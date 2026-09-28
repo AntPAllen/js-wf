@@ -55,6 +55,26 @@ runs finished at p99 42.35 and 38.89 seconds. The 30-second target remains
 variable and unmet as a reliable gate. A full no-fault 10,000-timer run after
 both lease changes passed at p99 728.8 ms with zero redeliveries and fences.
 
+Per-worker and per-original-owner-node diagnostics show the tail is spread
+across the cluster. A run before consumer retry backoff reached p99 61.97
+seconds: 2,210 timers exceeded 30 seconds across all three owner-node groups,
+with 34,315 redeliveries, 23,848 held-lease retries, 3,897 lease acquisition
+failures, and 2,135 fencing events. Partition loops now back off from 100 ms
+to at most two seconds after repeated transient consumer errors and reset on a
+healthy fetch. Two full runs with that change completed all workflows at p99
+31.32 and 37.16 seconds; the 30-second gate still failed. A trial that paused
+all of a worker's partition loops after lease API errors reduced such errors
+but shifted load to held-lease retries and finished at p99 44.53 seconds. A
+delivery-count-based delay for held leases reduced redeliveries to 6,740 but
+finished at p99 39.54 seconds. Both trials were reverted. The evidence points
+to a cluster-wide recovery backlog, not just delayed work on the isolated
+node, and leaves the p99 target open.
+
+The no-fault 10,000-timer run after the consumer backoff change passed at p99
+1.66 seconds, under its two-second gate. A focused consumer-leader test was
+also running during its early setup, so this is a correctness check rather
+than an isolated throughput baseline.
+
 Further 100-invocation diagnostics showed that wakeups can wait tens of
 seconds between enqueue and lease acquisition. With the reconciler disabled,
 p99 was 36.7 seconds, the longest enqueue-to-lease wait was 32.7 seconds,

@@ -169,6 +169,22 @@ func (w *Worker) consumer(ctx context.Context, partition uint32) (jetstream.Cons
 func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 	var slots chan struct{}
 	var active sync.WaitGroup
+	retryDelay := 100 * time.Millisecond
+	backoff := func() bool {
+		delay := retryDelay
+		if retryDelay < 2*time.Second {
+			retryDelay *= 2
+			if retryDelay > 2*time.Second {
+				retryDelay = 2 * time.Second
+			}
+		}
+		select {
+		case <-ctx.Done():
+			return false
+		case <-time.After(delay):
+			return true
+		}
+	}
 	if w.partitionConcurrency > 1 {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithCancel(ctx)
@@ -184,10 +200,8 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 			if !retryableConsumerError(err) {
 				return err
 			}
-			select {
-			case <-ctx.Done():
+			if !backoff() {
 				return nil
-			case <-time.After(100 * time.Millisecond):
 			}
 			continue
 		}
@@ -224,12 +238,16 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 					return nil
 				}
 				if errors.Is(err, nats.ErrTimeout) || errors.Is(err, jetstream.ErrNoMessages) || errors.Is(err, context.DeadlineExceeded) {
+					retryDelay = 100 * time.Millisecond
 					if refreshAfterEmpty() {
 						break
 					}
 					continue
 				}
 				if retryableConsumerError(err) {
+					if !backoff() {
+						return nil
+					}
 					break
 				}
 				return err
@@ -238,6 +256,7 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 			for msg := range batch.Messages() {
 				dispatched = true
 				emptyPolls = 0
+				retryDelay = 100 * time.Millisecond
 				if slots == nil {
 					w.handle(ctx, msg)
 					continue
@@ -261,6 +280,9 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 					return nil
 				}
 				if retryableConsumerError(batchErr) {
+					if !backoff() {
+						return nil
+					}
 					break
 				}
 				return batchErr

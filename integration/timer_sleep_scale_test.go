@@ -353,6 +353,7 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 	completionDuration := time.Since(startedAt)
 	var early, stuck int
 	lateness := make([]time.Duration, count)
+	var nodeLateness [3][]time.Duration
 	for index, due := range fireAt {
 		when := completedAt[index].Load()
 		if when == 0 || due.IsZero() {
@@ -370,6 +371,11 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 			late = 0
 		}
 		lateness[index] = late
+		if routeFaults {
+			partition := identity.Partition(typ, fmt.Sprintf("sleep-%05d", index), provision.Partitions)
+			ownerNode := int(partition%workerCount) % len(nodeLateness)
+			nodeLateness[ownerNode] = append(nodeLateness[ownerNode], late)
+		}
 	}
 	sort.Slice(lateness, func(i, j int) bool { return lateness[i] < lateness[j] })
 	p50 := lateness[int(math.Ceil(0.50*float64(count)))-1]
@@ -380,6 +386,9 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 	var buckets [6]uint64
 	for _, w := range workers {
 		m := w.Metrics()
+		if routeFaults {
+			t.Logf("worker=%s acquisitions=%d contentions=%d acquire_failures=%d redeliveries=%d fences=%d enqueue_to_lease_max=%s", w.ID, m.LeaseAcquisitions, m.LeaseContentions, m.LeaseAcquireFailures, m.Redeliveries, m.FencingEvents, m.EnqueueToLeaseMaximum)
+		}
 		scheduled += m.TimersScheduled
 		fired += m.TimersFired
 		redeliveries += m.Redeliveries
@@ -391,6 +400,16 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 		}
 		for i, value := range m.TimerLateBuckets {
 			buckets[i] += value
+		}
+	}
+	if routeFaults {
+		for node, values := range nodeLateness {
+			if len(values) == 0 {
+				continue
+			}
+			sort.Slice(values, func(i, j int) bool { return values[i] < values[j] })
+			late := len(values) - sort.Search(len(values), func(i int) bool { return values[i] > 30*time.Second })
+			t.Logf("owner_node=%d invocations=%d p99_lateness=%s over_30s=%d", node, len(values), values[int(math.Ceil(0.99*float64(len(values))))-1], late)
 		}
 	}
 	t.Logf("invocations=%d workers=%d partition_concurrency=%d start=%s complete=%s handler_lateness_p50=%s p99=%s max=%s early=%d stuck=%d wakeup_buckets=%v scheduled=%d fired=%d redeliveries=%d fences=%d lease_contentions=%d lease_acquire_failures=%d enqueue_to_lease_max=%s", count, len(workers), partitionConcurrency, startDuration, completionDuration, p50, p99, maximum, early, stuck, buckets, scheduled, fired, redeliveries, fences, contentions, acquireFailures, enqueueMax)
