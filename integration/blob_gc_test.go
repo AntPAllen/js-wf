@@ -24,8 +24,20 @@ func TestQuiescentBlobSweepPreservesRetainedReferences(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, name := range []string{"input-shared", "signal-snapshot", "step-result-snapshot", "terminal-result-state", "input-orphan", "user-unmanaged"} {
-		if _, err := objects.PutBytes(ctx, name, []byte(name)); err != nil {
-			t.Fatal(err)
+		deadline := time.Now().Add(5 * time.Second)
+		for {
+			_, err := objects.PutBytes(ctx, name, []byte(name))
+			if err == nil {
+				break
+			}
+			if !errors.Is(err, nats.ErrNoResponders) || time.Now().After(deadline) {
+				t.Fatal(err)
+			}
+			select {
+			case <-ctx.Done():
+				t.Fatal(ctx.Err())
+			case <-time.After(50 * time.Millisecond):
+			}
 		}
 	}
 	putInvocation := func(id string) uint64 {

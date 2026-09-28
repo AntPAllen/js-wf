@@ -100,8 +100,8 @@ The worker supports sequential durable operations. Workflow handlers should not 
 ## Verify
 
 ```sh
-go test ./...
-go test -race ./wf ./integration
+go test ./... -timeout=25m
+go test -race ./wf ./integration -timeout=25m
 WF_JOURNAL_BOUNDARY=1 go test ./integration -run '^TestJournalMaxEntriesBoundary$' -timeout=25m -v
 WF_DISPATCH_SCALE=1 go test ./integration -run '^TestTenThousandShortInvocationsAcrossAllPartitions$' -timeout=15m -v
 WF_TIMER_CANCEL_SCALE=1 go test ./integration -run '^TestThousandTimerCancellationsBeforeFire$' -timeout=10m -v
