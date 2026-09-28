@@ -105,3 +105,40 @@ func TestJournalLimitRecordsTerminalFailure(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestWorkerConstructorBoundsMetadataLookup(t *testing.T) {
+	cluster, err := testcluster.Start(t.TempDir(), 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	js, err := jetstream.New(cluster.Clients[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := provision.Ensure(ctx, js, 1); err != nil {
+		t.Fatal(err)
+	}
+	proxy, err := testcluster.NewClientProxy(cluster.Servers[0].ClientURL())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer proxy.Close()
+	nc, err := proxy.Connect()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer nc.Close()
+	proxied, err := jetstream.New(nc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	proxy.HoldResponses()
+	start := time.Now()
+	_, err = New(ctx, proxied, "bounded-constructor", nil)
+	if err == nil || !strings.Contains(err.Error(), "lease bucket") || ctx.Err() != nil || time.Since(start) > 8*time.Second {
+		t.Fatalf("bounded constructor: elapsed=%s err=%v context=%v", time.Since(start), err, ctx.Err())
+	}
+}

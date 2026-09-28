@@ -111,6 +111,9 @@ func runSeededAppendScenario(seed int64, replay *Trace) (trace Trace, runErr err
 			return Trace{}, err
 		}
 	}
+	if err := s.SetWorkload("journal_append_100"); err != nil {
+		return Trace{}, err
+	}
 	defer func() { trace = s.Trace() }()
 	model := NewJournalTransport(s)
 	store := journal.NewWithAppendPort(model)
@@ -251,6 +254,9 @@ func runTwoWriterCAS(seed int64, replay *Trace) (Trace, error) {
 			return Trace{}, err
 		}
 	}
+	if err := schedule.SetWorkload("journal_two_writer_cas"); err != nil {
+		return Trace{}, err
+	}
 	model := NewJournalTransport(schedule)
 	first, err := journal.NewWithAppendPort(model).Append(context.Background(), "test", "two-writers", journal.Entry{Kind: journal.Started, Index: 0, Epoch: 1}, 0)
 	if err != nil {
@@ -355,7 +361,21 @@ func TestReplayFaultTrace(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	replayed, err := runSeededAppendScenario(loaded.Seed, &loaded)
+	var replayed Trace
+	switch loaded.Workload {
+	case "journal_append_100":
+		replayed, err = runSeededAppendScenario(loaded.Seed, &loaded)
+	case "lease_100":
+		replayed, err = runSeededLeaseScenario(loaded.Seed, &loaded)
+	case "journal_two_writer_cas":
+		replayed, err = runTwoWriterCAS(loaded.Seed, &loaded)
+	case "lease_two_acquirer_fresh":
+		replayed, err = runTwoAcquirerRace(loaded.Seed, false, &loaded)
+	case "lease_two_acquirer_orphan":
+		replayed, err = runTwoAcquirerRace(loaded.Seed, true, &loaded)
+	default:
+		t.Fatalf("unknown trace workload %q", loaded.Workload)
+	}
 	if err != nil || !reflect.DeepEqual(loaded, replayed) {
 		t.Fatalf("FAULT_TRACE=%s FAULT_SEED=%d: %v", path, loaded.Seed, err)
 	}

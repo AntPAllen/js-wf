@@ -23,15 +23,73 @@ type Value struct {
 	Epoch  uint64 `json:"epoch"`
 }
 
-type Store struct{ kv jetstream.KeyValue }
+type Store struct {
+	kv   jetstream.KeyValue
+	port KVPort
+}
+
+// KVPort is the revision-CAS boundary used by lease decisions. It allows the
+// same Acquire, Renew, Release, and Cleanup code to run against a deterministic
+// KV model without implementing the full JetStream KeyValue interface.
+type KVPort interface {
+	Create(context.Context, string, []byte) (uint64, error)
+	Get(context.Context, string) (KVEntry, error)
+	Update(context.Context, string, []byte, uint64) (uint64, error)
+	Delete(context.Context, string, uint64) error
+	Now() time.Time
+}
+
+type KVEntry struct {
+	Value    []byte
+	Revision uint64
+	Created  time.Time
+}
+
+// NewWithKVPort builds a lease store over a deterministic KV transport.
+func NewWithKVPort(port KVPort) *Store { return &Store{port: port} }
+
+type jetStreamKVPort struct{ kv jetstream.KeyValue }
+
+func (p jetStreamKVPort) Create(ctx context.Context, key string, value []byte) (uint64, error) {
+	return p.kv.Create(ctx, key, value)
+}
+
+func (p jetStreamKVPort) Get(ctx context.Context, key string) (KVEntry, error) {
+	entry, err := p.kv.Get(ctx, key)
+	if err != nil {
+		return KVEntry{}, err
+	}
+	return KVEntry{Value: entry.Value(), Revision: entry.Revision(), Created: entry.Created()}, nil
+}
+
+func (p jetStreamKVPort) Update(ctx context.Context, key string, value []byte, revision uint64) (uint64, error) {
+	return p.kv.Update(ctx, key, value, revision)
+}
+
+func (p jetStreamKVPort) Delete(ctx context.Context, key string, revision uint64) error {
+	return p.kv.Delete(ctx, key, jetstream.LastRevision(revision))
+}
+
+func (jetStreamKVPort) Now() time.Time { return time.Now() }
+
+func (s *Store) operations() KVPort {
+	if s.port != nil {
+		return s.port
+	}
+	return jetStreamKVPort{kv: s.kv}
+}
 
 func New(ctx context.Context, js jetstream.JetStream) (*Store, error) {
 	kv, err := js.KeyValue(ctx, "WF_LEASE")
 	if err != nil {
 		return nil, err
 	}
-	return &Store{kv: kv}, nil
+	return NewWithKeyValue(kv), nil
 }
+
+// NewWithKeyValue uses a supplied bucket with the normal JetStream adapter.
+// This also permits short-TTL contract tests without changing WF_LEASE.
+func NewWithKeyValue(kv jetstream.KeyValue) *Store { return &Store{kv: kv} }
 
 type Lease struct {
 	store    *Store
@@ -54,13 +112,14 @@ func (s *Store) Acquire(ctx context.Context, typ, id, worker string) (*Lease, er
 		return nil, fmt.Errorf("empty worker ID")
 	}
 	key := identity.Key(typ, id)
+	port := s.operations()
 	// The revision itself becomes the epoch, so the value is updated once by
 	// its owner after Create. Until that update, other acquirers still fail.
 	data, _ := json.Marshal(Value{Worker: worker})
 	var rev uint64
 	var err error
 	for attempt := 0; attempt < 2; attempt++ {
-		rev, err = s.kv.Create(ctx, key, data)
+		rev, err = port.Create(ctx, key, data)
 		if err == nil {
 			break
 		}
@@ -70,7 +129,7 @@ func (s *Store) Acquire(ctx context.Context, typ, id, worker string) (*Lease, er
 		if attempt > 0 {
 			return nil, ErrHeld
 		}
-		entry, getErr := s.kv.Get(ctx, key)
+		entry, getErr := port.Get(ctx, key)
 		if errors.Is(getErr, jetstream.ErrKeyNotFound) {
 			continue
 		}
@@ -78,13 +137,13 @@ func (s *Store) Acquire(ctx context.Context, typ, id, worker string) (*Lease, er
 			return nil, getErr
 		}
 		var held Value
-		if json.Unmarshal(entry.Value(), &held) != nil || held.Worker == "" || held.Epoch != 0 || time.Since(entry.Created()) < time.Second {
+		if json.Unmarshal(entry.Value, &held) != nil || held.Worker == "" || held.Epoch != 0 || port.Now().Sub(entry.Created) < time.Second {
 			return nil, ErrHeld
 		}
 		// Create succeeded, but its owner never finished epoch initialization.
 		// The revision CAS makes reclaim safe against an in-flight Update: only
 		// one of Delete and Update can win, and no handler has started yet.
-		if deleteErr := s.kv.Delete(ctx, key, jetstream.LastRevision(entry.Revision())); deleteErr != nil {
+		if deleteErr := port.Delete(ctx, key, entry.Revision); deleteErr != nil {
 			if errors.Is(deleteErr, jetstream.ErrKeyRevisionMismatch) {
 				return nil, ErrHeld
 			}
@@ -93,7 +152,7 @@ func (s *Store) Acquire(ctx context.Context, typ, id, worker string) (*Lease, er
 	}
 	v := Value{Worker: worker, Epoch: rev}
 	data, _ = json.Marshal(v)
-	newRev, err := s.kv.Update(ctx, key, data, rev)
+	newRev, err := port.Update(ctx, key, data, rev)
 	if err != nil {
 		return nil, fmt.Errorf("%w: initialization: %w", ErrLost, err)
 	}
@@ -107,7 +166,7 @@ func (l *Lease) Renew(ctx context.Context) error {
 		return ErrLost
 	}
 	data, _ := json.Marshal(l.value)
-	rev, err := l.store.kv.Update(ctx, l.key, data, l.revision)
+	rev, err := l.store.operations().Update(ctx, l.key, data, l.revision)
 	if err != nil {
 		l.lost = true
 		return fmt.Errorf("%w: %v", ErrLost, err)
@@ -122,7 +181,7 @@ func (l *Lease) Release(ctx context.Context) error {
 	if l.lost {
 		return ErrLost
 	}
-	err := l.store.kv.Delete(ctx, l.key, jetstream.LastRevision(l.revision))
+	err := l.store.operations().Delete(ctx, l.key, l.revision)
 	if err != nil {
 		l.lost = true
 		return fmt.Errorf("%w: %v", ErrLost, err)
@@ -137,7 +196,8 @@ func (l *Lease) Release(ctx context.Context) error {
 func (l *Lease) Cleanup(ctx context.Context) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	entry, err := l.store.kv.Get(ctx, l.key)
+	port := l.store.operations()
+	entry, err := port.Get(ctx, l.key)
 	if errors.Is(err, jetstream.ErrKeyNotFound) {
 		l.lost = true
 		return nil
@@ -146,11 +206,11 @@ func (l *Lease) Cleanup(ctx context.Context) error {
 		return err
 	}
 	var current Value
-	if json.Unmarshal(entry.Value(), &current) != nil || current.Worker != l.value.Worker || current.Epoch != l.value.Epoch {
+	if json.Unmarshal(entry.Value, &current) != nil || current.Worker != l.value.Worker || current.Epoch != l.value.Epoch {
 		l.lost = true
 		return ErrLost
 	}
-	if err := l.store.kv.Delete(ctx, l.key, jetstream.LastRevision(entry.Revision())); err != nil {
+	if err := port.Delete(ctx, l.key, entry.Revision); err != nil {
 		if errors.Is(err, jetstream.ErrKeyRevisionMismatch) {
 			return ErrLost
 		}

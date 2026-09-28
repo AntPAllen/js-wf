@@ -139,9 +139,18 @@ func TestScheduledTimerSurvivesTwoFullClusterRestarts(t *testing.T) {
 			t.Fatalf("restart %d ended after scheduled fire time %s", restart+1, fireAt)
 		}
 	}
-	w, err = worker.New(ctx, all[1], "timer-after-restarts", map[string]worker.Handler{typ: handler})
-	if err != nil {
-		t.Fatal(err)
+	var lastWorkerErr error
+	for ctx.Err() == nil {
+		attempt, done := context.WithTimeout(ctx, 5*time.Second)
+		w, lastWorkerErr = worker.New(attempt, all[1], "timer-after-restarts", map[string]worker.Handler{typ: handler})
+		done()
+		if lastWorkerErr == nil {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if lastWorkerErr != nil || ctx.Err() != nil {
+		t.Fatalf("worker after restarts: %v (context: %v)", lastWorkerErr, ctx.Err())
 	}
 	workerCtx, stopWorker = context.WithCancel(ctx)
 	done = make(chan error, 1)
@@ -155,8 +164,24 @@ func TestScheduledTimerSurvivesTwoFullClusterRestarts(t *testing.T) {
 	if err := <-done; err != nil {
 		t.Fatal(err)
 	}
-	if calls.Load() != 2 {
-		t.Fatalf("handler replay count=%d", calls.Load())
+	records, _, err := journal.New(all[2]).Read(ctx, typ, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := []journal.Kind{journal.Started, journal.StepRequested, journal.Suspended, journal.StepCompleted, journal.Completed}
+	if len(records) != len(expected) {
+		t.Fatalf("timer journal has %d entries, want %d: %+v", len(records), len(expected), records)
+	}
+	for i, record := range records {
+		if record.Kind != expected[i] {
+			t.Fatalf("timer journal entry %d kind=%s, want %s", i, record.Kind, expected[i])
+		}
+	}
+	if calls.Load() < 2 {
+		t.Fatalf("handler replay count=%d, want initial suspension and completion", calls.Load())
+	}
+	if calls.Load() > 2 {
+		t.Logf("handler replayed %d times across restart redelivery; metrics=%+v", calls.Load(), w.Metrics())
 	}
 	if _, err := integrity.Check(ctx, all[0]); err != nil {
 		t.Fatalf("post-restart integrity: %v", err)

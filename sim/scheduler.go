@@ -11,7 +11,7 @@ import (
 	"sort"
 )
 
-const TraceVersion = 1
+const TraceVersion = 2
 
 type Decision struct {
 	AtMillis int64    `json:"at_ms"`
@@ -32,6 +32,7 @@ type TransportEvent struct {
 type Trace struct {
 	Version   int              `json:"version"`
 	Seed      int64            `json:"seed"`
+	Workload  string           `json:"workload"`
 	Decisions []Decision       `json:"decisions"`
 	Transport []TransportEvent `json:"transport"`
 }
@@ -39,6 +40,9 @@ type Trace struct {
 func (t Trace) Marshal() ([]byte, error) {
 	if t.Version != TraceVersion {
 		return nil, fmt.Errorf("unsupported simulation trace version %d", t.Version)
+	}
+	if t.Workload == "" {
+		return nil, fmt.Errorf("simulation trace has no workload")
 	}
 	return json.MarshalIndent(t, "", "  ")
 }
@@ -63,6 +67,9 @@ func LoadTrace(path string) (Trace, error) {
 	if trace.Version != TraceVersion {
 		return Trace{}, fmt.Errorf("unsupported simulation trace version %d", trace.Version)
 	}
+	if trace.Workload == "" {
+		return Trace{}, fmt.Errorf("simulation trace has no workload")
+	}
 	return trace, nil
 }
 
@@ -84,9 +91,23 @@ func ReplayScheduler(trace Trace) (*Scheduler, error) {
 	if trace.Version != TraceVersion {
 		return nil, fmt.Errorf("unsupported simulation trace version %d", trace.Version)
 	}
+	if trace.Workload == "" {
+		return nil, fmt.Errorf("simulation trace has no workload")
+	}
 	s := NewScheduler(trace.Seed)
 	s.replay = &trace
 	return s, nil
+}
+
+func (s *Scheduler) SetWorkload(name string) error {
+	if name == "" || s.trace.Workload != "" && s.trace.Workload != name {
+		return fmt.Errorf("invalid simulation workload %q", name)
+	}
+	if s.replay != nil && s.replay.Workload != name {
+		return fmt.Errorf("simulation workload %q differs from trace %q", name, s.replay.Workload)
+	}
+	s.trace.Workload = name
+	return nil
 }
 
 func (s *Scheduler) NowMillis() int64 { return s.now }

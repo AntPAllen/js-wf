@@ -113,24 +113,29 @@ func New(ctx context.Context, js jetstream.JetStream, id string, handlers map[st
 	if id == "" {
 		return nil, fmt.Errorf("empty worker ID")
 	}
-	l, err := lease.New(ctx, js)
+	// A cluster restart can leave one metadata lookup waiting for the caller's
+	// whole workflow lifetime. Bound constructor I/O so the caller can retry
+	// against the recovered leader.
+	attemptCtx, stopAttempt := context.WithTimeout(ctx, 5*time.Second)
+	defer stopAttempt()
+	l, err := lease.New(attemptCtx, js)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("lease bucket: %w", err)
 	}
-	state, err := js.KeyValue(ctx, "WF_STATE")
+	state, err := js.KeyValue(attemptCtx, "WF_STATE")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("state bucket: %w", err)
 	}
-	run, err := js.Stream(ctx, "WF_RUN")
+	run, err := js.Stream(attemptCtx, "WF_RUN")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("run stream: %w", err)
 	}
-	runInfo, err := run.Info(ctx)
+	runInfo, err := run.Info(attemptCtx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("run stream info: %w", err)
 	}
 	if !runInfo.Config.AllowMsgSchedules {
-		if _, err := js.Stream(ctx, "WF_TIMER"); err != nil {
+		if _, err := js.Stream(attemptCtx, "WF_TIMER"); err != nil {
 			return nil, fmt.Errorf("fallback timer stream: %w", err)
 		}
 	}
@@ -140,17 +145,17 @@ func New(ctx context.Context, js jetstream.JetStream, id string, handlers map[st
 			return nil, err
 		}
 	}
-	w.cancelStream, err = js.Stream(ctx, "WF_SIG")
+	w.cancelStream, err = js.Stream(attemptCtx, "WF_SIG")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("signal stream: %w", err)
 	}
 	w.cancelSubscription, err = js.Conn().Subscribe("wf.sig.*.*."+client.CancelSignalName, w.observeCancel)
 	if err != nil {
 		return nil, err
 	}
-	if err := js.Conn().FlushWithContext(ctx); err != nil {
+	if err := js.Conn().FlushWithContext(attemptCtx); err != nil {
 		_ = w.cancelSubscription.Unsubscribe()
-		return nil, err
+		return nil, fmt.Errorf("cancel subscription flush: %w", err)
 	}
 	return w, nil
 }
