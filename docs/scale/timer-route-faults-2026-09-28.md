@@ -16,9 +16,19 @@ than five minutes after the latest possible `fire_at`, so the diagnostic run
 was stopped. That run preceded the final bounded-read changes. A later
 100-invocation run with 1–10-second sleeps completed every workflow but had
 48.1 seconds p99 handler lateness, above the plan's 30-second chaos target.
-A final-code 100-invocation rerun completed all workflows with zero early or stuck
-completions and p99 37.18 seconds; the exact 10,000-case chaos gate has not
-yet passed with the latest changes.
+A 100-invocation rerun completed all workflows with zero early or stuck
+completions and p99 37.18 seconds.
+
+On the expanded 4-CPU, 15-GiB VM, a fresh full run scheduled all 10,000 timers
+with 9,314 still active before the first cut. All 10,000 handlers completed,
+all results and terminal journals were read, and `WF_RUN` drained in 77.0
+seconds after starts began. No handler finished early or five minutes late.
+The route sequence lasted 24.8 seconds. Handler lateness was 2.98 seconds at
+p50, **31.85 seconds at p99**, and 45.61 seconds maximum, so the 30-second
+p99 gate still failed. Workers recorded 9,359 redeliveries, 144 fencing
+events, and 57.42 seconds maximum enqueue-to-lease latency. This run proves
+liveness for this fault schedule but does not prove the latency target or
+consistent liveness across seeds and failure modes.
 
 Further 100-invocation diagnostics showed that wakeups can wait tens of
 seconds between enqueue and lease acquisition. With the reconciler disabled,
@@ -36,7 +46,10 @@ the timer reconciler no longer exits on a transient stream response or a
 cursor CAS conflict; `Client.Await` retries bounded reads; worker timer
 publication, server-time lookup, journal read, and invocation/signal lookups
 use bounded attempts; empty pull loops refresh consumers when messages remain
-unhandled. These changes preserved the no-fault 10,000-sleep result at
+unhandled. The test journal reader now also retries transient NATS
+`ErrNoResponders` during route isolation; a smaller run previously failed
+its result audit when that response reached the reader. These changes
+preserved the no-fault 10,000-sleep result at
 826 ms p99 in a subsequent full run. After the final consumer-refresh
 adjustment, another full no-fault run completed all 10,000 invocations with
 775.9 ms p99, 1.04 seconds maximum, and zero early or stuck completions.
@@ -47,7 +60,7 @@ To reproduce the smaller diagnostic run:
 
 ```sh
 WF_TIMER_SLEEP_CHAOS=1 WF_TIMER_SLEEP_COUNT=100 \
-  WF_TIMER_SLEEP_MAX_SECONDS=10 WF_TIMER_SLEEP_TIMEOUT_SECONDS=70 \
+  WF_TIMER_SLEEP_MAX_SECONDS=10 WF_TIMER_SLEEP_TIMEOUT_SECONDS=140 \
   go test ./integration -run '^TestTenThousandRandomSleepsDuringRouteFaults$' \
-  -count=1 -timeout=2m -v
+  -count=1 -timeout=4m -v
 ```

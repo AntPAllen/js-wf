@@ -112,8 +112,9 @@ The opt-in boundary test fills one three-replica journal with 100,000 entries,
 checks the next append is rejected, and reads the retained journal through
 another node. The manually triggered `long-journal` CI job also runs it.
 
-The opt-in timer route-fault gate currently fails its 30-second p99 and
-five-minute liveness targets. The fault schedule and observed results are in
+The opt-in timer route-fault gate still fails its 30-second p99 target. A
+recent full 10,000-timer run completed and drained, while an earlier run
+stalled; liveness across faults remains unproven. The observed results are in
 [`docs/scale/timer-route-faults-2026-09-28.md`](docs/scale/timer-route-faults-2026-09-28.md).
 
 For the separate-process subject-cardinality measurement, see

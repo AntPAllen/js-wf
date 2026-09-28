@@ -418,7 +418,7 @@ func readSleepJournal(ctx context.Context, j *journal.Store, typ, id string) ([]
 		}
 		var api *jetstream.APIError
 		if !errors.As(err, &api) || api.ErrorCode != 10008 {
-			if !errors.Is(err, jetstream.ErrNoStreamResponse) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, context.DeadlineExceeded) {
+			if !errors.Is(err, jetstream.ErrNoStreamResponse) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, nats.ErrNoResponders) && !errors.Is(err, nats.ErrDisconnected) && !errors.Is(err, nats.ErrConnectionReconnecting) && !errors.Is(err, context.DeadlineExceeded) {
 				return nil, err
 			}
 		}
