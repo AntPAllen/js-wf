@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -95,6 +96,71 @@ func casRaceRound(ctx context.Context, all [2]jetstream.JetStream, index, expect
 	outcomes[0], outcomes[1] = <-results, <-results
 	wg.Wait()
 	return outcomes, nil
+}
+
+// An unknown publish response cannot establish whether its CAS committed.
+// Resolve only from the retained subject tail, then let the next round and
+// final full-journal audit verify that no second physical append occurred.
+func resolveCASRaceUnknown(ctx context.Context, all [2]jetstream.JetStream, index, expected uint64) (uint64, string, error) {
+	until := time.Now().Add(5 * time.Second)
+	var lastErr error
+	var lastSeen uint64
+	for {
+		for _, js := range all {
+			attempt, stop := context.WithTimeout(ctx, time.Second)
+			stream, err := js.Stream(attempt, "WF_JRN")
+			var message *jetstream.RawStreamMsg
+			if err == nil {
+				message, err = stream.GetLastMsgForSubject(attempt, "wf.jrn.cas.scale")
+			}
+			stop()
+			if err != nil {
+				lastErr = err
+				continue
+			}
+			if message.Sequence == expected {
+				lastSeen = message.Sequence
+				continue
+			}
+			if message.Sequence != expected+1 {
+				return 0, "", fmt.Errorf("round %d expected one physical append after %d, found tail %d", index, expected, message.Sequence)
+			}
+			var entry journal.Entry
+			if err := json.Unmarshal(message.Data, &entry); err != nil {
+				return 0, "", err
+			}
+			kind := journal.StepRequested
+			if index%2 == 0 {
+				kind = journal.StepCompleted
+			}
+			if entry.Index != index || entry.Epoch != 1 || entry.Kind != kind || entry.WorkerID != "a" && entry.WorkerID != "b" {
+				return 0, "", fmt.Errorf("round %d unexpected retained winner: %+v", index, entry)
+			}
+			return message.Sequence, entry.WorkerID, nil
+		}
+		if time.Now().After(until) || ctx.Err() != nil {
+			return 0, "", fmt.Errorf("round %d no retained winner after unknown reply at tail %d: last seen %d, last read: %v", index, expected, lastSeen, lastErr)
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+}
+
+func TestCASRaceUnknownOutcomeResolvesRetainedWinner(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	first, err := journal.New(all[0]).Append(ctx, "cas", "scale", journal.Entry{Epoch: 1, Index: 0, Kind: journal.Started}, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lost := &ackLossJS{JetStream: all[0], subject: "wf.jrn.cas.scale", lostErr: context.DeadlineExceeded}
+	if _, err := journal.New(lost).Append(ctx, "cas", "scale", journal.Entry{Epoch: 1, Index: 1, Kind: journal.StepRequested, WorkerID: "a"}, first); !errors.Is(err, journal.ErrUnknown) || !lost.fired.Load() {
+		t.Fatalf("hidden committed acknowledgment: fired=%v err=%v", lost.fired.Load(), err)
+	}
+	next, winner, err := resolveCASRaceUnknown(ctx, [2]jetstream.JetStream{all[1], all[2]}, 1, first)
+	if err != nil || next != first+1 || winner != "a" {
+		t.Fatalf("resolved committed winner: seq=%d want=%d worker=%q err=%v", next, first+1, winner, err)
+	}
 }
 
 func restartJournalLeader(ctx context.Context, all *[3]jetstream.JetStream, cluster *testcluster.Cluster, wantMessages uint64) error {
@@ -205,6 +271,7 @@ func TestJournalCASTenThousandRacesWithLeaderRestarts(t *testing.T) {
 	}
 	started := time.Now()
 	var leaderKills int
+	var unknownRounds int
 	for index := uint64(1); index <= uint64(rounds); index++ {
 		attempt, stop := context.WithTimeout(ctx, 15*time.Second)
 		outcomes, err := casRaceRound(attempt, [2]jetstream.JetStream{all[0], all[1]}, index, seq)
@@ -212,7 +279,7 @@ func TestJournalCASTenThousandRacesWithLeaderRestarts(t *testing.T) {
 		if err != nil {
 			t.Fatalf("round %d expected_seq=%d outcomes=%+v: %v", index, seq, outcomes, err)
 		}
-		var wins, stales int
+		var wins, stales, unknowns int
 		var next uint64
 		for _, outcome := range outcomes {
 			switch {
@@ -221,12 +288,32 @@ func TestJournalCASTenThousandRacesWithLeaderRestarts(t *testing.T) {
 				next = outcome.seq
 			case errors.Is(outcome.err, journal.ErrStale):
 				stales++
+			case errors.Is(outcome.err, journal.ErrUnknown):
+				unknowns++
 			default:
 				t.Fatalf("round %d writer %s: %v", index, outcome.worker, outcome.err)
 			}
 		}
-		if wins != 1 || stales != 1 || next <= seq {
-			t.Fatalf("round %d expected_seq=%d outcomes=%+v wins=%d stales=%d", index, seq, outcomes, wins, stales)
+		if unknowns == 0 {
+			if wins != 1 || stales != 1 || next <= seq {
+				t.Fatalf("round %d expected_seq=%d outcomes=%+v wins=%d stales=%d", index, seq, outcomes, wins, stales)
+			}
+		} else {
+			if wins > 1 {
+				t.Fatalf("round %d two acknowledged winners: %+v", index, outcomes)
+			}
+			resolved, winner, err := resolveCASRaceUnknown(ctx, [2]jetstream.JetStream{all[0], all[1]}, index, seq)
+			if err != nil || wins == 1 && next != resolved {
+				t.Fatalf("round %d expected_seq=%d outcomes=%+v retained_seq=%d winner=%s err=%v", index, seq, outcomes, resolved, winner, err)
+			}
+			for _, outcome := range outcomes {
+				if outcome.err == nil && outcome.worker != winner {
+					t.Fatalf("round %d acknowledged winner %s differs from retained %s", index, outcome.worker, winner)
+				}
+			}
+			next = resolved
+			unknownRounds++
+			t.Logf("round %d resolved %d unknown reply(s) to retained winner %s at %d", index, unknowns, winner, next)
 		}
 		seq = next
 		if index%500 == 0 {
@@ -253,5 +340,5 @@ func TestJournalCASTenThousandRacesWithLeaderRestarts(t *testing.T) {
 			t.Fatalf("record %d: %+v", index, record)
 		}
 	}
-	t.Logf("server-side CAS races=%d leader_kills=%d elapsed=%s", rounds, leaderKills, time.Since(started))
+	t.Logf("server-side CAS races=%d leader_kills=%d unknown_rounds=%d elapsed=%s", rounds, leaderKills, unknownRounds, time.Since(started))
 }

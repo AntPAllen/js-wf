@@ -375,6 +375,8 @@ func TestReplayFaultTrace(t *testing.T) {
 		replayed, err = runSeededStartScenario(loaded.Seed, &loaded)
 	case "journal_two_writer_cas":
 		replayed, err = runTwoWriterCAS(loaded.Seed, &loaded)
+	case "journal_two_writer_unknown":
+		replayed, err = runTwoWriterUnknownCAS(loaded.Seed, &loaded)
 	case "lease_two_acquirer_fresh":
 		replayed, err = runTwoAcquirerRace(loaded.Seed, false, &loaded)
 	case "lease_two_acquirer_orphan":

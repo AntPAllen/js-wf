@@ -31,6 +31,13 @@ transport operation, so 100 seeded two-writer CAS races explore distinct
 interleavings without relying on Go goroutine timing. Every run retains one
 winner, rejects one stale writer, and replays its exact trace. A pinned race
 trace is also byte-identical across separate processes.
+A further 1,000 seeded two-writer races drop one publish before commit or
+hide its acknowledgment after commit. Each schedule retains exactly one
+next journal entry. A dropped publish leaves one caller with `ErrUnknown`
+and the other with success; a hidden acknowledgment leaves the physical
+winner with `ErrUnknown` and the other caller with `ErrStale`. Exact trace
+replay and cross-process equality pass. This is the
+modeled distinction needed when a real CAS race returns an ambiguous reply.
 
 The lease slice runs the production `lease.Store` decisions through a narrow
 KV port. Its in-memory model has global revisions, CAS create/update/delete,
