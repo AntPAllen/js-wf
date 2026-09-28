@@ -661,6 +661,7 @@ func (p *Projection) run(ctx context.Context) error {
 	}
 	ticker := time.NewTicker(rebuildInterval)
 	defer ticker.Stop()
+	fastPurge := false
 	for ctx.Err() == nil {
 		select {
 		case <-ticker.C:
@@ -669,7 +670,11 @@ func (p *Projection) run(ctx context.Context) error {
 			}
 		default:
 		}
-		batch, err := p.consumer.Fetch(16, jetstream.FetchMaxWait(time.Second))
+		journalWait := time.Second
+		if fastPurge {
+			journalWait = 25 * time.Millisecond
+		}
+		batch, err := p.consumer.Fetch(16, jetstream.FetchMaxWait(journalWait))
 		if err != nil {
 			if ctx.Err() != nil {
 				return nil
@@ -708,39 +713,43 @@ func (p *Projection) run(ctx context.Context) error {
 			}
 		}
 		if p.purgeConsumer != nil {
-			if err := p.consumePurges(ctx); err != nil {
+			count, err := p.consumePurges(ctx)
+			if err != nil {
 				return err
 			}
+			fastPurge = count > 0
 		}
 	}
 	return nil
 }
 
-func (p *Projection) consumePurges(ctx context.Context) error {
-	batch, err := p.purgeConsumer.Fetch(32, jetstream.FetchMaxWait(200*time.Millisecond))
+func (p *Projection) consumePurges(ctx context.Context) (int, error) {
+	batch, err := p.purgeConsumer.Fetch(128, jetstream.FetchMaxWait(200*time.Millisecond))
 	if err != nil {
 		if ctx.Err() != nil || errors.Is(err, nats.ErrTimeout) || errors.Is(err, jetstream.ErrNoMessages) {
-			return nil
+			return 0, nil
 		}
-		return err
+		return 0, err
 	}
+	processed := 0
 	for msg := range batch.Messages() {
 		parts := strings.Split(msg.Subject(), ".")
 		invSeq, parseErr := strconv.ParseUint(string(msg.Data()), 10, 64)
 		if len(parts) != 4 || parts[0] != "wf" || parts[1] != "purge" || identity.Validate(parts[2], parts[3]) != nil || parseErr != nil || invSeq == 0 {
 			_ = msg.NakWithDelay(time.Second)
-			return fmt.Errorf("invalid visibility purge event %q", msg.Subject())
+			return processed, fmt.Errorf("invalid visibility purge event %q", msg.Subject())
 		}
 		if err := p.postgres.DeleteGeneration(ctx, parts[2], parts[3], invSeq); err != nil {
 			_ = msg.NakWithDelay(time.Second)
-			return err
+			return processed, err
 		}
 		if err := msg.Ack(); err != nil {
-			return err
+			return processed, err
 		}
+		processed++
 	}
 	if err := batch.Error(); err != nil && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
-		return err
+		return processed, err
 	}
-	return nil
+	return processed, nil
 }
