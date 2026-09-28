@@ -21,6 +21,11 @@ var (
 
 const MaxEntries = 100000
 
+// A stopped server can leave a JetStream API lookup waiting for its caller's
+// entire workflow lifetime. Bound one append attempt so the worker can nak
+// and retry against the new leader while preserving the same CAS precondition.
+const appendAttemptTimeout = 5 * time.Second
+
 type Kind string
 
 const (
@@ -78,13 +83,21 @@ func (s *Store) Append(ctx context.Context, typ, id string, e Entry, expectedSeq
 	if e.Kind == "" {
 		return 0, fmt.Errorf("empty journal kind")
 	}
-	stream, err := s.js.Stream(ctx, "WF_JRN")
+	attemptCtx, stopAttempt := context.WithTimeout(ctx, appendAttemptTimeout)
+	defer stopAttempt()
+	stream, err := s.js.Stream(attemptCtx, "WF_JRN")
 	if err != nil {
-		return 0, err
+		if ctx.Err() != nil {
+			return 0, ctx.Err()
+		}
+		return 0, fmt.Errorf("%w: stream lookup: %v", ErrUnknown, err)
 	}
-	last, err := stream.GetLastMsgForSubject(ctx, identity.JournalSubject(typ, id))
+	last, err := stream.GetLastMsgForSubject(attemptCtx, identity.JournalSubject(typ, id))
 	if err != nil && !errors.Is(err, jetstream.ErrMsgNotFound) {
-		return 0, err
+		if ctx.Err() != nil {
+			return 0, ctx.Err()
+		}
+		return 0, fmt.Errorf("%w: tail lookup: %v", ErrUnknown, err)
 	}
 	if errors.Is(err, jetstream.ErrMsgNotFound) {
 		if expectedSeq != 0 || e.Index != 0 || e.Kind != Started {
@@ -111,7 +124,7 @@ func (s *Store) Append(ctx context.Context, typ, id string, e Entry, expectedSeq
 	// as stale after observing a newer subject tail. Retrying the same CAS is
 	// safe: a competing writer's committed append makes it fail again.
 	for attempt := 0; attempt < 3; attempt++ {
-		ack, err := s.js.Publish(ctx, identity.JournalSubject(typ, id), data, jetstream.WithExpectLastSequencePerSubject(expectedSeq))
+		ack, err := s.js.Publish(attemptCtx, identity.JournalSubject(typ, id), data, jetstream.WithExpectLastSequencePerSubject(expectedSeq))
 		if err == nil {
 			return ack.Sequence, nil
 		}
@@ -124,19 +137,19 @@ func (s *Store) Append(ctx context.Context, typ, id string, e Entry, expectedSeq
 		if api.ErrorCode != jetstream.JSErrCodeStreamWrongLastSequence && api.ErrorCode != jetstream.JSErrCodeStreamWrongLastSequenceConstant {
 			return 0, err // an explicit server rejection did not append
 		}
-		current, readErr := stream.GetLastMsgForSubject(ctx, identity.JournalSubject(typ, id))
+		current, readErr := stream.GetLastMsgForSubject(attemptCtx, identity.JournalSubject(typ, id))
 		if readErr != nil && !errors.Is(readErr, jetstream.ErrMsgNotFound) {
 			return 0, fmt.Errorf("%w: CAS rejected: %v; tail read: %v", ErrUnknown, err, readErr)
 		}
 		if readErr == nil && current.Sequence > expectedSeq {
 			return 0, fmt.Errorf("%w: expected subject seq %d, current %d: %v", ErrStale, expectedSeq, current.Sequence, err)
 		}
-		if attempt == 2 || ctx.Err() != nil {
+		if attempt == 2 || attemptCtx.Err() != nil {
 			return 0, fmt.Errorf("%w: CAS rejected while subject tail did not advance past %d: %v", ErrUnknown, expectedSeq, err)
 		}
 		select {
-		case <-ctx.Done():
-			return 0, fmt.Errorf("%w: %v", ErrUnknown, ctx.Err())
+		case <-attemptCtx.Done():
+			return 0, fmt.Errorf("%w: %v", ErrUnknown, attemptCtx.Err())
 		case <-time.After(25 * time.Millisecond):
 		}
 	}

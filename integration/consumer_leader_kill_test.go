@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"runtime"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -16,8 +19,238 @@ import (
 	"js-wf/wf"
 	"js-wf/worker"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
+
+// WF_REPEATED_CONSUMER_KILL=1 kills and restarts the current durable consumer
+// leader three times while a single hot partition has a large live backlog.
+func TestRepeatedConsumerLeaderKillsDuringBacklog(t *testing.T) {
+	if os.Getenv("WF_REPEATED_CONSUMER_KILL") == "" {
+		t.Skip("set WF_REPEATED_CONSUMER_KILL=1 for repeated consumer leader kills")
+	}
+	all, cluster := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+	const typ = "consumerkills"
+	partition := identity.Partition(typ, "job-0", provision.Partitions)
+	ids := make([]string, 0, 1000)
+	for candidate := 0; len(ids) < cap(ids); candidate++ {
+		id := fmt.Sprintf("job-%d", candidate)
+		if identity.Partition(typ, id, provision.Partitions) == partition {
+			ids = append(ids, id)
+		}
+	}
+	var active, calls atomic.Int64
+	handler := func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		calls.Add(1)
+		active.Add(1)
+		defer active.Add(-1)
+		select {
+		case <-time.After(50 * time.Millisecond):
+			return json.RawMessage(`1`), nil
+		case <-c.Context().Done():
+			return nil, c.Context().Err()
+		}
+	}
+	urls := make([]string, len(cluster.Servers))
+	for i, server := range cluster.Servers {
+		urls[i] = server.ClientURL()
+	}
+	nc, err := nats.Connect(strings.Join(urls, ","), nats.IgnoreDiscoveredServers(), nats.ReconnectWait(50*time.Millisecond), nats.MaxReconnects(-1))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer nc.Close()
+	workerJS, err := jetstream.New(nc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, err := worker.New(ctx, workerJS, "repeated-leader-worker", map[string]worker.Handler{typ: handler})
+	if err != nil {
+		t.Fatal(err)
+	}
+	workerCtx, stop := context.WithCancel(ctx)
+	defer stop()
+	workerDone := make(chan error, 1)
+	go func() { workerDone <- w.RunPartition(workerCtx, partition) }()
+	clients := [3]*client.Client{client.New(all[0]), client.New(all[1]), client.New(all[2])}
+	for i, id := range ids {
+		if _, err := clients[i%len(clients)].Start(ctx, typ, id, []byte(`null`)); err != nil {
+			t.Fatalf("start %s: %v", id, err)
+		}
+	}
+	name := fmt.Sprintf("WF_P_%02d", partition)
+	ready := func() *jetstream.ConsumerInfo {
+		t.Helper()
+		until := time.Now().Add(20 * time.Second)
+		for {
+			attempt, done := context.WithTimeout(ctx, time.Second)
+			consumer, err := all[0].Consumer(attempt, "WF_RUN", name)
+			var info *jetstream.ConsumerInfo
+			if err == nil {
+				info, err = consumer.Info(attempt)
+			}
+			var streamInfo *jetstream.StreamInfo
+			if err == nil {
+				var run jetstream.Stream
+				run, err = all[0].Stream(attempt, "WF_RUN")
+				if err == nil {
+					streamInfo, err = run.Info(attempt)
+				}
+			}
+			valid := err == nil && info != nil && info.Cluster != nil && info.Cluster.Leader != "" && len(info.Cluster.Replicas) == 2 && streamInfo != nil && streamInfo.Cluster != nil && len(streamInfo.Cluster.Replicas) == 2
+			if valid {
+				for _, replica := range info.Cluster.Replicas {
+					valid = valid && replica.Current && !replica.Offline
+				}
+				for _, replica := range streamInfo.Cluster.Replicas {
+					valid = valid && replica.Current && !replica.Offline
+				}
+			}
+			for node, server := range cluster.Servers {
+				routes, routeErr := server.Routez(nil)
+				if routeErr != nil {
+					valid = false
+					continue
+				}
+				peers := make(map[string]bool)
+				for _, route := range routes.Routes {
+					peers[route.RemoteName] = true
+				}
+				for other, peer := range cluster.Servers {
+					if other != node {
+						valid = valid && peers[peer.Name()]
+					}
+				}
+			}
+			done()
+			if valid {
+				return info
+			}
+			if time.Now().After(until) || ctx.Err() != nil {
+				t.Fatalf("consumer replicas not ready: consumer=%+v stream=%+v err=%v", info, streamInfo, err)
+			}
+			time.Sleep(25 * time.Millisecond)
+		}
+	}
+	killed := make([]string, 0, 3)
+	for round := 0; round < 3; round++ {
+		info := ready()
+		until := time.Now().Add(45 * time.Second)
+		for active.Load() == 0 {
+			if time.Now().After(until) || ctx.Err() != nil {
+				var workerErr any
+				exited := false
+				select {
+				case workerErr = <-workerDone:
+					exited = true
+				default:
+				}
+				attempt, done := context.WithTimeout(context.Background(), 2*time.Second)
+				view, viewErr := all[0].Consumer(attempt, "WF_RUN", name)
+				var consumerInfo *jetstream.ConsumerInfo
+				if viewErr == nil {
+					consumerInfo, viewErr = view.Info(attempt)
+				}
+				run, runErr := all[0].Stream(attempt, "WF_RUN")
+				var runInfo *jetstream.StreamInfo
+				if runErr == nil {
+					runInfo, runErr = run.Info(attempt)
+				}
+				done()
+				stack := make([]byte, 1<<20)
+				stack = stack[:runtime.Stack(stack, true)]
+				for _, goroutine := range strings.Split(string(stack), "\n\n") {
+					if strings.Contains(goroutine, "js-wf/worker.(*Worker).") {
+						t.Logf("worker stack:\n%s", goroutine)
+					}
+				}
+				t.Fatalf("no handler active before leader kill %d: calls=%d connection=%s worker_exited=%t worker_err=%v consumer=%+v consumer_err=%v stream=%+v stream_err=%v metrics=%+v", round, calls.Load(), nc.Status(), exited, workerErr, consumerInfo, viewErr, runInfo, runErr, w.Metrics())
+			}
+			time.Sleep(time.Millisecond)
+		}
+		leader := -1
+		for node, server := range cluster.Servers {
+			if server.Name() == info.Cluster.Leader {
+				leader = node
+			}
+		}
+		if leader < 0 {
+			t.Fatalf("unknown consumer leader %q", info.Cluster.Leader)
+		}
+		cluster.KillNode(leader)
+		killed = append(killed, info.Cluster.Leader)
+		other := (leader + 1) % 3
+		until = time.Now().Add(20 * time.Second)
+		for {
+			attempt, done := context.WithTimeout(ctx, time.Second)
+			consumer, err := all[other].Consumer(attempt, "WF_RUN", name)
+			var elected *jetstream.ConsumerInfo
+			if err == nil {
+				elected, err = consumer.Info(attempt)
+			}
+			done()
+			if err == nil && elected.Cluster != nil && elected.Cluster.Leader != "" && elected.Cluster.Leader != info.Cluster.Leader {
+				break
+			}
+			if time.Now().After(until) || ctx.Err() != nil {
+				t.Fatalf("consumer leader did not move after kill %d: info=%+v err=%v", round, elected, err)
+			}
+			time.Sleep(25 * time.Millisecond)
+		}
+		if err := cluster.RestartNode(leader); err != nil {
+			t.Fatal(err)
+		}
+		all[leader], err = jetstream.New(cluster.Clients[leader])
+		if err != nil {
+			t.Fatal(err)
+		}
+		ready()
+	}
+	reader := client.New(all[0])
+	t.Logf("after kills: handler_calls=%d connection=%s worker_metrics=%+v", calls.Load(), nc.Status(), w.Metrics())
+	for _, id := range ids {
+		value, err := reader.Await(ctx, typ, id)
+		if err != nil || string(value) != "1" {
+			var workerErr any
+			select {
+			case workerErr = <-workerDone:
+			default:
+			}
+			stack := make([]byte, 1<<20)
+			stack = stack[:runtime.Stack(stack, true)]
+			for _, goroutine := range strings.Split(string(stack), "\n\n") {
+				if strings.Contains(goroutine, "js-wf/worker.(*Worker).") {
+					t.Logf("worker stack:\n%s", goroutine)
+				}
+			}
+			t.Fatalf("await %s: value=%s err=%v handler_calls=%d connection=%s worker_err=%v metrics=%+v", id, value, err, calls.Load(), nc.Status(), workerErr, w.Metrics())
+		}
+	}
+	for {
+		view, err := all[0].Stream(ctx, "WF_RUN")
+		if err == nil {
+			state, infoErr := view.Info(ctx)
+			if infoErr == nil && state.State.Msgs == 0 {
+				break
+			}
+		}
+		if ctx.Err() != nil {
+			t.Fatal("run queue did not drain after repeated leader kills")
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+	stop()
+	if err := <-workerDone; err != nil {
+		t.Fatal(err)
+	}
+	report, err := integrity.Check(ctx, all[0])
+	if err != nil || report.Terminal != len(ids) || report.Invocations != len(ids) {
+		t.Fatalf("integrity=%+v err=%v", report, err)
+	}
+	t.Logf("killed consumer leaders=%v completed=%d handler_calls=%d redeliveries=%d", killed, len(ids), calls.Load(), w.Metrics().Redeliveries)
+}
 
 func TestConsumerLeaderKillDuringInFlightWorkflow(t *testing.T) {
 	all, cluster := setup(t)

@@ -118,13 +118,15 @@ func (w *Worker) consumer(ctx context.Context, partition uint32) (jetstream.Cons
 	if partition >= provision.Partitions {
 		return nil, fmt.Errorf("partition out of range")
 	}
-	run, err := w.js.Stream(ctx, "WF_RUN")
+	attemptCtx, stopAttempt := context.WithTimeout(ctx, 5*time.Second)
+	defer stopAttempt()
+	run, err := w.js.Stream(attemptCtx, "WF_RUN")
 	if err != nil {
 		return nil, err
 	}
 	name := fmt.Sprintf("WF_P_%02d", partition)
 	want := jetstream.ConsumerConfig{Name: name, Durable: name, FilterSubject: "wf.run." + strconv.FormatUint(uint64(partition), 10), AckPolicy: jetstream.AckExplicitPolicy, AckWait: 30 * time.Second, MaxDeliver: -1, MaxAckPending: 1000}
-	c, err := run.CreateConsumer(ctx, want)
+	c, err := run.CreateConsumer(attemptCtx, want)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +225,9 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		return
 	}
 	w.metrics.recordRedelivery(metadata)
-	l, err := w.leases.Acquire(ctx, typ, id, w.ID)
+	acquireCtx, stopAcquire := context.WithTimeout(ctx, 5*time.Second)
+	l, err := w.leases.Acquire(acquireCtx, typ, id, w.ID)
+	stopAcquire()
 	if errors.Is(err, lease.ErrHeld) {
 		_ = msg.NakWithDelay(time.Second)
 		return
@@ -237,7 +241,12 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	}
 	w.metrics.leaseAcquisitions.Add(1)
 	w.metrics.recordLeaseLatency(metadata, time.Now())
-	defer func() { _ = l.Release(context.Background()) }()
+	release := func() error {
+		releaseCtx, stopRelease := context.WithTimeout(context.Background(), 5*time.Second)
+		defer stopRelease()
+		return l.Release(releaseCtx)
+	}
+	defer func() { _ = release() }()
 	var leaseLost atomic.Bool
 	stopped := make(chan struct{})
 	go func() {
@@ -286,7 +295,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		_ = msg.NakWithDelay(delay)
 		return
 	}
-	if err := l.Release(context.Background()); err != nil {
+	if err := release(); err != nil {
 		if errors.Is(err, lease.ErrLost) && !leaseLost.Load() && !errors.Is(err, journal.ErrStale) {
 			w.metrics.fencingEvents.Add(1)
 		}
@@ -730,15 +739,17 @@ func (w *Worker) signalPayload(ctx context.Context, event signalRecord) ([]byte,
 }
 
 func (w *Worker) persistOutcome(ctx context.Context, typ, id string, invSeq uint64, payload []byte) error {
+	attemptCtx, stopAttempt := context.WithTimeout(ctx, 5*time.Second)
+	defer stopAttempt()
 	key := identity.Key(typ, id)
-	_, err := w.state.Create(ctx, key, payload)
+	_, err := w.state.Create(attemptCtx, key, payload)
 	if err == nil {
 		return nil
 	}
 	if !errors.Is(err, jetstream.ErrKeyExists) {
 		return err
 	}
-	previous, err := w.state.Get(ctx, key)
+	previous, err := w.state.Get(attemptCtx, key)
 	if err != nil {
 		return err
 	}
@@ -750,11 +761,11 @@ func (w *Worker) persistOutcome(ctx context.Context, typ, id string, invSeq uint
 		if marker.InvSeq >= invSeq {
 			return client.ErrPurged
 		}
-		_, err := w.state.Update(ctx, key, payload, previous.Revision())
+		_, err := w.state.Update(attemptCtx, key, payload, previous.Revision())
 		if err == nil {
 			return nil
 		}
-		current, getErr := w.state.Get(ctx, key)
+		current, getErr := w.state.Get(attemptCtx, key)
 		if getErr == nil && bytes.Equal(current.Value(), payload) {
 			return nil
 		}
