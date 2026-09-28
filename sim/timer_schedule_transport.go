@@ -41,6 +41,7 @@ type TimerScheduleTransport struct {
 	streamSeq        uint64
 	fallbackSeq      uint64
 	onNativeDelivery func(*nats.Msg, time.Time)
+	onFallbackWakeup func(*nats.Msg, time.Time)
 }
 
 var _ worker.TimerSchedulePort = (*TimerScheduleTransport)(nil)
@@ -53,6 +54,11 @@ func NewTimerScheduleTransport(schedule *Scheduler, base time.Time) *TimerSchedu
 // OnNativeDelivery connects due timer targets to a modeled durable consumer.
 func (m *TimerScheduleTransport) OnNativeDelivery(callback func(*nats.Msg, time.Time)) {
 	m.onNativeDelivery = callback
+}
+
+// OnFallbackWakeup connects committed scanner wakeups to a modeled consumer.
+func (m *TimerScheduleTransport) OnFallbackWakeup(callback func(*nats.Msg, time.Time)) {
+	m.onFallbackWakeup = callback
 }
 
 func (m *TimerScheduleTransport) QueueFault(kind AppendFault) error {
@@ -280,6 +286,9 @@ func (m *TimerScheduleTransport) PublishWakeup(ctx context.Context, message *nat
 	m.streamSeq++
 	m.runs = append(m.runs, Message{Subject: message.Subject, Sequence: m.streamSeq, Data: append([]byte(nil), message.Data...)})
 	m.wakeupIDs[messageID] = m.schedule.NowMillis()
+	if m.onFallbackWakeup != nil {
+		m.onFallbackWakeup(&nats.Msg{Subject: message.Subject, Data: append([]byte(nil), message.Data...), Header: cloneHeader(message.Header)}, m.base.Add(time.Duration(m.schedule.NowMillis())*time.Millisecond))
+	}
 	event.Sequence = m.streamSeq
 	if fault == LoseAckAfterCommit {
 		event.Outcome = string(fault)

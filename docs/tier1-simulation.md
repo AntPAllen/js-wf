@@ -107,8 +107,8 @@ revision-CAS port, including a lost create acknowledgment and idempotent
 retry. It reconstructs the checker input from the transports'
 retained contents, and runs `CheckSnapshot` after each of five terminal
 schedules per seed. The checker report enters the trace; exact disk replay
-and byte-identical cross-process traces pass. The full worker handler remains
-outside this model.
+and byte-identical cross-process traces pass. The full worker handler is
+exercised in the integrated workloads below.
 
 Another 1,000-seed workload runs production `Client.Start`, `wf.Run`, and
 `journal.Store.Append` and `Read` against retained in-memory transports. For five
@@ -183,6 +183,19 @@ change the consumer leader. No timer fires before its due time, each scenario
 retains one native timer source and one terminal result, and the final snapshot
 passes I1/I2/I3/I6. Seed 42 is pinned and replays across processes. Fallback
 timer routing and a simultaneous timer/signal wait remain separate slices.
+
+The integrated fallback timer workload runs the same production worker in
+fallback mode. Its timer request is retained in `WF_TIMER`; production
+`FallbackTimerScan.Scan` sees the due record, publishes the generation-bound
+`WF_RUN` wakeup, and deletes the timer. The committed wakeup feeds the same
+modeled durable consumer, including when its acknowledgment is lost. Across
+1,000 seeds, a dropped or unacknowledged timer schedule is retried by worker
+redelivery; dropped or unacknowledged scanner wakeup and timer-delete calls
+are repaired by a second scan. Completion append, run acknowledgment, and
+consumer leader faults also finish with one terminal result. The final raw
+snapshot passes I1/I2/I3/I6, and the trace replays across processes. The
+leased fallback poller and simultaneous timer/signal choices remain outside
+this integrated workload.
 
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
@@ -347,8 +360,8 @@ only after their due time; fallback records remain for the separate poller.
 The trace replays exactly and is byte-identical across processes. A three-node
 contract compares retained native headers, fallback payloads, duplicate
 acknowledgments, hidden acknowledgments after commit, and one routed target
-per native timer. Route partition timing and full worker timer replay remain
-outside this model.
+per native timer. Route partition timing remains outside this timer-publication
+slice; the integrated worker timer workloads above exercise replay.
 
 The fallback timer scanner now has a narrow retained-read, state-read,
 wakeup-publish, and delete port. Another 1,000-seed pipeline publishes 20
@@ -455,8 +468,9 @@ failure trace when one is written.
 global sequence gaps between subjects, retained bytes, and stale CAS results
 against a real three-node stream. Existing real-cluster tests cover network
 lost acknowledgments and injected unchanged-tail rejections. This comparison
-is limited: the integrated worker workload covers short handlers without
-native timer routing, retention, snapshot objects, running cancellation,
+is limited: the integrated worker workloads cover short handlers, signal
+resume, and native and fallback timer wakeups without retention, snapshot
+objects, running cancellation,
 Raft elections, or disk storage. The journal's five-second attempt
 deadline still uses wall time; only CAS retry waits are virtual in this first
 slice. A discrepancy seen only on real
