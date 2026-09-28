@@ -47,7 +47,7 @@ func TestSuspendedWakeupLivenessNegativeControl(t *testing.T) {
 	assertMissing := func(want int) SuspendedLivenessReport {
 		t.Helper()
 		report, err := CheckSuspendedWakeupLiveness(model, scan.Now(), scan.Grace)
-		if err == nil || report.Enabled != 4 || len(report.Missing) != want || report.Waiting[identity.Key("test", "liveness-04")] != "future timer" {
+		if err == nil || report.Enabled != 4 || len(report.Missing) != want || report.Waiting[identity.Key("test", "liveness-04")] != "future timer until 2023-11-14T22:13:23Z" {
 			t.Fatalf("enabled=%d waiting=%v missing=%v err=%v", report.Enabled, report.Waiting, report.Missing, err)
 		}
 		return report

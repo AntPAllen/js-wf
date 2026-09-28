@@ -217,7 +217,8 @@ wakeup counts with the model. A separate retained-state liveness checker
 independently reads suspended journals, pending timer deadlines, available
 signals, and stable reconciliation message IDs. It names waits that remain
 blocked and fails if an enabled wait lacks a retained `WF_RUN`. Every seeded
-scanner schedule runs this check after virtual time advances.
+scanner schedule runs this check after virtual time advances. Future timers
+report their exact virtual deadline plus grace.
 
 Another 1,000 seeded schedules run the production suspended-wait scanner
 inside the leased reconciler loop. Each seed mixes ten due timer waits with

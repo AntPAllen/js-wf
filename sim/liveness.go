@@ -152,7 +152,7 @@ func pendingTimerDue(records []journal.Record, name string, now time.Time, grace
 		return false, "", fmt.Errorf("timer wait differs from pending request")
 	}
 	if now.Before(request.FireAt.Add(grace)) {
-		return false, "future timer", nil
+		return false, "future timer until " + request.FireAt.Add(grace).UTC().Format(time.RFC3339Nano), nil
 	}
 	return true, "due timer", nil
 }
