@@ -101,7 +101,24 @@ func TestSuspendedScanRepairsMatchingSignalOnly(t *testing.T) {
 	}()
 	value, err := c.Await(ctx, typ, id)
 	if err != nil || string(value) != "42" {
-		t.Fatalf("result=%s err=%v", value, err)
+		probeCtx, stopProbe := context.WithTimeout(context.Background(), 5*time.Second)
+		defer stopProbe()
+		records, _, journalErr := j.Read(probeCtx, typ, id)
+		info, runErr := run.Info(probeCtx)
+		var loopErr, workerErr error
+		select {
+		case loopErr = <-loopDone:
+		default:
+		}
+		select {
+		case workerErr = <-done:
+		default:
+		}
+		var last journal.Kind
+		if len(records) > 0 {
+			last = records[len(records)-1].Kind
+		}
+		t.Fatalf("result=%s err=%v journal_entries=%d journal_tail=%s journal_err=%v run_info=%+v run_err=%v loop_err=%v worker_err=%v", value, err, len(records), last, journalErr, info, runErr, loopErr, workerErr)
 	}
 	stopLoop()
 	if err := <-loopDone; err != nil && !errors.Is(err, context.Canceled) {
