@@ -173,7 +173,10 @@ at a seeded save, stops the first scanner, and starts a replacement. It checks
 one retained wakeup per invocation, exact trace replay, and byte-identical
 traces across processes. The existing three-node cursor contract checks that
 a replacement starts from the saved cursor and stale revision writes fail.
-Concurrent scanner actors and a real lost-cursor-ack contract remain.
+A second three-node contract hides an acknowledgment after real `WF_STATE`
+cursor create or update commits, then confirms a reader on another node sees
+the committed cursor, advances it, and rejects the old revision. Three
+race-instrumented repeats passed. Concurrent scanner actors remain.
 
 The dispatch slice runs the production `worker.RunPartition` fetch/retry loop
 through a narrow consumer port with a supplied handler callback. Its model

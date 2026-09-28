@@ -15,8 +15,31 @@ import (
 	"js-wf/retention"
 	"js-wf/testcluster"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
+
+type hiddenCursorAckKV struct {
+	jetstream.KeyValue
+	key       string
+	operation string
+}
+
+func (h hiddenCursorAckKV) Create(ctx context.Context, key string, data []byte, opts ...jetstream.KVCreateOpt) (uint64, error) {
+	revision, err := h.KeyValue.Create(ctx, key, data, opts...)
+	if err == nil && h.key == key && h.operation == "create" {
+		return 0, nats.ErrTimeout
+	}
+	return revision, err
+}
+
+func (h hiddenCursorAckKV) Update(ctx context.Context, key string, data []byte, revision uint64) (uint64, error) {
+	next, err := h.KeyValue.Update(ctx, key, data, revision)
+	if err == nil && h.key == key && h.operation == "update" {
+		return 0, nats.ErrTimeout
+	}
+	return next, err
+}
 
 func TestReconcileRetriesLostLeaseInitialization(t *testing.T) {
 	err := fmt.Errorf("%w: initialization: context deadline exceeded", lease.ErrLost)
@@ -161,6 +184,83 @@ func TestCursorPersistsAcrossLeadersAndUsesCAS(t *testing.T) {
 	stopRetry()
 	if err := <-retryDone; err != nil && !errors.Is(err, context.Canceled) {
 		t.Fatal(err)
+	}
+}
+
+func TestCursorLostAcknowledgmentRereadsRealKV(t *testing.T) {
+	cluster, err := testcluster.Start(t.TempDir(), 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	var all [2]jetstream.JetStream
+	for i := range all {
+		all[i], err = jetstream.New(cluster.Clients[i])
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	for ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		err = provision.Ensure(attempt, all[0], 3)
+		stop()
+		if err == nil {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	writer, err := all[0].KeyValue(ctx, "WF_STATE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	reader, err := all[1].KeyValue(ctx, "WF_STATE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, scenario := range []struct {
+		kind      string
+		operation string
+	}{
+		{kind: "lost-create-ack", operation: "create"},
+		{kind: "lost-update-ack", operation: "update"},
+	} {
+		t.Run(scenario.operation, func(t *testing.T) {
+			var revision uint64
+			if scenario.operation == "update" {
+				var err error
+				revision, err = saveCursor(ctx, writer, scenario.kind, 4, 0)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			hidden := hiddenCursorAckKV{KeyValue: writer, key: "scan." + scenario.kind, operation: scenario.operation}
+			if _, err := saveCursor(ctx, hidden, scenario.kind, 5, revision); !errors.Is(err, nats.ErrTimeout) || !retryableReconcileError(err) {
+				t.Fatalf("committed cursor acknowledgment hidden: %v", err)
+			}
+			var saved, newRevision uint64
+			for ctx.Err() == nil {
+				var readErr error
+				saved, newRevision, readErr = loadCursor(ctx, reader, scenario.kind)
+				if readErr == nil && saved == 5 && newRevision > revision {
+					break
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
+			if saved != 5 || newRevision <= revision {
+				t.Fatalf("replacement cursor=%d revision=%d previous=%d ctx=%v", saved, newRevision, revision, ctx.Err())
+			}
+			if _, err := saveCursor(ctx, reader, scenario.kind, 6, newRevision); err != nil {
+				t.Fatalf("replacement cursor advance: %v", err)
+			}
+			if _, err := saveCursor(ctx, writer, scenario.kind, 7, revision); !errors.Is(err, ErrCursorStale) {
+				t.Fatalf("old cursor revision must be stale: %v", err)
+			}
+		})
 	}
 }
 
