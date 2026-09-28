@@ -49,6 +49,15 @@ lease; cleanup removes that owner's uncertain revision, then a successor
 acquires a higher epoch and survives a stale cleanup. Three normal repeats
 and a race run passed.
 
+Repeated lost-create-ack cluster runs twice observed a different-node KV read
+return the new survivor's pre-initialization value (`Epoch=0`) immediately
+after `Acquire` acknowledged its epoch update. The contract now waits up to
+three seconds for that read to reflect the initialized revision and retries
+the orphan claim during the one-second age boundary. The simulator can inject
+one predecessor-revision `Get` result; a lease contender that reads it is
+fenced by the revision CAS on delete. This models an observed response without
+attributing its cause to the server or treating the modeled lag as inevitable.
+
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
 subject, stores large input objects, and retains run enqueues with message-ID

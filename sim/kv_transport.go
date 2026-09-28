@@ -16,6 +16,7 @@ type KVFaultKind string
 const (
 	KVDropBeforeCommit   KVFaultKind = "drop_before_commit"
 	KVLoseAckAfterCommit KVFaultKind = "lose_ack_after_commit"
+	KVStaleRead          KVFaultKind = "stale_read"
 )
 
 type KVFault struct {
@@ -37,13 +38,14 @@ type KVTransport struct {
 	ttl      time.Duration
 	revision uint64
 	items    map[string]kvItem
+	previous map[string]kvItem
 	faults   []KVFault
 }
 
 var _ lease.KVPort = (*KVTransport)(nil)
 
 func NewKVTransport(schedule *Scheduler, ttl time.Duration) *KVTransport {
-	return &KVTransport{schedule: schedule, ttl: ttl, items: map[string]kvItem{}}
+	return &KVTransport{schedule: schedule, ttl: ttl, items: map[string]kvItem{}, previous: map[string]kvItem{}}
 }
 
 func (m *KVTransport) Now() time.Time {
@@ -53,10 +55,11 @@ func (m *KVTransport) Now() time.Time {
 }
 
 func (m *KVTransport) QueueFault(f KVFault) error {
-	if f.Operation != "create" && f.Operation != "update" && f.Operation != "delete" {
+	if f.Operation != "create" && f.Operation != "update" && f.Operation != "delete" && f.Operation != "get" {
 		return fmt.Errorf("invalid KV fault operation %q", f.Operation)
 	}
-	if f.Kind != KVDropBeforeCommit && f.Kind != KVLoseAckAfterCommit {
+	if (f.Operation == "get" && f.Kind != KVStaleRead) ||
+		(f.Operation != "get" && f.Kind != KVDropBeforeCommit && f.Kind != KVLoseAckAfterCommit) {
 		return fmt.Errorf("invalid KV fault kind %q", f.Kind)
 	}
 	m.mu.Lock()
@@ -102,6 +105,14 @@ func (m *KVTransport) Get(ctx context.Context, key string) (lease.KVEntry, error
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	item, exists := m.current(key)
+	if m.takeFault("get") == KVStaleRead {
+		if previous, ok := m.previous[key]; ok {
+			m.event(TransportEvent{Operation: "kv_get", Subject: key, Sequence: previous.revision, DataSHA256: digest(previous.value), Outcome: "stale_read"})
+			return lease.KVEntry{Value: append([]byte(nil), previous.value...), Revision: previous.revision, Created: previous.created}, nil
+		}
+		m.event(TransportEvent{Operation: "kv_get", Subject: key, Outcome: "stale_not_found"})
+		return lease.KVEntry{}, jetstream.ErrKeyNotFound
+	}
 	if !exists {
 		m.event(TransportEvent{Operation: "kv_get", Subject: key, Outcome: "not_found"})
 		return lease.KVEntry{}, jetstream.ErrKeyNotFound
@@ -161,6 +172,7 @@ func (m *KVTransport) Delete(ctx context.Context, key string, expected uint64) e
 		return jetstream.ErrKeyRevisionMismatch
 	}
 	m.revision++
+	m.previous[key] = item
 	delete(m.items, key)
 	event.Sequence = m.revision
 	if fault == KVLoseAckAfterCommit {
@@ -187,6 +199,11 @@ func (m *KVTransport) current(key string) (kvItem, bool) {
 
 func (m *KVTransport) put(key string, value []byte) uint64 {
 	m.revision++
+	if old, exists := m.items[key]; exists {
+		m.previous[key] = old
+	} else {
+		delete(m.previous, key)
+	}
 	m.items[key] = kvItem{value: append([]byte(nil), value...), revision: m.revision, created: m.now()}
 	return m.revision
 }

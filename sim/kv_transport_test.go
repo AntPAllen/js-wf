@@ -21,6 +21,40 @@ import (
 
 func TestLeaseKVFaultBoundaries(t *testing.T) {
 	ctx := context.Background()
+	t.Run("stale predecessor read cannot delete initialized lease", func(t *testing.T) {
+		schedule := NewScheduler(21)
+		model := NewKVTransport(schedule, 30*time.Second)
+		store := lease.NewWithKVPort(model)
+		owner, err := store.Acquire(ctx, "test", "one", "owner")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := schedule.AdvanceMillis(1500); err != nil {
+			t.Fatal(err)
+		}
+		if err := model.QueueFault(KVFault{Operation: "get", Kind: KVStaleRead}); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := store.Acquire(ctx, "test", "one", "challenger"); !errors.Is(err, lease.ErrHeld) {
+			t.Fatalf("stale contender acquired initialized lease: %v", err)
+		}
+		entry, err := model.Get(ctx, "test.one")
+		if err != nil || entry.Revision <= owner.Epoch() {
+			t.Fatalf("initialized lease changed: entry=%+v err=%v", entry, err)
+		}
+		var value lease.Value
+		if err := json.Unmarshal(entry.Value, &value); err != nil || value.Worker != "owner" || value.Epoch != owner.Epoch() {
+			t.Fatalf("initialized lease value=%+v err=%v", value, err)
+		}
+		var stale, fenced bool
+		for _, event := range schedule.Trace().Transport {
+			stale = stale || event.Operation == "kv_get" && event.Outcome == "stale_read"
+			fenced = fenced || event.Operation == "kv_delete" && event.Outcome == "revision_mismatch"
+		}
+		if !stale || !fenced {
+			t.Fatalf("missing stale-read/CAS-rejection evidence: stale=%v fenced=%v", stale, fenced)
+		}
+	})
 	t.Run("old uninitialized lease can be reclaimed", func(t *testing.T) {
 		schedule := NewScheduler(1)
 		model := NewKVTransport(schedule, 30*time.Second)
