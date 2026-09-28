@@ -21,8 +21,8 @@ verifies that the best generated trace reproduces the exact transport
 transcript on disk. A synthetic ten-choice failure shrinks to an earlier
 replayable failure. Actor removal and automatic CI shrinking remain.
 CI now replays a pinned corpus covering committed and dropped CAS unknowns,
-two-worker dispatch, competing suspended scanners, and retained-state
-checks. Failure traces are written under `sim/`, matching the uploaded
+two-worker dispatch, competing suspended scanners, retained-state checks,
+and workflow determinism. Failure traces are written under `sim/`, matching the uploaded
 artifact path.
 An operation context can be cancelled while its actor is waiting for a
 scheduler turn. The scheduler now resolves every submitted turn and lets the
@@ -82,9 +82,9 @@ It shares journal validation with the real JetStream checker. Deliberate
 mutations for duplicate starts (I1), two workers sharing an epoch and a
 descending epoch (I2), a completion without a request (I3), and a changed
 terminal value (I6) each make the checker fail. The real checker also rejects
-two recorded worker IDs in one nonzero epoch. I4 replay and I5 liveness
-negative controls, plus invoking this checker after integrated worker
-schedules, remain open.
+two recorded worker IDs in one nonzero epoch. I5 liveness negative controls
+and checker runs after integrated worker dispatch and lease decisions remain
+open.
 
 A separate 1,000-seed workload now runs production `Client.Start` and
 `journal.Store.Append` against retained in-memory invocation and journal
@@ -94,6 +94,16 @@ retained contents, and runs `CheckSnapshot` after each of five terminal
 schedules per seed. The checker report enters the trace; exact disk replay
 and byte-identical cross-process traces pass. Result persistence still needs
 the production worker handler in this model.
+
+Another 1,000-seed workload runs production `Client.Start`, `wf.Run`, and
+`journal.Store.Append` against retained in-memory transports. For five
+three-step completions per seed, it checks the reconstructed state, replays
+the real recorded step requests without rerunning an effect, then changes a
+step name and input separately. Both deliberate I4 mutations return
+`ErrNonDeterministic`. Its checker result and replay verdict enter the trace;
+exact disk replay and byte-identical cross-process traces pass. Dispatch,
+lease fencing, and the production worker's result write remain outside this
+workload.
 
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
