@@ -12,6 +12,10 @@ path. A focused control accepts a global sequence hole between two entries
 of one journal and rejects a missing logical index after a bounded two
 seconds of virtual retry time.
 
+The existing three-node journal contract now compares the modeled and real
+`Read` records and tail after interleaving two subjects, including their
+global stream-sequence hole. Three repeats and a race run passed.
+
 `sim.Scheduler` chooses seeded actions and records the enabled set, chosen
 action, virtual time, and transport calls in a versioned JSON trace. Replay
 rejects an unreachable choice or a changed transport transcript. Waiting

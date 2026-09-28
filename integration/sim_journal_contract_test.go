@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"reflect"
 	"testing"
 	"time"
 
@@ -21,7 +22,7 @@ func TestSimJournalAppendContractAgainstRealCluster(t *testing.T) {
 	defer cancel()
 	real := journal.New(all[0])
 	model := sim.NewJournalTransport(sim.NewScheduler(1))
-	simulated := journal.NewWithAppendPort(model)
+	simulated := journal.NewWithPorts(model, model)
 	const typ = "sim-contract"
 	appendBoth := func(id string, entry journal.Entry, expected uint64) uint64 {
 		t.Helper()
@@ -49,9 +50,13 @@ func TestSimJournalAppendContractAgainstRealCluster(t *testing.T) {
 	for _, id := range []string{"one", "two"} {
 		subject := identity.JournalSubject(typ, id)
 		modeled := model.Messages(subject)
-		records, _, err := real.Read(ctx, typ, id)
+		records, realTail, err := real.Read(ctx, typ, id)
 		if err != nil || len(records) != len(modeled) {
 			t.Fatalf("read %s: records=%d modeled=%d err=%v", id, len(records), len(modeled), err)
+		}
+		modelRecords, modelTail, modelErr := simulated.Read(ctx, typ, id)
+		if modelErr != nil || realTail != modelTail || !reflect.DeepEqual(records, modelRecords) {
+			t.Fatalf("read contract %s: real=%+v tail=%d model=%+v tail=%d err=%v", id, records, realTail, modelRecords, modelTail, modelErr)
 		}
 		for _, message := range modeled {
 			realMessage, err := stream.GetMsg(ctx, message.Sequence)
