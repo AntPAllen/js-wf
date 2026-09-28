@@ -5,8 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -18,9 +23,46 @@ import (
 	"js-wf/testcluster"
 	"js-wf/visibility"
 	"js-wf/wf"
+	"js-wf/worker"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
+
+var replayPluginOnce sync.Once
+var replayPluginPath, replayPluginDir string
+var replayPluginErr error
+
+func TestMain(m *testing.M) {
+	code := m.Run()
+	if replayPluginDir != "" {
+		_ = os.RemoveAll(replayPluginDir)
+	}
+	os.Exit(code)
+}
+
+func buildReplayPlugin(t *testing.T) string {
+	t.Helper()
+	replayPluginOnce.Do(func() {
+		replayPluginDir, replayPluginErr = os.MkdirTemp("", "js-wf-replay-plugin-")
+		if replayPluginErr != nil {
+			return
+		}
+		replayPluginPath = filepath.Join(replayPluginDir, "handler.so")
+		buildArgs := []string{"build"}
+		if replayPluginRace {
+			buildArgs = append(buildArgs, "-race")
+		}
+		buildArgs = append(buildArgs, "-buildmode=plugin", "-o", replayPluginPath, "./testdata/replayplugin")
+		build := exec.Command("go", buildArgs...)
+		if output, err := build.CombinedOutput(); err != nil {
+			replayPluginErr = fmt.Errorf("build replay handler plugin: %w: %s", err, output)
+		}
+	})
+	if replayPluginErr != nil {
+		t.Fatal(replayPluginErr)
+	}
+	return replayPluginPath
+}
 
 func TestOperatorCommands(t *testing.T) {
 	cluster, err := testcluster.Start(t.TempDir(), 1)
@@ -32,7 +74,7 @@ func TestOperatorCommands(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	if err := provision.Ensure(ctx, js, 1); err != nil {
 		t.Fatal(err)
@@ -107,6 +149,129 @@ func TestOperatorCommands(t *testing.T) {
 	if err := json.Unmarshal(call("export-journal", typ, id), &exported); err != nil || len(exported) != 2 {
 		t.Fatalf("export=%+v err=%v", exported, err)
 	}
+	pluginPath := buildReplayPlugin(t)
+	const replayID = "replay-target"
+	replayWorker, err := worker.New(ctx, js, "operator-replay-worker", map[string]worker.Handler{typ: func(c *wf.Context, raw json.RawMessage) (json.RawMessage, error) {
+		var input struct {
+			N int `json:"n"`
+		}
+		if err := json.Unmarshal(raw, &input); err != nil {
+			return nil, err
+		}
+		value, err := wf.Run(c, "double", input.N, func(context.Context) (int, error) { return input.N * 2, nil })
+		if err != nil {
+			return nil, err
+		}
+		return json.Marshal(value)
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	replayCtx, stopReplayWorker := context.WithCancel(ctx)
+	replayDone := make(chan error, 1)
+	go func() {
+		replayDone <- replayWorker.RunPartition(replayCtx, identity.Partition(typ, replayID, provision.Partitions))
+	}()
+	if _, err := client.New(js).Start(ctx, typ, replayID, []byte(`{"n":5}`)); err != nil {
+		t.Fatal(err)
+	}
+	if value, err := client.New(js).Await(ctx, typ, replayID); err != nil || string(value) != "10" {
+		t.Fatalf("replay fixture result=%s err=%v", value, err)
+	}
+	stopReplayWorker()
+	if err := <-replayDone; err != nil {
+		t.Fatal(err)
+	}
+	marker := filepath.Join(t.TempDir(), "effect")
+	t.Setenv("WF_REPLAY_EFFECT_MARKER", marker)
+	var replayed replayReport
+	if err := json.Unmarshal(call("-handler-plugin", pluginPath, "replay", typ, replayID), &replayed); err != nil || replayed.Type != typ || replayed.ID != replayID || string(replayed.Result) != "10" || replayed.JournalEntries != 4 {
+		t.Fatalf("replay report=%+v err=%v", replayed, err)
+	}
+	if _, err := os.Stat(marker); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("effect ran during replay: %v", err)
+	}
+	var ignoredReplay bytes.Buffer
+	if err := run(append(append([]string{}, base...), "-handler-plugin", pluginPath, "-handler-symbol", "ChangedWorkflow", "replay", typ, replayID), &ignoredReplay); !errors.Is(err, wf.ErrNonDeterministic) {
+		t.Fatalf("changed workflow replay: %v", err)
+	}
+	ignoredReplay.Reset()
+	if err := run(append(append([]string{}, base...), "-handler-plugin", pluginPath, "-handler-symbol", "ChangedResult", "replay", typ, replayID), &ignoredReplay); err == nil || !strings.Contains(err.Error(), "differs from terminal outcome") {
+		t.Fatalf("changed result replay: %v", err)
+	}
+	const blobID = "replay-blobs"
+	blobWorker, err := worker.New(ctx, js, "operator-blob-replay-worker", map[string]worker.Handler{typ: func(c *wf.Context, raw json.RawMessage) (json.RawMessage, error) {
+		var input struct {
+			Payload string `json:"payload"`
+		}
+		if err := json.Unmarshal(raw, &input); err != nil {
+			return nil, err
+		}
+		value, err := wf.Run(c, "large", len(input.Payload), func(context.Context) (string, error) {
+			return strings.Repeat("z", wf.MaxInlineResult+1), nil
+		})
+		if err != nil {
+			return nil, err
+		}
+		return json.Marshal(len(value))
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	blobCtx, stopBlobWorker := context.WithCancel(ctx)
+	blobDone := make(chan error, 1)
+	go func() {
+		blobDone <- blobWorker.RunPartition(blobCtx, identity.Partition(typ, blobID, provision.Partitions))
+	}()
+	largeInput, _ := json.Marshal(map[string]string{"payload": strings.Repeat("x", client.MaxInlineInput)})
+	if _, err := client.New(js).Start(ctx, typ, blobID, largeInput); err != nil {
+		t.Fatal(err)
+	}
+	if value, err := client.New(js).Await(ctx, typ, blobID); err != nil || string(value) != strconv.Itoa(wf.MaxInlineResult+1) {
+		t.Fatalf("blob replay fixture result=%s err=%v", value, err)
+	}
+	stopBlobWorker()
+	if err := <-blobDone; err != nil {
+		t.Fatal(err)
+	}
+	var blobReplay replayReport
+	if err := json.Unmarshal(call("-handler-plugin", pluginPath, "-handler-symbol", "LargeWorkflow", "replay", typ, blobID), &blobReplay); err != nil || string(blobReplay.Result) != strconv.Itoa(wf.MaxInlineResult+1) {
+		t.Fatalf("blob replay report=%+v err=%v", blobReplay, err)
+	}
+	if _, err := os.Stat(marker); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("large effect ran during replay: %v", err)
+	}
+	bundlePath := filepath.Join(t.TempDir(), "replay.json")
+	if err := os.WriteFile(bundlePath, call("export-replay", typ, blobID), 0600); err != nil {
+		t.Fatal(err)
+	}
+	var offline bytes.Buffer
+	if err := run([]string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", "LargeWorkflow", "-replay-bundle", bundlePath, "replay"}, &offline); err != nil {
+		t.Fatalf("offline replay with unreachable NATS: %v", err)
+	}
+	var offlineReport replayReport
+	if err := json.Unmarshal(offline.Bytes(), &offlineReport); err != nil || string(offlineReport.Result) != strconv.Itoa(wf.MaxInlineResult+1) {
+		t.Fatalf("offline replay=%+v err=%v", offlineReport, err)
+	}
+	if _, err := os.Stat(marker); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("large effect ran during offline replay: %v", err)
+	}
+	bundle, err := loadReplayBundle(bundlePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name := range bundle.Objects {
+		bundle.Objects[name] = []byte(`"corrupt"`)
+		break
+	}
+	corruptPath := filepath.Join(t.TempDir(), "corrupt.json")
+	corruptBytes, _ := json.Marshal(bundle)
+	if err := os.WriteFile(corruptPath, corruptBytes, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := run([]string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", "LargeWorkflow", "-replay-bundle", corruptPath, "replay"}, &offline); !errors.Is(err, wf.ErrCorruptJournal) {
+		t.Fatalf("corrupt offline replay object: %v", err)
+	}
 	if _, err := client.New(js).Start(ctx, typ, "cancel-target", []byte(`null`)); err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +283,7 @@ func TestOperatorCommands(t *testing.T) {
 		t.Fatalf("cancel=%+v err=%v", cancellation, err)
 	}
 	call("-grace", "1ns", "purge", typ, id)
-	if err := json.Unmarshal(call("-rebuild", "list", "completed"), &rows); err != nil || len(rows) != 0 {
+	if err := json.Unmarshal(call("-rebuild", "list", "completed"), &rows); err != nil || len(rows) != 2 || rows[0].ID == id || rows[1].ID == id {
 		t.Fatalf("list after purge=%+v err=%v", rows, err)
 	}
 	var sweep struct {

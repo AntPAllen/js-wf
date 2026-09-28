@@ -42,12 +42,34 @@ func run(args []string, out io.Writer) error {
 	budget := flags.Int("budget", 100, "suspended scan sequence budget")
 	scanGrace := flags.Duration("scan-grace", time.Second, "overdue timer grace for suspended scan")
 	apply := flags.Bool("apply", false, "publish suspended scan wakeups")
+	replayPlugin := flags.String("handler-plugin", "", "Go plugin exporting a replay handler")
+	replaySymbol := flags.String("handler-symbol", "Workflow", "handler symbol in the replay plugin")
+	replayBundlePath := flags.String("replay-bundle", "", "offline replay bundle JSON path")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
 	command := flags.Args()
 	if len(command) == 0 {
-		return errors.New("usage: wf [-url nats://...] {project|list [status]|describe type id|lag|export-journal type id|cancel type id|purge type id|sweep-tombstones|scan-suspended|journal-capacity|assignment-init worker...|assignment-get partition|assignment-move partition owner revision}")
+		return errors.New("usage: wf [-url nats://...] {project|list [status]|describe type id|lag|export-journal type id|export-replay type id|replay type id|cancel type id|purge type id|sweep-tombstones|scan-suspended|journal-capacity|assignment-init worker...|assignment-get partition|assignment-move partition owner revision}")
+	}
+	encode := func(value any) error {
+		writer := json.NewEncoder(out)
+		writer.SetIndent("", "  ")
+		return writer.Encode(value)
+	}
+	if command[0] == "replay" && *replayBundlePath != "" {
+		if len(command) != 1 || *replayPlugin == "" || *replaySymbol == "" {
+			return errors.New("usage: wf -handler-plugin path -replay-bundle file replay")
+		}
+		bundle, err := loadReplayBundle(*replayBundlePath)
+		if err != nil {
+			return err
+		}
+		report, err := runReplayBundle(bundle, *replayPlugin, *replaySymbol)
+		if err != nil {
+			return err
+		}
+		return encode(report)
 	}
 	if *url == "" {
 		*url = nats.DefaultURL
@@ -75,12 +97,25 @@ func run(args []string, out io.Writer) error {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
 	defer cancel()
-	encode := func(value any) error {
-		writer := json.NewEncoder(out)
-		writer.SetIndent("", "  ")
-		return writer.Encode(value)
-	}
 	switch command[0] {
+	case "export-replay":
+		if len(command) != 3 {
+			return errors.New("usage: wf export-replay type id")
+		}
+		bundle, err := fetchReplayBundle(ctx, js, command[1], command[2])
+		if err != nil {
+			return err
+		}
+		return encode(bundle)
+	case "replay":
+		if len(command) != 3 || *replayPlugin == "" || *replaySymbol == "" {
+			return errors.New("usage: wf -handler-plugin path [-handler-symbol Workflow] replay type id")
+		}
+		report, err := replayInvocation(ctx, js, command[1], command[2], *replayPlugin, *replaySymbol)
+		if err != nil {
+			return err
+		}
+		return encode(report)
 	case "assignment-init":
 		if len(command) < 2 {
 			return errors.New("usage: wf assignment-init worker...")
