@@ -20,6 +20,12 @@ bounded reruns, accepts only the same caller-selected invariant failure, and
 verifies that the best generated trace reproduces the exact transport
 transcript on disk. A synthetic ten-choice failure shrinks to an earlier
 replayable failure. Actor removal and automatic CI shrinking remain.
+An operation context can be cancelled while its actor is waiting for a
+scheduler turn. The scheduler now resolves every submitted turn and lets the
+transport observe that cancellation inside the chosen action; this removed
+an OS-select race that made two-worker dispatch traces diverge on replay.
+A focused cancellation probe and 20 repeated race-instrumented two-worker
+runs now replay exactly.
 `sim.RunAppendActors` also yields two real journal append calls at each
 transport operation, so 100 seeded two-writer CAS races explore distinct
 interleavings without relying on Go goroutine timing. Every run retains one
@@ -121,7 +127,18 @@ production scanner calls at each transport operation. It injects a lost
 signal publish acknowledgment or a lost/dropped wakeup enqueue, then scans
 from the returned cursor until exactly one retained wakeup exists. The
 trace replays exactly and is byte-identical across processes. The leased
-signal loop and worker signal drain remain outside the model.
+signal loop remains outside the model. The worker's production
+`DrainSignalsWithPort` now reads through a narrow signal/Object Store port
+while retaining its generation, hash, and journal-append decisions. A fifth
+1,000-seed workload drains 20 invocation fixtures per seed with unrelated
+global stream messages, purged holes, stale generations, blob references,
+lost signal publish acknowledgments, failed journal appends, corrupt hashes,
+and replay from consumed journal records. Eligible signals are journaled once
+and replay without another append; bad hashes fail before append. A three-node
+contract compares subject-filtered next-message reads, a deleted sequence,
+stale-generation skipping, ordered consumption, and journal replay against
+the model; three repeats passed. The full worker handler still uses real
+JetStream outside simulation for its lease, journal, and result decisions.
 
 The dispatch slice runs the production `worker.RunPartition` fetch/retry loop
 through a narrow consumer port with a supplied handler callback. Its model

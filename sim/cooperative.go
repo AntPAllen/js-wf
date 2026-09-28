@@ -57,21 +57,25 @@ func RunCooperative(ctx context.Context, schedule *Scheduler, actors []Cooperati
 	for _, actor := range actors {
 		actor := actor
 		go func() {
-			yield := func(ctx context.Context, action string, work func()) error {
+			yield := func(_ context.Context, action string, work func()) error {
 				if action == "" || strings.Contains(action, ":") || work == nil {
 					return fmt.Errorf("invalid simulation action %q", action)
 				}
 				turn := cooperativeTurn{actor: actor.Name, action: action, work: work, reply: make(chan struct{})}
+				// Once an operation is offered, the scheduler decides when it
+				// observes cancellation. Let the transport work see its own
+				// operation context; racing that context against turn delivery
+				// makes an identical trace take a different branch on replay.
 				select {
 				case turns <- turn:
-				case <-ctx.Done():
-					return ctx.Err()
+				case <-actorCtx.Done():
+					return actorCtx.Err()
 				}
 				select {
 				case <-turn.reply:
 					return nil
-				case <-ctx.Done():
-					return ctx.Err()
+				case <-actorCtx.Done():
+					return actorCtx.Err()
 				}
 			}
 			done <- actorResult{name: actor.Name, err: actor.Run(actorCtx, yield)}

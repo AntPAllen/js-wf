@@ -3,6 +3,7 @@ package sim
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"path/filepath"
 	"reflect"
@@ -70,6 +71,65 @@ func TestCooperativeStallListsUnfinishedActors(t *testing.T) {
 	var stalled *StallError
 	if !errors.Is(err, context.DeadlineExceeded) || !errors.As(err, &stalled) || !reflect.DeepEqual(stalled.Unfinished, []string{"blocked"}) || len(stalled.Pending) != 0 {
 		t.Fatalf("stall diagnostic: %+v err=%v", stalled, err)
+	}
+}
+
+func TestCooperativePendingTurnSurvivesOperationCancellation(t *testing.T) {
+	seed := int64(0)
+	for candidate := int64(1); candidate <= 100; candidate++ {
+		choice, err := NewScheduler(candidate).Choose([]string{"a:call", "b:cancel"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if choice == "b:cancel" {
+			seed = candidate
+			break
+		}
+	}
+	if seed == 0 {
+		t.Fatal("no seed selected cancellation before the pending call")
+	}
+	run := func(replay *Trace) (Trace, error) {
+		var schedule *Scheduler
+		if replay == nil {
+			schedule = NewScheduler(seed)
+		} else {
+			var err error
+			schedule, err = ReplayScheduler(*replay)
+			if err != nil {
+				return Trace{}, err
+			}
+		}
+		if err := schedule.SetWorkload("pending_cancel_probe"); err != nil {
+			return Trace{}, err
+		}
+		operationCtx, cancelOperation := context.WithCancel(context.Background())
+		defer cancelOperation()
+		observedCancellation := false
+		actors := []CooperativeActor{
+			{Name: "a", Run: func(_ context.Context, yield YieldFunc) error {
+				return yield(operationCtx, "call", func() { observedCancellation = operationCtx.Err() != nil })
+			}},
+			{Name: "b", Run: func(ctx context.Context, yield YieldFunc) error {
+				return yield(ctx, "cancel", cancelOperation)
+			}},
+		}
+		results, err := RunCooperative(context.Background(), schedule, actors)
+		if err != nil || results["a"] != nil || results["b"] != nil || !observedCancellation {
+			return schedule.Trace(), fmt.Errorf("pending turn results=%v saw cancellation=%v: %v", results, observedCancellation, err)
+		}
+		if err := schedule.Finish(); err != nil {
+			return schedule.Trace(), err
+		}
+		return schedule.Trace(), nil
+	}
+	generated, err := run(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	replayed, err := run(&generated)
+	if err != nil || !reflect.DeepEqual(generated, replayed) {
+		t.Fatalf("pending cancellation replay: err=%v equal=%v", err, reflect.DeepEqual(generated, replayed))
 	}
 }
 

@@ -945,6 +945,12 @@ func (w *Worker) watchRunningCancellation(ctx context.Context, typ, id string, i
 }
 
 func (w *Worker) drainSignals(ctx context.Context, typ, id string, invSeq uint64, records []journal.Record, appendEntry func(journal.Kind, json.RawMessage) error) ([]wf.Signal, error) {
+	return DrainSignalsWithPort(ctx, NewSignalDrainPort(w.js), typ, id, invSeq, records, appendEntry)
+}
+
+// DrainSignalsWithPort runs the production signal drain against a supplied
+// retained-read transport. appendEntry is the worker's fenced journal append.
+func DrainSignalsWithPort(ctx context.Context, port SignalDrainPort, typ, id string, invSeq uint64, records []journal.Record, appendEntry func(journal.Kind, json.RawMessage) error) ([]wf.Signal, error) {
 	var lastSeq uint64
 	var signals []wf.Signal
 	for _, r := range records {
@@ -956,28 +962,22 @@ func (w *Worker) drainSignals(ctx context.Context, typ, id string, invSeq uint64
 			return nil, wf.ErrCorruptJournal
 		}
 		lastSeq = event.Sequence
-		payload, err := w.signalPayload(ctx, event)
+		payload, err := signalPayloadWithPort(ctx, port, event)
 		if err != nil {
 			return nil, err
 		}
 		signals = append(signals, wf.Signal{Sequence: event.Sequence, Name: event.Name, Payload: payload})
 	}
 	lookupCtx, stopLookup := context.WithTimeout(ctx, 5*time.Second)
-	stream, err := w.js.Stream(lookupCtx, "WF_SIG")
-	stopLookup()
-	if err != nil {
-		return nil, err
-	}
-	lookupCtx, stopLookup = context.WithTimeout(ctx, 5*time.Second)
-	info, err := stream.Info(lookupCtx)
+	lastSignalSeq, err := port.LastSignalSequence(lookupCtx)
 	stopLookup()
 	if err != nil {
 		return nil, err
 	}
 	prefix := "wf.sig." + typ + "." + id + "."
-	for seq := lastSeq + 1; seq <= info.State.LastSeq && seq != 0; {
+	for seq := lastSeq + 1; seq <= lastSignalSeq && seq != 0; {
 		lookupCtx, stopLookup = context.WithTimeout(ctx, 5*time.Second)
-		m, err := stream.GetMsg(lookupCtx, seq, jetstream.WithGetMsgSubject(prefix+"*"))
+		m, err := port.NextSignal(lookupCtx, seq, prefix+"*")
 		stopLookup()
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			break
@@ -985,7 +985,7 @@ func (w *Worker) drainSignals(ctx context.Context, typ, id string, invSeq uint64
 		if err != nil {
 			return nil, err
 		}
-		if m.Sequence > info.State.LastSeq {
+		if m.Sequence > lastSignalSeq {
 			break
 		}
 		seq = m.Sequence + 1
@@ -1006,7 +1006,7 @@ func (w *Worker) drainSignals(ctx context.Context, typ, id string, invSeq uint64
 		if event.Ref != "" {
 			event.Payload = nil
 		}
-		payload, err := w.signalPayload(ctx, event)
+		payload, err := signalPayloadWithPort(ctx, port, event)
 		if err != nil {
 			return nil, err
 		}
@@ -1023,14 +1023,11 @@ func (w *Worker) drainSignals(ctx context.Context, typ, id string, invSeq uint64
 	return signals, nil
 }
 
-func (w *Worker) signalPayload(ctx context.Context, event signalRecord) ([]byte, error) {
+func signalPayloadWithPort(ctx context.Context, port SignalDrainPort, event signalRecord) ([]byte, error) {
 	payload := event.Payload
 	if event.Ref != "" {
-		objects, err := w.js.ObjectStore(ctx, "WF_BLOB")
-		if err != nil {
-			return nil, err
-		}
-		payload, err = objects.GetBytes(ctx, event.Ref)
+		var err error
+		payload, err = port.SignalBlob(ctx, event.Ref)
 		if err != nil {
 			return nil, err
 		}
