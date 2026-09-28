@@ -116,6 +116,13 @@ the trace; seed 42 is pinned and replays across processes. The production
 worker handler still needs an integrated dispatch, lease, journal, and result
 schedule in one model.
 
+A three-node contract compares modeled and real normal outcome creation,
+idempotent retry, changed-result rejection, same-generation tombstone fencing,
+and newer-generation replacement. Three repeats passed. A TCP proxy hides a
+committed real KV create acknowledgment; retry leaves its original revision
+and payload intact, matching the model's lost-ack cut. Three normal repeats
+and a race run passed.
+
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
 subject, stores large input objects, and retains run enqueues with message-ID

@@ -23,6 +23,8 @@ type OutcomePort interface {
 
 type jetStreamOutcomePort struct{ kv jetstream.KeyValue }
 
+func NewOutcomePort(kv jetstream.KeyValue) OutcomePort { return jetStreamOutcomePort{kv: kv} }
+
 func (p jetStreamOutcomePort) Create(ctx context.Context, key string, value []byte) (uint64, error) {
 	return p.kv.Create(ctx, key, value)
 }

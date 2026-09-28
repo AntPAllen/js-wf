@@ -1026,5 +1026,5 @@ func signalPayloadWithPort(ctx context.Context, port SignalDrainPort, event sign
 func (w *Worker) persistOutcome(ctx context.Context, typ, id string, invSeq uint64, payload []byte) error {
 	attemptCtx, stopAttempt := context.WithTimeout(ctx, 5*time.Second)
 	defer stopAttempt()
-	return PersistOutcomeWithPort(attemptCtx, jetStreamOutcomePort{kv: w.state}, typ, id, invSeq, payload)
+	return PersistOutcomeWithPort(attemptCtx, NewOutcomePort(w.state), typ, id, invSeq, payload)
 }
