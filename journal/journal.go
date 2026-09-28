@@ -27,6 +27,10 @@ const MaxEntries = 100000
 // and retry against the new leader while preserving the same CAS precondition.
 const appendAttemptTimeout = 5 * time.Second
 
+// Allow a replica's subject-tail read and the leader's CAS view to converge
+// after an election. Repeating the same CAS cannot overwrite another writer.
+const unchangedTailRetryLimit = 40
+
 type Kind string
 
 const (
@@ -220,7 +224,7 @@ func (s *Store) Append(ctx context.Context, typ, id string, e Entry, expectedSeq
 	// during leader/replica state convergence. Only classify a CAS rejection
 	// as stale after observing a newer subject tail. Retrying the same CAS is
 	// safe: a competing writer's committed append makes it fail again.
-	for attempt := 0; attempt < 3; attempt++ {
+	for attempt := 0; attempt < unchangedTailRetryLimit; attempt++ {
 		seq, err := port.Publish(attemptCtx, identity.JournalSubject(typ, id), data, expectedSeq)
 		if err == nil {
 			return seq, nil
@@ -241,7 +245,7 @@ func (s *Store) Append(ctx context.Context, typ, id string, e Entry, expectedSeq
 		if readErr == nil && current.Sequence > expectedSeq {
 			return 0, fmt.Errorf("%w: expected subject seq %d, current %d: %v", ErrStale, expectedSeq, current.Sequence, err)
 		}
-		if attempt == 2 || attemptCtx.Err() != nil {
+		if attempt == unchangedTailRetryLimit-1 || attemptCtx.Err() != nil {
 			return 0, fmt.Errorf("%w: CAS rejected while subject tail did not advance past %d: %v", ErrUnknown, expectedSeq, err)
 		}
 		if err := port.Wait(attemptCtx, 25*time.Millisecond); err != nil {

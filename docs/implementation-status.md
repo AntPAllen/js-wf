@@ -1,6 +1,8 @@
 # Implementation status against the supplied plan
 
-This records what the current repository proves. The [implementation plan](implementation-plan.md) remains the release target. Its Tier 1 section now specifies a seeded, replayable in-memory transport model, differential contract checks against real NATS, and incremental proof gates. The simulator is planned work; no simulation result is claimed here.
+This records what the current repository proves. The [implementation plan](implementation-plan.md) remains the release target. Its Tier 1 section specifies a seeded, replayable in-memory transport model, differential contract checks against real NATS, and incremental proof gates. The seeded and differential results below cover several transport slices; integrated worker and timer behavior remains unfinished.
+
+A CI run at `9a23a73` failed the 10,000-round journal CAS race at round 505, after the first leader restart: one writer received a wrong-last-sequence reply while its subject-tail read stayed at 505 through three attempts. The server-side cause remains unconfirmed. The runtime now permits 40 bounded same-CAS attempts (up to 975 ms of waits), and the seeded model checks recovery after four unchanged-tail rejections and `ErrUnknown` after 40. The pre-change 550-round leader-restart test passed ten local repetitions; a full post-change cluster run is still required to establish whether the rare real failure is resolved.
 
 | Phase | Implemented and checked | Still required |
 | --- | --- | --- |

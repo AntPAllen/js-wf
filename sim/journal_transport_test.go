@@ -72,13 +72,13 @@ func TestJournalAppendFaultBoundaries(t *testing.T) {
 	})
 	t.Run("persistent unchanged tail reject", func(t *testing.T) {
 		model := NewJournalTransport(NewScheduler(4))
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 40; i++ {
 			if err := model.QueueFault(Fault{Kind: RejectUnchanged}); err != nil {
 				t.Fatal(err)
 			}
 		}
-		_, err := journal.NewWithAppendPort(model).Append(ctx, "test", "reject-three", journal.Entry{Kind: journal.Started, Index: 0}, 0)
-		if !errors.Is(err, journal.ErrUnknown) || errors.Is(err, journal.ErrStale) || model.schedule.NowMillis() != 50 {
+		_, err := journal.NewWithAppendPort(model).Append(ctx, "test", "reject-forty", journal.Entry{Kind: journal.Started, Index: 0}, 0)
+		if !errors.Is(err, journal.ErrUnknown) || errors.Is(err, journal.ErrStale) || model.schedule.NowMillis() != 975 {
 			t.Fatalf("persistent reject: time=%d err=%v", model.schedule.NowMillis(), err)
 		}
 	})
@@ -118,7 +118,7 @@ func runSeededAppendScenario(seed int64, replay *Trace) (trace Trace, runErr err
 	model := NewJournalTransport(s)
 	store := journal.NewWithAppendPort(model)
 	for i := 0; i < 100; i++ {
-		choice, err := s.Choose([]string{"ok", "drop", "ack_lost", "reject_once", "reject_three"})
+		choice, err := s.Choose([]string{"ok", "drop", "ack_lost", "reject_once", "reject_four", "reject_forty"})
 		if err != nil {
 			return Trace{}, err
 		}
@@ -129,8 +129,12 @@ func runSeededAppendScenario(seed int64, replay *Trace) (trace Trace, runErr err
 			err = model.QueueFault(Fault{Kind: LoseAckAfterCommit})
 		case "reject_once":
 			err = model.QueueFault(Fault{Kind: RejectUnchanged})
-		case "reject_three":
-			for j := 0; j < 3; j++ {
+		case "reject_four", "reject_forty":
+			count := 4
+			if choice == "reject_forty" {
+				count = 40
+			}
+			for j := 0; j < count; j++ {
 				if err = model.QueueFault(Fault{Kind: RejectUnchanged}); err != nil {
 					return Trace{}, err
 				}
@@ -143,13 +147,13 @@ func runSeededAppendScenario(seed int64, replay *Trace) (trace Trace, runErr err
 		seq, appendErr := store.Append(context.Background(), "test", id, journal.Entry{Kind: journal.Started, Index: 0, Epoch: 1}, 0)
 		messages := model.Messages(identity.JournalSubject("test", id))
 		wantMessages := 1
-		if choice == "drop" || choice == "reject_three" {
+		if choice == "drop" || choice == "reject_forty" {
 			wantMessages = 0
 		}
 		if len(messages) != wantMessages {
 			return Trace{}, fmt.Errorf("seed %d case %d choice=%s messages=%d want=%d", seed, i, choice, len(messages), wantMessages)
 		}
-		if choice == "ok" || choice == "reject_once" {
+		if choice == "ok" || choice == "reject_once" || choice == "reject_four" {
 			if appendErr != nil || seq == 0 {
 				return Trace{}, fmt.Errorf("seed %d case %d choice=%s seq=%d err=%v", seed, i, choice, seq, appendErr)
 			}
