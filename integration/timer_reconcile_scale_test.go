@@ -15,6 +15,8 @@ import (
 	"js-wf/reconcile"
 	"js-wf/wf"
 	"js-wf/worker"
+
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 // Each journal represents a worker stopped after the timer request append and
@@ -69,9 +71,26 @@ func TestTwoHundredMissingTimerSchedulesReconcile(t *testing.T) {
 	if err != nil || info.State.Msgs != 0 {
 		t.Fatalf("missing schedules left run messages: info=%+v err=%v", info, err)
 	}
+	recoverMissingTimerSchedules(t, ctx, all, typ, count)
+}
+
+func recoverMissingTimerSchedules(t *testing.T, ctx context.Context, all []jetstream.JetStream, typ string, count int) {
+	t.Helper()
+	c := client.New(all[0])
+	j := journal.New(all[0])
 	workersCtx, stopWorkers := context.WithCancel(ctx)
 	var workers sync.WaitGroup
 	workerErrors := make(chan error, 3)
+	defer func() {
+		stopWorkers()
+		workers.Wait()
+		close(workerErrors)
+		for err := range workerErrors {
+			if err != nil && !errors.Is(err, context.Canceled) {
+				t.Errorf("worker exited: %v", err)
+			}
+		}
+	}()
 	for index := 0; index < 3; index++ {
 		w, err := worker.New(ctx, all[index], fmt.Sprintf("gap-worker-%d", index), map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 			if err := wf.Sleep(c, "gap", time.Second); err != nil {
@@ -88,18 +107,8 @@ func TestTwoHundredMissingTimerSchedulesReconcile(t *testing.T) {
 			workerErrors <- w.RunAssigned(workersCtx, index, 3)
 		}(index)
 	}
-	defer func() {
-		stopWorkers()
-		workers.Wait()
-		close(workerErrors)
-		for err := range workerErrors {
-			if err != nil && !errors.Is(err, context.Canceled) {
-				t.Errorf("worker exited: %v", err)
-			}
-		}
-	}()
 	control, stopControl := context.WithTimeout(ctx, 500*time.Millisecond)
-	_, err = c.Await(control, typ, "gap-000")
+	_, err := c.Await(control, typ, "gap-000")
 	stopControl()
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatalf("without reconciler a missing schedule must stall: %v", err)
@@ -139,7 +148,7 @@ func TestTwoHundredMissingTimerSchedulesReconcile(t *testing.T) {
 		t.Error(err)
 	}
 	if ctx.Err() != nil {
-		t.Fatalf("200 timers did not recover before deadline: %v", ctx.Err())
+		t.Fatalf("%d timers did not recover before deadline: %v", count, ctx.Err())
 	}
 	if t.Failed() {
 		return
