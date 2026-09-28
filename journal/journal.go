@@ -69,18 +69,73 @@ func DecodeAttempt(data []byte) (AttemptPayload, error) {
 }
 
 type Store struct {
-	js     jetstream.JetStream
-	mu     sync.Mutex
-	stream jetstream.Stream
-	state  jetstream.KeyValue
+	js         jetstream.JetStream
+	appendPort AppendPort
+	mu         sync.Mutex
+	stream     jetstream.Stream
+	state      jetstream.KeyValue
 }
 
 func New(js jetstream.JetStream) *Store { return &Store{js: js} }
+
+// AppendPort is the transport boundary used by the journal CAS decision path.
+// It permits deterministic transport simulations without replacing the SDK's
+// entire JetStream interface. Read and snapshot operations still use New.
+type AppendPort interface {
+	Last(context.Context, string) (AppendTail, error)
+	Publish(context.Context, string, []byte, uint64) (uint64, error)
+	Wait(context.Context, time.Duration) error
+}
+
+// AppendTail is the latest retained raw entry for one journal subject.
+type AppendTail struct {
+	Sequence uint64
+	Data     []byte
+}
+
+// NewWithAppendPort builds an append-only store for deterministic transport
+// tests. Read and snapshot operations require New with a real JetStream client.
+func NewWithAppendPort(port AppendPort) *Store { return &Store{appendPort: port} }
+
+type jetStreamAppendPort struct {
+	js     jetstream.JetStream
+	stream jetstream.Stream
+}
+
+func (p jetStreamAppendPort) Last(ctx context.Context, subject string) (AppendTail, error) {
+	msg, err := p.stream.GetLastMsgForSubject(ctx, subject)
+	if err != nil {
+		return AppendTail{}, err
+	}
+	return AppendTail{Sequence: msg.Sequence, Data: msg.Data}, nil
+}
+
+func (p jetStreamAppendPort) Publish(ctx context.Context, subject string, data []byte, expected uint64) (uint64, error) {
+	ack, err := p.js.Publish(ctx, subject, data, jetstream.WithExpectLastSequencePerSubject(expected))
+	if err != nil {
+		return 0, err
+	}
+	return ack.Sequence, nil
+}
+
+func (jetStreamAppendPort) Wait(ctx context.Context, delay time.Duration) error {
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
+	}
+}
 
 // Cache only successful handles. Their operations still make fresh JetStream
 // requests, while failed initial lookups remain retryable after provisioning
 // or a temporary server outage.
 func (s *Store) journalStream(ctx context.Context) (jetstream.Stream, error) {
+	if s.js == nil {
+		return nil, fmt.Errorf("journal stream unavailable on append-only transport")
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.stream != nil {
@@ -94,6 +149,9 @@ func (s *Store) journalStream(ctx context.Context) (jetstream.Stream, error) {
 }
 
 func (s *Store) stateKV(ctx context.Context) (jetstream.KeyValue, error) {
+	if s.js == nil {
+		return nil, fmt.Errorf("journal state unavailable on append-only transport")
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.state != nil {
@@ -120,14 +178,18 @@ func (s *Store) Append(ctx context.Context, typ, id string, e Entry, expectedSeq
 	}
 	attemptCtx, stopAttempt := context.WithTimeout(ctx, appendAttemptTimeout)
 	defer stopAttempt()
-	stream, err := s.journalStream(attemptCtx)
-	if err != nil {
-		if ctx.Err() != nil {
-			return 0, ctx.Err()
+	port := s.appendPort
+	if port == nil {
+		stream, err := s.journalStream(attemptCtx)
+		if err != nil {
+			if ctx.Err() != nil {
+				return 0, ctx.Err()
+			}
+			return 0, fmt.Errorf("%w: stream lookup: %v", ErrUnknown, err)
 		}
-		return 0, fmt.Errorf("%w: stream lookup: %v", ErrUnknown, err)
+		port = jetStreamAppendPort{js: s.js, stream: stream}
 	}
-	last, err := stream.GetLastMsgForSubject(attemptCtx, identity.JournalSubject(typ, id))
+	last, err := port.Last(attemptCtx, identity.JournalSubject(typ, id))
 	if err != nil && !errors.Is(err, jetstream.ErrMsgNotFound) {
 		if ctx.Err() != nil {
 			return 0, ctx.Err()
@@ -159,9 +221,9 @@ func (s *Store) Append(ctx context.Context, typ, id string, e Entry, expectedSeq
 	// as stale after observing a newer subject tail. Retrying the same CAS is
 	// safe: a competing writer's committed append makes it fail again.
 	for attempt := 0; attempt < 3; attempt++ {
-		ack, err := s.js.Publish(attemptCtx, identity.JournalSubject(typ, id), data, jetstream.WithExpectLastSequencePerSubject(expectedSeq))
+		seq, err := port.Publish(attemptCtx, identity.JournalSubject(typ, id), data, expectedSeq)
 		if err == nil {
-			return ack.Sequence, nil
+			return seq, nil
 		}
 		var api *jetstream.APIError
 		if !errors.As(err, &api) {
@@ -172,7 +234,7 @@ func (s *Store) Append(ctx context.Context, typ, id string, e Entry, expectedSeq
 		if api.ErrorCode != jetstream.JSErrCodeStreamWrongLastSequence && api.ErrorCode != jetstream.JSErrCodeStreamWrongLastSequenceConstant {
 			return 0, err // an explicit server rejection did not append
 		}
-		current, readErr := stream.GetLastMsgForSubject(attemptCtx, identity.JournalSubject(typ, id))
+		current, readErr := port.Last(attemptCtx, identity.JournalSubject(typ, id))
 		if readErr != nil && !errors.Is(readErr, jetstream.ErrMsgNotFound) {
 			return 0, fmt.Errorf("%w: CAS rejected: %v; tail read: %v", ErrUnknown, err, readErr)
 		}
@@ -182,10 +244,8 @@ func (s *Store) Append(ctx context.Context, typ, id string, e Entry, expectedSeq
 		if attempt == 2 || attemptCtx.Err() != nil {
 			return 0, fmt.Errorf("%w: CAS rejected while subject tail did not advance past %d: %v", ErrUnknown, expectedSeq, err)
 		}
-		select {
-		case <-attemptCtx.Done():
-			return 0, fmt.Errorf("%w: %v", ErrUnknown, attemptCtx.Err())
-		case <-time.After(25 * time.Millisecond):
+		if err := port.Wait(attemptCtx, 25*time.Millisecond); err != nil {
+			return 0, fmt.Errorf("%w: %v", ErrUnknown, err)
 		}
 	}
 	return 0, ErrUnknown

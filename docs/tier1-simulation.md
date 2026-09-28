@@ -1,0 +1,52 @@
+# Tier 1 deterministic simulation: journal append slice
+
+The first simulator slice runs the production `journal.Store.Append` decision
+path through a narrow `journal.AppendPort`. The production port still calls
+JetStream. The in-memory port keeps global stream sequences and per-subject
+tails, and can inject a request dropped before commit, an acknowledgment lost
+after commit, an unchanged-tail CAS rejection, or a competing commit.
+
+`sim.Scheduler` chooses seeded actions and records the enabled set, chosen
+action, virtual time, and transport calls in a versioned JSON trace. Replay
+rejects an unreachable choice or a changed transport transcript. Waiting
+between CAS retries advances virtual time; no wall-clock sleep is needed.
+`sim.RunAppendActors` also yields two real journal append calls at each
+transport operation, so 100 seeded two-writer CAS races explore distinct
+interleavings without relying on Go goroutine timing. Every run retains one
+winner, rejects one stale writer, and replays its exact trace. A pinned race
+trace is also byte-identical across separate processes.
+
+Run the fixed fault cases and 1,000 seeded scenarios:
+
+```sh
+go test ./sim -count=1
+go test -race ./sim -count=1
+```
+
+Set `FAULT_SEED` to select a seed for the separate-process trace test. A
+failing seeded scenario prints its seed and saves a trace under a temporary
+directory, or to `FAULT_TRACE_OUT` when set. To replay a saved trace:
+
+```sh
+FAULT_TRACE=/path/to/trace.json go test ./sim -run '^TestReplayFaultTrace$' -count=1
+```
+
+The default suite runs 1,000 seeded scenarios, each with 100 journal starts
+and a mix of transport outcomes, plus 100 two-writer races. On this VM the
+initial simulator package completed in 0.4 seconds without the race detector
+and 6.1 seconds with it. The trace
+test produced byte-identical JSON in two separate processes and rejected a
+changed enabled set. The unit CI job now runs this package and uploads a
+failure trace when one is written.
+
+`TestSimJournalAppendContractAgainstRealCluster` checks successful writes,
+global sequence gaps between subjects, retained bytes, and stale CAS results
+against a real three-node stream. Existing real-cluster tests cover network
+lost acknowledgments and injected unchanged-tail rejections. This comparison
+is limited: the model does not yet run leases, workers, consumers, timers,
+retention, Raft elections, or disk storage. The journal's five-second attempt
+deadline still uses wall time; only CAS retry waits are virtual in this first
+slice. A discrepancy seen only on real
+NATS is a candidate model gap or environment/server issue, not proof of a
+server defect. See the [Tier 1 plan](implementation-plan.md#distributed-verification)
+for the remaining transport contract and invariant gates.
