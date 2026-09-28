@@ -1,4 +1,4 @@
-# Tier 1 deterministic simulation: journal, lease, start, and dispatch slices
+# Tier 1 deterministic simulation: journal, lease, start, signal repair, and dispatch slices
 
 The first simulator slice runs the production `journal.Store.Append` decision
 path through a narrow `journal.AppendPort`. The production port still calls
@@ -84,6 +84,22 @@ message after expiry and stops being reenqueued once a journal exists. A
 three-node contract confirms that provisioned `WF_RUN` uses the two-minute
 window and that a separate short-window stream accepts the same message ID
 again after expiry while deduplicating it inside the window.
+
+The signal repair slice runs production `SignalScan.Scan` through a narrow
+port for retained signal and invocation reads, journal reads, and run enqueue.
+Its in-memory transport shares the start model's invocation stream, run
+message deduplication, and enqueue faults. The default 1,000-seed workload
+covers 20 signals per seed: an interrupted wakeup, lost or dropped enqueue
+acknowledgments, already consumed or terminal journals, stale invocation
+generations, purged signal sequence holes, absent invocations, and a scan
+repeated after the deduplication window. Eligible signals produce a retained
+wakeup; consumed, terminal, stale, purged, and absent targets do not. The
+trace replays exactly and seed 42 is byte-identical across processes. A
+three-node contract compares dry-run detection, repair, repeated-scan
+deduplication, stale-generation rejection, and a deleted signal sequence
+hole; three repeats passed. This slice models a committed signal as fixture
+state. It does not yet run the production client signal publish decisions,
+the leased signal loop, or the worker's signal drain in simulation.
 
 The dispatch slice runs the production `worker.RunPartition` fetch/retry loop
 through a narrow consumer port with a supplied handler callback. Its model

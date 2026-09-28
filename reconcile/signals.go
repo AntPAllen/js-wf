@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"js-wf/client"
@@ -17,13 +18,89 @@ import (
 )
 
 type SignalScan struct {
-	js     jetstream.JetStream
-	client *client.Client
-	jrn    *journal.Store
+	port SignalScanPort
 }
 
 func NewSignalScan(js jetstream.JetStream) *SignalScan {
-	return &SignalScan{js: js, client: client.New(js), jrn: journal.New(js)}
+	return NewSignalScanWithPort(&jetStreamSignalScanPort{js: js, client: client.New(js), jrn: journal.New(js)})
+}
+
+// SignalScanPort contains the retained reads and run enqueue used by Scan.
+type SignalScanPort interface {
+	GetSignal(context.Context, uint64) (*jetstream.RawStreamMsg, error)
+	LastSignalSequence(context.Context) (uint64, error)
+	ReadJournal(context.Context, string, string) ([]journal.Record, error)
+	LastInvocation(context.Context, string) (*jetstream.RawStreamMsg, error)
+	EnqueueSignal(context.Context, string, string, uint64) error
+}
+
+func NewSignalScanWithPort(port SignalScanPort) *SignalScan { return &SignalScan{port: port} }
+
+type jetStreamSignalScanPort struct {
+	js     jetstream.JetStream
+	client *client.Client
+	jrn    *journal.Store
+	mu     sync.Mutex
+	sig    jetstream.Stream
+	inv    jetstream.Stream
+}
+
+func (p *jetStreamSignalScanPort) stream(ctx context.Context, name string) (jetstream.Stream, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if name == "WF_SIG" && p.sig != nil {
+		return p.sig, nil
+	}
+	if name == "WF_INV" && p.inv != nil {
+		return p.inv, nil
+	}
+	stream, err := p.js.Stream(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	if name == "WF_SIG" {
+		p.sig = stream
+	} else {
+		p.inv = stream
+	}
+	return stream, nil
+}
+
+func (p *jetStreamSignalScanPort) GetSignal(ctx context.Context, sequence uint64) (*jetstream.RawStreamMsg, error) {
+	stream, err := p.stream(ctx, "WF_SIG")
+	if err != nil {
+		return nil, err
+	}
+	return stream.GetMsg(ctx, sequence)
+}
+
+func (p *jetStreamSignalScanPort) LastSignalSequence(ctx context.Context) (uint64, error) {
+	stream, err := p.stream(ctx, "WF_SIG")
+	if err != nil {
+		return 0, err
+	}
+	info, err := stream.Info(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return info.State.LastSeq, nil
+}
+
+func (p *jetStreamSignalScanPort) ReadJournal(ctx context.Context, typ, id string) ([]journal.Record, error) {
+	records, _, err := p.jrn.Read(ctx, typ, id)
+	return records, err
+}
+
+func (p *jetStreamSignalScanPort) LastInvocation(ctx context.Context, subject string) (*jetstream.RawStreamMsg, error) {
+	stream, err := p.stream(ctx, "WF_INV")
+	if err != nil {
+		return nil, err
+	}
+	return stream.GetLastMsgForSubject(ctx, subject)
+}
+
+func (p *jetStreamSignalScanPort) EnqueueSignal(ctx context.Context, typ, id string, sequence uint64) error {
+	return p.client.Enqueue(ctx, typ, id, fmt.Sprintf("signal-wakeup:%d", sequence))
 }
 
 type signalJournalState struct {
@@ -41,24 +118,16 @@ func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun b
 	if next == 0 {
 		next = 1
 	}
-	sig, err := s.js.Stream(ctx, "WF_SIG")
-	if err != nil {
-		return ScanResult{}, err
-	}
-	inv, err := s.js.Stream(ctx, "WF_INV")
-	if err != nil {
-		return ScanResult{}, err
-	}
 	cache := map[string]signalJournalState{}
 	result := ScanResult{NextSequence: next}
 	for scanned := 0; scanned < budget; scanned++ {
-		m, err := sig.GetMsg(ctx, next)
+		m, err := s.port.GetSignal(ctx, next)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
-			info, infoErr := sig.Info(ctx)
+			last, infoErr := s.port.LastSignalSequence(ctx)
 			if infoErr != nil {
 				return result, infoErr
 			}
-			if next > info.State.LastSeq {
+			if next > last {
 				result.NextSequence = 1
 				return result, nil
 			}
@@ -83,7 +152,7 @@ func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun b
 		key := identity.Key(typ, id)
 		state, ok := cache[key]
 		if !ok {
-			records, _, err := s.jrn.Read(ctx, typ, id)
+			records, err := s.port.ReadJournal(ctx, typ, id)
 			if err != nil {
 				return result, err
 			}
@@ -107,7 +176,7 @@ func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun b
 		if state.terminal || state.consumed[m.Sequence] {
 			continue
 		}
-		invocation, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, id))
+		invocation, err := s.port.LastInvocation(ctx, identity.InvocationSubject(typ, id))
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			continue
 		} else if err != nil {
@@ -118,7 +187,7 @@ func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun b
 		}
 		result.Reenqueued++
 		if !dryRun {
-			if err := s.client.Enqueue(ctx, typ, id, fmt.Sprintf("signal-wakeup:%d", m.Sequence)); err != nil {
+			if err := s.port.EnqueueSignal(ctx, typ, id, m.Sequence); err != nil {
 				return result, err
 			}
 		}
