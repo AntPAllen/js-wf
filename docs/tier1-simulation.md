@@ -97,8 +97,13 @@ wakeup; consumed, terminal, stale, purged, and absent targets do not. The
 trace replays exactly and seed 42 is byte-identical across processes. A
 three-node contract compares dry-run detection, repair, repeated-scan
 deduplication, stale-generation rejection, and a deleted signal sequence
-hole; three repeats passed. This slice models a committed signal as fixture
-state. It does not yet run the production client signal publish decisions,
+hole; three repeats passed. A second 1,000-seed workload interleaves a
+fixture signal publish with each production scanner transport call. It covers
+publication before the signal read, between a missing read and stream info,
+and after the scan; repeated scans from the returned cursor repair the
+wakeup in all three orders. The cooperative trace also replays exactly and
+is byte-identical across processes. This slice models a committed signal as
+fixture state. It does not yet run the production client signal publish decisions,
 the leased signal loop, or the worker's signal drain in simulation.
 
 The dispatch slice runs the production `worker.RunPartition` fetch/retry loop
