@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"js-wf/identity"
 
@@ -56,12 +57,39 @@ func (s *Store) Acquire(ctx context.Context, typ, id, worker string) (*Lease, er
 	// The revision itself becomes the epoch, so the value is updated once by
 	// its owner after Create. Until that update, other acquirers still fail.
 	data, _ := json.Marshal(Value{Worker: worker})
-	rev, err := s.kv.Create(ctx, key, data)
-	if err != nil {
-		if errors.Is(err, jetstream.ErrKeyExists) {
+	var rev uint64
+	var err error
+	for attempt := 0; attempt < 2; attempt++ {
+		rev, err = s.kv.Create(ctx, key, data)
+		if err == nil {
+			break
+		}
+		if !errors.Is(err, jetstream.ErrKeyExists) {
+			return nil, err
+		}
+		if attempt > 0 {
 			return nil, ErrHeld
 		}
-		return nil, err
+		entry, getErr := s.kv.Get(ctx, key)
+		if errors.Is(getErr, jetstream.ErrKeyNotFound) {
+			continue
+		}
+		if getErr != nil {
+			return nil, getErr
+		}
+		var held Value
+		if json.Unmarshal(entry.Value(), &held) != nil || held.Worker == "" || held.Epoch != 0 || time.Since(entry.Created()) < time.Second {
+			return nil, ErrHeld
+		}
+		// Create succeeded, but its owner never finished epoch initialization.
+		// The revision CAS makes reclaim safe against an in-flight Update: only
+		// one of Delete and Update can win, and no handler has started yet.
+		if deleteErr := s.kv.Delete(ctx, key, jetstream.LastRevision(entry.Revision())); deleteErr != nil {
+			if errors.Is(deleteErr, jetstream.ErrKeyRevisionMismatch) {
+				return nil, ErrHeld
+			}
+			return nil, deleteErr
+		}
 	}
 	v := Value{Worker: worker, Epoch: rev}
 	data, _ = json.Marshal(v)
@@ -98,6 +126,35 @@ func (l *Lease) Release(ctx context.Context) error {
 	if err != nil {
 		l.lost = true
 		return fmt.Errorf("%w: %v", ErrLost, err)
+	}
+	l.lost = true
+	return nil
+}
+
+// Cleanup resolves a failed or uncertain release after the handler has stopped.
+// It may delete only the lease with this worker and fencing epoch, using the
+// revision returned by KV. A successor's lease is never deleted.
+func (l *Lease) Cleanup(ctx context.Context) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	entry, err := l.store.kv.Get(ctx, l.key)
+	if errors.Is(err, jetstream.ErrKeyNotFound) {
+		l.lost = true
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	var current Value
+	if json.Unmarshal(entry.Value(), &current) != nil || current.Worker != l.value.Worker || current.Epoch != l.value.Epoch {
+		l.lost = true
+		return ErrLost
+	}
+	if err := l.store.kv.Delete(ctx, l.key, jetstream.LastRevision(entry.Revision())); err != nil {
+		if errors.Is(err, jetstream.ErrKeyRevisionMismatch) {
+			return ErrLost
+		}
+		return err
 	}
 	l.lost = true
 	return nil

@@ -43,6 +43,18 @@ consistently meet the gate. These runs show that both held leases and failed
 acquisitions contribute to the recovery backlog; they do not isolate a single
 server-side cause of the timing variance.
 
+Lease acquisition now uses revision CAS to reclaim an uninitialized key that
+has remained for at least one second after its creator failed before writing
+the fencing epoch. A fresh key remains held. Workers also make bounded,
+revision-checked cleanup attempts after an uncertain release; cleanup refuses
+to delete a successor's epoch. Real KV tests cover both cases, and the
+45-second worker-partition fencing test still passes. Three full route runs
+with uninitialized-key reclaim finished every invocation at p99 24.89, 20.52,
+and 40.21 seconds. After adding uncertain-release cleanup, two further full
+runs finished at p99 42.35 and 38.89 seconds. The 30-second target remains
+variable and unmet as a reliable gate. A full no-fault 10,000-timer run after
+both lease changes passed at p99 728.8 ms with zero redeliveries and fences.
+
 Further 100-invocation diagnostics showed that wakeups can wait tens of
 seconds between enqueue and lease acquisition. With the reconciler disabled,
 p99 was 36.7 seconds, the longest enqueue-to-lease wait was 32.7 seconds,

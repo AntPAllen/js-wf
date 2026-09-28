@@ -335,11 +335,34 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	w.metrics.leaseAcquisitions.Add(1)
 	w.metrics.recordLeaseLatency(metadata, time.Now())
 	release := func() error {
-		releaseCtx, stopRelease := context.WithTimeout(context.Background(), 5*time.Second)
+		releaseCtx, stopRelease := context.WithTimeout(context.Background(), 15*time.Second)
 		defer stopRelease()
-		return l.Release(releaseCtx)
+		attempt, stopAttempt := context.WithTimeout(releaseCtx, 2*time.Second)
+		err := l.Release(attempt)
+		stopAttempt()
+		if err == nil {
+			return nil
+		}
+		for releaseCtx.Err() == nil {
+			attempt, stopAttempt := context.WithTimeout(releaseCtx, 2*time.Second)
+			cleanupErr := l.Cleanup(attempt)
+			stopAttempt()
+			if cleanupErr == nil || errors.Is(cleanupErr, lease.ErrLost) {
+				return cleanupErr
+			}
+			select {
+			case <-releaseCtx.Done():
+			case <-time.After(200 * time.Millisecond):
+			}
+		}
+		return fmt.Errorf("lease cleanup after %v: %w", err, releaseCtx.Err())
 	}
-	defer func() { _ = release() }()
+	released := false
+	defer func() {
+		if !released {
+			_ = release()
+		}
+	}()
 	var leaseLost atomic.Bool
 	stopped := make(chan struct{})
 	go func() {
@@ -395,6 +418,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		_ = msg.NakWithDelay(time.Second)
 		return
 	}
+	released = true
 	if err := msg.Ack(); err == nil && cancelledTimerNoOp {
 		w.metrics.cancelledTimerNoOps.Add(1)
 	}
