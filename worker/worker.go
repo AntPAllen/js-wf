@@ -54,6 +54,8 @@ type Worker struct {
 	outcomePort          OutcomePort
 	invocationPort       InvocationPort
 	signalDrainPort      SignalDrainPort
+	timerSchedulePort    TimerSchedulePort
+	timerNowPort         func(context.Context) (time.Time, error)
 	client               *client.Client
 	ID                   string
 	Handlers             map[string]Handler
@@ -162,25 +164,28 @@ func New(ctx context.Context, js jetstream.JetStream, id string, handlers map[st
 	return w, nil
 }
 
-// ModeledWorkerPorts supplies the durable boundaries needed to execute short
+// ModeledWorkerPorts supplies the durable boundaries needed to execute
 // workflow handlers through the production Worker delivery path.
 type ModeledWorkerPorts struct {
-	Journal    *journal.Store
-	Leases     *lease.Store
-	Outcome    OutcomePort
-	Invocation InvocationPort
-	Signals    SignalDrainPort
-	Client     *client.Client
+	Journal     *journal.Store
+	Leases      *lease.Store
+	Outcome     OutcomePort
+	Invocation  InvocationPort
+	Signals     SignalDrainPort
+	Timer       TimerSchedulePort
+	TimerNow    func(context.Context) (time.Time, error)
+	NativeTimer bool
+	Client      *client.Client
 }
 
 // NewWithPorts builds a worker whose delivery and execution decisions run
-// against narrow transports. Snapshot objects and timer scheduling are not
-// provided by this constructor.
+// against narrow transports. Snapshot objects are not provided by this
+// constructor; timer scheduling is available when Timer and TimerNow are set.
 func NewWithPorts(id string, handlers map[string]Handler, ports ModeledWorkerPorts) (*Worker, error) {
 	if id == "" || ports.Journal == nil || ports.Leases == nil || ports.Outcome == nil || ports.Invocation == nil || ports.Signals == nil || ports.Client == nil {
 		return nil, fmt.Errorf("invalid modeled worker configuration")
 	}
-	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, cancelWaiters: make(map[string]*cancelWaiter)}, nil
+	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, cancelWaiters: make(map[string]*cancelWaiter)}, nil
 }
 
 type panicRetryError struct{ attempt int }
@@ -832,10 +837,14 @@ func NotifyParentWithClient(ctx context.Context, c *client.Client, typ, id strin
 }
 
 func (w *Worker) scheduleTimer(ctx context.Context, typ, id string, invSeq, step uint64, fireAt time.Time) error {
-	if w.js == nil {
+	port := w.timerSchedulePort
+	if port == nil && w.js != nil {
+		port = NewTimerSchedulePort(w.js)
+	}
+	if port == nil {
 		return fmt.Errorf("timer schedule unavailable on modeled worker")
 	}
-	newPublish, err := ScheduleTimerWithPort(ctx, NewTimerSchedulePort(w.js), w.nativeSchedules, typ, id, invSeq, step, fireAt)
+	newPublish, err := ScheduleTimerWithPort(ctx, port, w.nativeSchedules, typ, id, invSeq, step, fireAt)
 	if newPublish {
 		w.metrics.timersScheduled.Add(1)
 	}
@@ -863,6 +872,9 @@ func timerWasCancelled(records []journal.Record, step uint64) bool {
 }
 
 func (w *Worker) serverNow(ctx context.Context) (time.Time, error) {
+	if w.timerNowPort != nil {
+		return w.timerNowPort(ctx)
+	}
 	if w.js == nil {
 		return time.Time{}, fmt.Errorf("server time unavailable on modeled worker")
 	}

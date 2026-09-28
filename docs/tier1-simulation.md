@@ -171,6 +171,19 @@ liveness finds no eligible undrained signal. Seed 42 is pinned and replays
 across processes. Timer, snapshot, large blob, cancellation, and cooperative
 heartbeat turns remain outside this workload.
 
+The integrated native timer workload runs production `Client.Start`,
+`Worker.handle`, `wf.Timer`, and `TimerHandle.Await` over modeled clock, timer
+publish, and durable consumer ports. A first delivery journals `Suspended`;
+virtual time advances to the recorded fire time and the native timer target
+delivers with its generation, step headers, and server timestamp. The same
+worker replays the wait and writes its terminal journal and result. Across
+1,000 seeds the schedule publish is clean, dropped, or committed with a lost
+reply; other seeds lose a completion append or timer-run acknowledgment or
+change the consumer leader. No timer fires before its due time, each scenario
+retains one native timer source and one terminal result, and the final snapshot
+passes I1/I2/I3/I6. Seed 42 is pinned and replays across processes. Fallback
+timer routing and a simultaneous timer/signal wait remain separate slices.
+
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
 subject, stores large input objects, and retains run enqueues with message-ID

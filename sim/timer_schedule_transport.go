@@ -25,21 +25,22 @@ type timerPublication struct {
 // deduplication, and eventual native target delivery. Fallback records remain
 // retained for the separate fallback scanner to route.
 type TimerScheduleTransport struct {
-	schedule    *Scheduler
-	base        time.Time
-	window      int64
-	ids         map[string]int64
-	faults      []AppendFault
-	native      []timerPublication
-	fallback    []Message
-	deleted     map[uint64]bool
-	state       map[string][]byte
-	wakeupIDs   map[string]int64
-	wakeupFault []AppendFault
-	deleteFault []AppendFault
-	runs        []Message
-	streamSeq   uint64
-	fallbackSeq uint64
+	schedule         *Scheduler
+	base             time.Time
+	window           int64
+	ids              map[string]int64
+	faults           []AppendFault
+	native           []timerPublication
+	fallback         []Message
+	deleted          map[uint64]bool
+	state            map[string][]byte
+	wakeupIDs        map[string]int64
+	wakeupFault      []AppendFault
+	deleteFault      []AppendFault
+	runs             []Message
+	streamSeq        uint64
+	fallbackSeq      uint64
+	onNativeDelivery func(*nats.Msg, time.Time)
 }
 
 var _ worker.TimerSchedulePort = (*TimerScheduleTransport)(nil)
@@ -47,6 +48,11 @@ var _ reconcile.FallbackTimerScanPort = (*TimerScheduleTransport)(nil)
 
 func NewTimerScheduleTransport(schedule *Scheduler, base time.Time) *TimerScheduleTransport {
 	return &TimerScheduleTransport{schedule: schedule, base: base, window: (2 * time.Minute).Milliseconds(), ids: map[string]int64{}, deleted: map[uint64]bool{}, state: map[string][]byte{}, wakeupIDs: map[string]int64{}}
+}
+
+// OnNativeDelivery connects due timer targets to a modeled durable consumer.
+func (m *TimerScheduleTransport) OnNativeDelivery(callback func(*nats.Msg, time.Time)) {
+	m.onNativeDelivery = callback
 }
 
 func (m *TimerScheduleTransport) QueueFault(kind AppendFault) error {
@@ -163,6 +169,9 @@ func (m *TimerScheduleTransport) Advance(delay time.Duration) error {
 		m.streamSeq++
 		target := entry.message.Header.Get(jetstream.ScheduleTargetHeader)
 		m.runs = append(m.runs, Message{Subject: target, Sequence: m.streamSeq, Data: append([]byte(nil), entry.message.Data...)})
+		if m.onNativeDelivery != nil {
+			m.onNativeDelivery(&nats.Msg{Subject: target, Data: append([]byte(nil), entry.message.Data...), Header: cloneHeader(entry.message.Header)}, now)
+		}
 		m.event(TransportEvent{Operation: "deliver_native_timer", Subject: target, Sequence: m.streamSeq, DataSHA256: digest(entry.message.Data), Outcome: "ok"})
 	}
 	return nil

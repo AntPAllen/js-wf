@@ -21,6 +21,8 @@ type DispatchFault struct {
 type dispatchRecord struct {
 	subject    string
 	data       []byte
+	header     nats.Header
+	timestamp  time.Time
 	sequence   uint64
 	deliveries uint64
 	deadline   int64
@@ -64,10 +66,15 @@ func (m *DispatchTransport) QueueFault(f DispatchFault) error {
 }
 
 func (m *DispatchTransport) PublishRun(subject string, data []byte) uint64 {
+	return m.PublishRunMessage(subject, data, nil, time.Time{})
+}
+
+// PublishRunMessage retains the headers and server timestamp needed by timer wakeups.
+func (m *DispatchTransport) PublishRunMessage(subject string, data []byte, header nats.Header, timestamp time.Time) uint64 {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.sequence++
-	m.records = append(m.records, &dispatchRecord{subject: subject, data: append([]byte(nil), data...), sequence: m.sequence})
+	m.records = append(m.records, &dispatchRecord{subject: subject, data: append([]byte(nil), data...), header: cloneHeader(header), timestamp: timestamp, sequence: m.sequence})
 	m.event(TransportEvent{Operation: "run_publish", Subject: subject, Sequence: m.sequence, DataSHA256: digest(data), Outcome: "ok"})
 	return m.sequence
 }
@@ -204,10 +211,10 @@ type dispatchMsg struct {
 var _ jetstream.Msg = (*dispatchMsg)(nil)
 
 func (m *dispatchMsg) Metadata() (*jetstream.MsgMetadata, error) {
-	return &jetstream.MsgMetadata{NumDelivered: m.delivery, Sequence: jetstream.SequencePair{Stream: m.record.sequence, Consumer: m.delivery}}, nil
+	return &jetstream.MsgMetadata{NumDelivered: m.delivery, Sequence: jetstream.SequencePair{Stream: m.record.sequence, Consumer: m.delivery}, Timestamp: m.record.timestamp}, nil
 }
 func (m *dispatchMsg) Data() []byte                    { return append([]byte(nil), m.record.data...) }
-func (m *dispatchMsg) Headers() nats.Header            { return nats.Header{} }
+func (m *dispatchMsg) Headers() nats.Header            { return cloneHeader(m.record.header) }
 func (m *dispatchMsg) Subject() string                 { return m.record.subject }
 func (m *dispatchMsg) Reply() string                   { return "" }
 func (m *dispatchMsg) Ack() error                      { return m.finish("ack", 0) }
