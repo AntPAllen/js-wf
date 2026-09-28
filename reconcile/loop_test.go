@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -119,5 +120,32 @@ func TestCursorPersistsAcrossLeadersAndUsesCAS(t *testing.T) {
 	}
 	if _, err := saveCursor(ctx, state, "start", saved+11, revision); !errors.Is(err, ErrCursorStale) {
 		t.Fatalf("stale cursor update: %v", err)
+	}
+	var scans atomic.Int32
+	retryCtx, stopRetry := context.WithCancel(ctx)
+	retryDone := make(chan error, 1)
+	observedRetry := make(chan struct{}, 1)
+	go func() {
+		retryDone <- runLoop(retryCtx, a, "retry", "timer", 50*time.Millisecond, 1, func(_ context.Context, next uint64, _ int, _ bool) (ScanResult, error) {
+			if scans.Add(1) == 1 {
+				return ScanResult{}, jetstream.ErrNoStreamResponse
+			}
+			select {
+			case observedRetry <- struct{}{}:
+			default:
+			}
+			return ScanResult{NextSequence: next + 1}, nil
+		})
+	}()
+	select {
+	case <-observedRetry:
+	case err := <-retryDone:
+		t.Fatalf("reconciler exited on transient stream error: %v", err)
+	case <-ctx.Done():
+		t.Fatal("reconciler did not retry transient stream error")
+	}
+	stopRetry()
+	if err := <-retryDone; err != nil && !errors.Is(err, context.Canceled) {
+		t.Fatal(err)
 	}
 }

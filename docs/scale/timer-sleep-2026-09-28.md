@@ -40,4 +40,5 @@ The worker's existing wakeup buckets placed every scheduled message within
 the handler measurement above includes time queued for a worker and is the
 relevant figure for the plan's completion target. These rows are separate
 end-to-end runs, so the changing start duration also changes how densely
-deadlines overlap. The chaos target of p99 under 30 seconds remains unmeasured.
+deadlines overlap. The route-fault audit and its unmet p99/liveness target are
+recorded in [`timer-route-faults-2026-09-28.md`](timer-route-faults-2026-09-28.md).

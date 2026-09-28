@@ -491,17 +491,25 @@ func (c *Client) Await(ctx context.Context, typ, id string) (value []byte, err e
 	if err := identity.Validate(typ, id); err != nil {
 		return nil, err
 	}
-	state, err := c.js.KeyValue(ctx, "WF_STATE")
+	state, err := retryAwaitRead(ctx, func(attempt context.Context) (jetstream.KeyValue, error) {
+		return c.js.KeyValue(attempt, "WF_STATE")
+	})
 	if err != nil {
 		return nil, err
 	}
-	inv, err := c.js.Stream(ctx, "WF_INV")
+	inv, err := retryAwaitRead(ctx, func(attempt context.Context) (jetstream.Stream, error) {
+		return c.js.Stream(attempt, "WF_INV")
+	})
 	if err != nil {
 		return nil, err
 	}
-	input, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, id))
+	input, err := retryAwaitRead(ctx, func(attempt context.Context) (*jetstream.RawStreamMsg, error) {
+		return inv.GetLastMsgForSubject(attempt, identity.InvocationSubject(typ, id))
+	})
 	if errors.Is(err, jetstream.ErrMsgNotFound) {
-		if value, getErr := state.Get(ctx, identity.Key(typ, id)); getErr == nil {
+		if value, getErr := retryAwaitRead(ctx, func(attempt context.Context) (jetstream.KeyValueEntry, error) {
+			return state.Get(attempt, identity.Key(typ, id))
+		}); getErr == nil {
 			marker, tomb, decodeErr := retention.Decode(value.Value())
 			if decodeErr != nil {
 				return nil, decodeErr
@@ -520,7 +528,9 @@ func (c *Client) Await(ctx context.Context, typ, id string) (value []byte, err e
 	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
 	for {
-		e, err := state.Get(ctx, identity.Key(typ, id))
+		e, err := retryAwaitRead(ctx, func(attempt context.Context) (jetstream.KeyValueEntry, error) {
+			return state.Get(attempt, identity.Key(typ, id))
+		})
 		if err == nil {
 			marker, tomb, decodeErr := retention.Decode(e.Value())
 			if decodeErr != nil {
@@ -534,7 +544,9 @@ func (c *Client) Await(ctx context.Context, typ, id string) (value []byte, err e
 				// invocation is running.
 				goto wait
 			}
-			current, getErr := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, id))
+			current, getErr := retryAwaitRead(ctx, func(attempt context.Context) (*jetstream.RawStreamMsg, error) {
+				return inv.GetLastMsgForSubject(attempt, identity.InvocationSubject(typ, id))
+			})
 			if errors.Is(getErr, jetstream.ErrMsgNotFound) || getErr == nil && current.Sequence != input.Sequence {
 				return nil, ErrPurged
 			}
@@ -561,11 +573,15 @@ func (c *Client) Await(ctx context.Context, typ, id string) (value []byte, err e
 			if out.ResultRef == "" {
 				return out.ResultBytes(ctx, nil)
 			}
-			objects, err := c.js.ObjectStore(ctx, "WF_BLOB")
+			objects, err := retryAwaitRead(ctx, func(attempt context.Context) (jetstream.ObjectStore, error) {
+				return c.js.ObjectStore(attempt, "WF_BLOB")
+			})
 			if err != nil {
 				return nil, err
 			}
-			return out.ResultBytes(ctx, func(ctx context.Context, name string) ([]byte, error) { return objects.GetBytes(ctx, name) })
+			return out.ResultBytes(ctx, func(ctx context.Context, name string) ([]byte, error) {
+				return retryAwaitRead(ctx, func(attempt context.Context) ([]byte, error) { return objects.GetBytes(attempt, name) })
+			})
 		}
 		if !errors.Is(err, jetstream.ErrKeyNotFound) {
 			return nil, err
@@ -577,4 +593,36 @@ func (c *Client) Await(ctx context.Context, typ, id string) (value []byte, err e
 		case <-ticker.C:
 		}
 	}
+}
+
+// A JetStream request can wait for the caller's entire Await deadline during
+// leader movement. Retry one bounded read against the same durable state.
+func retryAwaitRead[T any](ctx context.Context, read func(context.Context) (T, error)) (T, error) {
+	for {
+		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
+		value, err := read(attempt)
+		stop()
+		if err == nil || !retryableAwaitReadError(err) || ctx.Err() != nil {
+			if ctx.Err() != nil && err != nil {
+				return value, ctx.Err()
+			}
+			return value, err
+		}
+		select {
+		case <-ctx.Done():
+			var zero T
+			return zero, ctx.Err()
+		case <-time.After(100 * time.Millisecond):
+		}
+	}
+}
+
+func retryableAwaitReadError(err error) bool {
+	var api *jetstream.APIError
+	if errors.As(err, &api) && api.ErrorCode == 10008 {
+		return true
+	}
+	return errors.Is(err, jetstream.ErrNoStreamResponse) || errors.Is(err, context.DeadlineExceeded) ||
+		errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) ||
+		errors.Is(err, nats.ErrDisconnected) || errors.Is(err, nats.ErrConnectionReconnecting)
 }

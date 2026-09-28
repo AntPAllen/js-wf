@@ -9,6 +9,7 @@ import (
 
 	"js-wf/lease"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -44,7 +45,9 @@ func saveCursor(ctx context.Context, state jetstream.KeyValue, kind string, next
 	} else {
 		newRevision, err = state.Update(ctx, key, data, revision)
 	}
-	if errors.Is(err, jetstream.ErrKeyExists) || errors.Is(err, jetstream.ErrKeyRevisionMismatch) {
+	var api *jetstream.APIError
+	if errors.Is(err, jetstream.ErrKeyExists) || errors.Is(err, jetstream.ErrKeyRevisionMismatch) ||
+		errors.As(err, &api) && api.ErrorCode == 10164 {
 		return 0, ErrCursorStale
 	}
 	return newRevision, err
@@ -54,61 +57,120 @@ func runLoop(ctx context.Context, js jetstream.JetStream, workerID, kind string,
 	if interval <= 0 || interval > 10*time.Second || budget < 1 {
 		return fmt.Errorf("invalid reconcile cadence or budget")
 	}
-	leasing, err := lease.New(ctx, js)
-	if err != nil {
-		return err
-	}
-	state, err := js.KeyValue(ctx, "WF_STATE")
-	if err != nil {
-		return err
-	}
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
+	wait := func() {
+		select {
+		case <-ctx.Done():
+		case <-ticker.C:
+		}
+	}
+	release := func(l *lease.Lease) {
+		releaseCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
+		defer stop()
+		_ = l.Release(releaseCtx)
+	}
 	for ctx.Err() == nil {
-		l, err := leasing.Acquire(ctx, "system", kind+"-reconciler", workerID)
-		if errors.Is(err, lease.ErrHeld) {
-			select {
-			case <-ctx.Done():
+		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
+		leasing, err := lease.New(attempt, js)
+		var state jetstream.KeyValue
+		if err == nil {
+			state, err = js.KeyValue(attempt, "WF_STATE")
+		}
+		stop()
+		if err != nil {
+			if ctx.Err() != nil {
 				return nil
-			case <-ticker.C:
-				continue
 			}
-		}
-		if err != nil {
-			return err
-		}
-		cursor, revision, err := loadCursor(ctx, state, kind)
-		if err != nil {
-			_ = l.Release(context.Background())
-			return err
-		}
-		for ctx.Err() == nil {
-			if err := l.Renew(ctx); err != nil {
-				break
-			}
-			result, err := scan(ctx, cursor, budget, false)
-			if err != nil {
-				_ = l.Release(context.Background())
+			if !retryableReconcileError(err) {
 				return err
 			}
-			if err := l.Renew(ctx); err != nil {
+			wait()
+			continue
+		}
+		attempt, stop = context.WithTimeout(ctx, 5*time.Second)
+		l, err := leasing.Acquire(attempt, "system", kind+"-reconciler", workerID)
+		stop()
+		if errors.Is(err, lease.ErrHeld) {
+			wait()
+			continue
+		}
+		if err != nil {
+			if ctx.Err() != nil {
+				return nil
+			}
+			if !retryableReconcileError(err) {
+				return err
+			}
+			wait()
+			continue
+		}
+		attempt, stop = context.WithTimeout(ctx, 5*time.Second)
+		cursor, revision, err := loadCursor(attempt, state, kind)
+		stop()
+		if err != nil {
+			release(l)
+			if ctx.Err() != nil {
+				return nil
+			}
+			if !retryableReconcileError(err) {
+				return err
+			}
+			wait()
+			continue
+		}
+		for ctx.Err() == nil {
+			attempt, stop = context.WithTimeout(ctx, 5*time.Second)
+			err = l.Renew(attempt)
+			stop()
+			if err != nil {
 				break
 			}
-			revision, err = saveCursor(ctx, state, kind, result.NextSequence, revision)
+			attempt, stop = context.WithTimeout(ctx, 5*time.Second)
+			result, err := scan(attempt, cursor, budget, false)
+			stop()
+			if err != nil {
+				if !retryableReconcileError(err) && ctx.Err() == nil {
+					release(l)
+					return err
+				}
+				break
+			}
+			attempt, stop = context.WithTimeout(ctx, 5*time.Second)
+			err = l.Renew(attempt)
+			stop()
+			if err != nil {
+				break
+			}
+			attempt, stop = context.WithTimeout(ctx, 5*time.Second)
+			revision, err = saveCursor(attempt, state, kind, result.NextSequence, revision)
+			stop()
 			if errors.Is(err, ErrCursorStale) {
 				break
 			}
 			if err != nil {
-				_ = l.Release(context.Background())
-				return err
+				if !retryableReconcileError(err) && ctx.Err() == nil {
+					release(l)
+					return err
+				}
+				break
 			}
 			cursor = result.NextSequence
-			select {
-			case <-ctx.Done():
-			case <-ticker.C:
-			}
+			wait()
 		}
-		_ = l.Release(context.Background())
+		release(l)
+		wait()
 	}
 	return nil
+}
+
+func retryableReconcileError(err error) bool {
+	var api *jetstream.APIError
+	if errors.As(err, &api) && (api.ErrorCode == 10008 || api.ErrorCode == 10164) {
+		return true
+	}
+	return errors.Is(err, jetstream.ErrNoStreamResponse) ||
+		errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) ||
+		errors.Is(err, nats.ErrDisconnected) || errors.Is(err, nats.ErrConnectionReconnecting) ||
+		errors.Is(err, context.DeadlineExceeded)
 }

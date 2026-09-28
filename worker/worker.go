@@ -53,6 +53,8 @@ type Worker struct {
 	maxEntries           uint64
 	maxPanicAttempts     int
 	partitionConcurrency int
+	ackWait              time.Duration
+	heartbeatInterval    time.Duration
 	nativeSchedules      bool
 	metrics              metricsCounters
 }
@@ -84,6 +86,20 @@ func WithPartitionConcurrency(count int) Option {
 	}
 }
 
+// WithDispatchTiming controls redelivery after a worker loses access to the
+// consumer. Progress heartbeats must be frequent enough to protect live work.
+// Every worker sharing a durable partition must use the same AckWait.
+func WithDispatchTiming(ackWait, heartbeat time.Duration) Option {
+	return func(w *Worker) error {
+		if heartbeat < time.Second || ackWait < 3*time.Second || ackWait > 5*time.Minute || heartbeat > ackWait/3 {
+			return fmt.Errorf("invalid dispatch acknowledgment and heartbeat intervals")
+		}
+		w.ackWait = ackWait
+		w.heartbeatInterval = heartbeat
+		return nil
+	}
+}
+
 func New(ctx context.Context, js jetstream.JetStream, id string, handlers map[string]Handler, options ...Option) (*Worker, error) {
 	if id == "" {
 		return nil, fmt.Errorf("empty worker ID")
@@ -109,7 +125,7 @@ func New(ctx context.Context, js jetstream.JetStream, id string, handlers map[st
 			return nil, fmt.Errorf("fallback timer stream: %w", err)
 		}
 	}
-	w := &Worker{js: js, jrn: journal.New(js), leases: l, state: state, client: client.New(js), ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, nativeSchedules: runInfo.Config.AllowMsgSchedules}
+	w := &Worker{js: js, jrn: journal.New(js), leases: l, state: state, client: client.New(js), ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, nativeSchedules: runInfo.Config.AllowMsgSchedules}
 	for _, option := range options {
 		if err := option(w); err != nil {
 			return nil, err
@@ -140,7 +156,7 @@ func (w *Worker) consumer(ctx context.Context, partition uint32) (jetstream.Cons
 		return nil, err
 	}
 	name := fmt.Sprintf("WF_P_%02d", partition)
-	want := jetstream.ConsumerConfig{Name: name, Durable: name, FilterSubject: "wf.run." + strconv.FormatUint(uint64(partition), 10), AckPolicy: jetstream.AckExplicitPolicy, AckWait: 30 * time.Second, MaxDeliver: -1, MaxAckPending: 1000}
+	want := jetstream.ConsumerConfig{Name: name, Durable: name, FilterSubject: "wf.run." + strconv.FormatUint(uint64(partition), 10), AckPolicy: jetstream.AckExplicitPolicy, AckWait: w.ackWait, MaxDeliver: -1, MaxAckPending: 1000}
 	c, err := run.CreateConsumer(attemptCtx, want)
 	if err != nil {
 		return nil, err
@@ -175,6 +191,22 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 			}
 			continue
 		}
+		emptyPolls := 0
+		refreshAfterEmpty := func() bool {
+			emptyPolls++
+			if emptyPolls < 3 {
+				return false
+			}
+			emptyPolls = 0
+			attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+			info, err := c.Info(attempt)
+			stop()
+			active := 0
+			if slots != nil {
+				active = len(slots)
+			}
+			return err != nil || info == nil || info.NumPending > 0 || info.NumAckPending > active
+		}
 		for ctx.Err() == nil {
 			if slots != nil {
 				select {
@@ -191,7 +223,10 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 				if ctx.Err() != nil {
 					return nil
 				}
-				if errors.Is(err, nats.ErrTimeout) || errors.Is(err, jetstream.ErrNoMessages) {
+				if errors.Is(err, nats.ErrTimeout) || errors.Is(err, jetstream.ErrNoMessages) || errors.Is(err, context.DeadlineExceeded) {
+					if refreshAfterEmpty() {
+						break
+					}
 					continue
 				}
 				if retryableConsumerError(err) {
@@ -202,6 +237,7 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 			dispatched := false
 			for msg := range batch.Messages() {
 				dispatched = true
+				emptyPolls = 0
 				if slots == nil {
 					w.handle(ctx, msg)
 					continue
@@ -216,14 +252,18 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 			if slots != nil && !dispatched {
 				<-slots
 			}
-			if err := batch.Error(); err != nil && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
+			batchErr := batch.Error()
+			if !dispatched && (batchErr == nil || errors.Is(batchErr, context.DeadlineExceeded) || errors.Is(batchErr, nats.ErrTimeout) || errors.Is(batchErr, jetstream.ErrNoMessages)) && refreshAfterEmpty() {
+				break
+			}
+			if batchErr != nil && !errors.Is(batchErr, context.DeadlineExceeded) && !errors.Is(batchErr, nats.ErrTimeout) && !errors.Is(batchErr, jetstream.ErrNoMessages) {
 				if ctx.Err() != nil {
 					return nil
 				}
-				if retryableConsumerError(err) {
+				if retryableConsumerError(batchErr) {
 					break
 				}
-				return err
+				return batchErr
 			}
 		}
 	}
@@ -232,10 +272,11 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 
 func retryableConsumerError(err error) bool {
 	var api *jetstream.APIError
-	if errors.As(err, &api) && api.ErrorCode == 10008 { // JSClusterNotAvailErr
+	if errors.As(err, &api) && (api.ErrorCode == 10008 || api.ErrorCode == 10164) { // Cluster unavailable or transient CAS during leader movement.
 		return true
 	}
 	return errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) ||
+		errors.Is(err, jetstream.ErrNoStreamResponse) ||
 		errors.Is(err, nats.ErrConnectionReconnecting) || errors.Is(err, nats.ErrDisconnected) ||
 		errors.Is(err, nats.ErrNoServers) || errors.Is(err, context.DeadlineExceeded) ||
 		errors.Is(err, jetstream.ErrConsumerLeadershipChanged) || errors.Is(err, jetstream.ErrServerShutdown)
@@ -301,7 +342,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	stopped := make(chan struct{})
 	go func() {
 		defer close(stopped)
-		ticker := time.NewTicker(10 * time.Second)
+		ticker := time.NewTicker(w.heartbeatInterval)
 		defer ticker.Stop()
 		for {
 			select {
@@ -358,15 +399,21 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 }
 
 func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wakeupAt time.Time, timer timerWakeup, cancelledTimerNoOp *bool) error {
-	records, tail, err := w.jrn.Read(ctx, typ, id)
+	readCtx, stopRead := context.WithTimeout(ctx, 15*time.Second)
+	records, tail, err := w.jrn.Read(readCtx, typ, id)
+	stopRead()
 	if err != nil {
 		return err
 	}
-	inv, err := w.js.Stream(ctx, "WF_INV")
+	lookupCtx, stopLookup := context.WithTimeout(ctx, 5*time.Second)
+	inv, err := w.js.Stream(lookupCtx, "WF_INV")
+	stopLookup()
 	if err != nil {
 		return err
 	}
-	input, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, id))
+	lookupCtx, stopLookup = context.WithTimeout(ctx, 5*time.Second)
+	input, err := inv.GetLastMsgForSubject(lookupCtx, identity.InvocationSubject(typ, id))
+	stopLookup()
 	if errors.Is(err, jetstream.ErrMsgNotFound) {
 		return nil
 	} // Purged invocation: wakeup is a no-op.
@@ -631,6 +678,8 @@ func (w *Worker) persistAndNotify(ctx context.Context, typ, id string, invSeq ui
 }
 
 func (w *Worker) scheduleTimer(ctx context.Context, typ, id string, invSeq, step uint64, fireAt time.Time) error {
+	attemptCtx, stopAttempt := context.WithTimeout(ctx, 3*time.Second)
+	defer stopAttempt()
 	messageID := "timer:" + identity.Key(typ, id) + ":" + strconv.FormatUint(invSeq, 10) + ":" + strconv.FormatUint(step, 10)
 	if !w.nativeSchedules {
 		payload, err := json.Marshal(struct {
@@ -639,7 +688,7 @@ func (w *Worker) scheduleTimer(ctx context.Context, typ, id string, invSeq, step
 		if err != nil {
 			return err
 		}
-		ack, err := w.js.Publish(ctx, identity.TimerSubject(typ, id, invSeq, step), payload, jetstream.WithMsgID(messageID))
+		ack, err := w.js.Publish(attemptCtx, identity.TimerSubject(typ, id, invSeq, step), payload, jetstream.WithMsgID(messageID))
 		if err == nil && !ack.Duplicate {
 			w.metrics.timersScheduled.Add(1)
 		}
@@ -652,7 +701,7 @@ func (w *Worker) scheduleTimer(ctx context.Context, typ, id string, invSeq, step
 	m.Header.Set(jetstream.ScheduleTargetHeader, target)
 	m.Header.Set(identity.TimerInvSeqHeader, strconv.FormatUint(invSeq, 10))
 	m.Header.Set(identity.TimerStepHeader, strconv.FormatUint(step, 10))
-	ack, err := w.js.PublishMsg(ctx, m, jetstream.WithMsgID(messageID))
+	ack, err := w.js.PublishMsg(attemptCtx, m, jetstream.WithMsgID(messageID))
 	if err == nil && !ack.Duplicate {
 		w.metrics.timersScheduled.Add(1)
 	}
@@ -680,11 +729,13 @@ func timerWasCancelled(records []journal.Record, step uint64) bool {
 }
 
 func (w *Worker) serverNow(ctx context.Context) (time.Time, error) {
-	run, err := w.js.Stream(ctx, "WF_RUN")
+	attemptCtx, stopAttempt := context.WithTimeout(ctx, 3*time.Second)
+	defer stopAttempt()
+	run, err := w.js.Stream(attemptCtx, "WF_RUN")
 	if err != nil {
 		return time.Time{}, err
 	}
-	info, err := run.Info(ctx)
+	info, err := run.Info(attemptCtx)
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -712,17 +763,23 @@ func (w *Worker) drainSignals(ctx context.Context, typ, id string, invSeq uint64
 		}
 		signals = append(signals, wf.Signal{Sequence: event.Sequence, Name: event.Name, Payload: payload})
 	}
-	stream, err := w.js.Stream(ctx, "WF_SIG")
+	lookupCtx, stopLookup := context.WithTimeout(ctx, 5*time.Second)
+	stream, err := w.js.Stream(lookupCtx, "WF_SIG")
+	stopLookup()
 	if err != nil {
 		return nil, err
 	}
-	info, err := stream.Info(ctx)
+	lookupCtx, stopLookup = context.WithTimeout(ctx, 5*time.Second)
+	info, err := stream.Info(lookupCtx)
+	stopLookup()
 	if err != nil {
 		return nil, err
 	}
 	prefix := "wf.sig." + typ + "." + id + "."
 	for seq := lastSeq + 1; seq <= info.State.LastSeq && seq != 0; {
-		m, err := stream.GetMsg(ctx, seq, jetstream.WithGetMsgSubject(prefix+"*"))
+		lookupCtx, stopLookup = context.WithTimeout(ctx, 5*time.Second)
+		m, err := stream.GetMsg(lookupCtx, seq, jetstream.WithGetMsgSubject(prefix+"*"))
+		stopLookup()
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			break
 		}
