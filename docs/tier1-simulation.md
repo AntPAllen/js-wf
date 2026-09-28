@@ -90,9 +90,17 @@ an older delivery after redelivery and clears the message, then accepts the
 newer's duplicate ack. The model now matches; three normal repeats and a race
 run passed. This slice exercises the dispatch loop and consumer contract; the
 worker handler's lease, journal, signal, and timer decisions remain outside
-the model. Simultaneous production partition loops and server-driven
-consumer-leader movement still need a
-cooperatively scheduled model comparison.
+the model. A second 1,000-seed workload now runs two production partition
+loops against one modeled durable. It yields at creation, fetch, wait,
+acknowledgment, nak, and progress calls; interleaves an injected leader-change
+error, unacknowledged first deliveries, and final acknowledgments; and drains
+all ten messages in every seed. Traces replay exactly and are byte-identical
+across processes. It exposed a clean-shutdown gap: cancellation during
+consumer creation returned `context canceled`; `RunPartition` now exits
+normally when its context is already canceled. The real shared-durable
+contract above confirms separate clients receive distinct messages and
+redelivery survives client replacement. The full handler and server-driven
+leader timing remain outside the modeled comparison.
 
 Run the fixed fault cases and 1,000 seeded scenarios:
 

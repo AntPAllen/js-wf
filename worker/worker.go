@@ -230,6 +230,9 @@ func RunPartitionWithPort(ctx context.Context, partition uint32, port DispatchPo
 	for ctx.Err() == nil {
 		c, err := port.Consumer(ctx, partition)
 		if err != nil {
+			if ctx.Err() != nil {
+				return nil
+			}
 			if !retryableConsumerError(err) {
 				return err
 			}
