@@ -40,10 +40,11 @@ func run(args []string, out io.Writer) error {
 	grace := flags.Duration("grace", 24*time.Hour, "purge tombstone grace")
 	rebuild := flags.Bool("rebuild", false, "rebuild the visibility view before listing")
 	attribute := flags.String("attribute", "", "filter list by a search attribute (key=value)")
-	cursor := flags.Uint64("cursor", 1, "suspended scan starting invocation sequence")
-	budget := flags.Int("budget", 100, "suspended scan sequence budget")
+	cursor := flags.Uint64("cursor", 1, "scan starting stream sequence")
+	budget := flags.Int("budget", 100, "scan sequence budget")
+	interval := flags.Duration("interval", 100*time.Millisecond, "reconciler loop interval")
 	scanGrace := flags.Duration("scan-grace", time.Second, "overdue timer grace for suspended scan")
-	apply := flags.Bool("apply", false, "publish suspended scan wakeups")
+	apply := flags.Bool("apply", false, "apply scan actions")
 	replayPlugin := flags.String("handler-plugin", "", "Go plugin exporting a replay handler")
 	replaySymbol := flags.String("handler-symbol", "Workflow", "handler symbol in the replay plugin")
 	replayBundlePath := flags.String("replay-bundle", "", "offline replay bundle JSON path")
@@ -52,7 +53,7 @@ func run(args []string, out io.Writer) error {
 	}
 	command := flags.Args()
 	if len(command) == 0 {
-		return errors.New("usage: wf [-url nats://...] [-attribute key=value] {project|list [status]|describe type id|lag|export-journal type id|export-replay type id|replay type id|cancel type id|purge type id|sweep-tombstones|scan-suspended|journal-capacity|assignment-init worker...|assignment-get partition|assignment-move partition owner revision}")
+		return errors.New("usage: wf [-url nats://...] [-attribute key=value] {project|list [status]|describe type id|lag|export-journal type id|export-replay type id|replay type id|cancel type id|purge type id|sweep-tombstones|scan-tombstones|tombstone-loop|scan-suspended|journal-capacity|assignment-init worker...|assignment-get partition|assignment-move partition owner revision}")
 	}
 	encode := func(value any) error {
 		writer := json.NewEncoder(out)
@@ -96,6 +97,14 @@ func run(args []string, out io.Writer) error {
 			return err
 		}
 		return projection.Run(ctx)
+	}
+	if command[0] == "tombstone-loop" {
+		if len(command) != 1 {
+			return errors.New("usage: wf [-interval duration] [-budget n] tombstone-loop")
+		}
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
+		return reconcile.RunTombstoneLoop(ctx, js, fmt.Sprintf("tombstone-%d", os.Getpid()), *interval, *budget)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
 	defer cancel()
@@ -205,6 +214,15 @@ func run(args []string, out io.Writer) error {
 			return err
 		}
 		return encode(result)
+	case "scan-tombstones":
+		if len(command) != 1 {
+			return errors.New("usage: wf [-cursor n] [-budget n] [-apply] scan-tombstones")
+		}
+		page, err := retention.NewTombstoneScan(js).Scan(ctx, *cursor, *budget, time.Now().UTC(), !*apply)
+		if err != nil {
+			return err
+		}
+		return encode(page)
 	case "purge":
 		if len(command) != 3 {
 			return errors.New("usage: wf purge type id")

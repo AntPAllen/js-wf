@@ -286,6 +286,13 @@ func TestOperatorCommands(t *testing.T) {
 	if err := json.Unmarshal(call("-rebuild", "list", "completed"), &rows); err != nil || len(rows) != 2 || rows[0].ID == id || rows[1].ID == id {
 		t.Fatalf("list after purge=%+v err=%v", rows, err)
 	}
+	var tombstonePage struct {
+		Eligible int `json:"eligible"`
+		Deleted  int `json:"deleted"`
+	}
+	if err := json.Unmarshal(call("-budget", "100", "scan-tombstones"), &tombstonePage); err != nil || tombstonePage.Eligible != 1 || tombstonePage.Deleted != 0 {
+		t.Fatalf("dry tombstone page=%+v err=%v", tombstonePage, err)
+	}
 	var sweep struct {
 		Deleted int `json:"deleted"`
 	}

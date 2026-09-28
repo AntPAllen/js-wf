@@ -51,31 +51,45 @@ func SweepTombstones(ctx context.Context, js jetstream.JetStream, now time.Time)
 			return result, err
 		}
 		result.Inspected++
-		if raw := bytes.TrimSpace(entry.Value()); len(raw) == 0 || raw[0] != '{' {
-			continue
-		}
-		marker, tomb, err := Decode(entry.Value())
+		expired, _, deleted, err := sweepEntry(ctx, state, inv, key, entry, now, false)
 		if err != nil {
 			return result, err
 		}
-		if !tomb || now.Before(marker.ExpiresAt) {
-			continue
+		if expired {
+			result.Expired++
 		}
-		result.Expired++
-		current, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(parts[0], parts[1]))
-		if err != nil && !errors.Is(err, jetstream.ErrMsgNotFound) {
-			return result, err
+		if deleted {
+			result.Deleted++
 		}
-		if err == nil && current.Sequence <= marker.InvSeq {
-			continue
-		}
-		if err := state.Delete(ctx, key, jetstream.LastRevision(entry.Revision())); err != nil {
-			if errors.Is(err, jetstream.ErrKeyRevisionMismatch) || errors.Is(err, jetstream.ErrKeyNotFound) {
-				continue
-			}
-			return result, err
-		}
-		result.Deleted++
 	}
 	return result, nil
+}
+
+func sweepEntry(ctx context.Context, state jetstream.KeyValue, inv jetstream.Stream, key string, entry jetstream.KeyValueEntry, now time.Time, dryRun bool) (expired, eligible, deleted bool, err error) {
+	if raw := bytes.TrimSpace(entry.Value()); len(raw) == 0 || raw[0] != '{' {
+		return false, false, false, nil
+	}
+	marker, tomb, err := Decode(entry.Value())
+	if err != nil || !tomb || now.Before(marker.ExpiresAt) {
+		return false, false, false, err
+	}
+	expired = true
+	parts := strings.Split(key, ".")
+	current, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(parts[0], parts[1]))
+	if err != nil && !errors.Is(err, jetstream.ErrMsgNotFound) {
+		return expired, false, false, err
+	}
+	if err == nil && current.Sequence <= marker.InvSeq {
+		return expired, false, false, nil
+	}
+	if dryRun {
+		return expired, true, false, nil
+	}
+	if err := state.Delete(ctx, key, jetstream.LastRevision(entry.Revision())); err != nil {
+		if errors.Is(err, jetstream.ErrKeyRevisionMismatch) || errors.Is(err, jetstream.ErrKeyNotFound) {
+			return expired, true, false, nil
+		}
+		return expired, true, false, err
+	}
+	return expired, true, true, nil
 }

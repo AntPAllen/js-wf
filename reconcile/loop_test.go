@@ -2,6 +2,7 @@ package reconcile
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 
 	"js-wf/lease"
 	"js-wf/provision"
+	"js-wf/retention"
 	"js-wf/testcluster"
 
 	"github.com/nats-io/nats.go/jetstream"
@@ -158,6 +160,81 @@ func TestCursorPersistsAcrossLeadersAndUsesCAS(t *testing.T) {
 	}
 	stopRetry()
 	if err := <-retryDone; err != nil && !errors.Is(err, context.Canceled) {
+		t.Fatal(err)
+	}
+}
+
+func TestTombstoneLoopReclaimsExpiredState(t *testing.T) {
+	cluster, err := testcluster.Start(t.TempDir(), 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	js, err := jetstream.New(cluster.Clients[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	for ctx.Err() == nil {
+		attempt, done := context.WithTimeout(ctx, 3*time.Second)
+		err = provision.Ensure(attempt, js, 3)
+		done()
+		if err == nil {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, err := js.KeyValue(ctx, "WF_STATE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().UTC()
+	marker, _ := json.Marshal(retention.Tombstone{Tombstone: true, InvSeq: 1, PurgedAt: now.Add(-time.Hour), ExpiresAt: now.Add(-time.Minute)})
+	if _, err := state.Put(ctx, "test.expired", marker); err != nil {
+		t.Fatal(err)
+	}
+	if err := RunTombstoneLoop(ctx, js, "invalid-budget", time.Second, 1); err == nil {
+		t.Fatal("accepted a one-sequence tombstone loop budget")
+	}
+	loopCtx, stop := context.WithCancel(ctx)
+	done := make(chan error, 1)
+	go func() { done <- RunTombstoneLoop(loopCtx, js, "tombstone-test", 50*time.Millisecond, 4) }()
+	for ctx.Err() == nil {
+		_, err := state.Get(ctx, "test.expired")
+		if errors.Is(err, jetstream.ErrKeyNotFound) {
+			break
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		select {
+		case loopErr := <-done:
+			t.Fatalf("tombstone loop exited before reclaiming: %v", loopErr)
+		case <-time.After(20 * time.Millisecond):
+		}
+	}
+	if ctx.Err() != nil {
+		t.Fatal("tombstone loop did not reclaim expired state")
+	}
+	for ctx.Err() == nil {
+		_, err := state.Get(ctx, "scan.tombstone")
+		if err == nil {
+			break
+		}
+		if !errors.Is(err, jetstream.ErrKeyNotFound) {
+			t.Fatal(err)
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatal("tombstone cursor was not persisted")
+	}
+	stop()
+	if err := <-done; err != nil && !errors.Is(err, context.Canceled) {
 		t.Fatal(err)
 	}
 }
