@@ -82,9 +82,9 @@ It shares journal validation with the real JetStream checker. Deliberate
 mutations for duplicate starts (I1), two workers sharing an epoch and a
 descending epoch (I2), a completion without a request (I3), and a changed
 terminal value (I6) each make the checker fail. The real checker also rejects
-two recorded worker IDs in one nonzero epoch. I5 liveness negative controls
-and checker runs after integrated worker dispatch and lease decisions remain
-open.
+two recorded worker IDs in one nonzero epoch. Suspended timer and signal
+wakeup checks and an I5 negative control are described below; integrated
+worker advancement and child-completion liveness remain open.
 
 A separate 1,000-seed workload now runs production `Client.Start` and
 `journal.Store.Append` against retained in-memory invocation and journal
@@ -213,14 +213,23 @@ invocation holes, dry runs, uncertain wakeup acknowledgments, deduplicated
 rescans, and virtual time advancing past a future timer. Its trace replays
 from disk and across processes. A three-node contract compares filtered
 signal reads through a deleted sequence hole, scan candidates, and retained
-wakeup counts with the model.
+wakeup counts with the model. A separate retained-state liveness checker
+independently reads suspended journals, pending timer deadlines, available
+signals, and stable reconciliation message IDs. It names waits that remain
+blocked and fails if an enabled wait lacks a retained `WF_RUN`. Every seeded
+scanner schedule runs this check after virtual time advances.
 
 Another 1,000 seeded schedules run the production suspended-wait scanner
 inside the leased reconciler loop. Each seed mixes ten due timer waits with
 ten matching signal waits, injects a dropped or unacknowledged wakeup
 enqueue and cursor CAS, then replaces the scanner. The saved cursor resumes
 the scan, all 20 wakeups remain unique, and traces replay from disk and
-across processes.
+across processes. Every seed checks that all 20 enabled waits have retained
+wakeups. A negative control skips the scanner, drops its first wakeup publish,
+and later removes a retained wakeup; the checker detects each missing
+message. Recovery scans and virtual time advancement clear the failures.
+This is a suspended timer/signal I5 check; child completion and integrated
+worker advancement still need coverage.
 
 A further 1,000 seeded schedules interleave two live suspended scanners at
 lease, cursor, cadence, invocation, journal, signal-read, and wakeup calls.

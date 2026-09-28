@@ -169,6 +169,11 @@ func runSeededSuspendedScan(seed int64, replay *Trace) (trace Trace, runErr erro
 			return trace, fmt.Errorf("seed %d future %d result=%+v runs=%d/%d err=%v", seed, sequence, result, len(model.Runs()), before, err)
 		}
 	}
+	report, err := CheckSuspendedWakeupLiveness(model, scan.Now(), scan.Grace)
+	if err != nil || len(report.Missing) != 0 {
+		return trace, fmt.Errorf("seed %d suspended liveness: enabled=%d waiting=%v missing=%v err=%v", seed, report.Enabled, report.Waiting, report.Missing, err)
+	}
+	schedule.RecordTransport(TransportEvent{Operation: "check_suspended_liveness", Sequence: uint64(report.Enabled), Outcome: "ok", AtMillis: schedule.NowMillis()})
 	if err := schedule.Finish(); err != nil {
 		return trace, err
 	}
