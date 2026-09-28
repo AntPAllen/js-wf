@@ -161,8 +161,20 @@ advances virtual time to make future requests due. Exact trace replay and
 byte-identical cross-process traces pass. A three-node contract compares
 model and real scan results and retained run counts for due, future,
 completed, terminal, and deleted-invocation cases; three repeats passed.
-Native timer routing and the worker handler's timer decisions remain outside
-this model.
+Native timer routing under partition and the worker handler's timer replay
+remain outside this scanner model.
+
+The worker's timer publication now uses a narrow port for native schedule
+messages and fallback timer records. A 1,000-seed workload runs production
+`ScheduleTimerWithPort` for 20 timers per seed, alternating native and fallback
+backends and injecting dropped publishes, committed publishes with lost
+acknowledgments, and duplicate retries. Virtual time delivers native targets
+only after their due time; fallback records remain for the separate poller.
+The trace replays exactly and is byte-identical across processes. A three-node
+contract compares retained native headers, fallback payloads, duplicate
+acknowledgments, hidden acknowledgments after commit, and one routed target
+per native timer. Route partition timing and full worker timer replay remain
+outside this model.
 
 The shared reconciler loop now has a narrow port for lease acquisition and
 renewal, cursor load and CAS save, and cadence waits. The model uses separate

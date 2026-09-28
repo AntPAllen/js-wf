@@ -794,31 +794,8 @@ func (w *Worker) persistAndNotify(ctx context.Context, typ, id string, invSeq ui
 }
 
 func (w *Worker) scheduleTimer(ctx context.Context, typ, id string, invSeq, step uint64, fireAt time.Time) error {
-	attemptCtx, stopAttempt := context.WithTimeout(ctx, 3*time.Second)
-	defer stopAttempt()
-	messageID := "timer:" + identity.Key(typ, id) + ":" + strconv.FormatUint(invSeq, 10) + ":" + strconv.FormatUint(step, 10)
-	if !w.nativeSchedules {
-		payload, err := json.Marshal(struct {
-			FireAt time.Time `json:"fire_at"`
-		}{fireAt})
-		if err != nil {
-			return err
-		}
-		ack, err := w.js.Publish(attemptCtx, identity.TimerSubject(typ, id, invSeq, step), payload, jetstream.WithMsgID(messageID))
-		if err == nil && !ack.Duplicate {
-			w.metrics.timersScheduled.Add(1)
-		}
-		return err
-	}
-	target := identity.RunSubject(typ, id, provision.Partitions)
-	source := fmt.Sprintf("wf.schedule.%s.%s.%d", typ, id, step)
-	m := &nats.Msg{Subject: source, Data: []byte(identity.Key(typ, id)), Header: nats.Header{}}
-	m.Header.Set(jetstream.ScheduleHeader, "@at "+fireAt.UTC().Format(time.RFC3339Nano))
-	m.Header.Set(jetstream.ScheduleTargetHeader, target)
-	m.Header.Set(identity.TimerInvSeqHeader, strconv.FormatUint(invSeq, 10))
-	m.Header.Set(identity.TimerStepHeader, strconv.FormatUint(step, 10))
-	ack, err := w.js.PublishMsg(attemptCtx, m, jetstream.WithMsgID(messageID))
-	if err == nil && !ack.Duplicate {
+	newPublish, err := ScheduleTimerWithPort(ctx, NewTimerSchedulePort(w.js), w.nativeSchedules, typ, id, invSeq, step, fireAt)
+	if newPublish {
 		w.metrics.timersScheduled.Add(1)
 	}
 	return err
