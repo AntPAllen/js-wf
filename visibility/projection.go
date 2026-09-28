@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"js-wf/identity"
@@ -49,8 +50,22 @@ type Projection struct {
 	postgres        *PostgresStore
 	consumer        jetstream.Consumer
 	purgeConsumer   jetstream.Consumer
+	backlogRebuilds atomic.Uint64
+	journalResets   atomic.Uint64
 	schemaVersion   int
 	attributeMapper func(map[string]string) (map[string]string, error)
+}
+
+// BacklogRebuilds counts successful PostgreSQL rebuilds triggered by a large
+// journal backlog during this projection process's lifetime.
+func (p *Projection) BacklogRebuilds() uint64 {
+	return p.backlogRebuilds.Load()
+}
+
+// JournalResets counts successful PostgreSQL durable-consumer advances after
+// a rebuild covered a stream watermark.
+func (p *Projection) JournalResets() uint64 {
+	return p.journalResets.Load()
 }
 
 type Option func(*Projection) error
@@ -460,12 +475,20 @@ func (p *Projection) rebuild(ctx context.Context) error {
 			}
 		}()
 	}
-produce:
-	for seq := info.State.FirstSeq; seq != 0 && seq <= info.State.LastSeq; seq++ {
-		select {
-		case jobs <- seq:
-		case <-rebuildCtx.Done():
-			break produce
+	if p.postgres != nil {
+		if info.State.Msgs != 0 {
+			if err := p.enqueueRetainedInvocations(rebuildCtx, info.State.LastSeq, jobs); err != nil && rebuildCtx.Err() == nil {
+				fail(err)
+			}
+		}
+	} else {
+	produce:
+		for seq := info.State.FirstSeq; seq != 0 && seq <= info.State.LastSeq; seq++ {
+			select {
+			case jobs <- seq:
+			case <-rebuildCtx.Done():
+				break produce
+			}
 		}
 	}
 	close(jobs)
@@ -494,6 +517,67 @@ produce:
 		}
 	}
 	return nil
+}
+
+// The PostgreSQL rebuild sees one retained WF_INV message per live subject.
+// An ordered consumer streams those messages without requesting every purged
+// sequence hole. Workers still fetch each retained input by sequence so the
+// rest of rebuild uses the same validation and generation checks.
+func (p *Projection) enqueueRetainedInvocations(ctx context.Context, through uint64, jobs chan<- uint64) error {
+	if through == 0 {
+		return nil
+	}
+	consumer, err := p.inv.OrderedConsumer(ctx, jetstream.OrderedConsumerConfig{
+		DeliverPolicy: jetstream.DeliverAllPolicy, HeadersOnly: true, InactiveThreshold: time.Minute,
+	})
+	if err != nil {
+		return err
+	}
+	for ctx.Err() == nil {
+		batch, err := consumer.Fetch(256, jetstream.FetchMaxWait(time.Second))
+		if err != nil {
+			if !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
+				return err
+			}
+			info, infoErr := consumer.Info(ctx)
+			if infoErr != nil {
+				return infoErr
+			}
+			if info.NumPending == 0 {
+				return nil
+			}
+			continue
+		}
+		var done bool
+		for msg := range batch.Messages() {
+			metadata, err := msg.Metadata()
+			if err != nil {
+				return err
+			}
+			if metadata.Sequence.Stream > through {
+				done = true
+				continue
+			}
+			if done {
+				continue
+			}
+			select {
+			case jobs <- metadata.Sequence.Stream:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+			if metadata.NumPending == 0 {
+				done = true
+			}
+		}
+		if err := batch.Error(); err != nil && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
+			return err
+		}
+		if done {
+			return nil
+		}
+	}
+	return ctx.Err()
 }
 
 func (p *Projection) Get(ctx context.Context, typ, id string) (Row, error) {
@@ -655,6 +739,9 @@ func (p *Projection) run(ctx context.Context) error {
 	if err := p.rebuild(ctx); err != nil {
 		return err
 	}
+	p.resetCoveredJournal(ctx, rebuiltThrough)
+	lastRebuild := time.Now()
+	lastBacklogCheck := time.Time{}
 	rebuildInterval := 30 * time.Second
 	if p.postgres != nil {
 		rebuildInterval = 15 * time.Minute
@@ -665,16 +752,56 @@ func (p *Projection) run(ctx context.Context) error {
 	for ctx.Err() == nil {
 		select {
 		case <-ticker.C:
+			before, err := p.jrn.Info(ctx)
+			if err != nil {
+				return err
+			}
 			if err := p.rebuild(ctx); err != nil {
 				return err
 			}
+			rebuiltThrough = before.State.LastSeq
+			p.resetCoveredJournal(ctx, rebuiltThrough)
+			lastRebuild = time.Now()
 		default:
 		}
+		// Replaying every journal message separately becomes expensive when a
+		// large backlog spans many entries per invocation. A rebuild visits
+		// independent invocations with bounded parallelism, and its watermark
+		// lets the durable consumer acknowledge the covered entries.
+		if p.postgres != nil && time.Since(lastBacklogCheck) >= 5*time.Second {
+			lastBacklogCheck = time.Now()
+			info, err := p.consumer.Info(ctx)
+			if err != nil {
+				return err
+			}
+			if info.NumPending+uint64(info.NumAckPending) >= 5000 && time.Since(lastRebuild) >= 10*time.Second {
+				before, err := p.jrn.Info(ctx)
+				if err != nil {
+					return err
+				}
+				// Old messages covered by the prior rebuild still count as
+				// pending until their acknowledgments drain. Rebuild only when
+				// enough new journal entries need projection.
+				if before.State.LastSeq > rebuiltThrough && before.State.LastSeq-rebuiltThrough >= 5000 {
+					if err := p.rebuild(ctx); err != nil {
+						return err
+					}
+					rebuiltThrough = before.State.LastSeq
+					p.resetCoveredJournal(ctx, rebuiltThrough)
+					p.backlogRebuilds.Add(1)
+					lastRebuild = time.Now()
+				}
+			}
+		}
 		journalWait := time.Second
+		journalBatchSize := 16
+		if p.postgres != nil {
+			journalBatchSize = 256
+		}
 		if fastPurge {
 			journalWait = 25 * time.Millisecond
 		}
-		batch, err := p.consumer.Fetch(16, jetstream.FetchMaxWait(journalWait))
+		batch, err := p.consumer.Fetch(journalBatchSize, jetstream.FetchMaxWait(journalWait))
 		if err != nil {
 			if ctx.Err() != nil {
 				return nil
@@ -721,6 +848,28 @@ func (p *Projection) run(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+// On servers that support consumer reset, skip journal entries already
+// covered by a successful PostgreSQL rebuild. The durable's original cursor
+// remains intact when reset is unavailable, and the normal ack path catches
+// up from there.
+func (p *Projection) resetCoveredJournal(ctx context.Context, through uint64) {
+	if p.postgres == nil || through == 0 || through == ^uint64(0) {
+		return
+	}
+	version := strings.Split(strings.TrimPrefix(p.js.Conn().ConnectedServerVersion(), "v"), ".")
+	if len(version) < 2 {
+		return
+	}
+	major, majorErr := strconv.Atoi(version[0])
+	minor, minorErr := strconv.Atoi(version[1])
+	if majorErr != nil || minorErr != nil || major < 2 || major == 2 && minor < 15 {
+		return
+	}
+	if _, err := p.jrn.ResetConsumerToSequence(ctx, "WF_VIEW_PG", through+1); err == nil {
+		p.journalResets.Add(1)
+	}
 }
 
 func (p *Projection) consumePurges(ctx context.Context) (int, error) {

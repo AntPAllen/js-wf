@@ -45,7 +45,9 @@ func purge(ctx context.Context, js jetstream.JetStream, typ, id string, grace ti
 		return err
 	}
 	l, err := leasing.Acquire(ctx, typ, id, "retention")
-	if errors.Is(err, lease.ErrHeld) {
+	if errors.Is(err, lease.ErrHeld) || errors.Is(err, lease.ErrLost) && errors.Is(err, jetstream.ErrKeyRevisionMismatch) {
+		// An initialization CAS can lose to another acquirer reclaiming an
+		// uninitialized lease under load. No retention work has begun yet.
 		return ErrActive
 	}
 	if err != nil {

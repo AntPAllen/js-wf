@@ -49,3 +49,10 @@ WF_PURGE_REUSE_SCALE=1 go test ./integration \
 Set `WF_PURGE_REUSE_COUNT=100` for a smaller diagnostic run.
 Add `WF_PURGE_REUSE_ACTIVE=1` to keep the other handlers executing throughout
 the purge. The test releases them after all old invocations are purged.
+
+Set `WF_PURGE_REUSE_POSTGRES=1` and `WF_TEST_POSTGRES_DSN` for a disposable
+database to run the same full proof with a live PostgreSQL projection. It
+first verifies that PostgreSQL contains all 10,000 old completed rows, then
+checks zero projection lag and every one of the 11,000 final row generations
+after the purge and reuse. The full active-handler mode passed with PostgreSQL in 3m02.6s;
+see [the PostgreSQL scale record](postgres-purge-feed-2026-09-28.md).

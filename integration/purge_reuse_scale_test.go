@@ -2,11 +2,13 @@ package integration_test
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -17,9 +19,11 @@ import (
 	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/retention"
+	"js-wf/visibility"
 	"js-wf/wf"
 	"js-wf/worker"
 
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -27,6 +31,7 @@ import (
 // WF_PURGE_REUSE_SCALE=1 runs the Phase 7 10k/10k/1k retention proof.
 // WF_PURGE_REUSE_COUNT can lower both 10k groups for diagnostics.
 // WF_PURGE_REUSE_ACTIVE=1 keeps all live handlers executing during the purge.
+// WF_PURGE_REUSE_POSTGRES=1 also verifies the live PostgreSQL projection.
 func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	if os.Getenv("WF_PURGE_REUSE_SCALE") == "" {
 		t.Skip("set WF_PURGE_REUSE_SCALE=1 for the 10k purge/reuse proof")
@@ -45,6 +50,36 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 	defer cancel()
 	const typ = "purge-scale"
+	var postgres *visibility.Projection
+	var postgresDB *sql.DB
+	if os.Getenv("WF_PURGE_REUSE_POSTGRES") == "1" {
+		dsn := os.Getenv("WF_TEST_POSTGRES_DSN")
+		if dsn == "" {
+			t.Fatal("WF_PURGE_REUSE_POSTGRES requires WF_TEST_POSTGRES_DSN for a disposable database")
+		}
+		var err error
+		postgresDB, err = sql.Open("pgx", dsn)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer postgresDB.Close()
+		postgres, err = visibility.New(ctx, all[0], visibility.WithPostgres(&visibility.PostgresStore{DB: postgresDB}))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := postgresDB.ExecContext(ctx, `TRUNCATE wf_visibility`); err != nil {
+			t.Fatal(err)
+		}
+		projectionCtx, stopProjection := context.WithCancel(ctx)
+		projectionDone := make(chan error, 1)
+		go func() { projectionDone <- postgres.Run(projectionCtx) }()
+		defer func() {
+			stopProjection()
+			if err := <-projectionDone; err != nil && !errors.Is(err, context.Canceled) {
+				t.Errorf("PostgreSQL projection exit: %v", err)
+			}
+		}()
+	}
 	type input struct {
 		Kind  string `json:"kind"`
 		Index int    `json:"index"`
@@ -117,6 +152,7 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	oldSeq := make([]uint64, reuseCount)
 	oldEpoch := make([]uint64, reuseCount)
 	newSeq := make([]uint64, reuseCount)
+	liveSeq := make([]uint64, count)
 	staleSignalSeq := make([]uint64, reuseCount)
 	freshSignalSeq := make([]uint64, reuseCount)
 	var purgesDone, reuseOverlaps atomic.Int64
@@ -147,9 +183,16 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 		oldEpoch[index] = records[0].Epoch
 		return nil
 	})
+	if postgres != nil {
+		waitPostgresPurgeScale(t, ctx, all[0], postgres, postgresDB, count, nil, nil)
+		t.Logf("PostgreSQL indexed %d completed old invocations before purge in %s", count, time.Since(start))
+	}
 	runPurgeScaleJobs(t, ctx, count, func(caller, index int) error {
 		data, _ := json.Marshal(input{Kind: "live", Index: index})
-		_, err := clients[caller%3].Start(ctx, typ, liveID(index), data)
+		handle, err := clients[caller%3].Start(ctx, typ, liveID(index), data)
+		if err == nil {
+			liveSeq[index] = handle.InvSeq
+		}
 		return err
 	})
 	waitSuspended := func(id string, js jetstream.JetStream) ([]journal.Record, error) {
@@ -328,7 +371,115 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	if _, err := integrity.Check(ctx, all[0]); err != nil {
 		t.Fatalf("retained integrity audit: %v", err)
 	}
+	if postgres != nil {
+		waitPostgresPurgeScale(t, ctx, all[0], postgres, postgresDB, count, liveSeq, newSeq)
+		if count == 10000 && postgres.BacklogRebuilds() == 0 {
+			t.Fatal("10,000-case PostgreSQL proof did not exercise backlog rebuild")
+		}
+		if count == 10000 && postgres.JournalResets() == 0 {
+			t.Fatal("10,000-case PostgreSQL proof did not advance rebuilt journal cursor")
+		}
+		t.Logf("PostgreSQL caught up after all purges and reuse in %s; backlog_rebuilds=%d journal_resets=%d", time.Since(start), postgres.BacklogRebuilds(), postgres.JournalResets())
+	}
 	t.Logf("retained integrity audit passed in %s", time.Since(start))
+}
+
+// A nil generation slice checks the pre-purge population. Otherwise every
+// retained row must belong to a live ID or to one of the reused generations.
+func waitPostgresPurgeScale(t *testing.T, ctx context.Context, js jetstream.JetStream, projection *visibility.Projection, db *sql.DB, count int, liveSeq, newSeq []uint64) {
+	t.Helper()
+	want := count
+	if liveSeq != nil {
+		want += len(newSeq)
+	}
+	lastProgress := time.Now()
+	for ctx.Err() == nil {
+		lag, err := projection.Lag(ctx)
+		if err == nil && lag == 0 {
+			var rows int
+			if err := db.QueryRowContext(ctx, `SELECT count(*) FROM wf_visibility WHERE type='purge-scale'`).Scan(&rows); err == nil && rows == want {
+				break
+			}
+		}
+		if time.Since(lastProgress) >= 10*time.Second {
+			var rows int
+			_ = db.QueryRowContext(ctx, `SELECT count(*) FROM wf_visibility WHERE type='purge-scale'`).Scan(&rows)
+			t.Logf("PostgreSQL catch-up rows=%d/%d lag=%d lag_err=%v backlog_rebuilds=%d journal_resets=%d", rows, want, lag, err, projection.BacklogRebuilds(), projection.JournalResets())
+			lastProgress = time.Now()
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		inspectCtx, stop := context.WithTimeout(context.Background(), 3*time.Second)
+		defer stop()
+		lag, lagErr := projection.Lag(inspectCtx)
+		var rows int
+		countErr := db.QueryRowContext(inspectCtx, `SELECT count(*) FROM wf_visibility WHERE type='purge-scale'`).Scan(&rows)
+		t.Fatalf("PostgreSQL projection did not settle: rows=%d/%d lag=%d lag_err=%v count_err=%v context=%v", rows, want, lag, lagErr, countErr, ctx.Err())
+	}
+	rows, err := db.QueryContext(ctx, `SELECT id, status, row_data->>'inv_seq' FROM wf_visibility WHERE type='purge-scale' ORDER BY id`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	seen := 0
+	for rows.Next() {
+		var id, status, generation string
+		if err := rows.Scan(&id, &status, &generation); err != nil {
+			t.Fatal(err)
+		}
+		if status != "completed" {
+			t.Fatalf("PostgreSQL row %s status=%s, want completed", id, status)
+		}
+		var index int
+		var wantSeq uint64
+		switch {
+		case strings.HasPrefix(id, "old-"):
+			if _, err := fmt.Sscanf(id, "old-%05d", &index); err != nil || index < 0 || index >= count {
+				t.Fatalf("invalid PostgreSQL old row %s: %v", id, err)
+			}
+			if liveSeq == nil {
+				// Before purge, only the completed status is required; its
+				// generation is checked by the source-of-truth journal.
+				seen++
+				continue
+			}
+			if index >= len(newSeq) {
+				t.Fatalf("purged PostgreSQL row %s remains", id)
+			}
+			wantSeq = newSeq[index]
+		case strings.HasPrefix(id, "live-") && liveSeq != nil:
+			if _, err := fmt.Sscanf(id, "live-%05d", &index); err != nil || index < 0 || index >= count {
+				t.Fatalf("invalid PostgreSQL live row %s: %v", id, err)
+			}
+			wantSeq = liveSeq[index]
+		default:
+			t.Fatalf("unexpected PostgreSQL row %s", id)
+		}
+		if wantSeq == 0 || generation != strconv.FormatUint(wantSeq, 10) {
+			t.Fatalf("PostgreSQL row %s generation=%s, want %d", id, generation, wantSeq)
+		}
+		seen++
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	if seen != want {
+		t.Fatalf("verified PostgreSQL rows=%d, want %d", seen, want)
+	}
+	if liveSeq != nil {
+		purges, err := js.Stream(ctx, "WF_PURGE")
+		if err != nil {
+			t.Fatal(err)
+		}
+		info, err := purges.Info(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if info.State.Msgs != 0 {
+			t.Fatalf("PostgreSQL purge work queue messages=%d, want zero", info.State.Msgs)
+		}
+	}
 }
 
 func runPurgeScaleJobs(t *testing.T, ctx context.Context, count int, action func(caller, index int) error) {

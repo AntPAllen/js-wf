@@ -21,6 +21,7 @@ import (
 	"js-wf/worker"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 func TestPostgresVisibilityProjection(t *testing.T) {
@@ -426,6 +427,62 @@ func TestPostgresPurgeFeedScale(t *testing.T) {
 		t.Fatalf("purge work queue retained messages=%d err=%v", info.State.Msgs, err)
 	}
 	t.Logf("purge events=%d remaining newer generations=%d elapsed=%s", count, remaining, time.Since(start))
+}
+
+func TestPostgresRebuildSkipsPurgedInvocationHoles(t *testing.T) {
+	dsn := os.Getenv("WF_TEST_POSTGRES_DSN")
+	if dsn == "" {
+		t.Skip("set WF_TEST_POSTGRES_DSN for PostgreSQL integration test")
+	}
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	p, err := visibility.New(ctx, all[0], visibility.WithPostgres(&visibility.PostgresStore{DB: db}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, `TRUNCATE wf_visibility`); err != nil {
+		t.Fatal(err)
+	}
+	const count = 1000
+	inv, err := all[0].Stream(ctx, "WF_INV")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 2*count; i++ {
+		id := fmt.Sprintf("pg-hole-%04d", i)
+		ack, err := all[0].Publish(ctx, "wf.inv.test."+id, []byte(`null`))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if i%2 == 0 {
+			if err := inv.Purge(ctx, jetstream.WithPurgeSubject("wf.inv.test."+id), jetstream.WithPurgeSequence(ack.Sequence+1)); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	if err := p.Rebuild(ctx); err != nil {
+		t.Fatal(err)
+	}
+	var rows int
+	if err := db.QueryRowContext(ctx, `SELECT count(*) FROM wf_visibility`).Scan(&rows); err != nil || rows != count {
+		t.Fatalf("rebuild after sequence holes: rows=%d want=%d err=%v", rows, count, err)
+	}
+	for _, id := range []string{"pg-hole-0000", "pg-hole-0001", "pg-hole-1998", "pg-hole-1999"} {
+		row, err := p.Get(ctx, "test", id)
+		if strings.HasSuffix(id, "0") || strings.HasSuffix(id, "8") {
+			if !errors.Is(err, visibility.ErrNotFound) {
+				t.Fatalf("purged invocation %s has row=%+v err=%v", id, row, err)
+			}
+		} else if err != nil || row.Status != "queued" {
+			t.Fatalf("retained invocation %s row=%+v err=%v", id, row, err)
+		}
+	}
 }
 
 func TestPostgresVisibilityWriterSessionLoss(t *testing.T) {

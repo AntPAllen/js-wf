@@ -95,7 +95,7 @@ func (s *Store) Acquire(ctx context.Context, typ, id, worker string) (*Lease, er
 	data, _ = json.Marshal(v)
 	newRev, err := s.kv.Update(ctx, key, data, rev)
 	if err != nil {
-		return nil, fmt.Errorf("%w: initialization: %v", ErrLost, err)
+		return nil, fmt.Errorf("%w: initialization: %w", ErrLost, err)
 	}
 	return &Lease{store: s, key: key, value: v, revision: newRev}, nil
 }
