@@ -1,0 +1,377 @@
+package integration_test
+
+import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"encoding/binary"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"hash"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"sort"
+	"strconv"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	"js-wf/client"
+	"js-wf/identity"
+	"js-wf/provision"
+	"js-wf/visibility"
+	"js-wf/wf"
+	"js-wf/worker"
+
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
+)
+
+func TestProjectionProcessHelper(t *testing.T) {
+	if os.Getenv("WF_PROJECTION_HELPER") == "" {
+		t.Skip("projection process helper")
+	}
+	connection, err := nats.Connect(os.Getenv("WF_PROJECTION_URL"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer connection.Close()
+	js, err := jetstream.New(connection)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	defer cancel()
+	projection, err := visibility.New(ctx, js)
+	if err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan error, 1)
+	go func() { done <- projection.Run(ctx) }()
+	select {
+	case err := <-done:
+		t.Fatalf("projection stopped before ready: %v", err)
+	case <-time.After(200 * time.Millisecond):
+	}
+	if err := os.WriteFile(os.Getenv("WF_PROJECTION_READY_FILE"), []byte("ready"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+}
+
+// WF_PROJECTION_SCALE=1 runs the Phase 7 consumer-restart proof. The count
+// defaults to 50,000; WF_PROJECTION_COUNT allows a smaller diagnostic run.
+func TestProjectionRecoversFiftyThousandInvocations(t *testing.T) {
+	if os.Getenv("WF_PROJECTION_SCALE") == "" {
+		t.Skip("set WF_PROJECTION_SCALE=1 for the 50,000-invocation projection proof")
+	}
+	count := 50000
+	if value := os.Getenv("WF_PROJECTION_COUNT"); value != "" {
+		parsed, err := strconv.Atoi(value)
+		if err != nil || parsed < 1 || parsed > 50000 {
+			t.Fatalf("invalid WF_PROJECTION_COUNT %q", value)
+		}
+		count = parsed
+	}
+	all, cluster := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
+	defer cancel()
+	const typ = "view-scale"
+	readyFile := filepath.Join(t.TempDir(), "projection-ready")
+	process := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestProjectionProcessHelper$")
+	process.Env = append(os.Environ(), "WF_PROJECTION_HELPER=1", "WF_PROJECTION_URL="+cluster.Servers[0].ClientURL(), "WF_PROJECTION_READY_FILE="+readyFile)
+	var processOutput bytes.Buffer
+	process.Stdout, process.Stderr = &processOutput, &processOutput
+	if err := process.Start(); err != nil {
+		t.Fatal(err)
+	}
+	processReaped := false
+	defer func() {
+		if !processReaped {
+			_ = process.Process.Kill()
+			_ = process.Wait()
+		}
+	}()
+	readyDeadline := time.Now().Add(10 * time.Second)
+	for time.Now().Before(readyDeadline) && ctx.Err() == nil {
+		if _, err := os.Stat(readyFile); err == nil {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if _, err := os.Stat(readyFile); err != nil {
+		t.Fatalf("projection process did not become ready: %v; output=%s", err, processOutput.String())
+	}
+	if err := process.Process.Kill(); err != nil {
+		t.Fatal(err)
+	}
+	if err := process.Wait(); err == nil {
+		t.Fatal("projection process exited without SIGKILL")
+	}
+	processReaped = true
+	projection, err := visibility.New(ctx, all[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	workerCtx, stopWorkers := context.WithCancel(ctx)
+	workerDone := make(chan error, 6)
+	defer func() {
+		stopWorkers()
+		for i := 0; i < 6; i++ {
+			if err := <-workerDone; err != nil && !errors.Is(err, context.Canceled) {
+				t.Errorf("worker exit: %v", err)
+			}
+		}
+	}()
+	for index := 0; index < 6; index++ {
+		w, err := worker.New(ctx, all[index%len(all)], fmt.Sprintf("view-scale-%d", index), map[string]worker.Handler{typ: func(_ *wf.Context, input json.RawMessage) (json.RawMessage, error) {
+			return input, nil
+		}}, worker.WithPartitionConcurrency(16))
+		if err != nil {
+			t.Fatal(err)
+		}
+		go func(index int) { workerDone <- w.RunAssigned(workerCtx, index, 6) }(index)
+	}
+	run, err := all[0].Stream(ctx, "WF_RUN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for ctx.Err() == nil {
+		info, err := run.Info(ctx)
+		if err == nil && info.State.Consumers == int(provision.Partitions) {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatal("dispatch consumers were not ready")
+	}
+	clients := [3]*client.Client{client.New(all[0]), client.New(all[1]), client.New(all[2])}
+	work := func(label string, action func(*client.Client, int) error) {
+		t.Helper()
+		workCtx, stopWork := context.WithCancel(ctx)
+		defer stopWork()
+		jobs := make(chan int, 256)
+		failures := make(chan error, 1)
+		var group sync.WaitGroup
+		for caller := 0; caller < 64; caller++ {
+			group.Add(1)
+			go func(caller int) {
+				defer group.Done()
+				for index := range jobs {
+					if err := action(clients[caller%len(clients)], index); err != nil {
+						select {
+						case failures <- err:
+						default:
+						}
+						stopWork()
+						return
+					}
+				}
+			}(caller)
+		}
+	produce:
+		for index := 0; index < count; index++ {
+			select {
+			case jobs <- index:
+			case <-workCtx.Done():
+				break produce
+			}
+		}
+		close(jobs)
+		group.Wait()
+		select {
+		case err := <-failures:
+			t.Fatalf("%s: %v", label, err)
+		default:
+		}
+		if ctx.Err() != nil {
+			t.Fatalf("%s: %v", label, ctx.Err())
+		}
+	}
+	started := time.Now()
+	work("start", func(c *client.Client, index int) error {
+		id := fmt.Sprintf("job-%05d", index)
+		_, err := c.Start(ctx, typ, id, []byte(strconv.Itoa(index)))
+		return err
+	})
+	t.Logf("started %d invocations in %s while projection stopped", count, time.Since(started))
+	work("await", func(c *client.Client, index int) error {
+		id := fmt.Sprintf("job-%05d", index)
+		result, err := c.Await(ctx, typ, id)
+		if err != nil {
+			return fmt.Errorf("%s: %w", id, err)
+		}
+		if string(result) != strconv.Itoa(index) {
+			return fmt.Errorf("%s: result=%s", id, result)
+		}
+		return nil
+	})
+	t.Logf("completed and checked %d results in %s", count, time.Since(started))
+	journalStream, err := all[1].Stream(ctx, "WF_JRN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, err := journalStream.Info(ctx)
+	if err != nil || info.State.Msgs != uint64(2*count) || info.State.NumSubjects != uint64(count) {
+		t.Fatalf("journal count: info=%+v err=%v", info, err)
+	}
+	if lag, err := projection.Lag(ctx); err != nil || lag != uint64(2*count) {
+		t.Fatalf("stopped projection lag=%d want=%d err=%v", lag, 2*count, err)
+	}
+	restarted, err := visibility.New(ctx, all[2])
+	if err != nil {
+		t.Fatal(err)
+	}
+	projectionCtx, stopProjection := context.WithCancel(ctx)
+	projectionDone := make(chan error, 1)
+	go func() { projectionDone <- restarted.Run(projectionCtx) }()
+	for ctx.Err() == nil {
+		select {
+		case err := <-projectionDone:
+			t.Fatalf("restarted projection exited before lag drained: %v", err)
+		default:
+		}
+		lag, err := restarted.Lag(ctx)
+		if err == nil && lag == 0 {
+			break
+		}
+		time.Sleep(250 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		stopProjection()
+		<-projectionDone
+		t.Fatalf("projection lag did not drain: %v", ctx.Err())
+	}
+	stopProjection()
+	if err := <-projectionDone; err != nil && !errors.Is(err, context.Canceled) {
+		t.Fatal(err)
+	}
+	t.Logf("projection lag drained in %s", time.Since(started))
+	view, err := all[0].KeyValue(ctx, "WF_VIEW")
+	if err != nil {
+		t.Fatal(err)
+	}
+	before, err := projectionStateDigest(ctx, view, count)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := restarted.Rebuild(ctx); err != nil {
+		t.Fatalf("full rebuild: %v", err)
+	}
+	after, err := projectionStateDigest(ctx, view, count)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if before != after {
+		t.Fatalf("full rebuild changed projection bytes or revisions: before=%x after=%x", before, after)
+	}
+	t.Logf("projection rebuild preserved %d row/index pairs in %s", count, time.Since(started))
+}
+
+func projectionStateDigest(ctx context.Context, view jetstream.KeyValue, count int) ([32]byte, error) {
+	readCtx, stop := context.WithCancel(ctx)
+	defer stop()
+	keys, err := view.Keys(ctx)
+	if err != nil {
+		return [32]byte{}, err
+	}
+	if len(keys) != 2*count {
+		return [32]byte{}, fmt.Errorf("projection has %d keys, want %d", len(keys), 2*count)
+	}
+	sort.Strings(keys)
+	rows, indexes := 0, 0
+	for _, key := range keys {
+		switch {
+		case strings.HasPrefix(key, "row."):
+			rows++
+			matching := "idx.completed." + strings.TrimPrefix(key, "row.")
+			if position := sort.SearchStrings(keys, matching); position >= len(keys) || keys[position] != matching {
+				return [32]byte{}, fmt.Errorf("row %q has no completed index", key)
+			}
+		case strings.HasPrefix(key, "idx.completed."):
+			indexes++
+			matching := "row." + strings.TrimPrefix(key, "idx.completed.")
+			if position := sort.SearchStrings(keys, matching); position >= len(keys) || keys[position] != matching {
+				return [32]byte{}, fmt.Errorf("index %q has no row", key)
+			}
+		default:
+			return [32]byte{}, fmt.Errorf("unexpected projection key %q", key)
+		}
+	}
+	if rows != count || indexes != count {
+		return [32]byte{}, fmt.Errorf("projection has %d rows and %d indexes, want %d each", rows, indexes, count)
+	}
+	digests := make([][32]byte, len(keys))
+	jobs := make(chan int, 128)
+	var group sync.WaitGroup
+	var firstErr error
+	var failOnce sync.Once
+	fail := func(err error) {
+		failOnce.Do(func() { firstErr = err; stop() })
+	}
+	for i := 0; i < 32; i++ {
+		group.Add(1)
+		go func() {
+			defer group.Done()
+			for index := range jobs {
+				key := keys[index]
+				entry, err := view.Get(readCtx, key)
+				if err != nil {
+					fail(err)
+					return
+				}
+				if strings.HasPrefix(key, "row.") {
+					var row visibility.Row
+					if err := json.Unmarshal(entry.Value(), &row); err != nil || row.Type != "view-scale" || row.Status != "completed" || key != "row."+identity.Key(row.Type, row.ID) || row.InvSeq == 0 || row.JournalSeq == 0 || row.LastIndex != 1 || row.Started.IsZero() || row.Updated.IsZero() {
+						fail(fmt.Errorf("invalid completed row %q: %+v: %v", key, row, err))
+						return
+					}
+				}
+				var revision [8]byte
+				binary.BigEndian.PutUint64(revision[:], entry.Revision())
+				h := sha256.New()
+				writeProjectionHash(h, []byte(key), revision[:], entry.Value())
+				digests[index] = sha256.Sum256(h.Sum(nil))
+			}
+		}()
+	}
+	for index := range keys {
+		select {
+		case jobs <- index:
+		case <-readCtx.Done():
+			close(jobs)
+			group.Wait()
+			if firstErr != nil {
+				return [32]byte{}, firstErr
+			}
+			return [32]byte{}, ctx.Err()
+		}
+	}
+	close(jobs)
+	group.Wait()
+	if firstErr != nil {
+		return [32]byte{}, firstErr
+	}
+	h := sha256.New()
+	for _, digest := range digests {
+		_, _ = h.Write(digest[:])
+	}
+	var output [32]byte
+	copy(output[:], h.Sum(nil))
+	return output, nil
+}
+
+func writeProjectionHash(h hash.Hash, parts ...[]byte) {
+	var length [8]byte
+	for _, part := range parts {
+		binary.BigEndian.PutUint64(length[:], uint64(len(part)))
+		_, _ = h.Write(length[:])
+		_, _ = h.Write(part)
+	}
+}

@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"js-wf/identity"
@@ -210,23 +211,64 @@ func (p *Projection) Rebuild(ctx context.Context) error {
 		return err
 	}
 	wanted := map[string]struct{}{}
+	// Every invocation has independent row and index keys, so bounded workers
+	// can rebuild them concurrently without changing their final bytes.
+	rebuildCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	jobs := make(chan uint64, 64)
+	var workers sync.WaitGroup
+	var wantedMu sync.Mutex
+	var firstErr error
+	var failOnce sync.Once
+	fail := func(err error) {
+		failOnce.Do(func() {
+			firstErr = err
+			cancel()
+		})
+	}
+	for i := 0; i < 32; i++ {
+		workers.Add(1)
+		go func() {
+			defer workers.Done()
+			for seq := range jobs {
+				input, err := p.inv.GetMsg(rebuildCtx, seq)
+				if errors.Is(err, jetstream.ErrMsgNotFound) {
+					continue
+				}
+				if err != nil {
+					fail(err)
+					return
+				}
+				row, _, err := p.describe(rebuildCtx, input)
+				if err == nil {
+					err = p.putRow(rebuildCtx, row)
+				}
+				if err != nil {
+					fail(err)
+					return
+				}
+				wantedMu.Lock()
+				wanted[rowKey(row.Type, row.ID)] = struct{}{}
+				wanted[indexKey(row)] = struct{}{}
+				wantedMu.Unlock()
+			}
+		}()
+	}
+produce:
 	for seq := info.State.FirstSeq; seq != 0 && seq <= info.State.LastSeq; seq++ {
-		input, err := p.inv.GetMsg(ctx, seq)
-		if errors.Is(err, jetstream.ErrMsgNotFound) {
-			continue
+		select {
+		case jobs <- seq:
+		case <-rebuildCtx.Done():
+			break produce
 		}
-		if err != nil {
-			return err
-		}
-		row, _, err := p.describe(ctx, input)
-		if err != nil {
-			return err
-		}
-		if err := p.putRow(ctx, row); err != nil {
-			return err
-		}
-		wanted[rowKey(row.Type, row.ID)] = struct{}{}
-		wanted[indexKey(row)] = struct{}{}
+	}
+	close(jobs)
+	workers.Wait()
+	if firstErr != nil {
+		return firstErr
+	}
+	if ctx.Err() != nil {
+		return ctx.Err()
 	}
 	keys, err := p.view.Keys(ctx)
 	if err != nil && !errors.Is(err, jetstream.ErrNoKeysFound) {
@@ -324,6 +366,11 @@ func (p *Projection) Lag(ctx context.Context) (uint64, error) {
 // Run rebuilds once, then consumes journal updates. Periodic rebuilds also
 // detect purges, which do not themselves emit journal messages.
 func (p *Projection) Run(ctx context.Context) error {
+	before, err := p.jrn.Info(ctx)
+	if err != nil {
+		return err
+	}
+	rebuiltThrough := before.State.LastSeq
 	if err := p.Rebuild(ctx); err != nil {
 		return err
 	}
@@ -348,6 +395,18 @@ func (p *Projection) Run(ctx context.Context) error {
 			return err
 		}
 		for msg := range batch.Messages() {
+			metadata, err := msg.Metadata()
+			if err != nil {
+				_ = msg.NakWithDelay(time.Second)
+				continue
+			}
+			// This entry committed before Rebuild began. Every retained
+			// invocation was read after that watermark, so its row already
+			// reflects this entry (or a newer one).
+			if metadata.Sequence.Stream <= rebuiltThrough {
+				_ = msg.Ack()
+				continue
+			}
 			parts := strings.Split(msg.Subject(), ".")
 			if len(parts) != 4 || parts[0] != "wf" || parts[1] != "jrn" {
 				_ = msg.Term()
