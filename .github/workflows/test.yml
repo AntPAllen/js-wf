@@ -10,7 +10,8 @@ jobs:
           go-version-file: go.mod
       - run: go test ./wf ./workflowlint ./identity ./journal ./lease ./provision ./reconcile ./client ./history ./worker ./integrity ./testcluster ./sim ./cmd/wf ./cmd/wf-lint ./cmd/wf-cas-bench ./cmd/wf-scale
         env:
-          FAULT_TRACE_OUT: sim/sim-failure.json
+          # Go runs sim tests from sim/, matching the artifact glob below.
+          FAULT_TRACE_OUT: sim-failure.json
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
