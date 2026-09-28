@@ -17,6 +17,7 @@ const (
 	KVDropBeforeCommit   KVFaultKind = "drop_before_commit"
 	KVLoseAckAfterCommit KVFaultKind = "lose_ack_after_commit"
 	KVStaleRead          KVFaultKind = "stale_read"
+	KVGetTransportLost   KVFaultKind = "get_transport_lost"
 )
 
 type KVFault struct {
@@ -58,7 +59,7 @@ func (m *KVTransport) QueueFault(f KVFault) error {
 	if f.Operation != "create" && f.Operation != "update" && f.Operation != "delete" && f.Operation != "get" {
 		return fmt.Errorf("invalid KV fault operation %q", f.Operation)
 	}
-	if (f.Operation == "get" && f.Kind != KVStaleRead) ||
+	if (f.Operation == "get" && f.Kind != KVStaleRead && f.Kind != KVGetTransportLost) ||
 		(f.Operation != "get" && f.Kind != KVDropBeforeCommit && f.Kind != KVLoseAckAfterCommit) {
 		return fmt.Errorf("invalid KV fault kind %q", f.Kind)
 	}
@@ -105,7 +106,11 @@ func (m *KVTransport) Get(ctx context.Context, key string) (lease.KVEntry, error
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	item, exists := m.current(key)
-	if m.takeFault("get") == KVStaleRead {
+	switch m.takeFault("get") {
+	case KVGetTransportLost:
+		m.event(TransportEvent{Operation: "kv_get", Subject: key, Outcome: string(KVGetTransportLost)})
+		return lease.KVEntry{}, ErrTransportLost
+	case KVStaleRead:
 		if previous, ok := m.previous[key]; ok {
 			m.event(TransportEvent{Operation: "kv_get", Subject: key, Sequence: previous.revision, DataSHA256: digest(previous.value), Outcome: "stale_read"})
 			return lease.KVEntry{Value: append([]byte(nil), previous.value...), Revision: previous.revision, Created: previous.created}, nil

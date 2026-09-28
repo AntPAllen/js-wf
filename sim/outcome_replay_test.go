@@ -21,6 +21,18 @@ import (
 	"js-wf/worker"
 )
 
+type loseOutcomeReadAfterUpdate struct{ *KVTransport }
+
+func (p loseOutcomeReadAfterUpdate) Update(ctx context.Context, key string, payload []byte, revision uint64) (uint64, error) {
+	sequence, err := p.KVTransport.Update(ctx, key, payload, revision)
+	if errors.Is(err, ErrTransportLost) {
+		if faultErr := p.QueueFault(KVFault{Operation: "get", Kind: KVGetTransportLost}); faultErr != nil {
+			return sequence, faultErr
+		}
+	}
+	return sequence, err
+}
+
 func runSeededOutcomePersistence(seed int64, replay *Trace) (trace Trace, runErr error) {
 	var schedule *Scheduler
 	if replay == nil {
@@ -39,7 +51,7 @@ func runSeededOutcomePersistence(seed int64, replay *Trace) (trace Trace, runErr
 	ctx := context.Background()
 	state := NewKVTransport(schedule, 0)
 	for i := 0; i < 20; i++ {
-		mode, err := schedule.Choose([]string{"normal", "drop_create", "lose_create_ack", "old_tombstone", "new_tombstone", "drop_update", "lose_update_ack"})
+		mode, err := schedule.Choose([]string{"normal", "drop_create", "lose_create_ack", "old_tombstone", "new_tombstone", "drop_update", "lose_update_ack", "lose_update_ack_read_lost"})
 		if err != nil {
 			return trace, err
 		}
@@ -48,7 +60,7 @@ func runSeededOutcomePersistence(seed int64, replay *Trace) (trace Trace, runErr
 		invSeq := uint64(i + 2)
 		payload := []byte(fmt.Sprintf(`{"inv_seq":%d,"result":"done"}`, invSeq))
 		var marker []byte
-		if mode == "old_tombstone" || mode == "new_tombstone" || mode == "drop_update" || mode == "lose_update_ack" {
+		if mode == "old_tombstone" || mode == "new_tombstone" || mode == "drop_update" || mode == "lose_update_ack" || mode == "lose_update_ack_read_lost" {
 			tombSeq := invSeq - 1
 			if mode == "old_tombstone" {
 				tombSeq = invSeq
@@ -68,19 +80,23 @@ func runSeededOutcomePersistence(seed int64, replay *Trace) (trace Trace, runErr
 			err = state.QueueFault(KVFault{Operation: "create", Kind: KVLoseAckAfterCommit})
 		case "drop_update":
 			err = state.QueueFault(KVFault{Operation: "update", Kind: KVDropBeforeCommit})
-		case "lose_update_ack":
+		case "lose_update_ack", "lose_update_ack_read_lost":
 			err = state.QueueFault(KVFault{Operation: "update", Kind: KVLoseAckAfterCommit})
 		}
 		if err != nil {
 			return trace, err
 		}
-		firstErr := worker.PersistOutcomeWithPort(ctx, state, "test", id, invSeq, payload)
+		var port worker.OutcomePort = state
+		if mode == "lose_update_ack_read_lost" {
+			port = loseOutcomeReadAfterUpdate{state}
+		}
+		firstErr := worker.PersistOutcomeWithPort(ctx, port, "test", id, invSeq, payload)
 		switch mode {
 		case "old_tombstone":
 			if !errors.Is(firstErr, client.ErrPurged) {
 				return trace, fmt.Errorf("seed %d case %d old tombstone: %v", seed, i, firstErr)
 			}
-		case "drop_create", "lose_create_ack", "drop_update":
+		case "drop_create", "lose_create_ack", "drop_update", "lose_update_ack_read_lost":
 			if !errors.Is(firstErr, ErrTransportLost) {
 				return trace, fmt.Errorf("seed %d case %d %s first attempt: %v", seed, i, mode, firstErr)
 			}

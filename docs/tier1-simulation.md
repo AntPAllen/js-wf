@@ -123,6 +123,12 @@ committed real KV create acknowledgment; retry leaves its original revision
 and payload intact, matching the model's lost-ack cut. Three normal repeats
 and a race run passed.
 
+A second proxy contract hides a committed tombstone-replacement update
+acknowledgment. The model can independently lose the following confirmation
+read, matching the error path while the real client connection is cut. Both
+paths retry without another KV revision or a changed result. Three normal
+repeats and a race run passed.
+
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
 subject, stores large input objects, and retains run enqueues with message-ID
