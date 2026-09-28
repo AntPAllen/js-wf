@@ -44,12 +44,25 @@ type Projection struct {
 	inv             jetstream.Stream
 	jrn             jetstream.Stream
 	view            jetstream.KeyValue
+	postgres        *PostgresStore
 	consumer        jetstream.Consumer
 	schemaVersion   int
 	attributeMapper func(map[string]string) (map[string]string, error)
 }
 
 type Option func(*Projection) error
+
+// WithPostgres directs the projection and queries to an indexed PostgreSQL
+// table. The caller owns db and must keep it open for the projection lifetime.
+func WithPostgres(store *PostgresStore) Option {
+	return func(p *Projection) error {
+		if store == nil {
+			return errors.New("nil PostgreSQL visibility store")
+		}
+		p.postgres = store
+		return nil
+	}
+}
 
 // WithAttributeMapper projects older journaled attribute shapes into a new
 // schema. Deploy one version at a time and run Rebuild to migrate every row.
@@ -79,12 +92,21 @@ func New(ctx context.Context, js jetstream.JetStream, options ...Option) (*Proje
 	if err != nil {
 		return nil, err
 	}
-	view, err := js.KeyValue(ctx, "WF_VIEW")
-	if err != nil {
-		return nil, err
+	var view jetstream.KeyValue
+	consumerName := "WF_VIEW"
+	if p.postgres == nil {
+		view, err = js.KeyValue(ctx, "WF_VIEW")
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		if err := p.postgres.Init(ctx); err != nil {
+			return nil, err
+		}
+		consumerName = "WF_VIEW_PG"
 	}
 	consumer, err := jrn.CreateConsumer(ctx, jetstream.ConsumerConfig{
-		Name: "WF_VIEW", Durable: "WF_VIEW", FilterSubject: "wf.jrn.*.*",
+		Name: consumerName, Durable: consumerName, FilterSubject: "wf.jrn.*.*",
 		AckPolicy: jetstream.AckExplicitPolicy, AckWait: 30 * time.Second, MaxDeliver: -1,
 	})
 	if err != nil {
@@ -229,6 +251,13 @@ func (p *Projection) SyncOne(ctx context.Context, typ, id string) error {
 }
 
 func (p *Projection) putRow(ctx context.Context, row Row) error {
+	return p.putRowGeneration(ctx, row, "")
+}
+
+func (p *Projection) putRowGeneration(ctx context.Context, row Row, generation string) error {
+	if p.postgres != nil {
+		return p.postgres.Put(ctx, row, generation)
+	}
 	key := rowKey(row.Type, row.ID)
 	data, err := json.Marshal(row)
 	if err != nil {
@@ -291,6 +320,9 @@ func (p *Projection) ensureIndex(ctx context.Context, key string, invSeq uint64)
 }
 
 func (p *Projection) deleteRow(ctx context.Context, typ, id string) error {
+	if p.postgres != nil {
+		return p.postgres.Delete(ctx, typ, id)
+	}
 	key := rowKey(typ, id)
 	prior, err := p.view.Get(ctx, key)
 	if errors.Is(err, jetstream.ErrKeyNotFound) {
@@ -317,6 +349,14 @@ func (p *Projection) deleteRow(ctx context.Context, typ, id string) error {
 // Rebuild reconciles all rows against retained invocations and logical
 // journals. It also removes rows and index entries for purged invocations.
 func (p *Projection) Rebuild(ctx context.Context) error {
+	generation := ""
+	if p.postgres != nil {
+		var err error
+		generation, err = newGeneration()
+		if err != nil {
+			return err
+		}
+	}
 	info, err := p.inv.Info(ctx)
 	if err != nil {
 		return err
@@ -352,7 +392,7 @@ func (p *Projection) Rebuild(ctx context.Context) error {
 				}
 				row, _, err := p.describe(rebuildCtx, input)
 				if err == nil {
-					err = p.putRow(rebuildCtx, row)
+					err = p.putRowGeneration(rebuildCtx, row, generation)
 				}
 				if err != nil {
 					fail(err)
@@ -384,6 +424,9 @@ produce:
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
+	if p.postgres != nil {
+		return p.postgres.DeleteOtherGenerations(ctx, generation)
+	}
 	keys, err := p.view.Keys(ctx)
 	if err != nil && !errors.Is(err, jetstream.ErrNoKeysFound) {
 		return err
@@ -405,6 +448,9 @@ func (p *Projection) Get(ctx context.Context, typ, id string) (Row, error) {
 	if err := identity.Validate(typ, id); err != nil {
 		return Row{}, err
 	}
+	if p.postgres != nil {
+		return p.postgres.Get(ctx, typ, id)
+	}
 	value, err := p.view.Get(ctx, rowKey(typ, id))
 	if errors.Is(err, jetstream.ErrKeyNotFound) {
 		return Row{}, ErrNotFound
@@ -422,6 +468,9 @@ func (p *Projection) Get(ctx context.Context, typ, id string) (Row, error) {
 func (p *Projection) List(ctx context.Context, status string) ([]Row, error) {
 	if status != "" && identity.ValidateToken(status) != nil {
 		return nil, fmt.Errorf("invalid status %q", status)
+	}
+	if p.postgres != nil {
+		return p.postgres.List(ctx, status)
 	}
 	keys, err := p.view.Keys(ctx)
 	if errors.Is(err, jetstream.ErrNoKeysFound) {
@@ -475,6 +524,9 @@ func (p *Projection) ListByAttribute(ctx context.Context, key, value, status str
 	}
 	if status != "" && identity.ValidateToken(status) != nil {
 		return nil, fmt.Errorf("invalid status %q", status)
+	}
+	if p.postgres != nil {
+		return p.postgres.ListByAttribute(ctx, key, value, status)
 	}
 	keys, err := p.view.Keys(ctx)
 	if errors.Is(err, jetstream.ErrNoKeysFound) {

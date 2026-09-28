@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -21,6 +22,7 @@ import (
 	"js-wf/retention"
 	"js-wf/visibility"
 
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -40,6 +42,7 @@ func run(args []string, out io.Writer) error {
 	grace := flags.Duration("grace", 24*time.Hour, "purge tombstone grace")
 	rebuild := flags.Bool("rebuild", false, "rebuild the visibility view before listing")
 	attribute := flags.String("attribute", "", "filter list by a search attribute (key=value)")
+	postgresDSN := flags.String("postgres-dsn", os.Getenv("WF_POSTGRES_DSN"), "PostgreSQL visibility connection string")
 	cursor := flags.Uint64("cursor", 1, "scan starting stream sequence")
 	budget := flags.Int("budget", 100, "scan sequence budget")
 	interval := flags.Duration("interval", 100*time.Millisecond, "reconciler loop interval")
@@ -86,13 +89,22 @@ func run(args []string, out io.Writer) error {
 	if err != nil {
 		return err
 	}
+	var projectionOptions []visibility.Option
+	if *postgresDSN != "" {
+		db, err := sql.Open("pgx", *postgresDSN)
+		if err != nil {
+			return err
+		}
+		defer db.Close()
+		projectionOptions = append(projectionOptions, visibility.WithPostgres(&visibility.PostgresStore{DB: db}))
+	}
 	if command[0] == "project" {
 		if len(command) != 1 {
 			return errors.New("usage: wf project")
 		}
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
-		projection, err := visibility.New(ctx, js)
+		projection, err := visibility.New(ctx, js, projectionOptions...)
 		if err != nil {
 			return err
 		}
@@ -232,7 +244,7 @@ func run(args []string, out io.Writer) error {
 		}
 		return encode(map[string]any{"purged": true, "type": command[1], "id": command[2]})
 	case "list", "describe", "lag", "export-journal":
-		projection, err := visibility.New(ctx, js)
+		projection, err := visibility.New(ctx, js, projectionOptions...)
 		if err != nil {
 			return err
 		}
