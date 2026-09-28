@@ -139,6 +139,7 @@ func ensure(ctx context.Context, js jetstream.JetStream, replicas int, nativeSch
 		{Name: "WF_RUN", Subjects: []string{"wf.run.*", "wf.schedule.*.*.*"}, Retention: jetstream.WorkQueuePolicy, Storage: jetstream.FileStorage, Replicas: replicas, Discard: jetstream.DiscardOld, MaxAge: 0, AllowMsgSchedules: nativeSchedules, AllowRollup: true},
 		{Name: "WF_JRN", Subjects: []string{"wf.jrn.*.*"}, Retention: jetstream.LimitsPolicy, Storage: jetstream.FileStorage, Replicas: replicas, Discard: jetstream.DiscardNew, MaxAge: 0, MaxBytes: journalMaxBytes},
 		{Name: "WF_SIG", Subjects: []string{"wf.sig.*.*.*"}, Retention: jetstream.LimitsPolicy, Storage: jetstream.FileStorage, Replicas: replicas, Discard: jetstream.DiscardNew, MaxAge: 0, Duplicates: 2 * time.Minute},
+		{Name: "WF_PURGE", Subjects: []string{"wf.purge.*.*"}, Retention: jetstream.WorkQueuePolicy, Storage: jetstream.FileStorage, Replicas: replicas, Discard: jetstream.DiscardOld, MaxAge: 30 * 24 * time.Hour, Duplicates: 2 * time.Minute},
 	}
 	if !nativeSchedules {
 		streams = append(streams, jetstream.StreamConfig{Name: "WF_TIMER", Subjects: []string{"wf.timer.*.*.*.*"}, Retention: jetstream.LimitsPolicy, Storage: jetstream.FileStorage, Replicas: replicas, Discard: jetstream.DiscardNew, MaxAge: 0, Duplicates: 2 * time.Minute})

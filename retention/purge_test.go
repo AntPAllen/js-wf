@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"testing"
 	"time"
 
@@ -91,6 +92,14 @@ func TestPurgeResumesAfterEveryStage(t *testing.T) {
 			inv, _ := js.Stream(ctx, "WF_INV")
 			if _, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, id)); !errors.Is(err, jetstream.ErrMsgNotFound) {
 				t.Fatalf("invocation remains: %v", err)
+			}
+			purges, err := js.Stream(ctx, "WF_PURGE")
+			if err != nil {
+				t.Fatal(err)
+			}
+			event, err := purges.GetLastMsgForSubject(ctx, "wf.purge."+typ+"."+id)
+			if err != nil || string(event.Data) != strconv.FormatUint(ack.Sequence, 10) {
+				t.Fatalf("purge event=%v err=%v", event, err)
 			}
 		})
 	}

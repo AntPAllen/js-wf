@@ -17,6 +17,7 @@ import (
 
 	"js-wf/identity"
 	"js-wf/journal"
+	"js-wf/retention"
 	"js-wf/wf"
 
 	"github.com/nats-io/nats.go"
@@ -44,8 +45,10 @@ type Projection struct {
 	inv             jetstream.Stream
 	jrn             jetstream.Stream
 	view            jetstream.KeyValue
+	state           jetstream.KeyValue
 	postgres        *PostgresStore
 	consumer        jetstream.Consumer
+	purgeConsumer   jetstream.Consumer
 	schemaVersion   int
 	attributeMapper func(map[string]string) (map[string]string, error)
 }
@@ -101,6 +104,21 @@ func New(ctx context.Context, js jetstream.JetStream, options ...Option) (*Proje
 		}
 	} else {
 		if err := p.postgres.Init(ctx); err != nil {
+			return nil, err
+		}
+		p.state, err = js.KeyValue(ctx, "WF_STATE")
+		if err != nil {
+			return nil, err
+		}
+		purges, err := js.Stream(ctx, "WF_PURGE")
+		if err != nil {
+			return nil, err
+		}
+		p.purgeConsumer, err = purges.CreateConsumer(ctx, jetstream.ConsumerConfig{
+			Name: "WF_VIEW_PG_PURGE", Durable: "WF_VIEW_PG_PURGE", FilterSubject: "wf.purge.*.*",
+			AckPolicy: jetstream.AckExplicitPolicy, AckWait: 30 * time.Second, MaxDeliver: -1,
+		})
+		if err != nil {
 			return nil, err
 		}
 		consumerName = "WF_VIEW_PG"
@@ -192,6 +210,21 @@ func (p *Projection) describe(ctx context.Context, input *jetstream.RawStreamMsg
 		}
 	}
 	if len(records) == 0 {
+		if p.state != nil {
+			entry, err := p.state.Get(ctx, identity.Key(typ, id))
+			if err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
+				return Row{}, nil, err
+			}
+			if err == nil {
+				marker, tomb, err := retention.Decode(entry.Value())
+				if err != nil {
+					return Row{}, nil, err
+				}
+				if tomb && marker.InvSeq == input.Sequence {
+					return Row{}, nil, ErrNotFound
+				}
+			}
+		}
 		return row, records, nil
 	}
 	last := records[len(records)-1]
@@ -405,6 +438,9 @@ func (p *Projection) rebuild(ctx context.Context) error {
 					return
 				}
 				row, _, err := p.describe(rebuildCtx, input)
+				if errors.Is(err, ErrNotFound) {
+					continue
+				}
 				if err == nil {
 					err = p.putRowGeneration(rebuildCtx, row, generation)
 				}
@@ -583,18 +619,26 @@ func (p *Projection) ListByAttribute(ctx context.Context, key, value, status str
 	return rows, nil
 }
 
-// Lag reports retained journal messages not yet acknowledged by the durable
-// projection consumer, including delivered but unacknowledged messages.
+// Lag reports journal and PostgreSQL purge messages awaiting durable
+// projection consumers, including delivered but unacknowledged messages.
 func (p *Projection) Lag(ctx context.Context) (uint64, error) {
 	info, err := p.consumer.Info(ctx)
 	if err != nil {
 		return 0, err
 	}
-	return info.NumPending + uint64(info.NumAckPending), nil
+	lag := info.NumPending + uint64(info.NumAckPending)
+	if p.purgeConsumer != nil {
+		purges, err := p.purgeConsumer.Info(ctx)
+		if err != nil {
+			return 0, err
+		}
+		lag += purges.NumPending + uint64(purges.NumAckPending)
+	}
+	return lag, nil
 }
 
-// Run rebuilds once, then consumes journal updates. Periodic rebuilds also
-// detect purges, which do not themselves emit journal messages.
+// Run rebuilds once, then consumes journal updates and PostgreSQL purge
+// events. Periodic rebuilds repair interrupted purge publication.
 func (p *Projection) Run(ctx context.Context) error {
 	if p.postgres != nil {
 		return p.postgres.withWriter(ctx, p.run)
@@ -611,7 +655,11 @@ func (p *Projection) run(ctx context.Context) error {
 	if err := p.rebuild(ctx); err != nil {
 		return err
 	}
-	ticker := time.NewTicker(30 * time.Second)
+	rebuildInterval := 30 * time.Second
+	if p.postgres != nil {
+		rebuildInterval = 15 * time.Minute
+	}
+	ticker := time.NewTicker(rebuildInterval)
 	defer ticker.Stop()
 	for ctx.Err() == nil {
 		select {
@@ -626,38 +674,73 @@ func (p *Projection) run(ctx context.Context) error {
 			if ctx.Err() != nil {
 				return nil
 			}
-			if errors.Is(err, nats.ErrTimeout) || errors.Is(err, jetstream.ErrNoMessages) {
-				continue
+			if !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
+				return err
 			}
-			return err
 		}
-		for msg := range batch.Messages() {
-			metadata, err := msg.Metadata()
-			if err != nil {
-				_ = msg.NakWithDelay(time.Second)
-				continue
-			}
-			// This entry committed before Rebuild began. Every retained
-			// invocation was read after that watermark, so its row already
-			// reflects this entry (or a newer one).
-			if metadata.Sequence.Stream <= rebuiltThrough {
+		if batch != nil {
+			for msg := range batch.Messages() {
+				metadata, err := msg.Metadata()
+				if err != nil {
+					_ = msg.NakWithDelay(time.Second)
+					continue
+				}
+				// This entry committed before Rebuild began. Every retained
+				// invocation was read after that watermark, so its row already
+				// reflects this entry (or a newer one).
+				if metadata.Sequence.Stream <= rebuiltThrough {
+					_ = msg.Ack()
+					continue
+				}
+				parts := strings.Split(msg.Subject(), ".")
+				if len(parts) != 4 || parts[0] != "wf" || parts[1] != "jrn" {
+					_ = msg.Term()
+					continue
+				}
+				if err := p.syncOne(ctx, parts[2], parts[3]); err != nil {
+					_ = msg.NakWithDelay(time.Second)
+					continue
+				}
 				_ = msg.Ack()
-				continue
 			}
-			parts := strings.Split(msg.Subject(), ".")
-			if len(parts) != 4 || parts[0] != "wf" || parts[1] != "jrn" {
-				_ = msg.Term()
-				continue
+			if err := batch.Error(); err != nil && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
+				return err
 			}
-			if err := p.syncOne(ctx, parts[2], parts[3]); err != nil {
-				_ = msg.NakWithDelay(time.Second)
-				continue
-			}
-			_ = msg.Ack()
 		}
-		if err := batch.Error(); err != nil && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
+		if p.purgeConsumer != nil {
+			if err := p.consumePurges(ctx); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (p *Projection) consumePurges(ctx context.Context) error {
+	batch, err := p.purgeConsumer.Fetch(32, jetstream.FetchMaxWait(200*time.Millisecond))
+	if err != nil {
+		if ctx.Err() != nil || errors.Is(err, nats.ErrTimeout) || errors.Is(err, jetstream.ErrNoMessages) {
+			return nil
+		}
+		return err
+	}
+	for msg := range batch.Messages() {
+		parts := strings.Split(msg.Subject(), ".")
+		invSeq, parseErr := strconv.ParseUint(string(msg.Data()), 10, 64)
+		if len(parts) != 4 || parts[0] != "wf" || parts[1] != "purge" || identity.Validate(parts[2], parts[3]) != nil || parseErr != nil || invSeq == 0 {
+			_ = msg.NakWithDelay(time.Second)
+			return fmt.Errorf("invalid visibility purge event %q", msg.Subject())
+		}
+		if err := p.postgres.DeleteGeneration(ctx, parts[2], parts[3], invSeq); err != nil {
+			_ = msg.NakWithDelay(time.Second)
 			return err
 		}
+		if err := msg.Ack(); err != nil {
+			return err
+		}
+	}
+	if err := batch.Error(); err != nil && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
+		return err
 	}
 	return nil
 }

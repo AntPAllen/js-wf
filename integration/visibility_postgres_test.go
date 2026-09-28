@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -167,6 +168,132 @@ func TestPostgresVisibilityProjection(t *testing.T) {
 	rows, err = p.ListByAttribute(ctx, "team", "alpha", "")
 	if err != nil || len(rows) != 0 {
 		t.Fatalf("stale attribute rows=%+v err=%v", rows, err)
+	}
+}
+
+func TestPostgresIncrementalPurgeAndLateEvent(t *testing.T) {
+	dsn := os.Getenv("WF_TEST_POSTGRES_DSN")
+	if dsn == "" {
+		t.Skip("set WF_TEST_POSTGRES_DSN for PostgreSQL integration test")
+	}
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	defer cancel()
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	p, err := visibility.New(ctx, all[0], visibility.WithPostgres(&visibility.PostgresStore{DB: db}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, `TRUNCATE wf_visibility`); err != nil {
+		t.Fatal(err)
+	}
+	const typ, id = "test", "postgres-incremental-purge"
+	c := client.New(all[0])
+	first, err := c.Start(ctx, typ, id, []byte(`null`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, err := worker.New(ctx, all[1], "pg-purge-worker", map[string]worker.Handler{typ: func(_ *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		return json.RawMessage(`null`), nil
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	workerCtx, stopWorker := context.WithCancel(ctx)
+	workerDone := make(chan error, 1)
+	go func() { workerDone <- w.RunPartition(workerCtx, identity.Partition(typ, id, provision.Partitions)) }()
+	projectCtx, stopProject := context.WithCancel(ctx)
+	projectDone := make(chan error, 1)
+	go func() { projectDone <- p.Run(projectCtx) }()
+	defer func() {
+		stopProject()
+		<-projectDone
+	}()
+	if _, err := c.Await(ctx, typ, id); err != nil {
+		t.Fatal(err)
+	}
+	stopWorker()
+	if err := <-workerDone; err != nil {
+		t.Fatal(err)
+	}
+	for ctx.Err() == nil {
+		row, err := p.Get(ctx, typ, id)
+		lag, lagErr := p.Lag(ctx)
+		if err == nil && row.Status == "completed" && lagErr == nil && lag == 0 {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatal("PostgreSQL did not project terminal result")
+	}
+	if err := retention.Purge(ctx, all[0], typ, id, time.Minute); err != nil {
+		t.Fatal(err)
+	}
+	for ctx.Err() == nil {
+		_, err := p.Get(ctx, typ, id)
+		lag, lagErr := p.Lag(ctx)
+		if errors.Is(err, visibility.ErrNotFound) && lagErr == nil && lag == 0 {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatal("PostgreSQL purge event did not remove the row")
+	}
+	second, err := c.Start(ctx, typ, id, []byte(`null`))
+	if err != nil || second.InvSeq == first.InvSeq {
+		t.Fatalf("reused start=%+v err=%v", second, err)
+	}
+	secondWorker, err := worker.New(ctx, all[1], "pg-purge-reuse-worker", map[string]worker.Handler{typ: func(_ *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		return json.RawMessage(`null`), nil
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondCtx, stopSecond := context.WithCancel(ctx)
+	secondDone := make(chan error, 1)
+	go func() {
+		secondDone <- secondWorker.RunPartition(secondCtx, identity.Partition(typ, id, provision.Partitions))
+	}()
+	if _, err := c.Await(ctx, typ, id); err != nil {
+		t.Fatal(err)
+	}
+	stopSecond()
+	if err := <-secondDone; err != nil {
+		t.Fatal(err)
+	}
+	for ctx.Err() == nil {
+		row, err := p.Get(ctx, typ, id)
+		lag, lagErr := p.Lag(ctx)
+		if err == nil && row.InvSeq == second.InvSeq && row.Status == "completed" && lagErr == nil && lag == 0 {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatal("PostgreSQL did not project the reused generation")
+	}
+	if _, err := all[0].Publish(ctx, "wf.purge."+typ+"."+id, []byte(strconv.FormatUint(first.InvSeq, 10))); err != nil {
+		t.Fatal(err)
+	}
+	for ctx.Err() == nil {
+		lag, err := p.Lag(ctx)
+		if err == nil && lag == 0 {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatal("late purge event was not acknowledged")
+	}
+	row, err := p.Get(ctx, typ, id)
+	if err != nil || row.InvSeq != second.InvSeq || row.Status != "completed" {
+		t.Fatalf("late event changed reused row=%+v err=%v", row, err)
 	}
 }
 

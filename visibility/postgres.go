@@ -147,6 +147,14 @@ func (s *PostgresStore) Delete(ctx context.Context, typ, id string) error {
 	return err
 }
 
+// DeleteGeneration applies a retained purge event without removing a row for
+// a newer invocation that has already reused the same type and ID.
+func (s *PostgresStore) DeleteGeneration(ctx context.Context, typ, id string, invSeq uint64) error {
+	_, err := s.DB.ExecContext(ctx, `DELETE FROM wf_visibility WHERE type=$1 AND id=$2 AND row_data->>'inv_seq'=$3`,
+		typ, id, fmt.Sprint(invSeq))
+	return err
+}
+
 // DeleteOtherGenerations runs only after every source invocation was read and
 // written successfully. An interrupted rebuild leaves existing rows intact.
 func (s *PostgresStore) DeleteOtherGenerations(ctx context.Context, generation string) error {

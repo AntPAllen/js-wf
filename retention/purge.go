@@ -70,6 +70,9 @@ func purge(ctx context.Context, js jetstream.JetStream, typ, id string, grace ti
 				return decodeErr
 			}
 			if tomb {
+				if err := publishPurge(ctx, js, typ, id, marker.InvSeq); err != nil {
+					return err
+				}
 				return clearPurgeMarker(ctx, state, purgeKey, marker.InvSeq)
 			}
 		}
@@ -128,6 +131,9 @@ func purge(ctx context.Context, js jetstream.JetStream, typ, id string, grace ti
 	if tomb {
 		if marker.InvSeq != input.Sequence {
 			return ErrNotTerminal
+		}
+		if err := publishPurge(ctx, js, typ, id, input.Sequence); err != nil {
+			return err
 		}
 		if err := inv.Purge(ctx, jetstream.WithPurgeSubject(identity.InvocationSubject(typ, id)), jetstream.WithPurgeSequence(input.Sequence+1)); err != nil {
 			return err
@@ -244,6 +250,9 @@ func purge(ctx context.Context, js jetstream.JetStream, typ, id string, grace ti
 	if err := stage("tombstone"); err != nil {
 		return err
 	}
+	if err := publishPurge(ctx, js, typ, id, input.Sequence); err != nil {
+		return err
+	}
 	if err := l.Renew(ctx); err != nil {
 		return err
 	}
@@ -254,6 +263,17 @@ func purge(ctx context.Context, js jetstream.JetStream, typ, id string, grace ti
 		return err
 	}
 	return clearPurgeMarker(ctx, state, purgeKey, input.Sequence)
+}
+
+// Publish before deleting WF_INV so a committed retirement always has a
+// durable visibility event. Replays use the generation-scoped message ID.
+func publishPurge(ctx context.Context, js jetstream.JetStream, typ, id string, invSeq uint64) error {
+	if invSeq == 0 {
+		return fmt.Errorf("purge event requires an invocation sequence")
+	}
+	_, err := js.Publish(ctx, "wf.purge."+typ+"."+id, []byte(strconv.FormatUint(invSeq, 10)),
+		jetstream.WithMsgID(fmt.Sprintf("purge:%s:%s:%d", typ, id, invSeq)))
+	return err
 }
 
 func purgeMarker(ctx context.Context, state jetstream.KeyValue, key string) (uint64, error) {
