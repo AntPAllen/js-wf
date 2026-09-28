@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"js-wf/client"
+	"js-wf/reconcile"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -81,6 +82,71 @@ func RunStartActors(ctx context.Context, schedule *Scheduler, transport client.S
 		actor := actor
 		cooperative = append(cooperative, CooperativeActor{Name: actor.Name, Run: func(ctx context.Context, yield YieldFunc) error {
 			return actor.Run(ctx, yieldingStartPort{yield: yield, transport: transport})
+		}})
+	}
+	return RunCooperative(ctx, schedule, cooperative)
+}
+
+type StartAndScanActor struct {
+	Name string
+	Run  func(context.Context, client.StartPort, reconcile.StartScanPort) error
+}
+
+type yieldingStartScanPort struct {
+	yield     YieldFunc
+	transport reconcile.StartScanPort
+}
+
+var _ reconcile.StartScanPort = yieldingStartScanPort{}
+
+func (p yieldingStartScanPort) GetInvocation(ctx context.Context, sequence uint64) (*jetstream.RawStreamMsg, error) {
+	var message *jetstream.RawStreamMsg
+	var operationErr error
+	if err := p.yield(ctx, "get_invocation", func() { message, operationErr = p.transport.GetInvocation(ctx, sequence) }); err != nil {
+		return nil, err
+	}
+	return message, operationErr
+}
+
+func (p yieldingStartScanPort) LastInvocationSequence(ctx context.Context) (uint64, error) {
+	var sequence uint64
+	var operationErr error
+	if err := p.yield(ctx, "invocation_stream_info", func() { sequence, operationErr = p.transport.LastInvocationSequence(ctx) }); err != nil {
+		return 0, err
+	}
+	return sequence, operationErr
+}
+
+func (p yieldingStartScanPort) JournalExists(ctx context.Context, subject string) (bool, error) {
+	var exists bool
+	var operationErr error
+	if err := p.yield(ctx, "journal_exists", func() { exists, operationErr = p.transport.JournalExists(ctx, subject) }); err != nil {
+		return false, err
+	}
+	return exists, operationErr
+}
+
+func (p yieldingStartScanPort) EnqueueStart(ctx context.Context, typ, id string, sequence uint64) error {
+	var operationErr error
+	if err := p.yield(ctx, "enqueue_start", func() { operationErr = p.transport.EnqueueStart(ctx, typ, id, sequence) }); err != nil {
+		return err
+	}
+	return operationErr
+}
+
+// RunStartAndScanActors interleaves client and reconciler transport calls.
+func RunStartAndScanActors(ctx context.Context, schedule *Scheduler, transport *StartTransport, actors []StartAndScanActor) (map[string]error, error) {
+	if transport == nil {
+		return nil, fmt.Errorf("simulation needs a start transport")
+	}
+	cooperative := make([]CooperativeActor, 0, len(actors))
+	for _, actor := range actors {
+		if actor.Run == nil {
+			return nil, fmt.Errorf("simulation actor %q has no run function", actor.Name)
+		}
+		actor := actor
+		cooperative = append(cooperative, CooperativeActor{Name: actor.Name, Run: func(ctx context.Context, yield YieldFunc) error {
+			return actor.Run(ctx, yieldingStartPort{yield: yield, transport: transport}, yieldingStartScanPort{yield: yield, transport: transport})
 		}})
 	}
 	return RunCooperative(ctx, schedule, cooperative)

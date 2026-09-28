@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"js-wf/client"
@@ -14,12 +15,86 @@ import (
 )
 
 type StartScan struct {
-	js     jetstream.JetStream
-	client *client.Client
+	port StartScanPort
 }
 
 func NewStartScan(js jetstream.JetStream) *StartScan {
-	return &StartScan{js: js, client: client.New(js)}
+	return NewStartScanWithPort(&jetStreamStartScanPort{js: js, client: client.New(js)})
+}
+
+// StartScanPort contains the stream reads and run publish used by Scan.
+type StartScanPort interface {
+	GetInvocation(context.Context, uint64) (*jetstream.RawStreamMsg, error)
+	LastInvocationSequence(context.Context) (uint64, error)
+	JournalExists(context.Context, string) (bool, error)
+	EnqueueStart(context.Context, string, string, uint64) error
+}
+
+func NewStartScanWithPort(port StartScanPort) *StartScan { return &StartScan{port: port} }
+
+type jetStreamStartScanPort struct {
+	js     jetstream.JetStream
+	client *client.Client
+	mu     sync.Mutex
+	inv    jetstream.Stream
+	jrn    jetstream.Stream
+}
+
+func (p *jetStreamStartScanPort) stream(ctx context.Context, name string) (jetstream.Stream, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if name == "WF_INV" && p.inv != nil {
+		return p.inv, nil
+	}
+	if name == "WF_JRN" && p.jrn != nil {
+		return p.jrn, nil
+	}
+	stream, err := p.js.Stream(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	if name == "WF_INV" {
+		p.inv = stream
+	} else {
+		p.jrn = stream
+	}
+	return stream, nil
+}
+
+func (p *jetStreamStartScanPort) GetInvocation(ctx context.Context, sequence uint64) (*jetstream.RawStreamMsg, error) {
+	stream, err := p.stream(ctx, "WF_INV")
+	if err != nil {
+		return nil, err
+	}
+	return stream.GetMsg(ctx, sequence)
+}
+
+func (p *jetStreamStartScanPort) LastInvocationSequence(ctx context.Context) (uint64, error) {
+	stream, err := p.stream(ctx, "WF_INV")
+	if err != nil {
+		return 0, err
+	}
+	info, err := stream.Info(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return info.State.LastSeq, nil
+}
+
+func (p *jetStreamStartScanPort) JournalExists(ctx context.Context, subject string) (bool, error) {
+	stream, err := p.stream(ctx, "WF_JRN")
+	if err != nil {
+		return false, err
+	}
+	_, err = stream.GetLastMsgForSubject(ctx, subject)
+	if errors.Is(err, jetstream.ErrMsgNotFound) {
+		return false, nil
+	}
+	return err == nil, err
+}
+
+func (p *jetStreamStartScanPort) EnqueueStart(ctx context.Context, typ, id string, sequence uint64) error {
+	return p.client.Enqueue(ctx, typ, id, "start:"+typ+"."+id+":"+strconv.FormatUint(sequence, 10))
 }
 
 type ScanResult struct {
@@ -48,23 +123,15 @@ func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 	if next == 0 {
 		next = 1
 	}
-	inv, err := s.js.Stream(ctx, "WF_INV")
-	if err != nil {
-		return ScanResult{}, err
-	}
-	jrn, err := s.js.Stream(ctx, "WF_JRN")
-	if err != nil {
-		return ScanResult{}, err
-	}
 	result := ScanResult{NextSequence: next}
 	for scanned := 0; scanned < budget; scanned++ {
-		m, err := inv.GetMsg(ctx, next)
+		m, err := s.port.GetInvocation(ctx, next)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
-			info, infoErr := inv.Info(ctx)
+			last, infoErr := s.port.LastInvocationSequence(ctx)
 			if infoErr != nil {
 				return result, infoErr
 			}
-			if next > info.State.LastSeq {
+			if next > last {
 				result.NextSequence = 1
 				return result, nil
 			}
@@ -83,18 +150,18 @@ func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			return result, fmt.Errorf("invalid invocation subject %q", m.Subject)
 		}
 		typ, id := parts[2], parts[3]
-		_, err = jrn.GetLastMsgForSubject(ctx, "wf.jrn."+typ+"."+id)
-		if err == nil {
-			continue
-		}
-		if !errors.Is(err, jetstream.ErrMsgNotFound) {
+		exists, err := s.port.JournalExists(ctx, "wf.jrn."+typ+"."+id)
+		if err != nil {
 			return result, err
+		}
+		if exists {
+			continue
 		}
 		result.Reenqueued++
 		if dryRun {
 			continue
 		}
-		if err := s.client.Enqueue(ctx, typ, id, "start:"+typ+"."+id+":"+strconv.FormatUint(m.Sequence, 10)); err != nil {
+		if err := s.port.EnqueueStart(ctx, typ, id, m.Sequence); err != nil {
 			return result, err
 		}
 	}

@@ -39,21 +39,25 @@ lease; cleanup removes that owner's uncertain revision, then a successor
 acquires a higher epoch and survives a stale cleanup. Three normal repeats
 and a race run passed.
 
-The client start slice runs the production `Client.Start` and `StartChild`
-decisions through a narrow `StartPort`. Its model enforces one invocation per
+The client start slice runs the production `Client.Start`, `StartChild`, and
+`StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
 subject, stores large input objects, and retains run enqueues with message-ID
 deduplication. It injects dropped publishes, commits with lost acknowledgments,
 stale reads, and lost run-enqueue acknowledgments. The default test runs 1,000
-seeded sequences of 20 starts and retries, then 100 same-input and 100
-different-input two-client races at transport yield points. Races retain one
-invocation and one run message. A three-node contract fixture compares the
+seeded sequences of 20 starts, retries, repair scans, and journaled rescans,
+then 100 same-input and 100
+different-input two-client races at transport yield points. Another 100 seeds
+interleave a lost-ack client start with a repair scan and finish with a final
+scan. Races retain one invocation and one run message. A three-node contract fixture compares the
 normal start, matching retry, mismatched retry, and retained queue state with
-the model; three repeats passed. Existing three-node fixtures also cover
+the model; three repeats passed. Another three-node contract fixture stores
+an invocation without a run message, confirms dry-run detection, repairs one
+run message, and confirms a repeated scan deduplicates; three repeats and a
+race run passed. The model also checks purged invocation sequence holes and a
+lost repair-enqueue acknowledgment. Existing three-node fixtures also cover
 network-lost start acknowledgments, absent-publish retry, and large input.
-The start model does not yet simulate the `WF_RUN` consumer, reconciliation,
-or the server's deduplication-window expiry. A lost invocation acknowledgment
-can leave the modeled run queue empty, just as the real client requires the
-start reconciler to repair it.
+The start model does not yet simulate the `WF_RUN` consumer, the leased scan
+loop and persisted cursor, or the server's deduplication-window expiry.
 
 Run the fixed fault cases and 1,000 seeded scenarios:
 

@@ -3,10 +3,14 @@ package sim
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"sync"
 	"time"
 
 	"js-wf/client"
+	"js-wf/identity"
+	"js-wf/provision"
+	"js-wf/reconcile"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -29,13 +33,15 @@ type StartTransport struct {
 	runs        []Message
 	runIDs      map[string]uint64
 	objects     map[string][]byte
+	journals    map[string]bool
 	faults      []StartFault
 }
 
 var _ client.StartPort = (*StartTransport)(nil)
+var _ reconcile.StartScanPort = (*StartTransport)(nil)
 
 func NewStartTransport(schedule *Scheduler) *StartTransport {
-	return &StartTransport{schedule: schedule, invocations: map[string]jetstream.RawStreamMsg{}, runIDs: map[string]uint64{}, objects: map[string][]byte{}}
+	return &StartTransport{schedule: schedule, invocations: map[string]jetstream.RawStreamMsg{}, runIDs: map[string]uint64{}, objects: map[string][]byte{}, journals: map[string]bool{}}
 }
 
 func (m *StartTransport) QueueFault(f StartFault) error {
@@ -199,6 +205,72 @@ func (m *StartTransport) Input(key string) []byte {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return append([]byte(nil), m.objects[key]...)
+}
+
+func (m *StartTransport) GetInvocation(ctx context.Context, sequence uint64) (*jetstream.RawStreamMsg, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, entry := range m.invocations {
+		if entry.Sequence == sequence {
+			entry.Header = cloneHeader(entry.Header)
+			entry.Data = append([]byte(nil), entry.Data...)
+			m.event(TransportEvent{Operation: "get_invocation", Subject: entry.Subject, Sequence: sequence, Outcome: "ok"})
+			return &entry, nil
+		}
+	}
+	m.event(TransportEvent{Operation: "get_invocation", Sequence: sequence, Outcome: "not_found"})
+	return nil, jetstream.ErrMsgNotFound
+}
+
+func (m *StartTransport) LastInvocationSequence(ctx context.Context) (uint64, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.event(TransportEvent{Operation: "invocation_stream_info", Sequence: m.invSeq, Outcome: "ok"})
+	return m.invSeq, nil
+}
+
+func (m *StartTransport) JournalExists(ctx context.Context, subject string) (bool, error) {
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	exists := m.journals[subject]
+	outcome := "not_found"
+	if exists {
+		outcome = "ok"
+	}
+	m.event(TransportEvent{Operation: "journal_exists", Subject: subject, Outcome: outcome})
+	return exists, nil
+}
+
+func (m *StartTransport) EnqueueStart(ctx context.Context, typ, id string, sequence uint64) error {
+	key := identity.Key(typ, id)
+	return m.EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(key), "start:"+key+":"+strconv.FormatUint(sequence, 10))
+}
+
+// MarkJournal records that a worker has started this invocation. Repeated
+// reconciliation must then skip it even if the run message has been consumed.
+func (m *StartTransport) MarkJournal(typ, id string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	subject := identity.JournalSubject(typ, id)
+	m.journals[subject] = true
+	m.event(TransportEvent{Operation: "mark_journal", Subject: subject, Outcome: "ok"})
+}
+
+// PurgeInvocation leaves a sequence hole, as a real stream purge does.
+func (m *StartTransport) PurgeInvocation(subject string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	delete(m.invocations, subject)
+	m.event(TransportEvent{Operation: "purge_invocation", Subject: subject, Outcome: "ok"})
 }
 
 func (m *StartTransport) takeFault(operation string) string {

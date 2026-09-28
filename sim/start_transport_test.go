@@ -15,6 +15,7 @@ import (
 
 	"js-wf/client"
 	"js-wf/identity"
+	"js-wf/reconcile"
 )
 
 func TestStartTransportFaultBoundaries(t *testing.T) {
@@ -86,6 +87,44 @@ func TestStartTransportFaultBoundaries(t *testing.T) {
 	})
 }
 
+func TestStartScanModelCursorAndUncertainEnqueue(t *testing.T) {
+	ctx := context.Background()
+	model := NewStartTransport(NewScheduler(6))
+	first, err := client.NewWithStartPort(model).Start(ctx, "test", "purged", []byte(`one`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	model.PurgeInvocation(identity.InvocationSubject("test", "purged"))
+	if err := model.QueueFault(StartFault{Operation: "publish_invocation", Kind: "lose_ack_after_commit"}); err != nil {
+		t.Fatal(err)
+	}
+	second, err := client.NewWithStartPort(model).Start(ctx, "test", "repair", []byte(`two`))
+	if !errors.Is(err, client.ErrAlreadyStarted) || second.InvSeq <= first.InvSeq || len(model.Runs()) != 1 {
+		t.Fatalf("uncertain second start: handle=%+v runs=%v err=%v", second, model.Runs(), err)
+	}
+	scan := reconcile.NewStartScanWithPort(model)
+	dry, err := scan.Scan(ctx, first.InvSeq, 2, true)
+	if err != nil || dry.Inspected != 1 || dry.Reenqueued != 1 || dry.NextSequence != second.InvSeq+1 || len(model.Runs()) != 1 {
+		t.Fatalf("dry run over sequence hole: result=%+v runs=%v err=%v", dry, model.Runs(), err)
+	}
+	if err := model.QueueFault(StartFault{Operation: "enqueue_run", Kind: "lose_ack_after_commit"}); err != nil {
+		t.Fatal(err)
+	}
+	partial, err := scan.Scan(ctx, first.InvSeq, 2, false)
+	if !errors.Is(err, ErrTransportLost) || partial.NextSequence != second.InvSeq+1 || partial.Reenqueued != 1 || len(model.Runs()) != 2 {
+		t.Fatalf("lost repair enqueue ack: result=%+v runs=%v err=%v", partial, model.Runs(), err)
+	}
+	retry, err := scan.Scan(ctx, first.InvSeq, 2, false)
+	if err != nil || retry.Reenqueued != 1 || len(model.Runs()) != 2 {
+		t.Fatalf("repeated repair should deduplicate: result=%+v runs=%v err=%v", retry, model.Runs(), err)
+	}
+	model.MarkJournal("test", "repair")
+	final, err := scan.Scan(ctx, first.InvSeq, 2, false)
+	if err != nil || final.Reenqueued != 0 || len(model.Runs()) != 2 {
+		t.Fatalf("journaled repair should stop: result=%+v runs=%v err=%v", final, model.Runs(), err)
+	}
+}
+
 func runSeededStartScenario(seed int64, replay *Trace) (trace Trace, runErr error) {
 	var schedule *Scheduler
 	if replay == nil {
@@ -97,12 +136,13 @@ func runSeededStartScenario(seed int64, replay *Trace) (trace Trace, runErr erro
 			return Trace{}, err
 		}
 	}
-	if err := schedule.SetWorkload("client_start_20"); err != nil {
+	if err := schedule.SetWorkload("client_start_repair_20"); err != nil {
 		return Trace{}, err
 	}
 	defer func() { trace = schedule.Trace() }()
 	model := NewStartTransport(schedule)
 	c := client.NewWithStartPort(model)
+	scanner := reconcile.NewStartScanWithPort(model)
 	committedRuns := 0
 	for i := 0; i < 20; i++ {
 		choice, err := schedule.Choose([]string{"normal", "lost_inv_ack", "lost_run_ack", "drop_run"})
@@ -157,6 +197,19 @@ func runSeededStartScenario(seed int64, replay *Trace) (trace Trace, runErr erro
 		_, mismatchErr := c.Start(context.Background(), "test", id, []byte(`changed`))
 		if !errors.Is(mismatchErr, client.ErrInputMismatch) {
 			return trace, fmt.Errorf("seed %d case %d mismatched retry: %v", seed, i, mismatchErr)
+		}
+		result, err := scanner.Scan(context.Background(), handle.InvSeq, 1, false)
+		if err != nil || result.Inspected != 1 || result.Reenqueued != 1 || result.NextSequence != handle.InvSeq+1 {
+			return trace, fmt.Errorf("seed %d case %d repair: result=%+v err=%v", seed, i, result, err)
+		}
+		committedRuns = i + 1
+		if got := len(model.Runs()); got != committedRuns {
+			return trace, fmt.Errorf("seed %d case %d after repair has %d runs, want %d", seed, i, got, committedRuns)
+		}
+		model.MarkJournal("test", id)
+		result, err = scanner.Scan(context.Background(), handle.InvSeq, 1, false)
+		if err != nil || result.Reenqueued != 0 || len(model.Runs()) != committedRuns {
+			return trace, fmt.Errorf("seed %d case %d journaled rescan: result=%+v runs=%d err=%v", seed, i, result, len(model.Runs()), err)
 		}
 	}
 	if err := schedule.Finish(); err != nil {
@@ -304,6 +357,73 @@ func TestCooperativeStartRacesReplay(t *testing.T) {
 			if err != nil || !reflect.DeepEqual(generated, replayed) {
 				t.Fatalf("FAULT_SEED=%d mismatch=%v replay: %v", seed, mismatch, err)
 			}
+		}
+	}
+}
+
+func runConcurrentStartRepair(seed int64, replay *Trace) (trace Trace, runErr error) {
+	var schedule *Scheduler
+	if replay == nil {
+		schedule = NewScheduler(seed)
+	} else {
+		var err error
+		schedule, err = ReplayScheduler(*replay)
+		if err != nil {
+			return Trace{}, err
+		}
+	}
+	if err := schedule.SetWorkload("client_start_scan_race"); err != nil {
+		return Trace{}, err
+	}
+	defer func() { trace = schedule.Trace() }()
+	model := NewStartTransport(schedule)
+	if err := model.QueueFault(StartFault{Operation: "publish_invocation", Kind: "lose_ack_after_commit"}); err != nil {
+		return trace, err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	actors := []StartAndScanActor{
+		{Name: "client", Run: func(ctx context.Context, start client.StartPort, _ reconcile.StartScanPort) error {
+			_, err := client.NewWithStartPort(start).Start(ctx, "test", "race", []byte(`input`))
+			return err
+		}},
+		{Name: "scanner", Run: func(ctx context.Context, _ client.StartPort, scan reconcile.StartScanPort) error {
+			_, err := reconcile.NewStartScanWithPort(scan).Scan(ctx, 1, 1, false)
+			return err
+		}},
+	}
+	results, err := RunStartAndScanActors(ctx, schedule, model, actors)
+	if err != nil {
+		return trace, err
+	}
+	if !errors.Is(results["client"], client.ErrAlreadyStarted) || results["scanner"] != nil {
+		return trace, fmt.Errorf("concurrent start/scan results: %v", results)
+	}
+	stored, exists := model.Invocation(identity.InvocationSubject("test", "race"))
+	if !exists || stored.Sequence != 1 || len(model.Runs()) > 1 {
+		return trace, fmt.Errorf("concurrent state: invocation=%+v runs=%v", stored, model.Runs())
+	}
+	if _, err := reconcile.NewStartScanWithPort(model).Scan(ctx, 1, 1, false); err != nil {
+		return trace, err
+	}
+	if len(model.Runs()) != 1 {
+		return trace, fmt.Errorf("post-race repair has %d runs, want one", len(model.Runs()))
+	}
+	if err := schedule.Finish(); err != nil {
+		return trace, err
+	}
+	return schedule.Trace(), nil
+}
+
+func TestCooperativeStartAndScannerRacesReplay(t *testing.T) {
+	for seed := int64(1); seed <= 100; seed++ {
+		generated, err := runConcurrentStartRepair(seed, nil)
+		if err != nil {
+			t.Fatalf("FAULT_SEED=%d start/scan race: %v", seed, err)
+		}
+		replayed, err := runConcurrentStartRepair(seed, &generated)
+		if err != nil || !reflect.DeepEqual(generated, replayed) {
+			t.Fatalf("FAULT_SEED=%d start/scan replay: %v", seed, err)
 		}
 	}
 }
