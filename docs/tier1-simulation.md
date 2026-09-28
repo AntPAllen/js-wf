@@ -82,6 +82,15 @@ two recorded worker IDs in one nonzero epoch. I4 replay and I5 liveness
 negative controls, plus invoking this checker after integrated worker
 schedules, remain open.
 
+A separate 1,000-seed workload now runs production `Client.Start` and
+`journal.Store.Append` against retained in-memory invocation and journal
+transports, with dropped and hidden-ack step completions. It writes modeled
+terminal KV values, reconstructs the checker input from the transports'
+retained contents, and runs `CheckSnapshot` after each of five terminal
+schedules per seed. The checker report enters the trace; exact disk replay
+and byte-identical cross-process traces pass. Result persistence still needs
+the production worker handler in this model.
+
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
 subject, stores large input objects, and retains run enqueues with message-ID

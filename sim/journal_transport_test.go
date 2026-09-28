@@ -423,6 +423,8 @@ func TestReplayFaultTrace(t *testing.T) {
 		replayed, err = runSeededSuspendedLoop(loaded.Seed, &loaded)
 	case "suspended_two_scanners":
 		replayed, err = runTwoSuspendedLoops(loaded.Seed, &loaded)
+	case "retained_invariants_5":
+		replayed, err = runSeededRetainedInvariantChecks(loaded.Seed, &loaded)
 	default:
 		t.Fatalf("unknown trace workload %q", loaded.Workload)
 	}
