@@ -39,6 +39,8 @@ func runSeededSignalPipeline(seed int64, replay *Trace) (trace Trace, runErr err
 	defer func() { trace = schedule.Trace() }()
 	ctx := context.Background()
 	model := NewSignalTransport(schedule)
+	journalModel := NewJournalTransport(schedule)
+	journalStore := journal.NewWithAppendPort(journalModel)
 	c := client.NewWithSignalPorts(model, model)
 	scan := reconcile.NewSignalScanWithPort(model)
 	const typ, id = "test", "pipeline"
@@ -105,14 +107,66 @@ func runSeededSignalPipeline(seed int64, replay *Trace) (trace Trace, runErr err
 			return trace, fmt.Errorf("seed %d signal %d mode=%s retained %d runs", seed, i, mode, got)
 		}
 	}
-	var records []journal.Record
+	journalSubject := identity.JournalSubject(typ, id)
+	startSeq, err := journalStore.Append(ctx, typ, id, journal.Entry{Kind: journal.Started, Index: 0, Epoch: 1}, 0)
+	if err != nil {
+		return trace, fmt.Errorf("seed %d journal start: %w", seed, err)
+	}
+	records := []journal.Record{{Entry: journal.Entry{Kind: journal.Started, Index: 0, Epoch: 1}, Sequence: startSeq}}
+	journalSeq := startSeq
+	faultChoices := make([]string, 20)
+	for i := range faultChoices {
+		faultChoices[i] = strconv.Itoa(i)
+	}
+	faultChoice, err := schedule.Choose(faultChoices)
+	if err != nil {
+		return trace, err
+	}
+	faultAt, _ := strconv.Atoi(faultChoice)
+	faulted := false
 	appendEntry := func(kind journal.Kind, payload json.RawMessage) error {
-		records = append(records, journal.Record{Entry: journal.Entry{Kind: kind, Index: uint64(len(records)), Payload: append([]byte(nil), payload...)}})
+		if !faulted && len(records)-1 == faultAt {
+			faulted = true
+			if err := journalModel.QueueFault(Fault{Kind: LoseAckAfterCommit}); err != nil {
+				return err
+			}
+		}
+		entry := journal.Entry{Kind: kind, Index: uint64(len(records)), Epoch: 1, Payload: append([]byte(nil), payload...)}
+		seq, err := journalStore.Append(ctx, typ, id, entry, journalSeq)
+		if err != nil {
+			return err
+		}
+		journalSeq = seq
+		records = append(records, journal.Record{Entry: entry, Sequence: seq})
 		return nil
 	}
-	signals, err := worker.DrainSignalsWithPort(ctx, model, typ, id, generation, nil, appendEntry)
-	if err != nil || len(signals) != 20 || len(records) != 20 {
+	signals, err := worker.DrainSignalsWithPort(ctx, model, typ, id, generation, records, appendEntry)
+	if !errors.Is(err, journal.ErrUnknown) || !faulted {
+		return trace, fmt.Errorf("seed %d lost journal ack at %d: %v", seed, faultAt, err)
+	}
+	// Redelivery reads the committed journal tail before draining again.
+	records = nil
+	for _, message := range journalModel.Messages(journalSubject) {
+		var entry journal.Entry
+		if err := json.Unmarshal(message.Data, &entry); err != nil {
+			return trace, err
+		}
+		records = append(records, journal.Record{Entry: entry, Sequence: message.Sequence})
+		journalSeq = message.Sequence
+	}
+	signals, err = worker.DrainSignalsWithPort(ctx, model, typ, id, generation, records, appendEntry)
+	if err != nil || len(signals) != 20 || len(records) != 21 {
 		return trace, fmt.Errorf("seed %d drain signals=%d records=%d err=%v", seed, len(signals), len(records), err)
+	}
+	retained := journalModel.Messages(journalSubject)
+	if len(retained) != len(records) {
+		return trace, fmt.Errorf("seed %d retained journal=%d records=%d", seed, len(retained), len(records))
+	}
+	for i, message := range retained {
+		encoded, err := json.Marshal(records[i].Entry)
+		if err != nil || message.Sequence != records[i].Sequence || !bytes.Equal(message.Data, encoded) {
+			return trace, fmt.Errorf("seed %d journal entry %d retained=%+v record=%+v err=%v", seed, i, message, records[i], err)
+		}
 	}
 	for i, signal := range signals {
 		if signal.Sequence != sequences[i] || signal.Name != "go" || !bytes.Equal(signal.Payload, payloads[i]) {
@@ -138,7 +192,7 @@ func runSeededSignalPipeline(seed int64, replay *Trace) (trace Trace, runErr err
 		}
 	}
 	replayed, err := worker.DrainSignalsWithPort(ctx, model, typ, id, generation, records, appendEntry)
-	if err != nil || len(replayed) != 20 || len(records) != 20 {
+	if err != nil || len(replayed) != 20 || len(records) != 21 || len(journalModel.Messages(journalSubject)) != 21 {
 		return trace, fmt.Errorf("seed %d replay signals=%d records=%d err=%v", seed, len(replayed), len(records), err)
 	}
 	before := len(model.Runs())
