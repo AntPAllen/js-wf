@@ -240,6 +240,13 @@ func (p *Projection) Describe(ctx context.Context, typ, id string) (Row, []journ
 
 // SyncOne projects the latest logical journal or removes a purged invocation.
 func (p *Projection) SyncOne(ctx context.Context, typ, id string) error {
+	if p.postgres != nil {
+		return p.postgres.withWriter(ctx, func(locked context.Context) error { return p.syncOne(locked, typ, id) })
+	}
+	return p.syncOne(ctx, typ, id)
+}
+
+func (p *Projection) syncOne(ctx context.Context, typ, id string) error {
 	row, _, err := p.Describe(ctx, typ, id)
 	if errors.Is(err, ErrNotFound) {
 		return p.deleteRow(ctx, typ, id)
@@ -349,6 +356,13 @@ func (p *Projection) deleteRow(ctx context.Context, typ, id string) error {
 // Rebuild reconciles all rows against retained invocations and logical
 // journals. It also removes rows and index entries for purged invocations.
 func (p *Projection) Rebuild(ctx context.Context) error {
+	if p.postgres != nil {
+		return p.postgres.withWriter(ctx, p.rebuild)
+	}
+	return p.rebuild(ctx)
+}
+
+func (p *Projection) rebuild(ctx context.Context) error {
 	generation := ""
 	if p.postgres != nil {
 		var err error
@@ -398,13 +412,15 @@ func (p *Projection) Rebuild(ctx context.Context) error {
 					fail(err)
 					return
 				}
-				wantedMu.Lock()
-				wanted[rowKey(row.Type, row.ID)] = struct{}{}
-				wanted[indexKey(row)] = struct{}{}
-				for _, key := range attributeIndexKeys(row) {
-					wanted[key] = struct{}{}
+				if p.postgres == nil {
+					wantedMu.Lock()
+					wanted[rowKey(row.Type, row.ID)] = struct{}{}
+					wanted[indexKey(row)] = struct{}{}
+					for _, key := range attributeIndexKeys(row) {
+						wanted[key] = struct{}{}
+					}
+					wantedMu.Unlock()
 				}
-				wantedMu.Unlock()
 			}
 		}()
 	}
@@ -580,12 +596,19 @@ func (p *Projection) Lag(ctx context.Context) (uint64, error) {
 // Run rebuilds once, then consumes journal updates. Periodic rebuilds also
 // detect purges, which do not themselves emit journal messages.
 func (p *Projection) Run(ctx context.Context) error {
+	if p.postgres != nil {
+		return p.postgres.withWriter(ctx, p.run)
+	}
+	return p.run(ctx)
+}
+
+func (p *Projection) run(ctx context.Context) error {
 	before, err := p.jrn.Info(ctx)
 	if err != nil {
 		return err
 	}
 	rebuiltThrough := before.State.LastSeq
-	if err := p.Rebuild(ctx); err != nil {
+	if err := p.rebuild(ctx); err != nil {
 		return err
 	}
 	ticker := time.NewTicker(30 * time.Second)
@@ -593,7 +616,7 @@ func (p *Projection) Run(ctx context.Context) error {
 	for ctx.Err() == nil {
 		select {
 		case <-ticker.C:
-			if err := p.Rebuild(ctx); err != nil {
+			if err := p.rebuild(ctx); err != nil {
 				return err
 			}
 		default:
@@ -626,7 +649,7 @@ func (p *Projection) Run(ctx context.Context) error {
 				_ = msg.Term()
 				continue
 			}
-			if err := p.SyncOne(ctx, parts[2], parts[3]); err != nil {
+			if err := p.syncOne(ctx, parts[2], parts[3]); err != nil {
 				_ = msg.NakWithDelay(time.Second)
 				continue
 			}

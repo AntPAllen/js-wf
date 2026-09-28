@@ -117,6 +117,18 @@ func TestPostgresVisibilityProjection(t *testing.T) {
 	if ctx.Err() != nil {
 		t.Fatal("PostgreSQL projection did not catch up")
 	}
+	otherDB, err := sql.Open("pgx", dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer otherDB.Close()
+	other, err := visibility.New(ctx, all[2], visibility.WithPostgres(&visibility.PostgresStore{DB: otherDB}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := other.Rebuild(ctx); !errors.Is(err, visibility.ErrPostgresWriterBusy) {
+		t.Fatalf("second PostgreSQL writer was allowed during Run: %v", err)
+	}
 	stopProject()
 	if err := <-projectDone; err != nil && !errors.Is(err, context.Canceled) {
 		t.Fatal(err)
@@ -125,7 +137,7 @@ func TestPostgresVisibilityProjection(t *testing.T) {
 	if err := <-workerDone; err != nil {
 		t.Fatal(err)
 	}
-	if err := p.Rebuild(ctx); err != nil {
+	if err := other.Rebuild(ctx); err != nil {
 		t.Fatal(err)
 	}
 	rows, err := p.List(ctx, "completed")

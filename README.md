@@ -89,7 +89,7 @@ Run `visibility.Projection.Run` in a separate goroutine or run the `project` CLI
 ./wf-cli -url nats://localhost:4222 -budget 256 -interval 100ms tombstone-loop
 ```
 
-For a larger query view, set `WF_POSTGRES_DSN` (or pass `-postgres-dsn`) on the `project`, `list`, and `lag` CLI commands. The CLI uses PostgreSQL instead of `WF_VIEW` for rows and queries; it creates `wf_visibility` with a status B-tree and a GIN index for exact search-attribute matches. The PostgreSQL projection has its own `WF_VIEW_PG` durable consumer, so a KV projector can run independently. Run one PostgreSQL projector against a database at a time. For example:
+For a larger query view, set `WF_POSTGRES_DSN` (or pass `-postgres-dsn`) on the `project`, `list`, and `lag` CLI commands. The CLI uses PostgreSQL instead of `WF_VIEW` for rows and queries; it creates `wf_visibility` with a status B-tree and a GIN index for exact search-attribute matches. The PostgreSQL projection has its own `WF_VIEW_PG` durable consumer, so a KV projector can run independently. A PostgreSQL advisory lock rejects concurrent projector writers and `-rebuild` commands while a projector runs. The database pool needs at least two connections. For example:
 
 ```sh
 export WF_POSTGRES_DSN='postgres://user:password@localhost:5432/workflows?sslmode=require'

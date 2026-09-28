@@ -4,17 +4,88 @@ import (
 	"context"
 	"crypto/rand"
 	"database/sql"
+	"database/sql/driver"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 )
+
+var ErrPostgresWriterBusy = errors.New("PostgreSQL visibility writer is already running")
+
+const postgresWriterLock int64 = 0x57465f56494557 // "WF_VIEW"
 
 // PostgresStore is the large-deployment visibility sink. It stores the same
 // Row JSON returned by the KV projection while indexing status and attributes.
 // Run one projection writer for this table at a time.
 type PostgresStore struct{ DB *sql.DB }
+
+// withWriter keeps the session-level advisory lock for the entire mutation.
+// A heartbeat detects loss of that session while work is still in flight.
+func (s *PostgresStore) withWriter(ctx context.Context, fn func(context.Context) error) error {
+	if s.DB.Stats().MaxOpenConnections == 1 {
+		return errors.New("PostgreSQL visibility writer needs at least two database connections")
+	}
+	conn, err := s.DB.Conn(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	var acquired bool
+	if err := conn.QueryRowContext(ctx, `SELECT pg_try_advisory_lock($1)`, postgresWriterLock).Scan(&acquired); err != nil {
+		return err
+	}
+	if !acquired {
+		return ErrPostgresWriterBusy
+	}
+	defer func() {
+		releaseCtx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		var released bool
+		if err := conn.QueryRowContext(releaseCtx, `SELECT pg_advisory_unlock($1)`, postgresWriterLock).Scan(&released); err != nil || !released {
+			// Never return a session that may still hold the lock to the pool.
+			_ = conn.Raw(func(any) error { return driver.ErrBadConn })
+		}
+	}()
+	workCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	finished := make(chan struct{})
+	lockLost := make(chan error, 1)
+	go func() {
+		defer close(finished)
+		ticker := time.NewTicker(5 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-workCtx.Done():
+				return
+			case <-ticker.C:
+				pingCtx, stop := context.WithTimeout(workCtx, 3*time.Second)
+				err := conn.PingContext(pingCtx)
+				stop()
+				if err != nil {
+					if workCtx.Err() != nil {
+						return
+					}
+					lockLost <- fmt.Errorf("PostgreSQL visibility writer lock session lost: %w", err)
+					cancel()
+					return
+				}
+			}
+		}
+	}()
+	err = fn(workCtx)
+	cancel()
+	<-finished
+	select {
+	case lost := <-lockLost:
+		return lost
+	default:
+		return err
+	}
+}
 
 func newGeneration() (string, error) {
 	var token [16]byte
