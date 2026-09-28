@@ -265,5 +265,5 @@ func (m *DispatchTransport) takeFault(operation string) string {
 
 func (m *DispatchTransport) event(event TransportEvent) {
 	event.AtMillis = m.schedule.NowMillis()
-	m.schedule.trace.Transport = append(m.schedule.trace.Transport, event)
+	m.schedule.RecordTransport(event)
 }

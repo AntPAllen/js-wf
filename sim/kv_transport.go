@@ -224,5 +224,5 @@ func (m *KVTransport) now() time.Time {
 
 func (m *KVTransport) event(event TransportEvent) {
 	event.AtMillis = m.schedule.NowMillis()
-	m.schedule.trace.Transport = append(m.schedule.trace.Transport, event)
+	m.schedule.RecordTransport(event)
 }

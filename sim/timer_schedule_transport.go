@@ -322,5 +322,5 @@ func (m *TimerScheduleTransport) Runs() []Message {
 
 func (m *TimerScheduleTransport) event(event TransportEvent) {
 	event.AtMillis = m.schedule.NowMillis()
-	m.schedule.trace.Transport = append(m.schedule.trace.Transport, event)
+	m.schedule.RecordTransport(event)
 }

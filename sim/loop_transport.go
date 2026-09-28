@@ -117,7 +117,7 @@ func (m *LoopTransport) Wait(ctx context.Context, delay time.Duration) error {
 	if err := m.schedule.AdvanceMillis(delay.Milliseconds()); err != nil {
 		return err
 	}
-	m.schedule.trace.Transport = append(m.schedule.trace.Transport, TransportEvent{Operation: "reconcile_wait", Outcome: fmt.Sprintf("%dms", delay.Milliseconds()), AtMillis: m.schedule.NowMillis()})
+	m.schedule.RecordTransport(TransportEvent{Operation: "reconcile_wait", Outcome: fmt.Sprintf("%dms", delay.Milliseconds()), AtMillis: m.schedule.NowMillis()})
 	m.waits++
 	if m.stop != nil && m.waits >= m.stopAt {
 		m.stop()

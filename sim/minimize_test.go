@@ -30,7 +30,7 @@ func runProbeFailure(replay *Trace) (trace Trace, runErr error) {
 		if err != nil {
 			return trace, err
 		}
-		schedule.trace.Transport = append(schedule.trace.Transport, TransportEvent{Operation: "probe", Outcome: choice})
+		schedule.RecordTransport(TransportEvent{Operation: "probe", Outcome: choice})
 		if choice == "unsafe" {
 			if err := schedule.Finish(); err != nil {
 				return trace, err

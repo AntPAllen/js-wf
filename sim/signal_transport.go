@@ -34,6 +34,7 @@ type SignalTransport struct {
 
 var _ reconcile.SignalScanPort = (*SignalTransport)(nil)
 var _ reconcile.TimerScanPort = (*SignalTransport)(nil)
+var _ reconcile.SuspendedScanPort = (*SignalTransport)(nil)
 var _ client.SignalPort = (*SignalTransport)(nil)
 
 func NewSignalTransport(schedule *Scheduler) *SignalTransport {
@@ -98,6 +99,26 @@ func (m *SignalTransport) GetSignal(ctx context.Context, sequence uint64) (*jets
 	return &message, nil
 }
 
+func (m *SignalTransport) GetSignalAfter(ctx context.Context, subject string, sequence uint64) (*jetstream.RawStreamMsg, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for current := sequence; current <= m.sequence && current != 0; current++ {
+		message, exists := m.signals[current]
+		if !exists || message.Subject != subject {
+			continue
+		}
+		m.event(TransportEvent{Operation: "get_signal_after", Subject: subject, Expected: sequence, Sequence: current, DataSHA256: digest(message.Data), Outcome: "ok"})
+		message.Header = cloneHeader(message.Header)
+		message.Data = append([]byte(nil), message.Data...)
+		return &message, nil
+	}
+	m.event(TransportEvent{Operation: "get_signal_after", Subject: subject, Expected: sequence, Outcome: "not_found"})
+	return nil, jetstream.ErrMsgNotFound
+}
+
 func (m *SignalTransport) LastSignalSequence(ctx context.Context) (uint64, error) {
 	if err := ctx.Err(); err != nil {
 		return 0, err
@@ -133,6 +154,14 @@ func (m *SignalTransport) EnqueueTimer(ctx context.Context, typ, id string, sequ
 	}
 	key := identity.Key(typ, id)
 	return m.EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(key), fmt.Sprintf("timer-reconcile:%s:%s:%d", typ, id, sequence))
+}
+
+func (m *SignalTransport) EnqueueSuspended(ctx context.Context, typ, id string, sequence uint64) error {
+	if sequence == 0 {
+		return fmt.Errorf("zero journal sequence")
+	}
+	key := identity.Key(typ, id)
+	return m.EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(key), fmt.Sprintf("reconcile:%s:%s:%d", typ, id, sequence))
 }
 
 func cloneJournalRecords(records []journal.Record) []journal.Record {

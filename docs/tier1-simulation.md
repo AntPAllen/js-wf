@@ -164,6 +164,17 @@ completed, terminal, and deleted-invocation cases; three repeats passed.
 Native timer routing under partition and the worker handler's timer replay
 remain outside this scanner model.
 
+The suspended-wait scanner now uses a narrow invocation, journal, filtered
+signal-read, and wakeup port. A 1,000-seed workload runs production
+`SuspendedScan.Scan` over 20 invocations per seed. It covers due and future
+timers, timer/signal select, matching and stale-generation signals, consumed
+and already-used signals, unrelated subjects, terminal journals, purged
+invocation holes, dry runs, uncertain wakeup acknowledgments, deduplicated
+rescans, and virtual time advancing past a future timer. Its trace replays
+from disk and across processes. A three-node contract compares filtered
+signal reads through a deleted sequence hole, scan candidates, and retained
+wakeup counts with the model.
+
 The worker's timer publication now uses a narrow port for native schedule
 messages and fallback timer records. A 1,000-seed workload runs production
 `ScheduleTimerWithPort` for 20 timers per seed, alternating native and fallback

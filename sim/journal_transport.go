@@ -171,7 +171,7 @@ func (m *JournalTransport) commit(subject string, data []byte) uint64 {
 
 func (m *JournalTransport) event(event TransportEvent) {
 	event.AtMillis = m.schedule.NowMillis()
-	m.schedule.trace.Transport = append(m.schedule.trace.Transport, event)
+	m.schedule.RecordTransport(event)
 }
 
 func digest(data []byte) string {

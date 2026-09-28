@@ -11,6 +11,7 @@ import (
 	"os"
 	"reflect"
 	"sort"
+	"sync"
 )
 
 const TraceVersion = 3
@@ -107,12 +108,22 @@ func LoadTrace(path string) (Trace, error) {
 // Scheduler chooses from a canonical enabled set. Replay consumes recorded
 // choices and fails immediately if an interleaving is no longer reachable.
 type Scheduler struct {
-	rng      *rand.Rand
-	trace    Trace
-	replay   *Trace
-	position int
-	now      int64
-	maxSteps int
+	transportMu sync.Mutex
+	rng         *rand.Rand
+	trace       Trace
+	replay      *Trace
+	position    int
+	now         int64
+	maxSteps    int
+}
+
+// RecordTransport serializes trace writes from production scans that inspect
+// several retained records concurrently. Cooperative workloads still choose
+// actor turns explicitly through Choose.
+func (s *Scheduler) RecordTransport(event TransportEvent) {
+	s.transportMu.Lock()
+	defer s.transportMu.Unlock()
+	s.trace.Transport = append(s.trace.Transport, event)
 }
 
 func NewScheduler(seed int64) *Scheduler {

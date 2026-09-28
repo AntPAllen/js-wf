@@ -20,15 +20,98 @@ import (
 // SuspendedScan inspects retained invocations whose latest journal entry is
 // Suspended. It repairs an overdue timer or an available awaited signal.
 type SuspendedScan struct {
-	js     jetstream.JetStream
-	client *client.Client
-	jrn    *journal.Store
-	Now    func() time.Time
-	Grace  time.Duration
+	port  SuspendedScanPort
+	Now   func() time.Time
+	Grace time.Duration
 }
 
 func NewSuspendedScan(js jetstream.JetStream) *SuspendedScan {
-	return &SuspendedScan{js: js, client: client.New(js), jrn: journal.New(js), Now: time.Now, Grace: time.Second}
+	return NewSuspendedScanWithPort(NewSuspendedScanPort(js))
+}
+
+func NewSuspendedScanPort(js jetstream.JetStream) SuspendedScanPort {
+	return &jetStreamSuspendedScanPort{js: js, client: client.New(js), jrn: journal.New(js)}
+}
+
+// SuspendedScanPort contains the retained reads and wakeup publish used by
+// the production suspended-wait repair decision.
+type SuspendedScanPort interface {
+	LastInvocationSequence(context.Context) (uint64, error)
+	GetInvocation(context.Context, uint64) (*jetstream.RawStreamMsg, error)
+	ReadJournal(context.Context, string, string) ([]journal.Record, error)
+	GetSignalAfter(context.Context, string, uint64) (*jetstream.RawStreamMsg, error)
+	EnqueueSuspended(context.Context, string, string, uint64) error
+}
+
+func NewSuspendedScanWithPort(port SuspendedScanPort) *SuspendedScan {
+	return &SuspendedScan{port: port, Now: time.Now, Grace: time.Second}
+}
+
+type jetStreamSuspendedScanPort struct {
+	js     jetstream.JetStream
+	client *client.Client
+	jrn    *journal.Store
+	mu     sync.Mutex
+	inv    jetstream.Stream
+	sig    jetstream.Stream
+}
+
+func (p *jetStreamSuspendedScanPort) stream(ctx context.Context, name string) (jetstream.Stream, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if name == "WF_INV" && p.inv != nil {
+		return p.inv, nil
+	}
+	if name == "WF_SIG" && p.sig != nil {
+		return p.sig, nil
+	}
+	stream, err := p.js.Stream(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	if name == "WF_INV" {
+		p.inv = stream
+	} else {
+		p.sig = stream
+	}
+	return stream, nil
+}
+
+func (p *jetStreamSuspendedScanPort) LastInvocationSequence(ctx context.Context) (uint64, error) {
+	stream, err := p.stream(ctx, "WF_INV")
+	if err != nil {
+		return 0, err
+	}
+	info, err := stream.Info(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return info.State.LastSeq, nil
+}
+
+func (p *jetStreamSuspendedScanPort) GetInvocation(ctx context.Context, sequence uint64) (*jetstream.RawStreamMsg, error) {
+	stream, err := p.stream(ctx, "WF_INV")
+	if err != nil {
+		return nil, err
+	}
+	return stream.GetMsg(ctx, sequence)
+}
+
+func (p *jetStreamSuspendedScanPort) ReadJournal(ctx context.Context, typ, id string) ([]journal.Record, error) {
+	records, _, err := p.jrn.Read(ctx, typ, id)
+	return records, err
+}
+
+func (p *jetStreamSuspendedScanPort) GetSignalAfter(ctx context.Context, subject string, sequence uint64) (*jetstream.RawStreamMsg, error) {
+	stream, err := p.stream(ctx, "WF_SIG")
+	if err != nil {
+		return nil, err
+	}
+	return stream.GetMsg(ctx, sequence, jetstream.WithGetMsgSubject(subject))
+}
+
+func (p *jetStreamSuspendedScanPort) EnqueueSuspended(ctx context.Context, typ, id string, journalSeq uint64) error {
+	return p.client.Enqueue(ctx, typ, id, fmt.Sprintf("reconcile:%s:%s:%d", typ, id, journalSeq))
 }
 
 // Scan advances a stream-sequence cursor. The budget counts holes as well as
@@ -41,26 +124,18 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 	if next == 0 {
 		next = 1
 	}
-	inv, err := s.js.Stream(ctx, "WF_INV")
+	last, err := s.port.LastInvocationSequence(ctx)
 	if err != nil {
 		return ScanResult{}, err
 	}
-	sig, err := s.js.Stream(ctx, "WF_SIG")
-	if err != nil {
-		return ScanResult{}, err
-	}
-	info, err := inv.Info(ctx)
-	if err != nil {
-		return ScanResult{}, err
-	}
-	if next > info.State.LastSeq {
+	if next > last {
 		return ScanResult{NextSequence: 1}, nil
 	}
 	// Keep memory and concurrent request pressure bounded even if an operator
 	// supplies a very large budget. A scan budget is a maximum, not a promise
 	// to inspect every requested sequence in one call.
 	count := min(budget, 4096)
-	available := info.State.LastSeq - next + 1
+	available := last - next + 1
 	wrap := available < uint64(count)
 	if available < uint64(count) {
 		count = int(available)
@@ -79,7 +154,7 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 		go func() {
 			defer workers.Done()
 			for index := range jobs {
-				input, err := inv.GetMsg(ctx, next+uint64(index))
+				input, err := s.port.GetInvocation(ctx, next+uint64(index))
 				if errors.Is(err, jetstream.ErrMsgNotFound) {
 					continue
 				}
@@ -88,7 +163,7 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 					continue
 				}
 				items[index].retained = true
-				items[index].candidate, items[index].ready, items[index].err = s.inspect(ctx, sig, input)
+				items[index].candidate, items[index].ready, items[index].err = s.inspect(ctx, input)
 			}
 		}()
 	}
@@ -115,8 +190,7 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 	result.Reenqueued = len(result.Candidates)
 	if !dryRun {
 		for _, candidate := range result.Candidates {
-			messageID := fmt.Sprintf("reconcile:%s:%s:%d", candidate.Type, candidate.ID, candidate.JournalSeq)
-			if err := s.client.Enqueue(ctx, candidate.Type, candidate.ID, messageID); err != nil {
+			if err := s.port.EnqueueSuspended(ctx, candidate.Type, candidate.ID, candidate.JournalSeq); err != nil {
 				return result, err
 			}
 		}
@@ -124,13 +198,13 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 	return result, nil
 }
 
-func (s *SuspendedScan) inspect(ctx context.Context, sig jetstream.Stream, input *jetstream.RawStreamMsg) (Candidate, bool, error) {
+func (s *SuspendedScan) inspect(ctx context.Context, input *jetstream.RawStreamMsg) (Candidate, bool, error) {
 	parts := strings.Split(input.Subject, ".")
 	if len(parts) != 4 || parts[0] != "wf" || parts[1] != "inv" || identity.Validate(parts[2], parts[3]) != nil {
 		return Candidate{}, false, fmt.Errorf("invalid invocation subject %q", input.Subject)
 	}
 	typ, id := parts[2], parts[3]
-	records, _, err := s.jrn.Read(ctx, typ, id)
+	records, err := s.port.ReadJournal(ctx, typ, id)
 	if err != nil {
 		return Candidate{}, false, err
 	}
@@ -159,14 +233,14 @@ func (s *SuspendedScan) inspect(ctx context.Context, sig jetstream.Stream, input
 		if identity.ValidateToken(name) != nil {
 			return Candidate{}, false, fmt.Errorf("invalid signal wait %q", suspended.WaitingOn)
 		}
-		ready, err = signalAvailable(ctx, sig, typ, id, name, input.Sequence, records)
+		ready, err = signalAvailable(ctx, s.port, typ, id, name, input.Sequence, records)
 		reason = "signal"
 	case strings.HasPrefix(suspended.WaitingOn, "select:"):
 		parts := strings.Split(suspended.WaitingOn, ":")
 		if len(parts) != 3 || identity.ValidateToken(parts[1]) != nil || identity.ValidateToken(parts[2]) != nil {
 			return Candidate{}, false, fmt.Errorf("invalid select wait %q", suspended.WaitingOn)
 		}
-		ready, err = signalAvailable(ctx, sig, typ, id, parts[2], input.Sequence, records)
+		ready, err = signalAvailable(ctx, s.port, typ, id, parts[2], input.Sequence, records)
 		if err == nil && !ready {
 			ready, err = s.timerDue(records, parts[1])
 		}
@@ -211,7 +285,7 @@ func (s *SuspendedScan) timerDue(records []journal.Record, name string) (bool, e
 	return !s.Now().Before(req.FireAt.Add(s.Grace)), nil
 }
 
-func signalAvailable(ctx context.Context, sig jetstream.Stream, typ, id, name string, invSeq uint64, records []journal.Record) (bool, error) {
+func signalAvailable(ctx context.Context, port SuspendedScanPort, typ, id, name string, invSeq uint64, records []journal.Record) (bool, error) {
 	used := map[uint64]bool{}
 	var consumed []uint64
 	var lastConsumed uint64
@@ -250,7 +324,7 @@ func signalAvailable(ctx context.Context, sig jetstream.Stream, typ, id, name st
 	}
 	subject := "wf.sig." + typ + "." + id + "." + name
 	for seq := lastConsumed + 1; seq != 0; {
-		message, err := sig.GetMsg(ctx, seq, jetstream.WithGetMsgSubject(subject))
+		message, err := port.GetSignalAfter(ctx, subject, seq)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			return false, nil
 		}
