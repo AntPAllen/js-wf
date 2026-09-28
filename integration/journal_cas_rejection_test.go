@@ -49,22 +49,28 @@ func TestJournalCASRejectionWithUnchangedTail(t *testing.T) {
 	if err != nil || second <= first || one.calls.Load() != 2 {
 		t.Fatalf("one unchanged-tail rejection: first=%d second=%d publish_calls=%d err=%v", first, second, one.calls.Load(), err)
 	}
-	three := &fakeCASRejectJS{JetStream: all[2]}
-	three.remaining.Store(3)
-	_, err = journal.New(three).Append(ctx, "cas", "false-stale", journal.Entry{Epoch: 1, Index: 2, Kind: journal.StepCompleted, WorkerID: "three"}, second)
-	if !errors.Is(err, journal.ErrUnknown) || errors.Is(err, journal.ErrStale) || three.calls.Load() != 3 {
-		t.Fatalf("persistent unchanged-tail rejections: calls=%d err=%v", three.calls.Load(), err)
+	four := &fakeCASRejectJS{JetStream: all[1]}
+	four.remaining.Store(4)
+	third, err := journal.New(four).Append(ctx, "cas", "false-stale", journal.Entry{Epoch: 1, Index: 2, Kind: journal.StepCompleted, WorkerID: "four"}, second)
+	if err != nil || third <= second || four.calls.Load() != 5 {
+		t.Fatalf("four unchanged-tail rejections: seq=%d calls=%d err=%v", third, four.calls.Load(), err)
 	}
-	third, err := base.Append(ctx, "cas", "false-stale", journal.Entry{Epoch: 1, Index: 2, Kind: journal.StepCompleted, WorkerID: "winner"}, second)
-	if err != nil || third <= second {
-		t.Fatalf("winner after false rejections: seq=%d err=%v", third, err)
+	forty := &fakeCASRejectJS{JetStream: all[2]}
+	forty.remaining.Store(40)
+	_, err = journal.New(forty).Append(ctx, "cas", "false-stale", journal.Entry{Epoch: 1, Index: 3, Kind: journal.StepRequested, WorkerID: "rejected"}, third)
+	if !errors.Is(err, journal.ErrUnknown) || errors.Is(err, journal.ErrStale) || forty.calls.Load() != 40 {
+		t.Fatalf("persistent unchanged-tail rejections: calls=%d err=%v", forty.calls.Load(), err)
 	}
-	_, err = journal.New(all[1]).Append(ctx, "cas", "false-stale", journal.Entry{Epoch: 1, Index: 2, Kind: journal.StepCompleted, WorkerID: "loser"}, second)
+	fourth, err := base.Append(ctx, "cas", "false-stale", journal.Entry{Epoch: 1, Index: 3, Kind: journal.StepRequested, WorkerID: "winner"}, third)
+	if err != nil || fourth <= third {
+		t.Fatalf("winner after false rejections: seq=%d err=%v", fourth, err)
+	}
+	_, err = journal.New(all[1]).Append(ctx, "cas", "false-stale", journal.Entry{Epoch: 1, Index: 3, Kind: journal.StepRequested, WorkerID: "loser"}, third)
 	if !errors.Is(err, journal.ErrStale) {
 		t.Fatalf("advanced tail must be stale: %v", err)
 	}
 	records, tail, err := base.Read(ctx, "cas", "false-stale")
-	if err != nil || len(records) != 3 || tail != third || records[2].WorkerID != "winner" {
+	if err != nil || len(records) != 4 || tail != fourth || records[3].WorkerID != "winner" {
 		t.Fatalf("journal after CAS rejections: records=%v tail=%d err=%v", records, tail, err)
 	}
 }
