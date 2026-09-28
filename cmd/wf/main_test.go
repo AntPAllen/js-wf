@@ -457,6 +457,32 @@ func TestOperatorReplayFailedAndSuspended(t *testing.T) {
 	if err := <-cancelDone; err != nil {
 		t.Fatal(err)
 	}
+	const cancelBeforeID = "cancel-before-handler"
+	if _, err := cancelClient.Start(ctx, typ, cancelBeforeID, []byte(`null`)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := cancelClient.Cancel(ctx, typ, cancelBeforeID); err != nil {
+		t.Fatal(err)
+	}
+	beforeWorker, err := worker.New(ctx, js, "replay-state-cancel-before", map[string]worker.Handler{typ: func(*wf.Context, json.RawMessage) (json.RawMessage, error) {
+		t.Error("handler ran after cancellation was stored")
+		return nil, nil
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	beforeCtx, stopBefore := context.WithCancel(ctx)
+	beforeDone := make(chan error, 1)
+	go func() {
+		beforeDone <- beforeWorker.RunPartition(beforeCtx, identity.Partition(typ, cancelBeforeID, provision.Partitions))
+	}()
+	if _, err := cancelClient.Await(ctx, typ, cancelBeforeID); !errors.Is(err, client.ErrCancelled) {
+		t.Fatalf("pre-handler cancellation fixture: %v", err)
+	}
+	stopBefore()
+	if err := <-beforeDone; err != nil {
+		t.Fatal(err)
+	}
 	marker := filepath.Join(t.TempDir(), "effect")
 	t.Setenv("WF_REPLAY_EFFECT_MARKER", marker)
 	check := func(id, symbol, status, detail string) {
@@ -490,11 +516,13 @@ func TestOperatorReplayFailedAndSuspended(t *testing.T) {
 	if err := run(append(append([]string{}, base...), "-handler-symbol", "ChangedWait", "replay", typ, "waiting-signal"), &changed); !errors.Is(err, wf.ErrNonDeterministic) {
 		t.Fatalf("changed suspended wait: %v", err)
 	}
+	check(cancelledID, "WaitSignalWorkflow", "failed", client.ErrCancelled.Error())
+	check(cancelBeforeID, "WaitSignalWorkflow", "failed", client.ErrCancelled.Error())
 	changed.Reset()
-	if err := run(append(append([]string{}, base...), "-handler-symbol", "WaitSignalWorkflow", "replay", typ, cancelledID), &changed); err == nil || !strings.Contains(err.Error(), "cannot verify cancellation") {
-		t.Fatalf("cancelled handler replay: %v", err)
+	if err := run(append(append([]string{}, base...), "-handler-symbol", "ChangedWait", "replay", typ, cancelledID), &changed); err == nil || !strings.Contains(err.Error(), "differs from prior suspension") {
+		t.Fatalf("changed pre-cancellation wait: %v", err)
 	}
-	for _, caseID := range []string{"failed-step", "waiting-timer"} {
+	for _, caseID := range []string{"failed-step", "waiting-timer", cancelledID} {
 		var exported bytes.Buffer
 		if err := run([]string{"-url", cluster.Servers[0].ClientURL(), "export-replay", typ, caseID}, &exported); err != nil {
 			t.Fatal(err)
@@ -506,10 +534,38 @@ func TestOperatorReplayFailedAndSuspended(t *testing.T) {
 		symbol := "FailWorkflow"
 		if caseID == "waiting-timer" {
 			symbol = "WaitTimerWorkflow"
+		} else if caseID == cancelledID {
+			symbol = "WaitSignalWorkflow"
 		}
 		var offline bytes.Buffer
 		if err := run([]string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", symbol, "-replay-bundle", bundlePath, "replay"}, &offline); err != nil {
 			t.Fatalf("offline replay %s: %v", caseID, err)
+		}
+		if caseID == cancelledID {
+			bundle, err := loadReplayBundle(bundlePath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for i := range bundle.Journal {
+				if bundle.Journal[i].Kind != journal.SignalConsumed || !bytes.Contains(bundle.Journal[i].Payload, []byte(client.CancelSignalName)) {
+					continue
+				}
+				var signal map[string]any
+				if err := json.Unmarshal(bundle.Journal[i].Payload, &signal); err != nil {
+					t.Fatal(err)
+				}
+				signal["name"] = "ordinary"
+				bundle.Journal[i].Payload, _ = json.Marshal(signal)
+			}
+			corrupt, _ := json.Marshal(bundle)
+			corruptPath := filepath.Join(t.TempDir(), "missing-cancel.json")
+			if err := os.WriteFile(corruptPath, corrupt, 0600); err != nil {
+				t.Fatal(err)
+			}
+			offline.Reset()
+			if err := run([]string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", symbol, "-replay-bundle", corruptPath, "replay"}, &offline); err == nil || !strings.Contains(err.Error(), "no consumed cancellation signal") {
+				t.Fatalf("missing cancellation signal replay: %v", err)
+			}
 		}
 	}
 }

@@ -174,22 +174,6 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 	if tail.Kind != journal.Completed && tail.Kind != journal.Failed && tail.Kind != journal.Suspended {
 		return report, fmt.Errorf("replay requires a completed, failed or suspended journal tail")
 	}
-	if tail.Kind == journal.Failed {
-		var outcome wf.Outcome
-		if json.Unmarshal(tail.Payload, &outcome) == nil && outcome.Error == client.ErrCancelled.Error() {
-			for _, record := range bundle.Journal {
-				if record.Kind != journal.SignalConsumed {
-					continue
-				}
-				var signal struct {
-					Name string `json:"name"`
-				}
-				if json.Unmarshal(record.Payload, &signal) == nil && signal.Name == client.CancelSignalName {
-					return report, fmt.Errorf("replay cannot verify cancellation: the worker committed failure before calling the handler")
-				}
-			}
-		}
-	}
 	loaded, err := plugin.Open(pluginPath)
 	if err != nil {
 		return report, fmt.Errorf("open replay handler: %w", err)
@@ -201,6 +185,12 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 	handler, ok := symbol.(func(*wf.Context, json.RawMessage) (json.RawMessage, error))
 	if !ok {
 		return report, fmt.Errorf("replay handler %q must have signature func(*wf.Context, json.RawMessage) (json.RawMessage, error)", symbolName)
+	}
+	if tail.Kind == journal.Failed {
+		var outcome wf.Outcome
+		if json.Unmarshal(tail.Payload, &outcome) == nil && outcome.Error == client.ErrCancelled.Error() {
+			return replayCancellation(bundle, handler)
+		}
 	}
 	journalBytes, err := json.Marshal(bundle.Journal)
 	if err != nil {
@@ -271,4 +261,70 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 	}
 	report.Status, report.Result = "completed", result
 	return report, nil
+}
+
+// replayCancellation checks the last handler suspension, then the worker's
+// cancellation decision. The worker handles the reserved signal before it
+// calls the handler again, so there is no final handler result to reproduce.
+func replayCancellation(bundle replayBundle, handler func(*wf.Context, json.RawMessage) (json.RawMessage, error)) (replayReport, error) {
+	records := bundle.Journal
+	tail := records[len(records)-1]
+	var outcome wf.Outcome
+	if err := json.Unmarshal(tail.Payload, &outcome); err != nil || outcome.InvSeq != bundle.InvSeq || outcome.Error != client.ErrCancelled.Error() {
+		return replayReport{}, fmt.Errorf("invalid cancellation outcome")
+	}
+	full, err := json.Marshal(records)
+	if err != nil {
+		return replayReport{}, err
+	}
+	validationStop := errors.New("cancellation journal validated")
+	_, err = wf.Replay(full, func(*wf.Context) (json.RawMessage, error) { return nil, validationStop }, wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects})
+	if !errors.Is(err, validationStop) {
+		return replayReport{}, fmt.Errorf("invalid cancellation journal: %w", err)
+	}
+	lastSuspended := -1
+	for i, record := range records[:len(records)-1] {
+		if record.Kind == journal.Suspended {
+			lastSuspended = i
+		}
+	}
+	firstAfter := lastSuspended + 1
+	if lastSuspended < 0 {
+		firstAfter = 1 // Started is the only entry before initial signal drain.
+	} else {
+		prefix, err := json.Marshal(records[:lastSuspended+1])
+		if err != nil {
+			return replayReport{}, err
+		}
+		var observed wf.ReplayObservation
+		_, err = wf.Replay(prefix, func(c *wf.Context) (json.RawMessage, error) { return handler(c, bundle.Input) }, wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects, Observation: &observed})
+		var suspended struct {
+			WaitingOn string `json:"waiting_on"`
+		}
+		if decodeErr := json.Unmarshal(records[lastSuspended].Payload, &suspended); decodeErr != nil || suspended.WaitingOn == "" {
+			return replayReport{}, fmt.Errorf("invalid prior suspension")
+		}
+		if !errors.Is(err, wf.ErrSuspended) || observed.WaitingOn != suspended.WaitingOn || observed.PlayedSteps != observed.RecordedSteps {
+			return replayReport{}, fmt.Errorf("handler replay differs from prior suspension: wait=%q error=%v recorded=%q steps=%d/%d", observed.WaitingOn, err, suspended.WaitingOn, observed.PlayedSteps, observed.RecordedSteps)
+		}
+	}
+	foundCancel := false
+	for _, record := range records[firstAfter : len(records)-1] {
+		if record.Kind != journal.SignalConsumed {
+			return replayReport{}, fmt.Errorf("unexpected journal entry after last suspension and before cancellation: %s", record.Kind)
+		}
+		var signal struct {
+			Name string `json:"name"`
+		}
+		if err := json.Unmarshal(record.Payload, &signal); err != nil {
+			return replayReport{}, fmt.Errorf("decode cancellation signal: %w", err)
+		}
+		if signal.Name == client.CancelSignalName {
+			foundCancel = true
+		}
+	}
+	if !foundCancel {
+		return replayReport{}, fmt.Errorf("cancellation failure has no consumed cancellation signal")
+	}
+	return replayReport{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, JournalEntries: len(records), Status: "failed", Error: outcome.Error}, nil
 }

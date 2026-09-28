@@ -42,7 +42,8 @@ step and signal object hashes, and the matching terminal result, error, or
 wait. The command returns a nonzero exit status if a step differs, an object
 is missing or corrupt, or replay reaches a different outcome.
 
-A cancellation can fail an invocation before the worker calls its handler.
-That path cannot be verified by rerunning the handler and is not yet supported
-by this command. The same limitation may apply to other failures committed
-without a final handler execution.
+For a cancellation, replay checks the last recorded handler suspension and
+the consumed cancellation signal. If cancellation arrived before the first
+handler run, it checks the journal and signal without calling the handler.
+Failures committed without a final handler execution for other reasons may
+still need a separate verification path.
