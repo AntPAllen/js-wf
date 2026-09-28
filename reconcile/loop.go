@@ -17,6 +17,64 @@ var ErrCursorStale = errors.New("reconciler cursor changed concurrently")
 
 type scanFunc func(context.Context, uint64, int, bool) (ScanResult, error)
 
+// LoopLease is the fenced lease held while a reconciler scans and saves its
+// cursor. A lost lease prevents that scanner from publishing another cursor.
+type LoopLease interface {
+	Renew(context.Context) error
+	Release(context.Context) error
+}
+
+// LoopPort is the narrow lease, cursor, and cadence boundary for all scanner
+// loops. The scan callback retains the production repair decisions.
+type LoopPort interface {
+	Prepare(context.Context) error
+	Acquire(context.Context, string, string) (LoopLease, error)
+	LoadCursor(context.Context, string) (uint64, uint64, error)
+	SaveCursor(context.Context, string, uint64, uint64) (uint64, error)
+	Wait(context.Context, time.Duration) error
+}
+
+type jetStreamLoopPort struct {
+	js      jetstream.JetStream
+	ticker  *time.Ticker
+	leasing *lease.Store
+	state   jetstream.KeyValue
+}
+
+func (p *jetStreamLoopPort) Prepare(ctx context.Context) error {
+	leasing, err := lease.New(ctx, p.js)
+	if err != nil {
+		return err
+	}
+	state, err := p.js.KeyValue(ctx, "WF_STATE")
+	if err != nil {
+		return err
+	}
+	p.leasing, p.state = leasing, state
+	return nil
+}
+
+func (p *jetStreamLoopPort) Acquire(ctx context.Context, kind, workerID string) (LoopLease, error) {
+	return p.leasing.Acquire(ctx, "system", kind+"-reconciler", workerID)
+}
+
+func (p *jetStreamLoopPort) LoadCursor(ctx context.Context, kind string) (uint64, uint64, error) {
+	return loadCursor(ctx, p.state, kind)
+}
+
+func (p *jetStreamLoopPort) SaveCursor(ctx context.Context, kind string, next, revision uint64) (uint64, error) {
+	return saveCursor(ctx, p.state, kind, next, revision)
+}
+
+func (p *jetStreamLoopPort) Wait(ctx context.Context, _ time.Duration) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-p.ticker.C:
+		return nil
+	}
+}
+
 func loadCursor(ctx context.Context, state jetstream.KeyValue, kind string) (uint64, uint64, error) {
 	entry, err := state.Get(ctx, "scan."+kind)
 	if errors.Is(err, jetstream.ErrKeyNotFound) {
@@ -57,26 +115,35 @@ func runLoop(ctx context.Context, js jetstream.JetStream, workerID, kind string,
 	if interval <= 0 || interval > 10*time.Second || budget < 1 {
 		return fmt.Errorf("invalid reconcile cadence or budget")
 	}
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-	wait := func() {
-		select {
-		case <-ctx.Done():
-		case <-ticker.C:
-		}
+	port := &jetStreamLoopPort{js: js, ticker: time.NewTicker(interval)}
+	defer port.ticker.Stop()
+	return RunLoopWithPort(ctx, port, workerID, kind, interval, budget, scan)
+}
+
+// RunLoopWithPort runs the production lease, scan, and cursor state machine
+// against a real or deterministic transport.
+func RunLoopWithPort(ctx context.Context, port LoopPort, workerID, kind string, interval time.Duration, budget int, scan func(context.Context, uint64, int, bool) (ScanResult, error)) error {
+	if interval <= 0 || interval > 10*time.Second || budget < 1 {
+		return fmt.Errorf("invalid reconcile cadence or budget")
 	}
-	release := func(l *lease.Lease) {
+	if port == nil || scan == nil {
+		return fmt.Errorf("missing reconcile transport or scan")
+	}
+	wait := func() error {
+		err := port.Wait(ctx, interval)
+		if ctx.Err() != nil {
+			return nil
+		}
+		return err
+	}
+	release := func(l LoopLease) {
 		releaseCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()
 		_ = l.Release(releaseCtx)
 	}
 	for ctx.Err() == nil {
 		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
-		leasing, err := lease.New(attempt, js)
-		var state jetstream.KeyValue
-		if err == nil {
-			state, err = js.KeyValue(attempt, "WF_STATE")
-		}
+		err := port.Prepare(attempt)
 		stop()
 		if err != nil {
 			if ctx.Err() != nil {
@@ -85,14 +152,18 @@ func runLoop(ctx context.Context, js jetstream.JetStream, workerID, kind string,
 			if !retryableReconcileError(err) {
 				return err
 			}
-			wait()
+			if err := wait(); err != nil {
+				return err
+			}
 			continue
 		}
 		attempt, stop = context.WithTimeout(ctx, 5*time.Second)
-		l, err := leasing.Acquire(attempt, "system", kind+"-reconciler", workerID)
+		l, err := port.Acquire(attempt, kind, workerID)
 		stop()
 		if errors.Is(err, lease.ErrHeld) {
-			wait()
+			if err := wait(); err != nil {
+				return err
+			}
 			continue
 		}
 		if err != nil {
@@ -102,11 +173,13 @@ func runLoop(ctx context.Context, js jetstream.JetStream, workerID, kind string,
 			if !retryableReconcileError(err) {
 				return err
 			}
-			wait()
+			if err := wait(); err != nil {
+				return err
+			}
 			continue
 		}
 		attempt, stop = context.WithTimeout(ctx, 5*time.Second)
-		cursor, revision, err := loadCursor(attempt, state, kind)
+		cursor, revision, err := port.LoadCursor(attempt, kind)
 		stop()
 		if err != nil {
 			release(l)
@@ -116,7 +189,9 @@ func runLoop(ctx context.Context, js jetstream.JetStream, workerID, kind string,
 			if !retryableReconcileError(err) {
 				return err
 			}
-			wait()
+			if err := wait(); err != nil {
+				return err
+			}
 			continue
 		}
 		for ctx.Err() == nil {
@@ -143,7 +218,7 @@ func runLoop(ctx context.Context, js jetstream.JetStream, workerID, kind string,
 				break
 			}
 			attempt, stop = context.WithTimeout(ctx, 5*time.Second)
-			revision, err = saveCursor(attempt, state, kind, result.NextSequence, revision)
+			revision, err = port.SaveCursor(attempt, kind, result.NextSequence, revision)
 			stop()
 			if errors.Is(err, ErrCursorStale) {
 				break
@@ -156,10 +231,15 @@ func runLoop(ctx context.Context, js jetstream.JetStream, workerID, kind string,
 				break
 			}
 			cursor = result.NextSequence
-			wait()
+			if err := wait(); err != nil {
+				release(l)
+				return err
+			}
 		}
 		release(l)
-		wait()
+		if err := wait(); err != nil {
+			return err
+		}
 	}
 	return nil
 }

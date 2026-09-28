@@ -161,8 +161,19 @@ advances virtual time to make future requests due. Exact trace replay and
 byte-identical cross-process traces pass. A three-node contract compares
 model and real scan results and retained run counts for due, future,
 completed, terminal, and deleted-invocation cases; three repeats passed.
-The scanner loop's lease and persisted cursor, native timer routing, and the
-worker handler's timer decisions remain outside this model.
+Native timer routing and the worker handler's timer decisions remain outside
+this model.
+
+The shared reconciler loop now has a narrow port for lease acquisition and
+renewal, cursor load and CAS save, and cadence waits. The model uses separate
+KV transports for the expiring lease and durable cursor. A 1,000-seed workload
+runs production `StartScan.Scan` inside the production loop for 20 invocations,
+injects a dropped cursor write or a committed write with a lost acknowledgment
+at a seeded save, stops the first scanner, and starts a replacement. It checks
+one retained wakeup per invocation, exact trace replay, and byte-identical
+traces across processes. The existing three-node cursor contract checks that
+a replacement starts from the saved cursor and stale revision writes fail.
+Concurrent scanner actors and a real lost-cursor-ack contract remain.
 
 The dispatch slice runs the production `worker.RunPartition` fetch/retry loop
 through a narrow consumer port with a supplied handler callback. Its model
