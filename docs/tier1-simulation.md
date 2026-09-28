@@ -21,8 +21,8 @@ verifies that the best generated trace reproduces the exact transport
 transcript on disk. A synthetic ten-choice failure shrinks to an earlier
 replayable failure. Actor removal and automatic CI shrinking remain.
 CI now replays a pinned corpus covering committed and dropped CAS unknowns,
-two-worker dispatch, competing suspended scanners, retained-state checks,
-and workflow determinism. Go runs package tests from `sim/`, so the relative
+two-worker dispatch, competing suspended scanners, suspended wakeup liveness,
+retained-state checks, and workflow determinism. Go runs package tests from `sim/`, so the relative
 `sim-failure.json` output lands under the uploaded artifact path.
 An operation context can be cancelled while its actor is waiting for a
 scheduler turn. The scheduler now resolves every submitted turn and lets the
