@@ -158,6 +158,19 @@ modeled consumer directly, including publishes with lost replies. Timer scheduli
 large result blobs, running cancellation, and cooperative heartbeat turns
 remain outside this integrated slice.
 
+The integrated signal workload follows one workflow across a suspension and
+resume. Production `Client.Start` enqueues its first run, `Worker.handle`
+journals `Suspended`, and production `Client.Signal` publishes `go` and enqueues
+the resumed run. The same worker drains and journals the signal, replays its
+earlier wait, and writes `StepCompleted`, `Completed`, and the terminal result.
+Across 1,000 seeds it covers a lost signal publish acknowledgment, dropped or
+unacknowledged wakeup enqueue repaired by production `SignalScan`, dropped or
+unacknowledged completion append, lost run acknowledgment, and a consumer
+leader change. The final retained snapshot passes I1/I2/I3/I6, and signal
+liveness finds no eligible undrained signal. Seed 42 is pinned and replays
+across processes. Timer, snapshot, large blob, cancellation, and cooperative
+heartbeat turns remain outside this workload.
+
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
 subject, stores large input objects, and retains run enqueues with message-ID

@@ -402,6 +402,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededOutcomePersistence(loaded.Seed, &loaded)
 	case "worker_execution_5":
 		replayed, err = runSeededWorkerExecution(loaded.Seed, &loaded)
+	case "worker_signal_execution":
+		replayed, err = runSeededWorkerSignalExecution(loaded.Seed, &loaded)
 	case "timer_scan_20":
 		replayed, err = runSeededTimerScan(loaded.Seed, &loaded)
 	case "reconcile_loop_20":
