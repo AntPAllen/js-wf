@@ -203,6 +203,9 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 		if outcome.Error == client.ErrCancelled.Error() {
 			return replayCancellation(bundle, handler)
 		}
+		if len(outcome.LimitRequest) != 0 {
+			return replayJournalLimit(bundle, handler, outcome)
+		}
 	}
 	journalBytes, err := json.Marshal(bundle.Journal)
 	if err != nil {
@@ -273,6 +276,31 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 	}
 	report.Status, report.Result = "completed", result
 	return report, nil
+}
+
+// The worker retains the attempted request in Failed when the journal has
+// room for a terminal record but not another step. Substitute that request
+// for Failed during offline replay: the handler must reach the same request,
+// then stop at the pending effect without executing it.
+func replayJournalLimit(bundle replayBundle, handler func(*wf.Context, json.RawMessage) (json.RawMessage, error), outcome wf.Outcome) (replayReport, error) {
+	if outcome.Error != journal.ErrTooLong.Error() || outcome.InvSeq != bundle.InvSeq || len(bundle.Journal) < 2 || !json.Valid(outcome.LimitRequest) {
+		return replayReport{}, fmt.Errorf("invalid journal-limit failure")
+	}
+	records := append([]journal.Record(nil), bundle.Journal...)
+	records[len(records)-1].Kind = journal.StepRequested
+	records[len(records)-1].Payload = outcome.LimitRequest
+	journalBytes, err := json.Marshal(records)
+	if err != nil {
+		return replayReport{}, err
+	}
+	var observed wf.ReplayObservation
+	_, replayErr := wf.Replay(journalBytes, func(c *wf.Context) (json.RawMessage, error) {
+		return handler(c, bundle.Input)
+	}, wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects, Observation: &observed})
+	if !errors.Is(replayErr, wf.ErrReplayPendingStep) || observed.PlayedSteps != observed.RecordedSteps {
+		return replayReport{}, fmt.Errorf("handler replay differs from journal-limit request: error=%v steps=%d/%d", replayErr, observed.PlayedSteps, observed.RecordedSteps)
+	}
+	return replayReport{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, JournalEntries: len(bundle.Journal), Status: "failed", Error: outcome.Error}, nil
 }
 
 // replayCancellation checks the last handler suspension, then the worker's

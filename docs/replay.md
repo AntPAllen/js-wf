@@ -45,5 +45,8 @@ is missing or corrupt, or replay reaches a different outcome.
 For a cancellation, replay checks the last recorded handler suspension and
 the consumed cancellation signal. If cancellation arrived before the first
 handler run, it checks the journal and signal without calling the handler.
-Failures committed without a final handler execution for other reasons may
-still need a separate verification path.
+When the worker reaches the journal entry limit before recording a new step
+request, its terminal failure includes that attempted request. Replay checks
+that the handler reaches the same request, then stops before running its
+effect. Older failures without this metadata and limits reached outside a
+step request still need a separate verification path.

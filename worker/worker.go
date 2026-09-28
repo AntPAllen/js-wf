@@ -541,7 +541,11 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		// nonterminal entries also leave one slot for a durable failure.
 		if kind != journal.Completed && kind != journal.Failed &&
 			(uint64(len(records)) >= w.maxEntries-1 || kind == journal.StepRequested && uint64(len(records)) >= w.maxEntries-2) {
-			failed, _ := json.Marshal(wf.Outcome{InvSeq: input.Sequence, Error: journal.ErrTooLong.Error()})
+			outcome := wf.Outcome{InvSeq: input.Sequence, Error: journal.ErrTooLong.Error()}
+			if kind == journal.StepRequested {
+				outcome.LimitRequest = payload
+			}
+			failed, _ := json.Marshal(outcome)
 			if err := writeEntry(journal.Failed, failed); err != nil {
 				return err
 			}

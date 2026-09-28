@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 )
 
@@ -14,6 +15,10 @@ type Outcome struct {
 	ResultRef  string `json:"result_ref,omitempty"`
 	ResultHash string `json:"result_hash,omitempty"`
 	Error      string `json:"error,omitempty"`
+	// LimitRequest records the step request that could not fit in WF_JRN.
+	// Offline replay uses it to verify the handler's next step without
+	// executing its effect.
+	LimitRequest json.RawMessage `json:"limit_request,omitempty"`
 }
 
 const MaxInlineTerminal = 600 * 1024

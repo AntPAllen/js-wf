@@ -2,6 +2,8 @@ package worker
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"strings"
 	"sync/atomic"
@@ -82,6 +84,22 @@ func TestJournalLimitRecordsTerminalFailure(t *testing.T) {
 	}
 	if records[7].Kind != journal.Failed {
 		t.Fatalf("terminal kind=%s", records[7].Kind)
+	}
+	var outcome wf.Outcome
+	if err := json.Unmarshal(records[7].Payload, &outcome); err != nil {
+		t.Fatal(err)
+	}
+	var attempted struct {
+		Kind      string `json:"kind"`
+		Name      string `json:"name"`
+		InputHash string `json:"input_hash"`
+	}
+	if err := json.Unmarshal(outcome.LimitRequest, &attempted); err != nil {
+		t.Fatal(err)
+	}
+	inputHash := sha256.Sum256([]byte(`3`))
+	if outcome.Error != journal.ErrTooLong.Error() || attempted.Kind != "run" || attempted.Name != "step" || attempted.InputHash != hex.EncodeToString(inputHash[:]) {
+		t.Fatalf("journal limit metadata: outcome=%+v attempted=%+v", outcome, attempted)
 	}
 	if _, err := integrity.Check(ctx, js); err != nil {
 		t.Fatal(err)
