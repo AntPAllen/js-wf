@@ -42,6 +42,8 @@ func run(args []string, out io.Writer) error {
 	grace := flags.Duration("grace", 24*time.Hour, "purge tombstone grace")
 	rebuild := flags.Bool("rebuild", false, "rebuild the visibility view before listing")
 	attribute := flags.String("attribute", "", "filter list by a search attribute (key=value)")
+	pageLimit := flags.Int("limit", 0, "return a bounded visibility page (1-1000 rows)")
+	pageAfter := flags.String("after", "", "visibility cursor from a previous page")
 	postgresDSN := flags.String("postgres-dsn", os.Getenv("WF_POSTGRES_DSN"), "PostgreSQL visibility connection string")
 	cursor := flags.Uint64("cursor", 1, "scan starting stream sequence")
 	budget := flags.Int("budget", 100, "scan sequence budget")
@@ -253,6 +255,9 @@ func run(args []string, out io.Writer) error {
 			if len(command) > 2 {
 				return errors.New("usage: wf list [status]")
 			}
+			if *pageLimit < 0 || *pageAfter != "" && *pageLimit == 0 {
+				return errors.New("list requires -limit 1..1000 when using -after")
+			}
 			if *rebuild {
 				if err := projection.Rebuild(ctx); err != nil {
 					return err
@@ -261,6 +266,24 @@ func run(args []string, out io.Writer) error {
 			status := ""
 			if len(command) == 2 {
 				status = command[1]
+			}
+			if *pageLimit > 0 {
+				if *attribute != "" {
+					key, value, found := strings.Cut(*attribute, "=")
+					if !found {
+						return errors.New("attribute filter must be key=value")
+					}
+					page, err := projection.ListByAttributePage(ctx, key, value, status, *pageAfter, *pageLimit)
+					if err != nil {
+						return err
+					}
+					return encode(page)
+				}
+				page, err := projection.ListPage(ctx, status, *pageAfter, *pageLimit)
+				if err != nil {
+					return err
+				}
+				return encode(page)
 			}
 			var rows []visibility.Row
 			var err error

@@ -33,7 +33,8 @@ func TestPostgresVisibilityProjection(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer db.Close()
-	p, err := visibility.New(ctx, all[0], visibility.WithPostgres(&visibility.PostgresStore{DB: db}))
+	store := &visibility.PostgresStore{DB: db}
+	p, err := visibility.New(ctx, all[0], visibility.WithPostgres(store))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,6 +52,40 @@ func TestPostgresVisibilityProjection(t *testing.T) {
 	row, err := p.Get(ctx, typ, id)
 	if err != nil || row.Status != "queued" {
 		t.Fatalf("queued row=%+v err=%v", row, err)
+	}
+	for _, extra := range []visibility.Row{
+		{Type: typ, ID: "postgres-a", Status: "queued", Attributes: map[string]string{"team": "alpha"}},
+		{Type: typ, ID: "postgres-z", Status: "queued", Attributes: map[string]string{"team": "alpha"}},
+	} {
+		if err := store.Put(ctx, extra, "test-page"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var ids []string
+	for cursor := ""; ; {
+		page, err := p.ListPage(ctx, "queued", cursor, 1)
+		if err != nil || len(page.Rows) != 1 {
+			t.Fatalf("page=%+v err=%v", page, err)
+		}
+		ids = append(ids, page.Rows[0].ID)
+		if page.Next == "" {
+			break
+		}
+		cursor = page.Next
+	}
+	if len(ids) != 3 || ids[0] != "postgres-a" || ids[1] != id || ids[2] != "postgres-z" {
+		t.Fatalf("paged ids=%v", ids)
+	}
+	first, err := p.ListByAttributePage(ctx, "team", "alpha", "queued", "", 1)
+	if err != nil || len(first.Rows) != 1 || first.Rows[0].ID != "postgres-a" || first.Next == "" {
+		t.Fatalf("attribute page=%+v err=%v", first, err)
+	}
+	second, err := p.ListByAttributePage(ctx, "team", "alpha", "queued", first.Next, 1)
+	if err != nil || len(second.Rows) != 1 || second.Rows[0].ID != "postgres-z" || second.Next != "" {
+		t.Fatalf("attribute next=%+v err=%v", second, err)
+	}
+	if err := p.Rebuild(ctx); err != nil {
+		t.Fatal(err)
 	}
 	w, err := worker.New(ctx, all[1], "pg-visibility-worker", map[string]worker.Handler{typ: func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
 		if err := c.SetSearchAttributes(map[string]string{"team": "alpha"}); err != nil {

@@ -126,6 +126,10 @@ func TestOperatorCommands(t *testing.T) {
 	if err := json.Unmarshal(call("-rebuild", "list", "completed"), &rows); err != nil || len(rows) != 1 || rows[0].ID != id {
 		t.Fatalf("list=%+v err=%v", rows, err)
 	}
+	var page visibility.Page
+	if err := json.Unmarshal(call("-limit", "1", "list", "completed"), &page); err != nil || len(page.Rows) != 1 || page.Rows[0].ID != id || page.Next != "" {
+		t.Fatalf("list page=%+v err=%v", page, err)
+	}
 	var lag struct {
 		Pending uint64 `json:"pending"`
 	}

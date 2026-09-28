@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 // PostgresStore is the large-deployment visibility sink. It stores the same
@@ -117,6 +118,36 @@ func (s *PostgresStore) ListByAttribute(ctx context.Context, key, value, status 
 		query = `SELECT row_data FROM wf_visibility WHERE attributes @> $1::jsonb AND status=$2 ORDER BY type, id`
 		args = append(args, status)
 	}
+	return s.queryRows(ctx, query, args...)
+}
+
+// QueryPage uses the primary-key order as a seek cursor. LIMIT is applied by
+// PostgreSQL before rows are transferred to the caller.
+func (s *PostgresStore) QueryPage(ctx context.Context, status string, attributes map[string]string, afterType, afterID string, limit int) ([]Row, error) {
+	query := `SELECT row_data FROM wf_visibility`
+	conditions := make([]string, 0, 3)
+	args := make([]any, 0, 6)
+	if afterType != "" {
+		conditions = append(conditions, fmt.Sprintf(`(type, id) > ($%d, $%d)`, len(args)+1, len(args)+2))
+		args = append(args, afterType, afterID)
+	}
+	if status != "" {
+		conditions = append(conditions, fmt.Sprintf(`status = $%d`, len(args)+1))
+		args = append(args, status)
+	}
+	if attributes != nil {
+		filter, err := json.Marshal(attributes)
+		if err != nil {
+			return nil, err
+		}
+		conditions = append(conditions, fmt.Sprintf(`attributes @> $%d::jsonb`, len(args)+1))
+		args = append(args, string(filter))
+	}
+	if len(conditions) > 0 {
+		query += ` WHERE ` + strings.Join(conditions, ` AND `)
+	}
+	query += fmt.Sprintf(` ORDER BY type, id LIMIT $%d`, len(args)+1)
+	args = append(args, limit)
 	return s.queryRows(ctx, query, args...)
 }
 
