@@ -411,6 +411,8 @@ func TestReplayFaultTrace(t *testing.T) {
 		replayed, err = runSeededTimerSchedule(loaded.Seed, &loaded)
 	case "fallback_timer_pipeline_20":
 		replayed, err = runSeededFallbackPipeline(loaded.Seed, &loaded)
+	case "fallback_reconcile_loop_20":
+		replayed, err = runSeededFallbackLoop(loaded.Seed, &loaded)
 	default:
 		t.Fatalf("unknown trace workload %q", loaded.Workload)
 	}

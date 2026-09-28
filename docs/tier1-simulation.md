@@ -187,6 +187,14 @@ time advances. The trace replays exactly across processes. The three-node
 timer contract now compares both failure cuts with a real stream, including
 duplicate wakeup suppression and deletion after a hidden acknowledgment.
 
+A separate 1,000-seed workload runs the same production fallback scanner
+inside the leased production reconciler loop. Each seed schedules 20 due
+fallback timers, injects one dropped or unacknowledged wakeup publish, one
+dropped or unacknowledged timer delete, and one dropped or unacknowledged
+cursor CAS. It then replaces the scanner. The persistent cursor advances,
+all 20 wakeups remain unique, and no fallback timer remains. Traces replay
+exactly, including from a saved file and across separate processes.
+
 The shared reconciler loop now has a narrow port for lease acquisition and
 renewal, cursor load and CAS save, and cadence waits. The model uses separate
 KV transports for the expiring lease and durable cursor. A 1,000-seed workload
