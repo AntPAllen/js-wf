@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"js-wf/client"
@@ -20,7 +21,7 @@ type TimerScan struct {
 }
 
 func NewTimerScan(js jetstream.JetStream) *TimerScan {
-	return NewTimerScanWithPort(jetStreamTimerScanPort{js: js, client: client.New(js), jrn: journal.New(js)})
+	return NewTimerScanWithPort(&jetStreamTimerScanPort{js: js, client: client.New(js), jrn: journal.New(js)})
 }
 
 // TimerScanPort contains the retained invocation and journal reads and the
@@ -40,18 +41,34 @@ type jetStreamTimerScanPort struct {
 	js     jetstream.JetStream
 	client *client.Client
 	jrn    *journal.Store
+	mu     sync.Mutex
+	inv    jetstream.Stream
 }
 
-func (p jetStreamTimerScanPort) GetInvocation(ctx context.Context, sequence uint64) (*jetstream.RawStreamMsg, error) {
+func (p *jetStreamTimerScanPort) stream(ctx context.Context) (jetstream.Stream, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.inv != nil {
+		return p.inv, nil
+	}
 	stream, err := p.js.Stream(ctx, "WF_INV")
+	if err != nil {
+		return nil, err
+	}
+	p.inv = stream
+	return stream, nil
+}
+
+func (p *jetStreamTimerScanPort) GetInvocation(ctx context.Context, sequence uint64) (*jetstream.RawStreamMsg, error) {
+	stream, err := p.stream(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return stream.GetMsg(ctx, sequence)
 }
 
-func (p jetStreamTimerScanPort) LastInvocationSequence(ctx context.Context) (uint64, error) {
-	stream, err := p.js.Stream(ctx, "WF_INV")
+func (p *jetStreamTimerScanPort) LastInvocationSequence(ctx context.Context) (uint64, error) {
+	stream, err := p.stream(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -62,12 +79,12 @@ func (p jetStreamTimerScanPort) LastInvocationSequence(ctx context.Context) (uin
 	return info.State.LastSeq, nil
 }
 
-func (p jetStreamTimerScanPort) ReadJournal(ctx context.Context, typ, id string) ([]journal.Record, error) {
+func (p *jetStreamTimerScanPort) ReadJournal(ctx context.Context, typ, id string) ([]journal.Record, error) {
 	records, _, err := p.jrn.Read(ctx, typ, id)
 	return records, err
 }
 
-func (p jetStreamTimerScanPort) EnqueueTimer(ctx context.Context, typ, id string, sequence uint64) error {
+func (p *jetStreamTimerScanPort) EnqueueTimer(ctx context.Context, typ, id string, sequence uint64) error {
 	return p.client.Enqueue(ctx, typ, id, fmt.Sprintf("timer-reconcile:%s:%s:%d", typ, id, sequence))
 }
 

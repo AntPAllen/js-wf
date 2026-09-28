@@ -8,7 +8,7 @@ The `d95d9f5` and `23a1a50` cluster CI jobs failed because an injected-rejection
 
 The seeded client-to-scanner-to-worker signal pipeline now sends each worker `SignalConsumed` append through production `journal.Store.Append` and the same in-memory stream model used by journal fault tests. Each seed loses one committed journal acknowledgment at a chosen signal, reloads the retained journal as a redelivered worker would, and drains the rest. It compares every retained stream sequence and payload with the records used for consumed-signal retry and worker replay.
 
-The production timer repair scanner now has a narrow transport port shared with the invocation, journal, and run-queue model. A 1,000-seed workload covers due and future timers, completed and terminal journals, invocation holes, dry runs, repeat scans, and uncertain wakeup enqueues; a three-node contract compares model and real outcomes and retained run counts, with three normal repeats passed. Native scheduled delivery and the leased scanner loop still need integrated simulation.
+The production timer repair scanner now has a narrow transport port shared with the invocation, journal, and run-queue model. A 1,000-seed workload covers due and future timers, completed and terminal journals, invocation holes, dry runs, repeat scans, and uncertain wakeup enqueues; a three-node contract compares model and real outcomes and retained run counts, with three normal repeats passed. Its production adapter caches the `WF_INV` stream handle; the opt-in 200-missing-schedule recovery test passed after that change. Native scheduled delivery and the leased scanner loop still need integrated simulation.
 
 | Phase | Implemented and checked | Still required |
 | --- | --- | --- |
