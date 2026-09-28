@@ -173,7 +173,11 @@ func runSeededSuspendedScan(seed int64, replay *Trace) (trace Trace, runErr erro
 	if err != nil || len(report.Missing) != 0 {
 		return trace, fmt.Errorf("seed %d suspended liveness: enabled=%d waiting=%v missing=%v err=%v", seed, report.Enabled, report.Waiting, report.Missing, err)
 	}
-	schedule.RecordTransport(TransportEvent{Operation: "check_suspended_liveness", Sequence: uint64(report.Enabled), Outcome: "ok", AtMillis: schedule.NowMillis()})
+	waiting, err := json.Marshal(report.Waiting)
+	if err != nil {
+		return trace, err
+	}
+	schedule.RecordTransport(TransportEvent{Operation: "check_suspended_liveness", Sequence: uint64(report.Enabled), DataSHA256: digest(waiting), Outcome: "ok", AtMillis: schedule.NowMillis()})
 	if err := schedule.Finish(); err != nil {
 		return trace, err
 	}
