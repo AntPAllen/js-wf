@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -166,5 +167,69 @@ func TestPostgresVisibilityProjection(t *testing.T) {
 	rows, err = p.ListByAttribute(ctx, "team", "alpha", "")
 	if err != nil || len(rows) != 0 {
 		t.Fatalf("stale attribute rows=%+v err=%v", rows, err)
+	}
+}
+
+func TestPostgresVisibilityWriterSessionLoss(t *testing.T) {
+	dsn := os.Getenv("WF_TEST_POSTGRES_DSN")
+	if dsn == "" {
+		t.Skip("set WF_TEST_POSTGRES_DSN for PostgreSQL integration test")
+	}
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	defer cancel()
+	firstDB, err := sql.Open("pgx", dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer firstDB.Close()
+	secondDB, err := sql.Open("pgx", dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer secondDB.Close()
+	first, err := visibility.New(ctx, all[0], visibility.WithPostgres(&visibility.PostgresStore{DB: firstDB}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := visibility.New(ctx, all[1], visibility.WithPostgres(&visibility.PostgresStore{DB: secondDB}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	runCtx, stop := context.WithCancel(ctx)
+	defer stop()
+	done := make(chan error, 1)
+	go func() { done <- first.Run(runCtx) }()
+	var pid int
+	for ctx.Err() == nil {
+		err = secondDB.QueryRowContext(ctx, `SELECT pid FROM pg_locks WHERE locktype='advisory' AND mode='ExclusiveLock' AND granted AND database=(SELECT oid FROM pg_database WHERE datname=current_database()) LIMIT 1`).Scan(&pid)
+		if err == nil {
+			break
+		}
+		if !errors.Is(err, sql.ErrNoRows) {
+			t.Fatal(err)
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatal("PostgreSQL writer did not acquire advisory lock")
+	}
+	var terminated bool
+	if err := secondDB.QueryRowContext(ctx, `SELECT pg_terminate_backend($1)`, pid).Scan(&terminated); err != nil {
+		t.Skipf("terminating a PostgreSQL backend requires an administrative test role: %v", err)
+	}
+	if !terminated {
+		t.Fatal("PostgreSQL did not terminate the writer lock session")
+	}
+	select {
+	case err := <-done:
+		if err == nil || !strings.Contains(err.Error(), "writer lock session lost") {
+			t.Fatalf("writer after lock loss: %v", err)
+		}
+	case <-ctx.Done():
+		t.Fatal("writer did not exit after lock session loss")
+	}
+	if err := second.Rebuild(ctx); err != nil {
+		t.Fatalf("replacement writer rebuild: %v", err)
 	}
 }
