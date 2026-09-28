@@ -188,7 +188,19 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 	}
 	if tail.Kind == journal.Failed {
 		var outcome wf.Outcome
-		if json.Unmarshal(tail.Payload, &outcome) == nil && outcome.Error == client.ErrCancelled.Error() {
+		if err := json.Unmarshal(tail.Payload, &outcome); err != nil {
+			return report, fmt.Errorf("decode failed outcome: %w", err)
+		}
+		if len(bundle.Journal) > 1 && bundle.Journal[len(bundle.Journal)-2].Kind == journal.Attempt {
+			attempt, err := journal.DecodeAttempt(bundle.Journal[len(bundle.Journal)-2].Payload)
+			if err != nil {
+				return report, fmt.Errorf("decode final panic attempt: %w", err)
+			}
+			if attempt.Error != outcome.Error {
+				return report, fmt.Errorf("final panic attempt differs from terminal failure: attempt=%q terminal=%q", attempt.Error, outcome.Error)
+			}
+		}
+		if outcome.Error == client.ErrCancelled.Error() {
 			return replayCancellation(bundle, handler)
 		}
 	}

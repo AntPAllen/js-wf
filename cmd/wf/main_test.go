@@ -562,6 +562,39 @@ func TestOperatorReplayFailedAndSuspended(t *testing.T) {
 	}
 	check("failed-step", "FailWorkflow", "failed", "boom")
 	check("failed-panic", "PanicWorkflow", "failed", "workflow panic: boom")
+	// The final Attempt can survive a crash and be turned into Failed by a
+	// replacement worker without another handler execution.
+	const recoveredID = "recovered-final-panic"
+	handle, err := client.New(js).Start(ctx, typ, recoveredID, []byte(`null`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	panicJournal := journal.New(js)
+	var panicTail uint64
+	for count := 0; count <= 3; count++ {
+		entry := journal.Entry{Epoch: 1, Index: uint64(count), Kind: journal.Started}
+		if count > 0 {
+			entry.Kind = journal.Attempt
+			entry.Payload, _ = json.Marshal(journal.AttemptPayload{Count: count, Error: "workflow panic: boom"})
+		}
+		panicTail, err = panicJournal.Append(ctx, typ, recoveredID, entry, panicTail)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	failedOutcome, _ := json.Marshal(wf.Outcome{InvSeq: handle.InvSeq, Error: "workflow panic: boom"})
+	if _, err := panicJournal.Append(ctx, typ, recoveredID, journal.Entry{Epoch: 2, Index: 4, Kind: journal.Failed, Payload: failedOutcome}, panicTail); err != nil {
+		t.Fatal(err)
+	}
+	check(recoveredID, "PanicWorkflow", "failed", "workflow panic: boom")
+	corruptPanic, err := fetchReplayBundle(ctx, js, typ, recoveredID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	corruptPanic.Journal[3].Payload, _ = json.Marshal(journal.AttemptPayload{Count: 3, Error: "workflow panic: changed"})
+	if _, err := runReplayBundle(corruptPanic, pluginPath, "PanicWorkflow"); err == nil || !strings.Contains(err.Error(), "final panic attempt differs") {
+		t.Fatalf("mismatched final panic attempt: %v", err)
+	}
 	check("waiting-signal", "WaitSignalWorkflow", "suspended", "signal:go")
 	check("waiting-timer", "WaitTimerWorkflow", "suspended", "timer:later")
 	if _, err := os.Stat(marker); !errors.Is(err, os.ErrNotExist) {
