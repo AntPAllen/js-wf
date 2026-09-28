@@ -4,14 +4,32 @@ package sim
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"math"
 	"math/rand"
 	"os"
 	"reflect"
 	"sort"
 )
 
-const TraceVersion = 2
+const TraceVersion = 3
+const DefaultMaxSteps = 100000
+
+var ErrStepLimit = errors.New("simulation step limit reached")
+
+type StepLimitError struct {
+	Limit      int
+	AtMillis   int64
+	Enabled    []string
+	LastChosen string
+}
+
+func (e *StepLimitError) Error() string {
+	return fmt.Sprintf("%v after %d choices at virtual time %dms; last=%q pending=%v", ErrStepLimit, e.Limit, e.AtMillis, e.LastChosen, e.Enabled)
+}
+
+func (*StepLimitError) Unwrap() error { return ErrStepLimit }
 
 type Decision struct {
 	AtMillis int64    `json:"at_ms"`
@@ -33,16 +51,29 @@ type Trace struct {
 	Version   int              `json:"version"`
 	Seed      int64            `json:"seed"`
 	Workload  string           `json:"workload"`
+	StepLimit int              `json:"step_limit,omitempty"`
 	Decisions []Decision       `json:"decisions"`
 	Transport []TransportEvent `json:"transport"`
 }
 
-func (t Trace) Marshal() ([]byte, error) {
-	if t.Version != TraceVersion {
-		return nil, fmt.Errorf("unsupported simulation trace version %d", t.Version)
+func validTraceVersion(version int) bool { return version == 2 || version == TraceVersion }
+
+func (t Trace) validate() error {
+	if !validTraceVersion(t.Version) {
+		return fmt.Errorf("unsupported simulation trace version %d", t.Version)
 	}
 	if t.Workload == "" {
-		return nil, fmt.Errorf("simulation trace has no workload")
+		return fmt.Errorf("simulation trace has no workload")
+	}
+	if t.Version == TraceVersion && t.StepLimit < 1 {
+		return fmt.Errorf("simulation trace has invalid step limit %d", t.StepLimit)
+	}
+	return nil
+}
+
+func (t Trace) Marshal() ([]byte, error) {
+	if err := t.validate(); err != nil {
+		return nil, err
 	}
 	return json.MarshalIndent(t, "", "  ")
 }
@@ -64,11 +95,8 @@ func LoadTrace(path string) (Trace, error) {
 	if err := json.Unmarshal(data, &trace); err != nil {
 		return Trace{}, err
 	}
-	if trace.Version != TraceVersion {
-		return Trace{}, fmt.Errorf("unsupported simulation trace version %d", trace.Version)
-	}
-	if trace.Workload == "" {
-		return Trace{}, fmt.Errorf("simulation trace has no workload")
+	if err := trace.validate(); err != nil {
+		return Trace{}, err
 	}
 	return trace, nil
 }
@@ -81,20 +109,37 @@ type Scheduler struct {
 	replay   *Trace
 	position int
 	now      int64
+	maxSteps int
 }
 
 func NewScheduler(seed int64) *Scheduler {
-	return &Scheduler{rng: rand.New(rand.NewSource(seed)), trace: Trace{Version: TraceVersion, Seed: seed, Decisions: []Decision{}, Transport: []TransportEvent{}}}
+	return &Scheduler{rng: rand.New(rand.NewSource(seed)), trace: Trace{Version: TraceVersion, Seed: seed, StepLimit: DefaultMaxSteps, Decisions: []Decision{}, Transport: []TransportEvent{}}, maxSteps: DefaultMaxSteps}
+}
+
+// SetMaxSteps bounds scheduler choices, including cooperative actor turns.
+// Use the same limit when generating and replaying a trace.
+func (s *Scheduler) SetMaxSteps(limit int) error {
+	if limit < 1 || s.position > limit {
+		return fmt.Errorf("invalid simulation step limit %d", limit)
+	}
+	if s.replay != nil && s.replay.StepLimit != 0 && s.replay.StepLimit != limit {
+		return fmt.Errorf("simulation step limit %d differs from trace %d", limit, s.replay.StepLimit)
+	}
+	s.maxSteps = limit
+	s.trace.StepLimit = limit
+	return nil
 }
 
 func ReplayScheduler(trace Trace) (*Scheduler, error) {
-	if trace.Version != TraceVersion {
-		return nil, fmt.Errorf("unsupported simulation trace version %d", trace.Version)
-	}
-	if trace.Workload == "" {
-		return nil, fmt.Errorf("simulation trace has no workload")
+	if err := trace.validate(); err != nil {
+		return nil, err
 	}
 	s := NewScheduler(trace.Seed)
+	s.trace.Version = trace.Version
+	s.trace.StepLimit = trace.StepLimit
+	if trace.StepLimit > 0 {
+		s.maxSteps = trace.StepLimit
+	}
 	s.replay = &trace
 	return s, nil
 }
@@ -113,8 +158,8 @@ func (s *Scheduler) SetWorkload(name string) error {
 func (s *Scheduler) NowMillis() int64 { return s.now }
 
 func (s *Scheduler) AdvanceMillis(delay int64) error {
-	if delay < 0 {
-		return fmt.Errorf("negative virtual delay")
+	if delay < 0 || s.now > math.MaxInt64-delay {
+		return fmt.Errorf("invalid virtual delay %dms at %dms", delay, s.now)
 	}
 	s.now += delay
 	return nil
@@ -130,6 +175,13 @@ func (s *Scheduler) Choose(enabled []string) (string, error) {
 		if choice == "" || i > 0 && choice == choices[i-1] {
 			return "", fmt.Errorf("invalid enabled action %q", choice)
 		}
+	}
+	if s.position >= s.maxSteps {
+		last := ""
+		if len(s.trace.Decisions) != 0 {
+			last = s.trace.Decisions[len(s.trace.Decisions)-1].Chosen
+		}
+		return "", &StepLimitError{Limit: s.maxSteps, AtMillis: s.now, Enabled: choices, LastChosen: last}
 	}
 	chosen := ""
 	if s.replay != nil {

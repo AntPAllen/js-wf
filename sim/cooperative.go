@@ -3,8 +3,22 @@ package sim
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 )
+
+type StallError struct {
+	Cause      error
+	WaitingFor string
+	Pending    []string
+	Unfinished []string
+}
+
+func (e *StallError) Error() string {
+	return fmt.Sprintf("simulation stalled waiting for %q: pending=%v unfinished=%v: %v", e.WaitingFor, e.Pending, e.Unfinished, e.Cause)
+}
+
+func (e *StallError) Unwrap() error { return e.Cause }
 
 // YieldFunc makes one shared-state operation available to the scheduler.
 // work runs only when that actor's turn is chosen.
@@ -69,7 +83,19 @@ func RunCooperative(ctx context.Context, schedule *Scheduler, actors []Cooperati
 		for {
 			select {
 			case <-ctx.Done():
-				return ctx.Err()
+				pendingActions := make([]string, 0, len(pending))
+				for _, turn := range pending {
+					pendingActions = append(pendingActions, turn.actor+":"+turn.action)
+				}
+				sort.Strings(pendingActions)
+				unfinished := make([]string, 0, len(actors)-len(results))
+				for name := range seen {
+					if _, finished := results[name]; !finished {
+						unfinished = append(unfinished, name)
+					}
+				}
+				sort.Strings(unfinished)
+				return &StallError{Cause: ctx.Err(), WaitingFor: target, Pending: pendingActions, Unfinished: unfinished}
 			case turn := <-turns:
 				if _, finished := results[turn.actor]; finished {
 					return fmt.Errorf("finished actor %q yielded again", turn.actor)

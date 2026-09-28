@@ -10,6 +10,12 @@ after commit, an unchanged-tail CAS rejection, or a competing commit.
 action, virtual time, and transport calls in a versioned JSON trace. Replay
 rejects an unreachable choice or a changed transport transcript. Waiting
 between CAS retries advances virtual time; no wall-clock sleep is needed.
+Version 3 traces record a default 100,000-choice limit. Reaching it reports
+the last choice, pending actions, and virtual time; a stalled cooperative
+actor reports unfinished actors when its caller context expires. Version 2
+traces still replay with the default limit. Virtual-clock overflow fails
+closed. These diagnostics distinguish a bounded livelock or stalled actor
+from a clean seed; shrinking a failure trace is still outstanding.
 `sim.RunAppendActors` also yields two real journal append calls at each
 transport operation, so 100 seeded two-writer CAS races explore distinct
 interleavings without relying on Go goroutine timing. Every run retains one
