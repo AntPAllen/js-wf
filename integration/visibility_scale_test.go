@@ -120,9 +120,10 @@ func TestProjectionRecoversFiftyThousandInvocations(t *testing.T) {
 	}
 	workerCtx, stopWorkers := context.WithCancel(ctx)
 	workerDone := make(chan error, 6)
+	startedWorkers := 0
 	defer func() {
 		stopWorkers()
-		for i := 0; i < 6; i++ {
+		for i := 0; i < startedWorkers; i++ {
 			if err := <-workerDone; err != nil && !errors.Is(err, context.Canceled) {
 				t.Errorf("worker exit: %v", err)
 			}
@@ -136,6 +137,7 @@ func TestProjectionRecoversFiftyThousandInvocations(t *testing.T) {
 			t.Fatal(err)
 		}
 		go func(index int) { workerDone <- w.RunAssigned(workerCtx, index, 6) }(index)
+		startedWorkers++
 	}
 	run, err := all[0].Stream(ctx, "WF_RUN")
 	if err != nil {
