@@ -176,6 +176,17 @@ acknowledgments, hidden acknowledgments after commit, and one routed target
 per native timer. Route partition timing and full worker timer replay remain
 outside this model.
 
+The fallback timer scanner now has a narrow retained-read, state-read,
+wakeup-publish, and delete port. Another 1,000-seed pipeline publishes 20
+fallback timers through the worker's production timer path and scans them
+through production `FallbackTimerScan.Scan`. Due, future, purging, and
+tombstoned generations are mixed. One wakeup publish loses its acknowledgment,
+then one timer delete loses its acknowledgment; retries retain one wakeup per
+eligible timer, remove retired records, and leave future timers until virtual
+time advances. The trace replays exactly across processes. The three-node
+timer contract now compares both failure cuts with a real stream, including
+duplicate wakeup suppression and deletion after a hidden acknowledgment.
+
 The shared reconciler loop now has a narrow port for lease acquisition and
 renewal, cursor load and CAS save, and cadence waits. The model uses separate
 KV transports for the expiring lease and durable cursor. A 1,000-seed workload

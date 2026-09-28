@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"js-wf/reconcile"
 	"js-wf/worker"
 
 	"github.com/nats-io/nats.go"
@@ -31,15 +32,21 @@ type TimerScheduleTransport struct {
 	faults      []AppendFault
 	native      []timerPublication
 	fallback    []Message
+	deleted     map[uint64]bool
+	state       map[string][]byte
+	wakeupIDs   map[string]int64
+	wakeupFault []AppendFault
+	deleteFault []AppendFault
 	runs        []Message
 	streamSeq   uint64
 	fallbackSeq uint64
 }
 
 var _ worker.TimerSchedulePort = (*TimerScheduleTransport)(nil)
+var _ reconcile.FallbackTimerScanPort = (*TimerScheduleTransport)(nil)
 
 func NewTimerScheduleTransport(schedule *Scheduler, base time.Time) *TimerScheduleTransport {
-	return &TimerScheduleTransport{schedule: schedule, base: base, window: (2 * time.Minute).Milliseconds(), ids: map[string]int64{}}
+	return &TimerScheduleTransport{schedule: schedule, base: base, window: (2 * time.Minute).Milliseconds(), ids: map[string]int64{}, deleted: map[uint64]bool{}, state: map[string][]byte{}, wakeupIDs: map[string]int64{}}
 }
 
 func (m *TimerScheduleTransport) QueueFault(kind AppendFault) error {
@@ -175,6 +182,134 @@ func (m *TimerScheduleTransport) FallbackRecords() []Message {
 		out[i].Data = append([]byte(nil), out[i].Data...)
 	}
 	return out
+}
+
+func (m *TimerScheduleTransport) RetainedFallbackRecords() []Message {
+	var out []Message
+	for _, message := range m.fallback {
+		if !m.deleted[message.Sequence] {
+			out = append(out, Message{Subject: message.Subject, Sequence: message.Sequence, Data: append([]byte(nil), message.Data...)})
+		}
+	}
+	return out
+}
+
+func (m *TimerScheduleTransport) SetState(key string, value []byte) {
+	m.state[key] = append([]byte(nil), value...)
+	m.event(TransportEvent{Operation: "set_timer_state", Subject: key, DataSHA256: digest(value), Outcome: "ok"})
+}
+
+func (m *TimerScheduleTransport) QueueWakeupFault(kind AppendFault) error {
+	if kind != DropBeforeCommit && kind != LoseAckAfterCommit {
+		return fmt.Errorf("invalid fallback wakeup fault %q", kind)
+	}
+	m.wakeupFault = append(m.wakeupFault, kind)
+	return nil
+}
+
+func (m *TimerScheduleTransport) QueueDeleteFault(kind AppendFault) error {
+	if kind != DropBeforeCommit && kind != LoseAckAfterCommit {
+		return fmt.Errorf("invalid timer delete fault %q", kind)
+	}
+	m.deleteFault = append(m.deleteFault, kind)
+	return nil
+}
+
+func (m *TimerScheduleTransport) LastTimerSequence(ctx context.Context) (uint64, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+	m.event(TransportEvent{Operation: "timer_stream_info", Sequence: m.fallbackSeq, Outcome: "ok"})
+	return m.fallbackSeq, nil
+}
+
+func (m *TimerScheduleTransport) GetTimer(ctx context.Context, sequence uint64) (*jetstream.RawStreamMsg, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if sequence == 0 || sequence > m.fallbackSeq || m.deleted[sequence] {
+		m.event(TransportEvent{Operation: "get_fallback_timer", Sequence: sequence, Outcome: "not_found"})
+		return nil, jetstream.ErrMsgNotFound
+	}
+	message := m.fallback[sequence-1]
+	m.event(TransportEvent{Operation: "get_fallback_timer", Subject: message.Subject, Sequence: sequence, DataSHA256: digest(message.Data), Outcome: "ok"})
+	return &jetstream.RawStreamMsg{Subject: message.Subject, Sequence: message.Sequence, Data: append([]byte(nil), message.Data...)}, nil
+}
+
+func (m *TimerScheduleTransport) StateValue(ctx context.Context, key string) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	value, exists := m.state[key]
+	if !exists {
+		m.event(TransportEvent{Operation: "get_timer_state", Subject: key, Outcome: "not_found"})
+		return nil, jetstream.ErrKeyNotFound
+	}
+	m.event(TransportEvent{Operation: "get_timer_state", Subject: key, DataSHA256: digest(value), Outcome: "ok"})
+	return append([]byte(nil), value...), nil
+}
+
+func (m *TimerScheduleTransport) PublishWakeup(ctx context.Context, message *nats.Msg, messageID string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	var fault AppendFault
+	if len(m.wakeupFault) != 0 {
+		fault, m.wakeupFault = m.wakeupFault[0], m.wakeupFault[1:]
+	}
+	event := TransportEvent{Operation: "publish_fallback_wakeup", Subject: message.Subject, DataSHA256: digest(message.Data)}
+	if fault == DropBeforeCommit {
+		event.Outcome = string(fault)
+		m.event(event)
+		return ErrTransportLost
+	}
+	if previous, exists := m.wakeupIDs[messageID]; exists && m.schedule.NowMillis()-previous < m.window {
+		event.Outcome = "duplicate"
+		m.event(event)
+		return nil
+	}
+	m.streamSeq++
+	m.runs = append(m.runs, Message{Subject: message.Subject, Sequence: m.streamSeq, Data: append([]byte(nil), message.Data...)})
+	m.wakeupIDs[messageID] = m.schedule.NowMillis()
+	event.Sequence = m.streamSeq
+	if fault == LoseAckAfterCommit {
+		event.Outcome = string(fault)
+		m.event(event)
+		return ErrTransportLost
+	}
+	event.Outcome = "ok"
+	m.event(event)
+	return nil
+}
+
+func (m *TimerScheduleTransport) DeleteTimer(ctx context.Context, sequence uint64) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	var fault AppendFault
+	if len(m.deleteFault) != 0 {
+		fault, m.deleteFault = m.deleteFault[0], m.deleteFault[1:]
+	}
+	event := TransportEvent{Operation: "delete_fallback_timer", Sequence: sequence}
+	if fault == DropBeforeCommit {
+		event.Outcome = string(fault)
+		m.event(event)
+		return ErrTransportLost
+	}
+	if sequence == 0 || sequence > m.fallbackSeq || m.deleted[sequence] {
+		event.Outcome = "not_found"
+		m.event(event)
+		return jetstream.ErrMsgNotFound
+	}
+	m.deleted[sequence] = true
+	if fault == LoseAckAfterCommit {
+		event.Outcome = string(fault)
+		m.event(event)
+		return ErrTransportLost
+	}
+	event.Outcome = "ok"
+	m.event(event)
+	return nil
 }
 
 func (m *TimerScheduleTransport) Runs() []Message {

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"js-wf/identity"
@@ -22,12 +23,100 @@ import (
 // of that boundary is safe because the wakeup has a stable message ID and the
 // worker treats duplicate wakeups as no-ops.
 type FallbackTimerScan struct {
-	js  jetstream.JetStream
-	Now func(context.Context) (time.Time, error)
+	port FallbackTimerScanPort
+	Now  func(context.Context) (time.Time, error)
+}
+
+// FallbackTimerScanPort is the retained timer, state, and run-publish boundary
+// used by the production fallback repair decision.
+type FallbackTimerScanPort interface {
+	LastTimerSequence(context.Context) (uint64, error)
+	GetTimer(context.Context, uint64) (*jetstream.RawStreamMsg, error)
+	StateValue(context.Context, string) ([]byte, error)
+	PublishWakeup(context.Context, *nats.Msg, string) error
+	DeleteTimer(context.Context, uint64) error
+}
+
+type jetStreamFallbackTimerScanPort struct {
+	js     jetstream.JetStream
+	mu     sync.Mutex
+	timers jetstream.Stream
+	state  jetstream.KeyValue
+}
+
+func (p *jetStreamFallbackTimerScanPort) timerStream(ctx context.Context) (jetstream.Stream, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.timers != nil {
+		return p.timers, nil
+	}
+	stream, err := p.js.Stream(ctx, "WF_TIMER")
+	if err == nil {
+		p.timers = stream
+	}
+	return stream, err
+}
+
+func (p *jetStreamFallbackTimerScanPort) stateBucket(ctx context.Context) (jetstream.KeyValue, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.state != nil {
+		return p.state, nil
+	}
+	state, err := p.js.KeyValue(ctx, "WF_STATE")
+	if err == nil {
+		p.state = state
+	}
+	return state, err
+}
+
+func (p *jetStreamFallbackTimerScanPort) LastTimerSequence(ctx context.Context) (uint64, error) {
+	stream, err := p.timerStream(ctx)
+	if err != nil {
+		return 0, err
+	}
+	info, err := stream.Info(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return info.State.LastSeq, nil
+}
+
+func (p *jetStreamFallbackTimerScanPort) GetTimer(ctx context.Context, sequence uint64) (*jetstream.RawStreamMsg, error) {
+	stream, err := p.timerStream(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return stream.GetMsg(ctx, sequence)
+}
+
+func (p *jetStreamFallbackTimerScanPort) StateValue(ctx context.Context, key string) ([]byte, error) {
+	state, err := p.stateBucket(ctx)
+	if err != nil {
+		return nil, err
+	}
+	entry, err := state.Get(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	return entry.Value(), nil
+}
+
+func (p *jetStreamFallbackTimerScanPort) PublishWakeup(ctx context.Context, message *nats.Msg, messageID string) error {
+	_, err := p.js.PublishMsg(ctx, message, jetstream.WithMsgID(messageID))
+	return err
+}
+
+func (p *jetStreamFallbackTimerScanPort) DeleteTimer(ctx context.Context, sequence uint64) error {
+	stream, err := p.timerStream(ctx)
+	if err != nil {
+		return err
+	}
+	return stream.DeleteMsg(ctx, sequence)
 }
 
 func NewFallbackTimerScan(js jetstream.JetStream) *FallbackTimerScan {
-	return &FallbackTimerScan{js: js, Now: func(ctx context.Context) (time.Time, error) {
+	return NewFallbackTimerScanWithPort(NewFallbackTimerScanPort(js), func(ctx context.Context) (time.Time, error) {
 		run, err := js.Stream(ctx, "WF_RUN")
 		if err != nil {
 			return time.Time{}, err
@@ -40,7 +129,15 @@ func NewFallbackTimerScan(js jetstream.JetStream) *FallbackTimerScan {
 			return time.Time{}, fmt.Errorf("server did not provide stream timestamp")
 		}
 		return info.TimeStamp, nil
-	}}
+	})
+}
+
+func NewFallbackTimerScanPort(js jetstream.JetStream) FallbackTimerScanPort {
+	return &jetStreamFallbackTimerScanPort{js: js}
+}
+
+func NewFallbackTimerScanWithPort(port FallbackTimerScanPort, now func(context.Context) (time.Time, error)) *FallbackTimerScan {
+	return &FallbackTimerScan{port: port, Now: now}
 }
 
 func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (ScanResult, error) {
@@ -50,15 +147,7 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 	if next == 0 {
 		next = 1
 	}
-	timers, err := s.js.Stream(ctx, "WF_TIMER")
-	if err != nil {
-		return ScanResult{}, err
-	}
-	info, err := timers.Info(ctx)
-	if err != nil {
-		return ScanResult{}, err
-	}
-	state, err := s.js.KeyValue(ctx, "WF_STATE")
+	last, err := s.port.LastTimerSequence(ctx)
 	if err != nil {
 		return ScanResult{}, err
 	}
@@ -68,11 +157,11 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 	}
 	result := ScanResult{NextSequence: next}
 	for scanned := 0; scanned < budget; scanned++ {
-		if next > info.State.LastSeq {
+		if next > last {
 			result.NextSequence = 1
 			return result, nil
 		}
-		message, err := timers.GetMsg(ctx, next)
+		message, err := s.port.GetTimer(ctx, next)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			next++
 			result.NextSequence = next
@@ -99,14 +188,14 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 		if json.Unmarshal(message.Data, &timer) != nil || timer.FireAt.IsZero() {
 			return result, fmt.Errorf("invalid fallback timer payload at %d", message.Sequence)
 		}
-		retired, err := fallbackTimerRetired(ctx, state, parts[2], parts[3], generation)
+		retired, err := fallbackTimerRetired(ctx, s.port, parts[2], parts[3], generation)
 		if err != nil {
 			return result, err
 		}
 		if retired {
 			result.Removed++
 			if !dryRun {
-				if err := timers.DeleteMsg(ctx, message.Sequence); err != nil {
+				if err := s.port.DeleteTimer(ctx, message.Sequence); err != nil {
 					return result, err
 				}
 			}
@@ -123,21 +212,21 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 		wakeup.Header.Set(identity.TimerInvSeqHeader, parts[4])
 		wakeup.Header.Set(identity.TimerStepHeader, parts[5])
 		messageID := fmt.Sprintf("fallback-timer:%s:%s:%d:%d", parts[2], parts[3], generation, step)
-		if _, err := s.js.PublishMsg(ctx, wakeup, jetstream.WithMsgID(messageID)); err != nil {
+		if err := s.port.PublishWakeup(ctx, wakeup, messageID); err != nil {
 			return result, err
 		}
-		if err := timers.DeleteMsg(ctx, message.Sequence); err != nil {
+		if err := s.port.DeleteTimer(ctx, message.Sequence); err != nil {
 			return result, err
 		}
 	}
 	return result, nil
 }
 
-func fallbackTimerRetired(ctx context.Context, state jetstream.KeyValue, typ, id string, generation uint64) (bool, error) {
+func fallbackTimerRetired(ctx context.Context, port FallbackTimerScanPort, typ, id string, generation uint64) (bool, error) {
 	key := identity.Key(typ, id)
-	purging, err := state.Get(ctx, "purging."+key)
+	purging, err := port.StateValue(ctx, "purging."+key)
 	if err == nil {
-		seq, parseErr := strconv.ParseUint(string(purging.Value()), 10, 64)
+		seq, parseErr := strconv.ParseUint(string(purging), 10, 64)
 		if parseErr != nil || seq == 0 {
 			return false, fmt.Errorf("invalid purge marker for %s", key)
 		}
@@ -147,14 +236,14 @@ func fallbackTimerRetired(ctx context.Context, state jetstream.KeyValue, typ, id
 	} else if !errors.Is(err, jetstream.ErrKeyNotFound) {
 		return false, err
 	}
-	value, err := state.Get(ctx, key)
+	value, err := port.StateValue(ctx, key)
 	if errors.Is(err, jetstream.ErrKeyNotFound) {
 		return false, nil
 	}
 	if err != nil {
 		return false, err
 	}
-	marker, tomb, err := retention.Decode(value.Value())
+	marker, tomb, err := retention.Decode(value)
 	if err != nil {
 		return false, err
 	}

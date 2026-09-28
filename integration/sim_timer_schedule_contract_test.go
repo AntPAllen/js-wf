@@ -10,6 +10,7 @@ import (
 
 	"js-wf/identity"
 	"js-wf/provision"
+	"js-wf/reconcile"
 	"js-wf/sim"
 	"js-wf/worker"
 
@@ -20,6 +21,30 @@ import (
 type hiddenTimerAckPort struct {
 	worker.TimerSchedulePort
 	used bool
+}
+
+type hiddenFallbackAckPort struct {
+	reconcile.FallbackTimerScanPort
+	publishHidden bool
+	deleteHidden  bool
+}
+
+func (p *hiddenFallbackAckPort) PublishWakeup(ctx context.Context, message *nats.Msg, messageID string) error {
+	err := p.FallbackTimerScanPort.PublishWakeup(ctx, message, messageID)
+	if err == nil && !p.publishHidden {
+		p.publishHidden = true
+		return nats.ErrTimeout
+	}
+	return err
+}
+
+func (p *hiddenFallbackAckPort) DeleteTimer(ctx context.Context, sequence uint64) error {
+	err := p.FallbackTimerScanPort.DeleteTimer(ctx, sequence)
+	if err == nil && !p.deleteHidden {
+		p.deleteHidden = true
+		return nats.ErrTimeout
+	}
+	return err
 }
 
 func (p *hiddenTimerAckPort) PublishFallback(ctx context.Context, subject string, payload []byte, messageID string) (bool, error) {
@@ -58,7 +83,8 @@ func TestSimTimerScheduleContractAgainstRealCluster(t *testing.T) {
 	}
 	base := time.Now().UTC()
 	fireAt := base.Add(2 * time.Second)
-	model := sim.NewTimerScheduleTransport(sim.NewScheduler(72), base)
+	clock := sim.NewScheduler(72)
+	model := sim.NewTimerScheduleTransport(clock, base)
 	realPort := worker.NewTimerSchedulePort(all[0])
 	var nativeIDs, fallbackIDs []string
 	for _, scenario := range []struct {
@@ -149,6 +175,53 @@ func TestSimTimerScheduleContractAgainstRealCluster(t *testing.T) {
 		}
 		if _, err := run.GetMsg(ctx, stored.Sequence+1, jetstream.WithGetMsgSubject(target)); !errors.Is(err, jetstream.ErrMsgNotFound) {
 			t.Fatalf("native target %s duplicated: %v", id, err)
+		}
+	}
+	realScanPort := reconcile.NewFallbackTimerScanPort(all[0])
+	hidden := &hiddenFallbackAckPort{FallbackTimerScanPort: realScanPort}
+	serverNow := func(ctx context.Context) (time.Time, error) {
+		info, err := run.Info(ctx)
+		if err != nil {
+			return time.Time{}, err
+		}
+		return info.TimeStamp, nil
+	}
+	realScan := reconcile.NewFallbackTimerScanWithPort(hidden, serverNow)
+	modelScan := reconcile.NewFallbackTimerScanWithPort(model, func(context.Context) (time.Time, error) {
+		return base.Add(time.Duration(clock.NowMillis()) * time.Millisecond), nil
+	})
+	if err := model.QueueWakeupFault(sim.LoseAckAfterCommit); err != nil {
+		t.Fatal(err)
+	}
+	if err := model.QueueDeleteFault(sim.LoseAckAfterCommit); err != nil {
+		t.Fatal(err)
+	}
+	for attempt := 0; attempt < 3; attempt++ {
+		modeled, modelErr := modelScan.Scan(ctx, 1, 10, false)
+		real, realErr := realScan.Scan(ctx, 1, 10, false)
+		if attempt < 2 {
+			if !errors.Is(modelErr, sim.ErrTransportLost) || !errors.Is(realErr, nats.ErrTimeout) || modeled.Reenqueued != 1 || real.Reenqueued != 1 {
+				t.Fatalf("fallback attempt %d model=%+v/%v real=%+v/%v", attempt, modeled, modelErr, real, realErr)
+			}
+		} else if modelErr != nil || realErr != nil || modeled.Reenqueued != 1 || real.Reenqueued != 1 || len(model.RetainedFallbackRecords()) != 0 {
+			t.Fatalf("fallback final model=%+v/%v real=%+v/%v retained=%d", modeled, modelErr, real, realErr, len(model.RetainedFallbackRecords()))
+		}
+	}
+	if len(model.Runs()) != 4 {
+		t.Fatalf("modeled routed timer wakeups=%d", len(model.Runs()))
+	}
+	for _, id := range fallbackIDs {
+		subject := identity.TimerSubject("test", id, 7, 3)
+		if _, err := fallback.GetLastMsgForSubject(ctx, subject); !errors.Is(err, jetstream.ErrMsgNotFound) {
+			t.Fatalf("fallback timer %s remained: %v", id, err)
+		}
+		target := identity.RunSubject("test", id, provision.Partitions)
+		stored, err := run.GetLastMsgForSubject(ctx, target)
+		if err != nil || string(stored.Data) != identity.Key("test", id) || stored.Header.Get(identity.TimerInvSeqHeader) != "7" {
+			t.Fatalf("fallback target %s=%+v err=%v", id, stored, err)
+		}
+		if _, err := run.GetMsg(ctx, stored.Sequence+1, jetstream.WithGetMsgSubject(target)); !errors.Is(err, jetstream.ErrMsgNotFound) {
+			t.Fatalf("fallback target %s duplicated: %v", id, err)
 		}
 	}
 }
