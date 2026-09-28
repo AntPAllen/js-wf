@@ -385,20 +385,51 @@ func TestLeaseNetworkLostCreateAckReclaimsUninitializedEpoch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	survivor, err := survivorStore.Acquire(ctx, typ, id, "survivor")
+	deadline := first.Created().Add(3 * time.Second)
+	var survivor *lease.Lease
+	for {
+		survivor, err = survivorStore.Acquire(ctx, typ, id, "survivor")
+		if !errors.Is(err, lease.ErrHeld) || time.Now().After(deadline) {
+			break
+		}
+		select {
+		case <-ctx.Done():
+			t.Fatal(ctx.Err())
+		case <-time.After(25 * time.Millisecond):
+		}
+	}
 	if err != nil {
+		if errors.Is(err, lease.ErrHeld) {
+			entry, getErr := observer.Get(ctx, typ+"."+id)
+			if getErr == nil {
+				var held lease.Value
+				_ = json.Unmarshal(entry.Value(), &held)
+				t.Fatalf("reclaim stayed held: value=%+v revision=%d age=%s first_age=%s", held, entry.Revision(), time.Since(entry.Created()), time.Since(first.Created()))
+			}
+			t.Fatalf("reclaim stayed held: observer=%v first_age=%s", getErr, time.Since(first.Created()))
+		}
 		t.Fatal(err)
 	}
 	if survivor.Epoch() <= first.Revision() {
 		t.Fatalf("reclaimed fencing epoch %d did not pass orphan revision %d", survivor.Epoch(), first.Revision())
 	}
-	entry, err := observer.Get(ctx, typ+"."+id)
-	if err != nil {
-		t.Fatal(err)
-	}
 	var current lease.Value
-	if err := json.Unmarshal(entry.Value(), &current); err != nil || current.Worker != "survivor" || current.Epoch != survivor.Epoch() {
-		t.Fatalf("reclaimed lease value=%+v err=%v", current, err)
+	observed := time.Now().Add(3 * time.Second)
+	for {
+		entry, getErr := observer.Get(ctx, typ+"."+id)
+		if getErr != nil {
+			t.Fatal(getErr)
+		}
+		if err := json.Unmarshal(entry.Value(), &current); err != nil {
+			t.Fatal(err)
+		}
+		if current.Worker == "survivor" && current.Epoch == survivor.Epoch() {
+			break
+		}
+		if time.Now().After(observed) {
+			t.Fatalf("reclaimed lease value=%+v, want survivor epoch %d", current, survivor.Epoch())
+		}
+		time.Sleep(25 * time.Millisecond)
 	}
 }
 

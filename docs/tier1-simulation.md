@@ -67,7 +67,13 @@ race run passed. The model also checks purged invocation sequence holes and a
 lost repair-enqueue acknowledgment. Existing three-node fixtures also cover
 network-lost start acknowledgments, absent-publish retry, and large input.
 The start-and-repair scenarios do not yet run the leased scan loop or its
-persisted cursor, or model the server's deduplication-window expiry.
+persisted cursor. The model now expires `WF_RUN` message IDs after the
+configured duplicate window using virtual time (two minutes by default).
+A model scan proves that a still-unstarted invocation gets another run
+message after expiry and stops being reenqueued once a journal exists. A
+three-node contract confirms that provisioned `WF_RUN` uses the two-minute
+window and that a separate short-window stream accepts the same message ID
+again after expiry while deduplicating it inside the window.
 
 The dispatch slice runs the production `worker.RunPartition` fetch/retry loop
 through a narrow consumer port with a supplied handler callback. Its model

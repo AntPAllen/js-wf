@@ -21,6 +21,11 @@ type StartFault struct {
 	Kind      string
 }
 
+type runDedupEntry struct {
+	sequence uint64
+	atMillis int64
+}
+
 // StartTransport models the write-once invocation stream, run enqueue, and
 // input objects used by client.Start. Run messages are retained until a worker
 // consumes them; this slice does not model that consumer yet.
@@ -31,7 +36,8 @@ type StartTransport struct {
 	runSeq      uint64
 	invocations map[string]jetstream.RawStreamMsg
 	runs        []Message
-	runIDs      map[string]uint64
+	runIDs      map[string]runDedupEntry
+	runWindow   int64
 	objects     map[string][]byte
 	journals    map[string]bool
 	faults      []StartFault
@@ -41,7 +47,22 @@ var _ client.StartPort = (*StartTransport)(nil)
 var _ reconcile.StartScanPort = (*StartTransport)(nil)
 
 func NewStartTransport(schedule *Scheduler) *StartTransport {
-	return &StartTransport{schedule: schedule, invocations: map[string]jetstream.RawStreamMsg{}, runIDs: map[string]uint64{}, objects: map[string][]byte{}, journals: map[string]bool{}}
+	return &StartTransport{schedule: schedule, invocations: map[string]jetstream.RawStreamMsg{}, runIDs: map[string]runDedupEntry{}, runWindow: (2 * time.Minute).Milliseconds(), objects: map[string][]byte{}, journals: map[string]bool{}}
+}
+
+// SetRunDedupWindow configures the virtual WF_RUN duplicate window. Call it
+// before publishing; the default matches JetStream's two-minute window.
+func (m *StartTransport) SetRunDedupWindow(window time.Duration) error {
+	if window < time.Millisecond || window%time.Millisecond != 0 {
+		return fmt.Errorf("invalid run dedup window %s", window)
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.runSeq != 0 {
+		return fmt.Errorf("run dedup window cannot change after publish")
+	}
+	m.runWindow = window.Milliseconds()
+	return nil
 }
 
 func (m *StartTransport) QueueFault(f StartFault) error {
@@ -143,14 +164,14 @@ func (m *StartTransport) EnqueueRun(ctx context.Context, subject string, data []
 		m.event(event)
 		return ErrTransportLost
 	}
-	if seq, duplicate := m.runIDs[messageID]; duplicate {
-		event.Sequence = seq
+	if previous, duplicate := m.runIDs[messageID]; duplicate && m.schedule.NowMillis()-previous.atMillis < m.runWindow {
+		event.Sequence = previous.sequence
 		event.Outcome = "duplicate"
 		m.event(event)
 		return nil
 	}
 	m.runSeq++
-	m.runIDs[messageID] = m.runSeq
+	m.runIDs[messageID] = runDedupEntry{sequence: m.runSeq, atMillis: m.schedule.NowMillis()}
 	m.runs = append(m.runs, Message{Subject: subject, Sequence: m.runSeq, Data: append([]byte(nil), data...)})
 	event.Sequence = m.runSeq
 	if fault == "lose_ack_after_commit" {

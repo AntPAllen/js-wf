@@ -16,6 +16,8 @@ import (
 	"js-wf/client"
 	"js-wf/identity"
 	"js-wf/reconcile"
+
+	"github.com/nats-io/nats.go"
 )
 
 func TestStartTransportFaultBoundaries(t *testing.T) {
@@ -85,6 +87,68 @@ func TestStartTransportFaultBoundaries(t *testing.T) {
 			t.Fatalf("stale-read retry: handle=%+v runs=%v err=%v", second, model.Runs(), err)
 		}
 	})
+}
+
+func TestStartRunDedupWindowExpiresInVirtualTime(t *testing.T) {
+	schedule := NewScheduler(19)
+	model := NewStartTransport(schedule)
+	if err := model.SetRunDedupWindow(time.Second); err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	const subject, messageID = "wf.run.0", "start:test.one:1"
+	for i := 0; i < 2; i++ {
+		if err := model.EnqueueRun(ctx, subject, []byte("test.one"), messageID); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(model.Runs()) != 1 {
+		t.Fatalf("duplicate inside window retained %d runs", len(model.Runs()))
+	}
+	if err := model.Wait(ctx, 3*time.Second); err != nil {
+		t.Fatal(err)
+	}
+	if err := model.EnqueueRun(ctx, subject, []byte("test.one"), messageID); err != nil {
+		t.Fatal(err)
+	}
+	if runs := model.Runs(); len(runs) != 2 || runs[0].Sequence == runs[1].Sequence {
+		t.Fatalf("expired message ID did not create a new run: %+v", runs)
+	}
+}
+
+func TestStartScanRepeatsAfterDedupExpiryUntilJournalExists(t *testing.T) {
+	ctx := context.Background()
+	model := NewStartTransport(NewScheduler(20))
+	invocation := &nats.Msg{Subject: identity.InvocationSubject("test", "repair"), Data: []byte("input")}
+	sequence, err := model.PublishInvocation(ctx, invocation)
+	if err != nil {
+		t.Fatal(err)
+	}
+	scan := reconcile.NewStartScanWithPort(model)
+	for i := 0; i < 2; i++ {
+		if _, err := scan.Scan(ctx, sequence, 1, false); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(model.Runs()) != 1 {
+		t.Fatalf("repair inside duplicate window retained %d runs", len(model.Runs()))
+	}
+	if err := model.Wait(ctx, 3*time.Minute); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := scan.Scan(ctx, sequence, 1, false); err != nil {
+		t.Fatal(err)
+	}
+	if len(model.Runs()) != 2 {
+		t.Fatalf("repair after duplicate window retained %d runs", len(model.Runs()))
+	}
+	model.MarkJournal("test", "repair")
+	if _, err := scan.Scan(ctx, sequence, 1, false); err != nil {
+		t.Fatal(err)
+	}
+	if len(model.Runs()) != 2 {
+		t.Fatalf("repair after journal retained %d runs", len(model.Runs()))
+	}
 }
 
 func TestStartScanModelCursorAndUncertainEnqueue(t *testing.T) {
