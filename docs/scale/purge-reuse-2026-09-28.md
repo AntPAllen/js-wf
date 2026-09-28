@@ -22,11 +22,21 @@ subjects, and the raw-stream integrity checker passes.
 Two full 10,000/10,000/1,000 runs passed on the expanded VM. The second run
 completed the overlapping purge/reuse phase in 28.7 seconds, checked all
 results by 47.1 seconds, and completed the integrity audit by 75.6 seconds.
-A 100/100/10 race-instrumented run also passed. The test's live workflows
-are durably suspended while purges run; it does not prove 10,000 handlers
-are simultaneously executing. The runtime uses KV lease creation revisions
-as fencing epochs, so a reused journal begins at index zero with a new
-positive epoch instead of the plan's literal `epoch: 0`.
+A 100/100/10 race-instrumented run also passed. In this original mode, live
+workflows are durably suspended while purges run. The runtime uses KV lease
+creation revisions as fencing epochs, so a reused journal begins at index zero
+with a new positive epoch instead of the plan's literal `epoch: 0`.
+
+An active-handler mode now holds all 10,000 live handlers inside their
+workflow functions while the same purge and reuse sequence runs. It requires
+the test to observe exactly 10,000 executing handlers before purging and
+checks that count again after all purges. The workers use an opt-in concurrency
+limit of 256 per partition; the normal default remains one. The full
+10,000/10,000/1,000 active-handler run passed on the expanded VM: 10,000
+handlers were executing by 13.8 seconds, the overlapping purge and reuse
+finished by 25.8 seconds, all results were checked by 60.9 seconds, and the
+retained-stream integrity audit passed by 99.7 seconds. A 100/100/10 active
+diagnostic and race-instrumented run passed too.
 
 Reproduce the full proof with:
 
@@ -37,3 +47,5 @@ WF_PURGE_REUSE_SCALE=1 go test ./integration \
 ```
 
 Set `WF_PURGE_REUSE_COUNT=100` for a smaller diagnostic run.
+Add `WF_PURGE_REUSE_ACTIVE=1` to keep the other handlers executing throughout
+the purge. The test releases them after all old invocations are purged.

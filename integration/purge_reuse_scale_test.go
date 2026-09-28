@@ -26,6 +26,7 @@ import (
 
 // WF_PURGE_REUSE_SCALE=1 runs the Phase 7 10k/10k/1k retention proof.
 // WF_PURGE_REUSE_COUNT can lower both 10k groups for diagnostics.
+// WF_PURGE_REUSE_ACTIVE=1 keeps all live handlers executing during the purge.
 func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	if os.Getenv("WF_PURGE_REUSE_SCALE") == "" {
 		t.Skip("set WF_PURGE_REUSE_SCALE=1 for the 10k purge/reuse proof")
@@ -39,6 +40,7 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 		count = parsed
 	}
 	reuseCount := count / 10
+	activeMode := os.Getenv("WF_PURGE_REUSE_ACTIVE") == "1"
 	all, _ := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 	defer cancel()
@@ -47,6 +49,8 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 		Kind  string `json:"kind"`
 		Index int    `json:"index"`
 	}
+	activeRelease := make(chan struct{})
+	var activeHandlers atomic.Int64
 	handler := func(c *wf.Context, raw json.RawMessage) (json.RawMessage, error) {
 		var job input
 		if err := json.Unmarshal(raw, &job); err != nil {
@@ -56,6 +60,15 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 		case "old":
 			return json.RawMessage(strconv.Itoa(job.Index)), nil
 		case "live":
+			if activeMode {
+				activeHandlers.Add(1)
+				defer activeHandlers.Add(-1)
+				select {
+				case <-activeRelease:
+				case <-c.Context().Done():
+					return nil, c.Context().Err()
+				}
+			}
 			return wf.AwaitSignal(c, "release")
 		case "reused":
 			return wf.AwaitSignal(c, "go")
@@ -75,7 +88,11 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 		}
 	}()
 	for index := 0; index < 6; index++ {
-		w, err := worker.New(ctx, all[index%len(all)], fmt.Sprintf("purge-scale-%d", index), map[string]worker.Handler{typ: handler}, worker.WithPartitionConcurrency(32))
+		concurrency := 32
+		if activeMode {
+			concurrency = 256
+		}
+		w, err := worker.New(ctx, all[index%len(all)], fmt.Sprintf("purge-scale-%d", index), map[string]worker.Handler{typ: handler}, worker.WithPartitionConcurrency(concurrency))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -151,11 +168,21 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 		}
 		return nil, ctx.Err()
 	}
-	runPurgeScaleJobs(t, ctx, count, func(caller, index int) error {
-		_, err := waitSuspended(liveID(index), all[caller%3])
-		return err
-	})
-	t.Logf("kept %d other invocations suspended before purge at %s", count, time.Since(start))
+	if activeMode {
+		for ctx.Err() == nil && activeHandlers.Load() != int64(count) {
+			time.Sleep(20 * time.Millisecond)
+		}
+		if ctx.Err() != nil {
+			t.Fatalf("only %d/%d handlers active: %v", activeHandlers.Load(), count, ctx.Err())
+		}
+		t.Logf("kept %d other handlers executing before purge at %s", count, time.Since(start))
+	} else {
+		runPurgeScaleJobs(t, ctx, count, func(caller, index int) error {
+			_, err := waitSuspended(liveID(index), all[caller%3])
+			return err
+		})
+		t.Logf("kept %d other invocations suspended before purge at %s", count, time.Since(start))
+	}
 	runPurgeScaleJobs(t, ctx, count, func(caller, index int) error {
 		id := oldID(index)
 		for ctx.Err() == nil {
@@ -199,7 +226,13 @@ func TestTenThousandConcurrentPurgesAndThousandReusedIDs(t *testing.T) {
 	if purgesDone.Load() != int64(count) || reuseOverlaps.Load() == 0 {
 		t.Fatalf("purge/reuse overlap: purged=%d/%d reused_during_purge=%d", purgesDone.Load(), count, reuseOverlaps.Load())
 	}
-	t.Logf("purged %d while %d remained suspended; reused %d ids in %s", count, count, reuseCount, time.Since(start))
+	if activeMode && activeHandlers.Load() != int64(count) {
+		t.Fatalf("handlers lost during purge: active=%d want=%d", activeHandlers.Load(), count)
+	}
+	t.Logf("purged %d while %d remained live; reused %d ids in %s", count, count, reuseCount, time.Since(start))
+	if activeMode {
+		close(activeRelease)
+	}
 	runPurgeScaleJobs(t, ctx, count, func(caller, index int) error {
 		_, err := waitSuspended(liveID(index), all[caller%3])
 		return err

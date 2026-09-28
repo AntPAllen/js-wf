@@ -78,8 +78,8 @@ func WithMaxPanicAttempts(count int) Option {
 // same workflow. The default is one, preserving strict serial dispatch.
 func WithPartitionConcurrency(count int) Option {
 	return func(w *Worker) error {
-		if count < 1 || count > 32 {
-			return fmt.Errorf("partition concurrency must be between 1 and 32")
+		if count < 1 || count > 256 {
+			return fmt.Errorf("partition concurrency must be between 1 and 256")
 		}
 		w.partitionConcurrency = count
 		return nil
