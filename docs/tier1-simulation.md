@@ -139,6 +139,14 @@ contract compares subject-filtered next-message reads, a deleted sequence,
 stale-generation skipping, ordered consumption, and journal replay against
 the model; three repeats passed. The full worker handler still uses real
 JetStream outside simulation for its lease, journal, and result decisions.
+A sixth 1,000-seed workload connects production client signal publishing,
+signal reconciliation, and worker signal drain against the shared model. It
+sends 20 ordered signals per seed under lost publish acknowledgments and lost
+or dropped wakeup enqueues, repairs uncertain wakeups, journals each signal
+once, retries some keys after consumed-signal purge, rejects changed retry
+payloads, and verifies replay plus a subsequent scan adds no wakeup. Seed 42
+replays from disk and is byte-identical across processes. Dispatch, lease
+fencing, and terminal result persistence are still separate modeled slices.
 
 The dispatch slice runs the production `worker.RunPartition` fetch/retry loop
 through a narrow consumer port with a supplied handler callback. Its model
