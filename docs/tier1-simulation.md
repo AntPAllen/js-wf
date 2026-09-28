@@ -167,7 +167,7 @@ this model.
 The shared reconciler loop now has a narrow port for lease acquisition and
 renewal, cursor load and CAS save, and cadence waits. The model uses separate
 KV transports for the expiring lease and durable cursor. A 1,000-seed workload
-runs production `StartScan.Scan` inside the production loop for 20 invocations,
+runs production `StartScan.Scan` or `TimerScan.Scan` inside the production loop for 20 invocations,
 injects a dropped cursor write or a committed write with a lost acknowledgment
 at a seeded save, stops the first scanner, and starts a replacement. It checks
 one retained wakeup per invocation, exact trace replay, and byte-identical

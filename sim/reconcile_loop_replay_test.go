@@ -3,6 +3,7 @@ package sim
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"js-wf/identity"
+	"js-wf/journal"
 	"js-wf/reconcile"
 
 	"github.com/nats-io/nats.go"
@@ -29,18 +31,43 @@ func runSeededReconcileLoop(seed int64, replay *Trace) (trace Trace, runErr erro
 			return Trace{}, err
 		}
 	}
-	if err := schedule.SetWorkload("start_reconcile_loop_20"); err != nil {
+	if err := schedule.SetWorkload("reconcile_loop_20"); err != nil {
 		return Trace{}, err
 	}
 	defer func() { trace = schedule.Trace() }()
 	ctx := context.Background()
-	starts := NewStartTransport(schedule)
+	mode, err := schedule.Choose([]string{"start", "timer"})
+	if err != nil {
+		return trace, err
+	}
+	model := NewSignalTransport(schedule)
+	starts := model.StartTransport
 	loop := NewLoopTransport(schedule)
-	scan := reconcile.NewStartScanWithPort(starts)
+	scan := reconcile.NewStartScanWithPort(starts).Scan
+	if mode == "timer" {
+		timerScan := reconcile.NewTimerScanWithPort(model)
+		base := time.Unix(1_700_000_000, 0).UTC()
+		timerScan.Now = func() time.Time { return base.Add(time.Duration(schedule.NowMillis()) * time.Millisecond) }
+		scan = timerScan.Scan
+	}
 	for i := 0; i < 20; i++ {
 		id := fmt.Sprintf("loop-%02d", i)
-		if _, err := starts.PublishInvocation(ctx, &nats.Msg{Subject: identity.InvocationSubject("test", id), Data: []byte("input")}); err != nil {
+		sequence, err := starts.PublishInvocation(ctx, &nats.Msg{Subject: identity.InvocationSubject("test", id), Data: []byte("input")})
+		if err != nil {
 			return trace, err
+		}
+		if mode == "timer" {
+			payload, err := json.Marshal(struct {
+				Kind   string    `json:"kind"`
+				FireAt time.Time `json:"fire_at"`
+			}{"timer", time.Unix(1_700_000_000, 0).Add(-time.Second)})
+			if err != nil {
+				return trace, err
+			}
+			model.SetJournal("test", id, []journal.Record{
+				{Entry: journal.Entry{Kind: journal.Started, Index: 0}, Sequence: sequence*10 + 1},
+				{Entry: journal.Entry{Kind: journal.StepRequested, Index: 1, Payload: payload}, Sequence: sequence*10 + 2},
+			})
 		}
 	}
 	choices := make([]string, 20)
@@ -61,16 +88,16 @@ func runSeededReconcileLoop(seed int64, replay *Trace) (trace Trace, runErr erro
 	}
 	firstCtx, stopFirst := context.WithCancel(ctx)
 	loop.StopAfterWaits(10, stopFirst)
-	if err := reconcile.RunLoopWithPort(firstCtx, loop, "first", "start", 100*time.Millisecond, 1, scan.Scan); err != nil {
+	if err := reconcile.RunLoopWithPort(firstCtx, loop, "first", mode, 100*time.Millisecond, 1, scan); err != nil {
 		return trace, fmt.Errorf("seed %d first loop: %w", seed, err)
 	}
-	cursor, revision, err := loop.LoadCursor(ctx, "start")
+	cursor, revision, err := loop.LoadCursor(ctx, mode)
 	if err != nil || revision == 0 || cursor < 1 || cursor > 11 || len(starts.Runs()) < 9 || len(starts.Runs()) > 10 {
 		return trace, fmt.Errorf("seed %d first cursor=%d revision=%d runs=%d err=%v", seed, cursor, revision, len(starts.Runs()), err)
 	}
 	secondCtx, stopSecond := context.WithCancel(ctx)
 	loop.StopAfterWaits(25, stopSecond)
-	if err := reconcile.RunLoopWithPort(secondCtx, loop, "replacement", "start", 100*time.Millisecond, 1, scan.Scan); err != nil {
+	if err := reconcile.RunLoopWithPort(secondCtx, loop, "replacement", mode, 100*time.Millisecond, 1, scan); err != nil {
 		return trace, fmt.Errorf("seed %d replacement loop: %w", seed, err)
 	}
 	if got := len(starts.Runs()); got != 20 {
