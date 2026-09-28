@@ -141,18 +141,20 @@ read, matching the error path while the real client connection is cut. Both
 paths retry without another KV revision or a changed result. Three normal
 repeats and a race run passed.
 
-The integrated short-handler workload runs production `Worker.handle` over a
-modeled durable consumer. Its invocation, lease KV, journal append and read,
+The integrated short-handler workload runs production `Client.Start` and
+`Worker.handle` over a shared modeled run stream and durable consumer. Its
+invocation, lease KV, journal append and read,
 signal drain, and terminal outcome KV operations use the existing narrow
 ports. Five workflows per seed execute a `wf.Run` effect and finish through
 the worker's lease release and message acknowledgment path. Across 1,000
-seeds, faults drop a step-completion request, hide a committed completion or
+seeds, faults drop or hide an initial run enqueue and repair it with production
+`StartScan`, drop a step-completion request, hide a committed completion or
 terminal KV reply, hide a run acknowledgment, or change the consumer leader.
 A dropped completion reruns its effect once; committed-but-unacknowledged
 completion and result writes replay without a second effect. The final raw
 snapshot passes I1/I2/I3/I6 checks. Seed 42 is pinned and replays across
-processes and under the race detector. This workload copies retained
-invocation keys into its modeled dispatch queue. Timer scheduling, snapshots,
+processes and under the race detector. Committed `WF_RUN` enqueues feed the
+modeled consumer directly, including publishes with lost replies. Timer scheduling, snapshots,
 large result blobs, running cancellation, and cooperative heartbeat turns
 remain outside this integrated slice.
 

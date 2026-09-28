@@ -36,6 +36,7 @@ type StartTransport struct {
 	runSeq      uint64
 	invocations map[string]jetstream.RawStreamMsg
 	runs        []Message
+	onRunCommit func(Message)
 	runIDs      map[string]runDedupEntry
 	runWindow   int64
 	objects     map[string][]byte
@@ -172,7 +173,11 @@ func (m *StartTransport) EnqueueRun(ctx context.Context, subject string, data []
 	}
 	m.runSeq++
 	m.runIDs[messageID] = runDedupEntry{sequence: m.runSeq, atMillis: m.schedule.NowMillis()}
-	m.runs = append(m.runs, Message{Subject: subject, Sequence: m.runSeq, Data: append([]byte(nil), data...)})
+	run := Message{Subject: subject, Sequence: m.runSeq, Data: append([]byte(nil), data...)}
+	m.runs = append(m.runs, run)
+	if m.onRunCommit != nil {
+		m.onRunCommit(run)
+	}
 	event.Sequence = m.runSeq
 	if fault == "lose_ack_after_commit" {
 		event.Outcome = fault
@@ -182,6 +187,14 @@ func (m *StartTransport) EnqueueRun(ctx context.Context, subject string, data []
 	event.Outcome = "ok"
 	m.event(event)
 	return nil
+}
+
+// OnRunCommit connects the retained WF_RUN stream to a modeled consumer.
+// Install it before actors begin publishing.
+func (m *StartTransport) OnRunCommit(callback func(Message)) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.onRunCommit = callback
 }
 
 func (m *StartTransport) Wait(ctx context.Context, delay time.Duration) error {

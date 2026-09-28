@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -19,10 +20,9 @@ import (
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
+	"js-wf/reconcile"
 	"js-wf/wf"
 	"js-wf/worker"
-
-	"github.com/nats-io/nats.go"
 )
 
 type faultingExecutionJournal struct {
@@ -75,13 +75,14 @@ func runSeededWorkerExecution(seed int64, replay *Trace) (trace Trace, runErr er
 	defer func() { trace = schedule.Trace() }()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	mode, err := schedule.Choose([]string{"clean", "step_drop", "step_ack_lost", "result_ack_lost", "run_ack_lost", "consumer_leader_changed"})
+	mode, err := schedule.Choose([]string{"clean", "start_run_drop", "start_run_ack_lost", "step_drop", "step_ack_lost", "result_ack_lost", "run_ack_lost", "consumer_leader_changed"})
 	if err != nil {
 		return trace, err
 	}
 	const count = 5
 	ids := integratedWorkerIDs(count)
-	signals := NewSignalTransport(schedule)
+	transport := NewWorkerTransport(schedule, 3*time.Second)
+	signals := transport.SignalTransport
 	journals := NewJournalTransport(schedule)
 	appendPort := &faultingExecutionJournal{JournalTransport: journals}
 	if mode == "step_drop" || mode == "step_ack_lost" {
@@ -95,13 +96,30 @@ func runSeededWorkerExecution(seed int64, replay *Trace) (trace Trace, runErr er
 	leaseState := NewKVTransport(schedule, 30*time.Second)
 	leasing := lease.NewWithKVPort(leaseState)
 	outcomes := NewKVTransport(schedule, 0)
-	dispatch := NewDispatchTransport(schedule, 3*time.Second)
+	dispatch := transport.Dispatch
 	effects := map[string]int{}
-	for _, id := range ids {
-		if _, err := signals.PublishInvocation(ctx, &nats.Msg{Subject: identity.InvocationSubject("test", id), Data: []byte(fmt.Sprintf(`{"id":%q}`, id))}); err != nil {
-			return trace, err
+	starter := client.NewWithStartPort(signals.StartTransport)
+	for index, id := range ids {
+		if index == 0 && (mode == "start_run_drop" || mode == "start_run_ack_lost") {
+			kind := "drop_before_commit"
+			if mode == "start_run_ack_lost" {
+				kind = "lose_ack_after_commit"
+			}
+			if err := signals.QueueFault(StartFault{Operation: "enqueue_run", Kind: kind}); err != nil {
+				return trace, err
+			}
 		}
-		dispatch.PublishRun(identity.RunSubject("test", id, provision.Partitions), []byte(identity.Key("test", id)))
+		handle, err := starter.Start(ctx, "test", id, []byte(fmt.Sprintf(`{"id":%q}`, id)))
+		if index == 0 && (mode == "start_run_drop" || mode == "start_run_ack_lost") {
+			if !errors.Is(err, client.ErrEnqueueUnknown) || handle.InvSeq == 0 {
+				return trace, fmt.Errorf("seed %d start %s fault=%s handle=%+v err=%v", seed, id, mode, handle, err)
+			}
+			if result, scanErr := reconcile.NewStartScanWithPort(signals.StartTransport).Scan(ctx, handle.InvSeq, 1, false); scanErr != nil || result.Reenqueued != 1 || dispatch.Pending() != 1 {
+				return trace, fmt.Errorf("seed %d start %s repaired=%+v pending=%d err=%v", seed, id, result, dispatch.Pending(), scanErr)
+			}
+		} else if err != nil || handle.InvSeq == 0 {
+			return trace, fmt.Errorf("seed %d start %s: handle=%+v err=%v", seed, id, handle, err)
+		}
 	}
 	if mode == "result_ack_lost" {
 		if err := outcomes.QueueFault(KVFault{Operation: "create", Kind: KVLoseAckAfterCommit}); err != nil {
