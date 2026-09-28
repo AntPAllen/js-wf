@@ -18,6 +18,7 @@ import (
 	"js-wf/client"
 	"js-wf/identity"
 	"js-wf/integrity"
+	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/testcluster"
 	"js-wf/wf"
@@ -33,7 +34,7 @@ func TestTwoHundredWorkflowsFiftyStepsWithRepeatedRebalance(t *testing.T) {
 	if os.Getenv("WF_REBALANCE_SCALE") == "" {
 		t.Skip("set WF_REBALANCE_SCALE=1 for the 200-workflow rebalance proof")
 	}
-	runRebalanceScale(t, false, false, false, false, false)
+	runRebalanceScale(t, false, false, false, false, false, false)
 }
 
 // WF_REBALANCE_KV_KILL=1 adds a KV leader kill to the same 200-workflow run.
@@ -42,7 +43,7 @@ func TestTwoHundredWorkflowsRebalanceDuringKVLeaderKill(t *testing.T) {
 	if os.Getenv("WF_REBALANCE_KV_KILL") == "" {
 		t.Skip("set WF_REBALANCE_KV_KILL=1 for the 200-workflow rebalance and leader-kill proof")
 	}
-	runRebalanceScale(t, true, false, false, false, false)
+	runRebalanceScale(t, true, false, false, false, false, false)
 }
 
 // WF_REBALANCE_WORKER_PARTITION=1 isolates one worker for 45 seconds while
@@ -51,7 +52,7 @@ func TestTwoHundredWorkflowsRebalanceDuringWorkerPartition(t *testing.T) {
 	if os.Getenv("WF_REBALANCE_WORKER_PARTITION") == "" {
 		t.Skip("set WF_REBALANCE_WORKER_PARTITION=1 for the 200-workflow network-partition proof")
 	}
-	runRebalanceScale(t, false, true, false, false, false)
+	runRebalanceScale(t, false, true, false, false, false, false)
 }
 
 // WF_REBALANCE_WORKER_KILL=1 closes an active worker connection, waits for its
@@ -60,7 +61,7 @@ func TestTwoHundredWorkflowsRebalanceDuringWorkerKill(t *testing.T) {
 	if os.Getenv("WF_REBALANCE_WORKER_KILL") == "" {
 		t.Skip("set WF_REBALANCE_WORKER_KILL=1 for the 200-workflow worker-kill proof")
 	}
-	runRebalanceScale(t, false, false, true, false, false)
+	runRebalanceScale(t, false, false, true, false, false, false)
 }
 
 // WF_REBALANCE_PROCESS_KILL=1 runs owner 0 in a child process and sends
@@ -69,7 +70,7 @@ func TestTwoHundredWorkflowsRebalanceDuringProcessKill(t *testing.T) {
 	if os.Getenv("WF_REBALANCE_PROCESS_KILL") == "" {
 		t.Skip("set WF_REBALANCE_PROCESS_KILL=1 for the 200-workflow process-kill proof")
 	}
-	runRebalanceScale(t, false, false, false, true, false)
+	runRebalanceScale(t, false, false, false, true, false, false)
 }
 
 // WF_REBALANCE_ROUTE_PARTITION=1 isolates one NATS server from both peers for
@@ -78,10 +79,20 @@ func TestTwoHundredWorkflowsRebalanceDuringRoutePartition(t *testing.T) {
 	if os.Getenv("WF_REBALANCE_ROUTE_PARTITION") == "" {
 		t.Skip("set WF_REBALANCE_ROUTE_PARTITION=1 for the 200-workflow server-route partition proof")
 	}
-	runRebalanceScale(t, false, false, false, false, true)
+	runRebalanceScale(t, false, false, false, false, true, false)
 }
 
-// TestRebalanceWorkerChild runs only as a subprocess of the process-kill test.
+// WF_REBALANCE_COMBINED_CHAOS=1 overlaps a worker process kill, a 45-second
+// process pause, a 45-second worker connection cut, and a 45-second server
+// route partition while the busy partition assignments keep moving.
+func TestTwoHundredWorkflowsRebalanceDuringCombinedFaults(t *testing.T) {
+	if os.Getenv("WF_REBALANCE_COMBINED_CHAOS") == "" {
+		t.Skip("set WF_REBALANCE_COMBINED_CHAOS=1 for the combined fault proof")
+	}
+	runRebalanceScale(t, false, true, false, true, true, true)
+}
+
+// TestRebalanceWorkerChild runs only as a subprocess of the process-fault tests.
 func TestRebalanceWorkerChild(t *testing.T) {
 	if os.Getenv("WF_REBALANCE_CHILD") != "1" {
 		t.Skip("worker subprocess helper")
@@ -99,15 +110,54 @@ func TestRebalanceWorkerChild(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	w, err := worker.New(context.Background(), js, "rebalance-0", map[string]worker.Handler{"rebalance": func(_ *wf.Context, input json.RawMessage) (json.RawMessage, error) {
+	workerID := os.Getenv("WF_REBALANCE_CHILD_WORKER")
+	if workerID == "" {
+		workerID = "rebalance-0"
+	}
+	pauseRelease := os.Getenv("WF_REBALANCE_CHILD_RELEASE")
+	pauseResult := os.Getenv("WF_REBALANCE_CHILD_RESULT")
+	if pauseRelease != "" && pauseResult == "" {
+		t.Fatal("missing pause-child result path")
+	}
+	w, err := worker.New(context.Background(), js, workerID, map[string]worker.Handler{"rebalance": func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
 		var id string
 		if err := json.Unmarshal(input, &id); err != nil {
 			return nil, err
 		}
+		var records []journal.Record
+		var tail uint64
+		if pauseRelease != "" {
+			var err error
+			records, tail, err = journal.New(js).Read(c.Context(), "rebalance", id)
+			if err != nil || len(records) != 1 || records[0].Kind != journal.Started {
+				return nil, fmt.Errorf("pause child initial journal=%+v err=%v", records, err)
+			}
+		}
 		if err := os.WriteFile(marker, []byte(id), 0644); err != nil {
 			return nil, err
 		}
-		select {}
+		if pauseRelease == "" {
+			select {}
+		}
+		for {
+			if _, err := os.Stat(pauseRelease); err == nil {
+				break
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+		attempt, done := context.WithTimeout(context.Background(), 10*time.Second)
+		defer done()
+		_, appendErr := journal.New(js).Append(attempt, "rebalance", id, journal.Entry{Epoch: records[0].Epoch, Index: 1, Kind: journal.Completed, Payload: json.RawMessage(`0`), WorkerID: workerID}, tail)
+		outcome := "success"
+		if errors.Is(appendErr, journal.ErrStale) {
+			outcome = "stale"
+		} else if appendErr != nil {
+			outcome = fmt.Sprintf("error: %v", appendErr)
+		}
+		if err := os.WriteFile(pauseResult, []byte(outcome), 0644); err != nil {
+			return nil, err
+		}
+		return nil, appendErr
 	}})
 	if err != nil {
 		t.Fatal(err)
@@ -117,7 +167,7 @@ func TestRebalanceWorkerChild(t *testing.T) {
 	}
 }
 
-func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, killProcess, routePartition bool) {
+func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, killProcess, routePartition, pauseProcess bool) {
 	t.Helper()
 	var all []jetstream.JetStream
 	var cluster *testcluster.Cluster
@@ -202,6 +252,10 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 	var isolatedJS jetstream.JetStream
 	var killConn *nats.Conn
 	var killJS jetstream.JetStream
+	isolatedWorkerIndex := 0
+	if killProcess {
+		isolatedWorkerIndex = 2
+	}
 	var dedicatedConns []*nats.Conn
 	defer func() {
 		for _, conn := range dedicatedConns {
@@ -273,6 +327,36 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 			}
 		}()
 	}
+	var pauseCmd *exec.Cmd
+	var pauseMarker, pauseRelease, pauseResult string
+	pauseWaited := false
+	if pauseProcess {
+		executable, err := os.Executable()
+		if err != nil {
+			t.Fatal(err)
+		}
+		childRoot := t.TempDir()
+		pauseMarker = filepath.Join(childRoot, "active-invocation")
+		pauseRelease = filepath.Join(childRoot, "release")
+		pauseResult = filepath.Join(childRoot, "result")
+		childLog, err := os.Create(filepath.Join(childRoot, "worker.log"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer childLog.Close()
+		pauseCmd = exec.Command(executable, "-test.run=^TestRebalanceWorkerChild$")
+		pauseCmd.Env = append(os.Environ(), "WF_REBALANCE_CHILD=1", "WF_REBALANCE_CHILD_URL="+cluster.Servers[workerNodes[1%len(workerNodes)]].ClientURL(), "WF_REBALANCE_CHILD_WORKER=rebalance-1", "WF_REBALANCE_CHILD_MARKER="+pauseMarker, "WF_REBALANCE_CHILD_RELEASE="+pauseRelease, "WF_REBALANCE_CHILD_RESULT="+pauseResult)
+		pauseCmd.Stdout, pauseCmd.Stderr = childLog, childLog
+		if err := pauseCmd.Start(); err != nil {
+			t.Fatal(err)
+		}
+		defer func() {
+			if !pauseWaited {
+				_ = pauseCmd.Process.Kill()
+				_ = pauseCmd.Wait()
+			}
+		}()
+	}
 	const typ = "rebalance"
 	var completed, collisions atomic.Int64
 	var activeByPartition [4]atomic.Int64
@@ -284,6 +368,7 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 		}
 		if _, loaded := active.LoadOrStore(id, true); loaded {
 			collisions.Add(1)
+			t.Logf("simultaneous handler execution for %s", id)
 			return nil, fmt.Errorf("simultaneous handler execution for %s", id)
 		}
 		defer active.Delete(id)
@@ -292,6 +377,7 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 		defer activeByPartition[partition].Add(-1)
 		count := 0
 		for step := 0; step < 50; step++ {
+			nextCount := count + 1
 			var err error
 			count, err = wf.Run(c, "increment", count, func(stepCtx context.Context) (int, error) {
 				timer := time.NewTimer(10 * time.Millisecond)
@@ -300,7 +386,7 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 				case <-stepCtx.Done():
 					return 0, stepCtx.Err()
 				case <-timer.C:
-					return count + 1, nil
+					return nextCount, nil
 				}
 			})
 			if err != nil {
@@ -337,11 +423,11 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 		}
 	}()
 	for index := range owners {
-		if killProcess && index == 0 {
+		if killProcess && index == 0 || pauseProcess && index == 1 {
 			continue
 		}
 		workerJS := all[workerNodes[index%len(workerNodes)]]
-		if isolateWorker && index == 0 {
+		if isolateWorker && index == isolatedWorkerIndex {
 			workerJS = isolatedJS
 		}
 		if killWorker && index == 0 {
@@ -389,6 +475,9 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 	workerIsolated, workerHealed, isolatedInFlight := false, false, false
 	workerKilled, workerRestarted, killedInFlight := false, false, false
 	processKilled, processKilledInFlight := false, false
+	processPaused, processResumed, pauseStale := false, false, false
+	var pausedAt time.Time
+	var pausedID string
 	routesIsolated, routesHealed, routeFaultInFlight := false, false, false
 	var isolatedAt time.Time
 	var routesIsolatedAt time.Time
@@ -486,6 +575,28 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 				}
 				processKilled = true
 			}
+			if pauseProcess && !processPaused {
+				until := time.Now().Add(2 * time.Second)
+				for {
+					activeID, readErr := os.ReadFile(pauseMarker)
+					if readErr == nil && len(activeID) > 0 {
+						if identity.Partition(typ, string(activeID), provision.Partitions) != 1 {
+							t.Fatalf("paused child held unexpected invocation %q", activeID)
+						}
+						pausedID = string(activeID)
+						break
+					}
+					if time.Now().After(until) || ctx.Err() != nil {
+						t.Fatalf("paused child did not enter a workflow: marker_err=%v", readErr)
+					}
+					time.Sleep(10 * time.Millisecond)
+				}
+				if err := pauseCmd.Process.Signal(syscall.SIGSTOP); err != nil {
+					t.Fatalf("pause worker process: %v", err)
+				}
+				pausedAt = time.Now()
+				processPaused = true
+			}
 			if killWorker && !workerKilled {
 				until := time.Now().Add(2 * time.Second)
 				for activeByPartition[0].Load() == 0 && time.Now().Before(until) {
@@ -517,10 +628,10 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 			}
 			if isolateWorker && !workerIsolated {
 				until := time.Now().Add(2 * time.Second)
-				for activeByPartition[0].Load() == 0 && time.Now().Before(until) {
+				for activeByPartition[isolatedWorkerIndex].Load() == 0 && time.Now().Before(until) {
 					time.Sleep(10 * time.Millisecond)
 				}
-				isolatedInFlight = activeByPartition[0].Load() > 0
+				isolatedInFlight = activeByPartition[isolatedWorkerIndex].Load() > 0
 				proxy.Block()
 				isolatedAt = time.Now()
 				workerIsolated = true
@@ -607,8 +718,54 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 	if routePartition && !routesHealed {
 		healRoutes()
 	}
-	if moves < 4 || inFlightMoves == 0 || collisions.Load() != 0 || (killKVLeader && !leaderKilled) || (isolateWorker && (!workerIsolated || !workerHealed || !isolatedInFlight)) || (killWorker && (!workerKilled || !workerRestarted || !killedInFlight)) || (killProcess && (!processKilled || !processKilledInFlight)) || (routePartition && (!routesIsolated || !routesHealed || !routeFaultInFlight)) {
-		t.Fatalf("rebalance proof: moves=%d in_flight=%d collisions=%d leader_killed=%t worker_isolated=%t worker_healed=%t isolated_in_flight=%t worker_killed=%t worker_restarted=%t killed_in_flight=%t process_killed=%t process_killed_in_flight=%t routes_isolated=%t routes_healed=%t route_fault_in_flight=%t", moves, inFlightMoves, collisions.Load(), leaderKilled, workerIsolated, workerHealed, isolatedInFlight, workerKilled, workerRestarted, killedInFlight, processKilled, processKilledInFlight, routesIsolated, routesHealed, routeFaultInFlight)
+	if pauseProcess {
+		if !processPaused || pausedID == "" {
+			t.Fatal("worker process was not paused in flight")
+		}
+		if remaining := 45*time.Second - time.Since(pausedAt); remaining > 0 {
+			select {
+			case <-time.After(remaining):
+			case <-ctx.Done():
+				t.Fatal("worker process was not stopped for 45 seconds")
+			}
+		}
+		value, err := clients[0].Await(ctx, typ, pausedID)
+		if err != nil || string(value) != "50" {
+			t.Fatalf("paused worker invocation result=%s err=%v", value, err)
+		}
+		if err := pauseCmd.Process.Signal(syscall.SIGCONT); err != nil {
+			t.Fatalf("resume worker process: %v", err)
+		}
+		if err := os.WriteFile(pauseRelease, []byte("resume"), 0644); err != nil {
+			t.Fatal(err)
+		}
+		for {
+			outcome, err := os.ReadFile(pauseResult)
+			if err == nil {
+				if string(outcome) != "stale" {
+					t.Fatalf("resumed worker append outcome=%q", outcome)
+				}
+				pauseStale = true
+				break
+			}
+			if ctx.Err() != nil {
+				t.Fatalf("resumed worker did not report stale append: %v", err)
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+		if err := pauseCmd.Process.Kill(); err != nil {
+			t.Fatal(err)
+		}
+		waitErr := pauseCmd.Wait()
+		pauseWaited = true
+		status, ok := pauseCmd.ProcessState.Sys().(syscall.WaitStatus)
+		if waitErr == nil || !ok || !status.Signaled() || status.Signal() != syscall.SIGKILL {
+			t.Fatalf("resumed worker process did not die from SIGKILL: state=%v err=%v", pauseCmd.ProcessState, waitErr)
+		}
+		processResumed = true
+	}
+	if moves < 4 || inFlightMoves == 0 || collisions.Load() != 0 || (killKVLeader && !leaderKilled) || (isolateWorker && (!workerIsolated || !workerHealed || !isolatedInFlight)) || (killWorker && (!workerKilled || !workerRestarted || !killedInFlight)) || (killProcess && (!processKilled || !processKilledInFlight)) || (routePartition && (!routesIsolated || !routesHealed || !routeFaultInFlight)) || (pauseProcess && (!processPaused || !processResumed || !pauseStale)) {
+		t.Fatalf("rebalance proof: moves=%d in_flight=%d collisions=%d leader_killed=%t worker_isolated=%t worker_healed=%t isolated_in_flight=%t worker_killed=%t worker_restarted=%t killed_in_flight=%t process_killed=%t process_killed_in_flight=%t routes_isolated=%t routes_healed=%t route_fault_in_flight=%t process_paused=%t process_resumed=%t pause_stale=%t", moves, inFlightMoves, collisions.Load(), leaderKilled, workerIsolated, workerHealed, isolatedInFlight, workerKilled, workerRestarted, killedInFlight, processKilled, processKilledInFlight, routesIsolated, routesHealed, routeFaultInFlight, processPaused, processResumed, pauseStale)
 	}
 	for index, id := range ids {
 		result, err := clients[index%len(clients)].Await(ctx, typ, id)
@@ -634,5 +791,5 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 	if err != nil || report.Terminal != len(ids) || report.Invocations != len(ids) {
 		t.Fatalf("integrity=%+v err=%v", report, err)
 	}
-	t.Logf("completed=%d moves=%d in_flight_moves=%d kv_leader_killed=%t worker_isolated_45s=%t worker_killed_and_restarted=%t process_killed=%t server_routes_isolated_45s=%t journal_entries=%d", completed.Load(), moves, inFlightMoves, leaderKilled, workerHealed, workerRestarted, processKilled, routesHealed, report.Entries)
+	t.Logf("completed=%d moves=%d in_flight_moves=%d kv_leader_killed=%t worker_isolated_45s=%t worker_killed_and_restarted=%t process_killed=%t server_routes_isolated_45s=%t process_paused_45s=%t pause_stale_append=%t journal_entries=%d", completed.Load(), moves, inFlightMoves, leaderKilled, workerHealed, workerRestarted, processKilled, routesHealed, processResumed, pauseStale, report.Entries)
 }

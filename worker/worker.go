@@ -249,7 +249,10 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				if err := l.Renew(ctx); err != nil {
+				renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
+				err := l.Renew(renewCtx)
+				stopRenew()
+				if err != nil {
 					if errors.Is(err, lease.ErrLost) {
 						leaseLost.Store(true)
 					}
@@ -341,7 +344,10 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		if err := l.Renew(ctx); err != nil {
+		renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
+		err := l.Renew(renewCtx)
+		stopRenew()
+		if err != nil {
 			return err
 		}
 		seq, err := w.jrn.Append(ctx, typ, id, journal.Entry{Epoch: l.Epoch(), Index: uint64(len(records)), Kind: kind, Payload: payload, WorkerID: w.ID}, tail)
@@ -449,7 +455,10 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		return objects.GetBytes(ctx, name)
 	})
 	wctx.SetTimerSupport(wakeupAt, func(ctx context.Context) (time.Time, error) { return w.serverNow(ctx) }, func(ctx context.Context, step uint64, fireAt time.Time) error {
-		if err := l.Renew(ctx); err != nil {
+		renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
+		err := l.Renew(renewCtx)
+		stopRenew()
+		if err != nil {
 			return err
 		}
 		return w.scheduleTimer(ctx, typ, id, input.Sequence, step, fireAt)
