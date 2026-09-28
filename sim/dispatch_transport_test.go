@@ -211,3 +211,70 @@ func TestDispatchLostAckCommitted(t *testing.T) {
 		t.Fatalf("lost committed acknowledgment: loop=%v ack=%v pending=%d", err, ackErr, model.Pending())
 	}
 }
+
+func TestDispatchDurableRestartAndSharedConsumers(t *testing.T) {
+	ctx := context.Background()
+	model := NewDispatchTransport(NewScheduler(100), time.Second)
+	model.PublishRun("wf.run.0", []byte(`first`))
+	before, err := model.Consumer(ctx, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstBatch, err := before.FetchOne(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	first := <-firstBatch.Messages()
+	firstMetadata, err := first.Metadata()
+	if err != nil || firstMetadata.NumDelivered != 1 {
+		t.Fatalf("first delivery=%+v err=%v", firstMetadata, err)
+	}
+	after, err := model.Consumer(ctx, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := model.Wait(ctx, time.Second); err != nil {
+		t.Fatal(err)
+	}
+	secondBatch, err := after.FetchOne(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second := <-secondBatch.Messages()
+	secondMetadata, err := second.Metadata()
+	if err != nil || secondMetadata.NumDelivered != 2 || secondMetadata.Sequence.Stream != firstMetadata.Sequence.Stream {
+		t.Fatalf("durable redelivery=%+v first=%+v err=%v", secondMetadata, firstMetadata, err)
+	}
+	if err := second.Ack(); err != nil {
+		t.Fatal(err)
+	}
+	model.PublishRun("wf.run.0", []byte(`second`))
+	model.PublishRun("wf.run.0", []byte(`third`))
+	peer, err := model.Consumer(ctx, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	oneBatch, err := after.FetchOne(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	twoBatch, err := peer.FetchOne(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	one, two := <-oneBatch.Messages(), <-twoBatch.Messages()
+	metaOne, errOne := one.Metadata()
+	metaTwo, errTwo := two.Metadata()
+	if errOne != nil || errTwo != nil || metaOne.Sequence.Stream == metaTwo.Sequence.Stream || metaOne.NumDelivered != 1 || metaTwo.NumDelivered != 1 {
+		t.Fatalf("shared consumer deliveries=%+v %+v errors=%v %v", metaOne, metaTwo, errOne, errTwo)
+	}
+	if err := one.Ack(); err != nil {
+		t.Fatal(err)
+	}
+	if err := two.Ack(); err != nil {
+		t.Fatal(err)
+	}
+	if model.Pending() != 0 || model.Creates() != 3 {
+		t.Fatalf("durable state pending=%d creates=%d", model.Pending(), model.Creates())
+	}
+}

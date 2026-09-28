@@ -81,9 +81,14 @@ an acknowledgment can commit while its response is lost. A three-node
 contract compares one delivery, AckWait redelivery, and final ack state with
 the model; three repeats and a race run passed. Existing three-node worker
 tests separately cover consumer-leader kills and a live handler's progress
-heartbeats. This slice exercises the dispatch loop and consumer contract, not
-the worker handler's lease, journal, signal, or timer decisions. It does not
-yet model consumer restart state across process death or simultaneous workers.
+heartbeats. A second three-node contract closes the first client with a
+delivery unacked, reopens the same durable from another node, and compares
+redelivery and acknowledgment with the model. Two clients then fetch distinct
+new messages from that durable; three repeats and a race run passed. This
+slice exercises the dispatch loop and consumer contract, not the worker
+handler's lease, journal, signal, or timer decisions. Simultaneous production
+partition loops and server-driven consumer-leader movement still need a
+cooperatively scheduled model comparison.
 
 Run the fixed fault cases and 1,000 seeded scenarios:
 
