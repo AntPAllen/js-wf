@@ -82,6 +82,17 @@ func TestThirtyDayTimerRetainedAcrossTwoFullRestarts(t *testing.T) {
 	}
 	source := fmt.Sprintf("wf.schedule.%s.%s.%d", typ, id, 0)
 	target := identity.RunSubject(typ, id, provision.Partitions)
+	var initialAckErr error
+	for ctx.Err() == nil {
+		initialAckErr = checkLongSchedule(ctx, all[0], source, target, fireAt)
+		if !errors.Is(initialAckErr, errInitialRunRetained) {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if initialAckErr != nil {
+		t.Fatalf("initial start run did not drain before restart: %v (ctx=%v)", initialAckErr, ctx.Err())
+	}
 	for index, js := range all {
 		if err := checkLongSchedule(ctx, js, source, target, fireAt); err != nil {
 			t.Fatalf("node %d before restart: %v", index, err)
@@ -124,6 +135,8 @@ func TestThirtyDayTimerRetainedAcrossTwoFullRestarts(t *testing.T) {
 	t.Logf("30-day schedule readable through all three nodes after two full cluster restarts; fire_at=%s", fireAt.Format(time.RFC3339Nano))
 }
 
+var errInitialRunRetained = errors.New("initial run remains retained")
+
 func checkLongSchedule(ctx context.Context, js jetstream.JetStream, source, target string, fireAt time.Time) error {
 	run, err := js.Stream(ctx, "WF_RUN")
 	if err != nil {
@@ -146,8 +159,13 @@ func checkLongSchedule(ctx context.Context, js jetstream.JetStream, source, targ
 	if got := stored.Header.Get(jetstream.ScheduleTargetHeader); got != target {
 		return fmt.Errorf("schedule target=%q", got)
 	}
-	if _, err := run.GetLastMsgForSubject(ctx, target); !errors.Is(err, jetstream.ErrMsgNotFound) {
-		return fmt.Errorf("30-day timer fired early or target read failed: %v", err)
+	if delivered, err := run.GetLastMsgForSubject(ctx, target); err == nil {
+		if delivered.Header.Get(identity.TimerInvSeqHeader) != "" || delivered.Header.Get(identity.TimerStepHeader) != "" {
+			return fmt.Errorf("30-day timer fired early: target sequence=%d headers=%v", delivered.Sequence, delivered.Header)
+		}
+		return fmt.Errorf("%w: target sequence=%d", errInitialRunRetained, delivered.Sequence)
+	} else if !errors.Is(err, jetstream.ErrMsgNotFound) {
+		return fmt.Errorf("30-day timer target read failed: %w", err)
 	}
 	return nil
 }
