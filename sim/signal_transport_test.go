@@ -3,6 +3,7 @@ package sim
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -118,6 +119,15 @@ func runSeededSignalRepairScenario(seed int64, replay *Trace) (trace Trace, runE
 			}
 		}
 	}
+	report, err := CheckSignalWakeupLiveness(model)
+	if err != nil || len(report.Missing) != 0 {
+		return trace, fmt.Errorf("seed %d signal liveness: enabled=%d waiting=%v missing=%v err=%v", seed, report.Enabled, report.Waiting, report.Missing, err)
+	}
+	waiting, err := json.Marshal(report.Waiting)
+	if err != nil {
+		return trace, err
+	}
+	schedule.RecordTransport(TransportEvent{Operation: "check_signal_liveness", Sequence: uint64(report.Enabled), DataSHA256: digest(waiting), Outcome: "ok", AtMillis: schedule.NowMillis()})
 	if err := schedule.Finish(); err != nil {
 		return trace, err
 	}
