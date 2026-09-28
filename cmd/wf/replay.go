@@ -6,11 +6,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"plugin"
 
+	"js-wf/client"
 	"js-wf/identity"
 	"js-wf/journal"
 	"js-wf/wf"
@@ -23,11 +25,14 @@ type replayReport struct {
 	ID             string          `json:"id"`
 	InvSeq         uint64          `json:"inv_seq"`
 	JournalEntries int             `json:"journal_entries"`
-	Result         json.RawMessage `json:"result"`
+	Status         string          `json:"status"`
+	Result         json.RawMessage `json:"result,omitempty"`
+	Error          string          `json:"error,omitempty"`
+	WaitingOn      string          `json:"waiting_on,omitempty"`
 }
 
-// ReplayBundle contains every durable input that a completed handler needs
-// for offline replay. []byte fields are base64-encoded by JSON.
+// replayBundle contains the durable inputs needed to replay a handler offline.
+// []byte fields are base64-encoded by JSON.
 type replayBundle struct {
 	Type      string            `json:"type"`
 	ID        string            `json:"id"`
@@ -162,8 +167,28 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 	if err := checkReplayInput(bundle); err != nil {
 		return report, err
 	}
-	if len(bundle.Journal) == 0 || bundle.Journal[len(bundle.Journal)-1].Kind != journal.Completed {
-		return report, fmt.Errorf("replay requires a completed invocation")
+	if len(bundle.Journal) == 0 {
+		return report, fmt.Errorf("replay journal is empty")
+	}
+	tail := bundle.Journal[len(bundle.Journal)-1]
+	if tail.Kind != journal.Completed && tail.Kind != journal.Failed && tail.Kind != journal.Suspended {
+		return report, fmt.Errorf("replay requires a completed, failed or suspended journal tail")
+	}
+	if tail.Kind == journal.Failed {
+		var outcome wf.Outcome
+		if json.Unmarshal(tail.Payload, &outcome) == nil && outcome.Error == client.ErrCancelled.Error() {
+			for _, record := range bundle.Journal {
+				if record.Kind != journal.SignalConsumed {
+					continue
+				}
+				var signal struct {
+					Name string `json:"name"`
+				}
+				if json.Unmarshal(record.Payload, &signal) == nil && signal.Name == client.CancelSignalName {
+					return report, fmt.Errorf("replay cannot verify cancellation: the worker committed failure before calling the handler")
+				}
+			}
+		}
 	}
 	loaded, err := plugin.Open(pluginPath)
 	if err != nil {
@@ -181,18 +206,55 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 	if err != nil {
 		return report, err
 	}
-	result, err := wf.Replay(journalBytes, func(c *wf.Context) (json.RawMessage, error) {
+	var observed wf.ReplayObservation
+	result, replayErr := wf.Replay(journalBytes, func(c *wf.Context) (json.RawMessage, error) {
 		return handler(c, bundle.Input)
-	}, wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects})
-	if err != nil {
-		return report, fmt.Errorf("replay %s.%s: %w", bundle.Type, bundle.ID, err)
+	}, wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects, Observation: &observed})
+	if observed.PlayedSteps != observed.RecordedSteps {
+		if errors.Is(replayErr, wf.ErrNonDeterministic) {
+			return report, fmt.Errorf("replay %s.%s: %w", bundle.Type, bundle.ID, replayErr)
+		}
+		return report, fmt.Errorf("%w: replay consumed %d/%d recorded steps", wf.ErrNonDeterministic, observed.PlayedSteps, observed.RecordedSteps)
+	}
+	report = replayReport{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, JournalEntries: len(bundle.Journal)}
+	if tail.Kind == journal.Suspended {
+		var suspended struct {
+			WaitingOn string `json:"waiting_on"`
+		}
+		if err := json.Unmarshal(tail.Payload, &suspended); err != nil || suspended.WaitingOn == "" {
+			return replayReport{}, fmt.Errorf("invalid suspended journal tail: %v", err)
+		}
+		if !errors.Is(replayErr, wf.ErrSuspended) || observed.WaitingOn != suspended.WaitingOn {
+			return replayReport{}, fmt.Errorf("replayed wait differs from suspended journal: replay=%q error=%v recorded=%q", observed.WaitingOn, replayErr, suspended.WaitingOn)
+		}
+		report.Status, report.WaitingOn = "suspended", suspended.WaitingOn
+		return report, nil
 	}
 	var outcome wf.Outcome
-	if err := json.Unmarshal(bundle.Journal[len(bundle.Journal)-1].Payload, &outcome); err != nil {
+	if err := json.Unmarshal(tail.Payload, &outcome); err != nil {
 		return report, fmt.Errorf("decode terminal outcome for %s.%s: %w", bundle.Type, bundle.ID, err)
 	}
-	if outcome.InvSeq != bundle.InvSeq || outcome.Error != "" {
-		return report, fmt.Errorf("replay requires a successful terminal outcome for the same invocation generation")
+	if outcome.InvSeq != bundle.InvSeq {
+		return report, fmt.Errorf("terminal outcome has a different invocation generation")
+	}
+	if tail.Kind == journal.Failed {
+		if replayErr == nil || errors.Is(replayErr, wf.ErrNonDeterministic) || errors.Is(replayErr, wf.ErrCorruptJournal) || errors.Is(replayErr, wf.ErrReplayObjectMissing) {
+			if replayErr != nil {
+				return replayReport{}, fmt.Errorf("replay %s.%s did not reproduce terminal failure: %w", bundle.Type, bundle.ID, replayErr)
+			}
+			return replayReport{}, fmt.Errorf("replay %s.%s did not reproduce terminal failure: %v", bundle.Type, bundle.ID, replayErr)
+		}
+		if outcome.Error == "" || replayErr.Error() != outcome.Error {
+			return replayReport{}, fmt.Errorf("replayed error differs from terminal outcome: replay=%q recorded=%q", replayErr, outcome.Error)
+		}
+		report.Status, report.Error = "failed", outcome.Error
+		return report, nil
+	}
+	if replayErr != nil {
+		return replayReport{}, fmt.Errorf("replay %s.%s: %w", bundle.Type, bundle.ID, replayErr)
+	}
+	if outcome.Error != "" {
+		return report, fmt.Errorf("completed journal has a terminal error")
 	}
 	committed, err := outcome.ResultBytes(context.Background(), func(_ context.Context, name string) ([]byte, error) {
 		data, ok := bundle.Objects[name]
@@ -207,5 +269,6 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 	if !bytes.Equal(result, committed) {
 		return report, fmt.Errorf("replayed result differs from terminal outcome for %s.%s", bundle.Type, bundle.ID)
 	}
-	return replayReport{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, JournalEntries: len(bundle.Journal), Result: result}, nil
+	report.Status, report.Result = "completed", result
+	return report, nil
 }

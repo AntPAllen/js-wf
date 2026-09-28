@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"js-wf/identity"
 	"js-wf/journal"
@@ -15,10 +16,19 @@ import (
 var ErrReplayObjectMissing = errors.New("offline replay object is missing")
 
 type ReplayOptions struct {
-	Type    string
-	ID      string
-	InvSeq  uint64
-	Objects map[string][]byte
+	Type        string
+	ID          string
+	InvSeq      uint64
+	Objects     map[string][]byte
+	Observation *ReplayObservation
+}
+
+// ReplayObservation describes the handler state reached while replaying
+// recorded steps. A caller can compare it with a Suspended or Failed tail.
+type ReplayObservation struct {
+	WaitingOn     string
+	PlayedSteps   int
+	RecordedSteps int
 }
 
 // Replay runs a workflow against serialized []journal.Record without NATS.
@@ -115,14 +125,21 @@ func Replay[T any](journalBytes []byte, fn func(*Context) (T, error), options ..
 	}
 	c := NewContext(context.Background(), entries, nil, signals...)
 	c.SetResultStore(nil, loadObject)
+	// A recorded sleep or child call may have suspended before it completed.
+	// Reaching that recorded boundary must not publish a fresh schedule or start
+	// a child while replaying offline.
+	c.SetTimerSupport(time.Time{}, nil, func(context.Context, uint64, time.Time) error { return nil })
 	if opts.Type != "" {
-		c.SetChildSupport(opts.Type, opts.ID, opts.InvSeq, nil)
+		c.SetChildSupport(opts.Type, opts.ID, opts.InvSeq, func(context.Context, string, string, []byte, string) error { return nil })
 	}
 	defer func() {
+		if opts.Observation != nil {
+			*opts.Observation = ReplayObservation{WaitingOn: c.WaitingOn(), PlayedSteps: c.position, RecordedSteps: len(c.entries)}
+		}
 		if panicValue := recover(); panicValue != nil {
 			var zero T
 			result = zero
-			err = fmt.Errorf("workflow panic during replay: %v", panicValue)
+			err = fmt.Errorf("workflow panic: %v", panicValue)
 		}
 	}()
 	result, err = fn(c)

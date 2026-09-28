@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
+	"time"
 
 	"js-wf/wf"
 )
@@ -65,4 +67,50 @@ func LargeWorkflow(c *wf.Context, raw json.RawMessage) (json.RawMessage, error) 
 		return nil, err
 	}
 	return json.Marshal(len(value))
+}
+
+func FailWorkflow(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+	_, err := wf.Run(c, "fail", 7, func(context.Context) (int, error) {
+		if marker := os.Getenv("WF_REPLAY_EFFECT_MARKER"); marker != "" {
+			_ = os.WriteFile(marker, []byte("effect ran"), 0600)
+		}
+		return 0, errors.New("boom")
+	})
+	return nil, err
+}
+
+func ChangedFailure(c *wf.Context, raw json.RawMessage) (json.RawMessage, error) {
+	_, err := FailWorkflow(c, raw)
+	if err != nil {
+		return nil, errors.New("changed failure")
+	}
+	return nil, nil
+}
+
+func ImmediateFailure(*wf.Context, json.RawMessage) (json.RawMessage, error) {
+	return nil, errors.New("boom")
+}
+
+func WaitSignalWorkflow(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+	_, err := wf.AwaitSignal(c, "go")
+	if err != nil {
+		return nil, err
+	}
+	return json.RawMessage(`true`), nil
+}
+
+func ChangedWait(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+	_, err := wf.AwaitSignal(c, "other")
+	return nil, err
+}
+
+func WaitTimerWorkflow(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+	if err := wf.Sleep(c, "later", time.Hour); err != nil {
+		return nil, err
+	}
+	return json.RawMessage(`true`), nil
+}
+
+func PanicWorkflow(*wf.Context, json.RawMessage) (json.RawMessage, error) {
+	panic("boom")
 }

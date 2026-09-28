@@ -1,11 +1,13 @@
-# Replay a completed workflow
+# Replay a workflow
 
 `wf replay` runs the caller's workflow handler against its retained journal
 through `wf.Replay`. It reads invocation input and referenced `WF_BLOB`
-objects, then checks that the replayed result bytes equal the terminal result.
-Recorded `wf.Run` effects are read from the journal and are not invoked again.
-The command currently accepts completed invocations; failed and suspended
-invocations are not yet supported.
+objects. For a completed invocation, it compares the replayed result bytes
+with the terminal result. For a failed invocation, it compares the replayed
+handler error with the terminal error. For a suspended invocation, it checks
+that replay reaches the same recorded wait. Recorded `wf.Run` effects are
+read from the journal and are not invoked again. A recorded timer or child
+request does not publish or start anything during replay.
 
 The CLI is generic, so it needs the workflow's Go code as a plugin. Build the
 plugin and CLI with the same Go toolchain and the same `js-wf` source version.
@@ -36,6 +38,11 @@ To capture the durable inputs and replay without a NATS connection:
 
 The bundle contains the invocation input, logical journal, and referenced
 Object Store bytes. Offline replay checks the input hash, journal step order,
-step and signal object hashes, and terminal result. The command returns a
-nonzero exit status if a step differs, an object is missing or corrupt, or the
-replayed result differs from the committed result.
+step and signal object hashes, and the matching terminal result, error, or
+wait. The command returns a nonzero exit status if a step differs, an object
+is missing or corrupt, or replay reaches a different outcome.
+
+A cancellation can fail an invocation before the worker calls its handler.
+That path cannot be verified by rerunning the handler and is not yet supported
+by this command. The same limitation may apply to other failures committed
+without a final handler execution.

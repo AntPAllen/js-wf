@@ -357,3 +357,159 @@ func TestJournalCapacityAlert(t *testing.T) {
 		t.Fatalf("capacity report=%+v err=%v", reported, err)
 	}
 }
+
+func TestOperatorReplayFailedAndSuspended(t *testing.T) {
+	cluster, err := testcluster.Start(t.TempDir(), 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	js, err := jetstream.New(cluster.Clients[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	defer cancel()
+	if err := provision.Ensure(ctx, js, 1); err != nil {
+		t.Fatal(err)
+	}
+	pluginPath := buildReplayPlugin(t)
+	base := []string{"-url", cluster.Servers[0].ClientURL(), "-handler-plugin", pluginPath}
+	const typ = "replay-state"
+	startAndWait := func(id string, handler worker.Handler, want journal.Kind, options ...worker.Option) {
+		t.Helper()
+		w, err := worker.New(ctx, js, "replay-state-"+id, map[string]worker.Handler{typ: handler}, options...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		workerCtx, stop := context.WithCancel(ctx)
+		done := make(chan error, 1)
+		go func() { done <- w.RunPartition(workerCtx, identity.Partition(typ, id, provision.Partitions)) }()
+		defer func() {
+			stop()
+			if err := <-done; err != nil {
+				t.Errorf("worker %s: %v", id, err)
+			}
+		}()
+		if _, err := client.New(js).Start(ctx, typ, id, []byte(`null`)); err != nil {
+			t.Fatal(err)
+		}
+		for ctx.Err() == nil {
+			records, _, err := journal.New(js).Read(ctx, typ, id)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(records) > 0 && records[len(records)-1].Kind == want {
+				return
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+		t.Fatalf("workflow %s did not reach %s: %v", id, want, ctx.Err())
+	}
+	startAndWait("failed-step", func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		_, err := wf.Run(c, "fail", 7, func(context.Context) (int, error) { return 0, errors.New("boom") })
+		return nil, err
+	}, journal.Failed)
+	startAndWait("failed-panic", func(*wf.Context, json.RawMessage) (json.RawMessage, error) {
+		panic("boom")
+	}, journal.Failed, worker.WithMaxPanicAttempts(1))
+	startAndWait("waiting-signal", func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		_, err := wf.AwaitSignal(c, "go")
+		return nil, err
+	}, journal.Suspended)
+	startAndWait("waiting-timer", func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		return nil, wf.Sleep(c, "later", time.Hour)
+	}, journal.Suspended)
+	const cancelledID = "cancelled"
+	cancelWorker, err := worker.New(ctx, js, "replay-state-cancelled", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		_, err := wf.AwaitSignal(c, "go")
+		return nil, err
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cancelCtx, stopCancelWorker := context.WithCancel(ctx)
+	cancelDone := make(chan error, 1)
+	go func() {
+		cancelDone <- cancelWorker.RunPartition(cancelCtx, identity.Partition(typ, cancelledID, provision.Partitions))
+	}()
+	cancelClient := client.New(js)
+	if _, err := cancelClient.Start(ctx, typ, cancelledID, []byte(`null`)); err != nil {
+		t.Fatal(err)
+	}
+	for ctx.Err() == nil {
+		records, _, err := journal.New(js).Read(ctx, typ, cancelledID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(records) > 0 && records[len(records)-1].Kind == journal.Suspended {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if _, err := cancelClient.Cancel(ctx, typ, cancelledID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := cancelClient.Await(ctx, typ, cancelledID); !errors.Is(err, client.ErrCancelled) {
+		t.Fatalf("cancelled replay fixture: %v", err)
+	}
+	stopCancelWorker()
+	if err := <-cancelDone; err != nil {
+		t.Fatal(err)
+	}
+	marker := filepath.Join(t.TempDir(), "effect")
+	t.Setenv("WF_REPLAY_EFFECT_MARKER", marker)
+	check := func(id, symbol, status, detail string) {
+		t.Helper()
+		var out bytes.Buffer
+		args := append(append([]string{}, base...), "-handler-symbol", symbol, "replay", typ, id)
+		if err := run(args, &out); err != nil {
+			t.Fatalf("replay %s: %v", id, err)
+		}
+		var report replayReport
+		if err := json.Unmarshal(out.Bytes(), &report); err != nil || report.Status != status || report.ID != id || status == "failed" && report.Error != detail || status == "suspended" && report.WaitingOn != detail {
+			t.Fatalf("replay %s report=%+v err=%v", id, report, err)
+		}
+	}
+	check("failed-step", "FailWorkflow", "failed", "boom")
+	check("failed-panic", "PanicWorkflow", "failed", "workflow panic: boom")
+	check("waiting-signal", "WaitSignalWorkflow", "suspended", "signal:go")
+	check("waiting-timer", "WaitTimerWorkflow", "suspended", "timer:later")
+	if _, err := os.Stat(marker); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("failed effect ran during replay: %v", err)
+	}
+	var changed bytes.Buffer
+	if err := run(append(append([]string{}, base...), "-handler-symbol", "ChangedFailure", "replay", typ, "failed-step"), &changed); err == nil || !strings.Contains(err.Error(), "replayed error differs") {
+		t.Fatalf("changed failure replay: %v", err)
+	}
+	changed.Reset()
+	if err := run(append(append([]string{}, base...), "-handler-symbol", "ImmediateFailure", "replay", typ, "failed-step"), &changed); !errors.Is(err, wf.ErrNonDeterministic) {
+		t.Fatalf("failure skipped recorded step: %v", err)
+	}
+	changed.Reset()
+	if err := run(append(append([]string{}, base...), "-handler-symbol", "ChangedWait", "replay", typ, "waiting-signal"), &changed); !errors.Is(err, wf.ErrNonDeterministic) {
+		t.Fatalf("changed suspended wait: %v", err)
+	}
+	changed.Reset()
+	if err := run(append(append([]string{}, base...), "-handler-symbol", "WaitSignalWorkflow", "replay", typ, cancelledID), &changed); err == nil || !strings.Contains(err.Error(), "cannot verify cancellation") {
+		t.Fatalf("cancelled handler replay: %v", err)
+	}
+	for _, caseID := range []string{"failed-step", "waiting-timer"} {
+		var exported bytes.Buffer
+		if err := run([]string{"-url", cluster.Servers[0].ClientURL(), "export-replay", typ, caseID}, &exported); err != nil {
+			t.Fatal(err)
+		}
+		bundlePath := filepath.Join(t.TempDir(), caseID+".json")
+		if err := os.WriteFile(bundlePath, exported.Bytes(), 0600); err != nil {
+			t.Fatal(err)
+		}
+		symbol := "FailWorkflow"
+		if caseID == "waiting-timer" {
+			symbol = "WaitTimerWorkflow"
+		}
+		var offline bytes.Buffer
+		if err := run([]string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", symbol, "-replay-bundle", bundlePath, "replay"}, &offline); err != nil {
+			t.Fatalf("offline replay %s: %v", caseID, err)
+		}
+	}
+}
