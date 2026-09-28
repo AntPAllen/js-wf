@@ -117,6 +117,76 @@ func TestWorkflowSleep(t *testing.T) {
 	}
 }
 
+func TestNonPositiveTimersCompleteWithoutWakeup(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	const typ, id = "test", "immediate-timers"
+	w, err := worker.New(ctx, all[1], "immediate-timer-worker", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		if err := wf.Sleep(c, "zero-sleep", 0); err != nil {
+			return nil, err
+		}
+		if err := wf.Sleep(c, "negative-sleep", -time.Second); err != nil {
+			return nil, err
+		}
+		for _, item := range []struct {
+			name     string
+			duration time.Duration
+		}{{"zero-timer", 0}, {"negative-timer", -time.Second}} {
+			timer, err := c.Timer(item.name, item.duration)
+			if err != nil {
+				return nil, err
+			}
+			if err := timer.Await(); err != nil {
+				return nil, err
+			}
+		}
+		return json.RawMessage(`true`), nil
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	workerCtx, stop := context.WithCancel(ctx)
+	defer stop()
+	done := make(chan error, 1)
+	go func() { done <- w.RunPartition(workerCtx, identity.Partition(typ, id, provision.Partitions)) }()
+	c := client.New(all[0])
+	if _, err := c.Start(ctx, typ, id, []byte(`null`)); err != nil {
+		t.Fatal(err)
+	}
+	value, err := c.Await(ctx, typ, id)
+	if err != nil || string(value) != "true" {
+		t.Fatalf("result=%s err=%v", value, err)
+	}
+	stop()
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+	if m := w.Metrics(); m.TimersScheduled != 0 || m.TimersFired != 0 {
+		t.Fatalf("immediate timer metrics: %+v", m)
+	}
+	records, _, err := journal.New(all[2]).Read(ctx, typ, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, record := range records {
+		if record.Kind == journal.Suspended {
+			t.Fatal("immediate timer suspended the workflow")
+		}
+	}
+	run, err := all[0].Stream(ctx, "WF_RUN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, err := run.Info(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.State.Msgs != 0 {
+		t.Fatalf("run messages=%d, want no retained wakeups after ack", info.State.Msgs)
+	}
+}
+
 func TestTimerCancellationBeforeScheduledWakeup(t *testing.T) {
 	all, _ := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
