@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -42,17 +43,18 @@ type signalRecord struct {
 }
 
 type Worker struct {
-	js               jetstream.JetStream
-	jrn              *journal.Store
-	leases           *lease.Store
-	state            jetstream.KeyValue
-	client           *client.Client
-	ID               string
-	Handlers         map[string]Handler
-	maxEntries       uint64
-	maxPanicAttempts int
-	nativeSchedules  bool
-	metrics          metricsCounters
+	js                   jetstream.JetStream
+	jrn                  *journal.Store
+	leases               *lease.Store
+	state                jetstream.KeyValue
+	client               *client.Client
+	ID                   string
+	Handlers             map[string]Handler
+	maxEntries           uint64
+	maxPanicAttempts     int
+	partitionConcurrency int
+	nativeSchedules      bool
+	metrics              metricsCounters
 }
 
 type Option func(*Worker) error
@@ -65,6 +67,19 @@ func WithMaxPanicAttempts(count int) Option {
 			return fmt.Errorf("max panic attempts must be positive")
 		}
 		w.maxPanicAttempts = count
+		return nil
+	}
+}
+
+// WithPartitionConcurrency bounds the number of messages handled at once by
+// each partition loop. The invocation lease still serializes messages for the
+// same workflow. The default is one, preserving strict serial dispatch.
+func WithPartitionConcurrency(count int) Option {
+	return func(w *Worker) error {
+		if count < 1 || count > 32 {
+			return fmt.Errorf("partition concurrency must be between 1 and 32")
+		}
+		w.partitionConcurrency = count
 		return nil
 	}
 }
@@ -94,7 +109,7 @@ func New(ctx context.Context, js jetstream.JetStream, id string, handlers map[st
 			return nil, fmt.Errorf("fallback timer stream: %w", err)
 		}
 	}
-	w := &Worker{js: js, jrn: journal.New(js), leases: l, state: state, client: client.New(js), ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, nativeSchedules: runInfo.Config.AllowMsgSchedules}
+	w := &Worker{js: js, jrn: journal.New(js), leases: l, state: state, client: client.New(js), ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, nativeSchedules: runInfo.Config.AllowMsgSchedules}
 	for _, option := range options {
 		if err := option(w); err != nil {
 			return nil, err
@@ -136,6 +151,17 @@ func (w *Worker) consumer(ctx context.Context, partition uint32) (jetstream.Cons
 // RunPartition processes one partition until cancellation. Multiple workers
 // may share the consumer; the per-invocation lease fences concurrent delivery.
 func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
+	var slots chan struct{}
+	var active sync.WaitGroup
+	if w.partitionConcurrency > 1 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithCancel(ctx)
+		slots = make(chan struct{}, w.partitionConcurrency)
+		defer func() {
+			cancel()
+			active.Wait()
+		}()
+	}
 	for ctx.Err() == nil {
 		c, err := w.consumer(ctx, partition)
 		if err != nil {
@@ -150,8 +176,18 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 			continue
 		}
 		for ctx.Err() == nil {
+			if slots != nil {
+				select {
+				case slots <- struct{}{}:
+				case <-ctx.Done():
+					return nil
+				}
+			}
 			batch, err := c.Fetch(1, jetstream.FetchMaxWait(time.Second))
 			if err != nil {
+				if slots != nil {
+					<-slots
+				}
 				if ctx.Err() != nil {
 					return nil
 				}
@@ -163,8 +199,22 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 				}
 				return err
 			}
+			dispatched := false
 			for msg := range batch.Messages() {
-				w.handle(ctx, msg)
+				dispatched = true
+				if slots == nil {
+					w.handle(ctx, msg)
+					continue
+				}
+				active.Add(1)
+				go func(msg jetstream.Msg) {
+					defer active.Done()
+					defer func() { <-slots }()
+					w.handle(ctx, msg)
+				}(msg)
+			}
+			if slots != nil && !dispatched {
+				<-slots
 			}
 			if err := batch.Error(); err != nil && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
 				if ctx.Err() != nil {
