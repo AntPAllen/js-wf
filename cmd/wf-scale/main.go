@@ -49,6 +49,7 @@ func main() {
 	child := flag.Bool("server", false, "run one benchmark NATS server")
 	countList := flag.String("counts", "100000,1000000", "ascending subject counts per stream")
 	workers := flag.Int("workers", 96, "concurrent publishers")
+	minAvailableMiB := flag.Int64("min-available-mib", 0, "stop if Linux MemAvailable falls below this many MiB; 0 disables the guard")
 	root := flag.String("root", "", "store and report directory; default temporary")
 	port := flag.Int("port", 0, "child client port")
 	routePort := flag.Int("route-port", 0, "child route port")
@@ -63,11 +64,11 @@ func main() {
 		return
 	}
 	counts, err := parseCounts(*countList)
-	if err != nil || *workers < 1 || *workers > 512 {
-		fmt.Fprintln(os.Stderr, "invalid counts or workers:", err)
+	if err != nil || *workers < 1 || *workers > 512 || *minAvailableMiB < 0 || *minAvailableMiB > 1<<40 {
+		fmt.Fprintln(os.Stderr, "invalid counts, workers, or memory threshold:", err)
 		os.Exit(2)
 	}
-	if err := run(counts, *workers, *root); err != nil {
+	if err := run(counts, *workers, *root, *minAvailableMiB); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -115,7 +116,7 @@ func freePort() (int, error) {
 	return l.Addr().(*net.TCPAddr).Port, nil
 }
 
-func run(counts []int, workers int, root string) (runErr error) {
+func run(counts []int, workers int, root string, minAvailableMiB int64) (runErr error) {
 	if root == "" {
 		var err error
 		root, err = os.MkdirTemp("", "wf-scale-")
@@ -223,6 +224,11 @@ func run(counts []int, workers int, root string) (runErr error) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Minute)
 	defer cancel()
+	guardCtx, stopGuard := context.WithCancelCause(ctx)
+	defer stopGuard(nil)
+	if minAvailableMiB > 0 {
+		go watchAvailableMemory(guardCtx, uint64(minAvailableMiB)*1024*1024, stopGuard)
+	}
 	for {
 		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
 		err := provision.Ensure(attempt, all[0], 3)
@@ -242,15 +248,25 @@ func run(counts []int, workers int, root string) (runErr error) {
 	previous := 0
 	for _, count := range counts {
 		started := time.Now()
-		if err := publishRange(ctx, all, previous, count, workers); err != nil {
+		publishErr := publishRange(guardCtx, all, previous, count, workers)
+		if err := context.Cause(guardCtx); err != nil {
 			return err
 		}
+		if publishErr != nil {
+			return publishErr
+		}
 		time.Sleep(3 * time.Second)
+		if err := context.Cause(guardCtx); err != nil {
+			return err
+		}
 		s := sample{Subjects: count, Elapsed: time.Since(started).String()}
 		if err := readRSS(children, &s.RSSBytes); err != nil {
 			return err
 		}
-		if err := inspect(ctx, all, &s); err != nil {
+		if err := inspect(guardCtx, all, &s); err != nil {
+			if cause := context.Cause(guardCtx); cause != nil {
+				return cause
+			}
 			return err
 		}
 		report.Samples = append(report.Samples, s)
@@ -328,6 +344,49 @@ func readRSS(children [3]*exec.Cmd, out *[3]uint64) error {
 		}
 	}
 	return nil
+}
+
+func watchAvailableMemory(ctx context.Context, minimum uint64, stop context.CancelCauseFunc) {
+	ticker := time.NewTicker(250 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		available, err := availableMemory()
+		if err != nil {
+			stop(fmt.Errorf("memory guard: %w", err))
+			return
+		}
+		if available < minimum {
+			stop(fmt.Errorf("memory guard: MemAvailable %d MiB below %d MiB", available/(1024*1024), minimum/(1024*1024)))
+			return
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+		}
+	}
+}
+
+func availableMemory() (uint64, error) {
+	data, err := os.ReadFile("/proc/meminfo")
+	if err != nil {
+		return 0, err
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		if !strings.HasPrefix(line, "MemAvailable:") {
+			continue
+		}
+		fields := strings.Fields(line)
+		if len(fields) != 3 || fields[2] != "kB" {
+			return 0, fmt.Errorf("invalid MemAvailable line %q", line)
+		}
+		kb, err := strconv.ParseUint(fields[1], 10, 64)
+		if err != nil {
+			return 0, err
+		}
+		return kb * 1024, nil
+	}
+	return 0, errors.New("MemAvailable missing from /proc/meminfo")
 }
 
 func inspect(ctx context.Context, all [3]jetstream.JetStream, s *sample) error {

@@ -5,7 +5,7 @@ processes with file storage and three replicas. It calls `provision.Ensure`,
 then writes one one-byte message per distinct ID to each of `WF_INV` and
 `WF_JRN`. At every checkpoint it checks both stream message and subject counts
 through each node, reads each server process's Linux `VmRSS`, and times five
-`Stream.Info` calls per stream and node. The JSON report is
+`Stream.Info` calls per stream and node. The original JSON report is
 [`subject-cardinality-2026-09-28.json`](subject-cardinality-2026-09-28.json).
 
 | Subjects in each stream | Node 0 RSS | Node 1 RSS | Node 2 RSS | Median `Stream.Info` latency across six node/stream pairs |
@@ -22,19 +22,38 @@ seconds after publishing. They are not a stable per-subject cost or a bound for
 larger deployments. The message payload is deliberately tiny, so this isolates
 index-heavy usage more than real workflow payload usage.
 
+After the VM grew to 15 GiB RAM and 35 GiB disk, the same harness completed
+fresh three-node runs through [5M](subject-cardinality-5m-2026-09-28.json) and
+[10M](subject-cardinality-10m-2026-09-28.json) subjects per stream. These
+checkpoints again matched the exact message and subject counts on every node.
+The 10M tier retained 20M distinct subjects per server across the two streams.
+
+| Subjects in each stream | Run | Node 0 RSS | Node 1 RSS | Node 2 RSS | Median `Stream.Info` range |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 3,000,000 | 5M run | 1,448.7 MiB | 1,630.3 MiB | 1,494.8 MiB | 0.138–0.253 ms |
+| 5,000,000 | 10M run | 2,181.9 MiB | 2,177.9 MiB | 2,292.4 MiB | 0.205–0.623 ms |
+| 10,000,000 | 10M run | 3,365.2 MiB | 3,393.1 MiB | 3,573.9 MiB | 0.116–0.427 ms |
+
+The 10M run published its final 5M IDs per stream in 3m2s with 96 concurrent
+publishers. Each server held a full file-backed replica; the retained stores
+used 2.9 GiB of disk together. These values are one run's whole-process RSS
+and stream-info timings, not a capacity guarantee for larger payloads or live
+workflow traffic.
+
 Run the same tiers on a host with enough memory for three full replicas:
 
 ```sh
 go build -o /tmp/wf-scale ./cmd/wf-scale
-/tmp/wf-scale -root /tmp/wf-scale-10m -counts 1000000,5000000,10000000 -workers 96
+/tmp/wf-scale -root /tmp/wf-scale-10m -counts 1000000,5000000,10000000 \
+  -workers 96 -min-available-mib 2048
 ```
 
 Use a fresh root for every run. The harness writes `report.json` after each
 completed checkpoint and retains the file stores when a root is specified.
-The 5M and 10M tiers were not run on this 7.7 GiB VM: extrapolating the
-observed 1M RSS across three processes approaches or exceeds its RAM, and the
-measurement would risk an out-of-memory kill. Those tiers remain required by
-the plan.
+The optional memory guard cancels publishing if Linux `MemAvailable` falls below
+the requested threshold; the 2 GiB guard did not fire in the 10M run. It was
+also exercised with a threshold above available RAM and stopped before the
+first checkpoint.
 
 ## CAS append throughput
 

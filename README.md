@@ -106,6 +106,6 @@ another node. The manually triggered `long-journal` CI job also runs it.
 
 For the separate-process subject-cardinality measurement, see
 [`docs/scale/README.md`](docs/scale/README.md). The recorded three-replica run
-reached 1M subjects in each of `WF_INV` and `WF_JRN`; 5M and 10M tiers need a
-larger host. The same document records hot-journal and concurrent CAS append
+reached 10M subjects in each of `WF_INV` and `WF_JRN` after the VM expansion.
+The same document records hot-journal and concurrent CAS append
 throughput from `cmd/wf-cas-bench`.
