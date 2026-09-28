@@ -774,6 +774,12 @@ func (w *Worker) persistAndNotify(ctx context.Context, typ, id string, invSeq ui
 	if err := w.persistOutcome(ctx, typ, id, invSeq, payload); err != nil {
 		return err
 	}
+	return NotifyParentWithClient(ctx, w.client, typ, id, invSeq, payload, headers)
+}
+
+// NotifyParentWithClient sends a terminal child outcome only to the parent
+// generation that started it. A retry uses the same child-derived signal key.
+func NotifyParentWithClient(ctx context.Context, c *client.Client, typ, id string, invSeq uint64, payload []byte, headers nats.Header) error {
 	parentType := headers.Get(client.ParentTypeHeader)
 	if parentType == "" {
 		return nil
@@ -786,7 +792,7 @@ func (w *Worker) persistAndNotify(ctx context.Context, typ, id string, invSeq ui
 	signalName := headers.Get(client.ParentSignalHeader)
 	digest := sha256.Sum256([]byte(identity.Key(typ, id) + ":" + strconv.FormatUint(invSeq, 10)))
 	key := "child-" + hex.EncodeToString(digest[:])
-	_, err = w.client.SignalToGeneration(ctx, parentType, parentID, signalName, payload, key, parentInvSeq)
+	_, err = c.SignalToGeneration(ctx, parentType, parentID, signalName, payload, key, parentInvSeq)
 	if errors.Is(err, client.ErrStaleGeneration) || errors.Is(err, client.ErrPurged) {
 		return nil
 	}

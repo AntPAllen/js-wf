@@ -107,6 +107,11 @@ func runSeededSignalPipeline(seed int64, replay *Trace) (trace Trace, runErr err
 			return trace, fmt.Errorf("seed %d signal %d mode=%s retained %d runs", seed, i, mode, got)
 		}
 	}
+	initialReport, err := CheckSignalWakeupLiveness(model)
+	if err != nil || initialReport.Enabled != 20 || len(initialReport.Waiting) != 0 {
+		return trace, fmt.Errorf("seed %d pre-drain signal liveness: enabled=%d waiting=%v missing=%v err=%v", seed, initialReport.Enabled, initialReport.Waiting, initialReport.Missing, err)
+	}
+	schedule.RecordTransport(TransportEvent{Operation: "check_signal_liveness", Sequence: uint64(initialReport.Enabled), Outcome: "pre_drain_ok", AtMillis: schedule.NowMillis()})
 	journalSubject := identity.JournalSubject(typ, id)
 	startSeq, err := journalStore.Append(ctx, typ, id, journal.Entry{Kind: journal.Started, Index: 0, Epoch: 1}, 0)
 	if err != nil {
@@ -200,6 +205,15 @@ func runSeededSignalPipeline(seed int64, replay *Trace) (trace Trace, runErr err
 	if err != nil || result.Reenqueued != 0 || len(model.Runs()) != before {
 		return trace, fmt.Errorf("seed %d post-consumption scan=%+v runs=%d/%d err=%v", seed, result, len(model.Runs()), before, err)
 	}
+	finalReport, err := CheckSignalWakeupLiveness(model)
+	if err != nil || finalReport.Enabled != 0 || len(finalReport.Missing) != 0 {
+		return trace, fmt.Errorf("seed %d post-drain signal liveness: enabled=%d waiting=%v missing=%v err=%v", seed, finalReport.Enabled, finalReport.Waiting, finalReport.Missing, err)
+	}
+	waiting, err := json.Marshal(finalReport.Waiting)
+	if err != nil {
+		return trace, err
+	}
+	schedule.RecordTransport(TransportEvent{Operation: "check_signal_liveness", DataSHA256: digest(waiting), Outcome: "post_drain_ok", AtMillis: schedule.NowMillis()})
 	if err := schedule.Finish(); err != nil {
 		return trace, err
 	}

@@ -396,6 +396,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededWorkerSignalDrain(loaded.Seed, &loaded)
 	case "signal_pipeline_20":
 		replayed, err = runSeededSignalPipeline(loaded.Seed, &loaded)
+	case "child_notification_20":
+		replayed, err = runSeededChildNotification(loaded.Seed, &loaded)
 	case "timer_scan_20":
 		replayed, err = runSeededTimerScan(loaded.Seed, &loaded)
 	case "reconcile_loop_20":

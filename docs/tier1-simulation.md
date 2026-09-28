@@ -21,7 +21,8 @@ verifies that the best generated trace reproduces the exact transport
 transcript on disk. A synthetic ten-choice failure shrinks to an earlier
 replayable failure. Actor removal and automatic CI shrinking remain.
 CI now replays a pinned corpus covering committed and dropped CAS unknowns,
-two-worker dispatch, competing suspended scanners, signal and suspended wakeup liveness,
+two-worker dispatch, competing suspended scanners, signal, suspended, and child
+notification liveness,
 retained-state checks, and workflow determinism. Go runs package tests from `sim/`, so the relative
 `sim-failure.json` output lands under the uploaded artifact path.
 An operation context can be cancelled while its actor is waiting for a
@@ -196,6 +197,21 @@ append loses its acknowledgment at a seeded position; worker redelivery
 reloads the retained journal and finishes without a duplicate entry. Every
 retained sequence and payload matches the replay records. Dispatch, lease
 fencing, and terminal result persistence are still separate modeled slices.
+
+The signal liveness checker also runs after 1,000 seeded production-client
+signal scenarios and before and after each seeded client-to-worker signal
+pipeline drains 20 signals. The checker sees every enabled signal before
+drain and no enabled signal after its journaled consumption. A further
+1,000-seed workload runs the worker's production child-to-parent notification
+decision through `Client.SignalToGeneration`, with distinct parent and child
+invocations and a retained child terminal journal. It injects dropped or
+unacknowledged signal publishes and wakeup enqueues, retries the same child
+notification, and checks one generation-bound signal and one parent wakeup.
+Reusing the parent ID fences the old child notification. The signal scanner
+deduplicates a further repair pass, and the retained-state liveness checker
+verifies the final state. Seed 42 is pinned and replays across processes.
+This covers child notification after a terminal outcome; the worker handler's
+terminal write and lease are still outside the model.
 
 The timer repair slice runs production `TimerScan.Scan` through retained
 invocation and journal reads and run enqueue on a narrow port. A 1,000-seed
