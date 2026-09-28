@@ -2,7 +2,7 @@
 
 An early Go implementation of the attached durable workflow plan. It uses NATS JetStream for write-once invocations, CAS journals, dispatch, leases, terminal results, and large input objects. The integration suite boots three real `nats-server` nodes in process.
 
-The [repository implementation plan](docs/implementation-plan.md) includes a detailed Tier 1 deterministic simulation design. The [journal and lease simulation slices](docs/tier1-simulation.md) each run 1,000 seeds in the default tests; [implementation status](docs/implementation-status.md) tracks what is actually verified.
+The [repository implementation plan](docs/implementation-plan.md) includes a detailed Tier 1 deterministic simulation design. The [journal, lease, and start simulation slices](docs/tier1-simulation.md) each run 1,000 seeds in the default tests; [implementation status](docs/implementation-status.md) tracks what is actually verified.
 
 ## What works
 

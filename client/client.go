@@ -53,11 +53,75 @@ type Handle struct {
 }
 
 type Client struct {
-	js       jetstream.JetStream
-	observer Observer
+	js        jetstream.JetStream
+	startPort StartPort
+	observer  Observer
 }
 
 func New(js jetstream.JetStream) *Client { return &Client{js: js} }
+
+// StartPort is the durable boundary used by Start and StartChild. The model
+// implements this small surface while the production adapter uses JetStream.
+type StartPort interface {
+	PublishInvocation(context.Context, *nats.Msg) (uint64, error)
+	LastInvocation(context.Context, string) (*jetstream.RawStreamMsg, error)
+	PutInput(context.Context, string, []byte) error
+	EnqueueRun(context.Context, string, []byte, string) error
+	Wait(context.Context, time.Duration) error
+}
+
+// NewWithStartPort runs production start decisions against a supplied port.
+func NewWithStartPort(port StartPort) *Client { return &Client{startPort: port} }
+
+type jetStreamStartPort struct{ js jetstream.JetStream }
+
+func (p jetStreamStartPort) PublishInvocation(ctx context.Context, msg *nats.Msg) (uint64, error) {
+	ack, err := p.js.PublishMsg(ctx, msg)
+	if err != nil {
+		return 0, err
+	}
+	return ack.Sequence, nil
+}
+
+func (p jetStreamStartPort) LastInvocation(ctx context.Context, subject string) (*jetstream.RawStreamMsg, error) {
+	stream, err := p.js.Stream(ctx, "WF_INV")
+	if err != nil {
+		return nil, err
+	}
+	return stream.GetLastMsgForSubject(ctx, subject)
+}
+
+func (p jetStreamStartPort) PutInput(ctx context.Context, key string, input []byte) error {
+	objects, err := p.js.ObjectStore(ctx, "WF_BLOB")
+	if err != nil {
+		return err
+	}
+	_, err = objects.PutBytes(ctx, key, input)
+	return err
+}
+
+func (p jetStreamStartPort) EnqueueRun(ctx context.Context, subject string, data []byte, dedupID string) error {
+	_, err := p.js.Publish(ctx, subject, data, jetstream.WithMsgID(dedupID))
+	return err
+}
+
+func (jetStreamStartPort) Wait(ctx context.Context, delay time.Duration) error {
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
+	}
+}
+
+func (c *Client) startOperations() StartPort {
+	if c.startPort != nil {
+		return c.startPort
+	}
+	return jetStreamStartPort{js: c.js}
+}
 
 // Start stores a write-once invocation and enqueues its first run. The writes
 // span two streams, so a reconciler must repair an invocation whose enqueue
@@ -127,22 +191,18 @@ func (c *Client) start(ctx context.Context, typ, id string, input []byte, parent
 		m.Header.Set(ParentSignalHeader, signalName)
 	}
 	if len(input) > MaxInlineInput {
-		objects, err := c.js.ObjectStore(ctx, "WF_BLOB")
-		if err != nil {
-			return h, err
-		}
 		key := "input-" + hex.EncodeToString(digest[:])
-		if _, err := objects.PutBytes(ctx, key, input); err != nil {
+		if err := c.startOperations().PutInput(ctx, key, input); err != nil {
 			return h, err
 		}
 		m.Data = nil
 		m.Header.Set(inputRefHeader, key)
 	}
-	var ack *jetstream.PubAck
+	var sequence uint64
 	var err error
 	for {
 		attemptCtx, stop := context.WithTimeout(ctx, 3*time.Second)
-		ack, err = c.js.PublishMsg(attemptCtx, m)
+		sequence, err = c.startOperations().PublishInvocation(attemptCtx, m)
 		stop()
 		if err == nil {
 			break
@@ -162,13 +222,11 @@ func (c *Client) start(ctx context.Context, typ, id string, input []byte, parent
 		if ctx.Err() != nil || errors.As(err, &apiErr) && !strings.Contains(apiErr.Description, "maximum messages per subject exceeded") {
 			return h, fmt.Errorf("%w: publish: %v; read: %v", ErrStartUnknown, err, getErr)
 		}
-		select {
-		case <-ctx.Done():
+		if waitErr := c.startOperations().Wait(ctx, 50*time.Millisecond); waitErr != nil {
 			return h, fmt.Errorf("%w: publish: %v; read: %v", ErrStartUnknown, err, getErr)
-		case <-time.After(50 * time.Millisecond):
 		}
 	}
-	h.InvSeq = ack.Sequence
+	h.InvSeq = sequence
 	if err := c.Enqueue(ctx, typ, id, "start:"+identity.Key(typ, id)+":"+strconv.FormatUint(h.InvSeq, 10)); err != nil {
 		return h, fmt.Errorf("%w: %v", ErrEnqueueUnknown, err)
 	}
@@ -179,30 +237,24 @@ func (c *Client) readStartAfterPublishError(ctx context.Context, subject string)
 	readCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 	var lastErr error
-	for {
-		stream, err := c.js.Stream(readCtx, "WF_INV")
+	for attempt := 0; attempt < 80; attempt++ {
+		existing, err := c.startOperations().LastInvocation(readCtx, subject)
 		if err == nil {
-			var existing *jetstream.RawStreamMsg
-			existing, err = stream.GetLastMsgForSubject(readCtx, subject)
-			if err == nil {
-				return existing, nil
-			}
+			return existing, nil
 		}
 		lastErr = err
-		select {
-		case <-readCtx.Done():
-			return nil, fmt.Errorf("%v: %w", lastErr, readCtx.Err())
-		case <-time.After(25 * time.Millisecond):
+		if err := c.startOperations().Wait(readCtx, 25*time.Millisecond); err != nil {
+			return nil, fmt.Errorf("%v: %w", lastErr, err)
 		}
 	}
+	return nil, lastErr
 }
 
 func (c *Client) Enqueue(ctx context.Context, typ, id, dedupID string) error {
 	if err := identity.Validate(typ, id); err != nil {
 		return err
 	}
-	_, err := c.js.Publish(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(identity.Key(typ, id)), jetstream.WithMsgID(dedupID))
-	return err
+	return c.startOperations().EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(identity.Key(typ, id)), dedupID)
 }
 
 // Signal stores an external event, then enqueues a wakeup. idempotencyKey

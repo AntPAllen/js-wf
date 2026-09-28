@@ -367,12 +367,18 @@ func TestReplayFaultTrace(t *testing.T) {
 		replayed, err = runSeededAppendScenario(loaded.Seed, &loaded)
 	case "lease_100":
 		replayed, err = runSeededLeaseScenario(loaded.Seed, &loaded)
+	case "client_start_20":
+		replayed, err = runSeededStartScenario(loaded.Seed, &loaded)
 	case "journal_two_writer_cas":
 		replayed, err = runTwoWriterCAS(loaded.Seed, &loaded)
 	case "lease_two_acquirer_fresh":
 		replayed, err = runTwoAcquirerRace(loaded.Seed, false, &loaded)
 	case "lease_two_acquirer_orphan":
 		replayed, err = runTwoAcquirerRace(loaded.Seed, true, &loaded)
+	case "client_two_starter_same":
+		replayed, err = runTwoStarterRace(loaded.Seed, false, &loaded)
+	case "client_two_starter_mismatch":
+		replayed, err = runTwoStarterRace(loaded.Seed, true, &loaded)
 	default:
 		t.Fatalf("unknown trace workload %q", loaded.Workload)
 	}

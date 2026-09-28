@@ -1,4 +1,4 @@
-# Tier 1 deterministic simulation: journal and lease slices
+# Tier 1 deterministic simulation: journal, lease, and start slices
 
 The first simulator slice runs the production `journal.Store.Append` decision
 path through a narrow `journal.AppendPort`. The production port still calls
@@ -38,6 +38,22 @@ renewal update acknowledgment. Both the real cluster and model report a lost
 lease; cleanup removes that owner's uncertain revision, then a successor
 acquires a higher epoch and survives a stale cleanup. Three normal repeats
 and a race run passed.
+
+The client start slice runs the production `Client.Start` and `StartChild`
+decisions through a narrow `StartPort`. Its model enforces one invocation per
+subject, stores large input objects, and retains run enqueues with message-ID
+deduplication. It injects dropped publishes, commits with lost acknowledgments,
+stale reads, and lost run-enqueue acknowledgments. The default test runs 1,000
+seeded sequences of 20 starts and retries, then 100 same-input and 100
+different-input two-client races at transport yield points. Races retain one
+invocation and one run message. A three-node contract fixture compares the
+normal start, matching retry, mismatched retry, and retained queue state with
+the model; three repeats passed. Existing three-node fixtures also cover
+network-lost start acknowledgments, absent-publish retry, and large input.
+The start model does not yet simulate the `WF_RUN` consumer, reconciliation,
+or the server's deduplication-window expiry. A lost invocation acknowledgment
+can leave the modeled run queue empty, just as the real client requires the
+start reconciler to repair it.
 
 Run the fixed fault cases and 1,000 seeded scenarios:
 
