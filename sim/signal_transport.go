@@ -33,6 +33,7 @@ type SignalTransport struct {
 }
 
 var _ reconcile.SignalScanPort = (*SignalTransport)(nil)
+var _ reconcile.TimerScanPort = (*SignalTransport)(nil)
 var _ client.SignalPort = (*SignalTransport)(nil)
 
 func NewSignalTransport(schedule *Scheduler) *SignalTransport {
@@ -124,6 +125,14 @@ func (m *SignalTransport) EnqueueSignal(ctx context.Context, typ, id string, seq
 	}
 	key := identity.Key(typ, id)
 	return m.EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(key), "signal-wakeup:"+strconv.FormatUint(sequence, 10))
+}
+
+func (m *SignalTransport) EnqueueTimer(ctx context.Context, typ, id string, sequence uint64) error {
+	if sequence == 0 {
+		return fmt.Errorf("zero journal sequence")
+	}
+	key := identity.Key(typ, id)
+	return m.EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(key), fmt.Sprintf("timer-reconcile:%s:%s:%d", typ, id, sequence))
 }
 
 func cloneJournalRecords(records []journal.Record) []journal.Record {

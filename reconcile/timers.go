@@ -15,14 +15,60 @@ import (
 )
 
 type TimerScan struct {
-	js     jetstream.JetStream
-	client *client.Client
-	jrn    *journal.Store
-	Now    func() time.Time
+	port TimerScanPort
+	Now  func() time.Time
 }
 
 func NewTimerScan(js jetstream.JetStream) *TimerScan {
-	return &TimerScan{js: js, client: client.New(js), jrn: journal.New(js), Now: time.Now}
+	return NewTimerScanWithPort(jetStreamTimerScanPort{js: js, client: client.New(js), jrn: journal.New(js)})
+}
+
+// TimerScanPort contains the retained invocation and journal reads and the
+// wakeup enqueue used by the timer repair decision.
+type TimerScanPort interface {
+	GetInvocation(context.Context, uint64) (*jetstream.RawStreamMsg, error)
+	LastInvocationSequence(context.Context) (uint64, error)
+	ReadJournal(context.Context, string, string) ([]journal.Record, error)
+	EnqueueTimer(context.Context, string, string, uint64) error
+}
+
+func NewTimerScanWithPort(port TimerScanPort) *TimerScan {
+	return &TimerScan{port: port, Now: time.Now}
+}
+
+type jetStreamTimerScanPort struct {
+	js     jetstream.JetStream
+	client *client.Client
+	jrn    *journal.Store
+}
+
+func (p jetStreamTimerScanPort) GetInvocation(ctx context.Context, sequence uint64) (*jetstream.RawStreamMsg, error) {
+	stream, err := p.js.Stream(ctx, "WF_INV")
+	if err != nil {
+		return nil, err
+	}
+	return stream.GetMsg(ctx, sequence)
+}
+
+func (p jetStreamTimerScanPort) LastInvocationSequence(ctx context.Context) (uint64, error) {
+	stream, err := p.js.Stream(ctx, "WF_INV")
+	if err != nil {
+		return 0, err
+	}
+	info, err := stream.Info(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return info.State.LastSeq, nil
+}
+
+func (p jetStreamTimerScanPort) ReadJournal(ctx context.Context, typ, id string) ([]journal.Record, error) {
+	records, _, err := p.jrn.Read(ctx, typ, id)
+	return records, err
+}
+
+func (p jetStreamTimerScanPort) EnqueueTimer(ctx context.Context, typ, id string, sequence uint64) error {
+	return p.client.Enqueue(ctx, typ, id, fmt.Sprintf("timer-reconcile:%s:%s:%d", typ, id, sequence))
 }
 
 // Scan enqueues a fresh run for each invocation whose journal still has an
@@ -35,19 +81,15 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 	if next == 0 {
 		next = 1
 	}
-	inv, err := s.js.Stream(ctx, "WF_INV")
-	if err != nil {
-		return ScanResult{}, err
-	}
 	result := ScanResult{NextSequence: next}
 	for scanned := 0; scanned < budget; scanned++ {
-		m, err := inv.GetMsg(ctx, next)
+		m, err := s.port.GetInvocation(ctx, next)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
-			info, infoErr := inv.Info(ctx)
+			last, infoErr := s.port.LastInvocationSequence(ctx)
 			if infoErr != nil {
 				return result, infoErr
 			}
-			if next > info.State.LastSeq {
+			if next > last {
 				result.NextSequence = 1
 				return result, nil
 			}
@@ -66,7 +108,7 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			return result, fmt.Errorf("invalid invocation subject %q", m.Subject)
 		}
 		typ, id := parts[2], parts[3]
-		records, _, err := s.jrn.Read(ctx, typ, id)
+		records, err := s.port.ReadJournal(ctx, typ, id)
 		if err != nil {
 			return result, err
 		}
@@ -101,7 +143,7 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 		}
 		result.Reenqueued++
 		if !dryRun {
-			if err := s.client.Enqueue(ctx, typ, id, fmt.Sprintf("timer-reconcile:%s:%s:%d", typ, id, pending.Sequence)); err != nil {
+			if err := s.port.EnqueueTimer(ctx, typ, id, pending.Sequence); err != nil {
 				return result, err
 			}
 		}

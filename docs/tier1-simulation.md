@@ -1,4 +1,4 @@
-# Tier 1 deterministic simulation: journal, lease, start, signals, and dispatch slices
+# Tier 1 deterministic simulation: journal, lease, start, signals, timers, and dispatch slices
 
 The first simulator slice runs the production `journal.Store.Append` decision
 path through a narrow `journal.AppendPort`. The production port still calls
@@ -145,8 +145,24 @@ sends 20 ordered signals per seed under lost publish acknowledgments and lost
 or dropped wakeup enqueues, repairs uncertain wakeups, journals each signal
 once, retries some keys after consumed-signal purge, rejects changed retry
 payloads, and verifies replay plus a subsequent scan adds no wakeup. Seed 42
-replays from disk and is byte-identical across processes. Dispatch, lease
+replays from disk and is byte-identical across processes. The drain now uses
+production journal CAS for each `SignalConsumed` entry. One committed journal
+append loses its acknowledgment at a seeded position; worker redelivery
+reloads the retained journal and finishes without a duplicate entry. Every
+retained sequence and payload matches the replay records. Dispatch, lease
 fencing, and terminal result persistence are still separate modeled slices.
+
+The timer repair slice runs production `TimerScan.Scan` through retained
+invocation and journal reads and run enqueue on a narrow port. A 1,000-seed
+workload scans 20 invocations per seed across due and future timer requests,
+completed and terminal journals, unrelated steps, deleted invocation holes,
+dry runs, duplicate scans, and lost or dropped wakeup acknowledgments. It
+advances virtual time to make future requests due. Exact trace replay and
+byte-identical cross-process traces pass. A three-node contract compares
+model and real scan results and retained run counts for due, future,
+completed, terminal, and deleted-invocation cases; three repeats passed.
+The scanner loop's lease and persisted cursor, native timer routing, and the
+worker handler's timer decisions remain outside this model.
 
 The dispatch slice runs the production `worker.RunPartition` fetch/retry loop
 through a narrow consumer port with a supplied handler callback. Its model
@@ -208,7 +224,7 @@ failure trace when one is written.
 global sequence gaps between subjects, retained bytes, and stale CAS results
 against a real three-node stream. Existing real-cluster tests cover network
 lost acknowledgments and injected unchanged-tail rejections. This comparison
-is limited: the model does not yet run the full worker handler, signals, timers, retention,
+is limited: the model does not yet run the full worker handler, native timer routing, retention,
 Raft elections, or disk storage. The journal's five-second attempt
 deadline still uses wall time; only CAS retry waits are virtual in this first
 slice. A discrepancy seen only on real

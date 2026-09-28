@@ -401,6 +401,8 @@ func TestReplayFaultTrace(t *testing.T) {
 		replayed, err = runSeededWorkerSignalDrain(loaded.Seed, &loaded)
 	case "signal_pipeline_20":
 		replayed, err = runSeededSignalPipeline(loaded.Seed, &loaded)
+	case "timer_scan_20":
+		replayed, err = runSeededTimerScan(loaded.Seed, &loaded)
 	default:
 		t.Fatalf("unknown trace workload %q", loaded.Workload)
 	}
