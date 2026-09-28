@@ -46,7 +46,7 @@ func runConcurrentSignalRepair(seed int64, replay *Trace) (trace Trace, runErr e
 	var published, cursor uint64
 	actors := []SignalActor{
 		{Name: "publisher", Run: func(ctx context.Context, yield YieldFunc, _ reconcile.SignalScanPort) error {
-			return yield(ctx, "publish_signal", func() { published = model.PublishSignal(message) })
+			return yield(ctx, "publish_signal", func() { published = model.CommitSignal(message) })
 		}},
 		{Name: "scanner", Run: func(ctx context.Context, _ YieldFunc, port reconcile.SignalScanPort) error {
 			result, err := reconcile.NewSignalScanWithPort(port).Scan(ctx, 1, 1, false)

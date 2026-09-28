@@ -58,7 +58,7 @@ func runSeededSignalRepairScenario(seed int64, replay *Trace) (trace Trace, runE
 		if generation != 0 {
 			message.Header.Set("Wf-Inv-Seq", strconv.FormatUint(generation, 10))
 		}
-		sequence := model.PublishSignal(message)
+		sequence := model.CommitSignal(message)
 		switch mode {
 		case "consumed":
 			model.SetJournal("test", id, []journal.Record{{Entry: journal.Entry{Kind: journal.SignalConsumed, Payload: []byte(fmt.Sprintf(`{"sig_seq":%d}`, sequence))}}})

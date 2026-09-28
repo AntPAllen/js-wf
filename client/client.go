@@ -53,9 +53,10 @@ type Handle struct {
 }
 
 type Client struct {
-	js        jetstream.JetStream
-	startPort StartPort
-	observer  Observer
+	js         jetstream.JetStream
+	startPort  StartPort
+	signalPort SignalPort
+	observer   Observer
 }
 
 func New(js jetstream.JetStream) *Client { return &Client{js: js} }
@@ -72,6 +73,19 @@ type StartPort interface {
 
 // NewWithStartPort runs production start decisions against a supplied port.
 func NewWithStartPort(port StartPort) *Client { return &Client{startPort: port} }
+
+// NewWithSignalPorts runs production start and signal decisions through
+// supplied transports, including SignalWithStart and wakeup enqueue.
+func NewWithSignalPorts(start StartPort, signal SignalPort) *Client {
+	return &Client{startPort: start, signalPort: signal}
+}
+
+func (c *Client) signalOperations() SignalPort {
+	if c.signalPort != nil {
+		return c.signalPort
+	}
+	return jetStreamSignalPort{js: c.js}
+}
 
 type jetStreamStartPort struct{ js jetstream.JetStream }
 
@@ -353,11 +367,8 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 	if idempotencyKey == "" || len(idempotencyKey) > 128 {
 		return 0, fmt.Errorf("invalid signal idempotency key")
 	}
-	inv, err := c.js.Stream(ctx, "WF_INV")
-	if err != nil {
-		return 0, err
-	}
-	invocation, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, id))
+	port := c.signalOperations()
+	invocation, err := port.LastInvocation(ctx, identity.InvocationSubject(typ, id))
 	if err != nil {
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			if expectedInvSeq != 0 {
@@ -377,12 +388,8 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 	if expectedInvSeq != 0 && invocation.Sequence != expectedInvSeq {
 		return 0, ErrStaleGeneration
 	}
-	state, err := c.js.KeyValue(ctx, "WF_STATE")
-	if err != nil {
-		return 0, err
-	}
-	if value, getErr := state.Get(ctx, identity.Key(typ, id)); getErr == nil {
-		marker, tomb, decodeErr := retention.Decode(value.Value())
+	if value, getErr := port.StateValue(ctx, identity.Key(typ, id)); getErr == nil {
+		marker, tomb, decodeErr := retention.Decode(value)
 		if decodeErr != nil {
 			return 0, decodeErr
 		}
@@ -393,11 +400,7 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 		return 0, getErr
 	}
 	if requireRunning {
-		stream, err := c.js.Stream(ctx, "WF_JRN")
-		if err != nil {
-			return 0, err
-		}
-		last, err := stream.GetLastMsgForSubject(ctx, identity.JournalSubject(typ, id))
+		last, err := port.LastJournal(ctx, identity.JournalSubject(typ, id))
 		if err != nil && !errors.Is(err, jetstream.ErrMsgNotFound) {
 			return 0, err
 		}
@@ -420,28 +423,20 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 	m.Header.Set(inputHashHeader, hex.EncodeToString(digest[:]))
 	m.Header.Set("Wf-Inv-Seq", strconv.FormatUint(invocation.Sequence, 10))
 	if len(payload) > MaxInlineSignal {
-		objects, err := c.js.ObjectStore(ctx, "WF_BLOB")
-		if err != nil {
-			return 0, err
-		}
 		key := "signal-" + hex.EncodeToString(digest[:])
-		if _, err := objects.PutBytes(ctx, key, payload); err != nil {
+		if err := port.PutSignalBlob(ctx, key, payload); err != nil {
 			return 0, err
 		}
 		m.Data = nil
 		m.Header.Set("Wf-Signal-Ref", key)
 	}
 	messageID := "signal:" + typ + ":" + id + ":" + strconv.FormatUint(invocation.Sequence, 10) + ":" + name + ":" + idempotencyKey
-	ack, err := c.js.PublishMsg(ctx, m, jetstream.WithMsgID(messageID))
+	ack, err := port.PublishSignal(ctx, m, messageID)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %v", ErrSignalUnknown, err)
 	}
 	if ack.Duplicate {
-		sig, err := c.js.Stream(ctx, "WF_SIG")
-		if err != nil {
-			return 0, err
-		}
-		prior, err := sig.GetMsg(ctx, ack.Sequence)
+		prior, err := port.SignalBySequence(ctx, ack.Sequence)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			if err := c.verifyConsumedSignal(ctx, typ, id, name, ack.Sequence, hex.EncodeToString(digest[:])); err != nil {
 				return 0, err
@@ -452,20 +447,17 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 			return 0, ErrSignalMismatch
 		}
 	}
-	if err := c.Enqueue(ctx, typ, id, fmt.Sprintf("signal-wakeup:%d", ack.Sequence)); err != nil {
+	if err := port.EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(identity.Key(typ, id)), fmt.Sprintf("signal-wakeup:%d", ack.Sequence)); err != nil {
 		return ack.Sequence, fmt.Errorf("%w: %v", ErrEnqueueUnknown, err)
 	}
 	return ack.Sequence, nil
 }
 
 func (c *Client) generationRetired(ctx context.Context, typ, id string, invSeq uint64) (bool, error) {
-	state, err := c.js.KeyValue(ctx, "WF_STATE")
-	if err != nil {
-		return false, err
-	}
+	port := c.signalOperations()
 	key := identity.Key(typ, id)
-	if value, err := state.Get(ctx, key); err == nil {
-		marker, tomb, err := retention.Decode(value.Value())
+	if value, err := port.StateValue(ctx, key); err == nil {
+		marker, tomb, err := retention.Decode(value)
 		if err != nil {
 			return false, err
 		}
@@ -475,8 +467,8 @@ func (c *Client) generationRetired(ctx context.Context, typ, id string, invSeq u
 	} else if !errors.Is(err, jetstream.ErrKeyNotFound) {
 		return false, err
 	}
-	if value, err := state.Get(ctx, "purging."+key); err == nil {
-		retiring, err := strconv.ParseUint(string(value.Value()), 10, 64)
+	if value, err := port.StateValue(ctx, "purging."+key); err == nil {
+		retiring, err := strconv.ParseUint(string(value), 10, 64)
 		if err != nil {
 			return false, err
 		}
@@ -488,7 +480,7 @@ func (c *Client) generationRetired(ctx context.Context, typ, id string, invSeq u
 }
 
 func (c *Client) verifyConsumedSignal(ctx context.Context, typ, id, name string, seq uint64, hash string) error {
-	records, _, err := journal.New(c.js).Read(ctx, typ, id)
+	records, err := c.signalOperations().ReadJournal(ctx, typ, id)
 	if err != nil {
 		return err
 	}

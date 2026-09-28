@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"time"
 
+	"js-wf/client"
 	"js-wf/identity"
 	"js-wf/journal"
 	"js-wf/provision"
@@ -15,39 +17,51 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 )
 
-// SignalTransport models the retained reads and run enqueues used by the
-// production signal reconciler. StartTransport supplies invocation and run
-// stream behavior, including message-ID deduplication and injected enqueue
-// failures. Signal publishing remains a fixture operation in this slice.
+// SignalTransport models the retained reads and writes used by the production
+// signal client and reconciler. StartTransport supplies invocation and run
+// stream behavior, including message-ID deduplication and enqueue faults.
 type SignalTransport struct {
 	*StartTransport
 	mu       sync.Mutex
 	sequence uint64
 	signals  map[uint64]jetstream.RawStreamMsg
 	journals map[string][]journal.Record
+	state    map[string][]byte
+	dedup    map[string]signalDedupEntry
+	window   int64
+	faults   []SignalFault
 }
 
 var _ reconcile.SignalScanPort = (*SignalTransport)(nil)
+var _ client.SignalPort = (*SignalTransport)(nil)
 
 func NewSignalTransport(schedule *Scheduler) *SignalTransport {
 	return &SignalTransport{
 		StartTransport: NewStartTransport(schedule),
 		signals:        map[uint64]jetstream.RawStreamMsg{},
 		journals:       map[string][]journal.Record{},
+		state:          map[string][]byte{},
+		dedup:          map[string]signalDedupEntry{},
+		window:         (2 * time.Minute).Milliseconds(),
 	}
 }
 
-// PublishSignal commits a fixture signal without its wakeup. The caller can
+// CommitSignal commits a fixture signal without its wakeup. The caller can
 // scan before or after a separate enqueue to explore the lost-wakeup cut.
-func (m *SignalTransport) PublishSignal(message *nats.Msg) uint64 {
+func (m *SignalTransport) CommitSignal(message *nats.Msg) uint64 {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	m.commitSignal(message)
+	m.event(TransportEvent{Operation: "publish_signal", Subject: message.Subject, Sequence: m.sequence, DataSHA256: digest(message.Data), Outcome: "ok"})
+	return m.sequence
+}
+
+func (m *SignalTransport) commitSignal(message *nats.Msg) uint64 {
 	m.sequence++
 	m.signals[m.sequence] = jetstream.RawStreamMsg{
 		Subject: message.Subject, Sequence: m.sequence,
 		Header: cloneHeader(message.Header), Data: append([]byte(nil), message.Data...),
 	}
-	m.event(TransportEvent{Operation: "publish_signal", Subject: message.Subject, Sequence: m.sequence, DataSHA256: digest(message.Data), Outcome: "ok"})
 	return m.sequence
 }
 

@@ -1,4 +1,4 @@
-# Tier 1 deterministic simulation: journal, lease, start, signal repair, and dispatch slices
+# Tier 1 deterministic simulation: journal, lease, start, signals, and dispatch slices
 
 The first simulator slice runs the production `journal.Store.Append` decision
 path through a narrow `journal.AppendPort`. The production port still calls
@@ -102,9 +102,23 @@ fixture signal publish with each production scanner transport call. It covers
 publication before the signal read, between a missing read and stream info,
 and after the scan; repeated scans from the returned cursor repair the
 wakeup in all three orders. The cooperative trace also replays exactly and
-is byte-identical across processes. This slice models a committed signal as
-fixture state. It does not yet run the production client signal publish decisions,
-the leased signal loop, or the worker's signal drain in simulation.
+is byte-identical across processes. A third 1,000-seed workload now runs
+production `Client.Signal`, `SignalWithOptions`, `SignalToGeneration`, and
+`SignalWithStart` through a narrow port backed by the same signal and run
+model. It covers request loss before commit, committed signals with lost
+acknowledgments, lost or dropped wakeup enqueue, matching and mismatched
+idempotency retries, terminal admission, stale generations, consumed-signal
+verification after purge, and client-to-scanner repair of an unknown outcome.
+Each case retains the expected signal and run messages, and seed 42 replays
+from disk and is byte-identical across processes. Focused tests also cover
+large signal Object Store spill. A three-node contract compares
+`SignalWithStart`, matching and changed retries, `RequireRunning`, and
+retained signal and run counts; three repeats passed. Existing real TCP-proxy
+and SDK-boundary tests cover lost signal acknowledgments and safe retry.
+The publication/scan race still uses a fixture publisher; production client
+and scanner operations have not yet been interleaved in one cooperative
+workload. The leased signal loop and worker signal drain remain outside the
+model.
 
 The dispatch slice runs the production `worker.RunPartition` fetch/retry loop
 through a narrow consumer port with a supplied handler callback. Its model

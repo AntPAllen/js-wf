@@ -37,7 +37,7 @@ func TestSimSignalRepairContractAgainstRealCluster(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	modelSequence := model.PublishSignal(message(modelGeneration))
+	modelSequence := model.CommitSignal(message(modelGeneration))
 	realScan := reconcile.NewSignalScan(all[1])
 	modelScan := reconcile.NewSignalScanWithPort(model)
 	realDry, realErr := realScan.Scan(ctx, realSignal.Sequence, 1, true)
@@ -59,7 +59,7 @@ func TestSimSignalRepairContractAgainstRealCluster(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	modelStale := model.PublishSignal(message(modelGeneration + 100))
+	modelStale := model.CommitSignal(message(modelGeneration + 100))
 	realSkipped, realErr := realScan.Scan(ctx, realStale.Sequence, 1, false)
 	modelSkipped, modelErr := modelScan.Scan(ctx, modelStale, 1, false)
 	if realErr != nil || modelErr != nil || realSkipped.Reenqueued != 0 || modelSkipped.Reenqueued != 0 || len(model.Runs()) != 1 {
@@ -69,7 +69,7 @@ func TestSimSignalRepairContractAgainstRealCluster(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	modelHole := model.PublishSignal(message(modelGeneration))
+	modelHole := model.CommitSignal(message(modelGeneration))
 	sig, err := all[0].Stream(ctx, "WF_SIG")
 	if err != nil {
 		t.Fatal(err)
