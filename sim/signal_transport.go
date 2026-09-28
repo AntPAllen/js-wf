@@ -12,6 +12,7 @@ import (
 	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/reconcile"
+	"js-wf/worker"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -36,6 +37,7 @@ var _ reconcile.SignalScanPort = (*SignalTransport)(nil)
 var _ reconcile.TimerScanPort = (*SignalTransport)(nil)
 var _ reconcile.SuspendedScanPort = (*SignalTransport)(nil)
 var _ client.SignalPort = (*SignalTransport)(nil)
+var _ worker.InvocationPort = (*SignalTransport)(nil)
 
 func NewSignalTransport(schedule *Scheduler) *SignalTransport {
 	return &SignalTransport{

@@ -228,6 +228,21 @@ func (m *StartTransport) Input(key string) []byte {
 	return append([]byte(nil), m.objects[key]...)
 }
 
+func (m *StartTransport) InputBlob(ctx context.Context, key string) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	value, exists := m.objects[key]
+	if !exists {
+		m.event(TransportEvent{Operation: "get_input_blob", Subject: key, Outcome: "not_found"})
+		return nil, jetstream.ErrObjectNotFound
+	}
+	m.event(TransportEvent{Operation: "get_input_blob", Subject: key, DataSHA256: digest(value), Outcome: "ok"})
+	return append([]byte(nil), value...), nil
+}
+
 func (m *StartTransport) GetInvocation(ctx context.Context, sequence uint64) (*jetstream.RawStreamMsg, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err

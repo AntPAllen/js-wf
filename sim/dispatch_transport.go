@@ -31,13 +31,14 @@ type dispatchRecord struct {
 // worker.RunPartition. It has virtual AckWait, explicit ack/nak/progress, and
 // injected consumer-leader errors; it does not model the handler's journal.
 type DispatchTransport struct {
-	mu       sync.Mutex
-	schedule *Scheduler
-	ackWait  int64
-	records  []*dispatchRecord
-	faults   []DispatchFault
-	creates  int
-	sequence uint64
+	mu        sync.Mutex
+	schedule  *Scheduler
+	ackWait   int64
+	records   []*dispatchRecord
+	faults    []DispatchFault
+	creates   int
+	sequence  uint64
+	onDrained func()
 }
 
 var _ worker.DispatchPort = (*DispatchTransport)(nil)
@@ -119,6 +120,14 @@ func (m *DispatchTransport) Pending() int {
 		}
 	}
 	return pending
+}
+
+// StopWhenDrained ends a modeled partition loop after every published run has
+// been acknowledged. Install it after publishing the workload's messages.
+func (m *DispatchTransport) StopWhenDrained(stop func()) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.onDrained = stop
 }
 
 type dispatchConsumer struct {
@@ -229,10 +238,12 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 		if model.takeFault("ack") == "lose_ack_after_commit" {
 			event.Outcome = "lose_ack_after_commit"
 			model.event(event)
+			model.stopIfDrained()
 			return ErrTransportLost
 		}
 		event.Outcome = "ok"
 		model.event(event)
+		model.stopIfDrained()
 		return nil
 	}
 	if m.record.acked || m.delivery != m.record.deliveries {
@@ -251,6 +262,18 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 	event.Outcome = "ok"
 	model.event(event)
 	return nil
+}
+
+func (m *DispatchTransport) stopIfDrained() {
+	if m.onDrained == nil || len(m.records) == 0 {
+		return
+	}
+	for _, record := range m.records {
+		if !record.acked {
+			return
+		}
+	}
+	m.onDrained()
 }
 
 func (m *DispatchTransport) takeFault(operation string) string {

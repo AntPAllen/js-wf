@@ -1,4 +1,4 @@
-# Tier 1 deterministic simulation: journal, lease, start, signals, timers, and dispatch slices
+# Tier 1 deterministic simulation: journal, lease, start, signals, timers, dispatch, and worker slices
 
 The first simulator slice runs the production `journal.Store.Append` decision
 path through a narrow `journal.AppendPort`. The production port still calls
@@ -32,7 +32,7 @@ transcript on disk. A synthetic ten-choice failure shrinks to an earlier
 replayable failure. Actor removal and automatic CI shrinking remain.
 CI now replays a pinned corpus covering committed and dropped CAS unknowns,
 two-worker dispatch, competing suspended scanners, signal, suspended, and child
-notification liveness, outcome persistence,
+notification liveness, outcome persistence, integrated short-handler execution,
 retained-state checks, and workflow determinism. Go runs package tests from `sim/`, so the relative
 `sim-failure.json` output lands under the uploaded artifact path.
 An operation context can be cancelled while its actor is waiting for a
@@ -125,8 +125,8 @@ create and update acknowledgments, retries persisted outcomes, replaces old
 purge tombstones by revision CAS, fences a same-generation tombstone, and
 rejects a changed terminal payload. Its retained KV value and decision enter
 the trace; seed 42 is pinned and replays across processes. The production
-worker handler still needs an integrated dispatch, lease, journal, and result
-schedule in one model.
+worker handler is exercised separately below through an integrated
+short-handler schedule.
 
 A three-node contract compares modeled and real normal outcome creation,
 idempotent retry, changed-result rejection, same-generation tombstone fencing,
@@ -140,6 +140,21 @@ acknowledgment. The model can independently lose the following confirmation
 read, matching the error path while the real client connection is cut. Both
 paths retry without another KV revision or a changed result. Three normal
 repeats and a race run passed.
+
+The integrated short-handler workload runs production `Worker.handle` over a
+modeled durable consumer. Its invocation, lease KV, journal append and read,
+signal drain, and terminal outcome KV operations use the existing narrow
+ports. Five workflows per seed execute a `wf.Run` effect and finish through
+the worker's lease release and message acknowledgment path. Across 1,000
+seeds, faults drop a step-completion request, hide a committed completion or
+terminal KV reply, hide a run acknowledgment, or change the consumer leader.
+A dropped completion reruns its effect once; committed-but-unacknowledged
+completion and result writes replay without a second effect. The final raw
+snapshot passes I1/I2/I3/I6 checks. Seed 42 is pinned and replays across
+processes and under the race detector. This workload copies retained
+invocation keys into its modeled dispatch queue. Timer scheduling, snapshots,
+large result blobs, running cancellation, and cooperative heartbeat turns
+remain outside this integrated slice.
 
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
@@ -370,9 +385,9 @@ new messages from that durable; three repeats and a race run passed. A direct
 three-node test then found a model discrepancy: JetStream accepts an ack from
 an older delivery after redelivery and clears the message, then accepts the
 newer's duplicate ack. The model now matches; three normal repeats and a race
-run passed. This slice exercises the dispatch loop and consumer contract; the
-worker handler's lease, journal, signal, and timer decisions remain outside
-the model. A second 1,000-seed workload now runs two production partition
+run passed. This slice exercises the dispatch loop and consumer contract with
+a callback handler. The integrated short-handler workload above exercises
+production lease, journal, and result decisions. A second 1,000-seed workload now runs two production partition
 loops against one modeled durable. It yields at creation, fetch, wait,
 acknowledgment, nak, and progress calls; interleaves an injected leader-change
 error, unacknowledged first deliveries, and final acknowledgments; and drains
@@ -381,8 +396,9 @@ across processes. It exposed a clean-shutdown gap: cancellation during
 consumer creation returned `context canceled`; `RunPartition` now exits
 normally when its context is already canceled. The real shared-durable
 contract above confirms separate clients receive distinct messages and
-redelivery survives client replacement. The full handler and server-driven
-leader timing remain outside the modeled comparison.
+redelivery survives client replacement. This dispatch-only workload uses a
+callback; the integrated short-handler workload above runs `Worker.handle`.
+Server-driven leader timing remains outside the modeled comparison.
 
 Run the fixed fault cases and 1,000 seeded scenarios:
 
@@ -411,7 +427,8 @@ failure trace when one is written.
 global sequence gaps between subjects, retained bytes, and stale CAS results
 against a real three-node stream. Existing real-cluster tests cover network
 lost acknowledgments and injected unchanged-tail rejections. This comparison
-is limited: the model does not yet run the full worker handler, native timer routing, retention,
+is limited: the integrated worker workload covers short handlers without
+native timer routing, retention, snapshot objects, running cancellation,
 Raft elections, or disk storage. The journal's five-second attempt
 deadline still uses wall time; only CAS retry waits are virtual in this first
 slice. A discrepancy seen only on real

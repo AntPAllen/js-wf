@@ -51,6 +51,9 @@ type Worker struct {
 	jrn                  *journal.Store
 	leases               *lease.Store
 	state                jetstream.KeyValue
+	outcomePort          OutcomePort
+	invocationPort       InvocationPort
+	signalDrainPort      SignalDrainPort
 	client               *client.Client
 	ID                   string
 	Handlers             map[string]Handler
@@ -159,6 +162,27 @@ func New(ctx context.Context, js jetstream.JetStream, id string, handlers map[st
 	return w, nil
 }
 
+// ModeledWorkerPorts supplies the durable boundaries needed to execute short
+// workflow handlers through the production Worker delivery path.
+type ModeledWorkerPorts struct {
+	Journal    *journal.Store
+	Leases     *lease.Store
+	Outcome    OutcomePort
+	Invocation InvocationPort
+	Signals    SignalDrainPort
+	Client     *client.Client
+}
+
+// NewWithPorts builds a worker whose delivery and execution decisions run
+// against narrow transports. Snapshot objects and timer scheduling are not
+// provided by this constructor.
+func NewWithPorts(id string, handlers map[string]Handler, ports ModeledWorkerPorts) (*Worker, error) {
+	if id == "" || ports.Journal == nil || ports.Leases == nil || ports.Outcome == nil || ports.Invocation == nil || ports.Signals == nil || ports.Client == nil {
+		return nil, fmt.Errorf("invalid modeled worker configuration")
+	}
+	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, cancelWaiters: make(map[string]*cancelWaiter)}, nil
+}
+
 type panicRetryError struct{ attempt int }
 
 func (e *panicRetryError) Error() string { return fmt.Sprintf("handler panic attempt %d", e.attempt) }
@@ -193,6 +217,12 @@ func (w *Worker) consumer(ctx context.Context, partition uint32) (jetstream.Cons
 // may share the consumer; the per-invocation lease fences concurrent delivery.
 func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 	return RunPartitionWithPort(ctx, partition, jetStreamDispatchPort{worker: w}, w.handle, w.partitionConcurrency)
+}
+
+// RunPartitionWithTransport executes the same worker handler over a supplied
+// durable consumer, including lease, journal, and result decisions.
+func (w *Worker) RunPartitionWithTransport(ctx context.Context, partition uint32, port DispatchPort) error {
+	return RunPartitionWithPort(ctx, partition, port, w.handle, w.partitionConcurrency)
 }
 
 // RunPartitionWithPort runs the production dispatch loop over a supplied
@@ -450,7 +480,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	}()
 	var cancelledTimerNoOp bool
 	err = w.execute(ctx, typ, id, l, metadata.Timestamp, timer, &cancelledTimerNoOp)
-	if err == nil && ctx.Err() == nil {
+	if err == nil && ctx.Err() == nil && w.js != nil {
 		err = w.jrn.MaybeSnapshot(ctx, typ, id, 256, 16)
 	}
 	processingCanceled := ctx.Err() != nil
@@ -488,14 +518,12 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	if err != nil {
 		return err
 	}
-	lookupCtx, stopLookup := context.WithTimeout(ctx, 5*time.Second)
-	inv, err := w.js.Stream(lookupCtx, "WF_INV")
-	stopLookup()
-	if err != nil {
-		return err
+	invocationPort := w.invocationPort
+	if invocationPort == nil {
+		invocationPort = jetStreamInvocationPort{js: w.js}
 	}
-	lookupCtx, stopLookup = context.WithTimeout(ctx, 5*time.Second)
-	input, err := inv.GetLastMsgForSubject(lookupCtx, identity.InvocationSubject(typ, id))
+	lookupCtx, stopLookup := context.WithTimeout(ctx, 5*time.Second)
+	input, err := invocationPort.LastInvocation(lookupCtx, identity.InvocationSubject(typ, id))
 	stopLookup()
 	if errors.Is(err, jetstream.ErrMsgNotFound) {
 		return nil
@@ -511,11 +539,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	}
 	inputData := input.Data
 	if key := input.Header.Get("Wf-Input-Ref"); key != "" {
-		objects, err := w.js.ObjectStore(ctx, "WF_BLOB")
-		if err != nil {
-			return err
-		}
-		inputData, err = objects.GetBytes(ctx, key)
+		inputData, err = invocationPort.InputBlob(ctx, key)
 		if err != nil {
 			return err
 		}
@@ -634,6 +658,9 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	defer cancelHandler()
 	wctx := wf.NewContext(handlerCtx, steps, func(ctx context.Context, k wf.Kind, p json.RawMessage) error { return appendEntry(journal.Kind(k), p) }, signals...)
 	wctx.SetResultStore(func(ctx context.Context, data []byte) (string, error) {
+		if w.js == nil {
+			return "", fmt.Errorf("result blob store unavailable on modeled worker")
+		}
 		objects, err := w.js.ObjectStore(ctx, "WF_BLOB")
 		if err != nil {
 			return "", err
@@ -643,6 +670,9 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		_, err = objects.PutBytes(ctx, name, data)
 		return name, err
 	}, func(ctx context.Context, name string) ([]byte, error) {
+		if w.js == nil {
+			return nil, fmt.Errorf("result blob store unavailable on modeled worker")
+		}
 		objects, err := w.js.ObjectStore(ctx, "WF_BLOB")
 		if err != nil {
 			return nil, err
@@ -746,6 +776,9 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		kind = journal.Failed
 		out = wf.Outcome{InvSeq: input.Sequence, Error: runErr.Error()}
 	} else if len(result) > wf.MaxInlineTerminal {
+		if w.js == nil {
+			return fmt.Errorf("terminal blob store unavailable on modeled worker")
+		}
 		objects, err := w.js.ObjectStore(ctx, "WF_BLOB")
 		if err != nil {
 			return err
@@ -799,6 +832,9 @@ func NotifyParentWithClient(ctx context.Context, c *client.Client, typ, id strin
 }
 
 func (w *Worker) scheduleTimer(ctx context.Context, typ, id string, invSeq, step uint64, fireAt time.Time) error {
+	if w.js == nil {
+		return fmt.Errorf("timer schedule unavailable on modeled worker")
+	}
 	newPublish, err := ScheduleTimerWithPort(ctx, NewTimerSchedulePort(w.js), w.nativeSchedules, typ, id, invSeq, step, fireAt)
 	if newPublish {
 		w.metrics.timersScheduled.Add(1)
@@ -827,6 +863,9 @@ func timerWasCancelled(records []journal.Record, step uint64) bool {
 }
 
 func (w *Worker) serverNow(ctx context.Context) (time.Time, error) {
+	if w.js == nil {
+		return time.Time{}, fmt.Errorf("server time unavailable on modeled worker")
+	}
 	attemptCtx, stopAttempt := context.WithTimeout(ctx, 3*time.Second)
 	defer stopAttempt()
 	run, err := w.js.Stream(attemptCtx, "WF_RUN")
@@ -885,6 +924,9 @@ func (w *Worker) observeCancel(message *nats.Msg) {
 // the durable stream at registration and after gaps. Journal writes remain on
 // the execute goroutine after the handler has returned.
 func (w *Worker) watchRunningCancellation(ctx context.Context, typ, id string, invSeq uint64, cancelHandler context.CancelFunc) func() bool {
+	if w.cancelStream == nil {
+		return func() bool { return false }
+	}
 	generation := strconv.FormatUint(invSeq, 10)
 	key := cancelKey(typ, id, generation)
 	waiter := &cancelWaiter{cancel: cancelHandler}
@@ -927,7 +969,11 @@ func (w *Worker) watchRunningCancellation(ctx context.Context, typ, id string, i
 }
 
 func (w *Worker) drainSignals(ctx context.Context, typ, id string, invSeq uint64, records []journal.Record, appendEntry func(journal.Kind, json.RawMessage) error) ([]wf.Signal, error) {
-	return DrainSignalsWithPort(ctx, NewSignalDrainPort(w.js), typ, id, invSeq, records, appendEntry)
+	port := w.signalDrainPort
+	if port == nil {
+		port = NewSignalDrainPort(w.js)
+	}
+	return DrainSignalsWithPort(ctx, port, typ, id, invSeq, records, appendEntry)
 }
 
 // DrainSignalsWithPort runs the production signal drain against a supplied
@@ -1026,5 +1072,9 @@ func signalPayloadWithPort(ctx context.Context, port SignalDrainPort, event sign
 func (w *Worker) persistOutcome(ctx context.Context, typ, id string, invSeq uint64, payload []byte) error {
 	attemptCtx, stopAttempt := context.WithTimeout(ctx, 5*time.Second)
 	defer stopAttempt()
-	return PersistOutcomeWithPort(attemptCtx, NewOutcomePort(w.state), typ, id, invSeq, payload)
+	port := w.outcomePort
+	if port == nil {
+		port = NewOutcomePort(w.state)
+	}
+	return PersistOutcomeWithPort(attemptCtx, port, typ, id, invSeq, payload)
 }
