@@ -30,7 +30,8 @@ The lease slice runs the production `lease.Store` decisions through a narrow
 KV port. Its in-memory model has global revisions, CAS create/update/delete,
 30-second key expiry, and explicit pre-commit drop or post-commit lost-ack
 faults. The default test runs 1,000 seeded sequences of acquire, release,
-expiry, orphan reclaim, and renewal. Another 100 seeds each schedule two
+expiry, orphan reclaim, stale predecessor reads, and renewal. Another 100
+seeds each schedule two
 acquirers against a fresh key and a stale uninitialized key at individual KV
 operations. Every race retains one initialized winner and fences the loser.
 The seeded lease trace is byte-identical across processes and replays from

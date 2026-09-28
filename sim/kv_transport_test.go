@@ -211,7 +211,7 @@ func runSeededLeaseScenario(seed int64, replay *Trace) (trace Trace, runErr erro
 	model := NewKVTransport(schedule, 30*time.Second)
 	store := lease.NewWithKVPort(model)
 	for i := 0; i < 100; i++ {
-		choice, err := schedule.Choose([]string{"release", "expire", "lost_release_ack", "orphan"})
+		choice, err := schedule.Choose([]string{"release", "expire", "lost_release_ack", "orphan", "stale_predecessor"})
 		if err != nil {
 			return Trace{}, err
 		}
@@ -247,6 +247,19 @@ func runSeededLeaseScenario(seed int64, replay *Trace) (trace Trace, runErr erro
 				}
 				if err := old.Release(context.Background()); !errors.Is(err, lease.ErrLost) {
 					return Trace{}, fmt.Errorf("lost release ack: %v", err)
+				}
+			case "stale_predecessor":
+				if err := schedule.AdvanceMillis(1100); err != nil {
+					return Trace{}, err
+				}
+				if err := model.QueueFault(KVFault{Operation: "get", Kind: KVStaleRead}); err != nil {
+					return Trace{}, err
+				}
+				if _, err := store.Acquire(context.Background(), "test", id, "stale"); !errors.Is(err, lease.ErrHeld) {
+					return Trace{}, fmt.Errorf("stale predecessor bypassed revision fence: %v", err)
+				}
+				if err := old.Release(context.Background()); err != nil {
+					return Trace{}, err
 				}
 			}
 		}
