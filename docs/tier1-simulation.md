@@ -20,6 +20,10 @@ bounded reruns, accepts only the same caller-selected invariant failure, and
 verifies that the best generated trace reproduces the exact transport
 transcript on disk. A synthetic ten-choice failure shrinks to an earlier
 replayable failure. Actor removal and automatic CI shrinking remain.
+CI now replays a pinned corpus covering committed and dropped CAS unknowns,
+two-worker dispatch, competing suspended scanners, and retained-state
+checks. Failure traces are written under `sim/`, matching the uploaded
+artifact path.
 An operation context can be cancelled while its actor is waiting for a
 scheduler turn. The scheduler now resolves every submitted turn and lets the
 transport observe that cancellation inside the chosen action; this removed

@@ -356,16 +356,9 @@ func TestCooperativeTwoWriterCASReplay(t *testing.T) {
 	}
 }
 
-func TestReplayFaultTrace(t *testing.T) {
-	path := os.Getenv("FAULT_TRACE")
-	if path == "" {
-		t.Skip("set FAULT_TRACE to replay a saved Tier 1 trace")
-	}
-	loaded, err := LoadTrace(path)
-	if err != nil {
-		t.Fatal(err)
-	}
+func replayTrace(loaded Trace) (Trace, error) {
 	var replayed Trace
+	var err error
 	switch loaded.Workload {
 	case "journal_append_100":
 		replayed, err = runSeededAppendScenario(loaded.Seed, &loaded)
@@ -426,9 +419,41 @@ func TestReplayFaultTrace(t *testing.T) {
 	case "retained_invariants_5":
 		replayed, err = runSeededRetainedInvariantChecks(loaded.Seed, &loaded)
 	default:
-		t.Fatalf("unknown trace workload %q", loaded.Workload)
+		return Trace{}, fmt.Errorf("unknown trace workload %q", loaded.Workload)
 	}
+	return replayed, err
+}
+
+func TestReplayFaultTrace(t *testing.T) {
+	path := os.Getenv("FAULT_TRACE")
+	if path == "" {
+		t.Skip("set FAULT_TRACE to replay a saved Tier 1 trace")
+	}
+	loaded, err := LoadTrace(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	replayed, err := replayTrace(loaded)
 	if err != nil || !reflect.DeepEqual(loaded, replayed) {
 		t.Fatalf("FAULT_TRACE=%s FAULT_SEED=%d: %v", path, loaded.Seed, err)
+	}
+}
+
+func TestPinnedRegressionCorpus(t *testing.T) {
+	paths, err := filepath.Glob("testdata/regressions/*.json")
+	if err != nil || len(paths) == 0 {
+		t.Fatalf("pinned trace corpus missing: paths=%v err=%v", paths, err)
+	}
+	for _, path := range paths {
+		t.Run(filepath.Base(path), func(t *testing.T) {
+			loaded, err := LoadTrace(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			replayed, err := replayTrace(loaded)
+			if err != nil || !reflect.DeepEqual(loaded, replayed) {
+				t.Fatalf("pinned trace %s seed=%d: %v", path, loaded.Seed, err)
+			}
+		})
 	}
 }

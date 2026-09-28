@@ -1,0 +1,685 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "retained_invariants_5",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "worker-a",
+        "worker-b"
+      ],
+      "chosen": "worker-b"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "drop_before_commit",
+        "lose_ack_after_commit",
+        "ok"
+      ],
+      "chosen": "ok"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "lose_ack_after_commit",
+        "ok"
+      ],
+      "chosen": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "worker-a",
+        "worker-b"
+      ],
+      "chosen": "worker-a"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "drop_before_commit",
+        "lose_ack_after_commit",
+        "ok"
+      ],
+      "chosen": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "lose_ack_after_commit",
+        "ok"
+      ],
+      "chosen": "ok"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "worker-a",
+        "worker-b"
+      ],
+      "chosen": "worker-b"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "drop_before_commit",
+        "lose_ack_after_commit",
+        "ok"
+      ],
+      "chosen": "ok"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "lose_ack_after_commit",
+        "ok"
+      ],
+      "chosen": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "worker-a",
+        "worker-b"
+      ],
+      "chosen": "worker-b"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "drop_before_commit",
+        "lose_ack_after_commit",
+        "ok"
+      ],
+      "chosen": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "lose_ack_after_commit",
+        "ok"
+      ],
+      "chosen": "ok"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "worker-a",
+        "worker-b"
+      ],
+      "chosen": "worker-b"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "drop_before_commit",
+        "lose_ack_after_commit",
+        "ok"
+      ],
+      "chosen": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "lose_ack_after_commit",
+        "ok"
+      ],
+      "chosen": "lose_ack_after_commit"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.invariant-00",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.42",
+      "sequence": 1,
+      "data_sha256": "d1e4daf8727ad978b51e3a2021c4d22e73079aa8888e7e13c32719be8db44678",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.invariant-00",
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "subject_full"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.test.invariant-00",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-00",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-00",
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-00",
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-00",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "f3ffe8c14d07338c99c96e82ecbfe5d48ae9e0e9046d2d8fe1db7aecd2662ecf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-00",
+      "sequence": 2,
+      "data_sha256": "f3ffe8c14d07338c99c96e82ecbfe5d48ae9e0e9046d2d8fe1db7aecd2662ecf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-00",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "5c7391b2576bec2b589c1a36740351454f0f62365d0ff3b9ab31574eb5456720",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-00",
+      "sequence": 3,
+      "data_sha256": "5c7391b2576bec2b589c1a36740351454f0f62365d0ff3b9ab31574eb5456720",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-00",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "0b11fa359b8c2265bc545d1012ccfd1594fcc407e32e6de0093170822da94c93",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.invariant-00",
+      "sequence": 1,
+      "data_sha256": "58bf5b5478e5d1fb7441daeff9fd1ed60a4ad5fbfabc64715cd8608f3f59f6da",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_invariants",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.invariant-01",
+      "sequence": 2,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.61",
+      "sequence": 2,
+      "data_sha256": "1b683d749dab10d3bcdc6d6de36db9150aec52de125261fe27a0678070c77c2d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.invariant-01",
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "subject_full"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.test.invariant-01",
+      "sequence": 2,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-01",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-01",
+      "sequence": 5,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-01",
+      "sequence": 5,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-01",
+      "expected": 5,
+      "sequence": 6,
+      "data_sha256": "dca784df064a28665b7591e91dccd5cf883f64286d2ea91e6c92017f28f02bcc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-01",
+      "sequence": 6,
+      "data_sha256": "dca784df064a28665b7591e91dccd5cf883f64286d2ea91e6c92017f28f02bcc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-01",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "38e4cbbbf2afe5cd5766e278a46c74a87eb5354df450634d820af1da44fe4a47",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-01",
+      "sequence": 7,
+      "data_sha256": "38e4cbbbf2afe5cd5766e278a46c74a87eb5354df450634d820af1da44fe4a47",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-01",
+      "expected": 7,
+      "sequence": 8,
+      "data_sha256": "036571e2da745d6f48d0c7770b7e4ba074e11a3bb68204295d6c8860020cb965",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.invariant-01",
+      "sequence": 2,
+      "data_sha256": "58bf5b5478e5d1fb7441daeff9fd1ed60a4ad5fbfabc64715cd8608f3f59f6da",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_invariants",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.invariant-02",
+      "sequence": 3,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.4",
+      "sequence": 3,
+      "data_sha256": "2cdf8447796f650abeba3bbee489e21eb9fb5949bd09fd93f859bf2fac11e39a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.invariant-02",
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "subject_full"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.test.invariant-02",
+      "sequence": 3,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-02",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-02",
+      "sequence": 9,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-02",
+      "sequence": 9,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-02",
+      "expected": 9,
+      "sequence": 10,
+      "data_sha256": "f3ffe8c14d07338c99c96e82ecbfe5d48ae9e0e9046d2d8fe1db7aecd2662ecf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-02",
+      "sequence": 10,
+      "data_sha256": "f3ffe8c14d07338c99c96e82ecbfe5d48ae9e0e9046d2d8fe1db7aecd2662ecf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-02",
+      "expected": 10,
+      "sequence": 11,
+      "data_sha256": "5c7391b2576bec2b589c1a36740351454f0f62365d0ff3b9ab31574eb5456720",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-02",
+      "sequence": 11,
+      "data_sha256": "5c7391b2576bec2b589c1a36740351454f0f62365d0ff3b9ab31574eb5456720",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-02",
+      "expected": 11,
+      "sequence": 12,
+      "data_sha256": "0b11fa359b8c2265bc545d1012ccfd1594fcc407e32e6de0093170822da94c93",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.invariant-02",
+      "sequence": 3,
+      "data_sha256": "58bf5b5478e5d1fb7441daeff9fd1ed60a4ad5fbfabc64715cd8608f3f59f6da",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_invariants",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.invariant-03",
+      "sequence": 4,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.23",
+      "sequence": 4,
+      "data_sha256": "ddeb77a800cf8e01d4e3cef3102547d22d672ff2a8c052922db4f91878c813d1",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.invariant-03",
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "subject_full"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.test.invariant-03",
+      "sequence": 4,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-03",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-03",
+      "sequence": 13,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-03",
+      "sequence": 13,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-03",
+      "expected": 13,
+      "sequence": 14,
+      "data_sha256": "f3ffe8c14d07338c99c96e82ecbfe5d48ae9e0e9046d2d8fe1db7aecd2662ecf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-03",
+      "sequence": 14,
+      "data_sha256": "f3ffe8c14d07338c99c96e82ecbfe5d48ae9e0e9046d2d8fe1db7aecd2662ecf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-03",
+      "expected": 14,
+      "sequence": 15,
+      "data_sha256": "5c7391b2576bec2b589c1a36740351454f0f62365d0ff3b9ab31574eb5456720",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-03",
+      "sequence": 15,
+      "data_sha256": "5c7391b2576bec2b589c1a36740351454f0f62365d0ff3b9ab31574eb5456720",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-03",
+      "expected": 15,
+      "sequence": 16,
+      "data_sha256": "0b11fa359b8c2265bc545d1012ccfd1594fcc407e32e6de0093170822da94c93",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.invariant-03",
+      "sequence": 4,
+      "data_sha256": "58bf5b5478e5d1fb7441daeff9fd1ed60a4ad5fbfabc64715cd8608f3f59f6da",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_invariants",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.invariant-04",
+      "sequence": 5,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.30",
+      "sequence": 5,
+      "data_sha256": "38f7460462d1536a49fa0372c34035a91bc7ef0729e726301fac0db522d31c10",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.invariant-04",
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "subject_full"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.test.invariant-04",
+      "sequence": 5,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-04",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-04",
+      "sequence": 17,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-04",
+      "sequence": 17,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-04",
+      "expected": 17,
+      "sequence": 18,
+      "data_sha256": "f3ffe8c14d07338c99c96e82ecbfe5d48ae9e0e9046d2d8fe1db7aecd2662ecf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-04",
+      "sequence": 18,
+      "data_sha256": "f3ffe8c14d07338c99c96e82ecbfe5d48ae9e0e9046d2d8fe1db7aecd2662ecf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-04",
+      "expected": 18,
+      "sequence": 19,
+      "data_sha256": "5c7391b2576bec2b589c1a36740351454f0f62365d0ff3b9ab31574eb5456720",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.invariant-04",
+      "sequence": 19,
+      "data_sha256": "5c7391b2576bec2b589c1a36740351454f0f62365d0ff3b9ab31574eb5456720",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.invariant-04",
+      "expected": 19,
+      "sequence": 20,
+      "data_sha256": "0b11fa359b8c2265bc545d1012ccfd1594fcc407e32e6de0093170822da94c93",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.invariant-04",
+      "sequence": 5,
+      "data_sha256": "58bf5b5478e5d1fb7441daeff9fd1ed60a4ad5fbfabc64715cd8608f3f59f6da",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_invariants",
+      "sequence": 5,
+      "outcome": "ok"
+    }
+  ]
+}

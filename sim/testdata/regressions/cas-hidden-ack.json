@@ -1,0 +1,80 @@
+{
+  "version": 3,
+  "seed": 1,
+  "workload": "journal_two_writer_unknown",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "drop_before_commit",
+        "lose_ack_after_commit"
+      ],
+      "chosen": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "alpha:last",
+        "beta:last"
+      ],
+      "chosen": "beta:last"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "alpha:last",
+        "beta:publish"
+      ],
+      "chosen": "beta:publish"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "alpha:last"
+      ],
+      "chosen": "alpha:last"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.unknown-race",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.unknown-race",
+      "sequence": 1,
+      "data_sha256": "2937e099505acab3c03ef302157fc18786d3b830af1995de09b079dfa582150e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.unknown-race",
+      "sequence": 1,
+      "data_sha256": "2937e099505acab3c03ef302157fc18786d3b830af1995de09b079dfa582150e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.unknown-race",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "8dbd8eda0aefb9ef6c3b89a881ae329a2adeaaf0d094d97403da8805e83fa64a",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.unknown-race",
+      "sequence": 2,
+      "data_sha256": "8dbd8eda0aefb9ef6c3b89a881ae329a2adeaaf0d094d97403da8805e83fa64a",
+      "outcome": "ok"
+    }
+  ]
+}
