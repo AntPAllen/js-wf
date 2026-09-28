@@ -54,6 +54,9 @@ type Trace struct {
 	StepLimit int              `json:"step_limit,omitempty"`
 	Decisions []Decision       `json:"decisions"`
 	Transport []TransportEvent `json:"transport"`
+	// GuidanceMask is an in-memory minimization control, never serialized.
+	// False releases that recorded choice to the seeded scheduler.
+	GuidanceMask []bool `json:"-"`
 }
 
 func validTraceVersion(version int) bool { return version == 2 || version == TraceVersion }
@@ -134,6 +137,9 @@ func ReplayScheduler(trace Trace) (*Scheduler, error) {
 	if err := trace.validate(); err != nil {
 		return nil, err
 	}
+	if trace.GuidanceMask != nil && len(trace.GuidanceMask) != len(trace.Decisions) {
+		return nil, fmt.Errorf("simulation guidance mask has %d entries for %d decisions", len(trace.GuidanceMask), len(trace.Decisions))
+	}
 	s := NewScheduler(trace.Seed)
 	s.trace.Version = trace.Version
 	s.trace.StepLimit = trace.StepLimit
@@ -184,7 +190,7 @@ func (s *Scheduler) Choose(enabled []string) (string, error) {
 		return "", &StepLimitError{Limit: s.maxSteps, AtMillis: s.now, Enabled: choices, LastChosen: last}
 	}
 	chosen := ""
-	if s.replay != nil {
+	if s.replay != nil && (s.replay.GuidanceMask == nil || s.position < len(s.replay.GuidanceMask) && s.replay.GuidanceMask[s.position]) {
 		if s.position >= len(s.replay.Decisions) {
 			return "", fmt.Errorf("simulation trace ended before decision %d", s.position)
 		}
@@ -208,6 +214,9 @@ func (s *Scheduler) Choose(enabled []string) (string, error) {
 func (s *Scheduler) Trace() Trace { return s.trace }
 
 func (s *Scheduler) Finish() error {
+	if s.replay != nil && s.replay.GuidanceMask != nil {
+		return nil
+	}
 	if s.replay != nil && s.position != len(s.replay.Decisions) {
 		return fmt.Errorf("simulation trace has %d unused decisions", len(s.replay.Decisions)-s.position)
 	}

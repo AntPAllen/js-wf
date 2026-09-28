@@ -15,7 +15,11 @@ the last choice, pending actions, and virtual time; a stalled cooperative
 actor reports unfinished actors when its caller context expires. Version 2
 traces still replay with the default limit. Virtual-clock overflow fails
 closed. These diagnostics distinguish a bounded livelock or stalled actor
-from a clean seed; shrinking a failure trace is still outstanding.
+from a clean seed. `sim.MinimizeFailureTrace` removes forced decisions in
+bounded reruns, accepts only the same caller-selected invariant failure, and
+verifies that the best generated trace reproduces the exact transport
+transcript on disk. A synthetic ten-choice failure shrinks to an earlier
+replayable failure. Actor removal and automatic CI shrinking remain.
 `sim.RunAppendActors` also yields two real journal append calls at each
 transport operation, so 100 seeded two-writer CAS races explore distinct
 interleavings without relying on Go goroutine timing. Every run retains one
