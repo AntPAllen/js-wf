@@ -17,6 +17,7 @@ import (
 	"js-wf/identity"
 	"js-wf/integrity"
 	"js-wf/journal"
+	workerpkg "js-wf/worker"
 )
 
 func retainedModelSnapshot(starts *StartTransport, journals *JournalTransport, state *KVTransport) (integrity.Snapshot, error) {
@@ -126,7 +127,7 @@ func runSeededRetainedInvariantChecks(seed int64, replay *Trace) (trace Trace, r
 			}
 			completed = messages[2].Sequence
 		}
-		terminal := []byte(`"done"`)
+		terminal := []byte(fmt.Sprintf(`{"inv_seq":%d,"result":"done"}`, handle.InvSeq))
 		if _, err := appendEntry(3, journal.Completed, terminal, completed); err != nil {
 			return trace, err
 		}
@@ -139,9 +140,12 @@ func runSeededRetainedInvariantChecks(seed int64, replay *Trace) (trace Trace, r
 				return trace, err
 			}
 		}
-		_, stateErr := state.Create(ctx, identity.Key("test", id), terminal)
+		stateErr := workerpkg.PersistOutcomeWithPort(ctx, state, "test", id, handle.InvSeq, terminal)
 		if kvFault == "ok" && stateErr != nil || kvFault != "ok" && !errors.Is(stateErr, ErrTransportLost) {
 			return trace, fmt.Errorf("seed %d %s terminal KV fault=%s: %v", seed, id, kvFault, stateErr)
+		}
+		if err := workerpkg.PersistOutcomeWithPort(ctx, state, "test", id, handle.InvSeq, terminal); err != nil {
+			return trace, fmt.Errorf("seed %d %s terminal KV retry: %w", seed, id, err)
 		}
 		snapshot, err := retainedModelSnapshot(starts, journals, state)
 		if err != nil {

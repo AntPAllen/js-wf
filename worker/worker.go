@@ -19,7 +19,6 @@ import (
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
-	"js-wf/retention"
 	"js-wf/wf"
 
 	"github.com/nats-io/nats.go"
@@ -1027,38 +1026,5 @@ func signalPayloadWithPort(ctx context.Context, port SignalDrainPort, event sign
 func (w *Worker) persistOutcome(ctx context.Context, typ, id string, invSeq uint64, payload []byte) error {
 	attemptCtx, stopAttempt := context.WithTimeout(ctx, 5*time.Second)
 	defer stopAttempt()
-	key := identity.Key(typ, id)
-	_, err := w.state.Create(attemptCtx, key, payload)
-	if err == nil {
-		return nil
-	}
-	if !errors.Is(err, jetstream.ErrKeyExists) {
-		return err
-	}
-	previous, err := w.state.Get(attemptCtx, key)
-	if err != nil {
-		return err
-	}
-	marker, tomb, err := retention.Decode(previous.Value())
-	if err != nil {
-		return err
-	}
-	if tomb {
-		if marker.InvSeq >= invSeq {
-			return client.ErrPurged
-		}
-		_, err := w.state.Update(attemptCtx, key, payload, previous.Revision())
-		if err == nil {
-			return nil
-		}
-		current, getErr := w.state.Get(attemptCtx, key)
-		if getErr == nil && bytes.Equal(current.Value(), payload) {
-			return nil
-		}
-		return err
-	}
-	if !bytes.Equal(previous.Value(), payload) {
-		return fmt.Errorf("terminal result changed for %s", key)
-	}
-	return nil
+	return PersistOutcomeWithPort(attemptCtx, jetStreamOutcomePort{kv: w.state}, typ, id, invSeq, payload)
 }

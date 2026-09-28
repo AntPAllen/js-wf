@@ -22,7 +22,7 @@ transcript on disk. A synthetic ten-choice failure shrinks to an earlier
 replayable failure. Actor removal and automatic CI shrinking remain.
 CI now replays a pinned corpus covering committed and dropped CAS unknowns,
 two-worker dispatch, competing suspended scanners, signal, suspended, and child
-notification liveness,
+notification liveness, outcome persistence,
 retained-state checks, and workflow determinism. Go runs package tests from `sim/`, so the relative
 `sim-failure.json` output lands under the uploaded artifact path.
 An operation context can be cancelled while its actor is waiting for a
@@ -84,17 +84,19 @@ mutations for duplicate starts (I1), two workers sharing an epoch and a
 descending epoch (I2), a completion without a request (I3), and a changed
 terminal value (I6) each make the checker fail. The real checker also rejects
 two recorded worker IDs in one nonzero epoch. Suspended timer and signal
-wakeup checks and an I5 negative control are described below; integrated
-worker advancement and child-completion liveness remain open.
+wakeup checks and I5 negative controls are described below; integrated
+worker advancement remains open.
 
 A separate 1,000-seed workload now runs production `Client.Start` and
 `journal.Store.Append` against retained in-memory invocation and journal
-transports, with dropped and hidden-ack step completions. It writes modeled
-terminal KV values, reconstructs the checker input from the transports'
+transports, with dropped and hidden-ack step completions. It runs the
+production worker's terminal KV persistence decision through the modeled
+revision-CAS port, including a lost create acknowledgment and idempotent
+retry. It reconstructs the checker input from the transports'
 retained contents, and runs `CheckSnapshot` after each of five terminal
 schedules per seed. The checker report enters the trace; exact disk replay
-and byte-identical cross-process traces pass. Result persistence still needs
-the production worker handler in this model.
+and byte-identical cross-process traces pass. The full worker handler remains
+outside this model.
 
 Another 1,000-seed workload runs production `Client.Start`, `wf.Run`, and
 `journal.Store.Append` against retained in-memory transports. For five
@@ -102,9 +104,17 @@ three-step completions per seed, it checks the reconstructed state, replays
 the real recorded step requests without rerunning an effect, then changes a
 step name and input separately. Both deliberate I4 mutations return
 `ErrNonDeterministic`. Its checker result and replay verdict enter the trace;
-exact disk replay and byte-identical cross-process traces pass. Dispatch,
-lease fencing, and the production worker's result write remain outside this
-workload.
+exact disk replay and byte-identical cross-process traces pass. Its terminal
+write also uses the production worker decision. Dispatch and lease fencing
+remain outside this workload.
+
+A further 1,000-seed terminal-outcome workload injects dropped or hidden KV
+create and update acknowledgments, retries persisted outcomes, replaces old
+purge tombstones by revision CAS, fences a same-generation tombstone, and
+rejects a changed terminal payload. Its retained KV value and decision enter
+the trace; seed 42 is pinned and replays across processes. The production
+worker handler still needs an integrated dispatch, lease, journal, and result
+schedule in one model.
 
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per

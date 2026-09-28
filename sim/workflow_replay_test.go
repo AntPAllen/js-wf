@@ -18,6 +18,7 @@ import (
 	"js-wf/integrity"
 	"js-wf/journal"
 	"js-wf/wf"
+	"js-wf/worker"
 )
 
 func runSeededWorkflowReplay(seed int64, replay *Trace) (trace Trace, runErr error) {
@@ -43,7 +44,8 @@ func runSeededWorkflowReplay(seed int64, replay *Trace) (trace Trace, runErr err
 	store := journal.NewWithAppendPort(journals)
 	for caseIndex := 0; caseIndex < 5; caseIndex++ {
 		id := fmt.Sprintf("replay-%02d", caseIndex)
-		if handle, err := client.Start(ctx, "test", id, []byte(`null`)); err != nil || handle.InvSeq == 0 {
+		handle, err := client.Start(ctx, "test", id, []byte(`null`))
+		if err != nil || handle.InvSeq == 0 {
 			return trace, fmt.Errorf("seed %d start %s: handle=%+v err=%v", seed, id, handle, err)
 		}
 		first, err := store.Append(ctx, "test", id, journal.Entry{Index: 0, Kind: journal.Started}, 0)
@@ -90,11 +92,11 @@ func runSeededWorkflowReplay(seed int64, replay *Trace) (trace Trace, runErr err
 		if err != nil || effects != 3 || index != 7 {
 			return trace, fmt.Errorf("seed %d handler %s result=%d effects=%d next_index=%d err=%v", seed, id, result, effects, index, err)
 		}
-		terminal := []byte(strconv.Itoa(result))
+		terminal := []byte(fmt.Sprintf(`{"inv_seq":%d,"result":%d}`, handle.InvSeq, result))
 		if _, err := store.Append(ctx, "test", id, journal.Entry{Epoch: 1, Index: index, Kind: journal.Completed, Payload: terminal, WorkerID: "worker-a"}, tail); err != nil {
 			return trace, err
 		}
-		if _, err := state.Create(ctx, identity.Key("test", id), terminal); err != nil {
+		if err := worker.PersistOutcomeWithPort(ctx, state, "test", id, handle.InvSeq, terminal); err != nil {
 			return trace, err
 		}
 		snapshot, err := retainedModelSnapshot(starts, journals, state)
