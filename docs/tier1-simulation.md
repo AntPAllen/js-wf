@@ -33,8 +33,11 @@ modeled expiry allow a higher fencing epoch and reject the old holder's renew
 and cleanup; three normal repeats and a race run passed. A second TCP-proxy
 fixture drops an acknowledgment after a real KV create commits and verifies
 that the uninitialized orphan is reclaimed with a higher epoch; three normal
-repeats and a race run passed. Lost acknowledgments during KV update still
-need a dedicated real-server comparison.
+repeats and a race run passed. A third TCP-proxy fixture drops a committed
+renewal update acknowledgment. Both the real cluster and model report a lost
+lease; cleanup removes that owner's uncertain revision, then a successor
+acquires a higher epoch and survives a stale cleanup. Three normal repeats
+and a race run passed.
 
 Run the fixed fault cases and 1,000 seeded scenarios:
 

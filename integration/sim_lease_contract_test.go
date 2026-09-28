@@ -55,6 +55,22 @@ type holdLeaseCreateKV struct {
 	owner *holdLeaseCreateJS
 }
 
+type holdLeaseRenewKV struct {
+	jetstream.KeyValue
+	proxy *testcluster.ClientProxy
+	held  chan struct{}
+	count int
+}
+
+func (h *holdLeaseRenewKV) Update(ctx context.Context, key string, value []byte, revision uint64) (uint64, error) {
+	h.count++
+	if h.count == 2 {
+		h.proxy.HoldResponses()
+		close(h.held)
+	}
+	return h.KeyValue.Update(ctx, key, value, revision)
+}
+
 func (h *holdLeaseCreateKV) Create(ctx context.Context, key string, value []byte, opts ...jetstream.KVCreateOpt) (uint64, error) {
 	h.owner.once.Do(func() {
 		h.owner.proxy.HoldResponses()
@@ -383,5 +399,103 @@ func TestLeaseNetworkLostCreateAckReclaimsUninitializedEpoch(t *testing.T) {
 	var current lease.Value
 	if err := json.Unmarshal(entry.Value(), &current); err != nil || current.Worker != "survivor" || current.Epoch != survivor.Epoch() {
 		t.Fatalf("reclaimed lease value=%+v err=%v", current, err)
+	}
+}
+
+func TestLeaseNetworkLostRenewAckCleanup(t *testing.T) {
+	all, cluster := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	proxy, err := testcluster.NewClientProxy(cluster.Servers[0].ClientURL())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer proxy.Close()
+	nc, err := proxy.Connect()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer nc.Close()
+	proxied, err := jetstream.New(nc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	kv, err := proxied.KeyValue(ctx, "WF_LEASE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	wrapped := &holdLeaseRenewKV{KeyValue: kv, proxy: proxy, held: make(chan struct{})}
+	store := lease.NewWithKeyValue(wrapped)
+	const typ, id = "lease-contract", "lost-renew-ack"
+	old, err := store.Acquire(ctx, typ, id, "old")
+	if err != nil {
+		t.Fatal(err)
+	}
+	observer, err := all[1].KeyValue(ctx, "WF_LEASE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	initial, err := observer.Get(ctx, typ+"."+id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
+	defer stopRenew()
+	renewed := make(chan error, 1)
+	go func() { renewed <- old.Renew(renewCtx) }()
+	select {
+	case <-wrapped.held:
+	case <-ctx.Done():
+		t.Fatal("lease renewal was not attempted")
+	}
+	var committed jetstream.KeyValueEntry
+	for ctx.Err() == nil {
+		committed, err = observer.Get(ctx, typ+"."+id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if committed.Revision() > initial.Revision() {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatal("held renewal did not commit")
+	}
+	var retained lease.Value
+	if err := json.Unmarshal(committed.Value(), &retained); err != nil || retained.Worker != "old" || retained.Epoch != old.Epoch() {
+		t.Fatalf("committed renewal value=%+v err=%v", retained, err)
+	}
+	proxy.Block()
+	select {
+	case err := <-renewed:
+		if !errors.Is(err, lease.ErrLost) {
+			t.Fatalf("lost renewal acknowledgment: %v", err)
+		}
+	case <-ctx.Done():
+		t.Fatal("renewal did not return after connection cut")
+	}
+	proxy.Heal()
+	if err := old.Cleanup(ctx); err != nil {
+		t.Fatalf("cleanup of uncertain renewal: %v", err)
+	}
+	successorStore, err := lease.New(ctx, all[2])
+	if err != nil {
+		t.Fatal(err)
+	}
+	successor, err := successorStore.Acquire(ctx, typ, id, "successor")
+	if err != nil || successor.Epoch() <= old.Epoch() {
+		t.Fatalf("successor acquisition: lease=%+v err=%v", successor, err)
+	}
+	if err := old.Cleanup(ctx); !errors.Is(err, lease.ErrLost) {
+		t.Fatalf("stale cleanup after successor: %v", err)
+	}
+	entry, err := observer.Get(ctx, typ+"."+id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var value lease.Value
+	if err := json.Unmarshal(entry.Value(), &value); err != nil || value.Worker != "successor" || value.Epoch != successor.Epoch() {
+		t.Fatalf("successor changed after cleanup: value=%+v err=%v", value, err)
 	}
 }

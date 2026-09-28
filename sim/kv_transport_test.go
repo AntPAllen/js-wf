@@ -104,6 +104,38 @@ func TestLeaseKVFaultBoundaries(t *testing.T) {
 			t.Fatalf("successor absent after cleanup: entry=%+v err=%v", entry, err)
 		}
 	})
+	t.Run("lost renewal acknowledgment cleans committed update", func(t *testing.T) {
+		model := NewKVTransport(NewScheduler(6), 30*time.Second)
+		store := lease.NewWithKVPort(model)
+		old, err := store.Acquire(ctx, "test", "one", "old")
+		if err != nil {
+			t.Fatal(err)
+		}
+		before, err := model.Get(ctx, "test.one")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := model.QueueFault(KVFault{Operation: "update", Kind: KVLoseAckAfterCommit}); err != nil {
+			t.Fatal(err)
+		}
+		if err := old.Renew(ctx); !errors.Is(err, lease.ErrLost) {
+			t.Fatalf("lost renewal acknowledgment: %v", err)
+		}
+		committed, err := model.Get(ctx, "test.one")
+		if err != nil || committed.Revision <= before.Revision {
+			t.Fatalf("renewal did not commit: entry=%+v err=%v", committed, err)
+		}
+		if err := old.Cleanup(ctx); err != nil {
+			t.Fatalf("cleanup after uncertain renewal: %v", err)
+		}
+		next, err := store.Acquire(ctx, "test", "one", "next")
+		if err != nil || next.Epoch() <= old.Epoch() {
+			t.Fatalf("successor acquisition: lease=%+v err=%v", next, err)
+		}
+		if err := old.Cleanup(ctx); !errors.Is(err, lease.ErrLost) {
+			t.Fatalf("stale cleanup: %v", err)
+		}
+	})
 	t.Run("create acknowledgment lost before initialization", func(t *testing.T) {
 		schedule := NewScheduler(4)
 		model := NewKVTransport(schedule, 30*time.Second)
