@@ -176,7 +176,12 @@ a replacement starts from the saved cursor and stale revision writes fail.
 A second three-node contract hides an acknowledgment after real `WF_STATE`
 cursor create or update commits, then confirms a reader on another node sees
 the committed cursor, advances it, and rejects the old revision. Three
-race-instrumented repeats passed. Concurrent scanner actors remain.
+race-instrumented repeats passed. A further 1,000-seed workload runs two
+live production start-scanner loops through cooperative yield points at lease,
+cursor, cadence, and retained stream calls. A seeded cursor write loss forces
+lease turnover. Every schedule retains ten distinct wakeups, and five
+race-instrumented runs replay exactly. Native timer routing and the worker
+handler remain outside this model.
 
 The dispatch slice runs the production `worker.RunPartition` fetch/retry loop
 through a narrow consumer port with a supplied handler callback. Its model

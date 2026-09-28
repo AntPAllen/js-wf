@@ -405,6 +405,8 @@ func TestReplayFaultTrace(t *testing.T) {
 		replayed, err = runSeededTimerScan(loaded.Seed, &loaded)
 	case "reconcile_loop_20":
 		replayed, err = runSeededReconcileLoop(loaded.Seed, &loaded)
+	case "reconcile_two_scanners":
+		replayed, err = runTwoReconcileLoops(loaded.Seed, &loaded)
 	default:
 		t.Fatalf("unknown trace workload %q", loaded.Workload)
 	}
