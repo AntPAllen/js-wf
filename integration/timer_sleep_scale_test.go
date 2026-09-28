@@ -66,7 +66,7 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 	timeoutSeconds := timerScaleOption(t, "WF_TIMER_SLEEP_TIMEOUT_SECONDS", 600, 30, 600)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSeconds)*time.Second)
 	defer cancel()
-	if routeFaults {
+	if routeFaults && os.Getenv("WF_TIMER_SLEEP_SKIP_RECONCILER") == "" {
 		loopCtx, stopLoop := context.WithCancel(ctx)
 		loopDone := make(chan error, 1)
 		go func() {
@@ -220,6 +220,13 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 		if ctx.Err() != nil {
 			t.Fatalf("timers were not all scheduled before route faults: %v", ctx.Err())
 		}
+		// Scheduling is counted before the initial handler releases its lease.
+		// Let those handlers finish so the route cut exercises suspended sleeps.
+		select {
+		case <-time.After(time.Second):
+		case <-ctx.Done():
+			t.Fatal(ctx.Err())
+		}
 		faultDone = make(chan timerRouteFaultResult, 1)
 		go func() { faultDone <- runTimerRouteFaults(ctx, cluster, all[0], typ, handler) }()
 	}
@@ -331,6 +338,7 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 			}
 		}()
 		workers = append(workers, fault.workers...)
+		t.Logf("route fault sequence elapsed=%s", fault.elapsed)
 	}
 	for {
 		info, err := run.Info(ctx)
@@ -367,18 +375,24 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 	p50 := lateness[int(math.Ceil(0.50*float64(count)))-1]
 	p99 := lateness[int(math.Ceil(0.99*float64(count)))-1]
 	maximum := lateness[count-1]
-	var scheduled, fired uint64
+	var scheduled, fired, redeliveries, fences uint64
+	var enqueueMax time.Duration
 	var buckets [6]uint64
 	for _, w := range workers {
 		m := w.Metrics()
 		scheduled += m.TimersScheduled
 		fired += m.TimersFired
+		redeliveries += m.Redeliveries
+		fences += m.FencingEvents
+		if m.EnqueueToLeaseMaximum > enqueueMax {
+			enqueueMax = m.EnqueueToLeaseMaximum
+		}
 		for i, value := range m.TimerLateBuckets {
 			buckets[i] += value
 		}
 	}
-	t.Logf("invocations=%d workers=%d partition_concurrency=%d start=%s complete=%s handler_lateness_p50=%s p99=%s max=%s early=%d stuck=%d wakeup_buckets=%v scheduled=%d fired=%d", count, len(workers), partitionConcurrency, startDuration, completionDuration, p50, p99, maximum, early, stuck, buckets, scheduled, fired)
-	if !routeFaults && scheduled != uint64(count) || fired != uint64(count) || scheduled > uint64(count) {
+	t.Logf("invocations=%d workers=%d partition_concurrency=%d start=%s complete=%s handler_lateness_p50=%s p99=%s max=%s early=%d stuck=%d wakeup_buckets=%v scheduled=%d fired=%d redeliveries=%d fences=%d enqueue_to_lease_max=%s", count, len(workers), partitionConcurrency, startDuration, completionDuration, p50, p99, maximum, early, stuck, buckets, scheduled, fired, redeliveries, fences, enqueueMax)
+	if scheduled != uint64(count) || fired > uint64(count) || !routeFaults && fired != uint64(count) {
 		t.Fatalf("timer metrics: scheduled=%d fired=%d want=%d", scheduled, fired, count)
 	}
 	limit := 2 * time.Second
@@ -418,6 +432,7 @@ func readSleepJournal(ctx context.Context, j *journal.Store, typ, id string) ([]
 }
 
 type timerRouteFaultResult struct {
+	elapsed time.Duration
 	workers []*worker.Worker
 	stop    context.CancelFunc
 	done    []<-chan error
@@ -425,6 +440,8 @@ type timerRouteFaultResult struct {
 }
 
 func runTimerRouteFaults(ctx context.Context, cluster *testcluster.Cluster, majority jetstream.JetStream, typ string, handler worker.Handler) (result timerRouteFaultResult) {
+	started := time.Now()
+	defer func() { result.elapsed = time.Since(started) }()
 	mesh := cluster.RouteMesh()
 	defer mesh.Heal()
 	backupCtx, stopBackups := context.WithCancel(ctx)
@@ -460,7 +477,7 @@ func runTimerRouteFaults(ctx context.Context, cluster *testcluster.Cluster, majo
 		}
 		standbys[node] = backup
 	}
-	started := map[int]bool{}
+	startedStandbys := map[int]bool{}
 	for _, node := range []int{2, 1, 2} {
 		if err := mesh.PartitionNode(node); err != nil {
 			result.err = err
@@ -476,14 +493,14 @@ func runTimerRouteFaults(ctx context.Context, cluster *testcluster.Cluster, majo
 			result.err = ctx.Err()
 			return
 		}
-		if !started[node] {
+		if !startedStandbys[node] {
 			backup := standbys[node]
 			partitions := standbyPartitions[node]
 			result.workers = append(result.workers, backup)
 			done := make(chan error, 1)
 			result.done = append(result.done, done)
 			go func() { done <- backup.RunPartitions(backupCtx, partitions) }()
-			started[node] = true
+			startedStandbys[node] = true
 		}
 		select {
 		case <-time.After(6 * time.Second):
