@@ -195,6 +195,12 @@ cursor CAS. It then replaces the scanner. The persistent cursor advances,
 all 20 wakeups remain unique, and no fallback timer remains. Traces replay
 exactly, including from a saved file and across separate processes.
 
+A further 1,000 seeded schedules interleave two live fallback scanners at
+lease, cursor, cadence, timer read, wakeup publish, and delete calls. A seeded
+cursor write loss forces lease turnover; a wakeup and a delete also lose
+their requests or acknowledgments. All ten due timers publish one wakeup
+and are removed. The trace replays from disk and across processes.
+
 The shared reconciler loop now has a narrow port for lease acquisition and
 renewal, cursor load and CAS save, and cadence waits. The model uses separate
 KV transports for the expiring lease and durable cursor. A 1,000-seed workload
