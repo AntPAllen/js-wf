@@ -84,10 +84,14 @@ tests separately cover consumer-leader kills and a live handler's progress
 heartbeats. A second three-node contract closes the first client with a
 delivery unacked, reopens the same durable from another node, and compares
 redelivery and acknowledgment with the model. Two clients then fetch distinct
-new messages from that durable; three repeats and a race run passed. This
-slice exercises the dispatch loop and consumer contract, not the worker
-handler's lease, journal, signal, or timer decisions. Simultaneous production
-partition loops and server-driven consumer-leader movement still need a
+new messages from that durable; three repeats and a race run passed. A direct
+three-node test then found a model discrepancy: JetStream accepts an ack from
+an older delivery after redelivery and clears the message, then accepts the
+newer's duplicate ack. The model now matches; three normal repeats and a race
+run passed. This slice exercises the dispatch loop and consumer contract; the
+worker handler's lease, journal, signal, and timer decisions remain outside
+the model. Simultaneous production partition loops and server-driven
+consumer-leader movement still need a
 cooperatively scheduled model comparison.
 
 Run the fixed fault cases and 1,000 seeded scenarios:

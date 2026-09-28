@@ -278,3 +278,32 @@ func TestDispatchDurableRestartAndSharedConsumers(t *testing.T) {
 		t.Fatalf("durable state pending=%d creates=%d", model.Pending(), model.Creates())
 	}
 }
+
+func TestDispatchLateAckAfterRedeliveryIsIdempotent(t *testing.T) {
+	ctx := context.Background()
+	model := NewDispatchTransport(NewScheduler(101), time.Second)
+	model.PublishRun("wf.run.0", []byte(`one`))
+	consumer, err := model.Consumer(ctx, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstBatch, err := consumer.FetchOne(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	first := <-firstBatch.Messages()
+	if err := model.Wait(ctx, time.Second); err != nil {
+		t.Fatal(err)
+	}
+	secondBatch, err := consumer.FetchOne(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second := <-secondBatch.Messages()
+	if err := first.Ack(); err != nil || model.Pending() != 0 {
+		t.Fatalf("late first ack: err=%v pending=%d", err, model.Pending())
+	}
+	if err := second.Ack(); err != nil || model.Pending() != 0 {
+		t.Fatalf("second ack: err=%v pending=%d", err, model.Pending())
+	}
+}

@@ -215,12 +215,31 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 	model := m.model
 	model.mu.Lock()
 	defer model.mu.Unlock()
+	event := TransportEvent{Operation: "consumer_" + operation, Subject: m.record.subject, Sequence: m.record.sequence}
+	if operation == "ack" {
+		if m.record.acked {
+			event.Outcome = "duplicate_ack"
+			model.event(event)
+			return nil
+		}
+		// JetStream accepts a late ack from an earlier delivery even after
+		// another client has received the redelivery. The first committed ack
+		// retires the stream message; later acks are idempotent.
+		m.record.acked = true
+		if model.takeFault("ack") == "lose_ack_after_commit" {
+			event.Outcome = "lose_ack_after_commit"
+			model.event(event)
+			return ErrTransportLost
+		}
+		event.Outcome = "ok"
+		model.event(event)
+		return nil
+	}
 	if m.record.acked || m.delivery != m.record.deliveries {
 		return fmt.Errorf("stale dispatch delivery")
 	}
-	event := TransportEvent{Operation: "consumer_" + operation, Subject: m.record.subject, Sequence: m.record.sequence}
 	switch operation {
-	case "ack", "term":
+	case "term":
 		m.record.acked = true
 	case "nak":
 		m.record.deadline = model.schedule.NowMillis() + delay.Milliseconds()
@@ -228,11 +247,6 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 		m.record.deadline = model.schedule.NowMillis() + model.ackWait
 	default:
 		return fmt.Errorf("invalid dispatch response %q", operation)
-	}
-	if operation == "ack" && model.takeFault("ack") == "lose_ack_after_commit" {
-		event.Outcome = "lose_ack_after_commit"
-		model.event(event)
-		return ErrTransportLost
 	}
 	event.Outcome = "ok"
 	model.event(event)
