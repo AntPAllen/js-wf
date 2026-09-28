@@ -3,16 +3,28 @@ package reconcile
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync/atomic"
 	"testing"
 	"time"
 
+	"js-wf/lease"
 	"js-wf/provision"
 	"js-wf/testcluster"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
+
+func TestReconcileRetriesLostLeaseInitialization(t *testing.T) {
+	err := fmt.Errorf("%w: initialization: context deadline exceeded", lease.ErrLost)
+	if !retryableReconcileError(err) {
+		t.Fatalf("lost lease initialization should retry: %v", err)
+	}
+	if retryableReconcileError(errors.New("invalid scan cursor")) {
+		t.Fatal("permanent cursor error should stop the loop")
+	}
+}
 
 func TestCursorPersistsAcrossLeadersAndUsesCAS(t *testing.T) {
 	cluster, err := testcluster.Start(t.TempDir(), 3)

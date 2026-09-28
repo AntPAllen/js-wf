@@ -320,10 +320,12 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	l, err := w.leases.Acquire(acquireCtx, typ, id, w.ID)
 	stopAcquire()
 	if errors.Is(err, lease.ErrHeld) {
+		w.metrics.leaseContentions.Add(1)
 		_ = msg.NakWithDelay(time.Second)
 		return
 	}
 	if err != nil {
+		w.metrics.leaseAcquireFailures.Add(1)
 		if errors.Is(err, lease.ErrLost) {
 			w.metrics.fencingEvents.Add(1)
 		}

@@ -375,7 +375,7 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 	p50 := lateness[int(math.Ceil(0.50*float64(count)))-1]
 	p99 := lateness[int(math.Ceil(0.99*float64(count)))-1]
 	maximum := lateness[count-1]
-	var scheduled, fired, redeliveries, fences uint64
+	var scheduled, fired, redeliveries, fences, contentions, acquireFailures uint64
 	var enqueueMax time.Duration
 	var buckets [6]uint64
 	for _, w := range workers {
@@ -384,6 +384,8 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 		fired += m.TimersFired
 		redeliveries += m.Redeliveries
 		fences += m.FencingEvents
+		contentions += m.LeaseContentions
+		acquireFailures += m.LeaseAcquireFailures
 		if m.EnqueueToLeaseMaximum > enqueueMax {
 			enqueueMax = m.EnqueueToLeaseMaximum
 		}
@@ -391,7 +393,7 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 			buckets[i] += value
 		}
 	}
-	t.Logf("invocations=%d workers=%d partition_concurrency=%d start=%s complete=%s handler_lateness_p50=%s p99=%s max=%s early=%d stuck=%d wakeup_buckets=%v scheduled=%d fired=%d redeliveries=%d fences=%d enqueue_to_lease_max=%s", count, len(workers), partitionConcurrency, startDuration, completionDuration, p50, p99, maximum, early, stuck, buckets, scheduled, fired, redeliveries, fences, enqueueMax)
+	t.Logf("invocations=%d workers=%d partition_concurrency=%d start=%s complete=%s handler_lateness_p50=%s p99=%s max=%s early=%d stuck=%d wakeup_buckets=%v scheduled=%d fired=%d redeliveries=%d fences=%d lease_contentions=%d lease_acquire_failures=%d enqueue_to_lease_max=%s", count, len(workers), partitionConcurrency, startDuration, completionDuration, p50, p99, maximum, early, stuck, buckets, scheduled, fired, redeliveries, fences, contentions, acquireFailures, enqueueMax)
 	if scheduled != uint64(count) || fired > uint64(count) || !routeFaults && fired != uint64(count) {
 		t.Fatalf("timer metrics: scheduled=%d fired=%d want=%d", scheduled, fired, count)
 	}

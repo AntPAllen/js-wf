@@ -12,6 +12,8 @@ import (
 // operators should keep those clocks synchronized when comparing latencies.
 type Metrics struct {
 	LeaseAcquisitions     uint64        `json:"lease_acquisitions"`
+	LeaseContentions      uint64        `json:"lease_contentions"`
+	LeaseAcquireFailures  uint64        `json:"lease_acquire_failures"`
 	FencingEvents         uint64        `json:"fencing_events"`
 	Redeliveries          uint64        `json:"redeliveries"`
 	EnqueueToLeaseSamples uint64        `json:"enqueue_to_lease_samples"`
@@ -28,6 +30,8 @@ type Metrics struct {
 
 type metricsCounters struct {
 	leaseAcquisitions     atomic.Uint64
+	leaseContentions      atomic.Uint64
+	leaseAcquireFailures  atomic.Uint64
 	fencingEvents         atomic.Uint64
 	redeliveries          atomic.Uint64
 	enqueueToLeaseSamples atomic.Uint64
@@ -91,6 +95,8 @@ func (m *metricsCounters) recordLeaseLatency(metadata *jetstream.MsgMetadata, ac
 func (w *Worker) Metrics() Metrics {
 	view := Metrics{
 		LeaseAcquisitions:     w.metrics.leaseAcquisitions.Load(),
+		LeaseContentions:      w.metrics.leaseContentions.Load(),
+		LeaseAcquireFailures:  w.metrics.leaseAcquireFailures.Load(),
 		FencingEvents:         w.metrics.fencingEvents.Load(),
 		Redeliveries:          w.metrics.redeliveries.Load(),
 		EnqueueToLeaseSamples: w.metrics.enqueueToLeaseSamples.Load(),

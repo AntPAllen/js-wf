@@ -30,6 +30,19 @@ events, and 57.42 seconds maximum enqueue-to-lease latency. This run proves
 liveness for this fault schedule but does not prove the latency target or
 consistent liveness across seeds and failure modes.
 
+Two instrumented full reruns measured lease contention separately from other
+acquisition failures. With the usual one-second retry after `ErrHeld`, all
+10,000 completed at p99 44.48 seconds; workers recorded 19,875 redeliveries,
+13,634 lease contentions, and 313 lease acquisition failures. A trial
+two-second retry brought one run to p99 27.87 seconds but its timer reconciler
+exited after a lease initialization timeout. The reconciler now retries that
+wrapped lease-loss error. A second two-second run then completed all 10,000
+at p99 43.43 seconds, with 20,975 redeliveries, 15,424 contentions, and
+2,220 acquisition failures. The longer retry was reverted because it did not
+consistently meet the gate. These runs show that both held leases and failed
+acquisitions contribute to the recovery backlog; they do not isolate a single
+server-side cause of the timing variance.
+
 Further 100-invocation diagnostics showed that wakeups can wait tens of
 seconds between enqueue and lease acquisition. With the reconciler disabled,
 p99 was 36.7 seconds, the longest enqueue-to-lease wait was 32.7 seconds,

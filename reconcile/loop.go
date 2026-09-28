@@ -165,12 +165,15 @@ func runLoop(ctx context.Context, js jetstream.JetStream, workerID, kind string,
 }
 
 func retryableReconcileError(err error) bool {
+	if errors.Is(err, lease.ErrLost) {
+		return true
+	}
 	var api *jetstream.APIError
 	if errors.As(err, &api) && (api.ErrorCode == 10008 || api.ErrorCode == 10164) {
 		return true
 	}
 	return errors.Is(err, jetstream.ErrNoStreamResponse) ||
 		errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) ||
-		errors.Is(err, nats.ErrDisconnected) || errors.Is(err, nats.ErrConnectionReconnecting) ||
+		errors.Is(err, nats.ErrDisconnected) || errors.Is(err, nats.ErrConnectionReconnecting) || errors.Is(err, nats.ErrNoServers) ||
 		errors.Is(err, context.DeadlineExceeded)
 }
