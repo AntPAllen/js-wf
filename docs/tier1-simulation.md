@@ -72,6 +72,16 @@ one predecessor-revision `Get` result; a lease contender that reads it is
 fenced by the revision CAS on delete. This models an observed response without
 attributing its cause to the server or treating the modeled lag as inevitable.
 
+The retained-state integrity checker now exposes `CheckSnapshot` for modeled
+invocation subjects, reconstructed journal records, and terminal KV values.
+It shares journal validation with the real JetStream checker. Deliberate
+mutations for duplicate starts (I1), two workers sharing an epoch and a
+descending epoch (I2), a completion without a request (I3), and a changed
+terminal value (I6) each make the checker fail. The real checker also rejects
+two recorded worker IDs in one nonzero epoch. I4 replay and I5 liveness
+negative controls, plus invoking this checker after integrated worker
+schedules, remain open.
+
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
 subject, stores large input objects, and retains run enqueues with message-ID
