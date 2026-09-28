@@ -51,6 +51,7 @@ type Context struct {
 	entries       []Entry
 	position      int
 	append        Appender
+	replay        bool
 	signals       []Signal
 	usedSignals   map[uint64]bool
 	waitingOn     string
@@ -113,7 +114,7 @@ func (c *Context) next(kind Kind, payload json.RawMessage) error {
 		return ErrSuspended
 	}
 	if c.append == nil {
-		return fmt.Errorf("replay reached journal tail")
+		return fmt.Errorf("%w: replay reached journal tail", ErrNonDeterministic)
 	}
 	if err := c.append(c.base, kind, payload); err != nil {
 		return err
@@ -187,6 +188,9 @@ func runWithKind[T any](c *Context, kind, name string, input any, fn func(contex
 			return zero, ErrCorruptJournal
 		}
 		return value, nil
+	}
+	if c.replay {
+		return zero, ErrReplayPendingStep
 	}
 	if err := c.base.Err(); err != nil {
 		return zero, err

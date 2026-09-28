@@ -14,6 +14,7 @@ import (
 )
 
 var ErrReplayObjectMissing = errors.New("offline replay object is missing")
+var ErrReplayPendingStep = errors.New("offline replay reached an incomplete step")
 
 type ReplayOptions struct {
 	Type        string
@@ -124,6 +125,7 @@ func Replay[T any](journalBytes []byte, fn func(*Context) (T, error), options ..
 		}
 	}
 	c := NewContext(context.Background(), entries, nil, signals...)
+	c.replay = true
 	c.SetResultStore(nil, loadObject)
 	// A recorded sleep or child call may have suspended before it completed.
 	// Reaching that recorded boundary must not publish a fresh schedule or start

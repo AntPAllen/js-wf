@@ -114,3 +114,23 @@ func WaitTimerWorkflow(c *wf.Context, _ json.RawMessage) (json.RawMessage, error
 func PanicWorkflow(*wf.Context, json.RawMessage) (json.RawMessage, error) {
 	panic("boom")
 }
+
+func PendingWorkflow(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+	_, err := wf.Run(c, "block", 0, func(context.Context) (int, error) {
+		if marker := os.Getenv("WF_REPLAY_EFFECT_MARKER"); marker != "" {
+			_ = os.WriteFile(marker, []byte("effect ran"), 0600)
+		}
+		return 0, nil
+	})
+	return nil, err
+}
+
+func CompletedThenWaitWorkflow(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+	_, err := wf.Run(c, "done", 0, func(context.Context) (int, error) {
+		if marker := os.Getenv("WF_REPLAY_EFFECT_MARKER"); marker != "" {
+			_ = os.WriteFile(marker, []byte("effect ran"), 0600)
+		}
+		return 1, nil
+	})
+	return nil, err
+}

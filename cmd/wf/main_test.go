@@ -546,6 +546,78 @@ func TestOperatorReplayFailedAndSuspended(t *testing.T) {
 	if err := <-beforeDone; err != nil {
 		t.Fatal(err)
 	}
+	const runningID = "cancel-running-effect"
+	entered := make(chan struct{})
+	runningWorker, err := worker.New(ctx, js, "replay-state-cancel-running", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		_, err := wf.Run(c, "block", 0, func(effectCtx context.Context) (int, error) {
+			close(entered)
+			<-effectCtx.Done()
+			return 0, effectCtx.Err()
+		})
+		return nil, err
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	runningCtx, stopRunning := context.WithCancel(ctx)
+	runningDone := make(chan error, 1)
+	go func() {
+		runningDone <- runningWorker.RunPartition(runningCtx, identity.Partition(typ, runningID, provision.Partitions))
+	}()
+	if _, err := cancelClient.Start(ctx, typ, runningID, []byte(`null`)); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-entered:
+	case <-ctx.Done():
+		t.Fatal("running replay effect did not start")
+	}
+	if _, err := cancelClient.Cancel(ctx, typ, runningID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := cancelClient.Await(ctx, typ, runningID); !errors.Is(err, client.ErrCancelled) {
+		t.Fatalf("running cancel fixture: %v", err)
+	}
+	stopRunning()
+	if err := <-runningDone; err != nil {
+		t.Fatal(err)
+	}
+	const completedID = "cancel-after-step"
+	stepDone := make(chan struct{})
+	completedWorker, err := worker.New(ctx, js, "replay-state-cancel-after-step", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		if _, err := wf.Run(c, "done", 0, func(context.Context) (int, error) { return 1, nil }); err != nil {
+			return nil, err
+		}
+		close(stepDone)
+		<-c.Context().Done()
+		return nil, c.Context().Err()
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	completedCtx, stopCompleted := context.WithCancel(ctx)
+	completedDone := make(chan error, 1)
+	go func() {
+		completedDone <- completedWorker.RunPartition(completedCtx, identity.Partition(typ, completedID, provision.Partitions))
+	}()
+	if _, err := cancelClient.Start(ctx, typ, completedID, []byte(`null`)); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-stepDone:
+	case <-ctx.Done():
+		t.Fatal("completed replay step did not finish")
+	}
+	if _, err := cancelClient.Cancel(ctx, typ, completedID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := cancelClient.Await(ctx, typ, completedID); !errors.Is(err, client.ErrCancelled) {
+		t.Fatalf("post-step cancel fixture: %v", err)
+	}
+	stopCompleted()
+	if err := <-completedDone; err != nil {
+		t.Fatal(err)
+	}
 	marker := filepath.Join(t.TempDir(), "effect")
 	t.Setenv("WF_REPLAY_EFFECT_MARKER", marker)
 	check := func(id, symbol, status, detail string) {
@@ -614,11 +686,13 @@ func TestOperatorReplayFailedAndSuspended(t *testing.T) {
 	}
 	check(cancelledID, "WaitSignalWorkflow", "failed", client.ErrCancelled.Error())
 	check(cancelBeforeID, "WaitSignalWorkflow", "failed", client.ErrCancelled.Error())
+	check(runningID, "PendingWorkflow", "failed", client.ErrCancelled.Error())
+	check(completedID, "CompletedThenWaitWorkflow", "failed", client.ErrCancelled.Error())
 	changed.Reset()
 	if err := run(append(append([]string{}, base...), "-handler-symbol", "ChangedWait", "replay", typ, cancelledID), &changed); err == nil || !strings.Contains(err.Error(), "differs from prior suspension") {
 		t.Fatalf("changed pre-cancellation wait: %v", err)
 	}
-	for _, caseID := range []string{"failed-step", "waiting-timer", cancelledID} {
+	for _, caseID := range []string{"failed-step", "waiting-timer", cancelledID, runningID, completedID} {
 		var exported bytes.Buffer
 		if err := run([]string{"-url", cluster.Servers[0].ClientURL(), "export-replay", typ, caseID}, &exported); err != nil {
 			t.Fatal(err)
@@ -632,6 +706,10 @@ func TestOperatorReplayFailedAndSuspended(t *testing.T) {
 			symbol = "WaitTimerWorkflow"
 		} else if caseID == cancelledID {
 			symbol = "WaitSignalWorkflow"
+		} else if caseID == runningID {
+			symbol = "PendingWorkflow"
+		} else if caseID == completedID {
+			symbol = "CompletedThenWaitWorkflow"
 		}
 		var offline bytes.Buffer
 		if err := run([]string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", symbol, "-replay-bundle", bundlePath, "replay"}, &offline); err != nil {

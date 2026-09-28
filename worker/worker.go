@@ -42,6 +42,11 @@ type signalRecord struct {
 	Hash     string `json:"hash,omitempty"`
 }
 
+type cancelWaiter struct {
+	cancel   context.CancelFunc
+	detected bool
+}
+
 type Worker struct {
 	js                   jetstream.JetStream
 	jrn                  *journal.Store
@@ -57,6 +62,10 @@ type Worker struct {
 	heartbeatInterval    time.Duration
 	nativeSchedules      bool
 	metrics              metricsCounters
+	cancelMu             sync.Mutex
+	cancelWaiters        map[string]*cancelWaiter
+	cancelStream         jetstream.Stream
+	cancelSubscription   *nats.Subscription
 }
 
 type Option func(*Worker) error
@@ -125,11 +134,23 @@ func New(ctx context.Context, js jetstream.JetStream, id string, handlers map[st
 			return nil, fmt.Errorf("fallback timer stream: %w", err)
 		}
 	}
-	w := &Worker{js: js, jrn: journal.New(js), leases: l, state: state, client: client.New(js), ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, nativeSchedules: runInfo.Config.AllowMsgSchedules}
+	w := &Worker{js: js, jrn: journal.New(js), leases: l, state: state, client: client.New(js), ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, nativeSchedules: runInfo.Config.AllowMsgSchedules, cancelWaiters: make(map[string]*cancelWaiter)}
 	for _, option := range options {
 		if err := option(w); err != nil {
 			return nil, err
 		}
+	}
+	w.cancelStream, err = js.Stream(ctx, "WF_SIG")
+	if err != nil {
+		return nil, err
+	}
+	w.cancelSubscription, err = js.Conn().Subscribe("wf.sig.*.*."+client.CancelSignalName, w.observeCancel)
+	if err != nil {
+		return nil, err
+	}
+	if err := js.Conn().FlushWithContext(ctx); err != nil {
+		_ = w.cancelSubscription.Unsubscribe()
+		return nil, err
 	}
 	return w, nil
 }
@@ -591,7 +612,9 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			return wf.ErrCorruptJournal
 		}
 	}
-	wctx := wf.NewContext(ctx, steps, func(ctx context.Context, k wf.Kind, p json.RawMessage) error { return appendEntry(journal.Kind(k), p) }, signals...)
+	handlerCtx, cancelHandler := context.WithCancel(ctx)
+	defer cancelHandler()
+	wctx := wf.NewContext(handlerCtx, steps, func(ctx context.Context, k wf.Kind, p json.RawMessage) error { return appendEntry(journal.Kind(k), p) }, signals...)
 	wctx.SetResultStore(func(ctx context.Context, data []byte) (string, error) {
 		objects, err := w.js.ObjectStore(ctx, "WF_BLOB")
 		if err != nil {
@@ -628,6 +651,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	var result json.RawMessage
 	var runErr error
 	var panicked bool
+	stopCancelWatch := w.watchRunningCancellation(ctx, typ, id, input.Sequence, cancelHandler)
 	func() {
 		defer func() {
 			if p := recover(); p != nil {
@@ -637,6 +661,31 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		}()
 		result, runErr = handler(wctx, inputData)
 	}()
+	cancelSeen := stopCancelWatch()
+	if cancelSeen {
+		current, err := w.drainSignals(ctx, typ, id, input.Sequence, records, appendEntry)
+		if err != nil {
+			return err
+		}
+		found := false
+		for _, signal := range current {
+			if signal.Name == client.CancelSignalName {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return journal.ErrUnknown
+		}
+		payload, err := json.Marshal(wf.Outcome{InvSeq: input.Sequence, Error: client.ErrCancelled.Error()})
+		if err != nil {
+			return err
+		}
+		if err := appendEntry(journal.Failed, payload); err != nil {
+			return err
+		}
+		return w.persistAndNotify(ctx, typ, id, input.Sequence, payload, input.Header)
+	}
 	if panicked {
 		reason := runErr.Error()
 		if len(reason) > 4096 {
@@ -791,6 +840,89 @@ func (w *Worker) serverNow(ctx context.Context) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("server did not provide stream timestamp")
 	}
 	return info.TimeStamp, nil
+}
+
+// Close releases the worker's live cancellation subscription after all
+// RunPartition loops have stopped.
+func (w *Worker) Close() error {
+	w.cancelMu.Lock()
+	subscription := w.cancelSubscription
+	w.cancelSubscription = nil
+	w.cancelMu.Unlock()
+	if subscription == nil {
+		return nil
+	}
+	return subscription.Unsubscribe()
+}
+
+func cancelKey(typ, id, generation string) string { return typ + "." + id + ":" + generation }
+
+func (w *Worker) markRunningCancellation(key string, expected *cancelWaiter) {
+	w.cancelMu.Lock()
+	defer w.cancelMu.Unlock()
+	waiter := w.cancelWaiters[key]
+	if waiter == nil || expected != nil && waiter != expected || waiter.detected {
+		return
+	}
+	waiter.detected = true
+	waiter.cancel()
+}
+
+func (w *Worker) observeCancel(message *nats.Msg) {
+	parts := strings.Split(message.Subject, ".")
+	if len(parts) != 5 || parts[0] != "wf" || parts[1] != "sig" || parts[4] != client.CancelSignalName {
+		return
+	}
+	generation := message.Header.Get("Wf-Inv-Seq")
+	if generation == "" {
+		return
+	}
+	w.markRunningCancellation(cancelKey(parts[2], parts[3], generation), nil)
+}
+
+// watchRunningCancellation observes the core signal notification and checks
+// the durable stream at registration and after gaps. Journal writes remain on
+// the execute goroutine after the handler has returned.
+func (w *Worker) watchRunningCancellation(ctx context.Context, typ, id string, invSeq uint64, cancelHandler context.CancelFunc) func() bool {
+	generation := strconv.FormatUint(invSeq, 10)
+	key := cancelKey(typ, id, generation)
+	waiter := &cancelWaiter{cancel: cancelHandler}
+	w.cancelMu.Lock()
+	w.cancelWaiters[key] = waiter
+	w.cancelMu.Unlock()
+	watchCtx, stop := context.WithCancel(ctx)
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		ticker := time.NewTicker(15 * time.Second)
+		defer ticker.Stop()
+		subject := "wf.sig." + typ + "." + id + "." + client.CancelSignalName
+		for watchCtx.Err() == nil {
+			lookupCtx, finish := context.WithTimeout(watchCtx, 2*time.Second)
+			message, err := w.cancelStream.GetLastMsgForSubject(lookupCtx, subject)
+			finish()
+			if err == nil && message.Header.Get("Wf-Inv-Seq") == generation {
+				w.markRunningCancellation(key, waiter)
+				return
+			}
+			select {
+			case <-watchCtx.Done():
+				return
+			case <-ticker.C:
+			}
+		}
+	}()
+	return func() bool {
+		w.cancelMu.Lock()
+		if w.cancelWaiters[key] == waiter {
+			delete(w.cancelWaiters, key)
+		}
+		detected := waiter.detected
+		w.cancelMu.Unlock()
+		stop()
+		<-done
+		return detected
+	}
 }
 
 func (w *Worker) drainSignals(ctx context.Context, typ, id string, invSeq uint64, records []journal.Record, appendEntry func(journal.Kind, json.RawMessage) error) ([]wf.Signal, error) {

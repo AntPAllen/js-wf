@@ -7,11 +7,38 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"js-wf/journal"
 )
+
+func TestOfflineReplayNeverRunsIncompleteEffect(t *testing.T) {
+	var requested json.RawMessage
+	ctx := NewContext(context.Background(), nil, func(_ context.Context, kind Kind, payload json.RawMessage) error {
+		if kind == StepRequested {
+			requested = append([]byte(nil), payload...)
+		}
+		return errors.New("stop before effect")
+	})
+	if _, err := Run(ctx, "pending", 7, func(context.Context) (int, error) { return 1, nil }); err == nil || len(requested) == 0 {
+		t.Fatalf("request fixture: %v", err)
+	}
+	records := []journal.Record{
+		{Entry: journal.Entry{Index: 0, Kind: journal.Started}, Sequence: 1},
+		{Entry: journal.Entry{Index: 1, Kind: journal.StepRequested, Payload: requested}, Sequence: 2},
+	}
+	data, _ := json.Marshal(records)
+	var effects atomic.Int32
+	var observed ReplayObservation
+	_, err := Replay(data, func(c *Context) (int, error) {
+		return Run(c, "pending", 7, func(context.Context) (int, error) { effects.Add(1); return 1, nil })
+	}, ReplayOptions{Observation: &observed})
+	if !errors.Is(err, ErrReplayPendingStep) || effects.Load() != 0 || observed.PlayedSteps != 1 || observed.RecordedSteps != 1 {
+		t.Fatalf("pending replay: err=%v effects=%d observation=%+v", err, effects.Load(), observed)
+	}
+}
 
 func TestOfflineReplayWithSignalAndObjectResult(t *testing.T) {
 	var emitted []Entry
