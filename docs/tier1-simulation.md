@@ -115,10 +115,13 @@ large signal Object Store spill. A three-node contract compares
 `SignalWithStart`, matching and changed retries, `RequireRunning`, and
 retained signal and run counts; three repeats passed. Existing real TCP-proxy
 and SDK-boundary tests cover lost signal acknowledgments and safe retry.
-The publication/scan race still uses a fixture publisher; production client
-and scanner operations have not yet been interleaved in one cooperative
-workload. The leased signal loop and worker signal drain remain outside the
-model.
+The earlier publication/scan race uses a fixture publisher. A fourth
+1,000-seed workload now interleaves production client signal calls with
+production scanner calls at each transport operation. It injects a lost
+signal publish acknowledgment or a lost/dropped wakeup enqueue, then scans
+from the returned cursor until exactly one retained wakeup exists. The
+trace replays exactly and is byte-identical across processes. The leased
+signal loop and worker signal drain remain outside the model.
 
 The dispatch slice runs the production `worker.RunPartition` fetch/retry loop
 through a narrow consumer port with a supplied handler callback. Its model

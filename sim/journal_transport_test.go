@@ -391,6 +391,8 @@ func TestReplayFaultTrace(t *testing.T) {
 		replayed, err = runConcurrentSignalRepair(loaded.Seed, &loaded)
 	case "client_signal_repair_20":
 		replayed, err = runSeededClientSignalScenario(loaded.Seed, &loaded)
+	case "client_signal_scan_race":
+		replayed, err = runConcurrentClientSignalRepair(loaded.Seed, &loaded)
 	default:
 		t.Fatalf("unknown trace workload %q", loaded.Workload)
 	}
