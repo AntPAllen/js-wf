@@ -1,4 +1,4 @@
-# Tier 1 deterministic simulation: journal, lease, and start slices
+# Tier 1 deterministic simulation: journal, lease, start, and dispatch slices
 
 The first simulator slice runs the production `journal.Store.Append` decision
 path through a narrow `journal.AppendPort`. The production port still calls
@@ -56,8 +56,24 @@ run message, and confirms a repeated scan deduplicates; three repeats and a
 race run passed. The model also checks purged invocation sequence holes and a
 lost repair-enqueue acknowledgment. Existing three-node fixtures also cover
 network-lost start acknowledgments, absent-publish retry, and large input.
-The start model does not yet simulate the `WF_RUN` consumer, the leased scan
-loop and persisted cursor, or the server's deduplication-window expiry.
+The start-and-repair scenarios do not yet run the leased scan loop or its
+persisted cursor, or model the server's deduplication-window expiry.
+
+The dispatch slice runs the production `worker.RunPartition` fetch/retry loop
+through a narrow consumer port with a supplied handler callback. Its model
+retains run messages, tracks delivery count, explicit ack/nak/progress, virtual
+AckWait, and consumer recreation after injected leader-change errors. The
+default test runs 1,000 seeds of 20 messages with immediate ack, one
+unacknowledged delivery, or a progress call before redelivery. Each scenario
+acks all 20 exactly once, drains the modeled queue, and replays its trace;
+seed 42 is byte-identical across processes. A focused model test proves that
+an acknowledgment can commit while its response is lost. A three-node
+contract compares one delivery, AckWait redelivery, and final ack state with
+the model; three repeats and a race run passed. Existing three-node worker
+tests separately cover consumer-leader kills and a live handler's progress
+heartbeats. This slice exercises the dispatch loop and consumer contract, not
+the worker handler's lease, journal, signal, or timer decisions. It does not
+yet model consumer restart state across process death or simultaneous workers.
 
 Run the fixed fault cases and 1,000 seeded scenarios:
 
@@ -86,7 +102,7 @@ failure trace when one is written.
 global sequence gaps between subjects, retained bytes, and stale CAS results
 against a real three-node stream. Existing real-cluster tests cover network
 lost acknowledgments and injected unchanged-tail rejections. This comparison
-is limited: the model does not yet run workers, consumers, timers, retention,
+is limited: the model does not yet run the full worker handler, signals, timers, retention,
 Raft elections, or disk storage. The journal's five-second attempt
 deadline still uses wall time; only CAS retry waits are virtual in this first
 slice. A discrepancy seen only on real

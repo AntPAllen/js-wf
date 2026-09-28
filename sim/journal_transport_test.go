@@ -381,6 +381,8 @@ func TestReplayFaultTrace(t *testing.T) {
 		replayed, err = runTwoStarterRace(loaded.Seed, true, &loaded)
 	case "client_start_scan_race":
 		replayed, err = runConcurrentStartRepair(loaded.Seed, &loaded)
+	case "dispatch_20":
+		replayed, err = runSeededDispatchScenario(loaded.Seed, &loaded)
 	default:
 		t.Fatalf("unknown trace workload %q", loaded.Workload)
 	}

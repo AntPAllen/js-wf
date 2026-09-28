@@ -193,6 +193,15 @@ func (w *Worker) consumer(ctx context.Context, partition uint32) (jetstream.Cons
 // RunPartition processes one partition until cancellation. Multiple workers
 // may share the consumer; the per-invocation lease fences concurrent delivery.
 func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
+	return RunPartitionWithPort(ctx, partition, jetStreamDispatchPort{worker: w}, w.handle, w.partitionConcurrency)
+}
+
+// RunPartitionWithPort runs the production dispatch loop over a supplied
+// consumer port and message handler. It is the Tier 1 dispatch simulation seam.
+func RunPartitionWithPort(ctx context.Context, partition uint32, port DispatchPort, handle func(context.Context, jetstream.Msg), concurrency int) error {
+	if partition >= provision.Partitions || port == nil || handle == nil || concurrency < 1 || concurrency > 256 {
+		return fmt.Errorf("invalid dispatch configuration")
+	}
 	var slots chan struct{}
 	var active sync.WaitGroup
 	retryDelay := 100 * time.Millisecond
@@ -204,24 +213,22 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 				retryDelay = 2 * time.Second
 			}
 		}
-		select {
-		case <-ctx.Done():
+		if err := port.Wait(ctx, delay); err != nil {
 			return false
-		case <-time.After(delay):
-			return true
 		}
+		return true
 	}
-	if w.partitionConcurrency > 1 {
+	if concurrency > 1 {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithCancel(ctx)
-		slots = make(chan struct{}, w.partitionConcurrency)
+		slots = make(chan struct{}, concurrency)
 		defer func() {
 			cancel()
 			active.Wait()
 		}()
 	}
 	for ctx.Err() == nil {
-		c, err := w.consumer(ctx, partition)
+		c, err := port.Consumer(ctx, partition)
 		if err != nil {
 			if !retryableConsumerError(err) {
 				return err
@@ -239,13 +246,13 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 			}
 			emptyPolls = 0
 			attempt, stop := context.WithTimeout(ctx, 2*time.Second)
-			info, err := c.Info(attempt)
+			pending, ackPending, err := c.Info(attempt)
 			stop()
 			active := 0
 			if slots != nil {
 				active = len(slots)
 			}
-			return err != nil || info == nil || info.NumPending > 0 || info.NumAckPending > active
+			return err != nil || pending > 0 || ackPending > active
 		}
 		for ctx.Err() == nil {
 			if slots != nil {
@@ -255,7 +262,7 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 					return nil
 				}
 			}
-			batch, err := c.Fetch(1, jetstream.FetchMaxWait(time.Second))
+			batch, err := c.FetchOne(ctx)
 			if err != nil {
 				if slots != nil {
 					<-slots
@@ -284,14 +291,14 @@ func (w *Worker) RunPartition(ctx context.Context, partition uint32) error {
 				emptyPolls = 0
 				retryDelay = 100 * time.Millisecond
 				if slots == nil {
-					w.handle(ctx, msg)
+					handle(ctx, msg)
 					continue
 				}
 				active.Add(1)
 				go func(msg jetstream.Msg) {
 					defer active.Done()
 					defer func() { <-slots }()
-					w.handle(ctx, msg)
+					handle(ctx, msg)
 				}(msg)
 			}
 			if slots != nil && !dispatched {
