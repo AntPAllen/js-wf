@@ -106,6 +106,7 @@ WF_JOURNAL_BOUNDARY=1 go test ./integration -run '^TestJournalMaxEntriesBoundary
 WF_DISPATCH_SCALE=1 go test ./integration -run '^TestTenThousandShortInvocationsAcrossAllPartitions$' -timeout=15m -v
 WF_TIMER_CANCEL_SCALE=1 go test ./integration -run '^TestThousandTimerCancellationsBeforeFire$' -timeout=10m -v
 WF_TIMER_SLEEP_SCALE=1 go test ./integration -run '^TestTenThousandRandomSleeps$' -timeout=12m -v
+WF_SUSPENDED_SCAN_SCALE=1 go test ./integration -run '^TestMillionSuspendedScanCursorSurvivesLeaderKill$' -timeout=15m -v
 go run ./cmd/wf-lint ./integration
 ```
 
