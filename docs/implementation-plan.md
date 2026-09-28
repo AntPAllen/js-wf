@@ -1,0 +1,381 @@
+# JetStream Durable Workflow Runtime — Implementation Plan
+
+Sep 27, 2026 · @Anthony Allen
+
+Repository copy of the supplied plan. The Tier 1 simulation section under
+Distributed verification was expanded on Sep 28, 2026; the remaining plan is
+preserved for reference.
+
+## Scope and architecture
+
+Build a Restate-style durable execution runtime on NATS JetStream 2.12+, in Go, with a Go SDK first. Restate-style means journal-and-suspend: user code runs forward, every awaited step's result is written to a per-invocation journal, and a resumed invocation replays journal entries instead of re-running side effects. This is chosen over Temporal-style full history replay because it needs far less SDK machinery and maps one-to-one onto JetStream's per-subject CAS append.
+
+&#91;embedded content: runtime architecture · 4 JetStream stores, 1 new runtime\]
+
+The only new stateful component is the SDK runtime inside the worker; every durable primitive is a stream or a KV bucket, and the dispatcher is stateless.
+
+**Storage layout**
+
+| Store | Subjects | Config that matters | Role |
+| --- | --- | --- | --- |
+| `WF_INV` stream | `wf.inv.<type>.<id>` | `MaxMsgsPerSubject=1`, `DiscardNewPerSubject`, limits retention | Start-once idempotency record; holds input + start metadata |
+| `WF_RUN` stream | `wf.run.<partition>` (mapped from `wf.run.<type>.<id>` via `{{partition(N, 2, 3)}}`) | WorkQueue retention, `AckWait` 30 s, `MaxDeliver` unlimited with backoff | Dispatch queue; one durable pull consumer per partition |
+| `WF_JRN` stream | `wf.jrn.<type>.<id>` | Limits retention, `DenyPurge=false`, `Nats-Expected-Last-Subject-Sequence` on every publish | Per-invocation journal; entries `{epoch, index, kind, payload}` |
+| `WF_SIG` stream | `wf.sig.<type>.<id>.<name>` | Limits retention, `Nats-Msg-Id` dedup window 2 min | External signals; merged into the journal by the worker |
+| `WF_LEASE` KV | key `<type>.<id>` | Per-key TTL 30 s, `LimitMarkerTTL` | Single-writer lease; value = `{worker, epoch}` |
+| `WF_STATE` KV | key `<type>.<id>` | History 1, revision CAS | Snapshot + terminal result; bounds journal replay |
+
+**Invariants every phase must keep** (these are the properties the distributed tests assert, numbered so later sections can cite them):
+
+1. **I1 Start-once.** For any `(type, id)`, at most one `WF_INV` record and at most one journal ever exist, however many concurrent starts arrive.
+2. **I2 Single writer.** Journal entries for one invocation are totally ordered by `(epoch, index)`; no two workers ever append with the same epoch, and a lower epoch never appends after a higher one has.
+3. **I3 Effect-once outcome.** A side effect may physically run more than once (at-least-once), but exactly one result is recorded per journal index, and user code only ever observes that result.
+4. **I4 Deterministic resume.** Replaying journal entries `0..k` through the user function produces the same sequence of step requests as the original run, or the runtime detects the divergence and halts that invocation with a non-determinism error.
+5. **I5 No lost wakeups.** Every timer, signal, or child completion eventually produces a `WF_RUN` message for its target (liveness under crash and partition).
+6. **I6 Durable completion.** Once any client observes a terminal result, every later read returns the same result for the retention window.
+
+## Phase 0 — Test harness and cluster fixtures
+
+Nothing else starts until a test can kill a JetStream node mid-publish and assert an invariant afterwards. Building this first is the difference between "works on my laptop" and a distributed system.
+
+**Deliverables**
+
+- [ ] `testcluster` package: boots a 3-node JetStream cluster in-process (`nats-server` as a library, `server.Options` with JetStream + cluster routes), returns clients pinned to each node. Boot under 3 s.
+- [ ] Fault injector with four verbs: `KillNode(i)`, `PartitionNodes(a, b)` (via a TCP proxy such as toxiproxy or an in-process route filter), `PauseNode(i)` (SIGSTOP or a blocking hook, to simulate GC / long pauses), `SlowDisk(i, latency)`.
+- [ ] Deterministic fault scheduler: seeds from `FAULT_SEED`, records the fault schedule to a file, replays it from a file. Every failing test prints its seed.
+- [ ] Invariant checker library: given the raw contents of `WF_INV`, `WF_JRN`, `WF_STATE` after a test, mechanically checks I1, I2, I3 and I6 from the stream data alone (no test-local bookkeeping). I4 and I5 get checkers in phases 4 and 5.
+- [ ] Client-side operation history recorder: every SDK call (`start`, `signal`, `getResult`) logs `{invoke_ts, return_ts, op, args, result}` in the format a linearizability checker (Porcupine) consumes.
+- [ ] CI job matrix: `unit` (single-node, no faults), `cluster` (3-node, no faults), `chaos` (3-node, random faults, 20 seeds), `soak` (nightly, 2 h, 200 seeds).
+
+**Proof of completion**
+
+- Test: publish 10 000 messages to a plain stream while `KillNode(leader)` fires at a random point. Assert: all acked publishes present, no gaps in sequence, and the invariant checker's stream-integrity pass is green. Establishes the harness can detect a lost ack.
+- Test: the same run with a pinned seed produces byte-identical fault schedules on two machines.
+- Negative control: deliberately break replication (`Replicas=1`) and confirm the same test now fails. A harness that cannot fail is not a harness.
+
+**Edge cases to test here**
+
+- Leader election of the stream's Raft group happens during a publish: the publisher gets a timeout, not an ack. The test must treat "no ack" as "unknown", never as "failed".
+- Consumer leader moves during a `Fetch`; in-flight messages get redelivered. Record and count redeliveries so later phases can assert on them.
+- Clock skew between nodes (inject ±5 s via a wrapped clock in the SDK, not the OS) so nothing in later phases depends on wall time agreement.
+
+## Phase 1 — Idempotent invocation (I1)
+
+`start(type, id, input)` becomes a single publish to `wf.inv.<type>.<id>` on a stream with `MaxMsgsPerSubject=1` and `DiscardNewPerSubject`. The server rejects the second and later publishes with a `maximum messages per subject exceeded` error, which the SDK maps to `ErrAlreadyStarted` and treats as success (returning the existing invocation handle).
+
+The start must also enqueue the first run. Use 2.12 atomic batch publish: `WF_INV` record + `WF_RUN` message in one batch, so neither exists without the other. Fallback for older servers: publish `WF_INV` first, then `WF_RUN` with `Nats-Msg-Id = start:<type>:<id>`; a dispatcher-side reconciler scans `WF_INV` subjects with no journal for a repair path.
+
+**Deliverables**
+
+- [ ] `client.Start` with `ErrAlreadyStarted` semantics and a returned handle `{type, id, invSeq}`.
+- [ ] Stream provisioning code that is idempotent (`CreateOrUpdateStream`) and asserts the config it finds matches what it wants; a mismatch is a startup error, not a silent adopt.
+- [ ] Batch-publish path with the fallback path behind a server-version check.
+- [ ] Input size guard: inputs above `max_payload` (default 1 MiB) go to an Object Store bucket with only the object key in `WF_INV`.
+
+**Proof of completion**
+
+- Test: 500 goroutines across 3 clients pinned to 3 different nodes call `Start` with the same id simultaneously. Assert exactly one `WF_INV` message, exactly one `WF_RUN` message, 499 `ErrAlreadyStarted`, 0 other errors. Run under `chaos` with `KillNode(leader)` during the burst.
+- Test: 100 000 distinct ids, then count subjects in `WF_INV` equals 100 000 and `WF_RUN` message count equals 100 000. Repeat with `PartitionNodes` toggling every 200 ms.
+- Linearizability: Porcupine model where `Start` is a register write-once; the recorded history must be linearizable under all chaos seeds.
+
+**Edge cases**
+
+- Publish times out with no ack. The client must retry with the same payload; the second attempt returns `ErrAlreadyStarted` if the first actually landed. Test by injecting a proxy that drops the ack but not the publish.
+- A client retries a start with a *different* input for the same id. Decision: reject with `ErrInputMismatch` by comparing an input hash stored in the `WF_INV` headers. Test both matching and mismatching retries.
+- The same id reused after the previous invocation completed and was purged. Decision: allowed only after purge; test that a purge followed by a start creates a fresh journal with epoch 0 and that nothing from the old journal is visible (this is why `WF_JRN` purge must complete before `WF_INV` purge).
+- Subject cardinality: `DiscardNewPerSubject` requires the per-subject index; measure memory for 10 M subjects on a 3-node cluster and record it in the doc's risk section.
+- `Nats-Msg-Id` dedup window elapsing between a failed and a retried publish (window default 2 min). The fallback path must tolerate a duplicate `WF_RUN` message, which phase 3's lease makes harmless; test by setting the window to 1 s.
+- Server version below 2.12 on one node only (rolling upgrade): batch publish must fail closed, not partially apply. Test with a mixed-version cluster fixture.
+
+## Phase 2 — Journal with CAS append (I2, I6)
+
+The journal is the system. Every entry is published to `wf.jrn.<type>.<id>` with `Nats-Expected-Last-Subject-Sequence` set to the stream sequence of the entry the writer last saw. A stale writer gets a `wrong last sequence` error and must stop. Entries carry `{epoch, index, kind, payload, worker_id}`; `kind` is one of `Started`, `StepRequested`, `StepCompleted`, `Suspended`, `SignalConsumed`, `Completed`, `Failed`.
+
+The journal reader is an ordered consumer filtered to the subject, started from the snapshot's sequence if `WF_STATE` has one. Snapshot every N entries (start with 256): write `{last_seq, epoch, state_blob}` to `WF_STATE` with revision CAS, then entries before `last_seq` may be dropped by per-subject purge with `Keep` semantics.
+
+**Deliverables**
+
+- [ ] `journal.Append(entry, expectedSeq) (seq, error)` distinguishing `ErrStale` (CAS lost), `ErrUnknown` (timeout), and success.
+- [ ] `journal.Read(type, id) (entries, tailSeq)` that resumes from a snapshot and verifies `index` is contiguous.
+- [ ] Snapshot writer with CAS on the `WF_STATE` revision and a journal purge that keeps the last K entries after the snapshot.
+- [ ] Journal integrity checker (extends the phase 0 checker): for every subject, `(epoch, index)` strictly increasing, exactly one `Started`, at most one terminal entry, no entry after a terminal.
+
+**Proof of completion**
+
+- Test: two writers holding the same `expectedSeq` race to append 10 000 times; exactly one wins each round, the loser always sees `ErrStale`, never a silent success. Run with the stream leader killed every 500 appends.
+- Test: append 5 000 entries with snapshots every 256 and purges after each; `Read` returns the same logical sequence as an un-snapshotted control run.
+- Test: on `ErrUnknown`, the writer re-reads the tail and finds either its entry (retry succeeded) or not (retry needed), never a foreign entry at its intended index. This is the ack-lost case and it must be exercised 1 000 times under `chaos`.
+- Throughput baseline recorded: appends per second per invocation and across 1 000 concurrent invocations on the 3-node fixture (`Replicas=3`, file storage). Regressions of more than 20% fail CI.
+
+**Edge cases**
+
+- **Lost ack on append.** Covered above; the recovery rule is "re-read tail, compare `(epoch, index, worker_id)`".
+- **Snapshot written, purge failed.** Reader must handle entries older than the snapshot still being present and skip them by sequence, not by index.
+- **Purge succeeded, snapshot write failed** (wrong order). Forbidden by construction: purge only after the snapshot CAS acks. Test the crash between the two by killing the worker after the CAS and confirming the next reader still has a complete view.
+- **Entry larger than `max_payload`.** Step results above \~900 KiB go to Object Store; the entry holds the key. Test with a 5 MiB step result.
+- **Stream leader changes between `Read` and `Append`.** The `expectedSeq` remains valid because sequences are stream-global; test that a leader change alone never causes `ErrStale`.
+- **Duplicate index from the same epoch** (a bug in the writer): the integrity checker must catch it, and the reader must refuse to resume rather than pick one.
+- **Subject with millions of entries** (a runaway loop that never suspends). Enforce a max journal length per invocation (say 100 000); exceeding it fails the invocation with `ErrJournalTooLong`. Test the boundary.
+- **Retention limits eviction** (`MaxBytes` on the stream hit): eviction of a live journal is data loss. Alert on stream usage at 70%; test that `DiscardNew` at the stream level turns appends into errors rather than evicting old journals (`Discard=new`, not `old`, on `WF_JRN`).
+
+## Phase 3 — Dispatch and single-writer (I2)
+
+This is where most durable-execution systems have their worst bugs, so it gets two independent mechanisms that must both agree before a worker touches a journal: a partitioned consumer that makes concurrent delivery rare, and a lease with a fencing epoch that makes it harmless when it happens anyway.
+
+Dispatch: `WF_RUN` messages are published to `wf.run.<type>.<id>` and a stream subject transform maps them to `wf.run.<partition>` with `{{partition(N, 2, 3)}}` hashing on type and id, so all runs for one invocation land in one partition. N durable pull consumers, one per partition, each with `MaxAckPending` tuned for throughput. Workers own partitions through a simple assignment in a KV bucket (start static, N=64; rebalancing is a later phase).
+
+Lease: before opening a journal the worker does `WF_LEASE.Create(key, {worker, epoch: last_epoch+1})` (fails if present) or `Update(key, ..., revision)` on an expired one. The epoch it wins becomes the epoch on every journal entry, and phase 2's CAS append rejects any lower epoch by construction: a fenced writer's `expectedSeq` is stale the moment the new epoch's `Started` entry lands. Lease TTL 30 s, renewed every 10 s; a renewal failure stops the worker before its next append.
+
+**Deliverables**
+
+- [ ] Subject transform + N partition consumers, provisioned idempotently.
+- [ ] `lease.Acquire(type, id) (epoch, error)`, `lease.Renew`, `lease.Release`; all with KV revision CAS.
+- [ ] Worker run loop: fetch → acquire lease → read journal → run until suspend or terminal → write `Suspended`/terminal entry → release lease → ack `WF_RUN` message. On any lease or CAS failure: stop, do not ack (let redelivery retry), log the fencing event.
+- [ ] In-progress heartbeat: `msg.InProgress()` every `AckWait/3` while running so long steps don't trigger redelivery.
+- [ ] Metrics: fencing events, lease acquisitions per invocation, redeliveries, time-from-enqueue-to-lease.
+
+**Proof of completion**
+
+- Test (the one that matters): 200 invocations, each a loop of 50 steps that increment a counter in the journal. 6 workers. Every 2 s one of: kill a worker, pause a worker for 45 s (longer than the lease), partition a worker from the cluster. After 5 min: every invocation completes with counter exactly 50, and the integrity checker shows I2 holds on every journal. Any journal with two epochs interleaved fails the run.
+- Test: paused worker resumes after lease expiry and tries to append. Assert it gets `ErrStale`, never a success. Assert a metric `fencing_events_total` incremented and the message was not acked by the fenced worker.
+- Test: `MaxAckPending=1000`, 10 000 short invocations across 64 partitions, all complete; no invocation is ever executed by two workers simultaneously (checked by a test-only "currently running" set in a KV with CAS; any collision fails).
+- Test: kill the `WF_RUN` consumer leader repeatedly; every message is eventually delivered and acked, with a recorded redelivery count.
+
+**Edge cases**
+
+- **Zombie worker after lease expiry.** Covered above; the CAS append is the last line of defence and the test must prove the lease alone was not what saved it (disable the lease in a debug build and confirm the CAS still rejects).
+- **Lease renewal succeeds but the worker is then paused for longer than the TTL** before its next append. The append must carry an `expectedSeq` from before the pause, so it fails; assert this explicitly.
+- **Two `WF_RUN` messages for the same invocation in flight at once** (timer fired while a signal arrived). The second acquirer finds the lease held, must nak with delay (not ack, not spin) and back off. Test that the invocation still processes both wakeups and that the loser does not starve.
+- **Worker acks the `WF_RUN` message, then crashes before releasing the lease.** The lease TTL handles it; assert no wakeup is lost because the journal's `Suspended` entry records what it is waiting on and the reconciler (phase 7) re-enqueues.
+- **Worker crashes after appending `Completed` but before ack.** Redelivery finds a terminal journal and acks immediately without running; test that no `Started` for a new epoch is written.
+- **Partition rebalance while a message is in flight.** Two workers may hold the same partition's consumer for a moment; the lease makes this safe. Test by reassigning partitions every 5 s during the chaos run.
+- **Poison invocation** (user code panics every time). `MaxDeliver` unlimited with exponential backoff capped at 5 min, plus a per-invocation attempt counter in the journal; after a configurable count, write `Failed` and stop. Test the count is honoured across worker restarts.
+- **Hot partition** (one tenant floods one partition). N=64 static partitions cannot fix this; record it as a known limit and test that other partitions keep their latency.
+- **`AckWait` shorter than a legitimate long step** without heartbeats: assert redelivery happens and the second worker is fenced, then assert that with heartbeats it does not happen.
+
+## Phase 4 — SDK core: journal-and-suspend (I3, I4)
+
+User code is an ordinary Go function `func(ctx wf.Context, input T) (R, error)`. Every durable operation goes through `ctx`: `ctx.Run(name, fn)` for a side effect, `ctx.Sleep(d)`, `ctx.Await(promise)`, `ctx.Signal(name)`. The runtime keeps a cursor into the journal. On each call it checks: is there a `StepCompleted` at this index? If yes, return its result without running anything. If there is a `StepRequested` but no completion, re-run the effect (at-least-once) and CAS-append the completion. If neither, append `StepRequested`, run, append `StepCompleted`.
+
+Determinism guard: `StepRequested` carries the step `name` and a hash of the step's declared inputs. On replay, a mismatch between the journal's entry and what the code asks for at that index halts the invocation with `ErrNonDeterministic` naming the index, the recorded name and the requested name. This catches the common failure (code changed under a running invocation) without needing Temporal-style full sandboxing.
+
+Suspension: when an await cannot complete, the runtime appends `Suspended{waiting_on}`, releases the lease and acks the run message. Nothing holds a goroutine or a connection while waiting. Resumption replays from the snapshot and continues past the `Suspended` entry once the awaited entry exists.
+
+**Deliverables**
+
+- [ ] `wf.Context` with `Run`, `Sleep`, `Await`, `Signal`, `Call` (child invocation), `SetState`/`GetState` (backed by the snapshot, journaled as entries).
+- [ ] Two-entry step protocol (`StepRequested` then `StepCompleted`) with the recovery table implemented and unit-tested for all four journal states at a given index.
+- [ ] Determinism guard with a clear error carrying index, expected and actual.
+- [ ] Code versioning hook: `ctx.Version(changeID, min, max)` journaled as an entry so a deploy can branch on it, the same shape as Temporal's `GetVersion`.
+- [ ] Replay harness: `wf.Replay(journalBytes, fn)` that runs a function against a recorded journal offline with no NATS. This is also the unit-test tool for user workflows.
+
+**Proof of completion**
+
+- Test: a workflow with 20 steps, each step increments an external counter (a plain in-memory map behind a mutex). Kill the worker at every one of the 41 possible points (before/after each of the 2 appends per step, plus the start). After all runs, the workflow result is correct in 41 of 41 cases and the external counter shows at most 2 increments per step (at-least-once effect, exactly-once outcome, I3).
+- Test: record a journal, change the workflow code so step 7 has a different name, replay; assert `ErrNonDeterministic{index: 7}`. Change step 7's *input* only; same assertion. Change step 21 (after the recorded tail); assert no error (I4).
+- Test: the phase 3 chaos run repeated with real SDK workflows instead of the counter loop, same pass criteria.
+- Property test: generate random workflow DAGs (steps, sleeps of 0, awaits on immediately-resolved promises), run once cleanly to produce a journal, then run under random kill points and assert the final result equals the clean result. 10 000 cases in CI.
+
+**Edge cases**
+
+- **Step returns a non-serialisable value** (channels, funcs, cyclic structs). Fail at `StepRequested` time with a typed error, before the effect runs; test with each.
+- **Effect runs, then the `StepCompleted` append gets `ErrUnknown`.** Re-read tail: if the completion is there, continue; if not, the recovery rule re-runs the effect. Document loudly that effects must be idempotent or tolerate a repeat; provide `ctx.RunOnce(idempotencyKey, fn)` that passes the journal index as the key so downstream systems can dedup.
+- **User code reads wall time, random numbers or goroutine-scheduled state.** Provide `ctx.Now()` and `ctx.Random()` that journal their values; a linter that flags `time.Now` and `rand.` inside workflow functions. Test the linter on a corpus.
+- **Goroutines spawned inside workflow code.** Not supported in v1; the determinism guard catches reordering. Test that two steps issued from two goroutines produce `ErrNonDeterministic` on replay at least sometimes, which proves the guard rather than the feature.
+- **Very long-running invocation crossing a code deploy.** `ctx.Version` test: old journal + new code with the version branch replays clean; old journal + new code without the branch fails clean.
+- **Panic inside a step.** Caught, recorded as `StepCompleted{error}`, surfaced to user code as an error; retry policy is user code's choice via `ctx.Run` options. Test panic, `runtime.Goexit`, and a step that blocks forever (must respect `ctx` cancellation from lease loss).
+- **Step result identical across a retry but with a different epoch.** Both writers cannot both succeed (I2); assert the surviving completion's epoch equals the lease epoch at the time.
+- **Journal cursor and snapshot disagree** (snapshot says index 300, journal tail says 298 because a purge kept too little). Refuse to run with `ErrJournalGap`; test by hand-corrupting a fixture.
+
+## Phase 5 — Timers and sleeps (I5)
+
+`ctx.Sleep(d)` appends `StepRequested{kind: timer, fire_at}` then publishes a `WF_RUN` message for the invocation with a `Nats-Schedule` header for `fire_at` (2.12 message scheduling) and `Nats-Msg-Id = timer:<type>:<id>:<index>`, then suspends. When it fires, the worker resumes, sees the timer entry and that `now >= fire_at`, appends `StepCompleted` and continues. If it resumes early for another reason (a signal), the timer stays pending and the scheduled message still fires later.
+
+Order matters: journal entry first, scheduled publish second. A crash between them leaves a journal saying "waiting on timer" with no scheduled message, which is exactly what the reconciler in phase 7 looks for. The reverse order would produce a wakeup for an invocation that has no record of wanting one, which is harmless but wasteful, so the order is a correctness choice only in combination with the reconciler.
+
+**Deliverables**
+
+- [ ] `ctx.Sleep`, `ctx.Timer(name, d)` returning an awaitable, and cancellation via `timer.Cancel()` which journals a `StepCompleted{cancelled}` and lets the eventual scheduled wakeup no-op.
+- [ ] Scheduled publish with a fallback for pre-2.12 servers: a `WF_TIMER` stream with per-message TTL and a poller that re-enqueues on expiry (slower, but the same contract).
+- [ ] Timer coalescing: a resumed invocation completes every timer whose `fire_at` has passed in one run, not one run per timer.
+- [ ] Timer metrics: scheduled, fired, late-by histogram, cancelled-but-fired no-ops.
+
+**Proof of completion**
+
+- Test: 10 000 invocations each sleep a random 1–60 s. All complete; measure lateness. Pass: p99 lateness under 2 s with no faults, under 30 s with the chaos schedule running. Zero invocations stuck after 5 min past their latest `fire_at` (I5).
+- Test: kill the worker between the journal append and the scheduled publish, 200 times. Without the reconciler these invocations stall (assert that, it validates the test); with the reconciler enabled all complete.
+- Test: a 30-day sleep on a cluster that is fully restarted (all 3 nodes) twice during the test with the clock advanced by a wrapped clock injected into the server. The scheduled message survives restarts and fires.
+- Test: cancel a timer 100 ms before it fires, 1 000 times. The invocation never observes the timer as fired; the late wakeup message is acked as a no-op and counted in metrics.
+
+**Edge cases**
+
+- **Timer fires while the invocation is running** (another wakeup holds the lease). The second `WF_RUN` message naks with delay; the running worker's timer coalescing may already have completed the timer, in which case the redelivered message is a no-op. Test both interleavings.
+- **Sleep of zero or negative duration.** Complete immediately in the same run; no message published. Test.
+- **Sleep longer than the stream's `MaxAge` on `WF_RUN`.** Scheduled messages must not be aged out; set `MaxAge=0` on `WF_RUN` and test a sleep longer than any other stream's `MaxAge`.
+- **Clock skew between the server that stores the schedule and the worker's `now`.** Timer completion uses the journal's `fire_at` versus the *server* timestamp on the wakeup message, never the worker's clock. Test with ±5 s worker skew from phase 0.
+- **Thousands of timers due in the same second** (a cron-like fan-in). Measure delivery rate; document the ceiling; ensure the consumer's `MaxAckPending` does not become the bottleneck.
+- **Timer for an invocation that has since completed** (completed via a signal path). Wakeup finds a terminal journal, acks, no-op. Test.
+- **Timer for an invocation that has been purged.** Wakeup finds no `WF_INV` record; ack and log at debug. Must not create a journal. Test.
+- **Duplicate scheduled publish** (client retried after `ErrUnknown`). `Nats-Msg-Id` dedups within the window; outside the window two wakeups arrive and the second is a no-op. Test with the window set to 1 s.
+
+## Phase 6 — Signals, promises and inter-workflow calls
+
+External writers must never append to a journal directly, because that would race the worker's CAS. Instead a signal is a publish to `wf.sig.<type>.<id>.<name>` plus a `WF_RUN` wakeup (batch-published together). The worker, holding the lease, reads pending signals from `WF_SIG` with an ordered consumer from the last consumed sequence (recorded in the journal as `SignalConsumed{sig_seq}`) and journals them in order. Signals are therefore delivered in `WF_SIG` sequence order, exactly once into the journal, and a signal that arrives before the invocation asks for it is buffered by the stream itself.
+
+A child call `ctx.Call(childType, childID, input)` is: journal `StepRequested{call}`, then `Start` the child with `childID` derived deterministically from parent id + index (so a retry hits `ErrAlreadyStarted`), then suspend. The child's terminal step publishes a signal `result` to the parent. A durable promise is a signal with a name the user chose and a `ctx.Await` on it; external systems resolve it through the client API.
+
+**Deliverables**
+
+- [ ] `client.Signal(type, id, name, payload)` with `Nats-Msg-Id` for client idempotency; `ctx.Signal(name)` returning a channel-like awaitable.
+- [ ] Signal drain step in the worker loop, with `SignalConsumed` journal entries and a per-subject purge of `WF_SIG` up to the consumed sequence at snapshot time.
+- [ ] `ctx.Call` with deterministic child ids and result-as-signal; `ctx.CallAsync` returning a promise.
+- [ ] Client `Await(type, id)` for results: watch `WF_STATE` key or read the terminal journal entry; returns the same bytes forever (I6).
+
+**Proof of completion**
+
+- Test: 100 signallers send 100 signals each (10 000 total, numbered) to one invocation while chaos runs. The invocation records them in `WF_SIG` sequence order with no gaps and no duplicates in the journal; every signaller's history is linearizable as a queue append.
+- Test: signal sent before `Start` (race at creation). The invocation sees it on its first drain. Test the reverse race: `Start` then signal 1 ms later.
+- Test: fan-out of 1 parent → 500 children → all results back. Kill the parent worker at random points. Exactly 500 child journals exist (I1 on children via deterministic ids), the parent's result is the sum of all children, no child ran twice as a new invocation.
+- Test: a 3-deep parent→child→grandchild chain where the middle worker dies after the grandchild completes but before the parent is signalled. The reconciler or the grandchild's `Nats-Msg-Id`-protected signal retry gets the result to the parent.
+
+**Edge cases**
+
+- **Signal to a completed invocation.** Stream accepts it; the wakeup finds a terminal journal and acks. The client gets no error unless it asked for `RequireRunning`. Test both.
+- **Signal to an invocation that does not exist.** Decision: signal-with-start (Temporal's semantics) is opt-in; without it, the client gets `ErrNotFound` from a `WF_INV` lookup. Test the lookup race with a concurrent start.
+- **Signal payload above `max_payload`.** Object Store spill, same as journal entries.
+- **Signal drained into the journal, then the worker dies before processing it.** The journal has `SignalConsumed`; replay delivers it to user code again from the journal, never from `WF_SIG`. Test.
+- **Signal drained but `SignalConsumed` append lost** (`ErrUnknown`). Re-read tail; the drain cursor comes from the journal, so the worst case is re-reading the same `WF_SIG` messages and appending them under the same index, which the CAS makes safe. Test 1 000 times under chaos.
+- **`WF_SIG` purge races a late drain** on a fenced worker: the fenced worker cannot append anyway (I2). Test.
+- **Child id collision** between two different parents (deterministic id scheme bug). Include the parent id in the hash and test that two parents with the same step index produce distinct child ids.
+- **Parent cancelled while children run.** v1: children are not cancelled automatically; document it. Add `ctx.Call` option `CancelWithParent` in v2 with a cancellation signal.
+- **Client `Await` on a result that was purged.** Return `ErrPurged`, not `ErrNotFound`, using a tombstone in `WF_STATE` that outlives the journal by the configured grace period. Test the ordering of purges.
+
+## Phase 7 — Reconciler, retention and visibility
+
+The reconciler is the liveness backstop for I5. It is a single-leader loop (leader elected with a `WF_LEASE` key) that scans for invocations whose journal says `Suspended{waiting_on}` but for which no corresponding wakeup can be found or whose expected wakeup time has passed by more than a grace period, and re-enqueues a `WF_RUN` message with `Nats-Msg-Id = reconcile:<type>:<id>:<jrn_seq>`. Because every wakeup is idempotent (phases 3 and 5), the reconciler can be aggressive and wrong without causing harm; it only needs to never be too quiet.
+
+Retention is a purge pipeline, strictly ordered: `WF_SIG` subject, then `WF_JRN` subject, then `WF_STATE` value replaced by a tombstone with TTL, then `WF_INV` subject. Reversing any pair of these opens a window where a fresh `Start` with a reused id can see old data.
+
+Visibility is a projection: a durable consumer over `WF_JRN` (all subjects) writes `{type, id, status, started, updated, waiting_on, custom search attributes}` into a queryable store. Start with a KV bucket per index (status → set of ids) for small deployments and a Postgres or ClickHouse sink behind the same interface for large ones. The projection is rebuildable from the journal at any time, so it is allowed to be wrong briefly.
+
+**Deliverables**
+
+- [ ] Reconciler with leader election, scan cadence, per-scan budget, and a dry-run mode that reports what it would re-enqueue.
+- [ ] Purge pipeline as a workflow in the runtime itself (dogfooding; the ordering constraint is exactly what a durable workflow is for).
+- [ ] Visibility projection with a `Rebuild()` that replays `WF_JRN` from sequence 1 and a `Lag()` metric.
+- [ ] Operator CLI: `wf list`, `wf describe <id>` (pretty-prints the journal), `wf replay <id>` (offline, from phase 4), `wf cancel`, `wf purge`.
+
+**Proof of completion**
+
+- Test: every stall-inducing kill point from phases 5 and 6 (append-then-crash-before-publish) re-run with the reconciler on. 100% of invocations complete within grace period + one scan interval. With the reconciler off, the same test reports the expected stalls (control).
+- Test: reconciler leader killed every 10 s during the run above; still 100% completion; no invocation gets more than `ceil(scan_count)` duplicate wakeups.
+- Test: purge 10 000 completed invocations while 10 000 others are running and 1 000 new starts reuse purged ids. Zero cross-contamination: every reused-id journal begins with `Started{epoch: 0, index: 0}` and no entry references a prior epoch.
+- Test: kill the projection consumer, run 50 000 invocations, restart it; `Lag()` drains to zero and a full `Rebuild()` produces byte-identical projection state.
+
+**Edge cases**
+
+- **Reconciler re-enqueues an invocation that is actually running.** The lease holder wins; the extra message naks and later no-ops. Test it happens and is harmless.
+- **Reconciler falls behind** (scan takes longer than the interval). Budgeted scans with a cursor in KV; test with 1 M suspended invocations on the fixture and confirm the cursor advances monotonically across leader changes.
+- **Two reconciler leaders** (lease expiry during a pause). Both may re-enqueue; `Nats-Msg-Id` dedups within the window and idempotent wakeups cover the rest. Test with a 45 s pause.
+- **Purge of a journal that a fenced worker is still reading.** The reader gets a gap or an empty subject and must exit without writing; assert no new `WF_STATE` write from it.
+- **Purge pipeline crashes midway.** It is itself a workflow, so it resumes; test every step boundary.
+- **Stream `MaxMsgsPerSubject` on `WF_JRN` misconfigured** (someone sets it to bound journal size). That silently drops old entries; the provisioning assertion from phase 1 must reject the config. Test.
+- **Projection reads a journal for an invocation already purged.** Emits a delete; a later rebuild must produce the same absence. Test.
+- **Search attribute changes shape** (a user renames a field). Projection versioning: store the schema version with each row and support a rebuild with a mapper.
+
+## Distributed verification
+
+Per-phase tests prove each mechanism; this layer proves the whole thing under adversarial conditions, in three tiers that cost progressively more and run progressively less often.
+
+**Tier 1 — Deterministic simulation (every commit).** Run the production client, journal, lease, worker, and reconciler state machines against a seeded in-memory transport. A scheduler owns virtual time and chooses every transport response, wakeup, redelivery, and actor step. A seed plus a recorded decision trace must replay the same state transitions and checker result byte-for-byte. This tier explores runtime logic rapidly; it does not simulate Raft, disk persistence, or undocumented NATS behavior. The real-cluster tiers remain independent evidence.
+
+**Implementation contract and boundaries**
+
+1. Introduce a narrow internal transport port for only the operations production code uses: publish and publish-with-headers, stream info/read/purge, durable fetch/ack/nak/progress, KV create/get/update/delete/watch, Object Store put/get/delete, and server-time/scheduling calls. Keep public NATS-facing constructors. A production adapter calls nats.go; the simulator implements the same port. Move one vertical slice at a time (journal CAS and lease, then start/dispatch, then signals/timers/children/retention) so tests run production decisions, not a rewritten test-only runtime. Do not implement the entire JetStream client interface as the model.
+2. Use cooperative actors, not uncontrolled Go goroutine timing, for simulated clients, workers, reconcilers, and servers. Every transport call, timer, lease renewal, handler effect boundary, and durable consumer action is a yield point. Actors share a virtual monotonic clock; wall-clock offsets are explicit per actor. Choose the next enabled action from a seed, record its actor and action ID, and fail replay if the enabled set or chosen action differs. Apply a maximum-step bound and report deadlock or livelock with pending actions.
+3. Model the used JetStream subset: global and per-subject stream sequences with retained sequence holes; expected-last-subject CAS; MaxMsgsPerSubject/discard behavior; publish deduplication windows; stream and consumer retention; explicit ack, nak, progress, AckWait, redelivery, and consumer restart; KV revisions, create/update/delete and lease expiry; Object Store references; scheduled wakeups. Faults must distinguish a request lost before commit, a commit whose acknowledgment is lost, a stale read, a transient error, a delayed response, and a redelivery. A successful acknowledgment is never rolled back in the model. If server semantics are uncertain, wait for a real NATS contract test before adding them.
+4. Store traces as versioned JSON: seed, model/adapter version, workload, initial state, scheduler choices, injected faults, transport requests and responses, virtual timestamps, and final checker result. FAULT_SEED selects generation; FAULT_TRACE replays a file without random choices. Failures print both and retain the trace as a CI artifact. Minimize a failure by removing decisions or actors while preserving the same invariant failure. A pinned trace must replay identically on different machines and with the race detector.
+5. Run the existing raw-state invariant checker for I1, I2, I3, and I6 after every terminal schedule and at selected intermediate cuts. Add I4 checks by replaying recorded step requests, and I5 checks against virtual time: after faults heal, every enabled invocation either advances or yields a bounded, named reason it cannot. Feed client operations into the existing Porcupine history models. Track duplicate effects, stale epochs, retries, and reconciler actions even when the final state is valid.
+6. Differentially check the model's transport contract, not only final workflow outputs. For each modeled API edge, run a small real three-node NATS fixture test and compare allowed responses and retained-state outcomes, including lost acknowledgments, CAS races, lease expiry, and redelivery. Replay every Tier 2/3 failure in Tier 1 when representable; otherwise add a contract fixture and extend the model. A failure only in simulation is a model or runtime candidate; a failure only on real NATS is a model-gap, environment, or server candidate. Do not label it a NATS bug from that difference alone.
+
+**Build order and proof gates**
+
+- sim/scheduler: deterministic virtual clock, cooperative actors, decision trace, exact replay, and shrinker. Prove two separate processes produce byte-identical traces from the same seed, and that changing a recorded enabled action makes replay fail closed.
+- sim/jetstream: in-memory stream/KV/consumer/Object Store subset with explicit fault hooks. Contract tests compare each modeled edge with the real fixture. A lost-ack case must commit once, return an unknown result, and permit a safe retry; a dropped-before-commit case must leave no record.
+- Runtime adapter: execute the same journal/lease/start/worker/reconciler code through production and simulated transports. Prove CAS single-writer fencing, start-once, effect-outcome once, deterministic resume, wakeup repair, terminal immutability, purge/reuse isolation, and snapshot/rebuild under injected cuts. Include a negative control for each of I1–I6; every checker must fail for its deliberate mutation.
+- CI: first gate a fixed regression corpus plus 1,000 seeded schedules per commit; raise to 10,000 per commit once measured on CI hardware within a few minutes. Record seeds, trace paths, model version, steps/s, and virtual-time coverage. Keep 100,000 clean seeds and all known regression traces as the release gate. A timeout, unexplained skipped action, or model/real contract mismatch fails the gate rather than counting as a clean seed.
+
+Start with the journal CAS/lost-ack vertical slice because it has a real three-node fixture and an unresolved server-side observation in the status record. The first useful result is a trace showing whether the runtime mishandles an unchanged-tail rejection under the modeled server contract; any real-only discrepancy then has a small API-level fixture to investigate. Follow with consumer-leader movement and timer route faults, where real runs have likewise exposed unexplained latency.
+
+**Tier 2 — Real cluster chaos (every merge).** Phase 0's 3-node fixture with the fault injector. The workload is a mixed generator: 40% short workflows, 30% timer-heavy, 20% signal-heavy, 10% deep fan-out. Faults follow a schedule from the chaos matrix below, 20 seeds per run, 10 min each.
+
+**Tier 3 — Jepsen-style (nightly and before release).** Five real VMs or containers with real network partitions (iptables), clock skew (libfaketime on servers and workers separately), disk stalls (dm-delay), and process kills including `SIGKILL` of the NATS server with unsynced writes (`sync_interval` set to the production value). Client histories recorded as in phase 0 and checked with Porcupine against these models: `Start` as write-once register; `Signal` as an ordered queue per invocation; `Await` as a read of a register that becomes immutable at first non-empty read. Plus the stream-level invariant checker over the final state.
+
+**Chaos matrix** (each row is a fault; each column is a workload the fault runs against; every cell must be green):
+
+| Fault | Short | Timer-heavy | Signal-heavy | Fan-out |
+| --- | --- | --- | --- | --- |
+| Kill stream leader (`WF_JRN`) every 30 s | I1, I2, I6 | I5 | I2, order | I1 on children |
+| Kill consumer leader (`WF_RUN`) every 30 s | completion | I5 | completion | completion |
+| Kill random worker every 5 s | I2, I3 | I5 | I2 | I2 |
+| Pause worker 45 s (past lease) | fencing count > 0, I2 | I2 | I2 | I2 |
+| Partition one server from two | progress on majority side | I5 | I2 | I1 |
+| Partition worker from cluster (asymmetric) | fencing, I2 | I5 | I2 | I2 |
+| Clock skew ±5 s on workers | I3 | timer lateness bound | order | I3 |
+| Clock skew ±60 s on one server | I6 | I5, lateness | order | I6 |
+| Disk stall 5 s on one server | latency only, all invariants | I5 | I2 | I2 |
+| `SIGKILL` all servers, restart | I1, I2, I6, no gaps | I5 | order | I1 |
+| Full cluster restart mid-fan-out | I6 | I5 | order | exactly N children |
+| Rolling server upgrade | batch-publish fails closed | I5 | order | I1 |
+
+**Liveness, not just safety.** Every tier records for each invocation the wall time from its last enabling event (start, timer due, signal sent, child completed) to its next journal entry. A safety-correct system that stalls is a failure: the pass bar is p99 under 30 s during faults and 100% completion within 5 min of the last fault healing.
+
+**The "done" bar for a release**
+
+1. Tier 1: 100 000 seeds clean.
+2. Tier 2: 200 consecutive seeds clean across the whole matrix.
+3. Tier 3: 24 h soak with the full matrix, zero invariant violations, zero stalls, and a written explanation for every fencing event and every reconciler re-enqueue (they are expected; unexplained ones mean a bug the checkers missed).
+4. Every bug found in tiers 2 or 3 during the cycle has a tier 1 reproduction added.
+5. A chaos run with a deliberately introduced bug in each of the six invariants (a mutation test: disable the CAS header, skip the lease, reverse the purge order, drop the determinism guard, remove `Nats-Msg-Id`, skip the reconciler) is caught by the checkers. If a mutation survives, the test suite is not done.
+
+## Edge case catalogue
+
+One row per failure mode that cuts across phases, with the mechanism that handles it and the test that proves it. The per-phase lists above hold the phase-local cases; this table is the cross-cutting index a reviewer can audit.
+
+| Failure mode | Where it bites | Mechanism | Proving test |
+| --- | --- | --- | --- |
+| Publish acked on server, ack lost to client | Every append and publish | Re-read tail / `Nats-Msg-Id` / `ErrAlreadyStarted` | Phase 1 dropped-ack proxy; phase 2 `ErrUnknown` ×1 000 |
+| Two workers believe they own one invocation | Dispatch | Lease epoch + CAS append (defence in depth) | Phase 3 pause-past-lease; lease-disabled debug build still safe |
+| Worker paused (GC, VM stall) longer than lease | Dispatch, timers | Fencing on next append | Phase 3 45 s pause |
+| Crash between two dependent writes | Start, sleep, signal, purge | Ordered writes + reconciler or batch publish | Phase 5 kill-between ×200; phase 7 pipeline boundaries |
+| Duplicate wakeup | Timers, signals, reconciler | Idempotent wakeup; nak-with-delay when lease held | Phase 5 cancel-then-fire; phase 7 double leader |
+| Effect executed twice | SDK steps | At-least-once effect, exactly-once recorded outcome; `RunOnce` key | Phase 4 41 kill points |
+| Code changed under running invocation | SDK | Determinism guard + `ctx.Version` | Phase 4 renamed step 7 |
+| Reused id after purge sees old data | Retention | Strict purge order, tombstone | Phase 7 10 000 reuse |
+| Stream eviction of live data | `WF_JRN`, `WF_RUN` | `Discard=new`, `MaxAge=0` on `WF_RUN`, config assertions | Phase 2 eviction; phase 7 misconfig |
+| Payload over `max_payload` | Inputs, results, signals | Object Store spill | 5 MiB tests in phases 1, 2, 6 |
+| Raft leader change mid-operation | Everything | Sequence numbers are stream-global; retries | Phase 0 baseline; leader kill rows of chaos matrix |
+| Mixed server versions | Batch publish, scheduling | Version check, fail closed, fallbacks | Rolling-upgrade row of chaos matrix |
+| Clock skew | Timers | Server timestamps for timer completion | Phase 5 ±5 s; matrix ±60 s |
+| Subject cardinality | `WF_INV`, `WF_JRN` | Purge pipeline; measured memory ceiling | Phase 1 10 M subject measurement |
+| Hot partition | Dispatch | Known limit in v1; isolation of other partitions | Phase 3 hot-tenant test |
+| Reconciler too aggressive / too quiet | Liveness | Idempotent wakeups; liveness bound in every tier | Phase 7 control runs (on/off) |
+| Poison invocation | Dispatch | Attempt counter in journal, terminal `Failed` | Phase 3 count across restarts |
+| Journal gap after purge | Replay | `ErrJournalGap`, refuse to run | Phase 4 corrupted fixture |
+
+## Open risks and what to measure in the first two weeks
+
+Three numbers decide whether this design survives contact with production, and all three can be measured with the phase 0 fixture before any SDK code exists.
+
+1. **Per-subject memory on the server.** `WF_INV` and `WF_JRN` each hold one subject per invocation. Fill a 3-node cluster with 1 M, 5 M and 10 M subjects and record RSS per node and stream-info latency. If 10 M costs more than a few GB per node, the retention window must be short or `WF_INV` needs a different design (a KV with TTL instead of a stream).
+2. **CAS append throughput on one subject and across many.** `Nats-Expected-Last-Subject-Sequence` is checked by the stream leader; measure appends/s at `Replicas=3` with file storage for one hot invocation and for 10 000 concurrent ones. If a single invocation caps below \~500 appends/s, step-heavy workflows need batching of `StepRequested`/`StepCompleted` pairs.
+3. **Scheduled message behaviour at volume.** Publish 1 M scheduled messages due over 24 h, restart the cluster twice, and confirm they all fire within tolerance. This feature is new in 2.12 and its interaction with stream limits, replication and restarts is the least battle-tested part of the whole stack.
+
+Other risks, in rough order of how much they would change the plan:
+
+- **The in-memory JetStream model for tier 1 drifts from the real server.** Mitigation is procedural: no tier 2 or 3 bug is closed without a tier 1 reproduction.
+- **Static partitioning.** N=64 fixed partitions means rebalancing is a manual operation in v1. Acceptable for a first release; the lease makes a later dynamic scheme safe to introduce.
+- **Go-only SDK.** Multi-language SDKs are where these projects die. Keep the journal format and the step protocol language-neutral (protobuf, documented recovery table) from day one so a second SDK is a port, not a redesign.
+- **Operational coupling to the NATS cluster's health.** A JetStream cluster that loses quorum stalls every workflow. This is the same trade Temporal makes with its database; document it and test the full-restart rows of the matrix.
+
+One decision left open for you: whether the reconciler should be a first-class part of v1 or deferred, given that 2.12 batch publish removes most of the crash windows it exists for. My view is to ship it in v1 anyway, because it is the only mechanism that recovers from bugs you have not thought of yet.
