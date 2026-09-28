@@ -189,6 +189,13 @@ enqueue and cursor CAS, then replaces the scanner. The saved cursor resumes
 the scan, all 20 wakeups remain unique, and traces replay from disk and
 across processes.
 
+A further 1,000 seeded schedules interleave two live suspended scanners at
+lease, cursor, cadence, invocation, journal, signal-read, and wakeup calls.
+A seeded cursor write loss forces lease turnover while one wakeup request or
+acknowledgment is lost. All ten waits, split between due timers and matching
+signals, retain one wakeup each. The trace replays from disk and across
+processes.
+
 The worker's timer publication now uses a narrow port for native schedule
 messages and fallback timer records. A 1,000-seed workload runs production
 `ScheduleTimerWithPort` for 20 timers per seed, alternating native and fallback
