@@ -294,6 +294,58 @@ func TestOperatorCommands(t *testing.T) {
 	}
 }
 
+func TestListAttributeFilter(t *testing.T) {
+	cluster, err := testcluster.Start(t.TempDir(), 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	js, err := jetstream.New(cluster.Clients[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	if err := provision.Ensure(ctx, js, 1); err != nil {
+		t.Fatal(err)
+	}
+	const typ, id = "test", "attribute-cli"
+	if _, err := js.Publish(ctx, identity.InvocationSubject(typ, id), []byte(`null`)); err != nil {
+		t.Fatal(err)
+	}
+	j := journal.New(js)
+	entries := []journal.Entry{
+		{Index: 0, Epoch: 1, Kind: journal.Started},
+		{Index: 1, Epoch: 1, Kind: journal.StepRequested, Payload: json.RawMessage(`{"kind":"search_attributes","name":"set"}`)},
+		{Index: 2, Epoch: 1, Kind: journal.StepCompleted, Payload: json.RawMessage(`{"result":{"team":"a=b"}}`)},
+		{Index: 3, Epoch: 1, Kind: journal.Completed},
+	}
+	var tail uint64
+	for _, entry := range entries {
+		tail, err = j.Append(ctx, typ, id, entry, tail)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	args := []string{"-url", cluster.Servers[0].ClientURL(), "-rebuild", "-attribute", "team=a=b", "list", "completed"}
+	var output bytes.Buffer
+	if err := run(args, &output); err != nil {
+		t.Fatal(err)
+	}
+	var rows []visibility.Row
+	if err := json.Unmarshal(output.Bytes(), &rows); err != nil || len(rows) != 1 || rows[0].ID != id {
+		t.Fatalf("filtered rows=%+v err=%v", rows, err)
+	}
+	output.Reset()
+	args[4] = "team=other"
+	if err := run(args, &output); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(output.Bytes(), &rows); err != nil || len(rows) != 0 {
+		t.Fatalf("unmatched rows=%+v err=%v", rows, err)
+	}
+}
+
 func TestJournalCapacityAlert(t *testing.T) {
 	cluster, err := testcluster.Start(t.TempDir(), 1)
 	if err != nil {

@@ -4,6 +4,8 @@ package visibility
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,6 +17,7 @@ import (
 
 	"js-wf/identity"
 	"js-wf/journal"
+	"js-wf/wf"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -37,14 +40,37 @@ type Row struct {
 }
 
 type Projection struct {
-	js       jetstream.JetStream
-	inv      jetstream.Stream
-	jrn      jetstream.Stream
-	view     jetstream.KeyValue
-	consumer jetstream.Consumer
+	js              jetstream.JetStream
+	inv             jetstream.Stream
+	jrn             jetstream.Stream
+	view            jetstream.KeyValue
+	consumer        jetstream.Consumer
+	schemaVersion   int
+	attributeMapper func(map[string]string) (map[string]string, error)
 }
 
-func New(ctx context.Context, js jetstream.JetStream) (*Projection, error) {
+type Option func(*Projection) error
+
+// WithAttributeMapper projects older journaled attribute shapes into a new
+// schema. Deploy one version at a time and run Rebuild to migrate every row.
+func WithAttributeMapper(version int, mapper func(map[string]string) (map[string]string, error)) Option {
+	return func(p *Projection) error {
+		if version < 2 || mapper == nil {
+			return fmt.Errorf("attribute mapper requires schema version >= 2 and a mapper")
+		}
+		p.schemaVersion = version
+		p.attributeMapper = mapper
+		return nil
+	}
+}
+
+func New(ctx context.Context, js jetstream.JetStream, options ...Option) (*Projection, error) {
+	p := &Projection{js: js, schemaVersion: 1}
+	for _, option := range options {
+		if err := option(p); err != nil {
+			return nil, err
+		}
+	}
 	inv, err := js.Stream(ctx, "WF_INV")
 	if err != nil {
 		return nil, err
@@ -64,11 +90,60 @@ func New(ctx context.Context, js jetstream.JetStream) (*Projection, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Projection{js: js, inv: inv, jrn: jrn, view: view, consumer: consumer}, nil
+	p.inv, p.jrn, p.view, p.consumer = inv, jrn, view, consumer
+	return p, nil
 }
 
 func rowKey(typ, id string) string { return "row." + identity.Key(typ, id) }
 func indexKey(row Row) string      { return "idx." + row.Status + "." + identity.Key(row.Type, row.ID) }
+
+func attributeIndexKey(row Row, key, value string) string {
+	digest := sha256.Sum256([]byte(value))
+	return "idxa." + key + "." + hex.EncodeToString(digest[:]) + "." + identity.Key(row.Type, row.ID)
+}
+
+func attributeIndexKeys(row Row) []string {
+	keys := make([]string, 0, len(row.Attributes))
+	for key, value := range row.Attributes {
+		keys = append(keys, attributeIndexKey(row, key, value))
+	}
+	return keys
+}
+
+func projectedAttributes(records []journal.Record) (map[string]string, error) {
+	var attributes map[string]string
+	for i := 0; i < len(records); i++ {
+		if records[i].Kind != journal.StepRequested {
+			continue
+		}
+		var request struct {
+			Kind string `json:"kind"`
+		}
+		if err := json.Unmarshal(records[i].Payload, &request); err != nil {
+			return nil, fmt.Errorf("decode step request %d: %w", records[i].Index, err)
+		}
+		if request.Kind != "search_attributes" || i+1 >= len(records) || records[i+1].Kind != journal.StepCompleted {
+			continue
+		}
+		var done struct {
+			Result json.RawMessage `json:"result"`
+			Error  string          `json:"error"`
+			Ref    string          `json:"result_ref"`
+		}
+		if err := json.Unmarshal(records[i+1].Payload, &done); err != nil {
+			return nil, fmt.Errorf("decode search attributes at %d: %w", records[i+1].Index, err)
+		}
+		if done.Error != "" {
+			continue
+		}
+		var replacement map[string]string
+		if done.Ref != "" || len(done.Result) == 0 || json.Unmarshal(done.Result, &replacement) != nil || wf.ValidateSearchAttributes(replacement) != nil {
+			return nil, fmt.Errorf("invalid search attributes at journal index %d", records[i+1].Index)
+		}
+		attributes = replacement
+	}
+	return attributes, nil
+}
 
 func (p *Projection) describe(ctx context.Context, input *jetstream.RawStreamMsg) (Row, []journal.Record, error) {
 	parts := strings.Split(input.Subject, ".")
@@ -80,7 +155,20 @@ func (p *Projection) describe(ctx context.Context, input *jetstream.RawStreamMsg
 	if err != nil {
 		return Row{}, nil, err
 	}
-	row := Row{SchemaVersion: 1, Type: typ, ID: id, Status: "queued", Started: input.Time, Updated: input.Time, InvSeq: input.Sequence, JournalSeq: tail}
+	row := Row{SchemaVersion: p.schemaVersion, Type: typ, ID: id, Status: "queued", Started: input.Time, Updated: input.Time, InvSeq: input.Sequence, JournalSeq: tail}
+	row.Attributes, err = projectedAttributes(records)
+	if err != nil {
+		return Row{}, nil, err
+	}
+	if p.attributeMapper != nil {
+		row.Attributes, err = p.attributeMapper(row.Attributes)
+		if err != nil {
+			return Row{}, nil, fmt.Errorf("map search attributes: %w", err)
+		}
+		if err := wf.ValidateSearchAttributes(row.Attributes); err != nil {
+			return Row{}, nil, fmt.Errorf("mapped search attributes: %w", err)
+		}
+	}
 	if len(records) == 0 {
 		return row, records, nil
 	}
@@ -151,7 +239,7 @@ func (p *Projection) putRow(ctx context.Context, row Row) error {
 		return err
 	}
 	if err == nil && bytes.Equal(prior.Value(), data) {
-		return p.ensureIndex(ctx, row)
+		return p.ensureIndexes(ctx, row)
 	}
 	if _, err := p.view.Put(ctx, key, data); err != nil {
 		return err
@@ -166,13 +254,31 @@ func (p *Projection) putRow(ctx context.Context, row Row) error {
 				return err
 			}
 		}
+		for key, value := range previous.Attributes {
+			if row.Attributes[key] == value {
+				if _, exists := row.Attributes[key]; exists {
+					continue
+				}
+			}
+			if err := p.view.Delete(ctx, attributeIndexKey(previous, key, value)); err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
+				return err
+			}
+		}
 	}
-	return p.ensureIndex(ctx, row)
+	return p.ensureIndexes(ctx, row)
 }
 
-func (p *Projection) ensureIndex(ctx context.Context, row Row) error {
-	key := indexKey(row)
-	value := []byte(strconv.FormatUint(row.InvSeq, 10))
+func (p *Projection) ensureIndexes(ctx context.Context, row Row) error {
+	for _, key := range append([]string{indexKey(row)}, attributeIndexKeys(row)...) {
+		if err := p.ensureIndex(ctx, key, row.InvSeq); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (p *Projection) ensureIndex(ctx context.Context, key string, invSeq uint64) error {
+	value := []byte(strconv.FormatUint(invSeq, 10))
 	prior, err := p.view.Get(ctx, key)
 	if err == nil && bytes.Equal(prior.Value(), value) {
 		return nil
@@ -199,6 +305,11 @@ func (p *Projection) deleteRow(ctx context.Context, typ, id string) error {
 	}
 	if err := p.view.Delete(ctx, indexKey(row)); err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
 		return err
+	}
+	for _, attributeKey := range attributeIndexKeys(row) {
+		if err := p.view.Delete(ctx, attributeKey); err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
+			return err
+		}
 	}
 	return p.view.Delete(ctx, key)
 }
@@ -250,6 +361,9 @@ func (p *Projection) Rebuild(ctx context.Context) error {
 				wantedMu.Lock()
 				wanted[rowKey(row.Type, row.ID)] = struct{}{}
 				wanted[indexKey(row)] = struct{}{}
+				for _, key := range attributeIndexKeys(row) {
+					wanted[key] = struct{}{}
+				}
 				wantedMu.Unlock()
 			}
 		}()
@@ -278,7 +392,7 @@ produce:
 		if _, ok := wanted[key]; ok {
 			continue
 		}
-		if strings.HasPrefix(key, "row.") || strings.HasPrefix(key, "idx.") {
+		if strings.HasPrefix(key, "row.") || strings.HasPrefix(key, "idx.") || strings.HasPrefix(key, "idxa.") {
 			if err := p.view.Delete(ctx, key); err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
 				return err
 			}
@@ -341,6 +455,54 @@ func (p *Projection) List(ctx context.Context, status string) ([]Row, error) {
 			return nil, err
 		}
 		if status == "" || row.Status == status && indexKey(row) == key {
+			rows = append(rows, row)
+		}
+	}
+	sort.Slice(rows, func(i, j int) bool {
+		if rows[i].Type == rows[j].Type {
+			return rows[i].ID < rows[j].ID
+		}
+		return rows[i].Type < rows[j].Type
+	})
+	return rows, nil
+}
+
+// ListByAttribute uses the value-hashed KV index and verifies each row before
+// returning it, so a stale index cannot produce a false match.
+func (p *Projection) ListByAttribute(ctx context.Context, key, value, status string) ([]Row, error) {
+	if err := wf.ValidateSearchAttributes(map[string]string{key: value}); err != nil {
+		return nil, err
+	}
+	if status != "" && identity.ValidateToken(status) != nil {
+		return nil, fmt.Errorf("invalid status %q", status)
+	}
+	keys, err := p.view.Keys(ctx)
+	if errors.Is(err, jetstream.ErrNoKeysFound) {
+		return []Row{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	digest := sha256.Sum256([]byte(value))
+	prefix := "idxa." + key + "." + hex.EncodeToString(digest[:]) + "."
+	rows := make([]Row, 0)
+	for _, index := range keys {
+		if !strings.HasPrefix(index, prefix) {
+			continue
+		}
+		entry, err := p.view.Get(ctx, "row."+strings.TrimPrefix(index, prefix))
+		if errors.Is(err, jetstream.ErrKeyNotFound) {
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+		var row Row
+		if err := json.Unmarshal(entry.Value(), &row); err != nil {
+			return nil, err
+		}
+		actual, exists := row.Attributes[key]
+		if exists && actual == value && attributeIndexKey(row, key, value) == index && (status == "" || row.Status == status) {
 			rows = append(rows, row)
 		}
 	}
