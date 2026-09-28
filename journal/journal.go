@@ -75,6 +75,7 @@ func DecodeAttempt(data []byte) (AttemptPayload, error) {
 type Store struct {
 	js         jetstream.JetStream
 	appendPort AppendPort
+	readPort   ReadPort
 	mu         sync.Mutex
 	stream     jetstream.Stream
 	state      jetstream.KeyValue
@@ -100,6 +101,19 @@ type AppendTail struct {
 // NewWithAppendPort builds an append-only store for deterministic transport
 // tests. Read and snapshot operations require New with a real JetStream client.
 func NewWithAppendPort(port AppendPort) *Store { return &Store{appendPort: port} }
+
+// ReadPort supplies retained live journal messages to the production Read
+// validator. The in-memory adapter has no snapshot objects; production Read
+// continues to load snapshots through JetStream.
+type ReadPort interface {
+	Next(context.Context, string, uint64) (AppendTail, error)
+	Wait(context.Context, time.Duration) error
+}
+
+// NewWithPorts runs Append and live Read decisions against supplied transports.
+func NewWithPorts(appendPort AppendPort, readPort ReadPort) *Store {
+	return &Store{appendPort: appendPort, readPort: readPort}
+}
 
 type jetStreamAppendPort struct {
 	js     jetstream.JetStream
@@ -266,6 +280,18 @@ func (s *Store) Read(ctx context.Context, typ, id string) ([]Record, uint64, err
 	if !errors.Is(err, ErrGap) {
 		return records, tail, err
 	}
+	if s.readPort != nil {
+		for attempt := 0; attempt < 80; attempt++ {
+			if waitErr := s.readPort.Wait(ctx, 25*time.Millisecond); waitErr != nil {
+				return nil, 0, waitErr
+			}
+			records, tail, err = s.readOnce(ctx, typ, id)
+			if !errors.Is(err, ErrGap) {
+				return records, tail, err
+			}
+		}
+		return nil, 0, err
+	}
 	retryUntil := time.Now().Add(2 * time.Second)
 	for {
 		if ctx.Err() != nil {
@@ -290,14 +316,23 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 	if err := identity.Validate(typ, id); err != nil {
 		return nil, 0, err
 	}
-	stream, err := s.journalStream(ctx)
-	if err != nil {
-		return nil, 0, err
+	var stream jetstream.Stream
+	if s.readPort == nil {
+		var err error
+		stream, err = s.journalStream(ctx)
+		if err != nil {
+			return nil, 0, err
+		}
 	}
 	subject := identity.JournalSubject(typ, id)
-	out, snap, err := s.loadSnapshot(ctx, typ, id)
-	if err != nil {
-		return nil, 0, err
+	var out []Record
+	var snap *Snapshot
+	if s.readPort == nil {
+		var err error
+		out, snap, err = s.loadSnapshot(ctx, typ, id)
+		if err != nil {
+			return nil, 0, err
+		}
 	}
 	var tail uint64
 	seq := uint64(1)
@@ -307,7 +342,17 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 	}
 	readLive := false
 	for {
-		m, err := stream.GetMsg(ctx, seq, jetstream.WithGetMsgSubject(subject))
+		var m AppendTail
+		var err error
+		if s.readPort != nil {
+			m, err = s.readPort.Next(ctx, subject, seq)
+		} else {
+			var raw *jetstream.RawStreamMsg
+			raw, err = stream.GetMsg(ctx, seq, jetstream.WithGetMsgSubject(subject))
+			if err == nil {
+				m = AppendTail{Sequence: raw.Sequence, Data: raw.Data}
+			}
+		}
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			break
 		}

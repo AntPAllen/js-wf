@@ -5,6 +5,12 @@ path through a narrow `journal.AppendPort`. The production port still calls
 JetStream. The in-memory port keeps global stream sequences and per-subject
 tails, and can inject a request dropped before commit, an acknowledgment lost
 after commit, an unchanged-tail CAS rejection, or a competing commit.
+The model now also supplies a narrow live-message `ReadPort` to production
+`journal.Store.Read`. The same index, epoch, and terminal validation runs over
+retained in-memory messages. Snapshot objects remain a real-JetStream read
+path. A focused control accepts a global sequence hole between two entries
+of one journal and rejects a missing logical index after a bounded two
+seconds of virtual retry time.
 
 `sim.Scheduler` chooses seeded actions and records the enabled set, chosen
 action, virtual time, and transport calls in a versioned JSON trace. Replay
@@ -89,7 +95,9 @@ worker advancement remains open.
 
 A separate 1,000-seed workload now runs production `Client.Start` and
 `journal.Store.Append` against retained in-memory invocation and journal
-transports, with dropped and hidden-ack step completions. It runs the
+transports, with dropped and hidden-ack step completions. It reloads each
+retained journal through production `journal.Store.Read` and compares it to
+the independent raw-state snapshot. It runs the
 production worker's terminal KV persistence decision through the modeled
 revision-CAS port, including a lost create acknowledgment and idempotent
 retry. It reconstructs the checker input from the transports'
@@ -99,7 +107,7 @@ and byte-identical cross-process traces pass. The full worker handler remains
 outside this model.
 
 Another 1,000-seed workload runs production `Client.Start`, `wf.Run`, and
-`journal.Store.Append` against retained in-memory transports. For five
+`journal.Store.Append` and `Read` against retained in-memory transports. For five
 three-step completions per seed, it checks the reconstructed state, replays
 the real recorded step requests without rerunning an effect, then changes a
 step name and input separately. Both deliberate I4 mutations return

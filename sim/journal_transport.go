@@ -49,6 +49,7 @@ type JournalTransport struct {
 }
 
 var _ journal.AppendPort = (*JournalTransport)(nil)
+var _ journal.ReadPort = (*JournalTransport)(nil)
 
 func NewJournalTransport(schedule *Scheduler) *JournalTransport {
 	return &JournalTransport{schedule: schedule, messages: map[string][]Message{}}
@@ -88,6 +89,23 @@ func (m *JournalTransport) Last(ctx context.Context, subject string) (journal.Ap
 	last := list[len(list)-1]
 	m.event(TransportEvent{Operation: "last", Subject: subject, Sequence: last.Sequence, DataSHA256: digest(last.Data), Outcome: "ok"})
 	return journal.AppendTail{Sequence: last.Sequence, Data: append([]byte(nil), last.Data...)}, nil
+}
+
+func (m *JournalTransport) Next(ctx context.Context, subject string, from uint64) (journal.AppendTail, error) {
+	if err := ctx.Err(); err != nil {
+		return journal.AppendTail{}, err
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, message := range m.messages[subject] {
+		if message.Sequence < from {
+			continue
+		}
+		m.event(TransportEvent{Operation: "next_journal", Subject: subject, Expected: from, Sequence: message.Sequence, DataSHA256: digest(message.Data), Outcome: "ok"})
+		return journal.AppendTail{Sequence: message.Sequence, Data: append([]byte(nil), message.Data...)}, nil
+	}
+	m.event(TransportEvent{Operation: "next_journal", Subject: subject, Expected: from, Outcome: "not_found"})
+	return journal.AppendTail{}, jetstream.ErrMsgNotFound
 }
 
 func (m *JournalTransport) Publish(ctx context.Context, subject string, data []byte, expected uint64) (uint64, error) {

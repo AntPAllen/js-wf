@@ -41,7 +41,7 @@ func runSeededWorkflowReplay(seed int64, replay *Trace) (trace Trace, runErr err
 	journals := NewJournalTransport(schedule)
 	state := NewKVTransport(schedule, 0)
 	client := client.NewWithStartPort(starts)
-	store := journal.NewWithAppendPort(journals)
+	store := journal.NewWithPorts(journals, journals)
 	for caseIndex := 0; caseIndex < 5; caseIndex++ {
 		id := fmt.Sprintf("replay-%02d", caseIndex)
 		handle, err := client.Start(ctx, "test", id, []byte(`null`))
@@ -102,6 +102,11 @@ func runSeededWorkflowReplay(seed int64, replay *Trace) (trace Trace, runErr err
 		snapshot, err := retainedModelSnapshot(starts, journals, state)
 		if err != nil {
 			return trace, err
+		}
+		readRecords, readTail, err := store.Read(ctx, "test", id)
+		wantRecords := snapshot.Journals[identity.JournalSubject("test", id)]
+		if err != nil || !reflect.DeepEqual(readRecords, wantRecords) || readTail != wantRecords[len(wantRecords)-1].Sequence {
+			return trace, fmt.Errorf("seed %d read %s: records=%d/%d tail=%d err=%v", seed, id, len(readRecords), len(wantRecords), readTail, err)
 		}
 		report, err := integrity.CheckSnapshot(snapshot)
 		want := integrity.Report{Invocations: caseIndex + 1, Journals: caseIndex + 1, Entries: 8 * (caseIndex + 1), Terminal: caseIndex + 1}

@@ -67,7 +67,7 @@ func runSeededRetainedInvariantChecks(seed int64, replay *Trace) (trace Trace, r
 	journals := NewJournalTransport(schedule)
 	state := NewKVTransport(schedule, 0)
 	c := client.NewWithStartPort(starts)
-	j := journal.NewWithAppendPort(journals)
+	j := journal.NewWithPorts(journals, journals)
 	for i := 0; i < 5; i++ {
 		id := fmt.Sprintf("invariant-%02d", i)
 		handle, err := c.Start(ctx, "test", id, []byte(`null`))
@@ -150,6 +150,11 @@ func runSeededRetainedInvariantChecks(seed int64, replay *Trace) (trace Trace, r
 		snapshot, err := retainedModelSnapshot(starts, journals, state)
 		if err != nil {
 			return trace, err
+		}
+		readRecords, readTail, err := j.Read(ctx, "test", id)
+		wantRecords := snapshot.Journals[identity.JournalSubject("test", id)]
+		if err != nil || !reflect.DeepEqual(readRecords, wantRecords) || readTail != wantRecords[len(wantRecords)-1].Sequence {
+			return trace, fmt.Errorf("seed %d read %s: records=%d/%d tail=%d err=%v", seed, id, len(readRecords), len(wantRecords), readTail, err)
 		}
 		report, err := integrity.CheckSnapshot(snapshot)
 		want := integrity.Report{Invocations: i + 1, Journals: i + 1, Entries: 4 * (i + 1), Terminal: i + 1}
