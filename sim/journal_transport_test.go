@@ -419,6 +419,8 @@ func TestReplayFaultTrace(t *testing.T) {
 		replayed, err = runTwoFallbackLoops(loaded.Seed, &loaded)
 	case "suspended_scan_20":
 		replayed, err = runSeededSuspendedScan(loaded.Seed, &loaded)
+	case "suspended_reconcile_loop_20":
+		replayed, err = runSeededSuspendedLoop(loaded.Seed, &loaded)
 	default:
 		t.Fatalf("unknown trace workload %q", loaded.Workload)
 	}

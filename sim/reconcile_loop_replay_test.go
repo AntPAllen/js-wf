@@ -70,7 +70,7 @@ func runSeededReconcileLoop(seed int64, replay *Trace) (trace Trace, runErr erro
 			})
 		}
 	}
-	choices := make([]string, 20)
+	choices := make([]string, 6)
 	for i := range choices {
 		choices[i] = strconv.Itoa(i + 1)
 	}
@@ -90,6 +90,9 @@ func runSeededReconcileLoop(seed int64, replay *Trace) (trace Trace, runErr erro
 	loop.StopAfterWaits(10, stopFirst)
 	if err := reconcile.RunLoopWithPort(firstCtx, loop, "first", mode, 100*time.Millisecond, 1, scan); err != nil {
 		return trace, fmt.Errorf("seed %d first loop: %w", seed, err)
+	}
+	if loop.saves < at {
+		return trace, fmt.Errorf("seed %d first scanner missed cursor fault at save %d after %d attempts", seed, at, loop.saves)
 	}
 	cursor, revision, err := loop.LoadCursor(ctx, mode)
 	if err != nil || revision == 0 || cursor < 1 || cursor > 11 || len(starts.Runs()) < 9 || len(starts.Runs()) > 10 {

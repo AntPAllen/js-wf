@@ -182,6 +182,13 @@ from disk and across processes. A three-node contract compares filtered
 signal reads through a deleted sequence hole, scan candidates, and retained
 wakeup counts with the model.
 
+Another 1,000 seeded schedules run the production suspended-wait scanner
+inside the leased reconciler loop. Each seed mixes ten due timer waits with
+ten matching signal waits, injects a dropped or unacknowledged wakeup
+enqueue and cursor CAS, then replaces the scanner. The saved cursor resumes
+the scan, all 20 wakeups remain unique, and traces replay from disk and
+across processes.
+
 The worker's timer publication now uses a narrow port for native schedule
 messages and fallback timer records. A 1,000-seed workload runs production
 `ScheduleTimerWithPort` for 20 timers per seed, alternating native and fallback

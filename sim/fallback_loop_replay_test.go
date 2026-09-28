@@ -68,7 +68,7 @@ func runSeededFallbackLoop(seed int64, replay *Trace) (trace Trace, runErr error
 			return trace, fmt.Errorf("seed %d timer %d new=%t err=%v", seed, i, newPublish, err)
 		}
 	}
-	choices := make([]string, 20)
+	choices := make([]string, 6)
 	for i := range choices {
 		choices[i] = strconv.Itoa(i + 1)
 	}
@@ -102,6 +102,9 @@ func runSeededFallbackLoop(seed int64, replay *Trace) (trace Trace, runErr error
 	loop.StopAfterWaits(10, stopFirst)
 	if err := reconcile.RunLoopWithPort(firstCtx, loop, "first", "fallback-timer", 100*time.Millisecond, 1, scan.Scan); err != nil {
 		return trace, fmt.Errorf("seed %d first loop: %w", seed, err)
+	}
+	if loop.saves < at {
+		return trace, fmt.Errorf("seed %d first scanner missed cursor fault at save %d after %d attempts", seed, at, loop.saves)
 	}
 	cursor, revision, err := loop.LoadCursor(ctx, "fallback-timer")
 	if err != nil || revision == 0 || cursor < 1 || cursor > 11 || len(model.Runs()) < 7 || len(model.Runs()) > 10 {
