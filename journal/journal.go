@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"js-wf/identity"
@@ -67,9 +68,43 @@ func DecodeAttempt(data []byte) (AttemptPayload, error) {
 	return attempt, nil
 }
 
-type Store struct{ js jetstream.JetStream }
+type Store struct {
+	js     jetstream.JetStream
+	mu     sync.Mutex
+	stream jetstream.Stream
+	state  jetstream.KeyValue
+}
 
 func New(js jetstream.JetStream) *Store { return &Store{js: js} }
+
+// Cache only successful handles. Their operations still make fresh JetStream
+// requests, while failed initial lookups remain retryable after provisioning
+// or a temporary server outage.
+func (s *Store) journalStream(ctx context.Context) (jetstream.Stream, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.stream != nil {
+		return s.stream, nil
+	}
+	stream, err := s.js.Stream(ctx, "WF_JRN")
+	if err == nil {
+		s.stream = stream
+	}
+	return stream, err
+}
+
+func (s *Store) stateKV(ctx context.Context) (jetstream.KeyValue, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.state != nil {
+		return s.state, nil
+	}
+	state, err := s.js.KeyValue(ctx, "WF_STATE")
+	if err == nil {
+		s.state = state
+	}
+	return state, err
+}
 
 // Append atomically compares the last sequence for this invocation's subject.
 // A timeout is ambiguous: the caller must Read before retrying.
@@ -85,7 +120,7 @@ func (s *Store) Append(ctx context.Context, typ, id string, e Entry, expectedSeq
 	}
 	attemptCtx, stopAttempt := context.WithTimeout(ctx, appendAttemptTimeout)
 	defer stopAttempt()
-	stream, err := s.js.Stream(attemptCtx, "WF_JRN")
+	stream, err := s.journalStream(attemptCtx)
 	if err != nil {
 		if ctx.Err() != nil {
 			return 0, ctx.Err()
@@ -191,7 +226,7 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 	if err := identity.Validate(typ, id); err != nil {
 		return nil, 0, err
 	}
-	stream, err := s.js.Stream(ctx, "WF_JRN")
+	stream, err := s.journalStream(ctx)
 	if err != nil {
 		return nil, 0, err
 	}

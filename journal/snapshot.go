@@ -37,7 +37,7 @@ func (s *Store) MaybeSnapshot(ctx context.Context, typ, id string, interval, kee
 	if err := identity.Validate(typ, id); err != nil {
 		return err
 	}
-	stream, err := s.js.Stream(ctx, "WF_JRN")
+	stream, err := s.journalStream(ctx)
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (s *Store) MaybeSnapshot(ctx context.Context, typ, id string, interval, kee
 	if err := json.Unmarshal(last.Data, &entry); err != nil {
 		return ErrGap
 	}
-	state, err := s.js.KeyValue(ctx, "WF_STATE")
+	state, err := s.stateKV(ctx)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func (s *Store) WriteSnapshot(ctx context.Context, typ, id string, keep int) (Sn
 	}
 	prefix := records[:cut]
 	last := prefix[len(prefix)-1]
-	state, err := s.js.KeyValue(ctx, "WF_STATE")
+	state, err := s.stateKV(ctx)
 	if err != nil {
 		return empty, err
 	}
@@ -189,7 +189,7 @@ func (s *Store) PurgeSnapshot(ctx context.Context, typ, id string, snap Snapshot
 		case <-time.After(25 * time.Millisecond):
 		}
 	}
-	stream, err := s.js.Stream(ctx, "WF_JRN")
+	stream, err := s.journalStream(ctx)
 	if err != nil {
 		return err
 	}
@@ -223,7 +223,7 @@ func (s *Store) PurgeSnapshot(ctx context.Context, typ, id string, snap Snapshot
 }
 
 func (s *Store) loadSnapshot(ctx context.Context, typ, id string) ([]Record, *Snapshot, error) {
-	state, err := s.js.KeyValue(ctx, "WF_STATE")
+	state, err := s.stateKV(ctx)
 	if err != nil {
 		return nil, nil, err
 	}

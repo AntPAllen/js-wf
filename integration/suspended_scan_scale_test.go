@@ -42,6 +42,7 @@ func TestSuspendedScanLeaderChild(t *testing.T) {
 
 // WF_SUSPENDED_SCAN_SCALE=1 runs the Phase 7 million-suspended cursor proof.
 // A lower WF_SUSPENDED_SCAN_COUNT is useful for diagnosing the fixture.
+// WF_SUSPENDED_SCAN_FULL=1 also requires a complete sweep within five minutes.
 func TestMillionSuspendedScanCursorSurvivesLeaderKill(t *testing.T) {
 	if os.Getenv("WF_SUSPENDED_SCAN_SCALE") == "" {
 		t.Skip("set WF_SUSPENDED_SCAN_SCALE=1 for the million-suspended cursor proof")
@@ -234,6 +235,60 @@ produce:
 	runInfo, err := run.Info(ctx)
 	if err != nil || runInfo.State.Msgs != 0 {
 		t.Fatalf("suspended scan published an unready wakeup: info=%+v err=%v", runInfo, err)
+	}
+	if os.Getenv("WF_SUSPENDED_SCAN_FULL") == "1" {
+		stopSecond()
+		if err := <-secondDone; err != nil && !errors.Is(err, context.Canceled) {
+			t.Fatal(err)
+		}
+		secondFinished = true
+		startCursor, err := readCursor()
+		if err != nil {
+			t.Fatal(err)
+		}
+		fullCtx, stopFull := context.WithCancel(ctx)
+		fullDone := make(chan error, 1)
+		go func() {
+			fullDone <- reconcile.RunSuspendedLoop(fullCtx, all[1], "scan-scale-full", 10*time.Millisecond, 1024)
+		}()
+		fullFinished := false
+		defer func() {
+			stopFull()
+			if !fullFinished {
+				if err := <-fullDone; err != nil && !errors.Is(err, context.Canceled) {
+					t.Errorf("full scanner: %v", err)
+				}
+			}
+		}()
+		sweepStart := time.Now()
+		previous := startCursor
+		for ctx.Err() == nil {
+			select {
+			case loopErr := <-fullDone:
+				fullFinished = true
+				t.Fatalf("full scanner stopped before wrapping: %v", loopErr)
+			default:
+			}
+			cursor, err := readCursor()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if cursor < previous {
+				if previous+4096 < uint64(count) {
+					t.Fatalf("full scanner cursor moved backward before stream end: %d -> %d", previous, cursor)
+				}
+				break
+			}
+			previous = cursor
+			if time.Since(sweepStart) > 5*time.Minute {
+				t.Fatalf("full suspended sweep exceeded five minutes: cursor=%d/%d", cursor, count)
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+		if ctx.Err() != nil {
+			t.Fatalf("full suspended sweep did not finish: %v", ctx.Err())
+		}
+		t.Logf("full suspended sweep wrapped after %s, starting at cursor %d", time.Since(sweepStart), startCursor)
 	}
 	t.Logf("retained %d suspended invocations; cursor advanced %d -> %d across SIGKILL in %s", count, before, last, time.Since(start))
 }

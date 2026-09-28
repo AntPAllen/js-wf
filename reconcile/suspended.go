@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"js-wf/client"
@@ -48,94 +49,135 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 	if err != nil {
 		return ScanResult{}, err
 	}
-	result := ScanResult{NextSequence: next}
-	for scanned := 0; scanned < budget; scanned++ {
-		input, err := inv.GetMsg(ctx, next)
-		if errors.Is(err, jetstream.ErrMsgNotFound) {
-			info, infoErr := inv.Info(ctx)
-			if infoErr != nil {
-				return result, infoErr
+	info, err := inv.Info(ctx)
+	if err != nil {
+		return ScanResult{}, err
+	}
+	if next > info.State.LastSeq {
+		return ScanResult{NextSequence: 1}, nil
+	}
+	// Keep memory and concurrent request pressure bounded even if an operator
+	// supplies a very large budget. A scan budget is a maximum, not a promise
+	// to inspect every requested sequence in one call.
+	count := min(budget, 4096)
+	available := info.State.LastSeq - next + 1
+	wrap := available < uint64(count)
+	if available < uint64(count) {
+		count = int(available)
+	}
+	type inspected struct {
+		retained  bool
+		ready     bool
+		candidate Candidate
+		err       error
+	}
+	items := make([]inspected, count)
+	jobs := make(chan int, 64)
+	var workers sync.WaitGroup
+	for worker := 0; worker < min(count, 32); worker++ {
+		workers.Add(1)
+		go func() {
+			defer workers.Done()
+			for index := range jobs {
+				input, err := inv.GetMsg(ctx, next+uint64(index))
+				if errors.Is(err, jetstream.ErrMsgNotFound) {
+					continue
+				}
+				if err != nil {
+					items[index].err = err
+					continue
+				}
+				items[index].retained = true
+				items[index].candidate, items[index].ready, items[index].err = s.inspect(ctx, sig, input)
 			}
-			if next > info.State.LastSeq {
-				result.NextSequence = 1
-				return result, nil
-			}
-			next++
-			result.NextSequence = next
-			continue
+		}()
+	}
+	for index := range items {
+		jobs <- index
+	}
+	close(jobs)
+	workers.Wait()
+	result := ScanResult{NextSequence: next + uint64(count)}
+	if wrap {
+		result.NextSequence = 1
+	}
+	for _, item := range items {
+		if item.err != nil {
+			return ScanResult{NextSequence: next}, item.err
 		}
-		if err != nil {
-			return result, err
+		if item.retained {
+			result.Inspected++
 		}
-		next = input.Sequence + 1
-		result.NextSequence = next
-		result.Inspected++
-		parts := strings.Split(input.Subject, ".")
-		if len(parts) != 4 || parts[0] != "wf" || parts[1] != "inv" || identity.Validate(parts[2], parts[3]) != nil {
-			return result, fmt.Errorf("invalid invocation subject %q", input.Subject)
+		if item.ready {
+			result.Candidates = append(result.Candidates, item.candidate)
 		}
-		typ, id := parts[2], parts[3]
-		records, _, err := s.jrn.Read(ctx, typ, id)
-		if err != nil {
-			return result, err
-		}
-		if len(records) == 0 || records[len(records)-1].Kind != journal.Suspended {
-			continue
-		}
-		last := records[len(records)-1]
-		var suspended struct {
-			WaitingOn string `json:"waiting_on"`
-		}
-		if err := json.Unmarshal(last.Payload, &suspended); err != nil {
-			return result, err
-		}
-		var ready bool
-		var reason string
-		switch {
-		case strings.HasPrefix(suspended.WaitingOn, "timer:"):
-			name := strings.TrimPrefix(suspended.WaitingOn, "timer:")
-			if identity.ValidateToken(name) != nil {
-				return result, fmt.Errorf("invalid timer wait %q", suspended.WaitingOn)
-			}
-			ready, err = s.timerDue(records, name)
-			reason = "timer"
-		case strings.HasPrefix(suspended.WaitingOn, "signal:"):
-			name := strings.TrimPrefix(suspended.WaitingOn, "signal:")
-			if identity.ValidateToken(name) != nil {
-				return result, fmt.Errorf("invalid signal wait %q", suspended.WaitingOn)
-			}
-			ready, err = signalAvailable(ctx, sig, typ, id, name, input.Sequence, records)
-			reason = "signal"
-		case strings.HasPrefix(suspended.WaitingOn, "select:"):
-			parts := strings.Split(suspended.WaitingOn, ":")
-			if len(parts) != 3 || identity.ValidateToken(parts[1]) != nil || identity.ValidateToken(parts[2]) != nil {
-				return result, fmt.Errorf("invalid select wait %q", suspended.WaitingOn)
-			}
-			ready, err = signalAvailable(ctx, sig, typ, id, parts[2], input.Sequence, records)
-			if err == nil && !ready {
-				ready, err = s.timerDue(records, parts[1])
-			}
-			reason = "select"
-		default:
-			return result, fmt.Errorf("unknown suspended wait %q", suspended.WaitingOn)
-		}
-		if err != nil {
-			return result, err
-		}
-		if !ready {
-			continue
-		}
-		candidate := Candidate{Type: typ, ID: id, Reason: reason, JournalSeq: last.Sequence}
-		result.Candidates = append(result.Candidates, candidate)
-		result.Reenqueued++
-		if !dryRun {
-			messageID := fmt.Sprintf("reconcile:%s:%s:%d", typ, id, last.Sequence)
-			if err := s.client.Enqueue(ctx, typ, id, messageID); err != nil {
+	}
+	result.Reenqueued = len(result.Candidates)
+	if !dryRun {
+		for _, candidate := range result.Candidates {
+			messageID := fmt.Sprintf("reconcile:%s:%s:%d", candidate.Type, candidate.ID, candidate.JournalSeq)
+			if err := s.client.Enqueue(ctx, candidate.Type, candidate.ID, messageID); err != nil {
 				return result, err
 			}
 		}
 	}
 	return result, nil
+}
+
+func (s *SuspendedScan) inspect(ctx context.Context, sig jetstream.Stream, input *jetstream.RawStreamMsg) (Candidate, bool, error) {
+	parts := strings.Split(input.Subject, ".")
+	if len(parts) != 4 || parts[0] != "wf" || parts[1] != "inv" || identity.Validate(parts[2], parts[3]) != nil {
+		return Candidate{}, false, fmt.Errorf("invalid invocation subject %q", input.Subject)
+	}
+	typ, id := parts[2], parts[3]
+	records, _, err := s.jrn.Read(ctx, typ, id)
+	if err != nil {
+		return Candidate{}, false, err
+	}
+	if len(records) == 0 || records[len(records)-1].Kind != journal.Suspended {
+		return Candidate{}, false, nil
+	}
+	last := records[len(records)-1]
+	var suspended struct {
+		WaitingOn string `json:"waiting_on"`
+	}
+	if err := json.Unmarshal(last.Payload, &suspended); err != nil {
+		return Candidate{}, false, err
+	}
+	var ready bool
+	var reason string
+	switch {
+	case strings.HasPrefix(suspended.WaitingOn, "timer:"):
+		name := strings.TrimPrefix(suspended.WaitingOn, "timer:")
+		if identity.ValidateToken(name) != nil {
+			return Candidate{}, false, fmt.Errorf("invalid timer wait %q", suspended.WaitingOn)
+		}
+		ready, err = s.timerDue(records, name)
+		reason = "timer"
+	case strings.HasPrefix(suspended.WaitingOn, "signal:"):
+		name := strings.TrimPrefix(suspended.WaitingOn, "signal:")
+		if identity.ValidateToken(name) != nil {
+			return Candidate{}, false, fmt.Errorf("invalid signal wait %q", suspended.WaitingOn)
+		}
+		ready, err = signalAvailable(ctx, sig, typ, id, name, input.Sequence, records)
+		reason = "signal"
+	case strings.HasPrefix(suspended.WaitingOn, "select:"):
+		parts := strings.Split(suspended.WaitingOn, ":")
+		if len(parts) != 3 || identity.ValidateToken(parts[1]) != nil || identity.ValidateToken(parts[2]) != nil {
+			return Candidate{}, false, fmt.Errorf("invalid select wait %q", suspended.WaitingOn)
+		}
+		ready, err = signalAvailable(ctx, sig, typ, id, parts[2], input.Sequence, records)
+		if err == nil && !ready {
+			ready, err = s.timerDue(records, parts[1])
+		}
+		reason = "select"
+	default:
+		return Candidate{}, false, fmt.Errorf("unknown suspended wait %q", suspended.WaitingOn)
+	}
+	if err != nil || !ready {
+		return Candidate{}, false, err
+	}
+	return Candidate{Type: typ, ID: id, Reason: reason, JournalSeq: last.Sequence}, true, nil
 }
 
 func (s *SuspendedScan) timerDue(records []journal.Record, name string) (bool, error) {
