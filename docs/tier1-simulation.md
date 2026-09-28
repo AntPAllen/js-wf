@@ -197,6 +197,18 @@ snapshot passes I1/I2/I3/I6, and the trace replays across processes. The
 leased fallback poller and simultaneous timer/signal choices remain outside
 this integrated workload.
 
+The integrated timer/signal select workload runs production `wf.Timer` and
+`TimerHandle.SelectSignal` through the modeled worker. Some seeds consume a
+signal before the timer is due; others leave the signal buffered until both
+are ready, where signal priority must win. Timer-only seeds fire the timer
+branch. It covers uncertain signal publishes and enqueues, a lost timer
+schedule acknowledgment, and consumer-leader movement. The worker records
+the selected branch in its journal and terminal result. After a signal win,
+the later timer target is acknowledged as a cancelled no-op without changing
+the terminal state. Across 1,000 seeds, retained I1/I2/I3/I6 state, exact
+result bytes, signal liveness, branch metrics, and cross-process trace replay
+pass.
+
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
 subject, stores large input objects, and retains run enqueues with message-ID
