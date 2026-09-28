@@ -1,0 +1,42 @@
+name: test
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./wf ./workflowlint ./identity ./journal ./lease ./provision ./reconcile ./client ./history ./worker ./integrity ./testcluster ./cmd/wf ./cmd/wf-lint ./cmd/wf-cas-bench ./cmd/wf-scale
+  cluster:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./integration -count=1 -timeout=20m
+  long-journal:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./integration -run '^(TestFiveThousandEntriesWithRepeatedSnapshots|TestJournalMaxEntriesBoundary)$' -count=1 -timeout=25m
+        env:
+          WF_LONG_TEST: '1'
+          WF_JOURNAL_BOUNDARY: '1'
+  dispatch-scale:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./integration -run '^TestTenThousandShortInvocationsAcrossAllPartitions$' -count=1 -timeout=15m -v
+        env:
+          WF_DISPATCH_SCALE: '1'
