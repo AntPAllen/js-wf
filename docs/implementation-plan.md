@@ -328,7 +328,7 @@ Start with the journal CAS/lost-ack vertical slice because it has a real three-n
 | Full cluster restart mid-fan-out | I6 | I5 | order | exactly N children |
 | Rolling server upgrade | batch-publish fails closed | I5 | order | I1 |
 
-**Liveness, not just safety.** Every tier records for each invocation the wall time from its last enabling event (start, timer due, signal sent, child completed) to its next journal entry. A safety-correct system that stalls is a failure: the pass bar is p99 under 30 s during faults and 100% completion within 5 min of the last fault healing.
+**Liveness, not just safety.** Every tier records for each invocation the wall time from its last enabling event (start, timer due, signal sent, child completed) to its next journal entry. A safety-correct system that stalls is a failure: the pass bar is p99 under 30 s during faults and 100% completion within 5 min of the last fault healing. For a route fault that deliberately removes quorum, measure the p99 recovery gate from the later of the enabling event and the final confirmed route heal. Also report the raw delay from the enabling event so the outage remains visible. An invocation that completes before healing contributes zero post-heal delay.
 
 **The "done" bar for a release**
 
