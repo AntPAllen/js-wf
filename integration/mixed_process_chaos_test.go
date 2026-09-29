@@ -430,76 +430,84 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, inv := range invocations {
-		attempt, stop := context.WithTimeout(ctx, 15*time.Second)
-		result, err := client.New(third).Await(attempt, inv.typ, inv.id)
-		stop()
-		if err != nil || string(result) != "42" {
-			t.Fatalf("restarted node mixed %s/%s result=%s err=%v", inv.typ, inv.id, result, err)
-		}
-	}
 	terminalStream, err := third.Stream(ctx, "WF_JRN")
 	if err != nil {
 		t.Fatal(err)
 	}
-	terminalAt := make([]time.Time, len(invocations))
-	for i, inv := range invocations {
-		var entry journal.Entry
-		var raw *jetstream.RawStreamMsg
-		var readErr error
-		until = time.Now().Add(15 * time.Second)
-		for time.Now().Before(until) && ctx.Err() == nil {
-			attempt, stop := context.WithTimeout(ctx, 3*time.Second)
-			raw, readErr = terminalStream.GetLastMsgForSubject(attempt, identity.JournalSubject(inv.typ, inv.id))
-			stop()
-			if readErr == nil {
-				readErr = json.Unmarshal(raw.Data, &entry)
-				if readErr == nil && entry.Kind == journal.Completed {
-					break
-				}
-			}
-			time.Sleep(100 * time.Millisecond)
-		}
-		if readErr != nil || entry.Kind != journal.Completed {
-			t.Fatalf("terminal journal entry %s/%s: kind=%s err=%v", inv.typ, inv.id, entry.Kind, readErr)
-		}
-		terminalAt[i] = raw.Time
-	}
 	seen := map[string]bool{}
-	lastChildCompletedAt := healedAt
 	for _, childID := range childIDs {
 		if childID == "" || seen[childID] {
 			t.Fatalf("duplicate or empty child ID: %q", childID)
 		}
 		seen[childID] = true
-		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
-		result, err := client.New(third).Await(attempt, "mixedchild", childID)
+	}
+	type terminalAudit struct {
+		at      time.Time
+		elapsed time.Duration
+		err     error
+	}
+	auditOne := func(typ, id, want string) terminalAudit {
+		started := time.Now()
+		attempt, stop := context.WithTimeout(ctx, 15*time.Second)
+		result, err := client.New(third).Await(attempt, typ, id)
 		stop()
-		if err != nil || string(result) != "7" {
-			t.Fatalf("restarted node child %s result=%s err=%v", childID, result, err)
+		if err != nil || string(result) != want {
+			return terminalAudit{elapsed: time.Since(started), err: fmt.Errorf("result=%s err=%v", result, err)}
 		}
-		var childEntry journal.Entry
-		var raw *jetstream.RawStreamMsg
+		until := time.Now().Add(15 * time.Second)
+		var entry journal.Entry
 		var readErr error
-		until = time.Now().Add(15 * time.Second)
 		for time.Now().Before(until) && ctx.Err() == nil {
 			attempt, stop := context.WithTimeout(ctx, 3*time.Second)
-			raw, readErr = terminalStream.GetLastMsgForSubject(attempt, identity.JournalSubject("mixedchild", childID))
+			raw, err := terminalStream.GetLastMsgForSubject(attempt, identity.JournalSubject(typ, id))
 			stop()
+			readErr = err
 			if readErr == nil {
-				readErr = json.Unmarshal(raw.Data, &childEntry)
-				if readErr == nil && childEntry.Kind == journal.Completed {
-					break
+				readErr = json.Unmarshal(raw.Data, &entry)
+				if readErr == nil && entry.Kind == journal.Completed {
+					return terminalAudit{at: raw.Time, elapsed: time.Since(started)}
 				}
 			}
 			time.Sleep(100 * time.Millisecond)
 		}
-		if readErr != nil || childEntry.Kind != journal.Completed {
-			t.Fatalf("child terminal journal %s: kind=%s err=%v", childID, childEntry.Kind, readErr)
+		return terminalAudit{elapsed: time.Since(started), err: fmt.Errorf("terminal kind=%s err=%v", entry.Kind, readErr)}
+	}
+	audits := make([]terminalAudit, len(invocations)+len(childIDs))
+	var auditWorkers sync.WaitGroup
+	for i, inv := range invocations {
+		auditWorkers.Add(1)
+		go func() {
+			defer auditWorkers.Done()
+			audits[i] = auditOne(inv.typ, inv.id, "42")
+		}()
+	}
+	for i, childID := range childIDs {
+		auditWorkers.Add(1)
+		go func() {
+			defer auditWorkers.Done()
+			audits[len(invocations)+i] = auditOne("mixedchild", childID, "7")
+		}()
+	}
+	auditWorkers.Wait()
+	terminalAt := make([]time.Time, len(invocations))
+	for i, inv := range invocations {
+		audit := audits[i]
+		if audit.err != nil {
+			t.Fatalf("restarted node mixed %s/%s audit after %s: %v", inv.typ, inv.id, audit.elapsed, audit.err)
 		}
-		if raw.Time.After(lastChildCompletedAt) {
-			lastChildCompletedAt = raw.Time
+		terminalAt[i] = audit.at
+		t.Logf("restarted node terminal type=%s id=%s audit=%s", inv.typ, inv.id, audit.elapsed)
+	}
+	lastChildCompletedAt := healedAt
+	for i, childID := range childIDs {
+		audit := audits[len(invocations)+i]
+		if audit.err != nil {
+			t.Fatalf("restarted node child %s audit after %s: %v", childID, audit.elapsed, audit.err)
 		}
+		if audit.at.After(lastChildCompletedAt) {
+			lastChildCompletedAt = audit.at
+		}
+		t.Logf("restarted node child id=%s audit=%s", childID, audit.elapsed)
 	}
 	enabledAt[len(invocations)-1] = lastChildCompletedAt
 	signalStream, err := third.Stream(ctx, "WF_SIG")
