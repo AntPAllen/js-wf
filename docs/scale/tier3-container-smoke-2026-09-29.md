@@ -28,3 +28,9 @@ The manual `tier3-container-smoke` workflow runs the same proof on a clean CI
 runner. This is a five-container topology and one network isolation plus one
 server kill/restart. It does not cover the full chaos matrix, clock skew, disk
 stalls, client histories, or the 24-hour Tier 3 soak.
+
+The first clean CI run passed in 124 seconds. After a three-run local repeat
+exposed a Docker `--rm` cleanup race on restart, the fixture began waiting for
+container-name removal. Three corrected local runs passed, followed by a
+[clean CI pass](https://github.com/AntPAllen/js-wf/actions/runs/36601536302)
+in 128 seconds.
