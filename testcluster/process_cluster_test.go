@@ -6,7 +6,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -255,6 +257,11 @@ func TestProcessClusterKillLeaderAndRestart(t *testing.T) {
 }
 
 func TestProcessClusterCombinedRecordedFaultsRecover(t *testing.T) {
+	seed, err := SeedFromEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rng := rand.New(rand.NewSource(seed))
 	root := t.TempDir()
 	c, err := StartPartitionableProcesses(root, 3)
 	if err != nil {
@@ -297,15 +304,23 @@ func TestProcessClusterCombinedRecordedFaultsRecover(t *testing.T) {
 		t.Fatalf("first publish=%+v err=%v", first, err)
 	}
 	killed, other := (leader+1)%3, (leader+2)%3
+	if rng.Intn(2) == 1 {
+		killed, other = other, killed
+	}
 	path := filepath.Join(root, "combined-faults.json")
-	schedule := FaultSchedule{Seed: 42, Events: []FaultEvent{
+	if output := os.Getenv("FAULT_SCHEDULE_OUT"); output != "" {
+		path = output
+	}
+	pauseAt := int64(10 + rng.Intn(30))
+	schedule := FaultSchedule{Seed: seed, Events: []FaultEvent{
 		{AtMillis: 0, Op: PartitionNodes, A: killed, B: other},
-		{AtMillis: 20, Op: PauseNode, A: leader},
-		{AtMillis: 40, Op: KillNode, A: killed},
+		{AtMillis: pauseAt, Op: PauseNode, A: leader},
+		{AtMillis: pauseAt + int64(10+rng.Intn(30)), Op: KillNode, A: killed},
 	}}
 	if err := schedule.Save(path); err != nil {
 		t.Fatal(err)
 	}
+	t.Logf("FAULT_SEED=%d FAULT_SCHEDULE=%s", seed, path)
 	replayed, err := LoadFaultSchedule(path)
 	if err != nil {
 		t.Fatal(err)
