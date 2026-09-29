@@ -15,6 +15,7 @@ jobs:
       WF_TIER3_CONTAINER: '1'
       WF_TIER3_HISTORY_OUT: tier3-client-history.jsonl
       WF_TIER3_QUORUM_HISTORY_OUT: tier3-quorum-history.jsonl
+      WF_TIER3_WORKER_HISTORY_OUT: tier3-worker-kill-history.jsonl
       WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval }}
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +23,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Verify five isolated NATS containers
-        run: go test ./integration -run '^TestFiveContainer(WorkflowSurvivesIsolationAndRestart|AckedPublishesSurviveLeader(Kill|Pause)|PublishRequiresQuorum)$' -count=1 -timeout=12m -v
+        run: go test ./integration -run '^TestFiveContainer(WorkflowSurvivesIsolationAndRestart|AckedPublishesSurviveLeader(Kill|Pause)|PublishRequiresQuorum|WorkerSIGKILLRecovers)$' -count=1 -timeout=12m -v
       - if: always()
         uses: actions/upload-artifact@v7
         with:
@@ -30,4 +31,5 @@ jobs:
           path: |
             integration/tier3-client-history.jsonl
             integration/tier3-quorum-history.jsonl
+            integration/tier3-worker-kill-history.jsonl
           if-no-files-found: ignore
