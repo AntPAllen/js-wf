@@ -111,6 +111,37 @@ func runSeededTombstoneSweep(seed int64, replay *Trace) (trace Trace, runErr err
 			return trace, fmt.Errorf("seed %d repaired tombstone retained: %v", seed, err)
 		}
 	}
+	extraValue, err := json.Marshal(retention.Tombstone{Tombstone: true, InvSeq: 1, PurgedAt: now.Add(-2 * time.Hour), ExpiresAt: now.Add(-time.Hour)})
+	if err != nil {
+		return trace, err
+	}
+	if _, err := state.Create(ctx, identity.Key(typ, "extra"), extraValue); err != nil {
+		return trace, err
+	}
+	if _, err := state.Create(ctx, identity.Key(typ, "result"), []byte(`{"inv_seq":9,"result":true}`)); err != nil {
+		return trace, err
+	}
+	if _, err := state.Create(ctx, "scan.cursor.v1", []byte(`1`)); err != nil {
+		return trace, err
+	}
+	full, err := retention.SweepTombstonesWithPort(ctx, port, now)
+	wantFullDeleted := 1
+	if mode == "dry_run" {
+		wantFullDeleted++
+	}
+	if err != nil || full.Deleted != wantFullDeleted {
+		return trace, fmt.Errorf("seed %d mode %s full sweep=%+v err=%v", seed, mode, full, err)
+	}
+	if _, err := state.Get(ctx, identity.Key(typ, "extra")); !errors.Is(err, jetstream.ErrKeyNotFound) {
+		return trace, fmt.Errorf("seed %d extra tombstone survived: %v", seed, err)
+	}
+	if _, err := state.Get(ctx, identity.Key(typ, "result")); err != nil {
+		return trace, fmt.Errorf("seed %d terminal result removed: %v", seed, err)
+	}
+	second, err := retention.SweepTombstonesWithPort(ctx, port, now)
+	if err != nil || second.Deleted != 0 {
+		return trace, fmt.Errorf("seed %d mode %s repeat sweep=%+v err=%v", seed, mode, second, err)
+	}
 	schedule.RecordTransport(TransportEvent{Operation: "check_tombstone_sweep", Subject: key, Outcome: mode, AtMillis: schedule.NowMillis()})
 	if err := schedule.Finish(); err != nil {
 		return trace, err

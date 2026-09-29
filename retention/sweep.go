@@ -19,9 +19,11 @@ type SweepResult struct {
 	Deleted   int `json:"deleted"`
 }
 
-// TombstoneSweepPort is the retained generation and state-CAS boundary used
-// when a tombstone is considered for deletion.
+// TombstoneSweepPort is the retained state, generation lookup, and CAS delete
+// boundary used by the production tombstone sweep.
 type TombstoneSweepPort interface {
+	StateKeys(context.Context) ([]string, error)
+	StateValue(context.Context, string) ([]byte, uint64, error)
 	CurrentInvocation(context.Context, string) (uint64, error)
 	DeleteState(context.Context, string, uint64) error
 }
@@ -29,6 +31,18 @@ type TombstoneSweepPort interface {
 type jetStreamTombstoneSweepPort struct {
 	state jetstream.KeyValue
 	inv   jetstream.Stream
+}
+
+func (p jetStreamTombstoneSweepPort) StateKeys(ctx context.Context) ([]string, error) {
+	return p.state.Keys(ctx)
+}
+
+func (p jetStreamTombstoneSweepPort) StateValue(ctx context.Context, key string) ([]byte, uint64, error) {
+	entry, err := p.state.Get(ctx, key)
+	if err != nil {
+		return nil, 0, err
+	}
+	return entry.Value(), entry.Revision(), nil
 }
 
 func (p jetStreamTombstoneSweepPort) CurrentInvocation(ctx context.Context, subject string) (uint64, error) {
@@ -55,7 +69,16 @@ func SweepTombstones(ctx context.Context, js jetstream.JetStream, now time.Time)
 	if err != nil {
 		return SweepResult{}, err
 	}
-	keys, err := state.Keys(ctx)
+	return SweepTombstonesWithPort(ctx, jetStreamTombstoneSweepPort{state: state, inv: inv}, now)
+}
+
+// SweepTombstonesWithPort runs the production sweep loop over a supplied
+// retained-state and invocation transport.
+func SweepTombstonesWithPort(ctx context.Context, port TombstoneSweepPort, now time.Time) (SweepResult, error) {
+	if port == nil || now.IsZero() {
+		return SweepResult{}, fmt.Errorf("invalid tombstone sweep port or clock")
+	}
+	keys, err := port.StateKeys(ctx)
 	if errors.Is(err, jetstream.ErrNoKeysFound) {
 		return SweepResult{}, nil
 	}
@@ -68,7 +91,7 @@ func SweepTombstones(ctx context.Context, js jetstream.JetStream, now time.Time)
 		if len(parts) != 2 || identity.Validate(parts[0], parts[1]) != nil {
 			continue
 		}
-		entry, err := state.Get(ctx, key)
+		value, revision, err := port.StateValue(ctx, key)
 		if errors.Is(err, jetstream.ErrKeyNotFound) {
 			continue
 		}
@@ -76,7 +99,7 @@ func SweepTombstones(ctx context.Context, js jetstream.JetStream, now time.Time)
 			return result, err
 		}
 		result.Inspected++
-		expired, _, deleted, err := SweepCandidate(ctx, jetStreamTombstoneSweepPort{state: state, inv: inv}, key, entry.Value(), entry.Revision(), now, false)
+		expired, _, deleted, err := SweepCandidate(ctx, port, key, value, revision, now, false)
 		if err != nil {
 			return result, err
 		}

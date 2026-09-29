@@ -3,6 +3,7 @@ package sim
 import (
 	"context"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -53,6 +54,28 @@ func (m *KVTransport) Now() time.Time {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.now()
+}
+
+// Keys returns live keys in a stable order for modeled KV enumeration.
+func (m *KVTransport) Keys(ctx context.Context) ([]string, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	keys := make([]string, 0, len(m.items))
+	for key := range m.items {
+		if _, live := m.current(key); live {
+			keys = append(keys, key)
+		}
+	}
+	sort.Strings(keys)
+	if len(keys) == 0 {
+		m.event(TransportEvent{Operation: "kv_keys", Outcome: "no_keys"})
+		return nil, jetstream.ErrNoKeysFound
+	}
+	m.event(TransportEvent{Operation: "kv_keys", Sequence: uint64(len(keys)), Outcome: "ok"})
+	return keys, nil
 }
 
 func (m *KVTransport) QueueFault(f KVFault) error {

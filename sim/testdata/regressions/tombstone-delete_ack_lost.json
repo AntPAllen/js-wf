@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "seed": 17,
+  "seed": 1,
   "workload": "tombstone_sweep",
   "step_limit": 100000,
   "decisions": [
@@ -47,6 +47,94 @@
       "operation": "kv_get",
       "subject": "test.retired",
       "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.extra",
+      "sequence": 3,
+      "data_sha256": "f4aca7e47918ac7abc080fcfcd257ff44e3c9a05e0a2696ae9a3c2700ae67e8d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.result",
+      "sequence": 4,
+      "data_sha256": "052e5f3604a1f129779720c139d748b92880603d4784b3fa264a3c00443d1220",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "scan.cursor.v1",
+      "sequence": 5,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_keys",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "test.extra",
+      "sequence": 3,
+      "data_sha256": "f4aca7e47918ac7abc080fcfcd257ff44e3c9a05e0a2696ae9a3c2700ae67e8d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.test.extra",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "test.extra",
+      "expected": 3,
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "test.result",
+      "sequence": 4,
+      "data_sha256": "052e5f3604a1f129779720c139d748b92880603d4784b3fa264a3c00443d1220",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "test.extra",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "test.result",
+      "sequence": 4,
+      "data_sha256": "052e5f3604a1f129779720c139d748b92880603d4784b3fa264a3c00443d1220",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_keys",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "test.result",
+      "sequence": 4,
+      "data_sha256": "052e5f3604a1f129779720c139d748b92880603d4784b3fa264a3c00443d1220",
+      "outcome": "ok"
     },
     {
       "at_ms": 0,

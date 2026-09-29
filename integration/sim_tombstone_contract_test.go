@@ -32,14 +32,12 @@ func TestSimTombstoneSweepContractAgainstRealCluster(t *testing.T) {
 	type candidate struct {
 		id             string
 		kind           string
-		wantExpired    bool
-		wantEligible   bool
 		wantStateAlive bool
 	}
 	cases := []candidate{
-		{id: "absent", kind: "absent", wantExpired: true, wantEligible: true},
-		{id: "held", kind: "held", wantExpired: true, wantStateAlive: true},
-		{id: "reused", kind: "reused", wantExpired: true, wantEligible: true},
+		{id: "absent", kind: "absent"},
+		{id: "held", kind: "held", wantStateAlive: true},
+		{id: "reused", kind: "reused"},
 		{id: "future", kind: "future", wantStateAlive: true},
 	}
 	for _, tc := range cases {
@@ -87,28 +85,24 @@ func TestSimTombstoneSweepContractAgainstRealCluster(t *testing.T) {
 		if _, err := realState.Put(ctx, key, encode(realGeneration)); err != nil {
 			t.Fatal(err)
 		}
-		modelValue := encode(modelGeneration)
-		revision, err := modelState.Create(ctx, key, modelValue)
+		_, err := modelState.Create(ctx, key, encode(modelGeneration))
 		if err != nil {
 			t.Fatal(err)
 		}
-		expired, eligible, deleted, err := retention.SweepCandidate(ctx, modelPort, key, modelValue, revision, now, false)
-		if err != nil || expired != tc.wantExpired || eligible != tc.wantEligible || deleted != tc.wantEligible {
-			t.Fatalf("model %s expired=%v eligible=%v deleted=%v err=%v", tc.id, expired, eligible, deleted, err)
-		}
-		_, err = modelState.Get(ctx, key)
-		if alive := err == nil; alive != tc.wantStateAlive {
-			t.Fatalf("model %s alive=%v err=%v", tc.id, alive, err)
-		}
+	}
+	modelResult, err := retention.SweepTombstonesWithPort(ctx, modelPort, now)
+	if err != nil || modelResult.Expired != 3 || modelResult.Deleted != 2 {
+		t.Fatalf("model sweep=%+v err=%v", modelResult, err)
 	}
 	realResult, err := retention.SweepTombstones(ctx, all[0], now)
-	if err != nil || realResult.Expired != 3 || realResult.Deleted != 2 {
-		t.Fatalf("real sweep=%+v err=%v", realResult, err)
+	if err != nil || realResult != modelResult {
+		t.Fatalf("real sweep=%+v model sweep=%+v err=%v", realResult, modelResult, err)
 	}
 	for _, tc := range cases {
+		_, modelErr := modelState.Get(ctx, identity.Key(typ, tc.id))
 		_, err := realState.Get(ctx, identity.Key(typ, tc.id))
-		if alive := err == nil; alive != tc.wantStateAlive || err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
-			t.Fatalf("real %s alive=%v err=%v", tc.id, alive, err)
+		if alive := err == nil; alive != tc.wantStateAlive || alive != (modelErr == nil) || err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
+			t.Fatalf("%s real=%v model=%v", tc.id, err, modelErr)
 		}
 	}
 }
