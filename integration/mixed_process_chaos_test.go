@@ -37,6 +37,7 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	rng := rand.New(rand.NewSource(seed))
 	root := t.TempDir()
 	cluster, err := testcluster.StartPartitionableProcesses(root, 3)
 	if err != nil {
@@ -78,8 +79,11 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		t.Fatalf("invalid journal leader %q: %v", info.Cluster.Leader, err)
 	}
 	killed, other := (leader+1)%3, (leader+2)%3
+	if rng.Intn(2) == 1 {
+		killed, other = other, killed
+	}
 	kinds := []string{"mixedshort", "mixedshort", "mixedshort", "mixedshort", "mixedtimer", "mixedtimer", "mixedtimer", "mixedsignal", "mixedsignal"}
-	rand.New(rand.NewSource(seed)).Shuffle(len(kinds), func(i, j int) { kinds[i], kinds[j] = kinds[j], kinds[i] })
+	rng.Shuffle(len(kinds), func(i, j int) { kinds[i], kinds[j] = kinds[j], kinds[i] })
 	kinds = append(kinds, "mixedfanout")
 	type invocation struct {
 		typ, id   string
@@ -254,11 +258,12 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	if output := os.Getenv("FAULT_SCHEDULE_OUT"); output != "" {
 		path = output
 	}
+	pauseAt := int64(10 + rng.Intn(30))
 	schedule := testcluster.FaultSchedule{Seed: seed, Events: []testcluster.FaultEvent{
-		{Op: testcluster.SlowDisk, A: other, LatencyMillis: 50},
-		{AtMillis: 10, Op: testcluster.PartitionNodes, A: killed, B: other},
-		{AtMillis: 20, Op: testcluster.PauseNode, A: leader},
-		{AtMillis: 30, Op: testcluster.KillNode, A: killed},
+		{Op: testcluster.SlowDisk, A: other, LatencyMillis: int64(25 + 5*rng.Intn(16))},
+		{AtMillis: 0, Op: testcluster.PartitionNodes, A: killed, B: other},
+		{AtMillis: pauseAt, Op: testcluster.PauseNode, A: leader},
+		{AtMillis: pauseAt + int64(10+rng.Intn(30)), Op: testcluster.KillNode, A: killed},
 	}}
 	if err := schedule.Save(path); err != nil {
 		t.Fatal(err)
