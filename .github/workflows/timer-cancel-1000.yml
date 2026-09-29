@@ -1,0 +1,14 @@
+name: timer-cancel-1000
+on: workflow_dispatch
+jobs:
+  cancel-before-fire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./integration -run '^TestThousandTimerCancellationsBeforeFire$' -count=1 -timeout=10m -v
+        env:
+          WF_TIMER_CANCEL_SCALE: '1'
