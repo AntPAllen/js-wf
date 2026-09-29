@@ -454,6 +454,13 @@ func readLiveBatch(ctx context.Context, stream jetstream.Stream, subject string,
 	if err != nil {
 		return nil, 0, false, fmt.Errorf("filtered journal consumer: %w", err)
 	}
+	if info := consumer.CachedInfo(); info != nil && info.Name != "" {
+		defer func() {
+			cleanupCtx, stop := context.WithTimeout(ctx, time.Second)
+			defer stop()
+			_ = stream.DeleteConsumer(cleanupCtx, info.Name)
+		}()
+	}
 	readLive := false
 	for ctx.Err() == nil {
 		batch, fetchErr := consumer.Fetch(256, jetstream.FetchMaxWait(250*time.Millisecond))
