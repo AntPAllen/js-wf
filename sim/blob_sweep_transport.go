@@ -39,7 +39,7 @@ var _ retention.BlobSweepPort = (*BlobSweepTransport)(nil)
 
 func NewBlobSweepTransport(schedule *Scheduler) *BlobSweepTransport {
 	streams := map[string]*blobSweepStream{}
-	for _, name := range []string{"WF_INV", "WF_SIG", "WF_JRN"} {
+	for _, name := range []string{"WF_INV", "WF_SIG", "WF_JRN", "WF_TIMER", "WF_PURGE"} {
 		streams[name] = &blobSweepStream{messages: map[uint64]retention.BlobSweepMessage{}}
 	}
 	return &BlobSweepTransport{schedule: schedule, state: NewKVTransport(schedule, 0), streams: streams, objects: map[string]blobSweepObject{}}
@@ -48,6 +48,10 @@ func NewBlobSweepTransport(schedule *Scheduler) *BlobSweepTransport {
 func (m *BlobSweepTransport) State() *KVTransport { return m.state }
 
 func (m *BlobSweepTransport) Publish(name string, header nats.Header, data []byte) (uint64, error) {
+	return m.PublishSubject(name, "", header, data)
+}
+
+func (m *BlobSweepTransport) PublishSubject(name, subject string, header nats.Header, data []byte) (uint64, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	stream := m.streams[name]
@@ -55,7 +59,7 @@ func (m *BlobSweepTransport) Publish(name string, header nats.Header, data []byt
 		return 0, fmt.Errorf("unknown blob sweep stream %q", name)
 	}
 	stream.last++
-	stream.messages[stream.last] = retention.BlobSweepMessage{Header: cloneHeader(header), Data: append([]byte(nil), data...)}
+	stream.messages[stream.last] = retention.BlobSweepMessage{Subject: subject, Header: cloneHeader(header), Data: append([]byte(nil), data...)}
 	m.event(TransportEvent{Operation: "blob_stream_publish", Subject: name, Sequence: stream.last, DataSHA256: digest(data), Outcome: "ok"})
 	return stream.last, nil
 }
@@ -142,7 +146,7 @@ func (m *BlobSweepTransport) StreamMessage(ctx context.Context, name string, seq
 		return retention.BlobSweepMessage{}, jetstream.ErrMsgNotFound
 	}
 	m.event(TransportEvent{Operation: "blob_stream_get", Subject: name, Sequence: sequence, DataSHA256: digest(message.Data), Outcome: "ok"})
-	return retention.BlobSweepMessage{Header: cloneHeader(message.Header), Data: append([]byte(nil), message.Data...)}, nil
+	return retention.BlobSweepMessage{Subject: message.Subject, Header: cloneHeader(message.Header), Data: append([]byte(nil), message.Data...)}, nil
 }
 
 func (m *BlobSweepTransport) StateKeys(ctx context.Context) ([]string, error) {

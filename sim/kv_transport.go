@@ -79,7 +79,7 @@ func (m *KVTransport) Keys(ctx context.Context) ([]string, error) {
 }
 
 func (m *KVTransport) QueueFault(f KVFault) error {
-	if f.Operation != "create" && f.Operation != "update" && f.Operation != "delete" && f.Operation != "get" {
+	if f.Operation != "create" && f.Operation != "put" && f.Operation != "update" && f.Operation != "delete" && f.Operation != "get" {
 		return fmt.Errorf("invalid KV fault operation %q", f.Operation)
 	}
 	if (f.Operation == "get" && f.Kind != KVStaleRead && f.Kind != KVGetTransportLost) ||
@@ -90,6 +90,33 @@ func (m *KVTransport) QueueFault(f KVFault) error {
 	defer m.mu.Unlock()
 	m.faults = append(m.faults, f)
 	return nil
+}
+
+// Put replaces a key without a revision condition, as WF_STATE purge markers
+// do. It still advances the bucket's global revision.
+func (m *KVTransport) Put(ctx context.Context, key string, value []byte) (uint64, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	event := TransportEvent{Operation: "kv_put", Subject: key, DataSHA256: digest(value)}
+	fault := m.takeFault("put")
+	if fault == KVDropBeforeCommit {
+		event.Outcome = string(fault)
+		m.event(event)
+		return 0, ErrTransportLost
+	}
+	revision := m.put(key, value)
+	event.Sequence = revision
+	if fault == KVLoseAckAfterCommit {
+		event.Outcome = string(fault)
+		m.event(event)
+		return 0, ErrTransportLost
+	}
+	event.Outcome = "ok"
+	m.event(event)
+	return revision, nil
 }
 
 func (m *KVTransport) Create(ctx context.Context, key string, value []byte) (uint64, error) {

@@ -88,6 +88,8 @@ func purgeWithPort(ctx context.Context, port PurgePort, typ, id string, grace ti
 				}
 				return clearPurgeMarker(ctx, port, purgeKey, marker.InvSeq)
 			}
+		} else if !errors.Is(stateErr, jetstream.ErrKeyNotFound) {
+			return stateErr
 		}
 		return ErrNotFound
 	}

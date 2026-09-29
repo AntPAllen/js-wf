@@ -26,8 +26,9 @@ type BlobSweepResult struct {
 }
 
 type BlobSweepMessage struct {
-	Header nats.Header
-	Data   []byte
+	Subject string
+	Header  nats.Header
+	Data    []byte
 }
 
 type BlobSweepObject struct {
@@ -86,7 +87,7 @@ func (p *jetStreamBlobSweepPort) StreamMessage(ctx context.Context, name string,
 	if err != nil {
 		return BlobSweepMessage{}, err
 	}
-	return BlobSweepMessage{Header: message.Header, Data: message.Data}, nil
+	return BlobSweepMessage{Subject: message.Subject, Header: message.Header, Data: message.Data}, nil
 }
 
 func (p *jetStreamBlobSweepPort) stateKV(ctx context.Context) (jetstream.KeyValue, error) {

@@ -202,8 +202,8 @@ after faults heal; the lost acknowledgment leaves the key absent. Two traces
 pin the lost-ack and replacement cuts, and exact replay, cross-process
 traces, and a race run pass. A three-node contract compares the complete real
 and modeled sweep results and retained keys for absent, held, reused, and
-unexpired generations; three repeats and a race run passed. This slice does
-not yet model the complete retention purge.
+unexpired generations; three repeats and a race run passed. Production
+retention purge is covered in a separate workload below.
 
 A separate 1,000-seed workload now runs production
 `SweepBlobsQuiescentWithPort` across modeled `WF_INV`, `WF_SIG`, and `WF_JRN`
@@ -217,8 +217,27 @@ traces cover a lost delete reply and a missing snapshot read; exact replay,
 cross-process traces, and a race run pass. A three-node contract compares
 the full real and modeled sweep result before and after removing retained
 references; three repeated runs and a race run passed. Reference removal in
-this workload is a fixture action; production `retention.Purge` stages are
-not yet scheduled through the model.
+this workload is a fixture action; a separate workload below runs production
+`retention.Purge` stages.
+
+A 1,000-seed combined workload now runs production `PurgeWithPort` and
+`SweepBlobsQuiescentWithPort` over shared retained streams, `WF_STATE`,
+lease KV, and Object Store objects. It faults the purge marker, signal and
+journal purges, generation-scoped fallback timer purge, snapshot manifest
+delete, tombstone CAS, purge-event publish, and final invocation purge.
+After retry, it checks one generation-bound purge event, no old invocation,
+signals, journal, or current-generation timer, a retained other-generation
+timer, a cleared marker and snapshot manifest, and reclamation of five
+unreferenced runtime objects. A second purge is idempotent. The workload
+also catches and now fixes a transient state read after the invocation is
+gone being mislabeled `ErrNotFound`; the transport error reaches the caller
+and a retry succeeds. Three traces pin lost purge-event and invocation
+replies and the transient read. Exact replay, cross-process traces, and a
+race run pass. A three-node contract compares the clean production purge
+and blob sweep with the model; three repeated runs and a race run passed.
+The model's purge journal read currently uses live entries while the
+snapshot manifest is retained, so a compacted journal's read path and
+concurrent writers still need an integrated retention schedule.
 
 The integrated short-handler workload runs production `Client.Start` and
 `Worker.handle` over a shared modeled run stream and durable consumer. Its

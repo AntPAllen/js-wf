@@ -414,6 +414,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededTombstoneSweep(loaded.Seed, &loaded)
 	case "blob_sweep":
 		replayed, err = runSeededBlobSweep(loaded.Seed, &loaded)
+	case "purge_blob":
+		replayed, err = runSeededPurgeBlob(loaded.Seed, &loaded)
 	case "worker_timer_execution":
 		replayed, err = runSeededWorkerTimerExecution(loaded.Seed, &loaded)
 	case "worker_fallback_timer_execution":
