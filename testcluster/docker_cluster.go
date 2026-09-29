@@ -235,6 +235,24 @@ func (c *DockerCluster) KillNode(i int) error {
 	return fmt.Errorf("Docker node %d was not removed after kill: %w", i, ctx.Err())
 }
 
+func (c *DockerCluster) PauseNode(i int) error {
+	return c.nodeCommand(i, "pause")
+}
+
+func (c *DockerCluster) UnpauseNode(i int) error {
+	return c.nodeCommand(i, "unpause")
+}
+
+func (c *DockerCluster) nodeCommand(i int, action string) error {
+	if i < 0 || i >= len(c.names) || c.names[i] == "" {
+		return fmt.Errorf("invalid Docker node %d", i)
+	}
+	ctx, stop := context.WithTimeout(context.Background(), 15*time.Second)
+	defer stop()
+	_, err := dockerCommand(ctx, action, c.names[i])
+	return err
+}
+
 func (c *DockerCluster) Logs(i int) (string, error) {
 	if i < 0 || i >= len(c.names) {
 		return "", fmt.Errorf("invalid Docker node %d", i)

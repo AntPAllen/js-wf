@@ -62,6 +62,14 @@ the full Tier 3 matrix.
 The manual CI workflow accepts the same value as its `sync_interval` input,
 for example `gh workflow run tier3-container-smoke.yml -f sync_interval=always`.
 
+`TestFiveContainerAckedPublishesSurviveLeaderPause` reuses the acknowledged
+write audit while Docker pauses the current stream leader. The four surviving
+replicas must acknowledge new writes during the pause, retain them before
+healing, and make them available through the resumed node. A local seed-1 run
+at `2m` passed with 956 acknowledged writes, including 455 after the pause.
+This process freeze does not emulate a delayed block device; that fault is
+still open.
+
 The first clean CI run passed in 124 seconds. After a three-run local repeat
 exposed a Docker `--rm` cleanup race on restart, the fixture began waiting for
 container-name removal. Three corrected local runs passed, followed by a

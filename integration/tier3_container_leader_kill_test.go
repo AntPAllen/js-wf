@@ -21,6 +21,16 @@ import (
 // TestFiveContainerAckedPublishesSurviveLeaderKill checks acknowledged file
 // stream writes while the five-replica leader is SIGKILLed and later restarted.
 func TestFiveContainerAckedPublishesSurviveLeaderKill(t *testing.T) {
+	testFiveContainerAckedPublishesSurviveLeaderFault(t, false)
+}
+
+// TestFiveContainerAckedPublishesSurviveLeaderPause freezes the stream leader
+// while a majority continues to acknowledge writes, then resumes that node.
+func TestFiveContainerAckedPublishesSurviveLeaderPause(t *testing.T) {
+	testFiveContainerAckedPublishesSurviveLeaderFault(t, true)
+}
+
+func testFiveContainerAckedPublishesSurviveLeaderFault(t *testing.T, pause bool) {
 	if os.Getenv("WF_TIER3_CONTAINER") != "1" {
 		t.Skip("set WF_TIER3_CONTAINER=1 for five-container NATS proof")
 	}
@@ -30,7 +40,7 @@ func TestFiveContainerAckedPublishesSurviveLeaderKill(t *testing.T) {
 	}
 	const writers, perWriter = 4, 250
 	killAt := 100 + rand.New(rand.NewSource(seed)).Intn(300)
-	t.Logf("FAULT_SEED=%d kill_after_attempt=%d", seed, killAt)
+	t.Logf("FAULT_SEED=%d pause=%t fault_after_attempt=%d", seed, pause, killAt)
 	cluster, err := testcluster.StartDockerCluster(t.TempDir(), 5)
 	if err != nil {
 		t.Fatal(err)
@@ -99,17 +109,22 @@ func TestFiveContainerAckedPublishesSurviveLeaderKill(t *testing.T) {
 	acked := map[uint64]string{}
 	var ackMu sync.Mutex
 	var attempts atomic.Int64
-	var killed atomic.Bool
+	var faulted atomic.Bool
 	var ackedAfter atomic.Int64
-	killNow := make(chan struct{})
-	killDone := make(chan error, 1)
+	faultNow := make(chan struct{})
+	faultDone := make(chan error, 1)
 	go func() {
-		<-killNow
-		err := cluster.KillNode(leader)
-		if err == nil {
-			killed.Store(true)
+		<-faultNow
+		var err error
+		if pause {
+			err = cluster.PauseNode(leader)
+		} else {
+			err = cluster.KillNode(leader)
 		}
-		killDone <- err
+		if err == nil {
+			faulted.Store(true)
+		}
+		faultDone <- err
 	}()
 	var publishers sync.WaitGroup
 	conflicts := make(chan error, 1)
@@ -119,7 +134,7 @@ func TestFiveContainerAckedPublishesSurviveLeaderKill(t *testing.T) {
 			defer publishers.Done()
 			for n := 0; n < perWriter; n++ {
 				if attempts.Add(1) == int64(killAt) {
-					close(killNow)
+					close(faultNow)
 				}
 				payload := fmt.Sprintf("%04d", writer*perWriter+n)
 				attempt, stop := context.WithTimeout(ctx, 500*time.Millisecond)
@@ -128,7 +143,7 @@ func TestFiveContainerAckedPublishesSurviveLeaderKill(t *testing.T) {
 				if err != nil {
 					continue // a publish without an ack has an unknown outcome
 				}
-				if killed.Load() {
+				if faulted.Load() {
 					ackedAfter.Add(1)
 				}
 				ackMu.Lock()
@@ -144,8 +159,11 @@ func TestFiveContainerAckedPublishesSurviveLeaderKill(t *testing.T) {
 		}(writer)
 	}
 	publishers.Wait()
-	if err := <-killDone; err != nil {
-		t.Fatalf("kill leader node %d: %v", leader, err)
+	if err := <-faultDone; err != nil {
+		t.Fatalf("fault leader node %d: %v", leader, err)
+	}
+	if pause {
+		defer func() { _ = cluster.UnpauseNode(leader) }()
 	}
 	select {
 	case err := <-conflicts:
@@ -171,7 +189,12 @@ func TestFiveContainerAckedPublishesSurviveLeaderKill(t *testing.T) {
 	if err != nil {
 		t.Fatalf("surviving node lost acknowledged writes: %v", err)
 	}
-	if err := cluster.RestartNode(leader); err != nil {
+	if pause {
+		err = cluster.UnpauseNode(leader)
+	} else {
+		err = cluster.RestartNode(leader)
+	}
+	if err != nil {
 		t.Fatal(err)
 	}
 	restartedConn, err := nats.Connect(cluster.ClientURL(leader), nats.NoReconnect(), nats.IgnoreDiscoveredServers())
@@ -191,11 +214,11 @@ func TestFiveContainerAckedPublishesSurviveLeaderKill(t *testing.T) {
 		}
 		stop()
 		if getErr == nil {
-			t.Logf("five-container leader kill: leader=%d acked=%d after_kill=%d", leader, len(acked), ackedAfter.Load())
+			t.Logf("five-container leader fault: pause=%t leader=%d acked=%d after_fault=%d", pause, leader, len(acked), ackedAfter.Load())
 			return
 		}
 		err = getErr
 		time.Sleep(200 * time.Millisecond)
 	}
-	t.Fatalf("restarted leader did not retain acknowledged writes: %v", err)
+	t.Fatalf("recovered leader did not retain acknowledged writes: %v", err)
 }
