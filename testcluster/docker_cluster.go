@@ -28,6 +28,7 @@ type DockerCluster struct {
 	routeNames    []string
 	urls          []string
 	monitorURLs   []string
+	syncInterval  string
 }
 
 func dockerCommand(ctx context.Context, args ...string) (string, error) {
@@ -49,6 +50,16 @@ func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
 		return nil, err
 	}
 	c := &DockerCluster{root: root, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count)}
+	c.syncInterval = os.Getenv("WF_TIER3_SYNC_INTERVAL")
+	if c.syncInterval == "" {
+		c.syncInterval = "2m" // pinned nats-server v2.15.0 file-store default
+	}
+	if c.syncInterval != "always" {
+		duration, parseErr := time.ParseDuration(c.syncInterval)
+		if parseErr != nil || duration <= 0 {
+			return nil, fmt.Errorf("invalid WF_TIER3_SYNC_INTERVAL %q", c.syncInterval)
+		}
+	}
 	defer func() {
 		if err != nil {
 			c.Close()
@@ -63,6 +74,10 @@ func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
 		return nil, fmt.Errorf("build Docker nats-server: %w: %s", buildErr, output)
 	}
 	if err := os.WriteFile(filepath.Join(root, "Dockerfile"), []byte("FROM scratch\nCOPY nats-server /nats-server\nENTRYPOINT [\"/nats-server\"]\n"), 0644); err != nil {
+		return nil, err
+	}
+	config := fmt.Sprintf("jetstream: { sync_interval: %q }\n", c.syncInterval)
+	if err := os.WriteFile(filepath.Join(root, "nats.conf"), []byte(config), 0644); err != nil {
 		return nil, err
 	}
 	commandCtx, stop := context.WithTimeout(context.Background(), 2*time.Minute)
@@ -90,6 +105,8 @@ func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
 
 func (c *DockerCluster) ClientURL(i int) string { return c.urls[i] }
 
+func (c *DockerCluster) SyncInterval() string { return c.syncInterval }
+
 func (c *DockerCluster) NodeName(i int) string {
 	if i < 0 || i >= len(c.names) {
 		return ""
@@ -105,13 +122,13 @@ func (c *DockerCluster) RestartNode(i int) error {
 	if err := os.MkdirAll(store, 0755); err != nil {
 		return err
 	}
-	serverArgs := []string{"-a", "0.0.0.0", "-p", "4222", "-m", "8222", "-n", c.names[i], "-js", "-sd", "/data", "-cluster_name", c.network, "-cluster", "nats://0.0.0.0:6222"}
+	serverArgs := []string{"-c", "/etc/nats.conf", "-a", "0.0.0.0", "-p", "4222", "-m", "8222", "-n", c.names[i], "-js", "-sd", "/data", "-cluster_name", c.network, "-cluster", "nats://0.0.0.0:6222"}
 	peer := 0
 	if i == 0 {
 		peer = 1
 	}
 	serverArgs = append(serverArgs, "-routes", "nats://"+c.routeNames[peer]+":6222")
-	args := []string{"run", "-d", "--rm", "--name", c.names[i], "--network", c.clientNetwork, "--user", fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()), "-p", "127.0.0.1::4222", "-p", "127.0.0.1::8222", "-v", store + ":/data", c.image}
+	args := []string{"run", "-d", "--rm", "--name", c.names[i], "--network", c.clientNetwork, "--user", fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()), "-p", "127.0.0.1::4222", "-p", "127.0.0.1::8222", "-v", store + ":/data", "-v", filepath.Join(c.root, "nats.conf") + ":/etc/nats.conf:ro", c.image}
 	args = append(args, serverArgs...)
 	ctx, stop := context.WithTimeout(context.Background(), 30*time.Second)
 	defer stop()

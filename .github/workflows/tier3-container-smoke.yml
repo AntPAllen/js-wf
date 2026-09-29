@@ -1,5 +1,12 @@
 name: tier3-container-smoke
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      sync_interval:
+        description: NATS file-store sync interval used in production
+        required: true
+        default: '2m'
+        type: string
 jobs:
   five-node:
     runs-on: ubuntu-latest
@@ -7,6 +14,7 @@ jobs:
     env:
       WF_TIER3_CONTAINER: '1'
       WF_TIER3_HISTORY_OUT: tier3-client-history.jsonl
+      WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

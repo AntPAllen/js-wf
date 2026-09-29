@@ -36,6 +36,7 @@ func TestFiveContainerAckedPublishesSurviveLeaderKill(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer cluster.Close()
+	t.Logf("file_store_sync_interval=%s", cluster.SyncInterval())
 	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Minute)
 	defer cancel()
 	if _, err := waitRouteCounts(ctx, cluster, 0, 16, 30*time.Second); err != nil {

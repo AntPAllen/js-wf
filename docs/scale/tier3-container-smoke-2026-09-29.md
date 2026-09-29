@@ -47,9 +47,16 @@ acknowledged payload through a survivor and through the killed node after a
 same-store restart. Local seeds 1–4 passed, with 956–964 acknowledged writes
 and 414–525 acknowledged after the kill. The [combined clean CI run](https://github.com/AntPAllen/js-wf/actions/runs/36606118005)
 passed both container tests; its seed-1 leader kill acknowledged 960 writes,
-including 493 after the kill, and uploaded the 14-operation workflow history. The test uses the pinned NATS server's
-default file-store sync interval; a production-configured interval and
-block-device delay remain for the full Tier 3 matrix.
+including 493 after the kill, and uploaded the 14-operation workflow history.
+The fixture mounts a NATS config that explicitly sets `sync_interval` to
+`2m`, the pinned server's default. Set `WF_TIER3_SYNC_INTERVAL` to the
+production server value to run the same proof with that interval; positive Go
+durations and `always` are accepted. Local leader-kill runs passed at `2m`,
+`1s`, and `always`. The production deployment value and block-device delay
+remain to be exercised in the full Tier 3 matrix.
+
+The manual CI workflow accepts the same value as its `sync_interval` input,
+for example `gh workflow run tier3-container-smoke.yml -f sync_interval=always`.
 
 The first clean CI run passed in 124 seconds. After a three-run local repeat
 exposed a Docker `--rm` cleanup race on restart, the fixture began waiting for
