@@ -19,6 +19,7 @@ jobs:
       WF_TIER3_FANOUT_HISTORY_OUT: tier3-fanout-restart-history.jsonl
       WF_TIER3_TIMER_HISTORY_OUT: tier3-timer-restart-history.jsonl
       WF_TIER3_SIGNAL_HISTORY_OUT: tier3-signal-restart-history.jsonl
+      WF_TIER3_CONSUMER_HISTORY_OUT: tier3-consumer-leader-history.jsonl
       WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval }}
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +27,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Verify five isolated NATS containers
-        run: go test ./integration -run '^TestFiveContainer(WorkflowSurvivesIsolationAndRestart|AckedPublishesSurviveLeader(Kill|Pause)|PublishRequiresQuorum|WorkerSIGKILLRecovers|FanoutSurvivesFullRestart|TimersSurviveFullRestart|SignalsSurviveFullRestart)$' -count=1 -timeout=12m -v
+        run: go test ./integration -run '^TestFiveContainer(WorkflowSurvivesIsolationAndRestart|AckedPublishesSurviveLeader(Kill|Pause)|PublishRequiresQuorum|WorkerSIGKILLRecovers|FanoutSurvivesFullRestart|TimersSurviveFullRestart|SignalsSurviveFullRestart|ConsumerLeaderKillDuringEffect)$' -count=1 -timeout=12m -v
       - if: always()
         uses: actions/upload-artifact@v7
         with:
@@ -38,4 +39,5 @@ jobs:
             integration/tier3-fanout-restart-history.jsonl
             integration/tier3-timer-restart-history.jsonl
             integration/tier3-signal-restart-history.jsonl
+            integration/tier3-consumer-leader-history.jsonl
           if-no-files-found: ignore
