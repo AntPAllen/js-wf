@@ -168,7 +168,7 @@ func TestSeededJournalBatchReadReplay(t *testing.T) {
 			t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, err)
 		}
 		if seed <= 10 {
-			replayed, err := runSeededJournalBatchRead(seed, &generated)
+			replayed, err := replayTrace(generated)
 			if err != nil || !reflect.DeepEqual(generated, replayed) {
 				t.Fatalf("FAULT_SEED=%d batch read replay: %v", seed, err)
 			}

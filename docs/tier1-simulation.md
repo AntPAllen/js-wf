@@ -24,8 +24,8 @@ entries interleaved with another subject and covers clean reads, partial
 delivery, cursor replacement after repeated faults, fail-closed retry
 exhaustion, and a deleted middle entry that returns `ErrGap` after 80 virtual
 25 ms whole-read retries. Batch-fault 50 ms retries also advance virtual time;
-the first ten seeds replay
-exactly, and seed 42 produces byte-identical traces across processes. The
+the first ten seeds replay through the shared trace dispatcher, and seed 42
+produces byte-identical traces across processes. The
 three-node 300-entry contract now mirrors the same publish order in the model
 and compares every record and tail after both production read paths.
 
