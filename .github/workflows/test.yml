@@ -69,6 +69,8 @@ jobs:
         run: WF_FULL_RESTART_FANOUT=1 go test ./integration -run '^TestFanoutSurvivesFullServerRestart$' -count=1 -timeout=4m -v
       - name: Consume one hundred ordered signals after a full server restart
         run: WF_FULL_RESTART_SIGNAL=1 go test ./integration -run '^TestOrderedSignalsSurviveFullServerRestart$' -count=1 -timeout=4m -v
+      - name: Recover one thousand short workflows after a full server restart
+        run: WF_FULL_RESTART_SHORT=1 go test ./integration -run '^TestThousandShortWorkflowsSurviveFullServerRestart$' -count=1 -timeout=5m -v
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
