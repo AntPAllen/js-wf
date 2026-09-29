@@ -128,3 +128,6 @@ worker shutdown in under one millisecond. This is a live large-payload check
 at 1,000 invocations; it does not establish the plan's 100,000-ID
 large-payload or faulted cardinality target.
 The manual `large-input-scale` workflow runs this proof on GitHub Actions.
+Its first run at `c7113ba` passed in 14.65 seconds of Go test time: starts
+took 9.22 seconds, all results were checked by 10.21 seconds, and worker
+shutdown took 134 microseconds.
