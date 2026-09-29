@@ -367,7 +367,17 @@ func killFanoutParentAtCut(t *testing.T, ctx context.Context, js jetstream.JetSt
 		}
 		time.Sleep(5 * time.Millisecond)
 	}
-	records, _, err := journal.New(js).Read(ctx, "parent", "large-fanout")
+	var records []journal.Record
+	until = time.Now().Add(10 * time.Second)
+	for time.Now().Before(until) && ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		records, _, err = journal.New(js).Read(attempt, "parent", "large-fanout")
+		stop()
+		if err == nil && len(records) == 1+2*(cut+1) && records[len(records)-1].Kind == journal.StepCompleted {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
 	if err != nil || len(records) != 1+2*(cut+1) || records[len(records)-1].Kind != journal.StepCompleted {
 		t.Fatalf("parent journal before SIGKILL: entries=%d want=%d err=%v", len(records), 1+2*(cut+1), err)
 	}
