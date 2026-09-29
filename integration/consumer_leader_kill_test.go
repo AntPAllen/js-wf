@@ -270,7 +270,7 @@ func TestConsumerLeaderKillDuringInFlightWorkflow(t *testing.T) {
 		t.Fatal(err)
 	}
 	name := fmt.Sprintf("WF_P_%02d", partition)
-	consumer, err := run.CreateConsumer(ctx, jetstream.ConsumerConfig{Name: name, Durable: name, FilterSubject: "wf.run." + strconv.FormatUint(uint64(partition), 10), AckPolicy: jetstream.AckExplicitPolicy, AckWait: 30 * time.Second, MaxDeliver: -1, MaxAckPending: 1000})
+	consumer, err := run.CreateConsumer(ctx, jetstream.ConsumerConfig{Name: name, Durable: name, FilterSubject: "wf.run." + strconv.FormatUint(uint64(partition), 10), AckPolicy: jetstream.AckExplicitPolicy, AckWait: worker.DefaultAckWait, MaxDeliver: -1, MaxAckPending: 1000})
 	if err != nil {
 		t.Fatal(err)
 	}

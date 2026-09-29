@@ -126,8 +126,8 @@ func runSeededHeartbeatHandoff(seed int64, replay *Trace) (trace Trace, runErr e
 	case <-ctx.Done():
 		return trace, fmt.Errorf("seed %d first worker did not stop: %w", seed, ctx.Err())
 	}
-	if effectCtx.Err() == nil || transport.Dispatch.Pending() != 1 || effects != 1 {
-		return trace, fmt.Errorf("seed %d first handoff effect=%v pending=%d effects=%d", seed, effectCtx.Err(), transport.Dispatch.Pending(), effects)
+	if effectCtx.Err() == nil || transport.Dispatch.Pending() != 2 || effects != 1 || first.Metrics().HandoffEnqueues != 1 {
+		return trace, fmt.Errorf("seed %d first handoff effect=%v pending=%d effects=%d enqueues=%d", seed, effectCtx.Err(), transport.Dispatch.Pending(), effects, first.Metrics().HandoffEnqueues)
 	}
 	partial, _, err := store.Read(ctx, typ, id)
 	if err != nil || len(partial) != 2 || partial[0].Kind != journal.Started || partial[1].Kind != journal.StepRequested {

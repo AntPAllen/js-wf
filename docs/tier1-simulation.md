@@ -365,11 +365,15 @@ processes and under the race detector. A three-node contract compares the
 model with real JetStream across the original and extended deadlines.
 A second 1,000-seed workload hands an unfinished step between two production
 workers. A dropped or unacknowledged lease renewal, failed progress write,
-or closed tick source cancels the first blocked effect. It naks the retained
-run message and cleans up its lease. The successor receives redelivery,
+or closed tick source cancels the first blocked effect. It cleans up its lease,
+publishes a durable handoff run keyed by the original stream sequence, and
+naks the original delivery. The successor receives the handoff and later
+redelivery of the original message,
 replays `StepRequested` under a higher epoch, executes the effect once more,
 and writes the only terminal result. I1/I2/I3/I6, exact replay, cross-process
-traces, and the race detector pass. Pinned traces cover a hidden renewal
+traces, and the race detector pass. The handoff is deduplicated across publish
+retries, and the original delivery remains safe if a quorum loss hides the
+nak. Pinned traces cover a hidden renewal
 reply and a failed progress write. A three-node worker-level fixture hides
 a committed lease-renewal reply during a blocked effect and checks the same
 handoff, terminal result, and drained run queue; three repeated runs and a

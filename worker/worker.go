@@ -76,6 +76,12 @@ type Worker struct {
 	modeledCancelNotifications bool
 }
 
+// DefaultAckWait leaves recovery time inside the 30-second post-heal
+// completion gate when an in-flight NAK is lost with the consumer quorum.
+const DefaultAckWait = 20 * time.Second
+
+const defaultHeartbeatInterval = 5 * time.Second
+
 // CancellationPollPort reads the latest durable cancel signal for one subject.
 type CancellationPollPort interface {
 	LastGeneration(context.Context, string) (string, error)
@@ -174,7 +180,7 @@ func New(ctx context.Context, js jetstream.JetStream, id string, handlers map[st
 			return nil, fmt.Errorf("fallback timer stream: %w", err)
 		}
 	}
-	w := &Worker{js: js, jrn: journal.New(js), leases: l, state: state, client: client.New(js), ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, nativeSchedules: runInfo.Config.AllowMsgSchedules, cancelWaiters: make(map[string]*cancelWaiter)}
+	w := &Worker{js: js, jrn: journal.New(js), leases: l, state: state, client: client.New(js), ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: DefaultAckWait, heartbeatInterval: defaultHeartbeatInterval, nativeSchedules: runInfo.Config.AllowMsgSchedules, cancelWaiters: make(map[string]*cancelWaiter)}
 	for _, option := range options {
 		if err := option(w); err != nil {
 			return nil, err
@@ -225,7 +231,7 @@ func NewWithPorts(id string, handlers map[string]Handler, ports ModeledWorkerPor
 	if id == "" || ports.Journal == nil || ports.Leases == nil || ports.Outcome == nil || ports.Invocation == nil || ports.Signals == nil || ports.Client == nil {
 		return nil, fmt.Errorf("invalid modeled worker configuration")
 	}
-	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, heartbeatTicks: ports.HeartbeatTicks, cancelWaiters: make(map[string]*cancelWaiter), modeledCancelNotifications: ports.CancellationNotifications, cancelPollPort: ports.CancellationPoll}, nil
+	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: DefaultAckWait, heartbeatInterval: defaultHeartbeatInterval, heartbeatTicks: ports.HeartbeatTicks, cancelWaiters: make(map[string]*cancelWaiter), modeledCancelNotifications: ports.CancellationNotifications, cancelPollPort: ports.CancellationPoll}, nil
 }
 
 type panicRetryError struct{ attempt int }
@@ -548,6 +554,16 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		if errors.As(err, &retry) {
 			delay = retry.Delay()
 		}
+		// A NAK sent while the consumer has no quorum can disappear even when
+		// the local connection accepts it. A live worker whose heartbeat stopped
+		// also enqueues a durable, deduplicated handoff after the route heals.
+		// The original delivery remains safe under the invocation lease.
+		if processingCanceled && parent.Err() == nil {
+			if cleanupErr := release(); cleanupErr == nil || errors.Is(cleanupErr, lease.ErrLost) {
+				released = true
+				w.enqueueCanceledHandoff(parent, typ, id, metadata.Sequence.Stream)
+			}
+		}
 		_ = msg.NakWithDelay(delay)
 		return
 	}
@@ -561,6 +577,28 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	released = true
 	if err := msg.Ack(); err == nil && cancelledTimerNoOp {
 		w.metrics.cancelledTimerNoOps.Add(1)
+	}
+}
+
+func (w *Worker) enqueueCanceledHandoff(parent context.Context, typ, id string, runSequence uint64) {
+	if w.client == nil || runSequence == 0 {
+		return
+	}
+	ctx, cancel := context.WithTimeout(parent, 20*time.Second)
+	defer cancel()
+	messageID := fmt.Sprintf("worker-handoff:%d", runSequence)
+	for ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		err := w.client.Enqueue(attempt, typ, id, messageID)
+		stop()
+		if err == nil {
+			w.metrics.handoffEnqueues.Add(1)
+			return
+		}
+		select {
+		case <-ctx.Done():
+		case <-time.After(100 * time.Millisecond):
+		}
 	}
 }
 

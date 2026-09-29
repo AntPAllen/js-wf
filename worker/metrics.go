@@ -15,6 +15,7 @@ type Metrics struct {
 	LeaseContentions      uint64        `json:"lease_contentions"`
 	LeaseAcquireFailures  uint64        `json:"lease_acquire_failures"`
 	FencingEvents         uint64        `json:"fencing_events"`
+	HandoffEnqueues       uint64        `json:"handoff_enqueues"`
 	Redeliveries          uint64        `json:"redeliveries"`
 	EnqueueToLeaseSamples uint64        `json:"enqueue_to_lease_samples"`
 	EnqueueToLeaseTotal   time.Duration `json:"enqueue_to_lease_total"`
@@ -33,6 +34,7 @@ type metricsCounters struct {
 	leaseContentions      atomic.Uint64
 	leaseAcquireFailures  atomic.Uint64
 	fencingEvents         atomic.Uint64
+	handoffEnqueues       atomic.Uint64
 	redeliveries          atomic.Uint64
 	enqueueToLeaseSamples atomic.Uint64
 	enqueueToLeaseTotal   atomic.Int64
@@ -98,6 +100,7 @@ func (w *Worker) Metrics() Metrics {
 		LeaseContentions:      w.metrics.leaseContentions.Load(),
 		LeaseAcquireFailures:  w.metrics.leaseAcquireFailures.Load(),
 		FencingEvents:         w.metrics.fencingEvents.Load(),
+		HandoffEnqueues:       w.metrics.handoffEnqueues.Load(),
 		Redeliveries:          w.metrics.redeliveries.Load(),
 		EnqueueToLeaseSamples: w.metrics.enqueueToLeaseSamples.Load(),
 		EnqueueToLeaseTotal:   time.Duration(w.metrics.enqueueToLeaseTotal.Load()),

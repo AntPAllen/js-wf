@@ -19,7 +19,7 @@ The only new stateful component is the SDK runtime inside the worker; every dura
 | Store | Subjects | Config that matters | Role |
 | --- | --- | --- | --- |
 | `WF_INV` stream | `wf.inv.<type>.<id>` | `MaxMsgsPerSubject=1`, `DiscardNewPerSubject`, limits retention | Start-once idempotency record; holds input + start metadata |
-| `WF_RUN` stream | `wf.run.<partition>` (mapped from `wf.run.<type>.<id>` via `{{partition(N, 2, 3)}}`) | WorkQueue retention, `AckWait` 30 s, `MaxDeliver` unlimited with backoff | Dispatch queue; one durable pull consumer per partition |
+| `WF_RUN` stream | `wf.run.<partition>` (mapped from `wf.run.<type>.<id>` via `{{partition(N, 2, 3)}}`) | WorkQueue retention, default consumer `AckWait` 20 s, `MaxDeliver` unlimited with backoff | Dispatch queue; one durable pull consumer per partition |
 | `WF_JRN` stream | `wf.jrn.<type>.<id>` | Limits retention, `DenyPurge=false`, `Nats-Expected-Last-Subject-Sequence` on every publish | Per-invocation journal; entries `{epoch, index, kind, payload}` |
 | `WF_SIG` stream | `wf.sig.<type>.<id>.<name>` | Limits retention, `Nats-Msg-Id` dedup window 2 min | External signals; merged into the journal by the worker |
 | `WF_LEASE` KV | key `<type>.<id>` | Per-key TTL 30 s, `LimitMarkerTTL` | Single-writer lease; value = `{worker, epoch}` |
@@ -329,6 +329,8 @@ Start with the journal CAS/lost-ack vertical slice because it has a real three-n
 | Rolling server upgrade | batch-publish fails closed | I5 | order | I1 |
 
 **Liveness, not just safety.** Every tier records for each invocation the wall time from its last enabling event (start, timer due, signal sent, child completed) to its next journal entry. A safety-correct system that stalls is a failure: the pass bar is p99 under 30 s during faults and 100% completion within 5 min of the last fault healing. For a route fault that deliberately removes quorum, measure the p99 recovery gate from the later of the enabling event and the final confirmed route heal. Also report the raw delay from the enabling event so the outage remains visible. An invocation that completes before healing contributes zero post-heal delay.
+
+The original 30-second consumer `AckWait` left no room for processing before the 30-second p99 recovery gate when a nak was lost during quorum loss. The runtime default is now 20 seconds with a five-second progress heartbeat; explicit 30-second control fixtures remain to test their configured behavior.
 
 **The "done" bar for a release**
 

@@ -217,8 +217,8 @@ func runWorkerHeartbeatFailureHandoff(t *testing.T, mode string) {
 		t.Fatal(err)
 	}
 	records, _, err := journal.New(all[0]).Read(ctx, typ, id)
-	if err != nil || len(records) != 4 || records[2].Kind != journal.StepCompleted || records[3].Kind != journal.Completed || records[2].Epoch <= records[1].Epoch || effects.Load() != 2 || port.failed.Load() != (mode == "progress") {
-		t.Fatalf("handoff records=%+v effects=%d failed=%v err=%v", records, effects.Load(), port.failed.Load(), err)
+	if err != nil || len(records) != 4 || records[2].Kind != journal.StepCompleted || records[3].Kind != journal.Completed || records[2].Epoch <= records[1].Epoch || effects.Load() != 2 || port.failed.Load() != (mode == "progress") || first.Metrics().HandoffEnqueues != 1 {
+		t.Fatalf("handoff records=%+v effects=%d failed=%v enqueues=%d err=%v", records, effects.Load(), port.failed.Load(), first.Metrics().HandoffEnqueues, err)
 	}
 	if _, err := integrity.Check(ctx, all[0]); err != nil {
 		t.Fatal(err)
