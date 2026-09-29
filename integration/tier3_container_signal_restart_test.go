@@ -201,6 +201,7 @@ func TestFiveContainerSignalsSurviveFullRestart(t *testing.T) {
 	}
 	afterClient := client.NewObserved(afterJS, recorder)
 	send(count/2, count, afterClient)
+	enablingAt := time.Now()
 	retry, err := afterClient.Signal(ctx, typ, id, "go", []byte("0"), "ordered-000")
 	if err != nil || retry == 0 {
 		t.Fatalf("duplicate signal after restart: sequence=%d err=%v", retry, err)
@@ -208,7 +209,6 @@ func TestFiveContainerSignalsSurviveFullRestart(t *testing.T) {
 	if _, err := afterClient.Signal(ctx, typ, id, "go", []byte("changed"), "ordered-000"); !errors.Is(err, client.ErrSignalMismatch) {
 		t.Fatalf("changed signal after restart: %v", err)
 	}
-	enablingAt := time.Now()
 	replacementConn, replacementJS, err := connect(2)
 	if err != nil {
 		t.Fatal(err)
