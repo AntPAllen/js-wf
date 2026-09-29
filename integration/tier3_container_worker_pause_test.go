@@ -6,9 +6,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 	"testing"
@@ -38,7 +40,8 @@ func TestFiveContainerWorkerPauseChild(t *testing.T) {
 	}
 	url, marker := os.Getenv("WF_TIER3_WORKER_PAUSE_URL"), os.Getenv("WF_TIER3_WORKER_PAUSE_MARKER")
 	release, outcome := os.Getenv("WF_TIER3_WORKER_PAUSE_RELEASE"), os.Getenv("WF_TIER3_WORKER_PAUSE_OUTCOME")
-	if url == "" || marker == "" || release == "" || outcome == "" {
+	metricsPath := os.Getenv("WF_TIER3_WORKER_PAUSE_METRICS")
+	if url == "" || marker == "" || release == "" || outcome == "" || metricsPath == "" {
 		t.Fatal("missing worker pause child configuration")
 	}
 	nc, err := nats.Connect(url, nats.NoReconnect(), nats.IgnoreDiscoveredServers())
@@ -85,6 +88,15 @@ func TestFiveContainerWorkerPauseChild(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer w.Close()
+	go func() {
+		for {
+			if count := w.Metrics().FencingEvents; count > 0 {
+				_ = os.WriteFile(metricsPath, []byte(fmt.Sprint(count)), 0600)
+				return
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+	}()
 	if err := w.RunPartition(context.Background(), identity.Partition(tier3WorkerPauseType, tier3WorkerPauseID, provision.Partitions)); err != nil {
 		t.Fatal(err)
 	}
@@ -153,8 +165,9 @@ func TestFiveContainerWorkerPausePastLease(t *testing.T) {
 	}
 	root := t.TempDir()
 	marker, release, outcome := filepath.Join(root, "entered"), filepath.Join(root, "release"), filepath.Join(root, "outcome")
+	metricsPath := filepath.Join(root, "fencing-count")
 	child := exec.Command(executable, "-test.run=^TestFiveContainerWorkerPauseChild$")
-	child.Env = append(os.Environ(), "WF_TIER3_WORKER_PAUSE_CHILD=1", "WF_TIER3_WORKER_PAUSE_URL="+cluster.ClientURL(0), "WF_TIER3_WORKER_PAUSE_MARKER="+marker, "WF_TIER3_WORKER_PAUSE_RELEASE="+release, "WF_TIER3_WORKER_PAUSE_OUTCOME="+outcome)
+	child.Env = append(os.Environ(), "WF_TIER3_WORKER_PAUSE_CHILD=1", "WF_TIER3_WORKER_PAUSE_URL="+cluster.ClientURL(0), "WF_TIER3_WORKER_PAUSE_MARKER="+marker, "WF_TIER3_WORKER_PAUSE_RELEASE="+release, "WF_TIER3_WORKER_PAUSE_OUTCOME="+outcome, "WF_TIER3_WORKER_PAUSE_METRICS="+metricsPath)
 	logFile, err := os.Create(filepath.Join(root, "child.log"))
 	if err != nil {
 		t.Fatal(err)
@@ -274,6 +287,22 @@ func TestFiveContainerWorkerPausePastLease(t *testing.T) {
 	if staleOutcome == "" || !strings.HasPrefix(staleOutcome, "error:") {
 		t.Fatalf("resumed old worker result=%q, want fenced error", staleOutcome)
 	}
+	var fencingCount string
+	for until := time.Now().Add(10 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
+		data, err := os.ReadFile(metricsPath)
+		if err == nil {
+			fencingCount = string(data)
+			break
+		}
+		if !errors.Is(err, os.ErrNotExist) {
+			t.Fatal(err)
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	count, parseErr := strconv.ParseUint(fencingCount, 10, 64)
+	if parseErr != nil || count == 0 {
+		t.Fatalf("paused worker did not report a fencing event: count=%q", fencingCount)
+	}
 	if err := child.Process.Kill(); err != nil {
 		t.Fatal(err)
 	}
@@ -300,5 +329,5 @@ func TestFiveContainerWorkerPausePastLease(t *testing.T) {
 	if result, err := history.CheckResults(operations, 10*time.Second); err != nil || result != porcupine.Ok {
 		t.Fatalf("worker pause result history=%s: %v", result, err)
 	}
-	t.Logf("five-container worker paused=%s successor_terminal_after_pause=%s stale_outcome=%q retained=%+v", time.Since(pausedAt), completedAt.Sub(pausedAt), staleOutcome, report)
+	t.Logf("five-container worker paused=%s successor_terminal_after_pause=%s stale_outcome=%q fencing_events=%s retained=%+v", time.Since(pausedAt), completedAt.Sub(pausedAt), staleOutcome, fencingCount, report)
 }
