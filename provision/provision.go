@@ -14,6 +14,11 @@ import (
 
 const Partitions uint32 = 64
 
+// LeaseTTL leaves room for a worker-kill takeover inside the 30-second fault
+// recovery gate. Workers renew every five seconds; an older bucket with a
+// different TTL fails the exact configuration check below.
+const LeaseTTL = 20 * time.Second
+
 type TimerBackend string
 
 const (
@@ -175,7 +180,7 @@ func ensure(ctx context.Context, js jetstream.JetStream, replicas int, nativeSch
 		}
 	}
 	for _, cfg := range []jetstream.KeyValueConfig{
-		{Bucket: "WF_LEASE", History: 1, TTL: 30 * time.Second, LimitMarkerTTL: time.Minute, Storage: jetstream.FileStorage, Replicas: replicas},
+		{Bucket: "WF_LEASE", History: 1, TTL: LeaseTTL, LimitMarkerTTL: time.Minute, Storage: jetstream.FileStorage, Replicas: replicas},
 		{Bucket: "WF_STATE", History: 1, Storage: jetstream.FileStorage, Replicas: replicas},
 		{Bucket: "WF_VIEW", History: 1, Storage: jetstream.FileStorage, Replicas: replicas},
 		{Bucket: "WF_ASSIGN", History: 1, Storage: jetstream.FileStorage, Replicas: replicas},

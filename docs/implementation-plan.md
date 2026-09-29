@@ -22,7 +22,7 @@ The only new stateful component is the SDK runtime inside the worker; every dura
 | `WF_RUN` stream | `wf.run.<partition>` (mapped from `wf.run.<type>.<id>` via `{{partition(N, 2, 3)}}`) | WorkQueue retention, default consumer `AckWait` 20 s, `MaxDeliver` unlimited with backoff | Dispatch queue; one durable pull consumer per partition |
 | `WF_JRN` stream | `wf.jrn.<type>.<id>` | Limits retention, `DenyPurge=false`, `Nats-Expected-Last-Subject-Sequence` on every publish | Per-invocation journal; entries `{epoch, index, kind, payload}` |
 | `WF_SIG` stream | `wf.sig.<type>.<id>.<name>` | Limits retention, `Nats-Msg-Id` dedup window 2 min | External signals; merged into the journal by the worker |
-| `WF_LEASE` KV | key `<type>.<id>` | Per-key TTL 30 s, `LimitMarkerTTL` | Single-writer lease; value = `{worker, epoch}` |
+| `WF_LEASE` KV | key `<type>.<id>` | Per-key TTL 20 s, `LimitMarkerTTL` | Single-writer lease; value = `{worker, epoch}` |
 | `WF_STATE` KV | key `<type>.<id>` | History 1, revision CAS | Snapshot + terminal result; bounds journal replay |
 
 **Invariants every phase must keep** (these are the properties the distributed tests assert, numbered so later sections can cite them):
@@ -124,7 +124,9 @@ This is where most durable-execution systems have their worst bugs, so it gets t
 
 Dispatch: `WF_RUN` messages are published to `wf.run.<type>.<id>` and a stream subject transform maps them to `wf.run.<partition>` with `{{partition(N, 2, 3)}}` hashing on type and id, so all runs for one invocation land in one partition. N durable pull consumers, one per partition, each with `MaxAckPending` tuned for throughput. Workers own partitions through a simple assignment in a KV bucket (start static, N=64; rebalancing is a later phase).
 
-Lease: before opening a journal the worker does `WF_LEASE.Create(key, {worker, epoch: last_epoch+1})` (fails if present) or `Update(key, ..., revision)` on an expired one. The epoch it wins becomes the epoch on every journal entry, and phase 2's CAS append rejects any lower epoch by construction: a fenced writer's `expectedSeq` is stale the moment the new epoch's `Started` entry lands. Lease TTL 30 s, renewed every 10 s; a renewal failure stops the worker before its next append.
+Lease: before opening a journal the worker does `WF_LEASE.Create(key, {worker, epoch: last_epoch+1})` (fails if present) or `Update(key, ..., revision)` on an expired one. The epoch it wins becomes the epoch on every journal entry, and phase 2's CAS append rejects any lower epoch by construction: a fenced writer's `expectedSeq` is stale the moment the new epoch's `Started` entry lands. Lease TTL 20 s, renewed every 5 s; a renewal failure stops the worker before its next append. The shorter TTL leaves takeover time inside the under-30-second fault-latency gate after a hard worker kill; provisioning rejects an existing bucket with a different TTL so the old recovery contract cannot silently persist.
+
+For an existing 30 s `WF_LEASE` bucket, stop workers and lease-holding loops before upgrading. Update that bucket's TTL to 20 s through JetStream KV management while preserving its other configuration and retained keys, verify the reported TTL, then start the new version. `provision.Ensure` refuses to run against the old TTL and never rewrites the bucket implicitly. Do not shorten TTL while old workers still hold live leases.
 
 **Deliverables**
 

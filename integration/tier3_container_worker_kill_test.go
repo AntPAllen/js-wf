@@ -228,7 +228,10 @@ func TestFiveContainerWorkerSIGKILLRecovers(t *testing.T) {
 		t.Fatalf("peer result after worker kill=%s err=%v", peerValue, err)
 	}
 	killToTerminal := completedAt.Sub(killedAt)
-	t.Logf("start-to-terminal=%s kill-to-terminal=%s 30s-target-met=%t", completedAt.Sub(startedAt), killToTerminal, killToTerminal < 30*time.Second)
+	if killToTerminal >= 30*time.Second {
+		t.Errorf("kill-to-terminal=%s, want <30s", killToTerminal)
+	}
+	t.Logf("start-to-terminal=%s kill-to-terminal=%s lease_ttl=%s", completedAt.Sub(startedAt), killToTerminal, provision.LeaseTTL)
 	if result, err := history.CheckStarts(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
 		t.Fatalf("worker kill start history=%s: %v", result, err)
 	}

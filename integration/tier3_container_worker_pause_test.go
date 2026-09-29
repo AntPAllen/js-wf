@@ -259,6 +259,9 @@ func TestFiveContainerWorkerPausePastLease(t *testing.T) {
 		t.Fatalf("replacement result=%s err=%v", value, err)
 	}
 	completedAt := time.Now()
+	if pauseToTerminal := completedAt.Sub(pausedAt); pauseToTerminal >= 30*time.Second {
+		t.Errorf("pause-to-successor-terminal=%s, want <30s", pauseToTerminal)
+	}
 	if remaining := 45*time.Second - time.Since(pausedAt); remaining > 0 {
 		select {
 		case <-time.After(remaining):

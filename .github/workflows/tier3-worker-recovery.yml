@@ -1,0 +1,33 @@
+name: tier3-worker-recovery
+on:
+  workflow_dispatch:
+    inputs:
+      sync_interval:
+        description: NATS file-store sync interval used in production
+        required: true
+        default: '2m'
+        type: string
+jobs:
+  lease-takeover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      WF_TIER3_CONTAINER: '1'
+      WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval }}
+      WF_TIER3_WORKER_HISTORY_OUT: tier3-worker-kill-history.jsonl
+      WF_TIER3_PAUSE_HISTORY_OUT: tier3-worker-pause-history.jsonl
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Reject an old lease TTL until it is explicitly changed
+        run: go test ./integration -run '^TestProvisionRejectsOldLeaseTTL$' -count=1 -timeout=2m -v
+      - name: Prove worker kill and pause recover within thirty seconds
+        run: go test ./integration -run '^TestFiveContainerWorker(SIGKILLRecovers|PausePastLease)$' -count=1 -timeout=5m -v
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tier3-worker-recovery-history
+          path: integration/tier3-worker-*-history.jsonl
+          if-no-files-found: ignore
