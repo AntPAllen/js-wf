@@ -2,6 +2,8 @@ package integration_test
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -64,14 +66,45 @@ func TestSimPurgeAndBlobSweepContractAgainstRealCluster(t *testing.T) {
 	if _, err := store.Append(ctx, typ, id, journal.Entry{Index: 1, Epoch: 1, Kind: journal.Completed, Payload: realOutcome}, seq); err != nil {
 		t.Fatal(err)
 	}
+	realSnapshot, err := store.SnapshotPrefix(ctx, typ, id, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	realSnapshotBytes, err := objects.GetBytes(ctx, realSnapshot.Object)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var modelStartedSeq uint64
 	for _, entry := range []journal.Entry{{Index: 0, Epoch: 1, Kind: journal.Started}, {Index: 1, Epoch: 1, Kind: journal.Completed, Payload: modelOutcome}} {
 		data, err := json.Marshal(entry)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if _, err := model.Blobs.PublishSubject("WF_JRN", identity.JournalSubject(typ, id), nil, data); err != nil {
+		modelSeq, err := model.Blobs.PublishSubject("WF_JRN", identity.JournalSubject(typ, id), nil, data)
+		if err != nil {
 			t.Fatal(err)
 		}
+		if entry.Kind == journal.Started {
+			modelStartedSeq = modelSeq
+		}
+	}
+	keyHash := sha256.Sum256([]byte(key))
+	modelSnapshotName := "snapshot-" + hex.EncodeToString(keyHash[:8]) + "-model"
+	modelSnapshotBytes, err := json.Marshal([]journal.Record{{Entry: journal.Entry{Index: 0, Epoch: 1, Kind: journal.Started}, Sequence: modelStartedSeq}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	model.Blobs.PutObject(modelSnapshotName, modelSnapshotBytes, time.Unix(0, 0).Add(-time.Hour))
+	modelSnapshotHash := sha256.Sum256(modelSnapshotBytes)
+	modelManifest, err := json.Marshal(journal.Snapshot{Version: 1, LastSeq: modelStartedSeq, LastIndex: 0, Epoch: 1, Object: modelSnapshotName, SHA256: hex.EncodeToString(modelSnapshotHash[:])})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := model.Blobs.State().Create(ctx, "snap."+key, modelManifest); err != nil {
+		t.Fatal(err)
+	}
+	if err := model.Blobs.Purge("WF_JRN", modelStartedSeq); err != nil {
+		t.Fatal(err)
 	}
 	state, err := all[0].KeyValue(ctx, "WF_STATE")
 	if err != nil {
@@ -92,6 +125,25 @@ func TestSimPurgeAndBlobSweepContractAgainstRealCluster(t *testing.T) {
 		}
 	}
 	compareSweep("before purge", 1)
+	if _, err := objects.PutBytes(ctx, realSnapshot.Object, []byte(`corrupt`)); err != nil {
+		t.Fatal(err)
+	}
+	model.Blobs.PutObject(modelSnapshotName, []byte(`corrupt`), time.Unix(0, 0).Add(-time.Hour))
+	realCorrupt := retention.Purge(ctx, all[0], typ, id, time.Hour)
+	modelCorrupt := retention.PurgeWithPort(ctx, model, typ, id, time.Hour)
+	if !errors.Is(realCorrupt, journal.ErrGap) || !errors.Is(modelCorrupt, journal.ErrGap) {
+		t.Fatalf("corrupt snapshot real=%v model=%v", realCorrupt, modelCorrupt)
+	}
+	if _, err := state.Get(ctx, "purging."+key); !errors.Is(err, jetstream.ErrKeyNotFound) {
+		t.Fatalf("real purge marker written despite corrupt snapshot: %v", err)
+	}
+	if _, err := model.Blobs.State().Get(ctx, "purging."+key); !errors.Is(err, jetstream.ErrKeyNotFound) {
+		t.Fatalf("model purge marker written despite corrupt snapshot: %v", err)
+	}
+	if _, err := objects.PutBytes(ctx, realSnapshot.Object, realSnapshotBytes); err != nil {
+		t.Fatal(err)
+	}
+	model.Blobs.PutObject(modelSnapshotName, modelSnapshotBytes, time.Unix(0, 0).Add(-time.Hour))
 	if err := retention.Purge(ctx, all[0], typ, id, time.Hour); err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +179,7 @@ func TestSimPurgeAndBlobSweepContractAgainstRealCluster(t *testing.T) {
 	if _, err := model.Invocation(ctx, invSubject); !errors.Is(err, jetstream.ErrMsgNotFound) {
 		t.Fatalf("model invocation retained: %v", err)
 	}
-	compareSweep("after purge", 3)
+	compareSweep("after purge", 4)
 	for _, name := range []string{"input-contract", "signal-contract", "terminal-result-contract", "input-orphan"} {
 		if _, err := objects.GetInfo(ctx, name); !errors.Is(err, jetstream.ErrObjectNotFound) || model.Blobs.HasObject(name) {
 			t.Fatalf("%s survived: %v", name, err)
@@ -135,5 +187,8 @@ func TestSimPurgeAndBlobSweepContractAgainstRealCluster(t *testing.T) {
 	}
 	if _, err := objects.GetInfo(ctx, "user-unmanaged"); err != nil || !model.Blobs.HasObject("user-unmanaged") {
 		t.Fatalf("unmanaged object removed: %v", err)
+	}
+	if model.Blobs.HasObject(modelSnapshotName) {
+		t.Fatal("modeled compacted snapshot object survived purge and blob sweep")
 	}
 }

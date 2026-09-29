@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "seed": 42,
+  "seed": 3,
   "workload": "purge_blob",
   "step_limit": 100000,
   "decisions": [
@@ -22,7 +22,7 @@
         "timer_drop",
         "tombstone_ack_lost"
       ],
-      "chosen": "missing_inv_state_read_lost"
+      "chosen": "snapshot_delayed_read"
     }
   ],
   "transport": [
@@ -322,11 +322,22 @@
       "at_ms": 0,
       "operation": "blob_get",
       "subject": "snapshot-d90cbcf9436e6d49-one",
+      "outcome": "transient_unavailable"
+    },
+    {
+      "at_ms": 25,
+      "operation": "purge_journal_wait",
+      "outcome": "25ms"
+    },
+    {
+      "at_ms": 25,
+      "operation": "blob_get",
+      "subject": "snapshot-d90cbcf9436e6d49-one",
       "data_sha256": "80c11c8faa852d38795fd1c8c6613b89934d21181a97c51bb5663130f33b7be7",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "purge_journal_next",
       "subject": "wf.jrn.test.retired",
       "expected": 4,
@@ -335,14 +346,14 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "purge_journal_next",
       "subject": "wf.jrn.test.retired",
       "expected": 5,
       "outcome": "not_found"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_update",
       "subject": "test.retired",
       "expected": 2,
@@ -351,7 +362,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_put",
       "subject": "purging.test.retired",
       "sequence": 3,
@@ -359,7 +370,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_update",
       "subject": "test.retired",
       "expected": 3,
@@ -368,14 +379,14 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "purge_subject",
       "subject": "WF_SIG:wf.sig.test.retired.*",
       "sequence": 1,
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_update",
       "subject": "test.retired",
       "expected": 4,
@@ -384,19 +395,19 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "purge_subject",
       "subject": "WF_JRN:wf.jrn.test.retired",
       "sequence": 1,
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "purge_has_timers",
       "outcome": "true"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_update",
       "subject": "test.retired",
       "expected": 5,
@@ -405,14 +416,14 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "purge_subject",
       "subject": "WF_TIMER:wf.timer.test.retired.1.*",
       "sequence": 1,
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_get",
       "subject": "snap.test.retired",
       "sequence": 1,
@@ -420,7 +431,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_delete",
       "subject": "snap.test.retired",
       "expected": 1,
@@ -428,7 +439,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_update",
       "subject": "test.retired",
       "expected": 6,
@@ -437,16 +448,16 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_update",
       "subject": "test.retired",
       "expected": 2,
       "sequence": 5,
-      "data_sha256": "f4aca7e47918ac7abc080fcfcd257ff44e3c9a05e0a2696ae9a3c2700ae67e8d",
+      "data_sha256": "4a8dd76dbf189b41eba6d98209cc9435fab6ec046dad0cfa835923440f6b0351",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "purge_event_publish",
       "subject": "wf.purge.test.retired",
       "sequence": 1,
@@ -454,7 +465,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_update",
       "subject": "test.retired",
       "expected": 7,
@@ -463,7 +474,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "purge_subject",
       "subject": "WF_INV:wf.inv.test.retired",
       "expected": 2,
@@ -471,7 +482,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_get",
       "subject": "purging.test.retired",
       "sequence": 3,
@@ -479,7 +490,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_delete",
       "subject": "purging.test.retired",
       "expected": 3,
@@ -487,7 +498,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_delete",
       "subject": "test.retired",
       "expected": 8,
@@ -495,7 +506,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_create",
       "subject": "test.retired",
       "sequence": 10,
@@ -503,7 +514,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_update",
       "subject": "test.retired",
       "expected": 10,
@@ -512,19 +523,35 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "purge_invocation_get",
       "subject": "wf.inv.test.retired",
       "outcome": "not_found"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_get",
       "subject": "test.retired",
-      "outcome": "get_transport_lost"
+      "sequence": 5,
+      "data_sha256": "4a8dd76dbf189b41eba6d98209cc9435fab6ec046dad0cfa835923440f6b0351",
+      "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
+      "operation": "purge_event_publish",
+      "subject": "wf.purge.test.retired",
+      "sequence": 1,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "duplicate"
+    },
+    {
+      "at_ms": 25,
+      "operation": "kv_get",
+      "subject": "purging.test.retired",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 25,
       "operation": "kv_delete",
       "subject": "test.retired",
       "expected": 11,
@@ -532,7 +559,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_create",
       "subject": "test.retired",
       "sequence": 13,
@@ -540,7 +567,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_update",
       "subject": "test.retired",
       "expected": 13,
@@ -549,21 +576,21 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "purge_invocation_get",
       "subject": "wf.inv.test.retired",
       "outcome": "not_found"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_get",
       "subject": "test.retired",
       "sequence": 5,
-      "data_sha256": "f4aca7e47918ac7abc080fcfcd257ff44e3c9a05e0a2696ae9a3c2700ae67e8d",
+      "data_sha256": "4a8dd76dbf189b41eba6d98209cc9435fab6ec046dad0cfa835923440f6b0351",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "purge_event_publish",
       "subject": "wf.purge.test.retired",
       "sequence": 1,
@@ -571,13 +598,13 @@
       "outcome": "duplicate"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_get",
       "subject": "purging.test.retired",
       "outcome": "not_found"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_delete",
       "subject": "test.retired",
       "expected": 14,
@@ -585,47 +612,47 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_get",
       "subject": "test.retired",
       "sequence": 5,
-      "data_sha256": "f4aca7e47918ac7abc080fcfcd257ff44e3c9a05e0a2696ae9a3c2700ae67e8d",
+      "data_sha256": "4a8dd76dbf189b41eba6d98209cc9435fab6ec046dad0cfa835923440f6b0351",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_get",
       "subject": "purging.test.retired",
       "outcome": "not_found"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_get",
       "subject": "snap.test.retired",
       "outcome": "not_found"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "purge_invocation_get",
       "subject": "wf.inv.test.retired",
       "outcome": "not_found"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_stream_range",
       "subject": "WF_SIG",
       "sequence": 1,
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_stream_range",
       "subject": "WF_JRN",
       "sequence": 4,
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_stream_range",
       "subject": "WF_TIMER",
       "expected": 2,
@@ -633,7 +660,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_stream_get",
       "subject": "WF_TIMER",
       "sequence": 2,
@@ -641,7 +668,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_stream_range",
       "subject": "WF_TIMER",
       "expected": 2,
@@ -649,82 +676,82 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_stream_range",
       "subject": "WF_INV",
       "sequence": 1,
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_stream_range",
       "subject": "WF_SIG",
       "sequence": 1,
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_stream_range",
       "subject": "WF_JRN",
       "sequence": 4,
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_keys",
       "sequence": 1,
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "kv_get",
       "subject": "test.retired",
       "sequence": 5,
-      "data_sha256": "f4aca7e47918ac7abc080fcfcd257ff44e3c9a05e0a2696ae9a3c2700ae67e8d",
+      "data_sha256": "4a8dd76dbf189b41eba6d98209cc9435fab6ec046dad0cfa835923440f6b0351",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_list",
       "sequence": 6,
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_delete",
       "subject": "input-one",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_delete",
       "subject": "signal-one",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_delete",
       "subject": "snapshot-d90cbcf9436e6d49-one",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_delete",
       "subject": "step-result-one",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "blob_delete",
       "subject": "terminal-result-one",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 25,
       "operation": "check_purge_blob",
       "subject": "test.retired",
       "sequence": 5,
-      "outcome": "missing_inv_state_read_lost"
+      "outcome": "snapshot_delayed_read"
     }
   ]
 }

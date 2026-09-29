@@ -16,6 +16,8 @@
         "purge_event_ack_lost",
         "signals_ack_lost",
         "signals_drop",
+        "snapshot_corrupt",
+        "snapshot_delayed_read",
         "snapshot_delete_drop",
         "timer_drop",
         "tombstone_ack_lost"
@@ -55,8 +57,8 @@
     {
       "at_ms": 0,
       "operation": "blob_put",
-      "subject": "snapshot-one",
-      "data_sha256": "3a3594ab2d8398efea714c7f63ba9aa28d93feb444b8bef35a19772fd5e8043e",
+      "subject": "snapshot-d90cbcf9436e6d49-one",
+      "data_sha256": "0c2a82a9fb6ce14198e0865ffdba707c6e7253896622c556d8b6d259b065e43c",
       "outcome": "ok"
     },
     {
@@ -124,8 +126,8 @@
     {
       "at_ms": 0,
       "operation": "blob_put",
-      "subject": "snapshot-one",
-      "data_sha256": "65342d655ca36836fee9ab6828196d99d4dfdcb3e82455dfbe18135b2eb98a9f",
+      "subject": "snapshot-d90cbcf9436e6d49-one",
+      "data_sha256": "80c11c8faa852d38795fd1c8c6613b89934d21181a97c51bb5663130f33b7be7",
       "outcome": "ok"
     },
     {
@@ -133,7 +135,28 @@
       "operation": "kv_create",
       "subject": "snap.test.retired",
       "sequence": 1,
-      "data_sha256": "5dfdac999440162aea99d49e7c494a42841f4d13c83014dddc3012a00fdd3669",
+      "data_sha256": "839548a76a4120641c40c618fe3ffb5fac97ef7f833078306dfb62adec73fe66",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_purge",
+      "subject": "WF_JRN",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_purge",
+      "subject": "WF_JRN",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_purge",
+      "subject": "WF_JRN",
+      "sequence": 3,
       "outcome": "ok"
     },
     {
@@ -196,32 +219,8 @@
       "at_ms": 0,
       "operation": "blob_stream_range",
       "subject": "WF_JRN",
-      "expected": 1,
+      "expected": 4,
       "sequence": 4,
-      "outcome": "ok"
-    },
-    {
-      "at_ms": 0,
-      "operation": "blob_stream_get",
-      "subject": "WF_JRN",
-      "sequence": 1,
-      "data_sha256": "2937e099505acab3c03ef302157fc18786d3b830af1995de09b079dfa582150e",
-      "outcome": "ok"
-    },
-    {
-      "at_ms": 0,
-      "operation": "blob_stream_get",
-      "subject": "WF_JRN",
-      "sequence": 2,
-      "data_sha256": "c494669710a3a9cc1f6a78c3b0e28ef817fb2fb837710326cce7bc32d17e03e1",
-      "outcome": "ok"
-    },
-    {
-      "at_ms": 0,
-      "operation": "blob_stream_get",
-      "subject": "WF_JRN",
-      "sequence": 3,
-      "data_sha256": "d7afb72246af46cf7040685c37fc7949c1aea7f177020d776ecb017f414a02c9",
       "outcome": "ok"
     },
     {
@@ -243,14 +242,14 @@
       "operation": "kv_get",
       "subject": "snap.test.retired",
       "sequence": 1,
-      "data_sha256": "5dfdac999440162aea99d49e7c494a42841f4d13c83014dddc3012a00fdd3669",
+      "data_sha256": "839548a76a4120641c40c618fe3ffb5fac97ef7f833078306dfb62adec73fe66",
       "outcome": "ok"
     },
     {
       "at_ms": 0,
       "operation": "blob_get",
-      "subject": "snapshot-one",
-      "data_sha256": "65342d655ca36836fee9ab6828196d99d4dfdcb3e82455dfbe18135b2eb98a9f",
+      "subject": "snapshot-d90cbcf9436e6d49-one",
+      "data_sha256": "80c11c8faa852d38795fd1c8c6613b89934d21181a97c51bb5663130f33b7be7",
       "outcome": "ok"
     },
     {
@@ -313,10 +312,34 @@
     },
     {
       "at_ms": 0,
-      "operation": "purge_journal_read",
-      "subject": "wf.jrn.test.retired",
-      "sequence": 4,
+      "operation": "kv_get",
+      "subject": "snap.test.retired",
+      "sequence": 1,
+      "data_sha256": "839548a76a4120641c40c618fe3ffb5fac97ef7f833078306dfb62adec73fe66",
       "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-d90cbcf9436e6d49-one",
+      "data_sha256": "80c11c8faa852d38795fd1c8c6613b89934d21181a97c51bb5663130f33b7be7",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.test.retired",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "d09caefd70eb84b261329b355ccca1d92906ad7047b9ac4ac6875db8b4fe5492",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.test.retired",
+      "expected": 5,
+      "outcome": "not_found"
     },
     {
       "at_ms": 0,
@@ -364,7 +387,7 @@
       "at_ms": 0,
       "operation": "purge_subject",
       "subject": "WF_JRN:wf.jrn.test.retired",
-      "sequence": 4,
+      "sequence": 1,
       "outcome": "ok"
     },
     {
@@ -393,7 +416,7 @@
       "operation": "kv_get",
       "subject": "snap.test.retired",
       "sequence": 1,
-      "data_sha256": "5dfdac999440162aea99d49e7c494a42841f4d13c83014dddc3012a00fdd3669",
+      "data_sha256": "839548a76a4120641c40c618fe3ffb5fac97ef7f833078306dfb62adec73fe66",
       "outcome": "ok"
     },
     {
@@ -691,7 +714,7 @@
     {
       "at_ms": 0,
       "operation": "blob_delete",
-      "subject": "snapshot-one",
+      "subject": "snapshot-d90cbcf9436e6d49-one",
       "outcome": "ok"
     },
     {

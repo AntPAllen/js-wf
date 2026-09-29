@@ -40,19 +40,21 @@ func runSeededPurgeBlob(seed int64, replay *Trace) (trace Trace, runErr error) {
 		return Trace{}, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose([]string{"clean", "marker_drop", "marker_ack_lost", "signals_drop", "signals_ack_lost", "journal_drop", "timer_drop", "snapshot_delete_drop", "tombstone_ack_lost", "purge_event_ack_lost", "invocation_ack_lost", "missing_inv_state_read_lost"})
+	mode, err := schedule.Choose([]string{"clean", "marker_drop", "marker_ack_lost", "signals_drop", "signals_ack_lost", "journal_drop", "timer_drop", "snapshot_delete_drop", "tombstone_ack_lost", "purge_event_ack_lost", "invocation_ack_lost", "missing_inv_state_read_lost", "snapshot_delayed_read", "snapshot_corrupt"})
 	if err != nil {
 		return trace, err
 	}
 	ctx := context.Background()
 	const typ, id = "test", "retired"
 	key := identity.Key(typ, id)
+	keyHash := sha256.Sum256([]byte(key))
+	snapshotName := "snapshot-" + hex.EncodeToString(keyHash[:8]) + "-one"
 	invSubject := identity.InvocationSubject(typ, id)
 	journalSubject := identity.JournalSubject(typ, id)
 	port := NewPurgeTransport(schedule)
 	port.EnableFallbackTimers()
 	old := time.Unix(0, 0).UTC().Add(-time.Hour)
-	for _, name := range []string{"input-one", "signal-one", "step-result-one", "terminal-result-one", "snapshot-one", "input-orphan", "user-unmanaged"} {
+	for _, name := range []string{"input-one", "signal-one", "step-result-one", "terminal-result-one", snapshotName, "input-orphan", "user-unmanaged"} {
 		port.Blobs.PutObject(name, []byte(name), old)
 	}
 	inputHeader := nats.Header{}
@@ -70,6 +72,7 @@ func runSeededPurgeBlob(seed int64, replay *Trace) (trace Trace, runErr error) {
 	if err != nil {
 		return trace, err
 	}
+	var prefix []journal.Record
 	for index, entry := range []journal.Entry{
 		{Kind: journal.Started},
 		{Kind: journal.StepRequested, Payload: json.RawMessage(`{"kind":"run","name":"work"}`)},
@@ -82,23 +85,31 @@ func runSeededPurgeBlob(seed int64, replay *Trace) (trace Trace, runErr error) {
 		if err != nil {
 			return trace, err
 		}
-		if _, err := port.Blobs.PublishSubject("WF_JRN", journalSubject, nil, data); err != nil {
+		sequence, err := port.Blobs.PublishSubject("WF_JRN", journalSubject, nil, data)
+		if err != nil {
 			return trace, err
 		}
+		if index < 3 {
+			prefix = append(prefix, journal.Record{Entry: entry, Sequence: sequence})
+		}
 	}
-	snapshotRecords := []journal.Record{{Entry: journal.Entry{Kind: journal.SignalConsumed, Payload: json.RawMessage(`{"ref":"signal-one"}`)}}}
-	snapshotBytes, err := json.Marshal(snapshotRecords)
+	snapshotBytes, err := json.Marshal(prefix)
 	if err != nil {
 		return trace, err
 	}
-	port.Blobs.PutObject("snapshot-one", snapshotBytes, old)
+	port.Blobs.PutObject(snapshotName, snapshotBytes, old)
 	snapshotHash := sha256.Sum256(snapshotBytes)
-	manifest, err := json.Marshal(journal.Snapshot{Object: "snapshot-one", SHA256: hex.EncodeToString(snapshotHash[:])})
+	manifest, err := json.Marshal(journal.Snapshot{Version: 1, LastSeq: prefix[2].Sequence, LastIndex: prefix[2].Index, Epoch: prefix[2].Epoch, Object: snapshotName, SHA256: hex.EncodeToString(snapshotHash[:])})
 	if err != nil {
 		return trace, err
 	}
 	if _, err := port.Blobs.State().Create(ctx, "snap."+key, manifest); err != nil {
 		return trace, err
+	}
+	for _, record := range prefix {
+		if err := port.Blobs.Purge("WF_JRN", record.Sequence); err != nil {
+			return trace, err
+		}
 	}
 	if _, err := port.Blobs.State().Create(ctx, key, terminal); err != nil {
 		return trace, err
@@ -114,6 +125,14 @@ func runSeededPurgeBlob(seed int64, replay *Trace) (trace Trace, runErr error) {
 	before, err := retention.SweepBlobsQuiescentWithPort(ctx, port.Blobs, 0, sweepNow)
 	if err != nil || before.Objects != 7 || before.Referenced != 5 || before.Deleted != 1 {
 		return trace, fmt.Errorf("seed %d initial blob sweep=%+v err=%v", seed, before, err)
+	}
+	if mode == "snapshot_delayed_read" {
+		if err := port.Blobs.QueueReadFault(snapshotName); err != nil {
+			return trace, err
+		}
+	}
+	if mode == "snapshot_corrupt" {
+		port.Blobs.PutObject(snapshotName, []byte(`corrupt`), old)
 	}
 	switch mode {
 	case "marker_drop", "marker_ack_lost":
@@ -143,12 +162,24 @@ func runSeededPurgeBlob(seed int64, replay *Trace) (trace Trace, runErr error) {
 		}
 	}
 	firstErr := retention.PurgeWithPort(ctx, port, typ, id, time.Hour)
-	if mode == "clean" || mode == "tombstone_ack_lost" || mode == "missing_inv_state_read_lost" {
+	if mode == "clean" || mode == "tombstone_ack_lost" || mode == "missing_inv_state_read_lost" || mode == "snapshot_delayed_read" {
 		if firstErr != nil {
 			return trace, fmt.Errorf("seed %d mode %s first purge: %w", seed, mode, firstErr)
 		}
 	} else if firstErr == nil {
 		return trace, fmt.Errorf("seed %d mode %s expected uncertain first purge", seed, mode)
+	}
+	if mode == "snapshot_delayed_read" && schedule.NowMillis() < 25 {
+		return trace, fmt.Errorf("seed %d snapshot read did not retry after visibility delay", seed)
+	}
+	if mode == "snapshot_corrupt" {
+		if !errors.Is(firstErr, journal.ErrGap) {
+			return trace, fmt.Errorf("seed %d corrupt snapshot error=%v", seed, firstErr)
+		}
+		if _, err := port.Blobs.State().Get(ctx, "purging."+key); !errors.Is(err, jetstream.ErrKeyNotFound) {
+			return trace, fmt.Errorf("seed %d corrupt snapshot allowed purge marker: %v", seed, err)
+		}
+		port.Blobs.PutObject(snapshotName, snapshotBytes, old)
 	}
 	if mode == "missing_inv_state_read_lost" {
 		if err := port.Blobs.State().QueueFault(KVFault{Operation: "get", Kind: KVGetTransportLost}); err != nil {
@@ -245,7 +276,7 @@ func TestSeededPurgeBlobReplay(t *testing.T) {
 			}
 		}
 	}
-	for _, mode := range []string{"clean", "marker_drop", "marker_ack_lost", "signals_drop", "signals_ack_lost", "journal_drop", "timer_drop", "snapshot_delete_drop", "tombstone_ack_lost", "purge_event_ack_lost", "invocation_ack_lost", "missing_inv_state_read_lost"} {
+	for _, mode := range []string{"clean", "marker_drop", "marker_ack_lost", "signals_drop", "signals_ack_lost", "journal_drop", "timer_drop", "snapshot_delete_drop", "tombstone_ack_lost", "purge_event_ack_lost", "invocation_ack_lost", "missing_inv_state_read_lost", "snapshot_delayed_read", "snapshot_corrupt"} {
 		if observed[mode] == 0 {
 			t.Fatalf("mode %s was not scheduled", mode)
 		}

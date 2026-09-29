@@ -225,19 +225,25 @@ A 1,000-seed combined workload now runs production `PurgeWithPort` and
 lease KV, and Object Store objects. It faults the purge marker, signal and
 journal purges, generation-scoped fallback timer purge, snapshot manifest
 delete, tombstone CAS, purge-event publish, and final invocation purge.
-After retry, it checks one generation-bound purge event, no old invocation,
+The purge reads its terminal journal through production `journal.Store.Read`:
+a compacted snapshot supplies the prefix and one live entry supplies the
+terminal suffix. A one-read object visibility delay recovers inside the
+journal reader; persistent corrupt object bytes fail before the purge marker
+is written, then a repaired object permits retry. After retry, it checks one
+generation-bound purge event, no old invocation,
 signals, journal, or current-generation timer, a retained other-generation
 timer, a cleared marker and snapshot manifest, and reclamation of five
 unreferenced runtime objects. A second purge is idempotent. The workload
 also catches and now fixes a transient state read after the invocation is
 gone being mislabeled `ErrNotFound`; the transport error reaches the caller
-and a retry succeeds. Three traces pin lost purge-event and invocation
-replies and the transient read. Exact replay, cross-process traces, and a
-race run pass. A three-node contract compares the clean production purge
-and blob sweep with the model; three repeated runs and a race run passed.
-The model's purge journal read currently uses live entries while the
-snapshot manifest is retained, so a compacted journal's read path and
-concurrent writers still need an integrated retention schedule.
+and a retry succeeds. Five traces pin lost purge-event and invocation
+replies, the transient state read, the object visibility delay, and corrupt
+snapshot bytes. Exact replay, cross-process traces, and a race run pass. A
+three-node contract compares production purge and blob sweeping, including
+the corrupt snapshot failure boundary and recovery, with the model; three
+repeated runs and a race run passed. Concurrent snapshot writes, active
+workflow writers, and retention purge still need a cooperative integrated
+schedule.
 
 The integrated short-handler workload runs production `Client.Start` and
 `Worker.handle` over a shared modeled run stream and durable consumer. Its

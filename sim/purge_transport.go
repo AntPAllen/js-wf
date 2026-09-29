@@ -2,14 +2,11 @@ package sim
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	"js-wf/identity"
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/retention"
@@ -34,6 +31,8 @@ type PurgeTransport struct {
 }
 
 var _ retention.PurgePort = (*PurgeTransport)(nil)
+var _ journal.ReadPort = (*PurgeTransport)(nil)
+var _ journal.SnapshotReadPort = (*PurgeTransport)(nil)
 
 func NewPurgeTransport(schedule *Scheduler) *PurgeTransport {
 	blobs := NewBlobSweepTransport(schedule)
@@ -114,30 +113,56 @@ func (m *PurgeTransport) DeleteState(ctx context.Context, key string, revision u
 }
 
 func (m *PurgeTransport) Journal(ctx context.Context, typ, id string) ([]journal.Record, error) {
+	records, _, err := journal.NewWithSnapshotReadPort(nil, m, m).Read(ctx, typ, id)
+	return records, err
+}
+
+func (m *PurgeTransport) Next(ctx context.Context, subject string, from uint64) (journal.AppendTail, error) {
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return journal.AppendTail{}, err
 	}
 	m.Blobs.mu.Lock()
 	defer m.Blobs.mu.Unlock()
 	stream := m.Blobs.streams["WF_JRN"]
-	subject := identity.JournalSubject(typ, id)
-	sequences := make([]uint64, 0, len(stream.messages))
+	var selected uint64
 	for sequence, message := range stream.messages {
-		if message.Subject == subject {
-			sequences = append(sequences, sequence)
+		if message.Subject == subject && sequence >= from && (selected == 0 || sequence < selected) {
+			selected = sequence
 		}
 	}
-	sort.Slice(sequences, func(i, j int) bool { return sequences[i] < sequences[j] })
-	records := make([]journal.Record, 0, len(sequences))
-	for _, sequence := range sequences {
-		var entry journal.Entry
-		if err := json.Unmarshal(stream.messages[sequence].Data, &entry); err != nil {
-			return nil, err
-		}
-		records = append(records, journal.Record{Entry: entry, Sequence: sequence})
+	if selected == 0 {
+		m.Blobs.event(TransportEvent{Operation: "purge_journal_next", Subject: subject, Expected: from, Outcome: "not_found"})
+		return journal.AppendTail{}, jetstream.ErrMsgNotFound
 	}
-	m.Blobs.event(TransportEvent{Operation: "purge_journal_read", Subject: subject, Sequence: uint64(len(records)), Outcome: "ok"})
-	return records, nil
+	data := append([]byte(nil), stream.messages[selected].Data...)
+	m.Blobs.event(TransportEvent{Operation: "purge_journal_next", Subject: subject, Expected: from, Sequence: selected, DataSHA256: digest(data), Outcome: "ok"})
+	return journal.AppendTail{Sequence: selected, Data: data}, nil
+}
+
+func (m *PurgeTransport) Wait(ctx context.Context, delay time.Duration) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if delay < 0 || delay%time.Millisecond != 0 {
+		return fmt.Errorf("invalid virtual delay %s", delay)
+	}
+	if err := m.schedule.AdvanceMillis(delay.Milliseconds()); err != nil {
+		return err
+	}
+	m.schedule.RecordTransport(TransportEvent{Operation: "purge_journal_wait", Outcome: delay.String(), AtMillis: m.schedule.NowMillis()})
+	return nil
+}
+
+func (m *PurgeTransport) GetManifest(ctx context.Context, key string) ([]byte, error) {
+	entry, err := m.Blobs.State().Get(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	return entry.Value, nil
+}
+
+func (m *PurgeTransport) GetObject(ctx context.Context, name string) ([]byte, error) {
+	return m.Blobs.ObjectBytes(ctx, name)
 }
 
 func (m *PurgeTransport) HasFallbackTimers(ctx context.Context) (bool, error) {
