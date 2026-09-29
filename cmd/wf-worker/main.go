@@ -41,6 +41,7 @@ func run(ctx context.Context, args []string) error {
 	pluginSymbol := flags.String("handler-symbol", "Handlers", "plugin handler-map symbol")
 	metricsAddr := flags.String("metrics-addr", "127.0.0.1:9090", "HTTP metrics listen address")
 	replicas := flags.Int("replicas", 3, "JetStream stream replica count")
+	journalMaxBytes := flags.Int64("journal-max-bytes", 0, "exact WF_JRN byte cap; zero adopts an uncapped stream")
 	mode := flags.String("mode", "static", "partition assignment mode: static or kv")
 	staticIndex := flags.Int("static-index", 0, "static worker index")
 	staticCount := flags.Int("static-count", 1, "number of static workers")
@@ -53,7 +54,7 @@ func run(ctx context.Context, args []string) error {
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	if flags.NArg() != 0 || *id == "" || *pluginPath == "" || *pluginSymbol == "" || *replicas < 1 || *replicas > 5 || *repairInterval <= 0 || *repairInterval > 10*time.Second || *repairBudget < 2 {
+	if flags.NArg() != 0 || *id == "" || *pluginPath == "" || *pluginSymbol == "" || *replicas < 1 || *replicas > 5 || *journalMaxBytes < 0 || *repairInterval <= 0 || *repairInterval > 10*time.Second || *repairBudget < 2 {
 		return fmt.Errorf("usage: wf-worker -id ID -handler-plugin FILE [-mode static|kv] [-metrics-addr ADDR]")
 	}
 	if *mode != "static" && *mode != "kv" {
@@ -84,7 +85,7 @@ func run(ctx context.Context, args []string) error {
 			return fmt.Errorf("retention workflow type %q collides with plugin handler", *retentionType)
 		}
 	}
-	nc, js, backend, w, err := startWorker(ctx, *url, *id, *replicas, *concurrency, handlers, *retentionType, *retentionGrace)
+	nc, js, backend, w, err := startWorker(ctx, *url, *id, *replicas, *journalMaxBytes, *concurrency, handlers, *retentionType, *retentionGrace)
 	if err != nil {
 		if ctx.Err() != nil {
 			return nil
@@ -98,7 +99,7 @@ func run(ctx context.Context, args []string) error {
 		return fmt.Errorf("listen for worker metrics: %w", err)
 	}
 	mux := http.NewServeMux()
-	mux.Handle("/metrics", worker.MetricsHandler(w))
+	mux.Handle("/metrics", metricsHandler(js, w))
 	server := &http.Server{Handler: mux, ReadHeaderTimeout: 5 * time.Second}
 	serveDone := make(chan error, 1)
 	go func() {
@@ -185,7 +186,7 @@ func run(ctx context.Context, args []string) error {
 	return firstErr
 }
 
-func startWorker(ctx context.Context, url, id string, replicas, concurrency int, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, error) {
+func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBytes int64, concurrency int, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, error) {
 	startupCtx, stopStartup := context.WithTimeout(ctx, 30*time.Second)
 	defer stopStartup()
 	var lastErr error
@@ -197,7 +198,11 @@ func startWorker(ctx context.Context, url, id string, replicas, concurrency int,
 			if err == nil {
 				attempt, stop := context.WithTimeout(startupCtx, 5*time.Second)
 				var backend provision.TimerBackend
-				backend, err = provision.EnsureAuto(attempt, js, replicas)
+				if journalMaxBytes > 0 {
+					backend, err = provision.EnsureAutoWithJournalLimit(attempt, js, replicas, journalMaxBytes)
+				} else {
+					backend, err = provision.EnsureAuto(attempt, js, replicas)
+				}
 				stop()
 				if err == nil {
 					workerHandlers := make(map[string]worker.Handler, len(handlers)+1)
@@ -240,6 +245,34 @@ func retryableStartupError(err error) bool {
 		errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) ||
 		errors.Is(err, nats.ErrDisconnected) || errors.Is(err, nats.ErrConnectionReconnecting) || errors.Is(err, nats.ErrNoServers) ||
 		errors.Is(err, context.DeadlineExceeded)
+}
+
+func metricsHandler(js jetstream.JetStream, w *worker.Worker) http.Handler {
+	workerMetrics := worker.MetricsHandler(w)
+	return http.HandlerFunc(func(out http.ResponseWriter, request *http.Request) {
+		if request.Method != http.MethodGet {
+			workerMetrics.ServeHTTP(out, request)
+			return
+		}
+		query, stop := context.WithTimeout(request.Context(), 2*time.Second)
+		defer stop()
+		stream, err := js.Stream(query, "WF_JRN")
+		if err != nil {
+			http.Error(out, fmt.Sprintf("journal capacity lookup: %v", err), http.StatusServiceUnavailable)
+			return
+		}
+		info, err := stream.Info(query)
+		if err != nil {
+			http.Error(out, fmt.Sprintf("journal capacity info: %v", err), http.StatusServiceUnavailable)
+			return
+		}
+		workerMetrics.ServeHTTP(out, request)
+		fmt.Fprintf(out, "# TYPE js_wf_journal_bytes gauge\njs_wf_journal_bytes %d\n", info.State.Bytes)
+		fmt.Fprintf(out, "# TYPE js_wf_journal_limit_bytes gauge\njs_wf_journal_limit_bytes %d\n", info.Config.MaxBytes)
+		if info.Config.MaxBytes > 0 {
+			fmt.Fprintf(out, "# TYPE js_wf_journal_capacity_ratio gauge\njs_wf_journal_capacity_ratio %.9f\n", float64(info.State.Bytes)/float64(info.Config.MaxBytes))
+		}
+	})
 }
 
 func loadHandlers(path, symbolName string) (map[string]worker.Handler, error) {

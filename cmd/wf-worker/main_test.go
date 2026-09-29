@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -11,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -244,15 +246,17 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
 	if err := listener.Close(); err != nil {
 		t.Fatal(err)
 	}
+	args := []string{
+		"-url", cluster.Servers[0].ClientURL(), "-id", "runner-smoke",
+		"-replicas", "1", "-handler-plugin", pluginPath, "-mode", mode,
+		"-metrics-addr", metricsAddr, "-reconcile-interval", "100ms",
+		"-retention-type", "retention", "-retention-grace", "1h",
+	}
+	if mode == "static" {
+		args = append(args, "-journal-max-bytes", "131072")
+	}
 	done := make(chan error, 1)
-	go func() {
-		done <- run(ctx, []string{
-			"-url", cluster.Servers[0].ClientURL(), "-id", "runner-smoke",
-			"-replicas", "1", "-handler-plugin", pluginPath, "-mode", mode,
-			"-metrics-addr", metricsAddr, "-reconcile-interval", "100ms",
-			"-retention-type", "retention", "-retention-grace", "1h",
-		})
-	}()
+	go func() { done <- run(ctx, args) }()
 	httpClient := &http.Client{Timeout: time.Second}
 	metricsURL := "http://" + metricsAddr + "/metrics"
 	for ctx.Err() == nil {
@@ -291,6 +295,9 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
 	_ = response.Body.Close()
 	if err != nil || response.StatusCode != http.StatusOK || !strings.Contains(string(data), "js_wf_worker_lease_acquisitions_total 1") || !strings.Contains(string(data), "js_wf_worker_enqueue_to_lease_seconds_count 1") {
 		t.Fatalf("metrics status=%d body=%s err=%v", response.StatusCode, data, err)
+	}
+	if mode == "static" && !strings.Contains(string(data), "js_wf_journal_limit_bytes 131072") {
+		t.Fatalf("missing configured journal limit in metrics: %s", data)
 	}
 	state, err := js.KeyValue(ctx, "WF_STATE")
 	if err != nil {
@@ -341,6 +348,40 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
 	}
 	if value, err := c.Await(ctx, "worker-smoke", "job"); err != nil || string(value) != "43" {
 		t.Fatalf("reused workflow result=%s err=%v", value, err)
+	}
+	if mode == "static" {
+		journalStream, err := js.Stream(ctx, "WF_JRN")
+		if err != nil {
+			t.Fatal(err)
+		}
+		info, err := journalStream.Info(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fill := 3*int64(info.Config.MaxBytes)/4 - int64(info.State.Bytes)
+		if fill <= 0 || fill > 100000 {
+			t.Fatalf("unexpected journal fill target: %d, current=%d", fill, info.State.Bytes)
+		}
+		if _, err := js.Publish(ctx, "wf.jrn.capacity.probe", bytes.Repeat([]byte{'x'}, int(fill))); err != nil {
+			t.Fatal(err)
+		}
+		response, err := httpClient.Get(metricsURL)
+		if err != nil {
+			t.Fatal(err)
+		}
+		data, err := io.ReadAll(response.Body)
+		_ = response.Body.Close()
+		if err != nil || response.StatusCode != http.StatusOK {
+			t.Fatalf("capacity scrape: status=%d err=%v body=%s", response.StatusCode, err, data)
+		}
+		ratios := strings.Split(string(data), "\njs_wf_journal_capacity_ratio ")
+		if len(ratios) != 2 {
+			t.Fatalf("missing journal capacity ratio: %s", data)
+		}
+		ratio, err := strconv.ParseFloat(strings.SplitN(ratios[1], "\n", 2)[0], 64)
+		if err != nil || ratio < 0.7 {
+			t.Fatalf("journal capacity ratio=%g err=%v body=%s", ratio, err, data)
+		}
 	}
 	cancel()
 	select {
