@@ -15,6 +15,9 @@ import (
 	"js-wf/integrity"
 	"js-wf/journal"
 	"js-wf/sim"
+	"js-wf/wf"
+
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 // Keep the modeled journal sequence and CAS baseline tied to a real stream.
@@ -125,6 +128,51 @@ func TestSkippedLeaseMutationIsDetected(t *testing.T) {
 	}
 	if _, err := integrity.Check(ctx, all[1]); err == nil || !strings.Contains(err.Error(), "used by workers") {
 		t.Fatalf("skipped-lease mutation escaped epoch-owner check: %v", err)
+	}
+}
+
+func TestReversedPurgeOrderMutationIsDetected(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	const typ, id = "mutation", "reversed-purge"
+	invocation, err := client.New(all[0]).Start(ctx, typ, id, []byte(`null`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	store := journal.New(all[0])
+	tail, err := store.Append(ctx, typ, id, journal.Entry{Kind: journal.Started, Index: 0}, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	terminal, err := json.Marshal(wf.Outcome{InvSeq: invocation.InvSeq, Result: []byte(`42`)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.Append(ctx, typ, id, journal.Entry{Kind: journal.Completed, Index: 1, Epoch: 1, WorkerID: "worker-a", Payload: terminal}, tail); err != nil {
+		t.Fatal(err)
+	}
+	state, err := all[0].KeyValue(ctx, "WF_STATE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := state.Put(ctx, identity.Key(typ, id), terminal); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := integrity.Check(ctx, all[1]); err != nil {
+		t.Fatalf("valid pre-purge state: %v", err)
+	}
+	inv, err := all[0].Stream(ctx, "WF_INV")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// A reversed purge followed by a crash leaves a retained journal with no
+	// invocation. Production retention purges the invocation last.
+	if err := inv.Purge(ctx, jetstream.WithPurgeSubject(identity.InvocationSubject(typ, id))); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := integrity.Check(ctx, all[1]); err == nil || !strings.Contains(err.Error(), "has no invocation") {
+		t.Fatalf("reversed-purge mutation escaped retained-state checker: %v", err)
 	}
 }
 
