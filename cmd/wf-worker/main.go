@@ -14,8 +14,10 @@ import (
 	"syscall"
 	"time"
 
+	"js-wf/identity"
 	"js-wf/provision"
 	"js-wf/reconcile"
+	"js-wf/retention"
 	"js-wf/worker"
 
 	"github.com/nats-io/nats.go"
@@ -43,6 +45,8 @@ func run(ctx context.Context, args []string) error {
 	staticIndex := flags.Int("static-index", 0, "static worker index")
 	staticCount := flags.Int("static-count", 1, "number of static workers")
 	concurrency := flags.Int("partition-concurrency", 1, "concurrent deliveries per partition")
+	retentionType := flags.String("retention-type", "", "optional workflow type for built-in durable purge handler")
+	retentionGrace := flags.Duration("retention-grace", 24*time.Hour, "purge tombstone lifetime")
 	repair := flags.Bool("reconcile", true, "run leader-elected repair loops")
 	repairInterval := flags.Duration("reconcile-interval", time.Second, "repair scan cadence")
 	repairBudget := flags.Int("reconcile-budget", 500, "stream sequences scanned per repair pass")
@@ -60,6 +64,14 @@ func run(ctx context.Context, args []string) error {
 			return err
 		}
 	}
+	if *retentionType != "" {
+		if err := identity.ValidateToken(*retentionType); err != nil {
+			return fmt.Errorf("retention workflow type: %w", err)
+		}
+		if *retentionGrace <= 0 {
+			return fmt.Errorf("retention grace must be positive")
+		}
+	}
 	if *url == "" {
 		*url = nats.DefaultURL
 	}
@@ -67,7 +79,12 @@ func run(ctx context.Context, args []string) error {
 	if err != nil {
 		return err
 	}
-	nc, js, backend, w, err := startWorker(ctx, *url, *id, *replicas, *concurrency, handlers)
+	if *retentionType != "" {
+		if _, exists := handlers[*retentionType]; exists {
+			return fmt.Errorf("retention workflow type %q collides with plugin handler", *retentionType)
+		}
+	}
+	nc, js, backend, w, err := startWorker(ctx, *url, *id, *replicas, *concurrency, handlers, *retentionType, *retentionGrace)
 	if err != nil {
 		if ctx.Err() != nil {
 			return nil
@@ -168,7 +185,7 @@ func run(ctx context.Context, args []string) error {
 	return firstErr
 }
 
-func startWorker(ctx context.Context, url, id string, replicas, concurrency int, handlers map[string]worker.Handler) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, error) {
+func startWorker(ctx context.Context, url, id string, replicas, concurrency int, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, error) {
 	startupCtx, stopStartup := context.WithTimeout(ctx, 30*time.Second)
 	defer stopStartup()
 	var lastErr error
@@ -183,8 +200,15 @@ func startWorker(ctx context.Context, url, id string, replicas, concurrency int,
 				backend, err = provision.EnsureAuto(attempt, js, replicas)
 				stop()
 				if err == nil {
+					workerHandlers := make(map[string]worker.Handler, len(handlers)+1)
+					for typ, handler := range handlers {
+						workerHandlers[typ] = handler
+					}
+					if retentionType != "" {
+						workerHandlers[retentionType] = retention.Handler(js, retentionGrace)
+					}
 					var w *worker.Worker
-					w, err = worker.New(startupCtx, js, id, handlers, worker.WithPartitionConcurrency(concurrency))
+					w, err = worker.New(startupCtx, js, id, workerHandlers, worker.WithPartitionConcurrency(concurrency))
 					if err == nil {
 						return nc, js, backend, w, nil
 					}

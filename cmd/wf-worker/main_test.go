@@ -178,6 +178,7 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
 			"-url", cluster.Servers[0].ClientURL(), "-id", "runner-smoke",
 			"-replicas", "1", "-handler-plugin", pluginPath, "-mode", mode,
 			"-metrics-addr", metricsAddr, "-reconcile-interval", "100ms",
+			"-retention-type", "retention", "-retention-grace", "1h",
 		})
 	}()
 	httpClient := &http.Client{Timeout: time.Second}
@@ -202,7 +203,8 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
 		t.Fatalf("metrics server did not become ready: %v", ctx.Err())
 	}
 	c := client.New(js)
-	if _, err := c.Start(ctx, "worker-smoke", "job", []byte(`42`)); err != nil {
+	first, err := c.Start(ctx, "worker-smoke", "job", []byte(`42`))
+	if err != nil {
 		t.Fatal(err)
 	}
 	result, err := c.Await(ctx, "worker-smoke", "job")
@@ -247,6 +249,26 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
 	}
 	if ctx.Err() != nil {
 		t.Fatalf("tombstone loop did not reclaim expired state: %v", ctx.Err())
+	}
+	request, err := json.Marshal(retention.Request{Type: "worker-smoke", ID: "job"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Start(ctx, "retention", "purge-job", request); err != nil {
+		t.Fatal(err)
+	}
+	if value, err := c.Await(ctx, "retention", "purge-job"); err != nil || string(value) != "true" {
+		t.Fatalf("retention workflow result=%s err=%v", value, err)
+	}
+	if _, err := c.Await(ctx, "worker-smoke", "job"); !errors.Is(err, client.ErrPurged) {
+		t.Fatalf("retired target: %v", err)
+	}
+	second, err := c.Start(ctx, "worker-smoke", "job", []byte(`43`))
+	if err != nil || second.InvSeq <= first.InvSeq {
+		t.Fatalf("reused invocation=%+v original=%+v err=%v", second, first, err)
+	}
+	if value, err := c.Await(ctx, "worker-smoke", "job"); err != nil || string(value) != "43" {
+		t.Fatalf("reused workflow result=%s err=%v", value, err)
 	}
 	cancel()
 	select {
