@@ -376,6 +376,10 @@ retries. A dropped nak leaves the original delivery pending until AckWait,
 while the handoff run lets the successor start sooner; the model checks both
 deliveries drain to the same terminal result. Pinned traces cover a hidden
 renewal reply, a failed progress write, and a dropped nak. A three-node
+dispatch contract now checks the modeled dropped-nak server state against a
+real consumer whose nak is withheld before send: the handoff arrives first,
+the original redelivers after AckWait, and both messages drain. Three normal
+runs and a race run passed. A three-node
 worker-level fixture hides
 a committed lease-renewal reply during a blocked effect and checks the same
 handoff, terminal result, and drained run queue; three repeated runs and a
