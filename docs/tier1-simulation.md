@@ -243,9 +243,16 @@ replies, the transient state read, the object visibility delay, and corrupt
 snapshot bytes. Exact replay, cross-process traces, and a race run pass. A
 three-node contract compares production purge and blob sweeping, including
 the corrupt snapshot failure boundary and recovery, with the model; three
-repeated runs and a race run passed. Concurrent snapshot writes, active
-workflow writers, and retention purge still need a cooperative integrated
-schedule.
+repeated runs and a race run passed. A further 1,000-seed cooperative
+schedule interleaves production snapshot reads and writes with a production
+retention purge attempt while a modeled worker holds the invocation lease.
+Purge returns `ErrActive` at every held-lease cut; after the snapshot
+finishes and the worker releases its lease, purge and quiescent blob sweep
+complete. Two traces pin the fenced and after-release orderings. A three-node
+fixture blocks a real snapshot object upload while a real purge attempts the
+same invocation, then checks journal reconstruction, purge, and blob
+reclamation after release. Active workflow journal writes and concurrent blob
+sweeping remain open; blob sweeping requires quiescent writers.
 
 The integrated short-handler workload runs production `Client.Start` and
 `Worker.handle` over a shared modeled run stream and durable consumer. Its
