@@ -106,6 +106,89 @@ func TestJournalLimitRecordsTerminalFailure(t *testing.T) {
 	}
 }
 
+func TestJournalLimitRecordsRejectedSignalDrain(t *testing.T) {
+	cluster, err := testcluster.Start(t.TempDir(), 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	js, err := jetstream.New(cluster.Clients[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	defer cancel()
+	if err := provision.Ensure(ctx, js, 1); err != nil {
+		t.Fatal(err)
+	}
+	const typ, id = "signal-limit", "drain"
+	w, err := New(ctx, js, "signal-limit-worker", map[string]Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		_, err := wf.AwaitSignal(c, "go")
+		return json.RawMessage(`true`), err
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	w.maxEntries = 4
+	c := client.New(js)
+	if _, err := c.Start(ctx, typ, id, []byte(`null`)); err != nil {
+		t.Fatal(err)
+	}
+	workerCtx, stop := context.WithCancel(ctx)
+	defer stop()
+	done := make(chan error, 1)
+	go func() { done <- w.RunPartition(workerCtx, identity.Partition(typ, id, provision.Partitions)) }()
+	store := journal.New(js)
+	for ctx.Err() == nil {
+		records, _, err := store.Read(ctx, typ, id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(records) == 3 && records[2].Kind == journal.Suspended {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatalf("handler did not suspend before signal: %v", ctx.Err())
+	}
+	signalSeq, err := c.Signal(ctx, typ, id, "go", []byte(`true`), "at-limit")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Await(ctx, typ, id); err == nil || !strings.Contains(err.Error(), journal.ErrTooLong.Error()) {
+		t.Fatalf("terminal journal-limit result: %v", err)
+	}
+	stop()
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+	records, _, err := store.Read(ctx, typ, id)
+	if err != nil || len(records) != 4 || records[3].Kind != journal.Failed {
+		t.Fatalf("rejected signal journal: records=%+v err=%v", records, err)
+	}
+	var outcome wf.Outcome
+	if err := json.Unmarshal(records[3].Payload, &outcome); err != nil || outcome.LimitEntry == nil || outcome.LimitEntry.Kind != string(journal.SignalConsumed) {
+		t.Fatalf("rejected signal metadata: outcome=%+v err=%v", outcome, err)
+	}
+	var attempted struct {
+		Sequence uint64 `json:"sig_seq"`
+		Name     string `json:"name"`
+		Payload  []byte `json:"payload"`
+		Hash     string `json:"hash"`
+	}
+	if err := json.Unmarshal(outcome.LimitEntry.Payload, &attempted); err != nil || attempted.Sequence != signalSeq || attempted.Name != "go" || string(attempted.Payload) != "true" {
+		t.Fatalf("attempted signal drain=%+v err=%v", attempted, err)
+	}
+	digest := sha256.Sum256([]byte(`true`))
+	if attempted.Hash != hex.EncodeToString(digest[:]) {
+		t.Fatalf("attempted signal hash=%q", attempted.Hash)
+	}
+	if _, err := integrity.Check(ctx, js); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestJournalLimitRecordsRejectedPanicAttempt(t *testing.T) {
 	cluster, err := testcluster.Start(t.TempDir(), 1)
 	if err != nil {

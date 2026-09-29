@@ -11,12 +11,14 @@ import (
 	"io"
 	"os"
 	"plugin"
+	"strconv"
 
 	"js-wf/client"
 	"js-wf/identity"
 	"js-wf/journal"
 	"js-wf/wf"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -34,13 +36,21 @@ type replayReport struct {
 // replayBundle contains the durable inputs needed to replay a handler offline.
 // []byte fields are base64-encoded by JSON.
 type replayBundle struct {
-	Type      string            `json:"type"`
-	ID        string            `json:"id"`
-	InvSeq    uint64            `json:"inv_seq"`
-	Input     []byte            `json:"input"`
-	InputHash string            `json:"input_hash"`
-	Journal   []journal.Record  `json:"journal"`
-	Objects   map[string][]byte `json:"objects"`
+	Type          string               `json:"type"`
+	ID            string               `json:"id"`
+	InvSeq        uint64               `json:"inv_seq"`
+	Input         []byte               `json:"input"`
+	InputHash     string               `json:"input_hash"`
+	Journal       []journal.Record     `json:"journal"`
+	Objects       map[string][]byte    `json:"objects"`
+	PendingSignal *replayPendingSignal `json:"pending_signal,omitempty"`
+}
+
+type replayPendingSignal struct {
+	Sequence uint64      `json:"sequence"`
+	Subject  string      `json:"subject"`
+	Header   nats.Header `json:"header"`
+	Data     []byte      `json:"data"`
 }
 
 func replayInvocation(ctx context.Context, js jetstream.JetStream, typ, id, pluginPath, symbolName string) (replayReport, error) {
@@ -138,6 +148,36 @@ func fetchReplayBundle(ctx context.Context, js jetstream.JetStream, typ, id stri
 				continue
 			}
 			if _, exists := bundle.Objects[ref]; !exists {
+				bundle.Objects[ref], err = loadObject(ref)
+				if err != nil {
+					return replayBundle{}, err
+				}
+			}
+		}
+	}
+	if len(bundle.Journal) > 0 && bundle.Journal[len(bundle.Journal)-1].Kind == journal.Failed {
+		tail := bundle.Journal[len(bundle.Journal)-1]
+		var outcome wf.Outcome
+		if err := json.Unmarshal(tail.Payload, &outcome); err != nil {
+			return replayBundle{}, fmt.Errorf("decode failed outcome: %w", err)
+		}
+		if outcome.LimitEntry != nil && outcome.LimitEntry.Kind == string(journal.SignalConsumed) {
+			var attempted struct {
+				Sequence uint64 `json:"sig_seq"`
+			}
+			if err := json.Unmarshal(outcome.LimitEntry.Payload, &attempted); err != nil || attempted.Sequence == 0 {
+				return replayBundle{}, fmt.Errorf("invalid rejected signal metadata: %v", err)
+			}
+			signals, err := js.Stream(ctx, "WF_SIG")
+			if err != nil {
+				return replayBundle{}, err
+			}
+			message, err := signals.GetMsg(ctx, attempted.Sequence)
+			if err != nil {
+				return replayBundle{}, fmt.Errorf("read rejected signal source: %w", err)
+			}
+			bundle.PendingSignal = &replayPendingSignal{Sequence: message.Sequence, Subject: message.Subject, Header: message.Header, Data: message.Data}
+			if ref := message.Header.Get("Wf-Signal-Ref"); ref != "" {
 				bundle.Objects[ref], err = loadObject(ref)
 				if err != nil {
 					return replayBundle{}, err
@@ -334,6 +374,10 @@ func replayNonStepJournalLimit(bundle replayBundle, handler func(*wf.Context, js
 		return replayReport{}, fmt.Errorf("handler replay differs from journal-limit history: error=%v steps=%d/%d", replayErr, observed.PlayedSteps, observed.RecordedSteps)
 	}
 	switch journal.Kind(outcome.LimitEntry.Kind) {
+	case journal.SignalConsumed:
+		if err := replayRejectedSignal(bundle, outcome.LimitEntry.Payload, replayErr, observed); err != nil {
+			return replayReport{}, err
+		}
 	case journal.Suspended:
 		var suspended struct {
 			WaitingOn string `json:"waiting_on"`
@@ -359,6 +403,83 @@ func replayNonStepJournalLimit(bundle replayBundle, handler func(*wf.Context, js
 		return replayReport{}, fmt.Errorf("journal-limit entry kind %q cannot be verified offline", outcome.LimitEntry.Kind)
 	}
 	return replayReport{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, JournalEntries: len(bundle.Journal), Status: "failed", Error: outcome.Error}, nil
+}
+
+func replayRejectedSignal(bundle replayBundle, raw json.RawMessage, replayErr error, observed wf.ReplayObservation) error {
+	source := bundle.PendingSignal
+	if source == nil {
+		return fmt.Errorf("rejected signal source is missing from replay bundle")
+	}
+	var attempted struct {
+		Sequence uint64 `json:"sig_seq"`
+		Name     string `json:"name"`
+		Payload  []byte `json:"payload"`
+		Ref      string `json:"ref"`
+		Hash     string `json:"hash"`
+	}
+	if err := json.Unmarshal(raw, &attempted); err != nil || attempted.Sequence == 0 || identity.ValidateToken(attempted.Name) != nil {
+		return fmt.Errorf("invalid rejected signal entry: %v", err)
+	}
+	if source.Sequence != attempted.Sequence || source.Subject != "wf.sig."+bundle.Type+"."+bundle.ID+"."+attempted.Name {
+		return fmt.Errorf("rejected signal source differs from attempted drain")
+	}
+	if generation := source.Header.Get("Wf-Inv-Seq"); generation != "" {
+		seq, err := strconv.ParseUint(generation, 10, 64)
+		if err != nil || seq != bundle.InvSeq {
+			return fmt.Errorf("rejected signal source has a different invocation generation")
+		}
+	}
+	ref := source.Header.Get("Wf-Signal-Ref")
+	hash := source.Header.Get("Wf-Input-SHA256")
+	payload := source.Data
+	if ref != "" {
+		if len(payload) != 0 {
+			return fmt.Errorf("rejected signal source has both inline data and an object reference")
+		}
+		var ok bool
+		payload, ok = bundle.Objects[ref]
+		if !ok {
+			return fmt.Errorf("rejected signal object %q is missing from replay bundle", ref)
+		}
+	}
+	if attempted.Ref != ref || attempted.Hash != hash || ref == "" && !bytes.Equal(attempted.Payload, payload) || ref != "" && len(attempted.Payload) != 0 {
+		return fmt.Errorf("rejected signal payload differs from retained source")
+	}
+	if hash != "" {
+		digest := sha256.Sum256(payload)
+		if hex.EncodeToString(digest[:]) != hash {
+			return fmt.Errorf("rejected signal payload hash mismatch")
+		}
+	}
+	for _, record := range bundle.Journal[:len(bundle.Journal)-1] {
+		if record.Kind != journal.SignalConsumed {
+			continue
+		}
+		var previous struct {
+			Sequence uint64 `json:"sig_seq"`
+		}
+		if json.Unmarshal(record.Payload, &previous) != nil || previous.Sequence >= attempted.Sequence {
+			return fmt.Errorf("rejected signal is not newer than consumed signals")
+		}
+	}
+	if errors.Is(replayErr, wf.ErrCorruptJournal) || errors.Is(replayErr, wf.ErrReplayObjectMissing) {
+		return fmt.Errorf("handler replay differs before rejected signal: %w", replayErr)
+	}
+	prior := bundle.Journal[len(bundle.Journal)-2]
+	switch prior.Kind {
+	case journal.StepRequested:
+		if !errors.Is(replayErr, wf.ErrReplayPendingStep) {
+			return fmt.Errorf("handler replay differs from prior pending step: %v", replayErr)
+		}
+	case journal.Suspended:
+		var suspended struct {
+			WaitingOn string `json:"waiting_on"`
+		}
+		if json.Unmarshal(prior.Payload, &suspended) != nil || suspended.WaitingOn == "" || !errors.Is(replayErr, wf.ErrSuspended) || observed.WaitingOn != suspended.WaitingOn {
+			return fmt.Errorf("handler replay differs from prior suspension: error=%v wait=%q", replayErr, observed.WaitingOn)
+		}
+	}
+	return nil
 }
 
 // replayCancellation checks the last handler suspension, then the worker's

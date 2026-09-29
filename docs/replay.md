@@ -36,8 +36,9 @@ To capture the durable inputs and replay without a NATS connection:
 ./wf-cli -handler-plugin ./workflow.so -replay-bundle replay.json replay
 ```
 
-The bundle contains the invocation input, logical journal, and referenced
-Object Store bytes. Offline replay checks the input hash, journal step order,
+The bundle contains the invocation input, logical journal, referenced
+Object Store bytes, and a retained signal source when a signal drain was
+rejected at the journal limit. Offline replay checks the input hash, journal step order,
 step and signal object hashes, and the matching terminal result, error, or
 wait. The command returns a nonzero exit status if a step differs, an object
 is missing or corrupt, or replay reaches a different outcome.
@@ -51,5 +52,7 @@ that the handler reaches the same request, then stops before running its
 effect. A rejected panic attempt or suspension also records its attempted
 entry; replay checks the reproduced panic or wait. Older journal-limit
 failures without attempted-entry metadata return an explicit verification
-error. Rejected signal drains cannot yet be replayed because exported bundles
-do not contain the unconsumed signal.
+error. For a rejected signal drain, replay checks the attempted entry against
+the exported `WF_SIG` source, its invocation generation, payload hash, and the
+handler's prior suspended state. Export requires that signal source and any
+referenced object to remain retained.

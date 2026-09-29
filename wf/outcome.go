@@ -19,8 +19,8 @@ type Outcome struct {
 	// Offline replay uses it to verify the handler's next step without
 	// executing its effect.
 	LimitRequest json.RawMessage `json:"limit_request,omitempty"`
-	// LimitEntry records a rejected suspension or panic attempt when the
-	// terminal slot is reserved. Replay checks the handler at that boundary.
+	// LimitEntry records a rejected suspension, panic attempt, or signal drain
+	// when the terminal slot is reserved. Replay checks that boundary.
 	LimitEntry *LimitEntry `json:"limit_entry,omitempty"`
 }
 
