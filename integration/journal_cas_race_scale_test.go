@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -23,16 +24,28 @@ import (
 type casPublishGate struct {
 	jetstream.JetStream
 	subject string
+	stream  jetstream.Stream
 	arrived chan<- struct{}
 	release <-chan struct{}
+	reached atomic.Bool
+}
+
+func (g *casPublishGate) Stream(ctx context.Context, name string) (jetstream.Stream, error) {
+	if name == "WF_JRN" && g.stream != nil {
+		return g.stream, nil
+	}
+	return g.JetStream.Stream(ctx, name)
 }
 
 func (g *casPublishGate) Publish(ctx context.Context, subject string, payload []byte, opts ...jetstream.PublishOpt) (*jetstream.PubAck, error) {
 	if subject == g.subject {
-		select {
-		case g.arrived <- struct{}{}:
-		case <-ctx.Done():
-			return nil, ctx.Err()
+		first := g.reached.CompareAndSwap(false, true)
+		if first {
+			select {
+			case g.arrived <- struct{}{}:
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			}
 		}
 		select {
 		case <-g.release:
@@ -44,12 +57,63 @@ func (g *casPublishGate) Publish(ctx context.Context, subject string, payload []
 }
 
 type casRoundOutcome struct {
-	worker string
-	seq    uint64
-	err    error
+	worker           string
+	seq              uint64
+	err              error
+	preflightRetries int
 }
 
-func casRaceRound(ctx context.Context, all [2]jetstream.JetStream, index, expected uint64) ([2]casRoundOutcome, error) {
+type failOnceLastStream struct {
+	jetstream.Stream
+	failed atomic.Bool
+}
+
+func (s *failOnceLastStream) GetLastMsgForSubject(ctx context.Context, subject string) (*jetstream.RawStreamMsg, error) {
+	if s.failed.CompareAndSwap(false, true) {
+		return nil, context.DeadlineExceeded
+	}
+	return s.Stream.GetLastMsgForSubject(ctx, subject)
+}
+
+func TestCASRaceRetriesPrePublishTailLookup(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	first, err := journal.New(all[0]).Append(ctx, "cas", "scale", journal.Entry{Epoch: 1, Index: 0, Kind: journal.Started}, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	streams, err := casRaceStreams(ctx, [2]jetstream.JetStream{all[0], all[1]})
+	if err != nil {
+		t.Fatal(err)
+	}
+	failing := &failOnceLastStream{Stream: streams[0]}
+	streams[0] = failing
+	outcomes, err := casRaceRound(ctx, [2]jetstream.JetStream{all[0], all[1]}, streams, 1, first)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var wins, stales, retries int
+	for _, outcome := range outcomes {
+		retries += outcome.preflightRetries
+		if outcome.err == nil {
+			wins++
+		} else if errors.Is(outcome.err, journal.ErrStale) {
+			stales++
+		} else {
+			t.Fatalf("writer %s: %v", outcome.worker, outcome.err)
+		}
+	}
+	if !failing.failed.Load() || retries != 1 || wins != 1 || stales != 1 {
+		t.Fatalf("pre-publish retry outcomes=%+v retries=%d", outcomes, retries)
+	}
+	journalRecords, _, err := journal.New(all[2]).Read(ctx, "cas", "scale")
+	if err != nil || len(journalRecords) != 2 || journalRecords[1].Index != 1 {
+		t.Fatalf("retained journal after retry: records=%v err=%v", journalRecords, err)
+	}
+}
+
+func casRaceRound(ctx context.Context, all [2]jetstream.JetStream, streams [2]jetstream.Stream, index, expected uint64) ([2]casRoundOutcome, error) {
 	var outcomes [2]casRoundOutcome
 	arrived := make(chan struct{}, 2)
 	release := make(chan struct{})
@@ -67,9 +131,17 @@ func casRaceRound(ctx context.Context, all [2]jetstream.JetStream, index, expect
 			if index%2 == 0 {
 				kind = journal.StepCompleted
 			}
-			js := &casPublishGate{JetStream: all[writer], subject: "wf.jrn.cas.scale", arrived: arrived, release: release}
-			seq, err := journal.New(js).Append(ctx, "cas", "scale", journal.Entry{Epoch: 1, Index: index, Kind: kind, WorkerID: name}, expected)
-			results <- casRoundOutcome{worker: name, seq: seq, err: err}
+			var outcome casRoundOutcome
+			outcome.worker = name
+			for attempt := 0; attempt < 3; attempt++ {
+				js := &casPublishGate{JetStream: all[writer], subject: "wf.jrn.cas.scale", stream: streams[writer], arrived: arrived, release: release}
+				outcome.seq, outcome.err = journal.New(js).Append(ctx, "cas", "scale", journal.Entry{Epoch: 1, Index: index, Kind: kind, WorkerID: name}, expected)
+				if js.reached.Load() || !errors.Is(outcome.err, journal.ErrUnknown) || ctx.Err() != nil {
+					break
+				}
+				outcome.preflightRetries++
+			}
+			results <- outcome
 		}(writer)
 	}
 	ready := 0
@@ -161,6 +233,27 @@ func TestCASRaceUnknownOutcomeResolvesRetainedWinner(t *testing.T) {
 	if err != nil || next != first+1 || winner != "a" {
 		t.Fatalf("resolved committed winner: seq=%d want=%d worker=%q err=%v", next, first+1, winner, err)
 	}
+}
+
+func casRaceStreams(ctx context.Context, all [2]jetstream.JetStream) ([2]jetstream.Stream, error) {
+	var streams [2]jetstream.Stream
+	for node, js := range all {
+		until := time.Now().Add(5 * time.Second)
+		for {
+			attempt, stop := context.WithTimeout(ctx, time.Second)
+			stream, err := js.Stream(attempt, "WF_JRN")
+			stop()
+			if err == nil {
+				streams[node] = stream
+				break
+			}
+			if ctx.Err() != nil || time.Now().After(until) {
+				return streams, fmt.Errorf("node %d journal stream preflight: %w", node, err)
+			}
+			time.Sleep(25 * time.Millisecond)
+		}
+	}
+	return streams, nil
 }
 
 func restartJournalLeader(ctx context.Context, all *[3]jetstream.JetStream, cluster *testcluster.Cluster, wantMessages uint64) error {
@@ -269,12 +362,17 @@ func TestJournalCASTenThousandRacesWithLeaderRestarts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	streams, err := casRaceStreams(ctx, [2]jetstream.JetStream{all[0], all[1]})
+	if err != nil {
+		t.Fatal(err)
+	}
 	started := time.Now()
 	var leaderKills int
 	var unknownRounds int
+	var preflightRetries int
 	for index := uint64(1); index <= uint64(rounds); index++ {
 		attempt, stop := context.WithTimeout(ctx, 15*time.Second)
-		outcomes, err := casRaceRound(attempt, [2]jetstream.JetStream{all[0], all[1]}, index, seq)
+		outcomes, err := casRaceRound(attempt, [2]jetstream.JetStream{all[0], all[1]}, streams, index, seq)
 		stop()
 		if err != nil {
 			t.Fatalf("round %d expected_seq=%d outcomes=%+v: %v", index, seq, outcomes, err)
@@ -282,6 +380,7 @@ func TestJournalCASTenThousandRacesWithLeaderRestarts(t *testing.T) {
 		var wins, stales, unknowns int
 		var next uint64
 		for _, outcome := range outcomes {
+			preflightRetries += outcome.preflightRetries
 			switch {
 			case outcome.err == nil:
 				wins++
@@ -320,6 +419,10 @@ func TestJournalCASTenThousandRacesWithLeaderRestarts(t *testing.T) {
 			if err := restartJournalLeader(ctx, &all, cluster, index+1); err != nil {
 				t.Fatalf("after round %d: %v", index, err)
 			}
+			streams, err = casRaceStreams(ctx, [2]jetstream.JetStream{all[0], all[1]})
+			if err != nil {
+				t.Fatalf("after round %d refresh journal handles: %v", index, err)
+			}
 			leaderKills++
 		}
 	}
@@ -340,5 +443,5 @@ func TestJournalCASTenThousandRacesWithLeaderRestarts(t *testing.T) {
 			t.Fatalf("record %d: %+v", index, record)
 		}
 	}
-	t.Logf("server-side CAS races=%d leader_kills=%d unknown_rounds=%d elapsed=%s", rounds, leaderKills, unknownRounds, time.Since(started))
+	t.Logf("server-side CAS races=%d leader_kills=%d unknown_rounds=%d pre_publish_retries=%d elapsed=%s", rounds, leaderKills, unknownRounds, preflightRetries, time.Since(started))
 }

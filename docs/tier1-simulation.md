@@ -112,6 +112,15 @@ winner with `ErrUnknown` and the other caller with `ErrStale`. Exact trace
 replay and cross-process equality pass. This is the
 modeled distinction needed when a real CAS race returns an ambiguous reply.
 
+A further 1,000-seed two-writer schedule injects one transient subject-tail
+lookup failure before either CAS publish. The caller sees `ErrUnknown`,
+retries the same entry, and the schedule retains one winner while the other
+writer is stale. Seed 42 is pinned and byte-identical across processes. A
+three-node fixture injects the tail lookup error before the publish barrier
+and checks the same outcomes; the 10,000-round race now caches stream handles
+across rounds, refreshing them after leader restarts, and retries a writer
+only when it has not yet reached the publish barrier.
+
 The lease slice runs the production `lease.Store` decisions through a narrow
 KV port. Its in-memory model has global revisions, CAS create/update/delete,
 30-second key expiry, and explicit pre-commit drop or post-commit lost-ack

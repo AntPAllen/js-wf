@@ -41,11 +41,12 @@ type Message struct {
 // Faults are consumed in publish order; callers can choose their order through
 // Scheduler rather than relying on Go goroutine timing.
 type JournalTransport struct {
-	mu       sync.Mutex
-	schedule *Scheduler
-	sequence uint64
-	messages map[string][]Message
-	faults   []Fault
+	mu        sync.Mutex
+	schedule  *Scheduler
+	sequence  uint64
+	messages  map[string][]Message
+	faults    []Fault
+	lastFault bool
 }
 
 var _ journal.AppendPort = (*JournalTransport)(nil)
@@ -89,12 +90,24 @@ func (m *JournalTransport) QueueFault(f Fault) error {
 	return nil
 }
 
+// QueueLastFault drops one subject-tail lookup before any CAS publish.
+func (m *JournalTransport) QueueLastFault() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.lastFault = true
+}
+
 func (m *JournalTransport) Last(ctx context.Context, subject string) (journal.AppendTail, error) {
 	if err := ctx.Err(); err != nil {
 		return journal.AppendTail{}, err
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	if m.lastFault {
+		m.lastFault = false
+		m.event(TransportEvent{Operation: "last", Subject: subject, Outcome: "transient_unavailable"})
+		return journal.AppendTail{}, ErrTransportLost
+	}
 	list := m.messages[subject]
 	if len(list) == 0 {
 		m.event(TransportEvent{Operation: "last", Subject: subject, Outcome: "not_found"})

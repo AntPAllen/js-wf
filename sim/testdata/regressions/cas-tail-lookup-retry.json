@@ -1,0 +1,117 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "journal_two_writer_tail_lookup",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "alpha:last",
+        "beta:last"
+      ],
+      "chosen": "beta:last"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "alpha:last",
+        "beta:last"
+      ],
+      "chosen": "beta:last"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "alpha:last",
+        "beta:publish"
+      ],
+      "chosen": "alpha:last"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "alpha:publish",
+        "beta:publish"
+      ],
+      "chosen": "alpha:publish"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "beta:publish"
+      ],
+      "chosen": "beta:publish"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "beta:last"
+      ],
+      "chosen": "beta:last"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.tail-lookup",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.tail-lookup",
+      "sequence": 1,
+      "data_sha256": "2937e099505acab3c03ef302157fc18786d3b830af1995de09b079dfa582150e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.tail-lookup",
+      "outcome": "transient_unavailable"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.tail-lookup",
+      "sequence": 1,
+      "data_sha256": "2937e099505acab3c03ef302157fc18786d3b830af1995de09b079dfa582150e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.tail-lookup",
+      "sequence": 1,
+      "data_sha256": "2937e099505acab3c03ef302157fc18786d3b830af1995de09b079dfa582150e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.tail-lookup",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "8cd8f3b947e1bd5793963e49a12701db06fe05e14b9329f19f0cd24b0c0ae8e8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.tail-lookup",
+      "expected": 1,
+      "data_sha256": "8dbd8eda0aefb9ef6c3b89a881ae329a2adeaaf0d094d97403da8805e83fa64a",
+      "outcome": "wrong_last_sequence"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.tail-lookup",
+      "sequence": 2,
+      "data_sha256": "8cd8f3b947e1bd5793963e49a12701db06fe05e14b9329f19f0cd24b0c0ae8e8",
+      "outcome": "ok"
+    }
+  ]
+}
