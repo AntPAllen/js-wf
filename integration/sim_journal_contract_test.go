@@ -3,12 +3,15 @@ package integration_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"reflect"
 	"testing"
 	"time"
 
+	"js-wf/client"
 	"js-wf/identity"
+	"js-wf/integrity"
 	"js-wf/journal"
 	"js-wf/sim"
 )
@@ -64,6 +67,37 @@ func TestSimJournalAppendContractAgainstRealCluster(t *testing.T) {
 				t.Fatalf("retained message %d for %s differs: err=%v", message.Sequence, id, err)
 			}
 		}
+	}
+}
+
+func TestMissingJournalCASHeaderMutationIsDetected(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	const typ, id = "mutation", "missing-cas"
+	if _, err := client.New(all[0]).Start(ctx, typ, id, []byte(`null`)); err != nil {
+		t.Fatal(err)
+	}
+	subject := identity.JournalSubject(typ, id)
+	for _, entry := range []journal.Entry{
+		{Kind: journal.Started, Index: 0},
+		{Kind: journal.StepRequested, Index: 1, Epoch: 1, WorkerID: "worker-a"},
+		{Kind: journal.StepRequested, Index: 1, Epoch: 2, WorkerID: "worker-b"},
+	} {
+		data, err := json.Marshal(entry)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// This deliberately bypasses journal.Append's CAS header.
+		if _, err := all[0].Publish(ctx, subject, data); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, _, err := journal.New(all[1]).Read(ctx, typ, id); !errors.Is(err, journal.ErrGap) {
+		t.Fatalf("missing-CAS mutation escaped journal reader: %v", err)
+	}
+	if _, err := integrity.Check(ctx, all[2]); err == nil {
+		t.Fatal("missing-CAS mutation escaped retained-state checker")
 	}
 }
 
