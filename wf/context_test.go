@@ -48,6 +48,53 @@ func TestStepRecovery(t *testing.T) {
 	}
 }
 
+func TestConcurrentStepOrderChangeFailsReplay(t *testing.T) {
+	var recorded []Entry
+	appendFn := func(_ context.Context, kind Kind, payload json.RawMessage) error {
+		recorded = append(recorded, Entry{Index: uint64(len(recorded) + 1), Kind: kind, Payload: payload})
+		return nil
+	}
+	runInOrder := func(c *Context, order [2]string, replay bool) error {
+		start := map[string]chan struct{}{"first": make(chan struct{}), "second": make(chan struct{})}
+		done := map[string]chan error{"first": make(chan error, 1), "second": make(chan error, 1)}
+		for _, name := range [2]string{"first", "second"} {
+			go func(name string) {
+				<-start[name]
+				_, err := Run(c, name, name, func(context.Context) (string, error) {
+					if replay {
+						return "", errors.New("effect ran during replay")
+					}
+					return name, nil
+				})
+				done[name] <- err
+			}(name)
+		}
+		for index, name := range order {
+			close(start[name])
+			if err := <-done[name]; err != nil {
+				// Let the other goroutine exit before returning. Context operations
+				// are serialized by the test's barriers, as workflow code must do.
+				if index == 0 {
+					other := order[1]
+					close(start[other])
+					<-done[other]
+				}
+				return err
+			}
+		}
+		return c.CheckComplete()
+	}
+	if err := runInOrder(NewContext(context.Background(), nil, appendFn), [2]string{"first", "second"}, false); err != nil || len(recorded) != 4 {
+		t.Fatalf("original concurrent steps: entries=%d err=%v", len(recorded), err)
+	}
+	if err := runInOrder(NewContext(context.Background(), recorded, nil), [2]string{"first", "second"}, true); err != nil {
+		t.Fatalf("same-order replay: %v", err)
+	}
+	if err := runInOrder(NewContext(context.Background(), recorded, nil), [2]string{"second", "first"}, true); !errors.Is(err, ErrNonDeterministic) {
+		t.Fatalf("reordered goroutine steps: %v", err)
+	}
+}
+
 func TestEffectPanicIsJournaled(t *testing.T) {
 	var entries []Entry
 	c := NewContext(context.Background(), nil, func(_ context.Context, k Kind, p json.RawMessage) error {
