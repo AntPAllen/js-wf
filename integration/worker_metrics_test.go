@@ -69,6 +69,13 @@ func TestWorkerDispatchMetricsAfterLeaseContention(t *testing.T) {
 	if m.LeaseAcquisitions != 1 || m.FencingEvents != 0 || m.Redeliveries < 1 || m.EnqueueToLeaseSamples != 1 || m.EnqueueToLeaseMaximum < 0 || m.EnqueueToLeaseTotal < m.EnqueueToLeaseMaximum {
 		t.Fatalf("dispatch metrics: %+v", m)
 	}
+	var bucketSamples uint64
+	for _, count := range m.EnqueueToLeaseBuckets {
+		bucketSamples += count
+	}
+	if bucketSamples != m.EnqueueToLeaseSamples {
+		t.Fatalf("enqueue-to-lease histogram has %d samples, want %d: %+v", bucketSamples, m.EnqueueToLeaseSamples, m)
+	}
 }
 
 func TestWorkerFencingMetricAndTerminalAppend(t *testing.T) {

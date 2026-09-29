@@ -20,6 +20,8 @@ type Metrics struct {
 	EnqueueToLeaseSamples uint64        `json:"enqueue_to_lease_samples"`
 	EnqueueToLeaseTotal   time.Duration `json:"enqueue_to_lease_total"`
 	EnqueueToLeaseMaximum time.Duration `json:"enqueue_to_lease_maximum"`
+	// Buckets count latency <=100ms, <=500ms, <=2s, <=10s, <=30s, and >30s.
+	EnqueueToLeaseBuckets [6]uint64     `json:"enqueue_to_lease_buckets"`
 	TimersScheduled       uint64        `json:"timers_scheduled"`
 	TimersFired           uint64        `json:"timers_fired"`
 	TimerLateTotal        time.Duration `json:"timer_late_total"`
@@ -39,6 +41,7 @@ type metricsCounters struct {
 	enqueueToLeaseSamples atomic.Uint64
 	enqueueToLeaseTotal   atomic.Int64
 	enqueueToLeaseMaximum atomic.Int64
+	enqueueToLeaseBuckets [6]atomic.Uint64
 	timersScheduled       atomic.Uint64
 	timersFired           atomic.Uint64
 	timerLateTotal        atomic.Int64
@@ -59,15 +62,7 @@ func (m *metricsCounters) recordTimerFired(fireAt, wakeupAt time.Time) {
 			break
 		}
 	}
-	boundaries := [...]time.Duration{100 * time.Millisecond, 500 * time.Millisecond, 2 * time.Second, 10 * time.Second, 30 * time.Second}
-	bucket := len(boundaries)
-	for i, boundary := range boundaries {
-		if late <= boundary {
-			bucket = i
-			break
-		}
-	}
-	m.timerLateBuckets[bucket].Add(1)
+	m.timerLateBuckets[latencyBucket(late)].Add(1)
 }
 
 func (m *metricsCounters) recordRedelivery(metadata *jetstream.MsgMetadata) {
@@ -91,6 +86,17 @@ func (m *metricsCounters) recordLeaseLatency(metadata *jetstream.MsgMetadata, ac
 			break
 		}
 	}
+	m.enqueueToLeaseBuckets[latencyBucket(latency)].Add(1)
+}
+
+func latencyBucket(value time.Duration) int {
+	boundaries := [...]time.Duration{100 * time.Millisecond, 500 * time.Millisecond, 2 * time.Second, 10 * time.Second, 30 * time.Second}
+	for i, boundary := range boundaries {
+		if value <= boundary {
+			return i
+		}
+	}
+	return len(boundaries)
 }
 
 // Metrics returns counters accumulated since this Worker was created.
@@ -113,6 +119,7 @@ func (w *Worker) Metrics() Metrics {
 	}
 	for i := range view.TimerLateBuckets {
 		view.TimerLateBuckets[i] = w.metrics.timerLateBuckets[i].Load()
+		view.EnqueueToLeaseBuckets[i] = w.metrics.enqueueToLeaseBuckets[i].Load()
 	}
 	return view
 }
