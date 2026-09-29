@@ -15,6 +15,8 @@ import (
 	"js-wf/visibility"
 	"js-wf/wf"
 	"js-wf/worker"
+
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 func TestVisibilitySearchAttributesRebuildPurgeAndReuse(t *testing.T) {
@@ -148,9 +150,23 @@ func TestVisibilitySearchAttributesRebuildPurgeAndReuse(t *testing.T) {
 	if err := migrated.Rebuild(ctx); err != nil {
 		t.Fatal(err)
 	}
-	rows, err := migrated.ListByAttribute(ctx, "group", "gamma", "completed")
+	var rows []visibility.Row
+	readbackDeadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(readbackDeadline) {
+		rows, err = migrated.ListByAttribute(ctx, "group", "gamma", "completed")
+		if err == nil && len(rows) == 1 {
+			break
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
 	if err != nil || len(rows) != 1 || rows[0].SchemaVersion != 2 {
-		t.Fatalf("migrated rows=%+v err=%v", rows, err)
+		row, getErr := migrated.Get(ctx, typ, id)
+		inv, invErr := all[2].Stream(ctx, "WF_INV")
+		var invInfo *jetstream.StreamInfo
+		if invErr == nil {
+			invInfo, invErr = inv.Info(ctx)
+		}
+		t.Fatalf("migrated rows=%+v err=%v row=%+v row_err=%v invocation_info=%+v invocation_err=%v", rows, err, row, getErr, invInfo, invErr)
 	}
 	rows, err = migrated.ListByAttribute(ctx, "team", "gamma", "")
 	if err != nil || len(rows) != 0 {
