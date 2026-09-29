@@ -127,3 +127,4 @@ passed in 20.28 seconds, with all results obtained in 16.24 seconds and
 worker shutdown in under one millisecond. This is a live large-payload check
 at 1,000 invocations; it does not establish the plan's 100,000-ID
 large-payload or faulted cardinality target.
+The manual `large-input-scale` workflow runs this proof on GitHub Actions.

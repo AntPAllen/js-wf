@@ -1,0 +1,14 @@
+name: large-input-scale
+on: workflow_dispatch
+jobs:
+  live-inputs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./integration -run '^TestLargeInputsAcrossLiveWorkers$' -count=1 -timeout=12m -v
+        env:
+          WF_LARGE_INPUT_SCALE: '1'
