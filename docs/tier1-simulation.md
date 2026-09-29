@@ -600,10 +600,12 @@ failure trace when one is written.
 global sequence gaps between subjects, retained bytes, and stale CAS results
 against a real three-node stream. Existing real-cluster tests cover network
 lost acknowledgments and injected unchanged-tail rejections. This comparison
-is limited: the integrated worker workloads cover short handlers, signal
-resume, and native and fallback timer wakeups without retention, snapshot
-objects, cancellation polling faults and heartbeat interleavings,
-Raft elections, or disk storage. The journal's five-second attempt
+is limited: separate integrated worker workloads cover short handlers,
+signal resume, timer wakeups, running cancellation, heartbeat handoff,
+large result objects, and snapshot reads and writes. Combined blob and
+retention faults, concurrent heartbeat and failure actor turns, Raft
+elections, and disk storage remain outside the in-memory model. The journal's
+five-second attempt
 deadline still uses wall time; only CAS retry waits are virtual in this first
 slice. A discrepancy seen only on real
 NATS is a candidate model gap or environment/server issue, not proof of a
