@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -148,10 +149,6 @@ func TestFiveContainerSignalsSurviveFullRestart(t *testing.T) {
 	if !suspended {
 		t.Fatal("workflow did not suspend before signal publication")
 	}
-	stopFirst()
-	if err := <-firstDone; err != nil && !errors.Is(err, context.Canceled) {
-		t.Fatalf("first worker: %v", err)
-	}
 	send := func(from, to int, c *client.Client) {
 		t.Helper()
 		for i := from; i < to; i++ {
@@ -163,6 +160,40 @@ func TestFiveContainerSignalsSurviveFullRestart(t *testing.T) {
 		}
 	}
 	send(0, count/2, c)
+	prefixConsumed := 0
+	var prefixLast journal.Kind
+	var prefixRecords []journal.Record
+	for until := time.Now().Add(30 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
+		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		records, _, readErr := journal.New(beforeJS).Read(attempt, typ, id)
+		stop()
+		if readErr == nil && len(records) != 0 {
+			prefixConsumed = 0
+			for _, record := range records {
+				if record.Kind == journal.SignalConsumed {
+					prefixConsumed++
+				}
+			}
+			prefixLast = records[len(records)-1].Kind
+			if prefixConsumed == count/2 && prefixLast == journal.Suspended {
+				prefixRecords = append([]journal.Record(nil), records...)
+				break
+			}
+		}
+		select {
+		case err := <-firstDone:
+			t.Fatalf("first worker exited before consuming signal prefix: %v", err)
+		default:
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if prefixConsumed != count/2 || prefixLast != journal.Suspended {
+		t.Fatalf("before restart consumed=%d last=%s, want %d consumed and suspended", prefixConsumed, prefixLast, count/2)
+	}
+	stopFirst()
+	if err := <-firstDone; err != nil && !errors.Is(err, context.Canceled) {
+		t.Fatalf("first worker: %v", err)
+	}
 	beforeConn.Close()
 	firstConn.Close()
 	for i := 0; i < 5; i++ {
@@ -185,6 +216,10 @@ func TestFiveContainerSignalsSurviveFullRestart(t *testing.T) {
 	}
 	if err := waitFiveReplicaReadiness(ctx, afterJS, partition); err != nil {
 		t.Fatalf("five-replica signal readiness after restart: %v", err)
+	}
+	recoveredPrefix, _, err := journal.New(afterJS).Read(ctx, typ, id)
+	if err != nil || !reflect.DeepEqual(recoveredPrefix, prefixRecords) {
+		t.Fatalf("consumed signal journal prefix changed across restart: entries=%d want=%d err=%v", len(recoveredPrefix), len(prefixRecords), err)
 	}
 	attempt, stop := context.WithTimeout(ctx, 5*time.Second)
 	stream, err := afterJS.Stream(attempt, "WF_SIG")
