@@ -102,6 +102,12 @@ model version, generated schedules, scheduler choices per second, transport
 events, and final virtual-time buckets. A local default run produced 49,602
 generated schedules and 1,503,118 scheduler choices in 34.1 seconds;
 22,808 schedules ended at virtual time zero and 2,894 at one minute or more.
+The first 10,000-per-workload GitHub Actions run passed at commit `77fac0d`:
+378.9 seconds of Go test time and 381.8 seconds wall time. This exceeds the
+plan's few-minute condition for making 10,000 seeds per workload a push gate.
+The default 1,000-per-workload suite already generates roughly 49,600
+schedules per push in aggregate; that count is distinct from 10,000 seeds
+for each workload.
 CI now replays a pinned corpus covering committed and dropped CAS unknowns,
 two-worker dispatch, competing suspended scanners, signal, suspended, and child
 notification liveness, outcome persistence, integrated short-handler execution,
