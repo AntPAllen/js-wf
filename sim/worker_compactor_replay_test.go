@@ -139,8 +139,24 @@ func runWorkerCompactor(seed int64, replay *Trace) (trace Trace, runErr error) {
 	if compactErr := results["compactor"]; compactErr != nil && !errors.Is(compactErr, ErrTransportLost) && !errors.Is(compactErr, journal.ErrSnapshotStale) {
 		return trace, fmt.Errorf("seed %d compactor: %w", seed, compactErr)
 	}
-	if mode == "clean" && results["compactor"] != nil || mode != "clean" && !errors.Is(results["compactor"], ErrTransportLost) {
+	if mode == "clean" && results["compactor"] != nil {
 		return trace, fmt.Errorf("seed %d mode=%s compactor: %v", seed, mode, results["compactor"])
+	}
+	if mode != "clean" {
+		var injected int
+		for _, event := range schedule.Trace().Transport {
+			if event.Outcome == string(faults[mode].Kind) {
+				injected++
+			}
+		}
+		if injected != 1 {
+			return trace, fmt.Errorf("seed %d mode=%s injected faults=%d, want 1", seed, mode, injected)
+		}
+		// The worker can reach the shared snapshot port before the
+		// compactor. It may consume and recover the injected fault itself.
+		if results["compactor"] != nil && !errors.Is(results["compactor"], ErrTransportLost) {
+			return trace, fmt.Errorf("seed %d mode=%s compactor: %v", seed, mode, results["compactor"])
+		}
 	}
 	if startEntries >= 66 {
 		return trace, fmt.Errorf("seed %d compactor started after handler completed", seed)

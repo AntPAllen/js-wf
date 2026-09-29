@@ -234,12 +234,32 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow
 	if err != nil || !strings.Contains(string(trace), "(DELAYED)") {
 		t.Fatalf("disk trace did not record a delayed store syscall: %v: %s", err, trace)
 	}
+	if err := cluster.RestartNode(killed); err != nil {
+		t.Fatal(err)
+	}
+	third, err := jetstream.New(cluster.Clients[killed])
+	if err != nil {
+		t.Fatal(err)
+	}
+	catchupDeadline := time.Now().Add(30 * time.Second)
+	for ctx.Err() == nil && time.Now().Before(catchupDeadline) {
+		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		result, err = client.New(third).Await(attempt, typ, id)
+		stop()
+		if err == nil && string(result) == "42" {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if err != nil || string(result) != "42" {
+		t.Fatalf("restarted node did not serve immutable result: %s, %v", result, err)
+	}
 	var report integrity.Report
 	auditDeadline := time.Now().Add(15 * time.Second)
 	var firstAuditErr error
 	for time.Now().Before(auditDeadline) && ctx.Err() == nil {
 		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
-		report, err = integrity.Check(attempt, js[other])
+		report, err = integrity.Check(attempt, third)
 		stop()
 		if err == nil && report.Invocations == 1 && report.Journals == 1 && report.Terminal == 1 {
 			break
@@ -250,10 +270,10 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow
 		time.Sleep(100 * time.Millisecond)
 	}
 	if err != nil || report.Invocations != 1 || report.Journals != 1 || report.Terminal != 1 {
-		t.Fatalf("retained integrity after four faults: report=%+v first_err=%v last_err=%v elapsed=%s", report, firstAuditErr, err, time.Since(startedAt))
+		t.Fatalf("retained integrity after all four faults healed: report=%+v first_err=%v last_err=%v elapsed=%s", report, firstAuditErr, err, time.Since(startedAt))
 	}
 	if signalWorkflow {
-		records, _, err := journal.New(js[other]).Read(ctx, typ, id)
+		records, _, err := journal.New(third).Read(ctx, typ, id)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -267,19 +287,4 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow
 			t.Fatalf("signal consumption entries=%d want=1", consumed)
 		}
 	}
-	if err := cluster.RestartNode(killed); err != nil {
-		t.Fatal(err)
-	}
-	third, err := jetstream.New(cluster.Clients[killed])
-	if err != nil {
-		t.Fatal(err)
-	}
-	for ctx.Err() == nil {
-		result, err = client.New(third).Await(ctx, typ, id)
-		if err == nil && string(result) == "42" {
-			return
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
-	t.Fatalf("restarted node did not serve immutable result: %s, %v", result, err)
 }
