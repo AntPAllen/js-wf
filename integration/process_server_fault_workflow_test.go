@@ -17,6 +17,7 @@ import (
 	"js-wf/client"
 	"js-wf/identity"
 	"js-wf/integrity"
+	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/testcluster"
 	"js-wf/wf"
@@ -26,6 +27,15 @@ import (
 )
 
 func TestWorkflowRecoversFromFourServerFaults(t *testing.T) {
+	runWorkflowWithFourServerFaults(t, false)
+}
+
+func TestTimerWorkflowRecoversFromFourServerFaults(t *testing.T) {
+	runWorkflowWithFourServerFaults(t, true)
+}
+
+func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow bool) {
+	t.Helper()
 	if os.Getenv("WF_PROCESS_WORKFLOW") != "1" {
 		t.Skip("set WF_PROCESS_WORKFLOW=1 for the four-fault workflow proof")
 	}
@@ -79,6 +89,13 @@ func TestWorkflowRecoversFromFourServerFaults(t *testing.T) {
 	release := make(chan struct{})
 	var once sync.Once
 	handler := func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		if timerWorkflow {
+			once.Do(func() { close(entered) })
+			if err := wf.Sleep(c, "during-quorum-loss", 3*time.Second); err != nil {
+				return nil, err
+			}
+			return json.RawMessage(`42`), nil
+		}
 		value, err := wf.Run(c, "held", 0, func(effectCtx context.Context) (int, error) {
 			once.Do(func() { close(entered) })
 			select {
@@ -111,6 +128,22 @@ func TestWorkflowRecoversFromFourServerFaults(t *testing.T) {
 		t.Fatalf("worker exited before effect: %v", err)
 	case <-time.After(15 * time.Second):
 		t.Fatal("handler effect did not start")
+	}
+	if timerWorkflow {
+		deadline := time.Now().Add(15 * time.Second)
+		for time.Now().Before(deadline) {
+			records, _, readErr := journal.New(js[other]).Read(ctx, typ, id)
+			if readErr == nil && len(records) > 0 && records[len(records)-1].Kind == journal.Suspended {
+				break
+			}
+			if readErr != nil {
+				t.Fatalf("read timer suspension: %v", readErr)
+			}
+			time.Sleep(30 * time.Millisecond)
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("timer workflow did not suspend before faults")
+		}
 	}
 	path := filepath.Join(root, "workflow-four-faults.json")
 	if output := os.Getenv("FAULT_SCHEDULE_OUT"); output != "" {

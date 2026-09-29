@@ -57,6 +57,8 @@ jobs:
           done
       - name: Complete a journaled workflow after four server faults
         run: WF_PROCESS_WORKFLOW=1 FAULT_SEED=42 FAULT_SCHEDULE_OUT=workflow-four-faults.json go test ./integration -run '^TestWorkflowRecoversFromFourServerFaults$' -count=1 -timeout=3m -v
+      - name: Recover a due timer after four server faults
+        run: WF_PROCESS_WORKFLOW=1 FAULT_SEED=42 FAULT_SCHEDULE_OUT=timer-four-faults.json go test ./integration -run '^TestTimerWorkflowRecoversFromFourServerFaults$' -count=1 -timeout=3m -v
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
@@ -64,6 +66,7 @@ jobs:
           path: |
             testcluster/fault-schedule-*.json
             integration/workflow-four-faults.json
+            integration/timer-four-faults.json
           if-no-files-found: ignore
   long-journal:
     if: github.event_name == 'workflow_dispatch'
