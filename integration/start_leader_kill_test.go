@@ -12,6 +12,7 @@ import (
 
 	"js-wf/client"
 	"js-wf/history"
+	"js-wf/reconcile"
 
 	"github.com/anishathalye/porcupine"
 	"github.com/nats-io/nats.go"
@@ -114,6 +115,8 @@ func TestConcurrentStartDuringInvocationLeaderKill(t *testing.T) {
 			counts["started"]++
 		case errors.Is(result.err, client.ErrAlreadyStarted):
 			counts["already"]++
+		case errors.Is(result.err, client.ErrEnqueueUnknown):
+			counts["enqueue_unknown"]++
 		default:
 			counts[fmt.Sprintf("%T: %v", result.err, result.err)]++
 		}
@@ -124,26 +127,34 @@ func TestConcurrentStartDuringInvocationLeaderKill(t *testing.T) {
 			winner = result.handle.InvSeq
 		}
 	}
-	if counts["started"] != 1 || counts["already"] != 499 {
+	if counts["started"]+counts["enqueue_unknown"] != 1 || counts["already"] != 499 {
 		t.Fatalf("start outcomes after leader kill: cut_at=%d counts=%v", completedAtCut, counts)
 	}
 	if result, err := history.CheckStarts(recorder.Snapshot(), 45*time.Second); err != nil || result != porcupine.Ok {
 		t.Fatalf("leader-kill start history=%s err=%v", result, err)
 	}
 	survivor := (leader + 1) % 3
-	inv, err = all[survivor].Stream(ctx, "WF_INV")
+	recoveryCtx, recoveryCancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer recoveryCancel()
+	// A committed invocation can outlive the burst deadline before its run
+	// enqueue is confirmed. Repair that cross-stream gap through the normal
+	// reconciler, then audit both retained streams.
+	if _, err := reconcile.NewStartScan(all[survivor]).Scan(recoveryCtx, 1, 10, false); err != nil {
+		t.Fatalf("repair start after leader kill: %v", err)
+	}
+	inv, err = all[survivor].Stream(recoveryCtx, "WF_INV")
 	if err != nil {
 		t.Fatal(err)
 	}
-	info, err = inv.Info(ctx)
+	info, err = inv.Info(recoveryCtx)
 	if err != nil || info.State.Msgs != 1 {
 		t.Fatalf("invocation stream: info=%+v err=%v", info, err)
 	}
-	run, err := all[survivor].Stream(ctx, "WF_RUN")
+	run, err := all[survivor].Stream(recoveryCtx, "WF_RUN")
 	if err != nil {
 		t.Fatal(err)
 	}
-	runInfo, err := run.Info(ctx)
+	runInfo, err := run.Info(recoveryCtx)
 	if err != nil || runInfo.State.Msgs != 1 {
 		t.Fatalf("run stream: info=%+v err=%v", runInfo, err)
 	}
