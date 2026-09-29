@@ -33,15 +33,16 @@ type dispatchRecord struct {
 // worker.RunPartition. It has virtual AckWait, explicit ack/nak/progress, and
 // injected consumer-leader errors; it does not model the handler's journal.
 type DispatchTransport struct {
-	mu        sync.Mutex
-	schedule  *Scheduler
-	ackWait   int64
-	records   []*dispatchRecord
-	faults    []DispatchFault
-	creates   int
-	sequence  uint64
-	onDrained func()
-	onNextAck func()
+	mu             sync.Mutex
+	schedule       *Scheduler
+	ackWait        int64
+	records        []*dispatchRecord
+	faults         []DispatchFault
+	creates        int
+	sequence       uint64
+	onDrained      func()
+	onNextAck      func()
+	onNextProgress func()
 }
 
 var _ worker.DispatchPort = (*DispatchTransport)(nil)
@@ -145,6 +146,14 @@ func (m *DispatchTransport) StopAfterNextAck(stop func()) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.onNextAck = stop
+}
+
+// OnNextProgress observes one committed heartbeat without reading the trace
+// concurrently with the worker's handler goroutine.
+func (m *DispatchTransport) OnNextProgress(notify func()) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.onNextProgress = notify
 }
 
 type dispatchConsumer struct {
@@ -283,6 +292,11 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 	}
 	event.Outcome = "ok"
 	model.event(event)
+	if operation == "progress" && model.onNextProgress != nil {
+		notify := model.onNextProgress
+		model.onNextProgress = nil
+		notify()
+	}
 	return nil
 }
 

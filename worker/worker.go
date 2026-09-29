@@ -65,6 +65,7 @@ type Worker struct {
 	partitionConcurrency       int
 	ackWait                    time.Duration
 	heartbeatInterval          time.Duration
+	heartbeatTicks             <-chan time.Time
 	nativeSchedules            bool
 	metrics                    metricsCounters
 	cancelMu                   sync.Mutex
@@ -200,6 +201,8 @@ type ModeledWorkerPorts struct {
 	// delivers committed notifications through ObserveCancellationNotification.
 	CancellationNotifications bool
 	CancellationPoll          CancellationPollPort
+	// HeartbeatTicks replaces the wall-clock ticker in modeled workers.
+	HeartbeatTicks <-chan time.Time
 }
 
 // NewWithPorts builds a worker whose delivery and execution decisions run
@@ -210,7 +213,7 @@ func NewWithPorts(id string, handlers map[string]Handler, ports ModeledWorkerPor
 	if id == "" || ports.Journal == nil || ports.Leases == nil || ports.Outcome == nil || ports.Invocation == nil || ports.Signals == nil || ports.Client == nil {
 		return nil, fmt.Errorf("invalid modeled worker configuration")
 	}
-	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, cancelWaiters: make(map[string]*cancelWaiter), modeledCancelNotifications: ports.CancellationNotifications, cancelPollPort: ports.CancellationPoll}, nil
+	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, heartbeatTicks: ports.HeartbeatTicks, cancelWaiters: make(map[string]*cancelWaiter), modeledCancelNotifications: ports.CancellationNotifications, cancelPollPort: ports.CancellationPoll}, nil
 }
 
 type panicRetryError struct{ attempt int }
@@ -484,13 +487,21 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	stopped := make(chan struct{})
 	go func() {
 		defer close(stopped)
-		ticker := time.NewTicker(w.heartbeatInterval)
-		defer ticker.Stop()
+		ticks := w.heartbeatTicks
+		if ticks == nil {
+			ticker := time.NewTicker(w.heartbeatInterval)
+			defer ticker.Stop()
+			ticks = ticker.C
+		}
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			case <-ticker.C:
+			case _, open := <-ticks:
+				if !open {
+					cancel()
+					return
+				}
 				renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
 				err := l.Renew(renewCtx)
 				stopRenew()

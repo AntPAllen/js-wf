@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -9,6 +10,99 @@ import (
 
 	"github.com/nats-io/nats.go/jetstream"
 )
+
+func TestSimDispatchProgressExtendsAckWaitContract(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	const ackWait = 4 * time.Second
+	model := sim.NewDispatchTransport(sim.NewScheduler(19), ackWait)
+	model.PublishRun("wf.run.0", []byte(`work`))
+	modelConsumer, err := model.Consumer(ctx, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	run, err := all[0].Stream(ctx, "WF_RUN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := all[0].Publish(ctx, "wf.run.0", []byte(`work`)); err != nil {
+		t.Fatal(err)
+	}
+	realConsumer, err := run.CreateConsumer(ctx, jetstream.ConsumerConfig{
+		Name: "WF_SIM_PROGRESS", Durable: "WF_SIM_PROGRESS", FilterSubject: "wf.run.0",
+		AckPolicy: jetstream.AckExplicitPolicy, AckWait: ackWait, MaxDeliver: -1, MaxAckPending: 1000,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	realFirst, err := realConsumer.Fetch(1, jetstream.FetchMaxWait(3*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstReal := <-realFirst.Messages()
+	firstModelBatch, err := modelConsumer.FetchOne(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstModel := <-firstModelBatch.Messages()
+	if firstReal == nil || firstModel == nil {
+		t.Fatal("first delivery missing")
+	}
+	time.Sleep(time.Second)
+	if err := firstReal.InProgress(); err != nil {
+		t.Fatal(err)
+	}
+	if err := model.Wait(ctx, time.Second); err != nil {
+		t.Fatal(err)
+	}
+	if err := firstModel.InProgress(); err != nil {
+		t.Fatal(err)
+	}
+	// This crosses the original deadline at four seconds while remaining
+	// before the five-second deadline set by InProgress.
+	time.Sleep(3100 * time.Millisecond)
+	noReal, err := realConsumer.FetchNoWait(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for message := range noReal.Messages() {
+		t.Fatalf("real consumer redelivered early: %q", message.Data())
+	}
+	if err := noReal.Error(); err != nil && !errors.Is(err, jetstream.ErrNoMessages) {
+		t.Fatal(err)
+	}
+	if err := model.Wait(ctx, 3100*time.Millisecond); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := modelConsumer.FetchOne(ctx); !errors.Is(err, jetstream.ErrNoMessages) {
+		t.Fatalf("model redelivered early: %v", err)
+	}
+	realSecond, err := realConsumer.Fetch(1, jetstream.FetchMaxWait(3*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondReal := <-realSecond.Messages()
+	secondModelBatch, err := modelConsumer.FetchOne(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondModel := <-secondModelBatch.Messages()
+	if secondReal == nil || secondModel == nil {
+		t.Fatal("redelivery after extended deadline missing")
+	}
+	realMeta, realErr := secondReal.Metadata()
+	modelMeta, modelErr := secondModel.Metadata()
+	if realErr != nil || modelErr != nil || realMeta.NumDelivered != 2 || modelMeta.NumDelivered != 2 {
+		t.Fatalf("redelivery metadata real=%+v %v model=%+v %v", realMeta, realErr, modelMeta, modelErr)
+	}
+	if err := secondReal.DoubleAck(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := secondModel.Ack(); err != nil {
+		t.Fatal(err)
+	}
+}
 
 func TestSimDispatchAckWaitContractAgainstRealCluster(t *testing.T) {
 	all, _ := setup(t)

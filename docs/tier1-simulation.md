@@ -224,6 +224,16 @@ the stale-then-matching durable poll. A three-node fixture removes the core
 subscription before delivery and verifies that the real periodic poll
 interrupts the effect and leaves one canceled terminal journal.
 
+A 1,000-seed heartbeat workload holds a production `wf.Run` effect while
+virtual ticks drive the worker’s real lease-renewal and consumer-progress
+decisions. At the original three-second AckWait boundary, an unprotected
+message redelivers, while early, late, and repeated progress reports extend
+its deadline. The worker then completes one effect and one terminal journal;
+the retained I1/I2/I3/I6 check passes. Seed 42 is pinned and replays across
+processes and under the race detector. A three-node contract compares the
+model with real JetStream across the original and extended deadlines.
+Cooperative multi-worker heartbeat and failure interleavings remain open.
+
 The integrated signal workload follows one workflow across a suspension and
 resume. Production `Client.Start` enqueues its first run, `Worker.handle`
 journals `Suspended`, and production `Client.Signal` publishes `go` and enqueues
