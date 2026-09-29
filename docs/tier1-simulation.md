@@ -25,8 +25,15 @@ transient object read retry on virtual time. A corrupt snapshot object fails
 closed with `ErrGap` after bounded virtual retries. A three-node contract
 compares real and modeled snapshot metadata, object bytes, reconstructed
 records, and tails after two compactions. Snapshot creation and purge still
-run through real JetStream in production; their modeled write decisions are
-the next part of this slice.
+run through real JetStream in production. A second 1,000-seed workload now
+runs production `MaybeSnapshot`, `SnapshotPrefix`, and `PurgeSnapshot` through
+modeled object upload, manifest revision CAS, fixed-bound journal purge, and
+consumed-signal purge. Dropped requests and committed writes with lost
+acknowledgments at each boundary retry to the same logical journal, one
+manifest, and no retained consumed signal. The three-node contract also runs
+production snapshot writes against both transports and compares both
+compactions byte for byte. Worker-triggered snapshot cadence remains to be
+connected to this model.
 
 `sim.Scheduler` chooses seeded actions and records the enabled set, chosen
 action, virtual time, and transport calls in a versioned JSON trace. Replay

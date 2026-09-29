@@ -73,17 +73,19 @@ func DecodeAttempt(data []byte) (AttemptPayload, error) {
 }
 
 type Store struct {
-	js               jetstream.JetStream
-	appendPort       AppendPort
-	readPort         ReadPort
-	snapshotReadPort SnapshotReadPort
-	mu               sync.Mutex
-	stream           jetstream.Stream
-	state            jetstream.KeyValue
+	js                jetstream.JetStream
+	appendPort        AppendPort
+	readPort          ReadPort
+	snapshotReadPort  SnapshotReadPort
+	snapshotWritePort SnapshotWritePort
+	mu                sync.Mutex
+	stream            jetstream.Stream
+	state             jetstream.KeyValue
 }
 
 func New(js jetstream.JetStream) *Store {
-	return &Store{js: js, snapshotReadPort: NewSnapshotReadPort(js)}
+	port := NewSnapshotPort(js)
+	return &Store{js: js, snapshotReadPort: port, snapshotWritePort: port}
 }
 
 // AppendPort is the transport boundary used by the journal CAS decision path.
@@ -122,6 +124,12 @@ func NewWithPorts(appendPort AppendPort, readPort ReadPort) *Store {
 // manifest and object boundary while keeping live reads on ReadPort.
 func NewWithSnapshotReadPort(appendPort AppendPort, readPort ReadPort, snapshotPort SnapshotReadPort) *Store {
 	return &Store{appendPort: appendPort, readPort: readPort, snapshotReadPort: snapshotPort}
+}
+
+// NewWithSnapshotPort also runs snapshot creation and prefix purge decisions
+// against the supplied narrow transport.
+func NewWithSnapshotPort(appendPort AppendPort, readPort ReadPort, snapshotPort SnapshotWritePort) *Store {
+	return &Store{appendPort: appendPort, readPort: readPort, snapshotReadPort: snapshotPort, snapshotWritePort: snapshotPort}
 }
 
 type jetStreamAppendPort struct {

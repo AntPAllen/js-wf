@@ -416,6 +416,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededWorkerLargeResult(loaded.Seed, &loaded)
 	case "snapshot_read_compacted":
 		replayed, err = runSeededSnapshotRead(loaded.Seed, &loaded)
+	case "snapshot_write_compact":
+		replayed, err = runSeededSnapshotWrite(loaded.Seed, &loaded)
 	case "timer_scan_20":
 		replayed, err = runSeededTimerScan(loaded.Seed, &loaded)
 	case "reconcile_loop_20":

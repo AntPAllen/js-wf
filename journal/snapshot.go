@@ -39,6 +39,23 @@ type SnapshotReadPort interface {
 	GetObject(context.Context, string) ([]byte, error)
 }
 
+type SnapshotManifestValue struct {
+	Value    []byte
+	Revision uint64
+}
+
+// SnapshotWritePort extends compacted reads with the exact durable writes
+// used by production snapshot creation and bounded prefix purge.
+type SnapshotWritePort interface {
+	SnapshotReadPort
+	GetManifestRevision(context.Context, string) (SnapshotManifestValue, error)
+	PutObject(context.Context, string, []byte) error
+	CreateManifest(context.Context, string, []byte) error
+	UpdateManifest(context.Context, string, []byte, uint64) error
+	PurgeJournal(context.Context, string, uint64) error
+	PurgeSignals(context.Context, string, uint64) error
+}
+
 type jetStreamSnapshotReadPort struct {
 	js      jetstream.JetStream
 	mu      sync.Mutex
@@ -50,16 +67,64 @@ func NewSnapshotReadPort(js jetstream.JetStream) SnapshotReadPort {
 	return &jetStreamSnapshotReadPort{js: js}
 }
 
+func NewSnapshotPort(js jetstream.JetStream) SnapshotWritePort {
+	return &jetStreamSnapshotReadPort{js: js}
+}
+
 func (p *jetStreamSnapshotReadPort) GetManifest(ctx context.Context, key string) ([]byte, error) {
+	value, err := p.GetManifestRevision(ctx, key)
+	return value.Value, err
+}
+
+func (p *jetStreamSnapshotReadPort) GetManifestRevision(ctx context.Context, key string) (SnapshotManifestValue, error) {
 	state, err := p.stateBucket(ctx)
 	if err != nil {
-		return nil, err
+		return SnapshotManifestValue{}, err
 	}
 	entry, err := state.Get(ctx, key)
 	if err != nil {
-		return nil, err
+		return SnapshotManifestValue{}, err
 	}
-	return entry.Value(), nil
+	return SnapshotManifestValue{Value: entry.Value(), Revision: entry.Revision()}, nil
+}
+
+func (p *jetStreamSnapshotReadPort) PutObject(ctx context.Context, name string, data []byte) error {
+	objects, err := p.objectStore(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = objects.PutBytes(ctx, name, data)
+	return err
+}
+func (p *jetStreamSnapshotReadPort) CreateManifest(ctx context.Context, key string, data []byte) error {
+	state, err := p.stateBucket(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = state.Create(ctx, key, data)
+	return err
+}
+func (p *jetStreamSnapshotReadPort) UpdateManifest(ctx context.Context, key string, data []byte, revision uint64) error {
+	state, err := p.stateBucket(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = state.Update(ctx, key, data, revision)
+	return err
+}
+func (p *jetStreamSnapshotReadPort) PurgeJournal(ctx context.Context, subject string, before uint64) error {
+	stream, err := p.js.Stream(ctx, "WF_JRN")
+	if err != nil {
+		return err
+	}
+	return stream.Purge(ctx, jetstream.WithPurgeSubject(subject), jetstream.WithPurgeSequence(before))
+}
+func (p *jetStreamSnapshotReadPort) PurgeSignals(ctx context.Context, subject string, before uint64) error {
+	stream, err := p.js.Stream(ctx, "WF_SIG")
+	if err != nil {
+		return err
+	}
+	return stream.Purge(ctx, jetstream.WithPurgeSubject(subject), jetstream.WithPurgeSequence(before))
 }
 
 func (p *jetStreamSnapshotReadPort) GetObject(ctx context.Context, name string) ([]byte, error) {
@@ -107,11 +172,24 @@ func (s *Store) MaybeSnapshot(ctx context.Context, typ, id string, interval, kee
 	if err := identity.Validate(typ, id); err != nil {
 		return err
 	}
-	stream, err := s.journalStream(ctx)
-	if err != nil {
-		return err
+	if s.snapshotWritePort == nil {
+		return fmt.Errorf("snapshot write transport unavailable")
 	}
-	last, err := stream.GetLastMsgForSubject(ctx, identity.JournalSubject(typ, id))
+	var last AppendTail
+	var err error
+	if s.appendPort != nil {
+		last, err = s.appendPort.Last(ctx, identity.JournalSubject(typ, id))
+	} else {
+		stream, streamErr := s.journalStream(ctx)
+		if streamErr != nil {
+			return streamErr
+		}
+		raw, lastErr := stream.GetLastMsgForSubject(ctx, identity.JournalSubject(typ, id))
+		err = lastErr
+		if lastErr == nil {
+			last = AppendTail{Sequence: raw.Sequence, Data: raw.Data}
+		}
+	}
 	if errors.Is(err, jetstream.ErrMsgNotFound) {
 		return nil
 	}
@@ -122,19 +200,15 @@ func (s *Store) MaybeSnapshot(ctx context.Context, typ, id string, interval, kee
 	if err := json.Unmarshal(last.Data, &entry); err != nil {
 		return ErrGap
 	}
-	state, err := s.stateKV(ctx)
-	if err != nil {
-		return err
-	}
 	var covered uint64
 	var previous *Snapshot
-	value, err := state.Get(ctx, snapshotKey(typ, id))
+	value, err := s.snapshotWritePort.GetManifestRevision(ctx, snapshotKey(typ, id))
 	if err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
 		return err
 	}
 	if err == nil {
 		previous = new(Snapshot)
-		if json.Unmarshal(value.Value(), previous) != nil || previous.Version != 1 {
+		if json.Unmarshal(value.Value, previous) != nil || previous.Version != 1 {
 			return ErrGap
 		}
 		covered = previous.LastIndex + 1
@@ -171,6 +245,10 @@ func (s *Store) WriteSnapshot(ctx context.Context, typ, id string, keep int) (Sn
 	if keep < 1 {
 		return empty, fmt.Errorf("keep must be positive")
 	}
+	port := s.snapshotWritePort
+	if port == nil {
+		return empty, fmt.Errorf("snapshot write transport unavailable")
+	}
 	records, _, err := s.Read(ctx, typ, id)
 	if err != nil {
 		return empty, err
@@ -181,17 +259,14 @@ func (s *Store) WriteSnapshot(ctx context.Context, typ, id string, keep int) (Sn
 	}
 	prefix := records[:cut]
 	last := prefix[len(prefix)-1]
-	state, err := s.stateKV(ctx)
-	if err != nil {
-		return empty, err
-	}
-	old, err := state.Get(ctx, snapshotKey(typ, id))
+	old, err := port.GetManifestRevision(ctx, snapshotKey(typ, id))
 	if err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
 		return empty, err
 	}
-	if err == nil {
+	oldExists := err == nil
+	if oldExists {
 		var previous Snapshot
-		if json.Unmarshal(old.Value(), &previous) != nil {
+		if json.Unmarshal(old.Value, &previous) != nil {
 			return empty, ErrGap
 		}
 		if previous.LastSeq >= last.Sequence {
@@ -205,22 +280,26 @@ func (s *Store) WriteSnapshot(ctx context.Context, typ, id string, keep int) (Sn
 	digest := sha256.Sum256(data)
 	keyDigest := sha256.Sum256([]byte(identity.Key(typ, id)))
 	objectName := fmt.Sprintf("snapshot-%s-%d-%s", hex.EncodeToString(keyDigest[:8]), last.Sequence, hex.EncodeToString(digest[:8]))
-	objects, err := s.js.ObjectStore(ctx, "WF_BLOB")
+	if err := port.PutObject(ctx, objectName, data); err != nil {
+		return empty, err
+	}
+	get := port.GetObject
+	if waiter, ok := port.(interface {
+		Wait(context.Context, time.Duration) error
+	}); ok {
+		_, err = verifiedSnapshotObjectVirtual(ctx, get, waiter.Wait, objectName, hex.EncodeToString(digest[:]))
+	} else {
+		_, err = verifiedSnapshotObject(ctx, get, objectName, hex.EncodeToString(digest[:]))
+	}
 	if err != nil {
-		return empty, err
-	}
-	if _, err := objects.PutBytes(ctx, objectName, data); err != nil {
-		return empty, err
-	}
-	if _, err := verifiedObject(ctx, objects, objectName, hex.EncodeToString(digest[:])); err != nil {
 		return empty, err
 	}
 	snap := Snapshot{Version: 1, LastSeq: last.Sequence, LastIndex: last.Index, Epoch: last.Epoch, Object: objectName, SHA256: hex.EncodeToString(digest[:])}
 	manifest, _ := json.Marshal(snap)
-	if old == nil {
-		_, err = state.Create(ctx, snapshotKey(typ, id), manifest)
+	if !oldExists {
+		err = port.CreateManifest(ctx, snapshotKey(typ, id), manifest)
 	} else {
-		_, err = state.Update(ctx, snapshotKey(typ, id), manifest, old.Revision())
+		err = port.UpdateManifest(ctx, snapshotKey(typ, id), manifest, old.Revision)
 	}
 	if err != nil {
 		if errors.Is(err, jetstream.ErrKeyExists) || errors.Is(err, jetstream.ErrKeyRevisionMismatch) {
@@ -240,10 +319,15 @@ func (s *Store) PurgeSnapshot(ctx context.Context, typ, id string, snap Snapshot
 	if snap.LastSeq == 0 {
 		return ErrSnapshotStale
 	}
+	port := s.snapshotWritePort
+	if port == nil {
+		return fmt.Errorf("snapshot write transport unavailable")
+	}
 	confirmCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 	var prefix []Record
-	for {
+	confirmed := false
+	for attempt := 0; attempt < 120; attempt++ {
 		var current *Snapshot
 		var err error
 		prefix, current, err = s.loadSnapshot(confirmCtx, typ, id)
@@ -251,19 +335,27 @@ func (s *Store) PurgeSnapshot(ctx context.Context, typ, id string, snap Snapshot
 			return err
 		}
 		if current != nil && current.LastSeq >= snap.LastSeq {
+			confirmed = true
 			break
 		}
-		select {
-		case <-confirmCtx.Done():
-			return ErrSnapshotStale
-		case <-time.After(25 * time.Millisecond):
+		if waiter, ok := port.(interface {
+			Wait(context.Context, time.Duration) error
+		}); ok {
+			if err := waiter.Wait(confirmCtx, 25*time.Millisecond); err != nil {
+				return ErrSnapshotStale
+			}
+		} else {
+			select {
+			case <-confirmCtx.Done():
+				return ErrSnapshotStale
+			case <-time.After(25 * time.Millisecond):
+			}
 		}
 	}
-	stream, err := s.journalStream(ctx)
-	if err != nil {
-		return err
+	if !confirmed {
+		return ErrSnapshotStale
 	}
-	if err := stream.Purge(ctx, jetstream.WithPurgeSubject(identity.JournalSubject(typ, id)), jetstream.WithPurgeSequence(snap.LastSeq+1)); err != nil {
+	if err := port.PurgeJournal(ctx, identity.JournalSubject(typ, id), snap.LastSeq+1); err != nil {
 		return err
 	}
 	var lastSignal uint64
@@ -285,11 +377,7 @@ func (s *Store) PurgeSnapshot(ctx context.Context, typ, id string, snap Snapshot
 	if lastSignal == 0 {
 		return nil
 	}
-	signals, err := s.js.Stream(ctx, "WF_SIG")
-	if err != nil {
-		return err
-	}
-	return signals.Purge(ctx, jetstream.WithPurgeSubject("wf.sig."+typ+"."+id+".*"), jetstream.WithPurgeSequence(lastSignal+1))
+	return port.PurgeSignals(ctx, "wf.sig."+typ+"."+id+".*", lastSignal+1)
 }
 
 func (s *Store) loadSnapshot(ctx context.Context, typ, id string) ([]Record, *Snapshot, error) {

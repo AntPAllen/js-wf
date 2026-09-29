@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -74,6 +75,17 @@ func (m *SignalTransport) PurgeSignal(sequence uint64) {
 	defer m.mu.Unlock()
 	delete(m.signals, sequence)
 	m.event(TransportEvent{Operation: "purge_signal", Sequence: sequence, Outcome: "ok"})
+}
+
+func (m *SignalTransport) PurgeSignalPrefix(prefix string, before uint64) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for seq, message := range m.signals {
+		if seq < before && strings.HasPrefix(message.Subject, prefix) {
+			delete(m.signals, seq)
+		}
+	}
+	m.event(TransportEvent{Operation: "purge_signal_prefix", Subject: prefix, Sequence: before, Outcome: "ok"})
 }
 
 func (m *SignalTransport) SetJournal(typ, id string, records []journal.Record) {

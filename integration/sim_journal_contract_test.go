@@ -76,7 +76,8 @@ func TestSimSnapshotReadContractAgainstRealCluster(t *testing.T) {
 	schedule := sim.NewScheduler(27)
 	live := sim.NewJournalTransport(schedule)
 	snapshots := sim.NewSnapshotReadTransport(schedule)
-	modeled := journal.NewWithSnapshotReadPort(live, live, snapshots)
+	snapshots.BindJournal(live)
+	modeled := journal.NewWithSnapshotPort(live, live, snapshots)
 	var records []journal.Record
 	appendBoth := func(kind journal.Kind) {
 		t.Helper()
@@ -97,7 +98,6 @@ func TestSimSnapshotReadContractAgainstRealCluster(t *testing.T) {
 		appendBoth(journal.StepRequested)
 		appendBoth(journal.StepCompleted)
 	}
-	subject := identity.JournalSubject(typ, id)
 	state, err := all[1].KeyValue(ctx, "WF_STATE")
 	if err != nil {
 		t.Fatal(err)
@@ -111,11 +111,10 @@ func TestSimSnapshotReadContractAgainstRealCluster(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		modelSnap, err := snapshots.SetSnapshot(typ, id, records[:len(records)-keep])
+		modelSnap, err := modeled.SnapshotPrefix(ctx, typ, id, keep)
 		if err != nil || realSnap != modelSnap {
 			t.Fatalf("snapshot keep=%d real=%+v model=%+v err=%v", keep, realSnap, modelSnap, err)
 		}
-		live.PurgeBefore(subject, modelSnap.LastSeq+1)
 		realRecords, realTail, realErr := real.Read(ctx, typ, id)
 		modelRecords, modelTail, modelErr := modeled.Read(ctx, typ, id)
 		if realErr != nil || modelErr != nil || realTail != modelTail || !reflect.DeepEqual(realRecords, modelRecords) || !reflect.DeepEqual(realRecords, records) {
