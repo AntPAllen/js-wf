@@ -64,7 +64,7 @@ Nothing else starts until a test can kill a JetStream node mid-publish and asser
 
 ## Phase 1 — Idempotent invocation (I1)
 
-`start(type, id, input)` becomes a single publish to `wf.inv.<type>.<id>` on a stream with `MaxMsgsPerSubject=1` and `DiscardNewPerSubject`. The server rejects the second and later publishes with a `maximum messages per subject exceeded` error, which the SDK maps to `ErrAlreadyStarted` and treats as success (returning the existing invocation handle).
+`start(type, id, input)` becomes a single publish to `wf.inv.<type>.<id>` on a stream with `MaxMsgsPerSubject=1` and `DiscardNewPerSubject`. Every publish also carries `Nats-Expected-Last-Subject-Sequence: 0`, so a retained invocation cannot be replaced by a later write even if the per-subject limit is ineffective during cluster movement. The server rejects the second and later publishes; the SDK reads the retained invocation, compares its input hash, and returns either `ErrAlreadyStarted` with its original handle or `ErrInputMismatch`.
 
 The start must also enqueue the first run. Publish `WF_INV` first, then `WF_RUN` with `Nats-Msg-Id = start:<type>:<id>`. The dispatcher-side reconciler scans retained `WF_INV` records with no journal and repeats the enqueue after a crash or uncertain acknowledgment. This two-write repair path is required on both 2.12+ and older servers because the records belong to different streams.
 
@@ -89,6 +89,7 @@ The start must also enqueue the first run. Publish `WF_INV` first, then `WF_RUN`
 - Subject cardinality: `DiscardNewPerSubject` requires the per-subject index; measure memory for 10 M subjects on a 3-node cluster and record it in the doc's risk section.
 - `Nats-Msg-Id` dedup window elapsing between a failed and a retried publish (window default 2 min). The fallback path must tolerate a duplicate `WF_RUN` message, which phase 3's lease makes harmless; test by setting the window to 1 s.
 - Server version below 2.12 on one node only (rolling upgrade): the two-write Start and repair path must preserve I1 and I5 through leader movement. Native timer mode must fail closed if cluster-wide support is unproven. Test with a mixed-version cluster fixture.
+- Simulate a one-shot failure of the `WF_INV` per-subject limit after a prior invocation has committed. A production `Start` retry must still preserve the first sequence through its subject-tail CAS; a control publish without the CAS header must demonstrate that the model would accept a second generation. Check the retained sequence before and after an actual mixed-version rolling upgrade.
 
 ## Phase 2 — Journal with CAS append (I2, I6)
 

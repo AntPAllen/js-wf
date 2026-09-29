@@ -198,6 +198,9 @@ func (c *Client) start(ctx context.Context, typ, id string, input []byte, parent
 	digest := sha256.Sum256(input)
 	m := &nats.Msg{Subject: identity.InvocationSubject(typ, id), Data: input, Header: nats.Header{}}
 	m.Header.Set(inputHashHeader, hex.EncodeToString(digest[:]))
+	// Keep write-once independent of WF_INV's per-subject discard rule. The
+	// modeled and real transports both see this CAS precondition.
+	m.Header.Set(jetstream.ExpectedLastSubjSeqHeader, "0")
 	if parentType != "" {
 		m.Header.Set(ParentTypeHeader, parentType)
 		m.Header.Set(ParentIDHeader, parentID)

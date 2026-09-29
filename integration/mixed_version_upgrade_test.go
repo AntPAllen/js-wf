@@ -54,6 +54,22 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 		t.Fatal(err)
 	}
 	defer cluster.Close()
+	defer func() {
+		if !t.Failed() {
+			return
+		}
+		for node := 0; node < 3; node++ {
+			logs, err := os.ReadFile(cluster.LogPath(node))
+			if err != nil {
+				t.Logf("node %d log read: %v", node, err)
+				continue
+			}
+			if len(logs) > 8192 {
+				logs = logs[len(logs)-8192:]
+			}
+			t.Logf("node %d log tail:\n%s", node, logs)
+		}
+	}()
 	all := make([]jetstream.JetStream, 3)
 	for i, nc := range cluster.Clients {
 		all[i], err = jetstream.New(nc)
@@ -67,7 +83,7 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	if version := cluster.Clients[1].ConnectedServerVersion(); strings.HasPrefix(version, "2.11.") {
 		t.Fatalf("new peer version=%q, want 2.12+", version)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 75*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 	var backend provision.TimerBackend
 	for ctx.Err() == nil {
@@ -161,6 +177,14 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	if retry, err := c.Start(ctx, typ, repairedID, payload); !errors.Is(err, client.ErrAlreadyStarted) || retry.InvSeq != ack.Sequence {
 		t.Fatalf("repaired invocation matching retry: handle=%+v err=%v want seq=%d", retry, err, ack.Sequence)
 	}
+	invocations, err := all[1].Stream(ctx, "WF_INV")
+	if err != nil {
+		t.Fatal(err)
+	}
+	retained, err := invocations.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, repairedID))
+	if err != nil || retained.Sequence != ack.Sequence {
+		t.Fatalf("matching retry changed invocation generation: retained=%+v err=%v want seq=%d", retained, err, ack.Sequence)
+	}
 	if report, err := integrity.Check(ctx, all[1]); err != nil || report.Invocations != 2 || report.Journals != 2 || report.Terminal != 2 {
 		t.Fatalf("mixed-version retained audit: report=%+v err=%v", report, err)
 	}
@@ -169,6 +193,10 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	}
 	if err := cluster.UpgradeNode(0); err != nil {
 		t.Fatalf("restart old peer on pinned binary: %v", err)
+	}
+	readyAt, err := waitMixedVersionReplicaCatchup(ctx, all[1])
+	if err != nil {
+		t.Fatalf("upgraded replica catch-up: %v", err)
 	}
 	if version := cluster.Clients[0].ConnectedServerVersion(); strings.HasPrefix(version, "2.11.") {
 		t.Fatalf("upgraded peer still reports %q", version)
@@ -192,9 +220,12 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	}
 	upgradedClient := client.New(upgraded)
 	for _, completedID := range []string{id, repairedID} {
-		value, err := upgradedClient.Await(ctx, typ, completedID)
+		t.Logf("pre-read %s: upgraded=%s survivor=%s", completedID, mixedVersionResultProbe(ctx, upgraded, typ, completedID), mixedVersionResultProbe(ctx, all[1], typ, completedID))
+		readCtx, stopRead := context.WithTimeout(ctx, 30*time.Second)
+		value, err := upgradedClient.Await(readCtx, typ, completedID)
+		stopRead()
 		if err != nil || string(value) != `"done"` {
-			t.Fatalf("upgraded peer retained result %s=%s err=%v", completedID, value, err)
+			t.Fatalf("upgraded peer retained result %s=%s err=%v after_ready=%s upgraded=%s survivor=%s", completedID, value, err, time.Since(readyAt), mixedVersionResultProbe(ctx, upgraded, typ, completedID), mixedVersionResultProbe(ctx, all[1], typ, completedID))
 		}
 	}
 	if _, err := upgradedClient.Start(ctx, typ, postUpgradeID, payload); err != nil {
@@ -207,4 +238,63 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	if report, err := integrity.Check(ctx, upgraded); err != nil || report.Invocations != 3 || report.Journals != 3 || report.Terminal != 3 {
 		t.Fatalf("post-upgrade retained audit: report=%+v err=%v", report, err)
 	}
+}
+
+func mixedVersionResultProbe(ctx context.Context, js jetstream.JetStream, typ, id string) string {
+	attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+	defer stop()
+	inv, err := js.Stream(attempt, "WF_INV")
+	if err != nil {
+		return fmt.Sprintf("inv-stream-error=%v", err)
+	}
+	message, err := inv.GetLastMsgForSubject(attempt, identity.InvocationSubject(typ, id))
+	if err != nil {
+		return fmt.Sprintf("inv-read-error=%v", err)
+	}
+	state, err := js.KeyValue(attempt, "WF_STATE")
+	if err != nil {
+		return fmt.Sprintf("inv-seq=%d state-bucket-error=%v", message.Sequence, err)
+	}
+	entry, err := state.Get(attempt, identity.Key(typ, id))
+	if err != nil {
+		return fmt.Sprintf("inv-seq=%d state-read-error=%v", message.Sequence, err)
+	}
+	return fmt.Sprintf("inv-seq=%d state-rev=%d state=%s", message.Sequence, entry.Revision(), entry.Value())
+}
+
+func waitMixedVersionReplicaCatchup(ctx context.Context, js jetstream.JetStream) (time.Time, error) {
+	var lastErr error
+	for until := time.Now().Add(30 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
+		ready := true
+		for _, name := range []string{"WF_INV", "WF_RUN", "WF_JRN", "KV_WF_STATE"} {
+			attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+			stream, err := js.Stream(attempt, name)
+			if err == nil {
+				var info *jetstream.StreamInfo
+				info, err = stream.Info(attempt)
+				if err == nil && (info.Cluster == nil || info.Cluster.Leader == "" || len(info.Cluster.Replicas) != 2) {
+					err = fmt.Errorf("%s replica status: %+v", name, info.Cluster)
+				}
+				if err == nil {
+					for _, replica := range info.Cluster.Replicas {
+						if !replica.Current || replica.Offline {
+							err = fmt.Errorf("%s replica not current: %+v", name, replica)
+							break
+						}
+					}
+				}
+			}
+			stop()
+			if err != nil {
+				lastErr = err
+				ready = false
+				break
+			}
+		}
+		if ready {
+			return time.Now(), nil
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	return time.Time{}, fmt.Errorf("replicas did not catch up: %v (context: %v)", lastErr, ctx.Err())
 }

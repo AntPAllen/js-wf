@@ -79,6 +79,10 @@ func (m *StartTransport) QueueFault(f StartFault) error {
 		if f.Operation != "last_invocation" {
 			return fmt.Errorf("invalid %s fault %q", f.Operation, f.Kind)
 		}
+	case "bypass_subject_limit":
+		if f.Operation != "publish_invocation" {
+			return fmt.Errorf("invalid %s fault %q", f.Operation, f.Kind)
+		}
 	default:
 		return fmt.Errorf("invalid start fault %q", f.Kind)
 	}
@@ -102,9 +106,17 @@ func (m *StartTransport) PublishInvocation(ctx context.Context, msg *nats.Msg) (
 		return 0, ErrTransportLost
 	}
 	if _, exists := m.invocations[msg.Subject]; exists {
-		event.Outcome = "subject_full"
-		m.event(event)
-		return 0, &jetstream.APIError{Code: 400, Description: "maximum messages per subject exceeded"}
+		if fault == "bypass_subject_limit" {
+			if msg.Header.Get(jetstream.ExpectedLastSubjSeqHeader) == "0" {
+				event.Outcome = "cas_reject"
+				m.event(event)
+				return 0, &jetstream.APIError{Code: 400, Description: "wrong last sequence"}
+			}
+		} else {
+			event.Outcome = "subject_full"
+			m.event(event)
+			return 0, &jetstream.APIError{Code: 400, Description: "maximum messages per subject exceeded"}
+		}
 	}
 	m.invSeq++
 	copyMsg := jetstream.RawStreamMsg{Subject: msg.Subject, Sequence: m.invSeq, Header: cloneHeader(msg.Header), Data: append([]byte(nil), msg.Data...)}

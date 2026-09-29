@@ -89,6 +89,34 @@ func TestStartTransportFaultBoundaries(t *testing.T) {
 	})
 }
 
+func TestStartSubjectTailCASDefendsAgainstIgnoredSubjectLimit(t *testing.T) {
+	ctx := context.Background()
+	model := NewStartTransport(NewScheduler(104))
+	c := client.NewWithStartPort(model)
+	first, err := c.Start(ctx, "test", "same", []byte(`1`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := model.QueueFault(StartFault{Operation: "publish_invocation", Kind: "bypass_subject_limit"}); err != nil {
+		t.Fatal(err)
+	}
+	retry, err := c.Start(ctx, "test", "same", []byte(`1`))
+	stored, ok := model.Invocation(identity.InvocationSubject("test", "same"))
+	if !errors.Is(err, client.ErrAlreadyStarted) || retry.InvSeq != first.InvSeq || !ok || stored.Sequence != first.InvSeq {
+		t.Fatalf("CAS-protected retry: first=%+v retry=%+v stored=%+v err=%v", first, retry, stored, err)
+	}
+	// Negative control: strip the CAS header while the server-side subject
+	// limit is ignored. The same transport now accepts a new generation.
+	if err := model.QueueFault(StartFault{Operation: "publish_invocation", Kind: "bypass_subject_limit"}); err != nil {
+		t.Fatal(err)
+	}
+	unguarded, err := model.PublishInvocation(ctx, &nats.Msg{Subject: identity.InvocationSubject("test", "same"), Data: []byte(`1`), Header: nats.Header{}})
+	stored, ok = model.Invocation(identity.InvocationSubject("test", "same"))
+	if err != nil || !ok || unguarded <= first.InvSeq || stored.Sequence != unguarded {
+		t.Fatalf("missing-CAS mutation was not retained: first=%+v stored=%+v ack=%d err=%v", first, stored, unguarded, err)
+	}
+}
+
 func TestMissingRunMessageIDMutationRetainsDuplicate(t *testing.T) {
 	ctx := context.Background()
 	const subject = "wf.run.0"
