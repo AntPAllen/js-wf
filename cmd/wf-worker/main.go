@@ -49,7 +49,7 @@ func run(ctx context.Context, args []string) error {
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	if flags.NArg() != 0 || *id == "" || *pluginPath == "" || *pluginSymbol == "" || *replicas < 1 || *replicas > 3 || *repairInterval <= 0 || *repairBudget < 1 {
+	if flags.NArg() != 0 || *id == "" || *pluginPath == "" || *pluginSymbol == "" || *replicas < 1 || *replicas > 3 || *repairInterval <= 0 || *repairInterval > 10*time.Second || *repairBudget < 2 {
 		return fmt.Errorf("usage: wf-worker -id ID -handler-plugin FILE [-mode static|kv] [-metrics-addr ADDR]")
 	}
 	if *mode != "static" && *mode != "kv" {
@@ -112,7 +112,7 @@ func run(ctx context.Context, args []string) error {
 	}()
 	runCtx, stopRun := context.WithCancel(ctx)
 	defer stopRun()
-	results := make(chan error, 6)
+	results := make(chan error, 7)
 	loops := 1
 	if *mode == "kv" {
 		go func() { results <- w.RunKVAssignments(runCtx) }()
@@ -132,6 +132,9 @@ func run(ctx context.Context, args []string) error {
 			},
 			func(c context.Context) error {
 				return reconcile.RunSuspendedLoop(c, js, *id, *repairInterval, *repairBudget)
+			},
+			func(c context.Context) error {
+				return reconcile.RunTombstoneLoop(c, js, *id, *repairInterval, *repairBudget)
 			},
 		}
 		if backend == provision.FallbackTimers {
