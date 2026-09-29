@@ -1,0 +1,519 @@
+{
+  "version": 3,
+  "seed": 4,
+  "workload": "blob_sweep",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "clean",
+        "delete_ack_lost",
+        "delete_drop",
+        "snapshot_corrupt",
+        "snapshot_read_fault",
+        "young_orphan"
+      ],
+      "chosen": "delete_ack_lost"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "input-shared",
+      "data_sha256": "b1ce36bfe91321cb90b4282fab7312ef72c8c28ef7dfc3935c2d1ce4d71d3b20",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "signal-snapshot",
+      "data_sha256": "4fac64db6fa201a2df8517a07f2612f12b4a1f781468d0382268a246877dd8e7",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "step-result-snapshot",
+      "data_sha256": "dabfae35290ab8bb5d74f265d3da8ee5233f5123283b7012c98e41b8545c1029",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "terminal-result-state",
+      "data_sha256": "7d2274148e1676c05211f29e57734c3decf7478cd9419ce75a4be1bb01a8bdc3",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "input-orphan",
+      "data_sha256": "5fd3a8ced0a530a148e3ee34881f8ede9b37b78879d8390cfdca62b9fe04bc65",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "user-unmanaged",
+      "data_sha256": "63f3943d78847f3fdf3ea13a4424be875c8359f8b17a39c6643e387c30697e33",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "recent-orphan",
+      "data_sha256": "ff90ceb120f813c479a9fe3854ef1f6e4a4a29392466dfc153043f0f3a086e17",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_INV",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_INV",
+      "sequence": 2,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_SIG",
+      "sequence": 1,
+      "data_sha256": "d041924c15885af6d06530a425c6dbffc80520150c4dd264f40b4364b12421a8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_JRN",
+      "sequence": 1,
+      "data_sha256": "73082ae47aa7bda6968ad2f83c575ed456a6a367123afc7b117886192593935e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_JRN",
+      "sequence": 2,
+      "data_sha256": "cba06b5736faf67e54b07b561eae94395e774c517a7d910a54369e1263ccfbd4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_JRN",
+      "sequence": 3,
+      "data_sha256": "644f9e05cff133775672486d7a6fb14e1b9b0cafe8b293af7fca1ac064d22433",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_purge",
+      "subject": "WF_JRN",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "snapshot-one",
+      "data_sha256": "143380e0b3c0dd89639fb47e0107f1cdb5e8e383c52f7d57f73747e6d297f06e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "snap.test.one",
+      "sequence": 1,
+      "data_sha256": "bc3520af76497ccb967546b34fc6ffbee56328353494573e98ede3145b73ba61",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.two",
+      "sequence": 2,
+      "data_sha256": "387f8553325c0b19bcf8e4201cbee9be1eba6ec948d67b873c0be210d4c47fb6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "scan.cursor.v1",
+      "sequence": 3,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_INV",
+      "expected": 1,
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_INV",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_INV",
+      "sequence": 2,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_SIG",
+      "expected": 1,
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_SIG",
+      "sequence": 1,
+      "data_sha256": "d041924c15885af6d06530a425c6dbffc80520150c4dd264f40b4364b12421a8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_JRN",
+      "expected": 1,
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 1,
+      "data_sha256": "73082ae47aa7bda6968ad2f83c575ed456a6a367123afc7b117886192593935e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 2,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 3,
+      "data_sha256": "644f9e05cff133775672486d7a6fb14e1b9b0cafe8b293af7fca1ac064d22433",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_keys",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "scan.cursor.v1",
+      "sequence": 3,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.test.one",
+      "sequence": 1,
+      "data_sha256": "bc3520af76497ccb967546b34fc6ffbee56328353494573e98ede3145b73ba61",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-one",
+      "data_sha256": "143380e0b3c0dd89639fb47e0107f1cdb5e8e383c52f7d57f73747e6d297f06e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "test.two",
+      "sequence": 2,
+      "data_sha256": "387f8553325c0b19bcf8e4201cbee9be1eba6ec948d67b873c0be210d4c47fb6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_list",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "input-orphan",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_INV",
+      "expected": 1,
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_INV",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_INV",
+      "sequence": 2,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_SIG",
+      "expected": 1,
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_SIG",
+      "sequence": 1,
+      "data_sha256": "d041924c15885af6d06530a425c6dbffc80520150c4dd264f40b4364b12421a8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_JRN",
+      "expected": 1,
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 1,
+      "data_sha256": "73082ae47aa7bda6968ad2f83c575ed456a6a367123afc7b117886192593935e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 2,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 3,
+      "data_sha256": "644f9e05cff133775672486d7a6fb14e1b9b0cafe8b293af7fca1ac064d22433",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_keys",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "scan.cursor.v1",
+      "sequence": 3,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.test.one",
+      "sequence": 1,
+      "data_sha256": "bc3520af76497ccb967546b34fc6ffbee56328353494573e98ede3145b73ba61",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-one",
+      "data_sha256": "143380e0b3c0dd89639fb47e0107f1cdb5e8e383c52f7d57f73747e6d297f06e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "test.two",
+      "sequence": 2,
+      "data_sha256": "387f8553325c0b19bcf8e4201cbee9be1eba6ec948d67b873c0be210d4c47fb6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_list",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_purge",
+      "subject": "WF_INV",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_purge",
+      "subject": "WF_INV",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_purge",
+      "subject": "WF_SIG",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_purge",
+      "subject": "WF_JRN",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_purge",
+      "subject": "WF_JRN",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "snap.test.one",
+      "expected": 1,
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "test.two",
+      "expected": 2,
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_INV",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_SIG",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_JRN",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_keys",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "scan.cursor.v1",
+      "sequence": 3,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_list",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "input-shared",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "signal-snapshot",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "snapshot-one",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "step-result-snapshot",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "terminal-result-state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_blob_sweep",
+      "sequence": 5,
+      "outcome": "delete_ack_lost"
+    }
+  ]
+}

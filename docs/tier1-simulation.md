@@ -196,15 +196,29 @@ generation, and KV revision checks through a narrow invocation lookup and
 delete port. The full production sweep also enumerates modeled state keys,
 skips non-tombstone entries, and makes an idempotent second pass. It covers a
 missing or held old invocation, a reused ID, an unexpired marker, a dry run,
-a state replacement before delete, and dropped
-or committed deletes with lost acknowledgments. The dropped delete is retried
+a state replacement before delete, and dropped or committed deletes with lost
+acknowledgments. The dropped delete is retried
 after faults heal; the lost acknowledgment leaves the key absent. Two traces
 pin the lost-ack and replacement cuts, and exact replay, cross-process
 traces, and a race run pass. A three-node contract compares the complete real
 and modeled sweep results and retained keys for absent, held, reused, and
 unexpired generations; three repeats and a race run passed. This slice does
-not yet model the complete
-retention purge or blob reclamation.
+not yet model the complete retention purge.
+
+A separate 1,000-seed workload now runs production
+`SweepBlobsQuiescentWithPort` across modeled `WF_INV`, `WF_SIG`, and `WF_JRN`
+messages, KV values, snapshot objects, and Object Store listings. It retains
+shared input, signal, step, terminal, and snapshot references; skips stream
+sequence holes and young or unmanaged objects; and reclaims orphans after
+their references are removed. Dropped and lost delete acknowledgments,
+temporarily unavailable snapshot reads, and corrupt snapshot bytes abort
+the pass at the expected cut, then recover after the fault clears. Two pinned
+traces cover a lost delete reply and a missing snapshot read; exact replay,
+cross-process traces, and a race run pass. A three-node contract compares
+the full real and modeled sweep result before and after removing retained
+references; three repeated runs and a race run passed. Reference removal in
+this workload is a fixture action; production `retention.Purge` stages are
+not yet scheduled through the model.
 
 The integrated short-handler workload runs production `Client.Start` and
 `Worker.handle` over a shared modeled run stream and durable consumer. Its
