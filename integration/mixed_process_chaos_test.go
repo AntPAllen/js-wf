@@ -45,6 +45,19 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer cluster.Close()
+	defer func() {
+		output := os.Getenv("FAULT_SCHEDULE_OUT")
+		if !t.Failed() || output == "" {
+			return
+		}
+		prefix := strings.TrimSuffix(output, filepath.Ext(output))
+		for i := range cluster.Commands {
+			data, readErr := os.ReadFile(cluster.LogPath(i))
+			if readErr == nil {
+				_ = os.WriteFile(fmt.Sprintf("%s-server-%d.log", prefix, i), data, 0644)
+			}
+		}
+	}()
 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
 	defer cancel()
 	js := make([]jetstream.JetStream, 3)
@@ -430,10 +443,32 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	terminalStream, err := third.Stream(ctx, "WF_JRN")
-	if err != nil {
-		t.Fatal(err)
+	var terminalStream jetstream.Stream
+	restartedReadStarted := time.Now()
+	readinessAttempts := 0
+	until = time.Now().Add(30 * time.Second)
+	for time.Now().Before(until) && ctx.Err() == nil {
+		readinessAttempts++
+		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		terminalStream, err = third.Stream(attempt, "WF_JRN")
+		if err == nil {
+			var streamInfo *jetstream.StreamInfo
+			streamInfo, err = terminalStream.Info(attempt)
+			if err == nil && streamInfo.Cluster != nil && streamInfo.Cluster.Leader != "" {
+				stop()
+				break
+			}
+			if err == nil {
+				err = fmt.Errorf("WF_JRN has no leader after restart")
+			}
+		}
+		stop()
+		time.Sleep(100 * time.Millisecond)
 	}
+	if err != nil || terminalStream == nil {
+		t.Fatalf("restarted node WF_JRN readiness after %s and %d attempts: %v (test context: %v)", time.Since(restartedReadStarted), readinessAttempts, err, ctx.Err())
+	}
+	t.Logf("restarted node WF_JRN ready in %s after %d attempts", time.Since(restartedReadStarted), readinessAttempts)
 	seen := map[string]bool{}
 	for _, childID := range childIDs {
 		if childID == "" || seen[childID] {
