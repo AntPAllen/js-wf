@@ -39,6 +39,7 @@ var _ reconcile.TimerScanPort = (*SignalTransport)(nil)
 var _ reconcile.SuspendedScanPort = (*SignalTransport)(nil)
 var _ client.SignalPort = (*SignalTransport)(nil)
 var _ worker.InvocationPort = (*SignalTransport)(nil)
+var _ worker.CancellationPollPort = (*SignalTransport)(nil)
 
 func NewSignalTransport(schedule *Scheduler) *SignalTransport {
 	return &SignalTransport{
@@ -111,6 +112,30 @@ func (m *SignalTransport) GetSignal(ctx context.Context, sequence uint64) (*jets
 	message.Header = cloneHeader(message.Header)
 	message.Data = append([]byte(nil), message.Data...)
 	return &message, nil
+}
+
+// LastGeneration models the retained WF_SIG lookup used when a worker misses
+// the core cancellation notification.
+func (m *SignalTransport) LastGeneration(ctx context.Context, subject string) (string, error) {
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var latest uint64
+	var generation string
+	for sequence, message := range m.signals {
+		if message.Subject == subject && sequence > latest {
+			latest = sequence
+			generation = message.Header.Get("Wf-Inv-Seq")
+		}
+	}
+	if latest == 0 {
+		m.event(TransportEvent{Operation: "cancel_poll_last", Subject: subject, Outcome: "not_found"})
+		return "", jetstream.ErrMsgNotFound
+	}
+	m.event(TransportEvent{Operation: "cancel_poll_last", Subject: subject, Sequence: latest, Outcome: generation})
+	return generation, nil
 }
 
 func (m *SignalTransport) GetSignalAfter(ctx context.Context, subject string, sequence uint64) (*jetstream.RawStreamMsg, error) {

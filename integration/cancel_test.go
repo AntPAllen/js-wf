@@ -185,3 +185,67 @@ func TestCancellationInterruptsRunningEffect(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestRunningCancellationRecoveredByDurablePoll(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	defer cancel()
+	const typ, id = "cancel", "missed-notification"
+	entered := make(chan struct{})
+	effectStopped := make(chan struct{})
+	w, err := worker.New(ctx, all[1], "polling-cancel-worker", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		_, err := wf.Run(c, "block", 0, func(effectCtx context.Context) (int, error) {
+			close(entered)
+			<-effectCtx.Done()
+			close(effectStopped)
+			return 0, effectCtx.Err()
+		})
+		return nil, err
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Remove and flush the core subscription before delivery. The durable
+	// WF_SIG lookup is then the only path that can stop the blocked effect.
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := all[1].Conn().FlushWithContext(ctx); err != nil {
+		t.Fatal(err)
+	}
+	workerCtx, stop := context.WithCancel(ctx)
+	defer stop()
+	done := make(chan error, 1)
+	go func() { done <- w.RunPartition(workerCtx, identity.Partition(typ, id, provision.Partitions)) }()
+	c := client.New(all[0])
+	if _, err := c.Start(ctx, typ, id, []byte(`null`)); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-entered:
+	case <-ctx.Done():
+		t.Fatal("effect did not start")
+	}
+	if _, err := c.Cancel(ctx, typ, id); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Await(ctx, typ, id); !errors.Is(err, client.ErrCancelled) {
+		t.Fatalf("durably polled result: %v", err)
+	}
+	select {
+	case <-effectStopped:
+	case <-ctx.Done():
+		t.Fatal("durable poll did not interrupt running effect")
+	}
+	stop()
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+	records, _, err := journal.New(all[2]).Read(ctx, typ, id)
+	if err != nil || len(records) != 4 || records[1].Kind != journal.StepRequested || records[2].Kind != journal.SignalConsumed || records[3].Kind != journal.Failed {
+		t.Fatalf("durably polled journal: %+v err=%v", records, err)
+	}
+	if _, err := integrity.Check(ctx, all[0]); err != nil {
+		t.Fatal(err)
+	}
+}

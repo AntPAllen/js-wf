@@ -71,7 +71,23 @@ type Worker struct {
 	cancelWaiters              map[string]*cancelWaiter
 	cancelStream               jetstream.Stream
 	cancelSubscription         *nats.Subscription
+	cancelPollPort             CancellationPollPort
 	modeledCancelNotifications bool
+}
+
+// CancellationPollPort reads the latest durable cancel signal for one subject.
+type CancellationPollPort interface {
+	LastGeneration(context.Context, string) (string, error)
+}
+
+type jetStreamCancellationPollPort struct{ stream jetstream.Stream }
+
+func (p jetStreamCancellationPollPort) LastGeneration(ctx context.Context, subject string) (string, error) {
+	message, err := p.stream.GetLastMsgForSubject(ctx, subject)
+	if err != nil {
+		return "", err
+	}
+	return message.Header.Get("Wf-Inv-Seq"), nil
 }
 
 type Option func(*Worker) error
@@ -155,6 +171,7 @@ func New(ctx context.Context, js jetstream.JetStream, id string, handlers map[st
 	if err != nil {
 		return nil, fmt.Errorf("signal stream: %w", err)
 	}
+	w.cancelPollPort = jetStreamCancellationPollPort{stream: w.cancelStream}
 	w.cancelSubscription, err = js.Conn().Subscribe("wf.sig.*.*."+client.CancelSignalName, w.observeCancel)
 	if err != nil {
 		return nil, err
@@ -182,6 +199,7 @@ type ModeledWorkerPorts struct {
 	// Enable waiter registration for modeled core notifications. The caller
 	// delivers committed notifications through ObserveCancellationNotification.
 	CancellationNotifications bool
+	CancellationPoll          CancellationPollPort
 }
 
 // NewWithPorts builds a worker whose delivery and execution decisions run
@@ -192,7 +210,7 @@ func NewWithPorts(id string, handlers map[string]Handler, ports ModeledWorkerPor
 	if id == "" || ports.Journal == nil || ports.Leases == nil || ports.Outcome == nil || ports.Invocation == nil || ports.Signals == nil || ports.Client == nil {
 		return nil, fmt.Errorf("invalid modeled worker configuration")
 	}
-	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, cancelWaiters: make(map[string]*cancelWaiter), modeledCancelNotifications: ports.CancellationNotifications}, nil
+	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, cancelWaiters: make(map[string]*cancelWaiter), modeledCancelNotifications: ports.CancellationNotifications, cancelPollPort: ports.CancellationPoll}, nil
 }
 
 type panicRetryError struct{ attempt int }
@@ -943,11 +961,37 @@ func (w *Worker) ObserveCancellationNotification(message *nats.Msg) {
 	w.observeCancel(message)
 }
 
+// PollRunningCancellation checks retained WF_SIG state for a missed core
+// notification. The real worker calls the same decision on registration and
+// every 15 seconds; modeled workers can call it at virtual-time ticks.
+func (w *Worker) PollRunningCancellation(ctx context.Context, typ, id string, invSeq uint64) (bool, error) {
+	return w.pollRunningCancellation(ctx, typ, id, strconv.FormatUint(invSeq, 10), nil)
+}
+
+func (w *Worker) pollRunningCancellation(ctx context.Context, typ, id, generation string, expected *cancelWaiter) (bool, error) {
+	if w.cancelPollPort == nil {
+		return false, fmt.Errorf("cancellation poll transport unavailable")
+	}
+	subject := "wf.sig." + typ + "." + id + "." + client.CancelSignalName
+	latest, err := w.cancelPollPort.LastGeneration(ctx, subject)
+	if errors.Is(err, jetstream.ErrMsgNotFound) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	if latest != generation {
+		return false, nil
+	}
+	w.markRunningCancellation(cancelKey(typ, id, generation), expected)
+	return true, nil
+}
+
 // watchRunningCancellation observes the core signal notification and checks
 // the durable stream at registration and after gaps. Journal writes remain on
 // the execute goroutine after the handler has returned.
 func (w *Worker) watchRunningCancellation(ctx context.Context, typ, id string, invSeq uint64, cancelHandler context.CancelFunc) func() bool {
-	if w.cancelStream == nil && !w.modeledCancelNotifications {
+	if w.cancelStream == nil && !w.modeledCancelNotifications && w.cancelPollPort == nil {
 		return func() bool { return false }
 	}
 	generation := strconv.FormatUint(invSeq, 10)
@@ -965,13 +1009,11 @@ func (w *Worker) watchRunningCancellation(ctx context.Context, typ, id string, i
 			defer close(done)
 			ticker := time.NewTicker(15 * time.Second)
 			defer ticker.Stop()
-			subject := "wf.sig." + typ + "." + id + "." + client.CancelSignalName
 			for watchCtx.Err() == nil {
 				lookupCtx, finish := context.WithTimeout(watchCtx, 2*time.Second)
-				message, err := w.cancelStream.GetLastMsgForSubject(lookupCtx, subject)
+				found, _ := w.pollRunningCancellation(lookupCtx, typ, id, generation, waiter)
 				finish()
-				if err == nil && message.Header.Get("Wf-Inv-Seq") == generation {
-					w.markRunningCancellation(key, waiter)
+				if found {
 					return
 				}
 				select {

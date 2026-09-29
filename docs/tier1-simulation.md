@@ -216,8 +216,13 @@ committed signals with lost replies and uncertain wakeup enqueues still
 interrupt the effect. The worker journals one `SignalConsumed` and `Failed`,
 without a `StepCompleted`, and the retained I1/I2/I3/I6 check passes. A
 lost-ack seed is pinned, and exact replay, cross-process traces, and a race
-run pass. The modeled path does not yet exercise the worker’s durable
-15-second cancellation poll after a lost core notification.
+run pass. The same production cancel-generation lookup now reads retained
+`WF_SIG` through a narrow port. Seeded modes withhold the core notification,
+advance virtual time to a 15-second poll, and ignore a stale retained
+generation before recognizing a matching one. A second pinned trace covers
+the stale-then-matching durable poll. A three-node fixture removes the core
+subscription before delivery and verifies that the real periodic poll
+interrupts the effect and leaves one canceled terminal journal.
 
 The integrated signal workload follows one workflow across a suspension and
 resume. Production `Client.Start` enqueues its first run, `Worker.handle`
@@ -570,7 +575,7 @@ against a real three-node stream. Existing real-cluster tests cover network
 lost acknowledgments and injected unchanged-tail rejections. This comparison
 is limited: the integrated worker workloads cover short handlers, signal
 resume, and native and fallback timer wakeups without retention, snapshot
-objects, durable cancellation polling,
+objects, cancellation polling faults and heartbeat interleavings,
 Raft elections, or disk storage. The journal's five-second attempt
 deadline still uses wall time; only CAS retry waits are virtual in this first
 slice. A discrepancy seen only on real

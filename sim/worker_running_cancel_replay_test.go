@@ -40,7 +40,7 @@ func runSeededWorkerRunningCancel(seed int64, replay *Trace) (trace Trace, runEr
 		return Trace{}, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose([]string{"clean", "publish_drop", "publish_ack_lost", "enqueue_drop", "enqueue_ack_lost"})
+	mode, err := schedule.Choose([]string{"clean", "publish_drop", "publish_ack_lost", "enqueue_drop", "enqueue_ack_lost", "missed_notification_poll", "stale_poll_then_match"})
 	if err != nil {
 		return trace, err
 	}
@@ -66,7 +66,7 @@ func runSeededWorkerRunningCancel(seed int64, replay *Trace) (trace Trace, runEr
 	}}, worker.ModeledWorkerPorts{
 		Journal: store, Leases: lease.NewWithKVPort(NewKVTransport(schedule, 30*time.Second)),
 		Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport,
-		Client: c, CancellationNotifications: true,
+		Client: c, CancellationNotifications: true, CancellationPoll: transport.SignalTransport,
 	})
 	if err != nil {
 		return trace, err
@@ -91,6 +91,13 @@ func runSeededWorkerRunningCancel(seed int64, replay *Trace) (trace Trace, runEr
 		return trace, fmt.Errorf("seed %d stale generation canceled effect", seed)
 	}
 	schedule.RecordTransport(TransportEvent{Operation: "cancel_notify", Subject: stale.Subject, Sequence: handle.InvSeq + 1, Outcome: "stale_generation", AtMillis: schedule.NowMillis()})
+	if mode == "stale_poll_then_match" {
+		transport.CommitSignal(stale)
+		found, err := w.PollRunningCancellation(ctx, typ, id, handle.InvSeq)
+		if err != nil || found || effectCtx.Err() != nil {
+			return trace, fmt.Errorf("seed %d stale durable poll found=%v err=%v", seed, found, err)
+		}
+	}
 	switch mode {
 	case "publish_drop":
 		err = transport.QueueSignalFault(SignalDropBeforeCommit)
@@ -135,8 +142,21 @@ func runSeededWorkerRunningCancel(seed int64, replay *Trace) (trace Trace, runEr
 	}
 	notification := &nats.Msg{Subject: stale.Subject, Header: nats.Header{}}
 	notification.Header.Set("Wf-Inv-Seq", strconv.FormatUint(handle.InvSeq, 10))
-	w.ObserveCancellationNotification(notification)
-	schedule.RecordTransport(TransportEvent{Operation: "cancel_notify", Subject: notification.Subject, Sequence: handle.InvSeq, Outcome: "matching_generation", AtMillis: schedule.NowMillis()})
+	if mode == "missed_notification_poll" || mode == "stale_poll_then_match" {
+		if effectCtx.Err() != nil {
+			return trace, fmt.Errorf("seed %d canceled before durable poll", seed)
+		}
+		if err := schedule.AdvanceMillis((15 * time.Second).Milliseconds()); err != nil {
+			return trace, err
+		}
+		found, err := w.PollRunningCancellation(ctx, typ, id, handle.InvSeq)
+		if err != nil || !found {
+			return trace, fmt.Errorf("seed %d durable poll found=%v err=%v", seed, found, err)
+		}
+	} else {
+		w.ObserveCancellationNotification(notification)
+		schedule.RecordTransport(TransportEvent{Operation: "cancel_notify", Subject: notification.Subject, Sequence: handle.InvSeq, Outcome: "matching_generation", AtMillis: schedule.NowMillis()})
+	}
 	select {
 	case <-effectCtx.Done():
 	case <-time.After(2 * time.Second):
@@ -213,7 +233,7 @@ func TestSeededWorkerRunningCancelReplay(t *testing.T) {
 			}
 		}
 	}
-	for _, mode := range []string{"clean", "publish_drop", "publish_ack_lost", "enqueue_drop", "enqueue_ack_lost"} {
+	for _, mode := range []string{"clean", "publish_drop", "publish_ack_lost", "enqueue_drop", "enqueue_ack_lost", "missed_notification_poll", "stale_poll_then_match"} {
 		if observedModes[mode] == 0 {
 			t.Fatalf("cancel fault mode %s was not scheduled", mode)
 		}

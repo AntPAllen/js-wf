@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "seed": 2,
+  "seed": 1,
   "workload": "worker_running_cancel",
   "step_limit": 100000,
   "decisions": [
@@ -15,7 +15,7 @@
         "publish_drop",
         "stale_poll_then_match"
       ],
-      "chosen": "publish_ack_lost"
+      "chosen": "stale_poll_then_match"
     }
   ],
   "transport": [
@@ -152,6 +152,21 @@
     },
     {
       "at_ms": 0,
+      "operation": "publish_signal",
+      "subject": "wf.sig.test.integrated-043._wf_cancel",
+      "sequence": 1,
+      "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "cancel_poll_last",
+      "subject": "wf.sig.test.integrated-043._wf_cancel",
+      "sequence": 1,
+      "outcome": "2"
+    },
+    {
+      "at_ms": 0,
       "operation": "last_invocation",
       "subject": "wf.inv.test.integrated-043",
       "sequence": 1,
@@ -168,25 +183,41 @@
       "at_ms": 0,
       "operation": "publish_signal",
       "subject": "wf.sig.test.integrated-043._wf_cancel",
-      "sequence": 1,
+      "sequence": 2,
       "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "outcome": "lose_ack_after_commit"
-    },
-    {
-      "at_ms": 0,
-      "operation": "cancel_notify",
-      "subject": "wf.sig.test.integrated-043._wf_cancel",
-      "sequence": 1,
-      "outcome": "matching_generation"
-    },
-    {
-      "at_ms": 0,
-      "operation": "signal_stream_info",
-      "sequence": 1,
       "outcome": "ok"
     },
     {
       "at_ms": 0,
+      "operation": "run_publish",
+      "subject": "wf.run.0",
+      "sequence": 2,
+      "data_sha256": "52f288aa8022511f4c51f16ad04d8432ba62d78d9c2562a69e848f98215e8656",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.0",
+      "sequence": 2,
+      "data_sha256": "52f288aa8022511f4c51f16ad04d8432ba62d78d9c2562a69e848f98215e8656",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "cancel_poll_last",
+      "subject": "wf.sig.test.integrated-043._wf_cancel",
+      "sequence": 2,
+      "outcome": "1"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "signal_stream_info",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
       "operation": "next_signal",
       "subject": "wf.sig.test.integrated-043.*",
       "expected": 1,
@@ -195,7 +226,16 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
+      "operation": "next_signal",
+      "subject": "wf.sig.test.integrated-043.*",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
       "operation": "kv_update",
       "subject": "test.integrated-043",
       "expected": 4,
@@ -204,7 +244,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
       "operation": "last",
       "subject": "wf.jrn.test.integrated-043",
       "sequence": 2,
@@ -212,16 +252,16 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
       "operation": "publish",
       "subject": "wf.jrn.test.integrated-043",
       "expected": 2,
       "sequence": 3,
-      "data_sha256": "fc409d35936dcfb1f6ee4ca99ac140521e07b77414495ff463f7c19da7fc9f37",
+      "data_sha256": "13c1ca520a0885b80023d36b98d8a757e9a68027cf912450109b9dc730f4294e",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
       "operation": "kv_update",
       "subject": "test.integrated-043",
       "expected": 5,
@@ -230,15 +270,15 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
       "operation": "last",
       "subject": "wf.jrn.test.integrated-043",
       "sequence": 3,
-      "data_sha256": "fc409d35936dcfb1f6ee4ca99ac140521e07b77414495ff463f7c19da7fc9f37",
+      "data_sha256": "13c1ca520a0885b80023d36b98d8a757e9a68027cf912450109b9dc730f4294e",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
       "operation": "publish",
       "subject": "wf.jrn.test.integrated-043",
       "expected": 3,
@@ -247,7 +287,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
       "operation": "kv_create",
       "subject": "test.integrated-043",
       "sequence": 1,
@@ -255,7 +295,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
       "operation": "kv_delete",
       "subject": "test.integrated-043",
       "expected": 6,
@@ -263,14 +303,38 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
       "operation": "consumer_ack",
       "subject": "wf.run.0",
       "sequence": 1,
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "sequence": 2,
+      "outcome": "delivery_1"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "kv_create",
+      "subject": "test.integrated-043",
+      "sequence": 8,
+      "data_sha256": "43c8e264a5e116243780caf24923712eae2fbe56b8c77306050f5b7a89480539",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "kv_update",
+      "subject": "test.integrated-043",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "d423c274c68960ea8595580c2e9585112dcacdeeac43a67686ce83d509a52b5f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
       "operation": "next_journal",
       "subject": "wf.jrn.test.integrated-043",
       "expected": 1,
@@ -279,7 +343,7 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
       "operation": "next_journal",
       "subject": "wf.jrn.test.integrated-043",
       "expected": 2,
@@ -288,16 +352,16 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
       "operation": "next_journal",
       "subject": "wf.jrn.test.integrated-043",
       "expected": 3,
       "sequence": 3,
-      "data_sha256": "fc409d35936dcfb1f6ee4ca99ac140521e07b77414495ff463f7c19da7fc9f37",
+      "data_sha256": "13c1ca520a0885b80023d36b98d8a757e9a68027cf912450109b9dc730f4294e",
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
       "operation": "next_journal",
       "subject": "wf.jrn.test.integrated-043",
       "expected": 4,
@@ -306,18 +370,99 @@
       "outcome": "ok"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
       "operation": "next_journal",
       "subject": "wf.jrn.test.integrated-043",
       "expected": 5,
       "outcome": "not_found"
     },
     {
-      "at_ms": 0,
+      "at_ms": 15000,
+      "operation": "last_invocation",
+      "subject": "wf.inv.test.integrated-043",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "kv_create",
+      "subject": "test.integrated-043",
+      "data_sha256": "4ffa303ea3ed460e71443bde850317d2752662ff962abebdd6b0c8e9adda616f",
+      "outcome": "key_exists"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "kv_get",
+      "subject": "test.integrated-043",
+      "sequence": 1,
+      "data_sha256": "4ffa303ea3ed460e71443bde850317d2752662ff962abebdd6b0c8e9adda616f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "kv_delete",
+      "subject": "test.integrated-043",
+      "expected": 9,
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "consumer_ack",
+      "subject": "wf.run.0",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "5391d63e90d9a60bed5589e3a9fc745de15880d57457ecdd4e8c77a570474f93",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "71d18910a3fdc5f3887c91681c3e4b9f4d80ca251ad4d906e14accc9ffe4ad61",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "13c1ca520a0885b80023d36b98d8a757e9a68027cf912450109b9dc730f4294e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "d944087ad54131efc6cff80a5cfa77b1a476c620c3720824802360a5232c916d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 5,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 15000,
       "operation": "check_worker_running_cancel",
       "subject": "wf.jrn.test.integrated-043",
-      "sequence": 1,
-      "outcome": "publish_ack_lost"
+      "sequence": 2,
+      "outcome": "stale_poll_then_match"
     }
   ]
 }
