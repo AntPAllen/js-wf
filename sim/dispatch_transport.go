@@ -41,6 +41,7 @@ type DispatchTransport struct {
 	creates   int
 	sequence  uint64
 	onDrained func()
+	onNextAck func()
 }
 
 var _ worker.DispatchPort = (*DispatchTransport)(nil)
@@ -135,6 +136,15 @@ func (m *DispatchTransport) StopWhenDrained(stop func()) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.onDrained = stop
+}
+
+// StopAfterNextAck ends a modeled loop after its next committed acknowledgment.
+// This lets a test hand off to a different partition while published child or
+// parent wakeups remain pending.
+func (m *DispatchTransport) StopAfterNextAck(stop func()) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.onNextAck = stop
 }
 
 type dispatchConsumer struct {
@@ -242,6 +252,11 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 		// another client has received the redelivery. The first committed ack
 		// retires the stream message; later acks are idempotent.
 		m.record.acked = true
+		if model.onNextAck != nil {
+			stop := model.onNextAck
+			model.onNextAck = nil
+			stop()
+		}
 		if model.takeFault("ack") == "lose_ack_after_commit" {
 			event.Outcome = "lose_ack_after_commit"
 			model.event(event)

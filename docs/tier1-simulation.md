@@ -209,6 +209,18 @@ the terminal state. Across 1,000 seeds, retained I1/I2/I3/I6 state, exact
 result bytes, signal liveness, branch metrics, and cross-process trace replay
 pass.
 
+The integrated child workload starts a parent through production `Client.Start`.
+The parent handler calls `wf.CallAsync` and journals a suspended
+`wf.AwaitPromise`. A production child handler runs one effect and persists its
+result; `Worker.handle` then sends the generation-bound terminal notification
+through the same modeled signal and run streams. The parent resumes, journals
+the consumed signal, and returns the child's result. Across 1,000 seeds,
+faults drop or hide the child step-completion acknowledgment, terminal KV
+acknowledgment, notification signal, or parent wakeup; a consumer-leader
+change also retries safely. The parent and child have one retained invocation
+and terminal result each, the parent receives one notification, the final
+snapshot passes I1/I2/I3/I6, and seed 42 replays across processes.
+
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
 subject, stores large input objects, and retains run enqueues with message-ID

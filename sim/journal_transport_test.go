@@ -410,6 +410,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededWorkerFallbackTimerExecution(loaded.Seed, &loaded)
 	case "worker_select_execution":
 		replayed, err = runSeededWorkerSelectExecution(loaded.Seed, &loaded)
+	case "worker_child_execution":
+		replayed, err = runSeededWorkerChildExecution(loaded.Seed, &loaded)
 	case "timer_scan_20":
 		replayed, err = runSeededTimerScan(loaded.Seed, &loaded)
 	case "reconcile_loop_20":
