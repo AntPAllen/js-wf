@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -98,6 +99,32 @@ func TestMissingJournalCASHeaderMutationIsDetected(t *testing.T) {
 	}
 	if _, err := integrity.Check(ctx, all[2]); err == nil {
 		t.Fatal("missing-CAS mutation escaped retained-state checker")
+	}
+}
+
+func TestSkippedLeaseMutationIsDetected(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	const typ, id = "mutation", "skipped-lease"
+	if _, err := client.New(all[0]).Start(ctx, typ, id, []byte(`null`)); err != nil {
+		t.Fatal(err)
+	}
+	store := journal.New(all[0])
+	var tail uint64
+	for _, entry := range []journal.Entry{
+		{Kind: journal.Started, Index: 0},
+		{Kind: journal.StepRequested, Index: 1, Epoch: 1, WorkerID: "worker-a"},
+		{Kind: journal.StepCompleted, Index: 2, Epoch: 1, WorkerID: "worker-b"},
+	} {
+		var err error
+		tail, err = store.Append(ctx, typ, id, entry, tail)
+		if err != nil {
+			t.Fatalf("append skipped-lease history: %v", err)
+		}
+	}
+	if _, err := integrity.Check(ctx, all[1]); err == nil || !strings.Contains(err.Error(), "used by workers") {
+		t.Fatalf("skipped-lease mutation escaped epoch-owner check: %v", err)
 	}
 }
 
