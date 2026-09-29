@@ -90,6 +90,13 @@ func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
 
 func (c *DockerCluster) ClientURL(i int) string { return c.urls[i] }
 
+func (c *DockerCluster) NodeName(i int) string {
+	if i < 0 || i >= len(c.names) {
+		return ""
+	}
+	return c.names[i]
+}
+
 func (c *DockerCluster) RestartNode(i int) error {
 	if i < 0 || i >= len(c.names) || c.names[i] == "" {
 		return fmt.Errorf("invalid Docker node %d", i)

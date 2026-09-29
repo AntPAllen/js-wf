@@ -34,9 +34,20 @@ WF_TIER3_CONTAINER=1 go test ./integration -run '^TestFiveContainerWorkflowSurvi
 ```
 
 The manual `tier3-container-smoke` workflow runs the same proof on a clean CI
-runner. This is a five-container topology and one network isolation plus one
-server kill/restart. It does not cover the full chaos matrix, clock skew, disk
-stalls, client histories, or the 24-hour Tier 3 soak.
+runner. This covers one network isolation and one server kill/restart, with
+client histories for starts, signals, and results. It does not cover the full
+chaos matrix, clock skew, disk stalls, or the 24-hour Tier 3 soak.
+
+The same manual workflow also runs `TestFiveContainerAckedPublishesSurviveLeaderKill`.
+That test creates a five-replica file stream, launches 1,000 concurrent publish
+attempts from a surviving node, and SIGKILLs the current stream leader at a
+seeded attempt. It treats unacknowledged publishes as unknown, requires
+acknowledgments after the kill, and checks every retained sequence and
+acknowledged payload through a survivor and through the killed node after a
+same-store restart. Local seeds 1–4 passed, with 956–964 acknowledged writes
+and 414–525 acknowledged after the kill. The test uses the pinned NATS server's
+default file-store sync interval; a production-configured interval and
+block-device delay remain for the full Tier 3 matrix.
 
 The first clean CI run passed in 124 seconds. After a three-run local repeat
 exposed a Docker `--rm` cleanup race on restart, the fixture began waiting for

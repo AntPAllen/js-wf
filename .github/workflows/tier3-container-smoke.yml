@@ -13,7 +13,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Verify five isolated NATS containers
-        run: go test ./integration -run '^TestFiveContainerWorkflowSurvivesIsolationAndRestart$' -count=1 -timeout=12m -v
+        run: go test ./integration -run '^TestFiveContainer(WorkflowSurvivesIsolationAndRestart|AckedPublishesSurviveLeaderKill)$' -count=1 -timeout=12m -v
       - if: always()
         uses: actions/upload-artifact@v7
         with:
