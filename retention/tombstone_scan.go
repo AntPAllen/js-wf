@@ -97,7 +97,7 @@ func (s *TombstoneScan) Scan(ctx context.Context, next uint64, budget int, now t
 			continue
 		}
 		result.Inspected++
-		expired, eligible, deleted, err := sweepEntry(ctx, state, inv, key, entry, now, dryRun)
+		expired, eligible, deleted, err := SweepCandidate(ctx, jetStreamTombstoneSweepPort{state: state, inv: inv}, key, entry.Value(), entry.Revision(), now, dryRun)
 		if err != nil {
 			return result, err
 		}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -16,6 +17,30 @@ type SweepResult struct {
 	Inspected int `json:"inspected"`
 	Expired   int `json:"expired"`
 	Deleted   int `json:"deleted"`
+}
+
+// TombstoneSweepPort is the retained generation and state-CAS boundary used
+// when a tombstone is considered for deletion.
+type TombstoneSweepPort interface {
+	CurrentInvocation(context.Context, string) (uint64, error)
+	DeleteState(context.Context, string, uint64) error
+}
+
+type jetStreamTombstoneSweepPort struct {
+	state jetstream.KeyValue
+	inv   jetstream.Stream
+}
+
+func (p jetStreamTombstoneSweepPort) CurrentInvocation(ctx context.Context, subject string) (uint64, error) {
+	message, err := p.inv.GetLastMsgForSubject(ctx, subject)
+	if err != nil {
+		return 0, err
+	}
+	return message.Sequence, nil
+}
+
+func (p jetStreamTombstoneSweepPort) DeleteState(ctx context.Context, key string, revision uint64) error {
+	return p.state.Delete(ctx, key, jetstream.LastRevision(revision))
 }
 
 // SweepTombstones removes expired tombstones after the retired invocation has
@@ -51,7 +76,7 @@ func SweepTombstones(ctx context.Context, js jetstream.JetStream, now time.Time)
 			return result, err
 		}
 		result.Inspected++
-		expired, _, deleted, err := sweepEntry(ctx, state, inv, key, entry, now, false)
+		expired, _, deleted, err := SweepCandidate(ctx, jetStreamTombstoneSweepPort{state: state, inv: inv}, key, entry.Value(), entry.Revision(), now, false)
 		if err != nil {
 			return result, err
 		}
@@ -65,27 +90,33 @@ func SweepTombstones(ctx context.Context, js jetstream.JetStream, now time.Time)
 	return result, nil
 }
 
-func sweepEntry(ctx context.Context, state jetstream.KeyValue, inv jetstream.Stream, key string, entry jetstream.KeyValueEntry, now time.Time, dryRun bool) (expired, eligible, deleted bool, err error) {
-	if raw := bytes.TrimSpace(entry.Value()); len(raw) == 0 || raw[0] != '{' {
+// SweepCandidate applies the production expiry, generation, and revision
+// guards to one state value. A retry after an uncertain delete reads the
+// current KV value before calling this again.
+func SweepCandidate(ctx context.Context, port TombstoneSweepPort, key string, value []byte, revision uint64, now time.Time, dryRun bool) (expired, eligible, deleted bool, err error) {
+	parts := strings.Split(key, ".")
+	if port == nil || len(parts) != 2 || identity.Validate(parts[0], parts[1]) != nil || revision == 0 || now.IsZero() {
+		return false, false, false, fmt.Errorf("invalid tombstone sweep candidate")
+	}
+	if raw := bytes.TrimSpace(value); len(raw) == 0 || raw[0] != '{' {
 		return false, false, false, nil
 	}
-	marker, tomb, err := Decode(entry.Value())
+	marker, tomb, err := Decode(value)
 	if err != nil || !tomb || now.Before(marker.ExpiresAt) {
 		return false, false, false, err
 	}
 	expired = true
-	parts := strings.Split(key, ".")
-	current, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(parts[0], parts[1]))
+	current, err := port.CurrentInvocation(ctx, identity.InvocationSubject(parts[0], parts[1]))
 	if err != nil && !errors.Is(err, jetstream.ErrMsgNotFound) {
 		return expired, false, false, err
 	}
-	if err == nil && current.Sequence <= marker.InvSeq {
+	if err == nil && current <= marker.InvSeq {
 		return expired, false, false, nil
 	}
 	if dryRun {
 		return expired, true, false, nil
 	}
-	if err := state.Delete(ctx, key, jetstream.LastRevision(entry.Revision())); err != nil {
+	if err := port.DeleteState(ctx, key, revision); err != nil {
 		if errors.Is(err, jetstream.ErrKeyRevisionMismatch) || errors.Is(err, jetstream.ErrKeyNotFound) {
 			return expired, true, false, nil
 		}

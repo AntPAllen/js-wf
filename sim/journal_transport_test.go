@@ -410,6 +410,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededWorkerHeartbeat(loaded.Seed, &loaded)
 	case "worker_heartbeat_handoff":
 		replayed, err = runSeededHeartbeatHandoff(loaded.Seed, &loaded)
+	case "tombstone_sweep":
+		replayed, err = runSeededTombstoneSweep(loaded.Seed, &loaded)
 	case "worker_timer_execution":
 		replayed, err = runSeededWorkerTimerExecution(loaded.Seed, &loaded)
 	case "worker_fallback_timer_execution":
