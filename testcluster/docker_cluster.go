@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -29,6 +30,8 @@ type DockerCluster struct {
 	urls          []string
 	monitorURLs   []string
 	syncInterval  string
+	skewNode      int
+	skewSeconds   int64
 }
 
 func dockerCommand(ctx context.Context, args ...string) (string, error) {
@@ -49,7 +52,22 @@ func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return nil, err
 	}
-	c := &DockerCluster{root: root, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count)}
+	c := &DockerCluster{root: root, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1}
+	if specification := os.Getenv("WF_TIER3_SERVER_SKEW"); specification != "" {
+		node, offset, found := strings.Cut(specification, ":")
+		if !found {
+			return nil, fmt.Errorf("invalid WF_TIER3_SERVER_SKEW %q: want node:duration", specification)
+		}
+		c.skewNode, err = strconv.Atoi(node)
+		if err != nil || c.skewNode < 0 || c.skewNode >= count {
+			return nil, fmt.Errorf("invalid WF_TIER3_SERVER_SKEW node %q", node)
+		}
+		duration, parseErr := time.ParseDuration(offset)
+		if parseErr != nil || duration == 0 || duration%time.Second != 0 || duration < -60*time.Second || duration > 60*time.Second {
+			return nil, fmt.Errorf("invalid WF_TIER3_SERVER_SKEW duration %q: want whole seconds within ±60s", offset)
+		}
+		c.skewSeconds = int64(duration / time.Second)
+	}
 	c.syncInterval = os.Getenv("WF_TIER3_SYNC_INTERVAL")
 	if c.syncInterval == "" {
 		c.syncInterval = "2m" // pinned nats-server v2.15.0 file-store default
@@ -73,7 +91,41 @@ func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
 	if output, buildErr := build.CombinedOutput(); buildErr != nil {
 		return nil, fmt.Errorf("build Docker nats-server: %w: %s", buildErr, output)
 	}
-	if err := os.WriteFile(filepath.Join(root, "Dockerfile"), []byte("FROM scratch\nCOPY nats-server /nats-server\nENTRYPOINT [\"/nats-server\"]\n"), 0644); err != nil {
+	dockerfile := "FROM scratch\nCOPY nats-server /nats-server\n"
+	if c.skewNode >= 0 {
+		source := filepath.Join(runtime.GOROOT(), "src", "time", "time.go")
+		content, readErr := os.ReadFile(source)
+		if readErr != nil {
+			return nil, fmt.Errorf("read Go clock source: %w", readErr)
+		}
+		const original = "\tsec, nsec, mono := runtimeNow()\n"
+		if strings.Count(string(content), original) != 1 {
+			return nil, fmt.Errorf("Go clock source does not contain exactly one runtimeNow call")
+		}
+		replacement := original + fmt.Sprintf("\tsec += %d // Tier 3 test-only wall-clock skew\n", c.skewSeconds)
+		patched := filepath.Join(root, "skew-time.go")
+		if writeErr := os.WriteFile(patched, []byte(strings.Replace(string(content), original, replacement, 1)), 0644); writeErr != nil {
+			return nil, writeErr
+		}
+		overlay, marshalErr := json.Marshal(struct {
+			Replace map[string]string `json:"Replace"`
+		}{Replace: map[string]string{source: patched}})
+		if marshalErr != nil {
+			return nil, marshalErr
+		}
+		overlayPath := filepath.Join(root, "skew-overlay.json")
+		if writeErr := os.WriteFile(overlayPath, overlay, 0644); writeErr != nil {
+			return nil, writeErr
+		}
+		skewBuild := exec.Command("go", "build", "-overlay="+overlayPath, "-o", filepath.Join(root, "nats-server-skewed"), "github.com/nats-io/nats-server/v2")
+		skewBuild.Env = append(os.Environ(), "CGO_ENABLED=0")
+		if output, buildErr := skewBuild.CombinedOutput(); buildErr != nil {
+			return nil, fmt.Errorf("build skewed Docker nats-server: %w: %s", buildErr, output)
+		}
+		dockerfile += "COPY nats-server-skewed /nats-server-skewed\n"
+	}
+	dockerfile += "ENTRYPOINT [\"/nats-server\"]\n"
+	if err := os.WriteFile(filepath.Join(root, "Dockerfile"), []byte(dockerfile), 0644); err != nil {
 		return nil, err
 	}
 	config := fmt.Sprintf("jetstream: { sync_interval: %q }\n", c.syncInterval)
@@ -107,6 +159,10 @@ func (c *DockerCluster) ClientURL(i int) string { return c.urls[i] }
 
 func (c *DockerCluster) SyncInterval() string { return c.syncInterval }
 
+func (c *DockerCluster) ClockSkew() (node int, offset time.Duration) {
+	return c.skewNode, time.Duration(c.skewSeconds) * time.Second
+}
+
 func (c *DockerCluster) NodeName(i int) string {
 	if i < 0 || i >= len(c.names) {
 		return ""
@@ -128,7 +184,11 @@ func (c *DockerCluster) RestartNode(i int) error {
 		peer = 1
 	}
 	serverArgs = append(serverArgs, "-routes", "nats://"+c.routeNames[peer]+":6222")
-	args := []string{"run", "-d", "--rm", "--name", c.names[i], "--network", c.clientNetwork, "--user", fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()), "-p", "127.0.0.1::4222", "-p", "127.0.0.1::8222", "-v", store + ":/data", "-v", filepath.Join(c.root, "nats.conf") + ":/etc/nats.conf:ro", c.image}
+	args := []string{"run", "-d", "--rm", "--name", c.names[i], "--network", c.clientNetwork, "--user", fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()), "-p", "127.0.0.1::4222", "-p", "127.0.0.1::8222", "-v", store + ":/data", "-v", filepath.Join(c.root, "nats.conf") + ":/etc/nats.conf:ro"}
+	if i == c.skewNode {
+		args = append(args, "--entrypoint", "/nats-server-skewed")
+	}
+	args = append(args, c.image)
 	args = append(args, serverArgs...)
 	ctx, stop := context.WithTimeout(context.Background(), 30*time.Second)
 	defer stop()
@@ -163,6 +223,36 @@ func (c *DockerCluster) RestartNode(i int) error {
 	}
 	logs, _ := c.Logs(i)
 	return fmt.Errorf("Docker node %d did not accept clients: %s", i, logs)
+}
+
+// ServerNow reads the clock of one actual NATS process from its monitoring
+// endpoint. Clock-skew tests must check this before claiming a skewed run.
+func (c *DockerCluster) ServerNow(ctx context.Context, i int) (time.Time, error) {
+	if i < 0 || i >= len(c.names) || c.monitorURLs[i] == "" {
+		return time.Time{}, fmt.Errorf("invalid Docker node %d", i)
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.monitorURLs[i]+"/varz", nil)
+	if err != nil {
+		return time.Time{}, err
+	}
+	response, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return time.Time{}, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return time.Time{}, fmt.Errorf("node %d varz status %d", i, response.StatusCode)
+	}
+	var data struct {
+		Now time.Time `json:"now"`
+	}
+	if err := json.NewDecoder(response.Body).Decode(&data); err != nil {
+		return time.Time{}, err
+	}
+	if data.Now.IsZero() {
+		return time.Time{}, fmt.Errorf("node %d varz omitted server time", i)
+	}
+	return data.Now, nil
 }
 
 // RouteCount reads the server's monitoring endpoint through its pinned host port.

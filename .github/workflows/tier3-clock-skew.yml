@@ -1,0 +1,30 @@
+name: tier3-clock-skew
+on:
+  workflow_dispatch:
+    inputs:
+      sync_interval:
+        description: NATS file-store sync interval used in production
+        required: true
+        default: '2m'
+        type: string
+jobs:
+  skewed-server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      WF_TIER3_CLOCK_SKEW: '1'
+      WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval }}
+      WF_TIER3_SKEW_HISTORY_OUT: tier3-clock-skew-history
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify real server clock offsets and native timer deadlines
+        run: go test ./integration -run '^TestFiveContainerServerClockSkewTimer$' -count=1 -timeout=6m -v
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tier3-clock-skew-history
+          path: integration/tier3-clock-skew-history-*.jsonl
+          if-no-files-found: ignore
