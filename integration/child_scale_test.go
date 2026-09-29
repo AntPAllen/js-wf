@@ -5,7 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"math/rand"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
 	"sync"
+	"syscall"
 	"testing"
 	"time"
 
@@ -18,22 +23,63 @@ import (
 	"js-wf/wf"
 	"js-wf/worker"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
 // TestFiveHundredChildFanout interrupts the parent during child creation,
 // then collects all child results after a restart.
 func TestFiveHundredChildFanout(t *testing.T) {
-	runFiveHundredChildFanout(t, false)
+	runFiveHundredChildFanout(t, false, false)
 }
 
 // The second fan-out run moves the journal leader after the parent has
 // committed a seeded prefix of child requests.
 func TestFiveHundredChildFanoutAcrossJournalLeaderRestart(t *testing.T) {
-	runFiveHundredChildFanout(t, true)
+	runFiveHundredChildFanout(t, true, false)
 }
 
-func runFiveHundredChildFanout(t *testing.T, restartLeader bool) {
+func TestFiveHundredChildFanoutAfterParentSIGKILL(t *testing.T) {
+	runFiveHundredChildFanout(t, false, true)
+}
+
+func TestFiveHundredChildFanoutProcessChild(t *testing.T) {
+	if os.Getenv("WF_FANOUT_PROCESS_CHILD") != "1" {
+		t.Skip("500-child parent worker process helper")
+	}
+	url, marker := os.Getenv("WF_FANOUT_PROCESS_URL"), os.Getenv("WF_FANOUT_PROCESS_MARKER")
+	cut, err := strconv.Atoi(os.Getenv("WF_FANOUT_PROCESS_CUT"))
+	if url == "" || marker == "" || err != nil || cut < 100 || cut >= 400 {
+		t.Fatal("invalid 500-child process helper configuration")
+	}
+	nc, err := nats.Connect(url, nats.NoReconnect(), nats.IgnoreDiscoveredServers())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer nc.Close()
+	js, err := jetstream.New(nc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	handlers := fanoutHandlers(cut, func() error {
+		if err := os.WriteFile(marker+".tmp", []byte(strconv.Itoa(cut)), 0600); err != nil {
+			return err
+		}
+		if err := os.Rename(marker+".tmp", marker); err != nil {
+			return err
+		}
+		select {}
+	})
+	w, err := worker.New(context.Background(), js, "parent-process-before-kill", handlers)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := w.RunPartition(context.Background(), identity.Partition("parent", "large-fanout", provision.Partitions)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess bool) {
 	t.Helper()
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
@@ -48,69 +94,40 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader bool) {
 	reached := make(chan struct{})
 	release := make(chan struct{})
 	var pauseOnce sync.Once
-	handlers := map[string]worker.Handler{
-		"parent": func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
-			promises := make([]wf.Promise, childCount)
-			for i := range promises {
-				input, _ := json.Marshal(i)
-				promise, err := wf.CallAsync(c, "child", input)
-				if err != nil {
-					return nil, err
-				}
-				promises[i] = promise
-				if i == cut {
-					pauseOnce.Do(func() {
-						close(reached)
-						<-release
-					})
-				}
-			}
-			sum := 0
-			for _, promise := range promises {
-				value, err := wf.AwaitPromise(c, promise)
-				if err != nil {
-					return nil, err
-				}
-				var n int
-				if err := json.Unmarshal(value, &n); err != nil {
-					return nil, err
-				}
-				sum += n
-			}
-			return json.Marshal(sum)
-		},
-		"child": func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
-			var n int
-			if err := json.Unmarshal(input, &n); err != nil {
-				return nil, err
-			}
-			value, err := wf.Run(c, "double", n, func(context.Context) (int, error) { return n * 2, nil })
-			if err != nil {
-				return nil, err
-			}
-			return json.Marshal(value)
-		},
+	afterChild := func() error {
+		if !killParentProcess {
+			pauseOnce.Do(func() {
+				close(reached)
+				<-release
+			})
+		}
+		return nil
 	}
+	handlers := fanoutHandlers(cut, afterChild)
 	if _, err := client.New(all[0]).Start(ctx, "parent", "large-fanout", []byte(`null`)); err != nil {
 		t.Fatal(err)
 	}
 	parentPart := identity.Partition("parent", "large-fanout", provision.Partitions)
-	first, err := worker.New(ctx, all[1], "parent-before-cut", handlers)
-	if err != nil {
-		t.Fatal(err)
-	}
-	firstCtx, stopFirst := context.WithCancel(ctx)
-	firstDone := make(chan error, 1)
-	go func() { firstDone <- first.RunPartition(firstCtx, parentPart) }()
-	select {
-	case <-reached:
-	case <-ctx.Done():
-		t.Fatal("parent did not reach injected cut")
-	}
-	stopFirst()
-	close(release)
-	if err := <-firstDone; err != nil && !errors.Is(err, context.Canceled) {
-		t.Fatalf("first parent worker: %v", err)
+	if killParentProcess {
+		killFanoutParentAtCut(t, ctx, all[0], cluster.Servers[1].ClientURL(), cut)
+	} else {
+		first, err := worker.New(ctx, all[1], "parent-before-cut", handlers)
+		if err != nil {
+			t.Fatal(err)
+		}
+		firstCtx, stopFirst := context.WithCancel(ctx)
+		firstDone := make(chan error, 1)
+		go func() { firstDone <- first.RunPartition(firstCtx, parentPart) }()
+		select {
+		case <-reached:
+		case <-ctx.Done():
+			t.Fatal("parent did not reach injected cut")
+		}
+		stopFirst()
+		close(release)
+		if err := <-firstDone; err != nil && !errors.Is(err, context.Canceled) {
+			t.Fatalf("first parent worker: %v", err)
+		}
 	}
 	if restartLeader {
 		stream, err := all[0].Stream(ctx, "WF_JRN")
@@ -261,4 +278,107 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader bool) {
 		}
 	}
 	t.Logf("completed %d children; %d shared the parent partition", childCount, insideParent)
+}
+
+func fanoutHandlers(cut int, afterChild func() error) map[string]worker.Handler {
+	const childCount = 500
+	return map[string]worker.Handler{
+		"parent": func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+			promises := make([]wf.Promise, childCount)
+			for i := range promises {
+				input, _ := json.Marshal(i)
+				promise, err := wf.CallAsync(c, "child", input)
+				if err != nil {
+					return nil, err
+				}
+				promises[i] = promise
+				if i == cut {
+					if err := afterChild(); err != nil {
+						return nil, err
+					}
+				}
+			}
+			sum := 0
+			for _, promise := range promises {
+				value, err := wf.AwaitPromise(c, promise)
+				if err != nil {
+					return nil, err
+				}
+				var n int
+				if err := json.Unmarshal(value, &n); err != nil {
+					return nil, err
+				}
+				sum += n
+			}
+			return json.Marshal(sum)
+		},
+		"child": func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
+			var n int
+			if err := json.Unmarshal(input, &n); err != nil {
+				return nil, err
+			}
+			value, err := wf.Run(c, "double", n, func(context.Context) (int, error) { return n * 2, nil })
+			if err != nil {
+				return nil, err
+			}
+			return json.Marshal(value)
+		},
+	}
+}
+
+func killFanoutParentAtCut(t *testing.T, ctx context.Context, js jetstream.JetStream, url string, cut int) {
+	t.Helper()
+	executable, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	marker := filepath.Join(root, "parent-cut")
+	logFile, err := os.Create(filepath.Join(root, "parent.log"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer logFile.Close()
+	cmd := exec.Command(executable, "-test.run=^TestFiveHundredChildFanoutProcessChild$")
+	cmd.Env = append(os.Environ(), "WF_FANOUT_PROCESS_CHILD=1", "WF_FANOUT_PROCESS_URL="+url, "WF_FANOUT_PROCESS_MARKER="+marker, "WF_FANOUT_PROCESS_CUT="+strconv.Itoa(cut))
+	cmd.Stdout, cmd.Stderr = logFile, logFile
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err)
+	}
+	waited := false
+	defer func() {
+		if !waited {
+			_ = cmd.Process.Kill()
+			_ = cmd.Wait()
+		}
+	}()
+	until := time.Now().Add(30 * time.Second)
+	for {
+		data, err := os.ReadFile(marker)
+		if err == nil {
+			if string(data) != strconv.Itoa(cut) {
+				t.Fatalf("parent cut marker=%q, want %d", data, cut)
+			}
+			break
+		}
+		if !errors.Is(err, os.ErrNotExist) || ctx.Err() != nil || time.Now().After(until) {
+			logs, _ := os.ReadFile(logFile.Name())
+			t.Fatalf("parent process did not reach child cut: marker=%v ctx=%v logs=%s", err, ctx.Err(), logs)
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	records, _, err := journal.New(js).Read(ctx, "parent", "large-fanout")
+	if err != nil || len(records) != 1+2*(cut+1) || records[len(records)-1].Kind != journal.StepCompleted {
+		t.Fatalf("parent journal before SIGKILL: entries=%d want=%d err=%v", len(records), 1+2*(cut+1), err)
+	}
+	if err := cmd.Process.Kill(); err != nil {
+		t.Fatal(err)
+	}
+	waitErr := cmd.Wait()
+	waited = true
+	status, ok := cmd.ProcessState.Sys().(syscall.WaitStatus)
+	if waitErr == nil || !ok || !status.Signaled() || status.Signal() != syscall.SIGKILL {
+		t.Fatalf("parent process was not SIGKILLed: state=%v err=%v", cmd.ProcessState, waitErr)
+	}
+	t.Logf("SIGKILLed parent worker after %d committed child requests", cut+1)
 }
