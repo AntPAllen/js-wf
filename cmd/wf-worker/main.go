@@ -49,7 +49,7 @@ func run(ctx context.Context, args []string) error {
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	if flags.NArg() != 0 || *id == "" || *pluginPath == "" || *pluginSymbol == "" || *replicas < 1 || *replicas > 3 || *repairInterval <= 0 || *repairInterval > 10*time.Second || *repairBudget < 2 {
+	if flags.NArg() != 0 || *id == "" || *pluginPath == "" || *pluginSymbol == "" || *replicas < 1 || *replicas > 5 || *repairInterval <= 0 || *repairInterval > 10*time.Second || *repairBudget < 2 {
 		return fmt.Errorf("usage: wf-worker -id ID -handler-plugin FILE [-mode static|kv] [-metrics-addr ADDR]")
 	}
 	if *mode != "static" && *mode != "kv" {
@@ -67,25 +67,15 @@ func run(ctx context.Context, args []string) error {
 	if err != nil {
 		return err
 	}
-	nc, err := nats.Connect(*url)
+	nc, js, backend, w, err := startWorker(ctx, *url, *id, *replicas, *concurrency, handlers)
 	if err != nil {
+		if ctx.Err() != nil {
+			return nil
+		}
 		return err
 	}
 	defer nc.Close()
-	js, err := jetstream.New(nc)
-	if err != nil {
-		return err
-	}
-	setupCtx, stopSetup := context.WithTimeout(ctx, 30*time.Second)
-	backend, err := provision.EnsureAuto(setupCtx, js, *replicas)
-	stopSetup()
-	if err != nil {
-		return fmt.Errorf("provision workflow stores: %w", err)
-	}
-	w, err := worker.New(ctx, js, *id, handlers, worker.WithPartitionConcurrency(*concurrency))
-	if err != nil {
-		return err
-	}
+	defer w.Close()
 	listener, err := net.Listen("tcp", *metricsAddr)
 	if err != nil {
 		return fmt.Errorf("listen for worker metrics: %w", err)
@@ -176,6 +166,56 @@ func run(ctx context.Context, args []string) error {
 		}
 	}
 	return firstErr
+}
+
+func startWorker(ctx context.Context, url, id string, replicas, concurrency int, handlers map[string]worker.Handler) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, error) {
+	startupCtx, stopStartup := context.WithTimeout(ctx, 30*time.Second)
+	defer stopStartup()
+	var lastErr error
+	for startupCtx.Err() == nil {
+		nc, err := nats.Connect(url, nats.Timeout(2*time.Second))
+		if err == nil {
+			var js jetstream.JetStream
+			js, err = jetstream.New(nc)
+			if err == nil {
+				attempt, stop := context.WithTimeout(startupCtx, 5*time.Second)
+				var backend provision.TimerBackend
+				backend, err = provision.EnsureAuto(attempt, js, replicas)
+				stop()
+				if err == nil {
+					var w *worker.Worker
+					w, err = worker.New(startupCtx, js, id, handlers, worker.WithPartitionConcurrency(concurrency))
+					if err == nil {
+						return nc, js, backend, w, nil
+					}
+				}
+			}
+			nc.Close()
+		}
+		lastErr = err
+		if !retryableStartupError(err) {
+			return nil, nil, "", nil, fmt.Errorf("start worker: %w", err)
+		}
+		select {
+		case <-startupCtx.Done():
+		case <-time.After(100 * time.Millisecond):
+		}
+	}
+	if ctx.Err() != nil {
+		return nil, nil, "", nil, ctx.Err()
+	}
+	return nil, nil, "", nil, fmt.Errorf("start worker after 30 seconds: %w", lastErr)
+}
+
+func retryableStartupError(err error) bool {
+	var api *jetstream.APIError
+	if errors.As(err, &api) && (api.ErrorCode == 10008 || api.ErrorCode == 10164) {
+		return true
+	}
+	return errors.Is(err, jetstream.ErrNoStreamResponse) ||
+		errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) ||
+		errors.Is(err, nats.ErrDisconnected) || errors.Is(err, nats.ErrConnectionReconnecting) || errors.Is(err, nats.ErrNoServers) ||
+		errors.Is(err, context.DeadlineExceeded)
 }
 
 func loadHandlers(path, symbolName string) (map[string]worker.Handler, error) {

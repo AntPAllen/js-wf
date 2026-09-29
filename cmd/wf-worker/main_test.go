@@ -38,6 +38,14 @@ func TestMain(m *testing.M) {
 }
 
 func TestWorkerRunnerCompletesWorkflowAndServesMetrics(t *testing.T) {
+	pluginPath := testWorkerPlugin(t)
+	for _, mode := range []string{"static", "kv"} {
+		t.Run(mode, func(t *testing.T) { runWorkerSmoke(t, pluginPath, mode) })
+	}
+}
+
+func testWorkerPlugin(t *testing.T) string {
+	t.Helper()
 	workerTestPluginOnce.Do(func() {
 		workerTestPluginDir, workerTestPluginErr = os.MkdirTemp("", "wf-worker-plugin-")
 		if workerTestPluginErr != nil {
@@ -57,8 +65,77 @@ func TestWorkerRunnerCompletesWorkflowAndServesMetrics(t *testing.T) {
 	if workerTestPluginErr != nil {
 		t.Fatal(workerTestPluginErr)
 	}
-	for _, mode := range []string{"static", "kv"} {
-		t.Run(mode, func(t *testing.T) { runWorkerSmoke(t, workerTestPluginPath, mode) })
+	return workerTestPluginPath
+}
+
+func TestWorkerRunnerStartsAfterServerRestart(t *testing.T) {
+	pluginPath := testWorkerPlugin(t)
+	cluster, err := testcluster.Start(t.TempDir(), 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	serverURL := cluster.Servers[0].ClientURL()
+	cluster.KillNode(0)
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	metricsAddr := listener.Addr().String()
+	_ = listener.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
+	defer cancel()
+	done := make(chan error, 1)
+	go func() {
+		done <- run(ctx, []string{"-url", serverURL, "-id", "restart-smoke", "-replicas", "1", "-handler-plugin", pluginPath, "-metrics-addr", metricsAddr, "-reconcile=false"})
+	}()
+	select {
+	case runErr := <-done:
+		t.Fatalf("runner exited before NATS restart: %v", runErr)
+	case <-time.After(300 * time.Millisecond):
+	}
+	if err := cluster.RestartNode(0); err != nil {
+		t.Fatal(err)
+	}
+	metricsURL := "http://" + metricsAddr + "/metrics"
+	clientHTTP := &http.Client{Timeout: time.Second}
+	for ctx.Err() == nil {
+		response, reqErr := clientHTTP.Get(metricsURL)
+		if reqErr == nil {
+			_ = response.Body.Close()
+			if response.StatusCode == http.StatusOK {
+				break
+			}
+		}
+		select {
+		case runErr := <-done:
+			t.Fatalf("runner exited during NATS recovery: %v", runErr)
+		default:
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatalf("runner did not start after NATS restart: %v", ctx.Err())
+	}
+	js, err := jetstream.New(cluster.Clients[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := client.New(js)
+	if _, err := c.Start(ctx, "worker-smoke", "after-restart", []byte(`42`)); err != nil {
+		t.Fatal(err)
+	}
+	if value, err := c.Await(ctx, "worker-smoke", "after-restart"); err != nil || string(value) != "42" {
+		t.Fatalf("workflow after restart: result=%s err=%v", value, err)
+	}
+	cancel()
+	select {
+	case runErr := <-done:
+		if runErr != nil {
+			t.Fatalf("runner shutdown: %v", runErr)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("runner did not stop")
 	}
 }
 
