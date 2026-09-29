@@ -61,3 +61,47 @@ func TestReplayJournalLimitChecksAttemptedStepWithoutEffect(t *testing.T) {
 		t.Fatalf("changed limit request accepted: %v", err)
 	}
 }
+
+func TestReplayNonStepJournalLimit(t *testing.T) {
+	pluginPath := buildReplayPlugin(t)
+	input := []byte(`null`)
+	inputHash := sha256.Sum256(input)
+	for _, tc := range []struct {
+		name, symbol, changed string
+		entry                 wf.LimitEntry
+	}{
+		{"suspension", "WaitSignalWorkflow", "ChangedWait", wf.LimitEntry{Kind: string(journal.Suspended), Payload: json.RawMessage(`{"waiting_on":"signal:go"}`)}},
+		{"panic", "PanicWorkflow", "ImmediateFailure", wf.LimitEntry{Kind: string(journal.Attempt), Payload: json.RawMessage(`{"count":1,"error":"workflow panic: boom"}`)}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			terminal, err := json.Marshal(wf.Outcome{InvSeq: 5, Error: journal.ErrTooLong.Error(), LimitEntry: &tc.entry})
+			if err != nil {
+				t.Fatal(err)
+			}
+			bundle := replayBundle{Type: "test", ID: tc.name, InvSeq: 5, Input: input, InputHash: hex.EncodeToString(inputHash[:]), Journal: []journal.Record{
+				{Entry: journal.Entry{Index: 0, Epoch: 1, Kind: journal.Started}, Sequence: 1},
+				{Entry: journal.Entry{Index: 1, Epoch: 1, Kind: journal.Failed, Payload: terminal}, Sequence: 2},
+			}}
+			if tc.name == "suspension" {
+				bundle.Journal = []journal.Record{
+					{Entry: journal.Entry{Index: 0, Epoch: 1, Kind: journal.Started}, Sequence: 1},
+					{Entry: journal.Entry{Index: 1, Epoch: 1, Kind: journal.StepRequested, Payload: json.RawMessage(`{"kind":"signal","name":"go","input_hash":""}`)}, Sequence: 2},
+					{Entry: journal.Entry{Index: 2, Epoch: 1, Kind: journal.Failed, Payload: terminal}, Sequence: 3},
+				}
+			}
+			report, err := runReplayBundle(bundle, pluginPath, tc.symbol)
+			if err != nil || report.Status != "failed" || report.Error != journal.ErrTooLong.Error() {
+				t.Fatalf("report=%+v err=%v", report, err)
+			}
+			if _, err := runReplayBundle(bundle, pluginPath, tc.changed); err == nil || !strings.Contains(err.Error(), "differs") {
+				t.Fatalf("changed handler accepted: %v", err)
+			}
+			legacy := bundle
+			legacy.Journal = append([]journal.Record(nil), bundle.Journal...)
+			legacy.Journal[len(legacy.Journal)-1].Payload, _ = json.Marshal(wf.Outcome{InvSeq: 5, Error: journal.ErrTooLong.Error()})
+			if _, err := runReplayBundle(legacy, pluginPath, tc.symbol); err == nil || !strings.Contains(err.Error(), "metadata") {
+				t.Fatalf("legacy failure incorrectly verified: %v", err)
+			}
+		})
+	}
+}

@@ -694,6 +694,8 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			outcome := wf.Outcome{InvSeq: input.Sequence, Error: journal.ErrTooLong.Error()}
 			if kind == journal.StepRequested {
 				outcome.LimitRequest = payload
+			} else if kind == journal.Attempt || kind == journal.Suspended {
+				outcome.LimitEntry = &wf.LimitEntry{Kind: string(kind), Payload: payload}
 			}
 			failed, _ := json.Marshal(outcome)
 			if err := writeEntry(journal.Failed, failed); err != nil {

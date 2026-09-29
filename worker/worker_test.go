@@ -106,6 +106,61 @@ func TestJournalLimitRecordsTerminalFailure(t *testing.T) {
 	}
 }
 
+func TestJournalLimitRecordsRejectedPanicAttempt(t *testing.T) {
+	cluster, err := testcluster.Start(t.TempDir(), 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	js, err := jetstream.New(cluster.Clients[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := provision.Ensure(ctx, js, 1); err != nil {
+		t.Fatal(err)
+	}
+	w, err := New(ctx, js, "limit-panic-worker", map[string]Handler{"test": func(*wf.Context, json.RawMessage) (json.RawMessage, error) {
+		panic("limit panic")
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	w.maxEntries = 2
+	if _, err := client.New(js).Start(ctx, "test", "limit-panic", []byte(`null`)); err != nil {
+		t.Fatal(err)
+	}
+	workerCtx, stop := context.WithCancel(ctx)
+	done := make(chan error, 1)
+	go func() {
+		done <- w.RunPartition(workerCtx, identity.Partition("test", "limit-panic", provision.Partitions))
+	}()
+	_, err = client.New(js).Await(ctx, "test", "limit-panic")
+	if err == nil || !strings.Contains(err.Error(), journal.ErrTooLong.Error()) {
+		t.Fatalf("terminal error: %v", err)
+	}
+	stop()
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+	records, _, err := journal.New(js).Read(ctx, "test", "limit-panic")
+	if err != nil || len(records) != 2 || records[1].Kind != journal.Failed {
+		t.Fatalf("records=%+v err=%v", records, err)
+	}
+	var outcome wf.Outcome
+	if err := json.Unmarshal(records[1].Payload, &outcome); err != nil {
+		t.Fatal(err)
+	}
+	if outcome.LimitEntry == nil || outcome.LimitEntry.Kind != string(journal.Attempt) {
+		t.Fatalf("missing attempted panic entry: %+v", outcome)
+	}
+	attempt, err := journal.DecodeAttempt(outcome.LimitEntry.Payload)
+	if err != nil || attempt.Count != 1 || attempt.Error != "workflow panic: limit panic" {
+		t.Fatalf("attempt=%+v err=%v", attempt, err)
+	}
+}
+
 func TestWorkerConstructorBoundsMetadataLookup(t *testing.T) {
 	cluster, err := testcluster.Start(t.TempDir(), 1)
 	if err != nil {

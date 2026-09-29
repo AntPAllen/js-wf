@@ -30,6 +30,7 @@ type ReplayObservation struct {
 	WaitingOn     string
 	PlayedSteps   int
 	RecordedSteps int
+	Panicked      bool
 }
 
 // Replay runs a workflow against serialized []journal.Record without NATS.
@@ -135,13 +136,15 @@ func Replay[T any](journalBytes []byte, fn func(*Context) (T, error), options ..
 		c.SetChildSupport(opts.Type, opts.ID, opts.InvSeq, func(context.Context, string, string, []byte, string) error { return nil })
 	}
 	defer func() {
-		if opts.Observation != nil {
-			*opts.Observation = ReplayObservation{WaitingOn: c.WaitingOn(), PlayedSteps: c.position, RecordedSteps: len(c.entries)}
-		}
+		panicked := false
 		if panicValue := recover(); panicValue != nil {
+			panicked = true
 			var zero T
 			result = zero
 			err = fmt.Errorf("workflow panic: %v", panicValue)
+		}
+		if opts.Observation != nil {
+			*opts.Observation = ReplayObservation{WaitingOn: c.WaitingOn(), PlayedSteps: c.position, RecordedSteps: len(c.entries), Panicked: panicked}
 		}
 	}()
 	result, err = fn(c)

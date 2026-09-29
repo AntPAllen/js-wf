@@ -206,6 +206,12 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 		if len(outcome.LimitRequest) != 0 {
 			return replayJournalLimit(bundle, handler, outcome)
 		}
+		if outcome.LimitEntry != nil {
+			return replayNonStepJournalLimit(bundle, handler, outcome)
+		}
+		if outcome.Error == journal.ErrTooLong.Error() {
+			return report, fmt.Errorf("journal-limit failure lacks attempted entry metadata; exact offline verification is unavailable")
+		}
 	}
 	journalBytes, err := json.Marshal(bundle.Journal)
 	if err != nil {
@@ -299,6 +305,54 @@ func replayJournalLimit(bundle replayBundle, handler func(*wf.Context, json.RawM
 	}, wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects, Observation: &observed})
 	if !errors.Is(replayErr, wf.ErrReplayPendingStep) || observed.PlayedSteps != observed.RecordedSteps {
 		return replayReport{}, fmt.Errorf("handler replay differs from journal-limit request: error=%v steps=%d/%d", replayErr, observed.PlayedSteps, observed.RecordedSteps)
+	}
+	return replayReport{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, JournalEntries: len(bundle.Journal), Status: "failed", Error: outcome.Error}, nil
+}
+
+func replayNonStepJournalLimit(bundle replayBundle, handler func(*wf.Context, json.RawMessage) (json.RawMessage, error), outcome wf.Outcome) (replayReport, error) {
+	if outcome.Error != journal.ErrTooLong.Error() || outcome.InvSeq != bundle.InvSeq || len(outcome.LimitRequest) != 0 || outcome.LimitEntry == nil || !json.Valid(outcome.LimitEntry.Payload) {
+		return replayReport{}, fmt.Errorf("invalid non-step journal-limit failure")
+	}
+	full, err := json.Marshal(bundle.Journal)
+	if err != nil {
+		return replayReport{}, err
+	}
+	validationStop := errors.New("journal validated")
+	_, err = wf.Replay(full, func(*wf.Context) (json.RawMessage, error) { return nil, validationStop }, wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects})
+	if !errors.Is(err, validationStop) {
+		return replayReport{}, fmt.Errorf("invalid journal-limit history: %w", err)
+	}
+	var observed wf.ReplayObservation
+	_, replayErr := wf.Replay(full, func(c *wf.Context) (json.RawMessage, error) {
+		return handler(c, bundle.Input)
+	}, wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects, Observation: &observed})
+	if observed.PlayedSteps != observed.RecordedSteps {
+		return replayReport{}, fmt.Errorf("handler replay differs from journal-limit history: error=%v steps=%d/%d", replayErr, observed.PlayedSteps, observed.RecordedSteps)
+	}
+	switch journal.Kind(outcome.LimitEntry.Kind) {
+	case journal.Suspended:
+		var suspended struct {
+			WaitingOn string `json:"waiting_on"`
+		}
+		if json.Unmarshal(outcome.LimitEntry.Payload, &suspended) != nil || suspended.WaitingOn == "" || !errors.Is(replayErr, wf.ErrSuspended) || observed.WaitingOn != suspended.WaitingOn {
+			return replayReport{}, fmt.Errorf("handler replay differs from journal-limit suspension: error=%v wait=%q", replayErr, observed.WaitingOn)
+		}
+	case journal.Attempt:
+		attempt, err := journal.DecodeAttempt(outcome.LimitEntry.Payload)
+		if err != nil || !observed.Panicked || replayErr == nil || replayErr.Error() != attempt.Error {
+			return replayReport{}, fmt.Errorf("handler replay differs from journal-limit panic: error=%v", replayErr)
+		}
+		count := 0
+		for _, record := range bundle.Journal {
+			if record.Kind == journal.Attempt {
+				count++
+			}
+		}
+		if attempt.Count != count+1 {
+			return replayReport{}, fmt.Errorf("journal-limit panic attempt count=%d, want %d", attempt.Count, count+1)
+		}
+	default:
+		return replayReport{}, fmt.Errorf("journal-limit entry kind %q cannot be verified offline", outcome.LimitEntry.Kind)
 	}
 	return replayReport{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, JournalEntries: len(bundle.Journal), Status: "failed", Error: outcome.Error}, nil
 }

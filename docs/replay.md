@@ -48,5 +48,8 @@ handler run, it checks the journal and signal without calling the handler.
 When the worker reaches the journal entry limit before recording a new step
 request, its terminal failure includes that attempted request. Replay checks
 that the handler reaches the same request, then stops before running its
-effect. Older failures without this metadata and limits reached outside a
-step request still need a separate verification path.
+effect. A rejected panic attempt or suspension also records its attempted
+entry; replay checks the reproduced panic or wait. Older journal-limit
+failures without attempted-entry metadata return an explicit verification
+error. Rejected signal drains cannot yet be replayed because exported bundles
+do not contain the unconsumed signal.
