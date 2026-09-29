@@ -88,6 +88,16 @@ bounded follow-up test now loads `sim-failure.json`, requires the same error
 and exact original transcript, then writes `sim-failure-minimized.json`. Both
 files are uploaded; a failed or unreproducible shrink leaves the original
 trace available.
+
+The seeded workload loops default to seeds 1–1,000. `SIM_SEEDS` accepts a
+larger upper bound for every workload, up to 1,000,000; smaller values fail
+closed because some coverage checks need the full first 1,000 seeds. A local
+`SIM_SEEDS=10000 go test ./sim -count=1 -timeout=20m` run passed in 334.5
+seconds of Go test time (334.9 seconds wall) on the expanded four-CPU VM.
+`tier1-extended` is a manual CI workflow with 10,000 and 100,000 seeds per
+workload and the same failure-trace artifact path. The per-push gate remains
+at 1,000 until the larger run is measured on CI hardware against the plan's
+few-minute condition.
 CI now replays a pinned corpus covering committed and dropped CAS unknowns,
 two-worker dispatch, competing suspended scanners, signal, suspended, and child
 notification liveness, outcome persistence, integrated short-handler execution,

@@ -1,0 +1,41 @@
+name: tier1-extended
+on:
+  workflow_dispatch:
+    inputs:
+      seeds:
+        description: Seed count per Tier 1 workload
+        required: true
+        type: choice
+        default: '10000'
+        options:
+          - '10000'
+          - '100000'
+jobs:
+  sim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      SIM_SEEDS: ${{ inputs.seeds }}
+      FAULT_TRACE_OUT: sim-failure.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Run seeded transport suite
+        run: |
+          echo "Tier 1 seeds per workload: 1..${SIM_SEEDS}"
+          /usr/bin/time -f 'elapsed=%e user=%U system=%S' go test ./sim -count=1 -timeout=110m
+      - if: failure()
+        timeout-minutes: 4
+        run: |
+          if test -f sim/sim-failure.json; then
+            cd sim
+            FAULT_TRACE=sim-failure.json FAULT_TRACE_MIN_OUT=sim-failure-minimized.json go test -run '^TestMinimizeFaultTrace$' -count=1 -timeout=3m
+          fi
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tier1-extended-failure-trace
+          path: sim/sim-failure*.json
+          if-no-files-found: ignore

@@ -228,7 +228,7 @@ func TestSeededAppendTraceReplaysAcrossProcesses(t *testing.T) {
 }
 
 func TestThousandSeededJournalAppendScenarios(t *testing.T) {
-	for seed := int64(1); seed <= 1000; seed++ {
+	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
 		trace, err := runSeededAppendScenario(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")

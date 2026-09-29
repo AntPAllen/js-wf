@@ -147,7 +147,7 @@ func TestCooperativeFallbackScannersReplay(t *testing.T) {
 		}
 		return
 	}
-	for seed := int64(1); seed <= 1000; seed++ {
+	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
 		generated, err := runTwoFallbackLoops(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")
