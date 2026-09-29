@@ -55,6 +55,20 @@ func NewJournalTransport(schedule *Scheduler) *JournalTransport {
 	return &JournalTransport{schedule: schedule, messages: map[string][]Message{}}
 }
 
+// PurgeBefore removes one subject's retained prefix while preserving global
+// sequence numbers and appends that landed after the fixed sequence bound.
+func (m *JournalTransport) PurgeBefore(subject string, before uint64) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	list := m.messages[subject]
+	cut := 0
+	for cut < len(list) && list[cut].Sequence < before {
+		cut++
+	}
+	m.messages[subject] = append([]Message(nil), list[cut:]...)
+	m.event(TransportEvent{Operation: "purge_journal_prefix", Subject: subject, Sequence: before, Outcome: "ok"})
+}
+
 func (m *JournalTransport) QueueFault(f Fault) error {
 	switch f.Kind {
 	case DropBeforeCommit, LoseAckAfterCommit, RejectUnchanged:

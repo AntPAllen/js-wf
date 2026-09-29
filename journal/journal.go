@@ -73,15 +73,18 @@ func DecodeAttempt(data []byte) (AttemptPayload, error) {
 }
 
 type Store struct {
-	js         jetstream.JetStream
-	appendPort AppendPort
-	readPort   ReadPort
-	mu         sync.Mutex
-	stream     jetstream.Stream
-	state      jetstream.KeyValue
+	js               jetstream.JetStream
+	appendPort       AppendPort
+	readPort         ReadPort
+	snapshotReadPort SnapshotReadPort
+	mu               sync.Mutex
+	stream           jetstream.Stream
+	state            jetstream.KeyValue
 }
 
-func New(js jetstream.JetStream) *Store { return &Store{js: js} }
+func New(js jetstream.JetStream) *Store {
+	return &Store{js: js, snapshotReadPort: NewSnapshotReadPort(js)}
+}
 
 // AppendPort is the transport boundary used by the journal CAS decision path.
 // It permits deterministic transport simulations without replacing the SDK's
@@ -113,6 +116,12 @@ type ReadPort interface {
 // NewWithPorts runs Append and live Read decisions against supplied transports.
 func NewWithPorts(appendPort AppendPort, readPort ReadPort) *Store {
 	return &Store{appendPort: appendPort, readPort: readPort}
+}
+
+// NewWithSnapshotReadPort also loads compacted prefixes through a narrow
+// manifest and object boundary while keeping live reads on ReadPort.
+func NewWithSnapshotReadPort(appendPort AppendPort, readPort ReadPort, snapshotPort SnapshotReadPort) *Store {
+	return &Store{appendPort: appendPort, readPort: readPort, snapshotReadPort: snapshotPort}
 }
 
 type jetStreamAppendPort struct {
@@ -277,6 +286,10 @@ func (s *Store) Read(ctx context.Context, typ, id string) ([]Record, uint64, err
 	// logical read so the new manifest supplies the prefix. Persistent gaps
 	// still fail closed after a short bounded interval.
 	records, tail, err := s.readOnce(ctx, typ, id)
+	var objectGap *snapshotObjectGap
+	if errors.As(err, &objectGap) {
+		return records, tail, err
+	}
 	if !errors.Is(err, ErrGap) {
 		return records, tail, err
 	}
@@ -286,6 +299,9 @@ func (s *Store) Read(ctx context.Context, typ, id string) ([]Record, uint64, err
 				return nil, 0, waitErr
 			}
 			records, tail, err = s.readOnce(ctx, typ, id)
+			if errors.As(err, &objectGap) {
+				return records, tail, err
+			}
 			if !errors.Is(err, ErrGap) {
 				return records, tail, err
 			}
@@ -306,6 +322,9 @@ func (s *Store) Read(ctx context.Context, typ, id string) ([]Record, uint64, err
 		case <-time.After(25 * time.Millisecond):
 		}
 		records, tail, err = s.readOnce(ctx, typ, id)
+		if errors.As(err, &objectGap) {
+			return records, tail, err
+		}
 		if !errors.Is(err, ErrGap) {
 			return records, tail, err
 		}
@@ -327,7 +346,7 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 	subject := identity.JournalSubject(typ, id)
 	var out []Record
 	var snap *Snapshot
-	if s.readPort == nil {
+	if s.readPort == nil || s.snapshotReadPort != nil {
 		var err error
 		out, snap, err = s.loadSnapshot(ctx, typ, id)
 		if err != nil {

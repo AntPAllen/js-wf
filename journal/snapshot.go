@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"js-wf/identity"
@@ -17,6 +18,11 @@ import (
 var ErrSnapshotTooShort = errors.New("journal has too few entries to snapshot")
 var ErrSnapshotStale = errors.New("snapshot revision compare-and-swap lost")
 
+type snapshotObjectGap struct{ cause error }
+
+func (e *snapshotObjectGap) Error() string { return fmt.Sprintf("%v: %v", ErrGap, e.cause) }
+func (e *snapshotObjectGap) Unwrap() error { return ErrGap }
+
 type Snapshot struct {
 	Version   int    `json:"version"`
 	LastSeq   uint64 `json:"last_seq"`
@@ -24,6 +30,70 @@ type Snapshot struct {
 	Epoch     uint64 `json:"epoch"`
 	Object    string `json:"object"`
 	SHA256    string `json:"sha256"`
+}
+
+// SnapshotReadPort contains the manifest and object reads needed to
+// reconstruct a compacted journal. Missing data still fails closed.
+type SnapshotReadPort interface {
+	GetManifest(context.Context, string) ([]byte, error)
+	GetObject(context.Context, string) ([]byte, error)
+}
+
+type jetStreamSnapshotReadPort struct {
+	js      jetstream.JetStream
+	mu      sync.Mutex
+	state   jetstream.KeyValue
+	objects jetstream.ObjectStore
+}
+
+func NewSnapshotReadPort(js jetstream.JetStream) SnapshotReadPort {
+	return &jetStreamSnapshotReadPort{js: js}
+}
+
+func (p *jetStreamSnapshotReadPort) GetManifest(ctx context.Context, key string) ([]byte, error) {
+	state, err := p.stateBucket(ctx)
+	if err != nil {
+		return nil, err
+	}
+	entry, err := state.Get(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	return entry.Value(), nil
+}
+
+func (p *jetStreamSnapshotReadPort) GetObject(ctx context.Context, name string) ([]byte, error) {
+	objects, err := p.objectStore(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return objects.GetBytes(ctx, name)
+}
+
+func (p *jetStreamSnapshotReadPort) stateBucket(ctx context.Context) (jetstream.KeyValue, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.state != nil {
+		return p.state, nil
+	}
+	state, err := p.js.KeyValue(ctx, "WF_STATE")
+	if err == nil {
+		p.state = state
+	}
+	return state, err
+}
+
+func (p *jetStreamSnapshotReadPort) objectStore(ctx context.Context) (jetstream.ObjectStore, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.objects != nil {
+		return p.objects, nil
+	}
+	objects, err := p.js.ObjectStore(ctx, "WF_BLOB")
+	if err == nil {
+		p.objects = objects
+	}
+	return objects, err
 }
 
 func snapshotKey(typ, id string) string { return "snap." + identity.Key(typ, id) }
@@ -223,11 +293,11 @@ func (s *Store) PurgeSnapshot(ctx context.Context, typ, id string, snap Snapshot
 }
 
 func (s *Store) loadSnapshot(ctx context.Context, typ, id string) ([]Record, *Snapshot, error) {
-	state, err := s.stateKV(ctx)
-	if err != nil {
-		return nil, nil, err
+	port := s.snapshotReadPort
+	if port == nil {
+		port = NewSnapshotReadPort(s.js)
 	}
-	value, err := state.Get(ctx, snapshotKey(typ, id))
+	value, err := port.GetManifest(ctx, snapshotKey(typ, id))
 	if errors.Is(err, jetstream.ErrKeyNotFound) {
 		return nil, nil, nil
 	}
@@ -235,7 +305,7 @@ func (s *Store) loadSnapshot(ctx context.Context, typ, id string) ([]Record, *Sn
 		return nil, nil, err
 	}
 	var snap Snapshot
-	if err := json.Unmarshal(value.Value(), &snap); err != nil {
+	if err := json.Unmarshal(value, &snap); err != nil {
 		return nil, nil, ErrGap
 	}
 	if snap.Version != 1 || snap.Object == "" || snap.SHA256 == "" {
@@ -245,11 +315,14 @@ func (s *Store) loadSnapshot(ctx context.Context, typ, id string) ([]Record, *Sn
 	if expectedPrefix := fmt.Sprintf("snapshot-%s-", hex.EncodeToString(keyDigest[:8])); len(snap.Object) < len(expectedPrefix) || snap.Object[:len(expectedPrefix)] != expectedPrefix {
 		return nil, nil, ErrGap
 	}
-	objects, err := s.js.ObjectStore(ctx, "WF_BLOB")
-	if err != nil {
-		return nil, nil, err
+	var data []byte
+	if waiter, ok := port.(interface {
+		Wait(context.Context, time.Duration) error
+	}); ok {
+		data, err = verifiedSnapshotObjectVirtual(ctx, port.GetObject, waiter.Wait, snap.Object, snap.SHA256)
+	} else {
+		data, err = verifiedSnapshotObject(ctx, port.GetObject, snap.Object, snap.SHA256)
 	}
-	data, err := verifiedObject(ctx, objects, snap.Object, snap.SHA256)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -277,11 +350,17 @@ func (s *Store) loadSnapshot(ctx context.Context, typ, id string) ([]Record, *Sn
 // has not caught up. Verify before acknowledging a manifest, and retry reads
 // for a bounded period. Persistent absence or hash mismatch remains a gap.
 func verifiedObject(ctx context.Context, objects jetstream.ObjectStore, name, wantHash string) ([]byte, error) {
+	return verifiedSnapshotObject(ctx, func(ctx context.Context, name string) ([]byte, error) {
+		return objects.GetBytes(ctx, name)
+	}, name, wantHash)
+}
+
+func verifiedSnapshotObject(ctx context.Context, get func(context.Context, string) ([]byte, error), name, wantHash string) ([]byte, error) {
 	retryCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 	var lastErr error
 	for {
-		data, err := objects.GetBytes(retryCtx, name)
+		data, err := get(retryCtx, name)
 		if err == nil {
 			digest := sha256.Sum256(data)
 			if hex.EncodeToString(digest[:]) == wantHash {
@@ -298,8 +377,32 @@ func verifiedObject(ctx context.Context, objects jetstream.ObjectStore, name, wa
 		}
 		select {
 		case <-retryCtx.Done():
-			return nil, fmt.Errorf("%w: snapshot object %q: %v", ErrGap, name, lastErr)
+			return nil, &snapshotObjectGap{cause: fmt.Errorf("snapshot object %q: %v", name, lastErr)}
 		case <-time.After(25 * time.Millisecond):
 		}
 	}
+}
+
+// The simulation adapter advances its seeded clock rather than sleeping
+// through the bounded replica-visibility retry window.
+func verifiedSnapshotObjectVirtual(ctx context.Context, get func(context.Context, string) ([]byte, error), wait func(context.Context, time.Duration) error, name, wantHash string) ([]byte, error) {
+	var lastErr error
+	for attempt := 0; attempt < 80; attempt++ {
+		data, err := get(ctx, name)
+		if err == nil {
+			digest := sha256.Sum256(data)
+			if hex.EncodeToString(digest[:]) == wantHash {
+				return data, nil
+			}
+			lastErr = fmt.Errorf("snapshot SHA256 differs")
+		} else {
+			lastErr = err
+		}
+		if attempt < 79 {
+			if err := wait(ctx, 25*time.Millisecond); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return nil, &snapshotObjectGap{cause: fmt.Errorf("snapshot object %q: %v", name, lastErr)}
 }

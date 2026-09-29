@@ -16,6 +16,18 @@ The existing three-node journal contract now compares the modeled and real
 `Read` records and tail after interleaving two subjects, including their
 global stream-sequence hole. Three repeats and a race run passed.
 
+The production `journal.Store.Read` can now load a compacted prefix through a
+narrow modeled manifest and Object Store read port, then join it to retained
+live entries. A 1,000-seed workload advances the snapshot manifest twice,
+purges only entries below each fixed sequence bound, and checks the original
+logical records and tail after both reads. A stale manifest read and a
+transient object read retry on virtual time. A corrupt snapshot object fails
+closed with `ErrGap` after bounded virtual retries. A three-node contract
+compares real and modeled snapshot metadata, object bytes, reconstructed
+records, and tails after two compactions. Snapshot creation and purge still
+run through real JetStream in production; their modeled write decisions are
+the next part of this slice.
+
 `sim.Scheduler` chooses seeded actions and records the enabled set, chosen
 action, virtual time, and transport calls in a versioned JSON trace. Replay
 rejects an unreachable choice or a changed transport transcript. Waiting

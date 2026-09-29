@@ -66,3 +66,76 @@ func TestSimJournalAppendContractAgainstRealCluster(t *testing.T) {
 		}
 	}
 }
+
+func TestSimSnapshotReadContractAgainstRealCluster(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	defer cancel()
+	const typ, id = "snapshot-contract", "one"
+	real := journal.New(all[0])
+	schedule := sim.NewScheduler(27)
+	live := sim.NewJournalTransport(schedule)
+	snapshots := sim.NewSnapshotReadTransport(schedule)
+	modeled := journal.NewWithSnapshotReadPort(live, live, snapshots)
+	var records []journal.Record
+	appendBoth := func(kind journal.Kind) {
+		t.Helper()
+		expected := uint64(0)
+		if len(records) > 0 {
+			expected = records[len(records)-1].Sequence
+		}
+		entry := journal.Entry{Kind: kind, Index: uint64(len(records)), Epoch: 1, WorkerID: "snapshot-worker"}
+		realSeq, realErr := real.Append(ctx, typ, id, entry, expected)
+		modelSeq, modelErr := modeled.Append(ctx, typ, id, entry, expected)
+		if realErr != nil || modelErr != nil || realSeq != modelSeq {
+			t.Fatalf("append %d: real=(%d,%v) model=(%d,%v)", entry.Index, realSeq, realErr, modelSeq, modelErr)
+		}
+		records = append(records, journal.Record{Entry: entry, Sequence: realSeq})
+	}
+	appendBoth(journal.Started)
+	for i := 0; i < 10; i++ {
+		appendBoth(journal.StepRequested)
+		appendBoth(journal.StepCompleted)
+	}
+	subject := identity.JournalSubject(typ, id)
+	state, err := all[1].KeyValue(ctx, "WF_STATE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	objects, err := all[1].ObjectStore(ctx, "WF_BLOB")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, keep := range []int{4, 2} {
+		realSnap, err := real.SnapshotPrefix(ctx, typ, id, keep)
+		if err != nil {
+			t.Fatal(err)
+		}
+		modelSnap, err := snapshots.SetSnapshot(typ, id, records[:len(records)-keep])
+		if err != nil || realSnap != modelSnap {
+			t.Fatalf("snapshot keep=%d real=%+v model=%+v err=%v", keep, realSnap, modelSnap, err)
+		}
+		live.PurgeBefore(subject, modelSnap.LastSeq+1)
+		realRecords, realTail, realErr := real.Read(ctx, typ, id)
+		modelRecords, modelTail, modelErr := modeled.Read(ctx, typ, id)
+		if realErr != nil || modelErr != nil || realTail != modelTail || !reflect.DeepEqual(realRecords, modelRecords) || !reflect.DeepEqual(realRecords, records) {
+			t.Fatalf("snapshot read keep=%d real=(%d,%d,%v) model=(%d,%d,%v)", keep, len(realRecords), realTail, realErr, len(modelRecords), modelTail, modelErr)
+		}
+		realManifest, err := state.Get(ctx, "snap."+identity.Key(typ, id))
+		if err != nil {
+			t.Fatal(err)
+		}
+		modelManifest, err := snapshots.GetManifest(ctx, "snap."+identity.Key(typ, id))
+		if err != nil || !bytes.Equal(realManifest.Value(), modelManifest) {
+			t.Fatalf("snapshot manifest keep=%d differs: %v", keep, err)
+		}
+		realObject, err := objects.GetBytes(ctx, realSnap.Object)
+		if err != nil {
+			t.Fatal(err)
+		}
+		modelObject, err := snapshots.GetObject(ctx, modelSnap.Object)
+		if err != nil || !bytes.Equal(realObject, modelObject) {
+			t.Fatalf("snapshot object keep=%d differs: %v", keep, err)
+		}
+	}
+}
