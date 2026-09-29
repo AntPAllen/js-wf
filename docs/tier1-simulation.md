@@ -242,9 +242,14 @@ traces, and the race detector pass. Pinned traces cover a hidden renewal
 reply and a failed progress write. A three-node worker-level fixture hides
 a committed lease-renewal reply during a blocked effect and checks the same
 handoff, terminal result, and drained run queue; three repeated runs and a
-race run passed. Real worker fixtures for failed progress writes and closed
-tick sources remain open, as does cooperative actor scheduling of concurrent
-heartbeat and failure turns.
+race run passed. Another three-node worker-level fixture injects a failed
+`InProgress` response at the real dispatch boundary while keeping the lease,
+journal, nak, redelivery, and successor execution on JetStream. It verifies
+the first effect stops, only `StepRequested` remains, the successor runs under
+a higher epoch, and the run message drains. Three repeated runs and a race
+run passed. A real worker fixture for a closed
+tick source and cooperative actor scheduling of concurrent heartbeat and
+failure turns remain open.
 
 The integrated signal workload follows one workflow across a suspension and
 resume. Production `Client.Start` enqueues its first run, `Worker.handle`
