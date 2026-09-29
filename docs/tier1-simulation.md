@@ -131,6 +131,12 @@ plan's few-minute condition for making 10,000 seeds per workload a push gate.
 The default 1,000-per-workload suite already generates roughly 49,600
 schedules per push in aggregate; that count is distinct from 10,000 seeds
 for each workload.
+The expanded [100,000-per-workload CI run](https://github.com/AntPAllen/js-wf/actions/runs/36619464017)
+passed at `e82897b`: 5,000,602 generated schedules, 150,227,003
+scheduler choices, and 1,177,902,920 modeled transport events in 59m20.3s
+of Go test time. This reaches the release seed count for the implemented
+model slices; it does not close unmodeled transport edges or real-cluster
+proofs.
 CI now replays a pinned corpus covering committed and dropped CAS unknowns,
 two-worker dispatch, competing suspended scanners, signal, suspended, and child
 notification liveness, outcome persistence, integrated short-handler execution,
