@@ -552,7 +552,7 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	for time.Now().Before(until) && ctx.Err() == nil {
 		signalReadAttempts++
 		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
-		signalStream, err = third.Stream(attempt, "WF_SIG")
+		signalStream, err = js[other].Stream(attempt, "WF_SIG")
 		if err == nil {
 			var streamInfo *jetstream.StreamInfo
 			streamInfo, err = signalStream.Info(attempt)
@@ -561,16 +561,16 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 				break
 			}
 			if err == nil {
-				err = fmt.Errorf("WF_SIG has no leader after restart")
+				err = fmt.Errorf("WF_SIG has no leader after route heal")
 			}
 		}
 		stop()
 		time.Sleep(100 * time.Millisecond)
 	}
 	if err != nil || signalStream == nil {
-		t.Fatalf("restarted node WF_SIG readiness after %s and %d attempts: %v (test context: %v)", time.Since(signalReadStarted), signalReadAttempts, err, ctx.Err())
+		t.Fatalf("survivor node %d WF_SIG readiness after %s and %d attempts: %v (test context: %v)", other, time.Since(signalReadStarted), signalReadAttempts, err, ctx.Err())
 	}
-	t.Logf("restarted node WF_SIG ready in %s after %d attempts", time.Since(signalReadStarted), signalReadAttempts)
+	t.Logf("survivor node %d WF_SIG ready in %s after %d attempts", other, time.Since(signalReadStarted), signalReadAttempts)
 	for i, inv := range invocations {
 		if inv.typ != "mixedsignal" {
 			continue

@@ -113,6 +113,16 @@ verified, and zero early or stuck completions. The route sequence lasted
 24.83 seconds. Further full runs are needed to establish consistency under
 the clarified gate; the raw 30-second target remains unmet in that run.
 
+A second full 10,000-timer route run passed with raw p99 36.60 seconds,
+post-heal p99 18.36 seconds, post-heal maximum 22.89 seconds, and zero early
+or stuck completions. All results and terminal journals were verified; the
+route sequence lasted 24.90 seconds. A 1,000-timer repeat also passed with
+post-heal p99 28.42 seconds. An earlier 1,000-timer run failed during result
+auditing after 970 handlers had completed; the inspected invocation already
+had a completed journal and result, so its cause remains unconfirmed. The
+full-scale recovery gate has now passed twice, while that smaller audit
+failure still warrants investigation.
+
 To reproduce the smaller diagnostic run:
 
 ```sh
