@@ -110,6 +110,22 @@ func TestSimRunDedupWindowExpiryAgainstRealCluster(t *testing.T) {
 	if err != nil || info.State.Msgs != 2 {
 		t.Fatalf("retained runs after expiry: info=%+v err=%v", info, err)
 	}
+	// Removing Nats-Msg-Id must leave two distinct run messages. This is
+	// the transport negative control for the missing-ID chaos mutation.
+	noID := &nats.Msg{Subject: subject, Data: []byte("without-id")}
+	for i := 0; i < 2; i++ {
+		ack, publishErr := all[0].PublishMsg(ctx, noID)
+		if publishErr != nil || ack.Duplicate || ack.Sequence != third.Sequence+uint64(i)+1 {
+			t.Fatalf("publish without message ID %d: ack=%+v err=%v", i, ack, publishErr)
+		}
+		if err := model.EnqueueRun(ctx, subject, noID.Data, ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	info, err = stream.Info(ctx)
+	if err != nil || info.State.Msgs != 4 || len(model.Runs()) != 4 {
+		t.Fatalf("missing-ID contract: real=%+v err=%v model runs=%d", info, err, len(model.Runs()))
+	}
 }
 
 func TestSimStartRepairContractAgainstRealCluster(t *testing.T) {

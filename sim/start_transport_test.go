@@ -89,6 +89,29 @@ func TestStartTransportFaultBoundaries(t *testing.T) {
 	})
 }
 
+func TestMissingRunMessageIDMutationRetainsDuplicate(t *testing.T) {
+	ctx := context.Background()
+	const subject = "wf.run.0"
+	withID := NewStartTransport(NewScheduler(101))
+	for range 2 {
+		if err := withID.EnqueueRun(ctx, subject, []byte("same"), "start:test.same:1"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if got := len(withID.Runs()); got != 1 {
+		t.Fatalf("message ID did not deduplicate: runs=%d", got)
+	}
+	withoutID := NewStartTransport(NewScheduler(101))
+	for range 2 {
+		if err := withoutID.EnqueueRun(ctx, subject, []byte("same"), ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if got := len(withoutID.Runs()); got != 2 {
+		t.Fatalf("missing message ID mutation escaped duplicate-run check: runs=%d", got)
+	}
+}
+
 func TestStartRunDedupWindowExpiresInVirtualTime(t *testing.T) {
 	schedule := NewScheduler(19)
 	model := NewStartTransport(schedule)

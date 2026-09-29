@@ -165,14 +165,18 @@ func (m *StartTransport) EnqueueRun(ctx context.Context, subject string, data []
 		m.event(event)
 		return ErrTransportLost
 	}
-	if previous, duplicate := m.runIDs[messageID]; duplicate && m.schedule.NowMillis()-previous.atMillis < m.runWindow {
-		event.Sequence = previous.sequence
-		event.Outcome = "duplicate"
-		m.event(event)
-		return nil
+	if messageID != "" {
+		if previous, duplicate := m.runIDs[messageID]; duplicate && m.schedule.NowMillis()-previous.atMillis < m.runWindow {
+			event.Sequence = previous.sequence
+			event.Outcome = "duplicate"
+			m.event(event)
+			return nil
+		}
 	}
 	m.runSeq++
-	m.runIDs[messageID] = runDedupEntry{sequence: m.runSeq, atMillis: m.schedule.NowMillis()}
+	if messageID != "" {
+		m.runIDs[messageID] = runDedupEntry{sequence: m.runSeq, atMillis: m.schedule.NowMillis()}
+	}
 	run := Message{Subject: subject, Sequence: m.runSeq, Data: append([]byte(nil), data...)}
 	m.runs = append(m.runs, run)
 	if m.onRunCommit != nil {
