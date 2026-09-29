@@ -34,6 +34,15 @@ manifest, and no retained consumed signal. The three-node contract also runs
 production snapshot writes against both transports and compares both
 compactions byte for byte.
 
+`sim.RunSnapshotActors` yields each production snapshot read, object write,
+manifest CAS, and bounded purge to the cooperative scheduler. A 1,000-seed
+two-compactor workload starts from one compacted journal, races two production
+`SnapshotPrefix` calls, and checks that the manifest advances one revision,
+the losing writer receives `ErrSnapshotStale` when its CAS conflicts, four
+live entries remain, and a fresh read reconstructs every original record.
+The workload pins a conflicting-CAS trace from seed 1, replays exact traces,
+and compares seed 42 across processes.
+
 The production worker now calls modeled `MaybeSnapshot` after a successful
 delivery when its journal has a snapshot write port. A 1,000-seed workload
 runs 130 `wf.Run` steps in one handler, triggering the ordinary 256-entry
