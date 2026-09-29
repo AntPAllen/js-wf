@@ -247,9 +247,11 @@ race run passed. Another three-node worker-level fixture injects a failed
 journal, nak, redelivery, and successor execution on JetStream. It verifies
 the first effect stops, only `StepRequested` remains, the successor runs under
 a higher epoch, and the run message drains. Three repeated runs and a race
-run passed. A real worker fixture for a closed
-tick source and cooperative actor scheduling of concurrent heartbeat and
-failure turns remain open.
+run passed. The same fixture closes an injected heartbeat tick source while
+the effect is blocked and verifies its cancellation, nak, successor replay,
+and queue drain. Both modes passed three repeated runs and a race run.
+Cooperative actor scheduling of concurrent heartbeat and failure turns
+remains open.
 
 The integrated signal workload follows one workflow across a suspension and
 resume. Production `Client.Start` enqueues its first run, `Worker.handle`

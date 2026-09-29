@@ -132,6 +132,18 @@ func WithDispatchTiming(ackWait, heartbeat time.Duration) Option {
 	}
 }
 
+// WithHeartbeatTicks supplies ticks for deterministic worker tests. Closing
+// the channel makes an active worker stop its effect and hand off the message.
+func WithHeartbeatTicks(ticks <-chan time.Time) Option {
+	return func(w *Worker) error {
+		if ticks == nil {
+			return fmt.Errorf("heartbeat tick channel is nil")
+		}
+		w.heartbeatTicks = ticks
+		return nil
+	}
+}
+
 func New(ctx context.Context, js jetstream.JetStream, id string, handlers map[string]Handler, options ...Option) (*Worker, error) {
 	if id == "" {
 		return nil, fmt.Errorf("empty worker ID")
