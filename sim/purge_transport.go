@@ -31,6 +31,7 @@ type PurgeTransport struct {
 }
 
 var _ retention.PurgePort = (*PurgeTransport)(nil)
+var _ journal.AppendPort = (*PurgeTransport)(nil)
 var _ journal.ReadPort = (*PurgeTransport)(nil)
 var _ journal.SnapshotReadPort = (*PurgeTransport)(nil)
 var _ journal.SnapshotWritePort = (*PurgeTransport)(nil)
@@ -116,6 +117,54 @@ func (m *PurgeTransport) DeleteState(ctx context.Context, key string, revision u
 func (m *PurgeTransport) Journal(ctx context.Context, typ, id string) ([]journal.Record, error) {
 	records, _, err := journal.NewWithSnapshotReadPort(nil, m, m).Read(ctx, typ, id)
 	return records, err
+}
+
+func (m *PurgeTransport) Last(ctx context.Context, subject string) (journal.AppendTail, error) {
+	if err := ctx.Err(); err != nil {
+		return journal.AppendTail{}, err
+	}
+	m.Blobs.mu.Lock()
+	defer m.Blobs.mu.Unlock()
+	stream := m.Blobs.streams["WF_JRN"]
+	var selected uint64
+	for sequence, message := range stream.messages {
+		if message.Subject == subject && sequence > selected {
+			selected = sequence
+		}
+	}
+	if selected == 0 {
+		m.Blobs.event(TransportEvent{Operation: "purge_journal_last", Subject: subject, Outcome: "not_found"})
+		return journal.AppendTail{}, jetstream.ErrMsgNotFound
+	}
+	data := append([]byte(nil), stream.messages[selected].Data...)
+	m.Blobs.event(TransportEvent{Operation: "purge_journal_last", Subject: subject, Sequence: selected, DataSHA256: digest(data), Outcome: "ok"})
+	return journal.AppendTail{Sequence: selected, Data: data}, nil
+}
+
+func (m *PurgeTransport) Publish(ctx context.Context, subject string, data []byte, expected uint64) (uint64, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+	m.Blobs.mu.Lock()
+	defer m.Blobs.mu.Unlock()
+	stream := m.Blobs.streams["WF_JRN"]
+	var current uint64
+	for sequence, message := range stream.messages {
+		if message.Subject == subject && sequence > current {
+			current = sequence
+		}
+	}
+	event := TransportEvent{Operation: "purge_journal_publish", Subject: subject, Expected: expected, DataSHA256: digest(data)}
+	if current != expected {
+		event.Outcome = "wrong_last_sequence"
+		m.Blobs.event(event)
+		return 0, wrongLastSequence()
+	}
+	stream.last++
+	stream.messages[stream.last] = retention.BlobSweepMessage{Subject: subject, Data: append([]byte(nil), data...)}
+	event.Sequence, event.Outcome = stream.last, "ok"
+	m.Blobs.event(event)
+	return stream.last, nil
 }
 
 func (m *PurgeTransport) Next(ctx context.Context, subject string, from uint64) (journal.AppendTail, error) {

@@ -418,6 +418,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededPurgeBlob(loaded.Seed, &loaded)
 	case "snapshot_purge_lease":
 		replayed, err = runSnapshotPurgeActors(loaded.Seed, &loaded)
+	case "snapshot_append_purge":
+		replayed, err = runSnapshotAppendPurgeActors(loaded.Seed, &loaded)
 	case "worker_timer_execution":
 		replayed, err = runSeededWorkerTimerExecution(loaded.Seed, &loaded)
 	case "worker_fallback_timer_execution":

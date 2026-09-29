@@ -251,8 +251,16 @@ finishes and the worker releases its lease, purge and quiescent blob sweep
 complete. Two traces pin the fenced and after-release orderings. A three-node
 fixture blocks a real snapshot object upload while a real purge attempts the
 same invocation, then checks journal reconstruction, purge, and blob
-reclamation after release. Active workflow journal writes and concurrent blob
-sweeping remain open; blob sweeping requires quiescent writers.
+reclamation after release. Another 1,000-seed cooperative schedule runs
+production journal `Append` concurrently with production `SnapshotPrefix` on
+the same retained transport, with a purge attempt fenced by the worker lease.
+The snapshot can cover either of two prefixes; its fixed purge bound always
+retains the later terminal append, and production `Read` reconstructs all
+entries before retention purge and quiescent blob sweep. Two traces pin both
+cutoffs. A three-node fixture blocks snapshot upload, appends the terminal
+entry, then checks the live suffix, reconstruction, purge, and reclamation.
+Scheduling the full worker handler against compaction and online blob sweeping
+remain open; blob sweeping requires quiescent writers.
 
 The integrated short-handler workload runs production `Client.Start` and
 `Worker.handle` over a shared modeled run stream and durable consumer. Its
