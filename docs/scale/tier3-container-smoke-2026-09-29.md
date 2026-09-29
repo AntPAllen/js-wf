@@ -13,9 +13,12 @@ sockets alive for about 90 seconds after network disconnection.
 The test provisions the workflow stores at five replicas, starts a worker,
 isolates node four, and races eight `Start` calls from clients pinned to the
 four-node majority. It requires one start and seven matching duplicates, then
-checks the recorded start history with Porcupine. It completes the workflow on
-the majority and checks for two seconds that the isolated node cannot observe
-the new result.
+checks the recorded start history with Porcupine. The workflow suspends on
+`AwaitSignal`; the majority sends one signal, retries its key with the same
+payload, and rejects a retry with a different payload. Porcupine checks that
+signal history, and the final journal must contain one `SignalConsumed` entry.
+The workflow completes on the majority. The test checks for two seconds that
+the isolated node cannot observe the new result.
 After route healing it reads the immutable result through that node, kills
 its container, waits for Docker to release that container name, restarts it
 on the same file store, reads the result again, and checks the retained
@@ -39,4 +42,7 @@ The first clean CI run passed in 124 seconds. After a three-run local repeat
 exposed a Docker `--rm` cleanup race on restart, the fixture began waiting for
 container-name removal. Three corrected local runs passed, followed by a
 [clean CI pass](https://github.com/AntPAllen/js-wf/actions/runs/36601536302)
-in 128 seconds.
+in 128 seconds. An [observed-history CI run](https://github.com/AntPAllen/js-wf/actions/runs/36602929845)
+passed in 121 seconds and uploaded 11 operations covering eight starts and
+three result reads. The subsequent signal-wakeup extension passed locally in
+109 seconds with 14 recorded operations; clean CI remains pending.

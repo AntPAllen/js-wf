@@ -16,6 +16,7 @@ import (
 	"js-wf/history"
 	"js-wf/identity"
 	"js-wf/integrity"
+	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/testcluster"
 	"js-wf/wf"
@@ -76,8 +77,9 @@ func TestFiveContainerWorkflowSurvivesIsolationAndRestart(t *testing.T) {
 		t.Fatalf("provision five-replica stores: %v", err)
 	}
 	const typ, id = "tier3", "isolate-restart"
-	w, err := worker.New(ctx, js, "tier3-worker", map[string]worker.Handler{typ: func(_ *wf.Context, input json.RawMessage) (json.RawMessage, error) {
-		return input, nil
+	w, err := worker.New(ctx, js, "tier3-worker", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		value, err := wf.AwaitSignal(c, "go")
+		return json.RawMessage(value), err
 	}})
 	if err != nil {
 		t.Fatal(err)
@@ -177,6 +179,41 @@ func TestFiveContainerWorkflowSurvivesIsolationAndRestart(t *testing.T) {
 	if result, err := history.CheckStarts(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
 		t.Fatalf("five-container start history=%s: %v", result, err)
 	}
+	suspendedUntil := time.Now().Add(30 * time.Second)
+	suspended := false
+	for time.Now().Before(suspendedUntil) && ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		entries, _, readErr := journal.New(js).Read(attempt, typ, id)
+		stop()
+		if readErr == nil {
+			for _, entry := range entries {
+				if entry.Kind == journal.Suspended {
+					suspended = true
+				}
+			}
+		}
+		if suspended {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if !suspended {
+		t.Fatal("workflow did not suspend before majority signal")
+	}
+	sequence, err := clients[1].Signal(ctx, typ, id, "go", []byte(`42`), "tier3-go")
+	if err != nil {
+		t.Fatalf("majority signal: %v", err)
+	}
+	duplicate, err := clients[2].Signal(ctx, typ, id, "go", []byte(`42`), "tier3-go")
+	if err != nil || duplicate != sequence {
+		t.Fatalf("majority signal retry=%d want=%d: %v", duplicate, sequence, err)
+	}
+	if _, err := clients[3].Signal(ctx, typ, id, "go", []byte(`43`), "tier3-go"); !errors.Is(err, client.ErrSignalMismatch) {
+		t.Fatalf("majority signal mismatch: %v", err)
+	}
+	if result, err := history.CheckSignals(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
+		t.Fatalf("five-container signal history=%s: %v", result, err)
+	}
 	if value, err := c.Await(ctx, typ, id); err != nil || string(value) != "42" {
 		t.Fatalf("majority result=%s err=%v", value, err)
 	}
@@ -258,6 +295,19 @@ func TestFiveContainerWorkflowSurvivesIsolationAndRestart(t *testing.T) {
 	}
 	if err != nil || report.Invocations != 1 || report.Journals != 1 || report.Terminal != 1 {
 		t.Fatalf("five-container retained audit=%+v: %v", report, err)
+	}
+	entries, _, err := journal.New(js).Read(ctx, typ, id)
+	if err != nil {
+		t.Fatalf("read five-container journal: %v", err)
+	}
+	var consumed int
+	for _, entry := range entries {
+		if entry.Kind == journal.SignalConsumed {
+			consumed++
+		}
+	}
+	if consumed != 1 {
+		t.Fatalf("five-container journal consumed %d signals, want 1", consumed)
 	}
 	t.Logf("five-container result survived one network isolation and one file-store restart: %+v", report)
 }
