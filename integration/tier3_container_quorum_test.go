@@ -165,7 +165,16 @@ func TestFiveContainerPublishRequiresQuorum(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	retained, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, id))
+	var retained *jetstream.RawStreamMsg
+	for until := time.Now().Add(30 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
+		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		retained, err = inv.GetLastMsgForSubject(attempt, identity.InvocationSubject(typ, id))
+		stop()
+		if err == nil {
+			break
+		}
+		time.Sleep(150 * time.Millisecond)
+	}
 	if err != nil || invInfo.State.Msgs != 1 || retained.Sequence != handle.InvSeq {
 		t.Fatalf("write-once invocation: count=%d retained=%+v handle=%+v err=%v", invInfo.State.Msgs, retained, handle, err)
 	}
