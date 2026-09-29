@@ -36,11 +36,17 @@ func runSeededWorkerTimerExecution(seed int64, replay *Trace) (trace Trace, runE
 			return Trace{}, err
 		}
 	}
-	if err := schedule.SetWorkload("worker_timer_execution"); err != nil {
+	workload := "worker_timer_execution_v2"
+	modes := []string{"clean", "timer_publish_drop", "timer_publish_ack_lost", "await_completion_drop", "await_completion_ack_lost", "timer_run_ack_lost", "consumer_leader_changed", "route_quorum_lost"}
+	if replay != nil && replay.Workload == "worker_timer_execution" {
+		workload = "worker_timer_execution"
+		modes = modes[:len(modes)-1]
+	}
+	if err := schedule.SetWorkload(workload); err != nil {
 		return Trace{}, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose([]string{"clean", "timer_publish_drop", "timer_publish_ack_lost", "await_completion_drop", "await_completion_ack_lost", "timer_run_ack_lost", "consumer_leader_changed"})
+	mode, err := schedule.Choose(modes)
 	if err != nil {
 		return trace, err
 	}
@@ -111,6 +117,9 @@ func runSeededWorkerTimerExecution(seed int64, replay *Trace) (trace Trace, runE
 		return trace, err
 	}
 	remaining := due.Sub(base.Add(time.Duration(schedule.NowMillis()) * time.Millisecond))
+	if mode == "route_quorum_lost" {
+		timers.SetScheduleQuorum(false)
+	}
 	if remaining > time.Millisecond {
 		if err := timers.Advance(remaining - time.Millisecond); err != nil {
 			return trace, err
@@ -122,6 +131,42 @@ func runSeededWorkerTimerExecution(seed int64, replay *Trace) (trace Trace, runE
 	}
 	if err := timers.Advance(remaining); err != nil {
 		return trace, err
+	}
+	var healedAtMillis int64
+	if mode == "route_quorum_lost" {
+		if transport.Dispatch.Pending() != 0 {
+			return trace, fmt.Errorf("seed %d native timer delivered without scheduling quorum", seed)
+		}
+		if err := timers.Advance(12 * time.Second); err != nil {
+			return trace, err
+		}
+		if transport.Dispatch.Pending() != 0 {
+			return trace, fmt.Errorf("seed %d overdue native timer delivered before route heal", seed)
+		}
+		healedAtMillis = schedule.NowMillis()
+		choice, err := schedule.Choose([]string{"0", "1000", "5000", "20000"})
+		if err != nil {
+			return trace, err
+		}
+		delayMillis, err := strconv.ParseInt(choice, 10, 64)
+		if err != nil {
+			return trace, err
+		}
+		if err := timers.SetHealDelay(time.Duration(delayMillis) * time.Millisecond); err != nil {
+			return trace, err
+		}
+		timers.SetScheduleQuorum(true)
+		if delayMillis != 0 {
+			if transport.Dispatch.Pending() != 0 {
+				return trace, fmt.Errorf("seed %d native timer delivered before recovery delay", seed)
+			}
+			if err := timers.Advance(time.Duration(delayMillis-1) * time.Millisecond); err != nil || transport.Dispatch.Pending() != 0 {
+				return trace, fmt.Errorf("seed %d native timer delivered early after heal: pending=%d err=%v", seed, transport.Dispatch.Pending(), err)
+			}
+			if err := timers.Advance(time.Millisecond); err != nil {
+				return trace, err
+			}
+		}
 	}
 	if transport.Dispatch.Pending() != 1 {
 		return trace, fmt.Errorf("seed %d due timer pending=%d", seed, transport.Dispatch.Pending())
@@ -140,6 +185,9 @@ func runSeededWorkerTimerExecution(seed int64, replay *Trace) (trace Trace, runE
 	transport.Dispatch.StopWhenDrained(stopSecond)
 	if err := w.RunPartitionWithTransport(secondCtx, 0, transport.Dispatch); err != nil || transport.Dispatch.Pending() != 0 {
 		return trace, fmt.Errorf("seed %d resumed timer delivery pending=%d err=%v", seed, transport.Dispatch.Pending(), err)
+	}
+	if mode == "route_quorum_lost" && schedule.NowMillis()-healedAtMillis >= 30_000 {
+		return trace, fmt.Errorf("seed %d timer resume after route heal took %d virtual ms", seed, schedule.NowMillis()-healedAtMillis)
 	}
 	records, _, err := store.Read(ctx, typ, id)
 	if err != nil || len(records) != 7 || records[5].Kind != journal.StepCompleted || records[6].Kind != journal.Completed {

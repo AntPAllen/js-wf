@@ -426,7 +426,7 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSnapshotAppendPurgeActors(loaded.Seed, &loaded)
 	case "failure_probe":
 		replayed, err = runProbeFailure(&loaded)
-	case "worker_timer_execution":
+	case "worker_timer_execution", "worker_timer_execution_v2":
 		replayed, err = runSeededWorkerTimerExecution(loaded.Seed, &loaded)
 	case "worker_fallback_timer_execution":
 		replayed, err = runSeededWorkerFallbackTimerExecution(loaded.Seed, &loaded)

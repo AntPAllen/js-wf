@@ -40,6 +40,9 @@ type TimerScheduleTransport struct {
 	runs             []Message
 	streamSeq        uint64
 	fallbackSeq      uint64
+	scheduleQuorum   bool
+	healDelayMillis  int64
+	deliverAfter     int64
 	onNativeDelivery func(*nats.Msg, time.Time)
 	onFallbackWakeup func(*nats.Msg, time.Time)
 }
@@ -48,7 +51,37 @@ var _ worker.TimerSchedulePort = (*TimerScheduleTransport)(nil)
 var _ reconcile.FallbackTimerScanPort = (*TimerScheduleTransport)(nil)
 
 func NewTimerScheduleTransport(schedule *Scheduler, base time.Time) *TimerScheduleTransport {
-	return &TimerScheduleTransport{schedule: schedule, base: base, window: (2 * time.Minute).Milliseconds(), ids: map[string]int64{}, deleted: map[uint64]bool{}, state: map[string][]byte{}, wakeupIDs: map[string]int64{}}
+	return &TimerScheduleTransport{schedule: schedule, base: base, window: (2 * time.Minute).Milliseconds(), ids: map[string]int64{}, deleted: map[uint64]bool{}, state: map[string][]byte{}, wakeupIDs: map[string]int64{}, scheduleQuorum: true}
+}
+
+// SetScheduleQuorum models the scheduling leader's inability to deliver
+// targets during a route cut. Due targets remain retained until the route
+// heals and its modeled recovery delay passes.
+func (m *TimerScheduleTransport) SetScheduleQuorum(available bool) {
+	if m.scheduleQuorum == available {
+		return
+	}
+	m.scheduleQuorum = available
+	outcome := "lost"
+	if available {
+		outcome = "healed"
+		m.deliverAfter = m.schedule.NowMillis() + m.healDelayMillis
+	}
+	m.event(TransportEvent{Operation: "timer_schedule_quorum", Outcome: outcome, AtMillis: m.schedule.NowMillis()})
+	if available {
+		m.deliverDue()
+	}
+}
+
+// SetHealDelay models bounded server-side leader recovery after routes heal.
+// The duration is chosen by the seeded workload in virtual time; it does not
+// assert NATS's exact recovery latency.
+func (m *TimerScheduleTransport) SetHealDelay(delay time.Duration) error {
+	if delay < 0 || delay%time.Millisecond != 0 {
+		return fmt.Errorf("invalid timer heal delay %s", delay)
+	}
+	m.healDelayMillis = delay.Milliseconds()
+	return nil
 }
 
 // OnNativeDelivery connects due timer targets to a modeled durable consumer.
@@ -165,6 +198,14 @@ func (m *TimerScheduleTransport) Advance(delay time.Duration) error {
 	if err := m.schedule.AdvanceMillis(delay.Milliseconds()); err != nil {
 		return err
 	}
+	m.deliverDue()
+	return nil
+}
+
+func (m *TimerScheduleTransport) deliverDue() {
+	if !m.scheduleQuorum || m.schedule.NowMillis() < m.deliverAfter {
+		return
+	}
 	now := m.base.Add(time.Duration(m.schedule.NowMillis()) * time.Millisecond)
 	for i := range m.native {
 		entry := &m.native[i]
@@ -180,7 +221,6 @@ func (m *TimerScheduleTransport) Advance(delay time.Duration) error {
 		}
 		m.event(TransportEvent{Operation: "deliver_native_timer", Subject: target, Sequence: m.streamSeq, DataSHA256: digest(entry.message.Data), Outcome: "ok"})
 	}
-	return nil
 }
 
 func (m *TimerScheduleTransport) NativeSources() []*nats.Msg {

@@ -12,6 +12,7 @@ import (
 	"js-wf/provision"
 	"js-wf/reconcile"
 	"js-wf/sim"
+	"js-wf/testcluster"
 	"js-wf/worker"
 
 	"github.com/nats-io/nats.go"
@@ -223,5 +224,92 @@ func TestSimTimerScheduleContractAgainstRealCluster(t *testing.T) {
 		if _, err := run.GetMsg(ctx, stored.Sequence+1, jetstream.WithGetMsgSubject(target)); !errors.Is(err, jetstream.ErrMsgNotFound) {
 			t.Fatalf("fallback target %s duplicated: %v", id, err)
 		}
+	}
+}
+
+func TestSimNativeTimerQuorumHealContractAgainstRealCluster(t *testing.T) {
+	cluster, err := testcluster.StartPartitionable(t.TempDir(), 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	all, cluster := setupCluster(t, cluster)
+	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	defer cancel()
+	const typ, id = "timer-contract", "route-quorum"
+	base := time.Now().UTC()
+	fireAt := base.Add(8 * time.Second)
+	clock := sim.NewScheduler(73)
+	model := sim.NewTimerScheduleTransport(clock, base)
+	if _, err := worker.ScheduleTimerWithPort(ctx, model, true, typ, id, 7, 3, fireAt); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := worker.ScheduleTimerWithPort(ctx, worker.NewTimerSchedulePort(all[0]), true, typ, id, 7, 3, fireAt); err != nil {
+		t.Fatal(err)
+	}
+	mesh := cluster.RouteMesh()
+	defer mesh.Heal()
+	if err := mesh.PartitionNode(0); err != nil {
+		t.Fatal(err)
+	}
+	if err := waitTimerRouteCounts(ctx, cluster, 0); err != nil {
+		t.Fatal(err)
+	}
+	cluster.KillNode(1) // Node 0 is isolated; node 2 alone has no quorum.
+	if time.Until(fireAt) < time.Second {
+		t.Fatal("failed to remove schedule quorum before timer due time")
+	}
+	model.SetScheduleQuorum(false)
+	if err := model.Advance(16 * time.Second); err != nil || len(model.Runs()) != 0 {
+		t.Fatalf("modeled due target before heal: runs=%d err=%v", len(model.Runs()), err)
+	}
+	if wait := time.Until(fireAt.Add(time.Second)); wait > 0 {
+		select {
+		case <-time.After(wait):
+		case <-ctx.Done():
+			t.Fatal(ctx.Err())
+		}
+	}
+	healedAt := time.Now()
+	mesh.Heal()
+	if err := cluster.RestartNode(1); err != nil {
+		t.Fatal(err)
+	}
+	if err := waitTimerRouteCounts(ctx, cluster, -1); err != nil {
+		t.Fatal(err)
+	}
+	quorumReadyAt := time.Now()
+	model.SetScheduleQuorum(true)
+	if len(model.Runs()) != 1 {
+		t.Fatalf("modeled target after quorum recovery=%d", len(model.Runs()))
+	}
+	target := identity.RunSubject(typ, id, provision.Partitions)
+	var delivered *jetstream.RawStreamMsg
+	var lastErr error
+	for ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		run, err := all[2].Stream(attempt, "WF_RUN")
+		if err == nil {
+			delivered, err = run.GetLastMsgForSubject(attempt, target)
+		}
+		stop()
+		if err == nil {
+			break
+		}
+		lastErr = err
+		time.Sleep(50 * time.Millisecond)
+	}
+	if delivered == nil || string(delivered.Data) != identity.Key(typ, id) || delivered.Header.Get(identity.TimerInvSeqHeader) != "7" {
+		t.Fatalf("real target after heal=%+v last_error=%v routes=%d/%d/%d context=%v", delivered, lastErr, cluster.Servers[0].NumRoutes(), cluster.Servers[1].NumRoutes(), cluster.Servers[2].NumRoutes(), ctx.Err())
+	}
+	run, err := all[2].Stream(ctx, "WF_RUN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := run.GetMsg(ctx, delivered.Sequence+1, jetstream.WithGetMsgSubject(target)); !errors.Is(err, jetstream.ErrMsgNotFound) {
+		t.Fatalf("duplicate native target after route heal: %v", err)
+	}
+	t.Logf("native timer target visible %s after route heal and %s after all routes returned", time.Since(healedAt), time.Since(quorumReadyAt))
+	if err := model.Advance(time.Second); err != nil || len(model.Runs()) != 1 {
+		t.Fatalf("modeled duplicate after heal: runs=%d err=%v", len(model.Runs()), err)
 	}
 }

@@ -656,6 +656,19 @@ acknowledgments, hidden acknowledgments after commit, and one routed target
 per native timer. Route partition timing remains outside this timer-publication
 slice; the integrated worker timer workloads above exercise replay.
 
+The native schedule model now has an explicit quorum cut: a target that becomes
+due during the cut stays retained until heal and an optional seeded virtual
+recovery delay. The integrated production-worker timer workload exercises a
+12-second overdue target with 0, 1, 5, or 20 seconds of post-heal delivery
+delay, then requires one completed workflow and a post-heal resume under
+30 virtual seconds. A three-node contract publishes a real native schedule,
+isolates one node and stops another before due time, then heals routes and
+restarts the stopped node; the target appears once after recovery. This
+contracts eventual delivery, not a fixed NATS leader-recovery delay.
+Seed 6 with a five-second virtual recovery delay is pinned in the regression
+corpus; the previous timer trace retains its original workload version and
+still replays byte-for-byte.
+
 The fallback timer scanner now has a narrow retained-read, state-read,
 wakeup-publish, and delete port. Another 1,000-seed pipeline publishes 20
 fallback timers through the worker's production timer path and scans them
