@@ -95,17 +95,17 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	}
 	const typ, id = "mixed-upgrade", "timer"
 	partition := identity.Partition(typ, id, provision.Partitions)
-	repairedID := ""
-	for candidate := 0; candidate < 10_000; candidate++ {
+	matchingIDs := make([]string, 0, 2)
+	for candidate := 0; candidate < 10_000 && len(matchingIDs) < 2; candidate++ {
 		value := fmt.Sprintf("repaired-%d", candidate)
 		if identity.Partition(typ, value, provision.Partitions) == partition {
-			repairedID = value
-			break
+			matchingIDs = append(matchingIDs, value)
 		}
 	}
-	if repairedID == "" {
-		t.Fatal("no second ID on the same partition")
+	if len(matchingIDs) != 2 {
+		t.Fatal("could not find two more IDs on the same partition")
 	}
+	repairedID, postUpgradeID := matchingIDs[0], matchingIDs[1]
 	w, err := worker.New(ctx, all[2], "upgrade-worker", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 		if err := wf.Sleep(c, "wait", time.Second); err != nil {
 			return nil, err
@@ -163,5 +163,48 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	}
 	if report, err := integrity.Check(ctx, all[1]); err != nil || report.Invocations != 2 || report.Journals != 2 || report.Terminal != 2 {
 		t.Fatalf("mixed-version retained audit: report=%+v err=%v", report, err)
+	}
+	if err := cluster.KillNode(0); err != nil {
+		t.Fatalf("stop old peer for upgrade: %v", err)
+	}
+	if err := cluster.UpgradeNode(0); err != nil {
+		t.Fatalf("restart old peer on pinned binary: %v", err)
+	}
+	if version := cluster.Clients[0].ConnectedServerVersion(); strings.HasPrefix(version, "2.11.") {
+		t.Fatalf("upgraded peer still reports %q", version)
+	}
+	upgraded, err := jetstream.New(cluster.Clients[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	var upgradedBackend provision.TimerBackend
+	for until := time.Now().Add(15 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
+		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		upgradedBackend, err = provision.EnsureAuto(attempt, upgraded, 3)
+		stop()
+		if err == nil {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if err != nil || upgradedBackend != provision.FallbackTimers {
+		t.Fatalf("upgraded peer changed fallback mode: backend=%q err=%v", upgradedBackend, err)
+	}
+	upgradedClient := client.New(upgraded)
+	for _, completedID := range []string{id, repairedID} {
+		value, err := upgradedClient.Await(ctx, typ, completedID)
+		if err != nil || string(value) != `"done"` {
+			t.Fatalf("upgraded peer retained result %s=%s err=%v", completedID, value, err)
+		}
+	}
+	if _, err := upgradedClient.Start(ctx, typ, postUpgradeID, payload); err != nil {
+		t.Fatalf("start through upgraded peer: %v", err)
+	}
+	result, err = upgradedClient.Await(ctx, typ, postUpgradeID)
+	if err != nil || string(result) != `"done"` {
+		t.Fatalf("post-upgrade result=%s err=%v", result, err)
+	}
+	if report, err := integrity.Check(ctx, upgraded); err != nil || report.Invocations != 3 || report.Journals != 3 || report.Terminal != 3 {
+		t.Fatalf("post-upgrade retained audit: report=%+v err=%v", report, err)
 	}
 }

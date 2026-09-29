@@ -254,6 +254,16 @@ func (c *ProcessCluster) KillNode(i int) error {
 }
 
 func (c *ProcessCluster) RestartNode(i int) error {
+	return c.restartNodeWithBinary(i, "")
+}
+
+// UpgradeNode restarts a stopped node on the same ports and file store using
+// the module-pinned server binary built when this fixture started.
+func (c *ProcessCluster) UpgradeNode(i int) error {
+	return c.restartNodeWithBinary(i, filepath.Join(c.root, "nats-server"))
+}
+
+func (c *ProcessCluster) restartNodeWithBinary(i int, binary string) error {
 	if i < 0 || i >= len(c.Commands) || c.Commands[i] == nil || c.Commands[i].ProcessState == nil {
 		return fmt.Errorf("process node %d is not stopped", i)
 	}
@@ -262,7 +272,10 @@ func (c *ProcessCluster) RestartNode(i int) error {
 	if err != nil {
 		return err
 	}
-	cmd := exec.Command(old.Args[0], old.Args[1:]...)
+	if binary == "" {
+		binary = old.Args[0]
+	}
+	cmd := exec.Command(binary, old.Args[1:]...)
 	cmd.Stdout, cmd.Stderr = logFile, logFile
 	err = cmd.Start()
 	_ = logFile.Close()
