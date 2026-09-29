@@ -487,5 +487,13 @@ func TestJournalCASTenThousandRacesWithLeaderRestarts(t *testing.T) {
 	if tail != seq || count != rounds+1 {
 		t.Fatalf("journal audit count=%d tail=%d want_count=%d want_tail=%d", count, tail, rounds+1, seq)
 	}
+	readCtx, stopRead := context.WithTimeout(context.Background(), 15*time.Second)
+	readStarted := time.Now()
+	records, readTail, err := journal.New(all[0]).Read(readCtx, "cas", "scale")
+	stopRead()
+	if err != nil || len(records) != rounds+1 || readTail != seq {
+		t.Fatalf("production journal read after CAS races: records=%d tail=%d want=%d err=%v", len(records), readTail, seq, err)
+	}
+	t.Logf("production journal read of %d entries took %s", len(records), time.Since(readStarted))
 	t.Logf("server-side CAS races=%d leader_kills=%d unknown_rounds=%d pre_publish_retries=%d elapsed=%s", rounds, leaderKills, unknownRounds, preflightRetries, time.Since(started))
 }

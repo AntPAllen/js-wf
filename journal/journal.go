@@ -10,6 +10,7 @@ import (
 
 	"js-wf/identity"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -21,6 +22,8 @@ var (
 )
 
 const MaxEntries = 100000
+
+const serialReadLimit = 64
 
 // A stopped server can leave a JetStream API lookup waiting for its caller's
 // entire workflow lifetime. Bound one append attempt so the worker can nak
@@ -388,7 +391,18 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 		tail = snap.LastSeq
 	}
 	readLive := false
+	var serialReads int
 	for {
+		if s.readPort == nil && serialReads == serialReadLimit {
+			var batched bool
+			var err error
+			out, tail, batched, err = readLiveBatch(ctx, stream, subject, seq, out, tail)
+			if err != nil {
+				return nil, 0, err
+			}
+			readLive = readLive || batched
+			break
+		}
 		var m AppendTail
 		var err error
 		if s.readPort != nil {
@@ -415,6 +429,7 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 			return nil, 0, err
 		}
 		readLive = true
+		serialReads++
 		tail = m.Sequence
 		if len(out) > MaxEntries {
 			return nil, 0, ErrTooLong
@@ -425,6 +440,66 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 		return nil, 0, ErrGap
 	}
 	return out, tail, nil
+}
+
+// readLiveBatch avoids one API round trip per entry for long real journals.
+// The filtered ordered consumer preserves stream order; verifyNext still
+// checks logical indices and epochs across the serial/batch boundary.
+func readLiveBatch(ctx context.Context, stream jetstream.Stream, subject string, seq uint64, out []Record, tail uint64) ([]Record, uint64, bool, error) {
+	consumer, err := stream.OrderedConsumer(ctx, jetstream.OrderedConsumerConfig{
+		FilterSubjects: []string{subject}, DeliverPolicy: jetstream.DeliverByStartSequencePolicy,
+		OptStartSeq: seq, InactiveThreshold: time.Minute,
+	})
+	if err != nil {
+		return nil, 0, false, err
+	}
+	readLive := false
+	for ctx.Err() == nil {
+		batch, fetchErr := consumer.Fetch(256, jetstream.FetchMaxWait(250*time.Millisecond))
+		if fetchErr != nil && !errors.Is(fetchErr, nats.ErrTimeout) && !errors.Is(fetchErr, jetstream.ErrNoMessages) {
+			return nil, 0, false, fetchErr
+		}
+		var received int
+		if batch != nil {
+			for msg := range batch.Messages() {
+				metadata, err := msg.Metadata()
+				if err != nil {
+					return nil, 0, false, err
+				}
+				var entry Entry
+				if err := json.Unmarshal(msg.Data(), &entry); err != nil {
+					return nil, 0, false, fmt.Errorf("%w: %v", ErrGap, err)
+				}
+				out, err = verifyNext(out, Record{Entry: entry, Sequence: metadata.Sequence.Stream})
+				if err != nil {
+					return nil, 0, false, err
+				}
+				readLive = true
+				tail = metadata.Sequence.Stream
+				seq = tail + 1
+				received++
+				if len(out) > MaxEntries {
+					return nil, 0, false, ErrTooLong
+				}
+			}
+			if err := batch.Error(); err != nil && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
+				return nil, 0, false, err
+			}
+		}
+		if received == 256 {
+			continue
+		}
+		// A short fetch may mean the consumer is catching up. Confirm the
+		// next subject message is absent before returning the current prefix.
+		_, err := stream.GetMsg(ctx, seq, jetstream.WithGetMsgSubject(subject))
+		if errors.Is(err, jetstream.ErrMsgNotFound) {
+			return out, tail, readLive, nil
+		}
+		if err != nil {
+			return nil, 0, false, err
+		}
+	}
+	return nil, 0, false, ctx.Err()
 }
 
 func verifyNext(out []Record, next Record) ([]Record, error) {
