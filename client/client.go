@@ -558,7 +558,7 @@ func (c *Client) Await(ctx context.Context, typ, id string) (value []byte, err e
 			if decodeErr != nil {
 				return nil, decodeErr
 			}
-			if tomb && time.Now().Before(marker.ExpiresAt) {
+			if tomb {
 				observedInvSeq = marker.InvSeq
 				return nil, ErrPurged
 			}
