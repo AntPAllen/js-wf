@@ -31,6 +31,14 @@ and compares every record and tail after both production read paths.
 A local 100,000-seed run of this batch-read workload passed in 167.62 seconds;
 this is one workload, not the full Tier 1 release gate.
 
+A pinned worker-kill lease trace now reproduces the five-container recovery
+floor using the production `lease.Acquire` and `journal.Append` decisions over
+virtual transports. The replacement receives `ErrHeld` at 29,999 ms after
+the killed owner's last lease write, acquires at the provisioned 30,000 ms
+TTL, and appends one step outcome and terminal entry under a higher epoch.
+Exact replay and a race run pass. This explains the lease-bound part of the
+real 31.1-second recovery without attributing its remaining delay to NATS.
+
 The production `journal.Store.Read` can now load a compacted prefix through a
 narrow modeled manifest and Object Store read port, then join it to retained
 live entries. A 1,000-seed workload advances the snapshot manifest twice,
