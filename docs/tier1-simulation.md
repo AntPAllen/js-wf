@@ -400,8 +400,13 @@ redelivery; dropped or unacknowledged scanner wakeup and timer-delete calls
 are repaired by a second scan. Completion append, run acknowledgment, and
 consumer leader faults also finish with one terminal result. The final raw
 snapshot passes I1/I2/I3/I6, and the trace replays across processes. The
-leased fallback poller and simultaneous timer/signal choices remain outside
-this integrated workload.
+leased fallback poller now runs in a second 1,000-seed integrated workload:
+the first production `RunLoopWithPort` instance acquires its lease, scans the
+due timer, and attempts a cursor save; a replacement instance loads that
+cursor and repairs dropped or hidden-ack wakeup, delete, and cursor writes.
+The retained wakeup then resumes the production worker to one terminal
+result. Seed 42 pins a dropped delete and replays byte-identically across
+processes. Simultaneous timer/signal choices are covered separately.
 
 The integrated timer/signal select workload runs production `wf.Timer` and
 `TimerHandle.SelectSignal` through the modeled worker. Some seeds consume a

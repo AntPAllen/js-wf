@@ -27,6 +27,14 @@ import (
 )
 
 func runSeededWorkerFallbackTimerExecution(seed int64, replay *Trace) (trace Trace, runErr error) {
+	return runSeededWorkerFallbackTimerExecutionWithLoop(seed, replay, false)
+}
+
+func runSeededWorkerFallbackTimerLoopExecution(seed int64, replay *Trace) (trace Trace, runErr error) {
+	return runSeededWorkerFallbackTimerExecutionWithLoop(seed, replay, true)
+}
+
+func runSeededWorkerFallbackTimerExecutionWithLoop(seed int64, replay *Trace, useLoop bool) (trace Trace, runErr error) {
 	var schedule *Scheduler
 	if replay == nil {
 		schedule = NewScheduler(seed)
@@ -37,11 +45,19 @@ func runSeededWorkerFallbackTimerExecution(seed int64, replay *Trace) (trace Tra
 			return Trace{}, err
 		}
 	}
-	if err := schedule.SetWorkload("worker_fallback_timer_execution"); err != nil {
+	workload := "worker_fallback_timer_execution"
+	if useLoop {
+		workload = "worker_fallback_timer_loop_execution"
+	}
+	if err := schedule.SetWorkload(workload); err != nil {
 		return Trace{}, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose([]string{"clean", "timer_publish_drop", "timer_publish_ack_lost", "wakeup_drop", "wakeup_ack_lost", "delete_drop", "delete_ack_lost", "await_completion_drop", "await_completion_ack_lost", "timer_run_ack_lost", "consumer_leader_changed"})
+	modes := []string{"clean", "timer_publish_drop", "timer_publish_ack_lost", "wakeup_drop", "wakeup_ack_lost", "delete_drop", "delete_ack_lost", "await_completion_drop", "await_completion_ack_lost", "timer_run_ack_lost", "consumer_leader_changed"}
+	if useLoop {
+		modes = append(modes, "cursor_save_drop", "cursor_save_ack_lost")
+	}
+	mode, err := schedule.Choose(modes)
 	if err != nil {
 		return trace, err
 	}
@@ -112,7 +128,11 @@ func runSeededWorkerFallbackTimerExecution(seed int64, replay *Trace) (trace Tra
 	if err := json.Unmarshal(timers.RetainedFallbackRecords()[0].Data, &scheduled); err != nil || scheduled.FireAt.IsZero() {
 		return trace, fmt.Errorf("seed %d invalid fallback timer: fire_at=%s err=%v", seed, scheduled.FireAt, err)
 	}
-	scan := reconcile.NewFallbackTimerScanWithPort(timers, func(context.Context) (time.Time, error) {
+	var scanPort reconcile.FallbackTimerScanPort = timers
+	if useLoop {
+		scanPort = timeoutFallbackPort{timers}
+	}
+	scan := reconcile.NewFallbackTimerScanWithPort(scanPort, func(context.Context) (time.Time, error) {
 		return base.Add(time.Duration(schedule.NowMillis()) * time.Millisecond), nil
 	})
 	remaining := scheduled.FireAt.Sub(base.Add(time.Duration(schedule.NowMillis()) * time.Millisecond))
@@ -149,16 +169,43 @@ func runSeededWorkerFallbackTimerExecution(seed int64, replay *Trace) (trace Tra
 			return trace, err
 		}
 	}
-	firstScan, scanErr := scan.Scan(ctx, 1, 1, false)
-	if mode == "wakeup_drop" || mode == "wakeup_ack_lost" || mode == "delete_drop" || mode == "delete_ack_lost" {
-		if !errors.Is(scanErr, ErrTransportLost) || firstScan.Reenqueued != 1 {
-			return trace, fmt.Errorf("seed %d faulted fallback scan=%+v err=%v", seed, firstScan, scanErr)
+	if useLoop {
+		loop := NewLoopTransport(schedule)
+		if mode == "cursor_save_drop" || mode == "cursor_save_ack_lost" {
+			fault := KVDropBeforeCommit
+			if mode == "cursor_save_ack_lost" {
+				fault = KVLoseAckAfterCommit
+			}
+			if err := loop.RejectCursorSaveAt(1, fault); err != nil {
+				return trace, err
+			}
 		}
-		if _, err := scan.Scan(ctx, 1, 1, false); err != nil {
-			return trace, fmt.Errorf("seed %d repair fallback scan: %w", seed, err)
+		firstLoopCtx, stopFirstLoop := context.WithCancel(ctx)
+		loop.StopAfterWaits(1, stopFirstLoop)
+		if err := reconcile.RunLoopWithPort(firstLoopCtx, loop, "first", "fallback-timer", 100*time.Millisecond, 1, scan.Scan); err != nil {
+			return trace, fmt.Errorf("seed %d first fallback loop: %w", seed, err)
 		}
-	} else if scanErr != nil || firstScan.Reenqueued != 1 {
-		return trace, fmt.Errorf("seed %d due fallback scan=%+v err=%v", seed, firstScan, scanErr)
+		secondLoopCtx, stopSecondLoop := context.WithCancel(ctx)
+		loop.StopAfterWaits(1, stopSecondLoop)
+		if err := reconcile.RunLoopWithPort(secondLoopCtx, loop, "replacement", "fallback-timer", 100*time.Millisecond, 1, scan.Scan); err != nil {
+			return trace, fmt.Errorf("seed %d replacement fallback loop: %w", seed, err)
+		}
+		cursor, revision, err := loop.LoadCursor(ctx, "fallback-timer")
+		if err != nil || cursor < 1 || cursor > 2 || revision == 0 {
+			return trace, fmt.Errorf("seed %d fallback loop cursor=%d revision=%d: %v", seed, cursor, revision, err)
+		}
+	} else {
+		firstScan, scanErr := scan.Scan(ctx, 1, 1, false)
+		if mode == "wakeup_drop" || mode == "wakeup_ack_lost" || mode == "delete_drop" || mode == "delete_ack_lost" {
+			if !errors.Is(scanErr, ErrTransportLost) || firstScan.Reenqueued != 1 {
+				return trace, fmt.Errorf("seed %d faulted fallback scan=%+v err=%v", seed, firstScan, scanErr)
+			}
+			if _, err := scan.Scan(ctx, 1, 1, false); err != nil {
+				return trace, fmt.Errorf("seed %d repair fallback scan: %w", seed, err)
+			}
+		} else if scanErr != nil || firstScan.Reenqueued != 1 {
+			return trace, fmt.Errorf("seed %d due fallback scan=%+v err=%v", seed, firstScan, scanErr)
+		}
 	}
 	if transport.Dispatch.Pending() != 1 || len(timers.Runs()) != 1 || len(timers.RetainedFallbackRecords()) != 0 {
 		return trace, fmt.Errorf("seed %d repaired timer pending=%d runs=%d retained=%d", seed, transport.Dispatch.Pending(), len(timers.Runs()), len(timers.RetainedFallbackRecords()))
@@ -197,7 +244,11 @@ func runSeededWorkerFallbackTimerExecution(seed int64, replay *Trace) (trace Tra
 	if err != nil || report != (integrity.Report{Invocations: 1, Journals: 1, Entries: 7, Terminal: 1}) {
 		return trace, fmt.Errorf("seed %d timer retained check=%+v err=%v", seed, report, err)
 	}
-	schedule.RecordTransport(TransportEvent{Operation: "check_worker_fallback_timer_execution", Outcome: mode, AtMillis: schedule.NowMillis()})
+	check := "check_worker_fallback_timer_execution"
+	if useLoop {
+		check = "check_worker_fallback_timer_loop_execution"
+	}
+	schedule.RecordTransport(TransportEvent{Operation: check, Outcome: mode, AtMillis: schedule.NowMillis()})
 	if err := schedule.Finish(); err != nil {
 		return trace, err
 	}
@@ -263,5 +314,61 @@ func TestSeededWorkerFallbackTimerExecutionReplay(t *testing.T) {
 	}
 	if !bytes.Equal(first, second) {
 		t.Fatal("worker fallback timer trace changed across processes")
+	}
+}
+
+func TestSeededWorkerFallbackTimerLoopExecutionReplay(t *testing.T) {
+	if os.Getenv("SIM_WORKER_FALLBACK_LOOP_HELPER") == "1" {
+		seed, err := strconv.ParseInt(os.Getenv("FAULT_SEED"), 10, 64)
+		if err != nil {
+			t.Fatal(err)
+		}
+		trace, err := runSeededWorkerFallbackTimerLoopExecution(seed, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := trace.Save(os.Getenv("SIM_WORKER_FALLBACK_LOOP_OUT")); err != nil {
+			t.Fatal(err)
+		}
+		return
+	}
+	for seed := int64(1); seed <= 1000; seed++ {
+		generated, err := runSeededWorkerFallbackTimerLoopExecution(seed, nil)
+		if err != nil {
+			path := os.Getenv("FAULT_TRACE_OUT")
+			if path == "" {
+				path = filepath.Join(t.TempDir(), "worker-fallback-loop.json")
+			}
+			if saveErr := generated.Save(path); saveErr != nil {
+				t.Fatalf("FAULT_SEED=%d: %v; save trace: %v", seed, err, saveErr)
+			}
+			t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, err)
+		}
+		if seed <= 10 {
+			replayed, err := runSeededWorkerFallbackTimerLoopExecution(seed, &generated)
+			if err != nil || !reflect.DeepEqual(generated, replayed) {
+				t.Fatalf("FAULT_SEED=%d worker fallback loop replay: %v", seed, err)
+			}
+		}
+	}
+	var files [2]string
+	for i := range files {
+		files[i] = filepath.Join(t.TempDir(), fmt.Sprintf("worker-fallback-loop-%d.json", i))
+		cmd := exec.Command(os.Args[0], "-test.run=^TestSeededWorkerFallbackTimerLoopExecutionReplay$")
+		cmd.Env = append(os.Environ(), "SIM_WORKER_FALLBACK_LOOP_HELPER=1", "SIM_WORKER_FALLBACK_LOOP_OUT="+files[i], "FAULT_SEED=42")
+		if output, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("child %d: %v: %s", i, err, output)
+		}
+	}
+	first, err := os.ReadFile(files[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := os.ReadFile(files[1])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(first, second) {
+		t.Fatal("worker fallback loop trace changed across processes")
 	}
 }
