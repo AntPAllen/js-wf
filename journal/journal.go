@@ -446,28 +446,39 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 // One filtered pull consumer preserves stream order across Fetch batches;
 // verifyNext still checks logical indices and epochs across the boundary.
 func readLiveBatch(ctx context.Context, stream jetstream.Stream, subject string, seq uint64, out []Record, tail uint64) ([]Record, uint64, bool, error) {
-	consumer, err := stream.CreateConsumer(ctx, jetstream.ConsumerConfig{
-		FilterSubject: subject, DeliverPolicy: jetstream.DeliverByStartSequencePolicy,
-		OptStartSeq: seq, AckPolicy: jetstream.AckNonePolicy,
-		Replicas: 1, InactiveThreshold: time.Minute,
-	})
-	if err != nil {
+	var consumer jetstream.Consumer
+	var names []string
+	defer func() {
+		for _, name := range names {
+			cleanupCtx, stop := context.WithTimeout(ctx, time.Second)
+			_ = stream.DeleteConsumer(cleanupCtx, name)
+			stop()
+		}
+	}()
+	create := func(start uint64) error {
+		created, err := stream.CreateConsumer(ctx, jetstream.ConsumerConfig{
+			FilterSubject: subject, DeliverPolicy: jetstream.DeliverByStartSequencePolicy,
+			OptStartSeq: start, AckPolicy: jetstream.AckNonePolicy,
+			Replicas: 1, InactiveThreshold: time.Minute,
+		})
+		if err != nil {
+			return err
+		}
+		consumer = created
+		if info := created.CachedInfo(); info != nil && info.Name != "" {
+			names = append(names, info.Name)
+		}
+		return nil
+	}
+	if err := create(seq); err != nil {
 		return nil, 0, false, fmt.Errorf("filtered journal consumer: %w", err)
 	}
-	if info := consumer.CachedInfo(); info != nil && info.Name != "" {
-		defer func() {
-			cleanupCtx, stop := context.WithTimeout(ctx, time.Second)
-			defer stop()
-			_ = stream.DeleteConsumer(cleanupCtx, info.Name)
-		}()
-	}
 	readLive := false
+	var noResponderRetries int
 	for ctx.Err() == nil {
 		batch, fetchErr := consumer.Fetch(256, jetstream.FetchMaxWait(250*time.Millisecond))
-		if fetchErr != nil && !errors.Is(fetchErr, nats.ErrTimeout) && !errors.Is(fetchErr, jetstream.ErrNoMessages) {
-			return nil, 0, false, fmt.Errorf("filtered journal fetch after %d entries: %w", len(out), fetchErr)
-		}
 		var received int
+		var batchErr error
 		if batch != nil {
 			for msg := range batch.Messages() {
 				metadata, err := msg.Metadata()
@@ -490,9 +501,34 @@ func readLiveBatch(ctx context.Context, stream jetstream.Stream, subject string,
 					return nil, 0, false, ErrTooLong
 				}
 			}
-			if err := batch.Error(); err != nil && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
-				return nil, 0, false, fmt.Errorf("filtered journal batch after %d entries: %w", len(out), err)
+			batchErr = batch.Error()
+		}
+		if received > 0 {
+			noResponderRetries = 0
+		}
+		transportErr := fetchErr
+		if transportErr == nil {
+			transportErr = batchErr
+		}
+		if errors.Is(transportErr, nats.ErrNoResponders) || errors.Is(transportErr, jetstream.ErrConsumerDeleted) {
+			noResponderRetries++
+			if noResponderRetries > 5 {
+				return nil, 0, false, fmt.Errorf("filtered journal pull after %d entries: %w", len(out), transportErr)
 			}
+			if noResponderRetries >= 2 {
+				if err := create(seq); err != nil {
+					return nil, 0, false, fmt.Errorf("replace filtered journal consumer after %d entries: %w", len(out), err)
+				}
+			}
+			select {
+			case <-ctx.Done():
+				return nil, 0, false, ctx.Err()
+			case <-time.After(50 * time.Millisecond):
+			}
+			continue
+		}
+		if transportErr != nil && !errors.Is(transportErr, nats.ErrTimeout) && !errors.Is(transportErr, jetstream.ErrNoMessages) {
+			return nil, 0, false, fmt.Errorf("filtered journal pull after %d entries: %w", len(out), transportErr)
 		}
 		if received == 256 {
 			continue
