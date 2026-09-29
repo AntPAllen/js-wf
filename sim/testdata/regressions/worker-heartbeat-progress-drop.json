@@ -1,0 +1,405 @@
+{
+  "version": 3,
+  "seed": 3,
+  "workload": "worker_heartbeat_handoff",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "progress_drop",
+        "renew_ack_lost",
+        "renew_drop",
+        "ticks_closed"
+      ],
+      "chosen": "progress_drop"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.integrated-043",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "run_publish",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "data_sha256": "52f288aa8022511f4c51f16ad04d8432ba62d78d9c2562a69e848f98215e8656",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "data_sha256": "52f288aa8022511f4c51f16ad04d8432ba62d78d9c2562a69e848f98215e8656",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_create",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "outcome": "delivery_1"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.integrated-043",
+      "sequence": 1,
+      "data_sha256": "65e2f53f28beb79c88ea99a60b1f7d8d9b2d9acf5e313f2e5d12ce48019a25e7",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "test.integrated-043",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "61870e4e27e5da9f47166e21bac415e362254697dcac89c2a8fdfdf75bcf8dc7",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 1,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.test.integrated-043",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "test.integrated-043",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "61870e4e27e5da9f47166e21bac415e362254697dcac89c2a8fdfdf75bcf8dc7",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.integrated-043",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.integrated-043",
+      "sequence": 1,
+      "data_sha256": "8299bfe6fccc40325ed130588b8a74297c3bdd00ad2f1c38950ee67161429c27",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "signal_stream_info",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "test.integrated-043",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "61870e4e27e5da9f47166e21bac415e362254697dcac89c2a8fdfdf75bcf8dc7",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.integrated-043",
+      "sequence": 1,
+      "data_sha256": "8299bfe6fccc40325ed130588b8a74297c3bdd00ad2f1c38950ee67161429c27",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "75dea7c5b0248bc5305c13d54c367800801b506379b5a4602037555f48e8c281",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "kv_update",
+      "subject": "test.integrated-043",
+      "expected": 4,
+      "sequence": 5,
+      "data_sha256": "61870e4e27e5da9f47166e21bac415e362254697dcac89c2a8fdfdf75bcf8dc7",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "consumer_progress",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "outcome": "drop_before_commit"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "consumer_nak",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "kv_delete",
+      "subject": "test.integrated-043",
+      "expected": 5,
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "8299bfe6fccc40325ed130588b8a74297c3bdd00ad2f1c38950ee67161429c27",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "75dea7c5b0248bc5305c13d54c367800801b506379b5a4602037555f48e8c281",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 3,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "kv_get",
+      "subject": "test.integrated-043",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "consumer_create",
+      "subject": "wf.run.0",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "outcome": "delivery_2"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "kv_create",
+      "subject": "test.integrated-043",
+      "sequence": 7,
+      "data_sha256": "42000d4910bf11687a3bb658862797b84a13acfef57c50daedbf966f452d003e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "kv_update",
+      "subject": "test.integrated-043",
+      "expected": 7,
+      "sequence": 8,
+      "data_sha256": "003c7056ed8dc1ab6e71a27384544966a993cb2d01370635e528d98c85ffa0df",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "8299bfe6fccc40325ed130588b8a74297c3bdd00ad2f1c38950ee67161429c27",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "75dea7c5b0248bc5305c13d54c367800801b506379b5a4602037555f48e8c281",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 3,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "last_invocation",
+      "subject": "wf.inv.test.integrated-043",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "signal_stream_info",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "kv_update",
+      "subject": "test.integrated-043",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "003c7056ed8dc1ab6e71a27384544966a993cb2d01370635e528d98c85ffa0df",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "last",
+      "subject": "wf.jrn.test.integrated-043",
+      "sequence": 2,
+      "data_sha256": "75dea7c5b0248bc5305c13d54c367800801b506379b5a4602037555f48e8c281",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "publish",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "934bf14e2f094ec3692c090268f092828af939086d48c041d912e13cdc364616",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "kv_update",
+      "subject": "test.integrated-043",
+      "expected": 9,
+      "sequence": 10,
+      "data_sha256": "003c7056ed8dc1ab6e71a27384544966a993cb2d01370635e528d98c85ffa0df",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "last",
+      "subject": "wf.jrn.test.integrated-043",
+      "sequence": 3,
+      "data_sha256": "934bf14e2f094ec3692c090268f092828af939086d48c041d912e13cdc364616",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "publish",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "65f1dca3d2e13a680067c2086951b73531ae5816f68028a433771e06bdbc05d8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "kv_create",
+      "subject": "test.integrated-043",
+      "sequence": 1,
+      "data_sha256": "77273c1b490dbd925a88f8f1cc1f1dddfccdaecb60f3ce31f1f4ef8c877d9070",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "kv_delete",
+      "subject": "test.integrated-043",
+      "expected": 10,
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "consumer_ack",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "8299bfe6fccc40325ed130588b8a74297c3bdd00ad2f1c38950ee67161429c27",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "75dea7c5b0248bc5305c13d54c367800801b506379b5a4602037555f48e8c281",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "934bf14e2f094ec3692c090268f092828af939086d48c041d912e13cdc364616",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "65f1dca3d2e13a680067c2086951b73531ae5816f68028a433771e06bdbc05d8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.integrated-043",
+      "expected": 5,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "check_worker_heartbeat_handoff",
+      "subject": "wf.jrn.test.integrated-043",
+      "outcome": "progress_drop"
+    }
+  ]
+}

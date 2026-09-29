@@ -232,7 +232,19 @@ its deadline. The worker then completes one effect and one terminal journal;
 the retained I1/I2/I3/I6 check passes. Seed 42 is pinned and replays across
 processes and under the race detector. A three-node contract compares the
 model with real JetStream across the original and extended deadlines.
-Cooperative multi-worker heartbeat and failure interleavings remain open.
+A second 1,000-seed workload hands an unfinished step between two production
+workers. A dropped or unacknowledged lease renewal, failed progress write,
+or closed tick source cancels the first blocked effect. It naks the retained
+run message and cleans up its lease. The successor receives redelivery,
+replays `StepRequested` under a higher epoch, executes the effect once more,
+and writes the only terminal result. I1/I2/I3/I6, exact replay, cross-process
+traces, and the race detector pass. Pinned traces cover a hidden renewal
+reply and a failed progress write. A three-node worker-level fixture hides
+a committed lease-renewal reply during a blocked effect and checks the same
+handoff, terminal result, and drained run queue; three repeated runs and a
+race run passed. Real worker fixtures for failed progress writes and closed
+tick sources remain open, as does cooperative actor scheduling of concurrent
+heartbeat and failure turns.
 
 The integrated signal workload follows one workflow across a suspension and
 resume. Production `Client.Start` enqueues its first run, `Worker.handle`

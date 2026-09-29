@@ -42,6 +42,7 @@ type DispatchTransport struct {
 	sequence       uint64
 	onDrained      func()
 	onNextAck      func()
+	onNextNak      func()
 	onNextProgress func()
 }
 
@@ -52,14 +53,21 @@ func NewDispatchTransport(schedule *Scheduler, ackWait time.Duration) *DispatchT
 }
 
 func (m *DispatchTransport) QueueFault(f DispatchFault) error {
-	if f.Operation != "consumer" && f.Operation != "fetch" && f.Operation != "ack" {
+	switch f.Operation {
+	case "consumer", "fetch":
+		if f.Kind != "leader_changed" {
+			return fmt.Errorf("invalid %s fault on %s", f.Kind, f.Operation)
+		}
+	case "ack":
+		if f.Kind != "lose_ack_after_commit" {
+			return fmt.Errorf("invalid %s fault on %s", f.Kind, f.Operation)
+		}
+	case "progress":
+		if f.Kind != "drop_before_commit" {
+			return fmt.Errorf("invalid %s fault on %s", f.Kind, f.Operation)
+		}
+	default:
 		return fmt.Errorf("invalid dispatch fault operation %q", f.Operation)
-	}
-	if f.Kind != "leader_changed" && f.Kind != "lose_ack_after_commit" {
-		return fmt.Errorf("invalid dispatch fault %q", f.Kind)
-	}
-	if f.Kind == "lose_ack_after_commit" && f.Operation != "ack" || f.Kind == "leader_changed" && f.Operation == "ack" {
-		return fmt.Errorf("invalid %s fault on %s", f.Kind, f.Operation)
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -146,6 +154,14 @@ func (m *DispatchTransport) StopAfterNextAck(stop func()) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.onNextAck = stop
+}
+
+// StopAfterNextNak ends one modeled worker loop at its failed delivery so a
+// successor can receive the retained run message.
+func (m *DispatchTransport) StopAfterNextNak(stop func()) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.onNextNak = stop
 }
 
 // OnNextProgress observes one committed heartbeat without reading the trace
@@ -280,6 +296,11 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 	if m.record.acked || m.delivery != m.record.deliveries {
 		return fmt.Errorf("stale dispatch delivery")
 	}
+	if operation == "progress" && model.takeFault("progress") == "drop_before_commit" {
+		event.Outcome = "drop_before_commit"
+		model.event(event)
+		return ErrTransportLost
+	}
 	switch operation {
 	case "term":
 		m.record.acked = true
@@ -292,6 +313,11 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 	}
 	event.Outcome = "ok"
 	model.event(event)
+	if operation == "nak" && model.onNextNak != nil {
+		stop := model.onNextNak
+		model.onNextNak = nil
+		stop()
+	}
 	if operation == "progress" && model.onNextProgress != nil {
 		notify := model.onNextProgress
 		model.onNextProgress = nil

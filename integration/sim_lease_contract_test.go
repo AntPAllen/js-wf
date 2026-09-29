@@ -57,14 +57,23 @@ type holdLeaseCreateKV struct {
 
 type holdLeaseRenewKV struct {
 	jetstream.KeyValue
-	proxy *testcluster.ClientProxy
-	held  chan struct{}
-	count int
+	proxy     *testcluster.ClientProxy
+	held      chan struct{}
+	mu        sync.Mutex
+	count     int
+	triggerAt int
 }
 
 func (h *holdLeaseRenewKV) Update(ctx context.Context, key string, value []byte, revision uint64) (uint64, error) {
+	h.mu.Lock()
 	h.count++
-	if h.count == 2 {
+	triggerAt := h.triggerAt
+	if triggerAt == 0 {
+		triggerAt = 2
+	}
+	hit := h.count == triggerAt
+	h.mu.Unlock()
+	if hit {
 		h.proxy.HoldResponses()
 		close(h.held)
 	}
