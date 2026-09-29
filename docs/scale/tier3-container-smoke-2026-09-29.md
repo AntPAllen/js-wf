@@ -45,7 +45,9 @@ seeded attempt. It treats unacknowledged publishes as unknown, requires
 acknowledgments after the kill, and checks every retained sequence and
 acknowledged payload through a survivor and through the killed node after a
 same-store restart. Local seeds 1–4 passed, with 956–964 acknowledged writes
-and 414–525 acknowledged after the kill. The test uses the pinned NATS server's
+and 414–525 acknowledged after the kill. The [combined clean CI run](https://github.com/AntPAllen/js-wf/actions/runs/36606118005)
+passed both container tests; its seed-1 leader kill acknowledged 960 writes,
+including 493 after the kill, and uploaded the 14-operation workflow history. The test uses the pinned NATS server's
 default file-store sync interval; a production-configured interval and
 block-device delay remain for the full Tier 3 matrix.
 
