@@ -662,8 +662,8 @@ recovery delay. The integrated production-worker timer workload exercises a
 12-second overdue target with 0, 1, 5, or 20 seconds of post-heal delivery
 delay, then requires one completed workflow and a post-heal resume under
 30 virtual seconds. A three-node contract publishes a real native schedule,
-isolates one node and stops another before due time, then heals routes and
-restarts the stopped node; the target appears once after recovery. This
+isolates one node and stops another before due time, then heals routes; the
+target appears once with two live nodes and the restarted third node reads it. This
 contracts eventual delivery, not a fixed NATS leader-recovery delay.
 Seed 6 with a five-second virtual recovery delay is pinned in the regression
 corpus; the previous timer trace retains its original workload version and

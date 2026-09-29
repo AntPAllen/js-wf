@@ -233,7 +233,7 @@ func TestSimNativeTimerQuorumHealContractAgainstRealCluster(t *testing.T) {
 		t.Fatal(err)
 	}
 	all, cluster := setupCluster(t, cluster)
-	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 75*time.Second)
 	defer cancel()
 	const typ, id = "timer-contract", "route-quorum"
 	base := time.Now().UTC()
@@ -271,11 +271,11 @@ func TestSimNativeTimerQuorumHealContractAgainstRealCluster(t *testing.T) {
 	}
 	healedAt := time.Now()
 	mesh.Heal()
-	if err := cluster.RestartNode(1); err != nil {
-		t.Fatal(err)
+	for ctx.Err() == nil && (cluster.Servers[0].NumRoutes() != 1 || cluster.Servers[2].NumRoutes() != 1) {
+		time.Sleep(20 * time.Millisecond)
 	}
-	if err := waitTimerRouteCounts(ctx, cluster, -1); err != nil {
-		t.Fatal(err)
+	if ctx.Err() != nil {
+		t.Fatalf("two surviving nodes did not reconnect: routes=%d/%d context=%v", cluster.Servers[0].NumRoutes(), cluster.Servers[2].NumRoutes(), ctx.Err())
 	}
 	quorumReadyAt := time.Now()
 	model.SetScheduleQuorum(true)
@@ -312,4 +312,35 @@ func TestSimNativeTimerQuorumHealContractAgainstRealCluster(t *testing.T) {
 	if err := model.Advance(time.Second); err != nil || len(model.Runs()) != 1 {
 		t.Fatalf("modeled duplicate after heal: runs=%d err=%v", len(model.Runs()), err)
 	}
+	if err := cluster.RestartNode(1); err != nil {
+		t.Fatal(err)
+	}
+	if err := waitTimerRouteCounts(ctx, cluster, -1); err != nil {
+		t.Fatal(err)
+	}
+	rejoinedClient, err := nats.Connect(cluster.Servers[1].ClientURL())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rejoinedClient.Close()
+	rejoinedJS, err := jetstream.New(rejoinedClient)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		rejoined, readErr := rejoinedJS.Stream(attempt, "WF_RUN")
+		if readErr == nil {
+			var message *jetstream.RawStreamMsg
+			message, readErr = rejoined.GetLastMsgForSubject(attempt, target)
+			if readErr == nil && message.Sequence == delivered.Sequence {
+				stop()
+				t.Logf("rejoined node served native target sequence %d", message.Sequence)
+				return
+			}
+		}
+		stop()
+		time.Sleep(50 * time.Millisecond)
+	}
+	t.Fatalf("rejoined node did not serve native target sequence %d: %v", delivered.Sequence, ctx.Err())
 }
