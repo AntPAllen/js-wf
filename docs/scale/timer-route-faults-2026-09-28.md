@@ -156,6 +156,14 @@ the third run had one post-heal outlier at 30.86 seconds while its p99 stayed
 at 12.25 seconds. The prior 30.98-second p99 miss remains a real outlier and
 its cause is not established by these passes.
 
+A fourth full 10,000-timer route run on 2026-09-29 passed with raw p99
+33.43 seconds and post-heal p99 12.06 seconds (maximum 13.07 seconds).
+The route sequence lasted 24.28 seconds. All 10,000 results and terminal
+journals were audited with zero early or stuck completions; workers recorded
+9,538 redeliveries and 357 fencing events. This is four full passes of the
+clarified gate. The separate synchronized 1–10-second diagnostic still has
+one recorded post-heal p99 miss.
+
 To reproduce the smaller diagnostic run:
 
 ```sh
