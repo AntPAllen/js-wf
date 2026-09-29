@@ -100,3 +100,30 @@ and 30 diagnostic hot-only repetitions passed, but those runs do not identify
 the server-side cause. A separate single-writer test killed the stream leader
 after the tail read but before the CAS publish and passed ten runs, so an
 ordinary leader change at that point does not reproduce the anomaly.
+
+## Live large inputs
+
+The opt-in test starts 1,000 distinct workflows with JSON inputs just over
+1 MiB. Run it with:
+
+```sh
+WF_LARGE_INPUT_SCALE=1 go test ./integration \
+  -run '^TestLargeInputsAcrossLiveWorkers$' -count=1 -timeout=12m -v
+```
+
+Each input has a unique
+content hash, so the run exercises 1,000 Object Store uploads rather than one
+shared object. Six workers load and validate the full input, return its ID,
+and drain all 64 run partitions. The test checks every result and the final
+invocation, journal, and run-stream counts. Set `WF_LARGE_INPUT_COUNT` to a
+smaller number for diagnosis.
+
+The full local run passed: 1,048,584 bytes per input, 1,048,584,000 total
+input bytes, 20.61 seconds to start all workflows, 20.93 seconds to obtain
+all results, and 24.70 seconds for the complete test. The three replicated
+file stores temporarily used about 3 GiB. A repeat also checked the third
+replica's Object Store listing for exactly 1,000 distinct input objects and
+passed in 20.28 seconds, with all results obtained in 16.24 seconds and
+worker shutdown in under one millisecond. This is a live large-payload check
+at 1,000 invocations; it does not establish the plan's 100,000-ID
+large-payload or faulted cardinality target.

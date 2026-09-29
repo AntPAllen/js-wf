@@ -369,7 +369,28 @@ func RunPartitionWithPort(ctx context.Context, partition uint32, port DispatchPo
 				return err
 			}
 			dispatched := false
-			for msg := range batch.Messages() {
+			messages := batch.Messages()
+			for messages != nil {
+				if ctx.Err() != nil {
+					if slots != nil && !dispatched {
+						<-slots
+					}
+					return nil
+				}
+				var msg jetstream.Msg
+				select {
+				case <-ctx.Done():
+					if slots != nil && !dispatched {
+						<-slots
+					}
+					return nil
+				case next, open := <-messages:
+					if !open {
+						messages = nil
+						continue
+					}
+					msg = next
+				}
 				dispatched = true
 				emptyPolls = 0
 				retryDelay = 100 * time.Millisecond
