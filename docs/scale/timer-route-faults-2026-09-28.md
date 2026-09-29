@@ -147,6 +147,15 @@ acquisition failures, and 84 fencing events. The earlier 30.98-second
 post-heal miss with much higher contention remains unexplained; one passing
 rerun does not establish consistency for this synchronized variant.
 
+Three more consecutive local repeats of the same 1,000-timer diagnostic
+passed on 2026-09-29. Raw p99 values were 38.27, 27.82, and 35.91 seconds;
+post-heal p99 values were 14.98, 11.62, and 12.25 seconds. Each run
+completed all 1,000 timers with zero early or stuck completions and audited
+their results and terminal journals. Redeliveries ranged from 926 to 4,175;
+the third run had one post-heal outlier at 30.86 seconds while its p99 stayed
+at 12.25 seconds. The prior 30.98-second p99 miss remains a real outlier and
+its cause is not established by these passes.
+
 To reproduce the smaller diagnostic run:
 
 ```sh
