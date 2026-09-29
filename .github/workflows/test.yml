@@ -55,11 +55,15 @@ jobs:
           for seed in $(seq 1 20); do
             WF_DISK_FAULT=1 FAULT_SEED="$seed" FAULT_SCHEDULE_OUT="fault-schedule-${seed}.json" go test ./testcluster -run '^TestProcessClusterCombinedFourFaultsRecover$' -count=1 -timeout=90s -v
           done
+      - name: Complete a journaled workflow after four server faults
+        run: WF_PROCESS_WORKFLOW=1 FAULT_SEED=42 FAULT_SCHEDULE_OUT=workflow-four-faults.json go test ./integration -run '^TestWorkflowRecoversFromFourServerFaults$' -count=1 -timeout=3m -v
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
           name: process-chaos-fault-schedules
-          path: testcluster/fault-schedule-*.json
+          path: |
+            testcluster/fault-schedule-*.json
+            integration/workflow-four-faults.json
           if-no-files-found: ignore
   long-journal:
     if: github.event_name == 'workflow_dispatch'
