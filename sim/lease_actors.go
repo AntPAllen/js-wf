@@ -9,13 +9,15 @@ import (
 )
 
 type LeaseActor struct {
-	Name string
-	Run  func(context.Context, lease.KVPort) error
+	Name            string
+	WallClockOffset time.Duration
+	Run             func(context.Context, lease.KVPort) error
 }
 
 type yieldingKVPort struct {
 	yield     YieldFunc
 	transport lease.KVPort
+	offset    time.Duration
 }
 
 var _ lease.KVPort = yieldingKVPort{}
@@ -57,7 +59,7 @@ func (p yieldingKVPort) Delete(ctx context.Context, key string, expected uint64)
 	return operationErr
 }
 
-func (p yieldingKVPort) Now() time.Time { return p.transport.Now() }
+func (p yieldingKVPort) Now() time.Time { return p.transport.Now().Add(p.offset) }
 
 // RunLeaseActors schedules production lease operations at KV boundaries.
 func RunLeaseActors(ctx context.Context, schedule *Scheduler, transport lease.KVPort, actors []LeaseActor) (map[string]error, error) {
@@ -70,8 +72,11 @@ func RunLeaseActors(ctx context.Context, schedule *Scheduler, transport lease.KV
 			return nil, fmt.Errorf("simulation actor %q has no run function", actor.Name)
 		}
 		actor := actor
+		if actor.WallClockOffset != 0 {
+			schedule.RecordTransport(TransportEvent{Operation: "actor_clock_offset", Subject: actor.Name, Outcome: actor.WallClockOffset.String(), AtMillis: schedule.NowMillis()})
+		}
 		cooperative = append(cooperative, CooperativeActor{Name: actor.Name, Run: func(ctx context.Context, yield YieldFunc) error {
-			return actor.Run(ctx, yieldingKVPort{yield: yield, transport: transport})
+			return actor.Run(ctx, yieldingKVPort{yield: yield, transport: transport, offset: actor.WallClockOffset})
 		}})
 	}
 	return RunCooperative(ctx, schedule, cooperative)

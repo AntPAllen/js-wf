@@ -1,0 +1,113 @@
+{
+  "version": 3,
+  "seed": 1,
+  "workload": "lease_clock_skew",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "after_fast_threshold",
+        "before_fast_threshold"
+      ],
+      "chosen": "before_fast_threshold"
+    },
+    {
+      "at_ms": 500,
+      "enabled": [
+        "fast:kv_create",
+        "slow:kv_create"
+      ],
+      "chosen": "slow:kv_create"
+    },
+    {
+      "at_ms": 500,
+      "enabled": [
+        "fast:kv_create",
+        "slow:kv_get"
+      ],
+      "chosen": "slow:kv_get"
+    },
+    {
+      "at_ms": 500,
+      "enabled": [
+        "fast:kv_create"
+      ],
+      "chosen": "fast:kv_create"
+    },
+    {
+      "at_ms": 500,
+      "enabled": [
+        "fast:kv_get"
+      ],
+      "chosen": "fast:kv_get"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.skew",
+      "sequence": 1,
+      "data_sha256": "c9e8e94fdb39aff040397e52d20717d763fd3db0ed3ce6438d7e996720f1578e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 500,
+      "operation": "actor_clock_offset",
+      "subject": "slow",
+      "outcome": "-400ms"
+    },
+    {
+      "at_ms": 500,
+      "operation": "actor_clock_offset",
+      "subject": "fast",
+      "outcome": "400ms"
+    },
+    {
+      "at_ms": 500,
+      "operation": "kv_create",
+      "subject": "test.skew",
+      "data_sha256": "f86f346b03b1209e5305851da1b763c6708c01c29f0885317e4db671b492f539",
+      "outcome": "key_exists"
+    },
+    {
+      "at_ms": 500,
+      "operation": "kv_get",
+      "subject": "test.skew",
+      "sequence": 1,
+      "data_sha256": "c9e8e94fdb39aff040397e52d20717d763fd3db0ed3ce6438d7e996720f1578e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 500,
+      "operation": "kv_create",
+      "subject": "test.skew",
+      "data_sha256": "90c1778a654def41969d47ca74b96ae2e138e4d4836e55856e2f1278a5d898c1",
+      "outcome": "key_exists"
+    },
+    {
+      "at_ms": 500,
+      "operation": "kv_get",
+      "subject": "test.skew",
+      "sequence": 1,
+      "data_sha256": "c9e8e94fdb39aff040397e52d20717d763fd3db0ed3ce6438d7e996720f1578e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 500,
+      "operation": "kv_get",
+      "subject": "test.skew",
+      "sequence": 1,
+      "data_sha256": "c9e8e94fdb39aff040397e52d20717d763fd3db0ed3ce6438d7e996720f1578e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 500,
+      "operation": "check_lease_clock_skew",
+      "subject": "test.skew",
+      "sequence": 1,
+      "outcome": "before_fast_threshold"
+    }
+  ]
+}

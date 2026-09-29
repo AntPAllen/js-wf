@@ -1,0 +1,162 @@
+{
+  "version": 3,
+  "seed": 2,
+  "workload": "lease_clock_skew",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "after_fast_threshold",
+        "before_fast_threshold"
+      ],
+      "chosen": "after_fast_threshold"
+    },
+    {
+      "at_ms": 800,
+      "enabled": [
+        "fast:kv_create",
+        "slow:kv_create"
+      ],
+      "chosen": "fast:kv_create"
+    },
+    {
+      "at_ms": 800,
+      "enabled": [
+        "fast:kv_get",
+        "slow:kv_create"
+      ],
+      "chosen": "fast:kv_get"
+    },
+    {
+      "at_ms": 800,
+      "enabled": [
+        "fast:kv_delete",
+        "slow:kv_create"
+      ],
+      "chosen": "fast:kv_delete"
+    },
+    {
+      "at_ms": 800,
+      "enabled": [
+        "fast:kv_create",
+        "slow:kv_create"
+      ],
+      "chosen": "fast:kv_create"
+    },
+    {
+      "at_ms": 800,
+      "enabled": [
+        "fast:kv_update",
+        "slow:kv_create"
+      ],
+      "chosen": "fast:kv_update"
+    },
+    {
+      "at_ms": 800,
+      "enabled": [
+        "slow:kv_create"
+      ],
+      "chosen": "slow:kv_create"
+    },
+    {
+      "at_ms": 800,
+      "enabled": [
+        "slow:kv_get"
+      ],
+      "chosen": "slow:kv_get"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.skew",
+      "sequence": 1,
+      "data_sha256": "c9e8e94fdb39aff040397e52d20717d763fd3db0ed3ce6438d7e996720f1578e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "actor_clock_offset",
+      "subject": "slow",
+      "outcome": "-400ms"
+    },
+    {
+      "at_ms": 800,
+      "operation": "actor_clock_offset",
+      "subject": "fast",
+      "outcome": "400ms"
+    },
+    {
+      "at_ms": 800,
+      "operation": "kv_create",
+      "subject": "test.skew",
+      "data_sha256": "90c1778a654def41969d47ca74b96ae2e138e4d4836e55856e2f1278a5d898c1",
+      "outcome": "key_exists"
+    },
+    {
+      "at_ms": 800,
+      "operation": "kv_get",
+      "subject": "test.skew",
+      "sequence": 1,
+      "data_sha256": "c9e8e94fdb39aff040397e52d20717d763fd3db0ed3ce6438d7e996720f1578e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "kv_delete",
+      "subject": "test.skew",
+      "expected": 1,
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "kv_create",
+      "subject": "test.skew",
+      "sequence": 3,
+      "data_sha256": "90c1778a654def41969d47ca74b96ae2e138e4d4836e55856e2f1278a5d898c1",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "kv_update",
+      "subject": "test.skew",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "c1b1fd080da1abbb000d2154afa3a8871be7fa6922b09cd6abfa6112fa1dd0d4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "kv_create",
+      "subject": "test.skew",
+      "data_sha256": "f86f346b03b1209e5305851da1b763c6708c01c29f0885317e4db671b492f539",
+      "outcome": "key_exists"
+    },
+    {
+      "at_ms": 800,
+      "operation": "kv_get",
+      "subject": "test.skew",
+      "sequence": 4,
+      "data_sha256": "c1b1fd080da1abbb000d2154afa3a8871be7fa6922b09cd6abfa6112fa1dd0d4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "kv_get",
+      "subject": "test.skew",
+      "sequence": 4,
+      "data_sha256": "c1b1fd080da1abbb000d2154afa3a8871be7fa6922b09cd6abfa6112fa1dd0d4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "check_lease_clock_skew",
+      "subject": "test.skew",
+      "sequence": 4,
+      "outcome": "after_fast_threshold"
+    }
+  ]
+}

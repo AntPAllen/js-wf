@@ -376,6 +376,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runTwoAcquirerRace(loaded.Seed, false, &loaded)
 	case "lease_two_acquirer_orphan":
 		replayed, err = runTwoAcquirerRace(loaded.Seed, true, &loaded)
+	case "lease_clock_skew":
+		replayed, err = runSkewedLeaseAcquirers(loaded.Seed, &loaded)
 	case "client_two_starter_same":
 		replayed, err = runTwoStarterRace(loaded.Seed, false, &loaded)
 	case "client_two_starter_mismatch":

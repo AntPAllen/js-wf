@@ -129,6 +129,14 @@ expiry, orphan reclaim, stale predecessor reads, and renewal. Another 100
 seeds each schedule two
 acquirers against a fresh key and a stale uninitialized key at individual KV
 operations. Every race retains one initialized winner and fences the loser.
+Lease actors can now read distinct wall clocks while sharing the same
+server-clock KV expiry and revisions. A 1,000-seed schedule gives contenders
+offsets of -400 ms and +400 ms around the one-second orphan-reclaim boundary.
+At 500 ms of server time both must leave the uninitialized key held; at
+800 ms only the fast clock can initiate reclaim, and revision CAS still
+permits one initialized winner. Both boundary traces are pinned on disk,
+and seed 1 is byte-identical across processes. Other modeled actors still
+need explicit wall-clock offsets.
 The seeded lease trace is byte-identical across processes and replays from
 disk. A real three-node fixture checks the model's normal revision, held-key,
 renewal, stale cleanup, and stale update behavior. A TCP-proxy fixture holds
