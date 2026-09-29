@@ -279,8 +279,15 @@ acknowledgment, retrying only when the terminal entry is absent. Three traces
 pin both cutoffs and both uncertain-reply branches. A three-node fixture
 blocks snapshot upload, exercises clean, dropped, and hidden-ack terminal
 appends, then checks the live suffix, reconstruction, purge, and reclamation.
-Scheduling the full worker handler against compaction and online blob sweeping
-remain open; blob sweeping requires quiescent writers.
+A further 1,000-seed schedule runs the production worker handler and an
+independent production compactor against one modeled journal. The handler
+executes 32 `wf.Run` effects while the compactor starts after a live prefix
+appears. Transport calls interleave under the cooperative scheduler, including
+dropped and hidden-ack object, manifest, and purge writes. The handler must
+complete once, a later compaction repairs uncertain writes, and production
+`Read` reconstructs all 66 entries from the snapshot and four live entries.
+The first ten seeds replay exactly. Online blob sweeping remains open; that
+workload still requires quiescent writers.
 
 The integrated short-handler workload runs production `Client.Start` and
 `Worker.handle` over a shared modeled run stream and durable consumer. Its
