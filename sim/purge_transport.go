@@ -33,6 +33,7 @@ type PurgeTransport struct {
 var _ retention.PurgePort = (*PurgeTransport)(nil)
 var _ journal.ReadPort = (*PurgeTransport)(nil)
 var _ journal.SnapshotReadPort = (*PurgeTransport)(nil)
+var _ journal.SnapshotWritePort = (*PurgeTransport)(nil)
 
 func NewPurgeTransport(schedule *Scheduler) *PurgeTransport {
 	blobs := NewBlobSweepTransport(schedule)
@@ -161,8 +162,42 @@ func (m *PurgeTransport) GetManifest(ctx context.Context, key string) ([]byte, e
 	return entry.Value, nil
 }
 
+func (m *PurgeTransport) GetManifestRevision(ctx context.Context, key string) (journal.SnapshotManifestValue, error) {
+	entry, err := m.Blobs.State().Get(ctx, key)
+	if err != nil {
+		return journal.SnapshotManifestValue{}, err
+	}
+	return journal.SnapshotManifestValue{Value: entry.Value, Revision: entry.Revision}, nil
+}
+
 func (m *PurgeTransport) GetObject(ctx context.Context, name string) ([]byte, error) {
 	return m.Blobs.ObjectBytes(ctx, name)
+}
+
+func (m *PurgeTransport) PutObject(ctx context.Context, name string, data []byte) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	m.Blobs.PutObject(name, data, m.Now())
+	return nil
+}
+
+func (m *PurgeTransport) CreateManifest(ctx context.Context, key string, data []byte) error {
+	_, err := m.Blobs.State().Create(ctx, key, data)
+	return err
+}
+
+func (m *PurgeTransport) UpdateManifest(ctx context.Context, key string, data []byte, revision uint64) error {
+	_, err := m.Blobs.State().Update(ctx, key, data, revision)
+	return err
+}
+
+func (m *PurgeTransport) PurgeJournal(ctx context.Context, subject string, before uint64) error {
+	return m.PurgeSubject(ctx, "WF_JRN", subject, before)
+}
+
+func (m *PurgeTransport) PurgeSignals(ctx context.Context, subject string, before uint64) error {
+	return m.PurgeSubject(ctx, "WF_SIG", subject, before)
 }
 
 func (m *PurgeTransport) HasFallbackTimers(ctx context.Context) (bool, error) {

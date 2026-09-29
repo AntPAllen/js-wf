@@ -3,8 +3,6 @@ package sim
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -47,14 +45,12 @@ func runSeededPurgeBlob(seed int64, replay *Trace) (trace Trace, runErr error) {
 	ctx := context.Background()
 	const typ, id = "test", "retired"
 	key := identity.Key(typ, id)
-	keyHash := sha256.Sum256([]byte(key))
-	snapshotName := "snapshot-" + hex.EncodeToString(keyHash[:8]) + "-one"
 	invSubject := identity.InvocationSubject(typ, id)
 	journalSubject := identity.JournalSubject(typ, id)
 	port := NewPurgeTransport(schedule)
 	port.EnableFallbackTimers()
 	old := time.Unix(0, 0).UTC().Add(-time.Hour)
-	for _, name := range []string{"input-one", "signal-one", "step-result-one", "terminal-result-one", snapshotName, "input-orphan", "user-unmanaged"} {
+	for _, name := range []string{"input-one", "signal-one", "step-result-one", "terminal-result-one", "input-orphan", "user-unmanaged"} {
 		port.Blobs.PutObject(name, []byte(name), old)
 	}
 	inputHeader := nats.Header{}
@@ -72,7 +68,6 @@ func runSeededPurgeBlob(seed int64, replay *Trace) (trace Trace, runErr error) {
 	if err != nil {
 		return trace, err
 	}
-	var prefix []journal.Record
 	for index, entry := range []journal.Entry{
 		{Kind: journal.Started},
 		{Kind: journal.StepRequested, Payload: json.RawMessage(`{"kind":"run","name":"work"}`)},
@@ -85,31 +80,18 @@ func runSeededPurgeBlob(seed int64, replay *Trace) (trace Trace, runErr error) {
 		if err != nil {
 			return trace, err
 		}
-		sequence, err := port.Blobs.PublishSubject("WF_JRN", journalSubject, nil, data)
-		if err != nil {
+		if _, err := port.Blobs.PublishSubject("WF_JRN", journalSubject, nil, data); err != nil {
 			return trace, err
 		}
-		if index < 3 {
-			prefix = append(prefix, journal.Record{Entry: entry, Sequence: sequence})
-		}
 	}
-	snapshotBytes, err := json.Marshal(prefix)
+	snapshot, err := journal.NewWithSnapshotPort(nil, port, port).SnapshotPrefix(ctx, typ, id, 1)
+	if err != nil {
+		return trace, fmt.Errorf("seed %d snapshot prefix: %w", seed, err)
+	}
+	snapshotName := snapshot.Object
+	snapshotBytes, err := port.GetObject(ctx, snapshotName)
 	if err != nil {
 		return trace, err
-	}
-	port.Blobs.PutObject(snapshotName, snapshotBytes, old)
-	snapshotHash := sha256.Sum256(snapshotBytes)
-	manifest, err := json.Marshal(journal.Snapshot{Version: 1, LastSeq: prefix[2].Sequence, LastIndex: prefix[2].Index, Epoch: prefix[2].Epoch, Object: snapshotName, SHA256: hex.EncodeToString(snapshotHash[:])})
-	if err != nil {
-		return trace, err
-	}
-	if _, err := port.Blobs.State().Create(ctx, "snap."+key, manifest); err != nil {
-		return trace, err
-	}
-	for _, record := range prefix {
-		if err := port.Blobs.Purge("WF_JRN", record.Sequence); err != nil {
-			return trace, err
-		}
 	}
 	if _, err := port.Blobs.State().Create(ctx, key, terminal); err != nil {
 		return trace, err

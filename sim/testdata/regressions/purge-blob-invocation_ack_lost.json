@@ -57,13 +57,6 @@
     {
       "at_ms": 0,
       "operation": "blob_put",
-      "subject": "snapshot-d90cbcf9436e6d49-one",
-      "data_sha256": "0c2a82a9fb6ce14198e0865ffdba707c6e7253896622c556d8b6d259b065e43c",
-      "outcome": "ok"
-    },
-    {
-      "at_ms": 0,
-      "operation": "blob_put",
       "subject": "input-orphan",
       "data_sha256": "5fd3a8ced0a530a148e3ee34881f8ede9b37b78879d8390cfdca62b9fe04bc65",
       "outcome": "ok"
@@ -125,8 +118,70 @@
     },
     {
       "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.test.retired",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.test.retired",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "2937e099505acab3c03ef302157fc18786d3b830af1995de09b079dfa582150e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.test.retired",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "c494669710a3a9cc1f6a78c3b0e28ef817fb2fb837710326cce7bc32d17e03e1",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.test.retired",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "d7afb72246af46cf7040685c37fc7949c1aea7f177020d776ecb017f414a02c9",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.test.retired",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "d09caefd70eb84b261329b355ccca1d92906ad7047b9ac4ac6875db8b4fe5492",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.test.retired",
+      "expected": 5,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.test.retired",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
       "operation": "blob_put",
-      "subject": "snapshot-d90cbcf9436e6d49-one",
+      "subject": "snapshot-d90cbcf9436e6d49-3-80c11c8faa852d38",
+      "data_sha256": "80c11c8faa852d38795fd1c8c6613b89934d21181a97c51bb5663130f33b7be7",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-d90cbcf9436e6d49-3-80c11c8faa852d38",
       "data_sha256": "80c11c8faa852d38795fd1c8c6613b89934d21181a97c51bb5663130f33b7be7",
       "outcome": "ok"
     },
@@ -135,28 +190,37 @@
       "operation": "kv_create",
       "subject": "snap.test.retired",
       "sequence": 1,
-      "data_sha256": "839548a76a4120641c40c618fe3ffb5fac97ef7f833078306dfb62adec73fe66",
+      "data_sha256": "02c1991d48358c35d943d41cbb58c9bb22a72ed28476819db33a6ad258478917",
       "outcome": "ok"
     },
     {
       "at_ms": 0,
-      "operation": "blob_stream_purge",
-      "subject": "WF_JRN",
+      "operation": "kv_get",
+      "subject": "snap.test.retired",
       "sequence": 1,
+      "data_sha256": "02c1991d48358c35d943d41cbb58c9bb22a72ed28476819db33a6ad258478917",
       "outcome": "ok"
     },
     {
       "at_ms": 0,
-      "operation": "blob_stream_purge",
-      "subject": "WF_JRN",
-      "sequence": 2,
+      "operation": "blob_get",
+      "subject": "snapshot-d90cbcf9436e6d49-3-80c11c8faa852d38",
+      "data_sha256": "80c11c8faa852d38795fd1c8c6613b89934d21181a97c51bb5663130f33b7be7",
       "outcome": "ok"
     },
     {
       "at_ms": 0,
-      "operation": "blob_stream_purge",
-      "subject": "WF_JRN",
+      "operation": "purge_subject",
+      "subject": "WF_JRN:wf.jrn.test.retired",
+      "expected": 4,
       "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-d90cbcf9436e6d49-3-80c11c8faa852d38",
+      "data_sha256": "80c11c8faa852d38795fd1c8c6613b89934d21181a97c51bb5663130f33b7be7",
       "outcome": "ok"
     },
     {
@@ -242,13 +306,13 @@
       "operation": "kv_get",
       "subject": "snap.test.retired",
       "sequence": 1,
-      "data_sha256": "839548a76a4120641c40c618fe3ffb5fac97ef7f833078306dfb62adec73fe66",
+      "data_sha256": "02c1991d48358c35d943d41cbb58c9bb22a72ed28476819db33a6ad258478917",
       "outcome": "ok"
     },
     {
       "at_ms": 0,
       "operation": "blob_get",
-      "subject": "snapshot-d90cbcf9436e6d49-one",
+      "subject": "snapshot-d90cbcf9436e6d49-3-80c11c8faa852d38",
       "data_sha256": "80c11c8faa852d38795fd1c8c6613b89934d21181a97c51bb5663130f33b7be7",
       "outcome": "ok"
     },
@@ -315,13 +379,13 @@
       "operation": "kv_get",
       "subject": "snap.test.retired",
       "sequence": 1,
-      "data_sha256": "839548a76a4120641c40c618fe3ffb5fac97ef7f833078306dfb62adec73fe66",
+      "data_sha256": "02c1991d48358c35d943d41cbb58c9bb22a72ed28476819db33a6ad258478917",
       "outcome": "ok"
     },
     {
       "at_ms": 0,
       "operation": "blob_get",
-      "subject": "snapshot-d90cbcf9436e6d49-one",
+      "subject": "snapshot-d90cbcf9436e6d49-3-80c11c8faa852d38",
       "data_sha256": "80c11c8faa852d38795fd1c8c6613b89934d21181a97c51bb5663130f33b7be7",
       "outcome": "ok"
     },
@@ -416,7 +480,7 @@
       "operation": "kv_get",
       "subject": "snap.test.retired",
       "sequence": 1,
-      "data_sha256": "839548a76a4120641c40c618fe3ffb5fac97ef7f833078306dfb62adec73fe66",
+      "data_sha256": "02c1991d48358c35d943d41cbb58c9bb22a72ed28476819db33a6ad258478917",
       "outcome": "ok"
     },
     {
@@ -714,7 +778,7 @@
     {
       "at_ms": 0,
       "operation": "blob_delete",
-      "subject": "snapshot-d90cbcf9436e6d49-one",
+      "subject": "snapshot-d90cbcf9436e6d49-3-80c11c8faa852d38",
       "outcome": "ok"
     },
     {

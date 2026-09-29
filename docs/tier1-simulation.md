@@ -225,9 +225,11 @@ A 1,000-seed combined workload now runs production `PurgeWithPort` and
 lease KV, and Object Store objects. It faults the purge marker, signal and
 journal purges, generation-scoped fallback timer purge, snapshot manifest
 delete, tombstone CAS, purge-event publish, and final invocation purge.
-The purge reads its terminal journal through production `journal.Store.Read`:
-a compacted snapshot supplies the prefix and one live entry supplies the
-terminal suffix. A one-read object visibility delay recovers inside the
+Production `journal.Store.SnapshotPrefix` first writes the snapshot object and
+manifest and purges the covered journal prefix through the same modeled
+transport. The purge then reads its terminal journal through production
+`journal.Store.Read`: that snapshot supplies the prefix and one live entry
+supplies the terminal suffix. A one-read object visibility delay recovers inside the
 journal reader; persistent corrupt object bytes fail before the purge marker
 is written, then a repaired object permits retry. After retry, it checks one
 generation-bound purge event, no old invocation,

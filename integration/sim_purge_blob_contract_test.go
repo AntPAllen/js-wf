@@ -2,8 +2,6 @@ package integration_test
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -74,36 +72,22 @@ func TestSimPurgeAndBlobSweepContractAgainstRealCluster(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var modelStartedSeq uint64
 	for _, entry := range []journal.Entry{{Index: 0, Epoch: 1, Kind: journal.Started}, {Index: 1, Epoch: 1, Kind: journal.Completed, Payload: modelOutcome}} {
 		data, err := json.Marshal(entry)
 		if err != nil {
 			t.Fatal(err)
 		}
-		modelSeq, err := model.Blobs.PublishSubject("WF_JRN", identity.JournalSubject(typ, id), nil, data)
-		if err != nil {
+		if _, err := model.Blobs.PublishSubject("WF_JRN", identity.JournalSubject(typ, id), nil, data); err != nil {
 			t.Fatal(err)
 		}
-		if entry.Kind == journal.Started {
-			modelStartedSeq = modelSeq
-		}
 	}
-	keyHash := sha256.Sum256([]byte(key))
-	modelSnapshotName := "snapshot-" + hex.EncodeToString(keyHash[:8]) + "-model"
-	modelSnapshotBytes, err := json.Marshal([]journal.Record{{Entry: journal.Entry{Index: 0, Epoch: 1, Kind: journal.Started}, Sequence: modelStartedSeq}})
+	modelSnapshot, err := journal.NewWithSnapshotPort(nil, model, model).SnapshotPrefix(ctx, typ, id, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	model.Blobs.PutObject(modelSnapshotName, modelSnapshotBytes, time.Unix(0, 0).Add(-time.Hour))
-	modelSnapshotHash := sha256.Sum256(modelSnapshotBytes)
-	modelManifest, err := json.Marshal(journal.Snapshot{Version: 1, LastSeq: modelStartedSeq, LastIndex: 0, Epoch: 1, Object: modelSnapshotName, SHA256: hex.EncodeToString(modelSnapshotHash[:])})
+	modelSnapshotName := modelSnapshot.Object
+	modelSnapshotBytes, err := model.GetObject(ctx, modelSnapshotName)
 	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := model.Blobs.State().Create(ctx, "snap."+key, modelManifest); err != nil {
-		t.Fatal(err)
-	}
-	if err := model.Blobs.Purge("WF_JRN", modelStartedSeq); err != nil {
 		t.Fatal(err)
 	}
 	state, err := all[0].KeyValue(ctx, "WF_STATE")
