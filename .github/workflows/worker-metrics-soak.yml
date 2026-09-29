@@ -1,0 +1,26 @@
+name: worker-metrics-soak
+on:
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: Live workflow load and metrics scrape duration
+        required: true
+        type: choice
+        default: '15m'
+        options:
+          - '15m'
+          - '60m'
+jobs:
+  soak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      WF_METRICS_SOAK: '1'
+      WF_METRICS_SOAK_DURATION: ${{ inputs.duration }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Run a live worker and scrape metrics during workflow load
+        run: go test ./cmd/wf-worker -run '^TestWorkerRunnerSustainedMetricsScrape$' -count=1 -timeout=70m -v
