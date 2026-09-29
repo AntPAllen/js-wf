@@ -1,0 +1,14 @@
+name: fanout-500-restart
+on: workflow_dispatch
+jobs:
+  full-restart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v
+        env:
+          WF_FULL_RESTART_FANOUT_500: '1'

@@ -30,12 +30,24 @@ func TestFanoutSurvivesFullServerRestart(t *testing.T) {
 	if os.Getenv("WF_FULL_RESTART_FANOUT") != "1" {
 		t.Skip("set WF_FULL_RESTART_FANOUT=1 for the process restart proof")
 	}
+	runFanoutFullServerRestart(t, 6)
+}
+
+func TestFiveHundredChildFanoutSurvivesFullServerRestart(t *testing.T) {
+	if os.Getenv("WF_FULL_RESTART_FANOUT_500") != "1" {
+		t.Skip("set WF_FULL_RESTART_FANOUT_500=1 for the 500-child process restart proof")
+	}
+	runFanoutFullServerRestart(t, 500)
+}
+
+func runFanoutFullServerRestart(t *testing.T, childCount int) {
+	t.Helper()
 	cluster, err := testcluster.StartPartitionableProcesses(t.TempDir(), 3)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer cluster.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 	js := make([]jetstream.JetStream, 3)
 	for i, conn := range cluster.Clients {
@@ -64,7 +76,7 @@ func TestFanoutSurvivesFullServerRestart(t *testing.T) {
 	handlers := map[string]worker.Handler{
 		typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 			once.Do(func() { close(parentEntered) })
-			promises := make([]wf.Promise, 6)
+			promises := make([]wf.Promise, childCount)
 			for i := range promises {
 				p, err := wf.CallAsync(c, childType, json.RawMessage(fmt.Sprint(i)))
 				if err != nil {
@@ -117,7 +129,7 @@ func TestFanoutSurvivesFullServerRestart(t *testing.T) {
 	}
 	j := journal.New(js[0])
 	var childIDs []string
-	until = time.Now().Add(20 * time.Second)
+	until = time.Now().Add(time.Minute)
 	for time.Now().Before(until) {
 		records, _, err := j.Read(ctx, typ, id)
 		if err != nil {
@@ -139,13 +151,13 @@ func TestFanoutSurvivesFullServerRestart(t *testing.T) {
 				childIDs = append(childIDs, req.ChildID)
 			}
 		}
-		if len(childIDs) == 6 && len(records) > 0 && records[len(records)-1].Kind == journal.Suspended {
+		if len(childIDs) == childCount && len(records) > 0 && records[len(records)-1].Kind == journal.Suspended {
 			break
 		}
 		time.Sleep(30 * time.Millisecond)
 	}
-	if len(childIDs) != 6 {
-		t.Fatalf("committed child IDs=%d, want 6", len(childIDs))
+	if len(childIDs) != childCount {
+		t.Fatalf("committed child IDs=%d, want %d", len(childIDs), childCount)
 	}
 	stopFirst()
 	select {
@@ -211,7 +223,7 @@ func TestFanoutSurvivesFullServerRestart(t *testing.T) {
 	}
 	close(release)
 	result, err := client.New(js[0]).Await(ctx, typ, id)
-	if err != nil || string(result) != "42" {
+	if err != nil || string(result) != fmt.Sprint(childCount*7) {
 		t.Fatalf("parent after full restart: result=%s err=%v", result, err)
 	}
 	seen := map[string]bool{}
@@ -225,18 +237,25 @@ func TestFanoutSurvivesFullServerRestart(t *testing.T) {
 			t.Fatalf("child %s after restart: result=%s err=%v", childID, result, err)
 		}
 	}
-	until = time.Now().Add(20 * time.Second)
+	auditAttemptTimeout := 3 * time.Second
+	auditDeadline := 30 * time.Second
+	if childCount >= 500 {
+		auditAttemptTimeout = time.Minute
+		auditDeadline = 2 * time.Minute
+	}
+	until = time.Now().Add(auditDeadline)
 	var report integrity.Report
 	for time.Now().Before(until) {
-		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		attempt, stop := context.WithTimeout(ctx, auditAttemptTimeout)
 		report, err = integrity.Check(attempt, js[0])
 		stop()
-		if err == nil && report.Invocations == 7 && report.Journals == 7 && report.Terminal == 7 {
+		if err == nil && report.Invocations == childCount+1 && report.Journals == childCount+1 && report.Terminal == childCount+1 {
 			break
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	if err != nil || report.Invocations != 7 || report.Journals != 7 || report.Terminal != 7 {
+	if err != nil || report.Invocations != childCount+1 || report.Journals != childCount+1 || report.Terminal != childCount+1 {
 		t.Fatalf("full-restart fan-out retained integrity: report=%+v err=%v", report, err)
 	}
+	t.Logf("full server restart recovered parent and %d children; retained integrity=%+v", childCount, report)
 }
