@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -12,9 +13,9 @@ import (
 	"js-wf/lease"
 )
 
-// This reproduces the lease-bound part of the five-container SIGKILL result.
-// Without a live owner to release the lease, even an immediately available
-// replacement cannot append a terminal entry before the configured 30 s TTL.
+// This reproduces the lease-bound part of the five-container SIGKILL and
+// SIGSTOP results. A stopped owner cannot release its lease, and its stale
+// journal append must be rejected after a successor has completed.
 func runWorkerKillLeaseExpiry(replay *Trace) (trace Trace, runErr error) {
 	var schedule *Scheduler
 	if replay == nil {
@@ -71,16 +72,34 @@ func runWorkerKillLeaseExpiry(replay *Trace) (trace Trace, runErr error) {
 	if err != nil || len(records) != 4 || tail != fourth || schedule.NowMillis() != 30_000 {
 		return trace, fmt.Errorf("recovery at %dms: entries=%d tail=%d want=%d err=%v", schedule.NowMillis(), len(records), tail, fourth, err)
 	}
+	if err := schedule.AdvanceMillis(15_000); err != nil {
+		return trace, err
+	}
+	if err := old.Renew(ctx); !errors.Is(err, lease.ErrLost) {
+		return trace, fmt.Errorf("paused owner renewed after successor acquired the lease: %v", err)
+	}
+	if _, err := store.Append(ctx, "test", "killed", journal.Entry{Epoch: old.Epoch(), Index: 2, Kind: journal.StepCompleted, WorkerID: "old"}, second); !errors.Is(err, journal.ErrStale) {
+		return trace, fmt.Errorf("paused owner appended after successor completed: %v", err)
+	}
+	afterResume, resumedTail, err := store.Read(ctx, "test", "killed")
+	if err != nil || !reflect.DeepEqual(afterResume, records) || resumedTail != fourth || schedule.NowMillis() != 45_000 {
+		return trace, fmt.Errorf("journal changed after paused owner resumed at %dms: entries=%v tail=%d err=%v", schedule.NowMillis(), afterResume, resumedTail, err)
+	}
 	if err := schedule.Finish(); err != nil {
 		return trace, err
 	}
 	return schedule.Trace(), nil
 }
 
-func TestWorkerKillLeaseExpiryExplainsLatency(t *testing.T) {
+func TestWorkerKillAndPauseLeaseExpiryAndFencing(t *testing.T) {
 	generated, err := runWorkerKillLeaseExpiry(nil)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if path := os.Getenv("SIM_WORKER_PAUSE_OUT"); path != "" {
+		if err := generated.Save(path); err != nil {
+			t.Fatal(err)
+		}
 	}
 	replayed, err := replayTrace(generated)
 	if err != nil || !reflect.DeepEqual(replayed, generated) {

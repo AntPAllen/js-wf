@@ -1,0 +1,225 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "worker_kill_lease_expiry",
+  "step_limit": 100000,
+  "decisions": [],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.killed",
+      "sequence": 1,
+      "data_sha256": "b83fc36317e331f270febe4f683cdbbfba3968397b02d98c0356b118242b2e6c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "test.killed",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.killed",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.killed",
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.killed",
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.killed",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "e0d86ba9fb60121bee78198a0845ef10f0d3e6f1258d98e39db2b461d1ce965b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 29999,
+      "operation": "kv_create",
+      "subject": "test.killed",
+      "data_sha256": "ee6acb9e04e4eb8c0307efe094ac304154eb7a4bbc56e1cb01a35bbebe458516",
+      "outcome": "key_exists"
+    },
+    {
+      "at_ms": 29999,
+      "operation": "kv_get",
+      "subject": "test.killed",
+      "sequence": 2,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "kv_create",
+      "subject": "test.killed",
+      "sequence": 3,
+      "data_sha256": "ee6acb9e04e4eb8c0307efe094ac304154eb7a4bbc56e1cb01a35bbebe458516",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "kv_update",
+      "subject": "test.killed",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "a48fb0add343cfd66f9d7125c78794629b6b6bf42d5bfd0e2e7fc0f562aedb0d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "last",
+      "subject": "wf.jrn.test.killed",
+      "sequence": 2,
+      "data_sha256": "e0d86ba9fb60121bee78198a0845ef10f0d3e6f1258d98e39db2b461d1ce965b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "publish",
+      "subject": "wf.jrn.test.killed",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "a3565d96985a50a68c49535aa2483eee9b1ea4a15dda3dad02556773d702627f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "last",
+      "subject": "wf.jrn.test.killed",
+      "sequence": 3,
+      "data_sha256": "a3565d96985a50a68c49535aa2483eee9b1ea4a15dda3dad02556773d702627f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "publish",
+      "subject": "wf.jrn.test.killed",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "98fec1718e1fe5bb1a5dcde0bdcaa7216dc1ccd4cd1588d2077a1274914dbeb0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.killed",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.killed",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "e0d86ba9fb60121bee78198a0845ef10f0d3e6f1258d98e39db2b461d1ce965b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.killed",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "a3565d96985a50a68c49535aa2483eee9b1ea4a15dda3dad02556773d702627f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.killed",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "98fec1718e1fe5bb1a5dcde0bdcaa7216dc1ccd4cd1588d2077a1274914dbeb0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.killed",
+      "expected": 5,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "kv_update",
+      "subject": "test.killed",
+      "expected": 2,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "revision_mismatch"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "last",
+      "subject": "wf.jrn.test.killed",
+      "sequence": 4,
+      "data_sha256": "98fec1718e1fe5bb1a5dcde0bdcaa7216dc1ccd4cd1588d2077a1274914dbeb0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.killed",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.killed",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "e0d86ba9fb60121bee78198a0845ef10f0d3e6f1258d98e39db2b461d1ce965b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.killed",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "a3565d96985a50a68c49535aa2483eee9b1ea4a15dda3dad02556773d702627f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.killed",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "98fec1718e1fe5bb1a5dcde0bdcaa7216dc1ccd4cd1588d2077a1274914dbeb0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.killed",
+      "expected": 5,
+      "outcome": "not_found"
+    }
+  ]
+}

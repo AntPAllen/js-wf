@@ -36,8 +36,13 @@ floor using the production `lease.Acquire` and `journal.Append` decisions over
 virtual transports. The replacement receives `ErrHeld` at 29,999 ms after
 the killed owner's last lease write, acquires at the provisioned 30,000 ms
 TTL, and appends one step outcome and terminal entry under a higher epoch.
-Exact replay and a race run pass. This explains the lease-bound part of the
-real 31.1-second recovery without attributing its remaining delay to NATS.
+At virtual 45,000 ms, the paused old owner resumes: production `lease.Renew`
+returns `ErrLost`, its stale production journal append returns `ErrStale`,
+and the four retained entries remain unchanged. The trace is pinned in
+`sim/testdata/regressions/worker-pause-lease.json`; exact disk replay and a
+focused race run pass. This explains the lease-bound part of the real 31.1-second
+recovery without attributing its remaining delay to NATS; process signals
+and server behavior remain outside the model.
 
 The production `journal.Store.Read` can now load a compacted prefix through a
 narrow modeled manifest and Object Store read port, then join it to retained
