@@ -20,9 +20,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Verify server skew across timers, signals, and short workflows
+      - name: Verify server skew across timer, signal, short, and fan-out workflows
         run: go test ./integration -run '^TestFiveContainerServerClockSkewTimer$' -count=1 -timeout=6m -v
-      - name: Verify worker skew across timers, signals, and short workflows
+      - name: Verify worker skew across timer, signal, short, and fan-out workflows
         env:
           WF_TIER3_WORKER_CLOCK_SKEW: '1'
         run: go test ./integration -run '^TestFiveContainerWorkerClockSkewTimer$' -count=1 -timeout=6m -v

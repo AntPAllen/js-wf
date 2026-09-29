@@ -118,6 +118,7 @@ func TestFiveContainerServerClockSkewTimer(t *testing.T) {
 				var request struct {
 					Signal bool `json:"signal"`
 					Short  bool `json:"short"`
+					Fanout bool `json:"fanout"`
 					N      int  `json:"n"`
 				}
 				if err := json.Unmarshal(input, &request); err != nil {
@@ -142,12 +143,15 @@ func TestFiveContainerServerClockSkewTimer(t *testing.T) {
 					}
 					return json.Marshal(value)
 				}
+				if request.Fanout {
+					return tier3ClockFanoutParent(c)
+				}
 				if err := wf.Sleep(c, "skewed-server", 3*time.Second); err != nil {
 					return nil, err
 				}
 				return json.RawMessage(`"done"`), nil
 			}
-			w, err := worker.New(ctx, workerJS, "tier3-clock-skew-worker", map[string]worker.Handler{typ: handler})
+			w, err := worker.New(ctx, workerJS, "tier3-clock-skew-worker", map[string]worker.Handler{typ: handler, tier3ClockFanoutChildType: tier3ClockFanoutChild})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -472,11 +476,60 @@ func TestFiveContainerServerClockSkewTimer(t *testing.T) {
 			if result, err := history.CheckResults(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
 				t.Fatalf("server-skew short result history=%s err=%v", result, err)
 			}
+			fanoutID := tier3ClockIDsForPartition(typ, id, "fanout", 1)[0]
+			if _, err := c.Start(ctx, typ, fanoutID, []byte(`{"fanout":true}`)); err != nil {
+				t.Fatalf("server-skew fan-out parent start: %v", err)
+			}
+			childIDs, childParts := tier3ClockFanoutRequests(t, ctx, controlJS, typ, fanoutID)
+			var otherParts []uint32
+			for _, part := range childParts {
+				if part != partition {
+					otherParts = append(otherParts, part)
+				}
+			}
+			if len(otherParts) > 0 {
+				childWorker, err := worker.New(ctx, readJS, "tier3-server-skew-child-worker", map[string]worker.Handler{tier3ClockFanoutChildType: tier3ClockFanoutChild})
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer childWorker.Close()
+				childCtx, stopChildren := context.WithCancel(ctx)
+				childDone := make(chan error, 1)
+				go func() { childDone <- childWorker.RunPartitions(childCtx, otherParts) }()
+				defer func() { stopChildren(); <-childDone }()
+				for _, part := range otherParts {
+					if err := waitFiveReplicaReadiness(ctx, controlJS, part); err != nil {
+						t.Fatalf("server-skew child partition %d readiness: %v", part, err)
+					}
+				}
+			}
+			fanoutLatency, fanoutEntries := tier3ClockFanoutVerify(t, ctx, controlJS, c, recorder, typ, fanoutID, childIDs)
+			parentCrossNode, err := crossNode.Await(ctx, typ, fanoutID)
+			if err != nil || string(parentCrossNode) != `30` {
+				t.Fatalf("server-skew cross-node fan-out parent=%s err=%v", parentCrossNode, err)
+			}
+			for i, childID := range childIDs {
+				childCrossNode, err := crossNode.Await(ctx, tier3ClockFanoutChildType, childID)
+				if err != nil || string(childCrossNode) != strconv.Itoa(i*2) {
+					t.Fatalf("server-skew cross-node child %d=%s err=%v", i, childCrossNode, err)
+				}
+			}
+			for _, item := range []struct {
+				Name   string
+				Stream jetstream.Stream
+			}{{"WF_RUN", run}, {"WF_SIG", sigStream}, {"WF_JRN", journalStream}, {"KV_WF_STATE", stateStream}} {
+				attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+				info, err := item.Stream.Info(attempt)
+				stop()
+				if err != nil || info == nil || info.Cluster == nil || info.Cluster.Leader != skewedLeader {
+					t.Fatalf("%s leader changed during skewed fan-out: info=%+v err=%v", item.Name, info, err)
+				}
+			}
 			report, err := integrity.Check(ctx, controlJS)
-			if err != nil || report.Invocations != shortCount+2 || report.Journals != shortCount+2 || report.Entries != len(signalRecords)+5+4*shortCount || report.Terminal != shortCount+2 {
+			if err != nil || report.Invocations != shortCount+2+1+len(childIDs) || report.Journals != shortCount+2+1+len(childIDs) || report.Entries != len(signalRecords)+5+4*shortCount+fanoutEntries || report.Terminal != shortCount+2+1+len(childIDs) {
 				t.Fatalf("skewed timer retained audit=%+v err=%v", report, err)
 			}
-			t.Logf("server_skew=%s measured_offset=%s WF_RUN_SIG_JRN_STATE_leader=%s timer_elapsed=%s timer_lateness=%s ordered_signals=%d signal_latency=%s short_count=%d short_p99=%s retained=%+v", offset, measuredOffset, skewedLeader, elapsed, lateness, consumed, signalLatency, shortCount, shortP99, report)
+			t.Logf("server_skew=%s measured_offset=%s WF_RUN_SIG_JRN_STATE_leader=%s timer_elapsed=%s timer_lateness=%s ordered_signals=%d signal_latency=%s short_count=%d short_p99=%s fanout_children=%d last_child_to_parent=%s retained=%+v", offset, measuredOffset, skewedLeader, elapsed, lateness, consumed, signalLatency, shortCount, shortP99, len(childIDs), fanoutLatency, report)
 		})
 	}
 }

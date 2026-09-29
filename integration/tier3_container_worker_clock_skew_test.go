@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -101,6 +102,7 @@ func TestFiveContainerWorkerClockSkewChild(t *testing.T) {
 		var request struct {
 			Signal bool `json:"signal"`
 			Short  bool `json:"short"`
+			Fanout bool `json:"fanout"`
 			N      int  `json:"n"`
 		}
 		if err := json.Unmarshal(input, &request); err != nil {
@@ -125,17 +127,35 @@ func TestFiveContainerWorkerClockSkewChild(t *testing.T) {
 			}
 			return json.Marshal(value)
 		}
+		if request.Fanout {
+			return tier3ClockFanoutParent(c)
+		}
 		if err := wf.Sleep(c, "worker-skew", 3*time.Second); err != nil {
 			return nil, err
 		}
 		return json.RawMessage(`"done"`), nil
 	}
-	w, err := worker.New(context.Background(), js, "tier3-skewed-worker", map[string]worker.Handler{tier3WorkerSkewType: handler})
+	workerID := os.Getenv("WF_TIER3_WORKER_SKEW_WORKER_ID")
+	if workerID == "" {
+		workerID = "tier3-skewed-worker"
+	}
+	w, err := worker.New(context.Background(), js, workerID, map[string]worker.Handler{tier3WorkerSkewType: handler, tier3ClockFanoutChildType: tier3ClockFanoutChild})
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer w.Close()
-	if err := w.RunPartition(context.Background(), identity.Partition(tier3WorkerSkewType, tier3WorkerSkewID, provision.Partitions)); err != nil {
+	partitions := []uint32{identity.Partition(tier3WorkerSkewType, tier3WorkerSkewID, provision.Partitions)}
+	if selected := os.Getenv("WF_TIER3_WORKER_SKEW_PARTITIONS"); selected != "" {
+		partitions = nil
+		for _, raw := range strings.Split(selected, ",") {
+			part, err := strconv.ParseUint(raw, 10, 32)
+			if err != nil || part >= uint64(provision.Partitions) {
+				t.Fatalf("invalid child partition %q: %v", raw, err)
+			}
+			partitions = append(partitions, uint32(part))
+		}
+	}
+	if err := w.RunPartitions(context.Background(), partitions); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -389,11 +409,67 @@ func TestFiveContainerWorkerClockSkewTimer(t *testing.T) {
 			if result, err := history.CheckResults(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
 				t.Fatalf("worker-skew short result history=%s err=%v", result, err)
 			}
+			fanoutID := tier3ClockIDsForPartition(tier3WorkerSkewType, tier3WorkerSkewID, "fanout", 1)[0]
+			if _, err := c.Start(ctx, tier3WorkerSkewType, fanoutID, []byte(`{"fanout":true}`)); err != nil {
+				t.Fatalf("worker-skew fan-out parent start: %v", err)
+			}
+			childIDs, childParts := tier3ClockFanoutRequests(t, ctx, js, tier3WorkerSkewType, fanoutID)
+			var otherParts []uint32
+			for _, part := range childParts {
+				if part != partition {
+					otherParts = append(otherParts, part)
+				}
+			}
+			if len(otherParts) > 0 {
+				partNames := make([]string, len(otherParts))
+				for i, part := range otherParts {
+					partNames[i] = strconv.FormatUint(uint64(part), 10)
+				}
+				childReady := filepath.Join(root, "child-worker-clock-offset")
+				children := exec.Command(binary, "-test.run=^TestFiveContainerWorkerClockSkewChild$")
+				children.Env = append(os.Environ(), "WF_TIER3_WORKER_SKEW_CHILD=1", "WF_TIER3_WORKER_SKEW_SECONDS="+strconv.Itoa(int(offset/time.Second)), "WF_TIER3_WORKER_SKEW_MONITOR="+cluster.MonitorURL(2), "WF_TIER3_WORKER_SKEW_URL="+cluster.ClientURL(2), "WF_TIER3_WORKER_SKEW_READY="+childReady, "WF_TIER3_WORKER_SKEW_PARTITIONS="+strings.Join(partNames, ","), "WF_TIER3_WORKER_SKEW_WORKER_ID=tier3-skewed-children")
+				childLog, err := os.Create(filepath.Join(root, "children.log"))
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer childLog.Close()
+				children.Stdout, children.Stderr = childLog, childLog
+				if err := children.Start(); err != nil {
+					t.Fatal(err)
+				}
+				defer func() { _ = children.Process.Kill(); _ = children.Wait() }()
+				for until := time.Now().Add(15 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
+					if _, err := os.Stat(childReady); err == nil {
+						break
+					}
+					time.Sleep(20 * time.Millisecond)
+				}
+				if _, err := os.ReadFile(childReady); err != nil {
+					logs, _ := os.ReadFile(childLog.Name())
+					t.Fatalf("skewed child worker clock not verified: %v logs=%s", err, logs)
+				}
+				for _, part := range otherParts {
+					if err := waitFiveReplicaReadiness(ctx, js, part); err != nil {
+						t.Fatalf("worker-skew child partition %d readiness: %v", part, err)
+					}
+				}
+			}
+			fanoutLatency, fanoutEntries := tier3ClockFanoutVerify(t, ctx, js, c, recorder, tier3WorkerSkewType, fanoutID, childIDs)
+			parentCrossNode, err := crossNode.Await(ctx, tier3WorkerSkewType, fanoutID)
+			if err != nil || string(parentCrossNode) != `30` {
+				t.Fatalf("worker-skew cross-node fan-out parent=%s err=%v", parentCrossNode, err)
+			}
+			for i, childID := range childIDs {
+				childCrossNode, err := crossNode.Await(ctx, tier3ClockFanoutChildType, childID)
+				if err != nil || string(childCrossNode) != strconv.Itoa(i*2) {
+					t.Fatalf("worker-skew cross-node child %d=%s err=%v", i, childCrossNode, err)
+				}
+			}
 			report, err := integrity.Check(ctx, js)
-			if err != nil || report.Invocations != shortCount+2 || report.Journals != shortCount+2 || report.Entries != len(signalRecords)+5+4*shortCount || report.Terminal != shortCount+2 {
+			if err != nil || report.Invocations != shortCount+2+1+len(childIDs) || report.Journals != shortCount+2+1+len(childIDs) || report.Entries != len(signalRecords)+5+4*shortCount+fanoutEntries || report.Terminal != shortCount+2+1+len(childIDs) {
 				t.Fatalf("worker skew retained audit=%+v err=%v", report, err)
 			}
-			t.Logf("worker_skew=%s measured_offset=%s timer_elapsed=%s timer_lateness=%s ordered_signals=%d signal_latency=%s short_count=%d short_p99=%s retained=%+v", offset, measured, elapsed, lateness, consumed, signalLatency, shortCount, shortP99, report)
+			t.Logf("worker_skew=%s measured_offset=%s timer_elapsed=%s timer_lateness=%s ordered_signals=%d signal_latency=%s short_count=%d short_p99=%s fanout_children=%d last_child_to_parent=%s retained=%+v", offset, measured, elapsed, lateness, consumed, signalLatency, shortCount, shortP99, len(childIDs), fanoutLatency, report)
 		})
 	}
 }
