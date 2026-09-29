@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -43,11 +45,15 @@ func newRouteMesh(routePorts []int) (*RouteMesh, error) {
 	for i, port := range routePorts {
 		listener, err := net.Listen("tcp", "127.0.0.1:0")
 		if err != nil {
-			m.Close()
+			for _, opened := range m.proxies {
+				_ = opened.listener.Close()
+			}
 			return nil, err
 		}
 		p := &routeProxy{mesh: m, node: i, listener: listener, target: fmt.Sprintf("127.0.0.1:%d", port), done: make(chan struct{})}
 		m.proxies = append(m.proxies, p)
+	}
+	for _, p := range m.proxies {
 		go p.accept()
 	}
 	return m, nil
@@ -187,7 +193,16 @@ func (p *routeProxy) bridge(s *routeSession) {
 		if err := json.Unmarshal(bytes.TrimSpace(line[5:]), &info); err != nil {
 			return
 		}
-		if _, err := fmt.Sscanf(info.Name, "wf-test-%d", &from); err != nil || from < 0 || from >= len(p.mesh.proxies) || from == p.node {
+		name := info.Name
+		if strings.HasPrefix(name, "wf-test-") {
+			name = strings.TrimPrefix(name, "wf-test-")
+		} else if strings.HasPrefix(name, "wf-process-") {
+			name = strings.TrimPrefix(name, "wf-process-")
+		} else {
+			return
+		}
+		from, err = strconv.Atoi(name)
+		if err != nil || from < 0 || from >= len(p.mesh.proxies) || from == p.node {
 			return
 		}
 		break

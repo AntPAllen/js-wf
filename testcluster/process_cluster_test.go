@@ -4,7 +4,10 @@ package testcluster
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -13,13 +16,47 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 )
 
+func waitProcessRoutes(t *testing.T, c *ProcessCluster, want [3]int) {
+	t.Helper()
+	client := &http.Client{Timeout: 500 * time.Millisecond}
+	deadline := time.Now().Add(10 * time.Second)
+	var got [3]int
+	for time.Now().Before(deadline) {
+		ready := true
+		for i, port := range c.monitors {
+			response, err := client.Get(fmt.Sprintf("http://127.0.0.1:%d/routez", port))
+			if err != nil {
+				ready = false
+				break
+			}
+			var routez struct {
+				NumRoutes int `json:"num_routes"`
+			}
+			err = json.NewDecoder(response.Body).Decode(&routez)
+			_ = response.Body.Close()
+			if err != nil || response.StatusCode != http.StatusOK {
+				ready = false
+				break
+			}
+			got[i] = routez.NumRoutes
+		}
+		if ready && got == want {
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	t.Fatalf("process routes=%v want=%v", got, want)
+}
+
 func TestProcessClusterPauseLeaderAndRecoverReplica(t *testing.T) {
-	c, err := StartProcesses(t.TempDir(), 3)
+	root := t.TempDir()
+	c, err := StartPartitionableProcesses(root, 3)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer c.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	waitProcessRoutes(t, c, [3]int{8, 8, 8})
+	ctx, cancel := context.WithTimeout(context.Background(), 40*time.Second)
 	defer cancel()
 	js := make([]jetstream.JetStream, 3)
 	for i, conn := range c.Clients {
@@ -53,7 +90,29 @@ func TestProcessClusterPauseLeaderAndRecoverReplica(t *testing.T) {
 	if err != nil || first == nil || first.Sequence != 1 {
 		t.Fatalf("first publish=%+v err=%v", first, err)
 	}
-	if err := (FaultSchedule{Seed: 42, Events: []FaultEvent{{Op: PauseNode, A: leader}}}).Run(ctx, c.ApplyFault); err != nil {
+	partitionPath := filepath.Join(root, "partition-fault.json")
+	if err := (FaultSchedule{Seed: 42, Events: []FaultEvent{{Op: PartitionNodes, A: 0, B: 1}}}).Save(partitionPath); err != nil {
+		t.Fatal(err)
+	}
+	partition, err := LoadFaultSchedule(partitionPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := partition.Run(ctx, c.ApplyFault); err != nil {
+		t.Fatal(err)
+	}
+	waitProcessRoutes(t, c, [3]int{4, 4, 8})
+	c.RouteMesh().Heal()
+	waitProcessRoutes(t, c, [3]int{8, 8, 8})
+	pausePath := filepath.Join(root, "pause-fault.json")
+	if err := (FaultSchedule{Seed: 42, Events: []FaultEvent{{Op: PauseNode, A: leader}}}).Save(pausePath); err != nil {
+		t.Fatal(err)
+	}
+	pause, err := LoadFaultSchedule(pausePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := pause.Run(ctx, c.ApplyFault); err != nil {
 		t.Fatal(err)
 	}
 	if err := c.Clients[leader].FlushTimeout(200 * time.Millisecond); err == nil {

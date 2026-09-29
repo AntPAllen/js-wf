@@ -18,12 +18,15 @@ import (
 // ProcessCluster runs real NATS server processes so one node can be stopped
 // with SIGSTOP without pausing the Go test process or its other nodes.
 type ProcessCluster struct {
-	Commands []*exec.Cmd
-	Clients  []*nats.Conn
-	ports    []int
-	routes   []int
-	logs     []string
-	paused   []bool
+	Commands  []*exec.Cmd
+	Clients   []*nats.Conn
+	root      string
+	ports     []int
+	routes    []int
+	monitors  []int
+	logs      []string
+	paused    []bool
+	routeMesh *RouteMesh
 }
 
 func (c *ProcessCluster) ClientURL(i int) string {
@@ -32,17 +35,36 @@ func (c *ProcessCluster) ClientURL(i int) string {
 
 func (c *ProcessCluster) LogPath(i int) string { return c.logs[i] }
 
+func (c *ProcessCluster) RouteMesh() *RouteMesh { return c.routeMesh }
+
 // ApplyFault lets a recorded fault schedule pause a separate server process.
 func (c *ProcessCluster) ApplyFault(event FaultEvent) error {
-	if event.Op != PauseNode {
+	switch event.Op {
+	case PauseNode:
+		return c.PauseNode(event.A)
+	case PartitionNodes:
+		if c.routeMesh == nil {
+			return fmt.Errorf("route partition requires StartPartitionableProcesses")
+		}
+		return c.routeMesh.PartitionNodes(event.A, event.B)
+	default:
 		return fmt.Errorf("fault verb %s is not supported by the process fixture", event.Op)
 	}
-	return c.PauseNode(event.A)
 }
 
 // StartProcesses builds the version of nats-server required by this module
 // and boots up to three file-backed nodes with separate OS process IDs.
 func StartProcesses(root string, count int) (_ *ProcessCluster, err error) {
+	return startProcesses(root, count, false)
+}
+
+// StartPartitionableProcesses routes all server links through a controllable
+// relay while retaining separate server process IDs and file stores.
+func StartPartitionableProcesses(root string, count int) (*ProcessCluster, error) {
+	return startProcesses(root, count, true)
+}
+
+func startProcesses(root string, count int, partitionable bool) (_ *ProcessCluster, err error) {
 	if count < 1 || count > 3 {
 		return nil, fmt.Errorf("count must be 1..3")
 	}
@@ -54,42 +76,61 @@ func StartProcesses(root string, count int) (_ *ProcessCluster, err error) {
 	if output, buildErr := build.CombinedOutput(); buildErr != nil {
 		return nil, fmt.Errorf("build nats-server: %w: %s", buildErr, output)
 	}
-	c := &ProcessCluster{ports: make([]int, count), routes: make([]int, count), paused: make([]bool, count)}
+	c := &ProcessCluster{root: root, ports: make([]int, count), routes: make([]int, count), monitors: make([]int, count), paused: make([]bool, count)}
 	defer func() {
 		if err != nil {
 			c.Close()
 		}
 	}()
 	used := map[int]bool{}
+	uniquePort := func() (int, error) {
+		for attempt := 0; attempt < 20; attempt++ {
+			port, portErr := freePort()
+			if portErr != nil {
+				return 0, portErr
+			}
+			if !used[port] {
+				used[port] = true
+				return port, nil
+			}
+		}
+		return 0, fmt.Errorf("could not allocate distinct NATS process ports")
+	}
 	for i := 0; i < count; i++ {
-		for _, slot := range []*int{&c.ports[i], &c.routes[i]} {
-			if count == 1 && slot == &c.routes[i] {
-				continue
-			}
-			for attempt := 0; attempt < 20; attempt++ {
-				port, portErr := freePort()
-				if portErr != nil {
-					return nil, portErr
-				}
-				if !used[port] {
-					used[port] = true
-					*slot = port
-					break
-				}
-			}
-			if *slot == 0 {
-				return nil, fmt.Errorf("could not allocate distinct NATS process ports")
+		c.ports[i], err = uniquePort()
+		if err != nil {
+			return nil, err
+		}
+		c.monitors[i], err = uniquePort()
+		if err != nil {
+			return nil, err
+		}
+		if count > 1 {
+			c.routes[i], err = uniquePort()
+			if err != nil {
+				return nil, err
 			}
 		}
 	}
+	if partitionable && count > 1 {
+		c.routeMesh, err = newRouteMesh(c.routes)
+		if err != nil {
+			return nil, err
+		}
+	}
 	for i := 0; i < count; i++ {
-		args := []string{"-a", "127.0.0.1", "-p", strconv.Itoa(c.ports[i]), "-n", fmt.Sprintf("wf-process-%d", i), "-js", "-sd", filepath.Join(root, fmt.Sprintf("node-%d", i))}
+		args := []string{"-a", "127.0.0.1", "-p", strconv.Itoa(c.ports[i]), "-m", strconv.Itoa(c.monitors[i]), "-n", fmt.Sprintf("wf-process-%d", i), "-js", "-sd", filepath.Join(root, fmt.Sprintf("node-%d", i))}
 		if count > 1 {
 			peer := 0
 			if i == 0 {
 				peer = 1
 			}
-			args = append(args, "--cluster", fmt.Sprintf("nats://127.0.0.1:%d", c.routes[i]), "--cluster_name", "wf-process", "--routes", fmt.Sprintf("nats://127.0.0.1:%d", c.routes[peer]))
+			peerAddress := fmt.Sprintf("127.0.0.1:%d", c.routes[peer])
+			if c.routeMesh != nil {
+				peerAddress = c.routeMesh.address(peer)
+				args = append(args, "--cluster_advertise", c.routeMesh.address(i))
+			}
+			args = append(args, "--cluster", fmt.Sprintf("nats://127.0.0.1:%d", c.routes[i]), "--cluster_name", "wf-process", "--routes", "nats://"+peerAddress)
 		}
 		logPath := filepath.Join(root, fmt.Sprintf("node-%d.log", i))
 		logFile, openErr := os.Create(logPath)
@@ -163,6 +204,10 @@ func (c *ProcessCluster) ResumeNode(i int) error {
 }
 
 func (c *ProcessCluster) Close() {
+	if c.routeMesh != nil {
+		c.routeMesh.Close()
+		c.routeMesh = nil
+	}
 	for _, client := range c.Clients {
 		client.Close()
 	}
