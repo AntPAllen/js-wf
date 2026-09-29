@@ -40,7 +40,7 @@ type StartTransport struct {
 	runIDs      map[string]runDedupEntry
 	runWindow   int64
 	objects     map[string][]byte
-	journals    map[string]bool
+	journals    map[string]uint64
 	faults      []StartFault
 }
 
@@ -48,7 +48,7 @@ var _ client.StartPort = (*StartTransport)(nil)
 var _ reconcile.StartScanPort = (*StartTransport)(nil)
 
 func NewStartTransport(schedule *Scheduler) *StartTransport {
-	return &StartTransport{schedule: schedule, invocations: map[string]jetstream.RawStreamMsg{}, runIDs: map[string]runDedupEntry{}, runWindow: (2 * time.Minute).Milliseconds(), objects: map[string][]byte{}, journals: map[string]bool{}}
+	return &StartTransport{schedule: schedule, invocations: map[string]jetstream.RawStreamMsg{}, runIDs: map[string]runDedupEntry{}, runWindow: (2 * time.Minute).Milliseconds(), objects: map[string][]byte{}, journals: map[string]uint64{}}
 }
 
 // SetRunDedupWindow configures the virtual WF_RUN duplicate window. Call it
@@ -294,7 +294,7 @@ func (m *StartTransport) JournalExists(ctx context.Context, subject string) (boo
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	exists := m.journals[subject]
+	exists := m.journals[subject] != 0
 	outcome := "not_found"
 	if exists {
 		outcome = "ok"
@@ -314,8 +314,18 @@ func (m *StartTransport) MarkJournal(typ, id string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	subject := identity.JournalSubject(typ, id)
-	m.journals[subject] = true
+	invocation := m.invocations[identity.InvocationSubject(typ, id)]
+	m.journals[subject] = invocation.Sequence
 	m.event(TransportEvent{Operation: "mark_journal", Subject: subject, Outcome: "ok"})
+}
+
+// PurgeJournal models the journal stage of retirement before invocation purge.
+func (m *StartTransport) PurgeJournal(typ, id string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	subject := identity.JournalSubject(typ, id)
+	delete(m.journals, subject)
+	m.event(TransportEvent{Operation: "purge_journal", Subject: subject, Outcome: "ok"})
 }
 
 // PurgeInvocation leaves a sequence hole, as a real stream purge does.

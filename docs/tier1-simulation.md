@@ -493,6 +493,16 @@ three-node contract confirms that provisioned `WF_RUN` uses the two-minute
 window and that a separate short-window stream accepts the same message ID
 again after expiry while deduplicating it inside the window.
 
+`CheckStartWakeupLiveness` independently checks each retained, unstarted
+invocation for a generation-matched `WF_RUN` message. The seeded 20-start
+workload checks the gap before each repair scan and verifies that the scan
+closes it. A skipped-reconciler control leaves a missing run that the checker
+rejects; deleting a repaired run makes it fail again. Journal markers now
+record the invocation sequence. A reused-ID control deliberately leaves the
+old journal after purging its invocation and shows that the checker detects
+the new generation's missing run even when the scanner mistakes the old
+journal for the new one. Purging the old journal lets the scanner repair it.
+
 The signal repair slice runs production `SignalScan.Scan` through a narrow
 port for retained signal and invocation reads, journal reads, and run enqueue.
 Its in-memory transport shares the start model's invocation stream, run

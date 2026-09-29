@@ -112,6 +112,75 @@ func TestMissingRunMessageIDMutationRetainsDuplicate(t *testing.T) {
 	}
 }
 
+func TestSkippedStartReconcilerMutationIsDetected(t *testing.T) {
+	ctx := context.Background()
+	model := NewStartTransport(NewScheduler(102))
+	const typ, id = "test", "missing-start-run"
+	subject := identity.InvocationSubject(typ, id)
+	sequence, err := model.PublishInvocation(ctx, &nats.Msg{Subject: subject, Data: []byte(`null`)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	missing := func() {
+		t.Helper()
+		report, err := CheckStartWakeupLiveness(model)
+		if err == nil || report.Unstarted != 1 || !reflect.DeepEqual(report.Missing, []string{identity.Key(typ, id)}) {
+			t.Fatalf("skipped reconciler escaped liveness check: report=%+v err=%v", report, err)
+		}
+	}
+	missing()
+	scan := reconcile.NewStartScanWithPort(model)
+	if result, err := scan.Scan(ctx, sequence, 1, false); err != nil || result.Reenqueued != 1 {
+		t.Fatalf("repair missing start: result=%+v err=%v", result, err)
+	}
+	if report, err := CheckStartWakeupLiveness(model); err != nil || report.Unstarted != 1 || len(report.Missing) != 0 {
+		t.Fatalf("repaired start liveness: report=%+v err=%v", report, err)
+	}
+	model.mu.Lock()
+	model.runs = nil // Deliberately lose the retained wakeup after repair.
+	model.mu.Unlock()
+	missing()
+	model.MarkJournal(typ, id)
+	if report, err := CheckStartWakeupLiveness(model); err != nil || report.Unstarted != 0 {
+		t.Fatalf("started invocation still needs a run: report=%+v err=%v", report, err)
+	}
+}
+
+func TestStartLivenessFencesReusedIDWithOldJournal(t *testing.T) {
+	ctx := context.Background()
+	model := NewStartTransport(NewScheduler(103))
+	const typ, id = "test", "reused-start"
+	if _, err := client.NewWithStartPort(model).Start(ctx, typ, id, []byte(`1`)); err != nil {
+		t.Fatal(err)
+	}
+	model.MarkJournal(typ, id)
+	model.PurgeInvocation(identity.InvocationSubject(typ, id)) // Mutated order: old journal remains.
+	newSequence, err := model.PublishInvocation(ctx, &nats.Msg{Subject: identity.InvocationSubject(typ, id), Data: []byte(`2`)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	missing := func() {
+		t.Helper()
+		report, err := CheckStartWakeupLiveness(model)
+		if err == nil || report.Unstarted != 1 || !reflect.DeepEqual(report.Missing, []string{identity.Key(typ, id)}) {
+			t.Fatalf("old generation hid missing new run: report=%+v err=%v", report, err)
+		}
+	}
+	missing()
+	scan := reconcile.NewStartScanWithPort(model)
+	if result, err := scan.Scan(ctx, newSequence, 1, false); err != nil || result.Reenqueued != 0 {
+		t.Fatalf("stale journal unexpectedly repaired new start: result=%+v err=%v", result, err)
+	}
+	missing()
+	model.PurgeJournal(typ, id)
+	if result, err := scan.Scan(ctx, newSequence, 1, false); err != nil || result.Reenqueued != 1 {
+		t.Fatalf("repair after old journal purge: result=%+v err=%v", result, err)
+	}
+	if report, err := CheckStartWakeupLiveness(model); err != nil || report.Unstarted != 1 || len(report.Missing) != 0 {
+		t.Fatalf("new generation liveness: report=%+v err=%v", report, err)
+	}
+}
+
 func TestStartRunDedupWindowExpiresInVirtualTime(t *testing.T) {
 	schedule := NewScheduler(19)
 	model := NewStartTransport(schedule)
@@ -277,6 +346,11 @@ func runSeededStartScenario(seed int64, replay *Trace) (trace Trace, runErr erro
 		if got := len(model.Runs()); got != committedRuns {
 			return trace, fmt.Errorf("seed %d case %d retained %d runs, want %d", seed, i, got, committedRuns)
 		}
+		liveness, livenessErr := CheckStartWakeupLiveness(model)
+		missingRun := choice == "lost_inv_ack" || choice == "drop_run"
+		if liveness.Unstarted != 1 || missingRun && (livenessErr == nil || !reflect.DeepEqual(liveness.Missing, []string{identity.Key("test", id)})) || !missingRun && (livenessErr != nil || len(liveness.Missing) != 0) {
+			return trace, fmt.Errorf("seed %d case %d pre-repair liveness: report=%+v err=%v", seed, i, liveness, livenessErr)
+		}
 		retry, retryErr := c.Start(context.Background(), "test", id, input)
 		if !errors.Is(retryErr, client.ErrAlreadyStarted) || retry.InvSeq != handle.InvSeq {
 			return trace, fmt.Errorf("seed %d case %d matching retry: handle=%+v err=%v", seed, i, retry, retryErr)
@@ -292,6 +366,9 @@ func runSeededStartScenario(seed int64, replay *Trace) (trace Trace, runErr erro
 		committedRuns = i + 1
 		if got := len(model.Runs()); got != committedRuns {
 			return trace, fmt.Errorf("seed %d case %d after repair has %d runs, want %d", seed, i, got, committedRuns)
+		}
+		if liveness, err := CheckStartWakeupLiveness(model); err != nil || liveness.Unstarted != 1 || len(liveness.Missing) != 0 {
+			return trace, fmt.Errorf("seed %d case %d repaired liveness: report=%+v err=%v", seed, i, liveness, err)
 		}
 		model.MarkJournal("test", id)
 		result, err = scanner.Scan(context.Background(), handle.InvSeq, 1, false)

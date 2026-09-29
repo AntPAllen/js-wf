@@ -10,9 +10,63 @@ import (
 
 	"js-wf/identity"
 	"js-wf/journal"
+	"js-wf/provision"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
+
+// StartLivenessReport counts retained invocations that have not entered a
+// journal and names those without a generation-matched retained run message.
+type StartLivenessReport struct {
+	Unstarted int
+	Missing   []string
+}
+
+// CheckStartWakeupLiveness checks the start-to-run gap after modeled actors
+// have quiesced. A run for an older generation of a reused ID does not count.
+func CheckStartWakeupLiveness(model *StartTransport) (StartLivenessReport, error) {
+	var report StartLivenessReport
+	if model == nil {
+		return report, fmt.Errorf("nil start liveness model")
+	}
+	model.mu.Lock()
+	defer model.mu.Unlock()
+	invocations := make([]jetstream.RawStreamMsg, 0, len(model.invocations))
+	for _, invocation := range model.invocations {
+		invocations = append(invocations, invocation)
+	}
+	sort.Slice(invocations, func(i, j int) bool { return invocations[i].Sequence < invocations[j].Sequence })
+	for _, invocation := range invocations {
+		parts := strings.Split(invocation.Subject, ".")
+		if len(parts) != 4 || parts[0] != "wf" || parts[1] != "inv" || identity.Validate(parts[2], parts[3]) != nil {
+			return report, fmt.Errorf("invalid retained invocation %q", invocation.Subject)
+		}
+		typ, id := parts[2], parts[3]
+		if model.journals[identity.JournalSubject(typ, id)] == invocation.Sequence {
+			continue
+		}
+		report.Unstarted++
+		key := identity.Key(typ, id)
+		messageID := fmt.Sprintf("start:%s:%d", key, invocation.Sequence)
+		entry, ok := model.runIDs[messageID]
+		retained := false
+		if ok {
+			for _, run := range model.runs {
+				if run.Sequence == entry.sequence && run.Subject == identity.RunSubject(typ, id, provision.Partitions) && string(run.Data) == key {
+					retained = true
+					break
+				}
+			}
+		}
+		if !retained {
+			report.Missing = append(report.Missing, key)
+		}
+	}
+	if len(report.Missing) != 0 {
+		return report, fmt.Errorf("unstarted invocations lack WF_RUN: %v", report.Missing)
+	}
+	return report, nil
+}
 
 // SuspendedLivenessReport names waits that are not yet enabled and enabled
 // waits whose reconciler wakeup is missing. It covers suspended timer, signal,
