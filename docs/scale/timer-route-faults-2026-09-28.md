@@ -132,6 +132,12 @@ latency gate at p99 30.98 seconds. It recorded 22,521 redeliveries and
 open; its sleep distribution differs from the specified 10,000-timer,
 1–60-second proof.
 
+After the terminal-journal audit change, a third full 10,000-timer run passed
+with raw p99 31.23 seconds, post-heal p99 16.90 seconds, post-heal maximum
+19.00 seconds, and zero early or stuck completions. All results and terminal
+journals were audited. This is three full passes of the clarified route gate;
+the separate 1–10-second diagnostic still has the recorded p99 miss.
+
 To reproduce the smaller diagnostic run:
 
 ```sh
