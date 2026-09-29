@@ -70,6 +70,16 @@ at `2m` passed with 956 acknowledged writes, including 455 after the pause.
 This process freeze does not emulate a delayed block device; that fault is
 still open.
 
+`TestFiveContainerPublishRequiresQuorum` disconnects three server route
+interfaces, waits until each has zero established routes, and attempts a
+five-replica stream publish through one of the remaining two nodes. It requires
+that publish to receive no acknowledgment. Reconnecting one node restores a
+three-node majority; another publish must receive an acknowledgment, and the
+stream audit checks the writes acknowledged before and after the cut. A local
+run passed in 99.68 seconds, with acknowledged sequences 1 and 2. The publish
+attempt during quorum loss has an unknown outcome; the test does not assert
+that its payload is absent after healing.
+
 The first clean CI run passed in 124 seconds. After a three-run local repeat
 exposed a Docker `--rm` cleanup race on restart, the fixture began waiting for
 container-name removal. Three corrected local runs passed, followed by a
