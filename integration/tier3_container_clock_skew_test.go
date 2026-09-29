@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"testing"
 	"time"
@@ -116,6 +117,8 @@ func TestFiveContainerServerClockSkewTimer(t *testing.T) {
 			handler := func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
 				var request struct {
 					Signal bool `json:"signal"`
+					Short  bool `json:"short"`
+					N      int  `json:"n"`
 				}
 				if err := json.Unmarshal(input, &request); err != nil {
 					return nil, err
@@ -131,6 +134,13 @@ func TestFiveContainerServerClockSkewTimer(t *testing.T) {
 						}
 					}
 					return json.RawMessage(`16`), nil
+				}
+				if request.Short {
+					value, err := wf.Run(c, "double", request.N, func(context.Context) (int, error) { return request.N * 2, nil })
+					if err != nil {
+						return nil, err
+					}
+					return json.Marshal(value)
 				}
 				if err := wf.Sleep(c, "skewed-server", 3*time.Second); err != nil {
 					return nil, err
@@ -229,6 +239,45 @@ func TestFiveContainerServerClockSkewTimer(t *testing.T) {
 			if !signalLeaderReady {
 				t.Fatalf("WF_SIG did not elect skewed server: info=%+v err=%v", sigInfo, err)
 			}
+			preferLeader := func(name string) jetstream.Stream {
+				stream, err := controlJS.Stream(ctx, name)
+				if err != nil {
+					t.Fatal(err)
+				}
+				info, err := stream.Info(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if info.Cluster == nil || info.Cluster.Leader != skewedLeader {
+					request, _ := json.Marshal(map[string]any{"placement": map[string]string{"preferred": skewedLeader}})
+					attempt, stop := context.WithTimeout(ctx, 5*time.Second)
+					reply, err := controlConn.RequestWithContext(attempt, "$JS.API.STREAM.LEADER.STEPDOWN."+name, request)
+					stop()
+					if err != nil {
+						t.Fatalf("step down %s leader: %v", name, err)
+					}
+					var response struct {
+						Success bool            `json:"success"`
+						Error   json.RawMessage `json:"error"`
+					}
+					if err := json.Unmarshal(reply.Data, &response); err != nil || !response.Success {
+						t.Fatalf("preferred %s skewed leader response=%s err=%v", name, reply.Data, err)
+					}
+				}
+				for until := time.Now().Add(20 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
+					attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+					info, err = stream.Info(attempt)
+					stop()
+					if err == nil && info.Cluster != nil && info.Cluster.Leader == skewedLeader {
+						return stream
+					}
+					time.Sleep(100 * time.Millisecond)
+				}
+				t.Fatalf("%s did not elect skewed server: info=%+v err=%v", name, info, err)
+				return nil
+			}
+			journalStream := preferLeader("WF_JRN")
+			stateStream := preferLeader("KV_WF_STATE")
 			recorder := &history.Recorder{}
 			defer func() {
 				if prefix := os.Getenv("WF_TIER3_SKEW_HISTORY_OUT"); prefix != "" {
@@ -364,11 +413,70 @@ func TestFiveContainerServerClockSkewTimer(t *testing.T) {
 			if result, err := history.CheckResults(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
 				t.Fatalf("server-skew combined result history=%s err=%v", result, err)
 			}
+			const shortCount = 100
+			shortIDs := tier3ClockIDsForPartition(typ, id, "short", shortCount)
+			started := make([]time.Time, shortCount)
+			for i, shortID := range shortIDs {
+				input, _ := json.Marshal(struct {
+					Short bool `json:"short"`
+					N     int  `json:"n"`
+				}{true, i})
+				started[i] = time.Now()
+				if _, err := c.Start(ctx, typ, shortID, input); err != nil {
+					t.Fatalf("server-skew short start %d: %v", i, err)
+				}
+			}
+			latencies := make([]time.Duration, shortCount)
+			for i, shortID := range shortIDs {
+				result, err := c.Await(ctx, typ, shortID)
+				latencies[i] = time.Since(started[i])
+				if err != nil || string(result) != strconv.Itoa(i*2) {
+					t.Fatalf("server-skew short result %d=%s err=%v", i, result, err)
+				}
+				entries, _, err := journal.New(controlJS).Read(ctx, typ, shortID)
+				if err != nil || len(entries) != 4 || entries[0].Kind != journal.Started || entries[1].Kind != journal.StepRequested || entries[2].Kind != journal.StepCompleted || entries[3].Kind != journal.Completed {
+					t.Fatalf("server-skew short journal %d=%+v err=%v", i, entries, err)
+				}
+			}
+			sort.Slice(latencies, func(i, j int) bool { return latencies[i] < latencies[j] })
+			shortP99 := latencies[98]
+			if shortP99 >= 30*time.Second {
+				t.Errorf("server-skew short start-to-result p99=%s, want <30s", shortP99)
+			}
+			readConn, readJS, err := connect(2)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer readConn.Close()
+			crossNode := client.New(readJS)
+			for i, shortID := range shortIDs {
+				result, err := crossNode.Await(ctx, typ, shortID)
+				if err != nil || string(result) != strconv.Itoa(i*2) {
+					t.Fatalf("server-skew cross-node short result %d=%s err=%v", i, result, err)
+				}
+			}
+			for _, item := range []struct {
+				Name   string
+				Stream jetstream.Stream
+			}{{"WF_JRN", journalStream}, {"KV_WF_STATE", stateStream}} {
+				attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+				info, err := item.Stream.Info(attempt)
+				stop()
+				if err != nil || info == nil || info.Cluster == nil || info.Cluster.Leader != skewedLeader {
+					t.Fatalf("%s leader changed during short workload: info=%+v err=%v", item.Name, info, err)
+				}
+			}
+			if result, err := history.CheckStarts(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
+				t.Fatalf("server-skew short start history=%s err=%v", result, err)
+			}
+			if result, err := history.CheckResults(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
+				t.Fatalf("server-skew short result history=%s err=%v", result, err)
+			}
 			report, err := integrity.Check(ctx, controlJS)
-			if err != nil || report.Invocations != 2 || report.Journals != 2 || report.Entries != len(signalRecords)+5 || report.Terminal != 2 {
+			if err != nil || report.Invocations != shortCount+2 || report.Journals != shortCount+2 || report.Entries != len(signalRecords)+5+4*shortCount || report.Terminal != shortCount+2 {
 				t.Fatalf("skewed timer retained audit=%+v err=%v", report, err)
 			}
-			t.Logf("server_skew=%s measured_offset=%s WF_RUN_and_SIG_leader=%s timer_elapsed=%s timer_lateness=%s ordered_signals=%d signal_latency=%s retained=%+v", offset, measuredOffset, skewedLeader, elapsed, lateness, consumed, signalLatency, report)
+			t.Logf("server_skew=%s measured_offset=%s WF_RUN_SIG_JRN_STATE_leader=%s timer_elapsed=%s timer_lateness=%s ordered_signals=%d signal_latency=%s short_count=%d short_p99=%s retained=%+v", offset, measuredOffset, skewedLeader, elapsed, lateness, consumed, signalLatency, shortCount, shortP99, report)
 		})
 	}
 }
