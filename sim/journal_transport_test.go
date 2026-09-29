@@ -420,6 +420,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSnapshotPurgeActors(loaded.Seed, &loaded)
 	case "snapshot_append_purge":
 		replayed, err = runSnapshotAppendPurgeActors(loaded.Seed, &loaded)
+	case "failure_probe":
+		replayed, err = runProbeFailure(&loaded)
 	case "worker_timer_execution":
 		replayed, err = runSeededWorkerTimerExecution(loaded.Seed, &loaded)
 	case "worker_fallback_timer_execution":
@@ -481,6 +483,48 @@ func TestReplayFaultTrace(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(loaded, replayed) {
 		t.Fatalf("FAULT_TRACE=%s FAULT_SEED=%d: %v", path, loaded.Seed, err)
 	}
+}
+
+func minimizeSavedFaultTrace(input, output string, maxRuns int) (int, error) {
+	if input == output {
+		return 0, fmt.Errorf("minimized trace would overwrite original")
+	}
+	loaded, err := LoadTrace(input)
+	if err != nil {
+		return 0, err
+	}
+	replayed, originalErr := replayTrace(loaded)
+	if originalErr == nil || !reflect.DeepEqual(loaded, replayed) {
+		return 0, fmt.Errorf("original failure trace did not replay exactly: %v", originalErr)
+	}
+	minimized, runs, err := MinimizeFailureTrace(loaded, func(guided *Trace) (Trace, error) {
+		return replayTrace(*guided)
+	}, func(candidate error) bool {
+		return candidate != nil && candidate.Error() == originalErr.Error()
+	}, maxRuns)
+	if err != nil {
+		return runs, err
+	}
+	if err := minimized.Save(output); err != nil {
+		return runs, err
+	}
+	return runs, nil
+}
+
+func TestMinimizeFaultTrace(t *testing.T) {
+	input := os.Getenv("FAULT_TRACE")
+	if input == "" {
+		t.Skip("set FAULT_TRACE to a failing saved Tier 1 trace")
+	}
+	output := os.Getenv("FAULT_TRACE_MIN_OUT")
+	if output == "" {
+		output = input + ".minimized.json"
+	}
+	runs, err := minimizeSavedFaultTrace(input, output, 50)
+	if err != nil {
+		t.Fatalf("FAULT_TRACE=%s: %v", input, err)
+	}
+	t.Logf("minimized %s to %s in %d reproductions", input, output, runs)
 }
 
 func TestPinnedRegressionCorpus(t *testing.T) {

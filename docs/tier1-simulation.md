@@ -83,8 +83,11 @@ replayable failure. The minimizer now also tries removing cooperative
 actors discovered in the trace. A minimized trace records disabled actor
 names and replays the same failure and transport transcript from disk; a
 two-actor probe removes its irrelevant actor. Ordinary traces omit the new
-field and keep their existing serialized form. Automatic CI shrinking
-remains.
+field and keep their existing serialized form. On a unit CI failure, a
+bounded follow-up test now loads `sim-failure.json`, requires the same error
+and exact original transcript, then writes `sim-failure-minimized.json`. Both
+files are uploaded; a failed or unreproducible shrink leaves the original
+trace available.
 CI now replays a pinned corpus covering committed and dropped CAS unknowns,
 two-worker dispatch, competing suspended scanners, signal, suspended, and child
 notification liveness, outcome persistence, integrated short-handler execution,
@@ -667,6 +670,7 @@ temporary directory, or to `FAULT_TRACE_OUT` when set. To replay a saved trace:
 
 ```sh
 FAULT_TRACE=/path/to/trace.json go test ./sim -run '^TestReplayFaultTrace$' -count=1
+FAULT_TRACE=/path/to/failing-trace.json FAULT_TRACE_MIN_OUT=/path/to/minimized.json go test ./sim -run '^TestMinimizeFaultTrace$' -count=1
 ```
 
 The default suite runs 1,000 journal scenarios, each with 100 starts and a

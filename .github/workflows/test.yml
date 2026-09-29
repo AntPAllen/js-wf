@@ -13,6 +13,13 @@ jobs:
           # Go runs sim tests from sim/, matching the artifact glob below.
           FAULT_TRACE_OUT: sim-failure.json
       - if: failure()
+        timeout-minutes: 4
+        run: |
+          if test -f sim/sim-failure.json; then
+            cd sim
+            FAULT_TRACE=sim-failure.json FAULT_TRACE_MIN_OUT=sim-failure-minimized.json go test -run '^TestMinimizeFaultTrace$' -count=1 -timeout=3m
+          fi
+      - if: failure()
         uses: actions/upload-artifact@v7
         with:
           name: tier1-failure-trace

@@ -169,3 +169,49 @@ func TestMinimizerRejectsDifferentFailureAndBudget(t *testing.T) {
 		t.Fatal("invalid minimization budget accepted")
 	}
 }
+
+func TestMinimizeSavedFaultTrace(t *testing.T) {
+	seed := int64(0)
+	for candidate := int64(1); candidate < 1000; candidate++ {
+		choice, err := NewScheduler(candidate).Choose([]string{"safe", "unsafe"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if choice == "unsafe" {
+			seed = candidate
+			break
+		}
+	}
+	if seed == 0 {
+		t.Fatal("no seed chose unsafe first")
+	}
+	original := Trace{Version: TraceVersion, Seed: seed, Workload: "failure_probe", StepLimit: DefaultMaxSteps, Decisions: make([]Decision, 10), Transport: make([]TransportEvent, 10)}
+	for i := range original.Decisions {
+		choice := "safe"
+		if i == 9 {
+			choice = "unsafe"
+		}
+		original.Decisions[i] = Decision{Enabled: []string{"safe", "unsafe"}, Chosen: choice}
+		original.Transport[i] = TransportEvent{Operation: "probe", Outcome: choice}
+	}
+	input := filepath.Join(t.TempDir(), "failure.json")
+	output := filepath.Join(t.TempDir(), "failure-minimized.json")
+	if err := original.Save(input); err != nil {
+		t.Fatal(err)
+	}
+	runs, err := minimizeSavedFaultTrace(input, output, 50)
+	if err != nil || runs < 3 {
+		t.Fatalf("saved failure minimization: runs=%d err=%v", runs, err)
+	}
+	minimized, err := LoadTrace(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	replayed, replayErr := replayTrace(minimized)
+	if !errors.Is(replayErr, errProbeInvariant) || !reflect.DeepEqual(minimized, replayed) || len(minimized.Decisions) >= len(original.Decisions) {
+		t.Fatalf("saved minimized failure: decisions=%d replay=%v equal=%v", len(minimized.Decisions), replayErr, reflect.DeepEqual(minimized, replayed))
+	}
+	if _, err := minimizeSavedFaultTrace(input, input, 50); err == nil {
+		t.Fatal("minimizer overwrote the original trace")
+	}
+}
