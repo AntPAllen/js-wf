@@ -443,28 +443,29 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 }
 
 // readLiveBatch avoids one API round trip per entry for long real journals.
-// The filtered ordered consumer preserves stream order; verifyNext still
-// checks logical indices and epochs across the serial/batch boundary.
+// One filtered pull consumer preserves stream order across Fetch batches;
+// verifyNext still checks logical indices and epochs across the boundary.
 func readLiveBatch(ctx context.Context, stream jetstream.Stream, subject string, seq uint64, out []Record, tail uint64) ([]Record, uint64, bool, error) {
-	consumer, err := stream.OrderedConsumer(ctx, jetstream.OrderedConsumerConfig{
-		FilterSubjects: []string{subject}, DeliverPolicy: jetstream.DeliverByStartSequencePolicy,
-		OptStartSeq: seq, InactiveThreshold: time.Minute,
+	consumer, err := stream.CreateConsumer(ctx, jetstream.ConsumerConfig{
+		FilterSubject: subject, DeliverPolicy: jetstream.DeliverByStartSequencePolicy,
+		OptStartSeq: seq, AckPolicy: jetstream.AckNonePolicy,
+		Replicas: 1, InactiveThreshold: time.Minute,
 	})
 	if err != nil {
-		return nil, 0, false, err
+		return nil, 0, false, fmt.Errorf("filtered journal consumer: %w", err)
 	}
 	readLive := false
 	for ctx.Err() == nil {
 		batch, fetchErr := consumer.Fetch(256, jetstream.FetchMaxWait(250*time.Millisecond))
 		if fetchErr != nil && !errors.Is(fetchErr, nats.ErrTimeout) && !errors.Is(fetchErr, jetstream.ErrNoMessages) {
-			return nil, 0, false, fetchErr
+			return nil, 0, false, fmt.Errorf("filtered journal fetch after %d entries: %w", len(out), fetchErr)
 		}
 		var received int
 		if batch != nil {
 			for msg := range batch.Messages() {
 				metadata, err := msg.Metadata()
 				if err != nil {
-					return nil, 0, false, err
+					return nil, 0, false, fmt.Errorf("filtered journal metadata after %d entries: %w", len(out), err)
 				}
 				var entry Entry
 				if err := json.Unmarshal(msg.Data(), &entry); err != nil {
@@ -483,7 +484,7 @@ func readLiveBatch(ctx context.Context, stream jetstream.Stream, subject string,
 				}
 			}
 			if err := batch.Error(); err != nil && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
-				return nil, 0, false, err
+				return nil, 0, false, fmt.Errorf("filtered journal batch after %d entries: %w", len(out), err)
 			}
 		}
 		if received == 256 {
@@ -496,7 +497,7 @@ func readLiveBatch(ctx context.Context, stream jetstream.Stream, subject string,
 			return out, tail, readLive, nil
 		}
 		if err != nil {
-			return nil, 0, false, err
+			return nil, 0, false, fmt.Errorf("filtered journal tail probe after %d entries: %w", len(out), err)
 		}
 	}
 	return nil, 0, false, ctx.Err()
