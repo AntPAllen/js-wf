@@ -1,0 +1,16 @@
+name: journal-snapshot-5000
+on:
+  workflow_dispatch:
+jobs:
+  snapshot-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WF_LONG_TEST: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Compare repeated snapshots with 5,000-entry control
+        run: go test ./integration -run '^TestFiveThousandEntriesWithRepeatedSnapshots$' -count=3 -timeout=12m -v
