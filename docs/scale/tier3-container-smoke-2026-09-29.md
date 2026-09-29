@@ -86,12 +86,17 @@ Porcupine accepted the two-operation write-once history, and `WF_INV` retained
 exactly one matching invocation. Set `WF_TIER3_QUORUM_HISTORY_OUT` to save this
 history locally; the manual CI workflow uploads it beside the workflow client
 history.
+
 The [clean `always` run](https://github.com/AntPAllen/js-wf/actions/runs/36612428951)
 passed the extended suite. The [first `2m` run](https://github.com/AntPAllen/js-wf/actions/runs/36612424503)
 failed at a transient 503 on the final `WF_INV` read after the stream had
 reported one retained message. The read now retries for up to 30 seconds;
-the full local test passed again in 107.50 seconds. A clean `2m` run of this
-change remains pending.
+the full local test passed again in 107.50 seconds. The
+[clean `2m` rerun](https://github.com/AntPAllen/js-wf/actions/runs/36613756190)
+passed all four tests and uploaded the two-call `unknown` then `started`
+history. The kill audit acknowledged 960 writes, 494 after the fault; the
+pause audit acknowledged 960, 495 after the fault.
+
 The [clean `2m` CI run](https://github.com/AntPAllen/js-wf/actions/runs/36611043100)
 passed all four container tests: the leader kill acknowledged 964 writes, 489
 after the fault; the leader pause acknowledged 956, 488 after the fault; the
