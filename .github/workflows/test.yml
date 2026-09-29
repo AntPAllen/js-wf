@@ -47,10 +47,13 @@ jobs:
             sudo apt-get update -qq
             sudo apt-get install -y strace
           fi
+          if test -f /proc/sys/kernel/yama/ptrace_scope; then
+            sudo sysctl -w kernel.yama.ptrace_scope=0
+          fi
       - name: Replay 20 recorded four-fault seeds
         run: |
           for seed in $(seq 1 20); do
-            FAULT_SEED="$seed" FAULT_SCHEDULE_OUT="fault-schedule-${seed}.json" go test ./testcluster -run '^TestProcessClusterCombinedFourFaultsRecover$' -count=1 -timeout=90s -v
+            WF_DISK_FAULT=1 FAULT_SEED="$seed" FAULT_SCHEDULE_OUT="fault-schedule-${seed}.json" go test ./testcluster -run '^TestProcessClusterCombinedFourFaultsRecover$' -count=1 -timeout=90s -v
           done
       - if: failure()
         uses: actions/upload-artifact@v7

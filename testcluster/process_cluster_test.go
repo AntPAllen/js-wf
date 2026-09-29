@@ -262,6 +262,9 @@ func TestProcessClusterCombinedRecordedFaultsRecover(t *testing.T) {
 }
 
 func TestProcessClusterCombinedFourFaultsRecover(t *testing.T) {
+	if os.Getenv("WF_DISK_FAULT") != "1" {
+		t.Skip("set WF_DISK_FAULT=1 to run the Linux disk-delay fixture")
+	}
 	if _, err := exec.LookPath("strace"); err != nil {
 		t.Skip("strace is required for the Linux disk-delay fixture")
 	}
@@ -398,6 +401,9 @@ func runProcessClusterCombinedFaultsRecover(t *testing.T, withDiskDelay bool) {
 }
 
 func TestProcessClusterSlowDiskDelaysStoreWrites(t *testing.T) {
+	if os.Getenv("WF_DISK_FAULT") != "1" {
+		t.Skip("set WF_DISK_FAULT=1 to run the Linux disk-delay fixture")
+	}
 	if _, err := exec.LookPath("strace"); err != nil {
 		t.Skip("strace is required for the Linux disk-delay fixture")
 	}
