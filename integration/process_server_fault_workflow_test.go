@@ -27,14 +27,18 @@ import (
 )
 
 func TestWorkflowRecoversFromFourServerFaults(t *testing.T) {
-	runWorkflowWithFourServerFaults(t, false)
+	runWorkflowWithFourServerFaults(t, false, false)
 }
 
 func TestTimerWorkflowRecoversFromFourServerFaults(t *testing.T) {
-	runWorkflowWithFourServerFaults(t, true)
+	runWorkflowWithFourServerFaults(t, true, false)
 }
 
-func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow bool) {
+func TestSignalWorkflowRecoversFromFourServerFaults(t *testing.T) {
+	runWorkflowWithFourServerFaults(t, false, true)
+}
+
+func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow bool) {
 	t.Helper()
 	if os.Getenv("WF_PROCESS_WORKFLOW") != "1" {
 		t.Skip("set WF_PROCESS_WORKFLOW=1 for the four-fault workflow proof")
@@ -49,7 +53,8 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow bool) {
 		t.Fatal(err)
 	}
 	defer cluster.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	startedAt := time.Now()
+	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
 	defer cancel()
 	js := make([]jetstream.JetStream, 3)
 	for i, conn := range cluster.Clients {
@@ -89,6 +94,14 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow bool) {
 	release := make(chan struct{})
 	var once sync.Once
 	handler := func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		if signalWorkflow {
+			once.Do(func() { close(entered) })
+			value, err := wf.AwaitSignal(c, "go")
+			if err != nil {
+				return nil, err
+			}
+			return json.RawMessage(value), nil
+		}
 		if timerWorkflow {
 			once.Do(func() { close(entered) })
 			if err := wf.Sleep(c, "during-quorum-loss", 3*time.Second); err != nil {
@@ -129,7 +142,7 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow bool) {
 	case <-time.After(15 * time.Second):
 		t.Fatal("handler effect did not start")
 	}
-	if timerWorkflow {
+	if timerWorkflow || signalWorkflow {
 		deadline := time.Now().Add(15 * time.Second)
 		for time.Now().Before(deadline) {
 			records, _, readErr := journal.New(js[other]).Read(ctx, typ, id)
@@ -193,7 +206,24 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow bool) {
 		successorDone <- successor.RunPartition(successorCtx, identity.Partition(typ, id, provision.Partitions))
 	}()
 	close(release)
+	if signalWorkflow {
+		signalDeadline := time.Now().Add(20 * time.Second)
+		var signalErr error
+		for time.Now().Before(signalDeadline) {
+			attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+			_, signalErr = c.Signal(attempt, typ, id, "go", []byte(`42`), "four-fault-signal")
+			stop()
+			if signalErr == nil {
+				break
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+		if signalErr != nil {
+			t.Fatalf("signal after route heal: %v", signalErr)
+		}
+	}
 	result, err := c.Await(ctx, typ, id)
+	t.Logf("four-fault workflow result after %s: result=%s err=%v", time.Since(startedAt), result, err)
 	if err != nil || string(result) != "42" {
 		t.Fatalf("workflow result=%s err=%v, first-worker=%+v successor=%+v", result, err, w.Metrics(), successor.Metrics())
 	}
@@ -205,15 +235,37 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow bool) {
 		t.Fatalf("disk trace did not record a delayed store syscall: %v: %s", err, trace)
 	}
 	var report integrity.Report
-	for ctx.Err() == nil {
-		report, err = integrity.Check(ctx, js[other])
+	auditDeadline := time.Now().Add(15 * time.Second)
+	var firstAuditErr error
+	for time.Now().Before(auditDeadline) && ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		report, err = integrity.Check(attempt, js[other])
+		stop()
 		if err == nil && report.Invocations == 1 && report.Journals == 1 && report.Terminal == 1 {
 			break
+		}
+		if firstAuditErr == nil && err != nil {
+			firstAuditErr = err
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
 	if err != nil || report.Invocations != 1 || report.Journals != 1 || report.Terminal != 1 {
-		t.Fatalf("retained integrity after four faults: report=%+v err=%v", report, err)
+		t.Fatalf("retained integrity after four faults: report=%+v first_err=%v last_err=%v elapsed=%s", report, firstAuditErr, err, time.Since(startedAt))
+	}
+	if signalWorkflow {
+		records, _, err := journal.New(js[other]).Read(ctx, typ, id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var consumed int
+		for _, entry := range records {
+			if entry.Kind == journal.SignalConsumed {
+				consumed++
+			}
+		}
+		if consumed != 1 {
+			t.Fatalf("signal consumption entries=%d want=1", consumed)
+		}
 	}
 	if err := cluster.RestartNode(killed); err != nil {
 		t.Fatal(err)
