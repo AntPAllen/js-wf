@@ -27,12 +27,31 @@ jobs:
           if-no-files-found: ignore
   cluster:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go test ./integration -count=1 -timeout=20m
+      - run: go test ./integration -count=1 -timeout=20m -skip '^(TestFiveHundredChildFanout|TestJournalCASTenThousandRacesWithLeaderRestarts)'
+  cluster-scale-fanout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./integration -run '^TestFiveHundredChildFanout($|AcrossJournalLeaderRestart$|AfterParentSIGKILL$)' -count=1 -timeout=20m -v
+  cluster-scale-cas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./integration -run '^TestJournalCASTenThousandRacesWithLeaderRestarts$' -count=1 -timeout=12m -v
   chaos-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 10
