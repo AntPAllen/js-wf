@@ -219,8 +219,16 @@ func TestFiveContainerWorkerSIGKILLRecovers(t *testing.T) {
 	if err != nil || string(value) != `"done"` {
 		t.Fatalf("result after worker kill=%s err=%v", value, err)
 	}
-	killToTerminal := time.Since(killedAt)
-	t.Logf("start-to-terminal=%s kill-to-terminal=%s 30s-target-met=%t", time.Since(startedAt), killToTerminal, killToTerminal < 30*time.Second)
+	completedAt := time.Now()
+	peerClient := client.NewObserved(peerJS, recorder)
+	if _, err := peerClient.Start(ctx, tier3WorkerKillType, tier3WorkerKillID, []byte(`null`)); !errors.Is(err, client.ErrAlreadyStarted) {
+		t.Fatalf("start retry after worker kill: %v", err)
+	}
+	if peerValue, err := peerClient.Await(ctx, tier3WorkerKillType, tier3WorkerKillID); err != nil || string(peerValue) != `"done"` {
+		t.Fatalf("peer result after worker kill=%s err=%v", peerValue, err)
+	}
+	killToTerminal := completedAt.Sub(killedAt)
+	t.Logf("start-to-terminal=%s kill-to-terminal=%s 30s-target-met=%t", completedAt.Sub(startedAt), killToTerminal, killToTerminal < 30*time.Second)
 	if result, err := history.CheckStarts(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
 		t.Fatalf("worker kill start history=%s: %v", result, err)
 	}
