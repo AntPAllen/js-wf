@@ -17,11 +17,24 @@ import (
 	"js-wf/testcluster"
 	"js-wf/wf"
 	"js-wf/worker"
+
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 // TestFiveHundredChildFanout interrupts the parent during child creation,
 // then collects all child results after a restart.
 func TestFiveHundredChildFanout(t *testing.T) {
+	runFiveHundredChildFanout(t, false)
+}
+
+// The second fan-out run moves the journal leader after the parent has
+// committed a seeded prefix of child requests.
+func TestFiveHundredChildFanoutAcrossJournalLeaderRestart(t *testing.T) {
+	runFiveHundredChildFanout(t, true)
+}
+
+func runFiveHundredChildFanout(t *testing.T, restartLeader bool) {
+	t.Helper()
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -29,7 +42,7 @@ func TestFiveHundredChildFanout(t *testing.T) {
 	const childCount = 500
 	cut := 100 + rand.New(rand.NewSource(seed)).Intn(300)
 	t.Logf("FAULT_SEED=%d parent_cut_after_child=%d", seed, cut)
-	all, _ := setup(t)
+	all, cluster := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 	reached := make(chan struct{})
@@ -98,6 +111,22 @@ func TestFiveHundredChildFanout(t *testing.T) {
 	close(release)
 	if err := <-firstDone; err != nil && !errors.Is(err, context.Canceled) {
 		t.Fatalf("first parent worker: %v", err)
+	}
+	if restartLeader {
+		stream, err := all[0].Stream(ctx, "WF_JRN")
+		if err != nil {
+			t.Fatal(err)
+		}
+		before, err := stream.Info(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		nodes := [3]jetstream.JetStream{all[0], all[1], all[2]}
+		if err := restartJournalLeader(ctx, &nodes, cluster, before.State.Msgs); err != nil {
+			t.Fatal(err)
+		}
+		copy(all, nodes[:])
+		t.Logf("restarted WF_JRN leader after %d child requests; retained journal messages=%d", cut+1, before.State.Msgs)
 	}
 	second, err := worker.New(ctx, all[1], "parent-after-cut", handlers)
 	if err != nil {
