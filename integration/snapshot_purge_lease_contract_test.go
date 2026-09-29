@@ -129,6 +129,12 @@ func TestSnapshotPurgeLeaseBoundaryAgainstRealCluster(t *testing.T) {
 }
 
 func TestSnapshotKeepsConcurrentAppendBeforePurgeAgainstRealCluster(t *testing.T) {
+	for _, mode := range []string{"clean", "append_drop", "append_ack_lost"} {
+		t.Run(mode, func(t *testing.T) { testSnapshotAppendBeforePurge(t, mode) })
+	}
+}
+
+func testSnapshotAppendBeforePurge(t *testing.T, mode string) {
 	all, _ := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -189,9 +195,40 @@ func TestSnapshotKeepsConcurrentAppendBeforePurgeAgainstRealCluster(t *testing.T
 	case <-ctx.Done():
 		t.Fatalf("waiting for snapshot object upload: %v", ctx.Err())
 	}
-	finalSeq, err := store.Append(ctx, typ, id, journal.Entry{Index: 3, Epoch: 1, Kind: journal.Completed, Payload: terminal}, tail)
-	if err != nil {
-		t.Fatalf("terminal append during snapshot upload: %v", err)
+	writer := store
+	var lost *ackLossJS
+	if mode != "clean" {
+		lost = &ackLossJS{JetStream: all[0], subject: identity.JournalSubject(typ, id), dropBeforePublish: mode == "append_drop"}
+		writer = journal.New(lost)
+	}
+	terminalEntry := journal.Entry{Index: 3, Epoch: 1, Kind: journal.Completed, Payload: terminal}
+	finalSeq, err := writer.Append(ctx, typ, id, terminalEntry, tail)
+	if mode == "clean" {
+		if err != nil {
+			t.Fatalf("terminal append during snapshot upload: %v", err)
+		}
+	} else {
+		if !errors.Is(err, journal.ErrUnknown) || !lost.fired.Load() {
+			t.Fatalf("%s terminal append: fired=%v err=%v", mode, lost.fired.Load(), err)
+		}
+		records, _, readErr := journal.New(all[0]).Read(ctx, typ, id)
+		if readErr != nil {
+			t.Fatalf("%s resolve unknown append: %v", mode, readErr)
+		}
+		if mode == "append_drop" {
+			if len(records) != 3 {
+				t.Fatalf("dropped append retained %d entries", len(records))
+			}
+			finalSeq, err = store.Append(ctx, typ, id, terminalEntry, tail)
+			if err != nil {
+				t.Fatalf("retry dropped append: %v", err)
+			}
+		} else {
+			if len(records) != 4 || records[3].Kind != journal.Completed || string(records[3].Payload) != string(terminal) {
+				t.Fatalf("hidden committed append read: %v", records)
+			}
+			finalSeq = records[3].Sequence
+		}
 	}
 	state, err := all[0].KeyValue(ctx, "WF_STATE")
 	if err != nil {

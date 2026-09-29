@@ -45,7 +45,7 @@ func (m *PurgeTransport) EnableFallbackTimers() { m.fallbackTimers = true }
 
 func (m *PurgeTransport) QueueFault(fault PurgeFault) error {
 	switch fault.Operation {
-	case "purge_WF_INV", "purge_WF_SIG", "purge_WF_JRN", "purge_WF_TIMER", "publish_purge":
+	case "append_WF_JRN", "purge_WF_INV", "purge_WF_SIG", "purge_WF_JRN", "purge_WF_TIMER", "publish_purge":
 	default:
 		return fmt.Errorf("invalid purge fault operation %q", fault.Operation)
 	}
@@ -155,6 +155,12 @@ func (m *PurgeTransport) Publish(ctx context.Context, subject string, data []byt
 		}
 	}
 	event := TransportEvent{Operation: "purge_journal_publish", Subject: subject, Expected: expected, DataSHA256: digest(data)}
+	fault := m.takeFault("append_WF_JRN")
+	if fault == DropBeforeCommit {
+		event.Outcome = string(fault)
+		m.Blobs.event(event)
+		return 0, ErrTransportLost
+	}
 	if current != expected {
 		event.Outcome = "wrong_last_sequence"
 		m.Blobs.event(event)
@@ -162,7 +168,13 @@ func (m *PurgeTransport) Publish(ctx context.Context, subject string, data []byt
 	}
 	stream.last++
 	stream.messages[stream.last] = retention.BlobSweepMessage{Subject: subject, Data: append([]byte(nil), data...)}
-	event.Sequence, event.Outcome = stream.last, "ok"
+	event.Sequence = stream.last
+	if fault == LoseAckAfterCommit {
+		event.Outcome = string(fault)
+		m.Blobs.event(event)
+		return 0, ErrTransportLost
+	}
+	event.Outcome = "ok"
 	m.Blobs.event(event)
 	return stream.last, nil
 }

@@ -256,9 +256,12 @@ production journal `Append` concurrently with production `SnapshotPrefix` on
 the same retained transport, with a purge attempt fenced by the worker lease.
 The snapshot can cover either of two prefixes; its fixed purge bound always
 retains the later terminal append, and production `Read` reconstructs all
-entries before retention purge and quiescent blob sweep. Two traces pin both
-cutoffs. A three-node fixture blocks snapshot upload, appends the terminal
-entry, then checks the live suffix, reconstruction, purge, and reclamation.
+entries before retention purge and quiescent blob sweep. The writer also
+re-reads after a dropped append request or a committed append with a hidden
+acknowledgment, retrying only when the terminal entry is absent. Three traces
+pin both cutoffs and both uncertain-reply branches. A three-node fixture
+blocks snapshot upload, exercises clean, dropped, and hidden-ack terminal
+appends, then checks the live suffix, reconstruction, purge, and reclamation.
 Scheduling the full worker handler against compaction and online blob sweeping
 remain open; blob sweeping requires quiescent writers.
 

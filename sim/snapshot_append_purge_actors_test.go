@@ -38,6 +38,10 @@ func runSnapshotAppendPurgeActors(seed int64, replay *Trace) (trace Trace, runEr
 		return Trace{}, err
 	}
 	defer func() { trace = schedule.Trace() }()
+	mode, err := schedule.Choose([]string{"clean", "append_drop", "append_ack_lost"})
+	if err != nil {
+		return trace, err
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	const typ, id = "test", "snapshot-append-purge"
@@ -75,6 +79,15 @@ func runSnapshotAppendPurgeActors(seed int64, replay *Trace) (trace Trace, runEr
 	if err != nil {
 		return trace, err
 	}
+	if mode != "clean" {
+		fault := DropBeforeCommit
+		if mode == "append_ack_lost" {
+			fault = LoseAckAfterCommit
+		}
+		if err := port.QueueFault(PurgeFault{Operation: "append_WF_JRN", Kind: fault}); err != nil {
+			return trace, err
+		}
+	}
 	var snap journal.Snapshot
 	actors := []CooperativeActor{
 		{Name: "snapshot", Run: func(ctx context.Context, yield YieldFunc) error {
@@ -88,8 +101,30 @@ func runSnapshotAppendPurgeActors(seed int64, replay *Trace) (trace Trace, runEr
 		}},
 		{Name: "writer", Run: func(ctx context.Context, yield YieldFunc) error {
 			store := journal.NewWithAppendPort(yieldingAppendPort{yield: yield, transport: port})
-			if _, err := store.Append(ctx, typ, id, journal.Entry{Index: 3, Epoch: 1, Kind: journal.Completed, Payload: terminal}, tail); err != nil {
-				return err
+			entry := journal.Entry{Index: 3, Epoch: 1, Kind: journal.Completed, Payload: terminal}
+			if _, err := store.Append(ctx, typ, id, entry, tail); err != nil {
+				if !errors.Is(err, journal.ErrUnknown) || mode == "clean" {
+					return err
+				}
+				reader := journal.NewWithSnapshotReadPort(nil,
+					yieldingSnapshotReadPort{yield: yield, transport: port},
+					yieldingSnapshotPort{yield: yield, transport: port})
+				records, _, readErr := reader.Read(ctx, typ, id)
+				if readErr != nil {
+					return readErr
+				}
+				switch len(records) {
+				case 3:
+					if _, err := store.Append(ctx, typ, id, entry, tail); err != nil {
+						return fmt.Errorf("retry dropped terminal append: %w", err)
+					}
+				case 4:
+					if records[3].Kind != journal.Completed || !bytes.Equal(records[3].Payload, terminal) {
+						return fmt.Errorf("unknown append resolved to foreign terminal entry")
+					}
+				default:
+					return fmt.Errorf("unknown append read %d entries", len(records))
+				}
 			}
 			var stateErr error
 			if err := yield(ctx, "write_terminal_state", func() {
@@ -115,6 +150,25 @@ func runSnapshotAppendPurgeActors(seed int64, replay *Trace) (trace Trace, runEr
 	}
 	if results["snapshot"] != nil || results["writer"] != nil || !errors.Is(results["purge"], retention.ErrActive) {
 		return trace, fmt.Errorf("seed %d actors=%v", seed, results)
+	}
+	var dropped, lostAck, committed int
+	for _, event := range schedule.Trace().Transport {
+		if event.Operation != "purge_journal_publish" || event.Subject != subject || event.Expected != tail {
+			continue
+		}
+		switch event.Outcome {
+		case string(DropBeforeCommit):
+			dropped++
+		case string(LoseAckAfterCommit):
+			lostAck++
+		case "ok":
+			committed++
+		}
+	}
+	if mode == "clean" && (dropped != 0 || lostAck != 0 || committed != 1) ||
+		mode == "append_drop" && (dropped != 1 || lostAck != 0 || committed != 1) ||
+		mode == "append_ack_lost" && (dropped != 0 || lostAck != 1 || committed != 0) {
+		return trace, fmt.Errorf("seed %d mode %s append outcomes: dropped=%d lost_ack=%d committed=%d", seed, mode, dropped, lostAck, committed)
 	}
 	if snap.LastIndex != 1 && snap.LastIndex != 2 {
 		return trace, fmt.Errorf("seed %d snapshot cutoff index %d", seed, snap.LastIndex)
@@ -158,7 +212,7 @@ func runSnapshotAppendPurgeActors(seed int64, replay *Trace) (trace Trace, runEr
 	if err != nil || after.Referenced != 0 || after.Deleted != 5 || port.PurgeEventCount() != 1 {
 		return trace, fmt.Errorf("seed %d sweep=%+v events=%d err=%v", seed, after, port.PurgeEventCount(), err)
 	}
-	schedule.RecordTransport(TransportEvent{Operation: "check_snapshot_append_purge", Subject: key, Sequence: snap.LastSeq, Outcome: fmt.Sprintf("cut_%d", snap.LastIndex), AtMillis: schedule.NowMillis()})
+	schedule.RecordTransport(TransportEvent{Operation: "check_snapshot_append_purge", Subject: key, Sequence: snap.LastSeq, Outcome: fmt.Sprintf("%s_cut_%d", mode, snap.LastIndex), AtMillis: schedule.NowMillis()})
 	if err := schedule.Finish(); err != nil {
 		return trace, err
 	}
@@ -181,6 +235,7 @@ func TestCooperativeSnapshotAppendPurgeReplay(t *testing.T) {
 		return
 	}
 	seen := map[string]int{}
+	cutoffs := map[string]int{}
 	for seed := int64(1); seed <= 1000; seed++ {
 		generated, err := runSnapshotAppendPurgeActors(seed, nil)
 		if err != nil {
@@ -191,7 +246,8 @@ func TestCooperativeSnapshotAppendPurgeReplay(t *testing.T) {
 			_ = generated.Save(path)
 			t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, err)
 		}
-		seen[generated.Transport[len(generated.Transport)-1].Outcome]++
+		seen[generated.Decisions[0].Chosen]++
+		cutoffs[generated.Transport[len(generated.Transport)-1].Outcome]++
 		if seed <= 10 {
 			replayed, err := runSnapshotAppendPurgeActors(seed, &generated)
 			if err != nil || !reflect.DeepEqual(generated, replayed) {
@@ -199,10 +255,24 @@ func TestCooperativeSnapshotAppendPurgeReplay(t *testing.T) {
 			}
 		}
 	}
-	if seen["cut_1"] == 0 || seen["cut_2"] == 0 {
-		t.Fatalf("missing append/snapshot ordering: %v", seen)
+	for _, mode := range []string{"clean", "append_drop", "append_ack_lost"} {
+		if seen[mode] == 0 {
+			t.Fatalf("missing append fault mode %s: %v", mode, seen)
+		}
 	}
-	for _, seed := range []int{1, 2} {
+	var cutOne, cutTwo int
+	for outcome, count := range cutoffs {
+		if len(outcome) >= 5 && outcome[len(outcome)-5:] == "cut_1" {
+			cutOne += count
+		}
+		if len(outcome) >= 5 && outcome[len(outcome)-5:] == "cut_2" {
+			cutTwo += count
+		}
+	}
+	if cutOne == 0 || cutTwo == 0 {
+		t.Fatalf("missing append/snapshot ordering: %v", cutoffs)
+	}
+	for _, seed := range []int{1, 2, 5} {
 		var files [2]string
 		for i := range files {
 			files[i] = filepath.Join(t.TempDir(), fmt.Sprintf("snapshot-append-purge-%d-%d.json", seed, i))

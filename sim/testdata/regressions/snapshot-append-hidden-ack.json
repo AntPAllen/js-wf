@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "seed": 2,
+  "seed": 5,
   "workload": "snapshot_append_purge",
   "step_limit": 100000,
   "decisions": [
@@ -11,7 +11,7 @@
         "append_drop",
         "clean"
       ],
-      "chosen": "append_drop"
+      "chosen": "append_ack_lost"
     },
     {
       "at_ms": 0,
@@ -20,19 +20,12 @@
         "snapshot:get_manifest",
         "writer:last"
       ],
-      "chosen": "purge:attempt_purge"
-    },
-    {
-      "at_ms": 0,
-      "enabled": [
-        "snapshot:get_manifest",
-        "writer:last"
-      ],
       "chosen": "snapshot:get_manifest"
     },
     {
       "at_ms": 0,
       "enabled": [
+        "purge:attempt_purge",
         "snapshot:next_journal",
         "writer:last"
       ],
@@ -41,10 +34,20 @@
     {
       "at_ms": 0,
       "enabled": [
+        "purge:attempt_purge",
         "snapshot:next_journal",
         "writer:last"
       ],
       "chosen": "snapshot:next_journal"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "purge:attempt_purge",
+        "snapshot:next_journal",
+        "writer:last"
+      ],
+      "chosen": "purge:attempt_purge"
     },
     {
       "at_ms": 0,
@@ -68,15 +71,15 @@
         "snapshot:get_manifest_revision",
         "writer:last"
       ],
-      "chosen": "snapshot:get_manifest_revision"
+      "chosen": "writer:last"
     },
     {
       "at_ms": 0,
       "enabled": [
-        "snapshot:put_snapshot_object",
-        "writer:last"
+        "snapshot:get_manifest_revision",
+        "writer:publish"
       ],
-      "chosen": "writer:last"
+      "chosen": "snapshot:get_manifest_revision"
     },
     {
       "at_ms": 0,
@@ -100,29 +103,21 @@
         "snapshot:create_manifest",
         "writer:publish"
       ],
-      "chosen": "writer:publish"
-    },
-    {
-      "at_ms": 0,
-      "enabled": [
-        "snapshot:create_manifest",
-        "writer:get_manifest"
-      ],
-      "chosen": "writer:get_manifest"
-    },
-    {
-      "at_ms": 0,
-      "enabled": [
-        "snapshot:create_manifest",
-        "writer:next_journal"
-      ],
       "chosen": "snapshot:create_manifest"
     },
     {
       "at_ms": 0,
       "enabled": [
         "snapshot:get_manifest",
-        "writer:next_journal"
+        "writer:publish"
+      ],
+      "chosen": "writer:publish"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "snapshot:get_manifest",
+        "writer:get_manifest"
       ],
       "chosen": "snapshot:get_manifest"
     },
@@ -130,23 +125,7 @@
       "at_ms": 0,
       "enabled": [
         "snapshot:get_snapshot_object",
-        "writer:next_journal"
-      ],
-      "chosen": "writer:next_journal"
-    },
-    {
-      "at_ms": 0,
-      "enabled": [
-        "snapshot:get_snapshot_object",
-        "writer:next_journal"
-      ],
-      "chosen": "writer:next_journal"
-    },
-    {
-      "at_ms": 0,
-      "enabled": [
-        "snapshot:get_snapshot_object",
-        "writer:next_journal"
+        "writer:get_manifest"
       ],
       "chosen": "snapshot:get_snapshot_object"
     },
@@ -154,39 +133,44 @@
       "at_ms": 0,
       "enabled": [
         "snapshot:purge_journal",
-        "writer:next_journal"
-      ],
-      "chosen": "writer:next_journal"
-    },
-    {
-      "at_ms": 0,
-      "enabled": [
-        "snapshot:purge_journal",
-        "writer:next_journal"
-      ],
-      "chosen": "writer:next_journal"
-    },
-    {
-      "at_ms": 0,
-      "enabled": [
-        "snapshot:purge_journal",
-        "writer:last"
+        "writer:get_manifest"
       ],
       "chosen": "snapshot:purge_journal"
     },
     {
       "at_ms": 0,
       "enabled": [
-        "writer:last"
+        "writer:get_manifest"
       ],
-      "chosen": "writer:last"
+      "chosen": "writer:get_manifest"
     },
     {
       "at_ms": 0,
       "enabled": [
-        "writer:publish"
+        "writer:get_snapshot_object"
       ],
-      "chosen": "writer:publish"
+      "chosen": "writer:get_snapshot_object"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "writer:next_journal"
+      ],
+      "chosen": "writer:next_journal"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "writer:next_journal"
+      ],
+      "chosen": "writer:next_journal"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "writer:next_journal"
+      ],
+      "chosen": "writer:next_journal"
     },
     {
       "at_ms": 0,
@@ -300,21 +284,6 @@
     },
     {
       "at_ms": 0,
-      "operation": "kv_create",
-      "subject": "test.snapshot-append-purge",
-      "data_sha256": "b8771b6e75094dcc237e637058c93070ca632dc3309a780ada8114f995b95459",
-      "outcome": "key_exists"
-    },
-    {
-      "at_ms": 0,
-      "operation": "kv_get",
-      "subject": "test.snapshot-append-purge",
-      "sequence": 2,
-      "data_sha256": "9f6818e3306e256f2cdbefaecba578e8f12764386e174ad1023bc1ff6a5446b9",
-      "outcome": "ok"
-    },
-    {
-      "at_ms": 0,
       "operation": "kv_get",
       "subject": "snap.test.snapshot-append-purge",
       "outcome": "not_found"
@@ -339,6 +308,21 @@
     },
     {
       "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.snapshot-append-purge",
+      "data_sha256": "b8771b6e75094dcc237e637058c93070ca632dc3309a780ada8114f995b95459",
+      "outcome": "key_exists"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "test.snapshot-append-purge",
+      "sequence": 2,
+      "data_sha256": "9f6818e3306e256f2cdbefaecba578e8f12764386e174ad1023bc1ff6a5446b9",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
       "operation": "purge_journal_next",
       "subject": "wf.jrn.test.snapshot-append-purge",
       "expected": 3,
@@ -355,17 +339,17 @@
     },
     {
       "at_ms": 0,
-      "operation": "kv_get",
-      "subject": "snap.test.snapshot-append-purge",
-      "outcome": "not_found"
-    },
-    {
-      "at_ms": 0,
       "operation": "purge_journal_last",
       "subject": "wf.jrn.test.snapshot-append-purge",
       "sequence": 3,
       "data_sha256": "9a0a651d1f06ebec80258d8dac81379d08706738fb7c0aab7deb556d831484e5",
       "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.test.snapshot-append-purge",
+      "outcome": "not_found"
     },
     {
       "at_ms": 0,
@@ -383,20 +367,6 @@
     },
     {
       "at_ms": 0,
-      "operation": "purge_journal_publish",
-      "subject": "wf.jrn.test.snapshot-append-purge",
-      "expected": 3,
-      "data_sha256": "fe24f39d3c43de2148831f5c1f3cc1cc2b644f7f188b0f86230cd65e28de7f57",
-      "outcome": "drop_before_commit"
-    },
-    {
-      "at_ms": 0,
-      "operation": "kv_get",
-      "subject": "snap.test.snapshot-append-purge",
-      "outcome": "not_found"
-    },
-    {
-      "at_ms": 0,
       "operation": "kv_create",
       "subject": "snap.test.snapshot-append-purge",
       "sequence": 1,
@@ -405,6 +375,15 @@
     },
     {
       "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.test.snapshot-append-purge",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "fe24f39d3c43de2148831f5c1f3cc1cc2b644f7f188b0f86230cd65e28de7f57",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
       "operation": "kv_get",
       "subject": "snap.test.snapshot-append-purge",
       "sequence": 1,
@@ -413,20 +392,25 @@
     },
     {
       "at_ms": 0,
-      "operation": "purge_journal_next",
-      "subject": "wf.jrn.test.snapshot-append-purge",
-      "expected": 1,
-      "sequence": 1,
-      "data_sha256": "2937e099505acab3c03ef302157fc18786d3b830af1995de09b079dfa582150e",
+      "operation": "blob_get",
+      "subject": "snapshot-82caea4b73269f4a-2-2f94f53bac70000d",
+      "data_sha256": "2f94f53bac70000dcae4ea4c9fc76dc73cb247799dff3c7b81f5b5c9fd097b38",
       "outcome": "ok"
     },
     {
       "at_ms": 0,
-      "operation": "purge_journal_next",
-      "subject": "wf.jrn.test.snapshot-append-purge",
-      "expected": 2,
+      "operation": "purge_subject",
+      "subject": "WF_JRN:wf.jrn.test.snapshot-append-purge",
+      "expected": 3,
       "sequence": 2,
-      "data_sha256": "c494669710a3a9cc1f6a78c3b0e28ef817fb2fb837710326cce7bc32d17e03e1",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.test.snapshot-append-purge",
+      "sequence": 1,
+      "data_sha256": "b485ce8ab3c99d45a5d35dcfe7c55c3f7635471ac85609a4153d95767f1dc3e7",
       "outcome": "ok"
     },
     {
@@ -450,32 +434,16 @@
       "operation": "purge_journal_next",
       "subject": "wf.jrn.test.snapshot-append-purge",
       "expected": 4,
-      "outcome": "not_found"
-    },
-    {
-      "at_ms": 0,
-      "operation": "purge_subject",
-      "subject": "WF_JRN:wf.jrn.test.snapshot-append-purge",
-      "expected": 3,
-      "sequence": 2,
-      "outcome": "ok"
-    },
-    {
-      "at_ms": 0,
-      "operation": "purge_journal_last",
-      "subject": "wf.jrn.test.snapshot-append-purge",
-      "sequence": 3,
-      "data_sha256": "9a0a651d1f06ebec80258d8dac81379d08706738fb7c0aab7deb556d831484e5",
-      "outcome": "ok"
-    },
-    {
-      "at_ms": 0,
-      "operation": "purge_journal_publish",
-      "subject": "wf.jrn.test.snapshot-append-purge",
-      "expected": 3,
       "sequence": 4,
       "data_sha256": "fe24f39d3c43de2148831f5c1f3cc1cc2b644f7f188b0f86230cd65e28de7f57",
       "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.test.snapshot-append-purge",
+      "expected": 5,
+      "outcome": "not_found"
     },
     {
       "at_ms": 0,
@@ -846,7 +814,7 @@
       "operation": "check_snapshot_append_purge",
       "subject": "test.snapshot-append-purge",
       "sequence": 2,
-      "outcome": "append_drop_cut_1"
+      "outcome": "append_ack_lost_cut_1"
     }
   ]
 }

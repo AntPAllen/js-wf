@@ -7,20 +7,28 @@
     {
       "at_ms": 0,
       "enabled": [
-        "purge:attempt_purge",
-        "snapshot:get_manifest",
-        "writer:last"
+        "append_ack_lost",
+        "append_drop",
+        "clean"
       ],
-      "chosen": "writer:last"
+      "chosen": "clean"
     },
     {
       "at_ms": 0,
       "enabled": [
         "purge:attempt_purge",
         "snapshot:get_manifest",
-        "writer:publish"
+        "writer:last"
       ],
       "chosen": "purge:attempt_purge"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "snapshot:get_manifest",
+        "writer:last"
+      ],
+      "chosen": "writer:last"
     },
     {
       "at_ms": 0,
@@ -234,14 +242,6 @@
     },
     {
       "at_ms": 0,
-      "operation": "purge_journal_last",
-      "subject": "wf.jrn.test.snapshot-append-purge",
-      "sequence": 3,
-      "data_sha256": "9a0a651d1f06ebec80258d8dac81379d08706738fb7c0aab7deb556d831484e5",
-      "outcome": "ok"
-    },
-    {
-      "at_ms": 0,
       "operation": "kv_create",
       "subject": "test.snapshot-append-purge",
       "data_sha256": "b8771b6e75094dcc237e637058c93070ca632dc3309a780ada8114f995b95459",
@@ -253,6 +253,14 @@
       "subject": "test.snapshot-append-purge",
       "sequence": 2,
       "data_sha256": "9f6818e3306e256f2cdbefaecba578e8f12764386e174ad1023bc1ff6a5446b9",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.test.snapshot-append-purge",
+      "sequence": 3,
+      "data_sha256": "9a0a651d1f06ebec80258d8dac81379d08706738fb7c0aab7deb556d831484e5",
       "outcome": "ok"
     },
     {
@@ -707,7 +715,7 @@
       "operation": "check_snapshot_append_purge",
       "subject": "test.snapshot-append-purge",
       "sequence": 3,
-      "outcome": "cut_2"
+      "outcome": "clean_cut_2"
     }
   ]
 }
