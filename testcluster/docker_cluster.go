@@ -193,8 +193,22 @@ func (c *DockerCluster) KillNode(i int) error {
 	}
 	ctx, stop := context.WithTimeout(context.Background(), 15*time.Second)
 	defer stop()
-	_, err := dockerCommand(ctx, "kill", c.names[i])
-	return err
+	if _, err := dockerCommand(ctx, "kill", c.names[i]); err != nil {
+		return err
+	}
+	// docker kill can return before --rm finishes releasing the container name.
+	// Wait for that cleanup before RestartNode reuses the same name and store.
+	for ctx.Err() == nil {
+		remaining, err := dockerCommand(ctx, "ps", "-a", "--filter", "name=^/"+c.names[i]+"$", "--format", "{{.Names}}")
+		if err != nil {
+			return err
+		}
+		if remaining == "" {
+			return nil
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	return fmt.Errorf("Docker node %d was not removed after kill: %w", i, ctx.Err())
 }
 
 func (c *DockerCluster) Logs(i int) (string, error) {

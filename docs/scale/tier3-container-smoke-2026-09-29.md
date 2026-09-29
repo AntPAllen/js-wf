@@ -14,8 +14,9 @@ The test provisions the workflow stores at five replicas, starts a worker,
 isolates node four, and completes a workflow on the four-node majority. It
 checks for two seconds that the isolated node cannot observe the new result.
 After route healing it reads the immutable result through that node, kills
-its container, restarts it on the same file store, reads the result again,
-and checks the retained invocation, journal, and terminal outcome.
+its container, waits for Docker to release that container name, restarts it
+on the same file store, reads the result again, and checks the retained
+invocation, journal, and terminal outcome.
 
 Run locally with Docker available:
 
