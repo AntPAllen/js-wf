@@ -44,5 +44,8 @@ container-name removal. Three corrected local runs passed, followed by a
 [clean CI pass](https://github.com/AntPAllen/js-wf/actions/runs/36601536302)
 in 128 seconds. An [observed-history CI run](https://github.com/AntPAllen/js-wf/actions/runs/36602929845)
 passed in 121 seconds and uploaded 11 operations covering eight starts and
-three result reads. The subsequent signal-wakeup extension passed locally in
-109 seconds with 14 recorded operations; clean CI remains pending.
+three result reads. The subsequent signal-wakeup extension passed locally in 109 seconds, then
+passed three fresh-cluster repeats in 112.68, 111.93, and 111.82 seconds. Its
+[clean CI run](https://github.com/AntPAllen/js-wf/actions/runs/36604281917)
+passed in 125 seconds and uploaded 14 client operations, including the signal
+retry and payload mismatch.
