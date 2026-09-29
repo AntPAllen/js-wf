@@ -253,3 +253,105 @@ func TestProcessClusterKillLeaderAndRestart(t *testing.T) {
 	}
 	t.Fatalf("restarted node %d did not recover acknowledged publish: %s (log=%s)", leader, fmt.Sprint(err), c.LogPath(leader))
 }
+
+func TestProcessClusterCombinedRecordedFaultsRecover(t *testing.T) {
+	root := t.TempDir()
+	c, err := StartPartitionableProcesses(root, 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+	defer cancel()
+	waitProcessRoutes(t, c, [3]int{8, 8, 8})
+	js := make([]jetstream.JetStream, 3)
+	for i, conn := range c.Clients {
+		js[i], err = jetstream.New(conn)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	var stream jetstream.Stream
+	for ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, time.Second)
+		stream, err = js[0].CreateStream(attempt, jetstream.StreamConfig{Name: "COMBINED_TEST", Subjects: []string{"combined.test"}, Replicas: 3, Storage: jetstream.FileStorage})
+		stop()
+		if err == nil {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if err != nil {
+		t.Fatalf("create three-replica stream: %v", err)
+	}
+	info, err := stream.Info(ctx)
+	if err != nil || info.Cluster == nil {
+		t.Fatalf("stream leader: info=%+v err=%v", info, err)
+	}
+	leader, err := strconv.Atoi(strings.TrimPrefix(info.Cluster.Leader, "wf-process-"))
+	if err != nil || leader < 0 || leader >= 3 {
+		t.Fatalf("invalid stream leader %q: %v", info.Cluster.Leader, err)
+	}
+	first, err := js[leader].Publish(ctx, "combined.test", []byte("before"))
+	if err != nil || first == nil || first.Sequence != 1 {
+		t.Fatalf("first publish=%+v err=%v", first, err)
+	}
+	killed, other := (leader+1)%3, (leader+2)%3
+	path := filepath.Join(root, "combined-faults.json")
+	schedule := FaultSchedule{Seed: 42, Events: []FaultEvent{
+		{AtMillis: 0, Op: PartitionNodes, A: killed, B: other},
+		{AtMillis: 20, Op: PauseNode, A: leader},
+		{AtMillis: 40, Op: KillNode, A: killed},
+	}}
+	if err := schedule.Save(path); err != nil {
+		t.Fatal(err)
+	}
+	replayed, err := LoadFaultSchedule(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := replayed.Run(ctx, c.ApplyFault); err != nil {
+		t.Fatal(err)
+	}
+	c.RouteMesh().Heal()
+	if err := c.ResumeNode(leader); err != nil {
+		t.Fatal(err)
+	}
+	var second *jetstream.PubAck
+	for ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		second, err = js[other].Publish(attempt, "combined.test", []byte("after-heal"))
+		stop()
+		if err == nil {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if err != nil || second == nil || second.Sequence != 2 {
+		t.Fatalf("majority publish after heal: ack=%+v err=%v", second, err)
+	}
+	if err := c.RestartNode(killed); err != nil {
+		t.Fatal(err)
+	}
+	waitProcessRoutes(t, c, [3]int{8, 8, 8})
+	resumed, err := jetstream.New(c.Clients[killed])
+	if err != nil {
+		t.Fatal(err)
+	}
+	for ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, time.Second)
+		recovered, getErr := resumed.Stream(attempt, "COMBINED_TEST")
+		if getErr == nil {
+			var message *jetstream.RawStreamMsg
+			message, getErr = recovered.GetMsg(attempt, 2)
+			if getErr == nil && string(message.Data) == "after-heal" {
+				stop()
+				return
+			}
+		}
+		stop()
+		err = getErr
+		time.Sleep(100 * time.Millisecond)
+	}
+	t.Fatalf("restarted node %d did not recover acknowledged publish: %s (log=%s)", killed, fmt.Sprint(err), c.LogPath(killed))
+}
