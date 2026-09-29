@@ -40,10 +40,30 @@ type routeSession struct {
 	upstream net.Conn
 }
 
-func newRouteMesh(routePorts []int) (*RouteMesh, error) {
+func newRouteMesh(routePorts, reservedPorts []int) (*RouteMesh, error) {
 	m := &RouteMesh{blocked: -1, blockedPair: [2]int{-1, -1}, sessions: make(map[*routeSession]struct{})}
+	reserved := make(map[int]bool, len(reservedPorts))
+	for _, port := range reservedPorts {
+		reserved[port] = true
+	}
 	for i, port := range routePorts {
-		listener, err := net.Listen("tcp", "127.0.0.1:0")
+		var listener net.Listener
+		var err error
+		for attempt := 0; attempt < 100; attempt++ {
+			listener, err = net.Listen("tcp", "127.0.0.1:0")
+			if err != nil {
+				break
+			}
+			proxyPort := listener.Addr().(*net.TCPAddr).Port
+			if !reserved[proxyPort] {
+				break
+			}
+			_ = listener.Close()
+			listener = nil
+		}
+		if err == nil && listener == nil {
+			err = fmt.Errorf("could not allocate route proxy port outside reserved server ports")
+		}
 		if err != nil {
 			for _, opened := range m.proxies {
 				_ = opened.listener.Close()

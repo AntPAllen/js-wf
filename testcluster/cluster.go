@@ -77,7 +77,7 @@ func start(root string, count int, partitionable bool) (*Cluster, error) {
 	}
 	c.ports, c.routes = ports, routes
 	if partitionable && count > 1 {
-		mesh, err := newRouteMesh(routes)
+		mesh, err := newRouteMesh(routes, append(append([]int(nil), ports...), routes...))
 		if err != nil {
 			return nil, err
 		}

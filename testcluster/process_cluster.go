@@ -118,7 +118,8 @@ func startProcesses(root string, count int, partitionable bool) (_ *ProcessClust
 		}
 	}
 	if partitionable && count > 1 {
-		c.routeMesh, err = newRouteMesh(c.routes)
+		reserved := append(append(append([]int(nil), c.ports...), c.monitors...), c.routes...)
+		c.routeMesh, err = newRouteMesh(c.routes, reserved)
 		if err != nil {
 			return nil, err
 		}
