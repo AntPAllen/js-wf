@@ -138,11 +138,20 @@ with raw p99 31.23 seconds, post-heal p99 16.90 seconds, post-heal maximum
 journals were audited. This is three full passes of the clarified route gate;
 the separate 1–10-second diagnostic still has the recorded p99 miss.
 
+A fresh 1,000-timer, 1–10-second diagnostic on 2026-09-29 passed with raw p99
+35.00 seconds, post-heal p99 13.62 seconds, post-heal maximum 14.02 seconds,
+and zero early or stuck completions. All results and terminal journals were
+audited, `WF_RUN` drained, and the route sequence lasted 24.90 seconds.
+Workers recorded 2,483 redeliveries, 1,674 lease contentions, 295 lease
+acquisition failures, and 84 fencing events. The earlier 30.98-second
+post-heal miss with much higher contention remains unexplained; one passing
+rerun does not establish consistency for this synchronized variant.
+
 To reproduce the smaller diagnostic run:
 
 ```sh
-WF_TIMER_SLEEP_CHAOS=1 WF_TIMER_SLEEP_COUNT=100 \
-  WF_TIMER_SLEEP_MAX_SECONDS=10 WF_TIMER_SLEEP_TIMEOUT_SECONDS=140 \
+WF_TIMER_SLEEP_CHAOS=1 WF_TIMER_SLEEP_COUNT=1000 \
+  WF_TIMER_SLEEP_MAX_SECONDS=10 WF_TIMER_SLEEP_TIMEOUT_SECONDS=600 \
   go test ./integration -run '^TestTenThousandRandomSleepsDuringRouteFaults$' \
-  -count=1 -timeout=4m -v
+  -count=1 -timeout=12m -v
 ```
