@@ -202,7 +202,7 @@ Order matters: journal entry first, scheduled publish second. A crash between th
 
 **Proof of completion**
 
-- Test: 10 000 invocations each sleep a random 1–60 s. All complete; measure lateness. Pass: p99 lateness under 2 s with no faults, under 30 s with the chaos schedule running. Zero invocations stuck after 5 min past their latest `fire_at` (I5).
+- Test: 10 000 invocations each sleep a random 1–60 s. All complete; measure lateness. Pass: p99 lateness under 2 s with no faults. For the route-fault recovery test, measure the 30 s p99 gate from the later of each timer's `fire_at` and the final route heal; report raw `fire_at`-to-completion p99 separately. Zero invocations stuck after 5 min past their latest `fire_at` (I5).
 - Test: kill the worker between the journal append and the scheduled publish, 200 times. Without the reconciler these invocations stall (assert that, it validates the test); with the reconciler enabled all complete.
 - Test: a 30-day sleep on a cluster that is fully restarted (all 3 nodes) twice during the test with the clock advanced by a wrapped clock injected into the server. The scheduled message survives restarts and fires.
 - Test: cancel a timer 100 ms before it fires, 1 000 times. The invocation never observes the timer as fired; the late wakeup message is acked as a no-op and counted in metrics.

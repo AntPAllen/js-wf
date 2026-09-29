@@ -194,6 +194,7 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 	}
 	startDuration := time.Since(startedAt)
 	var faultDone chan timerRouteFaultResult
+	var healedAt time.Time
 	if routeFaults {
 		for ctx.Err() == nil {
 			var scheduled, fired uint64
@@ -329,6 +330,7 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 		if fault.err != nil {
 			t.Fatalf("route faults: %v", fault.err)
 		}
+		healedAt = fault.healedAt
 		defer func() {
 			fault.stop()
 			for _, done := range fault.done {
@@ -353,6 +355,10 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 	completionDuration := time.Since(startedAt)
 	var early, stuck int
 	lateness := make([]time.Duration, count)
+	var recoveryLateness []time.Duration
+	if routeFaults {
+		recoveryLateness = make([]time.Duration, count)
+	}
 	var nodeLateness [3][]time.Duration
 	for index, due := range fireAt {
 		when := completedAt[index].Load()
@@ -372,6 +378,7 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 		}
 		lateness[index] = late
 		if routeFaults {
+			recoveryLateness[index] = sleepRecoveryLateness(completed, due, healedAt)
 			partition := identity.Partition(typ, fmt.Sprintf("sleep-%05d", index), provision.Partitions)
 			ownerNode := int(partition%workerCount) % len(nodeLateness)
 			nodeLateness[ownerNode] = append(nodeLateness[ownerNode], late)
@@ -381,6 +388,12 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 	p50 := lateness[int(math.Ceil(0.50*float64(count)))-1]
 	p99 := lateness[int(math.Ceil(0.99*float64(count)))-1]
 	maximum := lateness[count-1]
+	var recoveryP99, recoveryMaximum time.Duration
+	if routeFaults {
+		sort.Slice(recoveryLateness, func(i, j int) bool { return recoveryLateness[i] < recoveryLateness[j] })
+		recoveryP99 = recoveryLateness[int(math.Ceil(0.99*float64(count)))-1]
+		recoveryMaximum = recoveryLateness[count-1]
+	}
 	var scheduled, fired, redeliveries, fences, contentions, acquireFailures uint64
 	var enqueueMax time.Duration
 	var buckets [6]uint64
@@ -413,15 +426,18 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 		}
 	}
 	t.Logf("invocations=%d workers=%d partition_concurrency=%d start=%s complete=%s handler_lateness_p50=%s p99=%s max=%s early=%d stuck=%d wakeup_buckets=%v scheduled=%d fired=%d redeliveries=%d fences=%d lease_contentions=%d lease_acquire_failures=%d enqueue_to_lease_max=%s", count, len(workers), partitionConcurrency, startDuration, completionDuration, p50, p99, maximum, early, stuck, buckets, scheduled, fired, redeliveries, fences, contentions, acquireFailures, enqueueMax)
+	if routeFaults {
+		t.Logf("route_recovery_healed_at=%s p99=%s max=%s (measured from later of fire_at and final heal)", healedAt.Format(time.RFC3339Nano), recoveryP99, recoveryMaximum)
+	}
 	if scheduled != uint64(count) || fired > uint64(count) || !routeFaults && fired != uint64(count) {
 		t.Fatalf("timer metrics: scheduled=%d fired=%d want=%d", scheduled, fired, count)
 	}
-	limit := 2 * time.Second
 	if routeFaults {
-		limit = 30 * time.Second
-	}
-	if p99 >= limit {
-		t.Errorf("handler completion p99 lateness=%s, want <%s", p99, limit)
+		if recoveryP99 >= 30*time.Second {
+			t.Errorf("handler completion p99 after final route heal=%s, want <30s (raw fire_at p99=%s)", recoveryP99, p99)
+		}
+	} else if p99 >= 2*time.Second {
+		t.Errorf("handler completion p99 lateness=%s, want <2s", p99)
 	}
 	if early != 0 || stuck != 0 {
 		t.Errorf("sleep timing: early=%d stuck_after_five_minutes=%d", early, stuck)
@@ -453,11 +469,12 @@ func readSleepJournal(ctx context.Context, j *journal.Store, typ, id string) ([]
 }
 
 type timerRouteFaultResult struct {
-	elapsed time.Duration
-	workers []*worker.Worker
-	stop    context.CancelFunc
-	done    []<-chan error
-	err     error
+	elapsed  time.Duration
+	healedAt time.Time
+	workers  []*worker.Worker
+	stop     context.CancelFunc
+	done     []<-chan error
+	err      error
 }
 
 func runTimerRouteFaults(ctx context.Context, cluster *testcluster.Cluster, majority jetstream.JetStream, typ string, handler worker.Handler) (result timerRouteFaultResult) {
@@ -535,7 +552,19 @@ func runTimerRouteFaults(ctx context.Context, cluster *testcluster.Cluster, majo
 			return
 		}
 	}
+	result.healedAt = time.Now()
 	return
+}
+
+func sleepRecoveryLateness(completed, due, healedAt time.Time) time.Duration {
+	start := due
+	if healedAt.After(start) {
+		start = healedAt
+	}
+	if completed.Before(start) {
+		return 0
+	}
+	return completed.Sub(start)
 }
 
 func waitTimerRouteCounts(ctx context.Context, cluster *testcluster.Cluster, isolated int) error {

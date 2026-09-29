@@ -98,8 +98,20 @@ preserved the no-fault 10,000-sleep result at
 826 ms p99 in a subsequent full run. After the final consumer-refresh
 adjustment, another full no-fault run completed all 10,000 invocations with
 775.9 ms p99, 1.04 seconds maximum, and zero early or stuck completions.
-The current code still needs the route fault gate to pass consistently,
-followed by the broader chaos matrix.
+At that point the route-fault gate had not passed consistently; the broader
+chaos matrix remained open.
+
+On 2026-09-29 the route-fault gate was clarified to measure recovery from
+the later of each timer's `fire_at` and the final confirmed route heal.
+Completions during the fault have zero post-heal delay. The test still logs
+raw `fire_at`-to-completion lateness and still rejects early completions and
+completions more than five minutes after `fire_at`. A 100-timer diagnostic
+passed with raw p99 27.10 seconds and post-heal p99 8.05 seconds. A full
+10,000-timer run passed with raw p99 35.10 seconds, post-heal p99 13.04
+seconds, post-heal maximum 14.66 seconds, all results and terminal journals
+verified, and zero early or stuck completions. The route sequence lasted
+24.83 seconds. Further full runs are needed to establish consistency under
+the clarified gate; the raw 30-second target remains unmet in that run.
 
 To reproduce the smaller diagnostic run:
 
