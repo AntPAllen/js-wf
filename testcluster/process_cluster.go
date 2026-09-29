@@ -20,7 +20,6 @@ import (
 type ProcessCluster struct {
 	Commands  []*exec.Cmd
 	Clients   []*nats.Conn
-	root      string
 	ports     []int
 	routes    []int
 	monitors  []int
@@ -37,9 +36,11 @@ func (c *ProcessCluster) LogPath(i int) string { return c.logs[i] }
 
 func (c *ProcessCluster) RouteMesh() *RouteMesh { return c.routeMesh }
 
-// ApplyFault lets a recorded fault schedule pause a separate server process.
+// ApplyFault applies the process and route faults supported by this fixture.
 func (c *ProcessCluster) ApplyFault(event FaultEvent) error {
 	switch event.Op {
+	case KillNode:
+		return c.KillNode(event.A)
 	case PauseNode:
 		return c.PauseNode(event.A)
 	case PartitionNodes:
@@ -76,7 +77,7 @@ func startProcesses(root string, count int, partitionable bool) (_ *ProcessClust
 	if output, buildErr := build.CombinedOutput(); buildErr != nil {
 		return nil, fmt.Errorf("build nats-server: %w: %s", buildErr, output)
 	}
-	c := &ProcessCluster{root: root, ports: make([]int, count), routes: make([]int, count), monitors: make([]int, count), paused: make([]bool, count)}
+	c := &ProcessCluster{ports: make([]int, count), routes: make([]int, count), monitors: make([]int, count), paused: make([]bool, count)}
 	defer func() {
 		if err != nil {
 			c.Close()
@@ -203,6 +204,58 @@ func (c *ProcessCluster) ResumeNode(i int) error {
 	return nil
 }
 
+// KillNode terminates one server without removing its file store. RestartNode
+// can then reopen that store on the same client and route ports.
+func (c *ProcessCluster) KillNode(i int) error {
+	if i < 0 || i >= len(c.Commands) || c.Commands[i] == nil || c.Commands[i].ProcessState != nil {
+		return fmt.Errorf("process node %d cannot be killed", i)
+	}
+	cmd := c.Commands[i]
+	if c.paused[i] {
+		if err := cmd.Process.Signal(syscall.SIGCONT); err != nil {
+			return err
+		}
+		c.paused[i] = false
+	}
+	if err := cmd.Process.Kill(); err != nil {
+		return err
+	}
+	_ = cmd.Wait()
+	c.Clients[i].Close()
+	return nil
+}
+
+func (c *ProcessCluster) RestartNode(i int) error {
+	if i < 0 || i >= len(c.Commands) || c.Commands[i] == nil || c.Commands[i].ProcessState == nil {
+		return fmt.Errorf("process node %d is not stopped", i)
+	}
+	old := c.Commands[i]
+	logFile, err := os.OpenFile(c.logs[i], os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return err
+	}
+	cmd := exec.Command(old.Args[0], old.Args[1:]...)
+	cmd.Stdout, cmd.Stderr = logFile, logFile
+	err = cmd.Start()
+	_ = logFile.Close()
+	if err != nil {
+		return err
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		conn, dialErr := c.Dial(i)
+		if dialErr == nil {
+			c.Commands[i] = cmd
+			c.Clients[i] = conn
+			return nil
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	_ = cmd.Process.Kill()
+	_ = cmd.Wait()
+	return fmt.Errorf("restarted process node %d did not accept clients: log=%s", i, c.logs[i])
+}
+
 func (c *ProcessCluster) Close() {
 	if c.routeMesh != nil {
 		c.routeMesh.Close()
@@ -212,7 +265,7 @@ func (c *ProcessCluster) Close() {
 		client.Close()
 	}
 	for i, cmd := range c.Commands {
-		if cmd == nil || cmd.Process == nil {
+		if cmd == nil || cmd.Process == nil || cmd.ProcessState != nil {
 			continue
 		}
 		if c.paused[i] {
@@ -222,7 +275,7 @@ func (c *ProcessCluster) Close() {
 		_ = cmd.Process.Signal(syscall.SIGTERM)
 	}
 	for _, cmd := range c.Commands {
-		if cmd == nil || cmd.Process == nil {
+		if cmd == nil || cmd.Process == nil || cmd.ProcessState != nil {
 			continue
 		}
 		done := make(chan struct{})

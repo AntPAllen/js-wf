@@ -162,3 +162,94 @@ func TestProcessClusterPauseLeaderAndRecoverReplica(t *testing.T) {
 	}
 	t.Fatalf("resumed node %d did not recover acknowledged publish: %s (log=%s)", leader, fmt.Sprint(err), c.LogPath(leader))
 }
+
+func TestProcessClusterKillLeaderAndRestart(t *testing.T) {
+	root := t.TempDir()
+	c, err := StartProcesses(root, 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 40*time.Second)
+	defer cancel()
+	js := make([]jetstream.JetStream, 3)
+	for i, conn := range c.Clients {
+		js[i], err = jetstream.New(conn)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	var stream jetstream.Stream
+	for ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, time.Second)
+		stream, err = js[0].CreateStream(attempt, jetstream.StreamConfig{Name: "KILL_TEST", Subjects: []string{"kill.test"}, Replicas: 3, Storage: jetstream.FileStorage})
+		stop()
+		if err == nil {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if err != nil {
+		t.Fatalf("create three-replica stream: %v", err)
+	}
+	info, err := stream.Info(ctx)
+	if err != nil || info.Cluster == nil {
+		t.Fatalf("stream leader: info=%+v err=%v", info, err)
+	}
+	leader, err := strconv.Atoi(strings.TrimPrefix(info.Cluster.Leader, "wf-process-"))
+	if err != nil || leader < 0 || leader >= 3 {
+		t.Fatalf("invalid stream leader %q: %v", info.Cluster.Leader, err)
+	}
+	first, err := js[leader].Publish(ctx, "kill.test", []byte("before"))
+	if err != nil || first == nil || first.Sequence != 1 {
+		t.Fatalf("first publish=%+v err=%v", first, err)
+	}
+	faultPath := filepath.Join(root, "kill-fault.json")
+	if err := (FaultSchedule{Seed: 42, Events: []FaultEvent{{Op: KillNode, A: leader}}}).Save(faultPath); err != nil {
+		t.Fatal(err)
+	}
+	fault, err := LoadFaultSchedule(faultPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := fault.Run(ctx, c.ApplyFault); err != nil {
+		t.Fatal(err)
+	}
+	survivor := (leader + 1) % 3
+	var second *jetstream.PubAck
+	for ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		second, err = js[survivor].Publish(attempt, "kill.test", []byte("during"))
+		stop()
+		if err == nil {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if err != nil || second == nil || second.Sequence != 2 {
+		t.Fatalf("majority publish while node %d killed: ack=%+v err=%v", leader, second, err)
+	}
+	if err := c.RestartNode(leader); err != nil {
+		t.Fatal(err)
+	}
+	resumed, err := jetstream.New(c.Clients[leader])
+	if err != nil {
+		t.Fatal(err)
+	}
+	for ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, time.Second)
+		recovered, getErr := resumed.Stream(attempt, "KILL_TEST")
+		if getErr == nil {
+			var message *jetstream.RawStreamMsg
+			message, getErr = recovered.GetMsg(attempt, 2)
+			if getErr == nil && string(message.Data) == "during" {
+				stop()
+				return
+			}
+		}
+		stop()
+		err = getErr
+		time.Sleep(100 * time.Millisecond)
+	}
+	t.Fatalf("restarted node %d did not recover acknowledged publish: %s (log=%s)", leader, fmt.Sprint(err), c.LogPath(leader))
+}
