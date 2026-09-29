@@ -42,6 +42,7 @@ func run(ctx context.Context, args []string) error {
 	metricsAddr := flags.String("metrics-addr", "127.0.0.1:9090", "HTTP metrics listen address")
 	replicas := flags.Int("replicas", 3, "JetStream stream replica count")
 	journalMaxBytes := flags.Int64("journal-max-bytes", 0, "exact WF_JRN byte cap; zero adopts an uncapped stream")
+	timerBackend := flags.String("timer-backend", "auto", "timer storage mode: auto, native, or fallback")
 	mode := flags.String("mode", "static", "partition assignment mode: static or kv")
 	staticIndex := flags.Int("static-index", 0, "static worker index")
 	staticCount := flags.Int("static-count", 1, "number of static workers")
@@ -59,6 +60,9 @@ func run(ctx context.Context, args []string) error {
 	}
 	if *mode != "static" && *mode != "kv" {
 		return fmt.Errorf("invalid assignment mode %q", *mode)
+	}
+	if *timerBackend != "auto" && *timerBackend != "native" && *timerBackend != "fallback" {
+		return fmt.Errorf("invalid timer backend %q", *timerBackend)
 	}
 	if *mode == "static" {
 		if _, err := worker.StaticPartitions(*staticIndex, *staticCount); err != nil {
@@ -85,7 +89,7 @@ func run(ctx context.Context, args []string) error {
 			return fmt.Errorf("retention workflow type %q collides with plugin handler", *retentionType)
 		}
 	}
-	nc, js, backend, w, err := startWorker(ctx, *url, *id, *replicas, *journalMaxBytes, *concurrency, handlers, *retentionType, *retentionGrace)
+	nc, js, backend, w, err := startWorker(ctx, *url, *id, *replicas, *journalMaxBytes, *concurrency, *timerBackend, handlers, *retentionType, *retentionGrace)
 	if err != nil {
 		if ctx.Err() != nil {
 			return nil
@@ -186,7 +190,7 @@ func run(ctx context.Context, args []string) error {
 	return firstErr
 }
 
-func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBytes int64, concurrency int, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, error) {
+func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBytes int64, concurrency int, timerBackend string, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, error) {
 	startupCtx, stopStartup := context.WithTimeout(ctx, 30*time.Second)
 	defer stopStartup()
 	var lastErr error
@@ -197,12 +201,8 @@ func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBy
 			js, err = jetstream.New(nc)
 			if err == nil {
 				attempt, stop := context.WithTimeout(startupCtx, 5*time.Second)
-				var backend provision.TimerBackend
-				if journalMaxBytes > 0 {
-					backend, err = provision.EnsureAutoWithJournalLimit(attempt, js, replicas, journalMaxBytes)
-				} else {
-					backend, err = provision.EnsureAuto(attempt, js, replicas)
-				}
+				backend, provisionErr := ensureTimerBackend(attempt, js, replicas, journalMaxBytes, timerBackend)
+				err = provisionErr
 				stop()
 				if err == nil {
 					workerHandlers := make(map[string]worker.Handler, len(handlers)+1)
@@ -234,6 +234,28 @@ func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBy
 		return nil, nil, "", nil, ctx.Err()
 	}
 	return nil, nil, "", nil, fmt.Errorf("start worker after 30 seconds: %w", lastErr)
+}
+
+func ensureTimerBackend(ctx context.Context, js jetstream.JetStream, replicas int, journalMaxBytes int64, choice string) (provision.TimerBackend, error) {
+	switch choice {
+	case "auto":
+		if journalMaxBytes > 0 {
+			return provision.EnsureAutoWithJournalLimit(ctx, js, replicas, journalMaxBytes)
+		}
+		return provision.EnsureAuto(ctx, js, replicas)
+	case "native":
+		if journalMaxBytes > 0 {
+			return provision.NativeTimers, provision.EnsureWithJournalLimit(ctx, js, replicas, journalMaxBytes)
+		}
+		return provision.NativeTimers, provision.Ensure(ctx, js, replicas)
+	case "fallback":
+		if journalMaxBytes > 0 {
+			return provision.FallbackTimers, provision.EnsureFallbackWithJournalLimit(ctx, js, replicas, journalMaxBytes)
+		}
+		return provision.FallbackTimers, provision.EnsureFallback(ctx, js, replicas)
+	default:
+		return "", fmt.Errorf("invalid timer backend %q", choice)
+	}
 }
 
 func retryableStartupError(err error) bool {

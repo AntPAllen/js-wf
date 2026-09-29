@@ -154,9 +154,6 @@ func TestWorkerRunnerRunsFallbackTimerLoop(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
 	defer cancel()
-	if err := provision.EnsureFallback(ctx, js, 1); err != nil {
-		t.Fatal(err)
-	}
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -165,7 +162,7 @@ func TestWorkerRunnerRunsFallbackTimerLoop(t *testing.T) {
 	_ = listener.Close()
 	done := make(chan error, 1)
 	go func() {
-		done <- run(ctx, []string{"-url", cluster.Servers[0].ClientURL(), "-id", "fallback-smoke", "-replicas", "1", "-handler-plugin", pluginPath, "-metrics-addr", metricsAddr, "-reconcile-interval", "100ms"})
+		done <- run(ctx, []string{"-url", cluster.Servers[0].ClientURL(), "-id", "fallback-smoke", "-replicas", "1", "-handler-plugin", pluginPath, "-metrics-addr", metricsAddr, "-timer-backend", "fallback", "-reconcile-interval", "100ms"})
 	}()
 	metricsURL := "http://" + metricsAddr + "/metrics"
 	clientHTTP := &http.Client{Timeout: time.Second}
@@ -186,6 +183,14 @@ func TestWorkerRunnerRunsFallbackTimerLoop(t *testing.T) {
 	}
 	if ctx.Err() != nil {
 		t.Fatalf("fallback runner did not start: %v", ctx.Err())
+	}
+	runStream, err := js.Stream(ctx, "WF_RUN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	runInfo, err := runStream.Info(ctx)
+	if err != nil || runInfo.Config.AllowMsgSchedules {
+		t.Fatalf("explicit fallback did not provision fallback WF_RUN: info=%+v err=%v", runInfo, err)
 	}
 	c := client.New(js)
 	if _, err := c.Start(ctx, "worker-timer", "fallback", []byte(`null`)); err != nil {
