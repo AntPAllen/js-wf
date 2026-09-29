@@ -11,6 +11,7 @@ import (
 
 	"js-wf/journal"
 	"js-wf/lease"
+	"js-wf/provision"
 )
 
 // This reproduces the lease-bound part of the five-container SIGKILL and
@@ -32,7 +33,7 @@ func runWorkerKillLeaseExpiry(replay *Trace) (trace Trace, runErr error) {
 	}
 	defer func() { trace = schedule.Trace() }()
 	ctx := context.Background()
-	leasing := lease.NewWithKVPort(NewKVTransport(schedule, 30*time.Second))
+	leasing := lease.NewWithKVPort(NewKVTransport(schedule, provision.LeaseTTL))
 	transport := NewJournalTransport(schedule)
 	store := journal.NewWithPorts(transport, transport)
 	old, err := leasing.Acquire(ctx, "test", "killed", "old")
@@ -47,11 +48,11 @@ func runWorkerKillLeaseExpiry(replay *Trace) (trace Trace, runErr error) {
 	if err != nil {
 		return trace, err
 	}
-	if err := schedule.AdvanceMillis(29_999); err != nil {
+	if err := schedule.AdvanceMillis(provision.LeaseTTL.Milliseconds() - 1); err != nil {
 		return trace, err
 	}
 	if _, err := leasing.Acquire(ctx, "test", "killed", "replacement"); !errors.Is(err, lease.ErrHeld) {
-		return trace, fmt.Errorf("replacement acquired before 30s TTL: %v", err)
+		return trace, fmt.Errorf("replacement acquired before %s TTL: %v", provision.LeaseTTL, err)
 	}
 	if err := schedule.AdvanceMillis(1); err != nil {
 		return trace, err
@@ -69,10 +70,10 @@ func runWorkerKillLeaseExpiry(replay *Trace) (trace Trace, runErr error) {
 		return trace, err
 	}
 	records, tail, err := store.Read(ctx, "test", "killed")
-	if err != nil || len(records) != 4 || tail != fourth || schedule.NowMillis() != 30_000 {
+	if err != nil || len(records) != 4 || tail != fourth || schedule.NowMillis() != provision.LeaseTTL.Milliseconds() {
 		return trace, fmt.Errorf("recovery at %dms: entries=%d tail=%d want=%d err=%v", schedule.NowMillis(), len(records), tail, fourth, err)
 	}
-	if err := schedule.AdvanceMillis(15_000); err != nil {
+	if err := schedule.AdvanceMillis((45 * time.Second).Milliseconds() - provision.LeaseTTL.Milliseconds()); err != nil {
 		return trace, err
 	}
 	if err := old.Renew(ctx); !errors.Is(err, lease.ErrLost) {
