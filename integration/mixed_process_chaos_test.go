@@ -545,10 +545,32 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		t.Logf("restarted node child id=%s audit=%s", childID, audit.elapsed)
 	}
 	enabledAt[len(invocations)-1] = lastChildCompletedAt
-	signalStream, err := third.Stream(ctx, "WF_SIG")
-	if err != nil {
-		t.Fatal(err)
+	var signalStream jetstream.Stream
+	signalReadStarted := time.Now()
+	signalReadAttempts := 0
+	until = time.Now().Add(30 * time.Second)
+	for time.Now().Before(until) && ctx.Err() == nil {
+		signalReadAttempts++
+		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		signalStream, err = third.Stream(attempt, "WF_SIG")
+		if err == nil {
+			var streamInfo *jetstream.StreamInfo
+			streamInfo, err = signalStream.Info(attempt)
+			if err == nil && streamInfo.Cluster != nil && streamInfo.Cluster.Leader != "" {
+				stop()
+				break
+			}
+			if err == nil {
+				err = fmt.Errorf("WF_SIG has no leader after restart")
+			}
+		}
+		stop()
+		time.Sleep(100 * time.Millisecond)
 	}
+	if err != nil || signalStream == nil {
+		t.Fatalf("restarted node WF_SIG readiness after %s and %d attempts: %v (test context: %v)", time.Since(signalReadStarted), signalReadAttempts, err, ctx.Err())
+	}
+	t.Logf("restarted node WF_SIG ready in %s after %d attempts", time.Since(signalReadStarted), signalReadAttempts)
 	for i, inv := range invocations {
 		if inv.typ != "mixedsignal" {
 			continue
