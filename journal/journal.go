@@ -64,6 +64,17 @@ type AttemptPayload struct {
 	Error string `json:"error"`
 }
 
+const MaxAttemptErrorBytes = 4096
+
+// AttemptError is the exact error text retained for a panic attempt. JSON
+// replaces malformed UTF-8, including a rune cut by the byte limit.
+func AttemptError(reason string) string {
+	if len(reason) > MaxAttemptErrorBytes {
+		reason = reason[:MaxAttemptErrorBytes]
+	}
+	return string([]rune(reason))
+}
+
 func DecodeAttempt(data []byte) (AttemptPayload, error) {
 	var attempt AttemptPayload
 	if json.Unmarshal(data, &attempt) != nil || attempt.Count < 1 || attempt.Error == "" {

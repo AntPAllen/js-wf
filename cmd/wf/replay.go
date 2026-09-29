@@ -255,8 +255,12 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 			}
 			return replayReport{}, fmt.Errorf("replay %s.%s did not reproduce terminal failure: %v", bundle.Type, bundle.ID, replayErr)
 		}
-		if outcome.Error == "" || replayErr.Error() != outcome.Error {
-			return replayReport{}, fmt.Errorf("replayed error differs from terminal outcome: replay=%q recorded=%q", replayErr, outcome.Error)
+		replayedError := replayErr.Error()
+		if observed.Panicked {
+			replayedError = journal.AttemptError(replayedError)
+		}
+		if outcome.Error == "" || replayedError != outcome.Error {
+			return replayReport{}, fmt.Errorf("replayed error differs from terminal outcome: replay=%q recorded=%q", replayedError, outcome.Error)
 		}
 		report.Status, report.Error = "failed", outcome.Error
 		return report, nil
@@ -339,7 +343,7 @@ func replayNonStepJournalLimit(bundle replayBundle, handler func(*wf.Context, js
 		}
 	case journal.Attempt:
 		attempt, err := journal.DecodeAttempt(outcome.LimitEntry.Payload)
-		if err != nil || !observed.Panicked || replayErr == nil || replayErr.Error() != attempt.Error {
+		if err != nil || !observed.Panicked || replayErr == nil || journal.AttemptError(replayErr.Error()) != attempt.Error {
 			return replayReport{}, fmt.Errorf("handler replay differs from journal-limit panic: error=%v", replayErr)
 		}
 		count := 0

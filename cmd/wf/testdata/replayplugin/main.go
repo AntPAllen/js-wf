@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strings"
 	"time"
 
 	"js-wf/wf"
@@ -113,6 +114,10 @@ func WaitTimerWorkflow(c *wf.Context, _ json.RawMessage) (json.RawMessage, error
 
 func PanicWorkflow(*wf.Context, json.RawMessage) (json.RawMessage, error) {
 	panic("boom")
+}
+
+func LongPanicWorkflow(*wf.Context, json.RawMessage) (json.RawMessage, error) {
+	panic(strings.Repeat("x", 4096-len("workflow panic: ")-1) + "é trailing")
 }
 
 func PendingWorkflow(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {

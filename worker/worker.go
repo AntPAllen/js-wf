@@ -841,10 +841,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		return w.persistAndNotify(ctx, typ, id, input.Sequence, payload, input.Header)
 	}
 	if panicked {
-		reason := runErr.Error()
-		if len(reason) > 4096 {
-			reason = reason[:4096]
-		}
+		reason := journal.AttemptError(runErr.Error())
 		payload, _ := json.Marshal(journal.AttemptPayload{Count: attempts + 1, Error: reason})
 		if err := appendEntry(journal.Attempt, payload); err != nil {
 			return err
