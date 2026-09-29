@@ -47,30 +47,31 @@ type cancelWaiter struct {
 }
 
 type Worker struct {
-	js                   jetstream.JetStream
-	jrn                  *journal.Store
-	leases               *lease.Store
-	state                jetstream.KeyValue
-	outcomePort          OutcomePort
-	invocationPort       InvocationPort
-	signalDrainPort      SignalDrainPort
-	resultBlobPort       ResultBlobPort
-	timerSchedulePort    TimerSchedulePort
-	timerNowPort         func(context.Context) (time.Time, error)
-	client               *client.Client
-	ID                   string
-	Handlers             map[string]Handler
-	maxEntries           uint64
-	maxPanicAttempts     int
-	partitionConcurrency int
-	ackWait              time.Duration
-	heartbeatInterval    time.Duration
-	nativeSchedules      bool
-	metrics              metricsCounters
-	cancelMu             sync.Mutex
-	cancelWaiters        map[string]*cancelWaiter
-	cancelStream         jetstream.Stream
-	cancelSubscription   *nats.Subscription
+	js                         jetstream.JetStream
+	jrn                        *journal.Store
+	leases                     *lease.Store
+	state                      jetstream.KeyValue
+	outcomePort                OutcomePort
+	invocationPort             InvocationPort
+	signalDrainPort            SignalDrainPort
+	resultBlobPort             ResultBlobPort
+	timerSchedulePort          TimerSchedulePort
+	timerNowPort               func(context.Context) (time.Time, error)
+	client                     *client.Client
+	ID                         string
+	Handlers                   map[string]Handler
+	maxEntries                 uint64
+	maxPanicAttempts           int
+	partitionConcurrency       int
+	ackWait                    time.Duration
+	heartbeatInterval          time.Duration
+	nativeSchedules            bool
+	metrics                    metricsCounters
+	cancelMu                   sync.Mutex
+	cancelWaiters              map[string]*cancelWaiter
+	cancelStream               jetstream.Stream
+	cancelSubscription         *nats.Subscription
+	modeledCancelNotifications bool
 }
 
 type Option func(*Worker) error
@@ -178,16 +179,20 @@ type ModeledWorkerPorts struct {
 	TimerNow    func(context.Context) (time.Time, error)
 	NativeTimer bool
 	Client      *client.Client
+	// Enable waiter registration for modeled core notifications. The caller
+	// delivers committed notifications through ObserveCancellationNotification.
+	CancellationNotifications bool
 }
 
 // NewWithPorts builds a worker whose delivery and execution decisions run
 // against narrow transports. Snapshot objects are not provided by this
 // constructor; timer scheduling is available when Timer and TimerNow are set.
+// Modeled cancellation notifications do not include the durable signal poll.
 func NewWithPorts(id string, handlers map[string]Handler, ports ModeledWorkerPorts) (*Worker, error) {
 	if id == "" || ports.Journal == nil || ports.Leases == nil || ports.Outcome == nil || ports.Invocation == nil || ports.Signals == nil || ports.Client == nil {
 		return nil, fmt.Errorf("invalid modeled worker configuration")
 	}
-	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, cancelWaiters: make(map[string]*cancelWaiter)}, nil
+	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, cancelWaiters: make(map[string]*cancelWaiter), modeledCancelNotifications: ports.CancellationNotifications}, nil
 }
 
 type panicRetryError struct{ attempt int }
@@ -932,11 +937,17 @@ func (w *Worker) observeCancel(message *nats.Msg) {
 	w.markRunningCancellation(cancelKey(parts[2], parts[3], generation), nil)
 }
 
+// ObserveCancellationNotification delivers a core signal notification to a
+// modeled worker after its signal transport has committed the message.
+func (w *Worker) ObserveCancellationNotification(message *nats.Msg) {
+	w.observeCancel(message)
+}
+
 // watchRunningCancellation observes the core signal notification and checks
 // the durable stream at registration and after gaps. Journal writes remain on
 // the execute goroutine after the handler has returned.
 func (w *Worker) watchRunningCancellation(ctx context.Context, typ, id string, invSeq uint64, cancelHandler context.CancelFunc) func() bool {
-	if w.cancelStream == nil {
+	if w.cancelStream == nil && !w.modeledCancelNotifications {
 		return func() bool { return false }
 	}
 	generation := strconv.FormatUint(invSeq, 10)
@@ -947,26 +958,30 @@ func (w *Worker) watchRunningCancellation(ctx context.Context, typ, id string, i
 	w.cancelMu.Unlock()
 	watchCtx, stop := context.WithCancel(ctx)
 	done := make(chan struct{})
-	go func() {
-		defer close(done)
-		ticker := time.NewTicker(15 * time.Second)
-		defer ticker.Stop()
-		subject := "wf.sig." + typ + "." + id + "." + client.CancelSignalName
-		for watchCtx.Err() == nil {
-			lookupCtx, finish := context.WithTimeout(watchCtx, 2*time.Second)
-			message, err := w.cancelStream.GetLastMsgForSubject(lookupCtx, subject)
-			finish()
-			if err == nil && message.Header.Get("Wf-Inv-Seq") == generation {
-				w.markRunningCancellation(key, waiter)
-				return
+	if w.cancelStream == nil {
+		close(done)
+	} else {
+		go func() {
+			defer close(done)
+			ticker := time.NewTicker(15 * time.Second)
+			defer ticker.Stop()
+			subject := "wf.sig." + typ + "." + id + "." + client.CancelSignalName
+			for watchCtx.Err() == nil {
+				lookupCtx, finish := context.WithTimeout(watchCtx, 2*time.Second)
+				message, err := w.cancelStream.GetLastMsgForSubject(lookupCtx, subject)
+				finish()
+				if err == nil && message.Header.Get("Wf-Inv-Seq") == generation {
+					w.markRunningCancellation(key, waiter)
+					return
+				}
+				select {
+				case <-watchCtx.Done():
+					return
+				case <-ticker.C:
+				}
 			}
-			select {
-			case <-watchCtx.Done():
-				return
-			case <-ticker.C:
-			}
-		}
-	}()
+		}()
+	}
 	return func() bool {
 		w.cancelMu.Lock()
 		if w.cancelWaiters[key] == waiter {

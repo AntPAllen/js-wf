@@ -206,7 +206,18 @@ snapshot passes I1/I2/I3/I6 checks. Seed 42 is pinned and replays across
 processes and under the race detector. Committed `WF_RUN` enqueues feed the
 modeled consumer directly, including publishes with lost replies. Timer scheduling, snapshots,
 large result blobs, running cancellation, and cooperative heartbeat turns
-remain outside this integrated slice.
+are exercised in separate slices or remain open as described below.
+
+A separate 1,000-seed running-cancellation workload starts a production
+`Worker.handle` effect that waits for its context. A committed cancel signal
+is delivered to the worker’s production notification handler after a
+stale-generation notification is ignored. Dropped publishes are retried;
+committed signals with lost replies and uncertain wakeup enqueues still
+interrupt the effect. The worker journals one `SignalConsumed` and `Failed`,
+without a `StepCompleted`, and the retained I1/I2/I3/I6 check passes. A
+lost-ack seed is pinned, and exact replay, cross-process traces, and a race
+run pass. The modeled path does not yet exercise the worker’s durable
+15-second cancellation poll after a lost core notification.
 
 The integrated signal workload follows one workflow across a suspension and
 resume. Production `Client.Start` enqueues its first run, `Worker.handle`
@@ -559,7 +570,7 @@ against a real three-node stream. Existing real-cluster tests cover network
 lost acknowledgments and injected unchanged-tail rejections. This comparison
 is limited: the integrated worker workloads cover short handlers, signal
 resume, and native and fallback timer wakeups without retention, snapshot
-objects, running cancellation,
+objects, durable cancellation polling,
 Raft elections, or disk storage. The journal's five-second attempt
 deadline still uses wall time; only CAS retry waits are virtual in this first
 slice. A discrepancy seen only on real
