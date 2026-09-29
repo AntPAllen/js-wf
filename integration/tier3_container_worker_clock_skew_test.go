@@ -5,6 +5,8 @@ package integration_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -30,6 +32,17 @@ import (
 
 const tier3WorkerSkewType = "tier3-worker-clock-skew"
 const tier3WorkerSkewID = "timer"
+const tier3WorkerSkewSignalCount = 16
+
+func tier3WorkerSkewSignalID() string {
+	partition := identity.Partition(tier3WorkerSkewType, tier3WorkerSkewID, provision.Partitions)
+	for i := 0; ; i++ {
+		id := fmt.Sprintf("signals-%d", i)
+		if identity.Partition(tier3WorkerSkewType, id, provision.Partitions) == partition {
+			return id
+		}
+	}
+}
 
 func TestFiveContainerWorkerClockSkewChild(t *testing.T) {
 	if os.Getenv("WF_TIER3_WORKER_SKEW_CHILD") != "1" {
@@ -67,7 +80,25 @@ func TestFiveContainerWorkerClockSkewChild(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	handler := func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+	handler := func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
+		var request struct {
+			Signal bool `json:"signal"`
+		}
+		if err := json.Unmarshal(input, &request); err != nil {
+			return nil, err
+		}
+		if request.Signal {
+			for i := 0; i < tier3WorkerSkewSignalCount; i++ {
+				payload, err := wf.AwaitSignal(c, "go")
+				if err != nil {
+					return nil, err
+				}
+				if string(payload) != strconv.Itoa(i) {
+					return nil, fmt.Errorf("skewed worker signal %d carried %q", i, payload)
+				}
+			}
+			return json.RawMessage(`16`), nil
+		}
 		if err := wf.Sleep(c, "worker-skew", 3*time.Second); err != nil {
 			return nil, err
 		}
@@ -220,11 +251,71 @@ func TestFiveContainerWorkerClockSkewTimer(t *testing.T) {
 			if result, err := history.CheckResults(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
 				t.Fatalf("worker skew result history=%s err=%v", result, err)
 			}
+			signalID := tier3WorkerSkewSignalID()
+			if err := waitFiveReplicaReadiness(ctx, js, identity.Partition(tier3WorkerSkewType, signalID, provision.Partitions)); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := c.Start(ctx, tier3WorkerSkewType, signalID, []byte(`{"signal":true}`)); err != nil {
+				t.Fatal(err)
+			}
+			var signalSequence uint64
+			for i := 0; i < tier3WorkerSkewSignalCount; i++ {
+				sequence, err := c.Signal(ctx, tier3WorkerSkewType, signalID, "go", []byte(strconv.Itoa(i)), fmt.Sprintf("skew-%02d", i))
+				if err != nil || sequence <= signalSequence {
+					t.Fatalf("worker-skew signal %d sequence=%d previous=%d err=%v", i, sequence, signalSequence, err)
+				}
+				signalSequence = sequence
+			}
+			enablingAt := time.Now()
+			retrySequence, err := c.Signal(ctx, tier3WorkerSkewType, signalID, "go", []byte("0"), "skew-00")
+			if err != nil || retrySequence == 0 {
+				t.Fatalf("worker-skew matching signal retry sequence=%d err=%v", retrySequence, err)
+			}
+			if _, err := c.Signal(ctx, tier3WorkerSkewType, signalID, "go", []byte("changed"), "skew-00"); !errors.Is(err, client.ErrSignalMismatch) {
+				t.Fatalf("worker-skew changed signal retry: %v", err)
+			}
+			signalResult, err := c.Await(ctx, tier3WorkerSkewType, signalID)
+			signalLatency := time.Since(enablingAt)
+			if err != nil || string(signalResult) != `16` || signalLatency >= 30*time.Second {
+				t.Fatalf("worker-skew signal result=%s err=%v latency=%s", signalResult, err, signalLatency)
+			}
+			signalRecords, _, err := journal.New(js).Read(ctx, tier3WorkerSkewType, signalID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var consumed int
+			var previous uint64
+			for _, record := range signalRecords {
+				if record.Kind != journal.SignalConsumed {
+					continue
+				}
+				var signal struct {
+					Sequence uint64 `json:"sig_seq"`
+					Payload  []byte `json:"payload"`
+				}
+				if err := json.Unmarshal(record.Payload, &signal); err != nil || signal.Sequence <= previous || string(signal.Payload) != strconv.Itoa(consumed) {
+					t.Fatalf("worker-skew consumed signal %d: sequence=%d previous=%d payload=%q err=%v", consumed, signal.Sequence, previous, signal.Payload, err)
+				}
+				previous = signal.Sequence
+				consumed++
+			}
+			if consumed != tier3WorkerSkewSignalCount || signalRecords[len(signalRecords)-1].Kind != journal.Completed {
+				t.Fatalf("worker-skew consumed=%d journal entries=%d", consumed, len(signalRecords))
+			}
+			if result, err := history.CheckStarts(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
+				t.Fatalf("worker-skew combined start history=%s err=%v", result, err)
+			}
+			if result, err := history.CheckSignals(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
+				t.Fatalf("worker-skew signal history=%s err=%v", result, err)
+			}
+			if result, err := history.CheckResults(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
+				t.Fatalf("worker-skew combined result history=%s err=%v", result, err)
+			}
 			report, err := integrity.Check(ctx, js)
-			if err != nil || report.Invocations != 1 || report.Journals != 1 || report.Entries != 5 || report.Terminal != 1 {
+			if err != nil || report.Invocations != 2 || report.Journals != 2 || report.Entries != len(signalRecords)+5 || report.Terminal != 2 {
 				t.Fatalf("worker skew retained audit=%+v err=%v", report, err)
 			}
-			t.Logf("worker_skew=%s measured_offset=%s elapsed=%s fire_at=%s lateness=%s retained=%+v", offset, measured, elapsed, timer.FireAt, lateness, report)
+			t.Logf("worker_skew=%s measured_offset=%s timer_elapsed=%s timer_lateness=%s ordered_signals=%d signal_latency=%s retained=%+v", offset, measured, elapsed, lateness, consumed, signalLatency, report)
 		})
 	}
 }
