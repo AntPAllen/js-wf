@@ -79,6 +79,14 @@ stream audit checks the writes acknowledged before and after the cut. A local
 run passed in 99.68 seconds, with acknowledged sequences 1 and 2. The publish
 attempt during quorum loss has an unknown outcome; the test does not assert
 that its payload is absent after healing.
+The [clean `2m` CI run](https://github.com/AntPAllen/js-wf/actions/runs/36611043100)
+passed all four container tests: the leader kill acknowledged 964 writes, 489
+after the fault; the leader pause acknowledged 956, 488 after the fault; the
+quorum-cut audit and workflow isolation audit also passed. The
+[clean `always` CI run](https://github.com/AntPAllen/js-wf/actions/runs/36611047472)
+also passed all four: the kill acknowledged 952 writes, 528 after the fault;
+the pause acknowledged 952, 518 after the fault; and both route-cut audits
+passed.
 
 The first clean CI run passed in 124 seconds. After a three-run local repeat
 exposed a Docker `--rm` cleanup race on restart, the fixture began waiting for
