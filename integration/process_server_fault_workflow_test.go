@@ -27,18 +27,22 @@ import (
 )
 
 func TestWorkflowRecoversFromFourServerFaults(t *testing.T) {
-	runWorkflowWithFourServerFaults(t, false, false)
+	runWorkflowWithFourServerFaults(t, false, false, false)
 }
 
 func TestTimerWorkflowRecoversFromFourServerFaults(t *testing.T) {
-	runWorkflowWithFourServerFaults(t, true, false)
+	runWorkflowWithFourServerFaults(t, true, false, false)
 }
 
 func TestSignalWorkflowRecoversFromFourServerFaults(t *testing.T) {
-	runWorkflowWithFourServerFaults(t, false, true)
+	runWorkflowWithFourServerFaults(t, false, true, false)
 }
 
-func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow bool) {
+func TestFanoutWorkflowRecoversFromFourServerFaults(t *testing.T) {
+	runWorkflowWithFourServerFaults(t, false, false, true)
+}
+
+func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow, fanoutWorkflow bool) {
 	t.Helper()
 	if os.Getenv("WF_PROCESS_WORKFLOW") != "1" {
 		t.Skip("set WF_PROCESS_WORKFLOW=1 for the four-fault workflow proof")
@@ -94,6 +98,30 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow
 	release := make(chan struct{})
 	var once sync.Once
 	handler := func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		if fanoutWorkflow {
+			once.Do(func() { close(entered) })
+			promises := make([]wf.Promise, 6)
+			for i := range promises {
+				p, err := wf.CallAsync(c, "fourfaultchild", json.RawMessage(fmt.Sprint(i)))
+				if err != nil {
+					return nil, err
+				}
+				promises[i] = p
+			}
+			var sum int
+			for _, p := range promises {
+				value, err := wf.AwaitPromise(c, p)
+				if err != nil {
+					return nil, err
+				}
+				var n int
+				if err := json.Unmarshal(value, &n); err != nil {
+					return nil, err
+				}
+				sum += n
+			}
+			return json.Marshal(sum)
+		}
 		if signalWorkflow {
 			once.Do(func() { close(entered) })
 			value, err := wf.AwaitSignal(c, "go")
@@ -123,7 +151,24 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow
 		}
 		return json.RawMessage(fmt.Sprint(value)), nil
 	}
-	w, err := worker.New(ctx, js[other], "four-fault-before", map[string]worker.Handler{typ: handler})
+	handlers := map[string]worker.Handler{typ: handler}
+	if fanoutWorkflow {
+		handlers["fourfaultchild"] = func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+			value, err := wf.Run(c, "held-child", 0, func(effectCtx context.Context) (int, error) {
+				select {
+				case <-release:
+					return 7, nil
+				case <-effectCtx.Done():
+					return 0, effectCtx.Err()
+				}
+			})
+			if err != nil {
+				return nil, err
+			}
+			return json.RawMessage(fmt.Sprint(value)), nil
+		}
+	}
+	w, err := worker.New(ctx, js[other], "four-fault-before", handlers)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,20 +187,39 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow
 	case <-time.After(15 * time.Second):
 		t.Fatal("handler effect did not start")
 	}
-	if timerWorkflow || signalWorkflow {
+	var childIDs []string
+	if timerWorkflow || signalWorkflow || fanoutWorkflow {
 		deadline := time.Now().Add(15 * time.Second)
 		for time.Now().Before(deadline) {
 			records, _, readErr := journal.New(js[other]).Read(ctx, typ, id)
-			if readErr == nil && len(records) > 0 && records[len(records)-1].Kind == journal.Suspended {
-				break
-			}
 			if readErr != nil {
-				t.Fatalf("read timer suspension: %v", readErr)
+				t.Fatalf("read workflow suspension: %v", readErr)
+			}
+			if fanoutWorkflow {
+				childIDs = childIDs[:0]
+				for _, record := range records {
+					if record.Kind != journal.StepRequested {
+						continue
+					}
+					var request struct {
+						Kind    string `json:"kind"`
+						ChildID string `json:"child_id"`
+					}
+					if err := json.Unmarshal(record.Payload, &request); err != nil {
+						t.Fatal(err)
+					}
+					if request.Kind == "call_async" {
+						childIDs = append(childIDs, request.ChildID)
+					}
+				}
+			}
+			if len(records) > 0 && records[len(records)-1].Kind == journal.Suspended && (!fanoutWorkflow || len(childIDs) == 6) {
+				break
 			}
 			time.Sleep(30 * time.Millisecond)
 		}
 		if time.Now().After(deadline) {
-			t.Fatal("timer workflow did not suspend before faults")
+			t.Fatalf("workflow did not suspend before faults; child IDs=%d", len(childIDs))
 		}
 	}
 	path := filepath.Join(root, "workflow-four-faults.json")
@@ -195,7 +259,7 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow
 	if err != nil {
 		t.Fatal(err)
 	}
-	successor, err := worker.New(ctx, resumed, "four-fault-after", map[string]worker.Handler{typ: handler})
+	successor, err := worker.New(ctx, resumed, "four-fault-after", handlers)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -205,6 +269,17 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow
 	go func() {
 		successorDone <- successor.RunPartition(successorCtx, identity.Partition(typ, id, provision.Partitions))
 	}()
+	if fanoutWorkflow {
+		partitions := map[uint32]bool{identity.Partition(typ, id, provision.Partitions): true}
+		for _, childID := range childIDs {
+			part := identity.Partition("fourfaultchild", childID, provision.Partitions)
+			if partitions[part] {
+				continue
+			}
+			partitions[part] = true
+			go func() { _ = successor.RunPartition(successorCtx, part) }()
+		}
+	}
 	close(release)
 	if signalWorkflow {
 		signalDeadline := time.Now().Add(20 * time.Second)
@@ -254,6 +329,25 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow
 	if err != nil || string(result) != "42" {
 		t.Fatalf("restarted node did not serve immutable result: %s, %v", result, err)
 	}
+	if fanoutWorkflow {
+		seen := make(map[string]bool, len(childIDs))
+		for _, childID := range childIDs {
+			if childID == "" || seen[childID] {
+				t.Fatalf("duplicate or empty child ID: %q", childID)
+			}
+			seen[childID] = true
+			attempt, stop := context.WithTimeout(ctx, 5*time.Second)
+			childResult, childErr := client.New(third).Await(attempt, "fourfaultchild", childID)
+			stop()
+			if childErr != nil || string(childResult) != "7" {
+				t.Fatalf("child %s result=%s err=%v", childID, childResult, childErr)
+			}
+		}
+	}
+	wantInvocations := 1
+	if fanoutWorkflow {
+		wantInvocations += len(childIDs)
+	}
 	var report integrity.Report
 	auditDeadline := time.Now().Add(15 * time.Second)
 	var firstAuditErr error
@@ -261,7 +355,7 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow
 		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
 		report, err = integrity.Check(attempt, third)
 		stop()
-		if err == nil && report.Invocations == 1 && report.Journals == 1 && report.Terminal == 1 {
+		if err == nil && report.Invocations == wantInvocations && report.Journals == wantInvocations && report.Terminal == wantInvocations {
 			break
 		}
 		if firstAuditErr == nil && err != nil {
@@ -269,8 +363,8 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	if err != nil || report.Invocations != 1 || report.Journals != 1 || report.Terminal != 1 {
-		t.Fatalf("retained integrity after all four faults healed: report=%+v first_err=%v last_err=%v elapsed=%s", report, firstAuditErr, err, time.Since(startedAt))
+	if err != nil || report.Invocations != wantInvocations || report.Journals != wantInvocations || report.Terminal != wantInvocations {
+		t.Fatalf("retained integrity after all four faults healed: report=%+v want=%d first_err=%v last_err=%v elapsed=%s", report, wantInvocations, firstAuditErr, err, time.Since(startedAt))
 	}
 	if signalWorkflow {
 		records, _, err := journal.New(third).Read(ctx, typ, id)
