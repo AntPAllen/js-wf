@@ -4,77 +4,40 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nats.go/jetstream"
 )
 
-type noResponderReadStream struct {
-	jetstream.Stream
-	consumer *noResponderReadConsumer
-	created  int
-	deleted  int
-}
-
-func (s *noResponderReadStream) CreateConsumer(_ context.Context, _ jetstream.ConsumerConfig) (jetstream.Consumer, error) {
-	s.created++
-	return s.consumer, nil
-}
-
-func (s *noResponderReadStream) DeleteConsumer(_ context.Context, _ string) error {
-	s.deleted++
-	return nil
-}
-
-func (s *noResponderReadStream) GetMsg(_ context.Context, _ uint64, _ ...jetstream.GetMsgOpt) (*jetstream.RawStreamMsg, error) {
-	return nil, jetstream.ErrMsgNotFound
-}
-
-type noResponderReadConsumer struct {
-	jetstream.Consumer
+type noResponderBatchPort struct {
+	opened  int
+	closed  int
 	fetches int
-	msg     jetstream.Msg
+	data    []byte
 }
 
-func (c *noResponderReadConsumer) CachedInfo() *jetstream.ConsumerInfo {
-	return &jetstream.ConsumerInfo{Name: "read-test"}
+func (p *noResponderBatchPort) Open(_ context.Context, _ string, _ uint64) (BatchReadCursor, error) {
+	p.opened++
+	return p, nil
 }
 
-func (c *noResponderReadConsumer) Fetch(_ int, _ ...jetstream.FetchOpt) (jetstream.MessageBatch, error) {
-	c.fetches++
-	if c.fetches == 1 {
-		return readBatch{err: nats.ErrNoResponders}, nil
+func (p *noResponderBatchPort) Probe(_ context.Context, _ string, _ uint64) (bool, error) {
+	return false, nil
+}
+
+func (p *noResponderBatchPort) Wait(context.Context, time.Duration) error { return nil }
+
+func (p *noResponderBatchPort) Fetch(_ context.Context, _ int) ([]AppendTail, error) {
+	p.fetches++
+	if p.fetches == 1 {
+		return nil, nats.ErrNoResponders
 	}
-	messages := make(chan jetstream.Msg, 1)
-	messages <- c.msg
-	close(messages)
-	return readBatch{messages: messages}, nil
+	return []AppendTail{{Sequence: 2, Data: p.data}}, nil
 }
 
-type readBatch struct {
-	messages <-chan jetstream.Msg
-	err      error
-}
-
-func (b readBatch) Messages() <-chan jetstream.Msg {
-	if b.messages != nil {
-		return b.messages
-	}
-	empty := make(chan jetstream.Msg)
-	close(empty)
-	return empty
-}
-
-func (b readBatch) Error() error { return b.err }
-
-type readMsg struct {
-	jetstream.Msg
-	data []byte
-}
-
-func (m readMsg) Data() []byte { return m.data }
-func (m readMsg) Metadata() (*jetstream.MsgMetadata, error) {
-	return &jetstream.MsgMetadata{Sequence: jetstream.SequencePair{Stream: 2}}, nil
+func (p *noResponderBatchPort) Close(context.Context) error {
+	p.closed++
+	return nil
 }
 
 func TestBatchReadRetriesNoResponderWithoutSkippingEntry(t *testing.T) {
@@ -82,14 +45,13 @@ func TestBatchReadRetriesNoResponderWithoutSkippingEntry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	consumer := &noResponderReadConsumer{msg: readMsg{data: encoded}}
-	stream := &noResponderReadStream{consumer: consumer}
+	port := &noResponderBatchPort{data: encoded}
 	first := []Record{{Entry: Entry{Epoch: 1, Index: 0, Kind: Started}, Sequence: 1}}
-	records, tail, received, err := readLiveBatch(context.Background(), stream, "wf.jrn.test.retry", 2, first, 1)
+	records, tail, received, err := readLiveBatch(context.Background(), port, "wf.jrn.test.retry", 2, first, 1)
 	if err != nil || !received || len(records) != 2 || records[1].Index != 1 || tail != 2 {
 		t.Fatalf("read after no responder: records=%+v tail=%d received=%t err=%v", records, tail, received, err)
 	}
-	if consumer.fetches != 2 || stream.created != 1 || stream.deleted != 1 {
-		t.Fatalf("consumer lifecycle: fetches=%d created=%d deleted=%d", consumer.fetches, stream.created, stream.deleted)
+	if port.fetches != 2 || port.opened != 1 || port.closed != 1 {
+		t.Fatalf("consumer lifecycle: fetches=%d opened=%d closed=%d", port.fetches, port.opened, port.closed)
 	}
 }

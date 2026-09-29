@@ -41,16 +41,18 @@ type Message struct {
 // Faults are consumed in publish order; callers can choose their order through
 // Scheduler rather than relying on Go goroutine timing.
 type JournalTransport struct {
-	mu        sync.Mutex
-	schedule  *Scheduler
-	sequence  uint64
-	messages  map[string][]Message
-	faults    []Fault
-	lastFault bool
+	mu          sync.Mutex
+	schedule    *Scheduler
+	sequence    uint64
+	messages    map[string][]Message
+	faults      []Fault
+	batchFaults []BatchReadFault
+	lastFault   bool
 }
 
 var _ journal.AppendPort = (*JournalTransport)(nil)
 var _ journal.ReadPort = (*JournalTransport)(nil)
+var _ journal.BatchReadPort = (*JournalTransport)(nil)
 
 func NewJournalTransport(schedule *Scheduler) *JournalTransport {
 	return &JournalTransport{schedule: schedule, messages: map[string][]Message{}}

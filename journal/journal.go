@@ -90,6 +90,7 @@ type Store struct {
 	js                jetstream.JetStream
 	appendPort        AppendPort
 	readPort          ReadPort
+	batchReadPort     BatchReadPort
 	snapshotReadPort  SnapshotReadPort
 	snapshotWritePort SnapshotWritePort
 	mu                sync.Mutex
@@ -135,9 +136,29 @@ type ReadPort interface {
 	Wait(context.Context, time.Duration) error
 }
 
+// BatchReadPort is the narrow long-journal transport. Fetch may return a
+// partial batch together with an error; Read validates those entries before
+// retrying from the next stream sequence.
+type BatchReadPort interface {
+	Open(context.Context, string, uint64) (BatchReadCursor, error)
+	Probe(context.Context, string, uint64) (bool, error)
+	Wait(context.Context, time.Duration) error
+}
+
+type BatchReadCursor interface {
+	Fetch(context.Context, int) ([]AppendTail, error)
+	Close(context.Context) error
+}
+
 // NewWithPorts runs Append and live Read decisions against supplied transports.
 func NewWithPorts(appendPort AppendPort, readPort ReadPort) *Store {
 	return &Store{appendPort: appendPort, readPort: readPort}
+}
+
+// NewWithBatchReadPort also exercises the production long-read decisions
+// against a modeled batch transport.
+func NewWithBatchReadPort(appendPort AppendPort, readPort ReadPort, batchPort BatchReadPort) *Store {
+	return &Store{appendPort: appendPort, readPort: readPort, batchReadPort: batchPort}
 }
 
 // NewWithSnapshotReadPort also loads compacted prefixes through a narrow
@@ -374,6 +395,10 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 			return nil, 0, err
 		}
 	}
+	batchPort := s.batchReadPort
+	if batchPort == nil && stream != nil {
+		batchPort = jetStreamBatchReadPort{stream: stream}
+	}
 	subject := identity.JournalSubject(typ, id)
 	var out []Record
 	var snap *Snapshot
@@ -393,10 +418,10 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 	readLive := false
 	var serialReads int
 	for {
-		if s.readPort == nil && serialReads == serialReadLimit {
+		if batchPort != nil && serialReads == serialReadLimit {
 			var batched bool
 			var err error
-			out, tail, batched, err = readLiveBatch(ctx, stream, subject, seq, out, tail)
+			out, tail, batched, err = readLiveBatch(ctx, batchPort, subject, seq, out, tail)
 			if err != nil {
 				return nil, 0, err
 			}
@@ -445,29 +470,23 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 // readLiveBatch avoids one API round trip per entry for long real journals.
 // One filtered pull consumer preserves stream order across Fetch batches;
 // verifyNext still checks logical indices and epochs across the boundary.
-func readLiveBatch(ctx context.Context, stream jetstream.Stream, subject string, seq uint64, out []Record, tail uint64) ([]Record, uint64, bool, error) {
-	var consumer jetstream.Consumer
-	var names []string
+func readLiveBatch(ctx context.Context, port BatchReadPort, subject string, seq uint64, out []Record, tail uint64) ([]Record, uint64, bool, error) {
+	var consumer BatchReadCursor
+	var opened []BatchReadCursor
 	defer func() {
-		for _, name := range names {
+		for _, cursor := range opened {
 			cleanupCtx, stop := context.WithTimeout(ctx, time.Second)
-			_ = stream.DeleteConsumer(cleanupCtx, name)
+			_ = cursor.Close(cleanupCtx)
 			stop()
 		}
 	}()
 	create := func(start uint64) error {
-		created, err := stream.CreateConsumer(ctx, jetstream.ConsumerConfig{
-			FilterSubject: subject, DeliverPolicy: jetstream.DeliverByStartSequencePolicy,
-			OptStartSeq: start, AckPolicy: jetstream.AckNonePolicy,
-			Replicas: 1, InactiveThreshold: time.Minute,
-		})
+		created, err := port.Open(ctx, subject, start)
 		if err != nil {
 			return err
 		}
 		consumer = created
-		if info := created.CachedInfo(); info != nil && info.Name != "" {
-			names = append(names, info.Name)
-		}
+		opened = append(opened, created)
 		return nil
 	}
 	if err := create(seq); err != nil {
@@ -476,39 +495,27 @@ func readLiveBatch(ctx context.Context, stream jetstream.Stream, subject string,
 	readLive := false
 	var noResponderRetries int
 	for ctx.Err() == nil {
-		batch, fetchErr := consumer.Fetch(256, jetstream.FetchMaxWait(250*time.Millisecond))
-		var received int
-		var batchErr error
-		if batch != nil {
-			for msg := range batch.Messages() {
-				metadata, err := msg.Metadata()
-				if err != nil {
-					return nil, 0, false, fmt.Errorf("filtered journal metadata after %d entries: %w", len(out), err)
-				}
-				var entry Entry
-				if err := json.Unmarshal(msg.Data(), &entry); err != nil {
-					return nil, 0, false, fmt.Errorf("%w: %v", ErrGap, err)
-				}
-				out, err = verifyNext(out, Record{Entry: entry, Sequence: metadata.Sequence.Stream})
-				if err != nil {
-					return nil, 0, false, err
-				}
-				readLive = true
-				tail = metadata.Sequence.Stream
-				seq = tail + 1
-				received++
-				if len(out) > MaxEntries {
-					return nil, 0, false, ErrTooLong
-				}
+		messages, transportErr := consumer.Fetch(ctx, 256)
+		for _, msg := range messages {
+			var entry Entry
+			if err := json.Unmarshal(msg.Data, &entry); err != nil {
+				return nil, 0, false, fmt.Errorf("%w: %v", ErrGap, err)
 			}
-			batchErr = batch.Error()
+			var err error
+			out, err = verifyNext(out, Record{Entry: entry, Sequence: msg.Sequence})
+			if err != nil {
+				return nil, 0, false, err
+			}
+			readLive = true
+			tail = msg.Sequence
+			seq = tail + 1
+			if len(out) > MaxEntries {
+				return nil, 0, false, ErrTooLong
+			}
 		}
+		received := len(messages)
 		if received > 0 {
 			noResponderRetries = 0
-		}
-		transportErr := fetchErr
-		if transportErr == nil {
-			transportErr = batchErr
 		}
 		if errors.Is(transportErr, nats.ErrNoResponders) || errors.Is(transportErr, jetstream.ErrConsumerDeleted) {
 			noResponderRetries++
@@ -520,10 +527,8 @@ func readLiveBatch(ctx context.Context, stream jetstream.Stream, subject string,
 					return nil, 0, false, fmt.Errorf("replace filtered journal consumer after %d entries: %w", len(out), err)
 				}
 			}
-			select {
-			case <-ctx.Done():
-				return nil, 0, false, ctx.Err()
-			case <-time.After(50 * time.Millisecond):
+			if err := port.Wait(ctx, 50*time.Millisecond); err != nil {
+				return nil, 0, false, err
 			}
 			continue
 		}
@@ -535,8 +540,8 @@ func readLiveBatch(ctx context.Context, stream jetstream.Stream, subject string,
 		}
 		// A short fetch may mean the consumer is catching up. Confirm the
 		// next subject message is absent before returning the current prefix.
-		_, err := stream.GetMsg(ctx, seq, jetstream.WithGetMsgSubject(subject))
-		if errors.Is(err, jetstream.ErrMsgNotFound) {
+		exists, err := port.Probe(ctx, subject, seq)
+		if err == nil && !exists {
 			return out, tail, readLive, nil
 		}
 		if err != nil {

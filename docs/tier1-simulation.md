@@ -16,6 +16,17 @@ The existing three-node journal contract now compares the modeled and real
 `Read` records and tail after interleaving two subjects, including their
 global stream-sequence hole. Three repeats and a race run passed.
 
+Long reads now use the same production `BatchReadPort` decision path in the
+model and on JetStream after 64 live entries. The in-memory cursor returns
+subject-filtered stream sequences and can end a pull with a no-responder or
+consumer-deleted error after a partial batch. A 1,000-seed workload reads 80
+entries interleaved with another subject and covers clean reads, partial
+delivery, cursor replacement after repeated faults, and fail-closed retry
+exhaustion. Its 50 ms retries advance virtual time; the first ten seeds replay
+exactly, and seed 42 produces byte-identical traces across processes. The
+three-node 300-entry contract now mirrors the same publish order in the model
+and compares every record and tail after both production read paths.
+
 The production `journal.Store.Read` can now load a compacted prefix through a
 narrow modeled manifest and Object Store read port, then join it to retained
 live entries. A 1,000-seed workload advances the snapshot manifest twice,
