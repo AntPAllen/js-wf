@@ -155,6 +155,7 @@ func TestSeededJournalBatchReadReplay(t *testing.T) {
 		}
 		return
 	}
+	modes := map[string]int{}
 	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
 		generated, err := runSeededJournalBatchRead(seed, nil)
 		if err != nil {
@@ -167,12 +168,16 @@ func TestSeededJournalBatchReadReplay(t *testing.T) {
 			}
 			t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, err)
 		}
+		modes[generated.Decisions[0].Chosen]++
 		if seed <= 10 {
 			replayed, err := replayTrace(generated)
 			if err != nil || !reflect.DeepEqual(generated, replayed) {
 				t.Fatalf("FAULT_SEED=%d batch read replay: %v", seed, err)
 			}
 		}
+	}
+	if len(modes) != 7 {
+		t.Fatalf("batch read seed coverage: modes=%v", modes)
 	}
 	var files [2]string
 	for i := range files {
