@@ -106,13 +106,12 @@ func (m *StartTransport) PublishInvocation(ctx context.Context, msg *nats.Msg) (
 		return 0, ErrTransportLost
 	}
 	if _, exists := m.invocations[msg.Subject]; exists {
-		if fault == "bypass_subject_limit" {
-			if msg.Header.Get(jetstream.ExpectedLastSubjSeqHeader) == "0" {
-				event.Outcome = "cas_reject"
-				m.event(event)
-				return 0, &jetstream.APIError{Code: 400, Description: "wrong last sequence"}
-			}
-		} else {
+		if msg.Header.Get(jetstream.ExpectedLastSubjSeqHeader) == "0" {
+			event.Outcome = "cas_reject"
+			m.event(event)
+			return 0, &jetstream.APIError{Code: 400, ErrorCode: jetstream.JSErrCodeStreamWrongLastSequence, Description: "wrong last sequence"}
+		}
+		if fault != "bypass_subject_limit" {
 			event.Outcome = "subject_full"
 			m.event(event)
 			return 0, &jetstream.APIError{Code: 400, Description: "maximum messages per subject exceeded"}

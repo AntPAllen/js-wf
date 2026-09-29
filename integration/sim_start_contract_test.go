@@ -71,6 +71,20 @@ func TestStartSubjectTailCASWithoutSubjectLimit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	normalSubject := identity.InvocationSubject("cas-contract", "normal-limit")
+	normal := &nats.Msg{Subject: normalSubject, Data: []byte(`1`), Header: nats.Header{}}
+	normal.Header.Set(jetstream.ExpectedLastSubjSeqHeader, "0")
+	if _, err := all[0].PublishMsg(ctx, normal); err != nil {
+		t.Fatalf("first guarded publish with subject limit: %v", err)
+	}
+	if _, err := all[0].PublishMsg(ctx, normal); err == nil {
+		t.Fatal("second guarded publish passed both CAS and subject limit")
+	} else {
+		var apiErr *jetstream.APIError
+		if !errors.As(err, &apiErr) || apiErr.ErrorCode != jetstream.JSErrCodeStreamWrongLastSequence {
+			t.Fatalf("guarded duplicate should report CAS rejection before subject limit: %v", err)
+		}
+	}
 	config := info.Config
 	config.MaxMsgsPerSubject = -1
 	config.DiscardNewPerSubject = false

@@ -18,6 +18,7 @@ import (
 	"js-wf/reconcile"
 
 	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 func TestStartTransportFaultBoundaries(t *testing.T) {
@@ -96,6 +97,16 @@ func TestStartSubjectTailCASDefendsAgainstIgnoredSubjectLimit(t *testing.T) {
 	first, err := c.Start(ctx, "test", "same", []byte(`1`))
 	if err != nil {
 		t.Fatal(err)
+	}
+	guarded := &nats.Msg{Subject: identity.InvocationSubject("test", "same"), Data: []byte(`1`), Header: nats.Header{}}
+	guarded.Header.Set(jetstream.ExpectedLastSubjSeqHeader, "0")
+	if _, err := model.PublishInvocation(ctx, guarded); err == nil {
+		t.Fatal("normal duplicate unexpectedly passed CAS")
+	} else {
+		var apiErr *jetstream.APIError
+		if !errors.As(err, &apiErr) || apiErr.ErrorCode != jetstream.JSErrCodeStreamWrongLastSequence {
+			t.Fatalf("normal duplicate should report CAS rejection first: %v", err)
+		}
 	}
 	if err := model.QueueFault(StartFault{Operation: "publish_invocation", Kind: "bypass_subject_limit"}); err != nil {
 		t.Fatal(err)
