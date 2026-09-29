@@ -33,7 +33,7 @@ func runSeededJournalBatchRead(seed int64, replay *Trace) (trace Trace, runErr e
 		return Trace{}, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose([]string{"clean", "no_responders", "partial_no_responders", "partial_consumer_deleted", "replace_consumer", "persistent_no_responders"})
+	mode, err := schedule.Choose([]string{"clean", "no_responders", "partial_no_responders", "partial_consumer_deleted", "replace_consumer", "persistent_no_responders", "deleted_middle"})
 	if err != nil {
 		return trace, err
 	}
@@ -42,6 +42,7 @@ func runSeededJournalBatchRead(seed int64, replay *Trace) (trace Trace, runErr e
 	store := journal.NewWithBatchReadPort(model, model, model)
 	id := fmt.Sprintf("batch-%d", seed)
 	const typ = "batch"
+	subject := identity.JournalSubject(typ, id)
 	var expected []journal.Record
 	var tail uint64
 	for index := 0; index < 80; index++ {
@@ -84,11 +85,19 @@ func runSeededJournalBatchRead(seed int64, replay *Trace) (trace Trace, runErr e
 				return trace, err
 			}
 		}
+	case "deleted_middle":
+		if !model.DeleteMessage(subject, expected[70].Sequence) {
+			return trace, fmt.Errorf("seed %d could not delete journal entry", seed)
+		}
 	}
 	actual, gotTail, readErr := store.Read(ctx, typ, id)
 	if mode == "persistent_no_responders" {
 		if !errors.Is(readErr, nats.ErrNoResponders) || len(actual) != 0 || gotTail != 0 || schedule.NowMillis() != 250 {
 			return trace, fmt.Errorf("seed %d persistent fault: entries=%d tail=%d time=%d err=%v", seed, len(actual), gotTail, schedule.NowMillis(), readErr)
+		}
+	} else if mode == "deleted_middle" {
+		if !errors.Is(readErr, journal.ErrGap) || len(actual) != 0 || gotTail != 0 || schedule.NowMillis() != 2000 {
+			return trace, fmt.Errorf("seed %d deleted entry: entries=%d tail=%d time=%d err=%v", seed, len(actual), gotTail, schedule.NowMillis(), readErr)
 		}
 	} else if readErr != nil || gotTail != tail || !reflect.DeepEqual(actual, expected) {
 		return trace, fmt.Errorf("seed %d mode %s: entries=%d tail=%d want=%d err=%v", seed, mode, len(actual), gotTail, tail, readErr)
@@ -112,6 +121,8 @@ func runSeededJournalBatchRead(seed int64, replay *Trace) (trace Trace, runErr e
 		wantOpens, wantWaits = 2, 2
 	case "persistent_no_responders":
 		wantOpens, wantWaits = 5, 5
+	case "deleted_middle":
+		wantOpens, wantWaits = 81, 80
 	}
 	if opens != wantOpens || closes != opens || waits != wantWaits {
 		return trace, fmt.Errorf("seed %d mode %s: opens=%d closes=%d waits=%d", seed, mode, opens, closes, waits)

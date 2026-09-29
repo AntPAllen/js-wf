@@ -72,6 +72,23 @@ func (m *JournalTransport) PurgeBefore(subject string, before uint64) {
 	m.event(TransportEvent{Operation: "purge_journal_prefix", Subject: subject, Sequence: before, Outcome: "ok"})
 }
 
+// DeleteMessage removes one retained message without renumbering later
+// stream sequences, matching a JetStream message deletion.
+func (m *JournalTransport) DeleteMessage(subject string, sequence uint64) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	list := m.messages[subject]
+	for i, message := range list {
+		if message.Sequence == sequence {
+			m.messages[subject] = append(list[:i:i], list[i+1:]...)
+			m.event(TransportEvent{Operation: "delete_journal_message", Subject: subject, Sequence: sequence, Outcome: "ok"})
+			return true
+		}
+	}
+	m.event(TransportEvent{Operation: "delete_journal_message", Subject: subject, Sequence: sequence, Outcome: "not_found"})
+	return false
+}
+
 func (m *JournalTransport) QueueFault(f Fault) error {
 	switch f.Kind {
 	case DropBeforeCommit, LoseAckAfterCommit, RejectUnchanged:

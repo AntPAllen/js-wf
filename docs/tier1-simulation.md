@@ -21,8 +21,10 @@ model and on JetStream after 64 live entries. The in-memory cursor returns
 subject-filtered stream sequences and can end a pull with a no-responder or
 consumer-deleted error after a partial batch. A 1,000-seed workload reads 80
 entries interleaved with another subject and covers clean reads, partial
-delivery, cursor replacement after repeated faults, and fail-closed retry
-exhaustion. Its 50 ms retries advance virtual time; the first ten seeds replay
+delivery, cursor replacement after repeated faults, fail-closed retry
+exhaustion, and a deleted middle entry that returns `ErrGap` after 80 virtual
+25 ms whole-read retries. Batch-fault 50 ms retries also advance virtual time;
+the first ten seeds replay
 exactly, and seed 42 produces byte-identical traces across processes. The
 three-node 300-entry contract now mirrors the same publish order in the model
 and compares every record and tail after both production read paths.
