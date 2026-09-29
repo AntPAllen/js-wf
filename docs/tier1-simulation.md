@@ -40,8 +40,11 @@ two-compactor workload starts from one compacted journal, races two production
 `SnapshotPrefix` calls, and checks that the manifest advances one revision,
 the losing writer receives `ErrSnapshotStale` when its CAS conflicts, four
 live entries remain, and a fresh read reconstructs every original record.
-The workload pins a conflicting-CAS trace from seed 1, replays exact traces,
-and compares seed 42 across processes.
+Fault choices drop or hide acknowledgments for the object upload, manifest
+update, and bounded journal purge. A subsequent compactor call repairs the
+uncertain outcome without advancing the manifest again. The workload pins a
+conflicting-CAS and purge-drop trace from seed 1, replays exact traces, and
+compares seed 42 across processes.
 
 The production worker now calls modeled `MaybeSnapshot` after a successful
 delivery when its journal has a snapshot write port. A 1,000-seed workload

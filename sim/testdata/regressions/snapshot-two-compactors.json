@@ -7,6 +7,19 @@
     {
       "at_ms": 0,
       "enabled": [
+        "clean",
+        "manifest_ack_lost",
+        "manifest_drop",
+        "object_ack_lost",
+        "object_drop",
+        "purge_ack_lost",
+        "purge_drop"
+      ],
+      "chosen": "purge_drop"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
         "alpha:get_manifest",
         "beta:get_manifest"
       ],
@@ -19,14 +32,6 @@
         "beta:get_snapshot_object"
       ],
       "chosen": "beta:get_snapshot_object"
-    },
-    {
-      "at_ms": 0,
-      "enabled": [
-        "alpha:get_manifest",
-        "beta:next_journal"
-      ],
-      "chosen": "beta:next_journal"
     },
     {
       "at_ms": 0,
@@ -208,6 +213,14 @@
       "at_ms": 0,
       "enabled": [
         "alpha:next_journal",
+        "beta:next_journal"
+      ],
+      "chosen": "beta:next_journal"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "alpha:next_journal",
         "beta:get_manifest_revision"
       ],
       "chosen": "beta:get_manifest_revision"
@@ -218,23 +231,23 @@
         "alpha:next_journal",
         "beta:put_snapshot_object"
       ],
-      "chosen": "beta:put_snapshot_object"
-    },
-    {
-      "at_ms": 0,
-      "enabled": [
-        "alpha:next_journal",
-        "beta:get_snapshot_object"
-      ],
       "chosen": "alpha:next_journal"
     },
     {
       "at_ms": 0,
       "enabled": [
         "alpha:get_manifest_revision",
-        "beta:get_snapshot_object"
+        "beta:put_snapshot_object"
       ],
       "chosen": "alpha:get_manifest_revision"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "alpha:put_snapshot_object",
+        "beta:put_snapshot_object"
+      ],
+      "chosen": "beta:put_snapshot_object"
     },
     {
       "at_ms": 0,
@@ -250,15 +263,15 @@
         "alpha:put_snapshot_object",
         "beta:update_manifest"
       ],
-      "chosen": "beta:update_manifest"
+      "chosen": "alpha:put_snapshot_object"
     },
     {
       "at_ms": 0,
       "enabled": [
-        "alpha:put_snapshot_object",
-        "beta:get_manifest"
+        "alpha:get_snapshot_object",
+        "beta:update_manifest"
       ],
-      "chosen": "alpha:put_snapshot_object"
+      "chosen": "beta:update_manifest"
     },
     {
       "at_ms": 0,
@@ -282,14 +295,15 @@
         "alpha:get_snapshot_object",
         "beta:purge_journal"
       ],
-      "chosen": "beta:purge_journal"
+      "chosen": "alpha:get_snapshot_object"
     },
     {
       "at_ms": 0,
       "enabled": [
-        "alpha:get_snapshot_object"
+        "alpha:update_manifest",
+        "beta:purge_journal"
       ],
-      "chosen": "alpha:get_snapshot_object"
+      "chosen": "beta:purge_journal"
     },
     {
       "at_ms": 0,
@@ -1015,15 +1029,6 @@
     },
     {
       "at_ms": 0,
-      "operation": "next_journal",
-      "subject": "wf.jrn.test.snapshot-race-1",
-      "expected": 18,
-      "sequence": 18,
-      "data_sha256": "c71758ac4b065e80c29eeea1b6aed0c0d6b8ad21352af3484c357a6f8f910d81",
-      "outcome": "ok"
-    },
-    {
-      "at_ms": 0,
       "operation": "get_snapshot_manifest",
       "subject": "snap.test.snapshot-race-1",
       "data_sha256": "82c0edf7334cfaed1257c7b269d2efc4c8f2f2482b858e747139e63a08243d6f",
@@ -1033,9 +1038,9 @@
       "at_ms": 0,
       "operation": "next_journal",
       "subject": "wf.jrn.test.snapshot-race-1",
-      "expected": 19,
-      "sequence": 19,
-      "data_sha256": "3ba6130ea38bd260b69096278d2bc8df044fb23ae6b432928b5399686cddd53b",
+      "expected": 18,
+      "sequence": 18,
+      "data_sha256": "c71758ac4b065e80c29eeea1b6aed0c0d6b8ad21352af3484c357a6f8f910d81",
       "outcome": "ok"
     },
     {
@@ -1076,9 +1081,9 @@
       "at_ms": 0,
       "operation": "next_journal",
       "subject": "wf.jrn.test.snapshot-race-1",
-      "expected": 20,
-      "sequence": 20,
-      "data_sha256": "ffe582f0f302152f4107f983ad46fc50ab5969b4aac0f9225bee3ee37382ad80",
+      "expected": 19,
+      "sequence": 19,
+      "data_sha256": "3ba6130ea38bd260b69096278d2bc8df044fb23ae6b432928b5399686cddd53b",
       "outcome": "ok"
     },
     {
@@ -1094,9 +1099,9 @@
       "at_ms": 0,
       "operation": "next_journal",
       "subject": "wf.jrn.test.snapshot-race-1",
-      "expected": 21,
-      "sequence": 21,
-      "data_sha256": "d0157eb3092c91857331a37d924ac355489bcdbe4d2a06934c014cb5b82914f4",
+      "expected": 20,
+      "sequence": 20,
+      "data_sha256": "ffe582f0f302152f4107f983ad46fc50ab5969b4aac0f9225bee3ee37382ad80",
       "outcome": "ok"
     },
     {
@@ -1121,9 +1126,45 @@
       "at_ms": 0,
       "operation": "next_journal",
       "subject": "wf.jrn.test.snapshot-race-1",
+      "expected": 21,
+      "sequence": 21,
+      "data_sha256": "d0157eb3092c91857331a37d924ac355489bcdbe4d2a06934c014cb5b82914f4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.snapshot-race-1",
       "expected": 22,
       "sequence": 22,
       "data_sha256": "4ec3dc17b9333084bf08c819fe8a7975ed4af921207b0dae7f6ffa498982c066",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.snapshot-race-1",
+      "expected": 23,
+      "sequence": 23,
+      "data_sha256": "c9220ec20290d713aeba1374474a7e7b8072d790e6da7373dbac253bbe04d552",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.snapshot-race-1",
+      "expected": 22,
+      "sequence": 22,
+      "data_sha256": "4ec3dc17b9333084bf08c819fe8a7975ed4af921207b0dae7f6ffa498982c066",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.snapshot-race-1",
+      "expected": 24,
+      "sequence": 24,
+      "data_sha256": "2c664f3b09de3e37fec1c8f179461a340731f0fa27acbd001fd625ef98ec4109",
       "outcome": "ok"
     },
     {
@@ -1148,9 +1189,9 @@
       "at_ms": 0,
       "operation": "next_journal",
       "subject": "wf.jrn.test.snapshot-race-1",
-      "expected": 22,
-      "sequence": 22,
-      "data_sha256": "4ec3dc17b9333084bf08c819fe8a7975ed4af921207b0dae7f6ffa498982c066",
+      "expected": 25,
+      "sequence": 25,
+      "data_sha256": "b1b3fa471e4b73e30a5d0bba4b9d59de1fc8a57ad1a1258bdee5158de2dfccac",
       "outcome": "ok"
     },
     {
@@ -1166,27 +1207,14 @@
       "at_ms": 0,
       "operation": "next_journal",
       "subject": "wf.jrn.test.snapshot-race-1",
-      "expected": 23,
-      "sequence": 23,
-      "data_sha256": "c9220ec20290d713aeba1374474a7e7b8072d790e6da7373dbac253bbe04d552",
-      "outcome": "ok"
+      "expected": 26,
+      "outcome": "not_found"
     },
     {
       "at_ms": 0,
-      "operation": "next_journal",
-      "subject": "wf.jrn.test.snapshot-race-1",
-      "expected": 24,
-      "sequence": 24,
-      "data_sha256": "2c664f3b09de3e37fec1c8f179461a340731f0fa27acbd001fd625ef98ec4109",
-      "outcome": "ok"
-    },
-    {
-      "at_ms": 0,
-      "operation": "next_journal",
-      "subject": "wf.jrn.test.snapshot-race-1",
-      "expected": 25,
-      "sequence": 25,
-      "data_sha256": "b1b3fa471e4b73e30a5d0bba4b9d59de1fc8a57ad1a1258bdee5158de2dfccac",
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.snapshot-race-1",
+      "data_sha256": "82c0edf7334cfaed1257c7b269d2efc4c8f2f2482b858e747139e63a08243d6f",
       "outcome": "ok"
     },
     {
@@ -1212,21 +1240,14 @@
     },
     {
       "at_ms": 0,
-      "operation": "next_journal",
-      "subject": "wf.jrn.test.snapshot-race-1",
-      "expected": 26,
-      "outcome": "not_found"
-    },
-    {
-      "at_ms": 0,
-      "operation": "get_snapshot_manifest",
-      "subject": "snap.test.snapshot-race-1",
-      "data_sha256": "82c0edf7334cfaed1257c7b269d2efc4c8f2f2482b858e747139e63a08243d6f",
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-bb73f183b3715b60-21-927042bf40094e49",
+      "data_sha256": "927042bf40094e49fd78efb2e2a75da27e598426580f2e8f6f4c2f41e698136b",
       "outcome": "ok"
     },
     {
       "at_ms": 0,
-      "operation": "get_snapshot_object",
+      "operation": "put_snapshot_object",
       "subject": "snapshot-bb73f183b3715b60-21-927042bf40094e49",
       "data_sha256": "927042bf40094e49fd78efb2e2a75da27e598426580f2e8f6f4c2f41e698136b",
       "outcome": "ok"
@@ -1241,9 +1262,103 @@
     },
     {
       "at_ms": 0,
-      "operation": "put_snapshot_object",
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.snapshot-race-1",
+      "data_sha256": "e4707f5c4d728f830c46c215d41dbfbc0ee11f866c60cbd0337efb3ad0ff336b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
       "subject": "snapshot-bb73f183b3715b60-21-927042bf40094e49",
       "data_sha256": "927042bf40094e49fd78efb2e2a75da27e598426580f2e8f6f4c2f41e698136b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-bb73f183b3715b60-21-927042bf40094e49",
+      "data_sha256": "927042bf40094e49fd78efb2e2a75da27e598426580f2e8f6f4c2f41e698136b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_snapshot_journal",
+      "subject": "wf.jrn.test.snapshot-race-1",
+      "sequence": 22,
+      "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outcome": "drop_before_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "update_snapshot_manifest",
+      "subject": "snap.test.snapshot-race-1",
+      "sequence": 1,
+      "data_sha256": "e4707f5c4d728f830c46c215d41dbfbc0ee11f866c60cbd0337efb3ad0ff336b",
+      "outcome": "revision_mismatch"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.snapshot-race-1",
+      "data_sha256": "e4707f5c4d728f830c46c215d41dbfbc0ee11f866c60cbd0337efb3ad0ff336b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-bb73f183b3715b60-21-927042bf40094e49",
+      "data_sha256": "927042bf40094e49fd78efb2e2a75da27e598426580f2e8f6f4c2f41e698136b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.snapshot-race-1",
+      "expected": 22,
+      "sequence": 22,
+      "data_sha256": "4ec3dc17b9333084bf08c819fe8a7975ed4af921207b0dae7f6ffa498982c066",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.snapshot-race-1",
+      "expected": 23,
+      "sequence": 23,
+      "data_sha256": "c9220ec20290d713aeba1374474a7e7b8072d790e6da7373dbac253bbe04d552",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.snapshot-race-1",
+      "expected": 24,
+      "sequence": 24,
+      "data_sha256": "2c664f3b09de3e37fec1c8f179461a340731f0fa27acbd001fd625ef98ec4109",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.snapshot-race-1",
+      "expected": 25,
+      "sequence": 25,
+      "data_sha256": "b1b3fa471e4b73e30a5d0bba4b9d59de1fc8a57ad1a1258bdee5158de2dfccac",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.snapshot-race-1",
+      "expected": 26,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.snapshot-race-1",
+      "data_sha256": "e4707f5c4d728f830c46c215d41dbfbc0ee11f866c60cbd0337efb3ad0ff336b",
       "outcome": "ok"
     },
     {
@@ -1274,21 +1389,6 @@
       "sequence": 22,
       "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "outcome": "ok"
-    },
-    {
-      "at_ms": 0,
-      "operation": "get_snapshot_object",
-      "subject": "snapshot-bb73f183b3715b60-21-927042bf40094e49",
-      "data_sha256": "927042bf40094e49fd78efb2e2a75da27e598426580f2e8f6f4c2f41e698136b",
-      "outcome": "ok"
-    },
-    {
-      "at_ms": 0,
-      "operation": "update_snapshot_manifest",
-      "subject": "snap.test.snapshot-race-1",
-      "sequence": 1,
-      "data_sha256": "e4707f5c4d728f830c46c215d41dbfbc0ee11f866c60cbd0337efb3ad0ff336b",
-      "outcome": "revision_mismatch"
     },
     {
       "at_ms": 0,
@@ -1359,7 +1459,7 @@
       "operation": "check_snapshot_compactors",
       "subject": "wf.jrn.test.snapshot-race-1",
       "sequence": 21,
-      "outcome": "retained"
+      "outcome": "purge_drop"
     }
   ]
 }
