@@ -35,10 +35,14 @@ const tier3WorkerSkewID = "timer"
 const tier3WorkerSkewSignalCount = 16
 
 func tier3WorkerSkewSignalID() string {
-	partition := identity.Partition(tier3WorkerSkewType, tier3WorkerSkewID, provision.Partitions)
+	return tier3ClockSignalID(tier3WorkerSkewType, tier3WorkerSkewID)
+}
+
+func tier3ClockSignalID(typ, timerID string) string {
+	partition := identity.Partition(typ, timerID, provision.Partitions)
 	for i := 0; ; i++ {
 		id := fmt.Sprintf("signals-%d", i)
-		if identity.Partition(tier3WorkerSkewType, id, provision.Partitions) == partition {
+		if identity.Partition(typ, id, provision.Partitions) == partition {
 			return id
 		}
 	}
@@ -280,8 +284,8 @@ func TestFiveContainerWorkerClockSkewTimer(t *testing.T) {
 				t.Fatalf("worker-skew signal result=%s err=%v latency=%s", signalResult, err, signalLatency)
 			}
 			signalRecords, _, err := journal.New(js).Read(ctx, tier3WorkerSkewType, signalID)
-			if err != nil {
-				t.Fatal(err)
+			if err != nil || len(signalRecords) == 0 {
+				t.Fatalf("worker-skew signal journal=%+v err=%v", signalRecords, err)
 			}
 			var consumed int
 			var previous uint64

@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Verify real server clock offsets and native timer deadlines
+      - name: Verify server clock offsets, native timers, and signal order
         run: go test ./integration -run '^TestFiveContainerServerClockSkewTimer$' -count=1 -timeout=6m -v
       - name: Verify worker clock offsets, native timers, and signal order
         env:
