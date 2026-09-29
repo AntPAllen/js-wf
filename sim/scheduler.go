@@ -242,5 +242,6 @@ func (s *Scheduler) Finish() error {
 	if s.replay != nil && !reflect.DeepEqual(s.trace.Transport, s.replay.Transport) {
 		return fmt.Errorf("simulation transport trace diverged")
 	}
+	recordCoverage(s)
 	return nil
 }

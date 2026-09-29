@@ -97,7 +97,11 @@ seconds of Go test time (334.9 seconds wall) on the expanded four-CPU VM.
 `tier1-extended` is a manual CI workflow with 10,000 and 100,000 seeds per
 workload and the same failure-trace artifact path. The per-push gate remains
 at 1,000 until the larger run is measured on CI hardware against the plan's
-few-minute condition.
+few-minute condition. With `SIM_COVERAGE_SUMMARY=1`, the test runner reports
+model version, generated schedules, scheduler choices per second, transport
+events, and final virtual-time buckets. A local default run produced 49,602
+generated schedules and 1,503,118 scheduler choices in 34.1 seconds;
+22,808 schedules ended at virtual time zero and 2,894 at one minute or more.
 CI now replays a pinned corpus covering committed and dropped CAS unknowns,
 two-worker dispatch, competing suspended scanners, signal, suspended, and child
 notification liveness, outcome persistence, integrated short-handler execution,

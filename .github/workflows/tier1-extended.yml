@@ -16,6 +16,7 @@ jobs:
     timeout-minutes: 120
     env:
       SIM_SEEDS: ${{ inputs.seeds }}
+      SIM_COVERAGE_SUMMARY: '1'
       FAULT_TRACE_OUT: sim-failure.json
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +26,7 @@ jobs:
       - name: Run seeded transport suite
         run: |
           echo "Tier 1 seeds per workload: 1..${SIM_SEEDS}"
-          /usr/bin/time -f 'elapsed=%e user=%U system=%S' go test ./sim -count=1 -timeout=110m
+          /usr/bin/time -f 'elapsed=%e user=%U system=%S' go test -v ./sim -count=1 -timeout=110m
       - if: failure()
         timeout-minutes: 4
         run: |
