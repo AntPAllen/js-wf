@@ -282,6 +282,87 @@ func TestSimDispatchDroppedNakHandoffContract(t *testing.T) {
 	}
 }
 
+func TestSimDispatchDelayedNakContract(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
+	defer cancel()
+	const ackWait = 4 * time.Second
+	const nakDelay = time.Second
+	model := sim.NewDispatchTransport(sim.NewScheduler(24), ackWait)
+	model.PublishRun("wf.run.0", []byte(`work`))
+	modeledConsumer, err := model.Consumer(ctx, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	realRun, err := all[0].Stream(ctx, "WF_RUN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := all[0].Publish(ctx, "wf.run.0", []byte(`work`)); err != nil {
+		t.Fatal(err)
+	}
+	realConsumer, err := realRun.CreateConsumer(ctx, jetstream.ConsumerConfig{
+		Name: "WF_SIM_DELAYED_NAK", Durable: "WF_SIM_DELAYED_NAK", FilterSubject: "wf.run.0",
+		AckPolicy: jetstream.AckExplicitPolicy, AckWait: ackWait, MaxDeliver: -1, MaxAckPending: 1000,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	realFirstBatch, err := realConsumer.Fetch(1, jetstream.FetchMaxWait(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	realFirst := <-realFirstBatch.Messages()
+	modelFirstBatch, err := modeledConsumer.FetchOne(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	modelFirst := <-modelFirstBatch.Messages()
+	if realFirst == nil || modelFirst == nil {
+		t.Fatal("initial delivery missing")
+	}
+	if err := realFirst.NakWithDelay(nakDelay); err != nil {
+		t.Fatal(err)
+	}
+	if err := modelFirst.NakWithDelay(nakDelay); err != nil {
+		t.Fatal(err)
+	}
+	if err := model.Wait(ctx, nakDelay); err != nil {
+		t.Fatal(err)
+	}
+	realSecondBatch, err := realConsumer.Fetch(1, jetstream.FetchMaxWait(3*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	realSecond := <-realSecondBatch.Messages()
+	modelSecondBatch, err := modeledConsumer.FetchOne(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	modelSecond := <-modelSecondBatch.Messages()
+	if realSecond == nil || modelSecond == nil || string(realSecond.Data()) != "work" || string(modelSecond.Data()) != "work" {
+		t.Fatalf("delayed redelivery real=%v model=%v", realSecond, modelSecond)
+	}
+	realMeta, realErr := realSecond.Metadata()
+	modelMeta, modelErr := modelSecond.Metadata()
+	if realErr != nil || modelErr != nil || realMeta.NumDelivered != 2 || modelMeta.NumDelivered != 2 {
+		t.Fatalf("delayed redelivery count real=%+v %v model=%+v %v", realMeta, realErr, modelMeta, modelErr)
+	}
+	if err := realSecond.DoubleAck(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := modelSecond.Ack(); err != nil {
+		t.Fatal(err)
+	}
+	if model.Pending() != 0 {
+		t.Fatalf("model retained %d pending messages", model.Pending())
+	}
+	info, err := realConsumer.Info(ctx)
+	if err != nil || info.NumAckPending != 0 || info.NumPending != 0 {
+		t.Fatalf("real consumer state=%+v err=%v", info, err)
+	}
+}
+
 func TestSimDispatchDurableRestartAndSharedConsumerContract(t *testing.T) {
 	all, _ := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 18*time.Second)

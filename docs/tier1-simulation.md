@@ -379,7 +379,10 @@ renewal reply, a failed progress write, and a dropped nak. A three-node
 dispatch contract now checks the modeled dropped-nak server state against a
 real consumer whose nak is withheld before send: the handoff arrives first,
 the original redelivers after AckWait, and both messages drain. Three normal
-runs and a race run passed. A three-node
+runs and a race run passed. A second three-node contract checks that a
+successful one-second `NakWithDelay` redelivers before the four-second
+AckWait and drains after ack; three normal runs and a race run passed. A
+three-node
 worker-level fixture hides
 a committed lease-renewal reply during a blocked effect and checks the same
 handoff, terminal result, and drained run queue; three repeated runs and a
