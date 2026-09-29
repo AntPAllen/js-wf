@@ -3,16 +3,19 @@ package sim
 import (
 	"fmt"
 	"reflect"
+	"sort"
+	"strings"
 )
 
 // ReproduceFailure reruns a workload with an exact or guided trace. It must
 // return a generated trace and an error that identifies the checker failure.
 type ReproduceFailure func(*Trace) (Trace, error)
 
-// MinimizeFailureTrace removes forced scheduler choices while preserving the
-// same caller-selected failure. It tests progressively smaller chunks, then
-// verifies the best generated trace with exact replay. A rejected candidate
-// may be a different failure or a changed enabled set. maxRuns bounds work.
+// MinimizeFailureTrace removes forced scheduler choices and then cooperative
+// actors while preserving the same caller-selected failure. It tests
+// progressively smaller chunks, then verifies the best generated trace with
+// exact replay. A rejected candidate may be a different failure or a changed
+// enabled set. maxRuns bounds work.
 func MinimizeFailureTrace(original Trace, reproduce ReproduceFailure, sameFailure func(error) bool, maxRuns int) (Trace, int, error) {
 	if err := original.validate(); err != nil {
 		return Trace{}, 0, err
@@ -59,6 +62,28 @@ func MinimizeFailureTrace(original Trace, reproduce ReproduceFailure, sameFailur
 			}
 		}
 	}
+	for runs < maxRuns-1 {
+		reduced := false
+		for _, actor := range cooperativeActorCandidates(best) {
+			if runs >= maxRuns-1 {
+				break
+			}
+			candidate := best
+			candidate.DisabledActors = append(append([]string(nil), best.DisabledActors...), actor)
+			sort.Strings(candidate.DisabledActors)
+			candidate.GuidanceMask = make([]bool, len(best.Decisions))
+			generated, runErr := reproduce(&candidate)
+			runs++
+			if sameFailure(runErr) && len(generated.Decisions) < len(best.Decisions) && reflect.DeepEqual(generated.DisabledActors, candidate.DisabledActors) {
+				best = generated
+				reduced = true
+				break
+			}
+		}
+		if !reduced {
+			break
+		}
+	}
 	// The minimized output must stand alone: its exact transport transcript and
 	// enabled sets have to reproduce the failure without a guidance mask.
 	replayed, err := reproduce(&best)
@@ -67,4 +92,25 @@ func MinimizeFailureTrace(original Trace, reproduce ReproduceFailure, sameFailur
 		return Trace{}, runs, fmt.Errorf("minimized trace did not replay the requested failure and transcript: %v", err)
 	}
 	return best, runs, nil
+}
+
+func cooperativeActorCandidates(trace Trace) []string {
+	seen := map[string]bool{}
+	for _, decision := range trace.Decisions {
+		for _, action := range decision.Enabled {
+			actor, _, ok := strings.Cut(action, ":")
+			if ok && actor != "" && !seen[actor] {
+				seen[actor] = true
+			}
+		}
+	}
+	for _, actor := range trace.DisabledActors {
+		delete(seen, actor)
+	}
+	actors := make([]string, 0, len(seen))
+	for actor := range seen {
+		actors = append(actors, actor)
+	}
+	sort.Strings(actors)
+	return actors
 }

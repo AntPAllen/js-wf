@@ -79,7 +79,12 @@ from a clean seed. `sim.MinimizeFailureTrace` removes forced decisions in
 bounded reruns, accepts only the same caller-selected invariant failure, and
 verifies that the best generated trace reproduces the exact transport
 transcript on disk. A synthetic ten-choice failure shrinks to an earlier
-replayable failure. Actor removal and automatic CI shrinking remain.
+replayable failure. The minimizer now also tries removing cooperative
+actors discovered in the trace. A minimized trace records disabled actor
+names and replays the same failure and transport transcript from disk; a
+two-actor probe removes its irrelevant actor. Ordinary traces omit the new
+field and keep their existing serialized form. Automatic CI shrinking
+remains.
 CI now replays a pinned corpus covering committed and dropped CAS unknowns,
 two-worker dispatch, competing suspended scanners, signal, suspended, and child
 notification liveness, outcome persistence, integrated short-handler execution,

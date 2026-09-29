@@ -11,6 +11,7 @@ import (
 	"os"
 	"reflect"
 	"sort"
+	"strings"
 	"sync"
 )
 
@@ -49,12 +50,13 @@ type TransportEvent struct {
 }
 
 type Trace struct {
-	Version   int              `json:"version"`
-	Seed      int64            `json:"seed"`
-	Workload  string           `json:"workload"`
-	StepLimit int              `json:"step_limit,omitempty"`
-	Decisions []Decision       `json:"decisions"`
-	Transport []TransportEvent `json:"transport"`
+	Version        int              `json:"version"`
+	Seed           int64            `json:"seed"`
+	Workload       string           `json:"workload"`
+	StepLimit      int              `json:"step_limit,omitempty"`
+	DisabledActors []string         `json:"disabled_actors,omitempty"`
+	Decisions      []Decision       `json:"decisions"`
+	Transport      []TransportEvent `json:"transport"`
 	// GuidanceMask is an in-memory minimization control, never serialized.
 	// False releases that recorded choice to the seeded scheduler.
 	GuidanceMask []bool `json:"-"`
@@ -71,6 +73,11 @@ func (t Trace) validate() error {
 	}
 	if t.Version == TraceVersion && t.StepLimit < 1 {
 		return fmt.Errorf("simulation trace has invalid step limit %d", t.StepLimit)
+	}
+	for i, actor := range t.DisabledActors {
+		if actor == "" || strings.Contains(actor, ":") || i > 0 && actor <= t.DisabledActors[i-1] {
+			return fmt.Errorf("invalid disabled simulation actor %q", actor)
+		}
 	}
 	return nil
 }
@@ -154,6 +161,7 @@ func ReplayScheduler(trace Trace) (*Scheduler, error) {
 	s := NewScheduler(trace.Seed)
 	s.trace.Version = trace.Version
 	s.trace.StepLimit = trace.StepLimit
+	s.trace.DisabledActors = append([]string(nil), trace.DisabledActors...)
 	if trace.StepLimit > 0 {
 		s.maxSteps = trace.StepLimit
 	}

@@ -1,6 +1,7 @@
 package sim
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -42,6 +43,78 @@ func runProbeFailure(replay *Trace) (trace Trace, runErr error) {
 		return trace, err
 	}
 	return trace, nil
+}
+
+func runActorRemovalProbe(replay *Trace) (trace Trace, runErr error) {
+	var schedule *Scheduler
+	if replay == nil {
+		schedule = NewScheduler(42)
+	} else {
+		var err error
+		schedule, err = ReplayScheduler(*replay)
+		if err != nil {
+			return Trace{}, err
+		}
+	}
+	if err := schedule.SetWorkload("actor_removal_probe"); err != nil {
+		return Trace{}, err
+	}
+	defer func() { trace = schedule.Trace() }()
+	var failed bool
+	actors := []CooperativeActor{
+		{Name: "bug", Run: func(ctx context.Context, yield YieldFunc) error {
+			return yield(ctx, "trigger", func() { failed = true })
+		}},
+		{Name: "noise", Run: func(ctx context.Context, yield YieldFunc) error {
+			for i := 0; i < 3; i++ {
+				if err := yield(ctx, fmt.Sprintf("noise_%d", i), func() {}); err != nil {
+					return err
+				}
+			}
+			return nil
+		}},
+	}
+	results, err := RunCooperative(context.Background(), schedule, actors)
+	if err != nil {
+		return trace, err
+	}
+	for _, result := range results {
+		if result != nil {
+			return trace, result
+		}
+	}
+	if err := schedule.Finish(); err != nil {
+		return trace, err
+	}
+	if failed {
+		return trace, errProbeInvariant
+	}
+	return trace, nil
+}
+
+func TestMinimizeFailureTraceRemovesCooperativeActor(t *testing.T) {
+	original, err := runActorRemovalProbe(nil)
+	if !errors.Is(err, errProbeInvariant) || len(original.Decisions) != 4 {
+		t.Fatalf("original actor failure: decisions=%d err=%v", len(original.Decisions), err)
+	}
+	minimized, runs, err := MinimizeFailureTrace(original, runActorRemovalProbe, func(err error) bool {
+		return errors.Is(err, errProbeInvariant)
+	}, 100)
+	if err != nil || runs < 3 || len(minimized.Decisions) != 1 || !reflect.DeepEqual(minimized.DisabledActors, []string{"noise"}) {
+		t.Fatalf("actor reduction: decisions=%d disabled=%v runs=%d err=%v", len(minimized.Decisions), minimized.DisabledActors, runs, err)
+	}
+	path := filepath.Join(t.TempDir(), "actor-reduced.json")
+	if err := minimized.Save(path); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := LoadTrace(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	replayed, err := runActorRemovalProbe(&loaded)
+	if !errors.Is(err, errProbeInvariant) || !reflect.DeepEqual(loaded, replayed) {
+		t.Fatalf("actor-reduced disk replay: err=%v equal=%v", err, reflect.DeepEqual(loaded, replayed))
+	}
 }
 
 func TestMinimizeFailureTracePreservesInvariantAndExactReplay(t *testing.T) {

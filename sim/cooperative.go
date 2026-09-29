@@ -43,13 +43,28 @@ func RunCooperative(ctx context.Context, schedule *Scheduler, actors []Cooperati
 	if schedule == nil || len(actors) == 0 {
 		return nil, fmt.Errorf("simulation needs a scheduler and actors")
 	}
+	disabled := map[string]bool{}
+	for _, name := range schedule.trace.DisabledActors {
+		disabled[name] = true
+	}
+	names := map[string]bool{}
 	seen := map[string]bool{}
+	active := make([]CooperativeActor, 0, len(actors))
 	for _, actor := range actors {
-		if actor.Name == "" || strings.Contains(actor.Name, ":") || actor.Run == nil || seen[actor.Name] {
+		if actor.Name == "" || strings.Contains(actor.Name, ":") || actor.Run == nil || names[actor.Name] {
 			return nil, fmt.Errorf("invalid or duplicate simulation actor %q", actor.Name)
 		}
+		names[actor.Name] = true
+		if disabled[actor.Name] {
+			continue
+		}
 		seen[actor.Name] = true
+		active = append(active, actor)
 	}
+	if len(active) == 0 {
+		return nil, fmt.Errorf("simulation disabled every actor")
+	}
+	actors = active
 	actorCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	turns := make(chan cooperativeTurn, len(actors))
