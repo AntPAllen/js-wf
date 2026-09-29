@@ -57,6 +57,52 @@ func TestSimStartContractAgainstRealCluster(t *testing.T) {
 	}
 }
 
+// Isolate the invocation CAS from WF_INV's usual per-subject limit. This is
+// the real-server contract for the model's bypass_subject_limit fault.
+func TestStartSubjectTailCASWithoutSubjectLimit(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	inv, err := all[0].Stream(ctx, "WF_INV")
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, err := inv.Info(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	config := info.Config
+	config.MaxMsgsPerSubject = -1
+	config.DiscardNewPerSubject = false
+	if _, err := all[0].UpdateStream(ctx, config); err != nil {
+		t.Fatalf("remove per-subject limit: %v", err)
+	}
+	const typ, id = "cas-contract", "same-id"
+	input := []byte(`{"value":1}`)
+	first, err := client.New(all[0]).Start(ctx, typ, id, input)
+	if err != nil || first.InvSeq == 0 {
+		t.Fatalf("first start: handle=%+v err=%v", first, err)
+	}
+	retry, err := client.New(all[1]).Start(ctx, typ, id, input)
+	if !errors.Is(err, client.ErrAlreadyStarted) || retry.InvSeq != first.InvSeq {
+		t.Fatalf("CAS-protected retry: first=%+v retry=%+v err=%v", first, retry, err)
+	}
+	stored, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, id))
+	if err != nil || stored.Sequence != first.InvSeq {
+		t.Fatalf("retained CAS generation: message=%+v err=%v", stored, err)
+	}
+	// Without the header, this deliberately permissive stream accepts a new
+	// generation. That confirms the preceding rejection came from the CAS.
+	ack, err := all[2].PublishMsg(ctx, &nats.Msg{Subject: identity.InvocationSubject(typ, id), Data: input})
+	if err != nil || ack.Sequence <= first.InvSeq {
+		t.Fatalf("unguarded publish: ack=%+v err=%v", ack, err)
+	}
+	stored, err = inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, id))
+	if err != nil || stored.Sequence != ack.Sequence {
+		t.Fatalf("unguarded generation not retained: message=%+v ack=%+v err=%v", stored, ack, err)
+	}
+}
+
 func TestSimRunDedupWindowExpiryAgainstRealCluster(t *testing.T) {
 	all, _ := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
