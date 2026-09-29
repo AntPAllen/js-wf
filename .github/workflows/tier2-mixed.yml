@@ -10,6 +10,11 @@ on:
         options:
           - '20'
           - '200'
+      start_seed:
+        description: First seed in the consecutive range (default 1 for the release gate)
+        required: true
+        type: number
+        default: 1
 jobs:
   mixed:
     runs-on: ubuntu-latest
@@ -17,6 +22,7 @@ jobs:
     env:
       WF_MIXED_CHAOS: '1'
       MIXED_SEEDS: ${{ inputs.seeds }}
+      MIXED_START_SEED: ${{ inputs.start_seed }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -33,8 +39,13 @@ jobs:
           fi
       - name: Replay consecutive mixed workflow seeds
         run: |
-          for seed in $(seq 1 "$MIXED_SEEDS"); do
-            echo "Mixed workflow seed $seed/$MIXED_SEEDS"
+          if ! [[ "$MIXED_START_SEED" =~ ^[1-9][0-9]*$ ]]; then
+            echo "start_seed must be a positive integer" >&2
+            exit 1
+          fi
+          last_seed=$((MIXED_START_SEED + MIXED_SEEDS - 1))
+          for seed in $(seq "$MIXED_START_SEED" "$last_seed"); do
+            echo "Mixed workflow seed $seed ($MIXED_START_SEED..$last_seed)"
             FAULT_SEED="$seed" FAULT_SCHEDULE_OUT="mixed-four-faults-${seed}.json" go test ./integration -run '^TestMixedWorkflowsRecoverFromFourServerFaults$' -count=1 -timeout=5m -v
           done
       - if: always()
