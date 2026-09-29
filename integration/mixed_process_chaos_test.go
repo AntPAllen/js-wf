@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -213,10 +214,11 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	j := journal.New(js[other])
 	var childIDs []string
 	var allSuspended bool
+	timerDue := make([]time.Time, len(invocations))
 	until = time.Now().Add(20 * time.Second)
 	for time.Now().Before(until) {
 		allSuspended = true
-		for _, inv := range invocations {
+		for i, inv := range invocations {
 			if inv.typ == "mixedshort" {
 				continue
 			}
@@ -226,6 +228,23 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 			}
 			if len(records) == 0 || records[len(records)-1].Kind != journal.Suspended {
 				allSuspended = false
+			}
+			if inv.typ == "mixedtimer" {
+				for _, record := range records {
+					if record.Kind != journal.StepRequested {
+						continue
+					}
+					var request struct {
+						Kind   string    `json:"kind"`
+						FireAt time.Time `json:"fire_at"`
+					}
+					if json.Unmarshal(record.Payload, &request) == nil && request.Kind == "timer" {
+						timerDue[i] = request.FireAt
+					}
+				}
+				if timerDue[i].IsZero() {
+					allSuspended = false
+				}
 			}
 			if inv.typ == "mixedfanout" {
 				childIDs = childIDs[:0]
@@ -281,6 +300,27 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	if err := cluster.ResumeNode(leader); err != nil {
 		t.Fatal(err)
 	}
+	var healedAt time.Time
+	until = time.Now().Add(20 * time.Second)
+	for time.Now().Before(until) && ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		stream, lookupErr := js[other].Stream(attempt, "WF_JRN")
+		if lookupErr == nil {
+			var info *jetstream.StreamInfo
+			info, lookupErr = stream.Info(attempt)
+			if lookupErr == nil && info.Cluster != nil && info.Cluster.Leader != "" {
+				healedAt = time.Now()
+			}
+		}
+		stop()
+		if !healedAt.IsZero() {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if healedAt.IsZero() {
+		t.Fatal("journal quorum did not recover after route heal")
+	}
 	conn, err := cluster.Dial(leader)
 	if err != nil {
 		t.Fatal(err)
@@ -290,9 +330,19 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	successor, err := worker.New(ctx, resumed, "mixed-after", handlers)
+	var successor *worker.Worker
+	until = time.Now().Add(30 * time.Second)
+	for time.Now().Before(until) && ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
+		successor, err = worker.New(attempt, resumed, "mixed-after", handlers)
+		stop()
+		if err == nil {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("worker after four faults: %v (context: %v)", err, ctx.Err())
 	}
 	successorCtx, stopSuccessor := context.WithCancel(ctx)
 	defer stopSuccessor()
@@ -307,6 +357,30 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		}
 	}
 	close(release)
+	releasedAt := time.Now()
+	type completion struct {
+		index int
+		at    time.Time
+		value json.RawMessage
+		err   error
+	}
+	completed := make(chan completion, len(invocations))
+	for i, inv := range invocations {
+		go func(index int, inv invocation) {
+			value, awaitErr := client.New(js[other]).Await(ctx, inv.typ, inv.id)
+			completed <- completion{index: index, at: time.Now(), value: value, err: awaitErr}
+		}(i, inv)
+	}
+	enabledAt := make([]time.Time, len(invocations))
+	for i, inv := range invocations {
+		enabledAt[i] = healedAt
+		if inv.typ == "mixedshort" {
+			enabledAt[i] = releasedAt
+		}
+		if inv.typ == "mixedtimer" && timerDue[i].After(healedAt) {
+			enabledAt[i] = timerDue[i]
+		}
+	}
 	for i, inv := range invocations {
 		if inv.typ == "mixedsignal" {
 			until = time.Now().Add(20 * time.Second)
@@ -322,14 +396,26 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 			if err != nil {
 				t.Fatalf("signal %d after heal: %v", i, err)
 			}
+			enabledAt[i] = time.Now()
 		}
 	}
-	for _, inv := range invocations {
-		result, err := c.Await(ctx, inv.typ, inv.id)
-		if err != nil || string(result) != "42" {
-			t.Fatalf("mixed %s/%s result=%s err=%v", inv.typ, inv.id, result, err)
+	latencies := make([]time.Duration, 0, len(invocations))
+	for range invocations {
+		result := <-completed
+		inv := invocations[result.index]
+		if result.err != nil || string(result.value) != "42" {
+			t.Fatalf("mixed %s/%s result=%s err=%v", inv.typ, inv.id, result.value, result.err)
 		}
+		latency := result.at.Sub(enabledAt[result.index])
+		if latency < 0 {
+			latency = 0
+		}
+		t.Logf("mixed recovery type=%s id=%s latency=%s", inv.typ, inv.id, latency)
+		latencies = append(latencies, latency)
 	}
+	sort.Slice(latencies, func(i, j int) bool { return latencies[i] < latencies[j] })
+	p99 := latencies[(99*len(latencies)+99)/100-1]
+	t.Logf("mixed provisional result observation: p99=%s max=%s (fan-out parent still measured from quorum)", p99, latencies[len(latencies)-1])
 	if err := cluster.StopSlowDisk(other); err != nil {
 		t.Fatal(err)
 	}
@@ -352,7 +438,35 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 			t.Fatalf("restarted node mixed %s/%s result=%s err=%v", inv.typ, inv.id, result, err)
 		}
 	}
+	terminalStream, err := third.Stream(ctx, "WF_JRN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	terminalAt := make([]time.Time, len(invocations))
+	for i, inv := range invocations {
+		var entry journal.Entry
+		var raw *jetstream.RawStreamMsg
+		var readErr error
+		until = time.Now().Add(15 * time.Second)
+		for time.Now().Before(until) && ctx.Err() == nil {
+			attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+			raw, readErr = terminalStream.GetLastMsgForSubject(attempt, identity.JournalSubject(inv.typ, inv.id))
+			stop()
+			if readErr == nil {
+				readErr = json.Unmarshal(raw.Data, &entry)
+				if readErr == nil && entry.Kind == journal.Completed {
+					break
+				}
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+		if readErr != nil || entry.Kind != journal.Completed {
+			t.Fatalf("terminal journal entry %s/%s: kind=%s err=%v", inv.typ, inv.id, entry.Kind, readErr)
+		}
+		terminalAt[i] = raw.Time
+	}
 	seen := map[string]bool{}
+	lastChildCompletedAt := healedAt
 	for _, childID := range childIDs {
 		if childID == "" || seen[childID] {
 			t.Fatalf("duplicate or empty child ID: %q", childID)
@@ -364,6 +478,64 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		if err != nil || string(result) != "7" {
 			t.Fatalf("restarted node child %s result=%s err=%v", childID, result, err)
 		}
+		var childEntry journal.Entry
+		var raw *jetstream.RawStreamMsg
+		var readErr error
+		until = time.Now().Add(15 * time.Second)
+		for time.Now().Before(until) && ctx.Err() == nil {
+			attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+			raw, readErr = terminalStream.GetLastMsgForSubject(attempt, identity.JournalSubject("mixedchild", childID))
+			stop()
+			if readErr == nil {
+				readErr = json.Unmarshal(raw.Data, &childEntry)
+				if readErr == nil && childEntry.Kind == journal.Completed {
+					break
+				}
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+		if readErr != nil || childEntry.Kind != journal.Completed {
+			t.Fatalf("child terminal journal %s: kind=%s err=%v", childID, childEntry.Kind, readErr)
+		}
+		if raw.Time.After(lastChildCompletedAt) {
+			lastChildCompletedAt = raw.Time
+		}
+	}
+	enabledAt[len(invocations)-1] = lastChildCompletedAt
+	signalStream, err := third.Stream(ctx, "WF_SIG")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, inv := range invocations {
+		if inv.typ != "mixedsignal" {
+			continue
+		}
+		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
+		raw, readErr := signalStream.GetLastMsgForSubject(attempt, "wf.sig."+inv.typ+"."+inv.id+".go")
+		stop()
+		if readErr != nil {
+			t.Fatalf("committed signal timestamp %s: %v", inv.id, readErr)
+		}
+		enabledAt[i] = healedAt
+		if raw.Time.After(healedAt) {
+			enabledAt[i] = raw.Time
+		}
+	}
+	terminalLatencies := make([]time.Duration, 0, len(invocations))
+	for i, inv := range invocations {
+		latency := terminalAt[i].Sub(enabledAt[i])
+		if latency < 0 {
+			latency = 0
+		}
+		terminalLatencies = append(terminalLatencies, latency)
+		t.Logf("mixed terminal type=%s id=%s latency=%s", inv.typ, inv.id, latency)
+	}
+	sort.Slice(terminalLatencies, func(i, j int) bool { return terminalLatencies[i] < terminalLatencies[j] })
+	terminalP99 := terminalLatencies[(99*len(terminalLatencies)+99)/100-1]
+	t.Logf("mixed terminal p99 from last enabling event=%s", terminalP99)
+	t.Logf("mixed workers before=%+v after=%+v", first.Metrics(), successor.Metrics())
+	if terminalP99 >= 30*time.Second {
+		t.Errorf("mixed terminal p99=%s, want <30s", terminalP99)
 	}
 	for _, inv := range invocations {
 		if inv.typ != "mixedsignal" {
