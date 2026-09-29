@@ -74,12 +74,6 @@ func TestThirtyDayTimerRetainedAcrossTwoFullRestarts(t *testing.T) {
 	if fireAt.IsZero() || remaining < duration-5*time.Second || remaining > duration+5*time.Second {
 		t.Fatalf("30-day timer fire_at=%s, remaining=%s", fireAt, time.Until(fireAt))
 	}
-	stopWorker()
-	workerErr := <-workerDone
-	workerStopped = true
-	if workerErr != nil {
-		t.Fatal(workerErr)
-	}
 	source := fmt.Sprintf("wf.schedule.%s.%s.%d", typ, id, 0)
 	target := identity.RunSubject(typ, id, provision.Partitions)
 	var initialAckErr error
@@ -92,6 +86,14 @@ func TestThirtyDayTimerRetainedAcrossTwoFullRestarts(t *testing.T) {
 	}
 	if initialAckErr != nil {
 		t.Fatalf("initial start run did not drain before restart: %v (ctx=%v)", initialAckErr, ctx.Err())
+	}
+	// Let the live worker finish acknowledging its start delivery before
+	// stopping it. Suspension can be journaled before the ack reaches WF_RUN.
+	stopWorker()
+	workerErr := <-workerDone
+	workerStopped = true
+	if workerErr != nil {
+		t.Fatal(workerErr)
 	}
 	for index, js := range all {
 		if err := checkLongSchedule(ctx, js, source, target, fireAt); err != nil {
