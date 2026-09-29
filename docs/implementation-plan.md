@@ -3,8 +3,9 @@
 Sep 27, 2026 · @Anthony Allen
 
 Repository copy of the supplied plan. The Tier 1 simulation section under
-Distributed verification was expanded on Sep 28, 2026; the remaining plan is
-preserved for reference.
+Distributed verification was expanded on Sep 28, 2026. Cross-stream batch
+claims were corrected after implementation showed that JetStream atomic
+publishing is scoped to one stream.
 
 ## Scope and architecture
 
@@ -24,6 +25,8 @@ The only new stateful component is the SDK runtime inside the worker; every dura
 | `WF_SIG` stream | `wf.sig.<type>.<id>.<name>` | Limits retention, `Nats-Msg-Id` dedup window 2 min | External signals; merged into the journal by the worker |
 | `WF_LEASE` KV | key `<type>.<id>` | Per-key TTL 20 s, `LimitMarkerTTL` | Single-writer lease; value = `{worker, epoch}` |
 | `WF_STATE` KV | key `<type>.<id>` | History 1, revision CAS | Snapshot + terminal result; bounds journal replay |
+
+[NATS atomic batch publishing](https://docs.nats.io/nats-concepts/jetstream/streams) commits messages within one stream. It cannot atomically join `WF_INV` to `WF_RUN`, or `WF_SIG` to `WF_RUN`, because those streams need different retention policies. Ordered writes, stable message IDs, and durable repair scanners are required on every supported server version.
 
 **Invariants every phase must keep** (these are the properties the distributed tests assert, numbered so later sections can cite them):
 
@@ -63,13 +66,13 @@ Nothing else starts until a test can kill a JetStream node mid-publish and asser
 
 `start(type, id, input)` becomes a single publish to `wf.inv.<type>.<id>` on a stream with `MaxMsgsPerSubject=1` and `DiscardNewPerSubject`. The server rejects the second and later publishes with a `maximum messages per subject exceeded` error, which the SDK maps to `ErrAlreadyStarted` and treats as success (returning the existing invocation handle).
 
-The start must also enqueue the first run. Use 2.12 atomic batch publish: `WF_INV` record + `WF_RUN` message in one batch, so neither exists without the other. Fallback for older servers: publish `WF_INV` first, then `WF_RUN` with `Nats-Msg-Id = start:<type>:<id>`; a dispatcher-side reconciler scans `WF_INV` subjects with no journal for a repair path.
+The start must also enqueue the first run. Publish `WF_INV` first, then `WF_RUN` with `Nats-Msg-Id = start:<type>:<id>`. The dispatcher-side reconciler scans retained `WF_INV` records with no journal and repeats the enqueue after a crash or uncertain acknowledgment. This two-write repair path is required on both 2.12+ and older servers because the records belong to different streams.
 
 **Deliverables**
 
 - [ ] `client.Start` with `ErrAlreadyStarted` semantics and a returned handle `{type, id, invSeq}`.
 - [ ] Stream provisioning code that is idempotent (`CreateOrUpdateStream`) and asserts the config it finds matches what it wants; a mismatch is a startup error, not a silent adopt.
-- [ ] Batch-publish path with the fallback path behind a server-version check.
+- [ ] Durable two-write Start path with stable message IDs, unknown-outcome handling, and a repair scanner on every supported server version.
 - [ ] Input size guard: inputs above `max_payload` (default 1 MiB) go to an Object Store bucket with only the object key in `WF_INV`.
 
 **Proof of completion**
@@ -85,7 +88,7 @@ The start must also enqueue the first run. Use 2.12 atomic batch publish: `WF_IN
 - The same id reused after the previous invocation completed and was purged. Decision: allowed only after purge; test that a purge followed by a start creates a fresh journal with epoch 0 and that nothing from the old journal is visible (this is why `WF_JRN` purge must complete before `WF_INV` purge).
 - Subject cardinality: `DiscardNewPerSubject` requires the per-subject index; measure memory for 10 M subjects on a 3-node cluster and record it in the doc's risk section.
 - `Nats-Msg-Id` dedup window elapsing between a failed and a retried publish (window default 2 min). The fallback path must tolerate a duplicate `WF_RUN` message, which phase 3's lease makes harmless; test by setting the window to 1 s.
-- Server version below 2.12 on one node only (rolling upgrade): batch publish must fail closed, not partially apply. Test with a mixed-version cluster fixture.
+- Server version below 2.12 on one node only (rolling upgrade): the two-write Start and repair path must preserve I1 and I5 through leader movement. Native timer mode must fail closed if cluster-wide support is unproven. Test with a mixed-version cluster fixture.
 
 ## Phase 2 — Journal with CAS append (I2, I6)
 
@@ -222,7 +225,7 @@ Order matters: journal entry first, scheduled publish second. A crash between th
 
 ## Phase 6 — Signals, promises and inter-workflow calls
 
-External writers must never append to a journal directly, because that would race the worker's CAS. Instead a signal is a publish to `wf.sig.<type>.<id>.<name>` plus a `WF_RUN` wakeup (batch-published together). The worker, holding the lease, reads pending signals from `WF_SIG` with an ordered consumer from the last consumed sequence (recorded in the journal as `SignalConsumed{sig_seq}`) and journals them in order. Signals are therefore delivered in `WF_SIG` sequence order, exactly once into the journal, and a signal that arrives before the invocation asks for it is buffered by the stream itself.
+External writers must never append to a journal directly, because that would race the worker's CAS. Instead a signal is a publish to `wf.sig.<type>.<id>.<name>` followed by a `WF_RUN` wakeup with a stable message ID. A signal scanner repairs the wakeup after a crash or uncertain acknowledgment between those writes. The worker, holding the lease, reads pending signals from `WF_SIG` with an ordered consumer from the last consumed sequence (recorded in the journal as `SignalConsumed{sig_seq}`) and journals them in order. Signals are therefore delivered in `WF_SIG` sequence order, exactly once into the journal, and a signal that arrives before the invocation asks for it is buffered by the stream itself.
 
 A child call `ctx.Call(childType, childID, input)` is: journal `StepRequested{call}`, then `Start` the child with `childID` derived deterministically from parent id + index (so a retry hits `ErrAlreadyStarted`), then suspend. The child's terminal step publishes a signal `result` to the parent. A durable promise is a signal with a name the user chose and a `ctx.Await` on it; external systems resolve it through the client API.
 
@@ -330,7 +333,7 @@ Clock-skew injection must fail closed unless the running process reports the req
 | Disk stall 5 s on one server | latency only, all invariants | I5 | I2 | I2 |
 | `SIGKILL` all servers, restart | I1, I2, I6, no gaps | I5 | order | I1 |
 | Full cluster restart mid-fan-out | I6 | I5 | order | exactly N children |
-| Rolling server upgrade | batch-publish fails closed | I5 | order | I1 |
+| Rolling server upgrade | two-write Start and repair preserve I1/I5 | I5; native timers fail closed until cluster support is proven | order | I1 |
 
 **Liveness, not just safety.** Every tier records for each invocation the wall time from its last enabling event (start, timer due, signal sent, child completed) to its next journal entry. A safety-correct system that stalls is a failure: the pass bar is p99 under 30 s during faults and 100% completion within 5 min of the last fault healing. For a route fault that deliberately removes quorum, measure the p99 recovery gate from the later of the enabling event and the final confirmed route heal. Also report the raw delay from the enabling event so the outage remains visible. An invocation that completes before healing contributes zero post-heal delay.
 
@@ -353,7 +356,7 @@ One row per failure mode that cuts across phases, with the mechanism that handle
 | Publish acked on server, ack lost to client | Every append and publish | Re-read tail / `Nats-Msg-Id` / `ErrAlreadyStarted` | Phase 1 dropped-ack proxy; phase 2 `ErrUnknown` ×1 000 |
 | Two workers believe they own one invocation | Dispatch | Lease epoch + CAS append (defence in depth) | Phase 3 pause-past-lease; lease-disabled debug build still safe |
 | Worker paused (GC, VM stall) longer than lease | Dispatch, timers | Fencing on next append | Phase 3 45 s pause |
-| Crash between two dependent writes | Start, sleep, signal, purge | Ordered writes + reconciler or batch publish | Phase 5 kill-between ×200; phase 7 pipeline boundaries |
+| Crash between two dependent writes | Start, sleep, signal, purge | Ordered writes + durable repair scanners | Phase 5 kill-between ×200; phase 7 pipeline boundaries |
 | Duplicate wakeup | Timers, signals, reconciler | Idempotent wakeup; nak-with-delay when lease held | Phase 5 cancel-then-fire; phase 7 double leader |
 | Effect executed twice | SDK steps | At-least-once effect, exactly-once recorded outcome; `RunOnce` key | Phase 4 41 kill points |
 | Code changed under running invocation | SDK | Determinism guard + `ctx.Version` | Phase 4 renamed step 7 |
@@ -384,4 +387,4 @@ Other risks, in rough order of how much they would change the plan:
 - **Go-only SDK.** Multi-language SDKs are where these projects die. Keep the journal format and the step protocol language-neutral (protobuf, documented recovery table) from day one so a second SDK is a port, not a redesign.
 - **Operational coupling to the NATS cluster's health.** A JetStream cluster that loses quorum stalls every workflow. This is the same trade Temporal makes with its database; document it and test the full-restart rows of the matrix.
 
-One decision left open for you: whether the reconciler should be a first-class part of v1 or deferred, given that 2.12 batch publish removes most of the crash windows it exists for. My view is to ship it in v1 anyway, because it is the only mechanism that recovers from bugs you have not thought of yet.
+The reconciler is a first-class part of v1. Atomic batches cannot span this runtime's separate invocation, run, and signal streams, so repair scanners close the unavoidable crash windows between their dependent writes.

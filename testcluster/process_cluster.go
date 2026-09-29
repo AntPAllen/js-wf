@@ -63,6 +63,16 @@ func StartProcesses(root string, count int) (_ *ProcessCluster, err error) {
 	return startProcesses(root, count, false)
 }
 
+// StartMixedVersionProcesses starts a three-node file-backed cluster with a
+// chosen binary for each node. Empty paths use the server pinned by this
+// module. It is intended for rolling-upgrade contract tests.
+func StartMixedVersionProcesses(root string, binaries []string) (*ProcessCluster, error) {
+	if len(binaries) != 3 {
+		return nil, fmt.Errorf("mixed-version cluster needs three binaries")
+	}
+	return startProcessesWithBinaries(root, 3, false, binaries)
+}
+
 // StartPartitionableProcesses routes all server links through a controllable
 // relay while retaining separate server process IDs and file stores.
 func StartPartitionableProcesses(root string, count int) (*ProcessCluster, error) {
@@ -70,6 +80,10 @@ func StartPartitionableProcesses(root string, count int) (*ProcessCluster, error
 }
 
 func startProcesses(root string, count int, partitionable bool) (_ *ProcessCluster, err error) {
+	return startProcessesWithBinaries(root, count, partitionable, nil)
+}
+
+func startProcessesWithBinaries(root string, count int, partitionable bool, binaries []string) (_ *ProcessCluster, err error) {
 	if count < 1 || count > 3 {
 		return nil, fmt.Errorf("count must be 1..3")
 	}
@@ -143,7 +157,11 @@ func startProcesses(root string, count int, partitionable bool) (_ *ProcessClust
 		if openErr != nil {
 			return nil, openErr
 		}
-		cmd := exec.Command(binary, args...)
+		nodeBinary := binary
+		if len(binaries) > i && binaries[i] != "" {
+			nodeBinary = binaries[i]
+		}
+		cmd := exec.Command(nodeBinary, args...)
 		cmd.Stdout, cmd.Stderr = logFile, logFile
 		startErr := cmd.Start()
 		_ = logFile.Close()
