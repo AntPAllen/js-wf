@@ -40,7 +40,7 @@ func runSeededHeartbeatHandoff(seed int64, replay *Trace) (trace Trace, runErr e
 		return Trace{}, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose([]string{"renew_drop", "renew_ack_lost", "progress_drop", "ticks_closed"})
+	mode, err := schedule.Choose([]string{"renew_drop", "renew_ack_lost", "progress_drop", "ticks_closed", "nak_drop"})
 	if err != nil {
 		return trace, err
 	}
@@ -116,6 +116,11 @@ func runSeededHeartbeatHandoff(seed int64, replay *Trace) (trace Trace, runErr e
 		}
 		ticks <- time.UnixMilli(1000)
 	case "ticks_closed":
+		close(ticks)
+	case "nak_drop":
+		if err := transport.Dispatch.QueueFault(DispatchFault{Operation: "nak", Kind: "drop_before_commit"}); err != nil {
+			return trace, err
+		}
 		close(ticks)
 	}
 	select {
@@ -205,7 +210,7 @@ func TestSeededHeartbeatHandoffReplay(t *testing.T) {
 			}
 		}
 	}
-	for _, mode := range []string{"renew_drop", "renew_ack_lost", "progress_drop", "ticks_closed"} {
+	for _, mode := range []string{"renew_drop", "renew_ack_lost", "progress_drop", "ticks_closed", "nak_drop"} {
 		if observed[mode] == 0 {
 			t.Fatalf("handoff mode %s was not scheduled", mode)
 		}

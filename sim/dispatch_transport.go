@@ -66,6 +66,10 @@ func (m *DispatchTransport) QueueFault(f DispatchFault) error {
 		if f.Kind != "drop_before_commit" {
 			return fmt.Errorf("invalid %s fault on %s", f.Kind, f.Operation)
 		}
+	case "nak":
+		if f.Kind != "drop_before_commit" {
+			return fmt.Errorf("invalid %s fault on %s", f.Kind, f.Operation)
+		}
 	default:
 		return fmt.Errorf("invalid dispatch fault operation %q", f.Operation)
 	}
@@ -299,6 +303,16 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 	if operation == "progress" && model.takeFault("progress") == "drop_before_commit" {
 		event.Outcome = "drop_before_commit"
 		model.event(event)
+		return ErrTransportLost
+	}
+	if operation == "nak" && model.takeFault("nak") == "drop_before_commit" {
+		event.Outcome = "drop_before_commit"
+		model.event(event)
+		if model.onNextNak != nil {
+			stop := model.onNextNak
+			model.onNextNak = nil
+			stop()
+		}
 		return ErrTransportLost
 	}
 	switch operation {

@@ -372,9 +372,11 @@ redelivery of the original message,
 replays `StepRequested` under a higher epoch, executes the effect once more,
 and writes the only terminal result. I1/I2/I3/I6, exact replay, cross-process
 traces, and the race detector pass. The handoff is deduplicated across publish
-retries, and the original delivery remains safe if a quorum loss hides the
-nak. Pinned traces cover a hidden renewal
-reply and a failed progress write. A three-node worker-level fixture hides
+retries. A dropped nak leaves the original delivery pending until AckWait,
+while the handoff run lets the successor start sooner; the model checks both
+deliveries drain to the same terminal result. Pinned traces cover a hidden
+renewal reply, a failed progress write, and a dropped nak. A three-node
+worker-level fixture hides
 a committed lease-renewal reply during a blocked effect and checks the same
 handoff, terminal result, and drained run queue; three repeated runs and a
 race run passed. Another three-node worker-level fixture injects a failed
