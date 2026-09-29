@@ -11,12 +11,18 @@ sockets to close before it starts the majority workload; Docker can leave those
 sockets alive for about 90 seconds after network disconnection.
 
 The test provisions the workflow stores at five replicas, starts a worker,
-isolates node four, and completes a workflow on the four-node majority. It
-checks for two seconds that the isolated node cannot observe the new result.
+isolates node four, and races eight `Start` calls from clients pinned to the
+four-node majority. It requires one start and seven matching duplicates, then
+checks the recorded start history with Porcupine. It completes the workflow on
+the majority and checks for two seconds that the isolated node cannot observe
+the new result.
 After route healing it reads the immutable result through that node, kills
 its container, waits for Docker to release that container name, restarts it
 on the same file store, reads the result again, and checks the retained
 invocation, journal, and terminal outcome.
+It checks the successful result-read history across healing and restart with
+Porcupine. The manual CI workflow uploads the client history as JSONL; set
+`WF_TIER3_HISTORY_OUT` to save it during a local run.
 
 Run locally with Docker available:
 

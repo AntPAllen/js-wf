@@ -6,6 +6,7 @@ jobs:
     timeout-minutes: 15
     env:
       WF_TIER3_CONTAINER: '1'
+      WF_TIER3_HISTORY_OUT: tier3-client-history.jsonl
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -13,3 +14,9 @@ jobs:
           go-version-file: go.mod
       - name: Verify five isolated NATS containers
         run: go test ./integration -run '^TestFiveContainerWorkflowSurvivesIsolationAndRestart$' -count=1 -timeout=12m -v
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tier3-client-history
+          path: integration/tier3-client-history.jsonl
+          if-no-files-found: ignore

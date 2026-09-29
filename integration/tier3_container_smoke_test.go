@@ -5,12 +5,15 @@ package integration_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
 	"js-wf/client"
+	"js-wf/history"
 	"js-wf/identity"
 	"js-wf/integrity"
 	"js-wf/provision"
@@ -18,6 +21,7 @@ import (
 	"js-wf/wf"
 	"js-wf/worker"
 
+	"github.com/anishathalye/porcupine"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -49,7 +53,7 @@ func TestFiveContainerWorkflowSurvivesIsolationAndRestart(t *testing.T) {
 	}()
 	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Minute)
 	defer cancel()
-	nc, err := nats.Connect(cluster.ClientURL(0))
+	nc, err := nats.Connect(cluster.ClientURL(0), nats.NoReconnect(), nats.IgnoreDiscoveredServers())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,9 +111,71 @@ func TestFiveContainerWorkflowSurvivesIsolationAndRestart(t *testing.T) {
 	if err != nil || majorityRoutes < 4 || majorityRoutes > baseRoutes-4 {
 		t.Fatalf("majority route count after cut=%d, before=%d: %v", majorityRoutes, baseRoutes, err)
 	}
-	c := client.New(js)
-	if _, err := c.Start(ctx, typ, id, []byte(`42`)); err != nil {
-		t.Fatalf("start on four-node majority: %v", err)
+	recorder := &history.Recorder{}
+	defer func() {
+		path := os.Getenv("WF_TIER3_HISTORY_OUT")
+		if path == "" {
+			return
+		}
+		file, err := os.Create(path)
+		if err != nil {
+			t.Errorf("create Tier 3 client history: %v", err)
+			return
+		}
+		if err := recorder.WriteJSONL(file); err != nil {
+			t.Errorf("write Tier 3 client history: %v", err)
+		}
+		if err := file.Close(); err != nil {
+			t.Errorf("close Tier 3 client history: %v", err)
+		}
+	}()
+	c := client.NewObserved(js, recorder)
+	clients := []*client.Client{c}
+	for i := 1; i < 4; i++ {
+		peer, err := nats.Connect(cluster.ClientURL(i), nats.NoReconnect(), nats.IgnoreDiscoveredServers())
+		if err != nil {
+			t.Fatalf("connect majority node %d: %v", i, err)
+		}
+		defer peer.Close()
+		peerJS, err := jetstream.New(peer)
+		if err != nil {
+			t.Fatal(err)
+		}
+		clients = append(clients, client.NewObserved(peerJS, recorder))
+	}
+	const startCalls = 8
+	startResults := make(chan error, startCalls)
+	var starts sync.WaitGroup
+	for i := 0; i < startCalls; i++ {
+		starts.Add(1)
+		go func(i int) {
+			defer starts.Done()
+			handle, err := clients[i%len(clients)].Start(ctx, typ, id, []byte(`42`))
+			if handle.InvSeq == 0 {
+				startResults <- fmt.Errorf("start %d returned zero invocation sequence: %v", i, err)
+				return
+			}
+			startResults <- err
+		}(i)
+	}
+	starts.Wait()
+	close(startResults)
+	var started, already int
+	for err := range startResults {
+		switch {
+		case err == nil:
+			started++
+		case errors.Is(err, client.ErrAlreadyStarted):
+			already++
+		default:
+			t.Fatalf("concurrent majority start: %v", err)
+		}
+	}
+	if started != 1 || already != startCalls-1 {
+		t.Fatalf("concurrent majority starts: started=%d already=%d", started, already)
+	}
+	if result, err := history.CheckStarts(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
+		t.Fatalf("five-container start history=%s: %v", result, err)
 	}
 	if value, err := c.Await(ctx, typ, id); err != nil || string(value) != "42" {
 		t.Fatalf("majority result=%s err=%v", value, err)
@@ -156,6 +222,12 @@ func TestFiveContainerWorkflowSurvivesIsolationAndRestart(t *testing.T) {
 			value, err = client.New(peerJS).Await(attempt, typ, id)
 			stop()
 			if err == nil && string(value) == "42" {
+				observedCtx, stopObserved := context.WithTimeout(ctx, 3*time.Second)
+				observed, observedErr := client.NewObserved(peerJS, recorder).Await(observedCtx, typ, id)
+				stopObserved()
+				if observedErr != nil || string(observed) != "42" {
+					t.Fatalf("observed node four result=%s err=%v", observed, observedErr)
+				}
 				return
 			}
 			time.Sleep(150 * time.Millisecond)
@@ -170,6 +242,9 @@ func TestFiveContainerWorkflowSurvivesIsolationAndRestart(t *testing.T) {
 		t.Fatal(err)
 	}
 	readNode()
+	if result, err := history.CheckResults(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
+		t.Fatalf("five-container result history=%s: %v", result, err)
+	}
 	until := time.Now().Add(30 * time.Second)
 	var report integrity.Report
 	for time.Now().Before(until) && ctx.Err() == nil {
