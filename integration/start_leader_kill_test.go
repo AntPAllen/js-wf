@@ -127,7 +127,11 @@ func TestConcurrentStartDuringInvocationLeaderKill(t *testing.T) {
 			winner = result.handle.InvSeq
 		}
 	}
-	if counts["started"]+counts["enqueue_unknown"] != 1 || counts["already"] != 499 {
+	// The winning publish can commit before the leader dies while its ack is
+	// lost. In that case even its caller reads the retained row and reports
+	// AlreadyStarted. The stream audit below proves that one start committed.
+	confirmed := counts["started"] + counts["enqueue_unknown"]
+	if confirmed > 1 || confirmed+counts["already"] != 500 {
 		t.Fatalf("start outcomes after leader kill: cut_at=%d counts=%v", completedAtCut, counts)
 	}
 	if result, err := history.CheckStarts(recorder.Snapshot(), 45*time.Second); err != nil || result != porcupine.Ok {
