@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -257,6 +258,18 @@ func TestProcessClusterKillLeaderAndRestart(t *testing.T) {
 }
 
 func TestProcessClusterCombinedRecordedFaultsRecover(t *testing.T) {
+	runProcessClusterCombinedFaultsRecover(t, false)
+}
+
+func TestProcessClusterCombinedFourFaultsRecover(t *testing.T) {
+	if _, err := exec.LookPath("strace"); err != nil {
+		t.Skip("strace is required for the Linux disk-delay fixture")
+	}
+	runProcessClusterCombinedFaultsRecover(t, true)
+}
+
+func runProcessClusterCombinedFaultsRecover(t *testing.T, withDiskDelay bool) {
+	t.Helper()
 	seed, err := SeedFromEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -312,11 +325,15 @@ func TestProcessClusterCombinedRecordedFaultsRecover(t *testing.T) {
 		path = output
 	}
 	pauseAt := int64(10 + rng.Intn(30))
-	schedule := FaultSchedule{Seed: seed, Events: []FaultEvent{
+	events := []FaultEvent{
 		{AtMillis: 0, Op: PartitionNodes, A: killed, B: other},
 		{AtMillis: pauseAt, Op: PauseNode, A: leader},
 		{AtMillis: pauseAt + int64(10+rng.Intn(30)), Op: KillNode, A: killed},
-	}}
+	}
+	if withDiskDelay {
+		events = append([]FaultEvent{{AtMillis: 0, Op: SlowDisk, A: other, LatencyMillis: 50}}, events...)
+	}
+	schedule := FaultSchedule{Seed: seed, Events: events}
 	if err := schedule.Save(path); err != nil {
 		t.Fatal(err)
 	}
@@ -345,6 +362,15 @@ func TestProcessClusterCombinedRecordedFaultsRecover(t *testing.T) {
 	if err != nil || second == nil || second.Sequence != 2 {
 		t.Fatalf("majority publish after heal: ack=%+v err=%v", second, err)
 	}
+	if withDiskDelay {
+		if err := c.StopSlowDisk(other); err != nil {
+			t.Fatal(err)
+		}
+		data, err := os.ReadFile(c.DiskTracePath(other))
+		if err != nil || !strings.Contains(string(data), "(DELAYED)") {
+			t.Fatalf("no delayed store syscall in trace %s: %v: %s", c.DiskTracePath(other), err, data)
+		}
+	}
 	if err := c.RestartNode(killed); err != nil {
 		t.Fatal(err)
 	}
@@ -369,4 +395,67 @@ func TestProcessClusterCombinedRecordedFaultsRecover(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 	}
 	t.Fatalf("restarted node %d did not recover acknowledged publish: %s (log=%s)", killed, fmt.Sprint(err), c.LogPath(killed))
+}
+
+func TestProcessClusterSlowDiskDelaysStoreWrites(t *testing.T) {
+	if _, err := exec.LookPath("strace"); err != nil {
+		t.Skip("strace is required for the Linux disk-delay fixture")
+	}
+	c, err := StartProcesses(t.TempDir(), 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	js := make([]jetstream.JetStream, 3)
+	for i, conn := range c.Clients {
+		js[i], err = jetstream.New(conn)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	var stream jetstream.Stream
+	for ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, time.Second)
+		stream, err = js[0].CreateStream(attempt, jetstream.StreamConfig{Name: "DISK_TEST", Subjects: []string{"disk.test"}, Replicas: 3, Storage: jetstream.FileStorage})
+		stop()
+		if err == nil {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, err := stream.Info(ctx)
+	if err != nil || info.Cluster == nil {
+		t.Fatalf("stream leader: info=%+v err=%v", info, err)
+	}
+	leader, err := strconv.Atoi(strings.TrimPrefix(info.Cluster.Leader, "wf-process-"))
+	if err != nil || leader < 0 || leader >= 3 {
+		t.Fatalf("invalid stream leader %q: %v", info.Cluster.Leader, err)
+	}
+	if _, err := js[leader].Publish(ctx, "disk.test", []byte("before")); err != nil {
+		t.Fatal(err)
+	}
+	if err := (FaultSchedule{Seed: 42, Events: []FaultEvent{{Op: SlowDisk, A: leader, LatencyMillis: 50}}}).Run(ctx, c.ApplyFault); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 10; i++ {
+		if _, err := js[leader].Publish(ctx, "disk.test", []byte("during")); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := c.StopSlowDisk(leader); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(c.DiskTracePath(leader))
+	if err != nil || !strings.Contains(string(data), "(DELAYED)") {
+		t.Fatalf("no delayed store syscall in trace %s: %v: %s", c.DiskTracePath(leader), err, data)
+	}
+	info, err = stream.Info(ctx)
+	if err != nil || info.State.Msgs != 11 {
+		t.Fatalf("stream after disk delay: info=%+v err=%v", info, err)
+	}
 }

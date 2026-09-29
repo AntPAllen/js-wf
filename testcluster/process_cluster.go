@@ -20,11 +20,13 @@ import (
 type ProcessCluster struct {
 	Commands  []*exec.Cmd
 	Clients   []*nats.Conn
+	root      string
 	ports     []int
 	routes    []int
 	monitors  []int
 	logs      []string
 	paused    []bool
+	slowDisk  []*exec.Cmd
 	routeMesh *RouteMesh
 }
 
@@ -48,6 +50,8 @@ func (c *ProcessCluster) ApplyFault(event FaultEvent) error {
 			return fmt.Errorf("route partition requires StartPartitionableProcesses")
 		}
 		return c.routeMesh.PartitionNodes(event.A, event.B)
+	case SlowDisk:
+		return c.SlowDisk(event.A, time.Duration(event.LatencyMillis)*time.Millisecond)
 	default:
 		return fmt.Errorf("fault verb %s is not supported by the process fixture", event.Op)
 	}
@@ -77,7 +81,7 @@ func startProcesses(root string, count int, partitionable bool) (_ *ProcessClust
 	if output, buildErr := build.CombinedOutput(); buildErr != nil {
 		return nil, fmt.Errorf("build nats-server: %w: %s", buildErr, output)
 	}
-	c := &ProcessCluster{ports: make([]int, count), routes: make([]int, count), monitors: make([]int, count), paused: make([]bool, count)}
+	c := &ProcessCluster{root: root, ports: make([]int, count), routes: make([]int, count), monitors: make([]int, count), paused: make([]bool, count), slowDisk: make([]*exec.Cmd, count)}
 	defer func() {
 		if err != nil {
 			c.Close()
@@ -211,6 +215,11 @@ func (c *ProcessCluster) KillNode(i int) error {
 		return fmt.Errorf("process node %d cannot be killed", i)
 	}
 	cmd := c.Commands[i]
+	if c.slowDisk[i] != nil {
+		if err := c.StopSlowDisk(i); err != nil {
+			return err
+		}
+	}
 	if c.paused[i] {
 		if err := cmd.Process.Signal(syscall.SIGCONT); err != nil {
 			return err
@@ -257,6 +266,11 @@ func (c *ProcessCluster) RestartNode(i int) error {
 }
 
 func (c *ProcessCluster) Close() {
+	for i := range c.slowDisk {
+		if c.slowDisk[i] != nil {
+			_ = c.StopSlowDisk(i)
+		}
+	}
 	if c.routeMesh != nil {
 		c.routeMesh.Close()
 		c.routeMesh = nil
