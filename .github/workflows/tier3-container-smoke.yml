@@ -1,0 +1,15 @@
+name: tier3-container-smoke
+on: workflow_dispatch
+jobs:
+  five-node:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WF_TIER3_CONTAINER: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify five isolated NATS containers
+        run: go test ./integration -run '^TestFiveContainerWorkflowSurvivesIsolationAndRestart$' -count=1 -timeout=12m -v
