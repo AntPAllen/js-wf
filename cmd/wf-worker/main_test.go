@@ -2,36 +2,63 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"js-wf/assignment"
 	"js-wf/client"
+	"js-wf/identity"
 	"js-wf/provision"
+	"js-wf/retention"
 	"js-wf/testcluster"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
 
+var workerTestPluginOnce sync.Once
+var workerTestPluginPath string
+var workerTestPluginDir string
+var workerTestPluginErr error
+
+func TestMain(m *testing.M) {
+	code := m.Run()
+	_ = os.RemoveAll(workerTestPluginDir)
+	os.Exit(code)
+}
+
 func TestWorkerRunnerCompletesWorkflowAndServesMetrics(t *testing.T) {
-	pluginPath := filepath.Join(t.TempDir(), "handler.so")
-	buildArgs := []string{"build"}
-	if workerPluginRace {
-		buildArgs = append(buildArgs, "-race")
-	}
-	buildArgs = append(buildArgs, "-buildmode=plugin", "-o", pluginPath, "./testdata/handlerplugin")
-	build := exec.Command("go", buildArgs...)
-	if output, err := build.CombinedOutput(); err != nil {
-		t.Fatalf("build handler plugin: %v: %s", err, output)
+	workerTestPluginOnce.Do(func() {
+		workerTestPluginDir, workerTestPluginErr = os.MkdirTemp("", "wf-worker-plugin-")
+		if workerTestPluginErr != nil {
+			return
+		}
+		workerTestPluginPath = filepath.Join(workerTestPluginDir, "handler.so")
+		buildArgs := []string{"build"}
+		if workerPluginRace {
+			buildArgs = append(buildArgs, "-race")
+		}
+		buildArgs = append(buildArgs, "-buildmode=plugin", "-o", workerTestPluginPath, "./testdata/handlerplugin")
+		build := exec.Command("go", buildArgs...)
+		if output, err := build.CombinedOutput(); err != nil {
+			workerTestPluginErr = fmt.Errorf("build handler plugin: %w: %s", err, output)
+		}
+	})
+	if workerTestPluginErr != nil {
+		t.Fatal(workerTestPluginErr)
 	}
 	for _, mode := range []string{"static", "kv"} {
-		t.Run(mode, func(t *testing.T) { runWorkerSmoke(t, pluginPath, mode) })
+		t.Run(mode, func(t *testing.T) { runWorkerSmoke(t, workerTestPluginPath, mode) })
 	}
 }
 
@@ -113,6 +140,36 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
 	_ = response.Body.Close()
 	if err != nil || response.StatusCode != http.StatusOK || !strings.Contains(string(data), "js_wf_worker_lease_acquisitions_total 1") || !strings.Contains(string(data), "js_wf_worker_enqueue_to_lease_seconds_count 1") {
 		t.Fatalf("metrics status=%d body=%s err=%v", response.StatusCode, data, err)
+	}
+	state, err := js.KeyValue(ctx, "WF_STATE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	tombstone, err := json.Marshal(retention.Tombstone{
+		Tombstone: true,
+		InvSeq:    1,
+		PurgedAt:  time.Now().Add(-2 * time.Hour),
+		ExpiresAt: time.Now().Add(-time.Hour),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	key := identity.Key("worker-smoke", "expired")
+	if _, err := state.Put(ctx, key, tombstone); err != nil {
+		t.Fatal(err)
+	}
+	for ctx.Err() == nil {
+		_, err := state.Get(ctx, key)
+		if errors.Is(err, jetstream.ErrKeyNotFound) {
+			break
+		}
+		if err != nil {
+			t.Fatalf("check tombstone: %v", err)
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatalf("tombstone loop did not reclaim expired state: %v", ctx.Err())
 	}
 	cancel()
 	select {
