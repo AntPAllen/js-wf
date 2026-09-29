@@ -139,6 +139,78 @@ func TestWorkerRunnerStartsAfterServerRestart(t *testing.T) {
 	}
 }
 
+func TestWorkerRunnerRunsFallbackTimerLoop(t *testing.T) {
+	pluginPath := testWorkerPlugin(t)
+	cluster, err := testcluster.Start(t.TempDir(), 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	js, err := jetstream.New(cluster.Clients[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
+	defer cancel()
+	if err := provision.EnsureFallback(ctx, js, 1); err != nil {
+		t.Fatal(err)
+	}
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	metricsAddr := listener.Addr().String()
+	_ = listener.Close()
+	done := make(chan error, 1)
+	go func() {
+		done <- run(ctx, []string{"-url", cluster.Servers[0].ClientURL(), "-id", "fallback-smoke", "-replicas", "1", "-handler-plugin", pluginPath, "-metrics-addr", metricsAddr, "-reconcile-interval", "100ms"})
+	}()
+	metricsURL := "http://" + metricsAddr + "/metrics"
+	clientHTTP := &http.Client{Timeout: time.Second}
+	for ctx.Err() == nil {
+		response, reqErr := clientHTTP.Get(metricsURL)
+		if reqErr == nil {
+			_ = response.Body.Close()
+			if response.StatusCode == http.StatusOK {
+				break
+			}
+		}
+		select {
+		case runErr := <-done:
+			t.Fatalf("fallback runner exited during startup: %v", runErr)
+		default:
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatalf("fallback runner did not start: %v", ctx.Err())
+	}
+	c := client.New(js)
+	if _, err := c.Start(ctx, "worker-timer", "fallback", []byte(`null`)); err != nil {
+		t.Fatal(err)
+	}
+	if value, err := c.Await(ctx, "worker-timer", "fallback"); err != nil || string(value) != "42" {
+		t.Fatalf("fallback timer result=%s err=%v", value, err)
+	}
+	timers, err := js.Stream(ctx, "WF_TIMER")
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, err := timers.Info(ctx)
+	if err != nil || info.State.Msgs != 0 {
+		t.Fatalf("fallback timer stream: info=%+v err=%v", info, err)
+	}
+	cancel()
+	select {
+	case runErr := <-done:
+		if runErr != nil {
+			t.Fatalf("fallback runner shutdown: %v", runErr)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("fallback runner did not stop")
+	}
+}
+
 func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
 	t.Helper()
 	cluster, err := testcluster.Start(t.TempDir(), 1)
