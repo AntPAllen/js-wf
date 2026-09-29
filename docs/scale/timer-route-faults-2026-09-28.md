@@ -123,6 +123,15 @@ had a completed journal and result, so its cause remains unconfirmed. The
 full-scale recovery gate has now passed twice, while that smaller audit
 failure still warrants investigation.
 
+The result audit now retries a readable but nonterminal journal for at most
+45 seconds after `Await` reports a terminal result, then reports the last
+entry kind and transport error. A subsequent 1,000-timer, 1–10-second sleep
+run completed all results and terminal journals, but missed the post-heal
+latency gate at p99 30.98 seconds. It recorded 22,521 redeliveries and
+21,611 lease contentions. This shorter, more synchronized diagnostic remains
+open; its sleep distribution differs from the specified 10,000-timer,
+1–60-second proof.
+
 To reproduce the smaller diagnostic run:
 
 ```sh

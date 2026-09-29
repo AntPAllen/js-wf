@@ -446,17 +446,26 @@ func runTenThousandRandomSleeps(t *testing.T, routeFaults bool) {
 }
 
 func readSleepJournal(ctx context.Context, j *journal.Store, typ, id string) ([]journal.Record, error) {
-	for ctx.Err() == nil {
+	until := time.Now().Add(45 * time.Second)
+	var last []journal.Record
+	var lastErr error
+	for time.Now().Before(until) && ctx.Err() == nil {
 		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
 		records, _, err := j.Read(attempt, typ, id)
 		stop()
 		if err == nil {
-			return records, nil
-		}
-		var api *jetstream.APIError
-		if !errors.As(err, &api) || api.ErrorCode != 10008 {
-			if !errors.Is(err, jetstream.ErrNoStreamResponse) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, nats.ErrNoResponders) && !errors.Is(err, nats.ErrDisconnected) && !errors.Is(err, nats.ErrConnectionReconnecting) && !errors.Is(err, context.DeadlineExceeded) {
-				return nil, err
+			if len(records) != 0 && records[len(records)-1].Kind == journal.Completed {
+				return records, nil
+			}
+			last = records
+			lastErr = nil
+		} else {
+			lastErr = err
+			var api *jetstream.APIError
+			if !errors.As(err, &api) || api.ErrorCode != 10008 {
+				if !errors.Is(err, jetstream.ErrNoStreamResponse) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, nats.ErrNoResponders) && !errors.Is(err, nats.ErrDisconnected) && !errors.Is(err, nats.ErrConnectionReconnecting) && !errors.Is(err, context.DeadlineExceeded) {
+					return nil, err
+				}
 			}
 		}
 		select {
@@ -465,7 +474,14 @@ func readSleepJournal(ctx context.Context, j *journal.Store, typ, id string) ([]
 		case <-time.After(100 * time.Millisecond):
 		}
 	}
-	return nil, ctx.Err()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	lastKind := journal.Kind("")
+	if len(last) != 0 {
+		lastKind = last[len(last)-1].Kind
+	}
+	return last, fmt.Errorf("terminal journal not visible after 45s: last kind=%s, last error=%v", lastKind, lastErr)
 }
 
 type timerRouteFaultResult struct {
