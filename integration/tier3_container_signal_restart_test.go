@@ -208,6 +208,7 @@ func TestFiveContainerSignalsSurviveFullRestart(t *testing.T) {
 	if _, err := afterClient.Signal(ctx, typ, id, "go", []byte("changed"), "ordered-000"); !errors.Is(err, client.ErrSignalMismatch) {
 		t.Fatalf("changed signal after restart: %v", err)
 	}
+	enablingAt := time.Now()
 	replacementConn, replacementJS, err := connect(2)
 	if err != nil {
 		t.Fatal(err)
@@ -228,6 +229,10 @@ func TestFiveContainerSignalsSurviveFullRestart(t *testing.T) {
 	value, err := afterClient.Await(ctx, typ, id)
 	if err != nil || string(value) != "32" {
 		t.Fatalf("result after restart=%s err=%v", value, err)
+	}
+	recoveryLatency := time.Since(enablingAt)
+	if recoveryLatency >= 30*time.Second {
+		t.Errorf("signal terminal recovery=%s from last enabling signal, want <30s", recoveryLatency)
 	}
 	readConn, readJS, err := connect(3)
 	if err != nil {
@@ -275,5 +280,5 @@ func TestFiveContainerSignalsSurviveFullRestart(t *testing.T) {
 	if err != nil || report.Invocations != 1 || report.Journals != 1 || report.Terminal != 1 {
 		t.Fatalf("retained audit=%+v: %v", report, err)
 	}
-	t.Logf("five-container full restart retained and consumed %d ordered signals; journal entries=%d", consumed, len(records))
+	t.Logf("five-container full restart retained and consumed %d ordered signals; journal entries=%d recovery_from_last_signal=%s", consumed, len(records), recoveryLatency)
 }
