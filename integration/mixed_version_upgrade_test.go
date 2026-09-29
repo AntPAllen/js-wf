@@ -34,6 +34,21 @@ func TestMixedVersionRollingUpgradeFallback(t *testing.T) {
 	if oldBinary == "" {
 		t.Skip("set WF_NATS_SERVER_BIN to a NATS 2.11 server binary")
 	}
+	for _, test := range []struct {
+		name     string
+		newFirst bool
+	}{
+		{name: "old-peer-first"},
+		{name: "explicit-fallback-on-new-peer", newFirst: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			runMixedVersionRollingUpgradeFallback(t, oldBinary, test.newFirst)
+		})
+	}
+}
+
+func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFirst bool) {
+	t.Helper()
 	cluster, err := testcluster.StartMixedVersionProcesses(t.TempDir(), []string{oldBinary, "", ""})
 	if err != nil {
 		t.Fatal(err)
@@ -57,7 +72,12 @@ func TestMixedVersionRollingUpgradeFallback(t *testing.T) {
 	var backend provision.TimerBackend
 	for ctx.Err() == nil {
 		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
-		backend, err = provision.EnsureAuto(attempt, all[0], 3)
+		if newFirst {
+			err = provision.EnsureFallback(attempt, all[1], 3)
+			backend = provision.FallbackTimers
+		} else {
+			backend, err = provision.EnsureAuto(attempt, all[0], 3)
+		}
 		stop()
 		if err == nil {
 			break
@@ -65,7 +85,10 @@ func TestMixedVersionRollingUpgradeFallback(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 	}
 	if err != nil || backend != provision.FallbackTimers {
-		t.Fatalf("old peer fallback provision: backend=%q err=%v", backend, err)
+		t.Fatalf("mixed-version fallback provision: new_first=%t backend=%q err=%v", newFirst, backend, err)
+	}
+	if backend, err := provision.EnsureAuto(ctx, all[0], 3); err != nil || backend != provision.FallbackTimers {
+		t.Fatalf("old peer changed fallback mode: backend=%q err=%v", backend, err)
 	}
 	if backend, err := provision.EnsureAuto(ctx, all[1], 3); err != nil || backend != provision.FallbackTimers {
 		t.Fatalf("new peer changed fallback mode: backend=%q err=%v", backend, err)
