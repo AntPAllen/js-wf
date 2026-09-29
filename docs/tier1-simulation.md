@@ -32,8 +32,17 @@ consumed-signal purge. Dropped requests and committed writes with lost
 acknowledgments at each boundary retry to the same logical journal, one
 manifest, and no retained consumed signal. The three-node contract also runs
 production snapshot writes against both transports and compares both
-compactions byte for byte. Worker-triggered snapshot cadence remains to be
-connected to this model.
+compactions byte for byte.
+
+The production worker now calls modeled `MaybeSnapshot` after a successful
+delivery when its journal has a snapshot write port. A 1,000-seed workload
+runs 130 `wf.Run` steps in one handler, triggering the ordinary 256-entry
+snapshot cadence. Faults drop or hide acknowledgments for the object upload,
+manifest create, and bounded journal purge; terminal KV uncertainty and a
+consumer-leader change are also covered. Redelivery completes compaction
+without rerunning any of the 130 effects. The final logical journal has 262
+entries, the live stream keeps 16, and the reconstructed I1/I2/I3/I6
+snapshot passes. Seed 42 is pinned and replays across processes.
 
 `sim.Scheduler` chooses seeded actions and records the enabled set, chosen
 action, virtual time, and transport calls in a versioned JSON trace. Replay

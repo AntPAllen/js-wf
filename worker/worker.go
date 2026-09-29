@@ -487,7 +487,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	}()
 	var cancelledTimerNoOp bool
 	err = w.execute(ctx, typ, id, l, metadata.Timestamp, timer, &cancelledTimerNoOp)
-	if err == nil && ctx.Err() == nil && w.js != nil {
+	if err == nil && ctx.Err() == nil && w.jrn.HasSnapshotTransport() {
 		err = w.jrn.MaybeSnapshot(ctx, typ, id, 256, 16)
 	}
 	processingCanceled := ctx.Err() != nil

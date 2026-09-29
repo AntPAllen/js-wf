@@ -132,6 +132,9 @@ func NewWithSnapshotPort(appendPort AppendPort, readPort ReadPort, snapshotPort 
 	return &Store{appendPort: appendPort, readPort: readPort, snapshotReadPort: snapshotPort, snapshotWritePort: snapshotPort}
 }
 
+// HasSnapshotTransport reports whether worker-triggered compaction is wired.
+func (s *Store) HasSnapshotTransport() bool { return s.snapshotWritePort != nil }
+
 type jetStreamAppendPort struct {
 	js     jetstream.JetStream
 	stream jetstream.Stream
