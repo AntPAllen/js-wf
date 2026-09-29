@@ -88,6 +88,12 @@ func New(js jetstream.JetStream) *Store {
 	return &Store{js: js, snapshotReadPort: port, snapshotWritePort: port}
 }
 
+// NewWithJetStreamSnapshotPort keeps journal I/O on JetStream while supplying
+// a snapshot port, primarily for transport contracts and fault injection.
+func NewWithJetStreamSnapshotPort(js jetstream.JetStream, port SnapshotWritePort) *Store {
+	return &Store{js: js, snapshotReadPort: port, snapshotWritePort: port}
+}
+
 // AppendPort is the transport boundary used by the journal CAS decision path.
 // It permits deterministic transport simulations without replacing the SDK's
 // entire JetStream interface. Read and snapshot operations still use New.

@@ -48,6 +48,14 @@ Pinned seeds 1 and 4 cover CAS conflict with a dropped purge and a lost
 manifest acknowledgement, including the longer-prefix writer losing;
 seed 42 matches across processes.
 
+A three-node contract now mirrors the two-compactor race with production
+JetStream ports. A barrier holds both writers after they read the same
+manifest revision. Ten distinct journals per run check exactly one successful
+CAS and one `ErrSnapshotStale`, the winning manifest, every reconstructed
+logical record, and the physical suffix left by its fixed-bound purge.
+The two writers use different retained suffix lengths, so a stale purge with
+the longer cutoff would cause a visible gap.
+
 The production worker now calls modeled `MaybeSnapshot` after a successful
 delivery when its journal has a snapshot write port. A 1,000-seed workload
 runs 130 `wf.Run` steps in one handler, triggering the ordinary 256-entry
