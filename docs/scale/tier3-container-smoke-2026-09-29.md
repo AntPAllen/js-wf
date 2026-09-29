@@ -52,8 +52,12 @@ The fixture mounts a NATS config that explicitly sets `sync_interval` to
 `2m`, the pinned server's default. Set `WF_TIER3_SYNC_INTERVAL` to the
 production server value to run the same proof with that interval; positive Go
 durations and `always` are accepted. Local leader-kill runs passed at `2m`,
-`1s`, and `always`. The production deployment value and block-device delay
-remain to be exercised in the full Tier 3 matrix.
+`1s`, and `always`. The [clean `2m` CI run](https://github.com/AntPAllen/js-wf/actions/runs/36609558149)
+passed both tests with 964 acknowledged writes, 511 after the kill. The
+[clean `always` CI run](https://github.com/AntPAllen/js-wf/actions/runs/36609575682)
+also passed both with 964 acknowledged writes, 536 after the kill. The
+production deployment value and block-device delay remain to be exercised in
+the full Tier 3 matrix.
 
 The manual CI workflow accepts the same value as its `sync_interval` input,
 for example `gh workflow run tier3-container-smoke.yml -f sync_interval=always`.
