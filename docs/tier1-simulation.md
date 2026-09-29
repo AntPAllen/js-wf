@@ -286,8 +286,9 @@ appears. Transport calls interleave under the cooperative scheduler, including
 dropped and hidden-ack object, manifest, and purge writes. The handler must
 complete once, a later compaction repairs uncertain writes, and production
 `Read` reconstructs all 66 entries from the snapshot and four live entries.
-The first ten seeds replay exactly. Online blob sweeping remains open; that
-workload still requires quiescent writers.
+The first ten seeds replay exactly, seed 1's dropped purge is pinned on disk,
+and its trace is byte-identical across processes. Online blob sweeping remains
+open; that workload still requires quiescent writers.
 
 The integrated short-handler workload runs production `Client.Start` and
 `Worker.handle` over a shared modeled run stream and durable consumer. Its

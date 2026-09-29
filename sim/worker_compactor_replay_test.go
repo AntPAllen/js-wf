@@ -1,13 +1,16 @@
 package sim
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -169,6 +172,20 @@ func runWorkerCompactor(seed int64, replay *Trace) (trace Trace, runErr error) {
 }
 
 func TestSeededWorkerCompactorReplay(t *testing.T) {
+	if os.Getenv("SIM_WORKER_COMPACTOR_HELPER") == "1" {
+		seed, err := strconv.ParseInt(os.Getenv("FAULT_SEED"), 10, 64)
+		if err != nil {
+			t.Fatal(err)
+		}
+		trace, err := runWorkerCompactor(seed, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := trace.Save(os.Getenv("SIM_WORKER_COMPACTOR_OUT")); err != nil {
+			t.Fatal(err)
+		}
+		return
+	}
 	for seed := int64(1); seed <= 1000; seed++ {
 		generated, err := runWorkerCompactor(seed, nil)
 		if err != nil {
@@ -187,5 +204,25 @@ func TestSeededWorkerCompactorReplay(t *testing.T) {
 				t.Fatalf("FAULT_SEED=%d worker compactor replay: %v", seed, err)
 			}
 		}
+	}
+	var files [2]string
+	for i := range files {
+		files[i] = filepath.Join(t.TempDir(), fmt.Sprintf("worker-compactor-%d.json", i))
+		cmd := exec.Command(os.Args[0], "-test.run=^TestSeededWorkerCompactorReplay$")
+		cmd.Env = append(os.Environ(), "SIM_WORKER_COMPACTOR_HELPER=1", "SIM_WORKER_COMPACTOR_OUT="+files[i], "FAULT_SEED=1")
+		if output, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("child %d: %v: %s", i, err, output)
+		}
+	}
+	first, err := os.ReadFile(files[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := os.ReadFile(files[1])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(first, second) {
+		t.Fatal("worker compactor trace changed across processes")
 	}
 }
