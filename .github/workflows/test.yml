@@ -63,6 +63,8 @@ jobs:
         run: WF_PROCESS_WORKFLOW=1 FAULT_SEED=42 FAULT_SCHEDULE_OUT=signal-four-faults.json go test ./integration -run '^TestSignalWorkflowRecoversFromFourServerFaults$' -count=1 -timeout=4m -v
       - name: Recover a six-child fan-out after four server faults
         run: WF_PROCESS_WORKFLOW=1 FAULT_SEED=42 FAULT_SCHEDULE_OUT=fanout-four-faults.json go test ./integration -run '^TestFanoutWorkflowRecoversFromFourServerFaults$' -count=1 -timeout=4m -v
+      - name: Recover a mixed workflow batch after four server faults
+        run: WF_MIXED_CHAOS=1 FAULT_SEED=42 FAULT_SCHEDULE_OUT=mixed-four-faults.json go test ./integration -run '^TestMixedWorkflowsRecoverFromFourServerFaults$' -count=1 -timeout=5m -v
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
@@ -73,6 +75,7 @@ jobs:
             integration/timer-four-faults.json
             integration/signal-four-faults.json
             integration/fanout-four-faults.json
+            integration/mixed-four-faults.json
           if-no-files-found: ignore
   long-journal:
     if: github.event_name == 'workflow_dispatch'
