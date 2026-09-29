@@ -14,12 +14,24 @@ import (
 // ResultBlobTransport models the Object Store calls used by production worker
 // step and terminal result decisions.
 type ResultBlobTransport struct {
-	mu          sync.Mutex
-	schedule    *Scheduler
-	objects     map[string][]byte
-	faults      []AppendFault
-	namedPrefix string
-	namedFault  AppendFault
+	mu              sync.Mutex
+	schedule        *Scheduler
+	objects         map[string][]byte
+	faults          []AppendFault
+	namedPrefix     string
+	namedFault      AppendFault
+	readFaultPrefix string
+}
+
+// QueueReadFault makes the next matching object read temporarily unavailable.
+func (m *ResultBlobTransport) QueueReadFault(prefix string) error {
+	if prefix == "" {
+		return fmt.Errorf("empty result blob read fault prefix")
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.readFaultPrefix = prefix
+	return nil
 }
 
 // QueueNamedFault faults the next write whose content-addressed name has prefix.
@@ -86,11 +98,17 @@ func (m *ResultBlobTransport) GetBytes(ctx context.Context, name string) ([]byte
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	event := TransportEvent{Operation: "get_result_blob", Subject: name, AtMillis: m.schedule.NowMillis()}
+	if m.readFaultPrefix != "" && strings.HasPrefix(name, m.readFaultPrefix) {
+		m.readFaultPrefix = ""
+		event.Outcome = "transient_unavailable"
+		m.schedule.RecordTransport(event)
+		return nil, fmt.Errorf("%w: %w", worker.ErrResultBlobUnavailable, ErrTransportLost)
+	}
 	data, ok := m.objects[name]
 	if !ok {
 		event.Outcome = "not_found"
 		m.schedule.RecordTransport(event)
-		return nil, jetstream.ErrObjectNotFound
+		return nil, fmt.Errorf("%w: %w", worker.ErrResultBlobUnavailable, jetstream.ErrObjectNotFound)
 	}
 	event.Outcome = "ok"
 	event.DataSHA256 = digest(data)

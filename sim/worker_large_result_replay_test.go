@@ -40,7 +40,7 @@ func runSeededWorkerLargeResult(seed int64, replay *Trace) (trace Trace, runErr 
 		return Trace{}, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose([]string{"clean", "step_blob_drop", "step_blob_ack_lost", "terminal_blob_drop", "terminal_blob_ack_lost", "step_completion_ack_lost", "outcome_ack_lost", "consumer_leader_changed"})
+	mode, err := schedule.Choose([]string{"clean", "step_blob_drop", "step_blob_ack_lost", "step_blob_read_unavailable", "terminal_blob_drop", "terminal_blob_ack_lost", "step_completion_ack_lost", "outcome_ack_lost", "consumer_leader_changed"})
 	if err != nil {
 		return trace, err
 	}
@@ -51,7 +51,7 @@ func runSeededWorkerLargeResult(seed int64, replay *Trace) (trace Trace, runErr 
 	transport := NewWorkerTransport(schedule, 3*time.Second)
 	journals := NewJournalTransport(schedule)
 	appendPort := &faultingExecutionJournal{JournalTransport: journals}
-	if mode == "step_completion_ack_lost" {
+	if mode == "step_completion_ack_lost" || mode == "step_blob_read_unavailable" {
 		appendPort.subject = identity.JournalSubject(typ, id)
 		appendPort.fault = LoseAckAfterCommit
 	}
@@ -59,6 +59,11 @@ func runSeededWorkerLargeResult(seed int64, replay *Trace) (trace Trace, runErr 
 	leasing := lease.NewWithKVPort(NewKVTransport(schedule, 30*time.Second))
 	outcomes := NewKVTransport(schedule, 0)
 	blobs := NewResultBlobTransport(schedule)
+	if mode == "step_blob_read_unavailable" {
+		if err := blobs.QueueReadFault("step-result-"); err != nil {
+			return trace, err
+		}
+	}
 	if mode == "step_blob_drop" || mode == "step_blob_ack_lost" {
 		fault := DropBeforeCommit
 		if mode == "step_blob_ack_lost" {
@@ -124,6 +129,9 @@ func runSeededWorkerLargeResult(seed int64, replay *Trace) (trace Trace, runErr 
 	wantCalls := 1
 	if mode == "step_blob_drop" || mode == "step_blob_ack_lost" || mode == "terminal_blob_drop" || mode == "terminal_blob_ack_lost" || mode == "step_completion_ack_lost" {
 		wantCalls = 2
+	}
+	if mode == "step_blob_read_unavailable" {
+		wantCalls = 3
 	}
 	if calls != wantCalls {
 		return trace, fmt.Errorf("seed %d mode=%s calls=%d want=%d", seed, mode, calls, wantCalls)
