@@ -14,6 +14,7 @@ jobs:
     env:
       WF_TIER3_CONTAINER: '1'
       WF_TIER3_HISTORY_OUT: tier3-client-history.jsonl
+      WF_TIER3_QUORUM_HISTORY_OUT: tier3-quorum-history.jsonl
       WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval }}
     steps:
       - uses: actions/checkout@v4
@@ -26,5 +27,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: tier3-client-history
-          path: integration/tier3-client-history.jsonl
+          path: |
+            integration/tier3-client-history.jsonl
+            integration/tier3-quorum-history.jsonl
           if-no-files-found: ignore

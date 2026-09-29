@@ -4,13 +4,19 @@ package integration_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
 	"time"
 
+	"js-wf/client"
+	"js-wf/history"
+	"js-wf/identity"
+	"js-wf/provision"
 	"js-wf/testcluster"
 
+	"github.com/anishathalye/porcupine"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -40,6 +46,37 @@ func TestFiveContainerPublishRequiresQuorum(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	for until := time.Now().Add(60 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
+		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
+		err = provision.Ensure(attempt, js, 5)
+		stop()
+		if err == nil {
+			break
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+	if err != nil {
+		t.Fatalf("provision workflow stores: %v", err)
+	}
+	recorder := &history.Recorder{}
+	defer func() {
+		path := os.Getenv("WF_TIER3_QUORUM_HISTORY_OUT")
+		if path == "" {
+			return
+		}
+		file, err := os.Create(path)
+		if err != nil {
+			t.Errorf("create quorum-cut client history: %v", err)
+			return
+		}
+		if err := recorder.WriteJSONL(file); err != nil {
+			t.Errorf("write quorum-cut client history: %v", err)
+		}
+		if err := file.Close(); err != nil {
+			t.Errorf("close quorum-cut client history: %v", err)
+		}
+	}()
+	observed := client.NewObserved(js, recorder)
 	config := jetstream.StreamConfig{Name: "TIER3_QUORUM", Subjects: []string{"tier3.quorum"}, Storage: jetstream.FileStorage, Replicas: 5, Discard: jetstream.DiscardNew}
 	var stream jetstream.Stream
 	for until := time.Now().Add(60 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
@@ -78,6 +115,13 @@ func TestFiveContainerPublishRequiresQuorum(t *testing.T) {
 	if publishErr == nil {
 		t.Fatalf("publish acknowledged without quorum at sequence %d", ack.Sequence)
 	}
+	const typ, id = "tier3", "quorum-start"
+	startCtx, stopStart := context.WithTimeout(ctx, 3*time.Second)
+	_, startErr := observed.Start(startCtx, typ, id, []byte(`42`))
+	stopStart()
+	if !errors.Is(startErr, client.ErrStartUnknown) {
+		t.Fatalf("start without quorum returned %v, want unknown outcome", startErr)
+	}
 	if err := cluster.ConnectNode(2); err != nil {
 		t.Fatal(err)
 	}
@@ -97,13 +141,41 @@ func TestFiveContainerPublishRequiresQuorum(t *testing.T) {
 	if before.Sequence == after.Sequence {
 		t.Fatalf("before and after both acknowledged sequence %d", before.Sequence)
 	}
+	var handle client.Handle
+	for until := time.Now().Add(60 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
+		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
+		handle, err = observed.Start(attempt, typ, id, []byte(`42`))
+		stop()
+		if err == nil || errors.Is(err, client.ErrAlreadyStarted) {
+			break
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+	if err != nil && !errors.Is(err, client.ErrAlreadyStarted) || handle.InvSeq == 0 {
+		t.Fatalf("start after restoring quorum: handle=%+v err=%v", handle, err)
+	}
+	if result, err := history.CheckStarts(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
+		t.Fatalf("quorum-cut start history=%s: %v", result, err)
+	}
+	inv, err := js.Stream(ctx, "WF_INV")
+	if err != nil {
+		t.Fatal(err)
+	}
+	invInfo, err := inv.Info(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	retained, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, id))
+	if err != nil || invInfo.State.Msgs != 1 || retained.Sequence != handle.InvSeq {
+		t.Fatalf("write-once invocation: count=%d retained=%+v handle=%+v err=%v", invInfo.State.Msgs, retained, handle, err)
+	}
 	acked := map[uint64]string{before.Sequence: "before", after.Sequence: "after"}
 	for until := time.Now().Add(30 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
 		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
 		err = auditPlainStream(attempt, stream, acked)
 		stop()
 		if err == nil {
-			t.Logf("quorum cut: no acknowledgment with two reachable replicas; acknowledged sequences %d and %d before and after heal", before.Sequence, after.Sequence)
+			t.Logf("quorum cut: no acknowledgment with two reachable replicas; acknowledged sequences %d and %d before and after heal; start history=%d operations invocation=%d", before.Sequence, after.Sequence, len(recorder.Snapshot()), handle.InvSeq)
 			return
 		}
 		time.Sleep(200 * time.Millisecond)
