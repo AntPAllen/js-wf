@@ -221,6 +221,18 @@ change also retries safely. The parent and child have one retained invocation
 and terminal result each, the parent receives one notification, the final
 snapshot passes I1/I2/I3/I6, and seed 42 replays across processes.
 
+The integrated large-result workload runs production `wf.Run` and
+`Worker.handle` through a narrow result Object Store port. Each handler
+produces a result above both step and terminal inline limits, so both writes
+use content-addressed object names. Across 1,000 seeds, a step or terminal
+object write is dropped or committed with a lost acknowledgment, a step
+completion acknowledgment is lost, a terminal KV acknowledgment is lost, or
+the consumer leader changes. An uncertain step object write is retried by
+worker redelivery with the same object name; the worker does not journal a
+permanent failure for an ambiguous write. The workload checks two retained
+objects, their hashes and bytes, one terminal KV result, effect counts, and
+the I1/I2/I3/I6 snapshot. Seed 42 is pinned and replays across processes.
+
 The client start slice runs the production `Client.Start`, `StartChild`, and
 `StartScan.Scan` decisions through narrow transport ports. Its model enforces one invocation per
 subject, stores large input objects, and retains run enqueues with message-ID

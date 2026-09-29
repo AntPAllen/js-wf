@@ -54,6 +54,7 @@ type Worker struct {
 	outcomePort          OutcomePort
 	invocationPort       InvocationPort
 	signalDrainPort      SignalDrainPort
+	resultBlobPort       ResultBlobPort
 	timerSchedulePort    TimerSchedulePort
 	timerNowPort         func(context.Context) (time.Time, error)
 	client               *client.Client
@@ -172,6 +173,7 @@ type ModeledWorkerPorts struct {
 	Outcome     OutcomePort
 	Invocation  InvocationPort
 	Signals     SignalDrainPort
+	ResultBlobs ResultBlobPort
 	Timer       TimerSchedulePort
 	TimerNow    func(context.Context) (time.Time, error)
 	NativeTimer bool
@@ -185,7 +187,7 @@ func NewWithPorts(id string, handlers map[string]Handler, ports ModeledWorkerPor
 	if id == "" || ports.Journal == nil || ports.Leases == nil || ports.Outcome == nil || ports.Invocation == nil || ports.Signals == nil || ports.Client == nil {
 		return nil, fmt.Errorf("invalid modeled worker configuration")
 	}
-	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, cancelWaiters: make(map[string]*cancelWaiter)}, nil
+	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: 30 * time.Second, heartbeatInterval: 10 * time.Second, cancelWaiters: make(map[string]*cancelWaiter)}, nil
 }
 
 type panicRetryError struct{ attempt int }
@@ -662,27 +664,19 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	handlerCtx, cancelHandler := context.WithCancel(ctx)
 	defer cancelHandler()
 	wctx := wf.NewContext(handlerCtx, steps, func(ctx context.Context, k wf.Kind, p json.RawMessage) error { return appendEntry(journal.Kind(k), p) }, signals...)
+	resultBlobs := w.resultBlobs()
 	wctx.SetResultStore(func(ctx context.Context, data []byte) (string, error) {
-		if w.js == nil {
+		if resultBlobs == nil {
 			return "", fmt.Errorf("result blob store unavailable on modeled worker")
-		}
-		objects, err := w.js.ObjectStore(ctx, "WF_BLOB")
-		if err != nil {
-			return "", err
 		}
 		digest := sha256.Sum256(data)
 		name := "step-result-" + hex.EncodeToString(digest[:])
-		_, err = objects.PutBytes(ctx, name, data)
-		return name, err
+		return name, resultBlobs.PutBytes(ctx, name, data)
 	}, func(ctx context.Context, name string) ([]byte, error) {
-		if w.js == nil {
+		if resultBlobs == nil {
 			return nil, fmt.Errorf("result blob store unavailable on modeled worker")
 		}
-		objects, err := w.js.ObjectStore(ctx, "WF_BLOB")
-		if err != nil {
-			return nil, err
-		}
-		return objects.GetBytes(ctx, name)
+		return resultBlobs.GetBytes(ctx, name)
 	})
 	wctx.SetTimerSupport(wakeupAt, func(ctx context.Context) (time.Time, error) { return w.serverNow(ctx) }, func(ctx context.Context, step uint64, fireAt time.Time) error {
 		renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
@@ -772,7 +766,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	if runErr == nil {
 		runErr = wctx.CheckComplete()
 	}
-	if errors.Is(runErr, journal.ErrStale) || errors.Is(runErr, journal.ErrUnknown) || errors.Is(runErr, lease.ErrLost) || errors.Is(runErr, context.Canceled) || errors.Is(runErr, wf.ErrTimerSchedule) || errors.Is(runErr, wf.ErrChildStart) {
+	if errors.Is(runErr, journal.ErrStale) || errors.Is(runErr, journal.ErrUnknown) || errors.Is(runErr, lease.ErrLost) || errors.Is(runErr, context.Canceled) || errors.Is(runErr, wf.ErrTimerSchedule) || errors.Is(runErr, wf.ErrChildStart) || errors.Is(runErr, ErrResultBlobUnknown) {
 		return runErr
 	}
 	out := wf.Outcome{InvSeq: input.Sequence, Result: result}
@@ -781,16 +775,12 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		kind = journal.Failed
 		out = wf.Outcome{InvSeq: input.Sequence, Error: runErr.Error()}
 	} else if len(result) > wf.MaxInlineTerminal {
-		if w.js == nil {
+		if resultBlobs == nil {
 			return fmt.Errorf("terminal blob store unavailable on modeled worker")
-		}
-		objects, err := w.js.ObjectStore(ctx, "WF_BLOB")
-		if err != nil {
-			return err
 		}
 		digest := sha256.Sum256(result)
 		name := "terminal-result-" + hex.EncodeToString(digest[:])
-		if _, err := objects.PutBytes(ctx, name, result); err != nil {
+		if err := resultBlobs.PutBytes(ctx, name, result); err != nil {
 			return err
 		}
 		out.Result = nil
@@ -805,6 +795,16 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		return err
 	}
 	return w.persistAndNotify(ctx, typ, id, input.Sequence, payload, input.Header)
+}
+
+func (w *Worker) resultBlobs() ResultBlobPort {
+	if w.resultBlobPort != nil {
+		return w.resultBlobPort
+	}
+	if w.js != nil {
+		return NewResultBlobPort(w.js)
+	}
+	return nil
 }
 
 func (w *Worker) persistAndNotify(ctx context.Context, typ, id string, invSeq uint64, payload []byte, headers nats.Header) error {
