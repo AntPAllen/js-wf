@@ -65,6 +65,8 @@ jobs:
         run: WF_PROCESS_WORKFLOW=1 FAULT_SEED=42 FAULT_SCHEDULE_OUT=fanout-four-faults.json go test ./integration -run '^TestFanoutWorkflowRecoversFromFourServerFaults$' -count=1 -timeout=4m -v
       - name: Recover a mixed workflow batch after four server faults
         run: WF_MIXED_CHAOS=1 FAULT_SEED=42 FAULT_SCHEDULE_OUT=mixed-four-faults.json go test ./integration -run '^TestMixedWorkflowsRecoverFromFourServerFaults$' -count=1 -timeout=5m -v
+      - name: Recover six pending children after a full server restart
+        run: WF_FULL_RESTART_FANOUT=1 go test ./integration -run '^TestFanoutSurvivesFullServerRestart$' -count=1 -timeout=4m -v
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
