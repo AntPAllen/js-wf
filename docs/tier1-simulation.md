@@ -136,7 +136,11 @@ At 500 ms of server time both must leave the uninitialized key held; at
 800 ms only the fast clock can initiate reclaim, and revision CAS still
 permits one initialized winner. Both boundary traces are pinned on disk,
 and seed 1 is byte-identical across processes. Other modeled actors still
-need explicit wall-clock offsets.
+need explicit wall-clock offsets. A three-node contract gives the same real
+and modeled lease decisions -2 s and +2 s local offsets over server-clock
+KV revisions: the slow contender leaves the orphan held, the fast contender
+reclaims it, and both stores retain an initialized higher epoch. Three
+normal repeats and a race run passed.
 The seeded lease trace is byte-identical across processes and replays from
 disk. A real three-node fixture checks the model's normal revision, held-key,
 renewal, stale cleanup, and stale update behavior. A TCP-proxy fixture holds

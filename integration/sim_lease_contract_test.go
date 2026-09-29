@@ -64,6 +64,88 @@ type holdLeaseRenewKV struct {
 	triggerAt int
 }
 
+type realLeaseClockPort struct{ kv jetstream.KeyValue }
+
+func (p realLeaseClockPort) Create(ctx context.Context, key string, value []byte) (uint64, error) {
+	return p.kv.Create(ctx, key, value)
+}
+func (p realLeaseClockPort) Get(ctx context.Context, key string) (lease.KVEntry, error) {
+	entry, err := p.kv.Get(ctx, key)
+	if err != nil {
+		return lease.KVEntry{}, err
+	}
+	return lease.KVEntry{Value: entry.Value(), Revision: entry.Revision(), Created: entry.Created()}, nil
+}
+func (p realLeaseClockPort) Update(ctx context.Context, key string, value []byte, revision uint64) (uint64, error) {
+	return p.kv.Update(ctx, key, value, revision)
+}
+func (p realLeaseClockPort) Delete(ctx context.Context, key string, revision uint64) error {
+	return p.kv.Delete(ctx, key, jetstream.LastRevision(revision))
+}
+func (realLeaseClockPort) Now() time.Time { return time.Now() }
+
+type offsetLeaseClockPort struct {
+	lease.KVPort
+	offset time.Duration
+}
+
+func (p offsetLeaseClockPort) Now() time.Time { return p.KVPort.Now().Add(p.offset) }
+
+func TestSimLeaseClockSkewReclaimContractAgainstRealCluster(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	kv, err := all[0].KeyValue(ctx, "WF_LEASE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	model := sim.NewKVTransport(sim.NewScheduler(17), 30*time.Second)
+	const typ, id = "lease-contract", "skewed-orphan"
+	key := typ + "." + id
+	orphan, _ := json.Marshal(lease.Value{Worker: "crashed"})
+	realOld, err := kv.Create(ctx, key, orphan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	modelOld, err := model.Create(ctx, key, orphan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	realPort := realLeaseClockPort{kv: kv}
+	for _, tc := range []struct {
+		name   string
+		offset time.Duration
+		held   bool
+	}{
+		{name: "slow", offset: -2 * time.Second, held: true},
+		{name: "fast", offset: 2 * time.Second},
+	} {
+		realStore := lease.NewWithKVPort(offsetLeaseClockPort{KVPort: realPort, offset: tc.offset})
+		modelStore := lease.NewWithKVPort(offsetLeaseClockPort{KVPort: model, offset: tc.offset})
+		realLease, realErr := realStore.Acquire(ctx, typ, id, tc.name)
+		modelLease, modelErr := modelStore.Acquire(ctx, typ, id, tc.name)
+		if tc.held {
+			if !errors.Is(realErr, lease.ErrHeld) || !errors.Is(modelErr, lease.ErrHeld) {
+				t.Fatalf("%s early reclaim: real=%v model=%v", tc.name, realErr, modelErr)
+			}
+			continue
+		}
+		if realErr != nil || modelErr != nil || realLease.Epoch() <= realOld || modelLease.Epoch() <= modelOld {
+			t.Fatalf("%s reclaim: real_epoch=%v real_err=%v model_epoch=%v model_err=%v old=%d/%d", tc.name, realLease, realErr, modelLease, modelErr, realOld, modelOld)
+		}
+	}
+	for name, port := range map[string]lease.KVPort{"real": realPort, "model": model} {
+		entry, err := port.Get(ctx, key)
+		if err != nil {
+			t.Fatalf("%s retained lease: %v", name, err)
+		}
+		var value lease.Value
+		if err := json.Unmarshal(entry.Value, &value); err != nil || value.Worker != "fast" || value.Epoch == 0 || entry.Revision <= value.Epoch {
+			t.Fatalf("%s retained lease=%+v revision=%d err=%v", name, value, entry.Revision, err)
+		}
+	}
+}
+
 func (h *holdLeaseRenewKV) Update(ctx context.Context, key string, value []byte, revision uint64) (uint64, error) {
 	h.mu.Lock()
 	h.count++
