@@ -19,6 +19,12 @@ var ErrCorruptJournal = errors.New("invalid step protocol in journal")
 var ErrSuspended = errors.New("workflow suspended awaiting an external event")
 var ErrTimerSchedule = errors.New("timer schedule was not confirmed")
 var ErrChildStart = errors.New("child start was not confirmed")
+var ErrStepResultNotSerializable = errors.New("step result is not serializable")
+
+type stepResultSerializationError struct{ message string }
+
+func (e *stepResultSerializationError) Error() string { return e.message }
+func (e *stepResultSerializationError) Unwrap() error { return ErrStepResultNotSerializable }
 
 type NonDeterministicError struct {
 	Index         uint64
@@ -96,6 +102,7 @@ type completion struct {
 	ResultRef  string          `json:"result_ref,omitempty"`
 	ResultHash string          `json:"result_hash,omitempty"`
 	Error      string          `json:"error,omitempty"`
+	ErrorKind  string          `json:"error_kind,omitempty"`
 	SignalSeq  uint64          `json:"signal_seq,omitempty"`
 	Selected   string          `json:"selected,omitempty"`
 }
@@ -166,7 +173,13 @@ func runWithKind[T any](c *Context, kind, name string, input any, fn func(contex
 			return zero, ErrCorruptJournal
 		}
 		c.position++
+		if done.ErrorKind != "" && (done.ErrorKind != "result_not_serializable" || done.Error == "" || len(done.Result) != 0 || done.ResultRef != "") {
+			return zero, ErrCorruptJournal
+		}
 		if done.Error != "" {
+			if done.ErrorKind == "result_not_serializable" {
+				return zero, &stepResultSerializationError{message: done.Error}
+			}
 			return zero, errors.New(done.Error)
 		}
 		if done.ResultRef != "" {
@@ -200,14 +213,16 @@ func runWithKind[T any](c *Context, kind, name string, input any, fn func(contex
 		return zero, err
 	}
 	done := completion{}
+	var serializationErr error
 	if effectErr != nil {
 		done.Error = effectErr.Error()
 	} else {
 		result, err := json.Marshal(value)
 		if err != nil {
-			return zero, fmt.Errorf("step result: %w", err)
-		}
-		if len(result) > MaxInlineResult {
+			serializationErr = &stepResultSerializationError{message: fmt.Sprintf("%s: %v", ErrStepResultNotSerializable, err)}
+			done.Error = serializationErr.Error()
+			done.ErrorKind = "result_not_serializable"
+		} else if len(result) > MaxInlineResult {
 			if c.storeResult == nil {
 				return zero, fmt.Errorf("step result exceeds inline limit without Object Store")
 			}
@@ -230,6 +245,9 @@ func runWithKind[T any](c *Context, kind, name string, input any, fn func(contex
 		return zero, err
 	}
 	c.position++
+	if serializationErr != nil {
+		return zero, serializationErr
+	}
 	return value, effectErr
 }
 
