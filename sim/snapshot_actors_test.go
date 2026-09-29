@@ -101,7 +101,7 @@ func runTwoSnapshotCompactors(seed int64, replay *Trace) (trace Trace, runErr er
 			return err
 		}},
 		{Name: "beta", Run: func(ctx context.Context, store *journal.Store) error {
-			_, err := store.SnapshotPrefix(ctx, typ, id, 4)
+			_, err := store.SnapshotPrefix(ctx, typ, id, 2)
 			return err
 		}},
 	}
@@ -136,7 +136,8 @@ func runTwoSnapshotCompactors(seed int64, replay *Trace) (trace Trace, runErr er
 		return trace, err
 	}
 	read, tail, err := store.Read(ctx, typ, id)
-	if err != nil || !reflect.DeepEqual(read, records) || tail != records[len(records)-1].Sequence || len(live.Messages(subject)) != 4 || manifest.Revision != 2 || snap.LastIndex != uint64(len(records)-5) {
+	wantLive := len(records) - 1 - int(snap.LastIndex)
+	if err != nil || !reflect.DeepEqual(read, records) || tail != records[len(records)-1].Sequence || len(live.Messages(subject)) != wantLive || (manifest.Revision != 2 && manifest.Revision != 3) || (wantLive != 2 && wantLive != 4) {
 		return trace, fmt.Errorf("seed %d race: read=%d live=%d revision=%d lastIndex=%d err=%v", seed, len(read), len(live.Messages(subject)), manifest.Revision, snap.LastIndex, err)
 	}
 	schedule.RecordTransport(TransportEvent{Operation: "check_snapshot_compactors", Subject: subject, Sequence: snap.LastSeq, Outcome: mode, AtMillis: schedule.NowMillis()})
@@ -162,6 +163,7 @@ func TestCooperativeSnapshotCompactorsReplay(t *testing.T) {
 		return
 	}
 	var conflicted int
+	var staleLargerCut int
 	observedModes := map[string]int{}
 	for seed := int64(1); seed <= 1000; seed++ {
 		generated, err := runTwoSnapshotCompactors(seed, nil)
@@ -180,14 +182,22 @@ func TestCooperativeSnapshotCompactorsReplay(t *testing.T) {
 				t.Fatalf("FAULT_SEED=%d replay: %v", seed, err)
 			}
 		}
+		seedConflicted := false
 		for _, event := range generated.Transport {
 			if event.Operation == "update_snapshot_manifest" && event.Outcome == "revision_mismatch" {
 				conflicted++
+				seedConflicted = true
 			}
+		}
+		if seedConflicted && generated.Transport[len(generated.Transport)-1].Sequence == 21 {
+			staleLargerCut++
 		}
 	}
 	if conflicted == 0 {
 		t.Fatal("no seeded writer reached a conflicting manifest CAS")
+	}
+	if staleLargerCut == 0 {
+		t.Fatal("no longer-prefix writer lost the CAS to the shorter-prefix writer")
 	}
 	for _, mode := range []string{"clean", "object_drop", "object_ack_lost", "manifest_drop", "manifest_ack_lost", "purge_drop", "purge_ack_lost"} {
 		if observedModes[mode] == 0 {

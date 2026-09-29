@@ -36,15 +36,17 @@ compactions byte for byte.
 
 `sim.RunSnapshotActors` yields each production snapshot read, object write,
 manifest CAS, and bounded purge to the cooperative scheduler. A 1,000-seed
-two-compactor workload starts from one compacted journal, races two production
-`SnapshotPrefix` calls, and checks that the manifest advances one revision,
-the losing writer receives `ErrSnapshotStale` when its CAS conflicts, four
-live entries remain, and a fresh read reconstructs every original record.
-Fault choices drop or hide acknowledgments for the object upload, manifest
-update, and bounded journal purge. A subsequent compactor call repairs the
-uncertain outcome without advancing the manifest again. The workload pins a
-conflicting-CAS and purge-drop trace from seed 1, replays exact traces, and
-compares seed 42 across processes.
+two-compactor workload starts from one compacted journal and races two
+production `SnapshotPrefix` calls with different retained suffix lengths.
+The losing writer receives `ErrSnapshotStale` when its CAS conflicts; the
+manifest advances one or two revisions depending on whether the second
+compactor reads the new revision. A fresh read reconstructs every original
+record, and the live suffix matches the winning manifest. Fault choices
+drop or hide acknowledgments for the object upload, manifest update, and
+bounded journal purge. A later compactor call repairs uncertain writes.
+Pinned seeds 1 and 4 cover CAS conflict with a dropped purge and a lost
+manifest acknowledgement, including the longer-prefix writer losing;
+seed 42 matches across processes.
 
 The production worker now calls modeled `MaybeSnapshot` after a successful
 delivery when its journal has a snapshot write port. A 1,000-seed workload
