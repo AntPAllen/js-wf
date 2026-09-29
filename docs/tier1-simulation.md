@@ -28,6 +28,8 @@ the first ten seeds replay through the shared trace dispatcher, and seed 42
 produces byte-identical traces across processes. The
 three-node 300-entry contract now mirrors the same publish order in the model
 and compares every record and tail after both production read paths.
+A local 100,000-seed run of this batch-read workload passed in 167.62 seconds;
+this is one workload, not the full Tier 1 release gate.
 
 The production `journal.Store.Read` can now load a compacted prefix through a
 narrow modeled manifest and Object Store read port, then join it to retained
