@@ -8,9 +8,9 @@ on:
         default: '2m'
         type: string
 jobs:
-  skewed-server:
+  clock-skew:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     env:
       WF_TIER3_CLOCK_SKEW: '1'
       WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval }}
@@ -22,6 +22,10 @@ jobs:
           go-version-file: go.mod
       - name: Verify real server clock offsets and native timer deadlines
         run: go test ./integration -run '^TestFiveContainerServerClockSkewTimer$' -count=1 -timeout=6m -v
+      - name: Verify real worker clock offsets and native timer deadlines
+        env:
+          WF_TIER3_WORKER_CLOCK_SKEW: '1'
+        run: go test ./integration -run '^TestFiveContainerWorkerClockSkewTimer$' -count=1 -timeout=6m -v
       - if: always()
         uses: actions/upload-artifact@v7
         with:

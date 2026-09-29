@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -93,29 +92,9 @@ func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
 	}
 	dockerfile := "FROM scratch\nCOPY nats-server /nats-server\n"
 	if c.skewNode >= 0 {
-		source := filepath.Join(runtime.GOROOT(), "src", "time", "time.go")
-		content, readErr := os.ReadFile(source)
-		if readErr != nil {
-			return nil, fmt.Errorf("read Go clock source: %w", readErr)
-		}
-		const original = "\tsec, nsec, mono := runtimeNow()\n"
-		if strings.Count(string(content), original) != 1 {
-			return nil, fmt.Errorf("Go clock source does not contain exactly one runtimeNow call")
-		}
-		replacement := original + fmt.Sprintf("\tsec += %d // Tier 3 test-only wall-clock skew\n", c.skewSeconds)
-		patched := filepath.Join(root, "skew-time.go")
-		if writeErr := os.WriteFile(patched, []byte(strings.Replace(string(content), original, replacement, 1)), 0644); writeErr != nil {
-			return nil, writeErr
-		}
-		overlay, marshalErr := json.Marshal(struct {
-			Replace map[string]string `json:"Replace"`
-		}{Replace: map[string]string{source: patched}})
-		if marshalErr != nil {
-			return nil, marshalErr
-		}
-		overlayPath := filepath.Join(root, "skew-overlay.json")
-		if writeErr := os.WriteFile(overlayPath, overlay, 0644); writeErr != nil {
-			return nil, writeErr
+		overlayPath, overlayErr := WriteClockOverlay(root, time.Duration(c.skewSeconds)*time.Second)
+		if overlayErr != nil {
+			return nil, overlayErr
 		}
 		skewBuild := exec.Command("go", "build", "-overlay="+overlayPath, "-o", filepath.Join(root, "nats-server-skewed"), "github.com/nats-io/nats-server/v2")
 		skewBuild.Env = append(os.Environ(), "CGO_ENABLED=0")
@@ -156,6 +135,8 @@ func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
 }
 
 func (c *DockerCluster) ClientURL(i int) string { return c.urls[i] }
+
+func (c *DockerCluster) MonitorURL(i int) string { return c.monitorURLs[i] }
 
 func (c *DockerCluster) SyncInterval() string { return c.syncInterval }
 
