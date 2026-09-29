@@ -28,12 +28,24 @@ func TestThreeThousandTimersDueInOneSecond(t *testing.T) {
 	if os.Getenv("WF_TIMER_FANIN_SCALE") != "1" {
 		t.Skip("set WF_TIMER_FANIN_SCALE=1 for the 3,000-timer fan-in proof")
 	}
+	runTimerFanIn(t, 3000)
+}
+
+func TestTenThousandTimersDueInOneSecond(t *testing.T) {
+	if os.Getenv("WF_TIMER_FANIN_10000") != "1" {
+		t.Skip("set WF_TIMER_FANIN_10000=1 for the 10,000-timer fan-in proof")
+	}
+	runTimerFanIn(t, 10000)
+}
+
+func runTimerFanIn(t *testing.T, count int) {
+	t.Helper()
 	all, _ := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 7*time.Minute)
 	defer cancel()
-	const typ, count, workerCount = "timer-fanin", 3000, 6
+	const typ, workerCount = "timer-fanin", 6
 	// The next whole second keeps the expected due times away from a second
-	// boundary while leaving enough time to schedule and audit all 3,000.
+	// boundary while leaving enough time to schedule and audit up to 10,000.
 	target := time.Now().UTC().Add(180 * time.Second).Truncate(time.Second).Add(time.Second)
 	type input struct {
 		Index  int       `json:"index"`
@@ -125,7 +137,7 @@ func TestThreeThousandTimersDueInOneSecond(t *testing.T) {
 		for _, w := range workers {
 			scheduled += w.Metrics().TimersScheduled
 		}
-		if scheduled == count {
+		if scheduled == uint64(count) {
 			break
 		}
 		select {
@@ -250,7 +262,7 @@ func TestThreeThousandTimersDueInOneSecond(t *testing.T) {
 		lateness[index] = completed.Sub(due)
 	}
 	sort.Slice(lateness, func(i, j int) bool { return lateness[i] < lateness[j] })
-	p99 := lateness[int(math.Ceil(.99*count))-1]
+	p99 := lateness[int(math.Ceil(.99*float64(count)))-1]
 	if p99 >= 30*time.Second || lateness[count-1] >= 5*time.Minute {
 		t.Fatalf("fan-in liveness: p99=%s max=%s, want p99 <30s and no completion >=5m late", p99, lateness[count-1])
 	}

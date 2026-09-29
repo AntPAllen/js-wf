@@ -1,0 +1,14 @@
+name: timer-fanin-10000
+on: workflow_dispatch
+jobs:
+  fanin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./integration -run '^TestTenThousandTimersDueInOneSecond$' -count=1 -timeout=7m -v
+        env:
+          WF_TIMER_FANIN_10000: '1'
