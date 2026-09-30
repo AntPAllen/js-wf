@@ -2050,3 +2050,43 @@ and full matrix evidence remain open. Vet and diff checks passed.
 The extended Tier 1 run at `463ce86` remains confirmed in progress and predates
 these claim controls; it has not been restarted. Standard and mixed jobs at
 `8e04946` are now confirmed in progress; their result is still pending.
+
+
+## Native scheduled-message volume runner and completed extended Tier 1
+
+The new [timer-volume campaign](timer-volume.md) implements the outstanding
+one-million scheduled-message/24-hour/two-full-restart risk proof as a standalone
+runner. It uses production timer publication, three real server processes,
+three-replica file storage and 64 partition consumers. It verifies identity,
+generation, target, no early server publish/receipt, distinct emission sequences,
+confirmed acks and final queue drain. Defaults keep raw p99 at two seconds and
+maximum lateness at 30 seconds; the full workload has not completed yet.
+
+A 1,000-schedule/45-second fixture check passed across two confirmed three-PID
+SIGKILL/restart cycles, with all deliveries, zero redeliveries or ack errors,
+17 transient fetch errors and a drained queue. Raw p99 was 13.12 seconds and
+maximum 13.25 seconds, below this explicitly shortened run's 30-second limit.
+It is not two-second p99 or full-volume evidence. The retained report and binary
+observations pass offline smoke verification; release verification rejects the
+smaller scope. Checker controls reject missing/duplicate/early deliveries,
+changed generation/target, malformed identities, corrupt/truncated artifacts,
+incorrect percentile, incomplete kill records and undrained queues. The
+million-point deadline arithmetic is monotonic with exact 24-hour endpoints.
+Unit/checker race tests, vet and diff checks passed.
+
+The first provisioning attempt spent its entire 45-second context waiting; a
+second fixture run stalled after its second restart until the overall deadline.
+Setup requests now have independent short attempt bounds, and restart recovery
+attaches existing consumers instead of issuing updates. The final fixture check
+passed; the server-side reason for those earlier requests is not confirmed.
+The VM's regenerable Go build cache was cleared before preparing the full
+campaign, increasing free disk from 1.6 GiB to approximately 22 GiB.
+
+The [extended Tier 1 campaign at `463ce86`](https://github.com/AntPAllen/js-wf/actions/runs/36762005726)
+completed successfully: 7,100,604 generated schedules, 167,554,704 choices and
+1,543,791,007 transport events in 1h33m40.46s. This includes the bounded journal
+open and heartbeat-reuse workloads, but predates renewal timing assertions,
+coordinator pause/claim workloads and named transient enqueue recovery.
+The standard and twenty-seed mixed jobs at `8e04946` also completed successfully;
+the mixed job at `4653542` succeeded while its standard job is still running.
+Fresh extended validation of the later models remains required.
