@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -14,6 +15,8 @@ import (
 type retryScanStream struct {
 	jetstream.Stream
 	requests []uint64
+	mu       sync.Mutex
+	attempts map[uint64]int
 }
 
 func (s *retryScanStream) Info(context.Context, ...jetstream.StreamInfoOpt) (*jetstream.StreamInfo, error) {
@@ -25,8 +28,14 @@ func (s *retryScanStream) GetMsg(ctx context.Context, seq uint64, _ ...jetstream
 	if !ok || time.Until(deadline) > 2*time.Second {
 		panic("unbounded audit request")
 	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.attempts == nil {
+		s.attempts = make(map[uint64]int)
+	}
 	s.requests = append(s.requests, seq)
-	if seq == 2 && len(s.requests) == 2 {
+	s.attempts[seq]++
+	if seq == 2 && s.attempts[seq] == 1 {
 		return nil, nats.ErrTimeout
 	}
 	if seq == 3 {
@@ -39,7 +48,7 @@ func TestScanRetriesCurrentSequence(t *testing.T) {
 	stream := &retryScanStream{}
 	var visited []uint64
 	err := scan(context.Background(), stream, func(msg *jetstream.RawStreamMsg) error { visited = append(visited, msg.Sequence); return nil })
-	if err != nil || !reflect.DeepEqual(visited, []uint64{1, 2, 4}) || !reflect.DeepEqual(stream.requests, []uint64{1, 2, 2, 3, 4}) {
+	if err != nil || !reflect.DeepEqual(visited, []uint64{1, 2, 4}) || !reflect.DeepEqual(stream.attempts, map[uint64]int{1: 1, 2: 2, 3: 1, 4: 1}) {
 		t.Fatalf("visited=%v requests=%v err=%v", visited, stream.requests, err)
 	}
 }

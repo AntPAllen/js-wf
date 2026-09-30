@@ -9,6 +9,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"js-wf/identity"
@@ -36,18 +37,53 @@ func scanThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, v
 	if cutoff != nil && info.State.LastSeq > *cutoff {
 		info.State.LastSeq = *cutoff
 	}
-	for seq := info.State.FirstSeq; seq <= info.State.LastSeq && seq != 0; seq++ {
-		m, err := auditRead(ctx, func(attempt context.Context) (*jetstream.RawStreamMsg, error) { return stream.GetMsg(attempt, seq) })
-		if errors.Is(err, jetstream.ErrMsgNotFound) {
-			continue
+	// Read a bounded window in parallel, then visit it in stream order. This
+	// preserves exact sequence requests and hole detection without introducing
+	// a consumer, while avoiding one network round trip per serial entry.
+	const window = 32
+	for first := info.State.FirstSeq; first <= info.State.LastSeq && first != 0; {
+		count := uint64(window)
+		if remaining := info.State.LastSeq - first + 1; remaining < count {
+			count = remaining
 		}
-		if err != nil {
-			return err
+		type result struct {
+			msg *jetstream.RawStreamMsg
+			err error
 		}
-		if err := visit(m); err != nil {
-			return err
+		results := make([]result, count)
+		var readers sync.WaitGroup
+		for offset := range results {
+			readers.Add(1)
+			go func() {
+				defer readers.Done()
+				sequence := first + uint64(offset)
+				results[offset].msg, results[offset].err = auditRead(ctx, func(attempt context.Context) (*jetstream.RawStreamMsg, error) {
+					return stream.GetMsg(attempt, sequence)
+				})
+			}()
 		}
+		readers.Wait()
+		for offset, result := range results {
+			if errors.Is(result.err, jetstream.ErrMsgNotFound) {
+				continue
+			}
+			if result.err != nil {
+				return result.err
+			}
+			sequence := first + uint64(offset)
+			if result.msg == nil || result.msg.Sequence != sequence {
+				return fmt.Errorf("retained scan: response does not match requested sequence %d", sequence)
+			}
+			if err := visit(result.msg); err != nil {
+				return err
+			}
+		}
+		if count > info.State.LastSeq-first {
+			break
+		}
+		first += count
 	}
+
 	return nil
 }
 
