@@ -2193,3 +2193,34 @@ The million-timer process has begun deliveries and is still live with all
 million publishes acknowledged, no observed fetch/ack errors or redeliveries
 at inspection. Its full-day/restart outcome and the extended Tier 1 campaign
 remain pending; neither has been restarted.
+
+## Verified 200-seed sustained worker-kill campaign and new throughput miss
+
+The [worker-kill campaign at `1cc9a39`](https://github.com/AntPAllen/js-wf/actions/runs/36701632166)
+is now terminal and successful: bootstrap plus all 200 seed jobs. A new campaign
+checker inspected all 200 full job logs, rather than sampling the final seed.
+Every seed reports ten minutes, release duration, the expected mixed workload
+composition, an active-worker kill, matching invocation/journal/terminal counts,
+all six terminal/progress p99 gates, and the selected test PASS. Totals are
+359,744 terminal invocations, 3,969,579 journal entries and 23,800 actual kills;
+worst aggregate terminal p99 is 15.028 seconds and worst workload terminal p99
+28.020 seconds. There were 5,188 confirmed active-worker kills. Two individual
+progress delays exceeded thirty seconds, with maximum 46.030 seconds, while
+all progress p99 gates passed. [Inputs, hashes, per-seed report and reproduction command](scale/worker-kill-200-2026-09-30/README.md)
+are retained. Six checker controls reject missing/duplicate/failed jobs, smoke
+runs, wrong seed identities, missing PASS, mismatched counts and latency misses;
+the existing unit workflow discovers these controls. All thirteen Python
+controls pass. This clears the 200-seed requirement for this row and revision
+only; the full matrix on final runtime code remains open.
+
+The [latest paired throughput job](https://github.com/AntPAllen/js-wf/actions/runs/36776741900)
+failed its hot-subject ratio at 0.713537; parallel passed at 0.992376. Both
+baseline and candidate have samples near 2,150 and 1,540 hot appends/s. The
+benchmark, append implementation, provisioning, module versions and in-process
+fixture are unchanged between its compared revisions. The cause remains open;
+leader placement relative to the pinned client is not captured. [All six
+samples and failed summary](scale/cas-throughput-paired-ci-failure-2026-09-30/README.md)
+are retained. The 0.8 gate remains unchanged and this failure is not discarded.
+The latest mixed-version retention controls passed; that is focused control
+evidence, not general mixed-version compatibility. The million-timer process
+and extended Tier 1 campaign remain confirmed live and have not been restarted.
