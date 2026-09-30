@@ -3,6 +3,7 @@ package sim
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strconv"
 	"sync"
 	"time"
@@ -141,6 +142,25 @@ func (m *DispatchTransport) Pending() int {
 		}
 	}
 	return pending
+}
+
+// PendingSubjects exposes enabled run partitions to cooperative workloads.
+// It does not change durable delivery order within a partition.
+func (m *DispatchTransport) PendingSubjects() []string {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	seen := map[string]bool{}
+	for _, record := range m.records {
+		if !record.acked {
+			seen[record.subject] = true
+		}
+	}
+	subjects := make([]string, 0, len(seen))
+	for subject := range seen {
+		subjects = append(subjects, subject)
+	}
+	sort.Strings(subjects)
+	return subjects
 }
 
 // StopWhenDrained ends a modeled partition loop after every published run has
