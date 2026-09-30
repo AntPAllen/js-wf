@@ -17,6 +17,19 @@ func WriteClockOverlay(root string, offset time.Duration) (string, error) {
 	if offset == 0 || offset%time.Second != 0 || offset < -60*time.Second || offset > 60*time.Second {
 		return "", fmt.Errorf("clock overlay offset must be whole seconds within ±60s: %s", offset)
 	}
+	return writeClockOverlay(root, offset)
+}
+
+// WriteAdvancedClockOverlay builds a test clock for long-deadline restart
+// proofs. Keep the ordinary skew injector's ±60s validation unchanged.
+func WriteAdvancedClockOverlay(root string, offset time.Duration) (string, error) {
+	if offset < 24*time.Hour || offset > 31*24*time.Hour || offset%time.Second != 0 {
+		return "", fmt.Errorf("advanced clock must be whole seconds within 1..31 days: %s", offset)
+	}
+	return writeClockOverlay(root, offset)
+}
+
+func writeClockOverlay(root string, offset time.Duration) (string, error) {
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return "", err
 	}

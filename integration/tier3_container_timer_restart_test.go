@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -31,13 +32,39 @@ func TestFiveContainerTimersSurviveFullRestart(t *testing.T) {
 	if os.Getenv("WF_TIER3_CONTAINER") != "1" {
 		t.Skip("set WF_TIER3_CONTAINER=1 for five-container NATS proof")
 	}
-	const typ, count = "tier3-restart-timer", 16
-	const delay = 75 * time.Second
-	cluster, err := testcluster.StartDockerCluster(t.TempDir(), 5)
+	runFiveContainerTimerRestart(t, false)
+}
+
+func TestFiveContainerThirtyDayTimerFiresAfterTwoRestarts(t *testing.T) {
+	if os.Getenv("WF_TIER3_LONG_TIMER") != "1" {
+		t.Skip("set WF_TIER3_LONG_TIMER=1 for advanced-clock thirty-day timer proof")
+	}
+	runFiveContainerTimerRestart(t, true)
+}
+
+func runFiveContainerTimerRestart(t *testing.T, longTimer bool) {
+	t.Helper()
+	typ, count, delay := "tier3-restart-timer", 16, 75*time.Second
+	restarts := 1
+	advance := time.Duration(0)
+	var cluster *testcluster.DockerCluster
+	var err error
+	if longTimer {
+		typ, count, delay = "tier3-thirty-day-timer", 1, 30*24*time.Hour
+		restarts, advance = 2, 31*24*time.Hour
+		cluster, err = testcluster.StartAdvancingClockDockerCluster(t.TempDir(), 5, advance)
+	} else {
+		cluster, err = testcluster.StartDockerCluster(t.TempDir(), 5)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer cluster.Close()
+	if longTimer {
+		if err := cluster.AdvanceStoppedClusterClock(); err == nil {
+			t.Fatal("clock advance accepted while servers were running")
+		}
+	}
 	defer func() {
 		if !t.Failed() {
 			return
@@ -143,7 +170,7 @@ func TestFiveContainerTimersSurviveFullRestart(t *testing.T) {
 		stop()
 		if infoErr == nil {
 			pending = info.State.Msgs
-			if first.Metrics().TimersScheduled == count && pending == count {
+			if first.Metrics().TimersScheduled == uint64(count) && pending == uint64(count) {
 				break
 			}
 		}
@@ -154,7 +181,7 @@ func TestFiveContainerTimersSurviveFullRestart(t *testing.T) {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
-	if first.Metrics().TimersScheduled != count || pending != count {
+	if first.Metrics().TimersScheduled != uint64(count) || pending != uint64(count) {
 		t.Fatalf("timers before restart: scheduled=%d pending=%d want=%d", first.Metrics().TimersScheduled, pending, count)
 	}
 	stopFirst()
@@ -162,6 +189,7 @@ func TestFiveContainerTimersSurviveFullRestart(t *testing.T) {
 		t.Fatalf("first worker: %v", err)
 	}
 	fireAt := make([]time.Time, count)
+	prefixes := make([][]journal.Record, count)
 	for index := 0; index < count; index++ {
 		id := fmt.Sprintf("timer-%02d", index)
 		records, _, err := journal.New(beforeJS).Read(ctx, typ, id)
@@ -176,18 +204,80 @@ func TestFiveContainerTimersSurviveFullRestart(t *testing.T) {
 			t.Fatalf("timer %s fire_at=%s request=%s err=%v", id, request.FireAt, records[1].Payload, err)
 		}
 		fireAt[index] = request.FireAt
+		prefixes[index] = records
+		if longTimer && (request.FireAt.Sub(time.Now()) < delay-time.Minute || request.FireAt.Sub(time.Now()) > delay+time.Minute) {
+			t.Fatalf("timer deadline is not thirty days: %s", request.FireAt)
+		}
 	}
 	beforeConn.Close()
 	workerConn.Close()
-	for i := 0; i < 5; i++ {
-		if err := cluster.KillNode(i); err != nil {
-			t.Fatalf("kill node %d: %v", i, err)
+	for cycle := 0; cycle < restarts; cycle++ {
+		for i := 0; i < 5; i++ {
+			if err := cluster.KillNode(i); err != nil {
+				t.Fatalf("cycle %d kill node %d: %v", cycle, i, err)
+			}
 		}
-	}
-	for i := 0; i < 5; i++ {
-		if err := cluster.RestartNode(i); err != nil {
-			t.Fatalf("restart node %d: %v", i, err)
+		if longTimer && cycle == 1 {
+			if err := cluster.AdvanceStoppedClusterClock(); err != nil {
+				t.Fatal(err)
+			}
 		}
+		for i := 0; i < 5; i++ {
+			if err := cluster.RestartNode(i); err != nil {
+				t.Fatalf("cycle %d restart node %d: %v", cycle, i, err)
+			}
+		}
+		phaseConn, phaseJS, err := connect(0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := waitRouteCounts(ctx, cluster, 0, 16, 30*time.Second); err != nil {
+			phaseConn.Close()
+			t.Fatal(err)
+		}
+		if err := waitFiveReplicaReadiness(ctx, phaseJS, identity.Partition(typ, "timer-00", provision.Partitions)); err != nil {
+			phaseConn.Close()
+			t.Fatal(err)
+		}
+		if longTimer {
+			expected := time.Duration(0)
+			if cycle == 1 {
+				expected = advance
+			}
+			for i := 0; i < 5; i++ {
+				attempt, done := context.WithTimeout(ctx, 2*time.Second)
+				now, err := cluster.ServerNow(attempt, i)
+				done()
+				delta := now.Sub(time.Now())
+				if err != nil || delta < expected-2*time.Second || delta > expected+2*time.Second {
+					phaseConn.Close()
+					t.Fatalf("cycle %d node %d clock=%s expected=%s err=%v", cycle, i, delta, expected, err)
+				}
+				t.Logf("restart_cycle=%d node=%d measured_server_offset=%s", cycle+1, i, delta)
+			}
+			prefix, _, err := journal.New(phaseJS).Read(ctx, typ, "timer-00")
+			if err != nil || !reflect.DeepEqual(prefix, prefixes[0]) {
+				phaseConn.Close()
+				t.Fatalf("cycle %d changed journal prefix: %+v err=%v", cycle, prefix, err)
+			}
+			if cycle == 0 {
+				stream, err := phaseJS.Stream(ctx, "WF_RUN")
+				if err != nil {
+					phaseConn.Close()
+					t.Fatal(err)
+				}
+				scheduled, err := stream.GetLastMsgForSubject(ctx, fmt.Sprintf("wf.schedule.%s.timer-00.0", typ))
+				if err != nil || scheduled.Header.Get(jetstream.ScheduleHeader) != "@at "+fireAt[0].UTC().Format(time.RFC3339Nano) {
+					phaseConn.Close()
+					t.Fatalf("thirty-day schedule lost after first restart: %+v %v", scheduled, err)
+				}
+				if early, err := stream.GetLastMsgForSubject(ctx, identity.RunSubject(typ, "timer-00", provision.Partitions)); !errors.Is(err, jetstream.ErrMsgNotFound) {
+					phaseConn.Close()
+					t.Fatalf("thirty-day timer delivered before advanced restart: %+v err=%v", early, err)
+				}
+			}
+		}
+		phaseConn.Close()
 	}
 	afterConn, afterJS, err := connect(0)
 	if err != nil {
@@ -201,19 +291,36 @@ func TestFiveContainerTimersSurviveFullRestart(t *testing.T) {
 		t.Fatalf("five-replica timer readiness after restart: %v", err)
 	}
 	healedAt := time.Now()
+	if longTimer {
+		healedAt = healedAt.Add(advance)
+	}
 	attempt, stopAttempt := context.WithTimeout(ctx, 5*time.Second)
 	run, err = afterJS.Stream(attempt, "WF_RUN")
 	stopAttempt()
 	if err != nil {
 		t.Fatal(err)
 	}
-	for index := 0; index < count; index++ {
+	for index := 0; index < count && !longTimer; index++ {
 		id := fmt.Sprintf("timer-%02d", index)
 		source := fmt.Sprintf("wf.schedule.%s.%s.0", typ, id)
 		stored, err := run.GetLastMsgForSubject(ctx, source)
 		if err != nil || stored.Header.Get(jetstream.ScheduleHeader) != "@at "+fireAt[index].UTC().Format(time.RFC3339Nano) {
 			t.Fatalf("timer %s schedule after restart: message=%+v err=%v", id, stored, err)
 		}
+	}
+	if longTimer {
+		var wakeup *jetstream.RawStreamMsg
+		for until := time.Now().Add(10 * time.Second); time.Now().Before(until); {
+			wakeup, err = run.GetLastMsgForSubject(ctx, identity.RunSubject(typ, "timer-00", provision.Partitions))
+			if err == nil && wakeup.Header.Get(identity.TimerStepHeader) == "0" && !wakeup.Time.Before(fireAt[0]) {
+				break
+			}
+			time.Sleep(50 * time.Millisecond)
+		}
+		if err != nil || wakeup == nil || wakeup.Header.Get(identity.TimerStepHeader) != "0" || wakeup.Time.Before(fireAt[0]) {
+			t.Fatalf("advanced server did not fire retained thirty-day schedule: %+v %v", wakeup, err)
+		}
+		t.Logf("thirty-day timer fired after two full restarts: server_advance=%s due=%s wakeup_time=%s", advance, fireAt[0], wakeup.Time)
 	}
 	replacementConn, replacementJS, err := connect(2)
 	if err != nil {
@@ -262,6 +369,19 @@ func TestFiveContainerTimersSurviveFullRestart(t *testing.T) {
 	case err := <-readErrors:
 		t.Fatal(err)
 	default:
+	}
+	if longTimer {
+		for node := 0; node < 5; node++ {
+			nc, js, err := connect(node)
+			if err != nil {
+				t.Fatal(err)
+			}
+			value, err := client.NewObserved(js, recorder).Await(ctx, typ, "timer-00")
+			nc.Close()
+			if err != nil || string(value) != "0" {
+				t.Fatalf("node %d thirty-day immutable result=%s err=%v", node, value, err)
+			}
+		}
 	}
 	if result, err := history.CheckStarts(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
 		t.Fatalf("timer start history=%s: %v", result, err)

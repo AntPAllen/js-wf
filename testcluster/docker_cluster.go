@@ -32,6 +32,8 @@ type DockerCluster struct {
 	skewNode      int
 	skewSeconds   int64
 	oldNode       int
+	clockAdvance  time.Duration
+	clockAdvanced bool
 }
 
 func dockerCommand(ctx context.Context, args ...string) (string, error) {
@@ -46,7 +48,7 @@ func dockerCommand(ctx context.Context, args ...string) (string, error) {
 // StartDockerCluster builds this module's pinned nats-server in a scratch
 // image. Each node routes to node zero; discovered routes form the cluster.
 func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
-	return startDockerCluster(root, count, "")
+	return startDockerCluster(root, count, "", 0)
 }
 
 // StartMixedVersionDockerCluster starts node zero on oldBinary while the other
@@ -55,17 +57,29 @@ func StartMixedVersionDockerCluster(root string, count int, oldBinary string) (*
 	if oldBinary == "" {
 		return nil, fmt.Errorf("old server binary is required")
 	}
-	return startDockerCluster(root, count, oldBinary)
+	return startDockerCluster(root, count, oldBinary, 0)
 }
 
-func startDockerCluster(root string, count int, oldBinary string) (_ *DockerCluster, err error) {
+// StartAdvancingClockDockerCluster prepares an initially unshifted cluster
+// and a separately built future-clock binary for a later full stopped restart.
+func StartAdvancingClockDockerCluster(root string, count int, advance time.Duration) (*DockerCluster, error) {
+	if advance < 24*time.Hour || advance > 31*24*time.Hour || advance%time.Second != 0 {
+		return nil, fmt.Errorf("advance must be whole seconds within 1..31 days")
+	}
+	if os.Getenv("WF_TIER3_SERVER_SKEW") != "" {
+		return nil, fmt.Errorf("clock advance cannot be combined with a skewed peer")
+	}
+	return startDockerCluster(root, count, "", advance)
+}
+
+func startDockerCluster(root string, count int, oldBinary string, advance time.Duration) (_ *DockerCluster, err error) {
 	if count < 3 || count > 5 {
 		return nil, fmt.Errorf("docker cluster count must be 3..5")
 	}
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return nil, err
 	}
-	c := &DockerCluster{root: root, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1, oldNode: -1}
+	c := &DockerCluster{root: root, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1, oldNode: -1, clockAdvance: advance}
 	if oldBinary != "" {
 		c.oldNode = 0
 		data, readErr := os.ReadFile(oldBinary)
@@ -133,6 +147,18 @@ func startDockerCluster(root string, count int, oldBinary string) (_ *DockerClus
 		}
 		dockerfile += "COPY nats-server-skewed /nats-server-skewed\n"
 	}
+	if c.clockAdvance != 0 {
+		overlayPath, err := WriteAdvancedClockOverlay(filepath.Join(root, "advanced-clock"), c.clockAdvance)
+		if err != nil {
+			return nil, err
+		}
+		advanceBuild := exec.Command("go", "build", "-overlay="+overlayPath, "-o", filepath.Join(root, "nats-server-advanced"), "github.com/nats-io/nats-server/v2")
+		advanceBuild.Env = append(os.Environ(), "CGO_ENABLED=0")
+		if output, err := advanceBuild.CombinedOutput(); err != nil {
+			return nil, fmt.Errorf("build advanced-clock server: %w: %s", err, output)
+		}
+		dockerfile += "COPY nats-server-advanced /nats-server-advanced\n"
+	}
 	dockerfile += "ENTRYPOINT [\"/nats-server\"]\n"
 	if err := os.WriteFile(filepath.Join(root, "Dockerfile"), []byte(dockerfile), 0644); err != nil {
 		return nil, err
@@ -181,6 +207,27 @@ func (c *DockerCluster) NodeName(i int) string {
 	return c.names[i]
 }
 
+// AdvanceStoppedClusterClock selects the future-clock binary for all peers.
+// Every container must already be removed so no mixed clock cluster is exposed.
+func (c *DockerCluster) AdvanceStoppedClusterClock() error {
+	if c.clockAdvance == 0 || c.clockAdvanced {
+		return fmt.Errorf("cluster clock advance is unavailable or already applied")
+	}
+	ctx, done := context.WithTimeout(context.Background(), 15*time.Second)
+	defer done()
+	for _, name := range c.names {
+		existing, err := dockerCommand(ctx, "ps", "-a", "--filter", "name=^/"+name+"$", "--format", "{{.Names}}")
+		if err != nil {
+			return err
+		}
+		if existing != "" {
+			return fmt.Errorf("clock advance requires stopped container %s", name)
+		}
+	}
+	c.clockAdvanced = true
+	return nil
+}
+
 func (c *DockerCluster) RestartNode(i int) error {
 	if i < 0 || i >= len(c.names) || c.names[i] == "" {
 		return fmt.Errorf("invalid Docker node %d", i)
@@ -198,6 +245,8 @@ func (c *DockerCluster) RestartNode(i int) error {
 	args := []string{"run", "-d", "--rm", "--name", c.names[i], "--network", c.clientNetwork, "--user", fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()), "-p", "127.0.0.1::4222", "-p", "127.0.0.1::8222", "-v", store + ":/data", "-v", filepath.Join(c.root, "nats.conf") + ":/etc/nats.conf:ro"}
 	if i == c.oldNode {
 		args = append(args, "--entrypoint", "/nats-server-old")
+	} else if c.clockAdvanced {
+		args = append(args, "--entrypoint", "/nats-server-advanced")
 	} else if i == c.skewNode {
 		args = append(args, "--entrypoint", "/nats-server-skewed")
 	}
