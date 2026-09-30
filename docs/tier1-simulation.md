@@ -1184,3 +1184,21 @@ Exact/cross-process replay, the 100,000-seed pass and seed-42
 `lease-cleanup-stale-read.json` pin cover the decision. Real three-node controls
 also supply an earlier-worker value and preserve fresh successor state. This
 slice does not make a not-found reply authoritative or clear mixed-fault latency.
+
+
+## Virtual worker operation timing
+
+The `worker_signal_write_latency` workload attaches the optional production worker
+operation observer with a scheduler-backed observation clock. It checks call
+identity, outcomes, append indices/kinds, all 121 events and the exact duration
+of the 119 delayed calls. Observation does not advance virtual time or alter the
+transport transcript. Exact/cross-process replay and the existing pin remain
+valid; 100,000 schedules passed in 68.31 seconds. The deliberately over-30-second
+control remains a failing latency classification, not a relaxed recovery gate.
+
+For a real mixed-fault run, set `FAULT_SCHEDULE_OUT` to preserve the adjacent
+`-operations.json` artifact. Each event ends at `At` and its call starts at
+`At - Duration`. Concurrent heartbeat calls can overlap execution calls, so
+summing all real durations is not elapsed invocation time. Durations include
+client waiting/retries and do not identify a server-side cause. The coverage and
+real-run evidence are recorded in the implementation status.

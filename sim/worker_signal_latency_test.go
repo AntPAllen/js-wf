@@ -126,6 +126,7 @@ func runWorkerSignalWriteLatency(seed int64, replay *Trace) (trace Trace, runErr
 	signalPort := &latencySignalPort{SignalDrainPort: transport.SignalTransport, schedule: schedule, delay: delay}
 	outcomes := NewKVTransport(schedule, 0)
 	c := client.NewWithSignalPorts(transport.SignalTransport, transport.SignalTransport)
+	var operations []worker.OperationEvent
 	w, err := worker.NewWithPorts("signal-cost-worker", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 		sum := 0
 		for range 16 {
@@ -140,7 +141,7 @@ func runWorkerSignalWriteLatency(seed int64, replay *Trace) (trace Trace, runErr
 			sum += value
 		}
 		return json.Marshal(sum)
-	}}, worker.ModeledWorkerPorts{Journal: store, Leases: lease.NewWithKVPort(leasePort), Outcome: outcomes, Invocation: transport.SignalTransport, Signals: signalPort, Client: c, HeartbeatTicks: make(chan time.Time)})
+	}}, worker.ModeledWorkerPorts{Journal: store, Leases: lease.NewWithKVPort(leasePort), Outcome: outcomes, Invocation: transport.SignalTransport, Signals: signalPort, Client: c, HeartbeatTicks: make(chan time.Time), OperationObserver: func(event worker.OperationEvent) { operations = append(operations, event) }, OperationNow: func() time.Time { return time.UnixMilli(schedule.NowMillis()) }})
 	if err != nil {
 		return trace, err
 	}
@@ -163,6 +164,24 @@ func runWorkerSignalWriteLatency(seed int64, replay *Trace) (trace Trace, runErr
 	reads := journalPort.reads + signalPort.reads
 	if leasePort.updates != 51 || journalPort.publishes != 50 || reads != 18 || elapsed != 119*delay || transport.Dispatch.Pending() != 0 {
 		return trace, fmt.Errorf("signal write cost: elapsed=%d renewals=%d appends=%d reads=%d pending=%d", elapsed, leasePort.updates, journalPort.publishes, reads, transport.Dispatch.Pending())
+	}
+	counts := map[string]int{}
+	var measured time.Duration
+	for _, event := range operations {
+		if event.Worker != "signal-cost-worker" || event.Type != typ || event.ID != id || event.RunSequence == 0 || event.Delivery != 1 || event.Error != "" {
+			return trace, fmt.Errorf("operation identity/outcome: %+v", event)
+		}
+		counts[event.Operation]++
+		measured += event.Duration
+		if event.Operation == "journal_append" || event.Operation == "lease_renew_append" {
+			if event.JournalIndex >= 50 || event.JournalKind == "" || event.Duration != time.Duration(delay)*time.Millisecond {
+				return trace, fmt.Errorf("journal operation: %+v", event)
+			}
+		}
+	}
+	wantCounts := map[string]int{"lease_acquire": 1, "journal_read": 1, "invocation_read": 1, "signal_info": 1, "signal_read": 16, "lease_renew_append": 50, "journal_append": 50, "lease_release": 1}
+	if !reflect.DeepEqual(counts, wantCounts) || measured != time.Duration(119*delay)*time.Millisecond {
+		return trace, fmt.Errorf("operation costs: counts=%v want=%v elapsed=%s", counts, wantCounts, measured)
 	}
 	records, _, err := store.Read(ctx, typ, id)
 	if err != nil {

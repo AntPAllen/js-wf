@@ -1625,3 +1625,36 @@ its report and logs. See [scope and reproduction instructions](invariant-mutatio
 The previously dispatched extended Tier 1 campaign
 [36754525798](https://github.com/AntPAllen/js-wf/actions/runs/36754525798)
 was confirmed running; it has not been restarted.
+
+
+## Optional worker operation timing and virtual accounting
+
+`worker.WithOperationObserver` now emits per-delivery durations and outcomes for
+lease acquisition, append/heartbeat/timer renewal, release and cleanup, journal
+reads and appends, invocation lookup, signal reads and timer publication. Journal
+writes include the upcoming index and kind even when renewal or append fails.
+The observer is disabled by default; callbacks must be quick and concurrency-safe.
+These are whole worker-call durations, including local waiting and retries, not
+measurements of server execution or proof of a network/server cause. Snapshot,
+outcome persistence, input blobs and other calls are not yet instrumented.
+
+The modeled worker accepts a virtual observation clock without adding scheduler
+choices. The signal write-latency replay verifies all 121 observed calls, including
+119 delayed calls, and exactly `119 * delay` elapsed virtual time. Existing exact,
+cross-process and pinned replay traces remain valid. Its 100,000-seed run passed
+in 68.31 seconds; the focused race run passed in 12.23 seconds. Full ordinary
+simulator and worker suites passed in 51.91 and 13.06 seconds; the pinned race
+corpus passed in 1.96 seconds. Vet and diff checks passed.
+
+The four-fault mixed fixture saves `<schedule basename>-operations.json` alongside
+its schedule and logs matching timings when an invocation misses the latency bar.
+Its existing CI artifact glob includes this file. A fresh seed-12 race run passed
+in 39.08 seconds at terminal p99 10.75 seconds across 28 invocations and retained
+1,668 operation events. This fresh interleaving is not evidence that instrumentation
+improved latency and does not erase earlier failures or explain their causes.
+
+The [six focused production mutation CI run](https://github.com/AntPAllen/js-wf/actions/runs/36756278049)
+and [twenty-seed mixed campaign at `0dc173b`](https://github.com/AntPAllen/js-wf/actions/runs/36756278289)
+both completed successfully. The extended Tier 1 campaign
+[36754525798](https://github.com/AntPAllen/js-wf/actions/runs/36754525798) remains
+confirmed in progress. These results do not clear the full-matrix release gate.

@@ -69,6 +69,8 @@ type Worker struct {
 	nativeSchedules            bool
 	metrics                    metricsCounters
 	dispatchObserver           func(DispatchEvent)
+	operationObserver          func(OperationEvent)
+	operationNow               func() time.Time
 	cancelMu                   sync.Mutex
 	cancelWaiters              map[string]*cancelWaiter
 	cancelStream               jetstream.Stream
@@ -250,6 +252,10 @@ type ModeledWorkerPorts struct {
 	CancellationPoll          CancellationPollPort
 	// HeartbeatTicks replaces the wall-clock ticker in modeled workers.
 	HeartbeatTicks <-chan time.Time
+	// Optional diagnostics use virtual time in modeled workers. These callbacks
+	// must not advance the schedule or make durable transport calls.
+	OperationObserver func(OperationEvent)
+	OperationNow      func() time.Time
 }
 
 // NewWithPorts builds a worker whose delivery and execution decisions run
@@ -260,7 +266,7 @@ func NewWithPorts(id string, handlers map[string]Handler, ports ModeledWorkerPor
 	if id == "" || ports.Journal == nil || ports.Leases == nil || ports.Outcome == nil || ports.Invocation == nil || ports.Signals == nil || ports.Client == nil {
 		return nil, fmt.Errorf("invalid modeled worker configuration")
 	}
-	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: DefaultAckWait, heartbeatInterval: defaultHeartbeatInterval, heartbeatTicks: ports.HeartbeatTicks, cancelWaiters: make(map[string]*cancelWaiter), modeledCancelNotifications: ports.CancellationNotifications, cancelPollPort: ports.CancellationPoll}, nil
+	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: DefaultAckWait, heartbeatInterval: defaultHeartbeatInterval, heartbeatTicks: ports.HeartbeatTicks, operationObserver: ports.OperationObserver, operationNow: ports.OperationNow, cancelWaiters: make(map[string]*cancelWaiter), modeledCancelNotifications: ports.CancellationNotifications, cancelPollPort: ports.CancellationPoll}, nil
 }
 
 type panicRetryError struct{ attempt int }
@@ -513,11 +519,14 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		}
 		w.dispatchObserver(event)
 	}
+	ops := w.deliveryOperations(typ, id, metadata.Sequence.Stream, metadata.NumDelivered)
 	emit("fetched", nil)
 	w.metrics.recordRedelivery(metadata)
+	acquireStarted := ops.begin()
 	acquireCtx, stopAcquire := context.WithTimeout(ctx, 5*time.Second)
 	l, err := w.leases.Acquire(acquireCtx, typ, id, w.ID)
 	stopAcquire()
+	ops.finish(acquireStarted, "lease_acquire", 0, "", err)
 	if errors.Is(err, lease.ErrHeld) {
 		emit("lease_held", err)
 		w.metrics.leaseContentions.Add(1)
@@ -540,8 +549,10 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		releaseCtx, stopRelease := context.WithTimeout(context.Background(), 15*time.Second)
 		defer stopRelease()
 		attempt, stopAttempt := context.WithTimeout(releaseCtx, 2*time.Second)
+		started := ops.begin()
 		err := l.Release(attempt)
 		stopAttempt()
+		ops.finish(started, "lease_release", 0, "", err)
 		if err == nil {
 			emit("released", nil)
 			return nil
@@ -549,8 +560,10 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		emit("release_initial_error", err)
 		for releaseCtx.Err() == nil {
 			attempt, stopAttempt := context.WithTimeout(releaseCtx, 2*time.Second)
+			started := ops.begin()
 			cleanupErr := l.Cleanup(attempt)
 			stopAttempt()
+			ops.finish(started, "lease_cleanup", 0, "", cleanupErr)
 			if cleanupErr == nil || errors.Is(cleanupErr, lease.ErrLost) {
 				emit("release_cleanup_done", cleanupErr)
 				return cleanupErr
@@ -590,9 +603,11 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 					cancel()
 					return
 				}
+				started := ops.begin()
 				renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
 				err := l.Renew(renewCtx)
 				stopRenew()
+				ops.finish(started, "lease_renew_heartbeat", 0, "", err)
 				if err != nil {
 					if errors.Is(err, lease.ErrLost) {
 						leaseLost.Store(true)
@@ -608,7 +623,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		}
 	}()
 	var cancelledTimerNoOp bool
-	err = w.execute(ctx, typ, id, l, metadata.Timestamp, timer, &cancelledTimerNoOp)
+	err = w.execute(ctx, typ, id, l, metadata.Timestamp, timer, &cancelledTimerNoOp, ops)
 	if err == nil && ctx.Err() == nil && w.jrn.HasSnapshotTransport() {
 		err = w.jrn.MaybeSnapshot(ctx, typ, id, 256, 16)
 	}
@@ -684,10 +699,12 @@ func (w *Worker) enqueueCanceledHandoff(parent context.Context, typ, id string, 
 	}
 }
 
-func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wakeupAt time.Time, timer timerWakeup, cancelledTimerNoOp *bool) error {
+func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wakeupAt time.Time, timer timerWakeup, cancelledTimerNoOp *bool, ops *deliveryOperations) error {
+	readStarted := ops.begin()
 	readCtx, stopRead := context.WithTimeout(ctx, 15*time.Second)
 	records, tail, err := w.jrn.Read(readCtx, typ, id)
 	stopRead()
+	ops.finish(readStarted, "journal_read", 0, "", err)
 	if err != nil {
 		return err
 	}
@@ -695,9 +712,11 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	if invocationPort == nil {
 		invocationPort = jetStreamInvocationPort{js: w.js}
 	}
+	lookupStarted := ops.begin()
 	lookupCtx, stopLookup := context.WithTimeout(ctx, 5*time.Second)
 	input, err := invocationPort.LastInvocation(lookupCtx, identity.InvocationSubject(typ, id))
 	stopLookup()
+	ops.finish(lookupStarted, "invocation_read", 0, "", err)
 	if errors.Is(err, jetstream.ErrMsgNotFound) {
 		return nil
 	} // Purged invocation: wakeup is a no-op.
@@ -730,13 +749,17 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		if err := ctx.Err(); err != nil {
 			return err
 		}
+		started := ops.begin()
 		renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
 		err := l.Renew(renewCtx)
 		stopRenew()
+		ops.finish(started, "lease_renew_append", uint64(len(records)), kind, err)
 		if err != nil {
 			return err
 		}
+		started = ops.begin()
 		seq, err := w.jrn.Append(ctx, typ, id, journal.Entry{Epoch: l.Epoch(), Index: uint64(len(records)), Kind: kind, Payload: payload, WorkerID: w.ID}, tail)
+		ops.finish(started, "journal_append", uint64(len(records)), kind, err)
 		if err != nil {
 			return err
 		}
@@ -798,7 +821,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	if attempts >= w.maxPanicAttempts {
 		return failPanic(lastPanic)
 	}
-	signals, err := w.drainSignals(ctx, typ, id, input.Sequence, records, appendEntry)
+	signals, err := w.drainSignals(ctx, typ, id, input.Sequence, records, appendEntry, ops)
 	if err != nil {
 		return err
 	}
@@ -847,13 +870,18 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		return resultBlobs.GetBytes(ctx, name)
 	})
 	wctx.SetTimerSupport(wakeupAt, func(ctx context.Context) (time.Time, error) { return w.serverNow(ctx) }, func(ctx context.Context, step uint64, fireAt time.Time) error {
+		started := ops.begin()
 		renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
 		err := l.Renew(renewCtx)
 		stopRenew()
+		ops.finish(started, "lease_renew_timer", step, "", err)
 		if err != nil {
 			return err
 		}
-		return w.scheduleTimer(ctx, typ, id, input.Sequence, step, fireAt)
+		started = ops.begin()
+		err = w.scheduleTimer(ctx, typ, id, input.Sequence, step, fireAt)
+		ops.finish(started, "timer_schedule", step, "", err)
+		return err
 	})
 	wctx.SetTimerObserver(w.metrics.recordTimerFired)
 	wctx.SetChildSupport(typ, id, input.Sequence, func(ctx context.Context, childType, childID string, childInput []byte, signalName string) error {
@@ -878,7 +906,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	}()
 	cancelSeen := stopCancelWatch()
 	if cancelSeen {
-		current, err := w.drainSignals(ctx, typ, id, input.Sequence, records, appendEntry)
+		current, err := w.drainSignals(ctx, typ, id, input.Sequence, records, appendEntry, ops)
 		if err != nil {
 			return err
 		}
@@ -1179,10 +1207,13 @@ func (w *Worker) watchRunningCancellation(ctx context.Context, typ, id string, i
 	}
 }
 
-func (w *Worker) drainSignals(ctx context.Context, typ, id string, invSeq uint64, records []journal.Record, appendEntry func(journal.Kind, json.RawMessage) error) ([]wf.Signal, error) {
+func (w *Worker) drainSignals(ctx context.Context, typ, id string, invSeq uint64, records []journal.Record, appendEntry func(journal.Kind, json.RawMessage) error, ops *deliveryOperations) ([]wf.Signal, error) {
 	port := w.signalDrainPort
 	if port == nil {
 		port = NewSignalDrainPort(w.js)
+	}
+	if ops != nil {
+		port = observedSignalDrain{SignalDrainPort: port, operations: ops}
 	}
 	return DrainSignalsWithPort(ctx, port, typ, id, invSeq, records, appendEntry)
 }

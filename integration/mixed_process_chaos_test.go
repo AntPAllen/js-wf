@@ -255,7 +255,27 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		}
 		dispatchEvents = append(dispatchEvents, event)
 	}
-	first, err := worker.New(ctx, js[other], "mixed-before", handlers, worker.WithDispatchObserver(observeDispatch))
+	var operationEvents []worker.OperationEvent
+	var operationMu sync.Mutex
+	observeOperation := func(event worker.OperationEvent) {
+		operationMu.Lock()
+		operationEvents = append(operationEvents, event)
+		operationMu.Unlock()
+	}
+	if schedulePath := os.Getenv("FAULT_SCHEDULE_OUT"); schedulePath != "" {
+		t.Cleanup(func() {
+			operationMu.Lock()
+			data, err := json.MarshalIndent(operationEvents, "", "  ")
+			operationMu.Unlock()
+			if err == nil {
+				err = os.WriteFile(strings.TrimSuffix(schedulePath, ".json")+"-operations.json", data, 0600)
+			}
+			if err != nil {
+				t.Errorf("save operation timings: %v", err)
+			}
+		})
+	}
+	first, err := worker.New(ctx, js[other], "mixed-before", handlers, worker.WithDispatchObserver(observeDispatch), worker.WithOperationObserver(observeOperation))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -477,7 +497,7 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	until = time.Now().Add(30 * time.Second)
 	for time.Now().Before(until) && ctx.Err() == nil {
 		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
-		successor, err = worker.New(attempt, resumed, "mixed-after", handlers, worker.WithDispatchObserver(observeDispatch))
+		successor, err = worker.New(attempt, resumed, "mixed-after", handlers, worker.WithDispatchObserver(observeDispatch), worker.WithOperationObserver(observeOperation))
 		stop()
 		if err == nil {
 			break
@@ -831,6 +851,17 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 			dispatchEventsMu.Unlock()
 			for _, event := range selected {
 				t.Logf("slow %s/%s dispatch worker=%s stage=%s run_seq=%d delivery=%d since_enabled=%s err=%s", typ, id, event.Worker, event.Stage, event.RunSequence, event.Delivery, event.At.Sub(enabled), event.Error)
+			}
+			operationMu.Lock()
+			var selectedOperations []worker.OperationEvent
+			for _, event := range operationEvents {
+				if event.Type == typ && event.ID == id && !event.At.Before(enabled) {
+					selectedOperations = append(selectedOperations, event)
+				}
+			}
+			operationMu.Unlock()
+			for _, event := range selectedOperations {
+				t.Logf("slow %s/%s operation worker=%s name=%s run_seq=%d delivery=%d index=%d kind=%s since_enabled=%s duration=%s err=%s", typ, id, event.Worker, event.Operation, event.RunSequence, event.Delivery, event.JournalIndex, event.JournalKind, event.At.Sub(enabled), event.Duration, event.Error)
 			}
 			attempt, stop := context.WithTimeout(ctx, 5*time.Second)
 			records, _, readErr := journal.New(third).Read(attempt, typ, id)
