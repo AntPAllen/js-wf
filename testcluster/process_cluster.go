@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -27,6 +28,7 @@ type ProcessCluster struct {
 	ports     []int
 	routes    []int
 	monitors  []int
+	profiles  []int
 	logs      []string
 	paused    []bool
 	slowDisk  []*exec.Cmd
@@ -66,6 +68,12 @@ func StartProcesses(root string, count int) (_ *ProcessCluster, err error) {
 	return startProcesses(root, count, false)
 }
 
+// StartProfiledProcesses enables NATS' loopback HTTP profiler for diagnostic
+// stack capture. Sampling remains disabled; profiles are collected on demand.
+func StartProfiledProcesses(root string, count int) (*ProcessCluster, error) {
+	return startProcessesWithBinaries(root, count, false, nil, true)
+}
+
 // StartMixedVersionProcesses starts a three-node file-backed cluster with a
 // chosen binary for each node. Empty paths use the server pinned by this
 // module. It is intended for rolling-upgrade contract tests.
@@ -73,7 +81,7 @@ func StartMixedVersionProcesses(root string, binaries []string) (*ProcessCluster
 	if len(binaries) != 3 {
 		return nil, fmt.Errorf("mixed-version cluster needs three binaries")
 	}
-	return startProcessesWithBinaries(root, 3, false, binaries)
+	return startProcessesWithBinaries(root, 3, false, binaries, false)
 }
 
 // StartPartitionableProcesses routes all server links through a controllable
@@ -83,10 +91,10 @@ func StartPartitionableProcesses(root string, count int) (*ProcessCluster, error
 }
 
 func startProcesses(root string, count int, partitionable bool) (_ *ProcessCluster, err error) {
-	return startProcessesWithBinaries(root, count, partitionable, nil)
+	return startProcessesWithBinaries(root, count, partitionable, nil, false)
 }
 
-func startProcessesWithBinaries(root string, count int, partitionable bool, binaries []string) (_ *ProcessCluster, err error) {
+func startProcessesWithBinaries(root string, count int, partitionable bool, binaries []string, profiling bool) (_ *ProcessCluster, err error) {
 	if count < 1 || count > 3 {
 		return nil, fmt.Errorf("count must be 1..3")
 	}
@@ -98,7 +106,7 @@ func startProcessesWithBinaries(root string, count int, partitionable bool, bina
 	if output, buildErr := build.CombinedOutput(); buildErr != nil {
 		return nil, fmt.Errorf("build nats-server: %w: %s", buildErr, output)
 	}
-	c := &ProcessCluster{root: root, ports: make([]int, count), routes: make([]int, count), monitors: make([]int, count), paused: make([]bool, count), slowDisk: make([]*exec.Cmd, count)}
+	c := &ProcessCluster{root: root, ports: make([]int, count), routes: make([]int, count), monitors: make([]int, count), profiles: make([]int, count), paused: make([]bool, count), slowDisk: make([]*exec.Cmd, count)}
 	defer func() {
 		if err != nil {
 			c.Close()
@@ -127,6 +135,12 @@ func startProcessesWithBinaries(root string, count int, partitionable bool, bina
 		if err != nil {
 			return nil, err
 		}
+		if profiling {
+			c.profiles[i], err = uniquePort()
+			if err != nil {
+				return nil, err
+			}
+		}
 		if count > 1 {
 			c.routes[i], err = uniquePort()
 			if err != nil {
@@ -143,6 +157,9 @@ func startProcessesWithBinaries(root string, count int, partitionable bool, bina
 	}
 	for i := 0; i < count; i++ {
 		args := []string{"-a", "127.0.0.1", "-p", strconv.Itoa(c.ports[i]), "-m", strconv.Itoa(c.monitors[i]), "-n", fmt.Sprintf("wf-process-%d", i), "-js", "-sd", filepath.Join(root, fmt.Sprintf("node-%d", i))}
+		if profiling {
+			args = append(args, "--profile", strconv.Itoa(c.profiles[i]))
+		}
 		if count > 1 {
 			peer := 0
 			if i == 0 {
@@ -190,6 +207,43 @@ func startProcessesWithBinaries(root string, count int, partitionable bool, bina
 		}
 	}
 	return c, nil
+}
+
+// Diagnostic reads a bounded server stack or connection-state snapshot over
+// HTTP, independently of the NATS client connection being investigated.
+func (c *ProcessCluster) Diagnostic(ctx context.Context, node int, kind string) ([]byte, error) {
+	if node < 0 || node >= len(c.monitors) {
+		return nil, fmt.Errorf("invalid diagnostic node %d", node)
+	}
+	port, path := c.monitors[node], "/connz?subs=detail"
+	switch kind {
+	case "connections":
+	case "goroutines":
+		if node >= len(c.profiles) || c.profiles[node] == 0 {
+			return nil, fmt.Errorf("server profiling is not enabled")
+		}
+		port, path = c.profiles[node], "/debug/pprof/goroutine?debug=2"
+	default:
+		return nil, fmt.Errorf("unsupported diagnostic %q", kind)
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d%s", port, path), nil)
+	if err != nil {
+		return nil, err
+	}
+	response, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("server %s diagnostic: HTTP %d", kind, response.StatusCode)
+	}
+	const limit = 16 << 20
+	data, err := io.ReadAll(io.LimitReader(response.Body, limit+1))
+	if len(data) > limit {
+		return nil, fmt.Errorf("server %s diagnostic exceeds %d bytes", kind, limit)
+	}
+	return data, err
 }
 
 func (c *ProcessCluster) PauseNode(i int) error {

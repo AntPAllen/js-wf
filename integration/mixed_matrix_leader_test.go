@@ -122,6 +122,8 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	startCluster := testcluster.StartProcesses
 	if row == "server_partition" {
 		startCluster = testcluster.StartPartitionableProcesses
+	} else if row == "worker_isolation" {
+		startCluster = testcluster.StartProfiledProcesses
 	}
 	cluster, err := startCluster(t.TempDir(), 3)
 	if err != nil {
@@ -378,6 +380,9 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			faultsMu.Unlock()
 			if err != nil {
 				t.Logf("%s fault failed: %v", row, err)
+				if row == "worker_isolation" {
+					captureMatrixIsolationDiagnostics(t, cluster, workerRoot)
+				}
 				faultDone <- err
 				cancel()
 				return

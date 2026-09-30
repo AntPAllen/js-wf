@@ -597,3 +597,36 @@ func isolateMatrixWorkerReplies(ctx context.Context, fleet []*matrixProcessWorke
 	event.Healed = time.Now()
 	return event, nil
 }
+
+func captureMatrixIsolationDiagnostics(t *testing.T, cluster *testcluster.ProcessCluster, root string) {
+	t.Helper()
+	file, err := os.Create(filepath.Join(root, "proxy-goroutines.txt"))
+	if err == nil {
+		err = pprof.Lookup("goroutine").WriteTo(file, 2)
+		if closeErr := file.Close(); err == nil {
+			err = closeErr
+		}
+	}
+	if err != nil {
+		t.Logf("proxy stack diagnostic: %v", err)
+	}
+	ctx, stop := context.WithTimeout(context.Background(), 2*time.Second)
+	defer stop()
+	var captures sync.WaitGroup
+	for node := range cluster.Commands {
+		for _, kind := range []string{"goroutines", "connections"} {
+			captures.Add(1)
+			go func() {
+				defer captures.Done()
+				data, err := cluster.Diagnostic(ctx, node, kind)
+				if err == nil {
+					err = os.WriteFile(filepath.Join(root, fmt.Sprintf("server-%d-%s.txt", node, kind)), data, 0600)
+				}
+				if err != nil {
+					t.Logf("server %d %s diagnostic: %v", node, kind, err)
+				}
+			}()
+		}
+	}
+	captures.Wait()
+}

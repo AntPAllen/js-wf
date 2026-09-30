@@ -51,6 +51,38 @@ func waitProcessRoutes(t *testing.T, c *ProcessCluster, want [3]int) {
 	t.Fatalf("process routes=%v want=%v", got, want)
 }
 
+func TestProcessClusterIndependentDiagnostics(t *testing.T) {
+	c, err := StartProfiledProcesses(t.TempDir(), 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	// Diagnostics must remain available after the fixture's NATS client closes.
+	c.Clients[0].Close()
+	ctx, stop := context.WithTimeout(context.Background(), 5*time.Second)
+	defer stop()
+	stacks, err := c.Diagnostic(ctx, 0, "goroutines")
+	if err != nil || !strings.Contains(string(stacks), "goroutine ") || !strings.Contains(string(stacks), "nats-server") {
+		t.Fatalf("server stacks: bytes=%d err=%v", len(stacks), err)
+	}
+	connections, err := c.Diagnostic(ctx, 0, "connections")
+	var state struct {
+		ServerID string `json:"server_id"`
+	}
+	if err != nil || json.Unmarshal(connections, &state) != nil || state.ServerID == "" {
+		t.Fatalf("connection snapshot: %s err=%v", connections, err)
+	}
+	if err := c.KillNode(0); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.RestartNode(0); err != nil {
+		t.Fatal(err)
+	}
+	if stacks, err := c.Diagnostic(ctx, 0, "goroutines"); err != nil || !strings.Contains(string(stacks), "goroutine ") {
+		t.Fatalf("restarted profiler: bytes=%d err=%v", len(stacks), err)
+	}
+}
+
 func TestProcessClusterPauseLeaderAndRecoverReplica(t *testing.T) {
 	root := t.TempDir()
 	c, err := StartPartitionableProcesses(root, 3)
