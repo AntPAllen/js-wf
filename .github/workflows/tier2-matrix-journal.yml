@@ -1,0 +1,60 @@
+name: tier2-matrix-journal
+on:
+  workflow_dispatch:
+    inputs:
+      seeds:
+        description: Consecutive seeds for the sustained journal leader row
+        required: true
+        type: choice
+        default: '1'
+        options: ['1', '20', '200']
+      duration:
+        description: Ten minutes is the matrix duration; 35 seconds is smoke only
+        required: true
+        type: choice
+        default: '10m'
+        options: ['10m', '35s']
+jobs:
+  seeds:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.seeds }}
+    steps:
+      - id: matrix
+        env:
+          SEED_COUNT: ${{ inputs.seeds }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          count = int(os.environ['SEED_COUNT'])
+          assert count in (1, 20, 200)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('seeds=' + json.dumps(list(range(1, count + 1))) + '\n')
+          PY
+  journal:
+    needs: seeds
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        seed: ${{ fromJSON(needs.seeds.outputs.matrix) }}
+    env:
+      WF_MATRIX_CHAOS: '1'
+      WF_MATRIX_DURATION: ${{ inputs.duration }}
+      FAULT_SEED: ${{ matrix.seed }}
+      MATRIX_ARTIFACT_PREFIX: matrix-journal-${{ matrix.seed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Sustain mixed workloads while killing journal leader every thirty seconds
+        run: go test ./integration -run '^TestMixedMatrixJournalLeaderEveryThirtySeconds$' -count=1 -timeout=18m -v
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: matrix-journal-${{ matrix.seed }}-${{ inputs.duration }}
+          path: integration/matrix-journal-${{ matrix.seed }}-*
+          if-no-files-found: error
