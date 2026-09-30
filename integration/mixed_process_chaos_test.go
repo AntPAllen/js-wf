@@ -244,7 +244,18 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		})
 		return json.RawMessage(fmt.Sprint(value)), err
 	}
-	first, err := worker.New(ctx, js[other], "mixed-before", handlers)
+	var dispatchEvents []worker.DispatchEvent
+	var dispatchEventsMu sync.Mutex
+	observeDispatch := func(event worker.DispatchEvent) {
+		dispatchEventsMu.Lock()
+		defer dispatchEventsMu.Unlock()
+		if len(dispatchEvents) == 4096 {
+			copy(dispatchEvents, dispatchEvents[1:])
+			dispatchEvents = dispatchEvents[:4095]
+		}
+		dispatchEvents = append(dispatchEvents, event)
+	}
+	first, err := worker.New(ctx, js[other], "mixed-before", handlers, worker.WithDispatchObserver(observeDispatch))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -466,7 +477,7 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	until = time.Now().Add(30 * time.Second)
 	for time.Now().Before(until) && ctx.Err() == nil {
 		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
-		successor, err = worker.New(attempt, resumed, "mixed-after", handlers)
+		successor, err = worker.New(attempt, resumed, "mixed-after", handlers, worker.WithDispatchObserver(observeDispatch))
 		stop()
 		if err == nil {
 			break
@@ -809,6 +820,17 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		traceSlow := func(typ, id string, enabled, terminal time.Time) {
 			if terminal.Sub(enabled) < 30*time.Second {
 				return
+			}
+			dispatchEventsMu.Lock()
+			var selected []worker.DispatchEvent
+			for _, event := range dispatchEvents {
+				if event.Type == typ && event.ID == id {
+					selected = append(selected, event)
+				}
+			}
+			dispatchEventsMu.Unlock()
+			for _, event := range selected {
+				t.Logf("slow %s/%s dispatch worker=%s stage=%s run_seq=%d delivery=%d since_enabled=%s err=%s", typ, id, event.Worker, event.Stage, event.RunSequence, event.Delivery, event.At.Sub(enabled), event.Error)
 			}
 			attempt, stop := context.WithTimeout(ctx, 5*time.Second)
 			records, _, readErr := journal.New(third).Read(attempt, typ, id)

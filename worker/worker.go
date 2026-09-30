@@ -68,6 +68,7 @@ type Worker struct {
 	heartbeatTicks             <-chan time.Time
 	nativeSchedules            bool
 	metrics                    metricsCounters
+	dispatchObserver           func(DispatchEvent)
 	cancelMu                   sync.Mutex
 	cancelWaiters              map[string]*cancelWaiter
 	cancelStream               jetstream.Stream
@@ -98,6 +99,28 @@ func (p jetStreamCancellationPollPort) LastGeneration(ctx context.Context, subje
 }
 
 type Option func(*Worker) error
+
+// DispatchEvent reports one durable delivery's progress through the worker.
+// The observer runs on partition goroutines and must be concurrency-safe and
+// quick enough not to delay dispatch.
+type DispatchEvent struct {
+	At          time.Time
+	Worker      string
+	Type        string
+	ID          string
+	Stage       string
+	RunSequence uint64
+	Delivery    uint64
+	Error       string
+}
+
+// WithDispatchObserver supplies optional per-delivery diagnostics.
+func WithDispatchObserver(observe func(DispatchEvent)) Option {
+	return func(w *Worker) error {
+		w.dispatchObserver = observe
+		return nil
+	}
+}
 
 // WithMaxPanicAttempts sets the number of journaled handler panics allowed
 // before the invocation is durably failed. It must be set before RunPartition.
@@ -474,16 +497,29 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		_ = msg.NakWithDelay(time.Second)
 		return
 	}
+	emit := func(stage string, eventErr error) {
+		if w.dispatchObserver == nil {
+			return
+		}
+		event := DispatchEvent{At: time.Now(), Worker: w.ID, Type: typ, ID: id, Stage: stage, RunSequence: metadata.Sequence.Stream, Delivery: metadata.NumDelivered}
+		if eventErr != nil {
+			event.Error = eventErr.Error()
+		}
+		w.dispatchObserver(event)
+	}
+	emit("fetched", nil)
 	w.metrics.recordRedelivery(metadata)
 	acquireCtx, stopAcquire := context.WithTimeout(ctx, 5*time.Second)
 	l, err := w.leases.Acquire(acquireCtx, typ, id, w.ID)
 	stopAcquire()
 	if errors.Is(err, lease.ErrHeld) {
+		emit("lease_held", err)
 		w.metrics.leaseContentions.Add(1)
 		_ = msg.NakWithDelay(time.Second)
 		return
 	}
 	if err != nil {
+		emit("lease_error", err)
 		w.metrics.leaseAcquireFailures.Add(1)
 		if errors.Is(err, lease.ErrLost) {
 			w.metrics.fencingEvents.Add(1)
@@ -491,6 +527,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		_ = msg.NakWithDelay(time.Second)
 		return
 	}
+	emit("lease_acquired", nil)
 	w.metrics.leaseAcquisitions.Add(1)
 	w.metrics.recordLeaseLatency(metadata, time.Now())
 	release := func() error {
@@ -570,6 +607,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		w.metrics.fencingEvents.Add(1)
 	}
 	if err != nil || processingCanceled || leaseLost.Load() {
+		emit("execution_retry", err)
 		delay := time.Second
 		var retry *panicRetryError
 		if errors.As(err, &retry) {
@@ -589,6 +627,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		return
 	}
 	if err := release(); err != nil {
+		emit("release_error", err)
 		if errors.Is(err, lease.ErrLost) && !leaseLost.Load() && !errors.Is(err, journal.ErrStale) {
 			w.metrics.fencingEvents.Add(1)
 		}
@@ -596,7 +635,9 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		return
 	}
 	released = true
-	if err := msg.Ack(); err == nil && cancelledTimerNoOp {
+	ackErr := msg.Ack()
+	emit("ack", ackErr)
+	if ackErr == nil && cancelledTimerNoOp {
 		w.metrics.cancelledTimerNoOps.Add(1)
 	}
 }
