@@ -498,6 +498,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededRetainedInvariantChecks(loaded.Seed, &loaded)
 	case "workqueue_retention_33":
 		replayed, err = runSeededWorkQueueRetention(loaded.Seed, &loaded)
+	case "manual_owner_drain":
+		replayed, err = runSeededDeadOwnerDrain(loaded.Seed, &loaded)
 	case "automatic_membership":
 		replayed, err = runSeededMembership(loaded.Seed, &loaded)
 	case "select_many":

@@ -1143,3 +1143,16 @@ Negative controls demonstrated that all five corruptions survived the former
 snapshot checker; real three-node controls independently cover unknown kinds,
 unresolved success and a valid failed pending step. These controls strengthen
 I2/I3 checks without claiming the complete six-mutation release campaign.
+
+
+## Manual dead-owner terminal drain
+
+`TestSeededDeadOwnerDrainReplay` runs production balanced assignment CAS and
+modeled durable delivery over virtual KV/dispatch. It records an expected stall
+when a manual membership list retains a dead owner, then requires live-owner
+correction, redelivery two and confirmed queue removal. Seeds vary the retained
+partition and dropped or hidden committed assignment replies. Removing the
+correction fails the owner check; seed 42 is pinned in `manual-owner-drain.json`.
+This models the recovery obligation of the real combined rebalance fixture,
+whose final assignments previously could point at a killed subprocess. It does
+not model handler execution, process pauses or the automatic membership runner.

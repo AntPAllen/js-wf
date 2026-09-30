@@ -804,6 +804,23 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 	if moves < 4 || inFlightMoves == 0 || collisions.Load() != 0 || (killKVLeader && !leaderKilled) || (isolateWorker && (!workerIsolated || !workerHealed || !isolatedInFlight)) || (killWorker && (!workerKilled || !workerRestarted || !killedInFlight)) || (killProcess && (!processKilled || !processKilledInFlight)) || (routePartition && (!routesIsolated || !routesHealed || !routeFaultInFlight)) || (pauseProcess && (!processPaused || !processResumed || !pauseStale)) {
 		t.Fatalf("rebalance proof: moves=%d in_flight=%d collisions=%d leader_killed=%t worker_isolated=%t worker_healed=%t isolated_in_flight=%t worker_killed=%t worker_restarted=%t killed_in_flight=%t process_killed=%t process_killed_in_flight=%t routes_isolated=%t routes_healed=%t route_fault_in_flight=%t process_paused=%t process_resumed=%t pause_stale=%t", moves, inFlightMoves, collisions.Load(), leaderKilled, workerIsolated, workerHealed, isolatedInFlight, workerKilled, workerRestarted, killedInFlight, processKilled, processKilledInFlight, routesIsolated, routesHealed, routeFaultInFlight, processPaused, processResumed, pauseStale)
 	}
+	// This fixture uses manual assignments, not expiring membership. The
+	// handler cohort can finish while a duplicate terminal run is still held by
+	// the paused child. Remove killed owners before requiring that run to drain.
+	if killProcess || pauseProcess {
+		var survivors []string
+		for index, owner := range owners {
+			if killProcess && index == 0 || pauseProcess && index == 1 {
+				continue
+			}
+			survivors = append(survivors, owner)
+		}
+		result, err := assignment.Rebalance(ctx, assignments, survivors, false)
+		if err != nil || result.Conflicts != 0 {
+			t.Fatalf("final live-owner rebalance: result=%+v err=%v", result, err)
+		}
+		t.Logf("final live-owner rebalance: survivors=%v moves=%d", survivors, result.Moved)
+	}
 	for index, id := range ids {
 		result, err := clients[index%len(clients)].Await(ctx, typ, id)
 		var count int

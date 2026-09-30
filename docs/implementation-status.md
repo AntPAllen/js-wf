@@ -1460,3 +1460,51 @@ killed worker IDs in its rotation and stops moving partitions after handler
 completion; the paused subprocess is then killed before queue drain. That can
 leave the last assignment pointing at an absent worker and needs a targeted
 control. Fresh passing later CI does not erase that observation.
+
+
+## Final live-owner rebalance before terminal run drain
+
+The combined manual-rebalance fixture kept both killed subprocess IDs in its
+six-owner rotation. It stopped moving assignments once all handlers had
+returned, then killed the resumed pause subprocess after proving its append
+was fenced. A terminal redelivery could therefore remain on a partition owned
+by an absent process. The failed CI state named exactly that absent owner,
+`rebalance-1`, with one ack-pending run. This is a fixture recovery obligation;
+this fixture does not run the automatic membership coordinator.
+
+After preserving all fault and stale-append checks, the fixture now runs the
+production revision-CAS balanced assignment pass over the surviving worker IDs
+before requiring queue drain. The deadline, results, integrity and drain gates
+are unchanged. The full local combined-fault race proof passed in 148.24 seconds:
+200 workflows, fifty steps each, 20,400 journal entries, 104 repeated ownership
+moves including 29 in-flight moves, and twenty final moves to four surviving
+owners. Worker isolation, process kill, server route partition and forty-five
+second pause all occurred; the resumed append was stale and the queue drained.
+This result does not replace fresh clean-runner or sustained matrix validation.
+
+The new `manual_owner_drain` Tier 1 workload preserves an unacknowledged terminal
+redelivery, advances forty-five virtual seconds and demonstrates that including
+the dead process in a manual membership list leaves its assignment unchanged
+and the stream undrained. Correct live membership moves it to a surviving owner,
+which receives delivery two and confirms its acknowledgment. Thirty-two target
+partitions and clean/dropped/hidden-ack assignment updates vary by seed. Removing
+the live-owner correction through a Go build overlay fails seed 1 with
+`unrecovered owner=dead`. This is an assignment/dispatch transport slice, not an
+integrated handler, OS process or automatic-membership simulation.
+
+The 100,000-seed workload passed in 45.54 seconds; focused race/exact and
+cross-process replay passed in 6.58 seconds. Seed 42 is pinned in
+`manual-owner-drain.json`, and the complete pinned race corpus passed in 2.05
+seconds. The full ordinary simulator suite passed in 58.24 seconds and integrity
+in 0.86 seconds. Vet and diff checks passed. The earlier full simulator race
+attempt at `5f07594` exhausted Go's ten-minute suite deadline while processing
+the snapshot workload; it is incomplete evidence, not a clean full race pass.
+The ordinary full-suite pass covers the new shared-checker validation as well.
+
+The [standard test CI at `b8ff957`](https://github.com/AntPAllen/js-wf/actions/runs/36749165289)
+completed successfully, including the repaired independent CAS audit. Its
+[mixed campaign](https://github.com/AntPAllen/js-wf/actions/runs/36749165318)
+passed seeds 1–11 and failed seed 12 at terminal p99 54.56 seconds. The slow
+signal journal continued progressing to completion under the fault; the full
+trace requires separate investigation. This manual assignment fixture correction
+does not explain that different campaign.
