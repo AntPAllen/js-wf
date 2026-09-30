@@ -439,11 +439,30 @@ func TestJournalCASTenThousandRacesWithLeaderRestarts(t *testing.T) {
 	if err != nil || info.State.Msgs != uint64(rounds+1) || info.State.NumSubjects != 1 {
 		t.Fatalf("retained journal: info=%+v err=%v", info, err)
 	}
-	consumer, err := stream.OrderedConsumer(auditCtx, jetstream.OrderedConsumerConfig{
-		FilterSubjects: []string{"wf.jrn.cas.scale"}, DeliverPolicy: jetstream.DeliverAllPolicy,
-	})
-	if err != nil {
-		t.Fatalf("create journal audit consumer: %v", err)
+	var consumer jetstream.Consumer
+	var auditErr error
+	for attempt := 0; attempt < 18 && auditCtx.Err() == nil; attempt++ {
+		node := attempt % len(all)
+		request, stop := context.WithTimeout(auditCtx, 10*time.Second)
+		candidate, openErr := all[node].Stream(request, "WF_JRN")
+		if openErr == nil {
+			created, createErr := candidate.OrderedConsumer(request, jetstream.OrderedConsumerConfig{
+				FilterSubjects: []string{"wf.jrn.cas.scale"}, DeliverPolicy: jetstream.DeliverAllPolicy,
+			})
+			openErr = createErr
+			if openErr == nil {
+				consumer = created
+			}
+		}
+		stop()
+		if openErr == nil {
+			break
+		}
+		auditErr = openErr
+		t.Logf("journal audit consumer attempt %d via node %d: %v", attempt+1, node, openErr)
+	}
+	if consumer == nil {
+		t.Fatalf("create journal audit consumer after trying all nodes: %v (context: %v)", auditErr, auditCtx.Err())
 	}
 	var count int
 	var tail uint64

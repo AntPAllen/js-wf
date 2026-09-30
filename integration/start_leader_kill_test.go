@@ -117,6 +117,8 @@ func TestConcurrentStartDuringInvocationLeaderKill(t *testing.T) {
 			counts["already"]++
 		case errors.Is(result.err, client.ErrEnqueueUnknown):
 			counts["enqueue_unknown"]++
+		case errors.Is(result.err, client.ErrStartUnknown):
+			counts["unknown"]++
 		default:
 			counts[fmt.Sprintf("%T: %v", result.err, result.err)]++
 		}
@@ -131,7 +133,7 @@ func TestConcurrentStartDuringInvocationLeaderKill(t *testing.T) {
 	// lost. In that case even its caller reads the retained row and reports
 	// AlreadyStarted. The stream audit below proves that one start committed.
 	confirmed := counts["started"] + counts["enqueue_unknown"]
-	if confirmed > 1 || confirmed+counts["already"] != 500 {
+	if confirmed > 1 || confirmed+counts["already"]+counts["unknown"] != 500 {
 		t.Fatalf("start outcomes after leader kill: cut_at=%d counts=%v", completedAtCut, counts)
 	}
 	if result, err := history.CheckStarts(recorder.Snapshot(), 45*time.Second); err != nil || result != porcupine.Ok {
@@ -153,6 +155,10 @@ func TestConcurrentStartDuringInvocationLeaderKill(t *testing.T) {
 	info, err = inv.Info(recoveryCtx)
 	if err != nil || info.State.Msgs != 1 {
 		t.Fatalf("invocation stream: info=%+v err=%v", info, err)
+	}
+	retried, retryErr := client.New(all[survivor]).Start(recoveryCtx, "leaderkill", "same", []byte(`true`))
+	if !errors.Is(retryErr, client.ErrAlreadyStarted) || retried.InvSeq == 0 || winner != 0 && retried.InvSeq != winner {
+		t.Fatalf("resolve unknown start after heal: handle=%+v prior_seq=%d err=%v", retried, winner, retryErr)
 	}
 	run, err := all[survivor].Stream(recoveryCtx, "WF_RUN")
 	if err != nil {
