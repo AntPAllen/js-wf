@@ -490,6 +490,17 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	}
 	close(release)
 	releasedAt := time.Now()
+	repairCtx, stopRepair := context.WithCancel(ctx)
+	repairDone := make(chan error, 1)
+	go func() {
+		repairDone <- reconcile.RunSuspendedLoop(repairCtx, js[other], "mixed-suspended-repair", time.Second, 8)
+	}()
+	defer func() {
+		stopRepair()
+		if repairErr := <-repairDone; repairErr != nil {
+			t.Errorf("suspended repair loop: %v", repairErr)
+		}
+	}()
 	type completion struct {
 		index int
 		at    time.Time
@@ -797,6 +808,37 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 					continue
 				}
 				t.Logf("slow signal %s journal index=%d kind=%s worker=%s since_last_signal=%s", inv.id, record.Index, record.Kind, record.WorkerID, raw.Time.Sub(enabledAt[i]))
+			}
+		}
+		for i, childID := range childIDs {
+			enabled := healedAt
+			for n := 0; n < mixedGrandchildrenPerChild; n++ {
+				if at := audits[len(invocations)+len(childIDs)+i*mixedGrandchildrenPerChild+n].at; at.After(enabled) {
+					enabled = at
+				}
+			}
+			if audits[len(invocations)+i].at.Sub(enabled) < 30*time.Second {
+				continue
+			}
+			attempt, stop := context.WithTimeout(ctx, 5*time.Second)
+			records, _, readErr := journal.New(third).Read(attempt, "mixedchild", childID)
+			stop()
+			if readErr != nil {
+				t.Logf("slow child %s journal read: %v", childID, readErr)
+				continue
+			}
+			for _, record := range records {
+				if record.Kind != journal.Suspended && record.Kind != journal.SignalConsumed && record.Kind != journal.Completed {
+					continue
+				}
+				attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+				raw, readErr := terminalStream.GetMsg(attempt, record.Sequence)
+				stop()
+				if readErr != nil {
+					t.Logf("slow child %s journal sequence %d: %v", childID, record.Sequence, readErr)
+					continue
+				}
+				t.Logf("slow child %s journal index=%d kind=%s worker=%s since_last_grandchild=%s", childID, record.Index, record.Kind, record.WorkerID, raw.Time.Sub(enabled))
 			}
 		}
 		t.Errorf("mixed terminal p99=%s, want <30s", terminalP99)
