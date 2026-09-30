@@ -83,6 +83,10 @@ func (m *StartTransport) QueueFault(f StartFault) error {
 		if f.Operation != "publish_invocation" {
 			return fmt.Errorf("invalid %s fault %q", f.Operation, f.Kind)
 		}
+	case "duplicate_in_process":
+		if f.Operation != "enqueue_run" {
+			return fmt.Errorf("invalid %s fault %q", f.Operation, f.Kind)
+		}
 	default:
 		return fmt.Errorf("invalid start fault %q", f.Kind)
 	}
@@ -175,6 +179,11 @@ func (m *StartTransport) EnqueueRun(ctx context.Context, subject string, data []
 		event.Outcome = fault
 		m.event(event)
 		return ErrTransportLost
+	}
+	if fault == "duplicate_in_process" {
+		event.Outcome = fault
+		m.event(event)
+		return &jetstream.APIError{Code: 409, ErrorCode: 10158, Description: "duplicate message id is in process"}
 	}
 	if messageID != "" {
 		if previous, duplicate := m.runIDs[messageID]; duplicate && m.schedule.NowMillis()-previous.atMillis < m.runWindow {

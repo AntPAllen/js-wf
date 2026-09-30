@@ -62,6 +62,32 @@ func TestStartTransportFaultBoundaries(t *testing.T) {
 			t.Fatalf("lost run ack: handle=%+v runs=%v err=%v", handle, model.Runs(), err)
 		}
 	})
+	t.Run("duplicate in process retries the same start wakeup", func(t *testing.T) {
+		schedule := NewScheduler(33)
+		model := NewStartTransport(schedule)
+		if err := model.QueueFault(StartFault{Operation: "enqueue_run", Kind: "duplicate_in_process"}); err != nil {
+			t.Fatal(err)
+		}
+		handle, err := client.NewWithStartPort(model).Start(ctx, "test", "one", []byte(`1`))
+		if err != nil || handle.InvSeq == 0 || len(model.Runs()) != 1 || schedule.NowMillis() != 25 {
+			t.Fatalf("in-process start wakeup: handle=%+v runs=%v virtual_ms=%d err=%v", handle, model.Runs(), schedule.NowMillis(), err)
+		}
+	})
+	t.Run("duplicate in process retries the same signal wakeup", func(t *testing.T) {
+		schedule := NewScheduler(34)
+		model := NewSignalTransport(schedule)
+		c := client.NewWithSignalPorts(model, model)
+		if _, err := c.Start(ctx, "test", "one", []byte(`1`)); err != nil {
+			t.Fatal(err)
+		}
+		if err := model.QueueFault(StartFault{Operation: "enqueue_run", Kind: "duplicate_in_process"}); err != nil {
+			t.Fatal(err)
+		}
+		sequence, err := c.Signal(ctx, "test", "one", "go", []byte(`1`), "key")
+		if err != nil || sequence == 0 || len(model.Runs()) != 2 || schedule.NowMillis() != 25 {
+			t.Fatalf("in-process signal wakeup: sequence=%d runs=%v virtual_ms=%d err=%v", sequence, model.Runs(), schedule.NowMillis(), err)
+		}
+	})
 	t.Run("large input retains object and hash", func(t *testing.T) {
 		model := NewStartTransport(NewScheduler(4))
 		input := bytes.Repeat([]byte("x"), client.MaxInlineInput+1)

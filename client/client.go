@@ -285,7 +285,41 @@ func (c *Client) Enqueue(ctx context.Context, typ, id, dedupID string) error {
 	if err := identity.Validate(typ, id); err != nil {
 		return err
 	}
-	return c.startOperations().EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(identity.Key(typ, id)), dedupID)
+	port := c.startOperations()
+	return enqueueRunWithConflictRetry(ctx, port.Wait, func(attempt context.Context) error {
+		return port.EnqueueRun(attempt, identity.RunSubject(typ, id, provision.Partitions), []byte(identity.Key(typ, id)), dedupID)
+	})
+}
+
+// 10158 means another publish with this message ID is still in progress.
+// Retry the identical ID until the stream returns its committed duplicate ack
+// or accepts this attempt; neither outcome creates a second logical wakeup.
+func enqueueRunWithConflictRetry(ctx context.Context, wait func(context.Context, time.Duration) error, enqueue func(context.Context) error) error {
+	attemptCtx := ctx
+	conflicts := 0
+	var cancel context.CancelFunc
+	defer func() {
+		if cancel != nil {
+			cancel()
+		}
+	}()
+	for {
+		err := enqueue(attemptCtx)
+		var apiErr *jetstream.APIError
+		if !errors.As(err, &apiErr) || apiErr.ErrorCode != 10158 {
+			return err
+		}
+		conflicts++
+		if conflicts >= 80 {
+			return err
+		}
+		if cancel == nil {
+			attemptCtx, cancel = context.WithTimeout(ctx, 2*time.Second)
+		}
+		if err := wait(attemptCtx, 25*time.Millisecond); err != nil {
+			return err
+		}
+	}
 }
 
 // Signal stores an external event, then enqueues a wakeup. idempotencyKey
@@ -464,7 +498,9 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 			return 0, ErrSignalMismatch
 		}
 	}
-	if err := port.EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(identity.Key(typ, id)), fmt.Sprintf("signal-wakeup:%d", ack.Sequence)); err != nil {
+	if err := enqueueRunWithConflictRetry(ctx, c.startOperations().Wait, func(attempt context.Context) error {
+		return port.EnqueueRun(attempt, identity.RunSubject(typ, id, provision.Partitions), []byte(identity.Key(typ, id)), fmt.Sprintf("signal-wakeup:%d", ack.Sequence))
+	}); err != nil {
 		return ack.Sequence, fmt.Errorf("%w: %v", ErrEnqueueUnknown, err)
 	}
 	return ack.Sequence, nil

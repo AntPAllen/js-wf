@@ -532,6 +532,12 @@ run message, and confirms a repeated scan deduplicates; three repeats and a
 race run passed. The model also checks purged invocation sequence holes and a
 lost repair-enqueue acknowledgment. Existing three-node fixtures also cover
 network-lost start acknowledgments, absent-publish retry, and large input.
+
+An additional modeled fault returns JetStream 10158 while a wakeup message ID
+is in process. Production `Client.Enqueue` and `Client.Signal` retry the same
+ID after 25 ms of virtual time and retain one run message. The retry has a
+two-second wall-clock and 80-conflict bound in production.
+
 The start-and-repair scenarios do not yet run the leased scan loop or its
 persisted cursor. The model now expires `WF_RUN` message IDs after the
 configured duplicate window using virtual time (two minutes by default).
