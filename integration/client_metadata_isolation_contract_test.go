@@ -171,5 +171,9 @@ func TestMetadataRecoveryAfterAsymmetricReplyHold(t *testing.T) {
 		captureMatrixIsolationDiagnostics(t, cluster, []*testcluster.ClientProxy{proxy}, root)
 		t.Fatalf("fresh metadata request after PING recovery: %v", err)
 	}
+	if stats := proxy.Stats(); stats.BufferOverflows != 0 {
+		captureMatrixIsolationDiagnostics(t, cluster, []*testcluster.ClientProxy{proxy}, root)
+		t.Fatalf("reply-hold buffer overflow invalidates metadata fixture: %+v", stats)
+	}
 	t.Logf("METADATA_ISOLATION hold=%s recovery=%s requests_succeeded=%d failed=%d relay=%+v", healedAt.Sub(cutAt), time.Since(healedAt), succeeded.Load(), failed.Load(), proxy.Stats())
 }

@@ -15,22 +15,26 @@ import (
 // connections and refuses reconnects; Heal accepts reconnects again. It is
 // suitable for isolating a worker or SDK client from a running cluster.
 type ClientProxy struct {
-	listener       net.Listener
-	target         string
-	mu             sync.Mutex
-	blocked        bool
-	closed         bool
-	responsesHeld  chan struct{}
-	active         map[net.Conn]net.Conn
-	acceptDone     chan struct{}
-	sessions       sync.WaitGroup
-	clientBytes    uint64
-	serverBytes    uint64
-	heldBytes      uint64
-	nextConnection uint64
-	trafficLimit   int
-	trafficUsed    int
-	traffic        ClientProxyTraffic
+	listener          net.Listener
+	target            string
+	mu                sync.Mutex
+	blocked           bool
+	closed            bool
+	responsesHeld     chan struct{}
+	active            map[net.Conn]net.Conn
+	acceptDone        chan struct{}
+	sessions          sync.WaitGroup
+	clientBytes       uint64
+	serverBytes       uint64
+	replyBufferLimit  int
+	bufferedBytes     uint64
+	peakBufferedBytes uint64
+	bufferOverflows   uint64
+	heldBytes         uint64
+	nextConnection    uint64
+	trafficLimit      int
+	trafficUsed       int
+	traffic           ClientProxyTraffic
 }
 
 type ClientProxyTraffic struct {
@@ -102,7 +106,7 @@ func NewClientProxy(targetURL string) (*ClientProxy, error) {
 	if err != nil {
 		return nil, err
 	}
-	p := &ClientProxy{listener: listener, target: target, active: map[net.Conn]net.Conn{}, acceptDone: make(chan struct{})}
+	p := &ClientProxy{listener: listener, target: target, replyBufferLimit: 8 << 20, active: map[net.Conn]net.Conn{}, acceptDone: make(chan struct{})}
 	go p.accept()
 	return p, nil
 }
@@ -140,7 +144,10 @@ func (p *ClientProxy) Heal() {
 }
 
 // HoldResponses stops server-to-client bytes after they reach the proxy while
-// still forwarding client-to-server bytes. Call after Connect has completed.
+// still forwarding client-to-server bytes and draining upstream into a bounded
+// per-connection buffer. Overflow closes that connection and leaves a sticky
+// failure counter; callers must reject such a fault as invalid fixture evidence.
+// Call after Connect has completed.
 func (p *ClientProxy) HoldResponses() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -165,28 +172,33 @@ func (p *ClientProxy) resumeResponsesLocked() {
 // ClientProxyStats are byte counts at the relay boundaries, including bytes
 // awaiting release during an asymmetric server-to-client fault.
 type ClientProxyStats struct {
-	ClientToServer uint64 `json:"client_to_server"`
-	ServerToClient uint64 `json:"server_to_client"`
-	HeldBytes      uint64 `json:"held_bytes"`
-	ResponsesHeld  bool   `json:"responses_held"`
-	Active         int    `json:"active_connections"`
+	ClientToServer    uint64 `json:"client_to_server"`
+	ServerToClient    uint64 `json:"server_to_client"`
+	HeldBytes         uint64 `json:"held_bytes"`
+	ResponsesHeld     bool   `json:"responses_held"`
+	Active            int    `json:"active_connections"`
+	BufferedBytes     uint64 `json:"buffered_bytes"`
+	PeakBufferedBytes uint64 `json:"peak_buffered_bytes"`
+	BufferOverflows   uint64 `json:"buffer_overflows"`
 }
 
 func (p *ClientProxy) Stats() ClientProxyStats {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return ClientProxyStats{p.clientBytes, p.serverBytes, p.heldBytes, p.responsesHeld != nil, len(p.active)}
+	return ClientProxyStats{ClientToServer: p.clientBytes, ServerToClient: p.serverBytes, HeldBytes: p.heldBytes, ResponsesHeld: p.responsesHeld != nil, Active: len(p.active), BufferedBytes: p.bufferedBytes, PeakBufferedBytes: p.peakBufferedBytes, BufferOverflows: p.bufferOverflows}
 }
-func (p *ClientProxy) waitResponses(bytes int) {
+func (p *ClientProxy) waitResponses(done <-chan struct{}) bool {
 	p.mu.Lock()
 	held := p.responsesHeld
-	if held != nil {
-		p.heldBytes += uint64(bytes)
-	}
 	p.mu.Unlock()
 	if held != nil {
-		<-held
+		select {
+		case <-held:
+		case <-done:
+			return false
+		}
 	}
+	return true
 }
 
 type clientProxyWriter struct {
@@ -271,36 +283,112 @@ func (p *ClientProxy) bridge(client, upstream net.Conn, connection uint64) {
 		_ = upstream.Close()
 		_ = client.Close()
 	}()
-	buf := make([]byte, 32*1024)
-	for {
-		n, readErr := upstream.Read(buf)
-		if n > 0 {
-			p.waitResponses(n)
-			for offset := 0; offset < n; {
-				start := offset
-				written, writeErr := client.Write(buf[offset:n])
-				offset += written
+	// Keep reading upstream during the hold. Blocking Read here turns an
+	// application reply fault into TCP backpressure and retransmission recovery.
+	var queueMu sync.Mutex
+	var queue [][]byte
+	var queueCost int
+	var readFinished bool
+	notify := make(chan struct{}, 1)
+	readerDone := make(chan struct{})
+	wake := func() {
+		select {
+		case notify <- struct{}{}:
+		default:
+		}
+	}
+	go func() {
+		defer close(readerDone)
+		defer func() {
+			queueMu.Lock()
+			readFinished = true
+			queueMu.Unlock()
+			wake()
+		}()
+		buf := make([]byte, 32*1024)
+		for {
+			n, err := upstream.Read(buf)
+			if n > 0 {
+				queueMu.Lock()
+				// Charge record overhead too, so tiny reads cannot escape the cap.
+				if queueCost+n+64 > p.replyBufferLimit {
+					queueMu.Unlock()
+					p.mu.Lock()
+					p.bufferOverflows++
+					p.mu.Unlock()
+					_ = upstream.Close()
+					_ = client.Close()
+					return
+				}
+				queue = append(queue, append([]byte(nil), buf[:n]...))
+				queueCost += n + 64
 				p.mu.Lock()
-				p.serverBytes += uint64(written)
-				p.recordTrafficLocked(connection, "server_to_client", buf[start:offset])
+				p.bufferedBytes += uint64(n)
+				if p.bufferedBytes > p.peakBufferedBytes {
+					p.peakBufferedBytes = p.bufferedBytes
+				}
+				if p.responsesHeld != nil {
+					p.heldBytes += uint64(n)
+				}
 				p.mu.Unlock()
-				if written == 0 && writeErr == nil {
-					writeErr = io.ErrShortWrite
-				}
-				if writeErr != nil {
-					readErr = writeErr
-					break
-				}
+				queueMu.Unlock()
+				wake()
+			}
+			if err != nil {
+				return
 			}
 		}
-		if readErr != nil {
+	}()
+forward:
+	for {
+		if !p.waitResponses(copyDone) {
 			break
+		}
+		queueMu.Lock()
+		if len(queue) == 0 {
+			finished := readFinished
+			queueMu.Unlock()
+			if finished {
+				break
+			}
+			select {
+			case <-notify:
+			case <-copyDone:
+				break forward
+			}
+			continue
+		}
+		data := queue[0]
+		queue[0] = nil
+		queue = queue[1:]
+		queueCost -= len(data) + 64
+		p.mu.Lock()
+		p.bufferedBytes -= uint64(len(data))
+		p.mu.Unlock()
+		queueMu.Unlock()
+		for offset := 0; offset < len(data); {
+			start := offset
+			written, err := client.Write(data[offset:])
+			offset += written
+			p.mu.Lock()
+			p.serverBytes += uint64(written)
+			p.recordTrafficLocked(connection, "server_to_client", data[start:offset])
+			p.mu.Unlock()
+			if err != nil || written == 0 {
+				break forward
+			}
 		}
 	}
 	_ = client.Close()
 	_ = upstream.Close()
+	<-readerDone
 	<-copyDone
+	queueMu.Lock()
 	p.mu.Lock()
+	for _, data := range queue {
+		p.bufferedBytes -= uint64(len(data))
+	}
 	delete(p.active, client)
 	p.mu.Unlock()
+	queueMu.Unlock()
 }
