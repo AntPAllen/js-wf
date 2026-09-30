@@ -81,6 +81,9 @@ func checkJournalRecords(subject string, records []journal.Record, terminalValue
 	epochWorkers := map[uint64]string{}
 	for i, record := range records {
 		e := record.Entry
+		if record.Sequence == 0 || i > 0 && record.Sequence <= records[i-1].Sequence {
+			return 0, false, fmt.Errorf("%s: invalid retained journal sequence", subject)
+		}
 		if e.Index != uint64(i) {
 			return 0, false, fmt.Errorf("%s: index %d at position %d", subject, e.Index, i)
 		}
@@ -100,6 +103,11 @@ func checkJournalRecords(subject string, records []journal.Record, terminalValue
 			return 0, false, fmt.Errorf("%s: entry after terminal", subject)
 		}
 		switch e.Kind {
+		case journal.Started, journal.Failed:
+		case journal.Completed:
+			if outstanding {
+				return 0, false, fmt.Errorf("%s: successful terminal with unresolved request", subject)
+			}
 		case journal.StepRequested:
 			if outstanding {
 				return 0, false, fmt.Errorf("%s: overlapping step requests", subject)
@@ -128,6 +136,8 @@ func checkJournalRecords(subject string, records []journal.Record, terminalValue
 				return 0, false, fmt.Errorf("%s: handler attempt out of order", subject)
 			}
 			lastAttempt = attempt.Count
+		default:
+			return 0, false, fmt.Errorf("%s: unknown entry kind %q", subject, e.Kind)
 		}
 		if e.Kind == journal.Completed || e.Kind == journal.Failed {
 			terminal = e.Payload

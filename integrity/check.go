@@ -187,11 +187,6 @@ func check(ctx context.Context, js jetstream.JetStream, cutoff *uint64) (Report,
 				return 0, false, fmt.Errorf("%s: %w", subject, err)
 			}
 		}
-		for i, record := range records {
-			if record.Sequence == 0 || i > 0 && record.Sequence <= records[i-1].Sequence {
-				return 0, false, fmt.Errorf("%s: invalid retained journal sequence", subject)
-			}
-		}
 		entries, terminal, err := checkJournalRecords(subject, records, func() ([]byte, error) {
 			value, err := auditRead(ctx, func(attempt context.Context) (jetstream.KeyValueEntry, error) { return state.Get(attempt, key) })
 			if err != nil {

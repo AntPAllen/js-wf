@@ -1130,3 +1130,16 @@ complete pinned race corpus cover this slice. The full simulator suite passed
 in 49.97 seconds and the lease suite in 1.16 seconds; focused race checks passed.
 A live seed-2 mixed-fault race proof passed at 23.42-second terminal p99, but the
 earlier clean-runner 63.13-second miss is not attributed to this defect alone.
+
+
+## Shared retained-journal validation
+
+`CheckSnapshot` and the real stream audit now validate logical journal stream
+sequences through the same checker: sequences must be positive and increasing,
+while global sequence holes are allowed. Unknown entry kinds and a successful
+terminal with an unresolved request fail. Failed terminals may retain pending
+requests, and nonterminal pending or suspended histories remain valid cuts.
+Negative controls demonstrated that all five corruptions survived the former
+snapshot checker; real three-node controls independently cover unknown kinds,
+unresolved success and a valid failed pending step. These controls strengthen
+I2/I3 checks without claiming the complete six-mutation release campaign.

@@ -1425,3 +1425,38 @@ entry index/kind/worker, sequence and epoch assertions remain strict. This
 repairs the audit's handling of a transient response; it does not identify
 why the server/client consumer returned no responders in the old CI run or
 replace fresh clean-runner validation.
+
+
+## Shared retained-journal checker negative controls
+
+The invariant review found five mutations that survived `CheckSnapshot`:
+zero, duplicate and descending stream sequences, an unknown entry kind, and a
+successful terminal after an unresolved step request. The real checker already
+checked sequences separately; sequence validation now lives in the shared
+journal checker so real and simulated retained state enforce the same rule.
+Global stream-sequence holes remain valid. Unknown kinds and successful
+completion with a pending request now fail directly. Failed terminals may
+retain a pending request, as cancellation and journal-limit failure require;
+nonterminal pending and suspended histories remain valid intermediate cuts.
+
+The new controls failed against the previous checker before the fix. Real
+three-node race controls also reject an unknown kind and unresolved successful
+terminal, while accepting a failed pending step; the focused integrity/cohort
+integration run passed in 17.14 seconds. The complete integrity race suite
+passed in 1.88 seconds; vet and diff checks passed. The complete simulator race
+run is still active, with its result pending. These are added checker controls, not
+completion of the release's six production mutation campaign requirements.
+
+The [standard CI run at `af26451`](https://github.com/AntPAllen/js-wf/actions/runs/36747611863)
+and its [20-seed mixed campaign](https://github.com/AntPAllen/js-wf/actions/runs/36747612041)
+completed successfully. The older [standard run at `149c876`](https://github.com/AntPAllen/js-wf/actions/runs/36745857892)
+failed only its combined rebalance job: all workflow results reached the
+queue-drain phase, but one run message remained at the six-minute deadline,
+with partition 1 reporting one ack-pending message. This is an open drain
+failure, distinct from the mixed-version retention contract (this fixture uses
+the current server version throughout); its transport/runtime cause remains
+unconfirmed. Inspection also found that this manual rebalance fixture keeps
+killed worker IDs in its rotation and stops moving partitions after handler
+completion; the paused subprocess is then killed before queue drain. That can
+leave the last assignment pointing at an absent worker and needs a targeted
+control. Fresh passing later CI does not erase that observation.

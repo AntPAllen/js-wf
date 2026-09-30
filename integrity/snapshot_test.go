@@ -1,6 +1,7 @@
 package integrity
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -34,6 +35,15 @@ func TestSnapshotInvariantNegativeControls(t *testing.T) {
 		{"I1 duplicate start", func(s *Snapshot) { s.Invocations = append(s.Invocations, s.Invocations[0]) }, "duplicate invocation"},
 		{"I2 shared epoch", func(s *Snapshot) { s.Journals["wf.jrn.test.negative"][2].WorkerID = "worker-b" }, "used by workers"},
 		{"I2 descending epoch", func(s *Snapshot) { s.Journals["wf.jrn.test.negative"][2].Epoch = 0 }, "epoch or Started violation"},
+		{"I2 zero sequence", func(s *Snapshot) { s.Journals["wf.jrn.test.negative"][0].Sequence = 0 }, "invalid retained journal sequence"},
+		{"I2 duplicate sequence", func(s *Snapshot) { s.Journals["wf.jrn.test.negative"][2].Sequence = 2 }, "invalid retained journal sequence"},
+		{"I2 descending sequence", func(s *Snapshot) { s.Journals["wf.jrn.test.negative"][2].Sequence = 1 }, "invalid retained journal sequence"},
+		{"unknown entry kind", func(s *Snapshot) { s.Journals["wf.jrn.test.negative"][2].Kind = "Unknown" }, "unknown entry kind"},
+		{"I3 terminal with unresolved request", func(s *Snapshot) {
+			r := &s.Journals["wf.jrn.test.negative"][2]
+			r.Kind = journal.Attempt
+			r.Payload = json.RawMessage(`{"count":1,"error":"panic"}`)
+		}, "successful terminal with unresolved request"},
 		{"I3 outcome without request", func(s *Snapshot) { s.Journals["wf.jrn.test.negative"][1].Kind = journal.StepCompleted }, "completion without request"},
 		{"I6 changed terminal state", func(s *Snapshot) { s.TerminalState["test.negative"] = []byte(`"changed"`) }, "terminal state differs"},
 	} {
@@ -44,5 +54,37 @@ func TestSnapshotInvariantNegativeControls(t *testing.T) {
 				t.Fatalf("mutation survived: err=%v want=%q", err, control.want)
 			}
 		})
+	}
+}
+
+// Cancellation, exhausted attempts and journal limits may fail a pending step.
+// A live request or suspension may also be retained at an intermediate cut.
+func TestSnapshotAllowsPendingRequestWithoutSuccessfulTerminal(t *testing.T) {
+	for _, kind := range []journal.Kind{journal.Failed, journal.Suspended, journal.StepRequested} {
+		t.Run(string(kind), func(t *testing.T) {
+			s := terminalSnapshot()
+			records := s.Journals["wf.jrn.test.negative"]
+			if kind == journal.StepRequested {
+				records = records[:2]
+			} else {
+				records = records[:3]
+				records[2].Kind = kind
+				records[2].Payload = []byte(`"ok"`)
+			}
+			s.Journals["wf.jrn.test.negative"] = records
+			if _, err := CheckSnapshot(s); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestSnapshotAllowsGlobalSequenceHoles(t *testing.T) {
+	s := terminalSnapshot()
+	for i := range s.Journals["wf.jrn.test.negative"] {
+		s.Journals["wf.jrn.test.negative"][i].Sequence = uint64(10 + i*7)
+	}
+	if _, err := CheckSnapshot(s); err != nil {
+		t.Fatal(err)
 	}
 }
