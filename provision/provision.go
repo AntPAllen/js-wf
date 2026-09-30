@@ -26,10 +26,10 @@ const (
 	FallbackTimers TimerBackend = "fallback"
 )
 
-// EnsureAuto uses the configured WF_RUN mode when the stream exists. For a
-// fresh deployment it selects native scheduling on NATS 2.12+ and the retained
-// timer fallback on older servers. It fails closed while disconnected or when
-// an existing native stream is reached through an older server.
+// EnsureAuto selects the retained fallback for a fresh deployment. The
+// connected server version cannot prove every cluster peer supports native
+// scheduling. An existing native deployment requires explicit operator
+// selection through Ensure after its peer versions have been checked.
 func EnsureAuto(ctx context.Context, js jetstream.JetStream, replicas int) (TimerBackend, error) {
 	return ensureAuto(ctx, js, replicas, 0)
 }
@@ -44,11 +44,6 @@ func EnsureAutoWithJournalLimit(ctx context.Context, js jetstream.JetStream, rep
 }
 
 func ensureAuto(ctx context.Context, js jetstream.JetStream, replicas int, journalMaxBytes int64) (TimerBackend, error) {
-	version := js.Conn().ConnectedServerVersion()
-	nativeCapable, err := supportsSchedules(version)
-	if err != nil {
-		return "", err
-	}
 	backend := FallbackTimers
 	run, err := js.Stream(ctx, "WF_RUN")
 	switch {
@@ -58,23 +53,13 @@ func ensureAuto(ctx context.Context, js jetstream.JetStream, replicas int, journ
 			return "", infoErr
 		}
 		if info.Config.AllowMsgSchedules {
-			backend = NativeTimers
+			return "", fmt.Errorf("native timer stream requires explicit cluster-wide version verification; use native mode after checking every peer")
 		}
 	case errors.Is(err, jetstream.ErrStreamNotFound):
-		if nativeCapable {
-			backend = NativeTimers
-		}
 	default:
 		return "", err
 	}
-	if backend == NativeTimers && !nativeCapable {
-		return "", fmt.Errorf("native timer stream requires NATS 2.12+, connected to %s", version)
-	}
-	if backend == NativeTimers {
-		err = ensure(ctx, js, replicas, true, journalMaxBytes)
-	} else {
-		err = ensure(ctx, js, replicas, false, journalMaxBytes)
-	}
+	err = ensure(ctx, js, replicas, false, journalMaxBytes)
 	if err != nil {
 		return "", err
 	}
@@ -108,6 +93,9 @@ func supportsSchedules(version string) (bool, error) {
 // Ensure creates the stores and rejects incompatible existing configurations.
 // Calling CreateOrUpdateStream alone could silently adopt a destructive config.
 func Ensure(ctx context.Context, js jetstream.JetStream, replicas int) error {
+	if err := requireConnectedNativeVersion(js); err != nil {
+		return err
+	}
 	return ensure(ctx, js, replicas, true, 0)
 }
 
@@ -117,7 +105,22 @@ func EnsureWithJournalLimit(ctx context.Context, js jetstream.JetStream, replica
 	if maxBytes <= 0 {
 		return fmt.Errorf("journal max bytes must be positive")
 	}
+	if err := requireConnectedNativeVersion(js); err != nil {
+		return err
+	}
 	return ensure(ctx, js, replicas, true, maxBytes)
+}
+
+func requireConnectedNativeVersion(js jetstream.JetStream) error {
+	version := js.Conn().ConnectedServerVersion()
+	capable, err := supportsSchedules(version)
+	if err != nil {
+		return err
+	}
+	if !capable {
+		return fmt.Errorf("native timers require NATS 2.12+; connected server reports %s", version)
+	}
+	return nil
 }
 
 // EnsureFallback provisions retained timer records for servers without native

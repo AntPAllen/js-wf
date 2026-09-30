@@ -197,6 +197,8 @@ Suspension: when an await cannot complete, the runtime appends `Suspended{waitin
 
 `ctx.Sleep(d)` appends `StepRequested{kind: timer, fire_at}` then publishes a `WF_RUN` message for the invocation with a `Nats-Schedule` header for `fire_at` (2.12 message scheduling) and `Nats-Msg-Id = timer:<type>:<id>:<index>`, then suspends. When it fires, the worker resumes, sees the timer entry and that `now >= fire_at`, appends `StepCompleted` and continues. If it resumes early for another reason (a signal), the timer stays pending and the scheduled message still fires later.
 
+Admission also matters: a fresh deployment uses the retained `WF_TIMER` fallback by default because one connected server version cannot certify every peer. Native scheduling requires an explicit operator choice after all peer versions have been checked. Automatic provisioning rejects an existing native stream until the operator selects native mode explicitly.
+
 Order matters: journal entry first, scheduled publish second. A crash between them leaves a journal saying "waiting on timer" with no scheduled message, which is exactly what the reconciler in phase 7 looks for. The reverse order would produce a wakeup for an invocation that has no record of wanting one, which is harmless but wasteful, so the order is a correctness choice only in combination with the reconciler.
 
 **Deliverables**

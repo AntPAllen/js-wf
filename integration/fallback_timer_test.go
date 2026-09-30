@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -19,7 +20,7 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 )
 
-func TestAutoTimerBackendNative(t *testing.T) {
+func TestAutoTimerBackendFailsClosed(t *testing.T) {
 	cluster, err := testcluster.Start(t.TempDir(), 3)
 	if err != nil {
 		t.Fatal(err)
@@ -41,14 +42,26 @@ func TestAutoTimerBackendNative(t *testing.T) {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
-	if err != nil || backend != provision.NativeTimers {
-		t.Fatalf("automatic native provision: backend=%q err=%v", backend, err)
+	if err != nil || backend != provision.FallbackTimers {
+		t.Fatalf("automatic fallback provision: backend=%q err=%v", backend, err)
 	}
-	if backend, err := provision.EnsureAuto(ctx, js, 3); err != nil || backend != provision.NativeTimers {
-		t.Fatalf("automatic native reprovision: backend=%q err=%v", backend, err)
+	if backend, err := provision.EnsureAuto(ctx, js, 3); err != nil || backend != provision.FallbackTimers {
+		t.Fatalf("automatic fallback reprovision: backend=%q err=%v", backend, err)
 	}
-	if _, err := js.Stream(ctx, "WF_TIMER"); !errors.Is(err, jetstream.ErrStreamNotFound) {
-		t.Fatalf("native mode created fallback timer stream: %v", err)
+	if _, err := js.Stream(ctx, "WF_TIMER"); err != nil {
+		t.Fatalf("automatic mode omitted fallback timer stream: %v", err)
+	}
+}
+
+func TestAutoRejectsExistingNativeTimerStream(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if _, err := provision.EnsureAuto(ctx, all[0], 3); err == nil || !strings.Contains(err.Error(), "explicit cluster-wide version verification") {
+		t.Fatalf("automatic mode accepted native timer stream: %v", err)
+	}
+	if _, err := all[0].Stream(ctx, "WF_TIMER"); !errors.Is(err, jetstream.ErrStreamNotFound) {
+		t.Fatalf("explicit native mode unexpectedly has fallback stream: %v", err)
 	}
 }
 

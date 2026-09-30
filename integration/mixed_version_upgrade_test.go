@@ -39,7 +39,7 @@ func TestMixedVersionRollingUpgradeFallback(t *testing.T) {
 		newFirst bool
 	}{
 		{name: "old-peer-first"},
-		{name: "explicit-fallback-on-new-peer", newFirst: true},
+		{name: "auto-fallback-on-new-peer", newFirst: true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			runMixedVersionRollingUpgradeFallback(t, oldBinary, test.newFirst)
@@ -89,8 +89,7 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	for ctx.Err() == nil {
 		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
 		if newFirst {
-			err = provision.EnsureFallback(attempt, all[1], 3)
-			backend = provision.FallbackTimers
+			backend, err = provision.EnsureAuto(attempt, all[1], 3)
 		} else {
 			backend, err = provision.EnsureAuto(attempt, all[0], 3)
 		}

@@ -97,17 +97,18 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	if version := all[0].Conn().ConnectedServerVersion(); !strings.HasPrefix(version, "2.11.") {
 		t.Fatalf("old container version=%q", version)
 	}
+	var admission provision.TimerBackend
 	for ctx.Err() == nil {
 		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
-		err = provision.EnsureFallback(attempt, all[1], 5)
+		admission, err = provision.EnsureAuto(attempt, all[1], 5)
 		stop()
 		if err == nil {
 			break
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	if err != nil {
-		t.Fatalf("five-replica fallback provision: %v", err)
+	if err != nil || admission != provision.FallbackTimers {
+		t.Fatalf("five-replica automatic fallback provision: mode=%q err=%v", admission, err)
 	}
 	if mode, err := provision.EnsureAuto(ctx, all[0], 5); err != nil || mode != provision.FallbackTimers {
 		t.Fatalf("old peer fallback mode=%q err=%v", mode, err)

@@ -259,6 +259,9 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
 	}
 	if mode == "static" {
 		args = append(args, "-journal-max-bytes", "131072")
+	} else {
+		// This fixture pre-provisions native timers, so admission is explicit.
+		args = append(args, "-timer-backend", "native")
 	}
 	done := make(chan error, 1)
 	go func() { done <- run(ctx, args) }()
