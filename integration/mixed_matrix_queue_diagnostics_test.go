@@ -23,12 +23,14 @@ func captureMatrixQueueDiagnostics(t *testing.T, run jetstream.Stream) {
 	stop()
 	t.Logf("fresh queue metadata=%+v err=%v", info, err)
 	diagnostic := struct {
-		Stream        *jetstream.StreamInfo     `json:"stream,omitempty"`
-		Consumers     []*jetstream.ConsumerInfo `json:"consumers"`
-		Messages      []*jetstream.RawStreamMsg `json:"messages,omitempty"`
-		MessageErrors []string                  `json:"message_errors,omitempty"`
-		StreamError   string                    `json:"stream_error,omitempty"`
-		ConsumerError string                    `json:"consumer_error,omitempty"`
+		Stream              *jetstream.StreamInfo     `json:"stream,omitempty"`
+		Consumers           []*jetstream.ConsumerInfo `json:"consumers"`
+		Messages            []*jetstream.RawStreamMsg `json:"messages,omitempty"`
+		MessageScanComplete bool                      `json:"message_scan_complete"`
+		LastScannedSequence uint64                    `json:"last_scanned_sequence,omitempty"`
+		MessageErrors       []string                  `json:"message_errors,omitempty"`
+		StreamError         string                    `json:"stream_error,omitempty"`
+		ConsumerError       string                    `json:"consumer_error,omitempty"`
 	}{Stream: info}
 	if err != nil {
 		diagnostic.StreamError = err.Error()
@@ -51,12 +53,14 @@ func captureMatrixQueueDiagnostics(t *testing.T, run jetstream.Stream) {
 			attempt, stop := context.WithTimeout(rawCtx, 500*time.Millisecond)
 			message, err := run.GetMsg(attempt, seq)
 			stop()
+			diagnostic.LastScannedSequence = seq
 			if err == nil {
 				diagnostic.Messages = append(diagnostic.Messages, message)
 			} else if !errors.Is(err, jetstream.ErrMsgNotFound) {
 				diagnostic.MessageErrors = append(diagnostic.MessageErrors, fmt.Sprintf("seq=%d: %v", seq, err))
 			}
 		}
+		diagnostic.MessageScanComplete = diagnostic.LastScannedSequence == info.State.LastSeq && len(diagnostic.MessageErrors) == 0
 		t.Logf("queue raw retained messages=%d reported=%d errors=%v", len(diagnostic.Messages), info.State.Msgs, diagnostic.MessageErrors)
 	}
 	if prefix := os.Getenv("MATRIX_ARTIFACT_PREFIX"); prefix != "" {

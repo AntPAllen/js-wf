@@ -188,3 +188,13 @@ For the sustained rolling-upgrade row, provide a NATS 2.11.17 executable through
 The `upgrade` CI selector builds that version, starts all three nodes on it,
 and upgrades each once during the ten-minute mixed workload. Timers remain on
 the verified fallback backend; version transitions are retained in fault artifacts.
+
+
+To investigate the mixed-version WorkQueue retention regression, run
+`WF_NATS_SERVER_BIN=/path/to/nats-2.11.17 MATRIX_ARTIFACT_PREFIX=/tmp/mixed-ack go test -race ./integration -run '^TestMixedVersionExplicitAckWorkQueueRetention$' -count=1 -timeout=8m -v`.
+This opt-in transport contract checks out-of-order acknowledgments after a
+consumer-leader upgrade. The old-only and upgraded co-located leader controls
+pass; an old stream leader with an upgraded consumer leader currently retains
+acknowledged records. Split-version cases enforce the retention requirement
+and fail until the discrepancy is resolved; they are not clean release evidence.
+Failure artifacts include actual messages, consumer state and server logs.

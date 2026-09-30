@@ -1142,3 +1142,59 @@ the pending full CI/consecutive-seed gates.
 A fresh ten-minute block-stall race run using the bounded concurrent journal
 audit is active at `f9a11c7`, with seed 42 and artifact prefix
 `/tmp/js-wf-block-disk-parallel-audit-full`. Its terminal result remains pending.
+
+
+## Full block-stall proof and clean upgrade/block CI seeds
+
+The full local block-stall race run at `f9a11c7` passed in 665.57 seconds:
+113 batches, 3,164 terminal invocations, nineteen verified five-second block
+stalls and aggregate terminal p99 5.014 seconds. All shared gates passed,
+including the batch-90/2,520-invocation checkpoint that had failed before the
+bounded concurrent journal audit. This is one full local seed (42), not a
+controlled attribution of the earlier timeout or consecutive release evidence.
+
+The full [block-stall cleanup-fix CI seed](https://github.com/AntPAllen/js-wf/actions/runs/36732204328)
+and [rolling-upgrade CI seed](https://github.com/AntPAllen/js-wf/actions/runs/36732200367)
+passed at `321c70f`. Fresh twenty-seed workflows were dispatched at `407984d`
+for [block stalls](https://github.com/AntPAllen/js-wf/actions/runs/36737378968)
+and [rolling upgrades](https://github.com/AntPAllen/js-wf/actions/runs/36737383092).
+Their terminal gates remain pending.
+
+## Isolated mixed-version explicit-ack retention regression
+
+A fresh partial-upgrade race smoke reproduced the queue discrepancy: three
+actual signal-wakeup records at stream sequences 502–504 remained readable on
+`wf.run.32`. Its durable reported ack floor 790, zero pending and zero
+ack-pending. The run-stream leader remained on NATS 2.11.17 while its consumer
+leader was on 2.15.0. Diagnostics now record the last scanned sequence and
+whether every retained-sequence read completed, preventing a bounded partial
+scan from being treated as exhaustive evidence.
+
+`TestMixedVersionExplicitAckWorkQueueRetention` isolates this using JetStream
+publish/fetch/ack operations and leader changes. Three old servers create a
+replicated WorkQueue and durable, deliver 33 records, and upgrade the consumer
+leader before out-of-order acknowledgments. The all-old control passed with
+zero retained records and ack floor 33. Keeping the stream leader old left all
+33 records stored after both ordinary Ack and successful DoubleAck, despite
+ack floor 33, zero pending and zero ack-pending. Moving both leaders onto the
+upgraded node before ack passed with zero retained records. The inherited
+consumer-replica configuration used by the runtime also reproduced the failure,
+with two current replica peers and a complete raw scan. Its records remained
+stored beyond the unchanged thirty-second drain requirement; the race test
+failed in 41.42 seconds. The upgraded co-located control passed in 12.48 seconds,
+and the final all-old control passed in 4.20 seconds.
+
+The initial small fixture attempted API calls before old metadata/peer placement
+was ready. Bounded account/creation/leader-read attempts now cover fixture
+readiness, including the observed initial no-suitable-peers response. The
+retention drain deadline is unchanged. All failures capture raw records,
+consumer metadata and server logs. Vet and diff checks passed.
+
+The split-version cases remain intentionally strict failing opt-in conformance
+tests, not clean release evidence. This isolates the behavior to a NATS
+version/leader-placement transport combination; the internal compatibility
+cause and general repair remain open. The current simulator commits consumer
+ack and WorkQueue removal together, so the separate retention-commit edge is
+an explicit Tier 1 gap documented in `tier1-simulation.md`. Full rolling-upgrade
+matrix tests retain their seeded upgrade order; this new control does not
+replace that coverage.

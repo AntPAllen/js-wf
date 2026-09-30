@@ -1013,3 +1013,31 @@ B's complete assignment takeover, higher workflow epoch, all 65 immutable
 results, client histories and retained-state integrity. That fixture supplies
 the independent worker/process evidence rather than inferring it from virtual
 KV expiry.
+
+
+## Mixed-version WorkQueue retention contract gap
+
+`TestMixedVersionExplicitAckWorkQueueRetention` isolates the partial-upgrade
+queue discrepancy using JetStream publish, fetch and explicit ack operations,
+with no workflow execution. Three NATS 2.11.17 servers create a replicated
+WorkQueue and durable, deliver 33 records, upgrade the consumer leader to the
+module-pinned 2.15.0 server, and acknowledge even indices before odd indices.
+An all-old control removes every message. Moving both stream and consumer
+leaders onto the upgraded node before ack also removes every message.
+
+Keeping the stream leader on an old node leaves all 33 records readable while
+the consumer reports ack floor 33, zero pending and zero ack-pending. Both
+ordinary Ack and confirmed DoubleAck exhibit this behavior. The inherited
+consumer-replica configuration used by the runtime reproduces it too, with
+three actual peers and current replicas. Queue diagnostics record raw messages,
+metadata, last scanned sequence and whether the bounded scan completed.
+
+The current Tier 1 consumer model applies WorkQueue removal together with ack
+commit. It does not represent this version-dependent retention discrepancy.
+The real conformance failure remains a release gap. A model extension must
+separate consumer ack commitment from stream retention removal, preserve the
+successful consumer acknowledgment, and reproduce the retained/no-redelivery
+state without treating stalled removal as a clean liveness result. The
+observed leader-placement control is evidence for a recovery experiment;
+it does not establish the internal compatibility cause or a general runtime
+repair protocol. The full rolling-upgrade matrix still uses seeded node order.
