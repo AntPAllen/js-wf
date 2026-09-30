@@ -335,6 +335,21 @@ completion and queue-drain gates. The CI selector supports 1, 20 or 200 seeds;
 35-second runs remain smoke-only. Server skew and the other missing sustained
 rows still require their own fixtures and release-count validation.
 
+
+
+The sustained server-clock rows are `TestMixedMatrixServerClockSkewPositive`
+and `TestMixedMatrixServerClockSkewNegative`, exposed as `serverclockplus` and
+`serverclockminus` in the matrix workflow. One actual NATS process runs with
+its Go wall clock shifted by +60 or −60 seconds; peers and workers retain normal
+clocks. Startup, every thirty seconds and final checks verify all three clocks
+through `/varz` and require the invocation, run, journal, signal, state and lease
+stream leaders to remain on the skewed node. Latency artifacts record the
+known server offset and convert retained server timestamps and timer deadlines
+to the parent clock domain. Raw stored records are unchanged. The shared
+history, integrity, per-type p99, five-minute completion and queue-drain gates
+remain required. This is sustained static skew coverage; it does not combine
+skew with leader movement or other faults.
+
 **Tier 3 — Jepsen-style (nightly and before release).** Five real VMs or containers with real network partitions (iptables), separately verified server and worker clock skew, disk stalls (dm-delay), and process kills including `SIGKILL` of the NATS server with unsynced writes (`sync_interval` set to the production value). Client histories recorded as in phase 0 and checked with Porcupine against these models: `Start` as write-once register; `Signal` as an ordered queue per invocation; `Await` as a read of a register that becomes immutable at first non-empty read. Plus the stream-level invariant checker over the final state.
 
 Clock-skew injection must fail closed unless the running process reports the requested offset before the workload starts. The pinned Go server and a cgo-enabled Go probe bypassed `libfaketime`'s `LD_PRELOAD` clock interposition even though the same preload shifted `date`; [libfaketime documents this runtime limitation](https://github.com/wolfcw/libfaketime). The five-container server-clock slice instead builds the pinned NATS source with a test-only Go `time.Now` wall-clock overlay and verifies each node's own `/varz` time. The worker-clock slice uses the same overlay to build a separate worker process and checks its `time.Now` against an unshifted server's `/varz` before starting work. Both slices now cover one timer, one ordered-signal workflow, 100 short journaled effects, and a six-child fan-out with child-result signal and journal checks. The server slice keeps `WF_RUN`, `WF_SIG`, `WF_JRN`, and `KV_WF_STATE` leaders on the skewed node. These focused checks do not replace sustained mixed workloads and faults across the full matrix.

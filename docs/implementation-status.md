@@ -888,3 +888,45 @@ The first full ten-minute [worker-clock CI row](https://github.com/AntPAllen/js-
 was dispatched at `f911ef7` and is active. The matching local full seed 42 run
 is also active; neither terminal gate is counted yet. The old full Tier 1
 release-count workflow at `5372c36` remains in progress and predates these rows.
+
+
+## Completed worker-clock and expanded Tier 1 CI proofs
+
+The [ten-minute worker-clock CI run at `f911ef7`](https://github.com/AntPAllen/js-wf/actions/runs/36725316426)
+completed successfully. The corresponding local race seed 42 passed in 689.91
+seconds with 116 batches, 3,248 terminal invocations, 19 clock observations and
+aggregate terminal p99 5.031 seconds. All shared history, retained-state,
+per-type latency, completion and queue-drain gates passed. Consecutive 20/200
+worker-clock CI seed validation remains open.
+
+The [full Tier 1 run at `5372c36`](https://github.com/AntPAllen/js-wf/actions/runs/36716884416)
+completed successfully with 100,000 seeds per workload: 6,200,604 generated
+schedules, 158,952,053 scheduler choices and 1,360,164,122 transport events,
+in 4,461.25 seconds of Go test time. It includes general select and reusable
+promises but predates the suspended-select scanner and automatic membership
+models. Their individual local 100,000-seed passes do not substitute for a
+fresh full-suite CI release-count proof.
+
+
+## Sustained single-server clock-skew rows
+
+The mixed matrix now includes separate +60-second and −60-second NATS server
+rows, with verified Go wall-clock overlays on node 2. Both peers and all workers
+keep normal clocks. The invocation, run, journal, signal, state and lease stream
+leaders are placed on node 2 before workload startup and checked at each clock
+observation and before latency auditing. Every clock observation retains all
+three server times and measured offsets. Latency samples record the injected
+offset and normalize server-derived timestamps and timer deadlines to the
+parent clock, preserving the unchanged p99 and final-completion gates. Raw
+journal and signal records remain unchanged. Leader movement or incorrect
+clock evidence fails the row rather than being silently normalized.
+
+Race-instrumented seed 42 smoke runs passed both directions: eight batches,
+224 terminals and all shared history, integrity, per-type latency and queue
+gates per direction. Positive skew passed in 71.59 seconds with aggregate
+terminal p99 5.016 seconds; negative skew passed in 71.97 seconds with p99
+5.002 seconds. The observed shifted clocks were +59.998 seconds and −60.001
+seconds respectively. These 35-second workload runs are not ten-minute or
+release-count evidence. Vet and diff checks passed. CI exposes the separate
+`serverclockplus` and `serverclockminus` selectors with 1/20/200 seeds. Full
+sustained validation and combinations with moving leaders remain open.

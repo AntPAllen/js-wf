@@ -158,3 +158,10 @@ It uses +5-second, −5-second and normal-clock worker processes and verifies ea
 against real JetStream timestamps throughout the default ten-minute workload.
 The `tier2-matrix-leaders` workflow exposes this row as `workerclock`; a
 `WF_MATRIX_DURATION=35s` run is smoke evidence only.
+
+
+For sustained single-server ±60-second clock skew, run
+`WF_MATRIX_CHAOS=1 go test -race ./integration -run '^TestMixedMatrixServerClockSkew(Positive|Negative)$' -count=1 -timeout=40m`.
+Each direction runs a ten-minute mixed workload and verifies clocks and stream
+leader placement. The CI selectors are `serverclockplus` and `serverclockminus`;
+35-second runs remain smoke evidence only.

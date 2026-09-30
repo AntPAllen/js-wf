@@ -54,17 +54,19 @@ type matrixLeaderFault struct {
 	ProxyBefore      *testcluster.ClientProxyStats `json:"proxy_before,omitempty"`
 	ProxyBlocked     *testcluster.ClientProxyStats `json:"proxy_blocked,omitempty"`
 	ProxyHealed      *testcluster.ClientProxyStats `json:"proxy_healed,omitempty"`
+	ServerClocks     []matrixServerClockSample     `json:"server_clocks,omitempty"`
 	ClockSamples     []matrixWorkerClockSample     `json:"clock_samples,omitempty"`
 	Error            string                        `json:"error,omitempty"`
 }
 
 type matrixLatencySample struct {
-	Type     string        `json:"type"`
-	ID       string        `json:"id"`
-	Event    string        `json:"event"`
-	Enabled  time.Time     `json:"enabled"`
-	Observed time.Time     `json:"observed"`
-	Delay    time.Duration `json:"delay_ns"`
+	ServerClockOffset time.Duration `json:"server_clock_offset_ns,omitempty"`
+	Type              string        `json:"type"`
+	ID                string        `json:"id"`
+	Event             string        `json:"event"`
+	Enabled           time.Time     `json:"enabled"`
+	Observed          time.Time     `json:"observed"`
+	Delay             time.Duration `json:"delay_ns"`
 }
 
 // One sustained row of the release matrix. Shortened runs are smoke evidence;
@@ -99,6 +101,13 @@ func TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds(t *testing.T) {
 
 func TestMixedMatrixWorkerClockSkew(t *testing.T) { runMixedMatrixLeader(t, "worker_clock") }
 
+func TestMixedMatrixServerClockSkewPositive(t *testing.T) {
+	runMixedMatrixLeader(t, "server_clock_plus")
+}
+func TestMixedMatrixServerClockSkewNegative(t *testing.T) {
+	runMixedMatrixLeader(t, "server_clock_minus")
+}
+
 func runMixedMatrixLeader(t *testing.T, row string) {
 	t.Helper()
 	if os.Getenv("WF_MATRIX_CHAOS") != "1" {
@@ -129,8 +138,19 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			t.Fatal(err)
 		}
 	}
+	serverOffset := time.Duration(0)
+	if row == "server_clock_plus" {
+		serverOffset = 60 * time.Second
+	}
+	if row == "server_clock_minus" {
+		serverOffset = -60 * time.Second
+	}
 	startCluster := testcluster.StartProcesses
-	if row == "server_partition" {
+	if serverOffset != 0 {
+		startCluster = func(root string, count int) (*testcluster.ProcessCluster, error) {
+			return testcluster.StartClockSkewProcesses(root, count, 2, serverOffset)
+		}
+	} else if row == "server_partition" {
 		startCluster = testcluster.StartPartitionableProcesses
 	} else if row == "worker_isolation" {
 		startCluster = testcluster.StartProfiledProcesses
@@ -185,6 +205,16 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	if row == "worker_clock" {
 		if _, err := js.CreateStream(ctx, jetstream.StreamConfig{Name: "MATRIX_CLOCK", Subjects: []string{"matrix.clock.*"}, Storage: jetstream.FileStorage, Replicas: 3, MaxMsgsPerSubject: 16}); err != nil {
 			t.Fatal(err)
+		}
+	}
+	if serverOffset != 0 {
+		if err := preferMatrixSkewLeaders(ctx, nc, js); err != nil {
+			t.Fatal(err)
+		}
+		if proof, err := verifyMatrixServerClocks(ctx, js, cluster, serverOffset, time.Now()); err != nil {
+			t.Fatal(err)
+		} else {
+			t.Logf("initial server clock proof=%+v", proof.ServerClocks)
 		}
 	}
 	var recorder history.Recorder
@@ -386,7 +416,9 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 			var event matrixLeaderFault
 			var err error
-			if row == "worker_clock" {
+			if serverOffset != 0 {
+				event, err = verifyMatrixServerClocks(faultCtx, js, cluster, serverOffset, scheduled)
+			} else if row == "worker_clock" {
 				event, err = verifyMatrixWorkerClocks(processWorkers, scheduled)
 			} else if row == "worker_isolation" {
 				event, err = isolateMatrixWorkerReplies(faultCtx, processWorkers, workerProxies, faultRNG.Intn(len(processWorkers)), scheduled)
@@ -420,6 +452,10 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 			if row == "worker_pause" {
 				t.Logf("worker pause worker=%s confirmed=%s resumed=%s pause_duration=%s fencing_events=%d", event.Worker, event.Paused.Sub(start), event.Resumed.Sub(start), event.Resumed.Sub(event.Paused), event.FencingEvents)
+			}
+			if serverOffset != 0 {
+				t.Logf("server clock verification scheduled=%s samples=%+v", event.Scheduled.Sub(start), event.ServerClocks)
+				continue
 			}
 			if row == "worker_clock" {
 				t.Logf("worker clock verification scheduled=%s samples=%+v", event.Scheduled.Sub(start), event.ClockSamples)
@@ -593,6 +629,11 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			t.Fatal("worker fault row did not fault any worker with an active lease")
 		}
 	}
+	if serverOffset != 0 {
+		if _, err := verifyMatrixServerClocks(ctx, js, cluster, serverOffset, time.Now()); err != nil {
+			t.Fatal(err)
+		}
+	}
 	completionDeadline := faults[len(faults)-1].Healed.Add(5 * time.Minute)
 	// Terminal audits include all children and grandchildren, not just parents.
 	inv, err := js.Stream(ctx, "WF_INV")
@@ -610,7 +651,7 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 		}
 		parts := strings.Split(msg.Subject, ".")
 		attempt, done := context.WithTimeout(ctx, 20*time.Second)
-		samples, err := matrixInvocationLatencies(attempt, js, parts[2], parts[3], msg.Time, completionDeadline)
+		samples, err := matrixInvocationLatenciesWithClock(attempt, js, parts[2], parts[3], msg.Time, completionDeadline, serverOffset)
 		done()
 		if err != nil {
 			t.Fatal(err)
@@ -941,6 +982,12 @@ func killMatrixConsumerLeader(ctx context.Context, js jetstream.JetStream, clust
 }
 
 func matrixInvocationLatencies(ctx context.Context, js jetstream.JetStream, typ, id string, enabled, completionDeadline time.Time) ([]matrixLatencySample, error) {
+	return matrixInvocationLatenciesWithClock(ctx, js, typ, id, enabled, completionDeadline, 0)
+}
+
+func matrixInvocationLatenciesWithClock(ctx context.Context, js jetstream.JetStream, typ, id string, enabled, completionDeadline time.Time, offset time.Duration) ([]matrixLatencySample, error) {
+	enabled = enabled.Add(-offset)
+
 	records, _, err := journal.New(js).Read(ctx, typ, id)
 	if err != nil {
 		return nil, err
@@ -955,7 +1002,7 @@ func matrixInvocationLatencies(ctx context.Context, js jetstream.JetStream, typ,
 		if err != nil {
 			return nil, err
 		}
-		times[i] = msg.Time
+		times[i] = msg.Time.Add(-offset)
 	}
 	var samples []matrixLatencySample
 	progress := func(event string, at time.Time) error {
@@ -982,6 +1029,7 @@ func matrixInvocationLatencies(ctx context.Context, js jetstream.JetStream, typ,
 				return nil, err
 			}
 			if !request.FireAt.IsZero() {
+				request.FireAt = request.FireAt.Add(-offset)
 				if err := progress("timer_due", request.FireAt); err != nil {
 					return nil, err
 				}
@@ -1009,6 +1057,7 @@ func matrixInvocationLatencies(ctx context.Context, js jetstream.JetStream, typ,
 				if err != nil {
 					return nil, err
 				}
+				child.Time = child.Time.Add(-offset)
 				if err := progress("child_completed", child.Time); err != nil {
 					return nil, err
 				}
@@ -1032,6 +1081,7 @@ func matrixInvocationLatencies(ctx context.Context, js jetstream.JetStream, typ,
 			if err != nil {
 				return nil, err
 			}
+			msg.Time = msg.Time.Add(-offset)
 			if times[index].Before(msg.Time) {
 				return nil, fmt.Errorf("%s/%s signal consumed before publish", typ, id)
 			}
@@ -1047,6 +1097,7 @@ func matrixInvocationLatencies(ctx context.Context, js jetstream.JetStream, typ,
 	if err != nil {
 		return nil, err
 	}
+	last.Time = last.Time.Add(-offset)
 	if last.Time.After(completionDeadline) {
 		return nil, fmt.Errorf("%s/%s completed at %s after post-heal deadline %s", typ, id, last.Time, completionDeadline)
 	}
@@ -1054,6 +1105,9 @@ func matrixInvocationLatencies(ctx context.Context, js jetstream.JetStream, typ,
 		return nil, fmt.Errorf("%s/%s completed before its enabling event: terminal=%s enabled=%s", typ, id, last.Time, enabled)
 	}
 	samples = append(samples, matrixLatencySample{Type: typ, ID: id, Event: "terminal", Enabled: enabled, Observed: last.Time, Delay: last.Time.Sub(enabled)})
+	for i := range samples {
+		samples[i].ServerClockOffset = offset
+	}
 	return samples, nil
 }
 

@@ -84,6 +84,26 @@ func StartMixedVersionProcesses(root string, binaries []string) (*ProcessCluster
 	return startProcessesWithBinaries(root, 3, false, binaries, false)
 }
 
+// StartClockSkewProcesses shifts one actual NATS process's Go wall clock.
+// Callers must verify the running clocks through ServerNow before workloads.
+func StartClockSkewProcesses(root string, count, node int, offset time.Duration) (*ProcessCluster, error) {
+	if count < 1 || count > 3 || node < 0 || node >= count {
+		return nil, fmt.Errorf("invalid clock-skew process node/count")
+	}
+	overlay, err := WriteClockOverlay(filepath.Join(root, "clock"), offset)
+	if err != nil {
+		return nil, err
+	}
+	binary := filepath.Join(root, "nats-server-skewed")
+	build := exec.Command("go", "build", "-overlay="+overlay, "-o", binary, "github.com/nats-io/nats-server/v2")
+	if output, err := build.CombinedOutput(); err != nil {
+		return nil, fmt.Errorf("build skewed process server: %w: %s", err, output)
+	}
+	binaries := make([]string, count)
+	binaries[node] = binary
+	return startProcessesWithBinaries(root, count, false, binaries, false)
+}
+
 // StartPartitionableProcesses routes all server links through a controllable
 // relay while retaining separate server process IDs and file stores.
 func StartPartitionableProcesses(root string, count int) (*ProcessCluster, error) {
@@ -218,6 +238,8 @@ func (c *ProcessCluster) Diagnostic(ctx context.Context, node int, kind string) 
 	port, path := c.monitors[node], "/connz?subs=detail"
 	switch kind {
 	case "connections":
+	case "clock":
+		path = "/varz"
 	case "goroutines":
 		if node >= len(c.profiles) || c.profiles[node] == 0 {
 			return nil, fmt.Errorf("server profiling is not enabled")
@@ -244,6 +266,23 @@ func (c *ProcessCluster) Diagnostic(ctx context.Context, node int, kind string) 
 		return nil, fmt.Errorf("server %s diagnostic exceeds %d bytes", kind, limit)
 	}
 	return data, err
+}
+
+func (c *ProcessCluster) ServerNow(ctx context.Context, node int) (time.Time, error) {
+	data, err := c.Diagnostic(ctx, node, "clock")
+	if err != nil {
+		return time.Time{}, err
+	}
+	var clock struct {
+		Now time.Time `json:"now"`
+	}
+	if err := json.Unmarshal(data, &clock); err != nil {
+		return time.Time{}, err
+	}
+	if clock.Now.IsZero() {
+		return time.Time{}, fmt.Errorf("server clock omitted now")
+	}
+	return clock.Now, nil
 }
 
 func (c *ProcessCluster) PauseNode(i int) error {
