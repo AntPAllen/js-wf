@@ -21,6 +21,7 @@ import (
 	"js-wf/integrity"
 	"js-wf/journal"
 	"js-wf/provision"
+	"js-wf/reconcile"
 	"js-wf/testcluster"
 	"js-wf/wf"
 	"js-wf/worker"
@@ -532,6 +533,16 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 			enabledAt[i] = time.Now()
 		}
 	}
+	// Repair any signal wakeup whose NAK or enqueue was accepted locally but
+	// did not survive quorum loss. A deployed signal reconciler performs this
+	// sweep continuously; this fixture makes its post-heal pass explicit.
+	scanCtx, stopScan := context.WithTimeout(ctx, 30*time.Second)
+	signalRepair, scanErr := reconcile.NewSignalScan(js[other]).Scan(scanCtx, 0, 128, false)
+	stopScan()
+	if scanErr != nil {
+		t.Fatalf("post-heal signal repair: %v", scanErr)
+	}
+	t.Logf("post-heal signal repair inspected=%d reenqueued=%d", signalRepair.Inspected, signalRepair.Reenqueued)
 	latencies := make([]time.Duration, 0, len(invocations))
 	for range invocations {
 		result := <-completed
