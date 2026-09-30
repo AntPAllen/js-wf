@@ -930,3 +930,13 @@ seconds respectively. These 35-second workload runs are not ten-minute or
 release-count evidence. Vet and diff checks passed. CI exposes the separate
 `serverclockplus` and `serverclockminus` selectors with 1/20/200 seeds. Full
 sustained validation and combinations with moving leaders remain open.
+
+
+At `c0bd4f0`, fresh full-duration CI proofs were dispatched for
+[positive server skew](https://github.com/AntPAllen/js-wf/actions/runs/36727863573),
+[negative server skew](https://github.com/AntPAllen/js-wf/actions/runs/36727867863),
+[twenty consecutive worker-clock seeds](https://github.com/AntPAllen/js-wf/actions/runs/36727872006),
+and the [updated 100,000-seed-per-workload Tier 1 suite](https://github.com/AntPAllen/js-wf/actions/runs/36727875978).
+All four were queued at the last observation; none is counted as passing yet.
+A local ten-minute positive server-skew race run is active, using seed 42 and
+artifact prefix `/tmp/js-wf-server-clock-plus-full`; its terminal result is pending.
