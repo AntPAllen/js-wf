@@ -54,6 +54,7 @@ type matrixLeaderFault struct {
 	ProxyBefore      *testcluster.ClientProxyStats `json:"proxy_before,omitempty"`
 	ProxyBlocked     *testcluster.ClientProxyStats `json:"proxy_blocked,omitempty"`
 	ProxyHealed      *testcluster.ClientProxyStats `json:"proxy_healed,omitempty"`
+	Error            string                        `json:"error,omitempty"`
 }
 
 type matrixLatencySample struct {
@@ -369,10 +370,14 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			} else {
 				event, err = killMatrixJournalLeader(faultCtx, js, cluster, scheduled)
 			}
+			if err != nil {
+				event.Error = err.Error()
+			}
 			faultsMu.Lock()
 			faults = append(faults, event)
 			faultsMu.Unlock()
 			if err != nil {
+				t.Logf("%s fault failed: %v", row, err)
 				faultDone <- err
 				cancel()
 				return
@@ -461,6 +466,21 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			t.Logf("checkpoint audit batch=%d started elapsed=%s", batches, time.Since(start))
 			report, err := matrixRetainedAudit(ctx, js)
 			if err != nil || report.Invocations != batches*28 || report.Journals != batches*28 || report.Terminal != batches*28 {
+				// A controller or worker failure cancels the audit context. Keep
+				// that original failure visible instead of reporting cancellation
+				// as the only explanation for an incomplete retained-state scan.
+				select {
+				case faultErr := <-faultDone:
+					if faultErr != nil {
+						t.Fatalf("leader fault during checkpoint audit batch=%d: %v (audit: %v)", batches, faultErr, err)
+					}
+				default:
+				}
+				select {
+				case fleetErr := <-fleetErrors:
+					t.Fatalf("fleet during checkpoint audit batch=%d: %v (audit: %v)", batches, fleetErr, err)
+				default:
+				}
 				t.Fatalf("intermediate retained audit batch=%d report=%+v err=%v", batches, report, err)
 			}
 		}

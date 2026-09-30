@@ -541,7 +541,8 @@ func isolateMatrixWorkerReplies(ctx context.Context, fleet []*matrixProcessWorke
 		}
 	}
 	if event.ProxyHealed == nil {
-		return event, fmt.Errorf("worker PING recovery after reply isolation: %w", heal.Err())
+		health, readErr := os.ReadFile(process.base + "-transport.json")
+		return event, fmt.Errorf("worker PING recovery after reply isolation: %w; proxy=%+v last_success=%s health_read=%v", heal.Err(), proxy.Stats(), health, readErr)
 	}
 	fences, err := matrixWorkerFencingEvents(process.base+"-dispatch.jsonl", event.Killed)
 	if err != nil {
