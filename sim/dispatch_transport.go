@@ -2,6 +2,7 @@ package sim
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -28,6 +29,7 @@ type dispatchRecord struct {
 	deliveries uint64
 	deadline   int64
 	acked      bool
+	retained   bool
 }
 
 // DispatchTransport models the durable pull/ack subset used by
@@ -57,6 +59,10 @@ func (m *DispatchTransport) QueueFault(f DispatchFault) error {
 	switch f.Operation {
 	case "consumer", "fetch":
 		if f.Kind != "leader_changed" {
+			return fmt.Errorf("invalid %s fault on %s", f.Kind, f.Operation)
+		}
+	case "retention":
+		if f.Kind != "hold_after_ack" {
 			return fmt.Errorf("invalid %s fault on %s", f.Kind, f.Operation)
 		}
 	case "ack":
@@ -89,7 +95,7 @@ func (m *DispatchTransport) PublishRunMessage(subject string, data []byte, heade
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.sequence++
-	m.records = append(m.records, &dispatchRecord{subject: subject, data: append([]byte(nil), data...), header: cloneHeader(header), timestamp: timestamp, sequence: m.sequence})
+	m.records = append(m.records, &dispatchRecord{subject: subject, data: append([]byte(nil), data...), header: cloneHeader(header), timestamp: timestamp, sequence: m.sequence, retained: true})
 	m.event(TransportEvent{Operation: "run_publish", Subject: subject, Sequence: m.sequence, DataSHA256: digest(data), Outcome: "ok"})
 	return m.sequence
 }
@@ -144,6 +150,70 @@ func (m *DispatchTransport) Pending() int {
 	return pending
 }
 
+// RetainedSequences reports physical stream retention, independently of
+// delivery eligibility. A committed consumer ack does not imply removal.
+func (m *DispatchTransport) RetainedSequences() []uint64 {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var sequences []uint64
+	for _, record := range m.records {
+		if record.retained {
+			sequences = append(sequences, record.sequence)
+		}
+	}
+	return sequences
+}
+
+var ErrRunQueueRetained = errors.New("run queue retains messages")
+
+// CheckDrained applies the real matrix's stream-level drain requirement. The
+// consumer may have zero pending deliveries while retained records remain.
+func (m *DispatchTransport) CheckDrained() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	retained, pending := 0, 0
+	for _, record := range m.records {
+		if record.retained {
+			retained++
+		}
+		if !record.acked {
+			pending++
+		}
+	}
+	m.event(TransportEvent{Operation: "queue_drain_check", Outcome: fmt.Sprintf("retained_%d_pending_%d", retained, pending)})
+	if retained != 0 || pending != 0 {
+		return fmt.Errorf("%w: retained=%d deliverable=%d", ErrRunQueueRetained, retained, pending)
+	}
+	return nil
+}
+
+// CommitRetention explicitly commits a deferred stream removal. It is a
+// transport completion, not an assumed automatic repair of mixed-version NATS.
+func (m *DispatchTransport) CommitRetention(sequence uint64) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, record := range m.records {
+		if record.sequence != sequence {
+			continue
+		}
+		if !record.acked {
+			modelEvent := TransportEvent{Operation: "stream_retention", Subject: record.subject, Sequence: sequence, Outcome: "before_ack_rejected"}
+			m.event(modelEvent)
+			return fmt.Errorf("retention before ack for sequence %d", sequence)
+		}
+		outcome := "duplicate_commit"
+		if record.retained {
+			record.retained = false
+			outcome = "committed"
+			m.stopIfDrained()
+		}
+		m.event(TransportEvent{Operation: "stream_retention", Subject: record.subject, Sequence: sequence, Outcome: outcome})
+		return nil
+	}
+	m.event(TransportEvent{Operation: "stream_retention", Sequence: sequence, Outcome: "sequence_not_found"})
+	return fmt.Errorf("retention sequence %d not found", sequence)
+}
+
 // PendingSubjects exposes enabled run partitions to cooperative workloads.
 // It does not change durable delivery order within a partition.
 func (m *DispatchTransport) PendingSubjects() []string {
@@ -164,7 +234,7 @@ func (m *DispatchTransport) PendingSubjects() []string {
 }
 
 // StopWhenDrained ends a modeled partition loop after every published run has
-// been acknowledged. Install it after publishing the workload's messages.
+// been acknowledged and removed from the stream. Install it after publishing the workload's messages.
 func (m *DispatchTransport) StopWhenDrained(stop func()) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -299,8 +369,13 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 		}
 		// JetStream accepts a late ack from an earlier delivery even after
 		// another client has received the redelivery. The first committed ack
-		// retires the stream message; later acks are idempotent.
+		// commits consumer progress; stream removal is a separate state.
 		m.record.acked = true
+		if model.takeFault("retention") == "hold_after_ack" {
+			model.event(TransportEvent{Operation: "stream_retention", Subject: m.record.subject, Sequence: m.record.sequence, Outcome: "held_after_ack"})
+		} else {
+			m.record.retained = false
+		}
 		if model.onNextAck != nil {
 			stop := model.onNextAck
 			model.onNextAck = nil
@@ -338,6 +413,7 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 	switch operation {
 	case "term":
 		m.record.acked = true
+		m.record.retained = false
 	case "nak":
 		m.record.deadline = model.schedule.NowMillis() + delay.Milliseconds()
 	case "progress":
@@ -365,7 +441,7 @@ func (m *DispatchTransport) stopIfDrained() {
 		return
 	}
 	for _, record := range m.records {
-		if !record.acked {
+		if record.retained {
 			return
 		}
 	}

@@ -1015,7 +1015,7 @@ the independent worker/process evidence rather than inferring it from virtual
 KV expiry.
 
 
-## Mixed-version WorkQueue retention contract gap
+## Mixed-version WorkQueue retention reproduction
 
 `TestMixedVersionExplicitAckWorkQueueRetention` isolates the partial-upgrade
 queue discrepancy using JetStream publish, fetch and explicit ack operations,
@@ -1032,12 +1032,26 @@ consumer-replica configuration used by the runtime reproduces it too, with
 three actual peers and current replicas. Queue diagnostics record raw messages,
 metadata, last scanned sequence and whether the bounded scan completed.
 
-The current Tier 1 consumer model applies WorkQueue removal together with ack
-commit. It does not represent this version-dependent retention discrepancy.
-The real conformance failure remains a release gap. A model extension must
-separate consumer ack commitment from stream retention removal, preserve the
-successful consumer acknowledgment, and reproduce the retained/no-redelivery
-state without treating stalled removal as a clean liveness result. The
-observed leader-placement control is evidence for a recovery experiment;
-it does not establish the internal compatibility cause or a general runtime
-repair protocol. The full rolling-upgrade matrix still uses seeded node order.
+`TestSeededWorkQueueRetentionReplay` now separates committed consumer progress
+from physical stream retention in `DispatchTransport`. Each schedule delivers
+33 messages, chooses an acknowledgment order, and selects ordinary removal,
+held removal, or held removal combined with a lost committed ack reply. Held
+records remain stored after thirty seconds while the consumer reports no
+pending work and does not redeliver them. Duplicate confirmed acknowledgments
+must not silently complete removal. The stream-level `CheckDrained` rejects
+this state even though the consumer has drained; seed 5 pins that failure in
+`workqueue-retention-held.json`.
+
+The workload also tests explicit deferred removal completions, including
+rejection before ack and idempotence afterward. These completions are model
+controls, not an inferred repair mechanism for real mixed-version NATS. The
+held modes assert an expected liveness failure; passing the test means the
+checker recognizes it, not that runtime liveness under this fault is clean.
+The local 100,000-seed run passed in 24.05 seconds, the complete simulator suite
+passed in 53.74 seconds, and the final pinned race corpus passed in 1.96 seconds.
+Exact replay and byte-identical cross-process traces cover this transport slice.
+
+The real conformance failure remains a release gap. The observed placement
+control does not establish the internal compatibility cause or a general
+runtime repair protocol. The full rolling-upgrade matrix retains seeded node
+order.

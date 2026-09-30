@@ -1193,8 +1193,33 @@ consumer metadata and server logs. Vet and diff checks passed.
 The split-version cases remain intentionally strict failing opt-in conformance
 tests, not clean release evidence. This isolates the behavior to a NATS
 version/leader-placement transport combination; the internal compatibility
-cause and general repair remain open. The current simulator commits consumer
-ack and WorkQueue removal together, so the separate retention-commit edge is
-an explicit Tier 1 gap documented in `tier1-simulation.md`. Full rolling-upgrade
+cause and general repair remain open. The simulator extension below separates consumer ack commitment from
+WorkQueue removal and reproduces the observable retention failure. Full rolling-upgrade
 matrix tests retain their seeded upgrade order; this new control does not
 replace that coverage.
+
+
+## Tier 1 retained WorkQueue records and completed expanded CI
+
+The new `workqueue_retention_33` workload runs the production dispatch transport
+port against independently modeled consumer ack and stream removal state.
+Thirty-three acknowledged records can remain retained beyond thirty seconds,
+with zero consumer pending/ack-pending and no redelivery. The stream-level drain
+checker must reject this state. Seeded acknowledgment order, a composed lost ack
+reply, duplicate DoubleAck, and explicit deferred removal completions replay
+exactly; seed 5 pins the retained state in the regression corpus. Explicit
+completion is a model control, not a claim that moving a real NATS leader repairs
+retained records. The expected bad-state controls are not clean runtime liveness
+proofs or a resolution of the real mixed-version contract failure.
+
+The local 100,000-seed retention workload passed in 24.05 seconds. The full
+simulator suite passed in 53.74 seconds; after adding the new pin, the final
+pinned race corpus passed in 1.96 seconds. Vet and diff checks passed.
+
+The [completed expanded Tier 1 CI run](https://github.com/AntPAllen/js-wf/actions/runs/36727875978)
+at `c0bd4f0` passed 100,000 seeds per workload: 6,400,604 generated schedules,
+161,052,053 scheduler choices and 1,462,491,400 transport events in
+1h29m42.71s of Go test time. This includes automatic membership and multi-case
+suspended repair, but predates the WorkQueue retention extension. Remaining
+integrated/concurrent model coverage and independent real-cluster release gates
+remain open.
