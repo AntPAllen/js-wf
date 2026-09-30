@@ -537,21 +537,27 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		err := l.Release(attempt)
 		stopAttempt()
 		if err == nil {
+			emit("released", nil)
 			return nil
 		}
+		emit("release_initial_error", err)
 		for releaseCtx.Err() == nil {
 			attempt, stopAttempt := context.WithTimeout(releaseCtx, 2*time.Second)
 			cleanupErr := l.Cleanup(attempt)
 			stopAttempt()
 			if cleanupErr == nil || errors.Is(cleanupErr, lease.ErrLost) {
+				emit("release_cleanup_done", cleanupErr)
 				return cleanupErr
 			}
+			emit("release_cleanup_error", cleanupErr)
 			select {
 			case <-releaseCtx.Done():
 			case <-time.After(200 * time.Millisecond):
 			}
 		}
-		return fmt.Errorf("lease cleanup after %v: %w", err, releaseCtx.Err())
+		cleanupErr := fmt.Errorf("lease cleanup after %v: %w", err, releaseCtx.Err())
+		emit("release_cleanup_timeout", cleanupErr)
+		return cleanupErr
 	}
 	released := false
 	defer func() {
@@ -607,7 +613,15 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		w.metrics.fencingEvents.Add(1)
 	}
 	if err != nil || processingCanceled || leaseLost.Load() {
-		emit("execution_retry", err)
+		retryErr := err
+		if retryErr == nil {
+			if leaseLost.Load() {
+				retryErr = lease.ErrLost
+			} else {
+				retryErr = ctx.Err()
+			}
+		}
+		emit("execution_retry", retryErr)
 		delay := time.Second
 		var retry *panicRetryError
 		if errors.As(err, &retry) {
@@ -623,7 +637,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 				w.enqueueCanceledHandoff(parent, typ, id, metadata.Sequence.Stream)
 			}
 		}
-		_ = msg.NakWithDelay(delay)
+		emit("nak", msg.NakWithDelay(delay))
 		return
 	}
 	if err := release(); err != nil {
@@ -631,7 +645,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		if errors.Is(err, lease.ErrLost) && !leaseLost.Load() && !errors.Is(err, journal.ErrStale) {
 			w.metrics.fencingEvents.Add(1)
 		}
-		_ = msg.NakWithDelay(time.Second)
+		emit("nak", msg.NakWithDelay(time.Second))
 		return
 	}
 	released = true
