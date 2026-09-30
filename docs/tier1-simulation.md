@@ -1171,3 +1171,16 @@ Restoring the previous implementation fails seed 1. Exact/cross-process replay,
 slice. Real three-node controlled CAS races supply separate transport evidence.
 These controls isolate a local cleanup decision; they do not simulate disk
 stalls or clear the failed seed-12 mixed latency gate.
+
+
+## Older lease values during cleanup
+
+`TestSeededCleanupStaleReadReplay` delivers one or three stale pre-initialization
+KV values after the lease has acknowledged its epoch update and a dropped renewal
+has fenced execution. Cleanup must reject their older revisions as ownership
+evidence, converge on a fresh own value or return a bounded revision error, and
+never restore execution. Restoring the prior implementation fails seed 1.
+Exact/cross-process replay, the 100,000-seed pass and seed-42
+`lease-cleanup-stale-read.json` pin cover the decision. Real three-node controls
+also supply an earlier-worker value and preserve fresh successor state. This
+slice does not make a not-found reply authoritative or clear mixed-fault latency.

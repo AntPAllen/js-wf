@@ -498,6 +498,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededRetainedInvariantChecks(loaded.Seed, &loaded)
 	case "workqueue_retention_33":
 		replayed, err = runSeededWorkQueueRetention(loaded.Seed, &loaded)
+	case "lease_cleanup_stale_read":
+		replayed, err = runSeededCleanupStaleRead(loaded.Seed, &loaded)
 	case "lease_cleanup_conflict":
 		replayed, err = runSeededCleanupConflict(loaded.Seed, &loaded)
 	case "manual_owner_drain":

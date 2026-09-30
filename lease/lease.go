@@ -244,6 +244,12 @@ func (l *Lease) Cleanup(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
+		// A replica may return the pre-initialization value (epoch zero), or
+		// an earlier owner. Neither can prove a successor if its revision
+		// predates this lease's last acknowledged update.
+		if entry.Revision < l.revision {
+			continue
+		}
 		var current Value
 		if json.Unmarshal(entry.Value, &current) != nil || current.Worker != l.value.Worker || current.Epoch != l.value.Epoch {
 			l.lost = true

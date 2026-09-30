@@ -1549,3 +1549,46 @@ an explanation of the entire miss. Repeated renewal deadlines and sequential
 signal journal writes under continuing syscall disk delay remain in the trace.
 The under-thirty-second gate stays strict and the mixed release campaign remains
 open. The model controls do not establish why real requests were delayed.
+
+
+## Cleanup ignores reads older than its acknowledged revision
+
+The next cleanup review found that a direct KV read can return the lease's
+pre-initialization value with epoch zero. The previous identity check treated
+that value as a successor and abandoned cleanup, even though its revision was
+older than the current lease's acknowledged update. An earlier worker value at
+an older revision has the same problem. Cleanup now compares the read revision
+with its last acknowledged revision before classifying worker/epoch identity.
+An older revision consumes one of the existing three attempts; persistent older
+reads return a revision error so the bounded worker cleanup loop may retry.
+No delete is issued using such an older read. Fresh successor values still
+remain untouched and uncertain renewals remain fenced.
+
+The `lease_cleanup_stale_read` workload runs production acquisition, a dropped
+renewal, and cleanup over the virtual KV model. One stale initialization read
+must converge and remove the own lease. Three stale reads must exhaust the
+per-call bound without a presumed-successor `ErrLost`; a later fresh cleanup
+must remove the unchanged own lease. Restoring `67c3cea` through a Go overlay
+fails seed 1 with `persistent stale reads misclassified`. The 100,000-seed
+workload passed in 1.99 seconds, focused cleanup race tests in 5.35 seconds,
+and exact/cross-process replay passed. Seed 42 pins persistent older reads.
+The complete pinned race corpus passed in 2.19 seconds. Full ordinary simulator
+and lease suites passed in 49.90 and 3.42 seconds. A final real three-node race
+control also supplies an actual earlier-worker value, checks both stale-read
+bounds and preserves the existing successor/conflict controls; it passed in
+3.65 seconds. Vet and diff checks passed. This does not establish authoritative
+absence from a not-found reply without revision metadata, or clear the mixed
+latency gate.
+
+The [completed expanded Tier 1 campaign at `493c6a7`](https://github.com/AntPAllen/js-wf/actions/runs/36741786098)
+passed 100,000 seeds per workload: 6,500,604 generated schedules, 166,654,704
+scheduler choices and 1,477,763,449 transport events in 1h23m39.30s of Go test
+time. It includes WorkQueue retention but predates lease-gate cancellation,
+manual-owner drain, cleanup conflicts, stale cleanup reads and shared-checker
+changes. A fresh full-suite release-count campaign is therefore required.
+
+The [mixed campaign at `d793d1d`](https://github.com/AntPAllen/js-wf/actions/runs/36751908448)
+passed seeds 1–5 and failed seed 6 with terminal p99 32.78 seconds. This campaign
+predates both cleanup changes; neither this failure nor seed 12 is erased by
+passing local transport controls. The mixed and full-matrix latency gates remain
+open.
