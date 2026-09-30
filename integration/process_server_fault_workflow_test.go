@@ -259,9 +259,19 @@ func runWorkflowWithFourServerFaults(t *testing.T, timerWorkflow, signalWorkflow
 	if err != nil {
 		t.Fatal(err)
 	}
-	successor, err := worker.New(ctx, resumed, "four-fault-after", handlers)
-	if err != nil {
-		t.Fatal(err)
+	var successor *worker.Worker
+	successorDeadline := time.Now().Add(30 * time.Second)
+	for time.Now().Before(successorDeadline) && ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
+		successor, err = worker.New(attempt, resumed, "four-fault-after", handlers)
+		stop()
+		if err == nil {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if successor == nil {
+		t.Fatalf("replacement worker after route heal: %v (context: %v)", err, ctx.Err())
 	}
 	successorCtx, stopSuccessor := context.WithCancel(ctx)
 	defer stopSuccessor()
