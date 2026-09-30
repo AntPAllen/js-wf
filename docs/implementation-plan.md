@@ -109,7 +109,7 @@ The journal reader is an ordered consumer filtered to the subject, started from 
 - Test: two writers holding the same `expectedSeq` race to append 10 000 times; exactly one wins each round, the loser always sees `ErrStale`, never a silent success. Run with the stream leader killed every 500 appends.
 - Test: append 5 000 entries with snapshots every 256 and purges after each; `Read` returns the same logical sequence as an un-snapshotted control run.
 - Test: on `ErrUnknown`, the writer re-reads the tail and finds either its entry (retry succeeded) or not (retry needed), never a foreign entry at its intended index. This is the ack-lost case and it must be exercised 1 000 times under `chaos`.
-- Throughput baseline recorded: appends per second per invocation and across 1 000 concurrent invocations on the 3-node fixture (`Replicas=3`, file storage). Regressions of more than 20% fail CI.
+- Throughput baseline recorded: appends per second per invocation and across 1 000 concurrent invocations on the 3-node fixture (`Replicas=3`, file storage). Regressions of more than 20% fail CI. `cas-throughput` builds a pinned reference and candidate on the same isolated runner, alternates three rounds, and requires both median rates to meet the 80% bar. Preserve every report and reject incompatible runtimes, malformed measurements and failed benchmark processes. The reference changes through an explicit source edit; first hosted-runner validation remains required.
 
 **Edge cases**
 

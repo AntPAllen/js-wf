@@ -85,9 +85,35 @@ go run ./cmd/wf-cas-bench -output /tmp/cas-current.json \
 ```
 
 The optional baseline comparison rejects a workload or runtime mismatch and
-fails if either rate falls more than 20% below its baseline. It is not yet a CI
-gate: a dedicated benchmark runner and a baseline from that runner are needed
-for a meaningful regression check. One additional default run returned
+fails if either rate falls more than 20% below its baseline. The new
+`cas-throughput` CI workflow builds the fixed `4fa3119` reference and candidate
+before measurement, then runs both sequentially on one isolated Ubuntu 24.04
+runner. Three rounds alternate baseline/candidate order; the median rate of each
+workload must be at least 80% of its baseline median. Relevant main pushes and
+pull requests trigger the job; it also supports manual dispatch. The pinned
+reference is changed explicitly in workflow source, never refreshed automatically.
+
+Every sample must retain exactly 110,000 messages across 1,001 journal subjects
+and match the fixed workload and Go/NATS versions. Bad/missing reports, process
+failures, timeouts, incompatible versions and either throughput regression fail
+the job. The artifact preserves six raw JSON reports, process logs, binary hashes,
+source revisions, execution order, host metadata and the median comparison.
+Changing Go or NATS versions requires selecting a compatible reference through
+an explicit source edit. Branch protection is configured separately from this
+workflow.
+
+A local same-source paired control at `4fa3119` passed with median candidate /
+baseline ratios of 0.947 for the hot journal and 1.050 for parallel journals.
+Both independently built binaries used the same Go sources; this validates the
+runner/comparison path, not a performance improvement. The
+[summary and raw reports](cas-throughput-paired-2026-09-30/summary.json) retain all
+six full workloads. Hosted-runner validation remains pending. Runner load, disk
+variance and thermal effects can still affect a paired comparison; a failure
+requires inspection of the reports rather than automatic threshold relaxation.
+The checker tests include the exact 80% boundary, independent hot/parallel misses,
+median outliers, missing fresh output, invalid rates/counts and runtime mismatch.
+
+One additional default run returned
 `ErrStale` at hot-journal index 4,189 despite one writer and no injected fault.
 Raw file blocks retained by all three replicas ended at index 4,188, with no
 4,189 entry; the server-side reason for the wrong-last-sequence reply remains
