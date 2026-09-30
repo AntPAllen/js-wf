@@ -56,7 +56,10 @@ func (c *ProcessCluster) SlowDisk(i int, latency time.Duration) error {
 		return fmt.Errorf("start disk delay tracer: %w", err)
 	}
 	c.slowDisk[i] = cmd
-	deadline := time.Now().Add(3 * time.Second)
+	// strace -f must attach to every Go server thread. Under a busy mixed
+	// workload that can take longer than process startup, so confirm the
+	// actual attachment before advancing the fault schedule.
+	deadline := time.Now().Add(10 * time.Second)
 	for time.Now().Before(deadline) {
 		data, readErr := os.ReadFile(fmt.Sprintf("/proc/%d/status", c.Commands[i].Process.Pid))
 		if readErr == nil {
@@ -73,7 +76,7 @@ func (c *ProcessCluster) SlowDisk(i int, latency time.Duration) error {
 	}
 	_ = c.StopSlowDisk(i)
 	data, _ := os.ReadFile(filepath.Join(c.root, fmt.Sprintf("node-%d.strace-error.log", i)))
-	return fmt.Errorf("disk delay tracer did not attach to node %d: %s", i, strings.TrimSpace(string(data)))
+	return fmt.Errorf("disk delay tracer did not attach to node %d within 10s (server pid=%d tracer pid=%d tracer state=%v): %s", i, c.Commands[i].Process.Pid, cmd.Process.Pid, cmd.ProcessState, strings.TrimSpace(string(data)))
 }
 
 func (c *ProcessCluster) DiskTracePath(i int) string {
