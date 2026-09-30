@@ -1,6 +1,7 @@
 # Materialized SDK checkpoints with named continuations
 
-Status: continuation contract and SDK cursor foundation. Durable capture,
+Status: continuation contract, SDK cursor foundation and bounded frame codec.
+Durable capture,
 manifest publication, worker dispatch, suffix reads and recovery remain open.
 This document preserves the plan's checkpoint requirement; it does not count
 as a completed checkpoint feature.
@@ -146,3 +147,19 @@ The current cursor test proves only item 2's local SDK identity foundation:
 after omitting a completed prefix, the same suffix declarations and identities
 are produced; replay adds no effect, and losing the base is nondeterministic.
 Durable frame storage and all remaining verification above still need implementation.
+
+## Implemented frame codec
+
+`internal/checkpoint` defines version 1, with a 16 MiB cap on the whole
+serialized frame. Encode validates the frame and hashes exact stored bytes;
+Decode verifies size/hash before JSON parsing, rejects unknown fields and
+trailing JSON, checks semantic identities and binds generation/anchor to the
+expected manifest values. No partial frame is returned on any error. Promise
+outcomes preserve object references rather than derived result caches. State
+and user locals decoded from the frame are detached from transport buffers.
+
+The race suite and vet pass, with [raw proof and scope](scale/checkpoint-frame-2026-09-30/).
+No SDK or worker currently calls the codec. Capture must still enforce boundary
+and live-handle rules, and the worker must check stage registration, actual
+journal anchor, suffix continuity and configured journal limits before effects.
+This does not advance the checkpoint feature to complete.

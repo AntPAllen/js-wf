@@ -2507,3 +2507,22 @@ the sustained five-second stall row. [Raw failure evidence and reproducible
 accounting](scale/mixed-seed65-2026-09-30/) are retained. The test observed all
 28 terminal results but failed before the final integrity audit. The focused
 200-seed gate, Tier 1 reproduction and full-matrix release gates remain open.
+
+## Bounded continuation frame codec
+
+`internal/checkpoint` now implements the versioned frame schema and exact-byte
+SHA-256 encoding/decoding. Frames include generation, stage, locals, SDK state,
+signal consumption, promise outcome references, canceled timer positions, SDK
+offset, completion index/epoch and panic attempts. Decode verifies the full
+16 MiB bound and hash before parsing, rejects unsupported/unknown semantics,
+and checks expected generation/anchor without returning partial state. Detached
+round-trip state and corruption/semantic negative controls passed under race
+in 1.764 seconds; vet passed. [Proof logs and source hashes](scale/checkpoint-frame-2026-09-30/)
+are retained. This codec has no runtime callers yet: capture, frame publication,
+manifest CAS, dispatch, suffix validation and crash repair remain open.
+
+The per-push test and focused 20-seed mixed workflows at `a160167` completed
+successfully. The extended simulation campaign at `df72ed0` and original
+million-timer process remained authoritatively live during this work. Neither
+has been restarted or counted as terminal proof. The separate 200-seed mixed
+latency failure above remains unresolved.
