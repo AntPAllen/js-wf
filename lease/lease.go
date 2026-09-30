@@ -101,12 +101,13 @@ func New(ctx context.Context, js jetstream.JetStream) (*Store, error) {
 func NewWithKeyValue(kv jetstream.KeyValue) *Store { return &Store{kv: kv} }
 
 type Lease struct {
-	store    *Store
-	key      string
-	value    Value
-	gate     chan struct{}
-	revision uint64
-	lost     bool
+	store       *Store
+	key         string
+	value       Value
+	gate        chan struct{}
+	revision    uint64
+	lost        bool
+	lastRenewal time.Time
 }
 
 func (l *Lease) Epoch() uint64 { return l.value.Epoch }
@@ -161,11 +162,12 @@ func (s *Store) Acquire(ctx context.Context, typ, id, worker string) (*Lease, er
 	}
 	v := Value{Worker: worker, Epoch: rev}
 	data, _ = json.Marshal(v)
+	renewalStarted := port.Now()
 	newRev, err := port.Update(ctx, key, data, rev)
 	if err != nil {
 		return nil, fmt.Errorf("%w: initialization: %w", ErrLost, err)
 	}
-	return &Lease{store: s, key: key, value: v, revision: newRev, gate: make(chan struct{}, 1)}, nil
+	return &Lease{store: s, key: key, value: v, revision: newRev, lastRenewal: renewalStarted, gate: make(chan struct{}, 1)}, nil
 }
 
 // lock serializes revision decisions without keeping a canceled caller behind
@@ -190,21 +192,42 @@ func (l *Lease) lock(ctx context.Context) error {
 func (l *Lease) unlock() { <-l.gate }
 
 func (l *Lease) Renew(ctx context.Context) error {
+	_, err := l.renew(ctx, 0)
+	return err
+}
+
+// RenewIfIdle avoids a redundant heartbeat update when an acknowledged renewal
+// started less than minIdle ago. Journal writers must still call Renew before
+// every append. The returned bool reports whether a KV update was attempted.
+func (l *Lease) RenewIfIdle(ctx context.Context, minIdle time.Duration) (bool, error) {
+	return l.renew(ctx, minIdle)
+}
+
+func (l *Lease) renew(ctx context.Context, minIdle time.Duration) (bool, error) {
 	if err := l.lock(ctx); err != nil {
-		return err
+		return false, err
 	}
 	defer l.unlock()
 	if l.lost {
-		return ErrLost
+		return false, ErrLost
+	}
+	port := l.store.operations()
+	started := port.Now()
+	age := started.Sub(l.lastRenewal)
+	if minIdle > 0 && !l.lastRenewal.IsZero() && age >= 0 && age < minIdle {
+		return false, nil
 	}
 	data, _ := json.Marshal(l.value)
-	rev, err := l.store.operations().Update(ctx, l.key, data, l.revision)
+	rev, err := port.Update(ctx, l.key, data, l.revision)
 	if err != nil {
 		l.lost = true
-		return fmt.Errorf("%w: %v", ErrLost, err)
+		return true, fmt.Errorf("%w: %v", ErrLost, err)
 	}
 	l.revision = rev
-	return nil
+	// Use request start, not receipt of its reply: a delayed acknowledgement
+	// must not extend the interval during which a heartbeat can reuse this write.
+	l.lastRenewal = started
+	return true, nil
 }
 
 func (l *Lease) Release(ctx context.Context) error {

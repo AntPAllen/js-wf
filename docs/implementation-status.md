@@ -1739,3 +1739,48 @@ milliseconds to seconds, alongside millisecond journal appends in the late
 signal completion. These whole-call durations include local lease contention
 and transport waiting; they do not establish a NATS server cause. This failure
 remains open and is independent of filtered long-journal consumer creation.
+
+
+## Heartbeats reuse recent acknowledged lease renewals
+
+The first instrumented mixed CI failure showed successful heartbeat and append
+renewals sharing the same revision gate while the signal journal advanced. The
+worker now keeps its first heartbeat renewal unconditional, then uses
+`lease.RenewIfIdle` for later ticks. That call acquires the same cancellable gate,
+checks lost ownership before any reuse, and skips the KV update only when a
+successful renewal's request start is less than one heartbeat interval old.
+Each heartbeat still sends `InProgress`; every append and timer publication
+still unconditionally renews through revision CAS. Backward clock movement,
+interval expiry and a delayed acknowledgement require a fresh update. An
+uncertain update still permanently fences the old lease. Diagnostics distinguish
+an actual heartbeat renewal from `lease_heartbeat_recent`.
+
+The seven-case `lease_heartbeat_reuse` workload checks busy reuse, exact idle
+boundary, ten-second delayed acknowledgement, pause through expiry and successor
+acquisition, lost ownership, backward clock and cancellation. It also requires
+append-facing renewal to write even at the same instant. Counting the integrated
+worker's two progress heartbeats verifies the second progress call performs no
+redundant lease update. Restoring the old worker through an overlay fails seed 15;
+using acknowledgement receipt time for freshness fails the lease workload at
+seed 3. Both traces and the seed-42 lost-owner case are pinned.
+
+The lease and integrated worker workloads passed 100,000 seeds in 5.21 and
+10.46 seconds respectively. Exact/cross-process replay and final focused race
+checks passed in 7.32 seconds. Full ordinary simulator, lease and worker suites
+passed in 57.16, 3.43 and 13.26 seconds; the complete worker race suite passed in
+20.70 seconds. A real three-node race contract confirms an unchanged KV revision
+on recent reuse, unconditional append renewal, required idle renewal and failure
+after release; it passed in 4.22 seconds. Vet and diff checks passed.
+
+A fresh local seed-4 mixed race replay passed at terminal p99 18.18 seconds in
+44.81 seconds. Its artifact contained seven actual heartbeat renewal events and
+no `lease_heartbeat_recent` event. Consequently this run does not demonstrate
+that the optimization improved recovery or explain the earlier 40.44-second
+failure. The mixed and full-matrix gates remain open.
+
+The [extended Tier 1 run at `9d6d78f`](https://github.com/AntPAllen/js-wf/actions/runs/36754525798)
+completed successfully: 100,000 seeds per workload, 6,900,604 schedules,
+167,354,704 scheduler choices and 1,520,522,990 transport events in 48m0.50s of
+Go test time. It includes both cleanup fixes and manual-owner drain but predates
+consumer-creation retries and heartbeat reuse. Those additions require fresh
+full-suite release-count validation.

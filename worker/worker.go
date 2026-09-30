@@ -594,6 +594,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 			defer ticker.Stop()
 			ticks = ticker.C
 		}
+		heartbeatPrimed := false
 		for {
 			select {
 			case <-ctx.Done():
@@ -605,9 +606,22 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 				}
 				started := ops.begin()
 				renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
-				err := l.Renew(renewCtx)
+				var err error
+				renewed := true
+				// Establish the first heartbeat with an unconditional write; later
+				// ticks may reuse a recent append or heartbeat acknowledgement.
+				if !heartbeatPrimed {
+					err = l.Renew(renewCtx)
+				} else {
+					renewed, err = l.RenewIfIdle(renewCtx, w.heartbeatInterval)
+				}
+				heartbeatPrimed = true
 				stopRenew()
-				ops.finish(started, "lease_renew_heartbeat", 0, "", err)
+				operation := "lease_renew_heartbeat"
+				if err == nil && !renewed {
+					operation = "lease_heartbeat_recent"
+				}
+				ops.finish(started, operation, 0, "", err)
 				if err != nil {
 					if errors.Is(err, lease.ErrLost) {
 						leaseLost.Store(true)

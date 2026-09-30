@@ -172,6 +172,22 @@ func runSeededWorkerHeartbeat(seed int64, replay *Trace) (trace Trace, runErr er
 	if err != nil || report != (integrity.Report{Invocations: 1, Journals: 1, Entries: 4, Terminal: 1}) {
 		return trace, fmt.Errorf("seed %d retained check=%+v err=%v", seed, report, err)
 	}
+	if mode == "progress_twice" {
+		var first, redundant int
+		for _, event := range schedule.Trace().Transport {
+			if event.Operation == "kv_update" && event.Subject == identity.Key(typ, id) {
+				if event.AtMillis == 1000 {
+					first++
+				}
+				if event.AtMillis == 3500 {
+					redundant++
+				}
+			}
+		}
+		if first != 1 || redundant != 0 {
+			return trace, fmt.Errorf("heartbeat reuse: first updates=%d redundant updates=%d", first, redundant)
+		}
+	}
 	schedule.RecordTransport(TransportEvent{Operation: "check_worker_heartbeat", Subject: identity.JournalSubject(typ, id), Outcome: mode, AtMillis: schedule.NowMillis()})
 	if err := schedule.Finish(); err != nil {
 		return trace, err

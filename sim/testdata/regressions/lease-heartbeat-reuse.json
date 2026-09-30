@@ -1,0 +1,53 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "lease_heartbeat_reuse",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "backward_clock",
+        "busy",
+        "canceled",
+        "delayed_ack",
+        "idle_boundary",
+        "lost",
+        "paused_successor"
+      ],
+      "chosen": "lost"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.heartbeat",
+      "sequence": 1,
+      "data_sha256": "b83fc36317e331f270febe4f683cdbbfba3968397b02d98c0356b118242b2e6c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "test.heartbeat",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "test.heartbeat",
+      "expected": 2,
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_heartbeat_reuse",
+      "outcome": "lost"
+    }
+  ]
+}

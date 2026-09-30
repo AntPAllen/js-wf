@@ -1216,3 +1216,18 @@ contract holds an actual creation reply until the retry and verifies unchanged
 journal contents. The seed-42 pin, exact/cross-process replay and 100,000-seed
 pass cover this slice. The model supplies named replies rather than simulating
 the NATS metadata controller that caused the original CI read to wait.
+
+
+## Heartbeat renewal reuse
+
+`lease_heartbeat_reuse` checks production lease decisions for recent acknowledged
+renewals, idle interval expiry, delayed replies, takeover after a pause, lost
+ownership, backward clocks and canceled callers. Freshness uses request start,
+not acknowledgement receipt. An overlay that moves the timestamp to receipt
+fails seed 3; append-facing renewal remains unconditional. The integrated worker
+heartbeat workload counts the actual virtual KV calls for two progress ticks;
+restoring the previous worker fails seed 15 with a redundant second update.
+Both workloads passed 100,000 seeds with exact/cross-process replay. Pins retain
+the delayed-acknowledgement, lost-owner and integrated two-heartbeat cases.
+These controls prove transport-call reduction for that virtual interleaving,
+not a general explanation of observed NATS request delay or a mixed p99 pass.

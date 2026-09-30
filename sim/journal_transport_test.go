@@ -364,6 +364,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededAppendScenario(loaded.Seed, &loaded)
 	case "journal_batch_read_80":
 		replayed, err = runSeededJournalBatchRead(loaded.Seed, &loaded)
+	case "lease_heartbeat_reuse":
+		replayed, err = runLeaseHeartbeatReuse(loaded.Seed, &loaded)
 	case "journal_open_failure":
 		replayed, err = runJournalOpenFailure(loaded.Seed, &loaded)
 	case "journal_stalled_cursor":
