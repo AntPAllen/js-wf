@@ -31,6 +31,7 @@ import (
 // TestMixedWorkflowsRecoverFromFourServerFaults is a ten-invocation slice of
 // the Tier 2 mix. It runs the four workload classes together on one cluster.
 func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
+	const mixedSignalCount = 16
 	if os.Getenv("WF_MIXED_CHAOS") != "1" {
 		t.Skip("set WF_MIXED_CHAOS=1 for mixed real-cluster chaos")
 	}
@@ -155,8 +156,16 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		if _, err := mark(input); err != nil {
 			return nil, err
 		}
-		value, err := wf.AwaitSignal(c, "go")
-		return json.RawMessage(value), err
+		for n := 0; n < mixedSignalCount; n++ {
+			value, err := wf.AwaitSignal(c, "go")
+			if err != nil {
+				return nil, err
+			}
+			if string(value) != strconv.Itoa(n) {
+				return nil, fmt.Errorf("ordered signal %d carried %q", n, value)
+			}
+		}
+		return json.RawMessage(`42`), nil
 	}
 	handlers["mixedfanout"] = func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
 		if _, err := mark(input); err != nil {
@@ -396,18 +405,20 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	}
 	for i, inv := range invocations {
 		if inv.typ == "mixedsignal" {
-			until = time.Now().Add(20 * time.Second)
-			for time.Now().Before(until) {
-				attempt, stop := context.WithTimeout(ctx, 2*time.Second)
-				_, err = c.Signal(attempt, inv.typ, inv.id, "go", []byte(`42`), fmt.Sprintf("mixed-signal-%d", i))
-				stop()
-				if err == nil {
-					break
+			for n := 0; n < mixedSignalCount; n++ {
+				until = time.Now().Add(20 * time.Second)
+				for time.Now().Before(until) {
+					attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+					_, err = c.Signal(attempt, inv.typ, inv.id, "go", []byte(strconv.Itoa(n)), fmt.Sprintf("mixed-signal-%d-%d", i, n))
+					stop()
+					if err == nil {
+						break
+					}
+					time.Sleep(100 * time.Millisecond)
 				}
-				time.Sleep(100 * time.Millisecond)
-			}
-			if err != nil {
-				t.Fatalf("signal %d after heal: %v", i, err)
+				if err != nil {
+					t.Fatalf("signal %d/%d after heal: %v", i, n, err)
+				}
 			}
 			enabledAt[i] = time.Now()
 		}
@@ -613,13 +624,23 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 			t.Fatalf("signal journal %s: %v", inv.id, readErr)
 		}
 		var consumed int
+		var previous uint64
 		for _, record := range records {
-			if record.Kind == journal.SignalConsumed {
-				consumed++
+			if record.Kind != journal.SignalConsumed {
+				continue
 			}
+			var signal struct {
+				Sequence uint64 `json:"sig_seq"`
+				Payload  []byte `json:"payload"`
+			}
+			if err := json.Unmarshal(record.Payload, &signal); err != nil || signal.Sequence <= previous || string(signal.Payload) != strconv.Itoa(consumed) {
+				t.Fatalf("signal %s consumption %d: sequence=%d previous=%d payload=%q err=%v", inv.id, consumed, signal.Sequence, previous, signal.Payload, err)
+			}
+			previous = signal.Sequence
+			consumed++
 		}
-		if consumed != 1 {
-			t.Fatalf("signal %s consumed entries=%d, want 1", inv.id, consumed)
+		if consumed != mixedSignalCount {
+			t.Fatalf("signal %s consumed entries=%d, want %d", inv.id, consumed, mixedSignalCount)
 		}
 	}
 	until = time.Now().Add(20 * time.Second)
