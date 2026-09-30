@@ -102,6 +102,16 @@ func TestStartModelChecksLargeConcurrentLeaderKillBurst(t *testing.T) {
 	if result, err := CheckStarts(enqueueUnknown, 5*time.Second); err != nil || result != porcupine.Ok {
 		t.Fatalf("large concurrent enqueue-unknown history=%s err=%v", result, err)
 	}
+	selfObserved := append([]client.Operation(nil), operations...)
+	selfObserved[250].Result = json.RawMessage(`{"status":"already_started","inv_seq":7}`)
+	if result, err := CheckStarts(selfObserved, 5*time.Second); err != nil || result != porcupine.Ok {
+		t.Fatalf("large self-observed lost-ack history=%s err=%v", result, err)
+	}
+	selfObservedWrong := append([]client.Operation(nil), selfObserved...)
+	selfObservedWrong[6].Result = json.RawMessage(`{"status":"already_started","inv_seq":8}`)
+	if result, err := CheckStarts(selfObservedWrong, 5*time.Second); err != nil || result != porcupine.Illegal {
+		t.Fatalf("large inconsistent self-observed handles=%s err=%v", result, err)
+	}
 	tooEarly := append([]client.Operation(nil), operations...)
 	tooEarly[6].ReturnTS = base.Add(100 * time.Microsecond)
 	if result, err := CheckStarts(tooEarly, 5*time.Second); err != nil || result != porcupine.Illegal {
@@ -151,6 +161,37 @@ func TestUniformStartBurstProofMatchesPorcupine(t *testing.T) {
 			if !applicable || got != want {
 				t.Fatalf("started_at=%d variant=%d direct=%s applicable=%t porcupine=%s", startedAt, variant, got, applicable, want)
 			}
+		}
+	}
+}
+
+func TestUnconfirmedStartBurstProofMatchesPorcupine(t *testing.T) {
+	base := time.Date(2030, 1, 2, 3, 4, 5, 0, time.UTC)
+	args := json.RawMessage(`{"type":"leaderkill","id":"same","input_hash":"hash-a"}`)
+	for variant := 0; variant < 64; variant++ {
+		operations := make([]client.Operation, 6)
+		converted := make([]porcupine.Operation, 6)
+		for i := range operations {
+			status, seq := "already_started", uint64(7)
+			if variant&(1<<i) != 0 {
+				status, seq = "unknown", 0
+			}
+			result, err := json.Marshal(map[string]any{"status": status, "inv_seq": seq})
+			if err != nil {
+				t.Fatal(err)
+			}
+			call := base.Add(time.Duration(i) * 10 * time.Microsecond)
+			returned := base.Add(100 * time.Microsecond)
+			operations[i] = client.Operation{InvokeTS: call, ReturnTS: returned, Op: "start", Args: args, Result: result}
+			converted[i] = porcupine.Operation{Input: startInput{Type: "leaderkill", ID: "same", InputHash: "hash-a"}, Output: startOutput{Status: status, InvSeq: seq}, Call: call.UnixNano(), Return: returned.UnixNano()}
+		}
+		want, err := CheckStarts(operations, time.Second)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, applicable := checkUniformStartBurst(converted)
+		if !applicable || got != want {
+			t.Fatalf("variant=%d direct=%s applicable=%t porcupine=%s", variant, got, applicable, want)
 		}
 	}
 }

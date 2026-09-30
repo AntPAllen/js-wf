@@ -225,7 +225,25 @@ func checkUniformStartBurst(operations []porcupine.Operation) (porcupine.CheckRe
 		}
 	}
 	if started == nil {
-		return porcupine.Unknown, false
+		// A publish may commit, lose its acknowledgment, and be observed by
+		// its own caller as already_started. The earliest duplicate can be
+		// that call; all later matching duplicates follow it. Unknown calls
+		// may be placed as uncommitted attempts.
+		for _, operation := range operations {
+			output := operation.Output.(startOutput)
+			switch output.Status {
+			case "already_started":
+				if output.InvSeq == 0 || sequence != 0 && output.InvSeq != sequence {
+					return porcupine.Illegal, true
+				}
+				sequence = output.InvSeq
+			case "unknown":
+				if output.InvSeq != 0 {
+					return porcupine.Illegal, true
+				}
+			}
+		}
+		return porcupine.Ok, true
 	}
 	if sequence == 0 {
 		return porcupine.Illegal, true
