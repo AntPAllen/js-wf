@@ -34,29 +34,33 @@ import (
 )
 
 type matrixLeaderFault struct {
-	Scheduled        time.Time                     `json:"scheduled"`
-	Killed           time.Time                     `json:"killed"`
-	Healed           time.Time                     `json:"healed"`
-	Node             int                           `json:"node"`
-	Nodes            []int                         `json:"nodes,omitempty"`
-	Routes           [3]int                        `json:"partition_routes,omitempty"`
-	MajoritySequence uint64                        `json:"majority_sequence,omitempty"`
-	Consumer         string                        `json:"consumer,omitempty"`
-	Pending          uint64                        `json:"pending,omitempty"`
-	AckPending       int                           `json:"ack_pending,omitempty"`
-	Worker           string                        `json:"worker,omitempty"`
-	WorkerSlot       *int                          `json:"worker_slot,omitempty"`
-	PID              int                           `json:"pid,omitempty"`
-	ActiveLeases     int                           `json:"active_leases,omitempty"`
-	Paused           time.Time                     `json:"paused,omitempty"`
-	Resumed          time.Time                     `json:"resumed,omitempty"`
-	FencingEvents    int                           `json:"fencing_events,omitempty"`
-	ProxyBefore      *testcluster.ClientProxyStats `json:"proxy_before,omitempty"`
-	ProxyBlocked     *testcluster.ClientProxyStats `json:"proxy_blocked,omitempty"`
-	ProxyHealed      *testcluster.ClientProxyStats `json:"proxy_healed,omitempty"`
-	ServerClocks     []matrixServerClockSample     `json:"server_clocks,omitempty"`
-	ClockSamples     []matrixWorkerClockSample     `json:"clock_samples,omitempty"`
-	Error            string                        `json:"error,omitempty"`
+	FanoutParent          string                        `json:"fanout_parent,omitempty"`
+	FanoutTail            uint64                        `json:"fanout_tail,omitempty"`
+	FanoutChildren        []string                      `json:"fanout_children,omitempty"`
+	FanoutPendingChildren []string                      `json:"fanout_pending_children,omitempty"`
+	Scheduled             time.Time                     `json:"scheduled"`
+	Killed                time.Time                     `json:"killed"`
+	Healed                time.Time                     `json:"healed"`
+	Node                  int                           `json:"node"`
+	Nodes                 []int                         `json:"nodes,omitempty"`
+	Routes                [3]int                        `json:"partition_routes,omitempty"`
+	MajoritySequence      uint64                        `json:"majority_sequence,omitempty"`
+	Consumer              string                        `json:"consumer,omitempty"`
+	Pending               uint64                        `json:"pending,omitempty"`
+	AckPending            int                           `json:"ack_pending,omitempty"`
+	Worker                string                        `json:"worker,omitempty"`
+	WorkerSlot            *int                          `json:"worker_slot,omitempty"`
+	PID                   int                           `json:"pid,omitempty"`
+	ActiveLeases          int                           `json:"active_leases,omitempty"`
+	Paused                time.Time                     `json:"paused,omitempty"`
+	Resumed               time.Time                     `json:"resumed,omitempty"`
+	FencingEvents         int                           `json:"fencing_events,omitempty"`
+	ProxyBefore           *testcluster.ClientProxyStats `json:"proxy_before,omitempty"`
+	ProxyBlocked          *testcluster.ClientProxyStats `json:"proxy_blocked,omitempty"`
+	ProxyHealed           *testcluster.ClientProxyStats `json:"proxy_healed,omitempty"`
+	ServerClocks          []matrixServerClockSample     `json:"server_clocks,omitempty"`
+	ClockSamples          []matrixWorkerClockSample     `json:"clock_samples,omitempty"`
+	Error                 string                        `json:"error,omitempty"`
 }
 
 type matrixLatencySample struct {
@@ -100,6 +104,10 @@ func TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds(t *testing.T) {
 }
 
 func TestMixedMatrixWorkerClockSkew(t *testing.T) { runMixedMatrixLeader(t, "worker_clock") }
+
+func TestMixedMatrixFanoutRestartEveryThirtySeconds(t *testing.T) {
+	runMixedMatrixLeader(t, "fanout_restart")
+}
 
 func TestMixedMatrixServerClockSkewPositive(t *testing.T) {
 	runMixedMatrixLeader(t, "server_clock_plus")
@@ -217,6 +225,7 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			t.Logf("initial server clock proof=%+v", proof.ServerClocks)
 		}
 	}
+	var fanoutBarrier matrixFanoutBarrier
 	var recorder history.Recorder
 	var dispatchMu sync.Mutex
 	var dispatch []worker.DispatchEvent
@@ -372,7 +381,11 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 		}
 	} else {
-		w, err := worker.New(ctx, js, "matrix-worker", matrixLeaderHandlers(), worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
+		handlers := matrixLeaderHandlers()
+		if row == "fanout_restart" {
+			handlers = fanoutBarrier.handlers()
+		}
+		w, err := worker.New(ctx, js, "matrix-worker", handlers, worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
 			dispatchMu.Lock()
 			dispatch = append(dispatch, event)
 			dispatchMu.Unlock()
@@ -428,6 +441,8 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 				event, err = killMatrixProcessWorker(faultCtx, workerRoot, urls, processWorkers, faultRNG.Intn(len(processWorkers)), scheduled)
 			} else if row == "server_partition" {
 				event, err = partitionMatrixServer(faultCtx, js, cluster, scheduled)
+			} else if row == "fanout_restart" {
+				event, err = fanoutBarrier.restart(faultCtx, js, cluster, scheduled)
 			} else if row == "all_servers" {
 				event, err = killMatrixAllServers(faultCtx, js, cluster, scheduled)
 			} else if row == "consumer_leader" {
@@ -526,6 +541,9 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 		batchErrors := make(chan error, len(kinds))
 		for i, typ := range kinds {
 			id := fmt.Sprintf("seed-%d-batch-%d-%d", seed, batches, i)
+			if row == "fanout_restart" && typ == "matrixfanout" {
+				fanoutBarrier.noteParent(id)
+			}
 			batch.Add(1)
 			go func() {
 				defer batch.Done()
@@ -631,6 +649,11 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	}
 	if serverOffset != 0 {
 		if _, err := verifyMatrixServerClocks(ctx, js, cluster, serverOffset, time.Now()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if row == "fanout_restart" {
+		if err := verifyMatrixRestartFanouts(ctx, js, faults); err != nil {
 			t.Fatal(err)
 		}
 	}

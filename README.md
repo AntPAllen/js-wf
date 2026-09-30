@@ -165,3 +165,9 @@ For sustained single-server ±60-second clock skew, run
 Each direction runs a ten-minute mixed workload and verifies clocks and stream
 leader placement. The CI selectors are `serverclockplus` and `serverclockminus`;
 35-second runs remain smoke evidence only.
+
+
+For sustained full-cluster restarts at verified unfinished fan-out cuts, run
+`WF_MATRIX_CHAOS=1 go test -race ./integration -run '^TestMixedMatrixFanoutRestartEveryThirtySeconds$' -count=1 -timeout=18m`.
+The CI selector is `fanoutrestart`. Fault artifacts retain the suspended parent,
+six child IDs, unfinished children and journal cut sequence for each restart.

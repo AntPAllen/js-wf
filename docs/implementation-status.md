@@ -940,3 +940,29 @@ and the [updated 100,000-seed-per-workload Tier 1 suite](https://github.com/AntP
 All four were queued at the last observation; none is counted as passing yet.
 A local ten-minute positive server-skew race run is active, using seed 42 and
 artifact prefix `/tmp/js-wf-server-clock-plus-full`; its terminal result is pending.
+
+
+## Sustained restart at verified unfinished fan-out cuts
+
+`TestMixedMatrixFanoutRestartEveryThirtySeconds` extends the shared ten-minute
+mixed generator with verified restart cuts. At each thirty-second boundary,
+a barrier holds newly entered grandchild effects while the controller locates
+a suspended parent with six distinct durable child requests and at least one
+unfinished child. It records the parent ID, six child IDs, unfinished child IDs
+and journal tail before SIGKILLing all three servers. No server restarts until
+all are killed. Restart preserves stores and ports; the existing full workflow
+replica catch-up gate precedes barrier release. The parent's exact retained
+journal prefix must survive. Final assertions tie each cut to the same six
+completed children, each with exactly two completed grandchildren. The shared
+history, integrity, raw enabling-event p99, five-minute completion and drained
+queue requirements remain unchanged.
+
+An initial race smoke passed 196 terminals with aggregate terminal p99 12.74
+seconds. After adding explicit final descendant identity/count assertions, a
+fresh seed 42 race smoke passed in 81.25 seconds: eight batches, 224 terminals,
+one verified restart and aggregate terminal p99 13.39 seconds. The cut parent
+had all six children unfinished; kill occurred at +32.44 seconds and full
+replica recovery at +40.07 seconds. All shared and new checks passed. Vet and
+diff checks passed. These 35-second workloads do not count as ten-minute or
+consecutive-seed release evidence. CI exposes `fanoutrestart` with 1/20/200
+seeds. Sustained release coverage remains open.
