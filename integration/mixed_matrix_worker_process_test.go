@@ -98,7 +98,16 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 		}
 		return json.Marshal(value)
 	}
-	w, err := worker.New(ctx, js, id, handlers, worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(observe))
+	options := []worker.Option{worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(observe)}
+	if raw := os.Getenv("WF_MATRIX_WORKER_ACK_WAIT"); raw != "" {
+		ackWait, err := time.ParseDuration(raw)
+		if err != nil {
+			t.Fatalf("worker AckWait: %v", err)
+		}
+		options = append(options, worker.WithDispatchTiming(ackWait, 3*time.Second))
+		t.Logf("experimental worker AckWait=%s heartbeat=3s", ackWait)
+	}
+	w, err := worker.New(ctx, js, id, handlers, options...)
 	if err != nil {
 		t.Fatal(err)
 	}

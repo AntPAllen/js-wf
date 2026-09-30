@@ -426,6 +426,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededWorkerHeartbeat(loaded.Seed, &loaded)
 	case "worker_heartbeat_handoff":
 		replayed, err = runSeededHeartbeatHandoff(loaded.Seed, &loaded)
+	case "worker_successive_kills":
+		replayed, err = runSuccessiveWorkerKills(loaded.Seed, &loaded)
 	case "worker_kill_lease_expiry":
 		replayed, err = runWorkerKillLeaseExpiry(&loaded)
 	case "worker_canceled_retained_lease":
