@@ -700,3 +700,33 @@ and [pause](https://github.com/AntPAllen/js-wf/actions/runs/36718014204) workflo
 were dispatched at `9c01e6a` after their twenty-seed passes. Both remain pending
 validation; they are independent of the already-running 200-seed worker-kill
 row and the remaining matrix rows.
+
+
+## Deterministic balanced assignment policy
+
+`assignment.Plan` now balances all 64 partitions over a supplied live worker
+snapshot. Members are sorted, quotas differ by at most one, and existing owners
+retain their lowest numbered partitions up to their quota. Only dead/unlisted
+owners and excess partitions move. The plan minimizes moves for those fixed
+quotas and is independent of membership input order. Inputs are not mutated.
+`assignment.Rebalance` reads every retained owner/revision, supports dry run,
+and applies the plan with revision CAS. A concurrent move is not overwritten;
+conflicts are deferred to the next pass. Unknown acknowledgments remain errors
+and a later pass discovers any committed change without blindly repeating it.
+
+Property contracts cover membership sizes 1–64, deterministic ordering, exact
+quotas, minimum move counts, invalid inputs and a stable converged pass. A real
+three-node race contract covers unchanged dry-run state, a competing CAS move,
+a committed move with a hidden acknowledgment, recovery without another write
+to that partition, and a deleted assignment key. The complete assignment race
+suite passed in 3.74 seconds; vet and diff checks passed.
+
+Initial attempts timed out during eager cluster metadata/bucket provisioning,
+before assignment operations. The fixture now waits through bounded
+AccountInfo and assignment-bucket readiness calls, matching existing integration
+fixture startup behavior. This does not establish a NATS defect.
+
+The API currently requires an authoritative membership snapshot from its caller.
+Worker heartbeat registration, expiry-based membership, coordinator ownership,
+and automatic runner integration remain to be implemented; this policy is the
+assignment step for that controller, not a completed automatic rebalance claim.
