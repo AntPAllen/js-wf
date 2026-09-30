@@ -820,7 +820,26 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 			break
 		}
 		if ctx.Err() != nil {
-			t.Fatalf("run queue not drained: info=%+v err=%v", info, err)
+			inspectCtx, stopInspect := context.WithTimeout(context.Background(), 10*time.Second)
+			last, lastErr := run.Info(inspectCtx)
+			var consumers []string
+			for partition := uint32(0); partition < 4; partition++ {
+				name := fmt.Sprintf("WF_P_%02d", partition)
+				consumer, consumerErr := run.Consumer(inspectCtx, name)
+				if consumerErr != nil {
+					consumers = append(consumers, fmt.Sprintf("%s lookup=%v", name, consumerErr))
+					continue
+				}
+				state, stateErr := consumer.Info(inspectCtx)
+				owner, _, ownerErr := assignments.Get(inspectCtx, partition)
+				if stateErr != nil {
+					consumers = append(consumers, fmt.Sprintf("%s info=%v owner=%s owner_err=%v", name, stateErr, owner, ownerErr))
+					continue
+				}
+				consumers = append(consumers, fmt.Sprintf("%s pending=%d ack_pending=%d redelivered=%d owner=%s owner_err=%v", name, state.NumPending, state.NumAckPending, state.NumRedelivered, owner, ownerErr))
+			}
+			stopInspect()
+			t.Fatalf("run queue not drained: last_info=%+v last_err=%v timed_out_info=%+v timed_out_err=%v consumers=%v", last, lastErr, info, err, consumers)
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
