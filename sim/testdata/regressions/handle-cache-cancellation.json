@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "handle_cache_cancellation",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "failed_lookup",
+        "success"
+      ],
+      "chosen": "success"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "waiter_0",
+        "waiter_1"
+      ],
+      "chosen": "waiter_1"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "cancel",
+        "deadline"
+      ],
+      "chosen": "cancel"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "metadata_lookup",
+      "outcome": "held"
+    },
+    {
+      "at_ms": 1,
+      "operation": "metadata_waiter",
+      "subject": "waiter_1",
+      "outcome": "cancel"
+    },
+    {
+      "at_ms": 1,
+      "operation": "metadata_lookup",
+      "outcome": "success"
+    },
+    {
+      "at_ms": 1,
+      "operation": "metadata_cached",
+      "sequence": 1,
+      "outcome": "ok"
+    }
+  ]
+}

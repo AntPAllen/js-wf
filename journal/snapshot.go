@@ -7,10 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
 	"js-wf/identity"
+	"js-wf/internal/handlecache"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -58,9 +58,8 @@ type SnapshotWritePort interface {
 
 type jetStreamSnapshotReadPort struct {
 	js      jetstream.JetStream
-	mu      sync.Mutex
-	state   jetstream.KeyValue
-	objects jetstream.ObjectStore
+	state   handlecache.Cache[jetstream.KeyValue]
+	objects handlecache.Cache[jetstream.ObjectStore]
 }
 
 func NewSnapshotReadPort(js jetstream.JetStream) SnapshotReadPort {
@@ -136,29 +135,13 @@ func (p *jetStreamSnapshotReadPort) GetObject(ctx context.Context, name string) 
 }
 
 func (p *jetStreamSnapshotReadPort) stateBucket(ctx context.Context) (jetstream.KeyValue, error) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	if p.state != nil {
-		return p.state, nil
-	}
-	state, err := p.js.KeyValue(ctx, "WF_STATE")
-	if err == nil {
-		p.state = state
-	}
-	return state, err
+	return p.state.Get(ctx, func(request context.Context) (jetstream.KeyValue, error) { return p.js.KeyValue(request, "WF_STATE") })
 }
 
 func (p *jetStreamSnapshotReadPort) objectStore(ctx context.Context) (jetstream.ObjectStore, error) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	if p.objects != nil {
-		return p.objects, nil
-	}
-	objects, err := p.js.ObjectStore(ctx, "WF_BLOB")
-	if err == nil {
-		p.objects = objects
-	}
-	return objects, err
+	return p.objects.Get(ctx, func(request context.Context) (jetstream.ObjectStore, error) {
+		return p.js.ObjectStore(request, "WF_BLOB")
+	})
 }
 
 func snapshotKey(typ, id string) string { return "snap." + identity.Key(typ, id) }

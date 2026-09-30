@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
 	"js-wf/identity"
+	"js-wf/internal/handlecache"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -93,9 +93,8 @@ type Store struct {
 	batchReadPort     BatchReadPort
 	snapshotReadPort  SnapshotReadPort
 	snapshotWritePort SnapshotWritePort
-	mu                sync.Mutex
-	stream            jetstream.Stream
-	state             jetstream.KeyValue
+	stream            handlecache.Cache[jetstream.Stream]
+	state             handlecache.Cache[jetstream.KeyValue]
 }
 
 func New(js jetstream.JetStream) *Store {
@@ -215,32 +214,14 @@ func (s *Store) journalStream(ctx context.Context) (jetstream.Stream, error) {
 	if s.js == nil {
 		return nil, fmt.Errorf("journal stream unavailable on append-only transport")
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if s.stream != nil {
-		return s.stream, nil
-	}
-	stream, err := s.js.Stream(ctx, "WF_JRN")
-	if err == nil {
-		s.stream = stream
-	}
-	return stream, err
+	return s.stream.Get(ctx, func(request context.Context) (jetstream.Stream, error) { return s.js.Stream(request, "WF_JRN") })
 }
 
 func (s *Store) stateKV(ctx context.Context) (jetstream.KeyValue, error) {
 	if s.js == nil {
 		return nil, fmt.Errorf("journal state unavailable on append-only transport")
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if s.state != nil {
-		return s.state, nil
-	}
-	state, err := s.js.KeyValue(ctx, "WF_STATE")
-	if err == nil {
-		s.state = state
-	}
-	return state, err
+	return s.state.Get(ctx, func(request context.Context) (jetstream.KeyValue, error) { return s.js.KeyValue(request, "WF_STATE") })
 }
 
 // Append atomically compares the last sequence for this invocation's subject.
