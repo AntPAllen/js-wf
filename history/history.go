@@ -118,6 +118,16 @@ func CheckStarts(operations []client.Operation, timeout time.Duration) (porcupin
 		input.HasConfirmedStart = confirmed[input.Type+"."+input.ID]
 		converted[i].Input = input
 	}
+	// A large same-input burst has a direct linearizability proof. Exactly one
+	// call reports the successful publish; every matching duplicate can be
+	// placed after that call's invocation if its own interval reaches it, and
+	// every unknown call may be placed as an uncommitted attempt. This avoids
+	// factorial search over hundreds of equivalent overlapping duplicates.
+	if len(converted) > 64 {
+		if result, applicable := checkUniformStartBurst(converted); applicable {
+			return result, nil
+		}
+	}
 	model := porcupine.NondeterministicModel{
 		Partition: func(history []porcupine.Operation) [][]porcupine.Operation {
 			byKey := map[string][]porcupine.Operation{}
@@ -188,4 +198,50 @@ func CheckStarts(operations []client.Operation, timeout time.Duration) (porcupin
 		},
 	}
 	return porcupine.CheckOperationsTimeout(model.ToModel(), converted, timeout), nil
+}
+
+func checkUniformStartBurst(operations []porcupine.Operation) (porcupine.CheckResult, bool) {
+	var started *porcupine.Operation
+	var reference startInput
+	var sequence uint64
+	for i := range operations {
+		operation := &operations[i]
+		input := operation.Input.(startInput)
+		output := operation.Output.(startOutput)
+		if i == 0 {
+			reference = input
+		} else if input.Type != reference.Type || input.ID != reference.ID || input.InputHash != reference.InputHash || input.ParentType != reference.ParentType || input.ParentID != reference.ParentID || input.SignalName != reference.SignalName {
+			return porcupine.Unknown, false
+		}
+		switch output.Status {
+		case "started":
+			if started != nil {
+				return porcupine.Illegal, true
+			}
+			started, sequence = operation, output.InvSeq
+		case "already_started", "unknown":
+		default:
+			return porcupine.Unknown, false
+		}
+	}
+	if started == nil {
+		return porcupine.Unknown, false
+	}
+	if sequence == 0 {
+		return porcupine.Illegal, true
+	}
+	for _, operation := range operations {
+		output := operation.Output.(startOutput)
+		switch output.Status {
+		case "already_started":
+			if output.InvSeq != sequence || operation.Return < started.Call {
+				return porcupine.Illegal, true
+			}
+		case "unknown":
+			if output.InvSeq != 0 {
+				return porcupine.Illegal, true
+			}
+		}
+	}
+	return porcupine.Ok, true
 }

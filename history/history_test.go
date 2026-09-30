@@ -73,3 +73,38 @@ func TestRecorderExportsJSONLines(t *testing.T) {
 		t.Fatalf("history export=%q", output.String())
 	}
 }
+
+func TestStartModelChecksLargeConcurrentLeaderKillBurst(t *testing.T) {
+	base := time.Date(2030, 1, 2, 3, 4, 5, 0, time.UTC)
+	args := json.RawMessage(`{"type":"leaderkill","id":"same","input_hash":"hash-a"}`)
+	makeOperation := func(index int, status string, seq uint64) client.Operation {
+		result, err := json.Marshal(map[string]any{"status": status, "inv_seq": seq})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return client.Operation{InvokeTS: base.Add(time.Duration(index) * time.Microsecond), ReturnTS: base.Add(50*time.Millisecond + time.Duration(index)*time.Microsecond), Op: "start", Args: args, Result: result}
+	}
+	operations := make([]client.Operation, 0, 500)
+	for i := 0; i < 500; i++ {
+		status, seq := "already_started", uint64(7)
+		if i < 5 {
+			status, seq = "unknown", 0
+		} else if i == 250 {
+			status = "started"
+		}
+		operations = append(operations, makeOperation(i, status, seq))
+	}
+	if result, err := CheckStarts(operations, 5*time.Second); err != nil || result != porcupine.Ok {
+		t.Fatalf("large concurrent start history=%s err=%v", result, err)
+	}
+	tooEarly := append([]client.Operation(nil), operations...)
+	tooEarly[6].ReturnTS = base.Add(100 * time.Microsecond)
+	if result, err := CheckStarts(tooEarly, 5*time.Second); err != nil || result != porcupine.Illegal {
+		t.Fatalf("duplicate returned before successful call=%s err=%v", result, err)
+	}
+	wrongSequence := append([]client.Operation(nil), operations...)
+	wrongSequence[0].Result = json.RawMessage(`{"status":"already_started","inv_seq":8}`)
+	if result, err := CheckStarts(wrongSequence, 5*time.Second); err != nil || result != porcupine.Illegal {
+		t.Fatalf("mismatched duplicate handle=%s err=%v", result, err)
+	}
+}
