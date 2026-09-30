@@ -21,6 +21,7 @@ import (
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
+	"js-wf/testcluster"
 	"js-wf/wf"
 	"js-wf/worker"
 )
@@ -36,7 +37,11 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
-	nc, err := nats.Connect(os.Getenv("WF_MATRIX_WORKER_URLS"), nats.MaxReconnects(-1), nats.ReconnectWait(100*time.Millisecond), nats.Timeout(time.Second))
+	optionsConnect := []nats.Option{nats.MaxReconnects(-1), nats.ReconnectWait(100 * time.Millisecond), nats.Timeout(time.Second)}
+	if os.Getenv("WF_MATRIX_WORKER_PINNED") == "1" {
+		optionsConnect = append(optionsConnect, nats.IgnoreDiscoveredServers())
+	}
+	nc, err := nats.Connect(os.Getenv("WF_MATRIX_WORKER_URLS"), optionsConnect...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,12 +56,14 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 	}
 	defer events.Close()
 	var mu sync.Mutex
+	var observerErr error
 	active := map[string]bool{}
 	encoder := json.NewEncoder(events)
 	observe := func(event worker.DispatchEvent) {
 		mu.Lock()
 		defer mu.Unlock()
 		if err := encoder.Encode(event); err != nil {
+			observerErr = err
 			stop()
 			return
 		}
@@ -75,10 +82,12 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 				Active int `json:"active_leases"`
 			}{len(active)})
 			if err := os.WriteFile(base+"-active.tmp", data, 0600); err != nil {
+				observerErr = err
 				stop()
 				return
 			}
 			if err := os.Rename(base+"-active.tmp", base+"-active.json"); err != nil {
+				observerErr = err
 				stop()
 			}
 		}
@@ -115,7 +124,38 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 	}
 	defer w.Close()
 	var fleet sync.WaitGroup
-	failures := make(chan error, provision.Partitions)
+	failures := make(chan error, provision.Partitions+1)
+	if os.Getenv("WF_MATRIX_WORKER_PINNED") == "1" {
+		fleet.Add(1)
+		go func() {
+			defer fleet.Done()
+			ticker := time.NewTicker(500 * time.Millisecond)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-ticker.C:
+				}
+				if err := nc.FlushTimeout(time.Second); err != nil {
+					continue
+				}
+				data, _ := json.Marshal(struct {
+					At time.Time `json:"at"`
+				}{time.Now().UTC()})
+				if err := os.WriteFile(base+"-transport.tmp", data, 0600); err != nil {
+					failures <- fmt.Errorf("transport marker: %w", err)
+					stop()
+					return
+				}
+				if err := os.Rename(base+"-transport.tmp", base+"-transport.json"); err != nil {
+					failures <- fmt.Errorf("transport marker: %w", err)
+					stop()
+					return
+				}
+			}
+		}()
+	}
 	for partition := uint32(0); partition < provision.Partitions; partition++ {
 		fleet.Add(1)
 		go func() {
@@ -133,6 +173,12 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 	}
 	<-ctx.Done()
 	fleet.Wait()
+	mu.Lock()
+	observedError := observerErr
+	mu.Unlock()
+	if observedError != nil {
+		t.Fatalf("dispatch artifacts: %v", observedError)
+	}
 	select {
 	case err := <-failures:
 		t.Fatal(err)
@@ -161,6 +207,9 @@ func startMatrixProcessWorker(ctx context.Context, root string, urls []string, i
 	}
 	child := exec.Command(executable, "-test.run=^TestMixedMatrixWorkerProcessChild$")
 	child.Env = append(os.Environ(), "WF_MATRIX_WORKER_CHILD=1", "WF_MATRIX_WORKER_ID="+id, "WF_MATRIX_WORKER_URLS="+strings.Join(urls, ","), "WF_MATRIX_WORKER_BASE="+base)
+	if len(urls) == 1 {
+		child.Env = append(child.Env, "WF_MATRIX_WORKER_PINNED=1")
+	}
 	child.Stdout, child.Stderr = log, log
 	if err := child.Start(); err != nil {
 		log.Close()
@@ -414,4 +463,94 @@ func selectMatrixActiveWorker(ctx context.Context, fleet []*matrixProcessWorker,
 		}
 	}
 	return 0, fmt.Errorf("no active worker available to pause: %w", ready.Err())
+}
+
+func isolateMatrixWorkerReplies(ctx context.Context, fleet []*matrixProcessWorker, proxies []*testcluster.ClientProxy, first int, scheduled time.Time) (matrixLeaderFault, error) {
+	index, err := selectMatrixActiveWorker(ctx, fleet, first)
+	if err != nil {
+		return matrixLeaderFault{Scheduled: scheduled, Node: -1}, err
+	}
+	process, proxy := fleet[index], proxies[index]
+	event := matrixLeaderFault{Scheduled: scheduled, Node: -1, WorkerSlot: &index, Worker: process.id, PID: process.cmd.Process.Pid, Killed: time.Now()}
+	var active struct {
+		Active int `json:"active_leases"`
+	}
+	data, err := os.ReadFile(process.base + "-active.json")
+	if err != nil {
+		return event, err
+	}
+	if err := json.Unmarshal(data, &active); err != nil {
+		return event, err
+	}
+	event.ActiveLeases = active.Active
+	before := proxy.Stats()
+	event.ProxyBefore = &before
+	proxy.HoldResponses()
+	defer proxy.ResumeResponses()
+	// Confirm that replies are held while worker requests still reach the server.
+	cut, stop := context.WithTimeout(ctx, 5*time.Second)
+	for cut.Err() == nil {
+		blocked := proxy.Stats()
+		if blocked.ResponsesHeld && blocked.HeldBytes > before.HeldBytes && blocked.ClientToServer > before.ClientToServer {
+			event.ProxyBlocked = &blocked
+			break
+		}
+		select {
+		case <-cut.Done():
+		case <-time.After(20 * time.Millisecond):
+		}
+	}
+	stop()
+	if event.ProxyBlocked == nil {
+		return event, fmt.Errorf("worker one-way fault not confirmed: before=%+v current=%+v", before, proxy.Stats())
+	}
+	remaining := time.Until(event.Killed.Add(45 * time.Second))
+	timer := time.NewTimer(remaining)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return event, ctx.Err()
+	case <-timer.C:
+	}
+	event.Resumed = time.Now()
+	proxy.ResumeResponses()
+	heal, stop := context.WithTimeout(ctx, 10*time.Second)
+	defer stop()
+	for heal.Err() == nil {
+		data, readErr := os.ReadFile(process.base + "-transport.json")
+		if readErr == nil {
+			var health struct {
+				At time.Time `json:"at"`
+			}
+			if err := json.Unmarshal(data, &health); err != nil {
+				return event, err
+			}
+			if health.At.After(event.Resumed) {
+				healed := proxy.Stats()
+				if !healed.ResponsesHeld && healed.ServerToClient > event.ProxyBlocked.ServerToClient {
+					event.ProxyHealed = &healed
+					break
+				}
+			}
+		} else if !os.IsNotExist(readErr) {
+			return event, readErr
+		}
+		select {
+		case <-heal.Done():
+		case <-time.After(20 * time.Millisecond):
+		}
+	}
+	if event.ProxyHealed == nil {
+		return event, fmt.Errorf("worker PING recovery after reply isolation: %w", heal.Err())
+	}
+	fences, err := matrixWorkerFencingEvents(process.base+"-dispatch.jsonl", event.Killed)
+	if err != nil {
+		return event, err
+	}
+	event.FencingEvents = fences
+	if event.ActiveLeases > 0 && fences == 0 {
+		return event, fmt.Errorf("isolated active worker reported no fencing")
+	}
+	event.Healed = time.Now()
+	return event, nil
 }

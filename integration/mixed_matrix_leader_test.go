@@ -34,23 +34,26 @@ import (
 )
 
 type matrixLeaderFault struct {
-	Scheduled        time.Time `json:"scheduled"`
-	Killed           time.Time `json:"killed"`
-	Healed           time.Time `json:"healed"`
-	Node             int       `json:"node"`
-	Nodes            []int     `json:"nodes,omitempty"`
-	Routes           [3]int    `json:"partition_routes,omitempty"`
-	MajoritySequence uint64    `json:"majority_sequence,omitempty"`
-	Consumer         string    `json:"consumer,omitempty"`
-	Pending          uint64    `json:"pending,omitempty"`
-	AckPending       int       `json:"ack_pending,omitempty"`
-	Worker           string    `json:"worker,omitempty"`
-	WorkerSlot       *int      `json:"worker_slot,omitempty"`
-	PID              int       `json:"pid,omitempty"`
-	ActiveLeases     int       `json:"active_leases,omitempty"`
-	Paused           time.Time `json:"paused,omitempty"`
-	Resumed          time.Time `json:"resumed,omitempty"`
-	FencingEvents    int       `json:"fencing_events,omitempty"`
+	Scheduled        time.Time                     `json:"scheduled"`
+	Killed           time.Time                     `json:"killed"`
+	Healed           time.Time                     `json:"healed"`
+	Node             int                           `json:"node"`
+	Nodes            []int                         `json:"nodes,omitempty"`
+	Routes           [3]int                        `json:"partition_routes,omitempty"`
+	MajoritySequence uint64                        `json:"majority_sequence,omitempty"`
+	Consumer         string                        `json:"consumer,omitempty"`
+	Pending          uint64                        `json:"pending,omitempty"`
+	AckPending       int                           `json:"ack_pending,omitempty"`
+	Worker           string                        `json:"worker,omitempty"`
+	WorkerSlot       *int                          `json:"worker_slot,omitempty"`
+	PID              int                           `json:"pid,omitempty"`
+	ActiveLeases     int                           `json:"active_leases,omitempty"`
+	Paused           time.Time                     `json:"paused,omitempty"`
+	Resumed          time.Time                     `json:"resumed,omitempty"`
+	FencingEvents    int                           `json:"fencing_events,omitempty"`
+	ProxyBefore      *testcluster.ClientProxyStats `json:"proxy_before,omitempty"`
+	ProxyBlocked     *testcluster.ClientProxyStats `json:"proxy_blocked,omitempty"`
+	ProxyHealed      *testcluster.ClientProxyStats `json:"proxy_healed,omitempty"`
 }
 
 type matrixLatencySample struct {
@@ -86,6 +89,10 @@ func TestMixedMatrixRandomWorkerKilledEveryFiveSeconds(t *testing.T) {
 
 func TestMixedMatrixWorkerPausedFortyFiveSeconds(t *testing.T) {
 	runMixedMatrixLeader(t, "worker_pause")
+}
+
+func TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds(t *testing.T) {
+	runMixedMatrixLeader(t, "worker_isolation")
 }
 
 func runMixedMatrixLeader(t *testing.T, row string) {
@@ -168,13 +175,15 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	var latencySamples []matrixLatencySample
 	var workerRoot string
 	var processWorkers []*matrixProcessWorker
+	var workerProxies []*testcluster.ClientProxy
 	c := client.NewObserved(js, &recorder)
 	var faults []matrixLeaderFault
 	var faultsMu sync.Mutex
 	defer func() {
 		prefix := os.Getenv("MATRIX_ARTIFACT_PREFIX")
 		if prefix == "" {
-			return
+			prefix = filepath.Join(t.TempDir(), "matrix-artifacts")
+			t.Logf("matrix artifacts=%s", prefix)
 		}
 		file, err := os.Create(prefix + "-history.jsonl")
 		if err != nil {
@@ -228,6 +237,9 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 				for _, file := range files {
 					if !file.IsDir() {
 						data, err := os.ReadFile(filepath.Join(workerRoot, file.Name()))
+						if err == nil && strings.Contains(string(data), "--- FAIL: TestMixedMatrixWorkerProcessChild") {
+							t.Errorf("worker subprocess failure in %s", file.Name())
+						}
 						if err == nil && strings.Contains(string(data), "WARNING: DATA RACE") {
 							t.Errorf("worker race detector failure in %s", file.Name())
 						}
@@ -263,16 +275,36 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 		}()
 	}
-	if row == "worker_kill" || row == "worker_pause" {
+	if row == "worker_kill" || row == "worker_pause" || row == "worker_isolation" {
 		workerRoot = t.TempDir()
 		processWorkers = make([]*matrixProcessWorker, 3)
+		if row == "worker_isolation" {
+			workerProxies = make([]*testcluster.ClientProxy, 3)
+			defer func() {
+				for _, proxy := range workerProxies {
+					if proxy != nil {
+						proxy.Close()
+					}
+				}
+			}()
+			for index := range workerProxies {
+				workerProxies[index], err = testcluster.NewClientProxy(urls[index])
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+		}
 		defer func() {
 			for _, process := range processWorkers {
 				stopMatrixProcessWorker(process)
 			}
 		}()
 		for index := range processWorkers {
-			processWorkers[index], err = startMatrixProcessWorker(ctx, workerRoot, urls, index, 0)
+			workerURLs := urls
+			if row == "worker_isolation" {
+				workerURLs = []string{workerProxies[index].URL()}
+			}
+			processWorkers[index], err = startMatrixProcessWorker(ctx, workerRoot, workerURLs, index, 0)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -300,7 +332,7 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 		faultInterval = 5 * time.Second
 	}
 	firstFault := faultInterval
-	if row == "worker_pause" {
+	if row == "worker_pause" || row == "worker_isolation" {
 		faultInterval = 60 * time.Second
 		firstFault = 5 * time.Second
 	}
@@ -322,7 +354,9 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 			var event matrixLeaderFault
 			var err error
-			if row == "worker_pause" {
+			if row == "worker_isolation" {
+				event, err = isolateMatrixWorkerReplies(faultCtx, processWorkers, workerProxies, faultRNG.Intn(len(processWorkers)), scheduled)
+			} else if row == "worker_pause" {
 				event, err = pauseMatrixProcessWorker(faultCtx, processWorkers, faultRNG.Intn(len(processWorkers)), scheduled)
 			} else if row == "worker_kill" {
 				event, err = killMatrixProcessWorker(faultCtx, workerRoot, urls, processWorkers, faultRNG.Intn(len(processWorkers)), scheduled)
@@ -442,7 +476,7 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	if len(faults) != wantFaults {
 		t.Fatalf("faults=%d want=%d", len(faults), wantFaults)
 	}
-	if row == "worker_kill" || row == "worker_pause" {
+	if row == "worker_kill" || row == "worker_pause" || row == "worker_isolation" {
 		activeKills := 0
 		for _, fault := range faults {
 			if fault.ActiveLeases > 0 {

@@ -24,6 +24,9 @@ type ClientProxy struct {
 	active        map[net.Conn]net.Conn
 	acceptDone    chan struct{}
 	sessions      sync.WaitGroup
+	clientBytes   uint64
+	serverBytes   uint64
+	heldBytes     uint64
 }
 
 func NewClientProxy(targetURL string) (*ClientProxy, error) {
@@ -95,13 +98,44 @@ func (p *ClientProxy) resumeResponsesLocked() {
 	}
 }
 
-func (p *ClientProxy) waitResponses() {
+// ClientProxyStats are byte counts at the relay boundaries, including bytes
+// awaiting release during an asymmetric server-to-client fault.
+type ClientProxyStats struct {
+	ClientToServer uint64 `json:"client_to_server"`
+	ServerToClient uint64 `json:"server_to_client"`
+	HeldBytes      uint64 `json:"held_bytes"`
+	ResponsesHeld  bool   `json:"responses_held"`
+	Active         int    `json:"active_connections"`
+}
+
+func (p *ClientProxy) Stats() ClientProxyStats {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return ClientProxyStats{p.clientBytes, p.serverBytes, p.heldBytes, p.responsesHeld != nil, len(p.active)}
+}
+func (p *ClientProxy) waitResponses(bytes int) {
 	p.mu.Lock()
 	held := p.responsesHeld
+	if held != nil {
+		p.heldBytes += uint64(bytes)
+	}
 	p.mu.Unlock()
 	if held != nil {
 		<-held
 	}
+}
+
+type clientProxyWriter struct {
+	proxy    *ClientProxy
+	upstream net.Conn
+}
+
+func (w clientProxyWriter) Write(data []byte) (int, error) {
+	n, err := w.upstream.Write(data)
+	w.proxy.mu.Lock()
+	w.proxy.clientBytes += uint64(n)
+	w.proxy.mu.Unlock()
+	return n, err
 }
 
 func (p *ClientProxy) Close() {
@@ -156,7 +190,7 @@ func (p *ClientProxy) bridge(client, upstream net.Conn) {
 	defer p.sessions.Done()
 	copyDone := make(chan struct{})
 	go func() {
-		_, _ = io.Copy(upstream, client)
+		_, _ = io.Copy(clientProxyWriter{p, upstream}, client)
 		close(copyDone)
 		_ = upstream.Close()
 		_ = client.Close()
@@ -165,10 +199,13 @@ func (p *ClientProxy) bridge(client, upstream net.Conn) {
 	for {
 		n, readErr := upstream.Read(buf)
 		if n > 0 {
-			p.waitResponses()
+			p.waitResponses(n)
 			for offset := 0; offset < n; {
 				written, writeErr := client.Write(buf[offset:n])
 				offset += written
+				p.mu.Lock()
+				p.serverBytes += uint64(written)
+				p.mu.Unlock()
 				if written == 0 && writeErr == nil {
 					writeErr = io.ErrShortWrite
 				}
