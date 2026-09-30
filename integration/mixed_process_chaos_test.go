@@ -492,8 +492,24 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	releasedAt := time.Now()
 	repairCtx, stopRepair := context.WithCancel(ctx)
 	repairDone := make(chan error, 1)
+	type repairScan struct {
+		at     time.Time
+		cursor uint64
+		result reconcile.ScanResult
+		err    error
+	}
+	var repairScans []repairScan
+	var repairScansMu sync.Mutex
 	go func() {
-		repairDone <- reconcile.RunSuspendedLoop(repairCtx, js[other], "mixed-suspended-repair", time.Second, 8)
+		repairDone <- reconcile.RunSuspendedLoopObserved(repairCtx, js[other], "mixed-suspended-repair", time.Second, 8, func(cursor uint64, result reconcile.ScanResult, scanErr error) {
+			repairScansMu.Lock()
+			defer repairScansMu.Unlock()
+			if len(repairScans) == 256 {
+				copy(repairScans, repairScans[1:])
+				repairScans = repairScans[:255]
+			}
+			repairScans = append(repairScans, repairScan{at: time.Now(), cursor: cursor, result: result, err: scanErr})
+		})
 	}()
 	defer func() {
 		stopRepair()
@@ -785,6 +801,11 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	t.Logf("mixed terminal p99 from last enabling event=%s across %d invocations", terminalP99, len(terminalLatencies))
 	t.Logf("mixed workers before=%+v after=%+v", first.Metrics(), successor.Metrics())
 	if terminalP99 >= 30*time.Second {
+		repairScansMu.Lock()
+		for _, scan := range repairScans {
+			t.Logf("suspended scan since_heal=%s cursor=%d next=%d inspected=%d reenqueued=%d candidates=%+v err=%v", scan.at.Sub(healedAt), scan.cursor, scan.result.NextSequence, scan.result.Inspected, scan.result.Reenqueued, scan.result.Candidates, scan.err)
+		}
+		repairScansMu.Unlock()
 		traceSlow := func(typ, id string, enabled, terminal time.Time) {
 			if terminal.Sub(enabled) < 30*time.Second {
 				return
@@ -868,5 +889,23 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	}
 	if err != nil || report.Invocations != wantTerminal || report.Journals != wantTerminal || report.Terminal != wantTerminal {
 		t.Fatalf("mixed retained integrity: report=%+v err=%v", report, err)
+	}
+	runStream, err := third.Stream(ctx, "WF_RUN")
+	if err != nil {
+		t.Fatalf("mixed run queue lookup: %v", err)
+	}
+	until = time.Now().Add(30 * time.Second)
+	var runInfo *jetstream.StreamInfo
+	for time.Now().Before(until) && ctx.Err() == nil {
+		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		runInfo, err = runStream.Info(attempt)
+		stop()
+		if err == nil && runInfo.State.Msgs == 0 {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if err != nil || runInfo == nil || runInfo.State.Msgs != 0 {
+		t.Fatalf("mixed run queue did not drain: info=%+v err=%v context=%v", runInfo, err, ctx.Err())
 	}
 }

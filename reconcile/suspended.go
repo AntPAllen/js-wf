@@ -353,5 +353,20 @@ func signalAvailable(ctx context.Context, port SuspendedScanPort, typ, id, name 
 // RunSuspendedLoop uses the same KV leader lease and persisted cursor as the
 // other reconcilers, under its own suspended scan key.
 func RunSuspendedLoop(ctx context.Context, js jetstream.JetStream, workerID string, interval time.Duration, budget int) error {
-	return runLoop(ctx, js, workerID, "suspended", interval, budget, NewSuspendedScan(js).Scan)
+	return RunSuspendedLoopObserved(ctx, js, workerID, interval, budget, nil)
+}
+
+// RunSuspendedLoopObserved reports each completed scan attempt while using
+// the same production scanner and fenced cursor loop. The observer must not
+// block the reconciler.
+func RunSuspendedLoopObserved(ctx context.Context, js jetstream.JetStream, workerID string, interval time.Duration, budget int, observe func(uint64, ScanResult, error)) error {
+	scan := NewSuspendedScan(js).Scan
+	if observe == nil {
+		return runLoop(ctx, js, workerID, "suspended", interval, budget, scan)
+	}
+	return runLoop(ctx, js, workerID, "suspended", interval, budget, func(attempt context.Context, next uint64, budget int, dryRun bool) (ScanResult, error) {
+		result, err := scan(attempt, next, budget, dryRun)
+		observe(next, result, err)
+		return result, err
+	})
 }
