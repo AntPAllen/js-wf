@@ -113,7 +113,32 @@ start-to-result p99 values were 503 and 136 ms; final server RSS was
 1,982–2,055 MiB. Both retained cohorts remained present in the verified final
 counts (5,002,000 subjects per stream and 5,008,000 journal messages). Raw
 cohort audits and checksums are retained alongside the report. Large payloads
-at 5M/10M and all live traffic at 10M remain pending.
+at 10M and all live traffic at 10M remain pending.
+
+The [large-input run at 5M](live-cardinality-large-5m-2026-09-30/report.json)
+also passed with 1,000 spilled 1,100,000-byte inputs and 4,000 audited entries.
+Start-to-result p99/max were 1.422/1.687 seconds; final process RSS was
+3,362–3,852 MiB. The 4.6 GiB retained stores and cohort audit remain available.
+Thus inline and spilled live traffic are both verified at 1M and 5M. The 10M
+live requirements remain open.
+
+### Offline retained-evidence verification
+
+```sh
+/tmp/wf-scale -verify-live -root /tmp/wf-scale-large-5m
+```
+
+This requires a completed report with one audit per phase. It reruns the shared
+retained-state invariant checker, reconstructs each exact input and expected
+hash, verifies every saved terminal result, and checks cohort identities, journal
+shape and aggregate counts including prior cohorts. It makes no NATS connections.
+It rejects incomplete/missing phases, count errors, altered inputs, journal order,
+changed terminal bytes, and even a wrong result consistently recorded in both
+journal and terminal state. Ten negative controls and the real multi-cohort
+contract passed under race. Timing, RSS, effect and spill metrics are recorded
+observations whose consistency is checked; their original execution cannot be
+independently measured offline. Build revision and modified-source fields remain
+measurement provenance, not an authenticated statement from the verifier.
 
 ## CAS append throughput
 

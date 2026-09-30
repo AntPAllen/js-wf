@@ -62,6 +62,7 @@ func main() {
 	liveCount := flag.Int("live-workflows", 0, "real workflows after each cardinality checkpoint; 0 disables")
 	liveBytes := flag.Int("live-input-bytes", 64, "exact JSON input bytes per live workflow (64..5242880)")
 	root := flag.String("root", "", "store and report directory; default temporary")
+	verifyLive := flag.Bool("verify-live", false, "verify retained live reports and audits offline; requires -root")
 	port := flag.Int("port", 0, "child client port")
 	routePort := flag.Int("route-port", 0, "child route port")
 	peerRoutePort := flag.Int("peer-route-port", 0, "child route peer port")
@@ -72,6 +73,14 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		return
+	}
+	if *verifyLive {
+		if err := verifyLiveReport(*root); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		fmt.Fprintln(os.Stderr, "retained live cohorts verified")
 		return
 	}
 	counts, err := parseCounts(*countList)
@@ -304,6 +313,9 @@ func run(counts []int, workers int, root string, minAvailableMiB int64, live liv
 		if live.Count > 0 {
 			phase, err := runLiveWorkflows(guardCtx, all, root, count, priorLive, priorEntries, live)
 			if err != nil {
+				if cause := context.Cause(guardCtx); cause != nil {
+					return cause
+				}
 				return fmt.Errorf("live traffic at %d background subjects: %w", count, err)
 			}
 			if err := readRSS(children, &phase.RSSBytes); err != nil {

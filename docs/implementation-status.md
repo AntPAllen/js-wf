@@ -2397,3 +2397,29 @@ All 2,000 saved results independently decoded to their expected lengths/digests.
 are retained. This proves inline live traffic at those cardinalities, not large
 inputs at 5M/10M, live traffic at 10M, or the fault matrix. The independent
 million-timer campaign remains running on its original stores and source.
+
+
+## Five-million-subject spilled inputs and offline audit verification
+
+The clean `151735c` three-process run passed 5M background subjects per stream
+plus 1,000 exact 1,100,000-byte inputs. All spilled and completed; retained
+cohort checks found 4,000 entries and 1,000 terminals, and every pinned peer
+returned immutable expected results. Exact final counts were 5,001,000 subjects
+per stream, 5,001,000 invocation messages and 5,004,000 journal messages.
+Start-to-result p99/max were 1.422/1.687 seconds. Final server RSS was
+3,362–3,852 MiB and retained stores occupy 4.6 GiB. The 2 GiB memory guard did
+not fire. [Report, raw audit, logs and checksums](scale/live-cardinality-large-5m-2026-09-30/)
+are retained; inline and spilled traffic at 1M and 5M are now proved. The 10M
+live requirements remain open.
+
+`wf-scale -verify-live -root <retained-root>` now reruns the production retained
+invariant checker offline, reconstructs expected input lengths/hashes, checks
+saved terminal outcomes and phase/aggregate counts, and rejects incomplete
+reports. All three completed scale roots pass. Ten negative controls include
+missing cohorts, count/spill errors, altered inputs, journal reordering, changed
+terminal bytes, pretty-print payload corruption, and a wrong outcome consistently
+recorded in both terminal state and journal. The complete command package passed
+under race in 23.17 seconds; vet passed. Timing/RSS/effect/spill metrics are
+recorded observations, not independently re-observed by the offline verifier.
+The runner also preserves the memory guard's cancellation cause during live
+traffic instead of replacing it with a generic canceled-context error.
