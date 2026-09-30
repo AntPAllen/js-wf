@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -52,7 +54,6 @@ type jetStreamBlobSweepPort struct {
 	js      jetstream.JetStream
 	objects jetstream.ObjectStore
 	streams map[string]jetstream.Stream
-	state   jetstream.KeyValue
 }
 
 func (p *jetStreamBlobSweepPort) stream(ctx context.Context, name string) (jetstream.Stream, error) {
@@ -90,35 +91,80 @@ func (p *jetStreamBlobSweepPort) StreamMessage(ctx context.Context, name string,
 	return BlobSweepMessage{Subject: message.Subject, Header: message.Header, Data: message.Data}, nil
 }
 
-func (p *jetStreamBlobSweepPort) stateKV(ctx context.Context) (jetstream.KeyValue, error) {
-	if p.state != nil {
-		return p.state, nil
+// Enumerate the quiescent retained subjects through the paginated stream-info
+// API, rather than a watcher channel whose close can look like initialization
+// completion. Reading each listed subject below must succeed before deletion.
+func (p *jetStreamBlobSweepPort) retainedSubjects(ctx context.Context, name, prefix string) ([]string, error) {
+	stream, err := p.stream(ctx, name)
+	if err != nil {
+		return nil, err
 	}
-	state, err := p.js.KeyValue(ctx, "WF_STATE")
-	if err == nil {
-		p.state = state
+	info, err := stream.Info(ctx, jetstream.WithSubjectFilter(prefix+">"))
+	if err != nil {
+		return nil, err
 	}
-	return state, err
+	if uint64(len(info.State.Subjects)) != info.State.NumSubjects {
+		return nil, fmt.Errorf("incomplete retained subject census for %s: got=%d want=%d", name, len(info.State.Subjects), info.State.NumSubjects)
+	}
+	subjects := make([]string, 0, len(info.State.Subjects))
+	for subject, count := range info.State.Subjects {
+		if !strings.HasPrefix(subject, prefix) || len(subject) == len(prefix) || count == 0 {
+			return nil, fmt.Errorf("invalid retained metadata subject %q", subject)
+		}
+		subjects = append(subjects, subject)
+	}
+	sort.Strings(subjects)
+	return subjects, nil
 }
 
 func (p *jetStreamBlobSweepPort) StateKeys(ctx context.Context) ([]string, error) {
-	state, err := p.stateKV(ctx)
+	const prefix = "$KV.WF_STATE."
+	subjects, err := p.retainedSubjects(ctx, "KV_WF_STATE", prefix)
 	if err != nil {
 		return nil, err
 	}
-	return state.Keys(ctx)
+	keys := make([]string, len(subjects))
+	for i, subject := range subjects {
+		keys[i] = strings.TrimPrefix(subject, prefix)
+	}
+	return keys, nil
 }
 
 func (p *jetStreamBlobSweepPort) StateValue(ctx context.Context, key string) ([]byte, error) {
-	state, err := p.stateKV(ctx)
+	stream, err := p.stream(ctx, "KV_WF_STATE")
 	if err != nil {
 		return nil, err
 	}
-	entry, err := state.Get(ctx, key)
+	subject := "$KV.WF_STATE." + key
+	message, err := stream.GetLastMsgForSubject(ctx, subject)
 	if err != nil {
 		return nil, err
 	}
-	return entry.Value(), nil
+	return DecodeBlobSweepStateMetadata(key, BlobSweepMessage{Subject: message.Subject, Header: message.Header, Data: message.Data})
+}
+
+// DecodeBlobSweepStateMetadata validates a retained KV message before its
+// reference bytes may influence a destructive sweep. Shared with transport models.
+func DecodeBlobSweepStateMetadata(key string, message BlobSweepMessage) ([]byte, error) {
+	subject := "$KV.WF_STATE." + key
+	if message.Subject != subject {
+		return nil, fmt.Errorf("state metadata subject mismatch: %q", message.Subject)
+	}
+	switch message.Header.Get("KV-Operation") {
+	case "DEL", "PURGE":
+		return nil, jetstream.ErrKeyNotFound
+	case "":
+	default:
+		return nil, fmt.Errorf("unknown state operation for %q", key)
+	}
+	switch message.Header.Get(jetstream.MarkerReasonHeader) {
+	case "MaxAge", "Purge", "Remove":
+		return nil, jetstream.ErrKeyNotFound
+	case "":
+	default:
+		return nil, fmt.Errorf("unknown state marker for %q", key)
+	}
+	return message.Data, nil
 }
 
 func (p *jetStreamBlobSweepPort) ObjectBytes(ctx context.Context, name string) ([]byte, error) {
@@ -126,19 +172,50 @@ func (p *jetStreamBlobSweepPort) ObjectBytes(ctx context.Context, name string) (
 }
 
 func (p *jetStreamBlobSweepPort) Objects(ctx context.Context) ([]BlobSweepObject, error) {
-	all, err := p.objects.List(ctx)
+	const prefix = "$O.WF_BLOB.M."
+	subjects, err := p.retainedSubjects(ctx, "OBJ_WF_BLOB", "$O.WF_BLOB.")
 	if err != nil {
 		return nil, err
 	}
-	objects := make([]BlobSweepObject, 0, len(all))
-	for _, object := range all {
-		if object == nil {
-			objects = append(objects, BlobSweepObject{})
+	stream, err := p.stream(ctx, "OBJ_WF_BLOB")
+	if err != nil {
+		return nil, err
+	}
+	objects := make([]BlobSweepObject, 0, len(subjects))
+	for _, subject := range subjects {
+		if strings.HasPrefix(subject, "$O.WF_BLOB.C.") {
 			continue
 		}
-		objects = append(objects, BlobSweepObject{Name: object.Name, ModTime: object.ModTime})
+		if !strings.HasPrefix(subject, prefix) {
+			return nil, fmt.Errorf("unknown object store subject %q", subject)
+		}
+		message, err := stream.GetLastMsgForSubject(ctx, subject)
+		if err != nil {
+			return nil, err
+		}
+		object, live, err := DecodeBlobSweepObjectMetadata(subject, BlobSweepMessage{Subject: message.Subject, Data: message.Data}, message.Time)
+		if err != nil {
+			return nil, err
+		}
+		if live {
+			objects = append(objects, object)
+		}
 	}
 	return objects, nil
+}
+
+// DecodeBlobSweepObjectMetadata validates one retained object metadata message.
+// Deleted objects are excluded after their identity is validated.
+func DecodeBlobSweepObjectMetadata(subject string, message BlobSweepMessage, modified time.Time) (BlobSweepObject, bool, error) {
+	const prefix = "$O.WF_BLOB.M."
+	var info jetstream.ObjectInfo
+	if err := json.Unmarshal(message.Data, &info); err != nil {
+		return BlobSweepObject{}, false, fmt.Errorf("object metadata %q: %w", subject, err)
+	}
+	if info.Name == "" || info.Bucket != "WF_BLOB" || message.Subject != subject || prefix+base64.URLEncoding.EncodeToString([]byte(info.Name)) != subject {
+		return BlobSweepObject{}, false, fmt.Errorf("object metadata identity differs for %q", subject)
+	}
+	return BlobSweepObject{Name: info.Name, ModTime: modified}, !info.Deleted, nil
 }
 
 func (p *jetStreamBlobSweepPort) DeleteObject(ctx context.Context, name string) error {

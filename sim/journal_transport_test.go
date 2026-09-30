@@ -444,6 +444,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runCanceledWorkerRetainedLease(&loaded)
 	case "tombstone_sweep":
 		replayed, err = runSeededTombstoneSweep(loaded.Seed, &loaded)
+	case "blob_metadata":
+		replayed, err = runSeededBlobMetadata(loaded.Seed, &loaded)
 	case "blob_sweep":
 		replayed, err = runSeededBlobSweep(loaded.Seed, &loaded)
 	case "purge_blob":

@@ -140,6 +140,15 @@ observations whose consistency is checked; their original execution cannot be
 independently measured offline. Build revision and modified-source fields remain
 measurement provenance, not an authenticated statement from the verifier.
 
+The [10M inline live run](live-cardinality-inline-10m-2026-09-30/report.json)
+at clean `a1995cc` passed 1,000 workflows, 4,000 audited entries and exact
+10,001,000-subject counts through all peers. Start-to-result p99/max were
+420/1,137 ms; final server RSS was 3,159–3,270 MiB. The 2 GiB memory guard did
+not fire, and offline verification passed. Inline traffic is now measured at
+1M/5M/10M, spilled traffic at 1M/5M. Spilled-input traffic at 10M remains pending;
+its incremental memory needs exceed the remaining headroom alongside the
+million-timer campaign at the observed 5M large-input RSS.
+
 ## CAS append throughput
 
 `cmd/wf-cas-bench` uses the regular three-node in-process fixture with file

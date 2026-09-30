@@ -2423,3 +2423,44 @@ under race in 23.17 seconds; vet passed. Timing/RSS/effect/spill metrics are
 recorded observations, not independently re-observed by the offline verifier.
 The runner also preserves the memory guard's cancellation cause during live
 traffic instead of replacing it with a generic canceled-context error.
+
+
+## Ten-million-subject live inline proof
+
+The clean-source `a1995cc` run passed ten million background subjects in each
+stream followed by 1,000 production workflows with exact 64-byte inputs. Every
+result matched and remained immutable across all pinned peers; 4,000 retained
+entries, 1,000 terminal journals, exact aggregate counts and a drained queue
+passed. Final counts through every node were 10,001,000 subjects per stream,
+10,001,000 invocation messages and 10,004,000 journal messages. Offline audit
+verification passed. Start-to-result p99/max were 420/1,137 ms, and final server
+RSS was 3,159–3,270 MiB. The guard did not fire and the million-timer campaign
+continued without a restart. [Reports, raw audit and checksums](scale/live-cardinality-inline-10m-2026-09-30/)
+are retained. Inline traffic at 1M/5M/10M and spilled traffic at 1M/5M are proved;
+spilled traffic at 10M and the independent fault/release gates remain open.
+
+## Quiescent blob enumeration and metadata guards
+
+The sweep's real adapter now uses paginated retained-subject metadata and
+last-message reads for `KV_WF_STATE` and `OBJ_WF_BLOB`, avoiding watcher-channel
+completion ambiguity. It validates object subject/name/bucket identity, decodes
+known KV retirement markers, and fails on unknown or malformed metadata before
+any deletion. The predecessor accepts an injected unknown KV operation and
+deletes one orphan; disabling the new shared production decoder guard reproduces
+that missing validation in Tier 1 at seed 15. The model runs the production sweep
+and decoders, verifies zero deletion under four metadata faults, repairs each,
+and verifies correct reclamation. Four pins, exact/cross-process replay,
+100,000 local seeds (2.83 seconds), modeled race checks (10.60 seconds) and real
+three-node contracts under race (28.87 seconds) pass. [Controls, raw logs and
+scope](scale/blob-metadata-validation-2026-09-30/) are retained.
+
+These are injected metadata failures, not a reproduction or causal explanation
+of the old intermittent Object Store listing mismatch. Collection still requires
+quiescent writers; online writer coordination, SDK continuation checkpoints,
+full-matrix seed gates and the 24-hour soak remain open.
+
+The retained-subject map is also checked against the complete stream subject
+count, with object chunks included in the census and excluded from metadata
+parsing. Unknown Object Store subject layouts fail closed; that separate raw
+metadata control passed under race in 4.28 seconds. The contracts do not yet
+exercise the client's greater-than-100,000-subject pagination boundary.
