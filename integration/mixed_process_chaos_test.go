@@ -32,6 +32,7 @@ import (
 // the Tier 2 mix. It runs the four workload classes together on one cluster.
 func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	const mixedSignalCount = 16
+	const mixedTimerCount = 8
 	if os.Getenv("WF_MIXED_CHAOS") != "1" {
 		t.Skip("set WF_MIXED_CHAOS=1 for mixed real-cluster chaos")
 	}
@@ -147,8 +148,18 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		if _, err := mark(input); err != nil {
 			return nil, err
 		}
-		if err := wf.Sleep(c, "quorum-loss", 10*time.Second); err != nil {
-			return nil, err
+		timers := make([]*wf.TimerHandle, mixedTimerCount)
+		for n := range timers {
+			timer, err := c.Timer(fmt.Sprintf("quorum-loss-%d", n), 10*time.Second)
+			if err != nil {
+				return nil, err
+			}
+			timers[n] = timer
+		}
+		for _, timer := range timers {
+			if err := timer.Await(); err != nil {
+				return nil, err
+			}
 		}
 		return json.RawMessage(`42`), nil
 	}
@@ -252,19 +263,27 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 				allSuspended = false
 			}
 			if inv.typ == "mixedtimer" {
+				seenTimers := map[string]bool{}
 				for _, record := range records {
 					if record.Kind != journal.StepRequested {
 						continue
 					}
 					var request struct {
 						Kind   string    `json:"kind"`
+						Name   string    `json:"name"`
 						FireAt time.Time `json:"fire_at"`
 					}
-					if json.Unmarshal(record.Payload, &request) == nil && request.Kind == "timer" {
-						timerDue[i] = request.FireAt
+					if json.Unmarshal(record.Payload, &request) == nil && request.Kind == "timer_start" {
+						if request.FireAt.IsZero() || seenTimers[request.Name] {
+							t.Fatalf("timer %s/%s has missing deadline or duplicate name %q", inv.typ, inv.id, request.Name)
+						}
+						seenTimers[request.Name] = true
+						if request.FireAt.After(timerDue[i]) {
+							timerDue[i] = request.FireAt
+						}
 					}
 				}
-				if timerDue[i].IsZero() {
+				if len(seenTimers) != mixedTimerCount || timerDue[i].IsZero() {
 					allSuspended = false
 				}
 			}
