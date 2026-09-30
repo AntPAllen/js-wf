@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -19,6 +21,79 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
+
+type suspendedInvocationTimeoutPort struct {
+	reconcile.SuspendedScanPort
+	sequence uint64
+	failed   atomic.Bool
+}
+
+func (p *suspendedInvocationTimeoutPort) GetInvocation(ctx context.Context, sequence uint64) (*jetstream.RawStreamMsg, error) {
+	if sequence == p.sequence && !p.failed.Swap(true) {
+		return nil, nats.ErrTimeout
+	}
+	return p.SuspendedScanPort.GetInvocation(ctx, sequence)
+}
+
+func TestSuspendedScanContinuesPastOneReadTimeout(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	const typ = "test"
+	c := client.New(all[0])
+	j := journal.New(all[0])
+	for i := 1; i <= 3; i++ {
+		id := fmt.Sprintf("partial-read-%d", i)
+		handle, err := c.Start(ctx, typ, id, []byte(`null`))
+		if err != nil || handle.InvSeq != uint64(i) {
+			t.Fatalf("start %s: handle=%+v err=%v", id, handle, err)
+		}
+		seq, err := j.Append(ctx, typ, id, journal.Entry{Index: 0, Kind: journal.Started}, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		request, err := json.Marshal(struct {
+			Kind   string    `json:"kind"`
+			Name   string    `json:"name"`
+			FireAt time.Time `json:"fire_at"`
+		}{Kind: "timer", Name: "due", FireAt: time.Now().Add(-time.Minute)})
+		if err != nil {
+			t.Fatal(err)
+		}
+		seq, err = j.Append(ctx, typ, id, journal.Entry{Index: 1, Kind: journal.StepRequested, Payload: request}, seq)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := j.Append(ctx, typ, id, journal.Entry{Index: 2, Kind: journal.Suspended, Payload: json.RawMessage(`{"waiting_on":"timer:due"}`)}, seq); err != nil {
+			t.Fatal(err)
+		}
+	}
+	run, err := all[0].Stream(ctx, "WF_RUN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := run.Purge(ctx); err != nil {
+		t.Fatal(err)
+	}
+	port := &suspendedInvocationTimeoutPort{SuspendedScanPort: reconcile.NewSuspendedScanPort(all[2]), sequence: 2}
+	scan := reconcile.NewSuspendedScanWithPort(port)
+	first, err := scan.Scan(ctx, 1, 3, false)
+	if !errors.Is(err, nats.ErrTimeout) || first.NextSequence != 1 || first.Reenqueued != 2 {
+		t.Fatalf("partial scan=%+v err=%v", first, err)
+	}
+	info, err := run.Info(ctx)
+	if err != nil || info == nil || info.State.Msgs != 2 {
+		t.Fatalf("partial wakeups: info=%+v err=%v", info, err)
+	}
+	second, err := scan.Scan(ctx, first.NextSequence, 3, false)
+	if err != nil || second.Reenqueued != 3 {
+		t.Fatalf("retry scan=%+v err=%v", second, err)
+	}
+	info, err = run.Info(ctx)
+	if err != nil || info == nil || info.State.Msgs != 3 {
+		t.Fatalf("recovered wakeups: info=%+v err=%v", info, err)
+	}
+}
 
 func TestSuspendedScanRepairsMatchingSignalOnly(t *testing.T) {
 	all, _ := setup(t)
