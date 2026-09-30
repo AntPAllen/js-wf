@@ -2526,3 +2526,34 @@ successfully. The extended simulation campaign at `df72ed0` and original
 million-timer process remained authoritatively live during this work. Neither
 has been restarted or counted as terminal proof. The separate 200-seed mixed
 latency failure above remains unresolved.
+
+## SDK materialized frame capture and restore
+
+The SDK now captures and restores versioned continuation frames. The local
+uninterrupted comparison preserves state observations, consumed signals,
+reusable child outcomes, external deduplication keys and exact suffix entries;
+a second boundary preserves cancellation/consumption from the omitted prefix.
+Referenced child results are reread and hash-verified with no restored derived
+cache. Capture rejects pending/suspended boundaries and live timer handles,
+including signal-selected handles awaiting cancellation. Nested runtime objects
+and cyclic locals fail before writes. Restore rejects stale generations and
+malformed SDK suffixes without returning a context. The SDK race suite passed
+in 10.720 seconds, complete simulator suite in 81.171 seconds and strengthened
+focused controls under race in 1.024 seconds; vet passed. [Raw logs, source hashes
+and scope](scale/checkpoint-state-2026-09-30/) are retained. These primitives have
+no production worker callers yet: durable publication, manifest CAS, stage
+dispatch, logical suffix reads, offline continuation replay and crash repair
+remain required. No materialized-checkpoint completion claim is made.
+
+## Completed expanded simulation at df72ed0
+
+The [extended Tier 1 campaign](https://github.com/AntPAllen/js-wf/actions/runs/36782364759)
+completed successfully at clean `df72ed0cf0c94888d25ddaa1020f5c3471b67d14`:
+100,000 seeds per workload, 7,600,606 schedules, 169,856,712 choices and
+1,881,853,898 transport events in 1h43m34.969s of Go test time. The
+[complete coverage log](scale/tier1-df72ed0-2026-09-30/) is retained. This includes
+the fan-out and first-heartbeat freshness additions, but predates raw blob
+metadata validation and checkpoint foundation/capture changes. Final-source
+coverage, remaining modeled transport paths, the mixed latency failure and
+independent matrix/soak gates remain open. The original million-timer process
+remains live and has not been restarted for observation.

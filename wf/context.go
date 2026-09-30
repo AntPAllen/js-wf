@@ -54,28 +54,30 @@ type Entry struct {
 type Appender func(ctx context.Context, kind Kind, payload json.RawMessage) error
 
 type Context struct {
-	base               context.Context
-	entries            []Entry
-	position           int
-	stepOffset         uint64
-	append             Appender
-	replay             bool
-	signals            []Signal
-	usedSignals        map[uint64]bool
-	waitingOn          string
-	wakeupAt           time.Time
-	timerNow           func(context.Context) (time.Time, error)
-	scheduleTimer      func(context.Context, uint64, time.Time) error
-	timerFired         func(time.Time, time.Time)
-	parentType         string
-	parentID           string
-	parentInvSeq       uint64
-	startChild         func(context.Context, string, string, []byte, string) error
-	storeResult        func(context.Context, []byte) (string, error)
-	loadResult         func(context.Context, string) ([]byte, error)
-	promiseResults     map[string]*promiseResult
-	promiseResultBytes int
-	state              map[string]json.RawMessage
+	base                      context.Context
+	entries                   []Entry
+	position                  int
+	stepOffset                uint64
+	append                    Appender
+	replay                    bool
+	signals                   []Signal
+	usedSignals               map[uint64]bool
+	waitingOn                 string
+	wakeupAt                  time.Time
+	timerNow                  func(context.Context) (time.Time, error)
+	scheduleTimer             func(context.Context, uint64, time.Time) error
+	timerFired                func(time.Time, time.Time)
+	parentType                string
+	parentID                  string
+	parentInvSeq              uint64
+	startChild                func(context.Context, string, string, []byte, string) error
+	storeResult               func(context.Context, []byte) (string, error)
+	loadResult                func(context.Context, string) ([]byte, error)
+	promiseResults            map[string]*promiseResult
+	promiseResultBytes        int
+	state                     map[string]json.RawMessage
+	timerHandles              map[uint64]*TimerHandle
+	checkpointCancelledTimers map[uint64]bool
 }
 
 type Signal struct {

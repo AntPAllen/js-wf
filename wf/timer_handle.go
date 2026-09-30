@@ -75,7 +75,12 @@ func (c *Context) Timer(name string, d time.Duration) (*TimerHandle, error) {
 		}
 	}
 	c.position++
-	return &TimerHandle{c: c, name: name, step: step, fireAt: req.FireAt}, nil
+	handle := &TimerHandle{c: c, name: name, step: step, fireAt: req.FireAt}
+	if c.timerHandles == nil {
+		c.timerHandles = make(map[uint64]*TimerHandle)
+	}
+	c.timerHandles[step] = handle
+	return handle, nil
 }
 
 func (t *TimerHandle) action(kind string) error {

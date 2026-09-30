@@ -1,0 +1,148 @@
+=== RUN   TestCheckpointCursorPreservesSDKIdentitiesAndReplay
+--- PASS: TestCheckpointCursorPreservesSDKIdentitiesAndReplay (0.00s)
+=== RUN   TestCheckpointStateMatchesUninterruptedContinuation
+--- PASS: TestCheckpointStateMatchesUninterruptedContinuation (0.00s)
+=== RUN   TestCheckpointRejectsUnfinishedOrLiveTimerBoundary
+=== RUN   TestCheckpointRejectsUnfinishedOrLiveTimerBoundary/pending-request
+=== RUN   TestCheckpointRejectsUnfinishedOrLiveTimerBoundary/suspended
+=== RUN   TestCheckpointRejectsUnfinishedOrLiveTimerBoundary/timer
+--- PASS: TestCheckpointRejectsUnfinishedOrLiveTimerBoundary (0.00s)
+    --- PASS: TestCheckpointRejectsUnfinishedOrLiveTimerBoundary/pending-request (0.00s)
+    --- PASS: TestCheckpointRejectsUnfinishedOrLiveTimerBoundary/suspended (0.00s)
+    --- PASS: TestCheckpointRejectsUnfinishedOrLiveTimerBoundary/timer (0.00s)
+=== RUN   TestCheckpointRejectsRuntimeObjectsInLocalsBeforeWrites
+--- PASS: TestCheckpointRejectsRuntimeObjectsInLocalsBeforeWrites (0.00s)
+=== RUN   TestCheckpointRestoreRejectsGenerationAndSuffixBeforeEffects
+--- PASS: TestCheckpointRestoreRejectsGenerationAndSuffixBeforeEffects (0.00s)
+=== RUN   TestCheckpointPositiveTimerMustBeCanceledEvenAfterSignalSelection
+--- PASS: TestCheckpointPositiveTimerMustBeCanceledEvenAfterSignalSelection (0.00s)
+=== RUN   TestStepRecovery
+--- PASS: TestStepRecovery (0.00s)
+=== RUN   TestConcurrentStepOrderChangeFailsReplay
+--- PASS: TestConcurrentStepOrderChangeFailsReplay (0.00s)
+=== RUN   TestEffectPanicIsJournaled
+--- PASS: TestEffectPanicIsJournaled (0.00s)
+=== RUN   TestEffectGoexitIsJournaled
+--- PASS: TestEffectGoexitIsJournaled (0.00s)
+=== RUN   TestBlockedEffectReturnsOnCancellationWithoutCompletion
+--- PASS: TestBlockedEffectReturnsOnCancellationWithoutCompletion (0.00s)
+=== RUN   TestPromiseResolvesLargeChildResult
+--- PASS: TestPromiseResolvesLargeChildResult (0.00s)
+=== RUN   TestPromiseRepeatedAwaitReplaysOneConsumptionAndCopiesResult
+--- PASS: TestPromiseRepeatedAwaitReplaysOneConsumptionAndCopiesResult (0.00s)
+=== RUN   TestPromiseObjectReadRetryDoesNotConsumeAnotherSignal
+--- PASS: TestPromiseObjectReadRetryDoesNotConsumeAnotherSignal (0.00s)
+=== RUN   TestPromiseRepeatedChildFailureAndCorruptOutcome
+--- PASS: TestPromiseRepeatedChildFailureAndCorruptOutcome (0.00s)
+=== RUN   TestPromiseResultCacheRemainsBounded
+--- PASS: TestPromiseResultCacheRemainsBounded (0.17s)
+=== RUN   TestRandomWorkflowDAGsRecoverAfterKill
+--- PASS: TestRandomWorkflowDAGsRecoverAfterKill (9.44s)
+=== RUN   TestOfflineReplayNeverRunsIncompleteEffect
+--- PASS: TestOfflineReplayNeverRunsIncompleteEffect (0.00s)
+=== RUN   TestOfflineReplayWithSignalAndObjectResult
+--- PASS: TestOfflineReplayWithSignalAndObjectResult (0.06s)
+=== RUN   TestOfflineReplayObservesSuspensionAndFailure
+--- PASS: TestOfflineReplayObservesSuspensionAndFailure (0.00s)
+=== RUN   TestOfflineReplayObservesChildSuspension
+--- PASS: TestOfflineReplayObservesChildSuspension (0.00s)
+=== RUN   TestUnserializableStepResultsAreDurable
+=== RUN   TestUnserializableStepResultsAreDurable/channel
+=== RUN   TestUnserializableStepResultsAreDurable/function
+=== RUN   TestUnserializableStepResultsAreDurable/cyclic_value
+--- PASS: TestUnserializableStepResultsAreDurable (0.00s)
+    --- PASS: TestUnserializableStepResultsAreDurable/channel (0.00s)
+    --- PASS: TestUnserializableStepResultsAreDurable/function (0.00s)
+    --- PASS: TestUnserializableStepResultsAreDurable/cyclic_value (0.00s)
+=== RUN   TestUnknownStepResultErrorKindFailsClosed
+--- PASS: TestUnknownStepResultErrorKindFailsClosed (0.00s)
+=== RUN   TestSearchAttributesReplayAndValidation
+--- PASS: TestSearchAttributesReplayAndValidation (0.00s)
+=== RUN   TestSelectManySuspendsReplaysChoiceAndRetainsLosers
+--- PASS: TestSelectManySuspendsReplaysChoiceAndRetainsLosers (0.00s)
+=== RUN   TestSelectManyRejectsInvalidCasesAndCorruptCompletion
+--- PASS: TestSelectManyRejectsInvalidCasesAndCorruptCompletion (0.00s)
+=== RUN   TestSelectManyUnknownCompletionReplaysRecordedWinner
+--- PASS: TestSelectManyUnknownCompletionReplaysRecordedWinner (0.00s)
+=== RUN   TestTimerSelectSignalSuspendsAndReplaysChoice
+--- PASS: TestTimerSelectSignalSuspendsAndReplaysChoice (0.00s)
+=== RUN   TestTimerSelectSignalTimerBranchReplaysWithoutFiringAgain
+--- PASS: TestTimerSelectSignalTimerBranchReplaysWithoutFiringAgain (0.00s)
+=== RUN   TestJournaledStateReplayAndDivergence
+--- PASS: TestJournaledStateReplayAndDivergence (0.00s)
+=== RUN   TestTimerHandlesCancelAndCoalesceOnReplay
+--- PASS: TestTimerHandlesCancelAndCoalesceOnReplay (0.00s)
+=== RUN   TestTimerHandleRetriesScheduleAfterRequest
+--- PASS: TestTimerHandleRetriesScheduleAfterRequest (0.00s)
+=== RUN   TestSleepUsesServerClockAndReplays
+--- PASS: TestSleepUsesServerClockAndReplays (0.00s)
+=== RUN   TestNonpositiveSleepCompletesImmediately
+--- PASS: TestNonpositiveSleepCompletesImmediately (0.00s)
+=== RUN   TestRunOnceRetryKeepsDeduplicationKey
+--- PASS: TestRunOnceRetryKeepsDeduplicationKey (0.00s)
+=== RUN   TestJournaledNowAndRandomReplay
+--- PASS: TestJournaledNowAndRandomReplay (0.00s)
+=== RUN   TestVersionReplaysDecision
+--- PASS: TestVersionReplaysDecision (0.00s)
+PASS
+ok  	js-wf/wf	10.720s
+=== RUN   TestFrameRoundTripAndDetachedState
+--- PASS: TestFrameRoundTripAndDetachedState (0.00s)
+=== RUN   TestFrameRejectsCorruptionBeforeReturningState
+=== RUN   TestFrameRejectsCorruptionBeforeReturningState/lost-byte
+=== RUN   TestFrameRejectsCorruptionBeforeReturningState/changed-content
+=== RUN   TestFrameRejectsCorruptionBeforeReturningState/missing-hash
+=== RUN   TestFrameRejectsCorruptionBeforeReturningState/reused-id
+=== RUN   TestFrameRejectsCorruptionBeforeReturningState/foreign-invocation
+=== RUN   TestFrameRejectsCorruptionBeforeReturningState/stale-anchor
+=== RUN   TestFrameRejectsCorruptionBeforeReturningState/stale-epoch
+=== RUN   TestFrameRejectsCorruptionBeforeReturningState/oversized
+--- PASS: TestFrameRejectsCorruptionBeforeReturningState (0.01s)
+    --- PASS: TestFrameRejectsCorruptionBeforeReturningState/lost-byte (0.00s)
+    --- PASS: TestFrameRejectsCorruptionBeforeReturningState/changed-content (0.00s)
+    --- PASS: TestFrameRejectsCorruptionBeforeReturningState/missing-hash (0.00s)
+    --- PASS: TestFrameRejectsCorruptionBeforeReturningState/reused-id (0.00s)
+    --- PASS: TestFrameRejectsCorruptionBeforeReturningState/foreign-invocation (0.00s)
+    --- PASS: TestFrameRejectsCorruptionBeforeReturningState/stale-anchor (0.00s)
+    --- PASS: TestFrameRejectsCorruptionBeforeReturningState/stale-epoch (0.00s)
+    --- PASS: TestFrameRejectsCorruptionBeforeReturningState/oversized (0.00s)
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/version
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/stage
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/generation
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/epoch
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/pending-step
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/sdk-ahead-of-journal
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/signal-duplicate
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/signal-zero
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/signal-order
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/odd-timer
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/impossible-attempt-count
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/future-timer
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/state-key
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/promise-null
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/promise-inline-and-ref
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/promise-missing-hash
+=== RUN   TestFrameRejectsInvalidSemanticsWithMatchingHash/promise-unknown-field
+--- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash (0.01s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/version (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/stage (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/generation (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/epoch (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/pending-step (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/sdk-ahead-of-journal (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/signal-duplicate (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/signal-zero (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/signal-order (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/odd-timer (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/impossible-attempt-count (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/future-timer (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/state-key (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/promise-null (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/promise-inline-and-ref (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/promise-missing-hash (0.00s)
+    --- PASS: TestFrameRejectsInvalidSemanticsWithMatchingHash/promise-unknown-field (0.00s)
+=== RUN   TestFrameRejectsUnknownFieldsTrailingJSONAndInvalidState
+--- PASS: TestFrameRejectsUnknownFieldsTrailingJSONAndInvalidState (0.72s)
+PASS
+ok  	js-wf/internal/checkpoint	(cached)

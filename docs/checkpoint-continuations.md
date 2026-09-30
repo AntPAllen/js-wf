@@ -1,7 +1,7 @@
 # Materialized SDK checkpoints with named continuations
 
-Status: continuation contract, SDK cursor foundation and bounded frame codec.
-Durable capture,
+Status: continuation contract, SDK cursor foundation, bounded frame codec and
+SDK capture/restore. Durable publication,
 manifest publication, worker dispatch, suffix reads and recovery remain open.
 This document preserves the plan's checkpoint requirement; it does not count
 as a completed checkpoint feature.
@@ -146,7 +146,7 @@ event for terminal and next-entry latency checks.
 The current cursor test proves only item 2's local SDK identity foundation:
 after omitting a completed prefix, the same suffix declarations and identities
 are produced; replay adds no effect, and losing the base is nondeterministic.
-Durable frame storage and all remaining verification above still need implementation.
+Durable frame storage and the remaining integrated verification above still need implementation.
 
 ## Implemented frame codec
 
@@ -159,7 +159,32 @@ outcomes preserve object references rather than derived result caches. State
 and user locals decoded from the frame are detached from transport buffers.
 
 The race suite and vet pass, with [raw proof and scope](scale/checkpoint-frame-2026-09-30/).
-No SDK or worker currently calls the codec. Capture must still enforce boundary
-and live-handle rules, and the worker must check stage registration, actual
+The SDK capture/restore functions now call the codec and enforce boundary and
+live-handle rules. No production worker calls them yet. The worker must check
+stage registration, actual
 journal anchor, suffix continuity and configured journal limits before effects.
 This does not advance the checkpoint feature to complete.
+
+## Implemented SDK capture and restore
+
+`Context.CaptureCheckpoint` validates the boundary and serialized locals, then
+encodes a prospective frame whose SDK position includes the checkpoint pair.
+It makes no durable write and never advances the context. `NewCheckpointContext`
+verifies that frame against `CheckpointLocation`, validates ordered SDK suffix
+entries after the anchor, and restores detached state, consumption identities
+and promise outcome payloads. Derived result caches start empty; referenced
+results pass the existing outcome hash verifier on their first restored await.
+`CheckpointInfo` carries the stage, locals, panic attempts and canceled timer
+facts for future worker dispatch and wakeup filtering.
+
+Timer creation now registers handles in its context. Capture refuses any live
+handle, including one whose signal selection won without cancellation. Contexts
+and handles nested in locals are rejected before JSON serialization can turn
+them into empty objects. Cyclic locals fail without an append. Capture/restore
+controls and the full SDK/simulator checks are retained in
+[SDK checkpoint proof](scale/checkpoint-state-2026-09-30/).
+
+These are low-level SDK primitives. `wf.Continue`, stage registration and durable
+worker publication/dispatch remain proposed, and ordinary workers still replay
+from the initial handler. Frame hash/anchor binding is not a substitute for
+checking the actual retained checkpoint completion and contiguous journal suffix.
