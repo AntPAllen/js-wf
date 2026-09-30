@@ -1351,3 +1351,25 @@ children at creation seed 2 and collection seed 42, checking exact replay for
 both. It is finite scale evidence, not 100,000 seeds with 500 children, every
 possible cut, or the real-cluster 500-child chaos matrix. Snapshot compaction
 and transport-loss faults remain covered by separate modeled workloads.
+
+### First-heartbeat freshness
+
+Every heartbeat now applies the same request-start freshness interval, including
+the first one. Acquisition and append-facing renewals already provide an
+acknowledged ownership write. A first heartbeat within that interval can send
+consumer progress without another KV update; an overdue or backward-clock
+heartbeat must attempt an update, and a lost lease is never reused. Every
+journal append still renews unconditionally. Delayed acknowledgements do not
+refresh the bound because it begins before the KV request.
+
+The integrated heartbeat workload now requires zero writes for a first tick at
+1,000 or 2,999 virtual milliseconds after the prior append. A later tick at
+3,500 ms must update. The former unconditional-first-heartbeat worker fails
+this control at seed 1. Renewal-failure handoff modes inject their fault at the
+3,000 ms boundary so an actual update is attempted; progress failure and channel
+closure modes retain their prior fault points. Pins were regenerated and exact
+cross-process replay passes. All three heartbeat workloads passed 100,000 seeds
+with 300,000 schedules and 10,247,713 events in 35.95 seconds. A real three-node
+worker contract confirms recent/overdue first-heartbeat decisions and all four
+unconditional journal renewals. This call-count proof does not attribute the
+remaining mixed-fault latency failures.

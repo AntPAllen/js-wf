@@ -2297,3 +2297,41 @@ uses binary search without changing transport outcomes or event traces. All
 pinned traces still replay exactly. Final extended race validation and the
 new workload's 100,000-seed validation remain pending; older completed release
 counts do not cover it. The million-timer process remains live and undisturbed.
+
+## Completed fan-out model validation and first-heartbeat freshness
+
+The new six-child parent-interruption workload at clean source `97e72f4` passed
+100,000 seeds: 100,000 schedules, 1,600,000 choices and 64,378,345 transport
+events in 245.40 seconds. Its [coverage log](scale/fanout-interruption-100k-97e72f4-2026-09-30.txt)
+is retained. The modeled 500-child creation and result cuts also passed under
+the race detector in 279.14 seconds, alongside the six-child and pinned corpus
+race checks; the combined package run took 326.38 seconds. This is finite
+500-child scale validation, not 100,000 seeds at that size or the full real
+fault matrix.
+
+The [latest failed mixed campaign](https://github.com/AntPAllen/js-wf/actions/runs/36778973973)
+passed seeds 1–11 then missed seed 12 at 50.15 seconds. Its now-retained syscall
+trace contains 4,518 completed delayed calls; operation events locate both
+large KV Update time and local heartbeat gate waits. [Raw artifacts and limits
+on causal interpretation](scale/mixed-seed12-failure-2026-09-30/README.md) are retained.
+
+The worker now uses the existing acknowledged-renewal freshness rule on the
+first heartbeat too, eliminating a forced extra update when a recent acquisition
+or append already proved ownership. The interval still begins at request start,
+and every journal append still updates unconditionally. The strengthened model
+fails the former worker at seed 1. Renewal-drop/hidden-ack handoff fixtures now
+inject at the three-second freshness boundary so their faults still target
+real updates; progress/closure fault points remain intact. Regenerated pins,
+exact/cross-process replay and focused race controls pass. Three heartbeat
+workloads passed 100,000 seeds each in 35.95 seconds: 300,000 schedules and
+10,247,713 events. Real three-node recent/overdue first-heartbeat controls and
+lease reuse contracts passed under race in 15.56 seconds and require four
+unconditional append renewals. The full simulator passed in 84.35 seconds.
+
+A local seed-12 mixed race replay passed in 45.70 seconds at terminal p99
+17.53 seconds across 28 invocations. It is a fresh passing interleaving, not
+proof that the first-heartbeat change caused the earlier delay or that the
+200-seed mixed release gate is clear. [Before/after controls and validation
+logs](scale/first-heartbeat-policy-2026-09-30/) are retained. The million-timer
+campaign remains live on its original clean source, with no restart or scope
+change.

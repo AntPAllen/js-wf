@@ -594,7 +594,6 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 			defer ticker.Stop()
 			ticks = ticker.C
 		}
-		heartbeatPrimed := false
 		for {
 			select {
 			case <-ctx.Done():
@@ -606,13 +605,10 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 				}
 				started := ops.begin()
 				renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
-				minIdle := w.heartbeatInterval
-				// Establish the first heartbeat with an unconditional write.
-				if !heartbeatPrimed {
-					minIdle = 0
-				}
-				renewed, timing, err := ops.renew(renewCtx, l, minIdle)
-				heartbeatPrimed = true
+				// Acquisition and append renewals already acknowledge ownership.
+				// Apply the same request-start freshness bound to every heartbeat;
+				// each journal append still renews unconditionally.
+				renewed, timing, err := ops.renew(renewCtx, l, w.heartbeatInterval)
 				stopRenew()
 				operation := "lease_renew_heartbeat"
 				if err == nil && !renewed {

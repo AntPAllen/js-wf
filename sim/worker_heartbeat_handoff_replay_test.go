@@ -103,10 +103,12 @@ func runSeededHeartbeatHandoff(seed int64, replay *Trace) (trace Trace, runErr e
 		if err := leaseTransport.QueueFault(KVFault{Operation: "update", Kind: kind}); err != nil {
 			return trace, err
 		}
-		if err := schedule.AdvanceMillis(1000); err != nil {
+		// Trigger an actual renewal at the freshness boundary, rather than
+		// injecting a failure into a recent-write heartbeat that does no I/O.
+		if err := schedule.AdvanceMillis(3000); err != nil {
 			return trace, err
 		}
-		ticks <- time.UnixMilli(1000)
+		ticks <- time.UnixMilli(3000)
 	case "progress_drop":
 		if err := transport.Dispatch.QueueFault(DispatchFault{Operation: "progress", Kind: "drop_before_commit"}); err != nil {
 			return trace, err
