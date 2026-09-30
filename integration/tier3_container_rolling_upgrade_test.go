@@ -112,9 +112,9 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	if mode, err := provision.EnsureAuto(ctx, all[0], 5); err != nil || mode != provision.FallbackTimers {
 		t.Fatalf("old peer fallback mode=%q err=%v", mode, err)
 	}
-	const typ, firstID, signalType = "tier3-rolling-upgrade", "timer", "tier3-upgrade-signal"
+	const typ, firstID, signalType, fanoutType, childType = "tier3-rolling-upgrade", "timer", "tier3-upgrade-signal", "tier3-upgrade-fanout", "tier3-upgrade-child"
 	partition := identity.Partition(typ, firstID, provision.Partitions)
-	var repairedID, afterID, signalID string
+	var repairedID, afterID, signalID, fanoutID string
 	for candidate := 0; candidate < 10_000 && afterID == ""; candidate++ {
 		id := fmt.Sprintf("same-part-%d", candidate)
 		if identity.Partition(typ, id, provision.Partitions) != partition {
@@ -139,6 +139,16 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	if signalID == "" {
 		t.Fatal("could not find signal ID on worker partition")
 	}
+	for candidate := 0; candidate < 10_000; candidate++ {
+		id := fmt.Sprintf("fanout-part-%d", candidate)
+		if identity.Partition(fanoutType, id, provision.Partitions) == partition {
+			fanoutID = id
+			break
+		}
+	}
+	if fanoutID == "" {
+		t.Fatal("could not find fan-out ID on worker partition")
+	}
 	w, err := worker.New(ctx, all[3], "tier3-upgrade-worker", map[string]worker.Handler{
 		typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 			if err := wf.Sleep(c, "wait", time.Second); err != nil {
@@ -156,6 +166,29 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 				return nil, err
 			}
 			return json.Marshal([]json.RawMessage{first, second})
+		},
+		fanoutType: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+			promises := make([]wf.Promise, 6)
+			for i := range promises {
+				promise, err := wf.CallAsync(c, childType, json.RawMessage(fmt.Sprint(i)))
+				if err != nil {
+					return nil, err
+				}
+				promises[i] = promise
+			}
+			var sum int
+			for _, promise := range promises {
+				value, err := wf.AwaitPromise(c, promise)
+				if err != nil {
+					return nil, err
+				}
+				var n int
+				if err := json.Unmarshal(value, &n); err != nil {
+					return nil, err
+				}
+				sum += n
+			}
+			return json.Marshal(sum)
 		},
 	})
 	if err != nil {
@@ -217,6 +250,40 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	if err != nil || len(records) == 0 || records[len(records)-1].Kind != journal.Suspended {
 		t.Fatalf("signal workflow was not suspended before upgrade: records=%d err=%v", len(records), err)
 	}
+	if _, err := oldClient.Start(ctx, fanoutType, fanoutID, payload); err != nil {
+		t.Fatalf("start fan-out through old container: %v", err)
+	}
+	var childIDs []string
+	for until := time.Now().Add(20 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		parentRecords, _, readErr := journal.New(all[3]).Read(attempt, fanoutType, fanoutID)
+		stop()
+		if readErr == nil {
+			ids := map[string]bool{}
+			for _, record := range parentRecords {
+				if record.Kind != journal.StepRequested {
+					continue
+				}
+				var request struct {
+					ChildID string `json:"child_id"`
+				}
+				if json.Unmarshal(record.Payload, &request) == nil && request.ChildID != "" {
+					ids[request.ChildID] = true
+				}
+			}
+			if len(ids) == 6 && len(parentRecords) > 0 && parentRecords[len(parentRecords)-1].Kind == journal.Suspended {
+				childIDs = childIDs[:0]
+				for id := range ids {
+					childIDs = append(childIDs, id)
+				}
+				break
+			}
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if len(childIDs) != 6 {
+		t.Fatalf("fan-out did not durably suspend with six child requests: children=%d", len(childIDs))
+	}
 	if err := cluster.UpgradeNode(0); err != nil {
 		t.Fatalf("upgrade old container: %v", err)
 	}
@@ -249,13 +316,46 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	if value, err := upgradedClient.Await(ctx, signalType, signalID); err != nil || string(value) != `[1,2]` {
 		t.Fatalf("ordered post-upgrade signals=%s err=%v", value, err)
 	}
+	childWorker, err := worker.New(ctx, all[4], "tier3-upgrade-child-worker", map[string]worker.Handler{childType: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+		value, err := wf.Run(c, "child-effect", 0, func(context.Context) (int, error) { return 7, nil })
+		return json.RawMessage(fmt.Sprint(value)), err
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer childWorker.Close()
+	childCtx, stopChildren := context.WithCancel(ctx)
+	childParts := map[uint32]bool{}
+	for _, id := range childIDs {
+		childParts[identity.Partition(childType, id, provision.Partitions)] = true
+	}
+	childDone := make(chan error, len(childParts))
+	for part := range childParts {
+		go func(part uint32) { childDone <- childWorker.RunPartition(childCtx, part) }(part)
+	}
+	defer func() {
+		stopChildren()
+		for range childParts {
+			if err := <-childDone; err != nil && !errors.Is(err, context.Canceled) {
+				t.Error(err)
+			}
+		}
+	}()
+	if value, err := upgradedClient.Await(ctx, fanoutType, fanoutID); err != nil || string(value) != `42` {
+		t.Fatalf("post-upgrade fan-out result=%s err=%v", value, err)
+	}
+	for _, id := range childIDs {
+		if value, err := upgradedClient.Await(ctx, childType, id); err != nil || string(value) != `7` {
+			t.Fatalf("post-upgrade child %s=%s err=%v", id, value, err)
+		}
+	}
 	if _, err := upgradedClient.Start(ctx, typ, afterID, payload); err != nil {
 		t.Fatalf("post-upgrade start: %v", err)
 	}
 	if value, err := upgradedClient.Await(ctx, typ, afterID); err != nil || string(value) != `"done"` {
 		t.Fatalf("post-upgrade result=%s err=%v", value, err)
 	}
-	if report, err := integrity.Check(ctx, upgraded); err != nil || report.Invocations != 4 || report.Journals != 4 || report.Terminal != 4 {
+	if report, err := integrity.Check(ctx, upgraded); err != nil || report.Invocations != 11 || report.Journals != 11 || report.Terminal != 11 {
 		t.Fatalf("five-container upgrade audit: report=%+v err=%v", report, err)
 	}
 	if result, err := history.CheckStarts(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
