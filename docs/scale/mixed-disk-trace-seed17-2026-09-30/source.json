@@ -1,0 +1,13 @@
+{
+  "base_revision": "84b2296a0fcd32bfcfc7bfff84ff733f8c0abcce",
+  "source_modified": true,
+  "source_sha256": {
+    "testcluster/process_slow_disk_linux.go": "723b6b4958f058978d650cc053d6c9713a2d8b5ef1bc94ecd411f72486f11e14",
+    "testcluster/process_cluster.go": "148dc44ff6046b66fb16cd3a83cf5a0a1965dc1c851f5c9b062f507b931a3329",
+    "integration/mixed_process_chaos_test.go": "6ba74dc6e923f23a90f656315ebd967f61b50ba51c27cb52d07e2bfe77d111e7"
+  },
+  "command": "WF_MIXED_CHAOS=1 FAULT_SEED=17 FAULT_SCHEDULE_OUT=/tmp/js-wf-mixed17-mapped-disk.json go test -race ./integration -run ^TestMixedWorkflowsRecoverFromFourServerFaults$ -count=1 -v",
+  "test_seconds": 50.68,
+  "terminal_p99_seconds": 17.869381413,
+  "result": "passed"
+}

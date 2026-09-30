@@ -72,6 +72,11 @@ func TestProcessClusterIndependentDiagnostics(t *testing.T) {
 	if err != nil || json.Unmarshal(connections, &state) != nil || state.ServerID == "" {
 		t.Fatalf("connection snapshot: %s err=%v", connections, err)
 	}
+	state.ServerID = ""
+	jetstreamState, err := c.Diagnostic(ctx, 0, "jetstream")
+	if err != nil || json.Unmarshal(jetstreamState, &state) != nil || state.ServerID == "" {
+		t.Fatalf("JetStream snapshot: %s err=%v", jetstreamState, err)
+	}
 	if err := c.KillNode(0); err != nil {
 		t.Fatal(err)
 	}
@@ -491,6 +496,9 @@ func TestProcessClusterSlowDiskDelaysStoreWrites(t *testing.T) {
 	data, err := os.ReadFile(c.DiskTracePath(leader))
 	if err != nil || !strings.Contains(string(data), "(DELAYED)") {
 		t.Fatalf("no delayed store syscall in trace %s: %v: %s", c.DiskTracePath(leader), err, data)
+	}
+	if !strings.Contains(string(data), "<"+c.root+"/") || !strings.Contains(string(data), " (DELAYED) <") {
+		t.Fatalf("disk trace lacks decoded paths or syscall durations: %s", data)
 	}
 	info, err = stream.Info(ctx)
 	if err != nil || info.State.Msgs != 11 {

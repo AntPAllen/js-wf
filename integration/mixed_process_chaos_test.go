@@ -51,14 +51,24 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	defer cluster.Close()
 	defer func() {
 		output := os.Getenv("FAULT_SCHEDULE_OUT")
-		if !t.Failed() || output == "" {
+		if output == "" {
 			return
 		}
 		prefix := strings.TrimSuffix(output, filepath.Ext(output))
 		for i := range cluster.Commands {
-			data, readErr := os.ReadFile(cluster.LogPath(i))
-			if readErr == nil {
-				_ = os.WriteFile(fmt.Sprintf("%s-server-%d.log", prefix, i), data, 0644)
+			// Detach before reading so a failure during the active fault retains
+			// the flushed syscall trace. A normally healed fault is already stopped.
+			_ = cluster.StopSlowDisk(i)
+			if data, readErr := os.ReadFile(cluster.DiskTracePath(i)); readErr == nil {
+				if writeErr := os.WriteFile(fmt.Sprintf("%s-server-%d-disk.log", prefix, i), data, 0600); writeErr != nil {
+					t.Errorf("save disk trace: %v", writeErr)
+				}
+			}
+			if t.Failed() {
+				data, readErr := os.ReadFile(cluster.LogPath(i))
+				if readErr == nil {
+					_ = os.WriteFile(fmt.Sprintf("%s-server-%d.log", prefix, i), data, 0644)
+				}
 			}
 		}
 	}()
@@ -449,6 +459,21 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	}}
 	if err := schedule.Save(path); err != nil {
 		t.Fatal(err)
+	}
+	if os.Getenv("FAULT_SCHEDULE_OUT") != "" {
+		prefix := strings.TrimSuffix(path, filepath.Ext(path))
+		for node := range cluster.Commands {
+			attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+			data, err := cluster.Diagnostic(attempt, node, "jetstream")
+			stop()
+			if err != nil {
+				t.Logf("pre-fault JetStream diagnostic node %d: %v", node, err)
+				continue
+			}
+			if err := os.WriteFile(fmt.Sprintf("%s-server-%d-jetstream-before.json", prefix, node), data, 0600); err != nil {
+				t.Fatal(err)
+			}
+		}
 	}
 	t.Logf("FAULT_SEED=%d FAULT_SCHEDULE=%s", seed, path)
 	replay, err := testcluster.LoadFaultSchedule(path)

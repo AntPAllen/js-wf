@@ -14,7 +14,8 @@ import (
 	"time"
 )
 
-// SlowDisk delays writes and syncs on files already present in one node's
+// SlowDisk records timestamped syscalls, durations and decoded file paths while
+// delaying writes and syncs on files already present in one node's
 // JetStream store. strace filters by exact path, so newly created files are
 // outside this fault until it is reapplied after they exist.
 func (c *ProcessCluster) SlowDisk(i int, latency time.Duration) error {
@@ -40,7 +41,7 @@ func (c *ProcessCluster) SlowDisk(i int, latency time.Duration) error {
 	if len(files) == 0 {
 		return fmt.Errorf("process node %d has no existing store files to delay", i)
 	}
-	args := []string{"-f", "-p", strconv.Itoa(c.Commands[i].Process.Pid), "-o", c.DiskTracePath(i), "-e", "inject=write,writev,pwrite64,pwritev,pwritev2,fsync,fdatasync:delay_enter=" + strconv.FormatInt(latency.Milliseconds(), 10) + "ms"}
+	args := []string{"-f", "-ttt", "-T", "-y", "-p", strconv.Itoa(c.Commands[i].Process.Pid), "-o", c.DiskTracePath(i), "-e", "inject=write,writev,pwrite64,pwritev,pwritev2,fsync,fdatasync:delay_enter=" + strconv.FormatInt(latency.Milliseconds(), 10) + "ms"}
 	for _, path := range files {
 		args = append(args, "-P", path)
 	}

@@ -25,6 +25,8 @@ jobs:
           name: tier1-failure-trace
           path: sim/sim-failure*.json
           if-no-files-found: ignore
+      - name: Check benchmark and disk-trace parsers
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'
   cluster:
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -120,7 +122,7 @@ jobs:
             integration/timer-four-faults.json
             integration/signal-four-faults.json
             integration/fanout-four-faults.json
-            integration/mixed-four-faults.json
+            integration/mixed-four-faults*.json
             integration/mixed-four-faults-server-*.log
           if-no-files-found: ignore
   long-journal:

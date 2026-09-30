@@ -2156,3 +2156,40 @@ the existing 15-minute and 60-minute CI successes (2,551 and 10,197 successful
 workflow/scrape pairs). Fresh whole-runtime validation after later production
 changes remains independent. The million-timer runner and fresh extended Tier 1
 campaign are still confirmed live; neither has been restarted.
+
+
+## Timestamped disk traces and stream/consumer Raft attribution
+
+The [mixed campaign at `b25b889`](https://github.com/AntPAllen/js-wf/actions/runs/36773536279)
+passed seeds 1–16 and failed seed 17's terminal p99 at 58.88 seconds. Its retained
+operation events locate long signal append renewals inside KV updates rather
+than the local gate. It did not retain the actual disk syscall trace, so the
+injected store delays could not be correlated with those calls. The live large
+input scale requirement was rechecked separately: the existing 1,000-input,
+six-worker Object Store proof already has passing local and manual CI evidence.
+
+The disk injector now records Unix timestamps, durations and decoded paths.
+Mixed fixtures save flushed disk traces on success and failure, and pre-fault
+bounded JSz snapshots provide stream/consumer Raft group mappings. The existing
+CI artifact glob captures the disk logs; the smoke glob was expanded to retain
+JSz and operation JSON too. A parser joins interrupted calls by thread/syscall,
+reports unmatched/unfinished calls, groups stores and mapped Raft files, and
+counts temporal overlaps with approximate slow-renewal client windows. It
+explicitly avoids interpreting concurrent totals or overlaps as RPC causation.
+See [the diagnostic method and retained evidence](disk-trace-diagnostics.md).
+
+A local seed-17 race replay with the final mapping passed in 50.68 seconds at
+terminal p99 17.87 seconds across 28 invocations. The trace has 2,013 completed
+delayed calls, including 159 lease message-file writes and 248 lease Raft-file
+writes, versus 113 journal message-file writes and one journal Raft-file write.
+Fifty Raft calls remain unattributed and five calls unfinished. This narrows
+which stores were delayed in this passing interleaving; it does not establish
+the earlier CI cause or clear the 200-seed gate. The preceding trace-only race
+replay also passed in 49.44 seconds. Independent HTTP diagnostics and the real
+disk format control pass; seven Python parser/benchmark controls, vet and diff
+checks pass. No production lease/journal policy or latency gate was changed.
+
+The million-timer process has begun deliveries and is still live with all
+million publishes acknowledged, no observed fetch/ack errors or redeliveries
+at inspection. Its full-day/restart outcome and the extended Tier 1 campaign
+remain pending; neither has been restarted.

@@ -238,6 +238,8 @@ func (c *ProcessCluster) Diagnostic(ctx context.Context, node int, kind string) 
 	port, path := c.monitors[node], "/connz?subs=detail"
 	switch kind {
 	case "connections":
+	case "jetstream":
+		path = "/jsz?accounts=true&streams=true&consumers=true&raft=true"
 	case "clock":
 		path = "/varz"
 	case "goroutines":
