@@ -682,6 +682,18 @@ message. Recovery scans and virtual time advancement clear the failures.
 This is a suspended timer/signal I5 check; child completion and integrated
 worker advancement still need coverage.
 
+A separate 1,000-seed transport replay connects the production suspended
+scanner to the modeled durable consumer. It delivers a ready signal wakeup
+while a lease is held, drops the wakeup's `NakWithDelay` before commit, and
+keeps the original delivery pending for the 20-second `AckWait`. The scanner
+deduplicates within its first window, publishes a fresh run in the next
+ten-second window, and the consumer fetches that run before the original
+redelivery. Once the modeled journal becomes terminal, a rescan publishes
+nothing; the old delivery is then acknowledged as a no-op. The seed chooses
+the first delivery offset, and saved traces replay exactly. This isolates the
+transport and scanner timing; it does not model a full signal handler or prove
+which acknowledgment was lost in the real-cluster failures.
+
 A further 1,000 seeded schedules interleave two live suspended scanners at
 lease, cursor, cadence, invocation, journal, signal-read, and wakeup calls.
 A seeded cursor write loss forces lease turnover while one wakeup request or
