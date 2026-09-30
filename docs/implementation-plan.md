@@ -324,6 +324,17 @@ A sixth sustained row, `TestMixedMatrixWorkerPausedFortyFiveSeconds`, runs the m
 
 A seventh sustained row, `TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds`, holds server-to-worker replies for 45 seconds while continuing to forward worker requests. Each worker is pinned to its own client TCP proxy and ignores discovered peers. Seeded selection targets active work; relay byte counters confirm the asymmetric fault, and a fresh successful worker PING confirms recovery after replies resume. An active isolation must report fencing. Faults begin at +5s and repeat each minute. Shared histories, retained integrity, raw enabling-event latency and queue-drain gates remain required; select `isolation` in the workflow. This is a worker transport fault with the cluster quorum intact.
 
+The sustained worker-clock row is available as `TestMixedMatrixWorkerClockSkew`
+and `workerclock` in `tier2-matrix-leaders`. Three separate worker processes
+run with verified Go wall-clock offsets of +5 seconds, −5 seconds and zero
+throughout the ten-minute mixed workload. The parent verifies their clocks
+against retained JetStream probe timestamps initially and every thirty seconds;
+these are clock observations, not process kills. It retains the shared
+history, cohort/final integrity, per-type terminal/next-entry p99, final-enabling
+completion and queue-drain gates. The CI selector supports 1, 20 or 200 seeds;
+35-second runs remain smoke-only. Server skew and the other missing sustained
+rows still require their own fixtures and release-count validation.
+
 **Tier 3 — Jepsen-style (nightly and before release).** Five real VMs or containers with real network partitions (iptables), separately verified server and worker clock skew, disk stalls (dm-delay), and process kills including `SIGKILL` of the NATS server with unsynced writes (`sync_interval` set to the production value). Client histories recorded as in phase 0 and checked with Porcupine against these models: `Start` as write-once register; `Signal` as an ordered queue per invocation; `Await` as a read of a register that becomes immutable at first non-empty read. Plus the stream-level invariant checker over the final state.
 
 Clock-skew injection must fail closed unless the running process reports the requested offset before the workload starts. The pinned Go server and a cgo-enabled Go probe bypassed `libfaketime`'s `LD_PRELOAD` clock interposition even though the same preload shifted `date`; [libfaketime documents this runtime limitation](https://github.com/wolfcw/libfaketime). The five-container server-clock slice instead builds the pinned NATS source with a test-only Go `time.Now` wall-clock overlay and verifies each node's own `/varz` time. The worker-clock slice uses the same overlay to build a separate worker process and checks its `time.Now` against an unshifted server's `/varz` before starting work. Both slices now cover one timer, one ordered-signal workflow, 100 short journaled effects, and a six-child fan-out with child-result signal and journal checks. The server slice keeps `WF_RUN`, `WF_SIG`, `WF_JRN`, and `KV_WF_STATE` leaders on the skewed node. These focused checks do not replace sustained mixed workloads and faults across the full matrix.

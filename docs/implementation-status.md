@@ -840,3 +840,36 @@ thirty-day test passed in 41.22 seconds with 195 ms recovery. Its exported
 history contains one Start and six terminal reads, including all five nodes.
 The complete testcluster package passed in 23.97 seconds; vet and diff checks
 passed. These are local proofs; the dedicated new CI job still needs validation.
+
+
+## Sustained worker clock-skew matrix row
+
+`TestMixedMatrixWorkerClockSkew` now uses the shared ten-minute 40/30/20/10
+mixed generator with three separate worker processes at +5 seconds, −5 seconds
+and the normal clock. Skewed worker test binaries use the existing verified
+Go wall-clock overlay and race instrumentation; NATS and the parent history
+recorder keep their normal clocks. Each child publishes a clock probe and reads
+its retained server timestamp, then writes an atomic clock sample. Startup and
+every thirty-second observation validate identity, freshness and the measured
+offset. A bounded dedicated probe stream retains the latest samples without
+writing test probes into workflow journals. Negative controls reject an
+unshifted worker and stale evidence.
+
+The row shares completed-cohort and final retained audits, Start/Signal/Await
+histories, all per-type terminal and enabling-event next-entry p99 gates, final
+completion and queue drain. Fixed skew is applied throughout the workload;
+its periodic schedule records measured clock observations rather than kills.
+Building both skew binaries happens before the workload context starts so the
+full five-minute recovery allowance is preserved. The CI `workerclock` selector
+supports 1/20/200 seeds, with a twenty-minute Go timeout for cold instrumented
+builds; latency and workload duration gates are unchanged.
+
+A local seed 42 race smoke passed in 147.19 seconds including cold binary
+builds: eight batches, 224 terminals and aggregate terminal p99 5.02 seconds.
+Measured initial offsets were +4.999784 seconds, −5.000188 seconds and −1.55 ms.
+Every shared gate passed. The 35-second workload is explicitly excluded from
+ten-minute release evidence. Clock-verifier race controls, vet and diff checks
+passed. A fresh ten-minute seed 42 local race run is active using the final
+pre-workload build/context ordering; its terminal result is not yet evidence.
+Full consecutive CI validation and sustained server-skew/disk/upgrade/fan-out
+rows remain open.

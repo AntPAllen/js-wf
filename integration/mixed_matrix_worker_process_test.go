@@ -189,6 +189,41 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 			}
 		}()
 	}
+	if os.Getenv("WF_MATRIX_WORKER_CLOCK") == "1" {
+		attempt, done := context.WithTimeout(ctx, 2*time.Second)
+		clockStream, err := js.Stream(attempt, "MATRIX_CLOCK")
+		done()
+		if err != nil {
+			t.Fatal(err)
+		}
+		attempt, done = context.WithTimeout(ctx, 2*time.Second)
+		err = writeMatrixWorkerClock(attempt, js, clockStream, base, id)
+		done()
+		if err != nil {
+			t.Fatal(err)
+		}
+		fleet.Add(1)
+		go func() {
+			defer fleet.Done()
+			ticker := time.NewTicker(500 * time.Millisecond)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-ticker.C:
+				}
+				attempt, done := context.WithTimeout(ctx, 2*time.Second)
+				err := writeMatrixWorkerClock(attempt, js, clockStream, base, id)
+				done()
+				if err != nil && ctx.Err() == nil {
+					failures <- fmt.Errorf("worker clock proof: %w", err)
+					stop()
+					return
+				}
+			}
+		}()
+	}
 	for partition := uint32(0); partition < provision.Partitions; partition++ {
 		fleet.Add(1)
 		go func() {
@@ -232,6 +267,10 @@ func startMatrixProcessWorker(ctx context.Context, root string, urls []string, i
 	if err != nil {
 		return nil, err
 	}
+	return startMatrixProcessWorkerExecutable(ctx, root, urls, index, generation, executable, false)
+}
+
+func startMatrixProcessWorkerExecutable(ctx context.Context, root string, urls []string, index, generation int, executable string, clock bool) (*matrixProcessWorker, error) {
 	id := fmt.Sprintf("matrix-process-%d-generation-%d", index, generation)
 	base := filepath.Join(root, id)
 	log, err := os.Create(base + ".log")
@@ -240,6 +279,9 @@ func startMatrixProcessWorker(ctx context.Context, root string, urls []string, i
 	}
 	child := exec.Command(executable, "-test.run=^TestMixedMatrixWorkerProcessChild$")
 	child.Env = append(os.Environ(), "WF_MATRIX_WORKER_CHILD=1", "WF_MATRIX_WORKER_ID="+id, "WF_MATRIX_WORKER_URLS="+strings.Join(urls, ","), "WF_MATRIX_WORKER_BASE="+base)
+	if clock {
+		child.Env = append(child.Env, "WF_MATRIX_WORKER_CLOCK=1")
+	}
 	if len(urls) == 1 {
 		child.Env = append(child.Env, "WF_MATRIX_WORKER_PINNED=1")
 	}

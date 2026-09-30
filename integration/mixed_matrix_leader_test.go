@@ -54,6 +54,7 @@ type matrixLeaderFault struct {
 	ProxyBefore      *testcluster.ClientProxyStats `json:"proxy_before,omitempty"`
 	ProxyBlocked     *testcluster.ClientProxyStats `json:"proxy_blocked,omitempty"`
 	ProxyHealed      *testcluster.ClientProxyStats `json:"proxy_healed,omitempty"`
+	ClockSamples     []matrixWorkerClockSample     `json:"clock_samples,omitempty"`
 	Error            string                        `json:"error,omitempty"`
 }
 
@@ -96,6 +97,8 @@ func TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds(t *testing.T) {
 	runMixedMatrixLeader(t, "worker_isolation")
 }
 
+func TestMixedMatrixWorkerClockSkew(t *testing.T) { runMixedMatrixLeader(t, "worker_clock") }
+
 func runMixedMatrixLeader(t *testing.T, row string) {
 	t.Helper()
 	if os.Getenv("WF_MATRIX_CHAOS") != "1" {
@@ -118,6 +121,13 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
 		t.Fatal(err)
+	}
+	var clockBinaries []string
+	if row == "worker_clock" {
+		clockBinaries, err = buildMatrixClockWorkers(t.TempDir())
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 	startCluster := testcluster.StartProcesses
 	if row == "server_partition" {
@@ -169,6 +179,11 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	}
 	if row == "server_partition" {
 		if _, err := js.CreateStream(ctx, jetstream.StreamConfig{Name: "MATRIX_ROUTE_PROBE", Subjects: []string{"matrix.route.probe"}, Storage: jetstream.FileStorage, Replicas: 3}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if row == "worker_clock" {
+		if _, err := js.CreateStream(ctx, jetstream.StreamConfig{Name: "MATRIX_CLOCK", Subjects: []string{"matrix.clock.*"}, Storage: jetstream.FileStorage, Replicas: 3, MaxMsgsPerSubject: 16}); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -278,7 +293,7 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 		}()
 	}
-	if row == "worker_kill" || row == "worker_pause" || row == "worker_isolation" {
+	if row == "worker_kill" || row == "worker_pause" || row == "worker_isolation" || row == "worker_clock" {
 		workerRoot = t.TempDir()
 		processWorkers = make([]*matrixProcessWorker, 3)
 		if row == "worker_isolation" {
@@ -310,9 +325,20 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			if row == "worker_isolation" {
 				workerURLs = []string{workerProxies[index].URL()}
 			}
-			processWorkers[index], err = startMatrixProcessWorker(ctx, workerRoot, workerURLs, index, 0)
+			if row == "worker_clock" {
+				processWorkers[index], err = startMatrixProcessWorkerExecutable(ctx, workerRoot, workerURLs, index, 0, clockBinaries[index], true)
+			} else {
+				processWorkers[index], err = startMatrixProcessWorker(ctx, workerRoot, workerURLs, index, 0)
+			}
 			if err != nil {
 				t.Fatal(err)
+			}
+		}
+		if row == "worker_clock" {
+			if proof, err := verifyMatrixWorkerClocks(processWorkers, time.Now()); err != nil {
+				t.Fatal(err)
+			} else {
+				t.Logf("initial worker clock proofs=%+v", proof.ClockSamples)
 			}
 		}
 	} else {
@@ -360,7 +386,9 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 			var event matrixLeaderFault
 			var err error
-			if row == "worker_isolation" {
+			if row == "worker_clock" {
+				event, err = verifyMatrixWorkerClocks(processWorkers, scheduled)
+			} else if row == "worker_isolation" {
 				event, err = isolateMatrixWorkerReplies(faultCtx, processWorkers, workerProxies, faultRNG.Intn(len(processWorkers)), scheduled)
 			} else if row == "worker_pause" {
 				event, err = pauseMatrixProcessWorker(faultCtx, js, processWorkers, faultRNG.Intn(len(processWorkers)), scheduled)
@@ -392,6 +420,10 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 			if row == "worker_pause" {
 				t.Logf("worker pause worker=%s confirmed=%s resumed=%s pause_duration=%s fencing_events=%d", event.Worker, event.Paused.Sub(start), event.Resumed.Sub(start), event.Resumed.Sub(event.Paused), event.FencingEvents)
+			}
+			if row == "worker_clock" {
+				t.Logf("worker clock verification scheduled=%s samples=%+v", event.Scheduled.Sub(start), event.ClockSamples)
+				continue
 			}
 			t.Logf("%s fault node=%d nodes=%v worker=%s pid=%d active_leases=%d routes=%v majority_seq=%d consumer=%s pending=%d ack_pending=%d scheduled=%s killed=%s healed=%s", row, event.Node, event.Nodes, event.Worker, event.PID, event.ActiveLeases, event.Routes, event.MajoritySequence, event.Consumer, event.Pending, event.AckPending, event.Scheduled.Sub(start), event.Killed.Sub(start), event.Healed.Sub(start))
 		}
