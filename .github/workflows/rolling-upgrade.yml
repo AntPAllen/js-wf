@@ -34,4 +34,11 @@ jobs:
         env:
           WF_TIER3_CONTAINER: '1'
           WF_NATS_SERVER_BIN: ${{ runner.temp }}/nats-old/nats-server
+          WF_TIER3_UPGRADE_HISTORY_OUT: tier3-rolling-upgrade-history.jsonl
         run: go test ./integration -run '^TestFiveContainerRollingUpgradeFallback$' -count=1 -timeout=6m -v
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tier3-rolling-upgrade-history
+          path: integration/tier3-rolling-upgrade-history.jsonl
+          if-no-files-found: ignore

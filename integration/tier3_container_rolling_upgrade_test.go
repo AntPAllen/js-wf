@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"js-wf/client"
+	"js-wf/history"
 	"js-wf/identity"
 	"js-wf/integrity"
 	"js-wf/provision"
@@ -23,6 +24,7 @@ import (
 	"js-wf/wf"
 	"js-wf/worker"
 
+	"github.com/anishathalye/porcupine"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -56,6 +58,22 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	}()
 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
 	defer cancel()
+	recorder := &history.Recorder{}
+	defer func() {
+		if path := os.Getenv("WF_TIER3_UPGRADE_HISTORY_OUT"); path != "" {
+			file, err := os.Create(path)
+			if err != nil {
+				t.Errorf("create rolling-upgrade history: %v", err)
+				return
+			}
+			if err := recorder.WriteJSONL(file); err != nil {
+				t.Errorf("write rolling-upgrade history: %v", err)
+			}
+			if err := file.Close(); err != nil {
+				t.Errorf("close rolling-upgrade history: %v", err)
+			}
+		}
+	}()
 	connect := func(node int) (*nats.Conn, jetstream.JetStream) {
 		t.Helper()
 		nc, err := nats.Connect(cluster.ClientURL(node), nats.NoReconnect(), nats.IgnoreDiscoveredServers())
@@ -135,11 +153,11 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 			t.Error(err)
 		}
 	}()
-	oldClient := client.New(all[0])
+	oldClient := client.NewObserved(all[0], recorder)
 	if _, err := oldClient.Start(ctx, typ, firstID, []byte(`null`)); err != nil {
 		t.Fatalf("start through old container: %v", err)
 	}
-	if value, err := client.New(all[4]).Await(ctx, typ, firstID); err != nil || string(value) != `"done"` {
+	if value, err := client.NewObserved(all[4], recorder).Await(ctx, typ, firstID); err != nil || string(value) != `"done"` {
 		t.Fatalf("first result=%s err=%v", value, err)
 	}
 	payload := []byte(`null`)
@@ -153,7 +171,7 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	if result, err := reconcile.NewStartScan(all[1]).Scan(ctx, ack.Sequence, 1, false); err != nil || result.Reenqueued != 1 {
 		t.Fatalf("repair from new container: result=%+v err=%v", result, err)
 	}
-	if value, err := client.New(all[4]).Await(ctx, typ, repairedID); err != nil || string(value) != `"done"` {
+	if value, err := client.NewObserved(all[4], recorder).Await(ctx, typ, repairedID); err != nil || string(value) != `"done"` {
 		t.Fatalf("repaired result=%s err=%v", value, err)
 	}
 	if retry, err := oldClient.Start(ctx, typ, repairedID, payload); !errors.Is(err, client.ErrAlreadyStarted) || retry.InvSeq != ack.Sequence {
@@ -173,7 +191,7 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	if mode, err := provision.EnsureAuto(ctx, upgraded, 5); err != nil || mode != provision.FallbackTimers {
 		t.Fatalf("upgraded peer fallback mode=%q err=%v", mode, err)
 	}
-	upgradedClient := client.New(upgraded)
+	upgradedClient := client.NewObserved(upgraded, recorder)
 	for _, id := range []string{firstID, repairedID} {
 		readCtx, stop := context.WithTimeout(ctx, 30*time.Second)
 		value, err := upgradedClient.Await(readCtx, typ, id)
@@ -190,5 +208,11 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	}
 	if report, err := integrity.Check(ctx, upgraded); err != nil || report.Invocations != 3 || report.Journals != 3 || report.Terminal != 3 {
 		t.Fatalf("five-container upgrade audit: report=%+v err=%v", report, err)
+	}
+	if result, err := history.CheckStarts(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
+		t.Fatalf("rolling-upgrade Start history=%v err=%v", result, err)
+	}
+	if result, err := history.CheckResults(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
+		t.Fatalf("rolling-upgrade Await history=%v err=%v", result, err)
 	}
 }
