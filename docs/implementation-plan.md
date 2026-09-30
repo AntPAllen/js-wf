@@ -137,6 +137,7 @@ For an existing 20 s or 30 s `WF_LEASE` bucket, stop workers and lease-holding l
 - [ ] Subject transform + N partition consumers, provisioned idempotently.
 - [ ] `lease.Acquire(type, id) (epoch, error)`, `lease.Renew`, `lease.Release`; all with KV revision CAS.
 - [ ] Worker run loop: fetch → acquire lease → read journal → run until suspend or terminal → write `Suspended`/terminal entry → release lease → ack `WF_RUN` message. On any lease or CAS failure: stop, do not ack (let redelivery retry), log the fencing event.
+- A fetched run that finds a healthy owner naks with a five-second delay. It remains recoverable after owner failure without repeatedly racing the active writer when many signal or timer wakeups arrive for one invocation.
 - [ ] In-progress heartbeat: `msg.InProgress()` every `AckWait/3` while running so long steps don't trigger redelivery.
 - [ ] Metrics: fencing events, lease acquisitions per invocation, redeliveries, time-from-enqueue-to-lease.
 

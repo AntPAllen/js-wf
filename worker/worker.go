@@ -83,6 +83,11 @@ const DefaultAckWait = 20 * time.Second
 
 const defaultHeartbeatInterval = 3 * time.Second
 
+// A run that loses a lease race is still needed if the owner stops. Delay its
+// redelivery long enough to avoid a storm when many signal or timer wakeups
+// arrive for one healthy, long-running invocation.
+const heldLeaseNakDelay = 5 * time.Second
+
 // CancellationPollPort reads the latest durable cancel signal for one subject.
 type CancellationPollPort interface {
 	LastGeneration(context.Context, string) (string, error)
@@ -515,7 +520,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	if errors.Is(err, lease.ErrHeld) {
 		emit("lease_held", err)
 		w.metrics.leaseContentions.Add(1)
-		_ = msg.NakWithDelay(time.Second)
+		_ = msg.NakWithDelay(heldLeaseNakDelay)
 		return
 	}
 	if err != nil {
