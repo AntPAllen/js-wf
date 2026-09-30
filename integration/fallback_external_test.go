@@ -66,6 +66,9 @@ func TestFallbackWithPre212Server(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if err := provision.Ensure(ctx, js, 1); err == nil || !strings.Contains(err.Error(), "NATS 2.12+") {
+		t.Fatalf("explicit native admission accepted NATS 2.11: %v", err)
+	}
 	if backend, err := provision.EnsureAuto(ctx, js, 1); err != nil || backend != provision.FallbackTimers {
 		t.Fatalf("automatic provision on 2.11: backend=%q err=%v", backend, err)
 	}
