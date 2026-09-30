@@ -785,55 +785,30 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	t.Logf("mixed terminal p99 from last enabling event=%s across %d invocations", terminalP99, len(terminalLatencies))
 	t.Logf("mixed workers before=%+v after=%+v", first.Metrics(), successor.Metrics())
 	if terminalP99 >= 30*time.Second {
-		for i, inv := range invocations {
-			if inv.typ != "mixedtimer" || terminalAt[i].Sub(enabledAt[i]) < 30*time.Second {
-				continue
+		traceSlow := func(typ, id string, enabled, terminal time.Time) {
+			if terminal.Sub(enabled) < 30*time.Second {
+				return
 			}
 			attempt, stop := context.WithTimeout(ctx, 5*time.Second)
-			records, _, readErr := journal.New(third).Read(attempt, inv.typ, inv.id)
+			records, _, readErr := journal.New(third).Read(attempt, typ, id)
 			stop()
 			if readErr != nil {
-				t.Logf("slow timer %s journal read: %v", inv.id, readErr)
-				continue
+				t.Logf("slow %s/%s journal read: %v", typ, id, readErr)
+				return
 			}
 			for _, record := range records {
-				if record.Kind != journal.StepRequested && record.Kind != journal.StepCompleted && record.Kind != journal.Suspended && record.Kind != journal.Completed {
-					continue
-				}
 				attempt, stop := context.WithTimeout(ctx, 2*time.Second)
 				raw, readErr := terminalStream.GetMsg(attempt, record.Sequence)
 				stop()
 				if readErr != nil {
-					t.Logf("slow timer %s journal sequence %d: %v", inv.id, record.Sequence, readErr)
+					t.Logf("slow %s/%s journal sequence %d: %v", typ, id, record.Sequence, readErr)
 					continue
 				}
-				t.Logf("slow timer %s journal index=%d kind=%s worker=%s since_enabled=%s", inv.id, record.Index, record.Kind, record.WorkerID, raw.Time.Sub(enabledAt[i]))
+				t.Logf("slow %s/%s journal index=%d kind=%s worker=%s since_enabled=%s", typ, id, record.Index, record.Kind, record.WorkerID, raw.Time.Sub(enabled))
 			}
 		}
 		for i, inv := range invocations {
-			if inv.typ != "mixedsignal" || terminalAt[i].Sub(enabledAt[i]) < 30*time.Second {
-				continue
-			}
-			attempt, stop := context.WithTimeout(ctx, 5*time.Second)
-			records, _, readErr := journal.New(third).Read(attempt, inv.typ, inv.id)
-			stop()
-			if readErr != nil {
-				t.Logf("slow signal %s journal read: %v", inv.id, readErr)
-				continue
-			}
-			for _, record := range records {
-				if record.Kind != journal.SignalConsumed && record.Kind != journal.Suspended && record.Kind != journal.Completed {
-					continue
-				}
-				attempt, stop := context.WithTimeout(ctx, 2*time.Second)
-				raw, readErr := terminalStream.GetMsg(attempt, record.Sequence)
-				stop()
-				if readErr != nil {
-					t.Logf("slow signal %s journal sequence %d: %v", inv.id, record.Sequence, readErr)
-					continue
-				}
-				t.Logf("slow signal %s journal index=%d kind=%s worker=%s since_last_signal=%s", inv.id, record.Index, record.Kind, record.WorkerID, raw.Time.Sub(enabledAt[i]))
-			}
+			traceSlow(inv.typ, inv.id, enabledAt[i], terminalAt[i])
 		}
 		for i, childID := range childIDs {
 			enabled := healedAt
@@ -842,29 +817,10 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 					enabled = at
 				}
 			}
-			if audits[len(invocations)+i].at.Sub(enabled) < 30*time.Second {
-				continue
-			}
-			attempt, stop := context.WithTimeout(ctx, 5*time.Second)
-			records, _, readErr := journal.New(third).Read(attempt, "mixedchild", childID)
-			stop()
-			if readErr != nil {
-				t.Logf("slow child %s journal read: %v", childID, readErr)
-				continue
-			}
-			for _, record := range records {
-				if record.Kind != journal.Suspended && record.Kind != journal.SignalConsumed && record.Kind != journal.Completed {
-					continue
-				}
-				attempt, stop := context.WithTimeout(ctx, 2*time.Second)
-				raw, readErr := terminalStream.GetMsg(attempt, record.Sequence)
-				stop()
-				if readErr != nil {
-					t.Logf("slow child %s journal sequence %d: %v", childID, record.Sequence, readErr)
-					continue
-				}
-				t.Logf("slow child %s journal index=%d kind=%s worker=%s since_last_grandchild=%s", childID, record.Index, record.Kind, record.WorkerID, raw.Time.Sub(enabled))
-			}
+			traceSlow("mixedchild", childID, enabled, audits[len(invocations)+i].at)
+		}
+		for i, grandchildID := range grandchildIDs {
+			traceSlow("mixedgrandchild", grandchildID, releasedAt, audits[len(invocations)+len(childIDs)+i].at)
 		}
 		t.Errorf("mixed terminal p99=%s, want <30s", terminalP99)
 	}
