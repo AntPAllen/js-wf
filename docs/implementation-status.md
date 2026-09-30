@@ -1124,3 +1124,21 @@ were dispatched at `321c70f`. The first full
 [fan-out restart CI seed](https://github.com/AntPAllen/js-wf/actions/runs/36728933264)
 passed; [twenty consecutive seeds](https://github.com/AntPAllen/js-wf/actions/runs/36732209257)
 were dispatched at `321c70f` and remain pending.
+
+
+## Full three-server rolling-upgrade local proof
+
+The full ten-minute rolling-upgrade race run at `fbe34b7` passed in 660.94
+seconds: 73 batches, 2,044 terminals, three verified upgrades and aggregate
+terminal p99 5.021 seconds. Seed 42 upgraded nodes 1, 0 and 2, beginning at
++30 seconds, +5 minutes and +9 minutes 30 seconds. Recorded versions confirm
+all three started at 2.11.17 and all three finished at 2.15.0. Each transition
+passed eleven-store replica catch-up and unchanged fallback provisioning.
+All histories, intermediate/final integrity, per-type latency, final-completion
+and run-queue drain gates passed. This proves one full local seed; it neither
+explains the earlier shortened partial-upgrade queue discrepancy nor replaces
+the pending full CI/consecutive-seed gates.
+
+A fresh ten-minute block-stall race run using the bounded concurrent journal
+audit is active at `f9a11c7`, with seed 42 and artifact prefix
+`/tmp/js-wf-block-disk-parallel-audit-full`. Its terminal result remains pending.
