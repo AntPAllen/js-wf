@@ -363,7 +363,7 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			if row == "worker_isolation" {
 				event, err = isolateMatrixWorkerReplies(faultCtx, processWorkers, workerProxies, faultRNG.Intn(len(processWorkers)), scheduled)
 			} else if row == "worker_pause" {
-				event, err = pauseMatrixProcessWorker(faultCtx, processWorkers, faultRNG.Intn(len(processWorkers)), scheduled)
+				event, err = pauseMatrixProcessWorker(faultCtx, js, processWorkers, faultRNG.Intn(len(processWorkers)), scheduled)
 			} else if row == "worker_kill" {
 				event, err = killMatrixProcessWorker(faultCtx, workerRoot, urls, processWorkers, faultRNG.Intn(len(processWorkers)), scheduled)
 			} else if row == "server_partition" {

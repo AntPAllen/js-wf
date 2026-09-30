@@ -5,12 +5,14 @@ package integration_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"runtime/pprof"
+	"sort"
 	"strings"
 	"sync"
 	"syscall"
@@ -19,6 +21,7 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/identity"
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
@@ -325,39 +328,70 @@ func killMatrixProcessWorker(ctx context.Context, root string, urls []string, fl
 
 // pauseMatrixProcessWorker keeps the same OS process alive but unable to renew
 // or append for 45 seconds. Other members of the fleet serve its partitions.
-func pauseMatrixProcessWorker(ctx context.Context, fleet []*matrixProcessWorker, index int, scheduled time.Time) (matrixLeaderFault, error) {
-	selected, err := selectMatrixActiveWorker(ctx, fleet, index)
+func pauseMatrixProcessWorker(ctx context.Context, js jetstream.JetStream, fleet []*matrixProcessWorker, first int, scheduled time.Time) (matrixLeaderFault, error) {
+	ready, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	kv, err := js.KeyValue(ready, "WF_LEASE")
 	if err != nil {
 		return matrixLeaderFault{Scheduled: scheduled, Node: -1}, err
 	}
-	index = selected
-	process := fleet[index]
-	event := matrixLeaderFault{Scheduled: scheduled, Node: -1, WorkerSlot: &index, Worker: process.id, PID: process.cmd.Process.Pid, Killed: time.Now()}
-	if err := process.cmd.Process.Signal(syscall.SIGSTOP); err != nil {
-		return event, err
-	}
-	// Resume even if confirmation, artifact reads, or the controller fail.
-	defer process.cmd.Process.Signal(syscall.SIGCONT)
-	stopped, stop := context.WithTimeout(ctx, time.Second)
-	err = waitMatrixProcessState(stopped, event.PID, true)
-	stop()
-	if err != nil {
-		return event, fmt.Errorf("confirm stopped worker: %w", err)
-	}
-	event.Paused = time.Now()
-	var active struct {
-		Active int `json:"active_leases"`
-	}
-	if data, err := os.ReadFile(process.base + "-active.json"); err == nil {
-		if err := json.Unmarshal(data, &active); err != nil {
+	var process *matrixProcessWorker
+	var event matrixLeaderFault
+	for ready.Err() == nil {
+		index, err := selectMatrixActiveWorker(ready, fleet, first)
+		if err != nil {
 			return event, err
 		}
-		event.ActiveLeases = active.Active
-	} else if !os.IsNotExist(err) {
-		return event, err
+		process = fleet[index]
+		event = matrixLeaderFault{Scheduled: scheduled, Node: -1, WorkerSlot: &index, Worker: process.id, PID: process.cmd.Process.Pid, Killed: time.Now()}
+		if err := process.cmd.Process.Signal(syscall.SIGSTOP); err != nil {
+			return event, err
+		}
+		// Every attempted stop must be resumed, including failed confirmation.
+		defer process.cmd.Process.Signal(syscall.SIGCONT)
+		stopped, stop := context.WithTimeout(ready, time.Second)
+		err = waitMatrixProcessState(stopped, event.PID, true)
+		stop()
+		if err != nil {
+			return event, fmt.Errorf("confirm stopped worker: %w", err)
+		}
+		event.Paused = time.Now()
+		keys, err := matrixWorkerActiveLeaseKeys(process.base + "-dispatch.jsonl")
+		if err != nil {
+			return event, err
+		}
+		// The marker can lag a completed release. Even the dispatch trace can
+		// lag the broker's delete acknowledgement, so check current KV ownership
+		// without renewing or changing the stopped worker's lease.
+		for _, key := range keys {
+			entry, err := kv.Get(ready, key)
+			if errors.Is(err, jetstream.ErrKeyNotFound) || errors.Is(err, jetstream.ErrKeyDeleted) {
+				continue
+			}
+			if err != nil {
+				return event, err
+			}
+			var value lease.Value
+			if err := json.Unmarshal(entry.Value(), &value); err != nil {
+				return event, err
+			}
+			if value.Worker == process.id && value.Epoch != 0 {
+				event.ActiveLeases++
+			}
+		}
+		if event.ActiveLeases > 0 {
+			break
+		}
+		if err := process.cmd.Process.Signal(syscall.SIGCONT); err != nil {
+			return event, err
+		}
+		if err := waitMatrixProcessState(ready, event.PID, false); err != nil {
+			return event, err
+		}
+		first = (index + 1) % len(fleet)
 	}
-	if _, err := matrixWorkerFencingEvents(process.base+"-dispatch.jsonl", time.Time{}); err != nil {
-		return event, err
+	if event.ActiveLeases == 0 {
+		return event, fmt.Errorf("no retained active lease available to pause: %w", ready.Err())
 	}
 	timer := time.NewTimer(45 * time.Second)
 	defer timer.Stop()
@@ -376,8 +410,8 @@ func pauseMatrixProcessWorker(ctx context.Context, fleet []*matrixProcessWorker,
 	if err != nil {
 		return event, fmt.Errorf("confirm resumed worker: %w", err)
 	}
-	// An idle pause has no old lease to fence. An active pause must produce an
-	// explicit lost-lease/stale-append outcome after the old process resumes.
+	// Every confirmed pause holds a retained lease and must produce an explicit
+	// lost-lease/stale-append outcome after the old process resumes.
 	if event.ActiveLeases > 0 {
 		fenced, stop := context.WithTimeout(ctx, 10*time.Second)
 		defer stop()
@@ -430,6 +464,39 @@ func waitMatrixProcessState(ctx context.Context, pid int, stopped bool) error {
 		}
 	}
 	return ctx.Err()
+}
+
+// Read complete observer records rather than the asynchronously updated marker.
+// A stopped process cannot add records while this snapshot is inspected.
+func matrixWorkerActiveLeaseKeys(path string) ([]string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	active := make(map[string]bool)
+	lines := strings.Split(string(data), "\n")
+	for _, line := range lines[:len(lines)-1] {
+		if line == "" {
+			continue
+		}
+		var event worker.DispatchEvent
+		if err := json.Unmarshal([]byte(line), &event); err != nil {
+			return nil, err
+		}
+		key := identity.Key(event.Type, event.ID)
+		switch event.Stage {
+		case "lease_acquired":
+			active[key] = true
+		case "released", "release_initial_error", "release_cleanup_done":
+			delete(active, key)
+		}
+	}
+	keys := make([]string, 0, len(active))
+	for key := range active {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys, nil
 }
 
 func matrixWorkerFencingEvents(path string, since time.Time) (int, error) {
