@@ -15,18 +15,82 @@ import (
 // connections and refuses reconnects; Heal accepts reconnects again. It is
 // suitable for isolating a worker or SDK client from a running cluster.
 type ClientProxy struct {
-	listener      net.Listener
-	target        string
-	mu            sync.Mutex
-	blocked       bool
-	closed        bool
-	responsesHeld chan struct{}
-	active        map[net.Conn]net.Conn
-	acceptDone    chan struct{}
-	sessions      sync.WaitGroup
-	clientBytes   uint64
-	serverBytes   uint64
-	heldBytes     uint64
+	listener       net.Listener
+	target         string
+	mu             sync.Mutex
+	blocked        bool
+	closed         bool
+	responsesHeld  chan struct{}
+	active         map[net.Conn]net.Conn
+	acceptDone     chan struct{}
+	sessions       sync.WaitGroup
+	clientBytes    uint64
+	serverBytes    uint64
+	heldBytes      uint64
+	nextConnection uint64
+	trafficLimit   int
+	trafficUsed    int
+	traffic        ClientProxyTraffic
+}
+
+type ClientProxyTraffic struct {
+	Connections []ClientProxyConnection `json:"connections"`
+	Frames      []ClientProxyFrame      `json:"frames"`
+	Truncated   bool                    `json:"truncated"`
+}
+
+type ClientProxyConnection struct {
+	ID       uint64    `json:"id"`
+	Client   string    `json:"client"`
+	Upstream string    `json:"upstream"`
+	Target   string    `json:"target"`
+	At       time.Time `json:"at"`
+}
+
+type ClientProxyFrame struct {
+	Connection uint64    `json:"connection"`
+	Direction  string    `json:"direction"`
+	Data       []byte    `json:"data"`
+	At         time.Time `json:"at"`
+}
+
+// EnableTrafficTrace captures the connection prefix, including handshake and
+// successfully forwarded bytes. Enable before connecting. The limit accounts
+// for payload and record overhead; truncation explicitly invalidates a claim
+// that the retained prefix is a complete connection transcript.
+func (p *ClientProxy) EnableTrafficTrace(limit int) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.nextConnection != 0 || p.trafficLimit != 0 || limit < 1024 || limit > 16<<20 {
+		return fmt.Errorf("traffic trace requires an unused proxy and a 1 KiB..16 MiB budget")
+	}
+	p.trafficLimit = limit
+	return nil
+}
+
+func (p *ClientProxy) TrafficTrace() ClientProxyTraffic {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	trace := p.traffic
+	trace.Connections = append([]ClientProxyConnection(nil), trace.Connections...)
+	trace.Frames = append([]ClientProxyFrame(nil), trace.Frames...)
+	for i := range trace.Frames {
+		trace.Frames[i].Data = append([]byte(nil), trace.Frames[i].Data...)
+	}
+	return trace
+}
+
+func (p *ClientProxy) recordTrafficLocked(connection uint64, direction string, data []byte) {
+	if p.trafficLimit == 0 || p.traffic.Truncated || len(data) == 0 {
+		return
+	}
+	cost := len(data) + 128
+	if p.trafficUsed+cost > p.trafficLimit {
+		p.traffic.Truncated = true
+		return
+	}
+	p.trafficUsed += cost
+	p.traffic.Frames = append(p.traffic.Frames, ClientProxyFrame{connection, direction, append([]byte(nil), data...), time.Now().UTC()})
 }
 
 func NewClientProxy(targetURL string) (*ClientProxy, error) {
@@ -126,14 +190,16 @@ func (p *ClientProxy) waitResponses(bytes int) {
 }
 
 type clientProxyWriter struct {
-	proxy    *ClientProxy
-	upstream net.Conn
+	proxy      *ClientProxy
+	upstream   net.Conn
+	connection uint64
 }
 
 func (w clientProxyWriter) Write(data []byte) (int, error) {
 	n, err := w.upstream.Write(data)
 	w.proxy.mu.Lock()
 	w.proxy.clientBytes += uint64(n)
+	w.proxy.recordTrafficLocked(w.connection, "client_to_server", data[:n])
 	w.proxy.mu.Unlock()
 	return n, err
 }
@@ -180,17 +246,27 @@ func (p *ClientProxy) accept() {
 			continue
 		}
 		p.active[client] = upstream
+		p.nextConnection++
+		connection := p.nextConnection
+		if p.trafficLimit != 0 && !p.traffic.Truncated {
+			if p.trafficUsed+1024 > p.trafficLimit {
+				p.traffic.Truncated = true
+			} else {
+				p.trafficUsed += 1024
+				p.traffic.Connections = append(p.traffic.Connections, ClientProxyConnection{connection, client.RemoteAddr().String(), upstream.LocalAddr().String(), upstream.RemoteAddr().String(), time.Now().UTC()})
+			}
+		}
 		p.sessions.Add(1)
 		p.mu.Unlock()
-		go p.bridge(client, upstream)
+		go p.bridge(client, upstream, connection)
 	}
 }
 
-func (p *ClientProxy) bridge(client, upstream net.Conn) {
+func (p *ClientProxy) bridge(client, upstream net.Conn, connection uint64) {
 	defer p.sessions.Done()
 	copyDone := make(chan struct{})
 	go func() {
-		_, _ = io.Copy(clientProxyWriter{p, upstream}, client)
+		_, _ = io.Copy(clientProxyWriter{p, upstream, connection}, client)
 		close(copyDone)
 		_ = upstream.Close()
 		_ = client.Close()
@@ -201,10 +277,12 @@ func (p *ClientProxy) bridge(client, upstream net.Conn) {
 		if n > 0 {
 			p.waitResponses(n)
 			for offset := 0; offset < n; {
+				start := offset
 				written, writeErr := client.Write(buf[offset:n])
 				offset += written
 				p.mu.Lock()
 				p.serverBytes += uint64(written)
+				p.recordTrafficLocked(connection, "server_to_client", buf[start:offset])
 				p.mu.Unlock()
 				if written == 0 && writeErr == nil {
 					writeErr = io.ErrShortWrite

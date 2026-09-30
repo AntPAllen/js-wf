@@ -1,6 +1,7 @@
 package integration_test
 
 import (
+	"bytes"
 	"errors"
 	"testing"
 	"time"
@@ -17,6 +18,9 @@ func TestClientProxyAsymmetricIsolationContract(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer proxy.Close()
+	if err := proxy.EnableTrafficTrace(1 << 20); err != nil {
+		t.Fatal(err)
+	}
 	worker, err := proxy.Connect()
 	if err != nil {
 		t.Fatal(err)
@@ -73,5 +77,55 @@ func TestClientProxyAsymmetricIsolationContract(t *testing.T) {
 	healed := proxy.Stats()
 	if healed.ResponsesHeld || healed.ServerToClient <= blocked.ServerToClient || healed.Active != 1 {
 		t.Fatalf("heal not confirmed: blocked=%+v healed=%+v", blocked, healed)
+	}
+	trace := proxy.TrafficTrace()
+	if trace.Truncated || len(trace.Connections) != 1 || trace.Connections[0].Target == "" || trace.Connections[0].Upstream == "" {
+		t.Fatalf("connection transcript: %+v", trace.Connections)
+	}
+	var outbound, inbound []byte
+	for _, frame := range trace.Frames {
+		if frame.Connection != trace.Connections[0].ID {
+			t.Fatalf("frame belongs to an unrecorded connection: %d", frame.Connection)
+		}
+		switch frame.Direction {
+		case "client_to_server":
+			outbound = append(outbound, frame.Data...)
+		case "server_to_client":
+			inbound = append(inbound, frame.Data...)
+		default:
+			t.Fatalf("unknown transcript direction %q", frame.Direction)
+		}
+	}
+	if !bytes.Contains(outbound, []byte("outbound\r\n")) || !bytes.Contains(inbound, []byte("inbound\r\n")) || !bytes.Contains(outbound, []byte("PING\r\n")) || !bytes.Contains(inbound, []byte("PONG\r\n")) {
+		t.Fatal("transcript omitted forwarded request, reply or handshake")
+	}
+	// The consumer of a captured snapshot cannot modify the live transcript.
+	first := trace.Frames[0].Data[0]
+	trace.Frames[0].Data[0] ^= 0xff
+	if proxy.TrafficTrace().Frames[0].Data[0] != first {
+		t.Fatal("traffic snapshot shares mutable bytes with the live relay")
+	}
+	if err := proxy.EnableTrafficTrace(1024); err == nil {
+		t.Fatal("accepted a new capture after the connection handshake")
+	}
+
+	limited, err := testcluster.NewClientProxy(cluster.Servers[0].ClientURL())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer limited.Close()
+	if err := limited.EnableTrafficTrace(1024); err != nil {
+		t.Fatal(err)
+	}
+	client, err := limited.Connect()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	if err := client.FlushTimeout(time.Second); err != nil {
+		t.Fatalf("exhausted diagnostic budget affected forwarding: %v", err)
+	}
+	if trace := limited.TrafficTrace(); !trace.Truncated || len(trace.Frames) != 0 {
+		t.Fatal("exhausted capture was not reported as an incomplete transcript")
 	}
 }

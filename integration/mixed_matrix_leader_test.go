@@ -295,6 +295,9 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 				if err != nil {
 					t.Fatal(err)
 				}
+				if err := workerProxies[index].EnableTrafficTrace(4 << 20); err != nil {
+					t.Fatal(err)
+				}
 			}
 		}
 		defer func() {
@@ -381,7 +384,7 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			if err != nil {
 				t.Logf("%s fault failed: %v", row, err)
 				if row == "worker_isolation" {
-					captureMatrixIsolationDiagnostics(t, cluster, workerRoot)
+					captureMatrixIsolationDiagnostics(t, cluster, workerProxies, workerRoot)
 				}
 				faultDone <- err
 				cancel()

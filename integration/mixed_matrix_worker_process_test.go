@@ -38,7 +38,7 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
-	optionsConnect := []nats.Option{nats.MaxReconnects(-1), nats.ReconnectWait(100 * time.Millisecond), nats.Timeout(time.Second)}
+	optionsConnect := []nats.Option{nats.Name(id), nats.MaxReconnects(-1), nats.ReconnectWait(100 * time.Millisecond), nats.Timeout(time.Second)}
 	if os.Getenv("WF_MATRIX_WORKER_PINNED") == "1" {
 		optionsConnect = append(optionsConnect, nats.IgnoreDiscoveredServers())
 	}
@@ -598,8 +598,17 @@ func isolateMatrixWorkerReplies(ctx context.Context, fleet []*matrixProcessWorke
 	return event, nil
 }
 
-func captureMatrixIsolationDiagnostics(t *testing.T, cluster *testcluster.ProcessCluster, root string) {
+func captureMatrixIsolationDiagnostics(t *testing.T, cluster *testcluster.ProcessCluster, proxies []*testcluster.ClientProxy, root string) {
 	t.Helper()
+	for index, proxy := range proxies {
+		data, err := json.Marshal(proxy.TrafficTrace())
+		if err == nil {
+			err = os.WriteFile(filepath.Join(root, fmt.Sprintf("proxy-%d-traffic.json", index)), data, 0600)
+		}
+		if err != nil {
+			t.Logf("proxy %d traffic diagnostic: %v", index, err)
+		}
+	}
 	file, err := os.Create(filepath.Join(root, "proxy-goroutines.txt"))
 	if err == nil {
 		err = pprof.Lookup("goroutine").WriteTo(file, 2)
