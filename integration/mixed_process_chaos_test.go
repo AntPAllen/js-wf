@@ -786,6 +786,31 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	t.Logf("mixed workers before=%+v after=%+v", first.Metrics(), successor.Metrics())
 	if terminalP99 >= 30*time.Second {
 		for i, inv := range invocations {
+			if inv.typ != "mixedtimer" || terminalAt[i].Sub(enabledAt[i]) < 30*time.Second {
+				continue
+			}
+			attempt, stop := context.WithTimeout(ctx, 5*time.Second)
+			records, _, readErr := journal.New(third).Read(attempt, inv.typ, inv.id)
+			stop()
+			if readErr != nil {
+				t.Logf("slow timer %s journal read: %v", inv.id, readErr)
+				continue
+			}
+			for _, record := range records {
+				if record.Kind != journal.StepRequested && record.Kind != journal.StepCompleted && record.Kind != journal.Suspended && record.Kind != journal.Completed {
+					continue
+				}
+				attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+				raw, readErr := terminalStream.GetMsg(attempt, record.Sequence)
+				stop()
+				if readErr != nil {
+					t.Logf("slow timer %s journal sequence %d: %v", inv.id, record.Sequence, readErr)
+					continue
+				}
+				t.Logf("slow timer %s journal index=%d kind=%s worker=%s since_enabled=%s", inv.id, record.Index, record.Kind, record.WorkerID, raw.Time.Sub(enabledAt[i]))
+			}
+		}
+		for i, inv := range invocations {
 			if inv.typ != "mixedsignal" || terminalAt[i].Sub(enabledAt[i]) < 30*time.Second {
 				continue
 			}
