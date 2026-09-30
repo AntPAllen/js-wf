@@ -82,6 +82,12 @@ func runSeededChildNotification(seed int64, replay *Trace) (trace Trace, runErr 
 		if err != nil {
 			return trace, err
 		}
+		if mode != "parent_reused" {
+			report, err := CheckChildWakeupLiveness(model)
+			if err == nil || len(report.Missing) != 1 {
+				return trace, fmt.Errorf("seed %d child %d skipped notification survived: report=%+v err=%v", seed, i, report, err)
+			}
+		}
 		beforeRuns := len(model.Runs())
 		firstErr := worker.NotifyParentWithClient(ctx, c, "test", childID, childSeq, payload, headers)
 		switch mode {
@@ -96,6 +102,12 @@ func runSeededChildNotification(seed int64, replay *Trace) (trace Trace, runErr 
 		default:
 			if firstErr != nil {
 				return trace, fmt.Errorf("seed %d child %d %s first notify: %w", seed, i, mode, firstErr)
+			}
+		}
+		if mode == "drop_signal" || mode == "lost_signal_ack" || mode == "drop_wakeup" {
+			report, err := CheckChildWakeupLiveness(model)
+			if err == nil || len(report.Missing) != 1 {
+				return trace, fmt.Errorf("seed %d child %d lost delivery survived: report=%+v err=%v", seed, i, report, err)
 			}
 		}
 		stored := model.SignalFor("test", parentID, "child_done")
@@ -125,6 +137,9 @@ func runSeededChildNotification(seed int64, replay *Trace) (trace Trace, runErr 
 		if _, err := scan.Scan(ctx, stored[0].Sequence, 1, false); err != nil || len(model.Runs()) != beforeRuns+1 {
 			return trace, fmt.Errorf("seed %d child %d scanner dedup: %v", seed, i, err)
 		}
+	}
+	if report, err := CheckChildWakeupLiveness(model); err != nil || len(report.Missing) != 0 {
+		return trace, fmt.Errorf("seed %d child completion liveness: report=%+v err=%v", seed, report, err)
 	}
 	report, err := CheckSignalWakeupLiveness(model)
 	if err != nil || len(report.Missing) != 0 {

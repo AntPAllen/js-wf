@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       row:
-        description: Sustained leader fault row
+        description: Sustained fault row
         required: true
         type: choice
         default: journal
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Sustain mixed workloads while killing the selected leader every thirty seconds
+      - name: Sustain mixed workloads under the selected fault schedule
         run: go test ./integration -run "^${MATRIX_TEST}$" -count=1 -timeout=18m -v
       - if: always()
         uses: actions/upload-artifact@v7

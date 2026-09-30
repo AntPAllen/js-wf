@@ -94,6 +94,12 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			t.Fatalf("WF_MATRIX_DURATION=%q: want 35s..10m", raw)
 		}
 	}
+	// The matrix allows five minutes after the final heal and retains artifacts
+	// during cleanup. Fail before starting processes if Go would kill the test
+	// before those gates can finish.
+	if deadline, ok := t.Deadline(); ok && time.Until(deadline) < duration+6*time.Minute {
+		t.Fatalf("test timeout cannot cover matrix duration and recovery; use -timeout=%s or longer", duration+6*time.Minute)
+	}
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
 		t.Fatal(err)
