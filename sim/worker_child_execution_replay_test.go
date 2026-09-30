@@ -60,7 +60,22 @@ func runSeededWorkerChildExecution(seed int64, replay *Trace) (trace Trace, runE
 			if err != nil {
 				return nil, err
 			}
-			return wf.AwaitPromise(c, promise)
+			first, err := wf.AwaitPromise(c, promise)
+			if err != nil {
+				return nil, err
+			}
+			want := bytes.Clone(first)
+			if len(first) != 0 {
+				first[0] ^= 0xff
+			}
+			repeated, err := wf.AwaitPromise(c, promise)
+			if err != nil {
+				return nil, err
+			}
+			if !bytes.Equal(repeated, want) {
+				return nil, fmt.Errorf("repeated promise result changed")
+			}
+			return repeated, nil
 		},
 		childType: func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
 			childCalls++

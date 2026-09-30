@@ -125,6 +125,17 @@ func TestAsyncChildFanout(t *testing.T) {
 			if err := json.Unmarshal(result, &n); err != nil {
 				return nil, err
 			}
+			if len(result) > 0 {
+				result[0] = '!'
+			}
+			repeated, err := wf.AwaitPromise(c, p)
+			if err != nil {
+				return nil, err
+			}
+			var again int
+			if err := json.Unmarshal(repeated, &again); err != nil || again != n {
+				return nil, fmt.Errorf("repeated child result changed: %s (%v)", repeated, err)
+			}
 			sum += n
 		}
 		return json.Marshal(sum)

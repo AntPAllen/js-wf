@@ -926,3 +926,15 @@ acknowledgments also take this repair path. The same seed and trace replay exact
 across processes; seed 42 is pinned as `start-retry-repair.json`. Restoring the old
 start implementation fails seed 1's retained-run assertion. This models runtime
 repair decisions, not the real consumer seed 14 scanner delay or NATS leadership.
+
+
+## Repeated promise resolution
+
+The production-worker child execution workload now awaits the same resolved
+promise twice and mutates the first returned slice before the second await.
+Every existing seeded fault choice must still produce the same child and parent
+terminal bytes and one consumption of the result signal. It runs production
+`AwaitPromise` decisions and exact/cross-process transport replay. The second
+await introduces no durable operation, so the pinned child transcript stays
+unchanged. This does not model object-cache exhaustion; focused SDK contracts
+cover the sixteen-MiB bound and retryable object reads separately.

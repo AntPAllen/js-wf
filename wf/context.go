@@ -2,6 +2,7 @@
 package wf
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -53,25 +54,27 @@ type Entry struct {
 type Appender func(ctx context.Context, kind Kind, payload json.RawMessage) error
 
 type Context struct {
-	base          context.Context
-	entries       []Entry
-	position      int
-	append        Appender
-	replay        bool
-	signals       []Signal
-	usedSignals   map[uint64]bool
-	waitingOn     string
-	wakeupAt      time.Time
-	timerNow      func(context.Context) (time.Time, error)
-	scheduleTimer func(context.Context, uint64, time.Time) error
-	timerFired    func(time.Time, time.Time)
-	parentType    string
-	parentID      string
-	parentInvSeq  uint64
-	startChild    func(context.Context, string, string, []byte, string) error
-	storeResult   func(context.Context, []byte) (string, error)
-	loadResult    func(context.Context, string) ([]byte, error)
-	state         map[string]json.RawMessage
+	base               context.Context
+	entries            []Entry
+	position           int
+	append             Appender
+	replay             bool
+	signals            []Signal
+	usedSignals        map[uint64]bool
+	waitingOn          string
+	wakeupAt           time.Time
+	timerNow           func(context.Context) (time.Time, error)
+	scheduleTimer      func(context.Context, uint64, time.Time) error
+	timerFired         func(time.Time, time.Time)
+	parentType         string
+	parentID           string
+	parentInvSeq       uint64
+	startChild         func(context.Context, string, string, []byte, string) error
+	storeResult        func(context.Context, []byte) (string, error)
+	loadResult         func(context.Context, string) ([]byte, error)
+	promiseResults     map[string]*promiseResult
+	promiseResultBytes int
+	state              map[string]json.RawMessage
 }
 
 type Signal struct {
@@ -462,22 +465,55 @@ func CallAsync(c *Context, childType string, input []byte) (Promise, error) {
 	return p, nil
 }
 
+const maxCachedPromiseResultBytes = 16 << 20
+
+type promiseResult struct {
+	payload []byte
+	cached  bool
+	result  []byte
+}
+
+// AwaitPromise consumes the child's result signal once per replay. Repeated
+// awaits resolve the same immutable outcome without adding steps or waiting for
+// a second signal. Returned slices are detached. Result caching is bounded to
+// sixteen MiB per context; uncached object results are reread and hash-verified.
+// Transient object reads can be retried without consuming the signal again.
 func AwaitPromise(c *Context, p Promise) ([]byte, error) {
 	if err := identity.ValidateToken(p.SignalName); err != nil {
 		return nil, err
 	}
-	data, err := AwaitSignal(c, p.SignalName)
-	if err != nil {
-		return nil, err
+	if c.promiseResults == nil {
+		c.promiseResults = make(map[string]*promiseResult)
+	}
+	result := c.promiseResults[p.SignalName]
+	if result == nil {
+		data, err := AwaitSignal(c, p.SignalName)
+		if err != nil {
+			return nil, err
+		}
+		result = &promiseResult{payload: data}
+		c.promiseResults[p.SignalName] = result
+	}
+	if result.cached {
+		return bytes.Clone(result.result), nil
 	}
 	var out Outcome
-	if err := json.Unmarshal(data, &out); err != nil {
+	if json.Unmarshal(result.payload, &out) != nil {
 		return nil, ErrCorruptJournal
 	}
 	if out.Error != "" {
 		return nil, errors.New(out.Error)
 	}
-	return out.ResultBytes(c.base, c.loadResult)
+	data, err := out.ResultBytes(c.base, c.loadResult)
+	if err != nil {
+		return nil, err
+	}
+	if len(data) <= maxCachedPromiseResultBytes-c.promiseResultBytes {
+		result.result = bytes.Clone(data)
+		result.cached = true
+		c.promiseResultBytes += len(data)
+	}
+	return bytes.Clone(data), nil
 }
 
 // Version records a change decision once. New invocations choose max; replay
