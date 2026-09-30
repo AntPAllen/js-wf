@@ -22,8 +22,36 @@ const MembershipHeartbeat = 3 * time.Second
 // Membership uses server-expiring KV registrations with revision-fenced leases.
 // It owns a separate bucket so listing membership does not scan workflow leases.
 type Membership struct {
-	kv     jetstream.KeyValue
+	read   MembershipReadPort
 	leases *lease.Store
+}
+
+// MembershipReadPort is the retained registration enumeration/read boundary.
+type MembershipReadPort interface {
+	Keys(context.Context) ([]string, error)
+	Get(context.Context, string) (lease.KVEntry, error)
+}
+
+type MembershipPort interface {
+	lease.KVPort
+	MembershipReadPort
+}
+
+// NewMembershipWithPort runs the same registration/controller decisions over
+// a supplied transport; expiry belongs to that transport's server clock.
+func NewMembershipWithPort(port MembershipPort) *Membership {
+	return &Membership{read: port, leases: lease.NewWithKVPort(port)}
+}
+
+type membershipReadAdapter struct{ kv jetstream.KeyValue }
+
+func (p membershipReadAdapter) Keys(ctx context.Context) ([]string, error) { return p.kv.Keys(ctx) }
+func (p membershipReadAdapter) Get(ctx context.Context, key string) (lease.KVEntry, error) {
+	value, err := p.kv.Get(ctx, key)
+	if err != nil {
+		return lease.KVEntry{}, err
+	}
+	return lease.KVEntry{Value: value.Value(), Revision: value.Revision(), Created: value.Created()}, nil
 }
 
 // EnsureMembership creates or verifies the optional automatic-assignment bucket.
@@ -50,7 +78,7 @@ func EnsureMembership(ctx context.Context, js jetstream.JetStream, replicas int)
 	if status.History() != 1 || status.TTL() != provision.LeaseTTL || status.LimitMarkerTTL() != time.Minute || cfg.Storage != jetstream.FileStorage || cfg.Replicas != replicas || cfg.MaxBytes > 0 {
 		return nil, fmt.Errorf("bucket %s configuration mismatch", MembershipBucket)
 	}
-	return &Membership{kv: kv, leases: lease.NewWithKeyValue(kv)}, nil
+	return &Membership{read: membershipReadAdapter{kv: kv}, leases: lease.NewWithKeyValue(kv)}, nil
 }
 
 func membershipID(id string) string {
@@ -70,7 +98,7 @@ func (m *Membership) Register(ctx context.Context, id string) (*lease.Lease, err
 // Live returns a sorted snapshot of initialized registrations. Server KV expiry
 // determines liveness; worker wall clocks are never used to expire another owner.
 func (m *Membership) Live(ctx context.Context) ([]string, error) {
-	keys, err := m.kv.Keys(ctx)
+	keys, err := m.read.Keys(ctx)
 	if errors.Is(err, jetstream.ErrNoKeysFound) {
 		return nil, nil
 	}
@@ -82,7 +110,7 @@ func (m *Membership) Live(ctx context.Context) ([]string, error) {
 		if !strings.HasPrefix(key, "member.") {
 			continue
 		}
-		entry, err := m.kv.Get(ctx, key)
+		entry, err := m.read.Get(ctx, key)
 		if errors.Is(err, jetstream.ErrKeyNotFound) {
 			continue
 		}
@@ -90,7 +118,7 @@ func (m *Membership) Live(ctx context.Context) ([]string, error) {
 			return nil, err
 		}
 		var value lease.Value
-		if err := json.Unmarshal(entry.Value(), &value); err != nil {
+		if err := json.Unmarshal(entry.Value, &value); err != nil {
 			return nil, err
 		}
 		if validOwner(value.Worker) != nil || key != "member."+membershipID(value.Worker) {
@@ -154,7 +182,6 @@ func (c *Controller) Close() {
 // All members must register the same handler set. RunKVAssignments consumes the
 // resulting ownership map. Membership liveness uses server expiry, not clocks.
 func (c *Controller) Run(ctx context.Context) error {
-	m, id, assignments, registration := c.membership, c.id, c.assignments, c.registration
 	ticker := time.NewTicker(MembershipHeartbeat)
 	defer ticker.Stop()
 	for {
@@ -164,28 +191,7 @@ func (c *Controller) Run(ctx context.Context) error {
 		// Bound a pass below the membership TTL; a stopped/isolated process must
 		// fail closed instead of letting a stale membership drive new assignments.
 		attempt, done := context.WithTimeout(ctx, 8*time.Second)
-		err := registration.Renew(attempt)
-		if err == nil {
-			if c.coordinator == nil {
-				c.coordinator, err = m.leases.Acquire(attempt, "coordinator", "assign", id)
-				if errors.Is(err, lease.ErrHeld) {
-					err = nil
-				}
-			} else {
-				err = c.coordinator.Renew(attempt)
-			}
-		}
-		if err == nil && c.coordinator != nil {
-			var members []string
-			members, err = m.Live(attempt)
-			if err == nil {
-				if len(members) == 0 {
-					err = fmt.Errorf("live membership disappeared")
-				} else {
-					_, err = Rebalance(attempt, coordinatedAssignments{RebalancePort: assignments, leader: c.coordinator}, members, false)
-				}
-			}
-		}
+		err := c.Step(attempt)
 		done()
 		if err != nil {
 			if ctx.Err() != nil {
@@ -199,4 +205,34 @@ func (c *Controller) Run(ctx context.Context) error {
 		case <-ticker.C:
 		}
 	}
+}
+
+// Step renews registration, contends for coordinator ownership and applies one
+// rebalance pass. Run bounds each Step's context and schedules heartbeats.
+// Call serially; an error requires stopping the process's partition loops.
+func (c *Controller) Step(ctx context.Context) error {
+	m, id, assignments, registration := c.membership, c.id, c.assignments, c.registration
+	err := registration.Renew(ctx)
+	if err == nil {
+		if c.coordinator == nil {
+			c.coordinator, err = m.leases.Acquire(ctx, "coordinator", "assign", id)
+			if errors.Is(err, lease.ErrHeld) {
+				err = nil
+			}
+		} else {
+			err = c.coordinator.Renew(ctx)
+		}
+	}
+	if err == nil && c.coordinator != nil {
+		var members []string
+		members, err = m.Live(ctx)
+		if err == nil {
+			if len(members) == 0 {
+				err = fmt.Errorf("live membership disappeared")
+			} else {
+				_, err = Rebalance(ctx, coordinatedAssignments{RebalancePort: assignments, leader: c.coordinator}, members, false)
+			}
+		}
+	}
+	return err
 }

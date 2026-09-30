@@ -73,7 +73,7 @@ func TestMembershipExpiryFencesReusedIDAndVerifiesConfig(t *testing.T) {
 		t.Fatalf("successor removed: %v %v", live, err)
 	}
 	// An operator-created bucket with another expiry must fail closed.
-	status, err := members.kv.Status(ctx)
+	status, err := members.read.(membershipReadAdapter).kv.Status(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}

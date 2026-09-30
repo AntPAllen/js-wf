@@ -767,3 +767,37 @@ static, KV and automatic workflow/metrics smoke passed under the race detector
 in 5.67 seconds. Assignment/runner package suites and vet/diff checks passed.
 These are focused membership/controller and one-node runner contracts, not a
 sustained automatic-membership chaos or full-matrix release proof.
+
+
+## Automatic membership with real SIGKILL workflow traffic and Tier 1 replay
+
+A regular three-node test now runs the first automatic worker/coordinator in a
+separate process. It blocks that worker inside a durable first-step effect,
+verifies its retained workflow lease and coordinator identity, joins a second
+worker, confirms a 32/32 assignment split, and queues 64 additional ten-step
+workflows. The target stays on partition zero with the original owner until
+SIGKILL. The second worker waits for actual membership/coordinator expiry,
+takes all 64 partitions and completes every workflow. The target completion
+must use a higher fencing epoch. Start/Await histories and the final retained
+audit cover all 65 invocations, 1,430 journal entries and immutable results.
+
+Two race-instrumented runs passed: the first completed all results 15.11 seconds
+after SIGKILL; the final run after the controller transport refactor completed
+in 15.62 seconds (24.39 seconds package time). The target's kill-to-terminal
+gate remained under thirty seconds. This is one focused automatic-assignment
+process-fault contract, not the sustained mixed-workload or full-matrix gate.
+
+Production membership now has a narrow enumeration/read/lease transport port,
+and `Controller.Step` exposes exactly the pass used by its periodic runner.
+The seeded simulator runs registration, duplicate-ID rejection, coordinator
+contention, balanced joins, dropped/hidden assignment writes, stopped-owner
+expiry, stale-owner fencing, successor-safe cleanup and a stable no-write pass.
+A local 100,000-seed run passed in 66.27 seconds; exact and cross-process replay
+and the seed-42 hidden-ack pin passed. Focused race/pinned checks passed in
+12.15 seconds. This slice has three fault choices and fixed virtual heartbeat
+phase; concurrent controller turns, heartbeat transport faults and integrated
+worker execution remain separate work. Complete assignment/runner race suites
+passed in 40.51/6.00 seconds; vet and diff checks passed.
+
+The full release-count Tier 1 CI workflow at `5372c36` remains active and
+predates automatic membership. It must not be counted as membership validation.

@@ -983,3 +983,33 @@ and retained-state decisions, not the full worker/notifier pipeline or Raft.
 The local 100,000-seed scanner slice passed in 220.32 seconds. Final focused
 race/pinned checks passed in 33.16 seconds and the full simulator suite passed
 in 60.61 seconds. These counts cover the modeled scanner decisions only.
+
+
+## Automatic membership and assignment takeover
+
+`TestSeededMembershipReplay` runs production registration, membership listing,
+coordinator election, `Controller.Step`, balanced planning and assignment CAS
+against virtual KV transports. A starts with all 64 partitions; B joins. The
+seed chooses a clean rebalance, a dropped assignment update, or a committed
+update with its acknowledgment hidden. A then stops without releasing its
+registration or coordinator lease. B renews at three-second virtual intervals
+and takes over at the twelve-second expiry boundary. Every partition must end
+with B; A's next step must fail with `lease.ErrLost`, its cleanup must preserve
+B's coordinator lease, and another stable pass must write no assignments.
+
+Membership and assignment storage are separate models, with TTL only on the
+membership bucket. The production real adapter and modeled adapter share the
+same membership read/lease port and controller pass. The periodic runner wraps
+that pass with its bounded context and wall-clock ticker. A local 100,000-seed
+run passed in 66.27 seconds, with exact/cross-process replay and a seed-42 pin
+covering the hidden assignment acknowledgment. Focused race/pinned checks
+passed in 12.15 seconds. This is a sequential controller/transport slice with
+three assignment-fault choices and fixed heartbeat phase; it does not model
+arbitrary concurrent controllers, OS kills, worker handlers or server Raft.
+
+A separate real three-node contract SIGKILLs the actual A worker/coordinator
+inside its first durable effect, drives 64 other ten-step workflows, and checks
+B's complete assignment takeover, higher workflow epoch, all 65 immutable
+results, client histories and retained-state integrity. That fixture supplies
+the independent worker/process evidence rather than inferring it from virtual
+KV expiry.
