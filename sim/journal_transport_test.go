@@ -484,6 +484,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededFallbackLoop(loaded.Seed, &loaded)
 	case "fallback_two_scanners":
 		replayed, err = runTwoFallbackLoops(loaded.Seed, &loaded)
+	case "select_suspended_scan_20":
+		replayed, err = runSeededSelectSuspendedScan(loaded.Seed, &loaded)
 	case "suspended_scan_20":
 		replayed, err = runSeededSuspendedScan(loaded.Seed, &loaded)
 	case "suspended_reconcile_loop_20":

@@ -165,6 +165,9 @@ func CheckSuspendedWakeupLiveness(model *SignalTransport, now time.Time, grace t
 }
 
 func suspendedWaitEnabled(records []journal.Record, signals []jetstream.RawStreamMsg, invSeq uint64, typ, id, waitingOn string, now time.Time, grace time.Duration) (bool, string, error) {
+	if waitingOn == "select_many" {
+		return retainedSelectionEnabled(records, signals, invSeq, typ, id, now, grace)
+	}
 	parts := strings.Split(waitingOn, ":")
 	switch {
 	case len(parts) == 2 && parts[0] == "timer":
@@ -184,6 +187,57 @@ func suspendedWaitEnabled(records []journal.Record, signals []jetstream.RawStrea
 	default:
 		return false, "", fmt.Errorf("unsupported suspended wait %q", waitingOn)
 	}
+}
+
+// Inspect retained cases independently of the production scanner's transport
+// reads. A ready case must have a retained repair wakeup after faults heal.
+func retainedSelectionEnabled(records []journal.Record, signals []jetstream.RawStreamMsg, invSeq uint64, typ, id string, now time.Time, grace time.Duration) (bool, string, error) {
+	var pending *journal.Record
+	for i := range records {
+		if records[i].Kind == journal.StepRequested {
+			pending = &records[i]
+		} else if records[i].Kind == journal.StepCompleted {
+			pending = nil
+		}
+	}
+	if pending == nil {
+		return false, "", fmt.Errorf("selection has no pending request")
+	}
+	var request struct {
+		Kind  string `json:"kind"`
+		Cases []struct {
+			Kind   string    `json:"kind"`
+			Name   string    `json:"name"`
+			FireAt time.Time `json:"fire_at"`
+		} `json:"cases"`
+	}
+	if err := json.Unmarshal(pending.Payload, &request); err != nil {
+		return false, "", err
+	}
+	if request.Kind != "select_many" || len(request.Cases) == 0 {
+		return false, "", fmt.Errorf("invalid selection request")
+	}
+	for _, c := range request.Cases {
+		if identity.ValidateToken(c.Name) != nil || c.Kind != "timer" && c.Kind != "signal" && c.Kind != "promise" {
+			return false, "", fmt.Errorf("invalid selection case")
+		}
+	}
+	for _, c := range request.Cases {
+		if c.Kind == "timer" {
+			if c.FireAt.IsZero() || !now.Before(c.FireAt.Add(grace)) {
+				return true, "selection timer " + c.Name, nil
+			}
+			continue
+		}
+		ready, _, err := retainedSignalAvailable(records, signals, invSeq, typ, id, c.Name)
+		if err != nil {
+			return false, "", err
+		}
+		if ready {
+			return true, "selection " + c.Kind + " " + c.Name, nil
+		}
+	}
+	return false, "selection has no ready case", nil
 }
 
 func pendingTimerDue(records []journal.Record, name string, now time.Time, grace time.Duration) (bool, string, error) {

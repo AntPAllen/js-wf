@@ -656,3 +656,31 @@ active-worker pause row. This revision includes confirmed retained-lease target
 selection and asynchronous completed-cohort checkpoints, but predates concurrent
 raw audit reads and general select. It clears twenty consecutive seeds for this
 row at that revision; the 200-seed whole-matrix release gate remains open.
+
+
+## Tier 1 multi-case suspended repair
+
+The independent retained-state I5 checker now recognizes `select_many` waits.
+A separate seeded production-scanner workload varies twenty retained
+invocations per schedule across current/stale promise outcomes, matching and
+unrelated signals, consumed-but-unused and already-used signals, due/future
+timers, terminal/no-journal invocations, holes, dropped enqueue requests and
+committed enqueues with hidden acknowledgments. It checks dry-run behavior,
+immediate deduplication, later retry windows and repair after virtual time
+advances. Before repair, the independent checker must reject every enabled
+selection without a retained wakeup; after an uncertain enqueue it distinguishes
+absent writes from hidden acknowledgments. Final retained state must satisfy
+all enabled waits. The fixtures supply suspended journals and outcome signals;
+this is scanner/transport coverage, not integrated worker/notifier execution.
+
+A local 100,000-seed run passed in 220.32 seconds. Final focused race and pinned
+corpus checks passed in 33.16 seconds, the complete simulator suite in 60.61
+seconds, and vet/diff checks passed. Seed 1 pins promise readiness and dropped
+writes; seed 42 pins stale outcomes, used signals and a hidden enqueue reply.
+Both exact replay and byte-identical cross-process replay pass. Legacy scanner
+traces are preserved.
+
+The full [100,000-seed-per-workload CI run at `5372c36`](https://github.com/AntPAllen/js-wf/actions/runs/36716884416)
+is still active. It covers the general selector, matching-start repair and
+reusable promise changes, but predates this scanner workload. It cannot yet
+be counted as completed release evidence.

@@ -957,3 +957,29 @@ virtual wakeup time. This slice does not simulate the full child notifier,
 worker dispatch or suspended scanner pipeline. Real three-node restart tests
 separately exercise signal, timer and actual child-promise winners, including
 scanner repair after removal of the parent's retained run wakeup.
+
+
+## Multi-case suspended repair and retained wakeup checks
+
+`TestSeededSelectSuspendedScanReplay` runs production `SuspendedScan.Scan`
+against the retained invocation, journal, signal and enqueue transport. Twenty
+invocations per schedule vary due/future timers, current/stale child outcomes,
+matching and unrelated signals, drained-but-unused and already-used signals,
+terminal/no-journal invocations, invocation holes and dropped/hidden enqueue
+acknowledgments. Multi-case requests combine a signal, promise and timer.
+Dry runs must not publish; repair retries deduplicate immediately and create a
+fresh wakeup in the later retry window. Virtual time enables future timers.
+
+The independent retained-state I5 checker now understands multi-case waits.
+Before each repair, it rejects every enabled selection lacking a wakeup and
+names blocked waits. After uncertainty, it distinguishes an absent dropped
+publish from a retained publish whose acknowledgment was hidden. Final retained
+wakeups must satisfy all enabled selections. Seeds 1 and 42 pin promise repair,
+stale outcomes, used signals, lost acknowledgments and dropped publishes;
+exact and cross-process replay preserve the transport transcript. Existing
+legacy scanner workloads and pins are unchanged. This slice exercises scanner
+and retained-state decisions, not the full worker/notifier pipeline or Raft.
+
+The local 100,000-seed scanner slice passed in 220.32 seconds. Final focused
+race/pinned checks passed in 33.16 seconds and the full simulator suite passed
+in 60.61 seconds. These counts cover the modeled scanner decisions only.
