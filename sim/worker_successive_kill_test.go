@@ -16,6 +16,7 @@ import (
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
+	"js-wf/worker"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -24,8 +25,8 @@ import (
 // matrix: a delivery's owner dies before its first heartbeat, and the next
 // owner can die before completing the two-second effect. It uses production
 // lease and journal decisions, but does not simulate OS processes or the full
-// worker handler/heartbeat goroutines. The shorter AckWait is a candidate,
-// not a production configuration change.
+// worker handler/heartbeat goroutines. It checks the default against the
+// earlier twenty- and ten-second configurations.
 func runSuccessiveWorkerKills(seed int64, replay *Trace) (trace Trace, runErr error) {
 	schedule := NewScheduler(seed)
 	if replay != nil {
@@ -35,11 +36,19 @@ func runSuccessiveWorkerKills(seed int64, replay *Trace) (trace Trace, runErr er
 			return trace, err
 		}
 	}
-	if err := schedule.SetWorkload("worker_successive_kills"); err != nil {
+	workload := "worker_successive_kills_v2"
+	kills := []string{"14000", "16000", "21000"}
+	ackWaits := []time.Duration{20 * time.Second, 10 * time.Second, worker.DefaultAckWait}
+	if replay != nil && replay.Workload == "worker_successive_kills" {
+		workload = replay.Workload
+		kills = []string{"16000", "21000"}
+		ackWaits = ackWaits[:2]
+	}
+	if err := schedule.SetWorkload(workload); err != nil {
 		return trace, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	secondKill, err := schedule.Choose([]string{"16000", "21000"})
+	secondKill, err := schedule.Choose(kills)
 	if err != nil {
 		return trace, err
 	}
@@ -57,7 +66,7 @@ func runSuccessiveWorkerKills(seed int64, replay *Trace) (trace Trace, runErr er
 	if err != nil {
 		return trace, err
 	}
-	for _, ackWait := range []time.Duration{20 * time.Second, 10 * time.Second} {
+	for config, ackWait := range ackWaits {
 		base := schedule.NowMillis()
 		id := fmt.Sprintf("seed-%d-ack-%d", seed, ackWait.Milliseconds())
 		dispatch := NewDispatchTransport(schedule, ackWait)
@@ -140,18 +149,31 @@ func runSuccessiveWorkerKills(seed int64, replay *Trace) (trace Trace, runErr er
 			break
 		}
 		elapsed := schedule.NowMillis() - base
-		want := int64(40_000) + effectMillis
-		wantDeaths, wantHeld := 2, 0
-		if ackWait == 10*time.Second {
+		want := ackWait.Milliseconds() + effectMillis
+		wantDeaths, wantHeld := 1, 0
+		switch ackWait {
+		case 20 * time.Second:
+			if secondKillMillis == 21_000 {
+				want = 40_000 + effectMillis
+				wantDeaths = 2
+			}
+		case 10 * time.Second:
 			want = 15_000 + effectMillis
-			wantDeaths, wantHeld = 1, 1
+			wantHeld = 1
 			if secondKillMillis == 16_000 {
 				want = 30_000 + effectMillis
 				wantDeaths, wantHeld = 2, 2
 			}
-		} else if secondKillMillis == 16_000 {
-			want = 20_000 + effectMillis
-			wantDeaths = 1
+		case 13 * time.Second:
+			if secondKillMillis == 14_000 {
+				want = 26_000 + effectMillis
+				wantDeaths = 2
+			}
+
+		}
+
+		if config == 2 && elapsed >= 30_000 {
+			return trace, fmt.Errorf("default recovery exceeds gate: %dms", elapsed)
 		}
 		if elapsed != want || len(dead) != wantDeaths || held != wantHeld || dispatch.Pending() != 0 {
 			return trace, fmt.Errorf("AckWait=%s elapsed=%d want=%d deaths=%d held=%d pending=%d", ackWait, elapsed, want, len(dead), held, dispatch.Pending())
@@ -209,7 +231,7 @@ func TestSuccessiveWorkerKillDeliveryRecovery(t *testing.T) {
 			}
 		}
 	}
-	if len(modes) != 6 {
+	if len(modes) != 9 {
 		t.Fatalf("effect duration coverage: %v", modes)
 	}
 	var previous []byte

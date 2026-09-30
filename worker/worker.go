@@ -77,9 +77,10 @@ type Worker struct {
 	modeledCancelNotifications bool
 }
 
-// DefaultAckWait leaves recovery time inside the 30-second post-heal
-// completion gate when an in-flight NAK is lost with the consumer quorum.
-const DefaultAckWait = 20 * time.Second
+// DefaultAckWait allows a killed owner's lease to expire before redelivery,
+// with one second for initialization/transport skew. Two missed deliveries
+// leave processing time inside the 30-second recovery gate.
+const DefaultAckWait = provision.LeaseTTL + time.Second
 
 const defaultHeartbeatInterval = 3 * time.Second
 

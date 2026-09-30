@@ -888,3 +888,9 @@ slice. A discrepancy seen only on real
 NATS is a candidate model gap or environment/server issue, not proof of a
 server defect. See the [Tier 1 plan](implementation-plan.md#distributed-verification)
 for the remaining transport contract and invariant gates.
+
+### Successive worker-kill delivery timing
+
+`TestSuccessiveWorkerKillDeliveryRecovery` combines `DispatchTransport` with production lease acquisition and journal append/read code. It compares earlier 20s and 10s AckWait controls with the production default (lease TTL plus 1s), after a first kill before the heartbeat and a second targeted kill at 14s, 16s or 21s. Seeded effects take 1.8s, 2s or 2.2s. The default must finish below 30s across these nine cases, preserve one terminal journal, reject stale owners, and drain the modeled durable. Changing the default back to 20s fails the gate.
+
+The version-2 workload pins `worker-successive-kills-v2.json`; the earlier version and its trace remain replayable. `SIM_SEEDS` controls the local/CI seed count, and `SIM_SUCCESSIVE_KILLS_OUT` exports seed 42. Exact and cross-process replay checks cover transport events. This is a sequential delivery/lease timing slice; it does not execute OS process kills or full worker handler/heartbeat goroutines, and does not prove arbitrary repeated-kill or long-effect bounds. Real process-kill matrix runs supply that separate evidence.
