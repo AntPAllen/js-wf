@@ -37,3 +37,17 @@ with the adapter, shared decoders, modeled workload and real controls added.
 
 This strengthens quiescent collection. Online collection remains unsupported,
 and the original intermittent Object Store listing cause remains unconfirmed.
+
+
+The clean-source run at `dae341e3b6baa5934f055ce662ded5282da2db54`
+passed 100,000 schedules, 100,000 choices and 2,150,048 transport events in
+2.865 seconds. All schedules use zero virtual elapsed time because these
+metadata validation faults do not depend on clocks. The command was:
+
+```sh
+SIM_COVERAGE_SUMMARY=1 SIM_SEEDS=100000 go test ./sim \
+  -run '^TestSeededBlobMetadataReplay$' -count=1 -v
+```
+
+This is the new workload's release seed-count proof, not the expanded suite or
+any real-cluster release gate. The older full extended campaign remains live.

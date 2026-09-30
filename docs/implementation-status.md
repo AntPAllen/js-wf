@@ -2464,3 +2464,11 @@ count, with object chunks included in the census and excluded from metadata
 parsing. Unknown Object Store subject layouts fail closed; that separate raw
 metadata control passed under race in 4.28 seconds. The contracts do not yet
 exercise the client's greater-than-100,000-subject pagination boundary.
+
+
+At clean `dae341e`, the new metadata workload also passed 100,000 schedules,
+100,000 choices and 2,150,048 events in 2.865 seconds. Its [coverage log](scale/blob-metadata-validation-2026-09-30/100k-clean-dae341e.log)
+is retained. Metadata faults consume zero virtual time; this count applies
+only to that workload. The previous full extended simulation and the 200-seed
+focused mixed campaign are still running independently, as is the original
+24-hour million-timer campaign.
