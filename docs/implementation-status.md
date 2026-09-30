@@ -1998,3 +1998,25 @@ initial full simulator invocation read old pins before regeneration and failed
 those three traces; the regenerated corpus and final full suite both passed.
 Vet and diff checks passed. These controls do not clear the automatic-membership
 full fault matrix or the 200-seed/24-hour release gates.
+
+
+## Persistent enqueue repair fixture after named transient retries
+
+The [standard CI run at `89a8f75`](https://github.com/AntPAllen/js-wf/actions/runs/36768217380)
+failed `TestMatchingStartRetryRepairsDroppedEnqueueWithoutScanner`: its first
+Start returned success instead of the expected `ErrEnqueueUnknown`. That fixture
+injected exactly two no-stream replies. The newly supported bounded retry
+correctly recovered on its third publish, so the fixture no longer represented
+persistent transport failure. No production recovery failure is established.
+
+The fixture now blocks every run publish until explicitly healed. Initial Start
+and matching retry must exhaust the retry window with the same invocation and
+visible unknown outcome. Changed input must make no enqueue attempt; retained
+run count remains zero while blocked. After heal, matching Start repairs the
+run without a scanner, returns `ErrAlreadyStarted`, and cross-node retry keeps
+exactly one invocation and run. The three-node race test passed in 7.35 seconds
+(package 8.38 seconds); vet/diff checks passed. The latest twenty-seed mixed
+campaign at `89a8f75` completed successfully, while its focused mutation job
+also passed. These do not replace fresh standard CI or the full release gates.
+The extended Tier 1 campaign at `463ce86` is still confirmed live and predates
+the coordinator claim and new enqueue workload; it has not been restarted.
