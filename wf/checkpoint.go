@@ -132,6 +132,9 @@ func NewCheckpointContext(base context.Context, entries []Entry, appendFn Append
 	c.parentID = location.ID
 	c.parentInvSeq = location.InvSeq
 	c.state = frame.State
+	if c.state == nil {
+		c.state = make(map[string]json.RawMessage)
+	}
 	c.promiseResults = make(map[string]*promiseResult, len(frame.PromiseOutcomes))
 	for name, payload := range frame.PromiseOutcomes {
 		c.promiseResults[name] = &promiseResult{payload: payload}

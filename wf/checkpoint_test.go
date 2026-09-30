@@ -325,3 +325,34 @@ func TestCheckpointLocalValidationVisitsOverlappingSlices(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestCheckpointRestoresNullableEmptyStateAsWritableMap(t *testing.T) {
+	var entries []Entry
+	c := checkpointTestContext(&entries)
+	raw, _, err := c.CaptureCheckpoint("next_v1", nil, 2, 1, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var frame map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &frame); err != nil {
+		t.Fatal(err)
+	}
+	frame["state"] = json.RawMessage(`null`)
+	raw, err = json.Marshal(frame)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sum := sha256.Sum256(raw)
+	location := CheckpointLocation{Type: "parent", ID: "materialized", InvSeq: 17, Index: 2, Epoch: 1, Hash: hex.EncodeToString(sum[:])}
+	restored, _, err := NewCheckpointContext(context.Background(), nil, func(context.Context, Kind, json.RawMessage) error { return nil }, raw, location)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := restored.SetState("created", 23); err != nil {
+		t.Fatal(err)
+	}
+	var result int
+	if found, err := restored.GetState("created", &result); err != nil || !found || result != 23 {
+		t.Fatalf("%v %d %v", found, result, err)
+	}
+}

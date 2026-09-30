@@ -33,3 +33,10 @@ no production worker caller yet. Publication, manifest CAS, logical suffix
 reads, stage dispatch, offline continuation replay, reconciliation and real/model
 crash-cut gates remain open. The control simulates the committed pair locally;
 it does not prove that NATS committed it.
+
+A later nullable-empty-state control overlays the production restore source
+from `02e5b08` and fails with `assignment to entry in nil map` when the restored
+continuation sets its first state value. Restore now initializes a writable
+empty map for a valid `state:null` frame. The same control passed under race
+in 1.012 seconds. Before/after logs and final source hashes are retained. This
+is a local SDK bug/control, not a NATS failure or a durable publication proof.

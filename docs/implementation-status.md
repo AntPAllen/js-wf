@@ -2557,3 +2557,10 @@ metadata validation and checkpoint foundation/capture changes. Final-source
 coverage, remaining modeled transport paths, the mixed latency failure and
 independent matrix/soak gates remain open. The original million-timer process
 remains live and has not been restarted for observation.
+
+The nullable-empty-state control then found an SDK restore bug: a valid
+`state:null` frame left a nil map and panicked on the continuation's first
+SetState. An overlay of actual production source `02e5b08` fails that control
+with the nil-map panic. Restore now initializes an empty writable map, and the
+control passed under race in 1.012 seconds. [Before/after logs and final hashes](scale/checkpoint-state-2026-09-30/)
+are retained. Durable worker integration remains open.
