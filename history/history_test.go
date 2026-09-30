@@ -97,6 +97,11 @@ func TestStartModelChecksLargeConcurrentLeaderKillBurst(t *testing.T) {
 	if result, err := CheckStarts(operations, 5*time.Second); err != nil || result != porcupine.Ok {
 		t.Fatalf("large concurrent start history=%s err=%v", result, err)
 	}
+	enqueueUnknown := append([]client.Operation(nil), operations...)
+	enqueueUnknown[250].Result = json.RawMessage(`{"status":"enqueue_unknown","inv_seq":7}`)
+	if result, err := CheckStarts(enqueueUnknown, 5*time.Second); err != nil || result != porcupine.Ok {
+		t.Fatalf("large concurrent enqueue-unknown history=%s err=%v", result, err)
+	}
 	tooEarly := append([]client.Operation(nil), operations...)
 	tooEarly[6].ReturnTS = base.Add(100 * time.Microsecond)
 	if result, err := CheckStarts(tooEarly, 5*time.Second); err != nil || result != porcupine.Illegal {
@@ -113,13 +118,16 @@ func TestUniformStartBurstProofMatchesPorcupine(t *testing.T) {
 	base := time.Date(2030, 1, 2, 3, 4, 5, 0, time.UTC)
 	args := json.RawMessage(`{"type":"leaderkill","id":"same","input_hash":"hash-a"}`)
 	for startedAt := 0; startedAt < 6; startedAt++ {
-		for variant := 0; variant < 32; variant++ {
+		for variant := 0; variant < 64; variant++ {
 			operations := make([]client.Operation, 6)
 			converted := make([]porcupine.Operation, 6)
 			for i := range operations {
 				status, seq := "already_started", uint64(7)
 				if i == startedAt {
 					status = "started"
+					if variant&32 != 0 {
+						status = "enqueue_unknown"
+					}
 				} else if variant&(1<<i) != 0 {
 					status, seq = "unknown", 0
 				}

@@ -119,7 +119,7 @@ func CheckStarts(operations []client.Operation, timeout time.Duration) (porcupin
 		converted[i].Input = input
 	}
 	// A large same-input burst has a direct linearizability proof. Exactly one
-	// call reports the successful publish; every matching duplicate can be
+	// call reports a confirmed invocation publish; every matching duplicate can be
 	// placed after that call's invocation if its own interval reaches it, and
 	// every unknown call may be placed as an uncommitted attempt. This avoids
 	// factorial search over hundreds of equivalent overlapping duplicates.
@@ -214,7 +214,7 @@ func checkUniformStartBurst(operations []porcupine.Operation) (porcupine.CheckRe
 			return porcupine.Unknown, false
 		}
 		switch output.Status {
-		case "started":
+		case "started", "enqueue_unknown":
 			if started != nil {
 				return porcupine.Illegal, true
 			}
