@@ -108,3 +108,41 @@ func TestStartModelChecksLargeConcurrentLeaderKillBurst(t *testing.T) {
 		t.Fatalf("mismatched duplicate handle=%s err=%v", result, err)
 	}
 }
+
+func TestUniformStartBurstProofMatchesPorcupine(t *testing.T) {
+	base := time.Date(2030, 1, 2, 3, 4, 5, 0, time.UTC)
+	args := json.RawMessage(`{"type":"leaderkill","id":"same","input_hash":"hash-a"}`)
+	for startedAt := 0; startedAt < 6; startedAt++ {
+		for variant := 0; variant < 32; variant++ {
+			operations := make([]client.Operation, 6)
+			converted := make([]porcupine.Operation, 6)
+			for i := range operations {
+				status, seq := "already_started", uint64(7)
+				if i == startedAt {
+					status = "started"
+				} else if variant&(1<<i) != 0 {
+					status, seq = "unknown", 0
+				}
+				result, err := json.Marshal(map[string]any{"status": status, "inv_seq": seq})
+				if err != nil {
+					t.Fatal(err)
+				}
+				call := base.Add(time.Duration(i) * 10 * time.Microsecond)
+				returned := base.Add(100 * time.Microsecond)
+				if variant&1 != 0 && i < startedAt && status == "already_started" {
+					returned = base.Add(time.Duration(i)*10*time.Microsecond + time.Microsecond)
+				}
+				operations[i] = client.Operation{InvokeTS: call, ReturnTS: returned, Op: "start", Args: args, Result: result}
+				converted[i] = porcupine.Operation{Input: startInput{Type: "leaderkill", ID: "same", InputHash: "hash-a", HasConfirmedStart: true}, Output: startOutput{Status: status, InvSeq: seq}, Call: call.UnixNano(), Return: returned.UnixNano()}
+			}
+			want, err := CheckStarts(operations, time.Second)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, applicable := checkUniformStartBurst(converted)
+			if !applicable || got != want {
+				t.Fatalf("started_at=%d variant=%d direct=%s applicable=%t porcupine=%s", startedAt, variant, got, applicable, want)
+			}
+		}
+	}
+}
