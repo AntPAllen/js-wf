@@ -33,6 +33,7 @@ import (
 func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	const mixedSignalCount = 16
 	const mixedTimerCount = 8
+	const mixedGrandchildrenPerChild = 2
 	if os.Getenv("WF_MIXED_CHAOS") != "1" {
 		t.Skip("set WF_MIXED_CHAOS=1 for mixed real-cluster chaos")
 	}
@@ -205,10 +206,37 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		return json.Marshal(sum)
 	}
 	handlers["mixedchild"] = func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
-		value, err := wf.Run(c, "held-child", 0, func(effectCtx context.Context) (int, error) {
+		promises := make([]wf.Promise, mixedGrandchildrenPerChild)
+		for n := range promises {
+			promise, err := wf.CallAsync(c, "mixedgrandchild", json.RawMessage(strconv.Itoa(n)))
+			if err != nil {
+				return nil, err
+			}
+			promises[n] = promise
+		}
+		var sum int
+		for _, promise := range promises {
+			value, err := wf.AwaitPromise(c, promise)
+			if err != nil {
+				return nil, err
+			}
+			var n int
+			if err := json.Unmarshal(value, &n); err != nil {
+				return nil, err
+			}
+			sum += n
+		}
+		return json.Marshal(sum)
+	}
+	handlers["mixedgrandchild"] = func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
+		var n int
+		if err := json.Unmarshal(input, &n); err != nil || n < 0 || n >= mixedGrandchildrenPerChild {
+			return nil, fmt.Errorf("invalid grandchild input %s: %v", input, err)
+		}
+		value, err := wf.Run(c, "held-grandchild", 0, func(effectCtx context.Context) (int, error) {
 			select {
 			case <-release:
-				return 7, nil
+				return n + 3, nil
 			case <-effectCtx.Done():
 				return 0, effectCtx.Err()
 			}
@@ -314,6 +342,68 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	if len(childIDs) != 6 || !allSuspended {
 		t.Fatalf("before faults: fan-out children=%d suspended=%t", len(childIDs), allSuspended)
 	}
+	seenChildren := map[string]bool{}
+	for _, childID := range childIDs {
+		if childID == "" || seenChildren[childID] {
+			t.Fatalf("duplicate or empty child ID before faults: %q", childID)
+		}
+		seenChildren[childID] = true
+		part := identity.Partition("mixedchild", childID, provision.Partitions)
+		if !parts[part] {
+			parts[part] = true
+			go func() { _ = first.RunPartition(firstCtx, part) }()
+		}
+	}
+	var grandchildIDs []string
+	grandchildWant := map[string]string{}
+	until = time.Now().Add(20 * time.Second)
+	for time.Now().Before(until) {
+		ready := true
+		pendingIDs := make([]string, 0, len(childIDs)*mixedGrandchildrenPerChild)
+		pendingWant := map[string]string{}
+		for _, childID := range childIDs {
+			records, _, err := j.Read(ctx, "mixedchild", childID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(records) == 0 || records[len(records)-1].Kind != journal.Suspended {
+				ready = false
+			}
+			var calls int
+			for _, record := range records {
+				if record.Kind != journal.StepRequested {
+					continue
+				}
+				var request struct {
+					Kind    string `json:"kind"`
+					ChildID string `json:"child_id"`
+				}
+				if err := json.Unmarshal(record.Payload, &request); err != nil {
+					t.Fatal(err)
+				}
+				if request.Kind != "call_async" {
+					continue
+				}
+				if calls >= mixedGrandchildrenPerChild || request.ChildID == "" || pendingWant[request.ChildID] != "" {
+					t.Fatalf("invalid grandchild request from %s: %+v", childID, request)
+				}
+				pendingIDs = append(pendingIDs, request.ChildID)
+				pendingWant[request.ChildID] = strconv.Itoa(calls + 3)
+				calls++
+			}
+			if calls != mixedGrandchildrenPerChild {
+				ready = false
+			}
+		}
+		if ready && len(pendingIDs) == len(childIDs)*mixedGrandchildrenPerChild {
+			grandchildIDs, grandchildWant = pendingIDs, pendingWant
+			break
+		}
+		time.Sleep(30 * time.Millisecond)
+	}
+	if len(grandchildIDs) != len(childIDs)*mixedGrandchildrenPerChild {
+		t.Fatalf("before faults: durable grandchildren=%d, want %d", len(grandchildIDs), len(childIDs)*mixedGrandchildrenPerChild)
+	}
 	path := filepath.Join(root, "mixed-four-faults.json")
 	if output := os.Getenv("FAULT_SCHEDULE_OUT"); output != "" {
 		path = output
@@ -390,8 +480,8 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	for part := range parts {
 		go func(part uint32) { _ = successor.RunPartition(successorCtx, part) }(part)
 	}
-	for _, childID := range childIDs {
-		part := identity.Partition("mixedchild", childID, provision.Partitions)
+	for _, grandchildID := range grandchildIDs {
+		part := identity.Partition("mixedgrandchild", grandchildID, provision.Partitions)
 		if !parts[part] {
 			parts[part] = true
 			go func() { _ = successor.RunPartition(successorCtx, part) }()
@@ -506,6 +596,12 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		}
 		seen[childID] = true
 	}
+	for _, grandchildID := range grandchildIDs {
+		if grandchildID == "" || seen[grandchildID] {
+			t.Fatalf("duplicate or empty grandchild ID: %q", grandchildID)
+		}
+		seen[grandchildID] = true
+	}
 	type terminalAudit struct {
 		at      time.Time
 		elapsed time.Duration
@@ -537,7 +633,7 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		}
 		return terminalAudit{elapsed: time.Since(started), err: fmt.Errorf("terminal kind=%s err=%v", entry.Kind, readErr)}
 	}
-	audits := make([]terminalAudit, len(invocations)+len(childIDs))
+	audits := make([]terminalAudit, len(invocations)+len(childIDs)+len(grandchildIDs))
 	var auditWorkers sync.WaitGroup
 	for i, inv := range invocations {
 		auditWorkers.Add(1)
@@ -551,6 +647,13 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		go func() {
 			defer auditWorkers.Done()
 			audits[len(invocations)+i] = auditOne("mixedchild", childID, "7")
+		}()
+	}
+	for i, grandchildID := range grandchildIDs {
+		auditWorkers.Add(1)
+		go func() {
+			defer auditWorkers.Done()
+			audits[len(invocations)+len(childIDs)+i] = auditOne("mixedgrandchild", grandchildID, grandchildWant[grandchildID])
 		}()
 	}
 	auditWorkers.Wait()
@@ -573,6 +676,13 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 			lastChildCompletedAt = audit.at
 		}
 		t.Logf("restarted node child id=%s audit=%s", childID, audit.elapsed)
+	}
+	for i, grandchildID := range grandchildIDs {
+		audit := audits[len(invocations)+len(childIDs)+i]
+		if audit.err != nil {
+			t.Fatalf("restarted node grandchild %s audit after %s: %v", grandchildID, audit.elapsed, audit.err)
+		}
+		t.Logf("restarted node grandchild id=%s audit=%s", grandchildID, audit.elapsed)
 	}
 	enabledAt[len(invocations)-1] = lastChildCompletedAt
 	var signalStream jetstream.Stream
@@ -616,7 +726,7 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 			enabledAt[i] = raw.Time
 		}
 	}
-	terminalLatencies := make([]time.Duration, 0, len(invocations))
+	terminalLatencies := make([]time.Duration, 0, len(audits))
 	for i, inv := range invocations {
 		latency := terminalAt[i].Sub(enabledAt[i])
 		if latency < 0 {
@@ -625,9 +735,32 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		terminalLatencies = append(terminalLatencies, latency)
 		t.Logf("mixed terminal type=%s id=%s latency=%s", inv.typ, inv.id, latency)
 	}
+	for i, childID := range childIDs {
+		enabled := healedAt
+		for n := 0; n < mixedGrandchildrenPerChild; n++ {
+			grandchildAt := audits[len(invocations)+len(childIDs)+i*mixedGrandchildrenPerChild+n].at
+			if grandchildAt.After(enabled) {
+				enabled = grandchildAt
+			}
+		}
+		latency := audits[len(invocations)+i].at.Sub(enabled)
+		if latency < 0 {
+			latency = 0
+		}
+		terminalLatencies = append(terminalLatencies, latency)
+		t.Logf("mixed terminal type=mixedchild id=%s latency=%s", childID, latency)
+	}
+	for i, grandchildID := range grandchildIDs {
+		latency := audits[len(invocations)+len(childIDs)+i].at.Sub(releasedAt)
+		if latency < 0 {
+			latency = 0
+		}
+		terminalLatencies = append(terminalLatencies, latency)
+		t.Logf("mixed terminal type=mixedgrandchild id=%s latency=%s", grandchildID, latency)
+	}
 	sort.Slice(terminalLatencies, func(i, j int) bool { return terminalLatencies[i] < terminalLatencies[j] })
 	terminalP99 := terminalLatencies[(99*len(terminalLatencies)+99)/100-1]
-	t.Logf("mixed terminal p99 from last enabling event=%s", terminalP99)
+	t.Logf("mixed terminal p99 from last enabling event=%s across %d invocations", terminalP99, len(terminalLatencies))
 	t.Logf("mixed workers before=%+v after=%+v", first.Metrics(), successor.Metrics())
 	if terminalP99 >= 30*time.Second {
 		t.Errorf("mixed terminal p99=%s, want <30s", terminalP99)
@@ -663,17 +796,18 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		}
 	}
 	until = time.Now().Add(20 * time.Second)
+	wantTerminal := len(invocations) + len(childIDs) + len(grandchildIDs)
 	var report integrity.Report
 	for time.Now().Before(until) {
 		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
 		report, err = integrity.Check(attempt, third)
 		stop()
-		if err == nil && report.Invocations == 16 && report.Journals == 16 && report.Terminal == 16 {
+		if err == nil && report.Invocations == wantTerminal && report.Journals == wantTerminal && report.Terminal == wantTerminal {
 			break
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	if err != nil || report.Invocations != 16 || report.Journals != 16 || report.Terminal != 16 {
+	if err != nil || report.Invocations != wantTerminal || report.Journals != wantTerminal || report.Terminal != wantTerminal {
 		t.Fatalf("mixed retained integrity: report=%+v err=%v", report, err)
 	}
 }
