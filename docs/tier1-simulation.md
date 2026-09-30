@@ -46,6 +46,17 @@ proves the modeled lease boundary; real recovery at this TTL is measured
 separately. Process signals
 and server behavior remain outside the model.
 
+A second pinned lease trace isolates the mixed seed 55 retained-lease delay.
+The old owner writes a partial journal and renews its lease at virtual 9,000 ms.
+A delete dropped before commit makes production `lease.Release` fail, and a
+transport-lost cleanup read leaves the lease present. The replacement receives
+`ErrHeld` one millisecond before the renewed 12-second TTL expires, acquires
+at 21,000 ms with a higher epoch, completes the journal, and rejects the old
+owner's cleanup, renewal, and stale append. The trace is
+`sim/testdata/regressions/worker-canceled-retained-lease.json`. It proves the
+runtime's lease and fencing behavior under those modeled replies; the real
+seed 55 trace did not establish which release or cleanup call failed.
+
 The production `journal.Store.Read` can now load a compacted prefix through a
 narrow modeled manifest and Object Store read port, then join it to retained
 live entries. A 1,000-seed workload advances the snapshot manifest twice,
