@@ -1322,3 +1322,32 @@ the first claim write after renewal through actual registration/coordinator
 expiry and requires one CAS conflict, no successor revision changes after old
 cleanup and only c live. It calls Step directly past Run's normal eight-second
 pass budget; it is not a process/VM pause or full automatic-membership matrix.
+
+## Parent interruption during asynchronous fan-out
+
+`TestSeededWorkerFanoutInterruptedReplay` runs production client, worker, lease,
+journal, signal, `CallAsync` and `AwaitPromise` decisions on the modeled
+transport. Each seed chooses an interruption after a completed child-creation
+step or after a decoded child result, before adding it to the parent's local
+sum. It also schedules which pending partition runs next. The interrupted
+parent returns cancellation, its delivery is retried by a new worker identity,
+and normal lease cleanup runs. Heartbeat ticks are supplied by the model, so
+wall-clock race-instrumentation cost cannot introduce real ticker events. This
+is a durable replay boundary model, not a
+SIGKILL or a lost-cleanup/lease-expiry model.
+
+The workload verifies the entire committed parent prefix remains byte-identical,
+the successor terminal has a higher epoch, every deterministic child identity
+appears exactly once, every child effect executes once, every child result agrees
+with its input, the parent sum is correct, and all invocation/journal/terminal
+counts and the final retained-state audit agree. The run queue must drain.
+The default six-child variant follows `SIM_SEEDS` (1,000 per push), replays its
+first ten schedules exactly and verifies seed 42 byte-identically across
+processes. Creation and collection traces are pinned in the regression corpus;
+`FAULT_TRACE` and the minimizer recognize both workload sizes.
+
+`TestFiveHundredChildModeledParentInterruption` runs the same model with 500
+children at creation seed 2 and collection seed 42, checking exact replay for
+both. It is finite scale evidence, not 100,000 seeds with 500 children, every
+possible cut, or the real-cluster 500-child chaos matrix. Snapshot compaction
+and transport-loss faults remain covered by separate modeled workloads.

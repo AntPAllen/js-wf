@@ -1,0 +1,34 @@
+{
+  "nats_server_version": "2.15.0",
+  "go_version": "go1.27.1",
+  "replicas": 3,
+  "storage": "file",
+  "parallel_workers": 1000,
+  "hot": {
+    "invocations": 1,
+    "entries_each": 10000,
+    "appends": 10000,
+    "elapsed_ms": 6553.343582,
+    "appends_per_second": 1525.9386105539918
+  },
+  "parallel": {
+    "invocations": 1000,
+    "entries_each": 100,
+    "appends": 100000,
+    "elapsed_ms": 4861.033814,
+    "appends_per_second": 20571.755685384338
+  },
+  "journal_messages": 110000,
+  "journal_subjects": 1001,
+  "hot_placement": "follower",
+  "hot_topology_before": {
+    "leader": "wf-test-2",
+    "client_server": "wf-test-0",
+    "client_is_leader": false
+  },
+  "hot_topology_after": {
+    "leader": "wf-test-2",
+    "client_server": "wf-test-0",
+    "client_is_leader": false
+  }
+}

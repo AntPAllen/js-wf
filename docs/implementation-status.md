@@ -2250,3 +2250,50 @@ benchmark and leader/follower controls pass under the race detector in 18.28s.
 The fixed-reference build and controlled smoke checks are verified separately.
 The latest 20-seed mixed campaign at `9b71aaf` passed, while the million-timer
 process and extended simulation campaign remain live.
+
+## Completed placement-controlled throughput and expanded release-count simulation
+
+The [controlled throughput CI campaign](https://github.com/AntPAllen/js-wf/actions/runs/36778974153)
+passed both client placements at `9d7e6c0`. Leader hot/parallel median ratios
+were 1.003080/0.994610; follower ratios were 1.001873/0.993820. Downloaded
+samples independently reproduce these comparisons and their shared harness
+hashes. The leader (~2,110/s) and follower (~1,524/s) rate bands also agree with
+the diagnostic hypothesis; no old topology can be reconstructed. [All raw
+artifacts and verification scope](scale/cas-throughput-placement-ci-2026-09-30/README.md)
+are retained. The previous failure remains recorded and the 80% thresholds
+are unchanged.
+
+The [extended Tier 1 campaign at `b25b889`](https://github.com/AntPAllen/js-wf/actions/runs/36773625051)
+completed successfully: 100,000 seeds per workload, 7,500,604 generated
+schedules, 168,254,704 scheduler choices and 1,814,974,692 transport events in
+48m7.408s. Its [downloaded coverage line](scale/tier1-extended-b25b889-2026-09-30.txt)
+validates the newer coordinator-claim and named enqueue retry slices. It
+predates the parent-interruption model described below; no new model's release
+count is inferred from an older passing campaign.
+
+## Seeded parent interruption during creation and result collection
+
+The new [fan-out replay model](tier1-simulation.md#parent-interruption-during-asynchronous-fan-out)
+runs production worker/client/SDK decisions with seeded partition order and an
+interruption at a selected completed SDK boundary. A successor must preserve
+the exact parent prefix, use the same child identities, complete with a higher
+epoch and correct sum, and retain one terminal journal per child with each
+input-derived result and one effect execution. A final retained-state audit and
+drained modeled run queue are mandatory. The six-child variant passed 1,000
+seeds, exact replay and byte-identical cross-process replay in 2.84 seconds;
+creation and result cuts are pinned and registered for trace replay/minimization.
+The same model's 500-child creation cut 356 and result cut 88 passed exact
+replay in 23.08 seconds after explicit boundary-count checks, with 501 invocation/journal/terminal identities each.
+This is a returned-cancellation delivery interruption with normal cleanup,
+not process SIGKILL, snapshot compaction, or the full 500-child fault matrix.
+
+An initial 500-child race attempt exhausted the model's two-minute wall budget;
+it did not establish an invariant violation. Model deadline exhaustion is now
+reported explicitly, and heartbeat ticks are injected rather than allowing
+real time to introduce events in a long seeded execution. A CPU profile also
+located linear journal seeking during repeated large-parent reads. The modeled
+subject sequences are sorted and purge/delete preserve order, so Next now
+uses binary search without changing transport outcomes or event traces. All
+pinned traces still replay exactly. Final extended race validation and the
+new workload's 100,000-seed validation remain pending; older completed release
+counts do not cover it. The million-timer process remains live and undisturbed.

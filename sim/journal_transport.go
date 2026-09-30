@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -163,10 +164,13 @@ func (m *JournalTransport) Next(ctx context.Context, subject string, from uint64
 			return journal.AppendTail{}, &jetstream.APIError{ErrorCode: 10008}
 		}
 	}
-	for _, message := range m.messages[subject] {
-		if message.Sequence < from {
-			continue
-		}
+	// Appends are ordered by global sequence; purge and deletion preserve
+	// that order. Seeking avoids rescanning the prefix for every entry of
+	// a large parent replay without changing its modeled transport events.
+	list := m.messages[subject]
+	index := sort.Search(len(list), func(i int) bool { return list[i].Sequence >= from })
+	if index < len(list) {
+		message := list[index]
 		m.event(TransportEvent{Operation: "next_journal", Subject: subject, Expected: from, Sequence: message.Sequence, DataSHA256: digest(message.Data), Outcome: "ok"})
 		return journal.AppendTail{Sequence: message.Sequence, Data: append([]byte(nil), message.Data...)}, nil
 	}
