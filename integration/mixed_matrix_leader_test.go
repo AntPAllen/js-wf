@@ -37,6 +37,7 @@ type matrixLeaderFault struct {
 	Killed     time.Time `json:"killed"`
 	Healed     time.Time `json:"healed"`
 	Node       int       `json:"node"`
+	Nodes      []int     `json:"nodes,omitempty"`
 	Consumer   string    `json:"consumer,omitempty"`
 	Pending    uint64    `json:"pending,omitempty"`
 	AckPending int       `json:"ack_pending,omitempty"`
@@ -54,19 +55,19 @@ type matrixLatencySample struct {
 // One sustained row of the release matrix. Shortened runs are smoke evidence;
 // the default exercises ten minutes on the same stores and worker fleet.
 func TestMixedMatrixJournalLeaderEveryThirtySeconds(t *testing.T) {
-	runMixedMatrixLeader(t, false)
+	runMixedMatrixLeader(t, "journal_leader")
 }
 
 func TestMixedMatrixConsumerLeaderEveryThirtySeconds(t *testing.T) {
-	runMixedMatrixLeader(t, true)
+	runMixedMatrixLeader(t, "consumer_leader")
 }
 
-func runMixedMatrixLeader(t *testing.T, consumerRow bool) {
+func TestMixedMatrixAllServersKilledEveryThirtySeconds(t *testing.T) {
+	runMixedMatrixLeader(t, "all_servers")
+}
+
+func runMixedMatrixLeader(t *testing.T, row string) {
 	t.Helper()
-	row := "journal_leader"
-	if consumerRow {
-		row = "consumer_leader"
-	}
 	if os.Getenv("WF_MATRIX_CHAOS") != "1" {
 		t.Skip("set WF_MATRIX_CHAOS=1 for sustained mixed matrix chaos")
 	}
@@ -228,7 +229,9 @@ func runMixedMatrixLeader(t *testing.T, consumerRow bool) {
 			}
 			var event matrixLeaderFault
 			var err error
-			if consumerRow {
+			if row == "all_servers" {
+				event, err = killMatrixAllServers(faultCtx, js, cluster, scheduled)
+			} else if row == "consumer_leader" {
 				event, err = killMatrixConsumerLeader(faultCtx, js, cluster, scheduled, faultRNG)
 			} else {
 				event, err = killMatrixJournalLeader(faultCtx, js, cluster, scheduled)
@@ -241,7 +244,7 @@ func runMixedMatrixLeader(t *testing.T, consumerRow bool) {
 				cancel()
 				return
 			}
-			t.Logf("%s fault node=%d consumer=%s pending=%d ack_pending=%d scheduled=%s killed=%s healed=%s", row, event.Node, event.Consumer, event.Pending, event.AckPending, event.Scheduled.Sub(start), event.Killed.Sub(start), event.Healed.Sub(start))
+			t.Logf("%s fault node=%d nodes=%v consumer=%s pending=%d ack_pending=%d scheduled=%s killed=%s healed=%s", row, event.Node, event.Nodes, event.Consumer, event.Pending, event.AckPending, event.Scheduled.Sub(start), event.Killed.Sub(start), event.Healed.Sub(start))
 		}
 	}()
 	defer func() { stopFault(); <-faultExited }()
@@ -760,4 +763,52 @@ func matrixInvocationLatencies(ctx context.Context, js jetstream.JetStream, typ,
 	}
 	samples = append(samples, matrixLatencySample{Type: typ, ID: id, Event: "terminal", Enabled: enabled, Observed: last.Time, Delay: last.Time.Sub(enabled)})
 	return samples, nil
+}
+
+// Kill every server before restarting any of them. No graceful flush occurs;
+// each process returns on its original ports and persistent file store.
+func killMatrixAllServers(ctx context.Context, js jetstream.JetStream, cluster *testcluster.ProcessCluster, scheduled time.Time) (matrixLeaderFault, error) {
+	event := matrixLeaderFault{Scheduled: scheduled, Node: -1, Killed: time.Now()}
+	bound, stop := context.WithTimeout(ctx, 25*time.Second)
+	defer stop()
+	for node := 0; node < 3; node++ {
+		if err := cluster.KillNode(node); err != nil {
+			return event, err
+		}
+		event.Nodes = append(event.Nodes, node)
+	}
+	for node := 0; node < 3; node++ {
+		if err := cluster.RestartNode(node); err != nil {
+			return event, err
+		}
+	}
+	// All workflow stores must have their full replica set back before heal.
+	for bound.Err() == nil {
+		ready := true
+		for _, name := range []string{"WF_INV", "WF_JRN", "WF_RUN", "WF_SIG", "KV_WF_LEASE", "KV_WF_STATE", "WF_PURGE", "KV_WF_VIEW", "KV_WF_ASSIGN", "OBJ_WF_BLOB"} {
+			attempt, done := context.WithTimeout(bound, time.Second)
+			stream, err := js.Stream(attempt, name)
+			var info *jetstream.StreamInfo
+			if err == nil {
+				info, err = stream.Info(attempt)
+			}
+			done()
+			if err != nil || info.Cluster == nil || info.Cluster.Leader == "" || len(info.Cluster.Replicas) != 2 {
+				ready = false
+				break
+			}
+			for _, peer := range info.Cluster.Replicas {
+				ready = ready && peer.Current && !peer.Offline
+			}
+			if !ready {
+				break
+			}
+		}
+		if ready {
+			event.Healed = time.Now()
+			return event, nil
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	return event, fmt.Errorf("full cluster recovery: %w", bound.Err())
 }
