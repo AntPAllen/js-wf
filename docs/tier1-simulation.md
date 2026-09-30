@@ -1285,3 +1285,19 @@ recovery and semantic rejection, with exact/cross-process replay and a
 100,000-seed pass. A real three-node SDK-boundary contract verifies committed
 and absent publish outcomes and cross-node counts; it does not establish why
 the original startup CI received a no-stream-response reply.
+
+
+## Unchanged assignment owner during coordinator takeover
+
+`unchanged_membership_coordinator` pauses production rebalance over owners c
+while a plans to move partitions. After a/b expire, c would keep the paused
+partition owner unchanged. The old implementation permits one stale CAS write
+at seed 2. The coordinator now claims every assignment revision before balancing,
+so both pause boundaries fence the incumbent even for a same-owner takeover.
+All six cut/partition combinations, exact replay, separate-process identity,
+100,000 schedules and the pinned seed 2 pass. Existing membership traces were
+regenerated for the claim operations. Real three-node contracts cover both
+changed and unchanged owners. Separate partial-claim controls fail reads, drop
+writes, hide committed acknowledgments and race revisions; no balance begins
+until the entire claim is acknowledged. This models runtime coordination and
+server KV expiry, not Raft or an atomic cross-bucket transaction.

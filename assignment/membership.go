@@ -153,6 +153,7 @@ type Controller struct {
 	assignments  RebalancePort
 	registration *lease.Lease
 	coordinator  *lease.Lease
+	claimPending bool
 }
 
 func (m *Membership) Controller(ctx context.Context, id string, assignments RebalancePort) (*Controller, error) {
@@ -216,11 +217,20 @@ func (c *Controller) Step(ctx context.Context) error {
 	if err == nil {
 		if c.coordinator == nil {
 			c.coordinator, err = m.leases.Acquire(ctx, "coordinator", "assign", id)
+			if err == nil {
+				c.claimPending = true
+			}
 			if errors.Is(err, lease.ErrHeld) {
 				err = nil
 			}
 		} else {
 			err = c.coordinator.Renew(ctx)
+		}
+	}
+	if err == nil && c.coordinator != nil && c.claimPending {
+		err = c.claimAssignments(ctx)
+		if err == nil {
+			c.claimPending = false
 		}
 	}
 	if err == nil && c.coordinator != nil {
@@ -235,4 +245,28 @@ func (c *Controller) Step(ctx context.Context) error {
 		}
 	}
 	return err
+}
+
+// claimAssignments invalidates every previous coordinator's assignment CAS
+// snapshot before balancing, including owners that need no move. Membership and
+// assignments live in separate buckets: renewing the coordinator alone cannot
+// fence an assignment already in flight after that renewal. A completed claim
+// ensures every such older revision conflicts. Same-owner puts do not restart
+// partition loops. Missing/deleted assignments are initialized to this member.
+// Conflicts and unknown outcomes fail the pass closed; callers stop worker loops.
+func (c *Controller) claimAssignments(ctx context.Context) error {
+	port := coordinatedAssignments{RebalancePort: c.assignments, leader: c.coordinator}
+	for p := uint32(0); p < provision.Partitions; p++ {
+		owner, revision, err := port.GetLatest(ctx, p)
+		if err != nil {
+			return err
+		}
+		if owner == "" {
+			owner = c.id
+		}
+		if _, err := port.Assign(ctx, p, owner, revision); err != nil {
+			return err
+		}
+	}
+	return nil
 }

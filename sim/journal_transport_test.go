@@ -510,6 +510,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededDeadOwnerDrain(loaded.Seed, &loaded)
 	case "enqueue_transport_retry":
 		replayed, err = runEnqueueTransportRetry(loaded.Seed, &loaded)
+	case "unchanged_membership_coordinator":
+		replayed, err = runUnchangedCoordinator(loaded.Seed, &loaded)
 	case "paused_membership_coordinator":
 		replayed, err = runPausedCoordinator(loaded.Seed, &loaded)
 	case "automatic_membership":

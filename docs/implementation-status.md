@@ -1952,3 +1952,49 @@ seed-1 race replay passed in 22.10 seconds with result 42. These establish
 bounded client recovery and a fresh passing interleaving, not the original
 server cause or the full-matrix latency gate. The running extended Tier 1
 campaign predates this new workload and has not been restarted.
+
+
+## Coordinator takeover claims unchanged assignment revisions
+
+The new `unchanged_membership_coordinator` workload resets all assignments to c
+before pausing the incumbent's rebalance either before renewal or after renewal
+and before assignment CAS. Only c remains registered through server expiry.
+Without a revision claim, c would keep the paused partition's existing owner
+and revision, allowing the expired incumbent to CAS it to a dead owner. The
+old production source overlay reproduces seed 2 with one successful stale
+post-takeover assignment; this is a runtime coordination bug, not a NATS claim.
+
+Every newly acquired coordinator now claims all 64 assignment revisions before
+reading live membership and balancing. Existing owners are preserved during the
+claim; missing/deleted keys are initialized to the registered coordinator.
+Each write renews coordinator ownership first. Read/write uncertainty or CAS
+conflict returns immediately, so no balance moves follow a partial claim.
+The runner stops on that error; server expiry or cleanup permits a successor
+claim. An acknowledged claim invalidates prior CAS snapshots even where no
+owner moves. Stable coordinator passes do not rewrite revisions. Same-owner
+watch updates already preserve worker loops. A takeover can add up to 64
+assignment CAS writes and coordinator renewals; the production eight-second
+pass deadline remains unchanged. This is fencing after a completed claim, not
+an atomic cross-bucket transaction or protection from unrelated manual writes.
+
+The unchanged-owner workload passed 100,000 seeds in 90.94 seconds with exact
+and cross-process replay; seed 2 is pinned. Existing automatic-membership and
+paused-coordinator pins were regenerated for the new production request trace.
+Focused membership/paused/unchanged replay and the pinned corpus passed under
+race in 50.32 seconds while other verification ran. The final full ordinary
+simulator suite passed in 69.51 seconds. Partial-claim controls cover failed
+reads, dropped writes, committed writes with lost acknowledgments and concurrent
+CAS conflict; all stop before any balance move and let a successor finish,
+then leave stable revisions unchanged. Their race check passed.
+
+Real three-node race handoff controls passed for changed owners (18.79 seconds)
+and unchanged owners (18.22 seconds), requiring the old assignment CAS to
+conflict and the old coordinator to lose renewal. Real SIGKILL recovery with
+65 invocations and 1,430 journal entries passed in 28.81 seconds; all results
+arrived 16.73 seconds after the kill. The real membership runner test now starts
+with a deletion marker, an existing departed owner and never-created keys;
+join, graceful leave and takeover passed under race in 25.35 seconds. The
+initial full simulator invocation read old pins before regeneration and failed
+those three traces; the regenerated corpus and final full suite both passed.
+Vet and diff checks passed. These controls do not clear the automatic-membership
+full fault matrix or the 200-seed/24-hour release gates.

@@ -54,7 +54,15 @@ func (p *pausedCoordinatorAssignments) Assign(ctx context.Context, partition uin
 	}
 	return next, err
 }
-func runPausedCoordinator(seed int64, replay *Trace) (trace Trace, runErr error) {
+func runPausedCoordinator(seed int64, replay *Trace) (Trace, error) {
+	return runPausedCoordinatorMode(seed, replay, false)
+}
+
+func runUnchangedCoordinator(seed int64, replay *Trace) (Trace, error) {
+	return runPausedCoordinatorMode(seed, replay, true)
+}
+
+func runPausedCoordinatorMode(seed int64, replay *Trace, unchanged bool) (trace Trace, runErr error) {
 	var schedule *Scheduler
 	if replay == nil {
 		schedule = NewScheduler(seed)
@@ -65,7 +73,11 @@ func runPausedCoordinator(seed int64, replay *Trace) (trace Trace, runErr error)
 			return trace, err
 		}
 	}
-	if err := schedule.SetWorkload("paused_membership_coordinator"); err != nil {
+	workload := "paused_membership_coordinator"
+	if unchanged {
+		workload = "unchanged_membership_coordinator"
+	}
+	if err := schedule.SetWorkload(workload); err != nil {
 		return trace, err
 	}
 	defer func() { trace = schedule.Trace() }()
@@ -106,6 +118,19 @@ func runPausedCoordinator(seed int64, replay *Trace) (trace Trace, runErr error)
 	}
 	if err := c.Step(ctx); err != nil {
 		return trace, err
+	}
+	if unchanged {
+		// The incumbent will plan moves away from c, but the successor would
+		// keep the paused partition on c even without changing its revision.
+		for p := uint32(0); p < provision.Partitions; p++ {
+			_, rev, err := retained.GetLatest(ctx, p)
+			if err != nil {
+				return trace, err
+			}
+			if _, err := retained.Assign(ctx, p, "c", rev); err != nil {
+				return trace, err
+			}
+		}
 	}
 	paused.hook = func() error {
 		schedule.RecordTransport(TransportEvent{Operation: "pause_coordinator", Outcome: cut, Sequence: uint64(partition), AtMillis: schedule.NowMillis()})

@@ -160,6 +160,19 @@ For an existing 20 s or 30 s `WF_LEASE` bucket, stop workers and lease-holding l
 - **Hot partition** (one tenant floods one partition). N=64 static partitions cannot fix this; record it as a known limit and test that other partitions keep their latency.
 - **`AckWait` shorter than a legitimate long step** without heartbeats: assert redelivery happens and the second worker is fenced, then assert that with heartbeats it does not happen.
 
+Automatic membership coordinator takeover must invalidate every retained assignment
+revision before balancing, including assignments whose owner remains unchanged.
+Renewing a coordinator lease in a separate bucket cannot fence an assignment
+already paused between that renewal and its CAS. A new coordinator claims all
+64 keys with same-owner CAS writes (initializing missing/deleted keys), renewing
+its lease before each write. Any read, write, or CAS uncertainty stops the pass;
+only a fully acknowledged claim permits balancing. Subsequent passes by the
+same coordinator do not repeat the claim. Workers retain loops on same-owner
+revision changes. Prove the unchanged-owner pause boundary in Tier 1 and on a
+real three-node cluster, plus partial-claim failure and tombstone recovery.
+This fences older revisions after the claim completes; it is not an atomic
+transaction across the membership and assignment buckets.
+
 ## Phase 4 — SDK core: journal-and-suspend (I3, I4)
 
 User code is an ordinary Go function `func(ctx wf.Context, input T) (R, error)`. Every durable operation goes through `ctx`: `ctx.Run(name, fn)` for a side effect, `ctx.Sleep(d)`, `ctx.Await(promise)`, `ctx.Signal(name)`. The runtime keeps a cursor into the journal. On each call it checks: is there a `StepCompleted` at this index? If yes, return its result without running anything. If there is a `StepRequested` but no completion, re-run the effect (at-least-once) and CAS-append the completion. If neither, append `StepRequested`, run, append `StepCompleted`.

@@ -41,6 +41,11 @@ func (p *heldCoordinatorAssignment) Assign(ctx context.Context, partition uint32
 }
 
 func TestPausedMembershipCoordinatorCannotOverwriteSuccessor(t *testing.T) {
+	t.Run("changed_owners", func(t *testing.T) { testPausedMembershipCoordinator(t, false) })
+	t.Run("unchanged_owner", func(t *testing.T) { testPausedMembershipCoordinator(t, true) })
+}
+
+func testPausedMembershipCoordinator(t *testing.T, unchanged bool) {
 	all, _ := setup(t)
 	ctx, stop := context.WithTimeout(context.Background(), 40*time.Second)
 	defer stop()
@@ -79,6 +84,21 @@ func TestPausedMembershipCoordinatorCannotOverwriteSuccessor(t *testing.T) {
 	if err := c.Step(ctx); err != nil {
 		t.Fatal(err)
 	}
+	if unchanged {
+		for p := uint32(0); p < provision.Partitions; p++ {
+			_, rev, err := owners.GetLatest(ctx, p)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := owners.Assign(ctx, p, "c", rev); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	_, initialRevision, err := owners.GetLatest(ctx, 63)
+	if err != nil {
+		t.Fatal(err)
+	}
 	held.armed.Store(true)
 	done := make(chan error, 1)
 	go func() { done <- a.Step(ctx) }()
@@ -100,11 +120,11 @@ func TestPausedMembershipCoordinatorCannotOverwriteSuccessor(t *testing.T) {
 		if err := c.Step(ctx); err != nil {
 			t.Fatal(err)
 		}
-		owner, _, err := owners.GetLatest(ctx, 0)
+		owner, revision, err := owners.GetLatest(ctx, 63)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if owner == "c" {
+		if owner == "c" && (!unchanged || revision > initialRevision) {
 			break
 		}
 		select {

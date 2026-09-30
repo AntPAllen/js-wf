@@ -110,6 +110,18 @@ func TestMembershipControllerBalancesJoinAndGracefulLeave(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// First acquisition must claim an existing owner, a deletion marker, and
+	// never-created keys before balancing. Deletion revisions remain CAS fences.
+	rev, err := owners.Assign(ctx, 0, "departed", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := owners.kv.Delete(ctx, "p00", jetstream.LastRevision(rev)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := owners.Assign(ctx, 1, "departed", 0); err != nil {
+		t.Fatal(err)
+	}
 	a, err := members.Controller(ctx, "a", owners)
 	if err != nil {
 		t.Fatal(err)
