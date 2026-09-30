@@ -174,23 +174,22 @@ func check(ctx context.Context, js jetstream.JetStream, cutoff *uint64) (Report,
 		subjects = append(subjects, subject)
 	}
 	sort.Strings(subjects)
-	for _, subject := range subjects {
+	audited, err := auditJournals(ctx, subjects, func(ctx context.Context, subject string) (int, bool, error) {
 		key, err := journalKey(subject, seen)
 		if err != nil {
-			return report, err
+			return 0, false, err
 		}
 		parts := strings.Split(key, ".")
-		report.Journals++
 		records := live[subject]
 		if compacted[subject] {
 			records, _, err = journal.New(js).Read(ctx, parts[0], parts[1])
 			if err != nil {
-				return report, fmt.Errorf("%s: %w", subject, err)
+				return 0, false, fmt.Errorf("%s: %w", subject, err)
 			}
 		}
 		for i, record := range records {
 			if record.Sequence == 0 || i > 0 && record.Sequence <= records[i-1].Sequence {
-				return report, fmt.Errorf("%s: invalid retained journal sequence", subject)
+				return 0, false, fmt.Errorf("%s: invalid retained journal sequence", subject)
 			}
 		}
 		entries, terminal, err := checkJournalRecords(subject, records, func() ([]byte, error) {
@@ -201,11 +200,53 @@ func check(ctx context.Context, js jetstream.JetStream, cutoff *uint64) (Report,
 			return value.Value(), nil
 		})
 		if err != nil {
-			return report, err
+			return 0, false, err
 		}
-		report.Entries += entries
-		if terminal {
-			report.Terminal++
+		return entries, terminal, nil
+	})
+	report.Journals, report.Entries, report.Terminal = audited.Journals, audited.Entries, audited.Terminal
+	if err != nil {
+		return report, err
+	}
+
+	return report, nil
+}
+
+// Check independent retained journals in bounded windows, then reduce in
+// sorted subject order. Read completion order cannot hide an earlier invariant
+// failure or change its reported subject. Maps captured by check are immutable.
+func auditJournals(ctx context.Context, subjects []string, check func(context.Context, string) (int, bool, error)) (Report, error) {
+	var report Report
+	const window = 16
+	type result struct {
+		entries  int
+		terminal bool
+		err      error
+	}
+	for first := 0; first < len(subjects); first += window {
+		if ctx.Err() != nil {
+			return report, ctx.Err()
+		}
+		count := min(window, len(subjects)-first)
+		results := make([]result, count)
+		var readers sync.WaitGroup
+		for offset := range results {
+			readers.Add(1)
+			go func() {
+				defer readers.Done()
+				results[offset].entries, results[offset].terminal, results[offset].err = check(ctx, subjects[first+offset])
+			}()
+		}
+		readers.Wait()
+		for _, result := range results {
+			report.Journals++
+			if result.err != nil {
+				return report, result.err
+			}
+			report.Entries += result.entries
+			if result.terminal {
+				report.Terminal++
+			}
 		}
 	}
 	return report, nil

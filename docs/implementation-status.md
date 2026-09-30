@@ -1089,3 +1089,38 @@ focused race repetitions passed in 17.47 seconds. A strengthened race test
 requiring cancellation to exercise a confirmed active device suspension passed
 in 6.50 seconds, and no test mappings remained. Clean-runner validation of this
 fix and the full sustained block-stall gate remain open.
+
+
+## Bounded concurrent journal and terminal-state auditing
+
+The retained-state checker now validates independent journals in windows of
+sixteen, including snapshot reconstruction and terminal KV agreement. Previously
+this phase ran serially after the concurrent raw scan, so a stalled KV leader
+could consume a checkpoint allowance while checking thousands of terminal
+values. Results are reduced in sorted subject order; a faster later request
+cannot hide an earlier invariant error or change the reported failing subject.
+Every invocation/journal/snapshot/terminal check remains required. The per-read
+two-second attempts, named transient retry policy, twenty-second matrix audit
+attempts and overall matrix latency/completion gates are unchanged.
+
+Race controls verify bounded reader concurrency, complete traversal, changed
+and missing terminal values in a later window, structural corruption in the
+last window, and deterministic first-error selection when another failure
+returns sooner. The complete integrity package passed under the race detector
+in 1.88 seconds. Real three-node epoch-mutation and snapshot/purge recovery
+contracts passed in a 12.79-second integration run. The explicitly enabled
+33,600-entry/800-terminal scale proof passed under its twenty-second audit
+deadline in 13.58 seconds (24.35 seconds total Go test time). A new scale shape
+matching larger terminal cohorts passed 3,200 invocations, 3,200 terminal values
+and 32,000 entries under the same deadline in 12.93 seconds (25.03 seconds total).
+Both scale shapes are now included in the per-push audit job. Vet and diff
+checks passed. These no-fault proofs do not explain or clear the earlier
+full block-stall audit deadline failure; fresh fault validation is required.
+
+The full local rolling-upgrade race run at `fbe34b7` remains active. Its matching
+[new CI seed](https://github.com/AntPAllen/js-wf/actions/runs/36732200367) and
+[block-stall cleanup-fix CI seed](https://github.com/AntPAllen/js-wf/actions/runs/36732204328)
+were dispatched at `321c70f`. The first full
+[fan-out restart CI seed](https://github.com/AntPAllen/js-wf/actions/runs/36728933264)
+passed; [twenty consecutive seeds](https://github.com/AntPAllen/js-wf/actions/runs/36732209257)
+were dispatched at `321c70f` and remain pending.

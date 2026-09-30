@@ -61,7 +61,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Audit 33600 retained entries within the checkpoint deadline
-        run: WF_AUDIT_SCALE=1 go test -race ./integration -run '^TestRetainedAuditThirtyThousandEntriesWithinCheckpointDeadline$' -count=1 -timeout=4m -v
+        run: WF_AUDIT_SCALE=1 go test -race ./integration -run '^TestRetainedAudit(ThirtyThousandEntries|ThreeThousandTerminals)WithinCheckpointDeadline$' -count=1 -timeout=4m -v
   cluster-rebalance-combined:
     runs-on: ubuntu-latest
     timeout-minutes: 9

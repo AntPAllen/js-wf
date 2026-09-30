@@ -16,6 +16,15 @@ import (
 )
 
 func TestRetainedAuditThirtyThousandEntriesWithinCheckpointDeadline(t *testing.T) {
+	runRetainedAuditScale(t, 800, 42)
+}
+
+func TestRetainedAuditThreeThousandTerminalsWithinCheckpointDeadline(t *testing.T) {
+	runRetainedAuditScale(t, 3200, 10)
+}
+
+func runRetainedAuditScale(t *testing.T, invocations, entries int) {
+	t.Helper()
 	if os.Getenv("WF_AUDIT_SCALE") != "1" {
 		t.Skip("set WF_AUDIT_SCALE=1 for the retained-state scan boundary")
 	}
@@ -28,8 +37,6 @@ func TestRetainedAuditThirtyThousandEntriesWithinCheckpointDeadline(t *testing.T
 		t.Fatal(err)
 	}
 	c := client.New(js)
-	const invocations = 800
-	const entries = 42
 	tasks := make(chan int)
 	failures := make(chan error, invocations)
 	var writers sync.WaitGroup
@@ -44,12 +51,12 @@ func TestRetainedAuditThirtyThousandEntriesWithinCheckpointDeadline(t *testing.T
 					continue
 				}
 				var writeErr error
-				for index := uint64(0); index < entries; index++ {
+				for index := uint64(0); index < uint64(entries); index++ {
 					kind := journal.StepRequested
 					switch {
 					case index == 0:
 						kind = journal.Started
-					case index == entries-1:
+					case index == uint64(entries-1):
 						kind = journal.Completed
 					case index%2 == 0:
 						kind = journal.StepCompleted
