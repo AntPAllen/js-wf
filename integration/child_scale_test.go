@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"sync"
 	"syscall"
@@ -31,17 +32,21 @@ import (
 // TestFiveHundredChildFanout interrupts the parent during child creation,
 // then collects all child results after a restart.
 func TestFiveHundredChildFanout(t *testing.T) {
-	runFiveHundredChildFanout(t, false, false)
+	runFiveHundredChildFanout(t, false, false, false)
 }
 
 // The second fan-out run moves the journal leader after the parent has
 // committed a seeded prefix of child requests.
 func TestFiveHundredChildFanoutAcrossJournalLeaderRestart(t *testing.T) {
-	runFiveHundredChildFanout(t, true, false)
+	runFiveHundredChildFanout(t, true, false, false)
 }
 
 func TestFiveHundredChildFanoutAfterParentSIGKILL(t *testing.T) {
-	runFiveHundredChildFanout(t, false, true)
+	runFiveHundredChildFanout(t, false, true, false)
+}
+
+func TestFiveHundredChildFanoutAfterParentResultSIGKILL(t *testing.T) {
+	runFiveHundredChildFanout(t, false, false, true)
 }
 
 func TestFiveHundredChildFanoutProcessChild(t *testing.T) {
@@ -50,7 +55,8 @@ func TestFiveHundredChildFanoutProcessChild(t *testing.T) {
 	}
 	url, marker := os.Getenv("WF_FANOUT_PROCESS_URL"), os.Getenv("WF_FANOUT_PROCESS_MARKER")
 	cut, err := strconv.Atoi(os.Getenv("WF_FANOUT_PROCESS_CUT"))
-	if url == "" || marker == "" || err != nil || cut < 100 || cut >= 400 {
+	phase := os.Getenv("WF_FANOUT_PROCESS_PHASE")
+	if url == "" || marker == "" || err != nil || cut < 0 || cut >= 500 || (phase != "results" && (cut < 100 || cut >= 400)) {
 		t.Fatal("invalid 500-child process helper configuration")
 	}
 	nc, err := nats.Connect(url, nats.NoReconnect(), nats.IgnoreDiscoveredServers())
@@ -62,7 +68,7 @@ func TestFiveHundredChildFanoutProcessChild(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	handlers := fanoutHandlers(cut, func() error {
+	pause := func() error {
 		if err := os.WriteFile(marker+".tmp", []byte(strconv.Itoa(cut)), 0600); err != nil {
 			return err
 		}
@@ -70,7 +76,11 @@ func TestFiveHundredChildFanoutProcessChild(t *testing.T) {
 			return err
 		}
 		select {}
-	})
+	}
+	handlers := fanoutHandlers(cut, pause)
+	if phase == "results" {
+		handlers = fanoutHandlersAtResults(cut, pause)
+	}
 	w, err := worker.New(context.Background(), js, "parent-process-before-kill", handlers)
 	if err != nil {
 		t.Fatal(err)
@@ -80,7 +90,7 @@ func TestFiveHundredChildFanoutProcessChild(t *testing.T) {
 	}
 }
 
-func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess bool) {
+func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, killDuringResults bool) {
 	t.Helper()
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
@@ -88,6 +98,13 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess bo
 	}
 	const childCount = 500
 	cut := 100 + rand.New(rand.NewSource(seed)).Intn(300)
+	resultCut := rand.New(rand.NewSource(seed)).Intn(childCount)
+	if raw := os.Getenv("WF_FANOUT_RESULT_CUT"); killDuringResults && raw != "" {
+		resultCut, err = strconv.Atoi(raw)
+		if err != nil || resultCut < 0 || resultCut >= childCount {
+			t.Fatalf("invalid WF_FANOUT_RESULT_CUT=%q", raw)
+		}
+	}
 	t.Logf("FAULT_SEED=%d parent_cut_after_child=%d", seed, cut)
 	all, cluster := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
@@ -254,6 +271,11 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess bo
 	if ctx.Err() != nil {
 		t.Fatalf("children outside parent partition did not finish: %v", ctx.Err())
 	}
+	var killedPrefix []journal.Record
+	if killDuringResults {
+		t.Logf("FAULT_SEED=%d parent_cut_after_result=%d", seed, resultCut)
+		killedPrefix = killFanoutParentAtBoundary(t, ctx, all[0], cluster.Servers[1].ClientURL(), resultCut, "results")
+	}
 	final, err := worker.New(ctx, all[1], "parent-after-children", handlers)
 	if err != nil {
 		t.Fatal(err)
@@ -276,6 +298,15 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess bo
 			t.Fatalf("child worker: %v", err)
 		}
 	}
+	if killDuringResults {
+		finalRecords, _, err := j.Read(ctx, "parent", "large-fanout")
+		if err != nil || len(finalRecords) <= len(killedPrefix) || !reflect.DeepEqual(killedPrefix, finalRecords[:len(killedPrefix)]) {
+			t.Fatalf("parent changed durable result prefix after SIGKILL: %v", err)
+		}
+		if finalRecords[len(finalRecords)-1].Epoch <= killedPrefix[len(killedPrefix)-1].Epoch {
+			t.Fatal("successor completed without a higher fencing epoch")
+		}
+	}
 	report, err := integrity.Check(ctx, all[0])
 	if err != nil {
 		t.Fatal(err)
@@ -294,7 +325,15 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess bo
 	if info.State.Msgs != childCount+1 {
 		t.Fatalf("invocation count=%d", info.State.Msgs)
 	}
-	for _, id := range childIDs {
+	for index, id := range childIDs {
+		if killDuringResults {
+			for _, peer := range []jetstream.JetStream{all[0], all[2]} {
+				result, err := client.New(peer).Await(ctx, "child", id)
+				if err != nil || string(result) != strconv.Itoa(2*index) {
+					t.Fatalf("child %d result=%s err=%v", index, result, err)
+				}
+			}
+		}
 		message, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject("child", id))
 		if err != nil || message.Header.Get(client.ParentTypeHeader) != "parent" || message.Header.Get(client.ParentIDHeader) != "large-fanout" {
 			t.Fatalf("child %s invocation=%+v err=%v", id, message, err)
@@ -354,6 +393,14 @@ func logFanoutCreationFailure(t *testing.T, nodes []jetstream.JetStream, partiti
 }
 
 func fanoutHandlers(cut int, afterChild func() error) map[string]worker.Handler {
+	return fanoutHandlersAtCuts(cut, afterChild, -1, nil)
+}
+
+func fanoutHandlersAtResults(cut int, afterResult func() error) map[string]worker.Handler {
+	return fanoutHandlersAtCuts(-1, nil, cut, afterResult)
+}
+
+func fanoutHandlersAtCuts(cut int, afterChild func() error, resultCut int, afterResult func() error) map[string]worker.Handler {
 	const childCount = 500
 	return map[string]worker.Handler{
 		"parent": func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
@@ -372,7 +419,7 @@ func fanoutHandlers(cut int, afterChild func() error) map[string]worker.Handler 
 				}
 			}
 			sum := 0
-			for _, promise := range promises {
+			for index, promise := range promises {
 				value, err := wf.AwaitPromise(c, promise)
 				if err != nil {
 					return nil, err
@@ -380,6 +427,11 @@ func fanoutHandlers(cut int, afterChild func() error) map[string]worker.Handler 
 				var n int
 				if err := json.Unmarshal(value, &n); err != nil {
 					return nil, err
+				}
+				if index == resultCut {
+					if err := afterResult(); err != nil {
+						return nil, err
+					}
 				}
 				sum += n
 			}
@@ -400,6 +452,10 @@ func fanoutHandlers(cut int, afterChild func() error) map[string]worker.Handler 
 }
 
 func killFanoutParentAtCut(t *testing.T, ctx context.Context, js jetstream.JetStream, url string, cut int) {
+	_ = killFanoutParentAtBoundary(t, ctx, js, url, cut, "create")
+}
+
+func killFanoutParentAtBoundary(t *testing.T, ctx context.Context, js jetstream.JetStream, url string, cut int, phase string) []journal.Record {
 	t.Helper()
 	executable, err := os.Executable()
 	if err != nil {
@@ -413,7 +469,7 @@ func killFanoutParentAtCut(t *testing.T, ctx context.Context, js jetstream.JetSt
 	}
 	defer logFile.Close()
 	cmd := exec.Command(executable, "-test.run=^TestFiveHundredChildFanoutProcessChild$")
-	cmd.Env = append(os.Environ(), "WF_FANOUT_PROCESS_CHILD=1", "WF_FANOUT_PROCESS_URL="+url, "WF_FANOUT_PROCESS_MARKER="+marker, "WF_FANOUT_PROCESS_CUT="+strconv.Itoa(cut))
+	cmd.Env = append(os.Environ(), "WF_FANOUT_PROCESS_CHILD=1", "WF_FANOUT_PROCESS_URL="+url, "WF_FANOUT_PROCESS_MARKER="+marker, "WF_FANOUT_PROCESS_CUT="+strconv.Itoa(cut), "WF_FANOUT_PROCESS_PHASE="+phase)
 	cmd.Stdout, cmd.Stderr = logFile, logFile
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)
@@ -446,13 +502,13 @@ func killFanoutParentAtCut(t *testing.T, ctx context.Context, js jetstream.JetSt
 		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
 		records, _, err = journal.New(js).Read(attempt, "parent", "large-fanout")
 		stop()
-		if err == nil && len(records) == 1+2*(cut+1) && records[len(records)-1].Kind == journal.StepCompleted {
+		if err == nil && fanoutCutMatches(records, cut, phase) {
 			break
 		}
 		time.Sleep(20 * time.Millisecond)
 	}
-	if err != nil || len(records) != 1+2*(cut+1) || records[len(records)-1].Kind != journal.StepCompleted {
-		t.Fatalf("parent journal before SIGKILL: entries=%d want=%d err=%v", len(records), 1+2*(cut+1), err)
+	if err != nil || !fanoutCutMatches(records, cut, phase) {
+		t.Fatalf("parent journal before SIGKILL: phase=%s cut=%d entries=%d err=%v", phase, cut, len(records), err)
 	}
 	if err := cmd.Process.Kill(); err != nil {
 		t.Fatal(err)
@@ -463,5 +519,51 @@ func killFanoutParentAtCut(t *testing.T, ctx context.Context, js jetstream.JetSt
 	if waitErr == nil || !ok || !status.Signaled() || status.Signal() != syscall.SIGKILL {
 		t.Fatalf("parent process was not SIGKILLed: state=%v err=%v", cmd.ProcessState, waitErr)
 	}
-	t.Logf("SIGKILLed parent worker after %d committed child requests", cut+1)
+	t.Logf("SIGKILLed parent worker at %s cut %d; retained entries=%d", phase, cut, len(records))
+	return records
+}
+
+func fanoutCutMatches(records []journal.Record, cut int, phase string) bool {
+	if len(records) == 0 || records[len(records)-1].Kind != journal.StepCompleted {
+		return false
+	}
+	if phase != "results" {
+		return len(records) == 1+2*(cut+1)
+	}
+	var names []string
+	results := 0
+	pendingKind, pendingName := "", ""
+	for _, record := range records {
+		switch record.Kind {
+		case journal.StepRequested:
+			if pendingKind != "" {
+				return false
+			}
+			var request struct {
+				Kind string `json:"kind"`
+				Name string `json:"name"`
+			}
+			if json.Unmarshal(record.Payload, &request) != nil {
+				return false
+			}
+			pendingKind, pendingName = request.Kind, request.Name
+		case journal.StepCompleted:
+			switch pendingKind {
+			case "call_async":
+				names = append(names, pendingName)
+			case "signal":
+				if results >= len(names) || pendingName != names[results] {
+					return false
+				}
+				results++
+			default:
+				return false
+			}
+			pendingKind, pendingName = "", ""
+		case journal.Started, journal.Suspended, journal.SignalConsumed:
+		default:
+			return false
+		}
+	}
+	return len(names) == 500 && results == cut+1 && pendingKind == ""
 }

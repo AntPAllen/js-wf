@@ -257,7 +257,7 @@ A child call `ctx.Call(childType, childID, input)` is: journal `StepRequested{ca
 
 - Test: 100 signallers send 100 signals each (10 000 total, numbered) to one invocation while chaos runs. The invocation records them in `WF_SIG` sequence order with no gaps and no duplicates in the journal; every signaller's history is linearizable as a queue append.
 - Test: signal sent before `Start` (race at creation). The invocation sees it on its first drain. Test the reverse race: `Start` then signal 1 ms later.
-- Test: fan-out of 1 parent → 500 children → all results back. Kill the parent worker at random points. Exactly 500 child journals exist (I1 on children via deterministic ids), the parent's result is the sum of all children, no child ran twice as a new invocation.
+- Test: fan-out of 1 parent → 500 children → all results back. Kill the parent worker at random points. Exactly 500 child journals exist (I1 on children via deterministic ids), the parent's result is the sum of all children, no child ran twice as a new invocation. Include child-creation and result-collection cuts, including after the first and last result; preserve the committed parent prefix and require a higher successor epoch. The result-collection fixture is `TestFiveHundredChildFanoutAfterParentResultSIGKILL`.
 - Test: a 3-deep parent→child→grandchild chain where the middle worker dies after the grandchild completes but before the parent is signalled. The reconciler or the grandchild's `Nats-Msg-Id`-protected signal retry gets the result to the parent.
 
 **Edge cases**

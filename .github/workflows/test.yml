@@ -8,7 +8,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go test ./wf ./workflowlint ./identity ./journal ./lease ./provision ./reconcile ./client ./history ./worker ./integrity ./testcluster ./sim ./cmd/wf ./cmd/wf-worker ./cmd/wf-lint ./cmd/wf-cas-bench ./cmd/wf-scale
+      - run: go test ./wf ./workflowlint ./identity ./journal ./lease ./provision ./reconcile ./client ./history ./worker ./integrity ./testcluster ./sim ./cmd/wf ./cmd/wf-worker ./cmd/wf-lint ./cmd/wf-cas-bench ./cmd/wf-scale ./cmd/wf-timer-volume
         env:
           # Go runs sim tests from sim/, matching the artifact glob below.
           FAULT_TRACE_OUT: sim-failure.json
@@ -42,7 +42,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go test ./integration -run '^TestFiveHundredChildFanout($|AcrossJournalLeaderRestart$|AfterParentSIGKILL$)' -count=1 -timeout=20m -v
+      - run: go test ./integration -run '^TestFiveHundredChildFanout($|AcrossJournalLeaderRestart$|AfterParentSIGKILL$|AfterParentResultSIGKILL$)' -count=1 -timeout=20m -v
   cluster-scale-cas:
     runs-on: ubuntu-latest
     timeout-minutes: 20
