@@ -2064,7 +2064,7 @@ maximum lateness at 30 seconds; the full workload has not completed yet.
 
 A 1,000-schedule/45-second fixture check passed across two confirmed three-PID
 SIGKILL/restart cycles, with all deliveries, zero redeliveries or ack errors,
-17 transient fetch errors and a drained queue. Raw p99 was 13.12 seconds and
+28 transient fetch errors and a drained queue. Raw p99 was 13.12 seconds and
 maximum 13.25 seconds, below this explicitly shortened run's 30-second limit.
 It is not two-second p99 or full-volume evidence. The retained report and binary
 observations pass offline smoke verification; release verification rejects the
@@ -2090,3 +2090,31 @@ coordinator pause/claim workloads and named transient enqueue recovery.
 The standard and twenty-seed mixed jobs at `8e04946` also completed successfully;
 the mixed job at `4653542` succeeded while its standard job is still running.
 Fresh extended validation of the later models remains required.
+
+
+## Million schedules loaded and fresh extended simulation running
+
+The full volume campaign is now confirmed live at clean revision `b25b889`.
+All 1,000,000 production schedule publishes were acknowledged before the first
+deadline, with 64 publishers and approximately 0.8–0.9 GiB RSS per server at
+this inspection. The [initial running report](scale/timer-volume-million-2026-09-30-start.json)
+is loading evidence, not a completed delivery/restart pass. Deadlines span
+Sep 30 20:49:18.293006668 UTC through Oct 1 20:49:18.293006668 UTC. Full cluster
+kills are planned at one-third and two-thirds of that span. Raw p99 remains
+limited to two seconds and maximum to 30 seconds.
+
+The live runner is PID 581576, local execution session 50794. Stores, server
+logs and atomic progress are under `/tmp/js-wf-timer-volume-million-20260930`;
+runner output is `/tmp/js-wf-timer-volume-million.log`. Revalidate the process
+and session before continuing; a polling timeout is not a reason to restart.
+Completion still requires all deliveries, both recorded full restarts, queue
+drain, lateness gates and successful offline release verification.
+
+After the older extended simulation run was confirmed terminal/successful,
+a [fresh 100,000-seed-per-workload campaign](https://github.com/AntPAllen/js-wf/actions/runs/36773625051)
+was started at `b25b889` and is now confirmed in progress. It includes the new
+coordinator claim/pause and named enqueue recovery models and refreshed pins.
+This is a new source-validation campaign, not a restart of a live job. The
+full timer-volume and fresh extended simulation results remain pending.
+The retained smoke's transient fetch-error count is 28; the earlier prose used
+17 from a preceding smoke and has been corrected to match the retained report.

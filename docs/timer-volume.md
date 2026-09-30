@@ -69,7 +69,7 @@ at receipt; the binary artifact records the sequence and receipt time.
 The short check deliberately permits 30-second raw p99 because outages occupy a
 large part of its 45-second span. It is excluded from the million-message and
 24-hour gates. The Sep 30 check retained [the report and binary observations](scale/timer-volume-smoke-2026-09-30/report.json):
-1,000/1,000 delivered, zero redeliveries and ack errors, 17 transient fetch
+1,000/1,000 delivered, zero redeliveries and ack errors, 28 transient fetch
 errors, two confirmed full kills, zero final backlog, raw p99 13.12 seconds and
 maximum 13.25 seconds. Offline smoke verification passed; release verification
 correctly rejected its smaller scope. Earlier runner attempts exposed an
