@@ -1055,3 +1055,27 @@ The real conformance failure remains a release gap. The observed placement
 control does not establish the internal compatibility cause or a general
 runtime repair protocol. The full rolling-upgrade matrix retains seeded node
 order.
+
+
+### Observed post-ack recovery and likely proposal-ownership mismatch
+
+The real `mixed-move-after-ack` control now uses the inherited replica
+configuration and requires all 33 acknowledged records to remain stored for
+thirty seconds before moving the stream leader to the upgraded consumer leader.
+It then requires zero stored messages and unchanged completed consumer progress.
+The final race test passed in 40.57 seconds, with all 33 raw pre-move records
+saved and a complete sequence scan. Afterward every original sequence must
+return message-not-found, independently of the zero stream count. This supports explicit modeled retention completion
+for that fixture; the simulator does not implement server leader election or
+infer universal recovery from a move.
+
+Source inspection supplies a likely explanation for the retained placement:
+`stream.ackMsg` in NATS 2.11.17 allows the consumer leader to propose removal,
+while 2.15.0 allows the stream leader. With an old stream leader and upgraded
+consumer leader on different nodes, each node fails its own ownership condition.
+This is a source-supported causal hypothesis, not an instrumented proof that
+those branches were taken in every real failure. See the pinned upstream
+[2.11.17 implementation](https://github.com/nats-io/nats-server/blob/v2.11.17/server/stream.go#L6574)
+and [2.15.0 implementation](https://github.com/nats-io/nats-server/blob/v2.15.0/server/stream.go#L9372).
+The strict split-version conformance cases and full seeded rolling-upgrade
+matrix remain independent requirements.

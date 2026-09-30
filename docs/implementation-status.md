@@ -1256,3 +1256,57 @@ clear sustained or consecutive-seed release requirements.
 The [new full Tier 1 CI run](https://github.com/AntPAllen/js-wf/actions/runs/36741786098)
 at `493c6a7` is live with 100,000 seeds per workload, including the WorkQueue
 retention extension. It remains separate from the completed expanded run above.
+
+
+## Mixed-version retention after a stream-leader move
+
+The new `mixed-move-after-ack` opt-in control reproduces the 33-record retained
+state with the runtime's inherited consumer replicas. It waits the unchanged
+thirty-second drain allowance, requires ack floor 33 and no consumer pending
+work, and saves a complete raw sequence scan containing every record. Only then
+does it move the stream leader onto the upgraded consumer leader's node.
+Without republishing or issuing new acknowledgments, the retained stream drains
+and consumer progress remains complete. The initial local race test passed in 43.70
+seconds. The final test additionally verifies the expected leader placement
+before and after the move and reads each original sequence afterward; all 33
+must return message-not-found. That final race test passed in 40.57 seconds.
+One intervening attempt failed before ack at preferred consumer-leader placement.
+The helper now waits for all peers to be current and retries the documented
+preferred stepdown request within its existing ten-second bound; the unchanged
+thirty-second retention requirement remains strict. This proves that recovery action in the fixture, not that arbitrary
+leader changes repair all mixed-version queues or that release gates are green.
+
+A likely compatibility mechanism is now visible in pinned upstream source:
+[2.11.17 `stream.ackMsg`](https://github.com/nats-io/nats-server/blob/v2.11.17/server/stream.go)
+allows a consumer leader to propose retention removal; [2.15.0](https://github.com/nats-io/nats-server/blob/v2.15.0/server/stream.go)
+assigns that responsibility to the stream leader. In the failing placement, the
+upgraded consumer leader is a stream follower and the old stream leader is a
+consumer follower, leaving neither eligible under its own rule. This is an
+inference from the real placement controls and source, not yet branch-level
+instrumentation or an upstream compatibility patch. The ordinary split-version
+contracts still fail strictly, and the full upgrade matrix keeps seeded node
+order. No automatic production repair or queue purge has been added.
+
+
+## Full isolation seed 21 after acquisition handoff
+
+The ten-minute local seed-21 race replay passed in 662.12 seconds: 90 mixed
+batches, 2,520 terminal invocations, 27,765 journal entries, and ten confirmed
+active reply isolations. Each isolation recorded fencing for its specifically
+selected delivery. Every completed-cohort checkpoint, final retained-state
+audit, Start/Signal/Await history, per-type terminal and next-entry latency,
+post-heal completion deadline and queue drain passed. Aggregate terminal p99 was
+5.051 seconds; short terminal p99 was 20.023 seconds and its maximum next-entry
+delay was 23.200 seconds. No measured next-entry delay exceeded thirty seconds.
+This closes the local seed's active-target selection failure, not the 200-seed
+campaign or the full release matrix.
+
+The [fresh 20-seed isolation campaign](https://github.com/AntPAllen/js-wf/actions/runs/36743079344)
+at `882ef6b` is queued. The earlier 200-seed campaign remains failed; this
+replacement runs the changed handoff and delivery-specific fencing gate.
+
+
+The placement-helper controls also passed under the race detector: all-old
+retention in 3.18 seconds and pre-ack upgraded co-location in 11.54 seconds
+(package 15.74 seconds). Vet and diff checks passed. These controls exercise the
+revised helper without relaxing the split-version retention assertion.

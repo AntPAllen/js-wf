@@ -24,7 +24,7 @@ func TestMixedVersionExplicitAckWorkQueueRetention(t *testing.T) {
 	if old == "" {
 		t.Skip("requires NATS 2.11.17 through WF_NATS_SERVER_BIN")
 	}
-	for _, mode := range []string{"old-control", "mixed-ack", "mixed-double-ack", "mixed-co-located", "mixed-inherited-replicas"} {
+	for _, mode := range []string{"old-control", "mixed-ack", "mixed-double-ack", "mixed-co-located", "mixed-inherited-replicas", "mixed-move-after-ack"} {
 		t.Run(mode, func(t *testing.T) {
 			if prefix := os.Getenv("MATRIX_ARTIFACT_PREFIX"); prefix != "" {
 				t.Setenv("MATRIX_ARTIFACT_PREFIX", prefix+"-"+mode)
@@ -60,7 +60,11 @@ func TestMixedVersionExplicitAckWorkQueueRetention(t *testing.T) {
 					t.Logf("server %d log tail:\n%s", node, data)
 				}
 			}()
-			ctx, done := context.WithTimeout(context.Background(), 90*time.Second)
+			caseTimeout := 90 * time.Second
+			if mode == "mixed-move-after-ack" {
+				caseTimeout = 120 * time.Second
+			}
+			ctx, done := context.WithTimeout(context.Background(), caseTimeout)
 			defer done()
 			nc := cluster.Clients[2]
 			js, err := jetstream.New(nc)
@@ -78,7 +82,7 @@ func TestMixedVersionExplicitAckWorkQueueRetention(t *testing.T) {
 				t.Fatal(err)
 			}
 			consumerReplicas := 3
-			if mode == "mixed-inherited-replicas" {
+			if mode == "mixed-inherited-replicas" || mode == "mixed-move-after-ack" {
 				consumerReplicas = 0
 			}
 			consumer, err := waitMixedAckMetadata(ctx, func(attempt context.Context) (jetstream.Consumer, error) {
@@ -158,24 +162,62 @@ func TestMixedVersionExplicitAckWorkQueueRetention(t *testing.T) {
 					}
 				}
 			}
-			until := time.Now().Add(30 * time.Second)
 			var info *jetstream.StreamInfo
 			var ci *jetstream.ConsumerInfo
-			for time.Now().Before(until) && ctx.Err() == nil {
-				attempt, stop := context.WithTimeout(ctx, time.Second)
-				info, err = stream.Info(attempt)
-				if err == nil {
-					ci, err = consumer.Info(attempt)
+			waitDrain := func() {
+				until := time.Now().Add(30 * time.Second)
+				for time.Now().Before(until) && ctx.Err() == nil {
+					attempt, stop := context.WithTimeout(ctx, time.Second)
+					info, err = stream.Info(attempt)
+					if err == nil {
+						ci, err = consumer.Info(attempt)
+					}
+					stop()
+					if err == nil && info.State.Msgs == 0 && ci.NumAckPending == 0 && ci.NumPending == 0 && ci.AckFloor.Stream == count {
+						break
+					}
+					time.Sleep(50 * time.Millisecond)
 				}
-				stop()
-				if err == nil && info.State.Msgs == 0 && ci.NumAckPending == 0 && ci.NumPending == 0 && ci.AckFloor.Stream == count {
-					break
+			}
+			waitDrain()
+			if mode == "mixed-move-after-ack" {
+				// Require the observed bad state before trying a recovery action.
+				// Co-location before ack is already a passing control; it does not
+				// establish that a leader move afterward repairs retained records.
+				if err != nil || info == nil || ci == nil || info.State.Msgs != count || ci.NumAckPending != 0 || ci.NumPending != 0 || ci.AckFloor.Stream != count || info.Cluster == nil || ci.Cluster == nil || info.Cluster.Leader != "wf-process-2" || ci.Cluster.Leader != "wf-process-1" {
+					t.Fatalf("recovery precondition absent: stream=%+v consumer=%+v err=%v", info, ci, err)
 				}
-				time.Sleep(50 * time.Millisecond)
+				t.Logf("ACK_RETENTION_BEFORE_MOVE versions=%v stream_leader=%s consumer_leader=%s ack_floor=%d retained=%d", matrixClusterVersions(cluster), info.Cluster.Leader, ci.Cluster.Leader, ci.AckFloor.Stream, info.State.Msgs)
+				if prefix := os.Getenv("MATRIX_ARTIFACT_PREFIX"); prefix != "" {
+					t.Setenv("MATRIX_ARTIFACT_PREFIX", prefix+"-before-move")
+					captureMatrixQueueDiagnostics(t, stream)
+					t.Setenv("MATRIX_ARTIFACT_PREFIX", prefix)
+				}
+				preferMixedAckLeader(t, ctx, nc, "$JS.API.STREAM.LEADER.STEPDOWN.ACK_CONTRACT", "wf-process-1", func(ctx context.Context) (*jetstream.ClusterInfo, error) {
+					info, err := stream.Info(ctx)
+					if err != nil {
+						return nil, err
+					}
+					return info.Cluster, nil
+				})
+				waitDrain()
 			}
 			if err != nil || info == nil || ci == nil || info.State.Msgs != 0 || ci.NumAckPending != 0 || ci.NumPending != 0 || ci.AckFloor.Stream != count {
 				captureMatrixQueueDiagnostics(t, stream)
 				t.Fatalf("retention mode=%s stream=%+v consumer=%+v err=%v", mode, info, ci, err)
+			}
+			if mode == "mixed-move-after-ack" && (info.Cluster.Leader != "wf-process-1" || ci.Cluster.Leader != "wf-process-1") {
+				t.Fatalf("recovery leader placement changed: stream=%+v consumer=%+v", info.Cluster, ci.Cluster)
+			}
+			if mode == "mixed-move-after-ack" {
+				for sequence := uint64(1); sequence <= count; sequence++ {
+					attempt, stop := context.WithTimeout(ctx, time.Second)
+					_, readErr := stream.GetMsg(attempt, sequence)
+					stop()
+					if !errors.Is(readErr, jetstream.ErrMsgNotFound) {
+						t.Fatalf("post-move raw sequence %d still present or unconfirmed: %v", sequence, readErr)
+					}
+				}
 			}
 			t.Logf("ACK_RETENTION mode=%s versions=%v stream_leader=%s consumer_leader=%s ack_floor=%d retained=%d", mode, matrixClusterVersions(cluster), info.Cluster.Leader, ci.Cluster.Leader, ci.AckFloor.Stream, info.State.Msgs)
 		})
@@ -188,32 +230,39 @@ func preferMixedAckLeader(t *testing.T, ctx context.Context, nc *nats.Conn, api,
 	if err != nil || info == nil {
 		t.Fatalf("leader lookup: %+v %v", info, err)
 	}
-	if info.Leader != preferred {
-		data, _ := json.Marshal(map[string]any{"placement": map[string]string{"preferred": preferred}})
-		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
-		reply, err := nc.RequestWithContext(attempt, api, data)
-		stop()
-		if err != nil {
-			t.Fatal(err)
-		}
-		var response struct {
-			Success bool `json:"success"`
-		}
-		if json.Unmarshal(reply.Data, &response) != nil || !response.Success {
-			t.Fatalf("preferred leader rejected: %s", reply.Data)
-		}
-	}
+	data, _ := json.Marshal(map[string]any{"placement": map[string]string{"preferred": preferred}})
+	var requested time.Time
 	for until := time.Now().Add(10 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
 		attempt, stop := context.WithTimeout(ctx, time.Second)
 		info, err = lookup(attempt)
 		stop()
-		if err == nil && info != nil && info.Leader == preferred && len(info.Replicas) == 2 {
-			ready := true
+		ready := err == nil && info != nil && len(info.Replicas) == 2
+		if ready {
 			for _, replica := range info.Replicas {
 				ready = ready && replica.Current && !replica.Offline
 			}
-			if ready {
-				return
+		}
+		if ready && info.Leader == preferred {
+			return
+		}
+		// A restart can report readiness before the consumer replica can win
+		// its preferred election. Do not churn an uncaught-up group; retry the
+		// placement only after every peer is current, within the same bound.
+		if ready && time.Since(requested) >= time.Second {
+			requested = time.Now()
+			attempt, stop := context.WithTimeout(ctx, time.Second)
+			reply, requestErr := nc.RequestWithContext(attempt, api, data)
+			stop()
+			if requestErr != nil && !matrixTransientTransport(requestErr) {
+				t.Fatal(requestErr)
+			}
+			if requestErr == nil {
+				var response struct {
+					Success bool `json:"success"`
+				}
+				if json.Unmarshal(reply.Data, &response) != nil || !response.Success {
+					t.Fatalf("preferred leader rejected: %s", reply.Data)
+				}
 			}
 		}
 		time.Sleep(50 * time.Millisecond)

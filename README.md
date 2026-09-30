@@ -197,4 +197,9 @@ consumer-leader upgrade. The old-only and upgraded co-located leader controls
 pass; an old stream leader with an upgraded consumer leader currently retains
 acknowledged records. Split-version cases enforce the retention requirement
 and fail until the discrepancy is resolved; they are not clean release evidence.
-Failure artifacts include actual messages, consumer state and server logs.
+The `mixed-move-after-ack` recovery control first requires 33 records to remain
+stored for thirty seconds, then moves the stream leader onto the upgraded
+consumer leader's node and requires the stream to drain. That control passed
+locally; it establishes this fixture's recovery action, not a general upgrade
+repair protocol. Failure artifacts include actual messages, consumer state and
+server logs; the recovery control also saves its pre-move raw queue.
