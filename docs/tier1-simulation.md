@@ -914,3 +914,15 @@ The transcript records controlled actor boundaries; observing the wait context's
 The 300-ms case is explicitly recorded as `known_over_30s_control`, not a clean liveness schedule. This demonstrates that individually successful requests can exhaust the latency budget under the current write protocol. It does not reproduce a broker failure or establish why a real request was slow. Heartbeat ticks are held quiet to isolate per-entry renewal; other request classes have zero added latency, and the fixture starts with buffered signals rather than replaying a previously suspended prefix. These are explicit cost-model assumptions, not a complete bound on production recovery.
 
 `SIM_SIGNAL_COST_OUT` exports seed 42 to the pinned `worker-signal-write-latency.json` corpus. `SIM_SEEDS` controls schedule count. Exact replay, cross-process trace identity and coverage of all four delays are checked. The 100,000-seed local cost-model run passed in 88.12 seconds; focused race/pinned checks and the full simulator suite passed. This verifies the model and its known failing control, not the release's clean-seed gate.
+
+
+## Matching start retry repairs its enqueue
+
+The seeded start transport scenario now requires a matching production `Start`
+retry to repair a dropped first run enqueue before any reconciler scan. It checks
+one retained invocation and one generation-specific run message, rejects changed
+input, and verifies wakeup liveness immediately after retry. Hidden invocation
+acknowledgments also take this repair path. The same seed and trace replay exactly
+across processes; seed 42 is pinned as `start-retry-repair.json`. Restoring the old
+start implementation fails seed 1's retained-run assertion. This models runtime
+repair decisions, not the real consumer seed 14 scanner delay or NATS leadership.

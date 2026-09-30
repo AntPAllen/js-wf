@@ -33,18 +33,18 @@ func TestStartTransportFaultBoundaries(t *testing.T) {
 			t.Fatalf("start after dropped publish: handle=%+v runs=%v err=%v", handle, model.Runs(), err)
 		}
 	})
-	t.Run("lost invocation ack stores once without enqueue", func(t *testing.T) {
+	t.Run("lost invocation ack repairs its enqueue", func(t *testing.T) {
 		model := NewStartTransport(NewScheduler(2))
 		if err := model.QueueFault(StartFault{Operation: "publish_invocation", Kind: "lose_ack_after_commit"}); err != nil {
 			t.Fatal(err)
 		}
 		c := client.NewWithStartPort(model)
 		first, err := c.Start(ctx, "test", "one", []byte(`1`))
-		if !errors.Is(err, client.ErrAlreadyStarted) || first.InvSeq == 0 || len(model.Runs()) != 0 {
+		if !errors.Is(err, client.ErrAlreadyStarted) || first.InvSeq == 0 || len(model.Runs()) != 1 {
 			t.Fatalf("lost invocation ack: handle=%+v runs=%v err=%v", first, model.Runs(), err)
 		}
 		second, err := c.Start(ctx, "test", "one", []byte(`1`))
-		if !errors.Is(err, client.ErrAlreadyStarted) || second.InvSeq != first.InvSeq || len(model.Runs()) != 0 {
+		if !errors.Is(err, client.ErrAlreadyStarted) || second.InvSeq != first.InvSeq || len(model.Runs()) != 1 {
 			t.Fatalf("matching retry: handle=%+v runs=%v err=%v", second, model.Runs(), err)
 		}
 		_, err = c.Start(ctx, "test", "one", []byte(`2`))
@@ -316,11 +316,11 @@ func TestStartScanModelCursorAndUncertainEnqueue(t *testing.T) {
 		t.Fatal(err)
 	}
 	model.PurgeInvocation(identity.InvocationSubject("test", "purged"))
-	if err := model.QueueFault(StartFault{Operation: "publish_invocation", Kind: "lose_ack_after_commit"}); err != nil {
+	if err := model.QueueFault(StartFault{Operation: "enqueue_run", Kind: "drop_before_commit"}); err != nil {
 		t.Fatal(err)
 	}
 	second, err := client.NewWithStartPort(model).Start(ctx, "test", "repair", []byte(`two`))
-	if !errors.Is(err, client.ErrAlreadyStarted) || second.InvSeq <= first.InvSeq || len(model.Runs()) != 1 {
+	if !errors.Is(err, client.ErrEnqueueUnknown) || second.InvSeq <= first.InvSeq || len(model.Runs()) != 1 {
 		t.Fatalf("uncertain second start: handle=%+v runs=%v err=%v", second, model.Runs(), err)
 	}
 	scan := reconcile.NewStartScanWithPort(model)
@@ -395,6 +395,7 @@ func runSeededStartScenario(seed int64, replay *Trace) (trace Trace, runErr erro
 				return trace, fmt.Errorf("seed %d case %d normal: %w", seed, i, startErr)
 			}
 		case "lost_inv_ack":
+			committedRuns++
 			if !errors.Is(startErr, client.ErrAlreadyStarted) {
 				return trace, fmt.Errorf("seed %d case %d lost inv ack: %v", seed, i, startErr)
 			}
@@ -412,13 +413,19 @@ func runSeededStartScenario(seed int64, replay *Trace) (trace Trace, runErr erro
 			return trace, fmt.Errorf("seed %d case %d retained %d runs, want %d", seed, i, got, committedRuns)
 		}
 		liveness, livenessErr := CheckStartWakeupLiveness(model)
-		missingRun := choice == "lost_inv_ack" || choice == "drop_run"
+		missingRun := choice == "drop_run"
 		if liveness.Unstarted != 1 || missingRun && (livenessErr == nil || !reflect.DeepEqual(liveness.Missing, []string{identity.Key("test", id)})) || !missingRun && (livenessErr != nil || len(liveness.Missing) != 0) {
 			return trace, fmt.Errorf("seed %d case %d pre-repair liveness: report=%+v err=%v", seed, i, liveness, livenessErr)
 		}
 		retry, retryErr := c.Start(context.Background(), "test", id, input)
 		if !errors.Is(retryErr, client.ErrAlreadyStarted) || retry.InvSeq != handle.InvSeq {
 			return trace, fmt.Errorf("seed %d case %d matching retry: handle=%+v err=%v", seed, i, retry, retryErr)
+		}
+		if len(model.Runs()) != i+1 {
+			return trace, fmt.Errorf("seed %d case %d matching retry did not repair enqueue", seed, i)
+		}
+		if _, err := CheckStartWakeupLiveness(model); err != nil {
+			return trace, fmt.Errorf("seed %d case %d retry liveness: %w", seed, i, err)
 		}
 		_, mismatchErr := c.Start(context.Background(), "test", id, []byte(`changed`))
 		if !errors.Is(mismatchErr, client.ErrInputMismatch) {

@@ -233,8 +233,8 @@ func TestStartLostAckAndReconcile(t *testing.T) {
 		t.Fatal(err)
 	}
 	info, err = run.Info(ctx)
-	if err != nil || info.State.Msgs != 0 {
-		t.Fatalf("run stream before repair=%+v err=%v", info.State, err)
+	if err != nil || info.State.Msgs != 1 {
+		t.Fatalf("run stream after lost-ack repair=%+v err=%v", info.State, err)
 	}
 	scan, err := reconcile.NewStartScan(all[1]).Scan(ctx, 0, 10, false)
 	if err != nil || scan.Reenqueued != 1 {

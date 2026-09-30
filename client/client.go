@@ -247,6 +247,12 @@ func (c *Client) start(ctx context.Context, typ, id string, input []byte, parent
 			if existing.Header.Get(inputHashHeader) != hex.EncodeToString(digest[:]) || existing.Header.Get(ParentTypeHeader) != parentType || existing.Header.Get(ParentIDHeader) != parentID || existing.Header.Get(ParentInvSeqHeader) != m.Header.Get(ParentInvSeqHeader) || existing.Header.Get(ParentSignalHeader) != signalName {
 				return h, ErrInputMismatch
 			}
+			// A matching invocation may have committed before its enqueue was
+			// attempted or acknowledged. Repair the second write on retry with
+			// the same generation-specific ID; do not wait for a full scan.
+			if err := c.Enqueue(ctx, typ, id, "start:"+identity.Key(typ, id)+":"+strconv.FormatUint(h.InvSeq, 10)); err != nil {
+				return h, fmt.Errorf("%w: %v", ErrEnqueueUnknown, err)
+			}
 			return h, ErrAlreadyStarted
 		}
 		var apiErr *jetstream.APIError
