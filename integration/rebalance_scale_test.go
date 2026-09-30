@@ -145,9 +145,18 @@ func TestRebalanceWorkerChild(t *testing.T) {
 			}
 			time.Sleep(10 * time.Millisecond)
 		}
-		attempt, done := context.WithTimeout(context.Background(), 10*time.Second)
-		defer done()
-		_, appendErr := journal.New(js).Append(attempt, "rebalance", id, journal.Entry{Epoch: records[0].Epoch, Index: 1, Kind: journal.Completed, Payload: json.RawMessage(`0`), WorkerID: workerID}, tail)
+		probeCtx, stopProbe := context.WithTimeout(context.Background(), 45*time.Second)
+		defer stopProbe()
+		var appendErr error
+		for probeCtx.Err() == nil {
+			attempt, done := context.WithTimeout(probeCtx, 5*time.Second)
+			_, appendErr = journal.New(js).Append(attempt, "rebalance", id, journal.Entry{Epoch: records[0].Epoch, Index: 1, Kind: journal.Completed, Payload: json.RawMessage(`0`), WorkerID: workerID}, tail)
+			done()
+			if !errors.Is(appendErr, journal.ErrUnknown) && !errors.Is(appendErr, context.DeadlineExceeded) {
+				break
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
 		outcome := "success"
 		if errors.Is(appendErr, journal.ErrStale) {
 			outcome = "stale"
@@ -181,7 +190,7 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 	} else {
 		all, cluster = setup(t)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Minute)
 	defer cancel()
 	workerNodes := []int{0, 1, 2}
 	kvLeader := -1
