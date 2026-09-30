@@ -1658,3 +1658,39 @@ and [twenty-seed mixed campaign at `0dc173b`](https://github.com/AntPAllen/js-wf
 both completed successfully. The extended Tier 1 campaign
 [36754525798](https://github.com/AntPAllen/js-wf/actions/runs/36754525798) remains
 confirmed in progress. These results do not clear the full-matrix release gate.
+
+
+## Completed sustained campaigns confirmed after operation instrumentation
+
+Direct GitHub Actions inspection confirmed the following campaigns completed
+successfully, with the bootstrap and all twenty seed jobs successful and no
+pending jobs. Downloaded seed-20 logs confirm the selected fault test ran at
+`WF_MATRIX_DURATION=10m`, passed its workload latency and progress checks and
+completed in 628–661 seconds; these are sustained rows, not shortened smoke runs.
+
+| Fault row | Revision | Twenty-seed campaign | Seed-20 test duration |
+| --- | --- | --- | --- |
+| Worker reply isolation | `882ef6b` | [36743079344](https://github.com/AntPAllen/js-wf/actions/runs/36743079344) | 631.63 s |
+| Five-second block-device stall | `407984d` | [36737378968](https://github.com/AntPAllen/js-wf/actions/runs/36737378968) | 646.00 s |
+| Rolling server upgrade | `407984d` | [36737383092](https://github.com/AntPAllen/js-wf/actions/runs/36737383092) | 628.81 s |
+| Restart at unfinished fan-out cuts | `321c70f` | [36732209257](https://github.com/AntPAllen/js-wf/actions/runs/36732209257) | 638.50 s |
+| Server clock +60 s | `d6d4397` | [36730799284](https://github.com/AntPAllen/js-wf/actions/runs/36730799284) | 660.73 s |
+| Server clock -60 s | `d6d4397` | [36730802966](https://github.com/AntPAllen/js-wf/actions/runs/36730802966) | 656.59 s |
+
+This establishes twenty clean seeds for each listed revision and row. It does
+not establish 200 consecutive clean seeds, validation of later production changes,
+strict mixed-version WorkQueue compatibility, the full chaos matrix, or Tier 3's
+24-hour soak and required dm-delay device.
+
+The earlier 200-seed worker campaign [36701632166](https://github.com/AntPAllen/js-wf/actions/runs/36701632166)
+still had 92 successful jobs including bootstrap and 109 unfinished jobs at this
+inspection. The pause campaign [36718014204](https://github.com/AntPAllen/js-wf/actions/runs/36718014204)
+had 148 successful jobs including bootstrap and 53 unfinished jobs, no failures.
+The isolation campaign [36718010557](https://github.com/AntPAllen/js-wf/actions/runs/36718010557)
+had 86 successes including bootstrap, seven failures (21, 29, 37, 63, 70, 73, 82)
+and 108 unfinished jobs. It therefore cannot clear the consecutive-clean gate.
+Seed 63's downloaded completed-job log fails at 55.62 seconds because an isolated
+active worker reported no fencing. This older campaign predates the acknowledged
+acquire-to-delivery handoff selection fix in `882ef6b`; the newer twenty-seed result
+above does not erase it or constitute fresh 200-seed proof. These confirmed-live
+campaigns have not been restarted.
