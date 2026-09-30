@@ -107,7 +107,10 @@ baseline ratios of 0.947 for the hot journal and 1.050 for parallel journals.
 Both independently built binaries used the same Go sources; this validates the
 runner/comparison path, not a performance improvement. The
 [summary and raw reports](cas-throughput-paired-2026-09-30/summary.json) retain all
-six full workloads. Hosted-runner validation remains pending. Runner load, disk
+six full workloads. The [first hosted CI run](https://github.com/AntPAllen/js-wf/actions/runs/36764395969)
+passed with hot/parallel ratios of 0.991 / 0.988; its
+[summary and raw reports](cas-throughput-paired-ci-2026-09-30/summary.json)
+reproduce both medians and all exact counts. Runner load, disk
 variance and thermal effects can still affect a paired comparison; a failure
 requires inspection of the reports rather than automatic threshold relaxation.
 The checker tests include the exact 80% boundary, independent hot/parallel misses,

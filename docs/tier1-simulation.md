@@ -1250,3 +1250,23 @@ its update call and zero gate wait, including its lost-transport case. The signa
 latency workload checks each of its 50 append renewals has zero gate wait and
 exactly the seeded delay in the update call. Observation adds no scheduler
 choices or transport events; the pinned traces remain unchanged.
+
+
+## Paused membership coordinator during assignment planning
+
+`paused_membership_coordinator` runs three production controllers and pauses
+one after its assignment snapshot or after its coordinator renewal, before
+assignment CAS. Virtual TTL expires two registrations while the third renews,
+takes coordination and replaces every assignment. The resumed old pass must
+fence; a previously entered assignment may only conflict with the successor's
+new revision. Old cleanup and another successor pass must preserve all owners
+and revisions. Six seeded boundary/partition combinations pass, including
+exact/cross-process replay and 100,000 schedules. The before/after-renew pins
+retain both cases. A production-renewal mutation fails seed 1.
+
+A real three-node contract exercises the after-renew boundary through actual KV
+expiry with the same CAS and successor-preservation assertions. It calls Step
+directly with a long context; it does not simulate SIGSTOP or Run's eight-second
+pass deadline. Separate buckets still lack an atomic coordinator-plus-assignment
+transaction; these controls establish fencing when the takeover changed the
+assignment revisions, not every possible unchanged-assignment race.

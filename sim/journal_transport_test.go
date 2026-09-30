@@ -508,6 +508,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededCleanupConflict(loaded.Seed, &loaded)
 	case "manual_owner_drain":
 		replayed, err = runSeededDeadOwnerDrain(loaded.Seed, &loaded)
+	case "paused_membership_coordinator":
+		replayed, err = runPausedCoordinator(loaded.Seed, &loaded)
 	case "automatic_membership":
 		replayed, err = runSeededMembership(loaded.Seed, &loaded)
 	case "select_many":
