@@ -1508,3 +1508,44 @@ passed seeds 1–11 and failed seed 12 at terminal p99 54.56 seconds. The slow
 signal journal continued progressing to completion under the fault; the full
 trace requires separate investigation. This manual assignment fixture correction
 does not explain that different campaign.
+
+
+## Cleanup revision conflicts require an ownership reread
+
+The failed seed-12 mixed campaign showed a renewal deadline, cleanup reporting
+`ErrLost`, and roughly one lease TTL before reacquisition. Review found that
+`Lease.Cleanup` treated every delete revision conflict as proof of a successor.
+A late committed renewal by the same worker and epoch also changes the revision;
+that conflict alone cannot establish foreign ownership or completed cleanup.
+
+Cleanup now rereads identity after a revision conflict, with at most three
+read/delete attempts per call under the caller's original context. A matching
+worker and epoch may be deleted only with the revision just read. A different
+worker or epoch remains untouched and returns `ErrLost`. Persistent conflicts
+return the original revision error, allowing the existing bounded worker cleanup
+loop to retry rather than declare cleanup finished. An uncertain renewal still
+fences the owner; this change never restores its right to execute or append.
+
+The `lease_cleanup_conflict` Tier 1 workload delivers same-owner late updates,
+same-worker new-epoch acquisition, foreign-worker acquisition, or three persistent
+same-owner conflicts exactly between read and delete. It checks successful own
+cleanup, bounded retry classification, unchanged successor bytes/revision and
+permanent fencing of the old owner. Restoring the prior production implementation
+through a Go overlay fails seed 1 with `bounded conflicts misclassified`.
+The 100,000-seed workload passed in 2.97 seconds; exact/cross-process replay and
+focused race checks passed in 3.24 seconds. Seed 42 pins persistent conflicts.
+The complete pinned race corpus passed in 2.03 seconds. Real three-node race
+controls force a revision update at the same boundary and verify same-owner
+cleanup, same-worker new-epoch preservation and persistent-conflict recovery;
+the full lease race suite passed in 4.47 seconds. Full ordinary simulator and
+lease suites passed in 51.84 and 3.38 seconds. Vet and diff checks passed.
+
+The live seed-12 four-fault race replay nevertheless failed at terminal p99
+62.67 seconds in a 90.55-second run. Its transcript now records cleanup revision
+errors followed by successful cleanup at +8.96 and +21.70 seconds, rather than
+stopping at those conflicts as a presumed successor. This is real evidence for
+the corrected recovery path, not a controlled before/after performance proof or
+an explanation of the entire miss. Repeated renewal deadlines and sequential
+signal journal writes under continuing syscall disk delay remain in the trace.
+The under-thirty-second gate stays strict and the mixed release campaign remains
+open. The model controls do not establish why real requests were delayed.

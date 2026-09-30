@@ -233,25 +233,30 @@ func (l *Lease) Cleanup(ctx context.Context) error {
 	}
 	defer l.unlock()
 	port := l.store.operations()
-	entry, err := port.Get(ctx, l.key)
-	if errors.Is(err, jetstream.ErrKeyNotFound) {
+	// An uncertain renewal can commit after the read but before the delete.
+	// A revision conflict alone does not establish a successor: reread identity.
+	for attempt := 0; attempt < 3; attempt++ {
+		entry, err := port.Get(ctx, l.key)
+		if errors.Is(err, jetstream.ErrKeyNotFound) {
+			l.lost = true
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var current Value
+		if json.Unmarshal(entry.Value, &current) != nil || current.Worker != l.value.Worker || current.Epoch != l.value.Epoch {
+			l.lost = true
+			return ErrLost
+		}
+		if err := port.Delete(ctx, l.key, entry.Revision); err != nil {
+			if errors.Is(err, jetstream.ErrKeyRevisionMismatch) && attempt < 2 {
+				continue
+			}
+			return err
+		}
 		l.lost = true
 		return nil
 	}
-	if err != nil {
-		return err
-	}
-	var current Value
-	if json.Unmarshal(entry.Value, &current) != nil || current.Worker != l.value.Worker || current.Epoch != l.value.Epoch {
-		l.lost = true
-		return ErrLost
-	}
-	if err := port.Delete(ctx, l.key, entry.Revision); err != nil {
-		if errors.Is(err, jetstream.ErrKeyRevisionMismatch) {
-			return ErrLost
-		}
-		return err
-	}
-	l.lost = true
-	return nil
+	return jetstream.ErrKeyRevisionMismatch
 }

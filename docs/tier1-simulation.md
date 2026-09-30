@@ -1156,3 +1156,18 @@ correction fails the owner check; seed 42 is pinned in `manual-owner-drain.json`
 This models the recovery obligation of the real combined rebalance fixture,
 whose final assignments previously could point at a killed subprocess. It does
 not model handler execution, process pauses or the automatic membership runner.
+
+
+## Lease cleanup after a concurrent revision change
+
+`TestSeededCleanupConflictReplay` runs production renewal and cleanup against
+virtual KV. A hidden committed renewal fences the owner; at cleanup's delete
+boundary another same-owner update or successor acquisition changes the read
+revision. Cleanup must reread worker/epoch identity, remove only its own lease,
+and preserve successor bytes and revision. Three persistent conflicts must
+return a retryable revision error rather than presumed successor ownership.
+Restoring the previous implementation fails seed 1. Exact/cross-process replay,
+100,000 schedules and the `lease-cleanup-conflict.json` seed-42 pin cover this
+slice. Real three-node controlled CAS races supply separate transport evidence.
+These controls isolate a local cleanup decision; they do not simulate disk
+stalls or clear the failed seed-12 mixed latency gate.

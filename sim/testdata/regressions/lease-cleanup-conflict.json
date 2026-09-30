@@ -1,0 +1,177 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "lease_cleanup_conflict",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "foreign_worker",
+        "persistent_same_owner",
+        "same_owner",
+        "same_worker_new_epoch"
+      ],
+      "chosen": "persistent_same_owner"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.cleanup",
+      "sequence": 1,
+      "data_sha256": "b83fc36317e331f270febe4f683cdbbfba3968397b02d98c0356b118242b2e6c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "test.cleanup",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "test.cleanup",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "test.cleanup",
+      "sequence": 3,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "kv_get",
+      "subject": "test.cleanup",
+      "sequence": 3,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "kv_update",
+      "subject": "test.cleanup",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "kv_delete",
+      "subject": "test.cleanup",
+      "expected": 3,
+      "outcome": "revision_mismatch"
+    },
+    {
+      "at_ms": 200,
+      "operation": "kv_get",
+      "subject": "test.cleanup",
+      "sequence": 4,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 400,
+      "operation": "kv_get",
+      "subject": "test.cleanup",
+      "sequence": 4,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 400,
+      "operation": "kv_update",
+      "subject": "test.cleanup",
+      "expected": 4,
+      "sequence": 5,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 400,
+      "operation": "kv_delete",
+      "subject": "test.cleanup",
+      "expected": 4,
+      "outcome": "revision_mismatch"
+    },
+    {
+      "at_ms": 400,
+      "operation": "kv_get",
+      "subject": "test.cleanup",
+      "sequence": 5,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "kv_get",
+      "subject": "test.cleanup",
+      "sequence": 5,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "kv_update",
+      "subject": "test.cleanup",
+      "expected": 5,
+      "sequence": 6,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "kv_delete",
+      "subject": "test.cleanup",
+      "expected": 5,
+      "outcome": "revision_mismatch"
+    },
+    {
+      "at_ms": 600,
+      "operation": "kv_get",
+      "subject": "test.cleanup",
+      "sequence": 6,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "kv_get",
+      "subject": "test.cleanup",
+      "sequence": 6,
+      "data_sha256": "430c9b2d1eac0b7f9b9927a418d61f7d636615c0211b34e1af60243ed7edd791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "kv_delete",
+      "subject": "test.cleanup",
+      "expected": 6,
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "kv_get",
+      "subject": "test.cleanup",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 600,
+      "operation": "check_cleanup_conflict",
+      "outcome": "persistent_same_owner"
+    }
+  ]
+}
