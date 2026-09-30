@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -148,10 +149,37 @@ func TestRebalanceWorkerChild(t *testing.T) {
 		probeCtx, stopProbe := context.WithTimeout(context.Background(), 45*time.Second)
 		defer stopProbe()
 		var appendErr error
+		probeURLs := strings.Split(os.Getenv("WF_REBALANCE_CHILD_PROBE_URLS"), ",")
+		probeAttempt := 0
 		for probeCtx.Err() == nil {
+			probeJS := js
+			var probeConn *nats.Conn
+			if probeAttempt > 0 && len(probeURLs) > 0 && probeURLs[0] != "" {
+				probeURL := probeURLs[(probeAttempt-1)%len(probeURLs)]
+				probeConn, err = nats.Connect(probeURL, nats.NoReconnect(), nats.IgnoreDiscoveredServers(), nats.Timeout(time.Second))
+				if err == nil {
+					probeJS, err = jetstream.New(probeConn)
+				}
+				if err != nil {
+					if probeConn != nil {
+						probeConn.Close()
+					}
+					appendErr = fmt.Errorf("%w: connect probe peer %s: %v", journal.ErrUnknown, probeURL, err)
+					probeAttempt++
+					select {
+					case <-probeCtx.Done():
+					case <-time.After(100 * time.Millisecond):
+					}
+					continue
+				}
+			}
 			attempt, done := context.WithTimeout(probeCtx, 5*time.Second)
-			_, appendErr = journal.New(js).Append(attempt, "rebalance", id, journal.Entry{Epoch: records[0].Epoch, Index: 1, Kind: journal.Completed, Payload: json.RawMessage(`0`), WorkerID: workerID}, tail)
+			_, appendErr = journal.New(probeJS).Append(attempt, "rebalance", id, journal.Entry{Epoch: records[0].Epoch, Index: 1, Kind: journal.Completed, Payload: json.RawMessage(`0`), WorkerID: workerID}, tail)
 			done()
+			if probeConn != nil {
+				probeConn.Close()
+			}
+			probeAttempt++
 			if !errors.Is(appendErr, journal.ErrUnknown) && !errors.Is(appendErr, context.DeadlineExceeded) {
 				break
 			}
@@ -161,7 +189,7 @@ func TestRebalanceWorkerChild(t *testing.T) {
 		if errors.Is(appendErr, journal.ErrStale) {
 			outcome = "stale"
 		} else if appendErr != nil {
-			outcome = fmt.Sprintf("error: %v", appendErr)
+			outcome = fmt.Sprintf("error after %d attempts: %v", probeAttempt, appendErr)
 		}
 		if err := os.WriteFile(pauseResult, []byte(outcome), 0644); err != nil {
 			return nil, err
@@ -354,7 +382,7 @@ func runRebalanceScale(t *testing.T, killKVLeader, isolateWorker, killWorker, ki
 		}
 		defer childLog.Close()
 		pauseCmd = exec.Command(executable, "-test.run=^TestRebalanceWorkerChild$")
-		pauseCmd.Env = append(os.Environ(), "WF_REBALANCE_CHILD=1", "WF_REBALANCE_CHILD_URL="+cluster.Servers[workerNodes[1%len(workerNodes)]].ClientURL(), "WF_REBALANCE_CHILD_WORKER=rebalance-1", "WF_REBALANCE_CHILD_MARKER="+pauseMarker, "WF_REBALANCE_CHILD_RELEASE="+pauseRelease, "WF_REBALANCE_CHILD_RESULT="+pauseResult)
+		pauseCmd.Env = append(os.Environ(), "WF_REBALANCE_CHILD=1", "WF_REBALANCE_CHILD_URL="+cluster.Servers[workerNodes[1%len(workerNodes)]].ClientURL(), "WF_REBALANCE_CHILD_PROBE_URLS="+cluster.Servers[workerNodes[0]].ClientURL()+","+cluster.Servers[workerNodes[2%len(workerNodes)]].ClientURL(), "WF_REBALANCE_CHILD_WORKER=rebalance-1", "WF_REBALANCE_CHILD_MARKER="+pauseMarker, "WF_REBALANCE_CHILD_RELEASE="+pauseRelease, "WF_REBALANCE_CHILD_RESULT="+pauseResult)
 		pauseCmd.Stdout, pauseCmd.Stderr = childLog, childLog
 		if err := pauseCmd.Start(); err != nil {
 			t.Fatal(err)

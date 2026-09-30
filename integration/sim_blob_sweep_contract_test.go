@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -121,7 +122,31 @@ func TestSimBlobSweepContractAgainstRealCluster(t *testing.T) {
 		modeled, modelErr := retention.SweepBlobsQuiescentWithPort(ctx, model, 0, now)
 		real, realErr := retention.SweepBlobsQuiescent(ctx, all[0], 0, now)
 		if modelErr != nil || realErr != nil || real != modeled || real.Deleted != wantDeleted {
-			t.Fatalf("%s real=%+v err=%v model=%+v err=%v", stage, real, realErr, modeled, modelErr)
+			probeCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
+			defer stop()
+			listed, listErr := objects.List(probeCtx)
+			infoState := make(map[string]string)
+			for _, name := range []string{"input-kept", "signal-kept", "step-result-kept", "snapshot-kept", "terminal-result-kept", "input-orphan", "user-unmanaged"} {
+				info, infoErr := objects.GetInfo(probeCtx, name)
+				if infoErr != nil {
+					infoState[name] = infoErr.Error()
+				} else {
+					infoState[name] = fmt.Sprintf("deleted=%t nuid=%s", info.Deleted, info.NUID)
+				}
+			}
+			objectStream, streamErr := all[0].Stream(probeCtx, "OBJ_WF_BLOB")
+			var objectState any
+			if streamErr == nil {
+				streamInfo, infoErr := objectStream.Info(probeCtx)
+				if infoErr == nil {
+					objectState = streamInfo.State
+				} else {
+					objectState = infoErr
+				}
+			} else {
+				objectState = streamErr
+			}
+			t.Fatalf("%s real=%+v err=%v model=%+v err=%v; relist=%d err=%v object_infos=%v object_stream=%v", stage, real, realErr, modeled, modelErr, len(listed), listErr, infoState, objectState)
 		}
 	}
 	compare("retained", 1)
