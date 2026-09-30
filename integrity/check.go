@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/nats-io/nats.go"
 	"sort"
 	"strings"
+	"time"
 
 	"js-wf/identity"
 	"js-wf/journal"
@@ -23,12 +25,12 @@ type Report struct {
 }
 
 func scan(ctx context.Context, stream jetstream.Stream, visit func(*jetstream.RawStreamMsg) error) error {
-	info, err := stream.Info(ctx)
+	info, err := auditRead(ctx, func(attempt context.Context) (*jetstream.StreamInfo, error) { return stream.Info(attempt) })
 	if err != nil {
 		return err
 	}
 	for seq := info.State.FirstSeq; seq <= info.State.LastSeq && seq != 0; seq++ {
-		m, err := stream.GetMsg(ctx, seq)
+		m, err := auditRead(ctx, func(attempt context.Context) (*jetstream.RawStreamMsg, error) { return stream.GetMsg(attempt, seq) })
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			continue
 		}
@@ -46,15 +48,15 @@ func scan(ctx context.Context, stream jetstream.Stream, visit func(*jetstream.Ra
 // terminal state agreement over the retained streams. Run after quiescence.
 func Check(ctx context.Context, js jetstream.JetStream) (Report, error) {
 	var report Report
-	inv, err := js.Stream(ctx, "WF_INV")
+	inv, err := auditRead(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })
 	if err != nil {
 		return report, err
 	}
-	jrn, err := js.Stream(ctx, "WF_JRN")
+	jrn, err := auditRead(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_JRN") })
 	if err != nil {
 		return report, err
 	}
-	state, err := js.KeyValue(ctx, "WF_STATE")
+	state, err := auditRead(ctx, func(attempt context.Context) (jetstream.KeyValue, error) { return js.KeyValue(attempt, "WF_STATE") })
 	if err != nil {
 		return report, err
 	}
@@ -70,17 +72,20 @@ func Check(ctx context.Context, js jetstream.JetStream) (Report, error) {
 		return report, err
 	}
 	groups := map[string]struct{}{}
+	live := map[string][]journal.Record{}
+	compacted := map[string]bool{}
 	if err := scan(ctx, jrn, func(m *jetstream.RawStreamMsg) error {
 		var e journal.Entry
 		if err := json.Unmarshal(m.Data, &e); err != nil {
 			return err
 		}
 		groups[m.Subject] = struct{}{}
+		live[m.Subject] = append(live[m.Subject], journal.Record{Entry: e, Sequence: m.Sequence})
 		return nil
 	}); err != nil {
 		return report, err
 	}
-	keys, err := state.Keys(ctx)
+	keys, err := auditRead(ctx, func(attempt context.Context) ([]string, error) { return state.Keys(attempt) })
 	if err != nil && !errors.Is(err, jetstream.ErrNoKeysFound) {
 		return report, err
 	}
@@ -92,7 +97,9 @@ func Check(ctx context.Context, js jetstream.JetStream) (Report, error) {
 		if len(parts) != 2 || identity.Validate(parts[0], parts[1]) != nil {
 			return report, fmt.Errorf("invalid snapshot key %s", key)
 		}
-		groups[identity.JournalSubject(parts[0], parts[1])] = struct{}{}
+		subject := identity.JournalSubject(parts[0], parts[1])
+		groups[subject] = struct{}{}
+		compacted[subject] = true
 	}
 	subjects := make([]string, 0, len(groups))
 	for subject := range groups {
@@ -106,12 +113,20 @@ func Check(ctx context.Context, js jetstream.JetStream) (Report, error) {
 		}
 		parts := strings.Split(key, ".")
 		report.Journals++
-		records, _, err := journal.New(js).Read(ctx, parts[0], parts[1])
-		if err != nil {
-			return report, fmt.Errorf("%s: %w", subject, err)
+		records := live[subject]
+		if compacted[subject] {
+			records, _, err = journal.New(js).Read(ctx, parts[0], parts[1])
+			if err != nil {
+				return report, fmt.Errorf("%s: %w", subject, err)
+			}
+		}
+		for i, record := range records {
+			if record.Sequence == 0 || i > 0 && record.Sequence <= records[i-1].Sequence {
+				return report, fmt.Errorf("%s: invalid retained journal sequence", subject)
+			}
 		}
 		entries, terminal, err := checkJournalRecords(subject, records, func() ([]byte, error) {
-			value, err := state.Get(ctx, key)
+			value, err := auditRead(ctx, func(attempt context.Context) (jetstream.KeyValueEntry, error) { return state.Get(attempt, key) })
 			if err != nil {
 				return nil, err
 			}
@@ -126,4 +141,28 @@ func Check(ctx context.Context, js jetstream.JetStream) (Report, error) {
 		}
 	}
 	return report, nil
+}
+
+// Retry a lost read at its current position rather than restarting a full
+// retained-state scan. Semantic and invariant errors are never retried.
+func auditRead[T any](ctx context.Context, read func(context.Context) (T, error)) (T, error) {
+	var value T
+	var err error
+	for attempt := 0; attempt < 3; attempt++ {
+		if ctx.Err() != nil {
+			return value, ctx.Err()
+		}
+		call, stop := context.WithTimeout(ctx, 2*time.Second)
+		value, err = read(call)
+		stop()
+		if err == nil {
+			return value, nil
+		}
+		var api *jetstream.APIError
+		transient := errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || errors.As(err, &api) && api.ErrorCode == 10008
+		if !transient || ctx.Err() != nil {
+			break
+		}
+	}
+	return value, err
 }
