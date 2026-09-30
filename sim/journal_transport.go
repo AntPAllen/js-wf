@@ -11,6 +11,7 @@ import (
 
 	"js-wf/journal"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -47,6 +48,7 @@ type JournalTransport struct {
 	messages    map[string][]Message
 	faults      []Fault
 	batchFaults []BatchReadFault
+	nextFaults  []NextReadFault
 	lastFault   bool
 }
 
@@ -143,6 +145,24 @@ func (m *JournalTransport) Next(ctx context.Context, subject string, from uint64
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	if len(m.nextFaults) > 0 && m.nextFaults[0].Sequence == from {
+		fault := m.nextFaults[0]
+		m.nextFaults = m.nextFaults[1:]
+		if fault.Kind == "timeout" {
+			if err := m.schedule.AdvanceMillis(2000); err != nil {
+				return journal.AppendTail{}, err
+			}
+		}
+		m.event(TransportEvent{Operation: "next_journal", Subject: subject, Expected: from, Outcome: fault.Kind})
+		switch fault.Kind {
+		case "timeout":
+			return journal.AppendTail{}, context.DeadlineExceeded
+		case "no_responders":
+			return journal.AppendTail{}, nats.ErrNoResponders
+		case "unavailable":
+			return journal.AppendTail{}, &jetstream.APIError{ErrorCode: 10008}
+		}
+	}
 	for _, message := range m.messages[subject] {
 		if message.Sequence < from {
 			continue
@@ -245,4 +265,24 @@ func digest(data []byte) string {
 
 func wrongLastSequence() error {
 	return &jetstream.APIError{Code: 400, ErrorCode: jetstream.JSErrCodeStreamWrongLastSequenceConstant, Description: "wrong last sequence"}
+}
+
+type NextReadFault struct {
+	Sequence uint64
+	Kind     string
+}
+
+func (m *JournalTransport) QueueNextFault(fault NextReadFault) error {
+	if fault.Sequence == 0 {
+		return fmt.Errorf("next-read fault requires a sequence")
+	}
+	switch fault.Kind {
+	case "timeout", "no_responders", "unavailable":
+	default:
+		return fmt.Errorf("unknown next-read fault %q", fault.Kind)
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.nextFaults = append(m.nextFaults, fault)
+	return nil
 }

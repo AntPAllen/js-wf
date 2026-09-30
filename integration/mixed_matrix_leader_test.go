@@ -487,7 +487,7 @@ func matrixRetryClient(ctx context.Context, call func(context.Context) error) er
 		if err == nil {
 			return nil
 		}
-		if !errors.Is(err, client.ErrStartUnknown) && !errors.Is(err, client.ErrSignalUnknown) && !errors.Is(err, client.ErrEnqueueUnknown) && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, nats.ErrNoResponders) {
+		if !errors.Is(err, client.ErrStartUnknown) && !errors.Is(err, client.ErrSignalUnknown) && !errors.Is(err, client.ErrEnqueueUnknown) && !matrixTransientTransport(err) {
 			return err
 		}
 		select {

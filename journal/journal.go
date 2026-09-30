@@ -428,17 +428,7 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 			readLive = readLive || batched
 			break
 		}
-		var m AppendTail
-		var err error
-		if s.readPort != nil {
-			m, err = s.readPort.Next(ctx, subject, seq)
-		} else {
-			var raw *jetstream.RawStreamMsg
-			raw, err = stream.GetMsg(ctx, seq, jetstream.WithGetMsgSubject(subject))
-			if err == nil {
-				m = AppendTail{Sequence: raw.Sequence, Data: raw.Data}
-			}
-		}
+		m, err := s.nextLive(ctx, stream, subject, seq)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			break
 		}
@@ -587,4 +577,55 @@ func verifyNext(out []Record, next Record) ([]Record, error) {
 		return nil, ErrGap
 	}
 	return append(out, next), nil
+}
+
+// A lost serial read reply must not occupy the execution lease for the whole
+// invocation read deadline. Retry the same next-subject sequence, preserving
+// all already verified records and the gap checks that follow.
+func (s *Store) nextLive(ctx context.Context, stream jetstream.Stream, subject string, sequence uint64) (AppendTail, error) {
+	var message AppendTail
+	var err error
+	for attempt := 0; attempt < 3; attempt++ {
+		if ctx.Err() != nil {
+			return message, ctx.Err()
+		}
+		request, stop := context.WithTimeout(ctx, 2*time.Second)
+		if s.readPort != nil {
+			message, err = s.readPort.Next(request, subject, sequence)
+		} else {
+			var raw *jetstream.RawStreamMsg
+			raw, err = stream.GetMsg(request, sequence, jetstream.WithGetMsgSubject(subject))
+			if err == nil {
+				message = AppendTail{Sequence: raw.Sequence, Data: raw.Data}
+			}
+		}
+		stop()
+		if err == nil {
+			return message, nil
+		}
+		var api *jetstream.APIError
+		transient := errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || errors.As(err, &api) && api.ErrorCode == 10008
+		if !transient {
+			return message, err
+		}
+		if attempt == 2 || ctx.Err() != nil {
+			return message, fmt.Errorf("next journal %s from sequence %d after %d attempts: %w", subject, sequence, attempt+1, err)
+		}
+		err = nil
+		if s.readPort != nil {
+			err = s.readPort.Wait(ctx, 25*time.Millisecond)
+		} else {
+			timer := time.NewTimer(25 * time.Millisecond)
+			select {
+			case <-ctx.Done():
+				err = ctx.Err()
+			case <-timer.C:
+			}
+			timer.Stop()
+		}
+		if err != nil {
+			return message, err
+		}
+	}
+	return message, err
 }
