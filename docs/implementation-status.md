@@ -684,3 +684,19 @@ The full [100,000-seed-per-workload CI run at `5372c36`](https://github.com/AntP
 is still active. It covers the general selector, matching-start repair and
 reusable promise changes, but predates this scanner workload. It cannot yet
 be counted as completed release evidence.
+
+
+## Twenty consecutive sustained isolation CI seeds
+
+The [twenty-seed reply-isolation workflow](https://github.com/AntPAllen/js-wf/actions/runs/36711444917)
+completed successfully at `1b6c3ce`: all seed jobs 1–20 passed the ten-minute
+row with bounded upstream-draining reply holds, completed-cohort checkpoints
+and matching-start enqueue repair. This clears twenty consecutive seeds for
+that row and revision. It predates concurrent raw audit reads and general
+select and does not clear the whole-matrix release gate.
+
+Fresh 200-seed ten-minute [isolation](https://github.com/AntPAllen/js-wf/actions/runs/36718010557)
+and [pause](https://github.com/AntPAllen/js-wf/actions/runs/36718014204) workflows
+were dispatched at `9c01e6a` after their twenty-seed passes. Both remain pending
+validation; they are independent of the already-running 200-seed worker-kill
+row and the remaining matrix rows.
