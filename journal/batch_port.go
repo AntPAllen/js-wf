@@ -22,7 +22,12 @@ func (jetStreamBatchReadPort) Wait(ctx context.Context, delay time.Duration) err
 }
 
 func (p jetStreamBatchReadPort) Open(ctx context.Context, subject string, sequence uint64) (BatchReadCursor, error) {
-	consumer, err := p.stream.CreateConsumer(ctx, jetstream.ConsumerConfig{
+	// A caller may allow minutes for the whole logical read. A lost consumer
+	// creation reply must not consume that entire budget. An unknown creation
+	// leaves at most an ephemeral cursor that expires through inactivity.
+	attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+	defer stop()
+	consumer, err := p.stream.CreateConsumer(attempt, jetstream.ConsumerConfig{
 		FilterSubject: subject, DeliverPolicy: jetstream.DeliverByStartSequencePolicy,
 		OptStartSeq: sequence, AckPolicy: jetstream.AckNonePolicy,
 		Replicas: 1, InactiveThreshold: time.Minute,

@@ -1694,3 +1694,48 @@ active worker reported no fencing. This older campaign predates the acknowledged
 acquire-to-delivery handoff selection fix in `882ef6b`; the newer twenty-seed result
 above does not erase it or constitute fresh 200-seed proof. These confirmed-live
 campaigns have not been restarted.
+
+
+## Bounded filtered journal consumer creation after a leader restart
+
+The [standard CI run at `0dc173b`](https://github.com/AntPAllen/js-wf/actions/runs/36756278029)
+failed the 500-child journal-leader-restart fixture at 304.18 seconds. The
+replacement worker completed child creation and suspended the parent at index
+1014 on all three peers, while the fixture's first observation read consumed
+almost the entire five-minute context creating a filtered journal consumer.
+The cause of the absent creation reply remains unconfirmed. The no-fault and
+parent-SIGKILL variants passed in the same job; this is not evidence of lost
+children or an invocation that failed to advance.
+
+The real batch adapter now bounds each creation request to three seconds.
+Production long-read decisions retry at most three creation attempts, separated
+by 50 ms, only for no responders, timeout or a per-attempt deadline while the
+whole-read context is still live. Every attempt keeps the same verified starting
+sequence; semantic errors and cancellation are returned. A lost creation reply
+can leave an ephemeral cursor, whose existing one-minute inactivity setting
+bounds its lifetime. No read deadline or journal integrity rule was relaxed.
+
+The `journal_open_failure` seeded workload checks transient deadline/no-responder
+recovery, persistent deadline exhaustion after three attempts, semantic-error
+fail-fast behavior, unchanged 80-entry reconstruction, and the exact virtual
+attempt budgets. Restoring the old production long-read code through a Go overlay
+fails seed 1 with no-responder recovery returning no records. Exact/cross-process
+replay and the seed-42 regression pin pass. The 100,000-seed run passed in 65.27
+seconds, the focused race tests in 8.58 seconds and the complete pinned race
+corpus in 3.01 seconds. Full ordinary simulator and journal suites passed in
+71.23 seconds and 0.003 seconds; vet and diff checks passed.
+
+A real three-node TCP-proxy test holds the committed creation response until the
+second request starts, then resumes replies and requires the exact 80-entry
+journal and tail. It passed under the race detector in 7.05 seconds. A fresh
+500-child leader-restart race run passed in 37.12 seconds. These prove bounded
+transport recovery and a fresh passing fixture, not the server-side cause of the
+original delayed reply or completion of the full fan-out chaos matrix.
+
+Separately, the [first instrumented mixed CI campaign](https://github.com/AntPAllen/js-wf/actions/runs/36759102385)
+passed seeds 1–3 and failed seed 4 at terminal p99 40.44 seconds. The new log
+records repeated successful append/heartbeat lease renewals lasting hundreds of
+milliseconds to seconds, alongside millisecond journal appends in the late
+signal completion. These whole-call durations include local lease contention
+and transport waiting; they do not establish a NATS server cause. This failure
+remains open and is independent of filtered long-journal consumer creation.

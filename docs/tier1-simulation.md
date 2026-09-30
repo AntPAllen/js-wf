@@ -1202,3 +1202,17 @@ For a real mixed-fault run, set `FAULT_SCHEDULE_OUT` to preserve the adjacent
 summing all real durations is not elapsed invocation time. Durations include
 client waiting/retries and do not identify a server-side cause. The coverage and
 real-run evidence are recorded in the implementation status.
+
+
+## Filtered consumer creation failures
+
+`journal_open_failure` drives production long-read creation decisions through
+one virtual deadline or no-responder outcome, three persistent deadlines, or a
+semantic config rejection. Attempts retain the same sequence after the 64-entry
+serial prefix. It verifies all reconstructed records, bounded attempt counts and
+virtual elapsed time, and fails against the earlier fail-on-first-error code.
+The real adapter separately bounds requests to three seconds; a TCP-proxy
+contract holds an actual creation reply until the retry and verifies unchanged
+journal contents. The seed-42 pin, exact/cross-process replay and 100,000-seed
+pass cover this slice. The model supplies named replies rather than simulating
+the NATS metadata controller that caused the original CI read to wait.

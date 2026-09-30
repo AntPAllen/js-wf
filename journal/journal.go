@@ -452,13 +452,26 @@ func readLiveBatch(ctx context.Context, port BatchReadPort, subject string, seq 
 		}
 	}()
 	create := func(start uint64) error {
-		created, err := port.Open(ctx, subject, start)
-		if err != nil {
-			return err
+		for attempt := 0; attempt < 3; attempt++ {
+			created, err := port.Open(ctx, subject, start)
+			if err == nil {
+				consumer = created
+				opened = append(opened, created)
+				return nil
+			}
+			// Retry only named transport outcomes while the whole-read context
+			// is live. Every attempt starts at the same verified sequence.
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
+			if attempt == 2 || (!errors.Is(err, nats.ErrNoResponders) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, context.DeadlineExceeded)) {
+				return err
+			}
+			if err := port.Wait(ctx, 50*time.Millisecond); err != nil {
+				return err
+			}
 		}
-		consumer = created
-		opened = append(opened, created)
-		return nil
+		panic("unreachable consumer creation retry")
 	}
 	if err := create(seq); err != nil {
 		return nil, 0, false, fmt.Errorf("filtered journal consumer: %w", err)

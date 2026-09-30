@@ -15,6 +15,7 @@ import (
 type heldSerialReadJS struct {
 	jetstream.JetStream
 	proxy    *testcluster.ClientProxy
+	batch    bool
 	armed    atomic.Bool
 	requests atomic.Int32
 	retried  chan struct{}
@@ -34,8 +35,17 @@ type heldSerialReadStream struct {
 }
 
 func (s *heldSerialReadStream) GetMsg(ctx context.Context, seq uint64, opts ...jetstream.GetMsgOpt) (*jetstream.RawStreamMsg, error) {
-	s.owner.holdReadResponse()
+	if !s.owner.batch {
+		s.owner.holdReadResponse()
+	}
 	return s.Stream.GetMsg(ctx, seq, opts...)
+}
+
+func (s *heldSerialReadStream) CreateConsumer(ctx context.Context, config jetstream.ConsumerConfig) (jetstream.Consumer, error) {
+	if s.owner.batch {
+		s.owner.holdReadResponse()
+	}
+	return s.Stream.CreateConsumer(ctx, config)
 }
 
 func (h *heldSerialReadJS) holdReadResponse() {
@@ -60,19 +70,30 @@ func (p *heldManifestReadPort) GetManifest(ctx context.Context, key string) ([]b
 }
 
 func TestSerialJournalReadRecoversHeldNetworkResponse(t *testing.T) {
-	testJournalReadRecoversHeldNetworkResponse(t, false)
+	testJournalReadRecoversHeldNetworkResponse(t, false, false)
 }
 func TestManifestReadRecoversHeldNetworkResponse(t *testing.T) {
-	testJournalReadRecoversHeldNetworkResponse(t, true)
+	testJournalReadRecoversHeldNetworkResponse(t, true, false)
 }
-func testJournalReadRecoversHeldNetworkResponse(t *testing.T, manifest bool) {
+func TestJournalConsumerCreationRecoversHeldNetworkResponse(t *testing.T) {
+	testJournalReadRecoversHeldNetworkResponse(t, false, true)
+}
+func testJournalReadRecoversHeldNetworkResponse(t *testing.T, manifest, batch bool) {
 	t.Helper()
 	all, cluster := setup(t)
 	ctx, stop := context.WithTimeout(context.Background(), 15*time.Second)
 	defer stop()
 	store := journal.New(all[0])
 	var tail uint64
-	for index, kind := range []journal.Kind{journal.Started, journal.StepRequested, journal.StepCompleted, journal.Completed} {
+	kinds := []journal.Kind{journal.Started, journal.StepRequested, journal.StepCompleted, journal.Completed}
+	if batch {
+		kinds = make([]journal.Kind, 80)
+		for index := range kinds {
+			kinds[index] = journal.StepRequested
+		}
+		kinds[0] = journal.Started
+	}
+	for index, kind := range kinds {
 		var err error
 		tail, err = store.Append(ctx, "test", "held-serial-read", journal.Entry{Index: uint64(index), Kind: kind}, tail)
 		if err != nil {
@@ -93,9 +114,12 @@ func testJournalReadRecoversHeldNetworkResponse(t *testing.T, manifest bool) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	hooked := &heldSerialReadJS{JetStream: js, proxy: proxy, retried: make(chan struct{})}
+	hooked := &heldSerialReadJS{JetStream: js, proxy: proxy, batch: batch, retried: make(chan struct{})}
 	reader := journal.New(hooked)
 	minimumRequests := int32(5)
+	if batch {
+		minimumRequests = 2
+	}
 	if manifest {
 		reader = journal.NewWithJetStreamSnapshotPort(js, &heldManifestReadPort{SnapshotWritePort: journal.NewSnapshotPort(js), owner: hooked})
 		minimumRequests = 2
