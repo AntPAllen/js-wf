@@ -2493,3 +2493,17 @@ in 80.871 seconds, and strengthened cursor control under race in 1.015 seconds.
 Vet and diff checks passed. [Raw logs](scale/checkpoint-cursor-2026-09-30/) are
 retained. Frame capture, manifest publication, suffix reads, worker dispatch,
 reconciliation and model/real crash-boundary proofs remain required.
+
+## Focused 200-seed mixed campaign fails seed 65
+
+The [200-seed campaign at clean `a1995cc`](https://github.com/AntPAllen/js-wf/actions/runs/36786018726)
+passed seeds 1–64 and failed seed 65's terminal p99 at 37.809 seconds. Both
+signal parents missed the gate (37.809/33.676 seconds). The complete operation
+JSON locates 35.554/33.243 seconds in their unconditional append-renew KV
+updates, with only 57/65 microseconds in local append gates and no renew
+errors. This identifies a client wait location, not a proven server cause.
+The 85 ms syscall disk slowdown persists until cleanup; it is distinct from
+the sustained five-second stall row. [Raw failure evidence and reproducible
+accounting](scale/mixed-seed65-2026-09-30/) are retained. The test observed all
+28 terminal results but failed before the final integrity audit. The focused
+200-seed gate, Tier 1 reproduction and full-matrix release gates remain open.
