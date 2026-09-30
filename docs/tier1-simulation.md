@@ -219,6 +219,15 @@ and a race run passed with one higher-epoch winner and 31 held losers. The
 in-memory KV model already exposes the normalized conflict contract; a unit
 test also preserves the underlying API error while distinguishing unrelated
 transport errors.
+The matching cooperative Tier 1 workload now schedules 32 production acquirers
+at every KV operation after an initialized holder expires. Each of 1,000
+default seeds must retain exactly one higher-epoch winner and return `ErrHeld`
+to all 31 losers. The expired holder's renewal and cleanup must be fenced
+without changing the successor. The first ten seeds replay exactly, seed 42
+is byte-identical across processes and pinned in the regression corpus, and
+the workload participates in `SIM_SEEDS` extended runs. This checks the
+normalized contract and production acquisition decisions; raw server API
+error classification remains covered by the adapter unit test and real fixture.
 The seeded lease trace is byte-identical across processes and replays from
 disk. A real three-node fixture checks the model's normal revision, held-key,
 renewal, stale cleanup, and stale update behavior. A TCP-proxy fixture holds
