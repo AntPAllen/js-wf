@@ -34,6 +34,7 @@ import (
 )
 
 type matrixLeaderFault struct {
+	BlockStall            *testcluster.BlockStallProof  `json:"block_stall,omitempty"`
 	FanoutParent          string                        `json:"fanout_parent,omitempty"`
 	FanoutTail            uint64                        `json:"fanout_tail,omitempty"`
 	FanoutChildren        []string                      `json:"fanout_children,omitempty"`
@@ -105,6 +106,10 @@ func TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds(t *testing.T) {
 
 func TestMixedMatrixWorkerClockSkew(t *testing.T) { runMixedMatrixLeader(t, "worker_clock") }
 
+func TestMixedMatrixBlockDiskStallEveryThirtySeconds(t *testing.T) {
+	runMixedMatrixLeader(t, "block_disk")
+}
+
 func TestMixedMatrixFanoutRestartEveryThirtySeconds(t *testing.T) {
 	runMixedMatrixLeader(t, "fanout_restart")
 }
@@ -153,8 +158,28 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	if row == "server_clock_minus" {
 		serverOffset = -60 * time.Second
 	}
+	var blockDisk *testcluster.BlockDisk
+	defer func() {
+		if blockDisk != nil {
+			if err := blockDisk.Close(); err != nil {
+				t.Errorf("block disk cleanup: %v", err)
+			}
+		}
+	}()
 	startCluster := testcluster.StartProcesses
-	if serverOffset != 0 {
+	if row == "block_disk" {
+		startCluster = func(root string, count int) (*testcluster.ProcessCluster, error) {
+			var err error
+			blockDisk, err = testcluster.NewBlockDisk(root)
+			if err != nil {
+				return nil, err
+			}
+			if err := os.Symlink(blockDisk.StoreDir, filepath.Join(root, "node-2")); err != nil {
+				return nil, err
+			}
+			return testcluster.StartProcesses(root, count)
+		}
+	} else if serverOffset != 0 {
 		startCluster = func(root string, count int) (*testcluster.ProcessCluster, error) {
 			return testcluster.StartClockSkewProcesses(root, count, 2, serverOffset)
 		}
@@ -216,7 +241,7 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 		}
 	}
 	if serverOffset != 0 {
-		if err := preferMatrixSkewLeaders(ctx, nc, js); err != nil {
+		if err := preferMatrixNodeTwoLeaders(ctx, nc, js); err != nil {
 			t.Fatal(err)
 		}
 		if proof, err := verifyMatrixServerClocks(ctx, js, cluster, serverOffset, time.Now()); err != nil {
@@ -429,7 +454,9 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 			var event matrixLeaderFault
 			var err error
-			if serverOffset != 0 {
+			if row == "block_disk" {
+				event, err = stallMatrixBlockDisk(faultCtx, nc, js, blockDisk, scheduled)
+			} else if serverOffset != 0 {
 				event, err = verifyMatrixServerClocks(faultCtx, js, cluster, serverOffset, scheduled)
 			} else if row == "worker_clock" {
 				event, err = verifyMatrixWorkerClocks(processWorkers, scheduled)

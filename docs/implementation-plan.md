@@ -363,6 +363,19 @@ history, integrity, raw enabling-event p99 and queue-drain gates. The barrier
 is fault orchestration; the handler bodies and child protocol execute in the
 production worker. Smoke runs do not establish sustained release coverage.
 
+The sustained five-second block-device stall row is
+`TestMixedMatrixBlockDiskStallEveryThirtySeconds` (`blockdisk` in CI).
+Node 2's entire JetStream store resides on a private ext4 filesystem backed by
+a sparse image, loop device and device-mapper linear target. Before each stall,
+workflow stream leaders are moved to that node; suspending its mapped device
+blocks all filesystem block requests, including files created after startup.
+Each fault proves a dirty-file sync stayed blocked for the full five seconds,
+then resumes the device and verifies full workflow-store replica catch-up.
+The shared mixed workload and raw enabling-event latency gates apply. This
+requires passwordless sudo, loop devices and device mapper. It supplies real
+block-device stall coverage; Tier 3's separate dm-delay per-request injection
+and five-node full-matrix soak remain required.
+
 **Tier 3 — Jepsen-style (nightly and before release).** Five real VMs or containers with real network partitions (iptables), separately verified server and worker clock skew, disk stalls (dm-delay), and process kills including `SIGKILL` of the NATS server with unsynced writes (`sync_interval` set to the production value). Client histories recorded as in phase 0 and checked with Porcupine against these models: `Start` as write-once register; `Signal` as an ordered queue per invocation; `Await` as a read of a register that becomes immutable at first non-empty read. Plus the stream-level invariant checker over the final state.
 
 Clock-skew injection must fail closed unless the running process reports the requested offset before the workload starts. The pinned Go server and a cgo-enabled Go probe bypassed `libfaketime`'s `LD_PRELOAD` clock interposition even though the same preload shifted `date`; [libfaketime documents this runtime limitation](https://github.com/wolfcw/libfaketime). The five-container server-clock slice instead builds the pinned NATS source with a test-only Go `time.Now` wall-clock overlay and verifies each node's own `/varz` time. The worker-clock slice uses the same overlay to build a separate worker process and checks its `time.Now` against an unshifted server's `/varz` before starting work. Both slices now cover one timer, one ordered-signal workflow, 100 short journaled effects, and a six-child fan-out with child-result signal and journal checks. The server slice keeps `WF_RUN`, `WF_SIG`, `WF_JRN`, and `KV_WF_STATE` leaders on the skewed node. These focused checks do not replace sustained mixed workloads and faults across the full matrix.

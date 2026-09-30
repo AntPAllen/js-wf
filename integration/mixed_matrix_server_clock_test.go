@@ -21,7 +21,7 @@ type matrixServerClockSample struct {
 	MeasuredOffset time.Duration `json:"offset_ns"`
 }
 
-func preferMatrixSkewLeaders(ctx context.Context, nc *nats.Conn, js jetstream.JetStream) error {
+func preferMatrixNodeTwoLeaders(ctx context.Context, nc *nats.Conn, js jetstream.JetStream) error {
 	const leader = "wf-process-2"
 	for _, name := range matrixClockStreams {
 		stream, err := js.Stream(ctx, name)

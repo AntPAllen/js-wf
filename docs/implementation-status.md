@@ -966,3 +966,44 @@ replica recovery at +40.07 seconds. All shared and new checks passed. Vet and
 diff checks passed. These 35-second workloads do not count as ten-minute or
 consecutive-seed release evidence. CI exposes `fanoutrestart` with 1/20/200
 seeds. Sustained release coverage remains open.
+
+
+## Full positive server-clock local proof
+
+The ten-minute positive server-clock race run at `c0bd4f0` completed
+successfully in 673.59 seconds: 117 batches, 3,276 terminal invocations,
+19 verified clock observations and aggregate terminal p99 5.016 seconds.
+All shared history, integrity, per-type latency, final-completion and queue
+checks passed. This is one local seed (42), not consecutive CI evidence.
+The full fan-out restart local run remains active, and its first CI seed was
+[dispatched at `06c487e`](https://github.com/AntPAllen/js-wf/actions/runs/36728933264).
+
+## Real five-second block-device stalls
+
+`testcluster.BlockDisk` creates a private 512 MiB sparse image, loop device,
+device-mapper linear target and ext4 mount. It never maps a host data device.
+The sustained `blockdisk` row places node 2's entire JetStream store on this
+filesystem, moves the six relevant workflow stream leaders there before each
+thirty-second fault, suspends all mapped-device I/O for five seconds, and
+requires full replica catch-up after resume. Each fault captures device state,
+suspend/resume times and a dirty-file sync that remained blocked for the full
+interval. This covers newly created files as well as existing files, unlike
+the path-filtered strace injector. The shared histories, raw-state audits,
+raw enabling-event p99 and queue-drain gates remain required.
+
+The privileged fixture race test passed in 6.56 seconds, including a five-second
+blocked-sync proof, cancellation recovery, and removal of the mount, mapping,
+loop device and image. The first attempt found that this VM does not populate
+`/dev/mapper` automatically after target creation; the fixture now uses the
+explicit documented `dmsetup mknodes` operation. A seed 42 matrix race smoke
+passed in 68.42 seconds: eight batches, 224 terminals, all shared gates and
+aggregate terminal p99 4.999 seconds. The device remained suspended for 5.014
+seconds, and the dirty sync returned 5.043 seconds after suspension. No test
+mappings or loop devices remained after cleanup. Vet and diff checks passed.
+This is 35-second smoke evidence, not sustained or consecutive-seed validation.
+
+CI exposes `blockdisk` with 1/20/200 seeds and first runs the privileged fixture
+race test. Passwordless sudo, loop devices, device mapper and ext4 tools are
+required. This VM's kernel has no `dm-delay` target or loadable module; the
+[distinct per-request delay injection](https://docs.kernel.org/admin-guide/device-mapper/delay.html)
+required by Tier 3 remains open, as does the five-node full-matrix soak.

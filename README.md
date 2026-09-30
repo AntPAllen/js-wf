@@ -171,3 +171,12 @@ For sustained full-cluster restarts at verified unfinished fan-out cuts, run
 `WF_MATRIX_CHAOS=1 go test -race ./integration -run '^TestMixedMatrixFanoutRestartEveryThirtySeconds$' -count=1 -timeout=18m`.
 The CI selector is `fanoutrestart`. Fault artifacts retain the suspended parent,
 six child IDs, unfinished children and journal cut sequence for each restart.
+
+
+For real five-second filesystem block stalls, run
+`WF_MATRIX_CHAOS=1 go test -race ./integration -run '^TestMixedMatrixBlockDiskStallEveryThirtySeconds$' -count=1 -timeout=18m`.
+The `blockdisk` CI row checks its privileged fixture first. The fixture requires
+Linux device mapper, loop devices, ext4 tools and passwordless sudo. It creates
+and removes a private file-backed device for one server's store. Fault artifacts
+record suspended/resumed times and the blocked-sync proof; this is separate
+from dm-delay per-request injection.
