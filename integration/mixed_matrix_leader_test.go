@@ -397,6 +397,43 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 		}
 	}()
 	defer func() { stopFault(); <-faultExited }()
+	// Audit completed cohorts on one independent reader. The workload keeps
+	// producing active executions while the controller schedules pause faults.
+	type checkpoint struct {
+		batch  int
+		cutoff uint64
+	}
+	checkpoints := make(chan checkpoint, 128)
+	checkpointErrors := make(chan error, 1)
+	checkpointCtx, stopCheckpoints := context.WithCancel(ctx)
+	checkpointDone := make(chan struct{})
+	go func() {
+		defer close(checkpointDone)
+		for {
+			select {
+			case <-checkpointCtx.Done():
+				return
+			case cut, ok := <-checkpoints:
+				if !ok {
+					return
+				}
+				t.Logf("checkpoint audit batch=%d invocation_cutoff=%d started elapsed=%s", cut.batch, cut.cutoff, time.Since(start))
+				report, err := matrixRetainedAuditUsing(checkpointCtx, func(attempt context.Context) (integrity.Report, error) {
+					return integrity.CheckThroughInvocationSequence(attempt, js, cut.cutoff)
+				})
+				if checkpointCtx.Err() != nil {
+					return
+				}
+				if err != nil || report.Invocations != cut.batch*28 || report.Journals != cut.batch*28 || report.Terminal != cut.batch*28 {
+					checkpointErrors <- fmt.Errorf("intermediate retained audit batch=%d cutoff=%d report=%+v err=%v", cut.batch, cut.cutoff, report, err)
+					cancel()
+					return
+				}
+				t.Logf("checkpoint audit batch=%d complete report=%+v elapsed=%s", cut.batch, report, time.Since(start))
+			}
+		}
+	}()
+	defer func() { stopCheckpoints(); <-checkpointDone }()
 	rng := rand.New(rand.NewSource(seed))
 	var latencies []time.Duration
 	latenciesByType := map[string][]time.Duration{}
@@ -410,6 +447,8 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 		case err := <-fleetErrors:
 			t.Fatalf("fleet: %v", err)
+		case err := <-checkpointErrors:
+			t.Fatal(err)
 		default:
 		}
 		kinds := []string{"matrixshort", "matrixshort", "matrixshort", "matrixshort", "matrixtimer", "matrixtimer", "matrixtimer", "matrixsignal", "matrixsignal", "matrixfanout"}
@@ -453,6 +492,11 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 		stopBatch()
 		if ctx.Err() != nil {
 			select {
+			case err := <-checkpointErrors:
+				t.Fatal(err)
+			default:
+			}
+			select {
 			case err := <-fleetErrors:
 				t.Fatalf("fleet: %v", err)
 			default:
@@ -471,28 +515,29 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 		}
 		batches++
 		if batches%10 == 0 {
-			t.Logf("checkpoint audit batch=%d started elapsed=%s", batches, time.Since(start))
-			report, err := matrixRetainedAudit(ctx, js)
-			if err != nil || report.Invocations != batches*28 || report.Journals != batches*28 || report.Terminal != batches*28 {
-				// A controller or worker failure cancels the audit context. Keep
-				// that original failure visible instead of reporting cancellation
-				// as the only explanation for an incomplete retained-state scan.
-				select {
-				case faultErr := <-faultDone:
-					if faultErr != nil {
-						t.Fatalf("leader fault during checkpoint audit batch=%d: %v (audit: %v)", batches, faultErr, err)
-					}
-				default:
-				}
-				select {
-				case fleetErr := <-fleetErrors:
-					t.Fatalf("fleet during checkpoint audit batch=%d: %v (audit: %v)", batches, fleetErr, err)
-				default:
-				}
-				t.Fatalf("intermediate retained audit batch=%d report=%+v err=%v", batches, report, err)
+			stream, err := matrixReadMetadata(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })
+			if err != nil {
+				t.Fatal(err)
+			}
+			info, err := matrixReadMetadata(ctx, func(attempt context.Context) (*jetstream.StreamInfo, error) { return stream.Info(attempt) })
+			if err != nil {
+				t.Fatal(err)
+			}
+			select {
+			case checkpoints <- checkpoint{batch: batches, cutoff: info.State.LastSeq}:
+			case <-ctx.Done():
+				t.Fatalf("enqueue checkpoint: %v", ctx.Err())
 			}
 		}
+
 		t.Logf("mixed batch=%d elapsed=%s", batches, time.Since(start))
+	}
+	close(checkpoints)
+	<-checkpointDone
+	select {
+	case err := <-checkpointErrors:
+		t.Fatal(err)
+	default:
 	}
 	if err := <-faultDone; err != nil {
 		t.Fatalf("leader fault: %v", err)
@@ -615,11 +660,15 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 // duration. Every attempt still checks the whole retained state; only named
 // transient transport failures get a fresh context, never invariant errors.
 func matrixRetainedAudit(ctx context.Context, js jetstream.JetStream) (integrity.Report, error) {
+	return matrixRetainedAuditUsing(ctx, func(attempt context.Context) (integrity.Report, error) { return integrity.Check(attempt, js) })
+}
+
+func matrixRetainedAuditUsing(ctx context.Context, check func(context.Context) (integrity.Report, error)) (integrity.Report, error) {
 	var report integrity.Report
 	var err error
 	for i := 0; i < 3; i++ {
 		attempt, done := context.WithTimeout(ctx, 20*time.Second)
-		report, err = integrity.Check(attempt, js)
+		report, err = check(attempt)
 		done()
 		if err == nil {
 			return report, nil

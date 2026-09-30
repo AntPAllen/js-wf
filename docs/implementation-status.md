@@ -555,3 +555,14 @@ Direct completed-job logs from the still-running refreshed leader matrices estab
 
 
 The corrected local ten-minute pause seed 7 race run ended at 498.31 seconds before completing the workload. Eight confirmed active pauses reported fencing, including the formerly problematic fifth schedule. The ninth selection found no active worker within five seconds while batch 60's checkpoint audit was running, and canceled the run. This is a distinct active-target availability failure, not evidence that the original stale-marker selection remains or that the sustained pause gate is clean. Its log is `/tmp/js-wf-pause7-confirmed-full.log`; fresh validation must address checkpoint/target availability without accepting idle pauses as active fencing proof.
+
+
+## Completed-cohort checkpoints while sustained workloads continue
+
+The matrix generator previously waited for each whole-retained-state checkpoint before starting another batch. During a long checkpoint this deliberately left all workers idle while the pause controller still required an active target. Checkpoints now capture the `WF_INV` high-water mark after every tenth completed batch and queue that completed cohort to one independent reader. The generator immediately continues its same seeded mixed batches. Every queued checkpoint must finish before final validation; checkpoint failures cancel the workload and remain visible. The final quiescent audit still checks the entire retained state and exact totals.
+
+`integrity.CheckThroughInvocationSequence` reads retained invocation records through the captured sequence, then checks those invocations' current journal and snapshot records and terminal KV values. Later invocations are outside that cohort. Cohort members must be quiescent and must not be purged or reused during the audit. The global checker remains required to detect journals outside the captured cohort and to establish final integrity. A real three-node race contract checks exclusion of later work, preservation of global orphan detection, and detection of corruption written to an older journal after the cutoff; it passed in 4.40 seconds. The integrity race suite, vet and diff checks passed.
+
+A 65-second seed 7 pause race workload passed: one active 45-second pause with two fencing events, eleven batches, 308 terminals, 3,409 journal entries and aggregate terminal p99 5.00 seconds. Its batch-10 cohort audit checked exactly 280 terminals while batch 11 ran, then the full final audit checked all 308. All shared gates passed. This shortened evidence is excluded from ten-minute release validation; a fresh full seed 7 replay is required.
+
+The [buffered metadata CI contract at `d95ee56`](https://github.com/AntPAllen/js-wf/actions/runs/36709224607) passed: 45.001-second hold, 20.86-ms recovery, 656,089-byte peak buffer and no overflow. This clears that focused transport contract once; the separately running sustained isolation and consecutive-seed gates remain open.
