@@ -1,0 +1,23 @@
+name: metadata-isolation-contract
+on:
+  workflow_dispatch:
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      WF_METADATA_ISOLATION_CONTRACT: '1'
+      METADATA_ISOLATION_ARTIFACT_PREFIX: metadata-isolation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Recover metadata requests and PING after 45-second asymmetric reply hold
+        run: go test ./integration -run '^TestMetadataRecoveryAfterAsymmetricReplyHold$' -count=1 -timeout=4m -v
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: metadata-isolation-diagnostics
+          path: metadata-isolation-*
+          if-no-files-found: ignore

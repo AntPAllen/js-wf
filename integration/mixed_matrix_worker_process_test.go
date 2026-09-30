@@ -600,6 +600,17 @@ func isolateMatrixWorkerReplies(ctx context.Context, fleet []*matrixProcessWorke
 
 func captureMatrixIsolationDiagnostics(t *testing.T, cluster *testcluster.ProcessCluster, proxies []*testcluster.ClientProxy, root string) {
 	t.Helper()
+	// Capture kernel send/receive queues before teardown. The NATS pending-byte
+	// counter excludes data already accepted by the TCP send buffer.
+	sockets, stopSockets := context.WithTimeout(context.Background(), 2*time.Second)
+	data, socketErr := exec.CommandContext(sockets, "ss", "-tinp", "dst", "127.0.0.1").CombinedOutput()
+	stopSockets()
+	if err := os.WriteFile(filepath.Join(root, "sockets.txt"), data, 0600); err != nil {
+		t.Logf("socket diagnostic artifact: %v", err)
+	}
+	if socketErr != nil {
+		t.Logf("socket diagnostic: %v", socketErr)
+	}
 	for index, proxy := range proxies {
 		data, err := json.Marshal(proxy.TrafficTrace())
 		if err == nil {
