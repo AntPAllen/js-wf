@@ -536,7 +536,9 @@ network-lost start acknowledgments, absent-publish retry, and large input.
 An additional modeled fault returns JetStream 10158 while a wakeup message ID
 is in process. Production `Client.Enqueue` and `Client.Signal` retry the same
 ID after 25 ms of virtual time and retain one run message. The retry has a
-two-second wall-clock and 80-conflict bound in production.
+two-second wall-clock and 80-conflict bound in production. The 20-signal
+seeded pipeline now chooses this fault alongside lost acknowledgments and
+dropped enqueues, then checks that a matching retry retains one wakeup.
 
 The start-and-repair scenarios do not yet run the leased scan loop or its
 persisted cursor. The model now expires `WF_RUN` message IDs after the

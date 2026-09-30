@@ -51,7 +51,7 @@ func runSeededSignalPipeline(seed int64, replay *Trace) (trace Trace, runErr err
 	sequences := make([]uint64, 0, 20)
 	payloads := make([][]byte, 0, 20)
 	for i := 0; i < 20; i++ {
-		mode, err := schedule.Choose([]string{"normal", "duplicate", "lost_publish_ack", "lost_enqueue_ack", "dropped_enqueue"})
+		mode, err := schedule.Choose([]string{"normal", "duplicate", "lost_publish_ack", "lost_enqueue_ack", "dropped_enqueue", "duplicate_in_process"})
 		if err != nil {
 			return trace, err
 		}
@@ -62,10 +62,12 @@ func runSeededSignalPipeline(seed int64, replay *Trace) (trace Trace, runErr err
 			if err := model.QueueSignalFault(SignalLoseAckAfterCommit); err != nil {
 				return trace, err
 			}
-		} else if mode == "lost_enqueue_ack" || mode == "dropped_enqueue" {
+		} else if mode == "lost_enqueue_ack" || mode == "dropped_enqueue" || mode == "duplicate_in_process" {
 			kind := "lose_ack_after_commit"
 			if mode == "dropped_enqueue" {
 				kind = "drop_before_commit"
+			} else if mode == "duplicate_in_process" {
+				kind = "duplicate_in_process"
 			}
 			if err := model.QueueFault(StartFault{Operation: "enqueue_run", Kind: kind}); err != nil {
 				return trace, err
@@ -96,7 +98,7 @@ func runSeededSignalPipeline(seed int64, replay *Trace) (trace Trace, runErr err
 				return trace, err
 			}
 		}
-		if mode == "duplicate" || mode == "lost_publish_ack" || mode == "lost_enqueue_ack" || mode == "dropped_enqueue" {
+		if mode == "duplicate" || mode == "duplicate_in_process" || mode == "lost_publish_ack" || mode == "lost_enqueue_ack" || mode == "dropped_enqueue" {
 			if again, err := call(); err != nil || again != sequence {
 				return trace, fmt.Errorf("seed %d signal %d retry seq=%d first=%d err=%v", seed, i, again, sequence, err)
 			}
