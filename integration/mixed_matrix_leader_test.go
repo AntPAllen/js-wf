@@ -48,6 +48,9 @@ type matrixLeaderFault struct {
 	WorkerSlot       *int      `json:"worker_slot,omitempty"`
 	PID              int       `json:"pid,omitempty"`
 	ActiveLeases     int       `json:"active_leases,omitempty"`
+	Paused           time.Time `json:"paused,omitempty"`
+	Resumed          time.Time `json:"resumed,omitempty"`
+	FencingEvents    int       `json:"fencing_events,omitempty"`
 }
 
 type matrixLatencySample struct {
@@ -79,6 +82,10 @@ func TestMixedMatrixServerPartitionEveryThirtySeconds(t *testing.T) {
 
 func TestMixedMatrixRandomWorkerKilledEveryFiveSeconds(t *testing.T) {
 	runMixedMatrixLeader(t, "worker_kill")
+}
+
+func TestMixedMatrixWorkerPausedFortyFiveSeconds(t *testing.T) {
+	runMixedMatrixLeader(t, "worker_pause")
 }
 
 func runMixedMatrixLeader(t *testing.T, row string) {
@@ -256,7 +263,7 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 		}()
 	}
-	if row == "worker_kill" {
+	if row == "worker_kill" || row == "worker_pause" {
 		workerRoot = t.TempDir()
 		processWorkers = make([]*matrixProcessWorker, 3)
 		defer func() {
@@ -292,6 +299,11 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	if row == "worker_kill" {
 		faultInterval = 5 * time.Second
 	}
+	firstFault := faultInterval
+	if row == "worker_pause" {
+		faultInterval = 60 * time.Second
+		firstFault = 5 * time.Second
+	}
 	faultCtx, stopFault := context.WithCancel(ctx)
 	faultDone := make(chan error, 1)
 	faultExited := make(chan struct{})
@@ -299,7 +311,7 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	go func() {
 		defer close(faultExited)
 		defer close(faultDone)
-		for scheduled := start.Add(faultInterval); scheduled.Before(end); scheduled = scheduled.Add(faultInterval) {
+		for scheduled := start.Add(firstFault); scheduled.Before(end); scheduled = scheduled.Add(faultInterval) {
 			timer := time.NewTimer(time.Until(scheduled))
 			select {
 			case <-faultCtx.Done():
@@ -310,7 +322,9 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 			var event matrixLeaderFault
 			var err error
-			if row == "worker_kill" {
+			if row == "worker_pause" {
+				event, err = pauseMatrixProcessWorker(faultCtx, processWorkers, faultRNG.Intn(len(processWorkers)), scheduled)
+			} else if row == "worker_kill" {
 				event, err = killMatrixProcessWorker(faultCtx, workerRoot, urls, processWorkers, faultRNG.Intn(len(processWorkers)), scheduled)
 			} else if row == "server_partition" {
 				event, err = partitionMatrixServer(faultCtx, js, cluster, scheduled)
@@ -328,6 +342,9 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 				faultDone <- err
 				cancel()
 				return
+			}
+			if row == "worker_pause" {
+				t.Logf("worker pause worker=%s confirmed=%s resumed=%s pause_duration=%s fencing_events=%d", event.Worker, event.Paused.Sub(start), event.Resumed.Sub(start), event.Resumed.Sub(event.Paused), event.FencingEvents)
 			}
 			t.Logf("%s fault node=%d nodes=%v worker=%s pid=%d active_leases=%d routes=%v majority_seq=%d consumer=%s pending=%d ack_pending=%d scheduled=%s killed=%s healed=%s", row, event.Node, event.Nodes, event.Worker, event.PID, event.ActiveLeases, event.Routes, event.MajoritySequence, event.Consumer, event.Pending, event.AckPending, event.Scheduled.Sub(start), event.Killed.Sub(start), event.Healed.Sub(start))
 		}
@@ -418,20 +435,23 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	if err := <-faultDone; err != nil {
 		t.Fatalf("leader fault: %v", err)
 	}
-	wantFaults := int((duration - time.Nanosecond) / faultInterval)
+	wantFaults := 0
+	if duration > firstFault {
+		wantFaults = 1 + int((duration-firstFault-time.Nanosecond)/faultInterval)
+	}
 	if len(faults) != wantFaults {
 		t.Fatalf("faults=%d want=%d", len(faults), wantFaults)
 	}
-	if row == "worker_kill" {
+	if row == "worker_kill" || row == "worker_pause" {
 		activeKills := 0
 		for _, fault := range faults {
 			if fault.ActiveLeases > 0 {
 				activeKills++
 			}
 		}
-		t.Logf("worker kills=%d active_worker_kills=%d", len(faults), activeKills)
+		t.Logf("worker faults=%d active_worker_faults=%d row=%s", len(faults), activeKills, row)
 		if activeKills == 0 {
-			t.Fatal("worker kill row did not kill any worker with an active lease")
+			t.Fatal("worker fault row did not fault any worker with an active lease")
 		}
 	}
 	completionDeadline := faults[len(faults)-1].Healed.Add(5 * time.Minute)

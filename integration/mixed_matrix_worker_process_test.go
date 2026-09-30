@@ -18,6 +18,8 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/journal"
+	"js-wf/lease"
 	"js-wf/provision"
 	"js-wf/wf"
 	"js-wf/worker"
@@ -240,4 +242,176 @@ func killMatrixProcessWorker(ctx context.Context, root string, urls []string, fl
 	fleet[index] = next
 	event.Healed = time.Now()
 	return event, nil
+}
+
+// pauseMatrixProcessWorker keeps the same OS process alive but unable to renew
+// or append for 45 seconds. Other members of the fleet serve its partitions.
+func pauseMatrixProcessWorker(ctx context.Context, fleet []*matrixProcessWorker, index int, scheduled time.Time) (matrixLeaderFault, error) {
+	selected, err := selectMatrixActiveWorker(ctx, fleet, index)
+	if err != nil {
+		return matrixLeaderFault{Scheduled: scheduled, Node: -1}, err
+	}
+	index = selected
+	process := fleet[index]
+	event := matrixLeaderFault{Scheduled: scheduled, Node: -1, WorkerSlot: &index, Worker: process.id, PID: process.cmd.Process.Pid, Killed: time.Now()}
+	if err := process.cmd.Process.Signal(syscall.SIGSTOP); err != nil {
+		return event, err
+	}
+	// Resume even if confirmation, artifact reads, or the controller fail.
+	defer process.cmd.Process.Signal(syscall.SIGCONT)
+	stopped, stop := context.WithTimeout(ctx, time.Second)
+	err = waitMatrixProcessState(stopped, event.PID, true)
+	stop()
+	if err != nil {
+		return event, fmt.Errorf("confirm stopped worker: %w", err)
+	}
+	event.Paused = time.Now()
+	var active struct {
+		Active int `json:"active_leases"`
+	}
+	if data, err := os.ReadFile(process.base + "-active.json"); err == nil {
+		if err := json.Unmarshal(data, &active); err != nil {
+			return event, err
+		}
+		event.ActiveLeases = active.Active
+	} else if !os.IsNotExist(err) {
+		return event, err
+	}
+	if _, err := matrixWorkerFencingEvents(process.base+"-dispatch.jsonl", time.Time{}); err != nil {
+		return event, err
+	}
+	timer := time.NewTimer(45 * time.Second)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return event, ctx.Err()
+	case <-timer.C:
+	}
+	event.Resumed = time.Now()
+	if err := process.cmd.Process.Signal(syscall.SIGCONT); err != nil {
+		return event, err
+	}
+	resumed, stop := context.WithTimeout(ctx, time.Second)
+	err = waitMatrixProcessState(resumed, event.PID, false)
+	stop()
+	if err != nil {
+		return event, fmt.Errorf("confirm resumed worker: %w", err)
+	}
+	// An idle pause has no old lease to fence. An active pause must produce an
+	// explicit lost-lease/stale-append outcome after the old process resumes.
+	if event.ActiveLeases > 0 {
+		fenced, stop := context.WithTimeout(ctx, 10*time.Second)
+		defer stop()
+		for fenced.Err() == nil {
+			after, err := matrixWorkerFencingEvents(process.base+"-dispatch.jsonl", event.Resumed)
+			if err != nil {
+				return event, err
+			}
+			if after > 0 {
+				event.FencingEvents = after
+				break
+			}
+			select {
+			case <-fenced.Done():
+			case <-time.After(20 * time.Millisecond):
+			}
+		}
+		if event.FencingEvents == 0 {
+			return event, fmt.Errorf("active paused worker did not report fencing after resume: %w", fenced.Err())
+		}
+	}
+	event.Healed = time.Now()
+	return event, nil
+}
+
+func waitMatrixProcessState(ctx context.Context, pid int, stopped bool) error {
+	for ctx.Err() == nil {
+		data, err := os.ReadFile(fmt.Sprintf("/proc/%d/status", pid))
+		if err != nil {
+			return err
+		}
+		for _, line := range strings.Split(string(data), "\n") {
+			if strings.HasPrefix(line, "State:") {
+				fields := strings.Fields(line)
+				if len(fields) < 2 {
+					return fmt.Errorf("malformed process state: %q", line)
+				}
+				state := fields[1]
+				if state == "Z" || state == "X" {
+					return fmt.Errorf("worker exited: %s", state)
+				}
+				if (state == "T" || state == "t") == stopped {
+					return nil
+				}
+			}
+		}
+		select {
+		case <-ctx.Done():
+		case <-time.After(10 * time.Millisecond):
+		}
+	}
+	return ctx.Err()
+}
+
+func matrixWorkerFencingEvents(path string, since time.Time) (int, error) {
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+	count := 0
+	// A running child may be halfway through its final JSONL write. Only complete
+	// lines are eligible evidence; invalid completed lines fail the fixture.
+	lines := strings.Split(string(data), "\n")
+	for _, line := range lines[:len(lines)-1] {
+		if line == "" {
+			continue
+		}
+		var event worker.DispatchEvent
+		if err := json.Unmarshal([]byte(line), &event); err != nil {
+			return 0, err
+		}
+		if event.At.Before(since) {
+			continue
+		}
+		if strings.Contains(event.Error, lease.ErrLost.Error()) || strings.Contains(event.Error, journal.ErrStale.Error()) {
+			count++
+		}
+	}
+	return count, nil
+}
+
+// Use the seeded candidate order while requiring an execution to fence. A
+// bounded wait catches short idle gaps between mixed batches.
+func selectMatrixActiveWorker(ctx context.Context, fleet []*matrixProcessWorker, first int) (int, error) {
+	ready, stop := context.WithTimeout(ctx, 5*time.Second)
+	defer stop()
+	for ready.Err() == nil {
+		for offset := range fleet {
+			index := (first + offset) % len(fleet)
+			data, err := os.ReadFile(fleet[index].base + "-active.json")
+			if os.IsNotExist(err) {
+				continue
+			}
+			if err != nil {
+				return 0, err
+			}
+			var active struct {
+				Active int `json:"active_leases"`
+			}
+			if err := json.Unmarshal(data, &active); err != nil {
+				return 0, err
+			}
+			if active.Active > 0 {
+				return index, nil
+			}
+		}
+		select {
+		case <-ready.Done():
+		case <-time.After(20 * time.Millisecond):
+		}
+	}
+	return 0, fmt.Errorf("no active worker available to pause: %w", ready.Err())
 }
