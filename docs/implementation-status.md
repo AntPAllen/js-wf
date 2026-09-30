@@ -1592,3 +1592,36 @@ passed seeds 1–5 and failed seed 6 with terminal p99 32.78 seconds. This campa
 predates both cleanup changes; neither this failure nor seed 12 is erased by
 passing local transport controls. The mixed and full-matrix latency gates remain
 open.
+
+
+## Six focused mutations of production code
+
+`scripts/check-invariant-mutations.py` now uses Go overlays to mutate six
+production mechanisms without changing checkout files. Its unmodified fixtures
+must first pass. Detection requires the selected test to fail with exact semantic
+markers; package build errors, skips, test timeouts and other failures cannot
+count. Mandatory compile-error and unrelated-test-failure controls verify that
+classification. Mutation anchors must occur exactly once, and artifacts record
+source hashes, commit, test logs, timings and modeled failure traces.
+
+All six baselines and mutations passed the final local runner in 34.37 seconds
+of fixture time. Removing the production journal CAS publish option produced two
+acknowledged winners in gated round one. Giving each worker an independent lease
+key allowed the second owner to acquire. Purging invocation first broke recovery
+after a retained purge-marker crash. Disabling the production step comparison
+accepted a renamed replay step. Removing the production run message ID retained
+64 equal-ID enqueues instead of one. Skipping production start scanning left a
+known missing wakeup unrepaired. Both runner negative controls failed without
+being counted as detection. The CAS baseline runs 1,000 races with two real
+journal-leader restarts; this is not the independent 10,000-round scale proof.
+
+The CAS, lease and enqueue fixtures use three real nodes, the purge stage fixture
+uses one real node, and SDK replay/start repair run production code against
+modeled transports. These controls improve on forged bad histories but do not
+constitute the plan's whole mixed-workload six-mutation chaos release campaign.
+That requirement remains open. The new `invariant-mutations` CI workflow runs
+manually and on relevant main-branch source/fixture changes, always preserving
+its report and logs. See [scope and reproduction instructions](invariant-mutations.md).
+The previously dispatched extended Tier 1 campaign
+[36754525798](https://github.com/AntPAllen/js-wf/actions/runs/36754525798)
+was confirmed running; it has not been restarted.

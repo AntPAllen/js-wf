@@ -1,0 +1,40 @@
+name: invariant-mutations
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/invariant-mutations.yml'
+      - 'scripts/check-invariant-mutations.py'
+      - 'journal/journal.go'
+      - 'lease/lease.go'
+      - 'retention/purge.go'
+      - 'wf/context.go'
+      - 'client/client.go'
+      - 'reconcile/starts.go'
+      - 'integration/journal_cas_race_scale_test.go'
+      - 'integration/journal_cas_audit_test.go'
+      - 'integration/core_test.go'
+      - 'integration/ack_loss_test.go'
+      - 'retention/purge_test.go'
+      - 'sim/workflow_replay_test.go'
+      - 'sim/start_transport_test.go'
+      - 'go.mod'
+      - 'go.sum'
+jobs:
+  semantic-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Require six semantic production mutation detections
+        run: python3 scripts/check-invariant-mutations.py --output "$RUNNER_TEMP/invariant-mutations"
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: focused-production-mutations
+          path: ${{ runner.temp }}/invariant-mutations
+          if-no-files-found: warn
