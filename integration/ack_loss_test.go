@@ -4,13 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"js-wf/client"
 	"js-wf/history"
+	"js-wf/identity"
 	"js-wf/journal"
+	"js-wf/provision"
 	"js-wf/reconcile"
 	"js-wf/testcluster"
 
@@ -18,6 +21,46 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
+
+func TestConcurrentEnqueueSameMessageID(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	const callers = 64
+	var ready sync.WaitGroup
+	ready.Add(callers)
+	start := make(chan struct{})
+	results := make(chan error, callers)
+	for i := 0; i < callers; i++ {
+		go func(js jetstream.JetStream) {
+			ready.Done()
+			<-start
+			results <- client.New(js).Enqueue(ctx, "test", "same-wakeup", "same-message-id")
+		}(all[i%len(all)])
+	}
+	ready.Wait()
+	close(start)
+	for range callers {
+		if err := <-results; err != nil {
+			t.Fatalf("concurrent same-ID enqueue: %v", err)
+		}
+	}
+	subject := identity.RunSubject("test", "same-wakeup", provision.Partitions)
+	for i, js := range all {
+		run, err := js.Stream(ctx, "WF_RUN")
+		if err != nil {
+			t.Fatal(err)
+		}
+		raw, err := run.GetLastMsgForSubject(ctx, subject)
+		if err != nil || string(raw.Data) != identity.Key("test", "same-wakeup") {
+			t.Fatalf("node %d retained wakeup=%+v err=%v", i, raw, err)
+		}
+		info, err := run.Info(ctx)
+		if err != nil || info.State.Msgs != 1 {
+			t.Fatalf("node %d retained run messages=%+v err=%v", i, info, err)
+		}
+	}
+}
 
 // ackLossJS simulates a lost publish acknowledgment at the SDK boundary. A
 // successful underlying publish is committed on the real three-node server;
