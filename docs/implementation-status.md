@@ -1389,3 +1389,39 @@ move and two-consumer expected retained-state/recovery contracts. The separate
 strict split-version conformance cases still fail; successful expected-bad-state
 recognition and fixture recovery do not establish general mixed-version runtime
 compatibility or clear the sustained upgrade release row.
+
+
+## Independent CAS audit cursor recovery
+
+The [standard test run at `ba5c625`](https://github.com/AntPAllen/js-wf/actions/runs/36744596826)
+failed its 10,000-round CAS proof after the independent retained audit had read
+3,584 entries: its ordered consumer batch returned `nats: no responders
+available for request`. This is incomplete audit evidence, not a demonstrated
+second CAS winner or missing record. The production long-journal reader already
+has separate modeled no-responder/partial-delivery recovery.
+
+The independent raw CAS audit now preserves its verified count, stream sequence
+and epoch across a named transient consumer failure. A replacement ordered
+consumer starts at the last verified sequence plus one; partial-batch entries
+are checked before its error is handled. At most three consecutive recovery
+attempts without progress are allowed, inside the unchanged three-minute audit
+context. No responders, consumer-deleted, request timeout, no-stream-response
+and API 10008 are named transport cases. Semantic errors fail directly,
+including semantic errors wrapped or joined with a transport error. Creation
+attempts still rotate through pinned nodes within their original bounds, and
+semantic creation failures are not retried.
+
+Controlled transport tests prove continuation after partial delivery, correct
+restart position, bounded persistent failure and rejection of missing,
+duplicate, corrupt and unexpected-writer entries. A wrapped semantic error
+after delivery of every expected entry must still fail. The final focused race
+checks passed in 1.27 seconds; integration vet and diff checks passed.
+
+The full local 10,000-round proof passed in 66.79 seconds with twenty leader
+kills, no unknown winner rounds or pre-publication retries, and all 10,001
+retained entries audited. The separate production read returned the same full
+journal and tail in 313 ms. The final tail/count, retained stream counts,
+entry index/kind/worker, sequence and epoch assertions remain strict. This
+repairs the audit's handling of a transient response; it does not identify
+why the server/client consumer returned no responders in the old CI run or
+replace fresh clean-runner validation.

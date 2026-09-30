@@ -426,9 +426,8 @@ func TestJournalCASTenThousandRacesWithLeaderRestarts(t *testing.T) {
 			leaderKills++
 		}
 	}
-	// Audit every retained entry through a batched ordered consumer. The
-	// production journal reader uses one API lookup per entry; that is covered
-	// separately and can consume this entire proof's deadline at 10,001 entries.
+	// Audit every retained CAS winner through an independent ordered consumer.
+	// The production reconstructed journal read is checked separately below.
 	auditCtx, stopAudit := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer stopAudit()
 	stream, err := all[0].Stream(auditCtx, "WF_JRN")
@@ -439,69 +438,34 @@ func TestJournalCASTenThousandRacesWithLeaderRestarts(t *testing.T) {
 	if err != nil || info.State.Msgs != uint64(rounds+1) || info.State.NumSubjects != 1 {
 		t.Fatalf("retained journal: info=%+v err=%v", info, err)
 	}
-	var consumer jetstream.Consumer
-	var auditErr error
-	for attempt := 0; attempt < 18 && auditCtx.Err() == nil; attempt++ {
-		node := attempt % len(all)
-		request, stop := context.WithTimeout(auditCtx, 10*time.Second)
-		candidate, openErr := all[node].Stream(request, "WF_JRN")
-		if openErr == nil {
-			created, createErr := candidate.OrderedConsumer(request, jetstream.OrderedConsumerConfig{
-				FilterSubjects: []string{"wf.jrn.cas.scale"}, DeliverPolicy: jetstream.DeliverAllPolicy,
-			})
-			openErr = createErr
+	openAudit := func(from uint64) (casAuditCursor, error) {
+		var auditErr error
+		for attempt := 0; attempt < 18 && auditCtx.Err() == nil; attempt++ {
+			node := attempt % len(all)
+			request, stop := context.WithTimeout(auditCtx, 10*time.Second)
+			candidate, openErr := all[node].Stream(request, "WF_JRN")
 			if openErr == nil {
-				consumer = created
+				created, createErr := candidate.OrderedConsumer(request, jetstream.OrderedConsumerConfig{
+					FilterSubjects: []string{"wf.jrn.cas.scale"}, DeliverPolicy: jetstream.DeliverByStartSequencePolicy, OptStartSeq: from,
+				})
+				openErr = createErr
+				if openErr == nil {
+					stop()
+					return created, nil
+				}
 			}
+			stop()
+			if !casAuditTransient(openErr) && !(errors.Is(openErr, context.DeadlineExceeded) && auditCtx.Err() == nil) {
+				return nil, openErr
+			}
+			auditErr = openErr
+			t.Logf("journal audit consumer attempt %d via node %d from sequence %d: %v", attempt+1, node, from, openErr)
 		}
-		stop()
-		if openErr == nil {
-			break
-		}
-		auditErr = openErr
-		t.Logf("journal audit consumer attempt %d via node %d: %v", attempt+1, node, openErr)
+		return nil, fmt.Errorf("create journal audit consumer after trying all nodes: %w (context: %v)", auditErr, auditCtx.Err())
 	}
-	if consumer == nil {
-		t.Fatalf("create journal audit consumer after trying all nodes: %v (context: %v)", auditErr, auditCtx.Err())
-	}
-	var count int
-	var tail uint64
-	var epoch uint64
-	for count < rounds+1 {
-		batchSize := 512
-		if remaining := rounds + 1 - count; remaining < batchSize {
-			batchSize = remaining
-		}
-		batch, err := consumer.Fetch(batchSize, jetstream.FetchMaxWait(5*time.Second))
-		if err != nil {
-			t.Fatalf("journal audit fetch after %d entries: %v", count, err)
-		}
-		for msg := range batch.Messages() {
-			metadata, err := msg.Metadata()
-			if err != nil {
-				t.Fatalf("journal audit metadata at %d: %v", count, err)
-			}
-			var entry journal.Entry
-			if err := json.Unmarshal(msg.Data(), &entry); err != nil {
-				t.Fatalf("journal audit decode at %d: %v", count, err)
-			}
-			expectedKind := journal.StepRequested
-			if count%2 == 0 {
-				expectedKind = journal.StepCompleted
-			}
-			if msg.Subject() != "wf.jrn.cas.scale" || entry.Index != uint64(count) ||
-				metadata.Sequence.Stream <= tail || entry.Epoch < epoch ||
-				(count == 0 && entry.Kind != journal.Started) ||
-				(count > 0 && (entry.Kind != expectedKind || entry.WorkerID != "a" && entry.WorkerID != "b")) {
-				t.Fatalf("invalid journal audit entry %d: subject=%s seq=%d entry=%+v prior_seq=%d prior_epoch=%d", count, msg.Subject(), metadata.Sequence.Stream, entry, tail, epoch)
-			}
-			tail = metadata.Sequence.Stream
-			epoch = entry.Epoch
-			count++
-		}
-		if err := batch.Error(); err != nil {
-			t.Fatalf("journal audit batch after %d entries: %v", count, err)
-		}
+	count, tail, err := auditCASJournal(auditCtx, rounds+1, openAudit)
+	if err != nil {
+		t.Fatalf("journal audit after %d entries at seq %d: %v", count, tail, err)
 	}
 	if tail != seq || count != rounds+1 {
 		t.Fatalf("journal audit count=%d tail=%d want_count=%d want_tail=%d", count, tail, rounds+1, seq)
