@@ -19,6 +19,16 @@ def validate(report):
     for name, value in expected.items():
         if report.get(name) != value:
             raise ValueError(f"invalid benchmark {name}: {report.get(name)!r}")
+    placement = report.get("hot_placement", "pinned")
+    if placement not in ("pinned", "leader", "follower"):
+        raise ValueError("invalid hot placement")
+    if placement != "pinned":
+        before, after = report.get("hot_topology_before"), report.get("hot_topology_after")
+        if not isinstance(before, dict) or before != after:
+            raise ValueError("hot topology missing or changed across sample")
+        leader, client = before.get("leader"), before.get("client_server")
+        if not isinstance(leader, str) or not leader or not isinstance(client, str) or not client or before.get("client_is_leader") is not (placement == "leader") or (leader == client) != (placement == "leader"):
+            raise ValueError("hot placement does not match topology")
     for name, invocations, each in (("hot", 1, 10000), ("parallel", 1000, 100)):
         sample = report[name]
         for field, expected_value in (("invocations", invocations), ("entries_each", each),
@@ -41,6 +51,8 @@ def compare(baselines, candidates, minimum=0.8):
     reference = baselines[0]
     for report in baselines + candidates:
         validate(report)
+        if report.get("hot_placement", "pinned") != reference.get("hot_placement", "pinned"):
+            raise ValueError("hot placement mismatch")
         for field in ("go_version", "nats_server_version"):
             if report[field] != reference[field]:
                 raise ValueError(f"runtime mismatch: {field}")
@@ -57,12 +69,12 @@ def compare(baselines, candidates, minimum=0.8):
     return results
 
 
-def measurement(binary, output, log, timeout):
+def measurement(binary, output, log, timeout, placement="pinned"):
     # A successful process that emits no report must not reuse an earlier file.
     output.unlink(missing_ok=True)
     # Separate process groups let a timeout stop the benchmark's children too.
     with log.open("wb") as stream:
-        process = subprocess.Popen([str(binary), "-output", str(output)],
+        process = subprocess.Popen([str(binary), "-output", str(output), "-hot-placement", placement],
                                    stdout=stream, stderr=subprocess.STDOUT,
                                    start_new_session=True)
         try:
@@ -75,6 +87,8 @@ def measurement(binary, output, log, timeout):
         raise RuntimeError(f"benchmark exited {code}; see {log}")
     report = json.loads(output.read_text())
     validate(report)
+    if report.get("hot_placement", "pinned") != placement:
+        raise ValueError("benchmark ignored requested hot placement")
     return report
 
 
@@ -85,6 +99,8 @@ def main():
     parser.add_argument("--baseline-revision", required=True)
     parser.add_argument("--candidate-revision", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--hot-placement", choices=("pinned", "leader", "follower"), default="pinned")
+    parser.add_argument("--harness-sha256")
     parser.add_argument("--rounds", type=int, default=3, choices=(3, 5))
     parser.add_argument("--timeout", type=float, default=180)
     args = parser.parse_args()
@@ -93,7 +109,8 @@ def main():
     args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=True)
     binaries = {"baseline": args.baseline_binary.resolve(), "candidate": args.candidate_binary.resolve()}
-    summary = {"minimum_ratio": 0.8, "rounds": args.rounds,
+    summary = {"minimum_ratio": 0.8, "hot_placement": args.hot_placement,
+               "harness_sha256": args.harness_sha256, "rounds": args.rounds,
                "baseline_revision": args.baseline_revision,
                "candidate_revision": args.candidate_revision,
                "platform": platform.platform(), "cpu_count": os.cpu_count(),
@@ -109,7 +126,7 @@ def main():
                 label = f"{name}-{round_number}"
                 summary["order"].append(label)
                 samples[name].append(measurement(binaries[name], args.output / f"{label}.json",
-                                                 args.output / f"{label}.log", args.timeout))
+                                                 args.output / f"{label}.log", args.timeout, args.hot_placement))
                 print(f"completed {label}", flush=True)
         summary["results"] = compare(samples["baseline"], samples["candidate"])
         summary["passed"] = all(r["passed"] for r in summary["results"].values())

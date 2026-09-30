@@ -44,6 +44,32 @@ class GateControls(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 gate.measurement(binary, output, root / "log", 1)
 
+    def test_controlled_placement_requires_matching_stable_topology(self):
+        def placed(placement):
+            value = report()
+            value["hot_placement"] = placement
+            value["hot_topology_before"] = {"leader": "node-0", "client_server": "node-0" if placement == "leader" else "node-1", "client_is_leader": placement == "leader"}
+            value["hot_topology_after"] = copy.deepcopy(value["hot_topology_before"])
+            return value
+        for placement in ("leader", "follower"):
+            good = placed(placement)
+            self.assertTrue(all(r["passed"] for r in gate.compare([good] * 3, [good] * 3).values()))
+            bad = copy.deepcopy(good)
+            del bad["hot_topology_after"]
+            with self.assertRaises(ValueError):
+                gate.validate(bad)
+            bad = copy.deepcopy(good)
+            bad["hot_topology_after"]["leader"] = "changed"
+            with self.assertRaises(ValueError):
+                gate.validate(bad)
+            bad = copy.deepcopy(good)
+            bad["hot_topology_before"]["client_is_leader"] = placement != "leader"
+            bad["hot_topology_after"] = copy.deepcopy(bad["hot_topology_before"])
+            with self.assertRaises(ValueError):
+                gate.validate(bad)
+        with self.assertRaises(ValueError):
+            gate.compare([placed("leader")] * 3, [placed("follower")] * 3)
+
     def test_invalid_measurements_cannot_pass(self):
         for field, value in (("replicas", 1), ("journal_messages", 109999), ("go_version", "other")):
             bad = report()

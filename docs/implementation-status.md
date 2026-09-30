@@ -2224,3 +2224,29 @@ are retained. The 0.8 gate remains unchanged and this failure is not discarded.
 The latest mixed-version retention controls passed; that is focused control
 evidence, not general mixed-version compatibility. The million-timer process
 and extended Tier 1 campaign remain confirmed live and have not been restarted.
+
+## Controlled client placement in the paired throughput gate
+
+A [nine-sample real-cluster topology probe](scale/cas-hot-topology-probe-2026-09-30/README.md)
+measured hot appends through each pinned client on one cluster, rotating order
+and preserving nine separate subjects. Node 2 remained leader in all boundary
+snapshots. Its client median was 3,541.50 appends/s; the two followers' median
+was 2,578.10, ratio 0.7280, with every leader sample faster than every follower
+sample. All 90,000 messages and nine subjects were retained. This identifies a
+concrete placement confounder capable of producing the observed rate bands;
+it does not retrospectively explain the uninstrumented CI failure.
+
+The benchmark now records leader/client identity outside its timed hot loop.
+Controlled leader and follower modes select a pinned connection and reject
+changed observed topology. The paired CI gate requires both modes separately
+at the unchanged 80% hot and parallel thresholds. Its fixed production reference
+remains `4fa3119`; only the measurement harness is shared with the candidate,
+with its source and checksums retained and a guard against production overlays.
+The comparator rejects missing, changed or mismatched controlled placement,
+while old reports keep their pinned-node semantics. Fresh hosted validation is
+required; neither the original failed gate nor the full release gate is cleared
+by this local diagnostic. Fourteen Python controls pass; real probe, default
+benchmark and leader/follower controls pass under the race detector in 18.28s.
+The fixed-reference build and controlled smoke checks are verified separately.
+The latest 20-seed mixed campaign at `9b71aaf` passed, while the million-timer
+process and extended simulation campaign remain live.

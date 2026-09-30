@@ -86,9 +86,12 @@ go run ./cmd/wf-cas-bench -output /tmp/cas-current.json \
 
 The optional baseline comparison rejects a workload or runtime mismatch and
 fails if either rate falls more than 20% below its baseline. The new
-`cas-throughput` CI workflow builds the fixed `4fa3119` reference and candidate
-before measurement, then runs both sequentially on one isolated Ubuntu 24.04
-runner. Three rounds alternate baseline/candidate order; the median rate of each
+`cas-throughput` CI workflow builds the fixed `4fa3119` production reference
+and candidate with the same current benchmark harness. The baseline journal,
+provisioning, fixture and dependencies remain at the fixed revision; a source
+diff guard rejects any production overlay. Two jobs cover hot writes through
+the leader and through a follower separately, each running both revisions
+sequentially on one isolated Ubuntu 24.04 runner. Three rounds alternate baseline/candidate order; the median rate of each
 workload must be at least 80% of its baseline median. Relevant main pushes and
 pull requests trigger the job; it also supports manual dispatch. The pinned
 reference is changed explicitly in workflow source, never refreshed automatically.
@@ -97,7 +100,11 @@ Every sample must retain exactly 110,000 messages across 1,001 journal subjects
 and match the fixed workload and Go/NATS versions. Bad/missing reports, process
 failures, timeouts, incompatible versions and either throughput regression fail
 the job. The artifact preserves six raw JSON reports, process logs, binary hashes,
-source revisions, execution order, host metadata and the median comparison.
+production source revisions, shared harness sources/checksums, client/leader
+placement before and after the hot sample, execution order, host metadata and
+the median comparison. Missing/mismatched placement or a changed observed
+leader rejects a controlled sample. Historical reports without placement retain
+their original pinned-node semantics.
 Changing Go or NATS versions requires selecting a compatible reference through
 an explicit source edit. Branch protection is configured separately from this
 workflow.

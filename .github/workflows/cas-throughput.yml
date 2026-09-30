@@ -30,6 +30,10 @@ jobs:
   paired-throughput:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        placement: [leader, follower]
     env:
       # Fixed reference; changes are explicit source edits, never automatic refresh.
       BASELINE_REVISION: 4fa311954f42d1325a46dad12bb5d128dad2b747
@@ -42,24 +46,36 @@ jobs:
           go-version-file: go.mod
       - name: Verify comparison controls
         run: python3 -m unittest discover -s scripts -p 'test_cas_throughput.py' -v
-      - name: Build both revisions before measurement
+      - name: Build both production revisions with the same benchmark harness
         run: |
           mkdir -p "$RUNNER_TEMP/cas-throughput"
           git worktree add --detach "$RUNNER_TEMP/cas-baseline" "$BASELINE_REVISION"
           go build -o "$RUNNER_TEMP/cas-throughput/candidate" ./cmd/wf-cas-bench
+          # Share only the measurement harness. Journal, dependencies and fixture
+          # remain at the fixed baseline revision, with no production overlay.
+          cp cmd/wf-cas-bench/main.go cmd/wf-cas-bench/topology.go "$RUNNER_TEMP/cas-baseline/cmd/wf-cas-bench/"
+          sha256sum cmd/wf-cas-bench/main.go cmd/wf-cas-bench/topology.go > "$RUNNER_TEMP/cas-throughput/harness-files.sha256"
+          cp cmd/wf-cas-bench/main.go cmd/wf-cas-bench/topology.go "$RUNNER_TEMP/cas-throughput/"
           cd "$RUNNER_TEMP/cas-baseline"
+          git diff --exit-code -- journal provision testcluster go.mod go.sum
           go build -o "$RUNNER_TEMP/cas-throughput/baseline" ./cmd/wf-cas-bench
       - name: Require both median rates within twenty percent of baseline
         run: |
           python3 scripts/check-cas-throughput.py \
             --baseline-binary "$RUNNER_TEMP/cas-throughput/baseline" \
             --candidate-binary "$RUNNER_TEMP/cas-throughput/candidate" \
+            --hot-placement "${{ matrix.placement }}" \
+            --harness-sha256 "$(sha256sum "$RUNNER_TEMP/cas-throughput/harness-files.sha256" | cut -d ' ' -f1)" \
             --baseline-revision "$BASELINE_REVISION" \
             --candidate-revision "$(git rev-parse HEAD)" \
             --output "$RUNNER_TEMP/cas-throughput/reports"
       - if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: paired-cas-throughput
-          path: ${{ runner.temp }}/cas-throughput/reports
+          name: paired-cas-throughput-${{ matrix.placement }}
+          path: |
+            ${{ runner.temp }}/cas-throughput/reports
+            ${{ runner.temp }}/cas-throughput/main.go
+            ${{ runner.temp }}/cas-throughput/topology.go
+            ${{ runner.temp }}/cas-throughput/harness-files.sha256
           if-no-files-found: warn

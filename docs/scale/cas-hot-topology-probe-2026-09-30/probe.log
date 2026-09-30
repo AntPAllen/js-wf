@@ -1,0 +1,205 @@
+probe round=1 node=0 client=wf-test-0 leader=wf-test-2 local=false rate=2678.47
+probe round=1 node=1 client=wf-test-1 leader=wf-test-2 local=false rate=2716.06
+probe round=1 node=2 client=wf-test-2 leader=wf-test-2 local=true rate=3610.02
+probe round=2 node=1 client=wf-test-1 leader=wf-test-2 local=false rate=2587.30
+probe round=2 node=2 client=wf-test-2 leader=wf-test-2 local=true rate=3334.02
+probe round=2 node=0 client=wf-test-0 leader=wf-test-2 local=false rate=2568.91
+probe round=3 node=2 client=wf-test-2 leader=wf-test-2 local=true rate=3541.50
+probe round=3 node=0 client=wf-test-0 leader=wf-test-2 local=false rate=2543.00
+probe round=3 node=1 client=wf-test-1 leader=wf-test-2 local=false rate=2554.57
+{
+  "scope": "diagnostic: pinned client placement on one three-replica file cluster",
+  "samples": [
+    {
+      "round": 1,
+      "node": 0,
+      "before": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-0",
+        "client_is_leader": false
+      },
+      "after": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-0",
+        "client_is_leader": false
+      },
+      "measurement": {
+        "invocations": 1,
+        "entries_each": 10000,
+        "appends": 10000,
+        "elapsed_ms": 3733.473296,
+        "appends_per_second": 2678.4710126931627
+      }
+    },
+    {
+      "round": 1,
+      "node": 1,
+      "before": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-1",
+        "client_is_leader": false
+      },
+      "after": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-1",
+        "client_is_leader": false
+      },
+      "measurement": {
+        "invocations": 1,
+        "entries_each": 10000,
+        "appends": 10000,
+        "elapsed_ms": 3681.807003,
+        "appends_per_second": 2716.0576292705805
+      }
+    },
+    {
+      "round": 1,
+      "node": 2,
+      "before": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-2",
+        "client_is_leader": true
+      },
+      "after": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-2",
+        "client_is_leader": true
+      },
+      "measurement": {
+        "invocations": 1,
+        "entries_each": 10000,
+        "appends": 10000,
+        "elapsed_ms": 2770.069689,
+        "appends_per_second": 3610.017480682956
+      }
+    },
+    {
+      "round": 2,
+      "node": 1,
+      "before": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-1",
+        "client_is_leader": false
+      },
+      "after": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-1",
+        "client_is_leader": false
+      },
+      "measurement": {
+        "invocations": 1,
+        "entries_each": 10000,
+        "appends": 10000,
+        "elapsed_ms": 3865.031253,
+        "appends_per_second": 2587.301200278289
+      }
+    },
+    {
+      "round": 2,
+      "node": 2,
+      "before": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-2",
+        "client_is_leader": true
+      },
+      "after": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-2",
+        "client_is_leader": true
+      },
+      "measurement": {
+        "invocations": 1,
+        "entries_each": 10000,
+        "appends": 10000,
+        "elapsed_ms": 2999.382619,
+        "appends_per_second": 3334.019453421391
+      }
+    },
+    {
+      "round": 2,
+      "node": 0,
+      "before": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-0",
+        "client_is_leader": false
+      },
+      "after": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-0",
+        "client_is_leader": false
+      },
+      "measurement": {
+        "invocations": 1,
+        "entries_each": 10000,
+        "appends": 10000,
+        "elapsed_ms": 3892.704544,
+        "appends_per_second": 2568.9080398905303
+      }
+    },
+    {
+      "round": 3,
+      "node": 2,
+      "before": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-2",
+        "client_is_leader": true
+      },
+      "after": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-2",
+        "client_is_leader": true
+      },
+      "measurement": {
+        "invocations": 1,
+        "entries_each": 10000,
+        "appends": 10000,
+        "elapsed_ms": 2823.661877,
+        "appends_per_second": 3541.5005179814593
+      }
+    },
+    {
+      "round": 3,
+      "node": 0,
+      "before": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-0",
+        "client_is_leader": false
+      },
+      "after": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-0",
+        "client_is_leader": false
+      },
+      "measurement": {
+        "invocations": 1,
+        "entries_each": 10000,
+        "appends": 10000,
+        "elapsed_ms": 3932.357116,
+        "appends_per_second": 2543.0040316816435
+      }
+    },
+    {
+      "round": 3,
+      "node": 1,
+      "before": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-1",
+        "client_is_leader": false
+      },
+      "after": {
+        "leader": "wf-test-2",
+        "client_server": "wf-test-1",
+        "client_is_leader": false
+      },
+      "measurement": {
+        "invocations": 1,
+        "entries_each": 10000,
+        "appends": 10000,
+        "elapsed_ms": 3914.55096,
+        "appends_per_second": 2554.5714188377815
+      }
+    }
+  ],
+  "messages": 90000,
+  "subjects": 9
+}

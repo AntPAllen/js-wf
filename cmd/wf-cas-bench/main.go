@@ -27,16 +27,25 @@ type result struct {
 	AppendsSec  float64 `json:"appends_per_second"`
 }
 
+type topology struct {
+	Leader         string `json:"leader"`
+	ClientServer   string `json:"client_server"`
+	ClientIsLeader bool   `json:"client_is_leader"`
+}
+
 type report struct {
-	NATSServerVersion string `json:"nats_server_version"`
-	GoVersion         string `json:"go_version"`
-	Replicas          int    `json:"replicas"`
-	Storage           string `json:"storage"`
-	ParallelWorkers   int    `json:"parallel_workers"`
-	Hot               result `json:"hot"`
-	Parallel          result `json:"parallel"`
-	JournalMessages   uint64 `json:"journal_messages"`
-	JournalSubjects   uint64 `json:"journal_subjects"`
+	NATSServerVersion string   `json:"nats_server_version"`
+	GoVersion         string   `json:"go_version"`
+	Replicas          int      `json:"replicas"`
+	Storage           string   `json:"storage"`
+	ParallelWorkers   int      `json:"parallel_workers"`
+	Hot               result   `json:"hot"`
+	Parallel          result   `json:"parallel"`
+	JournalMessages   uint64   `json:"journal_messages"`
+	JournalSubjects   uint64   `json:"journal_subjects"`
+	HotPlacement      string   `json:"hot_placement"`
+	HotBefore         topology `json:"hot_topology_before"`
+	HotAfter          topology `json:"hot_topology_after"`
 }
 
 func main() {
@@ -47,8 +56,14 @@ func main() {
 	output := flag.String("output", "", "write JSON report to this file")
 	baseline := flag.String("baseline", "", "compare throughput with a baseline JSON report")
 	minRatio := flag.Float64("min-ratio", 0.8, "minimum allowed fraction of baseline throughput")
+	placement := flag.String("hot-placement", "pinned", "hot client placement: pinned (node 0), leader, or follower")
+	probe := flag.Bool("probe-hot-topology", false, "diagnostic only: measure hot appends through each pinned node on one cluster")
 	root := flag.String("root", "", "file store directory; default temporary")
 	flag.Parse()
+	if *placement != "pinned" && *placement != "leader" && *placement != "follower" {
+		fmt.Fprintln(os.Stderr, "invalid hot placement")
+		os.Exit(2)
+	}
 	if *hotCount < 1 || *hotCount > journal.MaxEntries || *parallelCount < 1 || *entriesEach < 1 || *entriesEach > journal.MaxEntries || *workers < 1 || *workers > *parallelCount || *minRatio <= 0 || *minRatio > 1 {
 		fmt.Fprintln(os.Stderr, "invalid benchmark sizes")
 		os.Exit(2)
@@ -62,7 +77,32 @@ func main() {
 		}
 		defer os.RemoveAll(*root)
 	}
-	rep, err := run(*root, *hotCount, *parallelCount, *entriesEach, *workers)
+	if *probe {
+		if *baseline != "" {
+			fmt.Fprintln(os.Stderr, "topology probe cannot compare release throughput")
+			os.Exit(2)
+		}
+		rep, err := runTopologyProbe(*root, *hotCount)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		data, err := json.MarshalIndent(rep, "", "  ")
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		data = append(data, '\n')
+		if *output != "" {
+			if err := os.WriteFile(*output, data, 0644); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+		}
+		_, _ = os.Stdout.Write(data)
+		return
+	}
+	rep, err := runWithPlacement(*root, *hotCount, *parallelCount, *entriesEach, *workers, *placement)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -102,7 +142,14 @@ func compareBaseline(current, baseline report, minRatio float64) error {
 	if minRatio <= 0 || minRatio > 1 {
 		return fmt.Errorf("invalid minimum ratio %g", minRatio)
 	}
-	if current.NATSServerVersion != baseline.NATSServerVersion || current.GoVersion != baseline.GoVersion || current.Replicas != baseline.Replicas || current.Storage != baseline.Storage || current.ParallelWorkers != baseline.ParallelWorkers || current.Hot.Invocations != baseline.Hot.Invocations || current.Hot.EntriesEach != baseline.Hot.EntriesEach || current.Parallel.Invocations != baseline.Parallel.Invocations || current.Parallel.EntriesEach != baseline.Parallel.EntriesEach {
+	currentPlacement, baselinePlacement := current.HotPlacement, baseline.HotPlacement
+	if currentPlacement == "" {
+		currentPlacement = "pinned"
+	}
+	if baselinePlacement == "" {
+		baselinePlacement = "pinned"
+	}
+	if currentPlacement != baselinePlacement || current.NATSServerVersion != baseline.NATSServerVersion || current.GoVersion != baseline.GoVersion || current.Replicas != baseline.Replicas || current.Storage != baseline.Storage || current.ParallelWorkers != baseline.ParallelWorkers || current.Hot.Invocations != baseline.Hot.Invocations || current.Hot.EntriesEach != baseline.Hot.EntriesEach || current.Parallel.Invocations != baseline.Parallel.Invocations || current.Parallel.EntriesEach != baseline.Parallel.EntriesEach {
 		return fmt.Errorf("baseline workload or runtime differs from current run")
 	}
 	for _, check := range []struct {
@@ -118,6 +165,10 @@ func compareBaseline(current, baseline report, minRatio float64) error {
 }
 
 func run(root string, hotCount, parallelCount, entriesEach, workers int) (report, error) {
+	return runWithPlacement(root, hotCount, parallelCount, entriesEach, workers, "pinned")
+}
+
+func runWithPlacement(root string, hotCount, parallelCount, entriesEach, workers int, placement string) (report, error) {
 	var rep report
 	c, err := testcluster.Start(root, 3)
 	if err != nil {
@@ -150,9 +201,41 @@ func run(root string, hotCount, parallelCount, entriesEach, workers int) (report
 	rep.GoVersion = runtime.Version()
 	rep.Replicas, rep.Storage, rep.ParallelWorkers = 3, "file", workers
 	stores := [3]*journal.Store{journal.New(all[0]), journal.New(all[1]), journal.New(all[2])}
-	rep.Hot, err = appendJournal(ctx, stores[0], all[0], "hot", hotCount)
+	node := 0
+	rep.HotPlacement = placement
+	initial, err := captureTopology(ctx, all[0], c.Clients[0].ConnectedServerName())
 	if err != nil {
 		return rep, err
+	}
+	if placement != "pinned" {
+		node = -1
+		for i, nc := range c.Clients {
+			if (nc.ConnectedServerName() == initial.Leader) == (placement == "leader") {
+				node = i
+				break
+			}
+		}
+		if node < 0 {
+			return rep, fmt.Errorf("cannot locate %s client", placement)
+		}
+	}
+	rep.HotBefore, err = captureTopology(ctx, all[node], c.Clients[node].ConnectedServerName())
+	if err != nil {
+		return rep, err
+	}
+	if placement != "pinned" && rep.HotBefore.ClientIsLeader != (placement == "leader") {
+		return rep, fmt.Errorf("hot placement changed before sample")
+	}
+	rep.Hot, err = appendJournal(ctx, stores[node], all[node], "hot", hotCount)
+	if err != nil {
+		return rep, err
+	}
+	rep.HotAfter, err = captureTopology(ctx, all[node], c.Clients[node].ConnectedServerName())
+	if err != nil {
+		return rep, err
+	}
+	if placement != "pinned" && rep.HotBefore != rep.HotAfter {
+		return rep, fmt.Errorf("hot topology changed across sample")
 	}
 	fmt.Fprintf(os.Stderr, "hot: %.1f appends/s\n", rep.Hot.AppendsSec)
 	rep.Parallel, err = appendParallel(ctx, stores, all, parallelCount, entriesEach, workers)
