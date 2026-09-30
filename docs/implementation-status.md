@@ -873,3 +873,18 @@ passed. A fresh ten-minute seed 42 local race run is active using the final
 pre-workload build/context ordering; its terminal result is not yet evidence.
 Full consecutive CI validation and sustained server-skew/disk/upgrade/fan-out
 rows remain open.
+
+
+## Clean advanced-clock timer CI and initial sustained worker-skew validation
+
+The [five-container workflow at `889cb36`](https://github.com/AntPAllen/js-wf/actions/runs/36723415972)
+completed successfully: both `long-timer-clock` and the existing `five-node`
+job passed. The downloaded thirty-day history artifact contains one Start and
+six result reads, covering the replacement read and all five restarted nodes.
+This closes clean-runner validation of the advanced-clock thirty-day firing
+contract; it is not the full 24-hour matrix soak.
+
+The first full ten-minute [worker-clock CI row](https://github.com/AntPAllen/js-wf/actions/runs/36725316426)
+was dispatched at `f911ef7` and is active. The matching local full seed 42 run
+is also active; neither terminal gate is counted yet. The old full Tier 1
+release-count workflow at `5372c36` remains in progress and predates these rows.
