@@ -33,14 +33,16 @@ import (
 )
 
 type matrixLeaderFault struct {
-	Scheduled  time.Time `json:"scheduled"`
-	Killed     time.Time `json:"killed"`
-	Healed     time.Time `json:"healed"`
-	Node       int       `json:"node"`
-	Nodes      []int     `json:"nodes,omitempty"`
-	Consumer   string    `json:"consumer,omitempty"`
-	Pending    uint64    `json:"pending,omitempty"`
-	AckPending int       `json:"ack_pending,omitempty"`
+	Scheduled        time.Time `json:"scheduled"`
+	Killed           time.Time `json:"killed"`
+	Healed           time.Time `json:"healed"`
+	Node             int       `json:"node"`
+	Nodes            []int     `json:"nodes,omitempty"`
+	Routes           [3]int    `json:"partition_routes,omitempty"`
+	MajoritySequence uint64    `json:"majority_sequence,omitempty"`
+	Consumer         string    `json:"consumer,omitempty"`
+	Pending          uint64    `json:"pending,omitempty"`
+	AckPending       int       `json:"ack_pending,omitempty"`
 }
 
 type matrixLatencySample struct {
@@ -66,6 +68,10 @@ func TestMixedMatrixAllServersKilledEveryThirtySeconds(t *testing.T) {
 	runMixedMatrixLeader(t, "all_servers")
 }
 
+func TestMixedMatrixServerPartitionEveryThirtySeconds(t *testing.T) {
+	runMixedMatrixLeader(t, "server_partition")
+}
+
 func runMixedMatrixLeader(t *testing.T, row string) {
 	t.Helper()
 	if os.Getenv("WF_MATRIX_CHAOS") != "1" {
@@ -83,7 +89,11 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cluster, err := testcluster.StartProcesses(t.TempDir(), 3)
+	startCluster := testcluster.StartProcesses
+	if row == "server_partition" {
+		startCluster = testcluster.StartPartitionableProcesses
+	}
+	cluster, err := startCluster(t.TempDir(), 3)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +102,15 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	for i := range urls {
 		urls[i] = cluster.ClientURL(i)
 	}
-	nc, err := nats.Connect(strings.Join(urls, ","), nats.MaxReconnects(-1), nats.ReconnectWait(100*time.Millisecond), nats.Timeout(time.Second))
+	clientURLs := urls
+	if row == "server_partition" {
+		clientURLs = urls[:2]
+	}
+	connectOptions := []nats.Option{nats.MaxReconnects(-1), nats.ReconnectWait(100 * time.Millisecond), nats.Timeout(time.Second)}
+	if row == "server_partition" {
+		connectOptions = append(connectOptions, nats.IgnoreDiscoveredServers())
+	}
+	nc, err := nats.Connect(strings.Join(clientURLs, ","), connectOptions...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,6 +134,11 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	stopReady()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if row == "server_partition" {
+		if _, err := js.CreateStream(ctx, jetstream.StreamConfig{Name: "MATRIX_ROUTE_PROBE", Subjects: []string{"matrix.route.probe"}, Storage: jetstream.FileStorage, Replicas: 3}); err != nil {
+			t.Fatal(err)
+		}
 	}
 	var recorder history.Recorder
 	var dispatchMu sync.Mutex
@@ -229,7 +252,9 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 			var event matrixLeaderFault
 			var err error
-			if row == "all_servers" {
+			if row == "server_partition" {
+				event, err = partitionMatrixServer(faultCtx, js, cluster, scheduled)
+			} else if row == "all_servers" {
 				event, err = killMatrixAllServers(faultCtx, js, cluster, scheduled)
 			} else if row == "consumer_leader" {
 				event, err = killMatrixConsumerLeader(faultCtx, js, cluster, scheduled, faultRNG)
@@ -244,7 +269,7 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 				cancel()
 				return
 			}
-			t.Logf("%s fault node=%d nodes=%v consumer=%s pending=%d ack_pending=%d scheduled=%s killed=%s healed=%s", row, event.Node, event.Nodes, event.Consumer, event.Pending, event.AckPending, event.Scheduled.Sub(start), event.Killed.Sub(start), event.Healed.Sub(start))
+			t.Logf("%s fault node=%d nodes=%v routes=%v majority_seq=%d consumer=%s pending=%d ack_pending=%d scheduled=%s killed=%s healed=%s", row, event.Node, event.Nodes, event.Routes, event.MajoritySequence, event.Consumer, event.Pending, event.AckPending, event.Scheduled.Sub(start), event.Killed.Sub(start), event.Healed.Sub(start))
 		}
 	}()
 	defer func() { stopFault(); <-faultExited }()
@@ -782,18 +807,133 @@ func killMatrixAllServers(ctx context.Context, js jetstream.JetStream, cluster *
 			return event, err
 		}
 	}
-	// All workflow stores must have their full replica set back before heal.
+	if err := waitMatrixWorkflowReplicas(bound, js); err != nil {
+		return event, err
+	}
+	event.Healed = time.Now()
+	return event, nil
+}
+
+func matrixRouteCounts(ctx context.Context, cluster *testcluster.ProcessCluster, want [3]int) ([3]int, error) {
+	var got [3]int
+	for ctx.Err() == nil {
+		ready := true
+		for node := range got {
+			count, err := cluster.RouteCount(ctx, node)
+			if err != nil {
+				ready = false
+				break
+			}
+			got[node] = count
+		}
+		if ready && got == want {
+			return got, nil
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	return got, fmt.Errorf("route counts=%v want=%v: %w", got, want, ctx.Err())
+}
+
+func partitionMatrixServer(ctx context.Context, js jetstream.JetStream, cluster *testcluster.ProcessCluster, scheduled time.Time) (matrixLeaderFault, error) {
+	event := matrixLeaderFault{Scheduled: scheduled, Node: 2, Killed: time.Now()}
+	bound, stop := context.WithTimeout(ctx, 35*time.Second)
+	defer stop()
+	if err := cluster.RouteMesh().PartitionNode(2); err != nil {
+		return event, err
+	}
+	defer cluster.RouteMesh().Heal()
+	cut, done := context.WithTimeout(bound, 4*time.Second)
+	var err error
+	event.Routes, err = matrixRouteCounts(cut, cluster, [3]int{4, 4, 0})
+	done()
+	if err != nil {
+		return event, err
+	}
+	// The workload connection is restricted to the two majority nodes. Require
+	// an acknowledged replicated write while the minority is still isolated.
+	publish, done := context.WithTimeout(bound, 6*time.Second)
+	for publish.Err() == nil {
+		ack, pubErr := js.Publish(publish, "matrix.route.probe", []byte(scheduled.Format(time.RFC3339Nano)), jetstream.WithMsgID(scheduled.Format(time.RFC3339Nano)))
+		if pubErr == nil {
+			event.MajoritySequence = ack.Sequence
+			break
+		}
+		if !matrixTransientTransport(pubErr) {
+			done()
+			return event, pubErr
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	done()
+	if event.MajoritySequence == 0 {
+		return event, fmt.Errorf("majority publish did not commit during isolation")
+	}
+	timer := time.NewTimer(time.Until(event.Killed.Add(10 * time.Second)))
+	defer timer.Stop()
+	select {
+	case <-bound.Done():
+		return event, bound.Err()
+	case <-timer.C:
+	}
+	cluster.RouteMesh().Heal()
+	if _, err := matrixRouteCounts(bound, cluster, [3]int{8, 8, 8}); err != nil {
+		return event, err
+	}
+	// Confirm the formerly isolated peer has the majority's retained write,
+	// then require full workflow-store replica catch-up before recording heal.
+	minority, err := jetstream.New(cluster.Clients[2])
+	if err != nil {
+		return event, err
+	}
 	for bound.Err() == nil {
+		attempt, done := context.WithTimeout(bound, time.Second)
+		stream, readErr := minority.Stream(attempt, "MATRIX_ROUTE_PROBE")
+		var msg *jetstream.RawStreamMsg
+		if readErr == nil {
+			msg, readErr = stream.GetMsg(attempt, event.MajoritySequence)
+		}
+		done()
+		if readErr == nil {
+			if string(msg.Data) != scheduled.Format(time.RFC3339Nano) {
+				return event, fmt.Errorf("majority probe payload changed")
+			}
+			break
+		}
+		if !matrixTransientTransport(readErr) && !errors.Is(readErr, jetstream.ErrMsgNotFound) {
+			return event, readErr
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if bound.Err() != nil {
+		return event, bound.Err()
+	}
+	if err := waitMatrixWorkflowReplicas(bound, js); err != nil {
+		return event, err
+	}
+	event.Healed = time.Now()
+	return event, nil
+}
+
+func waitMatrixWorkflowReplicas(ctx context.Context, js jetstream.JetStream) error {
+	var lastName string
+	var lastCluster *jetstream.ClusterInfo
+	var lastErr error
+	for ctx.Err() == nil {
 		ready := true
 		for _, name := range []string{"WF_INV", "WF_JRN", "WF_RUN", "WF_SIG", "KV_WF_LEASE", "KV_WF_STATE", "WF_PURGE", "KV_WF_VIEW", "KV_WF_ASSIGN", "OBJ_WF_BLOB"} {
-			attempt, done := context.WithTimeout(bound, time.Second)
+			attempt, done := context.WithTimeout(ctx, time.Second)
 			stream, err := js.Stream(attempt, name)
 			var info *jetstream.StreamInfo
 			if err == nil {
 				info, err = stream.Info(attempt)
 			}
 			done()
-			if err != nil || info.Cluster == nil || info.Cluster.Leader == "" || len(info.Cluster.Replicas) != 2 {
+			lastName, lastErr = name, err
+			lastCluster = nil
+			if info != nil {
+				lastCluster = info.Cluster
+			}
+			if err != nil || info == nil || info.Cluster == nil || info.Cluster.Leader == "" || len(info.Cluster.Replicas) != 2 {
 				ready = false
 				break
 			}
@@ -805,10 +945,15 @@ func killMatrixAllServers(ctx context.Context, js jetstream.JetStream, cluster *
 			}
 		}
 		if ready {
-			event.Healed = time.Now()
-			return event, nil
+			return nil
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
-	return event, fmt.Errorf("full cluster recovery: %w", bound.Err())
+	clusterJSON, _ := json.Marshal(lastCluster)
+	return fmt.Errorf("workflow replica recovery stream=%s cluster=%s last_error=%v: %w", lastName, clusterJSON, lastErr, ctx.Err())
+}
+
+func matrixTransientTransport(err error) bool {
+	var api *jetstream.APIError
+	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || errors.As(err, &api) && api.ErrorCode == 10008
 }

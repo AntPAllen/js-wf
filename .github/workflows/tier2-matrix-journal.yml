@@ -7,7 +7,7 @@ on:
         required: true
         type: choice
         default: journal
-        options: [journal, consumer, cluster]
+        options: [journal, consumer, cluster, partition]
       seeds:
         description: Consecutive seeds for the selected sustained row
         required: true
@@ -36,7 +36,7 @@ jobs:
           import json, os
           count = int(os.environ['SEED_COUNT'])
           assert count in (1, 20, 200)
-          assert os.environ['MATRIX_ROW'] in ('journal', 'consumer', 'cluster')
+          assert os.environ['MATRIX_ROW'] in ('journal', 'consumer', 'cluster', 'partition')
           assert os.environ['MATRIX_DURATION'] in ('10m', '35s')
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('seeds=' + json.dumps(list(range(1, count + 1))) + '\n')
@@ -55,7 +55,7 @@ jobs:
       WF_MATRIX_DURATION: ${{ inputs.duration }}
       FAULT_SEED: ${{ matrix.seed }}
       MATRIX_ARTIFACT_PREFIX: matrix-${{ inputs.row }}-${{ matrix.seed }}
-      MATRIX_TEST: ${{ inputs.row == 'cluster' && 'TestMixedMatrixAllServersKilledEveryThirtySeconds' || inputs.row == 'consumer' && 'TestMixedMatrixConsumerLeaderEveryThirtySeconds' || 'TestMixedMatrixJournalLeaderEveryThirtySeconds' }}
+      MATRIX_TEST: ${{ inputs.row == 'partition' && 'TestMixedMatrixServerPartitionEveryThirtySeconds' || inputs.row == 'cluster' && 'TestMixedMatrixAllServersKilledEveryThirtySeconds' || inputs.row == 'consumer' && 'TestMixedMatrixConsumerLeaderEveryThirtySeconds' || 'TestMixedMatrixJournalLeaderEveryThirtySeconds' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

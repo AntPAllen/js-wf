@@ -3,7 +3,10 @@
 package testcluster
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -341,4 +344,30 @@ func (c *ProcessCluster) Dial(i int) (*nats.Conn, error) {
 		return nil, fmt.Errorf("process node %d out of range", i)
 	}
 	return nats.Connect(c.ClientURL(i), nats.Timeout(2*time.Second), nats.NoReconnect())
+}
+
+// RouteCount reads the pinned server's public NATS monitoring endpoint.
+func (c *ProcessCluster) RouteCount(ctx context.Context, node int) (int, error) {
+	if node < 0 || node >= len(c.monitors) {
+		return 0, fmt.Errorf("invalid monitor node %d", node)
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/routez", c.monitors[node]), nil)
+	if err != nil {
+		return 0, err
+	}
+	response, err := (&http.Client{Timeout: time.Second}).Do(req)
+	if err != nil {
+		return 0, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("routez status %d", response.StatusCode)
+	}
+	var info struct {
+		NumRoutes int `json:"num_routes"`
+	}
+	if err := json.NewDecoder(response.Body).Decode(&info); err != nil {
+		return 0, err
+	}
+	return info.NumRoutes, nil
 }

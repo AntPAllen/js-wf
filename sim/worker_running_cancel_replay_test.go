@@ -154,8 +154,10 @@ func runSeededWorkerRunningCancel(seed int64, replay *Trace) (trace Trace, runEr
 			return trace, fmt.Errorf("seed %d durable poll found=%v err=%v", seed, found, err)
 		}
 	} else {
-		w.ObserveCancellationNotification(notification)
+		// Record delivery before it unblocks the worker actor; recording after
+		// cancellation lets actor writes race this trace event.
 		schedule.RecordTransport(TransportEvent{Operation: "cancel_notify", Subject: notification.Subject, Sequence: handle.InvSeq, Outcome: "matching_generation", AtMillis: schedule.NowMillis()})
+		w.ObserveCancellationNotification(notification)
 	}
 	select {
 	case <-effectCtx.Done():
