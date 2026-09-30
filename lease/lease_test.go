@@ -14,6 +14,27 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 )
 
+type createErrorKV struct {
+	jetstream.KeyValue
+	err error
+}
+
+func (kv createErrorKV) Create(context.Context, string, []byte, ...jetstream.KVCreateOpt) (uint64, error) {
+	return 0, kv.err
+}
+
+func TestCreateNormalizesReplicatedCASConflict(t *testing.T) {
+	raw := &jetstream.APIError{Code: 400, ErrorCode: jetstream.JSErrCodeStreamWrongLastSequenceConstant, Description: "wrong last sequence"}
+	_, err := (jetStreamKVPort{kv: createErrorKV{err: raw}}).Create(context.Background(), "test.one", []byte(`{}`))
+	if !errors.Is(err, jetstream.ErrKeyExists) || !errors.Is(err, raw) {
+		t.Fatalf("replicated Create CAS conflict was not normalized and preserved: %v", err)
+	}
+	_, err = (jetStreamKVPort{kv: createErrorKV{err: context.DeadlineExceeded}}).Create(context.Background(), "test.one", []byte(`{}`))
+	if !errors.Is(err, context.DeadlineExceeded) || errors.Is(err, jetstream.ErrKeyExists) {
+		t.Fatalf("non-CAS Create error was changed: %v", err)
+	}
+}
+
 func TestAcquireReclaimsOnlyStaleUninitializedLease(t *testing.T) {
 	cluster, err := testcluster.Start(t.TempDir(), 1)
 	if err != nil {

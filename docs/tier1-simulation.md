@@ -208,6 +208,17 @@ and modeled lease decisions -2 s and +2 s local offsets over server-clock
 KV revisions: the slow contender leaves the orphan held, the fast contender
 reclaims it, and both stores retain an initialized higher epoch. Three
 normal repeats and a race run passed.
+
+A separate three-node expiry race starts 32 production lease acquirers through
+clients pinned to all three nodes after a short-TTL key expires. Before adapter
+normalization, one contender won, 21 returned `ErrHeld`, and ten leaked raw
+JetStream CAS code 10164 from the expired-key `Create` path. The production KV
+adapter now maps that Create response to `ErrKeyExists`, which the unchanged
+production lease decision classifies as `ErrHeld`. Three real-cluster repeats
+and a race run passed with one higher-epoch winner and 31 held losers. The
+in-memory KV model already exposes the normalized conflict contract; a unit
+test also preserves the underlying API error while distinguishing unrelated
+transport errors.
 The seeded lease trace is byte-identical across processes and replays from
 disk. A real three-node fixture checks the model's normal revision, held-key,
 renewal, stale cleanup, and stale update behavior. A TCP-proxy fixture holds

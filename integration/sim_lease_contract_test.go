@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -401,6 +402,85 @@ func TestSimLeaseExpiryContractAgainstRealCluster(t *testing.T) {
 	}
 	if err := modelOld.Cleanup(ctx); !errors.Is(err, lease.ErrLost) {
 		t.Fatalf("modeled expired cleanup: %v", err)
+	}
+}
+
+func TestLeaseExpiryRaceNormalizesCASConflicts(t *testing.T) {
+	all, _ := setup(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	const ttl = 2 * time.Second
+	kv, err := all[0].CreateKeyValue(ctx, jetstream.KeyValueConfig{
+		Bucket: "WF_LEASE_EXPIRY_RACE", History: 1, TTL: ttl,
+		LimitMarkerTTL: time.Second, Storage: jetstream.FileStorage, Replicas: 3,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	const typ, id = "lease-contract", "expiry-race"
+	old, err := lease.NewWithKeyValue(kv).Acquire(ctx, typ, id, "old")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for ctx.Err() == nil {
+		_, err = kv.Get(ctx, typ+"."+id)
+		if errors.Is(err, jetstream.ErrKeyNotFound) {
+			break
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+	if ctx.Err() != nil {
+		t.Fatal("lease did not expire")
+	}
+	var peers [3]jetstream.KeyValue
+	peers[0] = kv
+	for i := 1; i < len(peers); i++ {
+		peers[i], err = all[i].KeyValue(ctx, "WF_LEASE_EXPIRY_RACE")
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	const contenders = 32
+	var started sync.WaitGroup
+	var done sync.WaitGroup
+	started.Add(contenders)
+	done.Add(contenders)
+	begin := make(chan struct{})
+	results := make([]struct {
+		epoch uint64
+		err   error
+	}, contenders)
+	for i := range results {
+		go func(i int) {
+			defer done.Done()
+			started.Done()
+			<-begin
+			winner, acquireErr := lease.NewWithKeyValue(peers[i%len(peers)]).Acquire(ctx, typ, id, fmt.Sprintf("contender-%02d", i))
+			results[i].err = acquireErr
+			if winner != nil {
+				results[i].epoch = winner.Epoch()
+			}
+		}(i)
+	}
+	started.Wait()
+	close(begin)
+	done.Wait()
+	var winners, held int
+	for i, result := range results {
+		switch {
+		case result.err == nil && result.epoch > old.Epoch():
+			winners++
+		case errors.Is(result.err, lease.ErrHeld):
+			held++
+		default:
+			t.Errorf("contender %d: epoch=%d err=%v", i, result.epoch, result.err)
+		}
+	}
+	if winners != 1 || held != contenders-1 {
+		t.Fatalf("expiry race: winners=%d held=%d want=1/%d", winners, held, contenders-1)
 	}
 }
 

@@ -51,7 +51,17 @@ func NewWithKVPort(port KVPort) *Store { return &Store{port: port} }
 type jetStreamKVPort struct{ kv jetstream.KeyValue }
 
 func (p jetStreamKVPort) Create(ctx context.Context, key string, value []byte) (uint64, error) {
-	return p.kv.Create(ctx, key, value)
+	revision, err := p.kv.Create(ctx, key, value)
+	if err != nil && !errors.Is(err, jetstream.ErrKeyExists) {
+		var apiErr *jetstream.APIError
+		if errors.As(err, &apiErr) && (apiErr.ErrorCode == jetstream.JSErrCodeStreamWrongLastSequence || apiErr.ErrorCode == jetstream.JSErrCodeStreamWrongLastSequenceConstant) {
+			// Create can expose the raw CAS response when concurrent callers
+			// replace an expired key's delete marker. It still means another
+			// contender won this revision race.
+			return 0, fmt.Errorf("%w: %w", err, jetstream.ErrKeyExists)
+		}
+	}
+	return revision, err
 }
 
 func (p jetStreamKVPort) Get(ctx context.Context, key string) (KVEntry, error) {
