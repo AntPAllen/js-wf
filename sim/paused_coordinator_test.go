@@ -20,6 +20,7 @@ import (
 type pausedCoordinatorAssignments struct {
 	assignment.RebalancePort
 	cut                      string
+	claim                    bool
 	partition                uint32
 	hook                     func() error
 	afterTakeover            bool
@@ -28,7 +29,7 @@ type pausedCoordinatorAssignments struct {
 
 func (p *pausedCoordinatorAssignments) GetLatest(ctx context.Context, partition uint32) (string, uint64, error) {
 	owner, revision, err := p.RebalancePort.GetLatest(ctx, partition)
-	if err == nil && p.cut == "before_renew" && partition == 63 && p.hook != nil {
+	if err == nil && p.cut == "before_renew" && ((!p.claim && partition == 63) || (p.claim && partition == p.partition)) && p.hook != nil {
 		hook := p.hook
 		p.hook = nil
 		if err := hook(); err != nil {

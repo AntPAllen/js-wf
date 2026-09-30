@@ -2020,3 +2020,33 @@ campaign at `89a8f75` completed successfully, while its focused mutation job
 also passed. These do not replace fresh standard CI or the full release gates.
 The extended Tier 1 campaign at `463ce86` is still confirmed live and predates
 the coordinator claim and new enqueue workload; it has not been restarted.
+
+
+## Paused coordinator claim before balancing
+
+The `paused_coordinator_claim` workload now tests takeover while an incumbent
+is refreshing assignment revisions, rather than during its later balance pass.
+Seeds select the first/middle/last key and a before-renew or after-renew cut.
+Assignments already belong to c, so the successor preserves their owner while
+claiming every revision. Only c continues registration heartbeats through
+server expiry. Before-renew interruption returns `ErrLost` without attempting
+assignment; after-renew interruption permits one stale CAS conflict and returns
+`ErrConflict`. Both stop before any balance pass. Old cleanup cannot remove
+successor membership/coordinator ownership or change stable assignments.
+
+The new workload passed 100,000 seeds in 51.79 seconds with all six combinations,
+exact replay and cross-process identity. Two pins preserve first-key after-renew
+and last-key before-renew boundaries. Focused race replay, partial-claim failure
+controls and the entire pinned corpus passed in 9.32 seconds. An overlay removing
+renewal only from the claim loop fails seed 1 with `ErrConflict` where `ErrLost`
+and no stale attempt are required; it compiled and failed the semantic assertion.
+The real three-node race contract holds the first claim write after renewal
+through actual server expiry, then requires one stale CAS conflict, all 64
+successor owners/revisions intact after old cleanup and membership exactly c.
+It passed in 17.04 seconds (package 18.08 seconds). This calls Step directly
+beyond Run's eight-second pass deadline; automatic-membership process/VM pause
+and full matrix evidence remain open. Vet and diff checks passed.
+
+The extended Tier 1 run at `463ce86` remains confirmed in progress and predates
+these claim controls; it has not been restarted. Standard and mixed jobs at
+`8e04946` are now confirmed in progress; their result is still pending.

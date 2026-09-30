@@ -169,7 +169,7 @@ its lease before each write. Any read, write, or CAS uncertainty stops the pass;
 only a fully acknowledged claim permits balancing. Subsequent passes by the
 same coordinator do not repeat the claim. Workers retain loops on same-owner
 revision changes. Prove the unchanged-owner pause boundary in Tier 1 and on a
-real three-node cluster, plus partial-claim failure and tombstone recovery.
+real three-node cluster, plus pauses during the claim itself, partial-claim failure and tombstone recovery.
 This fences older revisions after the claim completes; it is not an atomic
 transaction across the membership and assignment buckets.
 

@@ -1301,3 +1301,24 @@ changed and unchanged owners. Separate partial-claim controls fail reads, drop
 writes, hide committed acknowledgments and race revisions; no balance begins
 until the entire claim is acknowledged. This models runtime coordination and
 server KV expiry, not Raft or an atomic cross-bucket transaction.
+
+
+## Coordinator paused during its assignment claim
+
+`paused_coordinator_claim` interrupts a new coordinator's claim at its first,
+middle or last key, either after the assignment read before renewal or after
+renewal before assignment CAS. Only c heartbeats while the incumbent expires;
+c claims all revisions with unchanged owners. Before-renew interruption must
+return `ErrLost` without a stale assignment attempt. After-renew interruption
+must make exactly one conflicting CAS and return `ErrConflict`, stopping the
+claim before any balance pass. Closing the old controller must preserve the
+successor's coordinator, live membership and stable assignment revisions.
+
+All six combinations pass 100,000 schedules, exact replay and separate-process
+trace identity. Pins retain seed 2's first-key after-renew pause and seed 42's
+last-key before-renew pause. Removing renewal specifically from the claim loop
+fails seed 1's required before-renew fencing. A real three-node contract holds
+the first claim write after renewal through actual registration/coordinator
+expiry and requires one CAS conflict, no successor revision changes after old
+cleanup and only c live. It calls Step directly past Run's normal eight-second
+pass budget; it is not a process/VM pause or full automatic-membership matrix.

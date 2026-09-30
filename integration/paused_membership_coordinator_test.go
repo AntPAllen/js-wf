@@ -41,11 +41,12 @@ func (p *heldCoordinatorAssignment) Assign(ctx context.Context, partition uint32
 }
 
 func TestPausedMembershipCoordinatorCannotOverwriteSuccessor(t *testing.T) {
-	t.Run("changed_owners", func(t *testing.T) { testPausedMembershipCoordinator(t, false) })
-	t.Run("unchanged_owner", func(t *testing.T) { testPausedMembershipCoordinator(t, true) })
+	t.Run("changed_owners", func(t *testing.T) { testPausedMembershipCoordinator(t, false, false) })
+	t.Run("unchanged_owner", func(t *testing.T) { testPausedMembershipCoordinator(t, true, false) })
+	t.Run("paused_claim", func(t *testing.T) { testPausedMembershipCoordinator(t, true, true) })
 }
 
-func testPausedMembershipCoordinator(t *testing.T, unchanged bool) {
+func testPausedMembershipCoordinator(t *testing.T, unchanged, claim bool) {
 	all, _ := setup(t)
 	ctx, stop := context.WithTimeout(context.Background(), 40*time.Second)
 	defer stop()
@@ -65,8 +66,10 @@ func testPausedMembershipCoordinator(t *testing.T, unchanged bool) {
 		t.Fatal(err)
 	}
 	defer a.Close()
-	if err := a.Step(ctx); err != nil {
-		t.Fatal(err)
+	if !claim {
+		if err := a.Step(ctx); err != nil {
+			t.Fatal(err)
+		}
 	}
 	b, err := members.Controller(ctx, "b", owners)
 	if err != nil {
@@ -78,11 +81,13 @@ func testPausedMembershipCoordinator(t *testing.T, unchanged bool) {
 		t.Fatal(err)
 	}
 	defer c.Close()
-	if err := b.Step(ctx); err != nil {
-		t.Fatal(err)
-	}
-	if err := c.Step(ctx); err != nil {
-		t.Fatal(err)
+	if !claim {
+		if err := b.Step(ctx); err != nil {
+			t.Fatal(err)
+		}
+		if err := c.Step(ctx); err != nil {
+			t.Fatal(err)
+		}
 	}
 	if unchanged {
 		for p := uint32(0); p < provision.Partitions; p++ {
@@ -143,8 +148,12 @@ func testPausedMembershipCoordinator(t *testing.T, unchanged bool) {
 	resume()
 	result := <-done
 	joined = true
-	if !errors.Is(result, lease.ErrLost) {
-		t.Fatalf("paused coordinator not fenced: %v", result)
+	want := lease.ErrLost
+	if claim {
+		want = assignment.ErrConflict
+	}
+	if !errors.Is(result, want) {
+		t.Fatalf("paused coordinator not fenced: %v want=%v", result, want)
 	}
 	if held.attempts.Load() != 1 || held.conflicts.Load() != 1 {
 		t.Fatalf("stale assignment attempts=%d conflicts=%d", held.attempts.Load(), held.conflicts.Load())
