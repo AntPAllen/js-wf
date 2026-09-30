@@ -486,3 +486,15 @@ Other risks, in rough order of how much they would change the plan:
 - **Operational coupling to the NATS cluster's health.** A JetStream cluster that loses quorum stalls every workflow. This is the same trade Temporal makes with its database; document it and test the full-restart rows of the matrix.
 
 The reconciler is a first-class part of v1. Atomic batches cannot span this runtime's separate invocation, run, and signal streams, so repair scanners close the unavoidable crash windows between their dependent writes.
+
+
+### High-cardinality live traffic measurement
+
+The standalone `cmd/wf-scale` runner supports `-live-workflows` and
+`-live-input-bytes` after each `-counts` checkpoint. Retain an explicit fresh
+root, the report and raw live-cohort audits. Run both inline and spilled payload
+cohorts at the target cardinalities, checking cross-node immutable results,
+input hashes, retained journal/state invariants, exact aggregate subject/message
+counts, queue drain, and process RSS. Opaque background capacity records do not
+count as completed workflow evidence. A small runner smoke does not clear the
+10-million-subject live traffic requirement.

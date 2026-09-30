@@ -2335,3 +2335,21 @@ proof that the first-heartbeat change caused the earlier delay or that the
 logs](scale/first-heartbeat-policy-2026-09-30/) are retained. The million-timer
 campaign remains live on its original clean source, with no restart or scope
 change.
+
+
+## Live-workflow cardinality runner
+
+`wf-scale` now accepts `-live-workflows` and `-live-input-bytes` to execute real
+production workflows after each background-cardinality checkpoint. It verifies
+input hashes/spill counts, cross-peer immutable results, retained cohort journal
+and terminal-state invariants, drained run queue, and exact aggregate stream
+counts including earlier live cohorts. Reports record source identity, success
+or failure, latency and per-process RSS; raw cohort audits remain retained.
+The opaque background messages are explicitly excluded from workflow integrity
+claims. See [usage and smoke evidence](scale/README.md#live-workflows-at-cardinality-checkpoints).
+
+The real three-node inline/spill/multiple-cohort contract passed under race in
+20.92 seconds. A standalone three-process 100/200-subject smoke passed with
+24 total 1,100,000-byte inputs, all spilled, all terminal, and 96 journal entries.
+This establishes the runner; high-cardinality live traffic validation remains
+open until a completed run at that cardinality is retained.

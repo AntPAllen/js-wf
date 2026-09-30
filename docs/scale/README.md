@@ -55,6 +55,48 @@ the requested threshold; the 2 GiB guard did not fire in the 10M run. It was
 also exercised with a threshold above available RAM and stopped before the
 first checkpoint.
 
+## Live workflows at cardinality checkpoints
+
+Add `-live-workflows` to run actual production client, worker, SDK and journal
+operations after each background checkpoint. `-live-input-bytes` sets the exact
+JSON input length; inputs larger than the client's inline limit use `WF_BLOB`.
+For example:
+
+```sh
+go build -o /tmp/wf-scale ./cmd/wf-scale
+/tmp/wf-scale -root /tmp/wf-scale-live-1m -counts 1000000 \
+  -live-workflows 1000 -live-input-bytes 1100000 -min-available-mib 2048
+```
+
+Three workers serve all 64 partitions through pinned peers. Sixteen concurrent
+clients start workflows whose durable step verifies input length and SHA256.
+Each result must match and remain byte-identical when read through all three
+peers. The cohort audit checks actual retained invocation identities/input
+hashes, journals and terminal state, exactly four entries per invocation, input
+spill counts, and a drained `WF_RUN`. Effects follow the runtime's at-least-once
+contract; their execution count is reported. These are no-fault client-start-to-
+result latencies, including the first consumer startup, rather than fault-recovery
+latencies or a throughput release gate.
+
+Earlier live cohorts remain retained. Reports distinguish background subject
+counts from total subjects/messages and verify totals through each node. The
+one-byte background messages are opaque capacity data; the invariant audit
+explicitly covers only real live cohorts. `live-<checkpoint>-audit.json` retains
+that cohort's snapshot and expected results. Audit JSON is compact because
+pretty-printing changes journal payload bytes. Reports include build revision,
+modified-source state, terminal success/failure status, and RSS after each phase.
+Use a fresh explicit root to preserve all stores and evidence.
+
+The [three-process smoke](live-cardinality-smoke-2026-09-30/report.json) passed
+100 and 200 background subjects per stream, with twelve 1,100,000-byte inputs
+after each checkpoint. Both cohorts had twelve spills, twelve terminal journals,
+48 entries, and twelve effect executions. The second phase retained both cohorts,
+with 224 invocation messages/subjects and 296 journal messages on every node.
+This binary was built from modified source based on `df72ed0`; it is a runner
+smoke, not the million/ten-million-subject proof. The retained race contract
+covers small inline inputs followed by spilled inputs and rechecks serialized
+evidence with the invariant checker; it also rejects totals omitting prior cohorts.
+
 ## CAS append throughput
 
 `cmd/wf-cas-bench` uses the regular three-node in-process fixture with file

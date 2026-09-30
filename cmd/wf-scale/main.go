@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/debug"
 	"sort"
 	"strconv"
 	"strings"
@@ -35,14 +36,22 @@ type sample struct {
 	InvocationSubjects uint64      `json:"invocation_subjects"`
 	JournalSubjects    uint64      `json:"journal_subjects"`
 	InfoMedian         [3][2]int64 `json:"stream_info_median_microseconds"`
+	LiveInvocations    int         `json:"live_invocations_before_sample,omitempty"`
+	LiveEntries        int         `json:"live_journal_entries_before_sample,omitempty"`
 	InfoMax            [3][2]int64 `json:"stream_info_max_microseconds"`
 }
 
 type report struct {
-	ServerVersion string    `json:"server_version"`
-	Workers       int       `json:"workers"`
-	BaselineRSS   [3]uint64 `json:"baseline_rss_bytes_per_node"`
-	Samples       []sample  `json:"samples"`
+	Revision       string       `json:"revision,omitempty"`
+	SourceModified string       `json:"source_modified,omitempty"`
+	Status         string       `json:"status"`
+	Error          string       `json:"error,omitempty"`
+	ServerVersion  string       `json:"server_version"`
+	Workers        int          `json:"workers"`
+	BaselineRSS    [3]uint64    `json:"baseline_rss_bytes_per_node"`
+	Samples        []sample     `json:"samples"`
+	LiveRequested  int          `json:"live_workflows_per_checkpoint,omitempty"`
+	Live           []liveSample `json:"live,omitempty"`
 }
 
 func main() {
@@ -50,6 +59,8 @@ func main() {
 	countList := flag.String("counts", "100000,1000000", "ascending subject counts per stream")
 	workers := flag.Int("workers", 96, "concurrent publishers")
 	minAvailableMiB := flag.Int64("min-available-mib", 0, "stop if Linux MemAvailable falls below this many MiB; 0 disables the guard")
+	liveCount := flag.Int("live-workflows", 0, "real workflows after each cardinality checkpoint; 0 disables")
+	liveBytes := flag.Int("live-input-bytes", 64, "exact JSON input bytes per live workflow (64..5242880)")
 	root := flag.String("root", "", "store and report directory; default temporary")
 	port := flag.Int("port", 0, "child client port")
 	routePort := flag.Int("route-port", 0, "child route port")
@@ -64,11 +75,11 @@ func main() {
 		return
 	}
 	counts, err := parseCounts(*countList)
-	if err != nil || *workers < 1 || *workers > 512 || *minAvailableMiB < 0 || *minAvailableMiB > 1<<40 {
-		fmt.Fprintln(os.Stderr, "invalid counts, workers, or memory threshold:", err)
+	if err != nil || *liveCount < 0 || *liveCount > 100000 || *liveBytes < 64 || *liveBytes > 5*1024*1024 || *workers < 1 || *workers > 512 || *minAvailableMiB < 0 || *minAvailableMiB > 1<<40 {
+		fmt.Fprintln(os.Stderr, "invalid counts, workers, memory threshold, or live configuration:", err)
 		os.Exit(2)
 	}
-	if err := run(counts, *workers, *root, *minAvailableMiB); err != nil {
+	if err := run(counts, *workers, *root, *minAvailableMiB, liveConfig{Count: *liveCount, InputBytes: *liveBytes}); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -116,7 +127,7 @@ func freePort() (int, error) {
 	return l.Addr().(*net.TCPAddr).Port, nil
 }
 
-func run(counts []int, workers int, root string, minAvailableMiB int64) (runErr error) {
+func run(counts []int, workers int, root string, minAvailableMiB int64, live liveConfig) (runErr error) {
 	if root == "" {
 		var err error
 		root, err = os.MkdirTemp("", "wf-scale-")
@@ -241,7 +252,27 @@ func run(counts []int, workers int, root string, minAvailableMiB int64) (runErr 
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	report := report{ServerVersion: conns[0].ConnectedServerVersion(), Workers: workers}
+	report := report{ServerVersion: conns[0].ConnectedServerVersion(), Workers: workers, LiveRequested: live.Count, Status: "running"}
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, setting := range info.Settings {
+			if setting.Key == "vcs.revision" {
+				report.Revision = setting.Value
+			}
+			if setting.Key == "vcs.modified" {
+				report.SourceModified = setting.Value
+			}
+		}
+	}
+	defer func() {
+		report.Status = "completed"
+		if runErr != nil {
+			report.Status, report.Error = "failed", runErr.Error()
+		}
+		if err := saveReport(root, report); err != nil && runErr == nil {
+			runErr = err
+		}
+	}()
+	priorLive, priorEntries := 0, 0
 	if err := readRSS(children, &report.BaselineRSS); err != nil {
 		return err
 	}
@@ -259,7 +290,7 @@ func run(counts []int, workers int, root string, minAvailableMiB int64) (runErr 
 		if err := context.Cause(guardCtx); err != nil {
 			return err
 		}
-		s := sample{Subjects: count, Elapsed: time.Since(started).String()}
+		s := sample{Subjects: count, Elapsed: time.Since(started).String(), LiveInvocations: priorLive, LiveEntries: priorEntries}
 		if err := readRSS(children, &s.RSSBytes); err != nil {
 			return err
 		}
@@ -270,18 +301,33 @@ func run(counts []int, workers int, root string, minAvailableMiB int64) (runErr 
 			return err
 		}
 		report.Samples = append(report.Samples, s)
-		data, err := json.MarshalIndent(report, "", "  ")
-		if err != nil {
-			return err
+		if live.Count > 0 {
+			phase, err := runLiveWorkflows(guardCtx, all, root, count, priorLive, priorEntries, live)
+			if err != nil {
+				return fmt.Errorf("live traffic at %d background subjects: %w", count, err)
+			}
+			if err := readRSS(children, &phase.RSSBytes); err != nil {
+				return err
+			}
+			report.Live = append(report.Live, phase)
+			priorLive += live.Count
+			priorEntries += phase.Audit.Entries
 		}
-		data = append(data, '\n')
-		if err := os.WriteFile(filepath.Join(root, "report.json"), data, 0644); err != nil {
+		if err := saveReport(root, report); err != nil {
 			return err
 		}
 		fmt.Fprintf(os.Stderr, "subjects=%d rss=%v info_median_us=%v\n", count, s.RSSBytes, s.InfoMedian)
 		previous = count
 	}
 	return nil
+}
+
+func saveReport(root string, report report) error {
+	data, err := json.MarshalIndent(report, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(root, "report.json"), append(data, '\n'), 0644)
 }
 
 func publishRange(ctx context.Context, all [3]jetstream.JetStream, first, last, workers int) error {
@@ -406,8 +452,13 @@ func inspect(ctx context.Context, all [3]jetstream.JetStream, s *sample) error {
 				if err != nil {
 					return err
 				}
-				if info.State.Msgs != uint64(s.Subjects) || info.State.NumSubjects != uint64(s.Subjects) {
-					return fmt.Errorf("node %d stream %s: msgs=%d subjects=%d want=%d", node, name, info.State.Msgs, info.State.NumSubjects, s.Subjects)
+				wantSubjects := uint64(s.Subjects + s.LiveInvocations)
+				wantMessages := wantSubjects
+				if streamIndex == 1 {
+					wantMessages = uint64(s.Subjects + s.LiveEntries)
+				}
+				if info.State.Msgs != wantMessages || info.State.NumSubjects != wantSubjects {
+					return fmt.Errorf("node %d stream %s: msgs=%d/%d subjects=%d/%d", node, name, info.State.Msgs, wantMessages, info.State.NumSubjects, wantSubjects)
 				}
 				if node == 0 {
 					if streamIndex == 0 {
