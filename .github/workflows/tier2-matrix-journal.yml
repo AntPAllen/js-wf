@@ -51,7 +51,6 @@ jobs:
       matrix:
         seed: ${{ fromJSON(needs.seeds.outputs.matrix) }}
     env:
-      WF_NATS_SERVER_BIN: ${{ runner.temp }}/nats-old/nats-server
       WF_MATRIX_CHAOS: '1'
       WF_MATRIX_DURATION: ${{ inputs.duration }}
       FAULT_SEED: ${{ matrix.seed }}
@@ -68,6 +67,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/nats-old"
           GOBIN="$RUNNER_TEMP/nats-old" go install github.com/nats-io/nats-server/v2@v2.11.17
+          printf 'WF_NATS_SERVER_BIN=%s/nats-old/nats-server\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - name: Verify block device fault prerequisites
         if: inputs.row == 'blockdisk'
         run: |
