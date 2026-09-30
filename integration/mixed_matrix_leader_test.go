@@ -34,6 +34,8 @@ import (
 )
 
 type matrixLeaderFault struct {
+	VersionsBefore        []string                      `json:"versions_before,omitempty"`
+	VersionsAfter         []string                      `json:"versions_after,omitempty"`
 	BlockStall            *testcluster.BlockStallProof  `json:"block_stall,omitempty"`
 	FanoutParent          string                        `json:"fanout_parent,omitempty"`
 	FanoutTail            uint64                        `json:"fanout_tail,omitempty"`
@@ -106,6 +108,8 @@ func TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds(t *testing.T) {
 
 func TestMixedMatrixWorkerClockSkew(t *testing.T) { runMixedMatrixLeader(t, "worker_clock") }
 
+func TestMixedMatrixRollingServerUpgrade(t *testing.T) { runMixedMatrixLeader(t, "rolling_upgrade") }
+
 func TestMixedMatrixBlockDiskStallEveryThirtySeconds(t *testing.T) {
 	runMixedMatrixLeader(t, "block_disk")
 }
@@ -167,7 +171,15 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 		}
 	}()
 	startCluster := testcluster.StartProcesses
-	if row == "block_disk" {
+	if row == "rolling_upgrade" {
+		oldBinary := os.Getenv("WF_NATS_SERVER_BIN")
+		if oldBinary == "" {
+			t.Fatal("rolling upgrade row requires WF_NATS_SERVER_BIN pointing to NATS 2.11.17")
+		}
+		startCluster = func(root string, count int) (*testcluster.ProcessCluster, error) {
+			return testcluster.StartMixedVersionProcesses(root, []string{oldBinary, oldBinary, oldBinary})
+		}
+	} else if row == "block_disk" {
 		startCluster = func(root string, count int) (*testcluster.ProcessCluster, error) {
 			var err error
 			blockDisk, err = testcluster.NewBlockDisk(root)
@@ -193,6 +205,29 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 		t.Fatal(err)
 	}
 	defer cluster.Close()
+	defer func() {
+		if !t.Failed() {
+			return
+		}
+		for node := range cluster.Commands {
+			data, err := os.ReadFile(cluster.LogPath(node))
+			if err != nil {
+				t.Logf("server %d log: %v", node, err)
+				continue
+			}
+			if len(data) > 4096 {
+				data = data[len(data)-4096:]
+			}
+			t.Logf("server %d log tail:\n%s", node, data)
+		}
+	}()
+	if row == "rolling_upgrade" {
+		for node, version := range matrixClusterVersions(cluster) {
+			if version != "2.11.17" {
+				t.Fatalf("initial node %d version=%s want=2.11.17", node, version)
+			}
+		}
+	}
 	urls := make([]string, 3)
 	for i := range urls {
 		urls[i] = cluster.ClientURL(i)
@@ -219,7 +254,15 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	ready, stopReady := context.WithTimeout(ctx, 30*time.Second)
 	for ready.Err() == nil {
 		attempt, stop := context.WithTimeout(ready, 3*time.Second)
-		err = provision.Ensure(attempt, js, 3)
+		if row == "rolling_upgrade" {
+			var backend provision.TimerBackend
+			backend, err = provision.EnsureAuto(attempt, js, 3)
+			if err == nil && backend != provision.FallbackTimers {
+				err = fmt.Errorf("upgrade requires fallback timer backend: %s", backend)
+			}
+		} else {
+			err = provision.Ensure(attempt, js, 3)
+		}
 		stop()
 		if err == nil {
 			break
@@ -425,6 +468,11 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	launch(func() error { return reconcile.RunStartLoop(workCtx, js, "matrix-start", time.Second, 32) })
 	launch(func() error { return reconcile.RunSignalLoop(workCtx, js, "matrix-signal", time.Second, 32) })
 	launch(func() error { return reconcile.RunSuspendedLoop(workCtx, js, "matrix-suspended", time.Second, 8) })
+	if row == "rolling_upgrade" {
+		launch(func() error {
+			return reconcile.RunFallbackTimerLoop(workCtx, js, "matrix-upgrade-timers", 100*time.Millisecond, 100)
+		})
+	}
 	start := time.Now()
 	end := start.Add(duration)
 	faultInterval := 30 * time.Second
@@ -436,14 +484,25 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 		faultInterval = 60 * time.Second
 		firstFault = 5 * time.Second
 	}
+	if row == "rolling_upgrade" && duration > 2*firstFault {
+		faultInterval = (duration - 2*firstFault) / 2
+		if faultInterval < 30*time.Second {
+			faultInterval = 30 * time.Second
+		}
+	}
 	faultCtx, stopFault := context.WithCancel(ctx)
 	faultDone := make(chan error, 1)
 	faultExited := make(chan struct{})
 	faultRNG := rand.New(rand.NewSource(seed ^ 0x6c6561646572))
+	upgradeOrder := rand.New(rand.NewSource(seed ^ 0x75706772616465)).Perm(3)
 	go func() {
 		defer close(faultExited)
 		defer close(faultDone)
+		upgradeIndex := 0
 		for scheduled := start.Add(firstFault); scheduled.Before(end); scheduled = scheduled.Add(faultInterval) {
+			if row == "rolling_upgrade" && upgradeIndex == 3 {
+				break
+			}
 			timer := time.NewTimer(time.Until(scheduled))
 			select {
 			case <-faultCtx.Done():
@@ -454,7 +513,10 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 			}
 			var event matrixLeaderFault
 			var err error
-			if row == "block_disk" {
+			if row == "rolling_upgrade" {
+				event, err = upgradeMatrixServer(faultCtx, js, cluster, upgradeOrder[upgradeIndex], scheduled)
+				upgradeIndex++
+			} else if row == "block_disk" {
 				event, err = stallMatrixBlockDisk(faultCtx, nc, js, blockDisk, scheduled)
 			} else if serverOffset != 0 {
 				event, err = verifyMatrixServerClocks(faultCtx, js, cluster, serverOffset, scheduled)
@@ -659,6 +721,9 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	if duration > firstFault {
 		wantFaults = 1 + int((duration-firstFault-time.Nanosecond)/faultInterval)
 	}
+	if row == "rolling_upgrade" && wantFaults > 3 {
+		wantFaults = 3
+	}
 	if len(faults) != wantFaults {
 		t.Fatalf("faults=%d want=%d", len(faults), wantFaults)
 	}
@@ -766,11 +831,14 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	drainCtx, stopDrain := context.WithTimeout(ctx, 30*time.Second)
 	defer stopDrain()
 	for {
-		info, err := run.Info(drainCtx)
+		attempt, done := context.WithTimeout(drainCtx, 2*time.Second)
+		info, err := run.Info(attempt)
+		done()
 		if err == nil && info.State.Msgs == 0 {
 			break
 		}
 		if drainCtx.Err() != nil {
+			captureMatrixQueueDiagnostics(t, run)
 			t.Fatalf("run queue did not drain: info=%+v err=%v", info, err)
 		}
 		time.Sleep(100 * time.Millisecond)

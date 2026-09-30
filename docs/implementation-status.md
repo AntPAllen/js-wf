@@ -1007,3 +1007,85 @@ race test. Passwordless sudo, loop devices, device mapper and ext4 tools are
 required. This VM's kernel has no `dm-delay` target or loadable module; the
 [distinct per-request delay injection](https://docs.kernel.org/admin-guide/device-mapper/delay.html)
 required by Tier 3 remains open, as does the five-node full-matrix soak.
+
+
+## Full fan-out restart and server-clock CI evidence
+
+The ten-minute local fan-out restart race run at `06c487e` passed in 691.87
+seconds: 76 batches, 2,128 terminal invocations, 19 verified unfinished fan-out
+restart cuts and aggregate terminal p99 13.434 seconds. Every cut preserved its
+parent journal prefix and final six-child/two-grandchild identities. All shared
+history, integrity, latency, final-completion and queue-drain gates passed.
+This proves one full local seed (42), not consecutive CI validation.
+
+Both full server-clock CI seeds at `c0bd4f0` completed successfully:
+[positive skew](https://github.com/AntPAllen/js-wf/actions/runs/36727863573) and
+[negative skew](https://github.com/AntPAllen/js-wf/actions/runs/36727867863).
+Fresh consecutive twenty-seed workflows were dispatched at `d6d4397` for
+[positive skew](https://github.com/AntPAllen/js-wf/actions/runs/36730799284) and
+[negative skew](https://github.com/AntPAllen/js-wf/actions/runs/36730802966).
+Their terminal outcomes remain pending. The first full block-stall CI seed is
+[run 36730215801](https://github.com/AntPAllen/js-wf/actions/runs/36730215801),
+also pending. Local full negative-skew and block-stall race proofs remain active.
+
+## Sustained rolling server upgrade row and bounded queue observations
+
+`TestMixedMatrixRollingServerUpgrade` starts three actual NATS 2.11.17 processes,
+verifies every initial version and provisions fallback timers through
+`EnsureAuto`. During the ten-minute shared workload it upgrades all three once
+to the module-pinned server version in seeded node order, starting at +30 seconds,
++5 minutes and +9 minutes 30 seconds. Each transition preserves ports/stores,
+records all peer versions before/after, checks eleven-store replica catch-up
+including `WF_TIMER`, and revalidates the unchanged fallback deployment.
+The production fallback timer scanner runs throughout. The shared history,
+raw-state, latency, completion and queue-drain gates remain required.
+
+The initial 35-second seed 42 race smoke upgraded node 1 from 2.11.17 to 2.15.0
+while leaving its peers unchanged. All 140 invocations completed and passed
+histories, integrity and latency, with aggregate terminal p99 5.065 seconds.
+It failed the unchanged thirty-second queue-drain gate when a stream-info
+request consumed the remaining context; it cannot establish a clean row or
+identify why that metadata response failed. Queue polling now gives each
+request a two-second deadline within the same total allowance. A failure uses
+a fresh bounded context to capture stream state, every durable's pending and
+ack-pending deliveries and sequence floors in a JSON artifact, plus server log
+tails. A fresh same-seed race smoke is active. A 35-second upgrade run changes
+only one server and cannot prove the full three-server transition.
+
+
+The bounded-request upgrade smoke also failed the unchanged queue-drain gate
+in 84.09 seconds. All 168 invocations completed; aggregate terminal p99 was
+5.146 seconds and all histories/integrity/per-type latency checks passed.
+Fresh metadata showed nine retained `WF_RUN` messages on two subjects, while
+all 64 durable consumer records reported zero pending and zero ack-pending.
+The saved queue artifact contains the complete consumer list. This is an
+unresolved retained-queue discrepancy, not proof of a NATS cause. Diagnostics
+now also capture raw retained messages and read errors on a recurrence.
+The full ten-minute upgrade row remains unverified; it upgrades all three
+servers, unlike the two single-node smoke attempts.
+
+## Negative server-clock full proof and block-stall failures
+
+The full local negative-skew race run at `d6d4397` passed in 662.23 seconds:
+114 batches, 3,192 terminals, 19 verified clock observations and aggregate
+terminal p99 5.020 seconds. All shared gates passed. Both server-clock directions
+now have local full-duration and one-seed CI passes, while consecutive twenty
+seed validation remains pending.
+
+The full local block-stall race run at `d6d4397` failed in 569.55 seconds during
+the batch-90 intermediate audit: invocation scanning reached 2,520 records,
+but a terminal-state read for a child exhausted the checkpoint context after
+369 journals. Earlier cohort audits through batch 80 passed. This does not
+prove a missing terminal value or clear the sustained row; the audit deadline
+remains unchanged and its cause is open.
+
+The [first block-stall CI run](https://github.com/AntPAllen/js-wf/actions/runs/36730215801)
+failed before the mixed workload: its five-second blocked-sync proof passed,
+but cancellation recovery left the mount busy during cleanup. The fixture
+returned without joining an in-flight sync; closing its descriptor does not
+prove the kernel has released its mount reference. The cancellation cleanup
+now resumes the device and joins the sync before closing the file. Three
+focused race repetitions passed in 17.47 seconds. A strengthened race test
+requiring cancellation to exercise a confirmed active device suspension passed
+in 6.50 seconds, and no test mappings remained. Clean-runner validation of this
+fix and the full sustained block-stall gate remain open.

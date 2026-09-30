@@ -7,7 +7,7 @@ on:
         required: true
         type: choice
         default: journal
-        options: [journal, consumer, cluster, partition, worker, pause, isolation, workerclock, serverclockplus, serverclockminus, fanoutrestart, blockdisk]
+        options: [journal, consumer, cluster, partition, worker, pause, isolation, workerclock, serverclockplus, serverclockminus, fanoutrestart, blockdisk, upgrade]
       seeds:
         description: Consecutive seeds for the selected sustained row
         required: true
@@ -36,7 +36,7 @@ jobs:
           import json, os
           count = int(os.environ['SEED_COUNT'])
           assert count in (1, 20, 200)
-          assert os.environ['MATRIX_ROW'] in ('journal', 'consumer', 'cluster', 'partition', 'worker', 'pause', 'isolation', 'workerclock', 'serverclockplus', 'serverclockminus', 'fanoutrestart', 'blockdisk')
+          assert os.environ['MATRIX_ROW'] in ('journal', 'consumer', 'cluster', 'partition', 'worker', 'pause', 'isolation', 'workerclock', 'serverclockplus', 'serverclockminus', 'fanoutrestart', 'blockdisk', 'upgrade')
           assert os.environ['MATRIX_DURATION'] in ('10m', '35s')
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('seeds=' + json.dumps(list(range(1, count + 1))) + '\n')
@@ -51,17 +51,23 @@ jobs:
       matrix:
         seed: ${{ fromJSON(needs.seeds.outputs.matrix) }}
     env:
+      WF_NATS_SERVER_BIN: ${{ runner.temp }}/nats-old/nats-server
       WF_MATRIX_CHAOS: '1'
       WF_MATRIX_DURATION: ${{ inputs.duration }}
       FAULT_SEED: ${{ matrix.seed }}
       MATRIX_ARTIFACT_PREFIX: matrix-${{ inputs.row }}-${{ matrix.seed }}
       MATRIX_TIMEOUT: ${{ (inputs.row == 'workerclock' || inputs.row == 'serverclockplus' || inputs.row == 'serverclockminus') && '20m' || '18m' }}
-      MATRIX_TEST: ${{ inputs.row == 'blockdisk' && 'TestMixedMatrixBlockDiskStallEveryThirtySeconds' || inputs.row == 'fanoutrestart' && 'TestMixedMatrixFanoutRestartEveryThirtySeconds' || inputs.row == 'serverclockplus' && 'TestMixedMatrixServerClockSkewPositive' || inputs.row == 'serverclockminus' && 'TestMixedMatrixServerClockSkewNegative' || inputs.row == 'workerclock' && 'TestMixedMatrixWorkerClockSkew' || inputs.row == 'isolation' && 'TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds' || inputs.row == 'pause' && 'TestMixedMatrixWorkerPausedFortyFiveSeconds' || inputs.row == 'worker' && 'TestMixedMatrixRandomWorkerKilledEveryFiveSeconds' || inputs.row == 'partition' && 'TestMixedMatrixServerPartitionEveryThirtySeconds' || inputs.row == 'cluster' && 'TestMixedMatrixAllServersKilledEveryThirtySeconds' || inputs.row == 'consumer' && 'TestMixedMatrixConsumerLeaderEveryThirtySeconds' || 'TestMixedMatrixJournalLeaderEveryThirtySeconds' }}
+      MATRIX_TEST: ${{ inputs.row == 'upgrade' && 'TestMixedMatrixRollingServerUpgrade' || inputs.row == 'blockdisk' && 'TestMixedMatrixBlockDiskStallEveryThirtySeconds' || inputs.row == 'fanoutrestart' && 'TestMixedMatrixFanoutRestartEveryThirtySeconds' || inputs.row == 'serverclockplus' && 'TestMixedMatrixServerClockSkewPositive' || inputs.row == 'serverclockminus' && 'TestMixedMatrixServerClockSkewNegative' || inputs.row == 'workerclock' && 'TestMixedMatrixWorkerClockSkew' || inputs.row == 'isolation' && 'TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds' || inputs.row == 'pause' && 'TestMixedMatrixWorkerPausedFortyFiveSeconds' || inputs.row == 'worker' && 'TestMixedMatrixRandomWorkerKilledEveryFiveSeconds' || inputs.row == 'partition' && 'TestMixedMatrixServerPartitionEveryThirtySeconds' || inputs.row == 'cluster' && 'TestMixedMatrixAllServersKilledEveryThirtySeconds' || inputs.row == 'consumer' && 'TestMixedMatrixConsumerLeaderEveryThirtySeconds' || 'TestMixedMatrixJournalLeaderEveryThirtySeconds' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Build initial NATS 2.11.17 servers
+        if: inputs.row == 'upgrade'
+        run: |
+          mkdir -p "$RUNNER_TEMP/nats-old"
+          GOBIN="$RUNNER_TEMP/nats-old" go install github.com/nats-io/nats-server/v2@v2.11.17
       - name: Verify block device fault prerequisites
         if: inputs.row == 'blockdisk'
         run: |

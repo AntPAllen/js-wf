@@ -180,3 +180,11 @@ Linux device mapper, loop devices, ext4 tools and passwordless sudo. It creates
 and removes a private file-backed device for one server's store. Fault artifacts
 record suspended/resumed times and the blocked-sync proof; this is separate
 from dm-delay per-request injection.
+
+
+For the sustained rolling-upgrade row, provide a NATS 2.11.17 executable through
+`WF_NATS_SERVER_BIN` and run
+`WF_MATRIX_CHAOS=1 go test -race ./integration -run '^TestMixedMatrixRollingServerUpgrade$' -count=1 -timeout=18m`.
+The `upgrade` CI selector builds that version, starts all three nodes on it,
+and upgrades each once during the ten-minute mixed workload. Timers remain on
+the verified fallback backend; version transitions are retained in fault artifacts.

@@ -160,10 +160,28 @@ func (d *BlockDisk) Stall(ctx context.Context, duration time.Duration) (proof Bl
 		}
 		synced <- syncResult{time.Now(), writeErr}
 	}()
+	syncFinished := false
+	// Joining the sync is required after cancellation: closing its descriptor
+	// does not guarantee an in-flight fsync has released its mount reference.
+	defer func() {
+		if resumeErr := resume(); resumeErr != nil && err == nil {
+			err = resumeErr
+		}
+		if !syncFinished {
+			select {
+			case <-synced:
+			case <-time.After(15 * time.Second):
+				if err == nil {
+					err = fmt.Errorf("sync did not exit after block device resume")
+				}
+			}
+		}
+	}()
 	timer := time.NewTimer(time.Until(proof.Suspended.Add(duration)))
 	defer timer.Stop()
 	select {
 	case result := <-synced:
+		syncFinished = true
 		return proof, fmt.Errorf("sync escaped suspended device at %s: %v", result.at, result.err)
 	case <-ctx.Done():
 		return proof, ctx.Err()
@@ -175,6 +193,7 @@ func (d *BlockDisk) Stall(ctx context.Context, duration time.Duration) (proof Bl
 	}
 	select {
 	case result := <-synced:
+		syncFinished = true
 		proof.SyncReturned = result.at
 		return proof, result.err
 	case <-ctx.Done():

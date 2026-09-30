@@ -35,10 +35,13 @@ func TestBlockDiskStallBlocksSyncAndCleansUp(t *testing.T) {
 	// Cancel while the block fault is active: cleanup must restore the device,
 	// allowing the queued sync and a subsequent ordinary write to finish.
 	canceled, cancel := context.WithTimeout(context.Background(), 250*time.Millisecond)
-	_, err = disk.Stall(canceled, 5*time.Second)
+	canceledProof, err := disk.Stall(canceled, 5*time.Second)
 	cancel()
 	if err == nil {
 		t.Fatal("canceled stall unexpectedly succeeded")
+	}
+	if canceledProof.Suspended.IsZero() || canceledProof.Resumed.IsZero() {
+		t.Fatalf("cancellation did not exercise an active device stall: %+v", canceledProof)
 	}
 	if err := os.WriteFile(disk.StoreDir+"/after-cancel", []byte("ok"), 0600); err != nil {
 		t.Fatal(err)
