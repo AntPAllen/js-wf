@@ -97,6 +97,24 @@ smoke, not the million/ten-million-subject proof. The retained race contract
 covers small inline inputs followed by spilled inputs and rechecks serialized
 evidence with the invariant checker; it also rejects totals omitting prior cohorts.
 
+The [clean-source million-subject live run](live-cardinality-1m-2026-09-30/report.json)
+at `151735c` completed 1,000 workflows with 1,100,000-byte inputs, all spilled,
+with 4,000 audited journal entries and 1,000 immutable terminal results. Its
+start-to-result p99/max were 1.280/1.418 seconds, including first-consumer startup.
+After the live phase server RSS was 1,728–1,867 MiB, greater than the
+544–605 MiB index-only checkpoint; input storage and live runtime activity
+matter for sizing. The retained file stores together occupy 3.5 GiB. The run
+coexisted with the separate million-timer campaign on this VM, so its timings
+are observations under that load. The 10M live requirement remains open.
+
+The [clean-source inline run through 5M](live-cardinality-inline-5m-2026-09-30/report.json)
+completed 1,000 64-byte-input workflows at each of 1M and 5M. The respective
+start-to-result p99 values were 503 and 136 ms; final server RSS was
+1,982–2,055 MiB. Both retained cohorts remained present in the verified final
+counts (5,002,000 subjects per stream and 5,008,000 journal messages). Raw
+cohort audits and checksums are retained alongside the report. Large payloads
+at 5M/10M and all live traffic at 10M remain pending.
+
 ## CAS append throughput
 
 `cmd/wf-cas-bench` uses the regular three-node in-process fixture with file

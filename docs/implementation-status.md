@@ -2353,3 +2353,47 @@ The real three-node inline/spill/multiple-cohort contract passed under race in
 24 total 1,100,000-byte inputs, all spilled, all terminal, and 96 journal entries.
 This establishes the runner; high-cardinality live traffic validation remains
 open until a completed run at that cardinality is retained.
+
+
+## Million-subject live spilled-input proof and clean mixed campaign
+
+The clean-source `151735c` three-process run completed one million background
+subjects in each of `WF_INV` and `WF_JRN`, then 1,000 production workflows with
+exactly 1,100,000 input bytes each. All 1,000 inputs spilled, all 1,000 results
+matched through every peer, the cohort audit found 4,000 entries and 1,000
+terminals, and the run queue drained. Final counts through every node were
+1,001,000 subjects in each stream, 1,001,000 invocation messages and 1,004,000
+journal messages. Start-to-result p99 was 1.2796 seconds, maximum 1.4175 seconds;
+the live phase including final audit took 26.05 seconds. Server RSS after that
+phase was 1,727.6/1,771.1/1,866.9 MiB. The entire retained root occupies 3.5 GiB.
+[Report, raw cohort audit and log](scale/live-cardinality-1m-2026-09-30/)
+are retained. An independent decode of all saved terminal-state results matched
+all 1,000 expected lengths/digests. This is no-fault 1M-cardinality evidence;
+10M live traffic and the fault release matrix remain open.
+
+The [full per-push workflow](https://github.com/AntPAllen/js-wf/actions/runs/36782320126)
+and [twenty-seed mixed campaign](https://github.com/AntPAllen/js-wf/actions/runs/36782320099)
+at `df72ed0` both completed successfully. The downloaded mixed log contains
+seeds 1 through 20, twenty passing cases and twenty under-30-second p99 samples;
+[extracted coverage](scale/mixed-df72ed0-20-seeds-2026-09-30.txt) is retained.
+This is the focused four-server-fault test, not the ten-minute sustained full
+matrix or causal proof that the first-heartbeat optimization resolved all earlier
+misses. The expanded 100,000-seed-per-workload simulation at that source is
+still running independently.
+
+
+## Live inline workflow traffic through five million subjects
+
+A second clean-source `151735c` run passed 1M and 5M background subjects in
+both streams, executing 1,000 workflows with exact 64-byte inputs after each
+checkpoint. Each cohort had 1,000 terminals, 4,000 entries and no spilled inputs.
+Start-to-result p99 was 502.7 ms at 1M and 135.6 ms at 5M; first-consumer startup
+is included in the former. The live phases including audit took 10.49 and
+9.77 seconds. At the final checkpoint all nodes reported 5,002,000 subjects in
+each stream, 5,002,000 invocation messages and 5,008,000 journal messages,
+including both retained live cohorts. Final server RSS was 1,982–2,055 MiB.
+All 2,000 saved results independently decoded to their expected lengths/digests.
+[Report, raw audits, checksums and command](scale/live-cardinality-inline-5m-2026-09-30/)
+are retained. This proves inline live traffic at those cardinalities, not large
+inputs at 5M/10M, live traffic at 10M, or the fault matrix. The independent
+million-timer campaign remains running on its original stores and source.
