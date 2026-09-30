@@ -292,26 +292,39 @@ func (c *Client) Enqueue(ctx context.Context, typ, id, dedupID string) error {
 		return err
 	}
 	port := c.startOperations()
-	return enqueueRunWithConflictRetry(ctx, port.Wait, func(attempt context.Context) error {
+	// An unknown publish without an idempotency ID cannot be retried safely
+	// by this helper; preserve the caller's single-attempt outcome.
+	if dedupID == "" {
+		return port.EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(identity.Key(typ, id)), dedupID)
+	}
+	return enqueueRunWithRetry(ctx, port.Wait, func(attempt context.Context) error {
 		return port.EnqueueRun(attempt, identity.RunSubject(typ, id, provision.Partitions), []byte(identity.Key(typ, id)), dedupID)
 	})
 }
 
-// 10158 means another publish with this message ID is still in progress.
-// Retry the identical ID until the stream returns its committed duplicate ack
-// or accepts this attempt; neither outcome creates a second logical wakeup.
-func enqueueRunWithConflictRetry(ctx context.Context, wait func(context.Context, time.Duration) error, enqueue func(context.Context) error) error {
+// Retry the identical message ID on an in-progress duplicate (10158) or a named
+// transient transport outcome. A lost reply may hide a committed enqueue; the
+// stable ID resolves that uncertainty without inventing a new logical wakeup.
+// The post-error window and attempt count stay bounded.
+func enqueueRunWithRetry(ctx context.Context, wait func(context.Context, time.Duration) error, enqueue func(context.Context) error) error {
 	attemptCtx := ctx
-	conflicts := 0
+	failures := 0
 	var cancel context.CancelFunc
 	for {
 		err := enqueue(attemptCtx)
-		var apiErr *jetstream.APIError
-		if !errors.As(err, &apiErr) || apiErr.ErrorCode != 10158 {
+		if err == nil || ctx.Err() != nil {
 			return err
 		}
-		conflicts++
-		if conflicts >= 80 {
+		var apiErr *jetstream.APIError
+		retry := errors.Is(err, nats.ErrNoResponders) || errors.Is(err, nats.ErrNoStreamResponse) || errors.Is(err, jetstream.ErrNoStreamResponse) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, context.DeadlineExceeded)
+		if errors.As(err, &apiErr) {
+			retry = apiErr.ErrorCode == 10158
+		}
+		if !retry {
+			return err
+		}
+		failures++
+		if failures >= 80 {
 			return err
 		}
 		if cancel == nil {
@@ -502,7 +515,7 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 			return 0, ErrSignalMismatch
 		}
 	}
-	if err := enqueueRunWithConflictRetry(ctx, c.startOperations().Wait, func(attempt context.Context) error {
+	if err := enqueueRunWithRetry(ctx, c.startOperations().Wait, func(attempt context.Context) error {
 		return port.EnqueueRun(attempt, identity.RunSubject(typ, id, provision.Partitions), []byte(identity.Key(typ, id)), fmt.Sprintf("signal-wakeup:%d", ack.Sequence))
 	}); err != nil {
 		return ack.Sequence, fmt.Errorf("%w: %v", ErrEnqueueUnknown, err)

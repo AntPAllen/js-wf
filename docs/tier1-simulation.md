@@ -1270,3 +1270,18 @@ directly with a long context; it does not simulate SIGSTOP or Run's eight-second
 pass deadline. Separate buckets still lack an atomic coordinator-plus-assignment
 transaction; these controls establish fencing when the takeover changed the
 assignment revisions, not every possible unchanged-assignment race.
+
+
+## Named transient enqueue replies
+
+`enqueue_transport_retry` supplies named no-responder/no-stream replies before
+commit and timeout/deadline replies after commit to production Start/enqueue
+code. Stable IDs must recover without another invocation or retained run within
+the dedup window. Persistent failures exhaust 80 attempts with 1,975 ms of
+virtual waits; matching retry repairs the same generation. Semantic API errors
+fail fast. An unkeyed enqueue control preserves its unknown single-attempt
+outcome. Restoring the prior client fails seed 1. Three pins retain transient
+recovery and semantic rejection, with exact/cross-process replay and a
+100,000-seed pass. A real three-node SDK-boundary contract verifies committed
+and absent publish outcomes and cross-node counts; it does not establish why
+the original startup CI received a no-stream-response reply.

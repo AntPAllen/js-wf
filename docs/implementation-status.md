@@ -1907,3 +1907,48 @@ The repository retains the [summary and raw hosted measurements](scale/cas-throu
 This clears first hosted execution of the 20% gate, not the full fault/release
 requirements. The already-running full Tier 1 campaign at `463ce86` predates
 the new coordinator workload and has not been restarted.
+
+
+## Named transient run-enqueue recovery before fault injection
+
+The [standard CI run at `4fa3119`](https://github.com/AntPAllen/js-wf/actions/runs/36763064009)
+failed its signal four-fault smoke before injecting any scheduled fault. `Start`
+acknowledged the invocation but returned `ErrEnqueueUnknown` with “no response
+from stream”; the test ended at 10.52 seconds. The server-side reason remains
+unconfirmed. The enqueue helper previously retried only API 10158, so a named
+transient response could abandon enqueue confirmation immediately even though
+retrying the same generation-specific message ID was safe.
+
+The shared start/signal enqueue helper now also retries no responders, both
+NATS no-stream-response error types, timeout and a per-attempt deadline while
+the caller context remains live. Other API errors take precedence over named
+transport components and fail immediately. The existing post-error two-second
+window, 25 ms waits and maximum 80 failed attempts remain unchanged; the first
+publish still uses the caller's context. Unkeyed `Client.Enqueue` calls retain
+their single-attempt unknown outcome rather than retrying an ambiguous publish
+without an ID. Exhaustion still returns `ErrEnqueueUnknown` to Start/Signal;
+a matching Start can repair the same invocation, and scanners remain the
+backstop. No successful start, input mismatch or generation semantics changed.
+
+The seven-case `enqueue_transport_retry` workload covers absent no-responder and
+no-stream replies, committed timeout/deadline replies, persistent absent and
+committed failures, and semantic API rejection. It verifies identical message
+IDs across attempts, one invocation, no extra retained run under modeled dedup,
+80-attempt exhaustion at 1,975 ms of virtual waits, and same-generation matching
+retry repair. The unkeyed control requires one attempted/retained publish and no
+wait. Restoring the prior production client through an overlay fails seed 1's
+committed timeout recovery. Pins preserve semantic fail-fast, no-stream response
+and committed timeout cases. Exact/cross-process replay passes.
+
+The 100,000-seed workload passed in 11.59 seconds. Final focused race checks
+passed in 4.63 seconds; the full ordinary simulator and client suites passed in
+74.19 and 0.05 seconds, and the existing pinned corpus passed. Vet/diff checks
+passed. A three-node race contract injects an absent or committed
+no-stream-response result at the SDK publish boundary and requires successful
+Start, matching retry identity and exactly two invocations/two runs across all
+peers for the two independent cases. It passed in 3.56 seconds; the existing
+64-caller same-ID control passed in 3.37 seconds. A fresh signal four-fault
+seed-1 race replay passed in 22.10 seconds with result 42. These establish
+bounded client recovery and a fresh passing interleaving, not the original
+server cause or the full-matrix latency gate. The running extended Tier 1
+campaign predates this new workload and has not been restarted.

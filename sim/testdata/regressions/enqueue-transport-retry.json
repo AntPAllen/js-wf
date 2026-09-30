@@ -1,0 +1,38 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "enqueue_transport_retry",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "deadline_after",
+        "no_responders_before",
+        "no_stream_before",
+        "persistent_after",
+        "persistent_before",
+        "semantic_error",
+        "timeout_after"
+      ],
+      "chosen": "semantic_error"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.enqueue-retry",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_named_error",
+      "subject": "wf.run.62",
+      "data_sha256": "c89765ca75b9ded94b75dcab18ecdbc91ed9f8dc58a40494532c633930c7d88c",
+      "outcome": "nats: API error: code=400 err_code=10052 description=invalid stream configuration\nnats: no responders available for request"
+    }
+  ]
+}

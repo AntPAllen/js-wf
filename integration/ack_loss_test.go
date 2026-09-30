@@ -687,3 +687,34 @@ func TestThousandJournalLostAckRecoveries(t *testing.T) {
 		seen[message.Subject] = true
 	}
 }
+
+func TestStartRepairsTransientEnqueueOnRealCluster(t *testing.T) {
+	all, _ := setup(t)
+	ctx, stop := context.WithTimeout(context.Background(), 20*time.Second)
+	defer stop()
+	for _, committed := range []bool{false, true} {
+		id := fmt.Sprintf("transient-enqueue-%t", committed)
+		runSubject := identity.RunSubject("test", id, provision.Partitions)
+		fault := &ackLossJS{JetStream: all[0], subject: runSubject, dropBeforePublish: !committed, lostErr: jetstream.ErrNoStreamResponse}
+		handle, err := client.New(fault).Start(ctx, "test", id, []byte(`null`))
+		if err != nil || handle.InvSeq == 0 || !fault.fired.Load() {
+			t.Fatalf("committed=%t start=%+v fired=%v err=%v", committed, handle, fault.fired.Load(), err)
+		}
+		retried, err := client.New(all[1]).Start(ctx, "test", id, []byte(`null`))
+		if !errors.Is(err, client.ErrAlreadyStarted) || retried.InvSeq != handle.InvSeq {
+			t.Fatalf("committed=%t matching retry=%+v err=%v", committed, retried, err)
+		}
+	}
+	for i, js := range all {
+		for _, name := range []string{"WF_INV", "WF_RUN"} {
+			stream, err := js.Stream(ctx, name)
+			if err != nil {
+				t.Fatal(err)
+			}
+			info, err := stream.Info(ctx)
+			if err != nil || info.State.Msgs != 2 {
+				t.Fatalf("node=%d stream=%s counts=%+v err=%v", i, name, info, err)
+			}
+		}
+	}
+}
