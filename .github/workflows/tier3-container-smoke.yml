@@ -1,5 +1,7 @@
 name: tier3-container-smoke
 on:
+  schedule:
+    - cron: '17 5 * * *'
   workflow_dispatch:
     inputs:
       sync_interval:
@@ -21,7 +23,7 @@ jobs:
       WF_TIER3_SIGNAL_HISTORY_OUT: tier3-signal-restart-history.jsonl
       WF_TIER3_CONSUMER_HISTORY_OUT: tier3-consumer-leader-history.jsonl
       WF_TIER3_PAUSE_HISTORY_OUT: tier3-worker-pause-history.jsonl
-      WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval }}
+      WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval || '2m' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

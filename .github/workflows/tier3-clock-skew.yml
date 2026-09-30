@@ -1,5 +1,7 @@
 name: tier3-clock-skew
 on:
+  schedule:
+    - cron: '37 5 * * *'
   workflow_dispatch:
     inputs:
       sync_interval:
@@ -13,7 +15,7 @@ jobs:
     timeout-minutes: 12
     env:
       WF_TIER3_CLOCK_SKEW: '1'
-      WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval }}
+      WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval || '2m' }}
       WF_TIER3_SKEW_HISTORY_OUT: tier3-clock-skew-history
     steps:
       - uses: actions/checkout@v4

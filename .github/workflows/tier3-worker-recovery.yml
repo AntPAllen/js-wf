@@ -1,5 +1,7 @@
 name: tier3-worker-recovery
 on:
+  schedule:
+    - cron: '57 5 * * *'
   workflow_dispatch:
     inputs:
       sync_interval:
@@ -13,7 +15,7 @@ jobs:
     timeout-minutes: 8
     env:
       WF_TIER3_CONTAINER: '1'
-      WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval }}
+      WF_TIER3_SYNC_INTERVAL: ${{ inputs.sync_interval || '2m' }}
       WF_TIER3_WORKER_HISTORY_OUT: tier3-worker-kill-history.jsonl
       WF_TIER3_PAUSE_HISTORY_OUT: tier3-worker-pause-history.jsonl
     steps:
