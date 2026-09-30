@@ -81,7 +81,7 @@ type Worker struct {
 // completion gate when an in-flight NAK is lost with the consumer quorum.
 const DefaultAckWait = 20 * time.Second
 
-const defaultHeartbeatInterval = 5 * time.Second
+const defaultHeartbeatInterval = 3 * time.Second
 
 // CancellationPollPort reads the latest durable cancel signal for one subject.
 type CancellationPollPort interface {

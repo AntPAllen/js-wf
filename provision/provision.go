@@ -15,9 +15,9 @@ import (
 const Partitions uint32 = 64
 
 // LeaseTTL leaves room for a worker-kill takeover inside the 30-second fault
-// recovery gate. Workers renew every five seconds; an older bucket with a
+// recovery gate. Workers renew every three seconds; an older bucket with a
 // different TTL fails the exact configuration check below.
-const LeaseTTL = 20 * time.Second
+const LeaseTTL = 12 * time.Second
 
 type TimerBackend string
 

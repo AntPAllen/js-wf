@@ -45,7 +45,7 @@ func TestProvisionRejectsOldLeaseTTL(t *testing.T) {
 		}
 	}
 	cfg := status.Config()
-	cfg.TTL = 30 * time.Second
+	cfg.TTL = 20 * time.Second
 	if _, err := all[0].UpdateKeyValue(ctx, cfg); err != nil {
 		t.Fatalf("set old lease TTL: %v", err)
 	}

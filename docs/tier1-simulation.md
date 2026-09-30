@@ -33,16 +33,17 @@ this is one workload, not the full Tier 1 release gate.
 
 A pinned worker-kill lease trace now reproduces the five-container recovery
 floor using the production `lease.Acquire` and `journal.Append` decisions over
-virtual transports. The replacement receives `ErrHeld` at 19,999 ms after
-the killed owner's last lease write, acquires at the provisioned 20,000 ms
+virtual transports. The replacement receives `ErrHeld` at 11,999 ms after
+the killed owner's last lease write, acquires at the provisioned 12,000 ms
 TTL, and appends one step outcome and terminal entry under a higher epoch.
 At virtual 45,000 ms, the paused old owner resumes: production `lease.Renew`
 returns `ErrLost`, its stale production journal append returns `ErrStale`,
 and the four retained entries remain unchanged. The trace is pinned in
 `sim/testdata/regressions/worker-pause-lease.json`; exact disk replay and a
-focused race run pass. The earlier 30-second trace explained the old 31.1-second
-recovery; this trace tracks the new 20-second lease and observed 21-second
-recovery without attributing its remaining delay to NATS. Process signals
+focused race run pass. Earlier 30-second and 20-second traces corresponded to
+31.1-second and 21-second observed recoveries. The current 12-second trace
+proves the modeled lease boundary; real recovery at this TTL is measured
+separately. Process signals
 and server behavior remain outside the model.
 
 The production `journal.Store.Read` can now load a compacted prefix through a
