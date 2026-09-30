@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"js-wf/journal"
+	"js-wf/lease"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -13,17 +14,20 @@ import (
 // It does not distinguish server execution from network or client time. No
 // invocation inputs, signal contents or step results are included.
 type OperationEvent struct {
-	At           time.Time
-	Duration     time.Duration
-	Worker       string
-	Type         string
-	ID           string
-	RunSequence  uint64
-	Delivery     uint64
-	Operation    string
-	JournalIndex uint64
-	JournalKind  journal.Kind
-	Error        string
+	At                   time.Time
+	Duration             time.Duration
+	Worker               string
+	Type                 string
+	ID                   string
+	RunSequence          uint64
+	Delivery             uint64
+	Operation            string
+	JournalIndex         uint64
+	JournalKind          journal.Kind
+	Error                string
+	LeaseGateWait        time.Duration
+	LeaseUpdateDuration  time.Duration
+	LeaseUpdateAttempted bool
 }
 
 // WithOperationObserver enables optional per-call timings. The callback may
@@ -59,7 +63,7 @@ func (o *deliveryOperations) begin() time.Time {
 	return o.now()
 }
 
-func (o *deliveryOperations) finish(start time.Time, name string, index uint64, kind journal.Kind, err error) {
+func (o *deliveryOperations) finish(start time.Time, name string, index uint64, kind journal.Kind, err error, renewals ...lease.RenewalTiming) {
 	if o == nil {
 		return
 	}
@@ -69,6 +73,11 @@ func (o *deliveryOperations) finish(start time.Time, name string, index uint64, 
 	event.Operation, event.JournalIndex, event.JournalKind = name, index, kind
 	if err != nil {
 		event.Error = err.Error()
+	}
+	if len(renewals) > 0 {
+		event.LeaseGateWait = renewals[0].GateWait
+		event.LeaseUpdateDuration = renewals[0].Update
+		event.LeaseUpdateAttempted = renewals[0].UpdateAttempted
 	}
 	o.emit(event)
 }
@@ -97,4 +106,12 @@ func (p observedSignalDrain) SignalBlob(ctx context.Context, name string) ([]byt
 	data, err := p.SignalDrainPort.SignalBlob(ctx, name)
 	p.operations.finish(started, "signal_blob_read", 0, "", err)
 	return data, err
+}
+
+func (o *deliveryOperations) renew(ctx context.Context, l *lease.Lease, minIdle time.Duration) (bool, lease.RenewalTiming, error) {
+	if o != nil {
+		return l.RenewTimed(ctx, minIdle)
+	}
+	updated, err := l.RenewIfIdle(ctx, minIdle)
+	return updated, lease.RenewalTiming{}, err
 }

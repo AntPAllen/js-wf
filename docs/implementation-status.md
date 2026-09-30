@@ -1784,3 +1784,48 @@ completed successfully: 100,000 seeds per workload, 6,900,604 schedules,
 Go test time. It includes both cleanup fixes and manual-owner drain but predates
 consumer-creation retries and heartbeat reuse. Those additions require fresh
 full-suite release-count validation.
+
+
+## Lease operation timings distinguish gate waits and update calls
+
+Optional worker operation events now include `LeaseGateWait`,
+`LeaseUpdateDuration` and `LeaseUpdateAttempted` for append, heartbeat and timer
+renewals. `lease.RenewTimed` executes the same revision decision as ordinary
+renewal; observation-disabled workers use the unmeasured path. The gate duration
+includes local wait for the cancellable revision gate; update duration surrounds
+only the KV port call. KV time still includes NATS client/network work, and the
+whole event contains both sub-durations, so their sums are not independent
+invocation latency or server execution time.
+
+The existing gate-cancellation workload now verifies one virtual millisecond
+behind a held renewal and no attempted KV update for a canceled contender. The
+held renewal accounts for one millisecond in its update call, including the
+failed-transport branch. The signal-write workload verifies zero gate wait and
+exactly its seeded per-call delay in all fifty append renewals. Both workloads
+passed 100,000 seeds each in a combined 153.19 seconds. Focused race tests and
+the complete existing pinned corpus passed in 15.99 seconds, with exact and
+cross-process replay still producing unchanged transport transcripts. Full
+ordinary simulator, lease and worker suites passed in 118.99, 3.69 and 13.62
+seconds while the release-count workload ran concurrently. Vet and diff checks
+passed.
+
+A fresh real seed-4 four-fault race replay passed in 61.40 seconds with terminal
+p99 16.88 seconds across 28 invocations. Its artifact records nine recent-renewal
+heartbeats that attempted no KV update: their total gate wait was 1.00 second.
+Across 391 append renewals, total gate wait was 2.44 seconds and total KV-call
+time 87.72 seconds, with maxima of 0.40 and 0.56 seconds respectively. Fifteen
+actual heartbeat renewals included a KV call lasting 3.00044 seconds; their
+maximum gate wait was 0.20 seconds. These totals span concurrent invocations and
+calls; they are not one invocation's critical path. This shows measured transport
+call time and local gate time separately in a new passing interleaving. It does
+not explain the earlier seed-4 CI failure, which had no such sub-durations, or
+prove that server execution caused the slow requests. The unchanged mixed p99
+and full-matrix gates remain open.
+
+The [twenty-seed mixed campaign at `758dd25`](https://github.com/AntPAllen/js-wf/actions/runs/36760462707)
+and its [focused mutation gate](https://github.com/AntPAllen/js-wf/actions/runs/36760462680)
+completed successfully. The newly dispatched extended Tier 1 campaign
+[36762005726](https://github.com/AntPAllen/js-wf/actions/runs/36762005726) is
+confirmed in progress at `463ce86`; it has not been restarted. That run includes
+heartbeat reuse and consumer creation retries, but predates these additional
+timing assertions.

@@ -1231,3 +1231,22 @@ Both workloads passed 100,000 seeds with exact/cross-process replay. Pins retain
 the delayed-acknowledgement, lost-owner and integrated two-heartbeat cases.
 These controls prove transport-call reduction for that virtual interleaving,
 not a general explanation of observed NATS request delay or a mixed p99 pass.
+
+
+## Separating lease gate waits from update calls
+
+When operation observation is enabled, `lease.RenewTimed` supplies the same
+renewal decision plus gate-wait duration, KV-update duration and whether an update
+was attempted. Worker heartbeat, append and timer renewal events include those
+values as `LeaseGateWait`, `LeaseUpdateDuration` and `LeaseUpdateAttempted`.
+The whole event duration contains these sub-durations; adding all three double
+counts time. A KV update still includes NATS client work and network time, so a
+long update alone does not establish a server-side cause.
+
+The existing gate-cancellation replay checks one virtual millisecond waiting
+behind a held renewal, zero update time and no transport attempt for the canceled
+waiter. The held renewal independently accounts for one virtual millisecond in
+its update call and zero gate wait, including its lost-transport case. The signal
+latency workload checks each of its 50 append renewals has zero gate wait and
+exactly the seeded delay in the update call. Observation adds no scheduler
+choices or transport events; the pinned traces remain unchanged.

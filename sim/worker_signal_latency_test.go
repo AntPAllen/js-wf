@@ -171,6 +171,9 @@ func runWorkerSignalWriteLatency(seed int64, replay *Trace) (trace Trace, runErr
 		if event.Worker != "signal-cost-worker" || event.Type != typ || event.ID != id || event.RunSequence == 0 || event.Delivery != 1 || event.Error != "" {
 			return trace, fmt.Errorf("operation identity/outcome: %+v", event)
 		}
+		if event.Operation == "lease_renew_append" && (event.LeaseGateWait != 0 || event.LeaseUpdateDuration != time.Duration(delay)*time.Millisecond || !event.LeaseUpdateAttempted) {
+			return trace, fmt.Errorf("renewal timing accounting: %+v", event)
+		}
 		counts[event.Operation]++
 		measured += event.Duration
 		if event.Operation == "journal_append" || event.Operation == "lease_renew_append" {

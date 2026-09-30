@@ -90,7 +90,12 @@ func runLeaseGateCancellation(seed int64, replay *Trace) (trace Trace, runErr er
 	unblock := func() { once.Do(func() { close(port.released) }) }
 	defer unblock()
 	leader := make(chan error, 1)
-	go func() { leader <- owner.Renew(context.Background()) }()
+	var leaderTiming lease.RenewalTiming
+	go func() {
+		_, timing, err := owner.RenewTimed(context.Background(), 0)
+		leaderTiming = timing
+		leader <- err
+	}()
 	select {
 	case <-port.entered:
 	case <-time.After(time.Second):
@@ -101,10 +106,13 @@ func runLeaseGateCancellation(seed int64, replay *Trace) (trace Trace, runErr er
 	defer cancel()
 	waiterCtx := &cacheWaitContext{Context: base, waiting: make(chan struct{}), deadline: kind == "deadline"}
 	waiter := make(chan error, 1)
+	var waiterTiming lease.RenewalTiming
 	call := func(ctx context.Context) error {
 		switch operation {
 		case "renew":
-			return owner.Renew(ctx)
+			_, timing, err := owner.RenewTimed(ctx, 0)
+			waiterTiming = timing
+			return err
 		case "release":
 			return owner.Release(ctx)
 		default:
@@ -133,6 +141,9 @@ func runLeaseGateCancellation(seed int64, replay *Trace) (trace Trace, runErr er
 	case <-time.After(time.Second):
 		return trace, fmt.Errorf("canceled lease waiter remained behind held renewal")
 	}
+	if operation == "renew" && (waiterTiming.GateWait != time.Millisecond || waiterTiming.Update != 0 || waiterTiming.UpdateAttempted) {
+		return trace, fmt.Errorf("canceled gate timing: %+v", waiterTiming)
+	}
 	if port.calls.Load() != 2 || port.requests.Load() != 3 {
 		return trace, fmt.Errorf("canceled waiter reached update transport: calls=%d", port.calls.Load())
 	}
@@ -145,6 +156,9 @@ func runLeaseGateCancellation(seed int64, replay *Trace) (trace Trace, runErr er
 		}
 	case <-time.After(time.Second):
 		return trace, fmt.Errorf("held renewal did not finish")
+	}
+	if leaderTiming.GateWait != 0 || leaderTiming.Update != time.Millisecond || !leaderTiming.UpdateAttempted {
+		return trace, fmt.Errorf("held update timing: %+v", leaderTiming)
 	}
 	schedule.RecordTransport(TransportEvent{Operation: "lease_gate_owner", Outcome: mode, AtMillis: schedule.NowMillis()})
 	if err := call(waiterCtx); !errors.Is(err, want) {

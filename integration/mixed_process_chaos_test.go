@@ -861,7 +861,7 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 			}
 			operationMu.Unlock()
 			for _, event := range selectedOperations {
-				t.Logf("slow %s/%s operation worker=%s name=%s run_seq=%d delivery=%d index=%d kind=%s since_enabled=%s duration=%s err=%s", typ, id, event.Worker, event.Operation, event.RunSequence, event.Delivery, event.JournalIndex, event.JournalKind, event.At.Sub(enabled), event.Duration, event.Error)
+				t.Logf("slow %s/%s operation worker=%s name=%s run_seq=%d delivery=%d index=%d kind=%s since_enabled=%s duration=%s lease_gate=%s lease_update=%s lease_update_attempted=%t err=%s", typ, id, event.Worker, event.Operation, event.RunSequence, event.Delivery, event.JournalIndex, event.JournalKind, event.At.Sub(enabled), event.Duration, event.LeaseGateWait, event.LeaseUpdateDuration, event.LeaseUpdateAttempted, event.Error)
 			}
 			attempt, stop := context.WithTimeout(ctx, 5*time.Second)
 			records, _, readErr := journal.New(third).Read(attempt, typ, id)

@@ -606,22 +606,19 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 				}
 				started := ops.begin()
 				renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
-				var err error
-				renewed := true
-				// Establish the first heartbeat with an unconditional write; later
-				// ticks may reuse a recent append or heartbeat acknowledgement.
+				minIdle := w.heartbeatInterval
+				// Establish the first heartbeat with an unconditional write.
 				if !heartbeatPrimed {
-					err = l.Renew(renewCtx)
-				} else {
-					renewed, err = l.RenewIfIdle(renewCtx, w.heartbeatInterval)
+					minIdle = 0
 				}
+				renewed, timing, err := ops.renew(renewCtx, l, minIdle)
 				heartbeatPrimed = true
 				stopRenew()
 				operation := "lease_renew_heartbeat"
 				if err == nil && !renewed {
 					operation = "lease_heartbeat_recent"
 				}
-				ops.finish(started, operation, 0, "", err)
+				ops.finish(started, operation, 0, "", err, timing)
 				if err != nil {
 					if errors.Is(err, lease.ErrLost) {
 						leaseLost.Store(true)
@@ -765,9 +762,9 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		}
 		started := ops.begin()
 		renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
-		err := l.Renew(renewCtx)
+		_, timing, err := ops.renew(renewCtx, l, 0)
 		stopRenew()
-		ops.finish(started, "lease_renew_append", uint64(len(records)), kind, err)
+		ops.finish(started, "lease_renew_append", uint64(len(records)), kind, err, timing)
 		if err != nil {
 			return err
 		}
@@ -886,9 +883,9 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	wctx.SetTimerSupport(wakeupAt, func(ctx context.Context) (time.Time, error) { return w.serverNow(ctx) }, func(ctx context.Context, step uint64, fireAt time.Time) error {
 		started := ops.begin()
 		renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
-		err := l.Renew(renewCtx)
+		_, timing, err := ops.renew(renewCtx, l, 0)
 		stopRenew()
-		ops.finish(started, "lease_renew_timer", step, "", err)
+		ops.finish(started, "lease_renew_timer", step, "", err, timing)
 		if err != nil {
 			return err
 		}

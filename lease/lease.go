@@ -192,7 +192,7 @@ func (l *Lease) lock(ctx context.Context) error {
 func (l *Lease) unlock() { <-l.gate }
 
 func (l *Lease) Renew(ctx context.Context) error {
-	_, err := l.renew(ctx, 0)
+	_, err := l.renew(ctx, 0, nil)
 	return err
 }
 
@@ -200,12 +200,36 @@ func (l *Lease) Renew(ctx context.Context) error {
 // started less than minIdle ago. Journal writers must still call Renew before
 // every append. The returned bool reports whether a KV update was attempted.
 func (l *Lease) RenewIfIdle(ctx context.Context, minIdle time.Duration) (bool, error) {
-	return l.renew(ctx, minIdle)
+	return l.renew(ctx, minIdle, nil)
 }
 
-func (l *Lease) renew(ctx context.Context, minIdle time.Duration) (bool, error) {
-	if err := l.lock(ctx); err != nil {
-		return false, err
+// RenewalTiming separates local revision-gate waiting from the KV Update call.
+// KV duration includes client/network time and is not server execution time.
+type RenewalTiming struct {
+	GateWait        time.Duration
+	Update          time.Duration
+	UpdateAttempted bool
+}
+
+// RenewTimed makes the same decision as RenewIfIdle, with optional diagnostics.
+// minIdle=0 keeps renewal unconditional. Durations use the transport clock.
+func (l *Lease) RenewTimed(ctx context.Context, minIdle time.Duration) (bool, RenewalTiming, error) {
+	var timing RenewalTiming
+	updated, err := l.renew(ctx, minIdle, &timing)
+	return updated, timing, err
+}
+
+func (l *Lease) renew(ctx context.Context, minIdle time.Duration, timing *RenewalTiming) (bool, error) {
+	var gateStarted time.Time
+	if timing != nil {
+		gateStarted = l.store.operations().Now()
+	}
+	lockErr := l.lock(ctx)
+	if timing != nil {
+		timing.GateWait = l.store.operations().Now().Sub(gateStarted)
+	}
+	if lockErr != nil {
+		return false, lockErr
 	}
 	defer l.unlock()
 	if l.lost {
@@ -218,7 +242,15 @@ func (l *Lease) renew(ctx context.Context, minIdle time.Duration) (bool, error) 
 		return false, nil
 	}
 	data, _ := json.Marshal(l.value)
+	var updateStarted time.Time
+	if timing != nil {
+		updateStarted = port.Now()
+		timing.UpdateAttempted = true
+	}
 	rev, err := port.Update(ctx, l.key, data, l.revision)
+	if timing != nil {
+		timing.Update = port.Now().Sub(updateStarted)
+	}
 	if err != nil {
 		l.lost = true
 		return true, fmt.Errorf("%w: %v", ErrLost, err)
