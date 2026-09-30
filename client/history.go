@@ -95,3 +95,13 @@ func awaitStatus(err error, terminalFailed bool) string {
 		return "error"
 	}
 }
+
+// A generic failure before PublishSignal cannot have appended a queue entry.
+// Keep recognized outcomes and every post-publication failure unchanged.
+func observedSignalStatus(err error, publishAttempted bool) string {
+	status := signalStatus(err)
+	if status == "error" && !publishAttempted {
+		return "not_published"
+	}
+	return status
+}

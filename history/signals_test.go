@@ -27,6 +27,8 @@ func TestSignalModel(t *testing.T) {
 		ops  []client.Operation
 		want porcupine.CheckResult
 	}{
+		{"pre-publication timeout has no queue effect", []client.Operation{operation(0, time.Millisecond, "one", "hash-a", "not_published", 0), operation(2*time.Millisecond, 3*time.Millisecond, "one", "hash-b", "signaled", 10)}, porcupine.Ok},
+		{"pre-publication failure cannot claim a sequence", []client.Operation{operation(0, time.Millisecond, "one", "hash-a", "not_published", 10)}, porcupine.Illegal},
 		{"ordered and idempotent", []client.Operation{first, second, duplicate, mismatch}, porcupine.Ok},
 		{"reverse sequence", []client.Operation{operation(0, time.Millisecond, "one", "hash-a", "signaled", 12), operation(2*time.Millisecond, 3*time.Millisecond, "two", "hash-b", "signaled", 10)}, porcupine.Illegal},
 		{"duplicate changed sequence", []client.Operation{first, operation(2*time.Millisecond, 3*time.Millisecond, "one", "hash-a", "signaled", 11)}, porcupine.Illegal},
@@ -36,6 +38,9 @@ func TestSignalModel(t *testing.T) {
 		{"uncertain absent", []client.Operation{unknown, operation(10*time.Millisecond, 11*time.Millisecond, "three", "hash-e", "signaled", 14)}, porcupine.Ok},
 		{"uncertain before later append", []client.Operation{unknown, operation(10*time.Millisecond, 11*time.Millisecond, "four", "hash-e", "signaled", 16), operation(12*time.Millisecond, 13*time.Millisecond, "three", "hash-d", "signaled", 14)}, porcupine.Ok},
 		{"uncertain cannot precede lower sequence", []client.Operation{first, unknown, operation(10*time.Millisecond, 11*time.Millisecond, "three", "hash-d", "signaled", 9)}, porcupine.Illegal},
+		{"distinct keys across windows", []client.Operation{first, operation(3*time.Minute, 3*time.Minute+time.Millisecond, "two", "hash-b", "signaled", 12)}, porcupine.Ok},
+		{"reverse order across windows", []client.Operation{first, operation(3*time.Minute, 3*time.Minute+time.Millisecond, "two", "hash-b", "signaled", 9)}, porcupine.Illegal},
+		{"distinct keys share sequence across windows", []client.Operation{first, operation(3*time.Minute, 3*time.Minute+time.Millisecond, "two", "hash-b", "signaled", 10)}, porcupine.Illegal},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -48,5 +53,21 @@ func TestSignalModel(t *testing.T) {
 	long := []client.Operation{first, operation(3*time.Minute, 3*time.Minute+time.Millisecond, "one", "hash-a", "signaled", 10)}
 	if got, err := CheckSignals(long, time.Second); got != porcupine.Unknown || err == nil {
 		t.Fatalf("expired dedup window: check=%s err=%v", got, err)
+	}
+	for _, mutate := range []func(*signalInput){
+		func(input *signalInput) { input.ID = "another" },
+		func(input *signalInput) { input.Name = "another" },
+		func(input *signalInput) { input.InvSeq++ },
+	} {
+		later := operation(3*time.Minute, 3*time.Minute+time.Millisecond, "one", "hash-a", "signaled", 12)
+		var input signalInput
+		if err := json.Unmarshal(later.Args, &input); err != nil {
+			t.Fatal(err)
+		}
+		mutate(&input)
+		later.Args, _ = json.Marshal(input)
+		if got, err := CheckSignals([]client.Operation{first, later}, time.Second); got != porcupine.Ok || err != nil {
+			t.Fatalf("distinct identity across windows: check=%s err=%v", got, err)
+		}
 	}
 }

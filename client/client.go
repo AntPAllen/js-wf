@@ -298,11 +298,6 @@ func enqueueRunWithConflictRetry(ctx context.Context, wait func(context.Context,
 	attemptCtx := ctx
 	conflicts := 0
 	var cancel context.CancelFunc
-	defer func() {
-		if cancel != nil {
-			cancel()
-		}
-	}()
 	for {
 		err := enqueue(attemptCtx)
 		var apiErr *jetstream.APIError
@@ -315,6 +310,7 @@ func enqueueRunWithConflictRetry(ctx context.Context, wait func(context.Context,
 		}
 		if cancel == nil {
 			attemptCtx, cancel = context.WithTimeout(ctx, 2*time.Second)
+			defer cancel()
 		}
 		if err := wait(attemptCtx, 25*time.Millisecond); err != nil {
 			return err
@@ -391,6 +387,7 @@ func (c *Client) Cancel(ctx context.Context, typ, id string) (uint64, error) {
 
 func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byte, idempotencyKey string, expectedInvSeq uint64, operation string, requireRunning bool) (sequence uint64, err error) {
 	var observedInvSeq uint64
+	publishAttempted := false
 	if c.observer != nil {
 		started := time.Now()
 		payloadHash := hashBytes(payload)
@@ -406,7 +403,7 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 			}{typ, id, name, payloadHash, idempotencyKey, observedInvSeq, requireRunning}, struct {
 				Status    string `json:"status"`
 				SignalSeq uint64 `json:"signal_seq"`
-			}{signalStatus(err), sequence}, err)
+			}{observedSignalStatus(err, publishAttempted), sequence}, err)
 		}()
 	}
 	if err := identity.Validate(typ, id); err != nil {
@@ -482,6 +479,7 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 		m.Header.Set("Wf-Signal-Ref", key)
 	}
 	messageID := "signal:" + typ + ":" + id + ":" + strconv.FormatUint(invocation.Sequence, 10) + ":" + name + ":" + idempotencyKey
+	publishAttempted = true
 	ack, err := port.PublishSignal(ctx, m, messageID)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %v", ErrSignalUnknown, err)

@@ -33,15 +33,40 @@ import (
 )
 
 type matrixLeaderFault struct {
-	Scheduled time.Time `json:"scheduled"`
-	Killed    time.Time `json:"killed"`
-	Healed    time.Time `json:"healed"`
-	Node      int       `json:"node"`
+	Scheduled  time.Time `json:"scheduled"`
+	Killed     time.Time `json:"killed"`
+	Healed     time.Time `json:"healed"`
+	Node       int       `json:"node"`
+	Consumer   string    `json:"consumer,omitempty"`
+	Pending    uint64    `json:"pending,omitempty"`
+	AckPending int       `json:"ack_pending,omitempty"`
+}
+
+type matrixLatencySample struct {
+	Type     string        `json:"type"`
+	ID       string        `json:"id"`
+	Event    string        `json:"event"`
+	Enabled  time.Time     `json:"enabled"`
+	Observed time.Time     `json:"observed"`
+	Delay    time.Duration `json:"delay_ns"`
 }
 
 // One sustained row of the release matrix. Shortened runs are smoke evidence;
 // the default exercises ten minutes on the same stores and worker fleet.
 func TestMixedMatrixJournalLeaderEveryThirtySeconds(t *testing.T) {
+	runMixedMatrixLeader(t, false)
+}
+
+func TestMixedMatrixConsumerLeaderEveryThirtySeconds(t *testing.T) {
+	runMixedMatrixLeader(t, true)
+}
+
+func runMixedMatrixLeader(t *testing.T, consumerRow bool) {
+	t.Helper()
+	row := "journal_leader"
+	if consumerRow {
+		row = "consumer_leader"
+	}
 	if os.Getenv("WF_MATRIX_CHAOS") != "1" {
 		t.Skip("set WF_MATRIX_CHAOS=1 for sustained mixed matrix chaos")
 	}
@@ -94,6 +119,7 @@ func TestMixedMatrixJournalLeaderEveryThirtySeconds(t *testing.T) {
 	var recorder history.Recorder
 	var dispatchMu sync.Mutex
 	var dispatch []worker.DispatchEvent
+	var latencySamples []matrixLatencySample
 	c := client.NewObserved(js, &recorder)
 	var faults []matrixLeaderFault
 	var faultsMu sync.Mutex
@@ -139,6 +165,13 @@ func TestMixedMatrixJournalLeaderEveryThirtySeconds(t *testing.T) {
 		if err != nil {
 			t.Errorf("fault artifact: %v", err)
 		}
+		data, err = json.MarshalIndent(latencySamples, "", "  ")
+		if err == nil {
+			err = os.WriteFile(prefix+"-latencies.json", append(data, '\n'), 0644)
+		}
+		if err != nil {
+			t.Errorf("latency artifact: %v", err)
+		}
 		if t.Failed() {
 			for i := range urls {
 				if data, err := os.ReadFile(cluster.LogPath(i)); err == nil {
@@ -180,6 +213,7 @@ func TestMixedMatrixJournalLeaderEveryThirtySeconds(t *testing.T) {
 	faultCtx, stopFault := context.WithCancel(ctx)
 	faultDone := make(chan error, 1)
 	faultExited := make(chan struct{})
+	faultRNG := rand.New(rand.NewSource(seed ^ 0x6c6561646572))
 	go func() {
 		defer close(faultExited)
 		defer close(faultDone)
@@ -192,7 +226,13 @@ func TestMixedMatrixJournalLeaderEveryThirtySeconds(t *testing.T) {
 				return
 			case <-timer.C:
 			}
-			event, err := killMatrixJournalLeader(faultCtx, js, cluster, scheduled)
+			var event matrixLeaderFault
+			var err error
+			if consumerRow {
+				event, err = killMatrixConsumerLeader(faultCtx, js, cluster, scheduled, faultRNG)
+			} else {
+				event, err = killMatrixJournalLeader(faultCtx, js, cluster, scheduled)
+			}
 			faultsMu.Lock()
 			faults = append(faults, event)
 			faultsMu.Unlock()
@@ -201,13 +241,14 @@ func TestMixedMatrixJournalLeaderEveryThirtySeconds(t *testing.T) {
 				cancel()
 				return
 			}
-			t.Logf("journal leader fault node=%d scheduled=%s killed=%s healed=%s", event.Node, event.Scheduled.Sub(start), event.Killed.Sub(start), event.Healed.Sub(start))
+			t.Logf("%s fault node=%d consumer=%s pending=%d ack_pending=%d scheduled=%s killed=%s healed=%s", row, event.Node, event.Consumer, event.Pending, event.AckPending, event.Scheduled.Sub(start), event.Killed.Sub(start), event.Healed.Sub(start))
 		}
 	}()
 	defer func() { stopFault(); <-faultExited }()
 	rng := rand.New(rand.NewSource(seed))
 	var latencies []time.Duration
 	latenciesByType := map[string][]time.Duration{}
+	progressByType := map[string][]time.Duration{}
 	batches := 0
 	for time.Now().Before(end) {
 		select {
@@ -310,19 +351,27 @@ func TestMixedMatrixJournalLeaderEveryThirtySeconds(t *testing.T) {
 		}
 		parts := strings.Split(msg.Subject, ".")
 		attempt, done := context.WithTimeout(ctx, 20*time.Second)
-		latency, err := matrixTerminalLatency(attempt, js, parts[2], parts[3], msg.Time, completionDeadline)
+		samples, err := matrixInvocationLatencies(attempt, js, parts[2], parts[3], msg.Time, completionDeadline)
 		done()
 		if err != nil {
 			t.Fatal(err)
 		}
-		latencies = append(latencies, latency)
-		latenciesByType[parts[2]] = append(latenciesByType[parts[2]], latency)
+		latencySamples = append(latencySamples, samples...)
+		for _, sample := range samples {
+			if sample.Event == "terminal" {
+				latencies = append(latencies, sample.Delay)
+				latenciesByType[parts[2]] = append(latenciesByType[parts[2]], sample.Delay)
+			} else {
+				progressByType[parts[2]] = append(progressByType[parts[2]], sample.Delay)
+			}
+		}
 	}
 	report, err := matrixRetainedAudit(ctx, js)
 	want := batches * 28
 	if err != nil || report.Invocations != want || report.Journals != want || report.Terminal != want {
 		t.Fatalf("mixed retained state=%+v want=%d err=%v", report, want, err)
 	}
+	t.Logf("MATRIX_RETAINED row=%s report=%+v expected_invocations=%d", row, report, want)
 	for _, check := range []func([]client.Operation, time.Duration) (porcupine.CheckResult, error){history.CheckStarts, history.CheckSignals, history.CheckResults} {
 		result, err := check(recorder.Snapshot(), 30*time.Second)
 		if err != nil || result != porcupine.Ok {
@@ -331,7 +380,7 @@ func TestMixedMatrixJournalLeaderEveryThirtySeconds(t *testing.T) {
 	}
 	sort.Slice(latencies, func(i, j int) bool { return latencies[i] < latencies[j] })
 	p99 := latencies[(len(latencies)*99+99)/100-1]
-	t.Logf("MATRIX_RESULT row=journal_leader seed=%d duration=%s release_duration=%t batches=%d invocations=%d faults=%d terminal_p99=%s", seed, duration, duration == 10*time.Minute, batches, want, len(faults), p99)
+	t.Logf("MATRIX_RESULT row=%s seed=%d duration=%s release_duration=%t batches=%d invocations=%d faults=%d terminal_p99=%s", row, seed, duration, duration == 10*time.Minute, batches, want, len(faults), p99)
 	if p99 >= 30*time.Second {
 		t.Fatalf("terminal p99=%s, want <30s", p99)
 	}
@@ -345,6 +394,19 @@ func TestMixedMatrixJournalLeaderEveryThirtySeconds(t *testing.T) {
 		t.Logf("MATRIX_CELL type=%s invocations=%d terminal_p99=%s", typ, len(values), p99)
 		if p99 >= 30*time.Second {
 			t.Errorf("%s terminal p99=%s, want <30s", typ, p99)
+		}
+		progress := progressByType[typ]
+		sort.Slice(progress, func(i, j int) bool { return progress[i] < progress[j] })
+		progressP99 := progress[(len(progress)*99+99)/100-1]
+		var aboveThirty int
+		for _, delay := range progress {
+			if delay >= 30*time.Second {
+				aboveThirty++
+			}
+		}
+		t.Logf("MATRIX_PROGRESS type=%s enabled_events=%d progress_p99=%s progress_max=%s above_30s=%d", typ, len(progress), progressP99, progress[len(progress)-1], aboveThirty)
+		if progressP99 >= 30*time.Second {
+			t.Errorf("%s progress p99=%s, want <30s", typ, progressP99)
 		}
 	}
 	run, err := js.Stream(ctx, "WF_RUN")
@@ -515,32 +577,145 @@ func killMatrixJournalLeader(ctx context.Context, js jetstream.JetStream, cluste
 	return event, fmt.Errorf("journal leader recovery: %w", attempt.Err())
 }
 
-func matrixTerminalLatency(ctx context.Context, js jetstream.JetStream, typ, id string, enabled, completionDeadline time.Time) (time.Duration, error) {
+func killMatrixConsumerLeader(ctx context.Context, js jetstream.JetStream, cluster *testcluster.ProcessCluster, scheduled time.Time, rng *rand.Rand) (matrixLeaderFault, error) {
+	event := matrixLeaderFault{Scheduled: scheduled, Node: -1}
+	bound, stop := context.WithTimeout(ctx, 20*time.Second)
+	defer stop()
+	stream, err := js.Stream(bound, "WF_RUN")
+	if err != nil {
+		return event, err
+	}
+	var selected jetstream.Consumer
+	var selectedInfo *jetstream.ConsumerInfo
+	// Prefer a consumer with live deliveries; if all are idle, record the
+	// selected durable explicitly so that an idle fault is visible in evidence.
+	for _, partition := range rng.Perm(int(provision.Partitions)) {
+		attempt, done := context.WithTimeout(bound, 2*time.Second)
+		consumer, err := stream.Consumer(attempt, fmt.Sprintf("WF_P_%02d", partition))
+		done()
+		if errors.Is(err, jetstream.ErrConsumerNotFound) {
+			continue
+		}
+		if err != nil {
+			return event, err
+		}
+		info := consumer.CachedInfo()
+		if info == nil || info.Cluster == nil || info.Cluster.Leader == "" {
+			return event, fmt.Errorf("consumer has no confirmed leader: %+v", info)
+		}
+		if selected == nil || info.NumPending > 0 || info.NumAckPending > 0 {
+			selected, selectedInfo = consumer, info
+		}
+		if info.NumPending > 0 || info.NumAckPending > 0 {
+			break
+		}
+	}
+	if selected == nil {
+		return event, fmt.Errorf("no durable consumer found")
+	}
+	node, err := strconv.Atoi(strings.TrimPrefix(selectedInfo.Cluster.Leader, "wf-process-"))
+	if err != nil || node < 0 || node >= 3 {
+		return event, fmt.Errorf("unknown consumer leader %q", selectedInfo.Cluster.Leader)
+	}
+	event.Node, event.Consumer = node, selectedInfo.Name
+	event.Pending, event.AckPending = selectedInfo.NumPending, selectedInfo.NumAckPending
+	event.Killed = time.Now()
+	if err := cluster.KillNode(node); err != nil {
+		return event, err
+	}
+	if err := cluster.RestartNode(node); err != nil {
+		return event, err
+	}
+	for bound.Err() == nil {
+		attempt, done := context.WithTimeout(bound, time.Second)
+		info, err := selected.Info(attempt)
+		done()
+		ready := err == nil && info.Cluster != nil && info.Cluster.Leader != "" && len(info.Cluster.Replicas) == 2
+		if ready {
+			for _, peer := range info.Cluster.Replicas {
+				ready = ready && peer.Current && !peer.Offline
+			}
+		}
+		if ready {
+			event.Healed = time.Now()
+			return event, nil
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	return event, fmt.Errorf("consumer leader recovery: %w", bound.Err())
+}
+
+func matrixInvocationLatencies(ctx context.Context, js jetstream.JetStream, typ, id string, enabled, completionDeadline time.Time) ([]matrixLatencySample, error) {
 	records, _, err := journal.New(js).Read(ctx, typ, id)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	stream, err := js.Stream(ctx, "WF_JRN")
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	for _, record := range records {
+	times := make([]time.Time, len(records))
+	for i, record := range records {
+		msg, err := stream.GetMsg(ctx, record.Sequence)
+		if err != nil {
+			return nil, err
+		}
+		times[i] = msg.Time
+	}
+	var samples []matrixLatencySample
+	progress := func(event string, at time.Time) error {
+		for _, observed := range times {
+			if !observed.Before(at) {
+				samples = append(samples, matrixLatencySample{Type: typ, ID: id, Event: event, Enabled: at, Observed: observed, Delay: observed.Sub(at)})
+				return nil
+			}
+		}
+		return fmt.Errorf("%s/%s has no journal progress after %s at %s", typ, id, event, at)
+	}
+	if err := progress("start", enabled); err != nil {
+		return nil, err
+	}
+	for index, record := range records {
 		if record.Kind == journal.StepRequested {
 			var request struct {
+				Kind      string    `json:"kind"`
 				FireAt    time.Time `json:"fire_at"`
 				ChildType string    `json:"child_type"`
 				ChildID   string    `json:"child_id"`
 			}
 			if err := json.Unmarshal(record.Payload, &request); err != nil {
-				return 0, err
+				return nil, err
 			}
-			if request.FireAt.After(enabled) {
-				enabled = request.FireAt
+			if !request.FireAt.IsZero() {
+				if err := progress("timer_due", request.FireAt); err != nil {
+					return nil, err
+				}
+				if request.Kind == "timer" {
+					completed := false
+					for j := index + 1; j < len(records); j++ {
+						if records[j].Kind == journal.StepCompleted {
+							if times[j].Before(request.FireAt) {
+								return nil, fmt.Errorf("%s/%s timer completed before deadline", typ, id)
+							}
+							completed = true
+							break
+						}
+					}
+					if !completed {
+						return nil, fmt.Errorf("%s/%s timer has no completion", typ, id)
+					}
+				}
+				if request.FireAt.After(enabled) {
+					enabled = request.FireAt
+				}
 			}
 			if request.ChildID != "" {
 				child, err := stream.GetLastMsgForSubject(ctx, identity.JournalSubject(request.ChildType, request.ChildID))
 				if err != nil {
-					return 0, err
+					return nil, err
+				}
+				if err := progress("child_completed", child.Time); err != nil {
+					return nil, err
 				}
 				if child.Time.After(enabled) {
 					enabled = child.Time
@@ -552,15 +727,21 @@ func matrixTerminalLatency(ctx context.Context, js jetstream.JetStream, typ, id 
 				Sequence uint64 `json:"sig_seq"`
 			}
 			if err := json.Unmarshal(record.Payload, &signal); err != nil {
-				return 0, err
+				return nil, err
 			}
 			signals, err := js.Stream(ctx, "WF_SIG")
 			if err != nil {
-				return 0, err
+				return nil, err
 			}
 			msg, err := signals.GetMsg(ctx, signal.Sequence)
 			if err != nil {
-				return 0, err
+				return nil, err
+			}
+			if times[index].Before(msg.Time) {
+				return nil, fmt.Errorf("%s/%s signal consumed before publish", typ, id)
+			}
+			if err := progress("signal_sent", msg.Time); err != nil {
+				return nil, err
 			}
 			if msg.Time.After(enabled) {
 				enabled = msg.Time
@@ -569,10 +750,14 @@ func matrixTerminalLatency(ctx context.Context, js jetstream.JetStream, typ, id 
 	}
 	last, err := stream.GetLastMsgForSubject(ctx, identity.JournalSubject(typ, id))
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	if last.Time.After(completionDeadline) {
-		return 0, fmt.Errorf("%s/%s completed at %s after post-heal deadline %s", typ, id, last.Time, completionDeadline)
+		return nil, fmt.Errorf("%s/%s completed at %s after post-heal deadline %s", typ, id, last.Time, completionDeadline)
 	}
-	return max(time.Duration(0), last.Time.Sub(enabled)), nil
+	if last.Time.Before(enabled) {
+		return nil, fmt.Errorf("%s/%s completed before its enabling event: terminal=%s enabled=%s", typ, id, last.Time, enabled)
+	}
+	samples = append(samples, matrixLatencySample{Type: typ, ID: id, Event: "terminal", Enabled: enabled, Observed: last.Time, Delay: last.Time.Sub(enabled)})
+	return samples, nil
 }

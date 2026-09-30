@@ -366,6 +366,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededJournalBatchRead(loaded.Seed, &loaded)
 	case "journal_stalled_cursor":
 		replayed, err = runStalledJournalCursor(loaded.Seed, &loaded)
+	case "signal_history_duplicate_windows":
+		replayed, err = runSignalHistoryWindow(loaded.Seed, &loaded)
 	case "lease_100":
 		replayed, err = runSeededLeaseScenario(loaded.Seed, &loaded)
 	case "client_start_repair_20":

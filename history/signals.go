@@ -40,12 +40,18 @@ type signalState struct {
 }
 
 // CheckSignals checks queue append order and idempotent retry responses for a
-// single WF_SIG duplicate window. Histories spanning two minutes are refused:
-// JetStream is allowed to accept a reused idempotency key after that window.
+// WF_SIG queue across duplicate identities. Each identity's history must fit within two
+// minutes: JetStream may accept its reused key after that window. Distinct
+// identities may span a sustained run; stream-order checks still cover them.
 // Unknown publishes branch into absent and committed possibilities.
 func CheckSignals(operations []client.Operation, timeout time.Duration) (porcupine.CheckResult, error) {
 	var converted []porcupine.Operation
-	var earliest, latest time.Time
+	type identity struct {
+		typ, id, name, key string
+		invSeq             uint64
+	}
+	type window struct{ earliest, latest time.Time }
+	windows := map[identity]window{}
 	knownOutcomes := true
 	for index, operation := range operations {
 		if operation.Op != "signal" {
@@ -63,26 +69,31 @@ func CheckSignals(operations []client.Operation, timeout time.Duration) (porcupi
 			return porcupine.Illegal, fmt.Errorf("operation %d has invalid signal arguments or timestamps", index)
 		}
 		switch output.Status {
-		case "signaled", "enqueue_unknown", "unknown", "payload_mismatch", "not_found":
+		case "signaled", "enqueue_unknown", "unknown", "payload_mismatch", "not_found", "not_published":
 		default:
 			return porcupine.Unknown, fmt.Errorf("operation %d has unsupported signal outcome %q", index, output.Status)
 		}
 		if output.Status == "unknown" {
 			knownOutcomes = false
 		}
-		if earliest.IsZero() || operation.InvokeTS.Before(earliest) {
-			earliest = operation.InvokeTS
+		key := identity{input.Type, input.ID, input.Name, input.IdempotencyKey, input.InvSeq}
+		span := windows[key]
+		if span.earliest.IsZero() || operation.InvokeTS.Before(span.earliest) {
+			span.earliest = operation.InvokeTS
 		}
-		if operation.ReturnTS.After(latest) {
-			latest = operation.ReturnTS
+		if operation.ReturnTS.After(span.latest) {
+			span.latest = operation.ReturnTS
 		}
+		windows[key] = span
 		converted = append(converted, porcupine.Operation{Input: input, Output: output, Call: operation.InvokeTS.UnixNano(), Return: operation.ReturnTS.UnixNano()})
 	}
 	if len(converted) == 0 {
 		return porcupine.Unknown, fmt.Errorf("no signal operations")
 	}
-	if latest.Sub(earliest) >= 2*time.Minute {
-		return porcupine.Unknown, fmt.Errorf("signal history spans the configured duplicate window")
+	for _, span := range windows {
+		if span.latest.Sub(span.earliest) >= 2*time.Minute {
+			return porcupine.Unknown, fmt.Errorf("signal identity history spans the configured duplicate window")
+		}
 	}
 	if knownOutcomes && !knownSignalOrder(converted) {
 		return porcupine.Illegal, nil
@@ -188,6 +199,11 @@ func signalStep(rawState, rawInput, rawOutput interface{}) []interface{} {
 		}
 	}
 	switch output.Status {
+	case "not_published":
+		if output.SignalSeq != 0 {
+			return nil
+		}
+		return []interface{}{state}
 	case "not_found":
 		if output.SignalSeq != 0 || input.InvSeq != 0 {
 			return nil

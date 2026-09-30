@@ -1,0 +1,28 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "signal_history_duplicate_windows",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "distinct_generations",
+        "distinct_invocations",
+        "distinct_keys",
+        "distinct_names",
+        "expired_retry",
+        "reverse_order"
+      ],
+      "chosen": "reverse_order"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 180001,
+      "operation": "check_signal_history_window",
+      "subject": "reverse_order",
+      "outcome": "Illegal"
+    }
+  ]
+}
