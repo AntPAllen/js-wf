@@ -811,7 +811,7 @@ global sequence gaps between subjects, retained bytes, and stale CAS results
 against a real three-node stream. Existing real-cluster tests cover network
 lost acknowledgments and injected unchanged-tail rejections. This comparison
 is limited: separate integrated worker workloads cover short handlers,
-signal resume, timer wakeups, running cancellation, heartbeat handoff,
+signal resume, timer wakeups and eight-timer bursts, running cancellation, heartbeat handoff,
 large result objects, and snapshot reads and writes. Combined blob and
 retention faults, concurrent heartbeat and failure actor turns, Raft
 elections, and disk storage remain outside the in-memory model. The journal's
