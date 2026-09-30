@@ -59,9 +59,9 @@ func (p yieldingSuspendedScanPort) GetSignalAfter(ctx context.Context, subject s
 	return message, operationErr
 }
 
-func (p yieldingSuspendedScanPort) EnqueueSuspended(ctx context.Context, typ, id string, sequence uint64) error {
+func (p yieldingSuspendedScanPort) EnqueueSuspended(ctx context.Context, typ, id string, sequence uint64, retryWindow int64) error {
 	var operationErr error
-	if err := p.yield(ctx, "suspended_enqueue", func() { operationErr = p.port.EnqueueSuspended(ctx, typ, id, sequence) }); err != nil {
+	if err := p.yield(ctx, "suspended_enqueue", func() { operationErr = p.port.EnqueueSuspended(ctx, typ, id, sequence, retryWindow) }); err != nil {
 		return err
 	}
 	return operationErr

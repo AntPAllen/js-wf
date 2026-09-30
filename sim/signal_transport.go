@@ -195,12 +195,12 @@ func (m *SignalTransport) EnqueueTimer(ctx context.Context, typ, id string, sequ
 	return m.EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(key), fmt.Sprintf("timer-reconcile:%s:%s:%d", typ, id, sequence))
 }
 
-func (m *SignalTransport) EnqueueSuspended(ctx context.Context, typ, id string, sequence uint64) error {
+func (m *SignalTransport) EnqueueSuspended(ctx context.Context, typ, id string, sequence uint64, retryWindow int64) error {
 	if sequence == 0 {
 		return fmt.Errorf("zero journal sequence")
 	}
 	key := identity.Key(typ, id)
-	return m.EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(key), fmt.Sprintf("reconcile:%s:%s:%d", typ, id, sequence))
+	return m.EnqueueRun(ctx, identity.RunSubject(typ, id, provision.Partitions), []byte(key), fmt.Sprintf("reconcile:%s:%s:%d:%d", typ, id, sequence, retryWindow))
 }
 
 func cloneJournalRecords(records []journal.Record) []journal.Record {

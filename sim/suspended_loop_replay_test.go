@@ -22,8 +22,8 @@ import (
 
 type timeoutSuspendedPort struct{ reconcile.SuspendedScanPort }
 
-func (p timeoutSuspendedPort) EnqueueSuspended(ctx context.Context, typ, id string, sequence uint64) error {
-	err := p.SuspendedScanPort.EnqueueSuspended(ctx, typ, id, sequence)
+func (p timeoutSuspendedPort) EnqueueSuspended(ctx context.Context, typ, id string, sequence uint64, retryWindow int64) error {
+	err := p.SuspendedScanPort.EnqueueSuspended(ctx, typ, id, sequence, retryWindow)
 	if errors.Is(err, ErrTransportLost) {
 		return nats.ErrTimeout
 	}

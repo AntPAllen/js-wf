@@ -658,12 +658,14 @@ signal-read, and wakeup port. A 1,000-seed workload runs production
 timers, timer/signal select, matching and stale-generation signals, consumed
 and already-used signals, unrelated subjects, terminal journals, purged
 invocation holes, dry runs, uncertain wakeup acknowledgments, deduplicated
-rescans, and virtual time advancing past a future timer. Its trace replays
+rescans, a fresh wakeup ID in the next ten-second retry window for a
+still-ready wait, and virtual time advancing past a future timer. Its trace replays
 from disk and across processes. A three-node contract compares filtered
 signal reads through a deleted sequence hole, scan candidates, and retained
 wakeup counts with the model. A separate retained-state liveness checker
 independently reads suspended journals, pending timer deadlines, available
-signals, and stable reconciliation message IDs. It names waits that remain
+signals, and reconciliation message IDs scoped to journal tail and retry
+window. It names waits that remain
 blocked and fails if an enabled wait lacks a retained `WF_RUN`. Every seeded
 scanner schedule runs this check after virtual time advances. Future timers
 report their exact virtual deadline plus grace.

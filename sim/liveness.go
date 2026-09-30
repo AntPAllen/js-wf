@@ -135,15 +135,23 @@ func CheckSuspendedWakeupLiveness(model *SignalTransport, now time.Time, grace t
 			continue
 		}
 		report.Enabled++
-		messageID := fmt.Sprintf("reconcile:%s:%s:%d", typ, id, records[len(records)-1].Sequence)
-		entry, ok := runIDs[messageID]
+		messagePrefix := fmt.Sprintf("reconcile:%s:%s:%d:", typ, id, records[len(records)-1].Sequence)
 		retained := false
-		if ok {
+		for messageID, entry := range runIDs {
+			if !strings.HasPrefix(messageID, messagePrefix) {
+				continue
+			}
+			if _, err := strconv.ParseInt(strings.TrimPrefix(messageID, messagePrefix), 10, 64); err != nil {
+				continue
+			}
 			for _, run := range runs {
 				if run.Sequence == entry.sequence && string(run.Data) == key {
 					retained = true
 					break
 				}
+			}
+			if retained {
+				break
 			}
 		}
 		if !retained {

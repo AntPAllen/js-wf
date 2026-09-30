@@ -25,6 +25,8 @@ type SuspendedScan struct {
 	Grace time.Duration
 }
 
+const suspendedRetryWindow = 10 * time.Second
+
 func NewSuspendedScan(js jetstream.JetStream) *SuspendedScan {
 	return NewSuspendedScanWithPort(NewSuspendedScanPort(js))
 }
@@ -40,7 +42,7 @@ type SuspendedScanPort interface {
 	GetInvocation(context.Context, uint64) (*jetstream.RawStreamMsg, error)
 	ReadJournal(context.Context, string, string) ([]journal.Record, error)
 	GetSignalAfter(context.Context, string, uint64) (*jetstream.RawStreamMsg, error)
-	EnqueueSuspended(context.Context, string, string, uint64) error
+	EnqueueSuspended(context.Context, string, string, uint64, int64) error
 }
 
 func NewSuspendedScanWithPort(port SuspendedScanPort) *SuspendedScan {
@@ -110,8 +112,8 @@ func (p *jetStreamSuspendedScanPort) GetSignalAfter(ctx context.Context, subject
 	return stream.GetMsg(ctx, sequence, jetstream.WithGetMsgSubject(subject))
 }
 
-func (p *jetStreamSuspendedScanPort) EnqueueSuspended(ctx context.Context, typ, id string, journalSeq uint64) error {
-	return p.client.Enqueue(ctx, typ, id, fmt.Sprintf("reconcile:%s:%s:%d", typ, id, journalSeq))
+func (p *jetStreamSuspendedScanPort) EnqueueSuspended(ctx context.Context, typ, id string, journalSeq uint64, retryWindow int64) error {
+	return p.client.Enqueue(ctx, typ, id, fmt.Sprintf("reconcile:%s:%s:%d:%d", typ, id, journalSeq, retryWindow))
 }
 
 // Scan advances a stream-sequence cursor. The budget counts holes as well as
@@ -189,8 +191,14 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 	}
 	result.Reenqueued = len(result.Candidates)
 	if !dryRun {
+		// A prior wakeup may have been delivered while another worker held the
+		// invocation lease, then its NAK lost during a route fault. Retrying the
+		// same message ID forever leaves recovery to the consumer AckWait.
+		// One ID per window bounds repeated wakeups while making a fresh run
+		// available before that 20-second fallback.
+		retryWindow := s.Now().UnixNano() / int64(suspendedRetryWindow)
 		for _, candidate := range result.Candidates {
-			if err := s.port.EnqueueSuspended(ctx, candidate.Type, candidate.ID, candidate.JournalSeq); err != nil {
+			if err := s.port.EnqueueSuspended(ctx, candidate.Type, candidate.ID, candidate.JournalSeq, retryWindow); err != nil {
 				return result, err
 			}
 		}

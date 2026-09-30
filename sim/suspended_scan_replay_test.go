@@ -85,6 +85,7 @@ func runSeededSuspendedScan(seed int64, replay *Trace) (trace Trace, runErr erro
 	base := time.Unix(1_700_000_000, 0).UTC()
 	scan.Now = func() time.Time { return base.Add(time.Duration(schedule.NowMillis()) * time.Millisecond) }
 	var future []uint64
+	var retryCandidates []uint64
 	for i := 0; i < 20; i++ {
 		mode, err := schedule.Choose([]string{"due_timer", "future_timer", "due_select", "matching_signal", "signal_select", "stale_then_matching", "consumed_unused", "consumed_used", "unrelated_signal", "terminal", "no_journal", "hole", "lost_ack", "drop_enqueue"})
 		if err != nil {
@@ -125,6 +126,9 @@ func runSeededSuspendedScan(seed int64, replay *Trace) (trace Trace, runErr erro
 			model.PurgeInvocation(identity.InvocationSubject("test", id))
 		}
 		eligible := mode == "due_timer" || mode == "due_select" || mode == "matching_signal" || mode == "signal_select" || mode == "stale_then_matching" || mode == "consumed_unused" || mode == "lost_ack" || mode == "drop_enqueue"
+		if eligible {
+			retryCandidates = append(retryCandidates, sequence)
+		}
 		before := len(model.Runs())
 		dry, err := scan.Scan(ctx, sequence, 1, true)
 		if err != nil || len(model.Runs()) != before || (dry.Reenqueued == 1) != eligible {
@@ -167,6 +171,23 @@ func runSeededSuspendedScan(seed int64, replay *Trace) (trace Trace, runErr erro
 		result, err := scan.Scan(ctx, sequence, 1, false)
 		if err != nil || result.Reenqueued != 1 || len(model.Runs()) != before+1 {
 			return trace, fmt.Errorf("seed %d future %d result=%+v runs=%d/%d err=%v", seed, sequence, result, len(model.Runs()), before, err)
+		}
+	}
+	if len(retryCandidates) > 0 {
+		// A lost NAK after lease contention leaves the first wakeup pending
+		// until AckWait. A still-ready suspension gets one fresh message ID in
+		// the next retry window, while an immediate repeated scan deduplicates.
+		if err := model.Wait(ctx, 10*time.Second); err != nil {
+			return trace, err
+		}
+		sequence := retryCandidates[0]
+		before := len(model.Runs())
+		result, err := scan.Scan(ctx, sequence, 1, false)
+		if err != nil || result.Reenqueued != 1 || len(model.Runs()) != before+1 {
+			return trace, fmt.Errorf("seed %d retry window result=%+v runs=%d/%d err=%v", seed, result, len(model.Runs()), before, err)
+		}
+		if _, err := scan.Scan(ctx, sequence, 1, false); err != nil || len(model.Runs()) != before+1 {
+			return trace, fmt.Errorf("seed %d retry window dedup runs=%d/%d err=%v", seed, len(model.Runs()), before, err)
 		}
 	}
 	report, err := CheckSuspendedWakeupLiveness(model, scan.Now(), scan.Grace)
