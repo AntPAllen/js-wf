@@ -34,6 +34,7 @@ import (
 )
 
 type matrixLeaderFault struct {
+	IsolationTarget       *matrixIsolationTarget        `json:"isolation_target,omitempty"`
 	VersionsBefore        []string                      `json:"versions_before,omitempty"`
 	VersionsAfter         []string                      `json:"versions_after,omitempty"`
 	BlockStall            *testcluster.BlockStallProof  `json:"block_stall,omitempty"`

@@ -95,6 +95,12 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 				stop()
 			}
 		}
+		if event.Stage == "lease_acquired" {
+			if err := holdMatrixIsolationTarget(ctx, base, event); err != nil {
+				observerErr = err
+				stop()
+			}
+		}
 	}
 	handlers := matrixLeaderHandlers()
 	handlers["matrixshort"] = func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
@@ -542,6 +548,10 @@ func matrixWorkerActiveLeaseKeys(path string) ([]string, error) {
 }
 
 func matrixWorkerFencingEvents(path string, since time.Time) (int, error) {
+	return matrixWorkerDeliveryFencingEvents(path, since, nil)
+}
+
+func matrixWorkerDeliveryFencingEvents(path string, since time.Time, delivery *worker.DispatchEvent) (int, error) {
 	data, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
 		return 0, nil
@@ -562,6 +572,9 @@ func matrixWorkerFencingEvents(path string, since time.Time) (int, error) {
 			return 0, err
 		}
 		if event.At.Before(since) {
+			continue
+		}
+		if delivery != nil && (event.Worker != delivery.Worker || event.Type != delivery.Type || event.ID != delivery.ID || event.RunSequence != delivery.RunSequence || event.Delivery != delivery.Delivery) {
 			continue
 		}
 		if strings.Contains(event.Error, lease.ErrLost.Error()) || strings.Contains(event.Error, journal.ErrStale.Error()) {
@@ -605,27 +618,23 @@ func selectMatrixActiveWorker(ctx context.Context, fleet []*matrixProcessWorker,
 }
 
 func isolateMatrixWorkerReplies(ctx context.Context, fleet []*matrixProcessWorker, proxies []*testcluster.ClientProxy, first int, scheduled time.Time) (matrixLeaderFault, error) {
-	index, err := selectMatrixActiveWorker(ctx, fleet, first)
+	index, target, releaseTarget, err := armMatrixIsolationTarget(ctx, fleet, first)
 	if err != nil {
 		return matrixLeaderFault{Scheduled: scheduled, Node: -1}, err
 	}
+	defer releaseTarget()
 	process, proxy := fleet[index], proxies[index]
-	event := matrixLeaderFault{Scheduled: scheduled, Node: -1, WorkerSlot: &index, Worker: process.id, PID: process.cmd.Process.Pid, Killed: time.Now()}
-	var active struct {
-		Active int `json:"active_leases"`
-	}
-	data, err := os.ReadFile(process.base + "-active.json")
-	if err != nil {
-		return event, err
-	}
-	if err := json.Unmarshal(data, &active); err != nil {
-		return event, err
-	}
-	event.ActiveLeases = active.Active
+	event := matrixLeaderFault{Scheduled: scheduled, Node: -1, WorkerSlot: &index, Worker: process.id, PID: process.cmd.Process.Pid, Killed: time.Now(), ActiveLeases: 1, IsolationTarget: &target}
 	before := proxy.Stats()
 	event.ProxyBefore = &before
 	proxy.HoldResponses()
 	defer proxy.ResumeResponses()
+	// The selected delivery cannot execute or release its acquired lease until
+	// the parent has installed the reply hold. Release all acquisition barriers
+	// immediately afterward; only the selected proxy remains faulty.
+	if err := releaseTarget(); err != nil {
+		return event, fmt.Errorf("release isolation acquisition barriers: %w", err)
+	}
 	// Confirm that replies are held while worker requests still reach the server.
 	cut, stop := context.WithTimeout(ctx, 5*time.Second)
 	for cut.Err() == nil {
@@ -698,7 +707,7 @@ func isolateMatrixWorkerReplies(ctx context.Context, fleet []*matrixProcessWorke
 	if stats := proxy.Stats(); stats.BufferOverflows != 0 {
 		return event, fmt.Errorf("reply-hold buffer overflow invalidates isolation fixture: %+v", stats)
 	}
-	fences, err := matrixWorkerFencingEvents(process.base+"-dispatch.jsonl", event.Killed)
+	fences, err := matrixWorkerDeliveryFencingEvents(process.base+"-dispatch.jsonl", event.Killed, &target.Delivery)
 	if err != nil {
 		return event, err
 	}

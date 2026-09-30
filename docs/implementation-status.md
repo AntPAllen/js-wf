@@ -1223,3 +1223,36 @@ at `c0bd4f0` passed 100,000 seeds per workload: 6,400,604 generated schedules,
 suspended repair, but predates the WorkQueue retention extension. Remaining
 integrated/concurrent model coverage and independent real-cluster release gates
 remain open.
+
+
+## Isolation target selection race in the 200-seed campaign
+
+The [200-seed isolation campaign](https://github.com/AntPAllen/js-wf/actions/runs/36718010557)
+failed seeds 21, 29 and 37 with `isolated active worker reported no fencing`.
+Downloaded fault/dispatch artifacts show releases at the selection boundary:
+seed 21's short deliveries released 77–79 ms before the cut; seed 29's selected
+signal released 83 microseconds before it; seed 37's last signal release event
+was timestamped 14 microseconds afterward. The active marker and actual release
+can cross because the observer persists its marker after the release operation.
+These runs do not provide active-execution fencing proof or a clean release gate.
+
+Isolation selection now arms the subprocesses and waits at a newly acquired
+delivery boundary. The selected delivery cannot execute or release its lease
+until the parent installs its reply hold. All acquisition barriers are then
+released immediately; the chosen proxy alone holds replies for 45 seconds.
+The fault artifact records a fresh token, invocation, run sequence and delivery
+number. The fencing reader requires a post-cut lost-lease/stale-journal error
+from that exact delivery, excluding unrelated invocations and earlier delivery
+attempts. The acquisition barrier is bounded and selection failure disarms it.
+The production worker implementation is unchanged.
+
+Race tests reject stale readiness markers, premature handoff, canceled selection
+and unrelated fencing evidence. A seed-21 real race smoke passed in 74.82 seconds;
+a seed-29 race smoke with the delivery-specific fencing gate passed in 69.71
+seconds. Both retain the existing histories, integrity, latency and queue-drain
+gates. A ten-minute seed-21 race replay is in progress; shortened proofs do not
+clear sustained or consecutive-seed release requirements.
+
+The [new full Tier 1 CI run](https://github.com/AntPAllen/js-wf/actions/runs/36741786098)
+at `493c6a7` is live with 100,000 seeds per workload, including the WorkQueue
+retention extension. It remains separate from the completed expanded run above.
