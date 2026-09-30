@@ -178,9 +178,16 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 	if wrap {
 		result.NextSequence = 1
 	}
+	var inspectErr error
 	for _, item := range items {
 		if item.err != nil {
-			return ScanResult{NextSequence: next}, item.err
+			// A transient read on one invocation must not suppress ready
+			// wakeups independently found elsewhere on this page. Keep the
+			// cursor here so the failed read is retried on the next pass.
+			if inspectErr == nil {
+				inspectErr = item.err
+			}
+			continue
 		}
 		if item.retained {
 			result.Inspected++
@@ -188,6 +195,9 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 		if item.ready {
 			result.Candidates = append(result.Candidates, item.candidate)
 		}
+	}
+	if inspectErr != nil {
+		result.NextSequence = next
 	}
 	result.Reenqueued = len(result.Candidates)
 	if !dryRun {
@@ -203,7 +213,7 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 			}
 		}
 	}
-	return result, nil
+	return result, inspectErr
 }
 
 func (s *SuspendedScan) inspect(ctx context.Context, input *jetstream.RawStreamMsg) (Candidate, bool, error) {
