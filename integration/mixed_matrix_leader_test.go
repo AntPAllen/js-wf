@@ -649,6 +649,32 @@ func matrixRetryClient(ctx context.Context, call func(context.Context) error) er
 	}
 }
 
+// Fault selection is read-only. Retry named transport failures under the
+// controller's existing deadline without changing the seeded candidate order.
+// Missing resources and configuration errors remain immediate failures.
+func matrixReadMetadata[T any](ctx context.Context, lookup func(context.Context) (T, error)) (T, error) {
+	var zero T
+	for i := 0; ; i++ {
+		if err := ctx.Err(); err != nil {
+			return zero, err
+		}
+		attempt, done := context.WithTimeout(ctx, 2*time.Second)
+		value, err := lookup(attempt)
+		done()
+		if err == nil {
+			return value, nil
+		}
+		if i == 2 || !matrixTransientTransport(err) {
+			return zero, err
+		}
+		select {
+		case <-ctx.Done():
+			return zero, ctx.Err()
+		case <-time.After(50 * time.Millisecond):
+		}
+	}
+}
+
 func matrixLeaderHandlers() map[string]worker.Handler {
 	return map[string]worker.Handler{
 		"matrixshort": func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
@@ -718,11 +744,15 @@ func killMatrixJournalLeader(ctx context.Context, js jetstream.JetStream, cluste
 	event := matrixLeaderFault{Scheduled: scheduled, Node: -1}
 	attempt, stop := context.WithTimeout(ctx, 20*time.Second)
 	defer stop()
-	stream, err := js.Stream(attempt, "WF_JRN")
+	stream, err := matrixReadMetadata(attempt, func(ctx context.Context) (jetstream.Stream, error) {
+		return js.Stream(ctx, "WF_JRN")
+	})
 	if err != nil {
 		return event, err
 	}
-	info, err := stream.Info(attempt)
+	info, err := matrixReadMetadata(attempt, func(ctx context.Context) (*jetstream.StreamInfo, error) {
+		return stream.Info(ctx)
+	})
 	if err != nil || info.Cluster == nil {
 		return event, fmt.Errorf("journal leader: info=%+v err=%v", info, err)
 	}
@@ -760,7 +790,9 @@ func killMatrixConsumerLeader(ctx context.Context, js jetstream.JetStream, clust
 	event := matrixLeaderFault{Scheduled: scheduled, Node: -1}
 	bound, stop := context.WithTimeout(ctx, 20*time.Second)
 	defer stop()
-	stream, err := js.Stream(bound, "WF_RUN")
+	stream, err := matrixReadMetadata(bound, func(ctx context.Context) (jetstream.Stream, error) {
+		return js.Stream(ctx, "WF_RUN")
+	})
 	if err != nil {
 		return event, err
 	}
@@ -769,9 +801,9 @@ func killMatrixConsumerLeader(ctx context.Context, js jetstream.JetStream, clust
 	// Prefer a consumer with live deliveries; if all are idle, record the
 	// selected durable explicitly so that an idle fault is visible in evidence.
 	for _, partition := range rng.Perm(int(provision.Partitions)) {
-		attempt, done := context.WithTimeout(bound, 2*time.Second)
-		consumer, err := stream.Consumer(attempt, fmt.Sprintf("WF_P_%02d", partition))
-		done()
+		consumer, err := matrixReadMetadata(bound, func(ctx context.Context) (jetstream.Consumer, error) {
+			return stream.Consumer(ctx, fmt.Sprintf("WF_P_%02d", partition))
+		})
 		if errors.Is(err, jetstream.ErrConsumerNotFound) {
 			continue
 		}
