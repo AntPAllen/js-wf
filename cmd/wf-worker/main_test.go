@@ -41,7 +41,7 @@ func TestMain(m *testing.M) {
 
 func TestWorkerRunnerCompletesWorkflowAndServesMetrics(t *testing.T) {
 	pluginPath := testWorkerPlugin(t)
-	for _, mode := range []string{"static", "kv"} {
+	for _, mode := range []string{"static", "kv", "auto"} {
 		t.Run(mode, func(t *testing.T) { runWorkerSmoke(t, pluginPath, mode) })
 	}
 }

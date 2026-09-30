@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"js-wf/assignment"
 	"js-wf/identity"
 	"js-wf/provision"
 	"js-wf/reconcile"
@@ -43,7 +44,7 @@ func run(ctx context.Context, args []string) error {
 	replicas := flags.Int("replicas", 3, "JetStream stream replica count")
 	journalMaxBytes := flags.Int64("journal-max-bytes", 0, "exact WF_JRN byte cap; zero adopts an uncapped stream")
 	timerBackend := flags.String("timer-backend", "auto", "timer storage mode: auto, native, or fallback")
-	mode := flags.String("mode", "static", "partition assignment mode: static or kv")
+	mode := flags.String("mode", "static", "partition assignment mode: static, kv, or auto")
 	staticIndex := flags.Int("static-index", 0, "static worker index")
 	staticCount := flags.Int("static-count", 1, "number of static workers")
 	concurrency := flags.Int("partition-concurrency", 1, "concurrent deliveries per partition")
@@ -56,9 +57,9 @@ func run(ctx context.Context, args []string) error {
 		return err
 	}
 	if flags.NArg() != 0 || *id == "" || *pluginPath == "" || *pluginSymbol == "" || *replicas < 1 || *replicas > 5 || *journalMaxBytes < 0 || *repairInterval <= 0 || *repairInterval > 10*time.Second || *repairBudget < 2 {
-		return fmt.Errorf("usage: wf-worker -id ID -handler-plugin FILE [-mode static|kv] [-metrics-addr ADDR]")
+		return fmt.Errorf("usage: wf-worker -id ID -handler-plugin FILE [-mode static|kv|auto] [-metrics-addr ADDR]")
 	}
-	if *mode != "static" && *mode != "kv" {
+	if *mode != "static" && *mode != "kv" && *mode != "auto" {
 		return fmt.Errorf("invalid assignment mode %q", *mode)
 	}
 	if *timerBackend != "auto" && *timerBackend != "native" && *timerBackend != "fallback" {
@@ -98,6 +99,23 @@ func run(ctx context.Context, args []string) error {
 	}
 	defer nc.Close()
 	defer w.Close()
+	var controller *assignment.Controller
+	if *mode == "auto" {
+		startup, done := context.WithTimeout(ctx, 8*time.Second)
+		members, err := assignment.EnsureMembership(startup, js, *replicas)
+		if err == nil {
+			var owners *assignment.Store
+			owners, err = assignment.New(startup, js)
+			if err == nil {
+				controller, err = members.Controller(startup, *id, owners)
+			}
+		}
+		done()
+		if err != nil {
+			return fmt.Errorf("automatic assignment startup: %w", err)
+		}
+		defer controller.Close()
+	}
 	listener, err := net.Listen("tcp", *metricsAddr)
 	if err != nil {
 		return fmt.Errorf("listen for worker metrics: %w", err)
@@ -124,12 +142,16 @@ func run(ctx context.Context, args []string) error {
 	}()
 	runCtx, stopRun := context.WithCancel(ctx)
 	defer stopRun()
-	results := make(chan error, 7)
+	results := make(chan error, 8)
 	loops := 1
-	if *mode == "kv" {
+	if *mode == "kv" || *mode == "auto" {
 		go func() { results <- w.RunKVAssignments(runCtx) }()
 	} else {
 		go func() { results <- w.RunAssigned(runCtx, *staticIndex, *staticCount) }()
+	}
+	if controller != nil {
+		go func() { results <- controller.Run(runCtx) }()
+		loops++
 	}
 	if *repair {
 		start := []func(context.Context) error{
