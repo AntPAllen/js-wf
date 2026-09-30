@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"runtime/pprof"
 	"strings"
 	"sync"
 	"syscall"
@@ -124,8 +125,37 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 	}
 	defer w.Close()
 	var fleet sync.WaitGroup
-	failures := make(chan error, provision.Partitions+1)
+	failures := make(chan error, provision.Partitions+2)
 	if os.Getenv("WF_MATRIX_WORKER_PINNED") == "1" {
+		// Ask a live, isolated child for stacks without stopping or reconnecting
+		// it. Avoid querying the connection: its mutex might itself be the reason
+		// a PING cannot complete.
+		dumps := make(chan os.Signal, 1)
+		signal.Notify(dumps, syscall.SIGUSR1)
+		defer signal.Stop(dumps)
+		fleet.Add(1)
+		go func() {
+			defer fleet.Done()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-dumps:
+				}
+				file, err := os.Create(base + "-goroutines.txt")
+				if err == nil {
+					err = pprof.Lookup("goroutine").WriteTo(file, 2)
+					if closeErr := file.Close(); err == nil {
+						err = closeErr
+					}
+				}
+				if err != nil {
+					failures <- fmt.Errorf("worker stack capture: %w", err)
+					stop()
+					return
+				}
+			}
+		}()
 		fleet.Add(1)
 		go func() {
 			defer fleet.Done()
@@ -541,8 +571,20 @@ func isolateMatrixWorkerReplies(ctx context.Context, fleet []*matrixProcessWorke
 		}
 	}
 	if event.ProxyHealed == nil {
+		dumpErr := process.cmd.Process.Signal(syscall.SIGUSR1)
+		if dumpErr == nil {
+			// Stack capture is diagnostic only and cannot turn this failed gate
+			// into success. Give the child a bounded chance to create its file.
+			until := time.Now().Add(time.Second)
+			for time.Now().Before(until) {
+				if _, err := os.Stat(process.base + "-goroutines.txt"); err == nil {
+					break
+				}
+				time.Sleep(20 * time.Millisecond)
+			}
+		}
 		health, readErr := os.ReadFile(process.base + "-transport.json")
-		return event, fmt.Errorf("worker PING recovery after reply isolation: %w; proxy=%+v last_success=%s health_read=%v", heal.Err(), proxy.Stats(), health, readErr)
+		return event, fmt.Errorf("worker PING recovery after reply isolation: %w; proxy=%+v last_success=%s health_read=%v stack_signal=%v", heal.Err(), proxy.Stats(), health, readErr, dumpErr)
 	}
 	fences, err := matrixWorkerFencingEvents(process.base+"-dispatch.jsonl", event.Killed)
 	if err != nil {
