@@ -1345,3 +1345,47 @@ gaps; a passing expected-bad-state control is not a clean runtime gate.
 The final multi-consumer race proof, including explicit final stream-leader
 verification, passed in 47.06 seconds. Integration vet, workflow YAML parsing
 and diff checks passed. Clean-runner control validation remains pending.
+
+
+## Lease serialization deadlines and seeded cancellation reproduction
+
+A later [mixed-fault CI campaign](https://github.com/AntPAllen/js-wf/actions/runs/36744596798)
+at `ba5c625` passed seed 1 and failed seed 2 with terminal p99 63.13 seconds.
+Its signals and timers made journal progress interspersed with failed renewal,
+lease-loss and retry events while the syscall disk delay remained active.
+The route recovery timestamp already applies the user's later-of-enable/heal
+rule; the disk fault intentionally continues through completion. This remains
+a failed latency gate, not a route-timestamp definition fix.
+
+Inspection found a separate local deadline defect: Renew, Release and Cleanup
+held one mutex across their network calls, so a waiting operation could exceed
+its own context deadline while another operation held the mutex. Lease revision
+decisions now use a cancellable gate. Cancellation before gate acquisition
+makes no KV request and leaves ownership unchanged; an uncertain renewal that
+actually attempted its update still marks the owner lost. Serialization and
+revision CAS remain required.
+
+The new Tier 1 workload holds a production renewal, starts one of the three
+contending operations, delivers virtual cancellation/deadline and verifies
+prompt independent return, no transport access, and unchanged ownership from
+the canceled wait. A failed held renewal must remain fenced; a successful one
+must permit a later renewal. All twelve combinations are seeded. The old-mutex
+build overlay fails seed 1, exact replay and cross-process identity pass, and
+seed 42 is pinned. The final 100,000-seed run passed in 4.08 seconds; the full
+simulator suite passed in 49.97 seconds, lease tests in 1.16 seconds, and final
+pinned race corpus in 1.96 seconds. Vet and diff checks passed.
+
+The local seed-2 four-fault race replay passed in 62.91 seconds with terminal
+p99 23.419 seconds across 28 invocations. This is a fresh local passing result,
+not controlled attribution of the old CI miss or a replacement consecutive
+seed gate. Materialized SDK state checkpoints remain open; this investigation
+took priority when the new CI failure appeared.
+
+## Clean mixed-version retention control CI
+
+The [dedicated clean-runner retention controls](https://github.com/AntPAllen/js-wf/actions/runs/36745858100)
+at `149c876` passed. This runs the old-only, pre-ack co-location, post-ack leader
+move and two-consumer expected retained-state/recovery contracts. The separate
+strict split-version conformance cases still fail; successful expected-bad-state
+recognition and fixture recovery do not establish general mixed-version runtime
+compatibility or clear the sustained upgrade release row.

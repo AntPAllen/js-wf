@@ -1104,3 +1104,29 @@ pre-ack co-location, post-ack leader-move and multi-consumer controls. It saves
 pre-move raw state even on success. Expected retained-state recognition is
 explicitly separate from the strict split-version conformance tests that still
 fail and the sustained runtime matrix.
+
+
+## Cancellable waits behind lease transport operations
+
+`TestSeededLeaseGateCancellationReplay` holds a production `Lease.Renew` at
+its KV update boundary while another caller enters Renew, Release or Cleanup.
+A virtual cancellation or deadline must return that waiter before the held
+renewal completes, without making any KV request or poisoning the lease.
+After the held renewal succeeds, a fresh renewal must succeed; after its
+uncertain transport failure, ownership must remain lost. Twelve seeded cases
+combine waiter operation, cancellation kind and held-renewal outcome.
+
+Production lease revision decisions now use a cancellable serialization gate.
+The original mutex held across network calls prevented waiting callers from
+honoring their contexts; restoring that implementation makes seed 1 fail at
+the controlled waiting boundary. The model observes the wait through the
+context's Done method, delivers cancellation at one millisecond of virtual
+time, and uses host guards only to detect stuck actors. It does not simulate
+NATS server delays or prove the complete mixed-fault latency budget.
+
+The local 100,000-seed workload passed in 4.08 seconds. Exact replay,
+cross-process trace identity, the `lease-gate-cancellation.json` pin and the
+complete pinned race corpus cover this slice. The full simulator suite passed
+in 49.97 seconds and the lease suite in 1.16 seconds; focused race checks passed.
+A live seed-2 mixed-fault race proof passed at 23.42-second terminal p99, but the
+earlier clean-runner 63.13-second miss is not attributed to this defect alone.

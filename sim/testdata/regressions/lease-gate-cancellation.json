@@ -1,0 +1,92 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "lease_gate_cancellation",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "failed_renew",
+        "success"
+      ],
+      "chosen": "success"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "cleanup",
+        "release",
+        "renew"
+      ],
+      "chosen": "renew"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "cancel",
+        "deadline"
+      ],
+      "chosen": "cancel"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "test.gate",
+      "sequence": 1,
+      "data_sha256": "30d7721249422d500d2b1c1ddb27b7a46fcf87d5abab459f4a9e97051eb3f79a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "test.gate",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "3dc2d89b7e1fd2f1ec4fba3f99deb45315164f3bb3a23ae2fa7991f950fe46db",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "lease_gate_owner",
+      "outcome": "held"
+    },
+    {
+      "at_ms": 1,
+      "operation": "lease_gate_waiter",
+      "subject": "renew",
+      "outcome": "cancel"
+    },
+    {
+      "at_ms": 1,
+      "operation": "kv_update",
+      "subject": "test.gate",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "3dc2d89b7e1fd2f1ec4fba3f99deb45315164f3bb3a23ae2fa7991f950fe46db",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1,
+      "operation": "lease_gate_owner",
+      "outcome": "success"
+    },
+    {
+      "at_ms": 1,
+      "operation": "kv_update",
+      "subject": "test.gate",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "3dc2d89b7e1fd2f1ec4fba3f99deb45315164f3bb3a23ae2fa7991f950fe46db",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1,
+      "operation": "lease_gate_final",
+      "sequence": 3,
+      "outcome": "success"
+    }
+  ]
+}

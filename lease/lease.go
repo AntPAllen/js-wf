@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
 	"js-wf/identity"
@@ -105,7 +104,7 @@ type Lease struct {
 	store    *Store
 	key      string
 	value    Value
-	mu       sync.Mutex
+	gate     chan struct{}
 	revision uint64
 	lost     bool
 }
@@ -166,12 +165,35 @@ func (s *Store) Acquire(ctx context.Context, typ, id, worker string) (*Lease, er
 	if err != nil {
 		return nil, fmt.Errorf("%w: initialization: %w", ErrLost, err)
 	}
-	return &Lease{store: s, key: key, value: v, revision: newRev}, nil
+	return &Lease{store: s, key: key, value: v, revision: newRev, gate: make(chan struct{}, 1)}, nil
 }
 
+// lock serializes revision decisions without keeping a canceled caller behind
+// another operation's network request. Cancellation before acquiring the gate
+// has not attempted a KV mutation and must not mark this lease lost.
+func (l *Lease) lock(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case l.gate <- struct{}{}:
+	}
+	if err := ctx.Err(); err != nil {
+		l.unlock()
+		return err
+	}
+	return nil
+}
+
+func (l *Lease) unlock() { <-l.gate }
+
 func (l *Lease) Renew(ctx context.Context) error {
-	l.mu.Lock()
-	defer l.mu.Unlock()
+	if err := l.lock(ctx); err != nil {
+		return err
+	}
+	defer l.unlock()
 	if l.lost {
 		return ErrLost
 	}
@@ -186,8 +208,10 @@ func (l *Lease) Renew(ctx context.Context) error {
 }
 
 func (l *Lease) Release(ctx context.Context) error {
-	l.mu.Lock()
-	defer l.mu.Unlock()
+	if err := l.lock(ctx); err != nil {
+		return err
+	}
+	defer l.unlock()
 	if l.lost {
 		return ErrLost
 	}
@@ -204,8 +228,10 @@ func (l *Lease) Release(ctx context.Context) error {
 // It may delete only the lease with this worker and fencing epoch, using the
 // revision returned by KV. A successor's lease is never deleted.
 func (l *Lease) Cleanup(ctx context.Context) error {
-	l.mu.Lock()
-	defer l.mu.Unlock()
+	if err := l.lock(ctx); err != nil {
+		return err
+	}
+	defer l.unlock()
 	port := l.store.operations()
 	entry, err := port.Get(ctx, l.key)
 	if errors.Is(err, jetstream.ErrKeyNotFound) {
