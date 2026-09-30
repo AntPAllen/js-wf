@@ -938,3 +938,22 @@ terminal bytes and one consumption of the result signal. It runs production
 await introduces no durable operation, so the pinned child transcript stays
 unchanged. This does not model object-cache exhaustion; focused SDK contracts
 cover the sixteen-MiB bound and retryable object reads separately.
+
+
+## General durable selection
+
+`TestSeededSelectManyReplay` runs production timer creation, `wf.Select`,
+`AwaitPromise` and journal append/read against the seeded journal transport.
+It varies argument priority, readiness and a dropped or hidden committed
+selection completion. Resume can introduce earlier ready cases; a retained
+completion must still replay its recorded winner. A selected promise remains
+reusable without consuming another signal. The final five-entry journal and
+selected bytes are checked. Exact replay, cross-process identity and the
+`select-many.json` regression pin cover this slice. A local 100,000-seed run
+passed in 11.37 seconds, with focused race and pinned-corpus checks passing.
+
+Buffered signals and promise outcomes are fixture inputs; timer readiness uses
+virtual wakeup time. This slice does not simulate the full child notifier,
+worker dispatch or suspended scanner pipeline. Real three-node restart tests
+separately exercise signal, timer and actual child-promise winners, including
+scanner repair after removal of the parent's retained run wakeup.

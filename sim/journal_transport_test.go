@@ -492,6 +492,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runTwoSuspendedLoops(loaded.Seed, &loaded)
 	case "retained_invariants_5":
 		replayed, err = runSeededRetainedInvariantChecks(loaded.Seed, &loaded)
+	case "select_many":
+		replayed, err = runSeededSelectMany(loaded.Seed, &loaded)
 	case "workflow_replay_5":
 		replayed, err = runSeededWorkflowReplay(loaded.Seed, &loaded)
 	default:

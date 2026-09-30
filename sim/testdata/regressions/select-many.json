@@ -1,0 +1,310 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "select_many",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "promise",
+        "signal",
+        "timer"
+      ],
+      "chosen": "timer"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "all",
+        "last_only",
+        "none"
+      ],
+      "chosen": "none"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "clean",
+        "drop_completion",
+        "lose_completion_ack"
+      ],
+      "chosen": "lose_completion_ack"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.select",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.select",
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.select",
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.select",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "6d7d5f268c06e1fa04acb9e591f1340ddd61a452ae7e547286200642b06f8e05",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.select",
+      "sequence": 2,
+      "data_sha256": "6d7d5f268c06e1fa04acb9e591f1340ddd61a452ae7e547286200642b06f8e05",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.select",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "f61cdaf25b1c0c174e3fc5e2ef4655f48d20f069e52fc98ee1e4dbf5d21ad51e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "6d7d5f268c06e1fa04acb9e591f1340ddd61a452ae7e547286200642b06f8e05",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "f61cdaf25b1c0c174e3fc5e2ef4655f48d20f069e52fc98ee1e4dbf5d21ad51e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 4,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.select",
+      "sequence": 3,
+      "data_sha256": "f61cdaf25b1c0c174e3fc5e2ef4655f48d20f069e52fc98ee1e4dbf5d21ad51e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.select",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "5938e31c0ddb0e7debcf1f82eb30717bd9377bbb123b31d1f86e7d130c9d6f03",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "wait",
+      "outcome": "2000ms"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "6d7d5f268c06e1fa04acb9e591f1340ddd61a452ae7e547286200642b06f8e05",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "f61cdaf25b1c0c174e3fc5e2ef4655f48d20f069e52fc98ee1e4dbf5d21ad51e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "5938e31c0ddb0e7debcf1f82eb30717bd9377bbb123b31d1f86e7d130c9d6f03",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 5,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "last",
+      "subject": "wf.jrn.test.select",
+      "sequence": 4,
+      "data_sha256": "5938e31c0ddb0e7debcf1f82eb30717bd9377bbb123b31d1f86e7d130c9d6f03",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "publish",
+      "subject": "wf.jrn.test.select",
+      "expected": 4,
+      "sequence": 5,
+      "data_sha256": "ec54d274c20f74777deec38d4ed188a039efc4bf4c93a0dc035fe3d4787c6338",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "6d7d5f268c06e1fa04acb9e591f1340ddd61a452ae7e547286200642b06f8e05",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "f61cdaf25b1c0c174e3fc5e2ef4655f48d20f069e52fc98ee1e4dbf5d21ad51e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "5938e31c0ddb0e7debcf1f82eb30717bd9377bbb123b31d1f86e7d130c9d6f03",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 5,
+      "sequence": 5,
+      "data_sha256": "ec54d274c20f74777deec38d4ed188a039efc4bf4c93a0dc035fe3d4787c6338",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 6,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "6d7d5f268c06e1fa04acb9e591f1340ddd61a452ae7e547286200642b06f8e05",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "f61cdaf25b1c0c174e3fc5e2ef4655f48d20f069e52fc98ee1e4dbf5d21ad51e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "5938e31c0ddb0e7debcf1f82eb30717bd9377bbb123b31d1f86e7d130c9d6f03",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 5,
+      "sequence": 5,
+      "data_sha256": "ec54d274c20f74777deec38d4ed188a039efc4bf4c93a0dc035fe3d4787c6338",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.select",
+      "expected": 6,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "check_select_many",
+      "outcome": "timer"
+    }
+  ]
+}

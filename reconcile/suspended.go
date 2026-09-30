@@ -253,6 +253,9 @@ func (s *SuspendedScan) inspect(ctx context.Context, input *jetstream.RawStreamM
 		}
 		ready, err = signalAvailable(ctx, s.port, typ, id, name, input.Sequence, records)
 		reason = "signal"
+	case suspended.WaitingOn == "select_many":
+		ready, err = s.selectReady(ctx, typ, id, input.Sequence, records)
+		reason = "select"
 	case strings.HasPrefix(suspended.WaitingOn, "select:"):
 		parts := strings.Split(suspended.WaitingOn, ":")
 		if len(parts) != 3 || identity.ValidateToken(parts[1]) != nil || identity.ValidateToken(parts[2]) != nil {
@@ -270,6 +273,63 @@ func (s *SuspendedScan) inspect(ctx context.Context, input *jetstream.RawStreamM
 		return Candidate{}, false, err
 	}
 	return Candidate{Type: typ, ID: id, Reason: reason, JournalSeq: last.Sequence}, true, nil
+}
+
+// A multi-case wait carries its complete durable case list in the pending
+// request. Any ready case justifies a repair wakeup; a failed signal read must
+// not suppress an independently due timer or another available signal.
+func (s *SuspendedScan) selectReady(ctx context.Context, typ, id string, invSeq uint64, records []journal.Record) (bool, error) {
+	var pending *journal.Record
+	for i := range records {
+		switch records[i].Kind {
+		case journal.StepRequested:
+			pending = &records[i]
+		case journal.StepCompleted:
+			pending = nil
+		}
+	}
+	if pending == nil {
+		return false, fmt.Errorf("multi-case suspension has no pending request")
+	}
+	var request struct {
+		Kind  string `json:"kind"`
+		Cases []struct {
+			Kind   string    `json:"kind"`
+			Name   string    `json:"name"`
+			FireAt time.Time `json:"fire_at"`
+		} `json:"cases"`
+	}
+	if err := json.Unmarshal(pending.Payload, &request); err != nil {
+		return false, err
+	}
+	if request.Kind != "select_many" || len(request.Cases) == 0 {
+		return false, fmt.Errorf("invalid multi-case request")
+	}
+	for _, c := range request.Cases {
+		if identity.ValidateToken(c.Name) != nil || c.Kind != "timer" && c.Kind != "signal" && c.Kind != "promise" {
+			return false, fmt.Errorf("invalid multi-case awaitable")
+		}
+	}
+	var readErr error
+	for _, c := range request.Cases {
+		if c.Kind == "timer" {
+			if c.FireAt.IsZero() || !s.Now().Before(c.FireAt.Add(s.Grace)) {
+				return true, nil
+			}
+			continue
+		}
+		ready, err := signalAvailable(ctx, s.port, typ, id, c.Name, invSeq, records)
+		if err != nil {
+			if readErr == nil {
+				readErr = err
+			}
+			continue
+		}
+		if ready {
+			return true, nil
+		}
+	}
+	return false, readErr
 }
 
 func (s *SuspendedScan) timerDue(records []journal.Record, name string) (bool, error) {
