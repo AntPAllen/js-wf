@@ -2472,3 +2472,24 @@ is retained. Metadata faults consume zero virtual time; this count applies
 only to that workload. The previous full extended simulation and the 200-seed
 focused mixed campaign are still running independently, as is the original
 24-hour million-timer campaign.
+
+## Named continuation design and absolute SDK cursor foundation
+
+The [checkpoint continuation contract](checkpoint-continuations.md) specifies
+explicit named stages with serialized local data, generation-fenced frame
+storage, an archive-preserving manifest, suffix dispatch and crash repair. An
+ordinary Go stack cannot be reconstructed from final SDK state; the design
+requires an explicit continuation boundary to skip prefix execution safely.
+The public continuation APIs are proposed and are not callable yet.
+
+The SDK now distinguishes its relative retained-entry cursor from the absolute
+SDK entry position used by child IDs, timer IDs and external RunOnce keys. A
+control compares an uninterrupted workflow with a prefix-free suffix at the
+same offset, requires identical entries and identities, checks zero effects
+and child starts on replay, and rejects a forgotten offset before any effect.
+No worker currently supplies a nonzero offset, so durable checkpoint dispatch
+is still open. The SDK race suite passed in 8.604 seconds, full simulator suite
+in 80.871 seconds, and strengthened cursor control under race in 1.015 seconds.
+Vet and diff checks passed. [Raw logs](scale/checkpoint-cursor-2026-09-30/) are
+retained. Frame capture, manifest publication, suffix reads, worker dispatch,
+reconciliation and model/real crash-boundary proofs remain required.

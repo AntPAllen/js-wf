@@ -29,7 +29,7 @@ func (c *Context) Timer(name string, d time.Duration) (*TimerHandle, error) {
 	if err := identity.ValidateToken(name); err != nil {
 		return nil, err
 	}
-	step := uint64(c.position)
+	step := c.stepPosition()
 	var req request
 	if c.position < len(c.entries) {
 		recorded := c.entries[c.position]

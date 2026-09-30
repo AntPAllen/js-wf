@@ -57,6 +57,7 @@ type Context struct {
 	base               context.Context
 	entries            []Entry
 	position           int
+	stepOffset         uint64
 	append             Appender
 	replay             bool
 	signals            []Signal
@@ -119,6 +120,11 @@ func (c *Context) SetResultStore(store func(context.Context, []byte) (string, er
 	c.loadResult = load
 }
 
+// stepPosition is the absolute SDK entry position. position remains a cursor
+// into the retained suffix; a continuation checkpoint can omit earlier entries
+// without changing timer, child or external deduplication identities.
+func (c *Context) stepPosition() uint64 { return c.stepOffset + uint64(c.position) }
+
 func (c *Context) next(kind Kind, payload json.RawMessage) error {
 	if c.waitingOn != "" {
 		return ErrSuspended
@@ -129,7 +135,7 @@ func (c *Context) next(kind Kind, payload json.RawMessage) error {
 	if err := c.append(c.base, kind, payload); err != nil {
 		return err
 	}
-	c.entries = append(c.entries, Entry{Index: uint64(len(c.entries) + 1), Kind: kind, Payload: payload})
+	c.entries = append(c.entries, Entry{Index: c.stepOffset + uint64(len(c.entries)) + 1, Kind: kind, Payload: payload})
 	return nil
 }
 
@@ -331,7 +337,7 @@ func Call(c *Context, childType string, input []byte) ([]byte, error) {
 	if c.parentType == "" || c.parentID == "" || c.parentInvSeq == 0 || c.startChild == nil {
 		return nil, fmt.Errorf("child support is not configured")
 	}
-	step := uint64(c.position)
+	step := c.stepPosition()
 	childID := c.childID(childType, step)
 	signalName := "child_" + strconv.FormatUint(step, 10)
 	inputDigest := sha256.Sum256(input)
@@ -425,7 +431,7 @@ func CallAsync(c *Context, childType string, input []byte) (Promise, error) {
 	if c.parentType == "" || c.parentID == "" || c.parentInvSeq == 0 || c.startChild == nil {
 		return empty, fmt.Errorf("child support is not configured")
 	}
-	step := uint64(c.position)
+	step := c.stepPosition()
 	p := Promise{ChildType: childType, ChildID: c.childID(childType, step), SignalName: "child_" + strconv.FormatUint(step, 10)}
 	inputDigest := sha256.Sum256(input)
 	want := request{Kind: "call_async", Name: p.SignalName, InputHash: hex.EncodeToString(inputDigest[:]), ChildType: childType, ChildID: p.ChildID}
@@ -577,7 +583,7 @@ func Sleep(c *Context, name string, d time.Duration) error {
 	if name == "" {
 		return fmt.Errorf("empty timer name")
 	}
-	step := uint64(c.position)
+	step := c.stepPosition()
 	var req request
 	if c.position < len(c.entries) {
 		recorded := c.entries[c.position]

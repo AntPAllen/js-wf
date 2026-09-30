@@ -22,7 +22,7 @@ func RunOnce[T any](c *Context, name string, input any, fn func(context.Context,
 	if c.parentType == "" || c.parentID == "" || c.parentInvSeq == 0 {
 		return zero, ErrInvocationIdentity
 	}
-	material := c.parentType + ":" + c.parentID + ":" + strconv.FormatUint(c.parentInvSeq, 10) + ":" + strconv.FormatUint(uint64(c.position), 10) + ":" + name
+	material := c.parentType + ":" + c.parentID + ":" + strconv.FormatUint(c.parentInvSeq, 10) + ":" + strconv.FormatUint(c.stepPosition(), 10) + ":" + name
 	digest := sha256.Sum256([]byte(material))
 	key := "wf-" + hex.EncodeToString(digest[:])
 	declared := struct {
