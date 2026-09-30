@@ -18,7 +18,7 @@ type BatchReadFault struct {
 }
 
 func (m *JournalTransport) QueueBatchFault(fault BatchReadFault) error {
-	if fault.After < 0 || fault.Kind != "no_responders" && fault.Kind != "consumer_deleted" {
+	if fault.After < 0 || fault.Kind != "no_responders" && fault.Kind != "consumer_deleted" && fault.Kind != "timeout" && fault.Kind != "no_messages" {
 		return fmt.Errorf("invalid journal batch fault %+v", fault)
 	}
 	m.mu.Lock()
@@ -97,6 +97,12 @@ func (c *journalBatchCursor) Fetch(ctx context.Context, limit int) ([]journal.Ap
 		m.event(event)
 		if fault.Kind == "no_responders" {
 			return messages, nats.ErrNoResponders
+		}
+		if fault.Kind == "timeout" {
+			return messages, nats.ErrTimeout
+		}
+		if fault.Kind == "no_messages" {
+			return messages, jetstream.ErrNoMessages
 		}
 		return messages, jetstream.ErrConsumerDeleted
 	}

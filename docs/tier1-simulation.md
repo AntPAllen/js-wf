@@ -31,6 +31,19 @@ and compares every record and tail after both production read paths.
 A local 100,000-seed run of this batch-read workload passed in 167.62 seconds;
 this is one workload, not the full Tier 1 release gate.
 
+A separate 1,000-seed workload models timed-out or empty pulls while a direct
+tail probe still finds the next entry. Production reads replace the cursor
+after two empty pulls, resume from the last verified sequence, and return a
+bounded timeout after six consecutive empty pulls rather than spinning until
+the caller's deadline. The workload covers stalls before and after partial
+delivery, permanent stalls, exact replay, and cross-process trace identity;
+seed 42 is pinned. It fails against the former read loop. A real 500-child
+leader-restart reproduction timed out at 303 seconds while its parent was
+already suspended and acknowledged; three local runs after cursor replacement
+completed all children and retained audits in 10.4, 17.1, and 10.8 seconds.
+This isolates the observer's lack of progress; the precise real transport
+condition that stopped its cursor remains unconfirmed.
+
 A pinned worker-kill lease trace now reproduces the five-container recovery
 floor using the production `lease.Acquire` and `journal.Append` decisions over
 virtual transports. The replacement receives `ErrHeld` at 11,999 ms after

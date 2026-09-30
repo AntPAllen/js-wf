@@ -494,6 +494,7 @@ func readLiveBatch(ctx context.Context, port BatchReadPort, subject string, seq 
 	}
 	readLive := false
 	var noResponderRetries int
+	var noProgressRetries int
 	for ctx.Err() == nil {
 		messages, transportErr := consumer.Fetch(ctx, 256)
 		for _, msg := range messages {
@@ -516,6 +517,7 @@ func readLiveBatch(ctx context.Context, port BatchReadPort, subject string, seq 
 		received := len(messages)
 		if received > 0 {
 			noResponderRetries = 0
+			noProgressRetries = 0
 		}
 		if errors.Is(transportErr, nats.ErrNoResponders) || errors.Is(transportErr, jetstream.ErrConsumerDeleted) {
 			noResponderRetries++
@@ -546,6 +548,24 @@ func readLiveBatch(ctx context.Context, port BatchReadPort, subject string, seq 
 		}
 		if err != nil {
 			return nil, 0, false, fmt.Errorf("filtered journal tail probe after %d entries: %w", len(out), err)
+		}
+		if received == 0 {
+			// The direct probe found an entry, but this cursor did not deliver
+			// it. A cursor can stop making progress during leader movement or
+			// concurrent prefix purge. Replace it at the last verified sequence
+			// and bound repeated empty pulls even when the caller has no deadline.
+			noProgressRetries++
+			if noProgressRetries > 5 {
+				return nil, 0, false, fmt.Errorf("filtered journal pull stalled after %d entries: %w", len(out), nats.ErrTimeout)
+			}
+			if noProgressRetries >= 2 {
+				if err := create(seq); err != nil {
+					return nil, 0, false, fmt.Errorf("replace stalled journal consumer after %d entries: %w", len(out), err)
+				}
+			}
+			if err := port.Wait(ctx, 50*time.Millisecond); err != nil {
+				return nil, 0, false, err
+			}
 		}
 	}
 	return nil, 0, false, ctx.Err()

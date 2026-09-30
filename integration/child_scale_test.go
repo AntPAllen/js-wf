@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -145,7 +146,21 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess bo
 		copy(all, nodes[:])
 		t.Logf("restarted WF_JRN leader after %d child requests; retained journal messages=%d", cut+1, before.State.Msgs)
 	}
-	second, err := worker.New(ctx, all[1], "parent-after-cut", handlers)
+	var dispatchMu sync.Mutex
+	var parentDispatch []worker.DispatchEvent
+	observeParent := func(event worker.DispatchEvent) {
+		if event.Type != "parent" || event.ID != "large-fanout" {
+			return
+		}
+		dispatchMu.Lock()
+		defer dispatchMu.Unlock()
+		if len(parentDispatch) == 256 {
+			copy(parentDispatch, parentDispatch[1:])
+			parentDispatch = parentDispatch[:255]
+		}
+		parentDispatch = append(parentDispatch, event)
+	}
+	second, err := worker.New(ctx, all[1], "parent-after-cut", handlers, worker.WithDispatchObserver(observeParent))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,9 +169,16 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess bo
 	go func() { secondDone <- second.RunPartition(secondCtx, parentPart) }()
 	j := journal.New(all[0])
 	var childIDs []string
+	logCreationFailure := func() {
+		dispatchMu.Lock()
+		events := append([]worker.DispatchEvent(nil), parentDispatch...)
+		dispatchMu.Unlock()
+		logFanoutCreationFailure(t, all, parentPart, len(childIDs), second.Metrics(), events)
+	}
 	for ctx.Err() == nil {
 		records, _, err := j.Read(ctx, "parent", "large-fanout")
 		if err != nil {
+			logCreationFailure()
 			t.Fatal(err)
 		}
 		childIDs = childIDs[:0]
@@ -181,6 +203,7 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess bo
 		time.Sleep(50 * time.Millisecond)
 	}
 	if len(childIDs) != childCount {
+		logCreationFailure()
 		t.Fatalf("parent started %d children before timeout: %v", len(childIDs), ctx.Err())
 	}
 	stopSecond()
@@ -278,6 +301,56 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess bo
 		}
 	}
 	t.Logf("completed %d children; %d shared the parent partition", childCount, insideParent)
+}
+
+// The polling read can outlive the fixture context during leader movement.
+// Diagnose with a fresh, bounded context so the original error is not the only
+// evidence of whether the parent or its observer stopped making progress.
+func logFanoutCreationFailure(t *testing.T, nodes []jetstream.JetStream, partition uint32, childCount int, metrics worker.Metrics, events []worker.DispatchEvent) {
+	t.Helper()
+	t.Logf("fan-out creation failure: last observed children=%d replacement metrics=%+v", childCount, metrics)
+	for _, event := range events {
+		t.Logf("fan-out parent dispatch at=%s worker=%s stage=%s run_seq=%d delivery=%d err=%s", event.At.UTC().Format(time.RFC3339Nano), event.Worker, event.Stage, event.RunSequence, event.Delivery, event.Error)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	for node, js := range nodes {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		stream, err := js.Stream(attempt, "WF_JRN")
+		if err == nil {
+			info, infoErr := stream.Info(attempt)
+			if info != nil {
+				t.Logf("fan-out node=%d journal state=%+v cluster=%+v err=%v", node, info.State, info.Cluster, infoErr)
+			} else {
+				t.Logf("fan-out node=%d journal info err=%v", node, infoErr)
+			}
+			last, lastErr := stream.GetLastMsgForSubject(attempt, identity.JournalSubject("parent", "large-fanout"))
+			var entry journal.Entry
+			if lastErr == nil {
+				lastErr = json.Unmarshal(last.Data, &entry)
+			}
+			t.Logf("fan-out node=%d parent tail index=%d kind=%s epoch=%d worker=%s err=%v", node, entry.Index, entry.Kind, entry.Epoch, entry.WorkerID, lastErr)
+		} else {
+			t.Logf("fan-out node=%d journal lookup err=%v", node, err)
+		}
+		stop()
+	}
+	attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+	defer stop()
+	run, err := nodes[0].Stream(attempt, "WF_RUN")
+	if err != nil {
+		t.Logf("fan-out run lookup err=%v", err)
+		return
+	}
+	info, err := run.Info(attempt)
+	t.Logf("fan-out run info=%+v err=%v", info, err)
+	consumer, err := run.Consumer(attempt, fmt.Sprintf("WF_P_%02d", partition))
+	if err != nil {
+		t.Logf("fan-out parent consumer lookup err=%v", err)
+		return
+	}
+	consumerInfo, err := consumer.Info(attempt)
+	t.Logf("fan-out parent consumer info=%+v err=%v", consumerInfo, err)
 }
 
 func fanoutHandlers(cut int, afterChild func() error) map[string]worker.Handler {
