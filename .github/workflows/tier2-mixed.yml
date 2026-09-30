@@ -1,5 +1,7 @@
 name: tier2-mixed
 on:
+  push:
+    branches: [main]
   schedule:
     - cron: '17 3 * * *'
   workflow_dispatch:
@@ -23,7 +25,7 @@ jobs:
     timeout-minutes: 240
     env:
       WF_MIXED_CHAOS: '1'
-      MIXED_SEEDS: ${{ inputs.seeds || '200' }}
+      MIXED_SEEDS: ${{ inputs.seeds || (github.event_name == 'schedule' && '200') || '20' }}
       MIXED_START_SEED: ${{ inputs.start_seed || '1' }}
     steps:
       - uses: actions/checkout@v4
