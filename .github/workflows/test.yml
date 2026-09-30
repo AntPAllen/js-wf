@@ -52,6 +52,16 @@ jobs:
         with:
           go-version-file: go.mod
       - run: go test ./integration -run '^TestJournalCASTenThousandRacesWithLeaderRestarts$' -count=1 -timeout=16m -v
+  cluster-rebalance-combined:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Rebalance 200 workflows across four combined faults
+        run: WF_REBALANCE_COMBINED_CHAOS=1 go test ./integration -run '^TestTwoHundredWorkflowsRebalanceDuringCombinedFaults$' -count=1 -timeout=7m -v
   chaos-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 10
