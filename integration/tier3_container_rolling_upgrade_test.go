@@ -18,6 +18,7 @@ import (
 	"js-wf/history"
 	"js-wf/identity"
 	"js-wf/integrity"
+	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/reconcile"
 	"js-wf/testcluster"
@@ -111,9 +112,9 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	if mode, err := provision.EnsureAuto(ctx, all[0], 5); err != nil || mode != provision.FallbackTimers {
 		t.Fatalf("old peer fallback mode=%q err=%v", mode, err)
 	}
-	const typ, firstID = "tier3-rolling-upgrade", "timer"
+	const typ, firstID, signalType = "tier3-rolling-upgrade", "timer", "tier3-upgrade-signal"
 	partition := identity.Partition(typ, firstID, provision.Partitions)
-	var repairedID, afterID string
+	var repairedID, afterID, signalID string
 	for candidate := 0; candidate < 10_000 && afterID == ""; candidate++ {
 		id := fmt.Sprintf("same-part-%d", candidate)
 		if identity.Partition(typ, id, provision.Partitions) != partition {
@@ -128,12 +129,35 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	if afterID == "" {
 		t.Fatal("could not find same-partition IDs")
 	}
-	w, err := worker.New(ctx, all[3], "tier3-upgrade-worker", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
-		if err := wf.Sleep(c, "wait", time.Second); err != nil {
-			return nil, err
+	for candidate := 0; candidate < 10_000; candidate++ {
+		id := fmt.Sprintf("signal-part-%d", candidate)
+		if identity.Partition(signalType, id, provision.Partitions) == partition {
+			signalID = id
+			break
 		}
-		return json.RawMessage(`"done"`), nil
-	}})
+	}
+	if signalID == "" {
+		t.Fatal("could not find signal ID on worker partition")
+	}
+	w, err := worker.New(ctx, all[3], "tier3-upgrade-worker", map[string]worker.Handler{
+		typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+			if err := wf.Sleep(c, "wait", time.Second); err != nil {
+				return nil, err
+			}
+			return json.RawMessage(`"done"`), nil
+		},
+		signalType: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+			first, err := wf.AwaitSignal(c, "go")
+			if err != nil {
+				return nil, err
+			}
+			second, err := wf.AwaitSignal(c, "go")
+			if err != nil {
+				return nil, err
+			}
+			return json.Marshal([]json.RawMessage{first, second})
+		},
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,6 +201,22 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	if retry, err := oldClient.Start(ctx, typ, repairedID, payload); !errors.Is(err, client.ErrAlreadyStarted) || retry.InvSeq != ack.Sequence {
 		t.Fatalf("old-container retry: handle=%+v err=%v want=%d", retry, err, ack.Sequence)
 	}
+	if _, err := oldClient.Start(ctx, signalType, signalID, payload); err != nil {
+		t.Fatalf("start signal wait through old container: %v", err)
+	}
+	for until := time.Now().Add(15 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		records, _, readErr := journal.New(all[3]).Read(attempt, signalType, signalID)
+		stop()
+		if readErr == nil && len(records) > 0 && records[len(records)-1].Kind == journal.Suspended {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	records, _, err := journal.New(all[3]).Read(ctx, signalType, signalID)
+	if err != nil || len(records) == 0 || records[len(records)-1].Kind != journal.Suspended {
+		t.Fatalf("signal workflow was not suspended before upgrade: records=%d err=%v", len(records), err)
+	}
 	if err := cluster.UpgradeNode(0); err != nil {
 		t.Fatalf("upgrade old container: %v", err)
 	}
@@ -200,13 +240,22 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 			t.Fatalf("retained result %s=%s err=%v probe=%s", id, value, err, mixedVersionResultProbe(ctx, upgraded, typ, id))
 		}
 	}
+	if _, err := upgradedClient.Signal(ctx, signalType, signalID, "go", []byte(`1`), "upgrade-first"); err != nil {
+		t.Fatalf("first post-upgrade signal: %v", err)
+	}
+	if _, err := client.NewObserved(all[1], recorder).Signal(ctx, signalType, signalID, "go", []byte(`2`), "upgrade-second"); err != nil {
+		t.Fatalf("second post-upgrade signal: %v", err)
+	}
+	if value, err := upgradedClient.Await(ctx, signalType, signalID); err != nil || string(value) != `[1,2]` {
+		t.Fatalf("ordered post-upgrade signals=%s err=%v", value, err)
+	}
 	if _, err := upgradedClient.Start(ctx, typ, afterID, payload); err != nil {
 		t.Fatalf("post-upgrade start: %v", err)
 	}
 	if value, err := upgradedClient.Await(ctx, typ, afterID); err != nil || string(value) != `"done"` {
 		t.Fatalf("post-upgrade result=%s err=%v", value, err)
 	}
-	if report, err := integrity.Check(ctx, upgraded); err != nil || report.Invocations != 3 || report.Journals != 3 || report.Terminal != 3 {
+	if report, err := integrity.Check(ctx, upgraded); err != nil || report.Invocations != 4 || report.Journals != 4 || report.Terminal != 4 {
 		t.Fatalf("five-container upgrade audit: report=%+v err=%v", report, err)
 	}
 	if result, err := history.CheckStarts(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
@@ -214,5 +263,8 @@ func TestFiveContainerRollingUpgradeFallback(t *testing.T) {
 	}
 	if result, err := history.CheckResults(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
 		t.Fatalf("rolling-upgrade Await history=%v err=%v", result, err)
+	}
+	if result, err := history.CheckSignals(recorder.Snapshot(), 10*time.Second); err != nil || result != porcupine.Ok {
+		t.Fatalf("rolling-upgrade Signal history=%v err=%v", result, err)
 	}
 }
