@@ -851,14 +851,17 @@ func partitionMatrixServer(ctx context.Context, js jetstream.JetStream, cluster 
 	}
 	// The workload connection is restricted to the two majority nodes. Require
 	// an acknowledged replicated write while the minority is still isolated.
-	publish, done := context.WithTimeout(bound, 6*time.Second)
+	publish, done := context.WithDeadline(bound, event.Killed.Add(10*time.Second))
 	for publish.Err() == nil {
-		ack, pubErr := js.Publish(publish, "matrix.route.probe", []byte(scheduled.Format(time.RFC3339Nano)), jetstream.WithMsgID(scheduled.Format(time.RFC3339Nano)))
+		attempt, stopAttempt := context.WithTimeout(publish, time.Second)
+		ack, pubErr := js.Publish(attempt, "matrix.route.probe", []byte(scheduled.Format(time.RFC3339Nano)), jetstream.WithMsgID(scheduled.Format(time.RFC3339Nano)))
+		stopAttempt()
 		if pubErr == nil {
 			event.MajoritySequence = ack.Sequence
 			break
 		}
-		if !matrixTransientTransport(pubErr) {
+		var api *jetstream.APIError
+		if !matrixTransientTransport(pubErr) && !(errors.As(pubErr, &api) && api.ErrorCode == 10158) {
 			done()
 			return event, pubErr
 		}

@@ -385,7 +385,14 @@ func (s *Store) loadSnapshot(ctx context.Context, typ, id string) ([]Record, *Sn
 	if port == nil {
 		port = NewSnapshotReadPort(s.js)
 	}
-	value, err := port.GetManifest(ctx, snapshotKey(typ, id))
+	wait := waitReadRequest
+	if waiter, ok := port.(interface {
+		Wait(context.Context, time.Duration) error
+	}); ok {
+		wait = waiter.Wait
+	}
+	key := snapshotKey(typ, id)
+	value, err := boundedReadRequest(ctx, wait, "snapshot manifest "+key, func(request context.Context) ([]byte, error) { return port.GetManifest(request, key) })
 	if errors.Is(err, jetstream.ErrKeyNotFound) {
 		return nil, nil, nil
 	}

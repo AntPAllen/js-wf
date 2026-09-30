@@ -583,49 +583,59 @@ func verifyNext(out []Record, next Record) ([]Record, error) {
 // invocation read deadline. Retry the same next-subject sequence, preserving
 // all already verified records and the gap checks that follow.
 func (s *Store) nextLive(ctx context.Context, stream jetstream.Stream, subject string, sequence uint64) (AppendTail, error) {
-	var message AppendTail
-	var err error
+	wait := waitReadRequest
+	if s.readPort != nil {
+		wait = s.readPort.Wait
+	}
+	return boundedReadRequest(ctx, wait, fmt.Sprintf("next journal %s from sequence %d", subject, sequence), func(request context.Context) (AppendTail, error) {
+		if s.readPort != nil {
+			return s.readPort.Next(request, subject, sequence)
+		}
+		raw, err := stream.GetMsg(request, sequence, jetstream.WithGetMsgSubject(subject))
+		if err != nil {
+			return AppendTail{}, err
+		}
+		return AppendTail{Sequence: raw.Sequence, Data: raw.Data}, nil
+	})
+}
+
+func transientReadRequest(err error) bool {
+	var api *jetstream.APIError
+	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || errors.As(err, &api) && api.ErrorCode == 10008
+}
+
+func waitReadRequest(ctx context.Context, delay time.Duration) error {
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
+	}
+}
+
+func boundedReadRequest[T any](ctx context.Context, wait func(context.Context, time.Duration) error, label string, read func(context.Context) (T, error)) (T, error) {
+	var value T
 	for attempt := 0; attempt < 3; attempt++ {
 		if ctx.Err() != nil {
-			return message, ctx.Err()
+			return value, ctx.Err()
 		}
 		request, stop := context.WithTimeout(ctx, 2*time.Second)
-		if s.readPort != nil {
-			message, err = s.readPort.Next(request, subject, sequence)
-		} else {
-			var raw *jetstream.RawStreamMsg
-			raw, err = stream.GetMsg(request, sequence, jetstream.WithGetMsgSubject(subject))
-			if err == nil {
-				message = AppendTail{Sequence: raw.Sequence, Data: raw.Data}
-			}
-		}
+		result, err := read(request)
 		stop()
 		if err == nil {
-			return message, nil
+			return result, nil
 		}
-		var api *jetstream.APIError
-		transient := errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || errors.As(err, &api) && api.ErrorCode == 10008
-		if !transient {
-			return message, err
+		if !transientReadRequest(err) {
+			return value, err
 		}
 		if attempt == 2 || ctx.Err() != nil {
-			return message, fmt.Errorf("next journal %s from sequence %d after %d attempts: %w", subject, sequence, attempt+1, err)
+			return value, fmt.Errorf("%s after %d attempts: %w", label, attempt+1, err)
 		}
-		err = nil
-		if s.readPort != nil {
-			err = s.readPort.Wait(ctx, 25*time.Millisecond)
-		} else {
-			timer := time.NewTimer(25 * time.Millisecond)
-			select {
-			case <-ctx.Done():
-				err = ctx.Err()
-			case <-timer.C:
-			}
-			timer.Stop()
-		}
-		if err != nil {
-			return message, err
+		if err := wait(ctx, 25*time.Millisecond); err != nil {
+			return value, err
 		}
 	}
-	return message, err
+	panic("unreachable bounded read")
 }

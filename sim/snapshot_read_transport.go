@@ -13,23 +13,25 @@ import (
 	"js-wf/identity"
 	"js-wf/journal"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
 // SnapshotReadTransport holds the manifest and object reads needed by
 // production journal.Store.Read after a compacted prefix is purged.
 type SnapshotReadTransport struct {
-	mu                sync.Mutex
-	schedule          *Scheduler
-	manifests         map[string][]byte
-	objects           map[string][]byte
-	manifestRevisions map[string]uint64
-	revision          uint64
-	live              *JournalTransport
-	signals           *SignalTransport
-	writeFaults       []SnapshotFault
-	manifestMiss      bool
-	objectTransient   bool
+	mu                 sync.Mutex
+	schedule           *Scheduler
+	manifests          map[string][]byte
+	objects            map[string][]byte
+	manifestRevisions  map[string]uint64
+	revision           uint64
+	live               *JournalTransport
+	signals            *SignalTransport
+	writeFaults        []SnapshotFault
+	manifestMiss       bool
+	manifestReadFaults []string
+	objectTransient    bool
 }
 
 var _ journal.SnapshotReadPort = (*SnapshotReadTransport)(nil)
@@ -291,6 +293,24 @@ func (m *SnapshotReadTransport) GetManifest(ctx context.Context, key string) ([]
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	if len(m.manifestReadFaults) > 0 {
+		kind := m.manifestReadFaults[0]
+		m.manifestReadFaults = m.manifestReadFaults[1:]
+		if kind == "timeout" {
+			if err := m.schedule.AdvanceMillis(2000); err != nil {
+				return nil, err
+			}
+		}
+		m.writeEvent("get_snapshot_manifest", key, 0, nil, kind)
+		switch kind {
+		case "timeout":
+			return nil, context.DeadlineExceeded
+		case "no_responders":
+			return nil, nats.ErrNoResponders
+		case "unavailable":
+			return nil, &jetstream.APIError{ErrorCode: 10008}
+		}
+	}
 	data, _, err := m.getManifestLocked(key)
 	return data, err
 }
@@ -338,4 +358,16 @@ func (m *SnapshotReadTransport) GetObject(ctx context.Context, name string) ([]b
 	event.DataSHA256 = digest(data)
 	m.schedule.RecordTransport(event)
 	return append([]byte(nil), data...), nil
+}
+
+func (m *SnapshotReadTransport) QueueManifestReadFault(kind string) error {
+	switch kind {
+	case "timeout", "no_responders", "unavailable":
+	default:
+		return fmt.Errorf("unknown manifest read fault %q", kind)
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.manifestReadFaults = append(m.manifestReadFaults, kind)
+	return nil
 }

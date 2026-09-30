@@ -34,18 +34,39 @@ type heldSerialReadStream struct {
 }
 
 func (s *heldSerialReadStream) GetMsg(ctx context.Context, seq uint64, opts ...jetstream.GetMsgOpt) (*jetstream.RawStreamMsg, error) {
-	if s.owner.armed.Load() {
-		switch s.owner.requests.Add(1) {
-		case 1:
-			s.owner.proxy.HoldResponses()
-		case 2:
-			close(s.owner.retried)
-		}
-	}
+	s.owner.holdReadResponse()
 	return s.Stream.GetMsg(ctx, seq, opts...)
 }
 
+func (h *heldSerialReadJS) holdReadResponse() {
+	if h.armed.Load() {
+		switch h.requests.Add(1) {
+		case 1:
+			h.proxy.HoldResponses()
+		case 2:
+			close(h.retried)
+		}
+	}
+}
+
+type heldManifestReadPort struct {
+	journal.SnapshotWritePort
+	owner *heldSerialReadJS
+}
+
+func (p *heldManifestReadPort) GetManifest(ctx context.Context, key string) ([]byte, error) {
+	p.owner.holdReadResponse()
+	return p.SnapshotWritePort.GetManifest(ctx, key)
+}
+
 func TestSerialJournalReadRecoversHeldNetworkResponse(t *testing.T) {
+	testJournalReadRecoversHeldNetworkResponse(t, false)
+}
+func TestManifestReadRecoversHeldNetworkResponse(t *testing.T) {
+	testJournalReadRecoversHeldNetworkResponse(t, true)
+}
+func testJournalReadRecoversHeldNetworkResponse(t *testing.T, manifest bool) {
+	t.Helper()
 	all, cluster := setup(t)
 	ctx, stop := context.WithTimeout(context.Background(), 15*time.Second)
 	defer stop()
@@ -74,6 +95,11 @@ func TestSerialJournalReadRecoversHeldNetworkResponse(t *testing.T) {
 	}
 	hooked := &heldSerialReadJS{JetStream: js, proxy: proxy, retried: make(chan struct{})}
 	reader := journal.New(hooked)
+	minimumRequests := int32(5)
+	if manifest {
+		reader = journal.NewWithJetStreamSnapshotPort(js, &heldManifestReadPort{SnapshotWritePort: journal.NewSnapshotPort(js), owner: hooked})
+		minimumRequests = 2
+	}
 	before, _, err := reader.Read(ctx, "test", "held-serial-read")
 	if err != nil {
 		t.Fatal(err)
@@ -92,7 +118,7 @@ func TestSerialJournalReadRecoversHeldNetworkResponse(t *testing.T) {
 	select {
 	case <-hooked.retried:
 	case <-time.After(4 * time.Second):
-		t.Fatal("lost serial response occupied the full read deadline without a retry")
+		t.Fatal("lost journal read response occupied the full read deadline without a retry")
 	}
 	proxy.ResumeResponses()
 	select {
@@ -103,7 +129,7 @@ func TestSerialJournalReadRecoversHeldNetworkResponse(t *testing.T) {
 	case <-ctx.Done():
 		t.Fatal(ctx.Err())
 	}
-	if hooked.requests.Load() < 5 {
-		t.Fatalf("serial requests=%d", hooked.requests.Load())
+	if hooked.requests.Load() < minimumRequests {
+		t.Fatalf("journal read requests=%d", hooked.requests.Load())
 	}
 }
