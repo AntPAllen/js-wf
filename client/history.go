@@ -26,7 +26,7 @@ type Observer interface {
 }
 
 func NewObserved(js jetstream.JetStream, observer Observer) *Client {
-	return &Client{js: js, observer: observer}
+	return &Client{js: js, startPort: &jetStreamStartPort{js: js}, observer: observer}
 }
 
 func (c *Client) observe(start time.Time, op string, args, result any, err error) {

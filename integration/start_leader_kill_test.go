@@ -22,6 +22,7 @@ import (
 type countedStartJS struct {
 	jetstream.JetStream
 	entered *atomic.Int64
+	lookups *atomic.Int64
 }
 
 func (c *countedStartJS) PublishMsg(ctx context.Context, msg *nats.Msg, opts ...jetstream.PublishOpt) (*jetstream.PubAck, error) {
@@ -29,6 +30,14 @@ func (c *countedStartJS) PublishMsg(ctx context.Context, msg *nats.Msg, opts ...
 		c.entered.Add(1)
 	}
 	return c.JetStream.PublishMsg(ctx, msg, opts...)
+}
+
+func (c *countedStartJS) Stream(ctx context.Context, name string) (jetstream.Stream, error) {
+	stream, err := c.JetStream.Stream(ctx, name)
+	if name == "WF_INV" && err == nil {
+		c.lookups.Add(1)
+	}
+	return stream, err
 }
 
 func TestConcurrentStartDuringInvocationLeaderKill(t *testing.T) {
@@ -52,7 +61,7 @@ func TestConcurrentStartDuringInvocationLeaderKill(t *testing.T) {
 	if leader < 0 {
 		t.Fatalf("unknown invocation leader %q", info.Cluster.Leader)
 	}
-	var entered, completed atomic.Int64
+	var entered, completed, lookups atomic.Int64
 	recorder := &history.Recorder{}
 	clients := make([]*client.Client, 3)
 	for i := range clients {
@@ -69,7 +78,7 @@ func TestConcurrentStartDuringInvocationLeaderKill(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		clients[i] = client.NewObserved(&countedStartJS{JetStream: js, entered: &entered}, recorder)
+		clients[i] = client.NewObserved(&countedStartJS{JetStream: js, entered: &entered, lookups: &lookups}, recorder)
 	}
 	type outcome struct {
 		handle client.Handle
@@ -136,6 +145,10 @@ func TestConcurrentStartDuringInvocationLeaderKill(t *testing.T) {
 	if confirmed > 1 || confirmed+counts["already"]+counts["unknown"] != 500 {
 		t.Fatalf("start outcomes after leader kill: cut_at=%d counts=%v", completedAtCut, counts)
 	}
+	if got := lookups.Load(); got > int64(len(clients)) {
+		t.Fatalf("WF_INV stream lookups=%d across %d clients, want at most one successful lookup per client", got, len(clients))
+	}
+	t.Logf("leader-kill start outcomes=%v successful WF_INV handle lookups=%d", counts, lookups.Load())
 	if result, err := history.CheckStarts(recorder.Snapshot(), 45*time.Second); err != nil || result != porcupine.Ok {
 		t.Fatalf("leader-kill start history=%s err=%v", result, err)
 	}

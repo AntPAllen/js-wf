@@ -89,5 +89,5 @@ func (p jetStreamSignalPort) ReadJournal(ctx context.Context, typ, id string) ([
 }
 
 func (p jetStreamSignalPort) EnqueueRun(ctx context.Context, subject string, data []byte, messageID string) error {
-	return (jetStreamStartPort{js: p.js}).EnqueueRun(ctx, subject, data, messageID)
+	return (&jetStreamStartPort{js: p.js}).EnqueueRun(ctx, subject, data, messageID)
 }

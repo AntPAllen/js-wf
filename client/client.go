@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"js-wf/identity"
@@ -59,7 +60,9 @@ type Client struct {
 	observer   Observer
 }
 
-func New(js jetstream.JetStream) *Client { return &Client{js: js} }
+func New(js jetstream.JetStream) *Client {
+	return &Client{js: js, startPort: &jetStreamStartPort{js: js}}
+}
 
 // StartPort is the durable boundary used by Start and StartChild. The model
 // implements this small surface while the production adapter uses JetStream.
@@ -87,9 +90,13 @@ func (c *Client) signalOperations() SignalPort {
 	return jetStreamSignalPort{js: c.js}
 }
 
-type jetStreamStartPort struct{ js jetstream.JetStream }
+type jetStreamStartPort struct {
+	js  jetstream.JetStream
+	mu  sync.Mutex
+	inv jetstream.Stream
+}
 
-func (p jetStreamStartPort) PublishInvocation(ctx context.Context, msg *nats.Msg) (uint64, error) {
+func (p *jetStreamStartPort) PublishInvocation(ctx context.Context, msg *nats.Msg) (uint64, error) {
 	ack, err := p.js.PublishMsg(ctx, msg)
 	if err != nil {
 		return 0, err
@@ -97,15 +104,22 @@ func (p jetStreamStartPort) PublishInvocation(ctx context.Context, msg *nats.Msg
 	return ack.Sequence, nil
 }
 
-func (p jetStreamStartPort) LastInvocation(ctx context.Context, subject string) (*jetstream.RawStreamMsg, error) {
-	stream, err := p.js.Stream(ctx, "WF_INV")
-	if err != nil {
-		return nil, err
+func (p *jetStreamStartPort) LastInvocation(ctx context.Context, subject string) (*jetstream.RawStreamMsg, error) {
+	p.mu.Lock()
+	if p.inv == nil {
+		opened, err := p.js.Stream(ctx, "WF_INV")
+		if err != nil {
+			p.mu.Unlock()
+			return nil, err
+		}
+		p.inv = opened
 	}
+	stream := p.inv
+	p.mu.Unlock()
 	return stream.GetLastMsgForSubject(ctx, subject)
 }
 
-func (p jetStreamStartPort) PutInput(ctx context.Context, key string, input []byte) error {
+func (p *jetStreamStartPort) PutInput(ctx context.Context, key string, input []byte) error {
 	objects, err := p.js.ObjectStore(ctx, "WF_BLOB")
 	if err != nil {
 		return err
@@ -114,12 +128,12 @@ func (p jetStreamStartPort) PutInput(ctx context.Context, key string, input []by
 	return err
 }
 
-func (p jetStreamStartPort) EnqueueRun(ctx context.Context, subject string, data []byte, dedupID string) error {
+func (p *jetStreamStartPort) EnqueueRun(ctx context.Context, subject string, data []byte, dedupID string) error {
 	_, err := p.js.Publish(ctx, subject, data, jetstream.WithMsgID(dedupID))
 	return err
 }
 
-func (jetStreamStartPort) Wait(ctx context.Context, delay time.Duration) error {
+func (*jetStreamStartPort) Wait(ctx context.Context, delay time.Duration) error {
 	timer := time.NewTimer(delay)
 	defer timer.Stop()
 	select {
@@ -134,7 +148,7 @@ func (c *Client) startOperations() StartPort {
 	if c.startPort != nil {
 		return c.startPort
 	}
-	return jetStreamStartPort{js: c.js}
+	return &jetStreamStartPort{js: c.js}
 }
 
 // Start stores a write-once invocation and enqueues its first run. The writes
