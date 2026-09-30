@@ -18,3 +18,20 @@ jobs:
         env:
           WF_NATS_SERVER_BIN: ${{ runner.temp }}/nats-old/nats-server
         run: go test ./integration -run '^(TestFallbackWithPre212Server|TestMixedVersionRollingUpgradeFallback)$' -count=1 -timeout=3m -v
+  five-container-upgrade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build static NATS 2.11.17
+        run: |
+          mkdir -p "$RUNNER_TEMP/nats-old"
+          CGO_ENABLED=0 GOBIN="$RUNNER_TEMP/nats-old" go install github.com/nats-io/nats-server/v2@v2.11.17
+      - name: Upgrade one of five isolated containers
+        env:
+          WF_TIER3_CONTAINER: '1'
+          WF_NATS_SERVER_BIN: ${{ runner.temp }}/nats-old/nats-server
+        run: go test ./integration -run '^TestFiveContainerRollingUpgradeFallback$' -count=1 -timeout=6m -v

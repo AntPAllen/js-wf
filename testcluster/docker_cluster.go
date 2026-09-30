@@ -31,6 +31,7 @@ type DockerCluster struct {
 	syncInterval  string
 	skewNode      int
 	skewSeconds   int64
+	oldNode       int
 }
 
 func dockerCommand(ctx context.Context, args ...string) (string, error) {
@@ -45,13 +46,36 @@ func dockerCommand(ctx context.Context, args ...string) (string, error) {
 // StartDockerCluster builds this module's pinned nats-server in a scratch
 // image. Each node routes to node zero; discovered routes form the cluster.
 func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
+	return startDockerCluster(root, count, "")
+}
+
+// StartMixedVersionDockerCluster starts node zero on oldBinary while the other
+// nodes use the module-pinned server. UpgradeNode replaces node zero in place.
+func StartMixedVersionDockerCluster(root string, count int, oldBinary string) (*DockerCluster, error) {
+	if oldBinary == "" {
+		return nil, fmt.Errorf("old server binary is required")
+	}
+	return startDockerCluster(root, count, oldBinary)
+}
+
+func startDockerCluster(root string, count int, oldBinary string) (_ *DockerCluster, err error) {
 	if count < 3 || count > 5 {
 		return nil, fmt.Errorf("docker cluster count must be 3..5")
 	}
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return nil, err
 	}
-	c := &DockerCluster{root: root, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1}
+	c := &DockerCluster{root: root, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1, oldNode: -1}
+	if oldBinary != "" {
+		c.oldNode = 0
+		data, readErr := os.ReadFile(oldBinary)
+		if readErr != nil {
+			return nil, fmt.Errorf("read old server binary: %w", readErr)
+		}
+		if writeErr := os.WriteFile(filepath.Join(root, "nats-server-old"), data, 0755); writeErr != nil {
+			return nil, fmt.Errorf("copy old server binary: %w", writeErr)
+		}
+	}
 	if specification := os.Getenv("WF_TIER3_SERVER_SKEW"); specification != "" {
 		node, offset, found := strings.Cut(specification, ":")
 		if !found {
@@ -66,6 +90,9 @@ func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
 			return nil, fmt.Errorf("invalid WF_TIER3_SERVER_SKEW duration %q: want whole seconds within ±60s", offset)
 		}
 		c.skewSeconds = int64(duration / time.Second)
+		if c.skewNode == c.oldNode {
+			return nil, fmt.Errorf("old server node %d cannot also use the skewed binary", c.oldNode)
+		}
 	}
 	c.syncInterval = os.Getenv("WF_TIER3_SYNC_INTERVAL")
 	if c.syncInterval == "" {
@@ -91,6 +118,9 @@ func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
 		return nil, fmt.Errorf("build Docker nats-server: %w: %s", buildErr, output)
 	}
 	dockerfile := "FROM scratch\nCOPY nats-server /nats-server\n"
+	if c.oldNode >= 0 {
+		dockerfile += "COPY nats-server-old /nats-server-old\n"
+	}
 	if c.skewNode >= 0 {
 		overlayPath, overlayErr := WriteClockOverlay(root, time.Duration(c.skewSeconds)*time.Second)
 		if overlayErr != nil {
@@ -166,7 +196,9 @@ func (c *DockerCluster) RestartNode(i int) error {
 	}
 	serverArgs = append(serverArgs, "-routes", "nats://"+c.routeNames[peer]+":6222")
 	args := []string{"run", "-d", "--rm", "--name", c.names[i], "--network", c.clientNetwork, "--user", fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()), "-p", "127.0.0.1::4222", "-p", "127.0.0.1::8222", "-v", store + ":/data", "-v", filepath.Join(c.root, "nats.conf") + ":/etc/nats.conf:ro"}
-	if i == c.skewNode {
+	if i == c.oldNode {
+		args = append(args, "--entrypoint", "/nats-server-old")
+	} else if i == c.skewNode {
 		args = append(args, "--entrypoint", "/nats-server-skewed")
 	}
 	args = append(args, c.image)
@@ -204,6 +236,19 @@ func (c *DockerCluster) RestartNode(i int) error {
 	}
 	logs, _ := c.Logs(i)
 	return fmt.Errorf("Docker node %d did not accept clients: %s", i, logs)
+}
+
+// UpgradeNode restarts the old node with the current image binary and its
+// existing file store. It is valid only for a mixed-version cluster.
+func (c *DockerCluster) UpgradeNode(i int) error {
+	if i != c.oldNode || i < 0 {
+		return fmt.Errorf("Docker node %d is not the old-version node", i)
+	}
+	if err := c.KillNode(i); err != nil {
+		return err
+	}
+	c.oldNode = -1
+	return c.RestartNode(i)
 }
 
 // ServerNow reads the clock of one actual NATS process from its monitoring

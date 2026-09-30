@@ -194,7 +194,7 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	if err := cluster.UpgradeNode(0); err != nil {
 		t.Fatalf("restart old peer on pinned binary: %v", err)
 	}
-	readyAt, err := waitMixedVersionReplicaCatchup(ctx, all[1])
+	readyAt, err := waitMixedVersionReplicaCatchup(ctx, all[1], 3)
 	if err != nil {
 		t.Fatalf("upgraded replica catch-up: %v", err)
 	}
@@ -262,17 +262,17 @@ func mixedVersionResultProbe(ctx context.Context, js jetstream.JetStream, typ, i
 	return fmt.Sprintf("inv-seq=%d state-rev=%d state=%s", message.Sequence, entry.Revision(), entry.Value())
 }
 
-func waitMixedVersionReplicaCatchup(ctx context.Context, js jetstream.JetStream) (time.Time, error) {
+func waitMixedVersionReplicaCatchup(ctx context.Context, js jetstream.JetStream, replicas int) (time.Time, error) {
 	var lastErr error
-	for until := time.Now().Add(30 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
+	for until := time.Now().Add(45 * time.Second); time.Now().Before(until) && ctx.Err() == nil; {
 		ready := true
-		for _, name := range []string{"WF_INV", "WF_RUN", "WF_JRN", "KV_WF_STATE"} {
+		for _, name := range []string{"WF_INV", "WF_RUN", "WF_JRN", "WF_SIG", "WF_PURGE", "WF_TIMER", "KV_WF_LEASE", "KV_WF_STATE", "KV_WF_VIEW", "KV_WF_ASSIGN", "OBJ_WF_BLOB"} {
 			attempt, stop := context.WithTimeout(ctx, 2*time.Second)
 			stream, err := js.Stream(attempt, name)
 			if err == nil {
 				var info *jetstream.StreamInfo
 				info, err = stream.Info(attempt)
-				if err == nil && (info.Cluster == nil || info.Cluster.Leader == "" || len(info.Cluster.Replicas) != 2) {
+				if err == nil && (info.Cluster == nil || info.Cluster.Leader == "" || len(info.Cluster.Replicas) != replicas-1) {
 					err = fmt.Errorf("%s replica status: %+v", name, info.Cluster)
 				}
 				if err == nil {
