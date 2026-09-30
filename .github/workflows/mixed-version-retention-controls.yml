@@ -1,0 +1,46 @@
+name: mixed-version-retention-controls
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/mixed-version-retention-controls.yml'
+      - 'integration/mixed_version*'
+      - 'testcluster/process_cluster.go'
+      - 'go.mod'
+      - 'go.sum'
+jobs:
+  retention-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build initial NATS 2.11.17 servers
+        run: |
+          mkdir -p "$RUNNER_TEMP/nats-old"
+          GOBIN="$RUNNER_TEMP/nats-old" go install github.com/nats-io/nats-server/v2@v2.11.17
+          printf 'WF_NATS_SERVER_BIN=%s/nats-old/nats-server\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - name: Verify ordinary retention and post-ack leader-move controls
+        env:
+          MATRIX_ARTIFACT_PREFIX: ack-single
+        run: go test -race ./integration -run '^TestMixedVersionExplicitAckWorkQueueRetention$/(old-control|mixed-co-located|mixed-move-after-ack)$' -count=1 -timeout=6m -v
+      - name: Recognize known retained state and verify multi-consumer recovery
+        env:
+          MATRIX_ARTIFACT_PREFIX: ack-multi
+        run: go test -race ./integration -run '^TestMixedVersionMultipleConsumerRetentionRecovery$' -count=1 -timeout=3m -v
+      # The split-version strict conformance cases still fail. Passing expected
+      # bad-state controls is not a clean mixed-version runtime release gate.
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mixed-version-retention-control-state
+          path: integration/ack-*.json
+          if-no-files-found: ignore
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mixed-version-retention-control-logs
+          path: integration/ack-*.log
+          if-no-files-found: ignore

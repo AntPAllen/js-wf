@@ -1079,3 +1079,28 @@ those branches were taken in every real failure. See the pinned upstream
 and [2.15.0 implementation](https://github.com/nats-io/nats-server/blob/v2.15.0/server/stream.go#L9372).
 The strict split-version conformance cases and full seeded rolling-upgrade
 matrix remain independent requirements.
+
+
+### Two real consumer groups and distinct upgraded leaders
+
+`TestMixedVersionMultipleConsumerRetentionRecovery` extends the real placement
+controls to two independent R3 consumer groups with inherited replicas. Each
+receives 33 messages on its own filter while all three servers are old. One
+consumer leader upgrades. Interleaved out-of-order DoubleAck calls commit both
+groups, but after thirty seconds only the upgraded leader's 33 records remain
+stored under the old stream leader; all 33 old leader records are already absent.
+A complete raw scan and individual sequence reads verify the distinction.
+
+Moving the stream leader onto the upgraded node removes the retained group.
+After upgrading the other consumer leader, a second 66-message round drains
+with two distinct upgraded consumer leaders and an upgraded stream leader. All
+132 original sequences must be absent and each consumer's ack floor must match
+its delivered count. The initial race proof passed in 44.99 seconds. This is
+real transport evidence across multiple consumer groups, not a new simulated
+Raft model or a general rolling-upgrade repair algorithm.
+
+The dedicated `mixed-version-retention-controls` workflow runs old-only,
+pre-ack co-location, post-ack leader-move and multi-consumer controls. It saves
+pre-move raw state even on success. Expected retained-state recognition is
+explicitly separate from the strict split-version conformance tests that still
+fail and the sustained runtime matrix.

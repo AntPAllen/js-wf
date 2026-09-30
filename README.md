@@ -203,3 +203,13 @@ consumer leader's node and requires the stream to drain. That control passed
 locally; it establishes this fixture's recovery action, not a general upgrade
 repair protocol. Failure artifacts include actual messages, consumer state and
 server logs; the recovery control also saves its pre-move raw queue.
+
+`TestMixedVersionMultipleConsumerRetentionRecovery` adds two durable consumers.
+It checks that only the upgraded consumer leader's records remain retained under
+an old stream leader, verifies removal after the stream-leader move, then
+upgrades the second consumer leader and requires both groups to drain with
+separate upgraded leaders. All 132 records are verified with raw sequence
+reads. Run it with the same old binary and artifact variables:
+`go test -race ./integration -run '^TestMixedVersionMultipleConsumerRetentionRecovery$' -count=1 -timeout=3m -v`.
+The `mixed-version-retention-controls` workflow runs these expected bad-state
+and recovery controls; a pass does not clear strict mixed-version conformance.

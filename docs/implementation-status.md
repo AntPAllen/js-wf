@@ -1310,3 +1310,38 @@ The placement-helper controls also passed under the race detector: all-old
 retention in 3.18 seconds and pre-ack upgraded co-location in 11.54 seconds
 (package 15.74 seconds). Vet and diff checks passed. These controls exercise the
 revised helper without relaxing the split-version retention assertion.
+
+
+## Two-consumer mixed-version retention and CI controls
+
+The new `TestMixedVersionMultipleConsumerRetentionRecovery` uses two independent
+R3 consumer groups with inherited replicas on one WorkQueue stream. Each fetches
+33 records before one consumer leader upgrades. Both groups acknowledge out of
+order using confirmed DoubleAck. After thirty seconds, both consumers have zero
+pending work and completed ack floors, but only the upgraded leader's 33 records
+remain stored under the old stream leader. The old consumer leader's records
+are absent. Individual raw reads and a complete saved stream scan verify this
+per-group distinction; it is not a counter-only comparison.
+
+Moving the stream leader onto the upgraded node removes the retained group.
+The other consumer leader then upgrades and receives a second 33-record cohort
+alongside the first group. Both cohorts drain with separate upgraded consumer
+leaders, one remote from the upgraded stream leader. Every one of the 132
+original stream sequences must return message-not-found, consumer ack floors
+must match all deliveries, and the expected final leaders and versions must be
+confirmed. The initial local race proof passed in 44.99 seconds. This strengthens
+the placement/ownership hypothesis and recovery controls without claiming a
+production repair protocol or closing split-version conformance.
+
+A new `mixed-version-retention-controls` CI workflow builds the actual old
+2.11.17 binary and runs old-only, pre-ack co-location, post-ack leader-move and
+multi-consumer controls against the pinned new server. It retains the pre-move
+raw state on successful runs and server logs on failures. It has a manual
+trigger and runs on changes to these contracts, the process fixture or module
+versions. The known failing strict split-version cases remain explicit release
+gaps; a passing expected-bad-state control is not a clean runtime gate.
+
+
+The final multi-consumer race proof, including explicit final stream-leader
+verification, passed in 47.06 seconds. Integration vet, workflow YAML parsing
+and diff checks passed. Clean-runner control validation remains pending.
