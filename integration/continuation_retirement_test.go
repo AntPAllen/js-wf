@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -24,7 +25,32 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 )
 
+type retirementManifestPort struct {
+	journal.SnapshotWritePort
+	failFresh  atomic.Bool
+	generation atomic.Uint64
+	dropped    atomic.Int64
+}
+
+func (p *retirementManifestPort) CreateManifest(ctx context.Context, key string, data []byte) error {
+	var snap journal.Snapshot
+	if err := json.Unmarshal(data, &snap); err != nil {
+		return err
+	}
+	if snap.Runtime != nil && snap.Runtime.InvSeq == p.generation.Load() && p.failFresh.Swap(false) {
+		p.dropped.Add(1)
+		return journal.ErrUnknown
+	}
+	return p.SnapshotWritePort.CreateManifest(ctx, key, data)
+}
+
 func TestContinuationRetirementGCAndGenerationReuse(t *testing.T) {
+	for _, fault := range []bool{false, true} {
+		t.Run(fmt.Sprintf("manifest_drop=%t", fault), func(t *testing.T) { runContinuationRetirementGCAndGenerationReuse(t, fault) })
+	}
+}
+
+func runContinuationRetirementGCAndGenerationReuse(t *testing.T, manifestDrop bool) {
 	all, _ := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
@@ -35,9 +61,23 @@ func TestContinuationRetirementGCAndGenerationReuse(t *testing.T) {
 	sharedJSON, _ := json.Marshal(payload)
 	digest := sha256.Sum256(sharedJSON)
 	sharedObject := "step-result-" + hex.EncodeToString(digest[:])
+	store := journal.New(all[2])
+	var freshGeneration atomic.Uint64
+	var freshInitialCalls atomic.Int64
+	port := &retirementManifestPort{SnapshotWritePort: journal.NewSnapshotPort(all[1])}
 	var initialCalls, effects atomic.Int64
 	handlers := map[string]worker.Handler{typ: func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
 		initialCalls.Add(1)
+		if string(input) == "2" {
+			freshInitialCalls.Add(1)
+			view, err := store.ReadCheckpoint(c.Context(), typ, retired, freshGeneration.Load())
+			if err != nil {
+				return nil, err
+			}
+			if view != nil {
+				return nil, fmt.Errorf("initial handler entered after fresh runtime manifest publication")
+			}
+		}
 		if err := c.SetState("value", input); err != nil {
 			return nil, err
 		}
@@ -58,7 +98,7 @@ func TestContinuationRetirementGCAndGenerationReuse(t *testing.T) {
 		result, _ := json.Marshal(value)
 		return result, nil
 	}}
-	w, err := worker.New(ctx, all[1], "checkpoint-retirement", handlers, worker.WithContinuations(typ, stages))
+	w, err := worker.New(ctx, all[1], "checkpoint-retirement", handlers, worker.WithContinuations(typ, stages), worker.WithJournalStore(journal.NewWithJetStreamSnapshotPort(all[1], port)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +139,6 @@ func TestContinuationRetirementGCAndGenerationReuse(t *testing.T) {
 	if initialCalls.Load() != 2 || effects.Load() != 2 {
 		t.Fatalf("calls=%d effects=%d", initialCalls.Load(), effects.Load())
 	}
-	store := journal.New(all[2])
 	old, err := store.ReadCheckpoint(ctx, typ, retired, first.InvSeq)
 	if err != nil || old == nil {
 		t.Fatalf("old checkpoint=%+v err=%v", old, err)
@@ -164,6 +203,7 @@ func TestContinuationRetirementGCAndGenerationReuse(t *testing.T) {
 	if err != nil || second.InvSeq <= first.InvSeq {
 		t.Fatalf("reused handle=%+v err=%v", second, err)
 	}
+	freshGeneration.Store(second.InvSeq)
 	// Inject old metadata after reuse. Generation rejection must happen before
 	// any old object access; those objects have already been collected.
 	revision, err := state.Create(ctx, snapshotKey, savedManifest)
@@ -208,6 +248,8 @@ func TestContinuationRetirementGCAndGenerationReuse(t *testing.T) {
 	if err := state.Delete(ctx, snapshotKey, jetstream.LastRevision(revision)); err != nil {
 		t.Fatal(err)
 	}
+	port.generation.Store(second.InvSeq)
+	port.failFresh.Store(manifestDrop)
 	stop, done = run(w)
 	value, err := c.Await(ctx, typ, retired)
 	stop()
@@ -216,8 +258,14 @@ func TestContinuationRetirementGCAndGenerationReuse(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if err != nil || string(value) != "2" || initialCalls.Load() != 3 || effects.Load() != 3 {
+	if err != nil || string(value) != "2" || initialCalls.Load() != 2+freshInitialCalls.Load() || freshInitialCalls.Load() < 1 || effects.Load() != 3 {
 		t.Fatalf("reused result=%s calls=%d effects=%d err=%v", value, initialCalls.Load(), effects.Load(), err)
+	}
+	if manifestDrop && (port.dropped.Load() != 1 || freshInitialCalls.Load() < 2) {
+		t.Fatalf("controlled manifest loss not exercised: dropped=%d fresh_calls=%d", port.dropped.Load(), freshInitialCalls.Load())
+	}
+	if !manifestDrop && port.dropped.Load() != 0 {
+		t.Fatal("unexpected injected drop")
 	}
 	fresh, err := store.ReadCheckpoint(ctx, typ, retired, second.InvSeq)
 	if err != nil || fresh == nil || fresh.Snapshot.Runtime.InvSeq != second.InvSeq || fresh.Snapshot.Runtime.Object == old.Snapshot.Runtime.Object {
@@ -248,5 +296,5 @@ func TestContinuationRetirementGCAndGenerationReuse(t *testing.T) {
 	if err != nil || !bytes.Equal(sharedBytes, sharedJSON) {
 		t.Fatalf("shared content after reuse lost: %v", err)
 	}
-	t.Logf("continuation retirement/reuse: old_generation=%d fresh_generation=%d reclaimed=%d calls=%d effects=%d terminals=%d shared_blob_retained=true", first.InvSeq, second.InvSeq, swept.Deleted, initialCalls.Load(), effects.Load(), report.Terminal)
+	t.Logf("continuation retirement/reuse: old_generation=%d fresh_generation=%d reclaimed=%d calls=%d effects=%d terminals=%d shared_blob_retained=true fresh_initial_calls=%d manifest_drops=%d", first.InvSeq, second.InvSeq, swept.Deleted, initialCalls.Load(), effects.Load(), report.Terminal, freshInitialCalls.Load(), port.dropped.Load())
 }

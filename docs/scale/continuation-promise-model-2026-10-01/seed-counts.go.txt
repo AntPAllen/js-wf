@@ -1,0 +1,8 @@
+package main
+import("fmt";"js-wf/sim")
+func main(){
+ modes:=[]string{"clean","resume_read_once","resume_read_twice","corrupt_child","terminal_drop","terminal_ack_lost"}
+ counts:=map[string]int{}; first:=map[string]int{}
+ for seed:=int64(1);seed<=100000;seed++{s:=sim.NewScheduler(seed);if err:=s.SetWorkload("continuation_promise");err!=nil{panic(err)};m,err:=s.Choose(modes);if err!=nil{panic(err)};counts[m]++;if first[m]==0{first[m]=int(seed)}}
+ for _,m:=range modes{fmt.Printf("mode=%s schedules=%d first_seed=%d\n",m,counts[m],first[m])}
+}

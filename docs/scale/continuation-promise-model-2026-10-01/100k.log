@@ -1,0 +1,11 @@
+=== RUN   TestSeededContinuationPromiseReplay
+    continuation_promise_replay_test.go:365: mode=clean first_seed=5
+    continuation_promise_replay_test.go:365: mode=resume_read_once first_seed=7
+    continuation_promise_replay_test.go:365: mode=resume_read_twice first_seed=12
+    continuation_promise_replay_test.go:365: mode=corrupt_child first_seed=4
+    continuation_promise_replay_test.go:365: mode=terminal_drop first_seed=1
+    continuation_promise_replay_test.go:365: mode=terminal_ack_lost first_seed=2
+--- PASS: TestSeededContinuationPromiseReplay (735.90s)
+PASS
+TIER1_COVERAGE model_version=3 seeds_per_workload=100000 generated_schedules=100000 scheduler_choices=100000 choices_per_second=135.9 transport_events=21160695 virtual_ms_max=2000 virtual_buckets_zero=33576 under_1s=0 under_1m=66424 at_least_1m=0 elapsed=12m15.90424512s
+ok  	js-wf/sim	735.908s

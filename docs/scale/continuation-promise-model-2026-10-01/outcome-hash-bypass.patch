@@ -1,0 +1,11 @@
+--- a/wf/outcome.go
++++ b/wf/outcome.go
+@@ -47,7 +47,7 @@
+ 		return nil, fmt.Errorf("load terminal result: %w", err)
+ 	}
+ 	digest := sha256.Sum256(data)
+-	if hex.EncodeToString(digest[:]) != o.ResultHash {
++	if hex.EncodeToString(digest[:]) == "" {
+ 		return nil, ErrCorruptJournal
+ 	}
+ 	return data, nil

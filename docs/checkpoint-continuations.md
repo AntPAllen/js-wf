@@ -497,3 +497,59 @@ retain the proof. This closes the focused real reusable-promise/retirement slice
 seeded integrated promises, SIGKILL/combined faults and remaining continuation
 acceptance gates stay open, along with full matrix/soak, online GC and mixed
 seed 65 latency. The million-timer runner remains live without restart.
+
+## Seeded resolved promises, transient result reads and corruption controls
+
+The production parent/child workers now run continuation_promise against seeded
+transport. A real child execution produces a 614,402-byte spilled terminal
+result; the parent consumes it, checkpoints its promise metadata and suspends
+finish_v1. A fresh worker resumes with no archive reads and awaits the promise
+twice, checking detached bytes and one successful verified blob read. The parent
+initial handler remains at its two prefix entries, with one call_async and one
+child consumption. Raw integrity requires both parent and child terminal.
+
+Six modes cover normal operation, one/two unavailable resumed reads, dropped/
+hidden-ACK child terminal-object writes and deliberate stored-object corruption.
+Lost writes can repeat the child handler while retaining one child invocation
+and notification; result-read retries never consume another signal. Corruption
+must fail the parent with ErrCorruptJournal and is reported separately as an
+expected rejection control.
+
+The 100,000-schedule run passed in 735.908 seconds with 21,160,695 transport events
+and a two-second virtual maximum: 83,194 successful recoveries and 16,806 expected
+corruption rejections. First-ten exact replay, cross-process seed-42 identity,
+all six modes and two final pins pass. New workload plus then-current corpus
+passed under race in 75.563 seconds; final new pins passed separately in 1.220
+seconds; full simulator suite passed in 137.897 seconds. Compiled mutations
+omitting restored promise metadata and bypassing outcome hashing fail in 0.024
+and 0.012 seconds. Vet passed. [Logs, patches and hashes](scale/continuation-promise-model-2026-10-01/)
+retain the evidence. Runtime source is unchanged from parent 8f6789a.
+
+Extended Tier 1 gets a 180-minute job / 170-minute Go timeout to accommodate the
+added workloads after the earlier roughly 104-minute broad run. The normal
+cluster suite gets 35/30 minutes after an earlier 18-minute suite and added
+contracts; individual recovery bounds remain enforced. Combined faults, modeled
+promise retirement/GC, actual promise SIGKILL/server cuts, remaining continuation
+gates and independent full matrix/24-hour soak remain open. This includes
+expected rejection controls and is not an unqualified all-success release gate.
+
+## Retirement handler entries follow publication rather than fixed counts
+
+[CI at 3a5ed7e](https://github.com/AntPAllen/js-wf/actions/runs/36805207254) returned
+the correct reused result with four handler entries and three effects, failing
+the retirement fixture's fixed three-entry assertion. The log does not establish
+why the fourth entry happened. A controlled real manifest Create loss now
+reproduces four entries/three effects: replay before runtime publication is
+permitted and repairs the committed checkpoint without repeating its effect.
+
+The fixture now directly requires that every fresh initial-handler entry sees
+no published frame for its generation. It separately counts those entries,
+retains exactly three effects and every stale-frame/result/collection check,
+and requires its controlled loss to occur exactly once. Both baseline and loss
+cases passed under race in 39.228 seconds. A compiled worker overlay ignoring
+a published generation-3 frame fails that new guard in 18.561 seconds. Vet passed.
+[Original CI log, new controls and hashes](scale/continuation-retirement-publication-2026-10-01/)
+retain the proof. This corrects the fixture without changing runtime decisions
+or claiming that the controlled fault explains the original CI interleaving.
+Fresh CI validation remains pending. Mixed seed 65 latency and online GC stay
+open; the million-timer runner remains live without restart.

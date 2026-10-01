@@ -1,0 +1,12 @@
+--- a/wf/checkpoint.go
++++ b/wf/checkpoint.go
+@@ -165,7 +165,8 @@
+ 	}
+ 	c.promiseResults = make(map[string]*promiseResult, len(frame.PromiseOutcomes))
+ 	for name, payload := range frame.PromiseOutcomes {
+-		c.promiseResults[name] = &promiseResult{payload: payload}
++		_ = name
++		_ = payload
+ 	}
+ 	for _, seq := range frame.ConsumedSignals {
+ 		c.usedSignals[seq] = true

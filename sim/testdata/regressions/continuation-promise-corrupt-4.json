@@ -1,0 +1,1604 @@
+{
+  "version": 3,
+  "seed": 4,
+  "workload": "continuation_promise",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "clean",
+        "corrupt_child",
+        "resume_read_once",
+        "resume_read_twice",
+        "terminal_ack_lost",
+        "terminal_drop"
+      ],
+      "chosen": "corrupt_child"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.parent.checkpoint-promise",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "run_publish",
+      "subject": "wf.run.11",
+      "sequence": 1,
+      "data_sha256": "7e88d324a3865725fee9554fc5db112b6a0b67a2440ecbfd2be0e4fc88727c80",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.11",
+      "sequence": 1,
+      "data_sha256": "7e88d324a3865725fee9554fc5db112b6a0b67a2440ecbfd2be0e4fc88727c80",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_create",
+      "subject": "wf.run.11",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.11",
+      "sequence": 1,
+      "outcome": "delivery_1"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "parent.checkpoint-promise",
+      "sequence": 1,
+      "data_sha256": "5bea88a1580054e0d32ff6443b4b607ff41bc68c2bdadd81e262f3fb48fbfc78",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "4d3e61d26c259a189bef8ba7b36dbd8834c9fbe6d6bc110c6eb02119c4ecbd27",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.parent.checkpoint-promise",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 1,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "4d3e61d26c259a189bef8ba7b36dbd8834c9fbe6d6bc110c6eb02119c4ecbd27",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 1,
+      "data_sha256": "edf66c680744c14ec35d344d04e81e05e83b07ca2f42e9c8014ad23c6ad476ca",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "signal_stream_info",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "4d3e61d26c259a189bef8ba7b36dbd8834c9fbe6d6bc110c6eb02119c4ecbd27",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 1,
+      "data_sha256": "edf66c680744c14ec35d344d04e81e05e83b07ca2f42e9c8014ad23c6ad476ca",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "fa9b76218a8502d817dfcddbcab0bdf566f0e20e70a43546ad22e6178469274b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.child.c-2ef9fe63c3325cf08067199081754d88",
+      "sequence": 2,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "run_publish",
+      "subject": "wf.run.49",
+      "sequence": 2,
+      "data_sha256": "58eb691a01bd63db70f9bbf374e1d188a69fc46a7c0b6b4d50d8fe67a76c5295",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.49",
+      "sequence": 2,
+      "data_sha256": "58eb691a01bd63db70f9bbf374e1d188a69fc46a7c0b6b4d50d8fe67a76c5295",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 4,
+      "sequence": 5,
+      "data_sha256": "4d3e61d26c259a189bef8ba7b36dbd8834c9fbe6d6bc110c6eb02119c4ecbd27",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 2,
+      "data_sha256": "fa9b76218a8502d817dfcddbcab0bdf566f0e20e70a43546ad22e6178469274b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "2be80409fdff10c799673d5e6dcda4171944233c2cc72b427420cb2fc55d8c2d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 5,
+      "sequence": 6,
+      "data_sha256": "4d3e61d26c259a189bef8ba7b36dbd8834c9fbe6d6bc110c6eb02119c4ecbd27",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 3,
+      "data_sha256": "2be80409fdff10c799673d5e6dcda4171944233c2cc72b427420cb2fc55d8c2d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "1b79b8e4a37968f8ae4f8a22ada116ffb9b81f05b727eedb87bc46e6f73fa8aa",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "4d3e61d26c259a189bef8ba7b36dbd8834c9fbe6d6bc110c6eb02119c4ecbd27",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 4,
+      "data_sha256": "1b79b8e4a37968f8ae4f8a22ada116ffb9b81f05b727eedb87bc46e6f73fa8aa",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 4,
+      "sequence": 5,
+      "data_sha256": "7992588e8224b4a6417888d74db9aae780607865b28a3859a5dc5ccc53ce9aae",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "parent.checkpoint-promise",
+      "expected": 7,
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_ack",
+      "subject": "wf.run.11",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_create",
+      "subject": "wf.run.49",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.49",
+      "sequence": 2,
+      "outcome": "delivery_1"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "child.c-2ef9fe63c3325cf08067199081754d88",
+      "sequence": 9,
+      "data_sha256": "5bea88a1580054e0d32ff6443b4b607ff41bc68c2bdadd81e262f3fb48fbfc78",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "child.c-2ef9fe63c3325cf08067199081754d88",
+      "expected": 9,
+      "sequence": 10,
+      "data_sha256": "6db4085e5e2e6f54efb84b5b7e5aeb3d28176eab11bfbc2eb0a162417af80a23",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.child.c-2ef9fe63c3325cf08067199081754d88",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.child.c-2ef9fe63c3325cf08067199081754d88",
+      "expected": 1,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.child.c-2ef9fe63c3325cf08067199081754d88",
+      "sequence": 2,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "child.c-2ef9fe63c3325cf08067199081754d88",
+      "expected": 10,
+      "sequence": 11,
+      "data_sha256": "6db4085e5e2e6f54efb84b5b7e5aeb3d28176eab11bfbc2eb0a162417af80a23",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.child.c-2ef9fe63c3325cf08067199081754d88",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.child.c-2ef9fe63c3325cf08067199081754d88",
+      "sequence": 6,
+      "data_sha256": "c7db52f138cf0333e3ec2b76dc7550c58f6564f21cff07a9f427ebcf7b5fb6fc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "signal_stream_info",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "put_result_blob",
+      "subject": "terminal-result-7994010c3c8767abac27bafba432b121a97b2b55752fb5c67a2af13e004b8729",
+      "data_sha256": "7994010c3c8767abac27bafba432b121a97b2b55752fb5c67a2af13e004b8729",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "child.c-2ef9fe63c3325cf08067199081754d88",
+      "expected": 11,
+      "sequence": 12,
+      "data_sha256": "6db4085e5e2e6f54efb84b5b7e5aeb3d28176eab11bfbc2eb0a162417af80a23",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.child.c-2ef9fe63c3325cf08067199081754d88",
+      "sequence": 6,
+      "data_sha256": "c7db52f138cf0333e3ec2b76dc7550c58f6564f21cff07a9f427ebcf7b5fb6fc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.child.c-2ef9fe63c3325cf08067199081754d88",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "84fb049630f4f3390469185a955a4b72c01a7e410541ab7303f868e02ae9bd42",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "child.c-2ef9fe63c3325cf08067199081754d88",
+      "sequence": 1,
+      "data_sha256": "55755abf508dc8d6c78cfc0ad21f2486e6acd2713bc200ac574165c7f9d34992",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.parent.checkpoint-promise",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "state_get",
+      "subject": "parent.checkpoint-promise",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_signal",
+      "subject": "wf.sig.parent.checkpoint-promise.child_0",
+      "sequence": 1,
+      "data_sha256": "55755abf508dc8d6c78cfc0ad21f2486e6acd2713bc200ac574165c7f9d34992",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "run_publish",
+      "subject": "wf.run.11",
+      "sequence": 3,
+      "data_sha256": "7e88d324a3865725fee9554fc5db112b6a0b67a2440ecbfd2be0e4fc88727c80",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.11",
+      "sequence": 3,
+      "data_sha256": "7e88d324a3865725fee9554fc5db112b6a0b67a2440ecbfd2be0e4fc88727c80",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.child.c-2ef9fe63c3325cf08067199081754d88",
+      "sequence": 7,
+      "data_sha256": "84fb049630f4f3390469185a955a4b72c01a7e410541ab7303f868e02ae9bd42",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.child.c-2ef9fe63c3325cf08067199081754d88",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "child.c-2ef9fe63c3325cf08067199081754d88",
+      "expected": 12,
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_ack",
+      "subject": "wf.run.49",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_create",
+      "subject": "wf.run.11",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.11",
+      "sequence": 3,
+      "outcome": "delivery_1"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "parent.checkpoint-promise",
+      "sequence": 14,
+      "data_sha256": "5bea88a1580054e0d32ff6443b4b607ff41bc68c2bdadd81e262f3fb48fbfc78",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 14,
+      "sequence": 15,
+      "data_sha256": "f61cca833dbfd95d6ed94f3abb4c091e8feff202aa24deb8a17a0b133350bea5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.parent.checkpoint-promise",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "edf66c680744c14ec35d344d04e81e05e83b07ca2f42e9c8014ad23c6ad476ca",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "fa9b76218a8502d817dfcddbcab0bdf566f0e20e70a43546ad22e6178469274b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "2be80409fdff10c799673d5e6dcda4171944233c2cc72b427420cb2fc55d8c2d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "1b79b8e4a37968f8ae4f8a22ada116ffb9b81f05b727eedb87bc46e6f73fa8aa",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 5,
+      "sequence": 5,
+      "data_sha256": "7992588e8224b4a6417888d74db9aae780607865b28a3859a5dc5ccc53ce9aae",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 6,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "signal_stream_info",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_signal",
+      "subject": "wf.sig.parent.checkpoint-promise.*",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "55755abf508dc8d6c78cfc0ad21f2486e6acd2713bc200ac574165c7f9d34992",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 15,
+      "sequence": 16,
+      "data_sha256": "f61cca833dbfd95d6ed94f3abb4c091e8feff202aa24deb8a17a0b133350bea5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 5,
+      "data_sha256": "7992588e8224b4a6417888d74db9aae780607865b28a3859a5dc5ccc53ce9aae",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 5,
+      "sequence": 8,
+      "data_sha256": "b081267876682c913e3c407a391f1d07974860f17db2b1b02690d9fa65eb6496",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 16,
+      "sequence": 17,
+      "data_sha256": "f61cca833dbfd95d6ed94f3abb4c091e8feff202aa24deb8a17a0b133350bea5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 8,
+      "data_sha256": "b081267876682c913e3c407a391f1d07974860f17db2b1b02690d9fa65eb6496",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "c2163605ef1b3945d7f47f070b4587a3fa80c978f03a57f3f36b9cb73067563b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_result_blob",
+      "subject": "terminal-result-7994010c3c8767abac27bafba432b121a97b2b55752fb5c67a2af13e004b8729",
+      "data_sha256": "7994010c3c8767abac27bafba432b121a97b2b55752fb5c67a2af13e004b8729",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 17,
+      "sequence": 18,
+      "data_sha256": "f61cca833dbfd95d6ed94f3abb4c091e8feff202aa24deb8a17a0b133350bea5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 9,
+      "data_sha256": "c2163605ef1b3945d7f47f070b4587a3fa80c978f03a57f3f36b9cb73067563b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 9,
+      "sequence": 10,
+      "data_sha256": "32a94d0110359e661dd916e219fbda3617b67c58d91e2f4cc025fcbead1db8ef",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "put_result_blob",
+      "subject": "step-result-74ac5f04e824b5fd6d2f2b026b54671ea6aba89cce51788c15bf7e033ae23880",
+      "data_sha256": "74ac5f04e824b5fd6d2f2b026b54671ea6aba89cce51788c15bf7e033ae23880",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_result_blob",
+      "subject": "step-result-74ac5f04e824b5fd6d2f2b026b54671ea6aba89cce51788c15bf7e033ae23880",
+      "data_sha256": "74ac5f04e824b5fd6d2f2b026b54671ea6aba89cce51788c15bf7e033ae23880",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 18,
+      "sequence": 19,
+      "data_sha256": "f61cca833dbfd95d6ed94f3abb4c091e8feff202aa24deb8a17a0b133350bea5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 10,
+      "data_sha256": "32a94d0110359e661dd916e219fbda3617b67c58d91e2f4cc025fcbead1db8ef",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 10,
+      "sequence": 11,
+      "data_sha256": "0806eea450f4c5950c7a00e6c15ecbfd06d221181f4b6ffa810a77b2e3c21a1a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 19,
+      "sequence": 20,
+      "data_sha256": "f61cca833dbfd95d6ed94f3abb4c091e8feff202aa24deb8a17a0b133350bea5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "edf66c680744c14ec35d344d04e81e05e83b07ca2f42e9c8014ad23c6ad476ca",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "fa9b76218a8502d817dfcddbcab0bdf566f0e20e70a43546ad22e6178469274b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "2be80409fdff10c799673d5e6dcda4171944233c2cc72b427420cb2fc55d8c2d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "1b79b8e4a37968f8ae4f8a22ada116ffb9b81f05b727eedb87bc46e6f73fa8aa",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 5,
+      "sequence": 5,
+      "data_sha256": "7992588e8224b4a6417888d74db9aae780607865b28a3859a5dc5ccc53ce9aae",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 6,
+      "sequence": 8,
+      "data_sha256": "b081267876682c913e3c407a391f1d07974860f17db2b1b02690d9fa65eb6496",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 9,
+      "sequence": 9,
+      "data_sha256": "c2163605ef1b3945d7f47f070b4587a3fa80c978f03a57f3f36b9cb73067563b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 10,
+      "sequence": 10,
+      "data_sha256": "32a94d0110359e661dd916e219fbda3617b67c58d91e2f4cc025fcbead1db8ef",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 11,
+      "sequence": 11,
+      "data_sha256": "0806eea450f4c5950c7a00e6c15ecbfd06d221181f4b6ffa810a77b2e3c21a1a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 12,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_result_blob",
+      "subject": "step-result-74ac5f04e824b5fd6d2f2b026b54671ea6aba89cce51788c15bf7e033ae23880",
+      "data_sha256": "74ac5f04e824b5fd6d2f2b026b54671ea6aba89cce51788c15bf7e033ae23880",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "put_snapshot_object",
+      "subject": "snapshot-7e88d324a3865725-10-721ff6fa8babd3f5",
+      "data_sha256": "721ff6fa8babd3f5c17f56be5187d556e98b38a771baf085322983c9ba7d85e8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-7e88d324a3865725-10-721ff6fa8babd3f5",
+      "data_sha256": "721ff6fa8babd3f5c17f56be5187d556e98b38a771baf085322983c9ba7d85e8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "create_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "sequence": 1,
+      "data_sha256": "aea886ad1dbb4f257fc01c4ed2412b85730b6556014b94a5945caa9bcefb6906",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 20,
+      "sequence": 21,
+      "data_sha256": "f61cca833dbfd95d6ed94f3abb4c091e8feff202aa24deb8a17a0b133350bea5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "data_sha256": "aea886ad1dbb4f257fc01c4ed2412b85730b6556014b94a5945caa9bcefb6906",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-7e88d324a3865725-10-721ff6fa8babd3f5",
+      "data_sha256": "721ff6fa8babd3f5c17f56be5187d556e98b38a771baf085322983c9ba7d85e8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_prefix",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_snapshot_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 11,
+      "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_signal_prefix",
+      "subject": "wf.sig.parent.checkpoint-promise.",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_snapshot_signals",
+      "subject": "wf.sig.parent.checkpoint-promise.*",
+      "sequence": 2,
+      "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 21,
+      "sequence": 22,
+      "data_sha256": "f61cca833dbfd95d6ed94f3abb4c091e8feff202aa24deb8a17a0b133350bea5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 11,
+      "data_sha256": "0806eea450f4c5950c7a00e6c15ecbfd06d221181f4b6ffa810a77b2e3c21a1a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 11,
+      "sequence": 12,
+      "data_sha256": "c5f9c8a0546a797e5416dcd7d194343a1079183bbf22cbd6d21ac447b78a4f45",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 22,
+      "sequence": 23,
+      "data_sha256": "f61cca833dbfd95d6ed94f3abb4c091e8feff202aa24deb8a17a0b133350bea5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "run_publish",
+      "subject": "wf.run.11",
+      "sequence": 4,
+      "data_sha256": "7e88d324a3865725fee9554fc5db112b6a0b67a2440ecbfd2be0e4fc88727c80",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.11",
+      "sequence": 4,
+      "data_sha256": "7e88d324a3865725fee9554fc5db112b6a0b67a2440ecbfd2be0e4fc88727c80",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "parent.checkpoint-promise",
+      "expected": 23,
+      "sequence": 24,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_ack",
+      "subject": "wf.run.11",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_create",
+      "subject": "wf.run.11",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.11",
+      "sequence": 4,
+      "outcome": "delivery_1"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "parent.checkpoint-promise",
+      "sequence": 25,
+      "data_sha256": "5bea88a1580054e0d32ff6443b4b607ff41bc68c2bdadd81e262f3fb48fbfc78",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 25,
+      "sequence": 26,
+      "data_sha256": "d118b795365db39942c917a9fc6a819bd28ea8cf7bfef2fa5ebacdcf6af02fcf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.parent.checkpoint-promise",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "data_sha256": "aea886ad1dbb4f257fc01c4ed2412b85730b6556014b94a5945caa9bcefb6906",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_result_blob",
+      "subject": "step-result-74ac5f04e824b5fd6d2f2b026b54671ea6aba89cce51788c15bf7e033ae23880",
+      "data_sha256": "74ac5f04e824b5fd6d2f2b026b54671ea6aba89cce51788c15bf7e033ae23880",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 11,
+      "sequence": 11,
+      "data_sha256": "0806eea450f4c5950c7a00e6c15ecbfd06d221181f4b6ffa810a77b2e3c21a1a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 12,
+      "sequence": 12,
+      "data_sha256": "c5f9c8a0546a797e5416dcd7d194343a1079183bbf22cbd6d21ac447b78a4f45",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 13,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "data_sha256": "aea886ad1dbb4f257fc01c4ed2412b85730b6556014b94a5945caa9bcefb6906",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "signal_stream_info",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 26,
+      "sequence": 27,
+      "data_sha256": "d118b795365db39942c917a9fc6a819bd28ea8cf7bfef2fa5ebacdcf6af02fcf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 12,
+      "data_sha256": "c5f9c8a0546a797e5416dcd7d194343a1079183bbf22cbd6d21ac447b78a4f45",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 12,
+      "sequence": 13,
+      "data_sha256": "0998362e3aea0585c7e57966052fd1a607fda62153c06dc2535525aca98016f1",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 27,
+      "sequence": 28,
+      "data_sha256": "d118b795365db39942c917a9fc6a819bd28ea8cf7bfef2fa5ebacdcf6af02fcf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 13,
+      "data_sha256": "0998362e3aea0585c7e57966052fd1a607fda62153c06dc2535525aca98016f1",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 13,
+      "sequence": 14,
+      "data_sha256": "cd84aae23782386175fb6bef14cced175353aa978d717bee0343b8a8bf186052",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "parent.checkpoint-promise",
+      "expected": 28,
+      "sequence": 29,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_ack",
+      "subject": "wf.run.11",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "data_sha256": "aea886ad1dbb4f257fc01c4ed2412b85730b6556014b94a5945caa9bcefb6906",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-7e88d324a3865725-10-721ff6fa8babd3f5",
+      "data_sha256": "721ff6fa8babd3f5c17f56be5187d556e98b38a771baf085322983c9ba7d85e8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 11,
+      "sequence": 11,
+      "data_sha256": "0806eea450f4c5950c7a00e6c15ecbfd06d221181f4b6ffa810a77b2e3c21a1a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 12,
+      "sequence": 12,
+      "data_sha256": "c5f9c8a0546a797e5416dcd7d194343a1079183bbf22cbd6d21ac447b78a4f45",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 13,
+      "sequence": 13,
+      "data_sha256": "0998362e3aea0585c7e57966052fd1a607fda62153c06dc2535525aca98016f1",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 14,
+      "sequence": 14,
+      "data_sha256": "cd84aae23782386175fb6bef14cced175353aa978d717bee0343b8a8bf186052",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 15,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "data_sha256": "aea886ad1dbb4f257fc01c4ed2412b85730b6556014b94a5945caa9bcefb6906",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_result_blob",
+      "subject": "step-result-74ac5f04e824b5fd6d2f2b026b54671ea6aba89cce51788c15bf7e033ae23880",
+      "data_sha256": "74ac5f04e824b5fd6d2f2b026b54671ea6aba89cce51788c15bf7e033ae23880",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 11,
+      "sequence": 11,
+      "data_sha256": "0806eea450f4c5950c7a00e6c15ecbfd06d221181f4b6ffa810a77b2e3c21a1a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 12,
+      "sequence": 12,
+      "data_sha256": "c5f9c8a0546a797e5416dcd7d194343a1079183bbf22cbd6d21ac447b78a4f45",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 13,
+      "sequence": 13,
+      "data_sha256": "0998362e3aea0585c7e57966052fd1a607fda62153c06dc2535525aca98016f1",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 14,
+      "sequence": 14,
+      "data_sha256": "cd84aae23782386175fb6bef14cced175353aa978d717bee0343b8a8bf186052",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 15,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "data_sha256": "aea886ad1dbb4f257fc01c4ed2412b85730b6556014b94a5945caa9bcefb6906",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "corrupt_promise_blob",
+      "subject": "terminal-result-7994010c3c8767abac27bafba432b121a97b2b55752fb5c67a2af13e004b8729",
+      "data_sha256": "cbfeda2b1f044ccca4ea9dac0fe08a34af201914e29adf982262f1d735d08996",
+      "outcome": "corrupt"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.parent.checkpoint-promise",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "state_get",
+      "subject": "parent.checkpoint-promise",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_signal",
+      "subject": "wf.sig.parent.checkpoint-promise.gate",
+      "sequence": 2,
+      "data_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "run_publish",
+      "subject": "wf.run.11",
+      "sequence": 5,
+      "data_sha256": "7e88d324a3865725fee9554fc5db112b6a0b67a2440ecbfd2be0e4fc88727c80",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.11",
+      "sequence": 5,
+      "data_sha256": "7e88d324a3865725fee9554fc5db112b6a0b67a2440ecbfd2be0e4fc88727c80",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_create",
+      "subject": "wf.run.11",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.11",
+      "sequence": 5,
+      "outcome": "delivery_1"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "parent.checkpoint-promise",
+      "sequence": 30,
+      "data_sha256": "6b08faa42f955a40a039d7dfb38b15d64b1b14d92d2b6100970ea684b5892b0d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 30,
+      "sequence": 31,
+      "data_sha256": "a2d04d90e8684d1e5499c3704abba0ee363766e4de9f31d3e87307e3d014819f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.parent.checkpoint-promise",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "data_sha256": "aea886ad1dbb4f257fc01c4ed2412b85730b6556014b94a5945caa9bcefb6906",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_result_blob",
+      "subject": "step-result-74ac5f04e824b5fd6d2f2b026b54671ea6aba89cce51788c15bf7e033ae23880",
+      "data_sha256": "74ac5f04e824b5fd6d2f2b026b54671ea6aba89cce51788c15bf7e033ae23880",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 11,
+      "sequence": 11,
+      "data_sha256": "0806eea450f4c5950c7a00e6c15ecbfd06d221181f4b6ffa810a77b2e3c21a1a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 12,
+      "sequence": 12,
+      "data_sha256": "c5f9c8a0546a797e5416dcd7d194343a1079183bbf22cbd6d21ac447b78a4f45",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 13,
+      "sequence": 13,
+      "data_sha256": "0998362e3aea0585c7e57966052fd1a607fda62153c06dc2535525aca98016f1",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 14,
+      "sequence": 14,
+      "data_sha256": "cd84aae23782386175fb6bef14cced175353aa978d717bee0343b8a8bf186052",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 15,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "data_sha256": "aea886ad1dbb4f257fc01c4ed2412b85730b6556014b94a5945caa9bcefb6906",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "signal_stream_info",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_signal",
+      "subject": "wf.sig.parent.checkpoint-promise.*",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 31,
+      "sequence": 32,
+      "data_sha256": "a2d04d90e8684d1e5499c3704abba0ee363766e4de9f31d3e87307e3d014819f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 14,
+      "data_sha256": "cd84aae23782386175fb6bef14cced175353aa978d717bee0343b8a8bf186052",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 14,
+      "sequence": 15,
+      "data_sha256": "981293646f6d5004d84cdf643d7e02e7869186eb66eb31d03287a22d2806e122",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 32,
+      "sequence": 33,
+      "data_sha256": "a2d04d90e8684d1e5499c3704abba0ee363766e4de9f31d3e87307e3d014819f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 15,
+      "data_sha256": "981293646f6d5004d84cdf643d7e02e7869186eb66eb31d03287a22d2806e122",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 15,
+      "sequence": 16,
+      "data_sha256": "3989d88b1f95cf3a0ce14719d024c4c8c2ef0b4b4fcf8939026ce710edd4e532",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_result_blob",
+      "subject": "terminal-result-7994010c3c8767abac27bafba432b121a97b2b55752fb5c67a2af13e004b8729",
+      "data_sha256": "cbfeda2b1f044ccca4ea9dac0fe08a34af201914e29adf982262f1d735d08996",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "parent.checkpoint-promise",
+      "expected": 33,
+      "sequence": 34,
+      "data_sha256": "a2d04d90e8684d1e5499c3704abba0ee363766e4de9f31d3e87307e3d014819f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 16,
+      "data_sha256": "3989d88b1f95cf3a0ce14719d024c4c8c2ef0b4b4fcf8939026ce710edd4e532",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 16,
+      "sequence": 17,
+      "data_sha256": "3dab72690a299e10a70a84d5f3e35de1dca1ad56e90974b430a160728d034d95",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "parent.checkpoint-promise",
+      "sequence": 2,
+      "data_sha256": "3f39a77067e790404941194aa008936b497ad383434955700d944dec4afd5a48",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "parent.checkpoint-promise",
+      "expected": 34,
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_ack",
+      "subject": "wf.run.11",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.parent.checkpoint-promise",
+      "data_sha256": "aea886ad1dbb4f257fc01c4ed2412b85730b6556014b94a5945caa9bcefb6906",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-7e88d324a3865725-10-721ff6fa8babd3f5",
+      "data_sha256": "721ff6fa8babd3f5c17f56be5187d556e98b38a771baf085322983c9ba7d85e8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 11,
+      "sequence": 11,
+      "data_sha256": "0806eea450f4c5950c7a00e6c15ecbfd06d221181f4b6ffa810a77b2e3c21a1a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 12,
+      "sequence": 12,
+      "data_sha256": "c5f9c8a0546a797e5416dcd7d194343a1079183bbf22cbd6d21ac447b78a4f45",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 13,
+      "sequence": 13,
+      "data_sha256": "0998362e3aea0585c7e57966052fd1a607fda62153c06dc2535525aca98016f1",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 14,
+      "sequence": 14,
+      "data_sha256": "cd84aae23782386175fb6bef14cced175353aa978d717bee0343b8a8bf186052",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 15,
+      "sequence": 15,
+      "data_sha256": "981293646f6d5004d84cdf643d7e02e7869186eb66eb31d03287a22d2806e122",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 16,
+      "sequence": 16,
+      "data_sha256": "3989d88b1f95cf3a0ce14719d024c4c8c2ef0b4b4fcf8939026ce710edd4e532",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 17,
+      "sequence": 17,
+      "data_sha256": "3dab72690a299e10a70a84d5f3e35de1dca1ad56e90974b430a160728d034d95",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "expected": 18,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_continuation_promise",
+      "subject": "wf.jrn.parent.checkpoint-promise",
+      "sequence": 17,
+      "outcome": "corrupt_child"
+    }
+  ]
+}

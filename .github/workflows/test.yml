@@ -29,13 +29,13 @@ jobs:
         run: python3 -m unittest discover -s scripts -p 'test_*.py'
   cluster:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go test ./integration -count=1 -timeout=20m -skip '^(TestFiveHundredChildFanout|TestJournalCASTenThousandRacesWithLeaderRestarts)'
+      - run: go test ./integration -count=1 -timeout=30m -skip '^(TestFiveHundredChildFanout|TestJournalCASTenThousandRacesWithLeaderRestarts)'
   cluster-scale-fanout:
     runs-on: ubuntu-latest
     timeout-minutes: 25

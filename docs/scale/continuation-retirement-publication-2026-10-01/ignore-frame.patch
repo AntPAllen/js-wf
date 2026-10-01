@@ -1,0 +1,10 @@
+--- a/worker/worker.go
++++ b/worker/worker.go
+@@ -748,6 +748,7 @@
+ 		readStarted := ops.begin()
+ 		readCtx, stopRead := context.WithTimeout(ctx, 15*time.Second)
+ 		resumed, err = w.jrn.ReadCheckpoint(readCtx, typ, id, input.Sequence)
++		if err == nil && input.Sequence == 3 { resumed = nil }
+ 		if err == nil && resumed != nil {
+ 			r := resumed.Snapshot.Runtime
+ 			_, checkpointInfo, err = wf.NewCheckpointContext(ctx, nil, nil, resumed.Frame, wf.CheckpointLocation{Type: typ, ID: id, InvSeq: input.Sequence, Index: r.Index, Epoch: r.Epoch, Hash: r.SHA256})
