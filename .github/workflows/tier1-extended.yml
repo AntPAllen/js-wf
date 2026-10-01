@@ -23,12 +23,18 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Verify suite-result guard
+        run: python3 -m unittest discover -s scripts -p 'test_tier1_suite.py'
       - name: Run seeded transport suite
         run: |
           set -o pipefail
           git rev-parse HEAD > tier1-source.txt
+          SIM_COVERAGE_SUMMARY=0 go test ./sim -list '^Test' > tier1-list.log
+          rg '^Test[[:alnum:]_]+$' tier1-list.log > tier1-inventory.txt
+          rg --files sim/testdata/regressions -g '*.json' | sort > tier1-regression-inventory.txt
           echo "Tier 1 seeds per workload: 1..${SIM_SEEDS}"
-          /usr/bin/time -f 'elapsed=%e user=%U system=%S' go test -v ./sim -count=1 -timeout=300m 2>&1 | tee tier1-suite.log
+          /usr/bin/time -o tier1-time.txt -f 'elapsed=%e user=%U system=%S' go test -json ./sim -count=1 -timeout=300m | tee tier1-events.jsonl | python3 -u scripts/render-go-test.py | tee tier1-suite.log
+          python3 scripts/check-tier1-suite.py --events tier1-events.jsonl --inventory tier1-inventory.txt --regressions tier1-regression-inventory.txt --source tier1-source.txt --seeds "$SIM_SEEDS" --output tier1-result.json
       - if: failure()
         timeout-minutes: 4
         run: |
@@ -49,4 +55,10 @@ jobs:
           path: |
             tier1-source.txt
             tier1-suite.log
+            tier1-list.log
+            tier1-inventory.txt
+            tier1-regression-inventory.txt
+            tier1-events.jsonl
+            tier1-time.txt
+            tier1-result.json
           if-no-files-found: warn

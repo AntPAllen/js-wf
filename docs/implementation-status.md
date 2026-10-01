@@ -4980,3 +4980,20 @@ budgeting and repair/fencing observation changes are included. A queued or runni
 workflow is not terminal acceptance. No historical TTL-mismatch recovery run was
 restarted. The unfinished-worker isolation campaign36928729086 remains in progress
 and the million-timer user service remains active atPID18146.
+
+
+## Complete Tier 1 suite inventory and pinned-corpus guard verified
+
+The extended workflow now captures Go JSON and the compiled test and source
+regression inventories. `check-tier1-suite.py` requires every listed test and
+subtest to execute and finish once, every pinned regression to pass, package
+completion, exact source identity and consistent nonempty aggregate counters.
+Only the two documented explicit-trace tests may skip. Missing tests/pins,
+unexpected skips/failures, duplicate events and corrupt coverage fail closed.
+[Local complete-package proof](scale/tier1-suite-guard-2026-10-01/) passes107.158s
+at98b5030 with1,000 configured seeds:147 top-level passes,two explained skips,
+all168 pins,100,632 schedules,1,733,227 choices and23,489,156 transport events.
+All61 Python tests,workflow YAML parsing and diff checks pass. The aggregate
+seed count remains configuration rather than independent per-workload coverage
+proof. Campaign36929826425 has started; its pre-guard original logs require a
+separate review. It is not restarted to apply this evidence-only change.
