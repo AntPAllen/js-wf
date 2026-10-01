@@ -1,0 +1,1018 @@
+{
+  "scope": "recorded decisions of five R5 workers and observed repair scanners",
+  "fencing_records": 14,
+  "repair_records": 51,
+  "fencing_per_worker": {
+    "tier3-mixed-3": 5,
+    "tier3-mixed-0": 5,
+    "tier3-mixed-4": 2,
+    "tier3-mixed-1": 1,
+    "tier3-mixed-2": 1
+  },
+  "repairs_by_outcome": {
+    "suspended/acknowledged": 20,
+    "signal/acknowledged": 26,
+    "start/acknowledged": 4,
+    "signal/uncertain": 1
+  },
+  "explanations": [
+    {
+      "kind": "fencing",
+      "index": 0,
+      "evidence": {
+        "At": "2026-10-01T19:57:29.31246607Z",
+        "Worker": "tier3-mixed-3",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-13-9",
+        "RunSequence": 1548,
+        "Delivery": 1,
+        "Epoch": 9015,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: nats: no response from stream"
+      },
+      "explanation": "Heartbeat renewal could not confirm continuing ownership and returned ErrLost; processing was canceled."
+    },
+    {
+      "kind": "fencing",
+      "index": 1,
+      "evidence": {
+        "At": "2026-10-01T19:58:28.822807188Z",
+        "Worker": "tier3-mixed-0",
+        "Type": "matrixsignal",
+        "ID": "tier3-1-batch-17-8",
+        "RunSequence": 1898,
+        "Delivery": 2,
+        "Epoch": 11796,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: nats: no response from stream"
+      },
+      "explanation": "Heartbeat renewal could not confirm continuing ownership and returned ErrLost; processing was canceled."
+    },
+    {
+      "kind": "fencing",
+      "index": 2,
+      "evidence": {
+        "At": "2026-10-01T19:58:28.884407119Z",
+        "Worker": "tier3-mixed-3",
+        "Type": "matrixsignal",
+        "ID": "tier3-1-batch-17-4",
+        "RunSequence": 1912,
+        "Delivery": 2,
+        "Epoch": 11807,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: nats: no response from stream"
+      },
+      "explanation": "Heartbeat renewal could not confirm continuing ownership and returned ErrLost; processing was canceled."
+    },
+    {
+      "kind": "fencing",
+      "index": 3,
+      "evidence": {
+        "At": "2026-10-01T19:58:58.139920724Z",
+        "Worker": "tier3-mixed-3",
+        "Type": "matrixchild",
+        "ID": "c-03c8d6d61439689054822c276baeac55",
+        "RunSequence": 2372,
+        "Delivery": 1,
+        "Epoch": 0,
+        "Reason": "lease_initialization_lost",
+        "Error": "workflow lease was lost: initialization: nats: no response from stream"
+      },
+      "explanation": "Lease initialization did not confirm ownership; the delivery retries."
+    },
+    {
+      "kind": "fencing",
+      "index": 4,
+      "evidence": {
+        "At": "2026-10-01T19:58:58.14119624Z",
+        "Worker": "tier3-mixed-4",
+        "Type": "matrixchild",
+        "ID": "c-e85699b82724ff7e4d04203843edc890",
+        "RunSequence": 2357,
+        "Delivery": 1,
+        "Epoch": 13915,
+        "Reason": "lease_execution_lost",
+        "Error": "workflow lease was lost: nats: no response from stream"
+      },
+      "explanation": "Execution renewal could not confirm ownership and returned ErrLost; the worker stops this delivery."
+    },
+    {
+      "kind": "fencing",
+      "index": 5,
+      "evidence": {
+        "At": "2026-10-01T19:58:58.141224635Z",
+        "Worker": "tier3-mixed-3",
+        "Type": "matrixsignal",
+        "ID": "tier3-1-batch-21-4",
+        "RunSequence": 2364,
+        "Delivery": 1,
+        "Epoch": 13946,
+        "Reason": "lease_execution_lost",
+        "Error": "workflow lease was lost: nats: no response from stream"
+      },
+      "explanation": "Execution renewal could not confirm ownership and returned ErrLost; the worker stops this delivery."
+    },
+    {
+      "kind": "fencing",
+      "index": 6,
+      "evidence": {
+        "At": "2026-10-01T19:58:58.145081767Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixsignal",
+        "ID": "tier3-1-batch-21-0",
+        "RunSequence": 2362,
+        "Delivery": 1,
+        "Epoch": 13936,
+        "Reason": "lease_execution_lost",
+        "Error": "workflow lease was lost: nats: no response from stream"
+      },
+      "explanation": "Execution renewal could not confirm ownership and returned ErrLost; the worker stops this delivery."
+    },
+    {
+      "kind": "fencing",
+      "index": 7,
+      "evidence": {
+        "At": "2026-10-01T19:58:58.149465901Z",
+        "Worker": "tier3-mixed-3",
+        "Type": "matrixchild",
+        "ID": "c-8398c0bc841ca6c39ee2f4ab33c5f8ca",
+        "RunSequence": 2363,
+        "Delivery": 1,
+        "Epoch": 13933,
+        "Reason": "lease_execution_lost",
+        "Error": "workflow lease was lost: nats: no response from stream"
+      },
+      "explanation": "Execution renewal could not confirm ownership and returned ErrLost; the worker stops this delivery."
+    },
+    {
+      "kind": "fencing",
+      "index": 8,
+      "evidence": {
+        "At": "2026-10-01T20:00:29.590986766Z",
+        "Worker": "tier3-mixed-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-28-9",
+        "RunSequence": 3197,
+        "Delivery": 1,
+        "Epoch": 18946,
+        "Reason": "journal_stale",
+        "Error": "journal compare-and-swap lost: expected subject seq 8925, current 8928: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 0"
+      },
+      "explanation": "The journal rejected this owner\u2019s epoch or expected tail; the delivery retries."
+    },
+    {
+      "kind": "fencing",
+      "index": 9,
+      "evidence": {
+        "At": "2026-10-01T20:00:29.593190828Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-28-4",
+        "RunSequence": 3199,
+        "Delivery": 1,
+        "Epoch": 18945,
+        "Reason": "journal_stale",
+        "Error": "journal compare-and-swap lost: expected subject seq 8927, current 8929: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 0"
+      },
+      "explanation": "The journal rejected this owner\u2019s epoch or expected tail; the delivery retries."
+    },
+    {
+      "kind": "fencing",
+      "index": 10,
+      "evidence": {
+        "At": "2026-10-01T20:00:29.593192631Z",
+        "Worker": "tier3-mixed-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-28-1",
+        "RunSequence": 3198,
+        "Delivery": 1,
+        "Epoch": 18947,
+        "Reason": "journal_stale",
+        "Error": "journal compare-and-swap lost: expected subject seq 8926, current 8930: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 0"
+      },
+      "explanation": "The journal rejected this owner\u2019s epoch or expected tail; the delivery retries."
+    },
+    {
+      "kind": "fencing",
+      "index": 11,
+      "evidence": {
+        "At": "2026-10-01T20:00:45.043643033Z",
+        "Worker": "tier3-mixed-4",
+        "Type": "matrixchild",
+        "ID": "c-51c13080cbff4a4aaf1e27ca9c44a75d",
+        "RunSequence": 3376,
+        "Delivery": 1,
+        "Epoch": 0,
+        "Reason": "lease_initialization_lost",
+        "Error": "workflow lease was lost: initialization: nats: nats: API error: code=400 err_code=10164 description=wrong last sequence: nats: key revision mismatch"
+      },
+      "explanation": "Lease initialization did not confirm ownership; the delivery retries."
+    },
+    {
+      "kind": "fencing",
+      "index": 12,
+      "evidence": {
+        "At": "2026-10-01T20:00:59.559378195Z",
+        "Worker": "tier3-mixed-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-31-4",
+        "RunSequence": 3510,
+        "Delivery": 1,
+        "Epoch": 20739,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: nats: no response from stream"
+      },
+      "explanation": "Heartbeat renewal could not confirm continuing ownership and returned ErrLost; processing was canceled."
+    },
+    {
+      "kind": "fencing",
+      "index": 13,
+      "evidence": {
+        "At": "2026-10-01T20:03:03.287046678Z",
+        "Worker": "tier3-mixed-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-41-2",
+        "RunSequence": 4636,
+        "Delivery": 1,
+        "Epoch": 0,
+        "Reason": "lease_initialization_lost",
+        "Error": "workflow lease was lost: initialization: context deadline exceeded"
+      },
+      "explanation": "Lease initialization did not confirm ownership; the delivery retries."
+    },
+    {
+      "kind": "repair",
+      "index": 0,
+      "evidence": {
+        "at": "2026-10-01T19:55:19.965890914Z",
+        "kind": "suspended",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-0-4",
+        "reason": "signal",
+        "journal_sequence": 136,
+        "retry_window": 179088451,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 1,
+      "evidence": {
+        "at": "2026-10-01T19:55:20.922217956Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-0-4",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 33,
+        "invocation_sequence": 4,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 2,
+      "evidence": {
+        "at": "2026-10-01T19:55:20.923737852Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-0-4",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 34,
+        "invocation_sequence": 4,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 3,
+      "evidence": {
+        "at": "2026-10-01T19:55:22.916237232Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-0-4",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 33,
+        "invocation_sequence": 4,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 4,
+      "evidence": {
+        "at": "2026-10-01T19:55:22.918161034Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-0-4",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 34,
+        "invocation_sequence": 4,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 5,
+      "evidence": {
+        "at": "2026-10-01T19:55:23.932585751Z",
+        "kind": "suspended",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-0-4",
+        "reason": "signal",
+        "journal_sequence": 237,
+        "retry_window": 179088452,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 6,
+      "evidence": {
+        "at": "2026-10-01T19:55:25.010676793Z",
+        "kind": "signal",
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-1-3",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 50,
+        "invocation_sequence": 32,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 7,
+      "evidence": {
+        "at": "2026-10-01T19:55:25.93570665Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-1-0",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 67,
+        "invocation_sequence": 29,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 8,
+      "evidence": {
+        "at": "2026-10-01T19:55:25.938552028Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-1-0",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 68,
+        "invocation_sequence": 29,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 9,
+      "evidence": {
+        "at": "2026-10-01T19:55:26.940269442Z",
+        "kind": "suspended",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-1-0",
+        "reason": "signal",
+        "journal_sequence": 544,
+        "retry_window": 179088452,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 10,
+      "evidence": {
+        "at": "2026-10-01T19:55:26.943132932Z",
+        "kind": "suspended",
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-1-3",
+        "reason": "signal",
+        "journal_sequence": 509,
+        "retry_window": 179088452,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 11,
+      "evidence": {
+        "at": "2026-10-01T19:55:28.989468003Z",
+        "kind": "signal",
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-2-7",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 84,
+        "invocation_sequence": 65,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 12,
+      "evidence": {
+        "at": "2026-10-01T19:55:29.954051411Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-2-0",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 100,
+        "invocation_sequence": 58,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 13,
+      "evidence": {
+        "at": "2026-10-01T19:55:29.955620548Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-2-0",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 101,
+        "invocation_sequence": 58,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 14,
+      "evidence": {
+        "at": "2026-10-01T19:55:29.957246231Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-2-0",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 102,
+        "invocation_sequence": 58,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 15,
+      "evidence": {
+        "at": "2026-10-01T19:55:30.938585373Z",
+        "kind": "suspended",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-2-0",
+        "reason": "signal",
+        "journal_sequence": 845,
+        "retry_window": 179088453,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 16,
+      "evidence": {
+        "at": "2026-10-01T19:55:31.934423973Z",
+        "kind": "suspended",
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-2-7",
+        "reason": "signal",
+        "journal_sequence": 808,
+        "retry_window": 179088453,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 17,
+      "evidence": {
+        "at": "2026-10-01T19:55:33.934056036Z",
+        "kind": "suspended",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-3-3",
+        "reason": "signal",
+        "journal_sequence": 1166,
+        "retry_window": 179088453,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 18,
+      "evidence": {
+        "at": "2026-10-01T19:55:38.925260384Z",
+        "kind": "suspended",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-4-7",
+        "reason": "signal",
+        "journal_sequence": 1462,
+        "retry_window": 179088453,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 19,
+      "evidence": {
+        "at": "2026-10-01T19:55:41.008293069Z",
+        "kind": "signal",
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-5-5",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 185,
+        "invocation_sequence": 150,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 20,
+      "evidence": {
+        "at": "2026-10-01T19:55:41.009503879Z",
+        "kind": "signal",
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-5-7",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 186,
+        "invocation_sequence": 148,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 21,
+      "evidence": {
+        "at": "2026-10-01T19:55:41.944994784Z",
+        "kind": "suspended",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-5-6",
+        "reason": "signal",
+        "journal_sequence": 1780,
+        "retry_window": 179088454,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 22,
+      "evidence": {
+        "at": "2026-10-01T19:55:41.947289118Z",
+        "kind": "suspended",
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-5-7",
+        "reason": "signal",
+        "journal_sequence": 1743,
+        "retry_window": 179088454,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 23,
+      "evidence": {
+        "at": "2026-10-01T19:55:41.949071761Z",
+        "kind": "suspended",
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-5-5",
+        "reason": "signal",
+        "journal_sequence": 1731,
+        "retry_window": 179088454,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 24,
+      "evidence": {
+        "at": "2026-10-01T19:55:42.013159979Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-5-6",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 204,
+        "invocation_sequence": 147,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 25,
+      "evidence": {
+        "at": "2026-10-01T19:55:44.931807267Z",
+        "kind": "suspended",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-6-9",
+        "reason": "signal",
+        "journal_sequence": 2095,
+        "retry_window": 179088454,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 26,
+      "evidence": {
+        "at": "2026-10-01T19:56:19.014678649Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-9-0",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 338,
+        "invocation_sequence": 255,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 27,
+      "evidence": {
+        "at": "2026-10-01T19:56:19.01587974Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-9-0",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 339,
+        "invocation_sequence": 255,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 28,
+      "evidence": {
+        "at": "2026-10-01T19:56:19.01704835Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-9-0",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 340,
+        "invocation_sequence": 255,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 29,
+      "evidence": {
+        "at": "2026-10-01T19:56:55.420514098Z",
+        "kind": "suspended",
+        "type": "matrixtimer",
+        "id": "tier3-1-batch-10-0",
+        "reason": "timer",
+        "journal_sequence": 3333,
+        "retry_window": 179088461,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended timer wait was due; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 30,
+      "evidence": {
+        "at": "2026-10-01T19:56:55.421296728Z",
+        "kind": "suspended",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-10-1",
+        "reason": "signal",
+        "journal_sequence": 3324,
+        "retry_window": 179088461,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 31,
+      "evidence": {
+        "at": "2026-10-01T19:56:55.422054477Z",
+        "kind": "suspended",
+        "type": "matrixtimer",
+        "id": "tier3-1-batch-10-4",
+        "reason": "timer",
+        "journal_sequence": 3331,
+        "retry_window": 179088461,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended timer wait was due; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 32,
+      "evidence": {
+        "at": "2026-10-01T19:56:55.422969073Z",
+        "kind": "suspended",
+        "type": "matrixtimer",
+        "id": "tier3-1-batch-10-9",
+        "reason": "timer",
+        "journal_sequence": 3332,
+        "retry_window": 179088461,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended timer wait was due; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 33,
+      "evidence": {
+        "at": "2026-10-01T19:58:43.95160291Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-19-8",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 679,
+        "invocation_sequence": 540,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 34,
+      "evidence": {
+        "at": "2026-10-01T19:58:43.95293761Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-19-8",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 680,
+        "invocation_sequence": 540,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 35,
+      "evidence": {
+        "at": "2026-10-01T19:59:17.910747007Z",
+        "kind": "suspended",
+        "type": "matrixchild",
+        "id": "c-e85699b82724ff7e4d04203843edc890",
+        "reason": "signal",
+        "journal_sequence": 6739,
+        "retry_window": 179088475,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 36,
+      "evidence": {
+        "at": "2026-10-01T19:59:21.93594784Z",
+        "kind": "suspended",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-22-1",
+        "reason": "signal",
+        "journal_sequence": 7031,
+        "retry_window": 179088476,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 37,
+      "evidence": {
+        "at": "2026-10-01T19:59:52.90456404Z",
+        "kind": "start",
+        "type": "matrixchild",
+        "id": "c-9b697ed9ad80fc23da92cd497c3efe41",
+        "reason": "missing_journal",
+        "source_sequence": 714,
+        "invocation_sequence": 714,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained invocation had no journal; the scanner attempted a deduplicated start wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 38,
+      "evidence": {
+        "at": "2026-10-01T20:00:40.925460037Z",
+        "kind": "start",
+        "type": "matrixchild",
+        "id": "c-490ab6f0ce212d523e7745e41585c2a3",
+        "reason": "missing_journal",
+        "source_sequence": 829,
+        "invocation_sequence": 829,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained invocation had no journal; the scanner attempted a deduplicated start wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 39,
+      "evidence": {
+        "at": "2026-10-01T20:00:41.890779848Z",
+        "kind": "start",
+        "type": "matrixgrandchild",
+        "id": "c-4898ddb1f5d2adf85d5c58b30d6632a8",
+        "reason": "missing_journal",
+        "source_sequence": 835,
+        "invocation_sequence": 835,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained invocation had no journal; the scanner attempted a deduplicated start wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 40,
+      "evidence": {
+        "at": "2026-10-01T20:00:41.893724087Z",
+        "kind": "start",
+        "type": "matrixgrandchild",
+        "id": "c-e7d70828a23a6f9634e794cf90490567",
+        "reason": "missing_journal",
+        "source_sequence": 837,
+        "invocation_sequence": 837,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained invocation had no journal; the scanner attempted a deduplicated start wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 41,
+      "evidence": {
+        "at": "2026-10-01T20:01:45.259510359Z",
+        "kind": "signal",
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-36-6",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 1240,
+        "invocation_sequence": 1009,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 42,
+      "evidence": {
+        "at": "2026-10-01T20:01:45.945634381Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-36-0",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 1257,
+        "invocation_sequence": 1012,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 43,
+      "evidence": {
+        "at": "2026-10-01T20:01:45.946926024Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-36-0",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 1258,
+        "invocation_sequence": 1012,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 44,
+      "evidence": {
+        "at": "2026-10-01T20:03:25.88784268Z",
+        "kind": "signal",
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-44-0",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 1509,
+        "invocation_sequence": 1234,
+        "outcome": "uncertain",
+        "error": "context deadline exceeded"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication did not return a successful acknowledgment; it may have committed and needs a safe retry."
+    },
+    {
+      "kind": "repair",
+      "index": 45,
+      "evidence": {
+        "at": "2026-10-01T20:03:25.954486553Z",
+        "kind": "signal",
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-44-7",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 1511,
+        "invocation_sequence": 1238,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 46,
+      "evidence": {
+        "at": "2026-10-01T20:03:26.019851989Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-44-1",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 1528,
+        "invocation_sequence": 1236,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 47,
+      "evidence": {
+        "at": "2026-10-01T20:03:26.021267408Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-44-1",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 1529,
+        "invocation_sequence": 1236,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 48,
+      "evidence": {
+        "at": "2026-10-01T20:03:26.022608022Z",
+        "kind": "signal",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-44-1",
+        "reason": "unconsumed_signal_nonterminal_generation",
+        "source_sequence": 1530,
+        "invocation_sequence": 1236,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 49,
+      "evidence": {
+        "at": "2026-10-01T20:04:14.933504139Z",
+        "kind": "suspended",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-47-9",
+        "reason": "signal",
+        "journal_sequence": 14752,
+        "retry_window": 179088505,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    },
+    {
+      "kind": "repair",
+      "index": 50,
+      "evidence": {
+        "at": "2026-10-01T20:04:17.927722454Z",
+        "kind": "suspended",
+        "type": "matrixfanout",
+        "id": "tier3-1-batch-48-2",
+        "reason": "signal",
+        "journal_sequence": 15069,
+        "retry_window": 179088505,
+        "outcome": "acknowledged"
+      },
+      "explanation": "A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window. Publication was acknowledged; message-ID deduplication can make this a repeated wakeup."
+    }
+  ],
+  "server_root_causes_confirmed": false,
+  "independently_reaudits_server_state": false,
+  "clears_full_tier3_release": false,
+  "input_sha256": {
+    "worker-metrics.json": "737ed1855ca1095362384480b62fa05ad78bab90250abcb745aa2fe8625be97a",
+    "fencing.json": "8dccb99cb73dd79045756c7b52f9ef32648cd55931c79435469d81fe82ae9e69",
+    "repairs.json": "f9e09c1c5b7b2dc75ed35c95c3867b0115ed538360391bc249a44a752f7ad8f8"
+  }
+}

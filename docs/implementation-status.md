@@ -4802,3 +4802,22 @@ Majority route run36917337770 is terminal SUCCESS at52fdbdf; its downloaded
 artifact review is pending, so this update does not certify that ten-minute row.
 Comprehensive simulation36900782095 remains in progress, and the million-timer
 service remains active at MainPID18146. Neither is terminal acceptance.
+
+
+## Majority-progress route ten-minute proof verified
+
+[Hosted run36917337770](scale/tier3-mixed-route-majority-2026-10-01/hosted-ten-minute/)
+is terminal SUCCESS at52fdbdf:665.55s named race /666.574s package,53 batches,
+1,484 completed invocations,16,382 entries and19 confirmed single-node cuts.
+Original events and each retained majority progress artifact pass the current
+row guard. All histories, invariants, raw p99 and physical drain pass; worst
+terminal p99 is20.375s and progress p99 is13.160s. No heal-time exception applies.
+
+All14 fencing records match counters:4 heartbeat,4 execution,3 initialization,
+and3 journal-stale. Thirteen overlap cuts. One initialization revision mismatch
+is7.758906748s after heal, so fault causation is not asserted. Exact delivery
+traces and terminal/later-invocation-ack evidence distinguish two already-terminal
+duplicates from twelve later-terminal records. All51 repair decisions have
+checked explanations:50 acknowledged and one uncertain signal publication.
+This closes one clean-source ten-minute majority slice, not default-ping,
+separate-process, current-source full suite or24-hour matrix gates.
