@@ -4856,3 +4856,11 @@ reader race and vet pass. The initial acquisition timeout and old30s cadence
 assertion failure remain excluded evidence. This is fixture/smoke progress, not
 ten-minute or24-hour acceptance. The production12s TTL avoids the historical
 30s fixture mismatch; its old smoke is not rerun.
+
+
+The [clean-source worker-kill ten-minute campaign36923802476](https://github.com/AntPAllen/js-wf/actions/runs/36923802476)
+is queued at3a82c86; its exact source/inputs are retained beside the smoke.
+It requires119 actual five-second SIGKILL slots and the unchanged mixed gates.
+Comprehensive simulation36900782095 remains in progress; the million-timer
+service remains active at MainPID18146, with168,921 receipts at its latest
+checkpoint. These are live handles, not terminal acceptance.
