@@ -26,6 +26,7 @@ import (
 	"js-wf/provision"
 	"js-wf/reconcile"
 	"js-wf/testcluster"
+	"js-wf/wf"
 	"js-wf/worker"
 )
 
@@ -82,12 +83,6 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
 		t.Skip("set WF_TIER3_MATRIX=1 for sustained five-container mixed faults")
-	}
-	// A peer-skew row cannot use the shared broker-timestamp latency audit:
-	// leadership changes mix clock domains. Keep it fail-closed until its
-	// independent controller observations supply the enabling/progress times.
-	if matrixServerClockOffset(row) != 0 {
-		t.Fatal("server-clock rows require independent controller latency observations before acceptance")
 	}
 	duration := 10 * time.Minute
 	if value := os.Getenv("WF_TIER3_MATRIX_DURATION"); value != "" {
@@ -185,6 +180,26 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	var recorder history.Recorder
 	c := client.NewObserved(js, &recorder)
 	var evidenceMu sync.Mutex
+	var controllerOperations []worker.OperationEvent
+	var controllerTimers = make(map[string]matrixControllerTimerCall)
+	var controllerProof matrixControllerAudit
+	var controllerReceipts []matrixControllerJournalReceipt
+	var controllerAuditOperations []worker.OperationEvent
+	var controllerAuditTimers []matrixControllerTimerCall
+	var controllerClientCalls []client.Operation
+	var receiptObserver *matrixControllerReceiptObserver
+	var observeOperations func(worker.OperationEvent)
+	if matrixServerClockOffset(row) != 0 {
+		observeOperations = func(event worker.OperationEvent) {
+			if event.Operation != "journal_append" && event.Operation != "timer_clock" {
+				return
+			}
+			evidenceMu.Lock()
+			controllerOperations = append(controllerOperations, event)
+			evidenceMu.Unlock()
+		}
+	}
+
 	var dispatch []worker.DispatchEvent
 	var fencing []worker.FencingEvent
 	var repairs []reconcile.RepairEvent
@@ -241,9 +256,44 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	if row == "fanout_restart" {
 		handlers = fanoutBarrier.handlers()
 	}
+	if matrixServerClockOffset(row) != 0 {
+		handlers["matrixtimer"] = func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
+			var request struct {
+				ID string `json:"fixture_id"`
+			}
+			if err := json.Unmarshal(input, &request); err != nil || request.ID == "" {
+				return nil, fmt.Errorf("missing controller timer fixture identity")
+			}
+			for i := 0; i < 8; i++ {
+				name := fmt.Sprintf("timer-%d", i)
+				key := request.ID + "/" + name
+				before := time.Now().UTC()
+				evidenceMu.Lock()
+				timer := controllerTimers[key]
+				if timer.FirstCall.IsZero() {
+					timer = matrixControllerTimerCall{ID: request.ID, Name: name, FirstCall: before, Duration: 250 * time.Millisecond}
+					controllerTimers[key] = timer
+				}
+				evidenceMu.Unlock()
+				err := wf.Sleep(c, name, 250*time.Millisecond)
+				if err != nil {
+					return nil, err
+				}
+				after := time.Now().UTC()
+				evidenceMu.Lock()
+				timer = controllerTimers[key]
+				if timer.FirstReturn.IsZero() || after.Before(timer.FirstReturn) {
+					timer.FirstReturn = after
+					controllerTimers[key] = timer
+				}
+				evidenceMu.Unlock()
+			}
+			return json.RawMessage(`42`), nil
+		}
+	}
 	if row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
 		for node := 0; node < 5; node++ {
-			w, err := worker.New(ctx, js, fmt.Sprintf("tier3-mixed-%d", node), handlers, worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
+			w, err := worker.New(ctx, js, fmt.Sprintf("tier3-mixed-%d", node), handlers, worker.WithPartitionConcurrency(4), worker.WithOperationObserver(observeOperations), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
 				evidenceMu.Lock()
 				dispatch = append(dispatch, event)
 				evidenceMu.Unlock()
@@ -351,6 +401,28 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		evidenceMu.Unlock()
 		evidenceMu.Lock()
 		write("server-clock-observations.json", clockObservations)
+		if matrixServerClockOffset(row) != 0 {
+			operations := controllerOperations
+			if controllerAuditOperations != nil {
+				operations = controllerAuditOperations
+			}
+			write("controller-operations.json", operations)
+			var timers []matrixControllerTimerCall
+			for _, timer := range controllerTimers {
+				timers = append(timers, timer)
+			}
+			if controllerAuditTimers != nil {
+				timers = controllerAuditTimers
+			}
+			write("controller-timers.json", timers)
+			write("controller-client-calls.json", controllerClientCalls)
+			if receiptObserver != nil && controllerReceipts == nil {
+				controllerReceipts, _ = receiptObserver.snapshot()
+			}
+			write("controller-receipts.json", controllerReceipts)
+			write("controller-latency-audit.json", controllerProof)
+		}
+
 		evidenceMu.Unlock()
 		write("faults.json", faults)
 		write("latencies.json", samples)
@@ -383,6 +455,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	stopReady()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if matrixServerClockOffset(row) != 0 {
+		receiptObserver, err = startMatrixControllerReceiptObserver(ctx, js)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer receiptObserver.consume.Stop()
 	}
 	observeClocks := func(stage string, fault int) error {
 		if matrixServerClockOffset(row) == 0 {
@@ -528,8 +607,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			batch.Add(1)
 			go func() {
 				defer batch.Done()
+				input := []byte(`null`)
+				if matrixServerClockOffset(row) != 0 && typ == "matrixtimer" {
+					input, _ = json.Marshal(map[string]string{"fixture_id": id})
+				}
 				if err := matrixRetryClient(batchCtx, func(attempt context.Context) error {
-					_, err := c.Start(attempt, typ, id, []byte(`null`))
+					_, err := c.Start(attempt, typ, id, input)
 					if errors.Is(err, client.ErrAlreadyStarted) {
 						return nil
 					}
@@ -643,18 +726,39 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for sequence := info.State.FirstSeq; sequence <= info.State.LastSeq; sequence++ {
-		attempt, stop := context.WithTimeout(ctx, 20*time.Second)
-		msg, err := inv.GetMsg(attempt, sequence)
-		if err == nil {
-			parts := strings.Split(msg.Subject, ".")
-			var next []matrixLatencySample
-			next, err = matrixInvocationLatencies(attempt, js, parts[2], parts[3], msg.Time, completionDeadline)
-			samples = append(samples, next...)
-		}
-		stop()
+	if matrixServerClockOffset(row) != 0 {
+		controllerReceipts, err = receiptObserver.snapshot()
 		if err != nil {
 			t.Fatal(err)
+		}
+		evidenceMu.Lock()
+		operations := append([]worker.OperationEvent(nil), controllerOperations...)
+		var timers []matrixControllerTimerCall
+		for _, timer := range controllerTimers {
+			timers = append(timers, timer)
+		}
+		evidenceMu.Unlock()
+		controllerAuditOperations, controllerAuditTimers = operations, timers
+		controllerClientCalls = recorder.Snapshot()
+		controllerProof, err = auditMatrixControllerLatencies(ctx, js, operations, controllerReceipts, controllerClientCalls, timers, completionDeadline)
+		if err != nil {
+			t.Fatal(err)
+		}
+		samples = controllerProof.Samples
+	} else {
+		for sequence := info.State.FirstSeq; sequence <= info.State.LastSeq; sequence++ {
+			attempt, stop := context.WithTimeout(ctx, 20*time.Second)
+			msg, err := inv.GetMsg(attempt, sequence)
+			if err == nil {
+				parts := strings.Split(msg.Subject, ".")
+				var next []matrixLatencySample
+				next, err = matrixInvocationLatencies(attempt, js, parts[2], parts[3], msg.Time, completionDeadline)
+				samples = append(samples, next...)
+			}
+			stop()
+			if err != nil {
+				t.Fatal(err)
+			}
 		}
 	}
 	report, err := matrixRetainedAudit(ctx, js)

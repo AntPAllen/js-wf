@@ -51,3 +51,12 @@ class FencingTimelineReview(unittest.TestCase):
         result=r.review(f,d,l,fl)
         self.assertEqual(result['outside_confirmed_faults'],1)
         self.assertEqual(result['records'][0]['classification'],'completed_during_original_delivery')
+
+    def test_controller_terminal_windows_preserve_uncertain_ordering(self):
+        for lower,label in [('01','completion_window_overlaps_fetch'),('03','completion_window_overlaps_fencing'),('04.5','completed_after_fencing')]:
+            f,d,l,fl=self.fixture(terminal='05')
+            l[0]['observed_lower']='2026-10-01T12:00:'+lower+'Z'
+            self.assertEqual(r.review(f,d,l,fl)['records'][0]['classification'],label)
+        f,d,l,fl=self.fixture()
+        l[0]['observed_lower']='2026-10-01T12:00:06Z'
+        with self.assertRaises(ValueError):r.review(f,d,l,fl)

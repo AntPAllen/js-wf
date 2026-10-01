@@ -1008,7 +1008,12 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		}
 		return resultBlobs.GetBytes(ctx, name)
 	})
-	wctx.SetTimerSupport(wakeupAt, func(ctx context.Context) (time.Time, error) { return w.serverNow(ctx) }, func(ctx context.Context, step uint64, fireAt time.Time) error {
+	wctx.SetTimerSupport(wakeupAt, func(ctx context.Context) (time.Time, error) {
+		started := ops.begin()
+		serverTime, err := w.serverNow(ctx)
+		ops.finishTimerClock(started, nextIndex(), serverTime, err)
+		return serverTime, err
+	}, func(ctx context.Context, step uint64, fireAt time.Time) error {
 		started := ops.begin()
 		renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
 		_, timing, err := ops.renew(renewCtx, l, 0)

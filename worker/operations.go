@@ -28,6 +28,8 @@ type OperationEvent struct {
 	LeaseGateWait        time.Duration
 	LeaseUpdateDuration  time.Duration
 	LeaseUpdateAttempted bool
+	// ServerTime identifies the successful SDK clock lookup that created a timer.
+	ServerTime *time.Time `json:",omitempty"`
 }
 
 // WithOperationObserver enables optional per-call timings. The callback may
@@ -78,6 +80,24 @@ func (o *deliveryOperations) finish(start time.Time, name string, index uint64, 
 		event.LeaseGateWait = renewals[0].GateWait
 		event.LeaseUpdateDuration = renewals[0].Update
 		event.LeaseUpdateAttempted = renewals[0].UpdateAttempted
+	}
+	o.emit(event)
+}
+
+func (o *deliveryOperations) finishTimerClock(start time.Time, index uint64, serverTime time.Time, err error) {
+	if o == nil {
+		return
+	}
+	event := o.base
+	event.At = o.now()
+	event.Duration = event.At.Sub(start)
+	event.Operation = "timer_clock"
+	event.JournalIndex = index
+	event.JournalKind = journal.StepRequested
+	if err != nil {
+		event.Error = err.Error()
+	} else {
+		event.ServerTime = &serverTime
 	}
 	o.emit(event)
 }

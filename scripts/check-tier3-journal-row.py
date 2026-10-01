@@ -499,5 +499,7 @@ if __name__ == '__main__':
     if args.row.startswith('server_clock_'):
         if args.root is None: parser.error('--root is required for server clock rows')
         report['server_clock_artifact_checks']=check_server_clock_artifacts(args.root,report,args.row)
+        controller=load('controller_latency','check-controller-latency.py')
+        report['controller_latency_artifact_checks']=controller.check(args.root,report,timestamp_ns)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))

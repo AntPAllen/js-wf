@@ -5060,3 +5060,31 @@ unknown acknowledgement classification in that contract check is synthetic,
 not a real injected loss. Pure timing controls cover the later-commit case.
 The sustained server-skew rows remain fail-closed until these pieces are wired
 to controller timer/enabling observations and their complete latency audit.
+
+
+## Controller-clock latency audit connected to peer-skew rows
+
+The new server-clock rows now run the full controller audit instead of the
+mixed-clock broker-timestamp checker. Worker operation observations optionally
+record successful timer clock responses; each retained `fire_at` joins its
+actual successful SDK lookup. Completion must begin after the latest deadline
+allowed by that request/return window. Root SDK calls,parent requests,external
+signals,child terminal windows and timer origins supply conservative enabling
+bounds. Internal child-signal publication without an observed SDK call is
+bounded earlier by invocation creation. Successful append acknowledgements or
+full-entry-matched independent receipts supply upper bounds; unknown returns
+never do. Each p99 sample and its enabling origin must match retained evidence.
+Terminal windows overlapping fetch/fencing retain uncertainty in the timeline.
+
+[Actual three-node eight-timer contract](scale/controller-latency-audit-2026-10-01/)
+passes the focused race suite11.761s:26 matched journal windows and ten samples,
+all eight successful timer origins and no accepted early-completion ambiguity.
+The independent artifact guard and all66 Python tests pass. Worker race suite
+passes31.442s; full1,000-seed simulator passes104.638s with147 top-level passes,
+two explained trace-only skips and all168 pinned traces. Vet/diff checks pass.
+One earlier validation found a10ns serialization/monotonic-duration difference;
+persisted timestamp arithmetic now agrees exactly with the independent reviewer.
+No actual peer-clock row is cleared by this focused contract. Those smoke and
+sustained campaigns are next. Comprehensive36929826425 still runs at its original
+source,which predates the additive timer-clock diagnostic; it is not restarted
+just to follow this source change. Full release gates remain open.

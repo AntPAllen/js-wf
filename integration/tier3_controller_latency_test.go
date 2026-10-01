@@ -15,21 +15,22 @@ import (
 // an exact commit timestamp. Failed contenders can widen the lower bound, but
 // cannot make the measured latency smaller.
 type matrixControllerAppendBound struct {
-	Sequence uint64       `json:"sequence"`
-	Type     string       `json:"type"`
-	ID       string       `json:"id"`
-	Worker   string       `json:"worker"`
-	Index    uint64       `json:"index"`
-	Kind     journal.Kind `json:"kind"`
-	Before   time.Time    `json:"before"`
-	After    time.Time    `json:"after"`
-	Attempts int          `json:"attempts"`
+	Sequence uint64        `json:"sequence"`
+	Entry    journal.Entry `json:"entry"`
+	Type     string        `json:"type"`
+	ID       string        `json:"id"`
+	Worker   string        `json:"worker"`
+	Index    uint64        `json:"index"`
+	Kind     journal.Kind  `json:"kind"`
+	Before   time.Time     `json:"before"`
+	After    time.Time     `json:"after"`
+	Attempts int           `json:"attempts"`
 }
 
 func matrixControllerAppendBounds(typ, id string, records []journal.Record, operations []worker.OperationEvent, receipts map[uint64]time.Time) ([]matrixControllerAppendBound, error) {
 	bounds := make([]matrixControllerAppendBound, 0, len(records))
 	for _, record := range records {
-		bound := matrixControllerAppendBound{Sequence: record.Sequence, Type: typ, ID: id, Worker: record.WorkerID, Index: record.Index, Kind: record.Kind}
+		bound := matrixControllerAppendBound{Sequence: record.Sequence, Entry: record.Entry, Type: typ, ID: id, Worker: record.WorkerID, Index: record.Index, Kind: record.Kind}
 		for _, event := range operations {
 			if event.Operation != "journal_append" || event.Type != typ || event.ID != id || event.Worker != record.WorkerID || event.JournalIndex != record.Index || event.JournalKind != record.Kind {
 				continue
@@ -77,7 +78,7 @@ func matrixControllerProgress(typ, id, event string, enabled time.Time, afterSeq
 		if bound.After.Before(enabled) {
 			return matrixLatencySample{}, fmt.Errorf("controller progress precedes enabling observation for %s/%s %s", typ, id, event)
 		}
-		return matrixLatencySample{Type: typ, ID: id, Event: event, Enabled: enabled, Observed: bound.After, Delay: bound.After.Sub(enabled)}, nil
+		return matrixLatencySample{Type: typ, ID: id, Event: event, Enabled: enabled, Observed: bound.After, ObservedLower: &bound.Before, Delay: bound.After.UTC().Sub(enabled.UTC())}, nil
 	}
 	return matrixLatencySample{}, fmt.Errorf("missing causal controller progress for %s/%s %s after seq%d", typ, id, event, afterSequence)
 }

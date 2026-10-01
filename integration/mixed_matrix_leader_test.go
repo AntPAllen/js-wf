@@ -84,6 +84,7 @@ type matrixLeaderFault struct {
 
 type matrixLatencySample struct {
 	ServerClockOffset time.Duration `json:"server_clock_offset_ns,omitempty"`
+	ObservedLower     *time.Time    `json:"observed_lower,omitempty"`
 	Type              string        `json:"type"`
 	ID                string        `json:"id"`
 	Event             string        `json:"event"`

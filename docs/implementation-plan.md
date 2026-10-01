@@ -540,12 +540,21 @@ It retains controller-bracketed monitoring reads for all five actual clocks at
 startup and before/after every cut, plus confirmed journal-leader metadata and
 ordered process-removal/restart observations. The artifact checker rejects
 missing/unshifted clocks,wrong leader scope and reversed process timelines.
-These rows currently fail closed before starting a cluster: their latency audit
-must first use independent unshifted controller observations. The existing
-broker-timestamp audit cannot safely compare timestamps across skewed and
-unskewed journal leadership. A known configuration offset or a success flag is
-not sufficient to reconstruct a mixed-leader event timeline. No sustained clock
-row is verified by this scaffolding; existing focused clock proofs and the full
+These rows now use an independent unshifted controller audit. Append starts
+bound journal commits below; successful acknowledgements or independently
+matched journal receipts bound them above. Unknown returns never provide commit
+upper bounds. Root SDK calls and parent child requests bound enqueue; external
+signal calls and child terminal windows bound readiness. Runtime child-signal
+publication is conservatively bounded by invocation creation when no observed
+SDK call exists. Timer deadlines join each retained `fire_at` to the successful
+SDK clock lookup that created it. Completion must begin after that lookup's
+latest possible deadline; uncertainty cannot be accepted as proof of no early
+completion. Latency p99 uses conservative delay bounds with the strict30s gate.
+Raw broker timestamps remain retained data and never supply mixed-clock latency.
+The artifact checker reconstructs windows,sample origins,p99 and timer coverage.
+Terminal windows overlapping a fetch or fencing event retain an uncertain
+classification; they are never presented as exact commit timestamps. No sustained clock
+row is verified by the focused controller contract; existing focused clock proofs and the full
 24-hour matrix remain separate requirements.
 
 **The "done" bar for a release**

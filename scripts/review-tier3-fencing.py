@@ -31,11 +31,15 @@ def review(fencing,dispatch,latencies,faults):
             raise ValueError('fencing lacks one exact delivery fetch or one invocation terminal sample')
         fetch=ns(fetched[0]['At']); completed=ns(terminal[0]['observed'])
         if fetch>at:raise ValueError('fencing precedes its delivery fetch')
+        lower=ns(terminal[0].get('observed_lower') or terminal[0]['observed'])
+        if lower>completed:raise ValueError('reversed terminal observation interval')
         if completed<=fetch:classification='already_terminal_before_fetch'
         elif completed<at:classification='completed_during_original_delivery'
         else:classification='completed_after_fencing'
         overlaps=[i+1 for i,f in enumerate(faults) if ns(f['killed'])<=at<=ns(f['healed'])]
         pauses=[i+1 for i,f in enumerate(faults) if f.get('worker')==event['Worker'] and f.get('paused_leases') and ns(f['paused'])<=completed<ns(f['resumed']) and any(l['key']==event['Type']+'.'+event['ID'] and l['epoch']==event['Epoch'] for l in f['paused_leases'])]
+        if lower<=fetch<completed:classification='completion_window_overlaps_fetch'
+        elif lower<=at<completed:classification='completion_window_overlaps_fencing'
         if pauses:
             if classification!='completed_during_original_delivery':raise ValueError('paused ownership timeline disagrees with original delivery')
             classification='completed_while_original_owner_stopped'
