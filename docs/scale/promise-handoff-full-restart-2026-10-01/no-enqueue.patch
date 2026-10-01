@@ -1,0 +1,11 @@
+--- worker/continuation.go
++++ worker/continuation.go
+@@ -148,7 +148,7 @@
+ 	if err := owner.Renew(ctx); err != nil {
+ 		return err
+ 	}
+-	return w.client.Enqueue(ctx, typ, id, fmt.Sprintf("continuation:%d:%d", invSeq, sequence))
++	return nil
+ }
+ 
+ // WithJournalStore supplies the worker's journal transport, including snapshot

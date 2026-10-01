@@ -1,0 +1,164 @@
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart/after_handoff_release
+    continuation_promise_kill_test.go:194: lease retained after handoff: <nil>
+    continuation_promise_kill_test.go:272: worker: 
+    continuation_promise_kill_test.go:213: server 0: [675313] 2026/10/01 08:16:53.231961 [INF] Starting nats-server
+        [675313] 2026/10/01 08:16:53.232020 [INF]   Version:  2.15.0
+        [675313] 2026/10/01 08:16:53.232022 [INF]   Git:      [not set]
+        [675313] 2026/10/01 08:16:53.232023 [INF]   Cluster:  wf-process
+        [675313] 2026/10/01 08:16:53.232024 [INF]   Name:     wf-process-0
+        [675313] 2026/10/01 08:16:53.232025 [INF]   Node:     0m6vARoZ
+        [675313] 2026/10/01 08:16:53.232026 [INF]   ID:       NA3DR34SWQRAXJH3FWYTVDXZTZAWD6BZARTZIHBEM4DI2JVKAVE446MX
+        [675313] 2026/10/01 08:16:53.236867 [INF] Starting http monitor on 127.0.0.1:40343
+        [675313] 2026/10/01 08:16:53.236975 [INF] Starting JetStream
+        [675313] 2026/10/01 08:16:53.237108 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+        [675313] 2026/10/01 08:16:53.237110 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+        [675313] 2026/10/01 08:16:53.237111 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+        [675313] 2026/10/01 08:16:53.237111 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+        [675313] 2026/10/01 08:16:53.237112 [INF] 
+        [675313] 2026/10/01 08:16:53.237113 [INF]          https://docs.nats.io/jetstream
+        [675313] 2026/10/01 08:16:53.237114 [INF] 
+        [675313] 2026/10/01 08:16:53.237114 [INF] ---------------- JETSTREAM ----------------
+        [675313] 2026/10/01 08:16:53.237115 [INF]   Strict:          true
+        [675313] 2026/10/01 08:16:53.237117 [INF]   Max Memory:      11.71 GB
+        [675313] 2026/10/01 08:16:53.237118 [INF]   Max Storage:     1.64 GB
+        [675313] 2026/10/01 08:16:53.237119 [INF]   Store Directory: "/tmp/TestContinuationPromiseSIGKILLAndFullServerRestartafter_handoff2191509292/001/servers/node-0/jetstream"
+        [675313] 2026/10/01 08:16:53.237121 [INF]   API Level:       5
+        [675313] 2026/10/01 08:16:53.237122 [INF] -------------------------------------------
+        [675313] 2026/10/01 08:16:53.237342 [INF] Starting JetStream cluster
+        [675313] 2026/10/01 08:16:53.237344 [INF] Creating JetStream metadata controller
+        [675313] 2026/10/01 08:16:53.237936 [INF] JetStream cluster bootstrapping
+        [675313] 2026/10/01 08:16:53.259802 [INF] Took 22.82385ms to start JetStream
+        [675313] 2026/10/01 08:16:53.260061 [INF] Listening for client connections on 127.0.0.1:38911
+        [675313] 2026/10/01 08:16:53.260095 [INF] Server is ready
+        [675313] 2026/10/01 08:16:53.260344 [INF] Cluster name is wf-process
+        [675313] 2026/10/01 08:16:53.260375 [INF] Listening for route connections on 127.0.0.1:44001
+        [675313] 2026/10/01 08:16:53.260785 [INF] 127.0.0.1:45931 - rid:8 - Route connection created
+        [675313] 2026/10/01 08:16:53.261210 [INF] 127.0.0.1:45931 - rid:8 - Router connection closed: Client Closed
+        [675313] 2026/10/01 08:16:53.261842 [INF] 127.0.0.1:45931 - rid:9 - Route connection created
+        [675313] 2026/10/01 08:16:53.262098 [INF] 127.0.0.1:51188 - rid:10 - Route connection created
+        [675313] 2026/10/01 08:16:53.262287 [INF] 127.0.0.1:51214 - rid:11 - Route connection created
+        [675313] 2026/10/01 08:16:53.262349 [INF] 127.0.0.1:51204 - rid:12 - Route connection created
+        [675313] 2026/10/01 08:16:53.262393 [INF] 127.0.0.1:51210 - rid:13 - Route connection created
+        [675313] 2026/10/01 08:16:53.262889 [INF] 127.0.0.1:51214 - rid:11 - Router connection closed: Duplicate Route - Remote: wf-process-1
+        [675313] 2026/10/01 08:16:53.263178 [INF] 127.0.0.1:45931 - rid:9 - Router connection closed: Read Error - Remote: wf-process-1
+        [675313] 2026/10/01 08:16:53.263568 [INF] 127.0.0.1:51222 - rid:14 - Route connection created
+        [675313] 2026/10/01 08:16:53.264305 [INF] 127.0.0.1:51236 - rid:15 - Route connection created
+        [675313] 2026/10/01 08:16:53.360658 [WRN] Waiting for routing to be established...
+        [675313] 2026/10/01 08:16:53.360770 [WRN] JetStream has not established contact with a meta leader
+        [675313] 2026/10/01 08:16:53.435641 [INF] Self is new JetStream cluster metadata leader
+        [675313] 2026/10/01 08:16:54.266195 [INF] 127.0.0.1:45931 - rid:17 - Route connection created
+        [675313] 2026/10/01 08:16:54.267302 [INF] 127.0.0.1:45931 - rid:18 - Route connection created
+        [675313] 2026/10/01 08:16:54.291942 [INF] 127.0.0.1:45931 - rid:19 - Route connection created
+        [675313] 2026/10/01 08:16:54.296063 [INF] 127.0.0.1:51250 - rid:20 - Route connection created
+        [675313] 2026/10/01 08:16:54.296278 [INF] 127.0.0.1:51250 - rid:20 - Router connection closed: Client Closed
+        [675313] 2026/10/01 08:16:54.302726 [INF] 127.0.0.1:45931 - rid:21 - Route connection created
+        [675313] 2026/10/01 08:16:54.302967 [INF] 127.0.0.1:45931 - rid:21 - Router connection closed: Duplicate Route - Remote: wf-process-1
+        [675313] 2026/10/01 08:16:56.415294 [INF] JetStream cluster new stream leader for '$G > WF_INV'
+        [675313] 2026/10/01 08:16:56.490991 [INF] JetStream cluster new stream leader for '$G > WF_RUN'
+        [675313] 2026/10/01 08:16:56.764964 [INF] JetStream cluster new stream leader for '$G > WF_PURGE'
+        [675313] 2026/10/01 08:16:57.075601 [INF] JetStream cluster new stream leader for '$G > KV_WF_VIEW'
+    continuation_promise_kill_test.go:213: server 1: [675314] 2026/10/01 08:16:53.233808 [INF] Starting nats-server
+        [675314] 2026/10/01 08:16:53.234831 [INF]   Version:  2.15.0
+        [675314] 2026/10/01 08:16:53.234837 [INF]   Git:      [not set]
+        [675314] 2026/10/01 08:16:53.234838 [INF]   Cluster:  wf-process
+        [675314] 2026/10/01 08:16:53.234840 [INF]   Name:     wf-process-1
+        [675314] 2026/10/01 08:16:53.234842 [INF]   Node:     St9I6EVH
+        [675314] 2026/10/01 08:16:53.234843 [INF]   ID:       NDVCEDYLOUK3YVPBXH65SWGVEPMX27PI7O74EZ4RXFVQ4BPBMUO2ORBB
+        [675314] 2026/10/01 08:16:53.238013 [INF] Starting http monitor on 127.0.0.1:33891
+        [675314] 2026/10/01 08:16:53.238914 [INF] Starting JetStream
+        [675314] 2026/10/01 08:16:53.243510 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+        [675314] 2026/10/01 08:16:53.243516 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+        [675314] 2026/10/01 08:16:53.243517 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+        [675314] 2026/10/01 08:16:53.243518 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+        [675314] 2026/10/01 08:16:53.243518 [INF] 
+        [675314] 2026/10/01 08:16:53.243519 [INF]          https://docs.nats.io/jetstream
+        [675314] 2026/10/01 08:16:53.243520 [INF] 
+        [675314] 2026/10/01 08:16:53.243521 [INF] ---------------- JETSTREAM ----------------
+        [675314] 2026/10/01 08:16:53.243521 [INF]   Strict:          true
+        [675314] 2026/10/01 08:16:53.243523 [INF]   Max Memory:      11.71 GB
+        [675314] 2026/10/01 08:16:53.243524 [INF]   Max Storage:     1.64 GB
+        [675314] 2026/10/01 08:16:53.243524 [INF]   Store Directory: "/tmp/TestContinuationPromiseSIGKILLAndFullServerRestartafter_handoff2191509292/001/servers/node-1/jetstream"
+        [675314] 2026/10/01 08:16:53.243529 [INF]   API Level:       5
+        [675314] 2026/10/01 08:16:53.243530 [INF] -------------------------------------------
+        [675314] 2026/10/01 08:16:53.244041 [INF] Starting JetStream cluster
+        [675314] 2026/10/01 08:16:53.244047 [INF] Creating JetStream metadata controller
+        [675314] 2026/10/01 08:16:53.244789 [INF] JetStream cluster bootstrapping
+        [675314] 2026/10/01 08:16:53.261459 [INF] Took 22.540849ms to start JetStream
+        [675314] 2026/10/01 08:16:53.261540 [INF] Listening for client connections on 127.0.0.1:33971
+        [675314] 2026/10/01 08:16:53.261546 [INF] Server is ready
+        [675314] 2026/10/01 08:16:53.261559 [INF] Cluster name is wf-process
+        [675314] 2026/10/01 08:16:53.261601 [INF] Listening for route connections on 127.0.0.1:36531
+        [675314] 2026/10/01 08:16:53.262363 [INF] 127.0.0.1:36643 - rid:8 - Route connection created
+        [675314] 2026/10/01 08:16:53.262416 [INF] 127.0.0.1:35572 - rid:9 - Route connection created
+        [675314] 2026/10/01 08:16:53.262834 [INF] 127.0.0.1:36643 - rid:10 - Route connection created
+        [675314] 2026/10/01 08:16:53.262966 [INF] 127.0.0.1:36643 - rid:8 - Router connection closed: Client Closed - Remote: wf-process-0
+        [675314] 2026/10/01 08:16:53.262984 [INF] 127.0.0.1:35572 - rid:9 - Router connection closed: Duplicate Route - Remote: wf-process-0
+        [675314] 2026/10/01 08:16:53.263802 [INF] 127.0.0.1:35578 - rid:11 - Route connection created
+        [675314] 2026/10/01 08:16:53.362268 [WRN] Waiting for routing to be established...
+        [675314] 2026/10/01 08:16:54.266395 [INF] 127.0.0.1:35584 - rid:13 - Route connection created
+        [675314] 2026/10/01 08:16:54.267174 [INF] 127.0.0.1:35592 - rid:14 - Route connection created
+        [675314] 2026/10/01 08:16:54.267481 [INF] 127.0.0.1:35604 - rid:15 - Route connection created
+        [675314] 2026/10/01 08:16:54.291500 [INF] 127.0.0.1:35612 - rid:16 - Route connection created
+        [675314] 2026/10/01 08:16:54.291992 [INF] 127.0.0.1:35620 - rid:17 - Route connection created
+        [675314] 2026/10/01 08:16:54.292387 [INF] 127.0.0.1:35622 - rid:18 - Route connection created
+        [675314] 2026/10/01 08:16:54.296033 [INF] 127.0.0.1:36643 - rid:19 - Route connection created
+        [675314] 2026/10/01 08:16:54.296185 [INF] 127.0.0.1:36643 - rid:19 - Router connection closed: Duplicate Route - Remote: wf-process-0
+        [675314] 2026/10/01 08:16:54.302865 [INF] 127.0.0.1:35632 - rid:20 - Route connection created
+        [675314] 2026/10/01 08:16:54.303076 [INF] 127.0.0.1:35632 - rid:20 - Router connection closed: Client Closed
+        [675314] 2026/10/01 08:16:54.357653 [INF] JetStream cluster new metadata leader: wf-process-0/wf-process
+        [675314] 2026/10/01 08:16:56.899134 [INF] JetStream cluster new stream leader for '$G > KV_WF_LEASE'
+        [675314] 2026/10/01 08:16:56.971915 [INF] JetStream cluster new stream leader for '$G > KV_WF_STATE'
+        [675314] 2026/10/01 08:16:57.152473 [INF] JetStream cluster new stream leader for '$G > KV_WF_ASSIGN'
+        [675314] 2026/10/01 08:16:57.233927 [INF] JetStream cluster new stream leader for '$G > OBJ_WF_BLOB'
+        [675314] 2026/10/01 08:16:57.330684 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_60'
+        [675314] 2026/10/01 08:16:57.452805 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_22'
+    continuation_promise_kill_test.go:213: server 2: [675315] 2026/10/01 08:16:53.236188 [INF] Starting nats-server
+        [675315] 2026/10/01 08:16:53.236231 [INF]   Version:  2.15.0
+        [675315] 2026/10/01 08:16:53.236233 [INF]   Git:      [not set]
+        [675315] 2026/10/01 08:16:53.236234 [INF]   Cluster:  wf-process
+        [675315] 2026/10/01 08:16:53.236235 [INF]   Name:     wf-process-2
+        [675315] 2026/10/01 08:16:53.236237 [INF]   Node:     0WED9nmv
+        [675315] 2026/10/01 08:16:53.236238 [INF]   ID:       NAEXQEIPUUGFJY466VRN3O733ST6NHNECH6WYQS73AIW4CYRWEQSTTLF
+        [675315] 2026/10/01 08:16:53.238744 [INF] Starting http monitor on 127.0.0.1:43567
+        [675315] 2026/10/01 08:16:53.238825 [INF] Starting JetStream
+        [675315] 2026/10/01 08:16:53.242337 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+        [675315] 2026/10/01 08:16:53.242343 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+        [675315] 2026/10/01 08:16:53.242344 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+        [675315] 2026/10/01 08:16:53.242345 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+        [675315] 2026/10/01 08:16:53.242345 [INF] 
+        [675315] 2026/10/01 08:16:53.242346 [INF]          https://docs.nats.io/jetstream
+        [675315] 2026/10/01 08:16:53.242347 [INF] 
+        [675315] 2026/10/01 08:16:53.242348 [INF] ---------------- JETSTREAM ----------------
+        [675315] 2026/10/01 08:16:53.242348 [INF]   Strict:          true
+        [675315] 2026/10/01 08:16:53.242350 [INF]   Max Memory:      11.71 GB
+        [675315] 2026/10/01 08:16:53.242351 [INF]   Max Storage:     1.64 GB
+        [675315] 2026/10/01 08:16:53.242352 [INF]   Store Directory: "/tmp/TestContinuationPromiseSIGKILLAndFullServerRestartafter_handoff2191509292/001/servers/node-2/jetstream"
+        [675315] 2026/10/01 08:16:53.242355 [INF]   API Level:       5
+        [675315] 2026/10/01 08:16:53.242356 [INF] -------------------------------------------
+        [675315] 2026/10/01 08:16:53.242710 [INF] Starting JetStream cluster
+        [675315] 2026/10/01 08:16:53.242715 [INF] Creating JetStream metadata controller
+        [675315] 2026/10/01 08:16:53.243170 [INF] JetStream cluster bootstrapping
+        [675315] 2026/10/01 08:16:53.260822 [INF] Took 21.990122ms to start JetStream
+        [675315] 2026/10/01 08:16:53.260861 [INF] Listening for client connections on 127.0.0.1:38411
+        [675315] 2026/10/01 08:16:53.260870 [INF] Server is ready
+        [675315] 2026/10/01 08:16:53.260912 [INF] Cluster name is wf-process
+        [675315] 2026/10/01 08:16:53.260925 [INF] Listening for route connections on 127.0.0.1:40937
+        [675315] 2026/10/01 08:16:53.261193 [INF] 127.0.0.1:36643 - rid:8 - Route connection created
+        [675315] 2026/10/01 08:16:53.261249 [INF] 127.0.0.1:36643 - rid:9 - Route connection created
+        [675315] 2026/10/01 08:16:53.263406 [INF] 127.0.0.1:36643 - rid:10 - Route connection created
+        [675315] 2026/10/01 08:16:53.263742 [INF] 127.0.0.1:45931 - rid:11 - Route connection created
+        [675315] 2026/10/01 08:16:53.263996 [INF] 127.0.0.1:36643 - rid:12 - Route connection created
+        [675315] 2026/10/01 08:16:53.362162 [WRN] Waiting for routing to be established...
+        [675315] 2026/10/01 08:16:53.362228 [WRN] JetStream has not established contact with a meta leader
+        [675315] 2026/10/01 08:16:53.428093 [INF] JetStream cluster new metadata leader: wf-process-0/wf-process
+        [675315] 2026/10/01 08:16:54.267290 [INF] 127.0.0.1:45931 - rid:14 - Route connection created
+        [675315] 2026/10/01 08:16:54.268019 [INF] 127.0.0.1:45931 - rid:15 - Route connection created
+        [675315] 2026/10/01 08:16:54.292209 [INF] 127.0.0.1:45931 - rid:16 - Route connection created
+        [675315] 2026/10/01 08:16:56.567139 [INF] JetStream cluster new stream leader for '$G > WF_JRN'
+        [675315] 2026/10/01 08:16:56.655998 [INF] JetStream cluster new stream leader for '$G > WF_SIG'
+--- FAIL: TestContinuationPromiseSIGKILLAndFullServerRestart (20.62s)
+    --- FAIL: TestContinuationPromiseSIGKILLAndFullServerRestart/after_handoff_release (20.62s)
+FAIL
+FAIL	js-wf/integration	20.626s
+FAIL

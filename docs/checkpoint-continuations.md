@@ -834,3 +834,24 @@ tombstones, raw terminal audits, exact replay and compiled missing-reference/
 wrong-generation controls are verified. [100,000-seed proof and scope](scale/continuation-retirement-model-2026-10-01/)
 retain evidence. This slice explicitly orchestrates SDK delivery cuts; worker
 integration, reuse under combined faults and online GC remain open.
+
+
+## Shared worker promises, retirement and combined publication/handoff cuts
+
+Production parent/child dispatch and client Signal now run on shared retained
+stores in the seeded worker_promise_retirement slice. Final 100,000 schedules
+pass with lost notifications/object writes, replacement reads, uncertain retire-
+ment/GC, complete-history offline replay and generation-correct tombstones.
+The production 614,402-byte child spill is retained by a compact parent frame
+through child retirement, then reclaimed with the parent frame/archive.
+
+Eight actual worker SIGKILL publication/handoff cuts combined with all-three-
+server SIGKILL/restart pass under race in 144.645 seconds, with unchanged confirmed
+journal prefixes, higher successor epochs and sub-30-second raw kill/enabling
+recovery. Published frames skip initial/archive reads; completed frames awaiting
+manifest repair are reused. The two handoff cuts assert pre-kill lease and exact
+run-message states. Compiled enqueue/release omissions are caught semantically.
+[Seeded proof](scale/worker-promise-retirement-2026-10-01/) and
+[combined cuts](scale/promise-handoff-full-restart-2026-10-01/) record source and
+scope. These do not prove all reply-loss combinations, active-writer GC, TTL,
+limit-adjacent combined faults or the independent full-matrix/24-hour gates.

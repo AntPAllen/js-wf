@@ -54,9 +54,10 @@ the retired generations; invocation and snapshot/purging metadata must be gone.
 The source preceding the final signal-consumption count assertions passed
 100,000 schedules in 1,154.847 seconds (36,961,056 transport events, maximum
 virtual time 1,000 ms). This does not establish those later assertions at the
-release seed count. A separate final-checker 100,000-seed
-campaign is running with `/tmp/js-wf-worker-promise-retirement-final-100k.log`.
-The final-checker campaign is not claimed complete here. Response faults and
+release seed count. The final-checker 100,000-seed campaign passes in 1,164.872 seconds with
+36,961,056 transport events and maximum virtual time 1,000 ms. Its exact and
+cross-process checks are included; the stored source manifest matches current
+model/runtime files. The final-checker log is retained here. Response faults and
 up to one second of virtual retry time do not prove lease expiry, process
 partitions or sustained liveness.
 

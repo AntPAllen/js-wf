@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"testing"
 	"time"
@@ -91,7 +92,10 @@ func promiseKillHandlers(log string) (map[string]worker.Handler, map[string]work
 }
 
 // Capture every candidate frame, including cuts before manifest publication.
-type promiseKillResultPort struct{ *continuationKillResultPort }
+type promiseKillResultPort struct {
+	*continuationKillResultPort
+	frameReady *atomic.Bool
+}
 
 func (p *promiseKillResultPort) PutBytes(ctx context.Context, name string, data []byte) error {
 	var frame struct {
@@ -109,7 +113,13 @@ func (p *promiseKillResultPort) PutBytes(ctx context.Context, name string, data 
 			return err
 		}
 	}
-	return p.continuationKillResultPort.PutBytes(ctx, name, data)
+	if err := p.continuationKillResultPort.PutBytes(ctx, name, data); err != nil {
+		return err
+	}
+	if frame.Stage == "finish_v1" {
+		p.frameReady.Store(true)
+	}
+	return nil
 }
 
 func TestContinuationPromiseKillChild(t *testing.T) {
@@ -130,7 +140,19 @@ func TestContinuationPromiseKillChild(t *testing.T) {
 	log := os.Getenv("WF_PROMISE_KILL_LOG")
 	port := &continuationKillSnapshotPort{SnapshotWritePort: journal.NewSnapshotPort(js), cut: os.Getenv("WF_PROMISE_KILL_CUT"), marker: os.Getenv("WF_PROMISE_KILL_MARKER")}
 	handlers, stages := promiseKillHandlers(log)
-	w, err := worker.New(ctx, js, "promise-killed", handlers, worker.WithContinuations(promiseKillType, stages), worker.WithJournalStore(journal.NewWithJetStreamSnapshotPort(js, port)), worker.WithResultBlobPort(&promiseKillResultPort{&continuationKillResultPort{ResultBlobPort: worker.NewResultBlobPort(js), stop: port}}))
+	var frameReady atomic.Bool
+	observer := func(event worker.OperationEvent) {
+		if event.Error != "" || event.Type != promiseKillType || event.ID != promiseKillID || !frameReady.Load() {
+			return
+		}
+		if event.Operation == "journal_append" && event.JournalKind == journal.Suspended {
+			port.stopAt("after_suspended")
+		}
+		if event.Operation == "lease_release" {
+			port.stopAt("after_handoff_release")
+		}
+	}
+	w, err := worker.New(ctx, js, "promise-killed", handlers, worker.WithContinuations(promiseKillType, stages), worker.WithJournalStore(journal.NewWithJetStreamSnapshotPort(js, port)), worker.WithResultBlobPort(&promiseKillResultPort{continuationKillResultPort: &continuationKillResultPort{ResultBlobPort: worker.NewResultBlobPort(js), stop: port}, frameReady: &frameReady}), worker.WithOperationObserver(observer))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -168,7 +190,7 @@ func TestContinuationPromiseSIGKILLAndFullServerRestart(t *testing.T) {
 	if os.Getenv("WF_PROMISE_FULL_RESTART") != "1" {
 		t.Skip("set WF_PROMISE_FULL_RESTART=1 for combined process cuts")
 	}
-	for _, cut := range []string{"before_frame", "after_frame", "before_manifest", "after_manifest", "after_journal_purge", "after_signal_purge"} {
+	for _, cut := range []string{"before_frame", "after_frame", "before_manifest", "after_manifest", "after_journal_purge", "after_signal_purge", "after_suspended", "after_handoff_release"} {
 		t.Run(cut, func(t *testing.T) { runPromiseKillRestart(t, cut) })
 	}
 }
@@ -274,8 +296,57 @@ func runPromiseKillRestart(t *testing.T, cut string) {
 	if cut == "before_frame" || cut == "after_frame" {
 		wantKind = journal.StepRequested
 	}
+	handoff := cut == "after_suspended" || cut == "after_handoff_release"
+	if handoff {
+		wantKind = journal.Suspended
+	}
 	if last.Kind != wantKind {
 		t.Fatalf("cut tail=%+v", last)
+	}
+	if handoff {
+		if string(last.Payload) != `{"waiting_on":"continuation:finish_v1"}` {
+			t.Fatalf("incorrect handoff suspension: %s", last.Payload)
+		}
+		leases, err := all[0].KeyValue(ctx, "WF_LEASE")
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, leaseErr := leases.Get(ctx, identity.Key(promiseKillType, promiseKillID))
+		if cut == "after_suspended" && leaseErr != nil {
+			t.Fatalf("lease absent before handoff: %v", leaseErr)
+		}
+		if cut == "after_handoff_release" && !errors.Is(leaseErr, jetstream.ErrKeyNotFound) {
+			t.Fatalf("lease retained after handoff: %v", leaseErr)
+		}
+		runs, err := all[0].Stream(ctx, "WF_RUN")
+		if err != nil {
+			t.Fatal(err)
+		}
+		info, err := runs.Info(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		messageID := fmt.Sprintf("continuation:%d:%d", handle.InvSeq, before[len(before)-2].Sequence)
+		found := 0
+		for seq := info.State.FirstSeq; seq <= info.State.LastSeq; seq++ {
+			msg, err := runs.GetMsg(ctx, seq)
+			if errors.Is(err, jetstream.ErrMsgNotFound) {
+				continue
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if msg.Header.Get("Nats-Msg-Id") == messageID {
+				found++
+			}
+		}
+		want := 0
+		if cut == "after_handoff_release" {
+			want = 1
+		}
+		if found != want {
+			t.Fatalf("handoff messages=%d want=%d", found, want)
+		}
 	}
 	var promise wf.Promise
 	raw, err := os.ReadFile(log + ".promise")

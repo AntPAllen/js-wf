@@ -148,3 +148,22 @@ jobs:
       - run: go test ./integration -run '^TestTenThousandShortInvocationsAcrossAllPartitions$' -count=1 -timeout=15m -v
         env:
           WF_DISPATCH_SCALE: '1'
+
+  continuation-promise-restart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      WF_PROMISE_FULL_RESTART: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Race-check eight promise publication and handoff cuts
+        run: go test -race ./integration -run '^TestContinuationPromiseSIGKILLAndFullServerRestart$' -count=1 -timeout=8m -v 2>&1 | tee continuation-promise-restart.log
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: continuation-promise-restart
+          path: continuation-promise-restart.log
+          if-no-files-found: error

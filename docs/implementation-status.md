@@ -3645,3 +3645,32 @@ validation remains live; this earlier proof does not establish the later
 assertions. Original million-timer and hosted comprehensive simulation jobs
 continue without observation-triggered restart. Full matrix/24-hour soak,
 remaining transport/cut combinations, online GC and scale gates remain open.
+
+
+## Resolved-promise handoff cuts and final release-count seeded proof
+
+The promise process fixture adds after-suspension and after-handoff/release
+cuts, guarded by an atomic parent frame-ready flag to avoid stopping on initial
+child waits. Before SIGKILL, the suspension cut requires a retained lease and
+no continuation run; the release cut requires one generation/checkpoint-specific
+run and no lease. Both restart all three servers on retained stores and preserve
+all prior replay, integrity, epoch, promise/GC and latency gates. Final race of
+all eight publication/handoff cuts passes in 144.645 seconds; the two new cases
+also pass separately in 37.370 seconds. Compiled omitted enqueue/release controls
+fail on missing handoff/retained lease in 5.320/20.626 seconds. The initial release
+control build failure is excluded; vet passes. [Evidence](scale/promise-handoff-full-restart-2026-10-01/)
+is retained.
+
+Final shared-worker-promise checker source completes 100,000 schedules in
+1,164.872 seconds, 36,961,056 events, maximum virtual time 1,000 ms. The retained
+source manifest matches current tested files. This clears that modeled slice's
+seed count; final full-suite validation remains independent and active.
+
+GitHub has not registered the new standalone promise workflow despite its remote
+main file, nor recorded fcf4537 push runs; cause is unconfirmed. The eight-cut job
+moves into the registered standard test workflow and the standalone file is
+removed. Hosted confirmation remains pending. Standard fcf4537 run 36834846249,
+20-seed mixed run 36834849592 and new 200-seed mixed run 36835269534 are live;
+production/model source is unchanged here. The 844db83 20-seed mixed and CAS
+throughput jobs pass. None establishes the whole-matrix 200-seed or five-node
+24-hour release gate. Original million timers remain live without restart.
