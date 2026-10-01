@@ -3,7 +3,9 @@
 package integration_test
 
 import (
+	"context"
 	"encoding/json"
+	"github.com/nats-io/nats.go/jetstream"
 	"testing"
 	"time"
 
@@ -64,5 +66,55 @@ func TestMatrixPendingClockTimerAdmissionRejectsStaleAndUnprovenWaits(t *testing
 				}
 			})
 		}
+	}
+}
+
+// Embed the full API interface while replacing only the retained-tail read.
+// Every other API operation would fail if accidentally used by this helper.
+type matrixClockTailReadStub struct {
+	jetstream.Stream
+	tail *jetstream.RawStreamMsg
+	err  error
+}
+
+func (s matrixClockTailReadStub) GetLastMsgForSubject(context.Context, string) (*jetstream.RawStreamMsg, error) {
+	return s.tail, s.err
+}
+
+func TestMatrixClockTimerRefreshRejectsAdvancedOrLateTail(t *testing.T) {
+	for _, mode := range []string{"valid", "advanced_sequence", "changed_entry", "late", "corrupt", "transport_error"} {
+		t.Run(mode, func(t *testing.T) {
+			entry := journal.Entry{Index: 17, Kind: journal.Suspended, WorkerID: "worker", Payload: json.RawMessage(`{"waiting_on":"timer:wait"}`)}
+			receipt := matrixControllerJournalReceipt{Sequence: 12, Subject: "wf.jrn.matrixtimer.inv", Entry: entry}
+			candidate := &matrixClockTimerAdmission{Suspended: receipt, EarliestDue: time.Now().Add(time.Second)}
+			data, _ := json.Marshal(entry)
+			tail := &jetstream.RawStreamMsg{Sequence: 12, Subject: receipt.Subject, Data: data}
+			stub := matrixClockTailReadStub{tail: tail}
+			switch mode {
+			case "advanced_sequence":
+				tail.Sequence = 13
+			case "changed_entry":
+				entry.Kind = journal.Completed
+				tail.Data, _ = json.Marshal(entry)
+			case "late":
+				candidate.EarliestDue = time.Now()
+			case "corrupt":
+				tail.Data = []byte("invalid")
+			case "transport_error":
+				stub.err = context.DeadlineExceeded
+			}
+			selected, err := refreshMatrixClockTimerCandidate(context.Background(), stub, candidate)
+			if mode == "valid" {
+				if err != nil || selected == nil {
+					t.Fatalf("selected=%+v err=%v", selected, err)
+				}
+			} else if mode == "corrupt" || mode == "transport_error" {
+				if err == nil {
+					t.Fatal("unreadable tail admitted")
+				}
+			} else if err != nil || selected != nil {
+				t.Fatalf("stale tail admitted: %+v err=%v", selected, err)
+			}
+		})
 	}
 }

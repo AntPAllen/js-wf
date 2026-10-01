@@ -5366,3 +5366,32 @@ Behind fix validation36941535795 remains in progress. The new comprehensive
 36942165713 is queued; ahead diagnostic36939480705 remains in progress with
 its retained contradictory step/log observations. Million-timer service
 remains active atPID18146 with296,709 receipts at the sampled checkpoint.
+
+
+### Sustained behind-clock SDK fix verified; opt-in pending timer cuts wired
+
+Run36941535795 at source55bd33e passes723.32s. All three current artifact
+reviewers independently pass:83 batches,2324 invocations,25,601 entries,
+19 shifted-owner cuts,1992 controller-audited timer waits,195 actual clock
+observations and116 role observations. Worst terminal/progress p99 are
+13.427461733s/10.864556460s. Histories,invariants,immutable terminals and
+physical WF_RUN/64-consumer drain pass.93 repair records match counters
+(92 acknowledged,one uncertain),with no fencing records.
+[Original compressed proof and independent reports](scale/tier3-mixed-server-clock-2026-10-01/behind-fixed-ten-minute/)
+verify this one sustained row; pending timer admission/all combinations,
+200-seed and24-hour full-matrix gates remain open.
+
+The later opt-in timer-cut path now refreshes the exact retained suspended
+tail before SIGKILL and requires actual removal before its conservative
+controller duration boundary. A10s candidate selection budget and150ms
+initial/100ms refreshed lead keep uncertain cuts excluded. Per-cut artifacts
+join to final receipts/retained entries and actual process operations; later
+journal windows beginning before removal are rejected as uncertain. Log or
+CLI opt-in requires every cut proof. Workflow clock_timer_cut defaults false.
+[Admission code and scope](scale/clock-timer-admission-2026-10-01/) are retained.
+Focused Go race checks pass1.386s;32 Python Tier3 guard tests pass,including
+20 admission subcases. Native opt-in execution is still unverified.
+
+Freed54,087,705 bytes of obsolete original failing-row download after matching
+all60 files against their retained compressed original hashes. The complete
+proof remains in the repository; no live process/store was removed.

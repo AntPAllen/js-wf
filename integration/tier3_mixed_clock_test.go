@@ -146,7 +146,7 @@ func preferMatrixClockLeaders(ctx context.Context, nc *nats.Conn, js jetstream.J
 	return observeMatrixClockRoles(bound, js, stage, fault, func(leader string) bool { return leader == cluster.NodeName(4) })
 }
 
-func killFiveContainerMixedClockLeader(ctx context.Context, js jetstream.JetStream, cluster *testcluster.DockerCluster, scheduled time.Time, prefix string, fault int, record func([]matrixClockRoleObservation)) (matrixLeaderFault, error) {
+func killFiveContainerMixedClockLeader(ctx context.Context, js jetstream.JetStream, cluster *testcluster.DockerCluster, scheduled time.Time, prefix string, fault int, record func([]matrixClockRoleObservation), admit func(context.Context, jetstream.Stream) (*matrixClockTimerCut, error)) (matrixLeaderFault, error) {
 	event := matrixLeaderFault{Scheduled: scheduled, Node: 4}
 	bound, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
@@ -165,11 +165,34 @@ func killFiveContainerMixedClockLeader(ctx context.Context, js jetstream.JetStre
 	if err != nil {
 		return event, err
 	}
+	var timerCut *matrixClockTimerCut
+	if admit != nil {
+		timerCut, err = admit(bound, stream)
+		if err != nil {
+			return event, err
+		}
+		if timerCut == nil {
+			return event, fmt.Errorf("missing required timer cut candidate")
+		}
+	}
 	event.Killed = time.Now().UTC()
 	if err := cluster.KillNode(4); err != nil {
 		return event, err
 	}
 	removed := time.Now().UTC()
+	if timerCut != nil {
+		timerCut.Removed = removed
+		data, err := json.MarshalIndent(timerCut, "", "  ")
+		if err == nil {
+			err = os.WriteFile(prefix+"-clock-timer-cut.json", data, 0644)
+		}
+		if err != nil {
+			return event, err
+		}
+		if !removed.Before(timerCut.Admission.EarliestDue) {
+			return event, fmt.Errorf("timer clock cut removal missed the duration boundary")
+		}
+	}
 	// Keep the skewed server down until both roles have actually changed to an
 	// unshifted peer; an immediate restart could simply re-elect the same clock.
 	replacement, err := observeMatrixClockRoles(bound, js, "replacement", fault, func(leader string) bool { return leader != "" && leader != cluster.NodeName(4) })

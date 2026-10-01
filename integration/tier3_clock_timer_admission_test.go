@@ -3,12 +3,15 @@
 package integration_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 	"time"
 
+	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/journal"
 	"js-wf/worker"
 )
@@ -23,6 +26,35 @@ type matrixClockTimerAdmission struct {
 	Observed     time.Time                      `json:"observed"`
 	EarliestDue  time.Time                      `json:"earliest_due"`
 	SourceOffset time.Duration                  `json:"source_offset_ns"`
+}
+
+type matrixClockTimerCut struct {
+	Admission *matrixClockTimerAdmission `json:"admission"`
+	Tail      *jetstream.RawStreamMsg    `json:"refreshed_tail"`
+	Refreshed time.Time                  `json:"refreshed"`
+	Removed   time.Time                  `json:"removed"`
+}
+
+func refreshMatrixClockTimerCandidate(ctx context.Context, stream jetstream.Stream, candidate *matrixClockTimerAdmission) (*matrixClockTimerCut, error) {
+	if candidate == nil {
+		return nil, nil
+	}
+	tail, err := stream.GetLastMsgForSubject(ctx, candidate.Suspended.Subject)
+	if err != nil {
+		return nil, err
+	}
+	var entry journal.Entry
+	if err := json.Unmarshal(tail.Data, &entry); err != nil {
+		return nil, err
+	}
+	if tail.Sequence != candidate.Suspended.Sequence || tail.Subject != candidate.Suspended.Subject || !reflect.DeepEqual(entry, candidate.Suspended.Entry) {
+		return nil, nil
+	}
+	refreshed := time.Now().UTC()
+	if !refreshed.Add(100 * time.Millisecond).Before(candidate.EarliestDue) {
+		return nil, nil
+	}
+	return &matrixClockTimerCut{Admission: candidate, Tail: tail, Refreshed: refreshed}, nil
 }
 
 // Select an observed durable positive Sleep request with the latest observed

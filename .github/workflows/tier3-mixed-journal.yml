@@ -14,6 +14,10 @@ on:
         type: choice
         default: '10m'
         options: ['35s', '10m']
+      clock_timer_cut:
+        description: Require a pending positive Sleep before each server-clock cut
+        type: boolean
+        default: false
 jobs:
   journal:
     runs-on: ubuntu-latest
@@ -23,6 +27,7 @@ jobs:
       TIER3_MATRIX_ROW: ${{ inputs.row }}
       WF_TIER3_MATRIX_DURATION: ${{ inputs.duration }}
       WF_TIER3_SYNC_INTERVAL: '2m'
+      WF_TIER3_CLOCK_TIMER_CUT: ${{ inputs.clock_timer_cut && '1' || '' }}
       TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
       GOMEMLIMIT: 512MiB
       GOMAXPROCS: '2'
@@ -51,7 +56,9 @@ jobs:
             *) exit 1 ;;
           esac
           go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py
-          python3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --output /tmp/tier3-mixed-journal-result.json
+          cut_args=()
+          if [ "$WF_TIER3_CLOCK_TIMER_CUT" = 1 ]; then cut_args+=(--require-clock-timer-cut); fi
+          python3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --output /tmp/tier3-mixed-journal-result.json "${cut_args[@]}"
           python3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"
           python3 scripts/review-tier3-fencing.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/fencing-timeline-review.json"
       - if: always()

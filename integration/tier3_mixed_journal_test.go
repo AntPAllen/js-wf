@@ -95,6 +95,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	if duration != 35*time.Second && duration != 10*time.Minute && duration != 24*time.Hour {
 		t.Fatal("duration must be35s smoke,10m row,or24h single-row soak")
 	}
+	timerCutRequired := os.Getenv("WF_TIER3_CLOCK_TIMER_CUT") == "1"
+	if timerCutRequired && matrixServerClockOffset(row) == 0 {
+		t.Fatal("timer cut admission requires a server-clock row")
+	}
+	if timerCutRequired {
+		t.Log("TIER3_CLOCK_TIMER_CUT_REQUIRED=true")
+	}
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -535,7 +542,39 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				return
 			}
 			if matrixServerClockOffset(row) != 0 {
-				event, err = killFiveContainerMixedClockLeader(ctx, js, cluster, scheduled, prefix, len(faults)+1, recordRoles)
+				var admit func(context.Context, jetstream.Stream) (*matrixClockTimerCut, error)
+				if timerCutRequired {
+					admit = func(bound context.Context, stream jetstream.Stream) (*matrixClockTimerCut, error) {
+						selection, stop := context.WithTimeout(bound, 10*time.Second)
+						defer stop()
+						for {
+							receipts, err := receiptObserver.snapshot()
+							if err != nil {
+								return nil, err
+							}
+							evidenceMu.Lock()
+							ops := append([]worker.OperationEvent(nil), controllerOperations...)
+							evidenceMu.Unlock()
+							candidate, err := selectMatrixPendingClockTimer(receipts, ops, time.Now().UTC(), matrixServerClockOffset(row), 150*time.Millisecond)
+							if err != nil {
+								return nil, err
+							}
+							cut, err := refreshMatrixClockTimerCandidate(selection, stream, candidate)
+							if err != nil {
+								return nil, err
+							}
+							if cut != nil {
+								return cut, nil
+							}
+							select {
+							case <-selection.Done():
+								return nil, fmt.Errorf("no provable pending timer for clock cut: %w", selection.Err())
+							case <-time.After(5 * time.Millisecond):
+							}
+						}
+					}
+				}
+				event, err = killFiveContainerMixedClockLeader(ctx, js, cluster, scheduled, prefix, len(faults)+1, recordRoles, admit)
 			} else if row == "worker_isolation" {
 				event, err = isolateMatrixWorkerReplies(ctx, processes, workerProxies, faultRNG.Intn(len(processes)), scheduled, func(c context.Context, fleet []*matrixProcessWorker, first int) (int, matrixIsolationTarget, func() error, error) {
 					return armMatrixUnfinishedIsolationTarget(c, js, fleet, first)

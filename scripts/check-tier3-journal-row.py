@@ -515,7 +515,10 @@ if __name__ == '__main__':
     parser.add_argument('--events', required=True, type=Path)
     parser.add_argument('--duration', required=True, choices=('35s', '10m'))
     parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('--require-clock-timer-cut', action='store_true')
     args = parser.parse_args()
+    if args.require_clock_timer_cut and not args.row.startswith('server_clock_'):
+        parser.error('--require-clock-timer-cut requires a server-clock row')
     events = [json.loads(line) for line in args.events.read_text().splitlines() if line.strip()]
     report = check(events, args.duration, args.row)
     if args.row == 'consumer':
@@ -547,5 +550,9 @@ if __name__ == '__main__':
         controller=load('controller_latency','check-controller-latency.py')
         report['controller_latency_artifact_checks']=controller.check(args.root,report,timestamp_ns)
         report['clock_role_artifact_checks']=check_server_clock_role_artifacts(args.root,report,args.row)
+        required = args.require_clock_timer_cut or any('TIER3_CLOCK_TIMER_CUT_REQUIRED=true' in event.get('Output','') for event in events)
+        if required:
+            admission=load('clock_timer_cut','check-clock-timer-cut.py')
+            report['clock_timer_cut_artifact_checks']=admission.check(args.root,report,args.row,timestamp_ns)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))
