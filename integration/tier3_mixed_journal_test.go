@@ -50,9 +50,13 @@ func TestFiveContainerMixedRouteQuorumEveryThirtySeconds(t *testing.T) {
 	runFiveContainerMixedLeader(t, "route_quorum")
 }
 
+func TestFiveContainerMixedRouteMajorityEveryThirtySeconds(t *testing.T) {
+	runFiveContainerMixedLeader(t, "route_majority")
+}
+
 func runFiveContainerMixedLeader(t *testing.T, row string) {
 	t.Helper()
-	if row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" {
+	if row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" {
 		t.Fatal("unsupported R5 fault row")
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
@@ -82,7 +86,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	if err := os.MkdirAll(root, 0755); err != nil {
 		t.Fatal(err)
 	}
-	if row == "route_quorum" {
+	if row == "route_quorum" || row == "route_majority" {
 		// The default route ping can take30s before stale sockets disappear,
 		// which exceeds the scheduled cut cadence. Make this fixture detection
 		// interval explicit; production write-sync remains unchanged.
@@ -143,7 +147,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if row == "route_quorum" {
+	if row == "route_quorum" || row == "route_majority" {
 		if _, err := js.CreateStream(ctx, jetstream.StreamConfig{Name: "TIER3_ROUTE_PROBE", Subjects: []string{"tier3.route.probe"}, Replicas: 5, Storage: jetstream.FileStorage}); err != nil {
 			t.Fatal(err)
 		}
@@ -306,8 +310,8 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			prefix := filepath.Join(root, fmt.Sprintf("fault-%d", len(faults)+1))
 			if row == "consumer" {
 				event, err = killFiveContainerMixedConsumerLeader(ctx, js, cluster, scheduled, prefix, faultRNG)
-			} else if row == "route_quorum" {
-				event, err = partitionFiveContainerMixedQuorum(ctx, js, cluster, scheduled, prefix, faultRNG)
+			} else if row == "route_quorum" || row == "route_majority" {
+				event, err = partitionFiveContainerMixedRoute(ctx, js, cluster, scheduled, prefix, faultRNG, nc, row == "route_quorum")
 			} else if row == "fanout_restart" {
 				event, err = fanoutBarrier.restartWith(ctx, js, scheduled, prefix, func() (matrixLeaderFault, error) {
 					return killFiveContainerMixedAllServers(ctx, js, cluster, scheduled, prefix)

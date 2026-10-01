@@ -1,0 +1,722 @@
+[
+  {
+    "event": {
+      "At": "2026-10-01T19:26:21.493140767Z",
+      "Worker": "tier3-mixed-1",
+      "Type": "matrixgrandchild",
+      "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+      "RunSequence": 692,
+      "Delivery": 1,
+      "Epoch": 3818,
+      "Reason": "lease_heartbeat_lost",
+      "Error": "workflow lease was lost: nats: no response from stream"
+    },
+    "overlapping_faults": [
+      1
+    ],
+    "exact_delivery_steps": [
+      {
+        "At": "2026-10-01T19:26:11.983238216Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+        "Stage": "fetched",
+        "RunSequence": 692,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:11.989746519Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+        "Stage": "lease_acquired",
+        "RunSequence": 692,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:21.493145053Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+        "Stage": "execution_retry",
+        "RunSequence": 692,
+        "Delivery": 1,
+        "Error": "context canceled"
+      },
+      {
+        "At": "2026-10-01T19:26:21.493189601Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+        "Stage": "release_initial_error",
+        "RunSequence": 692,
+        "Delivery": 1,
+        "Error": "workflow lease was lost"
+      },
+      {
+        "At": "2026-10-01T19:26:22.003435749Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+        "Stage": "release_cleanup_error",
+        "RunSequence": 692,
+        "Delivery": 1,
+        "Error": "nats: no response from stream"
+      },
+      {
+        "At": "2026-10-01T19:26:22.70603112Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+        "Stage": "release_cleanup_error",
+        "RunSequence": 692,
+        "Delivery": 1,
+        "Error": "nats: no response from stream"
+      },
+      {
+        "At": "2026-10-01T19:26:23.410336181Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+        "Stage": "release_cleanup_error",
+        "RunSequence": 692,
+        "Delivery": 1,
+        "Error": "nats: no response from stream"
+      },
+      {
+        "At": "2026-10-01T19:26:24.112587315Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+        "Stage": "release_cleanup_error",
+        "RunSequence": 692,
+        "Delivery": 1,
+        "Error": "nats: no response from stream"
+      },
+      {
+        "At": "2026-10-01T19:26:24.816920936Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+        "Stage": "release_cleanup_done",
+        "RunSequence": 692,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:27.170717428Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+        "Stage": "nak",
+        "RunSequence": 692,
+        "Delivery": 1,
+        "Error": ""
+      }
+    ],
+    "terminal_sample": {
+      "type": "matrixgrandchild",
+      "id": "c-58bd9381ec8d688b4b519076c8b33352",
+      "event": "terminal",
+      "enabled": "2026-10-01T19:26:11.979583245Z",
+      "observed": "2026-10-01T19:26:12.022689165Z",
+      "delay_ns": 43105920
+    },
+    "terminal_precedes_fencing": true,
+    "later_invocation_acks": [
+      {
+        "At": "2026-10-01T19:26:27.213351148Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+        "Stage": "ack",
+        "RunSequence": 753,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:28.183910902Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-58bd9381ec8d688b4b519076c8b33352",
+        "Stage": "ack",
+        "RunSequence": 692,
+        "Delivery": 2,
+        "Error": ""
+      }
+    ],
+    "server_root_cause_confirmed": false
+  },
+  {
+    "event": {
+      "At": "2026-10-01T19:26:21.494806431Z",
+      "Worker": "tier3-mixed-2",
+      "Type": "matrixgrandchild",
+      "ID": "c-d6e6a62de4ba329d43af55e4d84b95cb",
+      "RunSequence": 694,
+      "Delivery": 1,
+      "Epoch": 3825,
+      "Reason": "lease_heartbeat_lost",
+      "Error": "workflow lease was lost: nats: no response from stream"
+    },
+    "overlapping_faults": [
+      1
+    ],
+    "exact_delivery_steps": [
+      {
+        "At": "2026-10-01T19:26:11.988201007Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-d6e6a62de4ba329d43af55e4d84b95cb",
+        "Stage": "fetched",
+        "RunSequence": 694,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:11.991129644Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-d6e6a62de4ba329d43af55e4d84b95cb",
+        "Stage": "lease_acquired",
+        "RunSequence": 694,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:21.494810107Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-d6e6a62de4ba329d43af55e4d84b95cb",
+        "Stage": "execution_retry",
+        "RunSequence": 694,
+        "Delivery": 1,
+        "Error": "context canceled"
+      },
+      {
+        "At": "2026-10-01T19:26:21.494837809Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-d6e6a62de4ba329d43af55e4d84b95cb",
+        "Stage": "release_initial_error",
+        "RunSequence": 694,
+        "Delivery": 1,
+        "Error": "workflow lease was lost"
+      },
+      {
+        "At": "2026-10-01T19:26:22.002333532Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-d6e6a62de4ba329d43af55e4d84b95cb",
+        "Stage": "release_cleanup_error",
+        "RunSequence": 694,
+        "Delivery": 1,
+        "Error": "nats: no response from stream"
+      },
+      {
+        "At": "2026-10-01T19:26:22.203797344Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-d6e6a62de4ba329d43af55e4d84b95cb",
+        "Stage": "release_cleanup_done",
+        "RunSequence": 694,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:27.199332187Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-d6e6a62de4ba329d43af55e4d84b95cb",
+        "Stage": "nak",
+        "RunSequence": 694,
+        "Delivery": 1,
+        "Error": ""
+      }
+    ],
+    "terminal_sample": {
+      "type": "matrixgrandchild",
+      "id": "c-d6e6a62de4ba329d43af55e4d84b95cb",
+      "event": "terminal",
+      "enabled": "2026-10-01T19:26:11.984549792Z",
+      "observed": "2026-10-01T19:26:14.032065479Z",
+      "delay_ns": 2047515687
+    },
+    "terminal_precedes_fencing": true,
+    "later_invocation_acks": [
+      {
+        "At": "2026-10-01T19:26:27.225502377Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-d6e6a62de4ba329d43af55e4d84b95cb",
+        "Stage": "ack",
+        "RunSequence": 754,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:28.216149845Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-d6e6a62de4ba329d43af55e4d84b95cb",
+        "Stage": "ack",
+        "RunSequence": 694,
+        "Delivery": 2,
+        "Error": ""
+      }
+    ],
+    "server_root_cause_confirmed": false
+  },
+  {
+    "event": {
+      "At": "2026-10-01T19:26:21.520967527Z",
+      "Worker": "tier3-mixed-2",
+      "Type": "matrixgrandchild",
+      "ID": "c-f560e634b6f254300aeeb799e7907ed0",
+      "RunSequence": 699,
+      "Delivery": 1,
+      "Epoch": 3854,
+      "Reason": "lease_heartbeat_lost",
+      "Error": "workflow lease was lost: nats: no response from stream"
+    },
+    "overlapping_faults": [
+      1
+    ],
+    "exact_delivery_steps": [
+      {
+        "At": "2026-10-01T19:26:12.013088677Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-f560e634b6f254300aeeb799e7907ed0",
+        "Stage": "fetched",
+        "RunSequence": 699,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:12.015906665Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-f560e634b6f254300aeeb799e7907ed0",
+        "Stage": "lease_acquired",
+        "RunSequence": 699,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:21.520975289Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-f560e634b6f254300aeeb799e7907ed0",
+        "Stage": "execution_retry",
+        "RunSequence": 699,
+        "Delivery": 1,
+        "Error": "context canceled"
+      },
+      {
+        "At": "2026-10-01T19:26:21.521007699Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-f560e634b6f254300aeeb799e7907ed0",
+        "Stage": "release_initial_error",
+        "RunSequence": 699,
+        "Delivery": 1,
+        "Error": "workflow lease was lost"
+      },
+      {
+        "At": "2026-10-01T19:26:21.521620922Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-f560e634b6f254300aeeb799e7907ed0",
+        "Stage": "release_cleanup_done",
+        "RunSequence": 699,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:27.284729394Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-f560e634b6f254300aeeb799e7907ed0",
+        "Stage": "nak",
+        "RunSequence": 699,
+        "Delivery": 1,
+        "Error": ""
+      }
+    ],
+    "terminal_sample": {
+      "type": "matrixgrandchild",
+      "id": "c-f560e634b6f254300aeeb799e7907ed0",
+      "event": "terminal",
+      "enabled": "2026-10-01T19:26:12.009746431Z",
+      "observed": "2026-10-01T19:26:12.054479957Z",
+      "delay_ns": 44733526
+    },
+    "terminal_precedes_fencing": true,
+    "later_invocation_acks": [
+      {
+        "At": "2026-10-01T19:26:27.070506982Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-f560e634b6f254300aeeb799e7907ed0",
+        "Stage": "ack",
+        "RunSequence": 750,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:28.300676688Z",
+        "Worker": "tier3-mixed-2",
+        "Type": "matrixgrandchild",
+        "ID": "c-f560e634b6f254300aeeb799e7907ed0",
+        "Stage": "ack",
+        "RunSequence": 699,
+        "Delivery": 2,
+        "Error": ""
+      }
+    ],
+    "server_root_cause_confirmed": false
+  },
+  {
+    "event": {
+      "At": "2026-10-01T19:26:23.475013772Z",
+      "Worker": "tier3-mixed-1",
+      "Type": "matrixgrandchild",
+      "ID": "c-c6c0f2016268a126bab66e297f015572",
+      "RunSequence": 713,
+      "Delivery": 1,
+      "Epoch": 4009,
+      "Reason": "lease_heartbeat_lost",
+      "Error": "workflow lease was lost: nats: no response from stream"
+    },
+    "overlapping_faults": [
+      1
+    ],
+    "exact_delivery_steps": [
+      {
+        "At": "2026-10-01T19:26:13.970779616Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-c6c0f2016268a126bab66e297f015572",
+        "Stage": "fetched",
+        "RunSequence": 713,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:13.972796205Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-c6c0f2016268a126bab66e297f015572",
+        "Stage": "lease_acquired",
+        "RunSequence": 713,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:23.475018208Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-c6c0f2016268a126bab66e297f015572",
+        "Stage": "execution_retry",
+        "RunSequence": 713,
+        "Delivery": 1,
+        "Error": "context canceled"
+      },
+      {
+        "At": "2026-10-01T19:26:23.475059181Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-c6c0f2016268a126bab66e297f015572",
+        "Stage": "release_initial_error",
+        "RunSequence": 713,
+        "Delivery": 1,
+        "Error": "workflow lease was lost"
+      },
+      {
+        "At": "2026-10-01T19:26:23.978046942Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-c6c0f2016268a126bab66e297f015572",
+        "Stage": "release_cleanup_error",
+        "RunSequence": 713,
+        "Delivery": 1,
+        "Error": "nats: no response from stream"
+      },
+      {
+        "At": "2026-10-01T19:26:24.683162774Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-c6c0f2016268a126bab66e297f015572",
+        "Stage": "release_cleanup_done",
+        "RunSequence": 713,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:27.28948484Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-c6c0f2016268a126bab66e297f015572",
+        "Stage": "nak",
+        "RunSequence": 713,
+        "Delivery": 1,
+        "Error": ""
+      }
+    ],
+    "terminal_sample": {
+      "type": "matrixgrandchild",
+      "id": "c-c6c0f2016268a126bab66e297f015572",
+      "event": "terminal",
+      "enabled": "2026-10-01T19:26:13.968675295Z",
+      "observed": "2026-10-01T19:26:13.997095599Z",
+      "delay_ns": 28420304
+    },
+    "terminal_precedes_fencing": true,
+    "later_invocation_acks": [
+      {
+        "At": "2026-10-01T19:26:27.314718254Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-c6c0f2016268a126bab66e297f015572",
+        "Stage": "ack",
+        "RunSequence": 757,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:28.315608478Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-c6c0f2016268a126bab66e297f015572",
+        "Stage": "ack",
+        "RunSequence": 713,
+        "Delivery": 2,
+        "Error": ""
+      }
+    ],
+    "server_root_cause_confirmed": false
+  },
+  {
+    "event": {
+      "At": "2026-10-01T19:26:24.36344369Z",
+      "Worker": "tier3-mixed-4",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-6-3",
+      "RunSequence": 668,
+      "Delivery": 1,
+      "Epoch": 3731,
+      "Reason": "lease_heartbeat_lost",
+      "Error": "workflow lease was lost: nats: no response from stream"
+    },
+    "overlapping_faults": [
+      1
+    ],
+    "exact_delivery_steps": [
+      {
+        "At": "2026-10-01T19:26:11.84792939Z",
+        "Worker": "tier3-mixed-4",
+        "Type": "matrixshort",
+        "ID": "tier3-1-batch-6-3",
+        "Stage": "fetched",
+        "RunSequence": 668,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:11.860206721Z",
+        "Worker": "tier3-mixed-4",
+        "Type": "matrixshort",
+        "ID": "tier3-1-batch-6-3",
+        "Stage": "lease_acquired",
+        "RunSequence": 668,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:24.36345079Z",
+        "Worker": "tier3-mixed-4",
+        "Type": "matrixshort",
+        "ID": "tier3-1-batch-6-3",
+        "Stage": "execution_retry",
+        "RunSequence": 668,
+        "Delivery": 1,
+        "Error": "context canceled"
+      },
+      {
+        "At": "2026-10-01T19:26:24.363480215Z",
+        "Worker": "tier3-mixed-4",
+        "Type": "matrixshort",
+        "ID": "tier3-1-batch-6-3",
+        "Stage": "release_initial_error",
+        "RunSequence": 668,
+        "Delivery": 1,
+        "Error": "workflow lease was lost"
+      },
+      {
+        "At": "2026-10-01T19:26:24.363856858Z",
+        "Worker": "tier3-mixed-4",
+        "Type": "matrixshort",
+        "ID": "tier3-1-batch-6-3",
+        "Stage": "release_cleanup_done",
+        "RunSequence": 668,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:27.245231366Z",
+        "Worker": "tier3-mixed-4",
+        "Type": "matrixshort",
+        "ID": "tier3-1-batch-6-3",
+        "Stage": "nak",
+        "RunSequence": 668,
+        "Delivery": 1,
+        "Error": ""
+      }
+    ],
+    "terminal_sample": {
+      "type": "matrixshort",
+      "id": "tier3-1-batch-6-3",
+      "event": "terminal",
+      "enabled": "2026-10-01T19:26:11.841448208Z",
+      "observed": "2026-10-01T19:26:11.915785119Z",
+      "delay_ns": 74336911
+    },
+    "terminal_precedes_fencing": true,
+    "later_invocation_acks": [
+      {
+        "At": "2026-10-01T19:26:27.254348027Z",
+        "Worker": "tier3-mixed-4",
+        "Type": "matrixshort",
+        "ID": "tier3-1-batch-6-3",
+        "Stage": "ack",
+        "RunSequence": 755,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:28.253000315Z",
+        "Worker": "tier3-mixed-4",
+        "Type": "matrixshort",
+        "ID": "tier3-1-batch-6-3",
+        "Stage": "ack",
+        "RunSequence": 668,
+        "Delivery": 2,
+        "Error": ""
+      }
+    ],
+    "server_root_cause_confirmed": false
+  },
+  {
+    "event": {
+      "At": "2026-10-01T19:26:24.459748954Z",
+      "Worker": "tier3-mixed-1",
+      "Type": "matrixgrandchild",
+      "ID": "c-ed06b763e6b1154cea6f07b5696d0ede",
+      "RunSequence": 689,
+      "Delivery": 1,
+      "Epoch": 3798,
+      "Reason": "lease_heartbeat_lost",
+      "Error": "workflow lease was lost: nats: no response from stream"
+    },
+    "overlapping_faults": [
+      1
+    ],
+    "exact_delivery_steps": [
+      {
+        "At": "2026-10-01T19:26:11.951163812Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-ed06b763e6b1154cea6f07b5696d0ede",
+        "Stage": "fetched",
+        "RunSequence": 689,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:11.95709076Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-ed06b763e6b1154cea6f07b5696d0ede",
+        "Stage": "lease_acquired",
+        "RunSequence": 689,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:24.45975284Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-ed06b763e6b1154cea6f07b5696d0ede",
+        "Stage": "execution_retry",
+        "RunSequence": 689,
+        "Delivery": 1,
+        "Error": "context canceled"
+      },
+      {
+        "At": "2026-10-01T19:26:24.459775224Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-ed06b763e6b1154cea6f07b5696d0ede",
+        "Stage": "release_initial_error",
+        "RunSequence": 689,
+        "Delivery": 1,
+        "Error": "workflow lease was lost"
+      },
+      {
+        "At": "2026-10-01T19:26:24.714265068Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-ed06b763e6b1154cea6f07b5696d0ede",
+        "Stage": "release_cleanup_done",
+        "RunSequence": 689,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:27.067546367Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-ed06b763e6b1154cea6f07b5696d0ede",
+        "Stage": "nak",
+        "RunSequence": 689,
+        "Delivery": 1,
+        "Error": ""
+      }
+    ],
+    "terminal_sample": {
+      "type": "matrixgrandchild",
+      "id": "c-ed06b763e6b1154cea6f07b5696d0ede",
+      "event": "terminal",
+      "enabled": "2026-10-01T19:26:11.945725897Z",
+      "observed": "2026-10-01T19:26:11.993733285Z",
+      "delay_ns": 48007388
+    },
+    "terminal_precedes_fencing": true,
+    "later_invocation_acks": [
+      {
+        "At": "2026-10-01T19:26:27.144250638Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-ed06b763e6b1154cea6f07b5696d0ede",
+        "Stage": "ack",
+        "RunSequence": 751,
+        "Delivery": 1,
+        "Error": ""
+      },
+      {
+        "At": "2026-10-01T19:26:28.082757711Z",
+        "Worker": "tier3-mixed-1",
+        "Type": "matrixgrandchild",
+        "ID": "c-ed06b763e6b1154cea6f07b5696d0ede",
+        "Stage": "ack",
+        "RunSequence": 689,
+        "Delivery": 2,
+        "Error": ""
+      }
+    ],
+    "server_root_cause_confirmed": false
+  }
+]

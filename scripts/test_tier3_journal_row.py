@@ -197,3 +197,28 @@ class RouteArtifactChecks(unittest.TestCase):
                 if mode=='valid':self.assertEqual(row.check_route_artifacts(root,report)['matched_recovery_samples'],12)
                 else:
                     with self.assertRaises(ValueError):row.check_route_artifacts(root,report)
+
+
+class MajorityArtifactChecks(unittest.TestCase):
+    def test_progress_must_be_on_majority_during_cut(self):
+        import tempfile,json
+        for mode in ('valid','no_progress','after_heal','isolated_client','wrong_nodes','missing_routes','probe_failed','wrong_sequence'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory)
+                stamp=lambda second:f'2026-10-01T12:00:{second:02d}Z'
+                fault=dict(nodes=[2],killed=stamp(1),healed=stamp(10),majority_sequence=20)
+                obs=[dict(Phase='isolated',Node=2,Routes=0,At=stamp(2))]+[dict(Phase='reconnected',Node=n,Routes=16,At=stamp(5+n)) for n in range(5)]
+                progress=dict(Before=10,After=20,ObservedAt=stamp(4),ClientURL='nats://majority:4222',IsolatedURL='nats://isolated:4222')
+                probe=dict(Before=1,AcknowledgedSequence=2,UnacknowledgedError='')
+                if mode=='no_progress':progress['After']=10
+                elif mode=='after_heal':progress['ObservedAt']=stamp(11)
+                elif mode=='isolated_client':progress['ClientURL']=progress['IsolatedURL']
+                elif mode=='wrong_nodes':fault['nodes']=[1,2,3]
+                elif mode=='missing_routes':obs[0]['Routes']=4
+                elif mode=='probe_failed':probe['UnacknowledgedError']='timeout'
+                elif mode=='wrong_sequence':fault['majority_sequence']=21
+                for name,value in [('faults.json',[fault]),('fault-1-route-observations.json',obs),('fault-1-majority-progress.json',progress),('fault-1-quorum-probe.json',probe)]:
+                    (root/name).write_text(json.dumps(value))
+                if mode=='valid':self.assertEqual(row.check_majority_artifacts(root,dict(confirmed_faults=1))['confirmed_majority_progress_intervals'],1)
+                else:
+                    with self.assertRaises(ValueError):row.check_majority_artifacts(root,dict(confirmed_faults=1))

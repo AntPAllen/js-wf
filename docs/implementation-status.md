@@ -4687,3 +4687,36 @@ campaign36911677345 is now terminal SUCCESS; downloaded-artifact review is
 pending. Comprehensive simulation36900782095 remains in progress. The million
 timer service remains active at MainPID18146 with111,029 receipts at its latest
 checkpoint. The route campaign and timers are not terminal acceptance.
+
+
+## Hosted sustained R5 mid-fan-out proof retained
+
+The [hosted mid-fan-out row36911677345](scale/tier3-mixed-fanout-restart-2026-10-01/hosted-ten-minute/)
+is terminal SUCCESS at35d192c:683.01s/684.038s package,65 batches,1,820 completions,
+20,120 entries and19 actual all-five-down restarts. The current verifier accepts
+the unchanged original events and all19 unfinished fan-out cuts, exact recovered
+prefixes and final six-child/twelve-grandchild trees. All history, invariant,
+raw p99 and physical drain checks pass; worst terminal p99 is16.654s.
+All261 fencing records match counters and confirmed outages;259 heartbeat and
+two execution losses have exact delivery/terminal/later-ack traces. Eight
+already-terminal duplicate deliveries are distinguished from253 records with
+later observed terminal. All65 acknowledged repairs have checked explanations.
+This closes one ten-minute row at its source, not the full24-hour matrix.
+
+
+## Sustained R5 majority-progress route row implemented
+
+The new route_majority row isolates one server other than the shared client's
+connected server. It requires a probe acknowledgement and WF_JRN advancement
+while isolation is confirmed, then verifies all route meshes/R5 recovery.
+Its latency gate uses raw enabling-event delays; the quorum-loss adjustment
+does not apply. [Native race smoke](scale/tier3-mixed-route-majority-2026-10-01/)
+passes71.70s/72.732s package:196 completions,2,173 entries,one confirmed cut.
+WF_JRN advances2008→2081 during isolation. Worst terminal p99 is15.397s and
+progress p99 is17.389s; all histories/invariants/physical drain pass. All six
+heartbeat fencing events match counters and confirmed outage times, but their
+invocations were already terminal before duplicate delivery fencing; earlier
+completion and later cleanup are explicitly distinguished. All70 acknowledged
+repairs have checked explanations. All39 Python tests and integration/testcluster
+vet pass. The1s fixture route ping and shared majority connection are explicit;
+ten-minute/default-ping/process/full24-hour gates remain separate.

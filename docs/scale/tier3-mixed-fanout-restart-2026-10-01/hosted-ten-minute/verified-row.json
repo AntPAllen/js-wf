@@ -1,0 +1,51 @@
+{
+  "scope": "single five-container R5 mid-fan-out all-server restart row",
+  "seed": 1,
+  "duration_seconds": 600,
+  "shortened_smoke": false,
+  "invocations": 1820,
+  "journal_entries": 20120,
+  "confirmed_faults": 19,
+  "active_consumer_faults": null,
+  "cells": {
+    "matrixshort": {
+      "invocations": 260,
+      "terminal_p99_seconds": 0.208370631,
+      "progress_p99_seconds": 0.16902820600000001
+    },
+    "matrixtimer": {
+      "invocations": 195,
+      "terminal_p99_seconds": 0.30116621400000004,
+      "progress_p99_seconds": 13.892967788
+    },
+    "matrixsignal": {
+      "invocations": 130,
+      "terminal_p99_seconds": 16.528797237,
+      "progress_p99_seconds": 0.496964265
+    },
+    "matrixfanout": {
+      "invocations": 65,
+      "terminal_p99_seconds": 5.03578054,
+      "progress_p99_seconds": 0.213003837
+    },
+    "matrixchild": {
+      "invocations": 390,
+      "terminal_p99_seconds": 5.041241797,
+      "progress_p99_seconds": 2.965239933
+    },
+    "matrixgrandchild": {
+      "invocations": 780,
+      "terminal_p99_seconds": 16.653995742,
+      "progress_p99_seconds": 0.092113616
+    }
+  },
+  "clears_full_tier3_release": false,
+  "restart_artifact_checks": {
+    "confirmed_all_down_boundaries": 19,
+    "nodes_per_boundary": 5
+  },
+  "fanout_cut_artifact_checks": {
+    "unfinished_six_child_cuts": 19,
+    "recovered_prefixes": 19
+  }
+}

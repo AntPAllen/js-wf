@@ -7,7 +7,7 @@ on:
         type: choice
         required: true
         default: journal
-        options: [journal, consumer, restart, fanout_restart, route_quorum]
+        options: [journal, consumer, restart, fanout_restart, route_quorum, route_majority]
       duration:
         description: Ten minutes is sustained; 35 seconds is fixture smoke only
         required: true
@@ -42,6 +42,7 @@ jobs:
             restart) row_test=TestFiveContainerMixedAllServersEveryThirtySeconds ;;
             fanout_restart) row_test=TestFiveContainerMixedFanoutRestartEveryThirtySeconds ;;
             route_quorum) row_test=TestFiveContainerMixedRouteQuorumEveryThirtySeconds ;;
+            route_majority) row_test=TestFiveContainerMixedRouteMajorityEveryThirtySeconds ;;
             *) exit 1 ;;
           esac
           go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py

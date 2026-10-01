@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/testcluster"
 )
@@ -30,7 +31,7 @@ func tier3RouteRecoveryDelay(sample matrixLatencySample, faults []matrixLeaderFa
 	return sample.Observed.Sub(baseline)
 }
 
-func partitionFiveContainerMixedQuorum(ctx context.Context, js jetstream.JetStream, cluster *testcluster.DockerCluster, scheduled time.Time, prefix string, rng *rand.Rand) (matrixLeaderFault, error) {
+func partitionFiveContainerMixedRoute(ctx context.Context, js jetstream.JetStream, cluster *testcluster.DockerCluster, scheduled time.Time, prefix string, rng *rand.Rand, nc *nats.Conn, quorumRemoving bool) (matrixLeaderFault, error) {
 	event := matrixLeaderFault{Scheduled: scheduled, Node: -1}
 	bound, stop := context.WithTimeout(ctx, 90*time.Second)
 	defer stop()
@@ -54,6 +55,18 @@ func partitionFiveContainerMixedQuorum(ctx context.Context, js jetstream.JetStre
 		return event, err
 	}
 	nodes := rng.Perm(5)[:3]
+	if !quorumRemoving {
+		nodes = nil
+		for _, node := range rng.Perm(5) {
+			if cluster.ClientURL(node) != nc.ConnectedUrl() {
+				nodes = []int{node}
+				break
+			}
+		}
+		if len(nodes) != 1 {
+			return event, fmt.Errorf("no node distinct from majority client's connected server")
+		}
+	}
 	event.Killed = time.Now()
 	var disconnected []int
 	defer func() {
@@ -75,17 +88,40 @@ func partitionFiveContainerMixedQuorum(ctx context.Context, js jetstream.JetStre
 		}
 		observations = append(observations, observation{"isolated", node, routes, time.Now().UTC()})
 	}
+	var majorityBefore *jetstream.StreamInfo
+	if !quorumRemoving {
+		stream, err := matrixReadMetadata(bound, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_JRN") })
+		if err != nil {
+			return event, err
+		}
+		majorityBefore, err = matrixReadMetadata(bound, func(attempt context.Context) (*jetstream.StreamInfo, error) { return stream.Info(attempt) })
+		if err != nil {
+			return event, err
+		}
+	}
 	// Client ports remain reachable; only server-to-server routes are removed.
 	attempt, cancel := context.WithTimeout(bound, 3*time.Second)
 	during, publishErr := js.Publish(attempt, "tier3.route.probe", []byte("during"))
 	cancel()
-	if publishErr == nil {
+	if quorumRemoving && publishErr == nil {
 		return event, fmt.Errorf("R5 publication acknowledged with three route-isolated peers: %+v", during)
 	}
+	if !quorumRemoving && publishErr != nil {
+		return event, fmt.Errorf("majority probe did not acknowledge: %w", publishErr)
+	}
+	message := ""
+	if publishErr != nil {
+		message = publishErr.Error()
+	}
+	var acknowledged uint64
+	if during != nil {
+		acknowledged = during.Sequence
+	}
 	data, err := json.MarshalIndent(struct {
-		Before              uint64
-		UnacknowledgedError string
-	}{before.Sequence, publishErr.Error()}, "", "  ")
+		Before               uint64
+		UnacknowledgedError  string
+		AcknowledgedSequence uint64
+	}{before.Sequence, message, acknowledged}, "", "  ")
 	if err != nil {
 		return event, err
 	}
@@ -98,6 +134,35 @@ func partitionFiveContainerMixedQuorum(ctx context.Context, js jetstream.JetStre
 	case <-bound.Done():
 		return event, bound.Err()
 	case <-timer.C:
+	}
+	if !quorumRemoving {
+		stream, err := matrixReadMetadata(bound, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_JRN") })
+		if err != nil {
+			return event, err
+		}
+		after, err := matrixReadMetadata(bound, func(attempt context.Context) (*jetstream.StreamInfo, error) { return stream.Info(attempt) })
+		if err != nil {
+			return event, err
+		}
+		if after.State.LastSeq <= majorityBefore.State.LastSeq {
+			return event, fmt.Errorf("no workflow journal progress on majority during confirmed isolation")
+		}
+		if nc.ConnectedUrl() == cluster.ClientURL(nodes[0]) {
+			return event, fmt.Errorf("client moved onto isolated server")
+		}
+		proof := struct {
+			ClientURL, IsolatedURL string
+			Before, After          uint64
+			ObservedAt             time.Time
+		}{nc.ConnectedUrl(), cluster.ClientURL(nodes[0]), majorityBefore.State.LastSeq, after.State.LastSeq, time.Now().UTC()}
+		data, err := json.MarshalIndent(proof, "", "  ")
+		if err != nil {
+			return event, err
+		}
+		if err = os.WriteFile(prefix+"-majority-progress.json", data, 0644); err != nil {
+			return event, err
+		}
+		event.MajoritySequence = after.State.LastSeq
 	}
 	for _, node := range nodes {
 		if err = cluster.ConnectNode(node); err != nil {

@@ -21,7 +21,8 @@ TESTS = {'journal': 'TestFiveContainerMixedJournalLeaderEveryThirtySeconds',
          'consumer': 'TestFiveContainerMixedConsumerLeaderEveryThirtySeconds',
          'restart': 'TestFiveContainerMixedAllServersEveryThirtySeconds',
          'fanout_restart': 'TestFiveContainerMixedFanoutRestartEveryThirtySeconds',
-         'route_quorum': 'TestFiveContainerMixedRouteQuorumEveryThirtySeconds'}
+         'route_quorum': 'TestFiveContainerMixedRouteQuorumEveryThirtySeconds',
+         'route_majority': 'TestFiveContainerMixedRouteMajorityEveryThirtySeconds'}
 TEST = TESTS['journal']
 
 
@@ -58,7 +59,8 @@ def check(events, duration, expected_row='journal'):
             raw_t,raw_p=matrix.one(r'TIER3_ROUTE_RAW_CELL type='+typ+r' terminal_p99=(\S+) progress_p99=(\S+)',log)
             cells[typ]['raw_terminal_p99_seconds']=matrix.seconds(raw_t)
             cells[typ]['raw_progress_p99_seconds']=matrix.seconds(raw_p)
-    scope = ('single five-container R5 quorum-removing route row' if row == 'route_quorum'
+    scope = ('single five-container R5 majority-progress route row' if row == 'route_majority'
+             else 'single five-container R5 quorum-removing route row' if row == 'route_quorum'
              else 'single five-container R5 mid-fan-out all-server restart row' if row == 'fanout_restart'
              else 'single five-container R5 all-server SIGKILL/restart row' if row == 'restart'
              else f'single five-container R5 {row}-leader row')
@@ -199,6 +201,27 @@ def check_route_artifacts(root, report):
     return dict(quorum_removing_cuts=len(faults),matched_recovery_samples=len(raw),basis='later of enabling event and last overlapping confirmed route/R5 heal')
 
 
+def check_majority_artifacts(root, report):
+    faults=json.loads((root/'faults.json').read_text())
+    if len(faults)!=report['confirmed_faults']:raise ValueError('majority fault count disagrees')
+    for index,fault in enumerate(faults,1):
+        nodes=fault['nodes']
+        if len(nodes)!=1 or nodes[0] not in range(5):raise ValueError('majority row did not isolate exactly one server')
+        obs=json.loads((root/f'fault-{index}-route-observations.json').read_text())
+        if [(x['Phase'],x['Node']) for x in obs]!=[('isolated',nodes[0])]+[('reconnected',n) for n in range(5)]:raise ValueError('missing majority cut/heal observations')
+        if obs[0]['Routes']!=0 or any(x['Routes']<16 for x in obs[1:]):raise ValueError('majority routes do not confirm cut/full heal')
+        times=[timestamp_ns(fault['killed'])]+[timestamp_ns(x['At']) for x in obs]+[timestamp_ns(fault['healed'])]
+        if times!=sorted(times):raise ValueError('reversed majority route times')
+        progress=json.loads((root/f'fault-{index}-majority-progress.json').read_text())
+        if progress['Before']<=0 or progress['After']<=progress['Before'] or fault['majority_sequence']!=progress['After']:
+            raise ValueError('workflow journal did not advance during the partition')
+        if progress['ClientURL']==progress['IsolatedURL']:raise ValueError('progress client is connected to the isolated server')
+        if not timestamp_ns(obs[0]['At'])<=timestamp_ns(progress['ObservedAt'])<=timestamp_ns(obs[1]['At']):raise ValueError('journal progress was not observed during isolation')
+        probe=json.loads((root/f'fault-{index}-quorum-probe.json').read_text())
+        if probe['UnacknowledgedError'] or probe['AcknowledgedSequence']<=probe['Before']:raise ValueError('majority probe did not acknowledge new progress')
+    return dict(confirmed_majority_progress_intervals=len(faults),basis='raw enabling-event latency; majority remains available')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, help='required consumer/restart fault artifacts')
@@ -220,5 +243,8 @@ if __name__ == '__main__':
     if args.row == 'route_quorum':
         if args.root is None: parser.error('--root is required for the route row')
         report['route_artifact_checks'] = check_route_artifacts(args.root, report)
+    if args.row == 'route_majority':
+        if args.root is None: parser.error('--root is required for the majority row')
+        report['majority_artifact_checks'] = check_majority_artifacts(args.root,report)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))
