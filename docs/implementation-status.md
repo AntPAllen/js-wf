@@ -5040,3 +5040,23 @@ No new clock campaign was launched with this known measurement ambiguity. This
 is unfinished fixture work, not a diagnosed runtime/NATS defect or a cleared
 latency gate. Existing focused clock proofs remain unchanged and do not close
 the sustained peer-clock/full24h matrix requirements.
+
+
+## Independent controller journal receipt and append bounds implemented
+
+[Native race contract](scale/controller-journal-receipts-2026-10-01/) passes four
+focused tests in4.379s (Go output4.377s), including an actual three-node production
+journal append observed through an independent ordered consumer. The receiver
+records unshifted host receipt times and full entry identity, preserves first
+receipts over redelivery and refuses changed entries. Retained sequence/subject/
+entry matching is required before a receipt can bound an unknown append.
+Worker call starts provide lower bounds; successful acknowledgements or
+independent read receipts provide upper bounds. A timeout return never supplies
+an upper bound because the server can commit afterward. Missing evidence fails.
+Causal stream sequence selects next progress despite reordered call returns.
+Owner/index/kind/invocation,invalid timing,missing evidence,changed entry and
+duplicate receipt controls pass. Vet/diff checks pass. The real append succeeds;
+unknown acknowledgement classification in that contract check is synthetic,
+not a real injected loss. Pure timing controls cover the later-commit case.
+The sustained server-skew rows remain fail-closed until these pieces are wired
+to controller timer/enabling observations and their complete latency audit.
