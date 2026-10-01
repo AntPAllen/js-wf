@@ -5157,3 +5157,24 @@ all artifact hashes are retained in
 Comprehensive36929826425 remains authoritatively in progress; matrix36891850893
 is queued. The million-timer service remains active atPID18146 with260,704
 receipts at the sampled checkpoint.
+
+
+### Tier 1 timer clock-source transition model
+
+The timer transport now separates optional leader wall-clock offsets from
+controller receipt timestamps and virtual elapsed transport budgets. A new
+seeded transport workload covers both ±60s origins and transition before/after
+the original due time while quorum is unavailable. It checks quorum withholding,
+exact controller delivery times, single delivery and exact replay; four disk
+traces raise the pinned corpus from168 to172. Focused1,000-seed checks pass,
+as does the combined race check with existing timer and production-worker burst
+workloads plus the pinned corpus (37.235s). All four new disk traces explicitly
+pass the general corpus replay (0.007s).
+
+Absolute-deadline sensitivity is characterized, not fixed: the ahead origin
+can defer delivery until controller+62s, and the behind origin can already be
+due at heal. This workload does not run production-worker decisions or verify
+NATS semantics and therefore does not certify the strict timer recovery gate.
+[Model scope and evidence](scale/timer-clock-model-2026-10-01/) are retained.
+The current comprehensive campaign predates these changes. Corrected R5 ahead
+smoke36938296826 is now authoritatively in progress; behind36938299478 is queued.

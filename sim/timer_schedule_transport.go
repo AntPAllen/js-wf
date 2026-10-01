@@ -25,26 +25,27 @@ type timerPublication struct {
 // deduplication, and eventual native target delivery. Fallback records remain
 // retained for the separate fallback scanner to route.
 type TimerScheduleTransport struct {
-	schedule         *Scheduler
-	base             time.Time
-	window           int64
-	ids              map[string]int64
-	faults           []AppendFault
-	native           []timerPublication
-	fallback         []Message
-	deleted          map[uint64]bool
-	state            map[string][]byte
-	wakeupIDs        map[string]int64
-	wakeupFault      []AppendFault
-	deleteFault      []AppendFault
-	runs             []Message
-	streamSeq        uint64
-	fallbackSeq      uint64
-	scheduleQuorum   bool
-	healDelayMillis  int64
-	deliverAfter     int64
-	onNativeDelivery func(*nats.Msg, time.Time)
-	onFallbackWakeup func(*nats.Msg, time.Time)
+	schedule          *Scheduler
+	base              time.Time
+	leaderClockOffset time.Duration
+	window            int64
+	ids               map[string]int64
+	faults            []AppendFault
+	native            []timerPublication
+	fallback          []Message
+	deleted           map[uint64]bool
+	state             map[string][]byte
+	wakeupIDs         map[string]int64
+	wakeupFault       []AppendFault
+	deleteFault       []AppendFault
+	runs              []Message
+	streamSeq         uint64
+	fallbackSeq       uint64
+	scheduleQuorum    bool
+	healDelayMillis   int64
+	deliverAfter      int64
+	onNativeDelivery  func(*nats.Msg, time.Time)
+	onFallbackWakeup  func(*nats.Msg, time.Time)
 }
 
 var _ worker.TimerSchedulePort = (*TimerScheduleTransport)(nil)
@@ -52,6 +53,24 @@ var _ reconcile.FallbackTimerScanPort = (*TimerScheduleTransport)(nil)
 
 func NewTimerScheduleTransport(schedule *Scheduler, base time.Time) *TimerScheduleTransport {
 	return &TimerScheduleTransport{schedule: schedule, base: base, window: (2 * time.Minute).Milliseconds(), ids: map[string]int64{}, deleted: map[uint64]bool{}, state: map[string][]byte{}, wakeupIDs: map[string]int64{}, scheduleQuorum: true}
+}
+
+// LeaderNow is the modeled scheduling leader's wall clock. Controller receipt
+// timestamps and transport retry/dedup budgets remain on virtual elapsed time.
+func (m *TimerScheduleTransport) LeaderNow() time.Time {
+	return m.base.Add(time.Duration(m.schedule.NowMillis()) * time.Millisecond).Add(m.leaderClockOffset)
+}
+
+// SetLeaderClockOffset models a wall-clock source transition. Comparing retained
+// absolute deadlines to this clock is a model assumption, not a NATS contract.
+func (m *TimerScheduleTransport) SetLeaderClockOffset(offset time.Duration) error {
+	if offset%time.Millisecond != 0 {
+		return fmt.Errorf("invalid timer leader clock offset %s", offset)
+	}
+	m.leaderClockOffset = offset
+	m.event(TransportEvent{Operation: "timer_leader_clock", Outcome: offset.String()})
+	m.deliverDue()
+	return nil
 }
 
 // SetScheduleQuorum models the scheduling leader's inability to deliver
@@ -209,7 +228,7 @@ func (m *TimerScheduleTransport) deliverDue() {
 	now := m.base.Add(time.Duration(m.schedule.NowMillis()) * time.Millisecond)
 	for i := range m.native {
 		entry := &m.native[i]
-		if entry.fired || now.Before(entry.due) {
+		if entry.fired || m.LeaderNow().Before(entry.due) {
 			continue
 		}
 		entry.fired = true

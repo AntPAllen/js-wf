@@ -567,6 +567,12 @@ row is verified by the focused controller contract; existing focused clock proof
 
 **The "done" bar for a release**
 
+The Tier 1 timer transport also models explicit leader wall-clock source
+transitions with controller-clock delivery observations. Seeded ±60s traces
+characterize retained absolute-deadline sensitivity; these transport assumptions
+do not certify NATS or production-worker clock tolerance. See the
+[timer clock model evidence](scale/timer-clock-model-2026-10-01/).
+
 1. Tier 1: 100 000 seeds clean.
 2. Tier 2: 200 consecutive seeds clean across the whole matrix.
 3. Tier 3: 24 h soak with the full matrix, zero invariant violations, zero stalls, and a written explanation for every fencing event and every reconciler re-enqueue (they are expected; unexplained ones mean a bug the checkers missed).
