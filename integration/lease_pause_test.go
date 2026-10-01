@@ -43,11 +43,17 @@ func TestPartitionedWorkerFencedAfterFortyFiveSeconds(t *testing.T) {
 	release := make(chan struct{})
 	var releaseOnce sync.Once
 	defer releaseOnce.Do(func() { close(release) })
+	var fencing []worker.FencingEvent
+	var fencingMu sync.Mutex
 	first, err := worker.New(ctx, proxied, "partitioned-first", map[string]worker.Handler{typ: func(*wf.Context, json.RawMessage) (json.RawMessage, error) {
 		entered <- struct{}{}
 		<-release
 		return json.RawMessage(`1`), nil
-	}})
+	}}, worker.WithFencingObserver(func(event worker.FencingEvent) {
+		fencingMu.Lock()
+		fencing = append(fencing, event)
+		fencingMu.Unlock()
+	}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,6 +130,18 @@ func TestPartitionedWorkerFencedAfterFortyFiveSeconds(t *testing.T) {
 	if first.Metrics().FencingEvents == 0 || second.Metrics().Redeliveries == 0 {
 		t.Fatalf("fencing metrics first=%+v second=%+v", first.Metrics(), second.Metrics())
 	}
+	fencingMu.Lock()
+	defer fencingMu.Unlock()
+	if uint64(len(fencing)) != first.Metrics().FencingEvents {
+		t.Fatalf("fencing evidence=%d count=%d", len(fencing), first.Metrics().FencingEvents)
+	}
+	for _, e := range fencing {
+		if e.Worker != first.ID || e.Type != typ || e.ID != id || e.Epoch == 0 || e.RunSequence == 0 || e.Delivery == 0 || e.At.IsZero() || e.Error == "" || e.Reason == "" {
+			t.Fatalf("unattributed fencing: %+v", e)
+		}
+	}
+	raw, _ := json.Marshal(fencing)
+	t.Logf("fencing observer events=%s", raw)
 	if _, err := integrity.Check(ctx, all[0]); err != nil {
 		t.Fatalf("integrity: %v", err)
 	}

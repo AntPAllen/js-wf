@@ -4475,3 +4475,35 @@ are retained. The comprehensive run predates the new notification workload; its
 result must retain that source scope. The independent current-source seed28
 replay is active at batch48 near five minutes. Remaining full-matrix and24-hour
 release gates stay open.
+
+
+## Current-source seed28 recovery and per-event soak evidence
+
+The clean d1231dd ten-minute journal seed28 race replay passes662.58s.
+It completes94 mixed batches,2,632 invocations and28,981 retained journal entries
+with19 confirmed leader kills. Aggregate terminal p99 is7.308s; all six per-type
+terminal/progress p99 gates pass, with the largest terminal cell11.844s.
+Histories, full retained-state audit and physical queue/consumer drain pass.
+[Raw artifacts and verified row](scale/parent-notification-budget-2026-10-01/current-seed28-pass/)
+are retained. This is one current-source row/seed, not200 consecutive seeds
+or proof of the precise original server interleaving. Notification CI36902096296
+at d1231dd also passes76.65s test /77.674s package with all four cases and
+[raw before/after artifacts](scale/parent-notification-budget-2026-10-01/hosted/).
+
+Worker fencing now has an optional record for every counter increment, including
+invocation/run/delivery identity, acquired epoch, failed check phase and exact
+error. Start, signal and suspended repair attempts record their decision source
+and acknowledged/uncertain/dry outcome, including attempts before scan failures.
+The integrated R5 race smoke passes55.530s with224 invocations and29 individually
+explained repairs. A real45-second partition race emits a nonzero fencing record
+matching the counter and passes49.530s with final stale-owner/journal checks.
+Lost-ack repair controls verify uncertainty and deduplicated retry on all three
+scanners; those tests plus all168 pins pass race4.166s. Existing pinned traces
+remain unchanged when observers are disabled. All30 Python verifier tests and
+vet pass. [Per-event proofs and scope](scale/tier3-event-observers-2026-10-01/)
+are retained, and R5 CI now requires explanations and counter coverage.
+
+This advances the24-hour soak's attribution requirement but does not clear it:
+full mixed-matrix coverage, other scanner types, separate process event logging,
+retained-source causal review and the full soak remain open. No explanation
+claims a NATS mechanism solely from lost ownership confirmation or a timeout.

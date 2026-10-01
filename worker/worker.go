@@ -47,6 +47,7 @@ type cancelWaiter struct {
 }
 
 type Worker struct {
+	fencingObserver            func(FencingEvent)
 	js                         jetstream.JetStream
 	jrn                        *journal.Store
 	leases                     *lease.Store
@@ -570,7 +571,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		emit("lease_error", err)
 		w.metrics.leaseAcquireFailures.Add(1)
 		if errors.Is(err, lease.ErrLost) {
-			w.metrics.fencingEvents.Add(1)
+			w.recordFencing(FencingEvent{Type: typ, ID: id, RunSequence: metadata.Sequence.Stream, Delivery: metadata.NumDelivered, Reason: "lease_initialization_lost"}, err)
 		}
 		_ = msg.NakWithDelay(time.Second)
 		return
@@ -618,6 +619,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		}
 	}()
 	var leaseLost atomic.Bool
+	var heartbeatLostErr error
 	stopped := make(chan struct{})
 	go func() {
 		defer close(stopped)
@@ -650,6 +652,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 				ops.finish(started, operation, 0, "", err, timing)
 				if err != nil {
 					if errors.Is(err, lease.ErrLost) {
+						heartbeatLostErr = err
 						leaseLost.Store(true)
 					}
 					cancel()
@@ -691,7 +694,13 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	cancel()
 	<-stopped
 	if leaseLost.Load() || errors.Is(err, lease.ErrLost) || errors.Is(err, journal.ErrStale) {
-		w.metrics.fencingEvents.Add(1)
+		reason, cause := "lease_execution_lost", err
+		if leaseLost.Load() {
+			reason, cause = "lease_heartbeat_lost", heartbeatLostErr
+		} else if errors.Is(err, journal.ErrStale) {
+			reason = "journal_stale"
+		}
+		w.recordFencing(FencingEvent{Type: typ, ID: id, RunSequence: metadata.Sequence.Stream, Delivery: metadata.NumDelivered, Epoch: l.Epoch(), Reason: reason}, cause)
 	}
 	if err != nil || processingCanceled || leaseLost.Load() {
 		retryErr := err
@@ -724,7 +733,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	if err := release(); err != nil {
 		emit("release_error", err)
 		if errors.Is(err, lease.ErrLost) && !leaseLost.Load() && !errors.Is(err, journal.ErrStale) {
-			w.metrics.fencingEvents.Add(1)
+			w.recordFencing(FencingEvent{Type: typ, ID: id, RunSequence: metadata.Sequence.Stream, Delivery: metadata.NumDelivered, Epoch: l.Epoch(), Reason: "lease_release_lost"}, err)
 		}
 		emit("nak", msg.NakWithDelay(time.Second))
 		return

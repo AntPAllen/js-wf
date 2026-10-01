@@ -25,12 +25,13 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Verify row-result guard
-        run: python3 -m unittest discover -s scripts -p 'test_tier3_journal_row.py'
+        run: python3 -m unittest discover -s scripts -p 'test_tier3*.py'
       - name: Sustain the five-container mixed journal row
         run: |
           set -o pipefail
           go test -p=1 -race -json ./integration -run '^TestFiveContainerMixedJournalLeaderEveryThirtySeconds$' -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py
           python3 scripts/check-tier3-journal-row.py --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --output /tmp/tier3-mixed-journal-result.json
+          python3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"
       - if: always()
         uses: actions/upload-artifact@v7
         with:

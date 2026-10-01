@@ -110,6 +110,13 @@ func TestFiveContainerMixedJournalLeaderEveryThirtySeconds(t *testing.T) {
 	c := client.NewObserved(js, &recorder)
 	var evidenceMu sync.Mutex
 	var dispatch []worker.DispatchEvent
+	var fencing []worker.FencingEvent
+	var repairs []reconcile.RepairEvent
+	repairObserver := func(event reconcile.RepairEvent) {
+		evidenceMu.Lock()
+		repairs = append(repairs, event)
+		evidenceMu.Unlock()
+	}
 	var scans []struct {
 		At     time.Time
 		Cursor uint64
@@ -144,6 +151,10 @@ func TestFiveContainerMixedJournalLeaderEveryThirtySeconds(t *testing.T) {
 			evidenceMu.Lock()
 			dispatch = append(dispatch, event)
 			evidenceMu.Unlock()
+		}), worker.WithFencingObserver(func(event worker.FencingEvent) {
+			evidenceMu.Lock()
+			fencing = append(fencing, event)
+			evidenceMu.Unlock()
 		}))
 		if err != nil {
 			t.Fatal(err)
@@ -154,10 +165,14 @@ func TestFiveContainerMixedJournalLeaderEveryThirtySeconds(t *testing.T) {
 		w := workers[part%5]
 		launch(func() error { return w.RunPartition(workCtx, part) })
 	}
-	launch(func() error { return reconcile.RunStartLoop(workCtx, js, "tier3-mixed-start", time.Second, 32) })
-	launch(func() error { return reconcile.RunSignalLoop(workCtx, js, "tier3-mixed-signal", time.Second, 32) })
 	launch(func() error {
-		return reconcile.RunSuspendedLoopObserved(workCtx, js, "tier3-mixed-suspended", time.Second, 8, func(cursor uint64, result reconcile.ScanResult, err error) {
+		return reconcile.RunRepairLoopObserved(workCtx, js, "tier3-mixed-start", "start", time.Second, 32, repairObserver)
+	})
+	launch(func() error {
+		return reconcile.RunRepairLoopObserved(workCtx, js, "tier3-mixed-signal", "signal", time.Second, 32, repairObserver)
+	})
+	launch(func() error {
+		return reconcile.RunSuspendedLoopWithObservers(workCtx, js, "tier3-mixed-suspended", time.Second, 8, func(cursor uint64, result reconcile.ScanResult, err error) {
 			evidenceMu.Lock()
 			defer evidenceMu.Unlock()
 			message := ""
@@ -170,7 +185,7 @@ func TestFiveContainerMixedJournalLeaderEveryThirtySeconds(t *testing.T) {
 				Result reconcile.ScanResult
 				Error  string
 			}{time.Now().UTC(), cursor, result, message})
-		})
+		}, repairObserver)
 	})
 	defer func() {
 		stopWork()
@@ -186,6 +201,8 @@ func TestFiveContainerMixedJournalLeaderEveryThirtySeconds(t *testing.T) {
 		}
 		evidenceMu.Lock()
 		write("dispatch.json", dispatch)
+		write("fencing.json", fencing)
+		write("repairs.json", repairs)
 		write("suspended-scans.json", scans)
 		evidenceMu.Unlock()
 		write("faults.json", faults)
@@ -195,6 +212,13 @@ func TestFiveContainerMixedJournalLeaderEveryThirtySeconds(t *testing.T) {
 			metrics = append(metrics, w.Metrics())
 		}
 		write("worker-metrics.json", metrics)
+		var fenceCount uint64
+		for _, m := range metrics {
+			fenceCount += m.FencingEvents
+		}
+		if fenceCount != uint64(len(fencing)) {
+			t.Errorf("fencing evidence=%d counter=%d", len(fencing), fenceCount)
+		}
 		f, err := os.Create(filepath.Join(root, "history.jsonl"))
 		if err != nil {
 			t.Error(err)

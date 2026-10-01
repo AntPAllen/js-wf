@@ -20,9 +20,10 @@ import (
 // SuspendedScan inspects retained invocations whose latest journal entry is
 // Suspended. It repairs an overdue timer or an available awaited signal.
 type SuspendedScan struct {
-	port  SuspendedScanPort
-	Now   func() time.Time
-	Grace time.Duration
+	Observe func(RepairEvent)
+	port    SuspendedScanPort
+	Now     func() time.Time
+	Grace   time.Duration
 }
 
 const suspendedRetryWindow = 10 * time.Second
@@ -208,9 +209,15 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 		// available before that 20-second fallback.
 		retryWindow := s.Now().UnixNano() / int64(suspendedRetryWindow)
 		for _, candidate := range result.Candidates {
-			if err := s.port.EnqueueSuspended(ctx, candidate.Type, candidate.ID, candidate.JournalSeq, retryWindow); err != nil {
+			err := s.port.EnqueueSuspended(ctx, candidate.Type, candidate.ID, candidate.JournalSeq, retryWindow)
+			reportRepair(s.Observe, RepairEvent{Kind: "suspended", Type: candidate.Type, ID: candidate.ID, Reason: candidate.Reason, JournalSequence: candidate.JournalSeq, RetryWindow: retryWindow}, false, err)
+			if err != nil {
 				return result, err
 			}
+		}
+	} else {
+		for _, candidate := range result.Candidates {
+			reportRepair(s.Observe, RepairEvent{Kind: "suspended", Type: candidate.Type, ID: candidate.ID, Reason: candidate.Reason, JournalSequence: candidate.JournalSeq}, true, nil)
 		}
 	}
 	return result, inspectErr
@@ -453,7 +460,15 @@ func RunSuspendedLoop(ctx context.Context, js jetstream.JetStream, workerID stri
 // the same production scanner and fenced cursor loop. The observer must not
 // block the reconciler.
 func RunSuspendedLoopObserved(ctx context.Context, js jetstream.JetStream, workerID string, interval time.Duration, budget int, observe func(uint64, ScanResult, error)) error {
-	scan := NewSuspendedScan(js).Scan
+	return RunSuspendedLoopWithObservers(ctx, js, workerID, interval, budget, observe, nil)
+}
+
+// RunSuspendedLoopWithObservers records both each scan result and each actual
+// repair attempt, including uncertain publications before a scan error.
+func RunSuspendedLoopWithObservers(ctx context.Context, js jetstream.JetStream, workerID string, interval time.Duration, budget int, observe func(uint64, ScanResult, error), repair func(RepairEvent)) error {
+	scanner := NewSuspendedScan(js)
+	scanner.Observe = repair
+	scan := scanner.Scan
 	if observe == nil {
 		return runLoop(ctx, js, workerID, "suspended", interval, budget, scan)
 	}

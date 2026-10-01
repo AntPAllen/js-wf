@@ -15,7 +15,8 @@ import (
 )
 
 type StartScan struct {
-	port StartScanPort
+	Observe func(RepairEvent)
+	port    StartScanPort
 }
 
 func NewStartScan(js jetstream.JetStream) *StartScan {
@@ -158,10 +159,14 @@ func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			continue
 		}
 		result.Reenqueued++
+		event := RepairEvent{Kind: "start", Type: typ, ID: id, Reason: "missing_journal", SourceSequence: m.Sequence, InvocationSequence: m.Sequence}
 		if dryRun {
+			reportRepair(s.Observe, event, true, nil)
 			continue
 		}
-		if err := s.port.EnqueueStart(ctx, typ, id, m.Sequence); err != nil {
+		err = s.port.EnqueueStart(ctx, typ, id, m.Sequence)
+		reportRepair(s.Observe, event, false, err)
+		if err != nil {
 			return result, err
 		}
 	}

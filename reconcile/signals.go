@@ -18,7 +18,8 @@ import (
 )
 
 type SignalScan struct {
-	port SignalScanPort
+	Observe func(RepairEvent)
+	port    SignalScanPort
 }
 
 func NewSignalScan(js jetstream.JetStream) *SignalScan {
@@ -186,10 +187,15 @@ func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun b
 			continue
 		}
 		result.Reenqueued++
-		if !dryRun {
-			if err := s.port.EnqueueSignal(ctx, typ, id, m.Sequence); err != nil {
-				return result, err
-			}
+		event := RepairEvent{Kind: "signal", Type: typ, ID: id, Reason: "unconsumed_signal_nonterminal_generation", SourceSequence: m.Sequence, InvocationSequence: invocation.Sequence}
+		if dryRun {
+			reportRepair(s.Observe, event, true, nil)
+			continue
+		}
+		err = s.port.EnqueueSignal(ctx, typ, id, m.Sequence)
+		reportRepair(s.Observe, event, false, err)
+		if err != nil {
+			return result, err
 		}
 	}
 	return result, nil
