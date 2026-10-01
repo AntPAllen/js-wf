@@ -2616,3 +2616,30 @@ claim a worker process skipped its initial handler. The focused 20-seed mixed
 and paired CAS throughput workflows at `586cc5d` completed successfully; they
 do not close the independent mixed seed 65 latency failure or release matrix.
 The original million-timer process remains live and was not restarted.
+
+## SDK Continue request/frame/completion protocol
+
+`wf.Continue` now validates registered stage/locals, serializes a materialized
+frame, always stores and reads back its content-addressed bytes, and appends a
+reference completion. Successful delivery ends with ErrContinuation; an unknown
+publication cannot advertise a point or become normal completion. Failed
+publication blocks later SDK appends. Completed replay preserves historical
+anchor epoch/counts instead of using the new lease, checks rebuilt state and
+declarations, and loads without another store. Pending requests may complete
+under a higher epoch. Locals marshal once; transport input is detached.
+
+Eight production-protocol fault modes passed exact/cross-process replay and
+100,000 schedules (5,962,551 events) in 30.102 seconds. A real three-node
+lease-renewed contract hides a committed SDK completion reply, acquires a higher
+replacement epoch, and replays with one prefix effect and one frame store before
+verified snapshot/purge and archive-denied resume. It passed under race in
+4.396 seconds. The full SDK race suite passed in 11.750 seconds and complete
+simulator suite in 87.821 seconds. Removing the production store-input clone
+makes the compiled transport-mutation control fail. [Raw proof, mutation and
+source hashes](scale/continuation-sdk-2026-10-01/) are retained; vet passed.
+
+Ordinary workers still have no continuation registry/dispatch hooks and return
+ErrContinuationUnsupported for this operation. Worker integration, suffix
+append/runtime counters, handoff repair, offline multistage replay and restart/
+retirement proofs remain open. The new operation is not a complete materialized
+checkpoint feature or a fix for the independent mixed latency failure.

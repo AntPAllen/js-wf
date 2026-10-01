@@ -173,6 +173,9 @@ func checkContinuationData(v reflect.Value, seen map[dataVisit]bool) error {
 			return checkContinuationData(v.Elem(), seen)
 		}
 	case reflect.Pointer, reflect.Map, reflect.Slice:
+		if v.Kind() == reflect.Slice && typ.Elem() == reflect.TypeFor[byte]() {
+			return nil
+		}
 		if v.IsNil() {
 			return nil
 		}

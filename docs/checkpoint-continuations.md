@@ -2,7 +2,8 @@
 
 Status: continuation contract, SDK cursor foundation, bounded frame codec and
 SDK capture/restore, archive/runtime publication and prefix-free journal reads.
-Frame/pair creation, worker dispatch and recovery remain open.
+SDK Continue frame/pair publication is implemented. Worker dispatch and recovery
+remain open.
 This document preserves the plan's checkpoint requirement; it does not count
 as a completed checkpoint feature.
 
@@ -16,12 +17,14 @@ boundary serializes the local data needed by the next function. Existing
 ordinary handlers retain their full replay contract.
 
 The proposed registration contains an initial handler and a map of stable,
-versioned continuation names. A proposed `wf.Continue(ctx, nextStage, data)`
+versioned continuation names. `wf.Continue(ctx, nextStage, data)`
 commits a checkpoint and ends the current delivery. Its caller must return the
 continuation result immediately. The worker invokes the named next function
 with the original invocation input and serialized continuation data. It creates
 no second invocation and does not reset the journal, fencing epoch or limits.
-These public APIs are proposed, not currently callable.
+Continue is callable on a context with continuation support configured. Worker
+registration/dispatch APIs remain proposed; ordinary workers return
+ErrContinuationUnsupported.
 
 Changing a stage's implementation still requires ordinary replay/version
 compatibility within that stage. Incompatible boundaries get a new name, and
@@ -228,3 +231,25 @@ no production worker callers. Stage dispatch must reject unknown registrations
 before running code, restore runtime cancellation/attempt facts, derive append
 indices from the anchor plus suffix, and preserve all lease/terminal guards.
 The required worker restart/prefix-handler avoidance proof remains open.
+
+## Implemented Continue step protocol
+
+`wf.Continue` validates registered stage/locals, captures a frame for the
+prospective completion, always stores and verifies its content-addressed object,
+and appends a reference completion. A successful call ends the delivery with
+ErrContinuation. The caller must return that error immediately; CheckComplete
+cannot treat the pending continuation as a terminal success. A publication
+error blocks that context's later SDK appends and normal completion.
+
+Recorded completion replay obtains its historical index/epoch/attempt facts
+from the caller's anchor resolver, verifies declared inputs and rebuilt frame
+bytes, and loads the saved frame without writing another. Pending requests can
+complete under a newer epoch. Locals are marshaled once and the object transport
+receives a detached input buffer. `Context.Continuation` returns scalar metadata
+for future worker manifest/handoff processing, not proof of a published manifest.
+
+[SDK protocol proof](scale/continuation-sdk-2026-10-01/) includes all request/frame/
+completion cuts, 100,000 seeded schedules and a lease-fenced real transport
+contract. Worker code still does not configure SetContinuationSupport or dispatch
+stages. The registry, suffix append counters/runtime facts, handoff repair,
+offline stage replay and worker process-kill proof remain open.

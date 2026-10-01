@@ -78,6 +78,10 @@ type Context struct {
 	state                     map[string]json.RawMessage
 	timerHandles              map[uint64]*TimerHandle
 	checkpointCancelledTimers map[uint64]bool
+	continuationStages        func(string) bool
+	continuationAnchor        func(uint64, bool) (ContinuationAnchor, error)
+	continuation              *ContinuationCheckpoint
+	continuationError         error
 }
 
 type Signal struct {
@@ -128,6 +132,9 @@ func (c *Context) SetResultStore(store func(context.Context, []byte) (string, er
 func (c *Context) stepPosition() uint64 { return c.stepOffset + uint64(c.position) }
 
 func (c *Context) next(kind Kind, payload json.RawMessage) error {
+	if c.continuationError != nil {
+		return c.continuationError
+	}
 	if c.waitingOn != "" {
 		return ErrSuspended
 	}
@@ -294,6 +301,12 @@ func runEffect[T any](ctx context.Context, fn func(context.Context) (T, error)) 
 }
 
 func (c *Context) CheckComplete() error {
+	if c.continuationError != nil {
+		return c.continuationError
+	}
+	if c.continuation != nil {
+		return ErrContinuation
+	}
 	if c.position != len(c.entries) {
 		return fmt.Errorf("%w: %d unplayed entries", ErrNonDeterministic, len(c.entries)-c.position)
 	}
