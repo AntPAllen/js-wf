@@ -12,3 +12,24 @@ jobs:
       - run: go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v
         env:
           WF_FULL_RESTART_FANOUT_500: '1'
+  consumer-leader:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WF_FANOUT_CONSUMER_500: '1'
+      WF_FANOUT_CONSUMER_REPORT: fanout-consumer-500
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Kill the consumer leader with 500 physically queued children
+        run: go test -race ./integration -run '^TestFiveHundredChildFanoutSurvivesConsumerLeaderKill$' -count=1 -timeout=8m -v | tee fanout-consumer-500.log
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: fanout-consumer-500
+          path: |
+            fanout-consumer-500.log
+            integration/fanout-consumer-500*.json
+          if-no-files-found: error

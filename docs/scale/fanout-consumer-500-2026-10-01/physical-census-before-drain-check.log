@@ -1,0 +1,12 @@
+=== RUN   TestFiveHundredChildFanoutSurvivesConsumerLeaderKill
+    fanout_full_server_restart_test.go:48: FANOUT_QUEUED_CHILDREN count=500 stream_messages=501 first=1 last=501
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_FAULT name=WF_P_39 leader=wf-process-2 node=2 pending=7 ack_pending=1 killed=2026-10-01T10:15:22.52513654Z
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_KILLED pid=683482 signal=killed
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_ELECTED name=WF_P_39 old=wf-process-2 new=wf-process-1 elapsed=7.367305351s
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_HEALED name=WF_P_39 leader=wf-process-1 elapsed=11.670013276s
+    fanout_full_server_restart_test.go:48: FANOUT_QUEUED_CHILDREN count=500 stream_messages=501 first=1 last=501
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_LATENCY children=500 child_start_p99=18.703447624s child_start_max=20.423188147s parent_last_child_delay=2.660419686s
+    fanout_full_server_restart_test.go:48: consumer leader kill recovered parent and 500 children; retained integrity={Invocations:501 Journals:501 Entries:4504 Terminal:501}
+--- PASS: TestFiveHundredChildFanoutSurvivesConsumerLeaderKill (34.93s)
+PASS
+ok  	js-wf/integration	35.967s

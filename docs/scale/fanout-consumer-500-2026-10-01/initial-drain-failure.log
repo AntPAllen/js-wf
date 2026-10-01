@@ -1,0 +1,13 @@
+=== RUN   TestFiveHundredChildFanoutSurvivesConsumerLeaderKill
+    fanout_full_server_restart_test.go:48: FANOUT_QUEUED_CHILDREN count=500 stream_messages=501 first=1 last=501
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_FAULT name=WF_P_39 leader=wf-process-0 node=0 pending=7 ack_pending=1 killed=2026-10-01T10:18:08.904978917Z
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_KILLED pid=683999 signal=killed
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_ELECTED name=WF_P_39 old=wf-process-0 new=wf-process-1 elapsed=4.212470302s
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_HEALED name=WF_P_39 leader=wf-process-1 elapsed=7.4359745s
+    fanout_full_server_restart_test.go:48: FANOUT_QUEUED_CHILDREN count=500 stream_messages=501 first=1 last=501
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_LATENCY children=500 child_start_p99=17.995821541s child_start_max=19.588097673s parent_last_child_delay=1.903918844s
+    fanout_full_server_restart_test.go:48: fanout run stream did not physically drain: info=&{Config:{Name:WF_RUN Description: Subjects:[wf.run.* wf.schedule.*.*.*] Retention:WorkQueue MaxConsumers:-1 MaxMsgs:-1 MaxBytes:-1 Discard:DiscardOld DiscardNewPerSubject:false MaxAge:0s MaxMsgsPerSubject:-1 MaxMsgSize:-1 Storage:File Replicas:3 NoAck:false Duplicates:2m0s Placement:<nil> Mirror:<nil> Sources:[] Sealed:false DenyDelete:false DenyPurge:false AllowRollup:true Compression:None FirstSeq:0 SubjectTransform:<nil> RePublish:<nil> AllowDirect:false MirrorDirect:false ConsumerLimits:{InactiveThreshold:0s MaxAckPending:0} Metadata:map[_nats.level:5 _nats.req.level:2 _nats.ver:2.15.0] Template: AllowMsgTTL:false SubjectDeleteMarkerTTL:0s AllowMsgCounter:false AllowAtomicPublish:false AllowMsgSchedules:true PersistMode:Default AllowBatchPublish:false} Created:2026-10-01 10:18:04.182754031 +0000 UTC State:{Msgs:354 Bytes:37878 FirstSeq:648 FirstTime:2026-10-01 10:18:18.441705271 +0000 UTC LastSeq:1001 LastTime:2026-10-01 10:18:25.184666899 +0000 UTC Consumers:64 Deleted:[] NumDeleted:0 NumSubjects:1 Subjects:map[]} Cluster:0xc00050f180 Mirror:<nil> Sources:[] TimeStamp:2026-10-01 10:19:00.660293039 +0000 UTC} err=run drain deadline: last read error=<nil>: context deadline exceeded
+--- FAIL: TestFiveHundredChildFanoutSurvivesConsumerLeaderKill (61.80s)
+FAIL
+FAIL	js-wf/integration	61.826s
+FAIL

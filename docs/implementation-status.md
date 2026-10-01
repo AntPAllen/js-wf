@@ -3883,3 +3883,34 @@ synthetic controls are not runtime acceptance evidence. Real all-row run
 remaining rows; its metadata is correctly rejected as unfinished. Final full
 matrix results, 200 consecutive seeds, five-node 24-hour soak, full latest
 simulation, scale/GC/combined-fault gates remain independent and open.
+
+
+## 500-child consumer-leader backlog fault and open terminal wakeup drain
+
+A new real R3 cut requires all 500 physical child run identities/sequences,
+SIGKILL of the confirmed backlogged consumer leader, a different leader while
+that server is dead, full store/consumer replica catch-up and exact parent
+history/child queue preservation. All 501 immutable outcomes and the shared
+raw audit pass (4,504 entries). Final observed child raw-start p99 is 13.962
+seconds; parent completion is 2.665 seconds after its last child. No heal-time
+adjustment is used for this quorum-preserving process fault.
+
+Final observed race fails in 58.979 seconds on a new 30-second queue-drain
+assertion: 360 parent wakeups remain; independent consumer state has 358 pending,
+one ack-pending, zero redeliveries. This is a live backlog, not an acknowledged
+retention discrepancy. The drain bound is a fixture diagnostic, distinct from
+the plan's five-minute completion/per-invocation p99 gates. Parent timings show
+142 full history reads totaling 14.597 seconds, many after terminal commitment;
+repeated terminal replay is a candidate bottleneck, not a server-cause claim.
+[Raw operations, queue/consumer state, server metadata and controls](scale/fanout-consumer-500-2026-10-01/)
+are retained. An earlier physical-census-only race passes in 35.967 seconds
+but does not clear the final drain assertion. The original six-child restart
+path passes under race in 19.970 seconds. Compiled no-kill/fake-enqueue controls
+fail semantically in 8.954/8.352 seconds; vet/YAML pass. An independent opt-in
+hosted job retains these diagnostics. No runtime policy or gate is relaxed.
+
+The all-row sustained campaign's first journal, consumer, all-server and
+majority-partition seed-1 rows pass. Actual completed job logs pass the existing
+per-seed semantic checker and are [retained with scope](scale/full-matrix-campaign-2026-10-01/).
+Remaining rows are live/queued; neither those four samples nor the live mixed
+200-seed/full simulation/million-timer campaigns complete the full release gates.

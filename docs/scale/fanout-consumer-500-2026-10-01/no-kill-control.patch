@@ -1,0 +1,10 @@
+--- testcluster/process_cluster.go
++++ testcluster/process_cluster.go
+@@ -328,6 +328,7 @@
+ // KillNode terminates one server without removing its file store. RestartNode
+ // can then reopen that store on the same client and route ports.
+ func (c *ProcessCluster) KillNode(i int) error {
++	return nil // negative control: report success without killing the server
+ 	if i < 0 || i >= len(c.Commands) || c.Commands[i] == nil || c.Commands[i].ProcessState != nil {
+ 		return fmt.Errorf("process node %d cannot be killed", i)
+ 	}

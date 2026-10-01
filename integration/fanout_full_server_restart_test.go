@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -40,7 +41,18 @@ func TestFiveHundredChildFanoutSurvivesFullServerRestart(t *testing.T) {
 	runFanoutFullServerRestart(t, 500)
 }
 
+func TestFiveHundredChildFanoutSurvivesConsumerLeaderKill(t *testing.T) {
+	if os.Getenv("WF_FANOUT_CONSUMER_500") != "1" {
+		t.Skip("set WF_FANOUT_CONSUMER_500=1 for the 500-child consumer-leader proof")
+	}
+	runFanoutServerFault(t, 500, true)
+}
+
 func runFanoutFullServerRestart(t *testing.T, childCount int) {
+	runFanoutServerFault(t, childCount, false)
+}
+
+func runFanoutServerFault(t *testing.T, childCount int, consumerFault bool) {
 	t.Helper()
 	cluster, err := testcluster.StartPartitionableProcesses(t.TempDir(), 3)
 	if err != nil {
@@ -168,14 +180,25 @@ func runFanoutFullServerRestart(t *testing.T, childCount int) {
 	case <-time.After(10 * time.Second):
 		t.Fatal("first worker did not stop before cluster restart")
 	}
-	for i := range cluster.Commands {
-		if err := cluster.KillNode(i); err != nil {
-			t.Fatalf("kill node %d: %v", i, err)
+	var beforeFault []journal.Record
+	var queuedBefore map[string]uint64
+	if consumerFault {
+		beforeFault, _, err = j.Read(ctx, typ, id)
+		if err != nil {
+			t.Fatal(err)
 		}
-	}
-	for i := range cluster.Commands {
-		if err := cluster.RestartNode(i); err != nil {
-			t.Fatalf("restart node %d: %v", i, err)
+		queuedBefore = fanoutQueuedChildRuns(t, ctx, js[0], childType, childIDs)
+		killFanoutBacklogConsumer(t, ctx, cluster, js, parentPart)
+	} else {
+		for i := range cluster.Commands {
+			if err := cluster.KillNode(i); err != nil {
+				t.Fatalf("kill node %d: %v", i, err)
+			}
+		}
+		for i := range cluster.Commands {
+			if err := cluster.RestartNode(i); err != nil {
+				t.Fatalf("restart node %d: %v", i, err)
+			}
 		}
 	}
 	js = make([]jetstream.JetStream, 3)
@@ -198,11 +221,44 @@ func runFanoutFullServerRestart(t *testing.T, childCount int) {
 	if err != nil {
 		t.Fatalf("cluster metadata after restart: %v", err)
 	}
+	if consumerFault {
+		after, _, err := journal.New(js[0]).Read(ctx, typ, id)
+		if err != nil || !reflect.DeepEqual(beforeFault, after) {
+			t.Fatalf("parent prefix changed across consumer fault: %v", err)
+		}
+		queuedAfter := fanoutQueuedChildRuns(t, ctx, js[0], childType, childIDs)
+		if !reflect.DeepEqual(queuedBefore, queuedAfter) {
+			t.Fatal("queued child run identities/sequences changed across consumer fault")
+		}
+	}
+	var operationMu sync.Mutex
+	var operations []worker.OperationEvent
+	var successorOptions []worker.Option
+	if consumerFault {
+		successorOptions = append(successorOptions, worker.WithOperationObserver(func(event worker.OperationEvent) {
+			if event.Type == typ && event.ID == id {
+				operationMu.Lock()
+				operations = append(operations, event)
+				operationMu.Unlock()
+			}
+		}))
+		defer func() {
+			operationMu.Lock()
+			snapshot := append([]worker.OperationEvent(nil), operations...)
+			operationMu.Unlock()
+			saveFanoutParentOperations(t, snapshot)
+			if prefix := os.Getenv("WF_FANOUT_CONSUMER_REPORT"); prefix != "" {
+				for _, err := range saveMixedJetStreamDiagnostics(cluster, prefix, "final") {
+					t.Errorf("fanout server diagnostics: %v", err)
+				}
+			}
+		}()
+	}
 	var successor *worker.Worker
 	until = time.Now().Add(30 * time.Second)
 	for time.Now().Before(until) && ctx.Err() == nil {
 		attempt, stop := context.WithTimeout(ctx, 5*time.Second)
-		successor, err = worker.New(attempt, js[2], "fanout-after-restart", handlers)
+		successor, err = worker.New(attempt, js[2], "fanout-after-restart", handlers, successorOptions...)
 		stop()
 		if err == nil {
 			break
@@ -257,5 +313,13 @@ func runFanoutFullServerRestart(t *testing.T, childCount int) {
 	if err != nil || report.Invocations != childCount+1 || report.Journals != childCount+1 || report.Terminal != childCount+1 {
 		t.Fatalf("full-restart fan-out retained integrity: report=%+v err=%v", report, err)
 	}
-	t.Logf("full server restart recovered parent and %d children; retained integrity=%+v", childCount, report)
+	if consumerFault {
+		assertFanoutFaultLatencies(t, ctx, js, typ, id, childType, childIDs)
+		assertFanoutRunDrain(t, ctx, js[0], parts)
+	}
+	if consumerFault {
+		t.Logf("consumer leader kill recovered parent and %d children; retained integrity=%+v", childCount, report)
+	} else {
+		t.Logf("full server restart recovered parent and %d children; retained integrity=%+v", childCount, report)
+	}
 }

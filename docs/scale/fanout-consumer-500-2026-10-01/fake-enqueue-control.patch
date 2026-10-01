@@ -1,0 +1,10 @@
+--- client/client.go
++++ client/client.go
+@@ -129,6 +129,7 @@
+ }
+ 
+ func (p *jetStreamStartPort) EnqueueRun(ctx context.Context, subject string, data []byte, dedupID string) error {
++	if strings.HasPrefix(string(data), "restartchild.") { return nil }
+ 	_, err := p.js.Publish(ctx, subject, data, jetstream.WithMsgID(dedupID))
+ 	return err
+ }
