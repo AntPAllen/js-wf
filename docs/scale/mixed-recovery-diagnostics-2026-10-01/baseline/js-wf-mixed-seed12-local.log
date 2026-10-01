@@ -1,0 +1,77 @@
+=== RUN   TestMixedWorkflowsRecoverFromFourServerFaults
+    mixed_process_chaos_test.go:478: FAULT_SEED=12 FAULT_SCHEDULE=/tmp/js-wf-mixed-seed12-local.json
+    mixed_process_chaos_test.go:628: post-heal signal repair inspected=50 reenqueued=12
+    mixed_process_chaos_test.go:640: mixed recovery type=mixedshort id=mixed-08-0 latency=1.246188341s
+    mixed_process_chaos_test.go:640: mixed recovery type=mixedshort id=mixed-00-0 latency=1.246194711s
+    mixed_process_chaos_test.go:640: mixed recovery type=mixedshort id=mixed-07-0 latency=2.812988142s
+    mixed_process_chaos_test.go:640: mixed recovery type=mixedshort id=mixed-01-0 latency=2.915442557s
+    mixed_process_chaos_test.go:640: mixed recovery type=mixedtimer id=mixed-03-0 latency=7.779859342s
+    mixed_process_chaos_test.go:640: mixed recovery type=mixedtimer id=mixed-05-0 latency=7.780623863s
+    mixed_process_chaos_test.go:640: mixed recovery type=mixedtimer id=mixed-04-0 latency=7.869595487s
+    mixed_process_chaos_test.go:640: mixed recovery type=mixedsignal id=mixed-02-0 latency=5.070286696s
+    mixed_process_chaos_test.go:640: mixed recovery type=mixedfanout id=mixed-09-0 latency=10.214985775s
+    mixed_process_chaos_test.go:640: mixed recovery type=mixedsignal id=mixed-06-0 latency=4.441776349s
+    mixed_process_chaos_test.go:645: mixed provisional result observation: p99=10.214985775s max=10.214985775s (fan-out parent still measured from quorum)
+    mixed_process_chaos_test.go:685: restarted node WF_JRN ready in 1.980508ms after 1 attempts
+    mixed_process_chaos_test.go:761: restarted node terminal type=mixedshort id=mixed-00-0 audit=10.28886ms
+    mixed_process_chaos_test.go:761: restarted node terminal type=mixedshort id=mixed-01-0 audit=9.921642ms
+    mixed_process_chaos_test.go:761: restarted node terminal type=mixedsignal id=mixed-02-0 audit=9.912108ms
+    mixed_process_chaos_test.go:761: restarted node terminal type=mixedtimer id=mixed-03-0 audit=9.948002ms
+    mixed_process_chaos_test.go:761: restarted node terminal type=mixedtimer id=mixed-04-0 audit=10.088375ms
+    mixed_process_chaos_test.go:761: restarted node terminal type=mixedtimer id=mixed-05-0 audit=9.582677ms
+    mixed_process_chaos_test.go:761: restarted node terminal type=mixedsignal id=mixed-06-0 audit=10.288379ms
+    mixed_process_chaos_test.go:761: restarted node terminal type=mixedshort id=mixed-07-0 audit=9.537879ms
+    mixed_process_chaos_test.go:761: restarted node terminal type=mixedshort id=mixed-08-0 audit=10.018699ms
+    mixed_process_chaos_test.go:761: restarted node terminal type=mixedfanout id=mixed-09-0 audit=9.435173ms
+    mixed_process_chaos_test.go:772: restarted node child id=c-2c0427b405f6e5cf41a7a5dd2529625c audit=9.954401ms
+    mixed_process_chaos_test.go:772: restarted node child id=c-61a693bbe622d9d1cff620a5ba2cda7f audit=9.428483ms
+    mixed_process_chaos_test.go:772: restarted node child id=c-3e3e4c70156e3fee9852004ca5949da3 audit=9.896193ms
+    mixed_process_chaos_test.go:772: restarted node child id=c-2d7fcc22d483fcf51ba57e3b2077e464 audit=10.305906ms
+    mixed_process_chaos_test.go:772: restarted node child id=c-1eaf330c748a119ebeda4a23d05429de audit=10.242479ms
+    mixed_process_chaos_test.go:772: restarted node child id=c-708e303ec63ebd5c030bc9ab47ec7aac audit=9.88071ms
+    mixed_process_chaos_test.go:779: restarted node grandchild id=c-425aa24102bf9165ef736361fbbfbb9e audit=8.574466ms
+    mixed_process_chaos_test.go:779: restarted node grandchild id=c-81df727d0b247de4898e89bde451172f audit=9.868842ms
+    mixed_process_chaos_test.go:779: restarted node grandchild id=c-8129cf1d1fd8e3a209b19b528165f4df audit=9.906799ms
+    mixed_process_chaos_test.go:779: restarted node grandchild id=c-26514356ab5a5acbf20ad5ce3acc8168 audit=10.406319ms
+    mixed_process_chaos_test.go:779: restarted node grandchild id=c-a879b3a6c93c88e46e7761b1e78637a2 audit=9.903935ms
+    mixed_process_chaos_test.go:779: restarted node grandchild id=c-535b8aa9db45ad629d92ad1b11208e82 audit=10.243822ms
+    mixed_process_chaos_test.go:779: restarted node grandchild id=c-ce30b309161f5923793aaf2cbc016d4e audit=10.215819ms
+    mixed_process_chaos_test.go:779: restarted node grandchild id=c-e1b3e514a9d31e1c0ae0fcf9d9dcde03 audit=9.857905ms
+    mixed_process_chaos_test.go:779: restarted node grandchild id=c-bb5f73df9b542dac375d03b4ea875933 audit=10.022746ms
+    mixed_process_chaos_test.go:779: restarted node grandchild id=c-01365f6a38e7c1ac2db485fc10fda086 audit=9.800688ms
+    mixed_process_chaos_test.go:779: restarted node grandchild id=c-a44599fc4037c49e5e71abfb8f6d759c audit=10.244963ms
+    mixed_process_chaos_test.go:779: restarted node grandchild id=c-e14a2648bb4377e8830f7b0584cfd294 audit=9.463476ms
+    mixed_process_chaos_test.go:807: survivor node 0 WF_SIG ready in 681.335µs after 1 attempts
+    mixed_process_chaos_test.go:830: mixed terminal type=mixedshort id=mixed-00-0 latency=1.068423845s
+    mixed_process_chaos_test.go:830: mixed terminal type=mixedshort id=mixed-01-0 latency=2.622655404s
+    mixed_process_chaos_test.go:830: mixed terminal type=mixedsignal id=mixed-02-0 latency=4.977792921s
+    mixed_process_chaos_test.go:830: mixed terminal type=mixedtimer id=mixed-03-0 latency=7.518632302s
+    mixed_process_chaos_test.go:830: mixed terminal type=mixedtimer id=mixed-04-0 latency=7.607234555s
+    mixed_process_chaos_test.go:830: mixed terminal type=mixedtimer id=mixed-05-0 latency=7.518628897s
+    mixed_process_chaos_test.go:830: mixed terminal type=mixedsignal id=mixed-06-0 latency=4.266319528s
+    mixed_process_chaos_test.go:830: mixed terminal type=mixedshort id=mixed-07-0 latency=2.622162125s
+    mixed_process_chaos_test.go:830: mixed terminal type=mixedshort id=mixed-08-0 latency=1.068432508s
+    mixed_process_chaos_test.go:830: mixed terminal type=mixedfanout id=mixed-09-0 latency=1.884663421s
+    mixed_process_chaos_test.go:845: mixed terminal type=mixedchild id=c-2c0427b405f6e5cf41a7a5dd2529625c latency=1.170374737s
+    mixed_process_chaos_test.go:845: mixed terminal type=mixedchild id=c-61a693bbe622d9d1cff620a5ba2cda7f latency=1.569022507s
+    mixed_process_chaos_test.go:845: mixed terminal type=mixedchild id=c-3e3e4c70156e3fee9852004ca5949da3 latency=1.012516891s
+    mixed_process_chaos_test.go:845: mixed terminal type=mixedchild id=c-2d7fcc22d483fcf51ba57e3b2077e464 latency=1.160920346s
+    mixed_process_chaos_test.go:845: mixed terminal type=mixedchild id=c-1eaf330c748a119ebeda4a23d05429de latency=5.518839834s
+    mixed_process_chaos_test.go:845: mixed terminal type=mixedchild id=c-708e303ec63ebd5c030bc9ab47ec7aac latency=1.010158779s
+    mixed_process_chaos_test.go:853: mixed terminal type=mixedgrandchild id=c-425aa24102bf9165ef736361fbbfbb9e latency=2.629919249s
+    mixed_process_chaos_test.go:853: mixed terminal type=mixedgrandchild id=c-81df727d0b247de4898e89bde451172f latency=1.249843674s
+    mixed_process_chaos_test.go:853: mixed terminal type=mixedgrandchild id=c-8129cf1d1fd8e3a209b19b528165f4df latency=544.763411ms
+    mixed_process_chaos_test.go:853: mixed terminal type=mixedgrandchild id=c-26514356ab5a5acbf20ad5ce3acc8168 latency=1.160995688s
+    mixed_process_chaos_test.go:853: mixed terminal type=mixedgrandchild id=c-a879b3a6c93c88e46e7761b1e78637a2 latency=7.13568624s
+    mixed_process_chaos_test.go:853: mixed terminal type=mixedgrandchild id=c-535b8aa9db45ad629d92ad1b11208e82 latency=636.726278ms
+    mixed_process_chaos_test.go:853: mixed terminal type=mixedgrandchild id=c-ce30b309161f5923793aaf2cbc016d4e latency=1.249848051s
+    mixed_process_chaos_test.go:853: mixed terminal type=mixedgrandchild id=c-e1b3e514a9d31e1c0ae0fcf9d9dcde03 latency=2.728322029s
+    mixed_process_chaos_test.go:853: mixed terminal type=mixedgrandchild id=c-bb5f73df9b542dac375d03b4ea875933 latency=1.249828501s
+    mixed_process_chaos_test.go:853: mixed terminal type=mixedgrandchild id=c-01365f6a38e7c1ac2db485fc10fda086 latency=728.863351ms
+    mixed_process_chaos_test.go:853: mixed terminal type=mixedgrandchild id=c-a44599fc4037c49e5e71abfb8f6d759c latency=4.776929891s
+    mixed_process_chaos_test.go:853: mixed terminal type=mixedgrandchild id=c-e14a2648bb4377e8830f7b0584cfd294 latency=7.138051333s
+    mixed_process_chaos_test.go:857: mixed terminal p99 from last enabling event=7.607234555s across 28 invocations
+    mixed_process_chaos_test.go:858: mixed workers before={LeaseAcquisitions:37 LeaseContentions:32 LeaseAcquireFailures:0 FencingEvents:5 HandoffEnqueues:5 Redeliveries:6 EnqueueToLeaseSamples:37 EnqueueToLeaseTotal:1m25.289765227s EnqueueToLeaseMaximum:16.041053917s EnqueueToLeaseBuckets:[4 16 8 7 2 0] TimersScheduled:24 TimersFired:0 TimerLateTotal:0s TimerLateMaximum:0s TimerLateBuckets:[0 0 0 0 0 0] CancelledTimerNoOps:0} after={LeaseAcquisitions:32 LeaseContentions:27 LeaseAcquireFailures:0 FencingEvents:0 HandoffEnqueues:0 Redeliveries:10 EnqueueToLeaseSamples:32 EnqueueToLeaseTotal:4m53.157007648s EnqueueToLeaseMaximum:19.564282518s EnqueueToLeaseBuckets:[1 2 3 11 15 0] TimersScheduled:0 TimersFired:24 TimerLateTotal:1m5.293586058s TimerLateMaximum:2.76099343s TimerLateBuckets:[0 0 0 24 0 0] CancelledTimerNoOps:0}
+--- PASS: TestMixedWorkflowsRecoverFromFourServerFaults (34.05s)
+PASS
+ok  	js-wf/integration	34.062s

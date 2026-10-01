@@ -29,6 +29,24 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 )
 
+// Monitoring snapshots are evidence about placement at their own timestamps;
+// they do not establish which Raft group processed a particular client call.
+func saveMixedJetStreamDiagnostics(cluster *testcluster.ProcessCluster, prefix, phase string) []error {
+	var writeErrors []error
+	for node := range cluster.Commands {
+		attempt, stop := context.WithTimeout(context.Background(), 2*time.Second)
+		data, err := cluster.Diagnostic(attempt, node, "jetstream")
+		stop()
+		if err != nil {
+			data, _ = json.MarshalIndent(map[string]any{"node": node, "captured_at": time.Now().UTC(), "diagnostic_error": err.Error()}, "", "  ")
+		}
+		if err := os.WriteFile(fmt.Sprintf("%s-server-%d-jetstream-%s.json", prefix, node, phase), data, 0600); err != nil {
+			writeErrors = append(writeErrors, err)
+		}
+	}
+	return writeErrors
+}
+
 // TestMixedWorkflowsRecoverFromFourServerFaults is a ten-invocation slice of
 // the Tier 2 mix. It runs the four workload classes together on one cluster.
 func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
@@ -55,6 +73,9 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 			return
 		}
 		prefix := strings.TrimSuffix(output, filepath.Ext(output))
+		for _, err := range saveMixedJetStreamDiagnostics(cluster, prefix, "final") {
+			t.Errorf("save final JetStream diagnostic: %v", err)
+		}
 		for i := range cluster.Commands {
 			// Detach before reading so a failure during the active fault retains
 			// the flushed syscall trace. A normally healed fault is already stopped.
@@ -508,6 +529,32 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	}
 	if healedAt.IsZero() {
 		t.Fatal("journal quorum did not recover after route heal")
+	}
+	if output := os.Getenv("FAULT_SCHEDULE_OUT"); output != "" {
+		// Capture in parallel with recovery, without delaying enabling events or
+		// moving the heal timestamp. Join before fixture teardown on every exit.
+		diagnostics := make(chan []error, 1)
+		stopDiagnostics := make(chan struct{})
+		prefix := strings.TrimSuffix(output, filepath.Ext(output))
+		go func() {
+			errors := saveMixedJetStreamDiagnostics(cluster, prefix, "after-heal")
+			// A second observation can distinguish incomplete elections at heal
+			// from placement while a slow invocation is still recovering.
+			timer := time.NewTimer(10 * time.Second)
+			defer timer.Stop()
+			select {
+			case <-timer.C:
+				errors = append(errors, saveMixedJetStreamDiagnostics(cluster, prefix, "during-recovery")...)
+			case <-stopDiagnostics:
+			}
+			diagnostics <- errors
+		}()
+		defer func() {
+			close(stopDiagnostics)
+			for _, err := range <-diagnostics {
+				t.Errorf("save recovery JetStream diagnostic: %v", err)
+			}
+		}()
 	}
 	conn, err := cluster.Dial(leader)
 	if err != nil {

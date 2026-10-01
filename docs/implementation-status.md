@@ -3153,3 +3153,32 @@ is retained with this proof; it predates these fixture-only changes and does
 not establish a causal explanation. Seeds 2, 12 and 65 remain open. Full Tier 1
 jobs and the million-timer campaign continue live without restart; online GC
 and independent final-source matrix/24-hour soak remain open.
+
+
+## Recovery-time placement evidence and an unpromoted acquisition experiment
+
+A local unmodified seed-12 run passed terminal p99 7.607 seconds. A compiled
+read-before-create lease acquisition prototype passed the lease suite, but its
+mixed run had p99 14.949 seconds and is not promoted. Saved schedules select
+different physical nodes because targets depend on the actual initial journal
+leader. Before-fault SDK progress also differs (0/10 versus 49/40 replacement
+signal renewals). These runs cannot establish an optimization benefit or a
+causal explanation of the hosted 40.574-second miss. Renewals/fencing remain
+unchanged. Existing trace analysis finds 3,719 delayed syscalls, including lease
+stream/Raft activity; temporal overlap is not per-RPC causation.
+
+Mixed fixtures now retain timestamped monitoring after heal, during recovery
+if still active ten seconds later, and at final state. Recovery captures run
+asynchronously and join on every exit; no enabling/heal timestamp or gate changes.
+Unavailable nodes produce explicit error artifacts. This records later leader
+placement that pre-fault-only monitoring missed. The final seed-12 race run
+passed in 50.914 seconds with p99 19.520, all 28 invocations, history/integrity/drain
+checks and all phases retained. [Raw experiments, exact schedules, snapshots,
+parser output and source hashes](scale/mixed-recovery-diagnostics-2026-10-01/)
+retain the scope and limitations.
+
+Standard CI at 7e414b2 passed. Hosted mixed seeds 2/12 and earlier seed 65 remain
+unresolved. A matched placement/progress contract is needed before changing
+acquisition behavior; server cause remains unconfirmed. Full matrix/24-hour soak,
+online GC and remaining plan gates remain open. Original full simulation jobs
+and million-timer process remain live without restart.

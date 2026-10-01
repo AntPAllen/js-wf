@@ -1,0 +1,16 @@
+--- a/lease/lease.go
++++ b/lease/lease.go
+@@ -125,6 +125,13 @@
+ 	port := s.operations()
+ 	// The revision itself becomes the epoch, so the value is updated once by
+ 	// its owner after Create. Until that update, other acquirers still fail.
++	if entry, readErr := port.Get(ctx, key); readErr == nil {
++		var held Value
++		age := port.Now().Sub(entry.Created)
++		if json.Unmarshal(entry.Value, &held) == nil && held.Worker != "" && held.Epoch != 0 && age >= 0 && age < time.Second {
++			return nil, ErrHeld
++		}
++	}
+ 	data, _ := json.Marshal(Value{Worker: worker})
+ 	var rev uint64
+ 	var err error
