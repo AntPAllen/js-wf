@@ -4379,6 +4379,36 @@ The initial hosted monitoring run36894904238 failed workflow validation before
 any jobs started: runner.temp was used in job-level env, where the runner context
 is unavailable. The workflow now uses a literal temporary artifact root and
 references env only from the upload step. Corrected run36895162324 at eaf83de
-is live; [metadata and corrected workflow identity](scale/capacity-alert-delivery-2026-10-01/ci-start.json)
-are retained. No hosted delivery pass is claimed yet. The native race proof is
+passed in 134.87s test /135.896s package; [metadata and corrected workflow identity](scale/capacity-alert-delivery-2026-10-01/ci-start.json)
+are retained. [Terminal metadata, raw logs and receiver artifacts](scale/capacity-alert-delivery-2026-10-01/hosted/) confirm firing after 120.368s and resolution after 1.002s. The native race proof is
 unchanged. Ordinary invocations skip without the opt-in environment flag.
+
+
+## Sustained five-container journal row scaffold and live gate corrections
+
+The new opt-in mixed R5 journal row runs the six production matrix workload
+types on five containers, with a confirmed journal-leader SIGKILL and retained-store
+restart every thirty seconds. Published client and monitoring ports remain stable
+across replacement containers, allowing persistent clients to reconnect. It records
+before-fault server state, histories, raw latencies, dispatch and suspended scans,
+audits every ten batches and requires physical run-stream and all-consumer drain.
+The race 35-second smoke passes with 224 invocations, 2,465 entries and one fault;
+maximum workload terminal p99 is 9.170s. Removing port reuse fails the address
+stability property at the actual first restart. [Native proof and control](scale/tier3-mixed-journal-2026-10-01/)
+are retained. Vet and all 27 Python verification tests pass. The manual CI supports
+35-second smoke and ten-minute sustained scope with explicit false-green guards.
+This remains one row; five worker objects share one client, and full fault matrix,
+24-hour soak and complete fencing/re-enqueue attribution remain open.
+
+Comprehensive simulator run36877170093 at 273646a is now terminal failure: the
+170-minute whole-package timeout expired 22 seconds into the snapshot-budget test,
+after earlier workloads including result-budget completed. This is incomplete
+release validation; no simulator invariant failure is established by that timeout.
+The live 200-seed full-matrix run36891850893 at 92586ea has a failed journal group:
+seed28 stalls awaiting a fan-out result and hits its five-minute batch deadline
+after batch52. Seeds25–27 passed; the cause of seed28 remains unconfirmed pending
+raw-state inspection. [Raw failure logs](scale/campaign-failures-2026-10-01/)
+are retained. Other jobs remain live; this campaign cannot clear the required
+200-consecutive-seed gate. Neither failure is a reason to repeat the historical
+30-second-TTL worker-kill mismatch. The independent million-timer user service
+remains active with its original 24-hour and latency targets.

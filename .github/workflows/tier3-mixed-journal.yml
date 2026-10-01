@@ -1,0 +1,45 @@
+name: tier3-mixed-journal
+on:
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: Ten minutes is sustained; 35 seconds is fixture smoke only
+        required: true
+        type: choice
+        default: '10m'
+        options: ['35s', '10m']
+jobs:
+  journal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      WF_TIER3_MATRIX: '1'
+      WF_TIER3_MATRIX_DURATION: ${{ inputs.duration }}
+      WF_TIER3_SYNC_INTERVAL: '2m'
+      TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify row-result guard
+        run: python3 -m unittest discover -s scripts -p 'test_tier3_journal_row.py'
+      - name: Sustain the five-container mixed journal row
+        run: |
+          set -o pipefail
+          go test -p=1 -race -json ./integration -run '^TestFiveContainerMixedJournalLeaderEveryThirtySeconds$' -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py
+          python3 scripts/check-tier3-journal-row.py --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --output /tmp/tier3-mixed-journal-result.json
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tier3-mixed-journal
+          path: |
+            /tmp/tier3-mixed-journal/*.json
+            /tmp/tier3-mixed-journal/*.jsonl
+            /tmp/tier3-mixed-journal/*.log
+            /tmp/tier3-mixed-journal/cluster/nats.conf
+            /tmp/tier3-mixed-journal-events.jsonl
+            /tmp/tier3-mixed-journal-result.json
+          if-no-files-found: warn

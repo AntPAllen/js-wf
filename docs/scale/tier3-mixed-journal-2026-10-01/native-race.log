@@ -1,0 +1,20 @@
+=== RUN   TestFiveContainerMixedJournalLeaderEveryThirtySeconds
+    tier3_mixed_journal_test.go:307: tier3 mixed batch=1 elapsed=4.028594897s
+    tier3_mixed_journal_test.go:307: tier3 mixed batch=2 elapsed=8.781099009s
+    tier3_mixed_journal_test.go:307: tier3 mixed batch=3 elapsed=12.749632864s
+    tier3_mixed_journal_test.go:307: tier3 mixed batch=4 elapsed=16.773213332s
+    tier3_mixed_journal_test.go:307: tier3 mixed batch=5 elapsed=20.796393969s
+    tier3_mixed_journal_test.go:307: tier3 mixed batch=6 elapsed=24.716229342s
+    tier3_mixed_journal_test.go:307: tier3 mixed batch=7 elapsed=28.743751058s
+    tier3_mixed_journal_test.go:243: tier3 journal fault node=3 scheduled=30s killed=30.023593321s healed=35.398800683s
+    tier3_mixed_journal_test.go:307: tier3 mixed batch=8 elapsed=40.267259899s
+    tier3_mixed_journal_test.go:384: TIER3_MIXED_CELL type=matrixshort invocations=32 terminal_p99=1.463577887s progress_p99=1.393642137s
+    tier3_mixed_journal_test.go:384: TIER3_MIXED_CELL type=matrixtimer invocations=24 terminal_p99=274.227891ms progress_p99=5.472850038s
+    tier3_mixed_journal_test.go:384: TIER3_MIXED_CELL type=matrixsignal invocations=16 terminal_p99=9.170451406s progress_p99=1.30433902s
+    tier3_mixed_journal_test.go:384: TIER3_MIXED_CELL type=matrixfanout invocations=8 terminal_p99=8.191683622s progress_p99=182.473693ms
+    tier3_mixed_journal_test.go:384: TIER3_MIXED_CELL type=matrixchild invocations=48 terminal_p99=189.614747ms progress_p99=157.896374ms
+    tier3_mixed_journal_test.go:384: TIER3_MIXED_CELL type=matrixgrandchild invocations=96 terminal_p99=447.282834ms progress_p99=373.248504ms
+    tier3_mixed_journal_test.go:423: TIER3_MIXED_RESULT row=journal seed=1 duration=35s five_replicas=true batches=8 invocations=224 entries=2465 faults=1 full_matrix_release=false
+--- PASS: TestFiveContainerMixedJournalLeaderEveryThirtySeconds (56.48s)
+PASS
+ok  	js-wf/integration	57.502s

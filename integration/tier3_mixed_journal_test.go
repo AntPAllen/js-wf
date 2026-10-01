@@ -1,0 +1,477 @@
+//go:build linux
+
+package integration_test
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"math/rand"
+	"os"
+	"path/filepath"
+	"sort"
+	"strconv"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/anishathalye/porcupine"
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/client"
+	"js-wf/history"
+	"js-wf/provision"
+	"js-wf/reconcile"
+	"js-wf/testcluster"
+	"js-wf/worker"
+)
+
+// The first sustained R5 mixed-workload row. This is not the full Tier 3 matrix
+// or its 24-hour release soak; unsupported rows are not treated as covered.
+func TestFiveContainerMixedJournalLeaderEveryThirtySeconds(t *testing.T) {
+	if os.Getenv("WF_TIER3_MATRIX") != "1" {
+		t.Skip("set WF_TIER3_MATRIX=1 for sustained five-container mixed journal faults")
+	}
+	duration := 10 * time.Minute
+	if value := os.Getenv("WF_TIER3_MATRIX_DURATION"); value != "" {
+		var err error
+		duration, err = time.ParseDuration(value)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	if duration != 35*time.Second && duration != 10*time.Minute && duration != 24*time.Hour {
+		t.Fatal("duration must be35s smoke,10m row,or24h single-row soak")
+	}
+	seed, err := testcluster.SeedFromEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rng := rand.New(rand.NewSource(seed))
+	root := os.Getenv("TIER3_MATRIX_ARTIFACT_ROOT")
+	if root == "" {
+		root = t.TempDir()
+	}
+	if err := os.MkdirAll(root, 0755); err != nil {
+		t.Fatal(err)
+	}
+	cluster, err := testcluster.StartDockerCluster(filepath.Join(root, "cluster"), 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	defer func() {
+		for node := 0; node < 5; node++ {
+			logs, err := cluster.Logs(node)
+			if err != nil {
+				t.Errorf("server log%d: %v", node, err)
+				continue
+			}
+			if err := os.WriteFile(filepath.Join(root, fmt.Sprintf("server-%d.log", node)), []byte(logs), 0644); err != nil {
+				t.Error(err)
+			}
+		}
+	}()
+	ctx, cancel := context.WithTimeout(context.Background(), duration+6*time.Minute)
+	defer cancel()
+	urls := make([]string, 5)
+	for node := range urls {
+		urls[node] = cluster.ClientURL(node)
+	}
+	nc, err := nats.Connect(strings.Join(urls, ","), nats.MaxReconnects(-1), nats.ReconnectWait(100*time.Millisecond), nats.IgnoreDiscoveredServers(), nats.Timeout(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer nc.Close()
+	js, err := jetstream.New(nc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ready, stopReady := context.WithTimeout(ctx, 45*time.Second)
+	for ready.Err() == nil {
+		attempt, stop := context.WithTimeout(ready, 3*time.Second)
+		err = provision.Ensure(attempt, js, 5)
+		stop()
+		if err == nil {
+			break
+		}
+		if !matrixTransientTransport(err) {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	stopReady()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var recorder history.Recorder
+	c := client.NewObserved(js, &recorder)
+	var evidenceMu sync.Mutex
+	var dispatch []worker.DispatchEvent
+	var scans []struct {
+		At     time.Time
+		Cursor uint64
+		Result reconcile.ScanResult
+		Error  string
+	}
+	var faults []matrixLeaderFault
+	var samples []matrixLatencySample
+	var fleet sync.WaitGroup
+	workCtx, stopWork := context.WithCancel(ctx)
+	fleetErrors := make(chan error, provision.Partitions+3)
+	launch := func(run func() error) {
+		fleet.Add(1)
+		go func() {
+			defer fleet.Done()
+			if err := run(); err != nil && workCtx.Err() == nil {
+				fleetErrors <- err
+				cancel()
+			}
+		}()
+	}
+	var workers []*worker.Worker
+	defer func() {
+		stopWork()
+		fleet.Wait()
+		for _, w := range workers {
+			_ = w.Close()
+		}
+	}()
+	for node := 0; node < 5; node++ {
+		w, err := worker.New(ctx, js, fmt.Sprintf("tier3-mixed-%d", node), matrixLeaderHandlers(), worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
+			evidenceMu.Lock()
+			dispatch = append(dispatch, event)
+			evidenceMu.Unlock()
+		}))
+		if err != nil {
+			t.Fatal(err)
+		}
+		workers = append(workers, w)
+	}
+	for part := uint32(0); part < provision.Partitions; part++ {
+		w := workers[part%5]
+		launch(func() error { return w.RunPartition(workCtx, part) })
+	}
+	launch(func() error { return reconcile.RunStartLoop(workCtx, js, "tier3-mixed-start", time.Second, 32) })
+	launch(func() error { return reconcile.RunSignalLoop(workCtx, js, "tier3-mixed-signal", time.Second, 32) })
+	launch(func() error {
+		return reconcile.RunSuspendedLoopObserved(workCtx, js, "tier3-mixed-suspended", time.Second, 8, func(cursor uint64, result reconcile.ScanResult, err error) {
+			evidenceMu.Lock()
+			defer evidenceMu.Unlock()
+			message := ""
+			if err != nil {
+				message = err.Error()
+			}
+			scans = append(scans, struct {
+				At     time.Time
+				Cursor uint64
+				Result reconcile.ScanResult
+				Error  string
+			}{time.Now().UTC(), cursor, result, message})
+		})
+	})
+	defer func() {
+		stopWork()
+		fleet.Wait()
+		write := func(name string, value any) {
+			data, err := json.MarshalIndent(value, "", "  ")
+			if err == nil {
+				err = os.WriteFile(filepath.Join(root, name), data, 0644)
+			}
+			if err != nil {
+				t.Error(err)
+			}
+		}
+		evidenceMu.Lock()
+		write("dispatch.json", dispatch)
+		write("suspended-scans.json", scans)
+		evidenceMu.Unlock()
+		write("faults.json", faults)
+		write("latencies.json", samples)
+		var metrics []worker.Metrics
+		for _, w := range workers {
+			metrics = append(metrics, w.Metrics())
+		}
+		write("worker-metrics.json", metrics)
+		f, err := os.Create(filepath.Join(root, "history.jsonl"))
+		if err != nil {
+			t.Error(err)
+		} else {
+			if err := recorder.WriteJSONL(f); err != nil {
+				t.Error(err)
+			}
+			if err := f.Close(); err != nil {
+				t.Error(err)
+			}
+		}
+	}()
+	ready, stopReady = context.WithTimeout(ctx, 60*time.Second)
+	err = waitFiveReplicaReadiness(ready, js, 0)
+	stopReady()
+	if err != nil {
+		t.Fatal(err)
+	}
+	started := time.Now()
+	end := started.Add(duration)
+	faultDone := make(chan error, 1)
+	go func() {
+		for scheduled := started.Add(30 * time.Second); scheduled.Before(end); scheduled = scheduled.Add(30 * time.Second) {
+			delay := time.Until(scheduled)
+			if delay < 0 {
+				delay = 0
+			}
+			timer := time.NewTimer(delay)
+			select {
+			case <-ctx.Done():
+				timer.Stop()
+				faultDone <- ctx.Err()
+				return
+			case <-timer.C:
+			}
+			event, err := killFiveContainerMixedJournalLeader(ctx, js, cluster, scheduled, filepath.Join(root, fmt.Sprintf("fault-%d", len(faults)+1)))
+			evidenceMu.Lock()
+			faults = append(faults, event)
+			evidenceMu.Unlock()
+			if err != nil {
+				t.Logf("tier3 journal fault failed: %v", err)
+				cancel()
+				faultDone <- err
+				return
+			}
+			t.Logf("tier3 journal fault node=%d scheduled=%s killed=%s healed=%s", event.Node, event.Scheduled.Sub(started), event.Killed.Sub(started), event.Healed.Sub(started))
+		}
+		faultDone <- nil
+	}()
+	faultJoined := false
+	defer func() {
+		if !faultJoined {
+			cancel()
+			<-faultDone
+		}
+	}()
+	batches := 0
+	for time.Now().Before(end) && ctx.Err() == nil {
+		kinds := []string{"matrixshort", "matrixshort", "matrixshort", "matrixshort", "matrixtimer", "matrixtimer", "matrixtimer", "matrixsignal", "matrixsignal", "matrixfanout"}
+		rng.Shuffle(len(kinds), func(i, j int) { kinds[i], kinds[j] = kinds[j], kinds[i] })
+		batchCtx, stopBatch := context.WithTimeout(ctx, 5*time.Minute)
+		var batch sync.WaitGroup
+		batchErrors := make(chan error, len(kinds))
+		for index, typ := range kinds {
+			id := fmt.Sprintf("tier3-%d-batch-%d-%d", seed, batches, index)
+			batch.Add(1)
+			go func() {
+				defer batch.Done()
+				if err := matrixRetryClient(batchCtx, func(attempt context.Context) error {
+					_, err := c.Start(attempt, typ, id, []byte(`null`))
+					if errors.Is(err, client.ErrAlreadyStarted) {
+						return nil
+					}
+					return err
+				}); err != nil {
+					batchErrors <- err
+					return
+				}
+				if typ == "matrixsignal" {
+					for n := 0; n < 8; n++ {
+						if err := matrixRetryClient(batchCtx, func(attempt context.Context) error {
+							_, err := c.Signal(attempt, typ, id, "go", []byte(strconv.Itoa(n)), fmt.Sprintf("signal-%d", n))
+							return err
+						}); err != nil {
+							batchErrors <- err
+							return
+						}
+					}
+				}
+				value, err := c.Await(batchCtx, typ, id)
+				if err != nil || string(value) != "42" {
+					batchErrors <- fmt.Errorf("result%s/%s=%s err=%v", typ, id, value, err)
+				}
+			}()
+		}
+		batch.Wait()
+		stopBatch()
+		close(batchErrors)
+		for err := range batchErrors {
+			t.Fatal(err)
+		}
+		batches++
+		if batches%10 == 0 {
+			report, err := matrixRetainedAudit(ctx, js)
+			if err != nil || report.Invocations != batches*28 || report.Journals != batches*28 || report.Terminal != batches*28 {
+				t.Fatalf("checkpoint batch=%d report=%+v err=%v", batches, report, err)
+			}
+			t.Logf("tier3 checkpoint batch=%d report=%+v", batches, report)
+		}
+		t.Logf("tier3 mixed batch=%d elapsed=%s", batches, time.Since(started))
+	}
+	if err := <-faultDone; err != nil {
+		faultJoined = true
+		t.Fatal(err)
+	}
+	faultJoined = true
+	if ctx.Err() != nil {
+		select {
+		case err := <-fleetErrors:
+			t.Fatal(err)
+		default:
+			t.Fatal(ctx.Err())
+		}
+	}
+	expectedFaults := int((duration - time.Nanosecond) / (30 * time.Second))
+	if len(faults) != expectedFaults {
+		t.Fatalf("faults=%d want=%d", len(faults), expectedFaults)
+	}
+	if len(faults) == 0 {
+		t.Fatal("no journal fault executed")
+	}
+	completionDeadline := faults[len(faults)-1].Healed.Add(5 * time.Minute)
+	inv, err := matrixReadMetadata(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, err := matrixReadMetadata(ctx, func(attempt context.Context) (*jetstream.StreamInfo, error) { return inv.Info(attempt) })
+	if err != nil {
+		t.Fatal(err)
+	}
+	for sequence := info.State.FirstSeq; sequence <= info.State.LastSeq; sequence++ {
+		attempt, stop := context.WithTimeout(ctx, 20*time.Second)
+		msg, err := inv.GetMsg(attempt, sequence)
+		if err == nil {
+			parts := strings.Split(msg.Subject, ".")
+			var next []matrixLatencySample
+			next, err = matrixInvocationLatencies(attempt, js, parts[2], parts[3], msg.Time, completionDeadline)
+			samples = append(samples, next...)
+		}
+		stop()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	report, err := matrixRetainedAudit(ctx, js)
+	want := batches * 28
+	if err != nil || report.Invocations != want || report.Journals != want || report.Terminal != want {
+		t.Fatalf("retained=%+v want=%d err=%v", report, want, err)
+	}
+	for _, check := range []func([]client.Operation, time.Duration) (porcupine.CheckResult, error){history.CheckStarts, history.CheckSignals, history.CheckResults} {
+		result, err := check(recorder.Snapshot(), 30*time.Second)
+		if err != nil || result != porcupine.Ok {
+			t.Fatalf("history=%v err=%v", result, err)
+		}
+	}
+	for _, typ := range []string{"matrixshort", "matrixtimer", "matrixsignal", "matrixfanout", "matrixchild", "matrixgrandchild"} {
+		var terminal, progress []time.Duration
+		for _, sample := range samples {
+			if sample.Type != typ {
+				continue
+			}
+			if sample.Event == "terminal" {
+				terminal = append(terminal, sample.Delay)
+			} else {
+				progress = append(progress, sample.Delay)
+			}
+		}
+		expectedCounts := map[string]int{"matrixshort": 4, "matrixtimer": 3, "matrixsignal": 2, "matrixfanout": 1, "matrixchild": 6, "matrixgrandchild": 12}
+		if len(terminal) != batches*expectedCounts[typ] || len(progress) == 0 {
+			t.Fatalf("missing%s latency samples", typ)
+		}
+		percentile := func(values []time.Duration) time.Duration {
+			sort.Slice(values, func(i, j int) bool { return values[i] < values[j] })
+			return values[(99*len(values)+99)/100-1]
+		}
+		tp, pp := percentile(terminal), percentile(progress)
+		t.Logf("TIER3_MIXED_CELL type=%s invocations=%d terminal_p99=%s progress_p99=%s", typ, len(terminal), tp, pp)
+		if tp >= 30*time.Second || pp >= 30*time.Second {
+			t.Errorf("%s terminal/progress p99=%s/%s want<30s", typ, tp, pp)
+		}
+	}
+	run, err := js.Stream(ctx, "WF_RUN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	drain, stopDrain := context.WithTimeout(ctx, 30*time.Second)
+	defer stopDrain()
+	for {
+		attempt, stop := context.WithTimeout(drain, 2*time.Second)
+		state, err := run.Info(attempt)
+		stop()
+		drained := err == nil && state.State.Msgs == 0
+		if drained {
+			for part := uint32(0); part < provision.Partitions; part++ {
+				attempt, stop := context.WithTimeout(drain, 2*time.Second)
+				consumer, err := run.Consumer(attempt, fmt.Sprintf("WF_P_%02d", part))
+				var info *jetstream.ConsumerInfo
+				if err == nil {
+					info, err = consumer.Info(attempt)
+				}
+				stop()
+				if err != nil || info.NumPending != 0 || info.NumAckPending != 0 {
+					drained = false
+					break
+				}
+			}
+		}
+		if drained {
+			break
+		}
+		if drain.Err() != nil {
+			t.Fatalf("run queue not drained: %+v %v", state, err)
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	t.Logf("TIER3_MIXED_RESULT row=journal seed=%d duration=%s five_replicas=true batches=%d invocations=%d entries=%d faults=%d full_matrix_release=false", seed, duration, batches, want, report.Entries, len(faults))
+}
+
+func killFiveContainerMixedJournalLeader(ctx context.Context, js jetstream.JetStream, cluster *testcluster.DockerCluster, scheduled time.Time, artifactPrefix string) (matrixLeaderFault, error) {
+	event := matrixLeaderFault{Scheduled: scheduled, Node: -1}
+	bound, stop := context.WithTimeout(ctx, 60*time.Second)
+	defer stop()
+	stream, err := matrixReadMetadata(bound, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_JRN") })
+	if err != nil {
+		return event, err
+	}
+	info, err := matrixReadMetadata(bound, func(attempt context.Context) (*jetstream.StreamInfo, error) { return stream.Info(attempt) })
+	if err != nil || info.Cluster == nil {
+		return event, fmt.Errorf("journal leader info=%+v err=%v", info, err)
+	}
+	for node := 0; node < 5; node++ {
+		if info.Cluster.Leader == cluster.NodeName(node) {
+			event.Node = node
+			break
+		}
+	}
+	if event.Node < 0 {
+		return event, fmt.Errorf("unknown journal leader%q", info.Cluster.Leader)
+	}
+	clientURL, monitorURL := cluster.ClientURL(event.Node), cluster.MonitorURL(event.Node)
+	logs, err := cluster.Logs(event.Node)
+	if err != nil {
+		return event, err
+	}
+	if err := os.WriteFile(artifactPrefix+"-server-before.log", []byte(logs), 0644); err != nil {
+		return event, err
+	}
+	data, err := json.MarshalIndent(info, "", "  ")
+	if err != nil {
+		return event, err
+	}
+	if err := os.WriteFile(artifactPrefix+"-journal-before.json", data, 0644); err != nil {
+		return event, err
+	}
+	event.Killed = time.Now()
+	if err := cluster.KillNode(event.Node); err != nil {
+		return event, err
+	}
+	if err := cluster.RestartNode(event.Node); err != nil {
+		return event, err
+	}
+	if cluster.ClientURL(event.Node) != clientURL || cluster.MonitorURL(event.Node) != monitorURL {
+		return event, fmt.Errorf("restart changed persistent client/monitor address")
+	}
+	if err := waitFiveReplicaReadiness(bound, js, 0); err != nil {
+		return event, err
+	}
+	event.Healed = time.Now()
+	return event, nil
+}

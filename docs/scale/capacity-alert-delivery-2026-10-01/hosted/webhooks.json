@@ -1,0 +1,84 @@
+[
+  {
+    "receiver": "local-fixture",
+    "status": "firing",
+    "alerts": [
+      {
+        "status": "firing",
+        "labels": {
+          "alertname": "WorkflowJournalCapacityHigh",
+          "cluster": "monitoring-fixture",
+          "severity": "warning"
+        },
+        "annotations": {
+          "description": "WF_JRN has reached 75.31% of its configured byte cap. Increase the cap or retire completed invocations before writes are rejected.",
+          "summary": "Workflow journal is at least 70% full"
+        },
+        "startsAt": "2026-10-01T16:56:02.158Z",
+        "endsAt": "0001-01-01T00:00:00Z",
+        "generatorURL": "http://runnervm8df0l:42859/graph?g0.expr=max+by+%28cluster%29+%28js_wf_journal_capacity_ratio%29+%3E%3D+0.7\u0026g0.tab=1",
+        "fingerprint": "b52c637df05b42f5"
+      }
+    ],
+    "notification_reason": "first notification",
+    "groupLabels": {
+      "alertname": "WorkflowJournalCapacityHigh",
+      "cluster": "monitoring-fixture"
+    },
+    "commonLabels": {
+      "alertname": "WorkflowJournalCapacityHigh",
+      "cluster": "monitoring-fixture",
+      "severity": "warning"
+    },
+    "commonAnnotations": {
+      "description": "WF_JRN has reached 75.31% of its configured byte cap. Increase the cap or retire completed invocations before writes are rejected.",
+      "summary": "Workflow journal is at least 70% full"
+    },
+    "routeLabels": {},
+    "externalURL": "http://runnervm8df0l:36991",
+    "version": "4",
+    "groupKey": "{}:{alertname=\"WorkflowJournalCapacityHigh\", cluster=\"monitoring-fixture\"}",
+    "truncatedAlerts": 0
+  },
+  {
+    "receiver": "local-fixture",
+    "status": "resolved",
+    "alerts": [
+      {
+        "status": "resolved",
+        "labels": {
+          "alertname": "WorkflowJournalCapacityHigh",
+          "cluster": "monitoring-fixture",
+          "severity": "warning"
+        },
+        "annotations": {
+          "description": "WF_JRN has reached 75.31% of its configured byte cap. Increase the cap or retire completed invocations before writes are rejected.",
+          "summary": "Workflow journal is at least 70% full"
+        },
+        "startsAt": "2026-10-01T16:56:02.158Z",
+        "endsAt": "2026-10-01T16:56:02.408Z",
+        "generatorURL": "http://runnervm8df0l:42859/graph?g0.expr=max+by+%28cluster%29+%28js_wf_journal_capacity_ratio%29+%3E%3D+0.7\u0026g0.tab=1",
+        "fingerprint": "b52c637df05b42f5"
+      }
+    ],
+    "notification_reason": "all alerts resolved",
+    "groupLabels": {
+      "alertname": "WorkflowJournalCapacityHigh",
+      "cluster": "monitoring-fixture"
+    },
+    "commonLabels": {
+      "alertname": "WorkflowJournalCapacityHigh",
+      "cluster": "monitoring-fixture",
+      "severity": "warning"
+    },
+    "commonAnnotations": {
+      "description": "WF_JRN has reached 75.31% of its configured byte cap. Increase the cap or retire completed invocations before writes are rejected.",
+      "summary": "Workflow journal is at least 70% full"
+    },
+    "routeLabels": {},
+    "externalURL": "http://runnervm8df0l:36991",
+    "version": "4",
+    "groupKey": "{}:{alertname=\"WorkflowJournalCapacityHigh\", cluster=\"monitoring-fixture\"}",
+    "truncatedAlerts": 0
+  }
+]

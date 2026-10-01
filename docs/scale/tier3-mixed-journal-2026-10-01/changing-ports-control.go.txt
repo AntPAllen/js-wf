@@ -245,10 +245,10 @@ func (c *DockerCluster) RestartNode(i int) error {
 	// Retain published ports across replacement containers. Long-lived clients
 	// must be able to reconnect after every original peer has been restarted.
 	clientBinding, monitorBinding := "127.0.0.1::4222", "127.0.0.1::8222"
-	if c.urls[i] != "" {
+	if false && c.urls[i] != "" {
 		clientBinding = strings.TrimPrefix(c.urls[i], "nats://") + ":4222"
 	}
-	if c.monitorURLs[i] != "" {
+	if false && c.monitorURLs[i] != "" {
 		monitorBinding = strings.TrimPrefix(c.monitorURLs[i], "http://") + ":8222"
 	}
 	args := []string{"run", "-d", "--rm", "--name", c.names[i], "--network", c.clientNetwork, "--user", fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()), "-p", clientBinding, "-p", monitorBinding, "-v", store + ":/data", "-v", filepath.Join(c.root, "nats.conf") + ":/etc/nats.conf:ro"}
