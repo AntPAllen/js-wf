@@ -511,6 +511,15 @@ counters are cross-checked. Raw p99, histories, retained invariants and physical
 drain remain required. A35s smoke performs the full45s pause; ten minutes require
 ten pauses. This does not replace the full24h mixed fault matrix.
 
+The retained fencing reviewer joins exact worker/run/delivery fetch records to
+journal terminal timestamps and confirmed fault intervals. It distinguishes
+already-terminal duplicate fetches from completion during an original delivery,
+while an owner is stopped, or after fencing. Later invocation ack observations
+are kept separate from the exact delivery; local ack success alone is not broker
+commit evidence. This review supplements history/invariant/drain checks and does
+not infer server causes or full-release acceptance. Missing or ambiguous original
+fetch/terminal evidence fails the review rather than becoming a causal claim.
+
 **The "done" bar for a release**
 
 1. Tier 1: 100 000 seeds clean.

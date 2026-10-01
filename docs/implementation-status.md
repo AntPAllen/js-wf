@@ -4676,8 +4676,9 @@ The [hosted all-server restart run36910529449](scale/tier3-mixed-restart-2026-10
 is terminal SUCCESS at0d6a94b:684.29s/685.325s package,1,960 invocations,21,598
 entries and19 verified all-five-down restarts. Largest terminal p99 is17.777s;
 all history/state/drain and explanation checks pass. All37 heartbeat fencing
-events overlap confirmed outages;36 invocations complete later,one terminal
-child's duplicate is explicitly distinguished from completion. All69 repairs
+events overlap confirmed outages;36 invocations complete later,one child
+completed during its original delivery before fencing (its fetch precedes the
+terminal). The earlier duplicate-cleanup description is corrected. All69 repairs
 have checked decisions. The downloaded native events and artifacts reverify
 unchanged. This closes that single ten-minute source/row, not the full matrix.
 
@@ -4889,3 +4890,28 @@ is queued atba824e2; exact source/inputs are retained beside the smoke. It requi
 ten confirmed45s pauses with original PID/lease/fencing evidence and unchanged
 mixed gates. The worker-kill campaign36923802476 remains in progress. Neither live
 handle is terminal acceptance.
+
+
+## Worker-kill ten-minute proof and reproducible fencing timeline review
+
+[Hosted run36923802476](scale/tier3-mixed-worker-kill-2026-10-01/hosted-ten-minute/)
+is terminal SUCCESS at3a82c86:669.60s /670.625s package,784 completions,8,657
+entries and119 confirmed five-second SIGKILL slots. All original artifact guards
+pass, including49 acquired held targets,124 process generations and five surviving
+final counter snapshots. Worst raw terminal p99 is17.919s and progress p99 is13.244s;
+histories/invariants/physical drain pass. Zero fencing is recorded; killed final
+counters remain unavailable. All219 repairs are acknowledged with checked decisions.
+This closes one ten-minute slice, not in-flight effect combinations or24h coverage.
+
+`scripts/review-tier3-fencing.py` now makes per-event timeline review reproducible
+from original dispatch records and journal terminal timestamps, including gzip
+artifacts. It distinguishes terminal before fetch, completion during the original
+delivery, completion while an owner was stopped, and completion after fencing.
+Later invocation ack observations are separate from exact delivery observations;
+a nil local ack result alone cannot prove broker commit. Missing/wrong/duplicate
+fetches, missing terminals and reversed timelines fail closed. The new review
+passes all retained journal/consumer/restart/fan-out/route/pause proofs. It corrects
+one restart narrative: that child was fetched before completion and fenced later,
+so it was not an already-terminal duplicate fetch. Original timestamps and all
+acceptance results are unchanged. All50 Python tests pass, including nanosecond
+ordering and resumed-ownership controls. Future R5 CI rows retain this review.

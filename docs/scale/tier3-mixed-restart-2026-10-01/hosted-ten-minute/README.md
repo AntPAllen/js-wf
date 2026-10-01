@@ -12,8 +12,9 @@ All37 fencing records match worker counters and are heartbeat ownership
 confirmation failures within confirmed all-server outages. Per-event exact
 delivery steps, terminal samples and later invocation acknowledgements are
 retained. Thirty-six invocations complete after fencing; one was already
-terminal before its duplicate delivery's heartbeat failed. Its later cleanup
-is distinguished from completion. No exact server mechanism is asserted.
+terminal before fencing, but its delivery was fetched before that terminal.
+It completed during the original delivery; it is not classified as an
+already-terminal duplicate fetch. No exact server mechanism is asserted.
 All69 acknowledged repairs (7start,43signal,19suspended) have checked decisions.
 
 This source predates the new mid-fan-out/route rows and route-only advertisement.
