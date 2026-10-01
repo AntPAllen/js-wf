@@ -215,6 +215,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		Error  string
 	}
 	var clockObservations []matrixServerClockObservation
+	var clockRoles []matrixClockRoleObservation
+	recordRoles := func(records []matrixClockRoleObservation) {
+		evidenceMu.Lock()
+		clockRoles = append(clockRoles, records...)
+		evidenceMu.Unlock()
+	}
 	var faults []matrixLeaderFault
 	var samples []matrixLatencySample
 	var fleet sync.WaitGroup
@@ -401,6 +407,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		evidenceMu.Unlock()
 		evidenceMu.Lock()
 		write("server-clock-observations.json", clockObservations)
+		write("server-clock-roles.json", clockRoles)
 		if matrixServerClockOffset(row) != 0 {
 			operations := controllerOperations
 			if controllerAuditOperations != nil {
@@ -473,6 +480,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		evidenceMu.Unlock()
 		return err
 	}
+	if matrixServerClockOffset(row) != 0 {
+		roles, err := preferMatrixClockLeaders(ctx, nc, js, cluster, "initial", 0)
+		recordRoles(roles)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 	if err := observeClocks("initial", 0); err != nil {
 		t.Fatal(err)
 	}
@@ -506,12 +520,23 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			var event matrixLeaderFault
 			var err error
 			prefix := filepath.Join(root, fmt.Sprintf("fault-%d", len(faults)+1))
+			if matrixServerClockOffset(row) != 0 {
+				roles, roleErr := preferMatrixClockLeaders(ctx, nc, js, cluster, "before", len(faults)+1)
+				recordRoles(roles)
+				if roleErr != nil {
+					cancel()
+					faultDone <- roleErr
+					return
+				}
+			}
 			if err := observeClocks("before", len(faults)+1); err != nil {
 				cancel()
 				faultDone <- err
 				return
 			}
-			if row == "worker_isolation" {
+			if matrixServerClockOffset(row) != 0 {
+				event, err = killFiveContainerMixedClockLeader(ctx, js, cluster, scheduled, prefix, len(faults)+1, recordRoles)
+			} else if row == "worker_isolation" {
 				event, err = isolateMatrixWorkerReplies(ctx, processes, workerProxies, faultRNG.Intn(len(processes)), scheduled, func(c context.Context, fleet []*matrixProcessWorker, first int) (int, matrixIsolationTarget, func() error, error) {
 					return armMatrixUnfinishedIsolationTarget(c, js, fleet, first)
 				})

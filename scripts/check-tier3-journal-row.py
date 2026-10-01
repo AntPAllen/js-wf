@@ -463,6 +463,51 @@ def check_server_clock_artifacts(root, report, selected_row):
                 journal_sigkill_boundaries=len(faults), checks_all_five_servers=True)
 
 
+def check_server_clock_role_artifacts(root, report, selected_row):
+    faults = json.loads((root/'faults.json').read_text())
+    roles = json.loads((root/'server-clock-roles.json').read_text())
+    if not faults or len(faults) != report['confirmed_faults']:raise ValueError('incomplete clock-role fault count')
+    expected = {('initial',0,name) for name in ('WF_RUN','WF_JRN')} | {
+        (stage,index,name) for stage in ('before','replacement','after')
+        for index in range(1,len(faults)+1) for name in ('WF_RUN','WF_JRN')
+    }
+    seen = set()
+    for role in roles:
+        key = (role['stage'],role['fault'],role['stream'])
+        if key not in expected or key in seen:raise ValueError('missing/duplicate/unexpected clock role observation')
+        seen.add(key)
+        info = role['info'];leader = info['cluster']['leader'];at = timestamp_ns(role['observed'])
+        if info['config']['name'] != role['stream'] or info['config']['num_replicas'] != 5 or len(info['cluster']['replicas']) != 4:
+            raise ValueError('clock role is not the required R5 stream')
+        if key[0] in ('initial','before') and not leader.endswith('-n4'):
+            raise ValueError('skewed peer never owned the timer/journal clock roles')
+        if key[0] in ('replacement','after') and not any(leader.endswith(f'-n{node}') for node in range(4)):
+            raise ValueError('clock role never changed to an unshifted peer')
+        if key[0] == 'initial':
+            if at > timestamp_ns(faults[0]['scheduled']):raise ValueError('initial role proof follows fault')
+        else:
+            fault = faults[key[1]-1]
+            if fault['node'] != 4:raise ValueError('clock cut did not kill the skewed clock owner')
+            operations = json.loads((root/f"fault-{key[1]}-journal-operations.json").read_text())
+            removed,restarted = map(timestamp_ns,[x['at'] for x in operations])
+            lo,hi = {
+                'before':(timestamp_ns(fault['scheduled']),timestamp_ns(fault['killed'])),
+                'replacement':(removed,restarted),
+                'after':(restarted,timestamp_ns(fault['healed']))
+            }[key[0]]
+            if not lo <= at <= hi:raise ValueError('clock-role change does not belong to its actual kill boundary')
+    if seen != expected:raise ValueError('incomplete timer/journal clock-role transitions')
+    offset = 60_000_000_000 if selected_row == 'server_clock_ahead' else -60_000_000_000
+    shifted = 0
+    for event in json.loads((root/'controller-operations.json').read_text()):
+        if event['Operation'] != 'timer_clock' or event.get('Error') or not event.get('ServerTime'):continue
+        end = timestamp_ns(event['At']);start = end-event['Duration'];server = timestamp_ns(event['ServerTime'])
+        if start+offset-2_000_000_000 <= server <= end+offset+2_000_000_000 and not start-2_000_000_000 <= server <= end+2_000_000_000 and end <= timestamp_ns(faults[0]['killed']):shifted += 1
+    if not shifted:raise ValueError('timer clock lookups never used the admitted skewed source')
+    return dict(role_observations=len(seen), confirmed_skewed_owner_kills=len(faults),
+                shifted_timer_clock_lookups=shifted, admits_all_in_flight_timer_cut_combinations=False)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, help='required consumer/restart fault artifacts')
@@ -501,5 +546,6 @@ if __name__ == '__main__':
         report['server_clock_artifact_checks']=check_server_clock_artifacts(args.root,report,args.row)
         controller=load('controller_latency','check-controller-latency.py')
         report['controller_latency_artifact_checks']=controller.check(args.root,report,timestamp_ns)
+        report['clock_role_artifact_checks']=check_server_clock_role_artifacts(args.root,report,args.row)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))

@@ -1,0 +1,58 @@
+{
+  "scope": "single five-container R5 server clock skew with journal SIGKILL row",
+  "seed": 1,
+  "duration_seconds": 35,
+  "shortened_smoke": true,
+  "invocations": 224,
+  "journal_entries": 2468,
+  "confirmed_faults": 1,
+  "active_consumer_faults": null,
+  "cells": {
+    "matrixshort": {
+      "invocations": 32,
+      "terminal_p99_seconds": 0.11488299600000001,
+      "progress_p99_seconds": 0.065473923
+    },
+    "matrixtimer": {
+      "invocations": 24,
+      "terminal_p99_seconds": 0.271484801,
+      "progress_p99_seconds": 7.001256058
+    },
+    "matrixsignal": {
+      "invocations": 16,
+      "terminal_p99_seconds": 3.382088692,
+      "progress_p99_seconds": 3.314221901
+    },
+    "matrixfanout": {
+      "invocations": 8,
+      "terminal_p99_seconds": 3.046282581,
+      "progress_p99_seconds": 3.525648086
+    },
+    "matrixchild": {
+      "invocations": 48,
+      "terminal_p99_seconds": 0.19353441400000002,
+      "progress_p99_seconds": 0.33695507199999997
+    },
+    "matrixgrandchild": {
+      "invocations": 96,
+      "terminal_p99_seconds": 0.147446242,
+      "progress_p99_seconds": 0.077368049
+    }
+  },
+  "clears_full_tier3_release": false,
+  "server_clock_artifact_checks": {
+    "skewed_server": 4,
+    "expected_offset_ns": 60000000000,
+    "actual_clock_observations": 15,
+    "journal_sigkill_boundaries": 1,
+    "checks_all_five_servers": true
+  },
+  "controller_latency_artifact_checks": {
+    "append_windows": 2468,
+    "invocations": 224,
+    "timer_waits": 192,
+    "clock": "unshifted-controller-conservative-bounds",
+    "uses_broker_timestamps": false,
+    "unknown_return_is_commit_upper_bound": false
+  }
+}

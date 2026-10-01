@@ -553,7 +553,15 @@ completion. Latency p99 uses conservative delay bounds with the strict30s gate.
 Raw broker timestamps remain retained data and never supply mixed-clock latency.
 The artifact checker reconstructs windows,sample origins,p99 and timer coverage.
 Terminal windows overlapping a fetch or fencing event retain an uncertain
-classification; they are never presented as exact commit timestamps. No sustained clock
+classification; they are never presented as exact commit timestamps. Clock-role admission now places both `WF_RUN` and `WF_JRN` on the skewed peer
+before workload start and each cut. The fault kills that peer and holds it down
+until both streams elect unshifted replacements, then restarts its retained
+store and requires full R5 recovery. Initial,before,replacement and after role
+metadata plus actual shifted timer-clock lookups are required. Peer-only smokes
+whose timer lookups stayed on unshifted leaders are retained as limited evidence
+and cannot clear this strengthened requirement. This admission does not prove
+every in-flight timer/effect/continuation cut combination; those remain open.
+No sustained clock
 row is verified by the focused controller contract; existing focused clock proofs and the full
 24-hour matrix remain separate requirements.
 

@@ -5100,3 +5100,31 @@ process evidence,all mixed cells and independent controller latency/timer
 artifact guards. Smoke is not sustained acceptance. Comprehensive36929826425
 remains in progress; the million-timer service remains active atPID18146 with
 240,228 receipts at the last sampled checkpoint.
+
+
+## Peer-clock smokes verified; clock-role coverage strengthened
+
+[Original ahead smoke36935066881](scale/tier3-mixed-server-clock-2026-10-01/ahead-peer-only-smoke/)
+passes104.07s/105.084s package; [behind36935069706](scale/tier3-mixed-server-clock-2026-10-01/behind-peer-only-smoke/)
+passes98.45s/99.470s. Each has224 completions,2,468 journal entries,one journal kill,
+15 actual clock readings and192 joined timer origins. Original artifact guards,
+controller windows,all mixed histories/invariants/conservative p99/drain and both
+event reviewers reverify. All22/27 repair publications are acknowledged; zero
+fencing matches all final worker counters. Original artifacts/hashes are retained.
+
+Coverage review found actual timer-clock lookups stayed on unshifted leaders
+and journal cuts killed nodes1/0,not skewed node4. These smokes verify peer skew
+and the controller audit only; they cannot certify deadline recovery across a
+skewed source's role change. The new admission now prefers skewed node4 for both
+WF_RUN/WF_JRN before start and each cut,kills that peer,and waits for unshifted
+replacement leaders before restart. Actual role metadata at initial/before/
+replacement/after boundaries and shifted timer lookups before the first cut
+are required. Same-source re-election,idle skewed peers,wrong killed nodes and
+missing role/clock/timeline evidence fail. All67 Python tests and controller
+contracts pass; integration/worker/testcluster vet passes. Actual strengthened
+clock smokes are next; no ten-minute or full-matrix clock gate is closed,and
+not every in-flight timer/effect/continuation cut combination is admitted.
+
+Four inactive obsolete prototype test binaries were hash-recorded and removed
+from /tmp,reclaiming205,397,047 bytes. Campaign stores,raw evidence,final fixture
+binaries and active million-timer/server executables were untouched.
