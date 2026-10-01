@@ -188,6 +188,7 @@ Suspension: when an await cannot complete, the runtime appends `Suspended{waitin
 - [ ] Determinism guard with a clear error carrying index, expected and actual.
 - [ ] Code versioning hook: `ctx.Version(changeID, min, max)` journaled as an entry so a deploy can branch on it, the same shape as Temporal's `GetVersion`.
 - [ ] Replay harness: `wf.Replay(journalBytes, fn)` that runs a function against a recorded journal offline with no NATS. This is also the unit-test tool for user workflows.
+- [ ] Materialized SDK checkpoints with explicit named continuations: persist locals/runtime state, resume a registered stage without archived-prefix reads, preserve absolute identities and fencing/limits, and prove publication, repair, offline replay and retirement cuts. The [continuation contract](checkpoint-continuations.md) records implementation and remaining acceptance gates.
 
 **Proof of completion**
 

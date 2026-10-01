@@ -19,8 +19,13 @@ var ErrCheckpointStore = errors.New("checkpoint storage or publication was not c
 
 // ContinuationAnchor comes from the worker's journal/lease facts. For an
 // existing completion the epoch and panic count belong to that recorded anchor,
-// not the replacement worker's lease or a later handler attempt.
-type ContinuationAnchor struct{ Index, Epoch, PanicAttempts uint64 }
+// not the replacement worker's lease or a later handler attempt. SignalCursor
+// is the highest SignalConsumed stream sequence through that anchor; later
+// drained signals must not alter a recorded frame.
+type ContinuationAnchor struct {
+	Index, Epoch, PanicAttempts uint64
+	SignalCursor                uint64
+}
 
 // ContinuationCheckpoint describes the completed pair the worker must publish
 // into a runtime manifest before suspending and handing off. It is not proof
@@ -117,6 +122,7 @@ func Continue(c *Context, stage string, data any) error {
 	if completedIndex != 0 && anchor.Index != completedIndex {
 		return ErrInvalidCheckpoint
 	}
+	c.checkpointSignalCursor = &anchor.SignalCursor
 	frame, hash, err := c.CaptureCheckpoint(stage, json.RawMessage(locals), anchor.Index, anchor.Epoch, anchor.PanicAttempts)
 	if err != nil {
 		return err
@@ -174,3 +180,6 @@ func (c *Context) verifyContinuationObject(name string, expected []byte) error {
 }
 
 func (c *Context) blockContinuation(err error) error { c.continuationError = err; return err }
+
+// ContinuationFailure returns an unconfirmed publication error even if a handler ignored it.
+func (c *Context) ContinuationFailure() error { return c.continuationError }

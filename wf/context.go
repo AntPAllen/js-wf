@@ -77,6 +77,8 @@ type Context struct {
 	promiseResultBytes        int
 	state                     map[string]json.RawMessage
 	timerHandles              map[uint64]*TimerHandle
+	checkpointDrainedCursor   uint64
+	checkpointSignalCursor    *uint64
 	checkpointCancelledTimers map[uint64]bool
 	continuationStages        func(string) bool
 	continuationAnchor        func(uint64, bool) (ContinuationAnchor, error)

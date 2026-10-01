@@ -60,6 +60,7 @@ type Worker struct {
 	client                     *client.Client
 	ID                         string
 	Handlers                   map[string]Handler
+	continuations              map[string]map[string]ContinuationHandler
 	maxEntries                 uint64
 	maxPanicAttempts           int
 	partitionConcurrency       int
@@ -262,11 +263,17 @@ type ModeledWorkerPorts struct {
 // against narrow transports. Snapshot objects are not provided by this
 // constructor; timer scheduling is available when Timer and TimerNow are set.
 // Modeled cancellation notifications do not include the durable signal poll.
-func NewWithPorts(id string, handlers map[string]Handler, ports ModeledWorkerPorts) (*Worker, error) {
+func NewWithPorts(id string, handlers map[string]Handler, ports ModeledWorkerPorts, options ...Option) (*Worker, error) {
 	if id == "" || ports.Journal == nil || ports.Leases == nil || ports.Outcome == nil || ports.Invocation == nil || ports.Signals == nil || ports.Client == nil {
 		return nil, fmt.Errorf("invalid modeled worker configuration")
 	}
-	return &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: DefaultAckWait, heartbeatInterval: defaultHeartbeatInterval, heartbeatTicks: ports.HeartbeatTicks, operationObserver: ports.OperationObserver, operationNow: ports.OperationNow, cancelWaiters: make(map[string]*cancelWaiter), modeledCancelNotifications: ports.CancellationNotifications, cancelPollPort: ports.CancellationPoll}, nil
+	w := &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: DefaultAckWait, heartbeatInterval: defaultHeartbeatInterval, heartbeatTicks: ports.HeartbeatTicks, operationObserver: ports.OperationObserver, operationNow: ports.OperationNow, cancelWaiters: make(map[string]*cancelWaiter), modeledCancelNotifications: ports.CancellationNotifications, cancelPollPort: ports.CancellationPoll}
+	for _, option := range options {
+		if err := option(w); err != nil {
+			return nil, err
+		}
+	}
+	return w, nil
 }
 
 type panicRetryError struct{ attempt int }
@@ -631,7 +638,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	}()
 	var cancelledTimerNoOp bool
 	err = w.execute(ctx, typ, id, l, metadata.Timestamp, timer, &cancelledTimerNoOp, ops)
-	if err == nil && ctx.Err() == nil && w.jrn.HasSnapshotTransport() {
+	if err == nil && ctx.Err() == nil && w.jrn.HasSnapshotTransport() && w.continuations[typ] == nil {
 		err = w.jrn.MaybeSnapshot(ctx, typ, id, 256, 16)
 	}
 	processingCanceled := ctx.Err() != nil
@@ -707,13 +714,20 @@ func (w *Worker) enqueueCanceledHandoff(parent context.Context, typ, id string, 
 }
 
 func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wakeupAt time.Time, timer timerWakeup, cancelledTimerNoOp *bool, ops *deliveryOperations) error {
-	readStarted := ops.begin()
-	readCtx, stopRead := context.WithTimeout(ctx, 15*time.Second)
-	records, tail, err := w.jrn.Read(readCtx, typ, id)
-	stopRead()
-	ops.finish(readStarted, "journal_read", 0, "", err)
-	if err != nil {
-		return err
+	var records []journal.Record
+	var tail, baseIndex uint64
+	var resumed *journal.CheckpointRead
+	var checkpointInfo wf.CheckpointInfo
+	if w.continuations[typ] == nil {
+		started := ops.begin()
+		readCtx, stop := context.WithTimeout(ctx, 15*time.Second)
+		var err error
+		records, tail, err = w.jrn.Read(readCtx, typ, id)
+		stop()
+		ops.finish(started, "journal_read", 0, "", err)
+		if err != nil {
+			return err
+		}
 	}
 	invocationPort := w.invocationPort
 	if invocationPort == nil {
@@ -730,10 +744,49 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	if err != nil {
 		return err
 	}
+	if w.continuations[typ] != nil {
+		readStarted := ops.begin()
+		readCtx, stopRead := context.WithTimeout(ctx, 15*time.Second)
+		resumed, err = w.jrn.ReadCheckpoint(readCtx, typ, id, input.Sequence)
+		if err == nil && resumed != nil {
+			r := resumed.Snapshot.Runtime
+			_, checkpointInfo, err = wf.NewCheckpointContext(ctx, nil, nil, resumed.Frame, wf.CheckpointLocation{Type: typ, ID: id, InvSeq: input.Sequence, Index: r.Index, Epoch: r.Epoch, Hash: r.SHA256})
+			if err == nil && w.continuations[typ][checkpointInfo.Stage] == nil {
+				err = wf.ErrUnknownContinuation
+			}
+			records = append([]journal.Record{resumed.Anchor}, resumed.Records...)
+			tail, baseIndex = resumed.Tail, resumed.Anchor.Index
+		}
+		if err == nil && resumed == nil {
+			records, tail, err = w.jrn.Read(readCtx, typ, id)
+		}
+		stopRead()
+		ops.finish(readStarted, "journal_read", 0, "", err)
+		if err != nil {
+			return err
+		}
+	}
+	if resumed != nil && records[len(records)-1].Index >= w.maxEntries {
+		return journal.ErrTooLong
+	}
+	if w.continuations[typ] == nil {
+		for _, record := range records {
+			if record.Kind != journal.StepRequested {
+				continue
+			}
+			var declaration struct {
+				Kind string `json:"kind"`
+			}
+			if json.Unmarshal(record.Payload, &declaration) == nil && declaration.Kind == "checkpoint" {
+				return wf.ErrContinuationUnsupported
+			}
+		}
+	}
+	nextIndex := func() uint64 { return baseIndex + uint64(len(records)) }
 	if timer.scheduled && timer.generation != input.Sequence {
 		return nil
 	}
-	if timer.scheduled && timerWasCancelled(records, timer.step) {
+	if timer.scheduled && (timerWasCancelled(records, timer.step) || containsTimer(checkpointInfo.CancelledTimers, timer.step)) {
 		*cancelledTimerNoOp = true
 	}
 	inputData := input.Data
@@ -760,28 +813,28 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
 		_, timing, err := ops.renew(renewCtx, l, 0)
 		stopRenew()
-		ops.finish(started, "lease_renew_append", uint64(len(records)), kind, err, timing)
+		ops.finish(started, "lease_renew_append", nextIndex(), kind, err, timing)
 		if err != nil {
 			return err
 		}
 		started = ops.begin()
-		seq, err := w.jrn.Append(ctx, typ, id, journal.Entry{Epoch: l.Epoch(), Index: uint64(len(records)), Kind: kind, Payload: payload, WorkerID: w.ID}, tail)
-		ops.finish(started, "journal_append", uint64(len(records)), kind, err)
+		seq, err := w.jrn.Append(ctx, typ, id, journal.Entry{Epoch: l.Epoch(), Index: nextIndex(), Kind: kind, Payload: payload, WorkerID: w.ID}, tail)
+		ops.finish(started, "journal_append", nextIndex(), kind, err)
 		if err != nil {
 			return err
 		}
-		records = append(records, journal.Record{Entry: journal.Entry{Epoch: l.Epoch(), Index: uint64(len(records)), Kind: kind, Payload: payload, WorkerID: w.ID}, Sequence: seq})
+		records = append(records, journal.Record{Entry: journal.Entry{Epoch: l.Epoch(), Index: nextIndex(), Kind: kind, Payload: payload, WorkerID: w.ID}, Sequence: seq})
 		tail = seq
 		return nil
 	}
 	appendEntry := func(kind journal.Kind, payload json.RawMessage) error {
-		if uint64(len(records)) >= w.maxEntries {
+		if nextIndex() >= w.maxEntries {
 			return journal.ErrTooLong
 		}
 		// A new request needs a completion and a terminal slot. Other
 		// nonterminal entries also leave one slot for a durable failure.
 		if kind != journal.Completed && kind != journal.Failed &&
-			(uint64(len(records)) >= w.maxEntries-1 || kind == journal.StepRequested && uint64(len(records)) >= w.maxEntries-2) {
+			(nextIndex() >= w.maxEntries-1 || kind == journal.StepRequested && nextIndex() >= w.maxEntries-2) {
 			outcome := wf.Outcome{InvSeq: input.Sequence, Error: journal.ErrTooLong.Error()}
 			if kind == journal.StepRequested {
 				outcome.LimitRequest = payload
@@ -801,7 +854,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			return err
 		}
 	}
-	var attempts int
+	attempts := int(checkpointInfo.PanicAttempts)
 	var lastPanic string
 	for _, record := range records {
 		if record.Kind != journal.Attempt {
@@ -826,9 +879,12 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	// If the previous worker committed the final attempt but stopped before
 	// appending Failed, finish from the journal without running user code again.
 	if attempts >= w.maxPanicAttempts {
+		if lastPanic == "" {
+			lastPanic = "workflow panic attempts exhausted"
+		}
 		return failPanic(lastPanic)
 	}
-	signals, err := w.drainSignals(ctx, typ, id, input.Sequence, records, appendEntry, ops)
+	signals, err := w.drainSignalsFrom(ctx, typ, id, input.Sequence, checkpointInfo.SignalCursor, records, appendEntry, ops)
 	if err != nil {
 		return err
 	}
@@ -861,7 +917,20 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	}
 	handlerCtx, cancelHandler := context.WithCancel(ctx)
 	defer cancelHandler()
-	wctx := wf.NewContext(handlerCtx, steps, func(ctx context.Context, k wf.Kind, p json.RawMessage) error { return appendEntry(journal.Kind(k), p) }, signals...)
+	appender := func(ctx context.Context, k wf.Kind, p json.RawMessage) error { return appendEntry(journal.Kind(k), p) }
+	wctx := wf.NewContext(handlerCtx, steps, appender, signals...)
+	if resumed != nil {
+		r := resumed.Snapshot.Runtime
+		wctx, checkpointInfo, err = wf.NewCheckpointContext(handlerCtx, steps, appender, resumed.Frame, wf.CheckpointLocation{Type: typ, ID: id, InvSeq: input.Sequence, Index: r.Index, Epoch: r.Epoch, Hash: r.SHA256}, signals...)
+		if err != nil {
+			return err
+		}
+	}
+	if stages := w.continuations[typ]; stages != nil {
+		wctx.SetContinuationSupport(func(stage string) bool { return stages[stage] != nil }, func(completed uint64, recorded bool) (wf.ContinuationAnchor, error) {
+			return continuationAnchor(records, nextIndex(), l.Epoch(), checkpointInfo, completed, recorded)
+		})
+	}
 	resultBlobs := w.resultBlobs()
 	wctx.SetResultStore(func(ctx context.Context, data []byte) (string, error) {
 		if resultBlobs == nil {
@@ -909,11 +978,15 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 				runErr = fmt.Errorf("workflow panic: %v", p)
 			}
 		}()
-		result, runErr = handler(wctx, inputData)
+		if resumed != nil {
+			result, runErr = w.continuations[typ][checkpointInfo.Stage](wctx, inputData, checkpointInfo.Data)
+		} else {
+			result, runErr = handler(wctx, inputData)
+		}
 	}()
 	cancelSeen := stopCancelWatch()
 	if cancelSeen {
-		current, err := w.drainSignals(ctx, typ, id, input.Sequence, records, appendEntry, ops)
+		current, err := w.drainSignalsFrom(ctx, typ, id, input.Sequence, checkpointInfo.SignalCursor, records, appendEntry, ops)
 		if err != nil {
 			return err
 		}
@@ -935,6 +1008,12 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			return err
 		}
 		return w.persistAndNotify(ctx, typ, id, input.Sequence, payload, input.Header)
+	}
+	if failure := wctx.ContinuationFailure(); failure != nil {
+		return failure
+	}
+	if point, ok := wctx.Continuation(); ok {
+		return w.publishContinuation(ctx, typ, id, input.Sequence, l, records, point, appendEntry)
 	}
 	if panicked {
 		reason := journal.AttemptError(runErr.Error())
@@ -966,7 +1045,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	if runErr == nil {
 		runErr = wctx.CheckComplete()
 	}
-	if errors.Is(runErr, journal.ErrStale) || errors.Is(runErr, journal.ErrUnknown) || errors.Is(runErr, lease.ErrLost) || errors.Is(runErr, context.Canceled) || errors.Is(runErr, wf.ErrTimerSchedule) || errors.Is(runErr, wf.ErrChildStart) || errors.Is(runErr, ErrResultBlobUnknown) || errors.Is(runErr, ErrResultBlobUnavailable) {
+	if errors.Is(runErr, journal.ErrStale) || errors.Is(runErr, journal.ErrUnknown) || errors.Is(runErr, lease.ErrLost) || errors.Is(runErr, context.Canceled) || errors.Is(runErr, wf.ErrTimerSchedule) || errors.Is(runErr, wf.ErrChildStart) || errors.Is(runErr, ErrResultBlobUnknown) || errors.Is(runErr, ErrResultBlobUnavailable) || errors.Is(runErr, wf.ErrCheckpointStore) {
 		return runErr
 	}
 	out := wf.Outcome{InvSeq: input.Sequence, Result: result}
@@ -1215,6 +1294,10 @@ func (w *Worker) watchRunningCancellation(ctx context.Context, typ, id string, i
 }
 
 func (w *Worker) drainSignals(ctx context.Context, typ, id string, invSeq uint64, records []journal.Record, appendEntry func(journal.Kind, json.RawMessage) error, ops *deliveryOperations) ([]wf.Signal, error) {
+	return w.drainSignalsFrom(ctx, typ, id, invSeq, 0, records, appendEntry, ops)
+}
+
+func (w *Worker) drainSignalsFrom(ctx context.Context, typ, id string, invSeq, cursor uint64, records []journal.Record, appendEntry func(journal.Kind, json.RawMessage) error, ops *deliveryOperations) ([]wf.Signal, error) {
 	port := w.signalDrainPort
 	if port == nil {
 		port = NewSignalDrainPort(w.js)
@@ -1222,13 +1305,16 @@ func (w *Worker) drainSignals(ctx context.Context, typ, id string, invSeq uint64
 	if ops != nil {
 		port = observedSignalDrain{SignalDrainPort: port, operations: ops}
 	}
-	return DrainSignalsWithPort(ctx, port, typ, id, invSeq, records, appendEntry)
+	return drainSignalsFromPort(ctx, port, typ, id, invSeq, cursor, records, appendEntry)
 }
 
 // DrainSignalsWithPort runs the production signal drain against a supplied
 // retained-read transport. appendEntry is the worker's fenced journal append.
 func DrainSignalsWithPort(ctx context.Context, port SignalDrainPort, typ, id string, invSeq uint64, records []journal.Record, appendEntry func(journal.Kind, json.RawMessage) error) ([]wf.Signal, error) {
-	var lastSeq uint64
+	return drainSignalsFromPort(ctx, port, typ, id, invSeq, 0, records, appendEntry)
+}
+
+func drainSignalsFromPort(ctx context.Context, port SignalDrainPort, typ, id string, invSeq, lastSeq uint64, records []journal.Record, appendEntry func(journal.Kind, json.RawMessage) error) ([]wf.Signal, error) {
 	var signals []wf.Signal
 	for _, r := range records {
 		if r.Kind != journal.SignalConsumed {

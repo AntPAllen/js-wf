@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 
 	"js-wf/identity"
 )
@@ -37,6 +38,12 @@ type Anchor struct {
 	Epoch uint64 `json:"epoch"`
 }
 
+type Signal struct {
+	Sequence uint64 `json:"sequence"`
+	Name     string `json:"name"`
+	Payload  []byte `json:"payload"`
+}
+
 type Frame struct {
 	Version  int             `json:"version"`
 	Identity Identity        `json:"identity"`
@@ -47,6 +54,8 @@ type Frame struct {
 	// checkpoint pair and never resets between stages.
 	StepPosition    uint64                     `json:"step_position"`
 	State           map[string]json.RawMessage `json:"state"`
+	SignalCursor    uint64                     `json:"signal_cursor,omitempty"`
+	PendingSignals  []Signal                   `json:"pending_signals,omitempty"`
 	ConsumedSignals []uint64                   `json:"consumed_signals"`
 	// PromiseOutcomes retains serialized wf.Outcome payloads, including object
 	// references. Derived result caches are deliberately not persisted.
@@ -99,6 +108,19 @@ func (f Frame) validate() error {
 		if out.ResultRef == "" && out.ResultHash != "" || out.ResultRef != "" && (len(out.Result) != 0 || !validHash(out.ResultHash)) {
 			return invalid("promise result reference")
 		}
+	}
+	if !sortedUnique(f.ConsumedSignals, false, 0) {
+		return invalid("consumed signal identities")
+	}
+	var previousSignal uint64
+	for _, signal := range f.PendingSignals {
+		if signal.Sequence <= previousSignal || signal.Sequence > f.SignalCursor || identity.ValidateToken(signal.Name) != nil {
+			return invalid("buffered signal identity")
+		}
+		if _, consumed := slices.BinarySearch(f.ConsumedSignals, signal.Sequence); consumed {
+			return invalid("buffered signal already consumed")
+		}
+		previousSignal = signal.Sequence
 	}
 	for _, step := range f.CancelledTimers {
 		if step%2 != 0 {

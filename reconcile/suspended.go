@@ -226,10 +226,27 @@ func (s *SuspendedScan) inspect(ctx context.Context, input *jetstream.RawStreamM
 	if err != nil {
 		return Candidate{}, false, err
 	}
-	if len(records) == 0 || records[len(records)-1].Kind != journal.Suspended {
+	if len(records) == 0 {
 		return Candidate{}, false, nil
 	}
 	last := records[len(records)-1]
+	// A committed boundary is enabled even before its manifest or suspension.
+	if last.Kind == journal.StepCompleted && len(records) >= 2 {
+		request := records[len(records)-2]
+		var declaration struct {
+			Kind string `json:"kind"`
+			Name string `json:"name"`
+		}
+		if request.Kind == journal.StepRequested && json.Unmarshal(request.Payload, &declaration) == nil && declaration.Kind == "checkpoint" {
+			if identity.ValidateToken(declaration.Name) != nil {
+				return Candidate{}, false, fmt.Errorf("invalid checkpoint stage")
+			}
+			return Candidate{Type: typ, ID: id, Reason: "continuation", JournalSeq: last.Sequence}, true, nil
+		}
+	}
+	if last.Kind != journal.Suspended {
+		return Candidate{}, false, nil
+	}
 	var suspended struct {
 		WaitingOn string `json:"waiting_on"`
 	}
@@ -239,6 +256,12 @@ func (s *SuspendedScan) inspect(ctx context.Context, input *jetstream.RawStreamM
 	var ready bool
 	var reason string
 	switch {
+	case strings.HasPrefix(suspended.WaitingOn, "continuation:"):
+		name := strings.TrimPrefix(suspended.WaitingOn, "continuation:")
+		if identity.ValidateToken(name) != nil {
+			return Candidate{}, false, fmt.Errorf("invalid continuation wait %q", suspended.WaitingOn)
+		}
+		ready, reason = true, "continuation"
 	case strings.HasPrefix(suspended.WaitingOn, "timer:"):
 		name := strings.TrimPrefix(suspended.WaitingOn, "timer:")
 		if identity.ValidateToken(name) != nil {

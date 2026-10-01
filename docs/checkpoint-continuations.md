@@ -2,8 +2,9 @@
 
 Status: continuation contract, SDK cursor foundation, bounded frame codec and
 SDK capture/restore, archive/runtime publication and prefix-free journal reads.
-SDK Continue frame/pair publication is implemented. Worker dispatch and recovery
-remain open.
+SDK Continue publication and worker stage dispatch, suffix resume, boundary
+compaction and handoff are implemented. Full crash/restart, offline replay and
+retirement gates remain open.
 This document preserves the plan's checkpoint requirement; it does not count
 as a completed checkpoint feature.
 
@@ -16,15 +17,18 @@ workflows therefore opt into registered, named continuation functions. Each
 boundary serializes the local data needed by the next function. Existing
 ordinary handlers retain their full replay contract.
 
-The proposed registration contains an initial handler and a map of stable,
+Registration contains an initial handler and a map of stable,
 versioned continuation names. `wf.Continue(ctx, nextStage, data)`
 commits a checkpoint and ends the current delivery. Its caller must return the
 continuation result immediately. The worker invokes the named next function
 with the original invocation input and serialized continuation data. It creates
 no second invocation and does not reset the journal, fencing epoch or limits.
-Continue is callable on a context with continuation support configured. Worker
-registration/dispatch APIs remain proposed; ordinary workers return
-ErrContinuationUnsupported.
+Use `worker.WithContinuations(type, stages)` with the existing initial handler.
+Each `worker.ContinuationHandler` receives `(ctx, originalInput, locals)`.
+Registration copies the stage map at construction. Workers with an incomplete
+registry reject a retained unknown stage before user code and retry the delivery;
+the stage must remain deployed while retained checkpoints reference it. Ordinary
+workflow contexts still return ErrContinuationUnsupported.
 
 Changing a stage's implementation still requires ordinary replay/version
 compatibility within that stage. Incompatible boundaries get a new name, and
@@ -37,7 +41,8 @@ A versioned, size-bounded checkpoint frame contains:
 
 - Workflow type, ID and invocation stream sequence.
 - Versioned next-stage name and JSON continuation data.
-- Materialized SDK state values, consumed signal identities and resolved promise
+- Materialized SDK state values, consumed signal identities, buffered unconsumed
+  signals with their retained-read cursor, and resolved promise
   outcome payloads, including content references rather than unbounded result caches.
 - Absolute SDK entry position after the checkpoint's request/completion pair.
 - Journal logical index/epoch for its anchor, with actual stream sequence carried
@@ -53,7 +58,7 @@ meaning. A checkpoint never resets the 100,000-entry journal limit.
 The cursor foundation adds a private SDK offset. Relative `position` still
 indexes the supplied suffix; absolute position determines child IDs, timer
 steps and `RunOnce` external keys. New ordinary contexts keep offset zero.
-No worker currently supplies a checkpoint offset.
+Continuation workers supply the saved offset while ordinary workers use zero.
 
 Capture requires a fully consumed SDK boundary, no pending requested step and
 no suspended wait. A live `TimerHandle` is tied to its original context and may
@@ -149,7 +154,8 @@ event for terminal and next-entry latency checks.
 The current cursor test proves only item 2's local SDK identity foundation:
 after omitting a completed prefix, the same suffix declarations and identities
 are produced; replay adds no effect, and losing the base is nondeterministic.
-Durable frame storage and the remaining integrated verification above still need implementation.
+Durable frame storage and worker dispatch now have focused proofs below.
+The full integrated verification above remains the acceptance target.
 
 ## Implemented frame codec
 
@@ -163,7 +169,7 @@ and user locals decoded from the frame are detached from transport buffers.
 
 The race suite and vet pass, with [raw proof and scope](scale/checkpoint-frame-2026-09-30/).
 The SDK capture/restore functions now call the codec and enforce boundary and
-live-handle rules. No production worker calls them yet. The worker must check
+live-handle rules. Continuation workers call them on the fast resume path. The worker must check
 stage registration, actual
 journal anchor, suffix continuity and configured journal limits before effects.
 This does not advance the checkpoint feature to complete.
@@ -187,9 +193,8 @@ them into empty objects. Cyclic locals fail without an append. Capture/restore
 controls and the full SDK/simulator checks are retained in
 [SDK checkpoint proof](scale/checkpoint-state-2026-09-30/).
 
-These are low-level SDK primitives. `wf.Continue`, stage registration and durable
-worker publication/dispatch remain proposed, and ordinary workers still replay
-from the initial handler. Frame hash/anchor binding is not a substitute for
+Ordinary workers replay from the initial handler. Opted-in continuation workers
+use these primitives for suffix replay and named-stage dispatch. Frame hash/anchor binding is not a substitute for
 checking the actual retained checkpoint completion and contiguous journal suffix.
 
 ## Implemented archive/runtime publication
@@ -201,7 +206,7 @@ to the completion and its serialized data hash to the checkpoint request. SDK
 positions are counted independently of auxiliary journal entries. Purge remains
 a separate confirmed step and preserves the live completion anchor. Newer runtime
 pointers reject older replacement attempts; generic compaction cannot remove
-the anchor. `wf.Continue` and frame/pair publication are still not wired.
+the anchor. `wf.Continue` and opted-in worker publication are wired.
 
 Continuation manifests use version 2. Ordinary manifests stay version 1. This
 lets old journal readers reject the new format before treating a continuation
@@ -226,8 +231,7 @@ full reads keep base zero and continue supporting archive-based audit/replay.
 
 [Reader proofs](scale/checkpoint-read-2026-10-01/) include 100,000 seeded schedules,
 a pinned batch-offset mutation control and a real port that denies every archive
-read while SDK state and 150 recorded effects replay correctly. There are still
-no production worker callers. Stage dispatch must reject unknown registrations
+read while SDK state and 150 recorded effects replay correctly. Opted-in workers now use this reader. Stage dispatch must reject unknown registrations
 before running code, restore runtime cancellation/attempt facts, derive append
 indices from the anchor plus suffix, and preserve all lease/terminal guards.
 The required worker restart/prefix-handler avoidance proof remains open.
@@ -250,6 +254,39 @@ for future worker manifest/handoff processing, not proof of a published manifest
 
 [SDK protocol proof](scale/continuation-sdk-2026-10-01/) includes all request/frame/
 completion cuts, 100,000 seeded schedules and a lease-fenced real transport
-contract. Worker code still does not configure SetContinuationSupport or dispatch
-stages. The registry, suffix append counters/runtime facts, handoff repair,
-offline stage replay and worker process-kill proof remain open.
+contract. Worker code configures the resolver with historical anchor epoch, panic count
+and signal cursor; later attempts and signals cannot change an existing frame.
+Offline stage replay and worker process-kill proof remain open.
+
+
+## Implemented worker execution
+
+`worker.WithContinuations` opts a type into immutable stage registration and
+compaction at continuation boundaries. An absent checkpoint uses full initial
+replay. A verified current-generation checkpoint restores state, buffered signals,
+promise outcomes, cancellation facts and SDK position, then dispatches its named
+stage with original input and explicit locals. Journal appends use the saved
+anchor plus suffix length and retain the original global entry limit and terminal
+slot reservation. Panic counts include the frame baseline and later attempts.
+Every append still renews the invocation lease unconditionally.
+
+The worker publishes the archive/runtime manifest, purges its confirmed prefix,
+appends a continuation suspension and enqueues a generation/anchor-scoped handoff
+before release/ack. It renews ownership before publication, purge and handoff.
+Generic after-delivery compaction is disabled for opted-in types. Cancellation
+still wins before handoff; an ignored unconfirmed Continue cannot become a normal
+result or panic retry. A verified checkpoint ends the delivery even if the caller
+ignores its return value.
+
+Suspended repair recognizes both a completed checkpoint pair before manifest/
+suspension publication and a continuation suspension. A later journal step stops
+that boundary's repair. The existing retry-window message ID prevents a lost
+handoff from becoming permanently suppressed by an older deduplication window.
+
+A three-node race contract crosses two checkpoints after 1,000 state updates,
+preserves buffered signals through signal purge, rejects an unknown deployed
+stage before effects, and resumes on a replacement worker with archive reads
+denied. Initial and middle handlers each run once; recorded prefix/suffix effects
+run once and retain distinct absolute keys. This is a graceful worker replacement,
+not SIGKILL or a completed fault-matrix proof. Seeded integrated transport checks
+cover publication and handoff faults; [proof and remaining scope](scale/continuation-worker-2026-10-01/).

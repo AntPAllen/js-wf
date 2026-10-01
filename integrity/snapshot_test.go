@@ -88,3 +88,40 @@ func TestSnapshotAllowsGlobalSequenceHoles(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestContinuationSuspensionRequiresCommittedMatchingFrame(t *testing.T) {
+	const subject = "wf.jrn.test.negative"
+	hash := strings.Repeat("a", 64)
+	good := func() Snapshot {
+		s := terminalSnapshot()
+		records := s.Journals[subject]
+		records[1].Payload = json.RawMessage(`{"kind":"checkpoint","name":"next_v1"}`)
+		records[2].Payload = json.RawMessage(`{"result_ref":"step-result-` + hash + `","result_hash":"` + hash + `"}`)
+		records = append(records[:3], journal.Record{Entry: journal.Entry{Epoch: 1, Index: 3, Kind: journal.Suspended, Payload: json.RawMessage(`{"waiting_on":"continuation:next_v1"}`), WorkerID: "worker-a"}, Sequence: 4})
+		s.Journals[subject] = records
+		delete(s.TerminalState, "test.negative")
+		return s
+	}
+	if _, err := CheckSnapshot(good()); err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		name    string
+		record  int
+		payload string
+	}{
+		{"wrong-stage", 3, `{"waiting_on":"continuation:other"}`},
+		{"ordinary-step", 1, `{"kind":"run","name":"next_v1"}`},
+		{"bad-hash", 2, `{"result_ref":"step-result-x","result_hash":"x"}`},
+		{"inline-result", 2, `{"result":23,"result_ref":"step-result-` + hash + `","result_hash":"` + hash + `"}`},
+		{"failed-frame", 2, `{"error":"failed","result_ref":"step-result-` + hash + `","result_hash":"` + hash + `"}`},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			s := good()
+			s.Journals[subject][test.record].Payload = json.RawMessage(test.payload)
+			if _, err := CheckSnapshot(s); err == nil {
+				t.Fatal("invalid continuation suspension accepted")
+			}
+		})
+	}
+}

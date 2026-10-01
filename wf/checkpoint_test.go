@@ -58,7 +58,7 @@ func TestCheckpointStateMatchesUninterruptedContinuation(t *testing.T) {
 		t.Fatal("capture mutated journal or cursor")
 	}
 	location := CheckpointLocation{Type: "parent", ID: "materialized", InvSeq: 17, Index: anchor, Epoch: 51, Hash: hash}
-	restored, info, err := NewCheckpointContext(context.Background(), nil, func(_ context.Context, k Kind, p json.RawMessage) error { return nil }, raw, location, signals...)
+	restored, info, err := NewCheckpointContext(context.Background(), nil, func(_ context.Context, k Kind, p json.RawMessage) error { return nil }, raw, location)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +127,7 @@ func TestCheckpointStateMatchesUninterruptedContinuation(t *testing.T) {
 	loc2.Index = restored.stepPosition() + 2
 	loc2.Epoch = 52
 	loc2.Hash = hash2
-	again, info2, err := NewCheckpointContext(context.Background(), nil, nil, raw2, loc2, signals...)
+	again, info2, err := NewCheckpointContext(context.Background(), nil, nil, raw2, loc2)
 	if err != nil || !again.usedSignals[3] || !again.usedSignals[7] || !again.usedSignals[9] || !reflect.DeepEqual(info2.CancelledTimers, info.CancelledTimers) {
 		t.Fatalf("second restore info=%+v err=%v", info2, err)
 	}

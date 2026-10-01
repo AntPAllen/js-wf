@@ -88,6 +88,13 @@ func TestFrameRejectsInvalidSemanticsWithMatchingHash(t *testing.T) {
 		{"epoch", func(f *Frame) { f.Anchor.Epoch = 0 }},
 		{"pending-step", func(f *Frame) { f.StepPosition = 11 }},
 		{"sdk-ahead-of-journal", func(f *Frame) { f.StepPosition = 18 }},
+		{"buffered-zero", func(f *Frame) { f.SignalCursor = 9; f.PendingSignals = []Signal{{Sequence: 0, Name: "input"}} }},
+		{"buffered-past-cursor", func(f *Frame) { f.SignalCursor = 8; f.PendingSignals = []Signal{{Sequence: 9, Name: "input"}} }},
+		{"buffered-consumed", func(f *Frame) { f.SignalCursor = 9; f.PendingSignals = []Signal{{Sequence: 7, Name: "input"}} }},
+		{"buffered-order", func(f *Frame) {
+			f.SignalCursor = 11
+			f.PendingSignals = []Signal{{Sequence: 9, Name: "input"}, {Sequence: 8, Name: "input"}}
+		}},
 		{"signal-duplicate", func(f *Frame) { f.ConsumedSignals = []uint64{3, 3} }},
 		{"signal-zero", func(f *Frame) { f.ConsumedSignals = []uint64{0} }},
 		{"signal-order", func(f *Frame) { f.ConsumedSignals = []uint64{7, 3} }},

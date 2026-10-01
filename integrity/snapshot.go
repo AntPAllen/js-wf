@@ -2,11 +2,13 @@ package integrity
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
 
+	"js-wf/identity"
 	"js-wf/journal"
 )
 
@@ -76,6 +78,7 @@ func checkJournalRecords(subject string, records []journal.Record, terminalValue
 	var terminal []byte
 	hasTerminal := false
 	outstanding := false
+	var requestPayload, completionPayload json.RawMessage
 	var lastSignalSeq uint64
 	var lastAttempt int
 	epochWorkers := map[uint64]string{}
@@ -113,13 +116,16 @@ func checkJournalRecords(subject string, records []journal.Record, terminalValue
 				return 0, false, fmt.Errorf("%s: overlapping step requests", subject)
 			}
 			outstanding = true
+			requestPayload = e.Payload
+			completionPayload = nil
 		case journal.StepCompleted:
 			if !outstanding {
 				return 0, false, fmt.Errorf("%s: completion without request", subject)
 			}
 			outstanding = false
+			completionPayload = e.Payload
 		case journal.Suspended:
-			if !outstanding {
+			if !outstanding && !validContinuationSuspension(requestPayload, completionPayload, e.Payload) {
 				return 0, false, fmt.Errorf("%s: suspension without request", subject)
 			}
 		case journal.SignalConsumed:
@@ -154,4 +160,30 @@ func checkJournalRecords(subject string, records []journal.Record, terminalValue
 		}
 	}
 	return len(records), hasTerminal, nil
+}
+
+// A continuation suspends after its completed checkpoint rather than with an
+// outstanding await. Require the matching declaration and content reference.
+func validContinuationSuspension(request, completion, suspension json.RawMessage) bool {
+	var req struct {
+		Kind string `json:"kind"`
+		Name string `json:"name"`
+	}
+	var done struct {
+		Result    json.RawMessage `json:"result"`
+		Ref       string          `json:"result_ref"`
+		Hash      string          `json:"result_hash"`
+		Error     string          `json:"error"`
+		ErrorKind string          `json:"error_kind"`
+		Signal    uint64          `json:"signal_seq"`
+		Selected  string          `json:"selected"`
+	}
+	var wait struct {
+		WaitingOn string `json:"waiting_on"`
+	}
+	if json.Unmarshal(request, &req) != nil || json.Unmarshal(completion, &done) != nil || json.Unmarshal(suspension, &wait) != nil || req.Kind != "checkpoint" || identity.ValidateToken(req.Name) != nil || wait.WaitingOn != "continuation:"+req.Name {
+		return false
+	}
+	hash, err := hex.DecodeString(done.Hash)
+	return err == nil && len(hash) == 32 && hex.EncodeToString(hash) == done.Hash && done.Ref == "step-result-"+done.Hash && len(done.Result) == 0 && done.Error == "" && done.ErrorKind == "" && done.Signal == 0 && done.Selected == ""
 }

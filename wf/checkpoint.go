@@ -35,6 +35,7 @@ type CheckpointInfo struct {
 	Data            json.RawMessage
 	StepPosition    uint64
 	PanicAttempts   uint64
+	SignalCursor    uint64
 	CancelledTimers []uint64
 }
 
@@ -86,6 +87,22 @@ func (c *Context) CaptureCheckpoint(stage string, data any, index, epoch, panicA
 		}
 		frame.PromiseOutcomes[name] = bytes.Clone(result.payload)
 	}
+	frame.SignalCursor = c.checkpointDrainedCursor
+	for _, signal := range c.signals {
+		if c.checkpointSignalCursor != nil && signal.Sequence > *c.checkpointSignalCursor {
+			continue
+		}
+		if signal.Sequence > frame.SignalCursor {
+			frame.SignalCursor = signal.Sequence
+		}
+		if !c.usedSignals[signal.Sequence] {
+			frame.PendingSignals = append(frame.PendingSignals, checkpoint.Signal{Sequence: signal.Sequence, Name: signal.Name, Payload: bytes.Clone(signal.Payload)})
+		}
+	}
+	if c.checkpointSignalCursor != nil {
+		frame.SignalCursor = *c.checkpointSignalCursor
+	}
+	sort.Slice(frame.PendingSignals, func(i, j int) bool { return frame.PendingSignals[i].Sequence < frame.PendingSignals[j].Sequence })
 	for seq, used := range c.usedSignals {
 		if used {
 			frame.ConsumedSignals = append(frame.ConsumedSignals, seq)
@@ -126,8 +143,19 @@ func NewCheckpointContext(base context.Context, entries []Entry, appendFn Append
 		detached[i] = entry
 		detached[i].Payload = bytes.Clone(entry.Payload)
 	}
-	c := NewContext(base, detached, appendFn, signals...)
+	buffered := make([]Signal, 0, len(frame.PendingSignals)+len(signals))
+	for _, signal := range frame.PendingSignals {
+		buffered = append(buffered, Signal{Sequence: signal.Sequence, Name: signal.Name, Payload: bytes.Clone(signal.Payload)})
+	}
+	for _, signal := range signals {
+		if signal.Sequence <= frame.SignalCursor {
+			return nil, CheckpointInfo{}, fmt.Errorf("%w: signal suffix overlaps frame", ErrInvalidCheckpoint)
+		}
+		buffered = append(buffered, signal)
+	}
+	c := NewContext(base, detached, appendFn, buffered...)
 	c.stepOffset = frame.StepPosition
+	c.checkpointDrainedCursor = frame.SignalCursor
 	c.parentType = location.Type
 	c.parentID = location.ID
 	c.parentInvSeq = location.InvSeq
@@ -146,7 +174,7 @@ func NewCheckpointContext(base context.Context, entries []Entry, appendFn Append
 	for _, step := range frame.CancelledTimers {
 		c.checkpointCancelledTimers[step] = true
 	}
-	return c, CheckpointInfo{Stage: frame.Stage, Data: frame.Data, StepPosition: frame.StepPosition, PanicAttempts: frame.PanicAttempts, CancelledTimers: append([]uint64(nil), frame.CancelledTimers...)}, nil
+	return c, CheckpointInfo{Stage: frame.Stage, Data: frame.Data, StepPosition: frame.StepPosition, PanicAttempts: frame.PanicAttempts, SignalCursor: frame.SignalCursor, CancelledTimers: append([]uint64(nil), frame.CancelledTimers...)}, nil
 }
 
 type dataVisit struct {

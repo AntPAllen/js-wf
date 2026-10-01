@@ -2643,3 +2643,47 @@ ErrContinuationUnsupported for this operation. Worker integration, suffix
 append/runtime counters, handoff repair, offline multistage replay and restart/
 retirement proofs remain open. The new operation is not a complete materialized
 checkpoint feature or a fix for the independent mixed latency failure.
+
+
+## Continuation worker dispatch, buffered signals and handoff
+
+Opted-in workers now register copied named-stage maps with WithContinuations,
+read verified frames and live suffixes, restore SDK/runtime facts, and invoke the
+named stage with original input and locals. Logical append indices and journal
+limit reservations include the saved anchor. Every append still renews ownership
+unconditionally. Checkpoint boundaries publish archive/runtime manifests, purge,
+suspend and enqueue a generation/anchor-scoped handoff before release/ack;
+generic after-delivery compaction is disabled for these types. Missing registries
+and unknown retained stages retry before user code rather than falling back to
+the initial handler. Ignored unconfirmed publication cannot become completion.
+
+Frames now preserve unconsumed drained signals plus the scan cursor, because
+snapshot purge can remove their original WF_SIG records. Historical checkpoint
+replay bounds the signal cursor and panic count at its completion. Suspended
+repair handles a completed checkpoint before manifest/suspension and the
+continuation suspension itself, then stops repairing once the journal advances.
+The raw-state checker requires a matching completed checkpoint/frame reference
+for this new suspension form; malformed declarations/references still fail.
+
+The real R3 three-node graceful-replacement contract passed under race in
+10.824 seconds, after 1,000 state updates and two boundaries. Both buffered
+signals survive purge, initial/middle handlers each run once, recorded effects
+run once with distinct absolute keys, and the final worker makes two frame reads
+and zero archive reads. Missing-registry/stage probes execute no user code;
+cross-peer results and the full retained-state integrity audit pass.
+
+Seventeen integrated worker transport modes passed 100,000 schedules with
+21,347,572 events in 102.297 seconds. Every queued fault must be exercised; this
+caught an unbound signal-purge fixture that had skipped the handoff fault, and
+that earlier fixture is excluded from the accepted proof. Exact and cross-process
+replay, the race campaign/corpus (20.818 seconds), package race suites, full final
+simulator suite (83.005 seconds) and vet passed. Removing buffered signals from
+production restoration makes compiled pinned seed 42 fail. [Raw logs, fixture
+failure, mutation and source hashes](scale/continuation-worker-2026-10-01/)
+are retained.
+
+This is integrated worker progress, not checkpoint acceptance or release signoff.
+Worker SIGKILL/all crash-cut repair proofs, offline multistage replay, retirement/
+reuse, integrated runtime-semantics/limit and GC gates remain open. The independent
+mixed seed 65 latency failure and final-source matrix/24-hour soak remain open.
+The original million-timer process is still running and has not been restarted.
