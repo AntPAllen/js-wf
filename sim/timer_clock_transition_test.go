@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -126,7 +127,7 @@ func TestSeededTimerClockTransitionReplay(t *testing.T) {
 		for _, event := range generated.Transport {
 			if event.Operation == "check_timer_clock_transition" {
 				if os.Getenv("SIM_WRITE_TIMER_CLOCK_PINS") == "1" && !covered[event.Outcome] {
-					path := filepath.Join("testdata", "regressions", "timer-clock-"+event.Outcome+".json")
+					path := filepath.Join("testdata", "regressions", "timer-clock-"+strings.ReplaceAll(event.Outcome, ":", "-")+".json")
 					if err := generated.Save(path); err != nil {
 						t.Fatal(err)
 					}
