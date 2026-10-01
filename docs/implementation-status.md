@@ -5178,3 +5178,24 @@ NATS semantics and therefore does not certify the strict timer recovery gate.
 [Model scope and evidence](scale/timer-clock-model-2026-10-01/) are retained.
 The current comprehensive campaign predates these changes. Corrected R5 ahead
 smoke36938296826 is now authoritatively in progress; behind36938299478 is queued.
+
+
+### Production-worker timer clock counterexamples
+
+Extended the existing eight-timer production-worker burst simulation with
+±60s timer origins and an unshifted scheduler after durable suspension. The
+real worker/SDK/lease/journal/outcome paths retain35 entries, one terminal42,
+two handler calls and a passing retained invariant audit in both cases.
+Completion is virtual controller+62s for ahead and+0s for behind. These are
+asserted characterization counterexamples to desired timing, not green timing
+acceptance. Two new disk traces raise the corpus to174. General replay now
+handles both this workload and the existing worker burst workload.
+
+The focused1,000-seed production-worker check passes in1.778s; combined race
+checks with existing burst, transport-clock workloads and all174 pins pass
+in62.063s. [Scope and evidence](scale/timer-clock-model-2026-10-01/) retain
+the explicit transport assumptions. Real NATS scheduling semantics and
+admitted in-flight clock cuts remain required before a production change or
+clock-tolerance claim. No production behavior was changed from the model alone.
+Both corrected R5 clock smokes36938296826 and36938299478 are authoritatively
+in progress at this checkpoint.

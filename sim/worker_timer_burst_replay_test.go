@@ -25,6 +25,10 @@ import (
 )
 
 func runSeededWorkerTimerBurst(seed int64, replay *Trace) (trace Trace, runErr error) {
+	return runWorkerTimerBurstScenario(seed, replay, false)
+}
+
+func runWorkerTimerBurstScenario(seed int64, replay *Trace, clockTransition bool) (trace Trace, runErr error) {
 	var schedule *Scheduler
 	if replay == nil {
 		schedule = NewScheduler(seed)
@@ -35,11 +39,17 @@ func runSeededWorkerTimerBurst(seed int64, replay *Trace) (trace Trace, runErr e
 			return Trace{}, err
 		}
 	}
-	if err := schedule.SetWorkload("worker_timer_burst_1"); err != nil {
+	workload := "worker_timer_burst_1"
+	modes := []string{"clean", "route_quorum_lost", "consumer_leader_changed", "timer_run_ack_lost"}
+	if clockTransition {
+		workload = "worker_timer_clock_transition"
+		modes = []string{"clock_ahead", "clock_behind"}
+	}
+	if err := schedule.SetWorkload(workload); err != nil {
 		return Trace{}, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose([]string{"clean", "route_quorum_lost", "consumer_leader_changed", "timer_run_ack_lost"})
+	mode, err := schedule.Choose(modes)
 	if err != nil {
 		return trace, err
 	}
@@ -50,6 +60,15 @@ func runSeededWorkerTimerBurst(seed int64, replay *Trace) (trace Trace, runErr e
 	base := time.Unix(1_700_000_000, 0).UTC()
 	transport := NewWorkerTransport(schedule, 3*time.Second)
 	timers := NewTimerScheduleTransport(schedule, base)
+	if clockTransition {
+		offset := time.Minute
+		if mode == "clock_behind" {
+			offset = -time.Minute
+		}
+		if err := timers.SetLeaderClockOffset(offset); err != nil {
+			return trace, err
+		}
+	}
 	timers.OnNativeDelivery(func(msg *nats.Msg, timestamp time.Time) {
 		transport.Dispatch.PublishRunMessage(msg.Subject, msg.Data, msg.Header, timestamp)
 	})
@@ -76,7 +95,7 @@ func runSeededWorkerTimerBurst(seed int64, replay *Trace) (trace Trace, runErr e
 		}
 		return json.RawMessage(`42`), nil
 	}}, worker.ModeledWorkerPorts{Journal: store, Leases: leasing, Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, Timer: timers, TimerNow: func(context.Context) (time.Time, error) {
-		return base.Add(time.Duration(schedule.NowMillis()) * time.Millisecond), nil
+		return timers.LeaderNow(), nil
 	}, NativeTimer: true, Client: c})
 	if err != nil {
 		return trace, err
@@ -110,7 +129,15 @@ func runSeededWorkerTimerBurst(seed int64, replay *Trace) (trace Trace, runErr e
 	if mode == "route_quorum_lost" {
 		timers.SetScheduleQuorum(false)
 	}
+	if clockTransition {
+		if err := timers.SetLeaderClockOffset(0); err != nil {
+			return trace, err
+		}
+	}
 	remaining := latestDue.Sub(base.Add(time.Duration(schedule.NowMillis()) * time.Millisecond))
+	if remaining < 0 {
+		remaining = 0
+	}
 	if remaining > time.Millisecond {
 		if err := timers.Advance(remaining - time.Millisecond); err != nil || transport.Dispatch.Pending() != 0 {
 			return trace, fmt.Errorf("seed %d timer delivered early: pending=%d err=%v", seed, transport.Dispatch.Pending(), err)
@@ -184,6 +211,21 @@ func runSeededWorkerTimerBurst(seed int64, replay *Trace) (trace Trace, runErr e
 		return trace, fmt.Errorf("seed %d burst retained check=%+v err=%v", seed, report, err)
 	}
 	schedule.RecordTransport(TransportEvent{Operation: "check_worker_timer_burst", Outcome: mode, AtMillis: schedule.NowMillis()})
+	if clockTransition {
+		// Characterize the production worker with the modeled clock contract.
+		// These are counterexamples to the desired controller-clock timing,
+		// not acceptance of that timing or proof of NATS's clock behavior.
+		expected := int64(0)
+		outcome := "completed_before_controller_duration"
+		if mode == "clock_ahead" {
+			expected = 62_000
+			outcome = "exceeded_controller_recovery_gate"
+		}
+		if schedule.NowMillis() != expected {
+			return trace, fmt.Errorf("seed %d clock transition completion=%d want=%d", seed, schedule.NowMillis(), expected)
+		}
+		schedule.RecordTransport(TransportEvent{Operation: "characterize_worker_timer_clock", Outcome: outcome, AtMillis: schedule.NowMillis()})
+	}
 	if err := schedule.Finish(); err != nil {
 		return trace, err
 	}

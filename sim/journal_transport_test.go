@@ -392,6 +392,10 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSkewedLeaseAcquirers(loaded.Seed, &loaded)
 	case "timer_clock_transition":
 		replayed, err = runTimerClockTransition(loaded.Seed, &loaded)
+	case "worker_timer_burst_1":
+		replayed, err = runSeededWorkerTimerBurst(loaded.Seed, &loaded)
+	case "worker_timer_clock_transition":
+		replayed, err = runWorkerTimerBurstScenario(loaded.Seed, &loaded, true)
 	case "client_two_starter_same":
 		replayed, err = runTwoStarterRace(loaded.Seed, false, &loaded)
 	case "client_two_starter_mismatch":
