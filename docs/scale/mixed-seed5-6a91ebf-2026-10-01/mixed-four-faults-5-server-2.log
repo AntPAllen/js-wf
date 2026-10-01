@@ -1,0 +1,137 @@
+[3266] 2026/10/01 05:53:58.971829 [INF] Starting nats-server
+[3266] 2026/10/01 05:53:58.971899 [INF]   Version:  2.15.0
+[3266] 2026/10/01 05:53:58.971903 [INF]   Git:      [not set]
+[3266] 2026/10/01 05:53:58.971907 [INF]   Cluster:  wf-process
+[3266] 2026/10/01 05:53:58.971909 [INF]   Name:     wf-process-2
+[3266] 2026/10/01 05:53:58.971913 [INF]   Node:     0WED9nmv
+[3266] 2026/10/01 05:53:58.971918 [INF]   ID:       NBKJZN5CQNW56BWBJWIFGOUOVWNY6HISYCCS6MVZXQNMQ2YXFABRWFCQ
+[3266] 2026/10/01 05:53:58.972440 [INF] Starting http monitor on 127.0.0.1:45687
+[3266] 2026/10/01 05:53:58.974452 [INF] Starting JetStream
+[3266] 2026/10/01 05:53:58.974644 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+[3266] 2026/10/01 05:53:58.974652 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+[3266] 2026/10/01 05:53:58.974655 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+[3266] 2026/10/01 05:53:58.974657 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+[3266] 2026/10/01 05:53:58.974659 [INF] 
+[3266] 2026/10/01 05:53:58.974660 [INF]          https://docs.nats.io/jetstream
+[3266] 2026/10/01 05:53:58.974662 [INF] 
+[3266] 2026/10/01 05:53:58.974664 [INF] ---------------- JETSTREAM ----------------
+[3266] 2026/10/01 05:53:58.974665 [INF]   Strict:          true
+[3266] 2026/10/01 05:53:58.974669 [INF]   Max Memory:      11.71 GB
+[3266] 2026/10/01 05:53:58.974671 [INF]   Max Storage:     63.51 GB
+[3266] 2026/10/01 05:53:58.974673 [INF]   Store Directory: "/tmp/TestMixedWorkflowsRecoverFromFourServerFaults874006668/001/node-2/jetstream"
+[3266] 2026/10/01 05:53:58.974676 [INF]   API Level:       5
+[3266] 2026/10/01 05:53:58.974678 [INF] -------------------------------------------
+[3266] 2026/10/01 05:53:58.975196 [INF] Starting JetStream cluster
+[3266] 2026/10/01 05:53:58.975207 [INF] Creating JetStream metadata controller
+[3266] 2026/10/01 05:53:58.976146 [INF] JetStream cluster bootstrapping
+[3266] 2026/10/01 05:53:58.978786 [INF] Took 4.327501ms to start JetStream
+[3266] 2026/10/01 05:53:58.978848 [INF] Listening for client connections on 127.0.0.1:45649
+[3266] 2026/10/01 05:53:58.978856 [INF] Server is ready
+[3266] 2026/10/01 05:53:58.978877 [INF] Cluster name is wf-process
+[3266] 2026/10/01 05:53:58.978911 [INF] Listening for route connections on 127.0.0.1:36181
+[3266] 2026/10/01 05:53:58.979204 [INF] 127.0.0.1:33437 - rid:8 - Route connection created
+[3266] 2026/10/01 05:53:58.979260 [INF] 127.0.0.1:33437 - rid:9 - Route connection created
+[3266] 2026/10/01 05:53:58.981240 [INF] 127.0.0.1:33437 - rid:10 - Route connection created
+[3266] 2026/10/01 05:53:58.982079 [INF] 127.0.0.1:33437 - rid:11 - Route connection created
+[3266] 2026/10/01 05:53:59.079227 [WRN] Waiting for routing to be established...
+[3266] 2026/10/01 05:53:59.079293 [WRN] JetStream has not established contact with a meta leader
+[3266] 2026/10/01 05:53:59.181028 [INF] Self is new JetStream cluster metadata leader
+[3266] 2026/10/01 05:53:59.985584 [INF] 127.0.0.1:33913 - rid:13 - Route connection created
+[3266] 2026/10/01 05:54:00.006176 [INF] 127.0.0.1:33913 - rid:14 - Route connection created
+[3266] 2026/10/01 05:54:00.007064 [INF] 127.0.0.1:33913 - rid:15 - Route connection created
+[3266] 2026/10/01 05:54:00.007934 [INF] 127.0.0.1:33913 - rid:16 - Route connection created
+[3266] 2026/10/01 05:54:03.179014 [INF] JetStream cluster new stream leader for '$G > WF_INV'
+[3266] 2026/10/01 05:54:03.299497 [INF] JetStream cluster new stream leader for '$G > WF_JRN'
+[3266] 2026/10/01 05:54:03.482610 [INF] JetStream cluster new stream leader for '$G > KV_WF_LEASE'
+[3266] 2026/10/01 05:54:03.603253 [INF] JetStream cluster new stream leader for '$G > KV_WF_VIEW'
+[3266] 2026/10/01 05:54:03.789769 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_18'
+[3266] 2026/10/01 05:54:03.798998 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_10'
+[3266] 2026/10/01 05:54:03.803584 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_26'
+[3266] 2026/10/01 05:54:03.809443 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_00'
+[3266] 2026/10/01 05:54:03.820483 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_28'
+[3266] 2026/10/01 05:54:16.217201 [INF] JetStream cluster no metadata leader
+[3266] 2026/10/01 05:54:16.220089 [WRN] JetStream cluster stream '$G > KV_WF_VIEW' has NO quorum, stalled
+[3266] 2026/10/01 05:54:16.220099 [WRN] JetStream cluster stream '$G > KV_WF_LEASE' has NO quorum, stalled
+[3266] 2026/10/01 05:54:16.220115 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_18' has NO quorum, stalled.
+[3266] 2026/10/01 05:54:16.220135 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_26' has NO quorum, stalled.
+[3266] 2026/10/01 05:54:16.220148 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_10' has NO quorum, stalled.
+[3266] 2026/10/01 05:54:16.220176 [WRN] JetStream cluster stream '$G > WF_INV' has NO quorum, stalled
+[3266] 2026/10/01 05:54:16.220165 [INF] 127.0.0.1:33437 - rid:10 - Router connection closed: Client Closed - Remote: wf-process-0
+[3266] 2026/10/01 05:54:16.220151 [INF] 127.0.0.1:33437 - rid:9 - Router connection closed: Client Closed - Remote: wf-process-0
+[3266] 2026/10/01 05:54:16.220250 [INF] 127.0.0.1:33437 - rid:8 - Router connection closed: Client Closed - Remote: wf-process-0
+[3266] 2026/10/01 05:54:16.220310 [INF] 127.0.0.1:33437 - rid:11 - Router connection closed: Client Closed - Remote: wf-process-0
+[3266] 2026/10/01 05:54:16.221952 [ERR] 127.0.0.1:33437 - rid:9 - Error flushing: writev tcp 127.0.0.1:52070->127.0.0.1:33437: writev: broken pipe
+[3266] 2026/10/01 05:54:16.222308 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_28' has NO quorum, stalled.
+[3266] 2026/10/01 05:54:16.227090 [WRN] JetStream cluster stream '$G > WF_JRN' has NO quorum, stalled
+[3266] 2026/10/01 05:54:16.227251 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_00' has NO quorum, stalled.
+[3266] 2026/10/01 05:54:16.265455 [INF] JetStream cluster new metadata leader: wf-process-1/wf-process
+[3266] 2026/10/01 05:54:16.272256 [INF] JetStream cluster new stream leader for '$G > KV_WF_ASSIGN'
+[3266] 2026/10/01 05:54:16.272328 [INF] JetStream cluster new stream leader for '$G > KV_WF_STATE'
+[3266] 2026/10/01 05:54:16.272802 [INF] JetStream cluster new stream leader for '$G > WF_PURGE'
+[3266] 2026/10/01 05:54:16.401503 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_22'
+[3266] 2026/10/01 05:54:17.242547 [INF] 127.0.0.1:33437 - rid:124 - Route connection created
+[3266] 2026/10/01 05:54:17.242662 [INF] 127.0.0.1:33437 - rid:124 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:17.266875 [INF] 127.0.0.1:33437 - rid:125 - Route connection created
+[3266] 2026/10/01 05:54:17.266964 [INF] 127.0.0.1:33437 - rid:125 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:17.273530 [INF] 127.0.0.1:33437 - rid:126 - Route connection created
+[3266] 2026/10/01 05:54:17.273731 [INF] 127.0.0.1:33437 - rid:126 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:17.274755 [INF] 127.0.0.1:33437 - rid:127 - Route connection created
+[3266] 2026/10/01 05:54:17.274899 [INF] 127.0.0.1:33437 - rid:127 - Router connection closed: Client Closed
+[3266] 2026/10/01 05:54:18.284602 [INF] 127.0.0.1:33437 - rid:128 - Route connection created
+[3266] 2026/10/01 05:54:18.284663 [INF] 127.0.0.1:33437 - rid:128 - Router connection closed: Client Closed
+[3266] 2026/10/01 05:54:18.306643 [INF] 127.0.0.1:33437 - rid:129 - Route connection created
+[3266] 2026/10/01 05:54:18.306735 [INF] 127.0.0.1:33437 - rid:129 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:18.328312 [INF] 127.0.0.1:33437 - rid:130 - Route connection created
+[3266] 2026/10/01 05:54:18.328457 [INF] 127.0.0.1:33437 - rid:130 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:18.369436 [INF] 127.0.0.1:33437 - rid:131 - Route connection created
+[3266] 2026/10/01 05:54:18.369569 [INF] 127.0.0.1:33437 - rid:131 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:19.313378 [INF] 127.0.0.1:33437 - rid:132 - Route connection created
+[3266] 2026/10/01 05:54:19.313550 [INF] 127.0.0.1:33437 - rid:132 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:19.336049 [INF] 127.0.0.1:33437 - rid:133 - Route connection created
+[3266] 2026/10/01 05:54:19.336169 [INF] 127.0.0.1:33437 - rid:133 - Router connection closed: Client Closed
+[3266] 2026/10/01 05:54:19.394189 [INF] 127.0.0.1:33437 - rid:134 - Route connection created
+[3266] 2026/10/01 05:54:19.394336 [INF] 127.0.0.1:33437 - rid:134 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:19.400260 [INF] 127.0.0.1:33437 - rid:135 - Route connection created
+[3266] 2026/10/01 05:54:19.400345 [INF] 127.0.0.1:33437 - rid:135 - Router connection closed: Client Closed
+[3266] 2026/10/01 05:54:20.355732 [INF] 127.0.0.1:33437 - rid:136 - Route connection created
+[3266] 2026/10/01 05:54:20.355879 [INF] 127.0.0.1:33437 - rid:136 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:20.403092 [INF] 127.0.0.1:33437 - rid:137 - Route connection created
+[3266] 2026/10/01 05:54:20.403235 [INF] 127.0.0.1:33437 - rid:137 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:20.434611 [INF] 127.0.0.1:33437 - rid:138 - Route connection created
+[3266] 2026/10/01 05:54:20.434703 [INF] 127.0.0.1:33437 - rid:138 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:20.449651 [INF] 127.0.0.1:33437 - rid:139 - Route connection created
+[3266] 2026/10/01 05:54:20.449847 [INF] 127.0.0.1:33437 - rid:139 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:20.961863 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_61'
+[3266] 2026/10/01 05:54:21.382731 [INF] 127.0.0.1:33437 - rid:140 - Route connection created
+[3266] 2026/10/01 05:54:21.382865 [INF] 127.0.0.1:33437 - rid:140 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:21.409374 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_05'
+[3266] 2026/10/01 05:54:21.410699 [INF] 127.0.0.1:33437 - rid:141 - Route connection created
+[3266] 2026/10/01 05:54:21.410906 [INF] 127.0.0.1:33437 - rid:141 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:21.481982 [INF] 127.0.0.1:33437 - rid:142 - Route connection created
+[3266] 2026/10/01 05:54:21.482137 [INF] 127.0.0.1:33437 - rid:142 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:21.506757 [INF] 127.0.0.1:33437 - rid:143 - Route connection created
+[3266] 2026/10/01 05:54:21.506867 [INF] 127.0.0.1:33437 - rid:143 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:22.443700 [INF] 127.0.0.1:33437 - rid:144 - Route connection created
+[3266] 2026/10/01 05:54:22.443906 [INF] 127.0.0.1:33437 - rid:144 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:22.474554 [INF] 127.0.0.1:33437 - rid:145 - Route connection created
+[3266] 2026/10/01 05:54:22.474677 [INF] 127.0.0.1:33437 - rid:145 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:22.533388 [INF] 127.0.0.1:33437 - rid:146 - Route connection created
+[3266] 2026/10/01 05:54:22.533520 [INF] 127.0.0.1:33437 - rid:146 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:22.545858 [INF] 127.0.0.1:33437 - rid:147 - Route connection created
+[3266] 2026/10/01 05:54:22.545980 [INF] 127.0.0.1:33437 - rid:147 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:23.460870 [INF] 127.0.0.1:33437 - rid:148 - Route connection created
+[3266] 2026/10/01 05:54:23.460979 [INF] 127.0.0.1:33437 - rid:148 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:23.518730 [INF] 127.0.0.1:33437 - rid:149 - Route connection created
+[3266] 2026/10/01 05:54:23.518878 [INF] 127.0.0.1:33437 - rid:149 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:23.609387 [INF] 127.0.0.1:33437 - rid:150 - Route connection created
+[3266] 2026/10/01 05:54:23.609519 [INF] 127.0.0.1:33437 - rid:150 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:23.615008 [INF] 127.0.0.1:33437 - rid:151 - Route connection created
+[3266] 2026/10/01 05:54:23.615111 [INF] 127.0.0.1:33437 - rid:151 - Router connection closed: Read Error
+[3266] 2026/10/01 05:54:24.507103 [INF] 127.0.0.1:33437 - rid:152 - Route connection created
+[3266] 2026/10/01 05:54:24.508161 [INF] 127.0.0.1:33437 - rid:153 - Route connection created
+[3266] 2026/10/01 05:54:24.508898 [INF] 127.0.0.1:33437 - rid:154 - Route connection created
+[3266] 2026/10/01 05:54:24.601900 [INF] 127.0.0.1:33437 - rid:155 - Route connection created
+[3266] 2026/10/01 05:54:24.602234 [INF] 127.0.0.1:33437 - rid:155 - Router connection closed: Duplicate Route - Remote: wf-process-0
+[3266] 2026/10/01 05:54:24.641035 [INF] 127.0.0.1:33437 - rid:156 - Route connection created
+[3266] 2026/10/01 05:54:24.653821 [INF] 127.0.0.1:33437 - rid:157 - Route connection created
+[3266] 2026/10/01 05:54:24.654125 [INF] 127.0.0.1:33437 - rid:157 - Router connection closed: Duplicate Route - Remote: wf-process-0

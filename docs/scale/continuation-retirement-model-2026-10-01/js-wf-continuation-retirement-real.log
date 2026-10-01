@@ -1,0 +1,10 @@
+=== RUN   TestContinuationRetirementGCAndGenerationReuse
+=== RUN   TestContinuationRetirementGCAndGenerationReuse/manifest_drop=false
+    continuation_retirement_test.go:299: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=3 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=1 manifest_drops=0
+=== RUN   TestContinuationRetirementGCAndGenerationReuse/manifest_drop=true
+    continuation_retirement_test.go:299: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=4 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=2 manifest_drops=1
+--- PASS: TestContinuationRetirementGCAndGenerationReuse (38.58s)
+    --- PASS: TestContinuationRetirementGCAndGenerationReuse/manifest_drop=false (18.94s)
+    --- PASS: TestContinuationRetirementGCAndGenerationReuse/manifest_drop=true (19.64s)
+PASS
+ok  	js-wf/integration	39.635s

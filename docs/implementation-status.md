@@ -3460,3 +3460,36 @@ mixed ~30-second observations. This pass does not explain the preceding
 503/10008 journal-tail failure. The independent mixed and newer full simulation
 jobs remain live; the original million-timer process remains live past 374,000
 deliveries without restart.
+
+## Seeded continuation retirement with shared promise references
+
+A new transport workload runs SDK-generated continuation frames, journal CAS,
+verified runtime snapshot publication/purge, restoration, production retirement
+and quiescent GC over shared stores. Eight retirement modes cross five GC modes
+(40 required combinations). GC before, between uncertain retirement/retry and
+after each retirement preserves the unfinished survivor's frame/archive/shared
+promise result; failed frame marking deletes nothing. Restored state/locals/
+promise values, terminal raw integrity, generation tombstones, two purge events
+and eventual reclamation are checked.
+
+Final-source 100,000 seeds pass in 104.968 seconds with 28,191,051 events and
+zero maximum virtual time. Exact first-ten replay, separate-process seed 42,
+new regression pin and corpus race pass (21.738 seconds). Compiled omitted frame
+promise marking and wrong tombstone-generation controls fail semantically;
+vet passes. Existing R3 retirement/reuse race passes in 39.635 seconds.
+[Proof and scope](scale/continuation-retirement-model-2026-10-01/)
+retain evidence. Worker-integrated retirement/reuse and combined process/server
+cuts remain open; this response-fault slice does not claim timing/online GC.
+
+The latest hosted mixed 6a91ebf campaign fails seed 5 after seeds 1–4 pass.
+All 28 outcomes and p99 5.950 seconds completed, but WF_RUN retained one message
+past the unchanged drain deadline. All three final snapshots show one ack pending
+on WF_P_27. [Full failure artifacts](scale/mixed-seed5-6a91ebf-2026-10-01/)
+are retained. The identity/ack timeline of that message and cause remain
+unconfirmed. Pressure and lease-disk jobs passed; the full release gate remains
+open. Original million-timer and newer full simulation jobs remain live.
+
+The matching real R3 frame-held promise restart/retirement race contract also
+passes in 18.264 seconds: 614,402-byte child result, 579-byte frame, no archived
+prefix reads, live GC deletes zero objects and retired GC deletes three. The
+new seeded workload uses small result bytes and does not claim spill scale.

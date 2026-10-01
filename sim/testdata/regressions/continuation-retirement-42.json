@@ -1,0 +1,2163 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "continuation_retirement",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "clean",
+        "invocation_ack_lost",
+        "journal_drop",
+        "marker_ack_lost",
+        "purge_event_ack_lost",
+        "signals_ack_lost",
+        "snapshot_delete_drop",
+        "tombstone_ack_lost"
+      ],
+      "chosen": "invocation_ack_lost"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "clean",
+        "delete_ack_lost",
+        "delete_drop",
+        "frame_corrupt",
+        "frame_read_lost"
+      ],
+      "chosen": "delete_drop"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "step-result-535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "input-orphan",
+      "data_sha256": "88f6811ab5d8fc6d3177f9b7609ae0fcebfda187e5046b62d38bb539e88b74d7",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "user-unmanaged",
+      "data_sha256": "04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_INV",
+      "sequence": 1,
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.retired",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.retired",
+      "sequence": 1,
+      "data_sha256": "ae137fc800bfa1308fbd4b1aa7b0d8613c4beec57bb3bc0ad23b0e6818a452f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_SIG",
+      "sequence": 1,
+      "data_sha256": "ac1809c8bc4c8d3b891d814a31d4b26c97dd9ec30b84388e60b80050db2f5980",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.retired",
+      "sequence": 1,
+      "data_sha256": "ae137fc800bfa1308fbd4b1aa7b0d8613c4beec57bb3bc0ad23b0e6818a452f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "e8f7a27ba1965b0c052632ddbe7b345709820eb8824b51845b5e0f66b53289d3",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.retired",
+      "sequence": 2,
+      "data_sha256": "e8f7a27ba1965b0c052632ddbe7b345709820eb8824b51845b5e0f66b53289d3",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "083776310e0789f414fa9b6cf18273b33ce45b67ddcee35a6d082c998bd8afd5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.retired",
+      "sequence": 3,
+      "data_sha256": "083776310e0789f414fa9b6cf18273b33ce45b67ddcee35a6d082c998bd8afd5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "2e8b8ae0736e0e3696af1c19bb64478f8543710881e59569c7ce202eb518fe78",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.retired",
+      "sequence": 4,
+      "data_sha256": "2e8b8ae0736e0e3696af1c19bb64478f8543710881e59569c7ce202eb518fe78",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 4,
+      "sequence": 5,
+      "data_sha256": "86c9e87a2ad8d9f94be8ef0373c4073e87e657888fd49fc797ced35e4be5279d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.retired",
+      "sequence": 5,
+      "data_sha256": "86c9e87a2ad8d9f94be8ef0373c4073e87e657888fd49fc797ced35e4be5279d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 5,
+      "sequence": 6,
+      "data_sha256": "6914a5c9fddda68fc80b1f66462a01a8b1aa7ed9f06bc7192319d36a4df9939f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.retired",
+      "sequence": 6,
+      "data_sha256": "6914a5c9fddda68fc80b1f66462a01a8b1aa7ed9f06bc7192319d36a4df9939f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "b79be28c62c0cf012b63d266e5c7981fe90cd84cbb58a6aa6395ead91bf4eadb",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "step-result-d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "data_sha256": "d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "data_sha256": "d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.retired",
+      "sequence": 7,
+      "data_sha256": "b79be28c62c0cf012b63d266e5c7981fe90cd84cbb58a6aa6395ead91bf4eadb",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 7,
+      "sequence": 8,
+      "data_sha256": "788ac863648ed7f30ea7e8dc6316d0948a59f1469474177036d943125880dc8e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.retired",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "ae137fc800bfa1308fbd4b1aa7b0d8613c4beec57bb3bc0ad23b0e6818a452f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "e8f7a27ba1965b0c052632ddbe7b345709820eb8824b51845b5e0f66b53289d3",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "083776310e0789f414fa9b6cf18273b33ce45b67ddcee35a6d082c998bd8afd5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "2e8b8ae0736e0e3696af1c19bb64478f8543710881e59569c7ce202eb518fe78",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 5,
+      "sequence": 5,
+      "data_sha256": "86c9e87a2ad8d9f94be8ef0373c4073e87e657888fd49fc797ced35e4be5279d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 6,
+      "sequence": 6,
+      "data_sha256": "6914a5c9fddda68fc80b1f66462a01a8b1aa7ed9f06bc7192319d36a4df9939f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 7,
+      "sequence": 7,
+      "data_sha256": "b79be28c62c0cf012b63d266e5c7981fe90cd84cbb58a6aa6395ead91bf4eadb",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 8,
+      "sequence": 8,
+      "data_sha256": "788ac863648ed7f30ea7e8dc6316d0948a59f1469474177036d943125880dc8e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 9,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "data_sha256": "d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.retired",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "snapshot-c5710b67023b4e77-7-84c5fa71473a300f",
+      "data_sha256": "84c5fa71473a300fb8e2ab3dfb8bd68d4b43b5737e9c3e4880ce028ac1cfe1e8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-c5710b67023b4e77-7-84c5fa71473a300f",
+      "data_sha256": "84c5fa71473a300fb8e2ab3dfb8bd68d4b43b5737e9c3e4880ce028ac1cfe1e8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "snap.retire.retired",
+      "sequence": 1,
+      "data_sha256": "e6986effa5c0b5828c495249bc012369b6cf6a5c10d35efcff80ddcb394aa8f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.retired",
+      "sequence": 1,
+      "data_sha256": "e6986effa5c0b5828c495249bc012369b6cf6a5c10d35efcff80ddcb394aa8f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-c5710b67023b4e77-7-84c5fa71473a300f",
+      "data_sha256": "84c5fa71473a300fb8e2ab3dfb8bd68d4b43b5737e9c3e4880ce028ac1cfe1e8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_subject",
+      "subject": "WF_JRN:wf.jrn.retire.retired",
+      "expected": 8,
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_subject",
+      "subject": "WF_SIG:wf.sig.retire.retired.*",
+      "expected": 2,
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "data_sha256": "d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.retired",
+      "sequence": 8,
+      "data_sha256": "788ac863648ed7f30ea7e8dc6316d0948a59f1469474177036d943125880dc8e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "479ec7064b0579c974e0d7a5c262ce050ec1f090d0b2742f5dca9532e44998bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_INV",
+      "sequence": 2,
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.survivor",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.survivor",
+      "sequence": 10,
+      "data_sha256": "ae137fc800bfa1308fbd4b1aa7b0d8613c4beec57bb3bc0ad23b0e6818a452f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_publish",
+      "subject": "WF_SIG",
+      "sequence": 2,
+      "data_sha256": "ac1809c8bc4c8d3b891d814a31d4b26c97dd9ec30b84388e60b80050db2f5980",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.survivor",
+      "sequence": 10,
+      "data_sha256": "ae137fc800bfa1308fbd4b1aa7b0d8613c4beec57bb3bc0ad23b0e6818a452f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 10,
+      "sequence": 11,
+      "data_sha256": "3a9b5cb9ac1ef3d4a85844054c0e50d4d63265b9a9045a08024935e65528441f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.survivor",
+      "sequence": 11,
+      "data_sha256": "3a9b5cb9ac1ef3d4a85844054c0e50d4d63265b9a9045a08024935e65528441f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 11,
+      "sequence": 12,
+      "data_sha256": "083776310e0789f414fa9b6cf18273b33ce45b67ddcee35a6d082c998bd8afd5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.survivor",
+      "sequence": 12,
+      "data_sha256": "083776310e0789f414fa9b6cf18273b33ce45b67ddcee35a6d082c998bd8afd5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 12,
+      "sequence": 13,
+      "data_sha256": "2e8b8ae0736e0e3696af1c19bb64478f8543710881e59569c7ce202eb518fe78",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.survivor",
+      "sequence": 13,
+      "data_sha256": "2e8b8ae0736e0e3696af1c19bb64478f8543710881e59569c7ce202eb518fe78",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 13,
+      "sequence": 14,
+      "data_sha256": "86c9e87a2ad8d9f94be8ef0373c4073e87e657888fd49fc797ced35e4be5279d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.survivor",
+      "sequence": 14,
+      "data_sha256": "86c9e87a2ad8d9f94be8ef0373c4073e87e657888fd49fc797ced35e4be5279d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 14,
+      "sequence": 15,
+      "data_sha256": "dddabde43cac95429abc38168813d8773bf426b2977ef0a0533cb87305599c82",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.survivor",
+      "sequence": 15,
+      "data_sha256": "dddabde43cac95429abc38168813d8773bf426b2977ef0a0533cb87305599c82",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 15,
+      "sequence": 16,
+      "data_sha256": "b79be28c62c0cf012b63d266e5c7981fe90cd84cbb58a6aa6395ead91bf4eadb",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "step-result-9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "data_sha256": "9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "data_sha256": "9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.survivor",
+      "sequence": 16,
+      "data_sha256": "b79be28c62c0cf012b63d266e5c7981fe90cd84cbb58a6aa6395ead91bf4eadb",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 16,
+      "sequence": 17,
+      "data_sha256": "76f75152b78296d2241d1d2e03c54658bdb2ab309b894d552caa1b1f68b9ead6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.survivor",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 1,
+      "sequence": 10,
+      "data_sha256": "ae137fc800bfa1308fbd4b1aa7b0d8613c4beec57bb3bc0ad23b0e6818a452f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 11,
+      "sequence": 11,
+      "data_sha256": "3a9b5cb9ac1ef3d4a85844054c0e50d4d63265b9a9045a08024935e65528441f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 12,
+      "sequence": 12,
+      "data_sha256": "083776310e0789f414fa9b6cf18273b33ce45b67ddcee35a6d082c998bd8afd5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 13,
+      "sequence": 13,
+      "data_sha256": "2e8b8ae0736e0e3696af1c19bb64478f8543710881e59569c7ce202eb518fe78",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 14,
+      "sequence": 14,
+      "data_sha256": "86c9e87a2ad8d9f94be8ef0373c4073e87e657888fd49fc797ced35e4be5279d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 15,
+      "sequence": 15,
+      "data_sha256": "dddabde43cac95429abc38168813d8773bf426b2977ef0a0533cb87305599c82",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 16,
+      "sequence": 16,
+      "data_sha256": "b79be28c62c0cf012b63d266e5c7981fe90cd84cbb58a6aa6395ead91bf4eadb",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 17,
+      "sequence": 17,
+      "data_sha256": "76f75152b78296d2241d1d2e03c54658bdb2ab309b894d552caa1b1f68b9ead6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 18,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "data_sha256": "9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.survivor",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_put",
+      "subject": "snapshot-2dedb3a6cee2fe8c-16-6f04c369aa4953c9",
+      "data_sha256": "6f04c369aa4953c9434c3a45b8366afd7004a833b95dc8f78c5634086d14c52a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-2dedb3a6cee2fe8c-16-6f04c369aa4953c9",
+      "data_sha256": "6f04c369aa4953c9434c3a45b8366afd7004a833b95dc8f78c5634086d14c52a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "snap.retire.survivor",
+      "sequence": 2,
+      "data_sha256": "0faaeb9403a116ddf3a99ea83cdc5fa682aeabdfb433621bec181d5074ba7834",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.survivor",
+      "sequence": 2,
+      "data_sha256": "0faaeb9403a116ddf3a99ea83cdc5fa682aeabdfb433621bec181d5074ba7834",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-2dedb3a6cee2fe8c-16-6f04c369aa4953c9",
+      "data_sha256": "6f04c369aa4953c9434c3a45b8366afd7004a833b95dc8f78c5634086d14c52a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_subject",
+      "subject": "WF_JRN:wf.jrn.retire.survivor",
+      "expected": 17,
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_subject",
+      "subject": "WF_SIG:wf.sig.retire.survivor.*",
+      "expected": 3,
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "data_sha256": "9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.survivor",
+      "sequence": 17,
+      "data_sha256": "76f75152b78296d2241d1d2e03c54658bdb2ab309b894d552caa1b1f68b9ead6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 17,
+      "sequence": 18,
+      "data_sha256": "479ec7064b0579c974e0d7a5c262ce050ec1f090d0b2742f5dca9532e44998bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "retire.survivor",
+      "sequence": 1,
+      "data_sha256": "b8771b6e75094dcc237e637058c93070ca632dc3309a780ada8114f995b95459",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.survivor",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "d7cba8d91bfda7a0d6d072cc3dfc5de7e19bfc7fd00a40159e7618a4b018ae41",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_invocation_get",
+      "subject": "wf.inv.retire.survivor",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "retire.survivor",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "retire.survivor",
+      "expected": 2,
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_INV",
+      "expected": 1,
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_INV",
+      "sequence": 1,
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_INV",
+      "sequence": 2,
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_SIG",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_JRN",
+      "expected": 8,
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 8,
+      "data_sha256": "788ac863648ed7f30ea7e8dc6316d0948a59f1469474177036d943125880dc8e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 9,
+      "data_sha256": "479ec7064b0579c974e0d7a5c262ce050ec1f090d0b2742f5dca9532e44998bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 10,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 11,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 12,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 13,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 14,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 15,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 16,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 17,
+      "data_sha256": "76f75152b78296d2241d1d2e03c54658bdb2ab309b894d552caa1b1f68b9ead6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 18,
+      "data_sha256": "479ec7064b0579c974e0d7a5c262ce050ec1f090d0b2742f5dca9532e44998bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_keys",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.retired",
+      "sequence": 1,
+      "data_sha256": "e6986effa5c0b5828c495249bc012369b6cf6a5c10d35efcff80ddcb394aa8f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "data_sha256": "d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-c5710b67023b4e77-7-84c5fa71473a300f",
+      "data_sha256": "84c5fa71473a300fb8e2ab3dfb8bd68d4b43b5737e9c3e4880ce028ac1cfe1e8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.survivor",
+      "sequence": 2,
+      "data_sha256": "0faaeb9403a116ddf3a99ea83cdc5fa682aeabdfb433621bec181d5074ba7834",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "data_sha256": "9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-2dedb3a6cee2fe8c-16-6f04c369aa4953c9",
+      "data_sha256": "6f04c369aa4953c9434c3a45b8366afd7004a833b95dc8f78c5634086d14c52a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_list",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "input-orphan",
+      "outcome": "drop_before_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_INV",
+      "expected": 1,
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_INV",
+      "sequence": 1,
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_INV",
+      "sequence": 2,
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_SIG",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_JRN",
+      "expected": 8,
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 8,
+      "data_sha256": "788ac863648ed7f30ea7e8dc6316d0948a59f1469474177036d943125880dc8e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 9,
+      "data_sha256": "479ec7064b0579c974e0d7a5c262ce050ec1f090d0b2742f5dca9532e44998bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 10,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 11,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 12,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 13,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 14,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 15,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 16,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 17,
+      "data_sha256": "76f75152b78296d2241d1d2e03c54658bdb2ab309b894d552caa1b1f68b9ead6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 18,
+      "data_sha256": "479ec7064b0579c974e0d7a5c262ce050ec1f090d0b2742f5dca9532e44998bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_keys",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.retired",
+      "sequence": 1,
+      "data_sha256": "e6986effa5c0b5828c495249bc012369b6cf6a5c10d35efcff80ddcb394aa8f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "data_sha256": "d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-c5710b67023b4e77-7-84c5fa71473a300f",
+      "data_sha256": "84c5fa71473a300fb8e2ab3dfb8bd68d4b43b5737e9c3e4880ce028ac1cfe1e8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.survivor",
+      "sequence": 2,
+      "data_sha256": "0faaeb9403a116ddf3a99ea83cdc5fa682aeabdfb433621bec181d5074ba7834",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "data_sha256": "9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-2dedb3a6cee2fe8c-16-6f04c369aa4953c9",
+      "data_sha256": "6f04c369aa4953c9434c3a45b8366afd7004a833b95dc8f78c5634086d14c52a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_list",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "input-orphan",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.retired",
+      "sequence": 9,
+      "data_sha256": "479ec7064b0579c974e0d7a5c262ce050ec1f090d0b2742f5dca9532e44998bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 9,
+      "sequence": 19,
+      "data_sha256": "644425bfea57155aa006fa642a1305318456b06798dee9c1ffdf68e6b116d2be",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.retired",
+      "sequence": 19,
+      "data_sha256": "644425bfea57155aa006fa642a1305318456b06798dee9c1ffdf68e6b116d2be",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 19,
+      "sequence": 20,
+      "data_sha256": "65e2a53c0918f61cfcd10314e62db93cdbce1390b80a044a8c196947a7863e28",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.retired",
+      "sequence": 20,
+      "data_sha256": "65e2a53c0918f61cfcd10314e62db93cdbce1390b80a044a8c196947a7863e28",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 20,
+      "sequence": 21,
+      "data_sha256": "c4280326ee81da42216dc9c61755a8b9e0470d8a415272802b4467dbcc79d86a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "retire.retired",
+      "sequence": 3,
+      "data_sha256": "c3b69a63531b74ee3f2ec809e75ea595d3cb4a78fb8e514dcb99e4d6c4cb8837",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "retire.retired",
+      "sequence": 4,
+      "data_sha256": "b8771b6e75094dcc237e637058c93070ca632dc3309a780ada8114f995b95459",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.retired",
+      "expected": 4,
+      "sequence": 5,
+      "data_sha256": "b8684ad940707a68c9be562df7d34e70b8ada09705844461f61811bbd2208796",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_invocation_get",
+      "subject": "wf.inv.retire.retired",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "retire.retired",
+      "sequence": 3,
+      "data_sha256": "c3b69a63531b74ee3f2ec809e75ea595d3cb4a78fb8e514dcb99e4d6c4cb8837",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "purging.retire.retired",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.retired",
+      "sequence": 1,
+      "data_sha256": "e6986effa5c0b5828c495249bc012369b6cf6a5c10d35efcff80ddcb394aa8f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-c5710b67023b4e77-7-84c5fa71473a300f",
+      "data_sha256": "84c5fa71473a300fb8e2ab3dfb8bd68d4b43b5737e9c3e4880ce028ac1cfe1e8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 8,
+      "sequence": 8,
+      "data_sha256": "788ac863648ed7f30ea7e8dc6316d0948a59f1469474177036d943125880dc8e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 9,
+      "sequence": 9,
+      "data_sha256": "479ec7064b0579c974e0d7a5c262ce050ec1f090d0b2742f5dca9532e44998bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 10,
+      "sequence": 19,
+      "data_sha256": "644425bfea57155aa006fa642a1305318456b06798dee9c1ffdf68e6b116d2be",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 20,
+      "sequence": 20,
+      "data_sha256": "65e2a53c0918f61cfcd10314e62db93cdbce1390b80a044a8c196947a7863e28",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 21,
+      "sequence": 21,
+      "data_sha256": "c4280326ee81da42216dc9c61755a8b9e0470d8a415272802b4467dbcc79d86a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.retired",
+      "expected": 22,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.retired",
+      "expected": 5,
+      "sequence": 6,
+      "data_sha256": "b8684ad940707a68c9be562df7d34e70b8ada09705844461f61811bbd2208796",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_put",
+      "subject": "purging.retire.retired",
+      "sequence": 4,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.retired",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "b8684ad940707a68c9be562df7d34e70b8ada09705844461f61811bbd2208796",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_subject",
+      "subject": "WF_SIG:wf.sig.retire.retired.*",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.retired",
+      "expected": 7,
+      "sequence": 8,
+      "data_sha256": "b8684ad940707a68c9be562df7d34e70b8ada09705844461f61811bbd2208796",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_subject",
+      "subject": "WF_JRN:wf.jrn.retire.retired",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_has_timers",
+      "outcome": "false"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.retired",
+      "sequence": 1,
+      "data_sha256": "e6986effa5c0b5828c495249bc012369b6cf6a5c10d35efcff80ddcb394aa8f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "snap.retire.retired",
+      "expected": 1,
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.retired",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "b8684ad940707a68c9be562df7d34e70b8ada09705844461f61811bbd2208796",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.retired",
+      "expected": 3,
+      "sequence": 6,
+      "data_sha256": "f4aca7e47918ac7abc080fcfcd257ff44e3c9a05e0a2696ae9a3c2700ae67e8d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_event_publish",
+      "subject": "wf.purge.retire.retired",
+      "sequence": 1,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.retired",
+      "expected": 9,
+      "sequence": 10,
+      "data_sha256": "b8684ad940707a68c9be562df7d34e70b8ada09705844461f61811bbd2208796",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_subject",
+      "subject": "WF_INV:wf.inv.retire.retired",
+      "expected": 2,
+      "sequence": 1,
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "retire.retired",
+      "expected": 10,
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_INV",
+      "expected": 2,
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_INV",
+      "sequence": 2,
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_SIG",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_JRN",
+      "expected": 17,
+      "sequence": 21,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 17,
+      "data_sha256": "76f75152b78296d2241d1d2e03c54658bdb2ab309b894d552caa1b1f68b9ead6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 18,
+      "data_sha256": "479ec7064b0579c974e0d7a5c262ce050ec1f090d0b2742f5dca9532e44998bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 19,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 20,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 21,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_keys",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "purging.retire.retired",
+      "sequence": 4,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "retire.retired",
+      "sequence": 6,
+      "data_sha256": "f4aca7e47918ac7abc080fcfcd257ff44e3c9a05e0a2696ae9a3c2700ae67e8d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.survivor",
+      "sequence": 2,
+      "data_sha256": "0faaeb9403a116ddf3a99ea83cdc5fa682aeabdfb433621bec181d5074ba7834",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "data_sha256": "9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-2dedb3a6cee2fe8c-16-6f04c369aa4953c9",
+      "data_sha256": "6f04c369aa4953c9434c3a45b8366afd7004a833b95dc8f78c5634086d14c52a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_list",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "snapshot-c5710b67023b4e77-7-84c5fa71473a300f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "step-result-d55f0d504135f17694f855bc004c0d149b0f384f1ed5b7b410e8a0364d394289",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "retire.retired",
+      "sequence": 12,
+      "data_sha256": "b8771b6e75094dcc237e637058c93070ca632dc3309a780ada8114f995b95459",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.retired",
+      "expected": 12,
+      "sequence": 13,
+      "data_sha256": "33bc5baf9f11597d28fd8a27b7daa4cc8e0efcd6a3faac9393db436875628606",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_invocation_get",
+      "subject": "wf.inv.retire.retired",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "retire.retired",
+      "sequence": 6,
+      "data_sha256": "f4aca7e47918ac7abc080fcfcd257ff44e3c9a05e0a2696ae9a3c2700ae67e8d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_event_publish",
+      "subject": "wf.purge.retire.retired",
+      "sequence": 1,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "duplicate"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "purging.retire.retired",
+      "sequence": 4,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "purging.retire.retired",
+      "expected": 4,
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "retire.retired",
+      "expected": 13,
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.retired",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "purging.retire.retired",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_INV",
+      "expected": 2,
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_INV",
+      "sequence": 2,
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_SIG",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_JRN",
+      "expected": 17,
+      "sequence": 21,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 17,
+      "data_sha256": "76f75152b78296d2241d1d2e03c54658bdb2ab309b894d552caa1b1f68b9ead6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 18,
+      "data_sha256": "479ec7064b0579c974e0d7a5c262ce050ec1f090d0b2742f5dca9532e44998bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 19,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 20,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_get",
+      "subject": "WF_JRN",
+      "sequence": 21,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_keys",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "retire.retired",
+      "sequence": 6,
+      "data_sha256": "f4aca7e47918ac7abc080fcfcd257ff44e3c9a05e0a2696ae9a3c2700ae67e8d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.survivor",
+      "sequence": 2,
+      "data_sha256": "0faaeb9403a116ddf3a99ea83cdc5fa682aeabdfb433621bec181d5074ba7834",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "data_sha256": "9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-2dedb3a6cee2fe8c-16-6f04c369aa4953c9",
+      "data_sha256": "6f04c369aa4953c9434c3a45b8366afd7004a833b95dc8f78c5634086d14c52a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_list",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "step-result-535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "data_sha256": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.survivor",
+      "sequence": 18,
+      "data_sha256": "479ec7064b0579c974e0d7a5c262ce050ec1f090d0b2742f5dca9532e44998bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 18,
+      "sequence": 22,
+      "data_sha256": "644425bfea57155aa006fa642a1305318456b06798dee9c1ffdf68e6b116d2be",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.survivor",
+      "sequence": 22,
+      "data_sha256": "644425bfea57155aa006fa642a1305318456b06798dee9c1ffdf68e6b116d2be",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 22,
+      "sequence": 23,
+      "data_sha256": "65e2a53c0918f61cfcd10314e62db93cdbce1390b80a044a8c196947a7863e28",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_last",
+      "subject": "wf.jrn.retire.survivor",
+      "sequence": 23,
+      "data_sha256": "65e2a53c0918f61cfcd10314e62db93cdbce1390b80a044a8c196947a7863e28",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_publish",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 23,
+      "sequence": 24,
+      "data_sha256": "77daa68ebb7a35ede8761521c202f467a1cb73bdffd904cd3beb46e02e437f28",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "retire.survivor",
+      "sequence": 8,
+      "data_sha256": "9fb16e762cd0407d8b2784bb6932edbcfc04b3255a6818635b749932bc39b251",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "retire.survivor",
+      "sequence": 15,
+      "data_sha256": "b8771b6e75094dcc237e637058c93070ca632dc3309a780ada8114f995b95459",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.survivor",
+      "expected": 15,
+      "sequence": 16,
+      "data_sha256": "8e78d60510ec1cf711e57808e6d336159e18210e021085816db3be9ca17d9404",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_invocation_get",
+      "subject": "wf.inv.retire.survivor",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "retire.survivor",
+      "sequence": 8,
+      "data_sha256": "9fb16e762cd0407d8b2784bb6932edbcfc04b3255a6818635b749932bc39b251",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "purging.retire.survivor",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.survivor",
+      "sequence": 2,
+      "data_sha256": "0faaeb9403a116ddf3a99ea83cdc5fa682aeabdfb433621bec181d5074ba7834",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_get",
+      "subject": "snapshot-2dedb3a6cee2fe8c-16-6f04c369aa4953c9",
+      "data_sha256": "6f04c369aa4953c9434c3a45b8366afd7004a833b95dc8f78c5634086d14c52a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 17,
+      "sequence": 17,
+      "data_sha256": "76f75152b78296d2241d1d2e03c54658bdb2ab309b894d552caa1b1f68b9ead6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 18,
+      "sequence": 18,
+      "data_sha256": "479ec7064b0579c974e0d7a5c262ce050ec1f090d0b2742f5dca9532e44998bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 19,
+      "sequence": 22,
+      "data_sha256": "644425bfea57155aa006fa642a1305318456b06798dee9c1ffdf68e6b116d2be",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 23,
+      "sequence": 23,
+      "data_sha256": "65e2a53c0918f61cfcd10314e62db93cdbce1390b80a044a8c196947a7863e28",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 24,
+      "sequence": 24,
+      "data_sha256": "77daa68ebb7a35ede8761521c202f467a1cb73bdffd904cd3beb46e02e437f28",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_next",
+      "subject": "wf.jrn.retire.survivor",
+      "expected": 25,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.survivor",
+      "expected": 16,
+      "sequence": 17,
+      "data_sha256": "8e78d60510ec1cf711e57808e6d336159e18210e021085816db3be9ca17d9404",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_put",
+      "subject": "purging.retire.survivor",
+      "sequence": 9,
+      "data_sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.survivor",
+      "expected": 17,
+      "sequence": 18,
+      "data_sha256": "8e78d60510ec1cf711e57808e6d336159e18210e021085816db3be9ca17d9404",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_subject",
+      "subject": "WF_SIG:wf.sig.retire.survivor.*",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.survivor",
+      "expected": 18,
+      "sequence": 19,
+      "data_sha256": "8e78d60510ec1cf711e57808e6d336159e18210e021085816db3be9ca17d9404",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_subject",
+      "subject": "WF_JRN:wf.jrn.retire.survivor",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_has_timers",
+      "outcome": "false"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "snap.retire.survivor",
+      "sequence": 2,
+      "data_sha256": "0faaeb9403a116ddf3a99ea83cdc5fa682aeabdfb433621bec181d5074ba7834",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "snap.retire.survivor",
+      "expected": 2,
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.survivor",
+      "expected": 19,
+      "sequence": 20,
+      "data_sha256": "8e78d60510ec1cf711e57808e6d336159e18210e021085816db3be9ca17d9404",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.survivor",
+      "expected": 8,
+      "sequence": 11,
+      "data_sha256": "998224bf61c957cf222c76edababad88d4fdec99cdfad61ee3406ef9f3b09081",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_event_publish",
+      "subject": "wf.purge.retire.survivor",
+      "sequence": 2,
+      "data_sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "retire.survivor",
+      "expected": 20,
+      "sequence": 21,
+      "data_sha256": "8e78d60510ec1cf711e57808e6d336159e18210e021085816db3be9ca17d9404",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_subject",
+      "subject": "WF_INV:wf.inv.retire.survivor",
+      "expected": 3,
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "purging.retire.survivor",
+      "sequence": 9,
+      "data_sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "purging.retire.survivor",
+      "expected": 9,
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "retire.survivor",
+      "expected": 21,
+      "sequence": 22,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_INV",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_SIG",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_stream_range",
+      "subject": "WF_JRN",
+      "sequence": 24,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_keys",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "retire.retired",
+      "sequence": 6,
+      "data_sha256": "f4aca7e47918ac7abc080fcfcd257ff44e3c9a05e0a2696ae9a3c2700ae67e8d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "retire.survivor",
+      "sequence": 11,
+      "data_sha256": "998224bf61c957cf222c76edababad88d4fdec99cdfad61ee3406ef9f3b09081",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_list",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "snapshot-2dedb3a6cee2fe8c-16-6f04c369aa4953c9",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "step-result-535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "blob_delete",
+      "subject": "step-result-9ff02fac704694b9ad4fe73e4e265a7253047871ea2a929eaf5c0771239386e4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "retire.retired",
+      "sequence": 6,
+      "data_sha256": "f4aca7e47918ac7abc080fcfcd257ff44e3c9a05e0a2696ae9a3c2700ae67e8d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_invocation_get",
+      "subject": "wf.inv.retire.retired",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "retire.survivor",
+      "sequence": 11,
+      "data_sha256": "998224bf61c957cf222c76edababad88d4fdec99cdfad61ee3406ef9f3b09081",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_invocation_get",
+      "subject": "wf.inv.retire.survivor",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_continuation_retirement",
+      "subject": "retire",
+      "sequence": 3,
+      "outcome": "invocation_ack_lost:delete_drop"
+    }
+  ]
+}

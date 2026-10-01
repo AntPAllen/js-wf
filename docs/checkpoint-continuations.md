@@ -822,3 +822,15 @@ ordinary completion/suspension. Existing plugin forms remain supported.
 prove basic registration/dispatch and offline effect suppression. Ordinary replay preserves typed missing-frame
 and unknown-stage errors. Combined fault and full
 release acceptance gates above remain open.
+
+## Seeded retirement and quiescent GC
+
+A continuation_retirement transport workload now exercises production SDK frames,
+checkpoint manifest publication/purge, restoration, retirement and quiescent GC
+on shared retained stores. Forty retirement/GC fault combinations preserve a
+survivor's frame-held promise result; mark failures stop before deletion, and
+GC between an uncertain retirement and its retry remains safe. Generation-bound
+tombstones, raw terminal audits, exact replay and compiled missing-reference/
+wrong-generation controls are verified. [100,000-seed proof and scope](scale/continuation-retirement-model-2026-10-01/)
+retain evidence. This slice explicitly orchestrates SDK delivery cuts; worker
+integration, reuse under combined faults and online GC remain open.

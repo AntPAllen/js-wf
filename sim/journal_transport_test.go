@@ -482,6 +482,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededContinuationPromise(loaded.Seed, &loaded)
 	case "continuation_panic":
 		replayed, err = runSeededContinuationPanic(loaded.Seed, &loaded)
+	case "continuation_retirement":
+		replayed, err = runSeededContinuationRetirement(loaded.Seed, &loaded)
 	case "continuation_limit":
 		replayed, err = runSeededContinuationLimit(loaded.Seed, &loaded)
 	case "worker_continuation":
