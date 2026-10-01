@@ -4821,3 +4821,19 @@ duplicates from twelve later-terminal records. All51 repair decisions have
 checked explanations:50 acknowledged and one uncertain signal publication.
 This closes one clean-source ten-minute majority slice, not default-ping,
 separate-process, current-source full suite or24-hour matrix gates.
+
+
+## Typed fencing evidence for matrix worker processes
+
+The shared sustained matrix subprocess helper now records actual typed fencing
+with PID, process sequence, invocation/delivery, epoch, reason and error, syncing
+each completed record. Graceful exit cross-checks production fencing metrics and
+retains the final snapshot. Killed processes have no final counter snapshot and
+may leave an interrupted final line; full hard-kill attribution remains open.
+[Native process proof](scale/matrix-process-fencing-2026-10-01/) passes8.34s /
+9.383s race package with the acquisition/selection regression checks. A real
+child holds an exact acquired lease, its revision is CAS-revoked after four
+seconds, and production execution records one lease loss before retrying to42.
+The recovered four-entry journal uses higher epochs and the retained audit passes.
+SIGTERM flushes the final snapshot with one matching fencing event. Vet passes.
+This is focused lease-revocation evidence, not an added sustained R5 row.

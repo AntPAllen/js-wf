@@ -366,6 +366,13 @@ A sixth sustained row, `TestMixedMatrixWorkerPausedFortyFiveSeconds`, runs the m
 
 A seventh sustained row, `TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds`, holds server-to-worker replies for 45 seconds while continuing to forward worker requests. Each worker is pinned to its own client TCP proxy and ignores discovered peers. Seeded selection uses an acquisition handoff: a child holds a newly acquired delivery until the parent installs the reply hold, preventing a released lease from being selected through a delayed active-count marker. The fault artifact names that delivery, and fencing must belong to it. Relay byte counters confirm the asymmetric fault, and a fresh successful worker PING confirms recovery after replies resume. An active isolation must report fencing. Faults begin at +5s and repeat each minute. Shared histories, retained integrity, raw enabling-event latency and queue-drain gates remain required; select `isolation` in the workflow. This is a worker transport fault with the cluster quorum intact.
 
+The shared matrix subprocess helper retains typed fencing JSONL with actual PID,
+process sequence and invocation/delivery/epoch identity. Completed fencing records
+are synced before callbacks return. Graceful exit cross-checks the production
+counter and retains final metrics. SIGKILL may interrupt the last record and has
+no final metrics snapshot; consumers must preserve this uncertainty. Focused
+lease-revocation proof does not certify a sustained R5 process-fault row.
+
 The sustained worker-clock row is available as `TestMixedMatrixWorkerClockSkew`
 and `workerclock` in `tier2-matrix-leaders`. Three separate worker processes
 run with verified Go wall-clock offsets of +5 seconds, −5 seconds and zero

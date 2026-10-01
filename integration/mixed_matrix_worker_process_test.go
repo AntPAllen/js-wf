@@ -59,8 +59,30 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer events.Close()
+	fenceFile, err := os.Create(base + "-fencing.jsonl")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer fenceFile.Close()
 	var mu sync.Mutex
 	var observerErr error
+	var fenceCount uint64
+	fenceEncoder := json.NewEncoder(fenceFile)
+	observeFence := func(event worker.FencingEvent) {
+		mu.Lock()
+		defer mu.Unlock()
+		fenceCount++
+		err := fenceEncoder.Encode(matrixProcessFencingRecord{PID: os.Getpid(), Sequence: fenceCount, Event: event})
+		if err == nil {
+			// These are rare fixture observations. Sync each completed record so
+			// a later process kill cannot erase an already retained observation.
+			err = fenceFile.Sync()
+		}
+		if err != nil {
+			observerErr = err
+			stop()
+		}
+	}
 	active := map[string]bool{}
 	encoder := json.NewEncoder(events)
 	observe := func(event worker.DispatchEvent) {
@@ -119,7 +141,7 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 		}
 		return json.Marshal(value)
 	}
-	options := []worker.Option{worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(observe)}
+	options := []worker.Option{worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(observe), worker.WithFencingObserver(observeFence)}
 	if raw := os.Getenv("WF_MATRIX_WORKER_ACK_WAIT"); raw != "" {
 		ackWait, err := time.ParseDuration(raw)
 		if err != nil {
@@ -249,7 +271,19 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 	fleet.Wait()
 	mu.Lock()
 	observedError := observerErr
+	observedFences := fenceCount
 	mu.Unlock()
+	metrics := w.Metrics()
+	if metrics.FencingEvents != observedFences {
+		t.Fatalf("fencing records=%d counter=%d", observedFences, metrics.FencingEvents)
+	}
+	data, err := json.MarshalIndent(matrixProcessMetrics{PID: os.Getpid(), Worker: id, Metrics: metrics}, "", "  ")
+	if err == nil {
+		err = os.WriteFile(base+"-metrics.json", data, 0600)
+	}
+	if err != nil {
+		t.Fatalf("process metrics: %v", err)
+	}
 	if observedError != nil {
 		t.Fatalf("dispatch artifacts: %v", observedError)
 	}
@@ -258,6 +292,20 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 		t.Fatal(err)
 	default:
 	}
+}
+
+// A final metrics snapshot exists only after graceful exit. A killed process
+// may have an incomplete last record; consumers must retain that uncertainty.
+type matrixProcessFencingRecord struct {
+	PID      int                 `json:"pid"`
+	Sequence uint64              `json:"sequence"`
+	Event    worker.FencingEvent `json:"event"`
+}
+
+type matrixProcessMetrics struct {
+	PID     int            `json:"pid"`
+	Worker  string         `json:"worker_id"`
+	Metrics worker.Metrics `json:"metrics"`
 }
 
 type matrixProcessWorker struct {
