@@ -1,0 +1,36 @@
+diff --git a/integration/mixed_process_chaos_test.go b/integration/mixed_process_chaos_test.go
+index 7459bf8..8dae405 100644
+--- a/integration/mixed_process_chaos_test.go
++++ b/integration/mixed_process_chaos_test.go
+@@ -1015,22 +1015,16 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
+ 	if err != nil || report.Invocations != wantTerminal || report.Journals != wantTerminal || report.Terminal != wantTerminal {
+ 		t.Fatalf("mixed retained integrity: report=%+v err=%v", report, err)
+ 	}
+-	runStream, err := third.Stream(ctx, "WF_RUN")
+-	if err != nil {
+-		t.Fatalf("mixed run queue lookup: %v", err)
+-	}
+-	until = time.Now().Add(30 * time.Second)
+-	var runInfo *jetstream.StreamInfo
+-	for time.Now().Before(until) && ctx.Err() == nil {
+-		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+-		runInfo, err = runStream.Info(attempt)
+-		stop()
+-		if err == nil && runInfo.State.Msgs == 0 {
+-			break
++	drainCtx, stopDrain := context.WithTimeout(ctx, 30*time.Second)
++	defer stopDrain()
++	runInfo, err := waitMixedRunDrain(drainCtx, 3*time.Second, 100*time.Millisecond, func(attempt context.Context) (*jetstream.StreamInfo, error) {
++		runStream, err := third.Stream(attempt, "WF_RUN")
++		if err != nil {
++			return nil, err
+ 		}
+-		time.Sleep(100 * time.Millisecond)
+-	}
+-	if err != nil || runInfo == nil || runInfo.State.Msgs != 0 {
++		return runStream.Info(attempt)
++	})
++	if err != nil {
+ 		t.Fatalf("mixed run queue did not drain: info=%+v err=%v context=%v", runInfo, err, ctx.Err())
+ 	}
+ }

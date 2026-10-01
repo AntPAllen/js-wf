@@ -1017,13 +1017,20 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	}
 	drainCtx, stopDrain := context.WithTimeout(ctx, 30*time.Second)
 	defer stopDrain()
+	metadataReads := 0
 	runInfo, err := waitMixedRunDrain(drainCtx, 3*time.Second, 100*time.Millisecond, func(attempt context.Context) (*jetstream.StreamInfo, error) {
+		metadataReads++
+		if metadataReads == 1 {
+			<-attempt.Done()
+			return nil, attempt.Err()
+		}
 		runStream, err := third.Stream(attempt, "WF_RUN")
 		if err != nil {
 			return nil, err
 		}
 		return runStream.Info(attempt)
 	})
+	t.Logf("controlled metadata reads=%d", metadataReads)
 	if err != nil {
 		t.Fatalf("mixed run queue did not drain: info=%+v err=%v context=%v", runInfo, err, ctx.Err())
 	}

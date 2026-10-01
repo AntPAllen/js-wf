@@ -3232,3 +3232,30 @@ bounded drain loop starts. [Raw CI artifacts and snapshots](scale/mixed-seed3-a3
 retain the next concrete read-contract target. Mixed latency/queue misses,
 final-source full matrix/24-hour soak, online GC and remaining plan requirements
 stay open. Original million-timer and full simulation jobs remain live unchanged.
+
+
+## Bounded final mixed run-queue metadata lookup
+
+The final mixed fixture now includes its initial restarted-node WF_RUN lookup
+inside the existing 30-second drain budget, with three-second request contexts.
+Named transient transport errors retry; hard errors, joined permanent causes
+and cancellation stop the check. A successful client read of exactly zero
+messages is still required. Monitoring cannot substitute for this gate.
+
+Focused race contracts passed in 1.095 seconds. An unmodified seed-3 race run
+passed with all 28 outcomes at p99 10.788 seconds. The final compiled control
+injects no-stream-response then a three-second lost lookup reply before real
+metadata reads: it passed in 33.365 seconds, p99 6.887 seconds, with 23 reads
+and final integrity/drain checks. A compiled one-retained-message acceptance
+mutant fails its semantic assertion; vet passes. [Logs, overlays, schedule,
+monitoring and hashes](scale/mixed-run-drain-2026-10-01/) retain the proof.
+Physical fault placement differs from hosted seed 3, so this proves bounded
+retry behavior rather than the original timeout's cause. No production runtime
+or latency gate changes. Mixed latency/metadata causes and final release gates
+remain open.
+
+The hosted held-lease disk contract at c56bda5 passed in
+[run 36813976941](https://github.com/AntPAllen/js-wf/actions/runs/36813976941);
+its mixed job remains active. Standard CI at a36cb7e also passed. Latest standard
+CI, both expanded simulation campaigns and the original million-timer process
+remain live at this update; no campaigns were restarted or canceled.
