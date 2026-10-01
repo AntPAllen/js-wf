@@ -4467,3 +4467,11 @@ at17:49:20UTC. Its [launch identity](scale/parent-notification-budget-2026-10-01
 and hosted notification run36902096296 are retained. Latest checked checkpoint
 has560 terminal invocations; neither live run is a pass yet. The million timer
 service remains active with46,780 receipts at the17:48UTC checkpoint.
+
+The instrumented ten-minute five-container journal CI run36902745848 is queued
+at clean7cec311; notification CI36902096296 and comprehensive100,000-seed
+CI36900782095 are in progress. [Follow-up source identities and last checked states](scale/parent-notification-budget-2026-10-01/live-followup-runs.json)
+are retained. The comprehensive run predates the new notification workload; its
+result must retain that source scope. The independent current-source seed28
+replay is active at batch48 near five minutes. Remaining full-matrix and24-hour
+release gates stay open.
