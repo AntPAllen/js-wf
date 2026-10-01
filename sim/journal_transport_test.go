@@ -476,6 +476,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededSnapshotRead(loaded.Seed, &loaded)
 	case "continuation_canceled_timer":
 		replayed, err = runSeededContinuationCanceledTimer(loaded.Seed, &loaded)
+	case "continuation_running_cancel":
+		replayed, err = runSeededContinuationRunningCancel(loaded.Seed, &loaded)
 	case "continuation_promise":
 		replayed, err = runSeededContinuationPromise(loaded.Seed, &loaded)
 	case "continuation_panic":

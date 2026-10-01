@@ -3259,3 +3259,53 @@ The hosted held-lease disk contract at c56bda5 passed in
 its mixed job remains active. Standard CI at a36cb7e also passed. Latest standard
 CI, both expanded simulation campaigns and the original million-timer process
 remain live at this update; no campaigns were restarted or canceled.
+
+
+## Active continuation cancellation and durable notification recovery
+
+A new seeded workload resumes a finish_v1 continuation from its frame, verifies
+state 23/locals 45, enters one blocking effect, rejects a stale-generation
+cancel and interrupts the active suffix on a matching cancel. The prefix stays
+byte-identical; archive reads are forbidden, cancellation consumes once and
+Failed has no effect completion. Seven modes cover cancel publish/enqueue
+lost-before-commit and hidden acknowledgments, plus missed notification and
+stale durable poll followed by a matching cancel. Production runtime source is
+unchanged.
+
+The workload passed 100,000 schedules in 74.582 seconds (16,988,200 events,
+maximum virtual time 15 seconds), a 1,000-seed race run and exact first-ten/
+separate-process seed-42 replay. The seed-42 regression is pinned and the full
+pinned corpus passes under race. Its matching real R3 contract passed under
+race in 49.719 seconds: notification cancellation took 116.826 ms, and removing
+and flushing the core subscription made the production durable poll recover in
+14.718 seconds. Both preserve ten prefix records, add exactly five suffix
+records, run the effect once, avoid archive reads and return ErrCancelled
+through all three peers with raw integrity passing. These are individual
+samples, not p99.
+
+Compiled production generation-key controls fail immediately on a stale cancel
+in the seed helper and at the corresponding real assertion under race. Vet
+passes. [Logs, mutation and hashes](scale/continuation-running-cancel-2026-10-01/)
+retain the proof. Combined publication/GC/cancellation cuts, handlers ignoring
+context, offline canceled-pending-effect replay and independent final release
+gates remain open; this is not the complete continuation acceptance suite.
+
+
+## Fresh mixed seed 9 latency miss and independent clean 20-seed campaign
+
+[Mixed CI at dd7389b](https://github.com/AntPAllen/js-wf/actions/runs/36814833995)
+passed seeds 1–8 then failed seed 9 p99 at 34.315 seconds across all 28 outcomes,
+before the final integrity/drain gates. Persistent 70 ms delay is on node 1,
+node 2 is isolated/killed and node 0 paused. Replacement signal groups spend
+30.573/29.973 seconds in 43/48 measured pre-append KV updates, with only
+69.631/76.973 microseconds local gate wait and zero errors. The underlying
+server cause remains unconfirmed. [Raw artifacts](scale/mixed-seed9-dd7389b-2026-10-01/)
+retain the evidence. No fencing, renewal or latency requirement is relaxed.
+
+The earlier [c56bda5 campaign](https://github.com/AntPAllen/js-wf/actions/runs/36813976941)
+passed all 20 mixed seeds and its separate held-lease disk contract. That green
+run neither clears the fresh latency miss nor proves 200 consecutive clean
+seeds across the full matrix. Latest-source mixed/standard CI, both expanded
+simulation jobs and the original million-timer process remain active at this
+update; none were restarted or canceled. Five-node 24-hour soak, online GC
+and remaining plan requirements stay open.

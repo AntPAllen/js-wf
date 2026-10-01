@@ -1,0 +1,11 @@
+--- worker/worker.go
++++ worker/worker.go
+@@ -1191,7 +1191,7 @@
+ 	return subscription.Unsubscribe()
+ }
+ 
+-func cancelKey(typ, id, generation string) string { return typ + "." + id + ":" + generation }
++func cancelKey(typ, id, generation string) string { return typ + "." + id }
+ 
+ func (w *Worker) markRunningCancellation(key string, expected *cancelWaiter) {
+ 	w.cancelMu.Lock()

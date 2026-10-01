@@ -739,3 +739,33 @@ is retained with this proof; it predates these fixture-only changes and does
 not establish a causal explanation. Seeds 2, 12 and 65 remain open. Full Tier 1
 jobs and the million-timer campaign continue live without restart; online GC
 and independent final-source matrix/24-hour soak remain open.
+
+
+## Active continuation cancellation and durable notification recovery
+
+A new seeded workload resumes a finish_v1 continuation from its frame, verifies
+state 23/locals 45, enters one blocking effect, rejects a stale-generation
+cancel and interrupts the active suffix on a matching cancel. The prefix stays
+byte-identical; archive reads are forbidden, cancellation consumes once and
+Failed has no effect completion. Seven modes cover cancel publish/enqueue
+lost-before-commit and hidden acknowledgments, plus missed notification and
+stale durable poll followed by a matching cancel. Production runtime source is
+unchanged.
+
+The workload passed 100,000 schedules in 74.582 seconds (16,988,200 events,
+maximum virtual time 15 seconds), a 1,000-seed race run and exact first-ten/
+separate-process seed-42 replay. The seed-42 regression is pinned and the full
+pinned corpus passes under race. Its matching real R3 contract passed under
+race in 49.719 seconds: notification cancellation took 116.826 ms, and removing
+and flushing the core subscription made the production durable poll recover in
+14.718 seconds. Both preserve ten prefix records, add exactly five suffix
+records, run the effect once, avoid archive reads and return ErrCancelled
+through all three peers with raw integrity passing. These are individual
+samples, not p99.
+
+Compiled production generation-key controls fail immediately on a stale cancel
+in the seed helper and at the corresponding real assertion under race. Vet
+passes. [Logs, mutation and hashes](scale/continuation-running-cancel-2026-10-01/)
+retain the proof. Combined publication/GC/cancellation cuts, handlers ignoring
+context, offline canceled-pending-effect replay and independent final release
+gates remain open; this is not the complete continuation acceptance suite.
