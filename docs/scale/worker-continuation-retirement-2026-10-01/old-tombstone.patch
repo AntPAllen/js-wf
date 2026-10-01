@@ -1,0 +1,11 @@
+--- retention/purge.go
++++ retention/purge.go
+@@ -242,7 +242,7 @@
+ 		return err
+ 	}
+ 	now := port.Now().UTC()
+-	marker = Tombstone{Tombstone: true, InvSeq: input.Sequence, PurgedAt: now, ExpiresAt: now.Add(grace)}
++	marker = Tombstone{Tombstone: true, InvSeq: 1, PurgedAt: now, ExpiresAt: now.Add(grace)}
+ 	data, _ := json.Marshal(marker)
+ 	if err := port.UpdateState(ctx, key, data, terminal.Revision); err != nil {
+ 		current, getErr := port.State(ctx, key)

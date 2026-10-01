@@ -3552,3 +3552,33 @@ and verifies it at row ends. This controls the measurement rather than fixing
 server election or changing the runtime. Its final eight-row race result above
 passes; hosted confirmation remains open. All production renewal, latency,
 queue-drain and full release gates remain unchanged.
+
+
+## Worker-integrated continuation retirement, quiescent GC and ID reuse
+
+A new seeded vertical slice runs production Start, worker dispatch/leases,
+checkpoint publication/restoration, retirement and GC on shared retained
+streams/KV/objects, with the existing run consumer transport. It covers a
+suspended worker and GC, replacement completion, seven retirement/reuse response
+faults, GC between uncertain retirement/retry, reclamation, fresh generation
+with changed input, ignored late old-generation signal, a second replacement,
+unique effect keys and both terminal raw-state audits. Final tombstone generation,
+invocation removal and snapshot/purging metadata removal are asserted.
+
+Final-source 100,000 schedules pass in 176.760 seconds (45,468,707 events,
+zero maximum virtual time). Exact cross-process replay, new pin and complete
+corpus/workload race pass in 34.007 seconds. Compiled retained-manifest,
+reused-effect-key and wrong-final-tombstone controls fail semantically; vet passes.
+The matching real R3 retirement/reuse race passes in 40.912 seconds, including
+clean and manifest-publication-loss cases with shared child objects. Data/cuts
+differ from the small seeded fixture; this is integration evidence rather than
+exact differential replay of every fault. [Proof and scope](scale/worker-continuation-retirement-2026-10-01/)
+are retained. Shared-promise worker integration, combined process/server cuts,
+online GC, TTL timing and independent release gates remain open.
+
+The cebd561 standard workflow and all 20 mixed seeds pass; its separate pressure
+job retains the pre-delay stopped-metadata-leader failure. The a8064ac workflow
+passes all 20 mixed seeds plus the final eight-row pressure and lease-disk jobs.
+Hosted delayed eight-owner KV sums 7.817–9.261 seconds still do not reproduce the
+mixed ~29-second update sum. Evidence is retained without weakening gates.
+Newer full simulation jobs and the original million-timer run remain live.

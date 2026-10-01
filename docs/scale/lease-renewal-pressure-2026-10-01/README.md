@@ -71,3 +71,14 @@ fails semantically at seed 1 (one update instead of required 51) in 0.005
 seconds. The patch/log is retained; no skipped renewal is introduced into
 production. The full latest-source simulation and real matrix/soak gates remain
 open independently of these contract/cost checks.
+
+## Hosted confirmation at a8064ac
+
+[Run 36826882488](https://github.com/AntPAllen/js-wf/actions/runs/36826882488)
+passes the final eight-row pressure job, lease-disk contract and all 20 mixed
+seeds. Retained pressure rows show delayed eight-owner KV sums 7.817–9.261
+seconds with no owner errors, consistent with the local steady case and still
+below the originating mixed ~29-second observation. The snapshot bucket was
+pinned to survivor node 0 in this source. Its pass controls that leaf's topology;
+it does not explain the prior stopped-metadata-leader failure or establish the
+whole-matrix 200-seed gate. Artifacts and full pressure job log are retained.

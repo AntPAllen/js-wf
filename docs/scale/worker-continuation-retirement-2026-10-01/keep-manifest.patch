@@ -1,0 +1,11 @@
+--- retention/purge.go
++++ retention/purge.go
+@@ -231,7 +231,7 @@
+ 		return err
+ 	}
+ 	if err == nil {
+-		if err := port.DeleteState(ctx, snapshotKey, snapshot.Revision); err != nil {
++		if err := func() error { _ = snapshot.Revision; return nil }(); err != nil {
+ 			return err
+ 		}
+ 	}
