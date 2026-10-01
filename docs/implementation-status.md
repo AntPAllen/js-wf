@@ -4770,3 +4770,9 @@ passes64.75s/65.782s package,224 completions,2,465 entries and confirmed journal
 progress2384→2465 during isolation. Worst terminal p99 is9.236s; all43 repairs
 have checked explanations and fencing is zero. It does not reproduce the exact
 hosted failure. A fresh clean-source ten-minute row remains required.
+
+The [bounded majority clean-runner campaign36917337770](https://github.com/AntPAllen/js-wf/actions/runs/36917337770)
+was launched at52fdbdf; its source/inputs are retained with the new smoke.
+Comprehensive simulation36900782095 remains in progress. The million-timer
+service remains active at MainPID18146 with132,207 receipts at its latest
+checkpoint. Neither live campaign is terminal acceptance.
