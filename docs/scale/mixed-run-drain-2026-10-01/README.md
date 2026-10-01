@@ -33,7 +33,7 @@ deadline. Monitoring is never consulted for success.
   pinned Stream/Info reads. PASS, 33.365 seconds, p99 6.88687974 seconds,
   23 metadata reads, all 28 outcomes and final integrity/drain checks.
 - Final compiled mutant accepting one retained message: semantic FAIL in
-  0.017 seconds (`retained queue accepted`, Msgs=1). Build errors and unrelated
+  0.013 seconds (`retained queue accepted`, Msgs=1). Build errors and unrelated
   timeouts are not counted as this control.
 - `go vet ./integration` and `git diff --check`: PASS.
 
