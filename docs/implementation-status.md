@@ -5199,3 +5199,27 @@ admitted in-flight clock cuts remain required before a production change or
 clock-tolerance claim. No production behavior was changed from the model alone.
 Both corrected R5 clock smokes36938296826 and36938299478 are authoritatively
 in progress at this checkpoint.
+
+### Corrected R5 clock transition smoke outcomes
+
+Source0682654 behind-clock smoke36938299478 passes112.59s. The current row
+guard and both event reviewers pass again against downloaded originals:
+196 invocations,2158 journal entries,one shifted-owner cut,eight role
+observations,15 actual clock reads,156 shifted timer-clock lookups and168
+controller-audited waits. Strict p99,histories,invariants and physical drain
+pass;55 repair records match final counters. This remains35-second smoke and
+does not admit every in-flight combination or establish sustained release.
+[Original compressed proof and verification](scale/tier3-mixed-server-clock-2026-10-01/behind-corrected-smoke/).
+
+Ahead36938296826 fails130.55s during physical drain with two retained WF_RUN
+messages after the30-second window. Its role transition and controller audit
+completed,with all logged p99 values below30s. Subjects/headers of the two
+messages were not captured; no server cause or clock-model equivalence is
+claimed. [Failure evidence](scale/tier3-mixed-server-clock-2026-10-01/ahead-corrected-drain-failure/)
+retains events,roles,process operations,last attempts and all original hashes.
+
+Added bounded read-only failure backlog capture using the last successful
+stream metadata range:512 sequence reads maximum,10s total,2s per read,explicit
+truncation/errors and payload omission over4KiB. It runs after drain failure and
+cannot clear or extend the strict gate. Current compilation and existing role
+regressions pass0.359s; exercising the diagnostic on a real failure remains open.

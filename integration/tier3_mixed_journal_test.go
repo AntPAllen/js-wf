@@ -886,6 +886,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		Error string
 	}
 	var drainAttempts []drainAttempt
+	var lastDrainState *jetstream.StreamInfo
 	defer func() {
 		data, err := json.MarshalIndent(drainAttempts, "", "  ")
 		if err == nil {
@@ -900,6 +901,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		attempt, stop := context.WithTimeout(drain, 2*time.Second)
 		state, err := run.Info(attempt)
 		stop()
+		if err == nil {
+			lastDrainState = state
+		}
 		message := ""
 		if err != nil {
 			message = err.Error()
@@ -927,6 +931,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			break
 		}
 		if drain.Err() != nil {
+			if snapshotErr := captureMatrixRunBacklog(filepath.Join(root, "drain-failure-backlog.json"), run, lastDrainState); snapshotErr != nil {
+				t.Errorf("capture failed drain backlog: %v", snapshotErr)
+			}
 			t.Fatalf("run queue not drained: %+v %v", state, err)
 		}
 		time.Sleep(100 * time.Millisecond)

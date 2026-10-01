@@ -35,3 +35,27 @@ Events, observed roles and hashes of every downloaded artifact are retained in
 `/tmp/js-wf-clock-behind-roles-36937362297`.
 
 Replacement smokes at clean source `0682654`: [ahead36938296826](https://github.com/AntPAllen/js-wf/actions/runs/36938296826) and [behind36938299478](https://github.com/AntPAllen/js-wf/actions/runs/36938299478). Both were authoritatively queued at launch; no acceptance is claimed. Exact source and inputs are retained.
+
+## Corrected smoke outcomes
+
+Behind36938299478 passes112.59s; independently rerun row guard and both event
+reviewers pass. Full original artifacts and verification reports are retained
+in `behind-corrected-smoke/`. It verifies196 invocations,2158 entries,one
+skewed-owner cut,eight role observations,156 shifted clock lookups,168 audited
+timer waits and physical drain. It remains shortened smoke evidence.
+
+Ahead36938296826 fails130.55s at physical drain after its role transition and
+controller audit. All logged workload p99 values are below30s, but two WF_RUN
+messages remain through the30-second drain window. Their subjects/headers were
+not retained, so the cause is unconfirmed. Events,roles,actual process operations,
+last drain attempts and all original artifact hashes are retained in
+`ahead-corrected-drain-failure/`. The raw download remains at
+`/tmp/js-wf-clock-ahead-corrected-36938296826`.
+
+A failed drain now captures bounded read-only raw retained-message observations:
+at most512 sequence reads,10seconds total,2seconds per read,with explicit
+truncation/errors and payload omission above4KiB. It uses the last successfully
+observed stream range when the last metadata attempt times out. The diagnostic
+runs after the gate has failed and cannot extend or satisfy the drain gate.
+Compilation and existing role-wait regressions pass (0.359s); this new diagnostic
+has not yet been exercised by a real failing cluster. No rerun is claimed here.
