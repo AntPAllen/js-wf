@@ -11,3 +11,7 @@ This source predates the parent-notification attempt budget and later repair/fen
 ## Expanded source campaign
 
 [Run36940808396](https://github.com/AntPAllen/js-wf/actions/runs/36940808396) launches at clean source `faf92045d88933090d2341e530df54f513bf396a` with100,000 configured seeds per workload,expected152 compiled tests and180 pinned traces. This workflow includes the strict full-suite evidence guard and always-uploaded source/inventory/events/results. It is authoritatively queued at launch and has no acceptance yet. Earlier36929826425 remains running; it was not cancelled or replaced.
+
+## Fresh-timer source campaign
+
+[Run36942165713](https://github.com/AntPAllen/js-wf/actions/runs/36942165713) launches at clean source `57ecf06ed179ae2083a65b13453ccbf85eafc1ab` with100,000 configured seeds,expected153 compiled tests and184 pins. It includes the SDK fresh-timer fix,its seeded real-worker regression and corrected standard inventory commands. It is queued and has no acceptance yet. Earlier36929826425 remains intact; failed36940808396 provides only setup evidence.
