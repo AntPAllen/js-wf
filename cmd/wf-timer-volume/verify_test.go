@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -75,5 +76,73 @@ func TestOfflineVerifierRejectsFalsePasses(t *testing.T) {
 				t.Fatal("false pass accepted")
 			}
 		})
+	}
+}
+
+func TestMillionReleaseVerifierCannotDowngradeLedgerEvidence(t *testing.T) {
+	root := t.TempDir()
+	rep, _ := verifierFixture()
+	rep.Count = 1000000
+	rep.Published, rep.Received = rep.Count, rep.Count
+	rep.Horizon = "24h"
+	rep.LastDue = rep.FirstDue.Add(24 * time.Hour)
+	rep.Revision = strings.Repeat("a", 40)
+	rep.SourceModified = "false"
+	rep.ReceiptLedger = receiptLedgerVersion
+	for i := range rep.Restarts {
+		rep.Restarts[i].Started = rep.FirstDue.Add(24 * time.Hour * time.Duration(i+1) / 3)
+		rep.Restarts[i].Healed = rep.Restarts[i].Started.Add(time.Millisecond)
+	}
+	archive := make([]byte, 16*rep.Count)
+	ledger := make([]byte, receiptSlotSize*rep.Count)
+	for i := 0; i < rep.Count; i++ {
+		deadline := due(rep.FirstDue, 24*time.Hour, rep.Count, i)
+		sequence := uint64(i + 100)
+		at := uint64(deadline.Add(time.Millisecond).UnixNano())
+		binary.LittleEndian.PutUint64(archive[16*i:], sequence)
+		binary.LittleEndian.PutUint64(archive[16*i+8:], at)
+		slot := ledger[receiptSlotSize*i : receiptSlotSize*(i+1)]
+		binary.LittleEndian.PutUint64(slot[:8], sequence)
+		binary.LittleEndian.PutUint64(slot[8:16], at)
+		binary.LittleEndian.PutUint64(slot[16:24], uint64(deadline.UnixNano()))
+		hash := sha256.Sum256(slot[:24])
+		copy(slot[24:], hash[:16])
+	}
+	hash := sha256.Sum256(archive)
+	rep.ObservationsSHA256 = hex.EncodeToString(hash[:])
+	for name, data := range map[string][]byte{"observations.bin": archive, "receipts.bin": ledger} {
+		if err := os.WriteFile(filepath.Join(root, name), data, 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	save := func() {
+		t.Helper()
+		data, err := json.Marshal(rep)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(root, "report.json"), data, 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	save()
+	if err := verifyReport(root, false); err != nil {
+		t.Fatalf("valid million-record artifact rejected: %v", err)
+	}
+	// Deleting the declaration must not bypass ledger checking, even when the
+	// archive, all million deadlines, hashes and release configuration still pass.
+	rep.ReceiptLedger = ""
+	ledger[8] ^= 1
+	if err := os.WriteFile(filepath.Join(root, "receipts.bin"), ledger, 0644); err != nil {
+		t.Fatal(err)
+	}
+	save()
+	if err := verifyReport(root, false); err == nil || !strings.Contains(err.Error(), "requires durable receipt ledger") {
+		t.Fatalf("downgraded release artifact accepted: %v", err)
+	}
+	rep.ReceiptLedger = receiptLedgerVersion
+	save()
+	if err := verifyReport(root, false); err == nil || !strings.Contains(err.Error(), "checksum mismatch") {
+		t.Fatalf("corrupt declared ledger accepted: %v", err)
 	}
 }

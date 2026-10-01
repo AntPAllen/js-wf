@@ -4302,3 +4302,36 @@ is claimed. The prior interrupted stores remain unchanged. Comprehensive final-
 source Tier 1 run 36877170093 (100k seeds) and all-thirteen-row Tier 2 run
 36877217660 (one seed, ten minutes per row) were also launched at 273646a.
 Their terminal results are pending; one seed cannot satisfy the 200-seed gate.
+
+
+## Whole sustained matrix passes one seed; direct-read replay extends Tier 1
+
+[Whole-matrix run 36877217660](scale/full-matrix-273646a-2026-10-01/) passes
+all thirteen ten-minute rows at 273646a. The full-matrix verifier confirms the
+same revision, 33,908 invocations, 313 faults and complete retained audits;
+worst aggregate terminal p99 is 15.017s, workload-cell p99 18.261s and progress
+p99 13.010s. Metadata and full raw log ZIP are retained. This proves one seed
+per row; the 200-seed and five-node 24-hour gates remain open.
+
+[Plain direct-read Tier 1 replay](scale/direct-read-model-2026-10-01/) now covers
+plain/wrapped replies and semantic lookalikes across retry, exhaustion and gap
+cuts. All twelve combinations are pinned; 100k seeds pass in 8.48s, including
+exact and separate-process replay. All 164 pins plus the workload pass race in
+7.027s. An API-only classifier control fails the gap property in 0.003s. This
+models the observed client reply, not the server-side cause. The comprehensive
+100k hosted run in flight predates these new traces. Release timer verification
+also requires a durable ledger declaration, closing an optional-ledger bypass.
+Synthetic million-record artifact tests pass with the complete ledger and
+reject declaration removal or checksum corruption; package race passes in
+8.387s. The optional-ledger control incorrectly accepts the downgraded artifact
+and fails the regression in 1.229s. Vet and 25 script tests pass.
+
+The first fresh durable million campaign is now authoritatively interrupted:
+PID16185, its three servers and session46731 are absent. Its last saved cut
+acknowledged all one million schedules, before first due, but no restarts or
+final audit occurred. Offline recovery reads every slot and finds zero receipts.
+[Retained report, ledger, recovery and server logs](scale/timer-durable-receipts-2026-10-01/interrupted-first-fresh-attempt/)
+exclude this attempt from acceptance. The VM boot is unchanged and no kernel
+OOM event appears in the interval; the exact cause remains unconfirmed. A
+running report is not liveness. The next long campaign will use a separate user
+service rather than depending on an execution-tool session.

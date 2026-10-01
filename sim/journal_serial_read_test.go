@@ -8,15 +8,21 @@ import (
 	"fmt"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/internal/natsutil"
 	"js-wf/journal"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
 func runJournalSerialRead(seed int64, replay *Trace) (trace Trace, runErr error) {
+	return runJournalSerialReadMode(seed, replay, false)
+}
+
+func runJournalSerialReadMode(seed int64, replay *Trace, direct bool) (trace Trace, runErr error) {
 	var schedule *Scheduler
 	if replay == nil {
 		schedule = NewScheduler(seed)
@@ -27,7 +33,11 @@ func runJournalSerialRead(seed int64, replay *Trace) (trace Trace, runErr error)
 			return trace, err
 		}
 	}
-	if err := schedule.SetWorkload("journal_serial_read_recovery"); err != nil {
+	workload := "journal_serial_read_recovery"
+	if direct {
+		workload = "journal_direct_unavailable_recovery"
+	}
+	if err := schedule.SetWorkload(workload); err != nil {
 		return trace, err
 	}
 	defer func() { trace = schedule.Trace() }()
@@ -35,7 +45,11 @@ func runJournalSerialRead(seed int64, replay *Trace) (trace Trace, runErr error)
 	if err != nil {
 		return trace, err
 	}
-	kind, err := schedule.Choose([]string{"timeout", "no_responders", "unavailable"})
+	kinds := []string{"timeout", "no_responders", "unavailable"}
+	if direct {
+		kinds = []string{"direct_unavailable", "wrapped_direct_unavailable", "unavailable_lookalike"}
+	}
+	kind, err := schedule.Choose(kinds)
 	if err != nil {
 		return trace, err
 	}
@@ -66,26 +80,35 @@ func runJournalSerialRead(seed int64, replay *Trace) (trace Trace, runErr error)
 		model.DeleteMessage("wf.jrn.test.serial-read", 2)
 	}
 	records, observedTail, readErr := store.Read(ctx, "test", "serial-read")
-	switch mode {
-	case "exhausted":
-		var api *jetstream.APIError
-		expected := kind == "timeout" && errors.Is(readErr, context.DeadlineExceeded) || kind == "no_responders" && errors.Is(readErr, nats.ErrNoResponders) || kind == "unavailable" && errors.As(readErr, &api) && api.ErrorCode == 10008
-		if !expected || len(records) != 0 || observedTail != 0 {
-			return trace, fmt.Errorf("exhaustion result=%v", readErr)
+	if kind == "unavailable_lookalike" {
+		if readErr == nil || natsutil.IsUnavailable(readErr) || len(model.nextFaults) != count-1 || schedule.NowMillis() != 0 {
+			return trace, fmt.Errorf("permanent lookalike retried or accepted: err=%v pending=%d time=%d", readErr, len(model.nextFaults), schedule.NowMillis())
 		}
-	case "gap":
-		if !errors.Is(readErr, journal.ErrGap) {
-			return trace, fmt.Errorf("gap result=%v", readErr)
-		}
-	default:
-		if readErr != nil || observedTail != tail || len(records) != len(entries) {
-			return trace, fmt.Errorf("read count=%d tail=%d err=%v", len(records), observedTail, readErr)
-		}
-		for i, record := range records {
-			got, _ := json.Marshal(record.Entry)
-			want, _ := json.Marshal(entries[i])
-			if !bytes.Equal(got, want) || record.Sequence != uint64(i+1) {
-				return trace, fmt.Errorf("record %d changed", i)
+	} else {
+		switch mode {
+		case "exhausted":
+			var api *jetstream.APIError
+			expected := kind == "timeout" && errors.Is(readErr, context.DeadlineExceeded) || kind == "no_responders" && errors.Is(readErr, nats.ErrNoResponders) || kind == "unavailable" && errors.As(readErr, &api) && api.ErrorCode == 10008
+			if direct {
+				expected = natsutil.IsUnavailable(readErr) && schedule.NowMillis() == 50 && len(model.nextFaults) == 0
+			}
+			if !expected || len(records) != 0 || observedTail != 0 {
+				return trace, fmt.Errorf("exhaustion result=%v", readErr)
+			}
+		case "gap":
+			if !errors.Is(readErr, journal.ErrGap) {
+				return trace, fmt.Errorf("gap result=%v", readErr)
+			}
+		default:
+			if readErr != nil || observedTail != tail || len(records) != len(entries) {
+				return trace, fmt.Errorf("read count=%d tail=%d err=%v", len(records), observedTail, readErr)
+			}
+			for i, record := range records {
+				got, _ := json.Marshal(record.Entry)
+				want, _ := json.Marshal(entries[i])
+				if !bytes.Equal(got, want) || record.Sequence != uint64(i+1) {
+					return trace, fmt.Errorf("record %d changed", i)
+				}
 			}
 		}
 	}
@@ -139,6 +162,70 @@ func TestSeededJournalSerialReadReplay(t *testing.T) {
 		path := filepath.Join(t.TempDir(), "journal-serial-read.json")
 		cmd := exec.Command(os.Args[0], "-test.run=^TestSeededJournalSerialReadReplay$")
 		cmd.Env = append(os.Environ(), "SIM_JOURNAL_SERIAL_READ_OUT="+path)
+		if output, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("child %d: %v: %s", i, err, output)
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if i == 1 && !bytes.Equal(previous, data) {
+			t.Fatal("serial read trace changed across processes")
+		}
+		previous = data
+	}
+}
+
+func TestSeededJournalDirectUnavailableReplay(t *testing.T) {
+	if path := os.Getenv("SIM_JOURNAL_DIRECT_READ_OUT"); path != "" {
+		seed := int64(42)
+		if raw := os.Getenv("FAULT_SEED"); raw != "" {
+			var err error
+			seed, err = strconv.ParseInt(raw, 10, 64)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		trace, err := runJournalSerialReadMode(seed, nil, true)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := trace.Save(path); err != nil {
+			t.Fatal(err)
+		}
+		return
+	}
+	modes := map[string]bool{}
+	kinds := map[string]bool{}
+	combinations := map[string]bool{}
+	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+		generated, err := runJournalSerialReadMode(seed, nil, true)
+		if err != nil {
+			path := os.Getenv("FAULT_TRACE_OUT")
+			if path == "" {
+				path = filepath.Join(t.TempDir(), "journal-serial-read-failure.json")
+			}
+			_ = generated.Save(path)
+			t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, err)
+		}
+		modes[generated.Decisions[0].Chosen] = true
+		kinds[generated.Decisions[1].Chosen] = true
+		combinations[generated.Decisions[0].Chosen+"/"+generated.Decisions[1].Chosen] = true
+		if seed <= 10 {
+			replayed, err := runJournalSerialReadMode(seed, &generated, true)
+			if err != nil || !reflect.DeepEqual(generated, replayed) {
+				t.Fatalf("seed=%d replay: %v", seed, err)
+			}
+		}
+	}
+	if len(modes) != 4 || len(kinds) != 3 || len(combinations) != 12 {
+		t.Fatalf("direct read mode coverage: %v", combinations)
+	}
+	var previous []byte
+	for i := 0; i < 2; i++ {
+		path := filepath.Join(t.TempDir(), "journal-serial-read.json")
+		cmd := exec.Command(os.Args[0], "-test.run=^TestSeededJournalDirectUnavailableReplay$")
+		cmd.Env = append(os.Environ(), "SIM_JOURNAL_DIRECT_READ_OUT="+path)
 		if output, err := cmd.CombinedOutput(); err != nil {
 			t.Fatalf("child %d: %v: %s", i, err, output)
 		}

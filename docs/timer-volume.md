@@ -60,7 +60,8 @@ The verifier checks the hash, record count, unique nonzero sequences, each
 receipt deadline, calculated p99/maximum, queue drain, both confirmed three-PID
 kills and restart progress. Release verification additionally requires exactly
 one million schedules over 24 hours, the default-or-stricter lateness limits,
-and a clean committed source revision. Server timestamp/header validation runs
+a clean committed source revision, and the durable receipt ledger declaration.
+Removing that declaration cannot downgrade release verification. Server timestamp/header validation runs
 at receipt; the archive records the sequence and receipt time. New reports also
 require the durable ledger to match every archived observation, including server
 publish deadlines and slot checksums. Older reports retain their original verifier

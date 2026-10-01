@@ -162,6 +162,12 @@ func (m *JournalTransport) Next(ctx context.Context, subject string, from uint64
 			return journal.AppendTail{}, nats.ErrNoResponders
 		case "unavailable":
 			return journal.AppendTail{}, &jetstream.APIError{ErrorCode: 10008}
+		case "direct_unavailable":
+			return journal.AppendTail{}, errors.New("nats: JetStream system temporarily unavailable")
+		case "wrapped_direct_unavailable":
+			return journal.AppendTail{}, fmt.Errorf("read reply: %w", errors.New("nats: JetStream system temporarily unavailable"))
+		case "unavailable_lookalike":
+			return journal.AppendTail{}, errors.New("invalid journal: nats: JetStream system temporarily unavailable")
 		}
 	}
 	// Appends are ordered by global sequence; purge and deletion preserve
@@ -281,7 +287,7 @@ func (m *JournalTransport) QueueNextFault(fault NextReadFault) error {
 		return fmt.Errorf("next-read fault requires a sequence")
 	}
 	switch fault.Kind {
-	case "timeout", "no_responders", "unavailable":
+	case "timeout", "no_responders", "unavailable", "direct_unavailable", "wrapped_direct_unavailable", "unavailable_lookalike":
 	default:
 		return fmt.Errorf("unknown next-read fault %q", fault.Kind)
 	}

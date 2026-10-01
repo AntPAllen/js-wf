@@ -1,0 +1,3 @@
+# Interrupted first fresh durable campaign
+
+At the next authoritative check, PID16185, all three server PIDs and execution session46731 are absent. The VM boot is unchanged and the kernel log has no OOM event in the interval. The exact cause is unconfirmed. The original report still says running and cannot prove liveness. It acknowledged one million schedules before first due, but had no confirmed server restarts or completion audit. Offline recovery validates all slots and finds zero receipts; no delivered/acknowledged timer proof survives this attempt. Original stores remain unchanged. A separate user service will host the next campaign independently of an execution-tool session. This attempt is excluded from release acceptance.

@@ -1,0 +1,9 @@
+# Plain direct-read unavailable replay
+
+The new journal_direct_unavailable_recovery workload exercises production serial journal reads on seeded in-memory transports with exact plain and wrapped unavailable replies. Four modes (one retry, two retries, three-attempt exhaustion, missing journal entry) cross three representations (plain, wrapped, semantic lookalike), with twelve pinned traces. Recovery preserves every decoded record and tail; exhaustion requires all three attempts and 50ms virtual wait; gaps remain errors. A lookalike semantic error must stop without a retry or time advance. Existing workload choice sets and prior pinned traces are unchanged.
+
+100,000 seeds pass in 8.48s, including first-ten exact replays and separate-process byte identity. All 164 pins and this workload pass race in 7.027s. The API-only classifier control fails semantically in 0.003s on seed1: the raw reply is returned instead of the expected post-retry gap. This proves the client reply classification contract, not the server-side cause or whole-audit cadence. Real wire decoder and whole-audit virtual-clock proofs remain in the prior partition-audit directory.
+
+Release verification now requires the durable receipt ledger declaration. A synthetic million-record artifact with a 24h span passes all offline checks; removing the declaration cannot bypass a corrupt ledger, and retaining it detects the checksum corruption. Full timer package race passes in 8.387s. The optional-ledger control falsely accepts the downgraded artifact and is rejected by the regression in 1.229s. Synthetic artifact checks are verifier proofs, not a native million-timer pass. Historical smoke reports keep compatibility. Vet and 25 script tests pass.
+
+The comprehensive hosted 100k run already in flight predates this new workload; focused coverage does not clear final-source comprehensive Tier 1 or other release gates.

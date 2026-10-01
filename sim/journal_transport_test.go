@@ -422,6 +422,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededWorkerSignalExecution(loaded.Seed, &loaded)
 	case "journal_manifest_read_recovery":
 		replayed, err = runJournalManifestRead(loaded.Seed, &loaded)
+	case "journal_direct_unavailable_recovery":
+		replayed, err = runJournalSerialReadMode(loaded.Seed, &loaded, true)
 	case "journal_serial_read_recovery":
 		replayed, err = runJournalSerialRead(loaded.Seed, &loaded)
 	case "worker_running_cancel":

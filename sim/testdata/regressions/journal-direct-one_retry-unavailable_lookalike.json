@@ -1,0 +1,116 @@
+{
+  "version": 3,
+  "seed": 5,
+  "workload": "journal_direct_unavailable_recovery",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "exhausted",
+        "gap",
+        "one_retry",
+        "two_retries"
+      ],
+      "chosen": "one_retry"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "direct_unavailable",
+        "unavailable_lookalike",
+        "wrapped_direct_unavailable"
+      ],
+      "chosen": "unavailable_lookalike"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.serial-read",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.serial-read",
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.serial-read",
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.serial-read",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "53b3c2831245475b651e6becda525522873f4977ea6e9dfac0f2f14feef1684c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.serial-read",
+      "sequence": 2,
+      "data_sha256": "53b3c2831245475b651e6becda525522873f4977ea6e9dfac0f2f14feef1684c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.serial-read",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "238d92b3d428b40efa09582ebc0efae90bede9024e0442b07301f3b6475d1791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.serial-read",
+      "sequence": 3,
+      "data_sha256": "238d92b3d428b40efa09582ebc0efae90bede9024e0442b07301f3b6475d1791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.serial-read",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "d16f9612dde6091fa2779f5ed84948615a7e15a316f3f97b8c59ae36e9dd29b5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.serial-read",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.serial-read",
+      "expected": 2,
+      "outcome": "unavailable_lookalike"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_serial_read",
+      "subject": "wf.jrn.test.serial-read",
+      "outcome": "one_retry"
+    }
+  ]
+}
