@@ -1,0 +1,1413 @@
+{
+  "scope": "retained delivery and terminal timelines",
+  "fencing_records": 15,
+  "classifications": {
+    "already_terminal_before_fetch": 4,
+    "completed_during_original_delivery": 2,
+    "completed_while_original_owner_stopped": 9
+  },
+  "outside_confirmed_faults": 0,
+  "records": [
+    {
+      "event": {
+        "At": "2026-10-01T21:10:53.924336904Z",
+        "Worker": "matrix-process-0-generation-0",
+        "Type": "matrixsignal",
+        "ID": "tier3-1-batch-70-2",
+        "RunSequence": 7748,
+        "Delivery": 2,
+        "Epoch": 45423,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: context canceled"
+      },
+      "classification": "already_terminal_before_fetch",
+      "overlapping_faults": [
+        9
+      ],
+      "matching_paused_ownership": [],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:10:08.528829345Z",
+          "Worker": "matrix-process-0-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-70-2",
+          "Stage": "fetched",
+          "RunSequence": 7748,
+          "Delivery": 2,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:10:08.531318691Z",
+          "Worker": "matrix-process-0-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-70-2",
+          "Stage": "lease_acquired",
+          "RunSequence": 7748,
+          "Delivery": 2,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:10:53.930063871Z",
+          "Worker": "matrix-process-0-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-70-2",
+          "Stage": "execution_retry",
+          "RunSequence": 7748,
+          "Delivery": 2,
+          "Error": "context deadline exceeded"
+        },
+        {
+          "At": "2026-10-01T21:10:53.930888563Z",
+          "Worker": "matrix-process-0-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-70-2",
+          "Stage": "nak",
+          "RunSequence": 7748,
+          "Delivery": 2,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:10:53.930995564Z",
+          "Worker": "matrix-process-0-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-70-2",
+          "Stage": "release_initial_error",
+          "RunSequence": 7748,
+          "Delivery": 2,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:10:53.950274894Z",
+          "Worker": "matrix-process-0-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-70-2",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 7748,
+          "Delivery": 2,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-70-2",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:10:03.630936688Z",
+        "observed": "2026-10-01T21:10:04.050710878Z",
+        "delay_ns": 419774190
+      },
+      "later_invocation_ack_observations": [],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:03:52.891821876Z",
+        "Worker": "matrix-process-1-generation-0",
+        "Type": "matrixsignal",
+        "ID": "tier3-1-batch-11-4",
+        "RunSequence": 1261,
+        "Delivery": 1,
+        "Epoch": 0,
+        "Reason": "lease_initialization_lost",
+        "Error": "workflow lease was lost: initialization: context deadline exceeded"
+      },
+      "classification": "completed_during_original_delivery",
+      "overlapping_faults": [
+        2
+      ],
+      "matching_paused_ownership": [],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:03:07.726458411Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-11-4",
+          "Stage": "fetched",
+          "RunSequence": 1261,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:03:52.89155954Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-11-4",
+          "Stage": "lease_error",
+          "RunSequence": 1261,
+          "Delivery": 1,
+          "Error": "workflow lease was lost: initialization: context deadline exceeded"
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-11-4",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:03:07.874770797Z",
+        "observed": "2026-10-01T21:03:20.90826255Z",
+        "delay_ns": 13033491753
+      },
+      "later_invocation_ack_observations": [],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:03:52.896711011Z",
+        "Worker": "matrix-process-1-generation-0",
+        "Type": "matrixchild",
+        "ID": "c-3f18ee10503c0af54f55a11e4282378b",
+        "RunSequence": 1259,
+        "Delivery": 1,
+        "Epoch": 7058,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: context canceled"
+      },
+      "classification": "completed_while_original_owner_stopped",
+      "overlapping_faults": [
+        2
+      ],
+      "matching_paused_ownership": [
+        2
+      ],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:03:07.705234479Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-3f18ee10503c0af54f55a11e4282378b",
+          "Stage": "fetched",
+          "RunSequence": 1259,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:03:07.713477271Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-3f18ee10503c0af54f55a11e4282378b",
+          "Stage": "lease_acquired",
+          "RunSequence": 1259,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:03:52.902745076Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-3f18ee10503c0af54f55a11e4282378b",
+          "Stage": "execution_retry",
+          "RunSequence": 1259,
+          "Delivery": 1,
+          "Error": "context deadline exceeded"
+        },
+        {
+          "At": "2026-10-01T21:03:52.902823004Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-3f18ee10503c0af54f55a11e4282378b",
+          "Stage": "nak",
+          "RunSequence": 1259,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:03:52.902916825Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-3f18ee10503c0af54f55a11e4282378b",
+          "Stage": "release_initial_error",
+          "RunSequence": 1259,
+          "Delivery": 1,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:03:52.913756248Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-3f18ee10503c0af54f55a11e4282378b",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 1259,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixchild",
+        "id": "c-3f18ee10503c0af54f55a11e4282378b",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:03:20.897556759Z",
+        "observed": "2026-10-01T21:03:25.949241432Z",
+        "delay_ns": 5051684673
+      },
+      "later_invocation_ack_observations": [],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:03:52.896913856Z",
+        "Worker": "matrix-process-1-generation-0",
+        "Type": "matrixshort",
+        "ID": "tier3-1-batch-11-1",
+        "RunSequence": 1231,
+        "Delivery": 1,
+        "Epoch": 6964,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost"
+      },
+      "classification": "completed_while_original_owner_stopped",
+      "overlapping_faults": [
+        2
+      ],
+      "matching_paused_ownership": [
+        2
+      ],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:03:07.519310764Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-11-1",
+          "Stage": "fetched",
+          "RunSequence": 1231,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:03:07.540038199Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-11-1",
+          "Stage": "lease_acquired",
+          "RunSequence": 1231,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:03:52.906331739Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-11-1",
+          "Stage": "execution_retry",
+          "RunSequence": 1231,
+          "Delivery": 1,
+          "Error": "workflow lease was lost: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 0: nats: key revision mismatch"
+        },
+        {
+          "At": "2026-10-01T21:03:52.906422436Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-11-1",
+          "Stage": "release_initial_error",
+          "RunSequence": 1231,
+          "Delivery": 1,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:03:52.913824381Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-11-1",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 1231,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:03:52.918436299Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-11-1",
+          "Stage": "nak",
+          "RunSequence": 1231,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixshort",
+        "id": "tier3-1-batch-11-1",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:03:07.391417689Z",
+        "observed": "2026-10-01T21:03:22.522434134Z",
+        "delay_ns": 15131016445
+      },
+      "later_invocation_ack_observations": [
+        {
+          "At": "2026-10-01T21:03:52.942195961Z",
+          "Worker": "matrix-process-0-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-11-1",
+          "Stage": "ack",
+          "RunSequence": 1893,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:03:52.910600945Z",
+        "Worker": "matrix-process-1-generation-0",
+        "Type": "matrixchild",
+        "ID": "c-bdbd0164c1dacbbbd691b5698454aad9",
+        "RunSequence": 1254,
+        "Delivery": 1,
+        "Epoch": 7029,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 0: nats: key revision mismatch"
+      },
+      "classification": "completed_while_original_owner_stopped",
+      "overlapping_faults": [
+        2
+      ],
+      "matching_paused_ownership": [
+        2
+      ],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:03:07.666261092Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-bdbd0164c1dacbbbd691b5698454aad9",
+          "Stage": "fetched",
+          "RunSequence": 1254,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:03:07.675638939Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-bdbd0164c1dacbbbd691b5698454aad9",
+          "Stage": "lease_acquired",
+          "RunSequence": 1254,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:03:52.912268693Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-bdbd0164c1dacbbbd691b5698454aad9",
+          "Stage": "execution_retry",
+          "RunSequence": 1254,
+          "Delivery": 1,
+          "Error": "child start was not confirmed: start outcome unknown: publish: context deadline exceeded; read: context canceled: context canceled"
+        },
+        {
+          "At": "2026-10-01T21:03:52.912355794Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-bdbd0164c1dacbbbd691b5698454aad9",
+          "Stage": "release_initial_error",
+          "RunSequence": 1254,
+          "Delivery": 1,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:03:52.919120424Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-bdbd0164c1dacbbbd691b5698454aad9",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 1254,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:03:52.921519063Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-bdbd0164c1dacbbbd691b5698454aad9",
+          "Stage": "nak",
+          "RunSequence": 1254,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixchild",
+        "id": "c-bdbd0164c1dacbbbd691b5698454aad9",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:03:20.764421123Z",
+        "observed": "2026-10-01T21:03:20.853579276Z",
+        "delay_ns": 89158153
+      },
+      "later_invocation_ack_observations": [
+        {
+          "At": "2026-10-01T21:03:52.958995068Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-bdbd0164c1dacbbbd691b5698454aad9",
+          "Stage": "ack",
+          "RunSequence": 1894,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:05:53.310403423Z",
+        "Worker": "matrix-process-2-generation-0",
+        "Type": "matrixchild",
+        "ID": "c-4ab50e63de3e9e0e16084ad580957ff0",
+        "RunSequence": 2942,
+        "Delivery": 3,
+        "Epoch": 17808,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 0: nats: key revision mismatch"
+      },
+      "classification": "already_terminal_before_fetch",
+      "overlapping_faults": [
+        4
+      ],
+      "matching_paused_ownership": [],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:05:08.158092395Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-4ab50e63de3e9e0e16084ad580957ff0",
+          "Stage": "fetched",
+          "RunSequence": 2942,
+          "Delivery": 3,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:05:08.161001938Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-4ab50e63de3e9e0e16084ad580957ff0",
+          "Stage": "lease_acquired",
+          "RunSequence": 2942,
+          "Delivery": 3,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:05:53.31877868Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-4ab50e63de3e9e0e16084ad580957ff0",
+          "Stage": "execution_retry",
+          "RunSequence": 2942,
+          "Delivery": 3,
+          "Error": "next journal wf.jrn.matrixchild.c-4ab50e63de3e9e0e16084ad580957ff0 from sequence 8355 after 1 attempts: context deadline exceeded"
+        },
+        {
+          "At": "2026-10-01T21:05:53.319298754Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-4ab50e63de3e9e0e16084ad580957ff0",
+          "Stage": "nak",
+          "RunSequence": 2942,
+          "Delivery": 3,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:05:53.319403672Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-4ab50e63de3e9e0e16084ad580957ff0",
+          "Stage": "release_initial_error",
+          "RunSequence": 2942,
+          "Delivery": 3,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:05:53.321967894Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-4ab50e63de3e9e0e16084ad580957ff0",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 2942,
+          "Delivery": 3,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixchild",
+        "id": "c-4ab50e63de3e9e0e16084ad580957ff0",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:04:58.137872605Z",
+        "observed": "2026-10-01T21:05:03.18472934Z",
+        "delay_ns": 5046856735
+      },
+      "later_invocation_ack_observations": [],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:06:52.971316099Z",
+        "Worker": "matrix-process-2-generation-0",
+        "Type": "matrixshort",
+        "ID": "tier3-1-batch-37-0",
+        "RunSequence": 4105,
+        "Delivery": 1,
+        "Epoch": 23618,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost"
+      },
+      "classification": "completed_while_original_owner_stopped",
+      "overlapping_faults": [
+        5
+      ],
+      "matching_paused_ownership": [
+        5
+      ],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:06:07.053357551Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-0",
+          "Stage": "fetched",
+          "RunSequence": 4105,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:06:07.063088174Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-0",
+          "Stage": "lease_acquired",
+          "RunSequence": 4105,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:06:52.972627985Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-0",
+          "Stage": "execution_retry",
+          "RunSequence": 4105,
+          "Delivery": 1,
+          "Error": "workflow lease was lost: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 0: nats: key revision mismatch"
+        },
+        {
+          "At": "2026-10-01T21:06:52.975891802Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-0",
+          "Stage": "release_initial_error",
+          "RunSequence": 4105,
+          "Delivery": 1,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:06:52.980577731Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-0",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 4105,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:06:52.982476531Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-0",
+          "Stage": "nak",
+          "RunSequence": 4105,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixshort",
+        "id": "tier3-1-batch-37-0",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:06:07.043621098Z",
+        "observed": "2026-10-01T21:06:22.073961641Z",
+        "delay_ns": 15030340543
+      },
+      "later_invocation_ack_observations": [
+        {
+          "At": "2026-10-01T21:06:53.039387758Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-0",
+          "Stage": "ack",
+          "RunSequence": 4842,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:06:52.975221497Z",
+        "Worker": "matrix-process-2-generation-0",
+        "Type": "matrixshort",
+        "ID": "tier3-1-batch-37-2",
+        "RunSequence": 4102,
+        "Delivery": 1,
+        "Epoch": 23620,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost"
+      },
+      "classification": "completed_while_original_owner_stopped",
+      "overlapping_faults": [
+        5
+      ],
+      "matching_paused_ownership": [
+        5
+      ],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:06:07.052245966Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-2",
+          "Stage": "fetched",
+          "RunSequence": 4102,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:06:07.064145367Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-2",
+          "Stage": "lease_acquired",
+          "RunSequence": 4102,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:06:52.976737205Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-2",
+          "Stage": "execution_retry",
+          "RunSequence": 4102,
+          "Delivery": 1,
+          "Error": "workflow lease was lost: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 0: nats: key revision mismatch"
+        },
+        {
+          "At": "2026-10-01T21:06:52.976822083Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-2",
+          "Stage": "release_initial_error",
+          "RunSequence": 4102,
+          "Delivery": 1,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:06:52.980163777Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-2",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 4102,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:06:52.982574889Z",
+          "Worker": "matrix-process-2-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-2",
+          "Stage": "nak",
+          "RunSequence": 4102,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixshort",
+        "id": "tier3-1-batch-37-2",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:06:07.043597202Z",
+        "observed": "2026-10-01T21:06:22.070152527Z",
+        "delay_ns": 15026555325
+      },
+      "later_invocation_ack_observations": [
+        {
+          "At": "2026-10-01T21:06:53.049786208Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-37-2",
+          "Stage": "ack",
+          "RunSequence": 4841,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:08:53.086162472Z",
+        "Worker": "matrix-process-3-generation-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-54-1",
+        "RunSequence": 6085,
+        "Delivery": 1,
+        "Epoch": 35050,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: context canceled"
+      },
+      "classification": "completed_while_original_owner_stopped",
+      "overlapping_faults": [
+        7
+      ],
+      "matching_paused_ownership": [
+        7
+      ],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:08:07.843207592Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-54-1",
+          "Stage": "fetched",
+          "RunSequence": 6085,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:08:07.850274769Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-54-1",
+          "Stage": "lease_acquired",
+          "RunSequence": 6085,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:08:53.093954565Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-54-1",
+          "Stage": "execution_retry",
+          "RunSequence": 6085,
+          "Delivery": 1,
+          "Error": "next journal wf.jrn.matrixtimer.tier3-1-batch-54-1 from sequence 16909 after 1 attempts: context deadline exceeded"
+        },
+        {
+          "At": "2026-10-01T21:08:53.094713348Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-54-1",
+          "Stage": "nak",
+          "RunSequence": 6085,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:08:53.095262526Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-54-1",
+          "Stage": "release_initial_error",
+          "RunSequence": 6085,
+          "Delivery": 1,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:08:53.117906241Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-54-1",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 6085,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixtimer",
+        "id": "tier3-1-batch-54-1",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:08:07.646569687Z",
+        "observed": "2026-10-01T21:08:20.872732033Z",
+        "delay_ns": 13226162346
+      },
+      "later_invocation_ack_observations": [],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:09:53.180817646Z",
+        "Worker": "matrix-process-3-generation-0",
+        "Type": "matrixsignal",
+        "ID": "tier3-1-batch-62-6",
+        "RunSequence": 6869,
+        "Delivery": 2,
+        "Epoch": 40224,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: context canceled"
+      },
+      "classification": "already_terminal_before_fetch",
+      "overlapping_faults": [
+        8
+      ],
+      "matching_paused_ownership": [],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:09:07.705240222Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-62-6",
+          "Stage": "fetched",
+          "RunSequence": 6869,
+          "Delivery": 2,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:09:07.710705416Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-62-6",
+          "Stage": "lease_acquired",
+          "RunSequence": 6869,
+          "Delivery": 2,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:09:53.182961756Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-62-6",
+          "Stage": "execution_retry",
+          "RunSequence": 6869,
+          "Delivery": 2,
+          "Error": "next journal wf.jrn.matrixsignal.tier3-1-batch-62-6 from sequence 19383 after 1 attempts: context deadline exceeded"
+        },
+        {
+          "At": "2026-10-01T21:09:53.183095047Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-62-6",
+          "Stage": "nak",
+          "RunSequence": 6869,
+          "Delivery": 2,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:09:53.183174326Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-62-6",
+          "Stage": "release_initial_error",
+          "RunSequence": 6869,
+          "Delivery": 2,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:09:53.196080293Z",
+          "Worker": "matrix-process-3-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-62-6",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 6869,
+          "Delivery": 2,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-62-6",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:09:02.832043084Z",
+        "observed": "2026-10-01T21:09:03.138896833Z",
+        "delay_ns": 306853749
+      },
+      "later_invocation_ack_observations": [],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:02:52.751048288Z",
+        "Worker": "matrix-process-4-generation-0",
+        "Type": "matrixchild",
+        "ID": "c-22664debdb87c771eba92afe704ddfb2",
+        "RunSequence": 105,
+        "Delivery": 1,
+        "Epoch": 497,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: context canceled"
+      },
+      "classification": "completed_during_original_delivery",
+      "overlapping_faults": [
+        1
+      ],
+      "matching_paused_ownership": [],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:02:07.62083633Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-22664debdb87c771eba92afe704ddfb2",
+          "Stage": "fetched",
+          "RunSequence": 105,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:02:07.631650141Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-22664debdb87c771eba92afe704ddfb2",
+          "Stage": "lease_acquired",
+          "RunSequence": 105,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:02:52.768949817Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-22664debdb87c771eba92afe704ddfb2",
+          "Stage": "execution_retry",
+          "RunSequence": 105,
+          "Delivery": 1,
+          "Error": "context deadline exceeded"
+        },
+        {
+          "At": "2026-10-01T21:02:52.769276509Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-22664debdb87c771eba92afe704ddfb2",
+          "Stage": "nak",
+          "RunSequence": 105,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:02:52.7720985Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-22664debdb87c771eba92afe704ddfb2",
+          "Stage": "release_initial_error",
+          "RunSequence": 105,
+          "Delivery": 1,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:02:52.777044782Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixchild",
+          "ID": "c-22664debdb87c771eba92afe704ddfb2",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 105,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixchild",
+        "id": "c-22664debdb87c771eba92afe704ddfb2",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:02:07.64950613Z",
+        "observed": "2026-10-01T21:02:07.720762911Z",
+        "delay_ns": 71256781
+      },
+      "later_invocation_ack_observations": [],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:04:52.801660716Z",
+        "Worker": "matrix-process-4-generation-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-19-7",
+        "RunSequence": 2200,
+        "Delivery": 1,
+        "Epoch": 12534,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: context canceled"
+      },
+      "classification": "completed_while_original_owner_stopped",
+      "overlapping_faults": [
+        3
+      ],
+      "matching_paused_ownership": [
+        3
+      ],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:04:07.699571087Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-19-7",
+          "Stage": "fetched",
+          "RunSequence": 2200,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:04:07.705919291Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-19-7",
+          "Stage": "lease_acquired",
+          "RunSequence": 2200,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:04:52.808822535Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-19-7",
+          "Stage": "execution_retry",
+          "RunSequence": 2200,
+          "Delivery": 1,
+          "Error": "context deadline exceeded"
+        },
+        {
+          "At": "2026-10-01T21:04:52.838664921Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-19-7",
+          "Stage": "nak",
+          "RunSequence": 2200,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:04:52.846041433Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-19-7",
+          "Stage": "release_initial_error",
+          "RunSequence": 2200,
+          "Delivery": 1,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:04:52.850447721Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-19-7",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 2200,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixtimer",
+        "id": "tier3-1-batch-19-7",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:04:22.284891654Z",
+        "observed": "2026-10-01T21:04:22.537219566Z",
+        "delay_ns": 252327912
+      },
+      "later_invocation_ack_observations": [],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:04:52.805285887Z",
+        "Worker": "matrix-process-4-generation-0",
+        "Type": "matrixshort",
+        "ID": "tier3-1-batch-19-0",
+        "RunSequence": 2120,
+        "Delivery": 1,
+        "Epoch": 12137,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 0: nats: key revision mismatch"
+      },
+      "classification": "completed_while_original_owner_stopped",
+      "overlapping_faults": [
+        3
+      ],
+      "matching_paused_ownership": [
+        3
+      ],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:04:05.842786547Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-19-0",
+          "Stage": "fetched",
+          "RunSequence": 2120,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:04:05.849006446Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-19-0",
+          "Stage": "lease_acquired",
+          "RunSequence": 2120,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:04:52.844816177Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-19-0",
+          "Stage": "execution_retry",
+          "RunSequence": 2120,
+          "Delivery": 1,
+          "Error": "context canceled"
+        },
+        {
+          "At": "2026-10-01T21:04:52.845300747Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-19-0",
+          "Stage": "release_initial_error",
+          "RunSequence": 2120,
+          "Delivery": 1,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:04:52.848673468Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-19-0",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 2120,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:04:52.853528271Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-19-0",
+          "Stage": "nak",
+          "RunSequence": 2120,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixshort",
+        "id": "tier3-1-batch-19-0",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:04:05.834661548Z",
+        "observed": "2026-10-01T21:04:20.860775562Z",
+        "delay_ns": 15026114014
+      },
+      "later_invocation_ack_observations": [
+        {
+          "At": "2026-10-01T21:04:52.881955069Z",
+          "Worker": "matrix-process-1-generation-0",
+          "Type": "matrixshort",
+          "ID": "tier3-1-batch-19-0",
+          "Stage": "ack",
+          "RunSequence": 2851,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:07:53.062640309Z",
+        "Worker": "matrix-process-4-generation-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-46-8",
+        "RunSequence": 5193,
+        "Delivery": 1,
+        "Epoch": 29813,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: context canceled"
+      },
+      "classification": "completed_while_original_owner_stopped",
+      "overlapping_faults": [
+        6
+      ],
+      "matching_paused_ownership": [
+        6
+      ],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:07:07.879583537Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-46-8",
+          "Stage": "fetched",
+          "RunSequence": 5193,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:07:07.883149559Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-46-8",
+          "Stage": "lease_acquired",
+          "RunSequence": 5193,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:07:53.074304941Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-46-8",
+          "Stage": "execution_retry",
+          "RunSequence": 5193,
+          "Delivery": 1,
+          "Error": "next journal wf.jrn.matrixtimer.tier3-1-batch-46-8 from sequence 14502 after 1 attempts: context deadline exceeded"
+        },
+        {
+          "At": "2026-10-01T21:07:53.07439749Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-46-8",
+          "Stage": "nak",
+          "RunSequence": 5193,
+          "Delivery": 1,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:07:53.074454226Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-46-8",
+          "Stage": "release_initial_error",
+          "RunSequence": 5193,
+          "Delivery": 1,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:07:53.078024384Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-46-8",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 5193,
+          "Delivery": 1,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixtimer",
+        "id": "tier3-1-batch-46-8",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:07:21.443760027Z",
+        "observed": "2026-10-01T21:07:21.707788102Z",
+        "delay_ns": 264028075
+      },
+      "later_invocation_ack_observations": [],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    },
+    {
+      "event": {
+        "At": "2026-10-01T21:11:56.384196458Z",
+        "Worker": "matrix-process-4-generation-0",
+        "Type": "matrixsignal",
+        "ID": "tier3-1-batch-79-6",
+        "RunSequence": 8741,
+        "Delivery": 3,
+        "Epoch": 51253,
+        "Reason": "lease_heartbeat_lost",
+        "Error": "workflow lease was lost: context canceled"
+      },
+      "classification": "already_terminal_before_fetch",
+      "overlapping_faults": [
+        10
+      ],
+      "matching_paused_ownership": [],
+      "exact_delivery_steps": [
+        {
+          "At": "2026-10-01T21:11:11.044895512Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-79-6",
+          "Stage": "fetched",
+          "RunSequence": 8741,
+          "Delivery": 3,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:11:11.052563484Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-79-6",
+          "Stage": "lease_acquired",
+          "RunSequence": 8741,
+          "Delivery": 3,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:11:56.386373011Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-79-6",
+          "Stage": "execution_retry",
+          "RunSequence": 8741,
+          "Delivery": 3,
+          "Error": "next journal wf.jrn.matrixsignal.tier3-1-batch-79-6 from sequence 24513 after 1 attempts: context deadline exceeded"
+        },
+        {
+          "At": "2026-10-01T21:11:56.38882505Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-79-6",
+          "Stage": "nak",
+          "RunSequence": 8741,
+          "Delivery": 3,
+          "Error": ""
+        },
+        {
+          "At": "2026-10-01T21:11:56.388935477Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-79-6",
+          "Stage": "release_initial_error",
+          "RunSequence": 8741,
+          "Delivery": 3,
+          "Error": "workflow lease was lost"
+        },
+        {
+          "At": "2026-10-01T21:11:56.398460841Z",
+          "Worker": "matrix-process-4-generation-0",
+          "Type": "matrixsignal",
+          "ID": "tier3-1-batch-79-6",
+          "Stage": "release_cleanup_done",
+          "RunSequence": 8741,
+          "Delivery": 3,
+          "Error": ""
+        }
+      ],
+      "terminal_sample": {
+        "type": "matrixsignal",
+        "id": "tier3-1-batch-79-6",
+        "event": "terminal",
+        "enabled": "2026-10-01T21:11:01.14354378Z",
+        "observed": "2026-10-01T21:11:06.103245185Z",
+        "delay_ns": 4959701405
+      },
+      "later_invocation_ack_observations": [],
+      "later_exact_delivery_ack_observations": [],
+      "server_root_cause_confirmed": false
+    }
+  ],
+  "ack_observations_prove_broker_commit": false,
+  "independently_reaudits_server_state": false,
+  "clears_full_tier3_release": false
+}

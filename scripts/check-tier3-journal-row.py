@@ -17,7 +17,8 @@ def load(name, file):
 
 matrix = load('matrix_row', 'check-matrix-campaign.py')
 execution = load('matrix_execution', 'check-matrix-result.py')
-TESTS = {'worker_pause': 'TestFiveContainerMixedWorkerPausedFortyFiveSeconds',
+TESTS = {'worker_isolation': 'TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds',
+         'worker_pause': 'TestFiveContainerMixedWorkerPausedFortyFiveSeconds',
          'worker_kill': 'TestFiveContainerMixedWorkerKilledEveryFiveSeconds',
          'journal': 'TestFiveContainerMixedJournalLeaderEveryThirtySeconds',
          'consumer': 'TestFiveContainerMixedConsumerLeaderEveryThirtySeconds',
@@ -39,7 +40,7 @@ def check(events, duration, expected_row='journal'):
     if row != expected_row or matrix.seconds(found_duration) != seconds or replicas != 'true' or release != 'false':
         raise ValueError('incorrect row, duration, replica scope or release claim')
     batches, invocations, entries, faults = map(int, (batches, invocations, entries, faults))
-    expected_faults=(seconds-6)//60+1 if row=='worker_pause' else (seconds-1)//(5 if row=='worker_kill' else 30)
+    expected_faults=(seconds-6)//60+1 if row in ('worker_pause','worker_isolation') else (seconds-1)//(5 if row=='worker_kill' else 30)
     if batches < 1 or invocations != batches*28 or entries <= invocations or faults != expected_faults:
         raise ValueError('incomplete workload, audit entries or fault count')
     active_consumer_faults = None
@@ -62,7 +63,8 @@ def check(events, duration, expected_row='journal'):
             raw_t,raw_p=matrix.one(r'TIER3_ROUTE_RAW_CELL type='+typ+r' terminal_p99=(\S+) progress_p99=(\S+)',log)
             cells[typ]['raw_terminal_p99_seconds']=matrix.seconds(raw_t)
             cells[typ]['raw_progress_p99_seconds']=matrix.seconds(raw_p)
-    scope = ('single five-container R5 worker pause-past-lease row' if row == 'worker_pause'
+    scope = ('single five-container R5 worker reply-isolation row' if row == 'worker_isolation'
+             else 'single five-container R5 worker pause-past-lease row' if row == 'worker_pause'
              else 'single five-container R5 worker SIGKILL row' if row == 'worker_kill'
              else 'single five-container R5 majority-progress route row' if row == 'route_majority'
              else 'single five-container R5 quorum-removing route row' if row == 'route_quorum'
@@ -314,11 +316,7 @@ def check_worker_artifacts(root,report):
                 complete_hard_kill_attribution=False)
 
 
-def check_pause_artifacts(root,report):
-    faults=json.loads((root/'faults.json').read_text())
-    sessions=json.loads((root/'process-evidence.json').read_text())
-    if len(faults)!=report['confirmed_faults'] or len(sessions)!=5:
-        raise ValueError('pause count or process fleet mismatch')
+def check_graceful_process_artifacts(root,sessions):
     by_worker={s['worker_id']:s for s in sessions}
     if set(by_worker)!={f'matrix-process-{i}-generation-0' for i in range(5)} or len({s['pid'] for s in sessions})!=5:
         raise ValueError('pause must keep the original five process identities')
@@ -341,6 +339,15 @@ def check_pause_artifacts(root,report):
         steps_all+=steps;fences_all += [r['event'] for r in records]
     if json.loads((root/'dispatch.json').read_text())!=steps_all or (json.loads((root/'fencing.json').read_text()) or [])!=fences_all:
         raise ValueError('pause aggregate evidence differs from original records')
+    return by_worker,steps_all,fences_all
+
+
+def check_pause_artifacts(root,report):
+    faults=json.loads((root/'faults.json').read_text())
+    sessions=json.loads((root/'process-evidence.json').read_text())
+    if len(faults)!=report['confirmed_faults'] or len(sessions)!=5:
+        raise ValueError('pause count or process fleet mismatch')
+    by_worker,steps_all,fences_all=check_graceful_process_artifacts(root,sessions)
     prior_schedule=None;matched=0
     for fault in faults:
         worker=fault['worker'];session=by_worker[worker];slot=fault['worker_slot']
@@ -365,6 +372,41 @@ def check_pause_artifacts(root,report):
         if not matching:raise ValueError('resumed fencing does not belong to a retained paused lease')
         matched+=len(matching)
     return dict(confirmed_45_second_pauses=len(faults),same_process_generations=5,graceful_counter_cross_checks=5,matched_resumed_fencing=matched,counter_cross_checks_complete=True)
+
+
+def check_isolation_artifacts(root,report):
+    faults=json.loads((root/'faults.json').read_text())
+    sessions=json.loads((root/'process-evidence.json').read_text())
+    if len(faults)!=report['confirmed_faults'] or len(sessions)!=5:raise ValueError('isolation fault/process count mismatch')
+    by_worker,steps,fences=check_graceful_process_artifacts(root,sessions)
+    specs=json.loads((root/'worker-proxy-specs.json').read_text())
+    if len(specs)!=5 or {s['slot'] for s in specs}!=set(range(5)) or len({s['proxy_url'] for s in specs})!=5 or len({s['server_url'] for s in specs})!=5:
+        raise ValueError('workers lack distinct pinned proxy/server endpoints')
+    for spec in specs:
+        if spec['worker_id']!=f"matrix-process-{spec['slot']}-generation-0" or spec['pid']!=by_worker[spec['worker_id']]['pid'] or spec['proxy_url']==spec['server_url']:
+            raise ValueError('proxy identity or pinning mismatch')
+    prior=None;matched=0
+    for f in faults:
+        worker=f['worker']; slot=f['worker_slot'];session=by_worker[worker]
+        if f['pid']!=session['pid'] or worker!=f'matrix-process-{slot}-generation-0' or f['active_leases']<=0 or f['fencing_events']<=0:raise ValueError('isolation lacks active selected process/fencing')
+        scheduled,killed,resumed,healed,ping=map(timestamp_ns,[f[k] for k in ('scheduled','killed','resumed','healed','worker_ping_at')])
+        if not scheduled<=killed<=resumed<ping<=healed or resumed-killed<45_000_000_000 or killed-scheduled>=5_000_000_000 or (prior is not None and scheduled-prior!=60_000_000_000):raise ValueError('isolation cut/duration/PING/heal timeline invalid')
+        prior=scheduled
+        target=f['isolation_target'];d=target['delivery']
+        if not target['token'] or d['Worker']!=worker or d['Stage']!='lease_acquired' or not scheduled<=timestamp_ns(d['At'])<=killed or d not in steps:raise ValueError('isolation lacks exact original acquired delivery')
+        prefix=target['journal_prefix'] or []
+        final=json.loads((root/f'fault-{faults.index(f)+1}-isolation-final-journal.json').read_text())
+        observed=timestamp_ns(target['nonterminal_observed_at'])
+        if not timestamp_ns(d['At'])<=observed<=killed or any(e['kind'] in ('Completed','Failed') for e in prefix) or (prefix and prefix[-1]['sequence']!=target['journal_tail']):raise ValueError('isolated target was already terminal or lacks cut prefix')
+        if final[:len(prefix)]!=prefix or not final or final[-1]['kind']!='Completed':raise ValueError('isolated target prefix or completion invalid')
+        terminal=[x for x in json.loads((root/'latencies.json').read_text()) if x['type']==d['Type'] and x['id']==d['ID'] and x['event']=='terminal']
+        if len(terminal)!=1 or timestamp_ns(terminal[0]['observed'])<killed:raise ValueError('isolated target completed before the reply cut')
+        before,blocked,after=[f[k] for k in ('proxy_before','proxy_blocked','proxy_healed')]
+        if before['responses_held'] or not blocked['responses_held'] or after['responses_held'] or blocked['held_bytes']<=before['held_bytes'] or blocked['client_to_server']<=before['client_to_server'] or after['server_to_client']<=blocked['server_to_client'] or any(p['buffer_overflows'] for p in (before,blocked,after)):raise ValueError('reply-only traffic evidence or buffer integrity invalid')
+        matching=[e for e in fences if e['Worker']==worker and e['Type']==d['Type'] and e['ID']==d['ID'] and e['RunSequence']==d['RunSequence'] and e['Delivery']==d['Delivery'] and killed<=timestamp_ns(e['At'])<=healed]
+        if not matching:raise ValueError('isolation fencing does not belong to acquired delivery')
+        matched+=len(matching)
+    return dict(confirmed_45_second_reply_holds=len(faults),same_process_generations=5,matched_selected_delivery_fencing=matched,graceful_counter_cross_checks=5,counter_cross_checks_complete=True)
 
 
 if __name__ == '__main__':
@@ -397,5 +439,8 @@ if __name__ == '__main__':
     if args.row == 'worker_pause':
         if args.root is None: parser.error('--root is required for the pause row')
         report['pause_artifact_checks']=check_pause_artifacts(args.root,report)
+    if args.row == 'worker_isolation':
+        if args.root is None: parser.error('--root is required for isolation')
+        report['isolation_artifact_checks']=check_isolation_artifacts(args.root,report)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))

@@ -22,6 +22,7 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/client"
 	"js-wf/history"
+	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/reconcile"
 	"js-wf/testcluster"
@@ -54,6 +55,10 @@ func TestFiveContainerMixedRouteMajorityEveryThirtySeconds(t *testing.T) {
 	runFiveContainerMixedLeader(t, "route_majority")
 }
 
+func TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds(t *testing.T) {
+	runFiveContainerMixedLeader(t, "worker_isolation")
+}
+
 func TestFiveContainerMixedWorkerPausedFortyFiveSeconds(t *testing.T) {
 	runFiveContainerMixedLeader(t, "worker_pause")
 }
@@ -64,7 +69,7 @@ func TestFiveContainerMixedWorkerKilledEveryFiveSeconds(t *testing.T) {
 
 func runFiveContainerMixedLeader(t *testing.T, row string) {
 	t.Helper()
-	if row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" {
+	if row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
 		t.Fatal("unsupported R5 fault row")
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
@@ -193,6 +198,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		}()
 	}
 	var processes, processSessions []*matrixProcessWorker
+	var workerProxies []*testcluster.ClientProxy
+	var proxySpecs []tier3ProxySpec
+	defer func() {
+		for _, proxy := range workerProxies {
+			proxy.Close()
+		}
+	}()
 	var workers []*worker.Worker
 	defer func() {
 		stopWork()
@@ -211,7 +223,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	if row == "fanout_restart" {
 		handlers = fanoutBarrier.handlers()
 	}
-	if row != "worker_kill" && row != "worker_pause" {
+	if row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
 		for node := 0; node < 5; node++ {
 			w, err := worker.New(ctx, js, fmt.Sprintf("tier3-mixed-%d", node), handlers, worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
 				evidenceMu.Lock()
@@ -233,12 +245,27 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		}
 	} else {
 		for slot := 0; slot < 5; slot++ {
-			process, err := startMatrixProcessWorker(ctx, root, urls, slot, 0)
+			workerURLs := urls
+			if row == "worker_isolation" {
+				proxy, err := testcluster.NewClientProxy(urls[slot])
+				if err != nil {
+					t.Fatal(err)
+				}
+				workerProxies = append(workerProxies, proxy)
+				if err := proxy.EnableTrafficTrace(4 << 20); err != nil {
+					t.Fatal(err)
+				}
+				workerURLs = []string{proxy.URL()}
+			}
+			process, err := startMatrixProcessWorker(ctx, root, workerURLs, slot, 0)
 			if err != nil {
 				t.Fatal(err)
 			}
 			processes = append(processes, process)
 			processSessions = append(processSessions, process)
+			if row == "worker_isolation" {
+				proxySpecs = append(proxySpecs, tier3ProxySpec{Worker: process.id, PID: process.cmd.Process.Pid, ProxyURL: workerURLs[0], ServerURL: urls[slot], Slot: slot})
+			}
 		}
 	}
 	launch(func() error {
@@ -275,7 +302,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				t.Error(err)
 			}
 		}
-		if row == "worker_kill" || row == "worker_pause" {
+		if row == "worker_kill" || row == "worker_pause" || row == "worker_isolation" {
 			for _, p := range processes {
 				stopMatrixProcessWorker(p)
 			}
@@ -291,6 +318,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				fencing = append(fencing, fences...)
 			}
 			write("process-evidence.json", sessions)
+			if row == "worker_isolation" {
+				write("worker-proxy-specs.json", proxySpecs)
+				for slot, proxy := range workerProxies {
+					write(fmt.Sprintf("proxy-%d-traffic.json", slot), proxy.TrafficTrace())
+				}
+			}
 		}
 		evidenceMu.Lock()
 		write("dispatch.json", dispatch)
@@ -309,7 +342,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		for _, m := range metrics {
 			fenceCount += m.FencingEvents
 		}
-		if row != "worker_kill" && row != "worker_pause" && fenceCount != uint64(len(fencing)) {
+		if row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" && fenceCount != uint64(len(fencing)) {
 			t.Errorf("fencing evidence=%d counter=%d", len(fencing), fenceCount)
 		}
 		f, err := os.Create(filepath.Join(root, "history.jsonl"))
@@ -339,7 +372,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		faultInterval = 5 * time.Second
 		firstFault = faultInterval
 	}
-	if row == "worker_pause" {
+	if row == "worker_pause" || row == "worker_isolation" {
 		faultInterval = 60 * time.Second
 		firstFault = 5 * time.Second
 	}
@@ -360,7 +393,11 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			var event matrixLeaderFault
 			var err error
 			prefix := filepath.Join(root, fmt.Sprintf("fault-%d", len(faults)+1))
-			if row == "worker_pause" {
+			if row == "worker_isolation" {
+				event, err = isolateMatrixWorkerReplies(ctx, processes, workerProxies, faultRNG.Intn(len(processes)), scheduled, func(c context.Context, fleet []*matrixProcessWorker, first int) (int, matrixIsolationTarget, func() error, error) {
+					return armMatrixUnfinishedIsolationTarget(c, js, fleet, first)
+				})
+			} else if row == "worker_pause" {
 				event, err = pauseMatrixProcessWorker(ctx, js, processes, faultRNG.Intn(len(processes)), scheduled)
 			} else if row == "worker_kill" {
 				// The acquisition handoff proves the selected delivery still holds
@@ -497,6 +534,33 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		t.Fatal(err)
 	}
 	faultJoined = true
+	if row == "worker_isolation" {
+		for index, fault := range faults {
+			final, _, err := journal.New(js).Read(ctx, fault.IsolationTarget.Delivery.Type, fault.IsolationTarget.Delivery.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			prefix := fault.IsolationTarget.JournalPrefix
+			if len(final) < len(prefix) {
+				t.Fatal("isolated invocation lost original prefix")
+			}
+			a, _ := json.Marshal(prefix)
+			b, _ := json.Marshal(final[:len(prefix)])
+			if len(prefix) > 0 && string(a) != string(b) {
+				t.Fatal("isolated invocation prefix changed")
+			}
+			if len(final) == 0 || final[len(final)-1].Kind != journal.Completed {
+				t.Fatal("isolated unfinished invocation did not complete")
+			}
+			data, err := json.MarshalIndent(final, "", "  ")
+			if err == nil {
+				err = os.WriteFile(filepath.Join(root, fmt.Sprintf("fault-%d-isolation-final-journal.json", index+1)), data, 0644)
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
 	if row == "fanout_restart" {
 		if err := verifyMatrixRestartFanoutsWithArtifacts(ctx, js, faults, root); err != nil {
 			t.Fatal(err)

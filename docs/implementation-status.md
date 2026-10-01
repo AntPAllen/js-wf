@@ -4915,3 +4915,35 @@ one restart narrative: that child was fetched before completion and fenced later
 so it was not an already-terminal duplicate fetch. Original timestamps and all
 acceptance results are unchanged. All50 Python tests pass, including nanosecond
 ordering and resumed-ownership controls. Future R5 CI rows retain this review.
+
+
+## Sustained R5 worker-pause proof verified
+
+[Hosted run36925290442](scale/tier3-mixed-worker-pause-2026-10-01/hosted-ten-minute/)
+is terminal SUCCESS atba824e2:717.30s /718.325s package,2,520 completions,
+27,905 entries and ten confirmed45s pauses. Each original pause snapshot has
+matching resumed typed fencing;14 records match held leases and all five final
+counters match all15 records. The timeline review distinguishes four completed
+before fetch,two during the original delivery and nine while the owner was
+stopped. Not every held lease was an unfinished invocation at the cut.
+All histories/invariants/raw p99/physical drain pass. Worst terminal p99 is15.027s
+and progress p99 is0.418s. All168 repairs are acknowledged with checked decisions.
+This closes one ten-minute slice, not the full200-seed/24-hour release gates.
+
+
+## R5 unfinished-invocation worker reply-isolation smoke implemented
+
+The new `worker_isolation` row pins five actual worker processes to separate
+proxy/server endpoints. It holds a selected acquired delivery while checking and
+retaining a nonterminal journal prefix, then blocks replies for45s while requests
+continue. Relay counters/overflow checks, fresh PING recovery, exact delivery
+fencing and final original-prefix/completion checks are required with all mixed
+history/invariant/raw p99/drain gates. [Native race smoke](scale/tier3-mixed-worker-isolation-2026-10-01/)
+passes73.04s /74.087s package:112 completions,1,233 entries,one full reply hold.
+Worst terminal p99 is4.775s and progress p99 is2.009s. One exact delivery fencing
+record precedes completion; all five graceful counters match and all78 repairs
+are acknowledged with checked explanations. All52 Python tests and vet pass.
+The first delivery-only smoke passed but selected an already-terminal duplicate;
+it remains excluded coverage. Cut admission now rejects that case and retains
+actual unfinished history. Common process validation is shared with pause and
+its original proof still passes. Ten-minute/full24-hour coverage remains open.

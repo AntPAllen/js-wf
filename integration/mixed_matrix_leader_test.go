@@ -44,6 +44,7 @@ type matrixPausedLease struct {
 }
 
 type matrixLeaderFault struct {
+	WorkerPingAt          time.Time                     `json:"worker_ping_at,omitempty"`
 	PausedLeases          []matrixPausedLease           `json:"paused_leases,omitempty"`
 	WorkerSelection       string                        `json:"worker_selection,omitempty"`
 	WorkerTarget          *matrixIsolationTarget        `json:"worker_target,omitempty"`

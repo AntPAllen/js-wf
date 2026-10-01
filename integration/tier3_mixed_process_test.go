@@ -13,6 +13,14 @@ import (
 	"js-wf/worker"
 )
 
+type tier3ProxySpec struct {
+	Worker    string `json:"worker_id"`
+	PID       int    `json:"pid"`
+	Slot      int    `json:"slot"`
+	ProxyURL  string `json:"proxy_url"`
+	ServerURL string `json:"server_url"`
+}
+
 type tier3ProcessEvidence struct {
 	ExitSuccess         bool            `json:"exit_success"`
 	ExitSignal          int             `json:"exit_signal"`

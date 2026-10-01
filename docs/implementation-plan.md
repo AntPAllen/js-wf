@@ -520,6 +520,20 @@ commit evidence. This review supplements history/invariant/drain checks and does
 not infer server causes or full-release acceptance. Missing or ambiguous original
 fetch/terminal evidence fails the review rather than becoming a causal claim.
 
+The R5 worker reply-isolation row is
+`TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds` (`worker_isolation`
+in CI). Five actual workers are pinned through separate proxies. At+5s and once
+per minute a selected acquired delivery remains held while its journal is read;
+only an unfinished invocation is admitted. The original nonterminal prefix is
+retained. Replies are held for45s while requests still reach the server; relay
+counters confirm asymmetry and reject overflow. A fresh successful worker PING
+and resumed replies confirm heal. Typed fencing must match the selected delivery;
+its final journal preserves the cut prefix and completes after the cut. All
+mixed histories/invariants/raw p99/physical drain and final process counter checks
+remain required. A terminal duplicate delivery is separate coverage and cannot
+clear this row. Ten minutes require ten actual reply holds; smoke never clears
+the full24-hour matrix.
+
 **The "done" bar for a release**
 
 1. Tier 1: 100 000 seeds clean.

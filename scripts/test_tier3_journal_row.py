@@ -344,3 +344,60 @@ class WorkerPauseRowChecks(unittest.TestCase):
                     self.assertTrue(result['counter_cross_checks_complete'])
                 else:
                     with self.assertRaises((ValueError,KeyError)):row.check_pause_artifacts(root,report)
+
+class WorkerIsolationRowChecks(unittest.TestCase):
+    def fixture(self,root):
+        import json
+        sessions,fault,report=WorkerPauseRowChecks().fixture(root)
+        worker=fault['worker']
+        fetch=dict(At='2026-10-01T12:00:00.4Z',Worker=worker,Type='matrixshort',ID='held',RunSequence=1,Delivery=1,Stage='fetched',Error='')
+        delivery=dict(fetch,At='2026-10-01T12:00:00.5Z',Stage='lease_acquired')
+        fault.update(isolation_target=dict(token='acquired',delivery=delivery,journal_prefix=[],journal_tail=0,nonterminal_observed_at='2026-10-01T12:00:00.6Z'),worker_ping_at='2026-10-01T12:00:47.5Z')
+        (root/'fault-1-isolation-final-journal.json').write_text(json.dumps([dict(sequence=2,kind='Completed')]))
+        (root/'latencies.json').write_text(json.dumps([dict(type='matrixshort',id='held',event='terminal',observed='2026-10-01T12:00:20Z')]))
+        stats=dict(client_to_server=10,server_to_client=20,held_bytes=0,responses_held=False,buffer_overflows=0)
+        fault.update(proxy_before=stats,proxy_blocked=dict(stats,client_to_server=11,held_bytes=1,responses_held=True),proxy_healed=dict(stats,client_to_server=12,server_to_client=21,held_bytes=1))
+        (root/(worker+'-dispatch.jsonl')).write_text(json.dumps(fetch)+'\n'+json.dumps(delivery)+'\n')
+        (root/'dispatch.json').write_text(json.dumps([fetch,delivery]))
+        sessions[0]['dispatch_records']=2
+        specs=[dict(worker_id=s['worker_id'],pid=s['pid'],slot=i,proxy_url=f'nats://127.0.0.1:{100+i}',server_url=f'nats://127.0.0.1:{200+i}') for i,s in enumerate(sessions)]
+        (root/'worker-proxy-specs.json').write_text(json.dumps(specs))
+        (root/'process-evidence.json').write_text(json.dumps(sessions));(root/'faults.json').write_text(json.dumps([fault]))
+        return sessions,fault,specs,report
+
+    def test_reply_isolation_scope_and_count(self):
+        for duration,count in [('35s',1),('10m',10)]:
+            events=fixture(duration)
+            for e in events:
+                if 'Test' in e:e['Test']=row.TESTS['worker_isolation']
+            events[0]['Output']=events[0]['Output'].replace('row=journal','row=worker_isolation').replace('faults=19',f'faults={count}')
+            result=row.check(events,duration,'worker_isolation')
+            self.assertEqual(result['confirmed_faults'],count)
+            self.assertFalse(result['clears_full_tier3_release'])
+
+    def test_asymmetry_exact_delivery_health_and_false_green_controls(self):
+        import json,tempfile
+        for mutation in ('none','short','stale_ping','requests_blocked','replies_not_held','no_held_bytes','overflow','no_healed_replies','wrong_delivery','wrong_pid','bypass_proxy','duplicate_proxy','terminal_before_cut','terminal_prefix','changed_prefix'):
+            with self.subTest(mutation=mutation),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);sessions,fault,specs,report=self.fixture(root)
+                if mutation=='short':fault['resumed']='2026-10-01T12:00:45Z'
+                elif mutation=='stale_ping':fault['worker_ping_at']='2026-10-01T12:00:45Z'
+                elif mutation=='requests_blocked':fault['proxy_blocked']['client_to_server']=10
+                elif mutation=='replies_not_held':fault['proxy_blocked']['responses_held']=False
+                elif mutation=='no_held_bytes':fault['proxy_blocked']['held_bytes']=0
+                elif mutation=='overflow':fault['proxy_healed']['buffer_overflows']=1
+                elif mutation=='no_healed_replies':fault['proxy_healed']['server_to_client']=20
+                elif mutation=='wrong_delivery':fault['isolation_target']['delivery']['RunSequence']=2
+                elif mutation=='wrong_pid':fault['pid']=999
+                elif mutation=='bypass_proxy':specs[0]['proxy_url']=specs[0]['server_url']
+                elif mutation=='duplicate_proxy':specs[0]['proxy_url']=specs[1]['proxy_url']
+                elif mutation=='terminal_before_cut':(root/'latencies.json').write_text(json.dumps([dict(type='matrixshort',id='held',event='terminal',observed='2026-10-01T12:00:00.7Z')]))
+                elif mutation=='terminal_prefix':fault['isolation_target']['journal_prefix']=[dict(sequence=1,kind='Completed')];fault['isolation_target']['journal_tail']=1
+                elif mutation=='changed_prefix':fault['isolation_target']['journal_prefix']=[dict(sequence=1,kind='Started')];fault['isolation_target']['journal_tail']=1
+                (root/'faults.json').write_text(json.dumps([fault]));(root/'worker-proxy-specs.json').write_text(json.dumps(specs))
+                if mutation=='none':
+                    result=row.check_isolation_artifacts(root,report)
+                    self.assertEqual(result['matched_selected_delivery_fencing'],1)
+                    self.assertTrue(result['counter_cross_checks_complete'])
+                else:
+                    with self.assertRaises((ValueError,KeyError)):row.check_isolation_artifacts(root,report)

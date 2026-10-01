@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/worker"
 )
@@ -21,8 +23,11 @@ import (
 // until the parent installs the fault. A sampled active count cannot give that
 // guarantee: the release may already have committed while its observer waits.
 type matrixIsolationTarget struct {
-	Token    string               `json:"token"`
-	Delivery worker.DispatchEvent `json:"delivery"`
+	JournalPrefix         []journal.Record     `json:"journal_prefix"`
+	JournalTail           uint64               `json:"journal_tail"`
+	NonterminalObservedAt time.Time            `json:"nonterminal_observed_at"`
+	Token                 string               `json:"token"`
+	Delivery              worker.DispatchEvent `json:"delivery"`
 }
 
 func holdMatrixIsolationTarget(ctx context.Context, base string, delivery worker.DispatchEvent) error {
@@ -112,6 +117,37 @@ func armMatrixIsolationTarget(ctx context.Context, fleet []*matrixProcessWorker,
 	}
 	err = fmt.Errorf("no acquired delivery available for reply isolation: %w", ready.Err())
 	return
+}
+
+// Select an unfinished invocation while its acquired delivery remains held.
+// Completed duplicate wakeups are useful separate coverage but cannot establish
+// recovery of an invocation whose progress is blocked by the reply fault.
+func armMatrixUnfinishedIsolationTarget(ctx context.Context, js jetstream.JetStream, fleet []*matrixProcessWorker, first int) (int, matrixIsolationTarget, func() error, error) {
+	bounded, stop := context.WithTimeout(ctx, 5*time.Second)
+	defer stop()
+	for bounded.Err() == nil {
+		index, target, release, err := armMatrixIsolationTarget(bounded, fleet, first)
+		if err != nil {
+			return index, target, release, err
+		}
+		attempt, done := context.WithTimeout(bounded, 2*time.Second)
+		prefix, tail, err := journal.New(js).Read(attempt, target.Delivery.Type, target.Delivery.ID)
+		done()
+		if err != nil {
+			return index, target, release, errors.Join(err, release())
+		}
+		if len(prefix) == 0 || (prefix[len(prefix)-1].Kind != journal.Completed && prefix[len(prefix)-1].Kind != journal.Failed) {
+			target.JournalPrefix = prefix
+			target.JournalTail = tail
+			target.NonterminalObservedAt = time.Now().UTC()
+			return index, target, release, nil
+		}
+		if err = release(); err != nil {
+			return index, target, release, err
+		}
+		first = (index + 1) % len(fleet)
+	}
+	return 0, matrixIsolationTarget{}, func() error { return nil }, fmt.Errorf("no unfinished invocation acquired for reply isolation: %w", bounded.Err())
 }
 
 func TestMatrixIsolationAcquisitionHandoff(t *testing.T) {

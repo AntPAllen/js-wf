@@ -667,8 +667,14 @@ func selectMatrixActiveWorker(ctx context.Context, fleet []*matrixProcessWorker,
 	return 0, fmt.Errorf("no active worker available to pause: %w", ready.Err())
 }
 
-func isolateMatrixWorkerReplies(ctx context.Context, fleet []*matrixProcessWorker, proxies []*testcluster.ClientProxy, first int, scheduled time.Time) (matrixLeaderFault, error) {
-	index, target, releaseTarget, err := armMatrixIsolationTarget(ctx, fleet, first)
+type matrixIsolationSelector func(context.Context, []*matrixProcessWorker, int) (int, matrixIsolationTarget, func() error, error)
+
+func isolateMatrixWorkerReplies(ctx context.Context, fleet []*matrixProcessWorker, proxies []*testcluster.ClientProxy, first int, scheduled time.Time, selectors ...matrixIsolationSelector) (matrixLeaderFault, error) {
+	selectTarget := matrixIsolationSelector(armMatrixIsolationTarget)
+	if len(selectors) > 0 {
+		selectTarget = selectors[0]
+	}
+	index, target, releaseTarget, err := selectTarget(ctx, fleet, first)
 	if err != nil {
 		return matrixLeaderFault{Scheduled: scheduled, Node: -1}, err
 	}
@@ -727,6 +733,7 @@ func isolateMatrixWorkerReplies(ctx context.Context, fleet []*matrixProcessWorke
 				healed := proxy.Stats()
 				if !healed.ResponsesHeld && healed.ServerToClient > event.ProxyBlocked.ServerToClient {
 					event.ProxyHealed = &healed
+					event.WorkerPingAt = health.At
 					break
 				}
 			}

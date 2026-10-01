@@ -1,0 +1,50 @@
+{
+  "scope": "single five-container R5 worker reply-isolation row",
+  "seed": 1,
+  "duration_seconds": 35,
+  "shortened_smoke": true,
+  "invocations": 112,
+  "journal_entries": 1239,
+  "confirmed_faults": 1,
+  "active_consumer_faults": null,
+  "cells": {
+    "matrixshort": {
+      "invocations": 16,
+      "terminal_p99_seconds": 4.34257078,
+      "progress_p99_seconds": 2.197845786
+    },
+    "matrixtimer": {
+      "invocations": 12,
+      "terminal_p99_seconds": 0.315473972,
+      "progress_p99_seconds": 0.834975498
+    },
+    "matrixsignal": {
+      "invocations": 8,
+      "terminal_p99_seconds": 4.82770598,
+      "progress_p99_seconds": 2.647043268
+    },
+    "matrixfanout": {
+      "invocations": 4,
+      "terminal_p99_seconds": 2.982903612,
+      "progress_p99_seconds": 0.567303116
+    },
+    "matrixchild": {
+      "invocations": 24,
+      "terminal_p99_seconds": 5.11866644,
+      "progress_p99_seconds": 2.105944759
+    },
+    "matrixgrandchild": {
+      "invocations": 48,
+      "terminal_p99_seconds": 1.147504646,
+      "progress_p99_seconds": 0.966334887
+    }
+  },
+  "clears_full_tier3_release": false,
+  "isolation_artifact_checks": {
+    "confirmed_45_second_reply_holds": 1,
+    "same_process_generations": 5,
+    "matched_selected_delivery_fencing": 1,
+    "graceful_counter_cross_checks": 5,
+    "counter_cross_checks_complete": true
+  }
+}

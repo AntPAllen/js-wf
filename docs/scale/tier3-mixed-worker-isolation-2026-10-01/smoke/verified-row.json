@@ -1,0 +1,50 @@
+{
+  "scope": "single five-container R5 worker reply-isolation row",
+  "seed": 1,
+  "duration_seconds": 35,
+  "shortened_smoke": true,
+  "invocations": 112,
+  "journal_entries": 1233,
+  "confirmed_faults": 1,
+  "active_consumer_faults": null,
+  "cells": {
+    "matrixshort": {
+      "invocations": 16,
+      "terminal_p99_seconds": 3.721904676,
+      "progress_p99_seconds": 1.668379601
+    },
+    "matrixtimer": {
+      "invocations": 12,
+      "terminal_p99_seconds": 0.30307725399999996,
+      "progress_p99_seconds": 1.700471752
+    },
+    "matrixsignal": {
+      "invocations": 8,
+      "terminal_p99_seconds": 3.654527813,
+      "progress_p99_seconds": 2.008533663
+    },
+    "matrixfanout": {
+      "invocations": 4,
+      "terminal_p99_seconds": 4.497358009,
+      "progress_p99_seconds": 1.170709427
+    },
+    "matrixchild": {
+      "invocations": 24,
+      "terminal_p99_seconds": 4.774754804,
+      "progress_p99_seconds": 0.459086455
+    },
+    "matrixgrandchild": {
+      "invocations": 48,
+      "terminal_p99_seconds": 0.503729459,
+      "progress_p99_seconds": 0.303072286
+    }
+  },
+  "clears_full_tier3_release": false,
+  "isolation_artifact_checks": {
+    "confirmed_45_second_reply_holds": 1,
+    "same_process_generations": 5,
+    "matched_selected_delivery_fencing": 1,
+    "graceful_counter_cross_checks": 5,
+    "counter_cross_checks_complete": true
+  }
+}
