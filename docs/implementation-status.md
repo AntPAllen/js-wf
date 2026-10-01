@@ -3120,3 +3120,36 @@ attribution and grouped timings](scale/mixed-seed12-7e414b2-2026-10-01/) are ret
 No fencing or renewal guarantee has been relaxed. This miss and seed 65 remain
 open, as do final-source full matrix/24-hour soak and online GC. The million-timer
 process and both full simulation jobs remain live without restart.
+
+
+## Actual SIGKILL after continuation suspension and handoff/release
+
+Two additional real R3 child-worker cuts now stop after acknowledged Suspended
+append and after acknowledged continuation enqueue plus lease release, before
+original delivery ACK. Parent reads confirm nine logical records ending at
+Suspended index 8, published frame, only two live journal messages and no live
+signals. The consumer still has unacknowledged runs. After suspension there is
+no expected handoff message and the lease remains present; after handoff/release
+exactly one correctly addressed stable-ID run is retained and the lease is gone.
+
+After verified SIGKILL, the scanner must enqueue one continuation candidate for
+the suspension sequence. A pinned replacement denies archive reads and never
+enters the prefix handler. Both effects run once; confirmed pre-kill prefix,
+frame-buffered signal/state/locals, result 46, peer reads, raw integrity and all
+12 offline SDK entries pass. Terminal scans enqueue nothing. Multiple durable
+wakeups are available; recovery is not attributed to any single queued delivery.
+
+The new cases passed under race in 21.693 seconds, with individual recovery
+12.932 seconds and 127.391 ms. Compiled production controls skipping handoff
+publication and suspended-continuation repair fail their selected assertions
+in 3.280/3.199 seconds. Vet passed. [Logs, mutations and hashes](scale/continuation-handoff-kill-2026-10-01/)
+retain evidence. No production runtime changes. Combined/server faults,
+unknown handoff/release/ACK replies, modeled process cuts and full release gates
+remain open; these two samples do not prove p99.
+
+[Mixed CI at 25330a9](https://github.com/AntPAllen/js-wf/actions/runs/36811347097)
+passed seed 1 then failed seed 2 terminal p99 at 47.748 seconds. The failed log
+is retained with this proof; it predates these fixture-only changes and does
+not establish a causal explanation. Seeds 2, 12 and 65 remain open. Full Tier 1
+jobs and the million-timer campaign continue live without restart; online GC
+and independent final-source matrix/24-hour soak remain open.

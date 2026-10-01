@@ -166,7 +166,18 @@ func TestContinuationKillChild(t *testing.T) {
 	}
 	port := &continuationKillSnapshotPort{SnapshotWritePort: journal.NewSnapshotPort(js), cut: os.Getenv("WF_CONTINUATION_KILL_CUT"), marker: os.Getenv("WF_CONTINUATION_KILL_MARKER")}
 	initial, stages := continuationKillHandlers(os.Getenv("WF_CONTINUATION_KILL_LOG"))
-	w, err := worker.New(context.Background(), js, "checkpoint-killed", initial, worker.WithContinuations(continuationKillType, stages), worker.WithJournalStore(journal.NewWithJetStreamSnapshotPort(js, port)), worker.WithResultBlobPort(&continuationKillResultPort{ResultBlobPort: worker.NewResultBlobPort(js), stop: port}))
+	observer := func(event worker.OperationEvent) {
+		if event.Error != "" {
+			return
+		}
+		if event.Operation == "journal_append" && event.JournalKind == journal.Suspended {
+			port.stopAt("after_suspended")
+		}
+		if event.Operation == "lease_release" {
+			port.stopAt("after_handoff_release")
+		}
+	}
+	w, err := worker.New(context.Background(), js, "checkpoint-killed", initial, worker.WithContinuations(continuationKillType, stages), worker.WithJournalStore(journal.NewWithJetStreamSnapshotPort(js, port)), worker.WithResultBlobPort(&continuationKillResultPort{ResultBlobPort: worker.NewResultBlobPort(js), stop: port}), worker.WithOperationObserver(observer))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,6 +193,10 @@ func TestContinuationWorkerSIGKILLPublicationCuts(t *testing.T) {
 
 func TestContinuationWorkerSIGKILLFrameCuts(t *testing.T) {
 	testContinuationWorkerSIGKILLCuts(t, []string{"before_frame", "after_frame"})
+}
+
+func TestContinuationWorkerSIGKILLHandoffCuts(t *testing.T) {
+	testContinuationWorkerSIGKILLCuts(t, []string{"after_suspended", "after_handoff_release"})
 }
 
 func testContinuationWorkerSIGKILLCuts(t *testing.T, cuts []string) {
@@ -252,7 +267,11 @@ func testContinuationWorkerSIGKILLCuts(t *testing.T, cuts []string) {
 			}
 			pendingFrame := cut == "before_frame" || cut == "after_frame"
 			unpublished := pendingFrame || cut == "before_manifest"
+			handoff := cut == "after_suspended" || cut == "after_handoff_release"
 			wantEntries, wantKind := 8, journal.StepCompleted
+			if handoff {
+				wantEntries, wantKind = 9, journal.Suspended
+			}
 			if pendingFrame {
 				wantEntries, wantKind = 7, journal.StepRequested
 			}
@@ -261,6 +280,63 @@ func testContinuationWorkerSIGKILLCuts(t *testing.T, cuts []string) {
 			}
 			lastBefore := before[len(before)-1]
 			firstEpoch := lastBefore.Epoch
+			if handoff {
+				if string(lastBefore.Payload) != `{"waiting_on":"continuation:finish_v1"}` {
+					t.Fatalf("wrong handoff suspension: %s", lastBefore.Payload)
+				}
+				run, err := all[1].Stream(ctx, "WF_RUN")
+				if err != nil {
+					t.Fatal(err)
+				}
+				info, err := run.Info(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+				messageID := fmt.Sprintf("continuation:%d:%d", handle.InvSeq, before[7].Sequence)
+				found := 0
+				for seq := info.State.FirstSeq; seq <= info.State.LastSeq; seq++ {
+					msg, err := run.GetMsg(ctx, seq)
+					if errors.Is(err, jetstream.ErrMsgNotFound) {
+						continue
+					}
+					if err != nil {
+						t.Fatal(err)
+					}
+					if msg.Header.Get("Nats-Msg-Id") == messageID {
+						if string(msg.Data) != identity.Key(continuationKillType, continuationKillID) {
+							t.Fatal("handoff targets wrong invocation")
+						}
+						found++
+					}
+				}
+				wantHandoffs := 0
+				if cut == "after_handoff_release" {
+					wantHandoffs = 1
+				}
+				if found != wantHandoffs {
+					t.Fatalf("confirmed handoffs=%d want=%d", found, wantHandoffs)
+				}
+				consumer, err := run.Consumer(ctx, fmt.Sprintf("WF_P_%02d", identity.Partition(continuationKillType, continuationKillID, provision.Partitions)))
+				if err != nil {
+					t.Fatal(err)
+				}
+				consumerInfo, err := consumer.Info(ctx)
+				if err != nil || consumerInfo.NumAckPending == 0 {
+					t.Fatalf("original delivery already acked: info=%+v err=%v", consumerInfo, err)
+				}
+				leases, err := all[1].KeyValue(ctx, "WF_LEASE")
+				if err != nil {
+					t.Fatal(err)
+				}
+				_, err = leases.Get(ctx, identity.Key(continuationKillType, continuationKillID))
+				if cut == "after_handoff_release" {
+					if !errors.Is(err, jetstream.ErrKeyNotFound) {
+						t.Fatalf("lease still present after release: %v", err)
+					}
+				} else if err != nil {
+					t.Fatalf("lease absent before handoff: %v", err)
+				}
+			}
 			var abandonedFrame struct {
 				Name string
 				Data []byte
@@ -316,10 +392,13 @@ func testContinuationWorkerSIGKILLCuts(t *testing.T, cuts []string) {
 					t.Fatal(err)
 				}
 				want := uint64(1)
+				if name == "WF_JRN" && handoff {
+					want = 2
+				}
 				if name == "WF_JRN" && (unpublished || cut == "after_manifest") {
 					want = uint64(wantEntries)
 				}
-				if name == "WF_SIG" && cut == "after_signal_purge" {
+				if name == "WF_SIG" && (cut == "after_signal_purge" || handoff) {
 					want = 0
 				}
 				if info.State.Msgs != want {

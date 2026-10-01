@@ -1,0 +1,11 @@
+--- a/reconcile/suspended.go
++++ b/reconcile/suspended.go
+@@ -256,7 +256,7 @@
+ 	var ready bool
+ 	var reason string
+ 	switch {
+-	case strings.HasPrefix(suspended.WaitingOn, "continuation:"):
++	case false:
+ 		name := strings.TrimPrefix(suspended.WaitingOn, "continuation:")
+ 		if identity.ValidateToken(name) != nil {
+ 			return Candidate{}, false, fmt.Errorf("invalid continuation wait %q", suspended.WaitingOn)
