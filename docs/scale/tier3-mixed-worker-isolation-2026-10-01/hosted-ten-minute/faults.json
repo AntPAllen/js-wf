@@ -1,0 +1,1497 @@
+[
+  {
+    "worker_ping_at": "2026-10-01T21:30:41.626232316Z",
+    "isolation_target": {
+      "journal_prefix": [
+        {
+          "epoch": 261,
+          "index": 0,
+          "kind": "Started",
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 128
+        },
+        {
+          "epoch": 261,
+          "index": 1,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "call_async",
+            "name": "child_0",
+            "input_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+            "fire_at": "0001-01-01T00:00:00Z",
+            "child_type": "matrixgrandchild",
+            "child_id": "c-2da21a3b0db8005055dc82b50170d5a3"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 131
+        },
+        {
+          "epoch": 261,
+          "index": 2,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 134
+        },
+        {
+          "epoch": 261,
+          "index": 3,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "call_async",
+            "name": "child_2",
+            "input_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+            "fire_at": "0001-01-01T00:00:00Z",
+            "child_type": "matrixgrandchild",
+            "child_id": "c-f33c7cc47cda6303df8b7a90c0fa3091"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 136
+        },
+        {
+          "epoch": 261,
+          "index": 4,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 140
+        },
+        {
+          "epoch": 261,
+          "index": 5,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "signal",
+            "name": "child_0",
+            "input_hash": "",
+            "fire_at": "0001-01-01T00:00:00Z"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 144
+        },
+        {
+          "epoch": 261,
+          "index": 6,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "signal:child_0"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 150
+        }
+      ],
+      "journal_tail": 150,
+      "nonterminal_observed_at": "2026-10-01T21:29:56.343206132Z",
+      "token": "2026-10-01T21:29:56.242292339Z",
+      "delivery": {
+        "At": "2026-10-01T21:29:56.283891353Z",
+        "Worker": "matrix-process-1-generation-0",
+        "Type": "matrixchild",
+        "ID": "c-5c8c2ac71362e72bb017480bfc104f04",
+        "Stage": "lease_acquired",
+        "RunSequence": 73,
+        "Delivery": 1,
+        "Error": ""
+      }
+    },
+    "scheduled": "2026-10-01T21:29:56.242139801Z",
+    "killed": "2026-10-01T21:29:56.343215109Z",
+    "healed": "2026-10-01T21:30:41.659301449Z",
+    "node": -1,
+    "partition_routes": [
+      0,
+      0,
+      0
+    ],
+    "worker": "matrix-process-1-generation-0",
+    "worker_slot": 1,
+    "pid": 6698,
+    "active_leases": 1,
+    "paused": "0001-01-01T00:00:00Z",
+    "resumed": "2026-10-01T21:30:41.343305215Z",
+    "fencing_events": 4,
+    "proxy_before": {
+      "client_to_server": 181095,
+      "server_to_client": 655631,
+      "held_bytes": 0,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 82884,
+      "buffer_overflows": 0
+    },
+    "proxy_blocked": {
+      "client_to_server": 181454,
+      "server_to_client": 655631,
+      "held_bytes": 338,
+      "responses_held": true,
+      "active_connections": 1,
+      "buffered_bytes": 338,
+      "peak_buffered_bytes": 82884,
+      "buffer_overflows": 0
+    },
+    "proxy_healed": {
+      "client_to_server": 250030,
+      "server_to_client": 1501911,
+      "held_bytes": 843315,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 843315,
+      "buffer_overflows": 0
+    }
+  },
+  {
+    "worker_ping_at": "2026-10-01T21:31:41.459365071Z",
+    "isolation_target": {
+      "journal_prefix": [
+        {
+          "epoch": 5629,
+          "index": 0,
+          "kind": "Started",
+          "worker_id": "matrix-process-2-generation-0",
+          "sequence": 2785
+        },
+        {
+          "epoch": 5629,
+          "index": 1,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-0",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:30:54.751971275Z"
+          },
+          "worker_id": "matrix-process-2-generation-0",
+          "sequence": 2798
+        },
+        {
+          "epoch": 5629,
+          "index": 2,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-0"
+          },
+          "worker_id": "matrix-process-2-generation-0",
+          "sequence": 2804
+        },
+        {
+          "epoch": 5746,
+          "index": 3,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 2882
+        },
+        {
+          "epoch": 5746,
+          "index": 4,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-1",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:30:55.249259672Z"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 2892
+        },
+        {
+          "epoch": 5746,
+          "index": 5,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-1"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 2904
+        },
+        {
+          "epoch": 5913,
+          "index": 6,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-2-generation-0",
+          "sequence": 2970
+        },
+        {
+          "epoch": 5913,
+          "index": 7,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-2",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:30:55.699714548Z"
+          },
+          "worker_id": "matrix-process-2-generation-0",
+          "sequence": 2979
+        },
+        {
+          "epoch": 5913,
+          "index": 8,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-2"
+          },
+          "worker_id": "matrix-process-2-generation-0",
+          "sequence": 2984
+        },
+        {
+          "epoch": 5997,
+          "index": 9,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 3006
+        },
+        {
+          "epoch": 5997,
+          "index": 10,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-3",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:30:56.108011049Z"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 3009
+        },
+        {
+          "epoch": 5997,
+          "index": 11,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-3"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 3011
+        }
+      ],
+      "journal_tail": 3011,
+      "nonterminal_observed_at": "2026-10-01T21:30:56.317019544Z",
+      "token": "2026-10-01T21:30:56.242382606Z",
+      "delivery": {
+        "At": "2026-10-01T21:30:56.2891562Z",
+        "Worker": "matrix-process-2-generation-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-9-1",
+        "Stage": "lease_acquired",
+        "RunSequence": 1087,
+        "Delivery": 1,
+        "Error": ""
+      }
+    },
+    "scheduled": "2026-10-01T21:30:56.242139801Z",
+    "killed": "2026-10-01T21:30:56.31702816Z",
+    "healed": "2026-10-01T21:31:41.578157309Z",
+    "node": -1,
+    "partition_routes": [
+      0,
+      0,
+      0
+    ],
+    "worker": "matrix-process-2-generation-0",
+    "worker_slot": 2,
+    "pid": 6711,
+    "active_leases": 1,
+    "paused": "0001-01-01T00:00:00Z",
+    "resumed": "2026-10-01T21:31:41.317036255Z",
+    "fencing_events": 4,
+    "proxy_before": {
+      "client_to_server": 2165724,
+      "server_to_client": 6098455,
+      "held_bytes": 0,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 60608,
+      "buffer_overflows": 0
+    },
+    "proxy_blocked": {
+      "client_to_server": 2165978,
+      "server_to_client": 6098455,
+      "held_bytes": 178,
+      "responses_held": true,
+      "active_connections": 1,
+      "buffered_bytes": 178,
+      "peak_buffered_bytes": 60608,
+      "buffer_overflows": 0
+    },
+    "proxy_healed": {
+      "client_to_server": 2222402,
+      "server_to_client": 6960619,
+      "held_bytes": 862158,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 862158,
+      "buffer_overflows": 0
+    }
+  },
+  {
+    "worker_ping_at": "2026-10-01T21:32:42.545384719Z",
+    "isolation_target": {
+      "journal_prefix": null,
+      "journal_tail": 0,
+      "nonterminal_observed_at": "2026-10-01T21:31:57.515120118Z",
+      "token": "2026-10-01T21:31:57.239062706Z",
+      "delivery": {
+        "At": "2026-10-01T21:31:57.487602191Z",
+        "Worker": "matrix-process-3-generation-0",
+        "Type": "matrixsignal",
+        "ID": "tier3-1-batch-18-5",
+        "Stage": "lease_acquired",
+        "RunSequence": 2007,
+        "Delivery": 1,
+        "Error": ""
+      }
+    },
+    "scheduled": "2026-10-01T21:31:56.242139801Z",
+    "killed": "2026-10-01T21:31:57.51513205Z",
+    "healed": "2026-10-01T21:32:42.768174877Z",
+    "node": -1,
+    "partition_routes": [
+      0,
+      0,
+      0
+    ],
+    "worker": "matrix-process-3-generation-0",
+    "worker_slot": 3,
+    "pid": 6721,
+    "active_leases": 1,
+    "paused": "0001-01-01T00:00:00Z",
+    "resumed": "2026-10-01T21:32:42.515308731Z",
+    "fencing_events": 4,
+    "proxy_before": {
+      "client_to_server": 4018616,
+      "server_to_client": 11298816,
+      "held_bytes": 0,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 71771,
+      "buffer_overflows": 0
+    },
+    "proxy_blocked": {
+      "client_to_server": 4018879,
+      "server_to_client": 11298816,
+      "held_bytes": 184,
+      "responses_held": true,
+      "active_connections": 1,
+      "buffered_bytes": 184,
+      "peak_buffered_bytes": 71771,
+      "buffer_overflows": 0
+    },
+    "proxy_healed": {
+      "client_to_server": 4074577,
+      "server_to_client": 12166736,
+      "held_bytes": 863531,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 863531,
+      "buffer_overflows": 0
+    }
+  },
+  {
+    "worker_ping_at": "2026-10-01T21:33:41.498301829Z",
+    "isolation_target": {
+      "journal_prefix": [
+        {
+          "epoch": 15826,
+          "index": 0,
+          "kind": "Started",
+          "worker_id": "matrix-process-1-generation-0",
+          "sequence": 7720
+        },
+        {
+          "epoch": 15826,
+          "index": 1,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-0",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:32:55.365664141Z"
+          },
+          "worker_id": "matrix-process-1-generation-0",
+          "sequence": 7730
+        },
+        {
+          "epoch": 15826,
+          "index": 2,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-0"
+          },
+          "worker_id": "matrix-process-1-generation-0",
+          "sequence": 7739
+        },
+        {
+          "epoch": 15943,
+          "index": 3,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 7815
+        },
+        {
+          "epoch": 15943,
+          "index": 4,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-1",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:32:55.84981948Z"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 7833
+        },
+        {
+          "epoch": 15943,
+          "index": 5,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-1"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 7850
+        },
+        {
+          "epoch": 16124,
+          "index": 6,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-2-generation-0",
+          "sequence": 7917
+        },
+        {
+          "epoch": 16124,
+          "index": 7,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-2",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:32:56.325231456Z"
+          },
+          "worker_id": "matrix-process-2-generation-0",
+          "sequence": 7921
+        },
+        {
+          "epoch": 16124,
+          "index": 8,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-2"
+          },
+          "worker_id": "matrix-process-2-generation-0",
+          "sequence": 7925
+        }
+      ],
+      "journal_tail": 7925,
+      "nonterminal_observed_at": "2026-10-01T21:32:56.466657005Z",
+      "token": "2026-10-01T21:32:56.242402635Z",
+      "delivery": {
+        "At": "2026-10-01T21:32:56.432394871Z",
+        "Worker": "matrix-process-3-generation-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-25-2",
+        "Stage": "lease_acquired",
+        "RunSequence": 2850,
+        "Delivery": 1,
+        "Error": ""
+      }
+    },
+    "scheduled": "2026-10-01T21:32:56.242139801Z",
+    "killed": "2026-10-01T21:32:56.466668817Z",
+    "healed": "2026-10-01T21:33:41.698396958Z",
+    "node": -1,
+    "partition_routes": [
+      0,
+      0,
+      0
+    ],
+    "worker": "matrix-process-3-generation-0",
+    "worker_slot": 3,
+    "pid": 6721,
+    "active_leases": 1,
+    "paused": "0001-01-01T00:00:00Z",
+    "resumed": "2026-10-01T21:33:41.467975011Z",
+    "fencing_events": 4,
+    "proxy_before": {
+      "client_to_server": 4492211,
+      "server_to_client": 13389475,
+      "held_bytes": 863531,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 863531,
+      "buffer_overflows": 0
+    },
+    "proxy_blocked": {
+      "client_to_server": 4492339,
+      "server_to_client": 13389475,
+      "held_bytes": 863620,
+      "responses_held": true,
+      "active_connections": 1,
+      "buffered_bytes": 89,
+      "peak_buffered_bytes": 863531,
+      "buffer_overflows": 0
+    },
+    "proxy_healed": {
+      "client_to_server": 4544886,
+      "server_to_client": 14188882,
+      "held_bytes": 1661453,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 863531,
+      "buffer_overflows": 0
+    }
+  },
+  {
+    "worker_ping_at": "2026-10-01T21:34:41.403999748Z",
+    "isolation_target": {
+      "journal_prefix": [
+        {
+          "epoch": 20351,
+          "index": 0,
+          "kind": "Started",
+          "worker_id": "matrix-process-2-generation-0",
+          "sequence": 9885
+        },
+        {
+          "epoch": 20351,
+          "index": 1,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-0",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:33:55.695476922Z"
+          },
+          "worker_id": "matrix-process-2-generation-0",
+          "sequence": 9897
+        },
+        {
+          "epoch": 20351,
+          "index": 2,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-0"
+          },
+          "worker_id": "matrix-process-2-generation-0",
+          "sequence": 9905
+        },
+        {
+          "epoch": 20479,
+          "index": 3,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 9980
+        },
+        {
+          "epoch": 20479,
+          "index": 4,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-1",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:33:56.155167073Z"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 9990
+        },
+        {
+          "epoch": 20479,
+          "index": 5,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-1"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 10011
+        }
+      ],
+      "journal_tail": 10011,
+      "nonterminal_observed_at": "2026-10-01T21:33:56.32903202Z",
+      "token": "2026-10-01T21:33:56.243801388Z",
+      "delivery": {
+        "At": "2026-10-01T21:33:56.264268088Z",
+        "Worker": "matrix-process-2-generation-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-32-5",
+        "Stage": "lease_acquired",
+        "RunSequence": 3612,
+        "Delivery": 1,
+        "Error": ""
+      }
+    },
+    "scheduled": "2026-10-01T21:33:56.242139801Z",
+    "killed": "2026-10-01T21:33:56.329042339Z",
+    "healed": "2026-10-01T21:34:41.981384936Z",
+    "node": -1,
+    "partition_routes": [
+      0,
+      0,
+      0
+    ],
+    "worker": "matrix-process-2-generation-0",
+    "worker_slot": 2,
+    "pid": 6711,
+    "active_leases": 1,
+    "paused": "0001-01-01T00:00:00Z",
+    "resumed": "2026-10-01T21:34:41.329463576Z",
+    "fencing_events": 4,
+    "proxy_before": {
+      "client_to_server": 6341514,
+      "server_to_client": 18522590,
+      "held_bytes": 862158,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 862158,
+      "buffer_overflows": 0
+    },
+    "proxy_blocked": {
+      "client_to_server": 6341770,
+      "server_to_client": 18522590,
+      "held_bytes": 862467,
+      "responses_held": true,
+      "active_connections": 1,
+      "buffered_bytes": 309,
+      "peak_buffered_bytes": 862158,
+      "buffer_overflows": 0
+    },
+    "proxy_healed": {
+      "client_to_server": 6404331,
+      "server_to_client": 19389510,
+      "held_bytes": 1727650,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 865492,
+      "buffer_overflows": 0
+    }
+  },
+  {
+    "worker_ping_at": "2026-10-01T21:35:41.540902301Z",
+    "isolation_target": {
+      "journal_prefix": [
+        {
+          "epoch": 24865,
+          "index": 0,
+          "kind": "Started",
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 12043
+        },
+        {
+          "epoch": 24865,
+          "index": 1,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-0",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:34:53.800334628Z"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 12054
+        },
+        {
+          "epoch": 24865,
+          "index": 2,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-0"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 12065
+        },
+        {
+          "epoch": 24963,
+          "index": 3,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 12118
+        },
+        {
+          "epoch": 24963,
+          "index": 4,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-1",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:34:54.217813651Z"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 12129
+        },
+        {
+          "epoch": 24963,
+          "index": 5,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-1"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 12140
+        },
+        {
+          "epoch": 25163,
+          "index": 6,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-1-generation-0",
+          "sequence": 12234
+        },
+        {
+          "epoch": 25163,
+          "index": 7,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-2",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:34:54.791481727Z"
+          },
+          "worker_id": "matrix-process-1-generation-0",
+          "sequence": 12241
+        },
+        {
+          "epoch": 25163,
+          "index": 8,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-2"
+          },
+          "worker_id": "matrix-process-1-generation-0",
+          "sequence": 12250
+        },
+        {
+          "epoch": 25246,
+          "index": 9,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 12270
+        },
+        {
+          "epoch": 25246,
+          "index": 10,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-3",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:34:55.156195935Z"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 12272
+        },
+        {
+          "epoch": 25246,
+          "index": 11,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-3"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 12274
+        },
+        {
+          "epoch": 25280,
+          "index": 12,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-1-generation-0",
+          "sequence": 12280
+        },
+        {
+          "epoch": 25280,
+          "index": 13,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-4",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:34:55.673133358Z"
+          },
+          "worker_id": "matrix-process-1-generation-0",
+          "sequence": 12282
+        },
+        {
+          "epoch": 25280,
+          "index": 14,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-4"
+          },
+          "worker_id": "matrix-process-1-generation-0",
+          "sequence": 12284
+        },
+        {
+          "epoch": 25313,
+          "index": 15,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 12296
+        },
+        {
+          "epoch": 25313,
+          "index": 16,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-5",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:34:56.153419529Z"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 12298
+        },
+        {
+          "epoch": 25313,
+          "index": 17,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-5"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 12300
+        }
+      ],
+      "journal_tail": 12300,
+      "nonterminal_observed_at": "2026-10-01T21:34:56.40798916Z",
+      "token": "2026-10-01T21:34:56.242587509Z",
+      "delivery": {
+        "At": "2026-10-01T21:34:56.364205688Z",
+        "Worker": "matrix-process-1-generation-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-39-4",
+        "Stage": "lease_acquired",
+        "RunSequence": 4412,
+        "Delivery": 1,
+        "Error": ""
+      }
+    },
+    "scheduled": "2026-10-01T21:34:56.242139801Z",
+    "killed": "2026-10-01T21:34:56.408119744Z",
+    "healed": "2026-10-01T21:35:41.760506313Z",
+    "node": -1,
+    "partition_routes": [
+      0,
+      0,
+      0
+    ],
+    "worker": "matrix-process-1-generation-0",
+    "worker_slot": 1,
+    "pid": 6698,
+    "active_leases": 1,
+    "paused": "0001-01-01T00:00:00Z",
+    "resumed": "2026-10-01T21:35:41.408242721Z",
+    "fencing_events": 4,
+    "proxy_before": {
+      "client_to_server": 7984610,
+      "server_to_client": 22953645,
+      "held_bytes": 843315,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 843315,
+      "buffer_overflows": 0
+    },
+    "proxy_blocked": {
+      "client_to_server": 7984893,
+      "server_to_client": 22953645,
+      "held_bytes": 843535,
+      "responses_held": true,
+      "active_connections": 1,
+      "buffered_bytes": 220,
+      "peak_buffered_bytes": 843315,
+      "buffer_overflows": 0
+    },
+    "proxy_healed": {
+      "client_to_server": 8038049,
+      "server_to_client": 23816110,
+      "held_bytes": 1698316,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 855001,
+      "buffer_overflows": 0
+    }
+  },
+  {
+    "worker_ping_at": "2026-10-01T21:36:41.34083267Z",
+    "isolation_target": {
+      "journal_prefix": null,
+      "journal_tail": 0,
+      "nonterminal_observed_at": "2026-10-01T21:35:56.302650249Z",
+      "token": "2026-10-01T21:35:56.242447576Z",
+      "delivery": {
+        "At": "2026-10-01T21:35:56.263916747Z",
+        "Worker": "matrix-process-3-generation-0",
+        "Type": "matrixgrandchild",
+        "ID": "c-c1ea173c28fc4f117cecf9ec6ce83fb2",
+        "Stage": "lease_acquired",
+        "RunSequence": 5129,
+        "Delivery": 1,
+        "Error": ""
+      }
+    },
+    "scheduled": "2026-10-01T21:35:56.242139801Z",
+    "killed": "2026-10-01T21:35:56.30266202Z",
+    "healed": "2026-10-01T21:36:41.770825765Z",
+    "node": -1,
+    "partition_routes": [
+      0,
+      0,
+      0
+    ],
+    "worker": "matrix-process-3-generation-0",
+    "worker_slot": 3,
+    "pid": 6721,
+    "active_leases": 1,
+    "paused": "0001-01-01T00:00:00Z",
+    "resumed": "2026-10-01T21:36:41.3028872Z",
+    "fencing_events": 4,
+    "proxy_before": {
+      "client_to_server": 8771579,
+      "server_to_client": 25909646,
+      "held_bytes": 1661453,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 863531,
+      "buffer_overflows": 0
+    },
+    "proxy_blocked": {
+      "client_to_server": 8771808,
+      "server_to_client": 25909646,
+      "held_bytes": 1670073,
+      "responses_held": true,
+      "active_connections": 1,
+      "buffered_bytes": 8620,
+      "peak_buffered_bytes": 863531,
+      "buffer_overflows": 0
+    },
+    "proxy_healed": {
+      "client_to_server": 8841770,
+      "server_to_client": 26800682,
+      "held_bytes": 2552489,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 6,
+      "peak_buffered_bytes": 891036,
+      "buffer_overflows": 0
+    }
+  },
+  {
+    "worker_ping_at": "2026-10-01T21:37:41.531919262Z",
+    "isolation_target": {
+      "journal_prefix": [
+        {
+          "epoch": 33912,
+          "index": 0,
+          "kind": "Started",
+          "worker_id": "matrix-process-4-generation-0",
+          "sequence": 16362
+        },
+        {
+          "epoch": 33912,
+          "index": 1,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-0",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:36:54.910493668Z"
+          },
+          "worker_id": "matrix-process-4-generation-0",
+          "sequence": 16371
+        },
+        {
+          "epoch": 33912,
+          "index": 2,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-0"
+          },
+          "worker_id": "matrix-process-4-generation-0",
+          "sequence": 16375
+        },
+        {
+          "epoch": 34027,
+          "index": 3,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 16452
+        },
+        {
+          "epoch": 34027,
+          "index": 4,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-1",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:36:55.310367706Z"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 16464
+        },
+        {
+          "epoch": 34027,
+          "index": 5,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-1"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 16472
+        },
+        {
+          "epoch": 34216,
+          "index": 6,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 16571
+        },
+        {
+          "epoch": 34216,
+          "index": 7,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-2",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:36:55.917227583Z"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 16575
+        },
+        {
+          "epoch": 34216,
+          "index": 8,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-2"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 16579
+        },
+        {
+          "epoch": 34297,
+          "index": 9,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 16596
+        },
+        {
+          "epoch": 34297,
+          "index": 10,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-3",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:36:56.235392258Z"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 16597
+        },
+        {
+          "epoch": 34297,
+          "index": 11,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-3"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 16598
+        }
+      ],
+      "journal_tail": 16598,
+      "nonterminal_observed_at": "2026-10-01T21:36:56.497795201Z",
+      "token": "2026-10-01T21:36:56.429312441Z",
+      "delivery": {
+        "At": "2026-10-01T21:36:56.453545364Z",
+        "Worker": "matrix-process-3-generation-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-53-2",
+        "Stage": "lease_acquired",
+        "RunSequence": 5939,
+        "Delivery": 1,
+        "Error": ""
+      }
+    },
+    "scheduled": "2026-10-01T21:36:56.242139801Z",
+    "killed": "2026-10-01T21:36:56.49780501Z",
+    "healed": "2026-10-01T21:37:41.91748455Z",
+    "node": -1,
+    "partition_routes": [
+      0,
+      0,
+      0
+    ],
+    "worker": "matrix-process-3-generation-0",
+    "worker_slot": 3,
+    "pid": 6721,
+    "active_leases": 1,
+    "paused": "0001-01-01T00:00:00Z",
+    "resumed": "2026-10-01T21:37:41.498226878Z",
+    "fencing_events": 4,
+    "proxy_before": {
+      "client_to_server": 9397838,
+      "server_to_client": 28259229,
+      "held_bytes": 2552489,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 891036,
+      "buffer_overflows": 0
+    },
+    "proxy_blocked": {
+      "client_to_server": 9398348,
+      "server_to_client": 28259229,
+      "held_bytes": 2555272,
+      "responses_held": true,
+      "active_connections": 1,
+      "buffered_bytes": 2783,
+      "peak_buffered_bytes": 891036,
+      "buffer_overflows": 0
+    },
+    "proxy_healed": {
+      "client_to_server": 9452903,
+      "server_to_client": 29087529,
+      "held_bytes": 3371326,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 891036,
+      "buffer_overflows": 0
+    }
+  },
+  {
+    "worker_ping_at": "2026-10-01T21:38:42.920662626Z",
+    "isolation_target": {
+      "journal_prefix": null,
+      "journal_tail": 0,
+      "nonterminal_observed_at": "2026-10-01T21:37:57.845097711Z",
+      "token": "2026-10-01T21:37:56.242554998Z",
+      "delivery": {
+        "At": "2026-10-01T21:37:57.805198085Z",
+        "Worker": "matrix-process-0-generation-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-60-5",
+        "Stage": "lease_acquired",
+        "RunSequence": 6634,
+        "Delivery": 1,
+        "Error": ""
+      }
+    },
+    "scheduled": "2026-10-01T21:37:56.242139801Z",
+    "killed": "2026-10-01T21:37:57.845108812Z",
+    "healed": "2026-10-01T21:38:43.862298559Z",
+    "node": -1,
+    "partition_routes": [
+      0,
+      0,
+      0
+    ],
+    "worker": "matrix-process-0-generation-0",
+    "worker_slot": 0,
+    "pid": 6689,
+    "active_leases": 1,
+    "paused": "0001-01-01T00:00:00Z",
+    "resumed": "2026-10-01T21:38:42.845123653Z",
+    "fencing_events": 4,
+    "proxy_before": {
+      "client_to_server": 14545119,
+      "server_to_client": 40942633,
+      "held_bytes": 0,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 41444,
+      "buffer_overflows": 0
+    },
+    "proxy_blocked": {
+      "client_to_server": 14545375,
+      "server_to_client": 40942633,
+      "held_bytes": 340,
+      "responses_held": true,
+      "active_connections": 1,
+      "buffered_bytes": 340,
+      "peak_buffered_bytes": 41444,
+      "buffer_overflows": 0
+    },
+    "proxy_healed": {
+      "client_to_server": 14614581,
+      "server_to_client": 41838295,
+      "held_bytes": 866216,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 866216,
+      "buffer_overflows": 0
+    }
+  },
+  {
+    "worker_ping_at": "2026-10-01T21:39:41.647742839Z",
+    "isolation_target": {
+      "journal_prefix": [
+        {
+          "epoch": 42988,
+          "index": 0,
+          "kind": "Started",
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 20691
+        },
+        {
+          "epoch": 42988,
+          "index": 1,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-0",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:38:54.506275763Z"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 20706
+        },
+        {
+          "epoch": 42988,
+          "index": 2,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-0"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 20715
+        },
+        {
+          "epoch": 43092,
+          "index": 3,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 20778
+        },
+        {
+          "epoch": 43092,
+          "index": 4,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-1",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:38:54.969170701Z"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 20796
+        },
+        {
+          "epoch": 43092,
+          "index": 5,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-1"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 20815
+        },
+        {
+          "epoch": 43295,
+          "index": 6,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 20887
+        },
+        {
+          "epoch": 43295,
+          "index": 7,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-2",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:38:55.456825467Z"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 20892
+        },
+        {
+          "epoch": 43295,
+          "index": 8,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-2"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 20898
+        },
+        {
+          "epoch": 43375,
+          "index": 9,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 20925
+        },
+        {
+          "epoch": 43375,
+          "index": 10,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-3",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:38:55.849611665Z"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 20928
+        },
+        {
+          "epoch": 43375,
+          "index": 11,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-3"
+          },
+          "worker_id": "matrix-process-0-generation-0",
+          "sequence": 20931
+        },
+        {
+          "epoch": 43413,
+          "index": 12,
+          "kind": "StepCompleted",
+          "payload": {},
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 20936
+        },
+        {
+          "epoch": 43413,
+          "index": 13,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "timer",
+            "name": "timer-4",
+            "input_hash": "",
+            "duration_nanos": 250000000,
+            "fire_at": "2026-10-01T21:38:56.345206488Z"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 20940
+        },
+        {
+          "epoch": 43413,
+          "index": 14,
+          "kind": "Suspended",
+          "payload": {
+            "waiting_on": "timer:timer-4"
+          },
+          "worker_id": "matrix-process-3-generation-0",
+          "sequence": 20941
+        }
+      ],
+      "journal_tail": 20941,
+      "nonterminal_observed_at": "2026-10-01T21:38:56.569287416Z",
+      "token": "2026-10-01T21:38:56.242872251Z",
+      "delivery": {
+        "At": "2026-10-01T21:38:56.535926428Z",
+        "Worker": "matrix-process-0-generation-0",
+        "Type": "matrixtimer",
+        "ID": "tier3-1-batch-67-1",
+        "Stage": "lease_acquired",
+        "RunSequence": 7488,
+        "Delivery": 1,
+        "Error": ""
+      }
+    },
+    "scheduled": "2026-10-01T21:38:56.242139801Z",
+    "killed": "2026-10-01T21:38:56.569298406Z",
+    "healed": "2026-10-01T21:39:42.085179761Z",
+    "node": -1,
+    "partition_routes": [
+      0,
+      0,
+      0
+    ],
+    "worker": "matrix-process-0-generation-0",
+    "worker_slot": 0,
+    "pid": 6689,
+    "active_leases": 1,
+    "paused": "0001-01-01T00:00:00Z",
+    "resumed": "2026-10-01T21:39:41.569485538Z",
+    "fencing_events": 4,
+    "proxy_before": {
+      "client_to_server": 15112702,
+      "server_to_client": 43169629,
+      "held_bytes": 866216,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 866216,
+      "buffer_overflows": 0
+    },
+    "proxy_blocked": {
+      "client_to_server": 15112830,
+      "server_to_client": 43169629,
+      "held_bytes": 866436,
+      "responses_held": true,
+      "active_connections": 1,
+      "buffered_bytes": 220,
+      "peak_buffered_bytes": 866216,
+      "buffer_overflows": 0
+    },
+    "proxy_healed": {
+      "client_to_server": 15165065,
+      "server_to_client": 43979622,
+      "held_bytes": 1673246,
+      "responses_held": false,
+      "active_connections": 1,
+      "buffered_bytes": 0,
+      "peak_buffered_bytes": 866216,
+      "buffer_overflows": 0
+    }
+  }
+]

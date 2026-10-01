@@ -4997,3 +4997,24 @@ All61 Python tests,workflow YAML parsing and diff checks pass. The aggregate
 seed count remains configuration rather than independent per-workload coverage
 proof. Campaign36929826425 has started; its pre-guard original logs require a
 separate review. It is not restarted to apply this evidence-only change.
+
+
+## Sustained R5 unfinished-worker reply isolation verified
+
+[Campaign36928729086](scale/tier3-mixed-worker-isolation-2026-10-01/hosted-ten-minute/)
+is verified terminal SUCCESS atdc8c8de:733.83s named race/734.873s package,
+73 batches,2,044 completions,22,538 entries and ten confirmed45s reply holds.
+Original artifact guards reverify nonterminal selected prefixes, asymmetric
+traffic,fresh PINGs,same processes,exact delivery fencing and completion after
+cut with preserved prefixes. All five final counters match all25 typed records.
+All mixed histories/invariants/raw p99/physical drain pass; worst terminal p99
+is20.055328529s and progress p99 is13.019610728s. All253 repairs are acknowledged
+(72start,153signal,28suspended). All25 fencing records lie within confirmed cuts:
+24heartbeat losses,one execution renewal loss. Their timelines distinguish23
+completed after fencing,one during its original delivery and one already-terminal
+fetch; the ten selected unfinished targets are checked separately. Uploaded
+artifacts,original-byte hashes and independent reviewer reports are retained.
+This closes one ten-minute row, not200-seed/full24h release coverage or confirmed
+server-side causes. The comprehensive campaign36929826425 is now in progress;
+the million-timer service remains active with207,753 receipts at the last sampled
+checkpoint. Neither live campaign is terminal acceptance.
