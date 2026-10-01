@@ -4424,3 +4424,26 @@ limit while passing preceding workloads. This changes no seed count, modeled
 invariant or runtime recovery target. A new complete run is still required.
 Seed28 raw queue/stalled-state, faults, dispatch and server artifacts are now
 retained alongside its failure log; no cause is inferred solely from its timeout.
+
+
+## Seed28 exposes an unbounded completed-child parent notification
+
+Retained stacks now identify two completed-child calls waiting five minutes
+in NotifyParentWithClient: LastInvocation and StateValue metadata requests.
+Their terminal state was already durable and their leases still renewed.
+The server-side missing-reply cause remains unconfirmed, but the worker-owned
+operation now has a fifteen-second whole-notification budget. Existing retry
+policy releases the child lease and repairs notification on redelivery using
+the unchanged generation-aware, child-derived signal key.
+
+[Four actual R3-store race cases](scale/parent-notification-budget-2026-10-01/)
+pass79.12s test /80.169s package. Metadata loss, dropped publication and lost
+committed-publication acknowledgment recover parent outcomes in16.266–16.336s,
+with live heartbeat renewals, ErrHeld past initial TTL, one effect, immutable
+child terminal history/state, released leases and one retained signal.
+The new production notification-decision model passes100,000 seeds in4.365s,
+exact and cross-process replay. Four pins expand the retained corpus to168.
+Corpus/new notification/existing owned-terminal checks pass under race24.816s;
+vet passes. Restoring unbounded calls fails both real and model budget
+properties in7.44s and0.004s. This does not identify a NATS mechanism or establish
+a whole-matrix pass. A current-source mixed seed28 replay remains required.

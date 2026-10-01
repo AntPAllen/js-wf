@@ -1,0 +1,13 @@
+# Bounded parent notification after a completed child
+
+The retained real journal-leader seed28 goroutine dump contains two completed-child worker calls blocked for five minutes in production parent notification: one in LastInvocation metadata, one in StateValue metadata. Their leases were still renewed. This establishes an unbounded worker-owned call; it does not identify the server-side cause of the missing replies or reproduce the original leader-election interleaving.
+
+NotifyParentWithClient now limits the whole operation to15s, retaining its generation check and stable child-derived idempotency key. A missing reply returns through existing worker retry/release policy. The child's terminal journal/state remain durable; redelivery retries notification without re-running its effect. Caller deadlines shorter than15s continue to apply.
+
+Four real R3-store race cases pass in79.12s test /80.169s package: invocation metadata missing, state metadata missing, signal publish dropped, signal committed with its acknowledgment withheld. Actual contexts expire while actual heartbeat renewals preserve ownership past the12s original lease TTL. ErrHeld near deadline confirms fencing. Parent results become available in16.266–16.336s, with one effect, unchanged terminal prefixes/outcomes, released child leases and exactly one retained parent signal. Per-case raw before/after records and outcomes are retained. A prior race run also passed80.578s. This fixture injects loss at the public JetStream boundary, not actual server packet loss; physical consumer drain and full mixed chaos are separate gates.
+
+The seeded in-memory notification decision workload passes100,000 seeds in4.365s. It checks production context budgeting, virtual15s missing-reply cost, repaired notification and repeat idempotency across all four modes, exact first-ten replay and cross-process trace identity. Four pins are added. Corpus plus new notification and existing owned-terminal seeded checks pass under race24.816s. This focused model does not run worker heartbeat/lease concurrency; the real fixture checks those paths.
+
+Restoring delivery-lifetime notification contexts rejects the budget property in the real fixture7.44s and model0.004s. Both compiled overlay controls, source and logs are retained; neither is a build failure or broad timeout. Vet passes. Manual worker-notification-budget CI retains the real-case records; the default integration job also includes the test.
+
+A fresh ten-minute real journal-seed28 mixed replay remains required to demonstrate recovery under the original mixed workload; the200-consecutive whole-matrix gate remains open. The running five-container ten-minute row was compiled before this fix and cannot validate it.

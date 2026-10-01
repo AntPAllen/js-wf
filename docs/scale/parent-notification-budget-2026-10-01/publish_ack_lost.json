@@ -1,0 +1,159 @@
+{
+  "Mode": "publish_ack_lost",
+  "Prefix": [
+    {
+      "epoch": 7,
+      "index": 0,
+      "kind": "Started",
+      "worker_id": "notify-budget-owner",
+      "sequence": 4
+    },
+    {
+      "epoch": 7,
+      "index": 1,
+      "kind": "StepRequested",
+      "payload": {
+        "kind": "run_once",
+        "name": "effect",
+        "input_hash": "bf1a68a4852a01314606a43b2a608f10456bb2b6a09c3439308bb06b67f057a6",
+        "fire_at": "0001-01-01T00:00:00Z"
+      },
+      "worker_id": "notify-budget-owner",
+      "sequence": 5
+    },
+    {
+      "epoch": 7,
+      "index": 2,
+      "kind": "StepCompleted",
+      "payload": {
+        "result": 42
+      },
+      "worker_id": "notify-budget-owner",
+      "sequence": 6
+    },
+    {
+      "epoch": 7,
+      "index": 3,
+      "kind": "Completed",
+      "payload": {
+        "inv_seq": 2,
+        "result": "NDI="
+      },
+      "worker_id": "notify-budget-owner",
+      "sequence": 7
+    }
+  ],
+  "After": [
+    {
+      "epoch": 7,
+      "index": 0,
+      "kind": "Started",
+      "worker_id": "notify-budget-owner",
+      "sequence": 4
+    },
+    {
+      "epoch": 7,
+      "index": 1,
+      "kind": "StepRequested",
+      "payload": {
+        "kind": "run_once",
+        "name": "effect",
+        "input_hash": "bf1a68a4852a01314606a43b2a608f10456bb2b6a09c3439308bb06b67f057a6",
+        "fire_at": "0001-01-01T00:00:00Z"
+      },
+      "worker_id": "notify-budget-owner",
+      "sequence": 5
+    },
+    {
+      "epoch": 7,
+      "index": 2,
+      "kind": "StepCompleted",
+      "payload": {
+        "result": 42
+      },
+      "worker_id": "notify-budget-owner",
+      "sequence": 6
+    },
+    {
+      "epoch": 7,
+      "index": 3,
+      "kind": "Completed",
+      "payload": {
+        "inv_seq": 2,
+        "result": "NDI="
+      },
+      "worker_id": "notify-budget-owner",
+      "sequence": 7
+    }
+  ],
+  "Before": "eyJpbnZfc2VxIjoyLCJyZXN1bHQiOiJOREk9In0=",
+  "AfterOutcome": "eyJpbnZfc2VxIjoyLCJyZXN1bHQiOiJOREk9In0=",
+  "ParentResult": "eyJpbnZfc2VxIjoyLCJyZXN1bHQiOiJOREk9In0=",
+  "SignalInfo": {
+    "config": {
+      "name": "WF_SIG",
+      "subjects": [
+        "wf.sig.*.*.*"
+      ],
+      "retention": "limits",
+      "max_consumers": -1,
+      "max_msgs": -1,
+      "max_bytes": -1,
+      "discard": "new",
+      "max_age": 0,
+      "max_msgs_per_subject": -1,
+      "max_msg_size": -1,
+      "storage": "file",
+      "num_replicas": 3,
+      "duplicate_window": 120000000000,
+      "compression": "none",
+      "allow_direct": false,
+      "mirror_direct": false,
+      "consumer_limits": {},
+      "metadata": {
+        "_nats.level": "5",
+        "_nats.req.level": "0",
+        "_nats.ver": "2.15.0"
+      }
+    },
+    "created": "2026-10-01T17:45:53.448275814Z",
+    "state": {
+      "messages": 1,
+      "bytes": 317,
+      "first_seq": 1,
+      "first_ts": "2026-10-01T17:45:54.452027724Z",
+      "last_seq": 1,
+      "last_ts": "2026-10-01T17:45:54.452027724Z",
+      "consumer_count": 0,
+      "deleted": null,
+      "num_deleted": 0,
+      "num_subjects": 1,
+      "subjects": null
+    },
+    "cluster": {
+      "name": "wf-test",
+      "raft_group": "S-R3F-ENVueAPm",
+      "leader": "wf-test-0",
+      "leader_since": "2026-10-01T17:45:53.551079865Z",
+      "system_account": true,
+      "traffic_account": "$SYS",
+      "replicas": [
+        {
+          "name": "wf-test-1",
+          "current": true,
+          "active": 19182788,
+          "peer": "OFrOUlB0"
+        },
+        {
+          "name": "wf-test-2",
+          "current": true,
+          "active": 19207806,
+          "peer": "80zpbVEM"
+        }
+      ]
+    },
+    "ts": "2026-10-01T17:46:10.571006496Z"
+  },
+  "Effects": 1,
+  "Heartbeats": 2
+}

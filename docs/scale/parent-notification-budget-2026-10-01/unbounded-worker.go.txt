@@ -1180,7 +1180,7 @@ func NotifyParentWithClient(ctx context.Context, c *client.Client, typ, id strin
 	// Metadata or signal replies can disappear while heartbeats still succeed.
 	// Bound this worker-owned operation so redelivery can repair notification
 	// without holding a completed child's lease for the workflow lifetime.
-	notifyCtx, stopNotify := context.WithTimeout(ctx, 15*time.Second)
+	notifyCtx, stopNotify := context.WithCancel(ctx)
 	defer stopNotify()
 	_, err = c.SignalToGeneration(notifyCtx, parentType, parentID, signalName, payload, key, parentInvSeq)
 	if errors.Is(err, client.ErrStaleGeneration) || errors.Is(err, client.ErrPurged) {

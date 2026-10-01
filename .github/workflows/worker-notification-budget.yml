@@ -1,0 +1,24 @@
+name: worker-notification-budget
+on:
+  workflow_dispatch:
+jobs:
+  notification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WF_NOTIFY_ARTIFACT_ROOT: /tmp/worker-notification-budget
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Recover parent notification after withheld replies
+        run: go test -p=1 -race ./integration -run '^TestWorkerParentNotificationMissingReplyRecovery$' -count=1 -timeout=5m -v
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: worker-notification-budget
+          path: /tmp/worker-notification-budget/*.json
+          if-no-files-found: error

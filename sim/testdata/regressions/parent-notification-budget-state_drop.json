@@ -1,0 +1,139 @@
+{
+  "version": 3,
+  "seed": 15,
+  "workload": "parent_notification_response_budget",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "invocation_drop",
+        "publish_ack_lost",
+        "publish_drop",
+        "state_drop"
+      ],
+      "chosen": "state_drop"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.parent.p",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.27",
+      "sequence": 1,
+      "data_sha256": "2bec826644e6e8a9e46b64099f844bd55d2d7319f8e92f59046fc0fda530fc3d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.child.c",
+      "sequence": 2,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.30",
+      "sequence": 2,
+      "data_sha256": "fff1958b412ab808f0733d382bd08f51e0c88792ed815f92ba084fe0ae5c2aec",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.parent.p",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "parent_notification_missing_reply",
+      "outcome": "state_drop"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "last_invocation",
+      "subject": "wf.inv.parent.p",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "state_get",
+      "subject": "parent.p",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "publish_signal",
+      "subject": "wf.sig.parent.p.result",
+      "sequence": 1,
+      "data_sha256": "5eda3c496790d92ff9aa99cbe255a49c2661ba5fe5c7d6c47c1b95f99d9af32e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "enqueue_run",
+      "subject": "wf.run.27",
+      "sequence": 3,
+      "data_sha256": "2bec826644e6e8a9e46b64099f844bd55d2d7319f8e92f59046fc0fda530fc3d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "last_invocation",
+      "subject": "wf.inv.parent.p",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "state_get",
+      "subject": "parent.p",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "publish_signal",
+      "subject": "wf.sig.parent.p.result",
+      "sequence": 1,
+      "data_sha256": "5eda3c496790d92ff9aa99cbe255a49c2661ba5fe5c7d6c47c1b95f99d9af32e",
+      "outcome": "duplicate"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "get_signal",
+      "subject": "wf.sig.parent.p.result",
+      "sequence": 1,
+      "data_sha256": "5eda3c496790d92ff9aa99cbe255a49c2661ba5fe5c7d6c47c1b95f99d9af32e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "enqueue_run",
+      "subject": "wf.run.27",
+      "sequence": 3,
+      "data_sha256": "2bec826644e6e8a9e46b64099f844bd55d2d7319f8e92f59046fc0fda530fc3d",
+      "outcome": "duplicate"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "check_parent_notification_budget",
+      "sequence": 1,
+      "outcome": "state_drop"
+    }
+  ]
+}

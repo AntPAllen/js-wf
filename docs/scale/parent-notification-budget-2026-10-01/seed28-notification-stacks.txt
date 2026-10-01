@@ -1,0 +1,63 @@
+goroutine 101617 [select, 5 minutes]:
+github.com/nats-io/nats%2ego.(*Conn).requestWithContext(0x26e2b1a8ee08, {0x1d78948, 0x26e2b1bf14f0}, {0x26e2b29f4980, 0x1f}, {0x0, 0x0, 0x0}, {0x0, 0x0, ...})
+	/home/runner/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:67 +0x225
+github.com/nats-io/nats%2ego.(*Conn).RequestWithContext(...)
+	/home/runner/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:37
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequest(0x26e2b1c1c2d0, {0x1d78948, 0x26e2b1bf14f0}, {0x26e2b45c0a98?, 0x17?}, {0x0, 0x0, 0x7f0b7415ac60?})
+	/home/runner/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:139 +0x119
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequestJSON(0x1?, {0x1d78948?, 0x26e2b1bf14f0?}, {0x26e2b45c0a98?, 0x26e2b1a3ca68?}, {0x1b34d40, 0x26e2b31bd680}, {0x0, 0x0, 0x0})
+	/home/runner/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:116 +0x4e
+github.com/nats-io/nats.go/jetstream.(*jetStream).Stream(0x26e2b1c1c2d0, {0x1d78948, 0x26e2b1bf14f0}, {0x26e2b1e640d0, 0xb})
+	/home/runner/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/jetstream.go:821 +0x174
+github.com/nats-io/nats.go/jetstream.(*jetStream).KeyValue(0x26e2b1c1c2d0, {0x1d78948, 0x26e2b1bf14f0}, {0x1119e71, 0x8})
+	/home/runner/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/kv.go:514 +0xf3
+js-wf/client.jetStreamSignalPort.StateValue({{0x1d7fca0?, 0x26e2b1c1c2d0?}}, {0x1d78948, 0x26e2b1bf14f0}, {0x26e2b29f4960, 0x1f})
+	/home/runner/work/js-wf/js-wf/client/signal_port.go:42 +0x4e
+js-wf/client.(*Client).signal(0x26e2b1a99680, {0x1d78948, 0x26e2b1bf14f0}, {0x26e2b28c6a10, 0xc}, {0x26e2b28c6a8e, 0x12}, {0x26e2b28c6b52, 0x7}, {0x26e2b29f4540, ...}, ...)
+	/home/runner/work/js-wf/js-wf/client/client.go:458 +0x4fb
+js-wf/client.(*Client).SignalToGeneration(0x40?, {0x1d78948?, 0x26e2b1bf14f0?}, {0x26e2b28c6a10?, 0x1d740c0?}, {0x26e2b28c6a8e?, 0x0?}, {0x26e2b28c6b52?, 0x26e2b24b8080?}, {0x26e2b29f4540, ...}, ...)
+	/home/runner/work/js-wf/js-wf/client/client.go:397 +0x116
+js-wf/worker.NotifyParentWithClient({0x1d78948, 0x26e2b1bf14f0}, 0x26e2b1a99680, {0x26e2b1c8e270, 0xb}, {0x26e2b1c8e27c, 0x22}, 0x5bc, {0x26e2b29f4540, 0x20, ...}, ...)
+	/home/runner/work/js-wf/js-wf/worker/worker.go:1180 +0x5e8
+js-wf/worker.(*Worker).persistAndNotify(0x26e2b1c9c008, {0x1d78948, 0x26e2b1bf14f0}, {0x26e2b1c8e270, 0xb}, {0x26e2b1c8e27c, 0x22}, 0x5bc, {0x26e2b29f4540, 0x20, ...}, ...)
+	/home/runner/work/js-wf/js-wf/worker/worker.go:1156 +0x108
+js-wf/worker.(*Worker).execute(0x26e2b1c9c008, {0x1d78948, 0x26e2b1bf14f0}, {0x26e2b1c8e270, 0xb}, {0x26e2b1c8e27c, 0x22}, 0x26e2b191e960, {0x1f7a3943, 0xee250899c, ...}, ...)
+	/home/runner/work/js-wf/js-wf/worker/worker.go:1139 +0x3d14
+js-wf/worker.(*Worker).handle(0x26e2b1c9c008, {0x1d78948, 0x26e2b1ad2140}, {0x1d7d548, 0x26e2b1bee5e0})
+	/home/runner/work/js-wf/js-wf/worker/worker.go:675 +0xbb6
+js-wf/worker.RunPartitionWithPort.func4({0x1d7d548?, 0x26e2b1bee5e0?})
+	/home/runner/work/js-wf/js-wf/worker/worker.go:460 +0x93
+created by js-wf/worker.RunPartitionWithPort in goroutine 59
+	/home/runner/work/js-wf/js-wf/worker/worker.go:457 +0xb89
+
+goroutine 101686 [select, 5 minutes]:
+github.com/nats-io/nats%2ego.(*Conn).requestWithContext(0x26e2b1a8ee08, {0x1d78948, 0x26e2b1d265a0}, {0x26e2b29f49a0, 0x1d}, {0x0, 0x0, 0x0}, {0x26e2b2be30e0, 0x48, ...})
+	/home/runner/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:67 +0x225
+github.com/nats-io/nats%2ego.(*Conn).RequestWithContext(...)
+	/home/runner/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/context.go:37
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequest(0x26e2b1c1c2d0, {0x1d78948, 0x26e2b1d265a0}, {0x26e2b45c0ac8?, 0x15?}, {0x26e2b1e30aa0, 0x1, 0x1?})
+	/home/runner/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:139 +0x119
+github.com/nats-io/nats.go/jetstream.(*jetStream).apiRequestJSON(0x1?, {0x1d78948?, 0x26e2b1d265a0?}, {0x26e2b45c0ac8?, 0x1b34d40?}, {0x1b33170, 0x26e2b2ba43e0}, {0x26e2b1e30aa0, 0x1, 0x1})
+	/home/runner/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/api.go:116 +0x4e
+github.com/nats-io/nats.go/jetstream.(*stream).getMsg(0x26e2b2ba43c0, {0x1d78948?, 0x26e2b1d265a0?}, 0x26e2b2157380)
+	/home/runner/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:596 +0x525
+github.com/nats-io/nats.go/jetstream.(*stream).GetLastMsgForSubject(0x26e2b2ba43c0, {0x1d78948, 0x26e2b1d265a0}, {0x26e2b31dd800, 0x35})
+	/home/runner/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/jetstream/stream.go:561 +0x7e
+js-wf/client.jetStreamSignalPort.LastInvocation({{0x1d7fca0?, 0x26e2b1c1c2d0?}}, {0x1d78948, 0x26e2b1d265a0}, {0x26e2b31dd800, 0x35})
+	/home/runner/work/js-wf/js-wf/client/signal_port.go:38 +0x7a
+js-wf/client.(*Client).signal(0x26e2b1a99680, {0x1d78948, 0x26e2b1d265a0}, {0x26e2b2b15550, 0xb}, {0x26e2b2ebf83e, 0x22}, {0x26e2b2b15592, 0x7}, {0x26e2b2b15a20, ...}, ...)
+	/home/runner/work/js-wf/js-wf/client/client.go:438 +0x3dd
+js-wf/client.(*Client).SignalToGeneration(0x40?, {0x1d78948?, 0x26e2b1d265a0?}, {0x26e2b2b15550?, 0x1d740c0?}, {0x26e2b2ebf83e?, 0x0?}, {0x26e2b2b15592?, 0x26e2b24de7f0?}, {0x26e2b2b15a20, ...}, ...)
+	/home/runner/work/js-wf/js-wf/client/client.go:397 +0x116
+js-wf/worker.NotifyParentWithClient({0x1d78948, 0x26e2b1d265a0}, 0x26e2b1a99680, {0x26e2b2bf0780, 0x10}, {0x26e2b2bf0791, 0x22}, 0x5cb, {0x26e2b2b15a20, 0x20, ...}, ...)
+	/home/runner/work/js-wf/js-wf/worker/worker.go:1180 +0x5e8
+js-wf/worker.(*Worker).persistAndNotify(0x26e2b1c9c008, {0x1d78948, 0x26e2b1d265a0}, {0x26e2b2bf0780, 0x10}, {0x26e2b2bf0791, 0x22}, 0x5cb, {0x26e2b2b15a20, 0x20, ...}, ...)
+	/home/runner/work/js-wf/js-wf/worker/worker.go:1156 +0x108
+js-wf/worker.(*Worker).execute(0x26e2b1c9c008, {0x1d78948, 0x26e2b1d265a0}, {0x26e2b2bf0780, 0x10}, {0x26e2b2bf0791, 0x22}, 0x26e2b191ed20, {0x206b1919, 0xee250899c, ...}, ...)
+	/home/runner/work/js-wf/js-wf/worker/worker.go:1139 +0x3d14
+js-wf/worker.(*Worker).handle(0x26e2b1c9c008, {0x1d78948, 0x26e2b1a164b0}, {0x1d7d548, 0x26e2b2b3b400})
+	/home/runner/work/js-wf/js-wf/worker/worker.go:675 +0xbb6
+js-wf/worker.RunPartitionWithPort.func4({0x1d7d548?, 0x26e2b2b3b400?})
+	/home/runner/work/js-wf/js-wf/worker/worker.go:460 +0x93
+created by js-wf/worker.RunPartitionWithPort in goroutine 118
+	/home/runner/work/js-wf/js-wf/worker/worker.go:457 +0xb89
