@@ -4335,3 +4335,17 @@ exclude this attempt from acceptance. The VM boot is unchanged and no kernel
 OOM event appears in the interval; the exact cause remains unconfirmed. A
 running report is not liveness. The next long campaign will use a separate user
 service rather than depending on an execution-tool session.
+
+
+The replacement clean-source million campaign at 92586ea runs independently
+as user service `js-wf-timer-million-20261001.service` (MainPID18146 at launch),
+with explicit 768MiB Go memory limits, two runtime CPUs, 6GiB whole-service
+memory cap and a 25-hour service deadline. Its original 24h/2s p99/30s maximum
+scope is unchanged; due span is Oct 1 16:40:33.825886070 through Oct 2 at the
+same time. [Service and binary identity](scale/timer-durable-receipts-2026-10-01/service-million-campaign-start.json)
+are retained; publication loading and terminal verification remain pending.
+Do not infer liveness from the progress file; inspect the user service and PID.
+The [200-seed whole-matrix campaign 36891850893](https://github.com/AntPAllen/js-wf/actions/runs/36891850893)
+is launched at the same clean revision after the one-seed whole-matrix pass.
+It requires all 2,600 executions and is currently pending. Neither launch
+clears its release gate. Previous interrupted stores are preserved.
