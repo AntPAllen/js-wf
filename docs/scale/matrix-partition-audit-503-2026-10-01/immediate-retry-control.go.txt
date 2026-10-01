@@ -921,7 +921,7 @@ func matrixRetainedAuditWithClock(ctx context.Context, check func(context.Contex
 			break
 		}
 		if i < 2 {
-			if pause := 10*time.Second - now().Sub(started); pause > 0 {
+			if pause := 0*time.Second - now().Sub(started); pause > 0 {
 				if waitErr := wait(bound, pause); waitErr != nil {
 					return report, fmt.Errorf("retained audit retry wait: %w", waitErr)
 				}

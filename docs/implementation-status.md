@@ -4220,3 +4220,15 @@ at batch 60 on API 503/error 10008 after three fast whole-audit attempts; batch
 in progress when audit failure canceled the fixture. [Original raw log and artifact ZIP](scale/matrix-partition-audit-503-2026-10-01/)
 retain the failure. This is audit availability evidence, not a final invariant
 or workflow-latency result. The matrix release gate remains open.
+
+
+The audit helper now spaces fast named-transient attempts by ten seconds inside
+an explicit sixty-second overall budget, preserving the original three twenty-
+second requests. Semantic invariant failures still stop immediately; exhaustion
+retains the underlying error and cancellation is prompt. A virtual-clock
+503/recovery contract, invariant/exhaustion and cancellation checks pass race in
+1.025s. A compiled immediate-retry control fails semantically in 0.005s at
+0/0.8/1.6-second attempt starts. [Retained source/controls](scale/matrix-partition-audit-503-2026-10-01/)
+record this harness change. A fresh full ten-minute local partition seed 1 is
+running with timings and memory limits; its terminal result remains pending.
+No workload, fault, p99, final completion or complete-audit requirement changes.
