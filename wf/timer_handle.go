@@ -15,12 +15,13 @@ var ErrTimerFired = errors.New("timer has already fired")
 // TimerHandle is bound to one workflow replay. Create it again on every replay
 // by calling Context.Timer at the same point in the handler.
 type TimerHandle struct {
-	c         *Context
-	name      string
-	step      uint64
-	fireAt    time.Time
-	cancelled bool
-	fired     bool
+	c                 *Context
+	name              string
+	step              uint64
+	fireAt            time.Time
+	cancelled         bool
+	fired             bool
+	createdInDelivery bool // The current wakeup cannot fire a newly created timer.
 }
 
 // Timer journals a durable timer and returns an awaitable handle. Creation
@@ -31,6 +32,7 @@ func (c *Context) Timer(name string, d time.Duration) (*TimerHandle, error) {
 	}
 	step := c.stepPosition()
 	var req request
+	fresh := c.position >= len(c.entries)
 	if c.position < len(c.entries) {
 		recorded := c.entries[c.position]
 		if recorded.Kind != StepRequested || json.Unmarshal(recorded.Payload, &req) != nil {
@@ -62,7 +64,7 @@ func (c *Context) Timer(name string, d time.Duration) (*TimerHandle, error) {
 			return nil, ErrCorruptJournal
 		}
 	} else {
-		if d > 0 && (c.wakeupAt.IsZero() || c.wakeupAt.Before(req.FireAt)) {
+		if d > 0 && (fresh || c.wakeupAt.IsZero() || c.wakeupAt.Before(req.FireAt)) {
 			if c.scheduleTimer == nil {
 				return nil, fmt.Errorf("%w: no scheduler", ErrTimerSchedule)
 			}
@@ -75,7 +77,7 @@ func (c *Context) Timer(name string, d time.Duration) (*TimerHandle, error) {
 		}
 	}
 	c.position++
-	handle := &TimerHandle{c: c, name: name, step: step, fireAt: req.FireAt}
+	handle := &TimerHandle{c: c, name: name, step: step, fireAt: req.FireAt, createdInDelivery: fresh}
 	if c.timerHandles == nil {
 		c.timerHandles = make(map[uint64]*TimerHandle)
 	}
@@ -126,7 +128,7 @@ func (t *TimerHandle) Await() error {
 			return ErrCorruptJournal
 		}
 	} else {
-		if !t.fireAt.IsZero() && (c.wakeupAt.IsZero() || c.wakeupAt.Before(t.fireAt)) {
+		if !t.fireAt.IsZero() && (t.createdInDelivery || c.wakeupAt.IsZero() || c.wakeupAt.Before(t.fireAt)) {
 			c.waitingOn = "timer:" + t.name
 			return ErrSuspended
 		}

@@ -119,7 +119,8 @@ func Select(c *Context, awaitables ...Awaitable) (int, []byte, error) {
 		ready := false
 		switch descriptor.Kind {
 		case "timer":
-			ready = descriptor.FireAt.IsZero() || !c.wakeupAt.IsZero() && !c.wakeupAt.Before(descriptor.FireAt)
+			timer := awaitables[i].(*TimerHandle)
+			ready = descriptor.FireAt.IsZero() || !timer.createdInDelivery && !c.wakeupAt.IsZero() && !c.wakeupAt.Before(descriptor.FireAt)
 		case "promise":
 			ready = c.promiseResults[descriptor.Name] != nil
 			if ready {

@@ -602,6 +602,9 @@ func Sleep(c *Context, name string, d time.Duration) error {
 	}
 	step := c.stepPosition()
 	var req request
+	// This delivery's wakeup predates a fresh request. Different leader clocks
+	// can make that old timestamp exceed the new deadline without any wait.
+	fresh := c.position >= len(c.entries)
 	if c.position < len(c.entries) {
 		recorded := c.entries[c.position]
 		if recorded.Kind != StepRequested {
@@ -638,7 +641,7 @@ func Sleep(c *Context, name string, d time.Duration) error {
 		c.position++
 		return nil
 	}
-	if d <= 0 || !c.wakeupAt.Before(req.FireAt) && !c.wakeupAt.IsZero() {
+	if d <= 0 || !fresh && !c.wakeupAt.Before(req.FireAt) && !c.wakeupAt.IsZero() {
 		if err := c.next(StepCompleted, json.RawMessage(`{}`)); err != nil {
 			return err
 		}

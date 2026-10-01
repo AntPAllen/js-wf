@@ -5289,3 +5289,29 @@ not independent per-workload coverage proof or the100,000-seed release gate.
 Both clock handles36939477954 and36939480705, and earlier comprehensive
 36929826425, remain authoritatively in progress. The ahead diagnostic's
 contradictory cancellation log remains excluded from verdicts.
+
+
+### Confirmed SDK fresh-timer early completion and fix
+
+Behind ten-minute run36939477954 at sourceb13f9c3 fails709.24s after88 batches
+and19 source transitions. The controller audit finds a confirmed early250ms
+sleep at matrixtimer/tier3-1-batch-38-6/timer-5. Both request16 and completion17
+occur in delivery1 of run4307. Independent completion receipt and Sleep return
+are about233ms before the earliest conservative controller duration boundary,
+so this is not merely overlapping timing uncertainty. [Complete original proof
+and focused causal join](scale/tier3-mixed-server-clock-2026-10-01/behind-ten-minute-early-timer-failure/)
+are retained. The source's smoke pass does not imply sustained clock acceptance.
+
+An older unshifted run timestamp satisfied the deadline created from a behind
+leader clock. The SDK therefore skipped scheduling/suspension for a fresh
+positive Sleep. Fresh positive Sleep and timer handles now require a later
+wakeup; existing recorded timers still coalesce on due replay and nonpositive
+timers remain immediate. Await,SelectSignal and Select apply the same freshness
+rule. No persisted journal or checkpoint format changes.
+
+The new regression exercises all four APIs and due replay. A Go overlay using
+original SDK files fails all four controls. Full SDK race tests pass12.860s
+and full worker race tests31.618s. Selected1,000-seed production-worker timer
+execution/burst/clock workloads plus all180 pins pass3.983s. Remaining
+absolute-clock transition counterexamples and full release gates stay open.
+The currently running comprehensive campaigns predate this production fix.

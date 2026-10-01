@@ -78,13 +78,24 @@ func TestTimerSelectSignalTimerBranchReplaysWithoutFiringAgain(t *testing.T) {
 		return nil
 	}
 	c := NewContext(context.Background(), entries, appendEntry)
-	c.SetTimerSupport(base.Add(2*time.Second), func(context.Context) (time.Time, error) { return base, nil }, func(context.Context, uint64, time.Time) error { return nil })
+	c.SetTimerSupport(base, func(context.Context) (time.Time, error) { return base, nil }, func(context.Context, uint64, time.Time) error { return nil })
 	c.SetTimerObserver(func(time.Time, time.Time) { fires++ })
 	timer, err := c.Timer("timeout", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
 	choice, data, err := timer.SelectSignal("ready")
+	if !errors.Is(err, ErrSuspended) || fires != 0 {
+		t.Fatalf("fresh timer: choice=%q fires=%d err=%v", choice, fires, err)
+	}
+	c = NewContext(context.Background(), entries, appendEntry)
+	c.SetTimerSupport(base.Add(2*time.Second), nil, nil)
+	c.SetTimerObserver(func(time.Time, time.Time) { fires++ })
+	timer, err = c.Timer("timeout", time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	choice, data, err = timer.SelectSignal("ready")
 	if err != nil || choice != TimerSelected || data != nil || fires != 1 {
 		t.Fatalf("timer branch: choice=%q data=%s fires=%d err=%v", choice, data, fires, err)
 	}

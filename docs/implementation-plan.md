@@ -261,6 +261,14 @@ Order matters: journal entry first, scheduled publish second. A crash between th
 - **Timer for an invocation that has been purged.** Wakeup finds no `WF_INV` record; ack and log at debug. Must not create a journal. Test.
 - **Duplicate scheduled publish** (client retried after `ErrUnknown`). `Nats-Msg-Id` dedups within the window; outside the window two wakeups arrive and the second is a no-op. Test with the window set to 1 s.
 
+Fresh positive timer requests must not consume the current delivery's older
+wakeup timestamp, even if a leader clock change makes that timestamp appear
+after the new deadline. Sleep and timer Await/selection now enforce this rule;
+recorded due timers retain coalescing on replay. The sustained behind-clock
+row exposed and preserves a confirmed early-completion regression in
+[the clock failure proof](scale/tier3-mixed-server-clock-2026-10-01/behind-ten-minute-early-timer-failure/).
+This fix does not certify all clock-source transition cases.
+
 ## Phase 6 — Signals, promises and inter-workflow calls
 
 External writers must never append to a journal directly, because that would race the worker's CAS. Instead a signal is a publish to `wf.sig.<type>.<id>.<name>` followed by a `WF_RUN` wakeup with a stable message ID. A signal scanner repairs the wakeup after a crash or uncertain acknowledgment between those writes. The worker, holding the lease, reads pending signals from `WF_SIG` with an ordered consumer from the last consumed sequence (recorded in the journal as `SignalConsumed{sig_seq}`) and journals them in order. Signals are therefore delivered in `WF_SIG` sequence order, exactly once into the journal, and a signal that arrives before the invocation asks for it is buffered by the stream itself.

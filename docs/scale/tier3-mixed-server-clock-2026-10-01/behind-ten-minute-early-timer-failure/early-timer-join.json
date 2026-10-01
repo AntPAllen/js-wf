@@ -1,0 +1,139 @@
+{
+  "scope": "fresh sleep completed in its original delivery before controller duration; no NATS root cause claim",
+  "run": 36939477954,
+  "source": "b13f9c35e523e9d6cf847e7afacf3d6285f32b41",
+  "id": "tier3-1-batch-38-6",
+  "timer": "timer-5",
+  "operations": [
+    {
+      "At": "2026-10-01T23:18:57.665564352Z",
+      "Duration": 7146591,
+      "Worker": "tier3-mixed-2",
+      "Type": "matrixtimer",
+      "ID": "tier3-1-batch-38-6",
+      "RunSequence": 4307,
+      "Delivery": 1,
+      "Operation": "timer_clock",
+      "JournalIndex": 16,
+      "JournalKind": "StepRequested",
+      "Error": "",
+      "LeaseGateWait": 0,
+      "LeaseUpdateDuration": 0,
+      "LeaseUpdateAttempted": false,
+      "ServerTime": "2026-10-01T23:17:57.662981282Z"
+    },
+    {
+      "At": "2026-10-01T23:18:57.67169843Z",
+      "Duration": 3704027,
+      "Worker": "tier3-mixed-2",
+      "Type": "matrixtimer",
+      "ID": "tier3-1-batch-38-6",
+      "RunSequence": 4307,
+      "Delivery": 1,
+      "Operation": "journal_append",
+      "JournalIndex": 16,
+      "JournalKind": "StepRequested",
+      "Error": "",
+      "LeaseGateWait": 0,
+      "LeaseUpdateDuration": 0,
+      "LeaseUpdateAttempted": false
+    },
+    {
+      "At": "2026-10-01T23:18:57.675959338Z",
+      "Duration": 3164426,
+      "Worker": "tier3-mixed-2",
+      "Type": "matrixtimer",
+      "ID": "tier3-1-batch-38-6",
+      "RunSequence": 4307,
+      "Delivery": 1,
+      "Operation": "journal_append",
+      "JournalIndex": 17,
+      "JournalKind": "StepCompleted",
+      "Error": "",
+      "LeaseGateWait": 0,
+      "LeaseUpdateDuration": 0,
+      "LeaseUpdateAttempted": false
+    }
+  ],
+  "receipts": [
+    {
+      "sequence": 11992,
+      "subject": "wf.jrn.matrixtimer.tier3-1-batch-38-6",
+      "entry": {
+        "epoch": 25134,
+        "index": 16,
+        "kind": "StepRequested",
+        "payload": {
+          "kind": "timer",
+          "name": "timer-5",
+          "input_hash": "",
+          "duration_nanos": 250000000,
+          "fire_at": "2026-10-01T23:17:57.912981282Z"
+        },
+        "worker_id": "tier3-mixed-2"
+      },
+      "observed_at": "2026-10-01T23:18:57.671213995Z"
+    },
+    {
+      "sequence": 11994,
+      "subject": "wf.jrn.matrixtimer.tier3-1-batch-38-6",
+      "entry": {
+        "epoch": 25134,
+        "index": 17,
+        "kind": "StepCompleted",
+        "payload": {},
+        "worker_id": "tier3-mixed-2"
+      },
+      "observed_at": "2026-10-01T23:18:57.675820797Z"
+    }
+  ],
+  "timer_call": {
+    "id": "tier3-1-batch-38-6",
+    "name": "timer-5",
+    "first_call": "2026-10-01T23:18:57.658414759Z",
+    "first_return": "2026-10-01T23:18:57.675969332Z",
+    "duration_ns": 250000000
+  },
+  "dispatch": [
+    {
+      "At": "2026-10-01T23:18:57.594509551Z",
+      "Worker": "tier3-mixed-2",
+      "Type": "matrixtimer",
+      "ID": "tier3-1-batch-38-6",
+      "Stage": "fetched",
+      "RunSequence": 4307,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-01T23:18:57.598614827Z",
+      "Worker": "tier3-mixed-2",
+      "Type": "matrixtimer",
+      "ID": "tier3-1-batch-38-6",
+      "Stage": "lease_acquired",
+      "RunSequence": 4307,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-01T23:18:57.720686367Z",
+      "Worker": "tier3-mixed-2",
+      "Type": "matrixtimer",
+      "ID": "tier3-1-batch-38-6",
+      "Stage": "released",
+      "RunSequence": 4307,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-01T23:18:57.720720587Z",
+      "Worker": "tier3-mixed-2",
+      "Type": "matrixtimer",
+      "ID": "tier3-1-batch-38-6",
+      "Stage": "ack",
+      "RunSequence": 4307,
+      "Delivery": 1,
+      "Error": ""
+    }
+  ]
+}

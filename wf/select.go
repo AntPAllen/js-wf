@@ -88,7 +88,7 @@ func (t *TimerHandle) SelectSignal(name string) (Selection, []byte, error) {
 		c.usedSignals[sig.Sequence] = true
 		return SignalSelected, sig.Payload, nil
 	}
-	if t.fireAt.IsZero() || !c.wakeupAt.IsZero() && !c.wakeupAt.Before(t.fireAt) {
+	if t.fireAt.IsZero() || !t.createdInDelivery && !c.wakeupAt.IsZero() && !c.wakeupAt.Before(t.fireAt) {
 		payload, _ := json.Marshal(completion{Selected: string(TimerSelected)})
 		if err := c.next(StepCompleted, payload); err != nil {
 			return "", nil, err

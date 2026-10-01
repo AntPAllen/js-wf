@@ -1,0 +1,114 @@
+[1] 2026/10/01 23:23:34.248554 [INF] Starting nats-server
+[1] 2026/10/01 23:23:34.248741 [INF]   Version:  2.15.0
+[1] 2026/10/01 23:23:34.248748 [INF]   Git:      [not set]
+[1] 2026/10/01 23:23:34.248752 [INF]   Cluster:  js-wf-route-5730-1790896439255003843
+[1] 2026/10/01 23:23:34.248754 [INF]   Name:     js-wf-route-5730-1790896439255003843-n4
+[1] 2026/10/01 23:23:34.248756 [INF]   Node:     tvcKL7IH
+[1] 2026/10/01 23:23:34.248757 [INF]   ID:       NDPLZ4WMNAECMCWZ6DVS43EEIK46VASJWJPA7ISL6VKD5BD6YOVBZZPO
+[1] 2026/10/01 23:23:34.248771 [INF] Using configuration file: /etc/nats.conf (sha256:2b3c0cdf1bae0dc828987430072bec52f1eee9114880f8779b1ec8bfa212027e)
+[1] 2026/10/01 23:23:34.249339 [INF] Starting http monitor on 0.0.0.0:8222
+[1] 2026/10/01 23:23:34.249486 [INF] Starting JetStream
+[1] 2026/10/01 23:23:34.249907 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+[1] 2026/10/01 23:23:34.249992 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+[1] 2026/10/01 23:23:34.250007 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+[1] 2026/10/01 23:23:34.250026 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+[1] 2026/10/01 23:23:34.250056 [INF] 
+[1] 2026/10/01 23:23:34.250066 [INF]          https://docs.nats.io/jetstream
+[1] 2026/10/01 23:23:34.250074 [INF] 
+[1] 2026/10/01 23:23:34.250083 [INF] ---------------- JETSTREAM ----------------
+[1] 2026/10/01 23:23:34.250092 [INF]   Strict:          true
+[1] 2026/10/01 23:23:34.250105 [INF]   Max Memory:      11.71 GB
+[1] 2026/10/01 23:23:34.250124 [INF]   Max Storage:     62.76 GB
+[1] 2026/10/01 23:23:34.250143 [INF]   Store Directory: "/data/jetstream"
+[1] 2026/10/01 23:23:34.250159 [INF]   API Level:       5
+[1] 2026/10/01 23:23:34.250170 [INF] -------------------------------------------
+[1] 2026/10/01 23:23:34.250766 [INF]   Starting restore for stream '$G > KV_WF_VIEW'
+[1] 2026/10/01 23:23:34.251201 [INF]   Starting restore for stream '$G > KV_WF_STATE'
+[1] 2026/10/01 23:23:34.250986 [INF]   Starting restore for stream '$G > WF_SIG'
+[1] 2026/10/01 23:23:34.252599 [INF]   Restored 0 messages for stream '$G > KV_WF_VIEW' in 1ms
+[1] 2026/10/01 23:23:34.251044 [INF]   Starting restore for stream '$G > WF_JRN'
+[1] 2026/10/01 23:23:34.251081 [INF]   Starting restore for stream '$G > WF_RUN'
+[1] 2026/10/01 23:23:34.251109 [INF]   Starting restore for stream '$G > WF_PURGE'
+[1] 2026/10/01 23:23:34.251115 [INF]   Starting restore for stream '$G > OBJ_WF_BLOB'
+[1] 2026/10/01 23:23:34.251141 [INF]   Starting restore for stream '$G > WF_INV'
+[1] 2026/10/01 23:23:34.251179 [INF]   Starting restore for stream '$G > KV_WF_ASSIGN'
+[1] 2026/10/01 23:23:34.251181 [INF]   Starting restore for stream '$G > KV_WF_LEASE'
+[1] 2026/10/01 23:23:34.263172 [INF]   Restored 0 messages for stream '$G > KV_WF_ASSIGN' in 9ms
+[1] 2026/10/01 23:23:34.263319 [WRN] Filestore [WF_RUN] Stream state detected prior state, could not locate msg block 3
+[1] 2026/10/01 23:23:34.263323 [WRN] Filestore [WF_RUN] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.263719 [INF]   Restored 2,856 messages for stream '$G > WF_SIG' in 12ms
+[1] 2026/10/01 23:23:34.264396 [WRN] Filestore [WF_RUN] Message scheduling state is outdated; attempting to recover using linear scan (seq 8819 to 9231)
+[1] 2026/10/01 23:23:34.264552 [WRN] Filestore [KV_WF_LEASE] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.264598 [WRN] Filestore [KV_WF_LEASE] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.265149 [INF]   Restored 32 messages for stream '$G > WF_RUN' in 11ms
+[1] 2026/10/01 23:23:34.265243 [INF]   Recovering 64 consumers for stream - '$G > WF_RUN'
+[1] 2026/10/01 23:23:34.272833 [INF]   Restored 0 messages for stream '$G > WF_PURGE' in 19ms
+[1] 2026/10/01 23:23:34.273126 [INF]   Restored 0 messages for stream '$G > OBJ_WF_BLOB' in 19ms
+[1] 2026/10/01 23:23:34.279064 [INF]   Restored 2,351 messages for stream '$G > KV_WF_STATE' in 28ms
+[1] 2026/10/01 23:23:34.291454 [INF]   Restored 2,352 messages for stream '$G > WF_INV' in 38ms
+[1] 2026/10/01 23:23:34.295422 [WRN] Filestore [KV_WF_LEASE] TTL state is outdated; attempting to recover using linear scan (seq 16122 to 54421)
+[1] 2026/10/01 23:23:34.303630 [INF]   Restored 25,836 messages for stream '$G > WF_JRN' in 51ms
+[1] 2026/10/01 23:23:34.333288 [INF]   Restored 1,085 messages for stream '$G > KV_WF_LEASE' in 80ms
+[1] 2026/10/01 23:23:34.333344 [INF] Starting JetStream cluster
+[1] 2026/10/01 23:23:34.333423 [INF] Creating JetStream metadata controller
+[1] 2026/10/01 23:23:34.333557 [WRN] Filestore [_meta_] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.333565 [WRN] Filestore [_meta_] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.334575 [INF] JetStream cluster recovering state
+[1] 2026/10/01 23:23:34.337979 [INF] Took 88.457392ms to start JetStream
+[1] 2026/10/01 23:23:34.338073 [INF] Listening for client connections on 0.0.0.0:4222
+[1] 2026/10/01 23:23:34.338240 [INF] Server is ready
+[1] 2026/10/01 23:23:34.338266 [INF] Cluster name is js-wf-route-5730-1790896439255003843
+[1] 2026/10/01 23:23:34.338312 [INF] Listening for route connections on 0.0.0.0:6222
+[1] 2026/10/01 23:23:34.339267 [INF] 172.19.0.2:6222 - rid:166 - Route connection created
+[1] 2026/10/01 23:23:34.339523 [INF] 172.19.0.2:6222 - rid:167 - Route connection created
+[1] 2026/10/01 23:23:34.341481 [INF] 172.19.0.3:36238 - rid:168 - Route connection created
+[1] 2026/10/01 23:23:34.342104 [INF] 172.19.0.3:36254 - rid:169 - Route connection created
+[1] 2026/10/01 23:23:34.342160 [INF] 172.19.0.5:58540 - rid:170 - Route connection created
+[1] 2026/10/01 23:23:34.342275 [INF] 172.19.0.5:58528 - rid:171 - Route connection created
+[1] 2026/10/01 23:23:34.342336 [INF] 172.19.0.4:36248 - rid:172 - Route connection created
+[1] 2026/10/01 23:23:34.342501 [INF] 172.19.0.4:36252 - rid:173 - Route connection created
+[1] 2026/10/01 23:23:34.343553 [INF] 172.19.0.5:58550 - rid:174 - Route connection created
+[1] 2026/10/01 23:23:34.343584 [INF] 172.19.0.2:6222 - rid:175 - Route connection created
+[1] 2026/10/01 23:23:34.344528 [INF] 172.19.0.4:36256 - rid:176 - Route connection created
+[1] 2026/10/01 23:23:34.345004 [INF] 172.19.0.4:36256 - rid:176 - Router connection closed: Client Closed
+[1] 2026/10/01 23:23:34.345167 [INF] 172.19.0.5:58550 - rid:174 - Router connection closed: Client Closed
+[1] 2026/10/01 23:23:34.345330 [INF] 172.19.0.3:36260 - rid:177 - Route connection created
+[1] 2026/10/01 23:23:34.345973 [INF] 172.19.0.4:36268 - rid:178 - Route connection created
+[1] 2026/10/01 23:23:34.346129 [INF] 172.19.0.2:6222 - rid:179 - Route connection created
+[1] 2026/10/01 23:23:34.346209 [INF] 172.19.0.4:36270 - rid:180 - Route connection created
+[1] 2026/10/01 23:23:34.346280 [INF] 172.19.0.5:58556 - rid:181 - Route connection created
+[1] 2026/10/01 23:23:34.347800 [INF] 172.19.0.5:58558 - rid:182 - Route connection created
+[1] 2026/10/01 23:23:34.349091 [INF] 172.19.0.3:36272 - rid:183 - Route connection created
+[1] 2026/10/01 23:23:34.349204 [INF] 172.19.0.4:36278 - rid:184 - Route connection created
+[1] 2026/10/01 23:23:34.349402 [INF] 172.19.0.4:36278 - rid:184 - Router connection closed: Client Closed
+[1] 2026/10/01 23:23:34.438260 [WRN] Waiting for routing to be established...
+[1] 2026/10/01 23:23:34.545515 [WRN] Filestore [C-R5F-FcnX2sHh] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.545528 [WRN] Filestore [C-R5F-FcnX2sHh] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.549091 [WRN] Filestore [C-R5F-PJ23xya6] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.549102 [WRN] Filestore [C-R5F-PJ23xya6] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.565026 [WRN] Filestore [C-R5F-H6mgiowe] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.565134 [WRN] Filestore [C-R5F-H6mgiowe] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.577765 [WRN] Filestore [C-R5F-jJsRyz3b] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.577775 [WRN] Filestore [C-R5F-jJsRyz3b] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.578871 [WRN] Filestore [C-R5F-0pGLez3v] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.578883 [WRN] Filestore [C-R5F-0pGLez3v] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.582212 [WRN] Filestore [C-R5F-EFAnqPEG] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.582222 [WRN] Filestore [C-R5F-EFAnqPEG] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.585448 [WRN] Filestore [C-R5F-63gOHt3w] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.585519 [WRN] Filestore [C-R5F-63gOHt3w] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.604547 [WRN] Filestore [C-R5F-1r7iBbni] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.604556 [WRN] Filestore [C-R5F-1r7iBbni] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.607890 [WRN] Filestore [C-R5F-BfJLoRKB] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.607898 [WRN] Filestore [C-R5F-BfJLoRKB] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.619980 [WRN] Filestore [C-R5F-aT3OuIwf] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.619991 [WRN] Filestore [C-R5F-aT3OuIwf] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.621136 [WRN] Filestore [C-R5F-zOpfBXbc] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.621146 [WRN] Filestore [C-R5F-zOpfBXbc] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.625671 [WRN] Filestore [C-R5F-r3jpwjQ9] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.625681 [WRN] Filestore [C-R5F-r3jpwjQ9] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.653732 [WRN] Filestore [C-R5F-GVKmkqE7] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 23:23:34.653742 [WRN] Filestore [C-R5F-GVKmkqE7] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 23:23:34.655561 [WRN] Metalayer blocking snapshot starting
+[1] 2026/10/01 23:23:34.656886 [WRN] Metalayer blocking snapshot took 0.001s (streams: 10, consumers: 65, compacted: 26.25 KB)
+[1] 2026/10/01 23:23:34.656938 [INF] JetStream cluster new metadata leader: js-wf-route-5730-1790896439255003843-n1/js-wf-route-5730-1790896439255003843
+[1] 2026/10/01 23:23:34.658176 [WRN] JetStream stream '$G > OBJ_WF_BLOB' is not current: group node unhealthy
