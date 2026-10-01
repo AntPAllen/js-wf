@@ -4447,3 +4447,23 @@ Corpus/new notification/existing owned-terminal checks pass under race24.816s;
 vet passes. Restoring unbounded calls fails both real and model budget
 properties in7.44s and0.004s. This does not identify a NATS mechanism or establish
 a whole-matrix pass. A current-source mixed seed28 replay remains required.
+
+
+The first sustained ten-minute R5 row is terminal FAIL685.78s:83 batches,
+2,324 completed invocations and all19 actual leader kills, with maximum workload
+terminal p9910.778s. Histories and retained-state audit passed, but final WF_RUN
+metadata requests exhausted the drain budget. Queue emptiness was not established;
+[raw failed campaign](scale/tier3-mixed-journal-2026-10-01/ten-minute-failure/)
+is retained, and no gate clears. The fixture now retains independent public
+HTTP JetStream/connection/route snapshots and every SDK drain attempt.
+Instrumentation smoke passes55.591s with168 invocations and actual metadata
+progress from four run messages to zero, followed by all64-consumer checks.
+The final thirty-second drain window includes before snapshots, so evidence
+collection does not add unbudgeted recovery time.
+
+A clean d1231dd race binary now runs the ten-minute journal seed28 replay as
+independent user service js-wf-journal-seed28-d1231dd.service, MainPID35268
+at17:49:20UTC. Its [launch identity](scale/parent-notification-budget-2026-10-01/current-seed28-service.json)
+and hosted notification run36902096296 are retained. Latest checked checkpoint
+has560 terminal invocations; neither live run is a pass yet. The million timer
+service remains active with46,780 receipts at the17:48UTC checkpoint.

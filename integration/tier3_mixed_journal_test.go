@@ -390,12 +390,54 @@ func TestFiveContainerMixedJournalLeaderEveryThirtySeconds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Preserve server-side placement/queues even if the client metadata path
+	// stops answering. These independent HTTP reads do not certify drainage.
+	captureDrain := func(phase string) {
+		for node := 0; node < 5; node++ {
+			for _, kind := range []string{"jetstream", "connections", "routes"} {
+				read, stop := context.WithTimeout(context.Background(), 2*time.Second)
+				data, err := cluster.Diagnostic(read, node, kind)
+				stop()
+				name := filepath.Join(root, fmt.Sprintf("drain-%s-node%d-%s.json", phase, node, kind))
+				if err != nil {
+					data, _ = json.Marshal(map[string]string{"error": err.Error()})
+				}
+				if err := os.WriteFile(name, data, 0644); err != nil {
+					t.Error(err)
+				}
+			}
+		}
+	}
 	drain, stopDrain := context.WithTimeout(ctx, 30*time.Second)
 	defer stopDrain()
+	captureDrain("before")
+	defer captureDrain("after")
+	type drainAttempt struct {
+		At    time.Time
+		Part  int
+		Info  *jetstream.StreamInfo
+		Error string
+	}
+	var drainAttempts []drainAttempt
+	defer func() {
+		data, err := json.MarshalIndent(drainAttempts, "", "  ")
+		if err == nil {
+			err = os.WriteFile(filepath.Join(root, "drain-attempts.json"), data, 0644)
+		}
+		if err != nil {
+			t.Error(err)
+		}
+	}()
+
 	for {
 		attempt, stop := context.WithTimeout(drain, 2*time.Second)
 		state, err := run.Info(attempt)
 		stop()
+		message := ""
+		if err != nil {
+			message = err.Error()
+		}
+		drainAttempts = append(drainAttempts, drainAttempt{time.Now().UTC(), -1, state, message})
 		drained := err == nil && state.State.Msgs == 0
 		if drained {
 			for part := uint32(0); part < provision.Partitions; part++ {
@@ -407,6 +449,8 @@ func TestFiveContainerMixedJournalLeaderEveryThirtySeconds(t *testing.T) {
 				}
 				stop()
 				if err != nil || info.NumPending != 0 || info.NumAckPending != 0 {
+					message := fmt.Sprintf("consumer=%+v error=%v", info, err)
+					drainAttempts = append(drainAttempts, drainAttempt{time.Now().UTC(), int(part), state, message})
 					drained = false
 					break
 				}

@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -337,6 +338,43 @@ func (c *DockerCluster) ServerNow(ctx context.Context, i int) (time.Time, error)
 		return time.Time{}, fmt.Errorf("node %d varz omitted server time", i)
 	}
 	return data.Now, nil
+}
+
+// Diagnostic reads public server monitoring independently of the NATS client.
+// Callers supply a bounded context; large responses cannot exhaust memory.
+func (c *DockerCluster) Diagnostic(ctx context.Context, node int, kind string) ([]byte, error) {
+	if node < 0 || node >= len(c.monitorURLs) {
+		return nil, fmt.Errorf("invalid diagnostic node %d", node)
+	}
+	var path string
+	switch kind {
+	case "connections":
+		path = "/connz?subs=detail"
+	case "jetstream":
+		path = "/jsz?accounts=true&streams=true&consumers=true&raft=true"
+	case "routes":
+		path = "/routez"
+	default:
+		return nil, fmt.Errorf("unsupported Docker diagnostic %q", kind)
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.monitorURLs[node]+path, nil)
+	if err != nil {
+		return nil, err
+	}
+	response, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("server %s diagnostic: HTTP %d", kind, response.StatusCode)
+	}
+	const limit = 16 << 20
+	data, err := io.ReadAll(io.LimitReader(response.Body, limit+1))
+	if len(data) > limit {
+		return nil, fmt.Errorf("server %s diagnostic exceeds %d bytes", kind, limit)
+	}
+	return data, err
 }
 
 // RouteCount reads the server's monitoring endpoint through its pinned host port.
