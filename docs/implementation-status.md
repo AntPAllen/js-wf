@@ -3725,3 +3725,32 @@ its chaos-smoke also passes, confirming the bounded election-readiness fix.
 The complete 1bcf5ef standard workflow also passes with its logs retained.
 Latest-source full simulation, whole-matrix 200-seed gate, five-node 24-hour
 soak and remaining plan gates stay open.
+
+
+## Controlled consumer traffic alongside eight-owner lease pressure
+
+A new opt-in four-row R3 pressure comparison keeps eight owners and 48 mandatory
+renewals/CAS appends each, healthy lease/state leaders, a journal leader on the
+70-ms delayed node and a stopped third node. A separate warmed R3 WorkQueue
+stream with eight healthy-led durables supplies bounded publish/delivery/
+DoubleAck load. Each traffic row requires 384 physical stream sequences and
+48 additional acknowledgement-floor entries per consumer, exact payloads,
+one delivery, drained stream/pending/ack-pending and unchanged leaders.
+
+The initial fixture waited for the background tail before lease checks and
+observed expired completed owners. Its failure is retained; checking/releasing
+foreground owners before that tail fixes fixture ordering without changing TTL
+or mandatory renewals. Final raw-counter race passes in 82.336 seconds. Delayed
+KV sums are 7.2161–8.4171 seconds without traffic and 8.3037–9.3597 with it,
+still below the real failing invocation's 30.5004-second update sum. The
+original eight-row helper path also passes in 43.810 seconds; vet passes.
+Compiled omitted ACK fails on eight retained records (9.32 seconds); fake local
+traffic success fails raw sequence growth 0 versus 384 (6.68 seconds).
+[Reports, controls and scope](scale/lease-consumer-pressure-2026-10-01/) are retained.
+
+An independent paired-pressure CI job is added to tier2-mixed; hosted confirmation
+remains pending. This synthetic transport load does not prove combined recovery,
+failed-acquisition or heartbeat behavior or identify NATS cause. No production
+runtime/gate changes are made. The 200-seed latency miss, whole matrix/24-hour
+soak, remaining capacity/GC/continuation gates and full latest-source simulation
+remain open. Original million timers continue live on their retained stores.

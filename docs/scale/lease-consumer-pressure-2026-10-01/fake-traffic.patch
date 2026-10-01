@@ -1,0 +1,12 @@
+--- integration/lease_consumer_pressure_test.go
++++ integration/lease_consumer_pressure_test.go
+@@ -65,7 +65,8 @@
+ }
+ 
+ func (p *leasePressureTraffic) run(ctx context.Context, calls int) leasePressureTrafficResult {
+-	results := make([]leasePressureTrafficResult, len(p.consumers))
++	if calls == 48 { return leasePressureTrafficResult{messages:8*48} }
++ results := make([]leasePressureTrafficResult, len(p.consumers))
+ 	var wg sync.WaitGroup
+ 	for i, consumer := range p.consumers {
+ 		wg.Add(1)

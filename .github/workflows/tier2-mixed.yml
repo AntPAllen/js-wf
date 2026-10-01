@@ -116,3 +116,32 @@ jobs:
           name: lease-append-pressure
           path: integration/lease-append-pressure*
           if-no-files-found: error
+
+  lease-consumer-pressure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WF_LEASE_CONSUMER_PRESSURE: '1'
+      LEASE_APPEND_REPORT: lease-consumer-pressure
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Ensure disk syscall tracer
+        run: |
+          if ! command -v strace >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y strace
+          fi
+          if test -f /proc/sys/kernel/yama/ptrace_scope; then
+            sudo sysctl -w kernel.yama.ptrace_scope=0
+          fi
+      - name: Measure paired renewal pressure with bounded consumer traffic
+        run: go test -race ./integration -run '^TestLeaseAppendPressureConsumerTrafficFixedPlacement$' -count=1 -timeout=6m -v
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lease-consumer-pressure
+          path: integration/lease-consumer-pressure*
+          if-no-files-found: error

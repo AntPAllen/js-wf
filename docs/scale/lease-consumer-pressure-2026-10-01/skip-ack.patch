@@ -1,0 +1,11 @@
+--- integration/lease_consumer_pressure_test.go
++++ integration/lease_consumer_pressure_test.go
+@@ -95,7 +95,7 @@
+ 						return
+ 					}
+ 					attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+-					err = message.DoubleAck(attempt)
++					err = func(context.Context) error { return nil }(attempt)
+ 					stop()
+ 					if err != nil {
+ 						result.err = fmt.Errorf("traffic ack %d/%d: %w", i, n, err)

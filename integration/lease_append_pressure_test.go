@@ -26,12 +26,17 @@ import (
 )
 
 type leaseAppendPressureRow struct {
-	Delayed bool                       `json:"delayed"`
-	Append  bool                       `json:"append"`
-	Writers int                        `json:"writers"`
-	Start   time.Time                  `json:"start"`
-	End     time.Time                  `json:"end"`
-	Owners  []leaseAppendPressureOwner `json:"owners"`
+	Delayed          bool                       `json:"delayed"`
+	ConsumerTraffic  bool                       `json:"consumer_traffic,omitempty"`
+	TrafficMessages  int                        `json:"traffic_messages,omitempty"`
+	TrafficEnd       time.Time                  `json:"traffic_end,omitempty"`
+	TrafficSeqBefore uint64                     `json:"traffic_seq_before,omitempty"`
+	TrafficSeqAfter  uint64                     `json:"traffic_seq_after,omitempty"`
+	Append           bool                       `json:"append"`
+	Writers          int                        `json:"writers"`
+	Start            time.Time                  `json:"start"`
+	End              time.Time                  `json:"end"`
+	Owners           []leaseAppendPressureOwner `json:"owners"`
 }
 
 type leaseAppendPressureOwner struct {
@@ -59,6 +64,18 @@ func TestLeaseAppendPressureFixedPlacement(t *testing.T) {
 	if os.Getenv("WF_LEASE_APPEND_PRESSURE") != "1" {
 		t.Skip("set WF_LEASE_APPEND_PRESSURE=1 for the fixed-placement pressure contract")
 	}
+	runLeaseAppendPressure(t, false)
+}
+
+func TestLeaseAppendPressureConsumerTrafficFixedPlacement(t *testing.T) {
+	if os.Getenv("WF_LEASE_CONSUMER_PRESSURE") != "1" {
+		t.Skip("set WF_LEASE_CONSUMER_PRESSURE=1 for paired consumer traffic")
+	}
+	runLeaseAppendPressure(t, true)
+}
+
+func runLeaseAppendPressure(t *testing.T, withTraffic bool) {
+	t.Helper()
 	if _, err := exec.LookPath("strace"); err != nil {
 		t.Fatal(err)
 	}
@@ -125,6 +142,10 @@ func TestLeaseAppendPressureFixedPlacement(t *testing.T) {
 	if err := waitMatrixWorkflowReplicas(ctx, js); err != nil {
 		t.Fatal(err)
 	}
+	var traffic *leasePressureTraffic
+	if withTraffic {
+		traffic = newLeasePressureTraffic(t, ctx, js, cluster)
+	}
 	if err := cluster.KillNode(2); err != nil {
 		t.Fatal(err)
 	}
@@ -163,14 +184,26 @@ func TestLeaseAppendPressureFixedPlacement(t *testing.T) {
 			}
 			tracing = true
 		}
-		for _, workload := range []struct {
+		workloads := []struct {
 			append  bool
 			writers int
-		}{{false, 1}, {true, 1}, {true, 2}, {true, 8}} {
-			row := leaseAppendPressureRow{Delayed: delayed, Append: workload.append, Writers: workload.writers, Owners: make([]leaseAppendPressureOwner, workload.writers)}
+			traffic bool
+		}{{false, 1, false}, {true, 1, false}, {true, 2, false}, {true, 8, false}}
+		if withTraffic {
+			workloads = []struct {
+				append  bool
+				writers int
+				traffic bool
+			}{{true, 8, false}, {true, 8, true}}
+		}
+		for _, workload := range workloads {
+			row := leaseAppendPressureRow{Delayed: delayed, ConsumerTraffic: workload.traffic, Append: workload.append, Writers: workload.writers, Owners: make([]leaseAppendPressureOwner, workload.writers)}
 			owners := make([]*lease.Lease, workload.writers)
 			for i := range owners {
 				id := fmt.Sprintf("d%t-a%t-w%d-%d", delayed, workload.append, workload.writers, i)
+				if workload.traffic {
+					id += "-traffic"
+				}
 				owners[i], err = leasing.Acquire(ctx, "pressure", id, id)
 				if err != nil {
 					t.Fatal(err)
@@ -180,6 +213,11 @@ func TestLeaseAppendPressureFixedPlacement(t *testing.T) {
 					t.Fatal(err)
 				}
 				row.Owners[i] = leaseAppendPressureOwner{ID: id, Epoch: owners[i].Epoch(), RevisionBefore: before.Revision()}
+			}
+			var trafficBefore leasePressureCounters
+			if workload.traffic {
+				trafficBefore = traffic.counters(t, ctx)
+				row.TrafficSeqBefore = trafficBefore.sequence
 			}
 			row.Start = time.Now().UTC()
 			start := make(chan struct{})
@@ -241,6 +279,11 @@ func TestLeaseAppendPressureFixedPlacement(t *testing.T) {
 					}
 				}(i, owner)
 			}
+			var trafficDone chan leasePressureTrafficResult
+			if workload.traffic {
+				trafficDone = make(chan leasePressureTrafficResult, 1)
+				go func() { <-start; trafficDone <- traffic.run(ctx, 48) }()
+			}
 			close(start)
 			wg.Wait()
 			row.End = time.Now().UTC()
@@ -273,6 +316,19 @@ func TestLeaseAppendPressureFixedPlacement(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
+			// Verify and release foreground owners before waiting for unrelated
+			// background traffic: its tail must not expire otherwise healthy leases.
+			if trafficDone != nil {
+				result := <-trafficDone
+				row.TrafficMessages = result.messages
+				row.TrafficEnd = time.Now().UTC()
+				rows[len(rows)-1].TrafficEnd = row.TrafficEnd
+				rows[len(rows)-1].TrafficMessages = result.messages
+				if result.err != nil || result.messages != 8*48 {
+					t.Fatalf("consumer traffic messages=%d err=%v", result.messages, result.err)
+				}
+			}
+
 			for name, node := range map[string]int{"KV_WF_LEASE": 0, "WF_JRN": 1, "KV_WF_STATE": 0} {
 				attempt, cancel := context.WithTimeout(ctx, 3*time.Second)
 				stream, err := js.Stream(attempt, name)
@@ -285,7 +341,22 @@ func TestLeaseAppendPressureFixedPlacement(t *testing.T) {
 					t.Fatalf("placement changed stream=%s info=%+v err=%v", name, info, err)
 				}
 			}
-			t.Logf("pressure delayed=%v append=%v writers=%d elapsed=%s owners=%+v", delayed, workload.append, workload.writers, row.End.Sub(row.Start), row.Owners)
+			if traffic != nil {
+				traffic.audit(t, ctx)
+			}
+			if workload.traffic {
+				after := traffic.counters(t, ctx)
+				if after.sequence-trafficBefore.sequence != 8*48 {
+					t.Fatalf("traffic physical sequence growth=%d want=%d", after.sequence-trafficBefore.sequence, 8*48)
+				}
+				for i := range after.ackFloors {
+					if after.ackFloors[i]-trafficBefore.ackFloors[i] != 48 {
+						t.Fatalf("traffic consumer %d confirmed ack growth=%d want=48", i, after.ackFloors[i]-trafficBefore.ackFloors[i])
+					}
+				}
+				rows[len(rows)-1].TrafficSeqAfter = after.sequence
+			}
+			t.Logf("pressure delayed=%v append=%v writers=%d traffic=%v messages=%d elapsed=%s owners=%+v", delayed, workload.append, workload.writers, workload.traffic, row.TrafficMessages, row.End.Sub(row.Start), row.Owners)
 		}
 	}
 	if err := cluster.StopSlowDisk(1); err != nil {
