@@ -401,3 +401,76 @@ class WorkerIsolationRowChecks(unittest.TestCase):
                     self.assertTrue(result['counter_cross_checks_complete'])
                 else:
                     with self.assertRaises((ValueError,KeyError)):row.check_isolation_artifacts(root,report)
+
+
+class ServerClockRowChecks(unittest.TestCase):
+    def test_named_clock_rows_keep_raw_gate_and_partial_scope(self):
+        for selected in ('server_clock_ahead', 'server_clock_behind'):
+            events = fixture('35s')
+            for event in events:
+                if 'Test' in event:
+                    event['Test'] = row.TESTS[selected]
+            events[0]['Output'] = events[0]['Output'].replace('row=journal', f'row={selected}')
+            result = row.check(events, '35s', selected)
+            self.assertFalse(result['clears_full_tier3_release'])
+            self.assertEqual(result['confirmed_faults'], 1)
+            events[0]['Output'] = events[0]['Output'].replace('terminal_p99=2s', 'terminal_p99=30s')
+            with self.assertRaises(ValueError):
+                row.check(events, '35s', selected)
+
+    def test_actual_clock_and_journal_kill_boundary_controls(self):
+        from datetime import datetime, timedelta, timezone
+        import json
+        import tempfile
+        origin = datetime(2026, 10, 1, 12, 0, tzinfo=timezone.utc)
+        stamp = lambda seconds: (origin + timedelta(seconds=seconds)).isoformat()
+        for selected, offset in (('server_clock_ahead', 60), ('server_clock_behind', -60)):
+            for mode in ('valid', 'missing_clock', 'duplicate', 'unshifted', 'other_node_shifted',
+                         'wrong_expected', 'slow_read', 'reversed_read', 'late_before', 'early_after',
+                         'missing_fault', 'wrong_leader', 'wrong_replicas', 'wrong_stream',
+                         'missing_removal', 'wrong_process', 'reversed_restart'):
+                with self.subTest(row=selected, mode=mode), tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    fault = dict(node=2, scheduled=stamp(30), killed=stamp(31), healed=stamp(34))
+                    observations = []
+                    for stage, base in (('initial', 1), ('before', 30.1), ('after', 34.1)):
+                        for node in range(5):
+                            before = base + node / 100
+                            want = offset if node == 4 else 0
+                            observations.append(dict(stage=stage, fault=0 if stage == 'initial' else 1, node=node,
+                                                     host_before=stamp(before), host_after=stamp(before+.002),
+                                                     server_now=stamp(before+.001+want), expected_offset_ns=want*1_000_000_000))
+                    info = dict(config=dict(name='WF_JRN', num_replicas=5), cluster=dict(leader='fixture-n2', replicas=[{}]*4))
+                    operations = [dict(node=2, action='sigkill_removed', at=stamp(32)), dict(node=2, action='restarted', at=stamp(33))]
+                    if mode == 'missing_clock': observations.pop()
+                    elif mode == 'duplicate': observations.append(observations[0])
+                    elif mode == 'unshifted': observations[4]['server_now'] = observations[4]['host_before']
+                    elif mode == 'other_node_shifted': observations[0]['server_now'] = stamp(61)
+                    elif mode == 'wrong_expected': observations[4]['expected_offset_ns'] = 0
+                    elif mode == 'slow_read': observations[0]['host_after'] = stamp(4)
+                    elif mode == 'reversed_read': observations[0]['host_after'] = stamp(0)
+                    elif mode == 'late_before':
+                        observations[5]['host_before'] = stamp(32)
+                        observations[5]['host_after'] = stamp(32.002)
+                        observations[5]['server_now'] = stamp(32.001)
+                    elif mode == 'early_after':
+                        observations[10]['host_before'] = stamp(33)
+                        observations[10]['host_after'] = stamp(33.002)
+                        observations[10]['server_now'] = stamp(33.001)
+                    elif mode == 'wrong_leader': info['cluster']['leader'] = 'fixture-n3'
+                    elif mode == 'wrong_replicas': info['config']['num_replicas'] = 3
+                    elif mode == 'wrong_stream': info['config']['name'] = 'WF_RUN'
+                    elif mode == 'missing_removal': operations.pop(0)
+                    elif mode == 'wrong_process': operations[0]['node'] = 3
+                    elif mode == 'reversed_restart': operations[1]['at'] = stamp(31)
+                    (root/'faults.json').write_text(json.dumps([] if mode == 'missing_fault' else [fault]))
+                    (root/'server-clock-observations.json').write_text(json.dumps(observations))
+                    (root/'fault-1-journal-before.json').write_text(json.dumps(info))
+                    (root/'fault-1-journal-operations.json').write_text(json.dumps(operations))
+                    if mode == 'valid':
+                        result = row.check_server_clock_artifacts(root, dict(confirmed_faults=1), selected)
+                        self.assertEqual(result['actual_clock_observations'], 15)
+                        self.assertEqual(result['expected_offset_ns'], offset*1_000_000_000)
+                    else:
+                        with self.assertRaises(ValueError):
+                            row.check_server_clock_artifacts(root, dict(confirmed_faults=1), selected)

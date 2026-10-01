@@ -17,7 +17,9 @@ def load(name, file):
 
 matrix = load('matrix_row', 'check-matrix-campaign.py')
 execution = load('matrix_execution', 'check-matrix-result.py')
-TESTS = {'worker_isolation': 'TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds',
+TESTS = {'server_clock_ahead': 'TestFiveContainerMixedServerClockAheadWithJournalKills',
+         'server_clock_behind': 'TestFiveContainerMixedServerClockBehindWithJournalKills',
+         'worker_isolation': 'TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds',
          'worker_pause': 'TestFiveContainerMixedWorkerPausedFortyFiveSeconds',
          'worker_kill': 'TestFiveContainerMixedWorkerKilledEveryFiveSeconds',
          'journal': 'TestFiveContainerMixedJournalLeaderEveryThirtySeconds',
@@ -63,7 +65,8 @@ def check(events, duration, expected_row='journal'):
             raw_t,raw_p=matrix.one(r'TIER3_ROUTE_RAW_CELL type='+typ+r' terminal_p99=(\S+) progress_p99=(\S+)',log)
             cells[typ]['raw_terminal_p99_seconds']=matrix.seconds(raw_t)
             cells[typ]['raw_progress_p99_seconds']=matrix.seconds(raw_p)
-    scope = ('single five-container R5 worker reply-isolation row' if row == 'worker_isolation'
+    scope = ('single five-container R5 server clock skew with journal SIGKILL row' if row.startswith('server_clock_')
+             else 'single five-container R5 worker reply-isolation row' if row == 'worker_isolation'
              else 'single five-container R5 worker pause-past-lease row' if row == 'worker_pause'
              else 'single five-container R5 worker SIGKILL row' if row == 'worker_kill'
              else 'single five-container R5 majority-progress route row' if row == 'route_majority'
@@ -409,6 +412,57 @@ def check_isolation_artifacts(root,report):
     return dict(confirmed_45_second_reply_holds=len(faults),same_process_generations=5,matched_selected_delivery_fencing=matched,graceful_counter_cross_checks=5,counter_cross_checks_complete=True)
 
 
+def check_server_clock_artifacts(root, report, selected_row):
+    offset = {'server_clock_ahead': 60_000_000_000, 'server_clock_behind': -60_000_000_000}[selected_row]
+    faults = json.loads((root/'faults.json').read_text())
+    observations = json.loads((root/'server-clock-observations.json').read_text())
+    if len(faults) != report['confirmed_faults'] or not faults:
+        raise ValueError('incomplete clock-row journal faults')
+    expected = {('initial', 0, node) for node in range(5)} | {
+        (stage, fault, node) for stage in ('before', 'after')
+        for fault in range(1, len(faults)+1) for node in range(5)
+    }
+    seen = set()
+    for observation in observations:
+        key = (observation['stage'], observation['fault'], observation['node'])
+        if key not in expected or key in seen:
+            raise ValueError('missing, duplicate or unexpected clock observation')
+        seen.add(key)
+        want = offset if observation['node'] == 4 else 0
+        before, actual, after = map(timestamp_ns, [observation[k] for k in ('host_before', 'server_now', 'host_after')])
+        if observation['expected_offset_ns'] != want or not 0 <= after-before <= 2_000_000_000 or not before+want-2_000_000_000 <= actual <= after+want+2_000_000_000:
+            raise ValueError('clock configuration is not established by actual bounded server reads')
+        if key[0] == 'initial':
+            if after > timestamp_ns(faults[0]['scheduled']):
+                raise ValueError('initial clock proof follows first fault')
+        else:
+            fault = faults[key[1]-1]
+            if key[0] == 'before' and not timestamp_ns(fault['scheduled']) <= before <= after <= timestamp_ns(fault['killed']):
+                raise ValueError('pre-fault clock proof does not precede the actual kill')
+            if key[0] == 'after' and before < timestamp_ns(fault['healed']):
+                raise ValueError('post-fault clock proof precedes confirmed R5 recovery')
+    if seen != expected:
+        raise ValueError('not all five actual clocks were verified at every fault boundary')
+    previous = None
+    for index, fault in enumerate(faults, 1):
+        node = fault['node']
+        scheduled, killed, healed = map(timestamp_ns, [fault[k] for k in ('scheduled', 'killed', 'healed')])
+        if type(node) is not int or node not in range(5) or not scheduled <= killed < healed or (previous is not None and scheduled-previous != 30_000_000_000):
+            raise ValueError('journal kill node/timeline/cadence invalid')
+        previous = scheduled
+        info = json.loads((root/f'fault-{index}-journal-before.json').read_text())
+        if info['config']['name'] != 'WF_JRN' or info['config']['num_replicas'] != 5 or not info['cluster']['leader'].endswith(f'-n{node}') or len(info['cluster']['replicas']) != 4:
+            raise ValueError('killed server is not a confirmed R5 journal leader')
+        operations = json.loads((root/f'fault-{index}-journal-operations.json').read_text())
+        if len(operations) != 2 or [x['action'] for x in operations] != ['sigkill_removed', 'restarted'] or any(x['node'] != node for x in operations):
+            raise ValueError('missing actual journal SIGKILL removal and restart')
+        removed, restarted = map(timestamp_ns, [x['at'] for x in operations])
+        if not killed <= removed <= restarted <= healed:
+            raise ValueError('journal process removal/restart ordering invalid')
+    return dict(skewed_server=4, expected_offset_ns=offset, actual_clock_observations=len(seen),
+                journal_sigkill_boundaries=len(faults), checks_all_five_servers=True)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, help='required consumer/restart fault artifacts')
@@ -442,5 +496,8 @@ if __name__ == '__main__':
     if args.row == 'worker_isolation':
         if args.root is None: parser.error('--root is required for isolation')
         report['isolation_artifact_checks']=check_isolation_artifacts(args.root,report)
+    if args.row.startswith('server_clock_'):
+        if args.root is None: parser.error('--root is required for server clock rows')
+        report['server_clock_artifact_checks']=check_server_clock_artifacts(args.root,report,args.row)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))

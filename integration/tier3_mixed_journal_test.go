@@ -31,6 +31,14 @@ import (
 
 // Sustained R5 mixed-workload rows. This is not the full Tier 3 matrix
 // or its 24-hour release soak; unsupported rows are not treated as covered.
+func TestFiveContainerMixedServerClockAheadWithJournalKills(t *testing.T) {
+	runFiveContainerMixedLeader(t, "server_clock_ahead")
+}
+
+func TestFiveContainerMixedServerClockBehindWithJournalKills(t *testing.T) {
+	runFiveContainerMixedLeader(t, "server_clock_behind")
+}
+
 func TestFiveContainerMixedJournalLeaderEveryThirtySeconds(t *testing.T) {
 	runFiveContainerMixedLeader(t, "journal")
 }
@@ -69,11 +77,17 @@ func TestFiveContainerMixedWorkerKilledEveryFiveSeconds(t *testing.T) {
 
 func runFiveContainerMixedLeader(t *testing.T, row string) {
 	t.Helper()
-	if row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
+	if matrixServerClockOffset(row) == 0 && row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
 		t.Fatal("unsupported R5 fault row")
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
 		t.Skip("set WF_TIER3_MATRIX=1 for sustained five-container mixed faults")
+	}
+	// A peer-skew row cannot use the shared broker-timestamp latency audit:
+	// leadership changes mix clock domains. Keep it fail-closed until its
+	// independent controller observations supply the enabling/progress times.
+	if matrixServerClockOffset(row) != 0 {
+		t.Fatal("server-clock rows require independent controller latency observations before acceptance")
 	}
 	duration := 10 * time.Minute
 	if value := os.Getenv("WF_TIER3_MATRIX_DURATION"); value != "" {
@@ -104,6 +118,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		// which exceeds the scheduled cut cadence. Make this fixture detection
 		// interval explicit; production write-sync remains unchanged.
 		t.Setenv("WF_TIER3_ROUTE_PING_INTERVAL", "1s")
+	}
+	if offset := matrixServerClockOffset(row); offset != 0 {
+		t.Setenv("WF_TIER3_SERVER_SKEW", fmt.Sprintf("4:%s", offset))
 	}
 	cluster, err := testcluster.StartDockerCluster(filepath.Join(root, "cluster"), 5)
 	if err != nil {
@@ -182,6 +199,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		Result reconcile.ScanResult
 		Error  string
 	}
+	var clockObservations []matrixServerClockObservation
 	var faults []matrixLeaderFault
 	var samples []matrixLatencySample
 	var fleet sync.WaitGroup
@@ -331,6 +349,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		write("repairs.json", repairs)
 		write("suspended-scans.json", scans)
 		evidenceMu.Unlock()
+		evidenceMu.Lock()
+		write("server-clock-observations.json", clockObservations)
+		evidenceMu.Unlock()
 		write("faults.json", faults)
 		write("latencies.json", samples)
 		var metrics []worker.Metrics
@@ -363,6 +384,19 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	observeClocks := func(stage string, fault int) error {
+		if matrixServerClockOffset(row) == 0 {
+			return nil
+		}
+		observed, err := observeMatrixServerClocks(ctx, cluster, row, stage, fault)
+		evidenceMu.Lock()
+		clockObservations = append(clockObservations, observed...)
+		evidenceMu.Unlock()
+		return err
+	}
+	if err := observeClocks("initial", 0); err != nil {
+		t.Fatal(err)
+	}
 	started := time.Now()
 	end := started.Add(duration)
 	faultDone := make(chan error, 1)
@@ -393,6 +427,11 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			var event matrixLeaderFault
 			var err error
 			prefix := filepath.Join(root, fmt.Sprintf("fault-%d", len(faults)+1))
+			if err := observeClocks("before", len(faults)+1); err != nil {
+				cancel()
+				faultDone <- err
+				return
+			}
 			if row == "worker_isolation" {
 				event, err = isolateMatrixWorkerReplies(ctx, processes, workerProxies, faultRNG.Intn(len(processes)), scheduled, func(c context.Context, fleet []*matrixProcessWorker, first int) (int, matrixIsolationTarget, func() error, error) {
 					return armMatrixUnfinishedIsolationTarget(c, js, fleet, first)
@@ -447,6 +486,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				event, err = killFiveContainerMixedAllServers(ctx, js, cluster, scheduled, prefix)
 			} else {
 				event, err = killFiveContainerMixedJournalLeader(ctx, js, cluster, scheduled, prefix)
+			}
+			if err == nil {
+				err = observeClocks("after", len(faults)+1)
 			}
 			evidenceMu.Lock()
 			faults = append(faults, event)
@@ -814,7 +856,21 @@ func killFiveContainerMixedJournalLeader(ctx context.Context, js jetstream.JetSt
 	if err := cluster.KillNode(event.Node); err != nil {
 		return event, err
 	}
+	removedAt := time.Now().UTC()
 	if err := cluster.RestartNode(event.Node); err != nil {
+		return event, err
+	}
+	restartedAt := time.Now().UTC()
+	operations := []struct {
+		Node   int       `json:"node"`
+		Action string    `json:"action"`
+		At     time.Time `json:"at"`
+	}{{event.Node, "sigkill_removed", removedAt}, {event.Node, "restarted", restartedAt}}
+	data, err = json.MarshalIndent(operations, "", "  ")
+	if err == nil {
+		err = os.WriteFile(artifactPrefix+"-journal-operations.json", data, 0644)
+	}
+	if err != nil {
 		return event, err
 	}
 	if cluster.ClientURL(event.Node) != clientURL || cluster.MonitorURL(event.Node) != monitorURL {

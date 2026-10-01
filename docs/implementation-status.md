@@ -5018,3 +5018,25 @@ This closes one ten-minute row, not200-seed/full24h release coverage or confirme
 server-side causes. The comprehensive campaign36929826425 is now in progress;
 the million-timer service remains active with207,753 receipts at the last sampled
 checkpoint. Neither live campaign is terminal acceptance.
+
+
+## Sustained server peer-clock row scaffolding and measurement gap
+
+Prepared separate R5 server-clock-ahead/behind mixed-workload rows with node4
+at±60s and thirty-second confirmed journal-leader SIGKILL/restart boundaries.
+Controller-bracketed actual server monitoring reads verify all five clocks at
+startup and before/after every fault. Journal metadata and actual process-removal/
+restart timestamps are retained. Both signs have artifact rejection controls
+for missing/unshifted clocks,incorrect leader scope and reversed process times.
+All63 Python tests pass; integration compile checks and integration/testcluster
+vet pass. These are implementation checks, not actual clock-row execution.
+
+Review found that `matrixInvocationLatencies` uses each broker's stored message
+timestamps. A leader change between skewed and unskewed peers mixes clock domains;
+it can produce apparent early/late progress unrelated to controller elapsed time.
+The new rows explicitly fail closed before starting a cluster until independent
+unshifted controller enabling/progress observations are implemented and checked.
+No new clock campaign was launched with this known measurement ambiguity. This
+is unfinished fixture work, not a diagnosed runtime/NATS defect or a cleared
+latency gate. Existing focused clock proofs remain unchanged and do not close
+the sustained peer-clock/full24h matrix requirements.

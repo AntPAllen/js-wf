@@ -534,6 +534,20 @@ remain required. A terminal duplicate delivery is separate coverage and cannot
 clear this row. Ten minutes require ten actual reply holds; smoke never clears
 the full24-hour matrix.
 
+The sustained server-clock-ahead and server-clock-behind row scaffolding combines
+one actual server at±60s with thirty-second journal-leader SIGKILL/restart cuts.
+It retains controller-bracketed monitoring reads for all five actual clocks at
+startup and before/after every cut, plus confirmed journal-leader metadata and
+ordered process-removal/restart observations. The artifact checker rejects
+missing/unshifted clocks,wrong leader scope and reversed process timelines.
+These rows currently fail closed before starting a cluster: their latency audit
+must first use independent unshifted controller observations. The existing
+broker-timestamp audit cannot safely compare timestamps across skewed and
+unskewed journal leadership. A known configuration offset or a success flag is
+not sufficient to reconstruct a mixed-leader event timeline. No sustained clock
+row is verified by this scaffolding; existing focused clock proofs and the full
+24-hour matrix remain separate requirements.
+
 **The "done" bar for a release**
 
 1. Tier 1: 100 000 seeds clean.
