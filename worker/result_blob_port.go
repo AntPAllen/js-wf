@@ -23,6 +23,18 @@ type ResultBlobPort interface {
 	GetBytes(context.Context, string) ([]byte, error)
 }
 
+// WithResultBlobPort supplies the object transport for step and terminal results.
+// Nil is rejected. Journal and runtime-frame reads use their separate transport.
+func WithResultBlobPort(port ResultBlobPort) Option {
+	return func(w *Worker) error {
+		if port == nil {
+			return fmt.Errorf("nil result blob port")
+		}
+		w.resultBlobPort = port
+		return nil
+	}
+}
+
 type jetStreamResultBlobPort struct{ js jetstream.JetStream }
 
 func NewResultBlobPort(js jetstream.JetStream) ResultBlobPort {

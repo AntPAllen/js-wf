@@ -466,3 +466,34 @@ covers uncertain Attempt/Failed writes; a seeded process-kill schedule, combined
 faults, server faults at these cuts and other continuation acceptance gates
 remain open. Mixed seed 65 latency, online GC and remaining capacity campaigns
 are unchanged. The million-timer runner continues live without restart.
+
+## Reusable frame-held promise across replacement and child/parent retirement
+
+A real R3 worker starts one child returning a spilled 614,402-byte JSON result.
+The parent resolves its promise and checkpoints finish_v1; its 579-byte frame
+retains outcome reference/hash and consumption facts without serializing the
+derived result cache. A replacement pinned to another peer resumes after a gate,
+awaits the saved promise twice and verifies detached return bytes. One real blob
+read serves both awaits. No prefix handler or archive read occurs; the child
+runs once and the logical history has one call and one child consumption.
+
+The new optional worker.WithResultBlobPort wraps the existing real result
+transport so loads are counted independently of journal/frame reads. All peers
+return 614402. Full offline staged replay verifies the same result and all eight
+SDK entries without another child invocation.
+
+Child retirement is correctly refused until its parent is terminal. With all
+worker loops stopped, later child retirement and quiescent sweep preserve its
+exact result via the retained parent frame. After parent retirement, sweep
+reclaims result/frame/archive (three objects). The raw audit after child
+retirement finds one current parent and one terminal. A compiled collector
+overlay omitting frame PromiseOutcomes reference marking deletes the result
+prematurely and fails this exact assertion.
+
+The real race contract passed in 18.250 seconds; mutation failed behaviorally
+in 17.070 seconds. Worker race suite passed in 14.433 seconds, SDK race used its
+unchanged cached pass, and vet passed. [Logs, mutation and source hashes](scale/continuation-promise-2026-10-01/)
+retain the proof. This closes the focused real reusable-promise/retirement slice;
+seeded integrated promises, SIGKILL/combined faults and remaining continuation
+acceptance gates stay open, along with full matrix/soak, online GC and mixed
+seed 65 latency. The million-timer runner remains live without restart.
