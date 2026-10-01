@@ -5088,3 +5088,15 @@ No actual peer-clock row is cleared by this focused contract. Those smoke and
 sustained campaigns are next. Comprehensive36929826425 still runs at its original
 source,which predates the additive timer-clock diagnostic; it is not restarted
 just to follow this source change. Full release gates remain open.
+
+
+Clean-source server-skew fixture smokes are launched ata1e9387:
+[ahead36935066881](https://github.com/AntPAllen/js-wf/actions/runs/36935066881) and
+[behind36935069706](https://github.com/AntPAllen/js-wf/actions/runs/36935069706).
+Exact source/35s inputs are retained in
+[the campaign directory](scale/tier3-mixed-server-clock-2026-10-01/).
+Both were queued at the last authoritative check. They require the full clock/
+process evidence,all mixed cells and independent controller latency/timer
+artifact guards. Smoke is not sustained acceptance. Comprehensive36929826425
+remains in progress; the million-timer service remains active atPID18146 with
+240,228 receipts at the last sampled checkpoint.
