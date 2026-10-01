@@ -1,0 +1,16 @@
+=== RUN   TestContinuationWorkerSIGKILLPublicationCuts
+=== RUN   TestContinuationWorkerSIGKILLPublicationCuts/before_manifest
+    continuation_kill_test.go:358: SIGKILL cut=before_manifest repaired=1 recovery=13.131321561s entries=16 first_epoch=1 final_epoch=20 archive_reads=0 frame_reads=0 offline_steps=12
+=== RUN   TestContinuationWorkerSIGKILLPublicationCuts/after_manifest
+    continuation_kill_test.go:358: SIGKILL cut=after_manifest repaired=1 recovery=12.933756041s entries=15 first_epoch=1 final_epoch=13 archive_reads=0 frame_reads=1 offline_steps=12
+=== RUN   TestContinuationWorkerSIGKILLPublicationCuts/after_journal_purge
+    continuation_kill_test.go:358: SIGKILL cut=after_journal_purge repaired=1 recovery=12.926729409s entries=15 first_epoch=1 final_epoch=14 archive_reads=0 frame_reads=1 offline_steps=12
+=== RUN   TestContinuationWorkerSIGKILLPublicationCuts/after_signal_purge
+    continuation_kill_test.go:358: SIGKILL cut=after_signal_purge repaired=1 recovery=12.930092198s entries=15 first_epoch=1 final_epoch=14 archive_reads=0 frame_reads=1 offline_steps=12
+--- PASS: TestContinuationWorkerSIGKILLPublicationCuts (66.36s)
+    --- PASS: TestContinuationWorkerSIGKILLPublicationCuts/before_manifest (16.75s)
+    --- PASS: TestContinuationWorkerSIGKILLPublicationCuts/after_manifest (16.53s)
+    --- PASS: TestContinuationWorkerSIGKILLPublicationCuts/after_journal_purge (16.44s)
+    --- PASS: TestContinuationWorkerSIGKILLPublicationCuts/after_signal_purge (16.65s)
+PASS
+ok  	js-wf/integration	67.402s

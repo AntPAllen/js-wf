@@ -341,3 +341,24 @@ by trusting stored frames, terminal mismatch/object controls, all seventeen
 seeded worker publication modes and complete archived-journal replay after the
 real three-node worker replacement. It does not close worker SIGKILL, retirement/
 reuse, integrated runtime-semantics or the independent matrix/soak gates.
+
+
+## Implemented worker SIGKILL publication cuts
+
+Four real R3 three-node contracts now kill the worker process before manifest
+creation and after confirmed manifest, journal purge and signal purge. Retained
+journal/signal counts attest each cut. Repair must enqueue exactly the committed
+checkpoint candidate; a successor pinned to another node acquires a higher
+epoch after lease expiry. Before the manifest, it replays to the recorded
+checkpoint without rerunning the prefix effect. After the manifest, it restores
+one frame with all archived-prefix accesses forbidden. The signal-purge cut
+also proves that buffered state survives an empty WF_SIG stream.
+
+All cases pass immutable cross-peer results, full retained-state integrity,
+offline history replay with no effects, and a settled repair scan with no new
+wakeup. Recovery measured 12.93–13.13 seconds under race. Disabling production
+completed-checkpoint repair makes the compiled before-manifest kill contract
+fail. [Raw proof and scope](scale/continuation-kill-2026-10-01/) are retained.
+These four actual process cuts strengthen the prior graceful replacement proof;
+remaining publication cuts, combinations and the complete acceptance gates above
+remain open.

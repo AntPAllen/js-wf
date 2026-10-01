@@ -2731,3 +2731,36 @@ limit/GC gates remain open, along with the mixed seed 65 latency failure and
 independent final-source matrix/24-hour soak. The test workflow at `8dc25f1`
 completed successfully, as did its focused mixed and mutation jobs. The original
 million-timer process remains running without a restart.
+
+
+## Actual continuation worker SIGKILL across publication
+
+A subprocess worker is now SIGKILLed at four confirmed publication boundaries:
+before manifest creation and after acknowledged manifest creation, journal
+prefix purge and signal purge. Raw retained counts attest each cut (8/1, 8/1,
+1/1 and 1/0 live journal/signal messages). The first cut has no runtime manifest;
+the other three do. Every cut has the committed checkpoint completion retained.
+Repair must enqueue one named continuation candidate for its anchor, and after
+completion must enqueue nothing. A replacement worker pinned to another node
+completes under a higher lease epoch. Original consumer redelivery is also
+available; the test independently asserts the repair publication.
+
+Before the manifest the initial handler is replayed without another prefix
+effect. After it exists, the initial handler is never invoked by the successor;
+a guard denies every archive read and observes exactly one frame read. Buffered
+signals survive even when signal purge leaves WF_SIG empty. Prefix/suffix effects
+execute once, state/locals match, all peers return immutable result 46, raw-state
+integrity passes and each complete history replays all 12 SDK entries offline
+with no recorded effect callback.
+
+All four strengthened real R3 cases passed under race in 67.402 seconds, with
+individual kill-to-terminal recovery 12.927–13.131 seconds. This is a focused
+four-cut latency proof, not a release p99 campaign. A compiled overlay removing
+completed-checkpoint repair fails the real before-manifest kill case with zero
+re-enqueues in 3.380 seconds. Vet passed. [Logs, mutation and source hashes](scale/continuation-kill-2026-10-01/)
+are retained. Production runtime source remains unchanged from `8e62eac`.
+
+Remaining request/frame/completion/suspension/handoff kill cuts and combinations,
+retirement/reuse, integrated runtime-semantics/limit/GC checks and full matrix/
+24-hour soak remain open. The independent mixed seed 65 latency miss is unchanged.
+The original million-timer process remains running and has not been restarted.
