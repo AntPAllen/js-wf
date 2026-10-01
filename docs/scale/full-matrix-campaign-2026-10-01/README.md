@@ -65,6 +65,24 @@ results explicitly report clears_tier2_200_seed_gate=false; even a successful
 recorded runtime assertions; it does not independently reconstruct raw stores
 or prove unrelated release requirements.
 
+## Completed seed-1 whole matrix
+
+Run 36845868029 completed successfully at
+82a7d6c880b61a6e308ae77cb7f48b4193b20b02. The terminal verifier passes the
+actual full job-log ZIP and metadata: all thirteen variants execute seed 1 for
+at least ten minutes at the same source, with 33,040 audited invocations and
+313 faults. Worst aggregate terminal p99 is 15.021 seconds; worst individual
+workload terminal p99 is 21.542 seconds; worst progress p99 is 13.245 seconds.
+Metadata, full ZIP and per-row semantic report are retained as seed1-hosted-*.
+Earlier pending statements above describe the campaign before completion.
+
+    python3 scripts/check-full-matrix.py --jobs docs/scale/full-matrix-campaign-2026-10-01/seed1-hosted-jobs.json --logs docs/scale/full-matrix-campaign-2026-10-01/seed1-hosted-logs.zip --seeds 1 --output /tmp/full-matrix-seed1-report.json
+
+Both release flags remain false. This is one seed per variant, not 200, and
+uses three nodes, not the five-node 24-hour soak. A new 200-seed all-row campaign
+is dispatched at the pipeline-fix revision; its live/queued work is not clean
+evidence until every required execution completes and the verifier passes.
+
 Five additional controls cover all supported counts/scopes, job and source
 identity, partial/duplicate/wrong/shortened seed logs, semantic p99 failures,
 registry consistency and duplicate ZIP job logs. Seventeen matrix tests and

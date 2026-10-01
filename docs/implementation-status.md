@@ -3940,3 +3940,23 @@ rolling-upgrade job is confirmed running. Terminal full-log verification remains
 required before declaring the campaign passed, and one seed does not clear the
 whole-matrix 200-seed or five-node 24-hour release gates. The original million
 native timers remain live; final audit and the remaining plan gates stay open.
+
+## Verified complete seed-1 sustained whole matrix
+
+Run 36845868029 at 82a7d6c880b61a6e308ae77cb7f48b4193b20b02 is now terminal.
+The whole-matrix verifier passes its actual full log ZIP and Actions metadata:
+all thirteen registered ten-minute variants execute seed 1 at the same source,
+with 33,040 audited invocations and 313 faults. Worst aggregate terminal p99 is
+15.021 seconds; worst workload terminal p99 is 21.542 seconds; worst progress
+p99 is 13.245 seconds. [Full input ZIP, metadata, semantic report and rerun
+command](scale/full-matrix-campaign-2026-10-01/) are retained. This establishes
+whole-matrix seed-1 coverage; both 200-seed and five-node soak flags remain false.
+
+The actual all-row 200-seed campaign 36850800757 is dispatched at
+0c564d6e51672765c7b13edd0bd2fa0d38166fee and confirmed in progress. Its planned
+2,600 executions in 221 groups do not count completed evidence. Independent
+corrected 500-child run 36850691761 is queued at the same source; its raw test
+failure must now propagate to job status. Production runtime is unchanged.
+Terminal duplicate wakeup drain, mixed latency misses, latest full simulation,
+original million-timer final audit and all remaining release requirements stay
+open; neither new campaign replaces the five-node 24-hour full-matrix soak.
