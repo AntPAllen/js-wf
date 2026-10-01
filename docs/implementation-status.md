@@ -4520,3 +4520,12 @@ events. [Original failure and separately verified native row](scale/tier3-mixed-
 are retained. Original workflow metadata remains failure. This is one ten-minute
 R5 row; it predates per-event observers and does not clear full soak attribution
 or the full matrix. The earlier local drain timeout remains excluded evidence.
+
+The new ten-minute R5 journal run36905129932 is queued at clean82e715b,
+including the per-event observers, explanation checks and canonical-duration
+verifier. [Launch source and scope](scale/tier3-event-observers-2026-10-01/ten-minute-ci-start.json)
+are retained. This validates the added event evidence; the corrected parser
+already verified the preceding downloaded native run without a cluster rerun.
+The comprehensive simulator run36900782095 remains in progress, and the
+million-timer user service is active at MainPID18146 with60,901 receipts at
+the latest checkpoint. None of these live campaigns is terminal acceptance.
