@@ -292,3 +292,55 @@ class WorkerKillRowChecks(unittest.TestCase):
             result=row.check_worker_artifacts(root,report)
             self.assertEqual(result['interrupted_tails'],1)
             self.assertEqual(path.read_text(),'{"pid":')
+
+class WorkerPauseRowChecks(unittest.TestCase):
+    def fixture(self,root):
+        import json
+        sessions=[];steps_all=[];fences_all=[]
+        for slot in range(5):
+            worker=f'matrix-process-{slot}-generation-0';pid=200+slot
+            event=dict(At='2026-10-01T12:00:47Z',Worker=worker,Type='matrixshort',ID='held',RunSequence=1,Delivery=1,Epoch=7,Reason='lease_heartbeat_lost',Error='lease was lost')
+            records=[dict(pid=pid,sequence=1,event=event)] if slot==0 else []
+            metrics=dict(fencing_events=len(records))
+            sessions.append(dict(worker_id=worker,pid=pid,generation=0,dispatch_records=0,fencing_records=len(records),partial_dispatch_tail=False,partial_fencing_tail=False,exit_signal=0,exit_success=True,final_metrics=metrics))
+            (root/(worker+'-dispatch.jsonl')).write_text('')
+            (root/(worker+'-fencing.jsonl')).write_text(''.join(json.dumps(r)+'\n' for r in records))
+            (root/(worker+'-metrics.json')).write_text(json.dumps(dict(pid=pid,worker_id=worker,metrics=metrics)))
+            fences_all += [r['event'] for r in records]
+        fault=dict(worker='matrix-process-0-generation-0',worker_slot=0,pid=200,scheduled='2026-10-01T12:00:00Z',killed='2026-10-01T12:00:01Z',paused='2026-10-01T12:00:01Z',resumed='2026-10-01T12:00:46Z',healed='2026-10-01T12:00:48Z',active_leases=1,fencing_events=1,paused_leases=[dict(key='matrixshort.held',worker_id='matrix-process-0-generation-0',epoch=7,revision=8,created_at='2026-10-01T11:59:59Z',observed_at='2026-10-01T12:00:02Z')])
+        for name,data in [('process-evidence.json',sessions),('faults.json',[fault]),('dispatch.json',steps_all),('fencing.json',fences_all)]: (root/name).write_text(json.dumps(data))
+        return sessions,fault,dict(confirmed_faults=1)
+
+    def test_pause_scope_and_fault_cadence(self):
+        for duration,count in [('35s',1),('10m',10)]:
+            events=fixture(duration)
+            for event in events:
+                if 'Test' in event:event['Test']=row.TESTS['worker_pause']
+            events[0]['Output']=events[0]['Output'].replace('row=journal','row=worker_pause').replace('faults=19',f'faults={count}')
+            result=row.check(events,duration,'worker_pause')
+            self.assertEqual(result['confirmed_faults'],count)
+            self.assertFalse(result['clears_full_tier3_release'])
+
+    def test_pause_exact_lease_fencing_and_false_green_controls(self):
+        import tempfile,json
+        for mutation in ('none','short','pid','epoch','wrong_key','no_held','no_fencing','interrupted','killed','replacement','counter','clock'):
+            with self.subTest(mutation=mutation),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);sessions,fault,report=self.fixture(root)
+                if mutation=='short':fault['resumed']='2026-10-01T12:00:45Z'
+                elif mutation=='pid':fault['pid']=999
+                elif mutation=='epoch':fault['paused_leases'][0]['epoch']=6
+                elif mutation=='wrong_key':fault['paused_leases'][0]['key']='matrixshort.other'
+                elif mutation=='no_held':fault['paused_leases']=[]
+                elif mutation=='no_fencing':fault['fencing_events']=0
+                elif mutation=='interrupted':sessions[0]['partial_fencing_tail']=True
+                elif mutation=='killed':sessions[0]['exit_signal']=9
+                elif mutation=='replacement':sessions[0]['worker_id']='matrix-process-0-generation-1'
+                elif mutation=='counter':sessions[0]['final_metrics']['fencing_events']=0
+                elif mutation=='clock':fault['paused_leases'][0]['observed_at']='2026-10-01T12:00:49Z'
+                (root/'process-evidence.json').write_text(json.dumps(sessions));(root/'faults.json').write_text(json.dumps([fault]))
+                if mutation=='none':
+                    result=row.check_pause_artifacts(root,report)
+                    self.assertEqual(result['matched_resumed_fencing'],1)
+                    self.assertTrue(result['counter_cross_checks_complete'])
+                else:
+                    with self.assertRaises((ValueError,KeyError)):row.check_pause_artifacts(root,report)

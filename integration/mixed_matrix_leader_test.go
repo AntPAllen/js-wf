@@ -34,7 +34,17 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 )
 
+type matrixPausedLease struct {
+	Key      string    `json:"key"`
+	Worker   string    `json:"worker_id"`
+	Epoch    uint64    `json:"epoch"`
+	Revision uint64    `json:"revision"`
+	Created  time.Time `json:"created_at"`
+	Observed time.Time `json:"observed_at"`
+}
+
 type matrixLeaderFault struct {
+	PausedLeases          []matrixPausedLease           `json:"paused_leases,omitempty"`
 	WorkerSelection       string                        `json:"worker_selection,omitempty"`
 	WorkerTarget          *matrixIsolationTarget        `json:"worker_target,omitempty"`
 	WorkerKillConfirmed   bool                          `json:"worker_sigkill_confirmed,omitempty"`

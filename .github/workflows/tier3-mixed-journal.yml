@@ -7,7 +7,7 @@ on:
         type: choice
         required: true
         default: journal
-        options: [journal, consumer, restart, fanout_restart, route_quorum, route_majority, worker_kill]
+        options: [journal, consumer, restart, fanout_restart, route_quorum, route_majority, worker_kill, worker_pause]
       duration:
         description: Ten minutes is sustained; 35 seconds is fixture smoke only
         required: true
@@ -37,6 +37,7 @@ jobs:
         run: |
           set -o pipefail
           case "$TIER3_MATRIX_ROW" in
+            worker_pause) row_test=TestFiveContainerMixedWorkerPausedFortyFiveSeconds ;;
             worker_kill) row_test=TestFiveContainerMixedWorkerKilledEveryFiveSeconds ;;
             journal) row_test=TestFiveContainerMixedJournalLeaderEveryThirtySeconds ;;
             consumer) row_test=TestFiveContainerMixedConsumerLeaderEveryThirtySeconds ;;

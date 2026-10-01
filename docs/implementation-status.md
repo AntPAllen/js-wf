@@ -4864,3 +4864,21 @@ It requires119 actual five-second SIGKILL slots and the unchanged mixed gates.
 Comprehensive simulation36900782095 remains in progress; the million-timer
 service remains active at MainPID18146, with168,921 receipts at its latest
 checkpoint. These are live handles, not terminal acceptance.
+
+
+## R5 mixed worker pause-past-lease row implemented
+
+The new `worker_pause` row keeps five actual worker processes against the R5
+Docker cluster. A seeded active worker is SIGSTOPped at+5s and once per minute,
+with retained KV key/epoch/revision/timestamp snapshots taken while stopped.
+Its full45s pause exceeds the production12s TTL; SIGCONT resumes the same PID,
+and typed fencing must match a paused lease. All shared mixed history, integrity,
+raw p99 and physical drain gates remain required.
+[Native race smoke](scale/tier3-mixed-worker-pause-2026-10-01/) passes114.38s /
+115.408s package:140 completions,1,550 entries and one45.081s pause. Worst terminal
+p99 is18.250s and progress p99 is6.980s. All five original process generations exit
+gracefully with matched final counters; the one heartbeat loss matches paused
+PID85158/epoch403. Its invocation completed while the owner was stopped; original
+delivery and terminal evidence remain visible. All57 repairs are acknowledged
+with checked explanations. All46 Python tests and vet pass. This is one smoke;
+ten-minute and full24-hour coverage remain open.

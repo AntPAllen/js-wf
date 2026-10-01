@@ -474,6 +474,7 @@ func pauseMatrixProcessWorker(ctx context.Context, js jetstream.JetStream, fleet
 			}
 			if value.Worker == process.id && value.Epoch != 0 {
 				event.ActiveLeases++
+				event.PausedLeases = append(event.PausedLeases, matrixPausedLease{Key: key, Worker: value.Worker, Epoch: value.Epoch, Revision: entry.Revision(), Created: entry.Created(), Observed: time.Now().UTC()})
 			}
 		}
 		if event.ActiveLeases > 0 {

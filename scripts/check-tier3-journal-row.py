@@ -17,7 +17,8 @@ def load(name, file):
 
 matrix = load('matrix_row', 'check-matrix-campaign.py')
 execution = load('matrix_execution', 'check-matrix-result.py')
-TESTS = {'worker_kill': 'TestFiveContainerMixedWorkerKilledEveryFiveSeconds',
+TESTS = {'worker_pause': 'TestFiveContainerMixedWorkerPausedFortyFiveSeconds',
+         'worker_kill': 'TestFiveContainerMixedWorkerKilledEveryFiveSeconds',
          'journal': 'TestFiveContainerMixedJournalLeaderEveryThirtySeconds',
          'consumer': 'TestFiveContainerMixedConsumerLeaderEveryThirtySeconds',
          'restart': 'TestFiveContainerMixedAllServersEveryThirtySeconds',
@@ -38,7 +39,8 @@ def check(events, duration, expected_row='journal'):
     if row != expected_row or matrix.seconds(found_duration) != seconds or replicas != 'true' or release != 'false':
         raise ValueError('incorrect row, duration, replica scope or release claim')
     batches, invocations, entries, faults = map(int, (batches, invocations, entries, faults))
-    if batches < 1 or invocations != batches*28 or entries <= invocations or faults != (seconds-1)//(5 if row=='worker_kill' else 30):
+    expected_faults=(seconds-6)//60+1 if row=='worker_pause' else (seconds-1)//(5 if row=='worker_kill' else 30)
+    if batches < 1 or invocations != batches*28 or entries <= invocations or faults != expected_faults:
         raise ValueError('incomplete workload, audit entries or fault count')
     active_consumer_faults = None
     if row == 'consumer':
@@ -60,7 +62,8 @@ def check(events, duration, expected_row='journal'):
             raw_t,raw_p=matrix.one(r'TIER3_ROUTE_RAW_CELL type='+typ+r' terminal_p99=(\S+) progress_p99=(\S+)',log)
             cells[typ]['raw_terminal_p99_seconds']=matrix.seconds(raw_t)
             cells[typ]['raw_progress_p99_seconds']=matrix.seconds(raw_p)
-    scope = ('single five-container R5 worker SIGKILL row' if row == 'worker_kill'
+    scope = ('single five-container R5 worker pause-past-lease row' if row == 'worker_pause'
+             else 'single five-container R5 worker SIGKILL row' if row == 'worker_kill'
              else 'single five-container R5 majority-progress route row' if row == 'route_majority'
              else 'single five-container R5 quorum-removing route row' if row == 'route_quorum'
              else 'single five-container R5 mid-fan-out all-server restart row' if row == 'fanout_restart'
@@ -311,6 +314,59 @@ def check_worker_artifacts(root,report):
                 complete_hard_kill_attribution=False)
 
 
+def check_pause_artifacts(root,report):
+    faults=json.loads((root/'faults.json').read_text())
+    sessions=json.loads((root/'process-evidence.json').read_text())
+    if len(faults)!=report['confirmed_faults'] or len(sessions)!=5:
+        raise ValueError('pause count or process fleet mismatch')
+    by_worker={s['worker_id']:s for s in sessions}
+    if set(by_worker)!={f'matrix-process-{i}-generation-0' for i in range(5)} or len({s['pid'] for s in sessions})!=5:
+        raise ValueError('pause must keep the original five process identities')
+    steps_all=[];fences_all=[]
+    for session in sessions:
+        worker=session['worker_id']
+        if type(session['pid']) is not int or session['pid']<=0 or session['generation']!=0 or not session['exit_success'] or session['exit_signal']!=0:
+            raise ValueError('pause process did not exit gracefully')
+        steps,dp=process_lines(root/(worker+'-dispatch.jsonl'))
+        records,fp=process_lines(root/(worker+'-fencing.jsonl'))
+        raw=json.loads((root/(worker+'-metrics.json')).read_text())
+        if dp or fp or session['partial_dispatch_tail'] or session['partial_fencing_tail'] or len(steps)!=session['dispatch_records'] or len(records)!=session['fencing_records']:
+            raise ValueError('pause process counts or complete records disagree')
+        final=session['final_metrics']
+        if raw!={'pid':session['pid'],'worker_id':worker,'metrics':final} or final['fencing_events']!=len(records):
+            raise ValueError('pause final counters disagree')
+        if any(e['Worker']!=worker for e in steps):raise ValueError('pause dispatch worker mismatch')
+        for i,r in enumerate(records,1):
+            if r['pid']!=session['pid'] or r['sequence']!=i or r['event']['Worker']!=worker:raise ValueError('pause fencing PID/identity/sequence mismatch')
+        steps_all+=steps;fences_all += [r['event'] for r in records]
+    if json.loads((root/'dispatch.json').read_text())!=steps_all or (json.loads((root/'fencing.json').read_text()) or [])!=fences_all:
+        raise ValueError('pause aggregate evidence differs from original records')
+    prior_schedule=None;matched=0
+    for fault in faults:
+        worker=fault['worker'];session=by_worker[worker];slot=fault['worker_slot']
+        if fault['pid']!=session['pid'] or type(slot) is not int or worker!=f'matrix-process-{slot}-generation-0' or fault.get('worker_sigkill_confirmed'):
+            raise ValueError('pause selected a different process or killed it')
+        schedule,killed,paused,resumed,healed=map(timestamp_ns,[fault[k] for k in ('scheduled','killed','paused','resumed','healed')])
+        if not schedule<=killed<=paused<=resumed<=healed or resumed-paused<45_000_000_000 or paused-schedule>=5_000_000_000:
+            raise ValueError('pause duration or operation timeline invalid')
+        if prior_schedule is not None and schedule-prior_schedule!=60_000_000_000:raise ValueError('pause cadence is not one minute')
+        prior_schedule=schedule
+        leases=fault['paused_leases']
+        if not leases or len(leases)!=fault['active_leases'] or fault['fencing_events']<=0:
+            raise ValueError('pause lacks observed active leases or resumed fencing')
+        held=set()
+        for lease in leases:
+            observed,created=map(timestamp_ns,[lease['observed_at'],lease['created_at']])
+            if lease['worker_id']!=worker or type(lease['epoch']) is not int or type(lease['revision']) is not int or lease['epoch']<=0 or lease['revision']<lease['epoch'] or not paused<=observed<=resumed or not created<=observed or resumed-created<=12_000_000_000:
+                raise ValueError('paused lease snapshot identity, epoch or expiry invalid')
+            held.add((lease['key'],lease['epoch']))
+        if len(held)!=len(leases):raise ValueError('duplicate paused lease evidence')
+        matching=[e for e in fences_all if e['Worker']==worker and resumed<=timestamp_ns(e['At'])<=healed and (e['Type']+'.'+e['ID'],e['Epoch']) in held]
+        if not matching:raise ValueError('resumed fencing does not belong to a retained paused lease')
+        matched+=len(matching)
+    return dict(confirmed_45_second_pauses=len(faults),same_process_generations=5,graceful_counter_cross_checks=5,matched_resumed_fencing=matched,counter_cross_checks_complete=True)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, help='required consumer/restart fault artifacts')
@@ -338,5 +394,8 @@ if __name__ == '__main__':
     if args.row == 'worker_kill':
         if args.root is None: parser.error('--root is required for the worker row')
         report['worker_artifact_checks'] = check_worker_artifacts(args.root,report)
+    if args.row == 'worker_pause':
+        if args.root is None: parser.error('--root is required for the pause row')
+        report['pause_artifact_checks']=check_pause_artifacts(args.root,report)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))

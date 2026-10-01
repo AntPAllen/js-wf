@@ -500,6 +500,17 @@ and surviving final counter snapshots are checked; interrupted tails and killed
 processes' missing final counters remain explicit. Smoke does not establish the
 ten-minute row or full24h matrix, and cannot certify complete hard-kill attribution.
 
+The R5 pause-past-lease row is
+`TestFiveContainerMixedWorkerPausedFortyFiveSeconds` (`worker_pause` in CI).
+Five actual worker processes run the shared mixed workload; at+5s and every
+minute a seeded active process is SIGSTOPped for45s and resumed with SIGCONT.
+The fixture confirms stopped/running OS states and retains actual KV ownership
+snapshots while stopped. After resume, typed fencing must match a retained lease
+key and epoch. The same five PIDs/generations survive, and all final fencing
+counters are cross-checked. Raw p99, histories, retained invariants and physical
+drain remain required. A35s smoke performs the full45s pause; ten minutes require
+ten pauses. This does not replace the full24h mixed fault matrix.
+
 **The "done" bar for a release**
 
 1. Tier 1: 100 000 seeds clean.
