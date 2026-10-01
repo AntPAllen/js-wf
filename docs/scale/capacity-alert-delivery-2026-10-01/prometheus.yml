@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 250ms
+  evaluation_interval: 250ms
+rule_files: [/fixture/prometheus-rules.yml]
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["127.0.0.1:33707"]
+scrape_configs:
+  - job_name: wf-worker
+    static_configs:
+      - targets: ["127.0.0.1:42945"]
+        labels: {cluster: monitoring-fixture}

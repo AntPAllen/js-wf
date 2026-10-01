@@ -1,0 +1,11 @@
+route:
+  receiver: local-fixture
+  group_by: [alertname, cluster]
+  group_wait: 0s
+  group_interval: 1s
+  repeat_interval: 1h
+receivers:
+  - name: local-fixture
+    webhook_configs:
+      - url: "http://127.0.0.1:42969"
+        send_resolved: true

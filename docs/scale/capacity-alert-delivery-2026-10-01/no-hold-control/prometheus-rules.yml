@@ -1,0 +1,11 @@
+groups:
+  - name: js-wf-capacity
+    rules:
+      - alert: WorkflowJournalCapacityHigh
+        expr: max by (cluster) (js_wf_journal_capacity_ratio) >= 0.7
+        for: 0s
+        labels:
+          severity: warning
+        annotations:
+          summary: Workflow journal is at least 70% full
+          description: WF_JRN has reached {{ $value | humanizePercentage }} of its configured byte cap. Increase the cap or retire completed invocations before writes are rejected.

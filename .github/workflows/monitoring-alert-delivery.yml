@@ -1,0 +1,38 @@
+name: monitoring-alert-delivery
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/monitoring-alert-delivery.yml'
+      - 'docs/monitoring/**'
+      - 'cmd/wf-worker/main.go'
+      - 'cmd/wf-worker/metrics_alert_test.go'
+      - 'worker/metrics_http.go'
+      - 'provision/capacity.go'
+jobs:
+  receiver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WF_MONITORING_ALERT: '1'
+      WF_MONITORING_ARTIFACT_DIR: ${{ runner.temp }}/monitoring-alert
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Pull fixture monitoring images
+        run: |
+          docker pull prom/prometheus:v3.15.0
+          docker pull prom/alertmanager:v0.34.1
+      - name: Evaluate shipping capacity rule and deliver firing and resolution
+        run: go test -p=1 -race ./cmd/wf-worker -run '^TestJournalCapacityAlertDeliveredAndResolved$' -count=1 -timeout=6m -v
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: monitoring-alert-delivery
+          path: ${{ runner.temp }}/monitoring-alert
+          if-no-files-found: warn

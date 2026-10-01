@@ -4349,3 +4349,27 @@ The [200-seed whole-matrix campaign 36891850893](https://github.com/AntPAllen/js
 is launched at the same clean revision after the one-seed whole-matrix pass.
 It requires all 2,600 executions and is currently pending. Neither launch
 clears its release gate. Previous interrupted stores are preserved.
+
+
+## Journal capacity alert reaches a real monitoring receiver
+
+[The capacity delivery fixture](scale/capacity-alert-delivery-2026-10-01/)
+passes under race in134.77s test /135.800s package. A real three-replica journal
+feeds the production wf-worker metrics handler; actual Prometheus and Alertmanager
+processes evaluate the unchanged 70% rule and two-minute hold. The fixture
+confirms no alert below threshold, observes pending state at75.3113% utilization,
+receives firing after120.271s, then receives resolution1.001s after removing
+only fixture data. Labels, severity, annotations and alert identity match.
+Configs, immutable image identities, server logs, pending API state and raw
+webhook bodies are retained. The no-hold control produces premature firing and
+fails the pending-state property in23.26s. Example configurations pass the actual
+promtool/amtool validators; vet passes. A dedicated opt-in CI workflow runs this
+same delivery path. [Monitoring examples and instructions](monitoring/README.md)
+connect the existing exporter, Prometheus rule and Alertmanager receiver.
+
+The first attempt failed in unbounded provisioning after240.01s and is retained
+as excluded evidence. Setup now has30s overall and3s attempt limits; the final
+run recovered from one3s timeout in a subsequent1.125s attempt. The server-side
+cause of the first wait remains unconfirmed. Local notification integration is
+verified; routing to an operator's actual account and its credentials/endpoints
+remains deployment configuration. Independent runtime release gates remain open.

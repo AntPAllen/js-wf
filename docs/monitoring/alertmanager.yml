@@ -1,0 +1,12 @@
+route:
+  receiver: workflow-operations
+  group_by: [alertname, cluster]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 4h
+receivers:
+  - name: workflow-operations
+    webhook_configs:
+      # Replace with your receiver; the fixture uses a private local receiver.
+      - url: 'http://127.0.0.1:9080/alerts'
+        send_resolved: true
