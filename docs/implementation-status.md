@@ -3000,3 +3000,46 @@ visibility test had run for six seconds. The full stack is retained in this
 proof. The already-pushed 0821f8c suite-budget increase is awaiting fresh CI.
 Its full 100,000-seed Tier 1 run and the million-timer campaign remain live
 without restart.
+
+
+## Active continuation canceled-timer wakeups and compatible version replay
+
+A new real R3 contract exposed a runtime bug: a native wakeup for a canceled
+timer was counted as a no-op but still entered an active continuation stage.
+Its logical journal stayed unchanged. The real reproduction failed in 15.487
+seconds; the production-worker seeded reproduction failed in 0.005 seconds.
+The worker now returns before active handler dispatch once cancellation is
+confirmed, while preserving generation/input/frame validation and terminal
+outcome repair ahead of that return.
+
+The real replacement-worker contract uses cancellation stored only in its frame
+(absolute timer step 2 / frame SDK position 8), rejects archive reads and requires
+no prefix/stage entries or journal changes on actual native delivery. After a
+signal gate, Version=2 replays despite an increased supported maximum of 3.
+Cross-peer result 2, raw integrity and full 12-step offline staged replay pass.
+This and the existing terminal cancellation contract passed under race in
+23.296 seconds. Worker race passed in 32.414 seconds; vet passed.
+
+The new continuation_canceled_timer model passed 100,000 schedules in 140.654
+seconds: seven fault modes times two deadlines, 200,000 choices and 23,960,419
+transport events. All 14 combinations and every injected fault must occur;
+first-ten exact replay, cross-process seed-42 identity and a new pinned trace
+are checked. New workload plus full pinned corpus passed under race in 23.797
+seconds. It also constructs terminal journal / absent outcome state and requires
+canceled delivery to repair state without dispatch or journal changes; this is
+a fixture boundary, not a claim that committed KV data disappears.
+
+Compiled selected-pin controls fail behaviorally: original dispatch reenters
+the stage in 0.009 seconds; placing the canceled return before terminal repair
+leaves state absent in 0.013 seconds. [Logs, controls and source hashes](scale/continuation-canceled-timer-2026-10-01/)
+retain the evidence. The fix applies to active ordinary invocations as well as
+continuations; the complete simulator suite passed in 116.150 seconds.
+
+[Standard CI at 0821f8c](https://github.com/AntPAllen/js-wf/actions/runs/36807803624)
+and its mixed job passed, validating the preceding publication-fixture and
+aggregate suite-budget changes. The 9b3831e mixed job also passed; its standard
+suite and the full 100,000-seed-per-workload run at 0821f8c remain in progress.
+Those jobs predate this runtime fix. Combined faults, remaining continuation
+acceptance cuts, full final-source matrix/24-hour soak, online GC and mixed
+seed 65 latency remain open. The original million-timer process remains live
+without restart.

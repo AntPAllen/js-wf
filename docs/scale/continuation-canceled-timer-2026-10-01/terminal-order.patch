@@ -1,0 +1,19 @@
+--- a/worker/worker.go
++++ b/worker/worker.go
+@@ -802,13 +802,13 @@
+ 			return fmt.Errorf("input hash mismatch for %s.%s", typ, id)
+ 		}
+ 	}
+-	if len(records) > 0 && (records[len(records)-1].Kind == journal.Completed || records[len(records)-1].Kind == journal.Failed) {
+-		return w.persistAndNotify(ctx, typ, id, input.Sequence, records[len(records)-1].Payload, input.Header)
+-	}
+ 	// A canceled timer can still repair a terminal outcome above. For an
+ 	// active invocation, acknowledge it without reentering the handler.
+ 	if *cancelledTimerNoOp {
+ 		return nil
++	}
++	if len(records) > 0 && (records[len(records)-1].Kind == journal.Completed || records[len(records)-1].Kind == journal.Failed) {
++		return w.persistAndNotify(ctx, typ, id, input.Sequence, records[len(records)-1].Payload, input.Header)
+ 	}
+ 	writeEntry := func(kind journal.Kind, payload json.RawMessage) error {
+ 		if err := ctx.Err(); err != nil {

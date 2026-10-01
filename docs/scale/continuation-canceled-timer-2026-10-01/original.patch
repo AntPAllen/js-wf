@@ -1,0 +1,14 @@
+--- a/worker/worker.go
++++ b/worker/worker.go
+@@ -805,11 +805,6 @@
+ 	if len(records) > 0 && (records[len(records)-1].Kind == journal.Completed || records[len(records)-1].Kind == journal.Failed) {
+ 		return w.persistAndNotify(ctx, typ, id, input.Sequence, records[len(records)-1].Payload, input.Header)
+ 	}
+-	// A canceled timer can still repair a terminal outcome above. For an
+-	// active invocation, acknowledge it without reentering the handler.
+-	if *cancelledTimerNoOp {
+-		return nil
+-	}
+ 	writeEntry := func(kind journal.Kind, payload json.RawMessage) error {
+ 		if err := ctx.Err(); err != nil {
+ 			return err
