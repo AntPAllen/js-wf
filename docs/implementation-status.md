@@ -12,7 +12,7 @@ A [later 100,000-seed-per-workload clean-runner run](https://github.com/AntPAlle
 
 The focused five-node container smoke, verified server/worker clock-skew, worker-recovery, and rolling-upgrade workflows are now scheduled daily at 05:17, 05:37, 05:57, and 06:17 UTC respectively. Scheduled container runs use the same `2m` file-store sync interval as the manual default, and all four retain their manual triggers. Their first scheduled executions and the plan's sustained 24-hour full-matrix Tier 3 soak remain open.
 
-A new opt-in five-container Tier 3 test SIGKILLs an actual worker process after its `StepRequested` entry is durable and its effect has started, then runs a replacement worker pinned to a different NATS node. Three local repeats and one race-instrumented run each completed with one invocation, four ordered journal entries, one terminal result, a higher replacement fencing epoch, and passing `Start` and `Await` histories. A further local run added a duplicate `Start` and a second terminal read through the replacement node; both passed the same history models. The [clean five-container CI run](https://github.com/AntPAllen/js-wf/actions/runs/36621543073) passed all five tests, and its downloaded history artifact contains one successful start, one matching duplicate, and two terminal reads with the same result hash. Kill-to-terminal times were 31.11–31.12 seconds locally and 31.109 seconds in CI. These runs meet the five-minute completion requirement but miss the plan's under-30-second fault-latency target for this single invocation. The provisioned lease TTL is 30 seconds, so recovery waits for expiry after a hard process kill; this smoke test records the miss and does not count as a green latency-matrix cell.
+A new opt-in five-container Tier 3 test SIGKILLs an actual worker process after its `StepRequested` entry is durable and its effect has started, then runs a replacement worker pinned to a different NATS node. Three local repeats and one race-instrumented run each completed with one invocation, four ordered journal entries, one terminal result, a higher replacement fencing epoch, and passing `Start` and `Await` histories. A further local run added a duplicate `Start` and a second terminal read through the replacement node; both passed the same history models. The [clean five-container CI run](https://github.com/AntPAllen/js-wf/actions/runs/36621543073) passed all five tests, and its downloaded history artifact contains one successful start, one matching duplicate, and two terminal reads with the same result hash. Kill-to-terminal times were 31.11–31.12 seconds locally and 31.109 seconds in CI. These historical runs used a 30-second lease TTL: their 31.1-second recovery is a fixture configuration mismatch, not evidence of a runtime defect. The current smoke provisions the production 12-second TTL and retains the under-30-second recovery gate. No further runs should chase the old TTL-bound miss. The historical runs remain partial evidence and do not count as a green current-source matrix cell.
 
 A Tier 1 replay of this worker-kill timing runs production lease acquisition and journal append decisions against virtual KV and journal transports. At 29,999 ms the replacement gets `ErrHeld`; at 30,000 ms it acquires a higher epoch and completes the journal. Exact replay, the full simulator package, and the focused race test passed. This establishes the configured TTL as a lower bound in the modeled failure, while the real run's extra ~1.1 seconds remains client scheduling, redelivery, and server work that the model does not isolate.
 
@@ -4156,3 +4156,67 @@ the final focused 100,000 seeds and race checks cover those assertions. Vet and
 all 25 script tests pass. Further frame/result reply-loss, limit/TTL/process
 combinations, comprehensive final-source and full matrix/soak gates remain open.
 The old live-owner stalls' exact blocking call and server cause remain unconfirmed.
+
+## Frame and spilled-result object requests have bounded recovery
+
+Worker-owned result object Put/Get calls now receive fifteen-second contexts
+independent of user effects. This covers frame storage/verification, spilled
+step/promise reads and spilled terminal writes. Bare custom-port deadline errors
+remain retryable as ErrResultBlobUnknown/ErrResultBlobUnavailable, with optional
+result_blob_put/result_blob_get timings. The continuation publication budget
+remains separate; no fencing or latency gate changes.
+
+[Model/native proof, controls and source hashes](scale/result-frame-response-budget-2026-10-01/)
+cover four frame and five large-result modes. Timeouts release ownership, leave
+no premature terminal outcome and preserve the durable prefix. Confirmed frames
+are reused; incomplete frame storage can leave an orphan and a newly anchored
+successor frame. Unrecorded large step results permit the effect to run again
+with the same RunOnce key; recorded effects and complete-history offline replay
+do not execute again. Native ordinary results are 921,602 bytes.
+
+All nine actual R3 port-response cases pass under race in 201.13s test / 202.303s
+package, with raw entry-to-terminal recovery 16.343–20.266s. Missing replies honor
+their actual child context. Hidden-write objects are read back before timeout;
+absent writes must be missing. Ownership is fenced past twelve seconds with at
+least two real heartbeat renewals. Prefix/frame checks, physical stream and
+consumer drain, cross-node immutable results, higher epoch and raw integrity
+pass. This is a port-response contract; it does not reproduce a NATS wire fault
+or the older sustained stalls. Nine new pins bring the corpus to 152; the entire
+corpus and both new workloads pass race in 194.571s. Full sim/worker/journal
+packages pass in 98.876/29.415/0.003s with memory limits, plus vet and 25 script
+tests. A compiled unbounded-port control fails specific model assertions in
+0.013s and the native fixture in 3.820s. A wrong-directory binary corpus run
+failed on missing relative testdata and is retained/excluded.
+
+The first focused 100,000-seed attempt and concurrent package/control runs were
+interrupted by a VM reboot, so their incomplete logs are not a seed-count pass.
+A fresh 100,000-seed frame/result campaign is running with GOMEMLIMIT=512MiB and
+GOMAXPROCS=2; its terminal result remains pending. Combined capacity/lease/TTL/
+server/process/route cases and comprehensive release gates remain open.
+
+## Million native timers were interrupted by the VM reboot
+
+The original million-schedule campaign PID and all servers are absent in the
+new boot (2026-10-01 13:32:31 UTC). [Preserved report, progress and boot evidence](scale/timer-million-interruption-2026-10-01/)
+record one million acknowledged schedules and 657,626 deliveries at the last
+saved cut, one confirmed controlled server restart, p99 251.640ms and max 16.918s.
+The second controlled restart and final audit were not observed. Individual
+observations were kept in memory until normal exit and are unavailable; the old
+running report does not prove current process liveness or completed acceptance.
+The original stores are preserved unchanged. Recovery of remaining traffic
+cannot retroactively reconstruct all previously acknowledged timestamps.
+
+Previous-boot logs show memory pressure and an OOM invocation during concurrent
+local tests; they do not identify the chosen victim or establish the reboot's
+cause. Subsequent verification uses explicit memory limits and bounded build
+concurrency. A durable observation protocol and fresh complete million-message/
+24-hour campaign remain required; this interrupted run cannot clear that gate.
+
+## Latest whole-matrix seed 1 fails a transient retained audit
+
+Hosted run 36858960098 at 762df09 is terminal failure. Its partition row fails
+at batch 60 on API 503/error 10008 after three fast whole-audit attempts; batch
+50 had audited 1,400 terminal invocations. The last partition's heal was still
+in progress when audit failure canceled the fixture. [Original raw log and artifact ZIP](scale/matrix-partition-audit-503-2026-10-01/)
+retain the failure. This is audit availability evidence, not a final invariant
+or workflow-latency result. The matrix release gate remains open.

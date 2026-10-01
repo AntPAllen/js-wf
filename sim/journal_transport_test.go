@@ -476,6 +476,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededWorkerFanout(loaded.Seed, &loaded, 500)
 	case "worker_child_execution":
 		replayed, err = runSeededWorkerChildExecution(loaded.Seed, &loaded)
+	case "worker_result_response_budget":
+		replayed, err = runSeededWorkerResultBudget(loaded.Seed, &loaded)
 	case "worker_large_result":
 		replayed, err = runSeededWorkerLargeResult(loaded.Seed, &loaded)
 	case "snapshot_read_compacted":
@@ -502,6 +504,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededContinuationRetirement(loaded.Seed, &loaded)
 	case "continuation_limit":
 		replayed, err = runSeededContinuationLimit(loaded.Seed, &loaded)
+	case "worker_frame_response_budget":
+		replayed, err = runSeededWorkerFrameBudget(loaded.Seed, &loaded)
 	case "worker_continuation_response_budget":
 		replayed, err = runSeededWorkerContinuationBudget(loaded.Seed, &loaded)
 	case "worker_continuation":

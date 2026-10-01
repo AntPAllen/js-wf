@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -23,9 +24,56 @@ import (
 	"js-wf/lease"
 	"js-wf/wf"
 	"js-wf/worker"
+
+	"github.com/nats-io/nats.go/jetstream"
 )
 
-func runSeededWorkerLargeResult(seed int64, replay *Trace) (trace Trace, runErr error) {
+type resultBudgetPort struct {
+	*ResultBlobTransport
+	mode        string
+	fired       bool
+	budgetError error
+}
+
+func (p *resultBudgetPort) missing(ctx context.Context, name string, commit func() error) error {
+	p.fired = true
+	deadline, ok := ctx.Deadline()
+	if !ok || time.Until(deadline) > 15*time.Second {
+		p.budgetError = fmt.Errorf("result object request inherits delivery lifetime instead of a 15s budget")
+		return fmt.Errorf("%w: %w", worker.ErrResultBlobUnknown, p.budgetError)
+	}
+	if strings.HasSuffix(p.mode, "ack_lost") {
+		if err := commit(); err != nil {
+			return err
+		}
+	}
+	if err := p.schedule.AdvanceMillis(15000); err != nil {
+		return err
+	}
+	p.schedule.RecordTransport(TransportEvent{Operation: "result_missing_reply", Subject: name, Outcome: p.mode})
+	// Return the raw error deliberately: worker policy must preserve retryability.
+	return context.DeadlineExceeded
+}
+func (p *resultBudgetPort) PutBytes(ctx context.Context, name string, data []byte) error {
+	if !p.fired && (strings.HasPrefix(p.mode, "step_put_") && strings.HasPrefix(name, "step-result-") || strings.HasPrefix(p.mode, "terminal_put_") && strings.HasPrefix(name, "terminal-result-")) {
+		return p.missing(ctx, name, func() error { return p.ResultBlobTransport.PutBytes(ctx, name, data) })
+	}
+	return p.ResultBlobTransport.PutBytes(ctx, name, data)
+}
+func (p *resultBudgetPort) GetBytes(ctx context.Context, name string) ([]byte, error) {
+	if !p.fired && p.mode == "step_get_drop" {
+		return nil, p.missing(ctx, name, func() error { return nil })
+	}
+	return p.ResultBlobTransport.GetBytes(ctx, name)
+}
+func runSeededWorkerResultBudget(seed int64, replay *Trace) (Trace, error) {
+	return runSeededWorkerLargeResultMode(seed, replay, true)
+}
+func runSeededWorkerLargeResult(seed int64, replay *Trace) (Trace, error) {
+	return runSeededWorkerLargeResultMode(seed, replay, false)
+}
+
+func runSeededWorkerLargeResultMode(seed int64, replay *Trace, budget bool) (trace Trace, runErr error) {
 	var schedule *Scheduler
 	if replay == nil {
 		schedule = NewScheduler(seed)
@@ -36,27 +84,40 @@ func runSeededWorkerLargeResult(seed int64, replay *Trace) (trace Trace, runErr 
 			return Trace{}, err
 		}
 	}
-	if err := schedule.SetWorkload("worker_large_result"); err != nil {
+	workload := "worker_large_result"
+	if budget {
+		workload = "worker_result_response_budget"
+	}
+	if err := schedule.SetWorkload(workload); err != nil {
 		return Trace{}, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose([]string{"clean", "step_blob_drop", "step_blob_ack_lost", "step_blob_read_unavailable", "terminal_blob_drop", "terminal_blob_ack_lost", "step_completion_ack_lost", "outcome_ack_lost", "consumer_leader_changed"})
+	modes := []string{"clean", "step_blob_drop", "step_blob_ack_lost", "step_blob_read_unavailable", "terminal_blob_drop", "terminal_blob_ack_lost", "step_completion_ack_lost", "outcome_ack_lost", "consumer_leader_changed"}
+	if budget {
+		modes = []string{"step_put_drop", "step_put_ack_lost", "step_get_drop", "terminal_put_drop", "terminal_put_ack_lost"}
+	}
+	mode, err := schedule.Choose(modes)
 	if err != nil {
 		return trace, err
 	}
-	ctx, stop := context.WithTimeout(context.Background(), 5*time.Second)
+	lifetime := 5 * time.Second
+	if budget {
+		lifetime = 5 * time.Minute
+	}
+	ctx, stop := context.WithTimeout(context.Background(), lifetime)
 	defer stop()
 	const typ = "test"
 	id := integratedWorkerIDs(1)[0]
 	transport := NewWorkerTransport(schedule, 3*time.Second)
 	journals := NewJournalTransport(schedule)
 	appendPort := &faultingExecutionJournal{JournalTransport: journals}
-	if mode == "step_completion_ack_lost" || mode == "step_blob_read_unavailable" {
+	if mode == "step_completion_ack_lost" || mode == "step_blob_read_unavailable" || mode == "step_get_drop" {
 		appendPort.subject = identity.JournalSubject(typ, id)
 		appendPort.fault = LoseAckAfterCommit
 	}
 	store := journal.NewWithPorts(appendPort, journals)
-	leasing := lease.NewWithKVPort(NewKVTransport(schedule, 30*time.Second))
+	leaseKV := NewKVTransport(schedule, 30*time.Second)
+	leasing := lease.NewWithKVPort(leaseKV)
 	outcomes := NewKVTransport(schedule, 0)
 	blobs := NewResultBlobTransport(schedule)
 	if mode == "step_blob_read_unavailable" {
@@ -94,21 +155,82 @@ func runSeededWorkerLargeResult(seed int64, replay *Trace) (trace Trace, runErr 
 	}
 	value := strings.Repeat("x", wf.MaxInlineResult)
 	result, _ := json.Marshal(value)
+	blobPort := worker.ResultBlobPort(blobs)
+	boundedBlobs := &resultBudgetPort{ResultBlobTransport: blobs, mode: mode}
+	if budget {
+		blobPort = boundedBlobs
+	}
 	var calls, effects int
+	var effectKeys []string
 	c := client.NewWithSignalPorts(transport.SignalTransport, transport.SignalTransport)
-	w, err := worker.NewWithPorts("modeled-large-result-worker", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+	handlers := map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 		calls++
-		got, err := wf.Run(c, "large", 1, func(context.Context) (string, error) { effects++; return value, nil })
+		var got string
+		var err error
+		if budget {
+			got, err = wf.RunOnce(c, "large", 1, func(_ context.Context, key string) (string, error) {
+				effects++
+				effectKeys = append(effectKeys, key)
+				return value, nil
+			})
+		} else {
+			got, err = wf.Run(c, "large", 1, func(context.Context) (string, error) { effects++; return value, nil })
+		}
 		if err != nil {
 			return nil, err
 		}
 		return json.Marshal(got)
-	}}, worker.ModeledWorkerPorts{Journal: store, Leases: leasing, Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, ResultBlobs: blobs, Client: c})
+	}}
+	w, err := worker.NewWithPorts("modeled-large-result-worker", handlers, worker.ModeledWorkerPorts{Journal: store, Leases: leasing, Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, ResultBlobs: blobPort, Client: c})
 	if err != nil {
 		return trace, err
 	}
 	if _, err := c.Start(ctx, typ, id, []byte(`null`)); err != nil {
 		return trace, err
+	}
+	var prefixAtTimeout []journal.Record
+	if budget {
+		if mode == "step_get_drop" {
+			initial, stopInitial := context.WithCancel(ctx)
+			transport.Dispatch.StopAfterNextNak(stopInitial)
+			if err := w.RunPartitionWithTransport(initial, 0, transport.Dispatch); err != nil {
+				return trace, err
+			}
+			if boundedBlobs.fired || effects != 1 {
+				return trace, fmt.Errorf("result read cut not prepared")
+			}
+			if err := schedule.AdvanceMillis(1000); err != nil {
+				return trace, err
+			}
+		}
+		attempt, stopAttempt := context.WithCancel(ctx)
+		transport.Dispatch.StopAfterNextNak(stopAttempt)
+		if err := w.RunPartitionWithTransport(attempt, 0, transport.Dispatch); err != nil {
+			return trace, err
+		}
+		if boundedBlobs.budgetError != nil {
+			return trace, boundedBlobs.budgetError
+		}
+		wantTime := int64(15000)
+		if mode == "step_get_drop" {
+			wantTime += 1000
+		}
+		if !boundedBlobs.fired || schedule.NowMillis() != wantTime || transport.Dispatch.Pending() == 0 {
+			return trace, fmt.Errorf("result cut fired=%v time=%d pending=%d", boundedBlobs.fired, schedule.NowMillis(), transport.Dispatch.Pending())
+		}
+		if _, err := leaseKV.Get(ctx, identity.Key(typ, id)); !errors.Is(err, jetstream.ErrKeyNotFound) {
+			return trace, fmt.Errorf("result timeout retained lease: %v", err)
+		}
+		if _, err := outcomes.Get(ctx, identity.Key(typ, id)); !errors.Is(err, jetstream.ErrKeyNotFound) {
+			return trace, fmt.Errorf("result timeout produced terminal outcome: %v", err)
+		}
+		prefixAtTimeout, _, err = store.Read(ctx, typ, id)
+		if err != nil {
+			return trace, err
+		}
+		if err := schedule.AdvanceMillis(1000); err != nil {
+			return trace, err
+		}
 	}
 	runCtx, stopRun := context.WithCancel(ctx)
 	transport.Dispatch.StopWhenDrained(stopRun)
@@ -120,21 +242,34 @@ func runSeededWorkerLargeResult(seed int64, replay *Trace) (trace Trace, runErr 
 		return trace, fmt.Errorf("seed %d large journal entries=%d err=%v", seed, len(records), err)
 	}
 	wantEffects := 1
-	if mode == "step_blob_drop" || mode == "step_blob_ack_lost" {
+	if mode == "step_blob_drop" || mode == "step_blob_ack_lost" || strings.HasPrefix(mode, "step_put_") {
 		wantEffects = 2
+	}
+	if budget {
+		for _, key := range effectKeys {
+			if key == "" || key != effectKeys[0] {
+				return trace, fmt.Errorf("RunOnce key changed across result timeout")
+			}
+		}
 	}
 	if effects != wantEffects {
 		return trace, fmt.Errorf("seed %d mode=%s effects=%d want=%d", seed, mode, effects, wantEffects)
 	}
 	wantCalls := 1
-	if mode == "step_blob_drop" || mode == "step_blob_ack_lost" || mode == "terminal_blob_drop" || mode == "terminal_blob_ack_lost" || mode == "step_completion_ack_lost" {
+	if mode == "step_blob_drop" || mode == "step_blob_ack_lost" || mode == "terminal_blob_drop" || mode == "terminal_blob_ack_lost" || mode == "step_completion_ack_lost" || strings.HasPrefix(mode, "step_put_") || strings.HasPrefix(mode, "terminal_put_") {
 		wantCalls = 2
 	}
-	if mode == "step_blob_read_unavailable" {
+	if mode == "step_blob_read_unavailable" || mode == "step_get_drop" {
 		wantCalls = 3
 	}
 	if calls != wantCalls {
 		return trace, fmt.Errorf("seed %d mode=%s calls=%d want=%d", seed, mode, calls, wantCalls)
+	}
+	if budget && (len(records) < len(prefixAtTimeout) || !reflect.DeepEqual(prefixAtTimeout, records[:len(prefixAtTimeout)])) {
+		return trace, fmt.Errorf("recorded result prefix changed")
+	}
+	if budget && records[len(records)-1].Epoch <= records[0].Epoch {
+		return trace, fmt.Errorf("result retry did not advance fencing epoch")
 	}
 	var completed struct {
 		ResultRef  string `json:"result_ref"`
@@ -174,6 +309,18 @@ func runSeededWorkerLargeResult(seed int64, replay *Trace) (trace Trace, runErr 
 	report, err := integrity.CheckSnapshot(snapshot)
 	if err != nil || report != (integrity.Report{Invocations: 1, Journals: 1, Entries: 4, Terminal: 1}) {
 		return trace, fmt.Errorf("seed %d large retained check=%+v err=%v", seed, report, err)
+	}
+	if budget {
+		journalBytes, err := json.Marshal(records)
+		if err != nil {
+			return trace, err
+		}
+		objects := map[string][]byte{completed.ResultRef: bytes.Clone(result), out.ResultRef: bytes.Clone(result)}
+		beforeEffects, beforeCalls := effects, calls
+		replayed, err := wf.Replay(journalBytes, func(c *wf.Context) (json.RawMessage, error) { return handlers[typ](c, nil) }, wf.ReplayOptions{Type: typ, ID: id, InvSeq: out.InvSeq, Objects: objects})
+		if err != nil || !bytes.Equal(replayed, result) || effects != beforeEffects || calls != beforeCalls+1 {
+			return trace, fmt.Errorf("offline result replay effects=%d result_bytes=%d err=%v", effects, len(replayed), err)
+		}
 	}
 	schedule.RecordTransport(TransportEvent{Operation: "check_worker_large_result", Outcome: mode, Sequence: uint64(blobs.Count()), AtMillis: schedule.NowMillis()})
 	if err := schedule.Finish(); err != nil {

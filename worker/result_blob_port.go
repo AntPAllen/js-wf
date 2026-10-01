@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -62,4 +63,35 @@ func (p jetStreamResultBlobPort) GetBytes(ctx context.Context, name string) ([]b
 		return nil, fmt.Errorf("%w: get %s: %w", ErrResultBlobUnavailable, name, err)
 	}
 	return data, nil
+}
+
+// Each runtime-owned object request has a budget independent of user effects.
+// Keep transient deadline errors retryable even for a custom port that returns
+// the raw context error rather than the standard adapter's typed error.
+type boundedResultBlobPort struct {
+	ResultBlobPort
+	operations *deliveryOperations
+}
+
+func (p boundedResultBlobPort) PutBytes(ctx context.Context, name string, data []byte) error {
+	request, stop := context.WithTimeout(ctx, 15*time.Second)
+	defer stop()
+	started := p.operations.begin()
+	err := p.ResultBlobPort.PutBytes(request, name, data)
+	if errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, ErrResultBlobUnknown) {
+		err = fmt.Errorf("%w: %w", ErrResultBlobUnknown, err)
+	}
+	p.operations.finish(started, "result_blob_put", 0, "", err)
+	return err
+}
+func (p boundedResultBlobPort) GetBytes(ctx context.Context, name string) ([]byte, error) {
+	request, stop := context.WithTimeout(ctx, 15*time.Second)
+	defer stop()
+	started := p.operations.begin()
+	data, err := p.ResultBlobPort.GetBytes(request, name)
+	if errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, ErrResultBlobUnavailable) {
+		err = fmt.Errorf("%w: %w", ErrResultBlobUnavailable, err)
+	}
+	p.operations.finish(started, "result_blob_get", 0, "", err)
+	return data, err
 }

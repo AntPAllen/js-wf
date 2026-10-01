@@ -984,7 +984,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	}
 	resultBlobs := w.resultBlobs()
 	if resultBlobs != nil {
-		resultBlobs = boundedResultBlobPort{ResultBlobPort: resultBlobs, operations: ops}
+		// Control: supply the original unbounded result port.
 	}
 	wctx.SetResultStore(func(ctx context.Context, data []byte) (string, error) {
 		if resultBlobs == nil {

@@ -1,0 +1,40 @@
+=== RUN   TestWorkerResultMissingReplyRecovery
+=== RUN   TestWorkerResultMissingReplyRecovery/frame_put_drop
+    worker_result_budget_test.go:249: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_result_budget_test.go:288: mode=frame_put_drop raw_recovery=16.342926217s request_to_terminal=20.123857163s inv_seq=1 result_bytes=2 effects=2 heartbeat_renewals=3 timeouts=1 integrity={Invocations:1 Journals:1 Entries:19 Terminal:1}
+=== RUN   TestWorkerResultMissingReplyRecovery/frame_put_ack_lost
+    worker_result_budget_test.go:249: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_result_budget_test.go:288: mode=frame_put_ack_lost raw_recovery=16.355711882s request_to_terminal=20.091557984s inv_seq=1 result_bytes=2 effects=2 heartbeat_renewals=3 timeouts=1 integrity={Invocations:1 Journals:1 Entries:19 Terminal:1}
+=== RUN   TestWorkerResultMissingReplyRecovery/frame_verify_drop
+    worker_result_budget_test.go:249: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_result_budget_test.go:288: mode=frame_verify_drop raw_recovery=20.265819653s request_to_terminal=25.124987775s inv_seq=1 result_bytes=2 effects=2 heartbeat_renewals=3 timeouts=1 integrity={Invocations:1 Journals:1 Entries:19 Terminal:1}
+=== RUN   TestWorkerResultMissingReplyRecovery/frame_replay_drop
+    worker_result_budget_test.go:249: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_result_budget_test.go:288: mode=frame_replay_drop raw_recovery=17.430148962s request_to_terminal=19.030374649s inv_seq=1 result_bytes=2 effects=2 heartbeat_renewals=4 timeouts=1 integrity={Invocations:1 Journals:1 Entries:19 Terminal:1}
+=== RUN   TestWorkerResultMissingReplyRecovery/step_put_drop
+    worker_result_budget_test.go:249: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_result_budget_test.go:288: mode=step_put_drop raw_recovery=16.367850673s request_to_terminal=16.308278891s inv_seq=1 result_bytes=921602 effects=2 heartbeat_renewals=2 timeouts=1 integrity={Invocations:1 Journals:1 Entries:4 Terminal:1}
+=== RUN   TestWorkerResultMissingReplyRecovery/step_put_ack_lost
+    worker_result_budget_test.go:249: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_result_budget_test.go:288: mode=step_put_ack_lost raw_recovery=16.376966226s request_to_terminal=16.263581951s inv_seq=1 result_bytes=921602 effects=2 heartbeat_renewals=3 timeouts=1 integrity={Invocations:1 Journals:1 Entries:4 Terminal:1}
+=== RUN   TestWorkerResultMissingReplyRecovery/step_get_drop
+    worker_result_budget_test.go:249: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_result_budget_test.go:288: mode=step_get_drop raw_recovery=17.474120599s request_to_terminal=16.321661026s inv_seq=1 result_bytes=921602 effects=1 heartbeat_renewals=3 timeouts=1 integrity={Invocations:1 Journals:1 Entries:4 Terminal:1}
+=== RUN   TestWorkerResultMissingReplyRecovery/terminal_put_drop
+    worker_result_budget_test.go:249: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_result_budget_test.go:288: mode=terminal_put_drop raw_recovery=16.83580426s request_to_terminal=16.767353131s inv_seq=1 result_bytes=921602 effects=1 heartbeat_renewals=3 timeouts=1 integrity={Invocations:1 Journals:1 Entries:4 Terminal:1}
+=== RUN   TestWorkerResultMissingReplyRecovery/terminal_put_ack_lost
+    worker_result_budget_test.go:249: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_result_budget_test.go:288: mode=terminal_put_ack_lost raw_recovery=16.891667807s request_to_terminal=16.528760713s inv_seq=1 result_bytes=921602 effects=1 heartbeat_renewals=3 timeouts=1 integrity={Invocations:1 Journals:1 Entries:4 Terminal:1}
+--- PASS: TestWorkerResultMissingReplyRecovery (201.13s)
+    --- PASS: TestWorkerResultMissingReplyRecovery/frame_put_drop (23.58s)
+    --- PASS: TestWorkerResultMissingReplyRecovery/frame_put_ack_lost (23.57s)
+    --- PASS: TestWorkerResultMissingReplyRecovery/frame_verify_drop (28.54s)
+    --- PASS: TestWorkerResultMissingReplyRecovery/frame_replay_drop (23.58s)
+    --- PASS: TestWorkerResultMissingReplyRecovery/step_put_drop (19.72s)
+    --- PASS: TestWorkerResultMissingReplyRecovery/step_put_ack_lost (19.76s)
+    --- PASS: TestWorkerResultMissingReplyRecovery/step_get_drop (20.88s)
+    --- PASS: TestWorkerResultMissingReplyRecovery/terminal_put_drop (20.64s)
+    --- PASS: TestWorkerResultMissingReplyRecovery/terminal_put_ack_lost (20.86s)
+PASS
+ok  	js-wf/integration	202.303s

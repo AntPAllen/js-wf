@@ -867,3 +867,15 @@ pass: final 100,000 seeds, exact replay, 143-pin corpus under race, and all eigh
 real R3 port-response cuts under race with 16.282–16.608s raw recovery. Frame
 Put/Get during the handler and further combined limit/TTL/process cases remain
 outside this proof, as do whole-matrix and soak release gates.
+
+
+## Frame object request deadlines
+
+Frame Put/Get through the worker result port now have separate fifteen-second
+budgets while user effects keep their original context. [Four frame and five
+spilled-result modes](scale/result-frame-response-budget-2026-10-01/) have seeded
+exact/offline replay, 152-pin race and nine real R3 port-response proofs. Confirmed
+frames are reused unchanged; a frame stored before completion can be orphaned
+and replaced by a newly anchored frame. The first 100,000-seed campaign was
+interrupted by the VM reboot; a fresh memory-bounded campaign is pending.
+Further combined limits, lease/TTL and server/process faults remain open.

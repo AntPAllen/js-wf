@@ -60,17 +60,26 @@ func (p *continuationWorkerJournal) Publish(ctx context.Context, subject string,
 
 type continuationWorkerSnapshots struct {
 	*SnapshotReadTransport
-	mode        string
-	fired       bool
-	budget      bool
-	budgetError error
+	mode         string
+	fired        bool
+	budget       bool
+	frameBudget  bool
+	frameReads   int
+	replayPrimed bool
+	budgetError  error
 }
 
 func (p *continuationWorkerSnapshots) PutObject(ctx context.Context, name string, raw []byte) error {
+	if p.frameBudget && strings.HasPrefix(p.mode, "frame_replay_") && strings.HasPrefix(name, "snapshot-") && !p.replayPrimed {
+		p.replayPrimed = true
+		if err := p.QueueWriteFault(SnapshotFault{"put_object", DropBeforeCommit}); err != nil {
+			return err
+		}
+	}
 	if p.budget && strings.HasPrefix(name, "snapshot-") {
 		return p.missingReply(ctx, "archive", name, func() error { return p.SnapshotReadTransport.PutObject(ctx, name, raw) })
 	}
-	if !p.fired && ((strings.HasPrefix(p.mode, "frame_") && strings.HasPrefix(name, "step-result-")) || (strings.HasPrefix(p.mode, "archive_") && strings.HasPrefix(name, "snapshot-"))) {
+	if !p.frameBudget && !p.fired && ((strings.HasPrefix(p.mode, "frame_") && strings.HasPrefix(name, "step-result-")) || (strings.HasPrefix(p.mode, "archive_") && strings.HasPrefix(name, "snapshot-"))) {
 		kind := DropBeforeCommit
 		if strings.HasSuffix(p.mode, "ack_lost") {
 			kind = LoseAckAfterCommit
@@ -83,9 +92,24 @@ func (p *continuationWorkerSnapshots) PutObject(ctx context.Context, name string
 	return p.SnapshotReadTransport.PutObject(ctx, name, raw)
 }
 func (p *continuationWorkerSnapshots) PutBytes(ctx context.Context, name string, raw []byte) error {
+	if p.frameBudget {
+		return p.missingReply(ctx, "frame_put", name, func() error { return p.SnapshotReadTransport.PutObject(ctx, name, raw) })
+	}
 	return p.PutObject(ctx, name, raw)
 }
 func (p *continuationWorkerSnapshots) GetBytes(ctx context.Context, name string) ([]byte, error) {
+	if p.frameBudget {
+		p.frameReads++
+		if strings.HasPrefix(p.mode, "frame_verify_") || strings.HasPrefix(p.mode, "frame_replay_") && p.frameReads == 2 {
+			operation := "frame_verify"
+			if strings.HasPrefix(p.mode, "frame_replay_") {
+				operation = "frame_replay"
+			}
+			var data []byte
+			err := p.missingReply(ctx, operation, name, func() error { var err error; data, err = p.GetObject(ctx, name); return err })
+			return data, err
+		}
+	}
 	return p.GetObject(ctx, name)
 }
 
@@ -132,13 +156,16 @@ func (p *continuationWorkerSnapshots) PurgeSignals(ctx context.Context, subject 
 	return p.SnapshotReadTransport.PurgeSignals(ctx, subject, before)
 }
 func runSeededWorkerContinuationBudget(seed int64, replay *Trace) (Trace, error) {
-	return runSeededWorkerContinuationMode(seed, replay, true)
+	return runSeededWorkerContinuationMode(seed, replay, true, false)
 }
 func runSeededWorkerContinuation(seed int64, replay *Trace) (Trace, error) {
-	return runSeededWorkerContinuationMode(seed, replay, false)
+	return runSeededWorkerContinuationMode(seed, replay, false, false)
 }
 
-func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget bool) (trace Trace, runErr error) {
+func runSeededWorkerFrameBudget(seed int64, replay *Trace) (Trace, error) {
+	return runSeededWorkerContinuationMode(seed, replay, false, true)
+}
+func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget, frameBudget bool) (trace Trace, runErr error) {
 	schedule := NewScheduler(seed)
 	if replay != nil {
 		var err error
@@ -147,9 +174,13 @@ func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget bool) (tr
 			return trace, err
 		}
 	}
+	bounded := budget || frameBudget
 	workload := "worker_continuation"
 	if budget {
 		workload = "worker_continuation_response_budget"
+	}
+	if frameBudget {
+		workload = "worker_frame_response_budget"
 	}
 	if err := schedule.SetWorkload(workload); err != nil {
 		return trace, err
@@ -159,12 +190,15 @@ func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget bool) (tr
 	if budget {
 		modes = []string{"archive_drop", "archive_ack_lost", "manifest_drop", "manifest_ack_lost", "purge_drop", "purge_ack_lost", "signal_purge_drop", "signal_purge_ack_lost"}
 	}
+	if frameBudget {
+		modes = []string{"frame_put_drop", "frame_put_ack_lost", "frame_verify_drop", "frame_replay_drop"}
+	}
 	mode, err := schedule.Choose(modes)
 	if err != nil {
 		return trace, err
 	}
 	lifetime := 10 * time.Second
-	if budget {
+	if bounded {
 		lifetime = 5 * time.Minute
 	}
 	ctx, stop := context.WithTimeout(context.Background(), lifetime)
@@ -174,7 +208,7 @@ func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget bool) (tr
 	transport := NewWorkerTransport(schedule, 3*time.Second)
 	live := NewJournalTransport(schedule)
 	appendPort := &continuationWorkerJournal{JournalTransport: live, mode: mode}
-	snapshots := &continuationWorkerSnapshots{SnapshotReadTransport: NewSnapshotReadTransport(schedule), mode: mode, budget: budget}
+	snapshots := &continuationWorkerSnapshots{SnapshotReadTransport: NewSnapshotReadTransport(schedule), mode: mode, budget: budget, frameBudget: frameBudget}
 	snapshots.BindJournal(live)
 	snapshots.BindSignals(transport.SignalTransport)
 	store := journal.NewWithSnapshotPort(appendPort, live, snapshots)
@@ -191,7 +225,7 @@ func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget bool) (tr
 			return trace, err
 		}
 	}
-	if !budget {
+	if !bounded {
 		switch mode {
 		case "manifest_drop", "manifest_ack_lost", "purge_drop", "purge_ack_lost", "signal_purge_drop", "signal_purge_ack_lost":
 			operation := "create_manifest"
@@ -228,7 +262,7 @@ func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget bool) (tr
 		if _, err := wf.RunOnce(c, "prefix", 23, func(_ context.Context, key string) (int, error) { effects++; prefixKey = key; return 46, nil }); err != nil {
 			return nil, err
 		}
-		if budget {
+		if bounded {
 			value, err := wf.AwaitSignal(c, "buffered")
 			if err != nil || string(value) != "1" {
 				return nil, fmt.Errorf("prefix signal=%s err=%v", value, err)
@@ -246,7 +280,7 @@ func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget bool) (tr
 			return nil, fmt.Errorf("continuation state %d: %v", total, err)
 		}
 		first := 0
-		if budget {
+		if bounded {
 			first = 1
 		}
 		for i := first; i < 2; i++ {
@@ -270,7 +304,21 @@ func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget bool) (tr
 	var frameName string
 	var frameBefore []byte
 	var prefixAtTimeout []journal.Record
-	if budget {
+	var confirmedFrame bool
+	if frameBudget && strings.HasPrefix(mode, "frame_replay_") {
+		initial, stopInitial := context.WithCancel(ctx)
+		transport.Dispatch.StopAfterNextNak(stopInitial)
+		if err := w.RunPartitionWithTransport(initial, 0, transport.Dispatch); err != nil {
+			return trace, err
+		}
+		if !snapshots.replayPrimed || snapshots.fired || effects != 1 || stageCalls != 0 {
+			return trace, fmt.Errorf("frame replay cut not prepared")
+		}
+		if err := schedule.AdvanceMillis(1000); err != nil {
+			return trace, err
+		}
+	}
+	if bounded {
 		attempt, stopAttempt := context.WithCancel(ctx)
 		transport.Dispatch.StopAfterNextNak(stopAttempt)
 		if err := w.RunPartitionWithTransport(attempt, 0, transport.Dispatch); err != nil {
@@ -279,7 +327,11 @@ func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget bool) (tr
 		if snapshots.budgetError != nil {
 			return trace, snapshots.budgetError
 		}
-		if !snapshots.fired || schedule.NowMillis() != 15000 || transport.Dispatch.Pending() == 0 || effects != 1 || stageCalls != 0 {
+		wantTime := int64(15000)
+		if frameBudget && strings.HasPrefix(mode, "frame_replay_") {
+			wantTime += 1000
+		}
+		if !snapshots.fired || schedule.NowMillis() != wantTime || transport.Dispatch.Pending() == 0 || effects != 1 || stageCalls != 0 {
 			return trace, fmt.Errorf("budget cut fired=%v time=%d pending=%d effects=%d stage=%d", snapshots.fired, schedule.NowMillis(), transport.Dispatch.Pending(), effects, stageCalls)
 		}
 		if _, err := leaseKV.Get(ctx, identity.Key(typ, id)); !errors.Is(err, jetstream.ErrKeyNotFound) {
@@ -304,8 +356,22 @@ func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget bool) (tr
 			}
 		}
 		snapshots.mu.Unlock()
-		if frameName == "" {
+		if frameName == "" && mode != "frame_put_drop" {
 			return trace, fmt.Errorf("missing durable frame at timeout")
+		}
+		for _, record := range prefixAtTimeout {
+			if record.Kind == journal.StepCompleted {
+				var done struct {
+					Ref string `json:"result_ref"`
+				}
+				_ = json.Unmarshal(record.Payload, &done)
+				if done.Ref == frameName && frameName != "" {
+					confirmedFrame = true
+				}
+			}
+		}
+		if budget && !confirmedFrame {
+			return trace, fmt.Errorf("publication timeout has no confirmed frame")
 		}
 		if err := schedule.AdvanceMillis(1000); err != nil {
 			return trace, err
@@ -346,13 +412,13 @@ func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget bool) (tr
 		objects[name] = bytes.Clone(value)
 	}
 	snapshots.mu.Unlock()
-	if budget && (len(records) < len(prefixAtTimeout) || !reflect.DeepEqual(prefixAtTimeout, records[:len(prefixAtTimeout)])) {
+	if bounded && (len(records) < len(prefixAtTimeout) || !reflect.DeepEqual(prefixAtTimeout, records[:len(prefixAtTimeout)])) {
 		return trace, fmt.Errorf("durable prefix changed on publication retry")
 	}
-	if budget && !bytes.Equal(frameBefore, objects[frameName]) {
+	if bounded && confirmedFrame && !bytes.Equal(frameBefore, objects[frameName]) {
 		return trace, fmt.Errorf("frame changed on publication retry")
 	}
-	if budget {
+	if bounded {
 		var finalEpoch uint64
 		for _, record := range records {
 			if record.Epoch > finalEpoch {
