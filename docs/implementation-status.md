@@ -2564,3 +2564,27 @@ SetState. An overlay of actual production source `02e5b08` fails that control
 with the nil-map panic. Restore now initializes an empty writable map, and the
 control passed under race in 1.012 seconds. [Before/after logs and final hashes](scale/checkpoint-state-2026-09-30/)
 are retained. Durable worker integration remains open.
+
+## Continuation archive/runtime manifest publication
+
+Checkpoint snapshots now verify a stored frame against its actual committed
+completion and declared checkpoint stage/input, then publish archive and runtime
+pointers in one revision-CAS manifest. The completion anchor stays retained;
+generic compaction cannot discard it, idempotent retries confirm the same
+pointer, and older anchors cannot replace newer ones. Continuation manifests
+use version 2 so old version-1 readers fail closed; ordinary snapshots stay
+version 1. The quiescent collector validates current frames and follows their
+promise result references. Overlaying the prior production collector at
+`8ecb81b` deletes a frame-held child result and fails the real contract.
+
+The corrected R3 three-node direct-storage contract passed under race in 4.498 s,
+including two checkpoint boundaries, cross-peer exact logical reconstruction,
+anchor preservation and a corrupt-frame sweep abort before deletion. Nine
+seeded archive/manifest/purge fault modes passed exact/cross-process replay
+under race in 7.587 s and 100,000 local seeds in 42.881 s. The complete final
+simulator suite passed in 91.741 s; journal controls and vet passed. [Raw proof
+logs, negative control and source hashes](scale/checkpoint-manifest-2026-10-01/)
+are retained. This is a publication foundation with no production worker
+callers yet: frame/pair creation cuts, suffix-only reads, stage dispatch,
+handoff/reconciliation, offline continuation replay and retirement/model-GC
+proofs remain open. It does not close the mixed seed 65 latency failure.

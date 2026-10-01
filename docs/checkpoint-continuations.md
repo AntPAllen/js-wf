@@ -1,8 +1,8 @@
 # Materialized SDK checkpoints with named continuations
 
 Status: continuation contract, SDK cursor foundation, bounded frame codec and
-SDK capture/restore. Durable publication,
-manifest publication, worker dispatch, suffix reads and recovery remain open.
+SDK capture/restore and archive/runtime manifest publication. Frame publication,
+worker dispatch, suffix reads and recovery remain open.
 This document preserves the plan's checkpoint requirement; it does not count
 as a completed checkpoint feature.
 
@@ -188,3 +188,25 @@ These are low-level SDK primitives. `wf.Continue`, stage registration and durabl
 worker publication/dispatch remain proposed, and ordinary workers still replay
 from the initial handler. Frame hash/anchor binding is not a substitute for
 checking the actual retained checkpoint completion and contiguous journal suffix.
+
+## Implemented archive/runtime publication
+
+`journal.WriteCheckpointSnapshot` verifies an already stored frame and committed
+checkpoint pair, archives the prefix strictly before its completion anchor, and
+publishes an archive/runtime manifest with revision CAS. The frame hash is bound
+to the completion and its serialized data hash to the checkpoint request. SDK
+positions are counted independently of auxiliary journal entries. Purge remains
+a separate confirmed step and preserves the live completion anchor. Newer runtime
+pointers reject older replacement attempts; generic compaction cannot remove
+the anchor. `wf.Continue` and frame/pair publication are still not wired.
+
+Continuation manifests use version 2. Ordinary manifests stay version 1. This
+lets old journal readers reject the new format before treating a continuation
+journal as an ordinary replay/compaction target. Version 2 without a pointer and
+version 1 with a pointer are rejected. The quiescent collector verifies the
+current frame and marks its promise outcome references as well as the archive.
+
+[Direct-storage real/model proofs](scale/checkpoint-manifest-2026-10-01/) include
+100,000 local fault schedules, exact replay, two real checkpoint boundaries and
+a real production-collector negative control. They do not prove worker dispatch,
+frame creation cuts, suffix-only resume, online collection or complete retirement.

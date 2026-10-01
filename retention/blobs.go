@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"js-wf/identity"
+	"js-wf/internal/checkpoint"
 	"js-wf/journal"
 
 	"github.com/nats-io/nats.go"
@@ -296,10 +297,27 @@ func SweepBlobsQuiescentWithPort(ctx context.Context, port BlobSweepPort, minAge
 				return BlobSweepResult{}, fmt.Errorf("invalid snapshot key %q", key)
 			}
 			var snap journal.Snapshot
-			if err := json.Unmarshal(value, &snap); err != nil || snap.Object == "" || snap.SHA256 == "" {
+			if err := json.Unmarshal(value, &snap); err != nil || snap.Object == "" || snap.SHA256 == "" || journal.ValidateRuntimeSnapshot(snap) != nil {
 				return BlobSweepResult{}, fmt.Errorf("invalid snapshot manifest %q", key)
 			}
 			mark(snap.Object)
+			if snap.Runtime != nil {
+				r := snap.Runtime
+				mark(r.Object)
+				raw, err := port.ObjectBytes(ctx, r.Object)
+				if err != nil {
+					return BlobSweepResult{}, fmt.Errorf("checkpoint object %q: %w", r.Object, err)
+				}
+				frame, err := checkpoint.Decode(raw, r.SHA256, checkpoint.Identity{Type: parts[0], ID: parts[1], InvSeq: r.InvSeq}, checkpoint.Anchor{Index: r.Index, Epoch: r.Epoch})
+				if err != nil || frame.Stage != r.Stage || frame.StepPosition != r.StepPosition {
+					return BlobSweepResult{}, fmt.Errorf("invalid checkpoint object %q: %v", r.Object, err)
+				}
+				for _, outcome := range frame.PromiseOutcomes {
+					if err := markEntryRefs(journal.Entry{Kind: journal.Completed, Payload: outcome}, mark); err != nil {
+						return BlobSweepResult{}, err
+					}
+				}
+			}
 			data, err := port.ObjectBytes(ctx, snap.Object)
 			if err != nil {
 				return BlobSweepResult{}, fmt.Errorf("snapshot object %q: %w", snap.Object, err)

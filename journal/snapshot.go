@@ -24,12 +24,13 @@ func (e *snapshotObjectGap) Error() string { return fmt.Sprintf("%v: %v", ErrGap
 func (e *snapshotObjectGap) Unwrap() error { return ErrGap }
 
 type Snapshot struct {
-	Version   int    `json:"version"`
-	LastSeq   uint64 `json:"last_seq"`
-	LastIndex uint64 `json:"last_index"`
-	Epoch     uint64 `json:"epoch"`
-	Object    string `json:"object"`
-	SHA256    string `json:"sha256"`
+	Version   int                `json:"version"`
+	LastSeq   uint64             `json:"last_seq"`
+	LastIndex uint64             `json:"last_index"`
+	Epoch     uint64             `json:"epoch"`
+	Object    string             `json:"object"`
+	SHA256    string             `json:"sha256"`
+	Runtime   *RuntimeCheckpoint `json:"runtime_checkpoint,omitempty"`
 }
 
 // SnapshotReadPort contains the manifest and object reads needed to
@@ -221,6 +222,10 @@ func (s *Store) SnapshotPrefix(ctx context.Context, typ, id string, keep int) (S
 // WriteSnapshot stores all entries except the newest keep entries. It does
 // not purge; a caller can recover a crash by calling PurgeSnapshot later.
 func (s *Store) WriteSnapshot(ctx context.Context, typ, id string, keep int) (Snapshot, error) {
+	return s.writeSnapshot(ctx, typ, id, keep, nil)
+}
+
+func (s *Store) writeSnapshot(ctx context.Context, typ, id string, keep int, runtime *RuntimeCheckpoint) (Snapshot, error) {
 	var empty Snapshot
 	if err := identity.Validate(typ, id); err != nil {
 		return empty, err
@@ -237,6 +242,12 @@ func (s *Store) WriteSnapshot(ctx context.Context, typ, id string, keep int) (Sn
 		return empty, err
 	}
 	cut := len(records) - keep
+	if runtime != nil {
+		if err := s.verifyRuntimeCheckpoint(ctx, typ, id, records, *runtime); err != nil {
+			return empty, err
+		}
+		cut = int(runtime.Index) // preserve the completion anchor and all newer entries
+	}
 	if cut < 1 {
 		return empty, ErrSnapshotTooShort
 	}
@@ -249,10 +260,30 @@ func (s *Store) WriteSnapshot(ctx context.Context, typ, id string, keep int) (Sn
 	oldExists := err == nil
 	if oldExists {
 		var previous Snapshot
-		if json.Unmarshal(old.Value, &previous) != nil {
+		if json.Unmarshal(old.Value, &previous) != nil || (previous.Version != 1 && previous.Version != 2) || ValidateRuntimeSnapshot(previous) != nil {
 			return empty, ErrGap
 		}
+		if previous.Runtime != nil {
+			if runtime == nil {
+				return empty, ErrCheckpointCompaction
+			}
+			if previous.Runtime.InvSeq != runtime.InvSeq {
+				return empty, ErrGap
+			}
+			if previous.Runtime.Sequence >= runtime.Sequence {
+				if *previous.Runtime == *runtime {
+					return previous, nil
+				}
+				return empty, ErrSnapshotStale
+			}
+			if previous.Runtime.Index >= runtime.Index || previous.Runtime.Epoch > runtime.Epoch {
+				return empty, ErrSnapshotStale
+			}
+		}
 		if previous.LastSeq >= last.Sequence {
+			if runtime != nil {
+				return empty, ErrSnapshotStale
+			}
 			return previous, nil
 		}
 	}
@@ -277,7 +308,10 @@ func (s *Store) WriteSnapshot(ctx context.Context, typ, id string, keep int) (Sn
 	if err != nil {
 		return empty, err
 	}
-	snap := Snapshot{Version: 1, LastSeq: last.Sequence, LastIndex: last.Index, Epoch: last.Epoch, Object: objectName, SHA256: hex.EncodeToString(digest[:])}
+	snap := Snapshot{Version: 1, LastSeq: last.Sequence, LastIndex: last.Index, Epoch: last.Epoch, Object: objectName, SHA256: hex.EncodeToString(digest[:]), Runtime: runtime}
+	if runtime != nil {
+		snap.Version = 2
+	}
 	manifest, _ := json.Marshal(snap)
 	if !oldExists {
 		err = port.CreateManifest(ctx, snapshotKey(typ, id), manifest)
@@ -386,7 +420,7 @@ func (s *Store) loadSnapshot(ctx context.Context, typ, id string) ([]Record, *Sn
 	if err := json.Unmarshal(value, &snap); err != nil {
 		return nil, nil, ErrGap
 	}
-	if snap.Version != 1 || snap.Object == "" || snap.SHA256 == "" {
+	if (snap.Version != 1 && snap.Version != 2) || snap.Object == "" || snap.SHA256 == "" || ValidateRuntimeSnapshot(snap) != nil {
 		return nil, nil, ErrGap
 	}
 	keyDigest := sha256.Sum256([]byte(identity.Key(typ, id)))

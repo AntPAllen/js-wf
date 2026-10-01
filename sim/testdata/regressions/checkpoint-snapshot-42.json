@@ -1,0 +1,592 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "checkpoint_snapshot",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "clean",
+        "manifest_ack_lost",
+        "manifest_drop",
+        "object_ack_lost",
+        "object_drop",
+        "purge_ack_lost",
+        "purge_drop",
+        "update_ack_lost",
+        "update_drop"
+      ],
+      "chosen": "update_drop"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.checkpoint",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.checkpoint",
+      "sequence": 1,
+      "data_sha256": "76ff8cb9f6130a68a3d259b325125e3120d4ba3c46851ea141be7a3d21e0cb48",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.checkpoint",
+      "sequence": 1,
+      "data_sha256": "76ff8cb9f6130a68a3d259b325125e3120d4ba3c46851ea141be7a3d21e0cb48",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "6e74fda5ea7d0bd19bf589e9f6a5af464d9d9f3a513ebbf6eeefe1e55d2dfb9c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.checkpoint",
+      "sequence": 2,
+      "data_sha256": "6e74fda5ea7d0bd19bf589e9f6a5af464d9d9f3a513ebbf6eeefe1e55d2dfb9c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "e82a3108a0a188d3fc37242fd2cf72206c6e5a29c3c785649126ff075899c794",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "put_snapshot_object",
+      "subject": "step-result-491d8f3831fdbc38e9f844d7dcf25d17e09e3a1b1a99e0e74953b5cedba5aa0c",
+      "data_sha256": "491d8f3831fdbc38e9f844d7dcf25d17e09e3a1b1a99e0e74953b5cedba5aa0c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.checkpoint",
+      "sequence": 3,
+      "data_sha256": "e82a3108a0a188d3fc37242fd2cf72206c6e5a29c3c785649126ff075899c794",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "e329e534de15621c08ba1fe150581378b1049934882a487020cccad010378b39",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.checkpoint",
+      "sequence": 4,
+      "data_sha256": "e329e534de15621c08ba1fe150581378b1049934882a487020cccad010378b39",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 4,
+      "sequence": 5,
+      "data_sha256": "ac16bf8448fe979e67cb7721fc01cbe50f520640501a1b6eed0d95335778ba43",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "76ff8cb9f6130a68a3d259b325125e3120d4ba3c46851ea141be7a3d21e0cb48",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "6e74fda5ea7d0bd19bf589e9f6a5af464d9d9f3a513ebbf6eeefe1e55d2dfb9c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "e82a3108a0a188d3fc37242fd2cf72206c6e5a29c3c785649126ff075899c794",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "e329e534de15621c08ba1fe150581378b1049934882a487020cccad010378b39",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 5,
+      "sequence": 5,
+      "data_sha256": "ac16bf8448fe979e67cb7721fc01cbe50f520640501a1b6eed0d95335778ba43",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 6,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "step-result-491d8f3831fdbc38e9f844d7dcf25d17e09e3a1b1a99e0e74953b5cedba5aa0c",
+      "data_sha256": "491d8f3831fdbc38e9f844d7dcf25d17e09e3a1b1a99e0e74953b5cedba5aa0c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "put_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-4-79a9e0e4540e1dd2",
+      "data_sha256": "79a9e0e4540e1dd2afdc2b1f635c518e3253fcc3ee046c69981a4cc929e3f4bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-4-79a9e0e4540e1dd2",
+      "data_sha256": "79a9e0e4540e1dd2afdc2b1f635c518e3253fcc3ee046c69981a4cc929e3f4bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "create_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "sequence": 1,
+      "data_sha256": "29588bebdd86dd2b20767242f6996881454ff7aadd208054d74e32913110476c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "data_sha256": "29588bebdd86dd2b20767242f6996881454ff7aadd208054d74e32913110476c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-4-79a9e0e4540e1dd2",
+      "data_sha256": "79a9e0e4540e1dd2afdc2b1f635c518e3253fcc3ee046c69981a4cc929e3f4bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_prefix",
+      "subject": "wf.jrn.test.checkpoint",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_snapshot_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "sequence": 5,
+      "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "data_sha256": "29588bebdd86dd2b20767242f6996881454ff7aadd208054d74e32913110476c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-4-79a9e0e4540e1dd2",
+      "data_sha256": "79a9e0e4540e1dd2afdc2b1f635c518e3253fcc3ee046c69981a4cc929e3f4bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 5,
+      "sequence": 5,
+      "data_sha256": "ac16bf8448fe979e67cb7721fc01cbe50f520640501a1b6eed0d95335778ba43",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 6,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "data_sha256": "29588bebdd86dd2b20767242f6996881454ff7aadd208054d74e32913110476c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "put_snapshot_object",
+      "subject": "step-result-51fe999420a3535c2d20fbe9ad699c7cac6745ae008e277421a505a6495a73d6",
+      "data_sha256": "51fe999420a3535c2d20fbe9ad699c7cac6745ae008e277421a505a6495a73d6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.checkpoint",
+      "sequence": 5,
+      "data_sha256": "ac16bf8448fe979e67cb7721fc01cbe50f520640501a1b6eed0d95335778ba43",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 5,
+      "sequence": 6,
+      "data_sha256": "9019b290bf445084eaf54a0fabdd04607f243ce2bb13a9f83c64e08596f62f2f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.checkpoint",
+      "sequence": 6,
+      "data_sha256": "9019b290bf445084eaf54a0fabdd04607f243ce2bb13a9f83c64e08596f62f2f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "31ae585c5922b29e12c7c1141204a7b8042667a7c4bc7fb38e315be02e71ef99",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "data_sha256": "29588bebdd86dd2b20767242f6996881454ff7aadd208054d74e32913110476c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-4-79a9e0e4540e1dd2",
+      "data_sha256": "79a9e0e4540e1dd2afdc2b1f635c518e3253fcc3ee046c69981a4cc929e3f4bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 5,
+      "sequence": 5,
+      "data_sha256": "ac16bf8448fe979e67cb7721fc01cbe50f520640501a1b6eed0d95335778ba43",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 6,
+      "sequence": 6,
+      "data_sha256": "9019b290bf445084eaf54a0fabdd04607f243ce2bb13a9f83c64e08596f62f2f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 7,
+      "sequence": 7,
+      "data_sha256": "31ae585c5922b29e12c7c1141204a7b8042667a7c4bc7fb38e315be02e71ef99",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 8,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "step-result-51fe999420a3535c2d20fbe9ad699c7cac6745ae008e277421a505a6495a73d6",
+      "data_sha256": "51fe999420a3535c2d20fbe9ad699c7cac6745ae008e277421a505a6495a73d6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "data_sha256": "29588bebdd86dd2b20767242f6996881454ff7aadd208054d74e32913110476c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "put_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-6-0a72253cbb88c427",
+      "data_sha256": "0a72253cbb88c427ec147e097b2319d0ed804d3b08fc1cd9fe35c1d98abddf5c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-6-0a72253cbb88c427",
+      "data_sha256": "0a72253cbb88c427ec147e097b2319d0ed804d3b08fc1cd9fe35c1d98abddf5c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "update_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "sequence": 1,
+      "data_sha256": "a7831f67d5cac36876c504117cd3003d9ed26c62d4a5e91bfa46b0b8e8ecfa67",
+      "outcome": "drop_before_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "data_sha256": "29588bebdd86dd2b20767242f6996881454ff7aadd208054d74e32913110476c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-4-79a9e0e4540e1dd2",
+      "data_sha256": "79a9e0e4540e1dd2afdc2b1f635c518e3253fcc3ee046c69981a4cc929e3f4bf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 5,
+      "sequence": 5,
+      "data_sha256": "ac16bf8448fe979e67cb7721fc01cbe50f520640501a1b6eed0d95335778ba43",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 6,
+      "sequence": 6,
+      "data_sha256": "9019b290bf445084eaf54a0fabdd04607f243ce2bb13a9f83c64e08596f62f2f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 7,
+      "sequence": 7,
+      "data_sha256": "31ae585c5922b29e12c7c1141204a7b8042667a7c4bc7fb38e315be02e71ef99",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 8,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "step-result-51fe999420a3535c2d20fbe9ad699c7cac6745ae008e277421a505a6495a73d6",
+      "data_sha256": "51fe999420a3535c2d20fbe9ad699c7cac6745ae008e277421a505a6495a73d6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "data_sha256": "29588bebdd86dd2b20767242f6996881454ff7aadd208054d74e32913110476c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "put_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-6-0a72253cbb88c427",
+      "data_sha256": "0a72253cbb88c427ec147e097b2319d0ed804d3b08fc1cd9fe35c1d98abddf5c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-6-0a72253cbb88c427",
+      "data_sha256": "0a72253cbb88c427ec147e097b2319d0ed804d3b08fc1cd9fe35c1d98abddf5c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "update_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "sequence": 2,
+      "data_sha256": "a7831f67d5cac36876c504117cd3003d9ed26c62d4a5e91bfa46b0b8e8ecfa67",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "data_sha256": "a7831f67d5cac36876c504117cd3003d9ed26c62d4a5e91bfa46b0b8e8ecfa67",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-6-0a72253cbb88c427",
+      "data_sha256": "0a72253cbb88c427ec147e097b2319d0ed804d3b08fc1cd9fe35c1d98abddf5c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 7,
+      "sequence": 7,
+      "data_sha256": "31ae585c5922b29e12c7c1141204a7b8042667a7c4bc7fb38e315be02e71ef99",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 8,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "step-result-491d8f3831fdbc38e9f844d7dcf25d17e09e3a1b1a99e0e74953b5cedba5aa0c",
+      "data_sha256": "491d8f3831fdbc38e9f844d7dcf25d17e09e3a1b1a99e0e74953b5cedba5aa0c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "data_sha256": "a7831f67d5cac36876c504117cd3003d9ed26c62d4a5e91bfa46b0b8e8ecfa67",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "data_sha256": "a7831f67d5cac36876c504117cd3003d9ed26c62d4a5e91bfa46b0b8e8ecfa67",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-6-0a72253cbb88c427",
+      "data_sha256": "0a72253cbb88c427ec147e097b2319d0ed804d3b08fc1cd9fe35c1d98abddf5c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_journal_prefix",
+      "subject": "wf.jrn.test.checkpoint",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "purge_snapshot_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "sequence": 7,
+      "data_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_manifest",
+      "subject": "snap.test.checkpoint",
+      "data_sha256": "a7831f67d5cac36876c504117cd3003d9ed26c62d4a5e91bfa46b0b8e8ecfa67",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_snapshot_object",
+      "subject": "snapshot-24b4abf87ccc0c64-6-0a72253cbb88c427",
+      "data_sha256": "0a72253cbb88c427ec147e097b2319d0ed804d3b08fc1cd9fe35c1d98abddf5c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 7,
+      "sequence": 7,
+      "data_sha256": "31ae585c5922b29e12c7c1141204a7b8042667a7c4bc7fb38e315be02e71ef99",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.checkpoint",
+      "expected": 8,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_checkpoint_snapshot",
+      "subject": "wf.jrn.test.checkpoint",
+      "sequence": 6,
+      "outcome": "update_drop"
+    }
+  ]
+}
