@@ -3674,3 +3674,24 @@ removed. Hosted confirmation remains pending. Standard fcf4537 run 36834846249,
 production/model source is unchanged here. The 844db83 20-seed mixed and CAS
 throughput jobs pass. None establishes the whole-matrix 200-seed or five-node
 24-hour release gate. Original million timers remain live without restart.
+
+
+## Fresh 200-seed mixed campaign stops at seed 4
+
+The fcf4537 [200-seed campaign](https://github.com/AntPAllen/js-wf/actions/runs/36835269534)
+passes seeds 1–3 then fails seed 4 signal terminal p99 at 31.421256978 seconds,
+above the unchanged 30-second gate. Its independent pressure and lease-disk
+jobs pass. Full operation data for mixedsignal/mixed-00-0 records 52 pre-append
+renewals totaling 30.501003236 seconds: 30.500405601 inside KV Update and
+0.000062393 at the local gate. The slow printed window contains 49 renewals;
+concurrent acquisition/heartbeat durations must not be summed as elapsed time.
+These client timings do not identify server execution or establish cause.
+[Full seed artifacts and summaries](scale/mixed-seed4-fcf4537-2026-10-01/)
+are retained for exact-cost modeling and further contract investigation. The
+uniform lease-cost Tier 1 control demonstrates the cost mechanism but does
+not reproduce this particular timing sequence or NATS behavior. The 200-seed
+release gate remains failed; no runtime guarantee or latency target is changed.
+
+The registered standard workflow at 1bcf5ef now reports its new promise-restart
+job running (36835630542), confirming the existing entry point executes the
+new CI gate. Its result and full simulation gates remain pending.
