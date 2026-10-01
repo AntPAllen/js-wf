@@ -5273,3 +5273,19 @@ is not treated as terminal or as a runtime verdict. No replacement is launched.
 Behind sustained36939477954 and comprehensive36929826425 remain in progress.
 The million-timer service remains active atPID18146 with275,529 receipts at
 the sampled checkpoint.
+
+
+### Expanded complete Tier 1 suite passes the strict guard
+
+The corrected portable-corpus run at clean source5389714 finishes with
+systemd inactive/success. Full simulator Go output passes107.721s, and the
+strict suite guard verifies150 top-level passes,two documented trace-only
+skips and all180 source-inventory pins. Aggregate coverage is103,632 schedules,
+1,738,227 choices and24,098,821 transport events. [Complete proof](scale/tier1-suite-guard-2026-10-01/expanded-portable-corpus-pass/)
+retains original events,inventories,source,output,time and the guard report.
+This proves whole compiled-inventory execution; configured1,000 seeds are
+not independent per-workload coverage proof or the100,000-seed release gate.
+
+Both clock handles36939477954 and36939480705, and earlier comprehensive
+36929826425, remain authoritatively in progress. The ahead diagnostic's
+contradictory cancellation log remains excluded from verdicts.
