@@ -4116,3 +4116,43 @@ invocations, 19 faults and aggregate terminal p99 7.327s. Complete log, terminal
 metadata and scoped report are [retained](scale/matrix-held-owner-stalls-2026-10-01/).
 It predates the snapshot budget and does not reproduce the earlier seed-1 stall.
 One seed cannot clear twenty or 200; both release flags remain false.
+
+## Continuation publication has a shared request budget
+
+Continuation archive/manifest publication, journal/signal purge, suspension
+append and handoff now share a fifteen-second context. Assigning the execute
+context also bounds the existing append closures. Timeout follows ordinary
+NAK/release/redelivery repair and records continuation_publish timing. Frame
+storage during the handler remains a separate operation and is not bounded by
+this publication change. No fencing, capacity or latency gate changes.
+
+[Seeded/native evidence, compiled controls and source hashes](scale/continuation-response-budget-2026-10-01/)
+are retained. The worker_continuation_response_budget workload covers eight
+missing-response cuts: archive, manifest, journal purge and consumed-signal purge,
+before commit or after a durable commit. The parent lifetime is five minutes;
+the model requires the supplied fifteen-second budget and advances virtual
+request cost without wall-clock sleep. The final stronger workload passes
+100,000 seeds in 131.39s. Exact first-ten and separate-process replay pass;
+eight pins bring the corpus to 143, with all pins plus the new workload passing
+race in 22.490s. No prior pin changes.
+
+After timeout the model requires lease release, absent terminal outcome and an
+unchanged stored frame/prefix. A fresh successor completes with a higher epoch,
+ordered buffered signals, one execution of each recorded effect, physical drain,
+raw integrity and complete-history offline replay without effects. All eight
+real R3 port-response cuts pass under race in 191.80s (192.844s package), with
+16.282–16.608s raw entry-to-terminal recovery, maintained ownership past the
+original twelve-second TTL, at least two real heartbeat renewals, unchanged
+frame/prefix, immutable cross-node result, duplicate-start rejection and one
+terminal in each 18–19-entry audit. The native fixture withholds a transport-port
+response until actual context expiry; it does not drop a NATS wire reply or
+reproduce the original sustained server failure.
+
+A compiled control creates but does not use the publication context and fails
+the specific budget assertion in both model (0.053s package) and native fixture
+(3.535s package), without build failure or waiting minutes. Full sim/worker/journal
+packages pass in 153.849/29.811/0.005s before the extra model prefix assertions;
+the final focused 100,000 seeds and race checks cover those assertions. Vet and
+all 25 script tests pass. Further frame/result reply-loss, limit/TTL/process
+combinations, comprehensive final-source and full matrix/soak gates remain open.
+The old live-owner stalls' exact blocking call and server cause remain unconfirmed.

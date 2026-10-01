@@ -464,6 +464,8 @@ Clock-skew injection must fail closed unless the running process reports the req
 
 The original 30-second consumer `AckWait` left no room for processing before the 30-second p99 recovery gate when a nak was lost during quorum loss. The runtime default is now thirteen seconds (the twelve-second lease TTL plus one second) with a three-second progress heartbeat; explicit 30-second control fixtures remain to test their configured behavior.
 
+Automatic journal snapshot attempts and continuation publication use a fifteen-second budget rather than the delivery lifetime. Continuation archive/manifest writes, journal/signal purges, suspension append and handoff share that deadline. Timeout retains the recorded frame and follows ordinary NAK/release/redelivery recovery. Frame storage during the handler is a separate operation; its remaining missing-response coverage is tracked independently.
+
 When a ready suspended wait remains at the same journal tail, its scanner wakeup message ID changes every ten seconds. Scans within a window deduplicate, while the next window can supply a fresh run if a prior wakeup was consumed during lease contention and its nak was lost. The scanner stops reenqueuing after the journal advances or the wait is no longer ready; the mixed fault gate still measures under 30 seconds from its last enabling event.
 
 **The "done" bar for a release**

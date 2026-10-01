@@ -1,0 +1,36 @@
+=== RUN   TestWorkerContinuationMissingReplyRecovery
+=== RUN   TestWorkerContinuationMissingReplyRecovery/archive_drop
+    worker_continuation_budget_test.go:209: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_continuation_budget_test.go:242: mode=archive_drop recovery=16.404190039s inv_seq=1 effects=2 heartbeat_renewals=2 timeouts=1 integrity={Invocations:1 Journals:1 Entries:19 Terminal:1}
+=== RUN   TestWorkerContinuationMissingReplyRecovery/archive_ack_lost
+    worker_continuation_budget_test.go:209: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_continuation_budget_test.go:242: mode=archive_ack_lost recovery=16.607897999s inv_seq=1 effects=2 heartbeat_renewals=3 timeouts=1 integrity={Invocations:1 Journals:1 Entries:19 Terminal:1}
+=== RUN   TestWorkerContinuationMissingReplyRecovery/manifest_drop
+    worker_continuation_budget_test.go:209: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_continuation_budget_test.go:242: mode=manifest_drop recovery=16.607306209s inv_seq=1 effects=2 heartbeat_renewals=2 timeouts=1 integrity={Invocations:1 Journals:1 Entries:19 Terminal:1}
+=== RUN   TestWorkerContinuationMissingReplyRecovery/manifest_ack_lost
+    worker_continuation_budget_test.go:209: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_continuation_budget_test.go:242: mode=manifest_ack_lost recovery=16.338950299s inv_seq=1 effects=2 heartbeat_renewals=2 timeouts=1 integrity={Invocations:1 Journals:1 Entries:18 Terminal:1}
+=== RUN   TestWorkerContinuationMissingReplyRecovery/purge_drop
+    worker_continuation_budget_test.go:209: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_continuation_budget_test.go:242: mode=purge_drop recovery=16.303716105s inv_seq=1 effects=2 heartbeat_renewals=2 timeouts=1 integrity={Invocations:1 Journals:1 Entries:18 Terminal:1}
+=== RUN   TestWorkerContinuationMissingReplyRecovery/purge_ack_lost
+    worker_continuation_budget_test.go:209: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_continuation_budget_test.go:242: mode=purge_ack_lost recovery=16.379344739s inv_seq=1 effects=2 heartbeat_renewals=3 timeouts=1 integrity={Invocations:1 Journals:1 Entries:18 Terminal:1}
+=== RUN   TestWorkerContinuationMissingReplyRecovery/signal_purge_drop
+    worker_continuation_budget_test.go:209: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_continuation_budget_test.go:242: mode=signal_purge_drop recovery=16.35844728s inv_seq=1 effects=2 heartbeat_renewals=3 timeouts=1 integrity={Invocations:1 Journals:1 Entries:18 Terminal:1}
+=== RUN   TestWorkerContinuationMissingReplyRecovery/signal_purge_ack_lost
+    worker_continuation_budget_test.go:209: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=1 pending=0 ack_pending=0
+    worker_continuation_budget_test.go:242: mode=signal_purge_ack_lost recovery=16.282250394s inv_seq=1 effects=2 heartbeat_renewals=2 timeouts=1 integrity={Invocations:1 Journals:1 Entries:18 Terminal:1}
+--- PASS: TestWorkerContinuationMissingReplyRecovery (191.80s)
+    --- PASS: TestWorkerContinuationMissingReplyRecovery/archive_drop (23.69s)
+    --- PASS: TestWorkerContinuationMissingReplyRecovery/archive_ack_lost (24.35s)
+    --- PASS: TestWorkerContinuationMissingReplyRecovery/manifest_drop (24.53s)
+    --- PASS: TestWorkerContinuationMissingReplyRecovery/manifest_ack_lost (23.84s)
+    --- PASS: TestWorkerContinuationMissingReplyRecovery/purge_drop (23.95s)
+    --- PASS: TestWorkerContinuationMissingReplyRecovery/purge_ack_lost (23.93s)
+    --- PASS: TestWorkerContinuationMissingReplyRecovery/signal_purge_drop (23.74s)
+    --- PASS: TestWorkerContinuationMissingReplyRecovery/signal_purge_ack_lost (23.77s)
+PASS
+ok  	js-wf/integration	192.844s

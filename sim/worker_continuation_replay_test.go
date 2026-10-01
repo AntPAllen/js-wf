@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -21,6 +22,8 @@ import (
 	"js-wf/lease"
 	"js-wf/wf"
 	"js-wf/worker"
+
+	"github.com/nats-io/nats.go/jetstream"
 )
 
 type continuationWorkerJournal struct {
@@ -57,11 +60,16 @@ func (p *continuationWorkerJournal) Publish(ctx context.Context, subject string,
 
 type continuationWorkerSnapshots struct {
 	*SnapshotReadTransport
-	mode  string
-	fired bool
+	mode        string
+	fired       bool
+	budget      bool
+	budgetError error
 }
 
 func (p *continuationWorkerSnapshots) PutObject(ctx context.Context, name string, raw []byte) error {
+	if p.budget && strings.HasPrefix(name, "snapshot-") {
+		return p.missingReply(ctx, "archive", name, func() error { return p.SnapshotReadTransport.PutObject(ctx, name, raw) })
+	}
 	if !p.fired && ((strings.HasPrefix(p.mode, "frame_") && strings.HasPrefix(name, "step-result-")) || (strings.HasPrefix(p.mode, "archive_") && strings.HasPrefix(name, "snapshot-"))) {
 		kind := DropBeforeCommit
 		if strings.HasSuffix(p.mode, "ack_lost") {
@@ -81,7 +89,56 @@ func (p *continuationWorkerSnapshots) GetBytes(ctx context.Context, name string)
 	return p.GetObject(ctx, name)
 }
 
-func runSeededWorkerContinuation(seed int64, replay *Trace) (trace Trace, runErr error) {
+// Model a response that never arrives until the publication budget expires.
+// Commit and response delivery are independent: an absent reply may follow a
+// durable commit. Virtual time accounts for the request cost without sleeping.
+func (p *continuationWorkerSnapshots) missingReply(ctx context.Context, operation, subject string, commit func() error) error {
+	if p.fired || !strings.HasPrefix(p.mode, operation+"_") {
+		return commit()
+	}
+	p.fired = true
+	deadline, ok := ctx.Deadline()
+	if !ok || time.Until(deadline) > 15*time.Second {
+		p.budgetError = fmt.Errorf("continuation %s request inherits delivery lifetime instead of a 15s budget", operation)
+		return p.budgetError
+	}
+	if strings.HasSuffix(p.mode, "ack_lost") {
+		if err := commit(); err != nil {
+			return err
+		}
+	}
+	if err := p.schedule.AdvanceMillis(15000); err != nil {
+		return err
+	}
+	p.schedule.RecordTransport(TransportEvent{Operation: "continuation_missing_reply", Subject: subject, Outcome: p.mode})
+	return context.DeadlineExceeded
+}
+func (p *continuationWorkerSnapshots) CreateManifest(ctx context.Context, key string, raw []byte) error {
+	if p.budget {
+		return p.missingReply(ctx, "manifest", key, func() error { return p.SnapshotReadTransport.CreateManifest(ctx, key, raw) })
+	}
+	return p.SnapshotReadTransport.CreateManifest(ctx, key, raw)
+}
+func (p *continuationWorkerSnapshots) PurgeJournal(ctx context.Context, subject string, before uint64) error {
+	if p.budget {
+		return p.missingReply(ctx, "purge", subject, func() error { return p.SnapshotReadTransport.PurgeJournal(ctx, subject, before) })
+	}
+	return p.SnapshotReadTransport.PurgeJournal(ctx, subject, before)
+}
+func (p *continuationWorkerSnapshots) PurgeSignals(ctx context.Context, subject string, before uint64) error {
+	if p.budget {
+		return p.missingReply(ctx, "signal_purge", subject, func() error { return p.SnapshotReadTransport.PurgeSignals(ctx, subject, before) })
+	}
+	return p.SnapshotReadTransport.PurgeSignals(ctx, subject, before)
+}
+func runSeededWorkerContinuationBudget(seed int64, replay *Trace) (Trace, error) {
+	return runSeededWorkerContinuationMode(seed, replay, true)
+}
+func runSeededWorkerContinuation(seed int64, replay *Trace) (Trace, error) {
+	return runSeededWorkerContinuationMode(seed, replay, false)
+}
+
+func runSeededWorkerContinuationMode(seed int64, replay *Trace, budget bool) (trace Trace, runErr error) {
 	schedule := NewScheduler(seed)
 	if replay != nil {
 		var err error
@@ -90,26 +147,39 @@ func runSeededWorkerContinuation(seed int64, replay *Trace) (trace Trace, runErr
 			return trace, err
 		}
 	}
-	if err := schedule.SetWorkload("worker_continuation"); err != nil {
+	workload := "worker_continuation"
+	if budget {
+		workload = "worker_continuation_response_budget"
+	}
+	if err := schedule.SetWorkload(workload); err != nil {
 		return trace, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose([]string{"clean", "request_drop", "request_ack_lost", "completion_drop", "completion_ack_lost", "frame_drop", "frame_ack_lost", "archive_drop", "archive_ack_lost", "manifest_drop", "manifest_ack_lost", "purge_drop", "purge_ack_lost", "signal_purge_drop", "signal_purge_ack_lost", "handoff_drop", "handoff_ack_lost"})
+	modes := []string{"clean", "request_drop", "request_ack_lost", "completion_drop", "completion_ack_lost", "frame_drop", "frame_ack_lost", "archive_drop", "archive_ack_lost", "manifest_drop", "manifest_ack_lost", "purge_drop", "purge_ack_lost", "signal_purge_drop", "signal_purge_ack_lost", "handoff_drop", "handoff_ack_lost"}
+	if budget {
+		modes = []string{"archive_drop", "archive_ack_lost", "manifest_drop", "manifest_ack_lost", "purge_drop", "purge_ack_lost", "signal_purge_drop", "signal_purge_ack_lost"}
+	}
+	mode, err := schedule.Choose(modes)
 	if err != nil {
 		return trace, err
 	}
-	ctx, stop := context.WithTimeout(context.Background(), 10*time.Second)
+	lifetime := 10 * time.Second
+	if budget {
+		lifetime = 5 * time.Minute
+	}
+	ctx, stop := context.WithTimeout(context.Background(), lifetime)
 	defer stop()
 	const typ = "test"
 	id := integratedWorkerIDs(1)[0]
 	transport := NewWorkerTransport(schedule, 3*time.Second)
 	live := NewJournalTransport(schedule)
 	appendPort := &continuationWorkerJournal{JournalTransport: live, mode: mode}
-	snapshots := &continuationWorkerSnapshots{SnapshotReadTransport: NewSnapshotReadTransport(schedule), mode: mode}
+	snapshots := &continuationWorkerSnapshots{SnapshotReadTransport: NewSnapshotReadTransport(schedule), mode: mode, budget: budget}
 	snapshots.BindJournal(live)
 	snapshots.BindSignals(transport.SignalTransport)
 	store := journal.NewWithSnapshotPort(appendPort, live, snapshots)
-	leasing := lease.NewWithKVPort(NewKVTransport(schedule, 30*time.Second))
+	leaseKV := NewKVTransport(schedule, 30*time.Second)
+	leasing := lease.NewWithKVPort(leaseKV)
 	outcomes := NewKVTransport(schedule, 0)
 	c := client.NewWithSignalPorts(transport.SignalTransport, transport.SignalTransport)
 	handle, err := c.Start(ctx, typ, id, []byte(`23`))
@@ -121,29 +191,31 @@ func runSeededWorkerContinuation(seed int64, replay *Trace) (trace Trace, runErr
 			return trace, err
 		}
 	}
-	switch mode {
-	case "manifest_drop", "manifest_ack_lost", "purge_drop", "purge_ack_lost", "signal_purge_drop", "signal_purge_ack_lost":
-		operation := "create_manifest"
-		if strings.HasPrefix(mode, "purge_") {
-			operation = "purge_journal"
-		}
-		if strings.HasPrefix(mode, "signal_purge_") {
-			operation = "purge_signals"
-		}
-		kind := DropBeforeCommit
-		if strings.HasSuffix(mode, "ack_lost") {
-			kind = LoseAckAfterCommit
-		}
-		if err := snapshots.QueueWriteFault(SnapshotFault{operation, kind}); err != nil {
-			return trace, err
-		}
-	case "handoff_drop", "handoff_ack_lost":
-		kind := "drop_before_commit"
-		if strings.HasSuffix(mode, "ack_lost") {
-			kind = "lose_ack_after_commit"
-		}
-		if err := transport.QueueFault(StartFault{Operation: "enqueue_run", Kind: kind}); err != nil {
-			return trace, err
+	if !budget {
+		switch mode {
+		case "manifest_drop", "manifest_ack_lost", "purge_drop", "purge_ack_lost", "signal_purge_drop", "signal_purge_ack_lost":
+			operation := "create_manifest"
+			if strings.HasPrefix(mode, "purge_") {
+				operation = "purge_journal"
+			}
+			if strings.HasPrefix(mode, "signal_purge_") {
+				operation = "purge_signals"
+			}
+			kind := DropBeforeCommit
+			if strings.HasSuffix(mode, "ack_lost") {
+				kind = LoseAckAfterCommit
+			}
+			if err := snapshots.QueueWriteFault(SnapshotFault{operation, kind}); err != nil {
+				return trace, err
+			}
+		case "handoff_drop", "handoff_ack_lost":
+			kind := "drop_before_commit"
+			if strings.HasSuffix(mode, "ack_lost") {
+				kind = "lose_ack_after_commit"
+			}
+			if err := transport.QueueFault(StartFault{Operation: "enqueue_run", Kind: kind}); err != nil {
+				return trace, err
+			}
 		}
 	}
 	var effects, initialCalls, stageCalls int
@@ -156,6 +228,12 @@ func runSeededWorkerContinuation(seed int64, replay *Trace) (trace Trace, runErr
 		if _, err := wf.RunOnce(c, "prefix", 23, func(_ context.Context, key string) (int, error) { effects++; prefixKey = key; return 46, nil }); err != nil {
 			return nil, err
 		}
+		if budget {
+			value, err := wf.AwaitSignal(c, "buffered")
+			if err != nil || string(value) != "1" {
+				return nil, fmt.Errorf("prefix signal=%s err=%v", value, err)
+			}
+		}
 		return nil, wf.Continue(c, "next_v1", 45)
 	}}
 	stages := map[string]worker.ContinuationHandler{"next_v1": func(c *wf.Context, input, locals json.RawMessage) (json.RawMessage, error) {
@@ -167,7 +245,11 @@ func runSeededWorkerContinuation(seed int64, replay *Trace) (trace Trace, runErr
 		if found, err := c.GetState("total", &total); err != nil || !found || total != 23 {
 			return nil, fmt.Errorf("continuation state %d: %v", total, err)
 		}
-		for i := 0; i < 2; i++ {
+		first := 0
+		if budget {
+			first = 1
+		}
+		for i := first; i < 2; i++ {
 			value, err := wf.AwaitSignal(c, "buffered")
 			if err != nil {
 				return nil, err
@@ -184,6 +266,54 @@ func runSeededWorkerContinuation(seed int64, replay *Trace) (trace Trace, runErr
 	w, err := worker.NewWithPorts("modeled-continuation", handlers, worker.ModeledWorkerPorts{Journal: store, Leases: leasing, Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, ResultBlobs: snapshots, Client: c}, worker.WithContinuations(typ, stages))
 	if err != nil {
 		return trace, err
+	}
+	var frameName string
+	var frameBefore []byte
+	var prefixAtTimeout []journal.Record
+	if budget {
+		attempt, stopAttempt := context.WithCancel(ctx)
+		transport.Dispatch.StopAfterNextNak(stopAttempt)
+		if err := w.RunPartitionWithTransport(attempt, 0, transport.Dispatch); err != nil {
+			return trace, err
+		}
+		if snapshots.budgetError != nil {
+			return trace, snapshots.budgetError
+		}
+		if !snapshots.fired || schedule.NowMillis() != 15000 || transport.Dispatch.Pending() == 0 || effects != 1 || stageCalls != 0 {
+			return trace, fmt.Errorf("budget cut fired=%v time=%d pending=%d effects=%d stage=%d", snapshots.fired, schedule.NowMillis(), transport.Dispatch.Pending(), effects, stageCalls)
+		}
+		if _, err := leaseKV.Get(ctx, identity.Key(typ, id)); !errors.Is(err, jetstream.ErrKeyNotFound) {
+			return trace, fmt.Errorf("budget timeout retained lease: %v", err)
+		}
+		if _, err := outcomes.Get(ctx, identity.Key(typ, id)); !errors.Is(err, jetstream.ErrKeyNotFound) {
+			return trace, fmt.Errorf("premature outcome at publication timeout: %v", err)
+		}
+		prefixAtTimeout, _, err = store.Read(ctx, typ, id)
+		if err != nil || len(prefixAtTimeout) == 0 {
+			return trace, fmt.Errorf("timeout prefix: %v", err)
+		}
+		snapshots.mu.Lock()
+		for name, raw := range snapshots.objects {
+			if strings.HasPrefix(name, "step-result-") {
+				if frameName != "" {
+					snapshots.mu.Unlock()
+					return trace, fmt.Errorf("multiple frames")
+				}
+				frameName = name
+				frameBefore = bytes.Clone(raw)
+			}
+		}
+		snapshots.mu.Unlock()
+		if frameName == "" {
+			return trace, fmt.Errorf("missing durable frame at timeout")
+		}
+		if err := schedule.AdvanceMillis(1000); err != nil {
+			return trace, err
+		}
+		w, err = worker.NewWithPorts("budget-successor", handlers, worker.ModeledWorkerPorts{Journal: store, Leases: leasing, Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, ResultBlobs: snapshots, Client: c}, worker.WithContinuations(typ, stages))
+		if err != nil {
+			return trace, err
+		}
 	}
 	runCtx, stopRun := context.WithCancel(ctx)
 	transport.Dispatch.StopWhenDrained(stopRun)
@@ -216,6 +346,23 @@ func runSeededWorkerContinuation(seed int64, replay *Trace) (trace Trace, runErr
 		objects[name] = bytes.Clone(value)
 	}
 	snapshots.mu.Unlock()
+	if budget && (len(records) < len(prefixAtTimeout) || !reflect.DeepEqual(prefixAtTimeout, records[:len(prefixAtTimeout)])) {
+		return trace, fmt.Errorf("durable prefix changed on publication retry")
+	}
+	if budget && !bytes.Equal(frameBefore, objects[frameName]) {
+		return trace, fmt.Errorf("frame changed on publication retry")
+	}
+	if budget {
+		var finalEpoch uint64
+		for _, record := range records {
+			if record.Epoch > finalEpoch {
+				finalEpoch = record.Epoch
+			}
+		}
+		if finalEpoch <= records[0].Epoch {
+			return trace, fmt.Errorf("successor did not advance epoch")
+		}
+	}
 	journalBytes, err := json.Marshal(records)
 	if err != nil {
 		return trace, err

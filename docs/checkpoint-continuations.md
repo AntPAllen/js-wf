@@ -855,3 +855,15 @@ run-message states. Compiled enqueue/release omissions are caught semantically.
 [combined cuts](scale/promise-handoff-full-restart-2026-10-01/) record source and
 scope. These do not prove all reply-loss combinations, active-writer GC, TTL,
 limit-adjacent combined faults or the independent full-matrix/24-hour gates.
+
+
+## Bounded publication recovery
+
+Archive/manifest publication, journal/signal purge, suspension append and handoff
+share a fifteen-second deadline. Missing replies before or after commit recover
+through existing NAK/release/redelivery; the stored frame and recorded prefix
+remain unchanged. [Eight seeded/native cuts and compiled controls](scale/continuation-response-budget-2026-10-01/)
+pass: final 100,000 seeds, exact replay, 143-pin corpus under race, and all eight
+real R3 port-response cuts under race with 16.282–16.608s raw recovery. Frame
+Put/Get during the handler and further combined limit/TTL/process cases remain
+outside this proof, as do whole-matrix and soak release gates.

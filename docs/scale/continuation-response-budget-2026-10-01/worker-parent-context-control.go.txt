@@ -1068,7 +1068,8 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		// archive, manifest, purge, suspension append and handoff share one
 		// deadline; a missing reply cannot hold this delivery indefinitely.
 		var stopPublication context.CancelFunc
-		ctx, stopPublication = context.WithTimeout(ctx, 15*time.Second)
+		ignoredPublicationCtx, stopPublication := context.WithTimeout(ctx, 15*time.Second)
+        _ = ignoredPublicationCtx
 		defer stopPublication()
 		started := ops.begin()
 		err := w.publishContinuation(ctx, typ, id, input.Sequence, l, records, point, appendEntry)
