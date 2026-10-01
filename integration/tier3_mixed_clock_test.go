@@ -75,27 +75,44 @@ type matrixClockRoleObservation struct {
 func observeMatrixClockRoles(ctx context.Context, js jetstream.JetStream, stage string, fault int, expected func(string) bool) ([]matrixClockRoleObservation, error) {
 	var records []matrixClockRoleObservation
 	for _, name := range []string{"WF_RUN", "WF_JRN"} {
-		for {
-			stream, err := matrixReadMetadata(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, name) })
+		info, err := waitMatrixClockRole(ctx, func(attempt context.Context) (*jetstream.StreamInfo, error) {
+			stream, err := js.Stream(attempt, name)
 			if err != nil {
-				return records, err
+				return nil, err
 			}
-			info, err := matrixReadMetadata(ctx, func(attempt context.Context) (*jetstream.StreamInfo, error) { return stream.Info(attempt) })
-			if err != nil {
-				return records, err
-			}
-			if info.Cluster != nil && expected(info.Cluster.Leader) {
-				records = append(records, matrixClockRoleObservation{stage, fault, name, time.Now().UTC(), info})
-				break
-			}
-			select {
-			case <-ctx.Done():
-				return records, fmt.Errorf("clock role %s %s did not elect expected leader: %w", stage, name, ctx.Err())
-			case <-time.After(50 * time.Millisecond):
-			}
+			return stream.Info(attempt)
+		}, expected)
+		if err != nil {
+			return records, fmt.Errorf("clock role %s %s: %w", stage, name, err)
 		}
+		records = append(records, matrixClockRoleObservation{stage, fault, name, time.Now().UTC(), info})
 	}
 	return records, nil
+}
+
+// Election observation uses the fault's deadline. The ordinary metadata helper's
+// three-attempt cap can expire while a killed leader's replacement is still being
+// elected. Permanent errors still fail immediately; no latency gate is changed.
+func waitMatrixClockRole(ctx context.Context, lookup func(context.Context) (*jetstream.StreamInfo, error), expected func(string) bool) (*jetstream.StreamInfo, error) {
+	for {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		attempt, cancel := context.WithTimeout(ctx, 2*time.Second)
+		info, err := lookup(attempt)
+		cancel()
+		if err != nil && !matrixTransientTransport(err) {
+			return nil, err
+		}
+		if err == nil && info != nil && info.Cluster != nil && expected(info.Cluster.Leader) {
+			return info, nil
+		}
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(50 * time.Millisecond):
+		}
+	}
 }
 
 func preferMatrixClockLeaders(ctx context.Context, nc *nats.Conn, js jetstream.JetStream, cluster *testcluster.DockerCluster, stage string, fault int) ([]matrixClockRoleObservation, error) {

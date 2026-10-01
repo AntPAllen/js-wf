@@ -13,3 +13,23 @@ Each requires all five actual clocks at startup and before/after one confirmed j
 - [Behind36937362297](https://github.com/AntPAllen/js-wf/actions/runs/36937362297).
 
 Both launch at `a12efce` with35-second inputs. They require skewed server4 to own both WF_RUN and WF_JRN before a cut,actual shifted timer-clock lookup evidence,and confirmed replacement leaders on unshifted peers before restart. All existing clock/controller/history/invariant/p99/drain gates remain. The original peer-only proofs cannot certify these stronger requirements. In-flight timer/effect/continuation combinations and sustained/full-matrix coverage remain open.
+
+## Stronger smoke failures and observation correction
+
+Both runs finished with failure. Ahead failed at96.02 seconds and behind at94.48
+seconds. Both retained initial and pre-cut WF_RUN/WF_JRN leader observations on
+the shifted peer4, then stopped during replacement observation, roughly6–7
+seconds after the cut. The shared metadata lookup permits only three2-second
+attempts and returned its attempt deadline before the clock fault's60-second
+deadline. No replacement role or final controller audit was accepted.
+
+The role observer now retries named transient transport failures until its
+existing caller deadline, while permanent failures remain immediate. Focused
+tests cover recovery after four failed reads, rejection of the old leader,
+permanent error handling and deadline cancellation. The strict p99 gates are
+unchanged. These failed runs establish an observation-budget problem; they do
+not establish safety, timer behavior after clock transition, or a server cause.
+Events, observed roles and hashes of every downloaded artifact are retained in
+`role-smoke-failures/`. The downloads remain at
+`/tmp/js-wf-clock-ahead-roles-36937359624` and
+`/tmp/js-wf-clock-behind-roles-36937362297`.

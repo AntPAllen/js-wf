@@ -5139,3 +5139,21 @@ leaders,plus shifted timer lookups and all prior mixed gates. Live handles are
 not terminal acceptance. Comprehensive36929826425 remains in progress; the
 million-timer service is active atPID18146 with256,466 receipts at its last
 sampled checkpoint.
+
+
+### Clock-role smoke observation budget correction
+
+Stronger sourcea12efce smokes36937359624 (ahead) and36937362297 (behind)
+finished with failure during replacement role observation. Both admitted shifted
+peer4 as WF_RUN/WF_JRN leader before the cut. Three2-second metadata attempts
+expired before the enclosing60-second fault deadline; no final audit or clock
+transition acceptance is claimed. Role observation now retries transient reads
+under that existing deadline and still rejects permanent errors immediately.
+Two focused regression tests pass normally (0.357s) and under race (1.370s),
+covering more than three failed reads, unexpected leaders, permanent errors and
+parent deadline cancellation. Strict p99 gates are unchanged. Events, roles and
+all artifact hashes are retained in
+[the failure evidence directory](scale/tier3-mixed-server-clock-2026-10-01/role-smoke-failures/).
+Comprehensive36929826425 remains authoritatively in progress; matrix36891850893
+is queued. The million-timer service remains active atPID18146 with260,704
+receipts at the sampled checkpoint.
