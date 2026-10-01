@@ -1,0 +1,176 @@
+[1] 2026/10/01 18:23:28.941309 [INF] Starting nats-server
+[1] 2026/10/01 18:23:28.941372 [INF]   Version:  2.15.0
+[1] 2026/10/01 18:23:28.941375 [INF]   Git:      [not set]
+[1] 2026/10/01 18:23:28.941378 [INF]   Cluster:  js-wf-route-5718-1790878619569089815
+[1] 2026/10/01 18:23:28.941381 [INF]   Name:     js-wf-route-5718-1790878619569089815-n0
+[1] 2026/10/01 18:23:28.941384 [INF]   Node:     20mtCybu
+[1] 2026/10/01 18:23:28.941387 [INF]   ID:       NANBCSAN2YXAWE4S57N2H2ZQOPU6KSJ5EFVH6SEY5USE4FWGHIKTPB4H
+[1] 2026/10/01 18:23:28.941398 [INF] Using configuration file: /etc/nats.conf (sha256:2b3c0cdf1bae0dc828987430072bec52f1eee9114880f8779b1ec8bfa212027e)
+[1] 2026/10/01 18:23:28.941867 [INF] Starting http monitor on 0.0.0.0:8222
+[1] 2026/10/01 18:23:28.942016 [INF] Starting JetStream
+[1] 2026/10/01 18:23:28.942217 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+[1] 2026/10/01 18:23:28.942221 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+[1] 2026/10/01 18:23:28.942223 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+[1] 2026/10/01 18:23:28.942224 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+[1] 2026/10/01 18:23:28.942226 [INF] 
+[1] 2026/10/01 18:23:28.942227 [INF]          https://docs.nats.io/jetstream
+[1] 2026/10/01 18:23:28.942229 [INF] 
+[1] 2026/10/01 18:23:28.942230 [INF] ---------------- JETSTREAM ----------------
+[1] 2026/10/01 18:23:28.942232 [INF]   Strict:          true
+[1] 2026/10/01 18:23:28.942235 [INF]   Max Memory:      11.71 GB
+[1] 2026/10/01 18:23:28.942238 [INF]   Max Storage:     62.94 GB
+[1] 2026/10/01 18:23:28.942239 [INF]   Store Directory: "/data/jetstream"
+[1] 2026/10/01 18:23:28.942241 [INF]   API Level:       5
+[1] 2026/10/01 18:23:28.942243 [INF] -------------------------------------------
+[1] 2026/10/01 18:23:28.942751 [INF]   Starting restore for stream '$G > WF_SIG'
+[1] 2026/10/01 18:23:28.942773 [INF]   Starting restore for stream '$G > KV_WF_ASSIGN'
+[1] 2026/10/01 18:23:28.942914 [INF]   Starting restore for stream '$G > KV_WF_STATE'
+[1] 2026/10/01 18:23:28.943002 [INF]   Starting restore for stream '$G > WF_INV'
+[1] 2026/10/01 18:23:28.943072 [INF]   Restored 0 messages for stream '$G > KV_WF_ASSIGN' in 0s
+[1] 2026/10/01 18:23:28.943166 [INF]   Starting restore for stream '$G > OBJ_WF_BLOB'
+[1] 2026/10/01 18:23:28.943381 [INF]   Restored 0 messages for stream '$G > OBJ_WF_BLOB' in 0s
+[1] 2026/10/01 18:23:28.943535 [INF]   Starting restore for stream '$G > WF_PURGE'
+[1] 2026/10/01 18:23:28.943609 [WRN] Filestore [WF_SIG] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 18:23:28.943614 [WRN] Filestore [WF_SIG] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 18:23:28.944067 [INF]   Restored 0 messages for stream '$G > WF_PURGE' in 1ms
+[1] 2026/10/01 18:23:28.944247 [INF]   Starting restore for stream '$G > WF_RUN'
+[1] 2026/10/01 18:23:28.944453 [WRN] Filestore [WF_RUN] Stream state detected prior state, could not locate msg block 4
+[1] 2026/10/01 18:23:28.944463 [WRN] Filestore [WF_RUN] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 18:23:28.946690 [INF]   Starting restore for stream '$G > KV_WF_LEASE'
+[1] 2026/10/01 18:23:28.946936 [INF]   Starting restore for stream '$G > KV_WF_VIEW'
+[1] 2026/10/01 18:23:28.947252 [WRN] Filestore [KV_WF_LEASE] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 18:23:28.947294 [WRN] Filestore [KV_WF_LEASE] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 18:23:28.947720 [INF]   Restored 0 messages for stream '$G > KV_WF_VIEW' in 1ms
+[1] 2026/10/01 18:23:28.947012 [WRN] Filestore [WF_RUN] Message scheduling state is outdated; attempting to recover using linear scan (seq 5537 to 6080)
+[1] 2026/10/01 18:23:28.948670 [WRN] Filestore [WF_INV] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 18:23:28.948720 [WRN] Filestore [WF_INV] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 18:23:28.950988 [INF]   Restored 1,870 messages for stream '$G > WF_SIG' in 8ms
+[1] 2026/10/01 18:23:28.951849 [INF]   Restored 28 messages for stream '$G > WF_RUN' in 8ms
+[1] 2026/10/01 18:23:28.952031 [INF]   Recovering 64 consumers for stream - '$G > WF_RUN'
+[1] 2026/10/01 18:23:28.952681 [INF]   Restored 1,540 messages for stream '$G > WF_INV' in 10ms
+[1] 2026/10/01 18:23:28.953189 [INF]   Starting restore for stream '$G > WF_JRN'
+[1] 2026/10/01 18:23:28.954276 [WRN] Filestore [WF_JRN] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 18:23:28.954681 [WRN] Filestore [WF_JRN] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 18:23:28.956807 [WRN] Filestore [KV_WF_STATE] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 18:23:28.956828 [WRN] Filestore [KV_WF_STATE] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 18:23:28.964151 [INF]   Restored 1,540 messages for stream '$G > KV_WF_STATE' in 21ms
+[1] 2026/10/01 18:23:28.964792 [WRN] Filestore [KV_WF_LEASE] TTL state is outdated; attempting to recover using linear scan (seq 30678 to 35970)
+[1] 2026/10/01 18:23:28.979919 [INF]   Restored 16,942 messages for stream '$G > WF_JRN' in 27ms
+[1] 2026/10/01 18:23:28.997163 [INF]   Restored 432 messages for stream '$G > KV_WF_LEASE' in 50ms
+[1] 2026/10/01 18:23:28.997362 [INF] Starting JetStream cluster
+[1] 2026/10/01 18:23:28.997404 [INF] Creating JetStream metadata controller
+[1] 2026/10/01 18:23:28.997696 [WRN] Filestore [_meta_] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 18:23:28.997710 [WRN] Filestore [_meta_] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 18:23:28.997962 [INF] JetStream cluster recovering state
+[1] 2026/10/01 18:23:29.000303 [INF] Took 58.278299ms to start JetStream
+[1] 2026/10/01 18:23:29.000493 [INF] Listening for client connections on 0.0.0.0:4222
+[1] 2026/10/01 18:23:29.000871 [INF] Server is ready
+[1] 2026/10/01 18:23:29.000918 [INF] Cluster name is js-wf-route-5718-1790878619569089815
+[1] 2026/10/01 18:23:29.001165 [INF] Listening for route connections on 0.0.0.0:6222
+[1] 2026/10/01 18:23:29.002876 [INF] 172.19.0.3:6222 - rid:166 - Route connection created
+[1] 2026/10/01 18:23:29.003067 [INF] 172.19.0.3:6222 - rid:167 - Route connection created
+[1] 2026/10/01 18:23:29.005952 [INF] 172.19.0.5:47770 - rid:168 - Route connection created
+[1] 2026/10/01 18:23:29.006775 [INF] 172.19.0.5:47756 - rid:170 - Route connection created
+[1] 2026/10/01 18:23:29.006544 [INF] 172.19.0.4:39726 - rid:169 - Route connection created
+[1] 2026/10/01 18:23:29.007211 [INF] 172.19.0.5:47772 - rid:171 - Route connection created
+[1] 2026/10/01 18:23:29.007228 [INF] 172.19.0.6:58016 - rid:172 - Route connection created
+[1] 2026/10/01 18:23:29.007312 [INF] 172.19.0.4:39722 - rid:173 - Route connection created
+[1] 2026/10/01 18:23:29.007366 [INF] 172.19.0.6:58018 - rid:174 - Route connection created
+[1] 2026/10/01 18:23:29.007428 [INF] 172.19.0.3:6222 - rid:175 - Route connection created
+[1] 2026/10/01 18:23:29.008628 [INF] 172.19.0.4:39728 - rid:176 - Route connection created
+[1] 2026/10/01 18:23:29.008715 [INF] 172.19.0.3:6222 - rid:177 - Route connection created
+[1] 2026/10/01 18:23:29.009164 [INF] 172.19.0.4:39742 - rid:178 - Route connection created
+[1] 2026/10/01 18:23:29.009689 [INF] 172.19.0.5:47784 - rid:179 - Route connection created
+[1] 2026/10/01 18:23:29.012796 [INF] 172.19.0.6:58028 - rid:180 - Route connection created
+[1] 2026/10/01 18:23:29.013574 [INF] 172.19.0.6:58038 - rid:181 - Route connection created
+[1] 2026/10/01 18:23:29.103237 [WRN] Waiting for routing to be established...
+[1] 2026/10/01 18:23:29.131341 [WRN] Catchup for stream '$G > KV_WF_LEASE' resetting first sequence: 27646 on catchup request
+[1] 2026/10/01 18:23:29.192658 [WRN] Filestore [C-R5F-2OdNQLjx] Stream state outdated, last block has additional entries, will rebuild
+[1] 2026/10/01 18:23:29.192676 [WRN] Filestore [C-R5F-2OdNQLjx] Recovering stream state from index errored: prior state file
+[1] 2026/10/01 18:23:29.274496 [WRN] Metalayer blocking snapshot starting
+[1] 2026/10/01 18:23:29.275705 [WRN] Metalayer blocking snapshot took 0.001s (streams: 10, consumers: 64, compacted: 54.74 KB)
+[1] 2026/10/01 18:23:29.275754 [WRN] JetStream has not established contact with a meta leader
+[1] 2026/10/01 18:23:29.405370 [INF] 172.19.0.3:51754 - rid:257 - Route connection created
+[1] 2026/10/01 18:23:29.405706 [INF] 172.19.0.3:51754 - rid:257 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.426516 [INF] 172.19.0.5:47786 - rid:258 - Route connection created
+[1] 2026/10/01 18:23:29.426800 [INF] 172.19.0.5:47786 - rid:258 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.429408 [INF] 172.19.0.6:58046 - rid:259 - Route connection created
+[1] 2026/10/01 18:23:29.429695 [INF] 172.19.0.6:58046 - rid:259 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.430345 [INF] 172.19.0.5:47794 - rid:260 - Route connection created
+[1] 2026/10/01 18:23:29.430616 [INF] 172.19.0.5:47794 - rid:260 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.444138 [INF] 172.19.0.4:39758 - rid:261 - Route connection created
+[1] 2026/10/01 18:23:29.444217 [INF] 172.19.0.4:39766 - rid:262 - Route connection created
+[1] 2026/10/01 18:23:29.444333 [INF] 172.19.0.4:39758 - rid:261 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.444418 [INF] 172.19.0.4:39766 - rid:262 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.451298 [INF] 172.19.0.3:51768 - rid:263 - Route connection created
+[1] 2026/10/01 18:23:29.451494 [INF] 172.19.0.3:51768 - rid:263 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.457552 [INF] 172.19.0.4:39774 - rid:264 - Route connection created
+[1] 2026/10/01 18:23:29.457767 [INF] 172.19.0.4:39774 - rid:264 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.458821 [INF] 172.19.0.5:47800 - rid:265 - Route connection created
+[1] 2026/10/01 18:23:29.459021 [INF] 172.19.0.5:47800 - rid:265 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.466724 [INF] 172.19.0.6:58060 - rid:266 - Route connection created
+[1] 2026/10/01 18:23:29.467029 [INF] 172.19.0.6:58060 - rid:266 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.467285 [INF] 172.19.0.6:58066 - rid:267 - Route connection created
+[1] 2026/10/01 18:23:29.467532 [INF] 172.19.0.6:58066 - rid:267 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.468634 [INF] 172.19.0.3:51776 - rid:268 - Route connection created
+[1] 2026/10/01 18:23:29.468824 [INF] 172.19.0.3:51776 - rid:268 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.471949 [INF] 172.19.0.6:58074 - rid:269 - Route connection created
+[1] 2026/10/01 18:23:29.472253 [INF] 172.19.0.6:58074 - rid:269 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.473576 [INF] 172.19.0.4:39790 - rid:270 - Route connection created
+[1] 2026/10/01 18:23:29.473755 [INF] 172.19.0.4:39790 - rid:270 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.476621 [INF] 172.19.0.5:47816 - rid:271 - Route connection created
+[1] 2026/10/01 18:23:29.476831 [INF] 172.19.0.5:47816 - rid:271 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:29.490720 [INF] 172.19.0.3:51780 - rid:272 - Route connection created
+[1] 2026/10/01 18:23:29.490991 [INF] 172.19.0.3:51780 - rid:272 - Router connection closed: Client Closed
+[1] 2026/10/01 18:23:32.160069 [INF] JetStream cluster new metadata leader: js-wf-route-5718-1790878619569089815-n1/js-wf-route-5718-1790878619569089815
+[1] 2026/10/01 18:23:58.387123 [INF] 172.19.0.5:47772 - rid:171 - Router connection closed: Client Closed - Remote: js-wf-route-5718-1790878619569089815-n3
+[1] 2026/10/01 18:23:58.387136 [INF] 172.19.0.5:47784 - rid:179 - Router connection closed: Client Closed - Remote: js-wf-route-5718-1790878619569089815-n3
+[1] 2026/10/01 18:23:58.387900 [INF] 172.19.0.5:47756 - rid:170 - Router connection closed: Client Closed - Remote: js-wf-route-5718-1790878619569089815-n3
+[1] 2026/10/01 18:23:58.388062 [INF] 172.19.0.5:47770 - rid:168 - Router connection closed: Client Closed - Remote: js-wf-route-5718-1790878619569089815-n3
+[1] 2026/10/01 18:23:58.994378 [INF] 172.19.0.5:45956 - rid:273 - Route connection created
+[1] 2026/10/01 18:23:58.994877 [INF] 172.19.0.5:45970 - rid:274 - Route connection created
+[1] 2026/10/01 18:23:58.998505 [INF] 172.19.0.5:45986 - rid:275 - Route connection created
+[1] 2026/10/01 18:23:59.000777 [INF] 172.19.0.5:45990 - rid:276 - Route connection created
+[1] 2026/10/01 18:24:01.597258 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_58' has NO quorum, stalled.
+[1] 2026/10/01 18:24:01.673262 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_04' has NO quorum, stalled.
+[1] 2026/10/01 18:24:01.694448 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_30'
+[1] 2026/10/01 18:24:01.702735 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_63' has NO quorum, stalled.
+[1] 2026/10/01 18:24:01.758934 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_11'
+[1] 2026/10/01 18:24:01.870158 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_61' has NO quorum, stalled.
+[1] 2026/10/01 18:24:02.059575 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_32' has NO quorum, stalled.
+[1] 2026/10/01 18:24:02.158297 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_00'
+[1] 2026/10/01 18:24:02.190813 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_54' has NO quorum, stalled.
+[1] 2026/10/01 18:24:02.295116 [WRN] JetStream cluster stream '$G > WF_SIG' has NO quorum, stalled
+[1] 2026/10/01 18:24:02.466705 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_09' has NO quorum, stalled.
+[1] 2026/10/01 18:24:02.499625 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_51'
+[1] 2026/10/01 18:24:02.501391 [WRN] JetStream cluster stream '$G > KV_WF_LEASE' has NO quorum, stalled
+[1] 2026/10/01 18:24:02.539749 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_22'
+[1] 2026/10/01 18:24:02.572627 [WRN] JetStream cluster stream '$G > OBJ_WF_BLOB' has NO quorum, stalled
+[1] 2026/10/01 18:24:02.622209 [WRN] JetStream cluster stream '$G > WF_INV' has NO quorum, stalled
+[1] 2026/10/01 18:24:02.663062 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_60'
+[1] 2026/10/01 18:24:02.674204 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_12' has NO quorum, stalled.
+[1] 2026/10/01 18:24:02.730560 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_41' has NO quorum, stalled.
+[1] 2026/10/01 18:24:02.733962 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_01' has NO quorum, stalled.
+[1] 2026/10/01 18:24:02.865651 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_28' has NO quorum, stalled.
+[1] 2026/10/01 18:24:02.876011 [WRN] JetStream cluster stream '$G > KV_WF_VIEW' has NO quorum, stalled
+[1] 2026/10/01 18:24:02.882135 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_18'
+[1] 2026/10/01 18:24:02.925215 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_07' has NO quorum, stalled.
+[1] 2026/10/01 18:24:02.981632 [WRN] JetStream cluster stream '$G > KV_WF_STATE' has NO quorum, stalled
+[1] 2026/10/01 18:24:03.015719 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_46' has NO quorum, stalled.
+[1] 2026/10/01 18:24:03.021886 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_27'
+[1] 2026/10/01 18:24:03.275576 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_10' has NO quorum, stalled.
+[1] 2026/10/01 18:24:03.335198 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_45' has NO quorum, stalled.
+[1] 2026/10/01 18:24:03.477550 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_31' has NO quorum, stalled.
+[1] 2026/10/01 18:24:03.534810 [INF] JetStream cluster new stream leader for '$G > WF_JRN'
+[1] 2026/10/01 18:24:03.624146 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_23' has NO quorum, stalled.
+[1] 2026/10/01 18:24:03.739725 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_06' has NO quorum, stalled.
+[1] 2026/10/01 18:24:03.777601 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_62' has NO quorum, stalled.
+[1] 2026/10/01 18:24:03.781174 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_47' has NO quorum, stalled.
+[1] 2026/10/01 18:24:03.916156 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_24' has NO quorum, stalled.
+[1] 2026/10/01 18:24:03.969604 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_57' has NO quorum, stalled.
+[1] 2026/10/01 18:24:04.134755 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_16' has NO quorum, stalled.
+[1] 2026/10/01 18:24:04.370377 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_15'
+[1] 2026/10/01 18:24:04.558136 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_02' has NO quorum, stalled.
+[1] 2026/10/01 18:24:04.600777 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_42' has NO quorum, stalled.
+[1] 2026/10/01 18:24:04.610890 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_29' has NO quorum, stalled.
+[1] 2026/10/01 18:24:04.672498 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_26' has NO quorum, stalled.

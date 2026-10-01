@@ -1,0 +1,11 @@
+# Hosted ten-minute journal row with per-event evidence
+
+Run36905129932 at82e715b is terminal SUCCESS. The actual race test passes700.68s test /701.720s package:85 mixed batches,2,380 invocations,26,208 journal entries and19 confirmed journal-leader SIGKILL/restarts. All six terminal/progress p99, history models, retained-state audit and physical run-stream/all64-consumer drain pass. The dedicated row guard and event explanation checks also pass. Raw Go JSON, before-fault metadata/logs, HTTP snapshots and final counters are retained.
+
+All four worker fencing records match the metric counters. Each is a heartbeat renewal that returned ErrLost with no response from stream during fault2: node0 killed18:18:28.352589934 and R5 recovery confirmed18:18:35.638187394. Events occur18:18:31.873–31.891. Cancellation, initial release failure, bounded cleanup retries, eventual cleanup and later ack are present for each exact worker/invocation/run sequence.
+
+The three timer invocations resume and become terminal18:18:37.798,18:18:38.036 and18:18:37.798. The fourth event is a child whose result was already terminal18:18:23.558: its duplicate delivery lost ownership confirmation during the outage and later cleaned up/acked; its handler completion must not be described as occurring after that fence. Per-event evidence and these distinctions are retained in fencing-causal-review.json. Final full integrity/drain checks corroborate safe recovery. The missing response is correlated with the confirmed kill interval, but its precise NATS server mechanism is not established.
+
+All112 repair attempts have individual source/decision explanations:21missing-journal starts,53unconsumed current-generation signal wakeups and38ready suspended waits. All were acknowledged; the report preserves that repeat message-ID deduplication can yield acknowledgment without a new physical message. The raw decision sources are recorded; this tool does not independently re-audit historical server reads.
+
+This clears one hosted ten-minute R5 journal row with event coverage. It does not establish the full Tier3 matrix, all other scanner/process sources,200-consecutive Tier2 seeds or24-hour soak; explicit full-release and server-root-cause flags remain false. Larger artifacts are gzip compressed.

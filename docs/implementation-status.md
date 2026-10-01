@@ -4557,3 +4557,24 @@ the existing45s provisioning deadline. The exact server-side reason remains
 unconfirmed. The manual workflow selects journal or consumer explicitly.
 The consumer's full ten-minute run, all other fault rows and the full24-hour
 matrix remain independent open gates; five worker objects share one client.
+
+
+Hosted journal row36905129932 at82e715b is now terminal SUCCESS: actual
+race test700.68s /701.720s package,85 batches,2,380 invocations,26,208 entries
+and19 actual kills. All workload/history/audit/drain and event-explanation
+checks pass. [Raw hosted proof and per-fencing review](scale/tier3-event-observers-2026-10-01/hosted-ten-minute/)
+record all four fencing events within the second kill's confirmed outage.
+Each lost heartbeat ownership confirmation, canceled and retried cleanup,
+then later acked. Three timers complete after recovery; the fourth is an
+already-terminal child's duplicate delivery, whose earlier terminal result
+is explicitly distinguished from later delivery cleanup. All112 repair
+attempts have source/decision explanations. This does not establish a precise
+NATS missing-response mechanism or a full24-hour matrix pass.
+
+The consumer ten-minute race binary at clean225f04a is independently live
+as user service js-wf-tier3-consumer-10m-225f04a.service, JSON wrapperMainPID44802
+at18:30:37UTC. Its [binary/tool/service identity](scale/tier3-mixed-consumer-2026-10-01/ten-minute-service-start.json)
+is retained. The first launch failed to find the tool before any unit or test
+started; the public go tool command resolved its executable and the service
+now emits native Go JSON. At the latest check its560-invocation retained audit
+passed and the test remained active. This is not terminal acceptance.
