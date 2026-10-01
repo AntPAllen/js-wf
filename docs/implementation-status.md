@@ -5128,3 +5128,14 @@ not every in-flight timer/effect/continuation cut combination is admitted.
 Four inactive obsolete prototype test binaries were hash-recorded and removed
 from /tmp,reclaiming205,397,047 bytes. Campaign stores,raw evidence,final fixture
 binaries and active million-timer/server executables were untouched.
+
+
+Strengthened clock-role smokes
+[ahead36937359624](https://github.com/AntPAllen/js-wf/actions/runs/36937359624) and
+[behind36937362297](https://github.com/AntPAllen/js-wf/actions/runs/36937362297)
+are launched ata12efce with35-second inputs. Exact source/inputs are retained.
+These require actual skewed WF_RUN/WF_JRN ownership and unshifted replacement
+leaders,plus shifted timer lookups and all prior mixed gates. Live handles are
+not terminal acceptance. Comprehensive36929826425 remains in progress; the
+million-timer service is active atPID18146 with256,466 receipts at its last
+sampled checkpoint.
