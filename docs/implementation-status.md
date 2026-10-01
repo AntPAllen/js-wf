@@ -3865,3 +3865,21 @@ this does not clear 200 seeds or the separate five-node 24-hour full-matrix
 soak. Production runtime/model source is unchanged from 28a09c4, whose full
 100,000-seed-per-workload campaign remains live, alongside mixed 200 seeds
 and the original million timers.
+
+
+## Whole-matrix campaign evidence verifier
+
+The all-row campaign now has a terminal verifier over Actions job metadata
+and full log ZIPs. It requires every planned group at the same checkout SHA,
+all thirteen rows, each requested seed once in order, exact ten-minute result
+guards, retained audit/workload counts and every terminal/progress p99 marker.
+Missing/duplicate/skipped/failed/live/shortened/wrong-revision evidence is rejected.
+The verifier reuses the existing per-row semantic checks and explicitly keeps
+one/twenty seeds below the 200-seed gate; no count establishes Tier 3's soak.
+[Controls, source hashes and live-run scope](scale/full-matrix-campaign-2026-10-01/)
+are retained. Seventeen matrix controls and all twenty-five script tests pass;
+synthetic controls are not runtime acceptance evidence. Real all-row run
+36845868029 is confirmed live with four active full-duration rows and queued
+remaining rows; its metadata is correctly rejected as unfinished. Final full
+matrix results, 200 consecutive seeds, five-node 24-hour soak, full latest
+simulation, scale/GC/combined-fault gates remain independent and open.

@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+"""Verify all sustained Tier 2 rows from completed Actions metadata and job logs.
+
+This verifies recorded runtime checks, not an independent scan of raw stores.
+"""
+import argparse
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import re
+import zipfile
+
+
+def local_module(name, filename):
+    spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name(filename))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+planner = local_module("matrix_planner", "matrix-campaign.py")
+gate = local_module("matrix_row_gate", "check-matrix-campaign.py")
+ROWS = {
+    "journal": ("journal_leader", "TestMixedMatrixJournalLeaderEveryThirtySeconds"),
+    "consumer": ("consumer_leader", "TestMixedMatrixConsumerLeaderEveryThirtySeconds"),
+    "cluster": ("all_servers", "TestMixedMatrixAllServersKilledEveryThirtySeconds"),
+    "partition": ("server_partition", "TestMixedMatrixServerPartitionEveryThirtySeconds"),
+    "worker": ("worker_kill", "TestMixedMatrixRandomWorkerKilledEveryFiveSeconds"),
+    "pause": ("worker_pause", "TestMixedMatrixWorkerPausedFortyFiveSeconds"),
+    "isolation": ("worker_isolation", "TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds"),
+    "workerclock": ("worker_clock", "TestMixedMatrixWorkerClockSkew"),
+    "serverclockplus": ("server_clock_plus", "TestMixedMatrixServerClockSkewPositive"),
+    "serverclockminus": ("server_clock_minus", "TestMixedMatrixServerClockSkewNegative"),
+    "fanoutrestart": ("fanout_restart", "TestMixedMatrixFanoutRestartEveryThirtySeconds"),
+    "blockdisk": ("block_disk", "TestMixedMatrixBlockDiskStallEveryThirtySeconds"),
+    "upgrade": ("rolling_upgrade", "TestMixedMatrixRollingServerUpgrade"),
+}
+HEADER = re.compile(r"Sustained matrix row=(\w+) seed=(\d+) duration=(\S+)")
+
+
+def job_name(job):
+    return f"leader ({job['row']}, {job['artifact_seed']})"
+
+
+def check_full_matrix(metadata, logs, count):
+    planned = planner.campaign("all", count, "10m")
+    if set(ROWS) != set(planner.ROWS):
+        raise ValueError("fault registry differs from campaign plan")
+    if metadata.get("status") != "completed" or metadata.get("conclusion") != "success":
+        raise ValueError("whole campaign is not terminal and successful")
+    revision = metadata.get("headSha", "")
+    if not re.fullmatch(r"[0-9a-f]{40}", revision):
+        raise ValueError("missing source revision")
+    expected = {job_name(job) for job in planned}
+    jobs = metadata.get("jobs", [])
+    if len(jobs) != len(expected) + 1 or {job["name"] for job in jobs} != expected | {"seeds"}:
+        raise ValueError("missing, duplicate or unexpected campaign jobs")
+    if any(job.get("status") != "completed" or job.get("conclusion") != "success" for job in jobs):
+        raise ValueError("unfinished, skipped or failed campaign job")
+    if set(logs) != expected:
+        raise ValueError("missing or unexpected job logs")
+    rows = {row: [] for row in ROWS}
+    for planned_job in planned:
+        name = job_name(planned_job)
+        log = logs[name]
+        if revision not in log:
+            raise ValueError(f"{name}: checkout revision missing or mismatched")
+        headers = list(HEADER.finditer(log))
+        actual = [(match[1], int(match[2]), match[3]) for match in headers]
+        expected_headers = [(planned_job["row"], seed, "10m") for seed in range(planned_job["first"], planned_job["last"] + 1)]
+        if actual != expected_headers:
+            raise ValueError(f"{name}: missing, duplicate, wrong or shortened seed executions")
+        runtime_row, test = ROWS[planned_job["row"]]
+        for i, header in enumerate(headers):
+            seed = int(header[2])
+            segment = log[header.end():headers[i+1].start() if i+1 < len(headers) else len(log)]
+            guard = f"Verified executed sustained test {test} duration=10m"
+            if segment.count(guard) != 1:
+                raise ValueError(f"{name} seed={seed}: missing or duplicate full-duration result guard")
+            rows[planned_job["row"]].append(gate.check_seed(segment, runtime_row, seed, test))
+    for row, seeds in rows.items():
+        if [record["seed"] for record in seeds] != list(range(1, count+1)):
+            raise ValueError(f"{row}: incomplete consecutive seed range")
+    flattened = [seed for seeds in rows.values() for seed in seeds]
+    return {
+        "revision": revision,
+        "scope": "whole three-node sustained fault matrix at the recorded revision",
+        "consecutive_seeds_per_row": count,
+        "duration_seconds_per_seed": 600,
+        "fault_variants": len(rows),
+        "executions": len(flattened),
+        "clears_tier2_200_seed_gate": count == 200,
+        "clears_tier3_24_hour_soak": False,
+        "invocations": sum(seed["invocations"] for seed in flattened),
+        "faults": sum(seed["faults"] for seed in flattened),
+        "worst_terminal_p99_seconds": max(seed["terminal_p99_seconds"] for seed in flattened),
+        "worst_cell_terminal_p99_seconds": max(cell["terminal_p99_seconds"] for seed in flattened for cell in seed["cells"].values()),
+        "worst_progress_p99_seconds": max(event["p99_seconds"] for seed in flattened for event in seed["progress"].values()),
+        "rows": rows,
+    }
+
+
+def load_logs(path):
+    logs = {}
+    with zipfile.ZipFile(path) as archive:
+        for filename in archive.namelist():
+            match = re.fullmatch(r"\d+_(leader \(\w+, [\d-]+\))\.txt", filename)
+            if match:
+                name = match[1]
+                if name in logs:
+                    raise ValueError(f"duplicate job log {name}")
+                logs[name] = archive.read(filename).decode("utf-8")
+    return logs
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--jobs", required=True, type=Path)
+    parser.add_argument("--logs", required=True, type=Path)
+    parser.add_argument("--seeds", required=True, type=int, choices=(1, 20, 200))
+    parser.add_argument("--output", required=True, type=Path)
+    args = parser.parse_args()
+    report = check_full_matrix(json.loads(args.jobs.read_text()), load_logs(args.logs), args.seeds)
+    report["input_sha256"] = {label: hashlib.sha256(path.read_bytes()).hexdigest() for label, path in (("jobs", args.jobs), ("logs_zip", args.logs))}
+    args.output.write_text(json.dumps(report, indent=2)+"\n")
+    print(json.dumps({key: value for key, value in report.items() if key != "rows"}, indent=2))

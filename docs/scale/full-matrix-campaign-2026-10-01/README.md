@@ -42,3 +42,33 @@ recorded revision. A one-seed campaign or 35-second run cannot clear that gate.
 This is still the three-node tier. The five-node 24-hour full-matrix soak,
 written explanations for fencing/re-enqueues, six-mutation mixed chaos release
 check and remaining capacity/runtime requirements remain independent.
+
+## Terminal whole-matrix verifier
+
+scripts/check-full-matrix.py reads terminal Actions job metadata and the
+corresponding full job-log ZIP. It requires exactly the planned setup/groups,
+all completed successfully, the same full checkout SHA in every group log,
+all thirteen rows, each consecutive seed exactly once, ten-minute execution,
+the per-seed JSON result guard, retained audit/workload counts and all workload
+terminal/progress p99 markers. It reuses the existing one-row semantic checker.
+A skipped, live, missing, duplicate, failed, shortened or wrong-revision result
+fails closed. Group logs are split at their explicit row/seed execution markers;
+missing later seeds cannot disappear into aggregate green metadata.
+
+    gh run view RUN_ID --json status,conclusion,headSha,jobs > jobs.json
+    gh api repos/AntPAllen/js-wf/actions/runs/RUN_ID/logs > logs.zip
+    python3 scripts/check-full-matrix.py --jobs jobs.json --logs logs.zip --seeds 1 --output full-matrix-report.json
+
+For the release campaign use --seeds 200. One- and twenty-seed full-matrix
+results explicitly report clears_tier2_200_seed_gate=false; even a successful
+200-seed campaign reports clears_tier3_24_hour_soak=false. The verifier checks
+recorded runtime assertions; it does not independently reconstruct raw stores
+or prove unrelated release requirements.
+
+Five additional controls cover all supported counts/scopes, job and source
+identity, partial/duplicate/wrong/shortened seed logs, semantic p99 failures,
+registry consistency and duplicate ZIP job logs. Seventeen matrix tests and
+all twenty-five script tests pass. Fixtures in those controls are synthetic,
+not release evidence. Actual live run 36845868029 metadata is retained and
+rejected as unfinished. Its one-seed-per-row ten-minute campaign remains live;
+final verification is pending. Production/model sources are unchanged.
