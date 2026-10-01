@@ -3,8 +3,8 @@
 Status: continuation contract, SDK cursor foundation, bounded frame codec and
 SDK capture/restore, archive/runtime publication and prefix-free journal reads.
 SDK Continue publication and worker stage dispatch, suffix resume, boundary
-compaction and handoff are implemented. Full crash/restart, offline replay and
-retirement gates remain open.
+compaction and handoff are implemented. Full crash/restart and retirement gates remain open. Complete-history offline
+stage replay is implemented with focused/model/real-journal checks below.
 This document preserves the plan's checkpoint requirement; it does not count
 as a completed checkpoint feature.
 
@@ -256,7 +256,7 @@ for future worker manifest/handoff processing, not proof of a published manifest
 completion cuts, 100,000 seeded schedules and a lease-fenced real transport
 contract. Worker code configures the resolver with historical anchor epoch, panic count
 and signal cursor; later attempts and signals cannot change an existing frame.
-Offline stage replay and worker process-kill proof remain open.
+Offline stage replay is implemented below; worker process-kill proof remains open.
 
 
 ## Implemented worker execution
@@ -290,3 +290,54 @@ denied. Initial and middle handlers each run once; recorded prefix/suffix effect
 run once and retain distinct absolute keys. This is a graceful worker replacement,
 not SIGKILL or a completed fault-matrix proof. Seeded integrated transport checks
 cover publication and handoff faults; [proof and remaining scope](scale/continuation-worker-2026-10-01/).
+
+
+## Implemented offline multistage replay
+
+`wf.ReplayWithContinuations` accepts the initial function, typed named-stage
+callbacks and ordinary ReplayOptions containing invocation identity and object
+bytes. It checks the complete logical journal structure with the invariant checker,
+rejects unknown recorded stage registrations before calling user code, and
+replays declarations from the initial handler. Each completed boundary rebuilds
+and compares its frame using historical completion epoch, panic count and signal
+cursor; it then restores the verified frame and remaining SDK suffix before
+calling the next stage. Later signals/attempts cannot change an earlier frame.
+No effect callback, child start, timer publication or journal/object write runs.
+
+A history ending at checkpoint completion or its continuation suspension returns
+ErrContinuation without entering the unrecorded next stage. An incomplete
+checkpoint returns ErrReplayPendingStep. Observation reports the current stage,
+verified boundary count and absolute played/recorded SDK positions. Missing or
+corrupt objects, divergent locals/rebuilt state, malformed journals and stage
+panics remain visible. A Completed history also checks the returned value against
+its generation-bound terminal outcome and verifies any terminal result object.
+RawMessage uses the worker's exact result bytes; other return types use JSON.
+The original `wf.Replay` contract remains available for ordinary handlers.
+
+For existing worker handlers, adapt the registered functions with closures that
+supply the original input:
+
+```go
+result, err := wf.ReplayWithContinuations(history,
+    func(c *wf.Context) (json.RawMessage, error) { return initial(c, input) },
+    map[string]wf.ReplayContinuation[json.RawMessage]{
+        "next_v1": func(c *wf.Context, locals json.RawMessage) (json.RawMessage, error) {
+            return next(c, input, locals)
+        },
+    },
+    wf.ReplayOptions{Type: typ, ID: id, InvSeq: generation, Objects: objects},
+)
+```
+
+Objects must include referenced frames, signal payloads, step/promise results
+and terminal results. `history` is the full archive-plus-live logical journal,
+not only ReadCheckpoint's suffix. Failed/pending histories expose the replayed
+error/wait; this API does not reenact every historical worker delivery, external
+cancellation or panic attempt. Those integrated acceptance checks remain open.
+
+[Offline replay proof](scale/continuation-replay-2026-10-01/) includes controls across two boundaries
+with historical signal/attempt facts, a mutation that conceals rebuilt-state defects
+by trusting stored frames, terminal mismatch/object controls, all seventeen
+seeded worker publication modes and complete archived-journal replay after the
+real three-node worker replacement. It does not close worker SIGKILL, retirement/
+reuse, integrated runtime-semantics or the independent matrix/soak gates.

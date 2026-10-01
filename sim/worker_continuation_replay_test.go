@@ -148,7 +148,7 @@ func runSeededWorkerContinuation(seed int64, replay *Trace) (trace Trace, runErr
 	}
 	var effects, initialCalls, stageCalls int
 	var prefixKey, suffixKey string
-	w, err := worker.NewWithPorts("modeled-continuation", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
+	handlers := map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 		initialCalls++
 		if err := c.SetState("total", 23); err != nil {
 			return nil, err
@@ -157,7 +157,8 @@ func runSeededWorkerContinuation(seed int64, replay *Trace) (trace Trace, runErr
 			return nil, err
 		}
 		return nil, wf.Continue(c, "next_v1", 45)
-	}}, worker.ModeledWorkerPorts{Journal: store, Leases: leasing, Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, ResultBlobs: snapshots, Client: c}, worker.WithContinuations(typ, map[string]worker.ContinuationHandler{"next_v1": func(c *wf.Context, input, locals json.RawMessage) (json.RawMessage, error) {
+	}}
+	stages := map[string]worker.ContinuationHandler{"next_v1": func(c *wf.Context, input, locals json.RawMessage) (json.RawMessage, error) {
 		stageCalls++
 		if string(input) != "23" || string(locals) != "45" {
 			return nil, fmt.Errorf("continuation inputs")
@@ -179,7 +180,8 @@ func runSeededWorkerContinuation(seed int64, replay *Trace) (trace Trace, runErr
 			return nil, err
 		}
 		return json.RawMessage(`23`), nil
-	}}))
+	}}
+	w, err := worker.NewWithPorts("modeled-continuation", handlers, worker.ModeledWorkerPorts{Journal: store, Leases: leasing, Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, ResultBlobs: snapshots, Client: c}, worker.WithContinuations(typ, stages))
 	if err != nil {
 		return trace, err
 	}
@@ -207,6 +209,24 @@ func runSeededWorkerContinuation(seed int64, replay *Trace) (trace Trace, runErr
 	report, err := integrity.CheckSnapshot(raw)
 	if err != nil || report.Invocations != 1 || report.Terminal != 1 {
 		return trace, fmt.Errorf("integrity=%+v err=%v", report, err)
+	}
+	objects := make(map[string][]byte)
+	snapshots.mu.Lock()
+	for name, value := range snapshots.objects {
+		objects[name] = bytes.Clone(value)
+	}
+	snapshots.mu.Unlock()
+	journalBytes, err := json.Marshal(records)
+	if err != nil {
+		return trace, err
+	}
+	initialBefore, stageBefore := initialCalls, stageCalls
+	var replayObservation wf.ReplayObservation
+	replayed, err := wf.ReplayWithContinuations(journalBytes, func(ctx *wf.Context) (json.RawMessage, error) { return handlers[typ](ctx, json.RawMessage(`23`)) }, map[string]wf.ReplayContinuation[json.RawMessage]{"next_v1": func(ctx *wf.Context, locals json.RawMessage) (json.RawMessage, error) {
+		return stages["next_v1"](ctx, json.RawMessage(`23`), locals)
+	}}, wf.ReplayOptions{Type: typ, ID: id, InvSeq: handle.InvSeq, Objects: objects, Observation: &replayObservation})
+	if err != nil || string(replayed) != "23" || effects != 2 || initialCalls != initialBefore+1 || stageCalls != stageBefore+1 || replayObservation.Continuations != 1 || replayObservation.PlayedSteps != replayObservation.RecordedSteps {
+		return trace, fmt.Errorf("offline continuation result=%s effects=%d observation=%+v err=%v", replayed, effects, replayObservation, err)
 	}
 	if (strings.HasPrefix(mode, "request_") || strings.HasPrefix(mode, "completion_")) && !appendPort.fired {
 		return trace, fmt.Errorf("journal fault was not exercised: %s", mode)

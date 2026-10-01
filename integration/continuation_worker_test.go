@@ -211,5 +211,53 @@ func TestContinuationWorkerRestartsWithoutPrefixReads(t *testing.T) {
 	if err != nil || view == nil || view.Snapshot.Runtime.Stage != "finish_v1" {
 		t.Fatalf("checkpoint=%+v err=%v", view, err)
 	}
-	t.Logf("prefix-free worker restart: initial=%d middle=%d effects=%d suffix=%d frame_reads=%d archive_reads=%d", initialCalls.Load(), middleCalls.Load(), effects.Load(), len(view.Records), guard.frames, guard.archives)
+	initialBefore, middleBefore := initialCalls.Load(), middleCalls.Load()
+	auditRecords, _, err := store.Read(ctx, typ, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	objects, err := all[0].ObjectStore(ctx, "WF_BLOB")
+	if err != nil {
+		t.Fatal(err)
+	}
+	replayObjects := make(map[string][]byte)
+	for _, record := range auditRecords {
+		var references struct {
+			Result string `json:"result_ref"`
+			Signal string `json:"ref"`
+		}
+		if len(record.Payload) == 0 {
+			continue
+		}
+		if err := json.Unmarshal(record.Payload, &references); err != nil {
+			t.Fatal(err)
+		}
+		for _, ref := range []string{references.Result, references.Signal} {
+			if ref == "" || replayObjects[ref] != nil {
+				continue
+			}
+			data, err := objects.GetBytes(ctx, ref)
+			if err != nil {
+				t.Fatal(err)
+			}
+			replayObjects[ref] = data
+		}
+	}
+	journalBytes, err := json.Marshal(auditRecords)
+	if err != nil {
+		t.Fatal(err)
+	}
+	replayStages := make(map[string]wf.ReplayContinuation[json.RawMessage])
+	for name, stage := range stages {
+		replayStages[name] = func(c *wf.Context, locals json.RawMessage) (json.RawMessage, error) {
+			return stage(c, json.RawMessage(`23`), locals)
+		}
+	}
+	var observation wf.ReplayObservation
+	replayed, err := wf.ReplayWithContinuations(journalBytes, func(c *wf.Context) (json.RawMessage, error) { return handlers[typ](c, json.RawMessage(`23`)) }, replayStages, wf.ReplayOptions{Type: typ, ID: id, InvSeq: handle.InvSeq, Objects: replayObjects, Observation: &observation})
+	if err != nil || string(replayed) != "50" || effects.Load() != 2 || initialCalls.Load() != initialBefore+1 || middleCalls.Load() != middleBefore+1 || observation.Continuations != 2 || observation.PlayedSteps != observation.RecordedSteps {
+		t.Fatalf("offline result=%s effects=%d observation=%+v err=%v", replayed, effects.Load(), observation, err)
+	}
+	t.Logf("offline continuation audit: frames=%d boundaries=%d played=%d recorded=%d effects=%d", len(replayObjects), observation.Continuations, observation.PlayedSteps, observation.RecordedSteps, effects.Load())
+	t.Logf("prefix-free worker restart: initial=%d middle=%d effects=%d suffix=%d frame_reads=%d archive_reads=%d", initialBefore, middleBefore, effects.Load(), len(view.Records), guard.frames, guard.archives)
 }

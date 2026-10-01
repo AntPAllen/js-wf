@@ -2687,3 +2687,47 @@ Worker SIGKILL/all crash-cut repair proofs, offline multistage replay, retiremen
 reuse, integrated runtime-semantics/limit and GC gates remain open. The independent
 mixed seed 65 latency failure and final-source matrix/24-hour soak remain open.
 The original million-timer process is still running and has not been restarted.
+
+
+## Offline continuation replay and terminal verification
+
+`wf.ReplayWithContinuations` now audits a full archive-plus-live journal through
+the initial handler and typed named-stage callbacks with no durable writes or
+effect callbacks. It preflights journal structure and stage registrations,
+rebuilds/verifies each checkpoint using historical epoch/attempt/signal facts,
+restores its materialized state and buffered signals, and continues on the
+remaining SDK suffix. Observations retain absolute played/recorded positions,
+stage and verified-boundary count. Histories ending at a completed checkpoint
+or continuation suspension stop before the unrecorded next stage. Incomplete
+checkpoints remain pending. Completed histories verify returned result bytes
+against the generation-bound terminal outcome and its object hash, if spilled.
+Ordinary Replay retains its prior contract.
+
+Focused race controls passed for two boundaries with a later signal/attempt,
+missing/corrupt objects, unknown registrations before user code, changed locals,
+rebuilt state mismatch, malformed suspension, pending completion, stage panic
+and inline/object-backed terminal divergence. A compiled production mutation
+that trusts frames instead of checking rebuilt hash/bytes conceals an injected
+SDK state-application defect and fails the control. The final full SDK race
+suite passed in 12.882 seconds. The complete final simulator suite passed in
+85.988 seconds; vet passed.
+
+All seventeen worker publication/handoff modes now replay their full retained
+journals offline, compare terminal results and confirm no new effect callback.
+The final 100,000-schedule campaign passed with 21,347,572 transport events in
+113.826 seconds; the modeled transport trace is unchanged by the offline audit.
+Exact replay and the pinned corpus/race campaign passed in 23.178 seconds.
+The real R3 three-node graceful worker replacement plus offline archived-journal
+audit passed under race in 25.889 seconds: two verified frames/boundaries,
+2,018/2,018 SDK entries consumed, immutable result 50, and no additional effect.
+[Raw proof, mutation and source hashes](scale/continuation-replay-2026-10-01/)
+are retained.
+
+This closes the focused offline multistage replay implementation gap. It does
+not reenact every historical worker delivery or external cancellation/panic
+timing, and Failed/pending histories expose their replayed error/wait. Worker
+SIGKILL/all crash-cut repair, retirement/reuse and integrated runtime-semantics/
+limit/GC gates remain open, along with the mixed seed 65 latency failure and
+independent final-source matrix/24-hour soak. The test workflow at `8dc25f1`
+completed successfully, as did its focused mixed and mutation jobs. The original
+million-timer process remains running without a restart.
