@@ -203,9 +203,24 @@ func TestWorkerRunnerRunsFallbackTimerLoop(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	info, err := timers.Info(ctx)
-	if err != nil || info.State.Msgs != 0 {
-		t.Fatalf("fallback timer stream: info=%+v err=%v", info, err)
+	// A terminal result can be observed after wakeup publication but before
+	// the independent scanner removes its source record. Require eventual
+	// cleanup before stopping that scanner.
+	cleanupCtx, stopCleanup := context.WithTimeout(ctx, 3*time.Second)
+	defer stopCleanup()
+	for {
+		info, err := timers.Info(cleanupCtx)
+		if err != nil {
+			t.Fatalf("fallback timer cleanup lookup: %v", err)
+		}
+		if info.State.Msgs == 0 {
+			break
+		}
+		select {
+		case <-cleanupCtx.Done():
+			t.Fatalf("fallback timer source not removed: messages=%d err=%v", info.State.Msgs, cleanupCtx.Err())
+		case <-time.After(10 * time.Millisecond):
+		}
 	}
 	cancel()
 	select {

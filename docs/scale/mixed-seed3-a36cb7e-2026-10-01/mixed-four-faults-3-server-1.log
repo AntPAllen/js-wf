@@ -1,0 +1,289 @@
+[2764] 2026/10/01 03:58:21.859668 [INF] Starting nats-server
+[2764] 2026/10/01 03:58:21.859695 [INF]   Version:  2.15.0
+[2764] 2026/10/01 03:58:21.859697 [INF]   Git:      [not set]
+[2764] 2026/10/01 03:58:21.859698 [INF]   Cluster:  wf-process
+[2764] 2026/10/01 03:58:21.859699 [INF]   Name:     wf-process-1
+[2764] 2026/10/01 03:58:21.859700 [INF]   Node:     St9I6EVH
+[2764] 2026/10/01 03:58:21.859701 [INF]   ID:       NCBZ2P43BXAXE5FBLRP2WZLCGXA67IXFTD3CIXPBE2G4JO6DAMCM6EFC
+[2764] 2026/10/01 03:58:21.860190 [INF] Starting http monitor on 127.0.0.1:46255
+[2764] 2026/10/01 03:58:21.860262 [INF] Starting JetStream
+[2764] 2026/10/01 03:58:21.860401 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+[2764] 2026/10/01 03:58:21.860404 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+[2764] 2026/10/01 03:58:21.860405 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+[2764] 2026/10/01 03:58:21.860407 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+[2764] 2026/10/01 03:58:21.860408 [INF] 
+[2764] 2026/10/01 03:58:21.860409 [INF]          https://docs.nats.io/jetstream
+[2764] 2026/10/01 03:58:21.860410 [INF] 
+[2764] 2026/10/01 03:58:21.860411 [INF] ---------------- JETSTREAM ----------------
+[2764] 2026/10/01 03:58:21.860412 [INF]   Strict:          true
+[2764] 2026/10/01 03:58:21.860415 [INF]   Max Memory:      11.71 GB
+[2764] 2026/10/01 03:58:21.860417 [INF]   Max Storage:     63.52 GB
+[2764] 2026/10/01 03:58:21.860418 [INF]   Store Directory: "/tmp/TestMixedWorkflowsRecoverFromFourServerFaults1612189958/001/node-1/jetstream"
+[2764] 2026/10/01 03:58:21.860420 [INF]   API Level:       5
+[2764] 2026/10/01 03:58:21.860421 [INF] -------------------------------------------
+[2764] 2026/10/01 03:58:21.860614 [INF] Starting JetStream cluster
+[2764] 2026/10/01 03:58:21.860618 [INF] Creating JetStream metadata controller
+[2764] 2026/10/01 03:58:21.861027 [INF] JetStream cluster bootstrapping
+[2764] 2026/10/01 03:58:21.862760 [INF] Took 2.494609ms to start JetStream
+[2764] 2026/10/01 03:58:21.862815 [INF] Listening for client connections on 127.0.0.1:46061
+[2764] 2026/10/01 03:58:21.862818 [INF] Server is ready
+[2764] 2026/10/01 03:58:21.862877 [INF] Cluster name is wf-process
+[2764] 2026/10/01 03:58:21.862890 [INF] Listening for route connections on 127.0.0.1:45395
+[2764] 2026/10/01 03:58:21.863335 [INF] 127.0.0.1:39459 - rid:8 - Route connection created
+[2764] 2026/10/01 03:58:21.863792 [INF] 127.0.0.1:41074 - rid:9 - Route connection created
+[2764] 2026/10/01 03:58:21.863848 [INF] 127.0.0.1:39459 - rid:10 - Route connection created
+[2764] 2026/10/01 03:58:21.864547 [INF] 127.0.0.1:41084 - rid:11 - Route connection created
+[2764] 2026/10/01 03:58:21.865445 [INF] 127.0.0.1:39459 - rid:8 - Router connection closed: Client Closed - Remote: wf-process-0
+[2764] 2026/10/01 03:58:21.865483 [INF] 127.0.0.1:41098 - rid:12 - Route connection created
+[2764] 2026/10/01 03:58:21.865488 [INF] 127.0.0.1:39459 - rid:10 - Router connection closed: Client Closed - Remote: wf-process-0
+[2764] 2026/10/01 03:58:21.865661 [INF] 127.0.0.1:41086 - rid:13 - Route connection created
+[2764] 2026/10/01 03:58:21.866163 [INF] 127.0.0.1:41104 - rid:14 - Route connection created
+[2764] 2026/10/01 03:58:21.866654 [INF] 127.0.0.1:41110 - rid:15 - Route connection created
+[2764] 2026/10/01 03:58:21.866942 [INF] 127.0.0.1:41122 - rid:16 - Route connection created
+[2764] 2026/10/01 03:58:21.867242 [INF] 127.0.0.1:41138 - rid:17 - Route connection created
+[2764] 2026/10/01 03:58:21.963021 [WRN] Waiting for routing to be established...
+[2764] 2026/10/01 03:58:21.963109 [WRN] JetStream has not established contact with a meta leader
+[2764] 2026/10/01 03:58:22.485401 [INF] JetStream cluster new metadata leader: wf-process-0/wf-process
+[2764] 2026/10/01 03:58:22.924554 [INF] 127.0.0.1:39459 - rid:19 - Route connection created
+[2764] 2026/10/01 03:58:22.924907 [INF] 127.0.0.1:39459 - rid:19 - Router connection closed: Duplicate Route - Remote: wf-process-0
+[2764] 2026/10/01 03:58:22.943557 [INF] 127.0.0.1:39459 - rid:20 - Route connection created
+[2764] 2026/10/01 03:58:22.943809 [INF] 127.0.0.1:39459 - rid:20 - Router connection closed: Duplicate Route - Remote: wf-process-0
+[2764] 2026/10/01 03:58:26.244837 [INF] JetStream cluster new stream leader for '$G > WF_SIG'
+[2764] 2026/10/01 03:58:26.480520 [INF] JetStream cluster new stream leader for '$G > KV_WF_VIEW'
+[2764] 2026/10/01 03:58:26.688680 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_27'
+[2764] 2026/10/01 03:58:26.691374 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_43'
+[2764] 2026/10/01 03:58:26.694274 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_12'
+[2764] 2026/10/01 03:58:26.876853 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_15'
+[2764] 2026/10/01 03:58:26.943163 [INF] 127.0.0.1:41074 - rid:9 - Router connection closed: Client Closed - Remote: wf-process-0
+[2764] 2026/10/01 03:58:26.943439 [INF] 127.0.0.1:41104 - rid:14 - Router connection closed: Client Closed - Remote: wf-process-0
+[2764] 2026/10/01 03:58:26.943478 [INF] 127.0.0.1:41084 - rid:11 - Router connection closed: Client Closed - Remote: wf-process-0
+[2764] 2026/10/01 03:58:26.943503 [INF] 127.0.0.1:41122 - rid:16 - Router connection closed: Client Closed - Remote: wf-process-0
+[2764] 2026/10/01 03:58:28.006747 [INF] 127.0.0.1:39459 - rid:106 - Route connection created
+[2764] 2026/10/01 03:58:28.006945 [INF] 127.0.0.1:39459 - rid:106 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:28.017116 [INF] 127.0.0.1:39459 - rid:107 - Route connection created
+[2764] 2026/10/01 03:58:28.017371 [INF] 127.0.0.1:39459 - rid:107 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:28.027482 [INF] 127.0.0.1:39459 - rid:108 - Route connection created
+[2764] 2026/10/01 03:58:28.027620 [INF] 127.0.0.1:39459 - rid:108 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:28.040997 [INF] 127.0.0.1:39459 - rid:109 - Route connection created
+[2764] 2026/10/01 03:58:28.041213 [INF] 127.0.0.1:39459 - rid:109 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:29.074600 [INF] 127.0.0.1:39459 - rid:110 - Route connection created
+[2764] 2026/10/01 03:58:29.074768 [INF] 127.0.0.1:39459 - rid:110 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:29.074817 [INF] 127.0.0.1:39459 - rid:111 - Route connection created
+[2764] 2026/10/01 03:58:29.074994 [INF] 127.0.0.1:39459 - rid:111 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:29.103320 [INF] 127.0.0.1:39459 - rid:112 - Route connection created
+[2764] 2026/10/01 03:58:29.103483 [INF] 127.0.0.1:39459 - rid:112 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:29.107639 [INF] 127.0.0.1:39459 - rid:113 - Route connection created
+[2764] 2026/10/01 03:58:29.107856 [INF] 127.0.0.1:39459 - rid:113 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:30.092043 [INF] 127.0.0.1:39459 - rid:114 - Route connection created
+[2764] 2026/10/01 03:58:30.092283 [INF] 127.0.0.1:39459 - rid:114 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:30.133118 [INF] 127.0.0.1:39459 - rid:115 - Route connection created
+[2764] 2026/10/01 03:58:30.133332 [INF] 127.0.0.1:39459 - rid:115 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:30.153648 [INF] 127.0.0.1:39459 - rid:116 - Route connection created
+[2764] 2026/10/01 03:58:30.153957 [INF] 127.0.0.1:39459 - rid:116 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:30.186059 [INF] 127.0.0.1:39459 - rid:117 - Route connection created
+[2764] 2026/10/01 03:58:30.186384 [INF] 127.0.0.1:39459 - rid:117 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:31.112905 [INF] 127.0.0.1:39459 - rid:118 - Route connection created
+[2764] 2026/10/01 03:58:31.113074 [INF] 127.0.0.1:39459 - rid:118 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:31.166127 [INF] 127.0.0.1:39459 - rid:119 - Route connection created
+[2764] 2026/10/01 03:58:31.166295 [INF] 127.0.0.1:39459 - rid:119 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:31.194813 [INF] 127.0.0.1:39459 - rid:120 - Route connection created
+[2764] 2026/10/01 03:58:31.194956 [INF] 127.0.0.1:39459 - rid:120 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:31.231534 [INF] 127.0.0.1:39459 - rid:121 - Route connection created
+[2764] 2026/10/01 03:58:31.231794 [INF] 127.0.0.1:39459 - rid:121 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:32.186012 [INF] 127.0.0.1:39459 - rid:122 - Route connection created
+[2764] 2026/10/01 03:58:32.186151 [INF] 127.0.0.1:39459 - rid:122 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:32.257149 [INF] 127.0.0.1:39459 - rid:123 - Route connection created
+[2764] 2026/10/01 03:58:32.257478 [INF] 127.0.0.1:39459 - rid:123 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:32.258107 [INF] 127.0.0.1:39459 - rid:124 - Route connection created
+[2764] 2026/10/01 03:58:32.258375 [INF] 127.0.0.1:39459 - rid:124 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:32.269883 [INF] 127.0.0.1:39459 - rid:125 - Route connection created
+[2764] 2026/10/01 03:58:32.270119 [INF] 127.0.0.1:39459 - rid:125 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:33.230122 [INF] 127.0.0.1:39459 - rid:126 - Route connection created
+[2764] 2026/10/01 03:58:33.230366 [INF] 127.0.0.1:39459 - rid:126 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:33.277089 [INF] 127.0.0.1:39459 - rid:127 - Route connection created
+[2764] 2026/10/01 03:58:33.277285 [INF] 127.0.0.1:39459 - rid:127 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:33.326514 [INF] 127.0.0.1:39459 - rid:128 - Route connection created
+[2764] 2026/10/01 03:58:33.326765 [INF] 127.0.0.1:39459 - rid:128 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:33.353591 [INF] 127.0.0.1:39459 - rid:129 - Route connection created
+[2764] 2026/10/01 03:58:33.353749 [INF] 127.0.0.1:39459 - rid:129 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:34.242979 [INF] 127.0.0.1:39459 - rid:130 - Route connection created
+[2764] 2026/10/01 03:58:34.243163 [INF] 127.0.0.1:39459 - rid:130 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:34.317710 [INF] 127.0.0.1:39459 - rid:131 - Route connection created
+[2764] 2026/10/01 03:58:34.317969 [INF] 127.0.0.1:39459 - rid:131 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:34.423427 [INF] 127.0.0.1:39459 - rid:132 - Route connection created
+[2764] 2026/10/01 03:58:34.423529 [INF] 127.0.0.1:39459 - rid:132 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:34.428039 [INF] 127.0.0.1:39459 - rid:133 - Route connection created
+[2764] 2026/10/01 03:58:34.428276 [INF] 127.0.0.1:39459 - rid:133 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:35.294234 [INF] 127.0.0.1:39459 - rid:134 - Route connection created
+[2764] 2026/10/01 03:58:35.294512 [INF] 127.0.0.1:39459 - rid:134 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:35.393937 [INF] 127.0.0.1:39459 - rid:135 - Route connection created
+[2764] 2026/10/01 03:58:35.394114 [INF] 127.0.0.1:39459 - rid:135 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:35.475979 [INF] 127.0.0.1:39459 - rid:136 - Route connection created
+[2764] 2026/10/01 03:58:35.476121 [INF] 127.0.0.1:39459 - rid:136 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:35.497214 [INF] 127.0.0.1:39459 - rid:137 - Route connection created
+[2764] 2026/10/01 03:58:35.497473 [INF] 127.0.0.1:39459 - rid:137 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:36.363938 [INF] 127.0.0.1:39459 - rid:138 - Route connection created
+[2764] 2026/10/01 03:58:36.364217 [INF] 127.0.0.1:39459 - rid:138 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:36.481224 [WRN] JetStream cluster stream '$G > KV_WF_VIEW' has NO quorum, stalled
+[2764] 2026/10/01 03:58:36.488283 [INF] 127.0.0.1:39459 - rid:139 - Route connection created
+[2764] 2026/10/01 03:58:36.488547 [INF] 127.0.0.1:39459 - rid:139 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:36.537493 [INF] 127.0.0.1:39459 - rid:140 - Route connection created
+[2764] 2026/10/01 03:58:36.537638 [INF] 127.0.0.1:39459 - rid:140 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:36.547752 [INF] 127.0.0.1:39459 - rid:141 - Route connection created
+[2764] 2026/10/01 03:58:36.548002 [INF] 127.0.0.1:39459 - rid:141 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:37.398652 [INF] 127.0.0.1:39459 - rid:142 - Route connection created
+[2764] 2026/10/01 03:58:37.398785 [INF] 127.0.0.1:39459 - rid:142 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:37.500412 [INF] 127.0.0.1:39459 - rid:143 - Route connection created
+[2764] 2026/10/01 03:58:37.500586 [INF] 127.0.0.1:39459 - rid:143 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:37.551941 [INF] 127.0.0.1:39459 - rid:144 - Route connection created
+[2764] 2026/10/01 03:58:37.552079 [INF] 127.0.0.1:39459 - rid:144 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:37.640026 [INF] 127.0.0.1:39459 - rid:145 - Route connection created
+[2764] 2026/10/01 03:58:37.640287 [INF] 127.0.0.1:39459 - rid:145 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:38.413169 [INF] 127.0.0.1:39459 - rid:146 - Route connection created
+[2764] 2026/10/01 03:58:38.413363 [INF] 127.0.0.1:39459 - rid:146 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:38.527866 [INF] 127.0.0.1:39459 - rid:147 - Route connection created
+[2764] 2026/10/01 03:58:38.528116 [INF] 127.0.0.1:39459 - rid:147 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:38.584107 [INF] 127.0.0.1:39459 - rid:148 - Route connection created
+[2764] 2026/10/01 03:58:38.584324 [INF] 127.0.0.1:39459 - rid:148 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:38.669501 [INF] 127.0.0.1:39459 - rid:149 - Route connection created
+[2764] 2026/10/01 03:58:38.669607 [INF] 127.0.0.1:39459 - rid:149 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:38.994947 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_15' has NO quorum, stalled.
+[2764] 2026/10/01 03:58:38.996294 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_12' has NO quorum, stalled.
+[2764] 2026/10/01 03:58:38.997417 [WRN] JetStream cluster stream '$G > WF_SIG' has NO quorum, stalled
+[2764] 2026/10/01 03:58:38.997556 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_27' has NO quorum, stalled.
+[2764] 2026/10/01 03:58:39.002970 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_43' has NO quorum, stalled.
+[2764] 2026/10/01 03:58:39.027521 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_63'
+[2764] 2026/10/01 03:58:39.030421 [INF] JetStream cluster new stream leader for '$G > KV_WF_LEASE'
+[2764] 2026/10/01 03:58:39.031373 [INF] JetStream cluster new stream leader for '$G > WF_JRN'
+[2764] 2026/10/01 03:58:39.031428 [INF] JetStream cluster new stream leader for '$G > KV_WF_STATE'
+[2764] 2026/10/01 03:58:39.032139 [INF] JetStream cluster new stream leader for '$G > WF_PURGE'
+[2764] 2026/10/01 03:58:39.032786 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_45'
+[2764] 2026/10/01 03:58:39.033255 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_33'
+[2764] 2026/10/01 03:58:39.034182 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_18'
+[2764] 2026/10/01 03:58:39.040045 [INF] JetStream cluster new stream leader for '$G > OBJ_WF_BLOB'
+[2764] 2026/10/01 03:58:39.040121 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_31'
+[2764] 2026/10/01 03:58:39.040282 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_55'
+[2764] 2026/10/01 03:58:39.040289 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_47'
+[2764] 2026/10/01 03:58:39.040306 [INF] JetStream cluster new stream leader for '$G > KV_WF_ASSIGN'
+[2764] 2026/10/01 03:58:39.040326 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_48'
+[2764] 2026/10/01 03:58:39.040326 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_51'
+[2764] 2026/10/01 03:58:39.419133 [INF] 127.0.0.1:39459 - rid:150 - Route connection created
+[2764] 2026/10/01 03:58:39.419405 [INF] 127.0.0.1:39459 - rid:150 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:39.622430 [INF] 127.0.0.1:39459 - rid:151 - Route connection created
+[2764] 2026/10/01 03:58:39.622598 [INF] 127.0.0.1:39459 - rid:151 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:39.671479 [INF] 127.0.0.1:39459 - rid:152 - Route connection created
+[2764] 2026/10/01 03:58:39.671602 [INF] 127.0.0.1:39459 - rid:152 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:39.734801 [INF] 127.0.0.1:39459 - rid:153 - Route connection created
+[2764] 2026/10/01 03:58:39.734953 [INF] 127.0.0.1:39459 - rid:153 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:39.906754 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_17'
+[2764] 2026/10/01 03:58:40.131729 [INF] Self is new JetStream cluster metadata leader
+[2764] 2026/10/01 03:58:40.163830 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_12'
+[2764] 2026/10/01 03:58:40.309184 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_15'
+[2764] 2026/10/01 03:58:40.392889 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_27'
+[2764] 2026/10/01 03:58:40.461030 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_43'
+[2764] 2026/10/01 03:58:40.494684 [INF] 127.0.0.1:39459 - rid:154 - Route connection created
+[2764] 2026/10/01 03:58:40.494841 [INF] 127.0.0.1:39459 - rid:154 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:40.667513 [INF] 127.0.0.1:39459 - rid:155 - Route connection created
+[2764] 2026/10/01 03:58:40.667715 [INF] 127.0.0.1:39459 - rid:155 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:40.737506 [INF] 127.0.0.1:39459 - rid:156 - Route connection created
+[2764] 2026/10/01 03:58:40.737780 [INF] 127.0.0.1:39459 - rid:156 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:40.754778 [INF] 127.0.0.1:39459 - rid:157 - Route connection created
+[2764] 2026/10/01 03:58:40.754979 [INF] 127.0.0.1:39459 - rid:157 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:40.898024 [INF] JetStream cluster new stream leader for '$G > WF_INV'
+[2764] 2026/10/01 03:58:40.995445 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_00'
+[2764] 2026/10/01 03:58:41.148985 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_61'
+[2764] 2026/10/01 03:58:41.214503 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_29'
+[2764] 2026/10/01 03:58:41.242217 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_26'
+[2764] 2026/10/01 03:58:41.264395 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_08'
+[2764] 2026/10/01 03:58:41.518544 [INF] 127.0.0.1:39459 - rid:185 - Route connection created
+[2764] 2026/10/01 03:58:41.518623 [INF] 127.0.0.1:39459 - rid:185 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:41.714257 [INF] 127.0.0.1:39459 - rid:186 - Route connection created
+[2764] 2026/10/01 03:58:41.714510 [INF] 127.0.0.1:39459 - rid:186 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:41.810518 [INF] 127.0.0.1:39459 - rid:187 - Route connection created
+[2764] 2026/10/01 03:58:41.810641 [INF] 127.0.0.1:39459 - rid:187 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:41.817084 [INF] 127.0.0.1:39459 - rid:188 - Route connection created
+[2764] 2026/10/01 03:58:41.817271 [INF] 127.0.0.1:39459 - rid:188 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:42.593964 [INF] 127.0.0.1:39459 - rid:189 - Route connection created
+[2764] 2026/10/01 03:58:42.594093 [INF] 127.0.0.1:39459 - rid:189 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:42.804969 [INF] 127.0.0.1:39459 - rid:190 - Route connection created
+[2764] 2026/10/01 03:58:42.805069 [INF] 127.0.0.1:39459 - rid:190 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:42.843113 [INF] 127.0.0.1:39459 - rid:191 - Route connection created
+[2764] 2026/10/01 03:58:42.843377 [INF] 127.0.0.1:39459 - rid:191 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:42.853687 [INF] 127.0.0.1:39459 - rid:192 - Route connection created
+[2764] 2026/10/01 03:58:42.853920 [INF] 127.0.0.1:39459 - rid:192 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:43.597309 [INF] 127.0.0.1:39459 - rid:193 - Route connection created
+[2764] 2026/10/01 03:58:43.597506 [INF] 127.0.0.1:39459 - rid:193 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:43.853325 [INF] 127.0.0.1:39459 - rid:194 - Route connection created
+[2764] 2026/10/01 03:58:43.853621 [INF] 127.0.0.1:39459 - rid:194 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:43.902716 [INF] 127.0.0.1:39459 - rid:195 - Route connection created
+[2764] 2026/10/01 03:58:43.902830 [INF] 127.0.0.1:39459 - rid:195 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:43.949158 [INF] 127.0.0.1:39459 - rid:196 - Route connection created
+[2764] 2026/10/01 03:58:43.949413 [INF] 127.0.0.1:39459 - rid:196 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:44.691159 [INF] 127.0.0.1:39459 - rid:197 - Route connection created
+[2764] 2026/10/01 03:58:44.691267 [INF] 127.0.0.1:39459 - rid:197 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:44.929284 [INF] 127.0.0.1:39459 - rid:198 - Route connection created
+[2764] 2026/10/01 03:58:44.929455 [INF] 127.0.0.1:39459 - rid:198 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:44.952970 [INF] 127.0.0.1:39459 - rid:199 - Route connection created
+[2764] 2026/10/01 03:58:44.953243 [INF] 127.0.0.1:39459 - rid:199 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:45.025453 [INF] 127.0.0.1:39459 - rid:200 - Route connection created
+[2764] 2026/10/01 03:58:45.025613 [INF] 127.0.0.1:39459 - rid:200 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:45.732288 [INF] 127.0.0.1:39459 - rid:201 - Route connection created
+[2764] 2026/10/01 03:58:45.732458 [INF] 127.0.0.1:39459 - rid:201 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:46.019216 [INF] 127.0.0.1:39459 - rid:202 - Route connection created
+[2764] 2026/10/01 03:58:46.019537 [INF] 127.0.0.1:39459 - rid:202 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:46.025495 [INF] 127.0.0.1:39459 - rid:203 - Route connection created
+[2764] 2026/10/01 03:58:46.025682 [INF] 127.0.0.1:39459 - rid:203 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:46.108890 [INF] 127.0.0.1:39459 - rid:204 - Route connection created
+[2764] 2026/10/01 03:58:46.109213 [INF] 127.0.0.1:39459 - rid:204 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:46.785921 [INF] 127.0.0.1:39459 - rid:205 - Route connection created
+[2764] 2026/10/01 03:58:46.786092 [INF] 127.0.0.1:39459 - rid:205 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:47.049315 [INF] 127.0.0.1:39459 - rid:206 - Route connection created
+[2764] 2026/10/01 03:58:47.049536 [INF] 127.0.0.1:39459 - rid:206 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:47.095775 [INF] 127.0.0.1:39459 - rid:207 - Route connection created
+[2764] 2026/10/01 03:58:47.095926 [INF] 127.0.0.1:39459 - rid:207 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:47.152208 [INF] 127.0.0.1:39459 - rid:208 - Route connection created
+[2764] 2026/10/01 03:58:47.152513 [INF] 127.0.0.1:39459 - rid:208 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:47.873648 [INF] 127.0.0.1:39459 - rid:209 - Route connection created
+[2764] 2026/10/01 03:58:47.873845 [INF] 127.0.0.1:39459 - rid:209 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:48.092570 [INF] 127.0.0.1:39459 - rid:210 - Route connection created
+[2764] 2026/10/01 03:58:48.092712 [INF] 127.0.0.1:39459 - rid:210 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:48.157194 [INF] 127.0.0.1:39459 - rid:211 - Route connection created
+[2764] 2026/10/01 03:58:48.157338 [INF] 127.0.0.1:39459 - rid:211 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:48.207337 [INF] 127.0.0.1:39459 - rid:212 - Route connection created
+[2764] 2026/10/01 03:58:48.207473 [INF] 127.0.0.1:39459 - rid:212 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:48.968063 [INF] 127.0.0.1:39459 - rid:213 - Route connection created
+[2764] 2026/10/01 03:58:48.968205 [INF] 127.0.0.1:39459 - rid:213 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:49.162223 [INF] 127.0.0.1:39459 - rid:214 - Route connection created
+[2764] 2026/10/01 03:58:49.162413 [INF] 127.0.0.1:39459 - rid:214 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:49.211569 [INF] 127.0.0.1:39459 - rid:215 - Route connection created
+[2764] 2026/10/01 03:58:49.211761 [INF] 127.0.0.1:39459 - rid:215 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:49.248181 [INF] 127.0.0.1:39459 - rid:216 - Route connection created
+[2764] 2026/10/01 03:58:49.248314 [INF] 127.0.0.1:39459 - rid:216 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:50.023903 [INF] 127.0.0.1:39459 - rid:217 - Route connection created
+[2764] 2026/10/01 03:58:50.024136 [INF] 127.0.0.1:39459 - rid:217 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:50.251918 [INF] 127.0.0.1:39459 - rid:218 - Route connection created
+[2764] 2026/10/01 03:58:50.252122 [INF] 127.0.0.1:39459 - rid:218 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:50.260160 [INF] 127.0.0.1:39459 - rid:219 - Route connection created
+[2764] 2026/10/01 03:58:50.260374 [INF] 127.0.0.1:39459 - rid:219 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:50.262415 [INF] 127.0.0.1:39459 - rid:220 - Route connection created
+[2764] 2026/10/01 03:58:50.262558 [INF] 127.0.0.1:39459 - rid:220 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:51.117476 [INF] 127.0.0.1:39459 - rid:221 - Route connection created
+[2764] 2026/10/01 03:58:51.117700 [INF] 127.0.0.1:39459 - rid:221 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:51.324425 [INF] 127.0.0.1:39459 - rid:222 - Route connection created
+[2764] 2026/10/01 03:58:51.324674 [INF] 127.0.0.1:39459 - rid:222 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:51.339985 [INF] 127.0.0.1:39459 - rid:223 - Route connection created
+[2764] 2026/10/01 03:58:51.340175 [INF] 127.0.0.1:39459 - rid:223 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:51.358111 [INF] 127.0.0.1:39459 - rid:224 - Route connection created
+[2764] 2026/10/01 03:58:51.358326 [INF] 127.0.0.1:39459 - rid:224 - Router connection closed: Client Closed
+[2764] 2026/10/01 03:58:51.738994 [INF] 127.0.0.1:33166 - rid:225 - Route connection created
+[2764] 2026/10/01 03:58:51.739077 [INF] 127.0.0.1:33180 - rid:226 - Route connection created
+[2764] 2026/10/01 03:58:51.740022 [INF] 127.0.0.1:33192 - rid:227 - Route connection created
+[2764] 2026/10/01 03:58:51.740722 [INF] 127.0.0.1:33198 - rid:228 - Route connection created
+[2764] 2026/10/01 03:58:52.176798 [INF] 127.0.0.1:39459 - rid:229 - Route connection created
+[2764] 2026/10/01 03:58:52.177082 [INF] 127.0.0.1:39459 - rid:229 - Router connection closed: Duplicate Route - Remote: wf-process-0
+[2764] 2026/10/01 03:58:52.404945 [INF] 127.0.0.1:39459 - rid:230 - Route connection created
+[2764] 2026/10/01 03:58:52.405235 [INF] 127.0.0.1:39459 - rid:230 - Router connection closed: Duplicate Route - Remote: wf-process-0
+[2764] 2026/10/01 03:58:52.419141 [INF] 127.0.0.1:39459 - rid:231 - Route connection created
+[2764] 2026/10/01 03:58:52.419382 [INF] 127.0.0.1:39459 - rid:231 - Router connection closed: Duplicate Route - Remote: wf-process-0
+[2764] 2026/10/01 03:58:52.421634 [INF] 127.0.0.1:39459 - rid:232 - Route connection created
+[2764] 2026/10/01 03:58:52.421833 [INF] 127.0.0.1:39459 - rid:232 - Router connection closed: Duplicate Route - Remote: wf-process-0

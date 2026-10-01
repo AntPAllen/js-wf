@@ -3182,3 +3182,53 @@ unresolved. A matched placement/progress contract is needed before changing
 acquisition behavior; server cause remains unconfirmed. Full matrix/24-hour soak,
 online GC and remaining plan gates remain open. Original full simulation jobs
 and million-timer process remain live without restart.
+
+
+## Controlled held-key acquisition versus renewal on a delayed R3 leader
+
+A new opt-in contract holds one initialized production lease on a fixed real
+file-backed three-node leader, with 85 ms delay on that leader's existing store
+files. Eight rejected acquisitions and eight pinned reads preserve owner,
+revision and the complete leader Raft WAL hash. Eight confirmed renewals preserve
+owner/epoch bytes while advancing revision and WAL; they must meet the 8×85 ms
+lower bound and retain delayed syscall/group evidence. The isolated bucket uses
+a one-minute TTL to exclude expiry; production's 12-second default is unchanged.
+
+The final race contract passed in 5.619 seconds. Rejected acquisitions took
+17.214 ms and reads 3.400 ms, both retaining WAL 640 bytes; renewals took 1.046
+seconds and advanced it to 2632 bytes. A compiled skipped-renewal control fails
+its WAL positive-control assertion in 2.019 seconds. Vet passed. [Reports,
+trace, controls and hashes](scale/lease-disk-contract-2026-10-01/) retain evidence.
+The separate hosted lease-disk-contract job now runs beside mixed campaigns.
+This rejects the rejected-create WAL-amplification hypothesis for this stable
+contract; it does not establish behavior during elections or explain the mixed
+failures. No acquisition, renewal or fencing change is promoted.
+
+## Fallback runner cleanup observation follows its independent scanner
+
+[Standard CI at 87d489a](https://github.com/AntPAllen/js-wf/actions/runs/36811727535)
+returned fallback result 42 but failed an immediate source-removal assertion.
+The fixture now waits up to three seconds for cleanup before stopping the
+scanner, retaining result/provisioning/joined-shutdown checks. A compiled 500 ms
+delete delay reproduces the old assertion failure and passes the revised test;
+skipping deletion fails the revised bounded check. The controls include cold
+plugin builds in their 45–47-second process totals. The full runner race package
+passed in 35.739 seconds and vet passed. [Original CI log, compiled controls,
+logs and source hashes](scale/fallback-runner-cleanup-2026-10-01/) retain evidence.
+This proves the assertion was too early without claiming the original hosted
+interleaving's cause. Production scanning/order and workflow latency gates are
+unchanged. Fresh standard CI confirmation remains pending.
+
+## Fresh mixed seed 3 queue lookup timeout with independent state evidence
+
+[Mixed CI at a36cb7e](https://github.com/AntPAllen/js-wf/actions/runs/36812809142)
+passed seeds 1/2. Seed 3 returned all 28 outcomes at p99 11.638 seconds and passed
+its integrity loop, then timed out in the final restarted-node WF_RUN metadata
+lookup before its 30-second drain loop. Final monitoring on all three nodes
+reports zero run messages and leader node 2; the leader reports both followers
+current. This does not clear the failed client lookup/drain gate or explain the
+request/response/routing failure. Its whole-context lookup can hang before the
+bounded drain loop starts. [Raw CI artifacts and snapshots](scale/mixed-seed3-a36cb7e-2026-10-01/)
+retain the next concrete read-contract target. Mixed latency/queue misses,
+final-source full matrix/24-hour soak, online GC and remaining plan requirements
+stay open. Original million-timer and full simulation jobs remain live unchanged.

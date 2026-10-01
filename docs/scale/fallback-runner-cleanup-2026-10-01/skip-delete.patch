@@ -1,0 +1,15 @@
+--- a/reconcile/fallback_timers.go
++++ b/reconcile/fallback_timers.go
+@@ -108,11 +108,7 @@
+ }
+ 
+ func (p *jetStreamFallbackTimerScanPort) DeleteTimer(ctx context.Context, sequence uint64) error {
+-	stream, err := p.timerStream(ctx)
+-	if err != nil {
+-		return err
+-	}
+-	return stream.DeleteMsg(ctx, sequence)
++	return nil
+ }
+ 
+ func NewFallbackTimerScan(js jetstream.JetStream) *FallbackTimerScan {

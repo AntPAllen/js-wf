@@ -1,0 +1,10 @@
+--- a/reconcile/fallback_timers.go
++++ b/reconcile/fallback_timers.go
+@@ -108,6 +108,7 @@
+ }
+ 
+ func (p *jetStreamFallbackTimerScanPort) DeleteTimer(ctx context.Context, sequence uint64) error {
++	time.Sleep(500*time.Millisecond)
+ 	stream, err := p.timerStream(ctx)
+ 	if err != nil {
+ 		return err

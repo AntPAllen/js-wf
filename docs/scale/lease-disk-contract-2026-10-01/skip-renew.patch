@@ -1,0 +1,12 @@
+--- a/lease/lease.go
++++ b/lease/lease.go
+@@ -192,8 +192,7 @@
+ func (l *Lease) unlock() { <-l.gate }
+ 
+ func (l *Lease) Renew(ctx context.Context) error {
+-	_, err := l.renew(ctx, 0, nil)
+-	return err
++	return nil
+ }
+ 
+ // RenewIfIdle avoids a redundant heartbeat update when an acknowledged renewal
