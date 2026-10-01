@@ -1,0 +1,7 @@
+# Hosted R5 row pass; workflow parser failure retained
+
+Run36902745848 at7cec311 is terminal workflow FAILURE. Its actual race test PASSES711.25s test /712.286s package:87 batches,2,436 invocations,26,822 journal entries and all19 actual journal-leader SIGKILL/restarts. All six per-type terminal/progress p99 remain below30s (largest terminal11.177605827s). Retained-state/history checks, physical WF_RUN drainage and all64 consumer checks pass. Independent HTTP diagnostics and individual drain attempts are retained.
+
+The following verifier step rejected Go's canonical duration=10m0s because it compared against the input spelling10m. The verifier now parses the duration and checks exact600-second equality. Fixtures use actual Go spelling; equivalent600s passes while wrong duration, missing faults/workload, skips, package failure and p99 misses continue to fail. All30 Python tests pass.
+
+The corrected verifier was run on the unchanged downloaded native Go JSON events and accepts the full single-row proof. This is not a green original workflow claim or a reason to alter its terminal metadata. It establishes one hosted ten-minute R5 journal-leader row, not the full Tier3 matrix or24-hour soak. This source predates individual fencing/repair observers, so complete per-event attribution remains unproved in this row. The earlier local R5 drain failure remains excluded and its missing-response cause unconfirmed.

@@ -4507,3 +4507,16 @@ This advances the24-hour soak's attribution requirement but does not clear it:
 full mixed-matrix coverage, other scanner types, separate process event logging,
 retained-source causal review and the full soak remain open. No explanation
 claims a NATS mechanism solely from lost ownership confirmation or a timeout.
+
+
+Hosted R5 run36902745848 at7cec311 is terminal workflow failure with an actual
+race-test PASS711.25s /712.286s package:87 batches,2,436 invocations,26,822 entries,
+19 actual leader kills, all six terminal/progress p99 gates, histories, retained
+audit and physical stream/all64-consumer drain checks pass. The next verifier
+step incorrectly compared input10m to Go's canonical10m0s. It now checks parsed
+exact600-second duration; fixtures use the real spelling, and all30 Python
+controls pass. The corrected verifier accepts the unchanged downloaded Go JSON
+events. [Original failure and separately verified native row](scale/tier3-mixed-journal-2026-10-01/hosted-row-pass-workflow-failure/)
+are retained. Original workflow metadata remains failure. This is one ten-minute
+R5 row; it predates per-event observers and does not clear full soak attribution
+or the full matrix. The earlier local drain timeout remains excluded evidence.

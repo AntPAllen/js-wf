@@ -10,7 +10,7 @@ spec.loader.exec_module(row)
 
 def fixture(duration='10m'):
     seconds, faults = (600, 19) if duration == '10m' else (35, 1)
-    lines = [f'TIER3_MIXED_RESULT row=journal seed=42 duration={duration} five_replicas=true batches=2 invocations=56 entries=618 faults={faults} full_matrix_release=false\n']
+    lines = [f'TIER3_MIXED_RESULT row=journal seed=42 duration={'10m0s' if duration == '10m' else duration} five_replicas=true batches=2 invocations=56 entries=618 faults={faults} full_matrix_release=false\n']
     for typ, count in zip(row.matrix.TYPES, (8, 6, 4, 2, 12, 24)):
         lines.append(f'TIER3_MIXED_CELL type={typ} invocations={count} terminal_p99=2s progress_p99=250ms\n')
     return [dict(Test=row.TEST, Action='output', Output=''.join(lines)),
@@ -22,6 +22,9 @@ class JournalRowChecks(unittest.TestCase):
         result = row.check(fixture(), '10m')
         self.assertEqual(result['invocations'], 56)
         self.assertFalse(result['clears_full_tier3_release'])
+        alternate = fixture()
+        alternate[0]['Output'] = alternate[0]['Output'].replace('duration=10m0s', 'duration=600s')
+        self.assertEqual(row.check(alternate, '10m')['duration_seconds'], 600)
         self.assertTrue(row.check(fixture('35s'), '35s')['shortened_smoke'])
 
     def test_false_green_rejected(self):
@@ -31,7 +34,7 @@ class JournalRowChecks(unittest.TestCase):
                 events = copy.deepcopy(fixture())
                 if name in ('skip', 'fail'): events[1]['Action'] = name
                 elif name == 'missing_package': events.pop()
-                elif name == 'wrong_duration': events[0]['Output'] = events[0]['Output'].replace('duration=10m', 'duration=35s')
+                elif name == 'wrong_duration': events[0]['Output'] = events[0]['Output'].replace('duration=10m0s', 'duration=35s')
                 elif name == 'replicas': events[0]['Output'] = events[0]['Output'].replace('five_replicas=true', 'five_replicas=false')
                 elif name == 'release': events[0]['Output'] = events[0]['Output'].replace('full_matrix_release=false', 'full_matrix_release=true')
                 elif name == 'missing_workload': events[0]['Output'] = '\n'.join(line for line in events[0]['Output'].splitlines() if 'type=matrixtimer' not in line)

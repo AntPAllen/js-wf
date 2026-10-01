@@ -26,7 +26,7 @@ def check(events, duration):
         r'TIER3_MIXED_RESULT row=(\w+) seed=(\d+) duration=(\S+) five_replicas=(\w+) '
         r'batches=(\d+) invocations=(\d+) entries=(\d+) faults=(\d+) full_matrix_release=(\w+)', log)
     seconds = {'35s': 35, '10m': 600}[duration]
-    if row != 'journal' or found_duration != duration or replicas != 'true' or release != 'false':
+    if row != 'journal' or matrix.seconds(found_duration) != seconds or replicas != 'true' or release != 'false':
         raise ValueError('incorrect row, duration, replica scope or release claim')
     batches, invocations, entries, faults = map(int, (batches, invocations, entries, faults))
     if batches < 1 or invocations != batches*28 or entries <= invocations or faults != (seconds-1)//30:
