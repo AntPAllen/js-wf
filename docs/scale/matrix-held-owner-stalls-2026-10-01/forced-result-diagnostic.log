@@ -1,0 +1,135 @@
+=== RUN   TestMixedMatrixJournalLeaderEveryThirtySeconds
+    mixed_matrix_leader_test.go:83: matrix stall diagnostic targets=10 captured=10 metadata_errors=map[]
+    mixed_matrix_leader_test.go:83: fresh queue metadata=&{Config:{Name:WF_RUN Description: Subjects:[wf.run.* wf.schedule.*.*.*] Retention:WorkQueue MaxConsumers:-1 MaxMsgs:-1 MaxBytes:-1 Discard:DiscardOld DiscardNewPerSubject:false MaxAge:0s MaxMsgsPerSubject:-1 MaxMsgSize:-1 Storage:File Replicas:3 NoAck:false Duplicates:2m0s Placement:<nil> Mirror:<nil> Sources:[] Sealed:false DenyDelete:false DenyPurge:false AllowRollup:true Compression:None FirstSeq:0 SubjectTransform:<nil> RePublish:<nil> AllowDirect:false MirrorDirect:false ConsumerLimits:{InactiveThreshold:0s MaxAckPending:0} Metadata:map[_nats.level:5 _nats.req.level:2 _nats.ver:2.15.0] Template: AllowMsgTTL:false SubjectDeleteMarkerTTL:0s AllowMsgCounter:false AllowAtomicPublish:false AllowMsgSchedules:true PersistMode:Default AllowBatchPublish:false} Created:2026-10-01 11:18:03.087036876 +0000 UTC State:{Msgs:10 Bytes:1179 FirstSeq:11 FirstTime:2026-10-01 11:18:03.818192502 +0000 UTC LastSeq:111 LastTime:2026-10-01 11:18:10.238493003 +0000 UTC Consumers:64 Deleted:[] NumDeleted:91 NumSubjects:3 Subjects:map[]} Cluster:0x2b0a7ef5c0e0 Mirror:<nil> Sources:[] TimeStamp:2026-10-01 11:18:10.32236555 +0000 UTC} err=<nil>
+    mixed_matrix_leader_test.go:83: queue consumer=WF_P_46 pending=0 ack_pending=1 delivered={Consumer:4 Stream:110 Last:2026-10-01 11:18:08.828045004 +0000 UTC} ack_floor={Consumer:2 Stream:84 Last:2026-10-01 11:18:08.846718186 +0000 UTC} cluster=&{Name:wf-process RaftGroup:C-R3F-kytCx1FD Leader:wf-process-0 LeaderSince:2026-10-01 11:18:06.492175821 +0000 UTC SystemAcc:true TrafficAcc:$SYS Replicas:[0x2b0a7f11ca00 0x2b0a7f11ca40] Desired:<nil>}
+    mixed_matrix_leader_test.go:83: queue consumer=WF_P_55 pending=0 ack_pending=8 delivered={Consumer:9 Stream:110 Last:2026-10-01 11:18:06.06626701 +0000 UTC} ack_floor={Consumer:1 Stream:10 Last:2026-10-01 11:18:06.659435457 +0000 UTC} cluster=&{Name:wf-process RaftGroup:C-R3F-6IKKfxx4 Leader:wf-process-1 LeaderSince:2026-10-01 11:18:05.836662778 +0000 UTC SystemAcc:true TrafficAcc:$SYS Replicas:[0x2b0a7f11d180 0x2b0a7f11d1c0] Desired:<nil>}
+    mixed_matrix_leader_test.go:83: queue consumer=WF_P_56 pending=0 ack_pending=1 delivered={Consumer:12 Stream:111 Last:2026-10-01 11:18:10.239891508 +0000 UTC} ack_floor={Consumer:3 Stream:76 Last:2026-10-01 11:18:10.263662536 +0000 UTC} cluster=&{Name:wf-process RaftGroup:C-R3F-kZAxY4h4 Leader:wf-process-1 LeaderSince:2026-10-01 11:18:06.075347718 +0000 UTC SystemAcc:true TrafficAcc:$SYS Replicas:[0x2b0a7f11d200 0x2b0a7f11d240] Desired:<nil>}
+    mixed_matrix_leader_test.go:83: queue raw retained messages=10 reported=10 errors=[]
+    mixed_matrix_leader_test.go:83: result matrixshort/seed-1-batch-0-3=0 err=<nil>
+    mixed_matrix_leader_test.go:222: server 0 log tail:
+        01 11:17:59.877479 [INF] Listening for route connections on 127.0.0.1:34457
+        [692065] 2026/10/01 11:17:59.877764 [ERR] Error trying to connect to route (attempt 1): dial tcp 127.0.0.1:40921: connect: connection refused
+        [692065] 2026/10/01 11:17:59.879154 [INF] 127.0.0.1:58970 - rid:8 - Route connection created
+        [692065] 2026/10/01 11:17:59.879212 [INF] 127.0.0.1:58968 - rid:9 - Route connection created
+        [692065] 2026/10/01 11:17:59.877765 [ERR] Error trying to connect to route (attempt 1): dial tcp 127.0.0.1:40921: connect: connection refused
+        [692065] 2026/10/01 11:17:59.879765 [INF] 127.0.0.1:58980 - rid:10 - Route connection created
+        [692065] 2026/10/01 11:17:59.879900 [INF] 127.0.0.1:58982 - rid:11 - Route connection created
+        [692065] 2026/10/01 11:17:59.879937 [INF] 127.0.0.1:58992 - rid:12 - Route connection created
+        [692065] 2026/10/01 11:17:59.880664 [INF] 127.0.0.1:59000 - rid:13 - Route connection created
+        [692065] 2026/10/01 11:17:59.880886 [INF] 127.0.0.1:59010 - rid:14 - Route connection created
+        [692065] 2026/10/01 11:17:59.881518 [INF] 127.0.0.1:59022 - rid:15 - Route connection created
+        [692065] 2026/10/01 11:17:59.978266 [WRN] Waiting for routing to be established...
+        [692065] 2026/10/01 11:17:59.978351 [WRN] JetStream has not established contact with a meta leader
+        [692065] 2026/10/01 11:18:00.345703 [INF] JetStream cluster new metadata leader: wf-process-2/wf-process
+        [692065] 2026/10/01 11:18:00.878422 [INF] 127.0.0.1:40921 - rid:17 - Route connection created
+        [692065] 2026/10/01 11:18:00.878512 [INF] 127.0.0.1:40921 - rid:17 - Router connection closed: Duplicate Route - Remote: wf-process-1
+        [692065] 2026/10/01 11:18:00.880693 [INF] 127.0.0.1:40921 - rid:18 - Route connection created
+        [692065] 2026/10/01 11:18:00.880797 [INF] 127.0.0.1:40921 - rid:18 - Router connection closed: Duplicate Route - Remote: wf-process-1
+        [692065] 2026/10/01 11:18:03.404790 [INF] JetStream cluster new stream leader for '$G > WF_PURGE'
+        [692065] 2026/10/01 11:18:03.567686 [INF] JetStream cluster new stream leader for '$G > KV_WF_STATE'
+        [692065] 2026/10/01 11:18:03.647813 [INF] JetStream cluster new stream leader for '$G > KV_WF_VIEW'
+        [692065] 2026/10/01 11:18:03.903125 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_13'
+        [692065] 2026/10/01 11:18:03.923759 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_17'
+        [692065] 2026/10/01 11:18:04.000053 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_01'
+        [692065] 2026/10/01 11:18:04.031507 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_02'
+        [692065] 2026/10/01 11:18:04.047030 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_03'
+        [692065] 2026/10/01 11:18:04.108078 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_23'
+        [692065] 2026/10/01 11:18:04.204257 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_24'
+        [692065] 2026/10/01 11:18:04.255025 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_54'
+        [692065] 2026/10/01 11:18:04.396859 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_29'
+        [692065] 2026/10/01 11:18:05.009471 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_49'
+        [692065] 2026/10/01 11:18:05.275882 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_05'
+        [692065] 2026/10/01 11:18:05.689712 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_63'
+        [692065] 2026/10/01 11:18:05.690952 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_62'
+        [692065] 2026/10/01 11:18:05.954279 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_53'
+        [692065] 2026/10/01 11:18:05.969573 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_34'
+        [692065] 2026/10/01 11:18:06.070771 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_47'
+        [692065] 2026/10/01 11:18:06.492181 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_46'
+        [692065] 2026/10/01 11:18:06.663428 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_57'
+    mixed_matrix_leader_test.go:222: server 1 log tail:
+        :59.879131 [INF] 127.0.0.1:34457 - rid:9 - Route connection created
+        [692066] 2026/10/01 11:17:59.879923 [INF] 127.0.0.1:34457 - rid:10 - Route connection created
+        [692066] 2026/10/01 11:17:59.880609 [INF] 127.0.0.1:39943 - rid:11 - Route connection created
+        [692066] 2026/10/01 11:17:59.880639 [INF] 127.0.0.1:39943 - rid:12 - Route connection created
+        [692066] 2026/10/01 11:17:59.880945 [INF] 127.0.0.1:34457 - rid:13 - Route connection created
+        [692066] 2026/10/01 11:17:59.881239 [INF] 127.0.0.1:39943 - rid:14 - Route connection created
+        [692066] 2026/10/01 11:17:59.881751 [INF] 127.0.0.1:39943 - rid:15 - Route connection created
+        [692066] 2026/10/01 11:17:59.978741 [WRN] Waiting for routing to be established...
+        [692066] 2026/10/01 11:17:59.978916 [WRN] JetStream has not established contact with a meta leader
+        [692066] 2026/10/01 11:18:00.346660 [INF] JetStream cluster new metadata leader: wf-process-2/wf-process
+        [692066] 2026/10/01 11:18:00.878348 [INF] 127.0.0.1:50804 - rid:17 - Route connection created
+        [692066] 2026/10/01 11:18:00.878573 [INF] 127.0.0.1:50804 - rid:17 - Router connection closed: Client Closed
+        [692066] 2026/10/01 11:18:00.880739 [INF] 127.0.0.1:50812 - rid:18 - Route connection created
+        [692066] 2026/10/01 11:18:00.880855 [INF] 127.0.0.1:50812 - rid:18 - Router connection closed: Client Closed
+        [692066] 2026/10/01 11:18:03.245439 [INF] JetStream cluster new stream leader for '$G > WF_JRN'
+        [692066] 2026/10/01 11:18:03.327523 [INF] JetStream cluster new stream leader for '$G > WF_SIG'
+        [692066] 2026/10/01 11:18:03.483823 [INF] JetStream cluster new stream leader for '$G > KV_WF_LEASE'
+        [692066] 2026/10/01 11:18:03.718398 [INF] JetStream cluster new stream leader for '$G > KV_WF_ASSIGN'
+        [692066] 2026/10/01 11:18:03.889874 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_37'
+        [692066] 2026/10/01 11:18:03.912409 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_14'
+        [692066] 2026/10/01 11:18:04.006317 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_20'
+        [692066] 2026/10/01 11:18:04.072768 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_22'
+        [692066] 2026/10/01 11:18:04.091954 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_08'
+        [692066] 2026/10/01 11:18:04.145780 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_51'
+        [692066] 2026/10/01 11:18:04.353212 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_31'
+        [692066] 2026/10/01 11:18:04.374630 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_32'
+        [692066] 2026/10/01 11:18:04.473226 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_30'
+        [692066] 2026/10/01 11:18:04.767120 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_27'
+        [692066] 2026/10/01 11:18:04.857835 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_38'
+        [692066] 2026/10/01 11:18:04.944361 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_41'
+        [692066] 2026/10/01 11:18:05.070170 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_19'
+        [692066] 2026/10/01 11:18:05.132188 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_42'
+        [692066] 2026/10/01 11:18:05.151932 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_26'
+        [692066] 2026/10/01 11:18:05.176958 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_61'
+        [692066] 2026/10/01 11:18:05.692044 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_45'
+        [692066] 2026/10/01 11:18:05.761952 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_48'
+        [692066] 2026/10/01 11:18:05.836667 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_55'
+        [692066] 2026/10/01 11:18:06.075351 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_56'
+        [692066] 2026/10/01 11:18:06.349444 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_60'
+        [692066] 2026/10/01 11:18:06.439850 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_52'
+    mixed_matrix_leader_test.go:222: server 2 log tail:
+        879259 [INF] Server is ready
+        [692070] 2026/10/01 11:17:59.879274 [INF] Cluster name is wf-process
+        [692070] 2026/10/01 11:17:59.879288 [INF] Listening for route connections on 127.0.0.1:39943
+        [692070] 2026/10/01 11:17:59.879612 [INF] 127.0.0.1:34457 - rid:8 - Route connection created
+        [692070] 2026/10/01 11:17:59.879658 [INF] 127.0.0.1:34457 - rid:9 - Route connection created
+        [692070] 2026/10/01 11:17:59.880753 [INF] 127.0.0.1:56866 - rid:10 - Route connection created
+        [692070] 2026/10/01 11:17:59.880777 [INF] 127.0.0.1:56870 - rid:11 - Route connection created
+        [692070] 2026/10/01 11:17:59.880800 [INF] 127.0.0.1:34457 - rid:12 - Route connection created
+        [692070] 2026/10/01 11:17:59.881286 [INF] 127.0.0.1:56882 - rid:13 - Route connection created
+        [692070] 2026/10/01 11:17:59.881475 [INF] 127.0.0.1:34457 - rid:14 - Route connection created
+        [692070] 2026/10/01 11:17:59.881774 [INF] 127.0.0.1:56892 - rid:15 - Route connection created
+        [692070] 2026/10/01 11:17:59.979855 [WRN] Waiting for routing to be established...
+        [692070] 2026/10/01 11:17:59.979908 [WRN] JetStream has not established contact with a meta leader
+        [692070] 2026/10/01 11:18:00.356186 [INF] Self is new JetStream cluster metadata leader
+        [692070] 2026/10/01 11:18:03.085340 [INF] JetStream cluster new stream leader for '$G > WF_INV'
+        [692070] 2026/10/01 11:18:03.171193 [INF] JetStream cluster new stream leader for '$G > WF_RUN'
+        [692070] 2026/10/01 11:18:03.790727 [INF] JetStream cluster new stream leader for '$G > OBJ_WF_BLOB'
+        [692070] 2026/10/01 11:18:03.933781 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_18'
+        [692070] 2026/10/01 11:18:03.956863 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_36'
+        [692070] 2026/10/01 11:18:03.964564 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_11'
+        [692070] 2026/10/01 11:18:03.969197 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_10'
+        [692070] 2026/10/01 11:18:03.975573 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_15'
+        [692070] 2026/10/01 11:18:03.990327 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_00'
+        [692070] 2026/10/01 11:18:04.030907 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_21'
+        [692070] 2026/10/01 11:18:04.064663 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_16'
+        [692070] 2026/10/01 11:18:04.112687 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_04'
+        [692070] 2026/10/01 11:18:04.145105 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_06'
+        [692070] 2026/10/01 11:18:04.213753 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_59'
+        [692070] 2026/10/01 11:18:04.250266 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_07'
+        [692070] 2026/10/01 11:18:04.251778 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_25'
+        [692070] 2026/10/01 11:18:04.400598 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_33'
+        [692070] 2026/10/01 11:18:04.444770 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_35'
+        [692070] 2026/10/01 11:18:04.554401 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_28'
+        [692070] 2026/10/01 11:18:04.666897 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_09'
+        [692070] 2026/10/01 11:18:04.767083 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_43'
+        [692070] 2026/10/01 11:18:04.951986 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_40'
+        [692070] 2026/10/01 11:18:04.969559 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_39'
+        [692070] 2026/10/01 11:18:05.062022 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_12'
+        [692070] 2026/10/01 11:18:05.357049 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_44'
+        [692070] 2026/10/01 11:18:05.680935 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_58'
+        [692070] 2026/10/01 11:18:06.172160 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_50'
+--- FAIL: TestMixedMatrixJournalLeaderEveryThirtySeconds (11.77s)
+FAIL
+FAIL	js-wf/integration	11.780s
+FAIL

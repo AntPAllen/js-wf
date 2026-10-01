@@ -87,9 +87,23 @@ Replay continues to reject differing recorded choices/events. Source hashes
 and the exact regenerated-pin list are retained.
 
 This closes the observed terminal full-replay backlog slice with local evidence.
-Hosted confirmation, latest-source comprehensive 100,000-seed simulation, the
+Latest-source comprehensive 100,000-seed simulation, the
 whole-matrix 200-seed campaign, five-node 24-hour soak, remaining combined faults,
 million-timer final audit and other capacity/operational gates remain open.
 The ongoing prior-source full campaigns are not restarted or counted as proof
 of this runtime revision. This one native cut does not clear the full 500-child
 fault matrix, and the deterministic cost model is not server-cause attribution.
+
+## Hosted confirmation
+
+Run 36852513175 at ca82e23dc67b36dfb47020f371e5f36f33724317 now completes.
+Both actual raw test logs, not only job status, PASS at the same source. Consumer
+leader recovery passes in 32.85 seconds with all 501 terminals and 4,504 entries;
+raw-start child p99 is 16.809 seconds and parent last-child delay is 2.608 seconds.
+WF_RUN and all 64 consumer pending/ack-pending counts are zero. The parent has
+two full history reads totaling 952.418ms and 499 canonical terminal probes.
+Full restart passes in 22.20 seconds with the same retained-state counts.
+Raw complete logs and job metadata are retained as hosted-shortcut-* here.
+The earlier failed baseline remains independent evidence. This confirms these
+two focused cuts; comprehensive simulation, the full 500-child matrix and all
+other unsatisfied release requirements remain open.

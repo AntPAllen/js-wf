@@ -4019,3 +4019,51 @@ queued. Older full simulation/matrix campaigns retain their prior source scope.
 The original million native timers remain live at approximately 590,000 observed
 deliveries; its second restart and final audit remain pending. The full goal and
 all unsatisfied release/scale/combined-fault requirements remain active.
+
+## Dispatch evidence locates live owners in journal-row stalls
+
+Retained dispatch events narrow the failed whole-campaign journal seeds. In
+seed 1, the timed-out parent finishes five owned deliveries by 10:52:04.596Z,
+but three grandchildren hold open executions for approximately 300 seconds
+until fixture cancellation. In seed 13, a timer and two short workflows likewise
+acquire near 10:51:53.23Z and report context-canceled retries near 10:56:53.23Z;
+timer deliveries find ErrHeld 109 times. These are live-owner execution stalls,
+separate from terminal wakeup replay. The original artifacts have no final raw
+state, operation timings or pre-cancellation stack to identify the blocking
+call, and do not establish a server cause or final invariant result.
+
+[Derived timelines, diagnostic contract/control and source scope](scale/matrix-held-owner-stalls-2026-10-01/)
+are retained. Failed sustained batches now capture goroutine stacks before worker
+cancellation, bounded raw invocation/journal-tail/outcome/lease readbacks for the
+cohort and active owners, and existing queue diagnostics. Missing/canceled reads
+and truncation remain explicit. Optional operation finish timings are retained
+for in-process workers and enabled in the hosted matrix. The raw-state capture
+has a fresh 15-second bound, two-second attempts and sixteen readers; it is a
+non-atomic diagnostic, not a full retained-history audit or repair protocol.
+A three-node contract passes under race in 3.34 seconds with raw identities and
+lease revision/value unchanged; a compiled omitted-owner diagnostic control
+fails semantically in 3.10 seconds. Vet/YAML and all 25 script tests pass.
+No runtime policy, workload or acceptance bound changes. A fresh full ten-minute
+local seed-13 journal row is active with timings; terminal result remains pending.
+
+Independent hosted terminal-shortcut run 36852513175 at ca82e23 is now verified
+from both complete raw test logs: consumer leader PASS32.85s, child p99 16.809s,
+parent delay 2.608s, 501 terminals/4,504 entries, physical run queue and all 64
+consumers drained; parent full reads are two (952ms), with 499 terminal probes.
+Full restart PASS22.20s with the same retained counts. [Raw logs/metadata](scale/terminal-owned-wakeups-2026-10-01/)
+are retained. These two focused hosted proofs do not clear comprehensive
+simulation, full 500-child matrix or other release gates. The original million
+timers and earlier full campaigns remain active at their recorded scope.
+
+The instrumented full local journal seed-13 replay now passes in 628.86 seconds:
+92 batches, 2,576 invocations, 19 leader kills, aggregate terminal p99 9.018s,
+worst workload terminal p99 15.052s and worst progress p99 7.065s. The existing
+per-seed semantic verifier passes its complete raw log; all operation/dispatch/
+history/fault/latency artifacts are retained compressed in the diagnostic proof
+folder. This does not reproduce or explain the original five-minute stall.
+A shortened 35-second journal race smoke passes in 51.110s with 7,424 operation
+records, and a compiled wrong-result fixture control exercises the actual
+failure path: FAIL11.77s with live stacks, ten raw cohort targets, queue and
+operation artifacts preserved. Initial three-minute-timeout attempts failed
+only the fixture preflight and are excluded; eight-minute bounds retain the
+existing recovery requirement. No shortened run counts sustained proof.

@@ -1,0 +1,299 @@
+//go:build linux
+
+package integration_test
+
+import (
+	"context"
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"runtime"
+	"sort"
+	"sync"
+	"testing"
+	"time"
+
+	"js-wf/client"
+	"js-wf/identity"
+	"js-wf/journal"
+	"js-wf/lease"
+	"js-wf/wf"
+	"js-wf/worker"
+
+	"github.com/nats-io/nats.go/jetstream"
+)
+
+type matrixStallTarget struct {
+	Type string
+	ID   string
+}
+type matrixStallKV struct {
+	Value    []byte
+	Revision uint64
+	Created  time.Time
+}
+type matrixStallState struct {
+	Target      matrixStallTarget
+	Invocation  *jetstream.RawStreamMsg
+	JournalTail *jetstream.RawStreamMsg
+	Outcome     *matrixStallKV
+	Lease       *matrixStallKV
+	Errors      map[string]string
+}
+type matrixStallDiagnostic struct {
+	CapturedAt       time.Time
+	Cause            string
+	Targets          int
+	Captured         int
+	States           []matrixStallState
+	MetadataErrors   map[string]string
+	ContextError     string
+	TargetsTruncated bool
+}
+
+// Keep delivery identity while finding owners: a losing duplicate's NAK must
+// not remove another delivery's active lease from this diagnostic target set.
+func matrixStallTargets(events []worker.DispatchEvent, cohort []matrixStallTarget) []matrixStallTarget {
+	type delivery struct {
+		target            matrixStallTarget
+		sequence, attempt uint64
+	}
+	active := map[delivery]bool{}
+	targets := map[matrixStallTarget]bool{}
+	for _, target := range cohort {
+		targets[target] = true
+	}
+	for _, event := range events {
+		d := delivery{matrixStallTarget{event.Type, event.ID}, event.RunSequence, event.Delivery}
+		switch event.Stage {
+		case "lease_acquired":
+			active[d] = true
+		case "released", "release_cleanup_done":
+			delete(active, d)
+		}
+	}
+	// Deliberate control: omit active owners outside the parent cohort.
+	out := make([]matrixStallTarget, 0, len(targets))
+	for target := range targets {
+		out = append(out, target)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Type != out[j].Type {
+			return out[i].Type < out[j].Type
+		}
+		return out[i].ID < out[j].ID
+	})
+	return out
+}
+
+func collectMatrixStallState(ctx context.Context, js jetstream.JetStream, targets []matrixStallTarget) matrixStallDiagnostic {
+	report := matrixStallDiagnostic{CapturedAt: time.Now(), Targets: len(targets), MetadataErrors: map[string]string{}}
+	streams := map[string]jetstream.Stream{}
+	buckets := map[string]jetstream.KeyValue{}
+	for _, name := range []string{"WF_INV", "WF_JRN"} {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		stream, err := js.Stream(attempt, name)
+		stop()
+		if err != nil {
+			report.MetadataErrors[name] = err.Error()
+		} else {
+			streams[name] = stream
+		}
+	}
+	for _, name := range []string{"WF_STATE", "WF_LEASE"} {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		bucket, err := js.KeyValue(attempt, name)
+		stop()
+		if err != nil {
+			report.MetadataErrors[name] = err.Error()
+		} else {
+			buckets[name] = bucket
+		}
+	}
+	// Bound both diagnostic memory and fan-out while exposing omissions explicitly.
+	if len(targets) > 256 {
+		report.TargetsTruncated = true
+		targets = targets[:256]
+	}
+	report.States = make([]matrixStallState, len(targets))
+	jobs := make(chan int, len(targets))
+	for i := range targets {
+		jobs <- i
+	}
+	close(jobs)
+	var wg sync.WaitGroup
+	for i := 0; i < 16; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for index := range jobs {
+				target := targets[index]
+				row := matrixStallState{Target: target, Errors: map[string]string{}}
+				for _, name := range []string{"WF_INV", "WF_JRN"} {
+					stream := streams[name]
+					if stream == nil {
+						continue
+					}
+					subject := identity.InvocationSubject(target.Type, target.ID)
+					if name == "WF_JRN" {
+						subject = identity.JournalSubject(target.Type, target.ID)
+					}
+					attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+					message, err := stream.GetLastMsgForSubject(attempt, subject)
+					stop()
+					if err != nil {
+						row.Errors[name] = err.Error()
+					} else if name == "WF_INV" {
+						row.Invocation = message
+					} else {
+						row.JournalTail = message
+					}
+				}
+				for _, name := range []string{"WF_STATE", "WF_LEASE"} {
+					bucket := buckets[name]
+					if bucket == nil {
+						continue
+					}
+					attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+					entry, err := bucket.Get(attempt, identity.Key(target.Type, target.ID))
+					stop()
+					if err != nil {
+						row.Errors[name] = err.Error()
+					} else {
+						value := &matrixStallKV{Value: entry.Value(), Revision: entry.Revision(), Created: entry.Created()}
+						if name == "WF_STATE" {
+							row.Outcome = value
+						} else {
+							row.Lease = value
+						}
+					}
+				}
+				report.States[index] = row
+			}
+		}()
+	}
+	wg.Wait()
+	report.Captured = len(report.States)
+	if ctx.Err() != nil {
+		report.ContextError = ctx.Err().Error()
+	}
+	return report
+}
+
+func TestMatrixStallDiagnosticRetainsOwnerAndRawState(t *testing.T) {
+	all, _ := setup(t)
+	ctx, stop := context.WithTimeout(context.Background(), 15*time.Second)
+	defer stop()
+	const typ, id = "stall-proof", "owner"
+	handle, err := client.New(all[0]).Start(ctx, typ, id, []byte(`null`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	leasing, err := lease.New(ctx, all[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	owner, err := leasing.Acquire(ctx, typ, id, "live-owner")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		releaseCtx, done := context.WithTimeout(context.Background(), 2*time.Second)
+		defer done()
+		_ = owner.Release(releaseCtx)
+	}()
+	store := journal.New(all[0])
+	seq, err := store.Append(ctx, typ, id, journal.Entry{Kind: journal.Started, Index: 0, Epoch: owner.Epoch(), WorkerID: "live-owner"}, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	payload, _ := json.Marshal(wf.Outcome{InvSeq: handle.InvSeq, Result: json.RawMessage(`42`)})
+	tail, err := store.Append(ctx, typ, id, journal.Entry{Kind: journal.Completed, Index: 1, Epoch: owner.Epoch(), WorkerID: "live-owner", Payload: payload}, seq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, err := all[0].KeyValue(ctx, "WF_STATE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = state.Create(ctx, identity.Key(typ, id), payload); err != nil {
+		t.Fatal(err)
+	}
+	events := []worker.DispatchEvent{
+		{Type: typ, ID: id, Stage: "lease_acquired", RunSequence: 1, Delivery: 1},
+		{Type: typ, ID: id, Stage: "lease_held", RunSequence: 2, Delivery: 1},
+		{Type: typ, ID: id, Stage: "nak", RunSequence: 2, Delivery: 1},
+	}
+	targets := matrixStallTargets(events, []matrixStallTarget{{typ, "missing"}})
+	if len(targets) != 2 {
+		t.Fatalf("losing delivery hid active owner: %v", targets)
+	}
+	report := collectMatrixStallState(ctx, all[1], targets)
+	if report.Targets != 2 || report.Captured != 2 || report.ContextError != "" || report.TargetsTruncated || len(report.MetadataErrors) != 0 {
+		t.Fatalf("report=%+v", report)
+	}
+	var actual *matrixStallState
+	for i := range report.States {
+		if report.States[i].Target.ID == id {
+			actual = &report.States[i]
+		} else if len(report.States[i].Errors) != 4 {
+			t.Fatalf("missing records not explicit: %+v", report.States[i])
+		}
+	}
+	if actual == nil || len(actual.Errors) != 0 || actual.Invocation.Sequence != handle.InvSeq || actual.JournalTail.Sequence != tail || actual.Outcome == nil || actual.Lease == nil || string(actual.Outcome.Value) != string(payload) {
+		t.Fatalf("raw state=%+v", actual)
+	}
+	leases, err := all[0].KeyValue(ctx, "WF_LEASE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	after, err := leases.Get(ctx, identity.Key(typ, id))
+	if err != nil || after.Revision() != actual.Lease.Revision || string(after.Value()) != string(actual.Lease.Value) {
+		t.Fatalf("diagnostic changed owner: %v", err)
+	}
+	canceled, cancel := context.WithCancel(ctx)
+	cancel()
+	incomplete := collectMatrixStallState(canceled, all[1], targets)
+	if incomplete.ContextError == "" || len(incomplete.MetadataErrors) != 4 {
+		t.Fatalf("canceled diagnostic claims complete state: %+v", incomplete)
+	}
+	t.Logf("raw invocation=%d tail=%d lease_revision=%d preserved; missing/canceled reads explicit", actual.Invocation.Sequence, actual.JournalTail.Sequence, actual.Lease.Revision)
+}
+
+func captureMatrixStallDiagnostics(t *testing.T, js jetstream.JetStream, events []worker.DispatchEvent, cohort []matrixStallTarget, cause error) {
+	t.Helper()
+	prefix := os.Getenv("MATRIX_ARTIFACT_PREFIX")
+	if prefix == "" {
+		prefix = filepath.Join(t.TempDir(), "matrix-stall")
+	}
+	// Capture before cancellation or further network calls so waiting owners and
+	// their heartbeats are still visible. Mark truncation instead of assuming full.
+	stack := make([]byte, 8<<20)
+	n := runtime.Stack(stack, true)
+	if n == len(stack) {
+		t.Log("matrix stall stack reached 8MiB bound; may be truncated")
+	}
+	if err := os.WriteFile(prefix+"-stalled-goroutines.txt", stack[:n], 0600); err != nil {
+		t.Errorf("stack artifact: %v", err)
+	}
+	ctx, stop := context.WithTimeout(context.Background(), 15*time.Second)
+	report := collectMatrixStallState(ctx, js, matrixStallTargets(events, cohort))
+	stop()
+	report.Cause = cause.Error()
+	data, err := json.MarshalIndent(report, "", "  ")
+	if err == nil {
+		err = os.WriteFile(prefix+"-stalled-state.json", append(data, '\n'), 0600)
+	}
+	if err != nil {
+		t.Errorf("stall state artifact: %v", err)
+	}
+	t.Logf("matrix stall diagnostic targets=%d captured=%d metadata_errors=%v", report.Targets, report.Captured, report.MetadataErrors)
+	attempt, stopRun := context.WithTimeout(context.Background(), 2*time.Second)
+	run, err := js.Stream(attempt, "WF_RUN")
+	stopRun()
+	if err == nil {
+		captureMatrixQueueDiagnostics(t, run)
+	} else {
+		t.Logf("stall run lookup: %v", err)
+	}
+}

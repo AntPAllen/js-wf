@@ -956,7 +956,7 @@ func matrixLeaderHandlers() map[string]worker.Handler {
 	return map[string]worker.Handler{
 		"matrixshort": func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 			value, err := wf.Run(c, "effect", 0, func(context.Context) (int, error) { return 42, nil })
-			return json.RawMessage(strconv.Itoa(value)), err
+			return json.RawMessage(strconv.Itoa(value - 42)), err
 		},
 		"matrixtimer": func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 			for i := 0; i < 8; i++ {

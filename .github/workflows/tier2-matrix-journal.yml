@@ -47,6 +47,7 @@ jobs:
         include: ${{ fromJSON(needs.seeds.outputs.matrix) }}
     env:
       WF_MATRIX_CHAOS: '1'
+      WF_MATRIX_OPERATION_TIMINGS: '1'
       WF_MATRIX_DURATION: ${{ inputs.duration }}
       FIRST_SEED: ${{ matrix.first }}
       LAST_SEED: ${{ matrix.last }}
