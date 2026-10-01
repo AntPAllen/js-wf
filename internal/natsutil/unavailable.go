@@ -1,0 +1,25 @@
+// Package natsutil classifies the reply forms used by the pinned NATS client.
+package natsutil
+
+import (
+	"errors"
+	"github.com/nats-io/nats.go/jetstream"
+)
+
+// IsUnavailable recognizes API 10008 and the exact direct-read description.
+// nats.go v1.54.0 converts empty direct responses with a non-404 Status header
+// to fmt.Errorf("nats: %s", Description), losing the API code and error type.
+// Match that known complete reply, never general substrings or invariant text.
+func IsUnavailable(err error) bool {
+	var api *jetstream.APIError
+	if errors.As(err, &api) && api.ErrorCode == 10008 {
+		return true
+	}
+	for err != nil {
+		if err.Error() == "nats: JetStream system temporarily unavailable" {
+			return true
+		}
+		err = errors.Unwrap(err)
+	}
+	return false
+}

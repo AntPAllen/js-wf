@@ -9,6 +9,7 @@ import (
 
 	"js-wf/identity"
 	"js-wf/internal/handlecache"
+	"js-wf/internal/natsutil"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -608,8 +609,7 @@ func (s *Store) nextLive(ctx context.Context, stream jetstream.Stream, subject s
 }
 
 func transientReadRequest(err error) bool {
-	var api *jetstream.APIError
-	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || errors.As(err, &api) && api.ErrorCode == 10008
+	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || natsutil.IsUnavailable(err)
 }
 
 func waitReadRequest(ctx context.Context, delay time.Duration) error {

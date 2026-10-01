@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"js-wf/identity"
+	"js-wf/internal/natsutil"
 	"js-wf/journal"
 
 	"github.com/nats-io/nats.go/jetstream"
@@ -262,8 +263,7 @@ func auditRead[T any](ctx context.Context, read func(context.Context) (T, error)
 		if err == nil {
 			return value, nil
 		}
-		var api *jetstream.APIError
-		transient := errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || errors.As(err, &api) && api.ErrorCode == 10008
+		transient := errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || natsutil.IsUnavailable(err)
 		if !transient || ctx.Err() != nil {
 			break
 		}

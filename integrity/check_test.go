@@ -60,6 +60,8 @@ func TestAuditReadBoundsRetriesAndPreservesErrors(t *testing.T) {
 	}{
 		{nats.ErrTimeout, 3}, {jetstream.ErrNoStreamResponse, 3},
 		{&jetstream.APIError{ErrorCode: 10008}, 3},
+		{errors.New("nats: JetStream system temporarily unavailable"), 3},
+		{errors.New("invalid retained payload: nats: JetStream system temporarily unavailable"), 1},
 		{jetstream.ErrMsgNotFound, 1}, {errors.New("invalid retained payload"), 1},
 	} {
 		calls := 0

@@ -4232,3 +4232,29 @@ retains the underlying error and cancellation is prompt. A virtual-clock
 record this harness change. A fresh full ten-minute local partition seed 1 is
 running with timings and memory limits; its terminal result remains pending.
 No workload, fault, p99, final completion or complete-audit requirement changes.
+
+
+The first local cadence replay fails at batch 20 in 170.237s on a plain direct-
+read unavailable error, after batch 10 audited 280 terminals. Cadence alone is
+insufficient: the typed API policy did not recognize that reply representation.
+[Retained complete artifacts and decoder evidence](scale/matrix-partition-audit-503-2026-10-01/)
+show pinned nats.go converts direct status-500 errors to plain Description text;
+typed API unavailable is 503/10008. Core status 503 becomes ErrNoResponders.
+A shared exact-reply classifier now covers both unavailable forms in integrity,
+journal serial reads and the matrix helper, preserving retry counts, request/
+overall budgets and rejection of semantic/invariant errors. An actual NATS
+connection/custom API responder proves decoder behavior for 500, 404 and 503
+under race in 4.160s;
+it is not a server-election reproduction. An API-only compiled control fails
+specific decoder/cadence assertions in 3.098s. The initial wrong-status fixture
+failed on ErrNoResponders and is excluded. Full sim/journal/integrity/helper
+suites pass in 107.534/0.003/0.851/0.003s. A fresh full ten-minute local partition
+seed 1 is active with the new classification; terminal result remains pending.
+
+
+The restarted bounded-memory frame workload has now completed 100,000 seeds in
+112.51s with exact first-ten and separate-process replay at its recorded source
+hashes. The companion large-result workload remains live; this is a completed
+frame slice, not a combined or comprehensive release-count result. The original
+million-timer stores remain preserved after interruption. Rebuildable Go cache
+cleanup frees space for the running campaigns; no acceptance data is removed.

@@ -21,6 +21,7 @@ import (
 	"js-wf/history"
 	"js-wf/identity"
 	"js-wf/integrity"
+	"js-wf/internal/natsutil"
 	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/reconcile"
@@ -1456,6 +1457,5 @@ func waitMatrixWorkflowReplicas(ctx context.Context, js jetstream.JetStream) err
 }
 
 func matrixTransientTransport(err error) bool {
-	var api *jetstream.APIError
-	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || errors.As(err, &api) && api.ErrorCode == 10008
+	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || natsutil.IsUnavailable(err)
 }

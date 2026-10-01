@@ -20,7 +20,7 @@ func TestMatrixRetainedAuditTransientCadence(t *testing.T) {
 	var attempts []time.Duration
 	var waits []time.Duration
 	expected := integrity.Report{Invocations: 1680, Journals: 1680, Terminal: 1680, Entries: 18480}
-	unavailable := &jetstream.APIError{Code: 503, ErrorCode: 10008, Description: "JetStream system temporarily unavailable"}
+	unavailable := errors.New("nats: JetStream system temporarily unavailable")
 	report, err := matrixRetainedAuditWithClock(context.Background(), func(ctx context.Context) (integrity.Report, error) {
 		deadline, ok := ctx.Deadline()
 		if !ok || time.Until(deadline) > 20*time.Second {
