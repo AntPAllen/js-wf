@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 10
     env:
       WF_MONITORING_ALERT: '1'
-      WF_MONITORING_ARTIFACT_DIR: ${{ runner.temp }}/monitoring-alert
+      WF_MONITORING_ARTIFACT_DIR: /tmp/monitoring-alert
       GOMEMLIMIT: 512MiB
       GOMAXPROCS: '2'
     steps:
@@ -34,5 +34,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: monitoring-alert-delivery
-          path: ${{ runner.temp }}/monitoring-alert
+          path: ${{ env.WF_MONITORING_ARTIFACT_DIR }}
           if-no-files-found: warn
