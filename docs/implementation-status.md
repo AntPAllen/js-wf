@@ -4720,3 +4720,10 @@ completion and later cleanup are explicitly distinguished. All70 acknowledged
 repairs have checked explanations. All39 Python tests and integration/testcluster
 vet pass. The1s fixture route ping and shared majority connection are explicit;
 ten-minute/default-ping/process/full24-hour gates remain separate.
+
+The [ten-minute majority route campaign](https://github.com/AntPAllen/js-wf/actions/runs/36914593168)
+was launched atcc001d2; source/inputs are retained beside the smoke proof.
+The quorum route campaign36913601073 and comprehensive simulation36900782095
+remain in progress. The million-timer service remains active at MainPID18146
+with116,675 receipts at its latest checkpoint. These live handles are not
+terminal acceptance.
