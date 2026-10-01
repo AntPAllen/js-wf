@@ -789,3 +789,24 @@ assertions. Complete wf race, full default sim, seeded/pinned race, real R3 race
 unchanged. [Proof](scale/continuation-cancel-offline-2026-10-01/) retains results.
 This closes the prior focused offline-cancellation gap; combined faults and
 independent full release gates remain open.
+
+
+## Seeded global journal budgets at continuation boundaries
+
+The continuation_limit workload runs production workers with bounded modeled
+budgets 16/18/20, two checkpoints and lost/hidden replies for gate consumption,
+completion and reserved Failed publication. All 21 combinations preserve global
+logical count, frame anchor and SDK offset; the next effect never runs, the
+reserved failure slot remains available, and immutable outcome/raw integrity
+and explicit CLI-style rejected-request replay pass. The modeled constructor
+may only lower the budget; zero retains the 100,000 default. Production's
+JetStream-facing constructor and hard journal cap are unchanged.
+
+100,000 seeds, exact first-ten/separate-process seed-42 replay, full pinned
+corpus under race, constructor bounds, real R3 budget-16 race and vet pass.
+The compiled suffix-budget control fails its semantic count assertion in
+0.006 seconds. [Proof](scale/continuation-limit-model-2026-10-01/) retains the
+scope. The independent real 100,000-entry default-cap proof still stands;
+small modeled budgets do not prove that scale anew. Combined real near-limit
+reply/server/process faults, seeded retirement/GC and full release gates remain
+open.

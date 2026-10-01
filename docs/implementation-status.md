@@ -3340,3 +3340,33 @@ retain the evidence. Expected corruption rejections are not successful workflow
 runs; this campaign predates later runtime/model additions. Mixed 9d2212b also
 passed its 20-seed campaign. The newer 7e414b2 expanded job and original
 million-timer process remain live without restart at this update.
+
+
+## Seeded continuation global limits and unknown replies at the boundary
+
+A new continuation_limit workload exercises production append guards with
+modeled global budgets 16/18/20 across two checkpoints. The modeled constructor
+can lower its budget, defaults to 100,000 and rejects values outside 4..100,000;
+the JetStream-facing constructor and hard cap are unchanged. This enables
+bounded seed exploration without replacing the independent real production-cap
+proof. Seven modes cover clean execution and lost/hidden acknowledgments for
+enabling-signal consumption, gate completion and reserved Failed publication.
+All 21 combinations preserve absolute frame/SDK indices, never execute the
+rejected effect, retain exactly the budget's records and one immutable terminal,
+avoid archived-prefix reads and pass raw integrity/offline rejected-request
+checks.
+
+The workload passes 100,000 seeds in 128.607 seconds (21,025,331 events), exact
+replay/separate-process seed 42, constructor bounds and pinned corpus under
+race. The existing real R3 budget-16 race contract also passes. A compiled
+suffix-length-budget control fails semantically with 22 records under budget
+20 in 0.006 seconds. Vet passes. [Logs, mutation and source hashes](scale/continuation-limit-model-2026-10-01/)
+retain evidence. Combined near-cap real reply/server/process cuts, seeded
+retirement/GC and independent full release gates remain open.
+
+The original million-timer process completed its first scheduled three-server
+SIGKILL after 333,343 deliveries, healed in 15.933 seconds and resumed delivery.
+[In-progress report](scale/timer-million-first-restart-2026-10-01/) is retained;
+this does not clear final lateness, drain, second restart or 24-hour completion.
+The 043e7e7 mixed campaign passed all 20 seeds; mixed latency causes remain open.
+The full 7e414b2 and 8a5e25e simulation jobs continue live without restart.

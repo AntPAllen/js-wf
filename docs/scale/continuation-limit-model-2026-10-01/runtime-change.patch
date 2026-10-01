@@ -1,0 +1,31 @@
+diff --git a/worker/worker.go b/worker/worker.go
+index a9abce3..3934561 100644
+--- a/worker/worker.go
++++ b/worker/worker.go
+@@ -257,6 +257,10 @@ type ModeledWorkerPorts struct {
+ 	// must not advance the schedule or make durable transport calls.
+ 	OperationObserver func(OperationEvent)
+ 	OperationNow      func() time.Time
++	// JournalEntryLimit lowers the global entry budget for bounded modeled
++	// boundary schedules. Zero uses journal.MaxEntries; values outside 4..MaxEntries
++	// are invalid. The JetStream-facing constructor keeps the production cap.
++	JournalEntryLimit uint64
+ }
+ 
+ // NewWithPorts builds a worker whose delivery and execution decisions run
+@@ -267,7 +271,15 @@ func NewWithPorts(id string, handlers map[string]Handler, ports ModeledWorkerPor
+ 	if id == "" || ports.Journal == nil || ports.Leases == nil || ports.Outcome == nil || ports.Invocation == nil || ports.Signals == nil || ports.Client == nil {
+ 		return nil, fmt.Errorf("invalid modeled worker configuration")
+ 	}
++	limit := ports.JournalEntryLimit
++	if limit == 0 {
++		limit = journal.MaxEntries
++	}
++	if limit < 4 || limit > journal.MaxEntries {
++		return nil, fmt.Errorf("invalid modeled journal entry limit %d", limit)
++	}
+ 	w := &Worker{jrn: ports.Journal, leases: ports.Leases, outcomePort: ports.Outcome, invocationPort: ports.Invocation, signalDrainPort: ports.Signals, resultBlobPort: ports.ResultBlobs, timerSchedulePort: ports.Timer, timerNowPort: ports.TimerNow, nativeSchedules: ports.NativeTimer, client: ports.Client, ID: id, Handlers: handlers, maxEntries: journal.MaxEntries, maxPanicAttempts: 3, partitionConcurrency: 1, ackWait: DefaultAckWait, heartbeatInterval: defaultHeartbeatInterval, heartbeatTicks: ports.HeartbeatTicks, operationObserver: ports.OperationObserver, operationNow: ports.OperationNow, cancelWaiters: make(map[string]*cancelWaiter), modeledCancelNotifications: ports.CancellationNotifications, cancelPollPort: ports.CancellationPoll}
++	w.maxEntries = limit
+ 	for _, option := range options {
+ 		if err := option(w); err != nil {
+ 			return nil, err
