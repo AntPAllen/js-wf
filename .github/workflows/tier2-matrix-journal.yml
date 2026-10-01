@@ -7,9 +7,9 @@ on:
         required: true
         type: choice
         default: journal
-        options: [journal, consumer, cluster, partition, worker, pause, isolation, workerclock, serverclockplus, serverclockminus, fanoutrestart, blockdisk, upgrade]
+        options: [all, journal, consumer, cluster, partition, worker, pause, isolation, workerclock, serverclockplus, serverclockminus, fanoutrestart, blockdisk, upgrade]
       seeds:
-        description: Consecutive seeds for the selected sustained row
+        description: Consecutive seeds per sustained row (all selects the whole matrix)
         required: true
         type: choice
         default: '1'
@@ -24,62 +24,64 @@ jobs:
   seeds:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.matrix.outputs.seeds }}
+      matrix: ${{ steps.matrix.outputs.jobs }}
     steps:
+      - uses: actions/checkout@v4
       - id: matrix
         env:
           SEED_COUNT: ${{ inputs.seeds }}
           MATRIX_ROW: ${{ inputs.row }}
           MATRIX_DURATION: ${{ inputs.duration }}
         run: |
-          python3 - <<'PY'
-          import json, os
-          count = int(os.environ['SEED_COUNT'])
-          assert count in (1, 20, 200)
-          assert os.environ['MATRIX_ROW'] in ('journal', 'consumer', 'cluster', 'partition', 'worker', 'pause', 'isolation', 'workerclock', 'serverclockplus', 'serverclockminus', 'fanoutrestart', 'blockdisk', 'upgrade')
-          assert os.environ['MATRIX_DURATION'] in ('10m', '35s')
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-              output.write('seeds=' + json.dumps(list(range(1, count + 1))) + '\n')
-          PY
+          python3 -m unittest discover -s scripts -p 'test_matrix_*.py'
+          python3 scripts/matrix-campaign.py
   leader:
+    name: ${{ inputs.row == 'all' && format('leader ({0}, {1})', matrix.row, matrix.artifact_seed) || format('leader ({0})', matrix.first) }}
     needs: seeds
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: ${{ inputs.row == 'all' && 300 || 25 }}
     strategy:
       fail-fast: false
       max-parallel: 4
       matrix:
-        seed: ${{ fromJSON(needs.seeds.outputs.matrix) }}
+        include: ${{ fromJSON(needs.seeds.outputs.matrix) }}
     env:
       WF_MATRIX_CHAOS: '1'
       WF_MATRIX_DURATION: ${{ inputs.duration }}
-      FAULT_SEED: ${{ matrix.seed }}
-      MATRIX_ARTIFACT_PREFIX: matrix-${{ inputs.row }}-${{ matrix.seed }}
-      MATRIX_TIMEOUT: ${{ (inputs.row == 'workerclock' || inputs.row == 'serverclockplus' || inputs.row == 'serverclockminus') && '20m' || '18m' }}
-      MATRIX_TEST: ${{ inputs.row == 'upgrade' && 'TestMixedMatrixRollingServerUpgrade' || inputs.row == 'blockdisk' && 'TestMixedMatrixBlockDiskStallEveryThirtySeconds' || inputs.row == 'fanoutrestart' && 'TestMixedMatrixFanoutRestartEveryThirtySeconds' || inputs.row == 'serverclockplus' && 'TestMixedMatrixServerClockSkewPositive' || inputs.row == 'serverclockminus' && 'TestMixedMatrixServerClockSkewNegative' || inputs.row == 'workerclock' && 'TestMixedMatrixWorkerClockSkew' || inputs.row == 'isolation' && 'TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds' || inputs.row == 'pause' && 'TestMixedMatrixWorkerPausedFortyFiveSeconds' || inputs.row == 'worker' && 'TestMixedMatrixRandomWorkerKilledEveryFiveSeconds' || inputs.row == 'partition' && 'TestMixedMatrixServerPartitionEveryThirtySeconds' || inputs.row == 'cluster' && 'TestMixedMatrixAllServersKilledEveryThirtySeconds' || inputs.row == 'consumer' && 'TestMixedMatrixConsumerLeaderEveryThirtySeconds' || 'TestMixedMatrixJournalLeaderEveryThirtySeconds' }}
+      FIRST_SEED: ${{ matrix.first }}
+      LAST_SEED: ${{ matrix.last }}
+      MATRIX_ROW: ${{ matrix.row }}
+      MATRIX_TIMEOUT: ${{ (matrix.row == 'workerclock' || matrix.row == 'serverclockplus' || matrix.row == 'serverclockminus') && '20m' || '18m' }}
+      MATRIX_TEST: ${{ matrix.row == 'upgrade' && 'TestMixedMatrixRollingServerUpgrade' || matrix.row == 'blockdisk' && 'TestMixedMatrixBlockDiskStallEveryThirtySeconds' || matrix.row == 'fanoutrestart' && 'TestMixedMatrixFanoutRestartEveryThirtySeconds' || matrix.row == 'serverclockplus' && 'TestMixedMatrixServerClockSkewPositive' || matrix.row == 'serverclockminus' && 'TestMixedMatrixServerClockSkewNegative' || matrix.row == 'workerclock' && 'TestMixedMatrixWorkerClockSkew' || matrix.row == 'isolation' && 'TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds' || matrix.row == 'pause' && 'TestMixedMatrixWorkerPausedFortyFiveSeconds' || matrix.row == 'worker' && 'TestMixedMatrixRandomWorkerKilledEveryFiveSeconds' || matrix.row == 'partition' && 'TestMixedMatrixServerPartitionEveryThirtySeconds' || matrix.row == 'cluster' && 'TestMixedMatrixAllServersKilledEveryThirtySeconds' || matrix.row == 'consumer' && 'TestMixedMatrixConsumerLeaderEveryThirtySeconds' || 'TestMixedMatrixJournalLeaderEveryThirtySeconds' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
       - name: Build initial NATS 2.11.17 servers
-        if: inputs.row == 'upgrade'
+        if: matrix.row == 'upgrade'
         run: |
           mkdir -p "$RUNNER_TEMP/nats-old"
           GOBIN="$RUNNER_TEMP/nats-old" go install github.com/nats-io/nats-server/v2@v2.11.17
           printf 'WF_NATS_SERVER_BIN=%s/nats-old/nats-server\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - name: Verify block device fault prerequisites
-        if: inputs.row == 'blockdisk'
+        if: matrix.row == 'blockdisk'
         run: |
           sudo -n dmsetup version
           sudo -n losetup --find
           command -v mkfs.ext4
           WF_BLOCK_DISK=1 go test -race ./testcluster -run '^TestBlockDiskStallBlocksSyncAndCleansUp$' -count=1 -timeout=2m -v
       - name: Sustain mixed workloads under the selected fault schedule
-        run: go test ./integration -run "^${MATRIX_TEST}$" -count=1 -timeout="${MATRIX_TIMEOUT}" -v
+        run: |
+          for seed in $(seq "$FIRST_SEED" "$LAST_SEED"); do
+            echo "Sustained matrix row=$MATRIX_ROW seed=$seed duration=$WF_MATRIX_DURATION"
+            result_log="integration/matrix-${MATRIX_ROW}-${seed}-test.jsonl"
+            FAULT_SEED="$seed" MATRIX_ARTIFACT_PREFIX="matrix-${MATRIX_ROW}-${seed}" go test -json ./integration -run "^${MATRIX_TEST}$" -count=1 -timeout="${MATRIX_TIMEOUT}" | tee "$result_log" | python3 -u scripts/render-go-test.py
+            python3 scripts/check-matrix-result.py "$result_log" "$MATRIX_TEST" "$WF_MATRIX_DURATION"
+          done
       - if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: matrix-${{ inputs.row }}-${{ matrix.seed }}-${{ inputs.duration }}
-          path: integration/matrix-${{ inputs.row }}-${{ matrix.seed }}-*
+          name: matrix-${{ matrix.row }}-${{ matrix.artifact_seed }}-${{ inputs.duration }}
+          path: integration/matrix-${{ matrix.row }}-*-*
           if-no-files-found: error

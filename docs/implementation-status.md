@@ -3843,3 +3843,25 @@ Latest comprehensive simulation runs predate this additional workload; final
 combined validation, whole-matrix 200 seeds, five-node 24-hour soak, original
 million-timer final audit, ten-million spilled-input traffic, online GC and
 remaining combined-fault gates remain open.
+
+
+## All-row sustained matrix campaign entry point
+
+The registered sustained matrix workflow now accepts row=all, selecting all
+thirteen fault variants on the same source. A 200-seed campaign expands 2,600
+row/seed executions into 221 groups of at most twelve seeds, preserving the
+hosted matrix/job limits and unchanged per-seed fault/runtime gates. Single-row
+campaign job/artifact naming remains compatible with the existing verifier.
+Every seed retains Go JSON events; an explicit guard requires the named test
+to pass exactly once, package completion and full requested elapsed duration.
+Skipped/missing/duplicate/shortened results fail. Groups stop on a failed seed;
+remaining seeds are absent evidence, never clean passes.
+
+Twelve planner/result/legacy campaign controls pass. A real 35-second journal
+seed-1 diagnostic passes in 46.818 seconds and is accepted as smoke but rejected
+as ten-minute proof. [Plan, runner controls and raw logs](scale/full-matrix-campaign-2026-10-01/)
+are retained. Hosted full-duration one-seed-per-row validation remains pending;
+this does not clear 200 seeds or the separate five-node 24-hour full-matrix
+soak. Production runtime/model source is unchanged from 28a09c4, whose full
+100,000-seed-per-workload campaign remains live, alongside mixed 200 seeds
+and the original million timers.

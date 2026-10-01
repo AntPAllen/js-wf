@@ -411,6 +411,16 @@ The production fallback scanner runs throughout; the ordinary raw enabling-event
 p99, histories, integrity and queue-drain gates apply. A 35-second smoke upgrades
 only one node and cannot prove the full three-node transition.
 
+The sustained matrix workflow also accepts `row=all`, expanding all thirteen
+fault variants at the same source revision. At 200 seeds this requires 2,600
+row/seed executions; groups of up to twelve consecutive seeds produce 221
+hosted jobs within the matrix limit. Every job retains per-seed fault/state
+artifacts and Go JSON results. The result guard rejects skipped/missing tests,
+failed or duplicate results and shortened duration. Groups stop on a failed
+seed; omitted subsequent seeds do not count clean. A one-seed all-row campaign
+checks coverage at that revision, while only all 200 successful seeds per row
+can clear Tier 2. See [campaign runner scope](scale/full-matrix-campaign-2026-10-01/).
+
 **Tier 3 — Jepsen-style (nightly and before release).** Five real VMs or containers with real network partitions (iptables), separately verified server and worker clock skew, disk stalls (dm-delay), and process kills including `SIGKILL` of the NATS server with unsynced writes (`sync_interval` set to the production value). Client histories recorded as in phase 0 and checked with Porcupine against these models: `Start` as write-once register; `Signal` as an ordered queue per invocation; `Await` as a read of a register that becomes immutable at first non-empty read. Plus the stream-level invariant checker over the final state.
 
 Clock-skew injection must fail closed unless the running process reports the requested offset before the workload starts. The pinned Go server and a cgo-enabled Go probe bypassed `libfaketime`'s `LD_PRELOAD` clock interposition even though the same preload shifted `date`; [libfaketime documents this runtime limitation](https://github.com/wolfcw/libfaketime). The five-container server-clock slice instead builds the pinned NATS source with a test-only Go `time.Now` wall-clock overlay and verifies each node's own `/varz` time. The worker-clock slice uses the same overlay to build a separate worker process and checks its `time.Now` against an unshifted server's `/varz` before starting work. Both slices now cover one timer, one ordered-signal workflow, 100 short journaled effects, and a six-child fan-out with child-result signal and journal checks. The server slice keeps `WF_RUN`, `WF_SIG`, `WF_JRN`, and `KV_WF_STATE` leaders on the skewed node. These focused checks do not replace sustained mixed workloads and faults across the full matrix.

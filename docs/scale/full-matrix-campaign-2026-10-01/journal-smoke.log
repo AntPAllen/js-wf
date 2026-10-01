@@ -1,0 +1,26 @@
+=== RUN   TestMixedMatrixJournalLeaderEveryThirtySeconds
+    mixed_matrix_leader_test.go:83: mixed batch=1 elapsed=5.118064541s
+    mixed_matrix_leader_test.go:83: mixed batch=2 elapsed=9.130154707s
+    mixed_matrix_leader_test.go:83: mixed batch=3 elapsed=13.144050072s
+    mixed_matrix_leader_test.go:83: mixed batch=4 elapsed=17.163566519s
+    mixed_matrix_leader_test.go:83: mixed batch=5 elapsed=21.176599961s
+    mixed_matrix_leader_test.go:83: mixed batch=6 elapsed=26.341511028s
+    mixed_matrix_leader_test.go:569: journal_leader fault node=0 nodes=[] worker= pid=0 active_leases=0 routes=[0 0 0] majority_seq=0 consumer= pending=0 ack_pending=0 scheduled=30s killed=30.003002142s healed=34.268885732s
+    mixed_matrix_leader_test.go:83: mixed batch=7 elapsed=37.05051129s
+    mixed_matrix_leader_test.go:83: MATRIX_RETAINED row=journal_leader report={Invocations:196 Journals:196 Entries:2162 Terminal:196} expected_invocations=196
+    mixed_matrix_leader_test.go:83: MATRIX_RESULT row=journal_leader seed=1 duration=35s release_duration=false batches=7 invocations=196 faults=1 terminal_p99=7.039881018s
+    mixed_matrix_leader_test.go:83: MATRIX_CELL type=matrixshort invocations=28 terminal_p99=929.121055ms
+    mixed_matrix_leader_test.go:83: MATRIX_PROGRESS type=matrixshort enabled_events=28 progress_p99=909.827823ms progress_max=909.827823ms above_30s=0
+    mixed_matrix_leader_test.go:83: MATRIX_CELL type=matrixtimer invocations=21 terminal_p99=7.039881018s
+    mixed_matrix_leader_test.go:83: MATRIX_PROGRESS type=matrixtimer enabled_events=189 progress_p99=6.250338656s progress_max=7.039131851s above_30s=0
+    mixed_matrix_leader_test.go:83: MATRIX_CELL type=matrixsignal invocations=14 terminal_p99=5.008127808s
+    mixed_matrix_leader_test.go:83: MATRIX_PROGRESS type=matrixsignal enabled_events=126 progress_p99=880.094909ms progress_max=880.106387ms above_30s=0
+    mixed_matrix_leader_test.go:83: MATRIX_CELL type=matrixfanout invocations=7 terminal_p99=8.525895001s
+    mixed_matrix_leader_test.go:83: MATRIX_PROGRESS type=matrixfanout enabled_events=91 progress_p99=136.122084ms progress_max=136.122084ms above_30s=0
+    mixed_matrix_leader_test.go:83: MATRIX_CELL type=matrixchild invocations=42 terminal_p99=3.931259716s
+    mixed_matrix_leader_test.go:83: MATRIX_PROGRESS type=matrixchild enabled_events=210 progress_p99=523.135177ms progress_max=878.752851ms above_30s=0
+    mixed_matrix_leader_test.go:83: MATRIX_CELL type=matrixgrandchild invocations=84 terminal_p99=747.485038ms
+    mixed_matrix_leader_test.go:83: MATRIX_PROGRESS type=matrixgrandchild enabled_events=84 progress_p99=728.20828ms progress_max=728.20828ms above_30s=0
+--- PASS: TestMixedMatrixJournalLeaderEveryThirtySeconds (46.81s)
+PASS
+ok  	js-wf/integration	46.818s
