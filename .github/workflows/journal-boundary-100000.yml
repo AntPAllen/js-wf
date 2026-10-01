@@ -14,3 +14,15 @@ jobs:
           go-version-file: go.mod
       - name: Verify 100,000-entry journal boundary and full read
         run: go test ./integration -run '^TestJournalMaxEntriesBoundary$' -count=1 -timeout=25m -v
+  continuation-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      WF_CONTINUATION_BOUNDARY: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify production continuation cap across checkpoints and replacement
+        run: go test ./worker -run '^TestContinuationProductionJournalLimitBoundary$' -count=1 -timeout=25m -v

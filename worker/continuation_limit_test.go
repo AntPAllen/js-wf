@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -37,6 +38,24 @@ func (p *continuationLimitFramePort) GetObject(ctx context.Context, name string)
 }
 
 func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
+	testContinuationJournalLimit(t, 16)
+}
+
+func TestContinuationProductionJournalLimitBoundary(t *testing.T) {
+	if os.Getenv("WF_CONTINUATION_BOUNDARY") != "1" {
+		t.Skip("set WF_CONTINUATION_BOUNDARY=1 for the real 100,000-entry continuation boundary")
+	}
+	testContinuationJournalLimit(t, journal.MaxEntries)
+}
+
+func testContinuationJournalLimit(t *testing.T, budget uint64) {
+	t.Helper()
+	padding := int((budget - 16) / 2)
+	paddingFirst := padding / 2
+	testTimeout := 45 * time.Second
+	if budget == journal.MaxEntries {
+		testTimeout = 20 * time.Minute
+	}
 	cluster, err := testcluster.Start(t.TempDir(), 3)
 	if err != nil {
 		t.Fatal(err)
@@ -50,7 +69,7 @@ func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
 		}
 		all = append(all, js)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
 	defer cancel()
 	for {
 		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
@@ -66,9 +85,24 @@ func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
 	}
 	const typ, id = "checkpoint-limit", "global"
 	var initialCalls, middleCalls, effects atomic.Int64
+	var gateReady atomic.Bool
+	pad := func(c *wf.Context, from, to int) error {
+		for i := from; i < to; i++ {
+			if err := c.SetState("padding", i); err != nil {
+				return err
+			}
+			if (i+1)%5000 == 0 {
+				t.Logf("continuation padding: durable_steps=%d/%d", i+1, padding)
+			}
+		}
+		return nil
+	}
 	handlers := map[string]Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 		initialCalls.Add(1)
 		if err := c.SetState("value", 10); err != nil {
+			return nil, err
+		}
+		if err := pad(c, 0, paddingFirst); err != nil {
 			return nil, err
 		}
 		return nil, wf.Continue(c, "middle_v1", 10)
@@ -84,9 +118,13 @@ func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
 			if !found || value != 10 || string(locals) != "10" {
 				return nil, fmt.Errorf("bad middle state")
 			}
+			if err := pad(c, paddingFirst, padding); err != nil {
+				return nil, err
+			}
 			return nil, wf.Continue(c, "finish_v1", 10)
 		},
 		"finish_v1": func(c *wf.Context, _, _ json.RawMessage) (json.RawMessage, error) {
+			gateReady.Store(true)
 			if _, err := wf.AwaitSignal(c, "gate"); err != nil {
 				return nil, err
 			}
@@ -101,7 +139,12 @@ func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
 	defer first.Close()
 	// The existing worker limit fixtures lower this private budget. The default
 	// and hard journal cap remain 100,000; no production configuration is added.
-	first.maxEntries = 16
+	if budget != journal.MaxEntries {
+		first.maxEntries = budget
+	}
+	if first.maxEntries != budget {
+		t.Fatalf("worker default budget=%d want=%d", first.maxEntries, budget)
+	}
 	c := client.New(all[0])
 	handle, err := c.Start(ctx, typ, id, []byte(`null`))
 	if err != nil {
@@ -114,6 +157,13 @@ func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
 	go func() { firstDone <- first.RunPartition(firstCtx, part) }()
 	store := journal.New(all[0])
 	for {
+		if !gateReady.Load() {
+			if ctx.Err() != nil {
+				t.Fatal(ctx.Err())
+			}
+			time.Sleep(20 * time.Millisecond)
+			continue
+		}
 		records, _, err := store.Read(ctx, typ, id)
 		if err != nil {
 			t.Fatal(err)
@@ -124,7 +174,7 @@ func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
 				t.Fatalf("failed before gate: %s", last.Payload)
 			}
 			if last.Kind == journal.Suspended && string(last.Payload) == `{"waiting_on":"signal:gate"}` {
-				if len(records) != 13 || last.Index != 12 {
+				if uint64(len(records)) != budget-3 || last.Index != budget-4 {
 					t.Fatalf("pre-resume entries=%d index=%d", len(records), last.Index)
 				}
 				break
@@ -143,7 +193,7 @@ func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
 	if err != nil || view == nil {
 		t.Fatalf("view=%+v err=%v", view, err)
 	}
-	if view.Anchor.Index != 9 || view.Snapshot.Runtime.StepPosition != 8 {
+	if view.Anchor.Index != budget-7 || view.Snapshot.Runtime.StepPosition != budget-8 {
 		t.Fatalf("saved indices=%+v", view.Snapshot.Runtime)
 	}
 	initialBefore, middleBefore := initialCalls.Load(), middleCalls.Load()
@@ -156,7 +206,12 @@ func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer second.Close()
-	second.maxEntries = 16
+	if budget != journal.MaxEntries {
+		second.maxEntries = budget
+	}
+	if second.maxEntries != budget {
+		t.Fatalf("replacement default budget=%d want=%d", second.maxEntries, budget)
+	}
 	secondCtx, stopSecond := context.WithCancel(ctx)
 	defer stopSecond()
 	secondDone := make(chan error, 1)
@@ -176,14 +231,14 @@ func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
 		t.Fatalf("effects=%d calls=%d/%d reads=%d/%d", effects.Load(), initialCalls.Load(), middleCalls.Load(), guard.archives, guard.frames)
 	}
 	records, _, err := store.Read(ctx, typ, id)
-	if err != nil || len(records) != 16 || records[15].Index != 15 || records[15].Kind != journal.Failed {
+	if err != nil || uint64(len(records)) != budget || records[budget-1].Index != budget-1 || records[budget-1].Kind != journal.Failed {
 		t.Fatalf("records=%d err=%v", len(records), err)
 	}
-	if records[13].Kind != journal.SignalConsumed || records[14].Kind != journal.StepCompleted {
+	if records[budget-3].Kind != journal.SignalConsumed || records[budget-2].Kind != journal.StepCompleted {
 		t.Fatal("enabling signal completion did not fit before reserved failure")
 	}
 	var outcome wf.Outcome
-	if err := json.Unmarshal(records[15].Payload, &outcome); err != nil || outcome.InvSeq != handle.InvSeq || outcome.Error != journal.ErrTooLong.Error() || outcome.LimitEntry != nil {
+	if err := json.Unmarshal(records[budget-1].Payload, &outcome); err != nil || outcome.InvSeq != handle.InvSeq || outcome.Error != journal.ErrTooLong.Error() || outcome.LimitEntry != nil {
 		t.Fatalf("outcome=%+v err=%v", outcome, err)
 	}
 	var request struct{ Kind, Name, InputHash string }
@@ -195,7 +250,7 @@ func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
 		t.Fatal(err)
 	}
 	terminal, err := state.Get(ctx, identity.Key(typ, id))
-	if err != nil || !bytes.Equal(terminal.Value(), records[15].Payload) {
+	if err != nil || !bytes.Equal(terminal.Value(), records[budget-1].Payload) {
 		t.Fatalf("state differs: %v", err)
 	}
 	for _, peer := range all {
@@ -234,8 +289,8 @@ func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
 	// Match the CLI's explicit limit-audit protocol: replace Failed with its
 	// retained rejected request and prove replay stops at the pending effect.
 	replayRecords := append([]journal.Record(nil), records...)
-	replayRecords[15].Kind = journal.StepRequested
-	replayRecords[15].Payload = outcome.LimitRequest
+	replayRecords[budget-1].Kind = journal.StepRequested
+	replayRecords[budget-1].Payload = outcome.LimitRequest
 	replay := func(history []journal.Record) (wf.ReplayObservation, error) {
 		raw, err := json.Marshal(history)
 		if err != nil {
@@ -257,7 +312,7 @@ func TestContinuationPreservesGlobalJournalLimitAndTerminalSlot(t *testing.T) {
 		t.Fatalf("limit replay=%+v err=%v effects=%d", obs, err, effects.Load())
 	}
 	changed := append([]journal.Record(nil), replayRecords...)
-	changed[15].Payload = json.RawMessage(`{"kind":"run","name":"wrong","input_hash":"wrong"}`)
+	changed[budget-1].Payload = json.RawMessage(`{"kind":"run","name":"wrong","input_hash":"wrong"}`)
 	if _, err := replay(changed); !errors.Is(err, wf.ErrNonDeterministic) || effects.Load() != 0 {
 		t.Fatalf("changed limit request accepted: %v effects=%d", err, effects.Load())
 	}

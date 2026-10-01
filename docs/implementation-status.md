@@ -3043,3 +3043,36 @@ Those jobs predate this runtime fix. Combined faults, remaining continuation
 acceptance cuts, full final-source matrix/24-hour soak, online GC and mixed
 seed 65 latency remain open. The original million-timer process remains live
 without restart.
+
+
+## Actual production continuation cap across checkpoints and replacement
+
+The continuation limit fixture now also has an opt-in real R3 100,000-entry
+case. Neither worker changes its default budget. Initial/middle stages each
+add 24,996 SetState steps before their checkpoints. The first worker stops
+with exactly 99,997 logical entries; finish_v1 is anchored at index 99,993 with
+absolute SDK position 99,992. Its replacement rejects archive reads and leaves
+prefix stage counts unchanged.
+
+The gate occupies SignalConsumed 99,997 and StepCompleted 99,998. The next effect
+cannot fit completion and terminal reservations, so Failed occupies 99,999 with
+the rejected LimitRequest and zero effect executions. Full logical history is
+exactly 100,000 entries, terminal state matches its payload, all peers return
+ErrTooLong and raw integrity finds one invocation/terminal. Explicit CLI-style
+rejected-request substitution replays both continuations and all 99,995 SDK
+entries offline to ErrReplayPendingStep; changing the declaration is rejected.
+
+The actual-cap run passed in 67.861 seconds; the shared small fixture passed
+under race in 18.045 seconds. A compiled suffix-length-budget mutant completes
+the small fixture incorrectly and fails its semantic assertion in 16.348
+seconds. Vet passed. [Logs, patch and hashes](scale/continuation-production-limit-2026-10-01/)
+retain the evidence. The manual journal-boundary-100000 workflow adds an
+independent continuation job; hosted confirmation remains pending. Runtime
+source is unchanged from 7e414b2.
+
+This closes the full production-cap continuation slice previously left open.
+Seeded integrated limits, limit-adjacent fault cuts and other continuation
+acceptance gates remain open, along with final-source full matrix/24-hour soak,
+mixed seed 65 latency and online GC. The earlier full simulation campaigns and
+million-timer process remain live without restart. Standard CI at 9b3831e has
+now passed, including its continuation limit contract.
