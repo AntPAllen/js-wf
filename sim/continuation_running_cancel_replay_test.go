@@ -243,6 +243,40 @@ func runSeededContinuationRunningCancel(seed int64, replay *Trace) (trace Trace,
 	if err != nil || report != (integrity.Report{Invocations: 1, Journals: 1, Entries: len(records), Terminal: 1}) {
 		return trace, fmt.Errorf("seed %d retained check=%+v err=%v", seed, report, err)
 	}
+	// Copy model objects without another transport operation. Offline replay
+	// audits the same committed history and keeps existing trace bytes stable.
+	objects := make(map[string][]byte)
+	snapshots.mu.Lock()
+	for name, raw := range snapshots.objects {
+		objects[name] = bytes.Clone(raw)
+	}
+	snapshots.mu.Unlock()
+	history, _ := json.Marshal(records)
+	var offlineEffects int
+	var observed wf.ReplayObservation
+	_, err = wf.ReplayWithContinuations(history, func(c *wf.Context) (json.RawMessage, error) {
+		if err := c.SetState("value", 23); err != nil {
+			return nil, err
+		}
+		return nil, wf.Continue(c, "finish_v1", 45)
+	}, map[string]wf.ReplayContinuation[json.RawMessage]{"finish_v1": func(c *wf.Context, locals json.RawMessage) (json.RawMessage, error) {
+		var value int
+		found, err := c.GetState("value", &value)
+		if err != nil || !found || value != 23 || string(locals) != "45" {
+			return nil, fmt.Errorf("offline state/locals changed: %d/%v/%s/%v", value, found, locals, err)
+		}
+		if _, err := wf.AwaitSignal(c, "gate"); err != nil {
+			return nil, err
+		}
+		_, err = wf.Run(c, "blocked-effect", 0, func(context.Context) (int, error) {
+			offlineEffects++
+			return 0, nil
+		})
+		return nil, err
+	}}, wf.ReplayOptions{Type: typ, ID: id, InvSeq: handle.InvSeq, Objects: objects, Observation: &observed})
+	if !errors.Is(err, wf.ErrReplayPendingStep) || offlineEffects != 0 || observed.Continuations != 1 || observed.Stage != "finish_v1" || observed.PlayedSteps != observed.RecordedSteps {
+		return trace, fmt.Errorf("seed %d offline canceled pending replay: err=%v effects=%d observed=%+v", seed, err, offlineEffects, observed)
+	}
 	schedule.RecordTransport(TransportEvent{Operation: "check_continuation_running_cancel", Subject: identity.JournalSubject(typ, id), Sequence: sequence, Outcome: mode, AtMillis: schedule.NowMillis()})
 	if err := schedule.Finish(); err != nil {
 		return trace, err

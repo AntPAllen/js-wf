@@ -769,3 +769,23 @@ passes. [Logs, mutation and hashes](scale/continuation-running-cancel-2026-10-01
 retain the proof. Combined publication/GC/cancellation cuts, handlers ignoring
 context, offline canceled-pending-effect replay and independent final release
 gates remain open; this is not the complete continuation acceptance suite.
+
+
+## Offline replay of canceled pending effects and early terminal identity
+
+The active-cancellation seeded and real R3 histories now reconstruct offline
+through all nine SDK entries. The pending effect request is verified without
+executing its callback; ErrReplayPendingStep describes the offline stop while
+the recorded Failed cancellation remains the workflow outcome. Both notification
+and production durable-poll histories pass. A two-checkpoint unit covers 15 SDK
+entries, changed pending declarations and invalid terminal payloads.
+
+The focused proof found a runtime defect: Failed terminal invocation generation
+was unchecked before replay handlers. The shared replay implementation now
+validates terminal identity whenever supplied and requires an error for Failed.
+Compiled old-runtime and callback-execution controls fail their exact semantic
+assertions. Complete wf race, full default sim, seeded/pinned race, real R3 race,
+100,000 expanded cancellation seeds and vet pass. Original trace bytes remain
+unchanged. [Proof](scale/continuation-cancel-offline-2026-10-01/) retains results.
+This closes the prior focused offline-cancellation gap; combined faults and
+independent full release gates remain open.

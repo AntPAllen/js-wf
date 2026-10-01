@@ -197,6 +197,65 @@ func TestReplayAcrossContinuationFramesAndHistoricalFacts(t *testing.T) {
 	}
 }
 
+func TestReplayContinuationCanceledPendingEffect(t *testing.T) {
+	f := buildReplayContinuationFixture(t)
+	// The active suffix's request is durable, but cancellation interrupts the
+	// callback before any completion. Preserve both frames and all prior steps.
+	found := false
+	for i, record := range f.records {
+		var req request
+		if record.Kind == journal.StepRequested && json.Unmarshal(record.Payload, &req) == nil && req.Kind == "run_once" && req.Name == "suffix" {
+			f.records = f.records[:i+1]
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatal("fixture has no suffix effect request")
+	}
+	index := uint64(len(f.records))
+	cancel, _ := json.Marshal(map[string]any{"sig_seq": 11, "name": "_wf_cancel", "payload": []byte(nil)})
+	f.records = append(f.records,
+		journal.Record{Entry: journal.Entry{Index: index, Epoch: 99, Kind: journal.SignalConsumed, Payload: cancel}, Sequence: index + 1},
+		journal.Record{Entry: journal.Entry{Index: index + 1, Epoch: 99, Kind: journal.Failed, Payload: json.RawMessage(`{"inv_seq":17,"error":"workflow cancelled"}`)}, Sequence: index + 2},
+	)
+	replay := func(records []journal.Record) (error, ReplayObservation, int, int) {
+		t.Helper()
+		var effects, initial, middle, finish int
+		first, stages := replayContinuationHandlers(&effects, &initial, &middle, &finish)
+		raw, _ := json.Marshal(records)
+		var observed ReplayObservation
+		_, err := ReplayWithContinuations(raw, first, stages, ReplayOptions{Type: "parent", ID: "replay", InvSeq: 17, Objects: f.objects, Observation: &observed})
+		return err, observed, effects, initial + middle + finish
+	}
+	err, observed, effects, calls := replay(f.records)
+	if !errors.Is(err, ErrReplayPendingStep) || effects != 0 || observed.Continuations != 2 || observed.Stage != "finish_v1" || observed.PlayedSteps != observed.RecordedSteps || calls != 3 {
+		t.Fatalf("canceled pending replay: err=%v effects=%d observed=%+v", err, effects, observed)
+	}
+	// The terminal error cannot excuse changing the pending declaration.
+	changed := append([]journal.Record(nil), f.records...)
+	var req map[string]any
+	if err := json.Unmarshal(changed[len(changed)-3].Payload, &req); err != nil {
+		t.Fatal(err)
+	}
+	req["name"] = "changed-effect"
+	changed[len(changed)-3].Payload, _ = json.Marshal(req)
+	if err, _, effects, _ := replay(changed); !errors.Is(err, ErrNonDeterministic) || effects != 0 {
+		t.Fatalf("cancel hid changed declaration: err=%v effects=%d", err, effects)
+	}
+	for _, payload := range []json.RawMessage{
+		json.RawMessage(`{"inv_seq":18,"error":"workflow cancelled"}`),
+		json.RawMessage(`{"inv_seq":17}`),
+		json.RawMessage(`{"inv_seq":"invalid"}`),
+	} {
+		changed = append([]journal.Record(nil), f.records...)
+		changed[len(changed)-1].Payload = payload
+		if err, _, effects, calls := replay(changed); !errors.Is(err, ErrCorruptJournal) || effects != 0 || calls != 0 {
+			t.Fatalf("invalid terminal accepted: payload=%s err=%v effects=%d handler_calls=%d", payload, err, effects, calls)
+		}
+	}
+}
+
 func TestReplayContinuationRejectsMissingObjectsUnknownStagesAndChanges(t *testing.T) {
 	f := buildReplayContinuationFixture(t)
 	raw, _ := json.Marshal(f.records)

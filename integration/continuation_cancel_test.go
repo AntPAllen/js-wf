@@ -206,5 +206,35 @@ func testContinuationActiveCancellation(t *testing.T, missedNotification bool) {
 	if err != nil || report.Invocations != 1 || report.Terminal != 1 || report.Entries != len(records) {
 		t.Fatalf("raw audit=%+v err=%v", report, err)
 	}
-	t.Logf("active continuation cancellation: missed_notification=%v prefix=%d suffix=%d effect_calls=%d archive_reads=%d frame_reads=%d cancellation_to_terminal=%s", missedNotification, len(prefix), len(suffix), effectCalls.Load(), guard.archives, guard.frames, elapsed)
+	view, err := store.ReadCheckpoint(ctx, typ, id, handle.InvSeq)
+	if err != nil || view == nil {
+		t.Fatalf("offline frame: view=%+v err=%v", view, err)
+	}
+	history, _ := json.Marshal(records)
+	var offlineEffects int
+	var observed wf.ReplayObservation
+	_, err = wf.ReplayWithContinuations(history, func(c *wf.Context) (json.RawMessage, error) {
+		if err := c.SetState("value", 23); err != nil {
+			return nil, err
+		}
+		return nil, wf.Continue(c, "finish_v1", 45)
+	}, map[string]wf.ReplayContinuation[json.RawMessage]{"finish_v1": func(c *wf.Context, locals json.RawMessage) (json.RawMessage, error) {
+		var value int
+		found, err := c.GetState("value", &value)
+		if err != nil || !found || value != 23 || string(locals) != "45" {
+			return nil, fmt.Errorf("offline state/locals changed: %d/%v/%s/%v", value, found, locals, err)
+		}
+		if _, err := wf.AwaitSignal(c, "gate"); err != nil {
+			return nil, err
+		}
+		_, err = wf.Run(c, "blocked-effect", 0, func(context.Context) (int, error) {
+			offlineEffects++
+			return 0, nil
+		})
+		return nil, err
+	}}, wf.ReplayOptions{Type: typ, ID: id, InvSeq: handle.InvSeq, Objects: map[string][]byte{view.Snapshot.Runtime.Object: view.Frame}, Observation: &observed})
+	if !errors.Is(err, wf.ErrReplayPendingStep) || offlineEffects != 0 || observed.Continuations != 1 || observed.Stage != "finish_v1" || observed.PlayedSteps != observed.RecordedSteps {
+		t.Fatalf("offline canceled pending replay: err=%v effects=%d observed=%+v", err, offlineEffects, observed)
+	}
+	t.Logf("active continuation cancellation: missed_notification=%v prefix=%d suffix=%d effect_calls=%d archive_reads=%d frame_reads=%d cancellation_to_terminal=%s offline_steps=%d", missedNotification, len(prefix), len(suffix), effectCalls.Load(), guard.archives, guard.frames, elapsed, observed.PlayedSteps)
 }

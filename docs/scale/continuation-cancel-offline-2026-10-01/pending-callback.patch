@@ -1,0 +1,10 @@
+--- wf/context.go
++++ wf/context.go
+@@ -223,6 +223,7 @@
+ 		return value, nil
+ 	}
+ 	if c.replay {
++		_, _ = runEffect(c.base, fn)
+ 		return zero, ErrReplayPendingStep
+ 	}
+ 	if err := c.base.Err(); err != nil {

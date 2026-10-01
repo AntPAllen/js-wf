@@ -3309,3 +3309,34 @@ seeds across the full matrix. Latest-source mixed/standard CI, both expanded
 simulation jobs and the original million-timer process remain active at this
 update; none were restarted or canceled. Five-node 24-hour soak, online GC
 and remaining plan requirements stay open.
+
+
+## Offline canceled-continuation audit and Failed terminal identity fix
+
+A focused two-checkpoint replay test exposed a wrong-generation Failed terminal
+that reached all three replay handlers and returned ErrReplayPendingStep.
+Replay now binds Completed/Failed terminal identity before user code when the
+caller supplies invocation identity, and rejects missing Failed errors. A
+canceled pending effect remains incomplete: its declaration is verified, its
+callback never runs and ErrReplayPendingStep remains the replay stop. The
+recorded Failed cancellation remains the workflow outcome.
+
+Complete wf race, focused seeded/pinned race, full default-seed sim, real R3
+race and vet pass. The expanded cancellation workload passes 100,000 schedules
+in 107.520 seconds with offline audit of every terminal history; both real
+notification/poll histories replay all nine SDK entries without a callback.
+The two-checkpoint unit replays 15 SDK entries and rejects changed pending
+requests and invalid terminal payloads before handlers. Compiled old-runtime
+and pending-callback controls fail their selected semantic assertions. Original
+pins are unchanged. [Logs, mutations and hashes](scale/continuation-cancel-offline-2026-10-01/)
+retain proof. This closes the focused canceled-pending offline slice; combined
+faults, full final-source release gates, online GC and mixed latency causes stay
+open.
+
+The original [0821f8c hosted 100,000-seed campaign](https://github.com/AntPAllen/js-wf/actions/runs/36807819775)
+completed successfully: 8,300,606 schedules, 170,756,712 choices and
+1,997,383,080 events in 1h51m44.961s. [Full log and scope](scale/tier1-0821f8c-100k-2026-10-01/)
+retain the evidence. Expected corruption rejections are not successful workflow
+runs; this campaign predates later runtime/model additions. Mixed 9d2212b also
+passed its 20-seed campaign. The newer 7e414b2 expanded job and original
+million-timer process remain live without restart at this update.
