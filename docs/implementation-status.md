@@ -2795,3 +2795,25 @@ retirement and other integrated SDK/runtime acceptance gates remain open. Online
 GC, the mixed seed 65 latency failure and independent final-source full matrix/
 24-hour soak remain open. The original million-timer campaign remains running
 without a restart.
+
+## Continuation panic budget across two checkpoints and worker replacement
+
+A real R3 three-node contract consumes one panic in the initial handler and one
+in middle_v1, then checkpoints finish_v1 with PanicAttempts=2. After a signal
+suspension, a replacement worker pinned to another peer restores state/locals
+20 through an archive-denying port. Its final poison panic reaches the shared
+three-attempt limit immediately. The full logical journal contains Attempt
+counts 1, 2, 3 and Failed; initial/middle handlers each ran twice and replacement
+entered the final stage only once. All peers return the same failure and the
+raw audit finds one invocation and one terminal. Archive reads are zero.
+
+The race contract passed in 20.925 seconds. A compiled production overlay resets
+the saved panic baseline to zero; the contract fails before the final stage
+with invalid step protocol in 5.708 seconds. Vet passed. [Logs, mutation and
+source hashes](scale/continuation-panic-2026-10-01/) bind this proof. Runtime code
+is unchanged from effe9c8.
+
+Panic Attempt-to-Failed SIGKILL/reply-loss cuts, seeded integrated panic-budget
+coverage and remaining continuation SDK acceptance gates remain open. This is
+not final-source full-matrix or soak evidence; online GC and mixed seed 65's
+latency miss remain open. The original million-timer runner is still live.
