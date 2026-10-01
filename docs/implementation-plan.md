@@ -569,6 +569,13 @@ metadata plus actual shifted timer-clock lookups are required. Peer-only smokes
 whose timer lookups stayed on unshifted leaders are retained as limited evidence
 and cannot clear this strengthened requirement. This admission does not prove
 every in-flight timer/effect/continuation cut combination; those remain open.
+Pending timer cut preparation now includes a deterministic candidate selector
+with shifted clock-origin and observed suspended-prefix checks. A candidate
+alone cannot admit a fault: refresh the actual retained tail, match its exact
+sequence/entry, confirm removal before the earliest conservative duration
+boundary, and corroborate the prefix in the final audit. This wiring and artifact
+guard remain open; see [admission preparation](scale/clock-timer-admission-2026-10-01/).
+
 No sustained clock
 row is verified by the focused controller contract; existing focused clock proofs and the full
 24-hour matrix remain separate requirements.

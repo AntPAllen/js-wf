@@ -5347,3 +5347,22 @@ on its runner. [Original setup evidence](scale/tier1-comprehensive-2026-10-01/ex
 is retained. Workflow inventory commands now use standard grep/find,verified
 byte-identical against the prior completed inventory; the strict guard stays.
 Behind fix run36941535795 and ahead diagnostic36939480705 remain in progress.
+
+
+### Pending timer cut candidate preparation
+
+Added deterministic selection from independent receipts and timer-clock
+operations for positive Sleep requests at an observed suspended tail.
+Selection verifies owner/index,unique successful shifted clock origin,recorded
+FireAt,matching wait and remaining conservative controller duration budget.
+Eighteen two-direction controls reject expired windows,completed tails,wrong
+waits/owners,unknown/unshifted clocks,ambiguous origins and future receipts.
+Normal tests pass0.005s; race checks1.019s. [Scope and required follow-up](scale/clock-timer-admission-2026-10-01/)
+are retained. This is not wired into native cuts or the row guard yet;
+receipt lag still requires an actual retained-tail refresh and removal-before-
+due proof,plus final prefix corroboration. No in-flight coverage is claimed.
+
+Behind fix validation36941535795 remains in progress. The new comprehensive
+36942165713 is queued; ahead diagnostic36939480705 remains in progress with
+its retained contradictory step/log observations. Million-timer service
+remains active atPID18146 with296,709 receipts at the sampled checkpoint.
