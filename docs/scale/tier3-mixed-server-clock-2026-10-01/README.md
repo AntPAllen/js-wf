@@ -33,3 +33,5 @@ Events, observed roles and hashes of every downloaded artifact are retained in
 `role-smoke-failures/`. The downloads remain at
 `/tmp/js-wf-clock-ahead-roles-36937359624` and
 `/tmp/js-wf-clock-behind-roles-36937362297`.
+
+Replacement smokes at clean source `0682654`: [ahead36938296826](https://github.com/AntPAllen/js-wf/actions/runs/36938296826) and [behind36938299478](https://github.com/AntPAllen/js-wf/actions/runs/36938299478). Both were authoritatively queued at launch; no acceptance is claimed. Exact source and inputs are retained.
