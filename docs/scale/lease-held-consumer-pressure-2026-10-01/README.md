@@ -70,3 +70,19 @@ confirmation for the new probe assertion remains pending.
 This fixture is test-only. The full latest-model simulation, whole-matrix
 200-clean-seed acceptance, five-node 24-hour soak, online GC and remaining
 capacity/combined-fault gates remain independent and open.
+
+## First hosted six-row observations
+
+The 463f648 push run 36843492527 fails its pressure job in 22.928 seconds.
+All three healthy rows pass; in the first delayed row (before consumer load
+or contender probes), three owners stop at 16/17 appends with ErrUnknown:
+tail lookup returns API 503/10008, JetStream temporarily unavailable.
+Other owners complete all 48 calls. Raw rows, final node metadata, job log
+and compressed disk trace are retained. This is not a held-probe assertion
+failure and does not identify a server cause. No runtime or fixture gate is
+relaxed to turn it green.
+
+The independently dispatched 200-seed run 36843533447's six-row pressure job
+passes on the same source. Its mixed campaign remains live; neither result
+is the whole sustained matrix release gate. Both observations must remain
+visible rather than treating the independent pass as erasing the failure.
