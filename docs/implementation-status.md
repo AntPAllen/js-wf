@@ -5247,3 +5247,29 @@ with existing dispatch,worker timer characterization and all180 pins pass
 32.209s. [Model scope/evidence](scale/consumer-clock-model-2026-10-01/) retain
 its explicit assumptions. Both real clock runs36939477954 and36939480705 are
 authoritatively in progress. No production behavior or latency gate changed.
+
+
+### Full expanded Tier 1 suite packaging correction
+
+At sourcee25b881 the complete1,000-seed suite passes110.246s:150 top-level
+passes,two documented trace-only skips and180 pinned traces. Aggregate coverage
+is103,632 generated schedules,1,738,227 choices and24,098,821 transport events.
+The suite evidence guard rejects four timer-clock filenames containing colons,
+so this run is not certified suite evidence. [Original failure artifacts](scale/tier1-suite-guard-2026-10-01/expanded-corpus-inventory-failure/)
+retain events,inventories,source,time,output and the guard error.
+
+Renamed those four traces to portable hyphen names and updated their generator;
+the guard remains strict. A complete fresh1,000-seed run at clean source5389714
+is active in systemd unit js-wf-tier1-portable-20261001,PID103469 at launch.
+Its inventories include152 tests and180 pins; output and final guard report
+are retained under /tmp/js-wf-tier1-portable-20261001. This current run has no
+terminal acceptance yet.
+
+Ahead diagnostic36939480705 has conflicting observations: downloadable job
+logs show a canceled selected test step and cleanup, with only three startup
+Go events, while both run and direct job APIs still report in_progress without
+a conclusion. [Retained state mismatch](scale/tier3-mixed-server-clock-2026-10-01/ahead-diagnostic-cancelled-job/)
+is not treated as terminal or as a runtime verdict. No replacement is launched.
+Behind sustained36939477954 and comprehensive36929826425 remain in progress.
+The million-timer service remains active atPID18146 with275,529 receipts at
+the sampled checkpoint.
