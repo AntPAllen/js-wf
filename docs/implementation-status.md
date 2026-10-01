@@ -3613,3 +3613,35 @@ missing-election deadline checks pass; three actual four-fault repeats pass in
 Full matrix/24-hour soak, combined continuation process/server cuts, online GC,
 remaining scale gates and final-source full simulation remain open. The original
 million-timer campaign remains live and has not been restarted for observation.
+
+
+## Resolved promise across worker publication SIGKILL and all-server restart
+
+A real separate parent/child worker is SIGKILLed at six frame/manifest/journal/
+signal publication boundaries, then all three NATS processes are SIGKILLed
+before any restart on retained stores. Confirmed routes and all ten workflow
+stores' current replicas precede replacement execution. Final six-cut race
+passes in 113.920 seconds with the production 614,402-byte child spill, unchanged
+confirmed journal prefix, higher successor epochs, one child handler invocation,
+one declaration/consumption and reusable detached promise bytes. Published
+manifests skip initial/archive reads; uncompleted candidates are replaced and
+collected. Completed checkpoints before manifest publication correctly reuse
+their already-recorded frame and anchor during manifest repair.
+
+Child retirement with stopped workers preserves three parent references and
+exact result bytes; offline complete-history replay passes; parent retirement
+reclaims all three objects. Raw kill and enabling-signal delays each remain
+under 30 seconds. Compiled GC-marking omission fails on premature deletion.
+Missing restored promise metadata fails on a new suspension for already-resolved
+child_0; its earlier timeout-only run is retained but explicitly not accepted
+as a mutation control. Vet passes. The initial six-cut test's incorrect frame-
+replacement assertion and corrected final run are both retained. [Evidence](scale/promise-combined-process-cuts-2026-10-01/)
+is retained; relevant main pushes now trigger a dedicated race workflow.
+
+The earlier shared-worker-promise seeded source, preceding final consumption
+assertions, completes 100,000 schedules in 1,154.847 seconds with 36,961,056
+transport events and maximum virtual time 1,000 ms. Final-checker release-count
+validation remains live; this earlier proof does not establish the later
+assertions. Original million-timer and hosted comprehensive simulation jobs
+continue without observation-triggered restart. Full matrix/24-hour soak,
+remaining transport/cut combinations, online GC and scale gates remain open.

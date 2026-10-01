@@ -1,0 +1,393 @@
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart/after_manifest
+    continuation_promise_kill_test.go:172: successor suspended on already-resolved frame-held promise child_0
+    continuation_promise_kill_test.go:250: worker: 
+    continuation_promise_kill_test.go:191: server 0: 026/10/01 08:05:48.358942 [INF] 
+        [672361] 2026/10/01 08:05:48.358944 [INF]          https://docs.nats.io/jetstream
+        [672361] 2026/10/01 08:05:48.358944 [INF] 
+        [672361] 2026/10/01 08:05:48.358945 [INF] ---------------- JETSTREAM ----------------
+        [672361] 2026/10/01 08:05:48.358947 [INF]   Strict:          true
+        [672361] 2026/10/01 08:05:48.358949 [INF]   Max Memory:      11.71 GB
+        [672361] 2026/10/01 08:05:48.358951 [INF]   Max Storage:     1.66 GB
+        [672361] 2026/10/01 08:05:48.358953 [INF]   Store Directory: "/tmp/TestContinuationPromiseSIGKILLAndFullServerRestartafter_manifes2896572950/001/servers/node-0/jetstream"
+        [672361] 2026/10/01 08:05:48.358955 [INF]   API Level:       5
+        [672361] 2026/10/01 08:05:48.358956 [INF] -------------------------------------------
+        [672361] 2026/10/01 08:05:48.359251 [INF] Starting JetStream cluster
+        [672361] 2026/10/01 08:05:48.359256 [INF] Creating JetStream metadata controller
+        [672361] 2026/10/01 08:05:48.360350 [INF] JetStream cluster bootstrapping
+        [672361] 2026/10/01 08:05:48.380363 [INF] Took 21.625485ms to start JetStream
+        [672361] 2026/10/01 08:05:48.380440 [INF] Listening for client connections on 127.0.0.1:34207
+        [672361] 2026/10/01 08:05:48.380445 [INF] Server is ready
+        [672361] 2026/10/01 08:05:48.380719 [INF] Cluster name is wf-process
+        [672361] 2026/10/01 08:05:48.380842 [INF] Listening for route connections on 127.0.0.1:35755
+        [672361] 2026/10/01 08:05:48.381395 [INF] 127.0.0.1:44029 - rid:8 - Route connection created
+        [672361] 2026/10/01 08:05:48.381406 [INF] 127.0.0.1:44029 - rid:9 - Route connection created
+        [672361] 2026/10/01 08:05:48.381409 [INF] 127.0.0.1:44029 - rid:8 - Router connection closed: Client Closed
+        [672361] 2026/10/01 08:05:48.381455 [INF] 127.0.0.1:44029 - rid:9 - Router connection closed: Client Closed
+        [672361] 2026/10/01 08:05:48.381570 [INF] 127.0.0.1:51698 - rid:10 - Route connection created
+        [672361] 2026/10/01 08:05:48.381623 [INF] 127.0.0.1:51688 - rid:11 - Route connection created
+        [672361] 2026/10/01 08:05:48.382620 [INF] 127.0.0.1:51710 - rid:12 - Route connection created
+        [672361] 2026/10/01 08:05:48.382649 [INF] 127.0.0.1:51708 - rid:13 - Route connection created
+        [672361] 2026/10/01 08:05:48.382919 [INF] 127.0.0.1:51724 - rid:14 - Route connection created
+        [672361] 2026/10/01 08:05:48.386502 [INF] 127.0.0.1:51728 - rid:15 - Route connection created
+        [672361] 2026/10/01 08:05:48.387133 [INF] 127.0.0.1:51736 - rid:16 - Route connection created
+        [672361] 2026/10/01 08:05:48.411324 [INF] 127.0.0.1:51742 - rid:17 - Route connection created
+        [672361] 2026/10/01 08:05:48.481092 [WRN] Waiting for routing to be established...
+        [672361] 2026/10/01 08:05:48.481147 [WRN] JetStream has not established contact with a meta leader
+        [672361] 2026/10/01 08:05:48.523054 [INF] JetStream cluster new metadata leader: wf-process-2/wf-process
+        [672361] 2026/10/01 08:05:49.413054 [INF] 127.0.0.1:44029 - rid:19 - Route connection created
+        [672361] 2026/10/01 08:05:49.413426 [INF] 127.0.0.1:44029 - rid:19 - Router connection closed: Duplicate Route - Remote: wf-process-1
+        [672361] 2026/10/01 08:05:49.443907 [INF] 127.0.0.1:44029 - rid:20 - Route connection created
+        [672361] 2026/10/01 08:05:49.446498 [INF] 127.0.0.1:44029 - rid:20 - Router connection closed: Duplicate Route - Remote: wf-process-1
+        [672361] 2026/10/01 08:05:51.711790 [INF] JetStream cluster new stream leader for '$G > WF_JRN'
+        [672361] 2026/10/01 08:05:51.888937 [INF] JetStream cluster new stream leader for '$G > WF_PURGE'
+        [672361] 2026/10/01 08:05:52.048371 [INF] JetStream cluster new stream leader for '$G > KV_WF_STATE'
+        [672361] 2026/10/01 08:05:52.294617 [INF] JetStream cluster new stream leader for '$G > OBJ_WF_BLOB'
+        [672361] 2026/10/01 08:05:52.502716 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_22'
+        [672409] 2026/10/01 08:05:52.630697 [INF] Starting nats-server
+        [672409] 2026/10/01 08:05:52.630764 [INF]   Version:  2.15.0
+        [672409] 2026/10/01 08:05:52.630766 [INF]   Git:      [not set]
+        [672409] 2026/10/01 08:05:52.630768 [INF]   Cluster:  wf-process
+        [672409] 2026/10/01 08:05:52.630768 [INF]   Name:     wf-process-0
+        [672409] 2026/10/01 08:05:52.630770 [INF]   Node:     0m6vARoZ
+        [672409] 2026/10/01 08:05:52.630771 [INF]   ID:       NDB7HP3RWQNO2VUXOHGC5XP327ZQD7PZFTZW5QEN56I3PKPG7C5MXO6B
+        [672409] 2026/10/01 08:05:52.633643 [INF] Starting http monitor on 127.0.0.1:34957
+        [672409] 2026/10/01 08:05:52.633742 [INF] Starting JetStream
+        [672409] 2026/10/01 08:05:52.633845 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+        [672409] 2026/10/01 08:05:52.633847 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+        [672409] 2026/10/01 08:05:52.633848 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+        [672409] 2026/10/01 08:05:52.633849 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+        [672409] 2026/10/01 08:05:52.633849 [INF] 
+        [672409] 2026/10/01 08:05:52.633850 [INF]          https://docs.nats.io/jetstream
+        [672409] 2026/10/01 08:05:52.633851 [INF] 
+        [672409] 2026/10/01 08:05:52.633852 [INF] ---------------- JETSTREAM ----------------
+        [672409] 2026/10/01 08:05:52.633853 [INF]   Strict:          true
+        [672409] 2026/10/01 08:05:52.633854 [INF]   Max Memory:      11.71 GB
+        [672409] 2026/10/01 08:05:52.633855 [INF]   Max Storage:     1.66 GB
+        [672409] 2026/10/01 08:05:52.633856 [INF]   Store Directory: "/tmp/TestContinuationPromiseSIGKILLAndFullServerRestartafter_manifes2896572950/001/servers/node-0/jetstream"
+        [672409] 2026/10/01 08:05:52.633860 [INF]   API Level:       5
+        [672409] 2026/10/01 08:05:52.633861 [INF] -------------------------------------------
+        [672409] 2026/10/01 08:05:52.634260 [INF]   Starting restore for stream '$G > KV_WF_LEASE'
+        [672409] 2026/10/01 08:05:52.634362 [INF]   Starting restore for stream '$G > WF_PURGE'
+        [672409] 2026/10/01 08:05:52.634589 [WRN] Filestore [KV_WF_LEASE] TTL state is outdated; attempting to recover using linear scan (seq 1 to 20)
+        [672409] 2026/10/01 08:05:52.634598 [INF]   Restored 0 messages for stream '$G > WF_PURGE' in 0s
+        [672409] 2026/10/01 08:05:52.634656 [INF]   Restored 2 messages for stream '$G > KV_WF_LEASE' in 0s
+        [672409] 2026/10/01 08:05:52.634702 [INF]   Starting restore for stream '$G > WF_RUN'
+        [672409] 2026/10/01 08:05:52.634748 [INF]   Starting restore for stream '$G > KV_WF_ASSIGN'
+        [672409] 2026/10/01 08:05:52.634919 [WRN] Filestore [WF_RUN] Message scheduling state is outdated; attempting to recover using linear scan (seq 1 to 3)
+        [672409] 2026/10/01 08:05:52.635117 [INF]   Starting restore for stream '$G > WF_SIG'
+        [672409] 2026/10/01 08:05:52.635130 [INF]   Restored 1 messages for stream '$G > WF_RUN' in 0s
+        [672409] 2026/10/01 08:05:52.635144 [INF]   Recovering 2 consumers for stream - '$G > WF_RUN'
+        [672409] 2026/10/01 08:05:52.635250 [INF]   Starting restore for stream '$G > KV_WF_STATE'
+        [672409] 2026/10/01 08:05:52.636433 [INF]   Restored 1 messages for stream '$G > WF_SIG' in 1ms
+        [672409] 2026/10/01 08:05:52.636548 [INF]   Starting restore for stream '$G > KV_WF_VIEW'
+        [672409] 2026/10/01 08:05:52.636676 [INF]   Starting restore for stream '$G > OBJ_WF_BLOB'
+        [672409] 2026/10/01 08:05:52.636726 [INF]   Starting restore for stream '$G > WF_INV'
+        [672409] 2026/10/01 08:05:52.636802 [INF]   Starting restore for stream '$G > WF_JRN'
+        [672409] 2026/10/01 08:05:52.637984 [INF]   Restored 11 messages for stream '$G > WF_JRN' in 1ms
+        [672409] 2026/10/01 08:05:52.638095 [INF]   Restored 2 messages for stream '$G > KV_WF_STATE' in 3ms
+        [672409] 2026/10/01 08:05:52.638123 [INF]   Restored 2 messages for stream '$G > WF_INV' in 1ms
+        [672409] 2026/10/01 08:05:52.638127 [INF]   Restored 0 messages for stream '$G > KV_WF_ASSIGN' in 3ms
+        [672409] 2026/10/01 08:05:52.639674 [INF]   Restored 10 messages for stream '$G > OBJ_WF_BLOB' in 3ms
+        [672409] 2026/10/01 08:05:52.639862 [INF]   Restored 0 messages for stream '$G > KV_WF_VIEW' in 3ms
+        [672409] 2026/10/01 08:05:52.639889 [INF] Starting JetStream cluster
+        [672409] 2026/10/01 08:05:52.639891 [INF] Creating JetStream metadata controller
+        [672409] 2026/10/01 08:05:52.640053 [WRN] Filestore [_meta_] Stream state outdated, last block has additional entries, will rebuild
+        [672409] 2026/10/01 08:05:52.640058 [WRN] Filestore [_meta_] Recovering stream state from index errored: prior state file
+        [672409] 2026/10/01 08:05:52.640257 [INF] JetStream cluster recovering state
+        [672409] 2026/10/01 08:05:52.651064 [INF] Took 17.31784ms to start JetStream
+        [672409] 2026/10/01 08:05:52.651131 [INF] Listening for client connections on 127.0.0.1:34207
+        [672409] 2026/10/01 08:05:52.651137 [INF] Server is ready
+        [672409] 2026/10/01 08:05:52.651475 [INF] Cluster name is wf-process
+        [672409] 2026/10/01 08:05:52.651518 [INF] Listening for route connections on 127.0.0.1:35755
+        [672409] 2026/10/01 08:05:52.651880 [INF] 127.0.0.1:44029 - rid:42 - Route connection created
+        [672409] 2026/10/01 08:05:52.651940 [INF] 127.0.0.1:44029 - rid:43 - Route connection created
+        [672409] 2026/10/01 08:05:52.652362 [INF] 127.0.0.1:44029 - rid:42 - Router connection closed: Read Error
+        [672409] 2026/10/01 08:05:52.652471 [INF] 127.0.0.1:44029 - rid:43 - Router connection closed: Read Error
+        [672409] 2026/10/01 08:05:52.705323 [INF] 127.0.0.1:51768 - rid:45 - Route connection created
+        [672409] 2026/10/01 08:05:52.705732 [INF] 127.0.0.1:51758 - rid:46 - Route connection created
+        [672409] 2026/10/01 08:05:52.711241 [INF] 127.0.0.1:51778 - rid:47 - Route connection created
+        [672409] 2026/10/01 08:05:52.712165 [INF] 127.0.0.1:51788 - rid:48 - Route connection created
+        [672409] 2026/10/01 08:05:52.751217 [WRN] Waiting for routing to be established...
+        [672409] 2026/10/01 08:05:52.757468 [WRN] Filestore [S-R3F-i2uT8PzZ] Stream state outdated, last block has additional entries, will rebuild
+        [672409] 2026/10/01 08:05:52.757479 [WRN] Filestore [S-R3F-i2uT8PzZ] Recovering stream state from index errored: prior state file
+        [672409] 2026/10/01 08:05:52.762387 [INF] 127.0.0.1:51792 - rid:52 - Route connection created
+        [672409] 2026/10/01 08:05:52.762414 [INF] 127.0.0.1:51804 - rid:53 - Route connection created
+        [672409] 2026/10/01 08:05:52.765152 [WRN] Filestore [S-R3F-1C97GFuw] Stream state outdated, last block has additional entries, will rebuild
+        [672409] 2026/10/01 08:05:52.765159 [WRN] Filestore [S-R3F-1C97GFuw] Recovering stream state from index errored: prior state file
+        [672409] 2026/10/01 08:05:52.769115 [INF] 127.0.0.1:51818 - rid:55 - Route connection created
+        [672409] 2026/10/01 08:05:52.769953 [INF] 127.0.0.1:51828 - rid:57 - Route connection created
+        [672409] 2026/10/01 08:05:52.790679 [WRN] Filestore [S-R3F-D2QcgwWN] Stream state outdated, last block has additional entries, will rebuild
+        [672409] 2026/10/01 08:05:52.790694 [WRN] Filestore [S-R3F-D2QcgwWN] Recovering stream state from index errored: prior state file
+        [672409] 2026/10/01 08:05:52.804429 [WRN] Metalayer blocking snapshot starting
+        [672409] 2026/10/01 08:05:52.812543 [WRN] Metalayer blocking snapshot took 0.008s (streams: 10, consumers: 3, compacted: 22.67 KB)
+        [672409] 2026/10/01 08:05:52.812583 [WRN] JetStream has not established contact with a meta leader
+        [672409] 2026/10/01 08:05:53.716329 [INF] 127.0.0.1:44029 - rid:65 - Route connection created
+        [672409] 2026/10/01 08:05:53.717721 [INF] 127.0.0.1:44029 - rid:65 - Router connection closed: Duplicate Route - Remote: wf-process-1
+        [672409] 2026/10/01 08:05:53.751395 [INF] 127.0.0.1:44029 - rid:66 - Route connection created
+        [672409] 2026/10/01 08:05:53.751650 [INF] 127.0.0.1:44029 - rid:66 - Router connection closed: Duplicate Route - Remote: wf-process-1
+        [672409] 2026/10/01 08:05:57.918032 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_22'
+        [672409] 2026/10/01 08:05:58.280134 [INF] JetStream cluster new stream leader for '$G > WF_RUN'
+        [672409] 2026/10/01 08:05:58.487144 [INF] JetStream cluster new stream leader for '$G > KV_WF_ASSIGN'
+        [672409] 2026/10/01 08:05:58.534919 [INF] Self is new JetStream cluster metadata leader
+        [672409] 2026/10/01 08:05:58.646990 [INF] JetStream cluster new stream leader for '$G > KV_WF_VIEW'
+    continuation_promise_kill_test.go:191: server 1: [672362] 2026/10/01 08:05:48.351677 [INF] Starting nats-server
+        [672362] 2026/10/01 08:05:48.351753 [INF]   Version:  2.15.0
+        [672362] 2026/10/01 08:05:48.351755 [INF]   Git:      [not set]
+        [672362] 2026/10/01 08:05:48.351757 [INF]   Cluster:  wf-process
+        [672362] 2026/10/01 08:05:48.351758 [INF]   Name:     wf-process-1
+        [672362] 2026/10/01 08:05:48.351760 [INF]   Node:     St9I6EVH
+        [672362] 2026/10/01 08:05:48.351762 [INF]   ID:       NDKTIZ4E7I5UJI3R2NR4TWCDMMI4L67KN3TPIVW25ZPT7V2KVWEIYKTE
+        [672362] 2026/10/01 08:05:48.356852 [INF] Starting http monitor on 127.0.0.1:35231
+        [672362] 2026/10/01 08:05:48.356986 [INF] Starting JetStream
+        [672362] 2026/10/01 08:05:48.357153 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+        [672362] 2026/10/01 08:05:48.357156 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+        [672362] 2026/10/01 08:05:48.357158 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+        [672362] 2026/10/01 08:05:48.357159 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+        [672362] 2026/10/01 08:05:48.357160 [INF] 
+        [672362] 2026/10/01 08:05:48.357161 [INF]          https://docs.nats.io/jetstream
+        [672362] 2026/10/01 08:05:48.357162 [INF] 
+        [672362] 2026/10/01 08:05:48.357163 [INF] ---------------- JETSTREAM ----------------
+        [672362] 2026/10/01 08:05:48.357164 [INF]   Strict:          true
+        [672362] 2026/10/01 08:05:48.357167 [INF]   Max Memory:      11.71 GB
+        [672362] 2026/10/01 08:05:48.357168 [INF]   Max Storage:     1.66 GB
+        [672362] 2026/10/01 08:05:48.357169 [INF]   Store Directory: "/tmp/TestContinuationPromiseSIGKILLAndFullServerRestartafter_manifes2896572950/001/servers/node-1/jetstream"
+        [672362] 2026/10/01 08:05:48.357171 [INF]   API Level:       5
+        [672362] 2026/10/01 08:05:48.357172 [INF] -------------------------------------------
+        [672362] 2026/10/01 08:05:48.357501 [INF] Starting JetStream cluster
+        [672362] 2026/10/01 08:05:48.357505 [INF] Creating JetStream metadata controller
+        [672362] 2026/10/01 08:05:48.360467 [INF] JetStream cluster bootstrapping
+        [672362] 2026/10/01 08:05:48.382024 [INF] Took 25.034592ms to start JetStream
+        [672362] 2026/10/01 08:05:48.382064 [INF] Listening for client connections on 127.0.0.1:40383
+        [672362] 2026/10/01 08:05:48.382068 [INF] Server is ready
+        [672362] 2026/10/01 08:05:48.382180 [INF] Cluster name is wf-process
+        [672362] 2026/10/01 08:05:48.382197 [INF] Listening for route connections on 127.0.0.1:40891
+        [672362] 2026/10/01 08:05:48.382626 [INF] 127.0.0.1:42519 - rid:8 - Route connection created
+        [672362] 2026/10/01 08:05:48.382646 [INF] 127.0.0.1:42519 - rid:9 - Route connection created
+        [672362] 2026/10/01 08:05:48.386895 [INF] 127.0.0.1:42519 - rid:10 - Route connection created
+        [672362] 2026/10/01 08:05:48.387187 [INF] 127.0.0.1:55228 - rid:11 - Route connection created
+        [672362] 2026/10/01 08:05:48.389417 [INF] 127.0.0.1:55238 - rid:12 - Route connection created
+        [672362] 2026/10/01 08:05:48.389556 [INF] 127.0.0.1:42519 - rid:13 - Route connection created
+        [672362] 2026/10/01 08:05:48.411219 [INF] 127.0.0.1:55250 - rid:14 - Route connection created
+        [672362] 2026/10/01 08:05:48.412400 [INF] 127.0.0.1:55254 - rid:15 - Route connection created
+        [672362] 2026/10/01 08:05:48.482834 [WRN] Waiting for routing to be established...
+        [672362] 2026/10/01 08:05:48.485544 [WRN] JetStream has not established contact with a meta leader
+        [672362] 2026/10/01 08:05:48.523447 [INF] JetStream cluster new metadata leader: wf-process-2/wf-process
+        [672362] 2026/10/01 08:05:49.413279 [INF] 127.0.0.1:55262 - rid:17 - Route connection created
+        [672362] 2026/10/01 08:05:49.413526 [INF] 127.0.0.1:55262 - rid:17 - Router connection closed: Client Closed
+        [672362] 2026/10/01 08:05:49.446374 [INF] 127.0.0.1:55270 - rid:18 - Route connection created
+        [672362] 2026/10/01 08:05:49.446595 [INF] 127.0.0.1:55270 - rid:18 - Router connection closed: Client Closed
+        [672362] 2026/10/01 08:05:51.553300 [INF] JetStream cluster new stream leader for '$G > WF_INV'
+        [672362] 2026/10/01 08:05:51.634549 [INF] JetStream cluster new stream leader for '$G > WF_RUN'
+        [672362] 2026/10/01 08:05:51.798009 [INF] JetStream cluster new stream leader for '$G > WF_SIG'
+        [672362] 2026/10/01 08:05:52.216235 [INF] JetStream cluster new stream leader for '$G > KV_WF_ASSIGN'
+        [672421] 2026/10/01 08:05:52.684545 [INF] Starting nats-server
+        [672421] 2026/10/01 08:05:52.684585 [INF]   Version:  2.15.0
+        [672421] 2026/10/01 08:05:52.684591 [INF]   Git:      [not set]
+        [672421] 2026/10/01 08:05:52.684593 [INF]   Cluster:  wf-process
+        [672421] 2026/10/01 08:05:52.684594 [INF]   Name:     wf-process-1
+        [672421] 2026/10/01 08:05:52.684597 [INF]   Node:     St9I6EVH
+        [672421] 2026/10/01 08:05:52.684598 [INF]   ID:       NC6E6RAZJGQ2HEW2LWLCPQVFGYE4BUECXTIZIK3QZJ3JH2DJ7WHBBBNA
+        [672421] 2026/10/01 08:05:52.688333 [INF] Starting http monitor on 127.0.0.1:35231
+        [672421] 2026/10/01 08:05:52.688435 [INF] Starting JetStream
+        [672421] 2026/10/01 08:05:52.688526 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+        [672421] 2026/10/01 08:05:52.688528 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+        [672421] 2026/10/01 08:05:52.688529 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+        [672421] 2026/10/01 08:05:52.688529 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+        [672421] 2026/10/01 08:05:52.688530 [INF] 
+        [672421] 2026/10/01 08:05:52.688531 [INF]          https://docs.nats.io/jetstream
+        [672421] 2026/10/01 08:05:52.688531 [INF] 
+        [672421] 2026/10/01 08:05:52.688532 [INF] ---------------- JETSTREAM ----------------
+        [672421] 2026/10/01 08:05:52.688533 [INF]   Strict:          true
+        [672421] 2026/10/01 08:05:52.688534 [INF]   Max Memory:      11.71 GB
+        [672421] 2026/10/01 08:05:52.688536 [INF]   Max Storage:     1.66 GB
+        [672421] 2026/10/01 08:05:52.688536 [INF]   Store Directory: "/tmp/TestContinuationPromiseSIGKILLAndFullServerRestartafter_manifes2896572950/001/servers/node-1/jetstream"
+        [672421] 2026/10/01 08:05:52.688541 [INF]   API Level:       5
+        [672421] 2026/10/01 08:05:52.688541 [INF] -------------------------------------------
+        [672421] 2026/10/01 08:05:52.688968 [INF]   Starting restore for stream '$G > KV_WF_LEASE'
+        [672421] 2026/10/01 08:05:52.689225 [WRN] Filestore [KV_WF_LEASE] TTL state is outdated; attempting to recover using linear scan (seq 1 to 20)
+        [672421] 2026/10/01 08:05:52.689287 [INF]   Restored 2 messages for stream '$G > KV_WF_LEASE' in 0s
+        [672421] 2026/10/01 08:05:52.689402 [INF]   Starting restore for stream '$G > OBJ_WF_BLOB'
+        [672421] 2026/10/01 08:05:52.690196 [INF]   Starting restore for stream '$G > WF_SIG'
+        [672421] 2026/10/01 08:05:52.690467 [INF]   Starting restore for stream '$G > WF_PURGE'
+        [672421] 2026/10/01 08:05:52.690602 [INF]   Restored 1 messages for stream '$G > WF_SIG' in 0s
+        [672421] 2026/10/01 08:05:52.690974 [INF]   Starting restore for stream '$G > KV_WF_STATE'
+        [672421] 2026/10/01 08:05:52.691045 [INF]   Starting restore for stream '$G > WF_JRN'
+        [672421] 2026/10/01 08:05:52.691765 [INF]   Starting restore for stream '$G > WF_RUN'
+        [672421] 2026/10/01 08:05:52.691807 [INF]   Restored 0 messages for stream '$G > WF_PURGE' in 1ms
+        [672421] 2026/10/01 08:05:52.691828 [INF]   Starting restore for stream '$G > KV_WF_VIEW'
+        [672421] 2026/10/01 08:05:52.691897 [INF]   Restored 2 messages for stream '$G > KV_WF_STATE' in 1ms
+        [672421] 2026/10/01 08:05:52.691930 [INF]   Starting restore for stream '$G > KV_WF_ASSIGN'
+        [672421] 2026/10/01 08:05:52.691985 [WRN] Filestore [WF_RUN] Message scheduling state is outdated; attempting to recover using linear scan (seq 1 to 3)
+        [672421] 2026/10/01 08:05:52.692014 [INF]   Restored 1 messages for stream '$G > WF_RUN' in 0s
+        [672421] 2026/10/01 08:05:52.692026 [INF]   Recovering 2 consumers for stream - '$G > WF_RUN'
+        [672421] 2026/10/01 08:05:52.692084 [INF]   Restored 11 messages for stream '$G > WF_JRN' in 1ms
+        [672421] 2026/10/01 08:05:52.692100 [INF]   Restored 0 messages for stream '$G > KV_WF_ASSIGN' in 0s
+        [672421] 2026/10/01 08:05:52.692130 [INF]   Starting restore for stream '$G > WF_INV'
+        [672421] 2026/10/01 08:05:52.692239 [INF]   Restored 0 messages for stream '$G > KV_WF_VIEW' in 0s
+        [672421] 2026/10/01 08:05:52.692289 [INF]   Restored 10 messages for stream '$G > OBJ_WF_BLOB' in 3ms
+        [672421] 2026/10/01 08:05:52.692296 [INF]   Restored 2 messages for stream '$G > WF_INV' in 0s
+        [672421] 2026/10/01 08:05:52.692321 [INF] Starting JetStream cluster
+        [672421] 2026/10/01 08:05:52.692323 [INF] Creating JetStream metadata controller
+        [672421] 2026/10/01 08:05:52.692390 [WRN] Filestore [_meta_] Stream state outdated, last block has additional entries, will rebuild
+        [672421] 2026/10/01 08:05:52.692392 [WRN] Filestore [_meta_] Recovering stream state from index errored: prior state file
+        [672421] 2026/10/01 08:05:52.692461 [INF] JetStream cluster recovering state
+        [672421] 2026/10/01 08:05:52.703577 [INF] Took 15.138374ms to start JetStream
+        [672421] 2026/10/01 08:05:52.703650 [INF] Listening for client connections on 127.0.0.1:40383
+        [672421] 2026/10/01 08:05:52.703656 [INF] Server is ready
+        [672421] 2026/10/01 08:05:52.704641 [INF] Cluster name is wf-process
+        [672421] 2026/10/01 08:05:52.704671 [INF] Listening for route connections on 127.0.0.1:40891
+        [672421] 2026/10/01 08:05:52.705431 [INF] 127.0.0.1:42519 - rid:42 - Route connection created
+        [672421] 2026/10/01 08:05:52.705552 [INF] 127.0.0.1:42519 - rid:43 - Route connection created
+        [672421] 2026/10/01 08:05:52.707380 [INF] 127.0.0.1:42519 - rid:44 - Route connection created
+        [672421] 2026/10/01 08:05:52.712057 [INF] 127.0.0.1:42519 - rid:45 - Route connection created
+        [672421] 2026/10/01 08:05:52.763408 [INF] 127.0.0.1:38203 - rid:47 - Route connection created
+        [672421] 2026/10/01 08:05:52.764591 [INF] 127.0.0.1:38203 - rid:48 - Route connection created
+        [672421] 2026/10/01 08:05:52.770116 [INF] 127.0.0.1:38203 - rid:49 - Route connection created
+        [672421] 2026/10/01 08:05:52.773215 [INF] 127.0.0.1:38203 - rid:50 - Route connection created
+        [672421] 2026/10/01 08:05:52.804446 [WRN] Waiting for routing to be established...
+        [672421] 2026/10/01 08:05:52.805136 [WRN] Filestore [S-R3F-L28Ilt5k] Stream state outdated, last block has additional entries, will rebuild
+        [672421] 2026/10/01 08:05:52.805143 [WRN] Filestore [S-R3F-L28Ilt5k] Recovering stream state from index errored: prior state file
+        [672421] 2026/10/01 08:05:52.826094 [WRN] Filestore [S-R3F-h9aLNOFM] Stream state outdated, last block has additional entries, will rebuild
+        [672421] 2026/10/01 08:05:52.826104 [WRN] Filestore [S-R3F-h9aLNOFM] Recovering stream state from index errored: prior state file
+        [672421] 2026/10/01 08:05:52.829346 [WRN] Filestore [S-R3F-tA5liQRR] Stream state outdated, last block has additional entries, will rebuild
+        [672421] 2026/10/01 08:05:52.829353 [WRN] Filestore [S-R3F-tA5liQRR] Recovering stream state from index errored: prior state file
+        [672421] 2026/10/01 08:05:52.860620 [WRN] Metalayer blocking snapshot starting
+        [672421] 2026/10/01 08:05:52.864837 [WRN] Metalayer blocking snapshot took 0.004s (streams: 10, consumers: 3, compacted: 22.75 KB)
+        [672421] 2026/10/01 08:05:52.864883 [WRN] JetStream has not established contact with a meta leader
+        [672421] 2026/10/01 08:05:53.717554 [INF] 127.0.0.1:55300 - rid:63 - Route connection created
+        [672421] 2026/10/01 08:05:53.718931 [INF] 127.0.0.1:55300 - rid:63 - Router connection closed: Client Closed
+        [672421] 2026/10/01 08:05:53.751407 [INF] 127.0.0.1:55312 - rid:64 - Route connection created
+        [672421] 2026/10/01 08:05:53.751735 [INF] 127.0.0.1:55312 - rid:64 - Router connection closed: Client Closed
+        [672421] 2026/10/01 08:05:56.868103 [INF] JetStream cluster new stream leader for '$G > KV_WF_LEASE'
+        [672421] 2026/10/01 08:05:56.933112 [INF] JetStream cluster new stream leader for '$G > WF_SIG'
+        [672421] 2026/10/01 08:05:57.605966 [INF] JetStream cluster new stream leader for '$G > WF_PURGE'
+        [672421] 2026/10/01 08:05:58.534657 [INF] JetStream cluster new metadata leader: wf-process-0/wf-process
+    continuation_promise_kill_test.go:191: server 2: [672363] 2026/10/01 08:05:48.355117 [INF] Starting nats-server
+        [672363] 2026/10/01 08:05:48.355170 [INF]   Version:  2.15.0
+        [672363] 2026/10/01 08:05:48.355173 [INF]   Git:      [not set]
+        [672363] 2026/10/01 08:05:48.355175 [INF]   Cluster:  wf-process
+        [672363] 2026/10/01 08:05:48.355176 [INF]   Name:     wf-process-2
+        [672363] 2026/10/01 08:05:48.355178 [INF]   Node:     0WED9nmv
+        [672363] 2026/10/01 08:05:48.355179 [INF]   ID:       NAVC33V2CWOUGF4476XM4JMFV2MV62HAYQGGVUZF2LTZV4MOFBMCUKST
+        [672363] 2026/10/01 08:05:48.359133 [INF] Starting http monitor on 127.0.0.1:42565
+        [672363] 2026/10/01 08:05:48.359226 [INF] Starting JetStream
+        [672363] 2026/10/01 08:05:48.359335 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+        [672363] 2026/10/01 08:05:48.359337 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+        [672363] 2026/10/01 08:05:48.359337 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+        [672363] 2026/10/01 08:05:48.359338 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+        [672363] 2026/10/01 08:05:48.359338 [INF] 
+        [672363] 2026/10/01 08:05:48.359339 [INF]          https://docs.nats.io/jetstream
+        [672363] 2026/10/01 08:05:48.359340 [INF] 
+        [672363] 2026/10/01 08:05:48.359341 [INF] ---------------- JETSTREAM ----------------
+        [672363] 2026/10/01 08:05:48.359341 [INF]   Strict:          true
+        [672363] 2026/10/01 08:05:48.359343 [INF]   Max Memory:      11.71 GB
+        [672363] 2026/10/01 08:05:48.359344 [INF]   Max Storage:     1.66 GB
+        [672363] 2026/10/01 08:05:48.359344 [INF]   Store Directory: "/tmp/TestContinuationPromiseSIGKILLAndFullServerRestartafter_manifes2896572950/001/servers/node-2/jetstream"
+        [672363] 2026/10/01 08:05:48.359347 [INF]   API Level:       5
+        [672363] 2026/10/01 08:05:48.359348 [INF] -------------------------------------------
+        [672363] 2026/10/01 08:05:48.359566 [INF] Starting JetStream cluster
+        [672363] 2026/10/01 08:05:48.359569 [INF] Creating JetStream metadata controller
+        [672363] 2026/10/01 08:05:48.359973 [INF] JetStream cluster bootstrapping
+        [672363] 2026/10/01 08:05:48.380385 [INF] Took 21.155781ms to start JetStream
+        [672363] 2026/10/01 08:05:48.380441 [INF] Listening for client connections on 127.0.0.1:35239
+        [672363] 2026/10/01 08:05:48.380445 [INF] Server is ready
+        [672363] 2026/10/01 08:05:48.380468 [INF] Cluster name is wf-process
+        [672363] 2026/10/01 08:05:48.380478 [INF] Listening for route connections on 127.0.0.1:34689
+        [672363] 2026/10/01 08:05:48.380806 [INF] 127.0.0.1:42519 - rid:8 - Route connection created
+        [672363] 2026/10/01 08:05:48.380856 [INF] 127.0.0.1:42519 - rid:9 - Route connection created
+        [672363] 2026/10/01 08:05:48.382846 [INF] 127.0.0.1:42519 - rid:10 - Route connection created
+        [672363] 2026/10/01 08:05:48.383467 [INF] 127.0.0.1:42519 - rid:11 - Route connection created
+        [672363] 2026/10/01 08:05:48.386986 [INF] 127.0.0.1:44029 - rid:12 - Route connection created
+        [672363] 2026/10/01 08:05:48.388258 [INF] 127.0.0.1:44029 - rid:13 - Route connection created
+        [672363] 2026/10/01 08:05:48.389639 [INF] 127.0.0.1:44029 - rid:14 - Route connection created
+        [672363] 2026/10/01 08:05:48.412012 [INF] 127.0.0.1:44029 - rid:15 - Route connection created
+        [672363] 2026/10/01 08:05:48.480472 [WRN] Waiting for routing to be established...
+        [672363] 2026/10/01 08:05:48.480590 [WRN] JetStream has not established contact with a meta leader
+        [672363] 2026/10/01 08:05:48.528195 [INF] Self is new JetStream cluster metadata leader
+        [672363] 2026/10/01 08:05:51.970325 [INF] JetStream cluster new stream leader for '$G > KV_WF_LEASE'
+        [672363] 2026/10/01 08:05:52.139855 [INF] JetStream cluster new stream leader for '$G > KV_WF_VIEW'
+        [672363] 2026/10/01 08:05:52.387856 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_60'
+        [672363] 2026/10/01 08:05:52.623111 [INF] 127.0.0.1:42519 - rid:10 - Router connection closed: Client Closed - Remote: wf-process-0
+        [672363] 2026/10/01 08:05:52.623226 [INF] 127.0.0.1:42519 - rid:11 - Router connection closed: Client Closed - Remote: wf-process-0
+        [672432] 2026/10/01 08:05:52.735774 [INF] Starting nats-server
+        [672432] 2026/10/01 08:05:52.735862 [INF]   Version:  2.15.0
+        [672432] 2026/10/01 08:05:52.735874 [INF]   Git:      [not set]
+        [672432] 2026/10/01 08:05:52.735875 [INF]   Cluster:  wf-process
+        [672432] 2026/10/01 08:05:52.735877 [INF]   Name:     wf-process-2
+        [672432] 2026/10/01 08:05:52.735878 [INF]   Node:     0WED9nmv
+        [672432] 2026/10/01 08:05:52.735880 [INF]   ID:       NBUUQMVQA6MYZCRB5L5I7ZROT2JRI6355O5YLGBZ5WG5DEGGMUEP3MIF
+        [672432] 2026/10/01 08:05:52.738878 [INF] Starting http monitor on 127.0.0.1:42565
+        [672432] 2026/10/01 08:05:52.738976 [INF] Starting JetStream
+        [672432] 2026/10/01 08:05:52.739091 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+        [672432] 2026/10/01 08:05:52.739092 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+        [672432] 2026/10/01 08:05:52.739093 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+        [672432] 2026/10/01 08:05:52.739094 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+        [672432] 2026/10/01 08:05:52.739094 [INF] 
+        [672432] 2026/10/01 08:05:52.739095 [INF]          https://docs.nats.io/jetstream
+        [672432] 2026/10/01 08:05:52.739096 [INF] 
+        [672432] 2026/10/01 08:05:52.739097 [INF] ---------------- JETSTREAM ----------------
+        [672432] 2026/10/01 08:05:52.739098 [INF]   Strict:          true
+        [672432] 2026/10/01 08:05:52.739099 [INF]   Max Memory:      11.71 GB
+        [672432] 2026/10/01 08:05:52.739100 [INF]   Max Storage:     1.66 GB
+        [672432] 2026/10/01 08:05:52.739101 [INF]   Store Directory: "/tmp/TestContinuationPromiseSIGKILLAndFullServerRestartafter_manifes2896572950/001/servers/node-2/jetstream"
+        [672432] 2026/10/01 08:05:52.739107 [INF]   API Level:       5
+        [672432] 2026/10/01 08:05:52.739108 [INF] -------------------------------------------
+        [672432] 2026/10/01 08:05:52.739531 [INF]   Starting restore for stream '$G > KV_WF_ASSIGN'
+        [672432] 2026/10/01 08:05:52.739753 [INF]   Restored 0 messages for stream '$G > KV_WF_ASSIGN' in 0s
+        [672432] 2026/10/01 08:05:52.739824 [INF]   Starting restore for stream '$G > KV_WF_LEASE'
+        [672432] 2026/10/01 08:05:52.739997 [WRN] Filestore [KV_WF_LEASE] TTL state is outdated; attempting to recover using linear scan (seq 1 to 20)
+        [672432] 2026/10/01 08:05:52.740046 [INF]   Restored 2 messages for stream '$G > KV_WF_LEASE' in 0s
+        [672432] 2026/10/01 08:05:52.740087 [INF]   Starting restore for stream '$G > KV_WF_STATE'
+        [672432] 2026/10/01 08:05:52.740212 [INF]   Restored 2 messages for stream '$G > KV_WF_STATE' in 0s
+        [672432] 2026/10/01 08:05:52.740249 [INF]   Starting restore for stream '$G > KV_WF_VIEW'
+        [672432] 2026/10/01 08:05:52.740369 [INF]   Restored 0 messages for stream '$G > KV_WF_VIEW' in 0s
+        [672432] 2026/10/01 08:05:52.740414 [INF]   Starting restore for stream '$G > OBJ_WF_BLOB'
+        [672432] 2026/10/01 08:05:52.740857 [INF]   Starting restore for stream '$G > WF_INV'
+        [672432] 2026/10/01 08:05:52.740865 [INF]   Starting restore for stream '$G > WF_PURGE'
+        [672432] 2026/10/01 08:05:52.740982 [INF]   Starting restore for stream '$G > WF_RUN'
+        [672432] 2026/10/01 08:05:52.741179 [INF]   Starting restore for stream '$G > WF_JRN'
+        [672432] 2026/10/01 08:05:52.741480 [INF]   Starting restore for stream '$G > WF_SIG'
+        [672432] 2026/10/01 08:05:52.742581 [INF]   Restored 2 messages for stream '$G > WF_INV' in 2ms
+        [672432] 2026/10/01 08:05:52.742732 [WRN] Filestore [WF_RUN] Message scheduling state is outdated; attempting to recover using linear scan (seq 1 to 3)
+        [672432] 2026/10/01 08:05:52.742821 [INF]   Restored 1 messages for stream '$G > WF_RUN' in 2ms
+        [672432] 2026/10/01 08:05:52.742856 [INF]   Recovering 2 consumers for stream - '$G > WF_RUN'
+        [672432] 2026/10/01 08:05:52.743132 [INF]   Restored 11 messages for stream '$G > WF_JRN' in 2ms
+        [672432] 2026/10/01 08:05:52.744048 [INF]   Restored 0 messages for stream '$G > WF_PURGE' in 3ms
+        [672432] 2026/10/01 08:05:52.744217 [INF]   Restored 10 messages for stream '$G > OBJ_WF_BLOB' in 4ms
+        [672432] 2026/10/01 08:05:52.744407 [INF]   Restored 1 messages for stream '$G > WF_SIG' in 3ms
+        [672432] 2026/10/01 08:05:52.744550 [INF] Starting JetStream cluster
+        [672432] 2026/10/01 08:05:52.744554 [INF] Creating JetStream metadata controller
+        [672432] 2026/10/01 08:05:52.744742 [WRN] Filestore [_meta_] Stream state outdated, last block has additional entries, will rebuild
+        [672432] 2026/10/01 08:05:52.744750 [WRN] Filestore [_meta_] Recovering stream state from index errored: prior state file
+        [672432] 2026/10/01 08:05:52.744855 [INF] JetStream cluster recovering state
+        [672432] 2026/10/01 08:05:52.761521 [INF] Took 22.54214ms to start JetStream
+        [672432] 2026/10/01 08:05:52.761578 [INF] Listening for client connections on 127.0.0.1:35239
+        [672432] 2026/10/01 08:05:52.761582 [INF] Server is ready
+        [672432] 2026/10/01 08:05:52.761810 [INF] Cluster name is wf-process
+        [672432] 2026/10/01 08:05:52.761844 [INF] Listening for route connections on 127.0.0.1:34689
+        [672432] 2026/10/01 08:05:52.762699 [INF] 127.0.0.1:42519 - rid:42 - Route connection created
+        [672432] 2026/10/01 08:05:52.762748 [INF] 127.0.0.1:42519 - rid:43 - Route connection created
+        [672432] 2026/10/01 08:05:52.764185 [INF] 127.0.0.1:56932 - rid:44 - Route connection created
+        [672432] 2026/10/01 08:05:52.764513 [INF] 127.0.0.1:42519 - rid:45 - Route connection created
+        [672432] 2026/10/01 08:05:52.769266 [INF] 127.0.0.1:56948 - rid:46 - Route connection created
+        [672432] 2026/10/01 08:05:52.769972 [INF] 127.0.0.1:42519 - rid:47 - Route connection created
+        [672432] 2026/10/01 08:05:52.770723 [INF] 127.0.0.1:56950 - rid:48 - Route connection created
+        [672432] 2026/10/01 08:05:52.773302 [INF] 127.0.0.1:56960 - rid:49 - Route connection created
+        [672432] 2026/10/01 08:05:52.862685 [WRN] Waiting for routing to be established...
+        [672432] 2026/10/01 08:05:52.885711 [WRN] Filestore [S-R3F-gLzAuDL7] Stream state outdated, last block has additional entries, will rebuild
+        [672432] 2026/10/01 08:05:52.885729 [WRN] Filestore [S-R3F-gLzAuDL7] Recovering stream state from index errored: prior state file
+        [672432] 2026/10/01 08:05:52.926753 [WRN] Metalayer blocking snapshot starting
+        [672432] 2026/10/01 08:05:52.930611 [WRN] Metalayer blocking snapshot took 0.004s (streams: 10, consumers: 3, compacted: 22.67 KB)
+        [672432] 2026/10/01 08:05:52.930654 [WRN] JetStream has not established contact with a meta leader
+        [672432] 2026/10/01 08:05:57.297235 [INF] JetStream cluster new stream leader for '$G > OBJ_WF_BLOB'
+        [672432] 2026/10/01 08:05:57.760011 [INF] JetStream cluster new stream leader for '$G > KV_WF_STATE'
+        [672432] 2026/10/01 08:05:58.279925 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_60'
+        [672432] 2026/10/01 08:05:58.535956 [INF] JetStream cluster new metadata leader: wf-process-0/wf-process
+        [672432] 2026/10/01 08:05:58.902300 [INF] JetStream cluster new stream leader for '$G > WF_JRN'
+        [672432] 2026/10/01 08:05:59.758651 [INF] JetStream cluster new stream leader for '$G > WF_INV'
+--- FAIL: TestContinuationPromiseSIGKILLAndFullServerRestart (18.16s)
+    --- FAIL: TestContinuationPromiseSIGKILLAndFullServerRestart/after_manifest (18.16s)
+FAIL
+FAIL	js-wf/integration	18.181s
+FAIL

@@ -51,11 +51,14 @@ the retired generations; invocation and snapshot/purging metadata must be gone.
   (0.043 seconds). Patches and semantic failure logs are retained. No control
   relies on a build error, skip or timeout.
 
-An earlier 100,000-seed process remains live on the source preceding the final
-signal-consumption count assertions. A separate final-checker 100,000-seed
+The source preceding the final signal-consumption count assertions passed
+100,000 schedules in 1,154.847 seconds (36,961,056 transport events, maximum
+virtual time 1,000 ms). This does not establish those later assertions at the
+release seed count. A separate final-checker 100,000-seed
 campaign is running with `/tmp/js-wf-worker-promise-retirement-final-100k.log`.
-Neither is claimed complete here. Zero virtual-time response faults do not
-prove lease expiry, process partitions or sustained liveness.
+The final-checker campaign is not claimed complete here. Response faults and
+up to one second of virtual retry time do not prove lease expiry, process
+partitions or sustained liveness.
 
 ## Independent hosted fixture failure
 
