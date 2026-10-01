@@ -3695,3 +3695,33 @@ release gate remains failed; no runtime guarantee or latency target is changed.
 The registered standard workflow at 1bcf5ef now reports its new promise-restart
 job running (36835630542), confirming the existing entry point executes the
 new CI gate. Its result and full simulation gates remain pending.
+
+
+## Real seed-4 renewal cost projection through production worker decisions
+
+A new seeded slice imports the failing fcf4537 invocation's 52 exact KV Update
+nanosecond costs and journal kinds/indices. Three actual worker dispatches match
+the initial wait, twelve buffered signals plus four arriving during the first
+costly renewal, then replacement completion. It requires 40 records at the
+intermediate suspension, final 52-entry raw integrity, 16 consumptions, result
+120, three separate untimed initialization updates and 52 matching mandatory
+pre-append renewals. Millisecond floor/ceil projections take 30.155/30.204
+seconds from the enabling boundary; zero-cost control finishes at zero.
+
+100,000 profile checks pass in 132.853 seconds (36,300,000 events), with exact/
+separate-process replay and finalized zero/floor/ceil pins. Workload/corpus race
+passes in 26.748 seconds and final-pin corpus race in 2.891 seconds; vet passes.
+A compiled cached-renewal control fails on omitted required updates in 0.006
+seconds. Floor/ceil are expected failing liveness controls, not clean release
+seeds; this repeats three fixed cost profiles and does not model NATS behavior
+or prove server cause. The existing full renewal/fencing policy is unchanged.
+[Costs, proof and attribution](scale/observed-renewal-cost-2026-10-01/) are retained.
+
+Real disk attribution records 484 lease-Raft writes totaling 34.076336 seconds
+and 259 lease-data writes totaling 18.236598 seconds, overlapping consumer and
+journal writes. Those physical windows cannot be added as RPC/critical-path
+execution. The hosted 1bcf5ef eight-cut restart race passes in 140.407 seconds;
+its chaos-smoke also passes, confirming the bounded election-readiness fix.
+The complete 1bcf5ef standard workflow also passes with its logs retained.
+Latest-source full simulation, whole-matrix 200-seed gate, five-node 24-hour
+soak and remaining plan gates stay open.

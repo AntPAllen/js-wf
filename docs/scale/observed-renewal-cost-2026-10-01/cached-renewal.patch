@@ -1,0 +1,20 @@
+--- worker/worker.go
++++ worker/worker.go
+@@ -841,7 +841,7 @@
+ 		}
+ 		started := ops.begin()
+ 		renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
+-		_, timing, err := ops.renew(renewCtx, l, 0)
++		_, timing, err := ops.renew(renewCtx, l, time.Second)
+ 		stopRenew()
+ 		ops.finish(started, "lease_renew_append", nextIndex(), kind, err, timing)
+ 		if err != nil {
+@@ -978,7 +978,7 @@
+ 	wctx.SetTimerSupport(wakeupAt, func(ctx context.Context) (time.Time, error) { return w.serverNow(ctx) }, func(ctx context.Context, step uint64, fireAt time.Time) error {
+ 		started := ops.begin()
+ 		renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
+-		_, timing, err := ops.renew(renewCtx, l, 0)
++		_, timing, err := ops.renew(renewCtx, l, time.Second)
+ 		stopRenew()
+ 		ops.finish(started, "lease_renew_timer", step, "", err, timing)
+ 		if err != nil {

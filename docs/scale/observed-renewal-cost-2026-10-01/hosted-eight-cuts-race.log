@@ -1,0 +1,28 @@
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart/before_frame
+    continuation_promise_kill_test.go:194: promise combined cut=before_frame child_bytes=614402 frame_bytes=582 kill_recovery=12.797448995s heal_recovery=5.243888699s signal_recovery=5.212553933s child_reads=2 archive_reads=0 abandoned_deleted=0 final_deleted=3
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart/after_frame
+    continuation_promise_kill_test.go:194: promise combined cut=after_frame child_bytes=614402 frame_bytes=582 kill_recovery=13.139369929s heal_recovery=6.646110825s signal_recovery=6.612918065s child_reads=2 archive_reads=0 abandoned_deleted=1 final_deleted=3
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart/before_manifest
+    continuation_promise_kill_test.go:194: promise combined cut=before_manifest child_bytes=614402 frame_bytes=582 kill_recovery=13.056156135s heal_recovery=4.446365476s signal_recovery=4.415345941s child_reads=2 archive_reads=0 abandoned_deleted=0 final_deleted=3
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart/after_manifest
+    continuation_promise_kill_test.go:194: promise combined cut=after_manifest child_bytes=614402 frame_bytes=582 kill_recovery=12.686313595s heal_recovery=5.145002803s signal_recovery=5.112935232s child_reads=1 archive_reads=0 abandoned_deleted=0 final_deleted=3
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart/after_journal_purge
+    continuation_promise_kill_test.go:194: promise combined cut=after_journal_purge child_bytes=614402 frame_bytes=582 kill_recovery=12.955185453s heal_recovery=4.34430724s signal_recovery=4.313198537s child_reads=1 archive_reads=0 abandoned_deleted=0 final_deleted=3
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart/after_signal_purge
+    continuation_promise_kill_test.go:194: promise combined cut=after_signal_purge child_bytes=614402 frame_bytes=582 kill_recovery=12.711188766s heal_recovery=5.151044366s signal_recovery=5.112346347s child_reads=1 archive_reads=0 abandoned_deleted=0 final_deleted=3
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart/after_suspended
+    continuation_promise_kill_test.go:194: promise combined cut=after_suspended child_bytes=614402 frame_bytes=582 kill_recovery=12.690661018s heal_recovery=5.147040603s signal_recovery=5.114825156s child_reads=1 archive_reads=0 abandoned_deleted=0 final_deleted=3
+=== RUN   TestContinuationPromiseSIGKILLAndFullServerRestart/after_handoff_release
+    continuation_promise_kill_test.go:194: promise combined cut=after_handoff_release child_bytes=614402 frame_bytes=582 kill_recovery=8.751690486s heal_recovery=150.367033ms signal_recovery=113.695931ms child_reads=1 archive_reads=0 abandoned_deleted=0 final_deleted=3
+--- PASS: TestContinuationPromiseSIGKILLAndFullServerRestart (139.39s)
+    --- PASS: TestContinuationPromiseSIGKILLAndFullServerRestart/before_frame (18.00s)
+    --- PASS: TestContinuationPromiseSIGKILLAndFullServerRestart/after_frame (18.16s)
+    --- PASS: TestContinuationPromiseSIGKILLAndFullServerRestart/before_manifest (18.17s)
+    --- PASS: TestContinuationPromiseSIGKILLAndFullServerRestart/after_manifest (17.73s)
+    --- PASS: TestContinuationPromiseSIGKILLAndFullServerRestart/after_journal_purge (18.03s)
+    --- PASS: TestContinuationPromiseSIGKILLAndFullServerRestart/after_signal_purge (17.73s)
+    --- PASS: TestContinuationPromiseSIGKILLAndFullServerRestart/after_suspended (17.74s)
+    --- PASS: TestContinuationPromiseSIGKILLAndFullServerRestart/after_handoff_release (13.84s)
+PASS
+ok  	js-wf/integration	140.407s
