@@ -433,3 +433,36 @@ not simulate Raft or establish real replies behind an unconfirmed server delay.
 Combined faults, actual Attempt-to-Failed SIGKILL and other continuation SDK
 acceptance gates remain open, as do final-source full matrix/soak, online GC and
 mixed seed 65's latency miss. The million-timer campaign remains live unchanged.
+
+## Actual SIGKILL after final panic Attempt and before terminal state publication
+
+A real Linux worker subprocess on an R3 three-node fixture consumes one panic
+before each of two checkpoints. Its finish_v1 frame saves PanicAttempts=2 and
+state/locals 20. A test-only operation observer holds its execution goroutine
+at either the acknowledged third Attempt or acknowledged Failed append. The
+parent independently confirms contiguous Attempt counts 1, 2, 3, the correct
+journal tail, the verified frame and absent terminal state before sending and
+verifying actual SIGKILL.
+
+A replacement pinned to another peer recovers through the original unacknowledged
+run; no synthetic wakeup is published. Every replacement handler is poisoned,
+and its reader denies archives. Both cuts return exactly final poison with
+no handler entries, one frame read and zero archive reads. The full pre-kill
+journal prefix is unchanged. After Attempt, only Failed is appended under a
+higher epoch; after Failed, the journal stays unchanged while terminal state is
+materialized. All peers return the same failure and raw integrity finds one
+invocation and one terminal.
+
+The race test passed in 40.714 seconds with recovery samples 13.015 and 13.024
+seconds and 19-entry final histories. A compiled production overlay bypassing
+the exhausted-budget recovery check fails after_attempt in 19.826 seconds:
+the replacement reruns its poisoned handler and changes the error. Vet passed.
+[Logs, mutation and source hashes](scale/continuation-panic-kill-2026-10-01/)
+retain the proof. Runtime source is unchanged from parent 3a5ed7e.
+
+These are two actual process-death cuts and individual under-30-second samples,
+not release p99 or full matrix/soak evidence. The existing Tier 1 panic workload
+covers uncertain Attempt/Failed writes; a seeded process-kill schedule, combined
+faults, server faults at these cuts and other continuation acceptance gates
+remain open. Mixed seed 65 latency, online GC and remaining capacity campaigns
+are unchanged. The million-timer runner continues live without restart.

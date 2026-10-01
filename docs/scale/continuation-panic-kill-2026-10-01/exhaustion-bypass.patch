@@ -1,0 +1,11 @@
+--- a/worker/worker.go
++++ b/worker/worker.go
+@@ -878,7 +878,7 @@
+ 	}
+ 	// If the previous worker committed the final attempt but stopped before
+ 	// appending Failed, finish from the journal without running user code again.
+-	if attempts >= w.maxPanicAttempts {
++	if false {
+ 		if lastPanic == "" {
+ 			lastPanic = "workflow panic attempts exhausted"
+ 		}
