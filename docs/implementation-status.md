@@ -4291,3 +4291,14 @@ verification with p99 9.599s/max 13.004s under explicit 30s smoke limits. Releas
 verification correctly rejects its shortened, dirty-source scope. The old
 million run's missing timestamps cannot be recovered; a fresh clean million/24h
 campaign with unchanged 2s p99/30s maximum and full final audit remains required.
+
+
+A fresh clean-source million-timer campaign at 273646a is now live, with durable
+receipts and the original 24h/2s p99/30s maximum gates. First due is Oct 1
+14:47:45.316540455 UTC; last due is Oct 2 at the same time. Its process/server
+snapshot, binary hash, root and session handle are recorded in the durable
+receipt proof directory. Publication loading is in progress; no terminal pass
+is claimed. The prior interrupted stores remain unchanged. Comprehensive final-
+source Tier 1 run 36877170093 (100k seeds) and all-thirteen-row Tier 2 run
+36877217660 (one seed, ten minutes per row) were also launched at 273646a.
+Their terminal results are pending; one seed cannot satisfy the 200-seed gate.
