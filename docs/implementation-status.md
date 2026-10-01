@@ -4000,3 +4000,22 @@ their original scope; neither proves this runtime revision. Five-node 24-hour
 soak, remaining combined transport/fault coverage, full 500-child matrix,
 ten-million spilled-input traffic, online GC and other plan requirements stay
 open. The full goal is not complete.
+
+## First sustained whole-campaign failures and shortcut CI dispatch
+
+The original 200-seed all-row campaign 36850800757 at 0c564d6 now fails journal
+seed 1 on fan-out seed-1-batch-82-8 and journal seed 13 on timer
+seed-13-batch-81-0, each with an Await context deadline after about 815 seconds.
+Both batch-80 audits passed with 2,240 terminals, but neither final cohort
+reaches completion/audit/p99/drain acceptance. Last journal fault heals near
++9m35s; cause remains unconfirmed. [Complete failed job logs and per-seed raw
+artifact ZIPs](scale/full-matrix-campaign-2026-10-01/) are retained. Failed groups
+omit later seeds; other groups remain active. This prevents a clean whole-matrix
+200-seed result. The earlier one-seed thirteen-row pass remains separate evidence.
+
+At the ca82e23 runtime revision, hosted 500-child confirmation 36852513175 and
+comprehensive 100,000-seed simulation 36852516040 are dispatched and confirmed
+queued. Older full simulation/matrix campaigns retain their prior source scope.
+The original million native timers remain live at approximately 590,000 observed
+deliveries; its second restart and final audit remain pending. The full goal and
+all unsatisfied release/scale/combined-fault requirements remain active.

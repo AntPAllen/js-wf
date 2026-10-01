@@ -90,3 +90,21 @@ all twenty-five script tests pass. Fixtures in those controls are synthetic,
 not release evidence. Actual live run 36845868029 metadata is retained and
 rejected as unfinished. Its one-seed-per-row ten-minute campaign remains live;
 final verification is pending. Production/model sources are unchanged.
+
+## First failures in the 200-seed campaign
+
+Run 36850800757 at 0c564d6 remains active, but journal groups 1-12 and 13-24
+fail their first seeds. Seed 1 stops waiting for fan-out seed-1-batch-82-8 in
+815.02 seconds; seed 13 stops waiting for timer seed-13-batch-81-0 in 815.12
+seconds. Both report context deadline exceeded. Their batch-80 intermediate
+audits had passed with 2,240 invocations/journals/terminals and 24,672/24,698
+entries; later journal-leader faults continue through +9m30s, with last heal
+near +9m35s. Neither reaches final all-terminal/raw audit or latency/drain
+acceptance. A passed intermediate audit does not prove safety or liveness for
+the incomplete final cohort, and these failures do not confirm a server cause.
+Both complete failed job logs and raw per-seed artifact ZIPs are retained here.
+Missing subsequent seeds in each failed group are not counted clean. Other
+groups continue independently; the whole campaign cannot clear its release
+bar after these failures. This campaign predates the ca82e23 terminal shortcut.
+The existing seed-1 pass at 82a7d6c remains valid at its own scope; the later
+seed-1 failure is retained independently rather than erased by that pass.
