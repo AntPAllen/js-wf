@@ -4643,3 +4643,9 @@ after fencing. All44 acknowledged repairs have checked explanations. All37
 Python guard tests and integration vet pass. The earlier smoke before final
 JSON retention also passed and its native events remain visible. The ten-minute
 row and full24-hour matrix remain open; server-side causes are unconfirmed.
+
+The [ten-minute clean-runner mid-fan-out campaign](https://github.com/AntPAllen/js-wf/actions/runs/36911677345)
+was launched at35d192c; its identity and inputs are retained alongside the smoke.
+The preceding all-server row36910529449 is now in progress, as is comprehensive
+simulation36900782095. The million-timer service remains active at MainPID18146
+with100,439 receipts at the latest checkpoint. None is terminal acceptance.
