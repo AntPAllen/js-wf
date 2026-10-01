@@ -227,11 +227,8 @@ func runSeededContinuationLimit(seed int64, replay *Trace) (trace Trace, runErr 
 		objects[name] = bytes.Clone(value)
 	}
 	snapshots.mu.Unlock()
-	// Match the CLI's explicit rejected-request audit. Failed itself remains the
-	// immutable terminal; this alternate history verifies its retained declaration.
+	// Audit the original Failed terminal and its retained rejected declaration.
 	replayRecords := append([]journal.Record(nil), records...)
-	replayRecords[budget-1].Kind = journal.StepRequested
-	replayRecords[budget-1].Payload = outcome.LimitRequest
 	replayLimit := func(history []journal.Record) (wf.ReplayObservation, error) {
 		raw, _ := json.Marshal(history)
 		var observed wf.ReplayObservation
@@ -250,7 +247,9 @@ func runSeededContinuationLimit(seed int64, replay *Trace) (trace Trace, runErr 
 		return trace, fmt.Errorf("limit audit=%+v err=%v effects=%d", observed, err, effects)
 	}
 	changed := append([]journal.Record(nil), replayRecords...)
-	changed[budget-1].Payload = json.RawMessage(`{"kind":"run","name":"changed","input_hash":"changed"}`)
+	changedOutcome := outcome
+	changedOutcome.LimitRequest = json.RawMessage(`{"kind":"run","name":"changed","input_hash":"changed"}`)
+	changed[budget-1].Payload, _ = json.Marshal(changedOutcome)
 	if _, err := replayLimit(changed); !errors.Is(err, wf.ErrNonDeterministic) || effects != 0 {
 		return trace, fmt.Errorf("changed limit request accepted: err=%v effects=%d", err, effects)
 	}

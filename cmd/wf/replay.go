@@ -336,10 +336,7 @@ func replayJournalLimit(bundle replayBundle, handler func(*wf.Context, json.RawM
 	if outcome.Error != journal.ErrTooLong.Error() || outcome.InvSeq != bundle.InvSeq || len(bundle.Journal) < 2 || !json.Valid(outcome.LimitRequest) {
 		return replayReport{}, fmt.Errorf("invalid journal-limit failure")
 	}
-	records := append([]journal.Record(nil), bundle.Journal...)
-	records[len(records)-1].Kind = journal.StepRequested
-	records[len(records)-1].Payload = outcome.LimitRequest
-	journalBytes, err := json.Marshal(records)
+	journalBytes, err := json.Marshal(bundle.Journal)
 	if err != nil {
 		return replayReport{}, err
 	}

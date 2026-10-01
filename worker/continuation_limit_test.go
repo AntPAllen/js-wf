@@ -286,11 +286,8 @@ func testContinuationJournalLimit(t *testing.T, budget uint64) {
 			replayObjects[done.Ref] = raw
 		}
 	}
-	// Match the CLI's explicit limit-audit protocol: replace Failed with its
-	// retained rejected request and prove replay stops at the pending effect.
+	// Audit the original Failed terminal and its retained rejected declaration.
 	replayRecords := append([]journal.Record(nil), records...)
-	replayRecords[budget-1].Kind = journal.StepRequested
-	replayRecords[budget-1].Payload = outcome.LimitRequest
 	replay := func(history []journal.Record) (wf.ReplayObservation, error) {
 		raw, err := json.Marshal(history)
 		if err != nil {
@@ -312,7 +309,9 @@ func testContinuationJournalLimit(t *testing.T, budget uint64) {
 		t.Fatalf("limit replay=%+v err=%v effects=%d", obs, err, effects.Load())
 	}
 	changed := append([]journal.Record(nil), replayRecords...)
-	changed[budget-1].Payload = json.RawMessage(`{"kind":"run","name":"wrong","input_hash":"wrong"}`)
+	changedOutcome := outcome
+	changedOutcome.LimitRequest = json.RawMessage(`{"kind":"run","name":"wrong","input_hash":"wrong"}`)
+	changed[budget-1].Payload, _ = json.Marshal(changedOutcome)
 	if _, err := replay(changed); !errors.Is(err, wf.ErrNonDeterministic) || effects.Load() != 0 {
 		t.Fatalf("changed limit request accepted: %v effects=%d", err, effects.Load())
 	}

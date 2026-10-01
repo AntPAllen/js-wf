@@ -49,7 +49,12 @@ handler run, it checks the journal and signal without calling the handler.
 When the worker reaches the journal entry limit before recording a new step
 request, its terminal failure includes that attempted request. Replay checks
 that the handler reaches the same request, then stops before running its
-effect. A rejected panic attempt or suspension also records its attempted
+effect. `wf.Replay` and `wf.ReplayWithContinuations` perform this request
+check directly on the original Failed journal; pass Type, ID and InvSeq in
+ReplayOptions. They return `ErrReplayPendingStep` for a rejected effect and
+preserve terminal identity validation. The rejected request contributes one
+pending SDK entry, without changing the raw journal or its absolute anchors.
+A rejected panic attempt or suspension also records its attempted
 entry; replay checks the reproduced panic or wait. Older journal-limit
 failures without attempted-entry metadata return an explicit verification
 error. For a rejected signal drain, replay checks the attempted entry against

@@ -3398,3 +3398,36 @@ fencing, held backoff and latency gates are unchanged. Latest full simulation
 jobs and the original million-timer process remain live without restart;
 full matrix/24-hour soak, online GC and other plan gates remain open. Mixed
 1db0bcf passed all 20 seeds.
+
+## Direct offline audit of retained journal-limit requests
+
+The public replay APIs now audit Failed.LimitRequest on the original journal.
+An SDK-only pending declaration preserves the raw Failed terminal, invocation
+identity, hard journal length and continuation anchors. The CLI uses this path
+instead of substituting the terminal record. Both modeled and real continuation
+limit fixtures now replay original failure histories and mutate the retained
+terminal declaration for non-determinism controls. Invocation identity is
+required; malformed/ambiguous limit metadata, unmatched generations and a hidden
+pending request fail before user code. Unknown rejected continuation stages also
+fail before initial code. Missing effects remain unexecuted.
+
+Focused full wf/CLI race, 1,000-seed continuation-limit/corpus race, real R3
+continuation-limit race, pinned corpus and vet pass. Compiled baseline replay
+fails to audit the retained request; a compiled pending-effect execution control
+is caught with effects=1. [Evidence](scale/continuation-limit-offline-2026-10-01/)
+retains tests and scope. Non-step LimitEntry auditing remains CLI-specific;
+continuation plugin/CLI registrations and combined near-cap fault gates remain
+open.
+
+The new hosted fixed-placement pressure job failed on a delayed one-owner
+journal tail lookup with API 503/10008 after 26 calls; no two-owner delayed row
+completed. [Uploaded raw artifacts](scale/lease-append-pressure-host-f976-2026-10-01/)
+are preserved. This does not reproduce the mixed ~30-second KV sums and its
+server cause remains unconfirmed. The independent lease-disk-contract and mixed jobs
+passed (all 20 mixed seeds); the overall workflow remains failed. The full 7e414b2 Tier 1 campaign completed successfully; later full
+campaigns and the original million-timer process remain live.
+
+The final-source original-terminal limit workload additionally passes 100,000
+seeds in 136.405 seconds. A synthetic 100,000-record hard-cap replay and all new
+metadata cases pass under race in 6.258 seconds. This proves offline cap handling;
+it does not replace the independent real production-limit durability evidence.

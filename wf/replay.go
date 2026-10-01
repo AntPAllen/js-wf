@@ -40,7 +40,9 @@ type ReplayObservation struct {
 
 // Replay runs a workflow against serialized []journal.Record without NATS.
 // Referenced step and signal objects must be supplied in ReplayOptions.Objects.
-// It checks journal ordering and that the function consumed every step.
+// It checks journal ordering and that the function consumed every step. A Failed
+// journal-limit tail with LimitRequest also audits the rejected declaration as
+// a pending SDK step; supply invocation identity for this terminal audit.
 func Replay[T any](journalBytes []byte, fn func(*Context) (T, error), options ...ReplayOptions) (T, error) {
 	return replayWithStages(journalBytes, fn, nil, options...)
 }
@@ -194,6 +196,35 @@ func replayWithStages[T any](journalBytes []byte, fn func(*Context) (T, error), 
 			return result, ErrCorruptJournal
 		}
 		anchors[i] = ContinuationAnchor{Index: record.Index, Epoch: record.Epoch, PanicAttempts: uint64(lastAttempt), SignalCursor: lastSignal}
+	}
+	// A limit failure retains the declaration that could not be appended. Audit
+	// it as an SDK-only pending step while preserving the original terminal and
+	// raw-record anchors (including at the hard journal-length boundary).
+	last := records[len(records)-1]
+	if last.Kind == journal.Failed {
+		var outcome Outcome
+		if json.Unmarshal(last.Payload, &outcome) == nil && len(outcome.LimitRequest) != 0 {
+			if opts.InvSeq == 0 {
+				return result, ErrInvocationIdentity
+			}
+			var declaration request
+			if outcome.InvSeq != opts.InvSeq || outcome.Error != journal.ErrTooLong.Error() || outcome.LimitEntry != nil || len(outcome.Result) != 0 || outcome.ResultRef != "" || outcome.ResultHash != "" || json.Unmarshal(outcome.LimitRequest, &declaration) != nil || declaration.Kind == "" || len(entries)%2 != 0 {
+				return result, ErrCorruptJournal
+			}
+			for i, entry := range entries {
+				want := StepRequested
+				if i%2 == 1 {
+					want = StepCompleted
+				}
+				if entry.Kind != want {
+					return result, ErrCorruptJournal
+				}
+			}
+			if stages != nil && declaration.Kind == "checkpoint" && stages[declaration.Name] == nil {
+				return result, fmt.Errorf("%w: %s", ErrUnknownContinuation, declaration.Name)
+			}
+			entries = append(entries, Entry{Index: last.Index, Kind: StepRequested, Payload: bytes.Clone(outcome.LimitRequest)})
+		}
 	}
 	c := NewContext(context.Background(), entries, nil, signals...)
 	configure := func(c *Context) {
