@@ -1,0 +1,267 @@
+﻿2026-10-01T06:36:16.7267090Z Current runner version: '2.337.0'
+2026-10-01T06:36:16.7288075Z ##[group]Runner Image Provisioner
+2026-10-01T06:36:16.7288782Z Hosted Compute Agent
+2026-10-01T06:36:16.7289312Z Version: 20260901.588
+2026-10-01T06:36:16.7289789Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-01T06:36:16.7290385Z Build Date: 2026-09-01T19:56:44Z
+2026-10-01T06:36:16.7290957Z Worker ID: {c4ae583c-a1cf-4afc-8fa9-e0aeeb1b82ce}
+2026-10-01T06:36:16.7291498Z Azure Region: centralus
+2026-10-01T06:36:16.7291965Z ##[endgroup]
+2026-10-01T06:36:16.7292973Z ##[group]Operating System
+2026-10-01T06:36:16.7293592Z Ubuntu
+2026-10-01T06:36:16.7294037Z 24.04.5
+2026-10-01T06:36:16.7294419Z LTS
+2026-10-01T06:36:16.7294827Z ##[endgroup]
+2026-10-01T06:36:16.7295246Z ##[group]Runner Image
+2026-10-01T06:36:16.7295684Z Image: ubuntu-24.04
+2026-10-01T06:36:16.7296148Z Version: 20260927.320.1
+2026-10-01T06:36:16.7297091Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-01T06:36:16.7298282Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-01T06:36:16.7299005Z ##[endgroup]
+2026-10-01T06:36:16.7299996Z ##[group]GITHUB_TOKEN Permissions
+2026-10-01T06:36:16.7302305Z Contents: read
+2026-10-01T06:36:16.7302745Z Metadata: read
+2026-10-01T06:36:16.7303151Z Packages: read
+2026-10-01T06:36:16.7303921Z ##[endgroup]
+2026-10-01T06:36:16.7305650Z Secret source: Actions
+2026-10-01T06:36:16.7306369Z Cache mode: write
+2026-10-01T06:36:16.7307069Z Prepare workflow directory
+2026-10-01T06:36:16.7605986Z Prepare all required actions
+2026-10-01T06:36:16.7642391Z Getting action download info
+2026-10-01T06:36:17.0498259Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-01T06:36:17.7745856Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+2026-10-01T06:36:18.3889106Z Download action repository 'actions/upload-artifact@v7' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-10-01T06:36:18.5775480Z Complete job name: lease-append-pressure
+2026-10-01T06:36:18.6473121Z ##[group]Run actions/checkout@v4
+2026-10-01T06:36:18.6474604Z with:
+2026-10-01T06:36:18.6475448Z   repository: AntPAllen/js-wf
+2026-10-01T06:36:18.6482116Z   token: ***
+2026-10-01T06:36:18.6482888Z   ssh-strict: true
+2026-10-01T06:36:18.6483803Z   ssh-user: git
+2026-10-01T06:36:18.6484642Z   persist-credentials: true
+2026-10-01T06:36:18.6485508Z   clean: true
+2026-10-01T06:36:18.6486320Z   sparse-checkout-cone-mode: true
+2026-10-01T06:36:18.6487207Z   fetch-depth: 1
+2026-10-01T06:36:18.6488056Z   fetch-tags: false
+2026-10-01T06:36:18.6488846Z   show-progress: true
+2026-10-01T06:36:18.6489656Z   lfs: false
+2026-10-01T06:36:18.6490403Z   submodules: false
+2026-10-01T06:36:18.6491190Z   set-safe-directory: true
+2026-10-01T06:36:18.6492097Z   allow-unsafe-pr-checkout: false
+2026-10-01T06:36:18.6493155Z env:
+2026-10-01T06:36:18.6494135Z   WF_LEASE_APPEND_PRESSURE: 1
+2026-10-01T06:36:18.6495211Z   LEASE_APPEND_REPORT: lease-append-pressure
+2026-10-01T06:36:18.6496185Z ##[endgroup]
+2026-10-01T06:36:18.7376747Z Syncing repository: AntPAllen/js-wf
+2026-10-01T06:36:18.7379884Z ##[group]Getting Git version info
+2026-10-01T06:36:18.7381365Z Working directory is '/home/runner/work/js-wf/js-wf'
+2026-10-01T06:36:18.7383973Z [command]/usr/bin/git version
+2026-10-01T06:36:18.7401992Z git version 2.55.0
+2026-10-01T06:36:18.7419894Z ##[endgroup]
+2026-10-01T06:36:18.7429081Z Temporarily overriding HOME='/home/runner/work/_temp/3e335f87-bcd4-4b83-937e-bbf5ed00839e' before making global git config changes
+2026-10-01T06:36:18.7432681Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-01T06:36:18.7440764Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+2026-10-01T06:36:18.7485748Z Deleting the contents of '/home/runner/work/js-wf/js-wf'
+2026-10-01T06:36:18.7490163Z ##[group]Initializing the repository
+2026-10-01T06:36:18.7496142Z [command]/usr/bin/git init /home/runner/work/js-wf/js-wf
+2026-10-01T06:36:18.8232500Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-01T06:36:18.8234668Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-01T06:36:18.8236465Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-01T06:36:18.8237730Z hint: call:
+2026-10-01T06:36:18.8238479Z hint:
+2026-10-01T06:36:18.8239676Z hint: 	git config --global init.defaultBranch <name>
+2026-10-01T06:36:18.8240789Z hint:
+2026-10-01T06:36:18.8242199Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-01T06:36:18.8244089Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-01T06:36:18.8245652Z hint:
+2026-10-01T06:36:18.8246988Z hint: 	git branch -m <name>
+2026-10-01T06:36:18.8248183Z hint:
+2026-10-01T06:36:18.8249459Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-01T06:36:18.8251174Z Initialized empty Git repository in /home/runner/work/js-wf/js-wf/.git/
+2026-10-01T06:36:18.8254629Z [command]/usr/bin/git remote add origin https://github.com/AntPAllen/js-wf
+2026-10-01T06:36:18.8289292Z ##[endgroup]
+2026-10-01T06:36:18.8291178Z ##[group]Disabling automatic garbage collection
+2026-10-01T06:36:18.8292620Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-01T06:36:18.8330006Z ##[endgroup]
+2026-10-01T06:36:18.8331779Z ##[group]Setting up auth
+2026-10-01T06:36:18.8336040Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-01T06:36:18.8364606Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-01T06:36:18.8641807Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-01T06:36:18.8670365Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-01T06:36:18.8837684Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-01T06:36:18.8866686Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-01T06:36:18.9036027Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-01T06:36:18.9073810Z ##[endgroup]
+2026-10-01T06:36:18.9075342Z ##[group]Fetching the repository
+2026-10-01T06:36:18.9082677Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +cebd5619d079df7f7e3a7cabc5e9071559760248:refs/remotes/origin/main
+2026-10-01T06:36:22.2346815Z From https://github.com/AntPAllen/js-wf
+2026-10-01T06:36:22.2348681Z  * [new ref]         cebd5619d079df7f7e3a7cabc5e9071559760248 -> origin/main
+2026-10-01T06:36:22.2351634Z ##[endgroup]
+2026-10-01T06:36:22.2352316Z ##[group]Determining the checkout info
+2026-10-01T06:36:22.2353091Z ##[endgroup]
+2026-10-01T06:36:22.2359127Z [command]/usr/bin/git sparse-checkout disable
+2026-10-01T06:36:22.2407960Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-01T06:36:22.2437298Z ##[group]Checking out the ref
+2026-10-01T06:36:22.2441575Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-01T06:36:22.3992069Z Switched to a new branch 'main'
+2026-10-01T06:36:22.3992929Z branch 'main' set up to track 'origin/main'.
+2026-10-01T06:36:22.4005997Z ##[endgroup]
+2026-10-01T06:36:22.4051608Z [command]/usr/bin/git log -1 --format=%H
+2026-10-01T06:36:22.4070994Z cebd5619d079df7f7e3a7cabc5e9071559760248
+2026-10-01T06:36:22.4270281Z ##[group]Run actions/setup-go@v5
+2026-10-01T06:36:22.4270660Z with:
+2026-10-01T06:36:22.4270901Z   go-version-file: go.mod
+2026-10-01T06:36:22.4271339Z   check-latest: false
+2026-10-01T06:36:22.4273181Z   token: ***
+2026-10-01T06:36:22.4273752Z   cache: true
+2026-10-01T06:36:22.4274029Z env:
+2026-10-01T06:36:22.4274301Z   WF_LEASE_APPEND_PRESSURE: 1
+2026-10-01T06:36:22.4274759Z   LEASE_APPEND_REPORT: lease-append-pressure
+2026-10-01T06:36:22.4275065Z ##[endgroup]
+2026-10-01T06:36:22.5299634Z Setup go version spec 1.27.1
+2026-10-01T06:36:22.5305754Z Attempting to download 1.27.1...
+2026-10-01T06:36:22.5396874Z (node:2102) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T06:36:22.5397723Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T06:36:23.2301717Z matching 1.27.1...
+2026-10-01T06:36:23.2320840Z Acquiring 1.27.1 from https://github.com/actions/go-versions/releases/download/1.27.1-33583469715/go-1.27.1-linux-x64.tar.gz
+2026-10-01T06:36:23.9016944Z Extracting Go...
+2026-10-01T06:36:23.9127166Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/b03de359-8582-4fbc-9650-884dd464cbea -f /home/runner/work/_temp/cfab02ea-2f29-4cb6-a99f-10230fc841fc
+2026-10-01T06:36:25.3144719Z Successfully extracted go to /home/runner/work/_temp/b03de359-8582-4fbc-9650-884dd464cbea
+2026-10-01T06:36:25.3145641Z Adding to the cache ...
+2026-10-01T06:36:36.6809469Z Successfully cached go to /opt/hostedtoolcache/go/1.27.1/x64
+2026-10-01T06:36:36.6809855Z Added go to the path
+2026-10-01T06:36:36.6811208Z Successfully set up Go version 1.27.1
+2026-10-01T06:36:36.6985785Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+2026-10-01T06:36:36.7013261Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+2026-10-01T06:36:36.7037799Z /home/runner/go/pkg/mod
+2026-10-01T06:36:36.7054455Z /home/runner/.cache/go-build
+2026-10-01T06:36:36.8559261Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.27.1-487c2eade748c1cfcd01caf54d154b8f65df65b05311c1ecee4b42fdda97ee43
+2026-10-01T06:36:36.8620453Z (node:2102) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-01T06:36:38.0373503Z Received 134217728 of 189957878 (70.7%), 124.6 MBs/sec
+2026-10-01T06:36:38.2872160Z Received 189957878 of 189957878 (100.0%), 141.8 MBs/sec
+2026-10-01T06:36:38.2872655Z Cache Size: ~181 MB (189957878 B)
+2026-10-01T06:36:38.2992264Z [command]/usr/bin/tar -xf /home/runner/work/_temp/a989ab49-aa01-4d85-b016-f66533ceaa4e/cache.tzst -P -C /home/runner/work/js-wf/js-wf --use-compress-program unzstd
+2026-10-01T06:36:38.8645689Z Cache restored successfully
+2026-10-01T06:36:38.8715238Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.27.1-487c2eade748c1cfcd01caf54d154b8f65df65b05311c1ecee4b42fdda97ee43
+2026-10-01T06:36:38.8741071Z go version go1.27.1 linux/amd64
+2026-10-01T06:36:38.8741363Z 
+2026-10-01T06:36:38.8741704Z ##[group]go env
+2026-10-01T06:36:39.1641233Z AR='ar'
+2026-10-01T06:36:39.1641732Z CC='gcc'
+2026-10-01T06:36:39.1642134Z CGO_CFLAGS='-O2 -g'
+2026-10-01T06:36:39.1642431Z CGO_CPPFLAGS=''
+2026-10-01T06:36:39.1642741Z CGO_CXXFLAGS='-O2 -g'
+2026-10-01T06:36:39.1643023Z CGO_ENABLED='1'
+2026-10-01T06:36:39.1643471Z CGO_FFLAGS='-O2 -g'
+2026-10-01T06:36:39.1643761Z CGO_LDFLAGS='-O2 -g'
+2026-10-01T06:36:39.1644065Z CXX='g++'
+2026-10-01T06:36:39.1644326Z GCCGO='gccgo'
+2026-10-01T06:36:39.1644646Z GO111MODULE=''
+2026-10-01T06:36:39.1644938Z GOAMD64='v1'
+2026-10-01T06:36:39.1645163Z GOARCH='amd64'
+2026-10-01T06:36:39.1645409Z GOAUTH='netrc'
+2026-10-01T06:36:39.1645634Z GOBIN='/home/runner/go/bin'
+2026-10-01T06:36:39.1645933Z GOCACHE='/home/runner/.cache/go-build'
+2026-10-01T06:36:39.1646230Z GOCACHEPROG=''
+2026-10-01T06:36:39.1646448Z GODEBUG=''
+2026-10-01T06:36:39.1646712Z GOENV='/home/runner/.config/go/env'
+2026-10-01T06:36:39.1647309Z GOEXE=''
+2026-10-01T06:36:39.1647538Z GOEXPERIMENT=''
+2026-10-01T06:36:39.1647766Z GOFIPS140='off'
+2026-10-01T06:36:39.1647994Z GOFLAGS=''
+2026-10-01T06:36:39.1648721Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build2227883396=/tmp/go-build -gno-record-gcc-switches'
+2026-10-01T06:36:39.1649243Z GOHOSTARCH='amd64'
+2026-10-01T06:36:39.1649483Z GOHOSTOS='linux'
+2026-10-01T06:36:39.1649708Z GOINSECURE=''
+2026-10-01T06:36:39.1649969Z GOMOD='/home/runner/work/js-wf/js-wf/go.mod'
+2026-10-01T06:36:39.1650305Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-10-01T06:36:39.1650557Z GONOPROXY=''
+2026-10-01T06:36:39.1650790Z GONOSUMDB=''
+2026-10-01T06:36:39.1651035Z GOOS='linux'
+2026-10-01T06:36:39.1651233Z GOPACKAGESDRIVER=''
+2026-10-01T06:36:39.1651488Z GOPATH='/home/runner/go'
+2026-10-01T06:36:39.1651736Z GOPRIVATE=''
+2026-10-01T06:36:39.1652042Z GOPROXY='https://proxy.golang.org,direct'
+2026-10-01T06:36:39.1652345Z GOROOT='/opt/hostedtoolcache/go/1.27.1/x64'
+2026-10-01T06:36:39.1652611Z GOSUMDB='sum.golang.org'
+2026-10-01T06:36:39.1652871Z GOTELEMETRY='local'
+2026-10-01T06:36:39.1653179Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-10-01T06:36:39.1653668Z GOTMPDIR=''
+2026-10-01T06:36:39.1653888Z GOTOOLCHAIN='auto'
+2026-10-01T06:36:39.1654179Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.1/x64/pkg/tool/linux_amd64'
+2026-10-01T06:36:39.1654550Z GOVCS=''
+2026-10-01T06:36:39.1654782Z GOVERSION='go1.27.1'
+2026-10-01T06:36:39.1655014Z GOWORK=''
+2026-10-01T06:36:39.1655227Z PKG_CONFIG='pkg-config'
+2026-10-01T06:36:39.1655463Z 
+2026-10-01T06:36:39.1655937Z ##[endgroup]
+2026-10-01T06:36:39.1776057Z ##[group]Run if ! command -v strace >/dev/null 2>&1; then
+2026-10-01T06:36:39.1776756Z [36;1mif ! command -v strace >/dev/null 2>&1; then[0m
+2026-10-01T06:36:39.1777138Z [36;1m  sudo apt-get update -qq[0m
+2026-10-01T06:36:39.1777401Z [36;1m  sudo apt-get install -y strace[0m
+2026-10-01T06:36:39.1777686Z [36;1mfi[0m
+2026-10-01T06:36:39.1777956Z [36;1mif test -f /proc/sys/kernel/yama/ptrace_scope; then[0m
+2026-10-01T06:36:39.1778326Z [36;1m  sudo sysctl -w kernel.yama.ptrace_scope=0[0m
+2026-10-01T06:36:39.1778613Z [36;1mfi[0m
+2026-10-01T06:36:39.2151922Z shell: /usr/bin/bash -e {0}
+2026-10-01T06:36:39.2152279Z env:
+2026-10-01T06:36:39.2152579Z   WF_LEASE_APPEND_PRESSURE: 1
+2026-10-01T06:36:39.2152860Z   LEASE_APPEND_REPORT: lease-append-pressure
+2026-10-01T06:36:39.2153130Z ##[endgroup]
+2026-10-01T06:36:39.2277610Z kernel.yama.ptrace_scope = 0
+2026-10-01T06:36:39.2319720Z ##[group]Run go test -race ./integration -run '^TestLeaseAppendPressureFixedPlacement$' -count=1 -timeout=5m -v
+2026-10-01T06:36:39.2320379Z [36;1mgo test -race ./integration -run '^TestLeaseAppendPressureFixedPlacement$' -count=1 -timeout=5m -v[0m
+2026-10-01T06:36:39.2351193Z shell: /usr/bin/bash -e {0}
+2026-10-01T06:36:39.2351505Z env:
+2026-10-01T06:36:39.2351747Z   WF_LEASE_APPEND_PRESSURE: 1
+2026-10-01T06:36:39.2352046Z   LEASE_APPEND_REPORT: lease-append-pressure
+2026-10-01T06:36:39.2352392Z ##[endgroup]
+2026-10-01T06:37:18.3498262Z === RUN   TestLeaseAppendPressureFixedPlacement
+2026-10-01T06:37:24.9560018Z     lease_append_pressure_test.go:284: pressure delayed=false append=false writers=1 elapsed=17.981681ms owners=[{ID:dfalse-afalse-w1-0 Calls:48 RenewTime:17.897353ms AppendTime:0s MaxRenew:452.533µs Epoch:5 RevisionBefore:6 RevisionAfter:54 GateTime:143.827µs UpdateTime:16.355184ms Error:}]
+2026-10-01T06:37:31.0761020Z     lease_append_pressure_test.go:260: append audit id=dfalse-atrue-w1-0 records=0 err=snapshot manifest snap.pressure.dfalse-atrue-w1-0 after 3 attempts: context deadline exceeded
+2026-10-01T06:37:31.3126981Z --- FAIL: TestLeaseAppendPressureFixedPlacement (12.96s)
+2026-10-01T06:37:31.3141877Z FAIL
+2026-10-01T06:37:31.3143031Z FAIL	js-wf/integration	12.975s
+2026-10-01T06:37:31.3180029Z FAIL
+2026-10-01T06:37:31.6947309Z ##[error]Process completed with exit code 1.
+2026-10-01T06:37:31.7027423Z ##[group]Run actions/upload-artifact@v7
+2026-10-01T06:37:31.7027770Z with:
+2026-10-01T06:37:31.7028082Z   name: lease-append-pressure
+2026-10-01T06:37:31.7028426Z   path: integration/lease-append-pressure*
+2026-10-01T06:37:31.7028784Z   if-no-files-found: error
+2026-10-01T06:37:31.7029220Z   compression-level: 6
+2026-10-01T06:37:31.7029520Z   overwrite: false
+2026-10-01T06:37:31.7029850Z   include-hidden-files: false
+2026-10-01T06:37:31.7030125Z   archive: true
+2026-10-01T06:37:31.7030396Z env:
+2026-10-01T06:37:31.7030638Z   WF_LEASE_APPEND_PRESSURE: 1
+2026-10-01T06:37:31.7030980Z   LEASE_APPEND_REPORT: lease-append-pressure
+2026-10-01T06:37:31.7031298Z ##[endgroup]
+2026-10-01T06:37:31.8325361Z With the provided path, there will be 4 files uploaded
+2026-10-01T06:37:31.8327020Z Artifact name is valid!
+2026-10-01T06:37:31.8327361Z Root directory input is valid!
+2026-10-01T06:37:32.1299100Z Uploading artifact: lease-append-pressure.zip
+2026-10-01T06:37:32.1333487Z Beginning upload of artifact content to blob storage
+2026-10-01T06:37:32.3047916Z Uploaded bytes 4399
+2026-10-01T06:37:32.3504311Z Finished uploading artifact content to blob storage!
+2026-10-01T06:37:32.3505051Z SHA256 digest of uploaded artifact is 3d337d05691b9b6296b577f6ddc055e4bc8a4189fc125a2096c66bb4fe7c58fc
+2026-10-01T06:37:32.3505958Z Finalizing artifact upload
+2026-10-01T06:37:32.6628194Z Artifact lease-append-pressure successfully finalized. Artifact ID 11145495160
+2026-10-01T06:37:32.6628821Z Artifact lease-append-pressure has been successfully uploaded! Final size is 4399 bytes. Artifact ID is 11145495160
+2026-10-01T06:37:32.6630906Z Artifact download URL: https://github.com/AntPAllen/js-wf/actions/runs/36825651900/artifacts/11145495160
+2026-10-01T06:37:32.6774862Z Post job cleanup.
+2026-10-01T06:37:32.7434104Z [command]/usr/bin/git version
+2026-10-01T06:37:32.7464531Z git version 2.55.0
+2026-10-01T06:37:32.7489151Z Temporarily overriding HOME='/home/runner/work/_temp/0ef8ae21-2e71-48a1-b8fb-7ab5c68ef697' before making global git config changes
+2026-10-01T06:37:32.7490543Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-01T06:37:32.7493039Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+2026-10-01T06:37:32.7522044Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-01T06:37:32.7546467Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-01T06:37:32.7716804Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-01T06:37:32.7737774Z http.https://github.com/.extraheader
+2026-10-01T06:37:32.7746558Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-01T06:37:32.7781470Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-01T06:37:32.7940380Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-01T06:37:32.7964912Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-01T06:37:32.8260136Z Cleaning up orphan processes
+2026-10-01T06:37:32.8459026Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

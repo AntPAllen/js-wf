@@ -3525,3 +3525,30 @@ is separate from terminal queue contention; active execution latency remains
 unresolved. Newer full simulation campaigns and the original million-timer run
 remain live. Full matrix, latest-source full simulation, 24-hour soak, remaining
 continuation fault combinations and scale/online-GC gates remain open.
+
+
+## Eight-owner lease pressure and isolated seeded renewal costs
+
+Hosted 83253a2 seed 4 spends 28.702689 seconds in 52 pre-append renewals,
+28.701955 inside KV Update and 0.000088 at the local gate; journal appends total
+0.202343 seconds. Retained disk attribution shows lease data/Raft and consumer
+writes overlapping those client windows, without identifying RPC server time
+or cause. The fixed-placement leaf adds eight independent owners to its one/
+two-owner rows. Final R3 race passes in 48.401 seconds; delayed eight-owner KV
+sums are 7.266–8.576 seconds each, still below the mixed ~29-second observation.
+
+A new seeded lease-only cost slice reuses production worker/lease/journal code
+and the existing uniform-cost model without changing old pins. 100,000 schedules
+pass in 75.377 seconds (24,700,000 events), exact cross-process replay, corpus/
+cost race and vet pass. The 620 ms per-update mode exposes 31.620-second execution
+as an explicit expected failing liveness control, not a clean release seed.
+A compiled cached-pre-append-renewal control fails the required-update checker.
+[Evidence and scope](scale/lease-renewal-pressure-2026-10-01/) are retained.
+
+The cebd561 hosted pressure job fails before disk injection because its snapshot
+manifest bucket still names stopped node 2 as leader. Artifacts are retained;
+the steady pressure fixture now pins that audit dependency to survivor node 0
+and verifies it at row ends. This controls the measurement rather than fixing
+server election or changing the runtime. Its final eight-row race result above
+passes; hosted confirmation remains open. All production renewal, latency,
+queue-drain and full release gates remain unchanged.

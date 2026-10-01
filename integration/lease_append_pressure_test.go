@@ -51,6 +51,10 @@ type leaseAppendPressureOwner struct {
 // Isolate the steady two-replica quorum seen after a mixed heal: lease leader
 // healthy node 0, journal leader delayed node 1, node 2 stopped. This measures
 // production renewal and CAS append operations, not the worker fault matrix.
+// Keep the snapshot-manifest bucket on a survivor: a killed metadata leader
+// would add an unrelated election to this steady pressure measurement.
+// Eight independent owners test shared lease-group pressure observed in mixed
+// recovery; each owner has its own key, epoch, revision gate and journal.
 func TestLeaseAppendPressureFixedPlacement(t *testing.T) {
 	if os.Getenv("WF_LEASE_APPEND_PRESSURE") != "1" {
 		t.Skip("set WF_LEASE_APPEND_PRESSURE=1 for the fixed-placement pressure contract")
@@ -81,7 +85,7 @@ func TestLeaseAppendPressureFixedPlacement(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for name, node := range map[string]int{"KV_WF_LEASE": 0, "WF_JRN": 1} {
+	for name, node := range map[string]int{"KV_WF_LEASE": 0, "WF_JRN": 1, "KV_WF_STATE": 0} {
 		name, node := name, node
 		preferMixedAckLeader(t, ctx, cluster.Clients[0], "$JS.API.STREAM.LEADER.STEPDOWN."+name, fmt.Sprintf("wf-process-%d", node), func(attempt context.Context) (*jetstream.ClusterInfo, error) {
 			stream, err := js.Stream(attempt, name)
@@ -162,7 +166,7 @@ func TestLeaseAppendPressureFixedPlacement(t *testing.T) {
 		for _, workload := range []struct {
 			append  bool
 			writers int
-		}{{false, 1}, {true, 1}, {true, 2}} {
+		}{{false, 1}, {true, 1}, {true, 2}, {true, 8}} {
 			row := leaseAppendPressureRow{Delayed: delayed, Append: workload.append, Writers: workload.writers, Owners: make([]leaseAppendPressureOwner, workload.writers)}
 			owners := make([]*lease.Lease, workload.writers)
 			for i := range owners {
@@ -269,7 +273,7 @@ func TestLeaseAppendPressureFixedPlacement(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			for name, node := range map[string]int{"KV_WF_LEASE": 0, "WF_JRN": 1} {
+			for name, node := range map[string]int{"KV_WF_LEASE": 0, "WF_JRN": 1, "KV_WF_STATE": 0} {
 				attempt, cancel := context.WithTimeout(ctx, 3*time.Second)
 				stream, err := js.Stream(attempt, name)
 				var info *jetstream.StreamInfo

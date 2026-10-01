@@ -93,7 +93,17 @@ func (p *latencySignalPort) NextSignal(ctx context.Context, from uint64, subject
 // drains 16 buffered signals with deterministic request latency. Heartbeat
 // ticks stay quiet to isolate the renew-before-each-entry protocol; those
 // per-entry renewals keep the lease alive throughout virtual execution.
-func runWorkerSignalWriteLatency(seed int64, replay *Trace) (trace Trace, runErr error) {
+func runWorkerSignalWriteLatency(seed int64, replay *Trace) (Trace, error) {
+	return runWorkerSignalLatencyCost(seed, replay, false)
+}
+
+// Lease-only costs isolate unconditional renewals from journal/signal reads.
+// These injected response durations do not model Raft or establish server cause.
+func runWorkerSignalLeaseLatency(seed int64, replay *Trace) (Trace, error) {
+	return runWorkerSignalLatencyCost(seed, replay, true)
+}
+
+func runWorkerSignalLatencyCost(seed int64, replay *Trace, leaseOnly bool) (trace Trace, runErr error) {
 	schedule := NewScheduler(seed)
 	if replay != nil {
 		var err error
@@ -102,11 +112,17 @@ func runWorkerSignalWriteLatency(seed int64, replay *Trace) (trace Trace, runErr
 			return trace, err
 		}
 	}
-	if err := schedule.SetWorkload("worker_signal_write_latency"); err != nil {
+	workload := "worker_signal_write_latency"
+	choices := []string{"0", "20", "170", "300"}
+	if leaseOnly {
+		workload = "worker_signal_lease_latency"
+		choices = []string{"0", "170", "560", "620"}
+	}
+	if err := schedule.SetWorkload(workload); err != nil {
 		return trace, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	selected, err := schedule.Choose([]string{"0", "20", "170", "300"})
+	selected, err := schedule.Choose(choices)
 	if err != nil {
 		return trace, err
 	}
@@ -114,16 +130,20 @@ func runWorkerSignalWriteLatency(seed int64, replay *Trace) (trace Trace, runErr
 	if err != nil {
 		return trace, err
 	}
+	journalDelay, signalDelay := delay, delay
+	if leaseOnly {
+		journalDelay, signalDelay = 0, 0
+	}
 	ctx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 	defer stop()
 	const typ, id = "test", "latency"
 	transport := NewWorkerTransport(schedule, worker.DefaultAckWait)
 	journals := NewJournalTransport(schedule)
-	journalPort := &latencyJournalPort{AppendPort: journals, ReadPort: journals, schedule: schedule, delay: delay}
+	journalPort := &latencyJournalPort{AppendPort: journals, ReadPort: journals, schedule: schedule, delay: journalDelay}
 	store := journal.NewWithPorts(journalPort, journalPort)
 	kv := NewKVTransport(schedule, provision.LeaseTTL)
 	leasePort := &latencyLeasePort{KVPort: kv, schedule: schedule, delay: delay}
-	signalPort := &latencySignalPort{SignalDrainPort: transport.SignalTransport, schedule: schedule, delay: delay}
+	signalPort := &latencySignalPort{SignalDrainPort: transport.SignalTransport, schedule: schedule, delay: signalDelay}
 	outcomes := NewKVTransport(schedule, 0)
 	c := client.NewWithSignalPorts(transport.SignalTransport, transport.SignalTransport)
 	var operations []worker.OperationEvent
@@ -162,7 +182,7 @@ func runWorkerSignalWriteLatency(seed int64, replay *Trace) (trace Trace, runErr
 	}
 	elapsed := schedule.NowMillis()
 	reads := journalPort.reads + signalPort.reads
-	if leasePort.updates != 51 || journalPort.publishes != 50 || reads != 18 || elapsed != 119*delay || transport.Dispatch.Pending() != 0 {
+	if leasePort.updates != 51 || journalPort.publishes != 50 || reads != 18 || elapsed != int64(leasePort.updates)*delay+int64(journalPort.publishes+journalPort.reads)*journalDelay+int64(signalPort.reads)*signalDelay || transport.Dispatch.Pending() != 0 {
 		return trace, fmt.Errorf("signal write cost: elapsed=%d renewals=%d appends=%d reads=%d pending=%d", elapsed, leasePort.updates, journalPort.publishes, reads, transport.Dispatch.Pending())
 	}
 	counts := map[string]int{}
@@ -177,13 +197,17 @@ func runWorkerSignalWriteLatency(seed int64, replay *Trace) (trace Trace, runErr
 		counts[event.Operation]++
 		measured += event.Duration
 		if event.Operation == "journal_append" || event.Operation == "lease_renew_append" {
-			if event.JournalIndex >= 50 || event.JournalKind == "" || event.Duration != time.Duration(delay)*time.Millisecond {
+			expectedDelay := delay
+			if event.Operation == "journal_append" {
+				expectedDelay = journalDelay
+			}
+			if event.JournalIndex >= 50 || event.JournalKind == "" || event.Duration != time.Duration(expectedDelay)*time.Millisecond {
 				return trace, fmt.Errorf("journal operation: %+v", event)
 			}
 		}
 	}
 	wantCounts := map[string]int{"lease_acquire": 1, "journal_read": 1, "invocation_read": 1, "signal_info": 1, "signal_read": 16, "lease_renew_append": 50, "journal_append": 50, "lease_release": 1}
-	if !reflect.DeepEqual(counts, wantCounts) || measured != time.Duration(119*delay)*time.Millisecond {
+	if !reflect.DeepEqual(counts, wantCounts) || measured != time.Duration(elapsed)*time.Millisecond {
 		return trace, fmt.Errorf("operation costs: counts=%v want=%v elapsed=%s", counts, wantCounts, measured)
 	}
 	records, _, err := store.Read(ctx, typ, id)
@@ -259,6 +283,58 @@ func TestSeededWorkerSignalWriteLatencyReplay(t *testing.T) {
 		path := filepath.Join(t.TempDir(), "signal-cost.json")
 		cmd := exec.Command(os.Args[0], "-test.run=^TestSeededWorkerSignalWriteLatencyReplay$")
 		cmd.Env = append(os.Environ(), "SIM_SIGNAL_COST_OUT="+path)
+		if output, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("child: %v: %s", err, output)
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if i == 1 && !bytes.Equal(data, previous) {
+			t.Fatal("signal cost trace changed across processes")
+		}
+		previous = data
+	}
+}
+
+func TestSeededWorkerSignalLeaseLatencyReplay(t *testing.T) {
+	if path := os.Getenv("SIM_SIGNAL_LEASE_COST_OUT"); path != "" {
+		trace, err := runWorkerSignalLeaseLatency(42, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := trace.Save(path); err != nil {
+			t.Fatal(err)
+		}
+		return
+	}
+	modes := map[string]bool{}
+	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+		trace, err := runWorkerSignalLeaseLatency(seed, nil)
+		if err != nil {
+			path := os.Getenv("FAULT_TRACE_OUT")
+			if path == "" {
+				path = filepath.Join(t.TempDir(), "signal-lease-cost-failure.json")
+			}
+			_ = trace.Save(path)
+			t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, err)
+		}
+		modes[trace.Decisions[0].Chosen] = true
+		if seed <= 10 {
+			replayed, err := replayTrace(trace)
+			if err != nil || !reflect.DeepEqual(trace, replayed) {
+				t.Fatalf("seed %d replay: %v", seed, err)
+			}
+		}
+	}
+	if len(modes) != 4 {
+		t.Fatalf("request latency coverage: %v", modes)
+	}
+	var previous []byte
+	for i := 0; i < 2; i++ {
+		path := filepath.Join(t.TempDir(), "signal-lease-cost.json")
+		cmd := exec.Command(os.Args[0], "-test.run=^TestSeededWorkerSignalLeaseLatencyReplay$")
+		cmd.Env = append(os.Environ(), "SIM_SIGNAL_LEASE_COST_OUT="+path)
 		if output, err := cmd.CombinedOutput(); err != nil {
 			t.Fatalf("child: %v: %s", err, output)
 		}
