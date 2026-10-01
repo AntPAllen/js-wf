@@ -1,0 +1,18 @@
+--- a/worker/worker.go
++++ b/worker/worker.go
+@@ -828,13 +828,13 @@
+ 		return nil
+ 	}
+ 	appendEntry := func(kind journal.Kind, payload json.RawMessage) error {
+-		if nextIndex() >= w.maxEntries {
++		if uint64(len(records)) >= w.maxEntries {
+ 			return journal.ErrTooLong
+ 		}
+ 		// A new request needs a completion and a terminal slot. Other
+ 		// nonterminal entries also leave one slot for a durable failure.
+ 		if kind != journal.Completed && kind != journal.Failed &&
+-			(nextIndex() >= w.maxEntries-1 || kind == journal.StepRequested && nextIndex() >= w.maxEntries-2) {
++			(uint64(len(records)) >= w.maxEntries-1 || kind == journal.StepRequested && uint64(len(records)) >= w.maxEntries-2) {
+ 			outcome := wf.Outcome{InvSeq: input.Sequence, Error: journal.ErrTooLong.Error()}
+ 			if kind == journal.StepRequested {
+ 				outcome.LimitRequest = payload

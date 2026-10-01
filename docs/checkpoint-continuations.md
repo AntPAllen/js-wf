@@ -553,3 +553,36 @@ retain the proof. This corrects the fixture without changing runtime decisions
 or claiming that the controlled fault explains the original CI interleaving.
 Fresh CI validation remains pending. Mixed seed 65 latency and online GC stay
 open; the million-timer runner remains live without restart.
+
+## Continuation global entry budget and reserved terminal request
+
+A worker-package real R3 contract follows the existing limit-fixture pattern:
+both workers use a private 16-entry test budget while production retains its
+100,000 default/hard cap. Two checkpoints leave a finish_v1 frame at logical
+anchor 9 / absolute SDK position 8. The first worker suspends on a gate at
+index 12, then stops. A replacement pinned to another peer uses no archive reads
+and leaves prefix-stage entry counts unchanged.
+
+The signal consumes index 13 and completes its wait at 14. The next effect
+request cannot fit a completion plus terminal, so Failed occupies index 15
+and retains the rejected declaration in LimitRequest. The effect never runs.
+Full reconstruction has exactly 16 entries, terminal state matches the journal,
+all peers return ErrTooLong and raw integrity finds one invocation/terminal.
+An explicit CLI-style rejected-request substitution audits both checkpoints
+and all 11 SDK entries offline, stopping at ErrReplayPendingStep with zero
+effects; a changed request is nondeterministic.
+
+The final race test passed in 17.983 seconds. A compiled production overlay using
+suffix length instead of absolute indices for budget/reservation completes the
+workflow incorrectly and fails the test in 16.850 seconds. Vet passed. [Logs,
+patch and source hashes](scale/continuation-limit-2026-10-01/) retain the proof.
+No production code changes are made. The full 100,000-entry continuation run,
+seeded integrated limits, limit-adjacent fault cuts and remaining SDK gates stay
+open, along with full matrix/soak, mixed seed 65 latency and online GC.
+
+[CI at 8f6789a](https://github.com/AntPAllen/js-wf/actions/runs/36806383537) confirms
+the earlier aggregate suite budget was exhausted at 20 minutes while its active
+visibility test had run for six seconds. The full stack is retained in this
+proof. The already-pushed 0821f8c suite-budget increase is awaiting fresh CI.
+Its full 100,000-seed Tier 1 run and the million-timer campaign remain live
+without restart.
