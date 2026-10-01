@@ -1,0 +1,378 @@
+diff --git a/.github/workflows/tier3-mixed-journal.yml b/.github/workflows/tier3-mixed-journal.yml
+index 566c4fe..30d411f 100644
+--- a/.github/workflows/tier3-mixed-journal.yml
++++ b/.github/workflows/tier3-mixed-journal.yml
+@@ -3,11 +3,11 @@ on:
+   workflow_dispatch:
+     inputs:
+       row:
+-        description: R5 leader fault row
++        description: R5 mixed fault row
+         type: choice
+         required: true
+         default: journal
+-        options: [journal, consumer, restart]
++        options: [journal, consumer, restart, fanout_restart]
+       duration:
+         description: Ten minutes is sustained; 35 seconds is fixture smoke only
+         required: true
+@@ -33,13 +33,14 @@ jobs:
+           go-version-file: go.mod
+       - name: Verify row-result guard
+         run: python3 -m unittest discover -s scripts -p 'test_tier3*.py'
+-      - name: Sustain the selected five-container mixed leader row
++      - name: Sustain the selected five-container mixed fault row
+         run: |
+           set -o pipefail
+           case "$TIER3_MATRIX_ROW" in
+             journal) row_test=TestFiveContainerMixedJournalLeaderEveryThirtySeconds ;;
+             consumer) row_test=TestFiveContainerMixedConsumerLeaderEveryThirtySeconds ;;
+             restart) row_test=TestFiveContainerMixedAllServersEveryThirtySeconds ;;
++            fanout_restart) row_test=TestFiveContainerMixedFanoutRestartEveryThirtySeconds ;;
+             *) exit 1 ;;
+           esac
+           go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py
+diff --git a/integration/mixed_matrix_fanout_restart_test.go b/integration/mixed_matrix_fanout_restart_test.go
+index 8abfe99..4a7a6b4 100644
+--- a/integration/mixed_matrix_fanout_restart_test.go
++++ b/integration/mixed_matrix_fanout_restart_test.go
+@@ -7,6 +7,7 @@ import (
+ 	"context"
+ 	"encoding/json"
+ 	"fmt"
++	"os"
+ 	"sort"
+ 	"sync"
+ 	"time"
+@@ -63,6 +64,11 @@ func (b *matrixFanoutBarrier) handlers() map[string]worker.Handler {
+ }
+ 
+ func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStream, cluster *testcluster.ProcessCluster, scheduled time.Time) (matrixLeaderFault, error) {
++	return b.restartWith(ctx, js, scheduled, "", func() (matrixLeaderFault, error) { return killMatrixAllServers(ctx, js, cluster, scheduled) })
++}
++
++// Share the cut and identity checks across native R3 and container R5 rows.
++func (b *matrixFanoutBarrier) restartWith(ctx context.Context, js jetstream.JetStream, scheduled time.Time, artifactPrefix string, kill func() (matrixLeaderFault, error)) (matrixLeaderFault, error) {
+ 	event := matrixLeaderFault{Scheduled: scheduled, Node: -1}
+ 	b.mu.Lock()
+ 	b.release, b.entered = make(chan struct{}), make(chan struct{}, 1)
+@@ -83,6 +89,7 @@ func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStrea
+ 	}
+ 	j := journal.New(js)
+ 	var prefix []journal.Record
++	var childPrefixes map[string][]journal.Record
+ 	for bound.Err() == nil {
+ 		b.mu.Lock()
+ 		parents := append([]string(nil), b.parents...)
+@@ -118,11 +125,13 @@ func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStrea
+ 				continue
+ 			}
+ 			var pending []string
++			childPrefixes = make(map[string][]journal.Record)
+ 			for child := range children {
+ 				childRecords, _, err := j.Read(bound, "matrixchild", child)
+ 				if err != nil {
+ 					return event, err
+ 				}
++				childPrefixes[child] = childRecords
+ 				if len(childRecords) == 0 || (childRecords[len(childRecords)-1].Kind != journal.Completed && childRecords[len(childRecords)-1].Kind != journal.Failed) {
+ 					pending = append(pending, child)
+ 				}
+@@ -161,7 +170,22 @@ func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStrea
+ 	if prefix == nil {
+ 		return event, fmt.Errorf("no suspended six-child parent at restart cut: %w", bound.Err())
+ 	}
+-	killed, err := killMatrixAllServers(ctx, js, cluster, scheduled)
++	if artifactPrefix != "" {
++		cut := struct {
++			ObservedAt    time.Time
++			Fault         matrixLeaderFault
++			ParentPrefix  []journal.Record
++			ChildPrefixes map[string][]journal.Record
++		}{time.Now().UTC(), event, prefix, childPrefixes}
++		data, err := json.MarshalIndent(cut, "", "  ")
++		if err != nil {
++			return event, err
++		}
++		if err = os.WriteFile(artifactPrefix+"-fanout-cut.json", data, 0644); err != nil {
++			return event, err
++		}
++	}
++	killed, err := kill()
+ 	event.Killed, event.Healed, event.Nodes = killed.Killed, killed.Healed, killed.Nodes
+ 	if err != nil {
+ 		return event, err
+@@ -180,6 +204,15 @@ func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStrea
+ 	if !bytes.Equal(before, after) {
+ 		return event, fmt.Errorf("fanout %s changed journal prefix during restart", event.FanoutParent)
+ 	}
++	if artifactPrefix != "" {
++		data, err := json.MarshalIndent(records, "", "  ")
++		if err != nil {
++			return event, err
++		}
++		if err = os.WriteFile(artifactPrefix+"-fanout-recovered-prefix.json", data, 0644); err != nil {
++			return event, err
++		}
++	}
+ 	return event, nil
+ }
+ 
+@@ -187,8 +220,12 @@ func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStrea
+ // exactly two terminal grandchildren per child, rather than only counting
+ // aggregate completions from the mixed generator.
+ func verifyMatrixRestartFanouts(ctx context.Context, js jetstream.JetStream, faults []matrixLeaderFault) error {
++	return verifyMatrixRestartFanoutsWithArtifacts(ctx, js, faults, "")
++}
++
++func verifyMatrixRestartFanoutsWithArtifacts(ctx context.Context, js jetstream.JetStream, faults []matrixLeaderFault, root string) error {
+ 	j := journal.New(js)
+-	for _, fault := range faults {
++	for faultIndex, fault := range faults {
+ 		if fault.FanoutParent == "" || len(fault.FanoutChildren) != 6 || len(fault.FanoutPendingChildren) == 0 {
+ 			return fmt.Errorf("restart lacks an unfinished six-child fanout cut: %+v", fault)
+ 		}
+@@ -196,6 +233,9 @@ func verifyMatrixRestartFanouts(ctx context.Context, js jetstream.JetStream, fau
+ 		if err != nil {
+ 			return err
+ 		}
++		parentRecords := records
++		childRecords := make(map[string][]journal.Record)
++		grandchildRecords := make(map[string][]journal.Record)
+ 		children, err := matrixTerminalChildren(records, 6)
+ 		if err != nil {
+ 			return fmt.Errorf("%s: %w", fault.FanoutParent, err)
+@@ -210,6 +250,7 @@ func verifyMatrixRestartFanouts(ctx context.Context, js jetstream.JetStream, fau
+ 			if err != nil {
+ 				return err
+ 			}
++			childRecords[child] = records
+ 			grandchildren, err := matrixTerminalChildren(records, 2)
+ 			if err != nil {
+ 				return fmt.Errorf("child %s: %w", child, err)
+@@ -219,10 +260,26 @@ func verifyMatrixRestartFanouts(ctx context.Context, js jetstream.JetStream, fau
+ 				if err != nil {
+ 					return err
+ 				}
++				grandchildRecords[grandchild] = records
+ 				if len(records) == 0 || records[len(records)-1].Kind != journal.Completed {
+ 					return fmt.Errorf("grandchild %s not completed", grandchild)
+ 				}
+ 			}
++
++		}
++		if root != "" {
++			proof := struct {
++				Parent        []journal.Record
++				Children      map[string][]journal.Record
++				Grandchildren map[string][]journal.Record
++			}{parentRecords, childRecords, grandchildRecords}
++			data, err := json.MarshalIndent(proof, "", "  ")
++			if err != nil {
++				return err
++			}
++			if err = os.WriteFile(fmt.Sprintf("%s/fault-%d-fanout-final.json", root, faultIndex+1), data, 0644); err != nil {
++				return err
++			}
+ 		}
+ 	}
+ 	return nil
+diff --git a/integration/tier3_mixed_journal_test.go b/integration/tier3_mixed_journal_test.go
+index 1556987..7c2c1be 100644
+--- a/integration/tier3_mixed_journal_test.go
++++ b/integration/tier3_mixed_journal_test.go
+@@ -42,9 +42,13 @@ func TestFiveContainerMixedAllServersEveryThirtySeconds(t *testing.T) {
+ 	runFiveContainerMixedLeader(t, "restart")
+ }
+ 
++func TestFiveContainerMixedFanoutRestartEveryThirtySeconds(t *testing.T) {
++	runFiveContainerMixedLeader(t, "fanout_restart")
++}
++
+ func runFiveContainerMixedLeader(t *testing.T, row string) {
+ 	t.Helper()
+-	if row != "journal" && row != "consumer" && row != "restart" {
++	if row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" {
+ 		t.Fatal("unsupported R5 fault row")
+ 	}
+ 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
+@@ -169,8 +173,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
+ 			_ = w.Close()
+ 		}
+ 	}()
++	var fanoutBarrier matrixFanoutBarrier
++	handlers := matrixLeaderHandlers()
++	if row == "fanout_restart" {
++		handlers = fanoutBarrier.handlers()
++	}
+ 	for node := 0; node < 5; node++ {
+-		w, err := worker.New(ctx, js, fmt.Sprintf("tier3-mixed-%d", node), matrixLeaderHandlers(), worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
++		w, err := worker.New(ctx, js, fmt.Sprintf("tier3-mixed-%d", node), handlers, worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
+ 			evidenceMu.Lock()
+ 			dispatch = append(dispatch, event)
+ 			evidenceMu.Unlock()
+@@ -282,6 +291,10 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
+ 			prefix := filepath.Join(root, fmt.Sprintf("fault-%d", len(faults)+1))
+ 			if row == "consumer" {
+ 				event, err = killFiveContainerMixedConsumerLeader(ctx, js, cluster, scheduled, prefix, faultRNG)
++			} else if row == "fanout_restart" {
++				event, err = fanoutBarrier.restartWith(ctx, js, scheduled, prefix, func() (matrixLeaderFault, error) {
++					return killFiveContainerMixedAllServers(ctx, js, cluster, scheduled, prefix)
++				})
+ 			} else if row == "restart" {
+ 				event, err = killFiveContainerMixedAllServers(ctx, js, cluster, scheduled, prefix)
+ 			} else {
+@@ -319,6 +332,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
+ 		batchErrors := make(chan error, len(kinds))
+ 		for index, typ := range kinds {
+ 			id := fmt.Sprintf("tier3-%d-batch-%d-%d", seed, batches, index)
++			if row == "fanout_restart" && typ == "matrixfanout" {
++				fanoutBarrier.noteParent(id)
++			}
+ 			batch.Add(1)
+ 			go func() {
+ 				defer batch.Done()
+@@ -370,6 +386,11 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
+ 		t.Fatal(err)
+ 	}
+ 	faultJoined = true
++	if row == "fanout_restart" {
++		if err := verifyMatrixRestartFanoutsWithArtifacts(ctx, js, faults, root); err != nil {
++			t.Fatal(err)
++		}
++	}
+ 	if ctx.Err() != nil {
+ 		select {
+ 		case err := <-fleetErrors:
+diff --git a/scripts/check-tier3-journal-row.py b/scripts/check-tier3-journal-row.py
+index 5d8ff66..525767c 100644
+--- a/scripts/check-tier3-journal-row.py
++++ b/scripts/check-tier3-journal-row.py
+@@ -19,7 +19,8 @@ matrix = load('matrix_row', 'check-matrix-campaign.py')
+ execution = load('matrix_execution', 'check-matrix-result.py')
+ TESTS = {'journal': 'TestFiveContainerMixedJournalLeaderEveryThirtySeconds',
+          'consumer': 'TestFiveContainerMixedConsumerLeaderEveryThirtySeconds',
+-         'restart': 'TestFiveContainerMixedAllServersEveryThirtySeconds'}
++         'restart': 'TestFiveContainerMixedAllServersEveryThirtySeconds',
++         'fanout_restart': 'TestFiveContainerMixedFanoutRestartEveryThirtySeconds'}
+ TEST = TESTS['journal']
+ 
+ 
+@@ -52,7 +53,9 @@ def check(events, duration, expected_row='journal'):
+         if int(count) != batches*per_batch or terminal >= 30 or progress >= 30:
+             raise ValueError(f'{typ}: incorrect count or over-budget p99')
+         cells[typ] = dict(invocations=int(count), terminal_p99_seconds=terminal, progress_p99_seconds=progress)
+-    scope = 'single five-container R5 all-server SIGKILL/restart row' if row == 'restart' else f'single five-container R5 {row}-leader row'
++    scope = ('single five-container R5 mid-fan-out all-server restart row' if row == 'fanout_restart'
++             else 'single five-container R5 all-server SIGKILL/restart row' if row == 'restart'
++             else f'single five-container R5 {row}-leader row')
+     return dict(scope=scope, seed=int(seed), duration_seconds=seconds,
+                 shortened_smoke=duration == '35s', invocations=invocations, journal_entries=entries,
+                 confirmed_faults=faults, active_consumer_faults=active_consumer_faults, cells=cells, clears_full_tier3_release=False)
+@@ -101,6 +104,50 @@ def check_restart_artifacts(root, report):
+     return dict(confirmed_all_down_boundaries=len(faults), nodes_per_boundary=5)
+ 
+ 
++def check_fanout_cut_artifacts(root, report):
++    check_restart_artifacts(root, report)
++    faults = json.loads((root/'faults.json').read_text())
++    for index, fault in enumerate(faults, 1):
++        cut = json.loads((root/f'fault-{index}-fanout-cut.json').read_text())
++        original = cut['ParentPrefix']
++        recovered = json.loads((root/f'fault-{index}-fanout-recovered-prefix.json').read_text())
++        selected = cut['Fault']
++        children, pending = fault['fanout_children'], fault['fanout_pending_children']
++        requests = [x['payload']['child_id'] for x in original
++                    if x['kind']=='StepRequested' and x.get('payload',{}).get('kind')=='call_async']
++        if not original or original[-1]['kind']!='Suspended' or original[-1]['sequence']!=fault['fanout_tail']:
++            raise ValueError('restart cut lacks a suspended parent at recorded tail')
++        if len(children)!=6 or len(set(children))!=6 or requests!=children or not pending or not set(pending)<=set(children):
++            raise ValueError('restart cut lacks exactly six children and unfinished work')
++        for key in ('fanout_parent','fanout_tail','fanout_children','fanout_pending_children'):
++            if selected[key]!=fault[key]: raise ValueError('fanout cut disagrees with fault identity')
++        prefixes = cut['ChildPrefixes']
++        if set(prefixes)!=set(children): raise ValueError('missing child prefixes at restart cut')
++        actual_pending = {child for child,records in prefixes.items()
++                          if not records or records[-1]['kind'] not in ('Completed','Failed')}
++        if actual_pending!=set(pending): raise ValueError('cut does not prove the recorded unfinished children')
++        observed,killed = [datetime.fromisoformat(s.replace('Z','+00:00')) for s in (cut['ObservedAt'],fault['killed'])]
++        if observed.tzinfo is None or observed>killed: raise ValueError('fanout cut was not observed before the kill')
++        if recovered[:len(original)]!=original: raise ValueError('restart changed the exact parent journal prefix')
++        final = json.loads((root/f'fault-{index}-fanout-final.json').read_text())
++        def terminal_children(records, expected):
++            if not records or records[-1]['kind']!='Completed': raise ValueError('fanout tree is not completed')
++            ids=[x['payload']['child_id'] for x in records if x['kind']=='StepRequested' and x.get('payload',{}).get('kind')=='call_async']
++            if len(ids)!=expected or len(set(ids))!=expected: raise ValueError('incorrect terminal child cardinality')
++            return set(ids)
++        if terminal_children(final['Parent'],6)!=set(children) or set(final['Children'])!=set(children):
++            raise ValueError('final parent tree changed child identities')
++        grandchildren=set()
++        for records in final['Children'].values():
++            ids=terminal_children(records,2)
++            if grandchildren & ids: raise ValueError('duplicate grandchild identity across children')
++            grandchildren |= ids
++        if set(final['Grandchildren'])!=grandchildren: raise ValueError('final tree lacks expected grandchildren')
++        for records in final['Grandchildren'].values():
++            if not records or records[-1]['kind']!='Completed': raise ValueError('grandchild is not completed')
++    return dict(unfinished_six_child_cuts=len(faults), recovered_prefixes=len(faults))
++
++
+ if __name__ == '__main__':
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument('--root', type=Path, help='required consumer/restart fault artifacts')
+@@ -114,8 +161,10 @@ if __name__ == '__main__':
+     if args.row == 'consumer':
+         if args.root is None: parser.error('--root is required for the consumer row')
+         report['selection_artifact_checks'] = check_consumer_artifacts(args.root, report)
+-    if args.row == 'restart':
++    if args.row in ('restart','fanout_restart'):
+         if args.root is None: parser.error('--root is required for the restart row')
+         report['restart_artifact_checks'] = check_restart_artifacts(args.root, report)
++    if args.row == 'fanout_restart':
++        report['fanout_cut_artifact_checks'] = check_fanout_cut_artifacts(args.root, report)
+     args.output.write_text(json.dumps(report, indent=2)+'\n')
+     print(json.dumps(report, indent=2))
+diff --git a/scripts/test_tier3_journal_row.py b/scripts/test_tier3_journal_row.py
+index 391e5cd..f38d564 100644
+--- a/scripts/test_tier3_journal_row.py
++++ b/scripts/test_tier3_journal_row.py
+@@ -133,3 +133,39 @@ class RestartRowChecks(unittest.TestCase):
+                 if mode=='valid': self.assertEqual(row.check_restart_artifacts(root,dict(confirmed_faults=1))['confirmed_all_down_boundaries'],1)
+                 else:
+                     with self.assertRaises(ValueError):row.check_restart_artifacts(root,dict(confirmed_faults=1))
++
++
++class FanoutCutChecks(unittest.TestCase):
++    def test_exact_cut_prefix_and_false_controls(self):
++        import tempfile,json
++        children=[f'child{i}' for i in range(6)]
++        for mode in ('valid','terminal_parent','tail','duplicate','missing_pending','terminal_child','changed_prefix','late_cut','wrong_parent','missing_child','final_parent','final_children','final_grandchild'):
++            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as directory:
++                root=Path(directory)
++                ops=[dict(Action=a,Node=n,At=f'2026-10-01T12:00:{i+2:02d}Z') for i,(a,n) in enumerate([('sigkill_removed',n) for n in range(5)]+[('restarted',n) for n in range(5)])]
++                fault=dict(killed='2026-10-01T12:00:01Z',healed='2026-10-01T12:00:12Z',nodes=list(range(5)),fanout_parent='parent',fanout_tail=7,fanout_children=children[:],fanout_pending_children=children[:])
++                prefix=[dict(kind='StepRequested',sequence=i+1,payload=dict(kind='call_async',child_id=child)) for i,child in enumerate(children)]+[dict(kind='Suspended',sequence=7)]
++                cut=dict(ObservedAt='2026-10-01T12:00:00Z',Fault=copy.deepcopy(fault),ParentPrefix=prefix,ChildPrefixes={child:[dict(kind='Suspended')] for child in children})
++                recovered=copy.deepcopy(prefix)
++                final=dict(Parent=copy.deepcopy(prefix)+[dict(kind='Completed')],Children={},Grandchildren={})
++                for child in children:
++                    ids=[f'{child}-grand{i}' for i in range(2)]
++                    final['Children'][child]=[dict(kind='StepRequested',payload=dict(kind='call_async',child_id=i)) for i in ids]+[dict(kind='Completed')]
++                    for i in ids:final['Grandchildren'][i]=[dict(kind='Completed')]
++                if mode=='terminal_parent':cut['ParentPrefix'][-1]['kind']='Completed'
++                elif mode=='tail':fault['fanout_tail']=8
++                elif mode=='duplicate':fault['fanout_children'][-1]=children[0]
++                elif mode=='missing_pending':fault['fanout_pending_children']=[]
++                elif mode=='terminal_child':cut['ChildPrefixes'][children[0]][-1]['kind']='Completed'
++                elif mode=='changed_prefix':recovered[0]['sequence']=100
++                elif mode=='late_cut':cut['ObservedAt']='2026-10-01T12:00:02Z'
++                elif mode=='wrong_parent':cut['Fault']['fanout_parent']='other'
++                elif mode=='missing_child':cut['ChildPrefixes'].pop(children[0])
++                elif mode=='final_parent':final['Parent'][-1]['kind']='Suspended'
++                elif mode=='final_children':final['Children'].pop(children[0])
++                elif mode=='final_grandchild':next(iter(final['Grandchildren'].values()))[-1]['kind']='Failed'
++                for name,value in [('faults.json',[fault]),('fault-1-restart-operations.json',ops),('fault-1-fanout-cut.json',cut),('fault-1-fanout-recovered-prefix.json',recovered),('fault-1-fanout-final.json',final)]:
++                    (root/name).write_text(json.dumps(value))
++                if mode=='valid':self.assertEqual(row.check_fanout_cut_artifacts(root,dict(confirmed_faults=1))['unfinished_six_child_cuts'],1)
++                else:
++                    with self.assertRaises(ValueError):row.check_fanout_cut_artifacts(root,dict(confirmed_faults=1))

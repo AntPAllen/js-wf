@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"sort"
 	"sync"
 	"time"
@@ -63,6 +64,11 @@ func (b *matrixFanoutBarrier) handlers() map[string]worker.Handler {
 }
 
 func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStream, cluster *testcluster.ProcessCluster, scheduled time.Time) (matrixLeaderFault, error) {
+	return b.restartWith(ctx, js, scheduled, "", func() (matrixLeaderFault, error) { return killMatrixAllServers(ctx, js, cluster, scheduled) })
+}
+
+// Share the cut and identity checks across native R3 and container R5 rows.
+func (b *matrixFanoutBarrier) restartWith(ctx context.Context, js jetstream.JetStream, scheduled time.Time, artifactPrefix string, kill func() (matrixLeaderFault, error)) (matrixLeaderFault, error) {
 	event := matrixLeaderFault{Scheduled: scheduled, Node: -1}
 	b.mu.Lock()
 	b.release, b.entered = make(chan struct{}), make(chan struct{}, 1)
@@ -83,6 +89,7 @@ func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStrea
 	}
 	j := journal.New(js)
 	var prefix []journal.Record
+	var childPrefixes map[string][]journal.Record
 	for bound.Err() == nil {
 		b.mu.Lock()
 		parents := append([]string(nil), b.parents...)
@@ -118,11 +125,13 @@ func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStrea
 				continue
 			}
 			var pending []string
+			childPrefixes = make(map[string][]journal.Record)
 			for child := range children {
 				childRecords, _, err := j.Read(bound, "matrixchild", child)
 				if err != nil {
 					return event, err
 				}
+				childPrefixes[child] = childRecords
 				if len(childRecords) == 0 || (childRecords[len(childRecords)-1].Kind != journal.Completed && childRecords[len(childRecords)-1].Kind != journal.Failed) {
 					pending = append(pending, child)
 				}
@@ -161,7 +170,22 @@ func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStrea
 	if prefix == nil {
 		return event, fmt.Errorf("no suspended six-child parent at restart cut: %w", bound.Err())
 	}
-	killed, err := killMatrixAllServers(ctx, js, cluster, scheduled)
+	if artifactPrefix != "" {
+		cut := struct {
+			ObservedAt    time.Time
+			Fault         matrixLeaderFault
+			ParentPrefix  []journal.Record
+			ChildPrefixes map[string][]journal.Record
+		}{time.Now().UTC(), event, prefix, childPrefixes}
+		data, err := json.MarshalIndent(cut, "", "  ")
+		if err != nil {
+			return event, err
+		}
+		if err = os.WriteFile(artifactPrefix+"-fanout-cut.json", data, 0644); err != nil {
+			return event, err
+		}
+	}
+	killed, err := kill()
 	event.Killed, event.Healed, event.Nodes = killed.Killed, killed.Healed, killed.Nodes
 	if err != nil {
 		return event, err
@@ -180,6 +204,15 @@ func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStrea
 	if !bytes.Equal(before, after) {
 		return event, fmt.Errorf("fanout %s changed journal prefix during restart", event.FanoutParent)
 	}
+	if artifactPrefix != "" {
+		data, err := json.MarshalIndent(records, "", "  ")
+		if err != nil {
+			return event, err
+		}
+		if err = os.WriteFile(artifactPrefix+"-fanout-recovered-prefix.json", data, 0644); err != nil {
+			return event, err
+		}
+	}
 	return event, nil
 }
 
@@ -187,8 +220,12 @@ func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStrea
 // exactly two terminal grandchildren per child, rather than only counting
 // aggregate completions from the mixed generator.
 func verifyMatrixRestartFanouts(ctx context.Context, js jetstream.JetStream, faults []matrixLeaderFault) error {
+	return verifyMatrixRestartFanoutsWithArtifacts(ctx, js, faults, "")
+}
+
+func verifyMatrixRestartFanoutsWithArtifacts(ctx context.Context, js jetstream.JetStream, faults []matrixLeaderFault, root string) error {
 	j := journal.New(js)
-	for _, fault := range faults {
+	for faultIndex, fault := range faults {
 		if fault.FanoutParent == "" || len(fault.FanoutChildren) != 6 || len(fault.FanoutPendingChildren) == 0 {
 			return fmt.Errorf("restart lacks an unfinished six-child fanout cut: %+v", fault)
 		}
@@ -196,6 +233,9 @@ func verifyMatrixRestartFanouts(ctx context.Context, js jetstream.JetStream, fau
 		if err != nil {
 			return err
 		}
+		parentRecords := records
+		childRecords := make(map[string][]journal.Record)
+		grandchildRecords := make(map[string][]journal.Record)
 		children, err := matrixTerminalChildren(records, 6)
 		if err != nil {
 			return fmt.Errorf("%s: %w", fault.FanoutParent, err)
@@ -210,6 +250,7 @@ func verifyMatrixRestartFanouts(ctx context.Context, js jetstream.JetStream, fau
 			if err != nil {
 				return err
 			}
+			childRecords[child] = records
 			grandchildren, err := matrixTerminalChildren(records, 2)
 			if err != nil {
 				return fmt.Errorf("child %s: %w", child, err)
@@ -219,9 +260,25 @@ func verifyMatrixRestartFanouts(ctx context.Context, js jetstream.JetStream, fau
 				if err != nil {
 					return err
 				}
+				grandchildRecords[grandchild] = records
 				if len(records) == 0 || records[len(records)-1].Kind != journal.Completed {
 					return fmt.Errorf("grandchild %s not completed", grandchild)
 				}
+			}
+
+		}
+		if root != "" {
+			proof := struct {
+				Parent        []journal.Record
+				Children      map[string][]journal.Record
+				Grandchildren map[string][]journal.Record
+			}{parentRecords, childRecords, grandchildRecords}
+			data, err := json.MarshalIndent(proof, "", "  ")
+			if err != nil {
+				return err
+			}
+			if err = os.WriteFile(fmt.Sprintf("%s/fault-%d-fanout-final.json", root, faultIndex+1), data, 0644); err != nil {
+				return err
 			}
 		}
 	}

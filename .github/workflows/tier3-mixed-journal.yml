@@ -3,11 +3,11 @@ on:
   workflow_dispatch:
     inputs:
       row:
-        description: R5 leader fault row
+        description: R5 mixed fault row
         type: choice
         required: true
         default: journal
-        options: [journal, consumer, restart]
+        options: [journal, consumer, restart, fanout_restart]
       duration:
         description: Ten minutes is sustained; 35 seconds is fixture smoke only
         required: true
@@ -33,13 +33,14 @@ jobs:
           go-version-file: go.mod
       - name: Verify row-result guard
         run: python3 -m unittest discover -s scripts -p 'test_tier3*.py'
-      - name: Sustain the selected five-container mixed leader row
+      - name: Sustain the selected five-container mixed fault row
         run: |
           set -o pipefail
           case "$TIER3_MATRIX_ROW" in
             journal) row_test=TestFiveContainerMixedJournalLeaderEveryThirtySeconds ;;
             consumer) row_test=TestFiveContainerMixedConsumerLeaderEveryThirtySeconds ;;
             restart) row_test=TestFiveContainerMixedAllServersEveryThirtySeconds ;;
+            fanout_restart) row_test=TestFiveContainerMixedFanoutRestartEveryThirtySeconds ;;
             *) exit 1 ;;
           esac
           go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py

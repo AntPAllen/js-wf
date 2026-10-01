@@ -42,9 +42,13 @@ func TestFiveContainerMixedAllServersEveryThirtySeconds(t *testing.T) {
 	runFiveContainerMixedLeader(t, "restart")
 }
 
+func TestFiveContainerMixedFanoutRestartEveryThirtySeconds(t *testing.T) {
+	runFiveContainerMixedLeader(t, "fanout_restart")
+}
+
 func runFiveContainerMixedLeader(t *testing.T, row string) {
 	t.Helper()
-	if row != "journal" && row != "consumer" && row != "restart" {
+	if row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" {
 		t.Fatal("unsupported R5 fault row")
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
@@ -169,8 +173,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			_ = w.Close()
 		}
 	}()
+	var fanoutBarrier matrixFanoutBarrier
+	handlers := matrixLeaderHandlers()
+	if row == "fanout_restart" {
+		handlers = fanoutBarrier.handlers()
+	}
 	for node := 0; node < 5; node++ {
-		w, err := worker.New(ctx, js, fmt.Sprintf("tier3-mixed-%d", node), matrixLeaderHandlers(), worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
+		w, err := worker.New(ctx, js, fmt.Sprintf("tier3-mixed-%d", node), handlers, worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
 			evidenceMu.Lock()
 			dispatch = append(dispatch, event)
 			evidenceMu.Unlock()
@@ -282,6 +291,10 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			prefix := filepath.Join(root, fmt.Sprintf("fault-%d", len(faults)+1))
 			if row == "consumer" {
 				event, err = killFiveContainerMixedConsumerLeader(ctx, js, cluster, scheduled, prefix, faultRNG)
+			} else if row == "fanout_restart" {
+				event, err = fanoutBarrier.restartWith(ctx, js, scheduled, prefix, func() (matrixLeaderFault, error) {
+					return killFiveContainerMixedAllServers(ctx, js, cluster, scheduled, prefix)
+				})
 			} else if row == "restart" {
 				event, err = killFiveContainerMixedAllServers(ctx, js, cluster, scheduled, prefix)
 			} else {
@@ -319,6 +332,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		batchErrors := make(chan error, len(kinds))
 		for index, typ := range kinds {
 			id := fmt.Sprintf("tier3-%d-batch-%d-%d", seed, batches, index)
+			if row == "fanout_restart" && typ == "matrixfanout" {
+				fanoutBarrier.noteParent(id)
+			}
 			batch.Add(1)
 			go func() {
 				defer batch.Done()
@@ -370,6 +386,11 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		t.Fatal(err)
 	}
 	faultJoined = true
+	if row == "fanout_restart" {
+		if err := verifyMatrixRestartFanoutsWithArtifacts(ctx, js, faults, root); err != nil {
+			t.Fatal(err)
+		}
+	}
 	if ctx.Err() != nil {
 		select {
 		case err := <-fleetErrors:

@@ -133,3 +133,39 @@ class RestartRowChecks(unittest.TestCase):
                 if mode=='valid': self.assertEqual(row.check_restart_artifacts(root,dict(confirmed_faults=1))['confirmed_all_down_boundaries'],1)
                 else:
                     with self.assertRaises(ValueError):row.check_restart_artifacts(root,dict(confirmed_faults=1))
+
+
+class FanoutCutChecks(unittest.TestCase):
+    def test_exact_cut_prefix_and_false_controls(self):
+        import tempfile,json
+        children=[f'child{i}' for i in range(6)]
+        for mode in ('valid','terminal_parent','tail','duplicate','missing_pending','terminal_child','changed_prefix','late_cut','wrong_parent','missing_child','final_parent','final_children','final_grandchild'):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as directory:
+                root=Path(directory)
+                ops=[dict(Action=a,Node=n,At=f'2026-10-01T12:00:{i+2:02d}Z') for i,(a,n) in enumerate([('sigkill_removed',n) for n in range(5)]+[('restarted',n) for n in range(5)])]
+                fault=dict(killed='2026-10-01T12:00:01Z',healed='2026-10-01T12:00:12Z',nodes=list(range(5)),fanout_parent='parent',fanout_tail=7,fanout_children=children[:],fanout_pending_children=children[:])
+                prefix=[dict(kind='StepRequested',sequence=i+1,payload=dict(kind='call_async',child_id=child)) for i,child in enumerate(children)]+[dict(kind='Suspended',sequence=7)]
+                cut=dict(ObservedAt='2026-10-01T12:00:00Z',Fault=copy.deepcopy(fault),ParentPrefix=prefix,ChildPrefixes={child:[dict(kind='Suspended')] for child in children})
+                recovered=copy.deepcopy(prefix)
+                final=dict(Parent=copy.deepcopy(prefix)+[dict(kind='Completed')],Children={},Grandchildren={})
+                for child in children:
+                    ids=[f'{child}-grand{i}' for i in range(2)]
+                    final['Children'][child]=[dict(kind='StepRequested',payload=dict(kind='call_async',child_id=i)) for i in ids]+[dict(kind='Completed')]
+                    for i in ids:final['Grandchildren'][i]=[dict(kind='Completed')]
+                if mode=='terminal_parent':cut['ParentPrefix'][-1]['kind']='Completed'
+                elif mode=='tail':fault['fanout_tail']=8
+                elif mode=='duplicate':fault['fanout_children'][-1]=children[0]
+                elif mode=='missing_pending':fault['fanout_pending_children']=[]
+                elif mode=='terminal_child':cut['ChildPrefixes'][children[0]][-1]['kind']='Completed'
+                elif mode=='changed_prefix':recovered[0]['sequence']=100
+                elif mode=='late_cut':cut['ObservedAt']='2026-10-01T12:00:02Z'
+                elif mode=='wrong_parent':cut['Fault']['fanout_parent']='other'
+                elif mode=='missing_child':cut['ChildPrefixes'].pop(children[0])
+                elif mode=='final_parent':final['Parent'][-1]['kind']='Suspended'
+                elif mode=='final_children':final['Children'].pop(children[0])
+                elif mode=='final_grandchild':next(iter(final['Grandchildren'].values()))[-1]['kind']='Failed'
+                for name,value in [('faults.json',[fault]),('fault-1-restart-operations.json',ops),('fault-1-fanout-cut.json',cut),('fault-1-fanout-recovered-prefix.json',recovered),('fault-1-fanout-final.json',final)]:
+                    (root/name).write_text(json.dumps(value))
+                if mode=='valid':self.assertEqual(row.check_fanout_cut_artifacts(root,dict(confirmed_faults=1))['unfinished_six_child_cuts'],1)
+                else:
+                    with self.assertRaises(ValueError):row.check_fanout_cut_artifacts(root,dict(confirmed_faults=1))

@@ -1,0 +1,51 @@
+{
+  "scope": "single five-container R5 mid-fan-out all-server restart row",
+  "seed": 1,
+  "duration_seconds": 35,
+  "shortened_smoke": true,
+  "invocations": 224,
+  "journal_entries": 2473,
+  "confirmed_faults": 1,
+  "active_consumer_faults": null,
+  "cells": {
+    "matrixshort": {
+      "invocations": 32,
+      "terminal_p99_seconds": 0.8016937239999999,
+      "progress_p99_seconds": 0.711012798
+    },
+    "matrixtimer": {
+      "invocations": 24,
+      "terminal_p99_seconds": 0.352352534,
+      "progress_p99_seconds": 11.353572556
+    },
+    "matrixsignal": {
+      "invocations": 16,
+      "terminal_p99_seconds": 4.86531771,
+      "progress_p99_seconds": 1.250897917
+    },
+    "matrixfanout": {
+      "invocations": 8,
+      "terminal_p99_seconds": 5.060605246,
+      "progress_p99_seconds": 0.299669885
+    },
+    "matrixchild": {
+      "invocations": 48,
+      "terminal_p99_seconds": 5.075130579,
+      "progress_p99_seconds": 1.849793818
+    },
+    "matrixgrandchild": {
+      "invocations": 96,
+      "terminal_p99_seconds": 16.420112204,
+      "progress_p99_seconds": 0.11350597600000001
+    }
+  },
+  "clears_full_tier3_release": false,
+  "restart_artifact_checks": {
+    "confirmed_all_down_boundaries": 1,
+    "nodes_per_boundary": 5
+  },
+  "fanout_cut_artifact_checks": {
+    "unfinished_six_child_cuts": 1,
+    "recovered_prefixes": 1
+  }
+}

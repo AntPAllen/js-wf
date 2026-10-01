@@ -19,7 +19,8 @@ matrix = load('matrix_row', 'check-matrix-campaign.py')
 execution = load('matrix_execution', 'check-matrix-result.py')
 TESTS = {'journal': 'TestFiveContainerMixedJournalLeaderEveryThirtySeconds',
          'consumer': 'TestFiveContainerMixedConsumerLeaderEveryThirtySeconds',
-         'restart': 'TestFiveContainerMixedAllServersEveryThirtySeconds'}
+         'restart': 'TestFiveContainerMixedAllServersEveryThirtySeconds',
+         'fanout_restart': 'TestFiveContainerMixedFanoutRestartEveryThirtySeconds'}
 TEST = TESTS['journal']
 
 
@@ -52,7 +53,9 @@ def check(events, duration, expected_row='journal'):
         if int(count) != batches*per_batch or terminal >= 30 or progress >= 30:
             raise ValueError(f'{typ}: incorrect count or over-budget p99')
         cells[typ] = dict(invocations=int(count), terminal_p99_seconds=terminal, progress_p99_seconds=progress)
-    scope = 'single five-container R5 all-server SIGKILL/restart row' if row == 'restart' else f'single five-container R5 {row}-leader row'
+    scope = ('single five-container R5 mid-fan-out all-server restart row' if row == 'fanout_restart'
+             else 'single five-container R5 all-server SIGKILL/restart row' if row == 'restart'
+             else f'single five-container R5 {row}-leader row')
     return dict(scope=scope, seed=int(seed), duration_seconds=seconds,
                 shortened_smoke=duration == '35s', invocations=invocations, journal_entries=entries,
                 confirmed_faults=faults, active_consumer_faults=active_consumer_faults, cells=cells, clears_full_tier3_release=False)
@@ -101,6 +104,50 @@ def check_restart_artifacts(root, report):
     return dict(confirmed_all_down_boundaries=len(faults), nodes_per_boundary=5)
 
 
+def check_fanout_cut_artifacts(root, report):
+    check_restart_artifacts(root, report)
+    faults = json.loads((root/'faults.json').read_text())
+    for index, fault in enumerate(faults, 1):
+        cut = json.loads((root/f'fault-{index}-fanout-cut.json').read_text())
+        original = cut['ParentPrefix']
+        recovered = json.loads((root/f'fault-{index}-fanout-recovered-prefix.json').read_text())
+        selected = cut['Fault']
+        children, pending = fault['fanout_children'], fault['fanout_pending_children']
+        requests = [x['payload']['child_id'] for x in original
+                    if x['kind']=='StepRequested' and x.get('payload',{}).get('kind')=='call_async']
+        if not original or original[-1]['kind']!='Suspended' or original[-1]['sequence']!=fault['fanout_tail']:
+            raise ValueError('restart cut lacks a suspended parent at recorded tail')
+        if len(children)!=6 or len(set(children))!=6 or requests!=children or not pending or not set(pending)<=set(children):
+            raise ValueError('restart cut lacks exactly six children and unfinished work')
+        for key in ('fanout_parent','fanout_tail','fanout_children','fanout_pending_children'):
+            if selected[key]!=fault[key]: raise ValueError('fanout cut disagrees with fault identity')
+        prefixes = cut['ChildPrefixes']
+        if set(prefixes)!=set(children): raise ValueError('missing child prefixes at restart cut')
+        actual_pending = {child for child,records in prefixes.items()
+                          if not records or records[-1]['kind'] not in ('Completed','Failed')}
+        if actual_pending!=set(pending): raise ValueError('cut does not prove the recorded unfinished children')
+        observed,killed = [datetime.fromisoformat(s.replace('Z','+00:00')) for s in (cut['ObservedAt'],fault['killed'])]
+        if observed.tzinfo is None or observed>killed: raise ValueError('fanout cut was not observed before the kill')
+        if recovered[:len(original)]!=original: raise ValueError('restart changed the exact parent journal prefix')
+        final = json.loads((root/f'fault-{index}-fanout-final.json').read_text())
+        def terminal_children(records, expected):
+            if not records or records[-1]['kind']!='Completed': raise ValueError('fanout tree is not completed')
+            ids=[x['payload']['child_id'] for x in records if x['kind']=='StepRequested' and x.get('payload',{}).get('kind')=='call_async']
+            if len(ids)!=expected or len(set(ids))!=expected: raise ValueError('incorrect terminal child cardinality')
+            return set(ids)
+        if terminal_children(final['Parent'],6)!=set(children) or set(final['Children'])!=set(children):
+            raise ValueError('final parent tree changed child identities')
+        grandchildren=set()
+        for records in final['Children'].values():
+            ids=terminal_children(records,2)
+            if grandchildren & ids: raise ValueError('duplicate grandchild identity across children')
+            grandchildren |= ids
+        if set(final['Grandchildren'])!=grandchildren: raise ValueError('final tree lacks expected grandchildren')
+        for records in final['Grandchildren'].values():
+            if not records or records[-1]['kind']!='Completed': raise ValueError('grandchild is not completed')
+    return dict(unfinished_six_child_cuts=len(faults), recovered_prefixes=len(faults))
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, help='required consumer/restart fault artifacts')
@@ -114,8 +161,10 @@ if __name__ == '__main__':
     if args.row == 'consumer':
         if args.root is None: parser.error('--root is required for the consumer row')
         report['selection_artifact_checks'] = check_consumer_artifacts(args.root, report)
-    if args.row == 'restart':
+    if args.row in ('restart','fanout_restart'):
         if args.root is None: parser.error('--root is required for the restart row')
         report['restart_artifact_checks'] = check_restart_artifacts(args.root, report)
+    if args.row == 'fanout_restart':
+        report['fanout_cut_artifact_checks'] = check_fanout_cut_artifacts(args.root, report)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))

@@ -4621,3 +4621,25 @@ is queued at0d6a94b with row=restart and duration=10m. Launch identity is retain
 alongside the smoke proof. This is not terminal acceptance. The comprehensive
 simulator36900782095 remains in progress; the million-timer service remains
 active at MainPID18146 with94,083 receipts at its latest checkpoint.
+
+
+## R5 mid-fan-out restart row and independent tree evidence
+
+The shared runner now supports fanout_restart as a distinct row. It uses the
+existing production-handler test barrier to select a suspended parent while
+actual grandchild effects are held, records all six child journals and their
+unfinished set, then performs the verified all-five-down restart. The parent
+prefix must survive exactly, and the final six children/twelve grandchildren
+must match the original request identities. Cut, recovered-prefix and final
+journals are retained and independently cross-checked by the row guard.
+
+[Final native race smoke](scale/tier3-mixed-fanout-restart-2026-10-01/) passes78.46s
+/79.487s package event:224 invocations,2,473 entries,one full restart. All six
+children were unfinished at the selected cut. Largest terminal p99 is16.420s;
+all history, invariant and physical drain gates pass. All15 heartbeat fencing
+records overlap the confirmed outage and match counters; exact delivery steps
+and later invocation acknowledgements are retained. All15 invocations complete
+after fencing. All44 acknowledged repairs have checked explanations. All37
+Python guard tests and integration vet pass. The earlier smoke before final
+JSON retention also passed and its native events remain visible. The ten-minute
+row and full24-hour matrix remain open; server-side causes are unconfirmed.
