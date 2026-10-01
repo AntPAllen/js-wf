@@ -31,3 +31,14 @@ Full hosted pagination confirmation is pending.
 
 WF_BLOB_ENUMERATION_COUNT may lower local diagnostics to 100..100005;
 only count greater than 100000 counts as the combined pagination proof.
+
+## Full hosted boundary proof
+
+Run 36844233572 at 100f16d completes successfully. It creates all 100,005
+objects/keys in 21.08 seconds; raw Object Store subjects/messages are 200,015
+and KV subjects/messages are 100,005. Both production sweeps list 100,007 live
+objects with one reference. Age guard deletes none (22.175 seconds); zero age
+deletes exactly one orphan (22.782 seconds). Final payload/absence checks pass.
+Test total is 71.219 seconds. Raw log and source/job state are retained.
+This clears the real pagination slice, while online GC and the independent
+full-matrix/scale release requirements remain open.

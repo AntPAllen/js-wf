@@ -1,0 +1,12 @@
+--- worker/worker.go
++++ worker/worker.go
+@@ -697,7 +697,8 @@
+ 				w.enqueueCanceledHandoff(parent, typ, id, metadata.Sequence.Stream)
+ 			}
+ 		}
+-		emit("nak", msg.NakWithDelay(delay))
++		_ = delay
++		emit("nak", msg.Ack())
+ 		return
+ 	}
+ 	if err := release(); err != nil {

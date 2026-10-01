@@ -3811,3 +3811,35 @@ source. [Both scopes and failure artifacts](scale/lease-held-consumer-pressure-2
 are retained. The failure is not erased or called a NATS bug by the other pass.
 The new 200-seed mixed campaign, comprehensive Tier 1 run and original million
 timers remain live. Remaining release gates and server cause stay open.
+
+
+## Completed real pagination and native unavailable-tail worker replay
+
+The [full blob boundary run](https://github.com/AntPAllen/js-wf/actions/runs/36844233572)
+at 100f16d passes in 71.219 seconds with 100,005 actual objects and KV keys.
+Raw subjects are 200,015 in Object Store and 100,005 in state. Both production
+sweeps enumerate 100,007 live objects/one reference; the age guard deletes none,
+then zero age deletes exactly the orphan. Protected result and unmanaged payloads
+remain intact and previously deleted metadata stays excluded. [Raw log and
+source/job scope](scale/blob-enumeration-boundary-2026-10-01/) clear this real
+pagination slice; collection still requires quiescent writers.
+
+A new native Tier 1 workload injects the hosted pressure failure's client-visible
+API 503/10008 at each production worker append stage, one/two/three times. Every
+failed delivery requires a retained run, exact journal prefix, released lease
+and no outcome; new workers resume until a four-record journal, immutable result
+42, raw integrity and full drain are established. Pre-completion effect retries
+remain permitted when their outcome was not recorded. 100,000 schedules pass
+in 17.888 seconds with 6,254,317 events, all twelve combinations, maximum virtual
+time three seconds; first-ten exact and cross-process replay pass. Twelve pins
+and full regression corpus plus workload pass under race in 8.009 seconds;
+vet passes. A compiled ACK-on-retry mutation fails in 0.004 seconds on lost
+pending run. Its earlier build failure and an initial fixture outcome-codec
+error are retained but excluded from proof. [Source, controls and scope](scale/worker-tail-unavailable-2026-10-01/)
+are retained. This reproduces runtime recovery decisions, not the NATS mechanism
+or real delayed-quorum liveness. No runtime policy or gates change.
+
+Latest comprehensive simulation runs predate this additional workload; final
+combined validation, whole-matrix 200 seeds, five-node 24-hour soak, original
+million-timer final audit, ten-million spilled-input traffic, online GC and
+remaining combined-fault gates remain open.
