@@ -1,0 +1,11 @@
+--- a/cmd/wf/replay.go
++++ b/cmd/wf/replay.go
+@@ -221,7 +221,7 @@
+ 			return stage(c, bundle.Input, locals)
+ 		}
+ 	}
+-	return wf.ReplayWithContinuations(raw, initial, stages, opts)
++	return wf.Replay(raw, initial, opts)
+ }
+ 
+ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replayReport, error) {

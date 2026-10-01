@@ -81,7 +81,7 @@ func run(ctx context.Context, args []string) error {
 	if *url == "" {
 		*url = nats.DefaultURL
 	}
-	handlers, err := loadHandlers(*pluginPath, *pluginSymbol)
+	handlers, continuationOptions, err := loadHandlers(*pluginPath, *pluginSymbol)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func run(ctx context.Context, args []string) error {
 			return fmt.Errorf("retention workflow type %q collides with plugin handler", *retentionType)
 		}
 	}
-	nc, js, backend, w, err := startWorker(ctx, *url, *id, *replicas, *journalMaxBytes, *concurrency, *timerBackend, handlers, *retentionType, *retentionGrace)
+	nc, js, backend, w, err := startWorker(ctx, *url, *id, *replicas, *journalMaxBytes, *concurrency, *timerBackend, handlers, *retentionType, *retentionGrace, continuationOptions...)
 	if err != nil {
 		if ctx.Err() != nil {
 			return nil
@@ -212,7 +212,7 @@ func run(ctx context.Context, args []string) error {
 	return firstErr
 }
 
-func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBytes int64, concurrency int, timerBackend string, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, error) {
+func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBytes int64, concurrency int, timerBackend string, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration, options ...worker.Option) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, error) {
 	startupCtx, stopStartup := context.WithTimeout(ctx, 30*time.Second)
 	defer stopStartup()
 	var lastErr error
@@ -235,7 +235,7 @@ func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBy
 						workerHandlers[retentionType] = retention.Handler(js, retentionGrace)
 					}
 					var w *worker.Worker
-					w, err = worker.New(startupCtx, js, id, workerHandlers, worker.WithPartitionConcurrency(concurrency))
+					w, err = worker.New(startupCtx, js, id, workerHandlers, append(options, worker.WithPartitionConcurrency(concurrency))...)
 					if err == nil {
 						return nc, js, backend, w, nil
 					}
@@ -319,31 +319,49 @@ func metricsHandler(js jetstream.JetStream, w *worker.Worker) http.Handler {
 	})
 }
 
-func loadHandlers(path, symbolName string) (map[string]worker.Handler, error) {
+func loadHandlers(path, symbolName string) (map[string]worker.Handler, []worker.Option, error) {
 	loaded, err := plugin.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("open handler plugin: %w", err)
+		return nil, nil, fmt.Errorf("open handler plugin: %w", err)
 	}
 	symbol, err := loaded.Lookup(symbolName)
 	if err != nil {
-		return nil, fmt.Errorf("load handler map %q: %w", symbolName, err)
+		return nil, nil, fmt.Errorf("load handler map %q: %w", symbolName, err)
 	}
 	var handlers map[string]worker.Handler
+	var definitions map[string]worker.WorkflowDefinition
+	var options []worker.Option
 	switch value := symbol.(type) {
 	case *map[string]worker.Handler:
 		handlers = *value
 	case func() map[string]worker.Handler:
 		handlers = value()
+	case *map[string]worker.WorkflowDefinition:
+		definitions = *value
+	case func() map[string]worker.WorkflowDefinition:
+		definitions = value()
 	default:
-		return nil, fmt.Errorf("plugin symbol %q must be a map[string]worker.Handler or a function returning one", symbolName)
+		return nil, nil, fmt.Errorf("plugin symbol %q must be a map[string]worker.Handler or map[string]worker.WorkflowDefinition, or a function returning either", symbolName)
+	}
+	if definitions != nil {
+		handlers = make(map[string]worker.Handler, len(definitions))
+		for typ, definition := range definitions {
+			if err := definition.Validate(); err != nil {
+				return nil, nil, fmt.Errorf("workflow %q: %w", typ, err)
+			}
+			handlers[typ] = definition.Handler
+			if len(definition.Continuations) != 0 {
+				options = append(options, worker.WithContinuations(typ, definition.Continuations))
+			}
+		}
 	}
 	if len(handlers) == 0 {
-		return nil, fmt.Errorf("handler map is empty")
+		return nil, nil, fmt.Errorf("handler map is empty")
 	}
 	for typ, handler := range handlers {
 		if strings.TrimSpace(typ) != typ || typ == "" || handler == nil {
-			return nil, fmt.Errorf("invalid handler for type %q", typ)
+			return nil, nil, fmt.Errorf("invalid handler for type %q", typ)
 		}
 	}
-	return handlers, nil
+	return handlers, options, nil
 }

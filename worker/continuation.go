@@ -16,6 +16,27 @@ import (
 // explicit locals. Names must remain registered while their checkpoints exist.
 type ContinuationHandler func(*wf.Context, json.RawMessage, json.RawMessage) (json.RawMessage, error)
 
+// WorkflowDefinition packages an initial handler with its named continuation
+// stages. Go plugins can export a definition for offline replay or a map of
+// definitions for wf-worker. Keep names registered while checkpoints exist.
+type WorkflowDefinition struct {
+	Handler       Handler
+	Continuations map[string]ContinuationHandler
+}
+
+// Validate checks the exported handler and stage registrations before startup.
+func (d WorkflowDefinition) Validate() error {
+	if d.Handler == nil {
+		return fmt.Errorf("workflow definition has no initial handler")
+	}
+	for name, handler := range d.Continuations {
+		if identity.ValidateToken(name) != nil || handler == nil {
+			return fmt.Errorf("invalid continuation stage %q", name)
+		}
+	}
+	return nil
+}
+
 // WithContinuations opts an existing workflow type into boundary compaction.
 // Registration is copied at construction and must be identical on all workers.
 func WithContinuations(typ string, stages map[string]ContinuationHandler) Option {

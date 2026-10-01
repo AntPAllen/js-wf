@@ -3431,3 +3431,32 @@ The final-source original-terminal limit workload additionally passes 100,000
 seeds in 136.405 seconds. A synthetic 100,000-record hard-cap replay and all new
 metadata cases pass under race in 6.258 seconds. This proves offline cap handling;
 it does not replace the independent real production-limit durability evidence.
+
+## Workflow definitions in worker and offline replay plugins
+
+Go plugins can now export worker.WorkflowDefinition (initial Handler plus named
+Continuations). Worker runner map/factory exports register stages; replay CLI
+single definition/factory exports audit through ReplayWithContinuations. The
+specialized cancellation, limit-request and non-step limit replay paths use the
+same stage-aware handler. Existing function/map plugins remain supported.
+
+A shared two-checkpoint fixture passes real R1 runner map/factory execution and
+real R3 execution/export, suspended/completed replay, saved-bundle replay with
+no reachable NATS, changed/missing stage and missing-object checks. Synthetic
+cancellation and limit Failed tails exercise specialized CLI validation; they
+are not independent real fault proofs. One live effect is retained and all
+replays execute zero effects. Full wf/wf-worker command race suites pass in
+23.412/6.651 seconds. Compiled dropped-registration and initial-only replay
+controls fail semantically. [Logs and scope](scale/continuation-plugin-2026-10-01/)
+retain the evidence, including an initial R3 setup timeout and the missing-object
+error-reporting bug it exposed. Bounded provisioning attempts and typed error
+preservation are verified in passing runs. Other continuation and full release
+gates remain open; simulator transports and pinned schedules are unchanged.
+
+The next hosted pressure and lease-disk-contract jobs at f3ff0c0 passed with
+unchanged fixture code. [All six rows and disk/monitoring artifacts](scale/lease-append-pressure-host-f3ff0c0-2026-10-01/)
+are retained. Delayed two-owner KV sums were 6.600/3.531 seconds, again below the
+mixed ~30-second observations. This pass does not explain the preceding
+503/10008 journal-tail failure. The independent mixed and newer full simulation
+jobs remain live; the original million-timer process remains live past 374,000
+deliveries without restart.

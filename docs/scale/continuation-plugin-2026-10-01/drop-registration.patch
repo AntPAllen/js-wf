@@ -1,0 +1,11 @@
+--- a/cmd/wf-worker/main.go
++++ b/cmd/wf-worker/main.go
+@@ -235,7 +235,7 @@
+ 						workerHandlers[retentionType] = retention.Handler(js, retentionGrace)
+ 					}
+ 					var w *worker.Worker
+-					w, err = worker.New(startupCtx, js, id, workerHandlers, append(options, worker.WithPartitionConcurrency(concurrency))...)
++					w, err = worker.New(startupCtx, js, id, workerHandlers, worker.WithPartitionConcurrency(concurrency))
+ 					if err == nil {
+ 						return nc, js, backend, w, nil
+ 					}

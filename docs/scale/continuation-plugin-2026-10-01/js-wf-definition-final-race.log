@@ -1,0 +1,51 @@
+=== RUN   TestOperatorCommands
+--- PASS: TestOperatorCommands (3.02s)
+=== RUN   TestListAttributeFilter
+--- PASS: TestListAttributeFilter (0.18s)
+=== RUN   TestJournalCapacityAlert
+--- PASS: TestJournalCapacityAlert (0.15s)
+=== RUN   TestOperatorReplayFailedAndSuspended
+--- PASS: TestOperatorReplayFailedAndSuspended (14.03s)
+=== RUN   TestReplayContinuationPlugin
+    replay_continuation_plugin_test.go:45: provision attempt: context deadline exceeded
+    replay_continuation_plugin_test.go:173: two continuation plugin stages: raw_entries=18 objects=2 result=60 offline_effects=0
+--- PASS: TestReplayContinuationPlugin (4.85s)
+=== RUN   TestReplayJournalLimitChecksAttemptedStepWithoutEffect
+--- PASS: TestReplayJournalLimitChecksAttemptedStepWithoutEffect (0.00s)
+=== RUN   TestReplayNonStepJournalLimit
+=== RUN   TestReplayNonStepJournalLimit/suspension
+=== RUN   TestReplayNonStepJournalLimit/panic
+--- PASS: TestReplayNonStepJournalLimit (0.00s)
+    --- PASS: TestReplayNonStepJournalLimit/suspension (0.00s)
+    --- PASS: TestReplayNonStepJournalLimit/panic (0.00s)
+=== RUN   TestReplayRejectedSignalDrainUsesRetainedSource
+--- PASS: TestReplayRejectedSignalDrainUsesRetainedSource (0.11s)
+=== RUN   TestReplayLongPanicMatchesTruncatedAttempt
+--- PASS: TestReplayLongPanicMatchesTruncatedAttempt (0.01s)
+PASS
+ok  	js-wf/cmd/wf	23.412s
+=== RUN   TestWorkerContinuationPlugin
+=== RUN   TestWorkerContinuationPlugin/Workflows
+    continuation_plugin_test.go:91: Workflows runner completed two checkpoints, restored state/input/locals, result=60
+=== RUN   TestWorkerContinuationPlugin/WorkflowFactory
+    continuation_plugin_test.go:91: WorkflowFactory runner completed two checkpoints, restored state/input/locals, result=60
+--- PASS: TestWorkerContinuationPlugin (2.36s)
+    --- PASS: TestWorkerContinuationPlugin/Workflows (0.52s)
+    --- PASS: TestWorkerContinuationPlugin/WorkflowFactory (0.55s)
+=== RUN   TestWorkerRunnerCompletesWorkflowAndServesMetrics
+=== RUN   TestWorkerRunnerCompletesWorkflowAndServesMetrics/static
+=== RUN   TestWorkerRunnerCompletesWorkflowAndServesMetrics/kv
+=== RUN   TestWorkerRunnerCompletesWorkflowAndServesMetrics/auto
+--- PASS: TestWorkerRunnerCompletesWorkflowAndServesMetrics (1.93s)
+    --- PASS: TestWorkerRunnerCompletesWorkflowAndServesMetrics/static (0.59s)
+    --- PASS: TestWorkerRunnerCompletesWorkflowAndServesMetrics/kv (0.75s)
+    --- PASS: TestWorkerRunnerCompletesWorkflowAndServesMetrics/auto (0.59s)
+=== RUN   TestWorkerRunnerStartsAfterServerRestart
+--- PASS: TestWorkerRunnerStartsAfterServerRestart (0.75s)
+=== RUN   TestWorkerRunnerRunsFallbackTimerLoop
+--- PASS: TestWorkerRunnerRunsFallbackTimerLoop (0.57s)
+=== RUN   TestWorkerRunnerSustainedMetricsScrape
+    metrics_soak_test.go:25: set WF_METRICS_SOAK=1 to run the live metrics scrape soak
+--- SKIP: TestWorkerRunnerSustainedMetricsScrape (0.00s)
+PASS
+ok  	js-wf/cmd/wf-worker	6.651s

@@ -8,7 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"js-wf/internal/testworkflow"
 	"js-wf/wf"
+	"js-wf/worker"
 )
 
 func replay(c *wf.Context, raw json.RawMessage, name string) (json.RawMessage, error) {
@@ -139,3 +141,19 @@ func CompletedThenWaitWorkflow(c *wf.Context, _ json.RawMessage) (json.RawMessag
 	})
 	return nil, err
 }
+
+var ContinuedWorkflow = testworkflow.Definition
+
+func ContinuedFactory() worker.WorkflowDefinition { return testworkflow.Definition }
+
+var MissingContinuation = worker.WorkflowDefinition{Handler: testworkflow.Definition.Handler, Continuations: map[string]worker.ContinuationHandler{"middle_v1": testworkflow.Definition.Continuations["middle_v1"]}}
+var ChangedContinuation = worker.WorkflowDefinition{Handler: testworkflow.Definition.Handler, Continuations: map[string]worker.ContinuationHandler{
+	"middle_v1": testworkflow.Definition.Continuations["middle_v1"],
+	"finish_v1": func(c *wf.Context, input, locals json.RawMessage) (json.RawMessage, error) {
+		if _, err := wf.AwaitSignal(c, "gate"); err != nil {
+			return nil, err
+		}
+		_, err := wf.Run(c, "changed", 30, func(context.Context) (int, error) { panic("offline effect ran") })
+		return nil, err
+	},
+}}

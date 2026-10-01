@@ -810,3 +810,15 @@ scope. The independent real 100,000-entry default-cap proof still stands;
 small modeled budgets do not prove that scale anew. Combined real near-limit
 reply/server/process faults, seeded retirement/GC and full release gates remain
 open.
+
+## Plugin registration and operator replay
+
+`worker.WorkflowDefinition` now packages initial Handler and named Continuations
+for Go plugins. `wf-worker` accepts a map/factory of definitions and registers
+stages before execution; `wf replay` accepts a single definition/factory and
+uses ReplayWithContinuations through specialized failure validators as well as
+ordinary completion/suspension. Existing plugin forms remain supported.
+[Real runner/R3 export tests, synthetic failure tails and compiled controls](scale/continuation-plugin-2026-10-01/)
+prove basic registration/dispatch and offline effect suppression. Ordinary replay preserves typed missing-frame
+and unknown-stage errors. Combined fault and full
+release acceptance gates above remain open.

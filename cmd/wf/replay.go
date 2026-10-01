@@ -17,6 +17,7 @@ import (
 	"js-wf/identity"
 	"js-wf/journal"
 	"js-wf/wf"
+	"js-wf/worker"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -202,6 +203,27 @@ func checkReplayInput(bundle replayBundle) error {
 	return nil
 }
 
+// replayWorkflow uses the same definition as the live worker plugin.
+type replayWorkflow struct {
+	initial worker.Handler
+	stages  map[string]worker.ContinuationHandler
+}
+
+func (h replayWorkflow) replay(raw []byte, bundle replayBundle, observation *wf.ReplayObservation) (json.RawMessage, error) {
+	opts := wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects, Observation: observation}
+	initial := func(c *wf.Context) (json.RawMessage, error) { return h.initial(c, bundle.Input) }
+	if len(h.stages) == 0 {
+		return wf.Replay(raw, initial, opts)
+	}
+	stages := make(map[string]wf.ReplayContinuation[json.RawMessage], len(h.stages))
+	for name, stage := range h.stages {
+		stages[name] = func(c *wf.Context, locals json.RawMessage) (json.RawMessage, error) {
+			return stage(c, bundle.Input, locals)
+		}
+	}
+	return wf.ReplayWithContinuations(raw, initial, stages, opts)
+}
+
 func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replayReport, error) {
 	var report replayReport
 	if err := checkReplayInput(bundle); err != nil {
@@ -222,9 +244,20 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 	if err != nil {
 		return report, fmt.Errorf("load replay handler %q: %w", symbolName, err)
 	}
-	handler, ok := symbol.(func(*wf.Context, json.RawMessage) (json.RawMessage, error))
-	if !ok {
-		return report, fmt.Errorf("replay handler %q must have signature func(*wf.Context, json.RawMessage) (json.RawMessage, error)", symbolName)
+	var handler replayWorkflow
+	switch value := symbol.(type) {
+	case func(*wf.Context, json.RawMessage) (json.RawMessage, error):
+		handler.initial = value
+	case *worker.WorkflowDefinition:
+		handler.initial, handler.stages = value.Handler, value.Continuations
+	case func() worker.WorkflowDefinition:
+		definition := value()
+		handler.initial, handler.stages = definition.Handler, definition.Continuations
+	default:
+		return report, fmt.Errorf("replay handler %q must be a workflow function or worker.WorkflowDefinition", symbolName)
+	}
+	if err := (worker.WorkflowDefinition{Handler: handler.initial, Continuations: handler.stages}).Validate(); err != nil {
+		return report, fmt.Errorf("replay handler %q: %w", symbolName, err)
 	}
 	if tail.Kind == journal.Failed {
 		var outcome wf.Outcome
@@ -258,11 +291,9 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 		return report, err
 	}
 	var observed wf.ReplayObservation
-	result, replayErr := wf.Replay(journalBytes, func(c *wf.Context) (json.RawMessage, error) {
-		return handler(c, bundle.Input)
-	}, wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects, Observation: &observed})
+	result, replayErr := handler.replay(journalBytes, bundle, &observed)
 	if observed.PlayedSteps != observed.RecordedSteps {
-		if errors.Is(replayErr, wf.ErrNonDeterministic) {
+		if errors.Is(replayErr, wf.ErrNonDeterministic) || errors.Is(replayErr, wf.ErrCorruptJournal) || errors.Is(replayErr, wf.ErrReplayObjectMissing) || errors.Is(replayErr, wf.ErrUnknownContinuation) {
 			return report, fmt.Errorf("replay %s.%s: %w", bundle.Type, bundle.ID, replayErr)
 		}
 		return report, fmt.Errorf("%w: replay consumed %d/%d recorded steps", wf.ErrNonDeterministic, observed.PlayedSteps, observed.RecordedSteps)
@@ -332,7 +363,7 @@ func runReplayBundle(bundle replayBundle, pluginPath, symbolName string) (replay
 // room for a terminal record but not another step. Substitute that request
 // for Failed during offline replay: the handler must reach the same request,
 // then stop at the pending effect without executing it.
-func replayJournalLimit(bundle replayBundle, handler func(*wf.Context, json.RawMessage) (json.RawMessage, error), outcome wf.Outcome) (replayReport, error) {
+func replayJournalLimit(bundle replayBundle, handler replayWorkflow, outcome wf.Outcome) (replayReport, error) {
 	if outcome.Error != journal.ErrTooLong.Error() || outcome.InvSeq != bundle.InvSeq || len(bundle.Journal) < 2 || !json.Valid(outcome.LimitRequest) {
 		return replayReport{}, fmt.Errorf("invalid journal-limit failure")
 	}
@@ -341,16 +372,14 @@ func replayJournalLimit(bundle replayBundle, handler func(*wf.Context, json.RawM
 		return replayReport{}, err
 	}
 	var observed wf.ReplayObservation
-	_, replayErr := wf.Replay(journalBytes, func(c *wf.Context) (json.RawMessage, error) {
-		return handler(c, bundle.Input)
-	}, wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects, Observation: &observed})
+	_, replayErr := handler.replay(journalBytes, bundle, &observed)
 	if !errors.Is(replayErr, wf.ErrReplayPendingStep) || observed.PlayedSteps != observed.RecordedSteps {
 		return replayReport{}, fmt.Errorf("handler replay differs from journal-limit request: error=%v steps=%d/%d", replayErr, observed.PlayedSteps, observed.RecordedSteps)
 	}
 	return replayReport{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, JournalEntries: len(bundle.Journal), Status: "failed", Error: outcome.Error}, nil
 }
 
-func replayNonStepJournalLimit(bundle replayBundle, handler func(*wf.Context, json.RawMessage) (json.RawMessage, error), outcome wf.Outcome) (replayReport, error) {
+func replayNonStepJournalLimit(bundle replayBundle, handler replayWorkflow, outcome wf.Outcome) (replayReport, error) {
 	if outcome.Error != journal.ErrTooLong.Error() || outcome.InvSeq != bundle.InvSeq || len(outcome.LimitRequest) != 0 || outcome.LimitEntry == nil || !json.Valid(outcome.LimitEntry.Payload) {
 		return replayReport{}, fmt.Errorf("invalid non-step journal-limit failure")
 	}
@@ -364,9 +393,7 @@ func replayNonStepJournalLimit(bundle replayBundle, handler func(*wf.Context, js
 		return replayReport{}, fmt.Errorf("invalid journal-limit history: %w", err)
 	}
 	var observed wf.ReplayObservation
-	_, replayErr := wf.Replay(full, func(c *wf.Context) (json.RawMessage, error) {
-		return handler(c, bundle.Input)
-	}, wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects, Observation: &observed})
+	_, replayErr := handler.replay(full, bundle, &observed)
 	if observed.PlayedSteps != observed.RecordedSteps {
 		return replayReport{}, fmt.Errorf("handler replay differs from journal-limit history: error=%v steps=%d/%d", replayErr, observed.PlayedSteps, observed.RecordedSteps)
 	}
@@ -482,7 +509,7 @@ func replayRejectedSignal(bundle replayBundle, raw json.RawMessage, replayErr er
 // replayCancellation checks the last handler suspension, then the worker's
 // cancellation decision. The worker handles the reserved signal before it
 // calls the handler again, so there is no final handler result to reproduce.
-func replayCancellation(bundle replayBundle, handler func(*wf.Context, json.RawMessage) (json.RawMessage, error)) (replayReport, error) {
+func replayCancellation(bundle replayBundle, handler replayWorkflow) (replayReport, error) {
 	records := bundle.Journal
 	tail := records[len(records)-1]
 	var outcome wf.Outcome
@@ -525,7 +552,7 @@ func replayCancellation(bundle replayBundle, handler func(*wf.Context, json.RawM
 			return replayReport{}, err
 		}
 		var observed wf.ReplayObservation
-		_, err = wf.Replay(prefix, func(c *wf.Context) (json.RawMessage, error) { return handler(c, bundle.Input) }, wf.ReplayOptions{Type: bundle.Type, ID: bundle.ID, InvSeq: bundle.InvSeq, Objects: bundle.Objects, Observation: &observed})
+		_, err = handler.replay(prefix, bundle, &observed)
 		last := records[firstTrailingSignal-1]
 		if observed.PlayedSteps != observed.RecordedSteps || errors.Is(err, wf.ErrNonDeterministic) || errors.Is(err, wf.ErrCorruptJournal) || errors.Is(err, wf.ErrReplayObjectMissing) {
 			if last.Kind == journal.Suspended {

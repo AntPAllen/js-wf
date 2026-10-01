@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"js-wf/internal/testworkflow"
 	"js-wf/wf"
 	"js-wf/worker"
 )
@@ -19,3 +20,9 @@ var Handlers = map[string]worker.Handler{
 		return json.RawMessage(`42`), nil
 	},
 }
+
+var Workflows = map[string]worker.WorkflowDefinition{"continued": testworkflow.Definition}
+
+func WorkflowFactory() map[string]worker.WorkflowDefinition { return Workflows }
+
+var InvalidWorkflows = map[string]worker.WorkflowDefinition{"continued": {Handler: testworkflow.Definition.Handler, Continuations: map[string]worker.ContinuationHandler{"bad.stage": nil}}}
