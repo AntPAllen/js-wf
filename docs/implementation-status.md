@@ -4067,3 +4067,52 @@ failure path: FAIL11.77s with live stacks, ten raw cohort targets, queue and
 operation artifacts preserved. Initial three-minute-timeout attempts failed
 only the fixture preflight and are excluded; eight-minute bounds retain the
 existing recovery requirement. No shortened run counts sustained proof.
+
+## Automatic snapshot attempts cannot inherit the workflow lifetime
+
+A concrete worker liveness gap is now reproduced in Tier 1: automatic
+MaybeSnapshot used the entire delivery context, allowing a missing metadata
+reply to keep ownership alive for minutes. The worker now bounds that complete
+operation to fifteen seconds and records journal_snapshot timing. Timeout uses
+the original NAK/release/redelivery repair; terminal hints remain disabled until
+snapshot success. Handler/parent context, fencing, append renewals, AckWait,
+heartbeat and all acceptance definitions are unchanged. Continuation checkpoint
+publication is outside this ordinary automatic-snapshot operation.
+
+[Model/native proofs, controls and source scope](scale/worker-snapshot-budget-2026-10-01/)
+are retained. The new completed/failed/suspended workload rejects an inherited
+five-minute context in 0.004 seconds, then passes 100,000 seeds in 21.291 seconds
+with 6,796,634 events and maximum virtual time sixteen seconds. Three pinned
+modes, first-ten exact replay and cross-process identity pass. A compiled parent-
+context control fails that property in both model (0.004s) and native fixture
+(3.41s), without build failure or a long timeout. The virtual lease TTL is thirty
+seconds; actual twelve-second TTL heartbeat maintenance is proven separately.
+
+The real three-node fixture with one withheld snapshot-port response passes
+under race in 19.38 seconds. The suspended owner remains ErrHeld past its
+original twelve-second TTL with actual renewals; timeout/redelivery completes
+with two handler calls, one effect, one snapshot timeout, unchanged suspended
+prefix, immutable result, duplicate-start rejection, empty run queue, no lease,
+and eight entries in the passing one-invocation raw audit. Raw signal-to-terminal
+recovery is 15.090 seconds. It is a transport-port response contract on real R3
+stores, not a dropped NATS wire reply or reproduction of the original server
+failure. An initial fixture's overly specific three-update expectation saw two
+because the existing freshness optimization skips ticker boundaries; that
+failure is retained and excluded. Fencing past TTL and the 30-second gate stay
+required, with observation relative to the request deadline.
+
+Full sim/worker/journal suites pass (97.559/30.023/0.005s), and the 135-pin corpus
+plus new workload pass race in 7.466s. Vet and 25 script tests pass. The actual
+500-child consumer fault still passes race in 30.32s with final outcomes/audit
+and physical drain; two full reads and two successful snapshots are observed.
+No existing pin changes. Final-source hosted/comprehensive/matrix/soak and all
+other remaining plan gates remain open. Snapshot work is a candidate boundary
+for the original five-minute stalls, whose precise call and server cause remain
+unconfirmed; this fix does not retrospectively explain them.
+
+The separate instrumented hosted journal seed-1 run 36855298677 at e5def8b now
+passes its actual ten-minute test and per-seed semantic verifier: 2,520 audited
+invocations, 19 faults and aggregate terminal p99 7.327s. Complete log, terminal
+metadata and scoped report are [retained](scale/matrix-held-owner-stalls-2026-10-01/).
+It predates the snapshot budget and does not reproduce the earlier seed-1 stall.
+One seed cannot clear twenty or 200; both release flags remain false.

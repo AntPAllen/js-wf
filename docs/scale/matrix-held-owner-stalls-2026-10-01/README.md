@@ -88,3 +88,21 @@ The first attempts of these two shortened runs used a three-minute Go timeout
 and were rejected by the fixture's existing duration-plus-recovery precondition;
 they never ran and are excluded. The subsequent eight-minute Go bound retains
 that precondition without changing the 35-second workload or any acceptance gate.
+
+## Hosted instrumented seed 1 and subsequent bounded snapshot candidate
+
+Run 36855298677 at e5def8bf34a0531c3d2209c9fb22c9cf64c2e794 PASSes its actual
+full ten-minute journal seed-1 test. Terminal job/source identity and the existing
+per-seed semantic checker pass: 2,520 audited invocations, 19 faults and aggregate
+terminal p99 7.327 seconds. Complete raw log, job metadata and the scoped semantic
+report are retained as hosted-instrumented-seed1-*. The twenty/200-seed campaign
+verifier deliberately does not accept one seed; this report checks the individual
+seed and explicitly leaves both release flags false. It does not reproduce or
+erase the earlier failure, and predates the subsequent runtime snapshot budget.
+
+A [subsequent snapshot response-budget proof](../worker-snapshot-budget-2026-10-01/)
+finds that automatic MaybeSnapshot inherited a workflow's whole lifetime. The
+production context gap has a fast Tier 1 reproduction and real R3 withheld-port
+contract, and is now bounded to fifteen seconds. This is a candidate stalled
+boundary only: the original two failures lack stack/operation data confirming
+snapshot work, and no server cause is attributed from this improvement.

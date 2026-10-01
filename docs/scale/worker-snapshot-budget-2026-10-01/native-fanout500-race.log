@@ -1,0 +1,14 @@
+=== RUN   TestFiveHundredChildFanoutSurvivesConsumerLeaderKill
+    fanout_full_server_restart_test.go:48: FANOUT_QUEUED_CHILDREN count=500 stream_messages=501 first=1 last=501
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_FAULT name=WF_P_39 leader=wf-process-2 node=2 pending=7 ack_pending=1 killed=2026-10-01T11:46:05.301310686Z
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_KILLED pid=696004 signal=killed
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_ELECTED name=WF_P_39 old=wf-process-2 new=wf-process-0 elapsed=6.314858838s
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_HEALED name=WF_P_39 leader=wf-process-0 elapsed=8.457768381s
+    fanout_full_server_restart_test.go:48: FANOUT_QUEUED_CHILDREN count=500 stream_messages=501 first=1 last=501
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_LATENCY children=500 child_start_p99=14.538989009s child_start_max=16.147699298s parent_last_child_delay=2.86991232s
+    fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=64 pending=0 ack_pending=0
+    fanout_full_server_restart_test.go:48: consumer leader kill recovered parent and 500 children; retained integrity={Invocations:501 Journals:501 Entries:4504 Terminal:501}
+    fanout_full_server_restart_test.go:249: FANOUT_PARENT_OPERATIONS events=6011 totals=map[invocation_read:{Calls:2 Duration:7.796718ms Errors:0} journal_append:{Calls:1501 Duration:2.523648555s Errors:0} journal_read:{Calls:2 Duration:1.654393024s Errors:0} journal_snapshot:{Calls:2 Duration:1.08958917s Errors:0} lease_acquire:{Calls:501 Duration:1.410840086s Errors:0} lease_heartbeat_recent:{Calls:2 Duration:46.32µs Errors:0} lease_release:{Calls:501 Duration:512.999737ms Errors:0} lease_renew_append:{Calls:1501 Duration:1.264181795s Errors:0} signal_info:{Calls:2 Duration:13.148014ms Errors:0} signal_read:{Calls:500 Duration:521.967403ms Errors:0} terminal_invocation_read:{Calls:499 Duration:1.014041179s Errors:0} terminal_parent_notify:{Calls:499 Duration:669.677µs Errors:0} terminal_state_read:{Calls:499 Duration:241.79672ms Errors:0}]
+--- PASS: TestFiveHundredChildFanoutSurvivesConsumerLeaderKill (30.32s)
+PASS
+ok  	js-wf/integration	31.344s

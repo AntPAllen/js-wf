@@ -679,8 +679,9 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		// invocation owned for its entire workflow lifetime. Publication and
 		// purge already support uncertain replies; retry them on redelivery.
 		snapshotCtx, stopSnapshot := context.WithTimeout(ctx, 15*time.Second)
+		_ = snapshotCtx
 		started := ops.begin()
-		err = w.jrn.MaybeSnapshot(snapshotCtx, typ, id, 256, 16)
+		err = w.jrn.MaybeSnapshot(ctx, typ, id, 256, 16)
 		stopSnapshot()
 		ops.finish(started, "journal_snapshot", 0, "", err)
 		if err == nil && ctx.Err() == nil {

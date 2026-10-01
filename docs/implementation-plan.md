@@ -164,6 +164,15 @@ required, and automatic snapshot repair must finish before the shortcut is
 enabled. The 100ms virtual full-read cost isolates repeated terminal replay;
 it does not attribute the observed delay to a NATS server mechanism. This
 focused proof does not replace the full fault matrix or final-source gates.
+
+Automatic ordinary-handler snapshot work also has a fifteen-second attempt
+budget. The [missing-response proof](scale/worker-snapshot-budget-2026-10-01/)
+checks the production context in Tier 1 and verifies actual R3 heartbeat fencing,
+release, suspended signal recovery and unchanged recorded effects while a
+snapshot-port reply is withheld. Snapshot publication/purge uncertainty still
+requires repair before enabling terminal hints. This proves bounded recovery
+under that response contract; the original real journal-row stalls have no
+stack evidence identifying snapshot work as their cause.
 - **Partition rebalance while a message is in flight.** Two workers may hold the same partition's consumer for a moment; the lease makes this safe. Test by reassigning partitions every 5 s during the chaos run.
 - **Poison invocation** (user code panics every time). `MaxDeliver` unlimited with exponential backoff capped at 5 min, plus a per-invocation attempt counter in the journal; after a configurable count, write `Failed` and stop. Test the count is honoured across worker restarts.
 - **Hot partition** (one tenant floods one partition). N=64 static partitions cannot fix this; record it as a known limit and test that other partitions keep their latency.
