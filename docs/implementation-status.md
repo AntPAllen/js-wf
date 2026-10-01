@@ -4560,7 +4560,7 @@ matrix remain independent open gates; five worker objects share one client.
 
 
 Hosted journal row36905129932 at82e715b is now terminal SUCCESS: actual
-race test700.68s /701.720s package,85 batches,2,380 invocations,26,208 entries
+race test700.68s /701.719s package,85 batches,2,380 invocations,26,208 entries
 and19 actual kills. All workload/history/audit/drain and event-explanation
 checks pass. [Raw hosted proof and per-fencing review](scale/tier3-event-observers-2026-10-01/hosted-ten-minute/)
 record all four fencing events within the second kill's confirmed outage.
@@ -4578,3 +4578,24 @@ is retained. The first launch failed to find the tool before any unit or test
 started; the public go tool command resolved its executable and the service
 now emits native Go JSON. At the latest check its560-invocation retained audit
 passed and the test remained active. This is not terminal acceptance.
+
+
+## Sustained R5 consumer leader proof and snapshot cross-checks
+
+The consumer service at clean225f04a is now terminal PASS:682.45s named test,
+683.497s native Go JSON package event,83 batches,2,324 invocations,25,631 entries
+and19 actual selected-consumer leader kills. Eighteen selections had active
+work and one was idle. All six workload p99/history/audit/physical drain gates
+pass; largest terminal p99 is13.797s. The [retained proof](scale/tier3-mixed-consumer-2026-10-01/ten-minute/)
+includes all19 selection snapshots cross-checked against fault identity,
+replicas, activity and timestamp ordering. All34 Python guard tests pass.
+
+All11 fencing records match worker counters and overlap confirmed faults;
+each invocation completes after fencing and later invocation acknowledgements
+are retained separately from the original fenced delivery. All141 acknowledged
+repairs have checked explanations. Exact server-side causes remain unconfirmed.
+This closes the single ten-minute consumer row at this source, not the full
+24-hour matrix or separate worker-process coverage. The earlier launch status
+above is superseded by this terminal proof. The million-timer service remains
+active at MainPID18146 with88,435 receipts at the latest checkpoint; it is not
+terminal acceptance.

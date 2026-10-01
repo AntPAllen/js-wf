@@ -68,3 +68,37 @@ class ConsumerRowChecks(unittest.TestCase):
         events = self.fixture(); events[0]['Output'] = events[0]['Output'].replace('TIER3_CONSUMER_FAULT','MISSING'); cases.append(events)
         for events in cases:
             with self.subTest(events=events), self.assertRaises(ValueError): row.check(events,'10m','consumer')
+
+
+class ConsumerArtifactChecks(unittest.TestCase):
+    def fixture(self, root):
+        import json
+        snapshot = dict(ObservedAt='2026-10-01T12:00:00Z',Node=2,Partition=3,Info=dict(name='WF_P_03',num_pending=0,num_ack_pending=1,cluster=dict(name='fixture',leader='fixture-n2',replicas=[{}]*4)))
+        fault = dict(node=2,consumer='WF_P_03',ack_pending=1,killed='2026-10-01T12:00:01Z',healed='2026-10-01T12:00:06Z')
+        (root/'faults.json').write_text(json.dumps([fault]))
+        (root/'fault-1-consumer-before.json').write_text(json.dumps(snapshot))
+        return snapshot, fault, dict(confirmed_faults=1,active_consumer_faults=1)
+
+    def test_matches_actual_snapshot_identity_activity_and_heal(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);_,_,report=self.fixture(root)
+            self.assertEqual(row.check_consumer_artifacts(root,report)['matched_consumer_snapshots'],1)
+
+    def test_rejects_false_fault_identity_or_activity_even_with_passing_log(self):
+        import tempfile,json
+        mutations = ['leader','replicas','node','partition','name','pending','before_kill','unhealed','count']
+        for mode in mutations:
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);snapshot,fault,report=self.fixture(root)
+                if mode=='leader':snapshot['Info']['cluster']['leader']='fixture-n1'
+                elif mode=='replicas':snapshot['Info']['cluster']['replicas']=[{}]*2
+                elif mode=='node':snapshot['Node']=1
+                elif mode=='partition':snapshot['Partition']=64
+                elif mode=='name':snapshot['Info']['name']='WF_P_04'
+                elif mode=='pending':snapshot['Info']['num_ack_pending']=0
+                elif mode=='before_kill':snapshot['ObservedAt']='2026-10-01T12:00:02Z'
+                elif mode=='unhealed':fault['healed']='2026-10-01T11:00:00Z'
+                elif mode=='count':report['confirmed_faults']=19
+                (root/'faults.json').write_text(json.dumps([fault]));(root/'fault-1-consumer-before.json').write_text(json.dumps(snapshot))
+                with self.assertRaises(ValueError):row.check_consumer_artifacts(root,report)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Verify one executed R5 mixed journal row; never certify full Tier 3 release."""
 import argparse
+from datetime import datetime
 import importlib.util
 import json
 from pathlib import Path
@@ -55,8 +56,36 @@ def check(events, duration, expected_row='journal'):
                 confirmed_faults=faults, active_consumer_faults=active_consumer_faults, cells=cells, clears_full_tier3_release=False)
 
 
+def check_consumer_artifacts(root, report):
+    faults = json.loads((root/'faults.json').read_text())
+    if len(faults) != report['confirmed_faults']:
+        raise ValueError('consumer fault artifact count disagrees')
+    clusters, active = set(), 0
+    for index, fault in enumerate(faults, 1):
+        snapshot = json.loads((root/f'fault-{index}-consumer-before.json').read_text())
+        info, node, partition = snapshot['Info'], snapshot['Node'], snapshot['Partition']
+        cluster = info['cluster']
+        if not 0 <= node < 5 or not 0 <= partition < 64:
+            raise ValueError('invalid consumer target node or partition')
+        if info['name'] != f'WF_P_{partition:02d}' or fault['consumer'] != info['name'] or fault['node'] != node:
+            raise ValueError('consumer target identity disagrees with fault record')
+        if cluster['leader'] != f"{cluster['name']}-n{node}" or len(cluster['replicas']) != 4:
+            raise ValueError('fault target was not the observed R5 consumer leader')
+        if info['num_pending'] != fault.get('pending', 0) or info['num_ack_pending'] != fault.get('ack_pending', 0):
+            raise ValueError('consumer activity disagrees with selection snapshot')
+        times = [datetime.fromisoformat(s.replace('Z','+00:00')) for s in (snapshot['ObservedAt'], fault['killed'], fault['healed'])]
+        if any(t.tzinfo is None for t in times) or not times[0] <= times[1] <= times[2]:
+            raise ValueError('missing or reversed consumer observation/kill/heal times')
+        clusters.add(cluster['name'])
+        active += info['num_pending'] > 0 or info['num_ack_pending'] > 0
+    if len(clusters) != 1 or active != report['active_consumer_faults']:
+        raise ValueError('consumer cluster or active fault coverage disagrees')
+    return dict(cluster=clusters.pop(), matched_consumer_snapshots=len(faults), active_selections=active)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--root', type=Path, help='required consumer selection/fault artifacts')
     parser.add_argument('--row', choices=tuple(TESTS), default='journal')
     parser.add_argument('--events', required=True, type=Path)
     parser.add_argument('--duration', required=True, choices=('35s', '10m'))
@@ -64,5 +93,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     events = [json.loads(line) for line in args.events.read_text().splitlines() if line.strip()]
     report = check(events, args.duration, args.row)
+    if args.row == 'consumer':
+        if args.root is None: parser.error('--root is required for the consumer row')
+        report['selection_artifact_checks'] = check_consumer_artifacts(args.root, report)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))

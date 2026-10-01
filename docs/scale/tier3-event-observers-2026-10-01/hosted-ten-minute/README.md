@@ -1,6 +1,6 @@
 # Hosted ten-minute journal row with per-event evidence
 
-Run36905129932 at82e715b is terminal SUCCESS. The actual race test passes700.68s test /701.720s package:85 mixed batches,2,380 invocations,26,208 journal entries and19 confirmed journal-leader SIGKILL/restarts. All six terminal/progress p99, history models, retained-state audit and physical run-stream/all64-consumer drain pass. The dedicated row guard and event explanation checks also pass. Raw Go JSON, before-fault metadata/logs, HTTP snapshots and final counters are retained.
+Run36905129932 at82e715b is terminal SUCCESS. The actual race test passes700.68s test /701.719s package:85 mixed batches,2,380 invocations,26,208 journal entries and19 confirmed journal-leader SIGKILL/restarts. All six terminal/progress p99, history models, retained-state audit and physical run-stream/all64-consumer drain pass. The dedicated row guard and event explanation checks also pass. Raw Go JSON, before-fault metadata/logs, HTTP snapshots and final counters are retained.
 
 All four worker fencing records match the metric counters. Each is a heartbeat renewal that returned ErrLost with no response from stream during fault2: node0 killed18:18:28.352589934 and R5 recovery confirmed18:18:35.638187394. Events occur18:18:31.873–31.891. Cancellation, initial release failure, bounded cleanup retries, eventual cleanup and later ack are present for each exact worker/invocation/run sequence.
 
