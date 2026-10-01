@@ -64,20 +64,8 @@ func (s *Store) verifyRuntimeCheckpoint(ctx context.Context, typ, id string, rec
 		return ErrGap
 	}
 	anchor := records[runtime.Index]
-	if anchor.Index != runtime.Index || anchor.Sequence != runtime.Sequence || anchor.Epoch != runtime.Epoch || anchor.Kind != StepCompleted {
-		return ErrGap
-	}
-	var done struct {
-		Result     json.RawMessage `json:"result"`
-		ResultRef  string          `json:"result_ref"`
-		ResultHash string          `json:"result_hash"`
-		Error      string          `json:"error"`
-		ErrorKind  string          `json:"error_kind"`
-		SignalSeq  uint64          `json:"signal_seq"`
-		Selected   string          `json:"selected"`
-	}
-	if json.Unmarshal(anchor.Payload, &done) != nil || len(done.Result) != 0 || done.Error != "" || done.ErrorKind != "" || done.SignalSeq != 0 || done.Selected != "" || done.ResultRef != runtime.Object || done.ResultHash != runtime.SHA256 {
-		return ErrGap
+	if err := verifyCheckpointAnchor(anchor, runtime); err != nil {
+		return err
 	}
 	var sdkPosition uint64
 	var request Record
@@ -125,6 +113,25 @@ func (s *Store) verifyRuntimeCheckpoint(ctx context.Context, typ, id string, rec
 	}
 	inputDigest := sha256.Sum256(frame.Data)
 	if frame.Stage != runtime.Stage || frame.StepPosition != runtime.StepPosition || declared.InputHash != hex.EncodeToString(inputDigest[:]) {
+		return ErrGap
+	}
+	return nil
+}
+
+func verifyCheckpointAnchor(anchor Record, runtime RuntimeCheckpoint) error {
+	if anchor.Index != runtime.Index || anchor.Sequence != runtime.Sequence || anchor.Epoch != runtime.Epoch || anchor.Kind != StepCompleted {
+		return ErrGap
+	}
+	var done struct {
+		Result     json.RawMessage `json:"result"`
+		ResultRef  string          `json:"result_ref"`
+		ResultHash string          `json:"result_hash"`
+		Error      string          `json:"error"`
+		ErrorKind  string          `json:"error_kind"`
+		SignalSeq  uint64          `json:"signal_seq"`
+		Selected   string          `json:"selected"`
+	}
+	if json.Unmarshal(anchor.Payload, &done) != nil || len(done.Result) != 0 || done.Error != "" || done.ErrorKind != "" || done.SignalSeq != 0 || done.Selected != "" || done.ResultRef != runtime.Object || done.ResultHash != runtime.SHA256 {
 		return ErrGap
 	}
 	return nil

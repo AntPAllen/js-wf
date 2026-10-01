@@ -166,6 +166,12 @@ func NewWithSnapshotReadPort(appendPort AppendPort, readPort ReadPort, snapshotP
 	return &Store{appendPort: appendPort, readPort: readPort, snapshotReadPort: snapshotPort}
 }
 
+// NewWithSnapshotReadPortAndBatch combines fast continuation and filtered
+// long-suffix reads without a JetStream dependency in transport models.
+func NewWithSnapshotReadPortAndBatch(appendPort AppendPort, readPort ReadPort, batchPort BatchReadPort, snapshotPort SnapshotReadPort) *Store {
+	return &Store{appendPort: appendPort, readPort: readPort, batchReadPort: batchPort, snapshotReadPort: snapshotPort}
+}
+
 // NewWithSnapshotPort also runs snapshot creation and prefix purge decisions
 // against the supplied narrow transport.
 func NewWithSnapshotPort(appendPort AppendPort, readPort ReadPort, snapshotPort SnapshotWritePort) *Store {
@@ -442,6 +448,10 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 // One filtered pull consumer preserves stream order across Fetch batches;
 // verifyNext still checks logical indices and epochs across the boundary.
 func readLiveBatch(ctx context.Context, port BatchReadPort, subject string, seq uint64, out []Record, tail uint64) ([]Record, uint64, bool, error) {
+	return readLiveBatchFrom(ctx, port, subject, seq, out, tail, 0)
+}
+
+func readLiveBatchFrom(ctx context.Context, port BatchReadPort, subject string, seq uint64, out []Record, tail, baseIndex uint64) ([]Record, uint64, bool, error) {
 	var consumer BatchReadCursor
 	var opened []BatchReadCursor
 	defer func() {
@@ -487,7 +497,7 @@ func readLiveBatch(ctx context.Context, port BatchReadPort, subject string, seq 
 				return nil, 0, false, fmt.Errorf("%w: %v", ErrGap, err)
 			}
 			var err error
-			out, err = verifyNext(out, Record{Entry: entry, Sequence: msg.Sequence})
+			out, err = verifyNextFrom(out, Record{Entry: entry, Sequence: msg.Sequence}, baseIndex)
 			if err != nil {
 				return nil, 0, false, err
 			}
@@ -556,8 +566,12 @@ func readLiveBatch(ctx context.Context, port BatchReadPort, subject string, seq 
 }
 
 func verifyNext(out []Record, next Record) ([]Record, error) {
-	if next.Index != uint64(len(out)) {
-		return nil, fmt.Errorf("%w: expected index %d, got %d", ErrGap, len(out), next.Index)
+	return verifyNextFrom(out, next, 0)
+}
+
+func verifyNextFrom(out []Record, next Record, baseIndex uint64) ([]Record, error) {
+	if next.Index != baseIndex+uint64(len(out)) {
+		return nil, fmt.Errorf("%w: expected index %d, got %d", ErrGap, baseIndex+uint64(len(out)), next.Index)
 	}
 	if next.Sequence == 0 {
 		return nil, ErrGap
@@ -567,7 +581,7 @@ func verifyNext(out []Record, next Record) ([]Record, error) {
 		if next.Sequence <= prev.Sequence || next.Epoch < prev.Epoch || prev.Kind == Completed || prev.Kind == Failed || next.Kind == Started {
 			return nil, ErrGap
 		}
-	} else if next.Kind != Started {
+	} else if baseIndex == 0 && next.Kind != Started {
 		return nil, ErrGap
 	}
 	return append(out, next), nil

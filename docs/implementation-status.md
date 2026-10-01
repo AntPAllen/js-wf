@@ -2588,3 +2588,31 @@ are retained. This is a publication foundation with no production worker
 callers yet: frame/pair creation cuts, suffix-only reads, stage dispatch,
 handoff/reconciliation, offline continuation replay and retirement/model-GC
 proofs remain open. It does not close the mixed seed 65 latency failure.
+
+## Prefix-free checkpoint resume reader
+
+The new `journal.ReadCheckpoint` reads manifest, verified frame, retained
+completion and contiguous live suffix without downloading archived prefixes.
+Absent metadata and ordinary v1 snapshots are distinct from invalid metadata,
+frame corruption and generation mismatch. Bounded whole-read recovery handles
+a newer checkpoint purging an older anchor; a final manifest check rejects a
+superseded pointer. Long suffixes use filtered batch cursors with the saved
+logical-index base. Full archive reconstruction remains available separately.
+
+The R3 three-node direct-storage/SDK contract denies every archive read and
+passed under race in 6.214 seconds. It restores state, records 150 effects, then
+replays the exact suffix with zero effect executions. Ten seeded modes cover
+corruption, gaps, generation, transient reads, compaction advancement and long
+suffixes. The race model passed in 18.392 seconds, and 100,000 schedules with
+28,229,366 events passed in 106.879 seconds. The complete final simulator suite
+passed in 89.245 seconds. Disabling the production batch offset makes pinned
+seed 42 fail with expected index 65 versus actual 69. [Proof logs, control and
+source hashes](scale/checkpoint-read-2026-10-01/) are retained. Vet passed.
+
+Workers still use full replay: continuation registration, frame/pair creation,
+lease-fenced stage dispatch/append counters, handoff repair, offline continuation
+replay and retirement/reuse gates remain open. This direct contract does not
+claim a worker process skipped its initial handler. The focused 20-seed mixed
+and paired CAS throughput workflows at `586cc5d` completed successfully; they
+do not close the independent mixed seed 65 latency failure or release matrix.
+The original million-timer process remains live and was not restarted.

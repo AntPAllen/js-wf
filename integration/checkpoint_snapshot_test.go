@@ -6,7 +6,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -19,6 +21,20 @@ import (
 
 	"github.com/nats-io/nats.go/jetstream"
 )
+
+type checkpointNoArchivePort struct {
+	journal.SnapshotWritePort
+	archives, frames int
+}
+
+func (p *checkpointNoArchivePort) GetObject(ctx context.Context, name string) ([]byte, error) {
+	if strings.HasPrefix(name, "snapshot-") {
+		p.archives++
+		return nil, fmt.Errorf("archival prefix access forbidden")
+	}
+	p.frames++
+	return p.SnapshotWritePort.GetObject(ctx, name)
+}
 
 func TestCheckpointManifestRetainsAnchorAndPromiseBlobs(t *testing.T) {
 	all, _ := setup(t)
@@ -121,6 +137,59 @@ func TestCheckpointManifestRetainsAnchorAndPromiseBlobs(t *testing.T) {
 	logical, gotTail, err = journal.New(all[1]).Read(ctx, typ, id)
 	if err != nil || gotTail != tail || !reflect.DeepEqual(logical, records) {
 		t.Fatalf("second logical replay differs: %v", err)
+	}
+	// The resume reader must not fetch either archived prefix object.
+	guard := &checkpointNoArchivePort{SnapshotWritePort: journal.NewSnapshotPort(all[2])}
+	fast := journal.NewWithJetStreamSnapshotPort(all[2], guard)
+	view, err := fast.ReadCheckpoint(ctx, typ, id, handle.InvSeq)
+	if err != nil || view == nil || len(view.Records) != 0 || view.Anchor.Sequence != newer.Sequence || view.Tail != tail {
+		t.Fatalf("empty resume=%+v err=%v", view, err)
+	}
+	location := wf.CheckpointLocation{Type: typ, ID: id, InvSeq: handle.InvSeq, Index: newer.Index, Epoch: newer.Epoch, Hash: newer.SHA256}
+	resumed, info, err := wf.NewCheckpointContext(ctx, nil, func(_ context.Context, kind wf.Kind, payload json.RawMessage) error {
+		appendEntry(journal.Kind(kind), payload)
+		return nil
+	}, view.Frame, location)
+	if err != nil || info.Stage != newer.Stage {
+		t.Fatalf("SDK restore info=%+v err=%v", info, err)
+	}
+	var state int
+	if found, err := resumed.GetState("total", &state); err != nil || !found || state != 23 {
+		t.Fatalf("state=%d found=%v err=%v", state, found, err)
+	}
+	effects := 0
+	for i := 0; i < 150; i++ {
+		value, err := wf.Run(resumed, fmt.Sprintf("suffix_%d", i), i, func(context.Context) (int, error) { effects++; return i * i, nil })
+		if err != nil || value != i*i {
+			t.Fatalf("suffix %d=%d err=%v", i, value, err)
+		}
+	}
+	view, err = fast.ReadCheckpoint(ctx, typ, id, handle.InvSeq)
+	if err != nil || view == nil || !reflect.DeepEqual(view.Records, records[newer.Index+1:]) || view.Tail != tail {
+		t.Fatalf("long resume err=%v", err)
+	}
+	steps := make([]wf.Entry, len(view.Records))
+	for i, record := range view.Records {
+		steps[i] = wf.Entry{Index: record.Index, Kind: wf.Kind(record.Kind), Payload: record.Payload}
+	}
+	replay, _, err := wf.NewCheckpointContext(ctx, steps, nil, view.Frame, location)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if found, err := replay.GetState("total", &state); err != nil || !found || state != 23 {
+		t.Fatal(found, state, err)
+	}
+	for i := 0; i < 150; i++ {
+		value, err := wf.Run(replay, fmt.Sprintf("suffix_%d", i), i, func(context.Context) (int, error) { t.Fatal("replayed effect executed"); return 0, nil })
+		if err != nil || value != i*i {
+			t.Fatalf("replay %d=%d err=%v", i, value, err)
+		}
+	}
+	if effects != 150 || guard.archives != 0 || guard.frames == 0 {
+		t.Fatalf("effects=%d archive reads=%d frame reads=%d", effects, guard.archives, guard.frames)
+	}
+	if _, err := fast.ReadCheckpoint(ctx, typ, id, handle.InvSeq+1); !errors.Is(err, journal.ErrCheckpointGeneration) {
+		t.Fatalf("generation=%v", err)
 	}
 	if _, err := objects.PutBytes(ctx, "input-checkpoint-orphan", []byte("orphan")); err != nil {
 		t.Fatal(err)

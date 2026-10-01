@@ -1,8 +1,8 @@
 # Materialized SDK checkpoints with named continuations
 
 Status: continuation contract, SDK cursor foundation, bounded frame codec and
-SDK capture/restore and archive/runtime manifest publication. Frame publication,
-worker dispatch, suffix reads and recovery remain open.
+SDK capture/restore, archive/runtime publication and prefix-free journal reads.
+Frame/pair creation, worker dispatch and recovery remain open.
 This document preserves the plan's checkpoint requirement; it does not count
 as a completed checkpoint feature.
 
@@ -210,3 +210,21 @@ current frame and marks its promise outcome references as well as the archive.
 100,000 local fault schedules, exact replay, two real checkpoint boundaries and
 a real production-collector negative control. They do not prove worker dispatch,
 frame creation cuts, suffix-only resume, online collection or complete retirement.
+
+## Implemented prefix-free resume reader
+
+`journal.ReadCheckpoint` verifies frame and retained completion, then returns
+only the post-anchor records. Archive objects are not fetched. Generation or
+metadata corruption never becomes an absent checkpoint. Named transport retries
+preserve cursors; whole-read retries repair a newer checkpoint purging an older
+anchor. The final manifest check rejects a superseded runtime pointer. Long
+suffixes use filtered batch reads with the saved logical-index base. Ordinary
+full reads keep base zero and continue supporting archive-based audit/replay.
+
+[Reader proofs](scale/checkpoint-read-2026-10-01/) include 100,000 seeded schedules,
+a pinned batch-offset mutation control and a real port that denies every archive
+read while SDK state and 150 recorded effects replay correctly. There are still
+no production worker callers. Stage dispatch must reject unknown registrations
+before running code, restore runtime cancellation/attempt facts, derive append
+indices from the anchor plus suffix, and preserve all lease/terminal guards.
+The required worker restart/prefix-handler avoidance proof remains open.
