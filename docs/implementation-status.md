@@ -4373,3 +4373,12 @@ run recovered from one 3s timeout in a subsequent 1.125s attempt. The server-sid
 cause of the first wait remains unconfirmed. Local notification integration is
 verified; routing to an operator's actual account and its credentials/endpoints
 remains deployment configuration. Independent runtime release gates remain open.
+
+
+The initial hosted monitoring run36894904238 failed workflow validation before
+any jobs started: runner.temp was used in job-level env, where the runner context
+is unavailable. The workflow now uses a literal temporary artifact root and
+references env only from the upload step. Corrected run36895162324 at eaf83de
+is live; [metadata and corrected workflow identity](scale/capacity-alert-delivery-2026-10-01/ci-start.json)
+are retained. No hosted delivery pass is claimed yet. The native race proof is
+unchanged. Ordinary invocations skip without the opt-in environment flag.
