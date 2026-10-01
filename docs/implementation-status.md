@@ -4971,3 +4971,12 @@ Future extended workflows retain source identity and suite logs on success and
 failure, preserving the test process's exit status through the log capture.
 The historical31.1s/30s-TTL worker-kill mismatch remains excluded from further
 runs; productionTTL12s/heartbeat3s/AckWait13s and the strict30s gate remain in force.
+
+
+The [current-source comprehensive campaign36929826425](https://github.com/AntPAllen/js-wf/actions/runs/36929826425)
+is launched ata70f378 with100,000 seeds per configured seeded workload. Its exact
+source and inputs are retained beside the earlier verified proof. Parent-notification
+budgeting and repair/fencing observation changes are included. A queued or running
+workflow is not terminal acceptance. No historical TTL-mismatch recovery run was
+restarted. The unfinished-worker isolation campaign36928729086 remains in progress
+and the million-timer user service remains active atPID18146.
