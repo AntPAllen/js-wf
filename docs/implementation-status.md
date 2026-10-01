@@ -4649,3 +4649,34 @@ was launched at35d192c; its identity and inputs are retained alongside the smoke
 The preceding all-server row36910529449 is now in progress, as is comprehensive
 simulation36900782095. The million-timer service remains active at MainPID18146
 with100,439 receipts at the latest checkpoint. None is terminal acceptance.
+
+
+## R5 quorum-removing route row uses verified recovery timing
+
+The new route_quorum row confirms three route-isolated peers and an
+unacknowledged R5 probe, then confirms all five route meshes and replica
+recovery before recording heal. It retains raw enabling delays and recovery
+delays independently; only overlapping outage intervals apply the later
+enabling event or last confirmed heal. Healthy-period delays remain visible.
+[Native race smoke and excluded earlier attempts](scale/tier3-mixed-route-quorum-2026-10-01/)
+pass72.43s/73.454s with168 completions,1,852 entries,one confirmed cut,largest
+raw terminal p99 23.724s and recovery p99 5.006s. All792 samples independently
+match original nanosecond timestamps, and all histories/invariants/drain pass.
+All59 repairs have checked explanations; fencing is zero. All38 Python tests,
+focused recovery race test and integration/testcluster vet pass.
+
+The fixture explicitly uses1s route ping and route-only advertised aliases
+with production2m write sync. Earlier default-ping attempts failed the30s
+zero-route observation deadline and remain excluded; the precise contribution
+of advertisement versus stale socket timing was not isolated. The ten-minute
+row, default-ping fault variant, majority-side progress and full24h matrix
+remain open. The existing route-specific heal-time target is preserved.
+
+The [hosted all-server restart run36910529449](scale/tier3-mixed-restart-2026-10-01/hosted-ten-minute/)
+is terminal SUCCESS at0d6a94b:684.29s/685.325s package,1,960 invocations,21,598
+entries and19 verified all-five-down restarts. Largest terminal p99 is17.777s;
+all history/state/drain and explanation checks pass. All37 heartbeat fencing
+events overlap confirmed outages;36 invocations complete later,one terminal
+child's duplicate is explicitly distinguished from completion. All69 repairs
+have checked decisions. The downloaded native events and artifacts reverify
+unchanged. This closes that single ten-minute source/row, not the full matrix.

@@ -169,3 +169,31 @@ class FanoutCutChecks(unittest.TestCase):
                 if mode=='valid':self.assertEqual(row.check_fanout_cut_artifacts(root,dict(confirmed_faults=1))['unfinished_six_child_cuts'],1)
                 else:
                     with self.assertRaises(ValueError):row.check_fanout_cut_artifacts(root,dict(confirmed_faults=1))
+
+
+class RouteArtifactChecks(unittest.TestCase):
+    def test_raw_over_budget_is_visible_and_recovery_is_verified(self):
+        import tempfile,json
+        for mode in ('valid','missing_raw','false_delay','false_p99','partial_quorum','routes','unhealed','probe','count'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory)
+                stamp=lambda second:f'2026-10-01T12:00:{second:02d}Z'
+                fault=dict(nodes=[0,1,2],killed=stamp(2),healed=stamp(32))
+                obs=[dict(Phase='isolated',Node=n,Routes=0,At=stamp(3+n)) for n in range(3)]+[dict(Phase='reconnected',Node=n,Routes=16,At=stamp(27+n)) for n in range(5)]
+                raw=[dict(type=typ,id='sample',event=event,enabled=stamp(1),observed=stamp(33),delay_ns=32_000_000_000) for typ in row.matrix.TYPES for event in ('terminal','start')]
+                adjusted=[{**x,'delay_ns':1_000_000_000} for x in raw]
+                report=dict(confirmed_faults=1,cells={typ:dict(invocations=1,terminal_p99_seconds=1,progress_p99_seconds=1,raw_terminal_p99_seconds=32,raw_progress_p99_seconds=32) for typ in row.matrix.TYPES})
+                probe=dict(Before=1,UnacknowledgedError='context deadline exceeded')
+                if mode=='missing_raw':raw.pop()
+                elif mode=='false_delay':adjusted[0]['delay_ns']=0
+                elif mode=='false_p99':report['cells'][row.matrix.TYPES[0]]['terminal_p99_seconds']=0
+                elif mode=='partial_quorum':fault['nodes']=[0,1]
+                elif mode=='routes':obs[2]['Routes']=1
+                elif mode=='unhealed':fault['healed']=stamp(28)
+                elif mode=='probe':probe['UnacknowledgedError']=''
+                elif mode=='count':report['cells'][row.matrix.TYPES[0]]['invocations']=2
+                for name,value in [('faults.json',[fault]),('fault-1-route-observations.json',obs),('fault-1-quorum-probe.json',probe),('latencies.json',raw),('route-recovery-latencies.json',adjusted)]:
+                    (root/name).write_text(json.dumps(value))
+                if mode=='valid':self.assertEqual(row.check_route_artifacts(root,report)['matched_recovery_samples'],12)
+                else:
+                    with self.assertRaises(ValueError):row.check_route_artifacts(root,report)

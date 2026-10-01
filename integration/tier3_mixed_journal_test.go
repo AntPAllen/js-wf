@@ -46,9 +46,13 @@ func TestFiveContainerMixedFanoutRestartEveryThirtySeconds(t *testing.T) {
 	runFiveContainerMixedLeader(t, "fanout_restart")
 }
 
+func TestFiveContainerMixedRouteQuorumEveryThirtySeconds(t *testing.T) {
+	runFiveContainerMixedLeader(t, "route_quorum")
+}
+
 func runFiveContainerMixedLeader(t *testing.T, row string) {
 	t.Helper()
-	if row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" {
+	if row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" {
 		t.Fatal("unsupported R5 fault row")
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
@@ -77,6 +81,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	if err := os.MkdirAll(root, 0755); err != nil {
 		t.Fatal(err)
+	}
+	if row == "route_quorum" {
+		// The default route ping can take30s before stale sockets disappear,
+		// which exceeds the scheduled cut cadence. Make this fixture detection
+		// interval explicit; production write-sync remains unchanged.
+		t.Setenv("WF_TIER3_ROUTE_PING_INTERVAL", "1s")
 	}
 	cluster, err := testcluster.StartDockerCluster(filepath.Join(root, "cluster"), 5)
 	if err != nil {
@@ -132,6 +142,11 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	stopReady()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if row == "route_quorum" {
+		if _, err := js.CreateStream(ctx, jetstream.StreamConfig{Name: "TIER3_ROUTE_PROBE", Subjects: []string{"tier3.route.probe"}, Replicas: 5, Storage: jetstream.FileStorage}); err != nil {
+			t.Fatal(err)
+		}
 	}
 	var recorder history.Recorder
 	c := client.NewObserved(js, &recorder)
@@ -291,6 +306,8 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			prefix := filepath.Join(root, fmt.Sprintf("fault-%d", len(faults)+1))
 			if row == "consumer" {
 				event, err = killFiveContainerMixedConsumerLeader(ctx, js, cluster, scheduled, prefix, faultRNG)
+			} else if row == "route_quorum" {
+				event, err = partitionFiveContainerMixedQuorum(ctx, js, cluster, scheduled, prefix, faultRNG)
 			} else if row == "fanout_restart" {
 				event, err = fanoutBarrier.restartWith(ctx, js, scheduled, prefix, func() (matrixLeaderFault, error) {
 					return killFiveContainerMixedAllServers(ctx, js, cluster, scheduled, prefix)
@@ -440,6 +457,21 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			t.Fatalf("history=%v err=%v", result, err)
 		}
 	}
+	var recoverySamples []matrixLatencySample
+	if row == "route_quorum" {
+		for _, sample := range samples {
+			adjusted := sample
+			adjusted.Delay = tier3RouteRecoveryDelay(sample, faults)
+			recoverySamples = append(recoverySamples, adjusted)
+		}
+		data, err := json.MarshalIndent(recoverySamples, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = os.WriteFile(filepath.Join(root, "route-recovery-latencies.json"), data, 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
 	for _, typ := range []string{"matrixshort", "matrixtimer", "matrixsignal", "matrixfanout", "matrixchild", "matrixgrandchild"} {
 		var terminal, progress []time.Duration
 		for _, sample := range samples {
@@ -461,6 +493,21 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			return values[(99*len(values)+99)/100-1]
 		}
 		tp, pp := percentile(terminal), percentile(progress)
+		if row == "route_quorum" {
+			t.Logf("TIER3_ROUTE_RAW_CELL type=%s terminal_p99=%s progress_p99=%s", typ, tp, pp)
+			terminal, progress = nil, nil
+			for _, sample := range recoverySamples {
+				if sample.Type != typ {
+					continue
+				}
+				if sample.Event == "terminal" {
+					terminal = append(terminal, sample.Delay)
+				} else {
+					progress = append(progress, sample.Delay)
+				}
+			}
+			tp, pp = percentile(terminal), percentile(progress)
+		}
 		t.Logf("TIER3_MIXED_CELL type=%s invocations=%d terminal_p99=%s progress_p99=%s", typ, len(terminal), tp, pp)
 		if tp >= 30*time.Second || pp >= 30*time.Second {
 			t.Errorf("%s terminal/progress p99=%s/%s want<30s", typ, tp, pp)

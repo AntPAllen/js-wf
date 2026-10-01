@@ -20,7 +20,8 @@ execution = load('matrix_execution', 'check-matrix-result.py')
 TESTS = {'journal': 'TestFiveContainerMixedJournalLeaderEveryThirtySeconds',
          'consumer': 'TestFiveContainerMixedConsumerLeaderEveryThirtySeconds',
          'restart': 'TestFiveContainerMixedAllServersEveryThirtySeconds',
-         'fanout_restart': 'TestFiveContainerMixedFanoutRestartEveryThirtySeconds'}
+         'fanout_restart': 'TestFiveContainerMixedFanoutRestartEveryThirtySeconds',
+         'route_quorum': 'TestFiveContainerMixedRouteQuorumEveryThirtySeconds'}
 TEST = TESTS['journal']
 
 
@@ -53,7 +54,12 @@ def check(events, duration, expected_row='journal'):
         if int(count) != batches*per_batch or terminal >= 30 or progress >= 30:
             raise ValueError(f'{typ}: incorrect count or over-budget p99')
         cells[typ] = dict(invocations=int(count), terminal_p99_seconds=terminal, progress_p99_seconds=progress)
-    scope = ('single five-container R5 mid-fan-out all-server restart row' if row == 'fanout_restart'
+        if row == 'route_quorum':
+            raw_t,raw_p=matrix.one(r'TIER3_ROUTE_RAW_CELL type='+typ+r' terminal_p99=(\S+) progress_p99=(\S+)',log)
+            cells[typ]['raw_terminal_p99_seconds']=matrix.seconds(raw_t)
+            cells[typ]['raw_progress_p99_seconds']=matrix.seconds(raw_p)
+    scope = ('single five-container R5 quorum-removing route row' if row == 'route_quorum'
+             else 'single five-container R5 mid-fan-out all-server restart row' if row == 'fanout_restart'
              else 'single five-container R5 all-server SIGKILL/restart row' if row == 'restart'
              else f'single five-container R5 {row}-leader row')
     return dict(scope=scope, seed=int(seed), duration_seconds=seconds,
@@ -148,6 +154,51 @@ def check_fanout_cut_artifacts(root, report):
     return dict(unfinished_six_child_cuts=len(faults), recovered_prefixes=len(faults))
 
 
+def timestamp_ns(value):
+    dt=datetime.fromisoformat(value.replace('Z','+00:00'))
+    if dt.tzinfo is None: raise ValueError('timezone missing')
+    fraction=re.search(r'\.(\d{1,9})(?:Z|[+-]\d{2}:\d{2})$',value)
+    return int(dt.replace(microsecond=0).timestamp())*1_000_000_000 + int((fraction[1] if fraction else '').ljust(9,'0'))
+
+
+def check_route_artifacts(root, report):
+    faults=json.loads((root/'faults.json').read_text())
+    if len(faults)!=report['confirmed_faults']:raise ValueError('route fault count disagrees')
+    for index,fault in enumerate(faults,1):
+        nodes=fault['nodes']
+        if len(nodes)!=3 or len(set(nodes))!=3 or any(n not in range(5) for n in nodes):raise ValueError('route cut does not remove R5 quorum')
+        obs=json.loads((root/f'fault-{index}-route-observations.json').read_text())
+        expected=[('isolated',n) for n in nodes]+[('reconnected',n) for n in range(5)]
+        if [(x['Phase'],x['Node']) for x in obs]!=expected:raise ValueError('missing route cut/heal observations')
+        if any(x['Routes']!=0 for x in obs[:3]) or any(x['Routes']<16 for x in obs[3:]):raise ValueError('routes do not confirm isolation/full heal')
+        times=[timestamp_ns(fault['killed'])]+[timestamp_ns(x['At']) for x in obs]+[timestamp_ns(fault['healed'])]
+        if times!=sorted(times):raise ValueError('route timestamps are reversed')
+        probe=json.loads((root/f'fault-{index}-quorum-probe.json').read_text())
+        if probe['Before']<=0 or not probe['UnacknowledgedError']:raise ValueError('missing observed no-quorum publication result')
+    raw=json.loads((root/'latencies.json').read_text())
+    adjusted=json.loads((root/'route-recovery-latencies.json').read_text())
+    if not raw or len(raw)!=len(adjusted):raise ValueError('missing recovery samples')
+    for sample,recovery in zip(raw,adjusted):
+        enabled,observed=timestamp_ns(sample['enabled']),timestamp_ns(sample['observed'])
+        baseline=enabled
+        for fault in faults:
+            killed,healed=timestamp_ns(fault['killed']),timestamp_ns(fault['healed'])
+            if observed>=killed and enabled<=healed:baseline=max(baseline,healed)
+        expected=max(0,observed-baseline)
+        if sample['delay_ns']!=observed-enabled or recovery!={**sample,'delay_ns':expected}:
+            raise ValueError('raw/recovery samples do not follow enabling/heal timestamps')
+    for typ,cell in report['cells'].items():
+        if sum(x['type']==typ and x['event']=='terminal' for x in raw)!=cell['invocations']:
+            raise ValueError('route terminal samples disagree with workload count')
+        for event,key in [('terminal','terminal'),('progress','progress')]:
+            for samples,prefix in [(raw,'raw_'),(adjusted,'')]:
+                values=sorted(x['delay_ns'] for x in samples if x['type']==typ and (x['event']=='terminal')==(event=='terminal'))
+                if not values:raise ValueError('missing route workload samples')
+                p99=values[(99*len(values)+99)//100-1]/1e9
+                if abs(p99-cell[prefix+key+'_p99_seconds'])>1e-6:raise ValueError('route p99 disagrees with original samples')
+    return dict(quorum_removing_cuts=len(faults),matched_recovery_samples=len(raw),basis='later of enabling event and last overlapping confirmed route/R5 heal')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, help='required consumer/restart fault artifacts')
@@ -166,5 +217,8 @@ if __name__ == '__main__':
         report['restart_artifact_checks'] = check_restart_artifacts(args.root, report)
     if args.row == 'fanout_restart':
         report['fanout_cut_artifact_checks'] = check_fanout_cut_artifacts(args.root, report)
+    if args.row == 'route_quorum':
+        if args.root is None: parser.error('--root is required for the route row')
+        report['route_artifact_checks'] = check_route_artifacts(args.root, report)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))

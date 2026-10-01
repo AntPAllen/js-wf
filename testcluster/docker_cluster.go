@@ -165,6 +165,13 @@ func startDockerCluster(root string, count int, oldBinary string, advance time.D
 		return nil, err
 	}
 	config := fmt.Sprintf("jetstream: { sync_interval: %q }\n", c.syncInterval)
+	if value := os.Getenv("WF_TIER3_ROUTE_PING_INTERVAL"); value != "" {
+		interval, err := time.ParseDuration(value)
+		if err != nil || interval <= 0 || interval > 30*time.Second {
+			return nil, fmt.Errorf("invalid WF_TIER3_ROUTE_PING_INTERVAL %q", value)
+		}
+		config += fmt.Sprintf("cluster: { ping_interval: %q }\n", value)
+	}
 	if err := os.WriteFile(filepath.Join(root, "nats.conf"), []byte(config), 0644); err != nil {
 		return nil, err
 	}
@@ -242,6 +249,10 @@ func (c *DockerCluster) RestartNode(i int) error {
 	if i == 0 {
 		peer = 1
 	}
+	// Explicitly advertise the route-only alias. With two container networks,
+	// default interface discovery can advertise the client bridge or loopback,
+	// allowing routes to survive DisconnectNode's route-network cut.
+	serverArgs = append(serverArgs, "-cluster_advertise", c.routeNames[i]+":6222")
 	serverArgs = append(serverArgs, "-routes", "nats://"+c.routeNames[peer]+":6222")
 	// Retain published ports across replacement containers. Long-lived clients
 	// must be able to reconnect after every original peer has been restarted.
