@@ -52,7 +52,26 @@ Their patches/logs are retained. These controls precede operation diagnostics
 but exercise the same physical kill/census assertions.
 
 The registered fanout-500-restart workflow adds an independent race job with
-operation/server/queue artifacts on failure. Hosted confirmation is pending.
+operation/server/queue artifacts on failure. Hosted run 36849349075 at d098d0c
+reports successful job metadata, but its raw consumer-leader test FAILS in
+59.84 seconds with 373 queued parent wakeups. It is not a passing test. Child
+raw-start p99 is 14.627 seconds, maximum 16.535 seconds; parent delay is 3.168
+seconds. The parent records 129 full history reads totaling 14.883 seconds.
+The independent full-restart test genuinely PASSes in 26.78 seconds with 501
+invocations/journals/terminals and 4,509 entries. Both complete job logs, job
+metadata and all five consumer diagnostic JSON artifacts are retained here.
+
+The consumer step's default shell did not propagate the failed go test through
+tee. All four existing Go-test log pipelines now explicitly enable pipefail,
+including promise-restart, blob pagination and the sustained matrix. The matrix
+already has a separate JSON result guard. Actual edited commands for the three
+standalone pipelines were executed with a stub Go command returning zero and
+one: each preserves the test exit code and writes its log in both cases. These
+six shell controls are recorded in pipeline-exit-controls.json; they verify
+exit propagation, not workflow correctness or runtime safety. Prior passing
+claims require a raw test PASS, not successful job metadata alone. The initial
+summary claiming both 500-child jobs passed is corrected by this raw evidence.
+
 This one backlog cut does not prove the full 500-child fault matrix or the
 separate 200-seed sustained matrix and five-node 24-hour soak.
 

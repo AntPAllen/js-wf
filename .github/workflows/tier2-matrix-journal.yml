@@ -73,6 +73,7 @@ jobs:
           WF_BLOCK_DISK=1 go test -race ./testcluster -run '^TestBlockDiskStallBlocksSyncAndCleansUp$' -count=1 -timeout=2m -v
       - name: Sustain mixed workloads under the selected fault schedule
         run: |
+          set -o pipefail
           for seed in $(seq "$FIRST_SEED" "$LAST_SEED"); do
             echo "Sustained matrix row=$MATRIX_ROW seed=$seed duration=$WF_MATRIX_DURATION"
             result_log="integration/matrix-${MATRIX_ROW}-${seed}-test.jsonl"

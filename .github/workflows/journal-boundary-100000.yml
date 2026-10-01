@@ -46,7 +46,9 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Verify real Object Store and KV enumeration beyond 100,000 subjects
-        run: go test ./integration -run '^TestQuiescentBlobSweepPaginationBoundary$' -count=1 -timeout=25m -v | tee blob-enumeration.log
+        run: |
+          set -o pipefail
+          go test ./integration -run '^TestQuiescentBlobSweepPaginationBoundary$' -count=1 -timeout=25m -v | tee blob-enumeration.log
       - if: always()
         uses: actions/upload-artifact@v7
         with:

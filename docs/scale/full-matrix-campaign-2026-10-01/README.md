@@ -56,7 +56,7 @@ fails closed. Group logs are split at their explicit row/seed execution markers;
 missing later seeds cannot disappear into aggregate green metadata.
 
     gh run view RUN_ID --json status,conclusion,headSha,jobs > jobs.json
-    gh api repos/AntPAllen/js-wf/actions/runs/RUN_ID/logs > logs.zip
+    gh api --allow-escape-sequences repos/AntPAllen/js-wf/actions/runs/RUN_ID/logs > logs.zip
     python3 scripts/check-full-matrix.py --jobs jobs.json --logs logs.zip --seeds 1 --output full-matrix-report.json
 
 For the release campaign use --seeds 200. One- and twenty-seed full-matrix

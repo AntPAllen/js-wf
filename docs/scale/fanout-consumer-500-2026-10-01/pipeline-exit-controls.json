@@ -1,0 +1,53 @@
+[
+  {
+    "workflow": "fanout-500-restart.yml",
+    "job": "consumer-leader",
+    "test_exit": 0,
+    "step_exit": 0,
+    "log_retained": true
+  },
+  {
+    "workflow": "fanout-500-restart.yml",
+    "job": "consumer-leader",
+    "test_exit": 1,
+    "step_exit": 1,
+    "log_retained": true
+  },
+  {
+    "workflow": "test.yml",
+    "job": "continuation-promise-restart",
+    "test_exit": 0,
+    "step_exit": 0,
+    "log_retained": true
+  },
+  {
+    "workflow": "test.yml",
+    "job": "continuation-promise-restart",
+    "test_exit": 1,
+    "step_exit": 1,
+    "log_retained": true
+  },
+  {
+    "workflow": "journal-boundary-100000.yml",
+    "job": "blob-enumeration-boundary",
+    "test_exit": 0,
+    "step_exit": 0,
+    "log_retained": true
+  },
+  {
+    "workflow": "journal-boundary-100000.yml",
+    "job": "blob-enumeration-boundary",
+    "test_exit": 1,
+    "step_exit": 1,
+    "log_retained": true
+  },
+  {
+    "workflow": "fanout-500-restart.yml",
+    "job": "consumer-leader",
+    "source": "d098d0c",
+    "test_exit": 1,
+    "step_exit": 0,
+    "log_retained": true,
+    "expected_masked_failure": true
+  }
+]

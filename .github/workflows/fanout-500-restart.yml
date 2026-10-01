@@ -24,7 +24,9 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Kill the consumer leader with 500 physically queued children
-        run: go test -race ./integration -run '^TestFiveHundredChildFanoutSurvivesConsumerLeaderKill$' -count=1 -timeout=8m -v | tee fanout-consumer-500.log
+        run: |
+          set -o pipefail
+          go test -race ./integration -run '^TestFiveHundredChildFanoutSurvivesConsumerLeaderKill$' -count=1 -timeout=8m -v | tee fanout-consumer-500.log
       - if: always()
         uses: actions/upload-artifact@v7
         with:

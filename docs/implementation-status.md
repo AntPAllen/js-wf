@@ -3914,3 +3914,29 @@ majority-partition seed-1 rows pass. Actual completed job logs pass the existing
 per-seed semantic checker and are [retained with scope](scale/full-matrix-campaign-2026-10-01/).
 Remaining rows are live/queued; neither those four samples nor the live mixed
 200-seed/full simulation/million-timer campaigns complete the full release gates.
+
+## Hosted 500-child failure masked by a logging pipeline
+
+Raw logs for run 36849349075 at d098d0c contradict its successful consumer job
+metadata: TestFiveHundredChildFanoutSurvivesConsumerLeaderKill FAILS in 59.84
+seconds on physical queue drain, with 373 parent wakeups retained. Child
+raw-start p99 is 14.627 seconds and parent last-child delay is 3.168 seconds;
+129 full parent history reads total 14.883 seconds. The independent full-restart
+test genuinely PASSes in 26.78 seconds, with 501 invocations/journals/terminals
+and 4,509 entries. Full raw job logs, job metadata and consumer diagnostics are
+[retained](scale/fanout-consumer-500-2026-10-01/). The prior user summary claiming
+both tests passed is superseded: green metadata alone did not prove execution.
+
+The standalone go-test/tee pipeline masked Go's exit code under the default
+shell. All four Go log pipelines now explicitly enable pipefail, including
+promise restart, blob pagination and the matrix (which already independently
+checks JSON results). Six controls execute the three edited standalone commands
+with stub Go exits zero/one; every step preserves the exit and retains its log.
+These are shell controls, not runtime proofs. No runtime behavior or latency
+bound changes. A fresh hosted consumer run must report the actual failed test.
+
+The all-row seed-1 campaign now reports twelve completed successful jobs; its
+rolling-upgrade job is confirmed running. Terminal full-log verification remains
+required before declaring the campaign passed, and one seed does not clear the
+whole-matrix 200-seed or five-node 24-hour release gates. The original million
+native timers remain live; final audit and the remaining plan gates stay open.
