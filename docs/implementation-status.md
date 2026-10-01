@@ -4882,3 +4882,10 @@ PID85158/epoch403. Its invocation completed while the owner was stopped; origina
 delivery and terminal evidence remain visible. All57 repairs are acknowledged
 with checked explanations. All46 Python tests and vet pass. This is one smoke;
 ten-minute and full24-hour coverage remain open.
+
+
+The [clean-source ten-minute pause campaign36925290442](https://github.com/AntPAllen/js-wf/actions/runs/36925290442)
+is queued atba824e2; exact source/inputs are retained beside the smoke. It requires
+ten confirmed45s pauses with original PID/lease/fencing evidence and unchanged
+mixed gates. The worker-kill campaign36923802476 remains in progress. Neither live
+handle is terminal acceptance.
