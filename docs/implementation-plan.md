@@ -20,7 +20,7 @@ The only new stateful component is the SDK runtime inside the worker; every dura
 | Store | Subjects | Config that matters | Role |
 | --- | --- | --- | --- |
 | `WF_INV` stream | `wf.inv.<type>.<id>` | `MaxMsgsPerSubject=1`, `DiscardNewPerSubject`, limits retention | Start-once idempotency record; holds input + start metadata |
-| `WF_RUN` stream | `wf.run.<partition>` (mapped from `wf.run.<type>.<id>` via `{{partition(N, 2, 3)}}`) | WorkQueue retention, default consumer `AckWait` 20 s, `MaxDeliver` unlimited with backoff | Dispatch queue; one durable pull consumer per partition |
+| `WF_RUN` stream | `wf.run.<partition>` (mapped from `wf.run.<type>.<id>` via `{{partition(N, 2, 3)}}`) | WorkQueue retention, default consumer `AckWait` 13 s (12 s lease TTL plus 1 s), `MaxDeliver` unlimited with backoff | Dispatch queue; one durable pull consumer per partition |
 | `WF_JRN` stream | `wf.jrn.<type>.<id>` | Limits retention, `DenyPurge=false`, `Nats-Expected-Last-Subject-Sequence` on every publish | Per-invocation journal; entries `{epoch, index, kind, payload}` |
 | `WF_SIG` stream | `wf.sig.<type>.<id>.<name>` | Limits retention, `Nats-Msg-Id` dedup window 2 min | External signals; merged into the journal by the worker |
 | `WF_LEASE` KV | key `<type>.<id>` | Per-key TTL 12 s, `LimitMarkerTTL` | Single-writer lease; value = `{worker, epoch}` |
