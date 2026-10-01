@@ -4680,3 +4680,10 @@ events overlap confirmed outages;36 invocations complete later,one terminal
 child's duplicate is explicitly distinguished from completion. All69 repairs
 have checked decisions. The downloaded native events and artifacts reverify
 unchanged. This closes that single ten-minute source/row, not the full matrix.
+
+The [ten-minute route campaign](https://github.com/AntPAllen/js-wf/actions/runs/36913601073)
+was launched atad3a251, with retained inputs/source identity. Mid-fan-out
+campaign36911677345 is now terminal SUCCESS; downloaded-artifact review is
+pending. Comprehensive simulation36900782095 remains in progress. The million
+timer service remains active at MainPID18146 with111,029 receipts at its latest
+checkpoint. The route campaign and timers are not terminal acceptance.
