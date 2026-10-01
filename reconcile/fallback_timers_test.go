@@ -50,10 +50,17 @@ func TestFallbackTimerScanRetriesCommittedWakeupBeforeDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 	scan := NewFallbackTimerScan(js)
+	var events []RepairEvent
+	scan.Observe = func(e RepairEvent) { events = append(events, e) }
 	result, err := scan.Scan(ctx, 1, 10, false)
 	if err != nil || result.Reenqueued != 1 {
 		t.Fatalf("fallback retry result=%+v err=%v", result, err)
 	}
+	if len(events) != 1 || events[0].Outcome != "acknowledged" || events[0].Kind != "fallback-timer" || events[0].InvocationSequence != generation || events[0].TimerStep == nil || *events[0].TimerStep != step || events[0].FireAt == nil {
+		t.Fatalf("real duplicate publication evidence=%+v", events)
+	}
+	encoded, _ := json.Marshal(events)
+	t.Logf("fallback repair events=%s", encoded)
 	run, err := js.Stream(ctx, "WF_RUN")
 	if err != nil {
 		t.Fatal(err)

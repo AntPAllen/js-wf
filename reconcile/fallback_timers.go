@@ -23,8 +23,9 @@ import (
 // of that boundary is safe because the wakeup has a stable message ID and the
 // worker treats duplicate wakeups as no-ops.
 type FallbackTimerScan struct {
-	port FallbackTimerScanPort
-	Now  func(context.Context) (time.Time, error)
+	port    FallbackTimerScanPort
+	Now     func(context.Context) (time.Time, error)
+	Observe func(RepairEvent)
 }
 
 // FallbackTimerScanPort is the retained timer, state, and run-publish boundary
@@ -205,15 +206,21 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 			continue
 		}
 		result.Reenqueued++
+		event := RepairEvent{Kind: "fallback-timer", Type: parts[2], ID: parts[3], Reason: "due_fallback_timer", SourceSequence: message.Sequence, InvocationSequence: generation, FireAt: &timer.FireAt, TimerStep: &step}
 		if dryRun {
+			reportRepair(s.Observe, event, true, nil)
 			continue
 		}
 		wakeup := &nats.Msg{Subject: identity.RunSubject(parts[2], parts[3], provision.Partitions), Data: []byte(identity.Key(parts[2], parts[3])), Header: nats.Header{}}
 		wakeup.Header.Set(identity.TimerInvSeqHeader, parts[4])
 		wakeup.Header.Set(identity.TimerStepHeader, parts[5])
 		messageID := fmt.Sprintf("fallback-timer:%s:%s:%d:%d", parts[2], parts[3], generation, step)
-		if err := s.port.PublishWakeup(ctx, wakeup, messageID); err != nil {
-			return result, err
+		publishErr := s.port.PublishWakeup(ctx, wakeup, messageID)
+		// A later timer deletion failure cannot turn an acknowledged publication
+		// into uncertainty; retain the publication result at its actual boundary.
+		reportRepair(s.Observe, event, false, publishErr)
+		if publishErr != nil {
+			return result, publishErr
 		}
 		if err := s.port.DeleteTimer(ctx, message.Sequence); err != nil {
 			return result, err

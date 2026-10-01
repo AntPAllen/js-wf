@@ -41,3 +41,18 @@ class EventExplanations(unittest.TestCase):
             with self.assertRaises(ValueError):explain.check(m,f,[altered])
         event['outcome']='dry_run';event['retry_window']=0
         self.assertIn('no publication was attempted',explain.check(m,f,[event])['explanations'][1]['explanation'])
+
+
+    def test_timer_source_due_time_and_step_evidence(self):
+        m,f,_=self.fixture()
+        for kind,reasons in [('timer',['timer','timer_start','timer_await']),('fallback-timer',['due_fallback_timer'])]:
+            for reason in reasons:
+                e=dict(at='2026-10-01T12:00:00Z',kind=kind,type='timer',id='t',reason=reason,source_sequence=10,invocation_sequence=4,journal_sequence=20,fire_at='2026-10-01T11:59:59Z',timer_step=0,outcome='acknowledged')
+                self.assertEqual(explain.check(m,f,[e])['repair_records'],1)
+                for field,value in [('fire_at',''),('fire_at','2026-10-01T11:59:59'),('source_sequence',0),('invocation_sequence',0)]+([('journal_sequence',0)] if kind=='timer' else [('timer_step',None),('timer_step',-1),('timer_step',True)]):
+                    altered=copy.deepcopy(e);altered[field]=value
+                    with self.subTest(kind=kind,field=field,value=value),self.assertRaises(ValueError):explain.check(m,f,[altered])
+                e['outcome']='uncertain';e['error']='committed publication acknowledgement lost'
+                self.assertIn('may have committed',explain.check(m,f,[e])['explanations'][1]['explanation'])
+                e['outcome']='dry_run';e.pop('error')
+                self.assertIn('no publication was attempted',explain.check(m,f,[e])['explanations'][1]['explanation'])

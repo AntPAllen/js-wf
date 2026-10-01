@@ -37,7 +37,7 @@ func reportRepair(observe func(RepairEvent), event RepairEvent, dry bool, err er
 	if dry {
 		event.Outcome = "dry_run"
 	} else if err != nil {
-		event.Outcome = "uncertain"
+		event.Outcome = "acknowledged"
 		event.Error = err.Error()
 	}
 	observe(event)

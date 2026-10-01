@@ -16,8 +16,9 @@ import (
 )
 
 type TimerScan struct {
-	port TimerScanPort
-	Now  func() time.Time
+	port    TimerScanPort
+	Now     func() time.Time
+	Observe func(RepairEvent)
 }
 
 func NewTimerScan(js jetstream.JetStream) *TimerScan {
@@ -159,10 +160,13 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			continue
 		}
 		result.Reenqueued++
+		var enqueueErr error
 		if !dryRun {
-			if err := s.port.EnqueueTimer(ctx, typ, id, pending.Sequence); err != nil {
-				return result, err
-			}
+			enqueueErr = s.port.EnqueueTimer(ctx, typ, id, pending.Sequence)
+		}
+		reportRepair(s.Observe, RepairEvent{Kind: "timer", Type: typ, ID: id, Reason: req.Kind, SourceSequence: m.Sequence, InvocationSequence: m.Sequence, JournalSequence: pending.Sequence, FireAt: &req.FireAt}, dryRun, enqueueErr)
+		if enqueueErr != nil {
+			return result, enqueueErr
 		}
 	}
 	return result, nil

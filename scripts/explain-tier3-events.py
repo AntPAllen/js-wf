@@ -15,6 +15,10 @@ FENCING = {
     'lease_release_lost': 'Lease cleanup returned ErrLost; cleanup must preserve successor safety.',
 }
 REPAIRS = {
+    ('timer','timer'): 'A retained incomplete sleep request was due; the scanner attempted its journal-sequence wakeup.',
+    ('timer','timer_start'): 'A retained timer creation request was due and incomplete; the scanner attempted its journal-sequence wakeup.',
+    ('timer','timer_await'): 'A retained timer await request was due and incomplete; the scanner attempted its journal-sequence wakeup.',
+    ('fallback-timer','due_fallback_timer'): 'A retained non-retired fallback timer was due; the scanner attempted a generation/step-specific wakeup before deleting the timer record.',
     ('start', 'missing_journal'): 'A retained invocation had no journal; the scanner attempted a deduplicated start wakeup.',
     ('signal', 'unconsumed_signal_nonterminal_generation'): 'A retained signal was unconsumed in a nonterminal journal and matched the current invocation generation; the scanner attempted a signal wakeup.',
     ('suspended', 'signal'): 'A suspended signal wait had an available signal; the scanner attempted a wakeup using its journal tail and retry window.',
@@ -65,6 +69,11 @@ def check(metrics, fencing, repairs):
                 raise ValueError('missing suspended journal tail or retry window')
         elif event.get('source_sequence', 0) <= 0 or event.get('invocation_sequence', 0) <= 0:
             raise ValueError('missing repair source or invocation generation')
+        if event['kind'] in ('timer','fallback-timer'):
+            if not event.get('fire_at'):raise ValueError('missing timer due-time evidence')
+            stamp(event['fire_at'])
+            if event['kind']=='timer' and event.get('journal_sequence',0)<=0:raise ValueError('missing pending timer journal sequence')
+            if event['kind']=='fallback-timer' and (type(event.get('timer_step')) is not int or event['timer_step']<0):raise ValueError('missing fallback timer step')
         suffix = {
             'acknowledged': ' Publication was acknowledged; message-ID deduplication can make this a repeated wakeup.',
             'uncertain': ' Publication did not return a successful acknowledgment; it may have committed and needs a safe retry.',
@@ -72,7 +81,7 @@ def check(metrics, fencing, repairs):
         }[outcome]
         explanations.append(dict(kind='repair', index=index, evidence=event, explanation=REPAIRS[key]+suffix))
         repair_counts[f'{event["kind"]}/{outcome}'] += 1
-    return dict(scope='recorded decisions of five R5 workers and start/signal/suspended reconcilers',
+    return dict(scope='recorded decisions of five R5 workers and observed repair scanners',
                 fencing_records=sum(observed.values()), repair_records=sum(repair_counts.values()),
                 fencing_per_worker=dict(observed), repairs_by_outcome=dict(repair_counts),
                 explanations=explanations, server_root_causes_confirmed=False,

@@ -1,0 +1,9 @@
+=== RUN   TestSeededFallbackTimerPipelineReplay
+    fallback_timer_pipeline_test.go:177: FAULT_SEED=1 FAULT_TRACE=/tmp/js-wf-fallback-pipeline-failure-1397984572/trace.json: seed 1 wakeup fault result={NextSequence:2 Inspected:1 Reenqueued:1 Removed:0 Candidates:[]} err=invalid fallback repair evidence: {At:2026-10-01 19:39:42.846891222 +0000 UTC Kind:fallback-timer Type:test ID:fallback-00 Reason:due_fallback_timer SourceSequence:1 InvocationSequence:7 JournalSequence:0 FireAt:2023-11-14 22:13:19 +0000 UTC TimerStep:0x1e6253b16d18 RetryWindow:0 Outcome:acknowledged Error:simulated transport lost}
+--- FAIL: TestSeededFallbackTimerPipelineReplay (0.00s)
+=== RUN   TestSeededTimerScanReplay
+    timer_scan_replay_test.go:203: FAULT_SEED=1 FAULT_TRACE=/tmp/js-wf-timer-scan-failure-4142530709/trace.json: invalid timer repair evidence: {At:2026-10-01 19:39:42.847644037 +0000 UTC Kind:timer Type:test ID:timer-14 Reason:timer SourceSequence:15 InvocationSequence:15 JournalSequence:152 FireAt:2023-11-14 22:13:19 +0000 UTC TimerStep:<nil> RetryWindow:0 Outcome:acknowledged Error:simulated transport lost}
+--- FAIL: TestSeededTimerScanReplay (0.00s)
+FAIL
+FAIL	js-wf/sim	0.005s
+FAIL

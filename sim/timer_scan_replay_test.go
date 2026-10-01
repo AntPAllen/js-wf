@@ -37,9 +37,33 @@ func runSeededTimerScan(seed int64, replay *Trace) (trace Trace, runErr error) {
 	defer func() { trace = schedule.Trace() }()
 	ctx := context.Background()
 	model := NewSignalTransport(schedule)
-	scan := reconcile.NewTimerScanWithPort(model)
+	scanner := reconcile.NewTimerScanWithPort(model)
 	base := time.Unix(1_700_000_000, 0).UTC()
-	scan.Now = func() time.Time { return base.Add(time.Duration(schedule.NowMillis()) * time.Millisecond) }
+	scanner.Now = func() time.Time { return base.Add(time.Duration(schedule.NowMillis()) * time.Millisecond) }
+	var observationErr error
+	var events []reconcile.RepairEvent
+	scanner.Observe = func(e reconcile.RepairEvent) { events = append(events, e) }
+	scan := func(ctx context.Context, next uint64, budget int, dry bool) (reconcile.ScanResult, error) {
+		before := len(events)
+		result, err := scanner.Scan(ctx, next, budget, dry)
+		if len(events)-before != result.Reenqueued {
+			observationErr = fmt.Errorf("timer event count disagrees with repair decisions")
+			return result, err
+		}
+		for _, e := range events[before:] {
+			want := "acknowledged"
+			if dry {
+				want = "dry_run"
+			} else if err != nil {
+				want = "uncertain"
+			}
+			if e.Kind != "timer" || e.Outcome != want || e.Type != "test" || e.SourceSequence != next || e.InvocationSequence != next || e.JournalSequence != next*10+2 || e.FireAt == nil || e.FireAt.IsZero() || e.FireAt.After(scanner.Now()) || e.At.IsZero() || (e.Error != "") != (want == "uncertain") {
+				observationErr = fmt.Errorf("invalid timer repair evidence: %+v", e)
+				return result, err
+			}
+		}
+		return result, err
+	}
 	var future []uint64
 	for i := 0; i < 20; i++ {
 		mode, err := schedule.Choose([]string{"timer", "timer_start", "timer_await", "future", "completed", "terminal", "no_request", "other_kind", "hole", "lost_ack", "drop_enqueue"})
@@ -88,7 +112,7 @@ func runSeededTimerScan(seed int64, replay *Trace) (trace Trace, runErr error) {
 		due := mode == "timer" || mode == "timer_start" || mode == "timer_await" || mode == "lost_ack" || mode == "drop_enqueue"
 		before := len(model.Runs())
 		if due {
-			result, err := scan.Scan(ctx, sequence, 1, true)
+			result, err := scan(ctx, sequence, 1, true)
 			if err != nil || result.Reenqueued != 1 || len(model.Runs()) != before {
 				return trace, fmt.Errorf("seed %d case %d dry run mode=%s result=%+v runs=%d/%d err=%v", seed, i, mode, result, len(model.Runs()), before, err)
 			}
@@ -101,7 +125,7 @@ func runSeededTimerScan(seed int64, replay *Trace) (trace Trace, runErr error) {
 			if err := model.QueueFault(StartFault{Operation: "enqueue_run", Kind: fault}); err != nil {
 				return trace, err
 			}
-			result, err := scan.Scan(ctx, sequence, 1, false)
+			result, err := scan(ctx, sequence, 1, false)
 			if err == nil || result.Reenqueued != 1 {
 				return trace, fmt.Errorf("seed %d case %d uncertain enqueue result=%+v err=%v", seed, i, result, err)
 			}
@@ -109,7 +133,7 @@ func runSeededTimerScan(seed int64, replay *Trace) (trace Trace, runErr error) {
 				return trace, fmt.Errorf("seed %d case %d fault=%s retained runs=%d", seed, i, mode, got)
 			}
 		}
-		result, err := scan.Scan(ctx, sequence, 1, false)
+		result, err := scan(ctx, sequence, 1, false)
 		if err != nil || result.NextSequence != sequence+1 || result.Reenqueued != map[bool]int{true: 1, false: 0}[due] {
 			return trace, fmt.Errorf("seed %d case %d mode=%s result=%+v err=%v", seed, i, mode, result, err)
 		}
@@ -121,7 +145,7 @@ func runSeededTimerScan(seed int64, replay *Trace) (trace Trace, runErr error) {
 			return trace, fmt.Errorf("seed %d case %d mode=%s runs=%d want=%d", seed, i, mode, got, wantRuns)
 		}
 		if due {
-			if _, err := scan.Scan(ctx, sequence, 1, false); err != nil || len(model.Runs()) != wantRuns {
+			if _, err := scan(ctx, sequence, 1, false); err != nil || len(model.Runs()) != wantRuns {
 				return trace, fmt.Errorf("seed %d case %d dedup mode=%s runs=%d err=%v", seed, i, mode, len(model.Runs()), err)
 			}
 		}
@@ -131,10 +155,13 @@ func runSeededTimerScan(seed int64, replay *Trace) (trace Trace, runErr error) {
 	}
 	for _, sequence := range future {
 		before := len(model.Runs())
-		result, err := scan.Scan(ctx, sequence, 1, false)
+		result, err := scan(ctx, sequence, 1, false)
 		if err != nil || result.Reenqueued != 1 || len(model.Runs()) != before+1 {
 			return trace, fmt.Errorf("seed %d future %d result=%+v runs=%d/%d err=%v", seed, sequence, result, len(model.Runs()), before, err)
 		}
+	}
+	if observationErr != nil {
+		return trace, observationErr
 	}
 	if err := schedule.Finish(); err != nil {
 		return trace, err

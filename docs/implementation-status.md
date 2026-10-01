@@ -4727,3 +4727,20 @@ The quorum route campaign36913601073 and comprehensive simulation36900782095
 remain in progress. The million-timer service remains active at MainPID18146
 with116,675 receipts at its latest checkpoint. These live handles are not
 terminal acceptance.
+
+
+## Timer and fallback repair observers validated in the seeded model
+
+Optional publication observers now cover due journal timers and fallback timers
+through the same fenced scanner loop. They retain due time, invocation/source
+sequences and journal tail or fallback step (including zero). Outcome is recorded
+at publication, before fallback deletion: an acknowledged wakeup remains
+acknowledged if deletion fails. Dry runs publish nothing and skipped records
+emit no enqueue evidence. [Seeded, native and mutation proof](scale/timer-repair-observers-2026-10-01/)
+passes100,000 timer seeds plus100,000 fallback pipeline seeds in38.413s, with exact
+and cross-process replay. Focused race checks and all168 pins pass11.263s;
+a real R1 duplicate-acknowledgement observation passes0.10s/1.117s package.
+All40 Python tests and vet pass. Erasing uncertainty fails both workloads at
+seed1 in0.005s. The control also exposed and corrected a timer test assertion
+that could be mistaken for an expected transport error; that initial control
+remains visible. This is scoped observer proof, not a new full suite or24h gate.

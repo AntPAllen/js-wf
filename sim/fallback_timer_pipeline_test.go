@@ -41,6 +41,21 @@ func runSeededFallbackPipeline(seed int64, replay *Trace) (trace Trace, runErr e
 	scan := reconcile.NewFallbackTimerScanWithPort(model, func(context.Context) (time.Time, error) {
 		return base.Add(time.Duration(schedule.NowMillis()) * time.Millisecond), nil
 	})
+	var events []reconcile.RepairEvent
+	scan.Observe = func(e reconcile.RepairEvent) { events = append(events, e) }
+	observedScan := func(ctx context.Context, next uint64, budget int, dry bool) (reconcile.ScanResult, error) {
+		before := len(events)
+		result, err := scan.Scan(ctx, next, budget, dry)
+		if len(events)-before != result.Reenqueued {
+			return result, fmt.Errorf("fallback event count disagrees with repair decisions")
+		}
+		for _, e := range events[before:] {
+			if e.Kind != "fallback-timer" || e.Reason != "due_fallback_timer" || e.Type != "test" || e.SourceSequence == 0 || e.InvocationSequence != 7 || e.TimerStep == nil || *e.TimerStep != 3 || e.FireAt == nil || e.FireAt.IsZero() || e.FireAt.After(base.Add(time.Duration(schedule.NowMillis())*time.Millisecond)) || e.At.IsZero() || (e.Error != "") != (e.Outcome == "uncertain") {
+				return result, fmt.Errorf("invalid fallback repair evidence: %+v", e)
+			}
+		}
+		return result, err
+	}
 	var dueCount, futureCount int
 	var dueIDs, futureIDs []string
 	for i := 0; i < 20; i++ {
@@ -91,13 +106,13 @@ func runSeededFallbackPipeline(seed int64, replay *Trace) (trace Trace, runErr e
 	if err := model.QueueDeleteFault(AppendFault(deleteFault)); err != nil {
 		return trace, err
 	}
-	if result, err := scan.Scan(ctx, 1, 20, false); !errors.Is(err, ErrTransportLost) || result.Reenqueued != 1 {
+	if result, err := observedScan(ctx, 1, 20, false); !errors.Is(err, ErrTransportLost) || result.Reenqueued != 1 || len(events) != 1 || events[0].Outcome != "uncertain" {
 		return trace, fmt.Errorf("seed %d wakeup fault result=%+v err=%v", seed, result, err)
 	}
-	if result, err := scan.Scan(ctx, 1, 20, false); !errors.Is(err, ErrTransportLost) || result.Reenqueued != 1 {
+	if result, err := observedScan(ctx, 1, 20, false); !errors.Is(err, ErrTransportLost) || result.Reenqueued != 1 || len(events) != 2 || events[1].Outcome != "acknowledged" {
 		return trace, fmt.Errorf("seed %d delete fault result=%+v err=%v", seed, result, err)
 	}
-	if _, err := scan.Scan(ctx, 1, 20, false); err != nil {
+	if _, err := observedScan(ctx, 1, 20, false); err != nil {
 		return trace, fmt.Errorf("seed %d retry: %w", seed, err)
 	}
 	if len(model.Runs()) != dueCount || len(model.RetainedFallbackRecords()) != futureCount {
@@ -111,7 +126,7 @@ func runSeededFallbackPipeline(seed int64, replay *Trace) (trace Trace, runErr e
 	if err := model.Advance(2 * time.Hour); err != nil {
 		return trace, err
 	}
-	if _, err := scan.Scan(ctx, 1, 20, false); err != nil {
+	if _, err := observedScan(ctx, 1, 20, false); err != nil {
 		return trace, fmt.Errorf("seed %d future scan: %w", seed, err)
 	}
 	if len(model.Runs()) != dueCount+futureCount || len(model.RetainedFallbackRecords()) != 0 {

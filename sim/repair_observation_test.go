@@ -9,6 +9,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"js-wf/client"
 	"js-wf/reconcile"
+	"js-wf/worker"
 )
 
 type hiddenRepairAck struct {
@@ -129,5 +130,30 @@ func TestRepairObservationDistinguishesDryUnknownAndAcknowledged(t *testing.T) {
 				t.Fatalf("ineligible invocation produced evidence: result=%+v events=%+v err=%v", result, events, err)
 			}
 		})
+	}
+}
+
+func TestFallbackTimerObservationDryRunAndZeroStep(t *testing.T) {
+	ctx := context.Background()
+	base := time.Unix(1_700_000_000, 0).UTC()
+	model := NewTimerScheduleTransport(NewScheduler(7), base)
+	if _, err := worker.ScheduleTimerWithPort(ctx, model, false, "test", "zero-step", 7, 0, base.Add(-time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	scan := reconcile.NewFallbackTimerScanWithPort(model, func(context.Context) (time.Time, error) { return base, nil })
+	var events []reconcile.RepairEvent
+	scan.Observe = func(e reconcile.RepairEvent) { events = append(events, e) }
+	result, err := scan.Scan(ctx, 1, 1, true)
+	if err != nil || result.Reenqueued != 1 || len(model.Runs()) != 0 || len(model.RetainedFallbackRecords()) != 1 || len(events) != 1 || events[0].Outcome != "dry_run" {
+		t.Fatalf("dry scan=%+v events=%+v err=%v", result, events, err)
+	}
+	result, err = scan.Scan(ctx, 1, 1, false)
+	if err != nil || result.Reenqueued != 1 || len(model.Runs()) != 1 || len(model.RetainedFallbackRecords()) != 0 || len(events) != 2 || events[1].Outcome != "acknowledged" {
+		t.Fatalf("publish scan=%+v events=%+v err=%v", result, events, err)
+	}
+	for _, e := range events {
+		if e.TimerStep == nil || *e.TimerStep != 0 || e.InvocationSequence != 7 || e.SourceSequence != 1 || e.FireAt == nil || !e.FireAt.Equal(base.Add(-time.Second)) {
+			t.Fatalf("zero-step evidence=%+v", e)
+		}
 	}
 }
