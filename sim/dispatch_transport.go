@@ -36,23 +36,42 @@ type dispatchRecord struct {
 // worker.RunPartition. It has virtual AckWait, explicit ack/nak/progress, and
 // injected consumer-leader errors; it does not model the handler's journal.
 type DispatchTransport struct {
-	mu             sync.Mutex
-	schedule       *Scheduler
-	ackWait        int64
-	records        []*dispatchRecord
-	faults         []DispatchFault
-	creates        int
-	sequence       uint64
-	onDrained      func()
-	onNextAck      func()
-	onNextNak      func()
-	onNextProgress func()
+	mu                  sync.Mutex
+	schedule            *Scheduler
+	ackWait             int64
+	consumerClockOffset int64
+	records             []*dispatchRecord
+	faults              []DispatchFault
+	creates             int
+	sequence            uint64
+	onDrained           func()
+	onNextAck           func()
+	onNextNak           func()
+	onNextProgress      func()
 }
 
 var _ worker.DispatchPort = (*DispatchTransport)(nil)
 
 func NewDispatchTransport(schedule *Scheduler, ackWait time.Duration) *DispatchTransport {
 	return &DispatchTransport{schedule: schedule, ackWait: ackWait.Milliseconds()}
+}
+
+// SetConsumerClockOffset models persisted delivery deadlines interpreted by a
+// different leader clock. This is an explicit transport assumption; it does
+// not assert NATS's election or pending-state timestamp conversion behavior.
+func (m *DispatchTransport) SetConsumerClockOffset(offset time.Duration) error {
+	if offset%time.Millisecond != 0 {
+		return fmt.Errorf("invalid consumer clock offset %s", offset)
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.consumerClockOffset = offset.Milliseconds()
+	m.event(TransportEvent{Operation: "consumer_clock", Outcome: offset.String()})
+	return nil
+}
+
+func (m *DispatchTransport) consumerNowMillis() int64 {
+	return m.schedule.NowMillis() + m.consumerClockOffset
 }
 
 func (m *DispatchTransport) QueueFault(f DispatchFault) error {
@@ -285,11 +304,11 @@ func (c dispatchConsumer) FetchOne(ctx context.Context) (worker.DispatchBatch, e
 		return nil, jetstream.ErrConsumerLeadershipChanged
 	}
 	for _, record := range m.records {
-		if record.subject != c.subject || record.acked || record.deliveries > 0 && m.schedule.NowMillis() < record.deadline {
+		if record.subject != c.subject || record.acked || record.deliveries > 0 && m.consumerNowMillis() < record.deadline {
 			continue
 		}
 		record.deliveries++
-		record.deadline = m.schedule.NowMillis() + m.ackWait
+		record.deadline = m.consumerNowMillis() + m.ackWait
 		m.event(TransportEvent{Operation: "consumer_fetch", Subject: c.subject, Sequence: record.sequence, Outcome: fmt.Sprintf("delivery_%d", record.deliveries)})
 		channel := make(chan jetstream.Msg, 1)
 		channel <- &dispatchMsg{model: m, record: record, delivery: record.deliveries}
@@ -415,9 +434,9 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 		m.record.acked = true
 		m.record.retained = false
 	case "nak":
-		m.record.deadline = model.schedule.NowMillis() + delay.Milliseconds()
+		m.record.deadline = model.consumerNowMillis() + delay.Milliseconds()
 	case "progress":
-		m.record.deadline = model.schedule.NowMillis() + model.ackWait
+		m.record.deadline = model.consumerNowMillis() + model.ackWait
 	default:
 		return fmt.Errorf("invalid dispatch response %q", operation)
 	}

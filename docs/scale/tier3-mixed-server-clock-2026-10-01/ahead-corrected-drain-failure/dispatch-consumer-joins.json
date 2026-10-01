@@ -1,0 +1,319 @@
+{
+  "scope": "stream range endpoints and local dispatch observations; exact retained message membership, broker commitment and root cause unconfirmed",
+  "dispatch": [
+    {
+      "At": "2026-10-01T23:06:15.102404166Z",
+      "Worker": "tier3-mixed-3",
+      "Type": "matrixchild",
+      "ID": "c-d2f8cdd94a2d2e3b32315dee6a0d2c82",
+      "Stage": "fetched",
+      "RunSequence": 725,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-01T23:06:15.10930471Z",
+      "Worker": "tier3-mixed-3",
+      "Type": "matrixchild",
+      "ID": "c-d2f8cdd94a2d2e3b32315dee6a0d2c82",
+      "Stage": "lease_held",
+      "RunSequence": 725,
+      "Delivery": 1,
+      "Error": "workflow lease is held"
+    },
+    {
+      "At": "2026-10-01T23:06:15.113338462Z",
+      "Worker": "tier3-mixed-3",
+      "Type": "matrixchild",
+      "ID": "c-d2f8cdd94a2d2e3b32315dee6a0d2c82",
+      "Stage": "terminal_probe_error",
+      "RunSequence": 725,
+      "Delivery": 1,
+      "Error": "nats: key not found"
+    },
+    {
+      "At": "2026-10-01T23:06:15.113358642Z",
+      "Worker": "tier3-mixed-3",
+      "Type": "matrixchild",
+      "ID": "c-d2f8cdd94a2d2e3b32315dee6a0d2c82",
+      "Stage": "nak",
+      "RunSequence": 725,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-01T23:06:18.583334105Z",
+      "Worker": "tier3-mixed-0",
+      "Type": "matrixtimer",
+      "ID": "tier3-1-batch-6-4",
+      "Stage": "fetched",
+      "RunSequence": 775,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-01T23:06:18.59001909Z",
+      "Worker": "tier3-mixed-0",
+      "Type": "matrixtimer",
+      "ID": "tier3-1-batch-6-4",
+      "Stage": "lease_acquired",
+      "RunSequence": 775,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-01T23:06:18.6414246Z",
+      "Worker": "tier3-mixed-0",
+      "Type": "matrixtimer",
+      "ID": "tier3-1-batch-6-4",
+      "Stage": "released",
+      "RunSequence": 775,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-01T23:06:18.64145141Z",
+      "Worker": "tier3-mixed-0",
+      "Type": "matrixtimer",
+      "ID": "tier3-1-batch-6-4",
+      "Stage": "ack",
+      "RunSequence": 775,
+      "Delivery": 1,
+      "Error": ""
+    }
+  ],
+  "consumer_leader_observations": [
+    {
+      "source": "drain-before-node0-jetstream.json",
+      "consumer": {
+        "stream_name": "WF_RUN",
+        "name": "WF_P_26",
+        "created": "2026-10-01T23:05:49.243492982Z",
+        "delivered": {
+          "consumer_seq": 27,
+          "stream_seq": 775,
+          "last_active": "2026-10-01T23:06:19.83016501Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 19,
+          "stream_seq": 727,
+          "last_active": "2026-10-01T23:06:19.842465694Z"
+        },
+        "num_ack_pending": 1,
+        "num_redelivered": 0,
+        "num_waiting": 1,
+        "num_pending": 0,
+        "cluster": {
+          "name": "js-wf-route-5709-1790895895824905739",
+          "raft_group": "C-R5F-k5MJovvg",
+          "leader": "js-wf-route-5709-1790895895824905739-n0",
+          "leader_since": "2026-10-01T23:06:26.078065917Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n1",
+              "current": true,
+              "active": 797142194,
+              "peer": "mzG9Uo1t"
+            },
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n2",
+              "current": true,
+              "active": 797031979,
+              "peer": "dQuhj2Fq"
+            },
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n3",
+              "current": true,
+              "active": 797033001,
+              "peer": "NbnUus6S"
+            },
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n4",
+              "current": true,
+              "active": 797142815,
+              "peer": "X83AngiH"
+            }
+          ]
+        },
+        "ts": "2026-10-01T23:06:33.951146165Z"
+      }
+    },
+    {
+      "source": "drain-before-node1-jetstream.json",
+      "consumer": {
+        "stream_name": "WF_RUN",
+        "name": "WF_P_43",
+        "created": "2026-10-01T23:05:49.243892542Z",
+        "delivered": {
+          "consumer_seq": 9,
+          "stream_seq": 775,
+          "last_active": "2026-10-01T23:06:16.183473424Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 7,
+          "stream_seq": 724,
+          "last_active": "2026-10-01T23:06:16.196441486Z"
+        },
+        "num_ack_pending": 1,
+        "num_redelivered": 0,
+        "num_waiting": 1,
+        "num_pending": 0,
+        "cluster": {
+          "name": "js-wf-route-5709-1790895895824905739",
+          "raft_group": "C-R5F-gvKWNrvC",
+          "leader": "js-wf-route-5709-1790895895824905739-n1",
+          "leader_since": "2026-10-01T23:06:23.202060863Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n0",
+              "current": true,
+              "active": 439341974,
+              "peer": "9gAi5y3k"
+            },
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n2",
+              "current": true,
+              "active": 439369685,
+              "peer": "dQuhj2Fq"
+            },
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n3",
+              "current": true,
+              "active": 439340932,
+              "peer": "NbnUus6S"
+            },
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n4",
+              "current": true,
+              "active": 439359840,
+              "peer": "X83AngiH"
+            }
+          ]
+        },
+        "ts": "2026-10-01T23:06:33.95564177Z"
+      }
+    },
+    {
+      "source": "drain-after-node0-jetstream.json",
+      "consumer": {
+        "stream_name": "WF_RUN",
+        "name": "WF_P_26",
+        "created": "2026-10-01T23:05:49.243492982Z",
+        "delivered": {
+          "consumer_seq": 27,
+          "stream_seq": 775,
+          "last_active": "2026-10-01T23:06:19.83016501Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 19,
+          "stream_seq": 727,
+          "last_active": "2026-10-01T23:06:19.842465694Z"
+        },
+        "num_ack_pending": 1,
+        "num_redelivered": 0,
+        "num_waiting": 1,
+        "num_pending": 0,
+        "cluster": {
+          "name": "js-wf-route-5709-1790895895824905739",
+          "raft_group": "C-R5F-k5MJovvg",
+          "leader": "js-wf-route-5709-1790895895824905739-n0",
+          "leader_since": "2026-10-01T23:06:26.078065917Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n1",
+              "current": true,
+              "active": 828695161,
+              "peer": "mzG9Uo1t"
+            },
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n2",
+              "current": true,
+              "active": 828668385,
+              "peer": "dQuhj2Fq"
+            },
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n3",
+              "current": true,
+              "active": 828566062,
+              "peer": "NbnUus6S"
+            },
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n4",
+              "current": true,
+              "active": 828738020,
+              "peer": "X83AngiH"
+            }
+          ]
+        },
+        "ts": "2026-10-01T23:07:04.087205646Z"
+      }
+    },
+    {
+      "source": "drain-after-node1-jetstream.json",
+      "consumer": {
+        "stream_name": "WF_RUN",
+        "name": "WF_P_43",
+        "created": "2026-10-01T23:05:49.243892542Z",
+        "delivered": {
+          "consumer_seq": 9,
+          "stream_seq": 775,
+          "last_active": "2026-10-01T23:06:16.183473424Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 7,
+          "stream_seq": 724,
+          "last_active": "2026-10-01T23:06:16.196441486Z"
+        },
+        "num_ack_pending": 1,
+        "num_redelivered": 0,
+        "num_waiting": 1,
+        "num_pending": 0,
+        "cluster": {
+          "name": "js-wf-route-5709-1790895895824905739",
+          "raft_group": "C-R5F-gvKWNrvC",
+          "leader": "js-wf-route-5709-1790895895824905739-n1",
+          "leader_since": "2026-10-01T23:06:23.202060863Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n0",
+              "current": true,
+              "active": 493265063,
+              "peer": "9gAi5y3k"
+            },
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n2",
+              "current": true,
+              "active": 493265714,
+              "peer": "dQuhj2Fq"
+            },
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n3",
+              "current": true,
+              "active": 493259179,
+              "peer": "NbnUus6S"
+            },
+            {
+              "name": "js-wf-route-5709-1790895895824905739-n4",
+              "current": true,
+              "active": 493255473,
+              "peer": "X83AngiH"
+            }
+          ]
+        },
+        "ts": "2026-10-01T23:07:04.09110764Z"
+      }
+    }
+  ],
+  "stream_range_endpoints": [
+    725,
+    775
+  ]
+}

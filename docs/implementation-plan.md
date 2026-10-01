@@ -571,7 +571,11 @@ The Tier 1 timer transport also models explicit leader wall-clock source
 transitions with controller-clock delivery observations. Seeded ±60s traces
 characterize retained absolute-deadline sensitivity; these transport assumptions
 do not certify NATS or production-worker clock tolerance. See the
-[timer clock model evidence](scale/timer-clock-model-2026-10-01/).
+[timer clock model evidence](scale/timer-clock-model-2026-10-01/). The dispatch model
+also characterizes consumer pending-deadline source transitions for ACK-wait,
+progress and delayed NAK, with six pinned traces. This remains an explicit model
+assumption until real retained pending state establishes its applicability; see
+[consumer clock model evidence](scale/consumer-clock-model-2026-10-01/).
 
 1. Tier 1: 100 000 seeds clean.
 2. Tier 2: 200 consecutive seeds clean across the whole matrix.

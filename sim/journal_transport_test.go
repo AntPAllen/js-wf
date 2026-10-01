@@ -404,6 +404,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runConcurrentStartRepair(loaded.Seed, &loaded)
 	case "dispatch_20":
 		replayed, err = runSeededDispatchScenario(loaded.Seed, &loaded)
+	case "dispatch_clock_transition":
+		replayed, err = runDispatchClockTransition(loaded.Seed, &loaded)
 	case "dispatch_two_workers":
 		replayed, err = runTwoDispatchWorkers(loaded.Seed, &loaded)
 	case "signal_repair_20":

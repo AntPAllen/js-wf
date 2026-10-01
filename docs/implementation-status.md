@@ -5223,3 +5223,27 @@ stream metadata range:512 sequence reads maximum,10s total,2s per read,explicit
 truncation/errors and payload omission over4KiB. It runs after drain failure and
 cannot clear or extend the strict gate. Current compilation and existing role
 regressions pass0.359s; exercising the diagnostic on a real failure remains open.
+
+
+### Consumer clock pending-deadline characterization
+
+The ahead failure's retained dispatch and current-leader monitoring narrow the
+observations: local lease-held/NAK at stream range endpoint725 and local ACK
+at775, no later fetch for either, plus one ACK-pending entry in each of WF_P_26
+and WF_P_43 before/after drain. Raw message membership and broker pending
+timestamps remain unverified. The [raw joins](scale/tier3-mixed-server-clock-2026-10-01/ahead-corrected-drain-failure/dispatch-consumer-joins.json)
+do not prove broker commitment or a server cause.
+
+Added optional consumer clock offsets to the seeded dispatch transport. The
+production partition loop characterizes six ±60s cases for unacknowledged
+delivery,progress and delayed NAK. With retained deadlines and no rebasing,
+ahead redelivery is virtual73s for ACK-wait/progress or61s for100ms NAK with
+1s polling; behind is immediate. Exactly two deliveries, final ACK,zero pending
+and zero physical retention are required. This green characterization preserves
+counterexamples, not a pass against the under30s contract.
+
+1,000 seeds pass0.049s. Six pins raise the corpus to180; combined race checks
+with existing dispatch,worker timer characterization and all180 pins pass
+32.209s. [Model scope/evidence](scale/consumer-clock-model-2026-10-01/) retain
+its explicit assumptions. Both real clock runs36939477954 and36939480705 are
+authoritatively in progress. No production behavior or latency gate changed.
