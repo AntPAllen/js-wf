@@ -59,6 +59,7 @@ func (h *terminalHints) snapshotReady(key string) {
 // terminal execution. Uncertain reads retain the held NAK path or fall back
 // to full journal execution when ownership has been acquired.
 func (w *Worker) terminalHeldDelivery(ctx context.Context, typ, id string, timer timerWakeup, ops *deliveryOperations) (bool, bool, error) {
+ if w.terminalHints.contains(identity.Key(typ,id)) { return true, false, nil }
 	ctx, stop := context.WithTimeout(ctx, 2*time.Second)
 	defer stop()
 	outcomePort := w.outcomePort

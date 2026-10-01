@@ -3960,3 +3960,43 @@ failure must now propagate to job status. Production runtime is unchanged.
 Terminal duplicate wakeup drain, mixed latency misses, latest full simulation,
 original million-timer final audit and all remaining release requirements stay
 open; neither new campaign replaces the five-node 24-hour full-matrix soak.
+
+## Owned terminal duplicates avoid full replay after snapshot repair
+
+A worker now uses a bounded 1,024-entry local hint to select the existing durable
+terminal probe after acquiring a lease. It must still read canonical outcome,
+match the current invocation generation, reject tombstone/corruption, finish
+parent notification, and release its lease before ACK. Uncertain probes fall
+back to ordinary replay/repair. Successful probes skip complete history reads
+and repeated automatic snapshot checks. Hints are not authority or durable state;
+eviction/restart safely falls back. Ordinary snapshot-capable handlers enable a
+hint only after automatic snapshot success, preserving retry after uncertain
+publication. The existing seeded snapshot worker caught and rejected the first
+prototype's premature hint; final repair assertions pass unchanged.
+
+[Native/model proofs, controls, source hashes and prior affected traces](scale/terminal-owned-wakeups-2026-10-01/)
+are retained. Final real 500-child consumer fault passes under race in 42.30
+seconds with child raw-start p99 20.410 seconds, parent last-child delay 3.902
+seconds, all 501 immutable outcomes, 4,506 audited entries and zero stream/
+consumer pending records. Parent full reads fall to four (1.936 seconds), with
+497 canonical terminal probes. Existing timer/continuation cancellation and
+held-lease terminal fixtures pass under race in 33.024 seconds. No latency gate,
+mandatory append renewal or healthy-owner terminal behavior is relaxed.
+
+The new owned-terminal workload passes 100,000 seeds in 83.498 seconds with
+35,001,268 events and eleven modes. A fixed 500-duplicate case covers/replays all
+modes. Eleven pins plus nine regenerated existing pins retain exact replay;
+prior affected traces are preserved. Full sim/worker/journal suites and vet
+pass, and the 132-pin corpus plus new workload/fixed case pass race in 44.801
+seconds. Compiled controls disabling hints, trusting hints before durable
+validation, and enabling them before snapshot success fail on 50-second virtual
+read cost, forbidden stale-generation ACK and missing compaction respectively.
+The pipeline-corrected baseline hosted consumer run now reports failure, matching
+its raw test; green metadata from the original run remains rejected evidence.
+
+Final-source hosted and comprehensive simulation confirmation remain pending.
+The active prior-source 200-seed whole matrix and million native timers keep
+their original scope; neither proves this runtime revision. Five-node 24-hour
+soak, remaining combined transport/fault coverage, full 500-child matrix,
+ten-million spilled-input traffic, online GC and other plan requirements stay
+open. The full goal is not complete.

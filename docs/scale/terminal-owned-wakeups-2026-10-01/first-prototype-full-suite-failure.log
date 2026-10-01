@@ -1,0 +1,31 @@
+--- FAIL: TestPinnedRegressionCorpus (0.96s)
+    --- FAIL: TestPinnedRegressionCorpus/continuation-running-cancel-42.json (0.01s)
+        journal_transport_test.go:641: pinned trace testdata/regressions/continuation-running-cancel-42.json seed=42: simulation transport trace diverged
+    --- FAIL: TestPinnedRegressionCorpus/terminal-held-42.json (0.00s)
+        journal_transport_test.go:641: pinned trace testdata/regressions/terminal-held-42.json seed=42: simulation transport trace diverged
+    --- FAIL: TestPinnedRegressionCorpus/worker-cancel-durable-poll.json (0.00s)
+        journal_transport_test.go:641: pinned trace testdata/regressions/worker-cancel-durable-poll.json seed=1: simulation transport trace diverged
+    --- FAIL: TestPinnedRegressionCorpus/worker-compactor-seed11508.json (0.01s)
+        journal_transport_test.go:641: pinned trace testdata/regressions/worker-compactor-seed11508.json seed=11508: simulation decision 239 diverged: at=1000 enabled=[compactor:purge_journal]; trace at=1000 enabled=[compactor:purge_journal worker:get_manifest]
+    --- FAIL: TestPinnedRegressionCorpus/worker-continuation-42.json (0.01s)
+        journal_transport_test.go:641: pinned trace testdata/regressions/worker-continuation-42.json seed=42: simulation transport trace diverged
+    --- FAIL: TestPinnedRegressionCorpus/worker-fanout-interruption-1.json (0.01s)
+        journal_transport_test.go:641: pinned trace testdata/regressions/worker-fanout-interruption-1.json seed=1: simulation transport trace diverged
+    --- FAIL: TestPinnedRegressionCorpus/worker-fanout-interruption-2.json (0.06s)
+        journal_transport_test.go:641: pinned trace testdata/regressions/worker-fanout-interruption-2.json seed=2: simulation transport trace diverged
+    --- FAIL: TestPinnedRegressionCorpus/worker-heartbeat-handoff.json (0.00s)
+        journal_transport_test.go:641: pinned trace testdata/regressions/worker-heartbeat-handoff.json seed=13: simulation transport trace diverged
+    --- FAIL: TestPinnedRegressionCorpus/worker-heartbeat-nak-drop.json (0.00s)
+        journal_transport_test.go:641: pinned trace testdata/regressions/worker-heartbeat-nak-drop.json seed=11: simulation transport trace diverged
+    --- FAIL: TestPinnedRegressionCorpus/worker-heartbeat-progress-drop.json (0.00s)
+        journal_transport_test.go:641: pinned trace testdata/regressions/worker-heartbeat-progress-drop.json seed=1: simulation transport trace diverged
+    --- FAIL: TestPinnedRegressionCorpus/worker-select-both-ready.json (0.01s)
+        journal_transport_test.go:641: pinned trace testdata/regressions/worker-select-both-ready.json seed=3: simulation transport trace diverged
+    --- FAIL: TestPinnedRegressionCorpus/worker-snapshot-execution.json (0.02s)
+        journal_transport_test.go:641: pinned trace testdata/regressions/worker-snapshot-execution.json seed=42: seed 42 live journal=262
+--- FAIL: TestSeededWorkerSnapshotExecutionReplay (0.02s)
+    worker_snapshot_execution_replay_test.go:176: FAULT_SEED=2 FAULT_TRACE=/tmp/js-wf-worker-snapshot-failure-431604637/trace.json: seed 2 live journal=262
+FAIL
+FAIL	js-wf/sim	142.312s
+ok  	js-wf/worker	30.097s
+FAIL

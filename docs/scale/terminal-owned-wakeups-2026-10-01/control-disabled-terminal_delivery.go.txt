@@ -22,11 +22,7 @@ type terminalHints struct {
 	next int
 }
 
-func (h *terminalHints) contains(key string) bool {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	return h.keys[key]
-}
+func (h *terminalHints) contains(key string) bool { return false }
 
 func (h *terminalHints) add(key string, ready bool) {
 	h.mu.Lock()

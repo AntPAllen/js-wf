@@ -155,6 +155,15 @@ For an existing 20 s or 30 s `WF_LEASE` bucket, stop workers and lease-holding l
 - **Two `WF_RUN` messages for the same invocation in flight at once** (timer fired while a signal arrived). The second acquirer finds the lease held, must nak with delay (not ack, not spin) and back off. Test that the invocation still processes both wakeups and that the loser does not starve.
 - **Worker acks the `WF_RUN` message, then crashes before releasing the lease.** The lease TTL handles it; assert no wakeup is lost because the journal's `Suspended` entry records what it is waiting on and the reconciler (phase 7) re-enqueues.
 - **Worker crashes after appending `Completed` but before ack.** Redelivery finds a terminal journal and acks immediately without running; test that no `Started` for a new epoch is written.
+
+Terminal duplicate processing also has a [seeded read-cost and real 500-child
+consumer-fault proof](scale/terminal-owned-wakeups-2026-10-01/). Bounded local
+hints select a durable outcome/current-generation probe after lease acquisition;
+uncertain probes fall back to journal replay, parent notification remains
+required, and automatic snapshot repair must finish before the shortcut is
+enabled. The 100ms virtual full-read cost isolates repeated terminal replay;
+it does not attribute the observed delay to a NATS server mechanism. This
+focused proof does not replace the full fault matrix or final-source gates.
 - **Partition rebalance while a message is in flight.** Two workers may hold the same partition's consumer for a moment; the lease makes this safe. Test by reassigning partitions every 5 s during the chaos run.
 - **Poison invocation** (user code panics every time). `MaxDeliver` unlimited with exponential backoff capped at 5 min, plus a per-invocation attempt counter in the journal; after a configurable count, write `Failed` and stop. Test the count is honoured across worker restarts.
 - **Hot partition** (one tenant floods one partition). N=64 static partitions cannot fix this; record it as a known limit and test that other partitions keep their latency.

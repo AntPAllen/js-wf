@@ -1,0 +1,15 @@
+=== RUN   TestContinuationCanceledTimerDoesNotReenterStageAndVersionsReplay
+    continuation_timer_test.go:215: continuation canceled timer: step=2 frame_offset=8 native_noops=1 archive_reads=0 frame_reads=2 stage_before=1 stage_after_wakeup=1 stage_after_gate=2 version_max=3 result=2 offline_steps=12
+--- PASS: TestContinuationCanceledTimerDoesNotReenterStageAndVersionsReplay (17.01s)
+=== RUN   TestTerminalWakeupsDrainWhileHealthyLeaseHeld
+=== RUN   TestTerminalWakeupsDrainWhileHealthyLeaseHeld/timer=false
+    terminal_held_test.go:162: terminal held wakeups=32 drain=560.03979ms effects=1 owner_revision=9 unchanged
+=== RUN   TestTerminalWakeupsDrainWhileHealthyLeaseHeld/timer=true
+    terminal_held_test.go:162: terminal held wakeups=32 drain=687.79697ms effects=1 owner_revision=17 unchanged
+--- PASS: TestTerminalWakeupsDrainWhileHealthyLeaseHeld (9.33s)
+    --- PASS: TestTerminalWakeupsDrainWhileHealthyLeaseHeld/timer=false (4.71s)
+    --- PASS: TestTerminalWakeupsDrainWhileHealthyLeaseHeld/timer=true (4.63s)
+=== RUN   TestTimerCancellationBeforeScheduledWakeup
+--- PASS: TestTimerCancellationBeforeScheduledWakeup (5.62s)
+PASS
+ok  	js-wf/integration	33.024s

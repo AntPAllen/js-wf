@@ -1139,7 +1139,7 @@ func (w *Worker) persistAndNotify(ctx context.Context, typ, id string, invSeq ui
 	}
 	// A failed automatic snapshot must still be repaired on redelivery before
 	// future terminal duplicates can skip it. Continuations own their snapshots.
-	w.terminalHints.add(identity.Key(typ, id), !w.jrn.HasSnapshotTransport() || w.continuations[typ] != nil)
+	w.terminalHints.add(identity.Key(typ, id), true)
 	return nil
 }
 
