@@ -4947,3 +4947,12 @@ The first delivery-only smoke passed but selected an already-terminal duplicate;
 it remains excluded coverage. Cut admission now rejects that case and retains
 actual unfinished history. Common process validation is shared with pause and
 its original proof still passes. Ten-minute/full24-hour coverage remains open.
+
+
+The [clean-source unfinished-invocation isolation campaign36928729086](https://github.com/AntPAllen/js-wf/actions/runs/36928729086)
+is queued atdc8c8de; exact source/inputs are retained with the smoke. It requires
+ten confirmed45s reply holds and original nonterminal-prefix recovery.
+Comprehensive simulation36900782095 is now terminal SUCCESS; its artifact review
+and exact covered-source scope remain pending. The million-timer service remains
+active at MainPID18146 with198,574 receipts at its latest checkpoint; that live
+campaign is not terminal acceptance.
