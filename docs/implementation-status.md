@@ -4615,3 +4615,9 @@ progress p99 14.313s. All histories, retained audit and physical stream/all64
 consumer drain checks pass. All97 acknowledged repairs have checked explanations;
 fencing is zero. All36 Python tests and integration vet pass. The ten-minute
 row, explicit mid-fan-out boundary and full24-hour matrix remain open.
+
+The [ten-minute clean-runner restart campaign](https://github.com/AntPAllen/js-wf/actions/runs/36910529449)
+is queued at0d6a94b with row=restart and duration=10m. Launch identity is retained
+alongside the smoke proof. This is not terminal acceptance. The comprehensive
+simulator36900782095 remains in progress; the million-timer service remains
+active at MainPID18146 with94,083 receipts at its latest checkpoint.
