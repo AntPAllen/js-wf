@@ -2764,3 +2764,34 @@ Remaining request/frame/completion/suspension/handoff kill cuts and combinations
 retirement/reuse, integrated runtime-semantics/limit/GC checks and full matrix/
 24-hour soak remain open. The independent mixed seed 65 latency miss is unchanged.
 The original million-timer process remains running and has not been restarted.
+
+
+## Continuation retirement, quiescent collection and ID reuse
+
+A real R3 three-node worker contract completes two continuation workflows with
+identity-bound frames/archives and one shared 921,602-byte step result. With all
+workers stopped, sweep preserves their live references. Retiring one invocation
+removes its runtime manifest and returns ErrPurged; the next sweep reclaims its
+old frame and archive while preserving the survivor and shared result. Shared
+bytes are verified before a fresh writer can recreate them and conceal a bug.
+
+ID reuse advances generation 1 to 3. Injected predecessor metadata is rejected
+with ErrCheckpointGeneration by both reader and real worker before another
+handler/effect, even though predecessor objects were already collected. Removing
+that injected pointer with revision CAS permits a fresh frame/state and result 2.
+The survivor still returns 1; cross-peer results and raw-state integrity prove
+two current terminals. Three initial handlers/effects execute across the three
+invocations/generations. Final quiescent sweep retains both current frames and
+shared result content.
+
+The final race contract passed in 19.385 seconds. A compiled production overlay
+skipping snapshot deletion fails the retired-manifest assertion in 3.420 seconds.
+Vet passed. [Raw logs, mutation and source hashes](scale/continuation-retirement-2026-10-01/)
+are retained. Runtime source remains unchanged from `5696347`.
+
+This is a focused lifecycle/shared-archive-reference proof. Retirement crash/
+reply-loss combinations, modeled continuation retirement/GC, frame-held promise
+retirement and other integrated SDK/runtime acceptance gates remain open. Online
+GC, the mixed seed 65 latency failure and independent final-source full matrix/
+24-hour soak remain open. The original million-timer campaign remains running
+without a restart.

@@ -362,3 +362,22 @@ fail. [Raw proof and scope](scale/continuation-kill-2026-10-01/) are retained.
 These four actual process cuts strengthen the prior graceful replacement proof;
 remaining publication cuts, combinations and the complete acceptance gates above
 remain open.
+
+
+## Implemented quiescent retirement and generation reuse contract
+
+A real R3 worker contract now retires one of two completed checkpointed
+invocations, removes its runtime manifest, and collects its old frame/archive.
+The other invocation retains its frame/archive and a shared large result, whose
+full bytes are checked before and after reuse. Every sweep occurs with workers
+stopped. The same ID starts a higher generation; an injected predecessor manifest
+is rejected by the reader and worker before user code or old object access.
+After revision-CAS removal of that injected metadata, the fresh invocation
+materializes new state/frame and completes, with immutable cross-peer results
+and raw-state integrity. The survivor remains unchanged.
+
+The final race contract passed in 19.385 seconds. A compiled mutation skipping
+manifest deletion fails at the retired-pointer assertion. [Logs and scope](scale/continuation-retirement-2026-10-01/)
+are retained. This focused lifecycle proof covers shared archive references;
+retirement fault combinations, modeled continuation GC, frame-held promise
+retirement and other acceptance gates remain open. Online GC remains unsupported.
