@@ -34,7 +34,7 @@ func main() {
 	}
 }
 
-func run(ctx context.Context, args []string) error {
+func run(ctx context.Context, args []string) (runErr error) {
 	flags := flag.NewFlagSet("wf-worker", flag.ContinueOnError)
 	url := flags.String("url", os.Getenv("NATS_URL"), "NATS server URL")
 	id := flags.String("id", "", "unique worker ID")
@@ -50,6 +50,7 @@ func run(ctx context.Context, args []string) error {
 	concurrency := flags.Int("partition-concurrency", 1, "concurrent deliveries per partition")
 	retentionType := flags.String("retention-type", "", "optional workflow type for built-in durable purge handler")
 	retentionGrace := flags.Duration("retention-grace", 24*time.Hour, "purge tombstone lifetime")
+	eventPath := flags.String("events-file", "", "optional append-only JSONL fencing and repair event file")
 	repair := flags.Bool("reconcile", true, "run leader-elected repair loops")
 	repairInterval := flags.Duration("reconcile-interval", time.Second, "repair scan cadence")
 	repairBudget := flags.Int("reconcile-budget", 500, "stream sequences scanned per repair pass")
@@ -89,6 +90,22 @@ func run(ctx context.Context, args []string) error {
 		if _, exists := handlers[*retentionType]; exists {
 			return fmt.Errorf("retention workflow type %q collides with plugin handler", *retentionType)
 		}
+	}
+	var eventErrors <-chan error
+	var observeRepair func(reconcile.RepairEvent)
+	if *eventPath != "" {
+		events, err := openWorkerEventLog(*eventPath, *id)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			if err := events.Close(); runErr == nil {
+				runErr = err
+			}
+		}()
+		continuationOptions = append(continuationOptions, worker.WithFencingObserver(events.fencing))
+		observeRepair = events.repair
+		eventErrors = events.errors
 	}
 	nc, js, backend, w, err := startWorker(ctx, *url, *id, *replicas, *journalMaxBytes, *concurrency, *timerBackend, handlers, *retentionType, *retentionGrace, continuationOptions...)
 	if err != nil {
@@ -156,16 +173,16 @@ func run(ctx context.Context, args []string) error {
 	if *repair {
 		start := []func(context.Context) error{
 			func(c context.Context) error {
-				return reconcile.RunStartLoop(c, js, *id, *repairInterval, *repairBudget)
+				return reconcile.RunRepairLoopObserved(c, js, *id, "start", *repairInterval, *repairBudget, observeRepair)
 			},
 			func(c context.Context) error {
-				return reconcile.RunSignalLoop(c, js, *id, *repairInterval, *repairBudget)
+				return reconcile.RunRepairLoopObserved(c, js, *id, "signal", *repairInterval, *repairBudget, observeRepair)
 			},
 			func(c context.Context) error {
-				return reconcile.RunTimerLoop(c, js, *id, *repairInterval, *repairBudget)
+				return reconcile.RunRepairLoopObserved(c, js, *id, "timer", *repairInterval, *repairBudget, observeRepair)
 			},
 			func(c context.Context) error {
-				return reconcile.RunSuspendedLoop(c, js, *id, *repairInterval, *repairBudget)
+				return reconcile.RunRepairLoopObserved(c, js, *id, "suspended", *repairInterval, *repairBudget, observeRepair)
 			},
 			func(c context.Context) error {
 				return reconcile.RunTombstoneLoop(c, js, *id, *repairInterval, *repairBudget)
@@ -173,7 +190,7 @@ func run(ctx context.Context, args []string) error {
 		}
 		if backend == provision.FallbackTimers {
 			start = append(start, func(c context.Context) error {
-				return reconcile.RunFallbackTimerLoop(c, js, *id, *repairInterval, *repairBudget)
+				return reconcile.RunRepairLoopObserved(c, js, *id, "fallback-timer", *repairInterval, *repairBudget, observeRepair)
 			})
 		}
 		for _, loop := range start {
@@ -186,6 +203,8 @@ func run(ctx context.Context, args []string) error {
 	received := 0
 	select {
 	case <-ctx.Done():
+	case err := <-eventErrors:
+		firstErr = err
 	case err := <-results:
 		received = 1
 		if ctx.Err() == nil {

@@ -1,0 +1,20 @@
+=== RUN   TestWorkerEventProcessRepairsLostWakeupAndFlushesOnSIGTERM
+    events_process_test.go:131: child pid=71787 result=42 events=2 JSONL={"version":1,"worker_id":"event-process","pid":71787,"process_started_at":"2026-10-01T20:08:39.587107805Z","sequence":1,"kind":"repair","event":{"at":"2026-10-01T20:08:39.718172003Z","kind":"start","type":"worker-smoke","id":"lost-wakeup","reason":"missing_journal","source_sequence":1,"invocation_sequence":1,"outcome":"acknowledged"}}
+        {"version":1,"worker_id":"event-process","pid":71787,"process_started_at":"2026-10-01T20:08:39.587107805Z","sequence":2,"kind":"repair","event":{"at":"2026-10-01T20:08:39.725143837Z","kind":"start","type":"worker-smoke","id":"lost-wakeup","reason":"missing_journal","source_sequence":1,"invocation_sequence":1,"outcome":"acknowledged"}}
+--- PASS: TestWorkerEventProcessRepairsLostWakeupAndFlushesOnSIGTERM (2.53s)
+=== RUN   TestWorkerEventLogPreservesTypedRecordsAndAppendSessions
+--- PASS: TestWorkerEventLogPreservesTypedRecordsAndAppendSessions (0.01s)
+=== RUN   TestWorkerEventLogCallbacksDoNotWaitForIOAndOverflowFails
+--- PASS: TestWorkerEventLogCallbacksDoNotWaitForIOAndOverflowFails (0.00s)
+=== RUN   TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal
+=== RUN   TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal/write
+=== RUN   TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal/sync
+=== RUN   TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal/close
+--- PASS: TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal (0.00s)
+    --- PASS: TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal/write (0.00s)
+    --- PASS: TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal/sync (0.00s)
+    --- PASS: TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal/close (0.00s)
+=== RUN   TestWorkerEventLogRefusesIncompleteAppendTail
+--- PASS: TestWorkerEventLogRefusesIncompleteAppendTail (0.00s)
+PASS
+ok  	js-wf/cmd/wf-worker	3.568s

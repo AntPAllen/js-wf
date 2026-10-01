@@ -1,0 +1,24 @@
+=== RUN   TestWorkerEventProcessRepairsLostWakeupAndFlushesOnSIGTERM
+    events_process_test.go:81: repaired result= err=context deadline exceeded
+    events_process_test.go:76: --- FAIL: TestWorkerEventProcessHelper (0.02s)
+            events_process_test.go:32: start worker: native timer stream requires explicit cluster-wide version verification; use native mode after checking every peer
+        FAIL
+        
+--- FAIL: TestWorkerEventProcessRepairsLostWakeupAndFlushesOnSIGTERM (50.45s)
+=== RUN   TestWorkerEventLogPreservesTypedRecordsAndAppendSessions
+--- PASS: TestWorkerEventLogPreservesTypedRecordsAndAppendSessions (0.01s)
+=== RUN   TestWorkerEventLogCallbacksDoNotWaitForIOAndOverflowFails
+--- PASS: TestWorkerEventLogCallbacksDoNotWaitForIOAndOverflowFails (0.00s)
+=== RUN   TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal
+=== RUN   TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal/write
+=== RUN   TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal/sync
+=== RUN   TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal/close
+--- PASS: TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal (0.00s)
+    --- PASS: TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal/write (0.00s)
+    --- PASS: TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal/sync (0.00s)
+    --- PASS: TestWorkerEventLogWriteSyncAndCloseFailuresAreFatal/close (0.00s)
+=== RUN   TestWorkerEventLogRefusesIncompleteAppendTail
+--- PASS: TestWorkerEventLogRefusesIncompleteAppendTail (0.00s)
+FAIL
+FAIL	js-wf/cmd/wf-worker	50.488s
+FAIL

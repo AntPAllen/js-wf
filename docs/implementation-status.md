@@ -4776,3 +4776,29 @@ was launched at52fdbdf; its source/inputs are retained with the new smoke.
 Comprehensive simulation36900782095 remains in progress. The million-timer
 service remains active at MainPID18146 with132,207 receipts at its latest
 checkpoint. Neither live campaign is terminal acceptance.
+
+
+## Production worker process event files
+
+`wf-worker -events-file FILE` now records actual fencing and all enqueue-producing
+repair scanners, including native and fallback timers. Versioned JSONL retains
+worker ID, actual PID, process session, sequence and typed publication evidence.
+A bounded asynchronous writer avoids disk waits in observer callbacks; overflow,
+write, sync and close failures return errors. Graceful shutdown drains and syncs;
+hard kills can lose the queued/unsynced tail. This is not complete hard-kill or
+24-hour attribution.
+
+[Retained proof](scale/worker-process-events-2026-10-01/) includes a real worker
+subprocess repairing a missing wakeup, returning42 and exiting successfully on
+SIGTERM. Its two acknowledged repair records identify child PID71787 and
+invocation generation1. Focused race tests pass3.568s, existing static/KV/automatic,
+fallback and continuation runner checks pass5.665s, and vet passes. Append sessions,
+blocked I/O, overflow, incomplete tails and write/sync/close failure controls pass.
+The initial fixture selected auto mode against a native stream and was correctly
+rejected; it is retained as excluded setup failure. The fixture now explicitly
+selects verified native mode and cancels its await if the child exits early.
+
+Majority route run36917337770 is terminal SUCCESS at52fdbdf; its downloaded
+artifact review is pending, so this update does not certify that ten-minute row.
+Comprehensive simulation36900782095 remains in progress, and the million-timer
+service remains active at MainPID18146. Neither is terminal acceptance.
