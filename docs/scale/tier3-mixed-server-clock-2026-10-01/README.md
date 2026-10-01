@@ -61,3 +61,7 @@ Compilation and existing role-wait regressions pass (0.359s); this new diagnosti
 has not yet been exercised by a real failing cluster. No rerun is claimed here.
 
 At source `b13f9c3`, behind ten-minute run [36939477954](https://github.com/AntPAllen/js-wf/actions/runs/36939477954) and ahead backlog-diagnostic smoke [36939480705](https://github.com/AntPAllen/js-wf/actions/runs/36939480705) are authoritatively queued. Exact launch source and inputs are retained. No acceptance is claimed for these new runs.
+
+## SDK fresh-timer fix validation
+
+The first sustained behind run36939477954 fails a confirmed early positive sleep. Full originals and the causal join are retained in `behind-ten-minute-early-timer-failure/`. Fresh Sleep and timer handles now reject the current delivery wakeup as evidence for a newly created positive wait. The same ten-minute row [36941535795](https://github.com/AntPAllen/js-wf/actions/runs/36941535795) launches at clean source `55bd33e5bd933d0b2f7869de774e777514b97807` and is queued. No acceptance is claimed. This does not clear other absolute clock-transition cases.

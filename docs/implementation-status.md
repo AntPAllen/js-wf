@@ -5315,3 +5315,11 @@ and full worker race tests31.618s. Selected1,000-seed production-worker timer
 execution/burst/clock workloads plus all180 pins pass3.983s. Remaining
 absolute-clock transition counterexamples and full release gates stay open.
 The currently running comprehensive campaigns predate this production fix.
+
+
+Fresh-timer fix validation is launched at clean55bd33e: behind sustained
+run36941535795 is authoritatively queued with the same10m row. Full current
+Tier1 simulation (1,000 seeds,180 pins) is active in systemd unit
+js-wf-tier1-fresh-timer-20261001,PID105758 at launch,with proof root
+/tmp/js-wf-tier1-fresh-timer-20261001. These are pending evidence. Existing
+comprehensive campaigns remain intact but predate the SDK fix.
