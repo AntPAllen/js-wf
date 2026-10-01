@@ -1,7 +1,13 @@
-name: tier3-mixed-journal
+name: tier3-mixed-leaders
 on:
   workflow_dispatch:
     inputs:
+      row:
+        description: R5 leader fault row
+        type: choice
+        required: true
+        default: journal
+        options: [journal, consumer]
       duration:
         description: Ten minutes is sustained; 35 seconds is fixture smoke only
         required: true
@@ -14,6 +20,7 @@ jobs:
     timeout-minutes: 25
     env:
       WF_TIER3_MATRIX: '1'
+      TIER3_MATRIX_ROW: ${{ inputs.row }}
       WF_TIER3_MATRIX_DURATION: ${{ inputs.duration }}
       WF_TIER3_SYNC_INTERVAL: '2m'
       TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
@@ -26,11 +33,16 @@ jobs:
           go-version-file: go.mod
       - name: Verify row-result guard
         run: python3 -m unittest discover -s scripts -p 'test_tier3*.py'
-      - name: Sustain the five-container mixed journal row
+      - name: Sustain the selected five-container mixed leader row
         run: |
           set -o pipefail
-          go test -p=1 -race -json ./integration -run '^TestFiveContainerMixedJournalLeaderEveryThirtySeconds$' -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py
-          python3 scripts/check-tier3-journal-row.py --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --output /tmp/tier3-mixed-journal-result.json
+          case "$TIER3_MATRIX_ROW" in
+            journal) row_test=TestFiveContainerMixedJournalLeaderEveryThirtySeconds ;;
+            consumer) row_test=TestFiveContainerMixedConsumerLeaderEveryThirtySeconds ;;
+            *) exit 1 ;;
+          esac
+          go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py
+          python3 scripts/check-tier3-journal-row.py --row "$TIER3_MATRIX_ROW" --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --output /tmp/tier3-mixed-journal-result.json
           python3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"
       - if: always()
         uses: actions/upload-artifact@v7

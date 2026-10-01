@@ -1,0 +1,11 @@
+# Five-container mixed consumer-leader row
+
+The35-second R5 race smoke passes54.54s test /55.568s package:224 invocations,2,465 retained journal entries and one actual WF_RUN consumer-leader SIGKILL/restart. Selection records WF_P_18 on node1 with five ack-pending deliveries and four replica peers. This is activity observed at metadata selection, not a guarantee those deliveries remained active at the later kill instant. The selected consumer and all workflow stores recover current R5 replicas, using production sync_interval=2m and stable published endpoints.
+
+All six mixed workloads pass terminal and enabling-progress p99 below30s (maximum terminal8.246211277s), histories/invariant audit and physical WF_RUN plus all64-consumer drainage. The row emits38 acknowledged repairs (5start,22signal,11suspended), each with a checked explanation; fencing counters/records are zero. Native Go JSON events, exact selection metadata, server logs, latencies and diagnostics are retained. The wrong-node overlay changes only the selected index; the confirmed-consumer-leader property rejects it in43.15s, before SIGKILL, rather than treating a random-node kill as this row's evidence.
+
+The verifier requires the named consumer test, its exact row/duration/counts, all19 faults for ten minutes (one for smoke), a confirmed selection marker for each fault and at least one selection with pending/ack-pending deliveries. All32 Python tests pass, including wrong named test/row, missing selections, all-idle selections and invalid node controls. The updated verifier still accepts the retained previous journal-row events. Vet passes.
+
+The first attempt failed in startup R5 provisioning with API10005 (no suitable peers for placement) in8.83s, before workload/fault execution. It is retained and excluded. Startup now retries this specific placement error only inside the existing45s setup deadline; permanent errors still stop setup. This does not establish a NATS server root cause.
+
+Both journal and consumer use the shared production mixed workload and invariant checks. Five worker objects share one client. This is one shortened consumer-row smoke, not a ten-minute pass, full Tier3 matrix or24-hour soak. Other fault variants, separate worker process faults and full causal review remain open. Large raw files are gzip compressed.

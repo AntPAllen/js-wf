@@ -629,6 +629,7 @@ func killFiveContainerMixedConsumerLeader(ctx context.Context, js jetstream.JetS
 	if event.Node < 0 {
 		return event, fmt.Errorf("unknown consumer leader %q", selected.Cluster.Leader)
 	}
+	event.Node = (event.Node + 1) % 5
 	if selected.Cluster.Leader != cluster.NodeName(event.Node) {
 		return event, fmt.Errorf("selected fault node is not the observed consumer leader")
 	}

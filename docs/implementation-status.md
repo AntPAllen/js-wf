@@ -4529,3 +4529,31 @@ already verified the preceding downloaded native run without a cluster rerun.
 The comprehensive simulator run36900782095 remains in progress, and the
 million-timer user service is active at MainPID18146 with60,901 receipts at
 the latest checkpoint. None of these live campaigns is terminal acceptance.
+
+
+## Shared sustained R5 runner now covers consumer leaders
+
+The new TestFiveContainerMixedConsumerLeaderEveryThirtySeconds shares the
+existing six-workload R5 runner, histories, per-type enabling/terminal p99,
+retained-state audit, full physical drain and per-event explanations.
+It chooses a confirmed WF_RUN consumer leader, preferring pending deliveries,
+records exact selection metadata and kills/restarts that server every30s.
+The selected consumer and all workflow stores must recover current R5 peers.
+At least one fault must select observed active deliveries; idle selections
+remain visible and cannot alone establish the row.
+
+[Race smoke and controls](scale/tier3-mixed-consumer-2026-10-01/) pass54.54s test
+/55.568s package:224 invocations,2,465 entries and one actual leader kill.
+WF_P_18 on node1 had five ack-pending deliveries at selection. All six per-type
+p99 are below30s (largest terminal8.246s), and all38 repair attempts have
+checked explanations. Wrong-node mutation fails the leader-identity property
+in43.15s before the kill. All32 Python tests and vet pass; named-test, row,
+missing/all-idle selections and invalid-node controls fail as required.
+The updated guard also accepts prior real journal-row events.
+
+The first attempt failed before workloads in startup placement with API10005
+in8.83s and is excluded. Only that named placement error now retries within
+the existing45s provisioning deadline. The exact server-side reason remains
+unconfirmed. The manual workflow selects journal or consumer explicitly.
+The consumer's full ten-minute run, all other fault rows and the full24-hour
+matrix remain independent open gates; five worker objects share one client.

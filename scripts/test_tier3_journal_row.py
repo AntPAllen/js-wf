@@ -43,3 +43,28 @@ class JournalRowChecks(unittest.TestCase):
                 elif name == 'faults': events[0]['Output'] = events[0]['Output'].replace('faults=19', 'faults=18')
                 elif name == 'duplicate_result': events[0]['Output'] += events[0]['Output'].splitlines()[0]+'\n'
                 with self.assertRaises(ValueError): row.check(events, '10m')
+
+
+class ConsumerRowChecks(unittest.TestCase):
+    def fixture(self):
+        events = fixture()
+        for event in events:
+            if 'Test' in event: event['Test'] = row.TESTS['consumer']
+        events[0]['Output'] = events[0]['Output'].replace('row=journal', 'row=consumer')
+        events[0]['Output'] += 'TIER3_CONSUMER_FAULT consumer=WF_P_03 node=2 pending=0 ack_pending=1\n'*19
+        return events
+
+    def test_actual_named_consumer_scope_and_active_selections(self):
+        result = row.check(self.fixture(), '10m', 'consumer')
+        self.assertEqual(result['active_consumer_faults'], 19)
+        self.assertFalse(result['clears_full_tier3_release'])
+
+    def test_rejects_wrong_test_row_missing_idle_and_wrong_node(self):
+        cases = []
+        events = self.fixture(); events[1]['Test'] = row.TEST; cases.append(events)
+        events = self.fixture(); events[0]['Output'] = events[0]['Output'].replace('row=consumer','row=journal'); cases.append(events)
+        events = self.fixture(); events[0]['Output'] = events[0]['Output'].replace('ack_pending=1','ack_pending=0'); cases.append(events)
+        events = self.fixture(); events[0]['Output'] = events[0]['Output'].replace('node=2','node=5'); cases.append(events)
+        events = self.fixture(); events[0]['Output'] = events[0]['Output'].replace('TIER3_CONSUMER_FAULT','MISSING'); cases.append(events)
+        for events in cases:
+            with self.subTest(events=events), self.assertRaises(ValueError): row.check(events,'10m','consumer')
