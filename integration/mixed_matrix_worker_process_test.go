@@ -412,6 +412,7 @@ func killMatrixProcessWorker(ctx context.Context, root string, urls []string, fl
 	case <-ctx.Done():
 		return event, ctx.Err()
 	}
+	event.WorkerKillConfirmed = true
 	next, err := startMatrixProcessWorker(ctx, root, urls, index, process.generation+1)
 	if err != nil {
 		fleet[index] = nil

@@ -34,10 +34,13 @@ def stamp(value):
         raise ValueError('event timestamp lacks a timezone')
 
 
-def check(metrics, fencing, repairs):
-    if not isinstance(metrics, list) or len(metrics) != 5:
-        raise ValueError('expected five worker metric records')
-    expected = {f'tier3-mixed-{i}': m['fencing_events'] for i, m in enumerate(metrics)}
+def check(metrics, fencing, repairs, expected_workers=None):
+    if expected_workers is None:
+        if not isinstance(metrics, list) or len(metrics) != 5:
+            raise ValueError('expected five worker metric records')
+        expected = {f'tier3-mixed-{i}': m['fencing_events'] for i, m in enumerate(metrics)}
+    else:
+        expected = expected_workers
     observed = Counter()
     explanations = []
     for index, event in enumerate(fencing or []):
@@ -51,7 +54,7 @@ def check(metrics, fencing, repairs):
         stamp(event['At'])
         observed[event['Worker']] += 1
         explanations.append(dict(kind='fencing', index=index, evidence=event, explanation=FENCING[reason]))
-    if any(observed[worker] != count for worker, count in expected.items()):
+    if any(count is not None and observed[worker] != count for worker, count in expected.items()):
         raise ValueError('fencing records disagree with worker counters')
     repair_counts = Counter()
     for index, event in enumerate(repairs or []):
@@ -81,7 +84,8 @@ def check(metrics, fencing, repairs):
         }[outcome]
         explanations.append(dict(kind='repair', index=index, evidence=event, explanation=REPAIRS[key]+suffix))
         repair_counts[f'{event["kind"]}/{outcome}'] += 1
-    return dict(scope='recorded decisions of five R5 workers and observed repair scanners',
+    return dict(scope='recorded R5 worker and repair decisions',
+                counter_cross_checks_complete=all(v is not None for v in expected.values()),
                 fencing_records=sum(observed.values()), repair_records=sum(repair_counts.values()),
                 fencing_per_worker=dict(observed), repairs_by_outcome=dict(repair_counts),
                 explanations=explanations, server_root_causes_confirmed=False,
@@ -95,7 +99,20 @@ if __name__ == '__main__':
     args = parser.parse_args()
     names = ('worker-metrics.json', 'fencing.json', 'repairs.json')
     blobs = [(args.root/name).read_bytes() for name in names]
-    result = check(*(json.loads(blob) for blob in blobs))
+    expected_workers=None
+    process_file=args.root/'process-evidence.json'
+    if process_file.exists():
+        names=names+('process-evidence.json',)
+        process_blob=process_file.read_bytes()
+        sessions=json.loads(process_blob)
+        expected_workers={s['worker_id']:s['final_metrics']['fencing_events'] if s.get('final_metrics') is not None else None for s in sessions}
+        if len(expected_workers)!=len(sessions) or sum(v is not None for v in expected_workers.values())!=5:
+            raise ValueError('missing or duplicate graceful process counter snapshots')
+        result=check(*(json.loads(blob) for blob in blobs),expected_workers=expected_workers)
+        result['complete_hard_kill_attribution']=False
+        blobs.append(process_blob)
+    else:
+        result=check(*(json.loads(blob) for blob in blobs))
     result['input_sha256'] = {name: hashlib.sha256(blob).hexdigest() for name, blob in zip(names, blobs)}
     args.output.write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps({k: v for k, v in result.items() if k != 'explanations'}, indent=2))

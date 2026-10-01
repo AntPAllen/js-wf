@@ -222,3 +222,73 @@ class MajorityArtifactChecks(unittest.TestCase):
                 if mode=='valid':self.assertEqual(row.check_majority_artifacts(root,dict(confirmed_faults=1))['confirmed_majority_progress_intervals'],1)
                 else:
                     with self.assertRaises(ValueError):row.check_majority_artifacts(root,dict(confirmed_faults=1))
+
+
+class WorkerKillRowChecks(unittest.TestCase):
+    def fixture(self,root):
+        import json
+        sessions=[];steps_all=[]
+        delivery=dict(At='2026-10-01T12:00:01Z',Worker='matrix-process-0-generation-0',Type='matrixshort',ID='x',Stage='lease_acquired',RunSequence=1,Delivery=1,Error='')
+        for slot,generation in [(i,0) for i in range(5)]+[(0,1)]:
+            worker=f'matrix-process-{slot}-generation-{generation}'
+            pid=100+slot+generation*5
+            steps=[delivery] if slot==generation==0 else []
+            metrics=dict(fencing_events=0)
+            session=dict(worker_id=worker,pid=pid,generation=generation,dispatch_records=len(steps),fencing_records=0,partial_dispatch_tail=False,partial_fencing_tail=False,exit_signal=9 if slot==generation==0 else 0,exit_success=not(slot==generation==0))
+            if session['exit_success']:
+                session['final_metrics']=metrics
+                (root/(worker+'-metrics.json')).write_text(json.dumps(dict(pid=pid,worker_id=worker,metrics=metrics)))
+            sessions.append(session);steps_all+=steps
+            (root/(worker+'-dispatch.jsonl')).write_text(''.join(json.dumps(e)+'\n' for e in steps))
+            (root/(worker+'-fencing.jsonl')).write_text('')
+        fault=dict(worker='matrix-process-0-generation-0',worker_slot=0,pid=100,worker_sigkill_confirmed=True,worker_selection='held_delivery',scheduled='2026-10-01T12:00:00Z',killed='2026-10-01T12:00:02Z',healed='2026-10-01T12:00:03Z',worker_target=dict(token='held',delivery=delivery))
+        for name,data in [('process-evidence.json',sessions),('faults.json',[fault]),('dispatch.json',steps_all),('fencing.json',[])]:
+            (root/name).write_text(json.dumps(data))
+        return sessions,fault,dict(confirmed_faults=1)
+
+    def test_five_second_cadence_and_scope(self):
+        events=fixture('35s')
+        for e in events:
+            if 'Test' in e:e['Test']=row.TESTS['worker_kill']
+        events[0]['Output']=events[0]['Output'].replace('row=journal','row=worker_kill').replace('faults=1','faults=6')
+        result=row.check(events,'35s','worker_kill')
+        self.assertEqual(result['confirmed_faults'],6)
+        self.assertFalse(result['clears_full_tier3_release'])
+        events[0]['Output']=events[0]['Output'].replace('faults=6','faults=1')
+        with self.assertRaises(ValueError):row.check(events,'35s','worker_kill')
+
+    def test_process_artifacts_and_rejection_controls(self):
+        import json,tempfile
+        for mutation in ('none','signal','pid','target','missing_replacement','counter','false_final','aggregate','tail','graceful_failure','late_kill','all_idle'):
+            with self.subTest(mutation=mutation),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);sessions,fault,report=self.fixture(root)
+                if mutation=='signal':fault['worker_sigkill_confirmed']=False
+                elif mutation=='pid':fault['pid']=999
+                elif mutation=='target':fault['worker_target']['delivery']['ID']='wrong'
+                elif mutation=='missing_replacement':sessions.pop()
+                elif mutation=='counter':sessions[1]['final_metrics']['fencing_events']=1
+                elif mutation=='false_final':sessions[0]['final_metrics']=dict(fencing_events=0)
+                elif mutation=='aggregate':(root/'dispatch.json').write_text('[]')
+                elif mutation=='tail':sessions[0]['partial_dispatch_tail']=True
+                elif mutation=='graceful_failure':sessions[1]['exit_success']=False
+                elif mutation=='late_kill':fault['killed']='2026-10-01T12:00:06Z';fault['healed']='2026-10-01T12:00:07Z'
+                elif mutation=='all_idle':fault.pop('worker_target');fault['worker_selection']='no_new_acquisition_within_500ms'
+                (root/'process-evidence.json').write_text(json.dumps(sessions));(root/'faults.json').write_text(json.dumps([fault]))
+                if mutation=='none':
+                    result=row.check_worker_artifacts(root,report)
+                    self.assertEqual(result['graceful_counter_cross_checks'],5)
+                    self.assertFalse(result['complete_hard_kill_attribution'])
+                else:
+                    with self.assertRaises((ValueError,KeyError)):row.check_worker_artifacts(root,report)
+
+    def test_partial_killed_tail_retained_without_counting(self):
+        import json,tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);sessions,_,report=self.fixture(root)
+            path=root/'matrix-process-0-generation-0-fencing.jsonl'
+            path.write_text('{"pid":')
+            sessions[0]['partial_fencing_tail']=True
+            (root/'process-evidence.json').write_text(json.dumps(sessions))
+            result=row.check_worker_artifacts(root,report)
+            self.assertEqual(result['interrupted_tails'],1)
+            self.assertEqual(path.read_text(),'{"pid":')

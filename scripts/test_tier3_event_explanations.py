@@ -56,3 +56,19 @@ class EventExplanations(unittest.TestCase):
                 self.assertIn('may have committed',explain.check(m,f,[e])['explanations'][1]['explanation'])
                 e['outcome']='dry_run';e.pop('error')
                 self.assertIn('no publication was attempted',explain.check(m,f,[e])['explanations'][1]['explanation'])
+
+
+class ProcessCounterExplanations(unittest.TestCase):
+    def test_retired_counters_stay_unknown_and_survivor_counters_are_checked(self):
+        _,f,r=EventExplanations().fixture()
+        f[0]['Worker']='retired'
+        expected={'retired':None,'survivor':0}
+        result=explain.check(None,f,r,expected_workers=expected)
+        self.assertFalse(result['counter_cross_checks_complete'])
+        self.assertFalse(result['clears_full_tier3_release'])
+        self.assertIn('may have committed',result['explanations'][1]['explanation'])
+        with self.assertRaises(ValueError):explain.check(None,f,r,expected_workers={'retired':0,'survivor':0})
+        f[0]['Worker']='survivor'
+        with self.assertRaises(ValueError):explain.check(None,f,r,expected_workers=expected)
+        f[0]['Worker']='unknown'
+        with self.assertRaises(ValueError):explain.check(None,f,r,expected_workers=expected)

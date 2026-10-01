@@ -4837,3 +4837,22 @@ seconds, and production execution records one lease loss before retrying to42.
 The recovered four-entry journal uses higher epochs and the retained audit passes.
 SIGTERM flushes the final snapshot with one matching fencing event. Vet passes.
 This is focused lease-revocation evidence, not an added sustained R5 row.
+
+
+## R5 mixed worker SIGKILL fixture and smoke implemented
+
+The new `worker_kill` row starts five real worker subprocesses against the
+five-container R5 stores, retaining production sync/timing and shared mixed
+history/invariant/raw p99/drain gates. Five-second seeded kill slots use a500ms
+handoff to retain exact acquired deliveries when available; other selections
+explicitly record no new acquisition. At least one held target kill is required.
+Replacement generations and actual SIGKILL exit states are independently checked.
+[Native race smoke](scale/tier3-mixed-worker-kill-2026-10-01/) passes59.75s /
+60.781s package:84 completions,927 entries,six kills,two held targets and eleven
+process generations. Worst terminal p99 is15.033s and progress p99 is13.234s.
+All51 repairs are acknowledged and fencing is zero. Five graceful final counters
+match; killed generations' final counters remain unavailable. All44 Python tests,
+reader race and vet pass. The initial acquisition timeout and old30s cadence
+assertion failure remain excluded evidence. This is fixture/smoke progress, not
+ten-minute or24-hour acceptance. The production12s TTL avoids the historical
+30s fixture mismatch; its old smoke is not rerun.

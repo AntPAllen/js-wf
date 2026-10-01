@@ -35,6 +35,9 @@ import (
 )
 
 type matrixLeaderFault struct {
+	WorkerSelection       string                        `json:"worker_selection,omitempty"`
+	WorkerTarget          *matrixIsolationTarget        `json:"worker_target,omitempty"`
+	WorkerKillConfirmed   bool                          `json:"worker_sigkill_confirmed,omitempty"`
 	IsolationTarget       *matrixIsolationTarget        `json:"isolation_target,omitempty"`
 	VersionsBefore        []string                      `json:"versions_before,omitempty"`
 	VersionsAfter         []string                      `json:"versions_after,omitempty"`

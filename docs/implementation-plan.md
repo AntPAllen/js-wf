@@ -488,6 +488,18 @@ Automatic journal snapshot attempts and continuation publication use a fifteen-s
 
 When a ready suspended wait remains at the same journal tail, its scanner wakeup message ID changes every ten seconds. Scans within a window deduplicate, while the next window can supply a fresh run if a prior wakeup was consumed during lease contention and its nak was lost. The scanner stops reenqueuing after the journal advances or the wait is no longer ready; the mixed fault gate still measures under 30 seconds from its last enabling event.
 
+The sustained R5 worker SIGKILL row is
+`TestFiveContainerMixedWorkerKilledEveryFiveSeconds` (`worker_kill` in
+`tier3-mixed-leaders`). Five actual worker processes run the shared mixed workload;
+seeded kills occupy five-second slots, followed by replacement generations.
+A500ms acquired-delivery handoff confirms held targets when available; other
+selections explicitly retain the no-new-acquisition outcome. At least one held
+target kill is required. Raw enabling-event p99, histories, invariants and final
+physical queue drain remain required. Original per-process dispatch/fencing files
+and surviving final counter snapshots are checked; interrupted tails and killed
+processes' missing final counters remain explicit. Smoke does not establish the
+ten-minute row or full24h matrix, and cannot certify complete hard-kill attribution.
+
 **The "done" bar for a release**
 
 1. Tier 1: 100 000 seeds clean.

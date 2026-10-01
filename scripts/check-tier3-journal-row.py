@@ -17,7 +17,8 @@ def load(name, file):
 
 matrix = load('matrix_row', 'check-matrix-campaign.py')
 execution = load('matrix_execution', 'check-matrix-result.py')
-TESTS = {'journal': 'TestFiveContainerMixedJournalLeaderEveryThirtySeconds',
+TESTS = {'worker_kill': 'TestFiveContainerMixedWorkerKilledEveryFiveSeconds',
+         'journal': 'TestFiveContainerMixedJournalLeaderEveryThirtySeconds',
          'consumer': 'TestFiveContainerMixedConsumerLeaderEveryThirtySeconds',
          'restart': 'TestFiveContainerMixedAllServersEveryThirtySeconds',
          'fanout_restart': 'TestFiveContainerMixedFanoutRestartEveryThirtySeconds',
@@ -37,7 +38,7 @@ def check(events, duration, expected_row='journal'):
     if row != expected_row or matrix.seconds(found_duration) != seconds or replicas != 'true' or release != 'false':
         raise ValueError('incorrect row, duration, replica scope or release claim')
     batches, invocations, entries, faults = map(int, (batches, invocations, entries, faults))
-    if batches < 1 or invocations != batches*28 or entries <= invocations or faults != (seconds-1)//30:
+    if batches < 1 or invocations != batches*28 or entries <= invocations or faults != (seconds-1)//(5 if row=='worker_kill' else 30):
         raise ValueError('incomplete workload, audit entries or fault count')
     active_consumer_faults = None
     if row == 'consumer':
@@ -59,7 +60,8 @@ def check(events, duration, expected_row='journal'):
             raw_t,raw_p=matrix.one(r'TIER3_ROUTE_RAW_CELL type='+typ+r' terminal_p99=(\S+) progress_p99=(\S+)',log)
             cells[typ]['raw_terminal_p99_seconds']=matrix.seconds(raw_t)
             cells[typ]['raw_progress_p99_seconds']=matrix.seconds(raw_p)
-    scope = ('single five-container R5 majority-progress route row' if row == 'route_majority'
+    scope = ('single five-container R5 worker SIGKILL row' if row == 'worker_kill'
+             else 'single five-container R5 majority-progress route row' if row == 'route_majority'
              else 'single five-container R5 quorum-removing route row' if row == 'route_quorum'
              else 'single five-container R5 mid-fan-out all-server restart row' if row == 'fanout_restart'
              else 'single five-container R5 all-server SIGKILL/restart row' if row == 'restart'
@@ -222,6 +224,93 @@ def check_majority_artifacts(root, report):
     return dict(confirmed_majority_progress_intervals=len(faults),basis='raw enabling-event latency; majority remains available')
 
 
+def process_lines(path):
+    data=path.read_bytes()
+    end=data.rfind(b'\n')+1
+    return [json.loads(line) for line in data[:end].splitlines() if line], end!=len(data)
+
+
+def check_worker_artifacts(root,report):
+    faults=json.loads((root/'faults.json').read_text())
+    sessions=json.loads((root/'process-evidence.json').read_text())
+    if len(faults)!=report['confirmed_faults'] or len(sessions)!=5+len(faults):
+        raise ValueError('incomplete worker generations or kill count')
+    by_worker={s['worker_id']:s for s in sessions}
+    if len(by_worker)!=len(sessions) or len({s['pid'] for s in sessions})!=len(sessions):
+        raise ValueError('duplicate worker generation or PID')
+    retired=set()
+    previous_schedule=None
+    for fault in faults:
+        scheduled=timestamp_ns(fault['scheduled'])
+        if timestamp_ns(fault['killed'])-scheduled>=5_000_000_000 or (previous_schedule is not None and scheduled-previous_schedule!=5_000_000_000):
+            raise ValueError('worker kills do not follow five-second schedule slots')
+        previous_schedule=scheduled
+        worker=fault['worker']; session=by_worker[worker]
+        if worker in retired or session['pid']!=fault['pid'] or not fault.get('worker_sigkill_confirmed'):
+            raise ValueError('missing confirmed SIGKILL or wrong target process')
+        slot=fault['worker_slot']
+        if type(slot) is not int or not 0<=slot<5 or worker!=f"matrix-process-{slot}-generation-{session['generation']}":
+            raise ValueError('invalid worker slot/generation')
+        if f"matrix-process-{slot}-generation-{session['generation']+1}" not in by_worker:
+            raise ValueError('killed worker lacks replacement generation')
+        target=fault.get('worker_target')
+        if not timestamp_ns(fault['scheduled'])<=timestamp_ns(fault['killed'])<=timestamp_ns(fault['healed']):
+            raise ValueError('worker kill/replacement timestamps reversed')
+        if target:
+            delivery=target['delivery']
+            if fault.get('worker_selection')!='held_delivery' or not target['token'] or delivery['Stage']!='lease_acquired' or delivery['Worker']!=worker or not all(delivery[k] for k in ('Type','ID','RunSequence','Delivery')):
+                raise ValueError('kill lacks held acquired-delivery identity')
+            if not timestamp_ns(fault['scheduled'])<=timestamp_ns(delivery['At'])<=timestamp_ns(fault['killed']):
+                raise ValueError('worker acquisition/kill timestamps reversed')
+            steps,partial=process_lines(root/(worker+'-dispatch.jsonl'))
+            if delivery not in steps:raise ValueError('held target missing from original dispatch records')
+        elif fault.get('worker_selection')!='no_new_acquisition_within_500ms':
+            raise ValueError('missing explicit worker selection outcome')
+        retired.add(worker)
+    active=sum(bool(f.get("worker_target")) for f in faults)
+    if not active:raise ValueError("worker row never killed a confirmed held delivery")
+    initial=set()
+    for session in sessions:
+        name=session['worker_id']; generation=session['generation']
+        match=re.fullmatch(r'matrix-process-([0-4])-generation-(\d+)',name)
+        if not match or type(generation) is not int or generation<0 or int(match[2])!=generation:
+            raise ValueError('invalid session slot or generation')
+        slot=int(match[1])
+        if generation==0:initial.add(slot)
+        elif f'matrix-process-{slot}-generation-{generation-1}' not in retired:
+            raise ValueError('replacement lacks a killed predecessor')
+    if initial!=set(range(5)):raise ValueError('missing initial five-process fleet')
+    steps_all=[]; fences_all=[]; cross_checks=0; partial_tails=0
+    for session in sessions:
+        worker=session['worker_id']
+        if type(session['pid']) is not int or session['pid']<=0:
+            raise ValueError('invalid actual process PID')
+        steps,dp=process_lines(root/(worker+'-dispatch.jsonl'))
+        fences,fp=process_lines(root/(worker+'-fencing.jsonl'))
+        if len(steps)!=session['dispatch_records'] or len(fences)!=session['fencing_records'] or dp!=session['partial_dispatch_tail'] or fp!=session['partial_fencing_tail']:
+            raise ValueError('process counts or interrupted-tail evidence disagree')
+        if any(e['Worker']!=worker for e in steps):raise ValueError('wrong dispatch process identity')
+        for i,record in enumerate(fences,1):
+            if record['pid']!=session['pid'] or record['sequence']!=i or record['event']['Worker']!=worker:
+                raise ValueError('wrong fencing process identity or sequence')
+        final=session.get('final_metrics')
+        if worker in retired:
+            if session.get('exit_signal')!=9 or session.get('exit_success') or final is not None or (root/(worker+'-metrics.json')).exists():raise ValueError('killed generation invents final counter cross-check')
+        else:
+            raw=json.loads((root/(worker+'-metrics.json')).read_text())
+            if not session.get('exit_success') or session.get('exit_signal')!=0 or final is None or raw!={'pid':session['pid'],'worker_id':worker,'metrics':final} or final['fencing_events']!=len(fences) or dp or fp:
+                raise ValueError('graceful process final counters disagree')
+            cross_checks+=1
+        partial_tails+=dp+fp
+        steps_all+=steps;fences_all += [r['event'] for r in fences]
+    if cross_checks!=5 or len(retired)!=len(faults):raise ValueError('missing surviving process counter checks')
+    if json.loads((root/'dispatch.json').read_text())!=steps_all or (json.loads((root/'fencing.json').read_text()) or [])!=fences_all:
+        raise ValueError('aggregate process evidence differs from original records')
+    return dict(confirmed_sigkills=len(faults),confirmed_held_delivery_kills=active,process_generations=len(sessions),graceful_counter_cross_checks=cross_checks,
+                interrupted_tails=partial_tails,killed_process_final_counters_available=False,
+                complete_hard_kill_attribution=False)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, help='required consumer/restart fault artifacts')
@@ -246,5 +335,8 @@ if __name__ == '__main__':
     if args.row == 'route_majority':
         if args.root is None: parser.error('--root is required for the majority row')
         report['majority_artifact_checks'] = check_majority_artifacts(args.root,report)
+    if args.row == 'worker_kill':
+        if args.root is None: parser.error('--root is required for the worker row')
+        report['worker_artifact_checks'] = check_worker_artifacts(args.root,report)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))

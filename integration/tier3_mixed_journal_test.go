@@ -54,9 +54,13 @@ func TestFiveContainerMixedRouteMajorityEveryThirtySeconds(t *testing.T) {
 	runFiveContainerMixedLeader(t, "route_majority")
 }
 
+func TestFiveContainerMixedWorkerKilledEveryFiveSeconds(t *testing.T) {
+	runFiveContainerMixedLeader(t, "worker_kill")
+}
+
 func runFiveContainerMixedLeader(t *testing.T, row string) {
 	t.Helper()
-	if row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" {
+	if row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" {
 		t.Fatal("unsupported R5 fault row")
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
@@ -184,6 +188,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			}
 		}()
 	}
+	var processes, processSessions []*matrixProcessWorker
 	var workers []*worker.Worker
 	defer func() {
 		stopWork()
@@ -192,29 +197,45 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			_ = w.Close()
 		}
 	}()
+	defer func() {
+		for _, p := range processes {
+			stopMatrixProcessWorker(p)
+		}
+	}()
 	var fanoutBarrier matrixFanoutBarrier
 	handlers := matrixLeaderHandlers()
 	if row == "fanout_restart" {
 		handlers = fanoutBarrier.handlers()
 	}
-	for node := 0; node < 5; node++ {
-		w, err := worker.New(ctx, js, fmt.Sprintf("tier3-mixed-%d", node), handlers, worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
-			evidenceMu.Lock()
-			dispatch = append(dispatch, event)
-			evidenceMu.Unlock()
-		}), worker.WithFencingObserver(func(event worker.FencingEvent) {
-			evidenceMu.Lock()
-			fencing = append(fencing, event)
-			evidenceMu.Unlock()
-		}))
-		if err != nil {
-			t.Fatal(err)
+	if row != "worker_kill" {
+		for node := 0; node < 5; node++ {
+			w, err := worker.New(ctx, js, fmt.Sprintf("tier3-mixed-%d", node), handlers, worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
+				evidenceMu.Lock()
+				dispatch = append(dispatch, event)
+				evidenceMu.Unlock()
+			}), worker.WithFencingObserver(func(event worker.FencingEvent) {
+				evidenceMu.Lock()
+				fencing = append(fencing, event)
+				evidenceMu.Unlock()
+			}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			workers = append(workers, w)
 		}
-		workers = append(workers, w)
-	}
-	for part := uint32(0); part < provision.Partitions; part++ {
-		w := workers[part%5]
-		launch(func() error { return w.RunPartition(workCtx, part) })
+		for part := uint32(0); part < provision.Partitions; part++ {
+			w := workers[part%5]
+			launch(func() error { return w.RunPartition(workCtx, part) })
+		}
+	} else {
+		for slot := 0; slot < 5; slot++ {
+			process, err := startMatrixProcessWorker(ctx, root, urls, slot, 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			processes = append(processes, process)
+			processSessions = append(processSessions, process)
+		}
 	}
 	launch(func() error {
 		return reconcile.RunRepairLoopObserved(workCtx, js, "tier3-mixed-start", "start", time.Second, 32, repairObserver)
@@ -250,6 +271,23 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				t.Error(err)
 			}
 		}
+		if row == "worker_kill" {
+			for _, p := range processes {
+				stopMatrixProcessWorker(p)
+			}
+			var sessions []tier3ProcessEvidence
+			for _, p := range processSessions {
+				proof, steps, fences, err := readTier3ProcessEvidence(p)
+				if err != nil {
+					t.Error(err)
+					continue
+				}
+				sessions = append(sessions, proof)
+				dispatch = append(dispatch, steps...)
+				fencing = append(fencing, fences...)
+			}
+			write("process-evidence.json", sessions)
+		}
 		evidenceMu.Lock()
 		write("dispatch.json", dispatch)
 		write("fencing.json", fencing)
@@ -267,7 +305,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		for _, m := range metrics {
 			fenceCount += m.FencingEvents
 		}
-		if fenceCount != uint64(len(fencing)) {
+		if row != "worker_kill" && fenceCount != uint64(len(fencing)) {
 			t.Errorf("fencing evidence=%d counter=%d", len(fencing), fenceCount)
 		}
 		f, err := os.Create(filepath.Join(root, "history.jsonl"))
@@ -291,8 +329,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	started := time.Now()
 	end := started.Add(duration)
 	faultDone := make(chan error, 1)
+	faultInterval := 30 * time.Second
+	if row == "worker_kill" {
+		faultInterval = 5 * time.Second
+	}
 	go func() {
-		for scheduled := started.Add(30 * time.Second); scheduled.Before(end); scheduled = scheduled.Add(30 * time.Second) {
+		for scheduled := started.Add(faultInterval); scheduled.Before(end); scheduled = scheduled.Add(faultInterval) {
 			delay := time.Until(scheduled)
 			if delay < 0 {
 				delay = 0
@@ -308,7 +350,43 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			var event matrixLeaderFault
 			var err error
 			prefix := filepath.Join(root, fmt.Sprintf("fault-%d", len(faults)+1))
-			if row == "consumer" {
+			if row == "worker_kill" {
+				// The acquisition handoff proves the selected delivery still holds
+				// its lease when SIGKILL occurs. Snapshot the pointers so release
+				// disarms the old generation as well as surviving workers.
+				snapshot := append([]*matrixProcessWorker(nil), processes...)
+				var slot int
+				var target matrixIsolationTarget
+				var release func() error
+				first := faultRNG.Intn(len(snapshot))
+				selectionCtx, stopSelection := context.WithTimeout(ctx, 500*time.Millisecond)
+				slot, target, release, err = armMatrixIsolationTarget(selectionCtx, snapshot, first)
+				stopSelection()
+				selection := "held_delivery"
+				if errors.Is(err, context.DeadlineExceeded) && ctx.Err() == nil {
+					// A serial cohort can be waiting for the killed owner's lease
+					// to expire, with no new acquisition. Random kill cadence must
+					// still continue; retain this as a distinct selection outcome.
+					if releaseErr := release(); releaseErr == nil {
+						err = nil
+						slot = first
+						selection = "no_new_acquisition_within_500ms"
+					}
+				}
+				if err == nil {
+					event, err = killMatrixProcessWorker(ctx, root, urls, processes, slot, scheduled)
+					event.WorkerSelection = selection
+					if selection == "held_delivery" {
+						event.WorkerTarget = &target
+					}
+					if processes[slot] != nil {
+						processSessions = append(processSessions, processes[slot])
+					}
+				}
+				if release != nil {
+					err = errors.Join(err, release())
+				}
+			} else if row == "consumer" {
 				event, err = killFiveContainerMixedConsumerLeader(ctx, js, cluster, scheduled, prefix, faultRNG)
 			} else if row == "route_quorum" || row == "route_majority" {
 				event, err = partitionFiveContainerMixedRoute(ctx, js, cluster, scheduled, prefix, faultRNG, nc, row == "route_quorum")
@@ -420,12 +498,23 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			t.Fatal(ctx.Err())
 		}
 	}
-	expectedFaults := int((duration - time.Nanosecond) / (30 * time.Second))
+	expectedFaults := int((duration - time.Nanosecond) / faultInterval)
 	if len(faults) != expectedFaults {
 		t.Fatalf("faults=%d want=%d", len(faults), expectedFaults)
 	}
 	if len(faults) == 0 {
 		t.Fatal("no journal fault executed")
+	}
+	if row == "worker_kill" {
+		active := 0
+		for _, fault := range faults {
+			if fault.WorkerTarget != nil {
+				active++
+			}
+		}
+		if active == 0 {
+			t.Fatal("worker row never killed a confirmed held delivery")
+		}
 	}
 	completionDeadline := faults[len(faults)-1].Healed.Add(5 * time.Minute)
 	inv, err := matrixReadMetadata(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })
