@@ -3370,3 +3370,31 @@ SIGKILL after 333,343 deliveries, healed in 15.933 seconds and resumed delivery.
 this does not clear final lateness, drain, second restart or 24-hour completion.
 The 043e7e7 mixed campaign passed all 20 seeds; mixed latency causes remain open.
 The full 7e414b2 and 8a5e25e simulation jobs continue live without restart.
+
+
+## Fixed-placement two-replica renewal and journal pressure control
+
+Hosted mixed seed 9 snapshots show lease leader healthy node 0, journal leader
+delayed node 1 and a lagging third replica during recovery. A new leaf fixes
+those two leaders, warms data/Raft files, stops node 2 and measures 48 production
+unconditional renewals per owner with/without journal CAS appends. No worker,
+run consumer or signal pipeline runs; this isolates method pressure, not the
+mixed matrix. Leaders are checked at row ends rather than attributed per RPC.
+
+With 70 ms node-1 delay, renewal alone takes 3.462 seconds; one coupled owner
+6.970 seconds; two coupled owners 10.847 seconds. The two-owner KV update sums
+are 4.410/4.332 seconds and local gates below one millisecond. Revisions advance
+with owner/epoch stable, all synthesized append indices/epochs are retained,
+the physical delay lower bound and DELAYED trace pass. The race contract passes
+in 31.533 seconds, a compiled skipped-renew revision control fails semantically,
+and vet/YAML checks pass. [Raw timings, disk trace, monitoring and hashes](scale/lease-append-pressure-2026-10-01/)
+retain evidence. A separate required-artifact hosted job is added; confirmation
+is pending.
+
+This stable two-node pressure case does not reproduce the hosted ~30-second KV
+sums. It excludes third-node catch-up, other Raft-group workload and recovery
+transients, so the underlying cause remains unconfirmed. Acquisition, renewal,
+fencing, held backoff and latency gates are unchanged. Latest full simulation
+jobs and the original million-timer process remain live without restart;
+full matrix/24-hour soak, online GC and other plan gates remain open. Mixed
+1db0bcf passed all 20 seeds.

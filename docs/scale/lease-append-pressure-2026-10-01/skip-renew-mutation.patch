@@ -1,0 +1,11 @@
+--- integration/lease_append_pressure_test.go
++++ integration/lease_append_pressure_test.go
+@@ -190,7 +190,7 @@
+ 					for n := range calls {
+ 						at := time.Now()
+ 						attempt, cancel := context.WithTimeout(ctx, 3*time.Second)
+-						renewed, timing, err := owner.RenewTimed(attempt, 0)
++						renewed, timing, err := func() (bool, lease.RenewalTiming, error) { return true, lease.RenewalTiming{UpdateAttempted:true}, nil }()
+ 						cancel()
+ 						result.GateTime += timing.GateWait
+ 						result.UpdateTime += timing.Update

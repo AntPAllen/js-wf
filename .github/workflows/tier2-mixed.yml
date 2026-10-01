@@ -88,3 +88,31 @@ jobs:
           name: lease-disk-contract
           path: integration/lease-disk-contract*
           if-no-files-found: error
+  lease-append-pressure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WF_LEASE_APPEND_PRESSURE: '1'
+      LEASE_APPEND_REPORT: lease-append-pressure
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Ensure disk syscall tracer
+        run: |
+          if ! command -v strace >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y strace
+          fi
+          if test -f /proc/sys/kernel/yama/ptrace_scope; then
+            sudo sysctl -w kernel.yama.ptrace_scope=0
+          fi
+      - name: Measure renewal and CAS append on a fixed two-replica quorum
+        run: go test -race ./integration -run '^TestLeaseAppendPressureFixedPlacement$' -count=1 -timeout=5m -v
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lease-append-pressure
+          path: integration/lease-append-pressure*
+          if-no-files-found: error
