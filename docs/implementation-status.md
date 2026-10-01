@@ -3754,3 +3754,35 @@ failed-acquisition or heartbeat behavior or identify NATS cause. No production
 runtime/gate changes are made. The 200-seed latency miss, whole matrix/24-hour
 soak, remaining capacity/GC/continuation gates and full latest-source simulation
 remain open. Original million timers continue live on their retained stores.
+
+
+## Held acquisition traffic in the paired consumer pressure fixture
+
+The fixed-placement comparison now has six rows: healthy/delayed × eight owners
+alone, with consumer traffic, and with consumer traffic plus held acquisitions.
+Every owner retains 48 unconditional renewals/CAS appends; every fourth append
+also probes the active lease through production Acquire with a different worker
+ID. Each contender row requires 96 ErrHeld results with no lease, preserving
+owner identity/epoch/revision and raw journal checks. A dedicated healthy-node
+connection measures outgoing requests independently: minimum 192, observed 288.
+Consumer rows retain 384 physical sequence advances, eight acknowledgement floors
+advancing by 48, exact one-delivery payloads and full drain/placement assertions.
+
+Final six-row race passes in 139.003 seconds; final vet passes. Delayed per-owner
+summed KV Update times are 8.1428–9.7765 seconds alone, 7.6678–8.4243 with traffic,
+and 10.2298–11.3569 with traffic plus probes. These do not reproduce the real
+seed-4 invocation's 30.5004 seconds or establish monotonic load causation.
+A compiled early ErrHeld/no-network control fails in 7.546 seconds on zero
+outgoing probe messages versus at least 192. [Reports, physical evidence and
+control](scale/lease-held-consumer-pressure-2026-10-01/) are retained.
+
+The prior fa99d53 hosted tier2-mixed run 36841144769 completes successfully,
+including mixed recovery and its independent four-row consumer pressure,
+original pressure and lease-disk jobs. Its job state and paired artifacts are
+retained; it does not validate the new six-row assertion. Probes here are paced
+across eight keys through one healthy connection; asymmetric worker isolation,
+heartbeat contention, retries/redelivery, a single hot key and election/catch-up
+remain distinct recovery shapes. No production runtime, TTL, renewal policy or
+latency gate changes. Latest comprehensive simulation and original million
+timers remain live; whole-matrix 200-seed, five-node 24-hour soak and remaining
+capacity/GC/combined-continuation gates remain open.

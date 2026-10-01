@@ -137,7 +137,7 @@ jobs:
           if test -f /proc/sys/kernel/yama/ptrace_scope; then
             sudo sysctl -w kernel.yama.ptrace_scope=0
           fi
-      - name: Measure paired renewal pressure with bounded consumer traffic
+      - name: Measure paired renewal pressure with consumer traffic and held acquisitions
         run: go test -race ./integration -run '^TestLeaseAppendPressureConsumerTrafficFixedPlacement$' -count=1 -timeout=6m -v
       - if: always()
         uses: actions/upload-artifact@v7

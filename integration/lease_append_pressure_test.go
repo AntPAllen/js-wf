@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -22,11 +23,14 @@ import (
 	"js-wf/testcluster"
 	"js-wf/wf"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
 type leaseAppendPressureRow struct {
 	Delayed          bool                       `json:"delayed"`
+	ProbeMessages    uint64                     `json:"probe_messages,omitempty"`
+	Contenders       bool                       `json:"contenders,omitempty"`
 	ConsumerTraffic  bool                       `json:"consumer_traffic,omitempty"`
 	TrafficMessages  int                        `json:"traffic_messages,omitempty"`
 	TrafficEnd       time.Time                  `json:"traffic_end,omitempty"`
@@ -42,6 +46,8 @@ type leaseAppendPressureRow struct {
 type leaseAppendPressureOwner struct {
 	ID             string        `json:"id"`
 	Calls          int           `json:"calls"`
+	HeldCalls      int           `json:"held_calls,omitempty"`
+	HeldTime       time.Duration `json:"held_ns,omitempty"`
 	RenewTime      time.Duration `json:"renew_ns"`
 	AppendTime     time.Duration `json:"append_ns"`
 	MaxRenew       time.Duration `json:"max_renew_ns"`
@@ -120,6 +126,23 @@ func runLeaseAppendPressure(t *testing.T, withTraffic bool) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	var probeConn *nats.Conn
+	probeLeasing := leasing
+	if withTraffic {
+		probeConn, err = nats.Connect(cluster.ClientURL(0), nats.NoReconnect(), nats.IgnoreDiscoveredServers())
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer probeConn.Close()
+		probeJS, err := jetstream.New(probeConn)
+		if err != nil {
+			t.Fatal(err)
+		}
+		probeLeasing, err = lease.New(ctx, probeJS)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 	store := journal.New(js)
 	kv, err := js.KeyValue(ctx, "WF_LEASE")
 	if err != nil {
@@ -185,24 +208,29 @@ func runLeaseAppendPressure(t *testing.T, withTraffic bool) {
 			tracing = true
 		}
 		workloads := []struct {
-			append  bool
-			writers int
-			traffic bool
-		}{{false, 1, false}, {true, 1, false}, {true, 2, false}, {true, 8, false}}
+			append     bool
+			writers    int
+			traffic    bool
+			contenders bool
+		}{{false, 1, false, false}, {true, 1, false, false}, {true, 2, false, false}, {true, 8, false, false}}
 		if withTraffic {
 			workloads = []struct {
-				append  bool
-				writers int
-				traffic bool
-			}{{true, 8, false}, {true, 8, true}}
+				append     bool
+				writers    int
+				traffic    bool
+				contenders bool
+			}{{true, 8, false, false}, {true, 8, true, false}, {true, 8, true, true}}
 		}
 		for _, workload := range workloads {
-			row := leaseAppendPressureRow{Delayed: delayed, ConsumerTraffic: workload.traffic, Append: workload.append, Writers: workload.writers, Owners: make([]leaseAppendPressureOwner, workload.writers)}
+			row := leaseAppendPressureRow{Delayed: delayed, Contenders: workload.contenders, ConsumerTraffic: workload.traffic, Append: workload.append, Writers: workload.writers, Owners: make([]leaseAppendPressureOwner, workload.writers)}
 			owners := make([]*lease.Lease, workload.writers)
 			for i := range owners {
 				id := fmt.Sprintf("d%t-a%t-w%d-%d", delayed, workload.append, workload.writers, i)
 				if workload.traffic {
 					id += "-traffic"
+				}
+				if workload.contenders {
+					id += "-held"
 				}
 				owners[i], err = leasing.Acquire(ctx, "pressure", id, id)
 				if err != nil {
@@ -218,6 +246,10 @@ func runLeaseAppendPressure(t *testing.T, withTraffic bool) {
 			if workload.traffic {
 				trafficBefore = traffic.counters(t, ctx)
 				row.TrafficSeqBefore = trafficBefore.sequence
+			}
+			var probeBefore uint64
+			if workload.contenders {
+				probeBefore = probeConn.Stats().OutMsgs
 			}
 			row.Start = time.Now().UTC()
 			start := make(chan struct{})
@@ -276,6 +308,18 @@ func runLeaseAppendPressure(t *testing.T, withTraffic bool) {
 							return
 						}
 						tail = sequence
+						if workload.contenders && n%4 == 0 {
+							at := time.Now()
+							attempt, cancel := context.WithTimeout(ctx, 3*time.Second)
+							contender, err := probeLeasing.Acquire(attempt, "pressure", result.ID, "contender-"+result.ID)
+							cancel()
+							result.HeldTime += time.Since(at)
+							if !errors.Is(err, lease.ErrHeld) || contender != nil {
+								result.Error = fmt.Sprintf("held admission accepted active owner at index %d: lease=%v err=%v", n, contender, err)
+								return
+							}
+							result.HeldCalls++
+						}
 					}
 				}(i, owner)
 			}
@@ -286,10 +330,21 @@ func runLeaseAppendPressure(t *testing.T, withTraffic bool) {
 			}
 			close(start)
 			wg.Wait()
+			if workload.contenders {
+				row.ProbeMessages = probeConn.Stats().OutMsgs - probeBefore
+				if row.ProbeMessages < uint64(workload.writers*(calls/4)*2) {
+					rows = append(rows, row)
+					t.Fatalf("held probe network messages=%d want at least %d", row.ProbeMessages, workload.writers*(calls/4)*2)
+				}
+			}
 			row.End = time.Now().UTC()
 			rows = append(rows, row)
 			for i, result := range row.Owners {
-				if result.Error != "" || result.Calls != calls {
+				wantHeld := 0
+				if workload.contenders {
+					wantHeld = calls / 4
+				}
+				if result.Error != "" || result.Calls != calls || result.HeldCalls != wantHeld {
 					t.Fatalf("row=%+v", row)
 				}
 				after, err := kv.Get(ctx, identity.Key("pressure", result.ID))
@@ -356,7 +411,7 @@ func runLeaseAppendPressure(t *testing.T, withTraffic bool) {
 				}
 				rows[len(rows)-1].TrafficSeqAfter = after.sequence
 			}
-			t.Logf("pressure delayed=%v append=%v writers=%d traffic=%v messages=%d elapsed=%s owners=%+v", delayed, workload.append, workload.writers, workload.traffic, row.TrafficMessages, row.End.Sub(row.Start), row.Owners)
+			t.Logf("pressure delayed=%v append=%v writers=%d traffic=%v contenders=%v messages=%d elapsed=%s owners=%+v", delayed, workload.append, workload.writers, workload.traffic, workload.contenders, row.TrafficMessages, row.End.Sub(row.Start), row.Owners)
 		}
 	}
 	if err := cluster.StopSlowDisk(1); err != nil {

@@ -1,0 +1,20 @@
+--- lease/lease.go
++++ lease/lease.go
+@@ -5,6 +5,7 @@
+ 	"encoding/json"
+ 	"errors"
+ 	"fmt"
++"strings"
+ 	"time"
+ 
+ 	"js-wf/identity"
+@@ -121,7 +122,8 @@
+ 	if worker == "" {
+ 		return nil, fmt.Errorf("empty worker ID")
+ 	}
+-	key := identity.Key(typ, id)
++	if strings.HasPrefix(worker,"contender-") {return nil,ErrHeld}
++ key := identity.Key(typ, id)
+ 	port := s.operations()
+ 	// The revision itself becomes the epoch, so the value is updated once by
+ 	// its owner after Create. Until that update, other acquirers still fail.
