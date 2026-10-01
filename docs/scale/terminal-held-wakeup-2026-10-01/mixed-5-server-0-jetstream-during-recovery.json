@@ -1,0 +1,1476 @@
+{
+  "memory": 0,
+  "storage": 140448,
+  "reserved_memory": 0,
+  "reserved_storage": 0,
+  "accounts": 1,
+  "ha_assets": 33,
+  "api": {
+    "level": 5,
+    "total": 726,
+    "errors": 189
+  },
+  "server_id": "NDU5RAZGH7L3LRKT6BTJTSPJ63AXZVRTIQB2C6WM3YKVAPYZ3CY7DYT5",
+  "now": "2026-10-01T06:23:41.765884324Z",
+  "config": {
+    "max_memory": 12572421120,
+    "max_storage": 2386148352,
+    "store_dir": "/tmp/TestMixedWorkflowsRecoverFromFourServerFaults3749442285/001/node-0/jetstream",
+    "sync_interval": 120000000000,
+    "strict": true
+  },
+  "limits": {
+    "default_max_consumers": 1000
+  },
+  "streams": 10,
+  "streams_leader": 7,
+  "consumers": 22,
+  "consumers_leader": 18,
+  "messages": 541,
+  "bytes": 140448,
+  "meta_cluster": {
+    "name": "wf-process",
+    "leader": "wf-process-0",
+    "peer": "0m6vARoZ",
+    "replicas": [
+      {
+        "name": "wf-process-1",
+        "current": true,
+        "active": 577078901,
+        "peer": "St9I6EVH"
+      },
+      {
+        "name": "wf-process-2",
+        "current": true,
+        "active": 577907684,
+        "peer": "0WED9nmv"
+      }
+    ],
+    "cluster_size": 3,
+    "quorum_needed": 2,
+    "pending": 0,
+    "pending_requests": 0,
+    "pending_infos": 0,
+    "snapshot": {
+      "pending_entries": 36,
+      "pending_size": 49419,
+      "last_time": "2026-10-01T06:23:31.735656123Z",
+      "last_duration": 1863497
+    }
+  },
+  "account_details": [
+    {
+      "name": "$G",
+      "id": "$G",
+      "memory": 0,
+      "storage": 333488,
+      "reserved_memory": 18446744073709551615,
+      "reserved_storage": 18446744073709551615,
+      "accounts": 0,
+      "ha_assets": 0,
+      "api": {
+        "level": 0,
+        "total": 1121,
+        "errors": 377
+      },
+      "stream_detail": [
+        {
+          "name": "WF_INV",
+          "created": "2026-10-01T06:23:17.875763624Z",
+          "cluster": {
+            "name": "wf-process",
+            "raft_group": "S-R3F-Xg8vWcWy",
+            "leader": "wf-process-0",
+            "leader_since": "2026-10-01T06:23:31.694401943Z",
+            "system_account": true,
+            "traffic_account": "$SYS",
+            "replicas": [
+              {
+                "name": "wf-process-1",
+                "current": true,
+                "active": 72130112,
+                "peer": "St9I6EVH"
+              },
+              {
+                "name": "wf-process-2",
+                "current": false,
+                "active": 70204259,
+                "lag": 30,
+                "peer": "0WED9nmv"
+              }
+            ]
+          },
+          "state": {
+            "messages": 28,
+            "bytes": 8206,
+            "first_seq": 1,
+            "first_ts": "2026-10-01T06:23:18.791608231Z",
+            "last_seq": 28,
+            "last_ts": "2026-10-01T06:23:19.506609705Z",
+            "num_subjects": 28,
+            "consumer_count": 0
+          },
+          "stream_raft_group": "S-R3F-Xg8vWcWy"
+        },
+        {
+          "name": "WF_RUN",
+          "created": "2026-10-01T06:23:17.967390006Z",
+          "cluster": {
+            "name": "wf-process",
+            "raft_group": "S-R3F-6fLa4lad",
+            "leader": "wf-process-0",
+            "leader_since": "2026-10-01T06:23:32.386113895Z",
+            "system_account": true,
+            "traffic_account": "$SYS",
+            "replicas": [
+              {
+                "name": "wf-process-1",
+                "current": true,
+                "active": 33323881,
+                "peer": "St9I6EVH"
+              },
+              {
+                "name": "wf-process-2",
+                "current": true,
+                "active": 33327467,
+                "peer": "0WED9nmv"
+              }
+            ]
+          },
+          "state": {
+            "messages": 16,
+            "bytes": 2218,
+            "first_seq": 56,
+            "first_ts": "2026-10-01T06:23:32.463022447Z",
+            "last_seq": 139,
+            "last_ts": "2026-10-01T06:23:40.380832748Z",
+            "num_subjects": 6,
+            "num_deleted": 68,
+            "consumer_count": 22
+          },
+          "consumer_detail": [
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_48",
+              "created": "2026-10-01T06:23:18.79707724Z",
+              "delivered": {
+                "consumer_seq": 3,
+                "stream_seq": 139,
+                "last_active": "2026-10-01T06:23:36.855473518Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 3,
+                "stream_seq": 126,
+                "last_active": "2026-10-01T06:23:37.071537543Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-YfBgRsFE",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:33.009535266Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 713240283,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 0,
+                    "lag": 30,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.765937785Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_00",
+              "created": "2026-10-01T06:23:18.797233278Z",
+              "delivered": {
+                "consumer_seq": 13,
+                "stream_seq": 138,
+                "last_active": "2026-10-01T06:23:40.182071094Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 3,
+                "stream_seq": 55,
+                "last_active": "2026-10-01T06:23:40.440214618Z"
+              },
+              "num_ack_pending": 3,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-tAOw9Q1E",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:32.540326642Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 376561516,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 371194143,
+                    "lag": 39,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.765950154Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_55",
+              "created": "2026-10-01T06:23:18.797332098Z",
+              "delivered": {
+                "consumer_seq": 10,
+                "stream_seq": 139,
+                "last_active": "2026-10-01T06:23:40.407107145Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 5,
+                "stream_seq": 132,
+                "last_active": "2026-10-01T06:23:40.873412206Z"
+              },
+              "num_ack_pending": 3,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-9oj0nEIt",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:33.152751297Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 817739543,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 0,
+                    "lag": 43,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.765958276Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_26",
+              "created": "2026-10-01T06:23:18.797393471Z",
+              "delivered": {
+                "consumer_seq": 12,
+                "stream_seq": 139,
+                "last_active": "2026-10-01T06:23:38.511373629Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 12,
+                "stream_seq": 137,
+                "last_active": "2026-10-01T06:23:38.703652243Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-GtA4TRr8",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:33.306492605Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 101675920,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": true,
+                    "active": 101604662,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.765969033Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_27",
+              "created": "2026-10-01T06:23:18.799373667Z",
+              "delivered": {
+                "consumer_seq": 37,
+                "stream_seq": 137,
+                "last_active": "2026-10-01T06:23:41.700976349Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 5,
+                "stream_seq": 77,
+                "last_active": "2026-10-01T06:23:41.732267516Z"
+              },
+              "num_ack_pending": 4,
+              "num_redelivered": 1,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-0ktVzAXS",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:31.73091917Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 33554523,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": true,
+                    "active": 33439768,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.765978197Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_43",
+              "created": "2026-10-01T06:23:18.799468521Z",
+              "delivered": {
+                "consumer_seq": 3,
+                "stream_seq": 136,
+                "last_active": "2026-10-01T06:23:36.967613927Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 3,
+                "stream_seq": 126,
+                "last_active": "2026-10-01T06:23:37.232475566Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-MSuCeJue",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:32.88028379Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 553130746,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 550196448,
+                    "lag": 28,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.765985728Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_10",
+              "created": "2026-10-01T06:23:18.799680314Z",
+              "delivered": {
+                "consumer_seq": 3,
+                "stream_seq": 136,
+                "last_active": "2026-10-01T06:23:36.989567015Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 3,
+                "stream_seq": 126,
+                "last_active": "2026-10-01T06:23:37.233427495Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-w2Vf1jql",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:33.152727701Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 553134512,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 548883859,
+                    "lag": 31,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.765992769Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_18",
+              "created": "2026-10-01T06:23:18.799711141Z",
+              "delivered": {
+                "consumer_seq": 20,
+                "stream_seq": 135,
+                "last_active": "2026-10-01T06:23:41.499724926Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 20,
+                "stream_seq": 135,
+                "last_active": "2026-10-01T06:23:41.528010376Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-13UXQlAl",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:31.731139385Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 237428861,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": true,
+                    "active": 237791623,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.765998828Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_12",
+              "created": "2026-10-01T06:23:18.802931915Z",
+              "delivered": {
+                "consumer_seq": 33,
+                "stream_seq": 139,
+                "last_active": "2026-10-01T06:23:41.674360391Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 17,
+                "stream_seq": 106,
+                "last_active": "2026-10-01T06:23:41.703721008Z"
+              },
+              "num_ack_pending": 3,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-tuMA878n",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:31.74975364Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 62046467,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": true,
+                    "active": 61765279,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.766006189Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_28",
+              "created": "2026-10-01T06:23:18.80311901Z",
+              "delivered": {
+                "consumer_seq": 6,
+                "stream_seq": 136,
+                "last_active": "2026-10-01T06:23:37.060096442Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 6,
+                "stream_seq": 127,
+                "last_active": "2026-10-01T06:23:37.269503208Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-JUPhrGJa",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:31.750659339Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 508919757,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 504298279,
+                    "lag": 41,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.766012939Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_15",
+              "created": "2026-10-01T06:23:19.289541488Z",
+              "delivered": {
+                "consumer_seq": 4,
+                "stream_seq": 135,
+                "last_active": "2026-10-01T06:23:37.278991817Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 2,
+                "stream_seq": 122,
+                "last_active": "2026-10-01T06:23:37.514952257Z"
+              },
+              "num_ack_pending": 2,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-5zk9g5oE",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:31.725013787Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 238853429,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": true,
+                    "active": 238586643,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.766018939Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_51",
+              "created": "2026-10-01T06:23:19.289762003Z",
+              "delivered": {
+                "consumer_seq": 4,
+                "stream_seq": 135,
+                "last_active": "2026-10-01T06:23:37.208629024Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 3,
+                "stream_seq": 127,
+                "last_active": "2026-10-01T06:23:37.459998368Z"
+              },
+              "num_ack_pending": 1,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-SaO96lab",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:33.340882391Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 305258193,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": true,
+                    "active": 305251933,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.766025579Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_63",
+              "created": "2026-10-01T06:23:19.290015319Z",
+              "delivered": {
+                "consumer_seq": 3,
+                "stream_seq": 136,
+                "last_active": "2026-10-01T06:23:37.933217445Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 3,
+                "stream_seq": 136,
+                "last_active": "2026-10-01T06:23:38.459419267Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-7OYeMzZe",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:31.748539341Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 350409826,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 347491041,
+                    "lag": 49,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.766031147Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_33",
+              "created": "2026-10-01T06:23:19.290108501Z",
+              "delivered": {
+                "consumer_seq": 7,
+                "stream_seq": 137,
+                "last_active": "2026-10-01T06:23:37.458618257Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 7,
+                "stream_seq": 134,
+                "last_active": "2026-10-01T06:23:37.879857153Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 2,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-msGDjRCn",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:31.725036883Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 355235614,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 351500686,
+                    "lag": 53,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.76604618Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_08",
+              "created": "2026-10-01T06:23:31.768909549Z",
+              "delivered": {
+                "consumer_seq": 1,
+                "stream_seq": 138,
+                "last_active": "2026-10-01T06:23:39.980909907Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 1,
+                "stream_seq": 38,
+                "last_active": "2026-10-01T06:23:40.167019225Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 0,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-aWmj1byf",
+                "leader": "wf-process-1",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 599777715,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 0,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.76605299Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_29",
+              "created": "2026-10-01T06:23:31.769589645Z",
+              "delivered": {
+                "consumer_seq": 7,
+                "stream_seq": 139,
+                "last_active": "2026-10-01T06:23:36.42861304Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 7,
+                "stream_seq": 121,
+                "last_active": "2026-10-01T06:23:36.938125304Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 1,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-gUIQ4kp1",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:31.893692984Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 827189231,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 0,
+                    "lag": 34,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.766057517Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_47",
+              "created": "2026-10-01T06:23:31.76967849Z",
+              "delivered": {
+                "consumer_seq": 1,
+                "stream_seq": 139,
+                "last_active": "2026-10-01T06:23:36.458423082Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 1,
+                "stream_seq": 51,
+                "last_active": "2026-10-01T06:23:36.859498377Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 1,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-oIviO3g1",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:36.454541351Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 889651763,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 0,
+                    "lag": 18,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.766062475Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_05",
+              "created": "2026-10-01T06:23:31.769714215Z",
+              "delivered": {
+                "consumer_seq": 4,
+                "stream_seq": 139,
+                "last_active": "2026-10-01T06:23:36.455086121Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 4,
+                "stream_seq": 126,
+                "last_active": "2026-10-01T06:23:36.941203431Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 1,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-yo3zZHWy",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:31.909659977Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 827155330,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 0,
+                    "lag": 33,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.766067252Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_37",
+              "created": "2026-10-01T06:23:31.769762328Z",
+              "delivered": {
+                "consumer_seq": 4,
+                "stream_seq": 139,
+                "last_active": "2026-10-01T06:23:36.424540979Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 4,
+                "stream_seq": 108,
+                "last_active": "2026-10-01T06:23:36.861228001Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 0,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-qIy2hxKr",
+                "leader": "wf-process-1",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 897745698,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 0,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.766072009Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_22",
+              "created": "2026-10-01T06:23:31.76986885Z",
+              "delivered": {
+                "consumer_seq": 7,
+                "stream_seq": 139,
+                "last_active": "2026-10-01T06:23:36.424830399Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 7,
+                "stream_seq": 121,
+                "last_active": "2026-10-01T06:23:36.856133613Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 0,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-rW53mHt6",
+                "leader": "wf-process-1",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 897813281,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 0,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.766075705Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_61",
+              "created": "2026-10-01T06:23:31.770034693Z",
+              "delivered": {
+                "consumer_seq": 1,
+                "stream_seq": 139,
+                "last_active": "2026-10-01T06:23:36.628075385Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 1,
+                "stream_seq": 46,
+                "last_active": "2026-10-01T06:23:37.036671322Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 1,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-NB2T9rqk",
+                "leader": "wf-process-0",
+                "leader_since": "2026-10-01T06:23:36.623863301Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 735748085,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 0,
+                    "lag": 16,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.766079511Z"
+            },
+            {
+              "stream_name": "WF_RUN",
+              "name": "WF_P_56",
+              "created": "2026-10-01T06:23:31.770081284Z",
+              "delivered": {
+                "consumer_seq": 1,
+                "stream_seq": 139,
+                "last_active": "2026-10-01T06:23:37.543103072Z"
+              },
+              "ack_floor": {
+                "consumer_seq": 1,
+                "stream_seq": 47,
+                "last_active": "2026-10-01T06:23:37.949442391Z"
+              },
+              "num_ack_pending": 0,
+              "num_redelivered": 0,
+              "num_waiting": 0,
+              "num_pending": 0,
+              "cluster": {
+                "name": "wf-process",
+                "raft_group": "C-R3F-meBOXPnE",
+                "leader": "wf-process-1",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-process-1",
+                    "current": true,
+                    "active": 809806613,
+                    "peer": "St9I6EVH"
+                  },
+                  {
+                    "name": "wf-process-2",
+                    "current": false,
+                    "active": 0,
+                    "peer": "0WED9nmv"
+                  }
+                ]
+              },
+              "ts": "2026-10-01T06:23:41.766085199Z"
+            }
+          ],
+          "stream_raft_group": "S-R3F-6fLa4lad",
+          "consumer_raft_groups": [
+            {
+              "name": "WF_P_48",
+              "raft_group": "C-R3F-YfBgRsFE"
+            },
+            {
+              "name": "WF_P_00",
+              "raft_group": "C-R3F-tAOw9Q1E"
+            },
+            {
+              "name": "WF_P_55",
+              "raft_group": "C-R3F-9oj0nEIt"
+            },
+            {
+              "name": "WF_P_26",
+              "raft_group": "C-R3F-GtA4TRr8"
+            },
+            {
+              "name": "WF_P_27",
+              "raft_group": "C-R3F-0ktVzAXS"
+            },
+            {
+              "name": "WF_P_43",
+              "raft_group": "C-R3F-MSuCeJue"
+            },
+            {
+              "name": "WF_P_10",
+              "raft_group": "C-R3F-w2Vf1jql"
+            },
+            {
+              "name": "WF_P_18",
+              "raft_group": "C-R3F-13UXQlAl"
+            },
+            {
+              "name": "WF_P_12",
+              "raft_group": "C-R3F-tuMA878n"
+            },
+            {
+              "name": "WF_P_28",
+              "raft_group": "C-R3F-JUPhrGJa"
+            },
+            {
+              "name": "WF_P_15",
+              "raft_group": "C-R3F-5zk9g5oE"
+            },
+            {
+              "name": "WF_P_51",
+              "raft_group": "C-R3F-SaO96lab"
+            },
+            {
+              "name": "WF_P_63",
+              "raft_group": "C-R3F-7OYeMzZe"
+            },
+            {
+              "name": "WF_P_33",
+              "raft_group": "C-R3F-msGDjRCn"
+            },
+            {
+              "name": "WF_P_08",
+              "raft_group": "C-R3F-aWmj1byf"
+            },
+            {
+              "name": "WF_P_29",
+              "raft_group": "C-R3F-gUIQ4kp1"
+            },
+            {
+              "name": "WF_P_47",
+              "raft_group": "C-R3F-oIviO3g1"
+            },
+            {
+              "name": "WF_P_05",
+              "raft_group": "C-R3F-yo3zZHWy"
+            },
+            {
+              "name": "WF_P_37",
+              "raft_group": "C-R3F-qIy2hxKr"
+            },
+            {
+              "name": "WF_P_22",
+              "raft_group": "C-R3F-rW53mHt6"
+            },
+            {
+              "name": "WF_P_61",
+              "raft_group": "C-R3F-NB2T9rqk"
+            },
+            {
+              "name": "WF_P_56",
+              "raft_group": "C-R3F-meBOXPnE"
+            }
+          ]
+        },
+        {
+          "name": "WF_JRN",
+          "created": "2026-10-01T06:23:18.053727935Z",
+          "cluster": {
+            "name": "wf-process",
+            "raft_group": "S-R3F-V5Y2qzIa",
+            "leader": "wf-process-0",
+            "leader_since": "2026-10-01T06:23:31.724957311Z",
+            "system_account": true,
+            "traffic_account": "$SYS",
+            "replicas": [
+              {
+                "name": "wf-process-1",
+                "current": true,
+                "active": 946088539,
+                "peer": "St9I6EVH"
+              },
+              {
+                "name": "wf-process-2",
+                "current": false,
+                "active": 0,
+                "lag": 268,
+                "peer": "0WED9nmv"
+              }
+            ]
+          },
+          "state": {
+            "messages": 389,
+            "bytes": 106166,
+            "first_seq": 1,
+            "first_ts": "2026-10-01T06:23:18.92709233Z",
+            "last_seq": 389,
+            "last_ts": "2026-10-01T06:23:40.818569137Z",
+            "num_subjects": 28,
+            "consumer_count": 0
+          },
+          "stream_raft_group": "S-R3F-V5Y2qzIa"
+        },
+        {
+          "name": "WF_SIG",
+          "created": "2026-10-01T06:23:18.147452181Z",
+          "cluster": {
+            "name": "wf-process",
+            "raft_group": "S-R3F-jsfg5vMh",
+            "leader": "wf-process-1",
+            "system_account": true,
+            "traffic_account": "$SYS",
+            "replicas": [
+              {
+                "name": "wf-process-1",
+                "current": true,
+                "active": 63694587,
+                "peer": "St9I6EVH"
+              },
+              {
+                "name": "wf-process-2",
+                "current": false,
+                "active": 0,
+                "peer": "0WED9nmv"
+              }
+            ]
+          },
+          "state": {
+            "messages": 50,
+            "bytes": 14438,
+            "first_seq": 1,
+            "first_ts": "2026-10-01T06:23:31.771642351Z",
+            "last_seq": 50,
+            "last_ts": "2026-10-01T06:23:40.354450365Z",
+            "num_subjects": 20,
+            "consumer_count": 0
+          },
+          "stream_raft_group": "S-R3F-jsfg5vMh"
+        },
+        {
+          "name": "WF_PURGE",
+          "created": "2026-10-01T06:23:18.235760639Z",
+          "cluster": {
+            "name": "wf-process",
+            "raft_group": "S-R3F-LSMV4M8C",
+            "leader": "wf-process-0",
+            "leader_since": "2026-10-01T06:23:31.723107424Z",
+            "system_account": true,
+            "traffic_account": "$SYS",
+            "replicas": [
+              {
+                "name": "wf-process-1",
+                "current": true,
+                "active": 47555002,
+                "peer": "St9I6EVH"
+              },
+              {
+                "name": "wf-process-2",
+                "current": false,
+                "active": 42798178,
+                "lag": 2,
+                "peer": "0WED9nmv"
+              }
+            ]
+          },
+          "state": {
+            "messages": 0,
+            "bytes": 0,
+            "first_seq": 0,
+            "first_ts": "0001-01-01T00:00:00Z",
+            "last_seq": 0,
+            "last_ts": "0001-01-01T00:00:00Z",
+            "consumer_count": 0
+          },
+          "stream_raft_group": "S-R3F-LSMV4M8C"
+        },
+        {
+          "name": "OBJ_WF_BLOB",
+          "created": "2026-10-01T06:23:18.692396769Z",
+          "cluster": {
+            "name": "wf-process",
+            "raft_group": "S-R3F-MVWCx6oJ",
+            "leader": "wf-process-0",
+            "leader_since": "2026-10-01T06:23:31.743015479Z",
+            "system_account": true,
+            "traffic_account": "$SYS",
+            "replicas": [
+              {
+                "name": "wf-process-1",
+                "current": true,
+                "active": 24973987,
+                "peer": "St9I6EVH"
+              },
+              {
+                "name": "wf-process-2",
+                "current": false,
+                "active": 22220074,
+                "lag": 2,
+                "peer": "0WED9nmv"
+              }
+            ]
+          },
+          "state": {
+            "messages": 0,
+            "bytes": 0,
+            "first_seq": 0,
+            "first_ts": "0001-01-01T00:00:00Z",
+            "last_seq": 0,
+            "last_ts": "0001-01-01T00:00:00Z",
+            "consumer_count": 0
+          },
+          "stream_raft_group": "S-R3F-MVWCx6oJ"
+        },
+        {
+          "name": "KV_WF_LEASE",
+          "created": "2026-10-01T06:23:18.31983482Z",
+          "cluster": {
+            "name": "wf-process",
+            "raft_group": "S-R3F-1ekUakaP",
+            "leader": "wf-process-0",
+            "leader_since": "2026-10-01T06:23:35.740333521Z",
+            "system_account": true,
+            "traffic_account": "$SYS",
+            "replicas": [
+              {
+                "name": "wf-process-1",
+                "current": true,
+                "active": 11169618,
+                "peer": "St9I6EVH"
+              },
+              {
+                "name": "wf-process-2",
+                "current": true,
+                "active": 11098980,
+                "peer": "0WED9nmv"
+              }
+            ]
+          },
+          "state": {
+            "messages": 29,
+            "bytes": 4618,
+            "first_seq": 298,
+            "first_ts": "2026-10-01T06:23:36.299739431Z",
+            "last_seq": 722,
+            "last_ts": "2026-10-01T06:23:41.754429682Z",
+            "num_subjects": 29,
+            "num_deleted": 396,
+            "consumer_count": 0
+          },
+          "stream_raft_group": "S-R3F-1ekUakaP"
+        },
+        {
+          "name": "KV_WF_STATE",
+          "created": "2026-10-01T06:23:18.416926855Z",
+          "cluster": {
+            "name": "wf-process",
+            "raft_group": "S-R3F-cEgCkw3z",
+            "leader": "wf-process-0",
+            "leader_since": "2026-10-01T06:23:32.78753044Z",
+            "system_account": true,
+            "traffic_account": "$SYS",
+            "replicas": [
+              {
+                "name": "wf-process-1",
+                "current": true,
+                "active": 875543821,
+                "peer": "St9I6EVH"
+              },
+              {
+                "name": "wf-process-2",
+                "current": false,
+                "active": 0,
+                "lag": 27,
+                "peer": "0WED9nmv"
+              }
+            ]
+          },
+          "state": {
+            "messages": 29,
+            "bytes": 4802,
+            "first_seq": 2,
+            "first_ts": "2026-10-01T06:23:36.054220765Z",
+            "last_seq": 34,
+            "last_ts": "2026-10-01T06:23:40.890052454Z",
+            "num_subjects": 29,
+            "num_deleted": 4,
+            "consumer_count": 0
+          },
+          "stream_raft_group": "S-R3F-cEgCkw3z"
+        },
+        {
+          "name": "KV_WF_VIEW",
+          "created": "2026-10-01T06:23:18.504873082Z",
+          "cluster": {
+            "name": "wf-process",
+            "raft_group": "S-R3F-wKjybpcH",
+            "leader": "wf-process-1",
+            "system_account": true,
+            "traffic_account": "$SYS",
+            "replicas": [
+              {
+                "name": "wf-process-1",
+                "current": true,
+                "active": 63942765,
+                "peer": "St9I6EVH"
+              },
+              {
+                "name": "wf-process-2",
+                "current": false,
+                "active": 0,
+                "peer": "0WED9nmv"
+              }
+            ]
+          },
+          "state": {
+            "messages": 0,
+            "bytes": 0,
+            "first_seq": 0,
+            "first_ts": "0001-01-01T00:00:00Z",
+            "last_seq": 0,
+            "last_ts": "0001-01-01T00:00:00Z",
+            "consumer_count": 0
+          },
+          "stream_raft_group": "S-R3F-wKjybpcH"
+        },
+        {
+          "name": "KV_WF_ASSIGN",
+          "created": "2026-10-01T06:23:18.597877542Z",
+          "cluster": {
+            "name": "wf-process",
+            "raft_group": "S-R3F-dbtFfnC3",
+            "leader": "wf-process-1",
+            "system_account": true,
+            "traffic_account": "$SYS",
+            "replicas": [
+              {
+                "name": "wf-process-1",
+                "current": true,
+                "active": 55225901,
+                "peer": "St9I6EVH"
+              },
+              {
+                "name": "wf-process-2",
+                "current": false,
+                "active": 0,
+                "peer": "0WED9nmv"
+              }
+            ]
+          },
+          "state": {
+            "messages": 0,
+            "bytes": 0,
+            "first_seq": 0,
+            "first_ts": "0001-01-01T00:00:00Z",
+            "last_seq": 0,
+            "last_ts": "0001-01-01T00:00:00Z",
+            "consumer_count": 0
+          },
+          "stream_raft_group": "S-R3F-dbtFfnC3"
+        }
+      ]
+    }
+  ],
+  "total": 1
+}

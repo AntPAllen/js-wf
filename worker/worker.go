@@ -549,7 +549,20 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	if errors.Is(err, lease.ErrHeld) {
 		emit("lease_held", err)
 		w.metrics.leaseContentions.Add(1)
-		_ = msg.NakWithDelay(heldLeaseNakDelay)
+		terminal, canceledTimer, terminalErr := w.terminalHeldDelivery(ctx, typ, id, timer, ops)
+		if terminal {
+			emit("terminal_held", nil)
+			ackErr := msg.Ack()
+			emit("ack", ackErr)
+			if ackErr == nil && canceledTimer {
+				w.metrics.cancelledTimerNoOps.Add(1)
+			}
+			return
+		}
+		if terminalErr != nil {
+			emit("terminal_probe_error", terminalErr)
+		}
+		emit("nak", msg.NakWithDelay(heldLeaseNakDelay))
 		return
 	}
 	if err != nil {

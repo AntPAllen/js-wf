@@ -3493,3 +3493,35 @@ The matching real R3 frame-held promise restart/retirement race contract also
 passes in 18.264 seconds: 614,402-byte child result, 579-byte frame, no archived
 prefix reads, live GC deletes zero objects and retired GC deletes three. The
 new seeded workload uses small result bytes and does not claim spill scale.
+
+
+## Terminal duplicate wakeups while a healthy lease is held
+
+A subsequent correlation of the 6a91ebf seed-5 operation log identifies retained
+run sequence 101 as mixedsignal/mixed-06-0. Eight ErrHeld retries at five-second
+intervals lose to other wakeups acquiring/releasing leases for the same terminal
+invocation. Raw headers/ACK commitment remain unknown; the earlier identity
+statement above is superseded by this operation evidence.
+
+On ErrHeld a bounded two-second production probe now permits ACK only for valid
+durable terminal state matching the current invocation sequence and successful
+idempotent parent notification. Uncertain, malformed, missing, tombstone and
+stale-generation probes retain the five-second NAK. It leaves lease ownership,
+journal, state and effects unchanged and preserves canceled-timer metrics.
+
+Final 100,000 seeded schedules pass in 36.790 seconds (18,443,969 events), exact
+cross-process replay and corpus/workload race pass, full worker/default simulator
+suites and vet pass. A real R3 race test drains 32 plain/canceled-timer wakeups
+in 165/425 ms under an unchanged healthy lease. Baseline production code fails
+both seeded and real drain controls; an omitted generation check fails the
+unsafe-ACK control. Local mixed seed 5 passes with p99 8.357 seconds and original
+integrity/drain gates. [Logs, controls and scope](scale/terminal-held-wakeup-2026-10-01/)
+are retained. Failure-only bounded raw-message/consumer sampling and dispatch
+history are added; their real R3 contract passes without relaxing any gate.
+
+The latest old-source hosted 83253a2 campaign fails seed 4 after seeds 1–3 pass,
+at signal-workflow terminal p99 31.049 seconds. [Retained failure](scale/mixed-seed4-83253a2-2026-10-01/)
+is separate from terminal queue contention; active execution latency remains
+unresolved. Newer full simulation campaigns and the original million-timer run
+remain live. Full matrix, latest-source full simulation, 24-hour soak, remaining
+continuation fault combinations and scale/online-GC gates remain open.

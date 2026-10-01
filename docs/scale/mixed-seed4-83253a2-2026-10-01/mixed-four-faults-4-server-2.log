@@ -1,0 +1,455 @@
+[3103] 2026/10/01 06:05:50.673532 [INF] Starting nats-server
+[3103] 2026/10/01 06:05:50.673562 [INF]   Version:  2.15.0
+[3103] 2026/10/01 06:05:50.673565 [INF]   Git:      [not set]
+[3103] 2026/10/01 06:05:50.673567 [INF]   Cluster:  wf-process
+[3103] 2026/10/01 06:05:50.673568 [INF]   Name:     wf-process-2
+[3103] 2026/10/01 06:05:50.673571 [INF]   Node:     0WED9nmv
+[3103] 2026/10/01 06:05:50.673573 [INF]   ID:       NDSDCKJFAXJYCCBI3CVXUJVZ6TQ75NNEQRRV6ML7QLQY57NJ7K3PNDO6
+[3103] 2026/10/01 06:05:50.673982 [INF] Starting http monitor on 127.0.0.1:45453
+[3103] 2026/10/01 06:05:50.674163 [INF] Starting JetStream
+[3103] 2026/10/01 06:05:50.674297 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+[3103] 2026/10/01 06:05:50.674302 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+[3103] 2026/10/01 06:05:50.674303 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+[3103] 2026/10/01 06:05:50.674305 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+[3103] 2026/10/01 06:05:50.674306 [INF] 
+[3103] 2026/10/01 06:05:50.674308 [INF]          https://docs.nats.io/jetstream
+[3103] 2026/10/01 06:05:50.674309 [INF] 
+[3103] 2026/10/01 06:05:50.674310 [INF] ---------------- JETSTREAM ----------------
+[3103] 2026/10/01 06:05:50.674312 [INF]   Strict:          true
+[3103] 2026/10/01 06:05:50.674315 [INF]   Max Memory:      11.71 GB
+[3103] 2026/10/01 06:05:50.674317 [INF]   Max Storage:     63.51 GB
+[3103] 2026/10/01 06:05:50.674318 [INF]   Store Directory: "/tmp/TestMixedWorkflowsRecoverFromFourServerFaults1576901357/001/node-2/jetstream"
+[3103] 2026/10/01 06:05:50.674321 [INF]   API Level:       5
+[3103] 2026/10/01 06:05:50.674323 [INF] -------------------------------------------
+[3103] 2026/10/01 06:05:50.674872 [INF] Starting JetStream cluster
+[3103] 2026/10/01 06:05:50.676321 [INF] Creating JetStream metadata controller
+[3103] 2026/10/01 06:05:50.676839 [INF] JetStream cluster bootstrapping
+[3103] 2026/10/01 06:05:50.678629 [INF] Took 4.459614ms to start JetStream
+[3103] 2026/10/01 06:05:50.678677 [INF] Listening for client connections on 127.0.0.1:43039
+[3103] 2026/10/01 06:05:50.678681 [INF] Server is ready
+[3103] 2026/10/01 06:05:50.678771 [INF] Cluster name is wf-process
+[3103] 2026/10/01 06:05:50.678799 [INF] Listening for route connections on 127.0.0.1:42509
+[3103] 2026/10/01 06:05:50.679218 [INF] 127.0.0.1:41191 - rid:8 - Route connection created
+[3103] 2026/10/01 06:05:50.679278 [INF] 127.0.0.1:41191 - rid:9 - Route connection created
+[3103] 2026/10/01 06:05:50.681623 [INF] 127.0.0.1:41191 - rid:10 - Route connection created
+[3103] 2026/10/01 06:05:50.681838 [INF] 127.0.0.1:52632 - rid:11 - Route connection created
+[3103] 2026/10/01 06:05:50.682544 [INF] 127.0.0.1:52638 - rid:12 - Route connection created
+[3103] 2026/10/01 06:05:50.682817 [INF] 127.0.0.1:41191 - rid:13 - Route connection created
+[3103] 2026/10/01 06:05:50.683459 [INF] 127.0.0.1:52648 - rid:14 - Route connection created
+[3103] 2026/10/01 06:05:50.779478 [WRN] Waiting for routing to be established...
+[3103] 2026/10/01 06:05:50.779540 [WRN] JetStream has not established contact with a meta leader
+[3103] 2026/10/01 06:05:51.235083 [INF] JetStream cluster new metadata leader: wf-process-0/wf-process
+[3103] 2026/10/01 06:05:51.735484 [INF] 127.0.0.1:34419 - rid:16 - Route connection created
+[3103] 2026/10/01 06:05:55.114093 [INF] JetStream cluster new stream leader for '$G > WF_PURGE'
+[3103] 2026/10/01 06:05:55.472605 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_13'
+[3103] 2026/10/01 06:05:55.476476 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_23'
+[3103] 2026/10/01 06:05:55.490113 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_01'
+[3103] 2026/10/01 06:05:55.834515 [INF] 127.0.0.1:41191 - rid:9 - Router connection closed: Client Closed - Remote: wf-process-0
+[3103] 2026/10/01 06:05:55.834915 [INF] 127.0.0.1:41191 - rid:13 - Router connection closed: Client Closed - Remote: wf-process-0
+[3103] 2026/10/01 06:05:55.834931 [INF] 127.0.0.1:41191 - rid:10 - Router connection closed: Client Closed - Remote: wf-process-0
+[3103] 2026/10/01 06:05:55.834954 [INF] 127.0.0.1:41191 - rid:8 - Router connection closed: Client Closed - Remote: wf-process-0
+[3103] 2026/10/01 06:05:56.849492 [INF] 127.0.0.1:41191 - rid:96 - Route connection created
+[3103] 2026/10/01 06:05:56.849640 [INF] 127.0.0.1:41191 - rid:96 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:56.853931 [INF] 127.0.0.1:41191 - rid:97 - Route connection created
+[3103] 2026/10/01 06:05:56.854083 [INF] 127.0.0.1:41191 - rid:97 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:56.894216 [INF] 127.0.0.1:41191 - rid:98 - Route connection created
+[3103] 2026/10/01 06:05:56.894453 [INF] 127.0.0.1:41191 - rid:98 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:56.905864 [INF] 127.0.0.1:41191 - rid:99 - Route connection created
+[3103] 2026/10/01 06:05:56.906119 [INF] 127.0.0.1:41191 - rid:99 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:57.862180 [INF] 127.0.0.1:41191 - rid:100 - Route connection created
+[3103] 2026/10/01 06:05:57.862287 [INF] 127.0.0.1:41191 - rid:100 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:57.913450 [INF] 127.0.0.1:41191 - rid:101 - Route connection created
+[3103] 2026/10/01 06:05:57.913708 [INF] 127.0.0.1:41191 - rid:101 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:57.958543 [INF] 127.0.0.1:41191 - rid:102 - Route connection created
+[3103] 2026/10/01 06:05:57.958916 [INF] 127.0.0.1:41191 - rid:102 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:57.971172 [INF] 127.0.0.1:41191 - rid:103 - Route connection created
+[3103] 2026/10/01 06:05:57.971335 [INF] 127.0.0.1:41191 - rid:103 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:58.909977 [INF] 127.0.0.1:41191 - rid:104 - Route connection created
+[3103] 2026/10/01 06:05:58.910217 [INF] 127.0.0.1:41191 - rid:104 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:58.959250 [INF] 127.0.0.1:41191 - rid:105 - Route connection created
+[3103] 2026/10/01 06:05:58.959518 [INF] 127.0.0.1:41191 - rid:105 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:58.989183 [INF] 127.0.0.1:41191 - rid:106 - Route connection created
+[3103] 2026/10/01 06:05:58.989431 [INF] 127.0.0.1:41191 - rid:106 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:59.041744 [INF] 127.0.0.1:41191 - rid:107 - Route connection created
+[3103] 2026/10/01 06:05:59.041930 [INF] 127.0.0.1:41191 - rid:107 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:59.962909 [INF] 127.0.0.1:41191 - rid:108 - Route connection created
+[3103] 2026/10/01 06:05:59.963188 [INF] 127.0.0.1:41191 - rid:108 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:05:59.996170 [INF] 127.0.0.1:41191 - rid:109 - Route connection created
+[3103] 2026/10/01 06:05:59.996330 [INF] 127.0.0.1:41191 - rid:109 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:00.038123 [INF] 127.0.0.1:41191 - rid:110 - Route connection created
+[3103] 2026/10/01 06:06:00.038421 [INF] 127.0.0.1:41191 - rid:110 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:00.055974 [INF] 127.0.0.1:41191 - rid:111 - Route connection created
+[3103] 2026/10/01 06:06:00.056233 [INF] 127.0.0.1:41191 - rid:111 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:01.035161 [INF] 127.0.0.1:41191 - rid:112 - Route connection created
+[3103] 2026/10/01 06:06:01.035405 [INF] 127.0.0.1:41191 - rid:112 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:01.048792 [INF] 127.0.0.1:41191 - rid:113 - Route connection created
+[3103] 2026/10/01 06:06:01.049171 [INF] 127.0.0.1:41191 - rid:113 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:01.073500 [INF] 127.0.0.1:41191 - rid:114 - Route connection created
+[3103] 2026/10/01 06:06:01.073786 [INF] 127.0.0.1:41191 - rid:114 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:01.103842 [INF] 127.0.0.1:41191 - rid:115 - Route connection created
+[3103] 2026/10/01 06:06:01.103994 [INF] 127.0.0.1:41191 - rid:115 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:02.067259 [INF] 127.0.0.1:41191 - rid:116 - Route connection created
+[3103] 2026/10/01 06:06:02.067532 [INF] 127.0.0.1:41191 - rid:116 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:02.075648 [INF] 127.0.0.1:41191 - rid:117 - Route connection created
+[3103] 2026/10/01 06:06:02.075870 [INF] 127.0.0.1:41191 - rid:117 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:02.134496 [INF] 127.0.0.1:41191 - rid:118 - Route connection created
+[3103] 2026/10/01 06:06:02.134629 [INF] 127.0.0.1:41191 - rid:118 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:02.176283 [INF] 127.0.0.1:41191 - rid:119 - Route connection created
+[3103] 2026/10/01 06:06:02.176453 [INF] 127.0.0.1:41191 - rid:119 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:03.099682 [INF] 127.0.0.1:41191 - rid:120 - Route connection created
+[3103] 2026/10/01 06:06:03.099816 [INF] 127.0.0.1:41191 - rid:120 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:03.148236 [INF] 127.0.0.1:41191 - rid:121 - Route connection created
+[3103] 2026/10/01 06:06:03.148395 [INF] 127.0.0.1:41191 - rid:121 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:03.171363 [INF] 127.0.0.1:41191 - rid:122 - Route connection created
+[3103] 2026/10/01 06:06:03.171556 [INF] 127.0.0.1:41191 - rid:122 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:03.258824 [INF] 127.0.0.1:41191 - rid:123 - Route connection created
+[3103] 2026/10/01 06:06:03.258949 [INF] 127.0.0.1:41191 - rid:123 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:04.184884 [INF] 127.0.0.1:41191 - rid:124 - Route connection created
+[3103] 2026/10/01 06:06:04.185045 [INF] 127.0.0.1:41191 - rid:124 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:04.200836 [INF] 127.0.0.1:41191 - rid:125 - Route connection created
+[3103] 2026/10/01 06:06:04.201012 [INF] 127.0.0.1:41191 - rid:125 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:04.242624 [INF] 127.0.0.1:41191 - rid:126 - Route connection created
+[3103] 2026/10/01 06:06:04.242850 [INF] 127.0.0.1:41191 - rid:126 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:04.321876 [INF] 127.0.0.1:41191 - rid:127 - Route connection created
+[3103] 2026/10/01 06:06:04.322007 [INF] 127.0.0.1:41191 - rid:127 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:05.248811 [INF] 127.0.0.1:41191 - rid:128 - Route connection created
+[3103] 2026/10/01 06:06:05.249046 [INF] 127.0.0.1:41191 - rid:128 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:05.263141 [INF] 127.0.0.1:41191 - rid:129 - Route connection created
+[3103] 2026/10/01 06:06:05.263571 [INF] 127.0.0.1:41191 - rid:129 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:05.269613 [INF] 127.0.0.1:41191 - rid:130 - Route connection created
+[3103] 2026/10/01 06:06:05.269795 [INF] 127.0.0.1:41191 - rid:130 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:05.365459 [INF] 127.0.0.1:41191 - rid:131 - Route connection created
+[3103] 2026/10/01 06:06:05.365741 [INF] 127.0.0.1:41191 - rid:131 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:06.292413 [INF] 127.0.0.1:41191 - rid:132 - Route connection created
+[3103] 2026/10/01 06:06:06.292583 [INF] 127.0.0.1:41191 - rid:132 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:06.303823 [INF] 127.0.0.1:41191 - rid:133 - Route connection created
+[3103] 2026/10/01 06:06:06.304012 [INF] 127.0.0.1:41191 - rid:133 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:06.327818 [INF] 127.0.0.1:41191 - rid:134 - Route connection created
+[3103] 2026/10/01 06:06:06.328026 [INF] 127.0.0.1:41191 - rid:134 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:06.444856 [INF] 127.0.0.1:41191 - rid:135 - Route connection created
+[3103] 2026/10/01 06:06:06.445036 [INF] 127.0.0.1:41191 - rid:135 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:07.314369 [INF] 127.0.0.1:41191 - rid:136 - Route connection created
+[3103] 2026/10/01 06:06:07.314595 [INF] 127.0.0.1:41191 - rid:136 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:07.327020 [INF] 127.0.0.1:41191 - rid:137 - Route connection created
+[3103] 2026/10/01 06:06:07.327238 [INF] 127.0.0.1:41191 - rid:137 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:07.364826 [INF] 127.0.0.1:41191 - rid:138 - Route connection created
+[3103] 2026/10/01 06:06:07.364948 [INF] 127.0.0.1:41191 - rid:138 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:07.497879 [INF] 127.0.0.1:41191 - rid:139 - Route connection created
+[3103] 2026/10/01 06:06:07.498136 [INF] 127.0.0.1:41191 - rid:139 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:07.869600 [WRN] JetStream cluster stream '$G > WF_PURGE' has NO quorum, stalled
+[3103] 2026/10/01 06:06:07.870123 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_23' has NO quorum, stalled.
+[3103] 2026/10/01 06:06:07.873700 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_13' has NO quorum, stalled.
+[3103] 2026/10/01 06:06:07.881979 [WRN] RAFT [0WED9nmv - C-R3F-VkKjQ3kI] Detected another leader with higher term, will stepdown
+[3103] 2026/10/01 06:06:07.938358 [INF] JetStream cluster new stream leader for '$G > WF_INV'
+[3103] 2026/10/01 06:06:07.938560 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_54'
+[3103] 2026/10/01 06:06:07.939091 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_00'
+[3103] 2026/10/01 06:06:07.939247 [INF] JetStream cluster new stream leader for '$G > OBJ_WF_BLOB'
+[3103] 2026/10/01 06:06:07.940511 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_33'
+[3103] 2026/10/01 06:06:07.941404 [INF] JetStream cluster new stream leader for '$G > WF_SIG'
+[3103] 2026/10/01 06:06:07.942641 [INF] JetStream cluster new stream leader for '$G > WF_JRN'
+[3103] 2026/10/01 06:06:07.943737 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_10'
+[3103] 2026/10/01 06:06:07.947238 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_28'
+[3103] 2026/10/01 06:06:07.947437 [INF] JetStream cluster new stream leader for '$G > KV_WF_STATE'
+[3103] 2026/10/01 06:06:07.948206 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_63'
+[3103] 2026/10/01 06:06:07.948436 [INF] JetStream cluster new stream leader for '$G > KV_WF_VIEW'
+[3103] 2026/10/01 06:06:07.948788 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_51'
+[3103] 2026/10/01 06:06:07.948981 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_15'
+[3103] 2026/10/01 06:06:08.347812 [INF] 127.0.0.1:41191 - rid:140 - Route connection created
+[3103] 2026/10/01 06:06:08.348089 [INF] 127.0.0.1:41191 - rid:140 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:08.367620 [INF] 127.0.0.1:41191 - rid:141 - Route connection created
+[3103] 2026/10/01 06:06:08.367683 [INF] 127.0.0.1:41191 - rid:141 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:08.418807 [INF] 127.0.0.1:41191 - rid:142 - Route connection created
+[3103] 2026/10/01 06:06:08.418978 [INF] 127.0.0.1:41191 - rid:142 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:08.426884 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_44'
+[3103] 2026/10/01 06:06:08.534118 [INF] 127.0.0.1:41191 - rid:143 - Route connection created
+[3103] 2026/10/01 06:06:08.534352 [INF] 127.0.0.1:41191 - rid:143 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:08.733359 [INF] Self is new JetStream cluster metadata leader
+[3103] 2026/10/01 06:06:09.147692 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_23'
+[3103] 2026/10/01 06:06:09.424213 [INF] 127.0.0.1:41191 - rid:144 - Route connection created
+[3103] 2026/10/01 06:06:09.424340 [INF] 127.0.0.1:41191 - rid:144 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:09.456002 [INF] 127.0.0.1:41191 - rid:145 - Route connection created
+[3103] 2026/10/01 06:06:09.456191 [INF] 127.0.0.1:41191 - rid:145 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:09.485243 [INF] 127.0.0.1:41191 - rid:146 - Route connection created
+[3103] 2026/10/01 06:06:09.485417 [INF] 127.0.0.1:41191 - rid:146 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:09.554753 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_01'
+[3103] 2026/10/01 06:06:09.580255 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_61'
+[3103] 2026/10/01 06:06:09.585605 [INF] 127.0.0.1:41191 - rid:175 - Route connection created
+[3103] 2026/10/01 06:06:09.585959 [INF] 127.0.0.1:41191 - rid:175 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:09.620247 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_22'
+[3103] 2026/10/01 06:06:09.627805 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_13'
+[3103] 2026/10/01 06:06:09.629332 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_27'
+[3103] 2026/10/01 06:06:10.296878 [INF] JetStream cluster new stream leader for '$G > WF_RUN'
+[3103] 2026/10/01 06:06:10.427618 [INF] 127.0.0.1:41191 - rid:178 - Route connection created
+[3103] 2026/10/01 06:06:10.427763 [INF] 127.0.0.1:41191 - rid:178 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:10.460462 [INF] 127.0.0.1:41191 - rid:179 - Route connection created
+[3103] 2026/10/01 06:06:10.460699 [INF] 127.0.0.1:41191 - rid:179 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:10.556619 [INF] 127.0.0.1:41191 - rid:180 - Route connection created
+[3103] 2026/10/01 06:06:10.556783 [INF] 127.0.0.1:41191 - rid:180 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:10.590555 [INF] 127.0.0.1:41191 - rid:181 - Route connection created
+[3103] 2026/10/01 06:06:10.590839 [INF] 127.0.0.1:41191 - rid:181 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:11.307794 [INF] JetStream cluster new stream leader for '$G > KV_WF_ASSIGN'
+[3103] 2026/10/01 06:06:11.459773 [INF] 127.0.0.1:41191 - rid:182 - Route connection created
+[3103] 2026/10/01 06:06:11.459856 [INF] 127.0.0.1:41191 - rid:182 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:11.480786 [INF] 127.0.0.1:41191 - rid:183 - Route connection created
+[3103] 2026/10/01 06:06:11.480959 [INF] 127.0.0.1:41191 - rid:183 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:11.600183 [INF] 127.0.0.1:41191 - rid:184 - Route connection created
+[3103] 2026/10/01 06:06:11.600360 [INF] 127.0.0.1:41191 - rid:184 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:11.616651 [INF] 127.0.0.1:41191 - rid:185 - Route connection created
+[3103] 2026/10/01 06:06:11.616967 [INF] 127.0.0.1:41191 - rid:185 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:12.491934 [INF] 127.0.0.1:41191 - rid:186 - Route connection created
+[3103] 2026/10/01 06:06:12.492085 [INF] 127.0.0.1:41191 - rid:186 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:12.525305 [INF] 127.0.0.1:41191 - rid:187 - Route connection created
+[3103] 2026/10/01 06:06:12.525444 [INF] 127.0.0.1:41191 - rid:187 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:12.609820 [INF] 127.0.0.1:41191 - rid:188 - Route connection created
+[3103] 2026/10/01 06:06:12.609924 [INF] 127.0.0.1:41191 - rid:188 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:12.622674 [INF] 127.0.0.1:41191 - rid:189 - Route connection created
+[3103] 2026/10/01 06:06:12.622885 [INF] 127.0.0.1:41191 - rid:189 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:13.556950 [INF] 127.0.0.1:41191 - rid:190 - Route connection created
+[3103] 2026/10/01 06:06:13.557156 [INF] 127.0.0.1:41191 - rid:190 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:13.600207 [INF] 127.0.0.1:41191 - rid:191 - Route connection created
+[3103] 2026/10/01 06:06:13.600374 [INF] 127.0.0.1:41191 - rid:191 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:13.613581 [INF] 127.0.0.1:41191 - rid:192 - Route connection created
+[3103] 2026/10/01 06:06:13.613678 [INF] 127.0.0.1:41191 - rid:192 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:13.632269 [INF] 127.0.0.1:41191 - rid:193 - Route connection created
+[3103] 2026/10/01 06:06:13.632524 [INF] 127.0.0.1:41191 - rid:193 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:14.232667 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_08'
+[3103] 2026/10/01 06:06:14.629798 [INF] 127.0.0.1:41191 - rid:194 - Route connection created
+[3103] 2026/10/01 06:06:14.629966 [INF] 127.0.0.1:41191 - rid:194 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:14.677595 [INF] 127.0.0.1:41191 - rid:195 - Route connection created
+[3103] 2026/10/01 06:06:14.677774 [INF] 127.0.0.1:41191 - rid:195 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:14.701430 [INF] 127.0.0.1:41191 - rid:196 - Route connection created
+[3103] 2026/10/01 06:06:14.701600 [INF] 127.0.0.1:41191 - rid:196 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:14.708590 [INF] 127.0.0.1:41191 - rid:197 - Route connection created
+[3103] 2026/10/01 06:06:14.708744 [INF] 127.0.0.1:41191 - rid:197 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:15.695900 [INF] 127.0.0.1:41191 - rid:198 - Route connection created
+[3103] 2026/10/01 06:06:15.696102 [INF] 127.0.0.1:41191 - rid:198 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:15.726869 [INF] 127.0.0.1:41191 - rid:199 - Route connection created
+[3103] 2026/10/01 06:06:15.726986 [INF] 127.0.0.1:41191 - rid:199 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:15.757132 [INF] 127.0.0.1:41191 - rid:200 - Route connection created
+[3103] 2026/10/01 06:06:15.757312 [INF] 127.0.0.1:41191 - rid:200 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:15.784879 [INF] 127.0.0.1:41191 - rid:201 - Route connection created
+[3103] 2026/10/01 06:06:15.785050 [INF] 127.0.0.1:41191 - rid:201 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:16.707195 [INF] 127.0.0.1:41191 - rid:202 - Route connection created
+[3103] 2026/10/01 06:06:16.707385 [INF] 127.0.0.1:41191 - rid:202 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:16.809778 [INF] 127.0.0.1:41191 - rid:203 - Route connection created
+[3103] 2026/10/01 06:06:16.809837 [INF] 127.0.0.1:41191 - rid:203 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:16.818591 [INF] 127.0.0.1:41191 - rid:204 - Route connection created
+[3103] 2026/10/01 06:06:16.818756 [INF] 127.0.0.1:41191 - rid:204 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:16.840693 [INF] 127.0.0.1:41191 - rid:205 - Route connection created
+[3103] 2026/10/01 06:06:16.840821 [INF] 127.0.0.1:41191 - rid:205 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:17.749785 [INF] 127.0.0.1:41191 - rid:206 - Route connection created
+[3103] 2026/10/01 06:06:17.750014 [INF] 127.0.0.1:41191 - rid:206 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:17.869879 [INF] 127.0.0.1:41191 - rid:207 - Route connection created
+[3103] 2026/10/01 06:06:17.870152 [INF] 127.0.0.1:41191 - rid:207 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:17.883645 [INF] 127.0.0.1:41191 - rid:208 - Route connection created
+[3103] 2026/10/01 06:06:17.883775 [INF] 127.0.0.1:41191 - rid:208 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:17.893384 [INF] 127.0.0.1:41191 - rid:209 - Route connection created
+[3103] 2026/10/01 06:06:17.893612 [INF] 127.0.0.1:41191 - rid:209 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:18.845551 [INF] 127.0.0.1:41191 - rid:210 - Route connection created
+[3103] 2026/10/01 06:06:18.845752 [INF] 127.0.0.1:41191 - rid:210 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:18.887229 [INF] 127.0.0.1:41191 - rid:211 - Route connection created
+[3103] 2026/10/01 06:06:18.887416 [INF] 127.0.0.1:41191 - rid:211 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:18.913637 [INF] 127.0.0.1:41191 - rid:212 - Route connection created
+[3103] 2026/10/01 06:06:18.913740 [INF] 127.0.0.1:41191 - rid:212 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:18.925034 [INF] 127.0.0.1:41191 - rid:213 - Route connection created
+[3103] 2026/10/01 06:06:18.925258 [INF] 127.0.0.1:41191 - rid:213 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:19.936082 [INF] 127.0.0.1:41191 - rid:214 - Route connection created
+[3103] 2026/10/01 06:06:19.936176 [INF] 127.0.0.1:41191 - rid:214 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:19.954568 [INF] 127.0.0.1:41191 - rid:215 - Route connection created
+[3103] 2026/10/01 06:06:19.954720 [INF] 127.0.0.1:41191 - rid:215 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:19.984323 [INF] 127.0.0.1:41191 - rid:216 - Route connection created
+[3103] 2026/10/01 06:06:19.984531 [INF] 127.0.0.1:41191 - rid:216 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:20.019978 [INF] 127.0.0.1:41191 - rid:217 - Route connection created
+[3103] 2026/10/01 06:06:20.020230 [INF] 127.0.0.1:41191 - rid:217 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:20.977510 [INF] 127.0.0.1:41191 - rid:218 - Route connection created
+[3103] 2026/10/01 06:06:20.977683 [INF] 127.0.0.1:41191 - rid:218 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:20.981506 [INF] 127.0.0.1:41191 - rid:219 - Route connection created
+[3103] 2026/10/01 06:06:20.981782 [INF] 127.0.0.1:41191 - rid:219 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:21.026436 [INF] 127.0.0.1:41191 - rid:220 - Route connection created
+[3103] 2026/10/01 06:06:21.026527 [INF] 127.0.0.1:41191 - rid:220 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:21.077360 [INF] 127.0.0.1:41191 - rid:221 - Route connection created
+[3103] 2026/10/01 06:06:21.077503 [INF] 127.0.0.1:41191 - rid:221 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:22.037000 [INF] 127.0.0.1:41191 - rid:222 - Route connection created
+[3103] 2026/10/01 06:06:22.037139 [INF] 127.0.0.1:41191 - rid:222 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:22.037193 [INF] 127.0.0.1:41191 - rid:223 - Route connection created
+[3103] 2026/10/01 06:06:22.037363 [INF] 127.0.0.1:41191 - rid:223 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:22.116994 [INF] 127.0.0.1:41191 - rid:224 - Route connection created
+[3103] 2026/10/01 06:06:22.117227 [INF] 127.0.0.1:41191 - rid:224 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:22.174228 [INF] 127.0.0.1:41191 - rid:225 - Route connection created
+[3103] 2026/10/01 06:06:22.174409 [INF] 127.0.0.1:41191 - rid:225 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:23.052004 [INF] 127.0.0.1:41191 - rid:226 - Route connection created
+[3103] 2026/10/01 06:06:23.052268 [INF] 127.0.0.1:41191 - rid:226 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:23.128519 [INF] 127.0.0.1:41191 - rid:227 - Route connection created
+[3103] 2026/10/01 06:06:23.128640 [INF] 127.0.0.1:41191 - rid:227 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:23.212190 [INF] 127.0.0.1:41191 - rid:228 - Route connection created
+[3103] 2026/10/01 06:06:23.212347 [INF] 127.0.0.1:41191 - rid:228 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:23.219463 [INF] 127.0.0.1:41191 - rid:229 - Route connection created
+[3103] 2026/10/01 06:06:23.219694 [INF] 127.0.0.1:41191 - rid:229 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:24.132636 [INF] 127.0.0.1:41191 - rid:230 - Route connection created
+[3103] 2026/10/01 06:06:24.132870 [INF] 127.0.0.1:41191 - rid:230 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:24.177249 [INF] 127.0.0.1:41191 - rid:231 - Route connection created
+[3103] 2026/10/01 06:06:24.177443 [INF] 127.0.0.1:41191 - rid:231 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:24.254738 [INF] 127.0.0.1:41191 - rid:232 - Route connection created
+[3103] 2026/10/01 06:06:24.254882 [INF] 127.0.0.1:41191 - rid:232 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:24.260727 [INF] 127.0.0.1:41191 - rid:233 - Route connection created
+[3103] 2026/10/01 06:06:24.261015 [INF] 127.0.0.1:41191 - rid:233 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:25.134923 [INF] 127.0.0.1:41191 - rid:234 - Route connection created
+[3103] 2026/10/01 06:06:25.135225 [INF] 127.0.0.1:41191 - rid:234 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:25.214679 [INF] 127.0.0.1:41191 - rid:235 - Route connection created
+[3103] 2026/10/01 06:06:25.214853 [INF] 127.0.0.1:41191 - rid:235 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:25.321097 [INF] 127.0.0.1:41191 - rid:236 - Route connection created
+[3103] 2026/10/01 06:06:25.321220 [INF] 127.0.0.1:41191 - rid:236 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:25.354468 [INF] 127.0.0.1:41191 - rid:237 - Route connection created
+[3103] 2026/10/01 06:06:25.354603 [INF] 127.0.0.1:41191 - rid:237 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:26.214613 [INF] 127.0.0.1:41191 - rid:238 - Route connection created
+[3103] 2026/10/01 06:06:26.214872 [INF] 127.0.0.1:41191 - rid:238 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:26.306292 [INF] 127.0.0.1:41191 - rid:239 - Route connection created
+[3103] 2026/10/01 06:06:26.306473 [INF] 127.0.0.1:41191 - rid:239 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:26.327216 [INF] 127.0.0.1:41191 - rid:240 - Route connection created
+[3103] 2026/10/01 06:06:26.327327 [INF] 127.0.0.1:41191 - rid:240 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:26.397864 [INF] 127.0.0.1:41191 - rid:241 - Route connection created
+[3103] 2026/10/01 06:06:26.398153 [INF] 127.0.0.1:41191 - rid:241 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:27.252389 [INF] 127.0.0.1:41191 - rid:242 - Route connection created
+[3103] 2026/10/01 06:06:27.252516 [INF] 127.0.0.1:41191 - rid:242 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:27.347126 [INF] 127.0.0.1:41191 - rid:243 - Route connection created
+[3103] 2026/10/01 06:06:27.347284 [INF] 127.0.0.1:41191 - rid:243 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:27.417595 [INF] 127.0.0.1:41191 - rid:244 - Route connection created
+[3103] 2026/10/01 06:06:27.417932 [INF] 127.0.0.1:41191 - rid:244 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:27.427871 [INF] 127.0.0.1:41191 - rid:245 - Route connection created
+[3103] 2026/10/01 06:06:27.428043 [INF] 127.0.0.1:41191 - rid:245 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:28.264577 [INF] 127.0.0.1:41191 - rid:246 - Route connection created
+[3103] 2026/10/01 06:06:28.264696 [INF] 127.0.0.1:41191 - rid:246 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:28.405356 [INF] 127.0.0.1:41191 - rid:247 - Route connection created
+[3103] 2026/10/01 06:06:28.405472 [INF] 127.0.0.1:41191 - rid:247 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:28.447842 [INF] 127.0.0.1:41191 - rid:248 - Route connection created
+[3103] 2026/10/01 06:06:28.448041 [INF] 127.0.0.1:41191 - rid:248 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:28.464093 [INF] 127.0.0.1:41191 - rid:249 - Route connection created
+[3103] 2026/10/01 06:06:28.464216 [INF] 127.0.0.1:41191 - rid:249 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:29.325581 [INF] 127.0.0.1:41191 - rid:250 - Route connection created
+[3103] 2026/10/01 06:06:29.325749 [INF] 127.0.0.1:41191 - rid:250 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:29.418973 [INF] 127.0.0.1:41191 - rid:251 - Route connection created
+[3103] 2026/10/01 06:06:29.419329 [INF] 127.0.0.1:41191 - rid:251 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:29.525278 [INF] 127.0.0.1:41191 - rid:252 - Route connection created
+[3103] 2026/10/01 06:06:29.525388 [INF] 127.0.0.1:41191 - rid:252 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:29.541307 [INF] 127.0.0.1:41191 - rid:253 - Route connection created
+[3103] 2026/10/01 06:06:29.541512 [INF] 127.0.0.1:41191 - rid:253 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:30.392292 [INF] 127.0.0.1:41191 - rid:254 - Route connection created
+[3103] 2026/10/01 06:06:30.392489 [INF] 127.0.0.1:41191 - rid:254 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:30.511419 [INF] 127.0.0.1:41191 - rid:255 - Route connection created
+[3103] 2026/10/01 06:06:30.511628 [INF] 127.0.0.1:41191 - rid:255 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:30.531828 [INF] 127.0.0.1:41191 - rid:256 - Route connection created
+[3103] 2026/10/01 06:06:30.532018 [INF] 127.0.0.1:41191 - rid:256 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:30.568080 [INF] 127.0.0.1:41191 - rid:257 - Route connection created
+[3103] 2026/10/01 06:06:30.568247 [INF] 127.0.0.1:41191 - rid:257 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:31.432227 [INF] 127.0.0.1:41191 - rid:258 - Route connection created
+[3103] 2026/10/01 06:06:31.432397 [INF] 127.0.0.1:41191 - rid:258 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:31.528211 [INF] 127.0.0.1:41191 - rid:259 - Route connection created
+[3103] 2026/10/01 06:06:31.528394 [INF] 127.0.0.1:41191 - rid:259 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:31.553954 [INF] 127.0.0.1:41191 - rid:260 - Route connection created
+[3103] 2026/10/01 06:06:31.554472 [INF] 127.0.0.1:41191 - rid:260 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:31.580157 [INF] 127.0.0.1:41191 - rid:261 - Route connection created
+[3103] 2026/10/01 06:06:31.580302 [INF] 127.0.0.1:41191 - rid:261 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:32.477786 [INF] 127.0.0.1:41191 - rid:262 - Route connection created
+[3103] 2026/10/01 06:06:32.477910 [INF] 127.0.0.1:41191 - rid:262 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:32.601815 [INF] 127.0.0.1:41191 - rid:263 - Route connection created
+[3103] 2026/10/01 06:06:32.601919 [INF] 127.0.0.1:41191 - rid:263 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:32.625418 [INF] 127.0.0.1:41191 - rid:264 - Route connection created
+[3103] 2026/10/01 06:06:32.625555 [INF] 127.0.0.1:41191 - rid:264 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:32.641755 [INF] 127.0.0.1:41191 - rid:265 - Route connection created
+[3103] 2026/10/01 06:06:32.641878 [INF] 127.0.0.1:41191 - rid:265 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:33.522206 [INF] 127.0.0.1:41191 - rid:266 - Route connection created
+[3103] 2026/10/01 06:06:33.522432 [INF] 127.0.0.1:41191 - rid:266 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:33.679328 [INF] 127.0.0.1:41191 - rid:267 - Route connection created
+[3103] 2026/10/01 06:06:33.679500 [INF] 127.0.0.1:41191 - rid:267 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:33.680113 [INF] 127.0.0.1:41191 - rid:268 - Route connection created
+[3103] 2026/10/01 06:06:33.680270 [INF] 127.0.0.1:41191 - rid:268 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:33.718526 [INF] 127.0.0.1:41191 - rid:269 - Route connection created
+[3103] 2026/10/01 06:06:33.718767 [INF] 127.0.0.1:41191 - rid:269 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:34.556719 [INF] 127.0.0.1:41191 - rid:270 - Route connection created
+[3103] 2026/10/01 06:06:34.556965 [INF] 127.0.0.1:41191 - rid:270 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:34.705660 [INF] 127.0.0.1:41191 - rid:271 - Route connection created
+[3103] 2026/10/01 06:06:34.705885 [INF] 127.0.0.1:41191 - rid:271 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:34.723401 [INF] 127.0.0.1:41191 - rid:272 - Route connection created
+[3103] 2026/10/01 06:06:34.723523 [INF] 127.0.0.1:41191 - rid:272 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:34.771349 [INF] 127.0.0.1:41191 - rid:273 - Route connection created
+[3103] 2026/10/01 06:06:34.771419 [INF] 127.0.0.1:41191 - rid:273 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:35.610150 [INF] 127.0.0.1:41191 - rid:274 - Route connection created
+[3103] 2026/10/01 06:06:35.610321 [INF] 127.0.0.1:41191 - rid:274 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:35.746356 [INF] 127.0.0.1:41191 - rid:275 - Route connection created
+[3103] 2026/10/01 06:06:35.746479 [INF] 127.0.0.1:41191 - rid:275 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:35.760151 [INF] 127.0.0.1:41191 - rid:276 - Route connection created
+[3103] 2026/10/01 06:06:35.760287 [INF] 127.0.0.1:41191 - rid:276 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:35.832276 [INF] 127.0.0.1:41191 - rid:277 - Route connection created
+[3103] 2026/10/01 06:06:35.832373 [INF] 127.0.0.1:41191 - rid:277 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:36.696777 [INF] 127.0.0.1:41191 - rid:278 - Route connection created
+[3103] 2026/10/01 06:06:36.696976 [INF] 127.0.0.1:41191 - rid:278 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:36.814524 [INF] 127.0.0.1:41191 - rid:279 - Route connection created
+[3103] 2026/10/01 06:06:36.814737 [INF] 127.0.0.1:41191 - rid:279 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:36.857168 [INF] 127.0.0.1:41191 - rid:280 - Route connection created
+[3103] 2026/10/01 06:06:36.857299 [INF] 127.0.0.1:41191 - rid:280 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:36.910076 [INF] 127.0.0.1:41191 - rid:281 - Route connection created
+[3103] 2026/10/01 06:06:36.910262 [INF] 127.0.0.1:41191 - rid:281 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:37.794180 [INF] 127.0.0.1:41191 - rid:282 - Route connection created
+[3103] 2026/10/01 06:06:37.794385 [INF] 127.0.0.1:41191 - rid:282 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:37.820021 [INF] 127.0.0.1:41191 - rid:283 - Route connection created
+[3103] 2026/10/01 06:06:37.820104 [INF] 127.0.0.1:41191 - rid:283 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:37.921609 [INF] 127.0.0.1:41191 - rid:284 - Route connection created
+[3103] 2026/10/01 06:06:37.921658 [INF] 127.0.0.1:41191 - rid:285 - Route connection created
+[3103] 2026/10/01 06:06:37.921708 [INF] 127.0.0.1:41191 - rid:284 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:37.921832 [INF] 127.0.0.1:41191 - rid:285 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:38.799099 [INF] 127.0.0.1:41191 - rid:286 - Route connection created
+[3103] 2026/10/01 06:06:38.799313 [INF] 127.0.0.1:41191 - rid:286 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:38.917890 [INF] 127.0.0.1:41191 - rid:287 - Route connection created
+[3103] 2026/10/01 06:06:38.917977 [INF] 127.0.0.1:41191 - rid:287 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:38.968372 [INF] 127.0.0.1:41191 - rid:288 - Route connection created
+[3103] 2026/10/01 06:06:38.968563 [INF] 127.0.0.1:41191 - rid:288 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:39.021805 [INF] 127.0.0.1:41191 - rid:289 - Route connection created
+[3103] 2026/10/01 06:06:39.021918 [INF] 127.0.0.1:41191 - rid:289 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:39.813900 [INF] 127.0.0.1:41191 - rid:290 - Route connection created
+[3103] 2026/10/01 06:06:39.814099 [INF] 127.0.0.1:41191 - rid:290 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:39.984116 [INF] 127.0.0.1:41191 - rid:291 - Route connection created
+[3103] 2026/10/01 06:06:39.984563 [INF] 127.0.0.1:41191 - rid:291 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:39.985713 [INF] 127.0.0.1:41191 - rid:292 - Route connection created
+[3103] 2026/10/01 06:06:39.985979 [INF] 127.0.0.1:41191 - rid:292 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:40.048147 [INF] 127.0.0.1:41191 - rid:293 - Route connection created
+[3103] 2026/10/01 06:06:40.048320 [INF] 127.0.0.1:41191 - rid:293 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:40.900572 [INF] 127.0.0.1:41191 - rid:294 - Route connection created
+[3103] 2026/10/01 06:06:40.900794 [INF] 127.0.0.1:41191 - rid:294 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:41.050483 [INF] 127.0.0.1:41191 - rid:295 - Route connection created
+[3103] 2026/10/01 06:06:41.050641 [INF] 127.0.0.1:41191 - rid:295 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:41.057690 [INF] 127.0.0.1:41191 - rid:296 - Route connection created
+[3103] 2026/10/01 06:06:41.057848 [INF] 127.0.0.1:41191 - rid:296 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:41.131822 [INF] 127.0.0.1:41191 - rid:297 - Route connection created
+[3103] 2026/10/01 06:06:41.132035 [INF] 127.0.0.1:41191 - rid:297 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:41.935939 [INF] 127.0.0.1:41191 - rid:298 - Route connection created
+[3103] 2026/10/01 06:06:41.936186 [INF] 127.0.0.1:41191 - rid:298 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:42.143165 [INF] 127.0.0.1:41191 - rid:299 - Route connection created
+[3103] 2026/10/01 06:06:42.143328 [INF] 127.0.0.1:41191 - rid:299 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:42.143876 [INF] 127.0.0.1:41191 - rid:300 - Route connection created
+[3103] 2026/10/01 06:06:42.144003 [INF] 127.0.0.1:41191 - rid:300 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:42.145967 [INF] 127.0.0.1:41191 - rid:301 - Route connection created
+[3103] 2026/10/01 06:06:42.146154 [INF] 127.0.0.1:41191 - rid:301 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:42.975249 [INF] 127.0.0.1:41191 - rid:302 - Route connection created
+[3103] 2026/10/01 06:06:42.975447 [INF] 127.0.0.1:41191 - rid:302 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:43.150014 [INF] 127.0.0.1:41191 - rid:303 - Route connection created
+[3103] 2026/10/01 06:06:43.150294 [INF] 127.0.0.1:41191 - rid:303 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:43.165745 [INF] 127.0.0.1:41191 - rid:304 - Route connection created
+[3103] 2026/10/01 06:06:43.166017 [INF] 127.0.0.1:41191 - rid:304 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:43.224621 [INF] 127.0.0.1:41191 - rid:305 - Route connection created
+[3103] 2026/10/01 06:06:43.224853 [INF] 127.0.0.1:41191 - rid:305 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:44.067360 [INF] 127.0.0.1:41191 - rid:306 - Route connection created
+[3103] 2026/10/01 06:06:44.067642 [INF] 127.0.0.1:41191 - rid:306 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:44.178973 [INF] 127.0.0.1:41191 - rid:307 - Route connection created
+[3103] 2026/10/01 06:06:44.179197 [INF] 127.0.0.1:41191 - rid:307 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:44.226989 [INF] 127.0.0.1:41191 - rid:308 - Route connection created
+[3103] 2026/10/01 06:06:44.227207 [INF] 127.0.0.1:41191 - rid:308 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:44.325662 [INF] 127.0.0.1:41191 - rid:309 - Route connection created
+[3103] 2026/10/01 06:06:44.325882 [INF] 127.0.0.1:41191 - rid:309 - Router connection closed: Client Closed
+[3103] 2026/10/01 06:06:45.137288 [INF] 127.0.0.1:41191 - rid:310 - Route connection created
+[3103] 2026/10/01 06:06:45.234250 [INF] 127.0.0.1:41191 - rid:311 - Route connection created
+[3103] 2026/10/01 06:06:45.235085 [INF] 127.0.0.1:41191 - rid:312 - Route connection created
+[3103] 2026/10/01 06:06:45.235666 [INF] 127.0.0.1:41191 - rid:313 - Route connection created
+[3103] 2026/10/01 06:06:45.296592 [INF] 127.0.0.1:41191 - rid:314 - Route connection created
+[3103] 2026/10/01 06:06:45.296881 [INF] 127.0.0.1:41191 - rid:314 - Router connection closed: Duplicate Route - Remote: wf-process-0
+[3103] 2026/10/01 06:06:45.389807 [INF] 127.0.0.1:41191 - rid:315 - Route connection created
+[3103] 2026/10/01 06:06:45.390087 [INF] 127.0.0.1:41191 - rid:315 - Router connection closed: Duplicate Route - Remote: wf-process-0

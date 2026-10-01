@@ -21,3 +21,14 @@ cuts, server logs and failed-job transcript. The independent lease-pressure and
 lease-disk jobs passed. This is a queue-drain failure rather than another
 terminal-latency miss. No latency, renewal or acknowledgment requirement was
 relaxed. A clean nearby campaign does not clear this failure or the full gate.
+
+## Subsequent operation-log correlation
+
+The original review above did not correlate the retained operation log. That
+log identifies sequence 101 as mixedsignal/mixed-06-0 with eight ErrHeld
+acquisitions at five-second intervals, while other wakeups for the same
+invocation release successful leases. The identity is therefore established
+by runtime operations; raw message headers and an ACK commitment are still
+unproven. See [terminal duplicate proof](../terminal-held-wakeup-2026-10-01/)
+for selected operations and controlled seeded/real reproduction. This new
+analysis does not label the original failure a server ACK-retention bug.

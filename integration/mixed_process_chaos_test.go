@@ -277,10 +277,12 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 	}
 	var dispatchEvents []worker.DispatchEvent
 	var dispatchEventsMu sync.Mutex
+	var dispatchDropped uint64
 	observeDispatch := func(event worker.DispatchEvent) {
 		dispatchEventsMu.Lock()
 		defer dispatchEventsMu.Unlock()
 		if len(dispatchEvents) == 4096 {
+			dispatchDropped++
 			copy(dispatchEvents, dispatchEvents[1:])
 			dispatchEvents = dispatchEvents[:4095]
 		}
@@ -294,6 +296,21 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		operationMu.Unlock()
 	}
 	if schedulePath := os.Getenv("FAULT_SCHEDULE_OUT"); schedulePath != "" {
+		t.Cleanup(func() {
+			dispatchEventsMu.Lock()
+			data, err := json.MarshalIndent(struct {
+				CapturedAt time.Time              `json:"captured_at"`
+				Dropped    uint64                 `json:"dropped"`
+				Events     []worker.DispatchEvent `json:"events"`
+			}{time.Now().UTC(), dispatchDropped, dispatchEvents}, "", "  ")
+			dispatchEventsMu.Unlock()
+			if err == nil {
+				err = os.WriteFile(strings.TrimSuffix(schedulePath, ".json")+"-dispatch.json", data, 0600)
+			}
+			if err != nil {
+				t.Errorf("save dispatch history: %v", err)
+			}
+		})
 		t.Cleanup(func() {
 			operationMu.Lock()
 			data, err := json.MarshalIndent(operationEvents, "", "  ")
@@ -1025,6 +1042,18 @@ func TestMixedWorkflowsRecoverFromFourServerFaults(t *testing.T) {
 		return runStream.Info(attempt)
 	})
 	if err != nil {
+		if schedulePath := os.Getenv("FAULT_SCHEDULE_OUT"); schedulePath != "" {
+			diagnosticCtx, stop := context.WithTimeout(context.Background(), 20*time.Second)
+			samples := collectMixedRunDrainDiagnostic(diagnosticCtx, third, runInfo, parts, err)
+			stop()
+			data, marshalErr := json.MarshalIndent(samples, "", "  ")
+			if marshalErr == nil {
+				marshalErr = os.WriteFile(strings.TrimSuffix(schedulePath, ".json")+"-run-drain.json", data, 0600)
+			}
+			if marshalErr != nil {
+				t.Errorf("save failed run drain: %v", marshalErr)
+			}
+		}
 		t.Fatalf("mixed run queue did not drain: info=%+v err=%v context=%v", runInfo, err, ctx.Err())
 	}
 }
