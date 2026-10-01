@@ -4956,3 +4956,18 @@ Comprehensive simulation36900782095 is now terminal SUCCESS; its artifact review
 and exact covered-source scope remain pending. The million-timer service remains
 active at MainPID18146 with198,574 receipts at its latest checkpoint; that live
 campaign is not terminal acceptance.
+
+
+## Comprehensive deterministic campaign verified at its recorded source
+
+[Campaign36900782095](scale/tier1-comprehensive-2026-10-01/) is verified SUCCESS
+at431c555:144 top-level passes,two explicit-trace skips,12,939.618s package,
+9,900,632 schedules,172,856,738 scheduler choices and2,328,341,361 transport events.
+The original suite log and hash are retained. The configured100,000 seeds per
+workload and aggregate counters do not independently prove per-workload seed
+coverage. This source predates parent-notification budgeting and later repair/
+fencing observation changes; current-source comprehensive validation remains open.
+Future extended workflows retain source identity and suite logs on success and
+failure, preserving the test process's exit status through the log capture.
+The historical31.1s/30s-TTL worker-kill mismatch remains excluded from further
+runs; productionTTL12s/heartbeat3s/AckWait13s and the strict30s gate remain in force.
