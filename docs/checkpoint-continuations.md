@@ -403,3 +403,33 @@ Panic Attempt-to-Failed SIGKILL/reply-loss cuts, seeded integrated panic-budget
 coverage and remaining continuation SDK acceptance gates remain open. This is
 not final-source full-matrix or soak evidence; online GC and mixed seed 65's
 latency miss remain open. The original million-timer runner is still live.
+
+## Seeded continuation panic budgets and uncertain terminal writes
+
+The production client/worker/journal/SDK now run a continuation_panic Tier 1
+workload with one or two panics before each of two checkpoints and an invocation
+budget of three to five. A fresh worker restores the exact panic baseline and
+state/locals 20 without archive reads. Its enabled final panic must produce
+contiguous Attempt counts and the same immutable failure, with a passing raw
+retained-state audit and no earlier-stage entries after replacement.
+
+Nine modes exercise clean execution plus drop-before-commit/hidden committed
+ACKs for final Attempt, final Failed, frame and archive writes. All 36 mode/count
+combinations must occur and every injected fault must be consumed. A dropped
+Attempt causes exactly one extra handler call; dropped/hidden Failed writes
+finish from the exhausted journaled budget without rerunning the handler.
+
+The 100,000-seed run passed in 183.074 seconds with 300,000 choices and 29,688,450
+transport events, maximum virtual time 16 seconds. First-ten exact replay,
+cross-process seed-42 identity and the new pinned trace are checked. New workload
+plus existing corpus passed under race in 41.690 seconds; the full simulator
+suite passed in 120.702 seconds. A compiled production budget-reset overlay fails
+the pin with an invalid step protocol in 0.008 seconds. Vet passed.
+[Logs, mutation and hashes](scale/continuation-panic-model-2026-10-01/) bind the proof.
+Runtime source remains unchanged from fbe427a.
+
+This closes the seeded normal-budget/individual uncertain-write slice; it does
+not simulate Raft or establish real replies behind an unconfirmed server delay.
+Combined faults, actual Attempt-to-Failed SIGKILL and other continuation SDK
+acceptance gates remain open, as do final-source full matrix/soak, online GC and
+mixed seed 65's latency miss. The million-timer campaign remains live unchanged.
