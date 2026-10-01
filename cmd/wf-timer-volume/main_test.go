@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -50,7 +52,14 @@ func TestDeliveryCheckerRejectsCorruptionAndDuplicateEmission(t *testing.T) {
 	base := time.Now().Add(-10 * time.Second)
 	partition := identity.Partition("volume", "0", provision.Partitions)
 	valid := observedMsg{data: []byte("volume.0"), subject: identity.RunSubject("volume", "0", provision.Partitions), header: nats.Header{identity.TimerInvSeqHeader: []string{"1"}, identity.TimerStepHeader: []string{"0"}}, meta: jetstream.MsgMetadata{Timestamp: base.Add(time.Second), Stream: "WF_RUN", Consumer: fmt.Sprintf("volume-%d", partition), Sequence: jetstream.SequencePair{Stream: 100}}}
-	newCampaign := func() *campaign { return &campaign{cfg: cfg, base: base, seen: make([]observation, 3)} }
+	newCampaign := func() *campaign {
+		f, err := os.Create(filepath.Join(t.TempDir(), "receipts.bin"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() { f.Close() })
+		return &campaign{cfg: cfg, base: base, seen: make([]observation, 3), ledger: f}
+	}
 	c := newCampaign()
 	if err := c.observe(valid, partition); err != nil {
 		t.Fatal(err)

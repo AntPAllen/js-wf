@@ -27,3 +27,7 @@ The original frame workload rejects inherited request lifetime in 0.003s. A comp
 ## Remaining scope
 
 Combined frame/result failures with lease expiry, capacity limits, server/process/route faults and online GC remain open. Completed focused workloads do not clear comprehensive final-source simulation, 200 whole-matrix seeds or the five-node 24-hour soak. Historical thirty-second-lease worker-kill smoke misses are configuration evidence; the current production/smoke TTL is twelve seconds and those old misses need no further reproduction.
+
+## Completed bounded-memory 100,000-seed campaign
+
+Both focused workloads passed: frame 112.51s and result 1774.37s. bounded-100k-final.log and bounded-campaign-result.json retain terminal output and binary/source identity from the start record. This supersedes the interrupted attempt for these two workloads; comprehensive final-source coverage and combined fault gates remain open.

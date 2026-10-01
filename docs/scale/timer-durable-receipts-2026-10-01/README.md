@@ -1,0 +1,9 @@
+# Durable timer receipts
+
+A checksummed 40-byte indexed receipt slot stores stream sequence, first receipt time and server publish time. Each first receipt is written and fsynced before it is counted or acknowledged. Same-sequence redelivery preserves the first timestamp; write/sync failure stops acknowledgment. Report/archive replacement syncs both file and directory. The report identifies the ledger format before publishers start. Invalid or torn slots are rejected conservatively rather than reconstructed.
+
+`-recover-observations` reads the durable ledger and writes a separate receipt-recovery directory with status interrupted. It cannot resume or certify a campaign; counters/restarts from the last report remain historical. This does not recover timestamps from the old in-memory million run. Full campaign resume is still open.
+
+Package race tests pass in 1.320s, including an actual SIGKILL of a helper process with no final archive or report checkpoint, then recovery of its receipt and rejection as completed evidence. Disk sync failure and short write are rejected before receipt acceptance. Vet passes. This is a runner crash fixture, not a VM power-loss proof.
+
+Native R3 smoke: 120 schedules over 90 seconds, two confirmed three-server SIGKILL restarts, zero backlog, p99 9.599474122s, max 13.004313226s under explicit 30s smoke limits. Offline smoke verification passes; release verification rejects the reduced/dirty-source workload. Controls reject a damaged slot and an altered archive even with a recomputed archive hash. Server logs/stores remain at /tmp/js-wf-timer-durable-smoke-20261001. Source hashes identify the current implementation; the smoke predates only parent-directory syncing on initial root creation. The 1M/24h release campaign and its unchanged 2s p99/30s maximum gates remain open.

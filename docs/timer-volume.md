@@ -37,7 +37,12 @@ Any missing timer fails the overall deadline, five minutes after the last due
 time. The runner does not advance clocks or relax the full campaign limits.
 
 The root retains server logs and stores, atomic `report.json` progress updates,
-and a final `observations.bin`. Each scheduled index has one 16-byte record:
+a durable `receipts.bin`, and a final `observations.bin`. Before acknowledging a
+first delivery, the runner writes and fsyncs its 40-byte indexed ledger slot:
+stream sequence, receipt/server timestamps and a checksum. Redelivery preserves
+the first timestamp. Write or sync failure stops that reader before acknowledgment.
+The initial ledger/report and subsequent report/archive replacements sync file
+contents and directory entries. Each archive index has one 16-byte record:
 little-endian uint64 stream sequence followed by int64 first-receipt Unix
 nanoseconds. A zero sequence represents a missing delivery. The report includes
 the binary observation SHA-256, Go/NATS versions, source revision and dirty flag,
@@ -56,7 +61,22 @@ receipt deadline, calculated p99/maximum, queue drain, both confirmed three-PID
 kills and restart progress. Release verification additionally requires exactly
 one million schedules over 24 hours, the default-or-stricter lateness limits,
 and a clean committed source revision. Server timestamp/header validation runs
-at receipt; the binary artifact records the sequence and receipt time.
+at receipt; the archive records the sequence and receipt time. New reports also
+require the durable ledger to match every archived observation, including server
+publish deadlines and slot checksums. Older reports retain their original verifier
+scope.
+
+After an interruption, recover retained receipts into a separate directory:
+
+```sh
+/tmp/wf-timer-volume -recover-observations -root /tmp/wf-timer-volume-million
+```
+
+This writes `receipt-recovery/report.json` and `observations.bin` with status
+`interrupted`, rebuilding the received count from valid ledger slots. It does not
+resume the campaign, certify its completion, or repair torn/corrupt slots. The
+source report and stores stay intact. Old campaigns that kept receipts only in
+memory cannot recover already acknowledged timestamps.
 
 ## Short fixture check
 

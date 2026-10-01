@@ -16,3 +16,7 @@ Pinned nats.go v1.54.0 stream.go's convertDirectGetMsgResponseToMsg converts non
 A real connection/custom API responder fixture uses the actual pinned client decoder for direct 500 unavailable, 404 absence and core 503 no-responder replies. It does not recreate a server election. The final fixture and raw-reply virtual-clock cadence tests pass under race in 4.160s package; a compiled API-only classifier control fails both decoder and cadence assertions in 3.098s package. The initial fixture sent 503 and correctly got ErrNoResponders; its failed expectation is retained and excluded. The corrected fixture uses the documented installed server's actual direct-error 500 form. Unit/integrity/journal tests pass; full sim/journal/integrity/helper suites pass in 107.534/0.003/0.851/0.003s, with prior pins unchanged.
 
 A fresh full-duration seed-1 partition run with the direct-reply policy is active at /tmp/js-wf-partition-direct-reply-seed1.log; its terminal result is pending. This does not explain the old live-owner runtime stalls or clear whole-matrix release acceptance.
+
+## Final full-duration local replay
+
+The direct-reply run is now terminal PASS620.19s: 71 batches, 1,988 complete terminals, 21,935 entries, 19 faults and p99 13.244810459s. local-direct-reply-result.json retains the check_seed verifier result and SHA-256 manifests for compressed raw artifacts. Batch-60 audit passes at 1,680 terminals. This remains one row/seed at e2382c0; whole-matrix release gates remain open.

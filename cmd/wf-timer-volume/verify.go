@@ -84,6 +84,17 @@ func verifyReport(root string, allowSmoke bool) error {
 		}
 		late[i] = time.Unix(0, at).Sub(deadline).Seconds()
 	}
+	if rep.ReceiptLedger != "" {
+		receipts, err := readReceiptLedger(root, rep, horizon)
+		if err != nil {
+			return err
+		}
+		for i, receipt := range receipts {
+			if receipt.Sequence != binary.LittleEndian.Uint64(data[16*i:]) || receipt.At.UnixNano() != int64(binary.LittleEndian.Uint64(data[16*i+8:])) {
+				return fmt.Errorf("timer %d archive differs from durable receipt", i)
+			}
+		}
+	}
 	sort.Float64s(late)
 	p99 := late[(99*len(late)+99)/100-1]
 	maximum := late[len(late)-1]

@@ -4190,8 +4190,9 @@ failed on missing relative testdata and is retained/excluded.
 
 The first focused 100,000-seed attempt and concurrent package/control runs were
 interrupted by a VM reboot, so their incomplete logs are not a seed-count pass.
-A fresh 100,000-seed frame/result campaign is running with GOMEMLIMIT=512MiB and
-GOMAXPROCS=2; its terminal result remains pending. Combined capacity/lease/TTL/
+The fresh 100,000-seed frame/result campaign completed successfully with GOMEMLIMIT=512MiB and
+GOMAXPROCS=2: frame 112.51s and result 1774.37s. Its final log and binary/source
+identity are retained in the response-budget proof directory. Combined capacity/lease/TTL/
 server/process/route cases and comprehensive release gates remain open.
 
 ## Million native timers were interrupted by the VM reboot
@@ -4258,3 +4259,35 @@ hashes. The companion large-result workload remains live; this is a completed
 frame slice, not a combined or comprehensive release-count result. The original
 million-timer stores remain preserved after interruption. Rebuildable Go cache
 cleanup frees space for the running campaigns; no acceptance data is removed.
+
+
+## Completed focused campaigns and durable timer evidence
+
+[Comprehensive Tier 1 run 36858955813](scale/tier1-100k-762df09-2026-10-01/)
+passed at 762df09: 100,000 seeds per seeded workload, 9,500,632 generated
+schedules, 172,356,738 choices and 2,276,946,793 transport events in 7424.966s.
+It predates continuation/frame/result budgets and the direct unavailable policy;
+it is not final-source comprehensive acceptance.
+
+[The direct-unavailable full-duration partition replay](scale/matrix-partition-audit-503-2026-10-01/local-direct-reply-result.json)
+passes at e2382c0 in 620.19s: 71 batches, 1,988 complete retained terminals,
+21,935 journal entries, 19 confirmed faults and terminal p99 13.244810459s.
+Raw log, history, dispatch, timings, latency and fault artifacts are compressed
+with original SHA-256 hashes. Batch-60 audit passes at 1,680 terminals. This
+single row does not clear 200 consecutive whole-matrix seeds or explain prior
+live-owner runtime stalls.
+
+[Durable timer receipts](scale/timer-durable-receipts-2026-10-01/) now sync a
+checksummed indexed slot before receipt accounting and DoubleAck, preserving
+first receipt and server publish timestamps. Atomic report/archive replacement
+also syncs file and directory; initial identity is durable before publication.
+Disk write/sync failure prevents new receipt acceptance. Offline recovery writes
+a separate interrupted report/archive and never certifies or resumes the run.
+Corrupt slots and archive/ledger mismatches fail verification. Package race tests
+pass in 1.320s, including an actual writer SIGKILL without final checkpoint and
+subsequent receipt recovery. Vet passes. Native R3 smoke delivers all 120 timers
+over 90s through both three-server kills, drains the queue, and passes offline
+verification with p99 9.599s/max 13.004s under explicit 30s smoke limits. Release
+verification correctly rejects its shortened, dirty-source scope. The old
+million run's missing timestamps cannot be recovered; a fresh clean million/24h
+campaign with unchanged 2s p99/30s maximum and full final audit remains required.

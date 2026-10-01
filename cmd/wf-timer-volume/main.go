@@ -53,6 +53,7 @@ type report struct {
 	Partitions                     uint32 `json:"partitions"`
 	Publishers                     int    `json:"publishers"`
 	Lead                           string `json:"lead"`
+	ReceiptLedger                  string `json:"receipt_ledger,omitempty"`
 	ObservationsSHA256             string `json:"observations_sha256,omitempty"`
 	Status                         string `json:"status"`
 	Error                          string `json:"error,omitempty"`
@@ -79,11 +80,13 @@ type observation struct {
 	At       time.Time
 }
 type campaign struct {
-	mu   sync.Mutex
-	cfg  config
-	rep  report
-	seen []observation
-	base time.Time
+	mu        sync.Mutex
+	cfg       config
+	rep       report
+	seen      []observation
+	base      time.Time
+	ledger    receiptFile
+	ledgerErr error
 }
 
 func main() {
@@ -95,9 +98,17 @@ func main() {
 	flag.DurationVar(&c.P99Limit, "p99-limit", 2*time.Second, "maximum raw delivery lateness p99")
 	flag.DurationVar(&c.MaxLate, "max-late", 30*time.Second, "maximum individual raw delivery lateness")
 	flag.StringVar(&c.Root, "root", "", "new directory for stores, logs and progress/results; required")
+	recoverReceipts := flag.Bool("recover-observations", false, "read durable receipts after interruption without resuming or certifying a campaign")
 	verify := flag.Bool("verify", false, "verify a completed campaign report and every observation offline")
 	allowSmoke := flag.Bool("allow-smoke", false, "allow verification below the million-message/24-hour release workload")
 	flag.Parse()
+	if *recoverReceipts {
+		if err := recoverObservations(c.Root); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		return
+	}
 	if *verify {
 		if err := verifyReport(c.Root, *allowSmoke); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -149,10 +160,7 @@ func (c *campaign) save() error {
 	}
 	// Atomic checkpoints survive interruption without claiming the run passed.
 	path := filepath.Join(c.cfg.Root, "report.json")
-	if err = os.WriteFile(path+".tmp", append(data, '\n'), 0644); err != nil {
-		return err
-	}
-	return os.Rename(path+".tmp", path)
+	return durableReplace(path, append(data, '\n'))
 }
 func (c *campaign) observe(msg jetstream.Msg, partition uint32) error {
 	key := strings.TrimPrefix(string(msg.Data()), "volume.")
@@ -184,6 +192,12 @@ func (c *campaign) observe(msg jetstream.Msg, partition uint32) error {
 		}
 		c.rep.Redeliveries++
 	} else {
+		if meta.Sequence.Stream == 0 {
+			return fmt.Errorf("timer %d has zero stream sequence", index)
+		}
+		if err := c.persistReceipt(index, meta.Sequence.Stream, now, meta.Timestamp); err != nil {
+			return err
+		}
 		*seen = observation{Sequence: meta.Sequence.Stream, At: now}
 		c.rep.Received++
 	}
@@ -283,6 +297,9 @@ func run(cfg config) (runErr error) {
 	if err := os.Mkdir(cfg.Root, 0755); err != nil {
 		return fmt.Errorf("campaign needs a new root: %w", err)
 	}
+	if err := syncDirectory(filepath.Dir(cfg.Root)); err != nil {
+		return err
+	}
 	c := &campaign{cfg: cfg, seen: make([]observation, cfg.Count)}
 	c.rep = report{Storage: "file", Replicas: 3, Partitions: provision.Partitions, Publishers: cfg.Publishers, Lead: cfg.Lead.String(), Status: "running", GoVersion: runtime.Version(), Count: cfg.Count, Horizon: cfg.Horizon.String(), P99Limit: cfg.P99Limit.String(), MaxLateLimit: cfg.MaxLate.String()}
 	if info, ok := debug.ReadBuildInfo(); ok {
@@ -344,9 +361,28 @@ func run(cfg config) (runErr error) {
 	if err != nil {
 		return err
 	}
+	ledger, err := os.OpenFile(filepath.Join(cfg.Root, "receipts.bin"), os.O_CREATE|os.O_EXCL|os.O_RDWR, 0644)
+	if err != nil {
+		return err
+	}
+	defer ledger.Close()
+	if err := ledger.Truncate(int64(cfg.Count) * receiptSlotSize); err != nil {
+		return err
+	}
+	if err := ledger.Sync(); err != nil {
+		return err
+	}
+	if err := syncDirectory(cfg.Root); err != nil {
+		return err
+	}
+	c.ledger = ledger
+	c.rep.ReceiptLedger = receiptLedgerVersion
 	c.base = time.Now().UTC().Add(cfg.Lead)
 	c.rep.FirstDue = c.base
 	c.rep.LastDue = c.base.Add(cfg.Horizon)
+	if err := c.save(); err != nil {
+		return err
+	}
 	failures := make(chan error, 1)
 	stopReaders, err := c.readers(ctx, js, failures, true)
 	if err != nil {
@@ -575,10 +611,7 @@ func (c *campaign) saveObservations() error {
 	}
 	c.mu.Unlock()
 	path := filepath.Join(c.cfg.Root, "observations.bin")
-	if err := os.WriteFile(path+".tmp", data, 0644); err != nil {
-		return err
-	}
-	if err := os.Rename(path+".tmp", path); err != nil {
+	if err := durableReplace(path, data); err != nil {
 		return err
 	}
 	sum := sha256.Sum256(data)
