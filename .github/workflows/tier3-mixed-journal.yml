@@ -7,7 +7,7 @@ on:
         type: choice
         required: true
         default: journal
-        options: [journal, consumer]
+        options: [journal, consumer, restart]
       duration:
         description: Ten minutes is sustained; 35 seconds is fixture smoke only
         required: true
@@ -39,6 +39,7 @@ jobs:
           case "$TIER3_MATRIX_ROW" in
             journal) row_test=TestFiveContainerMixedJournalLeaderEveryThirtySeconds ;;
             consumer) row_test=TestFiveContainerMixedConsumerLeaderEveryThirtySeconds ;;
+            restart) row_test=TestFiveContainerMixedAllServersEveryThirtySeconds ;;
             *) exit 1 ;;
           esac
           go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py

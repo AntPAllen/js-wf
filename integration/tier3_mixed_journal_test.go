@@ -28,7 +28,7 @@ import (
 	"js-wf/worker"
 )
 
-// The first sustained R5 mixed-workload row. This is not the full Tier 3 matrix
+// Sustained R5 mixed-workload rows. This is not the full Tier 3 matrix
 // or its 24-hour release soak; unsupported rows are not treated as covered.
 func TestFiveContainerMixedJournalLeaderEveryThirtySeconds(t *testing.T) {
 	runFiveContainerMixedLeader(t, "journal")
@@ -38,13 +38,17 @@ func TestFiveContainerMixedConsumerLeaderEveryThirtySeconds(t *testing.T) {
 	runFiveContainerMixedLeader(t, "consumer")
 }
 
+func TestFiveContainerMixedAllServersEveryThirtySeconds(t *testing.T) {
+	runFiveContainerMixedLeader(t, "restart")
+}
+
 func runFiveContainerMixedLeader(t *testing.T, row string) {
 	t.Helper()
-	if row != "journal" && row != "consumer" {
-		t.Fatal("unsupported R5 leader row")
+	if row != "journal" && row != "consumer" && row != "restart" {
+		t.Fatal("unsupported R5 fault row")
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
-		t.Skip("set WF_TIER3_MATRIX=1 for sustained five-container mixed journal faults")
+		t.Skip("set WF_TIER3_MATRIX=1 for sustained five-container mixed faults")
 	}
 	duration := 10 * time.Minute
 	if value := os.Getenv("WF_TIER3_MATRIX_DURATION"); value != "" {
@@ -278,6 +282,8 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			prefix := filepath.Join(root, fmt.Sprintf("fault-%d", len(faults)+1))
 			if row == "consumer" {
 				event, err = killFiveContainerMixedConsumerLeader(ctx, js, cluster, scheduled, prefix, faultRNG)
+			} else if row == "restart" {
+				event, err = killFiveContainerMixedAllServers(ctx, js, cluster, scheduled, prefix)
 			} else {
 				event, err = killFiveContainerMixedJournalLeader(ctx, js, cluster, scheduled, prefix)
 			}
@@ -667,5 +673,73 @@ func killFiveContainerMixedConsumerLeader(ctx context.Context, js jetstream.JetS
 		return event, err
 	}
 	event.Healed = time.Now()
+	return event, nil
+}
+
+// KillNode waits for container removal after literal SIGKILL. Complete every
+// kill before any restart so this cannot silently become a rolling restart.
+func killFiveContainerMixedAllServers(ctx context.Context, js jetstream.JetStream, cluster *testcluster.DockerCluster, scheduled time.Time, prefix string) (matrixLeaderFault, error) {
+	event := matrixLeaderFault{Scheduled: scheduled, Node: -1}
+	bound, stop := context.WithTimeout(ctx, 60*time.Second)
+	defer stop()
+	type operation struct {
+		Node   int
+		Action string
+		At     time.Time
+	}
+	var operations []operation
+	write := func() error {
+		data, err := json.MarshalIndent(operations, "", "  ")
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(prefix+"-restart-operations.json", data, 0644)
+	}
+	defer func() { _ = write() }()
+	var clients, monitors [5]string
+	for node := 0; node < 5; node++ {
+		clients[node], monitors[node] = cluster.ClientURL(node), cluster.MonitorURL(node)
+		logs, err := cluster.Logs(node)
+		if err != nil {
+			return event, err
+		}
+		if err = os.WriteFile(fmt.Sprintf("%s-node%d-before.log", prefix, node), []byte(logs), 0644); err != nil {
+			return event, err
+		}
+	}
+	event.Killed = time.Now()
+	for node := 0; node < 5; node++ {
+		if bound.Err() != nil {
+			return event, bound.Err()
+		}
+		if err := cluster.KillNode(node); err != nil {
+			return event, err
+		}
+		event.Nodes = append(event.Nodes, node)
+		operations = append(operations, operation{node, "sigkill_removed", time.Now().UTC()})
+	}
+	// Persist the all-down boundary before creating any replacement process.
+	if err := write(); err != nil {
+		return event, err
+	}
+	for node := 0; node < 5; node++ {
+		if bound.Err() != nil {
+			return event, bound.Err()
+		}
+		if err := cluster.RestartNode(node); err != nil {
+			return event, err
+		}
+		if cluster.ClientURL(node) != clients[node] || cluster.MonitorURL(node) != monitors[node] {
+			return event, fmt.Errorf("restart changed node%d persistent endpoints", node)
+		}
+		operations = append(operations, operation{node, "restarted", time.Now().UTC()})
+	}
+	if err := waitFiveReplicaReadiness(bound, js, 0); err != nil {
+		return event, err
+	}
+	event.Healed = time.Now()
+	if err := write(); err != nil {
+		return event, err
+	}
 	return event, nil
 }

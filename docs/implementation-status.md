@@ -4599,3 +4599,19 @@ This closes the single ten-minute consumer row at this source, not the full
 above is superseded by this terminal proof. The million-timer service remains
 active at MainPID18146 with88,435 receipts at the latest checkpoint; it is not
 terminal acceptance.
+
+
+## Sustained five-node all-server restart row implemented
+
+The shared R5 runner now supports all-server SIGKILL/restart faults every30s.
+All five kill/removal operations finish before any replacement starts, with
+retained operation timestamps, stable endpoints and current R5 recovery.
+The artifact guard rejects rolling restarts, missing/duplicate nodes and false
+timestamp ordering. The raw enabling-event p99 gate applies without the route
+heal-time exception. The [native race smoke](scale/tier3-mixed-restart-2026-10-01/)
+passes64.06s /65.095s native package event:140 invocations,1,545 entries,
+one complete five-server kill/restart, largest terminal p99 16.406s, largest
+progress p99 14.313s. All histories, retained audit and physical stream/all64
+consumer drain checks pass. All97 acknowledged repairs have checked explanations;
+fencing is zero. All36 Python tests and integration vet pass. The ten-minute
+row, explicit mid-fan-out boundary and full24-hour matrix remain open.

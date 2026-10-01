@@ -102,3 +102,34 @@ class ConsumerArtifactChecks(unittest.TestCase):
                 elif mode=='count':report['confirmed_faults']=19
                 (root/'faults.json').write_text(json.dumps([fault]));(root/'fault-1-consumer-before.json').write_text(json.dumps(snapshot))
                 with self.assertRaises(ValueError):row.check_consumer_artifacts(root,report)
+
+
+class RestartRowChecks(unittest.TestCase):
+    def test_named_restart_and_scope(self):
+        events = fixture('35s')
+        for e in events:
+            if 'Test' in e: e['Test'] = row.TESTS['restart']
+        events[0]['Output'] = events[0]['Output'].replace('row=journal','row=restart')
+        self.assertFalse(row.check(events,'35s','restart')['clears_full_tier3_release'])
+        events[1]['Test'] = row.TEST
+        with self.assertRaises(ValueError): row.check(events,'35s','restart')
+
+    def test_all_down_boundary_and_false_controls(self):
+        import tempfile,json
+        actions = [('sigkill_removed',n) for n in range(5)] + [('restarted',n) for n in range(5)]
+        for mode in ('valid','rolling','missing','wrong_node','reversed','no_timezone','partial_fault'):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as directory:
+                root=Path(directory)
+                ops=[dict(Action=a,Node=n,At=f'2026-10-01T12:00:{i+1:02d}Z') for i,(a,n) in enumerate(actions)]
+                fault=dict(killed='2026-10-01T12:00:00Z',healed='2026-10-01T12:00:11Z',nodes=list(range(5)))
+                if mode=='rolling':ops[1],ops[5]=ops[5],ops[1]
+                elif mode=='missing':ops.pop()
+                elif mode=='wrong_node':ops[4]['Node']=3
+                elif mode=='reversed':ops[5]['At']='2026-10-01T11:00:00Z'
+                elif mode=='no_timezone':ops[2]['At']='2026-10-01T12:00:03'
+                elif mode=='partial_fault':fault['nodes']=[0,1,2]
+                (root/'faults.json').write_text(json.dumps([fault]))
+                (root/'fault-1-restart-operations.json').write_text(json.dumps(ops))
+                if mode=='valid': self.assertEqual(row.check_restart_artifacts(root,dict(confirmed_faults=1))['confirmed_all_down_boundaries'],1)
+                else:
+                    with self.assertRaises(ValueError):row.check_restart_artifacts(root,dict(confirmed_faults=1))

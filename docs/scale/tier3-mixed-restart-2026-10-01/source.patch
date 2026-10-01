@@ -1,0 +1,242 @@
+diff --git a/.github/workflows/tier3-mixed-journal.yml b/.github/workflows/tier3-mixed-journal.yml
+index dfacf78..566c4fe 100644
+--- a/.github/workflows/tier3-mixed-journal.yml
++++ b/.github/workflows/tier3-mixed-journal.yml
+@@ -7,7 +7,7 @@ on:
+         type: choice
+         required: true
+         default: journal
+-        options: [journal, consumer]
++        options: [journal, consumer, restart]
+       duration:
+         description: Ten minutes is sustained; 35 seconds is fixture smoke only
+         required: true
+@@ -39,6 +39,7 @@ jobs:
+           case "$TIER3_MATRIX_ROW" in
+             journal) row_test=TestFiveContainerMixedJournalLeaderEveryThirtySeconds ;;
+             consumer) row_test=TestFiveContainerMixedConsumerLeaderEveryThirtySeconds ;;
++            restart) row_test=TestFiveContainerMixedAllServersEveryThirtySeconds ;;
+             *) exit 1 ;;
+           esac
+           go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py
+diff --git a/integration/tier3_mixed_journal_test.go b/integration/tier3_mixed_journal_test.go
+index fb06e65..1556987 100644
+--- a/integration/tier3_mixed_journal_test.go
++++ b/integration/tier3_mixed_journal_test.go
+@@ -28,7 +28,7 @@ import (
+ 	"js-wf/worker"
+ )
+ 
+-// The first sustained R5 mixed-workload row. This is not the full Tier 3 matrix
++// Sustained R5 mixed-workload rows. This is not the full Tier 3 matrix
+ // or its 24-hour release soak; unsupported rows are not treated as covered.
+ func TestFiveContainerMixedJournalLeaderEveryThirtySeconds(t *testing.T) {
+ 	runFiveContainerMixedLeader(t, "journal")
+@@ -38,13 +38,17 @@ func TestFiveContainerMixedConsumerLeaderEveryThirtySeconds(t *testing.T) {
+ 	runFiveContainerMixedLeader(t, "consumer")
+ }
+ 
++func TestFiveContainerMixedAllServersEveryThirtySeconds(t *testing.T) {
++	runFiveContainerMixedLeader(t, "restart")
++}
++
+ func runFiveContainerMixedLeader(t *testing.T, row string) {
+ 	t.Helper()
+-	if row != "journal" && row != "consumer" {
+-		t.Fatal("unsupported R5 leader row")
++	if row != "journal" && row != "consumer" && row != "restart" {
++		t.Fatal("unsupported R5 fault row")
+ 	}
+ 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
+-		t.Skip("set WF_TIER3_MATRIX=1 for sustained five-container mixed journal faults")
++		t.Skip("set WF_TIER3_MATRIX=1 for sustained five-container mixed faults")
+ 	}
+ 	duration := 10 * time.Minute
+ 	if value := os.Getenv("WF_TIER3_MATRIX_DURATION"); value != "" {
+@@ -278,6 +282,8 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
+ 			prefix := filepath.Join(root, fmt.Sprintf("fault-%d", len(faults)+1))
+ 			if row == "consumer" {
+ 				event, err = killFiveContainerMixedConsumerLeader(ctx, js, cluster, scheduled, prefix, faultRNG)
++			} else if row == "restart" {
++				event, err = killFiveContainerMixedAllServers(ctx, js, cluster, scheduled, prefix)
+ 			} else {
+ 				event, err = killFiveContainerMixedJournalLeader(ctx, js, cluster, scheduled, prefix)
+ 			}
+@@ -669,3 +675,71 @@ func killFiveContainerMixedConsumerLeader(ctx context.Context, js jetstream.JetS
+ 	event.Healed = time.Now()
+ 	return event, nil
+ }
++
++// KillNode waits for container removal after literal SIGKILL. Complete every
++// kill before any restart so this cannot silently become a rolling restart.
++func killFiveContainerMixedAllServers(ctx context.Context, js jetstream.JetStream, cluster *testcluster.DockerCluster, scheduled time.Time, prefix string) (matrixLeaderFault, error) {
++	event := matrixLeaderFault{Scheduled: scheduled, Node: -1}
++	bound, stop := context.WithTimeout(ctx, 60*time.Second)
++	defer stop()
++	type operation struct {
++		Node   int
++		Action string
++		At     time.Time
++	}
++	var operations []operation
++	write := func() error {
++		data, err := json.MarshalIndent(operations, "", "  ")
++		if err != nil {
++			return err
++		}
++		return os.WriteFile(prefix+"-restart-operations.json", data, 0644)
++	}
++	defer func() { _ = write() }()
++	var clients, monitors [5]string
++	for node := 0; node < 5; node++ {
++		clients[node], monitors[node] = cluster.ClientURL(node), cluster.MonitorURL(node)
++		logs, err := cluster.Logs(node)
++		if err != nil {
++			return event, err
++		}
++		if err = os.WriteFile(fmt.Sprintf("%s-node%d-before.log", prefix, node), []byte(logs), 0644); err != nil {
++			return event, err
++		}
++	}
++	event.Killed = time.Now()
++	for node := 0; node < 5; node++ {
++		if bound.Err() != nil {
++			return event, bound.Err()
++		}
++		if err := cluster.KillNode(node); err != nil {
++			return event, err
++		}
++		event.Nodes = append(event.Nodes, node)
++		operations = append(operations, operation{node, "sigkill_removed", time.Now().UTC()})
++	}
++	// Persist the all-down boundary before creating any replacement process.
++	if err := write(); err != nil {
++		return event, err
++	}
++	for node := 0; node < 5; node++ {
++		if bound.Err() != nil {
++			return event, bound.Err()
++		}
++		if err := cluster.RestartNode(node); err != nil {
++			return event, err
++		}
++		if cluster.ClientURL(node) != clients[node] || cluster.MonitorURL(node) != monitors[node] {
++			return event, fmt.Errorf("restart changed node%d persistent endpoints", node)
++		}
++		operations = append(operations, operation{node, "restarted", time.Now().UTC()})
++	}
++	if err := waitFiveReplicaReadiness(bound, js, 0); err != nil {
++		return event, err
++	}
++	event.Healed = time.Now()
++	if err := write(); err != nil {
++		return event, err
++	}
++	return event, nil
++}
+diff --git a/scripts/check-tier3-journal-row.py b/scripts/check-tier3-journal-row.py
+index 3085508..5d8ff66 100644
+--- a/scripts/check-tier3-journal-row.py
++++ b/scripts/check-tier3-journal-row.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Verify one executed R5 mixed journal row; never certify full Tier 3 release."""
++"""Verify one executed R5 mixed fault row; never certify full Tier 3 release."""
+ import argparse
+ from datetime import datetime
+ import importlib.util
+@@ -18,7 +18,8 @@ def load(name, file):
+ matrix = load('matrix_row', 'check-matrix-campaign.py')
+ execution = load('matrix_execution', 'check-matrix-result.py')
+ TESTS = {'journal': 'TestFiveContainerMixedJournalLeaderEveryThirtySeconds',
+-         'consumer': 'TestFiveContainerMixedConsumerLeaderEveryThirtySeconds'}
++         'consumer': 'TestFiveContainerMixedConsumerLeaderEveryThirtySeconds',
++         'restart': 'TestFiveContainerMixedAllServersEveryThirtySeconds'}
+ TEST = TESTS['journal']
+ 
+ 
+@@ -51,7 +52,8 @@ def check(events, duration, expected_row='journal'):
+         if int(count) != batches*per_batch or terminal >= 30 or progress >= 30:
+             raise ValueError(f'{typ}: incorrect count or over-budget p99')
+         cells[typ] = dict(invocations=int(count), terminal_p99_seconds=terminal, progress_p99_seconds=progress)
+-    return dict(scope=f'single five-container R5 {row}-leader row', seed=int(seed), duration_seconds=seconds,
++    scope = 'single five-container R5 all-server SIGKILL/restart row' if row == 'restart' else f'single five-container R5 {row}-leader row'
++    return dict(scope=scope, seed=int(seed), duration_seconds=seconds,
+                 shortened_smoke=duration == '35s', invocations=invocations, journal_entries=entries,
+                 confirmed_faults=faults, active_consumer_faults=active_consumer_faults, cells=cells, clears_full_tier3_release=False)
+ 
+@@ -83,9 +85,25 @@ def check_consumer_artifacts(root, report):
+     return dict(cluster=clusters.pop(), matched_consumer_snapshots=len(faults), active_selections=active)
+ 
+ 
++def check_restart_artifacts(root, report):
++    faults = json.loads((root/'faults.json').read_text())
++    if len(faults) != report['confirmed_faults']:
++        raise ValueError('restart fault count disagrees')
++    for index, fault in enumerate(faults, 1):
++        operations = json.loads((root/f'fault-{index}-restart-operations.json').read_text())
++        expected = [(action, node) for action in ('sigkill_removed', 'restarted') for node in range(5)]
++        if [(x['Action'], x['Node']) for x in operations] != expected or fault['nodes'] != list(range(5)):
++            raise ValueError('all five kills must precede all five restarts')
++        times = [datetime.fromisoformat(s.replace('Z','+00:00')) for s in
++                 [fault['killed']] + [x['At'] for x in operations] + [fault['healed']]]
++        if any(t.tzinfo is None for t in times) or times != sorted(times):
++            raise ValueError('restart operation times are missing or reversed')
++    return dict(confirmed_all_down_boundaries=len(faults), nodes_per_boundary=5)
++
++
+ if __name__ == '__main__':
+     parser = argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument('--root', type=Path, help='required consumer selection/fault artifacts')
++    parser.add_argument('--root', type=Path, help='required consumer/restart fault artifacts')
+     parser.add_argument('--row', choices=tuple(TESTS), default='journal')
+     parser.add_argument('--events', required=True, type=Path)
+     parser.add_argument('--duration', required=True, choices=('35s', '10m'))
+@@ -96,5 +114,8 @@ if __name__ == '__main__':
+     if args.row == 'consumer':
+         if args.root is None: parser.error('--root is required for the consumer row')
+         report['selection_artifact_checks'] = check_consumer_artifacts(args.root, report)
++    if args.row == 'restart':
++        if args.root is None: parser.error('--root is required for the restart row')
++        report['restart_artifact_checks'] = check_restart_artifacts(args.root, report)
+     args.output.write_text(json.dumps(report, indent=2)+'\n')
+     print(json.dumps(report, indent=2))
+diff --git a/scripts/test_tier3_journal_row.py b/scripts/test_tier3_journal_row.py
+index cf41b30..391e5cd 100644
+--- a/scripts/test_tier3_journal_row.py
++++ b/scripts/test_tier3_journal_row.py
+@@ -102,3 +102,34 @@ class ConsumerArtifactChecks(unittest.TestCase):
+                 elif mode=='count':report['confirmed_faults']=19
+                 (root/'faults.json').write_text(json.dumps([fault]));(root/'fault-1-consumer-before.json').write_text(json.dumps(snapshot))
+                 with self.assertRaises(ValueError):row.check_consumer_artifacts(root,report)
++
++
++class RestartRowChecks(unittest.TestCase):
++    def test_named_restart_and_scope(self):
++        events = fixture('35s')
++        for e in events:
++            if 'Test' in e: e['Test'] = row.TESTS['restart']
++        events[0]['Output'] = events[0]['Output'].replace('row=journal','row=restart')
++        self.assertFalse(row.check(events,'35s','restart')['clears_full_tier3_release'])
++        events[1]['Test'] = row.TEST
++        with self.assertRaises(ValueError): row.check(events,'35s','restart')
++
++    def test_all_down_boundary_and_false_controls(self):
++        import tempfile,json
++        actions = [('sigkill_removed',n) for n in range(5)] + [('restarted',n) for n in range(5)]
++        for mode in ('valid','rolling','missing','wrong_node','reversed','no_timezone','partial_fault'):
++            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as directory:
++                root=Path(directory)
++                ops=[dict(Action=a,Node=n,At=f'2026-10-01T12:00:{i+1:02d}Z') for i,(a,n) in enumerate(actions)]
++                fault=dict(killed='2026-10-01T12:00:00Z',healed='2026-10-01T12:00:11Z',nodes=list(range(5)))
++                if mode=='rolling':ops[1],ops[5]=ops[5],ops[1]
++                elif mode=='missing':ops.pop()
++                elif mode=='wrong_node':ops[4]['Node']=3
++                elif mode=='reversed':ops[5]['At']='2026-10-01T11:00:00Z'
++                elif mode=='no_timezone':ops[2]['At']='2026-10-01T12:00:03'
++                elif mode=='partial_fault':fault['nodes']=[0,1,2]
++                (root/'faults.json').write_text(json.dumps([fault]))
++                (root/'fault-1-restart-operations.json').write_text(json.dumps(ops))
++                if mode=='valid': self.assertEqual(row.check_restart_artifacts(root,dict(confirmed_faults=1))['confirmed_all_down_boundaries'],1)
++                else:
++                    with self.assertRaises(ValueError):row.check_restart_artifacts(root,dict(confirmed_faults=1))
