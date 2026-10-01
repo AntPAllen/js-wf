@@ -344,13 +344,11 @@ func runProcessClusterCombinedFaultsRecover(t *testing.T, withDiskDelay bool) {
 	if err != nil {
 		t.Fatalf("create three-replica stream: %v", err)
 	}
-	info, err := stream.Info(ctx)
-	if err != nil || info.Cluster == nil {
-		t.Fatalf("stream leader: info=%+v err=%v", info, err)
-	}
-	leader, err := strconv.Atoi(strings.TrimPrefix(info.Cluster.Leader, "wf-process-"))
-	if err != nil || leader < 0 || leader >= 3 {
-		t.Fatalf("invalid stream leader %q: %v", info.Cluster.Leader, err)
+	// Stream creation can return before the initial replica election finishes.
+	// Require an elected fixture node before constructing the fault schedule.
+	leader, err := awaitProcessStreamLeader(ctx, stream.Info, len(c.Clients))
+	if err != nil {
+		t.Fatalf("initial stream leader: %v", err)
 	}
 	first, err := js[leader].Publish(ctx, "combined.test", []byte("before"))
 	if err != nil || first == nil || first.Sequence != 1 {
@@ -504,4 +502,71 @@ func TestProcessClusterSlowDiskDelaysStoreWrites(t *testing.T) {
 	if err != nil || info.State.Msgs != 11 {
 		t.Fatalf("stream after disk delay: info=%+v err=%v", info, err)
 	}
+}
+
+// awaitProcessStreamLeader retries absent election metadata and info errors. Invalid
+// nonempty leader names fail immediately instead of selecting the wrong node.
+func awaitProcessStreamLeader(ctx context.Context, info func(context.Context, ...jetstream.StreamInfoOpt) (*jetstream.StreamInfo, error), nodes int) (int, error) {
+	ready, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	var lastErr error
+	for {
+		attempt, stop := context.WithTimeout(ready, time.Second)
+		state, err := info(attempt)
+		stop()
+		if err == nil && state != nil && state.Cluster != nil && state.Cluster.Leader != "" {
+			name := state.Cluster.Leader
+			leader, parseErr := strconv.Atoi(strings.TrimPrefix(name, "wf-process-"))
+			if !strings.HasPrefix(name, "wf-process-") || parseErr != nil || leader < 0 || leader >= nodes {
+				return 0, fmt.Errorf("invalid stream leader %q", name)
+			}
+			return leader, nil
+		}
+		lastErr = err
+		timer := time.NewTimer(25 * time.Millisecond)
+		select {
+		case <-ready.Done():
+			timer.Stop()
+			return 0, fmt.Errorf("stream leader not ready: %w (last info error: %v)", ready.Err(), lastErr)
+		case <-timer.C:
+		}
+	}
+}
+
+func TestAwaitProcessStreamLeader(t *testing.T) {
+	t.Run("initial election", func(t *testing.T) {
+		calls := 0
+		leader, err := awaitProcessStreamLeader(context.Background(), func(context.Context, ...jetstream.StreamInfoOpt) (*jetstream.StreamInfo, error) {
+			calls++
+			if calls == 1 {
+				return &jetstream.StreamInfo{}, nil
+			}
+			name := ""
+			if calls == 3 {
+				name = "wf-process-2"
+			}
+			return &jetstream.StreamInfo{Cluster: &jetstream.ClusterInfo{Leader: name}}, nil
+		}, 3)
+		if err != nil || leader != 2 || calls != 3 {
+			t.Fatalf("leader=%d calls=%d err=%v", leader, calls, err)
+		}
+	})
+	t.Run("invalid leader", func(t *testing.T) {
+		_, err := awaitProcessStreamLeader(context.Background(), func(context.Context, ...jetstream.StreamInfoOpt) (*jetstream.StreamInfo, error) {
+			return &jetstream.StreamInfo{Cluster: &jetstream.ClusterInfo{Leader: "other-2"}}, nil
+		}, 3)
+		if err == nil {
+			t.Fatal("accepted a leader outside the fixture")
+		}
+	})
+	t.Run("election deadline", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		defer cancel()
+		_, err := awaitProcessStreamLeader(ctx, func(context.Context, ...jetstream.StreamInfoOpt) (*jetstream.StreamInfo, error) {
+			return &jetstream.StreamInfo{Cluster: &jetstream.ClusterInfo{}}, nil
+		}, 3)
+		if err == nil || !strings.Contains(err.Error(), "context deadline exceeded") {
+			t.Fatalf("missing bounded election failure: %v", err)
+		}
+	})
 }

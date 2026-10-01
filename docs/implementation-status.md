@@ -3582,3 +3582,34 @@ passes all 20 mixed seeds plus the final eight-row pressure and lease-disk jobs.
 Hosted delayed eight-owner KV sums 7.817–9.261 seconds still do not reproduce the
 mixed ~29-second update sum. Evidence is retained without weakening gates.
 Newer full simulation jobs and the original million-timer run remain live.
+
+
+## Worker-integrated frame-held promises, child retirement and GC
+
+A new shared-store seeded slice executes actual parent/child workers and client
+Signal, spills a 614,402-byte child result at the production threshold, restores
+its frame-held promise on replacement, verifies detached reusable result bytes,
+and audits both terminal invocations. Child retirement rejects an unfinished
+parent; after parent completion its retained frame preserves the result through
+child retirement and uncertain-purge GC. Offline complete-history replay audits
+initial declarations and named stages without child execution. Final parent
+retirement reclaims three objects, with generation-correct tombstones and no
+retired invocation or snapshot/purging metadata.
+
+Final 1,000 schedules pass in 14.007 seconds, including exact/cross-process replay.
+Three compiled controls fail semantically: skipped frame promise marking,
+skipped restored promise metadata, and disabled signal deduplication. The matching
+real R3 promise restart/retirement race passes in 19.125 seconds and vet passes.
+Final-source complete corpus/workload race passes in 95.086 seconds;
+100,000-seed validation remains pending.
+[Evidence and scope](scale/worker-promise-retirement-2026-10-01/) are retained.
+
+The db043bc mixed campaign passes all 20 seeds plus pressure/disk jobs, but its
+standard workflow fails the first four-fault seed before injection on an empty
+initial stream leader. The combined fixture now uses bounded election readiness
+before choosing faults. Absent/empty-to-elected metadata, invalid names and
+missing-election deadline checks pass; three actual four-fault repeats pass in
+10.011 seconds. Hosted confirmation remains open; recovery gates are unchanged.
+Full matrix/24-hour soak, combined continuation process/server cuts, online GC,
+remaining scale gates and final-source full simulation remain open. The original
+million-timer campaign remains live and has not been restarted for observation.

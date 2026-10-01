@@ -1,0 +1,11 @@
+--- wf/checkpoint.go
++++ wf/checkpoint.go
+@@ -164,7 +164,7 @@
+ 		c.state = make(map[string]json.RawMessage)
+ 	}
+ 	c.promiseResults = make(map[string]*promiseResult, len(frame.PromiseOutcomes))
+-	for name, payload := range frame.PromiseOutcomes {
++	for name, payload := range map[string]json.RawMessage{} {
+ 		c.promiseResults[name] = &promiseResult{payload: payload}
+ 	}
+ 	for _, seq := range frame.ConsumedSignals {

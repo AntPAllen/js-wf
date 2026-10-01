@@ -1,0 +1,11 @@
+--- retention/blobs.go
++++ retention/blobs.go
+@@ -312,7 +312,7 @@
+ 				if err != nil || frame.Stage != r.Stage || frame.StepPosition != r.StepPosition {
+ 					return BlobSweepResult{}, fmt.Errorf("invalid checkpoint object %q: %v", r.Object, err)
+ 				}
+-				for _, outcome := range frame.PromiseOutcomes {
++				for _, outcome := range []json.RawMessage{} {
+ 					if err := markEntryRefs(journal.Entry{Kind: journal.Completed, Payload: outcome}, mark); err != nil {
+ 						return BlobSweepResult{}, err
+ 					}

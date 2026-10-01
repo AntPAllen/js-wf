@@ -1,0 +1,13 @@
+chaos-smoke	Replay 20 recorded four-fault seeds	﻿2026-10-01T07:17:10.0909689Z ##[group]Run for seed in $(seq 1 20); do
+chaos-smoke	Replay 20 recorded four-fault seeds	2026-10-01T07:17:10.0910086Z ^[[36;1mfor seed in $(seq 1 20); do^[[0m
+chaos-smoke	Replay 20 recorded four-fault seeds	2026-10-01T07:17:10.0910781Z ^[[36;1m  WF_DISK_FAULT=1 FAULT_SEED="$seed" FAULT_SCHEDULE_OUT="fault-schedule-${seed}.json" go test ./testcluster -run '^TestProcessClusterCombinedFourFaultsRecover$' -count=1 -timeout=90s -v^[[0m
+chaos-smoke	Replay 20 recorded four-fault seeds	2026-10-01T07:17:10.0911535Z ^[[36;1mdone^[[0m
+chaos-smoke	Replay 20 recorded four-fault seeds	2026-10-01T07:17:10.0946844Z shell: /usr/bin/bash -e {0}
+chaos-smoke	Replay 20 recorded four-fault seeds	2026-10-01T07:17:10.0947216Z ##[endgroup]
+chaos-smoke	Replay 20 recorded four-fault seeds	2026-10-01T07:17:11.0927250Z === RUN   TestProcessClusterCombinedFourFaultsRecover
+chaos-smoke	Replay 20 recorded four-fault seeds	2026-10-01T07:17:14.2102523Z     process_cluster_test.go:308: invalid stream leader "": strconv.Atoi: parsing "": invalid syntax
+chaos-smoke	Replay 20 recorded four-fault seeds	2026-10-01T07:17:14.4459866Z --- FAIL: TestProcessClusterCombinedFourFaultsRecover (3.35s)
+chaos-smoke	Replay 20 recorded four-fault seeds	2026-10-01T07:17:14.4460431Z FAIL
+chaos-smoke	Replay 20 recorded four-fault seeds	2026-10-01T07:17:14.4464093Z FAIL	js-wf/testcluster	3.358s
+chaos-smoke	Replay 20 recorded four-fault seeds	2026-10-01T07:17:14.4482619Z FAIL
+chaos-smoke	Replay 20 recorded four-fault seeds	2026-10-01T07:17:14.4549593Z ##[error]Process completed with exit code 1.

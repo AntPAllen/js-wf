@@ -1,0 +1,11 @@
+--- sim/worker_promise_retirement_replay_test.go
++++ sim/worker_promise_retirement_replay_test.go
+@@ -73,7 +73,7 @@
+ 		p.Blobs.event(event)
+ 		return client.SignalPublishAck{}, ErrTransportLost
+ 	}
+-	if prior, ok := p.signals[id]; id != "" && ok && p.schedule.NowMillis()-prior.atMillis < (2*time.Minute).Milliseconds() {
++	if prior, ok := p.signals[id]; false && id != "" && ok && p.schedule.NowMillis()-prior.atMillis < (2*time.Minute).Milliseconds() {
+ 		event.Outcome = "duplicate"
+ 		event.Sequence = prior.sequence
+ 		if fault == LoseAckAfterCommit {
