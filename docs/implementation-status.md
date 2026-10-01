@@ -5323,3 +5323,27 @@ Tier1 simulation (1,000 seeds,180 pins) is active in systemd unit
 js-wf-tier1-fresh-timer-20261001,PID105758 at launch,with proof root
 /tmp/js-wf-tier1-fresh-timer-20261001. These are pending evidence. Existing
 comprehensive campaigns remain intact but predate the SDK fix.
+
+
+### Fresh-timer full-suite pass and seeded production regression
+
+Source55bd33e completes the whole1,000-seed simulator suite and strict guard
+in106.096s:150 top-level passes,two documented skips and180 pins.
+[Complete source-bound proof](scale/tier1-suite-guard-2026-10-01/fresh-timer-fix-pass/)
+is retained. The unit ends inactive/success. This is not the100,000-seed gate.
+
+Added a seeded real-worker/SDK/journal/lease/outcome workload for an older
+unshifted delivery timestamp reaching a ±60s timer source. Subsequent timer
+wakeups use that scheduling leader's clock. Sixteen source/API/duration cases
+require eight genuine waits,nine replays,one immutable42,retained invariants
+and physical modeled drain.1,000 seeds pass1.507s; race checks plus all184
+pins pass30.886s. Original SDK overlay fails at seed1 in0.004s:zero schedules,
+all eight sleeps complete at virtual0. [Negative trace and model evidence](scale/fresh-timer-model-2026-10-01/)
+are retained. Four new pins raise the corpus to184; the previous whole-suite
+proof does not include these additions.
+
+Comprehensive36940808396 fails before seeded execution because rg is absent
+on its runner. [Original setup evidence](scale/tier1-comprehensive-2026-10-01/expanded-source-missing-rg/)
+is retained. Workflow inventory commands now use standard grep/find,verified
+byte-identical against the prior completed inventory; the strict guard stays.
+Behind fix run36941535795 and ahead diagnostic36939480705 remain in progress.
