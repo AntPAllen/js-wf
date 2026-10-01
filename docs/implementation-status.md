@@ -4412,3 +4412,15 @@ are retained. Other jobs remain live; this campaign cannot clear the required
 200-consecutive-seed gate. Neither failure is a reason to repeat the historical
 30-second-TTL worker-kill mismatch. The independent million-timer user service
 remains active with its original 24-hour and latency targets.
+
+The ten-minute mixed R5 journal row is now independently live from clean source
+aec7486 as user service js-wf-tier3-journal-10m-20261001.service, MainPID28253
+at launch17:36:53 UTC. It requires nineteen confirmed faults and the unchanged
+30-second per-workload p99 gates; [source/binary identity](scale/tier3-mixed-journal-2026-10-01/ten-minute-service-start.json)
+is retained. Its 3GiB service cap does not include Docker daemon containers.
+The comprehensive Tier 1 infrastructure deadline is raised from170 to300 minutes
+(job320) because the expanded suite demonstrably exceeded the former whole-package
+limit while passing preceding workloads. This changes no seed count, modeled
+invariant or runtime recovery target. A new complete run is still required.
+Seed28 raw queue/stalled-state, faults, dispatch and server artifacts are now
+retained alongside its failure log; no cause is inferred solely from its timeout.

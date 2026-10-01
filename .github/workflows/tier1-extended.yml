@@ -13,7 +13,7 @@ on:
 jobs:
   sim:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 320
     env:
       SIM_SEEDS: ${{ inputs.seeds }}
       SIM_COVERAGE_SUMMARY: '1'
@@ -26,7 +26,7 @@ jobs:
       - name: Run seeded transport suite
         run: |
           echo "Tier 1 seeds per workload: 1..${SIM_SEEDS}"
-          /usr/bin/time -f 'elapsed=%e user=%U system=%S' go test -v ./sim -count=1 -timeout=170m
+          /usr/bin/time -f 'elapsed=%e user=%U system=%S' go test -v ./sim -count=1 -timeout=300m
       - if: failure()
         timeout-minutes: 4
         run: |
