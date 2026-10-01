@@ -4744,3 +4744,29 @@ All40 Python tests and vet pass. Erasing uncertainty fails both workloads at
 seed1 in0.005s. The control also exposed and corrected a timer test assertion
 that could be mistaken for an expected transport error; that initial control
 remains visible. This is scoped observer proof, not a new full suite or24h gate.
+
+
+## Quorum route ten-minute proof and retained majority probe failure
+
+[Hosted quorum run36913601073](scale/tier3-mixed-route-quorum-2026-10-01/hosted-ten-minute/)
+is terminal SUCCESS atad3a251:668.49s/669.514s package,1,204 completions,13,285
+entries and19 confirmed three-node cuts. All5,676 raw/recovery samples and
+original cut/heal/probe artifacts reverify unchanged. Worst recovery terminal
+p99 is5.926s and raw terminal p99 is25.428s; all histories/invariants/drain pass.
+All11 fencing records match counters and confirmed outages; one already-terminal
+duplicate is distinguished from ten later-terminal records. All103 repair
+attempts have checked explanations:102 acknowledged and one uncertain signal
+publication, whose error and possible commit remain visible. This closes one
+source/ten-minute quorum slice, not default-ping/full24-hour coverage.
+
+[Majority run36914593168](scale/tier3-mixed-route-majority-2026-10-01/hosted-probe-failure/)
+is terminal FAILURE atcc001d2. At the first confirmed single-node cut its
+one-shot3s probe returned no response from stream; the controller canceled
+work and no final acceptance exists. Exact server cause remains unconfirmed.
+The probe now uses a15s whole budget with existing named-transient retries;
+workflow raw p99 and all safety/drain gates are unchanged. The [bounded probe
+race smoke](scale/tier3-mixed-route-majority-2026-10-01/bounded-probe-smoke/)
+passes64.75s/65.782s package,224 completions,2,465 entries and confirmed journal
+progress2384→2465 during isolation. Worst terminal p99 is9.236s; all43 repairs
+have checked explanations and fencing is zero. It does not reproduce the exact
+hosted failure. A fresh clean-source ten-minute row remains required.

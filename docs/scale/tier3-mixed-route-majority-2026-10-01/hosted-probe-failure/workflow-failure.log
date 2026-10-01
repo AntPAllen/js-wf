@@ -1,0 +1,40 @@
+journal	Sustain the selected five-container mixed fault row	﻿2026-10-01T19:29:32.9300467Z ##[group]Run set -o pipefail
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9300822Z ^[[36;1mset -o pipefail^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9301108Z ^[[36;1mcase "$TIER3_MATRIX_ROW" in^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9301560Z ^[[36;1m  journal) row_test=TestFiveContainerMixedJournalLeaderEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9302223Z ^[[36;1m  consumer) row_test=TestFiveContainerMixedConsumerLeaderEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9302890Z ^[[36;1m  restart) row_test=TestFiveContainerMixedAllServersEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9303531Z ^[[36;1m  fanout_restart) row_test=TestFiveContainerMixedFanoutRestartEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9304189Z ^[[36;1m  route_quorum) row_test=TestFiveContainerMixedRouteQuorumEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9304853Z ^[[36;1m  route_majority) row_test=TestFiveContainerMixedRouteMajorityEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9305338Z ^[[36;1m  *) exit 1 ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9305561Z ^[[36;1mesac^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9306558Z ^[[36;1mgo test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9308300Z ^[[36;1mpython3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --output /tmp/tier3-mixed-journal-result.json^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9309715Z ^[[36;1mpython3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9374590Z shell: /usr/bin/bash -e {0}
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9374861Z env:
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9375062Z   WF_TIER3_MATRIX: 1
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9375313Z   TIER3_MATRIX_ROW: route_majority
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9375596Z   WF_TIER3_MATRIX_DURATION: 10m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9376113Z   WF_TIER3_SYNC_INTERVAL: 2m
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9376428Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9376786Z   GOMEMLIMIT: 512MiB
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9377004Z   GOMAXPROCS: 2
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:29:32.9377223Z ##[endgroup]
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:31:05.8049325Z === RUN   TestFiveContainerMixedRouteMajorityEveryThirtySeconds
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:31:32.7918803Z     tier3_mixed_journal_test.go:54: tier3 provisioning retry: context deadline exceeded
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:31:35.8924367Z     tier3_mixed_journal_test.go:54: tier3 provisioning retry: context deadline exceeded
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:31:42.1064001Z     tier3_mixed_journal_test.go:54: tier3 mixed batch=1 elapsed=5.038308135s
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:31:46.0385660Z     tier3_mixed_journal_test.go:54: tier3 mixed batch=2 elapsed=8.971291214s
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:31:50.0763311Z     tier3_mixed_journal_test.go:54: tier3 mixed batch=3 elapsed=13.008945145s
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:31:54.1072281Z     tier3_mixed_journal_test.go:54: tier3 mixed batch=4 elapsed=17.0401325s
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:31:58.1357716Z     tier3_mixed_journal_test.go:54: tier3 mixed batch=5 elapsed=21.068322714s
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:32:02.0619020Z     tier3_mixed_journal_test.go:54: tier3 mixed batch=6 elapsed=24.994849746s
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:32:06.1011404Z     tier3_mixed_journal_test.go:54: tier3 mixed batch=7 elapsed=29.034138792s
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:32:10.6845207Z     tier3_mixed_journal_test.go:328: tier3 route_majority fault failed: majority probe did not acknowledge: nats: no response from stream
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:32:10.6922132Z     tier3_mixed_journal_test.go:54: resultmatrixtimer/tier3-1-batch-7-5= err=context canceled
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:32:12.6409287Z --- FAIL: TestFiveContainerMixedRouteMajorityEveryThirtySeconds (66.84s)
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:32:12.6410826Z FAIL
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:32:12.6476938Z FAIL	js-wf/integration	66.855s
+journal	Sustain the selected five-container mixed fault row	2026-10-01T19:32:12.8312806Z ##[error]Process completed with exit code 1.

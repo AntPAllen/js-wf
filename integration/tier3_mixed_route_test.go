@@ -100,9 +100,21 @@ func partitionFiveContainerMixedRoute(ctx context.Context, js jetstream.JetStrea
 		}
 	}
 	// Client ports remain reachable; only server-to-server routes are removed.
-	attempt, cancel := context.WithTimeout(bound, 3*time.Second)
-	during, publishErr := js.Publish(attempt, "tier3.route.probe", []byte("during"))
-	cancel()
+	var during *jetstream.PubAck
+	var publishErr error
+	if quorumRemoving {
+		attempt, cancel := context.WithTimeout(bound, 3*time.Second)
+		during, publishErr = js.Publish(attempt, "tier3.route.probe", []byte("during"))
+		cancel()
+	} else {
+		// Majority availability permits bounded leader recovery; a three-second
+		// one-shot probe imposed a stricter gate than the workflow's30s p99.
+		attempt, cancel := context.WithTimeout(bound, 15*time.Second)
+		during, publishErr = matrixReadMetadata(attempt, func(request context.Context) (*jetstream.PubAck, error) {
+			return js.Publish(request, "tier3.route.probe", []byte("during"))
+		})
+		cancel()
+	}
 	if quorumRemoving && publishErr == nil {
 		return event, fmt.Errorf("R5 publication acknowledged with three route-isolated peers: %+v", during)
 	}
