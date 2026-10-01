@@ -1,0 +1,24 @@
+=== RUN   TestContinuationWorkerSIGKILLPublicationCuts
+=== RUN   TestContinuationWorkerSIGKILLPublicationCuts/before_manifest
+    continuation_kill_test.go:487: SIGKILL cut=before_manifest repaired=1 recovery=13.130432537s entries=16 first_epoch=1 final_epoch=20 archive_reads=0 frame_reads=0 offline_steps=12
+=== RUN   TestContinuationWorkerSIGKILLPublicationCuts/after_manifest
+    continuation_kill_test.go:487: SIGKILL cut=after_manifest repaired=1 recovery=13.033500025s entries=15 first_epoch=1 final_epoch=13 archive_reads=0 frame_reads=1 offline_steps=12
+=== RUN   TestContinuationWorkerSIGKILLPublicationCuts/after_journal_purge
+    continuation_kill_test.go:487: SIGKILL cut=after_journal_purge repaired=1 recovery=13.034381882s entries=15 first_epoch=1 final_epoch=14 archive_reads=0 frame_reads=1 offline_steps=12
+=== RUN   TestContinuationWorkerSIGKILLPublicationCuts/after_signal_purge
+    continuation_kill_test.go:487: SIGKILL cut=after_signal_purge repaired=1 recovery=12.929397051s entries=15 first_epoch=1 final_epoch=14 archive_reads=0 frame_reads=1 offline_steps=12
+--- PASS: TestContinuationWorkerSIGKILLPublicationCuts (66.69s)
+    --- PASS: TestContinuationWorkerSIGKILLPublicationCuts/before_manifest (16.79s)
+    --- PASS: TestContinuationWorkerSIGKILLPublicationCuts/after_manifest (16.68s)
+    --- PASS: TestContinuationWorkerSIGKILLPublicationCuts/after_journal_purge (16.62s)
+    --- PASS: TestContinuationWorkerSIGKILLPublicationCuts/after_signal_purge (16.60s)
+=== RUN   TestContinuationWorkerSIGKILLFrameCuts
+=== RUN   TestContinuationWorkerSIGKILLFrameCuts/before_frame
+    continuation_kill_test.go:487: SIGKILL cut=before_frame repaired=0 recovery=13.136346266s entries=16 first_epoch=1 final_epoch=19 archive_reads=0 frame_reads=0 offline_steps=12
+=== RUN   TestContinuationWorkerSIGKILLFrameCuts/after_frame
+    continuation_kill_test.go:487: SIGKILL cut=after_frame repaired=0 recovery=13.131888969s entries=16 first_epoch=1 final_epoch=19 archive_reads=0 frame_reads=0 offline_steps=12
+--- PASS: TestContinuationWorkerSIGKILLFrameCuts (33.50s)
+    --- PASS: TestContinuationWorkerSIGKILLFrameCuts/before_frame (16.71s)
+    --- PASS: TestContinuationWorkerSIGKILLFrameCuts/after_frame (16.80s)
+PASS
+ok  	js-wf/integration	101.236s

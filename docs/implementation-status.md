@@ -3076,3 +3076,47 @@ acceptance gates remain open, along with final-source full matrix/24-hour soak,
 mixed seed 65 latency and online GC. The earlier full simulation campaigns and
 million-timer process remain live without restart. Standard CI at 9b3831e has
 now passed, including its continuation limit contract.
+
+
+## Actual SIGKILL before/after acknowledged checkpoint frame storage
+
+Two earlier real R3 cuts now hold a child worker after its durable checkpoint
+request and either before frame Put or after acknowledged frame Put, before
+checkpoint completion. The parent confirms seven live journal records, a
+pending finish_v1 declaration at index 6, absent manifest and prospective frame
+identity/anchor/hash/SDK offset. Before Put the object is absent; after Put its
+exact bytes are readable from another peer. The actual child exit is SIGKILL.
+The incomplete checkpoint must not produce a suspended-scanner candidate.
+
+A replacement pinned elsewhere recovers the original unacknowledged runs,
+replays the pending declaration without another prefix effect and commits its
+higher-epoch frame. The confirmed pre-kill prefix is byte-identical. Result 46,
+state/locals, buffered signal, peer immutability, raw integrity and all 12 SDK
+entries in offline staged replay pass. After acknowledged frame storage, the
+abandoned old-epoch object remains immutable; quiescent sweep deletes exactly
+that orphan and preserves the replacement frame and reconstructable history.
+
+All six new/existing kill cases passed under race in 101.236 seconds. New kill
+recovery samples are 13.136/13.132 seconds; these individual samples do not prove
+release p99. A compiled replay mutant repeats the prefix callback and fails
+before_frame's effect-count assertion in 16.267 seconds. Vet passed. [Logs,
+patch and source hashes](scale/continuation-frame-kill-2026-10-01/) retain the
+proof. Both hosted production-cap jobs at 02d5d19 also passed in
+[run 36810716129](https://github.com/AntPAllen/js-wf/actions/runs/36810716129).
+Runtime source is unchanged from 7e414b2. Remaining suspension/handoff cuts,
+combined/server faults, modeled kill/GC and independent release gates stay open.
+
+## Fresh mixed seed 12 latency miss at 7e414b2
+
+[Mixed CI run 36810326702](https://github.com/AntPAllen/js-wf/actions/runs/36810326702)
+passed seeds 1–11 then failed seed 12 terminal p99 at 40.574 seconds, before the
+final integrity audit. Persistent 85 ms disk delay is on node 2, node 0 is
+isolated/killed, and node 1 is paused. Two slow signal invocations spend measured
+39.293/38.436 seconds across 48 replacement pre-append KV updates each, with zero
+errors and only 60/76 microseconds total local gate wait. These measurements do
+not establish the underlying server cause or causal connection to the recent
+canceled-timer fix. [Downloaded logs, schedule, operation events, disk/Raft
+attribution and grouped timings](scale/mixed-seed12-7e414b2-2026-10-01/) are retained.
+No fencing or renewal guarantee has been relaxed. This miss and seed 65 remain
+open, as do final-source full matrix/24-hour soak and online GC. The million-timer
+process and both full simulation jobs remain live without restart.

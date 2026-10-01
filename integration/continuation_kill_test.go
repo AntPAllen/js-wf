@@ -3,8 +3,12 @@
 package integration_test
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -20,6 +24,7 @@ import (
 	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/reconcile"
+	"js-wf/retention"
 	"js-wf/wf"
 	"js-wf/worker"
 
@@ -64,6 +69,38 @@ func (p *continuationKillSnapshotPort) PurgeSignals(ctx context.Context, subject
 		return err
 	}
 	p.stopAt("after_signal_purge")
+	return nil
+}
+
+type continuationKillResultPort struct {
+	worker.ResultBlobPort
+	stop *continuationKillSnapshotPort
+}
+
+func (p *continuationKillResultPort) PutBytes(ctx context.Context, name string, data []byte) error {
+	var frame struct {
+		Stage string `json:"stage"`
+	}
+	isFrame := json.Unmarshal(data, &frame) == nil && frame.Stage == "finish_v1"
+	if isFrame && (p.stop.cut == "before_frame" || p.stop.cut == "after_frame") {
+		metadata, err := json.Marshal(struct {
+			Name string
+			Data []byte
+		}{name, data})
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(p.stop.marker+".frame", metadata, 0600); err != nil {
+			return err
+		}
+		p.stop.stopAt("before_frame")
+	}
+	if err := p.ResultBlobPort.PutBytes(ctx, name, data); err != nil {
+		return err
+	}
+	if isFrame {
+		p.stop.stopAt("after_frame")
+	}
 	return nil
 }
 
@@ -129,7 +166,7 @@ func TestContinuationKillChild(t *testing.T) {
 	}
 	port := &continuationKillSnapshotPort{SnapshotWritePort: journal.NewSnapshotPort(js), cut: os.Getenv("WF_CONTINUATION_KILL_CUT"), marker: os.Getenv("WF_CONTINUATION_KILL_MARKER")}
 	initial, stages := continuationKillHandlers(os.Getenv("WF_CONTINUATION_KILL_LOG"))
-	w, err := worker.New(context.Background(), js, "checkpoint-killed", initial, worker.WithContinuations(continuationKillType, stages), worker.WithJournalStore(journal.NewWithJetStreamSnapshotPort(js, port)))
+	w, err := worker.New(context.Background(), js, "checkpoint-killed", initial, worker.WithContinuations(continuationKillType, stages), worker.WithJournalStore(journal.NewWithJetStreamSnapshotPort(js, port)), worker.WithResultBlobPort(&continuationKillResultPort{ResultBlobPort: worker.NewResultBlobPort(js), stop: port}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,7 +177,16 @@ func TestContinuationKillChild(t *testing.T) {
 }
 
 func TestContinuationWorkerSIGKILLPublicationCuts(t *testing.T) {
-	for _, cut := range []string{"before_manifest", "after_manifest", "after_journal_purge", "after_signal_purge"} {
+	testContinuationWorkerSIGKILLCuts(t, []string{"before_manifest", "after_manifest", "after_journal_purge", "after_signal_purge"})
+}
+
+func TestContinuationWorkerSIGKILLFrameCuts(t *testing.T) {
+	testContinuationWorkerSIGKILLCuts(t, []string{"before_frame", "after_frame"})
+}
+
+func testContinuationWorkerSIGKILLCuts(t *testing.T, cuts []string) {
+	t.Helper()
+	for _, cut := range cuts {
 		t.Run(cut, func(t *testing.T) {
 			all, cluster := setup(t)
 			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
@@ -204,15 +250,60 @@ func TestContinuationWorkerSIGKILLPublicationCuts(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if len(before) != 8 || before[7].Kind != journal.StepCompleted {
-				t.Fatalf("cut journal entries=%d", len(before))
+			pendingFrame := cut == "before_frame" || cut == "after_frame"
+			unpublished := pendingFrame || cut == "before_manifest"
+			wantEntries, wantKind := 8, journal.StepCompleted
+			if pendingFrame {
+				wantEntries, wantKind = 7, journal.StepRequested
 			}
-			firstEpoch := before[7].Epoch
+			if len(before) != wantEntries || before[len(before)-1].Kind != wantKind {
+				t.Fatalf("cut journal entries=%d want=%d tail=%v", len(before), wantEntries, before)
+			}
+			lastBefore := before[len(before)-1]
+			firstEpoch := lastBefore.Epoch
+			var abandonedFrame struct {
+				Name string
+				Data []byte
+			}
+			if pendingFrame {
+				var declaration struct{ Kind, Name string }
+				if err := json.Unmarshal(lastBefore.Payload, &declaration); err != nil || declaration.Kind != "checkpoint" || declaration.Name != "finish_v1" {
+					t.Fatalf("pending checkpoint=%s err=%v", lastBefore.Payload, err)
+				}
+				markerBytes, err := os.ReadFile(marker + ".frame")
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err := json.Unmarshal(markerBytes, &abandonedFrame); err != nil {
+					t.Fatal(err)
+				}
+				digest := sha256.Sum256(abandonedFrame.Data)
+				hash := hex.EncodeToString(digest[:])
+				if abandonedFrame.Name != "step-result-"+hash {
+					t.Fatal("frame object name not bound to bytes")
+				}
+				_, frameInfo, err := wf.NewCheckpointContext(ctx, nil, nil, abandonedFrame.Data, wf.CheckpointLocation{Type: continuationKillType, ID: continuationKillID, InvSeq: handle.InvSeq, Index: lastBefore.Index + 1, Epoch: lastBefore.Epoch, Hash: hash})
+				if err != nil || frameInfo.Stage != "finish_v1" || frameInfo.StepPosition != 6 {
+					t.Fatalf("prospective frame=%+v err=%v", frameInfo, err)
+				}
+				objects, err := all[1].ObjectStore(ctx, "WF_BLOB")
+				if err != nil {
+					t.Fatal(err)
+				}
+				stored, err := objects.GetBytes(ctx, abandonedFrame.Name)
+				if cut == "before_frame" {
+					if !errors.Is(err, jetstream.ErrObjectNotFound) {
+						t.Fatalf("frame exists before put: %v", err)
+					}
+				} else if err != nil || !bytes.Equal(stored, abandonedFrame.Data) {
+					t.Fatalf("acknowledged frame missing or changed: %v", err)
+				}
+			}
 			view, err := store.ReadCheckpoint(ctx, continuationKillType, continuationKillID, handle.InvSeq)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if (view == nil) != (cut == "before_manifest") {
+			if (view == nil) != unpublished {
 				t.Fatalf("unexpected manifest at %s: %+v", cut, view)
 			}
 			for _, name := range []string{"WF_JRN", "WF_SIG"} {
@@ -225,8 +316,8 @@ func TestContinuationWorkerSIGKILLPublicationCuts(t *testing.T) {
 					t.Fatal(err)
 				}
 				want := uint64(1)
-				if name == "WF_JRN" && (cut == "before_manifest" || cut == "after_manifest") {
-					want = 8
+				if name == "WF_JRN" && (unpublished || cut == "after_manifest") {
+					want = uint64(wantEntries)
 				}
 				if name == "WF_SIG" && cut == "after_signal_purge" {
 					want = 0
@@ -246,13 +337,20 @@ func TestContinuationWorkerSIGKILLPublicationCuts(t *testing.T) {
 				t.Fatalf("not SIGKILL: state=%v err=%v", child.ProcessState, waitErr)
 			}
 			repair, err := reconcile.NewSuspendedScan(all[1]).Scan(ctx, handle.InvSeq, 1, false)
-			if err != nil || repair.Reenqueued != 1 || len(repair.Candidates) != 1 || repair.Candidates[0].Reason != "continuation" || repair.Candidates[0].JournalSeq != before[7].Sequence {
+			wantRepairs := 1
+			if pendingFrame {
+				wantRepairs = 0
+			}
+			if err != nil || repair.Reenqueued != wantRepairs || len(repair.Candidates) != wantRepairs {
+				t.Fatalf("checkpoint repair=%+v err=%v", repair, err)
+			}
+			if !pendingFrame && (repair.Candidates[0].Reason != "continuation" || repair.Candidates[0].JournalSeq != lastBefore.Sequence) {
 				t.Fatalf("checkpoint repair=%+v err=%v", repair, err)
 			}
 			initial, stages := continuationKillHandlers(effectLog)
 			guard := &checkpointNoArchivePort{SnapshotWritePort: journal.NewSnapshotPort(all[2])}
 			options := []worker.Option{worker.WithContinuations(continuationKillType, stages)}
-			if cut != "before_manifest" {
+			if !unpublished {
 				options = append(options, worker.WithJournalStore(journal.NewWithJetStreamSnapshotPort(all[2], guard)))
 			}
 			successor, err := worker.New(ctx, all[2], "checkpoint-successor", initial, options...)
@@ -283,13 +381,13 @@ func TestContinuationWorkerSIGKILLPublicationCuts(t *testing.T) {
 				t.Fatal(err)
 			}
 			expectedInitial := 1
-			if cut == "before_manifest" {
+			if unpublished {
 				expectedInitial = 2
 			}
 			if strings.Count(string(data), "initial\n") != expectedInitial || strings.Count(string(data), "prefix_effect\n") != 1 || strings.Count(string(data), "suffix_effect\n") != 1 {
 				t.Fatalf("unexpected handler/effect counts: %s", data)
 			}
-			if cut != "before_manifest" && (guard.archives != 0 || guard.frames == 0) {
+			if !unpublished && (guard.archives != 0 || guard.frames == 0) {
 				t.Fatalf("archive=%d frame=%d", guard.archives, guard.frames)
 			}
 			records, _, err := store.Read(ctx, continuationKillType, continuationKillID)
@@ -298,6 +396,37 @@ func TestContinuationWorkerSIGKILLPublicationCuts(t *testing.T) {
 			}
 			if records[len(records)-1].Kind != journal.Completed || records[len(records)-1].Epoch <= firstEpoch {
 				t.Fatal("successor did not complete under a higher epoch")
+			}
+			beforeBytes, _ := json.Marshal(before)
+			restoredPrefix, _ := json.Marshal(records[:len(before)])
+			if !bytes.Equal(beforeBytes, restoredPrefix) {
+				t.Fatal("successor changed the confirmed pre-kill journal prefix")
+			}
+			if cut == "after_frame" {
+				current, err := store.ReadCheckpoint(ctx, continuationKillType, continuationKillID, handle.InvSeq)
+				if err != nil || current == nil || current.Snapshot.Runtime.Object == abandonedFrame.Name {
+					t.Fatalf("replacement did not publish its own higher-epoch frame: view=%+v err=%v", current, err)
+				}
+				objects, err := all[1].ObjectStore(ctx, "WF_BLOB")
+				if err != nil {
+					t.Fatal(err)
+				}
+				old, err := objects.GetBytes(ctx, abandonedFrame.Name)
+				if err != nil || !bytes.Equal(old, abandonedFrame.Data) {
+					t.Fatalf("unreferenced confirmed object changed: %v", err)
+				}
+				// Child is dead and replacement loop has joined: all writers are quiescent.
+				sweep, err := retention.SweepBlobsQuiescent(ctx, all[1], 0, time.Now().Add(time.Minute))
+				if err != nil || sweep.Deleted != 1 {
+					t.Fatalf("orphan collection=%+v err=%v", sweep, err)
+				}
+				if _, err := objects.GetBytes(ctx, abandonedFrame.Name); !errors.Is(err, jetstream.ErrObjectNotFound) {
+					t.Fatalf("orphan still exists: %v", err)
+				}
+				kept, err := store.ReadCheckpoint(ctx, continuationKillType, continuationKillID, handle.InvSeq)
+				if err != nil || kept == nil || !bytes.Equal(kept.Frame, current.Frame) {
+					t.Fatalf("collection damaged live checkpoint: %v", err)
+				}
 			}
 			report, err := integrity.Check(ctx, all[1])
 			if err != nil || report.Invocations != 1 || report.Terminal != 1 {

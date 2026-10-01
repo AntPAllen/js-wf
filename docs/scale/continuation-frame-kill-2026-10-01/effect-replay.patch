@@ -1,0 +1,12 @@
+--- a/wf/util.go
++++ b/wf/util.go
+@@ -25,6 +25,9 @@
+ 	material := c.parentType + ":" + c.parentID + ":" + strconv.FormatUint(c.parentInvSeq, 10) + ":" + strconv.FormatUint(c.stepPosition(), 10) + ":" + name
+ 	digest := sha256.Sum256([]byte(material))
+ 	key := "wf-" + hex.EncodeToString(digest[:])
++	if !c.replay && c.position+1 < len(c.entries) {
++		if _, err := fn(c.base, key); err != nil { return zero, err }
++	}
+ 	declared := struct {
+ 		Input any    `json:"input"`
+ 		Key   string `json:"dedup_key"`

@@ -1,0 +1,425 @@
+[4481] 2026/10/01 03:32:06.946154 [INF] Starting nats-server
+[4481] 2026/10/01 03:32:06.946200 [INF]   Version:  2.15.0
+[4481] 2026/10/01 03:32:06.946203 [INF]   Git:      [not set]
+[4481] 2026/10/01 03:32:06.946205 [INF]   Cluster:  wf-process
+[4481] 2026/10/01 03:32:06.946207 [INF]   Name:     wf-process-1
+[4481] 2026/10/01 03:32:06.946210 [INF]   Node:     St9I6EVH
+[4481] 2026/10/01 03:32:06.946212 [INF]   ID:       NA5ZS556QRJCFIOGMDY56SUEU2RXVBVETLXPIQ7U44VLANSU54YKKD3N
+[4481] 2026/10/01 03:32:06.946591 [INF] Starting http monitor on 127.0.0.1:38701
+[4481] 2026/10/01 03:32:06.946715 [INF] Starting JetStream
+[4481] 2026/10/01 03:32:06.946945 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+[4481] 2026/10/01 03:32:06.946952 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+[4481] 2026/10/01 03:32:06.946955 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+[4481] 2026/10/01 03:32:06.946958 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+[4481] 2026/10/01 03:32:06.946961 [INF] 
+[4481] 2026/10/01 03:32:06.946964 [INF]          https://docs.nats.io/jetstream
+[4481] 2026/10/01 03:32:06.946966 [INF] 
+[4481] 2026/10/01 03:32:06.946968 [INF] ---------------- JETSTREAM ----------------
+[4481] 2026/10/01 03:32:06.946971 [INF]   Strict:          true
+[4481] 2026/10/01 03:32:06.946975 [INF]   Max Memory:      11.71 GB
+[4481] 2026/10/01 03:32:06.946979 [INF]   Max Storage:     63.57 GB
+[4481] 2026/10/01 03:32:06.946982 [INF]   Store Directory: "/tmp/TestMixedWorkflowsRecoverFromFourServerFaults1777335255/001/node-1/jetstream"
+[4481] 2026/10/01 03:32:06.947011 [INF]   API Level:       5
+[4481] 2026/10/01 03:32:06.947015 [INF] -------------------------------------------
+[4481] 2026/10/01 03:32:06.947320 [INF] Starting JetStream cluster
+[4481] 2026/10/01 03:32:06.947327 [INF] Creating JetStream metadata controller
+[4481] 2026/10/01 03:32:06.948148 [INF] JetStream cluster bootstrapping
+[4481] 2026/10/01 03:32:06.952935 [INF] Took 6.213529ms to start JetStream
+[4481] 2026/10/01 03:32:06.953022 [INF] Listening for client connections on 127.0.0.1:39121
+[4481] 2026/10/01 03:32:06.953030 [INF] Server is ready
+[4481] 2026/10/01 03:32:06.953103 [INF] Cluster name is wf-process
+[4481] 2026/10/01 03:32:06.953159 [INF] Listening for route connections on 127.0.0.1:39417
+[4481] 2026/10/01 03:32:06.953645 [INF] 127.0.0.1:44307 - rid:8 - Route connection created
+[4481] 2026/10/01 03:32:06.953891 [INF] 127.0.0.1:44307 - rid:9 - Route connection created
+[4481] 2026/10/01 03:32:06.954694 [INF] 127.0.0.1:44662 - rid:10 - Route connection created
+[4481] 2026/10/01 03:32:06.954838 [INF] 127.0.0.1:44648 - rid:11 - Route connection created
+[4481] 2026/10/01 03:32:06.955363 [INF] 127.0.0.1:44648 - rid:11 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:06.955931 [INF] 127.0.0.1:44666 - rid:12 - Route connection created
+[4481] 2026/10/01 03:32:06.956542 [INF] 127.0.0.1:44307 - rid:13 - Route connection created
+[4481] 2026/10/01 03:32:06.956818 [INF] 127.0.0.1:44307 - rid:13 - Router connection closed: Duplicate Route - Remote: wf-process-0
+[4481] 2026/10/01 03:32:06.957474 [INF] 127.0.0.1:36371 - rid:14 - Route connection created
+[4481] 2026/10/01 03:32:06.957830 [INF] 127.0.0.1:36371 - rid:15 - Route connection created
+[4481] 2026/10/01 03:32:06.958619 [INF] 127.0.0.1:36371 - rid:16 - Route connection created
+[4481] 2026/10/01 03:32:06.959762 [INF] 127.0.0.1:36371 - rid:17 - Route connection created
+[4481] 2026/10/01 03:32:07.054057 [WRN] Waiting for routing to be established...
+[4481] 2026/10/01 03:32:07.054119 [WRN] JetStream has not established contact with a meta leader
+[4481] 2026/10/01 03:32:07.134970 [INF] JetStream cluster new metadata leader: wf-process-2/wf-process
+[4481] 2026/10/01 03:32:11.216314 [INF] JetStream cluster new stream leader for '$G > WF_RUN'
+[4481] 2026/10/01 03:32:11.275383 [INF] JetStream cluster new stream leader for '$G > WF_JRN'
+[4481] 2026/10/01 03:32:11.334216 [INF] JetStream cluster new stream leader for '$G > WF_SIG'
+[4481] 2026/10/01 03:32:11.393771 [INF] JetStream cluster new stream leader for '$G > WF_PURGE'
+[4481] 2026/10/01 03:32:11.453322 [INF] JetStream cluster new stream leader for '$G > KV_WF_LEASE'
+[4481] 2026/10/01 03:32:11.577170 [INF] JetStream cluster new stream leader for '$G > KV_WF_VIEW'
+[4481] 2026/10/01 03:32:11.638079 [INF] JetStream cluster new stream leader for '$G > KV_WF_ASSIGN'
+[4481] 2026/10/01 03:32:11.790583 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_27'
+[4481] 2026/10/01 03:32:12.015409 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_51'
+[4481] 2026/10/01 03:32:12.028675 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_33'
+[4481] 2026/10/01 03:32:24.153179 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_51' has NO quorum, stalled.
+[4481] 2026/10/01 03:32:24.153364 [WRN] JetStream cluster stream '$G > KV_WF_VIEW' has NO quorum, stalled
+[4481] 2026/10/01 03:32:24.153485 [WRN] JetStream cluster stream '$G > KV_WF_LEASE' has NO quorum, stalled
+[4481] 2026/10/01 03:32:24.154684 [WRN] JetStream cluster stream '$G > WF_PURGE' has NO quorum, stalled
+[4481] 2026/10/01 03:32:24.156003 [WRN] JetStream cluster stream '$G > WF_RUN' has NO quorum, stalled
+[4481] 2026/10/01 03:32:24.156146 [ERR] 127.0.0.1:44307 - rid:8 - Error flushing: writev tcp 127.0.0.1:59548->127.0.0.1:44307: writev: broken pipe
+[4481] 2026/10/01 03:32:24.156161 [INF] 127.0.0.1:44307 - rid:8 - Router connection closed: Write Error - Remote: wf-process-0
+[4481] 2026/10/01 03:32:24.157181 [WRN] JetStream cluster stream '$G > WF_SIG' has NO quorum, stalled
+[4481] 2026/10/01 03:32:24.157266 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_27' has NO quorum, stalled.
+[4481] 2026/10/01 03:32:24.158706 [INF] 127.0.0.1:44666 - rid:12 - Router connection closed: Client Closed - Remote: wf-process-0
+[4481] 2026/10/01 03:32:24.158979 [WRN] JetStream cluster stream '$G > KV_WF_ASSIGN' has NO quorum, stalled
+[4481] 2026/10/01 03:32:24.159048 [INF] 127.0.0.1:44307 - rid:9 - Router connection closed: Client Closed - Remote: wf-process-0
+[4481] 2026/10/01 03:32:24.159150 [WRN] JetStream cluster stream '$G > WF_JRN' has NO quorum, stalled
+[4481] 2026/10/01 03:32:24.159193 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_33' has NO quorum, stalled.
+[4481] 2026/10/01 03:32:24.160144 [INF] 127.0.0.1:44662 - rid:10 - Router connection closed: Client Closed - Remote: wf-process-0
+[4481] 2026/10/01 03:32:24.947834 [INF] JetStream cluster new metadata leader: wf-process-2/wf-process
+[4481] 2026/10/01 03:32:25.167142 [INF] 127.0.0.1:44307 - rid:102 - Route connection created
+[4481] 2026/10/01 03:32:25.167266 [INF] 127.0.0.1:44307 - rid:102 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:25.168509 [INF] 127.0.0.1:44307 - rid:103 - Route connection created
+[4481] 2026/10/01 03:32:25.168590 [INF] 127.0.0.1:44307 - rid:103 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:25.191947 [INF] 127.0.0.1:44307 - rid:104 - Route connection created
+[4481] 2026/10/01 03:32:25.192051 [INF] 127.0.0.1:44307 - rid:104 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:25.235350 [INF] 127.0.0.1:44307 - rid:105 - Route connection created
+[4481] 2026/10/01 03:32:25.235500 [INF] 127.0.0.1:44307 - rid:105 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:25.452033 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_33'
+[4481] 2026/10/01 03:32:25.688593 [INF] JetStream cluster new stream leader for '$G > KV_WF_LEASE'
+[4481] 2026/10/01 03:32:26.179524 [INF] 127.0.0.1:44307 - rid:106 - Route connection created
+[4481] 2026/10/01 03:32:26.179633 [INF] 127.0.0.1:44307 - rid:106 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:26.202531 [INF] 127.0.0.1:44307 - rid:107 - Route connection created
+[4481] 2026/10/01 03:32:26.202628 [INF] 127.0.0.1:44307 - rid:107 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:26.277026 [INF] 127.0.0.1:44307 - rid:108 - Route connection created
+[4481] 2026/10/01 03:32:26.277155 [INF] 127.0.0.1:44307 - rid:108 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:26.277335 [INF] 127.0.0.1:44307 - rid:109 - Route connection created
+[4481] 2026/10/01 03:32:26.277419 [INF] 127.0.0.1:44307 - rid:109 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:27.276452 [INF] 127.0.0.1:44307 - rid:137 - Route connection created
+[4481] 2026/10/01 03:32:27.276588 [INF] 127.0.0.1:44307 - rid:137 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:27.288017 [INF] 127.0.0.1:44307 - rid:138 - Route connection created
+[4481] 2026/10/01 03:32:27.288138 [INF] 127.0.0.1:44307 - rid:138 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:27.305264 [INF] 127.0.0.1:44307 - rid:139 - Route connection created
+[4481] 2026/10/01 03:32:27.305366 [INF] 127.0.0.1:44307 - rid:139 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:27.344030 [INF] 127.0.0.1:44307 - rid:140 - Route connection created
+[4481] 2026/10/01 03:32:27.344054 [INF] 127.0.0.1:44307 - rid:140 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:28.340063 [INF] 127.0.0.1:44307 - rid:141 - Route connection created
+[4481] 2026/10/01 03:32:28.340289 [INF] 127.0.0.1:44307 - rid:141 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:28.352883 [INF] 127.0.0.1:44307 - rid:142 - Route connection created
+[4481] 2026/10/01 03:32:28.352987 [INF] 127.0.0.1:44307 - rid:142 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:28.395206 [INF] 127.0.0.1:44307 - rid:143 - Route connection created
+[4481] 2026/10/01 03:32:28.395309 [INF] 127.0.0.1:44307 - rid:143 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:28.407051 [INF] 127.0.0.1:44307 - rid:144 - Route connection created
+[4481] 2026/10/01 03:32:28.407160 [INF] 127.0.0.1:44307 - rid:144 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:29.357297 [INF] 127.0.0.1:44307 - rid:145 - Route connection created
+[4481] 2026/10/01 03:32:29.357432 [INF] 127.0.0.1:44307 - rid:145 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:29.372793 [INF] 127.0.0.1:44307 - rid:146 - Route connection created
+[4481] 2026/10/01 03:32:29.372924 [INF] 127.0.0.1:44307 - rid:146 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:29.408902 [INF] 127.0.0.1:44307 - rid:147 - Route connection created
+[4481] 2026/10/01 03:32:29.409020 [INF] 127.0.0.1:44307 - rid:147 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:29.495227 [INF] 127.0.0.1:44307 - rid:148 - Route connection created
+[4481] 2026/10/01 03:32:29.495355 [INF] 127.0.0.1:44307 - rid:148 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:30.382688 [INF] 127.0.0.1:44307 - rid:149 - Route connection created
+[4481] 2026/10/01 03:32:30.382934 [INF] 127.0.0.1:44307 - rid:149 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:30.397304 [INF] 127.0.0.1:44307 - rid:150 - Route connection created
+[4481] 2026/10/01 03:32:30.397352 [INF] 127.0.0.1:44307 - rid:150 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:30.508672 [INF] 127.0.0.1:44307 - rid:151 - Route connection created
+[4481] 2026/10/01 03:32:30.508939 [INF] 127.0.0.1:44307 - rid:151 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:30.534608 [INF] 127.0.0.1:44307 - rid:152 - Route connection created
+[4481] 2026/10/01 03:32:30.534738 [INF] 127.0.0.1:44307 - rid:152 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:31.407093 [INF] 127.0.0.1:44307 - rid:153 - Route connection created
+[4481] 2026/10/01 03:32:31.407182 [INF] 127.0.0.1:44307 - rid:153 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:31.424297 [INF] 127.0.0.1:44307 - rid:154 - Route connection created
+[4481] 2026/10/01 03:32:31.424674 [INF] 127.0.0.1:44307 - rid:154 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:31.538662 [INF] 127.0.0.1:44307 - rid:155 - Route connection created
+[4481] 2026/10/01 03:32:31.538780 [INF] 127.0.0.1:44307 - rid:155 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:31.546108 [INF] 127.0.0.1:44307 - rid:156 - Route connection created
+[4481] 2026/10/01 03:32:31.546208 [INF] 127.0.0.1:44307 - rid:156 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:32.483578 [INF] 127.0.0.1:44307 - rid:157 - Route connection created
+[4481] 2026/10/01 03:32:32.483667 [INF] 127.0.0.1:44307 - rid:157 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:32.508430 [INF] 127.0.0.1:44307 - rid:158 - Route connection created
+[4481] 2026/10/01 03:32:32.508536 [INF] 127.0.0.1:44307 - rid:158 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:32.540267 [INF] 127.0.0.1:44307 - rid:159 - Route connection created
+[4481] 2026/10/01 03:32:32.540362 [INF] 127.0.0.1:44307 - rid:159 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:32.613908 [INF] 127.0.0.1:44307 - rid:160 - Route connection created
+[4481] 2026/10/01 03:32:32.614074 [INF] 127.0.0.1:44307 - rid:160 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:32.952332 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_61'
+[4481] 2026/10/01 03:32:33.347576 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_29'
+[4481] 2026/10/01 03:32:33.573085 [INF] 127.0.0.1:44307 - rid:161 - Route connection created
+[4481] 2026/10/01 03:32:33.573203 [INF] 127.0.0.1:44307 - rid:161 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:33.582768 [INF] 127.0.0.1:44307 - rid:162 - Route connection created
+[4481] 2026/10/01 03:32:33.582865 [INF] 127.0.0.1:44307 - rid:162 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:33.585203 [INF] 127.0.0.1:44307 - rid:163 - Route connection created
+[4481] 2026/10/01 03:32:33.585286 [INF] 127.0.0.1:44307 - rid:163 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:33.652357 [INF] 127.0.0.1:44307 - rid:164 - Route connection created
+[4481] 2026/10/01 03:32:33.652447 [INF] 127.0.0.1:44307 - rid:164 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:33.703457 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_05'
+[4481] 2026/10/01 03:32:34.624186 [INF] 127.0.0.1:44307 - rid:165 - Route connection created
+[4481] 2026/10/01 03:32:34.624275 [INF] 127.0.0.1:44307 - rid:165 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:34.643601 [INF] 127.0.0.1:44307 - rid:166 - Route connection created
+[4481] 2026/10/01 03:32:34.643697 [INF] 127.0.0.1:44307 - rid:166 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:34.650107 [INF] 127.0.0.1:44307 - rid:167 - Route connection created
+[4481] 2026/10/01 03:32:34.650202 [INF] 127.0.0.1:44307 - rid:167 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:34.676728 [INF] 127.0.0.1:44307 - rid:168 - Route connection created
+[4481] 2026/10/01 03:32:34.676825 [INF] 127.0.0.1:44307 - rid:168 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:35.664530 [INF] 127.0.0.1:44307 - rid:169 - Route connection created
+[4481] 2026/10/01 03:32:35.664640 [INF] 127.0.0.1:44307 - rid:169 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:35.691511 [INF] 127.0.0.1:44307 - rid:170 - Route connection created
+[4481] 2026/10/01 03:32:35.691654 [INF] 127.0.0.1:44307 - rid:170 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:35.731089 [INF] 127.0.0.1:44307 - rid:171 - Route connection created
+[4481] 2026/10/01 03:32:35.731203 [INF] 127.0.0.1:44307 - rid:171 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:35.735626 [INF] 127.0.0.1:44307 - rid:172 - Route connection created
+[4481] 2026/10/01 03:32:35.735731 [INF] 127.0.0.1:44307 - rid:172 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:36.687160 [INF] 127.0.0.1:44307 - rid:173 - Route connection created
+[4481] 2026/10/01 03:32:36.687333 [INF] 127.0.0.1:44307 - rid:173 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:36.716040 [INF] 127.0.0.1:44307 - rid:174 - Route connection created
+[4481] 2026/10/01 03:32:36.716177 [INF] 127.0.0.1:44307 - rid:174 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:36.778340 [INF] 127.0.0.1:44307 - rid:175 - Route connection created
+[4481] 2026/10/01 03:32:36.778478 [INF] 127.0.0.1:44307 - rid:175 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:36.810867 [INF] 127.0.0.1:44307 - rid:176 - Route connection created
+[4481] 2026/10/01 03:32:36.810991 [INF] 127.0.0.1:44307 - rid:176 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:37.761233 [INF] 127.0.0.1:44307 - rid:177 - Route connection created
+[4481] 2026/10/01 03:32:37.761352 [INF] 127.0.0.1:44307 - rid:177 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:37.779921 [INF] 127.0.0.1:44307 - rid:178 - Route connection created
+[4481] 2026/10/01 03:32:37.780056 [INF] 127.0.0.1:44307 - rid:178 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:37.782377 [INF] 127.0.0.1:44307 - rid:179 - Route connection created
+[4481] 2026/10/01 03:32:37.782464 [INF] 127.0.0.1:44307 - rid:179 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:37.866955 [INF] 127.0.0.1:44307 - rid:180 - Route connection created
+[4481] 2026/10/01 03:32:37.867062 [INF] 127.0.0.1:44307 - rid:180 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:38.770125 [INF] 127.0.0.1:44307 - rid:181 - Route connection created
+[4481] 2026/10/01 03:32:38.770254 [INF] 127.0.0.1:44307 - rid:181 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:38.821123 [INF] 127.0.0.1:44307 - rid:182 - Route connection created
+[4481] 2026/10/01 03:32:38.821247 [INF] 127.0.0.1:44307 - rid:182 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:38.836747 [INF] 127.0.0.1:44307 - rid:183 - Route connection created
+[4481] 2026/10/01 03:32:38.836845 [INF] 127.0.0.1:44307 - rid:183 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:38.955092 [INF] 127.0.0.1:44307 - rid:184 - Route connection created
+[4481] 2026/10/01 03:32:38.955114 [INF] 127.0.0.1:44307 - rid:184 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:39.788020 [INF] 127.0.0.1:44307 - rid:185 - Route connection created
+[4481] 2026/10/01 03:32:39.788175 [INF] 127.0.0.1:44307 - rid:185 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:39.853771 [INF] 127.0.0.1:44307 - rid:186 - Route connection created
+[4481] 2026/10/01 03:32:39.853945 [INF] 127.0.0.1:44307 - rid:186 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:39.912513 [INF] 127.0.0.1:44307 - rid:187 - Route connection created
+[4481] 2026/10/01 03:32:39.912625 [INF] 127.0.0.1:44307 - rid:187 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:40.029369 [INF] 127.0.0.1:44307 - rid:188 - Route connection created
+[4481] 2026/10/01 03:32:40.029473 [INF] 127.0.0.1:44307 - rid:188 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:40.822368 [INF] 127.0.0.1:44307 - rid:189 - Route connection created
+[4481] 2026/10/01 03:32:40.822480 [INF] 127.0.0.1:44307 - rid:189 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:40.897028 [INF] 127.0.0.1:44307 - rid:190 - Route connection created
+[4481] 2026/10/01 03:32:40.897133 [INF] 127.0.0.1:44307 - rid:190 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:40.937513 [INF] 127.0.0.1:44307 - rid:191 - Route connection created
+[4481] 2026/10/01 03:32:40.937661 [INF] 127.0.0.1:44307 - rid:191 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:41.115341 [INF] 127.0.0.1:44307 - rid:192 - Route connection created
+[4481] 2026/10/01 03:32:41.115458 [INF] 127.0.0.1:44307 - rid:192 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:41.917806 [INF] 127.0.0.1:44307 - rid:193 - Route connection created
+[4481] 2026/10/01 03:32:41.918084 [INF] 127.0.0.1:44307 - rid:193 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:41.930427 [INF] 127.0.0.1:44307 - rid:194 - Route connection created
+[4481] 2026/10/01 03:32:41.930542 [INF] 127.0.0.1:44307 - rid:194 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:42.015923 [INF] 127.0.0.1:44307 - rid:195 - Route connection created
+[4481] 2026/10/01 03:32:42.016095 [INF] 127.0.0.1:44307 - rid:195 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:42.185775 [INF] 127.0.0.1:44307 - rid:196 - Route connection created
+[4481] 2026/10/01 03:32:42.185894 [INF] 127.0.0.1:44307 - rid:196 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:42.936930 [INF] 127.0.0.1:44307 - rid:197 - Route connection created
+[4481] 2026/10/01 03:32:42.937030 [INF] 127.0.0.1:44307 - rid:197 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:43.013960 [INF] 127.0.0.1:44307 - rid:198 - Route connection created
+[4481] 2026/10/01 03:32:43.014074 [INF] 127.0.0.1:44307 - rid:198 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:43.058983 [INF] 127.0.0.1:44307 - rid:199 - Route connection created
+[4481] 2026/10/01 03:32:43.059071 [INF] 127.0.0.1:44307 - rid:199 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:43.237105 [INF] 127.0.0.1:44307 - rid:200 - Route connection created
+[4481] 2026/10/01 03:32:43.237219 [INF] 127.0.0.1:44307 - rid:200 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:43.979057 [INF] 127.0.0.1:44307 - rid:201 - Route connection created
+[4481] 2026/10/01 03:32:43.979198 [INF] 127.0.0.1:44307 - rid:201 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:44.039354 [INF] 127.0.0.1:44307 - rid:202 - Route connection created
+[4481] 2026/10/01 03:32:44.039483 [INF] 127.0.0.1:44307 - rid:202 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:44.146354 [INF] 127.0.0.1:44307 - rid:203 - Route connection created
+[4481] 2026/10/01 03:32:44.146479 [INF] 127.0.0.1:44307 - rid:203 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:44.249631 [INF] 127.0.0.1:44307 - rid:204 - Route connection created
+[4481] 2026/10/01 03:32:44.249742 [INF] 127.0.0.1:44307 - rid:204 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:44.985431 [INF] 127.0.0.1:44307 - rid:205 - Route connection created
+[4481] 2026/10/01 03:32:44.985555 [INF] 127.0.0.1:44307 - rid:205 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:45.067781 [INF] 127.0.0.1:44307 - rid:206 - Route connection created
+[4481] 2026/10/01 03:32:45.067848 [INF] 127.0.0.1:44307 - rid:206 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:45.168881 [INF] 127.0.0.1:44307 - rid:207 - Route connection created
+[4481] 2026/10/01 03:32:45.168954 [INF] 127.0.0.1:44307 - rid:207 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:45.345657 [INF] 127.0.0.1:44307 - rid:208 - Route connection created
+[4481] 2026/10/01 03:32:45.345783 [INF] 127.0.0.1:44307 - rid:208 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:45.994274 [INF] 127.0.0.1:44307 - rid:209 - Route connection created
+[4481] 2026/10/01 03:32:45.994351 [INF] 127.0.0.1:44307 - rid:209 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:46.166800 [INF] 127.0.0.1:44307 - rid:210 - Route connection created
+[4481] 2026/10/01 03:32:46.166917 [INF] 127.0.0.1:44307 - rid:210 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:46.179278 [INF] 127.0.0.1:44307 - rid:211 - Route connection created
+[4481] 2026/10/01 03:32:46.179398 [INF] 127.0.0.1:44307 - rid:211 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:46.401425 [INF] 127.0.0.1:44307 - rid:212 - Route connection created
+[4481] 2026/10/01 03:32:46.401558 [INF] 127.0.0.1:44307 - rid:212 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:47.011588 [INF] 127.0.0.1:44307 - rid:213 - Route connection created
+[4481] 2026/10/01 03:32:47.011717 [INF] 127.0.0.1:44307 - rid:213 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:47.242375 [INF] 127.0.0.1:44307 - rid:214 - Route connection created
+[4481] 2026/10/01 03:32:47.242461 [INF] 127.0.0.1:44307 - rid:214 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:47.250982 [INF] 127.0.0.1:44307 - rid:215 - Route connection created
+[4481] 2026/10/01 03:32:47.251099 [INF] 127.0.0.1:44307 - rid:215 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:47.452870 [INF] 127.0.0.1:44307 - rid:216 - Route connection created
+[4481] 2026/10/01 03:32:47.453042 [INF] 127.0.0.1:44307 - rid:216 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:48.092372 [INF] 127.0.0.1:44307 - rid:217 - Route connection created
+[4481] 2026/10/01 03:32:48.092503 [INF] 127.0.0.1:44307 - rid:217 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:48.269757 [INF] 127.0.0.1:44307 - rid:218 - Route connection created
+[4481] 2026/10/01 03:32:48.269905 [INF] 127.0.0.1:44307 - rid:218 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:48.348872 [INF] 127.0.0.1:44307 - rid:219 - Route connection created
+[4481] 2026/10/01 03:32:48.348973 [INF] 127.0.0.1:44307 - rid:219 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:48.551748 [INF] 127.0.0.1:44307 - rid:220 - Route connection created
+[4481] 2026/10/01 03:32:48.551902 [INF] 127.0.0.1:44307 - rid:220 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:49.127253 [INF] 127.0.0.1:44307 - rid:221 - Route connection created
+[4481] 2026/10/01 03:32:49.127353 [INF] 127.0.0.1:44307 - rid:221 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:49.270301 [INF] 127.0.0.1:44307 - rid:222 - Route connection created
+[4481] 2026/10/01 03:32:49.270444 [INF] 127.0.0.1:44307 - rid:222 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:49.430608 [INF] 127.0.0.1:44307 - rid:223 - Route connection created
+[4481] 2026/10/01 03:32:49.430738 [INF] 127.0.0.1:44307 - rid:223 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:49.647857 [INF] 127.0.0.1:44307 - rid:224 - Route connection created
+[4481] 2026/10/01 03:32:49.647992 [INF] 127.0.0.1:44307 - rid:224 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:50.220834 [INF] 127.0.0.1:44307 - rid:225 - Route connection created
+[4481] 2026/10/01 03:32:50.220943 [INF] 127.0.0.1:44307 - rid:225 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:50.300941 [INF] 127.0.0.1:44307 - rid:226 - Route connection created
+[4481] 2026/10/01 03:32:50.301064 [INF] 127.0.0.1:44307 - rid:226 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:50.521659 [INF] 127.0.0.1:44307 - rid:227 - Route connection created
+[4481] 2026/10/01 03:32:50.521791 [INF] 127.0.0.1:44307 - rid:227 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:50.650151 [INF] 127.0.0.1:44307 - rid:228 - Route connection created
+[4481] 2026/10/01 03:32:50.650285 [INF] 127.0.0.1:44307 - rid:228 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:51.258632 [INF] 127.0.0.1:44307 - rid:229 - Route connection created
+[4481] 2026/10/01 03:32:51.258783 [INF] 127.0.0.1:44307 - rid:229 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:51.346464 [INF] 127.0.0.1:44307 - rid:230 - Route connection created
+[4481] 2026/10/01 03:32:51.346577 [INF] 127.0.0.1:44307 - rid:230 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:51.608391 [INF] 127.0.0.1:44307 - rid:231 - Route connection created
+[4481] 2026/10/01 03:32:51.608513 [INF] 127.0.0.1:44307 - rid:231 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:51.685197 [INF] 127.0.0.1:44307 - rid:232 - Route connection created
+[4481] 2026/10/01 03:32:51.685213 [INF] 127.0.0.1:44307 - rid:232 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:52.333535 [INF] 127.0.0.1:44307 - rid:233 - Route connection created
+[4481] 2026/10/01 03:32:52.333649 [INF] 127.0.0.1:44307 - rid:233 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:52.444502 [INF] 127.0.0.1:44307 - rid:234 - Route connection created
+[4481] 2026/10/01 03:32:52.444633 [INF] 127.0.0.1:44307 - rid:234 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:52.687217 [INF] 127.0.0.1:44307 - rid:235 - Route connection created
+[4481] 2026/10/01 03:32:52.687501 [INF] 127.0.0.1:44307 - rid:235 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:52.702326 [INF] 127.0.0.1:44307 - rid:236 - Route connection created
+[4481] 2026/10/01 03:32:52.702474 [INF] 127.0.0.1:44307 - rid:236 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:53.394927 [INF] 127.0.0.1:44307 - rid:237 - Route connection created
+[4481] 2026/10/01 03:32:53.395036 [INF] 127.0.0.1:44307 - rid:237 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:53.501726 [INF] 127.0.0.1:44307 - rid:238 - Route connection created
+[4481] 2026/10/01 03:32:53.501844 [INF] 127.0.0.1:44307 - rid:238 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:53.722562 [INF] 127.0.0.1:44307 - rid:239 - Route connection created
+[4481] 2026/10/01 03:32:53.722656 [INF] 127.0.0.1:44307 - rid:239 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:53.777395 [INF] 127.0.0.1:44307 - rid:240 - Route connection created
+[4481] 2026/10/01 03:32:53.777517 [INF] 127.0.0.1:44307 - rid:240 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:54.478313 [INF] 127.0.0.1:44307 - rid:241 - Route connection created
+[4481] 2026/10/01 03:32:54.478376 [INF] 127.0.0.1:44307 - rid:241 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:54.517246 [INF] 127.0.0.1:44307 - rid:242 - Route connection created
+[4481] 2026/10/01 03:32:54.517388 [INF] 127.0.0.1:44307 - rid:242 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:54.770146 [INF] 127.0.0.1:44307 - rid:243 - Route connection created
+[4481] 2026/10/01 03:32:54.770256 [INF] 127.0.0.1:44307 - rid:243 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:54.830979 [INF] 127.0.0.1:44307 - rid:244 - Route connection created
+[4481] 2026/10/01 03:32:54.831107 [INF] 127.0.0.1:44307 - rid:244 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:55.554933 [INF] 127.0.0.1:44307 - rid:245 - Route connection created
+[4481] 2026/10/01 03:32:55.555111 [INF] 127.0.0.1:44307 - rid:245 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:55.597769 [INF] 127.0.0.1:44307 - rid:246 - Route connection created
+[4481] 2026/10/01 03:32:55.597875 [INF] 127.0.0.1:44307 - rid:246 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:55.815886 [INF] 127.0.0.1:44307 - rid:247 - Route connection created
+[4481] 2026/10/01 03:32:55.816008 [INF] 127.0.0.1:44307 - rid:247 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:55.858275 [INF] 127.0.0.1:44307 - rid:248 - Route connection created
+[4481] 2026/10/01 03:32:55.858389 [INF] 127.0.0.1:44307 - rid:248 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:56.562115 [INF] 127.0.0.1:44307 - rid:249 - Route connection created
+[4481] 2026/10/01 03:32:56.562225 [INF] 127.0.0.1:44307 - rid:249 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:56.620008 [INF] 127.0.0.1:44307 - rid:250 - Route connection created
+[4481] 2026/10/01 03:32:56.620145 [INF] 127.0.0.1:44307 - rid:250 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:56.864564 [INF] 127.0.0.1:44307 - rid:251 - Route connection created
+[4481] 2026/10/01 03:32:56.864627 [INF] 127.0.0.1:44307 - rid:251 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:56.883131 [INF] 127.0.0.1:44307 - rid:252 - Route connection created
+[4481] 2026/10/01 03:32:56.883252 [INF] 127.0.0.1:44307 - rid:252 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:57.608662 [INF] 127.0.0.1:44307 - rid:253 - Route connection created
+[4481] 2026/10/01 03:32:57.608678 [INF] 127.0.0.1:44307 - rid:253 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:57.641910 [INF] 127.0.0.1:44307 - rid:254 - Route connection created
+[4481] 2026/10/01 03:32:57.642023 [INF] 127.0.0.1:44307 - rid:254 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:57.873269 [INF] 127.0.0.1:44307 - rid:255 - Route connection created
+[4481] 2026/10/01 03:32:57.873382 [INF] 127.0.0.1:44307 - rid:255 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:57.925775 [INF] 127.0.0.1:44307 - rid:256 - Route connection created
+[4481] 2026/10/01 03:32:57.925840 [INF] 127.0.0.1:44307 - rid:256 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:58.619273 [INF] 127.0.0.1:44307 - rid:257 - Route connection created
+[4481] 2026/10/01 03:32:58.619410 [INF] 127.0.0.1:44307 - rid:257 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:58.646607 [INF] 127.0.0.1:44307 - rid:258 - Route connection created
+[4481] 2026/10/01 03:32:58.646742 [INF] 127.0.0.1:44307 - rid:258 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:58.937711 [INF] 127.0.0.1:44307 - rid:259 - Route connection created
+[4481] 2026/10/01 03:32:58.937839 [INF] 127.0.0.1:44307 - rid:259 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:58.951467 [INF] 127.0.0.1:44307 - rid:260 - Route connection created
+[4481] 2026/10/01 03:32:58.951596 [INF] 127.0.0.1:44307 - rid:260 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:59.637753 [INF] 127.0.0.1:44307 - rid:261 - Route connection created
+[4481] 2026/10/01 03:32:59.637795 [INF] 127.0.0.1:44307 - rid:261 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:32:59.711509 [INF] 127.0.0.1:44307 - rid:262 - Route connection created
+[4481] 2026/10/01 03:32:59.711599 [INF] 127.0.0.1:44307 - rid:262 - Router connection closed: Read Error
+[4481] 2026/10/01 03:32:59.981837 [INF] 127.0.0.1:44307 - rid:263 - Route connection created
+[4481] 2026/10/01 03:32:59.981966 [INF] 127.0.0.1:44307 - rid:263 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:00.013507 [INF] 127.0.0.1:44307 - rid:264 - Route connection created
+[4481] 2026/10/01 03:33:00.013611 [INF] 127.0.0.1:44307 - rid:264 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:33:00.692018 [INF] 127.0.0.1:44307 - rid:265 - Route connection created
+[4481] 2026/10/01 03:33:00.692147 [INF] 127.0.0.1:44307 - rid:265 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:00.807700 [INF] 127.0.0.1:44307 - rid:266 - Route connection created
+[4481] 2026/10/01 03:33:00.807792 [INF] 127.0.0.1:44307 - rid:266 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:33:00.990563 [INF] 127.0.0.1:44307 - rid:267 - Route connection created
+[4481] 2026/10/01 03:33:00.990676 [INF] 127.0.0.1:44307 - rid:267 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:01.072287 [INF] 127.0.0.1:44307 - rid:268 - Route connection created
+[4481] 2026/10/01 03:33:01.072384 [INF] 127.0.0.1:44307 - rid:268 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:01.767569 [INF] 127.0.0.1:44307 - rid:269 - Route connection created
+[4481] 2026/10/01 03:33:01.767672 [INF] 127.0.0.1:44307 - rid:269 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:01.835554 [INF] 127.0.0.1:44307 - rid:270 - Route connection created
+[4481] 2026/10/01 03:33:01.835636 [INF] 127.0.0.1:44307 - rid:270 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:02.013480 [INF] 127.0.0.1:44307 - rid:271 - Route connection created
+[4481] 2026/10/01 03:33:02.013586 [INF] 127.0.0.1:44307 - rid:271 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:02.096932 [INF] 127.0.0.1:44307 - rid:272 - Route connection created
+[4481] 2026/10/01 03:33:02.097070 [INF] 127.0.0.1:44307 - rid:272 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:02.809894 [INF] 127.0.0.1:44307 - rid:273 - Route connection created
+[4481] 2026/10/01 03:33:02.810007 [INF] 127.0.0.1:44307 - rid:273 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:02.875290 [INF] 127.0.0.1:44307 - rid:274 - Route connection created
+[4481] 2026/10/01 03:33:02.875422 [INF] 127.0.0.1:44307 - rid:274 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:03.051339 [INF] 127.0.0.1:44307 - rid:275 - Route connection created
+[4481] 2026/10/01 03:33:03.051446 [INF] 127.0.0.1:44307 - rid:275 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:03.165070 [INF] 127.0.0.1:44307 - rid:276 - Route connection created
+[4481] 2026/10/01 03:33:03.165182 [INF] 127.0.0.1:44307 - rid:276 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:03.881231 [INF] 127.0.0.1:44307 - rid:277 - Route connection created
+[4481] 2026/10/01 03:33:03.881368 [INF] 127.0.0.1:44307 - rid:277 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:03.940265 [INF] 127.0.0.1:44307 - rid:278 - Route connection created
+[4481] 2026/10/01 03:33:03.940405 [INF] 127.0.0.1:44307 - rid:278 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:04.051873 [INF] 127.0.0.1:44307 - rid:279 - Route connection created
+[4481] 2026/10/01 03:33:04.051959 [INF] 127.0.0.1:44307 - rid:279 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:04.183308 [INF] 127.0.0.1:44307 - rid:280 - Route connection created
+[4481] 2026/10/01 03:33:04.183418 [INF] 127.0.0.1:44307 - rid:280 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:04.946775 [INF] 127.0.0.1:44307 - rid:281 - Route connection created
+[4481] 2026/10/01 03:33:04.946894 [INF] 127.0.0.1:44307 - rid:281 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:05.028396 [INF] 127.0.0.1:44307 - rid:282 - Route connection created
+[4481] 2026/10/01 03:33:05.028521 [INF] 127.0.0.1:44307 - rid:282 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:05.135470 [INF] 127.0.0.1:44307 - rid:283 - Route connection created
+[4481] 2026/10/01 03:33:05.135568 [INF] 127.0.0.1:44307 - rid:283 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:05.209550 [INF] 127.0.0.1:44307 - rid:284 - Route connection created
+[4481] 2026/10/01 03:33:05.209649 [INF] 127.0.0.1:44307 - rid:284 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:06.029925 [INF] 127.0.0.1:44307 - rid:285 - Route connection created
+[4481] 2026/10/01 03:33:06.030057 [INF] 127.0.0.1:44307 - rid:285 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:06.039405 [INF] 127.0.0.1:44307 - rid:286 - Route connection created
+[4481] 2026/10/01 03:33:06.039496 [INF] 127.0.0.1:44307 - rid:286 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:06.149844 [INF] 127.0.0.1:44307 - rid:287 - Route connection created
+[4481] 2026/10/01 03:33:06.149955 [INF] 127.0.0.1:44307 - rid:287 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:06.227929 [INF] 127.0.0.1:44307 - rid:288 - Route connection created
+[4481] 2026/10/01 03:33:06.228007 [INF] 127.0.0.1:44307 - rid:288 - Router connection closed: Client Closed
+[4481] 2026/10/01 03:33:07.081189 [INF] 127.0.0.1:44307 - rid:289 - Route connection created
+[4481] 2026/10/01 03:33:07.081326 [INF] 127.0.0.1:44307 - rid:289 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:07.122350 [INF] 127.0.0.1:44307 - rid:290 - Route connection created
+[4481] 2026/10/01 03:33:07.122510 [INF] 127.0.0.1:44307 - rid:290 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:07.214409 [INF] 127.0.0.1:44307 - rid:291 - Route connection created
+[4481] 2026/10/01 03:33:07.214499 [INF] 127.0.0.1:44307 - rid:291 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:07.319736 [INF] 127.0.0.1:44307 - rid:292 - Route connection created
+[4481] 2026/10/01 03:33:07.319887 [INF] 127.0.0.1:44307 - rid:292 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:08.147510 [INF] 127.0.0.1:44307 - rid:293 - Route connection created
+[4481] 2026/10/01 03:33:08.147654 [INF] 127.0.0.1:44307 - rid:293 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:08.188376 [INF] 127.0.0.1:44307 - rid:294 - Route connection created
+[4481] 2026/10/01 03:33:08.188504 [INF] 127.0.0.1:44307 - rid:294 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:08.245244 [INF] 127.0.0.1:44307 - rid:295 - Route connection created
+[4481] 2026/10/01 03:33:08.245367 [INF] 127.0.0.1:44307 - rid:295 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:08.353763 [INF] 127.0.0.1:44307 - rid:296 - Route connection created
+[4481] 2026/10/01 03:33:08.354007 [INF] 127.0.0.1:44307 - rid:296 - Router connection closed: Read Error
+[4481] 2026/10/01 03:33:08.876574 [INF] 127.0.0.1:34328 - rid:297 - Route connection created
+[4481] 2026/10/01 03:33:08.876673 [INF] 127.0.0.1:34332 - rid:298 - Route connection created
+[4481] 2026/10/01 03:33:08.878026 [INF] 127.0.0.1:34348 - rid:299 - Route connection created
+[4481] 2026/10/01 03:33:08.880407 [INF] 127.0.0.1:34354 - rid:300 - Route connection created
+[4481] 2026/10/01 03:33:09.169136 [INF] 127.0.0.1:44307 - rid:301 - Route connection created
+[4481] 2026/10/01 03:33:09.169483 [INF] 127.0.0.1:44307 - rid:301 - Router connection closed: Duplicate Route - Remote: wf-process-0
+[4481] 2026/10/01 03:33:09.253053 [INF] 127.0.0.1:44307 - rid:302 - Route connection created
+[4481] 2026/10/01 03:33:09.253190 [INF] 127.0.0.1:44307 - rid:302 - Router connection closed: Duplicate Route - Remote: wf-process-0
+[4481] 2026/10/01 03:33:09.294543 [INF] 127.0.0.1:44307 - rid:303 - Route connection created
+[4481] 2026/10/01 03:33:09.294851 [INF] 127.0.0.1:44307 - rid:303 - Router connection closed: Duplicate Route - Remote: wf-process-0
+[4481] 2026/10/01 03:33:09.439844 [INF] 127.0.0.1:44307 - rid:304 - Route connection created
+[4481] 2026/10/01 03:33:09.440244 [INF] 127.0.0.1:44307 - rid:304 - Router connection closed: Duplicate Route - Remote: wf-process-0
