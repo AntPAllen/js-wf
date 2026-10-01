@@ -59,3 +59,5 @@ observed stream range when the last metadata attempt times out. The diagnostic
 runs after the gate has failed and cannot extend or satisfy the drain gate.
 Compilation and existing role-wait regressions pass (0.359s); this new diagnostic
 has not yet been exercised by a real failing cluster. No rerun is claimed here.
+
+At source `b13f9c3`, behind ten-minute run [36939477954](https://github.com/AntPAllen/js-wf/actions/runs/36939477954) and ahead backlog-diagnostic smoke [36939480705](https://github.com/AntPAllen/js-wf/actions/runs/36939480705) are authoritatively queued. Exact launch source and inputs are retained. No acceptance is claimed for these new runs.
