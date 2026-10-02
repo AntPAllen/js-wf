@@ -10,6 +10,7 @@ import (
 
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/identity"
+	"js-wf/internal/natsutil"
 )
 
 // NativeTimerRetirePort exposes retained hints, not delivery or clock decisions.
@@ -96,11 +97,30 @@ func (p jetStreamNativeTimerRetirePort) LastNativeTimer(ctx context.Context, sub
 	return stream.GetLastMsgForSubject(ctx, subject)
 }
 func (p jetStreamNativeTimerRetirePort) DeleteNativeTimer(ctx context.Context, sequence uint64) error {
-	stream, err := p.js.Stream(ctx, "WF_RUN")
-	if err != nil {
+	return DeleteNativeTimerWithPort(ctx, legacyNativeTimerDeletePort{p.js}, sequence)
+}
+
+// NativeTimerDeletePort preserves the API error before the modern SDK's
+// DeleteMsg turns it into an untyped description. Only the observed sequence
+// is deleted; the caller has already checked the terminal generation.
+type NativeTimerDeletePort interface {
+	DeleteRetainedTimer(context.Context, uint64) error
+}
+
+func DeleteNativeTimerWithPort(ctx context.Context, port NativeTimerDeletePort, sequence uint64) error {
+	if err := ctx.Err(); err != nil {
 		return err
 	}
-	return stream.DeleteMsg(ctx, sequence)
+	if port == nil || sequence == 0 {
+		return fmt.Errorf("invalid native timer delete request")
+	}
+	return natsutil.NormalizeMessageDeleteError(port.DeleteRetainedTimer(ctx, sequence))
+}
+
+type legacyNativeTimerDeletePort struct{ js jetstream.JetStream }
+
+func (p legacyNativeTimerDeletePort) DeleteRetainedTimer(ctx context.Context, sequence uint64) error {
+	return natsutil.RawDeleteStreamMessage(ctx, p.js, "WF_RUN", sequence)
 }
 
 type jetStreamNativeTimerRetirePort struct{ js jetstream.JetStream }

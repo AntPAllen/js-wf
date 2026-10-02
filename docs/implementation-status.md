@@ -2,6 +2,17 @@
 
 ## Latest accepted evidence — 2026-10-02
 
+- Native timer deletion now preserves typed API causes across the pinned client
+  boundary. Temporary unavailable replies reach the existing bounded retry path;
+  only ordinary message-not-found or the exact500/10057 `no message found` reply
+  is benign. Other10057 deletion failures remain fatal. The shared fallback
+  deletion adapter preserves typed causes too. The new118th model executes both
+  production scanner loops across eight reply modes; two new replay pins bring
+  the corpus to264. See [native delete recovery](scale/native-delete-recovery-2026-10-02/).
+  Focused local race contracts, exact1..1000 model schedules, all264 pins,
+  fallback recovery and source mutation controls are accepted. Fresh full-suite,
+  admitted clock-row and hosted contract gates remain required; this does not
+  clear the failed ahead200 campaign or explain its underlying server replies.
 - Hosted all-six sustained-harness smoke37018302340 at `026d574` is independently
   accepted: six actual35s baseline/semantic-mutant pairs, all original source,
   overlay, control, workload, raw-measurement and cohort-preservation checks, and
@@ -16,7 +27,7 @@
   sentinel, bypassing intended retry/idempotent handling. Originals, precise
   scope and permanent-error constraints are retained in
   [ahead delete failure evidence](scale/native-timer-retirement-2026-10-02/ahead200-delete-failures/).
-  A seeded production-path reproduction and source fix are required next; no
+  The seeded production-path reproduction and source fix are described above; no
   latency or drain gate is changed and the remaining campaign is not restarted.
 - Hosted focused regression37018289819 at `026d574` is independently accepted:
   all seven jobs/twelve actual semantic pairs, exact Git production/fixture

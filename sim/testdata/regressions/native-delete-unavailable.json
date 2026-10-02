@@ -1,0 +1,309 @@
+{
+  "version": 3,
+  "seed": 18,
+  "workload": "native_timer_delete_api_reply",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "already_absent",
+        "canceled",
+        "delete_denied",
+        "lost_reply",
+        "normal",
+        "ordinary_not_found",
+        "store_failure",
+        "unavailable"
+      ],
+      "chosen": "unavailable"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "suspended",
+        "timer"
+      ],
+      "chosen": "suspended"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.one",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_native_timer",
+      "subject": "wf.schedule.test.one.1",
+      "sequence": 1,
+      "data_sha256": "60be9fa7b9ec9d0a098b9081955b6a01b963bf76babfc197e3689eb709138d77",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "set_journal",
+      "subject": "wf.jrn.test.one",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "system.suspended-reconciler",
+      "sequence": 1,
+      "data_sha256": "45b5f93e75610248e54466da1d6bbad1553b2fb9cfb8b17a0088d5c7186cdc6d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "cbb038fc1c5cc33a709bc1006199161ee7595d61e1ca7597dc47d417c64b5c7c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "scan.suspended",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "cbb038fc1c5cc33a709bc1006199161ee7595d61e1ca7597dc47d417c64b5c7c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "invocation_stream_info",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_invocation",
+      "subject": "wf.inv.test.one",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "read_journal",
+      "subject": "wf.jrn.test.one",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "native_delete_api",
+      "sequence": 1,
+      "outcome": "unavailable"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_delete",
+      "subject": "system.suspended-reconciler",
+      "expected": 3,
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 100,
+      "operation": "kv_create",
+      "subject": "system.suspended-reconciler",
+      "sequence": 5,
+      "data_sha256": "45b5f93e75610248e54466da1d6bbad1553b2fb9cfb8b17a0088d5c7186cdc6d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 5,
+      "sequence": 6,
+      "data_sha256": "df0134d4d6facfac380e72905a1212d909ffaaf179e0af5cc4751e47b92d67c2",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "kv_get",
+      "subject": "scan.suspended",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 100,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "df0134d4d6facfac380e72905a1212d909ffaaf179e0af5cc4751e47b92d67c2",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "invocation_stream_info",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "get_invocation",
+      "subject": "wf.inv.test.one",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "read_journal",
+      "subject": "wf.jrn.test.one",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "delete_native_timer",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 7,
+      "sequence": 8,
+      "data_sha256": "df0134d4d6facfac380e72905a1212d909ffaaf179e0af5cc4751e47b92d67c2",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "kv_create",
+      "subject": "scan.suspended",
+      "sequence": 1,
+      "data_sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 200,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "df0134d4d6facfac380e72905a1212d909ffaaf179e0af5cc4751e47b92d67c2",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "invocation_stream_info",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 9,
+      "sequence": 10,
+      "data_sha256": "df0134d4d6facfac380e72905a1212d909ffaaf179e0af5cc4751e47b92d67c2",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 300,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 10,
+      "sequence": 11,
+      "data_sha256": "df0134d4d6facfac380e72905a1212d909ffaaf179e0af5cc4751e47b92d67c2",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "invocation_stream_info",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "get_invocation",
+      "subject": "wf.inv.test.one",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "read_journal",
+      "subject": "wf.jrn.test.one",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 11,
+      "sequence": 12,
+      "data_sha256": "df0134d4d6facfac380e72905a1212d909ffaaf179e0af5cc4751e47b92d67c2",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 400,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 400,
+      "operation": "kv_delete",
+      "subject": "system.suspended-reconciler",
+      "expected": 12,
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_native_delete_reply",
+      "outcome": "unavailable/suspended"
+    }
+  ]
+}

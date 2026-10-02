@@ -1,5 +1,24 @@
 # Tier 1 deterministic simulation: journal, lease, start, signals, timers, dispatch, and worker slices
 
+## Native timer deletion reply recovery
+
+`TestSeededNativeTimerDeleteReplies` runs production `TimerScan`,
+`SuspendedScan`, the delete-error adapter and `RunLoopWithPort` over retained
+in-memory hints. Eight modes cover normal deletion, temporary unavailability,
+two already-absent API forms, committed deletion with a lost reply, denied
+deletion, store failure and cancellation. Both scanner choices give16 cases.
+The unavailable reply must retry; benign absence must finish; permanent failures
+must preserve the hint and stop with their typed API cause. The old client's
+cause-flattening behavior fails the actual production loop at pinned seeds3/18.
+The new workload is the118th and adds two pins (264 total); older campaign
+results retain their original graph scope. A real R3 request/reply contract
+checks14 cases through custom API prefixes and domains, including trace callbacks,
+ambiguous timeout and an error-free reply that omits confirmation of success.
+The dedicated `native-delete-contract` workflow verifies actual named test
+execution, exact1..1000 model evidence, all source pins, independent-process pin
+identity and semantic failures under the retained source overlay. These focused
+contracts do not substitute for full-suite or full-matrix release gates.
+
 The first simulator slice runs the production `journal.Store.Append` decision
 path through a narrow `journal.AppendPort`. The production port still calls
 JetStream. The in-memory port keeps global stream sequences and per-subject

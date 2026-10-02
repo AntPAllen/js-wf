@@ -1,0 +1,23 @@
+name: native-delete-contract
+on:
+  workflow_dispatch:
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify typed delete replies and reject cause-loss controls
+        run: python3 scripts/check-native-delete-contract.py --root native-delete-evidence
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: native-delete-evidence
+          path: native-delete-evidence
+          if-no-files-found: error

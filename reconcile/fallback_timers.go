@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"js-wf/identity"
+	"js-wf/internal/natsutil"
 	"js-wf/provision"
 	"js-wf/retention"
 
@@ -110,11 +111,10 @@ func (p *jetStreamFallbackTimerScanPort) PublishWakeup(ctx context.Context, mess
 }
 
 func (p *jetStreamFallbackTimerScanPort) DeleteTimer(ctx context.Context, sequence uint64) error {
-	stream, err := p.timerStream(ctx)
-	if err != nil {
+	if _, err := p.timerStream(ctx); err != nil {
 		return err
 	}
-	return stream.DeleteMsg(ctx, sequence)
+	return natsutil.DeleteStreamMessage(ctx, p.js, "WF_TIMER", sequence)
 }
 
 func NewFallbackTimerScan(js jetstream.JetStream) *FallbackTimerScan {
