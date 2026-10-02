@@ -1,0 +1,50 @@
+name: docker-rolling-upgrade-contract
+on:
+  workflow_dispatch:
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build the actual old static server for scratch containers
+        run: |
+          mkdir -p "$RUNNER_TEMP/nats-old"
+          CGO_ENABLED=0 GOBIN="$RUNNER_TEMP/nats-old" go install github.com/nats-io/nats-server/v2@v2.11.17
+          printf 'WF_NATS_SERVER_BIN=%s/nats-old/nats-server\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - name: Verify all peers upgrade with retained data and reject single-old-node startup
+        run: python3 scripts/check-docker-rolling-upgrade.py --root "$RUNNER_TEMP/docker-upgrade-evidence"
+      - name: Archive all contract evidence and physical stores
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, tarfile
+          from pathlib import Path
+          tmp = Path(os.environ['RUNNER_TEMP'])
+          root = tmp/'docker-upgrade-evidence'
+          assert root.is_dir(), 'no contract evidence'
+          files = sorted(p for p in root.rglob('*') if p.is_file())
+          hashes = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
+          assert hashes, 'empty evidence'
+          archive = tmp/'docker-upgrade-originals.tmp.tar.gz'
+          with tarfile.open(archive, 'w:gz') as tar:
+              for p in files: tar.add(p, arcname=str(p.relative_to(root)))
+          with tarfile.open(archive, 'r:gz') as tar:
+              assert {m.name: hashlib.sha256(tar.extractfile(m).read()).hexdigest() for m in tar.getmembers()} == hashes
+          archive.rename(tmp/'docker-upgrade-originals.tar.gz')
+          (tmp/'docker-upgrade-manifest.json').write_text(json.dumps(dict(files=hashes), indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: docker-rolling-upgrade-originals
+          path: |
+            ${{ runner.temp }}/docker-upgrade-originals.tar.gz
+            ${{ runner.temp }}/docker-upgrade-manifest.json
+          if-no-files-found: error

@@ -34,7 +34,7 @@ type DockerCluster struct {
 	syncInterval  string
 	skewNode      int
 	skewSeconds   int64
-	oldNode       int
+	oldNodes      []bool
 	clockAdvance  time.Duration
 	clockAdvanced bool
 }
@@ -69,6 +69,15 @@ func StartMixedVersionDockerCluster(root string, count int, oldBinary string) (*
 		return nil, fmt.Errorf("old server binary is required")
 	}
 	return startDockerCluster(root, count, oldBinary, 0, nil, nil)
+}
+
+// StartRollingUpgradeDockerCluster starts every peer on oldBinary. UpgradeNode
+// replaces each selected peer with the pinned current binary and retained store.
+func StartRollingUpgradeDockerCluster(root string, count int, oldBinary string) (*DockerCluster, error) {
+	if oldBinary == "" {
+		return nil, fmt.Errorf("old server binary is required")
+	}
+	return startDockerClusterVersioned(root, count, oldBinary, 0, nil, nil, true)
 }
 
 // StartAdvancingClockDockerCluster prepares an initially unshifted cluster
@@ -129,7 +138,11 @@ func (c *DockerCluster) serverConfig(i int) (string, error) {
 	return path, nil
 }
 
-func startDockerCluster(root string, count int, oldBinary string, advance time.Duration, overrides map[int]string, tags map[int][]string) (_ *DockerCluster, err error) {
+func startDockerCluster(root string, count int, oldBinary string, advance time.Duration, overrides map[int]string, tags map[int][]string) (*DockerCluster, error) {
+	return startDockerClusterVersioned(root, count, oldBinary, advance, overrides, tags, false)
+}
+
+func startDockerClusterVersioned(root string, count int, oldBinary string, advance time.Duration, overrides map[int]string, tags map[int][]string, allOld bool) (_ *DockerCluster, err error) {
 	if count < 3 || count > 5 {
 		return nil, fmt.Errorf("docker cluster count must be 3..5")
 	}
@@ -144,9 +157,11 @@ func startDockerCluster(root string, count int, oldBinary string, advance time.D
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return nil, err
 	}
-	c := &DockerCluster{root: root, stores: stores, serverTags: serverTags, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1, oldNode: -1, clockAdvance: advance}
+	c := &DockerCluster{root: root, stores: stores, serverTags: serverTags, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1, oldNodes: make([]bool, count), clockAdvance: advance}
 	if oldBinary != "" {
-		c.oldNode = 0
+		for node := range c.oldNodes {
+			c.oldNodes[node] = allOld || node == 0
+		}
 		data, readErr := os.ReadFile(oldBinary)
 		if readErr != nil {
 			return nil, fmt.Errorf("read old server binary: %w", readErr)
@@ -169,8 +184,8 @@ func startDockerCluster(root string, count int, oldBinary string, advance time.D
 			return nil, fmt.Errorf("invalid WF_TIER3_SERVER_SKEW duration %q: want whole seconds within ±60s", offset)
 		}
 		c.skewSeconds = int64(duration / time.Second)
-		if c.skewNode == c.oldNode {
-			return nil, fmt.Errorf("old server node %d cannot also use the skewed binary", c.oldNode)
+		if c.usesOldBinary(c.skewNode) {
+			return nil, fmt.Errorf("old server node %d cannot also use the skewed binary", c.skewNode)
 		}
 	}
 	c.syncInterval = os.Getenv("WF_TIER3_SYNC_INTERVAL")
@@ -197,7 +212,7 @@ func startDockerCluster(root string, count int, oldBinary string, advance time.D
 		return nil, fmt.Errorf("build Docker nats-server: %w: %s", buildErr, output)
 	}
 	dockerfile := "FROM scratch\nCOPY nats-server /nats-server\n"
-	if c.oldNode >= 0 {
+	if oldBinary != "" {
 		dockerfile += "COPY nats-server-old /nats-server-old\n"
 	}
 	if c.skewNode >= 0 {
@@ -332,7 +347,7 @@ func (c *DockerCluster) RestartNode(i int) error {
 		monitorBinding = strings.TrimPrefix(c.monitorURLs[i], "http://") + ":8222"
 	}
 	args := []string{"run", "-d", "--rm", "--name", c.names[i], "--network", c.clientNetwork, "--user", fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()), "-p", clientBinding, "-p", monitorBinding, "-v", store + ":/data", "-v", configPath + ":/etc/nats.conf:ro"}
-	if i == c.oldNode {
+	if c.usesOldBinary(i) {
 		args = append(args, "--entrypoint", "/nats-server-old")
 	} else if c.clockAdvanced {
 		args = append(args, "--entrypoint", "/nats-server-advanced")
@@ -376,16 +391,20 @@ func (c *DockerCluster) RestartNode(i int) error {
 	return fmt.Errorf("Docker node %d did not accept clients: %s", i, logs)
 }
 
+func (c *DockerCluster) usesOldBinary(i int) bool {
+	return i >= 0 && i < len(c.oldNodes) && c.oldNodes[i]
+}
+
 // UpgradeNode restarts the old node with the current image binary and its
-// existing file store. It is valid only for a mixed-version cluster.
+// existing file store. Other old-version peers remain on their selected binary.
 func (c *DockerCluster) UpgradeNode(i int) error {
-	if i != c.oldNode || i < 0 {
+	if !c.usesOldBinary(i) {
 		return fmt.Errorf("Docker node %d is not the old-version node", i)
 	}
 	if err := c.KillNode(i); err != nil {
 		return err
 	}
-	c.oldNode = -1
+	c.oldNodes[i] = false
 	return c.RestartNode(i)
 }
 

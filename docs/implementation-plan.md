@@ -869,3 +869,22 @@ earlier100k/90s diagnostic. It preserves all captured source hashes, binary,
 receipt ledger, observations, logs and physical stores in a lossless archive,
 with SHA256 member readback before publication, even after a campaign failure.
 A passing diagnostic would not establish the original missed-retirement cause.
+
+
+### Original matrix requirements beyond the initial fourteen R5 rows
+
+The original chaos table also requires worker clock skew and rolling server
+upgrade. The initial fourteen-row five-container registry does not contain
+those two rows; its complete campaign is implemented-row coverage, not full
+original-matrix completion. Tier2 has both rows. Their R5 ports remain required
+before the full24-hour release gate can be claimed.
+
+`StartRollingUpgradeDockerCluster` now starts every peer on an explicitly
+supplied old static server executable. `UpgradeNode` changes only the selected
+peer's binary and keeps its file-store binding. The existing mixed-version
+constructor still starts only node0 old. A manual docker-rolling-upgrade
+contract checks actual five-peer2.11.17 startup, all five transitions to2.15.0,
+retained R5 message bytes and physical local counts after each transition. Its
+compiled single-old-peer control must fail on the initial version observation.
+This constructor/retention contract does not substitute for the mixed-workload
+rolling-upgrade row, fail-closed feature checks or24-hour matrix soak.

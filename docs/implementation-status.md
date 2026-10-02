@@ -7562,3 +7562,25 @@ are archived losslessly with SHA256 readback. The raw fixture bytes remain in
 the prior accepted producer archive. This is collector evidence, not a new
 runtime, twelve-seed shard,14-row or24h soak result. Native-million diagnostic
 37059396897 is confirmed actively executing its campaign at885664e.
+
+
+## Original R5 matrix gaps identified; every-peer upgrade fixture prepared
+
+The supplied original chaos table includes worker-clock skew and rolling
+upgrade. Both are in Tier2, but neither is in the initial14 R5 registry. The
+active14-row campaign remains implemented-row coverage and cannot clear those
+original requirements. Five-container row ports and full24h soak remain open.
+
+The Docker fixture now supports all peers initially old, preserving the existing
+one-old-node constructor. UpgradeNode switches one selected peer while retaining
+other binary selections and all store bindings. A new opt-in actual five-peer
+contract checks2.11.17-to2.15.0 versions,32 original plus five new message bytes,
+and all five physical counts/last sequences after each cut. Its runner compiles
+the original single-old-peer behavior as a control and requires its specific
+initial-version failure; build/skip/global-timeout failures are rejected.
+
+The existing Docker unit regressions pass locally, compiling the new fixture;
+workflow and runner syntax parse. Actual real-cluster contract qualification is
+still required. Hosted workflow retains positive/negative physical stores and
+all evidence in a lossless archive with SHA256 member readback. This is fixture
+preparation, not a mixed-workload upgrade row or a release claim.
