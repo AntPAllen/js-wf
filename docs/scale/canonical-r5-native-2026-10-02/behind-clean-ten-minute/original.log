@@ -1,0 +1,522 @@
+journal	Set up job	﻿2026-10-02T06:43:23.4215964Z Current runner version: '2.337.0'
+journal	Set up job	2026-10-02T06:43:23.4244063Z ##[group]Runner Image Provisioner
+journal	Set up job	2026-10-02T06:43:23.4245087Z Hosted Compute Agent
+journal	Set up job	2026-10-02T06:43:23.4245746Z Version: 20260901.588
+journal	Set up job	2026-10-02T06:43:23.4246383Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+journal	Set up job	2026-10-02T06:43:23.4247229Z Build Date: 2026-09-01T19:56:44Z
+journal	Set up job	2026-10-02T06:43:23.4247941Z Worker ID: {82179f46-c8d9-4b48-b363-c58c41df46c1}
+journal	Set up job	2026-10-02T06:43:23.4248796Z Azure Region: northcentralus
+journal	Set up job	2026-10-02T06:43:23.4249475Z ##[endgroup]
+journal	Set up job	2026-10-02T06:43:23.4251568Z ##[group]Operating System
+journal	Set up job	2026-10-02T06:43:23.4252455Z Ubuntu
+journal	Set up job	2026-10-02T06:43:23.4253023Z 24.04.5
+journal	Set up job	2026-10-02T06:43:23.4253612Z LTS
+journal	Set up job	2026-10-02T06:43:23.4254234Z ##[endgroup]
+journal	Set up job	2026-10-02T06:43:23.4254822Z ##[group]Runner Image
+journal	Set up job	2026-10-02T06:43:23.4255496Z Image: ubuntu-24.04
+journal	Set up job	2026-10-02T06:43:23.4256132Z Version: 20260927.320.1
+journal	Set up job	2026-10-02T06:43:23.4257335Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+journal	Set up job	2026-10-02T06:43:23.4259178Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+journal	Set up job	2026-10-02T06:43:23.4260234Z ##[endgroup]
+journal	Set up job	2026-10-02T06:43:23.4261761Z ##[group]GITHUB_TOKEN Permissions
+journal	Set up job	2026-10-02T06:43:23.4264594Z Contents: read
+journal	Set up job	2026-10-02T06:43:23.4265247Z Metadata: read
+journal	Set up job	2026-10-02T06:43:23.4265910Z Packages: read
+journal	Set up job	2026-10-02T06:43:23.4266506Z ##[endgroup]
+journal	Set up job	2026-10-02T06:43:23.4268705Z Secret source: Actions
+journal	Set up job	2026-10-02T06:43:23.4269872Z Cache mode: write
+journal	Set up job	2026-10-02T06:43:23.4270824Z Prepare workflow directory
+journal	Set up job	2026-10-02T06:43:23.4821889Z Prepare all required actions
+journal	Set up job	2026-10-02T06:43:23.4869864Z Getting action download info
+journal	Set up job	2026-10-02T06:43:23.7351707Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+journal	Set up job	2026-10-02T06:43:23.8382224Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+journal	Set up job	2026-10-02T06:43:24.1873857Z Download action repository 'actions/upload-artifact@v7' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+journal	Set up job	2026-10-02T06:43:24.3608317Z Complete job name: journal
+journal	Run actions/checkout@v4	﻿2026-10-02T06:43:24.4322485Z ##[group]Run actions/checkout@v4
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4323704Z with:
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4324169Z   repository: AntPAllen/js-wf
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4328150Z   token: ***
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4328599Z   ssh-strict: true
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4329070Z   ssh-user: git
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4329526Z   persist-credentials: true
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4330009Z   clean: true
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4330455Z   sparse-checkout-cone-mode: true
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4330971Z   fetch-depth: 1
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4331587Z   fetch-tags: false
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4332043Z   show-progress: true
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4332493Z   lfs: false
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4332913Z   submodules: false
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4333351Z   set-safe-directory: true
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4333856Z   allow-unsafe-pr-checkout: false
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4334622Z env:
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4335032Z   WF_TIER3_MATRIX: 1
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4335508Z   TIER3_MATRIX_ROW: server_clock_behind
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4336086Z   WF_TIER3_MATRIX_DURATION: 10m
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4336587Z   WF_TIER3_SYNC_INTERVAL: 2m
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4337111Z   WF_TIER3_CLOCK_TIMER_CUT: 1
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4337609Z   WF_TIER3_COMMON_CLOCK: 1
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4338159Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4338781Z   GOMEMLIMIT: 512MiB
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4339223Z   GOMAXPROCS: 2
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.4339645Z ##[endgroup]
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5374575Z Syncing repository: AntPAllen/js-wf
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5377343Z ##[group]Getting Git version info
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5378459Z Working directory is '/home/runner/work/js-wf/js-wf'
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5380009Z [command]/usr/bin/git version
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5433258Z git version 2.55.0
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5455541Z ##[endgroup]
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5470872Z Temporarily overriding HOME='/home/runner/work/_temp/b573627d-9971-4215-92e9-436170993659' before making global git config changes
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5473287Z Adding repository directory to the temporary git global config as a safe directory
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5477977Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5531036Z Deleting the contents of '/home/runner/work/js-wf/js-wf'
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5534976Z ##[group]Initializing the repository
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5540875Z [command]/usr/bin/git init /home/runner/work/js-wf/js-wf
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5621077Z hint: Using 'master' as the name for the initial branch. This default branch name
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5625493Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5627025Z hint: to use in all of your new repositories, which will suppress this warning,
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5628205Z hint: call:
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5628845Z hint:
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5629636Z hint: 	git config --global init.defaultBranch <name>
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5630631Z hint:
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5631723Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5633226Z hint: 'development'. The just-created branch can be renamed via this command:
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5634388Z hint:
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5635061Z hint: 	git branch -m <name>
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5635837Z hint:
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5636850Z hint: Disable this message with "git config set advice.defaultBranchName false"
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5638662Z Initialized empty Git repository in /home/runner/work/js-wf/js-wf/.git/
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5641383Z [command]/usr/bin/git remote add origin https://github.com/AntPAllen/js-wf
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5691300Z ##[endgroup]
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5692758Z ##[group]Disabling automatic garbage collection
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5696319Z [command]/usr/bin/git config --local gc.auto 0
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5732249Z ##[endgroup]
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5733453Z ##[group]Setting up auth
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5738998Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.5788095Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.6158000Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.6202637Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.6460884Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.6501300Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.6746484Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.6790588Z ##[endgroup]
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.6791737Z ##[group]Fetching the repository
+journal	Run actions/checkout@v4	2026-10-02T06:43:24.6800993Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +27b78ca3ba95071fc817b35dd9fc07c4e52ec13d:refs/remotes/origin/main
+journal	Run actions/checkout@v4	2026-10-02T06:43:27.7872852Z From https://github.com/AntPAllen/js-wf
+journal	Run actions/checkout@v4	2026-10-02T06:43:27.7875177Z  * [new ref]         27b78ca3ba95071fc817b35dd9fc07c4e52ec13d -> origin/main
+journal	Run actions/checkout@v4	2026-10-02T06:43:27.7878482Z ##[endgroup]
+journal	Run actions/checkout@v4	2026-10-02T06:43:27.7879868Z ##[group]Determining the checkout info
+journal	Run actions/checkout@v4	2026-10-02T06:43:27.7881201Z ##[endgroup]
+journal	Run actions/checkout@v4	2026-10-02T06:43:27.7882483Z [command]/usr/bin/git sparse-checkout disable
+journal	Run actions/checkout@v4	2026-10-02T06:43:27.7933741Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+journal	Run actions/checkout@v4	2026-10-02T06:43:27.7967172Z ##[group]Checking out the ref
+journal	Run actions/checkout@v4	2026-10-02T06:43:27.7972337Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+journal	Run actions/checkout@v4	2026-10-02T06:43:28.4765654Z Switched to a new branch 'main'
+journal	Run actions/checkout@v4	2026-10-02T06:43:28.4766763Z branch 'main' set up to track 'origin/main'.
+journal	Run actions/checkout@v4	2026-10-02T06:43:28.4817513Z ##[endgroup]
+journal	Run actions/checkout@v4	2026-10-02T06:43:28.4865444Z [command]/usr/bin/git log -1 --format=%H
+journal	Run actions/checkout@v4	2026-10-02T06:43:28.4894598Z 27b78ca3ba95071fc817b35dd9fc07c4e52ec13d
+journal	Run actions/setup-go@v5	﻿2026-10-02T06:43:28.5142953Z ##[group]Run actions/setup-go@v5
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5143341Z with:
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5143605Z   go-version-file: go.mod
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5143894Z   check-latest: false
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5146365Z   token: ***
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5146617Z   cache: true
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5146861Z env:
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5147108Z   WF_TIER3_MATRIX: 1
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5147390Z   TIER3_MATRIX_ROW: server_clock_behind
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5147721Z   WF_TIER3_MATRIX_DURATION: 10m
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5148019Z   WF_TIER3_SYNC_INTERVAL: 2m
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5148313Z   WF_TIER3_CLOCK_TIMER_CUT: 1
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5148608Z   WF_TIER3_COMMON_CLOCK: 1
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5148939Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5149306Z   GOMEMLIMIT: 512MiB
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5149618Z   GOMAXPROCS: 2
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.5149893Z ##[endgroup]
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.6538204Z Setup go version spec 1.27.1
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.6548093Z Attempting to download 1.27.1...
+journal	Run actions/setup-go@v5	2026-10-02T06:43:28.6662060Z (node:2295) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+journal	Run actions/setup-go@v5	2026-10-02T06:43:29.3398151Z (Use `node --trace-deprecation ...` to show where the warning was created)
+journal	Run actions/setup-go@v5	2026-10-02T06:43:29.3399873Z matching 1.27.1...
+journal	Run actions/setup-go@v5	2026-10-02T06:43:29.3422141Z Acquiring 1.27.1 from https://github.com/actions/go-versions/releases/download/1.27.1-33583469715/go-1.27.1-linux-x64.tar.gz
+journal	Run actions/setup-go@v5	2026-10-02T06:43:29.7830344Z Extracting Go...
+journal	Run actions/setup-go@v5	2026-10-02T06:43:29.7950140Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/f14df17e-784b-4473-95f6-64b9bcd5f6c7 -f /home/runner/work/_temp/a1173fef-ba48-4f5c-bb14-7e7929d44e14
+journal	Run actions/setup-go@v5	2026-10-02T06:43:31.6382895Z Successfully extracted go to /home/runner/work/_temp/f14df17e-784b-4473-95f6-64b9bcd5f6c7
+journal	Run actions/setup-go@v5	2026-10-02T06:43:31.6383646Z Adding to the cache ...
+journal	Run actions/setup-go@v5	2026-10-02T06:43:36.5076311Z Successfully cached go to /opt/hostedtoolcache/go/1.27.1/x64
+journal	Run actions/setup-go@v5	2026-10-02T06:43:36.5082369Z Added go to the path
+journal	Run actions/setup-go@v5	2026-10-02T06:43:36.5083089Z Successfully set up Go version 1.27.1
+journal	Run actions/setup-go@v5	2026-10-02T06:43:36.5465369Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+journal	Run actions/setup-go@v5	2026-10-02T06:43:36.5507675Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+journal	Run actions/setup-go@v5	2026-10-02T06:43:36.5552767Z /home/runner/go/pkg/mod
+journal	Run actions/setup-go@v5	2026-10-02T06:43:36.5571580Z /home/runner/.cache/go-build
+journal	Run actions/setup-go@v5	2026-10-02T06:43:36.6612932Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+journal	Run actions/setup-go@v5	2026-10-02T06:43:36.6712738Z (node:2295) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+journal	Run actions/setup-go@v5	2026-10-02T06:43:37.7707583Z Received 134217728 of 209563510 (64.0%), 128.0 MBs/sec
+journal	Run actions/setup-go@v5	2026-10-02T06:43:38.0830729Z Received 209563510 of 209563510 (100.0%), 152.3 MBs/sec
+journal	Run actions/setup-go@v5	2026-10-02T06:43:38.0832113Z Cache Size: ~200 MB (209563510 B)
+journal	Run actions/setup-go@v5	2026-10-02T06:43:38.0938195Z [command]/usr/bin/tar -xf /home/runner/work/_temp/bedf9cda-b570-4709-b1ff-ba6c21b836ea/cache.tzst -P -C /home/runner/work/js-wf/js-wf --use-compress-program unzstd
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.1667474Z Cache restored successfully
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.1775638Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.1806805Z go version go1.27.1 linux/amd64
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.1807148Z 
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.1807583Z ##[group]go env
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2310181Z AR='ar'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2310872Z CC='gcc'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2312119Z CGO_CFLAGS='-O2 -g'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2312836Z CGO_CPPFLAGS=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2313498Z CGO_CXXFLAGS='-O2 -g'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2314112Z CGO_ENABLED='1'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2315271Z CGO_FFLAGS='-O2 -g'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2315819Z CGO_LDFLAGS='-O2 -g'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2316392Z CXX='g++'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2316910Z GCCGO='gccgo'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2317491Z GO111MODULE=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2318143Z GOAMD64='v1'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2319062Z GOARCH='amd64'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2319711Z GOAUTH='netrc'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2320236Z GOBIN='/home/runner/go/bin'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2321009Z GOCACHE='/home/runner/.cache/go-build'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2322011Z GOCACHEPROG=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2322646Z GODEBUG=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2323346Z GOENV='/home/runner/.config/go/env'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2324108Z GOEXE=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2324595Z GOEXPERIMENT=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2325279Z GOFIPS140='off'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2325902Z GOFLAGS=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2327422Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build3797594543=/tmp/go-build -gno-record-gcc-switches'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2328961Z GOHOSTARCH='amd64'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2329499Z GOHOSTOS='linux'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2330159Z GOINSECURE=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2331314Z GOMOD='/home/runner/work/js-wf/js-wf/go.mod'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2332415Z GOMODCACHE='/home/runner/go/pkg/mod'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2333126Z GONOPROXY=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2333768Z GONOSUMDB=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2334251Z GOOS='linux'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2334898Z GOPACKAGESDRIVER=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2335572Z GOPATH='/home/runner/go'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2336300Z GOPRIVATE=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2337103Z GOPROXY='https://proxy.golang.org,direct'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2338030Z GOROOT='/opt/hostedtoolcache/go/1.27.1/x64'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2338874Z GOSUMDB='sum.golang.org'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2339465Z GOTELEMETRY='local'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2340267Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2341038Z GOTMPDIR=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2341715Z GOTOOLCHAIN='auto'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2342611Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.1/x64/pkg/tool/linux_amd64'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2343410Z GOVCS=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2343961Z GOVERSION='go1.27.1'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2344521Z GOWORK=''
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2345096Z PKG_CONFIG='pkg-config'
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2345518Z 
+journal	Run actions/setup-go@v5	2026-10-02T06:43:39.2346408Z ##[endgroup]
+journal	Verify row-result guard	﻿2026-10-02T06:43:39.3691861Z ##[group]Run python3 -m unittest discover -s scripts -p 'test_tier3*.py'
+journal	Verify row-result guard	2026-10-02T06:43:39.3692528Z ^[[36;1mpython3 -m unittest discover -s scripts -p 'test_tier3*.py'^[[0m
+journal	Verify row-result guard	2026-10-02T06:43:39.3693072Z ^[[36;1mpython3 -m unittest discover -s scripts -p 'test_controller_latency.py'^[[0m
+journal	Verify row-result guard	2026-10-02T06:43:39.4791202Z shell: /usr/bin/bash -e {0}
+journal	Verify row-result guard	2026-10-02T06:43:39.4791771Z env:
+journal	Verify row-result guard	2026-10-02T06:43:39.4792079Z   WF_TIER3_MATRIX: 1
+journal	Verify row-result guard	2026-10-02T06:43:39.4792454Z   TIER3_MATRIX_ROW: server_clock_behind
+journal	Verify row-result guard	2026-10-02T06:43:39.4792860Z   WF_TIER3_MATRIX_DURATION: 10m
+journal	Verify row-result guard	2026-10-02T06:43:39.4793202Z   WF_TIER3_SYNC_INTERVAL: 2m
+journal	Verify row-result guard	2026-10-02T06:43:39.4793555Z   WF_TIER3_CLOCK_TIMER_CUT: 1
+journal	Verify row-result guard	2026-10-02T06:43:39.4793913Z   WF_TIER3_COMMON_CLOCK: 1
+journal	Verify row-result guard	2026-10-02T06:43:39.4794344Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+journal	Verify row-result guard	2026-10-02T06:43:39.4794852Z   GOMEMLIMIT: 512MiB
+journal	Verify row-result guard	2026-10-02T06:43:39.4795174Z   GOMAXPROCS: 2
+journal	Verify row-result guard	2026-10-02T06:43:39.4795499Z ##[endgroup]
+journal	Verify row-result guard	2026-10-02T06:43:40.0014999Z ............................................
+journal	Verify row-result guard	2026-10-02T06:43:40.0015886Z ----------------------------------------------------------------------
+journal	Verify row-result guard	2026-10-02T06:43:40.0016493Z Ran 44 tests in 0.318s
+journal	Verify row-result guard	2026-10-02T06:43:40.0016774Z 
+journal	Verify row-result guard	2026-10-02T06:43:40.0017002Z OK
+journal	Verify row-result guard	2026-10-02T06:43:40.1512446Z ...
+journal	Verify row-result guard	2026-10-02T06:43:40.1513160Z ----------------------------------------------------------------------
+journal	Verify row-result guard	2026-10-02T06:43:40.1513706Z Ran 3 tests in 0.079s
+journal	Verify row-result guard	2026-10-02T06:43:40.1513905Z 
+journal	Verify row-result guard	2026-10-02T06:43:40.1514041Z OK
+journal	Sustain the selected five-container mixed fault row	﻿2026-10-02T06:43:40.1660097Z ##[group]Run set -o pipefail
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1660473Z ^[[36;1mset -o pipefail^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1660747Z ^[[36;1mcase "$TIER3_MATRIX_ROW" in^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1661209Z ^[[36;1m  auto_journal) row_test=TestFiveContainerAutomaticMembershipWithJournalKills ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1662233Z ^[[36;1m  block_delay) row_test=TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1662876Z ^[[36;1m  block_disk) row_test=TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1663525Z ^[[36;1m  server_clock_ahead) row_test=TestFiveContainerMixedServerClockAheadWithJournalKills ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1664192Z ^[[36;1m  server_clock_behind) row_test=TestFiveContainerMixedServerClockBehindWithJournalKills ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1664900Z ^[[36;1m  worker_isolation) row_test=TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1665552Z ^[[36;1m  worker_pause) row_test=TestFiveContainerMixedWorkerPausedFortyFiveSeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1666172Z ^[[36;1m  worker_kill) row_test=TestFiveContainerMixedWorkerKilledEveryFiveSeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1666741Z ^[[36;1m  journal) row_test=TestFiveContainerMixedJournalLeaderEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1667319Z ^[[36;1m  consumer) row_test=TestFiveContainerMixedConsumerLeaderEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1667894Z ^[[36;1m  restart) row_test=TestFiveContainerMixedAllServersEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1668486Z ^[[36;1m  fanout_restart) row_test=TestFiveContainerMixedFanoutRestartEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1669097Z ^[[36;1m  route_quorum) row_test=TestFiveContainerMixedRouteQuorumEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1669707Z ^[[36;1m  route_majority) row_test=TestFiveContainerMixedRouteMajorityEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1670147Z ^[[36;1m  *) exit 1 ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1670376Z ^[[36;1mesac^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1671013Z ^[[36;1mgo test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1671799Z ^[[36;1mcut_args=()^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1672175Z ^[[36;1mif [ "$WF_TIER3_CLOCK_TIMER_CUT" = 1 ]; then cut_args+=(--require-clock-timer-cut); fi^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1672714Z ^[[36;1mif [ "$WF_TIER3_COMMON_CLOCK" = 1 ]; then cut_args+=(--require-common-timer-clock); fi^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1673924Z ^[[36;1mpython3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --output /tmp/tier3-mixed-journal-result.json --require-checkpoint-audits "${cut_args[@]}"^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1675318Z ^[[36;1mpython3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1676258Z ^[[36;1mpython3 scripts/review-tier3-fencing.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/fencing-timeline-review.json"^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1748153Z shell: /usr/bin/bash -e {0}
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1748421Z env:
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1748625Z   WF_TIER3_MATRIX: 1
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1748870Z   TIER3_MATRIX_ROW: server_clock_behind
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1749173Z   WF_TIER3_MATRIX_DURATION: 10m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1749434Z   WF_TIER3_SYNC_INTERVAL: 2m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1749685Z   WF_TIER3_CLOCK_TIMER_CUT: 1
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1749920Z   WF_TIER3_COMMON_CLOCK: 1
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1750208Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1750522Z   GOMEMLIMIT: 512MiB
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1750740Z   GOMAXPROCS: 2
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.1750947Z ##[endgroup]
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:40.2884995Z go: downloading google.golang.org/protobuf v1.36.6
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:59.5270880Z === RUN   TestFiveContainerMixedServerClockBehindWithJournalKills
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:59.5272597Z     tier3_mixed_journal_test.go:43: TIER3_CLOCK_TIMER_CUT_REQUIRED=true
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:43:59.5274139Z     tier3_mixed_journal_test.go:43: TIER3_CLOCK_TIMER_CUT_PROFILE=all-waits-2s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:44:54.3176587Z     tier3_mixed_journal_test.go:43: tier3 provisioning retry: context deadline exceeded
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:44:55.0950607Z     tier3_mixed_journal_test.go:43: TIER3_COMMON_TIMER_CLOCK=utc-quorum-v1
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:44:55.1229998Z     tier3_mixed_journal_test.go:43: TIER3_SUSPENDED_SCAN interval=100ms budget=256
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:45:14.4431685Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=1 elapsed=18.538325958s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:45:36.8548642Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=30s killed=30.096495163s healed=40.934534045s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:45:41.7826366Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=2 elapsed=45.877694201s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:46:05.6276050Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=1m0s killed=1m1.795719358s healed=1m9.709263726s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:46:05.7493193Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=3 elapsed=1m9.843466063s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:46:25.2158779Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=4 elapsed=1m29.311149571s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:46:39.4427246Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=1m30s killed=1m33.272305537s healed=1m43.516793024s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:46:50.1798687Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=5 elapsed=1m54.274721217s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:47:06.6965122Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=2m0s killed=2m3.050711438s healed=2m10.764850258s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:47:14.0462831Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=6 elapsed=2m18.141596195s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:47:36.5198953Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=2m30s killed=2m32.012647975s healed=2m40.595936687s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:47:39.2984376Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=7 elapsed=2m43.392943498s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:48:05.0496782Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=8 elapsed=3m9.143060694s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:48:05.9719252Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=3m0s killed=3m1.860971356s healed=3m10.038162802s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:48:24.7120713Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=9 elapsed=3m28.80719792s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:48:39.0793877Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=3m30s killed=3m33.193485698s healed=3m43.13891066s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:48:53.1926505Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=10 elapsed=3m57.284486735s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:48:53.1938882Z     tier3_mixed_journal_test.go:843: tier3 checkpoint audit batch=10 invocation_cutoff=280 started elapsed=3m57.289335046s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:48:55.2942893Z     tier3_mixed_journal_test.go:862: tier3 checkpoint batch=10 report={Invocations:280 Journals:280 Entries:3084 Terminal:280}
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:49:06.2178160Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=4m0s killed=4m1.349561345s healed=4m10.295929783s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:49:19.5660723Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=11 elapsed=4m23.659437498s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:49:36.7263360Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=4m30s killed=4m32.534940934s healed=4m40.799804934s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:49:44.3333094Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=12 elapsed=4m48.42858308s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:50:05.7641240Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=5m0s killed=5m2.075772077s healed=5m9.832192067s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:50:10.2812387Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=13 elapsed=5m14.376232698s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:50:33.8744363Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=14 elapsed=5m37.969270184s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:50:34.8347429Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=5m30s killed=5m33.106313383s healed=5m38.907742943s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:50:52.8394560Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=15 elapsed=5m56.933691175s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:51:08.2478292Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=6m0s killed=6m3.731555655s healed=6m12.322288943s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:51:20.3916196Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=16 elapsed=6m24.486303702s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:51:38.0800514Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=6m30s killed=6m33.37954635s healed=6m42.158601159s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:51:45.4442658Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=17 elapsed=6m49.539401602s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:52:08.1257564Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=7m0s killed=7m3.042700637s healed=7m12.200914477s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:52:10.7236331Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=18 elapsed=7m14.811839059s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:52:36.3206736Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=7m30s killed=7m32.583327718s healed=7m40.392297916s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:52:38.4815114Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=19 elapsed=7m42.576228427s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:52:58.9169282Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=20 elapsed=8m3.008242129s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:53:05.3999982Z     tier3_mixed_journal_test.go:843: tier3 checkpoint audit batch=20 invocation_cutoff=560 started elapsed=8m3.008651005s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:53:05.4002099Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=8m0s killed=8m3.568814912s healed=8m9.469525749s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:53:12.4716869Z     tier3_mixed_journal_test.go:862: tier3 checkpoint batch=20 report={Invocations:560 Journals:560 Entries:6166 Terminal:560}
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:53:21.2159074Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=21 elapsed=8m25.308760703s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:53:34.6173191Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=8m30s killed=8m30.447754157s healed=8m38.697575783s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:53:48.4782235Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=22 elapsed=8m52.573336711s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:54:07.9027043Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=9m0s killed=9m3.962740109s healed=9m11.980629625s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:54:16.6251791Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=23 elapsed=9m20.718502807s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:54:35.9598466Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=9m30s killed=9m31.831873153s healed=9m40.040243282s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:54:42.8892784Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=24 elapsed=9m46.984524724s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:55:02.5568910Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=25 elapsed=10m6.6522836s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:04.3183559Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_CELL type=matrixshort invocations=100 terminal_p99=405.239824ms progress_p99=229.871997ms
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:04.3204617Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_CELL type=matrixtimer invocations=75 terminal_p99=7.838306449s progress_p99=8.201714151s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:04.3206586Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_CELL type=matrixsignal invocations=50 terminal_p99=8.543235666s progress_p99=8.408965994s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:04.3212915Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_CELL type=matrixfanout invocations=25 terminal_p99=2.188283378s progress_p99=6.540206446s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:04.3219259Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_CELL type=matrixchild invocations=150 terminal_p99=826.949398ms progress_p99=6.616231799s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:04.3228238Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_CELL type=matrixgrandchild invocations=300 terminal_p99=274.479887ms progress_p99=154.954522ms
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:04.9021301Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_RESULT row=server_clock_behind seed=1 duration=10m0s five_replicas=true batches=25 invocations=700 entries=7703 faults=19 full_matrix_release=false
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:08.7257748Z --- PASS: TestFiveContainerMixedServerClockBehindWithJournalKills (729.20s)
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:08.7258400Z PASS
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:09.7490075Z ok  	js-wf/integration	730.234s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7543112Z {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7543876Z   "scope": "single five-container R5 server clock skew with journal SIGKILL row",
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7544712Z   "seed": 1,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7544961Z   "duration_seconds": 600,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7545251Z   "common_timer_clock": "utc-quorum-v1",
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7545575Z   "clock_timer_cut_profile": "all-waits-2s",
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7545882Z   "shortened_smoke": false,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7546145Z   "invocations": 700,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7546388Z   "journal_entries": 7703,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7546635Z   "confirmed_faults": 19,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7546894Z   "active_consumer_faults": null,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7547147Z   "cells": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7547371Z     "matrixshort": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7547623Z       "invocations": 100,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7547919Z       "terminal_p99_seconds": 0.405239824,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7548270Z       "progress_p99_seconds": 0.229871997
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7548540Z     },
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7548746Z     "matrixtimer": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7548994Z       "invocations": 75,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7549283Z       "terminal_p99_seconds": 7.838306449,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7549642Z       "progress_p99_seconds": 8.201714151
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7549903Z     },
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7550114Z     "matrixsignal": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7550370Z       "invocations": 50,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7550654Z       "terminal_p99_seconds": 8.543235666,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7550975Z       "progress_p99_seconds": 8.408965994
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7551225Z     },
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7551766Z     "matrixfanout": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7552090Z       "invocations": 25,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7552377Z       "terminal_p99_seconds": 2.188283378,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7552697Z       "progress_p99_seconds": 6.540206446
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7552951Z     },
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7553166Z     "matrixchild": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7553417Z       "invocations": 150,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7553708Z       "terminal_p99_seconds": 0.826949398,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7554027Z       "progress_p99_seconds": 6.616231799
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7554281Z     },
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7554506Z     "matrixgrandchild": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7554762Z       "invocations": 300,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7555074Z       "terminal_p99_seconds": 0.27447988700000003,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7555426Z       "progress_p99_seconds": 0.154954522
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7555675Z     }
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7555853Z   },
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7556070Z   "clears_full_tier3_release": false,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7556359Z   "server_clock_artifact_checks": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7556642Z     "skewed_server": 4,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7556922Z     "expected_offset_ns": -60000000000,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7557240Z     "actual_clock_observations": 195,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7557539Z     "journal_sigkill_boundaries": 19,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7557832Z     "checks_all_five_servers": true
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7558074Z   },
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7558302Z   "controller_latency_artifact_checks": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7558605Z     "append_windows": 7703,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7558873Z     "invocations": 700,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7559113Z     "timer_waits": 600,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7559446Z     "clock": "unshifted-controller-conservative-bounds",
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7559822Z     "uses_broker_timestamps": false,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7560164Z     "unknown_return_is_commit_upper_bound": false
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7560451Z   },
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7560665Z   "clock_role_artifact_checks": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7560952Z     "role_observations": 116,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7561243Z     "confirmed_skewed_owner_kills": 19,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7561684Z     "shifted_timer_clock_lookups": 0,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7561995Z     "shifted_native_hint_lookups": 40,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7562361Z     "admits_all_in_flight_timer_cut_combinations": false
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7562675Z   },
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7563206Z   "common_timer_clock_artifact_checks": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7563523Z     "physical_probes": 5,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7563798Z     "canonical_timer_requests": 600,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7564131Z     "startup_bounds_overlap_controller": true,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7564464Z     "healthy_error_assumption": "20ms",
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7564890Z     "max_skewed_assumption": 1,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7565182Z     "clears_full_tier3_release": false
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7565433Z   },
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7565649Z   "clock_timer_cut_artifact_checks": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7565942Z     "admitted_pending_sleep_cuts": 19,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7566274Z     "all_cuts_remove_source_before_duration": true,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7566647Z     "corroborates_final_retained_prefix": true,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7567035Z     "admits_all_in_flight_timer_cut_combinations": false,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7567385Z     "clears_full_tier3_release": false
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7567724Z   },
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7567946Z   "checkpoint_audit_checks": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7568246Z     "completed_cohort_audits": 2,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7568569Z     "all_expected_checkpoints_present": true,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7569115Z     "scope": "Captured completed cohorts; mandatory final whole-state check remains separate."
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7569553Z   }
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7569730Z }
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7979904Z {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7980459Z   "scope": "recorded R5 worker and repair decisions",
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7980908Z   "counter_cross_checks_complete": true,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7981207Z   "fencing_records": 0,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7981653Z   "repair_records": 165,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7981917Z   "fencing_per_worker": {},
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7982180Z   "repairs_by_outcome": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7982456Z     "suspended/acknowledged": 143,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7982753Z     "signal/acknowledged": 13,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7983027Z     "signal/uncertain": 1,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7983290Z     "suspended/uncertain": 1,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7983565Z     "start/acknowledged": 7
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7983809Z   },
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7984045Z   "server_root_causes_confirmed": false,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7984384Z   "independently_reaudits_server_state": false,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7984718Z   "clears_full_tier3_release": false,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7984988Z   "input_sha256": {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7985491Z     "worker-metrics.json": "e919b3dd465aa480ab9b10a6f2116b1ee1cc6ea5f2d061ac350b8bb13f764c40",
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7986172Z     "fencing.json": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7986800Z     "repairs.json": "637bd7d91b724aa6569eed7953ddff5221c0057154ed71575e57c6214d8f9de1"
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7987186Z   }
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.7987367Z }
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.8647332Z {
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.8647897Z   "scope": "retained delivery and terminal timelines",
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.8648331Z   "fencing_records": 0,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.8648588Z   "classifications": {},
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.8648852Z   "outside_confirmed_faults": 0,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.8649205Z   "ack_observations_prove_broker_commit": false,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.8649558Z   "independently_reaudits_server_state": false,
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.8649884Z   "clears_full_tier3_release": false
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:56:10.8650134Z }
+journal	Run actions/upload-artifact@v7	﻿2026-10-02T06:56:10.8780910Z ##[group]Run actions/upload-artifact@v7
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8781244Z with:
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8781670Z   name: tier3-mixed-journal
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8782601Z   path: /tmp/tier3-mixed-journal/*.json
+journal	Run actions/upload-artifact@v7	/tmp/tier3-mixed-journal/*.jsonl
+journal	Run actions/upload-artifact@v7	/tmp/tier3-mixed-journal/*.log
+journal	Run actions/upload-artifact@v7	/tmp/tier3-mixed-journal/*.txt
+journal	Run actions/upload-artifact@v7	/tmp/tier3-mixed-journal/cluster/*.conf
+journal	Run actions/upload-artifact@v7	/tmp/tier3-mixed-journal-events.jsonl
+journal	Run actions/upload-artifact@v7	/tmp/tier3-mixed-journal-result.json
+journal	Run actions/upload-artifact@v7	
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8783543Z   if-no-files-found: warn
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8783790Z   compression-level: 6
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8784015Z   overwrite: false
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8784242Z   include-hidden-files: false
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8784483Z   archive: true
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8784688Z env:
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8784874Z   WF_TIER3_MATRIX: 1
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8785102Z   TIER3_MATRIX_ROW: server_clock_behind
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8785379Z   WF_TIER3_MATRIX_DURATION: 10m
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8785633Z   WF_TIER3_SYNC_INTERVAL: 2m
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8785877Z   WF_TIER3_CLOCK_TIMER_CUT: 1
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8786156Z   WF_TIER3_COMMON_CLOCK: 1
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8786629Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8786939Z   GOMEMLIMIT: 512MiB
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8787155Z   GOMAXPROCS: 2
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:10.8787354Z ##[endgroup]
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:11.0398716Z Multiple search paths detected. Calculating the least common ancestor of all paths
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:11.0400585Z The least common ancestor is /tmp. This will be the root directory of the artifact
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:11.0401297Z With the provided path, there will be 123 files uploaded
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:11.0406504Z Artifact name is valid!
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:11.0406886Z Root directory input is valid!
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:11.2792139Z Uploading artifact: tier3-mixed-journal.zip
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:11.2833551Z Beginning upload of artifact content to blob storage
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:11.8446052Z Uploaded bytes 1459980
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:11.8778677Z Finished uploading artifact content to blob storage!
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:11.8779650Z SHA256 digest of uploaded artifact is 839479d3ba1c507ace3fa5c59c7fc56790105b88bc3d3084666792ac8dcfb89e
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:11.8780523Z Finalizing artifact upload
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:12.1257111Z Artifact tier3-mixed-journal successfully finalized. Artifact ID 11213378597
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:12.1258263Z Artifact tier3-mixed-journal has been successfully uploaded! Final size is 1459980 bytes. Artifact ID is 11213378597
+journal	Run actions/upload-artifact@v7	2026-10-02T06:56:12.1261936Z Artifact download URL: https://github.com/AntPAllen/js-wf/actions/runs/36974795077/artifacts/11213378597
+journal	Post Run actions/setup-go@v5	﻿2026-10-02T06:56:12.1424606Z Post job cleanup.
+journal	Post Run actions/setup-go@v5	2026-10-02T06:56:12.2641824Z (node:10727) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+journal	Post Run actions/setup-go@v5	2026-10-02T06:56:12.2642636Z (Use `node --trace-deprecation ...` to show where the warning was created)
+journal	Post Run actions/setup-go@v5	2026-10-02T06:56:12.2709811Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+journal	Post Run actions/setup-go@v5	2026-10-02T06:56:12.2754948Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+journal	Post Run actions/setup-go@v5	2026-10-02T06:56:12.2788187Z /home/runner/go/pkg/mod
+journal	Post Run actions/setup-go@v5	2026-10-02T06:56:12.2809748Z /home/runner/.cache/go-build
+journal	Post Run actions/setup-go@v5	2026-10-02T06:56:12.2814397Z Cache hit occurred on the primary key setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb, not saving cache.
+journal	Post Run actions/checkout@v4	﻿2026-10-02T06:56:12.3004864Z Post job cleanup.
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.3936177Z [command]/usr/bin/git version
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.3991198Z git version 2.55.0
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.4054989Z Temporarily overriding HOME='/home/runner/work/_temp/db7a0dd3-94ec-4c9d-917c-f5a622e6566e' before making global git config changes
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.4056577Z Adding repository directory to the temporary git global config as a safe directory
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.4057807Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.4104773Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.4164566Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.4466180Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.4496455Z http.https://github.com/.extraheader
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.4509176Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.4546197Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.4831307Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+journal	Post Run actions/checkout@v4	2026-10-02T06:56:12.4873396Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+journal	Complete job	﻿2026-10-02T06:56:12.5345554Z Cleaning up orphan processes
+journal	Complete job	2026-10-02T06:56:12.5714095Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

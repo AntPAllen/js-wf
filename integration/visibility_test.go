@@ -19,6 +19,12 @@ import (
 )
 
 func TestProjectionRebuildLagAndPurge(t *testing.T) {
+	for _, encoding := range []journal.Encoding{journal.JSON, journal.ProtobufV1} {
+		t.Run(string(encoding), func(t *testing.T) { runProjectionRebuildLagAndPurge(t, encoding) })
+	}
+}
+
+func runProjectionRebuildLagAndPurge(t *testing.T, encoding journal.Encoding) {
 	all, _ := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
 	defer cancel()
@@ -40,9 +46,12 @@ func TestProjectionRebuildLagAndPurge(t *testing.T) {
 		t.Fatalf("queued row=%+v err=%v", row, err)
 	}
 	w, err := worker.New(ctx, all[1], "projection-worker", map[string]worker.Handler{typ: func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
+		if err := c.SetSearchAttributes(map[string]string{"team": "wire-contract"}); err != nil {
+			return nil, err
+		}
 		value, err := wf.Run(c, "echo", string(input), func(context.Context) (json.RawMessage, error) { return input, nil })
 		return value, err
-	}})
+	}}, worker.WithJournalEncoding(encoding))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,6 +76,24 @@ func TestProjectionRebuildLagAndPurge(t *testing.T) {
 	}
 	if ctx.Err() != nil {
 		t.Fatalf("projection did not catch up: row=%+v err=%v", row, err)
+	}
+	stream, err := all[2].Stream(ctx, "WF_JRN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := stream.GetLastMsgForSubject(ctx, identity.JournalSubject(typ, id))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.HasPrefix(raw.Data, []byte{'W', 'F', 'J', 0}) != (encoding == journal.ProtobufV1) {
+		t.Fatal("wrong physical encoding", encoding)
+	}
+	if row.Attributes["team"] != "wire-contract" {
+		t.Fatal("missing projected attributes", row)
+	}
+	selected, err := p.ListByAttribute(ctx, "team", "wire-contract", "completed")
+	if err != nil || len(selected) != 1 || selected[0].ID != id {
+		t.Fatal("attribute index", selected, err)
 	}
 	if row.Started.IsZero() || row.Updated.IsZero() || row.JournalSeq == 0 {
 		t.Fatalf("missing projected timestamps or sequence: %+v", row)

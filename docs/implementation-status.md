@@ -6226,3 +6226,25 @@ name validation, with effects2 for unfinished request and1 for recorded outcome;
 forward native, CLI and persisted Python exchange also pass. Original evidence
 is retained. Behind36974795077 is still in progress; million service is active
 above590,000 receipts. Full rolling/chaos and long-campaign gates remain open.
+
+## Visibility lifecycle and admitted behind-clock row pass (2026-10-02)
+
+[JSON/protobuf visibility lifecycle](scale/protobuf-visibility-lifecycle-2026-10-02/)
+passes race10.138s: real journaled attributes, physical encoding, projection Lag0,
+attribute/status indexes, byte-identical rebuild after compaction, and purge followed
+by peer projection restart without stale rows. Future protocol CI requires this
+compiled test name. This is component proof, not the50k/10k scale gates.
+The original plan calls for ordered durable purge and does not explicitly require
+online blob sweeping. Online coordinated GC is an extension; earlier status prose
+listing it as a release blocker overstated the original requirement. Full original
+matrix/soak, mutation and per-phase proof obligations remain unchanged.
+
+[Accepted behind36974795077](scale/canonical-r5-native-2026-10-02/behind-clean-ten-minute/)
+is terminal/success at27b78ca,729.20s Go test,25 batches/700 invocations/7703 entries,
+600 waits and19 provable pending-Sleep cuts. Final history/audit/drain gates and
+independent terminal/progress p99 pass (worst8.543/8.409s). Required common-clock,
+actual shifted ownership, all-waits-2s durations and both expected cohort audits
+pass. Current offline verifier output equals the original uploaded report. This
+clears one admitted ten-minute behind seed, not ahead,24h/full matrix/all cut
+combinations, or protobuf chaos. Old failed attempts remain retained.
+Existing100k and million handles remain live; no TTL-mismatch reruns.
