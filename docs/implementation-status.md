@@ -7511,3 +7511,23 @@ artifact/log/explanation guard after all terminal jobs. No14-row result or24h
 soak is claimed by dispatch. Tier2 all13x200 run37057872230 remains queued at
 076ebad; current120-workload100k37051896032 remains in progress atad37bfc.
 No running trial was restarted or canceled.
+
+
+## Million-population hosted diagnostic prepared; completed downloads reclaimed
+
+The new manual native-million-diagnostic workflow runs the existing qualified
+volume binary at1M/10m, with15m loading runway,64 publishers and both full-cluster
+SIGKILL cuts. All-replica drain and offline receipt verification remain mandatory.
+Raw30s/60s limits are diagnostic only; allow-smoke cannot clear24h/2s/30s. The
+workflow records exact Go/module/workflow source hashes and preserves every
+captured physical store, ledger, observation, log and executable through a
+lossless archive verified by member SHA256 readback. YAML/shell/embedded Python
+syntax checks pass; no execution result is claimed by adding the workflow.
+
+Disk cleanup revalidated all766 archived members of the terminal accepted
+Tier2 campaign against both lossless archives, then removed749 redundant
+downloaded files, reclaiming567,436,033 bytes. All archived evidence remains
+available; original NATS stores and failed experiments were unchanged. Raw
+Tier2 downloads can be restored from the base/supplement manifests and archives.
+The README's outdated broad fault/continuation limitations now match current
+qualification, while explicit rollout/storage limitations remain documented.

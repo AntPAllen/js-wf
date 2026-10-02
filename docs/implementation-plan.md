@@ -853,3 +853,19 @@ admitted-clock verification requires all cut/probe evidence on both clock rows.
 A ten-minute full-row campaign still reports `clears_full_tier3_release=false`:
 complete fault coverage and the required24-hour full-matrix soak are separate
 requirements. Dispatch and planner/guard tests do not establish a campaign pass.
+
+
+### Million-population native timer diagnostic
+
+The manual `native-million-diagnostic` workflow runs the existing volume tool
+with1,000,000 schedules,64 publishers, a15-minute loading runway and ten minutes
+of deadlines. It retains both all-server SIGKILL cuts and mandatory all-replica
+physical drain. Diagnostic raw lateness limits are30s p99/60s maximum; raw
+measurements remain in the report. Offline verification explicitly uses
+`-allow-smoke`; this profile cannot clear the original24h/2s/30s release gate.
+
+This probes full population and production persistence cadence beyond the
+earlier100k/90s diagnostic. It preserves all captured source hashes, binary,
+receipt ledger, observations, logs and physical stores in a lossless archive,
+with SHA256 member readback before publication, even after a campaign failure.
+A passing diagnostic would not establish the original missed-retirement cause.

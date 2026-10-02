@@ -1,0 +1,76 @@
+name: native-million-diagnostic
+on:
+  workflow_dispatch:
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Record exact source and build the volume tool
+        run: |
+          mkdir -p "$RUNNER_TEMP/native-million-evidence"
+          python3 - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'native-million-evidence'
+          revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          assert not subprocess.check_output(['git', 'status', '--porcelain']), 'clean source required'
+          names = subprocess.check_output(['git', 'ls-files'], text=True).splitlines()
+          hashes = {name: hashlib.sha256(Path(name).read_bytes()).hexdigest() for name in names
+                    if name.endswith('.go') or name in ('go.mod', 'go.sum', '.github/workflows/native-million-diagnostic.yml')}
+          (root / 'source.json').write_text(json.dumps(dict(revision=revision, files=hashes,
+              scope='Million native schedules over ten minutes; population/drain diagnostic, not 24h release.'), indent=2)+'\n')
+          PY
+          go build -p=1 -trimpath -o "$RUNNER_TEMP/native-million-evidence/wf-timer-volume" ./cmd/wf-timer-volume
+          sha256sum "$RUNNER_TEMP/native-million-evidence/wf-timer-volume" > "$RUNNER_TEMP/native-million-evidence/binary.sha256"
+      - name: Exercise one million native timers and both all-server SIGKILL cuts
+        run: |
+          set -o pipefail
+          "$RUNNER_TEMP/native-million-evidence/wf-timer-volume" \
+            -count 1000000 -publishers 64 -lead 15m -horizon 10m \
+            -p99-limit 30s -max-late 60s \
+            -root "$RUNNER_TEMP/native-million-evidence/campaign" \
+            2>&1 | tee "$RUNNER_TEMP/native-million-evidence/campaign-output.log"
+      - name: Verify observations and every replica drain offline
+        run: |
+          set -o pipefail
+          "$RUNNER_TEMP/native-million-evidence/wf-timer-volume" \
+            -verify -allow-smoke -root "$RUNNER_TEMP/native-million-evidence/campaign" \
+            2>&1 | tee "$RUNNER_TEMP/native-million-evidence/offline-verification.log"
+      - name: Preserve all evidence and physical stores with verified archive readback
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, tarfile
+          from pathlib import Path
+          tmp = Path(os.environ['RUNNER_TEMP'])
+          root = tmp / 'native-million-evidence'
+          assert root.is_dir(), 'no evidence directory was created'
+          files = sorted(p for p in root.rglob('*') if p.is_file())
+          hashes = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
+          assert hashes, 'empty evidence'
+          archive = tmp / 'native-million-originals.tmp.tar.gz'
+          with tarfile.open(archive, 'w:gz') as tar:
+              for p in files: tar.add(p, arcname=str(p.relative_to(root)))
+          with tarfile.open(archive, 'r:gz') as tar:
+              actual = {m.name: hashlib.sha256(tar.extractfile(m).read()).hexdigest() for m in tar.getmembers()}
+          assert actual == hashes, 'archive readback mismatch'
+          archive.rename(tmp / 'native-million-originals.tar.gz')
+          (tmp / 'native-million-manifest.json').write_text(json.dumps(dict(files=hashes,
+              scope='All captured evidence, including file stores and executable; diagnostic only.'), indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: native-million-diagnostic-originals
+          path: |
+            ${{ runner.temp }}/native-million-originals.tar.gz
+            ${{ runner.temp }}/native-million-manifest.json
+          if-no-files-found: error
