@@ -48,6 +48,8 @@ func RunSubject(typ, id string, count uint32) string {
 
 const TimerInvSeqHeader = "Wf-Timer-Inv-Seq"
 const TimerStepHeader = "Wf-Timer-Step"
+const TimerClockDomainHeader = "Wf-Timer-Clock-Domain"
+const TimerDeadlineHeader = "Wf-Timer-Deadline"
 
 func TimerSubject(typ, id string, invSeq, step uint64) string {
 	return fmt.Sprintf("wf.timer.%s.%s.%d.%d", typ, id, invSeq, step)

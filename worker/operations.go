@@ -29,7 +29,9 @@ type OperationEvent struct {
 	LeaseUpdateDuration  time.Duration
 	LeaseUpdateAttempted bool
 	// ServerTime identifies the successful SDK clock lookup that created a timer.
-	ServerTime *time.Time `json:",omitempty"`
+	ServerTime             *time.Time `json:",omitempty"`
+	ClockDomain            string     `json:",omitempty"`
+	ClockLower, ClockUpper *time.Time `json:",omitempty"`
 }
 
 // WithOperationObserver enables optional per-call timings. The callback may
@@ -98,6 +100,25 @@ func (o *deliveryOperations) finishTimerClock(start time.Time, index uint64, ser
 		event.Error = err.Error()
 	} else {
 		event.ServerTime = &serverTime
+	}
+	o.emit(event)
+}
+
+func (o *deliveryOperations) finishDomainClock(start time.Time, index uint64, domain string, lower, upper time.Time, err error) {
+	if o == nil {
+		return
+	}
+	event := o.base
+	event.At = o.now()
+	event.Duration = event.At.Sub(start)
+	event.Operation = "timer_domain_clock"
+	event.JournalIndex = index
+	event.ClockDomain = domain
+	if err != nil {
+		event.Error = err.Error()
+	} else {
+		event.ClockLower = &lower
+		event.ClockUpper = &upper
 	}
 	o.emit(event)
 }

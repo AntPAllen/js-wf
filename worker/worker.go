@@ -58,6 +58,8 @@ type Worker struct {
 	resultBlobPort             ResultBlobPort
 	timerSchedulePort          TimerSchedulePort
 	timerNowPort               func(context.Context) (time.Time, error)
+	timerClockDomain           string
+	timerClockBounds           func(context.Context) (time.Time, time.Time, error)
 	client                     *client.Client
 	ID                         string
 	Handlers                   map[string]Handler
@@ -1008,12 +1010,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		}
 		return resultBlobs.GetBytes(ctx, name)
 	})
-	wctx.SetTimerSupport(wakeupAt, func(ctx context.Context) (time.Time, error) {
-		started := ops.begin()
-		serverTime, err := w.serverNow(ctx)
-		ops.finishTimerClock(started, nextIndex(), serverTime, err)
-		return serverTime, err
-	}, func(ctx context.Context, step uint64, fireAt time.Time) error {
+	scheduleTimer := func(ctx context.Context, step uint64, fireAt time.Time, domain string) error {
 		started := ops.begin()
 		renewCtx, stopRenew := context.WithTimeout(ctx, 3*time.Second)
 		_, timing, err := ops.renew(renewCtx, l, 0)
@@ -1023,10 +1020,32 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			return err
 		}
 		started = ops.begin()
-		err = w.scheduleTimer(ctx, typ, id, input.Sequence, step, fireAt)
+		if domain == "" {
+			err = w.scheduleTimer(ctx, typ, id, input.Sequence, step, fireAt)
+		} else {
+			err = w.scheduleDomainTimer(ctx, typ, id, input.Sequence, step, fireAt, domain)
+		}
 		ops.finish(started, "timer_schedule", step, "", err)
 		return err
+	}
+	wctx.SetTimerSupport(wakeupAt, func(ctx context.Context) (time.Time, error) {
+		started := ops.begin()
+		serverTime, err := w.serverNow(ctx)
+		ops.finishTimerClock(started, nextIndex(), serverTime, err)
+		return serverTime, err
+	}, func(ctx context.Context, step uint64, fireAt time.Time) error {
+		return scheduleTimer(ctx, step, fireAt, "")
 	})
+	if w.timerClockBounds != nil {
+		if err := wctx.SetTimerClockSupport(wf.TimerClockSupport{Domain: w.timerClockDomain, Bounds: func(ctx context.Context) (time.Time, time.Time, error) {
+			started := ops.begin()
+			lower, upper, err := w.domainTimerBounds(ctx)
+			ops.finishDomainClock(started, nextIndex(), w.timerClockDomain, lower, upper, err)
+			return lower, upper, err
+		}, Schedule: scheduleTimer}); err != nil {
+			return err
+		}
+	}
 	wctx.SetTimerObserver(w.metrics.recordTimerFired)
 	wctx.SetChildSupport(typ, id, input.Sequence, func(ctx context.Context, childType, childID string, childInput []byte, signalName string) error {
 		_, err := w.client.StartChild(ctx, childType, childID, childInput, typ, id, input.Sequence, signalName)

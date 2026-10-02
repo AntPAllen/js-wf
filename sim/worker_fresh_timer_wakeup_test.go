@@ -24,6 +24,10 @@ import (
 // A prior unshifted run reaches a worker whose TimerNow and scheduler now use
 // another clock. Subsequent native wakeups carry that scheduling leader's time.
 func runWorkerFreshTimerWakeup(seed int64, replay *Trace) (trace Trace, runErr error) {
+	return runWorkerFreshTimerWakeupClock(seed, replay, false)
+}
+
+func runWorkerFreshTimerWakeupClock(seed int64, replay *Trace, common bool) (trace Trace, runErr error) {
 	s := NewScheduler(seed)
 	if replay != nil {
 		var err error
@@ -32,7 +36,11 @@ func runWorkerFreshTimerWakeup(seed int64, replay *Trace) (trace Trace, runErr e
 			return Trace{}, err
 		}
 	}
-	if err := s.SetWorkload("worker_fresh_timer_wakeup"); err != nil {
+	workload := "worker_fresh_timer_wakeup"
+	if common {
+		workload = "worker_common_clock_timers"
+	}
+	if err := s.SetWorkload(workload); err != nil {
 		return Trace{}, err
 	}
 	defer func() { trace = s.Trace() }()
@@ -74,6 +82,13 @@ func runWorkerFreshTimerWakeup(seed int64, replay *Trace) (trace Trace, runErr e
 	const typ, count = "test", 8
 	id := integratedWorkerIDs(1)[0]
 	calls := 0
+	var options []worker.Option
+	if common {
+		options = append(options, worker.WithTimerClock("utc-quorum-v1", func(context.Context) (time.Time, time.Time, error) {
+			now := base.Add(time.Duration(s.NowMillis()) * time.Millisecond)
+			return now, now, nil
+		}))
+	}
 	w, err := worker.NewWithPorts("fresh-clock-worker", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 		calls++
 		for i := 0; i < count; i++ {
@@ -100,7 +115,7 @@ func runWorkerFreshTimerWakeup(seed int64, replay *Trace) (trace Trace, runErr e
 			}
 		}
 		return json.RawMessage(`42`), nil
-	}}, worker.ModeledWorkerPorts{Journal: store, Leases: lease.NewWithKVPort(NewKVTransport(s, provision.LeaseTTL)), Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, Timer: timers, TimerNow: func(context.Context) (time.Time, error) { return timers.LeaderNow(), nil }, NativeTimer: true, Client: c})
+	}}, worker.ModeledWorkerPorts{Journal: store, Leases: lease.NewWithKVPort(NewKVTransport(s, provision.LeaseTTL)), Outcome: outcomes, Invocation: transport.SignalTransport, Signals: transport.SignalTransport, Timer: timers, TimerNow: func(context.Context) (time.Time, error) { return timers.LeaderNow(), nil }, NativeTimer: true, Client: c}, options...)
 	if err != nil {
 		return trace, err
 	}
@@ -146,6 +161,23 @@ func runWorkerFreshTimerWakeup(seed int64, replay *Trace) (trace Trace, runErr e
 	}
 	if err != nil || len(records) != entries || records[len(records)-1].Kind != journal.Completed || calls != 9 || len(timers.NativeSources()) != count || s.NowMillis() != int64(count)*duration.Milliseconds() || transport.Dispatch.Pending() != 0 || len(transport.Dispatch.RetainedSequences()) != 0 {
 		return trace, fmt.Errorf("seed %d terminal entries=%d calls=%d time=%d err=%v", seed, len(records), calls, s.NowMillis(), err)
+	}
+	if common {
+		for _, record := range records {
+			if record.Kind != journal.StepRequested {
+				continue
+			}
+			var req struct {
+				Kind   string `json:"kind"`
+				Domain string `json:"clock_domain"`
+			}
+			if err := json.Unmarshal(record.Payload, &req); err != nil {
+				return trace, err
+			}
+			if (req.Kind == "timer" || req.Kind == "timer_start" || req.Kind == "timer_await" || req.Kind == "timer_signal_select") && req.Domain != "utc-quorum-v1" {
+				return trace, fmt.Errorf("lost durable clock domain")
+			}
+		}
 	}
 	snapshot, err := retainedModelSnapshot(transport.StartTransport, journals, outcomes)
 	if err != nil {
@@ -195,5 +227,31 @@ func TestSeededWorkerFreshTimerWakeupReplay(t *testing.T) {
 	}
 	if len(covered) != 16 {
 		t.Fatalf("missing source/API/duration cases: %v", covered)
+	}
+}
+
+// This focused production-worker check is not part of the pinned release corpus
+// yet. It exercises the new opt-in domain rather than relabel legacy traces.
+func TestWorkerCommonClockAcrossSkewedDeliveryTimestamps(t *testing.T) {
+	covered := map[string]bool{}
+	for seed := int64(1); seed <= 1000; seed++ {
+		generated, err := runWorkerFreshTimerWakeupClock(seed, nil, true)
+		if err != nil {
+			t.Fatalf("seed %d: %v", seed, err)
+		}
+		for _, event := range generated.Transport {
+			if event.Operation == "check_worker_fresh_timer" {
+				covered[event.Outcome] = true
+			}
+		}
+		if seed <= 10 {
+			replayed, err := runWorkerFreshTimerWakeupClock(seed, &generated, true)
+			if err != nil || !reflect.DeepEqual(generated, replayed) {
+				t.Fatalf("seed %d replay: %v", seed, err)
+			}
+		}
+	}
+	if len(covered) != 16 {
+		t.Fatalf("API/skew/duration coverage=%d want16", len(covered))
 	}
 }

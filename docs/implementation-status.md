@@ -5675,3 +5675,23 @@ are retained. Production adapters/writers remain unconfigured: provisioning,
 worker/CLI wiring, schedule translation/domain retention, migration and end-to-end
 seeded/native recovery evidence remain necessary. Neither the60.27s ahead-clock
 failure nor the incomplete behind-clock sustained run is cleared by this work.
+
+## Worker common-clock wiring and domain-preserving schedule transport (2026-10-02)
+
+WithTimerClock now installs canonical SDK support on production/model workers,
+bounds3s clock attempts and records domain/lower/upper operations. Native timer
+publication translates a delivery hint from the current scheduling clock but
+retains canonical deadline/domain in target headers; fallback payloads retain
+that domain/deadline without physical-clock lookup. Lease renewal, publish-ack
+classification, stable identity and new-schedule counters are preserved.
+Full worker race passes31.204s. Two production-worker deterministic workloads
+pass1000schedules each in58.331s, including all16API×±60s delivery-skew×duration
+cells, eight genuine waits, exact replay checks, immutable42 and integrity/drain.
+The new common-domain workload is not yet pinned/full100k acceptance. Native R3
+header contract passes3.53s/package4.563s and proves actual emitted target header
+preservation, not timer due or leader-transition recovery.
+[Full commands, logs and source hashes](scale/timer-clock-domain-worker-2026-10-02/README.md)
+are retained. CLI/defaults/R5 fixtures do not enable the option yet. Provisioning,
+trusted topology, repair-loop wiring, migration, pinned transition/repair models
+and native admitted-cut recovery remain required. Ahead60.27s and incomplete
+behind sustained gates remain open; all release scope is retained.
