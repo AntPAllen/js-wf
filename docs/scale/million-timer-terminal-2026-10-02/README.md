@@ -88,3 +88,22 @@ the actual named retained_sources test fails with `incorrect drain verdict`.
 `drain-diagnostics` preserves original positive/negative Go JSON events, stderr,
 exact overlay/source hashes and review correction. Vet passes. Every published
 archive member is compared by SHA256 on readback. No24-hour rerun is launched.
+
+## Short100k diagnostic: no reproduction
+
+The clean17db0fc diagnostic delivered all100,000 schedules across90s after a30s
+lead, with two actual all-server SIGKILL/restarts healing in10.459s/10.253s.
+The service exited0. The new final audit observes zero physical stream messages,
+zero pending work and all64 consumers checked. Original-binary offline smoke
+verification validates every receipt/observation and all diagnostic gates.
+Raw p99/max lateness are26.091659150s/26.653096595s, within this diagnostic's
+30s/60s bounds. Those bounds do not meet the million-timer release2s/30s profile;
+the workload is also smaller and far shorter. All572 tracked Go source files
+match the recorded Git revision. This did not reproduce the original retained
+source failure and does not explain it or certify the failed million campaign.
+
+`short100k-no-reproduction` preserves the report, complete ledger/observations,
+drain audit, log, build metadata, full source-file hash inventory, terminal
+service state and offline verification. Every archived member is SHA256-checked
+on readback. Original physical stores and executable remain under their local
+`/tmp/js-wf-native-source-short*` roots and are excluded from the archive.

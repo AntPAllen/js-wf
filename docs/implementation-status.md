@@ -7032,3 +7032,16 @@ at exact52f4e51ba190e24132933de967d5317c481b21fd, with10m per seed,
 source-exit and raw latency/drain checks are unchanged. Original failed ahead200
 artifacts and other existing campaign handles are retained. This is a full-range
 qualification launch for one row, not a passed row or full matrix claim.
+
+
+## Compact native-source diagnostic completed without reproduction
+
+The17db0fc100k/90s service exits0 after both actual all-server SIGKILL/restarts.
+All100,000 receipts validate offline. Its final explicit audit observes zero
+physical messages and pending work across all64 consumers. Raw p99/max are
+26.092s/26.653s against diagnostic30s/60s limits, not the million-timer2s/30s
+release profile. [Originals and scope](scale/million-timer-terminal-2026-10-02/)
+are preserved losslessly; physical stores/executable remain local. The retained
+source failure did not reproduce at this scale/timing. The million-timer drain
+failure and backend persistence-cause isolation remain open; no original failed
+store was altered, and no replacement24-hour campaign was started.
