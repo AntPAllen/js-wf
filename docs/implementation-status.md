@@ -5863,3 +5863,14 @@ Admitted35s canonical native smokes are queued at source0b921b7:
 and [behind36960953444](https://github.com/AntPAllen/js-wf/actions/runs/36960953444).
 Both enable the shared clock and pending-timer admission. Retained launch
 snapshots supply no acceptance result; review these handles before further runs.
+
+## Independently reviewed complete100k simulator campaign at57ecf06 (2026-10-02)
+
+[Run36942165713 evidence](scale/tier1-suite-guard-2026-10-01/fresh-worker-timer-release-count-pass/README.md)
+is now terminal/success and independently reviewed. Current guard reproduces
+the original report:151 top-level passes, two documented trace-only skips,
+all184 pins matching the source Git tree,10,400,632 schedules,173,756,738 choices
+and2,435,250,750 events. Elapsed12,682.31s. All11 original artifact/API/full-job
+files are retained with verified uncompressed hashes. This source predates the
+canonical clock and member-session additions; current234-pin/final-source100k
+and independent per-workload seed accounting remain open.
