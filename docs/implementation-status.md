@@ -5803,3 +5803,9 @@ no unfinished recovery. [Seeded/session evidence](scale/membership-session-recov
 passes1,000 schedules5.04s / package6.064s, three new/old exact pins1.132s,
 assignment/CLI races40.482s /30.452s and38 artifact controls. Full234-pin/100k and
 native sustained recovery remain open, as does full release scope.
+
+The corrected membership sustained campaign is queued as
+[run36958387092](https://github.com/AntPAllen/js-wf/actions/runs/36958387092),
+sourcec7f38e2. [Launch API evidence](scale/membership-session-recovery-2026-10-02/native-ten-minute-launch.json)
+is retained; queued state supplies no acceptance result. The million-timer
+service remains active, with432,371 receipts at this observation.
