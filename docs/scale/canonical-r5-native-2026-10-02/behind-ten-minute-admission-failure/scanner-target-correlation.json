@@ -1,0 +1,710 @@
+{
+  "scope": "Actual history/receipt/operation/cursor join. This proves no fallback scan visited these invocation sequences before fixture cancellation; native server redelivery causality remains separate.",
+  "inputs": {
+    "history.jsonl": "3d5c54752a43ea0ee1a667a77040a85bb3c1d8059ccf54e7223688b664f2a67a",
+    "suspended-scans.json": "0c88ebcd491321064bee9112816e639882e872e53b85ec8f03a9f56270a2ec4d",
+    "controller-operations.json": "dd528a33f7e12f101669cf4014349a4302eccfedf0428f29a5f1c88c4827b8de",
+    "controller-receipts.json": "0df5d7a035402495025f055d1986f4d8e821a42d2f96b1968c617600385e6095"
+  },
+  "targets": [
+    {
+      "id": "tier3-1-batch-11-5",
+      "invocation_sequence": 318,
+      "start": {
+        "invoke_ts": "2026-10-02T04:42:49.681929227Z",
+        "return_ts": "2026-10-02T04:42:49.694320092Z",
+        "op": "start",
+        "args": {
+          "type": "matrixtimer",
+          "id": "tier3-1-batch-11-5",
+          "input_hash": "47357a32787075f78777944533f20c499a38cbe9f11d4e5c26fa9b066388ad2f",
+          "input_size": 35
+        },
+        "result": {
+          "status": "started",
+          "inv_seq": 318
+        }
+      },
+      "scans_after_start": [
+        {
+          "At": "2026-10-02T04:42:50.437023742Z",
+          "Cursor": 73,
+          "Result": {
+            "next_sequence": 81,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:51.467683088Z",
+          "Cursor": 81,
+          "Result": {
+            "next_sequence": 89,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:52.481580949Z",
+          "Cursor": 89,
+          "Result": {
+            "next_sequence": 97,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:53.450498327Z",
+          "Cursor": 97,
+          "Result": {
+            "next_sequence": 105,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:54.452311518Z",
+          "Cursor": 105,
+          "Result": {
+            "next_sequence": 113,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:55.50740245Z",
+          "Cursor": 113,
+          "Result": {
+            "next_sequence": 121,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:56.48177639Z",
+          "Cursor": 121,
+          "Result": {
+            "next_sequence": 129,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:57.448707579Z",
+          "Cursor": 129,
+          "Result": {
+            "next_sequence": 137,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:58.469842895Z",
+          "Cursor": 137,
+          "Result": {
+            "next_sequence": 145,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:59.497310097Z",
+          "Cursor": 145,
+          "Result": {
+            "next_sequence": 153,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:43:00.45263226Z",
+          "Cursor": 153,
+          "Result": {
+            "next_sequence": 161,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:43:01.435307772Z",
+          "Cursor": 161,
+          "Result": {
+            "next_sequence": 169,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        }
+      ],
+      "journal_receipts": [
+        {
+          "sequence": 3394,
+          "subject": "wf.jrn.matrixtimer.tier3-1-batch-11-5",
+          "entry": {
+            "epoch": 7262,
+            "index": 0,
+            "kind": "Started",
+            "worker_id": "tier3-mixed-4"
+          },
+          "observed_at": "2026-10-02T04:42:49.726903855Z"
+        },
+        {
+          "sequence": 3403,
+          "subject": "wf.jrn.matrixtimer.tier3-1-batch-11-5",
+          "entry": {
+            "epoch": 7262,
+            "index": 1,
+            "kind": "StepRequested",
+            "payload": {
+              "kind": "timer",
+              "name": "timer-0",
+              "input_hash": "",
+              "duration_nanos": 2000000000,
+              "fire_at": "2026-10-02T04:42:51.803095685Z",
+              "clock_domain": "utc-quorum-v1"
+            },
+            "worker_id": "tier3-mixed-4"
+          },
+          "observed_at": "2026-10-02T04:42:49.749255589Z"
+        },
+        {
+          "sequence": 3423,
+          "subject": "wf.jrn.matrixtimer.tier3-1-batch-11-5",
+          "entry": {
+            "epoch": 7262,
+            "index": 2,
+            "kind": "Suspended",
+            "payload": {
+              "waiting_on": "timer:timer-0"
+            },
+            "worker_id": "tier3-mixed-4"
+          },
+          "observed_at": "2026-10-02T04:42:49.792196971Z"
+        }
+      ],
+      "timer_operations": [
+        {
+          "At": "2026-10-02T04:42:49.739416498Z",
+          "Duration": 17807,
+          "Worker": "tier3-mixed-4",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-11-5",
+          "RunSequence": 1232,
+          "Delivery": 1,
+          "Operation": "timer_domain_clock",
+          "JournalIndex": 1,
+          "JournalKind": "",
+          "Error": "",
+          "LeaseGateWait": 0,
+          "LeaseUpdateDuration": 0,
+          "LeaseUpdateAttempted": false,
+          "ClockDomain": "utc-quorum-v1",
+          "ClockLower": "2026-10-02T04:42:49.675182803Z",
+          "ClockUpper": "2026-10-02T04:42:49.803095685Z"
+        },
+        {
+          "At": "2026-10-02T04:42:49.779096304Z",
+          "Duration": 23988341,
+          "Worker": "tier3-mixed-4",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-11-5",
+          "RunSequence": 1232,
+          "Delivery": 1,
+          "Operation": "timer_native_hint",
+          "JournalIndex": 1,
+          "JournalKind": "StepRequested",
+          "Error": "",
+          "LeaseGateWait": 0,
+          "LeaseUpdateDuration": 0,
+          "LeaseUpdateAttempted": false,
+          "ServerTime": "2026-10-02T04:42:49.761689193Z",
+          "ClockDomain": "utc-quorum-v1",
+          "ClockLower": "2026-10-02T04:42:49.703839536Z",
+          "ClockUpper": "2026-10-02T04:42:49.841371791Z",
+          "TimerDeadline": "2026-10-02T04:42:51.803095685Z",
+          "TimerScheduleAt": "2026-10-02T04:42:51.860945342Z",
+          "TimerPublished": true
+        }
+      ],
+      "scanner_visited_target_before_cancellation": false,
+      "legacy_page_containing_target": 313
+    },
+    {
+      "id": "tier3-1-batch-11-7",
+      "invocation_sequence": 315,
+      "start": {
+        "invoke_ts": "2026-10-02T04:42:49.681557736Z",
+        "return_ts": "2026-10-02T04:42:49.694786546Z",
+        "op": "start",
+        "args": {
+          "type": "matrixtimer",
+          "id": "tier3-1-batch-11-7",
+          "input_hash": "c0579bbf64b9ef73c82298f4a91fae2e132a980e541f57192c9db4d55298a399",
+          "input_size": 35
+        },
+        "result": {
+          "status": "started",
+          "inv_seq": 315
+        }
+      },
+      "scans_after_start": [
+        {
+          "At": "2026-10-02T04:42:50.437023742Z",
+          "Cursor": 73,
+          "Result": {
+            "next_sequence": 81,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:51.467683088Z",
+          "Cursor": 81,
+          "Result": {
+            "next_sequence": 89,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:52.481580949Z",
+          "Cursor": 89,
+          "Result": {
+            "next_sequence": 97,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:53.450498327Z",
+          "Cursor": 97,
+          "Result": {
+            "next_sequence": 105,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:54.452311518Z",
+          "Cursor": 105,
+          "Result": {
+            "next_sequence": 113,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:55.50740245Z",
+          "Cursor": 113,
+          "Result": {
+            "next_sequence": 121,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:56.48177639Z",
+          "Cursor": 121,
+          "Result": {
+            "next_sequence": 129,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:57.448707579Z",
+          "Cursor": 129,
+          "Result": {
+            "next_sequence": 137,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:58.469842895Z",
+          "Cursor": 137,
+          "Result": {
+            "next_sequence": 145,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:59.497310097Z",
+          "Cursor": 145,
+          "Result": {
+            "next_sequence": 153,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:43:00.45263226Z",
+          "Cursor": 153,
+          "Result": {
+            "next_sequence": 161,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:43:01.435307772Z",
+          "Cursor": 161,
+          "Result": {
+            "next_sequence": 169,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        }
+      ],
+      "journal_receipts": [
+        {
+          "sequence": 3395,
+          "subject": "wf.jrn.matrixtimer.tier3-1-batch-11-7",
+          "entry": {
+            "epoch": 7252,
+            "index": 0,
+            "kind": "Started",
+            "worker_id": "tier3-mixed-2"
+          },
+          "observed_at": "2026-10-02T04:42:49.72696029Z"
+        },
+        {
+          "sequence": 3404,
+          "subject": "wf.jrn.matrixtimer.tier3-1-batch-11-7",
+          "entry": {
+            "epoch": 7252,
+            "index": 1,
+            "kind": "StepRequested",
+            "payload": {
+              "kind": "timer",
+              "name": "timer-0",
+              "input_hash": "",
+              "duration_nanos": 2000000000,
+              "fire_at": "2026-10-02T04:42:51.80206225Z",
+              "clock_domain": "utc-quorum-v1"
+            },
+            "worker_id": "tier3-mixed-2"
+          },
+          "observed_at": "2026-10-02T04:42:49.749357453Z"
+        },
+        {
+          "sequence": 3421,
+          "subject": "wf.jrn.matrixtimer.tier3-1-batch-11-7",
+          "entry": {
+            "epoch": 7252,
+            "index": 2,
+            "kind": "Suspended",
+            "payload": {
+              "waiting_on": "timer:timer-0"
+            },
+            "worker_id": "tier3-mixed-2"
+          },
+          "observed_at": "2026-10-02T04:42:49.792007735Z"
+        }
+      ],
+      "timer_operations": [
+        {
+          "At": "2026-10-02T04:42:49.73838792Z",
+          "Duration": 29625,
+          "Worker": "tier3-mixed-2",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-11-7",
+          "RunSequence": 1227,
+          "Delivery": 1,
+          "Operation": "timer_domain_clock",
+          "JournalIndex": 1,
+          "JournalKind": "",
+          "Error": "",
+          "LeaseGateWait": 0,
+          "LeaseUpdateDuration": 0,
+          "LeaseUpdateAttempted": false,
+          "ClockDomain": "utc-quorum-v1",
+          "ClockLower": "2026-10-02T04:42:49.674149368Z",
+          "ClockUpper": "2026-10-02T04:42:49.80206225Z"
+        },
+        {
+          "At": "2026-10-02T04:42:49.777864674Z",
+          "Duration": 22768288,
+          "Worker": "tier3-mixed-2",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-11-7",
+          "RunSequence": 1227,
+          "Delivery": 1,
+          "Operation": "timer_native_hint",
+          "JournalIndex": 1,
+          "JournalKind": "StepRequested",
+          "Error": "",
+          "LeaseGateWait": 0,
+          "LeaseUpdateDuration": 0,
+          "LeaseUpdateAttempted": false,
+          "ServerTime": "2026-10-02T04:42:49.761576994Z",
+          "ClockDomain": "utc-quorum-v1",
+          "ClockLower": "2026-10-02T04:42:49.704025988Z",
+          "ClockUpper": "2026-10-02T04:42:49.841558243Z",
+          "TimerDeadline": "2026-10-02T04:42:51.80206225Z",
+          "TimerScheduleAt": "2026-10-02T04:42:51.859613256Z",
+          "TimerPublished": true
+        }
+      ],
+      "scanner_visited_target_before_cancellation": false,
+      "legacy_page_containing_target": 313
+    },
+    {
+      "id": "tier3-1-batch-11-9",
+      "invocation_sequence": 316,
+      "start": {
+        "invoke_ts": "2026-10-02T04:42:49.681658659Z",
+        "return_ts": "2026-10-02T04:42:49.695220066Z",
+        "op": "start",
+        "args": {
+          "type": "matrixtimer",
+          "id": "tier3-1-batch-11-9",
+          "input_hash": "245e788526eb4ac5993ff0f8ccb4a858e8cf57eb58b2ff5f3ed577ad00207740",
+          "input_size": 35
+        },
+        "result": {
+          "status": "started",
+          "inv_seq": 316
+        }
+      },
+      "scans_after_start": [
+        {
+          "At": "2026-10-02T04:42:50.437023742Z",
+          "Cursor": 73,
+          "Result": {
+            "next_sequence": 81,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:51.467683088Z",
+          "Cursor": 81,
+          "Result": {
+            "next_sequence": 89,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:52.481580949Z",
+          "Cursor": 89,
+          "Result": {
+            "next_sequence": 97,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:53.450498327Z",
+          "Cursor": 97,
+          "Result": {
+            "next_sequence": 105,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:54.452311518Z",
+          "Cursor": 105,
+          "Result": {
+            "next_sequence": 113,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:55.50740245Z",
+          "Cursor": 113,
+          "Result": {
+            "next_sequence": 121,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:56.48177639Z",
+          "Cursor": 121,
+          "Result": {
+            "next_sequence": 129,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:57.448707579Z",
+          "Cursor": 129,
+          "Result": {
+            "next_sequence": 137,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:58.469842895Z",
+          "Cursor": 137,
+          "Result": {
+            "next_sequence": 145,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:42:59.497310097Z",
+          "Cursor": 145,
+          "Result": {
+            "next_sequence": 153,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:43:00.45263226Z",
+          "Cursor": 153,
+          "Result": {
+            "next_sequence": 161,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        },
+        {
+          "At": "2026-10-02T04:43:01.435307772Z",
+          "Cursor": 161,
+          "Result": {
+            "next_sequence": 169,
+            "inspected": 8,
+            "reenqueued": 0
+          },
+          "Error": ""
+        }
+      ],
+      "journal_receipts": [
+        {
+          "sequence": 3396,
+          "subject": "wf.jrn.matrixtimer.tier3-1-batch-11-9",
+          "entry": {
+            "epoch": 7261,
+            "index": 0,
+            "kind": "Started",
+            "worker_id": "tier3-mixed-2"
+          },
+          "observed_at": "2026-10-02T04:42:49.730246624Z"
+        },
+        {
+          "sequence": 3406,
+          "subject": "wf.jrn.matrixtimer.tier3-1-batch-11-9",
+          "entry": {
+            "epoch": 7261,
+            "index": 1,
+            "kind": "StepRequested",
+            "payload": {
+              "kind": "timer",
+              "name": "timer-0",
+              "input_hash": "",
+              "duration_nanos": 2000000000,
+              "fire_at": "2026-10-02T04:42:51.805975465Z",
+              "clock_domain": "utc-quorum-v1"
+            },
+            "worker_id": "tier3-mixed-2"
+          },
+          "observed_at": "2026-10-02T04:42:49.759198151Z"
+        },
+        {
+          "sequence": 3427,
+          "subject": "wf.jrn.matrixtimer.tier3-1-batch-11-9",
+          "entry": {
+            "epoch": 7261,
+            "index": 2,
+            "kind": "Suspended",
+            "payload": {
+              "waiting_on": "timer:timer-0"
+            },
+            "worker_id": "tier3-mixed-2"
+          },
+          "observed_at": "2026-10-02T04:42:49.797858142Z"
+        }
+      ],
+      "timer_operations": [
+        {
+          "At": "2026-10-02T04:42:49.742299873Z",
+          "Duration": 34161,
+          "Worker": "tier3-mixed-2",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-11-9",
+          "RunSequence": 1234,
+          "Delivery": 1,
+          "Operation": "timer_domain_clock",
+          "JournalIndex": 1,
+          "JournalKind": "",
+          "Error": "",
+          "LeaseGateWait": 0,
+          "LeaseUpdateDuration": 0,
+          "LeaseUpdateAttempted": false,
+          "ClockDomain": "utc-quorum-v1",
+          "ClockLower": "2026-10-02T04:42:49.678062583Z",
+          "ClockUpper": "2026-10-02T04:42:49.805975465Z"
+        },
+        {
+          "At": "2026-10-02T04:42:49.783371011Z",
+          "Duration": 19332940,
+          "Worker": "tier3-mixed-2",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-11-9",
+          "RunSequence": 1234,
+          "Delivery": 1,
+          "Operation": "timer_native_hint",
+          "JournalIndex": 1,
+          "JournalKind": "StepRequested",
+          "Error": "",
+          "LeaseGateWait": 0,
+          "LeaseUpdateDuration": 0,
+          "LeaseUpdateAttempted": false,
+          "ServerTime": "2026-10-02T04:42:49.775625783Z",
+          "ClockDomain": "utc-quorum-v1",
+          "ClockLower": "2026-10-02T04:42:49.711432194Z",
+          "ClockUpper": "2026-10-02T04:42:49.848964449Z",
+          "TimerDeadline": "2026-10-02T04:42:51.805975465Z",
+          "TimerScheduleAt": "2026-10-02T04:42:51.870169054Z",
+          "TimerPublished": true
+        }
+      ],
+      "scanner_visited_target_before_cancellation": false,
+      "legacy_page_containing_target": 313
+    }
+  ]
+}

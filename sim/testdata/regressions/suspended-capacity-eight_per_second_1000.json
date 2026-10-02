@@ -1,0 +1,4389 @@
+{
+  "version": 3,
+  "seed": 1,
+  "workload": "suspended_scan_capacity",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "256_per_100ms",
+        "eight_per_second"
+      ],
+      "chosen": "eight_per_second"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "1000",
+        "3000",
+        "336"
+      ],
+      "chosen": "1000"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "scan.suspended",
+      "sequence": 1,
+      "data_sha256": "96061e92f58e4bdcdee73df36183fe3ac64747c81c26f6c83aada8d2aabb1864",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "system.suspended-reconciler",
+      "sequence": 1,
+      "data_sha256": "7f8ba4240382aa0466e677695eda893923bb092e8268bcedc552c90a4fb6a02c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "scan.suspended",
+      "sequence": 1,
+      "data_sha256": "96061e92f58e4bdcdee73df36183fe3ac64747c81c26f6c83aada8d2aabb1864",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "capacity_scan",
+      "sequence": 73,
+      "outcome": "next=81 repaired=0"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "5316ca1c5ddca8e6ceccfce58f3b8540e540ee22f6180fb89492904051b3d531",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 4,
+      "sequence": 5,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "capacity_scan",
+      "sequence": 81,
+      "outcome": "next=89 repaired=0"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 5,
+      "sequence": 6,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "cd70bea023f752a0564abb6ed08d42c1440f2e33e29914e55e0be1595e24f45a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "capacity_scan",
+      "sequence": 89,
+      "outcome": "next=97 repaired=0"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 7,
+      "sequence": 8,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "d6d824abba4afde81129c71dea75b8100e96338da5f416d2f69088f1960cb091",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 3000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3000,
+      "operation": "capacity_scan",
+      "sequence": 97,
+      "outcome": "next=105 repaired=0"
+    },
+    {
+      "at_ms": 3000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 9,
+      "sequence": 10,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 4,
+      "sequence": 5,
+      "data_sha256": "1253e9373e781b7500266caa55150e08e210bc8cd8cc70d89985e3600155e860",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 4000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 10,
+      "sequence": 11,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4000,
+      "operation": "capacity_scan",
+      "sequence": 105,
+      "outcome": "next=113 repaired=0"
+    },
+    {
+      "at_ms": 4000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 11,
+      "sequence": 12,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 5,
+      "sequence": 6,
+      "data_sha256": "6c658ee83fb7e812482494f3e416a876f63f418a0b8a1f5e76d47ee4177035cb",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 12,
+      "sequence": 13,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "capacity_scan",
+      "sequence": 113,
+      "outcome": "next=121 repaired=0"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 13,
+      "sequence": 14,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "89aa1e580023722db67646e8149eb246c748e180e34a1cf679ab0b41a416d904",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 14,
+      "sequence": 15,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "capacity_scan",
+      "sequence": 121,
+      "outcome": "next=129 repaired=0"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 15,
+      "sequence": 16,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 7,
+      "sequence": 8,
+      "data_sha256": "6566230e3a3ce3774c1bbc7c18b590ae0f457bbcd511e90e3e7dca2a02e7addc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 7000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 16,
+      "sequence": 17,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7000,
+      "operation": "capacity_scan",
+      "sequence": 129,
+      "outcome": "next=137 repaired=0"
+    },
+    {
+      "at_ms": 7000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 17,
+      "sequence": 18,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "d80eae6e96d148b3b2abbbc6760077b66c4ea071f847dab573d507a32c4d99a5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 8000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 18,
+      "sequence": 19,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8000,
+      "operation": "capacity_scan",
+      "sequence": 137,
+      "outcome": "next=145 repaired=0"
+    },
+    {
+      "at_ms": 8000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 19,
+      "sequence": 20,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 9,
+      "sequence": 10,
+      "data_sha256": "be47addbcb8f60566a3d7fd5a36f8195798e2848b368195d9a5d20e007c59a0c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 9000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 20,
+      "sequence": 21,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9000,
+      "operation": "capacity_scan",
+      "sequence": 145,
+      "outcome": "next=153 repaired=0"
+    },
+    {
+      "at_ms": 9000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 21,
+      "sequence": 22,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 10,
+      "sequence": 11,
+      "data_sha256": "620c9c332101a5bae955c66ae72268fbcd3972766179522c8deede6a249addb7",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 10000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 22,
+      "sequence": 23,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10000,
+      "operation": "capacity_scan",
+      "sequence": 153,
+      "outcome": "next=161 repaired=0"
+    },
+    {
+      "at_ms": 10000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 23,
+      "sequence": 24,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 11,
+      "sequence": 12,
+      "data_sha256": "bb668ca95563216088b98a62557fa1e26802563f3919ac78ae30533bb9ed422c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 11000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 11000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 24,
+      "sequence": 25,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 11000,
+      "operation": "capacity_scan",
+      "sequence": 161,
+      "outcome": "next=169 repaired=0"
+    },
+    {
+      "at_ms": 11000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 25,
+      "sequence": 26,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 11000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 12,
+      "sequence": 13,
+      "data_sha256": "f57e5cb1f4532c008183057ecc94283801fcb5afe2d1c190e3dfd38c4da08042",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 26,
+      "sequence": 27,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "capacity_scan",
+      "sequence": 169,
+      "outcome": "next=177 repaired=0"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 27,
+      "sequence": 28,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 13,
+      "sequence": 14,
+      "data_sha256": "8cd2510271575d8430c05368315a87b9c4784c7389a47496080c1e615a2a00b6",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 13000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 28,
+      "sequence": 29,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13000,
+      "operation": "capacity_scan",
+      "sequence": 177,
+      "outcome": "next=185 repaired=0"
+    },
+    {
+      "at_ms": 13000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 29,
+      "sequence": 30,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 14,
+      "sequence": 15,
+      "data_sha256": "61a229bae1e90331edd986b6bbbe617f7035de88a5bf7c018c3add6c762a6e8d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 14000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 30,
+      "sequence": 31,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14000,
+      "operation": "capacity_scan",
+      "sequence": 185,
+      "outcome": "next=193 repaired=0"
+    },
+    {
+      "at_ms": 14000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 31,
+      "sequence": 32,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 15,
+      "sequence": 16,
+      "data_sha256": "684fe39f03758de6a882ae61fa62312b67e5b1e665928cbf3dc3d8f4f53e3562",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 32,
+      "sequence": 33,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "capacity_scan",
+      "sequence": 193,
+      "outcome": "next=201 repaired=0"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 33,
+      "sequence": 34,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 16,
+      "sequence": 17,
+      "data_sha256": "43974ed74066b207c30ffd0fed5146762e6c60745ac977004bc14507c7c42b50",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 16000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 34,
+      "sequence": 35,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16000,
+      "operation": "capacity_scan",
+      "sequence": 201,
+      "outcome": "next=209 repaired=0"
+    },
+    {
+      "at_ms": 16000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 35,
+      "sequence": 36,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 17,
+      "sequence": 18,
+      "data_sha256": "83f814f7a92e365cbd79f9addceed185761a8d38a06a2d4350bb1fe4b7632b34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 17000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 17000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 36,
+      "sequence": 37,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 17000,
+      "operation": "capacity_scan",
+      "sequence": 209,
+      "outcome": "next=217 repaired=0"
+    },
+    {
+      "at_ms": 17000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 37,
+      "sequence": 38,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 17000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 18,
+      "sequence": 19,
+      "data_sha256": "16badfc6202cb3f8889e0f2779b19218af4cbb736e56acadce8148aba9a7a9f8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 18000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 38,
+      "sequence": 39,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18000,
+      "operation": "capacity_scan",
+      "sequence": 217,
+      "outcome": "next=225 repaired=0"
+    },
+    {
+      "at_ms": 18000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 39,
+      "sequence": 40,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 19,
+      "sequence": 20,
+      "data_sha256": "0e6523810856a138a75dec70a9cf3778a5c70b83ac915f22c33f05db97cb3e68",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 19000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 40,
+      "sequence": 41,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19000,
+      "operation": "capacity_scan",
+      "sequence": 225,
+      "outcome": "next=233 repaired=0"
+    },
+    {
+      "at_ms": 19000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 41,
+      "sequence": 42,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 20,
+      "sequence": 21,
+      "data_sha256": "c0509a487a18b003ba05e505419ebb63e57a29158073e381f57160b5c5b86426",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 20000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 42,
+      "sequence": 43,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20000,
+      "operation": "capacity_scan",
+      "sequence": 233,
+      "outcome": "next=241 repaired=0"
+    },
+    {
+      "at_ms": 20000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 43,
+      "sequence": 44,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 21,
+      "sequence": 22,
+      "data_sha256": "749fc650cacb0f06547520d53c31505c8156e0a3be07073eddb2ef3ad9e383ba",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 21000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 44,
+      "sequence": 45,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21000,
+      "operation": "capacity_scan",
+      "sequence": 241,
+      "outcome": "next=249 repaired=0"
+    },
+    {
+      "at_ms": 21000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 45,
+      "sequence": 46,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 22,
+      "sequence": 23,
+      "data_sha256": "9f484139a27415ae2e8612bf6c65a8101a18eb5e9b7809e74ca63a45a65f17f4",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 22000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 46,
+      "sequence": 47,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22000,
+      "operation": "capacity_scan",
+      "sequence": 249,
+      "outcome": "next=257 repaired=0"
+    },
+    {
+      "at_ms": 22000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 47,
+      "sequence": 48,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 23,
+      "sequence": 24,
+      "data_sha256": "4c970004b0678d439f177e77d3cabdb7e9a44df770948ddc2467cbc76b7211c3",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 23000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 23000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 48,
+      "sequence": 49,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 23000,
+      "operation": "capacity_scan",
+      "sequence": 257,
+      "outcome": "next=265 repaired=0"
+    },
+    {
+      "at_ms": 23000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 49,
+      "sequence": 50,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 23000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 24,
+      "sequence": 25,
+      "data_sha256": "768b84ef05f655d57fe22d488451f075365f6cd18a13073466aa826cc0ebdbfb",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 24000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 50,
+      "sequence": 51,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24000,
+      "operation": "capacity_scan",
+      "sequence": 265,
+      "outcome": "next=273 repaired=0"
+    },
+    {
+      "at_ms": 24000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 51,
+      "sequence": 52,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 25,
+      "sequence": 26,
+      "data_sha256": "303c8bd55875dda240897db158acf70afe4226f300757f3518b86e6817c00022",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 25000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 52,
+      "sequence": 53,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25000,
+      "operation": "capacity_scan",
+      "sequence": 273,
+      "outcome": "next=281 repaired=0"
+    },
+    {
+      "at_ms": 25000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 53,
+      "sequence": 54,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 26,
+      "sequence": 27,
+      "data_sha256": "71a1c003a2b855d85582c8f6c7648c49d3fe836408a7e1b5d9b222448acb3c1b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 26000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 54,
+      "sequence": 55,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26000,
+      "operation": "capacity_scan",
+      "sequence": 281,
+      "outcome": "next=289 repaired=0"
+    },
+    {
+      "at_ms": 26000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 55,
+      "sequence": 56,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 27,
+      "sequence": 28,
+      "data_sha256": "af180e4359fc6179dc953abdcbdcaf7c146b53e1bee2b335e50dead11ccefa07",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 27000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 56,
+      "sequence": 57,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27000,
+      "operation": "capacity_scan",
+      "sequence": 289,
+      "outcome": "next=297 repaired=0"
+    },
+    {
+      "at_ms": 27000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 57,
+      "sequence": 58,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 28,
+      "sequence": 29,
+      "data_sha256": "4c15f47afe7f817fd559e12ddbc276f4930c5822f2049088d6f6605bec7cea56",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 28000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 58,
+      "sequence": 59,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28000,
+      "operation": "capacity_scan",
+      "sequence": 297,
+      "outcome": "next=305 repaired=0"
+    },
+    {
+      "at_ms": 28000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 59,
+      "sequence": 60,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 29,
+      "sequence": 30,
+      "data_sha256": "090d3859ff6840b2280f4708cf08cdaed873d967183a4d1deedc1a7964a21eee",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 29000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 29000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 60,
+      "sequence": 61,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 29000,
+      "operation": "capacity_scan",
+      "sequence": 305,
+      "outcome": "next=313 repaired=0"
+    },
+    {
+      "at_ms": 29000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 61,
+      "sequence": 62,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 29000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 30,
+      "sequence": 31,
+      "data_sha256": "8efbbe9bc19ad2e043c6cdb187c0a0fedde70b6458443ce0b5648ec04ccf4cdf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 62,
+      "sequence": 63,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "capacity_scan",
+      "sequence": 313,
+      "outcome": "next=321 repaired=0"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 63,
+      "sequence": 64,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 31,
+      "sequence": 32,
+      "data_sha256": "8d23cf6c86e834a7aa6eded54c26ce2bb2e74903538c61bdd5d2197997ab2f72",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 31000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 64,
+      "sequence": 65,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31000,
+      "operation": "capacity_scan",
+      "sequence": 321,
+      "outcome": "next=329 repaired=0"
+    },
+    {
+      "at_ms": 31000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 65,
+      "sequence": 66,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 32,
+      "sequence": 33,
+      "data_sha256": "0791963ca2667a23cf3268ad25d7bb6ca0ed287b192869703cdbcf0e87934c33",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 32000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 66,
+      "sequence": 67,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32000,
+      "operation": "capacity_scan",
+      "sequence": 329,
+      "outcome": "next=337 repaired=0"
+    },
+    {
+      "at_ms": 32000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 67,
+      "sequence": 68,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 33,
+      "sequence": 34,
+      "data_sha256": "8ede6b26343305e05c3c0029f4e830d4e8c2016869a9d1cd97b100b2a16dfd1c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 33000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 68,
+      "sequence": 69,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33000,
+      "operation": "capacity_scan",
+      "sequence": 337,
+      "outcome": "next=345 repaired=0"
+    },
+    {
+      "at_ms": 33000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 69,
+      "sequence": 70,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 34,
+      "sequence": 35,
+      "data_sha256": "da70dfa4d9f95ac979f921e8e623358236313f334afcd06cddf8a5621cf6a1e9",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 34000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 70,
+      "sequence": 71,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34000,
+      "operation": "capacity_scan",
+      "sequence": 345,
+      "outcome": "next=353 repaired=0"
+    },
+    {
+      "at_ms": 34000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 71,
+      "sequence": 72,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 35,
+      "sequence": 36,
+      "data_sha256": "459535faa370a3b5f8b87203b089623c7aeb9325abf241ec8a685b9c325047a3",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 35000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 35000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 72,
+      "sequence": 73,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 35000,
+      "operation": "capacity_scan",
+      "sequence": 353,
+      "outcome": "next=361 repaired=0"
+    },
+    {
+      "at_ms": 35000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 73,
+      "sequence": 74,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 35000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 36,
+      "sequence": 37,
+      "data_sha256": "73daa9289ddd08a53ba86f065ddb07bf915aba208bec652e999613d2a8444228",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 36000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 74,
+      "sequence": 75,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36000,
+      "operation": "capacity_scan",
+      "sequence": 361,
+      "outcome": "next=369 repaired=0"
+    },
+    {
+      "at_ms": 36000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 75,
+      "sequence": 76,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 37,
+      "sequence": 38,
+      "data_sha256": "5f193b350c8aba4883dedf97367ef3080821470661d0a2e1faf420a300cb5ca8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 37000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 76,
+      "sequence": 77,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37000,
+      "operation": "capacity_scan",
+      "sequence": 369,
+      "outcome": "next=377 repaired=0"
+    },
+    {
+      "at_ms": 37000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 77,
+      "sequence": 78,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 38,
+      "sequence": 39,
+      "data_sha256": "2c4cf657337835125bc4258d0e2e546af4185bdb70f64e1b0aa46d1d78017404",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 38000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 78,
+      "sequence": 79,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38000,
+      "operation": "capacity_scan",
+      "sequence": 377,
+      "outcome": "next=385 repaired=0"
+    },
+    {
+      "at_ms": 38000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 79,
+      "sequence": 80,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 39,
+      "sequence": 40,
+      "data_sha256": "131b0c35e2d7edef9dd63f48eff39341ef0a5f770538aa4e0017f41b9cdb135d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 39000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 80,
+      "sequence": 81,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39000,
+      "operation": "capacity_scan",
+      "sequence": 385,
+      "outcome": "next=393 repaired=0"
+    },
+    {
+      "at_ms": 39000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 81,
+      "sequence": 82,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 40,
+      "sequence": 41,
+      "data_sha256": "99a0b871c9047c4f5555fcf062e0623174bae38746fece6efdf032d80fb2221a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 40000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 82,
+      "sequence": 83,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40000,
+      "operation": "capacity_scan",
+      "sequence": 393,
+      "outcome": "next=401 repaired=0"
+    },
+    {
+      "at_ms": 40000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 83,
+      "sequence": 84,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 41,
+      "sequence": 42,
+      "data_sha256": "dcaadad1cfce437735b81ab025f776e5857e48558c47f6960e6a5f2595664a85",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 41000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 41000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 84,
+      "sequence": 85,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 41000,
+      "operation": "capacity_scan",
+      "sequence": 401,
+      "outcome": "next=409 repaired=0"
+    },
+    {
+      "at_ms": 41000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 85,
+      "sequence": 86,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 41000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 42,
+      "sequence": 43,
+      "data_sha256": "480f5a496560ae4228bb7977ecf29b2c589d7a7aa6b609534566af8cbc229a9e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 42000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 86,
+      "sequence": 87,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42000,
+      "operation": "capacity_scan",
+      "sequence": 409,
+      "outcome": "next=417 repaired=0"
+    },
+    {
+      "at_ms": 42000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 87,
+      "sequence": 88,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 43,
+      "sequence": 44,
+      "data_sha256": "afcf8bc077e68eb94dfe783205f32cabdeead61fd32ff5710947b6111ff2ff77",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 43000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 88,
+      "sequence": 89,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43000,
+      "operation": "capacity_scan",
+      "sequence": 417,
+      "outcome": "next=425 repaired=0"
+    },
+    {
+      "at_ms": 43000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 89,
+      "sequence": 90,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 44,
+      "sequence": 45,
+      "data_sha256": "0dfcddb0440e967f05bb68ca09a5e2188b8abc36bfb5b95b83b88be59c42c6e7",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 44000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 90,
+      "sequence": 91,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44000,
+      "operation": "capacity_scan",
+      "sequence": 425,
+      "outcome": "next=433 repaired=0"
+    },
+    {
+      "at_ms": 44000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 91,
+      "sequence": 92,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 45,
+      "sequence": 46,
+      "data_sha256": "aaf01d71b55e51b1a3051cbb3cdc0646578dcda722b2922072a81f257b1a9821",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 92,
+      "sequence": 93,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "capacity_scan",
+      "sequence": 433,
+      "outcome": "next=441 repaired=0"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 93,
+      "sequence": 94,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 46,
+      "sequence": 47,
+      "data_sha256": "2dfe70c43208f52b9ef4ea7e134705283947116491e81fbac05f0aedc25c5956",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 46000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 94,
+      "sequence": 95,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46000,
+      "operation": "capacity_scan",
+      "sequence": 441,
+      "outcome": "next=449 repaired=0"
+    },
+    {
+      "at_ms": 46000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 95,
+      "sequence": 96,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 47,
+      "sequence": 48,
+      "data_sha256": "4a30a219a9d7663fdd35c0a5df49c8d55018f13a0c53e10dd8efe8f7e4cc5d89",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 47000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 47000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 96,
+      "sequence": 97,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 47000,
+      "operation": "capacity_scan",
+      "sequence": 449,
+      "outcome": "next=457 repaired=0"
+    },
+    {
+      "at_ms": 47000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 97,
+      "sequence": 98,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 47000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 48,
+      "sequence": 49,
+      "data_sha256": "353767b239099863e13ca954e20a66c9d75f777baf239f56e399958de49bf79d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 48000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 48000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 98,
+      "sequence": 99,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 48000,
+      "operation": "capacity_scan",
+      "sequence": 457,
+      "outcome": "next=465 repaired=0"
+    },
+    {
+      "at_ms": 48000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 99,
+      "sequence": 100,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 48000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 49,
+      "sequence": 50,
+      "data_sha256": "ad3b83575249b68aab9602de378314fc221ab07a9b2ab0bb4a245ec649219f45",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 49000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 49000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 100,
+      "sequence": 101,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 49000,
+      "operation": "capacity_scan",
+      "sequence": 465,
+      "outcome": "next=473 repaired=0"
+    },
+    {
+      "at_ms": 49000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 101,
+      "sequence": 102,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 49000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 50,
+      "sequence": 51,
+      "data_sha256": "3a8f6d79cd434dc10588606993976b7b2bc038ff4a2481e857ac0168fc29a683",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 50000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 50000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 102,
+      "sequence": 103,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 50000,
+      "operation": "capacity_scan",
+      "sequence": 473,
+      "outcome": "next=481 repaired=0"
+    },
+    {
+      "at_ms": 50000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 103,
+      "sequence": 104,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 50000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 51,
+      "sequence": 52,
+      "data_sha256": "51d089cdaf0c968c94b80671489d22b6f79b1c57de80df880b008e9b37b49788",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 51000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 51000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 104,
+      "sequence": 105,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 51000,
+      "operation": "capacity_scan",
+      "sequence": 481,
+      "outcome": "next=489 repaired=0"
+    },
+    {
+      "at_ms": 51000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 105,
+      "sequence": 106,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 51000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 52,
+      "sequence": 53,
+      "data_sha256": "e4be97ce765e6cfcd703884cc31db7478fa7befca7cf6dc15420ba20ed718abe",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 52000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 52000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 106,
+      "sequence": 107,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 52000,
+      "operation": "capacity_scan",
+      "sequence": 489,
+      "outcome": "next=497 repaired=0"
+    },
+    {
+      "at_ms": 52000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 107,
+      "sequence": 108,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 52000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 53,
+      "sequence": 54,
+      "data_sha256": "dcb5d6e69e4ded78464ae2843f509daf65c9ca09dfdc9b5ad69166341963a877",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 53000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 53000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 108,
+      "sequence": 109,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 53000,
+      "operation": "capacity_scan",
+      "sequence": 497,
+      "outcome": "next=505 repaired=0"
+    },
+    {
+      "at_ms": 53000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 109,
+      "sequence": 110,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 53000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 54,
+      "sequence": 55,
+      "data_sha256": "e13b778ae833ca8c5d757c58e4a85bd71e08c05caedbd096e13ec3f7b228b43a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 54000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 54000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 110,
+      "sequence": 111,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 54000,
+      "operation": "capacity_scan",
+      "sequence": 505,
+      "outcome": "next=513 repaired=0"
+    },
+    {
+      "at_ms": 54000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 111,
+      "sequence": 112,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 54000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 55,
+      "sequence": 56,
+      "data_sha256": "39700d452c77592c9710a4a34c6fe97d6150e26d550a5cfa553b0177d7b23e95",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 55000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 55000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 112,
+      "sequence": 113,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 55000,
+      "operation": "capacity_scan",
+      "sequence": 513,
+      "outcome": "next=521 repaired=0"
+    },
+    {
+      "at_ms": 55000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 113,
+      "sequence": 114,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 55000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 56,
+      "sequence": 57,
+      "data_sha256": "72933e3b31f0070af6478edc3becf96e1ee59917620e8c509cf0e6b360e29c02",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 56000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 56000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 114,
+      "sequence": 115,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 56000,
+      "operation": "capacity_scan",
+      "sequence": 521,
+      "outcome": "next=529 repaired=0"
+    },
+    {
+      "at_ms": 56000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 115,
+      "sequence": 116,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 56000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 57,
+      "sequence": 58,
+      "data_sha256": "8920a14a7f6469b955b114111564cb9736440238d220fc9fd525efdb9a056d3e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 57000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 57000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 116,
+      "sequence": 117,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 57000,
+      "operation": "capacity_scan",
+      "sequence": 529,
+      "outcome": "next=537 repaired=0"
+    },
+    {
+      "at_ms": 57000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 117,
+      "sequence": 118,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 57000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 58,
+      "sequence": 59,
+      "data_sha256": "da6813d10025369ac0411363a16ab750adb21c6d0b38a03a9fc5ce58134da875",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 58000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 58000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 118,
+      "sequence": 119,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 58000,
+      "operation": "capacity_scan",
+      "sequence": 537,
+      "outcome": "next=545 repaired=0"
+    },
+    {
+      "at_ms": 58000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 119,
+      "sequence": 120,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 58000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 59,
+      "sequence": 60,
+      "data_sha256": "68e476b5d5aeca7b0e3b5ca867106c32e40cad05a490f6b08a24063cceed7e7e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 59000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 59000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 120,
+      "sequence": 121,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 59000,
+      "operation": "capacity_scan",
+      "sequence": 545,
+      "outcome": "next=553 repaired=0"
+    },
+    {
+      "at_ms": 59000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 121,
+      "sequence": 122,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 59000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 60,
+      "sequence": 61,
+      "data_sha256": "d40fbd13d527595c47eacbf0d7c87d256139d9d45261c25c2840d30a4756495b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 60000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 60000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 122,
+      "sequence": 123,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 60000,
+      "operation": "capacity_scan",
+      "sequence": 553,
+      "outcome": "next=561 repaired=0"
+    },
+    {
+      "at_ms": 60000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 123,
+      "sequence": 124,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 60000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 61,
+      "sequence": 62,
+      "data_sha256": "04edd1d7736883194af3ddb232c337e53d17bc93cfd2140c4f4c4e0d966798b1",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 61000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 61000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 124,
+      "sequence": 125,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 61000,
+      "operation": "capacity_scan",
+      "sequence": 561,
+      "outcome": "next=569 repaired=0"
+    },
+    {
+      "at_ms": 61000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 125,
+      "sequence": 126,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 61000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 62,
+      "sequence": 63,
+      "data_sha256": "c7ce483fd1cc5fd498e7e2a09851c65f89a33a6837f66d9fbb36e5e5f70b41a2",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 62000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 62000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 126,
+      "sequence": 127,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 62000,
+      "operation": "capacity_scan",
+      "sequence": 569,
+      "outcome": "next=577 repaired=0"
+    },
+    {
+      "at_ms": 62000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 127,
+      "sequence": 128,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 62000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 63,
+      "sequence": 64,
+      "data_sha256": "1086d35563c495c1cecbce12135cab3b945e01dd185ea2c1dc8ace5ad988977e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 63000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 63000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 128,
+      "sequence": 129,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 63000,
+      "operation": "capacity_scan",
+      "sequence": 577,
+      "outcome": "next=585 repaired=0"
+    },
+    {
+      "at_ms": 63000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 129,
+      "sequence": 130,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 63000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 64,
+      "sequence": 65,
+      "data_sha256": "c403741c4121989ac12c0829be88b8bec6f27b270f3cf8a7be3fe72cba473897",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 64000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 64000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 130,
+      "sequence": 131,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 64000,
+      "operation": "capacity_scan",
+      "sequence": 585,
+      "outcome": "next=593 repaired=0"
+    },
+    {
+      "at_ms": 64000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 131,
+      "sequence": 132,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 64000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 65,
+      "sequence": 66,
+      "data_sha256": "d4e33e2934280979f580a63f992daa7d0de2cd64a145d5c403a75c3dc5c0004e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 65000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 65000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 132,
+      "sequence": 133,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 65000,
+      "operation": "capacity_scan",
+      "sequence": 593,
+      "outcome": "next=601 repaired=0"
+    },
+    {
+      "at_ms": 65000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 133,
+      "sequence": 134,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 65000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 66,
+      "sequence": 67,
+      "data_sha256": "36c1cc2f9d7022bf6beacb6248a89e7e677b3bf9a91e6457a5ffdbade55b76da",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 66000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 66000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 134,
+      "sequence": 135,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 66000,
+      "operation": "capacity_scan",
+      "sequence": 601,
+      "outcome": "next=609 repaired=0"
+    },
+    {
+      "at_ms": 66000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 135,
+      "sequence": 136,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 66000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 67,
+      "sequence": 68,
+      "data_sha256": "1f594da9b409f7f4b9dc5015a81761b2fc2dd60eec773f74539bdfd30c552c89",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 67000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 67000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 136,
+      "sequence": 137,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 67000,
+      "operation": "capacity_scan",
+      "sequence": 609,
+      "outcome": "next=617 repaired=0"
+    },
+    {
+      "at_ms": 67000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 137,
+      "sequence": 138,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 67000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 68,
+      "sequence": 69,
+      "data_sha256": "85ea151b8c5b5ab0d3349100e441bd4b8dc20740d429c16c3b85b77066386e75",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 68000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 68000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 138,
+      "sequence": 139,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 68000,
+      "operation": "capacity_scan",
+      "sequence": 617,
+      "outcome": "next=625 repaired=0"
+    },
+    {
+      "at_ms": 68000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 139,
+      "sequence": 140,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 68000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 69,
+      "sequence": 70,
+      "data_sha256": "ad723f42c7aba316d944f19f340ce47d8e0c6fb354d212736ec4782314a6824a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 69000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 69000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 140,
+      "sequence": 141,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 69000,
+      "operation": "capacity_scan",
+      "sequence": 625,
+      "outcome": "next=633 repaired=0"
+    },
+    {
+      "at_ms": 69000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 141,
+      "sequence": 142,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 69000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 70,
+      "sequence": 71,
+      "data_sha256": "b6b1b469ea43c90a602e7ae3bdea001b11f66c17337dec23df0b0249542357ee",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 70000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 70000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 142,
+      "sequence": 143,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 70000,
+      "operation": "capacity_scan",
+      "sequence": 633,
+      "outcome": "next=641 repaired=0"
+    },
+    {
+      "at_ms": 70000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 143,
+      "sequence": 144,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 70000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 71,
+      "sequence": 72,
+      "data_sha256": "455ae2dfc77dd77562c06dc893a49d84795a93e4f86ea2e92006940c870ec044",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 71000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 71000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 144,
+      "sequence": 145,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 71000,
+      "operation": "capacity_scan",
+      "sequence": 641,
+      "outcome": "next=649 repaired=0"
+    },
+    {
+      "at_ms": 71000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 145,
+      "sequence": 146,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 71000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 72,
+      "sequence": 73,
+      "data_sha256": "5480ab857f30bc9abdc0d88179b66cb30b6a294029f8bed71e3b606a19941359",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 72000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 72000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 146,
+      "sequence": 147,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 72000,
+      "operation": "capacity_scan",
+      "sequence": 649,
+      "outcome": "next=657 repaired=0"
+    },
+    {
+      "at_ms": 72000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 147,
+      "sequence": 148,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 72000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 73,
+      "sequence": 74,
+      "data_sha256": "24be8ee76308afb924abfaf26212411f2b66e53b9ce2534e5c9f88354c88cc39",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 73000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 73000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 148,
+      "sequence": 149,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 73000,
+      "operation": "capacity_scan",
+      "sequence": 657,
+      "outcome": "next=665 repaired=0"
+    },
+    {
+      "at_ms": 73000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 149,
+      "sequence": 150,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 73000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 74,
+      "sequence": 75,
+      "data_sha256": "9ae8f17cfc8ba7fd8fb34b2a194ef965a3b36a40839a46eeab1350e916692ac9",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 74000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 74000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 150,
+      "sequence": 151,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 74000,
+      "operation": "capacity_scan",
+      "sequence": 665,
+      "outcome": "next=673 repaired=0"
+    },
+    {
+      "at_ms": 74000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 151,
+      "sequence": 152,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 74000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 75,
+      "sequence": 76,
+      "data_sha256": "f4466a4b51d21014b34f621813a1ed75f1c750ec328d908d9edc989c64778962",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 75000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 75000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 152,
+      "sequence": 153,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 75000,
+      "operation": "capacity_scan",
+      "sequence": 673,
+      "outcome": "next=681 repaired=0"
+    },
+    {
+      "at_ms": 75000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 153,
+      "sequence": 154,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 75000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 76,
+      "sequence": 77,
+      "data_sha256": "1c8dcc518b9942ef52885666bfb82260c287afbbeebb71e741b1262099424f11",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 76000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 76000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 154,
+      "sequence": 155,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 76000,
+      "operation": "capacity_scan",
+      "sequence": 681,
+      "outcome": "next=689 repaired=0"
+    },
+    {
+      "at_ms": 76000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 155,
+      "sequence": 156,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 76000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 77,
+      "sequence": 78,
+      "data_sha256": "fc4fb94d36f45aa9d13358022455e55db4b6f0eb536a1b2897c90dfd3df9eb9b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 77000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 77000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 156,
+      "sequence": 157,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 77000,
+      "operation": "capacity_scan",
+      "sequence": 689,
+      "outcome": "next=697 repaired=0"
+    },
+    {
+      "at_ms": 77000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 157,
+      "sequence": 158,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 77000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 78,
+      "sequence": 79,
+      "data_sha256": "d6723fa996ced47773f2dea29cce9b11f951e6dafe321a84ac7d32791c3b4660",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 78000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 78000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 158,
+      "sequence": 159,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 78000,
+      "operation": "capacity_scan",
+      "sequence": 697,
+      "outcome": "next=705 repaired=0"
+    },
+    {
+      "at_ms": 78000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 159,
+      "sequence": 160,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 78000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 79,
+      "sequence": 80,
+      "data_sha256": "bd94717d91260895035088525e817ea10375454f03aa3bd8b28b355a4cee22c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 79000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 79000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 160,
+      "sequence": 161,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 79000,
+      "operation": "capacity_scan",
+      "sequence": 705,
+      "outcome": "next=713 repaired=0"
+    },
+    {
+      "at_ms": 79000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 161,
+      "sequence": 162,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 79000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 80,
+      "sequence": 81,
+      "data_sha256": "40f8d6d22b99ea3388538fd60bbf532256434b0eac401df1d9a2bdbb29354ae8",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 80000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 80000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 162,
+      "sequence": 163,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 80000,
+      "operation": "capacity_scan",
+      "sequence": 713,
+      "outcome": "next=721 repaired=0"
+    },
+    {
+      "at_ms": 80000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 163,
+      "sequence": 164,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 80000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 81,
+      "sequence": 82,
+      "data_sha256": "74de057f768beb42de17ffc4b8a56100f0bed85947ecacaef111e3d3ec997950",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 81000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 81000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 164,
+      "sequence": 165,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 81000,
+      "operation": "capacity_scan",
+      "sequence": 721,
+      "outcome": "next=729 repaired=0"
+    },
+    {
+      "at_ms": 81000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 165,
+      "sequence": 166,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 81000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 82,
+      "sequence": 83,
+      "data_sha256": "509694b0a010c6431900e71b8210521af57d39ce8e64deb365f0a5c6c9a2ef6d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 82000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 82000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 166,
+      "sequence": 167,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 82000,
+      "operation": "capacity_scan",
+      "sequence": 729,
+      "outcome": "next=737 repaired=0"
+    },
+    {
+      "at_ms": 82000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 167,
+      "sequence": 168,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 82000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 83,
+      "sequence": 84,
+      "data_sha256": "bc8db39f614342b78a67494dbece216d3726f6924b73563be34fc630ac1db7f5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 83000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 83000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 168,
+      "sequence": 169,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 83000,
+      "operation": "capacity_scan",
+      "sequence": 737,
+      "outcome": "next=745 repaired=0"
+    },
+    {
+      "at_ms": 83000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 169,
+      "sequence": 170,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 83000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 84,
+      "sequence": 85,
+      "data_sha256": "42c6024940120036d7a0103375d5b8e5072589f6d0f9a1a8e7f6eb6a17358675",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 84000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 84000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 170,
+      "sequence": 171,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 84000,
+      "operation": "capacity_scan",
+      "sequence": 745,
+      "outcome": "next=753 repaired=0"
+    },
+    {
+      "at_ms": 84000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 171,
+      "sequence": 172,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 84000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 85,
+      "sequence": 86,
+      "data_sha256": "a8cee66e4788af8b855979155e486c988d84a42aba71e43a0fc26997ca12e737",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 85000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 85000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 172,
+      "sequence": 173,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 85000,
+      "operation": "capacity_scan",
+      "sequence": 753,
+      "outcome": "next=761 repaired=0"
+    },
+    {
+      "at_ms": 85000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 173,
+      "sequence": 174,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 85000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 86,
+      "sequence": 87,
+      "data_sha256": "c78961d3d782d8a85d9344eedae027f43ce6b9fd35c8f355861a39e0d0ddecc5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 86000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 86000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 174,
+      "sequence": 175,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 86000,
+      "operation": "capacity_scan",
+      "sequence": 761,
+      "outcome": "next=769 repaired=0"
+    },
+    {
+      "at_ms": 86000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 175,
+      "sequence": 176,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 86000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 87,
+      "sequence": 88,
+      "data_sha256": "afa472a961fbcb09314e81b2c3eb19cd2d9fd7527582f43a3b8fd9d3ed6d893d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 87000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 87000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 176,
+      "sequence": 177,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 87000,
+      "operation": "capacity_scan",
+      "sequence": 769,
+      "outcome": "next=777 repaired=0"
+    },
+    {
+      "at_ms": 87000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 177,
+      "sequence": 178,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 87000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 88,
+      "sequence": 89,
+      "data_sha256": "eaf89db7108470dc3f6b23ea90618264b3e8f8b6145371667c4055e9c5ce9f52",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 88000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 88000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 178,
+      "sequence": 179,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 88000,
+      "operation": "capacity_scan",
+      "sequence": 777,
+      "outcome": "next=785 repaired=0"
+    },
+    {
+      "at_ms": 88000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 179,
+      "sequence": 180,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 88000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 89,
+      "sequence": 90,
+      "data_sha256": "9e04a49e5786695116f9af28552da3083d4eeb015294b878d27053439e363cdf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 89000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 89000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 180,
+      "sequence": 181,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 89000,
+      "operation": "capacity_scan",
+      "sequence": 785,
+      "outcome": "next=793 repaired=0"
+    },
+    {
+      "at_ms": 89000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 181,
+      "sequence": 182,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 89000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 90,
+      "sequence": 91,
+      "data_sha256": "23c5910b8b10cfa86e40099cf01e5c2b36f4dd0a903f0c60e5517ea177f4d390",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 90000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 90000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 182,
+      "sequence": 183,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 90000,
+      "operation": "capacity_scan",
+      "sequence": 793,
+      "outcome": "next=801 repaired=0"
+    },
+    {
+      "at_ms": 90000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 183,
+      "sequence": 184,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 90000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 91,
+      "sequence": 92,
+      "data_sha256": "096012b7ebcaf56d1d63b2784d2b2bbdeae080d72ad6bd1b9f7018e62a3c37d0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 91000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 91000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 184,
+      "sequence": 185,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 91000,
+      "operation": "capacity_scan",
+      "sequence": 801,
+      "outcome": "next=809 repaired=0"
+    },
+    {
+      "at_ms": 91000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 185,
+      "sequence": 186,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 91000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 92,
+      "sequence": 93,
+      "data_sha256": "0b06d2ffebd5c025cf444cb95a73e1fff046569238eafd1e80f511ea2a807de3",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 92000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 92000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 186,
+      "sequence": 187,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 92000,
+      "operation": "capacity_scan",
+      "sequence": 809,
+      "outcome": "next=817 repaired=0"
+    },
+    {
+      "at_ms": 92000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 187,
+      "sequence": 188,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 92000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 93,
+      "sequence": 94,
+      "data_sha256": "7b2c21ead1522776414b5a256722903b465fd0c8e029005fcd865144a429da52",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 93000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 93000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 188,
+      "sequence": 189,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 93000,
+      "operation": "capacity_scan",
+      "sequence": 817,
+      "outcome": "next=825 repaired=0"
+    },
+    {
+      "at_ms": 93000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 189,
+      "sequence": 190,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 93000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 94,
+      "sequence": 95,
+      "data_sha256": "10e4e7caf8b078429bb1c80b1a10118ac6f963eff098fd25a66c78862ae5ebce",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 94000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 94000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 190,
+      "sequence": 191,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 94000,
+      "operation": "capacity_scan",
+      "sequence": 825,
+      "outcome": "next=833 repaired=0"
+    },
+    {
+      "at_ms": 94000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 191,
+      "sequence": 192,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 94000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 95,
+      "sequence": 96,
+      "data_sha256": "130790feced08212eed7d1490dd4d7abf138543be61a4744a03f69ecb9609764",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 95000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 95000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 192,
+      "sequence": 193,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 95000,
+      "operation": "capacity_scan",
+      "sequence": 833,
+      "outcome": "next=841 repaired=0"
+    },
+    {
+      "at_ms": 95000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 193,
+      "sequence": 194,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 95000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 96,
+      "sequence": 97,
+      "data_sha256": "7125e777a6b199fc4e8c2a0d024215e393c06bf775c217a5f2d8d1a6a7c98d96",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 96000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 96000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 194,
+      "sequence": 195,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 96000,
+      "operation": "capacity_scan",
+      "sequence": 841,
+      "outcome": "next=849 repaired=0"
+    },
+    {
+      "at_ms": 96000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 195,
+      "sequence": 196,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 96000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 97,
+      "sequence": 98,
+      "data_sha256": "12e967ca0f368d0d8511518c58c6929146650bb1babce4448263e67722dd0161",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 97000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 97000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 196,
+      "sequence": 197,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 97000,
+      "operation": "capacity_scan",
+      "sequence": 849,
+      "outcome": "next=857 repaired=0"
+    },
+    {
+      "at_ms": 97000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 197,
+      "sequence": 198,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 97000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 98,
+      "sequence": 99,
+      "data_sha256": "22cdd352056c42ac1a6d01d6bd4f8e8ed1c27fb9addc6e500a59f88b57e4612a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 98000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 98000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 198,
+      "sequence": 199,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 98000,
+      "operation": "capacity_scan",
+      "sequence": 857,
+      "outcome": "next=865 repaired=0"
+    },
+    {
+      "at_ms": 98000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 199,
+      "sequence": 200,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 98000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 99,
+      "sequence": 100,
+      "data_sha256": "8b6cd7c429e83373dbd412f43d7422c0c4a127d93d0f2ad15909f0c2a3e7b320",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 99000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 99000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 200,
+      "sequence": 201,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 99000,
+      "operation": "capacity_scan",
+      "sequence": 865,
+      "outcome": "next=873 repaired=0"
+    },
+    {
+      "at_ms": 99000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 201,
+      "sequence": 202,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 99000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 100,
+      "sequence": 101,
+      "data_sha256": "46f9d22816179479bd27b0036854788327eedf3f6f5d8dcb866b976e17cc9715",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 100000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 202,
+      "sequence": 203,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100000,
+      "operation": "capacity_scan",
+      "sequence": 873,
+      "outcome": "next=881 repaired=0"
+    },
+    {
+      "at_ms": 100000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 203,
+      "sequence": 204,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 101,
+      "sequence": 102,
+      "data_sha256": "28096b238fafbfd5abdb8ddf4e7f5a2c67196cfd8b5d49a196012d0269a2189f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 101000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 101000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 204,
+      "sequence": 205,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 101000,
+      "operation": "capacity_scan",
+      "sequence": 881,
+      "outcome": "next=889 repaired=0"
+    },
+    {
+      "at_ms": 101000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 205,
+      "sequence": 206,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 101000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 102,
+      "sequence": 103,
+      "data_sha256": "a829c72c42755e384141ad8f163e4965ef5c9f8f0e07378c1d05a7222af0dd80",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 102000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 102000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 206,
+      "sequence": 207,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 102000,
+      "operation": "capacity_scan",
+      "sequence": 889,
+      "outcome": "next=897 repaired=0"
+    },
+    {
+      "at_ms": 102000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 207,
+      "sequence": 208,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 102000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 103,
+      "sequence": 104,
+      "data_sha256": "c62510afc57db491f9f993387b76dd9a7d08f09c01326953904b6586c19c4b8a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 103000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 103000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 208,
+      "sequence": 209,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 103000,
+      "operation": "capacity_scan",
+      "sequence": 897,
+      "outcome": "next=905 repaired=0"
+    },
+    {
+      "at_ms": 103000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 209,
+      "sequence": 210,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 103000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 104,
+      "sequence": 105,
+      "data_sha256": "43f64dc77762f69f9f52d5f70b53170679cb9abfc688f4cf77bdfc8077f022bc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 104000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 104000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 210,
+      "sequence": 211,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 104000,
+      "operation": "capacity_scan",
+      "sequence": 905,
+      "outcome": "next=913 repaired=0"
+    },
+    {
+      "at_ms": 104000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 211,
+      "sequence": 212,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 104000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 105,
+      "sequence": 106,
+      "data_sha256": "1bee34b6262a7777362f96e3dd5635764e820f97bab9772f492397774a38d74a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 105000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 105000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 212,
+      "sequence": 213,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 105000,
+      "operation": "capacity_scan",
+      "sequence": 913,
+      "outcome": "next=921 repaired=0"
+    },
+    {
+      "at_ms": 105000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 213,
+      "sequence": 214,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 105000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 106,
+      "sequence": 107,
+      "data_sha256": "7e07ae1a0cd3da38f7e619aacacec577992e62944683b47726c201890e98d2a3",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 106000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 106000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 214,
+      "sequence": 215,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 106000,
+      "operation": "capacity_scan",
+      "sequence": 921,
+      "outcome": "next=929 repaired=0"
+    },
+    {
+      "at_ms": 106000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 215,
+      "sequence": 216,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 106000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 107,
+      "sequence": 108,
+      "data_sha256": "e0e3fcdfb0803ca538910c12042cb6232acb9e3c6db8908524aea6ed560e5334",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 107000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 107000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 216,
+      "sequence": 217,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 107000,
+      "operation": "capacity_scan",
+      "sequence": 929,
+      "outcome": "next=937 repaired=0"
+    },
+    {
+      "at_ms": 107000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 217,
+      "sequence": 218,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 107000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 108,
+      "sequence": 109,
+      "data_sha256": "ffd560d182369b08a8b3ed35cfa5ee3cc50b5b5f093ece3139181709813896c3",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 108000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 108000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 218,
+      "sequence": 219,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 108000,
+      "operation": "capacity_scan",
+      "sequence": 937,
+      "outcome": "next=945 repaired=0"
+    },
+    {
+      "at_ms": 108000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 219,
+      "sequence": 220,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 108000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 109,
+      "sequence": 110,
+      "data_sha256": "828bb918957379a792e06807bcd291daf3c1efaa51325f32d2fc7e3280f1b983",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 109000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 109000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 220,
+      "sequence": 221,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 109000,
+      "operation": "capacity_scan",
+      "sequence": 945,
+      "outcome": "next=953 repaired=0"
+    },
+    {
+      "at_ms": 109000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 221,
+      "sequence": 222,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 109000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 110,
+      "sequence": 111,
+      "data_sha256": "6953c2a883537cc80135516935de542987c2cd76f94d8cbf2ad004d7bf4c6195",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 110000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 110000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 222,
+      "sequence": 223,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 110000,
+      "operation": "capacity_scan",
+      "sequence": 953,
+      "outcome": "next=961 repaired=0"
+    },
+    {
+      "at_ms": 110000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 223,
+      "sequence": 224,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 110000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 111,
+      "sequence": 112,
+      "data_sha256": "eef79a6a04f78a54832c8891ed83f4863850ec0a7d9807e9b6ac208d23a1e59c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 111000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 111000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 224,
+      "sequence": 225,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 111000,
+      "operation": "capacity_scan",
+      "sequence": 961,
+      "outcome": "next=969 repaired=0"
+    },
+    {
+      "at_ms": 111000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 225,
+      "sequence": 226,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 111000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 112,
+      "sequence": 113,
+      "data_sha256": "16b30490a644117a249c2018f31f7d29d2848c8bd43956a895f9bcd649f3ff9c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 112000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 112000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 226,
+      "sequence": 227,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 112000,
+      "operation": "capacity_scan",
+      "sequence": 969,
+      "outcome": "next=977 repaired=0"
+    },
+    {
+      "at_ms": 112000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 227,
+      "sequence": 228,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 112000,
+      "operation": "kv_update",
+      "subject": "scan.suspended",
+      "expected": 113,
+      "sequence": 114,
+      "data_sha256": "3837e1aa083f578c9179bdd9e3b2b0ebe980361d800f99637c7b331c29a26e87",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 113000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 113000,
+      "operation": "kv_update",
+      "subject": "system.suspended-reconciler",
+      "expected": 228,
+      "sequence": 229,
+      "data_sha256": "dc74225135850c1bb04fb718de85ddfba890399ce9a2de7ed171211f48e0fc34",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 113000,
+      "operation": "capacity_repair",
+      "subject": "capacity-980",
+      "sequence": 9803,
+      "outcome": "170000011"
+    },
+    {
+      "at_ms": 113000,
+      "operation": "capacity_scan",
+      "sequence": 977,
+      "outcome": "next=985 repaired=1"
+    },
+    {
+      "at_ms": 113000,
+      "operation": "kv_delete",
+      "subject": "system.suspended-reconciler",
+      "expected": 229,
+      "sequence": 230,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 113000,
+      "operation": "characterize_scan_capacity",
+      "outcome": "eight_per_second_1000"
+    }
+  ]
+}

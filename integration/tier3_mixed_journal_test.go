@@ -486,8 +486,26 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	launch("repair/signal", func() error {
 		return reconcile.RunRepairLoopObserved(workCtx, js, "tier3-mixed-signal", "signal", time.Second, 32, repairObserver)
 	})
+	suspendedCadence, suspendedBudget := time.Second, 8
+	if matrixServerClockOffset(row) != 0 {
+		// Canonical repair must revisit the sustained retained population when a
+		// timer created on a healthy leader later moves to the shifted leader.
+		// Eight reads/second takes over thirty seconds to reach batch eleven.
+		suspendedCadence, suspendedBudget = 100*time.Millisecond, 256
+	}
+	scanPolicy, err := json.MarshalIndent(struct {
+		IntervalNanos int64 `json:"interval_nanos"`
+		Budget        int   `json:"budget"`
+	}{int64(suspendedCadence), suspendedBudget}, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "suspended-scan-policy.json"), scanPolicy, 0644); err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("TIER3_SUSPENDED_SCAN interval=%s budget=%d", suspendedCadence, suspendedBudget)
 	launch("repair/suspended", func() error {
-		return reconcile.RunSuspendedLoopWithClockAndObservers(workCtx, js, "tier3-mixed-suspended", time.Second, 8, func(cursor uint64, result reconcile.ScanResult, err error) {
+		return reconcile.RunSuspendedLoopWithClockAndObservers(workCtx, js, "tier3-mixed-suspended", suspendedCadence, suspendedBudget, func(cursor uint64, result reconcile.ScanResult, err error) {
 			evidenceMu.Lock()
 			defer evidenceMu.Unlock()
 			message := ""

@@ -5991,3 +5991,17 @@ original report, source-sensitive files match the exact commit, and the service
 is inactive/success/exit zero. This clears the normal1,000-seed whole-suite gate;
 full race and current-source100k requirements remain open. Million-timer service
 is still active with503,665 receipts; older100k36962606650 remains live.
+
+## Proven missing fallback visit and clock-row scan capacity (2026-10-02)
+
+[Actual correlation and seeded capacity regression](scale/suspended-clock-scan-capacity-2026-10-02/)
+join failed36965338232's timer starts to invocation315/316/318. After their start,
+every actual fallback page is below those sequences; no visit occurs before
+admission cancels. The model executes production suspended scan/fenced cursor
+with the same containing page and population up to3000, without native delivery:
+old8/s repairs at30/113/363s versus256/100ms at3.1/3.1/3.5s. All1000 seeds and six
+pins pass normal execution3.494s. Admission race controls pass1.032s; newcapacity
+race remains active. Corpus258 pins /113 tracked workloads. Clock-row fixture
+uses256/100ms and retains policy; admission and latency gates remain unchanged.
+This fixes fixture capacity, not a proven NATS defect or24h scalability; new
+native sustained and full-source simulator results remain required.

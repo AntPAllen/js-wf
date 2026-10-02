@@ -412,6 +412,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededDispatchScenario(loaded.Seed, &loaded)
 	case "dispatch_clock_transition":
 		replayed, err = runDispatchClockTransition(loaded.Seed, &loaded)
+	case "suspended_scan_capacity":
+		replayed, err = runSuspendedScanCapacity(loaded.Seed, &loaded)
 	case "consumer_pending_clock_restore":
 		replayed, err = runStoredPendingClock(loaded.Seed, &loaded)
 	case "dispatch_two_workers":
