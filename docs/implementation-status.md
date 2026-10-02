@@ -5601,3 +5601,20 @@ are retained. This is not yet wired to workflow clocks. Probe provisioning,
 durable clock-domain provenance, canonical deadlines, schedule translation,
 SDK due decisions, repairs and compatibility remain required; the60.27s native
 ahead-clock failure and full release gates remain open.
+
+## R5 automatic-membership native smoke independently verified (2026-10-02)
+
+Hosted36947230245 at0bfc1b4 passes78.38s with five35s workload batches,
+140invocations/1542entries and one actual journal-leader SIGKILL/restart.
+Current independent row/event/fencing reviewers pass. All64partitions have
+complete115write CAS chains and balanced13/13/13/13/12 owners; actual R5/file/12s
+membership and coordinator renewal bracket the fault. Allfive workers have
+observed workload lease acquisitions. Worst terminal/progress p99 are13.070s/
+13.035s. Histories, retained audits, immutable outcomes and physical queue drain
+pass; all104repairs acknowledge and reconcile with counters. Three fences match
+counters and retained completed-after-fencing timelines inside the fault.
+[Full originals, hosted logs and independently rerun reports](scale/tier3-automatic-membership-2026-10-02/hosted-smoke/README.md)
+are compressed and byte/hash-verified. This is one stable-membership smoke cut;
+sustained, churn/coordinator-process/clock/takeover/repeated5s reassignment and
+full release acceptance remain open. The verified smoke permits a sustained
+journal-fault row to proceed.
