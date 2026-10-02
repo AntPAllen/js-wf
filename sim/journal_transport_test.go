@@ -436,6 +436,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededOutcomePersistence(loaded.Seed, &loaded)
 	case "native_timer_terminal_retirement":
 		replayed, err = runNativeTimerRetirement(loaded.Seed, &loaded)
+	case "journal_initial_metadata_recovery":
+		replayed, err = runInitialJournalMetadata(loaded.Seed, &loaded)
 	case "worker_confirmed_ack_boundary":
 		replayed, err = runWorkerConfirmedAck(loaded.Seed, &loaded)
 	case "worker_execution_5":

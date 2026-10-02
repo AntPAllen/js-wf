@@ -97,6 +97,7 @@ type Store struct {
 	snapshotWritePort SnapshotWritePort
 	stream            handlecache.Cache[jetstream.Stream]
 	state             handlecache.Cache[jetstream.KeyValue]
+	readReady         handlecache.Cache[struct{}]
 }
 
 func New(js jetstream.JetStream) *Store {
@@ -135,6 +136,13 @@ func NewWithAppendPort(port AppendPort) *Store { return &Store{appendPort: port}
 type ReadPort interface {
 	Next(context.Context, string, uint64) (AppendTail, error)
 	Wait(context.Context, time.Duration) error
+}
+
+// ReadLookupPort optionally prepares a live-read transport's metadata handle.
+// Successful preparation is cached; failures use the same bounded retry policy
+// as the JetStream metadata lookup. Ports that need no preparation can omit it.
+type ReadLookupPort interface {
+	Lookup(context.Context) error
 }
 
 // BatchReadPort is the narrow long-journal transport. Fetch may return a
@@ -377,11 +385,23 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 		return nil, 0, err
 	}
 	var stream jetstream.Stream
+	var lookup func(context.Context) (jetstream.Stream, error)
+	wait := waitReadRequest
 	if s.readPort == nil {
+		lookup = s.journalStream
+	} else if port, ok := s.readPort.(ReadLookupPort); ok {
+		wait = s.readPort.Wait
+		lookup = func(request context.Context) (jetstream.Stream, error) {
+			_, err := s.readReady.Get(request, func(child context.Context) (struct{}, error) {
+				return struct{}{}, port.Lookup(child)
+			})
+			return nil, err
+		}
+	}
+	if lookup != nil {
 		var err error
-		// A first metadata reply can be lost before any serial read begins.
-		// Keep its retry budget aligned with the journal reads that follow.
-		stream, err = boundedReadRequest(ctx, waitReadRequest, "journal stream lookup", s.journalStream)
+		// Metadata and serial reads share the bounded policy on both adapters.
+		stream, err = boundedReadRequest(ctx, wait, "journal stream lookup", lookup)
 		if err != nil {
 			return nil, 0, err
 		}

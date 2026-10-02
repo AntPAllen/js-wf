@@ -1,0 +1,214 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "journal_initial_metadata_recovery",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "canceled",
+        "exhausted",
+        "no_responders",
+        "normal",
+        "one_timeout",
+        "permanent",
+        "two_timeouts",
+        "unavailable"
+      ],
+      "chosen": "exhausted"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.metadata",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.metadata",
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.metadata",
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "53b3c2831245475b651e6becda525522873f4977ea6e9dfac0f2f14feef1684c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.metadata",
+      "sequence": 2,
+      "data_sha256": "53b3c2831245475b651e6becda525522873f4977ea6e9dfac0f2f14feef1684c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "238d92b3d428b40efa09582ebc0efae90bede9024e0442b07301f3b6475d1791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last",
+      "subject": "wf.jrn.test.metadata",
+      "sequence": 3,
+      "data_sha256": "238d92b3d428b40efa09582ebc0efae90bede9024e0442b07301f3b6475d1791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "d16f9612dde6091fa2779f5ed84948615a7e15a316f3f97b8c59ae36e9dd29b5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "journal_metadata_lookup",
+      "subject": "WF_JRN",
+      "outcome": "timeout"
+    },
+    {
+      "at_ms": 2025,
+      "operation": "wait",
+      "outcome": "25ms"
+    },
+    {
+      "at_ms": 4025,
+      "operation": "journal_metadata_lookup",
+      "subject": "WF_JRN",
+      "outcome": "timeout"
+    },
+    {
+      "at_ms": 4050,
+      "operation": "wait",
+      "outcome": "25ms"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "journal_metadata_lookup",
+      "subject": "WF_JRN",
+      "outcome": "timeout"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "journal_metadata_lookup",
+      "subject": "WF_JRN",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "53b3c2831245475b651e6becda525522873f4977ea6e9dfac0f2f14feef1684c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "238d92b3d428b40efa09582ebc0efae90bede9024e0442b07301f3b6475d1791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "d16f9612dde6091fa2779f5ed84948615a7e15a316f3f97b8c59ae36e9dd29b5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 5,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 1,
+      "sequence": 1,
+      "data_sha256": "16bb1ee5923e9210f033f9c7d283d7c41009070433515bd28cb1c19259887918",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 2,
+      "sequence": 2,
+      "data_sha256": "53b3c2831245475b651e6becda525522873f4977ea6e9dfac0f2f14feef1684c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 3,
+      "sequence": 3,
+      "data_sha256": "238d92b3d428b40efa09582ebc0efae90bede9024e0442b07301f3b6475d1791",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 4,
+      "sequence": 4,
+      "data_sha256": "d16f9612dde6091fa2779f5ed84948615a7e15a316f3f97b8c59ae36e9dd29b5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "next_journal",
+      "subject": "wf.jrn.test.metadata",
+      "expected": 5,
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 6050,
+      "operation": "check_metadata_recovery",
+      "outcome": "exhausted"
+    }
+  ]
+}

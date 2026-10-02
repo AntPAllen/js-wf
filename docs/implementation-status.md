@@ -66,8 +66,15 @@
   because no retry starts within4s. This closes an adapter-level read-deadline
   gap without attributing the earlier mixed failure to a server bug. See
   [lookup evidence](scale/initial-journal-lookup-recovery-2026-10-02/).
-  Hosted contract run37009063667 at `e86165a` is independently accepted; initial metadata replies
-  are not represented by the existing116-workload virtual transport graph.
+  Hosted contract run37009063667 at `e86165a` is independently accepted.
+- The new117th modeled workload covers initial metadata preparation through the
+  shared production read retry/cache policy. All1000 seeds/eight modes pass under
+  race; a pinned exhausted-attempt trace replays under race and two processes
+  produce identical bytes. Removing the shared bound fails both the model and
+  real proxy contracts semantically. Prior116-workload traces remain unchanged.
+  See [metadata simulation evidence](scale/journal-metadata-simulation-2026-10-02/).
+  Full117-workload1k, hosted shared-contract and new-graph100k acceptance remain
+  required; prior graph campaigns cannot substitute for them.
 - Run37008116036 at `82494c5` passes six jobs including the new purge pair,
   but fails the start-repair mutant before its required semantic escape. The whole
   campaign remains rejected. Independent purge-component acceptance preserves
