@@ -2,6 +2,14 @@
 
 ## Latest accepted evidence — 2026-10-02
 
+- Native-retirement116-graph100k37002783868 is independently accepted at exact
+  `3184b65`, package10,442.686s:160 top-level passes, two documented skips,
+  261 source pins and all116 workloads executing exact1..100000. Source-extracted
+  declarations, AST seeded inventory and pin paths match; the uploaded result
+  regenerates byte-for-byte. Aggregate11,800,033 schedules/178,646,687 choices/
+  2,661,652,244 transport events. [Complete116-graph originals](scale/native-timer-retirement-2026-10-02/confirmed-116-workload-100k/).
+  This predates both new recovery models and does not clear118. The117/118
+  campaigns remain separate; full matrices and24h soak are still required.
 - Hosted concurrent-exit contract37030388260 is independently accepted at exact
   `0f979d0`: five actual race positives, both native auto-remove modes, an actual
   delayed Docker reply, three verifier tests and the precise one-token sequential
