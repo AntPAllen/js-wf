@@ -6014,3 +6014,14 @@ Changed-source admitted behind run36967016515 is queued atc477f00 with both
 required flags; full113-workload1000 normal unitjs-wf-tier1-scan-capacity-20261002
 is confirmed active. Both launches are recorded, not accepted; existing100k and
 million-timer handles continue unchanged.
+
+## Full113-workload suite and258 pins pass (2026-10-02)
+
+[Changed-source full1000 evidence](scale/suspended-clock-scan-capacity-2026-10-02/full-1000-pass/)
+atc477f00 passes120.184s:157 top-level tests, two documented trace-only skips,
+all258 source pins and all113 independent seed ranges1..1000. Aggregate
+115032 schedules/1781009 choices/26755928 events.
+Original/rechecked reports match; source-sensitive files equal the exact commit;
+service is inactive/success/exit zero. The1000 normal whole-suite gate is clear
+at this source, while100k and full race remain open. Changed-source admitted
+native behind36967016515 is confirmed in progress; no native acceptance yet.
