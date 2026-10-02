@@ -61,3 +61,23 @@ jobs:
           name: mixed-production-determinism
           path: ${{ runner.temp }}/mixed-determinism
           if-no-files-found: error
+
+  mixed-leases:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Detect independent lease keys with held replacement effects after leader kill
+        run: python3 scripts/check-invariant-mutations.py --mixed-leases --output "$RUNNER_TEMP/mixed-leases"
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mixed-production-leases
+          path: ${{ runner.temp }}/mixed-leases
+          if-no-files-found: error

@@ -23,6 +23,7 @@ import (
 	"js-wf/identity"
 	"js-wf/integrity"
 	"js-wf/journal"
+	"js-wf/lease"
 	"js-wf/provision"
 	"js-wf/testcluster"
 	"js-wf/wf"
@@ -35,11 +36,23 @@ func TestMixedDeterminismMutationAfterJournalLeaderKill(t *testing.T) {
 	if os.Getenv("WF_MIXED_DETERMINISM_MUTATION") != "1" {
 		t.Skip("set WF_MIXED_DETERMINISM_MUTATION=1 for the mixed production guard challenge")
 	}
+	runMixedGuardMutation(t, false)
+}
+
+func TestMixedLeaseMutationAfterJournalLeaderKill(t *testing.T) {
+	if os.Getenv("WF_MIXED_LEASE_MUTATION") != "1" {
+		t.Skip("set WF_MIXED_LEASE_MUTATION=1 for the mixed lease challenge")
+	}
+	runMixedGuardMutation(t, true)
+}
+
+func runMixedGuardMutation(t *testing.T, leaseChallenge bool) {
+	t.Helper()
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("FAULT_SEED=%d mixed_guard=I4", seed)
+	t.Logf("FAULT_SEED=%d mixed_lease_challenge=%t", seed, leaseChallenge)
 	ctx, cancel := context.WithTimeout(context.Background(), 150*time.Second)
 	defer cancel()
 	cluster, err := testcluster.StartProcesses(t.TempDir(), 3)
@@ -93,6 +106,12 @@ func TestMixedDeterminismMutationAfterJournalLeaderKill(t *testing.T) {
 	entered := make(chan int, 4)
 	var enteredOnce [4]sync.Once
 	var changedEffects atomic.Int64
+	replacementEntered := make(chan int, 4)
+	var replacementOnce [4]sync.Once
+	releaseReplacement := make(chan struct{})
+	var releaseOnce sync.Once
+	releaseEffects := func() { releaseOnce.Do(func() { close(releaseReplacement) }) }
+	defer releaseEffects()
 	handlers := func(replacement bool) map[string]worker.Handler {
 		return map[string]worker.Handler{
 			"guardshort": func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
@@ -104,7 +123,7 @@ func TestMixedDeterminismMutationAfterJournalLeaderKill(t *testing.T) {
 					return nil, fmt.Errorf("invalid short index%d", index)
 				}
 				name := "held"
-				if replacement && index == 0 {
+				if replacement && index == 0 && !leaseChallenge {
 					name = "changed"
 				}
 				value, err := wf.Run(c, name, 0, func(effectCtx context.Context) (int, error) {
@@ -112,6 +131,14 @@ func TestMixedDeterminismMutationAfterJournalLeaderKill(t *testing.T) {
 						enteredOnce[index].Do(func() { entered <- index })
 						<-effectCtx.Done()
 						return 0, effectCtx.Err()
+					}
+					if leaseChallenge {
+						replacementOnce[index].Do(func() { replacementEntered <- index })
+						select {
+						case <-releaseReplacement:
+						case <-effectCtx.Done():
+							return 0, effectCtx.Err()
+						}
 					}
 					if index == 0 {
 						changedEffects.Add(1)
@@ -321,6 +348,44 @@ func TestMixedDeterminismMutationAfterJournalLeaderKill(t *testing.T) {
 	survivor := (leader + 1) % 3
 	stopSecond := startWorker("mixed-guard-after", nodes[survivor], true)
 	defer stopSecond()
+	var leaseEscaped bool
+	var challengerEpoch uint64
+	if leaseChallenge {
+		enteredAfter := map[int]bool{}
+		for len(enteredAfter) < 4 {
+			select {
+			case index := <-replacementEntered:
+				if enteredAfter[index] {
+					t.Fatal("duplicate replacement short", index)
+				}
+				enteredAfter[index] = true
+			case <-ctx.Done():
+				t.Fatal("replacement effects never entered", ctx.Err())
+			}
+		}
+		t.Log("MIXED_LEASE_ADMISSION replacement_shorts_pending=4 owner=mixed-guard-after")
+		attempt, stop := context.WithTimeout(ctx, 3*time.Second)
+		leases, err := lease.New(attempt, nodes[survivor])
+		if err != nil {
+			stop()
+			t.Fatal(err)
+		}
+		rival, err := leases.Acquire(attempt, target.typ, target.id, "mixed-lease-challenger")
+		stop()
+		if err == nil {
+			leaseEscaped = true
+			challengerEpoch = rival.Epoch()
+			releaseCtx, releaseStop := context.WithTimeout(ctx, 3*time.Second)
+			releaseErr := rival.Release(releaseCtx)
+			releaseStop()
+			if releaseErr != nil {
+				t.Fatal("challenger cleanup", releaseErr)
+			}
+		} else if !errors.Is(err, lease.ErrHeld) {
+			t.Fatal("unexpected lease challenge", err)
+		}
+		releaseEffects()
+	}
 	c = client.New(nodes[survivor])
 	for _, inv := range cohort {
 		if inv.typ == "guardsignal" {
@@ -363,6 +428,16 @@ func TestMixedDeterminismMutationAfterJournalLeaderKill(t *testing.T) {
 		t.Fatalf("lost prefix or epoch handoff: %v", err)
 	}
 	t.Logf("MIXED_GUARD_COHORT shorts=4 timers=3 signals=2 fanout=1 children=6 grandchildren=12 terminal=28 entries=%d", report.Entries)
+	if leaseChallenge {
+		if resultErr != nil || string(value) != "42" || records[len(records)-1].Kind != journal.Completed {
+			t.Fatalf("lease cohort target result=%s err=%v", value, resultErr)
+		}
+		if leaseEscaped {
+			t.Fatalf("MIXED_MUTATION_ESCAPE category=independent_worker_leases admitted=1 rival_epoch=%d terminal=Completed", challengerEpoch)
+		}
+		t.Log("MIXED_LEASE_REJECTED admitted=0 error=workflow_lease_is_held terminal=28")
+		return
+	}
 	if changedEffects.Load() != 0 || resultErr == nil || !strings.Contains(resultErr.Error(), wf.ErrNonDeterministic.Error()) || records[len(records)-1].Kind != journal.Failed {
 		t.Fatalf("MIXED_MUTATION_ESCAPE invariant=I4 effects=%d result=%s error=%v terminal=%s", changedEffects.Load(), value, resultErr, records[len(records)-1].Kind)
 	}

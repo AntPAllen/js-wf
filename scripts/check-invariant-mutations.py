@@ -105,7 +105,12 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--mutation", choices=[m["name"] for m in MUTATIONS])
     parser.add_argument("--mixed-determinism", action="store_true", help="challenge I4 through a live mixed worker/leader-kill workload")
+    parser.add_argument("--mixed-leases", action="store_true", help="challenge lease exclusion after a real leader kill in the live mixed cohort")
     args = parser.parse_args()
+    if args.mixed_leases and args.mixed_determinism:
+        parser.error("select one mixed challenge")
+    if args.mixed_leases and args.mutation not in (None, "independent_worker_leases"):
+        parser.error("--mixed-leases selects only independent_worker_leases")
     if args.mixed_determinism and args.mutation not in (None, "missing_determinism_guard"):
         parser.error("--mixed-determinism selects only missing_determinism_guard")
     args.output = args.output.resolve()
@@ -118,11 +123,21 @@ def main():
                         environment={"WF_MIXED_DETERMINISM_MUTATION": "1"},
                         markers=["MIXED_GUARD_ADMISSION shorts_pending=4 timers_suspended=3 signals_suspended=2 fanout_suspended=1", "MIXED_GUARD_FAULT", "signal=SIGKILL", "MIXED_GUARD_COHORT shorts=4 timers=3 signals=2 fanout=1 children=6 grandchildren=12 terminal=28", "MIXED_MUTATION_ESCAPE invariant=I4 effects=1 result=42 error=<nil> terminal=Completed"])
         selected = [mutation]
+    if args.mixed_leases:
+        mutation = dict(next(m for m in MUTATIONS if m["name"] == "independent_worker_leases"))
+        mutation.update(package="./integration", test="TestMixedLeaseMutationAfterJournalLeaderKill",
+                        fixture_file="integration/mixed_determinism_mutation_test.go",
+                        environment={"WF_MIXED_LEASE_MUTATION": "1"},
+                        markers=["MIXED_GUARD_ADMISSION shorts_pending=4 timers_suspended=3 signals_suspended=2 fanout_suspended=1", "MIXED_GUARD_FAULT", "signal=SIGKILL", "MIXED_LEASE_ADMISSION replacement_shorts_pending=4 owner=mixed-guard-after", "MIXED_GUARD_COHORT shorts=4 timers=3 signals=2 fanout=1 children=6 grandchildren=12 terminal=28", "MIXED_MUTATION_ESCAPE category=independent_worker_leases admitted=1 rival_epoch=", "terminal=Completed"])
+        selected = [mutation]
     report = dict(scope="focused production mutations; full mixed-chaos gate remains open",
                   head=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                   cas_rounds=1000, seeds_per_modeled_workload=1000, mutations=[])
+    if args.mixed_leases:
+        report["scope"] = "one mixed production lease mutation; remaining mixed categories and full release remain open"
     if args.mixed_determinism:
-        report["scope"] = "one mixed production I4 mutation; the other five mixed categories and full release remain open"
+        report["scope"] = "one mixed production I4 mutation; remaining mixed categories and full release remain open"
+    if args.mixed_determinism or args.mixed_leases:
         report.pop("cas_rounds")
         report.pop("seeds_per_modeled_workload")
     success = True

@@ -72,3 +72,25 @@ This advances one category of the mixed mutation requirement. The other five
 mixed categories, more fault combinations and the full matrix release gates
 remain open. The existing default command still runs all six focused categories.
 The `mixed-determinism` workflow job retains the optional mode's evidence.
+
+## Live mixed lease exclusion challenge
+
+```sh
+python3 scripts/check-invariant-mutations.py --mixed-leases --output /tmp/js-wf-mixed-leases
+```
+
+This mode uses the same live 4/3/2/1 parent mix and six-child/twelve-grandchild
+cohort. After confirmed suspension and a real journal-leader SIGKILL, four distinct
+replacement short effects hold their leases. A challenger on the surviving node
+tries to acquire the target invocation under another worker identity. The intact
+lease implementation must return `ErrHeld`. The private-per-worker-key mutant
+must actually return a new lease; that lease is released, the held effects resume,
+and all28 invocations complete with their expected results and immutable prefixes.
+Only then does the named test fail with its lease-admission escape marker. Build,
+startup, timeout and unrelated cohort failures cannot count as mutation detections.
+
+This detects the broken lease exclusion contract in a live mixed fault workload.
+It does not claim that the mutated journal necessarily violates I2: journal CAS
+provides a separate defense. The CI `mixed-leases` job retains both executions and
+negative controls. Together with I4 this covers two mixed source-mutation
+categories; four categories and the full chaos release gate remain open.

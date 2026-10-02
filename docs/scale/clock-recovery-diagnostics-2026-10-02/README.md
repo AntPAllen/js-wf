@@ -19,3 +19,12 @@ into acceptance. A snapshot describes state at capture time only.
 `checks.log` records focused race checks for nested replica details and partial
 monitoring failure, including a blocked node, invalid JSON and HTTP errors.
 The capture retains all15 records without using failed bytes as successful data.
+
+The instrumented seed5 smoke at2875042 failed in91.7s at physical drain. Its
+fault healed and all six per-type latency checks ran, then three actual schedule
+subjects remained. Their Wf-Timer-Deadline values are11:15:47–49Z while stored
+Nats-Schedule times are11:16:47–49Z. The report and retained reads are preserved
+in `ahead-smoke-drain-review.json`. This identifies pending native hints after
+completed workflows; it does not establish a server cause. No fault-controller
+failure snapshots are expected on this run because its controller healed.
+The existing drain-before/after independent monitoring captures are retained.

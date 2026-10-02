@@ -6553,3 +6553,29 @@ six-second diagnostic budget runs after failure, before cleanup; it does not
 extend the recovery gate or certify the failed row. Focused race checks pass for
 nested state, blocked requests and partial responses. Evidence is under
 `scale/clock-recovery-diagnostics-2026-10-02/`.
+
+The instrumented seed5 ahead smoke at2875042 healed its admitted fault and
+passed the six per-type latency checks, then failed physical drain in91.7s.
+Three native schedule subjects remain, with stored schedule times roughly60s
+later than their durable common-clock deadlines. Original non-store artifacts,
+drain monitoring, retained message reads and test events are archived with
+verified member hashes under `scale/clock-recovery-diagnostics-2026-10-02/`.
+This is a failed row and provides a concrete schedule-cleanup issue to address;
+the strict physical-drain gate remains unchanged.
+
+## Live mixed lease mutation challenge
+
+The shared mixed fixture now adds a lease exclusion challenge after actual
+journal-leader SIGKILL and replacement. All four replacement short effects hold
+leases before a rival identity attempts to acquire the target. The intact runtime
+rejects it with ErrHeld; the compiled private-key mutant admits a rival epoch450.
+The challenger is released and all28 invocations must complete and pass the
+retained prefix/epoch/audit checks before the semantic escape fails the named test.
+Local baseline36.49s and mutant detection36.38s pass their required classifications;
+the intact race run passes too. The existing mixed I4 baseline/detection pair
+still passes with the shared fixture. Exact original logs/reports and independent
+actual-execution checks are retained under `scale/mixed-lease-mutation-2026-10-02/`.
+The new `--mixed-leases` runner mode and CI job cover this category, and reject
+build/timeout/unrelated failures. This proves broken lease exclusion is detected,
+not that the mutant must corrupt journals despite CAS. Four mixed categories and
+the full chaos gate remain open; hosted acceptance of the new job is pending.
