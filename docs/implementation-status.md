@@ -7086,3 +7086,25 @@ and original events are archived losslessly. Dedicated hosted contract and live
 new-source smoke remain required. The million-timer backend cause/failed drain and
 full runtime24-hour soak are still open. Fresh all-six mutation run37030840346 is
 terminal success; its independent raw-artifact review is underway, not accepted yet.
+
+
+## Fresh all-six sustained mutation gate accepted at0f
+
+[Run37030840346](scale/sustained-mixed-mutations-2026-10-02/hosted-current-ten-minute-pass/)
+is independently accepted at exact0f979d0. All six actual baseline/mutation
+pairs follow ten-minute mixed chaos on the same retained stores; all seven jobs
+pass. Git source inventories, exact compiled overlays, raw category receipts,
+original cut chronologies, checkpoint/final cohorts and all twelve phase reports
+verify. Compilation/unrelated controls remain rejected. Totals31,528 terminal
+invocations,347,356 entries and228 actual kills; worst terminal/progress p99
+16.744s/7.305s. Every published original is archived with SHA256 readback.
+
+This source includes the typed native-delete adapter and concurrent exit observer,
+closing the fresh six-category gate at that source. It does not qualify full
+matrix,119-workload100k, million-timer drain or full-runtime24-hour soak.
+
+Hosted physical-drain contract37043119136 is launched at329a56d. Live1000-timer
+smoke user unit `js-wf-physical-drain-live-20261002.service` is confirmed active
+with new all-replica audits,60s horizon and diagnostic30s/60s p99/max limits.
+Its source is clean329a56d; it cannot clear the million/24h2s/30s release gate.
+Originals/build metadata are in `/tmp/js-wf-physical-drain-live*`.
