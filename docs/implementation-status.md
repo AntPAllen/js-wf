@@ -2,6 +2,30 @@
 
 ## Latest accepted evidence — 2026-10-02
 
+- Hosted concurrent-exit contract37030388260 is independently accepted at exact
+  `0f979d0`: five actual race positives, both native auto-remove modes, an actual
+  delayed Docker reply, three verifier tests and the precise one-token sequential
+  source control. Full Git hashes, terminal metadata and original artifacts are
+  checked; no build/skip/global-timeout failure counts as detection.
+  [Hosted observer originals](scale/concurrent-docker-exit-2026-10-02/hosted-contract-pass/).
+  Sustained seed27 replay and fresh full-source mutation campaign remain open.
+- All-six ten-minute mutation campaign37021348438 is independently accepted at
+  exact `3a9f370`: seven terminal jobs, six actual sustained pairs, complete Git
+  source/overlay/control checks and byte-identical regenerated phase reports.
+  Original cohorts total31,528 invocations/347,370 entries/228 confirmed kills;
+  worst reconstructed terminal/progress p99=17.048586820s/8.124444452s. Actual
+  raw category counterexamples are checked without replacing the original
+  audit/history/drain gates. [All-six sustained originals](scale/sustained-mixed-mutations-2026-10-02/hosted-all-six-ten-minute-pass/).
+  This clears that source's sustained mutation gate and predates the timer-delete
+  fix. Fresh all-six10m run37030840346 is launched at `0f979d0`, unaccepted.
+- Admitted ahead-clock seed27 at exact `0f979d0` passes64.12s race smoke with56
+  invocations,617 entries,48 timer waits and one strictly admitted shifted-owner
+  kill. Physical drain and original retained/history/audit/clock gates pass.
+  [Admitted seed27 originals](scale/concurrent-docker-exit-2026-10-02/admitted-ahead27-smoke-pass/).
+  The original failed275s execution stays rejected; focused ten-minute replay
+  37030391587 is launched at0f979d0. Native-delete ahead20 run37028955339 is at
+  `7431799`; current118-graph100k37028379931 remains at431c934. Both qualifications
+  remain unaccepted. No live campaign or million-timer service was restarted.
 - Docker source-exit observation now polls concurrently with the kill command,
   retaining controller upper bounds and strict exit-before-timer-duration proof.
   Name reuse still waits for both confirmed absence and successful kill reply.
