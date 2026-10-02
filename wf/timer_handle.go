@@ -19,6 +19,8 @@ type TimerHandle struct {
 	name              string
 	step              uint64
 	fireAt            time.Time
+	clockDomain       string
+	observedAt        time.Time
 	cancelled         bool
 	fired             bool
 	createdInDelivery bool // The current wakeup cannot fire a newly created timer.
@@ -44,14 +46,12 @@ func (c *Context) Timer(name string, d time.Duration) (*TimerHandle, error) {
 	} else {
 		req = request{Kind: "timer_start", Name: name, DurationNanos: int64(d)}
 		if d > 0 {
-			if c.timerNow == nil {
-				return nil, fmt.Errorf("%w: no server clock", ErrTimerSchedule)
-			}
-			now, err := c.timerNow(c.base)
+			now, domain, err := c.timerOrigin()
 			if err != nil {
 				return nil, fmt.Errorf("%w: %w", ErrTimerSchedule, err)
 			}
 			req.FireAt = now.Add(d).UTC()
+			req.ClockDomain = domain
 		}
 		payload, _ := json.Marshal(req)
 		if err := c.next(StepRequested, payload); err != nil {
@@ -64,11 +64,12 @@ func (c *Context) Timer(name string, d time.Duration) (*TimerHandle, error) {
 			return nil, ErrCorruptJournal
 		}
 	} else {
-		if d > 0 && (fresh || c.wakeupAt.IsZero() || c.wakeupAt.Before(req.FireAt)) {
-			if c.scheduleTimer == nil {
-				return nil, fmt.Errorf("%w: no scheduler", ErrTimerSchedule)
-			}
-			if err := c.scheduleTimer(c.base, step, req.FireAt); err != nil {
+		ready, _, err := c.timerReady(req.ClockDomain, req.FireAt, fresh)
+		if err != nil {
+			return nil, err
+		}
+		if d > 0 && !ready {
+			if err := c.scheduleInDomain(step, req.FireAt, req.ClockDomain); err != nil {
 				return nil, fmt.Errorf("%w: %w", ErrTimerSchedule, err)
 			}
 		}
@@ -77,7 +78,7 @@ func (c *Context) Timer(name string, d time.Duration) (*TimerHandle, error) {
 		}
 	}
 	c.position++
-	handle := &TimerHandle{c: c, name: name, step: step, fireAt: req.FireAt, createdInDelivery: fresh}
+	handle := &TimerHandle{c: c, name: name, step: step, fireAt: req.FireAt, clockDomain: req.ClockDomain, createdInDelivery: fresh}
 	if c.timerHandles == nil {
 		c.timerHandles = make(map[uint64]*TimerHandle)
 	}
@@ -90,6 +91,7 @@ func (t *TimerHandle) action(kind string) error {
 	want := request{Kind: kind, Name: t.name, TimerStep: t.step}
 	if kind == "timer_await" {
 		want.FireAt = t.fireAt
+		want.ClockDomain = t.clockDomain
 	}
 	if c.position < len(c.entries) {
 		recorded := c.entries[c.position]
@@ -97,7 +99,7 @@ func (t *TimerHandle) action(kind string) error {
 		if recorded.Kind != StepRequested || json.Unmarshal(recorded.Payload, &got) != nil {
 			return ErrCorruptJournal
 		}
-		if got.Kind != kind || got.Name != t.name || got.TimerStep != t.step || !got.FireAt.Equal(want.FireAt) {
+		if got.Kind != kind || got.Name != t.name || got.TimerStep != t.step || !got.FireAt.Equal(want.FireAt) || got.ClockDomain != want.ClockDomain {
 			return &NonDeterministicError{Index: recorded.Index, RecordedName: got.Name, RequestedName: t.name}
 		}
 	} else {
@@ -110,8 +112,9 @@ func (t *TimerHandle) action(kind string) error {
 	return nil
 }
 
-// Await suspends until a run message with a server timestamp at or after the
-// recorded fire time arrives. Several due handles can complete in one run.
+// Await suspends until the configured clock proves the recorded deadline due.
+// Legacy timers use the run timestamp; tagged timers use their domain's lower
+// bound. Several due handles can complete in one run.
 func (t *TimerHandle) Await() error {
 	if t.cancelled {
 		return ErrTimerCancelled
@@ -128,7 +131,11 @@ func (t *TimerHandle) Await() error {
 			return ErrCorruptJournal
 		}
 	} else {
-		if !t.fireAt.IsZero() && (t.createdInDelivery || c.wakeupAt.IsZero() || c.wakeupAt.Before(t.fireAt)) {
+		ready, observed, err := c.timerReady(t.clockDomain, t.fireAt, t.createdInDelivery)
+		if err != nil {
+			return err
+		}
+		if !ready {
 			c.waitingOn = "timer:" + t.name
 			return ErrSuspended
 		}
@@ -136,7 +143,7 @@ func (t *TimerHandle) Await() error {
 			return err
 		}
 		if !t.fireAt.IsZero() && c.timerFired != nil {
-			c.timerFired(t.fireAt, c.wakeupAt)
+			c.timerFired(t.fireAt, observed)
 		}
 	}
 	c.position++

@@ -27,14 +27,14 @@ func (t *TimerHandle) SelectSignal(name string) (Selection, []byte, error) {
 		return "", nil, ErrTimerFired
 	}
 	c := t.c
-	want := request{Kind: "timer_signal_select", Name: name, TimerName: t.name, TimerStep: t.step, FireAt: t.fireAt}
+	want := request{Kind: "timer_signal_select", Name: name, TimerName: t.name, TimerStep: t.step, FireAt: t.fireAt, ClockDomain: t.clockDomain}
 	if c.position < len(c.entries) {
 		recorded := c.entries[c.position]
 		var got request
 		if recorded.Kind != StepRequested || json.Unmarshal(recorded.Payload, &got) != nil {
 			return "", nil, ErrCorruptJournal
 		}
-		if got.Kind != want.Kind || got.Name != name || got.TimerName != t.name || got.TimerStep != t.step || !got.FireAt.Equal(t.fireAt) {
+		if got.Kind != want.Kind || got.Name != name || got.TimerName != t.name || got.TimerStep != t.step || !got.FireAt.Equal(t.fireAt) || got.ClockDomain != want.ClockDomain {
 			return "", nil, &NonDeterministicError{Index: recorded.Index, RecordedName: got.Name, RequestedName: name}
 		}
 	} else {
@@ -88,7 +88,11 @@ func (t *TimerHandle) SelectSignal(name string) (Selection, []byte, error) {
 		c.usedSignals[sig.Sequence] = true
 		return SignalSelected, sig.Payload, nil
 	}
-	if t.fireAt.IsZero() || !t.createdInDelivery && !c.wakeupAt.IsZero() && !c.wakeupAt.Before(t.fireAt) {
+	ready, observed, err := c.timerReady(t.clockDomain, t.fireAt, t.createdInDelivery)
+	if err != nil {
+		return "", nil, err
+	}
+	if ready {
 		payload, _ := json.Marshal(completion{Selected: string(TimerSelected)})
 		if err := c.next(StepCompleted, payload); err != nil {
 			return "", nil, err
@@ -96,7 +100,7 @@ func (t *TimerHandle) SelectSignal(name string) (Selection, []byte, error) {
 		c.position++
 		t.fired = true
 		if !t.fireAt.IsZero() && c.timerFired != nil {
-			c.timerFired(t.fireAt, c.wakeupAt)
+			c.timerFired(t.fireAt, observed)
 		}
 		return TimerSelected, nil, nil
 	}

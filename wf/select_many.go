@@ -19,12 +19,13 @@ type Awaitable interface {
 type SignalAwaitable string
 
 type selectCase struct {
-	Kind      string    `json:"kind"`
-	Name      string    `json:"name"`
-	TimerStep uint64    `json:"timer_step,omitempty"`
-	FireAt    time.Time `json:"fire_at,omitempty"`
-	ChildType string    `json:"child_type,omitempty"`
-	ChildID   string    `json:"child_id,omitempty"`
+	Kind        string    `json:"kind"`
+	Name        string    `json:"name"`
+	TimerStep   uint64    `json:"timer_step,omitempty"`
+	FireAt      time.Time `json:"fire_at,omitempty"`
+	ClockDomain string    `json:"clock_domain,omitempty"`
+	ChildType   string    `json:"child_type,omitempty"`
+	ChildID     string    `json:"child_id,omitempty"`
 }
 
 func (s SignalAwaitable) selectionCase(*Context) (selectCase, error) {
@@ -55,7 +56,7 @@ func (t *TimerHandle) selectionCase(c *Context) (selectCase, error) {
 	if t.fired {
 		return selectCase{}, ErrTimerFired
 	}
-	return selectCase{Kind: "timer", Name: t.name, TimerStep: t.step, FireAt: t.fireAt}, nil
+	return selectCase{Kind: "timer", Name: t.name, TimerStep: t.step, FireAt: t.fireAt, ClockDomain: t.clockDomain}, nil
 }
 
 type selectRequest struct {
@@ -120,7 +121,11 @@ func Select(c *Context, awaitables ...Awaitable) (int, []byte, error) {
 		switch descriptor.Kind {
 		case "timer":
 			timer := awaitables[i].(*TimerHandle)
-			ready = descriptor.FireAt.IsZero() || !timer.createdInDelivery && !c.wakeupAt.IsZero() && !c.wakeupAt.Before(descriptor.FireAt)
+			var err error
+			ready, timer.observedAt, err = c.timerReady(descriptor.ClockDomain, descriptor.FireAt, timer.createdInDelivery)
+			if err != nil {
+				return -1, nil, err
+			}
 		case "promise":
 			ready = c.promiseResults[descriptor.Name] != nil
 			if ready {
@@ -162,7 +167,7 @@ func completeSelection(c *Context, awaitables []Awaitable, cases []selectCase, i
 		timer := awaitables[index].(*TimerHandle)
 		timer.fired = true
 		if fresh && !timer.fireAt.IsZero() && c.timerFired != nil {
-			c.timerFired(timer.fireAt, c.wakeupAt)
+			c.timerFired(timer.fireAt, timer.observedAt)
 		}
 		return index, nil, nil
 	}

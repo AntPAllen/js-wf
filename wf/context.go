@@ -66,6 +66,7 @@ type Context struct {
 	wakeupAt                  time.Time
 	timerNow                  func(context.Context) (time.Time, error)
 	scheduleTimer             func(context.Context, uint64, time.Time) error
+	timerClock                *TimerClockSupport
 	timerFired                func(time.Time, time.Time)
 	parentType                string
 	parentID                  string
@@ -104,6 +105,7 @@ type request struct {
 	InputHash     string    `json:"input_hash"`
 	DurationNanos int64     `json:"duration_nanos,omitempty"`
 	FireAt        time.Time `json:"fire_at,omitempty"`
+	ClockDomain   string    `json:"clock_domain,omitempty"`
 	TimerStep     uint64    `json:"timer_step,omitempty"`
 	TimerName     string    `json:"timer_name,omitempty"`
 	ChildType     string    `json:"child_type,omitempty"`
@@ -594,8 +596,9 @@ func Version(c *Context, changeID string, min, max int) (int, error) {
 }
 
 // Sleep journals a timer request before scheduling its wakeup. A suspended
-// invocation resumes on a later run message and completes when that message's
-// server timestamp reaches the recorded fire time.
+// invocation resumes on a later run message and completes when its configured
+// clock proves the recorded fire time due. Legacy timers use the
+// delivery timestamp; tagged timers use their clock domain's lower bound.
 func Sleep(c *Context, name string, d time.Duration) error {
 	if name == "" {
 		return fmt.Errorf("empty timer name")
@@ -619,14 +622,12 @@ func Sleep(c *Context, name string, d time.Duration) error {
 	} else {
 		req = request{Kind: "timer", Name: name, DurationNanos: int64(d)}
 		if d > 0 {
-			if c.timerNow == nil {
-				return fmt.Errorf("%w: no server clock", ErrTimerSchedule)
-			}
-			serverNow, err := c.timerNow(c.base)
+			serverNow, domain, err := c.timerOrigin()
 			if err != nil {
 				return fmt.Errorf("%w: %w", ErrTimerSchedule, err)
 			}
 			req.FireAt = serverNow.Add(d).UTC()
+			req.ClockDomain = domain
 		}
 		payload, _ := json.Marshal(req)
 		if err := c.next(StepRequested, payload); err != nil {
@@ -641,20 +642,21 @@ func Sleep(c *Context, name string, d time.Duration) error {
 		c.position++
 		return nil
 	}
-	if d <= 0 || !fresh && !c.wakeupAt.Before(req.FireAt) && !c.wakeupAt.IsZero() {
+	ready, observed, err := c.timerReady(req.ClockDomain, req.FireAt, fresh)
+	if err != nil {
+		return err
+	}
+	if d <= 0 || ready {
 		if err := c.next(StepCompleted, json.RawMessage(`{}`)); err != nil {
 			return err
 		}
 		if d > 0 && c.timerFired != nil {
-			c.timerFired(req.FireAt, c.wakeupAt)
+			c.timerFired(req.FireAt, observed)
 		}
 		c.position++
 		return nil
 	}
-	if c.scheduleTimer == nil {
-		return fmt.Errorf("%w: no scheduler", ErrTimerSchedule)
-	}
-	if err := c.scheduleTimer(c.base, step, req.FireAt); err != nil {
+	if err := c.scheduleInDomain(step, req.FireAt, req.ClockDomain); err != nil {
 		return fmt.Errorf("%w: %w", ErrTimerSchedule, err)
 	}
 	c.waitingOn = "timer:" + name

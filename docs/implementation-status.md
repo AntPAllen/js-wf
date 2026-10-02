@@ -5622,3 +5622,23 @@ journal-fault row to proceed.
 Verified automatic-membership smoke is followed by sustained ten-minute run
 36951027143 atc6ca226; the queued launch API is retained with row evidence.
 This live handle is pending, not a sustained or full-matrix acceptance result.
+
+## Durable SDK deadline domains and conservative due checks (2026-10-02)
+
+SDK timer requests/select cases can now retain explicit clock_domain metadata.
+Opt-in TimerClockSupport creates positive deadlines from the common upper bound,
+passes their domain to scheduling and completes only when its lower bound proves
+due. Sleep/Await/SelectSignal/Select all reject missing or mismatched pending
+clock support instead of consuming shifted dispatch timestamps; timer metrics
+use the due clock. Completed decisions replay without live clocks. Untagged
+legacy requests retain original behavior, including when new support is present.
+Full SDK race passes13.318s, including eight API×±60s delivery-clock cases,
+straddling intervals, unknown domains, completed replay and invalid-bound controls.
+Five production-worker simulator workloads pass1000seeds each plus their existing
+replay checks in70.148s, preserving legacy timer/fallback/fresh-wakeup semantics.
+[Complete commands, logs and source hashes](scale/timer-clock-domain-sdk-2026-10-02/README.md)
+are retained. Worker wiring, probe provisioning, schedule translation, canonical
+repair and end-to-end clock-transition recovery remain open. Tagged writers are
+not enabled; all readers/repairers must support the domain before activation,
+since older binaries ignore the extra JSON field. The real60.27s ahead-clock
+failure remains an open gate; neither it nor the full release scope is relaxed.
