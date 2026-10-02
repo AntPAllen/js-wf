@@ -5618,3 +5618,7 @@ are compressed and byte/hash-verified. This is one stable-membership smoke cut;
 sustained, churn/coordinator-process/clock/takeover/repeated5s reassignment and
 full release acceptance remain open. The verified smoke permits a sustained
 journal-fault row to proceed.
+
+Verified automatic-membership smoke is followed by sustained ten-minute run
+36951027143 atc6ca226; the queued launch API is retained with row evidence.
+This live handle is pending, not a sustained or full-matrix acceptance result.

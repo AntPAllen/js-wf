@@ -39,3 +39,7 @@ was dispatched at0bfc1b45a8b243ffc982ddb874db4f8c16b06b13.
 `smoke-launch.json` retains the original queued response. The hosted smoke now
 passes78.38s; [complete independently reviewed evidence](hosted-smoke/README.md)
 is retained. Sustained and broader automatic-membership fault scope remain open.
+
+After independent smoke verification, [ten-minute run36951027143](https://github.com/AntPAllen/js-wf/actions/runs/36951027143)
+was dispatched atc6ca226. `ten-minute-launch.json` retains its queued API response.
+No sustained verdict is claimed until its full final artifacts pass review.
