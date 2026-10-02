@@ -55,3 +55,15 @@ was dispatched after verification at31619b5430a5a44cc5978947d1c739b9dc0065a1.
 `ten-minute-launch.json` retains the queued API response. That run needs19
 admitted stalls and all unchanged workload/audit/history/latency/drain gates;
 there is no sustained verdict yet.
+
+## Missing-root bind isolation regression
+
+Two new controls fail against the pre-fix store-path validator at fc8126e:
+an existing symlink followed by a missing cluster root could hide a physical
+ancestor overlap, and a dangling root symlink was accepted. Path validation now
+resolves the nearest existing ancestor and appends only missing components,
+rejecting dangling symlinks. All three store-path tests (the original nine-case
+bind controls plus both new regressions) pass under race in1.025s. The ordinary
+artifact-root/private-device layout is unchanged; no additional native run is
+needed for this path-only fix. This does not certify race-free mutation of
+host symlinks by another process or relax caller ownership of private mounts.

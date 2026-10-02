@@ -5459,3 +5459,14 @@ compressed evidence and hashes are retained in
 [hosted smoke](scale/tier3-mixed-block-disk-2026-10-02/README.md).
 This is smoke acceptance only; the sustained row, separate dm-delay capability,
 combined fault cuts and full release matrices remain open.
+
+## Private Docker bind isolation through missing roots (2026-10-02)
+
+The new store-path validator had a reproducible gap when a nonexistent cluster
+root sat beneath an existing symlink: physical ancestor overlap with a supplied
+private store could escape the lexical path comparison. It also accepted a
+dangling root symlink. Both focused controls fail against fc8126e. The validator
+now resolves the nearest existing ancestor before appending missing components
+and rejects dangling symlinks. All store-path controls pass under race1.025s.
+This closes the path-validation defect; pending native fault campaigns keep
+their original sources/handles and are not restarted.

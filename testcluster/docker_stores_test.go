@@ -47,3 +47,33 @@ func TestDockerStorePathsRejectSharedOrUnintendedBinds(t *testing.T) {
 		t.Fatalf("incorrect bindings: %v", stores)
 	}
 }
+
+func TestDockerStorePathsResolveMissingRootUnderSymlink(t *testing.T) {
+	host, private, separate := t.TempDir(), t.TempDir(), t.TempDir()
+	alias := filepath.Join(host, "alias")
+	if err := os.Symlink(private, alias); err != nil {
+		t.Fatal(err)
+	}
+	root := filepath.Join(alias, "not-created", "nested")
+	if _, err := dockerStorePaths(root, 5, map[int]string{4: private}); err == nil {
+		t.Fatal("physical ancestor overlap beneath missing symlinked root was accepted")
+	}
+	paths, err := dockerStorePaths(root, 5, map[int]string{4: separate})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if paths[0] != filepath.Join(private, "not-created", "nested", "node-0") || paths[4] != separate {
+		t.Fatalf("missing root bindings are not canonical: %v", paths)
+	}
+}
+
+func TestDockerStorePathsRejectDanglingRootSymlink(t *testing.T) {
+	host := t.TempDir()
+	alias := filepath.Join(host, "dangling")
+	if err := os.Symlink(filepath.Join(host, "missing"), alias); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := dockerStorePaths(filepath.Join(alias, "cluster"), 5, nil); err == nil {
+		t.Fatal("dangling cluster root symlink accepted")
+	}
+}

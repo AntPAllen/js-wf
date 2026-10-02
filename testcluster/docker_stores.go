@@ -19,9 +19,8 @@ func dockerStorePaths(root string, count int, overrides map[int]string) ([]strin
 	if err != nil {
 		return nil, err
 	}
-	if resolved, err := filepath.EvalSymlinks(root); err == nil {
-		root = resolved
-	} else if !os.IsNotExist(err) {
+	root, err = resolveDockerStorePath(root)
+	if err != nil {
 		return nil, err
 	}
 	stores := make([]string, count)
@@ -42,11 +41,11 @@ func dockerStorePaths(root string, count int, overrides map[int]string) ([]strin
 		}
 	}
 	for node, path := range stores {
-		if resolved, err := filepath.EvalSymlinks(path); err == nil {
-			stores[node], path = resolved, resolved
-		} else if !os.IsNotExist(err) {
+		resolved, err := resolveDockerStorePath(path)
+		if err != nil {
 			return nil, err
 		}
+		stores[node], path = resolved, resolved
 		// Docker -v uses ':' as a separator. Reject an ambiguous bind before
 		// creating any containers or writing into an unintended host path.
 		if path == string(os.PathSeparator) || strings.Contains(path, ":") {
@@ -62,6 +61,35 @@ func dockerStorePaths(root string, count int, overrides map[int]string) ([]strin
 		}
 	}
 	return stores, nil
+}
+
+// A new cluster root can be missing below an existing symlink. Resolve its
+// nearest existing ancestor before comparing stores; comparing unresolved
+// spellings could otherwise put several nodes on one injected filesystem.
+func resolveDockerStorePath(path string) (string, error) {
+	var missing []string
+	for {
+		resolved, err := filepath.EvalSymlinks(path)
+		if err == nil {
+			for i := len(missing) - 1; i >= 0; i-- {
+				resolved = filepath.Join(resolved, missing[i])
+			}
+			return resolved, nil
+		}
+		if !os.IsNotExist(err) {
+			return "", err
+		}
+		// An existing dangling symlink is not a directory we may create.
+		if _, statErr := os.Lstat(path); !os.IsNotExist(statErr) {
+			return "", err
+		}
+		parent := filepath.Dir(path)
+		if parent == path {
+			return "", err
+		}
+		missing = append(missing, filepath.Base(path))
+		path = parent
+	}
 }
 
 // StoreBinding returns Docker's observed /data mount and rejects a container
