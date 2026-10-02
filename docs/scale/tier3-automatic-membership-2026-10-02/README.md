@@ -33,3 +33,7 @@ stable members. It does not claim membership churn, paused/isolated/killed
 coordinator takeover, worker/server clock combinations, or a reassignment every
 five seconds. Those combined automatic-membership fault cases and the200-seed
 and24-hour full release matrices remain required.
+
+The [hosted35s smoke](https://github.com/AntPAllen/js-wf/actions/runs/36947230245)
+was dispatched at0bfc1b45a8b243ffc982ddb874db4f8c16b06b13.
+`smoke-launch.json` retains its queued API response. No native verdict yet.
