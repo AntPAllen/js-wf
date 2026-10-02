@@ -5557,3 +5557,16 @@ tests pass. Original failed evidence is retained
 [here](scale/tier3-mixed-block-disk-2026-10-02/resume-command-observation-failure/README.md).
 That incomplete run does not count as sustained acceptance; a corrected run is
 required. Physical hold and raw30s recovery targets remain unchanged.
+
+## R5 per-request disk-delay smoke verified (2026-10-02)
+
+Hosted36945872372 at246ed70 passes native capability6.62s and mixed row81.96s.
+The35s workload produces252invocations/2775entries and one admitted R5 cut.
+Actual100ms dm-delay stays active5.001s; dirty sync takes414.745ms, then the
+same backing device returns to its observed linear table before confirmed heal.
+Current independent row/event/fencing reviewers pass. Worst terminal/progress
+p99 are5.005s/0.490s; histories, retained invariants, immutable outcomes and
+physical queue drain pass. All41repairs acknowledge and match counters;0fences.
+[Complete compressed originals and independent checks](scale/tier3-mixed-block-delay-2026-10-02/hosted-smoke/README.md)
+are hash-verified. This smoke permits the sustained row to proceed, but does
+not clear ten-minute, combined-fault,200-seed or24h acceptance.

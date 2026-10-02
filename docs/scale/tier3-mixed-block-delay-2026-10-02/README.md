@@ -34,4 +34,6 @@ The entire release scope remains required.
 
 The [hosted capability plus35s smoke](https://github.com/AntPAllen/js-wf/actions/runs/36945872372)
 was dispatched at source246ed70e0eedc76857163dac51d5249891b76484.
-`smoke-launch.json` retains the queued API response; no native verdict exists yet.
+`smoke-launch.json` retains the original queued API response. The native capability
+and smoke now pass; [complete verified evidence](hosted-smoke/README.md) is retained.
+The current independent guards also pass. Sustained acceptance remains pending.
