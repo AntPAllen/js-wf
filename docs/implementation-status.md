@@ -7023,3 +7023,12 @@ recover disk headroom; retained campaign data was preserved.
 Current119-workload100k run37039245566 and fresh all-six ten-minute mutation
 run37030840346 are now confirmed in progress. The production-cap continuation
 run37037256768 and older118-workload100k run37028379931 also remain active.
+
+Following the independently accepted ten-minute seed27 and compiled concurrent
+exit contract, the current-source ahead-clock seeds1..200 qualification is queued
+as [run37040118844](https://github.com/AntPAllen/js-wf/actions/runs/37040118844)
+at exact52f4e51ba190e24132933de967d5317c481b21fd, with10m per seed,
+`clock_timer_cut=true`, `common_timer_clock=true`, and starting seed1. Strict
+source-exit and raw latency/drain checks are unchanged. Original failed ahead200
+artifacts and other existing campaign handles are retained. This is a full-range
+qualification launch for one row, not a passed row or full matrix claim.
