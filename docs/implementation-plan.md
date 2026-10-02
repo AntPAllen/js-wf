@@ -813,3 +813,11 @@ frame-only recovery, offline staged replay and drained original dispatch.
 Keep the real-cluster combined proof as an independent gate. The 120th Tier 1
 workload implements 27 cut/budget/heal combinations; focused race/replay and the
 compiled suffix-budget negative pass. Full final-source qualification is open.
+
+
+The real combined continuation-limit fixture is independently qualified at the
+unchanged production100000 cap by [run37045827952](scale/continuation-limit-combined-2026-10-02/prompt-effect-production-cap/).
+All three worker-kill/retained-server-restart cuts preserve raw prefixes and
+recover below30s withTTL12s. The corrected compiled suffix-budget negative
+fails on one actual forbidden effect. This clears that fixture gate; current
+full Tier1 release coverage, complete fault matrices and24h soak remain required.

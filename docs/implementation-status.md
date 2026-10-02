@@ -9,8 +9,10 @@
   modeled outage. All27 combinations pass focused1k race/replay; the compiled
   suffix-budget control detects an actual forbidden effect. Final-source full
   120-workload1k/100k gates remain open.
-- Corrected hosted budget20 combined-cap contract37045824031 is accepted at
-  2a30165; production100000 campaign37045827952 remains confirmed active.
+- Corrected hosted budget20 contract37045824031 and production100000 combined-cap
+  campaign37045827952 are independently accepted at2a30165. All three production
+  cuts recover in12.840s/12.835s/12.937s; the compiled mutant triggers one actual
+  forbidden effect and fails semantically without a timeout.
 - Fresh all-six ten-minute mutation gate37030840346 is accepted at0f979d0.
   Ahead-clock seed27 ten-minute replay37030391587 is accepted at0f979d0;
   current ahead1..200 campaign37040118844 remains queued.
@@ -7253,3 +7255,27 @@ The final helper preserves failed traces before reporting errors; exact final
 source full120-workload1k/100k qualification remains open. All20 evidence files
 are archived losslessly with SHA256 readback. Earlier119-workload qualification
 continues independently and is not canceled or broadened to120.
+
+
+## Production100000 combined recovery and corrected control accepted
+
+[Run37045827952 independent proof](scale/continuation-limit-combined-2026-10-02/prompt-effect-production-cap/)
+accepts exact2a30165 with the unchanged production cap. All three race cuts
+preserve prefixes99,998/99,999/100,000 and finish with exactly100,000 entries,
+limit Failed and immutable terminal state. Actual worker SIGKILL is followed by
+graceful full NATS shutdown/restart of retained file stores; replacement uses
+the original dispatch on a peer. Recovery12.840s/12.835s/12.937s meets the strict
+30s gate with productionTTL12s. Checkpoint index99,993/SDK offset99,992,
+frame-only reads, higher epochs for successor appends, raw integrity and
+99,995-step/two-stage offline replay all verify with zero forbidden effects.
+
+The exact compiled suffix-budget mutant executes one actual forbidden effect
+after takeover. Its raw100,000-entry journal ends at the forbidden request;
+the corrected fixture fails semantically and promptly. Source hashes match Git,
+actual named/package verdicts pass/fail as intended and no timeout/build failure
+substitutes for detection. The original negative timeout remains rejected and
+preserved. This closes this production combined-cap fixture gate only; full
+120-workload qualification, fault matrices, million drain and24h runtime soak
+remain open. Local full120-workload1k race suite is active at clean a8e7670,
+compiled inventory120 seeded workloads/266 pins. The119-workload100k campaign
+continues independently.
