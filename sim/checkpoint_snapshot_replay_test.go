@@ -173,7 +173,7 @@ func TestSeededCheckpointSnapshotReplay(t *testing.T) {
 		return
 	}
 	observed := map[string]int{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		trace, err := runSeededCheckpointSnapshot(seed, nil)
 		if err != nil {
 			root := os.Getenv("FAULT_TRACE_OUT")

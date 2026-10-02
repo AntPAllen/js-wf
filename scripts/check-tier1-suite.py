@@ -13,7 +13,7 @@ TRACE_SKIPS = {
 }
 
 
-def check(events, inventory, seeds, source, regressions):
+def check(events, inventory, seeds, source, regressions, seeded_inventory=None):
     if not re.fullmatch(r"[0-9a-f]{40}", source):
         raise ValueError("missing exact source commit")
     if not isinstance(seeds, int) or not 1000 <= seeds <= 1_000_000:
@@ -31,6 +31,14 @@ def check(events, inventory, seeds, source, regressions):
     ) or "TestPinnedRegressionCorpus" not in names:
         raise ValueError("missing or invalid source regression inventory")
     required_pins = {"TestPinnedRegressionCorpus/" + Path(name).name for name in traces}
+    seeded_names = None
+    if seeded_inventory is not None:
+        seeded_names = seeded_inventory.splitlines()
+        if not seeded_names or len(set(seeded_names)) != len(seeded_names) or any(
+            not re.fullmatch(r"Test\w+", name) for name in seeded_names
+        ) or not set(seeded_names).issubset(names):
+            raise ValueError("invalid or empty source seeded-test inventory")
+    seed_records = {}
     runs, terminals, output, coverage, package_results = {}, {}, {}, [], []
     for event in events:
         if event.get("Package") != PACKAGE:
@@ -51,6 +59,17 @@ def check(events, inventory, seeds, source, regressions):
             package_results.append(action)
         if action == "output":
             for line in event.get("Output", "").splitlines():
+                if "TIER1_SEEDS " in line:
+                    tokens = line.split("TIER1_SEEDS ", 1)[1].split()
+                    fields = {}
+                    for token in tokens:
+                        key, sep, value = token.partition("=")
+                        if not sep or key in fields:
+                            raise ValueError("malformed or duplicate per-workload seed field")
+                        fields[key] = value
+                    if set(fields) != {"test", "first", "last", "completed", "requested"} or fields["test"] != name:
+                        raise ValueError("seed evidence identity or schema mismatch")
+                    seed_records.setdefault(name, []).append(fields)
                 if line.startswith("TIER1_COVERAGE "):
                     coverage.append(line)
     if package_results != ["pass"]:
@@ -91,6 +110,26 @@ def check(events, inventory, seeds, source, regressions):
         raise ValueError("empty aggregate campaign coverage")
     if sum(counts[key] for key in ("virtual_buckets_zero", "under_1s", "under_1m", "at_least_1m")) != counts["generated_schedules"]:
         raise ValueError("virtual-time buckets do not account for all generated schedules")
+    seed_proof = None
+    if seeded_names is not None:
+        if set(seed_records) != set(seeded_names):
+            raise ValueError("seed evidence differs from source seeded-test inventory")
+        for name, records in seed_records.items():
+            if len(records) != 1:
+                raise ValueError(f"duplicate per-workload seed evidence: {name}")
+            fields = records[0]
+            try:
+                counts_for_test = {key: int(fields[key]) for key in ("first", "last", "completed", "requested")}
+            except ValueError as error:
+                raise ValueError("invalid per-workload seed count") from error
+            if counts_for_test != {"first": 1, "last": seeds, "completed": seeds, "requested": seeds}:
+                raise ValueError(f"incomplete per-workload seed range: {name}")
+        seed_proof = {
+            "inventory_sha256": hashlib.sha256(seeded_inventory.encode()).hexdigest(),
+            "workloads": len(seeded_names), "first": 1, "last": seeds,
+            "completed_bodies": seeds * len(seeded_names),
+            "tests": sorted(seeded_names),
+        }
     return {
         "source": source,
         "package": PACKAGE,
@@ -100,7 +139,9 @@ def check(events, inventory, seeds, source, regressions):
         "pinned_regressions_pass": len(required_pins),
         "regression_inventory_sha256": hashlib.sha256(regressions.encode()).hexdigest(),
         "aggregate_counts": counts,
-        "scope": "Compiled test inventory completed; seed count is configuration, not independent per-workload seed coverage proof.",
+        "per_workload_seed_proof": seed_proof,
+        "scope": ("Compiled inventory and every source-inventoried seeded loop completed the exact requested contiguous seed range."
+                  if seed_proof else "Compiled test inventory completed; seed count is configuration, not independent per-workload seed coverage proof."),
     }
 
 
@@ -109,13 +150,14 @@ def main():
     parser.add_argument("--events", type=Path, required=True)
     parser.add_argument("--inventory", type=Path, required=True)
     parser.add_argument("--regressions", type=Path, required=True)
+    parser.add_argument("--seeded-inventory", type=Path)
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--seeds", type=int, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     with args.events.open() as stream:
         events = (json.loads(line) for line in stream if line.strip())
-        report = check(events, args.inventory.read_text(), args.seeds, args.source.read_text().strip(), args.regressions.read_text())
+        report = check(events, args.inventory.read_text(), args.seeds, args.source.read_text().strip(), args.regressions.read_text(), args.seeded_inventory.read_text() if args.seeded_inventory else None)
     report["events_sha256"] = hashlib.sha256(args.events.read_bytes()).hexdigest()
     args.output.write_text(json.dumps(report, indent=2) + "\n")
     print(f"Verified Tier 1 inventory: {report['top_level_pass']} passes, two trace-only skips")

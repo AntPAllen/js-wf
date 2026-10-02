@@ -108,7 +108,7 @@ func runTimerClockTransition(seed int64, replay *Trace) (trace Trace, runErr err
 
 func TestSeededTimerClockTransitionReplay(t *testing.T) {
 	covered := map[string]bool{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runTimerClockTransition(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")

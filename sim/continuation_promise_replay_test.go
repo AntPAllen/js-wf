@@ -328,7 +328,7 @@ func TestSeededContinuationPromiseReplay(t *testing.T) {
 	}
 	observed := map[string]bool{}
 	firstSeeds := map[string]int64{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runSeededContinuationPromise(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")

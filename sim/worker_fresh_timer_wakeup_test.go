@@ -323,7 +323,7 @@ func runWorkerTimerClockScenario(seed int64, replay *Trace, common, transition b
 
 func TestSeededWorkerFreshTimerWakeupReplay(t *testing.T) {
 	covered := map[string]bool{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runWorkerFreshTimerWakeup(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")
@@ -360,7 +360,7 @@ func TestSeededWorkerFreshTimerWakeupReplay(t *testing.T) {
 // Exercise the opt-in domain without reinterpreting legacy traces.
 func TestSeededWorkerCommonClockAcrossSkewedDeliveryTimestamps(t *testing.T) {
 	covered := map[string]bool{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runWorkerFreshTimerWakeupClock(seed, nil, true)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")
@@ -396,7 +396,7 @@ func TestSeededWorkerCommonClockAcrossSkewedDeliveryTimestamps(t *testing.T) {
 
 func TestSeededWorkerCommonClockTransitionRepair(t *testing.T) {
 	covered := map[string]bool{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runWorkerTimerClockScenario(seed, nil, true, true)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")

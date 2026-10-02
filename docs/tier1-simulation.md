@@ -1394,3 +1394,11 @@ Eight sequential waits, both cut times, four APIs and two durations give32 pins.
 [Evidence and transport assumptions](scale/timer-common-clock-transition-2026-10-02/README.md)
 cover1,000 race schedules and52 exact new/existing replays. Independent sampling,
 fenced loop cadence and admitted native recovery remain separate requirements.
+
+## Per-workload campaign accounting
+
+Future extended campaigns require a source AST inventory of tracked seed loops
+and exact completed range records for every inventoried test, in addition to
+whole-suite, pinned-regression and aggregate checks. See
+[accounting implementation and evidence](scale/tier1-per-workload-coverage-2026-10-02/).
+Historical configured counts alone do not establish per-workload completion.

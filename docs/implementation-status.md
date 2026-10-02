@@ -5951,3 +5951,15 @@ The launch snapshot is retained; no sustained pass is claimed. Existing100k
 run36962606650 remains in progress at5828875 (234 pins, preceding the18 new
 clock pins). The authoritative million-timer service remains active with497,313
 receipts observed; neither live campaign has been restarted.
+
+## Exact per-workload seed completion accounting (2026-10-02)
+
+[Tracked seeded loops and guard](scale/tier1-per-workload-coverage-2026-10-02/)
+now cover112 source-inventoried tests. Four cooperative races previously limited
+to100 seeds now use the campaign range. Exact completed loop-body counts are
+required in future extended CI; early exit, missing/duplicate records, foreign
+identity and short ranges fail. Focused actual race packages pass1.456s and
+6.060s with six independently reviewed complete1,000-seed records; ten Python
+negative/control methods pass. This adds completion evidence, not a full suite
+or100k acceptance. The existing100k run predates this accounting and continues
+at its original handle; no duplicate release campaign has been launched.

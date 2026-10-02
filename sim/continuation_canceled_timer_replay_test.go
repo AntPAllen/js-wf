@@ -305,7 +305,7 @@ func TestSeededContinuationCanceledTimerReplay(t *testing.T) {
 	}
 	observed := map[string]bool{}
 	combinations := map[string]bool{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runSeededContinuationCanceledTimer(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")

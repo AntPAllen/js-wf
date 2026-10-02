@@ -113,7 +113,7 @@ func TestSeededJournalManifestReadReplay(t *testing.T) {
 	}
 	modes := map[string]bool{}
 	kinds := map[string]bool{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runJournalManifestRead(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")

@@ -469,7 +469,7 @@ func TestSeededStartModelReplay(t *testing.T) {
 		}
 		return
 	}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runSeededStartScenario(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")
@@ -583,7 +583,7 @@ func runTwoStarterRace(seed int64, mismatch bool, replay *Trace) (trace Trace, r
 }
 
 func TestCooperativeStartRacesReplay(t *testing.T) {
-	for seed := int64(1); seed <= 100; seed++ {
+	for seed := range seededSchedules(t) {
 		for _, mismatch := range []bool{false, true} {
 			generated, err := runTwoStarterRace(seed, mismatch, nil)
 			if err != nil {
@@ -652,7 +652,7 @@ func runConcurrentStartRepair(seed int64, replay *Trace) (trace Trace, runErr er
 }
 
 func TestCooperativeStartAndScannerRacesReplay(t *testing.T) {
-	for seed := int64(1); seed <= 100; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runConcurrentStartRepair(seed, nil)
 		if err != nil {
 			t.Fatalf("FAULT_SEED=%d start/scan race: %v", seed, err)

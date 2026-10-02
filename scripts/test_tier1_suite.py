@@ -36,6 +36,24 @@ class Tier1SuiteTests(unittest.TestCase):
         self.assertEqual(report["aggregate_counts"]["generated_schedules"], 10)
         self.assertIn("not independent", report["scope"])
 
+    def test_exact_per_workload_completion_and_rejections(self):
+        record = {"Package": module.PACKAGE, "Test": "TestSeededWorkload", "Action": "output",
+                  "Output": "seed_count_test.go:40: TIER1_SEEDS test=TestSeededWorkload first=1 last=100000 completed=100000 requested=100000\n"}
+        def verify(events, inventory="TestSeededWorkload\n"):
+            return module.check(events, self.inventory, 100000, "a" * 40, self.regressions, inventory)
+        result = verify(self.events + [record])
+        self.assertEqual(result["per_workload_seed_proof"]["completed_bodies"], 100000)
+        for events in (self.events, self.events + [record, record]):
+            with self.assertRaises(ValueError): verify(events)
+        for old, new in (("first=1", "first=2"), ("last=100000", "last=99999"),
+                         ("completed=100000", "completed=99999"), ("requested=100000", "requested=1000"),
+                         ("completed=100000", "completed=x"), ("test=TestSeededWorkload", "test=Other"),
+                         ("first=1", "first=1 first=1"), ("first=1", "extra=1")):
+            with self.subTest(new=new), self.assertRaises(ValueError):
+                verify(self.events + [{**record, "Output": record["Output"].replace(old, new)}])
+        for inventory in ("", "TestSeededWorkload\n" * 2, "TestAbsent\n", "TestSeededWorkload/subcase\n"):
+            with self.assertRaises(ValueError): verify(self.events + [record], inventory)
+
     def test_missing_workload_or_terminal(self):
         for action in (None, "pass", "run"):
             with self.subTest(action=action), self.assertRaises(ValueError):

@@ -417,7 +417,7 @@ func TestSeededWorkerRetirementReplay(t *testing.T) {
 		return
 	}
 	observed := map[string]int{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runSeededWorkerRetirement(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")

@@ -195,7 +195,7 @@ func TestSeededPausedCoordinatorReplay(t *testing.T) {
 		return
 	}
 	modes := map[string]bool{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runPausedCoordinator(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")

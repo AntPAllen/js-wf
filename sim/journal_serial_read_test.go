@@ -135,7 +135,7 @@ func TestSeededJournalSerialReadReplay(t *testing.T) {
 	}
 	modes := map[string]bool{}
 	kinds := map[string]bool{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runJournalSerialRead(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")
@@ -198,7 +198,7 @@ func TestSeededJournalDirectUnavailableReplay(t *testing.T) {
 	modes := map[string]bool{}
 	kinds := map[string]bool{}
 	combinations := map[string]bool{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runJournalSerialReadMode(seed, nil, true)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")

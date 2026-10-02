@@ -104,7 +104,7 @@ func TestCooperativeTwoWriterUnknownReplay(t *testing.T) {
 		}
 		return
 	}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runTwoWriterUnknownCAS(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")
@@ -232,7 +232,7 @@ func TestCooperativeTwoWriterTailLookupRecovery(t *testing.T) {
 		}
 		return
 	}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runTwoWriterTailLookupRecovery(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")

@@ -137,7 +137,7 @@ func runSuspendedNakRecovery(seed int64, replay *Trace) (trace Trace, runErr err
 }
 
 func TestSeededSuspendedLostNakRecovery(t *testing.T) {
-	for seed := int64(1); seed <= seededScheduleLimit(t); seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runSuspendedNakRecovery(seed, nil)
 		if err != nil {
 			t.Fatalf("FAULT_SEED=%d: %v", seed, err)

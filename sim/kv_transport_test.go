@@ -299,7 +299,7 @@ func TestSeededLeaseModelReplay(t *testing.T) {
 		}
 		return
 	}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runSeededLeaseScenario(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")
@@ -438,7 +438,7 @@ func runTwoAcquirerRace(seed int64, orphan bool, replay *Trace) (trace Trace, ru
 }
 
 func TestCooperativeLeaseAcquireRacesReplay(t *testing.T) {
-	for seed := int64(1); seed <= 100; seed++ {
+	for seed := range seededSchedules(t) {
 		for _, orphan := range []bool{false, true} {
 			generated, err := runTwoAcquirerRace(seed, orphan, nil)
 			if err != nil {

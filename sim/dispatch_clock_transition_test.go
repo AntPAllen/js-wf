@@ -156,7 +156,7 @@ func runDispatchPendingClock(seed int64, replay *Trace, stored bool) (trace Trac
 
 func TestSeededStoredConsumerPendingClockReplay(t *testing.T) {
 	covered := map[string]bool{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runStoredPendingClock(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")
@@ -193,7 +193,7 @@ func TestSeededStoredConsumerPendingClockReplay(t *testing.T) {
 
 func TestSeededDispatchClockTransitionReplay(t *testing.T) {
 	covered := map[string]bool{}
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runDispatchClockTransition(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")

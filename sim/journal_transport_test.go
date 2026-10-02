@@ -228,7 +228,7 @@ func TestSeededAppendTraceReplaysAcrossProcesses(t *testing.T) {
 }
 
 func TestThousandSeededJournalAppendScenarios(t *testing.T) {
-	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+	for seed := range seededSchedules(t) {
 		trace, err := runSeededAppendScenario(seed, nil)
 		if err != nil {
 			path := os.Getenv("FAULT_TRACE_OUT")
@@ -324,7 +324,7 @@ func TestCooperativeTwoWriterCASReplay(t *testing.T) {
 		}
 		return
 	}
-	for seed := int64(1); seed <= 100; seed++ {
+	for seed := range seededSchedules(t) {
 		generated, err := runTwoWriterCAS(seed, nil)
 		if err != nil {
 			t.Fatalf("FAULT_SEED=%d: %v", seed, err)
