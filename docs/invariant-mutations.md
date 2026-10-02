@@ -73,6 +73,25 @@ journal-leader mutation campaign. A single pair or six smoke pairs cannot
 substitute. The independent 200-seed full matrix and 24-hour full-matrix soak
 remain separate release requirements.
 
+Download the terminal workflow's original artifacts and verify the entire
+campaign against its recorded Git revision:
+
+```sh
+gh run view RUN_ID --json status,conclusion,headSha,jobs > /tmp/sustained-metadata.json
+gh run download RUN_ID --dir /tmp/sustained-artifacts
+python3 scripts/check-sustained-mutation-campaign.py \
+  --metadata /tmp/sustained-metadata.json --artifacts /tmp/sustained-artifacts \
+  --duration 10m --output /tmp/sustained-verified.json
+```
+
+The verifier requires all seven successful jobs, every original category
+artifact, complete source inventories matching Git, exact single mutations and
+negative controls, actual named test outcomes, original measured samples and
+checkpoint/fault records, preserved cohort counts and decoded raw receipts. Each
+regenerated phase report must equal its uploaded report. A35s campaign is marked
+smoke and cannot clear the sustained gate; even a10m campaign does not clear the
+full matrix or soak. The repository must contain the workflow's recorded commit.
+
 The output directory contains `report.json`, unmodified and mutated Go JSON
 test logs, negative-control logs and any modeled failure traces. The report
 records the commit, production source hashes, selected tests, timings and

@@ -52,7 +52,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Verify sustained evidence rejects incomplete runs
-        run: python3 -m unittest discover -s scripts -p test_sustained_mutation.py
+        run: python3 -m unittest discover -s scripts -p 'test_sustained_mutation*.py'
       - name: Require original sustained mixed gates and the semantic mutation escape
         env:
           CATEGORY: ${{ matrix.category }}

@@ -1,0 +1,767 @@
+{
+  "source": "026d574c45627438d18eee3110b466dca1a85062",
+  "jobs": 7,
+  "actual_pairs": 12,
+  "checks": [
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_cas",
+      "actual_baseline_pass": true,
+      "actual_semantic_failure": true,
+      "source_hashes_match_git": true,
+      "exact_overlay": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "independent_worker_leases",
+      "actual_baseline_pass": true,
+      "actual_semantic_failure": true,
+      "source_hashes_match_git": true,
+      "exact_overlay": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "invocation_purged_first",
+      "actual_baseline_pass": true,
+      "actual_semantic_failure": true,
+      "source_hashes_match_git": true,
+      "exact_overlay": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_determinism_guard",
+      "actual_baseline_pass": true,
+      "actual_semantic_failure": true,
+      "source_hashes_match_git": true,
+      "exact_overlay": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_run_message_id",
+      "actual_baseline_pass": true,
+      "actual_semantic_failure": true,
+      "source_hashes_match_git": true,
+      "exact_overlay": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "skipped_start_reconciler",
+      "actual_baseline_pass": true,
+      "actual_semantic_failure": true,
+      "source_hashes_match_git": true,
+      "exact_overlay": true
+    },
+    {
+      "artifact": "mixed-production-cas",
+      "mutation": "missing_cas",
+      "actual_baseline_pass": true,
+      "actual_semantic_failure": true,
+      "source_hashes_match_git": true,
+      "exact_overlay": true
+    },
+    {
+      "artifact": "mixed-production-determinism",
+      "mutation": "missing_determinism_guard",
+      "actual_baseline_pass": true,
+      "actual_semantic_failure": true,
+      "source_hashes_match_git": true,
+      "exact_overlay": true
+    },
+    {
+      "artifact": "mixed-production-enqueue",
+      "mutation": "missing_run_message_id",
+      "actual_baseline_pass": true,
+      "actual_semantic_failure": true,
+      "source_hashes_match_git": true,
+      "exact_overlay": true
+    },
+    {
+      "artifact": "mixed-production-leases",
+      "mutation": "independent_worker_leases",
+      "actual_baseline_pass": true,
+      "actual_semantic_failure": true,
+      "source_hashes_match_git": true,
+      "exact_overlay": true
+    },
+    {
+      "artifact": "mixed-production-purge",
+      "mutation": "invocation_purged_first",
+      "actual_baseline_pass": true,
+      "actual_semantic_failure": true,
+      "source_hashes_match_git": true,
+      "exact_overlay": true
+    },
+    {
+      "artifact": "mixed-production-start-repair",
+      "mutation": "skipped_start_reconciler",
+      "actual_baseline_pass": true,
+      "actual_semantic_failure": true,
+      "source_hashes_match_git": true,
+      "exact_overlay": true
+    }
+  ],
+  "raw_proofs": {
+    "cas": {
+      "cas": {
+        "receipts": [
+          {
+            "Subject": "wf.jrn.guardshort.guardshort-0-0",
+            "Sequence": 154,
+            "Header": null,
+            "Data": "eyJlcG9jaCI6MSwiaW5kZXgiOjIsImtpbmQiOiJTdGVwQ29tcGxldGVkIiwicGF5bG9hZCI6eyJyZXN1bHQiOjQyfSwid29ya2VyX2lkIjoibWl4ZWQtZ3VhcmQtYmVmb3JlIn0=",
+            "Time": "2026-10-02T14:22:02.986485595Z"
+          },
+          {
+            "Subject": "wf.jrn.guardshort.guardshort-0-0",
+            "Sequence": 153,
+            "Header": null,
+            "Data": "eyJlcG9jaCI6MSwiaW5kZXgiOjIsImtpbmQiOiJTdGVwQ29tcGxldGVkIiwicGF5bG9hZCI6eyJyZXN1bHQiOjQyfSwid29ya2VyX2lkIjoibWl4ZWQtZ3VhcmQtYmVmb3JlIn0=",
+            "Time": "2026-10-02T14:22:02.986409552Z"
+          }
+        ],
+        "decoded": [
+          {
+            "epoch": 1,
+            "index": 2,
+            "kind": "StepCompleted",
+            "payload": {
+              "result": 42
+            },
+            "worker_id": "mixed-guard-before"
+          },
+          {
+            "epoch": 1,
+            "index": 2,
+            "kind": "StepCompleted",
+            "payload": {
+              "result": 42
+            },
+            "worker_id": "mixed-guard-before"
+          }
+        ]
+      }
+    },
+    "determinism": {},
+    "enqueue": {
+      "baseline": [
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 53,
+          "Header": {
+            "Nats-Msg-Id": [
+              "mixed-enqueue:guardshort.guardshort-0-0"
+            ]
+          },
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:23:20.289861829Z"
+        }
+      ],
+      "mutated": [
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 53,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554490254Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 54,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554496576Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 55,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554499161Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 56,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554500223Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 57,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554501305Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 58,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554502227Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 59,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554503339Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 60,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.55450418Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 61,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554505393Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 62,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554507436Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 63,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554932809Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 64,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554935243Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 65,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554936355Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 66,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554937237Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 67,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554938029Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 68,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.55493897Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 69,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554939621Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 70,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554943178Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 71,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.55494416Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 72,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554945392Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 73,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554946124Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 74,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554947677Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 75,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554948769Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 76,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.55494968Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 77,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554950652Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 78,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554951354Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 79,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554952125Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 80,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554952886Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 81,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554954199Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 82,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554955071Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 83,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554955842Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 84,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.554956624Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 85,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555226412Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 86,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555229277Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 87,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.55523065Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 88,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555232193Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 89,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555233595Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 90,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555235018Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 91,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555386361Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 92,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555390388Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 93,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555391831Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 94,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555393434Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 95,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555394757Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 96,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555396079Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 97,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555430624Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 98,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555432908Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 99,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555434321Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 100,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555436185Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 101,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555437688Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 102,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555440162Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 103,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555441655Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 104,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555443248Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 105,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555444581Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 106,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555445863Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 107,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555447005Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 108,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555450061Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 109,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555451574Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 110,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555453117Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 111,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555454389Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 112,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555455912Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 113,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555457244Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 114,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555458577Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 115,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.55546035Z"
+        },
+        {
+          "Subject": "wf.run.3",
+          "Sequence": 116,
+          "Header": null,
+          "Data": "Z3VhcmRzaG9ydC5ndWFyZHNob3J0LTAtMA==",
+          "Time": "2026-10-02T14:24:10.555462224Z"
+        }
+      ]
+    },
+    "leases": {},
+    "purge": {
+      "reuse": {
+        "old": [
+          {
+            "Subject": "wf.inv.guardshort.guardshort-0-0",
+            "Sequence": 1,
+            "Header": {
+              "Nats-Expected-Last-Subject-Sequence": [
+                "0"
+              ],
+              "Wf-Input-SHA256": [
+                "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+              ]
+            },
+            "Data": "MA==",
+            "Time": "2026-10-02T14:19:46.663549113Z"
+          }
+        ],
+        "prior": [
+          {
+            "epoch": 1,
+            "index": 0,
+            "kind": "Started",
+            "worker_id": "mixed-guard-before",
+            "sequence": 1
+          },
+          {
+            "epoch": 1,
+            "index": 1,
+            "kind": "StepRequested",
+            "payload": {
+              "kind": "run",
+              "name": "held",
+              "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+              "fire_at": "0001-01-01T00:00:00Z"
+            },
+            "worker_id": "mixed-guard-before",
+            "sequence": 2
+          },
+          {
+            "epoch": 255,
+            "index": 2,
+            "kind": "StepCompleted",
+            "payload": {
+              "result": 42
+            },
+            "worker_id": "mixed-guard-after",
+            "sequence": 157
+          },
+          {
+            "epoch": 255,
+            "index": 3,
+            "kind": "Completed",
+            "payload": {
+              "inv_seq": 1,
+              "result": "NDI="
+            },
+            "worker_id": "mixed-guard-after",
+            "sequence": 166
+          }
+        ],
+        "reused": [
+          {
+            "epoch": 814,
+            "index": 0,
+            "kind": "Started",
+            "worker_id": "mixed-purge-reused",
+            "sequence": 393
+          },
+          {
+            "epoch": 814,
+            "index": 1,
+            "kind": "StepRequested",
+            "payload": {
+              "kind": "run",
+              "name": "held",
+              "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+              "fire_at": "0001-01-01T00:00:00Z"
+            },
+            "worker_id": "mixed-purge-reused",
+            "sequence": 394
+          },
+          {
+            "epoch": 814,
+            "index": 2,
+            "kind": "StepCompleted",
+            "payload": {
+              "result": 42
+            },
+            "worker_id": "mixed-purge-reused",
+            "sequence": 395
+          },
+          {
+            "epoch": 814,
+            "index": 3,
+            "kind": "Completed",
+            "payload": {
+              "inv_seq": 29,
+              "result": "NDI="
+            },
+            "worker_id": "mixed-purge-reused",
+            "sequence": 396
+          }
+        ]
+      }
+    },
+    "start-repair": {
+      "baseline": {
+        "invocation": {
+          "Subject": "wf.inv.guardshort.repair-orphan",
+          "Sequence": 29,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Input-SHA256": [
+              "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+            ]
+          },
+          "Data": "MA==",
+          "Time": "2026-10-02T14:19:43.865531731Z"
+        },
+        "dispatch": [
+          {
+            "Subject": "wf.run.0",
+            "Sequence": 53,
+            "Header": {
+              "Nats-Msg-Id": [
+                "start:guardshort.repair-orphan:29"
+              ]
+            },
+            "Data": "Z3VhcmRzaG9ydC5yZXBhaXItb3JwaGFu",
+            "Time": "2026-10-02T14:19:51.06706522Z"
+          }
+        ]
+      },
+      "mutated": {
+        "invocation": {
+          "Subject": "wf.inv.guardshort.repair-orphan",
+          "Sequence": 23,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Input-SHA256": [
+              "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+            ]
+          },
+          "Data": "MA==",
+          "Time": "2026-10-02T14:20:27.228328557Z"
+        },
+        "dispatch": []
+      }
+    }
+  },
+  "clears_sustained_gate": false
+}

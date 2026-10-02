@@ -2,6 +2,22 @@
 
 ## Latest accepted evidence — 2026-10-02
 
+- Hosted focused regression37018289819 at `026d574` is independently accepted:
+  all seven jobs/twelve actual semantic pairs, exact Git production/fixture
+  hashes, exact overlays, both rejected controls per job and decoded raw category
+  proofs. See [original focused regression artifacts](scale/sustained-mixed-mutations-2026-10-02/focused-ci-regression/).
+  This validates extraction of the common guard helper, without substituting
+  for the live all-six sustained smoke or the ten-minute mutation campaign.
+- Four more local same-store35s pairs at exact `026d574` independently detect
+  purge ordering, private-worker leases, removed replay comparison and absent
+  enqueue message IDs. Complete Git source inventories, exact overlays/controls,
+  raw measurements/receipts and reproduced original phase reports all match.
+  See [remaining-four smoke originals](scale/sustained-mixed-mutations-2026-10-02/remaining-four-local-smoke/).
+  Together with the preceding CAS/start evidence, all six categories have local
+  sustained-harness smoke; none clears the ten-minute mutation gate. Hosted
+  all-six smoke37018302340 is live. The new independent campaign verifier requires
+  all original jobs/categories at one source and explicitly separates35s smoke,
+  ten-minute mutation acceptance and the still-open full matrix/soak requirements.
 - The new sustained mutation harness executes the existing mixed journal-leader
   row and its original release checks before admitting a controlled counterexample
   on the same retained stores. Local35s CAS and start-repair pairs detect their
