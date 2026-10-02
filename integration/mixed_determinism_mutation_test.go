@@ -60,6 +60,13 @@ func TestMixedEnqueueMutationAfterJournalLeaderKill(t *testing.T) {
 	runMixedGuardChallenge(t, "enqueue")
 }
 
+func TestMixedStartRepairMutationAfterJournalLeaderKill(t *testing.T) {
+	if os.Getenv("WF_MIXED_START_REPAIR_MUTATION") != "1" {
+		t.Skip("set WF_MIXED_START_REPAIR_MUTATION=1 for the mixed start repair challenge")
+	}
+	runMixedGuardChallenge(t, "start-repair")
+}
+
 func runMixedGuardMutation(t *testing.T, leaseChallenge bool) {
 	mode := "determinism"
 	if leaseChallenge {
@@ -72,6 +79,7 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 	leaseChallenge := mode == "leases"
 	casChallenge := mode == "cas"
 	enqueueChallenge := mode == "enqueue"
+	startRepairChallenge := mode == "start-repair"
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -345,6 +353,10 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 	}
 	t.Log("MIXED_GUARD_ADMISSION shorts_pending=4 timers_suspended=3 signals_suspended=2 fanout_suspended=1")
 	stopFirst()
+	var orphan client.Handle
+	if startRepairChallenge {
+		orphan = admitMixedMissingStart(t, ctx, nodes[0])
+	}
 	stream, err := nodes[0].Stream(ctx, "WF_JRN")
 	if err != nil {
 		t.Fatal(err)
@@ -376,6 +388,10 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 	var retainedEnqueues int
 	if enqueueChallenge {
 		retainedEnqueues = challengeMixedEnqueue(t, ctx, nodes, survivor, target.typ, target.id)
+	}
+	var startRepaired bool
+	if startRepairChallenge {
+		startRepaired = challengeMixedStartRepair(t, ctx, nodes[survivor], orphan)
 	}
 	stopSecond := startWorker("mixed-guard-after", nodes[survivor], true)
 	defer stopSecond()
@@ -443,15 +459,26 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 		}
 	}
 	value, resultErr := c.Await(ctx, target.typ, target.id)
+	expectedInvocations, expectedTerminals := 28, 28
+	if startRepairChallenge {
+		expectedInvocations = 29
+		if startRepaired {
+			extra, err := c.Await(ctx, orphan.Type, orphan.ID)
+			if err != nil || string(extra) != "42" {
+				t.Fatalf("repaired start result=%s err=%v", extra, err)
+			}
+			expectedTerminals = 29
+		}
+	}
 	var report integrity.Report
 	for ctx.Err() == nil {
 		report, err = integrity.Check(ctx, nodes[survivor])
-		if err == nil && report.Invocations == 28 && report.Journals == 28 && report.Terminal == 28 {
+		if err == nil && report.Invocations == expectedInvocations && report.Journals == expectedTerminals && report.Terminal == expectedTerminals {
 			break
 		}
 		time.Sleep(20 * time.Millisecond)
 	}
-	if err != nil || report.Invocations != 28 || report.Journals != 28 || report.Terminal != 28 {
+	if err != nil || report.Invocations != expectedInvocations || report.Journals != expectedTerminals || report.Terminal != expectedTerminals {
 		t.Fatalf("mixed retained audit %+v err%v", report, err)
 	}
 	records, _, err := journal.New(nodes[survivor]).Read(ctx, target.typ, target.id)
@@ -459,6 +486,17 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 		t.Fatalf("lost prefix or epoch handoff: %v", err)
 	}
 	t.Logf("MIXED_GUARD_COHORT shorts=4 timers=3 signals=2 fanout=1 children=6 grandchildren=12 terminal=28 entries=%d", report.Entries)
+	if startRepairChallenge {
+		if resultErr != nil || string(value) != "42" {
+			t.Fatalf("original cohort target result=%s err=%v", value, resultErr)
+		}
+		verifyMixedStartRepairOutcome(t, ctx, nodes[survivor], orphan, startRepaired)
+		if !startRepaired {
+			t.Fatal("MIXED_MUTATION_ESCAPE category=skipped_start_reconciler retained_invocations=29 original_terminal=28 orphan_journal=absent orphan_terminal=absent")
+		}
+		t.Log("MIXED_START_REPAIR_REJECTED retained_invocations=29 terminal=29")
+		return
+	}
 	if enqueueChallenge {
 		if resultErr != nil || string(value) != "42" || records[len(records)-1].Kind != journal.Completed {
 			t.Fatalf("enqueue cohort target result=%s err=%v", value, resultErr)

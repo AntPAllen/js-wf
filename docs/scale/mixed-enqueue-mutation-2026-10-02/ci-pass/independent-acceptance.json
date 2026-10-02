@@ -1,0 +1,196 @@
+{
+  "run": 37006150411,
+  "source": "6d958d5feb3e5d0b2288a81bf2150ff0d54d8af6",
+  "jobs": 5,
+  "semantic_pairs": [
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_cas",
+      "source_hashes_verified": true,
+      "named_baseline_pass": true,
+      "named_mutant_fail": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "independent_worker_leases",
+      "source_hashes_verified": true,
+      "named_baseline_pass": true,
+      "named_mutant_fail": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "invocation_purged_first",
+      "source_hashes_verified": true,
+      "named_baseline_pass": true,
+      "named_mutant_fail": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_determinism_guard",
+      "source_hashes_verified": true,
+      "named_baseline_pass": true,
+      "named_mutant_fail": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_run_message_id",
+      "source_hashes_verified": true,
+      "named_baseline_pass": true,
+      "named_mutant_fail": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "skipped_start_reconciler",
+      "source_hashes_verified": true,
+      "named_baseline_pass": true,
+      "named_mutant_fail": true
+    },
+    {
+      "artifact": "mixed-production-cas",
+      "mutation": "missing_cas",
+      "source_hashes_verified": true,
+      "named_baseline_pass": true,
+      "named_mutant_fail": true
+    },
+    {
+      "artifact": "mixed-production-determinism",
+      "mutation": "missing_determinism_guard",
+      "source_hashes_verified": true,
+      "named_baseline_pass": true,
+      "named_mutant_fail": true
+    },
+    {
+      "artifact": "mixed-production-enqueue",
+      "mutation": "missing_run_message_id",
+      "source_hashes_verified": true,
+      "named_baseline_pass": true,
+      "named_mutant_fail": true
+    },
+    {
+      "artifact": "mixed-production-leases",
+      "mutation": "independent_worker_leases",
+      "source_hashes_verified": true,
+      "named_baseline_pass": true,
+      "named_mutant_fail": true
+    }
+  ],
+  "enqueue_receipts": {
+    "baseline": {
+      "retained": 1,
+      "sequences": [
+        53
+      ],
+      "subject": "wf.run.3",
+      "body": "guardshort.guardshort-0-0",
+      "headers_verified": true
+    },
+    "mutated": {
+      "retained": 64,
+      "sequences": [
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116
+      ],
+      "subject": "wf.run.3",
+      "body": "guardshort.guardshort-0-0",
+      "headers_verified": true
+    }
+  },
+  "cas_receipts": [
+    {
+      "Subject": "wf.jrn.guardshort.guardshort-0-0",
+      "Sequence": 151,
+      "Header": null,
+      "Data": "eyJlcG9jaCI6NiwiaW5kZXgiOjIsImtpbmQiOiJTdGVwQ29tcGxldGVkIiwicGF5bG9hZCI6eyJyZXN1bHQiOjQyfSwid29ya2VyX2lkIjoibWl4ZWQtZ3VhcmQtYmVmb3JlIn0=",
+      "Time": "2026-10-02T12:26:50.392018148Z"
+    },
+    {
+      "Subject": "wf.jrn.guardshort.guardshort-0-0",
+      "Sequence": 152,
+      "Header": null,
+      "Data": "eyJlcG9jaCI6NiwiaW5kZXgiOjIsImtpbmQiOiJTdGVwQ29tcGxldGVkIiwicGF5bG9hZCI6eyJyZXN1bHQiOjQyfSwid29ya2VyX2lkIjoibWl4ZWQtZ3VhcmQtYmVmb3JlIn0=",
+      "Time": "2026-10-02T12:26:50.392119319Z"
+    }
+  ],
+  "decoded_cas_entries": [
+    {
+      "epoch": 6,
+      "index": 2,
+      "kind": "StepCompleted",
+      "payload": {
+        "result": 42
+      },
+      "worker_id": "mixed-guard-before"
+    },
+    {
+      "epoch": 6,
+      "index": 2,
+      "kind": "StepCompleted",
+      "payload": {
+        "result": 42
+      },
+      "worker_id": "mixed-guard-before"
+    }
+  ]
+}

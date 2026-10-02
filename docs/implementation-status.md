@@ -31,6 +31,20 @@
   journal-leader SIGKILL. Independently decoded raw receipts, exact fixture
   hashes and both negative controls are retained in
   [enqueue evidence](scale/mixed-enqueue-mutation-2026-10-02/).
+- [Mutation run37006150411](https://github.com/AntPAllen/js-wf/actions/runs/37006150411)
+  is independently accepted at `6d958d5`: five successful jobs, ten named
+  baseline/mutant pairs, exact recorded source hashes and rejected negative
+  controls. Raw enqueue receipts prove one message versus64 distinct physical
+  messages; raw CAS receipts prove two matching logical indexes. See
+  [original CI artifacts](scale/mixed-enqueue-mutation-2026-10-02/ci-pass/).
+- The final local mixed start-repair pair admits a durable29th invocation with
+  every initial dispatch dropped, then kills the real journal leader. Production
+  StartScan restores one generation-tagged dispatch and all29 complete; the
+  disabled-scanner mutant completes the original28 but leaves the orphan without
+  a dispatch, journal or terminal. The race baseline passes in36.64s. The first
+  unbounded verification failure is preserved and rejected; bounded readiness
+  attempts recover without changing the recovery gate. See
+  [start repair evidence](scale/mixed-start-repair-mutation-2026-10-02/).
 - Current-source [100k run37002783868](https://github.com/AntPAllen/js-wf/actions/runs/37002783868)
   remains live at `3184b65`. The
   [ten-minute ahead run37002781141](https://github.com/AntPAllen/js-wf/actions/runs/37002781141)
@@ -40,7 +54,7 @@
   audit/drain and verdict remain required.
 
 The current100k gate, sustained ahead20/200 acceptance, full200-seed Tier2 matrix,
-full Tier3 matrix/24h soak, two remaining mixed mutation categories and combined timer-cut/
+full Tier3 matrix/24h soak, the remaining purge-order mixed mutation category and combined timer-cut/
 continuation cases remain open. Running campaigns and component proofs do not
 clear these gates. The sections below retain chronological evidence and failures.
 The planned increase to10k per commit is not implemented; the plan conditions

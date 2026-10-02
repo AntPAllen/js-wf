@@ -9,6 +9,8 @@ on:
       - 'integration/mixed_determinism_mutation_test.go'
       - 'integration/mixed_cas_mutation_test.go'
       - 'integration/mixed_enqueue_mutation_test.go'
+      - 'integration/mixed_start_repair_mutation_test.go'
+      - 'integration/start_retry_repair_test.go'
       - 'worker/*.go'
       - 'testcluster/*.go'
       - 'journal/journal.go'
@@ -122,4 +124,24 @@ jobs:
         with:
           name: mixed-production-enqueue
           path: ${{ runner.temp }}/mixed-enqueue
+          if-no-files-found: error
+
+  mixed-start-repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Detect a disabled start scanner with an admitted missing dispatch after leader kill
+        run: python3 scripts/check-invariant-mutations.py --mixed-start-repair --output "$RUNNER_TEMP/mixed-start-repair"
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mixed-production-start-repair
+          path: ${{ runner.temp }}/mixed-start-repair
           if-no-files-found: error

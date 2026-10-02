@@ -34,6 +34,13 @@ based on `c6793cf` before commit.
 The first bootstrap runner was already running when the expected marker changed;
 its old in-memory classifier rejected the new semantic escape. Those originals
 are preserved separately. The final run uses matching classifier and fixture
-sources. Hosted acceptance is pending for the new mixed-enqueue CI job. This
-advances the fourth mixed source-mutation category; purge, start repair and the
-full mixed-chaos release gate remain open.
+sources. Hosted run37006150411 at `6d958d5` is independently accepted:
+all five jobs succeed, with ten named baseline/mutant pairs and both negative
+controls per job. Recorded production/fixture hashes match that Git revision.
+Independent raw enqueue checks confirm one retained message versus64 distinct
+sequences and their message-ID headers; the CAS receipts also decode to matching
+index2/result42 entries at different physical sequences. Original downloads,
+full job logs and terminal metadata are losslessly archived in
+[ci-pass](ci-pass/), with the independent verdict and member SHA256 manifest.
+This advances the fourth mixed source-mutation category; start repair now has
+separate local evidence, while purge and full mixed chaos remain open.
