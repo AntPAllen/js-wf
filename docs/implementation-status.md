@@ -7170,3 +7170,19 @@ combined-cap hosted budget20 run37045824031 and production100000 run37045827952
 are confirmed queued at2a30165; neither is accepted. The current ahead1..200
 campaign37040118844 remains queued. Full matrix, million-timer recovery and
 full-runtime24h soak remain open. No historical TTL-mismatch smoke was rerun.
+
+
+## Corrected continuation detector accepted in hosted budget20 contract
+
+[Run37045824031 raw/source review](scale/continuation-limit-combined-2026-10-02/prompt-effect-hosted20/)
+accepts exact2a30165. All three actual race positive cuts pass at budget20,
+with worker SIGKILL and graceful retained-store restart of all three servers.
+Recovery17.193s/13.039s/12.978s stays below the unchanged30s gate with12s TTL.
+Raw prefixes, exact20-entry limit failures, checkpoint index13/SDK offset12,
+two continuations, offline15-step replay and integrity audits verify.
+The exact compiled suffix-budget mutant fails on one actual forbidden effect;
+its retained20-entry journal ends at that request. No timeout/build failure
+substitutes for semantic detection. All56 published originals have lossless
+archive SHA256 readback. Production100000 run37045827952 is now confirmed
+in progress at2a30165, not accepted. The old production negative timeout
+remains rejected; its three intact positives remain separate verified evidence.
