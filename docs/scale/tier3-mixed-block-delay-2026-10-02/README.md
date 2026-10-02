@@ -31,3 +31,7 @@ missing. Native evidence must come from the hosted capability/smoke run.
 This is one individual R5 row. It does not close combined I/O/process/reply cuts,
 200 consecutive full-matrix seeds, power-loss durability or the24h full matrix.
 The entire release scope remains required.
+
+The [hosted capability plus35s smoke](https://github.com/AntPAllen/js-wf/actions/runs/36945872372)
+was dispatched at source246ed70e0eedc76857163dac51d5249891b76484.
+`smoke-launch.json` retains the queued API response; no native verdict exists yet.
