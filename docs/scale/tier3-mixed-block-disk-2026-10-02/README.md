@@ -23,8 +23,8 @@ cases. The integration package compiles; its opt-in native test skips without
 
 The [clean hosted 35-second smoke](https://github.com/AntPAllen/js-wf/actions/runs/36944821596)
 was dispatched at source1828d930243961232d0c2bdaa479fc2efee7eb3b;
-`smoke-launch.json` retains the API response. It is queued, with no native
-verdict yet. Sustained runs require that
+`smoke-launch.json` retains the original queued API response. The completed
+smoke and independent checks are described below. Sustained runs require that
 smoke's original evidence to pass the row guard and event reviewers first.
 This models actual blocked I/O, not per-request `dm-delay`, server process
 pause, power-loss durability, or all in-flight operation combinations. The
@@ -33,7 +33,7 @@ pause, power-loss durability, or all in-flight operation combinations. The
 ## Hosted smoke verified
 
 [Run36944821596](https://github.com/AntPAllen/js-wf/actions/runs/36944821596)
-passes at1828d930243961232d0c2bdaa479fc2efee7eb3b. The actual private-device
+passes75.33s test /76.349s package at1828d930243961232d0c2bdaa479fc2efee7eb3b. The actual private-device
 capability test passes before the R5 row. The row completes nine batches,
 252invocations and2774journal entries with one admitted node-four stall.
 Mapping suspension lasts5.024863770s; the actual dirty sync returns5.028883410s
@@ -49,3 +49,9 @@ terminal run API record and independent reviews, compressed losslessly with
 original SHA256/byte manifests. It cannot independently re-audit deleted server
 stores or certify underlying hardware durability. This is one35s smoke; a
 sustained ten-minute row and the full matrices remain required.
+
+The [ten-minute sustained row](https://github.com/AntPAllen/js-wf/actions/runs/36946199913)
+was dispatched after verification at31619b5430a5a44cc5978947d1c739b9dc0065a1.
+`ten-minute-launch.json` retains the queued API response. That run needs19
+admitted stalls and all unchanged workload/audit/history/latency/drain gates;
+there is no sustained verdict yet.
