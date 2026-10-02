@@ -46,3 +46,5 @@ Focused Go race checks (selection,refresh,existing election waits) pass1.386s.
 All32 Tier3 Python guard tests pass,including20 two-direction admission
 subcases with missing/corrupt proof,origin,deadline and overlap controls.
 The native opt-in path has not yet been executed and is not accepted evidence.
+
+At clean source7101d48, ahead smoke [36943700912](https://github.com/AntPAllen/js-wf/actions/runs/36943700912) and behind smoke [36943703099](https://github.com/AntPAllen/js-wf/actions/runs/36943703099) launch with clock_timer_cut=true and35s inputs. Both are queued; exact launch source/inputs are retained. No admitted native timer cut is claimed before terminal artifacts are verified.
