@@ -610,6 +610,16 @@ separate clock sources; six durable native cases calibrate the contract, not the
 whole combination matrix. See [native contract and replay evidence](scale/consumer-clock-native-contract-2026-10-02/).
 Neither characterization clears the historical ahead physical-drain failure.
 
+Fallback scan capacity is part of the fault-latency configuration. The retained
+clock-row failure showed that eight invocation sequences per second did not
+visit three newly suspended waits before admission canceled. Clock rows now use
+256 sequences per100ms, with the actual policy retained in artifacts. Seeded
+production scan/cursor cases reproduce the slow page and configured repair for
+populations up to3000; see [scan capacity evidence](scale/suspended-clock-scan-capacity-2026-10-02/).
+Keep the original admission and latency gates. Ten-minute capacity does not
+prove24-hour capacity: measure sweep time and RPC pressure at that population,
+including completed retained invocations, before claiming the full matrix.
+
 1. Tier 1: 100 000 seeds clean.
 2. Tier 2: 200 consecutive seeds clean across the whole matrix.
 3. Tier 3: 24 h soak with the full matrix, zero invariant violations, zero stalls, and a written explanation for every fencing event and every reconciler re-enqueue (they are expected; unexplained ones mean a bug the checkers missed).
