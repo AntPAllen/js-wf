@@ -23,9 +23,10 @@ import (
 // of that boundary is safe because the wakeup has a stable message ID and the
 // worker treats duplicate wakeups as no-ops.
 type FallbackTimerScan struct {
-	port    FallbackTimerScanPort
-	Now     func(context.Context) (time.Time, error)
-	Observe func(RepairEvent)
+	port      FallbackTimerScanPort
+	Now       func(context.Context) (time.Time, error)
+	DomainNow TimerDomainClock
+	Observe   func(RepairEvent)
 }
 
 // FallbackTimerScanPort is the retained timer, state, and run-publish boundary
@@ -152,9 +153,18 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 	if err != nil {
 		return ScanResult{}, err
 	}
-	now, err := s.Now(ctx)
-	if err != nil {
-		return ScanResult{}, err
+	var now time.Time
+	var legacyRead bool
+	legacyNow := func() (time.Time, error) {
+		if !legacyRead {
+			var err error
+			now, err = s.Now(ctx)
+			if err != nil {
+				return time.Time{}, err
+			}
+			legacyRead = true
+		}
+		return now, nil
 	}
 	result := ScanResult{NextSequence: next}
 	for scanned := 0; scanned < budget; scanned++ {
@@ -184,7 +194,8 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 			return result, fmt.Errorf("invalid fallback timer sequence in %q", message.Subject)
 		}
 		var timer struct {
-			FireAt time.Time `json:"fire_at"`
+			FireAt      time.Time `json:"fire_at"`
+			ClockDomain string    `json:"clock_domain"`
 		}
 		if json.Unmarshal(message.Data, &timer) != nil || timer.FireAt.IsZero() {
 			return result, fmt.Errorf("invalid fallback timer payload at %d", message.Sequence)
@@ -202,11 +213,15 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 			}
 			continue
 		}
-		if now.Before(timer.FireAt) {
+		due, err := timerDeadlineDue(ctx, s.DomainNow, legacyNow, timer.ClockDomain, timer.FireAt, 0)
+		if err != nil {
+			return result, err
+		}
+		if !due {
 			continue
 		}
 		result.Reenqueued++
-		event := RepairEvent{Kind: "fallback-timer", Type: parts[2], ID: parts[3], Reason: "due_fallback_timer", SourceSequence: message.Sequence, InvocationSequence: generation, FireAt: &timer.FireAt, TimerStep: &step}
+		event := RepairEvent{Kind: "fallback-timer", Type: parts[2], ID: parts[3], Reason: "due_fallback_timer", SourceSequence: message.Sequence, InvocationSequence: generation, FireAt: &timer.FireAt, ClockDomain: timer.ClockDomain, TimerStep: &step}
 		if dryRun {
 			reportRepair(s.Observe, event, true, nil)
 			continue

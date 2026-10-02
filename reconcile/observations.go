@@ -22,6 +22,7 @@ type RepairEvent struct {
 	InvocationSequence uint64     `json:"invocation_sequence,omitempty"`
 	JournalSequence    uint64     `json:"journal_sequence,omitempty"`
 	FireAt             *time.Time `json:"fire_at,omitempty"`
+	ClockDomain        string     `json:"clock_domain,omitempty"`
 	TimerStep          *uint64    `json:"timer_step,omitempty"`
 	RetryWindow        int64      `json:"retry_window,omitempty"`
 	Outcome            string     `json:"outcome"`

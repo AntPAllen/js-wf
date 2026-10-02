@@ -5657,3 +5657,21 @@ acceptance nor a final latency verdict. The timing is consistent with the known
 absolute-deadline clock-domain problem; exact broker behavior is not proven.
 No longer admission timeout or repeat campaign is planned before runtime clock
 and repair wiring. Both directions' sustained clock gates remain open.
+
+## Clock-domain-aware timer repair paths (2026-10-02)
+
+Timer, suspended-wait and retained fallback scans now use optional DomainNow
+lower bounds for tagged deadlines; they never substitute worker or legacy stream
+clock time. Missing/failed/empty/canceled domain clocks fail closed before timer
+enqueue. Three-second contexts bound clock attempts; suspended grace remains.
+Fallback scans lazily read legacy time and retain future records until an
+acknowledged wakeup; retired-generation cleanup remains independent. Timer and
+fallback repair events retain clock domains. Untagged records preserve legacy
+semantics. Full repair race passes12.964s; final domain/cancellation controls
+pass1.018s. Six seeded production-repair/fallback workloads pass1000seeds each
+plus cooperative/partial-read controls in50.791s.
+[Commands, complete logs and source hashes](scale/timer-clock-domain-repair-2026-10-02/README.md)
+are retained. Production adapters/writers remain unconfigured: provisioning,
+worker/CLI wiring, schedule translation/domain retention, migration and end-to-end
+seeded/native recovery evidence remain necessary. Neither the60.27s ahead-clock
+failure nor the incomplete behind-clock sustained run is cleared by this work.

@@ -20,10 +20,11 @@ import (
 // SuspendedScan inspects retained invocations whose latest journal entry is
 // Suspended. It repairs an overdue timer or an available awaited signal.
 type SuspendedScan struct {
-	Observe func(RepairEvent)
-	port    SuspendedScanPort
-	Now     func() time.Time
-	Grace   time.Duration
+	Observe   func(RepairEvent)
+	port      SuspendedScanPort
+	Now       func() time.Time
+	DomainNow TimerDomainClock
+	Grace     time.Duration
 }
 
 const suspendedRetryWindow = 10 * time.Second
@@ -274,7 +275,7 @@ func (s *SuspendedScan) inspect(ctx context.Context, input *jetstream.RawStreamM
 		if identity.ValidateToken(name) != nil {
 			return Candidate{}, false, fmt.Errorf("invalid timer wait %q", suspended.WaitingOn)
 		}
-		ready, err = s.timerDue(records, name)
+		ready, err = s.timerDue(ctx, records, name)
 		reason = "timer"
 	case strings.HasPrefix(suspended.WaitingOn, "signal:"):
 		name := strings.TrimPrefix(suspended.WaitingOn, "signal:")
@@ -293,7 +294,7 @@ func (s *SuspendedScan) inspect(ctx context.Context, input *jetstream.RawStreamM
 		}
 		ready, err = signalAvailable(ctx, s.port, typ, id, parts[2], input.Sequence, records)
 		if err == nil && !ready {
-			ready, err = s.timerDue(records, parts[1])
+			ready, err = s.timerDue(ctx, records, parts[1])
 		}
 		reason = "select"
 	default:
@@ -324,9 +325,10 @@ func (s *SuspendedScan) selectReady(ctx context.Context, typ, id string, invSeq 
 	var request struct {
 		Kind  string `json:"kind"`
 		Cases []struct {
-			Kind   string    `json:"kind"`
-			Name   string    `json:"name"`
-			FireAt time.Time `json:"fire_at"`
+			Kind        string    `json:"kind"`
+			Name        string    `json:"name"`
+			FireAt      time.Time `json:"fire_at"`
+			ClockDomain string    `json:"clock_domain"`
 		} `json:"cases"`
 	}
 	if err := json.Unmarshal(pending.Payload, &request); err != nil {
@@ -343,7 +345,14 @@ func (s *SuspendedScan) selectReady(ctx context.Context, typ, id string, invSeq 
 	var readErr error
 	for _, c := range request.Cases {
 		if c.Kind == "timer" {
-			if c.FireAt.IsZero() || !s.Now().Before(c.FireAt.Add(s.Grace)) {
+			due, err := timerDeadlineDue(ctx, s.DomainNow, func() (time.Time, error) { return s.Now(), nil }, c.ClockDomain, c.FireAt, s.Grace)
+			if err != nil {
+				if readErr == nil {
+					readErr = err
+				}
+				continue
+			}
+			if due {
 				return true, nil
 			}
 			continue
@@ -362,7 +371,7 @@ func (s *SuspendedScan) selectReady(ctx context.Context, typ, id string, invSeq 
 	return false, readErr
 }
 
-func (s *SuspendedScan) timerDue(records []journal.Record, name string) (bool, error) {
+func (s *SuspendedScan) timerDue(ctx context.Context, records []journal.Record, name string) (bool, error) {
 	var pending *journal.Record
 	for i := range records {
 		switch records[i].Kind {
@@ -376,21 +385,25 @@ func (s *SuspendedScan) timerDue(records []journal.Record, name string) (bool, e
 		return false, nil
 	}
 	var req struct {
-		Kind      string    `json:"kind"`
-		Name      string    `json:"name"`
-		TimerName string    `json:"timer_name"`
-		FireAt    time.Time `json:"fire_at"`
+		Kind        string    `json:"kind"`
+		Name        string    `json:"name"`
+		TimerName   string    `json:"timer_name"`
+		FireAt      time.Time `json:"fire_at"`
+		ClockDomain string    `json:"clock_domain"`
 	}
 	if err := json.Unmarshal(pending.Payload, &req); err != nil {
 		return false, err
 	}
 	if req.Kind == "timer_signal_select" {
-		return req.TimerName == name && !req.FireAt.IsZero() && !s.Now().Before(req.FireAt.Add(s.Grace)), nil
+		if req.TimerName != name || req.FireAt.IsZero() {
+			return false, nil
+		}
+		return timerDeadlineDue(ctx, s.DomainNow, func() (time.Time, error) { return s.Now(), nil }, req.ClockDomain, req.FireAt, s.Grace)
 	}
 	if (req.Kind != "timer" && req.Kind != "timer_await") || req.Name != name || req.FireAt.IsZero() {
 		return false, nil
 	}
-	return !s.Now().Before(req.FireAt.Add(s.Grace)), nil
+	return timerDeadlineDue(ctx, s.DomainNow, func() (time.Time, error) { return s.Now(), nil }, req.ClockDomain, req.FireAt, s.Grace)
 }
 
 func signalAvailable(ctx context.Context, port SuspendedScanPort, typ, id, name string, invSeq uint64, records []journal.Record) (bool, error) {

@@ -16,9 +16,10 @@ import (
 )
 
 type TimerScan struct {
-	port    TimerScanPort
-	Now     func() time.Time
-	Observe func(RepairEvent)
+	port      TimerScanPort
+	Now       func() time.Time
+	DomainNow TimerDomainClock
+	Observe   func(RepairEvent)
 }
 
 func NewTimerScan(js jetstream.JetStream) *TimerScan {
@@ -150,13 +151,21 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			continue
 		}
 		var req struct {
-			Kind   string    `json:"kind"`
-			FireAt time.Time `json:"fire_at"`
+			Kind        string    `json:"kind"`
+			FireAt      time.Time `json:"fire_at"`
+			ClockDomain string    `json:"clock_domain"`
 		}
 		if err := json.Unmarshal(pending.Payload, &req); err != nil {
 			return result, err
 		}
-		if req.Kind != "timer" && req.Kind != "timer_start" && req.Kind != "timer_await" || req.FireAt.IsZero() || s.Now().Before(req.FireAt) {
+		if req.Kind != "timer" && req.Kind != "timer_start" && req.Kind != "timer_await" || req.FireAt.IsZero() {
+			continue
+		}
+		due, err := timerDeadlineDue(ctx, s.DomainNow, func() (time.Time, error) { return s.Now(), nil }, req.ClockDomain, req.FireAt, 0)
+		if err != nil {
+			return result, err
+		}
+		if !due {
 			continue
 		}
 		result.Reenqueued++
@@ -164,7 +173,7 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 		if !dryRun {
 			enqueueErr = s.port.EnqueueTimer(ctx, typ, id, pending.Sequence)
 		}
-		reportRepair(s.Observe, RepairEvent{Kind: "timer", Type: typ, ID: id, Reason: req.Kind, SourceSequence: m.Sequence, InvocationSequence: m.Sequence, JournalSequence: pending.Sequence, FireAt: &req.FireAt}, dryRun, enqueueErr)
+		reportRepair(s.Observe, RepairEvent{Kind: "timer", Type: typ, ID: id, Reason: req.Kind, SourceSequence: m.Sequence, InvocationSequence: m.Sequence, JournalSequence: pending.Sequence, FireAt: &req.FireAt, ClockDomain: req.ClockDomain}, dryRun, enqueueErr)
 		if enqueueErr != nil {
 			return result, enqueueErr
 		}
