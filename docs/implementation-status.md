@@ -6366,3 +6366,10 @@ recorded source. It rejects missing, duplicate, extra, failed or live jobs,
 wrong seeds/durations/scope and missing admitted clock/checkpoint proof.
 All48 Tier3 controls pass. Its artifact path also rechecked the real accepted
 700-invocation ahead download byte-identically. Full-matrix/24h scope stays open.
+
+Current-source full-100k [run36979997529](https://github.com/AntPAllen/js-wf/actions/runs/36979997529)
+is queued at `2b8a216bc10456ead9f7bdc9e1e9844c7e092552` (115 seeded workloads,
+260 pins). Its original launch metadata is retained. Older113-workload run
+36972092297 remains in progress on its original source; it was not restarted.
+Million-timer user service remains active at PID18146 with626,514 receipts
+observed; final million receipts, second restart and terminal audit/drain are open.
