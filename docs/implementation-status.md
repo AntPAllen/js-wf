@@ -1,5 +1,33 @@
 # Implementation status against the supplied plan
 
+## Latest accepted evidence — 2026-10-02
+
+- Terminal native-hint retirement at `3184b65` passes the complete116-workload
+  per-commit simulation gate: exact1..1000 seeds each,261 pins and160 top-level
+  passes. The admitted seed5 ahead race smoke passes with56 invocations,617
+  entries, one confirmed pending-duration cut and unchanged30s physical drain.
+  The suspended scanner records three retired hints. See
+  [final-source evidence](scale/native-timer-retirement-2026-10-02/full1000-pass/)
+  and [admitted native smoke](scale/native-timer-retirement-2026-10-02/admitted-ahead-smoke-pass/).
+- [100k run36979997529](https://github.com/AntPAllen/js-wf/actions/runs/36979997529)
+  is independently accepted for the earlier115-workload/260-pin graph at
+  `2b8a216`: every workload completes1..100000,159 top-level tests pass, and the
+  regenerated report is byte-identical. Source inventories independently match.
+  It covers persisted protobuf and confirmed ACKs, predating native retirement.
+- [Mutation run37000773351](https://github.com/AntPAllen/js-wf/actions/runs/37000773351)
+  passes all six focused pairs plus both live mixed I4 and lease pairs at
+  `7902935`. Actual semantic execution and negative controls are independently
+  checked. Four mixed categories remain open.
+- Current-source [100k run37002783868](https://github.com/AntPAllen/js-wf/actions/runs/37002783868)
+  and [ten-minute ahead run37002781141](https://github.com/AntPAllen/js-wf/actions/runs/37002781141)
+  are live at `3184b65`. The million-timer user service is live; final ledger,
+  audit/drain and verdict remain required.
+
+The current100k gate, sustained ahead acceptance, full200-seed Tier2 matrix,
+full Tier3 matrix/24h soak, remaining mixed mutations and combined timer-cut/
+continuation cases remain open. Running campaigns and component proofs do not
+clear these gates. The sections below retain chronological evidence and failures.
+
 This records what the current repository proves. The [implementation plan](implementation-plan.md) remains the release target. Its Tier 1 section specifies a seeded, replayable in-memory transport model, differential contract checks against real NATS, and incremental proof gates. The seeded and differential results below cover several transport slices, including short worker execution, signal resume, native timer wakeup, and fallback timer scan-to-worker wakeup; other integrated paths remain unfinished.
 
 One [clean-runner integration job](https://github.com/AntPAllen/js-wf/actions/runs/36660121227) found a blob-sweep differential mismatch after purging retained references: the real Object Store pass listed and deleted one object while the model listed and deleted five. The first retained-reference pass had matched, and 35 focused local repeats of the contract passed; the cause is unconfirmed. On the next mismatch the contract now records a second Object Store listing, individual `GetInfo` results for all seven fixture names, and the raw object-stream state so a partial listing can be distinguished from missing or deleted metadata. This does not count as a clean differential gate.
@@ -6594,3 +6622,40 @@ scan race contract. Focused sequence-race/malformed-hint controls pass. Evidence
 is under `scale/native-timer-retirement-2026-10-02/`. Final-source whole-suite and
 admitted R5 smoke acceptance remain required. The ongoing older115-workload100k
 campaign does not cover this new retirement path; its original handle is retained.
+
+## Final native-retirement graph acceptance and next campaigns
+
+The final116-workload graph at3184b6596e026c7bdf6f669f53d3329f8e64f406 passes
+whole-suite verification in157.90s: all116 workloads actually complete1..1000,
+261 pins replay and160 top-level tests pass, with only the two explicit trace
+commands skipped. Aggregate118,033 schedules,1,787,011 choices and26,835,629
+transport events. The admitted seed5 ahead race smoke passes in86.29s with56
+invocations,617 entries,48 timer waits and one admitted shifted-owner kill.
+Independent original-artifact checks pass clock roles, confirmed source exit
+before duration, retained prefixes, histories, audit, latency and physical drain.
+The suspended scanner records three retired hints. Worst terminal/progress p99
+is1.172907114s/14.522306877s. Source-matched original evidence is byte-verified
+under `scale/native-timer-retirement-2026-10-02/full1000-pass/` and
+`admitted-ahead-smoke-pass/`. This35s smoke cannot replace sustained evidence.
+
+Run36979997529 is independently accepted at2b8a216 in13,949.38s. Its original
+report regenerates byte-for-byte; source-extracted test declarations, source AST
+seed inventory and pin paths independently match. All115 workloads execute exact
+seeds1..100000,159 top-level tests pass and260 pins replay. Aggregate11,700,032
+schedules,178,446,685 choices and2,659,376,866 events. Original artifacts, full job
+log, terminal metadata and independent checks are retained under
+`scale/confirmed-dispatch-ack-2026-10-02/confirmed-115-workload-100k/`.
+This graph predates native retirement and cannot clear the current116-workload gate.
+
+Hosted run37000773351 at7902935 passes all three mutation jobs. Actual JSON
+execution independently verifies eight baseline/detection pairs: six focused
+categories and mixed I4 plus leases, with required semantic markers and actual
+admission/SIGKILL/full28-terminal cohorts. Build and unrelated-test controls are
+verified and rejected as detections. Original artifacts/logs/terminal metadata and
+checks are retained under `scale/mixed-lease-mutation-2026-10-02/ci-pass/`.
+
+New current-source100k run37002783868 and ten-minute admitted ahead run37002781141
+are confirmed live at3184b65. No older live campaign was replaced or restarted.
+Current100k, sustained ahead acceptance, larger seed counts and all full-release
+matrix/soak gates remain open. The million-timer user service remains active at
+PID18146 with a796,743-receipt running observation; its final verdict remains open.

@@ -28,3 +28,10 @@ Started tail before the final eight-mode checks. An earlier full simulator suite
 passed in167.58s before suspended-scanner wiring, without coverage summary enabled;
 it does not establish the final graph's per-workload gate. Final-source full
 coverage and admitted native smoke evidence remain required.
+
+Final-source acceptance is now retained under `full1000-pass/` and
+`admitted-ahead-smoke-pass/`: the complete116-workload/261-pin per-commit gate
+and the admitted seed5 race smoke pass. The suspended scanner records three
+retired hints and the unchanged physical-drain gate passes. The new100k and
+ten-minute native campaigns remain separate live handles; no full-release claim
+is inferred from the smoke.
