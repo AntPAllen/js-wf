@@ -263,12 +263,26 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	var fleet sync.WaitGroup
 	workCtx, stopWork := context.WithCancel(ctx)
 	fleetErrors := make(chan error, provision.Partitions+3)
-	launch := func(run func() error) {
+	var fleetFailures []struct {
+		At    time.Time `json:"at"`
+		Loop  string    `json:"loop"`
+		Error string    `json:"error"`
+	}
+	launch := func(name string, run func() error) {
 		fleet.Add(1)
 		go func() {
 			defer fleet.Done()
 			if err := run(); err != nil && workCtx.Err() == nil {
-				fleetErrors <- err
+				failure := fmt.Errorf("%s: %w", name, err)
+				evidenceMu.Lock()
+				fleetFailures = append(fleetFailures, struct {
+					At    time.Time `json:"at"`
+					Loop  string    `json:"loop"`
+					Error string    `json:"error"`
+				}{time.Now().UTC(), name, err.Error()})
+				evidenceMu.Unlock()
+				t.Logf("tier3 fleet loop failed: %v", failure)
+				fleetErrors <- failure
 				cancel()
 			}
 		}()
@@ -392,8 +406,8 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			}
 			for node, w := range workers {
 				controller := controllers[node]
-				launch(func() error { return controller.Run(workCtx) })
-				launch(func() error { return w.RunKVAssignments(workCtx) })
+				launch(fmt.Sprintf("membership/tier3-mixed-%d", node), func() error { return controller.Run(workCtx) })
+				launch(fmt.Sprintf("assignments/tier3-mixed-%d", node), func() error { return w.RunKVAssignments(workCtx) })
 			}
 			if err := saveMatrixAutomaticSnapshot(ctx, js, automaticMembers, automaticOwners, filepath.Join(root, "automatic-initial.json")); err != nil {
 				t.Fatal(err)
@@ -401,7 +415,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		} else {
 			for part := uint32(0); part < provision.Partitions; part++ {
 				w := workers[part%5]
-				launch(func() error { return w.RunPartition(workCtx, part) })
+				launch(fmt.Sprintf("partition/%d", part), func() error { return w.RunPartition(workCtx, part) })
 			}
 		}
 	} else {
@@ -429,13 +443,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			}
 		}
 	}
-	launch(func() error {
+	launch("repair/start", func() error {
 		return reconcile.RunRepairLoopObserved(workCtx, js, "tier3-mixed-start", "start", time.Second, 32, repairObserver)
 	})
-	launch(func() error {
+	launch("repair/signal", func() error {
 		return reconcile.RunRepairLoopObserved(workCtx, js, "tier3-mixed-signal", "signal", time.Second, 32, repairObserver)
 	})
-	launch(func() error {
+	launch("repair/suspended", func() error {
 		return reconcile.RunSuspendedLoopWithObservers(workCtx, js, "tier3-mixed-suspended", time.Second, 8, func(cursor uint64, result reconcile.ScanResult, err error) {
 			evidenceMu.Lock()
 			defer evidenceMu.Unlock()
@@ -490,6 +504,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		if row == "auto_journal" {
 			write("automatic-writes.json", automaticWrites)
 		}
+		write("fleet-failures.json", fleetFailures)
 		write("dispatch.json", dispatch)
 		write("fencing.json", fencing)
 		write("repairs.json", repairs)

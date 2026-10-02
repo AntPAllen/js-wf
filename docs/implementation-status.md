@@ -5717,3 +5717,24 @@ remain required; ahead 60.27s and incomplete behind sustained gates remain open.
 The historical worker-kill 31.1s miss used a 30s TTL and remains a configuration
 mismatch excluded from further runs. Current production TTL 12s, heartbeat 3s
 and AckWait 13s retain the strict under-30s recovery target.
+
+## Independently reviewed sustained I/O rows and membership cancellation (2026-10-02)
+
+The corrected [dm-suspend ten-minute run36949600724](scale/tier3-mixed-block-disk-2026-10-02/hosted-ten-minute/README.md)
+passes current independent reviewers: 2,800 invocations, 30,867 entries and 19
+confirmed five-second stalls; worst per-type terminal/progress p99
+5.570849744s / 0.299056206s. All 88 repairs are acknowledged, no fences.
+The [dm-delay ten-minute run36950054475](scale/tier3-mixed-block-delay-2026-10-02/hosted-ten-minute/README.md)
+also passes: 2,828 invocations, 31,139 entries, 19 confirmed intervals; worst
+terminal/progress p99 5.069812378s / 0.346970594s; all 69 repairs acknowledged,
+no fences. History, invariant, immutable-result and physical-drain gates pass.
+All 94 original files per row are compressed, hashed and verified. Each clears
+one individual sustained seed only; combined/200-seed/24-hour scope remains open.
+
+[Automatic membership run36951027143](scale/tier3-automatic-membership-2026-10-02/hosted-ten-minute-failure/README.md)
+fails after three healed cuts: batch-10 retained checkpoint passes, then a timer
+result read sees parent cancellation at about99s. Existing artifacts do not expose
+the triggering fleet-loop error. The launcher now logs named loop failures before
+cancellation and retains timestamped fleet-failure evidence; runtime fail-closed
+behavior and targets are unchanged. All 30 original failure files are verified
+and retained. Sustained membership acceptance and full release remain open.
