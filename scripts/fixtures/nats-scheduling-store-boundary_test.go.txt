@@ -2,9 +2,11 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"testing"
 	"time"
 )
@@ -16,7 +18,7 @@ func TestWorkflowCopiedSchedulingIndexBoundary(t *testing.T) {
 	if root == "" {
 		t.Fatal("copied-store root required")
 	}
-	for _, mode := range []string{"intact", "removed"} {
+	for _, mode := range []string{"removed", "intact"} {
 		for node, expected := range []uint64{768, 141, 0} {
 			t.Run(fmt.Sprintf("%s/node-%d", mode, node), func(t *testing.T) {
 				dir := filepath.Join(root, "copies", mode, fmt.Sprintf("node-%d", node))
@@ -79,6 +81,81 @@ func TestWorkflowCopiedSchedulingIndexBoundary(t *testing.T) {
 					msg, err := fs.LoadMsg(seq, nil)
 					if err != nil || msg.subj != subject || string(getHeader(JSScheduleTarget, msg.hdr)) == "" {
 						t.Fatalf("recovered source %s/%d invalid: %v", subject, seq, err)
+					}
+				}
+				if os.Getenv("WF_COPIED_STORE_SUBJECT_PURGE") == "1" {
+					// The removed-index case discovers all physical source names.
+					// Reuse that read-only report to probe the intact-index copy.
+					known := schedules
+					if mode == "intact" {
+						raw, err := os.ReadFile(filepath.Join(root, fmt.Sprintf("removed-node-%d.json", node)))
+						if err != nil {
+							t.Fatal(err)
+						}
+						var found struct {
+							Schedules map[string]uint64 `json:"schedules"`
+						}
+						if err := json.Unmarshal(raw, &found); err != nil {
+							t.Fatal(err)
+						}
+						known = found.Schedules
+					}
+					subjects := make([]string, 0, len(known))
+					for subject := range known {
+						subjects = append(subjects, subject)
+					}
+					sort.Strings(subjects)
+					type probe struct {
+						Subject        string `json:"subject"`
+						Sequence       uint64 `json:"sequence"`
+						LookupSequence uint64 `json:"lookup_sequence"`
+						Purged         uint64 `json:"purged"`
+						AbsentAfter    bool   `json:"absent_after"`
+						DirectError    string `json:"direct_error"`
+						SubjectError   string `json:"subject_error"`
+					}
+					probes := make([]probe, 0, len(subjects))
+					// Save every completed probe even if a later assertion fails.
+					defer func() {
+						data, err := json.MarshalIndent(struct {
+							Mode   string      `json:"mode"`
+							Node   int         `json:"node"`
+							Before StreamState `json:"before"`
+							After  StreamState `json:"after"`
+							Probes []probe     `json:"probes"`
+						}{mode, node, state, fs.State(), probes}, "", "  ")
+						if err != nil {
+							t.Error(err)
+							return
+						}
+						if err := os.WriteFile(filepath.Join(root, fmt.Sprintf("subject-purge-%s-node-%d.json", mode, node)), data, 0644); err != nil {
+							t.Error(err)
+						}
+					}()
+					if uint64(len(subjects)) != expected {
+						t.Fatalf("source inventory=%d want=%d", len(subjects), expected)
+					}
+					for _, subject := range subjects {
+						seq := known[subject]
+						msg, err := fs.LoadLastMsg(subject, nil)
+						if err != nil || msg.seq != seq || msg.subj != subject {
+							t.Fatalf("subject lookup %s/%d: msg=%v err=%v", subject, seq, msg, err)
+						}
+						removed, err := fs.PurgeEx(subject, 0, 0)
+						if err != nil || removed != 1 {
+							t.Fatalf("subject purge %s/%d: removed=%d err=%v", subject, seq, removed, err)
+						}
+						_, directErr := fs.LoadMsg(seq, nil)
+						_, subjectErr := fs.LoadLastMsg(subject, nil)
+						absent := (errors.Is(directErr, ErrStoreMsgNotFound) || errors.Is(directErr, errDeletedMsg) || errors.Is(directErr, ErrStoreEOF)) && errors.Is(subjectErr, ErrStoreMsgNotFound)
+						probes = append(probes, probe{subject, seq, msg.seq, removed, absent, fmt.Sprint(directErr), fmt.Sprint(subjectErr)})
+						if !absent {
+							t.Fatalf("source remains after purge %s/%d: direct=%v subject=%v", subject, seq, directErr, subjectErr)
+						}
+					}
+					after := fs.State()
+					if after.Msgs != 0 || after.LastSeq != state.LastSeq {
+						t.Fatalf("purged store messages=%d last=%d", after.Msgs, after.LastSeq)
 					}
 				}
 			})

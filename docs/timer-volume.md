@@ -129,3 +129,14 @@ inconsistent state arose or authorize changing original indexes. In the earlier
 full-server copied-store experiment, removing indexes emitted duplicate targets.
 The failed million-message verdict remains failed until a full release campaign
 also meets delivery, latency and all-replica drain gates.
+
+Add `--probe-subject-purge` to that diagnostic to check exact subject lookup
+and purge on fresh copies with scheduling paused. Rebuilt-index reports supply
+physical source identities for probing the intact-index case. Every source must
+be found at its expected sequence, purged exactly once and absent afterward;
+all copied stores must finish physically empty with their last sequence intact.
+Direct missing-record, deleted-record and EOF responses are accepted only with
+subject absence and zero final messages. The [actual six-case result](scale/million-timer-terminal-2026-10-02/subject-purge-boundary/)
+finds and purges all 1,818 copied sources. Original stores remain untouched.
+This establishes post-recovery addressability and purge behavior; the original
+missed-retirement cause remains unconfirmed.

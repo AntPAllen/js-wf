@@ -7334,3 +7334,24 @@ Fresh all-thirteen Tier2 seed1 run37050644803 remains queued at3f483bd; one seed
 cannot clear200 seeds. No running trial was restarted or canceled. Full fault
 matrices, original million-timer persistence/drain and full-runtime24h soak
 remain open.
+
+## Retained native sources are addressable and purgeable after direct recovery
+
+[Six-case subject probe evidence](scale/million-timer-terminal-2026-10-02/subject-purge-boundary/)
+passes actual pinned NATS2.15.0 file-store tests in0.902s. Both intact-index and
+rebuilt-index copies expose exactly768/141/0 source subjects. All1,818 probes
+find their expected sequence through LoadLastMsg, purge exactly one source and
+verify direct/subject absence. All six copies finish with zero physical messages
+and last sequence2,000,000; scheduling stays paused and publishes zero targets.
+All4,998 original file hashes match before/after. This excludes a persistent
+post-recovery inability to locate/purge these records, while transient original
+failures and the initial missed-retirement cause remain unconfirmed.
+
+The reusable runner exposes --probe-subject-purge. Its first absence assertion
+wrongly rejected a successful purge's deleted-message response; the correction's
+first build used a nonexistent exported error. Both are rejected and preserved.
+The qualified fixture recognizes the pinned private error and verifies actual
+zero physical messages. All65 original qualified/rejected evidence files are
+archived losslessly with SHA256 readback, using XZ to preserve large repeated
+raw stream-state lists compactly. Physical copies/builds remain local. No original
+repair or new million/24h release claim is made.
