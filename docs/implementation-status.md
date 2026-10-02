@@ -6297,3 +6297,8 @@ required. Logs and hashes are retained in the model-boundary directory.
 The worker-kill smoke uses production LeaseTTL 12s with heartbeat 3s and AckWait
 13s, retaining its strict recovery-under-30s assertion. The historical 31.1s
 result with TTL30s is a configuration mismatch and is excluded from further runs.
+
+Changed-source full-1,000 validation is confirmed active at `1d135a1` in user
+unit `js-wf-confirmed-ack-boundary-full1000-20261002.service`, with originals
+under `/tmp/js-wf-confirmed-ack-boundary-full1000-20261002`. This is a launch,
+not a passed gate. Existing ahead, 100k and million-timer handles remain unchanged.
