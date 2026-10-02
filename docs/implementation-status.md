@@ -5542,3 +5542,18 @@ under race in 1.056s; unit CI includes the package. It is not wired into timers.
 Authenticated independent sampling, durable clock provenance, scheduling/repair
 translation, legacy compatibility and end-to-end evidence remain required; the
 native ahead-clock progress failure remains open.
+
+## R5 stall resume boundary corrected (2026-10-02)
+
+Sustained 36946199913 stops at its first cut: its sync returns 5.024s after
+suspension but 2.575ms before the controller observes `dmsetup resume` exit.
+Requiring sync after CLI exit mistakes a userspace observation for the kernel
+resume boundary. The fixture now records resume-command start; start and sync
+must both follow the full five-second hold, with sync after command start and
+both successful command completion/sync before heal. Native capability tests
+and independent guards enforce these boundaries. Three additional controls
+accept sync during resume and reject early resume/escaped sync; all 37 Tier3
+tests pass. Original failed evidence is retained
+[here](scale/tier3-mixed-block-disk-2026-10-02/resume-command-observation-failure/README.md).
+That incomplete run does not count as sustained acceptance; a corrected run is
+required. Physical hold and raw30s recovery targets remain unchanged.

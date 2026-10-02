@@ -29,7 +29,7 @@ func TestBlockDiskStallBlocksSyncAndCleansUp(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("block stall proof=%+v", proof)
-	if proof.Resumed.Sub(proof.Suspended) < 5*time.Second || proof.SyncReturned.Sub(proof.Suspended) < 5*time.Second {
+	if proof.ResumeStarted.Sub(proof.Suspended) < 5*time.Second || proof.Resumed.Before(proof.ResumeStarted) || proof.SyncReturned.Before(proof.ResumeStarted) {
 		t.Fatalf("invalid I/O stall proof: %+v", proof)
 	}
 	// Cancel while the block fault is active: cleanup must restore the device,

@@ -11,7 +11,7 @@ import (
 func TestEstimateBoundsAnchorUnderSkewLossAndReordering(t *testing.T) {
 	anchor := time.Unix(1_700_000_000, 0).UTC()
 	// Every subset of five servers with one skewed clock and two unavailable
-	// sources; every healthy error edge and observation order is checked.
+	// sources. Healthy error endpoints and all observation orders are checked.
 	for bad := 0; bad < 5; bad++ {
 		for _, skew := range []time.Duration{-time.Minute, time.Minute} {
 			for missing := 0; missing < 32; missing++ {

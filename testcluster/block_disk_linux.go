@@ -92,10 +92,11 @@ func blockDiskCommand(ctx context.Context, command string, args ...string) (stri
 }
 
 type BlockStallProof struct {
-	Suspended    time.Time `json:"suspended"`
-	Resumed      time.Time `json:"resumed"`
-	SyncReturned time.Time `json:"sync_returned"`
-	DeviceState  string    `json:"device_state"`
+	Suspended     time.Time `json:"suspended"`
+	Resumed       time.Time `json:"resumed"`
+	ResumeStarted time.Time `json:"resume_started"`
+	SyncReturned  time.Time `json:"sync_returned"`
+	DeviceState   string    `json:"device_state"`
 }
 
 // Stall blocks every block request on the mounted device and proves an actual
@@ -128,6 +129,7 @@ func (d *BlockDisk) Stall(ctx context.Context, duration time.Duration) (proof Bl
 		}
 		resumeCtx, done := context.WithTimeout(context.Background(), 15*time.Second)
 		defer done()
+		proof.ResumeStarted = time.Now()
 		_, resumeErr := blockDiskCommand(resumeCtx, "dmsetup", "resume", d.name)
 		if resumeErr == nil {
 			resumed = true

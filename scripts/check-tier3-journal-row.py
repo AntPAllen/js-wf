@@ -165,8 +165,10 @@ def check_block_disk_artifacts(root, report, delay=False):
                 raise ValueError('unverified per-request delay, sync or same-device restoration')
         else:
             suspended, resumed, synced = [timestamp_ns(proof[k]) for k in ('suspended', 'resumed', 'sync_returned')]
-            if (killed != suspended or resumed-suspended < 5_000_000_000 or
-                    not resumed <= synced <= healed or proof['device_state'] != 'Suspended'):
+            resume_started = timestamp_ns(proof['resume_started']) if 'resume_started' in proof else resumed
+            if (killed != suspended or resume_started-suspended < 5_000_000_000 or
+                    not resume_started <= resumed <= healed or not resume_started <= synced <= healed or
+                    proof['device_state'] != 'Suspended'):
                 raise ValueError('missing or reversed actual blocked-sync proof')
         roles = json.loads((root/f'fault-{index}-block-disk-roles.json').read_text())
         if len(roles) != 2 or {r['stream'] for r in roles} != {'WF_RUN', 'WF_JRN'}:

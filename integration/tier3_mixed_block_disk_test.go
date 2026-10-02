@@ -68,7 +68,10 @@ func stallFiveContainerMixedBlockDisk(ctx context.Context, nc *nats.Conn, js jet
 	if err != nil {
 		return event, err
 	}
-	if proof.Resumed.Sub(proof.Suspended) < 5*time.Second || proof.SyncReturned.Before(proof.Resumed) {
+	// The kernel resumes I/O inside dmsetup; the probe may return before the
+	// CLI exits. Use command start as the causal boundary, keeping the full
+	// five-second suspended and blocked-sync intervals required.
+	if proof.ResumeStarted.Sub(proof.Suspended) < 5*time.Second || proof.SyncReturned.Before(proof.ResumeStarted) || proof.Resumed.Before(proof.ResumeStarted) {
 		return event, fmt.Errorf("unverified five-second block stall: %+v", proof)
 	}
 	if err := waitFiveReplicaReadiness(bound, js, 0); err != nil {
