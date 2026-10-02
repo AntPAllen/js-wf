@@ -5445,3 +5445,17 @@ All35 Tier3 Python tests pass, including12 delay-proof controls; both controller
 tests pass. See [fixture scope](scale/tier3-mixed-block-delay-2026-10-02/README.md).
 Native smoke, sustained evidence and combined/200-seed/24h full matrix gates
 remain open; the raw30s recovery and2m file sync gates stay unchanged.
+
+## R5 native filesystem stall smoke verified (2026-10-02)
+
+Hosted36944821596 at1828d93 passes its actual private-device capability test and
+R5 mixed35s smoke: nine batches,252invocations,2774entries, one observed writable
+private store with both R5 leaders,5.025s mapping suspension and5.029s blocked
+sync. Worst raw terminal/progress p99 are4.993929649s/0.653438250s. Histories,
+retained audit, immutable outcomes and physical dispatch drain pass. Current
+row guard, event explainer and fencing reviewer independently pass;35repair
+records are acknowledged and match final counters, with0fences. Original
+compressed evidence and hashes are retained in
+[hosted smoke](scale/tier3-mixed-block-disk-2026-10-02/README.md).
+This is smoke acceptance only; the sustained row, separate dm-delay capability,
+combined fault cuts and full release matrices remain open.

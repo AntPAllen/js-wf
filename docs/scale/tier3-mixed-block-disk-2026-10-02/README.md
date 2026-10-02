@@ -29,3 +29,23 @@ smoke's original evidence to pass the row guard and event reviewers first.
 This models actual blocked I/O, not per-request `dm-delay`, server process
 pause, power-loss durability, or all in-flight operation combinations. The
 200-seed full matrix and 24-hour full matrix remain open.
+
+## Hosted smoke verified
+
+[Run36944821596](https://github.com/AntPAllen/js-wf/actions/runs/36944821596)
+passes at1828d930243961232d0c2bdaa479fc2efee7eb3b. The actual private-device
+capability test passes before the R5 row. The row completes nine batches,
+252invocations and2774journal entries with one admitted node-four stall.
+Mapping suspension lasts5.024863770s; the actual dirty sync returns5.028883410s
+after suspension. Both admitted R5 leaders are on the writable private store.
+Worst raw terminal p99 is4.993929649s and worst progress p99 is0.653438250s.
+All histories, final retained audit, immutable results and physical dispatch
+drain pass. Independently rerunning the current row guard, event explainer and
+fencing reviewer passes. All35repair records are acknowledged (27signal,
+8suspended); the five final worker counters match, and no fencing is observed.
+
+`hosted-smoke/` retains every original downloaded artifact plus full job log,
+terminal run API record and independent reviews, compressed losslessly with
+original SHA256/byte manifests. It cannot independently re-audit deleted server
+stores or certify underlying hardware durability. This is one35s smoke; a
+sustained ten-minute row and the full matrices remain required.
