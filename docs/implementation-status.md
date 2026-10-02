@@ -5896,3 +5896,16 @@ intervals and rejects malformed/unknown/ambiguous origins: actual canonical
 eight-timer artifact plus negative and legacy controls pass three methods;
 all40 Tier3 artifact methods also pass. This fixes runtime budget and reviewer
 gaps but does not clear either native failure or the full release gates.
+
+## Current simulator corpus: partial race evidence and100k launch (2026-10-02)
+
+[Local race evidence](scale/tier1-current-race-2026-10-02/README.md)
+at2617ce2 is terminal/failed on its18-minute package deadline:135 top-level
+passes, two documented trace-only skips and all234 source-inventory pins;
+19 tests remain incomplete/unexecuted. The active result-budget test is
+executing at seed377, not proven deadlocked. No whole-suite or aggregate pass
+is claimed. Source, originals, partial review and authoritative service status
+are retained. A new normal-deadline100k campaign is queued at5828875 as
+[run36962606650](https://github.com/AntPAllen/js-wf/actions/runs/36962606650),
+including the new child-start budget. Its queued launch is not acceptance.
+The million-timer service remains active, with470,484 receipts observed.
