@@ -6901,3 +6901,29 @@ Current100k run37002783868 and the million-timer user service remain active.
 The disk was nearly full; the regenerable3.4GiB Go build cache was cleared to
 make room for campaign artifacts. All retention evidence and live workload data
 remain available.
+
+
+## Combined continuation kill contract and terminal million-timer verdict
+
+The [combined continuation contract](scale/continuation-limit-combined-2026-10-02/)
+passes all three real worker-SIGKILL/full-cluster-restart cuts at private budget20,
+with retained prefixes, production lease expiry, immutable ErrTooLong results,
+no forbidden effects, no archive reads, and offline continuation replay. The
+compiled suffix-budget control is detected by an actual forbidden effect and
+a22-entry Completed journal. Source hashes match; worker vet passes. Production
+default100000 combined qualification and equivalent Tier1 boundaries remain open.
+
+The [million-timer service](scale/million-timer-terminal-2026-10-02/) is terminal
+failed, not running: all1M receipts validate offline and delivery lateness passes,
+but the final physical drain never certified before the campaign deadline.
+The original verifier rejects it. Failed-report final queue zeroes are defaults,
+not measurements. Original stores/log/ledger remain; diagnose drain on copies
+before repeating the24-hour campaign. This does not clear the full runtime soak.
+
+[CI scheduling changes](scale/ci-scheduling-2026-10-02/) shard two bounded reply-hold
+families after a confirmed aggregate30-minute package timeout, preserving all
+individual gates. Documentation-only triggers are filtered while executable docs
+fixtures remain included. Four redundant queued docs-only push runs were canceled;
+manual qualifications remain. Current118-workload100k run37028379931 is confirmed
+in progress; fresh all-six mutation run37030840346 remains queued. Focused ahead
+seed27 run37030391587 is terminal success; raw acceptance review remains pending.

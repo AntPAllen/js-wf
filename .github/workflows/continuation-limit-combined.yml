@@ -1,0 +1,36 @@
+name: continuation-limit-combined
+on:
+  workflow_dispatch:
+    inputs:
+      budget:
+        description: '16/20 are test budgets; 100000 exercises the production default cap'
+        type: choice
+        required: true
+        default: '16'
+        options: ['16', '20', '100000']
+jobs:
+  combined:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Require immutable near-cap recovery and detect suffix-budget control
+        run: python3 scripts/check-continuation-limit-kill.py --budget '${{ inputs.budget }}' --root continuation-limit-evidence
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: continuation-limit-evidence
+          path: |
+            continuation-limit-evidence/*.json
+            continuation-limit-evidence/*.jsonl
+            continuation-limit-evidence/*.stderr
+            continuation-limit-evidence/*.go
+            continuation-limit-evidence/*/*/*.json
+            continuation-limit-evidence/*/*/child.*
+          if-no-files-found: error

@@ -2,6 +2,14 @@ name: tier2-mixed
 on:
   push:
     branches: [main]
+    paths:
+      - '**'
+      - '!docs/**'
+      - 'docs/monitoring/**'
+      - 'docs/scale/controller-latency-audit-2026-10-01/**'
+      - 'docs/scale/canonical-timer-admission-2026-10-02/**'
+      - 'docs/scale/live-cardinality-smoke-2026-09-30/**'
+      - 'docs/scale/sustained-mixed-mutations-2026-10-02/local-smoke/**'
   schedule:
     - cron: '17 3 * * *'
   workflow_dispatch:

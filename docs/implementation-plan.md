@@ -759,3 +759,21 @@ leader change. Domain-aware repair still owns due-time correctness and liveness.
 Both scanner paths, lost/delete replies, dry runs, generation isolation and
 sequence replacement have seeded and native contracts; sustained admitted native
 row validation remains required. See [retirement evidence](scale/native-timer-retirement-2026-10-02/).
+
+
+### Additional qualification boundaries (2026-10-02)
+
+Near the journal cap, combine continuation restoration with a held production
+lease, actual worker SIGKILL, and a full retained-store cluster outage/restart.
+Cut after signal consumption, step completion, and terminal failure; require the
+original global-index prefix, one immutable ErrTooLong outcome, no effect beyond
+the budget, frame-only recovery, and matching offline continuation replay.
+Exercise private16/20 budgets for iteration and the unchanged production100000
+default for qualification. A compiled restored-suffix budget control must fail
+semantically. Local budget20 passes all cuts; production-cap qualification and
+Tier1 modeling of these combined fault boundaries remain required.
+
+The million-timer campaign must certify physical stream/consumer drain after
+all receipts, not infer drain from delivery counts or default report fields.
+The original24-hour attempt delivered all1M but failed its final deadline;
+retain that failed verdict and diagnose final drain before another long run.

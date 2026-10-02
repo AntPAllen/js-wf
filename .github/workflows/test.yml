@@ -1,5 +1,25 @@
 name: test
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    paths:
+      - '**'
+      - '!docs/**'
+      # These documentation paths are executable test fixtures/configuration.
+      - 'docs/monitoring/**'
+      - 'docs/scale/controller-latency-audit-2026-10-01/**'
+      - 'docs/scale/canonical-timer-admission-2026-10-02/**'
+      - 'docs/scale/live-cardinality-smoke-2026-09-30/**'
+      - 'docs/scale/sustained-mixed-mutations-2026-10-02/local-smoke/**'
+  pull_request:
+    paths:
+      - '**'
+      - '!docs/**'
+      - 'docs/monitoring/**'
+      - 'docs/scale/controller-latency-audit-2026-10-01/**'
+      - 'docs/scale/canonical-timer-admission-2026-10-02/**'
+      - 'docs/scale/live-cardinality-smoke-2026-09-30/**'
+      - 'docs/scale/sustained-mixed-mutations-2026-10-02/local-smoke/**'
+  workflow_dispatch:
 jobs:
   unit:
     runs-on: ubuntu-latest
@@ -35,7 +55,17 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go test ./integration -count=1 -timeout=30m -skip '^(TestFiveHundredChildFanout|TestJournalCASTenThousandRacesWithLeaderRestarts)'
+      - run: go test ./integration -count=1 -timeout=30m -skip '^(TestFiveHundredChildFanout|TestJournalCASTenThousandRacesWithLeaderRestarts|TestWorkerContinuationMissingReplyRecovery$|TestWorkerResultMissingReplyRecovery$)'
+  cluster-response-budgets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Exercise every bounded continuation and result reply hold
+        run: go test ./integration -run '^TestWorker(Continuation|Result)MissingReplyRecovery$' -count=1 -timeout=10m -v
   cluster-scale-fanout:
     runs-on: ubuntu-latest
     timeout-minutes: 25
