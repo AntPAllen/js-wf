@@ -7427,3 +7427,22 @@ drain/retirement and full-runtime24h soak remain open.
 Latest terminal-job poll: Tier2 seed1 run37050644803 is now in progress, with
 11 of13 actual rows successful and blockdisk/upgrade still active. These are
 job verdicts only; full artifact qualification awaits the complete campaign.
+
+
+## Current Tier2 eleven-row raw artifacts independently cross-checked
+
+[Partial source3f483bd evidence](scale/full-matrix-3f483bd-2026-10-02/completed-eleven/)
+archives745 original/review files losslessly after SHA256 readback. The eleven
+completed rows pass actual Go JSON named-test/package/full-duration and retained
+audit/latency checks using the campaign revision's checker. They cover29,232
+invocations/291 faults, worst terminal/cell/progress p99=15.010394s/18.069686s/
+12.938768s. All578 Git Go/module/workflow files match current local bytes;
+hosted checkout attribution still requires final Actions logs.
+
+The whole-matrix checker now supports --artifacts ROOT, cross-checking one raw
+Go JSON per expected row/seed against its Actions-log verdict and rejecting
+missing/duplicate records, absent package completion and disagreements. All18
+matrix tests pass, including those semantic rejection controls. This strengthens
+whole-campaign acceptance without bypassing its terminal-job/source checks.
+Run37050644803 remains active with blockdisk/upgrade unfinished. Eleven rows
+are partial evidence; full13 qualification and200 seeds remain open.

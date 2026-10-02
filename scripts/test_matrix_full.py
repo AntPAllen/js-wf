@@ -1,5 +1,6 @@
 import copy
 import importlib.util
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -35,6 +36,34 @@ def fixture(count):
 
 
 class FullMatrixTests(unittest.TestCase):
+    def test_raw_artifacts_match_and_reject_missing_duplicate_incomplete_or_disagreement(self):
+        metadata, logs = fixture(1)
+        report = full.check_full_matrix(metadata, logs, 1)
+        for change in (None, "missing", "duplicate", "incomplete", "disagreement"):
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                for row in full.ROWS:
+                    test = full.ROWS[row][1]
+                    output = seed_log(row, 1)
+                    if change == "disagreement" and row == "journal":
+                        output = output.replace("terminal_p99=15s", "terminal_p99=16s")
+                    events = [{"Action": "output", "Test": test, "Output": output},
+                              {"Action": "pass", "Test": test, "Elapsed": 628.65}]
+                    if change != "incomplete" or row != "journal":
+                        events.append({"Action": "pass"})
+                    path = root / f"matrix-{row}-1-test.jsonl"
+                    path.write_text("\n".join(json.dumps(e) for e in events))
+                if change == "missing":
+                    (root / "matrix-journal-1-test.jsonl").unlink()
+                if change == "duplicate":
+                    (root / "duplicate").mkdir()
+                    (root / "duplicate/matrix-journal-1-test.jsonl").write_bytes((root / "matrix-journal-1-test.jsonl").read_bytes())
+                if change is None:
+                    self.assertEqual(len(full.check_artifacts(report, root)), 13)
+                else:
+                    with self.assertRaises(ValueError):
+                        full.check_artifacts(report, root)
+
     def test_all_counts_and_scope(self):
         for count in (1, 20, 200):
             metadata, logs = fixture(count)

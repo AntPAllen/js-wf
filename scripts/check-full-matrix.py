@@ -21,6 +21,7 @@ def local_module(name, filename):
 
 planner = local_module("matrix_planner", "matrix-campaign.py")
 gate = local_module("matrix_row_gate", "check-matrix-campaign.py")
+duration_gate = local_module("matrix_duration_gate", "check-matrix-result.py")
 ROWS = {
     "journal": ("journal_leader", "TestMixedMatrixJournalLeaderEveryThirtySeconds"),
     "consumer": ("consumer_leader", "TestMixedMatrixConsumerLeaderEveryThirtySeconds"),
@@ -101,6 +102,29 @@ def check_full_matrix(metadata, logs, count):
     }
 
 
+def check_artifacts(report, root):
+    """Cross-check raw Go JSON against every log-derived row verdict."""
+    hashes = {}
+    for row, seeds in report["rows"].items():
+        runtime_row, test = ROWS[row]
+        for expected in seeds:
+            seed = expected["seed"]
+            matches = list(root.rglob(f"matrix-{row}-{seed}-test.jsonl"))
+            if len(matches) != 1 or not matches[0].is_file():
+                raise ValueError(f"{row}/{seed}: missing or duplicate raw events")
+            path = matches[0]
+            raw = path.read_bytes()
+            events = [json.loads(line) for line in raw.splitlines() if line.strip()]
+            duration_gate.check(events, test, "10m")
+            if any(e.get("Action") in ("fail", "build-fail") for e in events):
+                raise ValueError(f"{row}/{seed}: raw failure event")
+            actual = gate.check_seed("".join(e.get("Output", "") for e in events), runtime_row, seed, test)
+            if actual != expected:
+                raise ValueError(f"{row}/{seed}: raw events disagree with job log verdict")
+            hashes[str(path.relative_to(root))] = hashlib.sha256(raw).hexdigest()
+    return hashes
+
+
 def load_logs(path):
     logs = {}
     with zipfile.ZipFile(path) as archive:
@@ -120,8 +144,11 @@ if __name__ == "__main__":
     parser.add_argument("--logs", required=True, type=Path)
     parser.add_argument("--seeds", required=True, type=int, choices=(1, 20, 200))
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--artifacts", type=Path, help="also require matching raw Go JSON for every row/seed")
     args = parser.parse_args()
     report = check_full_matrix(json.loads(args.jobs.read_text()), load_logs(args.logs), args.seeds)
+    if args.artifacts is not None:
+        report["raw_event_sha256"] = check_artifacts(report, args.artifacts)
     report["input_sha256"] = {label: hashlib.sha256(path.read_bytes()).hexdigest() for label, path in (("jobs", args.jobs), ("logs_zip", args.logs))}
     args.output.write_text(json.dumps(report, indent=2)+"\n")
     print(json.dumps({key: value for key, value in report.items() if key != "rows"}, indent=2))
