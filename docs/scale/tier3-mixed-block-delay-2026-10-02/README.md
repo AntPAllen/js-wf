@@ -37,3 +37,7 @@ was dispatched at source246ed70e0eedc76857163dac51d5249891b76484.
 `smoke-launch.json` retains the original queued API response. The native capability
 and smoke now pass; [complete verified evidence](hosted-smoke/README.md) is retained.
 The current independent guards also pass. Sustained acceptance remains pending.
+
+After independent smoke verification, [ten-minute run36950054475](https://github.com/AntPAllen/js-wf/actions/runs/36950054475)
+was dispatched at267262a. `ten-minute-launch.json` retains its queued response.
+No sustained verdict is claimed until the complete row artifacts pass review.

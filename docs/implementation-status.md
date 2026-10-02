@@ -5570,3 +5570,16 @@ physical queue drain pass. All41repairs acknowledge and match counters;0fences.
 [Complete compressed originals and independent checks](scale/tier3-mixed-block-delay-2026-10-02/hosted-smoke/README.md)
 are hash-verified. This smoke permits the sustained row to proceed, but does
 not clear ten-minute, combined-fault,200-seed or24h acceptance.
+
+## Sustained I/O rows dispatched after verified fixture evidence (2026-10-02)
+
+Per-request delay ten-minute run36950054475 at267262a follows the independently
+verified native smoke. Corrected stall ten-minute run36949600724 ate171241
+follows the resume-command boundary correction. Their launch API responses are
+retained with each row's evidence. Both are queued, not accepted. Automatic
+membership36947230245 and behind-clock admitted-cut36947564272 also remain
+queued. Current comprehensive Tier1 run36942165713 is in progress; its older
+source predecessor36929826425 is completed/success but does not verify the
+later SDK fresh-wakeup fix or newer clock work. The million-timer service is
+confirmed active (PID18146), with356826receipts and its first full restart
+retained; second restart/final audit remain open.
