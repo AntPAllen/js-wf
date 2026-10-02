@@ -5528,3 +5528,17 @@ counterexample; the exact broker scheduling/redelivery path remains unproven.
 Clock-transition timer liveness is open. Behind admitted-cut ten-minute run
 36947564272 is queued after verified smoke; no ahead sustained acceptance or
 clock-gate relaxation is claimed.
+
+## Independent clock interval estimator foundation (2026-10-02)
+
+The ahead-clock failure follows the production absolute-deadline path. A new
+[runtimeclock estimator](../runtimeclock/README.md) bounds UTC at a common
+monotonic caller anchor using independent server samples, without worker wall
+time. Supported intersections require more identities than the allowed skewed
+clock count and are widened to prevent unsafe narrowing. Duplicate IDs,
+malformed/slow brackets and absent agreement fail closed. Exhaustive subset,
+ordering, ±60s skew, healthy-error and two-skewed-clock/narrowing tests pass
+under race in 1.056s; unit CI includes the package. It is not wired into timers.
+Authenticated independent sampling, durable clock provenance, scheduling/repair
+translation, legacy compatibility and end-to-end evidence remain required; the
+native ahead-clock progress failure remains open.
