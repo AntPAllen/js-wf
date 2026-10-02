@@ -1,0 +1,69 @@
+name: invariant-mutations-sustained
+on:
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: 'Original mixed chaos duration per baseline and mutant (35s is smoke only)'
+        required: true
+        default: '10m'
+        type: choice
+        options: ['35s', '10m']
+      category:
+        description: 'Mutation category; all is required for the six-category gate'
+        required: true
+        default: all
+        type: choice
+        options: [all, determinism, leases, cas, enqueue, start-repair, purge]
+jobs:
+  categories:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - id: plan
+        env:
+          CATEGORY: ${{ inputs.category }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          categories = ['determinism', 'leases', 'cas', 'enqueue', 'start-repair', 'purge']
+          category = os.environ['CATEGORY']
+          if category != 'all':
+              assert category in categories
+              categories = [category]
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+              out.write('matrix=' + json.dumps(categories) + '\n')
+          PY
+  sustained:
+    needs: categories
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        category: ${{ fromJson(needs.categories.outputs.matrix) }}
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify sustained evidence rejects incomplete runs
+        run: python3 -m unittest discover -s scripts -p test_sustained_mutation.py
+      - name: Require original sustained mixed gates and the semantic mutation escape
+        env:
+          CATEGORY: ${{ matrix.category }}
+          DURATION: ${{ inputs.duration }}
+        run: |
+          python3 scripts/check-invariant-mutations.py \
+            --mixed-"$CATEGORY" --sustained "$DURATION" \
+            --output "$RUNNER_TEMP/sustained-$CATEGORY"
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sustained-production-${{ matrix.category }}
+          path: ${{ runner.temp }}/sustained-${{ matrix.category }}
+          if-no-files-found: error

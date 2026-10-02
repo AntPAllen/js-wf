@@ -139,7 +139,7 @@ func challengeMixedPurge(t *testing.T, ctx context.Context, js jetstream.JetStre
 	return reused
 }
 
-func verifyMixedPurgeReuse(t *testing.T, ctx context.Context, js jetstream.JetStream, h client.Handle, old []journal.Record) {
+func verifyMixedPurgeReuse(t *testing.T, ctx context.Context, js jetstream.JetStream, h client.Handle, old []journal.Record, expectedInvocations int) {
 	t.Helper()
 	records, _, err := journal.New(js).Read(ctx, h.Type, h.ID)
 	if err != nil || len(records) != 4 || records[0].Index != 0 || records[0].Kind != journal.Started || records[0].Sequence <= old[len(old)-1].Sequence {
@@ -150,7 +150,7 @@ func verifyMixedPurgeReuse(t *testing.T, ctx context.Context, js jetstream.JetSt
 		t.Fatalf("reused outcome %+v", outcome)
 	}
 	report, err := integrity.Check(ctx, js)
-	if err != nil || report.Invocations != 28 || report.Journals != 28 || report.Terminal != 28 {
+	if err != nil || report.Invocations != expectedInvocations || report.Journals != expectedInvocations || report.Terminal != expectedInvocations {
 		t.Fatalf("reused retained audit %+v err=%v", report, err)
 	}
 	proof, err := json.Marshal(records)

@@ -2,6 +2,17 @@
 
 ## Latest accepted evidence — 2026-10-02
 
+- The new sustained mutation harness executes the existing mixed journal-leader
+  row and its original release checks before admitting a controlled counterexample
+  on the same retained stores. Local35s CAS and start-repair pairs detect their
+  actual semantic source mutations and preserve the original completed cohorts;
+  a CAS race baseline passes91.57s test /92.591s package. Independent raw-sample
+  p99 checks, decoded receipts, parser rejection controls and lossless originals
+  are retained in [sustained harness smoke evidence](scale/sustained-mixed-mutations-2026-10-02/local-smoke/).
+  The manual all-six workflow defaults to10m; all-six hosted smoke and actual
+  ten-minute pairs remain unaccepted. The full200-seed matrix and24-hour soak
+  remain separate requirements. Production source and the117-workload graph are
+  unchanged, so existing live long campaigns continue at their recorded source.
 - Terminal native-hint retirement at `3184b65` passes the complete116-workload
   incremental simulation gate: exact1..1000 seeds each,261 pins and160 top-level
   passes. The admitted seed5 ahead race smoke passes with56 invocations,617

@@ -144,7 +144,14 @@ func TestMixedMatrixServerClockSkewNegative(t *testing.T) {
 }
 
 func runMixedMatrixLeader(t *testing.T, row string) {
+	runMixedMatrixLeaderWithChallenge(t, row, "")
+}
+
+func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 	t.Helper()
+	if mutationMode != "" && row != "journal_leader" {
+		t.Fatal("sustained mutation challenge requires the journal-leader row")
+	}
 	if os.Getenv("WF_MATRIX_CHAOS") != "1" {
 		t.Skip("set WF_MATRIX_CHAOS=1 for sustained mixed matrix chaos")
 	}
@@ -810,6 +817,7 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	invocationCutoff := info.State.LastSeq
 	for sequence := info.State.FirstSeq; sequence <= info.State.LastSeq; sequence++ {
 		msg, err := inv.GetMsg(ctx, sequence)
 		if err != nil {
@@ -896,6 +904,12 @@ func runMixedMatrixLeader(t *testing.T, row string) {
 	}
 	stopWork()
 	fleet.Wait()
+	if mutationMode != "" {
+		if t.Failed() {
+			t.Fatal("sustained row failed a release gate before mutation admission")
+		}
+		challengeSustainedMixedMutation(t, ctx, cluster, js, mutationMode, seed, duration, time.Since(start), batches, len(faults), invocationCutoff, report)
+	}
 }
 
 // Lost read replies during a leader kill must not consume the entire workload

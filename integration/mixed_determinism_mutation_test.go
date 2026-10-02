@@ -83,16 +83,11 @@ func runMixedGuardMutation(t *testing.T, leaseChallenge bool) {
 }
 func runMixedGuardChallenge(t *testing.T, mode string) {
 	t.Helper()
-	leaseChallenge := mode == "leases"
-	casChallenge := mode == "cas"
-	enqueueChallenge := mode == "enqueue"
-	startRepairChallenge := mode == "start-repair"
-	purgeChallenge := mode == "purge"
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("FAULT_SEED=%d mixed_lease_challenge=%t", seed, leaseChallenge)
+	t.Logf("FAULT_SEED=%d mixed_lease_challenge=%t", seed, mode == "leases")
 	ctx, cancel := context.WithTimeout(context.Background(), 150*time.Second)
 	defer cancel()
 	cluster, err := testcluster.StartProcesses(t.TempDir(), 3)
@@ -119,6 +114,20 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	runMixedGuardChallengeOnCluster(t, ctx, cluster, nodes, mode, 0)
+}
+
+// Borrow the already exercised cluster and retain its completed workload. Each
+// guard challenge gets its existing 150s budget even after a sustained row.
+func runMixedGuardChallengeOnCluster(t *testing.T, parent context.Context, cluster *testcluster.ProcessCluster, nodes []jetstream.JetStream, mode string, priorInvocations int) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(parent, 150*time.Second)
+	defer cancel()
+	leaseChallenge := mode == "leases"
+	casChallenge := mode == "cas"
+	enqueueChallenge := mode == "enqueue"
+	startRepairChallenge := mode == "start-repair"
+	purgeChallenge := mode == "purge"
 	type invocation struct {
 		typ, id string
 		input   int
@@ -467,15 +476,15 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 		}
 	}
 	value, resultErr := c.Await(ctx, target.typ, target.id)
-	expectedInvocations, expectedTerminals := 28, 28
+	expectedInvocations, expectedTerminals := priorInvocations+28, priorInvocations+28
 	if startRepairChallenge {
-		expectedInvocations = 29
+		expectedInvocations = priorInvocations + 29
 		if startRepaired {
 			extra, err := c.Await(ctx, orphan.Type, orphan.ID)
 			if err != nil || string(extra) != "42" {
 				t.Fatalf("repaired start result=%s err=%v", extra, err)
 			}
-			expectedTerminals = 29
+			expectedTerminals = priorInvocations + 29
 		}
 	}
 	var report integrity.Report
@@ -506,7 +515,7 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 		if err != nil || string(result) != "42" {
 			t.Fatalf("reused purge result=%s err=%v", result, err)
 		}
-		verifyMixedPurgeReuse(t, ctx, nodes[survivor], reused, records)
+		verifyMixedPurgeReuse(t, ctx, nodes[survivor], reused, records, priorInvocations+28)
 		return
 	}
 	if startRepairChallenge {

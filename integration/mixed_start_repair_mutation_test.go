@@ -151,7 +151,7 @@ func readMixedStartRepairOutcome(ctx context.Context, js jetstream.JetStream, h 
 	if err != nil {
 		return fmt.Errorf("orphan run snapshot: %w", err)
 	}
-	for seq := uint64(1); seq <= info.State.LastSeq; seq++ {
+	for seq := info.State.FirstSeq; seq > 0 && seq <= info.State.LastSeq; seq++ {
 		msg, err := run.GetMsg(ctx, seq)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			continue

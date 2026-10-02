@@ -1,0 +1,67 @@
+{
+  "cas": [
+    {
+      "receipt": {
+        "Subject": "wf.jrn.guardshort.guardshort-0-0",
+        "Sequence": 2315,
+        "Header": null,
+        "Data": "eyJlcG9jaCI6NDQ2MSwiaW5kZXgiOjIsImtpbmQiOiJTdGVwQ29tcGxldGVkIiwicGF5bG9hZCI6eyJyZXN1bHQiOjQyfSwid29ya2VyX2lkIjoibWl4ZWQtZ3VhcmQtYmVmb3JlIn0=",
+        "Time": "2026-10-02T14:02:58.449455423Z"
+      },
+      "body": {
+        "epoch": 4461,
+        "index": 2,
+        "kind": "StepCompleted",
+        "payload": {
+          "result": 42
+        },
+        "worker_id": "mixed-guard-before"
+      }
+    },
+    {
+      "receipt": {
+        "Subject": "wf.jrn.guardshort.guardshort-0-0",
+        "Sequence": 2314,
+        "Header": null,
+        "Data": "eyJlcG9jaCI6NDQ2MSwiaW5kZXgiOjIsImtpbmQiOiJTdGVwQ29tcGxldGVkIiwicGF5bG9hZCI6eyJyZXN1bHQiOjQyfSwid29ya2VyX2lkIjoibWl4ZWQtZ3VhcmQtYmVmb3JlIn0=",
+        "Time": "2026-10-02T14:02:58.449442413Z"
+      },
+      "body": {
+        "epoch": 4461,
+        "index": 2,
+        "kind": "StepCompleted",
+        "payload": {
+          "result": 42
+        },
+        "worker_id": "mixed-guard-before"
+      }
+    }
+  ],
+  "start": {
+    "INVOCATION": {
+      "Subject": "wf.inv.guardshort.repair-orphan",
+      "Sequence": 225,
+      "Header": {
+        "Nats-Expected-Last-Subject-Sequence": [
+          "0"
+        ],
+        "Wf-Input-SHA256": [
+          "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+        ]
+      },
+      "Data": "MA==",
+      "Time": "2026-10-02T14:03:46.185764129Z"
+    },
+    "DISPATCH": {
+      "Subject": "wf.run.0",
+      "Sequence": 833,
+      "Header": {
+        "Nats-Msg-Id": [
+          "start:guardshort.repair-orphan:225"
+        ]
+      },
+      "Data": "Z3VhcmRzaG9ydC5yZXBhaXItb3JwaGFu",
+      "Time": "2026-10-02T14:03:54.385409152Z"
+    }
+  }
+}

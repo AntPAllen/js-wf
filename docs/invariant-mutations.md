@@ -30,6 +30,49 @@ with seeded in-memory transports. This is stronger than supplying a forged bad
 history, but it is **not the full mixed-workload six-mutation chaos release gate**.
 The independent full matrix, seed-count and soak requirements still apply.
 
+## Sustained mixed chaos and retained-store challenges
+
+Select one mixed category and a duration:
+
+```sh
+GOMEMLIMIT=512MiB GOMAXPROCS=2 python3 scripts/check-invariant-mutations.py \
+  --mixed-cas --sustained 10m --output /tmp/js-wf-sustained-cas
+```
+
+Repeat with `--mixed-determinism`, `--mixed-leases`, `--mixed-enqueue`,
+`--mixed-start-repair` and `--mixed-purge`. The manual
+`invariant-mutations-sustained` workflow selects all six by default, with two
+jobs at a time and no cancellation of other categories after a failure.
+`--sustained 35s` exercises the harness but is explicitly smoke evidence.
+
+Both the intact source and its single-source overlay run the original mixed
+journal-leader row first. Its ten-minute workload, 40/30/20/10 parent mix,
+children and grandchildren, nineteen journal-leader kills, checkpoint audits,
+client histories, aggregate and per-type terminal/progress p99, final-heal
+deadline and physical run-queue drain all remain required. The mutation is
+compiled into the runtime throughout that row. After the fleet and repair
+loops join, the same cluster and retained stores admit the controlled live
+guard cohort and an additional verified leader SIGKILL. No fresh cluster or
+purge separates the phases. The original completed cohort remains retained
+and must pass a high-water integrity/count audit even after a mutant fails.
+This audit establishes unchanged counts and valid retained state; it does not
+establish byte identity of every original record.
+
+The runner requires actual named execution for the requested duration, the
+same-store admission, all six original workload counts and p99 measurements,
+original fault/history/dispatch/latency artifacts, preservation of the original
+cohort, and the category's existing specific semantic escape. Compilation,
+unrelated failures, missing artifacts and early row failures remain rejected.
+It retains the changed production source, exact overlay maps, full source
+inventory hashes, both phase logs and the original matrix artifacts. Parser
+controls cover shortened/misclassified runs, wrong seed or cohort, missing
+workloads, over-budget p99, incomplete faults and missing artifacts.
+
+All six accepted ten-minute pairs at one source establish this sustained
+journal-leader mutation campaign. A single pair or six smoke pairs cannot
+substitute. The independent 200-seed full matrix and 24-hour full-matrix soak
+remain separate release requirements.
+
 The output directory contains `report.json`, unmodified and mutated Go JSON
 test logs, negative-control logs and any modeled failure traces. The report
 records the commit, production source hashes, selected tests, timings and
