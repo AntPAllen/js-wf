@@ -15,10 +15,12 @@ import (
 )
 
 type timerPublication struct {
-	message *nats.Msg
-	id      string
-	due     time.Time
-	fired   bool
+	message  *nats.Msg
+	id       string
+	due      time.Time
+	fired    bool
+	sequence uint64
+	retired  bool
 }
 
 // TimerScheduleTransport models only timer publish acknowledgment, message-ID
@@ -197,7 +199,7 @@ func (m *TimerScheduleTransport) PublishNative(ctx context.Context, message *nat
 	}
 	m.streamSeq++
 	copyMessage := &nats.Msg{Subject: message.Subject, Data: append([]byte(nil), message.Data...), Header: cloneHeader(message.Header)}
-	m.native = append(m.native, timerPublication{message: copyMessage, id: messageID, due: due})
+	m.native = append(m.native, timerPublication{message: copyMessage, id: messageID, due: due, sequence: m.streamSeq})
 	m.ids[messageID] = m.schedule.NowMillis()
 	event.Sequence = m.streamSeq
 	if fault == LoseAckAfterCommit {
@@ -228,7 +230,7 @@ func (m *TimerScheduleTransport) deliverDue() {
 	now := m.base.Add(time.Duration(m.schedule.NowMillis()) * time.Millisecond)
 	for i := range m.native {
 		entry := &m.native[i]
-		if entry.fired || m.LeaderNow().Before(entry.due) {
+		if entry.fired || entry.retired || m.LeaderNow().Before(entry.due) {
 			continue
 		}
 		entry.fired = true
@@ -400,4 +402,69 @@ func (m *TimerScheduleTransport) Runs() []Message {
 func (m *TimerScheduleTransport) event(event TransportEvent) {
 	event.AtMillis = m.schedule.NowMillis()
 	m.schedule.RecordTransport(event)
+}
+
+// Native source retirement preserves publication history while removing retained
+// hints and suppressing their future modeled delivery.
+func (m *TimerScheduleTransport) NativeTimerSubjects(ctx context.Context, typ, id string) ([]string, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	subjects := map[string]bool{}
+	prefix := "wf.schedule." + typ + "." + id + "."
+	for _, hint := range m.native {
+		if !hint.fired && !hint.retired && strings.HasPrefix(hint.message.Subject, prefix) {
+			subjects[hint.message.Subject] = true
+		}
+	}
+	out := make([]string, 0, len(subjects))
+	for subject := range subjects {
+		out = append(out, subject)
+	}
+	// Production sorts this list before making transport decisions.
+	return out, nil
+}
+func (m *TimerScheduleTransport) LastNativeTimer(ctx context.Context, subject string) (*jetstream.RawStreamMsg, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	for i := len(m.native) - 1; i >= 0; i-- {
+		hint := m.native[i]
+		if !hint.fired && !hint.retired && hint.message.Subject == subject {
+			return &jetstream.RawStreamMsg{Subject: subject, Sequence: hint.sequence, Header: cloneHeader(hint.message.Header), Data: append([]byte(nil), hint.message.Data...)}, nil
+		}
+	}
+	return nil, jetstream.ErrMsgNotFound
+}
+func (m *TimerScheduleTransport) DeleteNativeTimer(ctx context.Context, sequence uint64) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	var fault AppendFault
+	if len(m.deleteFault) > 0 {
+		fault, m.deleteFault = m.deleteFault[0], m.deleteFault[1:]
+	}
+	event := TransportEvent{Operation: "delete_native_timer", Sequence: sequence}
+	if fault == DropBeforeCommit {
+		event.Outcome = string(fault)
+		m.event(event)
+		return ErrTransportLost
+	}
+	for i := range m.native {
+		hint := &m.native[i]
+		if hint.sequence == sequence && !hint.retired && !hint.fired {
+			hint.retired = true
+			if fault == LoseAckAfterCommit {
+				event.Outcome = string(fault)
+				m.event(event)
+				return ErrTransportLost
+			}
+			event.Outcome = "ok"
+			m.event(event)
+			return nil
+		}
+	}
+	event.Outcome = "not_found"
+	m.event(event)
+	return jetstream.ErrMsgNotFound
 }

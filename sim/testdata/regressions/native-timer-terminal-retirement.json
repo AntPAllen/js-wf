@@ -1,0 +1,169 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "native_timer_terminal_retirement",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "drop_delete",
+        "failed_terminal",
+        "lost_delete_reply",
+        "normal"
+      ],
+      "chosen": "failed_terminal"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "suspended",
+        "timer"
+      ],
+      "chosen": "timer"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.one",
+      "sequence": 1,
+      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_native_timer",
+      "subject": "wf.schedule.test.one.1",
+      "sequence": 1,
+      "data_sha256": "60be9fa7b9ec9d0a098b9081955b6a01b963bf76babfc197e3689eb709138d77",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "set_journal",
+      "subject": "wf.jrn.test.one",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_invocation",
+      "subject": "wf.inv.test.one",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "read_journal",
+      "subject": "wf.jrn.test.one",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "set_journal",
+      "subject": "wf.jrn.test.one",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_invocation",
+      "subject": "wf.inv.test.one",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "read_journal",
+      "subject": "wf.jrn.test.one",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_invocation",
+      "subject": "wf.inv.test.one",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "read_journal",
+      "subject": "wf.jrn.test.one",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "delete_native_timer",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_invocation",
+      "subject": "wf.inv.test.one",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "read_journal",
+      "subject": "wf.jrn.test.one",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_native_timer",
+      "subject": "wf.schedule.test.one.2",
+      "sequence": 2,
+      "data_sha256": "60be9fa7b9ec9d0a098b9081955b6a01b963bf76babfc197e3689eb709138d77",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_native_timer",
+      "subject": "wf.schedule.test.one.3",
+      "sequence": 3,
+      "data_sha256": "60be9fa7b9ec9d0a098b9081955b6a01b963bf76babfc197e3689eb709138d77",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "get_invocation",
+      "subject": "wf.inv.test.one",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "read_journal",
+      "subject": "wf.jrn.test.one",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "delete_native_timer",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 120000,
+      "operation": "deliver_native_timer",
+      "subject": "wf.run.59",
+      "sequence": 4,
+      "data_sha256": "60be9fa7b9ec9d0a098b9081955b6a01b963bf76babfc197e3689eb709138d77",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_native_retirement",
+      "outcome": "failed_terminal"
+    }
+  ]
+}

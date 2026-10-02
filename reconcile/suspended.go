@@ -146,6 +146,7 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 	}
 	type inspected struct {
 		retained  bool
+		retired   int
 		ready     bool
 		candidate Candidate
 		err       error
@@ -167,7 +168,7 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 					continue
 				}
 				items[index].retained = true
-				items[index].candidate, items[index].ready, items[index].err = s.inspect(ctx, input)
+				items[index].candidate, items[index].ready, items[index].err = s.inspectWithRetirement(ctx, input, dryRun, &items[index].retired)
 			}
 		}()
 	}
@@ -182,6 +183,7 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 	}
 	var inspectErr error
 	for _, item := range items {
+		result.Removed += item.retired
 		if item.err != nil {
 			// A transient read on one invocation must not suppress ready
 			// wakeups independently found elsewhere on this page. Keep the
@@ -225,6 +227,10 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 }
 
 func (s *SuspendedScan) inspect(ctx context.Context, input *jetstream.RawStreamMsg) (Candidate, bool, error) {
+	var retired int
+	return s.inspectWithRetirement(ctx, input, false, &retired)
+}
+func (s *SuspendedScan) inspectWithRetirement(ctx context.Context, input *jetstream.RawStreamMsg, dryRun bool, retired *int) (Candidate, bool, error) {
 	parts := strings.Split(input.Subject, ".")
 	if len(parts) != 4 || parts[0] != "wf" || parts[1] != "inv" || identity.Validate(parts[2], parts[3]) != nil {
 		return Candidate{}, false, fmt.Errorf("invalid invocation subject %q", input.Subject)
@@ -238,6 +244,16 @@ func (s *SuspendedScan) inspect(ctx context.Context, input *jetstream.RawStreamM
 		return Candidate{}, false, nil
 	}
 	last := records[len(records)-1]
+	if last.Kind == journal.Completed || last.Kind == journal.Failed {
+		if port, ok := s.port.(NativeTimerRetirePort); ok {
+			var err error
+			*retired, err = RetireNativeTimerHints(ctx, port, typ, id, input.Sequence, dryRun)
+			if err != nil {
+				return Candidate{}, false, err
+			}
+		}
+		return Candidate{}, false, nil
+	}
 	// A committed boundary is enabled even before its manifest or suspension.
 	if last.Kind == journal.StepCompleted && len(records) >= 2 {
 		request := records[len(records)-2]

@@ -135,6 +135,13 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			continue
 		}
 		if records[len(records)-1].Kind == journal.Completed || records[len(records)-1].Kind == journal.Failed {
+			if port, ok := s.port.(NativeTimerRetirePort); ok {
+				removed, err := RetireNativeTimerHints(ctx, port, typ, id, m.Sequence, dryRun)
+				result.Removed += removed
+				if err != nil {
+					return result, err
+				}
+			}
 			continue
 		}
 		var pending *journal.Record

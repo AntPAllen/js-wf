@@ -745,3 +745,16 @@ boundary, and restart waits for name cleanup. Receipts retain both observations
 and bind node/container identity to the independent clock source and restart.
 Historical artifacts keep their original conservative cleanup timestamp. See
 [source-exit evidence and limits](scale/docker-source-exit-2026-10-02/).
+
+### Native timer hint retirement after completion
+
+The production timer and suspended-wait repair loops retire native schedule
+hints after reading a durable Completed or Failed journal. Cleanup matches the
+invocation generation and deletes an observed stream sequence, preserving active
+invocations and concurrent replacements. Recurring scans retry ambiguous deletes
+and catch late hints. This keeps physically retained future hints from extending
+the completed-cohort drain beyond the unchanged30s target after a scheduling-clock
+leader change. Domain-aware repair still owns due-time correctness and liveness.
+Both scanner paths, lost/delete replies, dry runs, generation isolation and
+sequence replacement have seeded and native contracts; sustained admitted native
+row validation remains required. See [retirement evidence](scale/native-timer-retirement-2026-10-02/).

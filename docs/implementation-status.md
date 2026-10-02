@@ -6579,3 +6579,18 @@ The new `--mixed-leases` runner mode and CI job cover this category, and reject
 build/timeout/unrelated failures. This proves broken lease exclusion is detected,
 not that the mutant must corrupt journals despite CAS. Four mixed categories and
 the full chaos gate remain open; hosted acceptance of the new job is pending.
+
+## Terminal native timer schedule retirement
+
+Timer and suspended repair now remove native schedule hints only after a durable
+terminal journal, matching invocation generation and deleting the observed stream
+sequence. This preserves active/new generations and concurrent replacements; dry
+runs retain data and recurrent scans handle late publishes or uncertain deletes.
+The first timer-only wiring missed this profile's suspended loop and its smoke
+failed drain in95.74s; original evidence is retained. Both paths are now covered by
+1,000 seeded race schedules over eight mode combinations, replay, a seed42 pin,
+a removed-production-cleanup negative control and an actual R3 native suspended
+scan race contract. Focused sequence-race/malformed-hint controls pass. Evidence
+is under `scale/native-timer-retirement-2026-10-02/`. Final-source whole-suite and
+admitted R5 smoke acceptance remain required. The ongoing older115-workload100k
+campaign does not cover this new retirement path; its original handle is retained.
