@@ -7466,3 +7466,16 @@ row still reports clears_full_tier3_release=false. All50 Tier3 and18 matrix
 guard tests pass, including shortened-duration/missing-fault rejection. Hosted
 workflow choices remain35s/10m; no24h run is claimed. Full matrices and original
 million-timer retirement/drain remain open.
+
+
+## Current all13 Tier2 200-seed campaign dispatched
+
+[Run37057872230](https://github.com/AntPAllen/js-wf/actions/runs/37057872230)
+is confirmed queued at exact076ebad5cb65daba7eae1b81950fc95e29fa259c, with
+row=all/seeds=200/duration=10m. Its Go/module/runtime sources match the accepted
+seed1 graph3f483bd; subsequent changes are verifiers, tests and documentation.
+The planner covers13 variants times200 consecutive seeds:2,600 ten-minute
+executions in221 bounded jobs, at most12 seeds per job. No running trial was
+restarted or canceled. Acceptance requires all expected terminal jobs, exact
+checkout/seed ranges, full-duration runtime checks and raw artifact agreement.
+Dispatch clears no gate. Current120-workload100k37051896032 remains in progress.
