@@ -67,6 +67,13 @@ func TestMixedStartRepairMutationAfterJournalLeaderKill(t *testing.T) {
 	runMixedGuardChallenge(t, "start-repair")
 }
 
+func TestMixedPurgeMutationAfterJournalLeaderKill(t *testing.T) {
+	if os.Getenv("WF_MIXED_PURGE_MUTATION") != "1" {
+		t.Skip("set WF_MIXED_PURGE_MUTATION=1 for the mixed purge challenge")
+	}
+	runMixedGuardChallenge(t, "purge")
+}
+
 func runMixedGuardMutation(t *testing.T, leaseChallenge bool) {
 	mode := "determinism"
 	if leaseChallenge {
@@ -80,6 +87,7 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 	casChallenge := mode == "cas"
 	enqueueChallenge := mode == "enqueue"
 	startRepairChallenge := mode == "start-repair"
+	purgeChallenge := mode == "purge"
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -486,6 +494,21 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 		t.Fatalf("lost prefix or epoch handoff: %v", err)
 	}
 	t.Logf("MIXED_GUARD_COHORT shorts=4 timers=3 signals=2 fanout=1 children=6 grandchildren=12 terminal=28 entries=%d", report.Entries)
+	if purgeChallenge {
+		if resultErr != nil || string(value) != "42" {
+			t.Fatalf("purge target result=%s err=%v", value, resultErr)
+		}
+		stopSecond()
+		reused := challengeMixedPurge(t, ctx, nodes[survivor], target.typ, target.id, records)
+		stopReused := startWorker("mixed-purge-reused", nodes[survivor], true)
+		defer stopReused()
+		result, err := c.Await(ctx, reused.Type, reused.ID)
+		if err != nil || string(result) != "42" {
+			t.Fatalf("reused purge result=%s err=%v", result, err)
+		}
+		verifyMixedPurgeReuse(t, ctx, nodes[survivor], reused, records)
+		return
+	}
 	if startRepairChallenge {
 		if resultErr != nil || string(value) != "42" {
 			t.Fatalf("original cohort target result=%s err=%v", value, resultErr)

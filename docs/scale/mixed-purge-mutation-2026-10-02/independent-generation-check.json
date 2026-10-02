@@ -1,0 +1,183 @@
+{
+  "baseline": {
+    "named_action": "pass",
+    "original_invocation": {
+      "Subject": "wf.inv.guardshort.guardshort-0-0",
+      "Sequence": 1,
+      "Header": {
+        "Nats-Expected-Last-Subject-Sequence": [
+          "0"
+        ],
+        "Wf-Input-SHA256": [
+          "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+        ]
+      },
+      "Data": "MA==",
+      "Time": "2026-10-02T12:36:40.289613844Z"
+    },
+    "retained_journal": [
+      {
+        "epoch": 7,
+        "index": 0,
+        "kind": "Started",
+        "worker_id": "mixed-guard-before",
+        "sequence": 5
+      },
+      {
+        "epoch": 7,
+        "index": 1,
+        "kind": "StepRequested",
+        "payload": {
+          "kind": "run",
+          "name": "held",
+          "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "fire_at": "0001-01-01T00:00:00Z"
+        },
+        "worker_id": "mixed-guard-before",
+        "sequence": 10
+      },
+      {
+        "epoch": 245,
+        "index": 2,
+        "kind": "StepCompleted",
+        "payload": {
+          "result": 42
+        },
+        "worker_id": "mixed-guard-after",
+        "sequence": 146
+      },
+      {
+        "epoch": 245,
+        "index": 3,
+        "kind": "Completed",
+        "payload": {
+          "inv_seq": 1,
+          "result": "NDI="
+        },
+        "worker_id": "mixed-guard-after",
+        "sequence": 147
+      }
+    ],
+    "retained_terminal": {
+      "inv_seq": 1,
+      "result": "NDI="
+    },
+    "retained_state_revision": 1,
+    "tombstone": {
+      "tombstone": true,
+      "inv_seq": 1,
+      "purged_at": "2026-10-02T12:37:11.500397001Z",
+      "expires_at": "2026-10-02T12:38:11.500397001Z"
+    },
+    "reused_journal": [
+      {
+        "epoch": 809,
+        "index": 0,
+        "kind": "Started",
+        "worker_id": "mixed-purge-reused",
+        "sequence": 393
+      },
+      {
+        "epoch": 809,
+        "index": 1,
+        "kind": "StepRequested",
+        "payload": {
+          "kind": "run",
+          "name": "held",
+          "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "fire_at": "0001-01-01T00:00:00Z"
+        },
+        "worker_id": "mixed-purge-reused",
+        "sequence": 394
+      },
+      {
+        "epoch": 809,
+        "index": 2,
+        "kind": "StepCompleted",
+        "payload": {
+          "result": 42
+        },
+        "worker_id": "mixed-purge-reused",
+        "sequence": 395
+      },
+      {
+        "epoch": 809,
+        "index": 3,
+        "kind": "Completed",
+        "payload": {
+          "inv_seq": 29,
+          "result": "NDI="
+        },
+        "worker_id": "mixed-purge-reused",
+        "sequence": 396
+      }
+    ]
+  },
+  "mutated": {
+    "named_action": "fail",
+    "original_invocation": {
+      "Subject": "wf.inv.guardshort.guardshort-0-0",
+      "Sequence": 1,
+      "Header": {
+        "Nats-Expected-Last-Subject-Sequence": [
+          "0"
+        ],
+        "Wf-Input-SHA256": [
+          "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+        ]
+      },
+      "Data": "MA==",
+      "Time": "2026-10-02T12:37:42.435852848Z"
+    },
+    "retained_journal": [
+      {
+        "epoch": 9,
+        "index": 0,
+        "kind": "Started",
+        "worker_id": "mixed-guard-before",
+        "sequence": 5
+      },
+      {
+        "epoch": 9,
+        "index": 1,
+        "kind": "StepRequested",
+        "payload": {
+          "kind": "run",
+          "name": "held",
+          "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "fire_at": "0001-01-01T00:00:00Z"
+        },
+        "worker_id": "mixed-guard-before",
+        "sequence": 7
+      },
+      {
+        "epoch": 379,
+        "index": 2,
+        "kind": "StepCompleted",
+        "payload": {
+          "result": 42
+        },
+        "worker_id": "mixed-guard-after",
+        "sequence": 195
+      },
+      {
+        "epoch": 379,
+        "index": 3,
+        "kind": "Completed",
+        "payload": {
+          "inv_seq": 1,
+          "result": "NDI="
+        },
+        "worker_id": "mixed-guard-after",
+        "sequence": 204
+      }
+    ],
+    "retained_terminal": {
+      "inv_seq": 1,
+      "result": "NDI="
+    },
+    "retained_state_revision": 15,
+    "invocation_absent": true,
+    "retry_invocation_not_found": true
+  }
+}

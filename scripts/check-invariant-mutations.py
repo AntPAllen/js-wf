@@ -109,9 +109,12 @@ def main():
     parser.add_argument("--mixed-cas", action="store_true", help="race two gated production journal appends in the live mixed leader-kill cohort")
     parser.add_argument("--mixed-enqueue", action="store_true", help="challenge retained dispatch deduplication in the live mixed leader-kill cohort")
     parser.add_argument("--mixed-start-repair", action="store_true", help="challenge missing-start repair in the live mixed leader-kill cohort")
+    parser.add_argument("--mixed-purge", action="store_true", help="challenge retirement ordering and recovery in the live mixed leader-kill cohort")
     args = parser.parse_args()
-    if sum((args.mixed_leases,args.mixed_determinism,args.mixed_cas,args.mixed_enqueue,args.mixed_start_repair))>1:
+    if sum((args.mixed_leases,args.mixed_determinism,args.mixed_cas,args.mixed_enqueue,args.mixed_start_repair,args.mixed_purge))>1:
         parser.error("select one mixed challenge")
+    if args.mixed_purge and args.mutation not in (None,"invocation_purged_first"):
+        parser.error("--mixed-purge selects only invocation_purged_first")
     if args.mixed_start_repair and args.mutation not in (None,"skipped_start_reconciler"):
         parser.error("--mixed-start-repair selects only skipped_start_reconciler")
     if args.mixed_enqueue and args.mutation not in (None,"missing_run_message_id"):
@@ -160,6 +163,13 @@ def main():
                         environment={"WF_MIXED_START_REPAIR_MUTATION": "1"},
                         markers=["MIXED_GUARD_ADMISSION shorts_pending=4 timers_suspended=3 signals_suspended=2 fanout_suspended=1", "MIXED_START_GAP_ADMISSION", "MIXED_GUARD_FAULT", "signal=SIGKILL", "MIXED_START_RAW_INVOCATION", "MIXED_START_SCAN inspected=0 reenqueued=0 retained_dispatch=0", "MIXED_GUARD_COHORT shorts=4 timers=3 signals=2 fanout=1 children=6 grandchildren=12 terminal=28", "MIXED_MUTATION_ESCAPE category=skipped_start_reconciler retained_invocations=29 original_terminal=28 orphan_journal=absent orphan_terminal=absent"])
         selected = [mutation]
+    if args.mixed_purge:
+        mutation = dict(next(m for m in MUTATIONS if m["name"] == "invocation_purged_first"))
+        mutation.update(package="./integration", test="TestMixedPurgeMutationAfterJournalLeaderKill",
+                        fixture_files=["integration/mixed_determinism_mutation_test.go", "integration/mixed_purge_mutation_test.go"],
+                        environment={"WF_MIXED_PURGE_MUTATION": "1"},
+                        markers=["MIXED_GUARD_ADMISSION shorts_pending=4 timers_suspended=3 signals_suspended=2 fanout_suspended=1", "MIXED_GUARD_FAULT", "signal=SIGKILL", "MIXED_GUARD_COHORT shorts=4 timers=3 signals=2 fanout=1 children=6 grandchildren=12 terminal=28", "MIXED_PURGE_RAW_INVOCATION", "MIXED_PURGE_RETAINED_JOURNAL", "MIXED_PURGE_RETAINED_STATE", "MIXED_MUTATION_ESCAPE category=invocation_purged_first cut_before=signals invocation=absent journal=unchanged terminal=unchanged purge_marker=retained retry=invocation_not_found original_terminal=28"])
+        selected = [mutation]
     report = dict(scope="focused production mutations; full mixed-chaos gate remains open",
                   head=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                   cas_rounds=1000, seeds_per_modeled_workload=1000, mutations=[])
@@ -173,7 +183,9 @@ def main():
         report["scope"] = "one mixed production enqueue mutation; remaining mixed categories and full release remain open"
     if args.mixed_start_repair:
         report["scope"] = "one mixed production start repair mutation; mutant leaves admitted orphan unstarted; remaining purge category and full release remain open"
-    if args.mixed_determinism or args.mixed_leases or args.mixed_cas or args.mixed_enqueue or args.mixed_start_repair:
+    if args.mixed_purge:
+        report["scope"] = "one mixed production purge-order mutation; six focused mixed categories have fixtures; full sustained mixed-chaos release gate remains open"
+    if args.mixed_determinism or args.mixed_leases or args.mixed_cas or args.mixed_enqueue or args.mixed_start_repair or args.mixed_purge:
         report.pop("cas_rounds")
         report.pop("seeds_per_modeled_workload")
     success = True

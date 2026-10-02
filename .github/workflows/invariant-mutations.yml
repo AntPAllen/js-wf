@@ -10,6 +10,7 @@ on:
       - 'integration/mixed_cas_mutation_test.go'
       - 'integration/mixed_enqueue_mutation_test.go'
       - 'integration/mixed_start_repair_mutation_test.go'
+      - 'integration/mixed_purge_mutation_test.go'
       - 'integration/start_retry_repair_test.go'
       - 'worker/*.go'
       - 'testcluster/*.go'
@@ -144,4 +145,24 @@ jobs:
         with:
           name: mixed-production-start-repair
           path: ${{ runner.temp }}/mixed-start-repair
+          if-no-files-found: error
+
+  mixed-purge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Detect invocation-first purge with retained journal and failed recovery after leader kill
+        run: python3 scripts/check-invariant-mutations.py --mixed-purge --output "$RUNNER_TEMP/mixed-purge"
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mixed-production-purge
+          path: ${{ runner.temp }}/mixed-purge
           if-no-files-found: error

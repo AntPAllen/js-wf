@@ -45,6 +45,15 @@
   unbounded verification failure is preserved and rejected; bounded readiness
   attempts recover without changing the recovery gate. See
   [start repair evidence](scale/mixed-start-repair-mutation-2026-10-02/).
+- The final local mixed purge-order pair completes/audits all28 original
+  invocations after leader SIGKILL, then cuts production retention before signal
+  deletion. The intact path retains the invocation, resumes idempotently and
+  reuses the ID with a fresh index0..3 journal/new-generation terminal. The
+  mutant loses WF_INV while journal/state/marker remain and an actual purge retry
+  returns ErrNotFound. Independent generation checks and the49.91s race baseline
+  pass. See [purge evidence](scale/mixed-purge-mutation-2026-10-02/).
+  All six source categories now have focused mixed fixtures; hosted acceptance
+  for the new purge fixture and prior start-repair campaign remains pending.
 - Current-source [100k run37002783868](https://github.com/AntPAllen/js-wf/actions/runs/37002783868)
   remains live at `3184b65`. The
   [ten-minute ahead run37002781141](https://github.com/AntPAllen/js-wf/actions/runs/37002781141)
@@ -54,7 +63,7 @@
   audit/drain and verdict remain required.
 
 The current100k gate, sustained ahead20/200 acceptance, full200-seed Tier2 matrix,
-full Tier3 matrix/24h soak, the remaining purge-order mixed mutation category and combined timer-cut/
+full Tier3 matrix/24h soak, the sustained whole-chaos mutation campaign and combined timer-cut/
 continuation cases remain open. Running campaigns and component proofs do not
 clear these gates. The sections below retain chronological evidence and failures.
 The planned increase to10k per commit is not implemented; the plan conditions
