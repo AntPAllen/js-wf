@@ -31,3 +31,25 @@ remain local at `/tmp/js-wf-timer-volume-million-service-20261001` and
 
 This is delivery evidence only. Neither the million-timer release gate nor the
 separate full-runtime24-hour soak has passed.
+
+## Isolated restored-store observation
+
+All three store copies were reopened on fresh localhost ports, using the pinned
+original server binary and server names. Five monitoring snapshots per node were
+recorded over20s, then all inspection processes were joined. Every original
+store-file SHA256 was checked before/after and remains unchanged.
+
+The last snapshot reports WF_RUN message counts768/141/0 across nodes0/1/2,
+with node0 the reported stream leader and all64 consumer pending/ack-pending
+counts zero on each node. Last sequence is2000000 on every replica. This is
+evidence of retained physical messages and divergent local store state in the
+restored copies, not proof of metadata-deadline exhaustion or its original cause.
+A zero-message follower cannot certify leader drain. Inspect retained message
+subjects/headers and replica convergence before attributing this to the server
+or changing any drain gate. The inspection restarted only copies, not originals.
+
+`store-copy/originals.tar.gz` preserves every top-level diagnostic file, including
+all15 full monitoring snapshots, logs, process/port identities, exact inspection
+script, original-file hash inventory, unchanged-store proof, and summary. Every
+member was compared by SHA256 on readback. Modified copied stores remain at
+`/tmp/js-wf-million-store-copy-20261002` and are excluded from that archive.

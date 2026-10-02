@@ -6927,3 +6927,19 @@ fixtures remain included. Four redundant queued docs-only push runs were cancele
 manual qualifications remain. Current118-workload100k run37028379931 is confirmed
 in progress; fresh all-six mutation run37030840346 remains queued. Focused ahead
 seed27 run37030391587 is terminal success; raw acceptance review remains pending.
+
+
+## Million-timer store-copy drain observation and new qualification handles
+
+Restoring isolated copies of all three failed million-timer stores yields
+WF_RUN message counts768/141/0 while node0 is the reported stream leader.
+All64 consumers report zero pending/ack-pending; last sequence is2000000.
+Every original store file is byte-identical before/after inspection.
+[All snapshots and script](scale/million-timer-terminal-2026-10-02/) are preserved.
+This does not certify original drain or establish the cause of local replica
+divergence. Inspect retained messages and convergence before altering gates.
+
+The combined continuation workflow is launched at e507a96: budget20 run
+37037252985 and production default100000 run37037256768 are queued.
+Neither launch is a passed qualification. The118-workload100k run remains
+confirmed in progress; the fresh all-six ten-minute mutation run is queued.
