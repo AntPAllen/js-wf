@@ -5767,3 +5767,23 @@ package3.138s. Corpus inventory is232; full232/100k acceptance is not claimed.
 are retained. Direct repair at due/heal and an ideal common provider do not prove
 sampling, elected repair-loop cadence or native broker recovery. R5 fixture
 wiring and admitted native ahead/behind gates remain open, with full scope intact.
+
+## Native Docker clock topology and observed repair-loop prerequisite (2026-10-02)
+
+Per-node copied placement tags are now supported in the Docker fixture, preserving
+existing untagged constructors. Parser/copy/invalid-topology/restart-config race
+tests pass1.016s. The suspended repair loop accepts a domain clock while retaining
+both scan/repair observers and production fenced cursor logic; full reconcile
+race passes13.346s, without claiming native elected-loop domain coverage.
+
+[Native five-container probes](scale/runtimeclock-docker-topology-2026-10-02/README.md)
+pass37.25s / package38.262s with actual±60s server4 shifts, exact five R1 placement
+constraints and fresh canonical bounds through healthy-node loss/restart. The
+initial immediate metadata check timed out in both directions; explicit30s
+restart readiness has one transient timeout then success in each. Full failed
+log/source hashes, final logs, topology, bounds and server configs/logs are retained
+and verified. Worker/timer latency gates are unchanged.
+
+The mixed R5 fixture origin selection and controller audit still require canonical
+domain plus shifted scheduling provenance before enabling tagged workers. These
+prerequisites do not clear admitted native ahead/behind or full release gates.

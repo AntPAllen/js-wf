@@ -94,3 +94,9 @@ unsafe due decisions. Provisioning does not perform that deployment migration.
 [Topology, shared-clock and actual CLI race evidence](../docs/scale/timer-clock-topology-cli-2026-10-02/README.md)
 covers healthy native/fallback timers and independent probe loss. It does not
 accept skewed-leader recovery or the full release matrix.
+
+[Native five-container topology evidence](../docs/scale/runtimeclock-docker-topology-2026-10-02/README.md)
+verifies per-server placement tags, actual±60s outliers and fresh bounds through
+one healthy probe's loss and restart. Post-restart metadata readiness can be
+transiently unavailable; sampling continues from independent available probes.
+This does not yet accept the mixed R5 workflow recovery gates.

@@ -479,7 +479,14 @@ func RunSuspendedLoopObserved(ctx context.Context, js jetstream.JetStream, worke
 // RunSuspendedLoopWithObservers records both each scan result and each actual
 // repair attempt, including uncertain publications before a scan error.
 func RunSuspendedLoopWithObservers(ctx context.Context, js jetstream.JetStream, workerID string, interval time.Duration, budget int, observe func(uint64, ScanResult, error), repair func(RepairEvent)) error {
+	return RunSuspendedLoopWithClockAndObservers(ctx, js, workerID, interval, budget, observe, repair, nil)
+}
+
+// RunSuspendedLoopWithClockAndObservers retains both scan and repair evidence
+// while using the tagged workers' domain provider under the fenced cursor loop.
+func RunSuspendedLoopWithClockAndObservers(ctx context.Context, js jetstream.JetStream, workerID string, interval time.Duration, budget int, observe func(uint64, ScanResult, error), repair func(RepairEvent), clock TimerDomainClock) error {
 	scanner := NewSuspendedScan(js)
+	scanner.DomainNow = clock
 	scanner.Observe = repair
 	scan := scanner.Scan
 	if observe == nil {

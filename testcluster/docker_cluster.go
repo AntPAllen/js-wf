@@ -30,6 +30,7 @@ type DockerCluster struct {
 	urls          []string
 	monitorURLs   []string
 	stores        []string
+	serverTags    map[int][]string
 	syncInterval  string
 	skewNode      int
 	skewSeconds   int64
@@ -50,7 +51,7 @@ func dockerCommand(ctx context.Context, args ...string) (string, error) {
 // StartDockerCluster builds this module's pinned nats-server in a scratch
 // image. Each node routes to node zero; discovered routes form the cluster.
 func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
-	return startDockerCluster(root, count, "", 0, nil)
+	return startDockerCluster(root, count, "", 0, nil, nil)
 }
 
 // StartDockerClusterWithStores binds existing caller-owned directories to the
@@ -58,7 +59,7 @@ func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
 // caller must keep these filesystems mounted until after Close; restarts reuse
 // the same bindings. This supports private device-mapper fault fixtures.
 func StartDockerClusterWithStores(root string, count int, stores map[int]string) (*DockerCluster, error) {
-	return startDockerCluster(root, count, "", 0, stores)
+	return startDockerCluster(root, count, "", 0, stores, nil)
 }
 
 // StartMixedVersionDockerCluster starts node zero on oldBinary while the other
@@ -67,7 +68,7 @@ func StartMixedVersionDockerCluster(root string, count int, oldBinary string) (*
 	if oldBinary == "" {
 		return nil, fmt.Errorf("old server binary is required")
 	}
-	return startDockerCluster(root, count, oldBinary, 0, nil)
+	return startDockerCluster(root, count, oldBinary, 0, nil, nil)
 }
 
 // StartAdvancingClockDockerCluster prepares an initially unshifted cluster
@@ -79,12 +80,62 @@ func StartAdvancingClockDockerCluster(root string, count int, advance time.Durat
 	if os.Getenv("WF_TIER3_SERVER_SKEW") != "" {
 		return nil, fmt.Errorf("clock advance cannot be combined with a skewed peer")
 	}
-	return startDockerCluster(root, count, "", advance, nil)
+	return startDockerCluster(root, count, "", advance, nil, nil)
 }
 
-func startDockerCluster(root string, count int, oldBinary string, advance time.Duration, overrides map[int]string) (_ *DockerCluster, err error) {
+// StartDockerClusterWithStoresAndTags copies documented server placement tags.
+// Restarts keep the same per-node configuration; callers select unique tags for
+// independent probes. Existing constructors retain their untagged configuration.
+func StartDockerClusterWithStoresAndTags(root string, count int, stores map[int]string, tags map[int][]string) (*DockerCluster, error) {
+	return startDockerCluster(root, count, "", 0, stores, tags)
+}
+
+func copyDockerServerTags(count int, tags map[int][]string) (map[int][]string, error) {
+	out := make(map[int][]string, len(tags))
+	for node, values := range tags {
+		if node < 0 || node >= count {
+			return nil, fmt.Errorf("server tag node %d out of range", node)
+		}
+		seen := map[string]bool{}
+		for _, value := range values {
+			if value == "" || strings.TrimSpace(value) != value || strings.ContainsAny(value, "\r\n") || seen[value] {
+				return nil, fmt.Errorf("invalid or duplicate server tag")
+			}
+			seen[value] = true
+		}
+		out[node] = append([]string(nil), values...)
+	}
+	return out, nil
+}
+
+func (c *DockerCluster) serverConfig(i int) (string, error) {
+	path := filepath.Join(c.root, "nats.conf")
+	if len(c.serverTags[i]) == 0 {
+		return path, nil
+	}
+	base, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	tags, err := json.Marshal(c.serverTags[i])
+	if err != nil {
+		return "", err
+	}
+	path = filepath.Join(c.root, fmt.Sprintf("node-%d.conf", i))
+	data := append(append(base, '\n'), []byte("server_tags: "+string(tags)+"\n")...)
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
+func startDockerCluster(root string, count int, oldBinary string, advance time.Duration, overrides map[int]string, tags map[int][]string) (_ *DockerCluster, err error) {
 	if count < 3 || count > 5 {
 		return nil, fmt.Errorf("docker cluster count must be 3..5")
+	}
+	serverTags, err := copyDockerServerTags(count, tags)
+	if err != nil {
+		return nil, err
 	}
 	stores, err := dockerStorePaths(root, count, overrides)
 	if err != nil {
@@ -93,7 +144,7 @@ func startDockerCluster(root string, count int, oldBinary string, advance time.D
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return nil, err
 	}
-	c := &DockerCluster{root: root, stores: stores, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1, oldNode: -1, clockAdvance: advance}
+	c := &DockerCluster{root: root, stores: stores, serverTags: serverTags, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1, oldNode: -1, clockAdvance: advance}
 	if oldBinary != "" {
 		c.oldNode = 0
 		data, readErr := os.ReadFile(oldBinary)
@@ -257,6 +308,10 @@ func (c *DockerCluster) RestartNode(i int) error {
 	if err := os.MkdirAll(store, 0755); err != nil {
 		return err
 	}
+	configPath, err := c.serverConfig(i)
+	if err != nil {
+		return err
+	}
 	serverArgs := []string{"-c", "/etc/nats.conf", "-a", "0.0.0.0", "-p", "4222", "-m", "8222", "-n", c.names[i], "-js", "-sd", "/data", "-cluster_name", c.network, "-cluster", "nats://0.0.0.0:6222"}
 	peer := 0
 	if i == 0 {
@@ -276,7 +331,7 @@ func (c *DockerCluster) RestartNode(i int) error {
 	if c.monitorURLs[i] != "" {
 		monitorBinding = strings.TrimPrefix(c.monitorURLs[i], "http://") + ":8222"
 	}
-	args := []string{"run", "-d", "--rm", "--name", c.names[i], "--network", c.clientNetwork, "--user", fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()), "-p", clientBinding, "-p", monitorBinding, "-v", store + ":/data", "-v", filepath.Join(c.root, "nats.conf") + ":/etc/nats.conf:ro"}
+	args := []string{"run", "-d", "--rm", "--name", c.names[i], "--network", c.clientNetwork, "--user", fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()), "-p", clientBinding, "-p", monitorBinding, "-v", store + ":/data", "-v", configPath + ":/etc/nats.conf:ro"}
 	if i == c.oldNode {
 		args = append(args, "--entrypoint", "/nats-server-old")
 	} else if c.clockAdvanced {
