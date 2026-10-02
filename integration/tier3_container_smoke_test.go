@@ -342,9 +342,9 @@ func waitFiveReplicaReadiness(ctx context.Context, js jetstream.JetStream, parti
 				info, err = stream.Info(attempt)
 			}
 			stop()
-			if err != nil || info.Cluster == nil || info.Cluster.Leader == "" || len(info.Cluster.Replicas) != 4 {
+			if err != nil || info == nil || info.Cluster == nil || info.Cluster.Leader == "" || len(info.Cluster.Replicas) != 4 {
 				ready = false
-				last = fmt.Sprintf("%s: info=%+v err=%v", name, info, err)
+				last = fiveReplicaReadinessDetail(name, info, err)
 				break
 			}
 			for _, replica := range info.Cluster.Replicas {
@@ -365,9 +365,9 @@ func waitFiveReplicaReadiness(ctx context.Context, js jetstream.JetStream, parti
 					consumerInfo, consumerErr = consumer.Info(attempt)
 				}
 				stop()
-				if consumerErr != nil || consumerInfo.Cluster == nil || consumerInfo.Cluster.Leader == "" || len(consumerInfo.Cluster.Replicas) != 4 {
+				if consumerErr != nil || consumerInfo == nil || consumerInfo.Cluster == nil || consumerInfo.Cluster.Leader == "" || len(consumerInfo.Cluster.Replicas) != 4 {
 					ready = false
-					last = fmt.Sprintf("run consumer: info=%+v err=%v", consumerInfo, consumerErr)
+					last = fiveReplicaReadinessDetail("run consumer", consumerInfo, consumerErr)
 					break
 				}
 				for _, replica := range consumerInfo.Cluster.Replicas {
@@ -385,4 +385,21 @@ func waitFiveReplicaReadiness(ctx context.Context, js jetstream.JetStream, parti
 		time.Sleep(200 * time.Millisecond)
 	}
 	return fmt.Errorf("timed out waiting for five current replicas: %s (context: %v)", last, ctx.Err())
+}
+
+// Preserve nested cluster/replica values rather than pointer addresses.
+func fiveReplicaReadinessDetail(name string, info any, err error) string {
+	detail := struct {
+		Name  string `json:"name"`
+		Info  any    `json:"info"`
+		Error string `json:"error,omitempty"`
+	}{Name: name, Info: info}
+	if err != nil {
+		detail.Error = err.Error()
+	}
+	data, marshalErr := json.Marshal(detail)
+	if marshalErr != nil {
+		return fmt.Sprintf("%s: encode readiness: %v; request: %v", name, marshalErr, err)
+	}
+	return string(data)
 }

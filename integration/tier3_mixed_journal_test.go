@@ -802,6 +802,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			if err != nil {
 				t.Logf("tier3 %s fault failed: %v", row, err)
 				cancel()
+				// Read monitoring independently after failure and before
+				// cleanup. These snapshots cannot satisfy the failed gate.
+				diagnosticCtx, diagnosticStop := context.WithTimeout(context.Background(), 6*time.Second)
+				for _, captureErr := range saveFiveContainerFaultDiagnostics(diagnosticCtx, cluster.Diagnostic, prefix) {
+					t.Logf("save fault diagnostic: %v", captureErr)
+				}
+				diagnosticStop()
 				faultDone <- err
 				return
 			}

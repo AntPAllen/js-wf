@@ -6540,3 +6540,16 @@ and failed in102.8s: its source exit precedes the earliest duration boundary by
 Original test events, server logs and non-store artifacts are archived with
 verified member hashes under the same evidence directory. This is a failed row;
 no timing/drain acceptance or server-side root cause is claimed.
+
+## Replica recovery failure diagnostics
+
+The failed ahead seed5 source-exit smoke has quorum-stall warnings on healthy
+nodes too, after route reconnection; a single stale replica is not established
+as the cause. Five-replica readiness errors now preserve nested cluster/replica
+JSON rather than pointer addresses. Every Tier3 mixed controller failure captures
+independent JetStream/Raft, route and connection monitoring on all five nodes,
+with controller time brackets and explicit request/invalid-JSON errors. A shared
+six-second diagnostic budget runs after failure, before cleanup; it does not
+extend the recovery gate or certify the failed row. Focused race checks pass for
+nested state, blocked requests and partial responses. Evidence is under
+`scale/clock-recovery-diagnostics-2026-10-02/`.
