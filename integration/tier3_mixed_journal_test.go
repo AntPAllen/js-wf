@@ -26,6 +26,7 @@ import (
 	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/reconcile"
+	"js-wf/runtimeclock"
 	"js-wf/testcluster"
 	"js-wf/wf"
 	"js-wf/worker"
@@ -109,6 +110,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		t.Fatal("duration must be35s smoke,10m row,or24h single-row soak")
 	}
 	timerCutRequired := os.Getenv("WF_TIER3_CLOCK_TIMER_CUT") == "1"
+	commonClockEnabled := matrixServerClockOffset(row) != 0 && os.Getenv("WF_TIER3_COMMON_CLOCK") == "1"
 	if timerCutRequired && matrixServerClockOffset(row) == 0 {
 		t.Fatal("timer cut admission requires a server-clock row")
 	}
@@ -154,7 +156,14 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		}()
 		stores = map[int]string{4: blockDisk.StoreDir}
 	}
-	cluster, err := testcluster.StartDockerClusterWithStores(filepath.Join(root, "cluster"), 5, stores)
+	var clockTags map[int][]string
+	if commonClockEnabled {
+		clockTags = map[int][]string{}
+		for node := 0; node < 5; node++ {
+			clockTags[node] = []string{fmt.Sprintf("wf-clock-node-%d", node)}
+		}
+	}
+	cluster, err := testcluster.StartDockerClusterWithStoresAndTags(filepath.Join(root, "cluster"), 5, stores, clockTags)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -214,6 +223,18 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			t.Fatal(err)
 		}
 	}
+	var timerClock *runtimeclock.Clock
+	var timerDomainNow reconcile.TimerDomainClock
+	var clockOptions []worker.Option
+	if commonClockEnabled {
+		timerClock, err = prepareMatrixIndependentClock(ctx, js, cluster, clockTags, root)
+		if err != nil {
+			t.Fatal(err)
+		}
+		timerDomainNow = timerClock.Lower
+		clockOptions = append(clockOptions, worker.WithTimerClock(runtimeclock.DeadlineDomain, timerClock.Bounds))
+		t.Log("TIER3_COMMON_TIMER_CLOCK=utc-quorum-v1")
+	}
 	var recorder history.Recorder
 	c := client.NewObserved(js, &recorder)
 	var evidenceMu sync.Mutex
@@ -228,7 +249,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	var observeOperations func(worker.OperationEvent)
 	if matrixServerClockOffset(row) != 0 {
 		observeOperations = func(event worker.OperationEvent) {
-			if event.Operation != "journal_append" && event.Operation != "timer_clock" {
+			if event.Operation != "journal_append" && event.Operation != "timer_clock" && event.Operation != "timer_domain_clock" && event.Operation != "timer_native_hint" {
 				return
 			}
 			evidenceMu.Lock()
@@ -360,7 +381,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	if row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
 		for node := 0; node < 5; node++ {
-			w, err := worker.New(ctx, js, fmt.Sprintf("tier3-mixed-%d", node), handlers, worker.WithPartitionConcurrency(4), worker.WithOperationObserver(observeOperations), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
+			options := []worker.Option{worker.WithPartitionConcurrency(4), worker.WithOperationObserver(observeOperations), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
 				evidenceMu.Lock()
 				dispatch = append(dispatch, event)
 				evidenceMu.Unlock()
@@ -368,7 +389,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				evidenceMu.Lock()
 				fencing = append(fencing, event)
 				evidenceMu.Unlock()
-			}))
+			})}
+			options = append(options, clockOptions...)
+			w, err := worker.New(ctx, js, fmt.Sprintf("tier3-mixed-%d", node), handlers, options...)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -457,7 +480,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		return reconcile.RunRepairLoopObserved(workCtx, js, "tier3-mixed-signal", "signal", time.Second, 32, repairObserver)
 	})
 	launch("repair/suspended", func() error {
-		return reconcile.RunSuspendedLoopWithObservers(workCtx, js, "tier3-mixed-suspended", time.Second, 8, func(cursor uint64, result reconcile.ScanResult, err error) {
+		return reconcile.RunSuspendedLoopWithClockAndObservers(workCtx, js, "tier3-mixed-suspended", time.Second, 8, func(cursor uint64, result reconcile.ScanResult, err error) {
 			evidenceMu.Lock()
 			defer evidenceMu.Unlock()
 			message := ""
@@ -470,7 +493,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				Result reconcile.ScanResult
 				Error  string
 			}{time.Now().UTC(), cursor, result, message})
-		}, repairObserver)
+		}, repairObserver, timerDomainNow)
 	})
 	defer func() {
 		stopWork()

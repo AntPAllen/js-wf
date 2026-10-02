@@ -580,6 +580,18 @@ No sustained clock
 row is verified by the focused controller contract; existing focused clock proofs and the full
 24-hour matrix remain separate requirements.
 
+The R5 clock rows can opt into the shared canonical clock with
+`WF_TIER3_COMMON_CLOCK=1` (workflow input `common_timer_clock`). Five uniquely
+tagged R1 memory probes bind to five physical servers. Workers and suspended
+repair share one provider with the configured one-skewed-peer assumption;
+canonical creation observations and fresh shifted native hints are retained
+separately. `independent-clock.json` preserves exact topology and startup bounds,
+and the artifact guard requires matching node tags and canonical domains on all
+retained timer requests. Combine this with `WF_TIER3_CLOCK_TIMER_CUT=1` for
+removal before the original request-start-plus-duration boundary. The existing
+early-completion and strict30s latency gates apply. Historical legacy-clock
+failures remain open until new admitted native evidence passes.
+
 **The "done" bar for a release**
 
 The Tier 1 timer transport also models explicit leader wall-clock source

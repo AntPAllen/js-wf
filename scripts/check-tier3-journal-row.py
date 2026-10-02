@@ -80,7 +80,11 @@ def check(events, duration, expected_row='journal'):
     profiles = re.findall(r'TIER3_CLOCK_TIMER_CUT_PROFILE=(\S+)', log)
     if profiles and (profiles != ['first-wait-2s'] or not row.startswith('server_clock_')):
         raise ValueError('invalid or duplicated clock timer cut profile')
+    clocks = re.findall(r'TIER3_COMMON_TIMER_CLOCK=(\S+)', log)
+    if clocks and (clocks != ['utc-quorum-v1'] or not row.startswith('server_clock_')):
+        raise ValueError('invalid or duplicated common timer clock profile')
     return dict(scope=scope, seed=int(seed), duration_seconds=seconds,
+                common_timer_clock=clocks[0] if clocks else None,
                 clock_timer_cut_profile=profiles[0] if profiles else None,
                 shortened_smoke=duration == '35s', invocations=invocations, journal_entries=entries,
                 confirmed_faults=faults, active_consumer_faults=active_consumer_faults, cells=cells, clears_full_tier3_release=False)
@@ -603,6 +607,46 @@ def check_server_clock_artifacts(root, report, selected_row):
                 journal_sigkill_boundaries=len(faults), checks_all_five_servers=True)
 
 
+def check_common_timer_clock(root, report):
+    if report.get('common_timer_clock') != 'utc-quorum-v1':
+        raise ValueError('common timer clock lacks its explicit profile')
+    proof = json.loads((root/'independent-clock.json').read_text())
+    cfg = proof['config']
+    if any(cfg.get(k) != v for k, v in dict(max_skewed=1, sample_budget='250ms', healthy_error='20ms', reading_age='1s', refresh='100ms').items()):
+        raise ValueError('unexpected common clock sampling contract')
+    probes, infos = cfg['probes'], proof['probes']
+    if len(probes) != 5 or len(infos) != 5:
+        raise ValueError('common clock requires five physical probes')
+    for key in ('name', 'server', 'identity', 'tag'):
+        if len({p[key] for p in probes}) != 5:
+            raise ValueError('common clock aliases physical probes')
+    for node, (probe, info) in enumerate(zip(probes, infos)):
+        if probe['name'] != f'WF_CLOCK_{node}' or probe['identity'] != f'docker-node-{node}' or probe['tag'] != f'wf-clock-node-{node}' or not probe['server'].endswith(f'-n{node}'):
+            raise ValueError('common clock physical binding mismatch')
+        config, cluster = info['config'], info['cluster']
+        expected = dict(name=probe['name'], subjects=['wf.clock.'+probe['name']], num_replicas=1,
+                        storage='memory', retention='limits', discard='old', max_msgs=1, max_bytes=1, max_msg_size=1)
+        if any(config.get(k) != v for k, v in expected.items()) or config['placement']['tags'] != [probe['tag']]:
+            raise ValueError('common clock probe configuration mismatch')
+        if config['metadata'].get('workflow_clock_domain') != 'utc-quorum-v1' or config['metadata'].get('workflow_clock_identity') != probe['identity']:
+            raise ValueError('common clock probe metadata mismatch')
+        if cluster['leader'] != probe['server'] or cluster.get('raft_group') or cluster.get('replicas') or cluster.get('desired'):
+            raise ValueError('common clock probe is not physically independent R1')
+        node_config = (root/'cluster'/f'node-{node}.conf').read_text()
+        tags = re.findall(r'^server_tags:\s*(\[[^\n]+\])\s*$', node_config, re.MULTILINE)
+        if len(tags) != 1 or json.loads(tags[0]) != [probe['tag']]:
+            raise ValueError('common clock configured node tag mismatch')
+    before, lower, upper, after = [timestamp_ns(proof[k]) for k in ('before','lower','upper','after')]
+    if before > after or lower > upper or lower > after or upper < before:
+        raise ValueError('common clock startup bounds miss controller bracket')
+    receipts = json.loads((root/'controller-receipts.json').read_text())
+    requests = [r for r in receipts if r['entry']['kind'] == 'StepRequested' and r['entry'].get('payload', {}).get('kind') == 'timer']
+    if not requests or any(r['entry']['payload'].get('clock_domain') != 'utc-quorum-v1' for r in requests):
+        raise ValueError('common clock run contains untagged or unknown-domain timers')
+    return dict(physical_probes=5, canonical_timer_requests=len(requests), startup_bounds_overlap_controller=True,
+                healthy_error_assumption='20ms', max_skewed_assumption=1, clears_full_tier3_release=False)
+
+
 def check_server_clock_role_artifacts(root, report, selected_row):
     faults = json.loads((root/'faults.json').read_text())
     roles = json.loads((root/'server-clock-roles.json').read_text())
@@ -660,9 +704,12 @@ if __name__ == '__main__':
     parser.add_argument('--duration', required=True, choices=('35s', '10m'))
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--require-clock-timer-cut', action='store_true')
+    parser.add_argument('--require-common-timer-clock', action='store_true')
     args = parser.parse_args()
     if args.require_clock_timer_cut and not args.row.startswith('server_clock_'):
         parser.error('--require-clock-timer-cut requires a server-clock row')
+    if args.require_common_timer_clock and not args.row.startswith('server_clock_'):
+        parser.error('--require-common-timer-clock requires a server-clock row')
     events = [json.loads(line) for line in args.events.read_text().splitlines() if line.strip()]
     report = check(events, args.duration, args.row)
     if args.row == 'auto_journal':
@@ -703,6 +750,8 @@ if __name__ == '__main__':
         controller=load('controller_latency','check-controller-latency.py')
         report['controller_latency_artifact_checks']=controller.check(args.root,report,timestamp_ns)
         report['clock_role_artifact_checks']=check_server_clock_role_artifacts(args.root,report,args.row)
+        if args.require_common_timer_clock or report['common_timer_clock']:
+            report['common_timer_clock_artifact_checks']=check_common_timer_clock(args.root,report)
         if required:
             admission=load('clock_timer_cut','check-clock-timer-cut.py')
             report['clock_timer_cut_artifact_checks']=admission.check(args.root,report,args.row,timestamp_ns)

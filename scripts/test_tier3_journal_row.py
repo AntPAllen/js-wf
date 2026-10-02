@@ -45,6 +45,46 @@ class JournalRowChecks(unittest.TestCase):
                 with self.assertRaises(ValueError): row.check(events, '10m')
 
 
+class CommonClockArtifactChecks(unittest.TestCase):
+    def fixture(self, root):
+        import json
+        probes = [dict(name=f'WF_CLOCK_{n}', server=f'cluster-n{n}', identity=f'docker-node-{n}', tag=f'wf-clock-node-{n}') for n in range(5)]
+        infos = [dict(config=dict(name=p['name'], subjects=['wf.clock.'+p['name']], num_replicas=1,
+                                 storage='memory', retention='limits', discard='old', max_msgs=1, max_bytes=1, max_msg_size=1,
+                                 placement=dict(tags=[p['tag']]), metadata=dict(workflow_clock_domain='utc-quorum-v1', workflow_clock_identity=p['identity'])),
+                      cluster=dict(leader=p['server'])) for p in probes]
+        proof = dict(config=dict(probes=probes, max_skewed=1, sample_budget='250ms', healthy_error='20ms', reading_age='1s', refresh='100ms'),
+                     probes=infos, before='2026-10-02T04:00:00Z', lower='2026-10-02T03:59:59.95Z', upper='2026-10-02T04:00:00.05Z', after='2026-10-02T04:00:00.01Z')
+        (root/'cluster').mkdir()
+        for n, p in enumerate(probes):
+            (root/'cluster'/f'node-{n}.conf').write_text('server_tags: '+json.dumps([p['tag']])+'\n')
+        receipt = dict(entry=dict(kind='StepRequested', payload=dict(kind='timer', clock_domain='utc-quorum-v1')))
+        (root/'controller-receipts.json').write_text(json.dumps([receipt]))
+        return proof
+
+    def test_requires_independent_placed_probes_and_tagged_requests(self):
+        import tempfile, json
+        for mutation in (None, 'profile', 'identity', 'leader', 'replicas', 'placement', 'tag', 'bounds', 'domain', 'sampling', 'count'):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory); proof = self.fixture(root)
+                report = dict(common_timer_clock='utc-quorum-v1')
+                if mutation == 'profile': report['common_timer_clock'] = None
+                elif mutation == 'identity': proof['config']['probes'][4]['identity'] = 'docker-node-0'
+                elif mutation == 'leader': proof['probes'][4]['cluster']['leader'] = 'cluster-n0'
+                elif mutation == 'replicas': proof['probes'][4]['config']['num_replicas'] = 3
+                elif mutation == 'placement': proof['probes'][4]['config']['placement']['tags'] = ['wf-clock-node-0']
+                elif mutation == 'tag': (root/'cluster'/'node-4.conf').write_text('server_tags: ["wf-clock-node-0"]\n')
+                elif mutation == 'bounds': proof['lower'] = '2026-10-02T04:01:00Z'
+                elif mutation == 'domain': (root/'controller-receipts.json').write_text(json.dumps([dict(entry=dict(kind='StepRequested', payload=dict(kind='timer')))]))
+                elif mutation == 'sampling': proof['config']['max_skewed'] = 0
+                elif mutation == 'count': proof['probes'].pop()
+                (root/'independent-clock.json').write_text(json.dumps(proof))
+                if mutation:
+                    with self.assertRaises(ValueError): row.check_common_timer_clock(root, report)
+                else:
+                    self.assertEqual(row.check_common_timer_clock(root, report)['canonical_timer_requests'], 1)
+
+
 class ConsumerRowChecks(unittest.TestCase):
     def fixture(self):
         events = fixture()

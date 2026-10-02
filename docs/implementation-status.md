@@ -5843,3 +5843,17 @@ context cancellation occurs0.315ms after that partition's ownership move; raw
 timing and correlation are retained without claiming callback/server causality.
 All originals, complete log/API/reviews and correlation are verified and retained.
 This clears one sustained fixed-fleet seed, with200/churn/combined/24h gates open.
+
+## Shared canonical clock wired into the R5 skew fixture (2026-10-02)
+
+The opt-in `WF_TIER3_COMMON_CLOCK=1` clock rows now share one independent
+five-probe provider between all workers and observed suspended repairs.
+`independent-clock.json` retains topology, placements and startup bounds;
+workflow input `common_timer_clock` requires exact artifact corroboration and
+canonical domains on every retained timer request. Per-node configurations are
+uploaded. Original pending-timer cut and early-completion/p99 gates apply.
+[Wiring evidence](scale/r5-shared-clock-wiring-2026-10-02/README.md)
+retains compilation (native tests skipped), race admission controls1.031s and
+all40 Python artifact methods. Native ahead/behind admitted acceptance remains
+open; this wiring does not clear the historical clock failures. The million-timer
+service remains active, with454,256 receipts at this observation.

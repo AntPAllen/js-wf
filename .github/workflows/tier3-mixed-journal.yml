@@ -18,6 +18,10 @@ on:
         description: Require a pending positive Sleep before each server-clock cut
         type: boolean
         default: false
+      common_timer_clock:
+        description: Use and verify five independent clock probes for server-clock rows
+        type: boolean
+        default: false
 jobs:
   journal:
     runs-on: ubuntu-latest
@@ -28,6 +32,7 @@ jobs:
       WF_TIER3_MATRIX_DURATION: ${{ inputs.duration }}
       WF_TIER3_SYNC_INTERVAL: '2m'
       WF_TIER3_CLOCK_TIMER_CUT: ${{ inputs.clock_timer_cut && '1' || '' }}
+      WF_TIER3_COMMON_CLOCK: ${{ inputs.common_timer_clock && '1' || '' }}
       TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
       GOMEMLIMIT: 512MiB
       GOMAXPROCS: '2'
@@ -78,6 +83,7 @@ jobs:
           go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py
           cut_args=()
           if [ "$WF_TIER3_CLOCK_TIMER_CUT" = 1 ]; then cut_args+=(--require-clock-timer-cut); fi
+          if [ "$WF_TIER3_COMMON_CLOCK" = 1 ]; then cut_args+=(--require-common-timer-clock); fi
           python3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --output /tmp/tier3-mixed-journal-result.json "${cut_args[@]}"
           python3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"
           python3 scripts/review-tier3-fencing.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/fencing-timeline-review.json"
@@ -90,7 +96,7 @@ jobs:
             /tmp/tier3-mixed-journal/*.jsonl
             /tmp/tier3-mixed-journal/*.log
             /tmp/tier3-mixed-journal/*.txt
-            /tmp/tier3-mixed-journal/cluster/nats.conf
+            /tmp/tier3-mixed-journal/cluster/*.conf
             /tmp/tier3-mixed-journal-events.jsonl
             /tmp/tier3-mixed-journal-result.json
           if-no-files-found: warn
