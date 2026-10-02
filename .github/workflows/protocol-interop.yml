@@ -2,9 +2,9 @@ name: journal-protocol-interop
 on:
   workflow_dispatch:
   push:
-    paths: ['protocol/**', 'journal/**', 'worker/**', 'client/**', 'integrity/**', 'retention/**', 'cmd/wf-worker/**', 'integration/journal_encoding_test.go', 'integration/visibility_test.go', 'scripts/check-protocol-interop.py', 'scripts/protocol-vectors/**', 'wf/**', 'go.mod', 'go.sum', '.github/workflows/protocol-interop.yml']
+    paths: ['protocol/**', 'journal/**', 'worker/**', 'client/**', 'integrity/**', 'retention/**', 'cmd/wf-worker/**', 'integration/journal_encoding_test.go', 'integration/visibility_test.go', 'integration/confirmed_ack_contract_test.go', 'scripts/check-protocol-interop.py', 'scripts/protocol-vectors/**', 'wf/**', 'go.mod', 'go.sum', '.github/workflows/protocol-interop.yml']
   pull_request:
-    paths: ['protocol/**', 'journal/**', 'worker/**', 'client/**', 'integrity/**', 'retention/**', 'cmd/wf-worker/**', 'integration/journal_encoding_test.go', 'integration/visibility_test.go', 'scripts/check-protocol-interop.py', 'scripts/protocol-vectors/**', 'wf/**', 'go.mod', 'go.sum', '.github/workflows/protocol-interop.yml']
+    paths: ['protocol/**', 'journal/**', 'worker/**', 'client/**', 'integrity/**', 'retention/**', 'cmd/wf-worker/**', 'integration/journal_encoding_test.go', 'integration/visibility_test.go', 'integration/confirmed_ack_contract_test.go', 'scripts/check-protocol-interop.py', 'scripts/protocol-vectors/**', 'wf/**', 'go.mod', 'go.sum', '.github/workflows/protocol-interop.yml']
 permissions:
   contents: read
 jobs:
@@ -32,8 +32,11 @@ jobs:
           go test -p=1 ./integration -list '^TestProtobufWorkerResumesJSONPrefixAndCompacts$' | grep -Fx 'TestProtobufWorkerResumesJSONPrefixAndCompacts'
           go test -p=1 ./integration -list '^TestJSONWorkerResumesProtobufStep$' | grep -Fx 'TestJSONWorkerResumesProtobufStep'
           go test -p=1 ./integration -list '^TestProjectionRebuildLagAndPurge$' | grep -Fx 'TestProjectionRebuildLagAndPurge'
+          go test -p=1 ./integration -list '^TestReplicatedConfirmedAckWithHeldReply$' | grep -Fx 'TestReplicatedConfirmedAckWithHeldReply'
+          go test -p=1 ./worker -list '^TestConfirmedDispatchAcknowledgementRespectsDeadline$' | grep -Fx 'TestConfirmedDispatchAcknowledgementRespectsDeadline'
           go test -p=1 ./cmd/wf-worker -list '^TestWorkerRunnerProtobufJournal$' | grep -Fx 'TestWorkerRunnerProtobufJournal'
-          go test -p=1 -race ./integration -run '^(TestProtobufWorkerResumesJSONPrefixAndCompacts|TestJSONWorkerResumesProtobufStep|TestProjectionRebuildLagAndPurge)$' -count=1 -v
+          go test -p=1 -race ./integration -run '^(TestProtobufWorkerResumesJSONPrefixAndCompacts|TestJSONWorkerResumesProtobufStep|TestProjectionRebuildLagAndPurge|TestReplicatedConfirmedAckWithHeldReply)$' -count=1 -v
+          go test -p=1 -race ./worker -run '^TestConfirmedDispatchAcknowledgementRespectsDeadline$' -count=1 -v
           go test -p=1 -race ./cmd/wf-worker -run '^TestWorkerRunnerProtobufJournal$' -count=1 -v
       - name: Exchange exact uint64 and JSON payload bytes with Python
         shell: bash

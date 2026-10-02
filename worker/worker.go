@@ -569,7 +569,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		terminal, canceledTimer, terminalErr := w.terminalHeldDelivery(ctx, typ, id, timer, ops)
 		if terminal {
 			emit("terminal_held", nil)
-			ackErr := msg.Ack()
+			ackErr := w.acknowledgeDispatch(parent, msg, ops)
 			emit("ack", ackErr)
 			if ackErr == nil && canceledTimer {
 				w.metrics.cancelledTimerNoOps.Add(1)
@@ -754,11 +754,24 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		return
 	}
 	released = true
-	ackErr := msg.Ack()
+	ackErr := w.acknowledgeDispatch(parent, msg, ops)
 	emit("ack", ackErr)
 	if ackErr == nil && cancelledTimerNoOp {
 		w.metrics.cancelledTimerNoOps.Add(1)
 	}
+}
+
+// A successful local ACK publish does not establish the consumer's outcome.
+// Bound confirmed acknowledgement independently of the cancelled handler context.
+// An ambiguous error leaves durable state intact for safe redelivery; this does
+// not imply physical WorkQueue deletion has completed.
+func (w *Worker) acknowledgeDispatch(parent context.Context, msg jetstream.Msg, ops *deliveryOperations) error {
+	started := ops.begin()
+	ctx, stop := context.WithTimeout(parent, 2*time.Second)
+	defer stop()
+	err := msg.DoubleAck(ctx)
+	ops.finish(started, "dispatch_ack_confirmed", 0, "", err)
+	return err
 }
 
 func (w *Worker) enqueueCanceledHandoff(parent context.Context, typ, id string, runSequence uint64) {

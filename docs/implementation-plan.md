@@ -704,3 +704,13 @@ record that failure and the interval correction. Ordinary non-admitted clock
 rows retain eight 250ms waits. Admission, clock-origin/publication proof, duration,
 latency, retained-state and drain gates are unchanged; fresh full native evidence
 remains required for the corrected admitted profile.
+
+### Dispatch acknowledgement outcome
+
+Workers now use a parent-bound two-second `DoubleAck` for completed and
+terminal-held deliveries and record `dispatch_ack_confirmed` operation timings.
+A nil result establishes a server reply; an error remains ambiguous. It does not
+prove physical WorkQueue deletion, which is checked separately. The
+[held-reply R3 contract](scale/confirmed-dispatch-ack-2026-10-02/) verifies committed
+ACK with lost confirmation and successful retry. This improves provenance over
+local asynchronous ACK returns; it does not close the old ahead-clock drain miss.

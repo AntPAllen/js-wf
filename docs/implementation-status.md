@@ -6248,3 +6248,17 @@ pass. Current offline verifier output equals the original uploaded report. This
 clears one admitted ten-minute behind seed, not ahead,24h/full matrix/all cut
 combinations, or protobuf chaos. Old failed attempts remain retained.
 Existing100k and million handles remain live; no TTL-mismatch reruns.
+
+## Bounded confirmed worker acknowledgements (2026-10-02)
+
+[ACK boundary evidence](scale/confirmed-dispatch-ack-2026-10-02/) shows pinned client
+Ack is a local publish while DoubleAck waits for a reply. Held-response R3 race
+contract passes4.736s: another connection observes committed ACK despite sender
+timeout, retry confirms after resume, and physical stream drain is checked
+separately. Worker ACK points now use two-second parent-bound DoubleAck and
+explicit dispatch_ack_confirmed timing/error observations. Parent-deadline and
+cancellation controls pass; worker race41.418s and four real native/lifecycle
+checks24.260s pass. Future CI requires compiled ACK-contract/deadline test names.
+No drain gate changed. Async NAKs and old ahead failure causality remain open;
+this is stronger future outcome provenance, not a claimed old-failure fix.
+Changed-source full simulator and native acceptance remain required.

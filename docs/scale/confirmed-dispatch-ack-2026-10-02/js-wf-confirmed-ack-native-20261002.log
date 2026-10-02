@@ -1,0 +1,23 @@
+=== RUN   TestReplicatedConfirmedAckWithHeldReply
+    confirmed_ack_contract_test.go:106: confirmed=false: held server replies, committed consumer ACK observed independently, stream drain; ambiguous DoubleAck retry confirmed
+    confirmed_ack_contract_test.go:106: confirmed=true: held server replies, committed consumer ACK observed independently, stream drain; ambiguous DoubleAck retry confirmed
+--- PASS: TestReplicatedConfirmedAckWithHeldReply (3.72s)
+=== RUN   TestProtobufWorkerResumesJSONPrefixAndCompacts
+    journal_encoding_test.go:125: R3 mixed JSON/protobuf: four entries, one effect/terminal, all-peer audit, live/snapshot blob retention and compaction pass
+--- PASS: TestProtobufWorkerResumesJSONPrefixAndCompacts (3.74s)
+=== RUN   TestJSONWorkerResumesProtobufStep
+=== RUN   TestJSONWorkerResumesProtobufStep/completed=false
+    journal_encoding_test.go:242: protobuf-to-JSON recovery completed=false effects=2: retained prefix, higher epoch and all-peer audit pass
+=== RUN   TestJSONWorkerResumesProtobufStep/completed=true
+    journal_encoding_test.go:242: protobuf-to-JSON recovery completed=true effects=1: retained prefix, higher epoch and all-peer audit pass
+--- PASS: TestJSONWorkerResumesProtobufStep (6.76s)
+    --- PASS: TestJSONWorkerResumesProtobufStep/completed=false (3.46s)
+    --- PASS: TestJSONWorkerResumesProtobufStep/completed=true (3.30s)
+=== RUN   TestProjectionRebuildLagAndPurge
+=== RUN   TestProjectionRebuildLagAndPurge/json
+=== RUN   TestProjectionRebuildLagAndPurge/protobuf-v1
+--- PASS: TestProjectionRebuildLagAndPurge (8.99s)
+    --- PASS: TestProjectionRebuildLagAndPurge/json (4.48s)
+    --- PASS: TestProjectionRebuildLagAndPurge/protobuf-v1 (4.51s)
+PASS
+ok  	js-wf/integration	24.260s
