@@ -6193,3 +6193,9 @@ Ubuntu's runner lacks rg. The exact-name presence check now uses standard grep
 rejection. Native/storage CI acceptance remains open. Current-source behind
 36974795077 is queued at27b78ca with corrected all-waits profile metadata and both
 clock requirements. Original100k/million handles remain unchanged.
+
+Replacement protocol CI36974885921 is queued at035403d with exact test presence,
+fixture regeneration and persisted Go/Python exchange required. Known-invalid
+queued protocol36974762883 (same unavailable-rg guard) was cancelled to avoid a
+predictable infrastructure failure; this is not acceptance or a runtime test
+failure. Behind36974795077 remains queued at27b78ca. Launch snapshots retained.
