@@ -5829,3 +5829,17 @@ are compressed, hashed and verified. The actual canonical provider is ideal UTC;
 independent sampling has separate evidence. No canonical SIGKILL cut is claimed.
 R5 writer/provider/observer wiring, admitted ahead/behind recovery and full
 release scope remain open. The membership campaign36958387092 is in progress.
+
+## Independently verified sustained member-session recovery (2026-10-02)
+
+[Run36958387092](scale/tier3-automatic-membership-2026-10-02/hosted-ten-minute-recovered/README.md)
+passes the ten-minute workload and current independent reviewers:19 journal
+kills,28 actual member rejoins with higher epochs,1,736 terminal invocations,
+19,133 entries and783 acknowledged assignment writes with complete64-key CAS
+chains. Worst terminal/progress p99 are15.629884296s /13.040560128s. All145
+repairs are acknowledged; histories, invariant, immutable and physical-drain
+gates pass. Four fenced deliveries subsequently complete. One outside-server-cut
+context cancellation occurs0.315ms after that partition's ownership move; raw
+timing and correlation are retained without claiming callback/server causality.
+All originals, complete log/API/reviews and correlation are verified and retained.
+This clears one sustained fixed-fleet seed, with200/churn/combined/24h gates open.
