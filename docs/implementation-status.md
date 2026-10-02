@@ -6211,3 +6211,11 @@ rolling binaries back to JSON-only readers. Future protocol CI requires the
 compiled reverse-test name along with the forward/CLI names before execution.
 Current protocol36974885921 and behind36974795077 are confirmed in progress;
 100k and million campaigns remain live on their original handles.
+
+[Corrected persisted-native CI36974885921](scale/persisted-protobuf-journal-2026-10-02/passed-native-ci/)
+is terminal/success at035403d. Actual native/CLI PASS lines follow explicit
+compiled-name checks; fixture regeneration and marked-storage Go/Python exchange
+also pass. This clears focused native CI proof that the omitted-test run lacked,
+not full rolling/chaos acceptance. Reverse-rollout CI36975249620 is confirmed
+in progress at2b2130f; its launch is retained, not acceptance. Behind36974795077
+is still confirmed in progress. Existing100k and million continue unchanged.
