@@ -2,6 +2,15 @@
 
 ## Latest accepted evidence — 2026-10-02
 
+- Hosted deletion contract37028014274 at `431c934` is independently accepted:
+  terminal run/job, all Git source hashes, actual six positive tests, exact1..1000
+  model,14 real cases,264 pins and separate-process pin identity. The exact
+  one-file source overlay causes both pinned production loops and the actual
+  real reply contract to fail for the intended semantic reason. [Hosted originals](scale/native-delete-recovery-2026-10-02/hosted-contract-pass/).
+  Full118-graph100k37028379931 is confirmed active at431c934. Fresh sustained
+  ahead20 qualification is launched after both local admitted smokes and hosted
+  contract acceptance; it is not yet accepted. Seed27's separate Docker exit
+  observation issue remains open before a fresh200 claim.
 - Full118-workload Tier1 at exact `431c934` passes166.468s:118,000 actual seed
   bodies,264 pins,162 top-level passes and only the two documented trace-only
   skips. Compiled/source AST inventories, contiguous ranges and committed Git
@@ -11,7 +20,7 @@
   admission plus physical drain. [Admitted originals](scale/native-delete-recovery-2026-10-02/admitted-ahead-smoke-pass/).
   Neither smoke clears the original sustained failures. Current118-graph100k
   run37028379931 and hosted deletion contract37028014274 are launched at431c934;
-  their acceptance remains open.
+  the100k acceptance remains open and the hosted contract is accepted above.
 - The older ahead200 campaign also fails seed20 on the same flattened503/10008
   delete cause, and seed27 on a separate timer-cut admission miss: its recorded
   source-absence upper bound is395ms past earliest due. Actual exit timing is
