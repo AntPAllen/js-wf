@@ -75,7 +75,11 @@ def check(events, duration, expected_row='journal'):
              else 'single five-container R5 mid-fan-out all-server restart row' if row == 'fanout_restart'
              else 'single five-container R5 all-server SIGKILL/restart row' if row == 'restart'
              else f'single five-container R5 {row}-leader row')
+    profiles = re.findall(r'TIER3_CLOCK_TIMER_CUT_PROFILE=(\S+)', log)
+    if profiles and (profiles != ['first-wait-2s'] or not row.startswith('server_clock_')):
+        raise ValueError('invalid or duplicated clock timer cut profile')
     return dict(scope=scope, seed=int(seed), duration_seconds=seconds,
+                clock_timer_cut_profile=profiles[0] if profiles else None,
                 shortened_smoke=duration == '35s', invocations=invocations, journal_entries=entries,
                 confirmed_faults=faults, active_consumer_faults=active_consumer_faults, cells=cells, clears_full_tier3_release=False)
 
@@ -587,11 +591,13 @@ if __name__ == '__main__':
         report['isolation_artifact_checks']=check_isolation_artifacts(args.root,report)
     if args.row.startswith('server_clock_'):
         if args.root is None: parser.error('--root is required for server clock rows')
+        required = args.require_clock_timer_cut or any('TIER3_CLOCK_TIMER_CUT_REQUIRED=true' in event.get('Output','') for event in events)
+        if required and report['clock_timer_cut_profile'] != 'first-wait-2s':
+            raise ValueError('required clock timer cut lacks its explicit first-wait-2s profile')
         report['server_clock_artifact_checks']=check_server_clock_artifacts(args.root,report,args.row)
         controller=load('controller_latency','check-controller-latency.py')
         report['controller_latency_artifact_checks']=controller.check(args.root,report,timestamp_ns)
         report['clock_role_artifact_checks']=check_server_clock_role_artifacts(args.root,report,args.row)
-        required = args.require_clock_timer_cut or any('TIER3_CLOCK_TIMER_CUT_REQUIRED=true' in event.get('Output','') for event in events)
         if required:
             admission=load('clock_timer_cut','check-clock-timer-cut.py')
             report['clock_timer_cut_artifact_checks']=admission.check(args.root,report,args.row,timestamp_ns)

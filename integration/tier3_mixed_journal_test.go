@@ -105,6 +105,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	if timerCutRequired {
 		t.Log("TIER3_CLOCK_TIMER_CUT_REQUIRED=true")
+		t.Log("TIER3_CLOCK_TIMER_CUT_PROFILE=first-wait-2s")
 	}
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
@@ -299,16 +300,22 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			}
 			for i := 0; i < 8; i++ {
 				name := fmt.Sprintf("timer-%d", i)
+				wait := 250 * time.Millisecond
+				if timerCutRequired && i == 0 {
+					// Docker removal needs a provable interval longer than the
+					// ordinary short wait. Keep the other seven waits unchanged.
+					wait = 2 * time.Second
+				}
 				key := request.ID + "/" + name
 				before := time.Now().UTC()
 				evidenceMu.Lock()
 				timer := controllerTimers[key]
 				if timer.FirstCall.IsZero() {
-					timer = matrixControllerTimerCall{ID: request.ID, Name: name, FirstCall: before, Duration: 250 * time.Millisecond}
+					timer = matrixControllerTimerCall{ID: request.ID, Name: name, FirstCall: before, Duration: wait}
 					controllerTimers[key] = timer
 				}
 				evidenceMu.Unlock()
-				err := wf.Sleep(c, name, 250*time.Millisecond)
+				err := wf.Sleep(c, name, wait)
 				if err != nil {
 					return nil, err
 				}
@@ -575,7 +582,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 							evidenceMu.Lock()
 							ops := append([]worker.OperationEvent(nil), controllerOperations...)
 							evidenceMu.Unlock()
-							candidate, err := selectMatrixPendingClockTimer(receipts, ops, time.Now().UTC(), matrixServerClockOffset(row), 150*time.Millisecond)
+							candidate, err := selectMatrixPendingClockTimer(receipts, ops, time.Now().UTC(), matrixServerClockOffset(row), 750*time.Millisecond)
 							if err != nil {
 								return nil, err
 							}

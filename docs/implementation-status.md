@@ -5412,3 +5412,20 @@ no real-cluster acceptance is claimed yet. See
 [fixture scope and checks](scale/tier3-mixed-block-disk-2026-10-02/README.md).
 Native smoke, sustained evidence, per-request dm-delay and the full release
 matrices remain open.
+
+## Clock timer admission removal budget corrected (2026-10-02)
+
+Both initial opt-in native pending-timer smokes failed their admission gate:
+Docker SIGKILL/removal returned357–365ms after refresh of a250ms Sleep,158–166ms
+past the conservative due boundary. Their exact retained suspended prefixes,
+clock origins and failed cut records are preserved in
+[original failure evidence](scale/clock-timer-admission-2026-10-01/removal-budget-failures/README.md).
+No runtime timing verdict or accepted timer-cut coverage is claimed. The opt-in
+fixture now uses an explicit first-wait-2s profile: timer-0 waits2s and seven
+other waits remain250ms. Both selection and fresh retained-tail admission need
+750ms remaining; actual removal-before-due and final-prefix corroboration stay
+strict. The controller guard validates the declared profile and every actual
+wait duration. Baseline rows and the raw30s latency target stay unchanged.
+Focused selector/refresh race checks pass1.033s; all34 Tier3 Python tests and
+both controller tests pass. Corrected native runs and the broader release
+clock matrix remain open.

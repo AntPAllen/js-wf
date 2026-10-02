@@ -23,13 +23,25 @@ func TestMatrixPendingClockTimerAdmissionRejectsStaleAndUnprovenWaits(t *testing
 			{Sequence: 12, Subject: "wf.jrn.matrixtimer.inv", Entry: journal.Entry{Index: 17, Kind: journal.Suspended, WorkerID: "worker", Payload: json.RawMessage(`{"waiting_on":"timer:timer-5"}`)}, ObservedAt: at.Add(20 * time.Millisecond)},
 		}
 		origin := worker.OperationEvent{Type: "matrixtimer", ID: "inv", Worker: "worker", JournalIndex: 16, JournalKind: journal.StepRequested, Operation: "timer_clock", At: at.Add(time.Millisecond), Duration: time.Millisecond, ServerTime: &server}
-		for _, mode := range []string{"valid", "late", "completed", "wrong_wait", "wrong_owner", "unknown_clock", "unshifted_clock", "ambiguous", "receipt_not_observed"} {
+		for _, mode := range []string{"valid", "short_for_docker", "long_for_docker", "late", "completed", "wrong_wait", "wrong_owner", "unknown_clock", "unshifted_clock", "ambiguous", "receipt_not_observed"} {
 			t.Run(offset.String()+"/"+mode, func(t *testing.T) {
 				rs := append([]matrixControllerJournalReceipt(nil), receipts...)
 				op := origin
 				ops := []worker.OperationEvent{op}
 				now := at.Add(30 * time.Millisecond)
+				lead := 100 * time.Millisecond
+				duration := 250 * time.Millisecond
 				switch mode {
+				case "short_for_docker":
+					lead = 750 * time.Millisecond
+				case "long_for_docker":
+					lead = 750 * time.Millisecond
+					duration = 2 * time.Second
+					var p map[string]any
+					_ = json.Unmarshal(payload, &p)
+					p["duration_nanos"] = int64(duration)
+					p["fire_at"] = server.Add(duration)
+					rs[0].Entry.Payload, _ = json.Marshal(p)
 				case "late":
 					now = at.Add(200 * time.Millisecond)
 				case "completed":
@@ -52,9 +64,9 @@ func TestMatrixPendingClockTimerAdmissionRejectsStaleAndUnprovenWaits(t *testing
 				case "receipt_not_observed":
 					rs[1].ObservedAt = now.Add(time.Second)
 				}
-				selected, err := selectMatrixPendingClockTimer(rs, ops, now, offset, 100*time.Millisecond)
-				if mode == "valid" {
-					if err != nil || selected == nil || selected.ID != "inv" || !selected.EarliestDue.Equal(at.Add(250*time.Millisecond)) {
+				selected, err := selectMatrixPendingClockTimer(rs, ops, now, offset, lead)
+				if mode == "valid" || mode == "long_for_docker" {
+					if err != nil || selected == nil || selected.ID != "inv" || !selected.EarliestDue.Equal(at.Add(duration)) {
 						t.Fatalf("selected=%+v err=%v", selected, err)
 					}
 				} else if mode == "ambiguous" {

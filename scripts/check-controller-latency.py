@@ -129,9 +129,13 @@ def check(root, report, ns):
     if len(timers) != report['cells']['matrixtimer']['invocations']*8:
         raise ValueError('controller timer observations do not cover all eight waits')
     seen_timers = set()
+    profile = report.get('clock_timer_cut_profile')
+    if profile not in (None, 'first-wait-2s'):
+        raise ValueError('unknown clock timer duration profile')
     for timer in timers:
         key = (timer['id'], timer['name'])
-        if key in seen_timers or timer['duration_ns'] != 250_000_000:
+        expected_duration = 2_000_000_000 if profile == 'first-wait-2s' and timer['name'] == 'timer-0' else 250_000_000
+        if key in seen_timers or timer['duration_ns'] != expected_duration:
             raise ValueError('duplicate or incorrect controller timer duration')
         seen_timers.add(key)
         due = timer_latest.get(key)

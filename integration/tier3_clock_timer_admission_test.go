@@ -51,7 +51,7 @@ func refreshMatrixClockTimerCandidate(ctx context.Context, stream jetstream.Stre
 		return nil, nil
 	}
 	refreshed := time.Now().UTC()
-	if !refreshed.Add(100 * time.Millisecond).Before(candidate.EarliestDue) {
+	if !refreshed.Add(750 * time.Millisecond).Before(candidate.EarliestDue) {
 		return nil, nil
 	}
 	return &matrixClockTimerCut{Admission: candidate, Tail: tail, Refreshed: refreshed}, nil
