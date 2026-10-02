@@ -230,17 +230,28 @@ func TestSeededWorkerFreshTimerWakeupReplay(t *testing.T) {
 	}
 }
 
-// This focused production-worker check is not part of the pinned release corpus
-// yet. It exercises the new opt-in domain rather than relabel legacy traces.
-func TestWorkerCommonClockAcrossSkewedDeliveryTimestamps(t *testing.T) {
+// Exercise the opt-in domain without reinterpreting legacy traces.
+func TestSeededWorkerCommonClockAcrossSkewedDeliveryTimestamps(t *testing.T) {
 	covered := map[string]bool{}
-	for seed := int64(1); seed <= 1000; seed++ {
+	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
 		generated, err := runWorkerFreshTimerWakeupClock(seed, nil, true)
 		if err != nil {
-			t.Fatalf("seed %d: %v", seed, err)
+			path := os.Getenv("FAULT_TRACE_OUT")
+			if path == "" {
+				path = filepath.Join(t.TempDir(), "common-clock-timers.json")
+			}
+			if saveErr := generated.Save(path); saveErr != nil {
+				t.Fatalf("seed %d: %v; save: %v", seed, err, saveErr)
+			}
+			t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, err)
 		}
 		for _, event := range generated.Transport {
 			if event.Operation == "check_worker_fresh_timer" {
+				if os.Getenv("SIM_WRITE_COMMON_CLOCK_PINS") == "1" && !covered[event.Outcome] {
+					if err := generated.Save(filepath.Join("testdata", "regressions", "worker-common-clock-"+event.Outcome+".json")); err != nil {
+						t.Fatal(err)
+					}
+				}
 				covered[event.Outcome] = true
 			}
 		}

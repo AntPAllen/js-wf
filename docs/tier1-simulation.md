@@ -1373,3 +1373,13 @@ with 300,000 schedules and 10,247,713 events in 35.95 seconds. A real three-node
 worker contract confirms recent/overdue first-heartbeat decisions and all four
 unconditional journal renewals. This call-count proof does not attribute the
 remaining mixed-fault latency failures.
+
+### Common timer clock corpus
+
+`TestSeededWorkerCommonClockAcrossSkewedDeliveryTimestamps` uses the actual
+worker and SDK with an ideal canonical clock while scheduling/delivery clocks
+vary by ±60s. Four timer APIs and two durations give sixteen pinned cases.
+The workload honors `SIM_SEEDS`, saves failed traces and supports generic replay.
+[Race evidence and exact pin replays](scale/timer-common-clock-corpus-2026-10-02/README.md)
+cover 1,000 schedules. Independent sampling, leader transitions, provider outages
+and full 100k release acceptance remain open.

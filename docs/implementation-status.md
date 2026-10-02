@@ -5738,3 +5738,19 @@ the triggering fleet-loop error. The launcher now logs named loop failures befor
 cancellation and retains timestamped fleet-failure evidence; runtime fail-closed
 behavior and targets are unchanged. All 30 original failure files are verified
 and retained. Sustained membership acceptance and full release remain open.
+
+## Common-clock deterministic workload registered for release runs (2026-10-02)
+
+The common-clock worker workload now honors SIM_SEEDS, preserves failed traces
+and participates in generic replay. Sixteen new pins retain every API × delivery
+skew × duration cell, bringing the inventory to 200. Its 1,000-schedule race run
+passes29.34s / package30.361s; all16 new pins replay exactly in package1.548s.
+[Complete evidence and scope](scale/timer-common-clock-corpus-2026-10-02/README.md)
+are retained. The ideal common provider does not establish independent sampler,
+leader-transition or repair-outage behavior; those models and final-source
+comprehensive100k acceptance remain open. Older campaigns do not cover this addition.
+
+The instrumented automatic-membership ten-minute diagnostic is queued as
+[run36956035359](https://github.com/AntPAllen/js-wf/actions/runs/36956035359),
+source073bc01. Launch API evidence is retained beside the previous failure.
+A queued run supplies no acceptance result.

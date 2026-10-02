@@ -396,6 +396,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededWorkerTimerBurst(loaded.Seed, &loaded)
 	case "worker_timer_clock_transition":
 		replayed, err = runWorkerTimerBurstScenario(loaded.Seed, &loaded, true)
+	case "worker_common_clock_timers":
+		replayed, err = runWorkerFreshTimerWakeupClock(loaded.Seed, &loaded, true)
 	case "worker_fresh_timer_wakeup":
 		replayed, err = runWorkerFreshTimerWakeup(loaded.Seed, &loaded)
 	case "client_two_starter_same":
