@@ -5963,3 +5963,18 @@ identity and short ranges fail. Focused actual race packages pass1.456s and
 negative/control methods pass. This adds completion evidence, not a full suite
 or100k acceptance. The existing100k run predates this accounting and continues
 at its original handle; no duplicate release campaign has been launched.
+
+The changed112-workload source4fba0c9 has a new authoritative full1,000-seed
+unit, `js-wf-tier1-seed-accounting-20261002.service`, confirmed active. It uses
+normal execution with a60-minute package deadline, exact compiled/source/pin
+inventories and the new guard; launch is not acceptance. Existing100k and
+million-timer handles remain unchanged.
+
+[Behind sustained attempt36965338232](scale/canonical-r5-native-2026-10-02/behind-ten-minute-admission-failure/)
+is terminal/failed on third-cut admission after169.592s. Two actual cuts and the
+batch10 checkpoint of280 terminals/3,084 entries precede cancellation. Batch11
+has canonical2s requests but healthy native schedule timestamps, which correctly
+cannot certify creation on the shifted source. No later qualifying wait appears
+before the10s admission deadline; the remaining progress cause is unconfirmed.
+All original artifacts and terminal/log evidence are retained. The sustained
+behind row remains open; no unchanged rerun or gate relaxation is launched.

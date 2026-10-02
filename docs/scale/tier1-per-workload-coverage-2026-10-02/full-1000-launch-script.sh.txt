@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd /home/exedev/js-wf
+export GOMEMLIMIT=512MiB GOMAXPROCS=2 SIM_SEEDS=1000 SIM_COVERAGE_SUMMARY=1
+root=/tmp/js-wf-tier1-seed-accounting-20261002
+mkdir -p "$root"
+git rev-parse HEAD > "$root/tier1-source.txt"
+SIM_COVERAGE_SUMMARY=0 go test -p=1 ./sim -list '^Test' > "$root/tier1-list.log"
+rg '^Test[[:alnum:]_]+$' "$root/tier1-list.log" > "$root/tier1-inventory.txt"
+go run ./scripts/tier1-seed-inventory > "$root/tier1-seeded-inventory.txt"
+rg --files sim/testdata/regressions -g '*.json' | sort > "$root/tier1-regression-inventory.txt"
+/usr/bin/time -o "$root/tier1-time.txt" -f 'elapsed=%e user=%U system=%S' go test -p=1 -json ./sim -count=1 -timeout=60m > "$root/tier1-events.jsonl"
+python3 scripts/check-tier1-suite.py --events "$root/tier1-events.jsonl" --inventory "$root/tier1-inventory.txt" --regressions "$root/tier1-regression-inventory.txt" --source "$root/tier1-source.txt" --seeded-inventory "$root/tier1-seeded-inventory.txt" --seeds 1000 --output "$root/tier1-result.json"
