@@ -6186,3 +6186,10 @@ records for Go; local race verification passes. A checked-in Go generator and
 CI byte comparison make fixture regeneration reviewable. Corrected native-test
 presence CI36974477604 is queued at04b4190; matching expanded-storage-exchange CI
 is still required. Existing100k and million handles continue.
+
+Presence-guard CI36974477604 is terminal/failed before native execution because
+Ubuntu's runner lacks rg. The exact-name presence check now uses standard grep
+-Fx; both compiled test inventories pass locally. This preserves the missing-test
+rejection. Native/storage CI acceptance remains open. Current-source behind
+36974795077 is queued at27b78ca with corrected all-waits profile metadata and both
+clock requirements. Original100k/million handles remain unchanged.

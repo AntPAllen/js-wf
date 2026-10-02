@@ -1,0 +1,13 @@
+interop	Verify real protobuf worker, mixed-format compaction and CLI	﻿2026-10-02T06:41:00.1619623Z ##[group]Run set -euo pipefail
+interop	Verify real protobuf worker, mixed-format compaction and CLI	2026-10-02T06:41:00.1619987Z ^[[36;1mset -euo pipefail^[[0m
+interop	Verify real protobuf worker, mixed-format compaction and CLI	2026-10-02T06:41:00.1620673Z ^[[36;1mgo test -p=1 ./integration -list '^TestProtobufWorkerResumesJSONPrefixAndCompacts$' | rg '^TestProtobufWorkerResumesJSONPrefixAndCompacts$'^[[0m
+interop	Verify real protobuf worker, mixed-format compaction and CLI	2026-10-02T06:41:00.1621658Z ^[[36;1mgo test -p=1 ./cmd/wf-worker -list '^TestWorkerRunnerProtobufJournal$' | rg '^TestWorkerRunnerProtobufJournal$'^[[0m
+interop	Verify real protobuf worker, mixed-format compaction and CLI	2026-10-02T06:41:00.1622468Z ^[[36;1mgo test -p=1 -race ./integration -run '^TestProtobufWorkerResumesJSONPrefixAndCompacts$' -count=1 -v^[[0m
+interop	Verify real protobuf worker, mixed-format compaction and CLI	2026-10-02T06:41:00.1623174Z ^[[36;1mgo test -p=1 -race ./cmd/wf-worker -run '^TestWorkerRunnerProtobufJournal$' -count=1 -v^[[0m
+interop	Verify real protobuf worker, mixed-format compaction and CLI	2026-10-02T06:41:00.1685658Z shell: /usr/bin/bash -e {0}
+interop	Verify real protobuf worker, mixed-format compaction and CLI	2026-10-02T06:41:00.1686080Z env:
+interop	Verify real protobuf worker, mixed-format compaction and CLI	2026-10-02T06:41:00.1686276Z   GOMEMLIMIT: 512MiB
+interop	Verify real protobuf worker, mixed-format compaction and CLI	2026-10-02T06:41:00.1686493Z   GOMAXPROCS: 2
+interop	Verify real protobuf worker, mixed-format compaction and CLI	2026-10-02T06:41:00.1686693Z ##[endgroup]
+interop	Verify real protobuf worker, mixed-format compaction and CLI	2026-10-02T06:41:00.1769492Z /home/runner/work/_temp/2e56c7f7-1be2-4a19-9af4-1dbe42b9d7db.sh: line 2: rg: command not found
+interop	Verify real protobuf worker, mixed-format compaction and CLI	2026-10-02T06:41:30.3967626Z ##[error]Process completed with exit code 127.
