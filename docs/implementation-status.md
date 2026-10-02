@@ -6065,3 +6065,28 @@ both required clock flags and mandatory checkpoint artifact verification.
 Its launch snapshot is retained, not accepted. Final43 Python artifact methods
 also reject noninteger checkpoint batch identities. The older100k handle remains
 live; the million-timer handle continues and neither has been restarted.
+
+## Portable journal contract and terminal campaign evidence (2026-10-02)
+
+[Version1 protobuf interchange](journal-protocol.md) now has generated bindings,
+lossless uint64/raw-JSON Go adapters, fail-closed envelope projection, portable
+vectors, independently generated Python exchange and a dedicated CI workflow.
+[Local evidence](scale/journal-protocol-interop-2026-10-02/) passes race checks
+for all kinds and actual SDK four-state recovery, errors/spilled-result hashes.
+Production persistence remains JSON; protobuf storage migration and a second SDK
+remain open. The plan records this partial language-neutral deliverable explicitly.
+
+[Older-source100k run36962606650](scale/tier1-100k-2026-10-02/source-5828875/)
+is terminal/success at5828875,6361.73 seconds,154 tests/234 pins and10.7M schedules.
+Its seed count is configuration only, predating independent per-workload proof
+and the113-workload/258-pin source. Latest-source100k remains required.
+
+[Async-checkpoint native36969577235](scale/tier3-independent-checkpoints-2026-10-02/behind-failed-native/)
+is terminal/failed375.556s. Checkpoints10/20/30 all complete and match280/560/840
+terminals; workload progresses independently. Fault10 admission expires after
+checkpoint30 has finished, so no checkpoint-blocked pause is inferred. Healthy
+hints on the first2s waits and shifted hints on later250ms waits suggest a timing
+opportunity issue; full causal correlation remains open. Original failed artifacts
+are retained. No final accepted audit/drain/history/latency or full clock-row pass.
+The million-timer unit remains live with more than555,000 receipts; final proof
+is pending. The historical31.1s worker-kill mismatch is not being rerun.

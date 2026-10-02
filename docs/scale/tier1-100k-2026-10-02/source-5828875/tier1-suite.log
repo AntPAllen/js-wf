@@ -1,0 +1,898 @@
+=== RUN   TestSeededBlobMetadataReplay
+--- PASS: TestSeededBlobMetadataReplay (1.54s)
+=== RUN   TestSeededBlobSweepReplay
+--- PASS: TestSeededBlobSweepReplay (3.14s)
+=== RUN   TestSeededCheckpointReadReplay
+--- PASS: TestSeededCheckpointReadReplay (47.63s)
+=== RUN   TestSeededCheckpointSnapshotReplay
+--- PASS: TestSeededCheckpointSnapshotReplay (15.49s)
+=== RUN   TestChildWakeupLivenessNegativeControls
+=== RUN   TestChildWakeupLivenessNegativeControls/skipped_notifier
+--- PASS: TestChildWakeupLivenessNegativeControls/skipped_notifier (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/dropped_signal
+--- PASS: TestChildWakeupLivenessNegativeControls/dropped_signal (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/dropped_wakeup
+--- PASS: TestChildWakeupLivenessNegativeControls/dropped_wakeup (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/removed_wakeup
+--- PASS: TestChildWakeupLivenessNegativeControls/removed_wakeup (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/changed_notification
+--- PASS: TestChildWakeupLivenessNegativeControls/changed_notification (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/changed_notification_hash
+--- PASS: TestChildWakeupLivenessNegativeControls/changed_notification_hash (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/consumed_purged_signal
+--- PASS: TestChildWakeupLivenessNegativeControls/consumed_purged_signal (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/wrong_consumed_outcome
+--- PASS: TestChildWakeupLivenessNegativeControls/wrong_consumed_outcome (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/wrong_consumed_hash
+--- PASS: TestChildWakeupLivenessNegativeControls/wrong_consumed_hash (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/parent_terminal
+--- PASS: TestChildWakeupLivenessNegativeControls/parent_terminal (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/stale_parent_terminal
+--- PASS: TestChildWakeupLivenessNegativeControls/stale_parent_terminal (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/parent_reused
+--- PASS: TestChildWakeupLivenessNegativeControls/parent_reused (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/parent_absent
+--- PASS: TestChildWakeupLivenessNegativeControls/parent_absent (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/child_nonterminal
+--- PASS: TestChildWakeupLivenessNegativeControls/child_nonterminal (0.00s)
+=== RUN   TestChildWakeupLivenessNegativeControls/stale_child_terminal
+--- PASS: TestChildWakeupLivenessNegativeControls/stale_child_terminal (0.00s)
+--- PASS: TestChildWakeupLivenessNegativeControls (0.00s)
+=== RUN   TestSeededChildNotificationReplay
+--- PASS: TestSeededChildNotificationReplay (61.25s)
+=== RUN   TestSeededContinuationCanceledTimerReplay
+--- PASS: TestSeededContinuationCanceledTimerReplay (54.38s)
+=== RUN   TestSeededContinuationLimitReplay
+--- PASS: TestSeededContinuationLimitReplay (64.59s)
+=== RUN   TestModeledJournalEntryLimitBounds
+=== RUN   TestModeledJournalEntryLimitBounds/0
+--- PASS: TestModeledJournalEntryLimitBounds/0 (0.00s)
+=== RUN   TestModeledJournalEntryLimitBounds/3
+--- PASS: TestModeledJournalEntryLimitBounds/3 (0.00s)
+=== RUN   TestModeledJournalEntryLimitBounds/4
+--- PASS: TestModeledJournalEntryLimitBounds/4 (0.00s)
+=== RUN   TestModeledJournalEntryLimitBounds/16
+--- PASS: TestModeledJournalEntryLimitBounds/16 (0.00s)
+=== RUN   TestModeledJournalEntryLimitBounds/100000
+--- PASS: TestModeledJournalEntryLimitBounds/100000 (0.00s)
+=== RUN   TestModeledJournalEntryLimitBounds/100001
+--- PASS: TestModeledJournalEntryLimitBounds/100001 (0.00s)
+--- PASS: TestModeledJournalEntryLimitBounds (0.00s)
+=== RUN   TestSeededContinuationPanicReplay
+--- PASS: TestSeededContinuationPanicReplay (69.58s)
+=== RUN   TestSeededContinuationPromiseReplay
+    continuation_promise_replay_test.go:365: mode=clean first_seed=5
+    continuation_promise_replay_test.go:365: mode=resume_read_once first_seed=7
+    continuation_promise_replay_test.go:365: mode=resume_read_twice first_seed=12
+    continuation_promise_replay_test.go:365: mode=corrupt_child first_seed=4
+    continuation_promise_replay_test.go:365: mode=terminal_drop first_seed=1
+    continuation_promise_replay_test.go:365: mode=terminal_ack_lost first_seed=2
+--- PASS: TestSeededContinuationPromiseReplay (399.53s)
+=== RUN   TestSeededContinuationRetirementReplay
+--- PASS: TestSeededContinuationRetirementReplay (45.11s)
+=== RUN   TestSeededContinuationRunningCancelReplay
+--- PASS: TestSeededContinuationRunningCancelReplay (41.12s)
+=== RUN   TestSeededContinuationSDKReplay
+--- PASS: TestSeededContinuationSDKReplay (14.29s)
+=== RUN   TestCoordinatorClaimFailsClosed
+=== RUN   TestCoordinatorClaimFailsClosed/read
+--- PASS: TestCoordinatorClaimFailsClosed/read (0.00s)
+=== RUN   TestCoordinatorClaimFailsClosed/drop
+--- PASS: TestCoordinatorClaimFailsClosed/drop (0.00s)
+=== RUN   TestCoordinatorClaimFailsClosed/lost_ack
+--- PASS: TestCoordinatorClaimFailsClosed/lost_ack (0.00s)
+=== RUN   TestCoordinatorClaimFailsClosed/conflict
+--- PASS: TestCoordinatorClaimFailsClosed/conflict (0.00s)
+--- PASS: TestCoordinatorClaimFailsClosed (0.00s)
+=== RUN   TestSeededDeadOwnerDrainReplay
+--- PASS: TestSeededDeadOwnerDrainReplay (18.47s)
+=== RUN   TestCooperativeTwoDispatchWorkersReplay
+--- PASS: TestCooperativeTwoDispatchWorkersReplay (6.82s)
+=== RUN   TestSeededDispatchClockTransitionReplay
+--- PASS: TestSeededDispatchClockTransitionReplay (1.94s)
+=== RUN   TestSeededDispatchModelReplay
+--- PASS: TestSeededDispatchModelReplay (4.32s)
+=== RUN   TestDispatchLostAckCommitted
+--- PASS: TestDispatchLostAckCommitted (0.00s)
+=== RUN   TestDispatchDurableRestartAndSharedConsumers
+--- PASS: TestDispatchDurableRestartAndSharedConsumers (0.00s)
+=== RUN   TestDispatchLateAckAfterRedeliveryIsIdempotent
+--- PASS: TestDispatchLateAckAfterRedeliveryIsIdempotent (0.00s)
+=== RUN   TestSeededEnqueueTransportRetryReplay
+--- PASS: TestSeededEnqueueTransportRetryReplay (2.63s)
+=== RUN   TestEnqueueWithoutMessageIDPreservesUnknownOutcome
+--- PASS: TestEnqueueWithoutMessageIDPreservesUnknownOutcome (0.00s)
+=== RUN   TestCooperativeFallbackScannersReplay
+--- PASS: TestCooperativeFallbackScannersReplay (49.92s)
+=== RUN   TestSeededFallbackLoopReplay
+--- PASS: TestSeededFallbackLoopReplay (21.73s)
+=== RUN   TestSeededFallbackTimerPipelineReplay
+--- PASS: TestSeededFallbackTimerPipelineReplay (9.51s)
+=== RUN   TestSeededHandleCacheCancellationReplay
+--- PASS: TestSeededHandleCacheCancellationReplay (1.50s)
+=== RUN   TestSeededRetainedInvariantChecks
+--- PASS: TestSeededRetainedInvariantChecks (15.29s)
+=== RUN   TestSeededJournalBatchReadReplay
+--- PASS: TestSeededJournalBatchReadReplay (135.29s)
+=== RUN   TestSeededJournalManifestReadReplay
+--- PASS: TestSeededJournalManifestReadReplay (8.50s)
+=== RUN   TestSeededJournalOpenFailureReplay
+--- PASS: TestSeededJournalOpenFailureReplay (23.81s)
+=== RUN   TestModeledJournalReadKeepsGlobalHolesAndRejectsIndexGap
+--- PASS: TestModeledJournalReadKeepsGlobalHolesAndRejectsIndexGap (0.00s)
+=== RUN   TestSeededJournalSerialReadReplay
+--- PASS: TestSeededJournalSerialReadReplay (6.99s)
+=== RUN   TestSeededJournalDirectUnavailableReplay
+--- PASS: TestSeededJournalDirectUnavailableReplay (5.28s)
+=== RUN   TestSeededStalledJournalCursorReplay
+--- PASS: TestSeededStalledJournalCursorReplay (24.26s)
+=== RUN   TestJournalAppendFaultBoundaries
+=== RUN   TestJournalAppendFaultBoundaries/ack_lost_after_commit
+--- PASS: TestJournalAppendFaultBoundaries/ack_lost_after_commit (0.00s)
+=== RUN   TestJournalAppendFaultBoundaries/drop_before_commit
+--- PASS: TestJournalAppendFaultBoundaries/drop_before_commit (0.00s)
+=== RUN   TestJournalAppendFaultBoundaries/unchanged_tail_reject
+--- PASS: TestJournalAppendFaultBoundaries/unchanged_tail_reject (0.00s)
+=== RUN   TestJournalAppendFaultBoundaries/persistent_unchanged_tail_reject
+--- PASS: TestJournalAppendFaultBoundaries/persistent_unchanged_tail_reject (0.00s)
+=== RUN   TestJournalAppendFaultBoundaries/competing_writer_advances_tail
+--- PASS: TestJournalAppendFaultBoundaries/competing_writer_advances_tail (0.00s)
+--- PASS: TestJournalAppendFaultBoundaries (0.00s)
+=== RUN   TestSeededAppendTraceReplaysAcrossProcesses
+--- PASS: TestSeededAppendTraceReplaysAcrossProcesses (0.01s)
+=== RUN   TestThousandSeededJournalAppendScenarios
+--- PASS: TestThousandSeededJournalAppendScenarios (63.72s)
+=== RUN   TestCooperativeTwoWriterCASReplay
+--- PASS: TestCooperativeTwoWriterCASReplay (0.01s)
+=== RUN   TestReplayFaultTrace
+    journal_transport_test.go:604: set FAULT_TRACE to replay a saved Tier 1 trace
+--- SKIP: TestReplayFaultTrace (0.00s)
+=== RUN   TestMinimizeFaultTrace
+    journal_transport_test.go:645: set FAULT_TRACE to a failing saved Tier 1 trace
+--- SKIP: TestMinimizeFaultTrace (0.00s)
+=== RUN   TestPinnedRegressionCorpus
+=== RUN   TestPinnedRegressionCorpus/automatic-membership.json
+--- PASS: TestPinnedRegressionCorpus/automatic-membership.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/blob-metadata-bucket.json
+--- PASS: TestPinnedRegressionCorpus/blob-metadata-bucket.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/blob-metadata-json.json
+--- PASS: TestPinnedRegressionCorpus/blob-metadata-json.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/blob-metadata-name.json
+--- PASS: TestPinnedRegressionCorpus/blob-metadata-name.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/blob-metadata-state_operation.json
+--- PASS: TestPinnedRegressionCorpus/blob-metadata-state_operation.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/blob-sweep-delete_ack_lost.json
+--- PASS: TestPinnedRegressionCorpus/blob-sweep-delete_ack_lost.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/blob-sweep-snapshot_read_fault.json
+--- PASS: TestPinnedRegressionCorpus/blob-sweep-snapshot_read_fault.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/cas-dropped-request.json
+--- PASS: TestPinnedRegressionCorpus/cas-dropped-request.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/cas-hidden-ack.json
+--- PASS: TestPinnedRegressionCorpus/cas-hidden-ack.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/cas-tail-lookup-retry.json
+--- PASS: TestPinnedRegressionCorpus/cas-tail-lookup-retry.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/checkpoint-read-42.json
+--- PASS: TestPinnedRegressionCorpus/checkpoint-read-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/checkpoint-snapshot-42.json
+--- PASS: TestPinnedRegressionCorpus/checkpoint-snapshot-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/child-notification.json
+--- PASS: TestPinnedRegressionCorpus/child-notification.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/continuation-canceled-timer-42.json
+--- PASS: TestPinnedRegressionCorpus/continuation-canceled-timer-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/continuation-limit-42.json
+--- PASS: TestPinnedRegressionCorpus/continuation-limit-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/continuation-panic-42.json
+--- PASS: TestPinnedRegressionCorpus/continuation-panic-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/continuation-promise-42.json
+--- PASS: TestPinnedRegressionCorpus/continuation-promise-42.json (0.01s)
+=== RUN   TestPinnedRegressionCorpus/continuation-promise-corrupt-4.json
+--- PASS: TestPinnedRegressionCorpus/continuation-promise-corrupt-4.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/continuation-retirement-42.json
+--- PASS: TestPinnedRegressionCorpus/continuation-retirement-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/continuation-running-cancel-42.json
+--- PASS: TestPinnedRegressionCorpus/continuation-running-cancel-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/continuation-sdk-42.json
+--- PASS: TestPinnedRegressionCorpus/continuation-sdk-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/dispatch-clock-ahead_ack_wait.json
+--- PASS: TestPinnedRegressionCorpus/dispatch-clock-ahead_ack_wait.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/dispatch-clock-ahead_nak.json
+--- PASS: TestPinnedRegressionCorpus/dispatch-clock-ahead_nak.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/dispatch-clock-ahead_progress.json
+--- PASS: TestPinnedRegressionCorpus/dispatch-clock-ahead_progress.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/dispatch-clock-behind_ack_wait.json
+--- PASS: TestPinnedRegressionCorpus/dispatch-clock-behind_ack_wait.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/dispatch-clock-behind_nak.json
+--- PASS: TestPinnedRegressionCorpus/dispatch-clock-behind_nak.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/dispatch-clock-behind_progress.json
+--- PASS: TestPinnedRegressionCorpus/dispatch-clock-behind_progress.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/dispatch-two-workers.json
+--- PASS: TestPinnedRegressionCorpus/dispatch-two-workers.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/enqueue-no-stream-response.json
+--- PASS: TestPinnedRegressionCorpus/enqueue-no-stream-response.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/enqueue-timeout-after-commit.json
+--- PASS: TestPinnedRegressionCorpus/enqueue-timeout-after-commit.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/enqueue-transport-retry.json
+--- PASS: TestPinnedRegressionCorpus/enqueue-transport-retry.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/handle-cache-cancellation.json
+--- PASS: TestPinnedRegressionCorpus/handle-cache-cancellation.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-direct-exhausted-direct_unavailable.json
+--- PASS: TestPinnedRegressionCorpus/journal-direct-exhausted-direct_unavailable.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-direct-exhausted-unavailable_lookalike.json
+--- PASS: TestPinnedRegressionCorpus/journal-direct-exhausted-unavailable_lookalike.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-direct-exhausted-wrapped_direct_unavailable.json
+--- PASS: TestPinnedRegressionCorpus/journal-direct-exhausted-wrapped_direct_unavailable.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-direct-gap-direct_unavailable.json
+--- PASS: TestPinnedRegressionCorpus/journal-direct-gap-direct_unavailable.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-direct-gap-unavailable_lookalike.json
+--- PASS: TestPinnedRegressionCorpus/journal-direct-gap-unavailable_lookalike.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-direct-gap-wrapped_direct_unavailable.json
+--- PASS: TestPinnedRegressionCorpus/journal-direct-gap-wrapped_direct_unavailable.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-direct-one_retry-direct_unavailable.json
+--- PASS: TestPinnedRegressionCorpus/journal-direct-one_retry-direct_unavailable.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-direct-one_retry-unavailable_lookalike.json
+--- PASS: TestPinnedRegressionCorpus/journal-direct-one_retry-unavailable_lookalike.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-direct-one_retry-wrapped_direct_unavailable.json
+--- PASS: TestPinnedRegressionCorpus/journal-direct-one_retry-wrapped_direct_unavailable.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-direct-two_retries-direct_unavailable.json
+--- PASS: TestPinnedRegressionCorpus/journal-direct-two_retries-direct_unavailable.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-direct-two_retries-unavailable_lookalike.json
+--- PASS: TestPinnedRegressionCorpus/journal-direct-two_retries-unavailable_lookalike.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-direct-two_retries-wrapped_direct_unavailable.json
+--- PASS: TestPinnedRegressionCorpus/journal-direct-two_retries-wrapped_direct_unavailable.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-manifest-read.json
+--- PASS: TestPinnedRegressionCorpus/journal-manifest-read.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-open-failure.json
+--- PASS: TestPinnedRegressionCorpus/journal-open-failure.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-serial-read.json
+--- PASS: TestPinnedRegressionCorpus/journal-serial-read.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/journal-stalled-cursor.json
+--- PASS: TestPinnedRegressionCorpus/journal-stalled-cursor.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/lease-cleanup-conflict.json
+--- PASS: TestPinnedRegressionCorpus/lease-cleanup-conflict.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/lease-cleanup-stale-read.json
+--- PASS: TestPinnedRegressionCorpus/lease-cleanup-stale-read.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/lease-clock-skew-seed1.json
+--- PASS: TestPinnedRegressionCorpus/lease-clock-skew-seed1.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/lease-clock-skew-seed2.json
+--- PASS: TestPinnedRegressionCorpus/lease-clock-skew-seed2.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/lease-expiry-32-acquirers.json
+--- PASS: TestPinnedRegressionCorpus/lease-expiry-32-acquirers.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/lease-gate-cancellation.json
+--- PASS: TestPinnedRegressionCorpus/lease-gate-cancellation.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/lease-heartbeat-delayed-ack.json
+--- PASS: TestPinnedRegressionCorpus/lease-heartbeat-delayed-ack.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/lease-heartbeat-reuse.json
+--- PASS: TestPinnedRegressionCorpus/lease-heartbeat-reuse.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/manual-owner-drain.json
+--- PASS: TestPinnedRegressionCorpus/manual-owner-drain.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/membership-session-drop_before_commit.json
+--- PASS: TestPinnedRegressionCorpus/membership-session-drop_before_commit.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/membership-session-lose_ack_after_commit.json
+--- PASS: TestPinnedRegressionCorpus/membership-session-lose_ack_after_commit.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/outcome-persistence.json
+--- PASS: TestPinnedRegressionCorpus/outcome-persistence.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/parent-notification-budget-invocation_drop.json
+--- PASS: TestPinnedRegressionCorpus/parent-notification-budget-invocation_drop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/parent-notification-budget-publish_ack_lost.json
+--- PASS: TestPinnedRegressionCorpus/parent-notification-budget-publish_ack_lost.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/parent-notification-budget-publish_drop.json
+--- PASS: TestPinnedRegressionCorpus/parent-notification-budget-publish_drop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/parent-notification-budget-state_drop.json
+--- PASS: TestPinnedRegressionCorpus/parent-notification-budget-state_drop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/paused-claim-after-renew.json
+--- PASS: TestPinnedRegressionCorpus/paused-claim-after-renew.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/paused-claim-before-renew.json
+--- PASS: TestPinnedRegressionCorpus/paused-claim-before-renew.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/paused-coordinator-after-renew.json
+--- PASS: TestPinnedRegressionCorpus/paused-coordinator-after-renew.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/paused-coordinator-before-renew.json
+--- PASS: TestPinnedRegressionCorpus/paused-coordinator-before-renew.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/purge-blob-invocation_ack_lost.json
+--- PASS: TestPinnedRegressionCorpus/purge-blob-invocation_ack_lost.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/purge-blob-missing_inv_state_read_lost.json
+--- PASS: TestPinnedRegressionCorpus/purge-blob-missing_inv_state_read_lost.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/purge-blob-purge_event_ack_lost.json
+--- PASS: TestPinnedRegressionCorpus/purge-blob-purge_event_ack_lost.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/purge-blob-snapshot_corrupt.json
+--- PASS: TestPinnedRegressionCorpus/purge-blob-snapshot_corrupt.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/purge-blob-snapshot_delayed_read.json
+--- PASS: TestPinnedRegressionCorpus/purge-blob-snapshot_delayed_read.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/retained-invariants.json
+--- PASS: TestPinnedRegressionCorpus/retained-invariants.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/select-many.json
+--- PASS: TestPinnedRegressionCorpus/select-many.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/select-suspended-scan-promise.json
+--- PASS: TestPinnedRegressionCorpus/select-suspended-scan-promise.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/select-suspended-scan.json
+--- PASS: TestPinnedRegressionCorpus/select-suspended-scan.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/signal-history-duplicate-windows.json
+--- PASS: TestPinnedRegressionCorpus/signal-history-duplicate-windows.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/signal-lease-cost-42.json
+--- PASS: TestPinnedRegressionCorpus/signal-lease-cost-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/signal-liveness.json
+--- PASS: TestPinnedRegressionCorpus/signal-liveness.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/snapshot-append-after-compact.json
+--- PASS: TestPinnedRegressionCorpus/snapshot-append-after-compact.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/snapshot-append-before-compact.json
+--- PASS: TestPinnedRegressionCorpus/snapshot-append-before-compact.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/snapshot-append-hidden-ack.json
+--- PASS: TestPinnedRegressionCorpus/snapshot-append-hidden-ack.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/snapshot-purge-after-release.json
+--- PASS: TestPinnedRegressionCorpus/snapshot-purge-after-release.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/snapshot-purge-fenced.json
+--- PASS: TestPinnedRegressionCorpus/snapshot-purge-fenced.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/snapshot-read-compacted.json
+--- PASS: TestPinnedRegressionCorpus/snapshot-read-compacted.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/snapshot-stale-longer-compactor.json
+--- PASS: TestPinnedRegressionCorpus/snapshot-stale-longer-compactor.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/snapshot-two-compactors.json
+--- PASS: TestPinnedRegressionCorpus/snapshot-two-compactors.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/snapshot-write-compact.json
+--- PASS: TestPinnedRegressionCorpus/snapshot-write-compact.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/start-retry-repair.json
+--- PASS: TestPinnedRegressionCorpus/start-retry-repair.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/suspended-liveness.json
+--- PASS: TestPinnedRegressionCorpus/suspended-liveness.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/suspended-two-scanners.json
+--- PASS: TestPinnedRegressionCorpus/suspended-two-scanners.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/terminal-held-42.json
+--- PASS: TestPinnedRegressionCorpus/terminal-held-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/timer-clock-ahead-after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/timer-clock-ahead-after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/timer-clock-ahead-before_due.json
+--- PASS: TestPinnedRegressionCorpus/timer-clock-ahead-before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/timer-clock-behind-after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/timer-clock-behind-after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/timer-clock-behind-before_due.json
+--- PASS: TestPinnedRegressionCorpus/timer-clock-behind-before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/tombstone-delete_ack_lost.json
+--- PASS: TestPinnedRegressionCorpus/tombstone-delete_ack_lost.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/tombstone-revision_changed.json
+--- PASS: TestPinnedRegressionCorpus/tombstone-revision_changed.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/unchanged-coordinator-after-renew.json
+--- PASS: TestPinnedRegressionCorpus/unchanged-coordinator-after-renew.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-cancel-durable-poll.json
+--- PASS: TestPinnedRegressionCorpus/worker-cancel-durable-poll.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-canceled-retained-lease.json
+--- PASS: TestPinnedRegressionCorpus/worker-canceled-retained-lease.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-child-execution.json
+--- PASS: TestPinnedRegressionCorpus/worker-child-execution.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_await_1s.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_await_1s.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_await_250ms.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_await_250ms.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_select_many_1s.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_select_many_1s.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_select_many_250ms.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_select_many_250ms.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_select_signal_1s.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_select_signal_1s.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_select_signal_250ms.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_select_signal_250ms.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_sleep_1s.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_sleep_1s.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_sleep_250ms.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_sleep_250ms.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_await_1s.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_await_1s.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_await_250ms.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_await_250ms.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_select_many_1s.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_select_many_1s.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_select_many_250ms.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_select_many_250ms.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_select_signal_1s.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_select_signal_1s.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_select_signal_250ms.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_select_signal_250ms.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_sleep_1s.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_sleep_1s.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_sleep_250ms.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_sleep_250ms.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_await_1s_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_await_1s_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_await_1s_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_await_1s_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_await_250ms_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_await_250ms_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_await_250ms_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_await_250ms_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_1s_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_1s_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_1s_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_1s_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_250ms_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_250ms_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_250ms_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_250ms_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_1s_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_1s_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_1s_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_1s_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_250ms_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_250ms_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_250ms_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_250ms_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_1s_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_1s_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_1s_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_1s_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_250ms_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_250ms_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_250ms_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_250ms_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_await_1s_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_await_1s_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_await_1s_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_await_1s_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_await_250ms_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_await_250ms_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_await_250ms_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_await_250ms_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_1s_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_1s_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_1s_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_1s_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_250ms_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_250ms_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_250ms_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_250ms_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_1s_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_1s_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_1s_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_1s_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_250ms_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_250ms_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_250ms_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_250ms_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_1s_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_1s_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_1s_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_1s_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_250ms_after_due_without_quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_250ms_after_due_without_quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_250ms_before_due.json
+--- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_250ms_before_due.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-compactor-seed1.json
+--- PASS: TestPinnedRegressionCorpus/worker-compactor-seed1.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-compactor-seed11508.json
+--- PASS: TestPinnedRegressionCorpus/worker-compactor-seed11508.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-continuation-42.json
+--- PASS: TestPinnedRegressionCorpus/worker-continuation-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-continuation-budget-archive-ack-lost.json
+--- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-archive-ack-lost.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-continuation-budget-archive-drop.json
+--- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-archive-drop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-continuation-budget-manifest-ack-lost.json
+--- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-manifest-ack-lost.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-continuation-budget-manifest-drop.json
+--- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-manifest-drop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-continuation-budget-purge-ack-lost.json
+--- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-purge-ack-lost.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-continuation-budget-purge-drop.json
+--- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-purge-drop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-continuation-budget-signal-purge-ack-lost.json
+--- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-signal-purge-ack-lost.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-continuation-budget-signal-purge-drop.json
+--- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-signal-purge-drop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-execution.json
+--- PASS: TestPinnedRegressionCorpus/worker-execution.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-fallback-timer-execution.json
+--- PASS: TestPinnedRegressionCorpus/worker-fallback-timer-execution.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-fallback-timer-loop.json
+--- PASS: TestPinnedRegressionCorpus/worker-fallback-timer-loop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-fanout-interruption-1.json
+--- PASS: TestPinnedRegressionCorpus/worker-fanout-interruption-1.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-fanout-interruption-2.json
+--- PASS: TestPinnedRegressionCorpus/worker-fanout-interruption-2.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-fanout-interruption-42.json
+--- PASS: TestPinnedRegressionCorpus/worker-fanout-interruption-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-frame-budget-frame-put-ack-lost.json
+--- PASS: TestPinnedRegressionCorpus/worker-frame-budget-frame-put-ack-lost.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-frame-budget-frame-put-drop.json
+--- PASS: TestPinnedRegressionCorpus/worker-frame-budget-frame-put-drop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-frame-budget-frame-replay-drop.json
+--- PASS: TestPinnedRegressionCorpus/worker-frame-budget-frame-replay-drop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-frame-budget-frame-verify-drop.json
+--- PASS: TestPinnedRegressionCorpus/worker-frame-budget-frame-verify-drop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-fresh-timer-behind_await_250ms.json
+--- PASS: TestPinnedRegressionCorpus/worker-fresh-timer-behind_await_250ms.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-fresh-timer-behind_select_many_250ms.json
+--- PASS: TestPinnedRegressionCorpus/worker-fresh-timer-behind_select_many_250ms.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-fresh-timer-behind_select_signal_250ms.json
+--- PASS: TestPinnedRegressionCorpus/worker-fresh-timer-behind_select_signal_250ms.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-fresh-timer-behind_sleep_250ms.json
+--- PASS: TestPinnedRegressionCorpus/worker-fresh-timer-behind_sleep_250ms.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-heartbeat-execution.json
+--- PASS: TestPinnedRegressionCorpus/worker-heartbeat-execution.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-heartbeat-handoff.json
+--- PASS: TestPinnedRegressionCorpus/worker-heartbeat-handoff.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-heartbeat-nak-drop.json
+--- PASS: TestPinnedRegressionCorpus/worker-heartbeat-nak-drop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-heartbeat-progress-drop.json
+--- PASS: TestPinnedRegressionCorpus/worker-heartbeat-progress-drop.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-heartbeat-reuse.json
+--- PASS: TestPinnedRegressionCorpus/worker-heartbeat-reuse.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-large-read-retry.json
+--- PASS: TestPinnedRegressionCorpus/worker-large-read-retry.json (0.01s)
+=== RUN   TestPinnedRegressionCorpus/worker-large-result.json
+--- PASS: TestPinnedRegressionCorpus/worker-large-result.json (0.01s)
+=== RUN   TestPinnedRegressionCorpus/worker-observed-renewal-cost-2.json
+--- PASS: TestPinnedRegressionCorpus/worker-observed-renewal-cost-2.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-observed-renewal-cost-42.json
+--- PASS: TestPinnedRegressionCorpus/worker-observed-renewal-cost-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-observed-renewal-cost-5.json
+--- PASS: TestPinnedRegressionCorpus/worker-observed-renewal-cost-5.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-pause-lease.json
+--- PASS: TestPinnedRegressionCorpus/worker-pause-lease.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-promise-retirement-42.json
+--- PASS: TestPinnedRegressionCorpus/worker-promise-retirement-42.json (0.01s)
+=== RUN   TestPinnedRegressionCorpus/worker-result-budget-step-get-drop.json
+--- PASS: TestPinnedRegressionCorpus/worker-result-budget-step-get-drop.json (0.01s)
+=== RUN   TestPinnedRegressionCorpus/worker-result-budget-step-put-ack-lost.json
+--- PASS: TestPinnedRegressionCorpus/worker-result-budget-step-put-ack-lost.json (0.01s)
+=== RUN   TestPinnedRegressionCorpus/worker-result-budget-step-put-drop.json
+--- PASS: TestPinnedRegressionCorpus/worker-result-budget-step-put-drop.json (0.01s)
+=== RUN   TestPinnedRegressionCorpus/worker-result-budget-terminal-put-ack-lost.json
+--- PASS: TestPinnedRegressionCorpus/worker-result-budget-terminal-put-ack-lost.json (0.01s)
+=== RUN   TestPinnedRegressionCorpus/worker-result-budget-terminal-put-drop.json
+--- PASS: TestPinnedRegressionCorpus/worker-result-budget-terminal-put-drop.json (0.01s)
+=== RUN   TestPinnedRegressionCorpus/worker-retirement-42.json
+--- PASS: TestPinnedRegressionCorpus/worker-retirement-42.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-running-cancel.json
+--- PASS: TestPinnedRegressionCorpus/worker-running-cancel.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-select-both-ready.json
+--- PASS: TestPinnedRegressionCorpus/worker-select-both-ready.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-select-execution.json
+--- PASS: TestPinnedRegressionCorpus/worker-select-execution.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-signal-execution.json
+--- PASS: TestPinnedRegressionCorpus/worker-signal-execution.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-signal-write-latency.json
+--- PASS: TestPinnedRegressionCorpus/worker-signal-write-latency.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-snapshot-budget-completed-5.json
+--- PASS: TestPinnedRegressionCorpus/worker-snapshot-budget-completed-5.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-snapshot-budget-failed-2.json
+--- PASS: TestPinnedRegressionCorpus/worker-snapshot-budget-failed-2.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-snapshot-budget-suspended-1.json
+--- PASS: TestPinnedRegressionCorpus/worker-snapshot-budget-suspended-1.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-snapshot-execution.json
+--- PASS: TestPinnedRegressionCorpus/worker-snapshot-execution.json (0.01s)
+=== RUN   TestPinnedRegressionCorpus/worker-successive-kills-v2.json
+--- PASS: TestPinnedRegressionCorpus/worker-successive-kills-v2.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-successive-kills.json
+--- PASS: TestPinnedRegressionCorpus/worker-successive-kills.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-tail-completed-1.json
+--- PASS: TestPinnedRegressionCorpus/worker-tail-completed-1.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-tail-completed-2.json
+--- PASS: TestPinnedRegressionCorpus/worker-tail-completed-2.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-tail-completed-3.json
+--- PASS: TestPinnedRegressionCorpus/worker-tail-completed-3.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-tail-requested-1.json
+--- PASS: TestPinnedRegressionCorpus/worker-tail-requested-1.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-tail-requested-2.json
+--- PASS: TestPinnedRegressionCorpus/worker-tail-requested-2.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-tail-requested-3.json
+--- PASS: TestPinnedRegressionCorpus/worker-tail-requested-3.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-tail-started-1.json
+--- PASS: TestPinnedRegressionCorpus/worker-tail-started-1.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-tail-started-2.json
+--- PASS: TestPinnedRegressionCorpus/worker-tail-started-2.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-tail-started-3.json
+--- PASS: TestPinnedRegressionCorpus/worker-tail-started-3.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-tail-terminal-1.json
+--- PASS: TestPinnedRegressionCorpus/worker-tail-terminal-1.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-tail-terminal-2.json
+--- PASS: TestPinnedRegressionCorpus/worker-tail-terminal-2.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-tail-terminal-3.json
+--- PASS: TestPinnedRegressionCorpus/worker-tail-terminal-3.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-terminal-owned-ack-lost-4.json
+--- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-ack-lost-4.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-terminal-owned-child-notify-1.json
+--- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-child-notify-1.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-terminal-owned-child-notify-ack-lost-7.json
+--- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-child-notify-ack-lost-7.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-terminal-owned-child-notify-drop-17.json
+--- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-child-notify-drop-17.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-terminal-owned-completed-26.json
+--- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-completed-26.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-terminal-owned-failed-13.json
+--- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-failed-13.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-terminal-owned-malformed-3.json
+--- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-malformed-3.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-terminal-owned-missing-state-14.json
+--- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-missing-state-14.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-terminal-owned-state-read-lost-5.json
+--- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-state-read-lost-5.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-terminal-owned-tombstone-18.json
+--- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-tombstone-18.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-terminal-owned-wrong-generation-2.json
+--- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-wrong-generation-2.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-timer-clock-completed_before_controller_duration.json
+--- PASS: TestPinnedRegressionCorpus/worker-timer-clock-completed_before_controller_duration.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-timer-clock-exceeded_controller_recovery_gate.json
+--- PASS: TestPinnedRegressionCorpus/worker-timer-clock-exceeded_controller_recovery_gate.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-timer-execution.json
+--- PASS: TestPinnedRegressionCorpus/worker-timer-execution.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/worker-timer-route-quorum.json
+--- PASS: TestPinnedRegressionCorpus/worker-timer-route-quorum.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/workflow-determinism.json
+--- PASS: TestPinnedRegressionCorpus/workflow-determinism.json (0.00s)
+=== RUN   TestPinnedRegressionCorpus/workqueue-retention-held.json
+--- PASS: TestPinnedRegressionCorpus/workqueue-retention-held.json (0.00s)
+--- PASS: TestPinnedRegressionCorpus (0.28s)
+=== RUN   TestCooperativeTwoWriterUnknownReplay
+--- PASS: TestCooperativeTwoWriterUnknownReplay (2.59s)
+=== RUN   TestCooperativeTwoWriterTailLookupRecovery
+--- PASS: TestCooperativeTwoWriterTailLookupRecovery (2.77s)
+=== RUN   TestLeaseKVFaultBoundaries
+=== RUN   TestLeaseKVFaultBoundaries/stale_predecessor_read_cannot_delete_initialized_lease
+--- PASS: TestLeaseKVFaultBoundaries/stale_predecessor_read_cannot_delete_initialized_lease (0.00s)
+=== RUN   TestLeaseKVFaultBoundaries/old_uninitialized_lease_can_be_reclaimed
+--- PASS: TestLeaseKVFaultBoundaries/old_uninitialized_lease_can_be_reclaimed (0.00s)
+=== RUN   TestLeaseKVFaultBoundaries/expired_holder_cannot_renew_or_remove_successor
+--- PASS: TestLeaseKVFaultBoundaries/expired_holder_cannot_renew_or_remove_successor (0.00s)
+=== RUN   TestLeaseKVFaultBoundaries/lost_release_acknowledgment_cleans_only_old_generation
+--- PASS: TestLeaseKVFaultBoundaries/lost_release_acknowledgment_cleans_only_old_generation (0.00s)
+=== RUN   TestLeaseKVFaultBoundaries/lost_renewal_acknowledgment_cleans_committed_update
+--- PASS: TestLeaseKVFaultBoundaries/lost_renewal_acknowledgment_cleans_committed_update (0.00s)
+=== RUN   TestLeaseKVFaultBoundaries/create_acknowledgment_lost_before_initialization
+--- PASS: TestLeaseKVFaultBoundaries/create_acknowledgment_lost_before_initialization (0.00s)
+--- PASS: TestLeaseKVFaultBoundaries (0.00s)
+=== RUN   TestSeededLeaseModelReplay
+--- PASS: TestSeededLeaseModelReplay (39.16s)
+=== RUN   TestKVRevisionMismatchDoesNotDeleteReplacement
+--- PASS: TestKVRevisionMismatchDoesNotDeleteReplacement (0.00s)
+=== RUN   TestCooperativeLeaseAcquireRacesReplay
+--- PASS: TestCooperativeLeaseAcquireRacesReplay (0.01s)
+=== RUN   TestSeededCleanupConflictReplay
+--- PASS: TestSeededCleanupConflictReplay (1.38s)
+=== RUN   TestSeededCleanupStaleReadReplay
+--- PASS: TestSeededCleanupStaleReadReplay (1.16s)
+=== RUN   TestSeededLeaseClockSkewReplay
+--- PASS: TestSeededLeaseClockSkewReplay (2.55s)
+=== RUN   TestSeededLeaseExpiryRaceReplay
+--- PASS: TestSeededLeaseExpiryRaceReplay (39.06s)
+=== RUN   TestSeededLeaseGateCancellationReplay
+--- PASS: TestSeededLeaseGateCancellationReplay (1.73s)
+=== RUN   TestSeededLeaseHeartbeatReuseReplay
+--- PASS: TestSeededLeaseHeartbeatReuseReplay (1.01s)
+=== RUN   TestSuspendedWakeupLivenessNegativeControl
+--- PASS: TestSuspendedWakeupLivenessNegativeControl (0.00s)
+=== RUN   TestSeededMembershipReplay
+--- PASS: TestSeededMembershipReplay (42.06s)
+=== RUN   TestSeededMembershipSessionRecovery
+--- PASS: TestSeededMembershipSessionRecovery (28.11s)
+=== RUN   TestMinimizeFailureTraceRemovesCooperativeActor
+--- PASS: TestMinimizeFailureTraceRemovesCooperativeActor (0.00s)
+=== RUN   TestMinimizeFailureTracePreservesInvariantAndExactReplay
+--- PASS: TestMinimizeFailureTracePreservesInvariantAndExactReplay (0.00s)
+=== RUN   TestMinimizerRejectsDifferentFailureAndBudget
+--- PASS: TestMinimizerRejectsDifferentFailureAndBudget (0.00s)
+=== RUN   TestMinimizeSavedFaultTrace
+--- PASS: TestMinimizeSavedFaultTrace (0.00s)
+=== RUN   TestSeededOutcomePersistenceReplay
+--- PASS: TestSeededOutcomePersistenceReplay (9.59s)
+=== RUN   TestSeededPausedCoordinatorClaimReplay
+--- PASS: TestSeededPausedCoordinatorClaimReplay (26.25s)
+=== RUN   TestSeededPausedCoordinatorReplay
+--- PASS: TestSeededPausedCoordinatorReplay (41.40s)
+=== RUN   TestSeededPurgeBlobReplay
+--- PASS: TestSeededPurgeBlobReplay (7.65s)
+=== RUN   TestCooperativeReconcileScannersReplay
+--- PASS: TestCooperativeReconcileScannersReplay (32.91s)
+=== RUN   TestSeededReconcileLoopReplay
+--- PASS: TestSeededReconcileLoopReplay (20.39s)
+=== RUN   TestRepairObservationDistinguishesDryUnknownAndAcknowledged
+=== RUN   TestRepairObservationDistinguishesDryUnknownAndAcknowledged/start
+--- PASS: TestRepairObservationDistinguishesDryUnknownAndAcknowledged/start (0.00s)
+=== RUN   TestRepairObservationDistinguishesDryUnknownAndAcknowledged/signal
+--- PASS: TestRepairObservationDistinguishesDryUnknownAndAcknowledged/signal (0.00s)
+=== RUN   TestRepairObservationDistinguishesDryUnknownAndAcknowledged/suspended
+--- PASS: TestRepairObservationDistinguishesDryUnknownAndAcknowledged/suspended (0.00s)
+--- PASS: TestRepairObservationDistinguishesDryUnknownAndAcknowledged (0.00s)
+=== RUN   TestFallbackTimerObservationDryRunAndZeroStep
+--- PASS: TestFallbackTimerObservationDryRunAndZeroStep (0.00s)
+=== RUN   TestStepLimitFailsWithPendingActionsAndReplays
+--- PASS: TestStepLimitFailsWithPendingActionsAndReplays (0.00s)
+=== RUN   TestCooperativeStallListsUnfinishedActors
+--- PASS: TestCooperativeStallListsUnfinishedActors (0.02s)
+=== RUN   TestCooperativePendingTurnSurvivesOperationCancellation
+--- PASS: TestCooperativePendingTurnSurvivesOperationCancellation (0.00s)
+=== RUN   TestSchedulerRejectsVirtualClockOverflowAndInvalidTraceLimit
+--- PASS: TestSchedulerRejectsVirtualClockOverflowAndInvalidTraceLimit (0.00s)
+=== RUN   TestSeededSelectManyReplay
+--- PASS: TestSeededSelectManyReplay (5.61s)
+=== RUN   TestSeededSelectSuspendedScanReplay
+--- PASS: TestSeededSelectSuspendedScanReplay (132.71s)
+=== RUN   TestCooperativeSignalPublishScanReplay
+--- PASS: TestCooperativeSignalPublishScanReplay (2.31s)
+=== RUN   TestCooperativeClientSignalRepairReplay
+--- PASS: TestCooperativeClientSignalRepairReplay (3.17s)
+=== RUN   TestSeededClientSignalReplay
+--- PASS: TestSeededClientSignalReplay (11.70s)
+=== RUN   TestClientSignalTransportFaultBoundaries
+--- PASS: TestClientSignalTransportFaultBoundaries (0.00s)
+=== RUN   TestClientSignalTransportTombstoneAndReuse
+--- PASS: TestClientSignalTransportTombstoneAndReuse (0.00s)
+=== RUN   TestClientSignalTransportGenerationTerminalAndBlob
+--- PASS: TestClientSignalTransportGenerationTerminalAndBlob (0.00s)
+=== RUN   TestSeededWorkerSignalDrainReplay
+--- PASS: TestSeededWorkerSignalDrainReplay (14.02s)
+=== RUN   TestWorkerSignalDrainModelSkipsGapsAndReplays
+--- PASS: TestWorkerSignalDrainModelSkipsGapsAndReplays (0.00s)
+=== RUN   TestSeededSignalHistoryWindowReplay
+--- PASS: TestSeededSignalHistoryWindowReplay (1.65s)
+=== RUN   TestSignalWakeupLivenessNegativeControl
+--- PASS: TestSignalWakeupLivenessNegativeControl (0.00s)
+=== RUN   TestSeededSignalPipelineReplay
+--- PASS: TestSeededSignalPipelineReplay (50.77s)
+=== RUN   TestSeededSignalRepairReplay
+--- PASS: TestSeededSignalRepairReplay (11.62s)
+=== RUN   TestCooperativeSnapshotCompactorsReplay
+    snapshot_actors_test.go:207: conflicting manifest CAS attempts: 23804
+--- PASS: TestCooperativeSnapshotCompactorsReplay (36.27s)
+=== RUN   TestCooperativeSnapshotAppendPurgeReplay
+--- PASS: TestCooperativeSnapshotAppendPurgeReplay (12.16s)
+=== RUN   TestCooperativeSnapshotPurgeLeaseReplay
+--- PASS: TestCooperativeSnapshotPurgeLeaseReplay (8.63s)
+=== RUN   TestSeededSnapshotReadReplay
+--- PASS: TestSeededSnapshotReadReplay (15.24s)
+=== RUN   TestSnapshotReadFailsClosedOnCorruptObject
+--- PASS: TestSnapshotReadFailsClosedOnCorruptObject (0.00s)
+=== RUN   TestSeededSnapshotWriteReplay
+--- PASS: TestSeededSnapshotWriteReplay (25.02s)
+=== RUN   TestStartTransportFaultBoundaries
+=== RUN   TestStartTransportFaultBoundaries/dropped_publish_retries_without_duplicate
+--- PASS: TestStartTransportFaultBoundaries/dropped_publish_retries_without_duplicate (0.00s)
+=== RUN   TestStartTransportFaultBoundaries/lost_invocation_ack_repairs_its_enqueue
+--- PASS: TestStartTransportFaultBoundaries/lost_invocation_ack_repairs_its_enqueue (0.00s)
+=== RUN   TestStartTransportFaultBoundaries/lost_enqueue_ack_commits_exactly_once
+--- PASS: TestStartTransportFaultBoundaries/lost_enqueue_ack_commits_exactly_once (0.00s)
+=== RUN   TestStartTransportFaultBoundaries/duplicate_in_process_retries_the_same_start_wakeup
+--- PASS: TestStartTransportFaultBoundaries/duplicate_in_process_retries_the_same_start_wakeup (0.00s)
+=== RUN   TestStartTransportFaultBoundaries/duplicate_in_process_retries_the_same_signal_wakeup
+--- PASS: TestStartTransportFaultBoundaries/duplicate_in_process_retries_the_same_signal_wakeup (0.00s)
+=== RUN   TestStartTransportFaultBoundaries/large_input_retains_object_and_hash
+--- PASS: TestStartTransportFaultBoundaries/large_input_retains_object_and_hash (0.00s)
+=== RUN   TestStartTransportFaultBoundaries/stale_read_after_duplicate_is_retried
+--- PASS: TestStartTransportFaultBoundaries/stale_read_after_duplicate_is_retried (0.00s)
+--- PASS: TestStartTransportFaultBoundaries (0.00s)
+=== RUN   TestStartSubjectTailCASDefendsAgainstIgnoredSubjectLimit
+--- PASS: TestStartSubjectTailCASDefendsAgainstIgnoredSubjectLimit (0.00s)
+=== RUN   TestMissingRunMessageIDMutationRetainsDuplicate
+--- PASS: TestMissingRunMessageIDMutationRetainsDuplicate (0.00s)
+=== RUN   TestSkippedStartReconcilerMutationIsDetected
+--- PASS: TestSkippedStartReconcilerMutationIsDetected (0.00s)
+=== RUN   TestStartLivenessFencesReusedIDWithOldJournal
+--- PASS: TestStartLivenessFencesReusedIDWithOldJournal (0.00s)
+=== RUN   TestStartRunDedupWindowExpiresInVirtualTime
+--- PASS: TestStartRunDedupWindowExpiresInVirtualTime (0.00s)
+=== RUN   TestStartScanRepeatsAfterDedupExpiryUntilJournalExists
+--- PASS: TestStartScanRepeatsAfterDedupExpiryUntilJournalExists (0.00s)
+=== RUN   TestStartScanModelCursorAndUncertainEnqueue
+--- PASS: TestStartScanModelCursorAndUncertainEnqueue (0.00s)
+=== RUN   TestSeededStartModelReplay
+--- PASS: TestSeededStartModelReplay (32.08s)
+=== RUN   TestCooperativeStartRacesReplay
+--- PASS: TestCooperativeStartRacesReplay (0.01s)
+=== RUN   TestCooperativeStartAndScannerRacesReplay
+--- PASS: TestCooperativeStartAndScannerRacesReplay (0.01s)
+=== RUN   TestCooperativeSuspendedScannersReplay
+--- PASS: TestCooperativeSuspendedScannersReplay (45.08s)
+=== RUN   TestSeededSuspendedLoopReplay
+--- PASS: TestSeededSuspendedLoopReplay (44.09s)
+=== RUN   TestSeededSuspendedLostNakRecovery
+--- PASS: TestSeededSuspendedLostNakRecovery (3.18s)
+=== RUN   TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead
+=== RUN   TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead/sequence-1
+--- PASS: TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead/sequence-1 (0.00s)
+=== RUN   TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead/sequence-2
+--- PASS: TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead/sequence-2 (0.00s)
+=== RUN   TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead/sequence-3
+--- PASS: TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead/sequence-3 (0.00s)
+--- PASS: TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead (0.00s)
+=== RUN   TestSeededSuspendedScanReplay
+--- PASS: TestSeededSuspendedScanReplay (33.54s)
+=== RUN   TestSeededTimerClockTransitionReplay
+--- PASS: TestSeededTimerClockTransitionReplay (2.82s)
+=== RUN   TestSeededTimerScanReplay
+--- PASS: TestSeededTimerScanReplay (10.42s)
+=== RUN   TestSeededTimerScheduleReplay
+--- PASS: TestSeededTimerScheduleReplay (10.89s)
+=== RUN   TestSeededTombstoneSweepReplay
+--- PASS: TestSeededTombstoneSweepReplay (1.73s)
+=== RUN   TestSeededUnchangedCoordinatorReplay
+--- PASS: TestSeededUnchangedCoordinatorReplay (38.73s)
+=== RUN   TestSeededWorkerChildExecutionReplay
+--- PASS: TestSeededWorkerChildExecutionReplay (20.27s)
+=== RUN   TestSeededWorkerCompactorReplay
+--- PASS: TestSeededWorkerCompactorReplay (110.27s)
+=== RUN   TestSeededWorkerContinuationBudgetReplay
+--- PASS: TestSeededWorkerContinuationBudgetReplay (52.33s)
+=== RUN   TestSeededWorkerContinuationReplay
+--- PASS: TestSeededWorkerContinuationReplay (49.99s)
+=== RUN   TestSeededWorkerDeepChildReplay
+--- PASS: TestSeededWorkerDeepChildReplay (45.75s)
+=== RUN   TestSeededWorkerExecutionReplay
+--- PASS: TestSeededWorkerExecutionReplay (26.06s)
+=== RUN   TestSeededWorkerFallbackTimerExecutionReplay
+--- PASS: TestSeededWorkerFallbackTimerExecutionReplay (13.46s)
+=== RUN   TestSeededWorkerFallbackTimerLoopExecutionReplay
+--- PASS: TestSeededWorkerFallbackTimerLoopExecutionReplay (15.04s)
+=== RUN   TestSeededWorkerFanoutInterruptedReplay
+--- PASS: TestSeededWorkerFanoutInterruptedReplay (96.87s)
+=== RUN   TestFiveHundredChildModeledParentInterruption
+=== RUN   TestFiveHundredChildModeledParentInterruption/seed2
+    worker_fanout_replay_test.go:333: seed=2 phase=creation cut=356
+--- PASS: TestFiveHundredChildModeledParentInterruption/seed2 (0.23s)
+=== RUN   TestFiveHundredChildModeledParentInterruption/seed42
+    worker_fanout_replay_test.go:333: seed=42 phase=results cut=88
+--- PASS: TestFiveHundredChildModeledParentInterruption/seed42 (0.38s)
+--- PASS: TestFiveHundredChildModeledParentInterruption (0.62s)
+=== RUN   TestSeededWorkerFrameBudgetReplay
+--- PASS: TestSeededWorkerFrameBudgetReplay (58.10s)
+=== RUN   TestSeededWorkerFreshTimerWakeupReplay
+--- PASS: TestSeededWorkerFreshTimerWakeupReplay (88.86s)
+=== RUN   TestSeededWorkerCommonClockAcrossSkewedDeliveryTimestamps
+--- PASS: TestSeededWorkerCommonClockAcrossSkewedDeliveryTimestamps (95.63s)
+=== RUN   TestSeededWorkerCommonClockTransitionRepair
+--- PASS: TestSeededWorkerCommonClockTransitionRepair (119.68s)
+=== RUN   TestSeededHeartbeatHandoffReplay
+--- PASS: TestSeededHeartbeatHandoffReplay (11.53s)
+=== RUN   TestSeededWorkerHeartbeatReplay
+--- PASS: TestSeededWorkerHeartbeatReplay (7.90s)
+=== RUN   TestWorkerKillAndPauseLeaseExpiryAndFencing
+--- PASS: TestWorkerKillAndPauseLeaseExpiryAndFencing (0.00s)
+=== RUN   TestCanceledWorkerRetainedLeaseExpiresAndFences
+--- PASS: TestCanceledWorkerRetainedLeaseExpiresAndFences (0.00s)
+=== RUN   TestSeededWorkerLargeResultReplay
+--- PASS: TestSeededWorkerLargeResultReplay (767.62s)
+=== RUN   TestSeededParentNotificationBudgetReplay
+--- PASS: TestSeededParentNotificationBudgetReplay (2.05s)
+=== RUN   TestSeededWorkerObservedRenewalCost
+    worker_observed_renewal_cost_test.go:305: observed cost profiles=map[ceil:33334 floor:33413 zero:33253]; floor/ceil are expected failing liveness controls, zero is the clean cost control
+--- PASS: TestSeededWorkerObservedRenewalCost (67.30s)
+=== RUN   TestSeededWorkerPromiseRetirementReplay
+--- PASS: TestSeededWorkerPromiseRetirementReplay (661.66s)
+=== RUN   TestSeededWorkerResultBudgetReplay
+--- PASS: TestSeededWorkerResultBudgetReplay (1031.20s)
+=== RUN   TestSeededWorkerRetirementReplay
+--- PASS: TestSeededWorkerRetirementReplay (89.36s)
+=== RUN   TestSeededWorkerRunningCancelReplay
+--- PASS: TestSeededWorkerRunningCancelReplay (9.06s)
+=== RUN   TestSeededWorkerSelectExecutionReplay
+--- PASS: TestSeededWorkerSelectExecutionReplay (18.00s)
+=== RUN   TestSeededWorkerSignalExecutionReplay
+--- PASS: TestSeededWorkerSignalExecutionReplay (11.89s)
+=== RUN   TestSeededWorkerSignalWriteLatencyReplay
+--- PASS: TestSeededWorkerSignalWriteLatencyReplay (42.43s)
+=== RUN   TestSeededWorkerSignalLeaseLatencyReplay
+--- PASS: TestSeededWorkerSignalLeaseLatencyReplay (42.52s)
+=== RUN   TestSeededWorkerSnapshotBudgetReplay
+--- PASS: TestSeededWorkerSnapshotBudgetReplay (11.47s)
+=== RUN   TestSeededWorkerSnapshotExecutionReplay
+--- PASS: TestSeededWorkerSnapshotExecutionReplay (367.55s)
+=== RUN   TestSuccessiveWorkerKillDeliveryRecovery
+--- PASS: TestSuccessiveWorkerKillDeliveryRecovery (9.48s)
+=== RUN   TestSeededWorkerTailLookupRecovery
+    worker_tail_lookup_replay_test.go:207: API 503/10008 recovery stages/counts=map[completed/1:8328 completed/2:8412 completed/3:8378 requested/1:8341 requested/2:8292 requested/3:8423 started/1:8232 started/2:8301 started/3:8317 terminal/1:8274 terminal/2:8402 terminal/3:8300]
+--- PASS: TestSeededWorkerTailLookupRecovery (11.26s)
+=== RUN   TestSeededTerminalHeldReplay
+--- PASS: TestSeededTerminalHeldReplay (18.66s)
+=== RUN   TestSeededTerminalOwnedReplay
+--- PASS: TestSeededTerminalOwnedReplay (43.03s)
+=== RUN   TestTerminalOwnedFiveHundred
+--- PASS: TestTerminalOwnedFiveHundred (0.36s)
+=== RUN   TestSeededWorkerTimerBurstReplay
+--- PASS: TestSeededWorkerTimerBurstReplay (95.14s)
+=== RUN   TestSeededWorkerTimerClockTransitionReplay
+--- PASS: TestSeededWorkerTimerClockTransitionReplay (96.61s)
+=== RUN   TestSeededWorkerTimerExecutionReplay
+--- PASS: TestSeededWorkerTimerExecutionReplay (15.03s)
+=== RUN   TestSeededWorkflowReplay
+--- PASS: TestSeededWorkflowReplay (54.75s)
+=== RUN   TestSeededWorkQueueRetentionReplay
+--- PASS: TestSeededWorkQueueRetentionReplay (11.51s)
+PASS
+TIER1_COVERAGE model_version=3 seeds_per_workload=100000 generated_schedules=10700632 scheduler_choices=174556738 choices_per_second=27439.6 transport_events=2592389673 virtual_ms_max=7200000 virtual_buckets_zero=3418990 under_1s=1096884 under_1m=5394319 at_least_1m=790439 elapsed=1h46m1.48494675s
+ok  	js-wf/sim	6361.490s

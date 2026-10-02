@@ -664,6 +664,8 @@ Other risks, in rough order of how much they would change the plan:
 - **The in-memory JetStream model for tier 1 drifts from the real server.** Mitigation is procedural: no tier 2 or 3 bug is closed without a tier 1 reproduction.
 - **Static partitioning.** N=64 fixed partitions means rebalancing is a manual operation in v1. Acceptable for a first release; the lease makes a later dynamic scheme safe to introduce.
 - **Go-only SDK.** Multi-language SDKs are where these projects die. Keep the journal format and the step protocol language-neutral (protobuf, documented recovery table) from day one so a second SDK is a port, not a redesign.
+
+The [version-1 journal and recovery contract](journal-protocol.md) now includes a protobuf interchange schema, lossless Go adapters and independently generated Python codec vectors. Production persistence remains JSON; persisted protobuf encoding/migration and a second SDK remain unimplemented. This partial deliverable does not close the language-neutral storage requirement.
 - **Operational coupling to the NATS cluster's health.** A JetStream cluster that loses quorum stalls every workflow. This is the same trade Temporal makes with its database; document it and test the full-restart rows of the matrix.
 
 The reconciler is a first-class part of v1. Atomic batches cannot span this runtime's separate invocation, run, and signal streams, so repair scanners close the unavoidable crash windows between their dependent writes.
