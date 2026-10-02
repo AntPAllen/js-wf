@@ -28,6 +28,13 @@ for i, vector in enumerate(vectors):
                 message.entry.kind, message.entry.payload_json, message.entry.worker_id)
     if observed != expected or vector["Kind"] != kinds[i]:
         raise ValueError(f"Go-to-Python mismatch: {vector['Name']}")
+    stored_wire = base64.b64decode(vector["StoredWireBase64"], validate=True)
+    if not stored_wire.startswith(b"WFJ\x00"):
+        raise ValueError("missing persisted protobuf marker")
+    stored = journal_pb2.JournalRecord()
+    stored.ParseFromString(stored_wire[4:])
+    if stored.version != 1 or stored.sequence != 0 or stored.entry != message.entry:
+        raise ValueError(f"Go stored record mismatch: {vector['Name']}")
     # Independently create messages and different boundary values/payload bytes.
     payload = b' {"integer":9007199254740993,"null":null} \n'
     entry = journal_pb2.JournalEntry(epoch=(1 << 64) - 1 - i, index=(1 << 53) + 17 + i,
@@ -36,6 +43,7 @@ for i, vector in enumerate(vectors):
     reverse.append(dict(Name=kinds[i], Kind=kinds[i], Sequence=str(produced.sequence),
                         Epoch=str(entry.epoch), Index=str(entry.index), WorkerID=entry.worker_id,
                         PayloadBase64=base64.b64encode(payload).decode(),
-                        WireBase64=base64.b64encode(produced.SerializeToString()).decode()))
+                        WireBase64=base64.b64encode(produced.SerializeToString()).decode(),
+                        StoredWireBase64=base64.b64encode(b"WFJ\x00" + journal_pb2.JournalRecord(version=1, entry=entry).SerializeToString()).decode()))
 (output / "vectors.json").write_text(json.dumps(reverse, indent=2) + "\n")
-print(f"PASS Go-to-Python: {len(vectors)} records; wrote {len(reverse)} independent Python-to-Go records")
+print(f"PASS Go-to-Python interchange and persisted storage: {len(vectors)} records; wrote {len(reverse)} independent Python-to-Go records")

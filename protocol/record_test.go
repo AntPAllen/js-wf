@@ -152,7 +152,7 @@ func TestSDKRecoveryStates(t *testing.T) {
 	}
 }
 
-type vector struct{ Name, Sequence, Epoch, Index, Kind, PayloadBase64, WorkerID, WireBase64 string }
+type vector struct{ Name, Sequence, Epoch, Index, Kind, PayloadBase64, WorkerID, WireBase64, StoredWireBase64 string }
 
 func TestPortableVectors(t *testing.T) {
 	path := "testdata/vectors.json"
@@ -194,6 +194,14 @@ func TestPortableVectors(t *testing.T) {
 			if got.Epoch != want.Epoch || got.Index != want.Index || got.Sequence != want.Sequence || got.Kind != want.Kind || got.WorkerID != want.WorkerID || !bytes.Equal(got.Payload, want.Payload) {
 				t.Fatal(got, want)
 			}
+			var stored journal.Entry
+			if err := journal.UnmarshalEntry(decode(v.StoredWireBase64), &stored); err != nil {
+				t.Fatal(err)
+			}
+			if stored.Epoch != want.Epoch || stored.Index != want.Index || stored.Kind != want.Kind || stored.WorkerID != want.WorkerID || !bytes.Equal(stored.Payload, want.Payload) {
+				t.Fatal("stored vector mismatch", stored, want.Entry)
+			}
+
 		})
 	}
 }

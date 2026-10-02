@@ -6170,3 +6170,19 @@ was also omitted from that commit and remained in the worktree. Both files are
 now included, and future protocol CI explicitly requires both native and CLI
 test names in the compiled inventories before running them. Original metadata
 and missing-file source evidence are retained. Fresh matching-source CI required.
+
+## Full114-workload gate and persisted Python exchange (2026-10-02)
+
+[Full1000 simulator evidence](scale/persisted-protobuf-journal-2026-10-02/full1000-pass/)
+is terminal/success at recorded8ffb0ea:158 tests,259 pins, all114 independent seed
+ranges1..1000,116032 schedules/1783009 choices/26779285 events. Original report
+and fresh verifier output match; retained dependency diff is empty. The omitted
+native test/profile label is separate and does not upgrade native CI proof.
+
+Portable vectors now include actual marked protobuf storage bytes as well as
+bare interchange envelopes. Independently generated Python verifies all eight
+Go storage records with sequence0 and produces eight distinct stored/envelope
+records for Go; local race verification passes. A checked-in Go generator and
+CI byte comparison make fixture regeneration reviewable. Corrected native-test
+presence CI36974477604 is queued at04b4190; matching expanded-storage-exchange CI
+is still required. Existing100k and million handles continue.
