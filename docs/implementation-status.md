@@ -5642,3 +5642,18 @@ repair and end-to-end clock-transition recovery remain open. Tagged writers are
 not enabled; all readers/repairers must support the domain before activation,
 since older binaries ignore the extra JSON field. The real60.27s ahead-clock
 failure remains an open gate; neither it nor the full release scope is relaxed.
+
+## Sustained behind-clock run fails second timer admission (2026-10-02)
+
+36947564272 at28b66c2 fails129.53s before its second admitted cut. The first cut
+has an exact pending shifted-origin tail and removal939.820ms before earliest
+due; replacement/heal succeeds. Before cut2 both roles move back to the minus60s
+peer, but the latest batch9 timer origins were created unshifted just before that
+move. No new timer-clock call appears during the10s selection window, so the
+fixture cannot admit another shifted-origin Sleep and cancels the load.
+[Full original failure evidence](scale/clock-timer-admission-2026-10-01/behind-sustained-admission-failure/README.md)
+is retained and byte/hash-verified. This incomplete run is neither sustained
+acceptance nor a final latency verdict. The timing is consistent with the known
+absolute-deadline clock-domain problem; exact broker behavior is not proven.
+No longer admission timeout or repeat campaign is planned before runtime clock
+and repair wiring. Both directions' sustained clock gates remain open.
