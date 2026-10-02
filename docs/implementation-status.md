@@ -7479,3 +7479,20 @@ executions in221 bounded jobs, at most12 seeds per job. No running trial was
 restarted or canceled. Acceptance requires all expected terminal jobs, exact
 checkout/seed ranges, full-duration runtime checks and raw artifact agreement.
 Dispatch clears no gate. Current120-workload100k37051896032 remains in progress.
+
+
+## Full fourteen-row R5 campaign planning and acceptance guard
+
+The existing five-container workflow now selects all14 implemented rows with
+1/20/200 seeds. Twelve-seed shards bound all-row200 to238 hosted jobs; separate
+seed roots preserve every raw report/audit/explanation without overwriting
+earlier seeds. Single-row job names and artifact layouts remain compatible.
+The all-row guard checks complete terminal jobs, exact checkout/seed headers,
+raw regenerated row reports and independently regenerated event/fencing review
+bytes. Clock flags apply only to clock rows and focused invalid combinations
+are rejected. Zero/invalid start ranges are rejected by the planner.
+
+All57 Tier3 guard tests pass, including complete200-seed planning and missing/
+duplicate/failed/live/source/seed/checkpoint/clock/release rejection controls.
+YAML parses and every shell step passes bash syntax checking. These are harness
+checks, not executed14-row evidence or24h soak. Full release remains open.

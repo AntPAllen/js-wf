@@ -7,7 +7,7 @@ on:
         type: choice
         required: true
         default: journal
-        options: [auto_journal, block_delay, block_disk, journal, consumer, restart, fanout_restart, route_quorum, route_majority, worker_kill, worker_pause, worker_isolation, server_clock_ahead, server_clock_behind]
+        options: [all, auto_journal, block_delay, block_disk, journal, consumer, restart, fanout_restart, route_quorum, route_majority, worker_kill, worker_pause, worker_isolation, server_clock_ahead, server_clock_behind]
       duration:
         description: Ten minutes is sustained; 35 seconds is fixture smoke only
         required: true
@@ -39,40 +39,38 @@ jobs:
     outputs:
       matrix: ${{ steps.matrix.outputs.jobs }}
     steps:
+      - uses: actions/checkout@v4
       - id: matrix
         env:
+          MATRIX_ROW: ${{ inputs.row }}
           SEED_COUNT: ${{ inputs.seeds }}
-          START_SEED: ${{ inputs.start_seed || '1' }}
+          START_SEED: ${{ inputs.start_seed }}
+          CLOCK_TIMER_CUT: ${{ inputs.clock_timer_cut && '1' || '' }}
+          COMMON_TIMER_CLOCK: ${{ inputs.common_timer_clock && '1' || '' }}
         run: |
-          python3 - <<'PYTHON'
-          import json, os
-          count = int(os.environ['SEED_COUNT'])
-          first = int(os.environ['START_SEED'])
-          if count not in (1, 20, 200):
-              raise ValueError('unsupported seed count')
-          if first < 1 or first + count - 1 > 2**63 - 1:
-              raise ValueError('invalid positive int64 seed range')
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-              output.write('jobs=' + json.dumps(list(range(first, first + count))) + '\n')
-          PYTHON
+          python3 -m unittest discover -s scripts -p 'test_tier3_matrix_planner.py'
+          python3 scripts/tier3-matrix-campaign.py
   journal:
-    name: journal (${{ matrix.seed }})
+    name: ${{ inputs.row == 'all' && format('journal ({0}, {1})', matrix.row, matrix.artifact_seed) || format('journal ({0})', matrix.first) }}
     needs: seeds
     strategy:
       fail-fast: false
       max-parallel: 4
       matrix:
-        seed: ${{ fromJSON(needs.seeds.outputs.matrix) }}
+        include: ${{ fromJSON(needs.seeds.outputs.matrix) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: ${{ inputs.row == 'all' && 300 || 25 }}
     env:
-      FAULT_SEED: ${{ matrix.seed }}
+      FAULT_SEED: ${{ matrix.first }}
+      FIRST_SEED: ${{ matrix.first }}
+      LAST_SEED: ${{ matrix.last }}
+      CAMPAIGN_ALL: ${{ inputs.row == 'all' && '1' || '' }}
       WF_TIER3_MATRIX: '1'
-      TIER3_MATRIX_ROW: ${{ inputs.row }}
+      TIER3_MATRIX_ROW: ${{ matrix.row }}
       WF_TIER3_MATRIX_DURATION: ${{ inputs.duration }}
       WF_TIER3_SYNC_INTERVAL: '2m'
-      WF_TIER3_CLOCK_TIMER_CUT: ${{ inputs.clock_timer_cut && '1' || '' }}
-      WF_TIER3_COMMON_CLOCK: ${{ inputs.common_timer_clock && '1' || '' }}
+      WF_TIER3_CLOCK_TIMER_CUT: ${{ inputs.clock_timer_cut && startsWith(matrix.row, 'server_clock_') && '1' || '' }}
+      WF_TIER3_COMMON_CLOCK: ${{ inputs.common_timer_clock && startsWith(matrix.row, 'server_clock_') && '1' || '' }}
       TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
       GOMEMLIMIT: 512MiB
       GOMAXPROCS: '2'
@@ -86,7 +84,7 @@ jobs:
           python3 -m unittest discover -s scripts -p 'test_tier3*.py'
           python3 -m unittest discover -s scripts -p 'test_controller_latency.py'
       - name: Verify private block-device stall capability
-        if: inputs.row == 'block_disk' || inputs.row == 'block_delay'
+        if: matrix.row == 'block_disk' || matrix.row == 'block_delay'
         env:
           WF_BLOCK_DISK: '1'
         run: |
@@ -95,7 +93,7 @@ jobs:
           command -v mkfs.ext4
           go test -p=1 -race ./testcluster -run '^TestBlockDiskStallBlocksSyncAndCleansUp$' -count=1 -timeout=2m -v
       - name: Verify per-request device delay capability
-        if: inputs.row == 'block_delay'
+        if: matrix.row == 'block_delay'
         env:
           WF_BLOCK_DELAY: '1'
         run: |
@@ -122,18 +120,37 @@ jobs:
             route_majority) row_test=TestFiveContainerMixedRouteMajorityEveryThirtySeconds ;;
             *) exit 1 ;;
           esac
-          go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py
-          cut_args=()
-          if [ "$WF_TIER3_CLOCK_TIMER_CUT" = 1 ]; then cut_args+=(--require-clock-timer-cut); fi
-          if [ "$WF_TIER3_COMMON_CLOCK" = 1 ]; then cut_args+=(--require-common-timer-clock); fi
-          python3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --expected-seed "$FAULT_SEED" --output /tmp/tier3-mixed-journal-result.json --require-checkpoint-audits "${cut_args[@]}"
-          python3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"
-          python3 scripts/review-tier3-fencing.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/fencing-timeline-review.json"
+          for seed in $(seq "$FIRST_SEED" "$LAST_SEED"); do
+            echo "TIER3_CAMPAIGN row=$TIER3_MATRIX_ROW seed=$seed duration=$WF_TIER3_MATRIX_DURATION"
+            export FAULT_SEED="$seed"
+            if [ "$CAMPAIGN_ALL" = 1 ]; then
+              seed_root="/tmp/tier3-matrix-range/seed-$seed"
+              mkdir -p "$seed_root"
+              export TIER3_MATRIX_ARTIFACT_ROOT="$seed_root/tier3-mixed-journal"
+              seed_events="$seed_root/tier3-mixed-journal-events.jsonl"
+              seed_result="$seed_root/tier3-mixed-journal-result.json"
+            else
+              seed_events=/tmp/tier3-mixed-journal-events.jsonl
+              seed_result=/tmp/tier3-mixed-journal-result.json
+            fi
+            go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee "$seed_events" | python3 -u scripts/render-go-test.py
+            cut_args=()
+            if [ "$WF_TIER3_CLOCK_TIMER_CUT" = 1 ]; then cut_args+=(--require-clock-timer-cut); fi
+            if [ "$WF_TIER3_COMMON_CLOCK" = 1 ]; then cut_args+=(--require-common-timer-clock); fi
+            python3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events "$seed_events" --duration "$WF_TIER3_MATRIX_DURATION" --expected-seed "$FAULT_SEED" --output "$seed_result" --require-checkpoint-audits "${cut_args[@]}"
+            python3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"
+            python3 scripts/review-tier3-fencing.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/fencing-timeline-review.json"
+          done
       - if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: tier3-${{ inputs.row }}-seed-${{ matrix.seed }}
+          name: tier3-${{ matrix.row }}-seed-${{ matrix.artifact_seed }}
           path: |
+            /tmp/tier3-matrix-range/**/*.json
+            /tmp/tier3-matrix-range/**/*.jsonl
+            /tmp/tier3-matrix-range/**/*.log
+            /tmp/tier3-matrix-range/**/*.txt
+            /tmp/tier3-matrix-range/**/cluster/*.conf
             /tmp/tier3-mixed-journal/*.json
             /tmp/tier3-mixed-journal/*.jsonl
             /tmp/tier3-mixed-journal/*.log
@@ -141,4 +158,4 @@ jobs:
             /tmp/tier3-mixed-journal/cluster/*.conf
             /tmp/tier3-mixed-journal-events.jsonl
             /tmp/tier3-mixed-journal-result.json
-          if-no-files-found: warn
+          if-no-files-found: error

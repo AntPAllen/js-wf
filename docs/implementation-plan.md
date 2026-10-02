@@ -834,3 +834,22 @@ and missing fault cuts are rejected. This enables long-run evidence collection;
 a single row retains `clears_full_tier3_release=false`. The full-matrix
 24-hour requirement remains unchanged. The hosted workflow still selects
 35-second smoke or ten-minute rows; adding verifier support is not a soak pass.
+
+
+### Complete five-container sustained row campaigns
+
+`tier3-mixed-leaders` now accepts `row=all` for all fourteen implemented R5
+fault variants at one revision, with 1,20 or200 consecutive seeds. All-row
+campaigns shard at twelve seeds per job: the200-seed campaign uses238 jobs,
+within the hosted256-job limit. Each seed retains separate raw events, row
+reports, checkpoint audits, event explanations and fencing reviews. Clock proof
+flags apply to both clock rows; focused non-clock requests with those flags
+are rejected. Focused single-row campaign naming/layout remains compatible.
+
+`check-tier3-full-matrix.py` requires every planned terminal job and exact
+checkout/seed header, regenerates every row report from raw artifacts, compares
+uploaded report bytes, and regenerates event/fencing explanations. Optional
+admitted-clock verification requires all cut/probe evidence on both clock rows.
+A ten-minute full-row campaign still reports `clears_full_tier3_release=false`:
+complete fault coverage and the required24-hour full-matrix soak are separate
+requirements. Dispatch and planner/guard tests do not establish a campaign pass.
