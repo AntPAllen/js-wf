@@ -6090,3 +6090,8 @@ opportunity issue; full causal correlation remains open. Original failed artifac
 are retained. No final accepted audit/drain/history/latency or full clock-row pass.
 The million-timer unit remains live with more than555,000 receipts; final proof
 is pending. The historical31.1s worker-kill mismatch is not being rerun.
+
+Fresh100k run36972092297 is queued atf81540e with the current113-workload/258-pin
+source and independent per-workload seed guard. Protocol interoperability CI
+36972084961 is confirmed in progress at the same source. Both are launches, not
+acceptance evidence. Million-timer unit remains active above560,000 receipts.
