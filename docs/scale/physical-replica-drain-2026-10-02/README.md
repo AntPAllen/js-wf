@@ -55,3 +55,9 @@ retains every top-level report/receipt/observation/audit/log plus build and term
 service metadata and independent raw-reply review. Every member in both archives
 was SHA256-compared after compression. Physical stores and binaries remain local
 and are excluded from those published archives.
+
+The rejected runway cause is corroborated by retained consumer metadata: first
+due17:48:15.116759647Z, last consumer created17:48:15.490332750Z. All64 creation
+timestamps are published separately in `live-smoke-pass/rejected-runway-cause.json`.
+Thus consumer setup had already crossed the loading deadline before publishers
+started; this is a setup configuration mismatch, not an all-replica drain miss.
