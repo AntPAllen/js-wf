@@ -3,7 +3,7 @@
 ## Latest accepted evidence — 2026-10-02
 
 - Terminal native-hint retirement at `3184b65` passes the complete116-workload
-  per-commit simulation gate: exact1..1000 seeds each,261 pins and160 top-level
+  incremental simulation gate: exact1..1000 seeds each,261 pins and160 top-level
   passes. The admitted seed5 ahead race smoke passes with56 invocations,617
   entries, one confirmed pending-duration cut and unchanged30s physical drain.
   The suspended scanner records three retired hints. See
@@ -17,16 +17,36 @@
 - [Mutation run37000773351](https://github.com/AntPAllen/js-wf/actions/runs/37000773351)
   passes all six focused pairs plus both live mixed I4 and lease pairs at
   `7902935`. Actual semantic execution and negative controls are independently
-  checked. Four mixed categories remain open.
+  checked. Subsequent CAS and enqueue evidence below advances two more categories.
+- [Mutation run37004744569](https://github.com/AntPAllen/js-wf/actions/runs/37004744569)
+  is independently accepted at `c6793cf`: four successful jobs, nine actual
+  baseline/mutant pairs and rejected compilation/unrelated-failure controls.
+  Two distinct retained CAS receipts decode to the same index2/result42;
+  the integrity checker rejects the duplicate. See
+  [original artifacts and independent acceptance](scale/mixed-cas-mutation-2026-10-02/ci-pass/).
+- The final local mixed enqueue challenge passes at the `c6793cf` worktree
+  with the new fixture:64 acknowledged calls retain one message with the
+  production message ID, versus64 distinct physical records without it.
+  Both variants complete and audit all28 admitted invocations after the actual
+  journal-leader SIGKILL. Independently decoded raw receipts, exact fixture
+  hashes and both negative controls are retained in
+  [enqueue evidence](scale/mixed-enqueue-mutation-2026-10-02/).
 - Current-source [100k run37002783868](https://github.com/AntPAllen/js-wf/actions/runs/37002783868)
-  and [ten-minute ahead run37002781141](https://github.com/AntPAllen/js-wf/actions/runs/37002781141)
-  are live at `3184b65`. The million-timer user service is live; final ledger,
+  remains live at `3184b65`. The
+  [ten-minute ahead run37002781141](https://github.com/AntPAllen/js-wf/actions/runs/37002781141)
+  is independently accepted:672 invocations,7404 entries and19 admitted cuts.
+  [Ahead20 run37004428244](https://github.com/AntPAllen/js-wf/actions/runs/37004428244)
+  is queued at `a4d57ab`. The million-timer user service is live; final ledger,
   audit/drain and verdict remain required.
 
-The current100k gate, sustained ahead acceptance, full200-seed Tier2 matrix,
-full Tier3 matrix/24h soak, remaining mixed mutations and combined timer-cut/
+The current100k gate, sustained ahead20/200 acceptance, full200-seed Tier2 matrix,
+full Tier3 matrix/24h soak, two remaining mixed mutation categories and combined timer-cut/
 continuation cases remain open. Running campaigns and component proofs do not
 clear these gates. The sections below retain chronological evidence and failures.
+The planned increase to10k per commit is not implemented; the plan conditions
+that increase on completing within a few minutes on CI hardware. The current
+incremental gate is1k, while accepted100k campaigns apply only to their recorded
+source graphs.
 
 This records what the current repository proves. The [implementation plan](implementation-plan.md) remains the release target. Its Tier 1 section specifies a seeded, replayable in-memory transport model, differential contract checks against real NATS, and incremental proof gates. The seeded and differential results below cover several transport slices, including short worker execution, signal resume, native timer wakeup, and fallback timer scan-to-worker wakeup; other integrated paths remain unfinished.
 

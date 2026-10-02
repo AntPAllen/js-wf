@@ -1,0 +1,105 @@
+{
+  "run": 37004744569,
+  "source": "c6793cff506c60f495b0042028b03a7de186a9a6",
+  "checks": [
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_cas",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "independent_worker_leases",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "invocation_purged_first",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_determinism_guard",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_run_message_id",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "skipped_start_reconciler",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-cas",
+      "mutation": "missing_cas",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-determinism",
+      "mutation": "missing_determinism_guard",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-leases",
+      "mutation": "independent_worker_leases",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    }
+  ],
+  "raw_cas_receipts": [
+    {
+      "Subject": "wf.jrn.guardshort.guardshort-0-0",
+      "Sequence": 151,
+      "Header": null,
+      "Data": "eyJlcG9jaCI6MSwiaW5kZXgiOjIsImtpbmQiOiJTdGVwQ29tcGxldGVkIiwicGF5bG9hZCI6eyJyZXN1bHQiOjQyfSwid29ya2VyX2lkIjoibWl4ZWQtZ3VhcmQtYmVmb3JlIn0=",
+      "Time": "2026-10-02T12:10:52.800554956Z"
+    },
+    {
+      "Subject": "wf.jrn.guardshort.guardshort-0-0",
+      "Sequence": 152,
+      "Header": null,
+      "Data": "eyJlcG9jaCI6MSwiaW5kZXgiOjIsImtpbmQiOiJTdGVwQ29tcGxldGVkIiwicGF5bG9hZCI6eyJyZXN1bHQiOjQyfSwid29ya2VyX2lkIjoibWl4ZWQtZ3VhcmQtYmVmb3JlIn0=",
+      "Time": "2026-10-02T12:10:52.800598904Z"
+    }
+  ],
+  "decoded_entries": [
+    {
+      "epoch": 1,
+      "index": 2,
+      "kind": "StepCompleted",
+      "payload": {
+        "result": 42
+      },
+      "worker_id": "mixed-guard-before"
+    },
+    {
+      "epoch": 1,
+      "index": 2,
+      "kind": "StepCompleted",
+      "payload": {
+        "result": 42
+      },
+      "worker_id": "mixed-guard-before"
+    }
+  ]
+}

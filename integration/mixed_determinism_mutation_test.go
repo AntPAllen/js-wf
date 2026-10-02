@@ -53,6 +53,13 @@ func TestMixedCASMutationAfterJournalLeaderKill(t *testing.T) {
 	runMixedGuardChallenge(t, "cas")
 }
 
+func TestMixedEnqueueMutationAfterJournalLeaderKill(t *testing.T) {
+	if os.Getenv("WF_MIXED_ENQUEUE_MUTATION") != "1" {
+		t.Skip("set WF_MIXED_ENQUEUE_MUTATION=1 for the mixed enqueue challenge")
+	}
+	runMixedGuardChallenge(t, "enqueue")
+}
+
 func runMixedGuardMutation(t *testing.T, leaseChallenge bool) {
 	mode := "determinism"
 	if leaseChallenge {
@@ -64,6 +71,7 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 	t.Helper()
 	leaseChallenge := mode == "leases"
 	casChallenge := mode == "cas"
+	enqueueChallenge := mode == "enqueue"
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -365,6 +373,10 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 	if casChallenge {
 		challengeMixedCAS(t, ctx, nodes, survivor, target.typ, target.id, prefix)
 	}
+	var retainedEnqueues int
+	if enqueueChallenge {
+		retainedEnqueues = challengeMixedEnqueue(t, ctx, nodes, survivor, target.typ, target.id)
+	}
 	stopSecond := startWorker("mixed-guard-after", nodes[survivor], true)
 	defer stopSecond()
 	var leaseEscaped bool
@@ -447,6 +459,16 @@ func runMixedGuardChallenge(t *testing.T, mode string) {
 		t.Fatalf("lost prefix or epoch handoff: %v", err)
 	}
 	t.Logf("MIXED_GUARD_COHORT shorts=4 timers=3 signals=2 fanout=1 children=6 grandchildren=12 terminal=28 entries=%d", report.Entries)
+	if enqueueChallenge {
+		if resultErr != nil || string(value) != "42" || records[len(records)-1].Kind != journal.Completed {
+			t.Fatalf("enqueue cohort target result=%s err=%v", value, resultErr)
+		}
+		if retainedEnqueues > 1 {
+			t.Fatalf("MIXED_MUTATION_ESCAPE category=missing_run_message_id acknowledged_calls=64 retained_at_least64=true terminal=28 retained=%d", retainedEnqueues)
+		}
+		t.Log("MIXED_ENQUEUE_REJECTED acknowledged_calls=64 retained=1 terminal=28")
+		return
+	}
 	if casChallenge {
 		if resultErr != nil || string(value) != "42" || records[len(records)-1].Kind != journal.Completed {
 			t.Fatalf("CAS cohort target result=%s err=%v", value, resultErr)

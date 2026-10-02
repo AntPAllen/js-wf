@@ -107,9 +107,12 @@ def main():
     parser.add_argument("--mixed-determinism", action="store_true", help="challenge I4 through a live mixed worker/leader-kill workload")
     parser.add_argument("--mixed-leases", action="store_true", help="challenge lease exclusion after a real leader kill in the live mixed cohort")
     parser.add_argument("--mixed-cas", action="store_true", help="race two gated production journal appends in the live mixed leader-kill cohort")
+    parser.add_argument("--mixed-enqueue", action="store_true", help="challenge retained dispatch deduplication in the live mixed leader-kill cohort")
     args = parser.parse_args()
-    if sum((args.mixed_leases,args.mixed_determinism,args.mixed_cas))>1:
+    if sum((args.mixed_leases,args.mixed_determinism,args.mixed_cas,args.mixed_enqueue))>1:
         parser.error("select one mixed challenge")
+    if args.mixed_enqueue and args.mutation not in (None,"missing_run_message_id"):
+        parser.error("--mixed-enqueue selects only missing_run_message_id")
     if args.mixed_cas and args.mutation not in (None,"missing_cas"):
         parser.error("--mixed-cas selects only missing_cas")
     if args.mixed_leases and args.mutation not in (None, "independent_worker_leases"):
@@ -140,6 +143,13 @@ def main():
                         environment={"WF_MIXED_CAS_MUTATION": "1"},
                         markers=["MIXED_GUARD_ADMISSION shorts_pending=4 timers_suspended=3 signals_suspended=2 fanout_suspended=1", "MIXED_GUARD_FAULT", "signal=SIGKILL", "MIXED_CAS_ADMISSION contenders=2", "MIXED_CAS_RETAINED", "MIXED_CAS_CHECKER_REJECTED", "MIXED_MUTATION_ESCAPE category=missing_cas acknowledged_winners=2 stale_rejections=0 same_index=2 retained_duplicates=2 checker_rejected=true"])
         selected = [mutation]
+    if args.mixed_enqueue:
+        mutation = dict(next(m for m in MUTATIONS if m["name"] == "missing_run_message_id"))
+        mutation.update(package="./integration", test="TestMixedEnqueueMutationAfterJournalLeaderKill",
+                        fixture_files=["integration/mixed_determinism_mutation_test.go", "integration/mixed_enqueue_mutation_test.go"],
+                        environment={"WF_MIXED_ENQUEUE_MUTATION": "1"},
+                        markers=["MIXED_GUARD_ADMISSION shorts_pending=4 timers_suspended=3 signals_suspended=2 fanout_suspended=1", "MIXED_GUARD_FAULT", "signal=SIGKILL", "MIXED_ENQUEUE_RAW_RECEIPT", "MIXED_ENQUEUE_ADMISSION acknowledged_calls=64", "MIXED_ENQUEUE_RETAINED_DUPLICATES acknowledged_calls=64 retained_at_least64=true id_headers=0", "MIXED_GUARD_COHORT shorts=4 timers=3 signals=2 fanout=1 children=6 grandchildren=12 terminal=28", "MIXED_MUTATION_ESCAPE category=missing_run_message_id acknowledged_calls=64 retained_at_least64=true terminal=28 retained="])
+        selected = [mutation]
     report = dict(scope="focused production mutations; full mixed-chaos gate remains open",
                   head=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                   cas_rounds=1000, seeds_per_modeled_workload=1000, mutations=[])
@@ -149,7 +159,9 @@ def main():
         report["scope"] = "one mixed production I4 mutation; remaining mixed categories and full release remain open"
     if args.mixed_cas:
         report["scope"] = "one mixed production CAS mutation; mutant stops on retained journal corruption; remaining categories and full release remain open"
-    if args.mixed_determinism or args.mixed_leases or args.mixed_cas:
+    if args.mixed_enqueue:
+        report["scope"] = "one mixed production enqueue mutation; remaining mixed categories and full release remain open"
+    if args.mixed_determinism or args.mixed_leases or args.mixed_cas or args.mixed_enqueue:
         report.pop("cas_rounds")
         report.pop("seeds_per_modeled_workload")
     success = True
