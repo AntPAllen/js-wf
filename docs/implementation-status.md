@@ -6989,3 +6989,37 @@ The enlarged119-workload100k qualification is queued as
 at exact7c5fb3ea468836ee95fd5b3e48318b1e5467b292. The existing118-workload
 run37028379931 and production-cap continuation run37037256768 remain active.
 No existing campaign was replaced or restarted. A queued launch is not acceptance.
+
+
+## Hosted ahead-clock seed27 ten-minute proof accepted
+
+[Run37030391587](scale/concurrent-docker-exit-2026-10-02/) at exact0f979d0 passes
+the actual race-instrumented ten-minute row:644 terminal invocations,7,079
+journal entries and19 admitted cuts. Worst per-type terminal/progress p99 are
+13.876s/14.934s. The raw-artifact checker verifies strict source exit, retained
+prefixes, histories, common clock, checkpoints, final state and physical drain;
+its regenerated report is byte-identical to the original. All published files
+are archived losslessly with SHA256 readback. This clears only focused seed27
+at that source and does not repair the original rejected ahead200 cut.
+
+The60-second million-store copy's metadata API marks both WF_RUN replicas current
+while reporting141 retained schedule sources under its leader. Local monitoring
+states nevertheless differ. Raft-current metadata is not evidence of physical
+message equality. The backend persistence cause remains unconfirmed.
+
+A compact native-source diagnostic is confirmed active as user unit
+`js-wf-native-source-short-20261002.service`, PID257468, with100,000 schedules,
+90s horizon,30s lead and two planned all-server SIGKILL/restarts. Its diagnostic
+p99/max delivery limits are30s/60s, so it cannot qualify the million-timer2s/30s
+release target. All100,000 publishes are acknowledged. Original binary metadata
+reports clean17db0fc source; all572 tracked Go files independently match that
+Git revision. The new per-attempt drain audit is enabled. Originals live under
+`/tmp/js-wf-native-source-short-20261002`, log at the matching `.log`, and build/
+launch/source metadata under `/tmp/js-wf-native-source-short-build-20261002`.
+This is an active diagnostic, not a passed gate. Existing million-timer stores
+were not restarted or altered. Only regenerable Go build cache was cleared to
+recover disk headroom; retained campaign data was preserved.
+
+Current119-workload100k run37039245566 and fresh all-six ten-minute mutation
+run37030840346 are now confirmed in progress. The production-cap continuation
+run37037256768 and older118-workload100k run37028379931 also remain active.

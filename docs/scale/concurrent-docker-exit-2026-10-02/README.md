@@ -46,3 +46,21 @@ row checks verify that requested seed; non-1 ranges do not satisfy the existing
 full-range campaign checker. Fresh admitted and sustained clock validation is
 still required. This contract alone does not explain the original server's exit
 or clear full matrix/soak gates.
+
+## Hosted ten-minute ahead-clock seed27
+
+[Run37030391587](https://github.com/AntPAllen/js-wf/actions/runs/37030391587)
+at exact0f979d0 completes the actual race-instrumented ten-minute seed27 row:
+644 terminal invocations,7,079 entries and19 admitted skewed-owner cuts. Every
+cut satisfies the strict source-exit-before-earliest-due rule. All histories,
+raw controller timing, per-type p99, final retained state, checkpoint cohorts,
+common clock and physical drain pass. Worst terminal/progress p99 are13.876s
+and14.934s. The checker regenerates the uploaded report byte-identically.
+`hosted-ahead27-ten-minute` preserves every downloaded artifact plus terminal
+run/job metadata, rechecked report and independent review, with SHA256 readback
+comparison for every member. CI source provenance comes from terminal checkout
+metadata; this row did not upload a complete Go source inventory.
+
+This accepts the focused current-observer seed27 only. It does not retroactively
+accept the original rejected ahead200 seed27 cut, certify seeds1..200, all timer
+combinations, the full matrix, or24-hour runtime soak.
