@@ -2,6 +2,20 @@
 
 ## Latest accepted evidence — 2026-10-02
 
+- Full118-workload Tier1 at exact `431c934` passes166.468s:118,000 actual seed
+  bodies,264 pins,162 top-level passes and only the two documented trace-only
+  skips. Compiled/source AST inventories, contiguous ranges and committed Git
+  source bytes are independently checked. [Full1k originals](scale/native-delete-recovery-2026-10-02/full1000-pass/).
+  Both admitted R5 ahead-clock35s race smokes at this source (seeds13/16) pass
+  with56 invocations each,616/618 entries,48 timer waits and strict source-exit
+  admission plus physical drain. [Admitted originals](scale/native-delete-recovery-2026-10-02/admitted-ahead-smoke-pass/).
+  Neither smoke clears the original sustained failures. Current118-graph100k
+  run37028379931 and hosted deletion contract37028014274 are launched at431c934;
+  their acceptance remains open.
+- The older ahead200 campaign also fails seed20 on the same flattened503/10008
+  delete cause, and seed27 on a separate timer-cut admission miss: its recorded
+  source-absence upper bound is395ms past earliest due. Actual exit timing is
+  unconfirmed; the cut stays rejected. [Additional original failures](scale/native-delete-recovery-2026-10-02/ahead200-additional-failures/).
 - Native timer deletion now preserves typed API causes across the pinned client
   boundary. Temporary unavailable replies reach the existing bounded retry path;
   only ordinary message-not-found or the exact500/10057 `no message found` reply
@@ -10,8 +24,8 @@
   production scanner loops across eight reply modes; two new replay pins bring
   the corpus to264. See [native delete recovery](scale/native-delete-recovery-2026-10-02/).
   Focused local race contracts, exact1..1000 model schedules, all264 pins,
-  fallback recovery and source mutation controls are accepted. Fresh full-suite,
-  admitted clock-row and hosted contract gates remain required; this does not
+  fallback recovery and source mutation controls are accepted. Full1k and admitted
+  clock smoke are recorded above; hosted and sustained gates remain required. This does not
   clear the failed ahead200 campaign or explain its underlying server replies.
 - Hosted all-six sustained-harness smoke37018302340 at `026d574` is independently
   accepted: six actual35s baseline/semantic-mutant pairs, all original source,
