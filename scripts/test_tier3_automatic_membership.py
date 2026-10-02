@@ -55,3 +55,21 @@ class AutomaticMembershipChecks(unittest.TestCase):
                     self.assertFalse(result['admits_membership_churn'])
                 else:
                     with self.assertRaises(ValueError):row.check_automatic_artifacts(root,dict(confirmed_faults=1))
+
+    def test_session_rejoins_require_stopped_workers_and_fresh_epochs(self):
+        for mode in ('valid','missing_stop','missing_join','same_epoch','wrong_previous','wrong_worker','time_regression','duplicate_stop','wait_without_stop'):
+            with self.subTest(mode=mode):
+                events=[dict(at='2026-10-02T00:00:01Z',worker='a',phase='stopped',previous_epoch=1,epoch=1,error='lease lost'),
+                        dict(at='2026-10-02T00:00:02Z',worker='a',phase='rejoined',previous_epoch=1,epoch=3)]
+                if mode=='missing_stop':events.pop(0)
+                elif mode=='missing_join':events.pop()
+                elif mode=='same_epoch':events[1]['epoch']=1
+                elif mode=='wrong_previous':events[1]['previous_epoch']=2
+                elif mode=='wrong_worker':events[1]['worker']='b'
+                elif mode=='time_regression':events[1]['at']='2026-10-02T00:00:00Z'
+                elif mode=='duplicate_stop':events.insert(1,copy.deepcopy(events[0]))
+                elif mode=='wait_without_stop':events[0]['phase']='rejoin_wait'
+                if mode=='valid':self.assertEqual(row.check_automatic_sessions(events,['a']),1)
+                else:
+                    with self.assertRaises(ValueError):row.check_automatic_sessions(events,['a'])
+        self.assertEqual(row.check_automatic_sessions(None,['a']),0)

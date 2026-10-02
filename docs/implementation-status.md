@@ -5787,3 +5787,19 @@ and verified. Worker/timer latency gates are unchanged.
 The mixed R5 fixture origin selection and controller audit still require canonical
 domain plus shifted scheduling provenance before enabling tagged workers. These
 prerequisites do not clear admitted native ahead/behind or full release gates.
+
+## Diagnosed membership renewal and joined session recovery (2026-10-02)
+
+[Instrumented run36956035359](scale/tier3-automatic-membership-2026-10-02/diagnosed-renewal-failure/README.md)
+identifies membership/tier3-mixed-4 renewal failing with `nats: no response from
+stream`, then fleet-wide cancellation during the first cut. KV commit and server
+root cause remain unconfirmed; original artifacts/log/API are retained and verified.
+
+Production Controller.RunWithWorkers now joins the affected member's workers
+before own-epoch cleanup and fresh registration. CLI auto and R5 automatic mode
+use it. Strict Renew, worker fencing and full coordinator claims remain unchanged.
+The session artifact guard requires stop/rejoin pairs with increasing epochs and
+no unfinished recovery. [Seeded/session evidence](scale/membership-session-recovery-2026-10-02/README.md)
+passes1,000 schedules5.04s / package6.064s, three new/old exact pins1.132s,
+assignment/CLI races40.482s /30.452s and38 artifact controls. Full234-pin/100k and
+native sustained recovery remain open, as does full release scope.

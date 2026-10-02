@@ -86,6 +86,36 @@ def check(events, duration, expected_row='journal'):
                 confirmed_faults=faults, active_consumer_faults=active_consumer_faults, cells=cells, clears_full_tier3_release=False)
 
 
+def check_automatic_sessions(events, members):
+    pending, current, times = {}, {}, {}
+    rejoins = 0
+    for event in events or []:
+        worker, phase = event['worker'], event['phase']
+        epoch, previous = event['epoch'], event['previous_epoch']
+        at = timestamp_ns(event['at'])
+        if worker not in members or not isinstance(epoch, int) or epoch <= 0 or previous <= 0:
+            raise ValueError('invalid member session identity/epoch')
+        if at < times.get(worker, at): raise ValueError('member session times regress')
+        times[worker] = at
+        if phase == 'stopped':
+            if worker in pending or epoch != previous or current.get(worker, epoch) != epoch or not event.get('error'):
+                raise ValueError('invalid stopped member session')
+            pending[worker] = epoch
+        elif phase == 'rejoin_wait':
+            if pending.get(worker) != previous or epoch != previous or not event.get('error'):
+                raise ValueError('invalid member rejoin wait')
+        elif phase == 'rejoined':
+            if pending.get(worker) != previous or epoch <= previous or event.get('error'):
+                raise ValueError('member restarted without a fresh acknowledged epoch')
+            del pending[worker]
+            current[worker] = epoch
+            rejoins += 1
+        else:
+            raise ValueError('unknown member session phase')
+    if pending: raise ValueError('member sessions did not recover before final audit')
+    return rejoins
+
+
 def check_automatic_artifacts(root, report):
     members = [f'tier3-mixed-{n}' for n in range(5)]
     snapshots = [json.loads((root/f'automatic-{stage}.json').read_text()) for stage in ('initial', 'final')]
@@ -131,7 +161,9 @@ def check_automatic_artifacts(root, report):
             raise ValueError('final assignment differs from observed coordinator writes')
     dispatched = {e['Worker'] for e in json.loads((root/'dispatch.json').read_text()) if e['Stage'] == 'lease_acquired' and e['RunSequence'] and e['Type'] and e['ID']}
     if dispatched != set(members): raise ValueError('not all five automatic assignment watchers executed workflows')
-    return dict(claimed_partitions=64, acknowledged_coordinator_writes=len(writes), observed_active_workers=5,
+    sessions_path = root/'automatic-sessions.json'
+    rejoins = check_automatic_sessions(json.loads(sessions_path.read_text()), members) if sessions_path.exists() else None
+    return dict(claimed_partitions=64, acknowledged_coordinator_writes=len(writes), observed_active_workers=5, session_rejoins=rejoins,
                 admits_membership_churn=False, clears_full_tier3_release=False)
 
 

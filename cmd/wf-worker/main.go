@@ -190,14 +190,12 @@ func run(ctx context.Context, args []string) (runErr error) {
 	defer stopRun()
 	results := make(chan error, 8)
 	loops := 1
-	if *mode == "kv" || *mode == "auto" {
+	if *mode == "auto" {
+		go func() { results <- controller.RunWithWorkers(runCtx, w.RunKVAssignments, nil) }()
+	} else if *mode == "kv" {
 		go func() { results <- w.RunKVAssignments(runCtx) }()
 	} else {
 		go func() { results <- w.RunAssigned(runCtx, *staticIndex, *staticCount) }()
-	}
-	if controller != nil {
-		go func() { results <- controller.Run(runCtx) }()
-		loops++
 	}
 	if *repair {
 		start := []func(context.Context) error{

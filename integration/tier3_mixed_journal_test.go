@@ -298,6 +298,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	var automaticMembers *assignment.Membership
 	var automaticOwners *assignment.Store
 	var automaticWrites []matrixAutomaticWrite
+	var automaticSessions []assignment.SessionEvent
 	var workers []*worker.Worker
 	defer func() {
 		stopWork()
@@ -406,8 +407,14 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			}
 			for node, w := range workers {
 				controller := controllers[node]
-				launch(fmt.Sprintf("membership/tier3-mixed-%d", node), func() error { return controller.Run(workCtx) })
-				launch(fmt.Sprintf("assignments/tier3-mixed-%d", node), func() error { return w.RunKVAssignments(workCtx) })
+				launch(fmt.Sprintf("member-session/tier3-mixed-%d", node), func() error {
+					return controller.RunWithWorkers(workCtx, w.RunKVAssignments, func(event assignment.SessionEvent) {
+						evidenceMu.Lock()
+						automaticSessions = append(automaticSessions, event)
+						evidenceMu.Unlock()
+						t.Logf("tier3 member session worker=%s phase=%s previous=%d epoch=%d error=%s", event.Worker, event.Phase, event.PreviousEpoch, event.Epoch, event.Error)
+					})
+				})
 			}
 			if err := saveMatrixAutomaticSnapshot(ctx, js, automaticMembers, automaticOwners, filepath.Join(root, "automatic-initial.json")); err != nil {
 				t.Fatal(err)
@@ -503,6 +510,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		evidenceMu.Lock()
 		if row == "auto_journal" {
 			write("automatic-writes.json", automaticWrites)
+			write("automatic-sessions.json", automaticSessions)
 		}
 		write("fleet-failures.json", fleetFailures)
 		write("dispatch.json", dispatch)

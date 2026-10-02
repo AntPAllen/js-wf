@@ -215,3 +215,9 @@ reads. Run it with the same old binary and artifact variables:
 `go test -race ./integration -run '^TestMixedVersionMultipleConsumerRetentionRecovery$' -count=1 -timeout=3m -v`.
 The `mixed-version-retention-controls` workflow runs these expected bad-state
 and recovery controls; a pass does not clear strict mixed-version conformance.
+
+Automatic CLI members now supervise registration and partition loops as one
+session. A failed controller pass stops and joins that member's workers before
+registration cleanup and a fresh epoch; permanent worker errors still exit.
+[Session recovery evidence](docs/scale/membership-session-recovery-2026-10-02/README.md)
+covers seeded uncertainty and CLI smoke, with sustained native acceptance pending.
