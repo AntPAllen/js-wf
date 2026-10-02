@@ -26,3 +26,27 @@ This estimator is not wired to production timer scheduling. Authenticated clock
 sampling, durable clock-domain provenance, deadline translation, repair,
 backward compatibility and end-to-end simulation/native gates still need work.
 It does not repair or accept the existing ahead-clock latency counterexample.
+
+## Bounded stream sampling
+
+`NewStreamSource` reads a fresh single-replica stream-info response per probe.
+It accepts only trusted server names mapped to physical identities and rejects
+replicated or migrating streams. Replicated STREAM.INFO admission and leader
+metadata construction are separate in the pinned server, so a leader field
+alone is insufficient timestamp-producer provenance during a transition.
+The single-replica/no-Raft response names its actual producer. The caller must
+supply authenticated cluster access, protected reply subjects and trusted topology.
+
+`NewSampler` brackets at most five parallel reads with one monotonic anchor,
+limits the collection budget, deduplicates physical sources, and requires the
+configured independent agreement. A source must honor cancellation. Unavailable
+sources are omitted; invalid successful observations fail closed. `Reading.Bounds`
+advances UTC bounds with monotonic elapsed time and rejects expired readings.
+The configured healthy-error budget must cover clock/rate uncertainty throughout
+the maximum reading age. Readings are private process-local values, not durable
+clock records. Two probe names on one server cannot establish agreement.
+
+[Race and native R3 evidence](../docs/scale/runtimeclock-sampling-2026-10-02/README.md)
+verifies forwarded identities, alias collapse and replicated-stream rejection.
+This remains unwired to workflow deadlines: the existing failed ahead-clock
+progress gate remains open.

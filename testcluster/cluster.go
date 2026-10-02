@@ -13,12 +13,13 @@ import (
 )
 
 type Cluster struct {
-	Servers   []*server.Server
-	Clients   []*nats.Conn
-	root      string
-	ports     []int
-	routes    []int
-	routeMesh *RouteMesh
+	Servers    []*server.Server
+	Clients    []*nats.Conn
+	root       string
+	ports      []int
+	routes     []int
+	routeMesh  *RouteMesh
+	serverTags map[int][]string
 }
 
 func freePort() (int, error) {
@@ -32,20 +33,37 @@ func freePort() (int, error) {
 
 // Start boots count nodes with separate file stores and pinned clients.
 func Start(root string, count int) (*Cluster, error) {
-	return start(root, count, false)
+	return start(root, count, false, nil)
+}
+
+// StartWithServerTags permits documented JetStream placement constraints in
+// native tests. Tags are copied before starting the servers.
+func StartWithServerTags(root string, count int, tags map[int][]string) (*Cluster, error) {
+	return start(root, count, false, tags)
 }
 
 // StartPartitionable routes every inter-server connection through a RouteMesh.
 // It is intended for route-partition tests, not throughput measurements.
 func StartPartitionable(root string, count int) (*Cluster, error) {
-	return start(root, count, true)
+	return start(root, count, true, nil)
 }
 
-func start(root string, count int, partitionable bool) (*Cluster, error) {
+func start(root string, count int, partitionable bool, tags map[int][]string) (*Cluster, error) {
 	if count < 1 || count > 3 {
 		return nil, fmt.Errorf("count must be 1..3")
 	}
-	c := &Cluster{root: root}
+	c := &Cluster{root: root, serverTags: make(map[int][]string, len(tags))}
+	for node, values := range tags {
+		if node < 0 || node >= count {
+			return nil, fmt.Errorf("server tag node %d out of range", node)
+		}
+		for _, value := range values {
+			if value == "" {
+				return nil, fmt.Errorf("empty server tag")
+			}
+		}
+		c.serverTags[node] = append([]string(nil), values...)
+	}
 	ports := make([]int, count)
 	routes := make([]int, count)
 	usedPorts := make(map[int]struct{}, 2*count)
@@ -131,6 +149,7 @@ func (c *Cluster) ApplyFault(event FaultEvent) error {
 
 func (c *Cluster) options(i int) *server.Options {
 	opts := &server.Options{Host: "127.0.0.1", Port: c.ports[i], JetStream: true, StoreDir: filepath.Join(c.root, fmt.Sprintf("node-%d", i)), NoLog: true, NoSigs: true, ServerName: fmt.Sprintf("wf-test-%d", i)}
+	opts.Tags.Add(c.serverTags[i]...)
 	if len(c.ports) > 1 {
 		opts.Accounts = []*server.Account{server.NewAccount("$SYS"), server.NewAccount("$G")}
 		opts.SystemAccount = "$SYS"

@@ -5583,3 +5583,21 @@ source predecessor36929826425 is completed/success but does not verify the
 later SDK fresh-wakeup fix or newer clock work. The million-timer service is
 confirmed active (PID18146), with356826receipts and its first full restart
 retained; second restart/final audit remain open.
+
+## Bounded independent clock sampling and native identity contract (2026-10-02)
+
+The runtimeclock estimator now has a production JetStream source and a bounded
+parallel sampler. Fresh R1/no-Raft probes authenticate timestamp producers via
+trusted physical topology. Replicated/migrating responses fail closed: pinned
+server source inspection shows their leader admission and reported leader can
+race, so that field alone is insufficient producer provenance. Duplicate probe
+owners count once; monotonic readings expire instead of caching wall clocks.
+Full package race tests pass1.139s, including±60s/loss/cancellation/alias controls.
+The native tagged R3 contract passes3.37s (package4.394s), samples three actual
+physical producers through one client, observes142ms uncertainty, rejects two
+same-owner probes as independent agreement and rejects real replicatedWF_RUN.
+[Commands, full terminal logs and tested-code hashes](scale/runtimeclock-sampling-2026-10-02/README.md)
+are retained. This is not yet wired to workflow clocks. Probe provisioning,
+durable clock-domain provenance, canonical deadlines, schedule translation,
+SDK due decisions, repairs and compatibility remain required; the60.27s native
+ahead-clock failure and full release gates remain open.
