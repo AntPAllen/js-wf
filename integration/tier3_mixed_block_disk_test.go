@@ -14,7 +14,7 @@ import (
 	"js-wf/testcluster"
 )
 
-func stallFiveContainerMixedBlockDisk(ctx context.Context, nc *nats.Conn, js jetstream.JetStream, cluster *testcluster.DockerCluster, disk *testcluster.BlockDisk, scheduled time.Time, prefix string, fault int) (matrixLeaderFault, error) {
+func stallFiveContainerMixedBlockDisk(ctx context.Context, nc *nats.Conn, js jetstream.JetStream, cluster *testcluster.DockerCluster, disk *testcluster.BlockDisk, scheduled time.Time, prefix string, fault int, delay bool) (matrixLeaderFault, error) {
 	event := matrixLeaderFault{Scheduled: scheduled, Node: 4}
 	bound, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
@@ -45,6 +45,22 @@ func stallFiveContainerMixedBlockDisk(ctx context.Context, nc *nats.Conn, js jet
 	}
 	if err != nil {
 		return event, err
+	}
+	if delay {
+		proof, err := disk.Delay(bound, 5*time.Second, 100*time.Millisecond)
+		event.BlockDelay = &proof
+		event.Killed = proof.Applied
+		if err != nil {
+			return event, err
+		}
+		if proof.Clearing.Sub(proof.Applied) < 5*time.Second || proof.SyncReturned.Sub(proof.SyncStarted) < 100*time.Millisecond {
+			return event, fmt.Errorf("unverified per-request block delay: %+v", proof)
+		}
+		if err := waitFiveReplicaReadiness(bound, js, 0); err != nil {
+			return event, err
+		}
+		event.Healed = time.Now().UTC()
+		return event, nil
 	}
 	proof, err := disk.Stall(bound, 5*time.Second)
 	event.BlockStall = &proof

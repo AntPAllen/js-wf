@@ -5429,3 +5429,19 @@ wait duration. Baseline rows and the raw30s latency target stay unchanged.
 Focused selector/refresh race checks pass1.033s; all34 Tier3 Python tests and
 both controller tests pass. Corrected native runs and the broader release
 clock matrix remain open.
+
+## R5 per-request dm-delay fixture added (2026-10-02)
+
+The five-container fixture adds `block_delay`, separate from device suspension:
+100ms read/write/flush delay on node four's private device-mapper filesystem for
+five seconds every30s. Each cut admits R5 journal/dispatch leaders on the observed
+writable store bind and retains actual delay/linear tables, a slow dirty-sync
+probe, same-backing restoration and R5 readiness. Cleanup restores with an
+independent context and joins any outstanding probe. Hosted capability tests
+must demonstrate real delay, cancellation/restoration, usable post-fault writes
+and mount/image cleanup before running the mixed fixture. The local VM has no
+`dm_delay` module; compilation with native tests skipped is not acceptance.
+All35 Tier3 Python tests pass, including12 delay-proof controls; both controller
+tests pass. See [fixture scope](scale/tier3-mixed-block-delay-2026-10-02/README.md).
+Native smoke, sustained evidence and combined/200-seed/24h full matrix gates
+remain open; the raw30s recovery and2m file sync gates stay unchanged.

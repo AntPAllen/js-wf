@@ -7,7 +7,7 @@ on:
         type: choice
         required: true
         default: journal
-        options: [block_disk, journal, consumer, restart, fanout_restart, route_quorum, route_majority, worker_kill, worker_pause, worker_isolation, server_clock_ahead, server_clock_behind]
+        options: [block_delay, block_disk, journal, consumer, restart, fanout_restart, route_quorum, route_majority, worker_kill, worker_pause, worker_isolation, server_clock_ahead, server_clock_behind]
       duration:
         description: Ten minutes is sustained; 35 seconds is fixture smoke only
         required: true
@@ -39,7 +39,7 @@ jobs:
       - name: Verify row-result guard
         run: python3 -m unittest discover -s scripts -p 'test_tier3*.py'
       - name: Verify private block-device stall capability
-        if: inputs.row == 'block_disk'
+        if: inputs.row == 'block_disk' || inputs.row == 'block_delay'
         env:
           WF_BLOCK_DISK: '1'
         run: |
@@ -47,10 +47,19 @@ jobs:
           sudo -n losetup --find
           command -v mkfs.ext4
           go test -p=1 -race ./testcluster -run '^TestBlockDiskStallBlocksSyncAndCleansUp$' -count=1 -timeout=2m -v
+      - name: Verify per-request device delay capability
+        if: inputs.row == 'block_delay'
+        env:
+          WF_BLOCK_DELAY: '1'
+        run: |
+          sudo -n modprobe dm_delay
+          sudo -n dmsetup targets
+          go test -p=1 -race ./testcluster -run '^TestBlockDiskDelaySlowsSyncAndRestoresOnCancellation$' -count=1 -timeout=2m -v
       - name: Sustain the selected five-container mixed fault row
         run: |
           set -o pipefail
           case "$TIER3_MATRIX_ROW" in
+            block_delay) row_test=TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds ;;
             block_disk) row_test=TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds ;;
             server_clock_ahead) row_test=TestFiveContainerMixedServerClockAheadWithJournalKills ;;
             server_clock_behind) row_test=TestFiveContainerMixedServerClockBehindWithJournalKills ;;

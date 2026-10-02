@@ -17,7 +17,7 @@ def load(name, file):
 
 matrix = load('matrix_row', 'check-matrix-campaign.py')
 execution = load('matrix_execution', 'check-matrix-result.py')
-TESTS = {'block_disk': 'TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds', 'server_clock_ahead': 'TestFiveContainerMixedServerClockAheadWithJournalKills',
+TESTS = {'block_delay': 'TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds', 'block_disk': 'TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds', 'server_clock_ahead': 'TestFiveContainerMixedServerClockAheadWithJournalKills',
          'server_clock_behind': 'TestFiveContainerMixedServerClockBehindWithJournalKills',
          'worker_isolation': 'TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds',
          'worker_pause': 'TestFiveContainerMixedWorkerPausedFortyFiveSeconds',
@@ -66,6 +66,7 @@ def check(events, duration, expected_row='journal'):
             cells[typ]['raw_terminal_p99_seconds']=matrix.seconds(raw_t)
             cells[typ]['raw_progress_p99_seconds']=matrix.seconds(raw_p)
     scope = ('single five-container R5 server clock skew with journal SIGKILL row' if row.startswith('server_clock_')
+             else 'single five-container R5 private filesystem per-request delay row' if row == 'block_delay'
              else 'single five-container R5 private filesystem I/O stall row' if row == 'block_disk'
              else 'single five-container R5 worker reply-isolation row' if row == 'worker_isolation'
              else 'single five-container R5 worker pause-past-lease row' if row == 'worker_pause'
@@ -84,13 +85,13 @@ def check(events, duration, expected_row='journal'):
                 confirmed_faults=faults, active_consumer_faults=active_consumer_faults, cells=cells, clears_full_tier3_release=False)
 
 
-def check_block_disk_artifacts(root, report):
+def check_block_disk_artifacts(root, report, delay=False):
     faults = json.loads((root/'faults.json').read_text())
     if not faults or len(faults) != report['confirmed_faults']:
         raise ValueError('block disk fault count disagrees')
     stores, containers = set(), set()
     for index, fault in enumerate(faults, 1):
-        proof = fault['block_stall']
+        proof = fault['block_delay' if delay else 'block_stall']
         binding = json.loads((root/f'fault-{index}-block-disk-binding.json').read_text())
         mount = binding['binding']
         if (fault['node'] != 4 or mount['node'] != 4 or mount['destination'] != '/data'
@@ -98,13 +99,25 @@ def check_block_disk_artifacts(root, report):
                 or mount['source'] != binding['store_dir'] or not mount['container'].endswith('-n4')):
             raise ValueError('stalled filesystem differs from writable server store')
         stores.add(mount['source']); containers.add(mount['container'])
-        scheduled, observed, killed, suspended, resumed, synced, healed = [timestamp_ns(x) for x in
-            (fault['scheduled'], binding['observed'], fault['killed'], proof['suspended'],
-             proof['resumed'], proof['sync_returned'], fault['healed'])]
-        if (not scheduled <= observed <= killed or killed != suspended or
-                resumed-suspended < 5_000_000_000 or not resumed <= synced <= healed or
-                proof['device_state'] != 'Suspended'):
-            raise ValueError('missing or reversed actual blocked-sync proof')
+        scheduled, observed, killed, healed = [timestamp_ns(x) for x in
+            (fault['scheduled'], binding['observed'], fault['killed'], fault['healed'])]
+        if not scheduled <= observed <= killed <= healed:
+            raise ValueError('reversed block fault admission/heal')
+        if delay:
+            applied, clearing, restored, started, returned = [timestamp_ns(proof[k]) for k in
+                ('applied', 'clearing', 'restored', 'sync_started', 'sync_returned')]
+            active, normal = proof['active_table'].split(), proof['restored_table'].split()
+            if (proof['delay_ns'] != 100_000_000 or killed != applied or
+                    clearing-applied < 5_000_000_000 or not clearing <= restored <= healed or
+                    not applied <= started <= returned <= clearing or returned-started < 100_000_000 or
+                    len(active) != 6 or active[:3] != ['0', '1048576', 'delay'] or active[4:] != ['0', '100'] or
+                    len(normal) != 5 or normal[:3] != ['0', '1048576', 'linear'] or normal[4] != '0' or normal[3] != active[3]):
+                raise ValueError('unverified per-request delay, sync or same-device restoration')
+        else:
+            suspended, resumed, synced = [timestamp_ns(proof[k]) for k in ('suspended', 'resumed', 'sync_returned')]
+            if (killed != suspended or resumed-suspended < 5_000_000_000 or
+                    not resumed <= synced <= healed or proof['device_state'] != 'Suspended'):
+                raise ValueError('missing or reversed actual blocked-sync proof')
         roles = json.loads((root/f'fault-{index}-block-disk-roles.json').read_text())
         if len(roles) != 2 or {r['stream'] for r in roles} != {'WF_RUN', 'WF_JRN'}:
             raise ValueError('missing journal/dispatch stall admission')
@@ -113,12 +126,13 @@ def check_block_disk_artifacts(root, report):
             if (role['stage'] != 'before' or role['fault'] != index or
                     info['config']['name'] != role['stream'] or info['config']['num_replicas'] != 5 or
                     info['cluster']['leader'] != mount['container'] or len(info['cluster']['replicas']) != 4 or
-                    not observed <= timestamp_ns(role['observed']) <= suspended):
+                    not observed <= timestamp_ns(role['observed']) <= killed):
                 raise ValueError('disk stall did not admit both R5 leaders on bound store')
     if len(stores) != 1 or len(containers) != 1:
         raise ValueError('disk stall changed its persistent filesystem/server')
-    return dict(confirmed_five_second_stalls=len(faults),
-                confirms_dm_delay=False, clears_full_tier3_release=False)
+    return dict(confirmed_five_second_stalls=0 if delay else len(faults),
+                confirmed_five_second_delay_intervals=len(faults) if delay else 0,
+                confirms_dm_delay=delay, clears_full_tier3_release=False)
 
 
 def check_consumer_artifacts(root, report):
@@ -563,9 +577,9 @@ if __name__ == '__main__':
         parser.error('--require-clock-timer-cut requires a server-clock row')
     events = [json.loads(line) for line in args.events.read_text().splitlines() if line.strip()]
     report = check(events, args.duration, args.row)
-    if args.row == 'block_disk':
+    if args.row in ('block_disk', 'block_delay'):
         if args.root is None: parser.error('--root is required for block disk')
-        report['block_disk_artifact_checks'] = check_block_disk_artifacts(args.root, report)
+        report['block_disk_artifact_checks'] = check_block_disk_artifacts(args.root, report, args.row == 'block_delay')
     if args.row == 'consumer':
         if args.root is None: parser.error('--root is required for the consumer row')
         report['selection_artifact_checks'] = check_consumer_artifacts(args.root, report)

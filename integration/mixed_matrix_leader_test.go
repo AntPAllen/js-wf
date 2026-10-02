@@ -52,6 +52,7 @@ type matrixLeaderFault struct {
 	IsolationTarget       *matrixIsolationTarget        `json:"isolation_target,omitempty"`
 	VersionsBefore        []string                      `json:"versions_before,omitempty"`
 	VersionsAfter         []string                      `json:"versions_after,omitempty"`
+	BlockDelay            *testcluster.BlockDelayProof  `json:"block_delay,omitempty"`
 	BlockStall            *testcluster.BlockStallProof  `json:"block_stall,omitempty"`
 	FanoutParent          string                        `json:"fanout_parent,omitempty"`
 	FanoutTail            uint64                        `json:"fanout_tail,omitempty"`

@@ -80,9 +80,13 @@ func TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds(t *testing.T) {
 	runFiveContainerMixedLeader(t, "block_disk")
 }
 
+func TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds(t *testing.T) {
+	runFiveContainerMixedLeader(t, "block_delay")
+}
+
 func runFiveContainerMixedLeader(t *testing.T, row string) {
 	t.Helper()
-	if matrixServerClockOffset(row) == 0 && row != "block_disk" && row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
+	if matrixServerClockOffset(row) == 0 && row != "block_delay" && row != "block_disk" && row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
 		t.Fatal("unsupported R5 fault row")
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
@@ -131,7 +135,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	var blockDisk *testcluster.BlockDisk
 	var stores map[int]string
-	if row == "block_disk" {
+	if row == "block_disk" || row == "block_delay" {
 		blockDisk, err = testcluster.NewBlockDisk(root)
 		if err != nil {
 			t.Fatal(err)
@@ -644,8 +648,8 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				if release != nil {
 					err = errors.Join(err, release())
 				}
-			} else if row == "block_disk" {
-				event, err = stallFiveContainerMixedBlockDisk(ctx, nc, js, cluster, blockDisk, scheduled, prefix, len(faults)+1)
+			} else if row == "block_disk" || row == "block_delay" {
+				event, err = stallFiveContainerMixedBlockDisk(ctx, nc, js, cluster, blockDisk, scheduled, prefix, len(faults)+1, row == "block_delay")
 			} else if row == "consumer" {
 				event, err = killFiveContainerMixedConsumerLeader(ctx, js, cluster, scheduled, prefix, faultRNG)
 			} else if row == "route_quorum" || row == "route_majority" {
