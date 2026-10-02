@@ -6199,3 +6199,15 @@ fixture regeneration and persisted Go/Python exchange required. Known-invalid
 queued protocol36974762883 (same unavailable-rg guard) was cancelled to avoid a
 predictable infrastructure failure; this is not acceptance or a runtime test
 failure. Behind36974795077 remains queued at27b78ca. Launch snapshots retained.
+
+## Protobuf writer rollout reversal verified (2026-10-02)
+
+[Real R3 reverse rollout](scale/persisted-protobuf-journal-2026-10-02/writer-reversal/)
+passes race8.242s: a higher-epoch JSON writer resumes protobuf request-only and
+request+completion prefixes, reruns only the unfinished effect, preserves prefix
+identities/payloads, persists JSON terminal bytes and passes all-peer audits.
+This verifies disabling protobuf writes while retaining upgraded readers, not
+rolling binaries back to JSON-only readers. Future protocol CI requires the
+compiled reverse-test name along with the forward/CLI names before execution.
+Current protocol36974885921 and behind36974795077 are confirmed in progress;
+100k and million campaigns remain live on their original handles.

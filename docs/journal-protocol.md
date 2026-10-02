@@ -28,7 +28,7 @@ the reader upgrade; then enable protobuf writes. Updated writers can return to
 JSON while reading mixed history, but rolling binaries back to JSON-only readers
 is unsafe while any protobuf entry remains. There is no automatic encoding
 negotiation, fleet-version detection or in-place historical rewrite. Focused
-mixed-format recovery/compaction and CLI tests pass; full rolling-upgrade and
+mixed-format recovery/compaction, writer reversal and CLI tests pass; full rolling-upgrade and
 chaos matrix acceptance for protobuf remains open. The original plan calls for
 a Go-only SDK; an additional executable SDK is future scope, not a release gate.
 
@@ -146,3 +146,11 @@ not proof of a second SDK or a full rolling-upgrade/chaos matrix pass.
 The same CI also exercises a real R3 worker resuming a JSON prefix, protobuf
 persistence, all-peer audit, snapshot compaction and blob retention, plus the
 CLI encoding flag and retention/reuse workflow.
+
+The writer reversal fixture starts with protobuf `Started`/`StepRequested`
+entries under a real lease, optionally records `StepCompleted`, releases that
+lease, and resumes with a JSON-writing worker at a higher epoch. Missing
+completion executes the effect again; recorded completion replays without another
+effect. Retained protobuf prefix identities and payloads stay unchanged, and all
+three peers audit the final four-entry journal. This verifies writer reversal
+using upgraded readers; it does not permit rollback to JSON-only binaries.
