@@ -7150,3 +7150,23 @@ raw/source checks pass. Corrected hosted20/100000 qualification remains open.
 Original production-cap positives stay verified; original negative timeout
 remains rejected and preserved. Older117-workload100k run37012116265 is terminal
 success but raw acceptance remains pending; current119-workload run is active.
+
+
+## Initial journal metadata graph: 117-workload 100k accepted
+
+[Run37012116265 independent evidence](scale/initial-journal-metadata-2026-10-02/confirmed-117-workload-100k/)
+accepts exact82f323a: actual package pass14,259.586s,161 top-level passes,
+two documented trace-only skips and262 source pins. Each of117 workloads
+completed exactly seeds1..100000, totaling11.7M bodies. Coverage is11,900,033
+schedules,178,746,687 choices and2,663,852,114 transport events. Compiled inventory
+and seeded AST regenerated from that Git revision match uploaded evidence;
+regression paths match Git and the suite report regenerates byte for byte.
+All847 originals are archived with SHA256 readback. An initial current-workspace
+AST output is retained as rejected; it contributes no acceptance evidence.
+
+This closes the117-workload graph gate only. Current119-workload100k37039245566
+and older118-workload100k37028379931 remain confirmed in progress. Corrected
+combined-cap hosted budget20 run37045824031 and production100000 run37045827952
+are confirmed queued at2a30165; neither is accepted. The current ahead1..200
+campaign37040118844 remains queued. Full matrix, million-timer recovery and
+full-runtime24h soak remain open. No historical TTL-mismatch smoke was rerun.
