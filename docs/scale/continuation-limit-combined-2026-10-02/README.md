@@ -44,3 +44,29 @@ produces22 entries and exactly one forbidden effect. All published originals
 and terminal run/job metadata are losslessly archived under `hosted-budget20`,
 with every member SHA256-compared after compression. The production100000 run
 37037256768 remains active; budget20 does not certify that gate.
+
+## Production-cap run: all positives pass, negative control times out
+
+[Run37037256768](https://github.com/AntPAllen/js-wf/actions/runs/37037256768)
+is terminal failed at exacte507a96. All three intact-worker production100000
+cuts actually pass, preserving99998/99999/100000-entry cut prefixes and exactly
+100000 final entries, terminal ErrTooLong, zero forbidden effects, frame-only
+recovery and production lease fencing. Recovery is12.590s/12.383s/12.395s.
+Source hashes and all raw prefixes/final journals were independently checked.
+
+The suffix-budget mutant actually executes the forbidden effect1120 times after
+replacement. The journal's separate hard100000-entry cap prevents the terminal
+completion that the small-budget negative-control verifier expects. The fixture
+waits for a terminal result and ends at its25-minute context deadline; the runner
+correctly rejects that verdict as `wrong detection`. There is no final mutant
+journal artifact. This is not a green overall qualification and is not an
+intact-worker failure. It establishes that the negative test needs to detect the
+first forbidden effect promptly rather than require impossible completion beyond
+the production journal cap. Preserve the original negative timeout and rerun the
+corrected control before accepting the combined production-cap qualification.
+
+`production-cap-partial` preserves all54 downloaded/metadata/review files,
+including the original positive and rejected negative events, handler logs,
+prefixes, frame/lease evidence and terminal failed-job log. Every member was
+SHA256-compared on readback. Hosted physical stores/binaries were not uploaded
+and are not claimed to be preserved in that archive.

@@ -7108,3 +7108,29 @@ smoke user unit `js-wf-physical-drain-live-20261002.service` is confirmed active
 with new all-replica audits,60s horizon and diagnostic30s/60s p99/max limits.
 Its source is clean329a56d; it cannot clear the million/24h2s/30s release gate.
 Originals/build metadata are in `/tmp/js-wf-physical-drain-live*`.
+
+## Physical drain hosted/live accepted; production-cap control defect isolated
+
+[Physical drain hosted and live evidence](scale/physical-replica-drain-2026-10-02/)
+is accepted at exact329a56d. The hosted source hashes and actual semantic controls
+verify. Live1000/60s survives both actual cluster kills; offline receipts and all
+three local zero-message/zero-pending64-consumer replies verify, with distinct
+server IDs and matching final sequence2000. Its diagnostic p99/max13.116s/13.253s
+are not million/24h release evidence. The earlier5s-runway attempt failed before
+any publish and remains rejected; qualified run uses30s lead. All published bytes
+are losslessly archived; original local stores/binaries remain.
+
+[Production-cap continuation run37037256768](scale/continuation-limit-combined-2026-10-02/)
+is terminal failed overall, but all three intact-worker100000-entry cuts pass
+and are independently verified. The compiled suffix-budget mutant executes1120
+forbidden effects, then times out awaiting a terminal result blocked by the
+journal's independent hard cap. The runner rejects its wrong detection, so the
+combined qualification is not green. Fix the negative fixture to fail promptly
+on its first actual forbidden effect and retain/replay the rejected original
+control. No intact-worker regression is established by this job failure.
+
+Current119-workload100k run37039245566 and older118-workload100k run37028379931
+remain confirmed active; current ahead1..200 run37040118844 remains queued. The
+fresh all-six mutation gate is accepted at0f. Million-timer recovery cause,
+combined production-cap negative qualification, full matrix and24h runtime soak
+remain open. The historical31.1s/30s-TTL worker-kill mismatch is not being rerun.

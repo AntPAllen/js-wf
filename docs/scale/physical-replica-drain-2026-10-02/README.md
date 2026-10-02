@@ -33,3 +33,25 @@ its actual named failure is semantic. Final source hashes identify tested change
 on parent4f610b9 and the corresponding files in this commit. The dedicated manual
 workflow repeats the final contract. A live new-source smoke and fresh million/
 24-hour release qualification remain required; no old campaign is reclassified.
+
+## Hosted contract and live smoke accepted
+
+[Hosted contract37043119136](https://github.com/AntPAllen/js-wf/actions/runs/37043119136)
+passes at exact329a56d. Uploaded source hashes match Git, and the original
+positive/negative executions are preserved under `hosted-pass`. The two semantic
+controls are caught, with no build failure substituted for detection.
+
+The clean329a56d live1000-timer/60s smoke survives two actual all-server SIGKILL/
+restarts healing in9.534s/9.569s. All receipts verify offline. Each raw local
+reply shows zero messages, zero pending/ack-pending and64 consumers; all three
+server IDs are distinct and final sequences match at2000. Raw p99/max are
+13.116s/13.253s against diagnostic30s/60s bounds. This accepts the new all-replica
+monitoring integration only, not the million/24h2s/30s release profile.
+
+The first smoke used5s lead; consumer setup consumed that runway and it failed
+before any publish. That setup attempt remains failed and is archived alongside
+the qualified30s-lead run. No runtime recovery target was changed. `live-smoke-pass`
+retains every top-level report/receipt/observation/audit/log plus build and terminal
+service metadata and independent raw-reply review. Every member in both archives
+was SHA256-compared after compression. Physical stores and binaries remain local
+and are excluded from those published archives.
