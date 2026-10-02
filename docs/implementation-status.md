@@ -6268,3 +6268,32 @@ active atd8842b6. ACK/lifecycle CI36977640313 is in progress; admitted ahead
 36977810495 is queued for ten minutes with common clock/cut proof required.
 All retain launch state, not accepted outcomes. Existing100k and million jobs
 continue on their original handles; ACK confirmation does not change their source.
+
+
+## Confirmed ACK deterministic boundary and accounting correction
+
+The `d8842b6` full-1,000-seed simulator run finished with failure in 117.59s.
+Its original events, inventories, source and timing are retained under
+`scale/confirmed-dispatch-ack-2026-10-02/model-boundary/full1000-failed/`.
+Two signal latency workloads and their corresponding pinned traces rejected the
+new `dispatch_ack_confirmed` operation because their expected count omitted it.
+The accounting now requires exactly one confirmed ACK; their elapsed-time,
+identity, error and journal checks remain unchanged. Historical trace files were
+not rewritten. The targeted race run passed the existing 259-pin corpus and both
+1,000-seed signal latency workloads in 31.678s.
+
+A new production-worker workload, `worker_confirmed_ack_boundary`, covers ACK
+request loss before commit, committed ACK reply loss, and committed ACK with
+physical retention held. Across AckWait 1s/3s/13s, all nine combinations passed
+1,000 race-instrumented schedules with one physical effect, one immutable terminal
+and a four-entry journal. Dropped requests recover at the configured AckWait;
+committed ACKs do not cause effect reexecution. Consumer acknowledgment alone
+fails the physical drain check while retention is held. The first ten traces
+replay exactly, and the new seed-42 disk pin replays in a separate invocation.
+Modeled DoubleAck also respects already-canceled operation contexts. This adds
+one seeded workload and one pin (115/260); full current-source validation remains
+required. Logs and hashes are retained in the model-boundary directory.
+
+The worker-kill smoke uses production LeaseTTL 12s with heartbeat 3s and AckWait
+13s, retaining its strict recovery-under-30s assertion. The historical 31.1s
+result with TTL30s is a configuration mismatch and is excluded from further runs.

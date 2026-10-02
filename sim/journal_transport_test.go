@@ -434,6 +434,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededChildNotification(loaded.Seed, &loaded)
 	case "outcome_persistence_20":
 		replayed, err = runSeededOutcomePersistence(loaded.Seed, &loaded)
+	case "worker_confirmed_ack_boundary":
+		replayed, err = runWorkerConfirmedAck(loaded.Seed, &loaded)
 	case "worker_execution_5":
 		replayed, err = runSeededWorkerExecution(loaded.Seed, &loaded)
 	case "worker_signal_execution":

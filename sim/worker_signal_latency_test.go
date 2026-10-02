@@ -206,7 +206,7 @@ func runWorkerSignalLatencyCost(seed int64, replay *Trace, leaseOnly bool) (trac
 			}
 		}
 	}
-	wantCounts := map[string]int{"lease_acquire": 1, "journal_read": 1, "invocation_read": 1, "signal_info": 1, "signal_read": 16, "lease_renew_append": 50, "journal_append": 50, "lease_release": 1}
+	wantCounts := map[string]int{"lease_acquire": 1, "journal_read": 1, "invocation_read": 1, "signal_info": 1, "signal_read": 16, "lease_renew_append": 50, "journal_append": 50, "lease_release": 1, "dispatch_ack_confirmed": 1}
 	if !reflect.DeepEqual(counts, wantCounts) || measured != time.Duration(elapsed)*time.Millisecond {
 		return trace, fmt.Errorf("operation costs: counts=%v want=%v elapsed=%s", counts, wantCounts, measured)
 	}

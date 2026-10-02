@@ -122,7 +122,7 @@ func (m *DispatchTransport) QueueFault(f DispatchFault) error {
 			return fmt.Errorf("invalid %s fault on %s", f.Kind, f.Operation)
 		}
 	case "ack":
-		if f.Kind != "lose_ack_after_commit" {
+		if f.Kind != "lose_ack_after_commit" && f.Kind != "drop_before_commit" {
 			return fmt.Errorf("invalid %s fault on %s", f.Kind, f.Operation)
 		}
 	case "progress":
@@ -404,13 +404,18 @@ var _ jetstream.Msg = (*dispatchMsg)(nil)
 func (m *dispatchMsg) Metadata() (*jetstream.MsgMetadata, error) {
 	return &jetstream.MsgMetadata{NumDelivered: m.delivery, Sequence: jetstream.SequencePair{Stream: m.record.sequence, Consumer: m.delivery}, Timestamp: m.record.timestamp}, nil
 }
-func (m *dispatchMsg) Data() []byte                    { return append([]byte(nil), m.record.data...) }
-func (m *dispatchMsg) Headers() nats.Header            { return cloneHeader(m.record.header) }
-func (m *dispatchMsg) Subject() string                 { return m.record.subject }
-func (m *dispatchMsg) Reply() string                   { return "" }
-func (m *dispatchMsg) Ack() error                      { return m.finish("ack", 0) }
-func (m *dispatchMsg) DoubleAck(context.Context) error { return m.Ack() }
-func (m *dispatchMsg) Nak() error                      { return m.finish("nak", 0) }
+func (m *dispatchMsg) Data() []byte         { return append([]byte(nil), m.record.data...) }
+func (m *dispatchMsg) Headers() nats.Header { return cloneHeader(m.record.header) }
+func (m *dispatchMsg) Subject() string      { return m.record.subject }
+func (m *dispatchMsg) Reply() string        { return "" }
+func (m *dispatchMsg) Ack() error           { return m.finish("ack", 0) }
+func (m *dispatchMsg) DoubleAck(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	return m.Ack()
+}
+func (m *dispatchMsg) Nak() error { return m.finish("nak", 0) }
 func (m *dispatchMsg) NakWithDelay(delay time.Duration) error {
 	return m.finish("nak", delay)
 }
@@ -429,6 +434,12 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 			model.event(event)
 			return nil
 		}
+		fault := model.takeFault("ack")
+		if fault == "drop_before_commit" {
+			event.Outcome = fault
+			model.event(event)
+			return ErrTransportLost
+		}
 		// JetStream accepts a late ack from an earlier delivery even after
 		// another client has received the redelivery. The first committed ack
 		// commits consumer progress; stream removal is a separate state.
@@ -443,7 +454,7 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 			model.onNextAck = nil
 			stop()
 		}
-		if model.takeFault("ack") == "lose_ack_after_commit" {
+		if fault == "lose_ack_after_commit" {
 			event.Outcome = "lose_ack_after_commit"
 			model.event(event)
 			model.stopIfDrained()
