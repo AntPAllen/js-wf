@@ -97,3 +97,35 @@ correctly rejected its smaller scope. Earlier runner attempts exposed an
 unbounded provisioning request and a post-restart consumer update waiting until
 the short campaign's deadline; bounded setup and retained-consumer attachment
 address these fixture issues, without asserting a server-side cause.
+
+## Isolate the retained scheduling-index boundary
+
+For the preserved failed October 1–2 million-message campaign, a bounded
+file-store diagnostic opens fresh copies through the pinned NATS 2.15.0 source:
+
+```sh
+python3 scripts/check-nats-scheduling-store-boundary.py \
+  --original /tmp/js-wf-timer-volume-million-service-20261001 \
+  --root /tmp/js-wf-million-direct-filestore-new
+```
+
+The output root must be new and outside the original campaign. The runner
+hashes every original file before and after, copies all three physical WF_RUN
+stores into two cases, and removes only copied `msgs/sched.db` indexes in the
+second case. It compiles a separate copy of the pinned upstream module with
+one additional diagnostic test. Upstream file-store and scheduler code remain
+unchanged. Scheduling stays paused in recovery mode; no NATS server, Raft group,
+workflow handler or publish callback runs.
+
+The diagnostic requires the original physical message counts 768/141/0 and
+last sequence 2,000,000 in both cases. It expects zero recovered schedules with
+the fully stamped empty indexes, and 768/141/0 recovered schedules without those
+indexes. Every rebuilt schedule must reference a readable source with a target
+header. Actual Go test verdicts, per-node recovered schedule maps, mutation
+records, source inventories and original-file hashes remain in the output root.
+
+This isolates the recovery boundary. It does not establish how the original
+inconsistent state arose or authorize changing original indexes. In the earlier
+full-server copied-store experiment, removing indexes emitted duplicate targets.
+The failed million-message verdict remains failed until a full release campaign
+also meets delivery, latency and all-replica drain gates.

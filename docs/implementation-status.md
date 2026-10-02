@@ -7186,3 +7186,25 @@ substitutes for semantic detection. All56 published originals have lossless
 archive SHA256 readback. Production100000 run37045827952 is now confirmed
 in progress at2a30165, not accepted. The old production negative timeout
 remains rejected; its three intact positives remain separate verified evidence.
+
+
+## Million-timer recovery boundary isolated without Raft or clients
+
+[Direct pinned file-store evidence](scale/million-timer-terminal-2026-10-02/direct-filestore-boundary/)
+passes six actual NATS2.15.0 Go cases on fresh copies. Each replica retains its
+original physical768/141/0 messages and last sequence2,000,000. Intact fully
+stamped empty indexes recover0/0/0 schedules; removing only copied indexes
+recovers768/141/0 schedules. Each recovered schedule points to a readable source
+with a target header. Scheduling stays paused in recovery mode: zero server
+processes, Raft groups, clients, publish callbacks or target publications.
+The recovery boundary therefore persists in the file store alone. The initial
+persistence inconsistency remains unconfirmed; this is not a backend fix.
+
+The reusable runner compiles an exact separate copy of the upstream module with
+one added fixture; source inventories and actual Go verdicts are retained.
+All4,998 original campaign file hashes match before/after. All21 published
+original evidence files are losslessly archived with SHA256 readback. Physical
+copies/build source remain local. Two earlier compilation setup attempts
+(module-cache overlay prohibition and copied read-only directory) are rejected
+and preserved. No original index repair, new million/24h release claim or
+historical worker-kill TTL-mismatch rerun occurred.
