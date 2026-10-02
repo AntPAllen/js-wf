@@ -5485,3 +5485,13 @@ See [fixture scope](scale/tier3-automatic-membership-2026-10-02/README.md).
 No native automatic row acceptance is claimed yet. Membership churn, coordinator
 process/reply/clock cuts, repeated in-flight reassignments and full release
 matrix gates remain open.
+
+## Durable-receipt million campaign first full restart (2026-10-02)
+
+The active service js-wf-timer-million-20261001.service (PID18146, source92586ea,
+unmodified) reports its first all-three-server SIGKILL after333344receipts,
+with distinct PIDs18193/18194/18195 and15.142295563s to confirmed heal. Receipt
+progress continues. A read-only mid-run report/log/service checkpoint is retained
+[here](scale/timer-durable-receipts-2026-10-01/service-first-restart/README.md).
+The second full restart, complete1M delivery, final latency/ledger audit and
+physical drain remain pending; this is not the24h acceptance verdict.
