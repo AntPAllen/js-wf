@@ -68,6 +68,21 @@ def check(root, report, row, timestamp_ns):
         actual_ops = json.loads((root/f'fault-{index}-journal-operations.json').read_text())
         if removed != timestamp_ns(actual_ops[0]['at']) or not timestamp_ns(request['observed_at']) <= observed or not timestamp_ns(suspended['observed_at']) <= observed or not end <= observed <= refreshed <= timestamp_ns(fault['killed']) <= removed < earliest_due:
             raise ValueError('timer cut did not remove the source before its duration boundary')
+        exit_proof = cut.get('exit_observation')
+        if exit_proof is not None:
+            if exit_proof['node'] != fault['node'] or not isinstance(exit_proof['container'], str) or not exit_proof['container'] or any(op.get('container') != exit_proof['container'] for op in actual_ops) or exit_proof['state'] not in ('exited', 'dead', 'absent'):
+                raise ValueError('invalid Docker source exit proof')
+            clock_path = root/'independent-clock.json'
+            if clock_path.exists() and json.loads(clock_path.read_text())['config']['probes'][exit_proof['node']]['server'] != exit_proof['container']:
+                raise ValueError('Docker exit proof names another clock source')
+            started = timestamp_ns(exit_proof['kill_started'])
+            returned = timestamp_ns(exit_proof['kill_returned'])
+            stopped = timestamp_ns(exit_proof['source_stopped'])
+            cleanup = timestamp_ns(exit_proof['cleanup_complete'])
+            if exit_proof['state'] == 'absent' and stopped != cleanup:
+                raise ValueError('absence must confirm exit and cleanup together')
+            if not timestamp_ns(fault['killed']) <= started <= returned <= stopped == removed <= cleanup <= timestamp_ns(actual_ops[1]['at']):
+                raise ValueError('Docker exit observation chronology changed')
         future = [b for b in bounds if b['type'] == 'matrixtimer' and b['id'] == admission['id'] and b['sequence'] > suspended['sequence']]
         if not future or any(timestamp_ns(b['before']) < removed for b in future):
             raise ValueError('final journal cannot corroborate the selected prefix at removal')

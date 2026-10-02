@@ -734,3 +734,14 @@ to independently verify a terminal campaign. Add `--require-admitted-clock`
 for clock campaigns. The command requires every seed's original events and
 fault artifacts, current verification matching the uploaded report, and the
 complete successful job set. A green summary without these inputs is insufficient.
+
+### Clock cut exit observation
+
+The Docker harness observes source exit separately from automatic container-name
+cleanup. A successful exact-name listing of `exited`, `dead` or absence gives a
+controller-clock upper bound on exit; running/removing states and failed listings
+cannot prove it. The admitted cut must still precede the earliest duration
+boundary, and restart waits for name cleanup. Receipts retain both observations
+and bind node/container identity to the independent clock source and restart.
+Historical artifacts keep their original conservative cleanup timestamp. See
+[source-exit evidence and limits](scale/docker-source-exit-2026-10-02/).

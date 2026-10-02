@@ -6518,3 +6518,25 @@ A748,029-receipt observation records three redeliveries, zero ACK/fetch errors,
 current p99 lateness0.251579657s and max15.976507332s. These are running observations;
 final million-receipt ledger verification, audit/drain and terminal verdict remain
 required. Ahead20 remains failed at seed5; no source-exit timestamp is retrofitted.
+
+## Confirmed clock-source exit before Docker cleanup
+
+The R5 clock cut harness now records a controller-clock upper bound on actual
+source exit separately from Docker's automatic container-name cleanup. A successful
+exact-name state listing must show `exited`, `dead`, or absence; running/removing
+states and listing failures cannot confirm exit. Restart still waits for cleanup.
+The pending-duration gate uses the confirmed-exit observation and remains strict.
+Offline checks bind the receipt to its node, container, restart operations and
+independent clock source, and validate chronology. Legacy evidence retains its
+original cleanup-time interpretation. Native Docker race tests pass for both
+retained and automatically removed containers, including an observed118ms gap
+between `dead` and name cleanup. Admission and offline rejection controls pass.
+Evidence is under `scale/docker-source-exit-2026-10-02/`. This does not retroactively
+accept ahead20 seed5 or establish that cleanup caused its missed cut.
+
+The subsequent admitted seed5 ahead smoke actually ran under the race detector
+and failed in102.8s: its source exit precedes the earliest duration boundary by
+1.27s, but the later five-current-replica heal check times out on KV_WF_LEASE.
+Original test events, server logs and non-store artifacts are archived with
+verified member hashes under the same evidence directory. This is a failed row;
+no timing/drain acceptance or server-side root cause is claimed.

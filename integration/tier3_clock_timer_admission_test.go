@@ -13,6 +13,7 @@ import (
 
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/journal"
+	"js-wf/testcluster"
 	"js-wf/worker"
 )
 
@@ -30,10 +31,11 @@ type matrixClockTimerAdmission struct {
 }
 
 type matrixClockTimerCut struct {
-	Admission *matrixClockTimerAdmission `json:"admission"`
-	Tail      *jetstream.RawStreamMsg    `json:"refreshed_tail"`
-	Refreshed time.Time                  `json:"refreshed"`
-	Removed   time.Time                  `json:"removed"`
+	ExitObservation *testcluster.DockerKillObservation `json:"exit_observation,omitempty"`
+	Admission       *matrixClockTimerAdmission         `json:"admission"`
+	Tail            *jetstream.RawStreamMsg            `json:"refreshed_tail"`
+	Refreshed       time.Time                          `json:"refreshed"`
+	Removed         time.Time                          `json:"removed"`
 }
 
 func refreshMatrixClockTimerCandidate(ctx context.Context, stream jetstream.Stream, candidate *matrixClockTimerAdmission) (*matrixClockTimerCut, error) {

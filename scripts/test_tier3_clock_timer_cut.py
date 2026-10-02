@@ -79,3 +79,26 @@ class ClockTimerCutChecks(unittest.TestCase):
                     if mode=='valid':self.assertEqual(checker.check(root,dict(confirmed_faults=1),'server_clock_'+direction,row.timestamp_ns)['admitted_pending_sleep_cuts'],1)
                     else:
                         with self.assertRaises((ValueError,KeyError)):checker.check(root,dict(confirmed_faults=1),'server_clock_'+direction,row.timestamp_ns)
+
+    def test_exit_observation_allows_late_cleanup_but_rejects_late_exit(self):
+        for mode in ('valid', 'running', 'late_exit', 'wrong_node', 'early_cleanup', 'wrong_removed', 'missing_container', 'wrong_container', 'wrong_clock_source', 'split_absence'):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);files=self.fixture(root,'ahead')
+                stamp=lambda f:'2026-10-01T23:18:57.'+f+'Z'
+                proof=dict(node=4,container='source-n4',kill_started=stamp('051'),kill_returned=stamp('055'),source_stopped=stamp('060'),cleanup_complete=stamp('400'),state='exited')
+                files['fault-1-clock-timer-cut.json']['exit_observation']=proof
+                files['fault-1-journal-operations.json'][0]['container']='source-n4'
+                files['fault-1-journal-operations.json'].append(dict(at=stamp('500'),container='source-n4'))
+                if mode=='running':proof['state']='running'
+                elif mode=='late_exit':proof['source_stopped']=stamp('260')
+                elif mode=='wrong_node':proof['node']=3
+                elif mode=='early_cleanup':proof['cleanup_complete']=stamp('059')
+                elif mode=='wrong_removed':proof['source_stopped']=stamp('061')
+                elif mode=='missing_container':proof['container']=''
+                elif mode=='wrong_container':proof['container']='another-n4'
+                elif mode=='wrong_clock_source':files['independent-clock.json']=dict(config=dict(probes=[dict(server='other')]*5))
+                elif mode=='split_absence':proof['state']='absent'
+                for name,data in files.items():(root/name).write_text(json.dumps(data))
+                if mode=='valid':checker.check(root,dict(confirmed_faults=1),'server_clock_ahead',row.timestamp_ns)
+                else:
+                    with self.assertRaises((ValueError,KeyError)):checker.check(root,dict(confirmed_faults=1),'server_clock_ahead',row.timestamp_ns)

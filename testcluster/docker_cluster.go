@@ -502,28 +502,63 @@ func (c *DockerCluster) ConnectNode(i int) error {
 	return err
 }
 
+// DockerKillObservation records controller-clock upper bounds, never daemon time.
+// SourceStopped confirms exit or absence; CleanupComplete permits name reuse.
+type DockerKillObservation struct {
+	Node            int       `json:"node"`
+	Container       string    `json:"container"`
+	KillStarted     time.Time `json:"kill_started"`
+	KillReturned    time.Time `json:"kill_returned"`
+	SourceStopped   time.Time `json:"source_stopped"`
+	CleanupComplete time.Time `json:"cleanup_complete"`
+	State           string    `json:"state"`
+}
+
 func (c *DockerCluster) KillNode(i int) error {
+	_, err := c.KillNodeObserved(i)
+	return err
+}
+
+func (c *DockerCluster) KillNodeObserved(i int) (DockerKillObservation, error) {
 	if i < 0 || i >= len(c.names) {
-		return fmt.Errorf("invalid Docker node %d", i)
+		return DockerKillObservation{}, fmt.Errorf("invalid Docker node %d", i)
 	}
 	ctx, stop := context.WithTimeout(context.Background(), 15*time.Second)
 	defer stop()
-	if _, err := dockerCommand(ctx, "kill", "--signal=SIGKILL", c.names[i]); err != nil {
-		return err
+	return observeDockerKill(ctx, i, c.names[i], dockerCommand)
+}
+
+func observeDockerKill(ctx context.Context, node int, name string, command func(context.Context, ...string) (string, error)) (DockerKillObservation, error) {
+	receipt := DockerKillObservation{Node: node, Container: name, KillStarted: time.Now().UTC()}
+	if _, err := command(ctx, "kill", "--signal=SIGKILL", name); err != nil {
+		return receipt, err
 	}
-	// docker kill can return before --rm finishes releasing the container name.
-	// Wait for that cleanup before RestartNode reuses the same name and store.
+	receipt.KillReturned = time.Now().UTC()
+	// A successful exact-name listing proves either stopped state or absence.
+	// Name cleanup may finish later. Unknown/removing/running states cannot
+	// establish source exit, and no server-clock FinishedAt is used.
 	for ctx.Err() == nil {
-		remaining, err := dockerCommand(ctx, "ps", "-a", "--filter", "name=^/"+c.names[i]+"$", "--format", "{{.Names}}")
+		state, err := command(ctx, "ps", "-a", "--filter", "name=^/"+name+"$", "--format", "{{.State}}")
 		if err != nil {
-			return err
+			return receipt, err
 		}
-		if remaining == "" {
-			return nil
+		observed := time.Now().UTC()
+		if receipt.SourceStopped.IsZero() && (state == "" || state == "exited" || state == "dead") {
+			receipt.SourceStopped, receipt.State = observed, state
+			if state == "" {
+				receipt.State = "absent"
+			}
 		}
-		time.Sleep(100 * time.Millisecond)
+		if state == "" {
+			receipt.CleanupComplete = observed
+			return receipt, nil
+		}
+		select {
+		case <-ctx.Done():
+		case <-time.After(100 * time.Millisecond):
+		}
 	}
-	return fmt.Errorf("Docker node %d was not removed after kill: %w", i, ctx.Err())
+	return receipt, fmt.Errorf("Docker node %d was not removed after kill: %w", node, ctx.Err())
 }
 
 func (c *DockerCluster) PauseNode(i int) error {

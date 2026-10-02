@@ -176,12 +176,14 @@ func killFiveContainerMixedClockLeader(ctx context.Context, js jetstream.JetStre
 		}
 	}
 	event.Killed = time.Now().UTC()
-	if err := cluster.KillNode(4); err != nil {
+	exitObservation, err := cluster.KillNodeObserved(4)
+	if err != nil {
 		return event, err
 	}
-	removed := time.Now().UTC()
+	removed := exitObservation.SourceStopped
 	if timerCut != nil {
 		timerCut.Removed = removed
+		timerCut.ExitObservation = &exitObservation
 		data, err := json.MarshalIndent(timerCut, "", "  ")
 		if err == nil {
 			err = os.WriteFile(prefix+"-clock-timer-cut.json", data, 0644)
@@ -205,10 +207,11 @@ func killFiveContainerMixedClockLeader(ctx context.Context, js jetstream.JetStre
 	}
 	restarted := time.Now().UTC()
 	operations := []struct {
-		Node   int       `json:"node"`
-		Action string    `json:"action"`
-		At     time.Time `json:"at"`
-	}{{4, "sigkill_removed", removed}, {4, "restarted", restarted}}
+		Container string    `json:"container"`
+		Node      int       `json:"node"`
+		Action    string    `json:"action"`
+		At        time.Time `json:"at"`
+	}{{cluster.NodeName(4), 4, "sigkill_removed", removed}, {cluster.NodeName(4), 4, "restarted", restarted}}
 	data, err = json.MarshalIndent(operations, "", "  ")
 	if err == nil {
 		err = os.WriteFile(prefix+"-journal-operations.json", data, 0644)
