@@ -7531,3 +7531,16 @@ available; original NATS stores and failed experiments were unchanged. Raw
 Tier2 downloads can be restored from the base/supplement manifests and archives.
 The README's outdated broad fault/continuation limitations now match current
 qualification, while explicit rollout/storage limitations remain documented.
+
+
+## Million-population hosted diagnostic dispatched
+
+[Run37059396897](https://github.com/AntPAllen/js-wf/actions/runs/37059396897)
+is confirmed queued at exact885664e3ec7b9c1b953d0b6313dabdf3c13bfe28. Its
+fixed profile is1M/10m,15m runway,64 publishers,30s/60s diagnostic raw limits,
+two actual all-server SIGKILL cuts and mandatory all-replica drain. All captured
+physical store/binary/receipt/log bytes will be archived after completion or
+failure with verified readback; no result or original-cause claim is made now.
+R5 all14 run37058644370 and Tier2 all13x200 run37057872230 remain queued;
+current120-workload100k37051896032 remains in progress. No active trial was
+restarted or canceled and the historical worker-kill TTL mismatch was not rerun.
