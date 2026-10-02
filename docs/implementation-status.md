@@ -5943,3 +5943,11 @@ response combinations;1,000 seeds plus legacy characterization pass under race
 in1.457s, and24 clock pins replay in1.096s. Corpus now252 pins. Six durable native
 cases calibrate the mechanism, not all18 model combinations. Historical ahead
 workflow drain and update-commit provenance remain open; gates are unchanged.
+
+The admitted behind ten-minute campaign is now queued at1eda169 as
+[run36965338232](https://github.com/AntPAllen/js-wf/actions/runs/36965338232),
+with both common-clock verification and every-cut pending-timer admission.
+The launch snapshot is retained; no sustained pass is claimed. Existing100k
+run36962606650 remains in progress at5828875 (234 pins, preceding the18 new
+clock pins). The authoritative million-timer service remains active with497,313
+receipts observed; neither live campaign has been restarted.
