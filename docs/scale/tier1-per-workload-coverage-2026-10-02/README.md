@@ -28,3 +28,9 @@ are retained. All ten Python guard methods pass, including missing, duplicate,
 short, malformed, foreign and wrong-inventory negative controls. All simulator
 test files compile in the focused command. A full112-workload completion and
 100k campaign at this source remain unproven.
+
+## Complete campaign result
+
+The [full1,000-seed suite](full-1000-pass/) now passes at4fba0c9:156 top-level
+passes, two documented trace-only skips, all252 pins and112 independent complete
+seed ranges. Package114.319s. The100k release requirement remains open.

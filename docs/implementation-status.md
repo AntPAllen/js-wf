@@ -5978,3 +5978,16 @@ cannot certify creation on the shifted source. No later qualifying wait appears
 before the10s admission deadline; the remaining progress cause is unconfirmed.
 All original artifacts and terminal/log evidence are retained. The sustained
 behind row remains open; no unchanged rerun or gate relaxation is launched.
+
+## Whole-suite1,000-seed proof with independent112-workload accounting (2026-10-02)
+
+[Terminal full-suite evidence](scale/tier1-per-workload-coverage-2026-10-02/full-1000-pass/)
+at4fba0c9 passes in114.319s package /114.84s process wall time. All156 top-level
+tests pass, two documented trace-only helpers skip, and all252 exact source
+pins pass. Each of112 inventoried seeded tests completes seeds1..1000, proving
+112,000 loop bodies independently of aggregate counts. Aggregate114,032
+schedules/1,779,009 choices/26,220,983 events. Guard re-review matches the
+original report, source-sensitive files match the exact commit, and the service
+is inactive/success/exit zero. This clears the normal1,000-seed whole-suite gate;
+full race and current-source100k requirements remain open. Million-timer service
+is still active with503,665 receipts; older100k36962606650 remains live.
