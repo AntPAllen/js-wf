@@ -7,7 +7,7 @@ on:
         type: choice
         required: true
         default: journal
-        options: [block_delay, block_disk, journal, consumer, restart, fanout_restart, route_quorum, route_majority, worker_kill, worker_pause, worker_isolation, server_clock_ahead, server_clock_behind]
+        options: [auto_journal, block_delay, block_disk, journal, consumer, restart, fanout_restart, route_quorum, route_majority, worker_kill, worker_pause, worker_isolation, server_clock_ahead, server_clock_behind]
       duration:
         description: Ten minutes is sustained; 35 seconds is fixture smoke only
         required: true
@@ -59,6 +59,7 @@ jobs:
         run: |
           set -o pipefail
           case "$TIER3_MATRIX_ROW" in
+            auto_journal) row_test=TestFiveContainerAutomaticMembershipWithJournalKills ;;
             block_delay) row_test=TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds ;;
             block_disk) row_test=TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds ;;
             server_clock_ahead) row_test=TestFiveContainerMixedServerClockAheadWithJournalKills ;;

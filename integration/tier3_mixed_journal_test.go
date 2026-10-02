@@ -20,6 +20,7 @@ import (
 	"github.com/anishathalye/porcupine"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/assignment"
 	"js-wf/client"
 	"js-wf/history"
 	"js-wf/journal"
@@ -84,9 +85,13 @@ func TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds(t *testing.T) {
 	runFiveContainerMixedLeader(t, "block_delay")
 }
 
+func TestFiveContainerAutomaticMembershipWithJournalKills(t *testing.T) {
+	runFiveContainerMixedLeader(t, "auto_journal")
+}
+
 func runFiveContainerMixedLeader(t *testing.T, row string) {
 	t.Helper()
-	if matrixServerClockOffset(row) == 0 && row != "block_delay" && row != "block_disk" && row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
+	if matrixServerClockOffset(row) == 0 && row != "auto_journal" && row != "block_delay" && row != "block_disk" && row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
 		t.Fatal("unsupported R5 fault row")
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
@@ -276,6 +281,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			proxy.Close()
 		}
 	}()
+	var automaticMembers *assignment.Membership
+	var automaticOwners *assignment.Store
+	var automaticWrites []matrixAutomaticWrite
 	var workers []*worker.Worker
 	defer func() {
 		stopWork()
@@ -351,9 +359,50 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			}
 			workers = append(workers, w)
 		}
-		for part := uint32(0); part < provision.Partitions; part++ {
-			w := workers[part%5]
-			launch(func() error { return w.RunPartition(workCtx, part) })
+		if row == "auto_journal" {
+			automaticMembers, err = assignment.EnsureMembership(ctx, js, 5)
+			if err != nil {
+				t.Fatal(err)
+			}
+			automaticOwners, err = assignment.New(ctx, js)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var controllers []*assignment.Controller
+			defer func() {
+				stopWork()
+				fleet.Wait()
+				for _, controller := range controllers {
+					controller.Close()
+				}
+			}()
+			// Register the whole fleet before any controller computes placement.
+			for node := range workers {
+				id := fmt.Sprintf("tier3-mixed-%d", node)
+				port := matrixAutomaticPort{RebalancePort: automaticOwners, id: id, observe: func(event matrixAutomaticWrite) {
+					evidenceMu.Lock()
+					automaticWrites = append(automaticWrites, event)
+					evidenceMu.Unlock()
+				}}
+				controller, err := automaticMembers.Controller(ctx, id, port)
+				if err != nil {
+					t.Fatal(err)
+				}
+				controllers = append(controllers, controller)
+			}
+			for node, w := range workers {
+				controller := controllers[node]
+				launch(func() error { return controller.Run(workCtx) })
+				launch(func() error { return w.RunKVAssignments(workCtx) })
+			}
+			if err := saveMatrixAutomaticSnapshot(ctx, js, automaticMembers, automaticOwners, filepath.Join(root, "automatic-initial.json")); err != nil {
+				t.Fatal(err)
+			}
+		} else {
+			for part := uint32(0); part < provision.Partitions; part++ {
+				w := workers[part%5]
+				launch(func() error { return w.RunPartition(workCtx, part) })
+			}
 		}
 	} else {
 		for slot := 0; slot < 5; slot++ {
@@ -438,6 +487,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			}
 		}
 		evidenceMu.Lock()
+		if row == "auto_journal" {
+			write("automatic-writes.json", automaticWrites)
+		}
 		write("dispatch.json", dispatch)
 		write("fencing.json", fencing)
 		write("repairs.json", repairs)
@@ -781,6 +833,11 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			if err != nil {
 				t.Fatal(err)
 			}
+		}
+	}
+	if row == "auto_journal" {
+		if err := saveMatrixAutomaticSnapshot(ctx, js, automaticMembers, automaticOwners, filepath.Join(root, "automatic-final.json")); err != nil {
+			t.Fatal(err)
 		}
 	}
 	if row == "fanout_restart" {

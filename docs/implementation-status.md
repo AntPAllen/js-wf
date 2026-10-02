@@ -5470,3 +5470,18 @@ now resolves the nearest existing ancestor before appending missing components
 and rejects dangling symlinks. All store-path controls pass under race1.025s.
 This closes the path-validation defect; pending native fault campaigns keep
 their original sources/handles and are not restarted.
+
+## Automatic membership added to the R5 mixed fixture (2026-10-02)
+
+A new `auto_journal` row registers five production membership controllers and
+runs production `RunKVAssignments` watchers during journal-leader kills. It
+requires actual R5 membership metadata, live coordinator and balanced64-owner
+snapshots before/after faults, and records each coordinator CAS write. The
+independent guard joins all64 assignment chains to final retained revisions,
+checks coordinator renewal/12s TTL and requires observed execution on all five
+workers. All37 Tier3 Python tests pass, including17 automatic-evidence cases;
+new integration compilation passes under race with the native opt-in skipped.
+See [fixture scope](scale/tier3-automatic-membership-2026-10-02/README.md).
+No native automatic row acceptance is claimed yet. Membership churn, coordinator
+process/reply/clock cuts, repeated in-flight reassignments and full release
+matrix gates remain open.

@@ -17,7 +17,7 @@ def load(name, file):
 
 matrix = load('matrix_row', 'check-matrix-campaign.py')
 execution = load('matrix_execution', 'check-matrix-result.py')
-TESTS = {'block_delay': 'TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds', 'block_disk': 'TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds', 'server_clock_ahead': 'TestFiveContainerMixedServerClockAheadWithJournalKills',
+TESTS = {'auto_journal': 'TestFiveContainerAutomaticMembershipWithJournalKills', 'block_delay': 'TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds', 'block_disk': 'TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds', 'server_clock_ahead': 'TestFiveContainerMixedServerClockAheadWithJournalKills',
          'server_clock_behind': 'TestFiveContainerMixedServerClockBehindWithJournalKills',
          'worker_isolation': 'TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds',
          'worker_pause': 'TestFiveContainerMixedWorkerPausedFortyFiveSeconds',
@@ -66,6 +66,7 @@ def check(events, duration, expected_row='journal'):
             cells[typ]['raw_terminal_p99_seconds']=matrix.seconds(raw_t)
             cells[typ]['raw_progress_p99_seconds']=matrix.seconds(raw_p)
     scope = ('single five-container R5 server clock skew with journal SIGKILL row' if row.startswith('server_clock_')
+             else 'single five-container R5 automatic membership with journal SIGKILL row' if row == 'auto_journal'
              else 'single five-container R5 private filesystem per-request delay row' if row == 'block_delay'
              else 'single five-container R5 private filesystem I/O stall row' if row == 'block_disk'
              else 'single five-container R5 worker reply-isolation row' if row == 'worker_isolation'
@@ -83,6 +84,55 @@ def check(events, duration, expected_row='journal'):
                 clock_timer_cut_profile=profiles[0] if profiles else None,
                 shortened_smoke=duration == '35s', invocations=invocations, journal_entries=entries,
                 confirmed_faults=faults, active_consumer_faults=active_consumer_faults, cells=cells, clears_full_tier3_release=False)
+
+
+def check_automatic_artifacts(root, report):
+    members = [f'tier3-mixed-{n}' for n in range(5)]
+    snapshots = [json.loads((root/f'automatic-{stage}.json').read_text()) for stage in ('initial', 'final')]
+    for snapshot in snapshots:
+        info = snapshot['membership_stream']
+        entries = snapshot['assignments']
+        if (snapshot['members'] != members or len(entries) != 64 or
+                {e['partition'] for e in entries} != set(range(64)) or
+                any(type(e['revision']) is not int or e['revision'] <= 0 or e['owner'] not in members for e in entries) or
+                snapshot['coordinator']['worker'] not in members or snapshot['coordinator']['epoch'] <= 0 or snapshot['coordinator_revision'] <= 0 or
+                info['config']['name'] != 'KV_WF_MEMBERS' or info['config']['num_replicas'] != 5 or
+                info['config']['max_age'] != 12_000_000_000 or info['config']['storage'] != 'file' or
+                not info['cluster']['leader'] or len(info['cluster']['replicas']) != 4 or
+                any(not r['current'] or r.get('offline', False) for r in info['cluster']['replicas'])):
+            raise ValueError('missing R5 membership, coordinator or complete owned partitions')
+        if [sum(e['owner'] == member for e in entries) for member in members] != [13,13,13,13,12]:
+            raise ValueError('automatic membership did not balance all64 partitions')
+    if snapshots[1]['coordinator_revision'] <= snapshots[0]['coordinator_revision']:
+        raise ValueError('coordinator did not renew or change across the fault run')
+    faults = json.loads((root/'faults.json').read_text())
+    if len(faults) != report['confirmed_faults'] or not faults or not timestamp_ns(snapshots[0]['observed']) <= timestamp_ns(faults[0]['killed']) <= timestamp_ns(faults[-1]['healed']) <= timestamp_ns(snapshots[1]['observed']):
+        raise ValueError('automatic snapshots do not bracket confirmed faults')
+    writes = json.loads((root/'automatic-writes.json').read_text())
+    histories = {p: [] for p in range(64)}
+    revisions = set()
+    for event in writes:
+        if event['controller'] not in members or event['owner'] not in members or event['partition'] not in histories or timestamp_ns(event['before']) > timestamp_ns(event['after']):
+            raise ValueError('invalid automatic coordinator write identity/times')
+        if event['error']:
+            raise ValueError('automatic controller encountered a failed/uncertain assignment write')
+        if event['revision'] in revisions or event['revision'] <= event['expected']:
+            raise ValueError('automatic assignment lacks unique increasing CAS revisions')
+        revisions.add(event['revision']); histories[event['partition']].append(event)
+    for part, history in histories.items():
+        history.sort(key=lambda e:e['revision'])
+        revision = 0
+        for event in history:
+            if event['expected'] != revision: raise ValueError('automatic assignment CAS chain is incomplete')
+            revision = event['revision']
+        if not history: raise ValueError('automatic coordinator never claimed every partition')
+        final = next(e for e in snapshots[1]['assignments'] if e['partition'] == part)
+        if final['revision'] != revision or final['owner'] != history[-1]['owner']:
+            raise ValueError('final assignment differs from observed coordinator writes')
+    dispatched = {e['Worker'] for e in json.loads((root/'dispatch.json').read_text()) if e['Stage'] == 'lease_acquired' and e['RunSequence'] and e['Type'] and e['ID']}
+    if dispatched != set(members): raise ValueError('not all five automatic assignment watchers executed workflows')
+    return dict(claimed_partitions=64, acknowledged_coordinator_writes=len(writes), observed_active_workers=5,
+                admits_membership_churn=False, clears_full_tier3_release=False)
 
 
 def check_block_disk_artifacts(root, report, delay=False):
@@ -577,6 +627,9 @@ if __name__ == '__main__':
         parser.error('--require-clock-timer-cut requires a server-clock row')
     events = [json.loads(line) for line in args.events.read_text().splitlines() if line.strip()]
     report = check(events, args.duration, args.row)
+    if args.row == 'auto_journal':
+        if args.root is None: parser.error('--root is required for automatic membership')
+        report['automatic_artifact_checks'] = check_automatic_artifacts(args.root, report)
     if args.row in ('block_disk', 'block_delay'):
         if args.root is None: parser.error('--root is required for block disk')
         report['block_disk_artifact_checks'] = check_block_disk_artifacts(args.root, report, args.row == 'block_delay')
