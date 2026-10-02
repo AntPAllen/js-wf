@@ -6352,3 +6352,17 @@ remain compatible. Multi-seed acceptance remains open until every required job
 and its original artifacts pass; adding the workflow is not a release claim.
 The million-timer process remains live under its user unit at PID18146; querying
 the system manager's same-named empty unit is not its authoritative handle.
+
+
+Twenty-seed admitted clock campaigns are now live at `579dbe1`:
+[ahead36979614670](https://github.com/AntPAllen/js-wf/actions/runs/36979614670)
+and [behind36979617411](https://github.com/AntPAllen/js-wf/actions/runs/36979617411).
+Each requests seeds1..20, ten minutes per seed, common-clock probes and actual
+pending-Sleep cut proof. Launch job states are retained; they are not acceptance.
+The offline `scripts/check-tier3-campaign.py` reruns every original artifact
+through the current per-row verifier, requires byte-identical uploaded reports,
+and then requires exact complete job/seed sets and terminal success at one
+recorded source. It rejects missing, duplicate, extra, failed or live jobs,
+wrong seeds/durations/scope and missing admitted clock/checkpoint proof.
+All48 Tier3 controls pass. Its artifact path also rechecked the real accepted
+700-invocation ahead download byte-identically. Full-matrix/24h scope stays open.

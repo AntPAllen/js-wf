@@ -727,3 +727,10 @@ seeds. Keep `duration=10m`, `common_timer_clock=true` and
 only its complete requested seed range at the recorded source after all original
 artifacts are verified; single-row campaigns do not replace the full-matrix or
 24-hour release gates. The 35s duration remains smoke evidence only.
+
+Use `scripts/check-tier3-campaign.py --metadata <run-with-jobs.json> --artifacts
+<download-root> --row <row> --seeds <count> --duration 10m --output <report.json>`
+to independently verify a terminal campaign. Add `--require-admitted-clock`
+for clock campaigns. The command requires every seed's original events and
+fault artifacts, current verification matching the uploaded report, and the
+complete successful job set. A green summary without these inputs is insufficient.
