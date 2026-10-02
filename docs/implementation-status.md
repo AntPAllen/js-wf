@@ -6153,3 +6153,9 @@ failed artifacts are retained. Fresh artifact acceptance remains required.
 Existing100k handle is still live; million-timer service is active above574,000
 receipts. Neither was restarted and the historical worker-kill TTL miss remains
 excluded from further runs.
+
+Fresh full1000 unitjs-wf-protobuf-full1000-20261002 is confirmed active at8ffb0ea,
+with114 source-inventoried seed ranges and259 pins required by the result guard.
+Expanded protocol/storage CI36974255511 is confirmed in progress at the same
+source. Launch metadata is retained, not accepted proof; existing100k and million
+handles continue independently without restart.
