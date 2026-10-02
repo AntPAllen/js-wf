@@ -6095,3 +6095,21 @@ Fresh100k run36972092297 is queued atf81540e with the current113-workload/258-pi
 source and independent per-workload seed guard. Protocol interoperability CI
 36972084961 is confirmed in progress at the same source. Both are launches, not
 acceptance evidence. Million-timer unit remains active above560,000 receipts.
+
+## Clock-cut timer opportunity and protocol CI path corrected (2026-10-02)
+
+[Actual failed batch32 replay](scale/clock-admission-wait-profile-2026-10-02/)
+feeds63 receipts/123 operations through the unchanged selector at2000 time-filtered
+snapshots: no candidate has750ms removal lead. Initial2s hints precede shifted
+leader preference; later shifted250ms requests are structurally too short.
+The admitted profile now uses2s for all eight waits. Both±60s virtual-receipt
+controls,256 delays each, reject the old first-only profile and admit the new
+profile. Existing negative admission checks plus this regression pass race1.380s;
+actual artifact replay passes2.373s. This changes workload intervals, not admission
+or latency criteria; sustained native acceptance remains open.
+
+Protocol CI36972084961 is terminal/failed: Go race and Python decoding passed,
+but the reverse test used a path relative to the package working directory.
+The workflow now passes an absolute workspace path. Failed metadata/logs and
+original vectors remain retained; a fresh CI result is required. Current-source
+100k36972092297 is confirmed in progress and remains on the same handle.

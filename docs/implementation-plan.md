@@ -693,3 +693,14 @@ independent reader so checkpoints do not stop production of positive pending
 waits for clock cuts. Every tenth-batch checkpoint must finish with exact cohort
 counts; final whole-retained-state checking remains mandatory. Future CI also
 requires all checkpoint artifacts. See [checks and scope](scale/tier3-independent-checkpoints-2026-10-02/).
+
+### Admitted server-clock timer workload profile
+
+When `WF_TIER3_CLOCK_TIMER_CUT=1`, all eight timer waits are two seconds. Giving
+only the first wait two seconds allowed a healthy first publication just before
+leader preference, followed by shifted 250ms waits that could never satisfy the
+750ms actual-removal lead. The [retained replay and deterministic selector regression](scale/clock-admission-wait-profile-2026-10-02/)
+record that failure and the interval correction. Ordinary non-admitted clock
+rows retain eight 250ms waits. Admission, clock-origin/publication proof, duration,
+latency, retained-state and drain gates are unchanged; fresh full native evidence
+remains required for the corrected admitted profile.

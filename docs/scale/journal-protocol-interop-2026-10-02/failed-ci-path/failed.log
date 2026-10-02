@@ -1,0 +1,24 @@
+interop	Exchange exact uint64 and JSON payload bytes with Python	﻿2026-10-02T06:09:04.8744317Z ##[group]Run set -euo pipefail
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8744660Z ^[[36;1mset -euo pipefail^[[0m
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8744944Z ^[[36;1mmkdir -p protocol-evidence/generated^[[0m
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8745328Z ^[[36;1mprotoc --version | tee protocol-evidence/versions.log^[[0m
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8745967Z ^[[36;1m/usr/bin/python3 -c 'import google.protobuf; print(google.protobuf.__version__)' | tee -a protocol-evidence/versions.log^[[0m
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8746643Z ^[[36;1mprotoc --python_out=protocol-evidence/generated protocol/v1/journal.proto^[[0m
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8747431Z ^[[36;1m/usr/bin/python3 scripts/check-protocol-interop.py protocol-evidence/generated protocol-evidence/python | tee protocol-evidence/interop.log^[[0m
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8748429Z ^[[36;1mPROTOCOL_INTEROP_DIR=protocol-evidence/python go test -p=1 -race ./protocol -run '^TestPortableVectors$' -v | tee protocol-evidence/reverse.log^[[0m
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8749391Z ^[[36;1msha256sum protocol/v1/journal.proto protocol/testdata/vectors.json protocol-evidence/python/vectors.json > protocol-evidence/SHA256SUMS^[[0m
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8820635Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8821004Z env:
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8821210Z   GOMEMLIMIT: 512MiB
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8821435Z   GOMAXPROCS: 2
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8821849Z ##[endgroup]
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.8948134Z libprotoc 3.21.12
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.9099663Z 4.21.12
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:04.9524227Z PASS Go-to-Python: 8 records; wrote 8 independent Python-to-Go records
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:05.5652969Z === RUN   TestPortableVectors
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:05.5654928Z     record_test.go:164: open protocol-evidence/python/vectors.json: no such file or directory
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:05.5655578Z --- FAIL: TestPortableVectors (0.00s)
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:05.5655890Z FAIL
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:05.5663536Z FAIL	js-wf/protocol	0.009s
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:05.5685899Z FAIL
+interop	Exchange exact uint64 and JSON payload bytes with Python	2026-10-02T06:09:05.5811675Z ##[error]Process completed with exit code 1.

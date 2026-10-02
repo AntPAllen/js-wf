@@ -6,6 +6,10 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/nats-io/nats.go/jetstream"
+	"math/rand"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -196,4 +200,124 @@ func TestMatrixCanonicalTimerAdmissionRequiresShiftedAcknowledgedHint(t *testing
 			})
 		}
 	}
+}
+
+// Virtual transport receipts exercise the real admission selector. The initial
+// hint comes from a healthy node just before leader preference; the next request
+// arrives six seconds later after repair/takeover, as in the retained failure.
+// Later waits must offer the same removal interval, rather than assuming the
+// first request will always be created after the fault controller moves leaders.
+func TestMatrixClockAdmissionAfterHealthyFirstHint(t *testing.T) {
+	at := time.Date(2026, 10, 2, 5, 44, 58, 0, time.UTC)
+	for _, offset := range []time.Duration{-time.Minute, time.Minute} {
+		for seed := int64(1); seed <= 256; seed++ {
+			rng := rand.New(rand.NewSource(seed))
+			delay := time.Duration(20+rng.Intn(180)) * time.Millisecond
+			build := func(start time.Time, duration, timeShift time.Duration, index uint64) ([]matrixControllerJournalReceipt, []worker.OperationEvent) {
+				lower, upper := start.Add(-10*time.Millisecond), start.Add(20*time.Millisecond)
+				fire := upper.Add(duration)
+				payload, _ := json.Marshal(map[string]any{"kind": "timer", "name": "wait", "duration_nanos": int64(duration), "fire_at": fire, "clock_domain": "utc-quorum-v1"})
+				receipts := []matrixControllerJournalReceipt{
+					{Sequence: index + 1, Subject: "wf.jrn.matrixtimer.inv", Entry: journal.Entry{Index: index, Kind: journal.StepRequested, WorkerID: "worker", Payload: payload}, ObservedAt: start.Add(delay)},
+					{Sequence: index + 2, Subject: "wf.jrn.matrixtimer.inv", Entry: journal.Entry{Index: index + 1, Kind: journal.Suspended, WorkerID: "worker", Payload: json.RawMessage(`{"waiting_on":"timer:wait"}`)}, ObservedAt: start.Add(delay + time.Millisecond)},
+				}
+				physical := start.Add(timeShift)
+				schedule := physical.Add(fire.Sub(lower))
+				published := true
+				ops := []worker.OperationEvent{
+					{Type: "matrixtimer", ID: "inv", Worker: "worker", JournalIndex: index, Operation: "timer_domain_clock", At: start.Add(time.Millisecond), Duration: time.Millisecond, ClockDomain: "utc-quorum-v1", ClockLower: &lower, ClockUpper: &upper},
+					{Type: "matrixtimer", ID: "inv", Worker: "worker", JournalIndex: index, JournalKind: journal.StepRequested, Operation: "timer_native_hint", At: start.Add(delay), Duration: delay - time.Millisecond, ClockDomain: "utc-quorum-v1", ServerTime: &physical, ClockLower: &lower, ClockUpper: &upper, TimerDeadline: &fire, TimerScheduleAt: &schedule, TimerPublished: &published},
+				}
+				return receipts, ops
+			}
+			rs, ops := build(at.Add(-500*time.Millisecond), 2*time.Second, 0, 1)
+			got, err := selectMatrixPendingClockTimer(rs, ops, at, offset, 750*time.Millisecond)
+			if err != nil || got != nil {
+				t.Fatalf("seed%d healthy initial hint admitted: %+v %v", seed, got, err)
+			}
+			for _, oldProfile := range []bool{true, false} {
+				admitted := false
+				start := at.Add(6 * time.Second)
+				for step := 1; step < 8 && start.Before(at.Add(10*time.Second)); step++ {
+					duration := matrixClockTimerWait(true)
+					if oldProfile {
+						duration = 250 * time.Millisecond
+					}
+					rs, ops = build(start, duration, offset, uint64(step*4+1))
+					now := start.Add(delay + 2*time.Millisecond)
+					candidate, err := selectMatrixPendingClockTimer(rs, ops, now, offset, 750*time.Millisecond)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if candidate != nil {
+						admitted = true
+						break
+					}
+					start = start.Add(duration + delay + time.Duration(rng.Intn(200))*time.Millisecond)
+				}
+				if admitted == oldProfile {
+					t.Fatalf("seed%d offset%s oldProfile%v admitted%v", seed, offset, oldProfile, admitted)
+				}
+			}
+		}
+	}
+}
+
+// Optional replay of the original failed native artifact, preserving all
+// receipt/operation timestamps. It makes no synthetic changes to native data.
+func TestMatrixClockAdmissionNativeBatch32Replay(t *testing.T) {
+	root := os.Getenv("WF_CLOCK_ADMISSION_REPLAY_ROOT")
+	if root == "" {
+		t.Skip("requires retained failed-native artifact")
+	}
+	load := func(name string, dst any) {
+		b, err := os.ReadFile(filepath.Join(root, name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := json.Unmarshal(b, dst); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var receipts []matrixControllerJournalReceipt
+	var operations []worker.OperationEvent
+	load("controller-receipts.json", &receipts)
+	load("controller-operations.json", &operations)
+	var selectedReceipts []matrixControllerJournalReceipt
+	var selectedOperations []worker.OperationEvent
+	for _, r := range receipts {
+		if strings.HasPrefix(r.Subject, "wf.jrn.matrixtimer.tier3-1-batch-32-") {
+			selectedReceipts = append(selectedReceipts, r)
+		}
+	}
+	for _, op := range operations {
+		if op.Type == "matrixtimer" && strings.HasPrefix(op.ID, "tier3-1-batch-32-") {
+			selectedOperations = append(selectedOperations, op)
+		}
+	}
+	if len(selectedReceipts) == 0 || len(selectedOperations) == 0 {
+		t.Fatal("missing batch32 native evidence")
+	}
+	start := time.Date(2026, 10, 2, 5, 44, 58, 188530631, time.UTC)
+	checked := 0
+	for now := start; now.Before(start.Add(10 * time.Second)); now = now.Add(5 * time.Millisecond) {
+		var rs []matrixControllerJournalReceipt
+		var ops []worker.OperationEvent
+		for _, r := range selectedReceipts {
+			if !r.ObservedAt.After(now) {
+				rs = append(rs, r)
+			}
+		}
+		for _, op := range selectedOperations {
+			if !op.At.After(now) {
+				ops = append(ops, op)
+			}
+		}
+		got, err := selectMatrixPendingClockTimer(rs, ops, now, -time.Minute, 750*time.Millisecond)
+		if err != nil || got != nil {
+			t.Fatalf("native replay at%s got%+v err%v", now, got, err)
+		}
+		checked++
+	}
+	t.Logf("native batch32: %d observed receipts, %d operations, %d snapshots; no provable pending timer with750ms lead", len(selectedReceipts), len(selectedOperations), checked)
 }

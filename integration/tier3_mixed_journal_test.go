@@ -365,12 +365,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			}
 			for i := 0; i < 8; i++ {
 				name := fmt.Sprintf("timer-%d", i)
-				wait := 250 * time.Millisecond
-				if timerCutRequired && i == 0 {
-					// Docker removal needs a provable interval longer than the
-					// ordinary short wait. Keep the other seven waits unchanged.
-					wait = 2 * time.Second
-				}
+				wait := matrixClockTimerWait(timerCutRequired)
 				key := request.ID + "/" + name
 				before := time.Now().UTC()
 				evidenceMu.Lock()
@@ -1449,4 +1444,14 @@ func killFiveContainerMixedAllServers(ctx context.Context, js jetstream.JetStrea
 		return event, err
 	}
 	return event, nil
+}
+
+// Every wait in the admitted clock profile must leave time for the actual
+// container removal. A healthy first hint can precede leader preference; later
+// waits must still offer a shifted hint with the same required removal lead.
+func matrixClockTimerWait(requireCut bool) time.Duration {
+	if requireCut {
+		return 2 * time.Second
+	}
+	return 250 * time.Millisecond
 }

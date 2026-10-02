@@ -32,7 +32,7 @@ jobs:
           /usr/bin/python3 -c 'import google.protobuf; print(google.protobuf.__version__)' | tee -a protocol-evidence/versions.log
           protoc --python_out=protocol-evidence/generated protocol/v1/journal.proto
           /usr/bin/python3 scripts/check-protocol-interop.py protocol-evidence/generated protocol-evidence/python | tee protocol-evidence/interop.log
-          PROTOCOL_INTEROP_DIR=protocol-evidence/python go test -p=1 -race ./protocol -run '^TestPortableVectors$' -v | tee protocol-evidence/reverse.log
+          PROTOCOL_INTEROP_DIR="$GITHUB_WORKSPACE/protocol-evidence/python" go test -p=1 -race ./protocol -run '^TestPortableVectors$' -v | tee protocol-evidence/reverse.log
           sha256sum protocol/v1/journal.proto protocol/testdata/vectors.json protocol-evidence/python/vectors.json > protocol-evidence/SHA256SUMS
       - uses: actions/upload-artifact@v4
         if: always()
