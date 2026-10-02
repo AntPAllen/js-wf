@@ -6005,3 +6005,12 @@ race remains active. Corpus258 pins /113 tracked workloads. Clock-row fixture
 uses256/100ms and retains policy; admission and latency gates remain unchanged.
 This fixes fixture capacity, not a proven NATS defect or24h scalability; new
 native sustained and full-source simulator results remain required.
+
+The capacity1000-seed race attempt is terminal/failed on its300.059s package
+deadline, with seed895 actively running production Scan at cursor953/budget8;
+no deadlock or full race pass is inferred. All six exact capacity pins pass under
+race in1.294s. Original logs and independent six-pin count are retained.
+Changed-source admitted behind run36967016515 is queued atc477f00 with both
+required flags; full113-workload1000 normal unitjs-wf-tier1-scan-capacity-20261002
+is confirmed active. Both launches are recorded, not accepted; existing100k and
+million-timer handles continue unchanged.
