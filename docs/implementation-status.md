@@ -14,7 +14,7 @@
   campaign37045827952 are independently accepted at2a30165. All three production
   cuts recover in12.840s/12.835s/12.937s; the compiled mutant triggers one actual
   forbidden effect and fails semantically without a timeout.
-- Fresh all-thirteen Tier2 seed1 campaign37050644803 is queued at3f483bd,
+- Fresh all-thirteen Tier2 seed1 campaign37050644803 is in progress at3f483bd,
   ten minutes per row. It cannot clear the200-seed gate.
 - Fresh all-six ten-minute mutation gate37030840346 is accepted at0f979d0.
   Ahead-clock seed27 ten-minute replay37030391587 is accepted at0f979d0;
@@ -7423,3 +7423,7 @@ a new raw-artifact qualification of the full release matrices. Current120-graph
 25 completed jobs with no failures observed and remains active. Tier2 all13
 seed1 campaign37050644803 is still queued. Full matrices, original million
 drain/retirement and full-runtime24h soak remain open.
+
+Latest terminal-job poll: Tier2 seed1 run37050644803 is now in progress, with
+11 of13 actual rows successful and blockdisk/upgrade still active. These are
+job verdicts only; full artifact qualification awaits the complete campaign.
