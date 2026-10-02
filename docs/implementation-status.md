@@ -6159,3 +6159,14 @@ with114 source-inventoried seed ranges and259 pins required by the result guard.
 Expanded protocol/storage CI36974255511 is confirmed in progress at the same
 source. Launch metadata is retained, not accepted proof; existing100k and million
 handles continue independently without restart.
+
+## Commit omission found by source audit (2026-10-02)
+
+Protocol/storage CI36974255511 reports success at8ffb0ea, but that commit omitted
+integration/journal_encoding_test.go. Its targeted Go command matched no test;
+therefore it supplies no mixed-format native CI proof. The local race result
+remains valid for the retained worktree test. The corrected all-waits-2s log label
+was also omitted from that commit and remained in the worktree. Both files are
+now included, and future protocol CI explicitly requires both native and CLI
+test names in the compiled inventories before running them. Original metadata
+and missing-file source evidence are retained. Fresh matching-source CI required.

@@ -25,6 +25,9 @@ jobs:
         run: go test -p=1 -race ./journal ./protocol/...
       - name: Verify real protobuf worker, mixed-format compaction and CLI
         run: |
+          set -euo pipefail
+          go test -p=1 ./integration -list '^TestProtobufWorkerResumesJSONPrefixAndCompacts$' | rg '^TestProtobufWorkerResumesJSONPrefixAndCompacts$'
+          go test -p=1 ./cmd/wf-worker -list '^TestWorkerRunnerProtobufJournal$' | rg '^TestWorkerRunnerProtobufJournal$'
           go test -p=1 -race ./integration -run '^TestProtobufWorkerResumesJSONPrefixAndCompacts$' -count=1 -v
           go test -p=1 -race ./cmd/wf-worker -run '^TestWorkerRunnerProtobufJournal$' -count=1 -v
       - name: Exchange exact uint64 and JSON payload bytes with Python

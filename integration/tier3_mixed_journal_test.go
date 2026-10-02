@@ -117,7 +117,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	if timerCutRequired {
 		t.Log("TIER3_CLOCK_TIMER_CUT_REQUIRED=true")
-		t.Log("TIER3_CLOCK_TIMER_CUT_PROFILE=first-wait-2s")
+		t.Log("TIER3_CLOCK_TIMER_CUT_PROFILE=all-waits-2s")
 	}
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
