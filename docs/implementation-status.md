@@ -6219,3 +6219,10 @@ also pass. This clears focused native CI proof that the omitted-test run lacked,
 not full rolling/chaos acceptance. Reverse-rollout CI36975249620 is confirmed
 in progress at2b2130f; its launch is retained, not acceptance. Behind36974795077
 is still confirmed in progress. Existing100k and million continue unchanged.
+
+[Reverse-rollout CI36975249620](scale/persisted-protobuf-journal-2026-10-02/writer-reversal/passed-ci/)
+is now terminal/success at2b2130f. Actual reverse test passes6.20s after compiled
+name validation, with effects2 for unfinished request and1 for recorded outcome;
+forward native, CLI and persisted Python exchange also pass. Original evidence
+is retained. Behind36974795077 is still in progress; million service is active
+above590,000 receipts. Full rolling/chaos and long-campaign gates remain open.
