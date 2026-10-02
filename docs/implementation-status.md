@@ -6262,3 +6262,9 @@ checks24.260s pass. Future CI requires compiled ACK-contract/deadline test names
 No drain gate changed. Async NAKs and old ahead failure causality remain open;
 this is stronger future outcome provenance, not a claimed old-failure fix.
 Changed-source full simulator and native acceptance remain required.
+
+Changed-source full1000 unitjs-wf-confirmed-ack-full1000-20261002 is confirmed
+active atd8842b6. ACK/lifecycle CI36977640313 is in progress; admitted ahead
+36977810495 is queued for ten minutes with common clock/cut proof required.
+All retain launch state, not accepted outcomes. Existing100k and million jobs
+continue on their original handles; ACK confirmation does not change their source.
