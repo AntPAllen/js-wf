@@ -28,3 +28,6 @@ clock workloads and membership-session recovery. The launch snapshot is
 retained; queued state supplies no acceptance. Review this handle before
 launching another whole-suite campaign. The earlier independently reviewed
 100k run remains scoped to57ecf06 and184 pins.
+
+The same100k handle is now confirmed in progress; an additional API snapshot
+is retained. It supplies no terminal acceptance result.

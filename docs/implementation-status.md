@@ -5909,3 +5909,9 @@ are retained. A new normal-deadline100k campaign is queued at5828875 as
 [run36962606650](https://github.com/AntPAllen/js-wf/actions/runs/36962606650),
 including the new child-start budget. Its queued launch is not acceptance.
 The million-timer service remains active, with470,484 receipts observed.
+
+The changed child-budget source also passes1,000 interrupted fan-out seeds
+under race, package33.018s. Corrected admitted behind smoke36962797494 is
+queued at410272f with both common clock and pending-timer admission enabled;
+its retained API snapshot supplies no acceptance. The same final-source100k
+handle36962606650 is now confirmed in progress. Ahead drain remains open.

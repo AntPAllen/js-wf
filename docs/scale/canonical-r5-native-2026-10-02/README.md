@@ -72,3 +72,12 @@ Admitted canonical native recovery, full updated simulator suite, final-source
 100k, sustained200-seed clock rows and the24-hour matrix remain open. Further
 native attempts must use the changed budget/reviewer source, not rerun these
 unchanged failures.
+
+The updated production worker's1,000-seed interrupted fan-out workload also
+passes31.99s /33.018s race package. Its log is retained under`checks/`.
+A corrected admitted behind35s smoke is queued as
+[run36962797494](https://github.com/AntPAllen/js-wf/actions/runs/36962797494)
+at source`410272fee5280abc4551f73475d7f33c5e4ea738`, including the whole child
+budget, child-start observations and canonical Python reviewer. Both clock
+and pending-Sleep inputs are enabled. Its API launch is retained; queued state
+is not acceptance. No unchanged ahead drain attempt was relaunched.
