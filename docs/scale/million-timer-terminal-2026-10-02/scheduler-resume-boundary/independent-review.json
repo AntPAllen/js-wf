@@ -1,0 +1,97 @@
+{
+  "verdict": "rejected: expired scheduler cleanup returns after second reopen",
+  "original_files_unchanged": 4998,
+  "source_checks": 1818,
+  "cases": [
+    {
+      "mode": "removed",
+      "node": 0,
+      "schedules_before_resume": 768,
+      "schedules_after_resume": 0,
+      "schedules_after_second_reopen": 768,
+      "target_callbacks": 0,
+      "state": {
+        "format": "counts-v1",
+        "messages": 0,
+        "first_seq": 2000001,
+        "last_seq": 2000000
+      }
+    },
+    {
+      "mode": "removed",
+      "node": 1,
+      "schedules_before_resume": 141,
+      "schedules_after_resume": 0,
+      "schedules_after_second_reopen": 141,
+      "target_callbacks": 0,
+      "state": {
+        "format": "counts-v1",
+        "messages": 0,
+        "first_seq": 2000001,
+        "last_seq": 2000000
+      }
+    },
+    {
+      "mode": "removed",
+      "node": 2,
+      "schedules_before_resume": 0,
+      "schedules_after_resume": 0,
+      "schedules_after_second_reopen": 0,
+      "target_callbacks": 0,
+      "state": {
+        "format": "counts-v1",
+        "messages": 0,
+        "first_seq": 2000001,
+        "last_seq": 2000000
+      }
+    },
+    {
+      "mode": "intact",
+      "node": 0,
+      "schedules_before_resume": 0,
+      "schedules_after_resume": 0,
+      "schedules_after_second_reopen": 0,
+      "target_callbacks": 0,
+      "state": {
+        "format": "counts-v1",
+        "messages": 0,
+        "first_seq": 2000001,
+        "last_seq": 2000000
+      }
+    },
+    {
+      "mode": "intact",
+      "node": 1,
+      "schedules_before_resume": 0,
+      "schedules_after_resume": 0,
+      "schedules_after_second_reopen": 0,
+      "target_callbacks": 0,
+      "state": {
+        "format": "counts-v1",
+        "messages": 0,
+        "first_seq": 2000001,
+        "last_seq": 2000000
+      }
+    },
+    {
+      "mode": "intact",
+      "node": 2,
+      "schedules_before_resume": 0,
+      "schedules_after_resume": 0,
+      "schedules_after_second_reopen": 0,
+      "target_callbacks": 0,
+      "state": {
+        "format": "counts-v1",
+        "messages": 0,
+        "first_seq": 2000001,
+        "last_seq": 2000000
+      }
+    }
+  ],
+  "failed_tests": [
+    "TestWorkflowCopiedSchedulingIndexBoundary/removed/node-0",
+    "TestWorkflowCopiedSchedulingIndexBoundary/removed/node-1",
+    "TestWorkflowCopiedSchedulingIndexBoundary"
+  ],
+  "scope": "Direct expired scheduling loop with recording callback, no server or Raft; no original-campaign cause claim."
+}

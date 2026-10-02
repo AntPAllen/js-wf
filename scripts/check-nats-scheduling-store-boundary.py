@@ -23,7 +23,9 @@ def main():
     parser.add_argument('--root', type=Path, required=True, help='new diagnostic output root')
     parser.add_argument('--probe-subject-purge', action='store_true', help='test exact subject lookup and purge on copies with scheduling paused')
     parser.add_argument('--probe-reopen', action='store_true', help='verify purges survive clean file-store close/reopen; implies subject-purge probe')
+    parser.add_argument('--probe-scheduler-resume', action='store_true', help='after reopen, run expired schedules with a recording callback and verify durable cleanup; implies reopen')
     args = parser.parse_args()
+    args.probe_reopen = args.probe_reopen or args.probe_scheduler_resume
     args.probe_subject_purge = args.probe_subject_purge or args.probe_reopen
     original, out = args.original.resolve(), args.root.resolve()
     report = json.loads((original / 'report.json').read_text())
@@ -75,7 +77,8 @@ def main():
         env = dict(os.environ, GOWORK='off', GOMEMLIMIT='512MiB', GOMAXPROCS='2',
                    WF_COPIED_STORE_BOUNDARY_ROOT=str(out),
                    WF_COPIED_STORE_SUBJECT_PURGE='1' if args.probe_subject_purge else '',
-                   WF_COPIED_STORE_REOPEN='1' if args.probe_reopen else '')
+                   WF_COPIED_STORE_REOPEN='1' if args.probe_reopen else '',
+                   WF_COPIED_STORE_RESUME='1' if args.probe_scheduler_resume else '')
         cmd = ['go', 'test', '-p=1', '-json',
                './server', '-run', '^' + TEST + '$', '-count=1', '-timeout=3m']
         (out / 'command.json').write_text(json.dumps(cmd, indent=2) + '\n')
@@ -93,6 +96,7 @@ def main():
             'original_physical_counts': [768, 141, 0], 'intact_schedule_counts': [0, 0, 0],
             'removed_schedule_counts': [768, 141, 0], 'server_processes': 0, 'publications': 0,
             'subject_purge_probe': args.probe_subject_purge, 'clean_reopen_probe': args.probe_reopen,
+            'scheduler_resume_probe': args.probe_scheduler_resume,
             'scope': 'Direct file-store recovery boundary; initial persistence inconsistency cause unconfirmed.'}, indent=2) + '\n')
     finally:
         after = hashes(original)

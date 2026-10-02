@@ -7396,3 +7396,30 @@ Current120-workload100k37051896032 remains in progress atad37bfc; all-thirteen
 Tier2 seed1 campaign37050644803 remains queued at3f483bd. Historical worker-kill
 31.1s/TTL30s remains excluded from reruns; productionTTL12s and strict recovery
 under30s are already qualified by the corrected production-cap contract.
+
+
+## Expired copied scheduler entries clear in memory, return after second reopen
+
+[Scheduler-resume evidence](scale/million-timer-terminal-2026-10-02/scheduler-resume-boundary/)
+records a second rejected durability trial in actual pinned NATS2.15.0 code.
+After exact source purges and initial reopen, the production expired scheduling
+loop clears768/141 rebuilt-index entries and produces zero recording callbacks.
+After another checked clean stop/reopen,768/141 entries return. Intact-index
+copies remain zero; all six physical counts remain zero at last sequence2M.
+The durable scheduler cleanup assertion fails and remains enforced. This is a
+direct loop invocation, not normal server recovery, Raft or target publication.
+
+Pinned source suggests the missing-source cleanup does not dirty the full-state
+writer, whose scheduling snapshot is skipped when state is clean. This narrow
+inference is not the original campaign's missed-retirement cause. All4,998
+original hashes match; all37 top-level evidence files are archived losslessly
+with SHA256 readback. Original stores are untouched.
+
+Main CI37049502357 is terminal success at exacta8e7670, with nine successful
+jobs and two documented conditional skips; its raw terminal metadata is saved
+in the held-takeover model evidence directory. This is CI status evidence, not
+a new raw-artifact qualification of the full release matrices. Current120-graph
+100k37051896032 remains independently in progress; ahead1..20037040118844 has
+25 completed jobs with no failures observed and remains active. Tier2 all13
+seed1 campaign37050644803 is still queued. Full matrices, original million
+drain/retirement and full-runtime24h soak remain open.

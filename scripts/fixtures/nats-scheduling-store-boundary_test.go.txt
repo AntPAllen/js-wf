@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -213,8 +214,58 @@ func TestWorkflowCopiedSchedulingIndexBoundary(t *testing.T) {
 						if err := os.WriteFile(filepath.Join(root, fmt.Sprintf("reopened-%s-node-%d.json", mode, node)), raw, 0644); err != nil {
 							t.Fatal(err)
 						}
-						if recovered.Msgs != 0 || recovered.LastSeq != 2000000 || recoveredSchedules != 0 || !isPaused {
+						if recovered.Msgs != 0 || recovered.LastSeq != 2000000 || !isPaused {
 							t.Fatalf("reopen messages=%d last=%d schedules=%d paused=%t", recovered.Msgs, recovered.LastSeq, recoveredSchedules, isPaused)
+						}
+						if os.Getenv("WF_COPIED_STORE_RESUME") != "1" {
+							if recoveredSchedules != 0 {
+								t.Fatalf("reopen messages=%d last=%d schedules=%d paused=%t", recovered.Msgs, recovered.LastSeq, recoveredSchedules, isPaused)
+							}
+						} else {
+							// Keep the before-resume report even if actual cleanup fails.
+							var callbacks atomic.Int64
+							fs.RegisterProcessJetStreamMsg(func(*inMsg) { callbacks.Add(1) })
+							fs.mu.Lock()
+							for _, sched := range fs.scheduling.schedules {
+								if sched.ts > time.Now().UnixNano() {
+									fs.mu.Unlock()
+									t.Fatal("future schedule cannot test expiry cleanup")
+								}
+							}
+							// Invoke the production loop directly, without a timer race.
+							fs.scheduling.paused = false
+							fs.mu.Unlock()
+							fs.runMsgScheduling()
+							fs.mu.Lock()
+							remaining := len(fs.scheduling.schedules)
+							fs.mu.Unlock()
+							if err := fs.Stop(); err != nil {
+								t.Fatal(err)
+							}
+							reopened, err := newFileStoreWithCreatedAndMode(FileStoreConfig{StoreDir: dir}, meta.StreamConfig, meta.Created, nil, nil, true)
+							if err != nil {
+								t.Fatal(err)
+							}
+							fs = reopened
+							fs.mu.Lock()
+							persisted := len(fs.scheduling.schedules)
+							fs.mu.Unlock()
+							raw, err := json.MarshalIndent(struct {
+								Before    int   `json:"schedules_before_resume"`
+								After     int   `json:"schedules_after_resume"`
+								Reopened  int   `json:"schedules_after_second_reopen"`
+								Callbacks int64 `json:"target_callbacks"`
+								State     any   `json:"state"`
+							}{recoveredSchedules, remaining, persisted, callbacks.Load(), workflowCopiedStateArtifact(fs.State())}, "", "  ")
+							if err != nil {
+								t.Fatal(err)
+							}
+							if err := os.WriteFile(filepath.Join(root, fmt.Sprintf("resumed-%s-node-%d.json", mode, node)), raw, 0644); err != nil {
+								t.Fatal(err)
+							}
+							if remaining != 0 || persisted != 0 || callbacks.Load() != 0 || fs.State().Msgs != 0 || fs.State().LastSeq != 2000000 {
+								t.Fatalf("resume cleanup remaining=%d persisted=%d callbacks=%d state=%+v", remaining, persisted, callbacks.Load(), fs.State())
+							}
 						}
 					}
 				}
