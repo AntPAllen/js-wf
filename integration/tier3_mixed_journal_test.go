@@ -76,9 +76,13 @@ func TestFiveContainerMixedWorkerKilledEveryFiveSeconds(t *testing.T) {
 	runFiveContainerMixedLeader(t, "worker_kill")
 }
 
+func TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds(t *testing.T) {
+	runFiveContainerMixedLeader(t, "block_disk")
+}
+
 func runFiveContainerMixedLeader(t *testing.T, row string) {
 	t.Helper()
-	if matrixServerClockOffset(row) == 0 && row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
+	if matrixServerClockOffset(row) == 0 && row != "block_disk" && row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
 		t.Fatal("unsupported R5 fault row")
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
@@ -124,7 +128,23 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	if offset := matrixServerClockOffset(row); offset != 0 {
 		t.Setenv("WF_TIER3_SERVER_SKEW", fmt.Sprintf("4:%s", offset))
 	}
-	cluster, err := testcluster.StartDockerCluster(filepath.Join(root, "cluster"), 5)
+	var blockDisk *testcluster.BlockDisk
+	var stores map[int]string
+	if row == "block_disk" {
+		blockDisk, err = testcluster.NewBlockDisk(root)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// Registered before cluster.Close so no server uses the mount when it
+		// is detached. The fault goroutine is joined before either cleanup.
+		defer func() {
+			if err := blockDisk.Close(); err != nil {
+				t.Error(err)
+			}
+		}()
+		stores = map[int]string{4: blockDisk.StoreDir}
+	}
+	cluster, err := testcluster.StartDockerClusterWithStores(filepath.Join(root, "cluster"), 5, stores)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -617,6 +637,8 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				if release != nil {
 					err = errors.Join(err, release())
 				}
+			} else if row == "block_disk" {
+				event, err = stallFiveContainerMixedBlockDisk(ctx, nc, js, cluster, blockDisk, scheduled, prefix, len(faults)+1)
 			} else if row == "consumer" {
 				event, err = killFiveContainerMixedConsumerLeader(ctx, js, cluster, scheduled, prefix, faultRNG)
 			} else if row == "route_quorum" || row == "route_majority" {

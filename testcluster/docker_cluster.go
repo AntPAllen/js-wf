@@ -29,6 +29,7 @@ type DockerCluster struct {
 	routeNames    []string
 	urls          []string
 	monitorURLs   []string
+	stores        []string
 	syncInterval  string
 	skewNode      int
 	skewSeconds   int64
@@ -49,7 +50,15 @@ func dockerCommand(ctx context.Context, args ...string) (string, error) {
 // StartDockerCluster builds this module's pinned nats-server in a scratch
 // image. Each node routes to node zero; discovered routes form the cluster.
 func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
-	return startDockerCluster(root, count, "", 0)
+	return startDockerCluster(root, count, "", 0, nil)
+}
+
+// StartDockerClusterWithStores binds existing caller-owned directories to the
+// specified nodes. Other nodes keep their ordinary root/node-N stores. The
+// caller must keep these filesystems mounted until after Close; restarts reuse
+// the same bindings. This supports private device-mapper fault fixtures.
+func StartDockerClusterWithStores(root string, count int, stores map[int]string) (*DockerCluster, error) {
+	return startDockerCluster(root, count, "", 0, stores)
 }
 
 // StartMixedVersionDockerCluster starts node zero on oldBinary while the other
@@ -58,7 +67,7 @@ func StartMixedVersionDockerCluster(root string, count int, oldBinary string) (*
 	if oldBinary == "" {
 		return nil, fmt.Errorf("old server binary is required")
 	}
-	return startDockerCluster(root, count, oldBinary, 0)
+	return startDockerCluster(root, count, oldBinary, 0, nil)
 }
 
 // StartAdvancingClockDockerCluster prepares an initially unshifted cluster
@@ -70,17 +79,21 @@ func StartAdvancingClockDockerCluster(root string, count int, advance time.Durat
 	if os.Getenv("WF_TIER3_SERVER_SKEW") != "" {
 		return nil, fmt.Errorf("clock advance cannot be combined with a skewed peer")
 	}
-	return startDockerCluster(root, count, "", advance)
+	return startDockerCluster(root, count, "", advance, nil)
 }
 
-func startDockerCluster(root string, count int, oldBinary string, advance time.Duration) (_ *DockerCluster, err error) {
+func startDockerCluster(root string, count int, oldBinary string, advance time.Duration, overrides map[int]string) (_ *DockerCluster, err error) {
 	if count < 3 || count > 5 {
 		return nil, fmt.Errorf("docker cluster count must be 3..5")
+	}
+	stores, err := dockerStorePaths(root, count, overrides)
+	if err != nil {
+		return nil, err
 	}
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return nil, err
 	}
-	c := &DockerCluster{root: root, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1, oldNode: -1, clockAdvance: advance}
+	c := &DockerCluster{root: root, stores: stores, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1, oldNode: -1, clockAdvance: advance}
 	if oldBinary != "" {
 		c.oldNode = 0
 		data, readErr := os.ReadFile(oldBinary)
@@ -240,7 +253,7 @@ func (c *DockerCluster) RestartNode(i int) error {
 	if i < 0 || i >= len(c.names) || c.names[i] == "" {
 		return fmt.Errorf("invalid Docker node %d", i)
 	}
-	store := filepath.Join(c.root, fmt.Sprintf("node-%d", i))
+	store := c.stores[i]
 	if err := os.MkdirAll(store, 0755); err != nil {
 		return err
 	}

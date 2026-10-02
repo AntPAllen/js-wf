@@ -1,0 +1,28 @@
+# R5 private filesystem stall fixture
+
+The new `block_disk` row in `tier3-mixed-journal.yml` mounts node four's
+persistent `/data` from a private 512 MiB sparse loop/device-mapper/ext4
+filesystem. Other nodes retain independent ordinary stores. The filesystem
+remains mounted until every container has stopped; each fault resumes its
+mapping even on cancellation, and the fault goroutine joins before cleanup.
+
+Every 30 seconds the row observes Docker's writable bind and elects both
+`WF_RUN` and `WF_JRN` leaders onto that node. It records both R5 role observations,
+suspends the private mapping for five seconds, and requires a dirty-file sync
+on that same filesystem to remain blocked until resume. The row waits for R5
+readiness after resume. The mixed workloads, raw enabling-event p99 <30s,
+histories, immutable terminals, retained journal audits and physical dispatch
+queue drain use the existing common fixture. File-store sync remains `2m`.
+
+The independent row guard joins the mount, roles and blocked-sync timestamps
+and rejects missing, short, escaped, mismatched or reversed evidence. Nine Go
+bind validation cases reject unintended/shared paths; their race run passes
+in 1.018s. All 34 Tier 3 Python tests pass, including 14 block-stall evidence
+cases. The integration package compiles; its opt-in native test skips without
+`WF_TIER3_MATRIX=1`. Those checks do not prove native fault acceptance.
+
+A clean hosted 35-second smoke is the next gate. Sustained runs require that
+smoke's original evidence to pass the row guard and event reviewers first.
+This models actual blocked I/O, not per-request `dm-delay`, server process
+pause, power-loss durability, or all in-flight operation combinations. The
+200-seed full matrix and 24-hour full matrix remain open.

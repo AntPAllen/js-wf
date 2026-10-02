@@ -5395,3 +5395,20 @@ Focused Go race checks pass1.386s;32 Python Tier3 guard tests pass,including
 Freed54,087,705 bytes of obsolete original failing-row download after matching
 all60 files against their retained compressed original hashes. The complete
 proof remains in the repository; no live process/store was removed.
+
+## R5 private filesystem stall row added (2026-10-02)
+
+The five-container mixed fixture now includes `block_disk`: node four's actual
+persistent writable Docker bind uses a private loop/device-mapper/ext4 store.
+Each 30-second fault admits both R5 dispatch and journal leaders on that store,
+records an actual five-second mapping suspension and blocked dirty-file sync,
+and waits for R5 readiness after resume. The existing mixed workload, raw p99,
+retained/historical audits, immutable outcomes and physical queue drain stay
+required. Production file-store sync remains2m. The row guard independently
+joins the binding, role observations and blocked-sync timestamps. Nine unsafe
+bind controls pass under race; all34 Tier3 Python tests pass, including14 disk
+proof cases. Integration compilation passes with the opt-in native row skipped;
+no real-cluster acceptance is claimed yet. See
+[fixture scope and checks](scale/tier3-mixed-block-disk-2026-10-02/README.md).
+Native smoke, sustained evidence, per-request dm-delay and the full release
+matrices remain open.
