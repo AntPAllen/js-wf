@@ -81,7 +81,7 @@ class ClockTimerCutChecks(unittest.TestCase):
                         with self.assertRaises((ValueError,KeyError)):checker.check(root,dict(confirmed_faults=1),'server_clock_'+direction,row.timestamp_ns)
 
     def test_exit_observation_allows_late_cleanup_but_rejects_late_exit(self):
-        for mode in ('valid', 'running', 'late_exit', 'wrong_node', 'early_cleanup', 'wrong_removed', 'missing_container', 'wrong_container', 'wrong_clock_source', 'split_absence'):
+        for mode in ('valid', 'concurrent_late_reply', 'unmarked_late_reply', 'reply_after_restart', 'early_reply', 'running', 'late_exit', 'wrong_node', 'early_cleanup', 'wrong_removed', 'missing_container', 'wrong_container', 'wrong_clock_source', 'split_absence'):
             with self.subTest(mode=mode), tempfile.TemporaryDirectory() as directory:
                 root=Path(directory);files=self.fixture(root,'ahead')
                 stamp=lambda f:'2026-10-01T23:18:57.'+f+'Z'
@@ -89,7 +89,11 @@ class ClockTimerCutChecks(unittest.TestCase):
                 files['fault-1-clock-timer-cut.json']['exit_observation']=proof
                 files['fault-1-journal-operations.json'][0]['container']='source-n4'
                 files['fault-1-journal-operations.json'].append(dict(at=stamp('500'),container='source-n4'))
-                if mode=='running':proof['state']='running'
+                if mode=='concurrent_late_reply':proof.update(concurrent_observation=True,kill_returned=stamp('450'))
+                elif mode=='unmarked_late_reply':proof['kill_returned']=stamp('450')
+                elif mode=='reply_after_restart':proof.update(concurrent_observation=True,kill_returned=stamp('550'))
+                elif mode=='early_reply':proof.update(concurrent_observation=True,kill_returned=stamp('049'))
+                elif mode=='running':proof['state']='running'
                 elif mode=='late_exit':proof['source_stopped']=stamp('260')
                 elif mode=='wrong_node':proof['node']=3
                 elif mode=='early_cleanup':proof['cleanup_complete']=stamp('059')
@@ -99,6 +103,6 @@ class ClockTimerCutChecks(unittest.TestCase):
                 elif mode=='wrong_clock_source':files['independent-clock.json']=dict(config=dict(probes=[dict(server='other')]*5))
                 elif mode=='split_absence':proof['state']='absent'
                 for name,data in files.items():(root/name).write_text(json.dumps(data))
-                if mode=='valid':checker.check(root,dict(confirmed_faults=1),'server_clock_ahead',row.timestamp_ns)
+                if mode in ('valid','concurrent_late_reply'):checker.check(root,dict(confirmed_faults=1),'server_clock_ahead',row.timestamp_ns)
                 else:
                     with self.assertRaises((ValueError,KeyError)):checker.check(root,dict(confirmed_faults=1),'server_clock_ahead',row.timestamp_ns)

@@ -2,6 +2,16 @@
 
 ## Latest accepted evidence — 2026-10-02
 
+- Docker source-exit observation now polls concurrently with the kill command,
+  retaining controller upper bounds and strict exit-before-timer-duration proof.
+  Name reuse still waits for both confirmed absence and successful kill reply.
+  Five race contracts pass, including both actual auto-remove modes and a real
+  Docker reply held after exit. An exact one-token sequential source control
+  fails the intended named ordering test. Verifier tests preserve legacy
+  chronology and reject late exit/early restart. [Original local contract](scale/concurrent-docker-exit-2026-10-02/).
+  The original seed27 cut remains rejected. New admitted/sustained replay is
+  required; `start_seed` is now available for focused R5 replay without changing
+  default full-range campaign acceptance.
 - Hosted deletion contract37028014274 at `431c934` is independently accepted:
   terminal run/job, all Git source hashes, actual six positive tests, exact1..1000
   model,14 real cases,264 pins and separate-process pin identity. The exact

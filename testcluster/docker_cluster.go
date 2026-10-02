@@ -505,13 +505,14 @@ func (c *DockerCluster) ConnectNode(i int) error {
 // DockerKillObservation records controller-clock upper bounds, never daemon time.
 // SourceStopped confirms exit or absence; CleanupComplete permits name reuse.
 type DockerKillObservation struct {
-	Node            int       `json:"node"`
-	Container       string    `json:"container"`
-	KillStarted     time.Time `json:"kill_started"`
-	KillReturned    time.Time `json:"kill_returned"`
-	SourceStopped   time.Time `json:"source_stopped"`
-	CleanupComplete time.Time `json:"cleanup_complete"`
-	State           string    `json:"state"`
+	Node                  int       `json:"node"`
+	Container             string    `json:"container"`
+	KillStarted           time.Time `json:"kill_started"`
+	KillReturned          time.Time `json:"kill_returned"`
+	SourceStopped         time.Time `json:"source_stopped"`
+	CleanupComplete       time.Time `json:"cleanup_complete"`
+	State                 string    `json:"state"`
+	ConcurrentObservation bool      `json:"concurrent_observation,omitempty"`
 }
 
 func (c *DockerCluster) KillNode(i int) error {
@@ -529,16 +530,45 @@ func (c *DockerCluster) KillNodeObserved(i int) (DockerKillObservation, error) {
 }
 
 func observeDockerKill(ctx context.Context, node int, name string, command func(context.Context, ...string) (string, error)) (DockerKillObservation, error) {
-	receipt := DockerKillObservation{Node: node, Container: name, KillStarted: time.Now().UTC()}
-	if _, err := command(ctx, "kill", "--signal=SIGKILL", name); err != nil {
-		return receipt, err
+	receipt := DockerKillObservation{Node: node, Container: name, KillStarted: time.Now().UTC(), ConcurrentObservation: true}
+	bound, cancel := context.WithCancel(ctx)
+	type killResult struct {
+		at  time.Time
+		err error
 	}
-	receipt.KillReturned = time.Now().UTC()
+	killed := make(chan killResult, 1)
+	go func() {
+		_, err := command(bound, "kill", "--signal=SIGKILL", name)
+		killed <- killResult{time.Now().UTC(), err}
+	}()
+	returned := false
+	defer func() {
+		cancel()
+		if !returned {
+			// Join the context-bound command even when observation fails.
+			<-killed
+		}
+	}()
+	acceptKill := func(result killResult) error {
+		returned = true
+		receipt.KillReturned = result.at
+		return result.err
+	}
 	// A successful exact-name listing proves either stopped state or absence.
 	// Name cleanup may finish later. Unknown/removing/running states cannot
-	// establish source exit, and no server-clock FinishedAt is used.
+	// establish source exit, and no server-clock FinishedAt is used. Poll while
+	// the kill request is running: its reply may wait for unrelated cleanup.
 	for ctx.Err() == nil {
-		state, err := command(ctx, "ps", "-a", "--filter", "name=^/"+name+"$", "--format", "{{.State}}")
+		if !returned {
+			select {
+			case result := <-killed:
+				if err := acceptKill(result); err != nil {
+					return receipt, err
+				}
+			default:
+			}
+		}
+		state, err := command(bound, "ps", "-a", "--filter", "name=^/"+name+"$", "--format", "{{.State}}")
 		if err != nil {
 			return receipt, err
 		}
@@ -551,6 +581,18 @@ func observeDockerKill(ctx context.Context, node int, name string, command func(
 		}
 		if state == "" {
 			receipt.CleanupComplete = observed
+			// Name reuse also requires the original kill command to finish, so
+			// a delayed request cannot target a successor with the same name.
+			if !returned {
+				select {
+				case result := <-killed:
+					if err := acceptKill(result); err != nil {
+						return receipt, err
+					}
+				case <-ctx.Done():
+					return receipt, ctx.Err()
+				}
+			}
 			return receipt, nil
 		}
 		select {

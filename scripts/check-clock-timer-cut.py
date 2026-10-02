@@ -81,7 +81,13 @@ def check(root, report, row, timestamp_ns):
             cleanup = timestamp_ns(exit_proof['cleanup_complete'])
             if exit_proof['state'] == 'absent' and stopped != cleanup:
                 raise ValueError('absence must confirm exit and cleanup together')
-            if not timestamp_ns(fault['killed']) <= started <= returned <= stopped == removed <= cleanup <= timestamp_ns(actual_ops[1]['at']):
+            restart = timestamp_ns(actual_ops[1]['at'])
+            if exit_proof.get('concurrent_observation') is True:
+                valid = (timestamp_ns(fault['killed']) <= started <= stopped == removed <= cleanup <= restart
+                         and started <= returned <= restart)
+            else:
+                valid = timestamp_ns(fault['killed']) <= started <= returned <= stopped == removed <= cleanup <= restart
+            if not valid:
                 raise ValueError('Docker exit observation chronology changed')
         future = [b for b in bounds if b['type'] == 'matrixtimer' and b['id'] == admission['id'] and b['sequence'] > suspended['sequence']]
         if not future or any(timestamp_ns(b['before']) < removed for b in future):

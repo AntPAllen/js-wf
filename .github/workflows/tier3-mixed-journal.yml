@@ -20,6 +20,11 @@ on:
         type: choice
         default: '1'
         options: ['1', '20', '200']
+      start_seed:
+        description: First seed (non-1 ranges are focused replay, not full-range acceptance)
+        required: true
+        type: number
+        default: 1
       clock_timer_cut:
         description: Require a pending positive Sleep before each server-clock cut
         type: boolean
@@ -37,14 +42,18 @@ jobs:
       - id: matrix
         env:
           SEED_COUNT: ${{ inputs.seeds }}
+          START_SEED: ${{ inputs.start_seed || '1' }}
         run: |
           python3 - <<'PYTHON'
           import json, os
           count = int(os.environ['SEED_COUNT'])
+          first = int(os.environ['START_SEED'])
           if count not in (1, 20, 200):
               raise ValueError('unsupported seed count')
+          if first < 1 or first + count - 1 > 2**63 - 1:
+              raise ValueError('invalid positive int64 seed range')
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-              output.write('jobs=' + json.dumps(list(range(1, count + 1))) + '\n')
+              output.write('jobs=' + json.dumps(list(range(first, first + count))) + '\n')
           PYTHON
   journal:
     name: journal (${{ matrix.seed }})

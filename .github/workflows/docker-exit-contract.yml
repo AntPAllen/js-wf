@@ -1,0 +1,32 @@
+name: docker-exit-contract
+on:
+  workflow_dispatch:
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build module-pinned NATS image
+        run: |
+          mkdir /tmp/docker-exit-image
+          CGO_ENABLED=0 go build -p=1 -o /tmp/docker-exit-image/nats-server github.com/nats-io/nats-server/v2
+          python3 - <<'PY'
+          from pathlib import Path
+          Path('/tmp/docker-exit-image/Dockerfile').write_text('FROM scratch\nCOPY nats-server /nats-server\nENTRYPOINT ["/nats-server"]\n')
+          PY
+          docker build -t js-wf-exit-contract /tmp/docker-exit-image
+      - name: Verify concurrent exit proof and sequential counterexample
+        run: python3 scripts/check-docker-exit-contract.py --image js-wf-exit-contract --root docker-exit-evidence
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: docker-exit-evidence
+          path: docker-exit-evidence
+          if-no-files-found: error
