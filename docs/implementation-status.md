@@ -8,7 +8,8 @@
 - The 120th workload combines continuation limits, a retained lease and a
   modeled outage. All27 combinations pass focused1k race/replay; the compiled
   suffix-budget control detects an actual forbidden effect. Full default1k
-  gate passes at3a5452e in120.296s; current120-workload100k remains open.
+  gate passes at3a5452e in120.296s; current120-workload100k37051896032
+  is queued atad37bfc and remains unaccepted.
 - Corrected hosted budget20 contract37045824031 and production100000 combined-cap
   campaign37045827952 are independently accepted at2a30165. All three production
   cuts recover in12.840s/12.835s/12.937s; the compiled mutant triggers one actual
@@ -7317,3 +7318,19 @@ model race and actual compiled controls remain separately accepted. No full
 race pass is claimed. All22 original accepted/rejected files are archived
 losslessly with SHA256 readback. Current120-workload100k and all remaining
 matrix/million/24h gates remain open.
+
+
+## Current120-workload100k release campaign dispatched
+
+[Run37051896032](https://github.com/AntPAllen/js-wf/actions/runs/37051896032)
+is confirmed queued at exactad37bfc492ec8726232f8c9e7850983fe82cd6e7 with
+100,000 seeds per workload. Its Go/module sources match the accepted final
+120-workload1k graph; the new commit adds only accepted evidence documentation.
+Full release acceptance will require terminal package/job success, compiled and
+AST source inventories, all266 known pins, exact1..100000 completion of all120
+workloads and independent raw-result regeneration. Queued is not acceptance.
+The older119-workload100k37039245566 remains confirmed active and separate.
+Fresh all-thirteen Tier2 seed1 run37050644803 remains queued at3f483bd; one seed
+cannot clear200 seeds. No running trial was restarted or canceled. Full fault
+matrices, original million-timer persistence/drain and full-runtime24h soak
+remain open.
