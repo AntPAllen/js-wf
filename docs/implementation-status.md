@@ -2,6 +2,22 @@
 
 ## Latest accepted evidence — 2026-10-02
 
+- Hosted all-six sustained-harness smoke37018302340 at `026d574` is independently
+  accepted: six actual35s baseline/semantic-mutant pairs, all original source,
+  overlay, control, workload, raw-measurement and cohort-preservation checks, and
+  every regenerated phase report matching its upload. See
+  [hosted all-six originals](scale/sustained-mixed-mutations-2026-10-02/hosted-all-six-smoke/).
+  It is explicitly smoke, not the ten-minute release gate. Actual ten-minute
+  campaign37021348438 is launched at exact `3a9f370` and remains unaccepted.
+- Ahead200 campaign37014965084 continues at `82f323a`, but terminal failures in
+  seeds13/16 prevent its complete-range acceptance. Both suspended repair loops
+  stop on native DeleteMsg errors:503/10008 unavailable and500/10057 no message
+  found. The pinned SDK flattens their typed API causes into the generic delete
+  sentinel, bypassing intended retry/idempotent handling. Originals, precise
+  scope and permanent-error constraints are retained in
+  [ahead delete failure evidence](scale/native-timer-retirement-2026-10-02/ahead200-delete-failures/).
+  A seeded production-path reproduction and source fix are required next; no
+  latency or drain gate is changed and the remaining campaign is not restarted.
 - Hosted focused regression37018289819 at `026d574` is independently accepted:
   all seven jobs/twelve actual semantic pairs, exact Git production/fixture
   hashes, exact overlays, both rejected controls per job and decoded raw category
