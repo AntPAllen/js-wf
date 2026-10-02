@@ -6405,3 +6405,11 @@ children. Three test methods reject missing/skipped/failed/duplicate executions,
 wrong cuts, prefix lengths, epochs, phases and incomplete fan-out. It accepts
 the actual converted run. `fanout-500-restart.yml` now adds this guarded full
 parent-boundary race job with direct JSON events and source/artifact retention.
+
+Hosted three-row fanout validation [run36980947655](https://github.com/AntPAllen/js-wf/actions/runs/36980947655)
+is queued at `3206be89a87c78f4d9c4f3de3e101b5cb0bbab07`, including the new guarded
+six-boundary parent job plus full-server and consumer-leader restart jobs.
+Launch metadata is retained; it is not accepted CI evidence. Both100k simulator
+handles now report in progress; ahead20 has three seed jobs passed and one live,
+behind20 has three live seed jobs. Neither campaign is accepted until complete.
+The million-timer user unit is active at PID18146 with633,573 receipts observed.
