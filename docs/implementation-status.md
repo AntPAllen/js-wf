@@ -9,7 +9,7 @@
   modeled outage. All27 combinations pass focused1k race/replay; the compiled
   suffix-budget control detects an actual forbidden effect. Full default1k
   gate passes at3a5452e in120.296s; current120-workload100k37051896032
-  is queued atad37bfc and remains unaccepted.
+  is in progress atad37bfc and remains unaccepted.
 - Corrected hosted budget20 contract37045824031 and production100000 combined-cap
   campaign37045827952 are independently accepted at2a30165. All three production
   cuts recover in12.840s/12.835s/12.937s; the compiled mutant triggers one actual
@@ -7375,3 +7375,24 @@ current120-workload100k37051896032 remains a separate confirmed active gate at
 ad37bfc. All-thirteen Tier2 seed1 campaign37050644803 remains queued at3f483bd;
 older118-workload100k37028379931 remains independently active. Full matrices,
 original million-timer persistence/drain and full-runtime24h soak remain open.
+
+
+## Copied-store clean reopen: physical absence holds, scheduler assertion fails
+
+[Clean-reopen evidence](scale/million-timer-terminal-2026-10-02/clean-reopen-boundary/)
+retains the actual failed pinned NATS2.15.0 experiment. All1,818 source checks
+remain absent after clean file-store stop/reopen and all six physical counts
+remain zero at last sequence2,000,000. Rebuilt-index copies retain768/141/0
+scheduler entries; intact-index copies retain0/0/0. The zero-schedule assertion
+fails on rebuilt nodes0/1 and remains enforced. Scheduling stays paused; no
+server, Raft group, callback or publication participates. Durable physical purge
+is observed, but the original retirement cause remains unconfirmed.
+
+All4,998 original file hashes match before/after. Executed fixture/runner hashes
+match current source; all31 top-level evidence files are archived losslessly
+with SHA256 readback. Reopen-mode state snapshots explicitly contain counts-v1,
+not full deleted-sequence arrays. No original repair or retry was performed.
+Current120-workload100k37051896032 remains in progress atad37bfc; all-thirteen
+Tier2 seed1 campaign37050644803 remains queued at3f483bd. Historical worker-kill
+31.1s/TTL30s remains excluded from reruns; productionTTL12s and strict recovery
+under30s are already qualified by the corrected production-cap contract.

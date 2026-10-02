@@ -22,7 +22,9 @@ def main():
     parser.add_argument('--original', type=Path, required=True, help='failed volume campaign root; read only')
     parser.add_argument('--root', type=Path, required=True, help='new diagnostic output root')
     parser.add_argument('--probe-subject-purge', action='store_true', help='test exact subject lookup and purge on copies with scheduling paused')
+    parser.add_argument('--probe-reopen', action='store_true', help='verify purges survive clean file-store close/reopen; implies subject-purge probe')
     args = parser.parse_args()
+    args.probe_subject_purge = args.probe_subject_purge or args.probe_reopen
     original, out = args.original.resolve(), args.root.resolve()
     report = json.loads((original / 'report.json').read_text())
     assert report['scheduled_count'] == 1000000 and report['status'] == 'failed', 'wrong campaign'
@@ -72,7 +74,8 @@ def main():
         (out / 'module-inventory.json').write_text(json.dumps(original_source, indent=2) + '\n')
         env = dict(os.environ, GOWORK='off', GOMEMLIMIT='512MiB', GOMAXPROCS='2',
                    WF_COPIED_STORE_BOUNDARY_ROOT=str(out),
-                   WF_COPIED_STORE_SUBJECT_PURGE='1' if args.probe_subject_purge else '')
+                   WF_COPIED_STORE_SUBJECT_PURGE='1' if args.probe_subject_purge else '',
+                   WF_COPIED_STORE_REOPEN='1' if args.probe_reopen else '')
         cmd = ['go', 'test', '-p=1', '-json',
                './server', '-run', '^' + TEST + '$', '-count=1', '-timeout=3m']
         (out / 'command.json').write_text(json.dumps(cmd, indent=2) + '\n')
@@ -89,7 +92,7 @@ def main():
         (out / 'result.json').write_text(json.dumps({'version': version, 'actual_copy_cases': 6,
             'original_physical_counts': [768, 141, 0], 'intact_schedule_counts': [0, 0, 0],
             'removed_schedule_counts': [768, 141, 0], 'server_processes': 0, 'publications': 0,
-            'subject_purge_probe': args.probe_subject_purge,
+            'subject_purge_probe': args.probe_subject_purge, 'clean_reopen_probe': args.probe_reopen,
             'scope': 'Direct file-store recovery boundary; initial persistence inconsistency cause unconfirmed.'}, indent=2) + '\n')
     finally:
         after = hashes(original)

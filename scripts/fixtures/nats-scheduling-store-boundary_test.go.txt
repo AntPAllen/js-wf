@@ -13,6 +13,20 @@ import (
 
 // This diagnostic opens only copies supplied by the external runner. Recovery
 // mode keeps scheduling paused: there is no server, Raft, callback or publication.
+// Reopen probes record the observed counts explicitly; earlier full snapshots
+// including deleted-sequence lists remain preserved in their original trials.
+func workflowCopiedStateArtifact(s StreamState) any {
+	if os.Getenv("WF_COPIED_STORE_REOPEN") != "1" {
+		return s
+	}
+	return struct {
+		Format   string `json:"format"`
+		Messages uint64 `json:"messages"`
+		FirstSeq uint64 `json:"first_seq"`
+		LastSeq  uint64 `json:"last_seq"`
+	}{"counts-v1", s.Msgs, s.FirstSeq, s.LastSeq}
+}
+
 func TestWorkflowCopiedSchedulingIndexBoundary(t *testing.T) {
 	root := os.Getenv("WF_COPIED_STORE_BOUNDARY_ROOT")
 	if root == "" {
@@ -40,7 +54,11 @@ func TestWorkflowCopiedSchedulingIndexBoundary(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				defer fs.Stop()
+				defer func() {
+					if err := fs.Stop(); err != nil {
+						t.Error(err)
+					}
+				}()
 				state := fs.State()
 				fs.mu.Lock()
 				count := len(fs.scheduling.schedules)
@@ -53,10 +71,10 @@ func TestWorkflowCopiedSchedulingIndexBoundary(t *testing.T) {
 				report := struct {
 					Mode      string            `json:"mode"`
 					Node      int               `json:"node"`
-					State     StreamState       `json:"state"`
+					State     any               `json:"state"`
 					Paused    bool              `json:"paused"`
 					Schedules map[string]uint64 `json:"schedules"`
-				}{mode, node, state, paused, schedules}
+				}{mode, node, workflowCopiedStateArtifact(state), paused, schedules}
 				data, err := json.MarshalIndent(report, "", "  ")
 				if err != nil {
 					t.Fatal(err)
@@ -118,12 +136,12 @@ func TestWorkflowCopiedSchedulingIndexBoundary(t *testing.T) {
 					// Save every completed probe even if a later assertion fails.
 					defer func() {
 						data, err := json.MarshalIndent(struct {
-							Mode   string      `json:"mode"`
-							Node   int         `json:"node"`
-							Before StreamState `json:"before"`
-							After  StreamState `json:"after"`
-							Probes []probe     `json:"probes"`
-						}{mode, node, state, fs.State(), probes}, "", "  ")
+							Mode   string  `json:"mode"`
+							Node   int     `json:"node"`
+							Before any     `json:"before"`
+							After  any     `json:"after"`
+							Probes []probe `json:"probes"`
+						}{mode, node, workflowCopiedStateArtifact(state), workflowCopiedStateArtifact(fs.State()), probes}, "", "  ")
 						if err != nil {
 							t.Error(err)
 							return
@@ -156,6 +174,48 @@ func TestWorkflowCopiedSchedulingIndexBoundary(t *testing.T) {
 					after := fs.State()
 					if after.Msgs != 0 || after.LastSeq != state.LastSeq {
 						t.Fatalf("purged store messages=%d last=%d", after.Msgs, after.LastSeq)
+					}
+					if os.Getenv("WF_COPIED_STORE_REOPEN") == "1" {
+						if err := fs.Stop(); err != nil {
+							t.Fatal(err)
+						}
+						reopened, err := newFileStoreWithCreatedAndMode(FileStoreConfig{StoreDir: dir}, meta.StreamConfig, meta.Created, nil, nil, true)
+						if err != nil {
+							t.Fatal(err)
+						}
+						fs = reopened
+						recovered := fs.State()
+						checks := 0
+						for _, subject := range subjects {
+							_, directErr := fs.LoadMsg(known[subject], nil)
+							_, subjectErr := fs.LoadLastMsg(subject, nil)
+							if !(errors.Is(directErr, ErrStoreMsgNotFound) || errors.Is(directErr, errDeletedMsg) || errors.Is(directErr, ErrStoreEOF)) || !errors.Is(subjectErr, ErrStoreMsgNotFound) {
+								t.Fatalf("source returned after reopen %s: direct=%v subject=%v", subject, directErr, subjectErr)
+							}
+							checks++
+						}
+						fs.mu.Lock()
+						recoveredSchedules := len(fs.scheduling.schedules)
+						isPaused := fs.scheduling.paused
+						fs.mu.Unlock()
+						raw, err := json.MarshalIndent(struct {
+							Mode          string `json:"mode"`
+							Node          int    `json:"node"`
+							State         any    `json:"state"`
+							Schedules     int    `json:"schedules"`
+							Paused        bool   `json:"paused"`
+							AbsentSources int    `json:"absent_sources"`
+							CleanStop     bool   `json:"clean_stop"`
+						}{mode, node, workflowCopiedStateArtifact(recovered), recoveredSchedules, isPaused, checks, true}, "", "  ")
+						if err != nil {
+							t.Fatal(err)
+						}
+						if err := os.WriteFile(filepath.Join(root, fmt.Sprintf("reopened-%s-node-%d.json", mode, node)), raw, 0644); err != nil {
+							t.Fatal(err)
+						}
+						if recovered.Msgs != 0 || recovered.LastSeq != 2000000 || recoveredSchedules != 0 || !isPaused {
+							t.Fatalf("reopen messages=%d last=%d schedules=%d paused=%t", recovered.Msgs, recovered.LastSeq, recoveredSchedules, isPaused)
+						}
 					}
 				}
 			})
