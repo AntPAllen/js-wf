@@ -53,7 +53,7 @@ func (a drainAudit) complete(partitions uint32) bool {
 		a.Pending != nil && *a.Pending == 0 && a.ConsumersChecked == partitions
 }
 
-func appendDrainAudit(path string, audit drainAudit) error {
+func appendDrainAudit(path string, audit any) error {
 	data, err := json.Marshal(audit)
 	if err != nil {
 		return err

@@ -7066,3 +7066,23 @@ Older short diagnostic acceptance retains its leader/consumer scope; it does
 not establish the stronger all-replica contract. Existing long campaigns remain
 active or queued at their recorded handles and are not restarted for observation
 timeouts. Million-timer release and full runtime24-hour soak remain open.
+
+
+## Physical replica drain contract implemented
+
+The [timer-volume physical drain contract](scale/physical-replica-drain-2026-10-02/)
+now checks local monitoring replies from every replica alongside leader/durable
+metadata, requiring distinct server identities, matching final sequences, zero
+physical messages and zero pending across all64 local consumers. Raw replies
+and timestamps are persisted; unobserved metadata cannot stand for empty state.
+The3s inspection budget and lateness/campaign limits are unchanged. Release
+verification rejects missing logical or physical proof, including stripped fields.
+
+The full package race test and vet pass. The original retained-store snapshots
+are actually exercised and rejected as drained. Both compiled controls are caught
+by named semantic failures; the initial unused-variable control build is rejected
+and retained separately. The final runner, input snapshot hashes, source hashes
+and original events are archived losslessly. Dedicated hosted contract and live
+new-source smoke remain required. The million-timer backend cause/failed drain and
+full runtime24-hour soak are still open. Fresh all-six mutation run37030840346 is
+terminal success; its independent raw-artifact review is underway, not accepted yet.

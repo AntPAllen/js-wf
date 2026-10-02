@@ -1,0 +1,23 @@
+name: physical-drain-contract
+on:
+  workflow_dispatch:
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Check every replica and reject stripped release evidence
+        run: python3 scripts/check-physical-drain-contract.py --root physical-drain-evidence
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: physical-drain-evidence
+          path: physical-drain-evidence/**
+          if-no-files-found: error

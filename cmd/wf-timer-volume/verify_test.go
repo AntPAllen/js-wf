@@ -27,7 +27,7 @@ func verifierFixture() (report, []byte) {
 	return rep, data
 }
 func TestOfflineVerifierRejectsFalsePasses(t *testing.T) {
-	for _, name := range []string{"valid", "running", "missing", "duplicate", "early", "wrong_hash", "wrong_percentile", "missing_kill", "undrained", "unobserved_drain", "partial_drain", "retained_source_drain", "truncated"} {
+	for _, name := range []string{"valid", "running", "missing", "duplicate", "early", "wrong_hash", "wrong_percentile", "missing_kill", "undrained", "unobserved_drain", "partial_drain", "retained_source_drain", "physical_retained", "physical_partial", "truncated"} {
 		t.Run(name, func(t *testing.T) {
 			rep, data := verifierFixture()
 			switch name {
@@ -53,6 +53,14 @@ func TestOfflineVerifierRejectsFalsePasses(t *testing.T) {
 			case "retained_source_drain":
 				messages, pending := uint64(141), 0
 				rep.LastDrainAudit = &drainAudit{Messages: &messages, Pending: &pending, ConsumersChecked: 64}
+			case "physical_retained":
+				physical := validPhysicalAudit(64)
+				mutatePhysicalReplica(t, &physical, 1, func(_, stream map[string]any) { stream["state"].(map[string]any)["messages"] = 141 })
+				rep.LastPhysicalDrainAudit = &physical
+			case "physical_partial":
+				physical := validPhysicalAudit(64)
+				physical.Replicas = physical.Replicas[:2]
+				rep.LastPhysicalDrainAudit = &physical
 			case "truncated":
 				data = data[:47]
 			}
@@ -97,6 +105,10 @@ func TestMillionReleaseVerifierCannotDowngradeLedgerEvidence(t *testing.T) {
 	rep.Revision = strings.Repeat("a", 40)
 	rep.SourceModified = "false"
 	rep.ReceiptLedger = receiptLedgerVersion
+	messages, pending := uint64(0), 0
+	rep.LastDrainAudit = &drainAudit{Messages: &messages, Pending: &pending, ConsumersChecked: 64}
+	physical := validPhysicalAudit(64)
+	rep.LastPhysicalDrainAudit = &physical
 	for i := range rep.Restarts {
 		rep.Restarts[i].Started = rep.FirstDue.Add(24 * time.Hour * time.Duration(i+1) / 3)
 		rep.Restarts[i].Healed = rep.Restarts[i].Started.Add(time.Millisecond)
@@ -139,6 +151,25 @@ func TestMillionReleaseVerifierCannotDowngradeLedgerEvidence(t *testing.T) {
 	}
 	// Deleting the declaration must not bypass ledger checking, even when the
 	// archive, all million deadlines, hashes and release configuration still pass.
+	for _, field := range []string{"physical", "logical"} {
+		physical, logical := rep.LastPhysicalDrainAudit, rep.LastDrainAudit
+		if field == "physical" {
+			rep.LastPhysicalDrainAudit = nil
+		} else {
+			rep.LastDrainAudit = nil
+		}
+		data, err := json.Marshal(rep)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(root, "report.json"), data, 0644); err != nil {
+			t.Fatal(err)
+		}
+		if err := verifyReport(root, false); err == nil || !strings.Contains(err.Error(), "requires physical replica drain evidence") {
+			t.Fatalf("stripped %s audit accepted: %v", field, err)
+		}
+		rep.LastPhysicalDrainAudit, rep.LastDrainAudit = physical, logical
+	}
 	rep.ReceiptLedger = ""
 	ledger[8] ^= 1
 	if err := os.WriteFile(filepath.Join(root, "receipts.bin"), ledger, 0644); err != nil {

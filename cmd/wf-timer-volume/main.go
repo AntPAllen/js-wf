@@ -71,9 +71,10 @@ type report struct {
 	P99Limit, MaxLateLimit         string
 	P99LateSeconds, MaxLateSeconds float64
 	Restarts                       []restart
-	FinalMessages                  uint64      `json:"final_stream_messages"`
-	FinalAckPending                int         `json:"final_ack_pending"`
-	LastDrainAudit                 *drainAudit `json:"last_drain_audit,omitempty"`
+	FinalMessages                  uint64              `json:"final_stream_messages"`
+	FinalAckPending                int                 `json:"final_ack_pending"`
+	LastDrainAudit                 *drainAudit         `json:"last_drain_audit,omitempty"`
+	LastPhysicalDrainAudit         *physicalDrainAudit `json:"last_physical_drain_audit,omitempty"`
 	Updated                        time.Time
 }
 type observation struct {
@@ -537,12 +538,19 @@ func run(cfg config) (runErr error) {
 					return info.NumAckPending + int(info.NumPending), nil
 				},
 			}, provision.Partitions)
+			physical := inspectPhysicalDrain(attempt, c.rep.Replicas, func(ctx context.Context, node int) ([]byte, error) {
+				return cluster.Diagnostic(ctx, node, "jetstream")
+			})
 			done()
 			c.rep.LastDrainAudit = &audit
+			c.rep.LastPhysicalDrainAudit = &physical
 			if err = appendDrainAudit(filepath.Join(cfg.Root, "drain-audits.jsonl"), audit); err != nil {
 				return err
 			}
-			if audit.complete(provision.Partitions) {
+			if err = appendDrainAudit(filepath.Join(cfg.Root, "physical-drain-audits.jsonl"), physical); err != nil {
+				return err
+			}
+			if audit.complete(provision.Partitions) && physical.complete(c.rep.Replicas, provision.Partitions) {
 				stopReaders()
 				stopReaders = nil
 				c.rep.FinalMessages = *audit.Messages

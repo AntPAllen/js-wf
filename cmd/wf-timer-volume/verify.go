@@ -40,11 +40,17 @@ func verifyReport(root string, allowSmoke bool) error {
 	if rep.LastDrainAudit != nil && !rep.LastDrainAudit.complete(rep.Partitions) {
 		return fmt.Errorf("incomplete final drain metadata")
 	}
+	if rep.LastPhysicalDrainAudit != nil && !rep.LastPhysicalDrainAudit.complete(rep.Replicas, rep.Partitions) {
+		return fmt.Errorf("incomplete physical replica drain")
+	}
 	if !allowSmoke && (rep.Count != 1000000 || horizon != 24*time.Hour || p99Limit > 2*time.Second || maxLate > 30*time.Second || rep.SourceModified != "false" || len(rep.Revision) != 40) {
 		return fmt.Errorf("report does not meet million-message/24-hour release scope")
 	}
 	if !allowSmoke && rep.ReceiptLedger != receiptLedgerVersion {
 		return fmt.Errorf("release report requires durable receipt ledger")
+	}
+	if !allowSmoke && (rep.LastDrainAudit == nil || rep.LastPhysicalDrainAudit == nil) {
+		return fmt.Errorf("release report requires physical replica drain evidence")
 	}
 	if p99Limit <= 0 || maxLate < p99Limit {
 		return fmt.Errorf("invalid lateness limits")
