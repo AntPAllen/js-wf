@@ -7045,3 +7045,24 @@ are preserved losslessly; physical stores/executable remain local. The retained
 source failure did not reproduce at this scale/timing. The million-timer drain
 failure and backend persistence-cause isolation remain open; no original failed
 store was altered, and no replacement24-hour campaign was started.
+
+
+## Native schedule-index recovery boundary identified on copied stores
+
+[Original index bytes and controlled-copy evidence](scale/million-timer-terminal-2026-10-02/)
+show identical empty scheduling indexes stamped2000001 on all three failed
+stores. Pinned server recovery does not scan older retained sources under that
+stamp. Removing only copied indexes makes the restored leader retire768 sources
+and emit768 new targets, while a follower retains another141 sources despite
+current metadata. Eight fetched new targets match already-delivered original
+receipt generations at new stream sequences. Every original store file remains
+byte-identical. The cause of the original physical/index inconsistency remains
+unconfirmed; index removal is not a repair recommendation or gate acceptance.
+
+This also exposes a gap in the current volume audit: it checks leader metadata
+and durable pending counts, but not every replica's local physical messages.
+Add an explicit all-replica final drain proof before another release campaign.
+Older short diagnostic acceptance retains its leader/consumer scope; it does
+not establish the stronger all-replica contract. Existing long campaigns remain
+active or queued at their recorded handles and are not restarted for observation
+timeouts. Million-timer release and full runtime24-hour soak remain open.

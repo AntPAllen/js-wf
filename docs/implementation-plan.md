@@ -789,3 +789,15 @@ exact trace replay, a disk pin, and compiled controls detecting both the old
 delivery-implies-absence assumption and deletion across generations.
 The119th workload passes local1,000-seed/full-suite validation; current119-workload
 100k qualification and real backend persistence-cause isolation remain open.
+
+
+### Physical replica drain qualification
+
+Final timer-volume certification must retain local WF_RUN message and consumer
+pending counts from every physical replica as well as leader metadata. Require
+all replicas empty after completed receipts; Raft-current metadata is not a
+substitute for matching local contents. Retain explicit observed counts and
+errors. Copied million-timer stores expose retained sources behind a fully
+stamped empty scheduling index; rebuilding copied indexes emits duplicate
+targets. Preserve the original failed verdict and require backend recovery
+isolation before any index repair or new million-timer release claim.

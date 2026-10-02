@@ -107,3 +107,37 @@ drain audit, log, build metadata, full source-file hash inventory, terminal
 service state and offline verification. Every archived member is SHA256-checked
 on readback. Original physical stores and executable remain under their local
 `/tmp/js-wf-native-source-short*` roots and are excluded from the archive.
+
+## Scheduling-index recovery boundary isolated on copies
+
+All three original `WF_RUN/msgs/sched.db` files are identical17-byte version1
+indexes: zero schedule entries, high sequence2000001. Read-only copies of those
+bytes are preserved. The pinned2.15.0 decoder returns that stamp, and recovery
+only scans source records at or beyond it. Because last sequence is2000000,
+the retained older sources do not enter its linear scheduling recovery scan.
+This explains their inactivity in the restored state, without establishing how
+physical source state and scheduling metadata became inconsistent originally.
+
+A fresh copy of every original store was made; only those copies' scheduling
+indexes were removed to force recovery scanning. After60s the elected leader
+has retired its768 sources and published768 new targets (last sequence2000768).
+Other local states have768/909/768 messages: the909 includes another141 retained
+sources. Both replicas are marked current in the leader's metadata reply.
+Every original store-file hash remains unchanged. This is controlled diagnostic
+mutation of copies, not a suggested migration or repair of the originals.
+
+A further read-only restore of the resulting copied stores fetches eight new
+targets. Every decoded payload/generation/step matches an already-delivered
+original ledger slot, at a new stream sequence above2000000, with the server's
+`Nats-Scheduler` and `Nats-Schedule-Next: purge` headers. Thus rebuilding this
+index can emit duplicate targets; it cannot be treated as a harmless way to
+certify the old campaign. No receipt is rewritten and no business handler runs.
+
+`index-rebuild-copy` and `rebuilt-target-review` preserve every top-level
+diagnostic original: complete monitoring snapshots, raw API messages, exact
+scripts, process identities, original/index-removal inventories, original-store
+unchanged proofs, pinned server build/source excerpts and receipt cross-checks.
+Every archived member is SHA256-compared on readback. Modified store copies
+remain local and are excluded from the archives. The original retention cause
+remains open. Future release drain must inspect every physical replica; an empty
+leader/current metadata alone cannot establish all-replica physical drain.
