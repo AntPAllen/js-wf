@@ -7,8 +7,8 @@
   active; they do not qualify the new 120-workload graph.
 - The 120th workload combines continuation limits, a retained lease and a
   modeled outage. All27 combinations pass focused1k race/replay; the compiled
-  suffix-budget control detects an actual forbidden effect. Final-source full
-  120-workload1k/100k gates remain open.
+  suffix-budget control detects an actual forbidden effect. Full default1k
+  gate passes at3a5452e in120.296s; current120-workload100k remains open.
 - Corrected hosted budget20 contract37045824031 and production100000 combined-cap
   campaign37045827952 are independently accepted at2a30165. All three production
   cuts recover in12.840s/12.835s/12.937s; the compiled mutant triggers one actual
@@ -7296,3 +7296,24 @@ campaigns36891850893/36850800757 remain separate preserved handles, with pending
 jobs; they were not canceled or replaced. The current119-workload100k campaign
 and the full120-workload1k race suite remain confirmed active. No historical
 TTL-mismatch run was repeated.
+
+
+## Full120-workload default1k gate accepted; full race attempt rejected
+
+[Final-source full suite evidence](scale/continuation-held-takeover-model-2026-10-02/full120-1k/)
+accepts exact3a5452e: actual package pass120.296s,164 top-level passes,
+two documented trace-only skips and266 pins. Every120 workload executes
+exactly seeds1..1000:120,000 bodies. Coverage122,034 schedules/1,797,015
+choices/27,138,160 events. All Go/module source hashes match Git and remain
+unchanged; compiled/AST inventories were generated from those identical sources.
+Regression paths and every pin's bytes match the recorded revision. The full
+suite guard checks all actual seed ranges and terminal/named verdicts.
+
+The earlier whole-package race run is terminal failed at900.076s, inside the
+older suspended-scan capacity workload, with114 top-level passes and no package
+completion. Its raw timeout and source evidence remain rejected and preserved.
+Standard suite mode is the existing default CI/release command; focused new
+model race and actual compiled controls remain separately accepted. No full
+race pass is claimed. All22 original accepted/rejected files are archived
+losslessly with SHA256 readback. Current120-workload100k and all remaining
+matrix/million/24h gates remain open.
