@@ -66,34 +66,44 @@ def check(metadata, logs, reports, count, duration, require_clock=False):
                 clears_full_tier3_release=False)
 
 
+def locate_seed_events(artifact, seed):
+    matches = [p for p in artifact.rglob('tier3-mixed-journal-events.jsonl')
+               if p.parent.name == f'seed-{seed}']
+    if len(matches) != 1:
+        raise ValueError('missing or duplicate per-seed raw events')
+    return matches[0]
+
+
+def verify_seed(events, output, row, seed, duration, require_clock):
+    args = [sys.executable, str(Path(__file__).with_name('check-tier3-journal-row.py')),
+            '--row', row, '--root', str(events.parent/'tier3-mixed-journal'),
+            '--events', str(events), '--duration', duration, '--expected-seed', str(seed),
+            '--output', str(output), '--require-checkpoint-audits']
+    if require_clock and row.startswith('server_clock_'):
+        args += ['--require-common-timer-clock', '--require-clock-timer-cut']
+    subprocess.run(args, check=True, stdout=subprocess.DEVNULL)
+    if output.read_bytes() != (events.parent/'tier3-mixed-journal-result.json').read_bytes():
+        raise ValueError('uploaded report differs from raw artifact verification')
+    report = json.loads(output.read_text())
+    for script, name in [('explain-tier3-events.py', 'event-explanations.json'),
+                         ('review-tier3-fencing.py', 'fencing-timeline-review.json')]:
+        subprocess.run([sys.executable, str(Path(__file__).with_name(script)),
+                        '--root', str(events.parent/'tier3-mixed-journal'),
+                        '--output', str(output)], check=True, stdout=subprocess.DEVNULL)
+        if output.read_bytes() != (events.parent/'tier3-mixed-journal'/name).read_bytes():
+            raise ValueError('uploaded event explanation/fencing review disagrees with raw artifacts')
+    return report
+
+
 def verify_artifacts(root, count, duration, require_clock):
     reports = {row: {} for row in planner.ROWS}
     with tempfile.TemporaryDirectory() as tmp:
         for job in planner.campaign('all', count):
             artifact = root / f"tier3-{job['row']}-seed-{job['artifact_seed']}"
             for seed in range(job['first'], job['last']+1):
-                matches = [p for p in artifact.rglob('tier3-mixed-journal-events.jsonl') if p.parent.name == f'seed-{seed}']
-                if len(matches) != 1:
-                    raise ValueError('missing or duplicate per-seed raw events')
-                events = matches[0]
-                output = Path(tmp) / 'result.json'
-                args = [sys.executable, str(Path(__file__).with_name('check-tier3-journal-row.py')),
-                        '--row', job['row'], '--root', str(events.parent/'tier3-mixed-journal'),
-                        '--events', str(events), '--duration', duration, '--expected-seed', str(seed),
-                        '--output', str(output), '--require-checkpoint-audits']
-                if require_clock and job['row'].startswith('server_clock_'):
-                    args += ['--require-common-timer-clock', '--require-clock-timer-cut']
-                subprocess.run(args, check=True, stdout=subprocess.DEVNULL)
-                if output.read_bytes() != (events.parent/'tier3-mixed-journal-result.json').read_bytes():
-                    raise ValueError('uploaded report differs from raw artifact verification')
-                reports[job['row']][seed] = json.loads(output.read_text())
-                for script, name in [('explain-tier3-events.py', 'event-explanations.json'),
-                                     ('review-tier3-fencing.py', 'fencing-timeline-review.json')]:
-                    subprocess.run([sys.executable, str(Path(__file__).with_name(script)),
-                                    '--root', str(events.parent/'tier3-mixed-journal'),
-                                    '--output', str(output)], check=True, stdout=subprocess.DEVNULL)
-                    if output.read_bytes() != (events.parent/'tier3-mixed-journal'/name).read_bytes():
-                        raise ValueError('uploaded event explanation/fencing review disagrees with raw artifacts')
+                events = locate_seed_events(artifact, seed)
+                reports[job['row']][seed] = verify_seed(events, Path(tmp)/'result.json',
+                    job['row'], seed, duration, require_clock)
     return reports
 
 

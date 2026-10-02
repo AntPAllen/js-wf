@@ -7544,3 +7544,21 @@ failure with verified readback; no result or original-cause claim is made now.
 R5 all14 run37058644370 and Tier2 all13x200 run37057872230 remain queued;
 current120-workload100k37051896032 remains in progress. No active trial was
 restarted or canceled and the historical worker-kill TTL mismatch was not rerun.
+
+
+## Grouped R5 collector checked against actual accepted clock-row artifacts
+
+[Collector contract evidence](scale/r5-grouped-artifact-contract-2026-10-02/)
+uses a byte-identical copy of accepted ahead27 run37030391587 in the new grouped
+seed-directory layout. The helper regenerates the actual644-invocation/19-cut
+row report, event explanations and fencing review byte for byte. All123 source
+fixture hashes remain unchanged. Altered row/explanation/fencing uploads,
+duplicate raw events and missing requested-seed events are rejected. Per-seed
+locator/verification functions are extracted for direct checks; complete matrix
+acceptance still requires every planned seed/row. All57 guard tests pass.
+
+Executed helper/source hashes, fixture hashes, regenerated reports and verdicts
+are archived losslessly with SHA256 readback. The raw fixture bytes remain in
+the prior accepted producer archive. This is collector evidence, not a new
+runtime, twelve-seed shard,14-row or24h soak result. Native-million diagnostic
+37059396897 is confirmed actively executing its campaign at885664e.
