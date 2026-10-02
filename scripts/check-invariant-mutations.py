@@ -106,9 +106,12 @@ def main():
     parser.add_argument("--mutation", choices=[m["name"] for m in MUTATIONS])
     parser.add_argument("--mixed-determinism", action="store_true", help="challenge I4 through a live mixed worker/leader-kill workload")
     parser.add_argument("--mixed-leases", action="store_true", help="challenge lease exclusion after a real leader kill in the live mixed cohort")
+    parser.add_argument("--mixed-cas", action="store_true", help="race two gated production journal appends in the live mixed leader-kill cohort")
     args = parser.parse_args()
-    if args.mixed_leases and args.mixed_determinism:
+    if sum((args.mixed_leases,args.mixed_determinism,args.mixed_cas))>1:
         parser.error("select one mixed challenge")
+    if args.mixed_cas and args.mutation not in (None,"missing_cas"):
+        parser.error("--mixed-cas selects only missing_cas")
     if args.mixed_leases and args.mutation not in (None, "independent_worker_leases"):
         parser.error("--mixed-leases selects only independent_worker_leases")
     if args.mixed_determinism and args.mutation not in (None, "missing_determinism_guard"):
@@ -130,6 +133,13 @@ def main():
                         environment={"WF_MIXED_LEASE_MUTATION": "1"},
                         markers=["MIXED_GUARD_ADMISSION shorts_pending=4 timers_suspended=3 signals_suspended=2 fanout_suspended=1", "MIXED_GUARD_FAULT", "signal=SIGKILL", "MIXED_LEASE_ADMISSION replacement_shorts_pending=4 owner=mixed-guard-after", "MIXED_GUARD_COHORT shorts=4 timers=3 signals=2 fanout=1 children=6 grandchildren=12 terminal=28", "MIXED_MUTATION_ESCAPE category=independent_worker_leases admitted=1 rival_epoch=", "terminal=Completed"])
         selected = [mutation]
+    if args.mixed_cas:
+        mutation = dict(next(m for m in MUTATIONS if m["name"] == "missing_cas"))
+        mutation.update(package="./integration", test="TestMixedCASMutationAfterJournalLeaderKill",
+                        fixture_files=["integration/mixed_determinism_mutation_test.go", "integration/mixed_cas_mutation_test.go", "integration/journal_cas_race_scale_test.go"],
+                        environment={"WF_MIXED_CAS_MUTATION": "1"},
+                        markers=["MIXED_GUARD_ADMISSION shorts_pending=4 timers_suspended=3 signals_suspended=2 fanout_suspended=1", "MIXED_GUARD_FAULT", "signal=SIGKILL", "MIXED_CAS_ADMISSION contenders=2", "MIXED_CAS_RETAINED", "MIXED_CAS_CHECKER_REJECTED", "MIXED_MUTATION_ESCAPE category=missing_cas acknowledged_winners=2 stale_rejections=0 same_index=2 retained_duplicates=2 checker_rejected=true"])
+        selected = [mutation]
     report = dict(scope="focused production mutations; full mixed-chaos gate remains open",
                   head=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                   cas_rounds=1000, seeds_per_modeled_workload=1000, mutations=[])
@@ -137,7 +147,9 @@ def main():
         report["scope"] = "one mixed production lease mutation; remaining mixed categories and full release remain open"
     if args.mixed_determinism:
         report["scope"] = "one mixed production I4 mutation; remaining mixed categories and full release remain open"
-    if args.mixed_determinism or args.mixed_leases:
+    if args.mixed_cas:
+        report["scope"] = "one mixed production CAS mutation; mutant stops on retained journal corruption; remaining categories and full release remain open"
+    if args.mixed_determinism or args.mixed_leases or args.mixed_cas:
         report.pop("cas_rounds")
         report.pop("seeds_per_modeled_workload")
     success = True
@@ -166,6 +178,8 @@ def main():
             original = source.read_text()
             entry = dict(name=mutation["name"], file=mutation["file"], test=mutation["test"],
                          source_sha256=hashlib.sha256(original.encode()).hexdigest())
+            if mutation.get("fixture_files"):
+                entry["fixture_source_sha256s"] = {path: hashlib.sha256((ROOT/path).read_bytes()).hexdigest() for path in mutation["fixture_files"]}
             if mutation.get("fixture_file"):
                 entry["fixture_file"] = mutation["fixture_file"]
                 entry["fixture_source_sha256"] = hashlib.sha256((ROOT / mutation["fixture_file"]).read_bytes()).hexdigest()

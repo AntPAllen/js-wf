@@ -94,3 +94,23 @@ It does not claim that the mutated journal necessarily violates I2: journal CAS
 provides a separate defense. The CI `mixed-leases` job retains both executions and
 negative controls. Together with I4 this covers two mixed source-mutation
 categories; four categories and the full chaos release gate remain open.
+
+## Live mixed CAS challenge
+
+```sh
+python3 scripts/check-invariant-mutations.py --mixed-cas --output /tmp/js-wf-mixed-cas
+```
+
+After the shared mixed admission and actual journal-leader SIGKILL, two production
+append calls read the same target tail and are gated before their CAS publications.
+Both attempt a matching completion at logical index2. The intact runtime accepts
+one and rejects the other, then the full28-invocation cohort completes and passes
+its raw-state audit. The CAS-header-removal mutant must acknowledge two distinct
+sequences whose retained raw entries have the same index, and the raw-state
+checker must reject that exact target for the duplicate. Its detection stops at
+retained corruption; the fixture does not delete the bad acknowledged entry to
+force a completed mutant cohort. Raw receipts, all three fixture/gate source hashes
+and semantic markers are retained. CI runs this as `mixed-cas`.
+
+Together with I4 and leases, this covers three mixed source mutation categories.
+Three categories and the original full chaos/invariant release gate remain open.

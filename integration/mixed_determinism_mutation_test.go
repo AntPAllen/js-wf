@@ -46,8 +46,24 @@ func TestMixedLeaseMutationAfterJournalLeaderKill(t *testing.T) {
 	runMixedGuardMutation(t, true)
 }
 
+func TestMixedCASMutationAfterJournalLeaderKill(t *testing.T) {
+	if os.Getenv("WF_MIXED_CAS_MUTATION") != "1" {
+		t.Skip("set WF_MIXED_CAS_MUTATION=1 for the mixed CAS challenge")
+	}
+	runMixedGuardChallenge(t, "cas")
+}
+
 func runMixedGuardMutation(t *testing.T, leaseChallenge bool) {
+	mode := "determinism"
+	if leaseChallenge {
+		mode = "leases"
+	}
+	runMixedGuardChallenge(t, mode)
+}
+func runMixedGuardChallenge(t *testing.T, mode string) {
 	t.Helper()
+	leaseChallenge := mode == "leases"
+	casChallenge := mode == "cas"
 	seed, err := testcluster.SeedFromEnv()
 	if err != nil {
 		t.Fatal(err)
@@ -123,7 +139,7 @@ func runMixedGuardMutation(t *testing.T, leaseChallenge bool) {
 					return nil, fmt.Errorf("invalid short index%d", index)
 				}
 				name := "held"
-				if replacement && index == 0 && !leaseChallenge {
+				if replacement && index == 0 && mode == "determinism" {
 					name = "changed"
 				}
 				value, err := wf.Run(c, name, 0, func(effectCtx context.Context) (int, error) {
@@ -346,6 +362,9 @@ func runMixedGuardMutation(t *testing.T, leaseChallenge bool) {
 		t.Fatal(err)
 	}
 	survivor := (leader + 1) % 3
+	if casChallenge {
+		challengeMixedCAS(t, ctx, nodes, survivor, target.typ, target.id, prefix)
+	}
 	stopSecond := startWorker("mixed-guard-after", nodes[survivor], true)
 	defer stopSecond()
 	var leaseEscaped bool
@@ -428,6 +447,13 @@ func runMixedGuardMutation(t *testing.T, leaseChallenge bool) {
 		t.Fatalf("lost prefix or epoch handoff: %v", err)
 	}
 	t.Logf("MIXED_GUARD_COHORT shorts=4 timers=3 signals=2 fanout=1 children=6 grandchildren=12 terminal=28 entries=%d", report.Entries)
+	if casChallenge {
+		if resultErr != nil || string(value) != "42" || records[len(records)-1].Kind != journal.Completed {
+			t.Fatalf("CAS cohort target result=%s err=%v", value, resultErr)
+		}
+		t.Log("MIXED_CAS_REJECTED acknowledged_winners=1 stale_rejections=1 terminal=28")
+		return
+	}
 	if leaseChallenge {
 		if resultErr != nil || string(value) != "42" || records[len(records)-1].Kind != journal.Completed {
 			t.Fatalf("lease cohort target result=%s err=%v", value, resultErr)

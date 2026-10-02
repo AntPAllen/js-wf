@@ -6659,3 +6659,33 @@ are confirmed live at3184b65. No older live campaign was replaced or restarted.
 Current100k, sustained ahead acceptance, larger seed counts and all full-release
 matrix/soak gates remain open. The million-timer user service remains active at
 PID18146 with a796,743-receipt running observation; its final verdict remains open.
+
+## Mixed CAS challenge and sustained ahead acceptance
+
+The new optional mixed CAS challenge shares the same distinct4/3/2/1 parent
+admission, real journal-leader SIGKILL and retained stores. Two production append
+calls pass the same-tail read and race at the server publish gate. The intact
+baseline accepts one matching StepCompleted and rejects one stale writer, then
+all28 invocations complete and pass prefix/epoch/raw-state checks. The compiled
+CAS-header-removal mutant acknowledges two distinct retained sequences at index2;
+raw receipts corroborate both, and the checker rejects that exact target for
+index2 at position3. Detection stops on this retained corruption without repairing
+or deleting the acknowledged bad entry. Final baseline36.40s and detection14.01s
+pass their classifications; the baseline race path passes too. Independent raw
+receipt checks and original logs/report are retained under
+`scale/mixed-cas-mutation-2026-10-02/`. The `--mixed-cas` runner records all three
+fixture/gate hashes and requires the precise semantic evidence. Hosted acceptance
+of the new job is pending; three mixed categories and full chaos remain open.
+
+Ten-minute admitted ahead run37002781141 at3184b65 is independently accepted:
+672 invocations,7,404 journal entries,19 admitted shifted-owner kills, worst
+terminal/progress p99=8.645096302s/11.802145823s and passing physical drain,
+histories, checkpoints and full audit. The regenerated original-artifact report
+is byte-identical; exact seed1 and all two terminal jobs are checked. Original
+artifacts/logs/terminal metadata and independent report are retained under
+`scale/native-timer-retirement-2026-10-02/ahead-ten-minute-pass/`.
+New ahead20 run37004428244 is live at a4d57ab with the same production/model graph.
+Current100k run37002783868 and the million-timer user service remain active.
+The disk was nearly full; the regenerable3.4GiB Go build cache was cleared to
+make room for campaign artifacts. All retention evidence and live workload data
+remain available.
