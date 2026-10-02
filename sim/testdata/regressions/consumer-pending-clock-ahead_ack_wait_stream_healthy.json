@@ -1,0 +1,222 @@
+{
+  "version": 3,
+  "seed": 8,
+  "workload": "consumer_pending_clock_restore",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ahead",
+        "behind"
+      ],
+      "chosen": "ahead"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ack_wait",
+        "nak",
+        "progress"
+      ],
+      "chosen": "ack_wait"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ahead",
+        "behind",
+        "healthy"
+      ],
+      "chosen": "healthy"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "consumer_pending_clock",
+      "outcome": "stored_message_then_consumer_updates"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_clock",
+      "outcome": "1m0s"
+    },
+    {
+      "at_ms": 0,
+      "operation": "run_publish",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "data_sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_create",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "outcome": "delivery_1"
+    },
+    {
+      "at_ms": 0,
+      "operation": "consumer_leader_restore",
+      "outcome": "0s"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 3000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 3000,
+      "operation": "consumer_info",
+      "subject": "wf.run.0",
+      "outcome": "pending_0_ack_1"
+    },
+    {
+      "at_ms": 3000,
+      "operation": "consumer_create",
+      "subject": "wf.run.0",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "consumer_info",
+      "subject": "wf.run.0",
+      "outcome": "pending_0_ack_1"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "consumer_create",
+      "subject": "wf.run.0",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 8000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 9000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 9000,
+      "operation": "consumer_info",
+      "subject": "wf.run.0",
+      "outcome": "pending_0_ack_1"
+    },
+    {
+      "at_ms": 9000,
+      "operation": "consumer_create",
+      "subject": "wf.run.0",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 11000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "consumer_info",
+      "subject": "wf.run.0",
+      "outcome": "pending_0_ack_1"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "consumer_create",
+      "subject": "wf.run.0",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "outcome": "no_messages"
+    },
+    {
+      "at_ms": 13000,
+      "operation": "consumer_fetch",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "outcome": "delivery_2"
+    },
+    {
+      "at_ms": 13000,
+      "operation": "consumer_ack",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13000,
+      "operation": "characterize_dispatch_clock",
+      "outcome": "ahead_ack_wait_stream_healthy"
+    }
+  ]
+}

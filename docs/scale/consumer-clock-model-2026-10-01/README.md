@@ -36,3 +36,12 @@ The model separates one plausible pending-deadline behavior from production
 workflow integrity. No production behavior or real-cluster drain target has
 been changed on the basis of this hypothesis. The instrumented ahead rerun
 36939480705 and behind ten-minute run36939477954 remain in progress.
+
+## Native calibration (2026-10-02)
+
+The initial consumer-clock-only assumption above does not hold for restored
+initial ACK-wait state: pinned NATS persists the stored message timestamp.
+Progress and delayed NAK do use consumer time. The legacy traces preserve their
+hypothesis semantics; the corrected contract has 18 new pins and a separate
+workload. [Native evidence and scope](../consumer-clock-native-contract-2026-10-02/)
+retain both the failed prediction and the passing durable-consumer proof.

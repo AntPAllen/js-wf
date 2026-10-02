@@ -21,15 +21,16 @@ type DispatchFault struct {
 }
 
 type dispatchRecord struct {
-	subject    string
-	data       []byte
-	header     nats.Header
-	timestamp  time.Time
-	sequence   uint64
-	deliveries uint64
-	deadline   int64
-	acked      bool
-	retained   bool
+	subject        string
+	data           []byte
+	header         nats.Header
+	timestamp      time.Time
+	sequence       uint64
+	deliveries     uint64
+	deadline       int64
+	storedDeadline int64
+	acked          bool
+	retained       bool
 }
 
 // DispatchTransport models the durable pull/ack subset used by
@@ -40,6 +41,7 @@ type DispatchTransport struct {
 	schedule            *Scheduler
 	ackWait             int64
 	consumerClockOffset int64
+	storedPendingClock  bool
 	records             []*dispatchRecord
 	faults              []DispatchFault
 	creates             int
@@ -72,6 +74,41 @@ func (m *DispatchTransport) SetConsumerClockOffset(offset time.Duration) error {
 
 func (m *DispatchTransport) consumerNowMillis() int64 {
 	return m.schedule.NowMillis() + m.consumerClockOffset
+}
+
+// EnableStoredPendingClock models the replicated pending timestamps verified
+// against pinned NATS: initial delivery persists the stored message timestamp;
+// progress and delayed NAK replace it with the consumer leader's timestamp.
+// This must be selected before publishing. Legacy hypothesis traces retain
+// their previous semantics unless explicitly enabled.
+func (m *DispatchTransport) EnableStoredPendingClock() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if len(m.records) != 0 || m.creates != 0 {
+		return fmt.Errorf("pending clock contract must precede transport use")
+	}
+	m.storedPendingClock = true
+	m.event(TransportEvent{Operation: "consumer_pending_clock", Outcome: "stored_message_then_consumer_updates"})
+	return nil
+}
+
+func (m *DispatchTransport) TransferConsumerLeadership(offset time.Duration) error {
+	if offset%time.Millisecond != 0 {
+		return fmt.Errorf("invalid consumer clock offset %s", offset)
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if !m.storedPendingClock {
+		return fmt.Errorf("pending clock contract is not enabled")
+	}
+	m.consumerClockOffset = offset.Milliseconds()
+	for _, record := range m.records {
+		if record.deliveries != 0 && !record.acked {
+			record.deadline = record.storedDeadline
+		}
+	}
+	m.event(TransportEvent{Operation: "consumer_leader_restore", Outcome: offset.String()})
+	return nil
 }
 
 func (m *DispatchTransport) QueueFault(f DispatchFault) error {
@@ -114,6 +151,9 @@ func (m *DispatchTransport) PublishRunMessage(subject string, data []byte, heade
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.sequence++
+	if m.storedPendingClock && timestamp.IsZero() {
+		timestamp = time.UnixMilli(m.schedule.NowMillis())
+	}
 	m.records = append(m.records, &dispatchRecord{subject: subject, data: append([]byte(nil), data...), header: cloneHeader(header), timestamp: timestamp, sequence: m.sequence, retained: true})
 	m.event(TransportEvent{Operation: "run_publish", Subject: subject, Sequence: m.sequence, DataSHA256: digest(data), Outcome: "ok"})
 	return m.sequence
@@ -309,6 +349,9 @@ func (c dispatchConsumer) FetchOne(ctx context.Context) (worker.DispatchBatch, e
 		}
 		record.deliveries++
 		record.deadline = m.consumerNowMillis() + m.ackWait
+		if m.storedPendingClock {
+			record.storedDeadline = record.timestamp.UnixMilli() + m.ackWait
+		}
 		m.event(TransportEvent{Operation: "consumer_fetch", Subject: c.subject, Sequence: record.sequence, Outcome: fmt.Sprintf("delivery_%d", record.deliveries)})
 		channel := make(chan jetstream.Msg, 1)
 		channel <- &dispatchMsg{model: m, record: record, delivery: record.deliveries}
@@ -439,6 +482,9 @@ func (m *dispatchMsg) finish(operation string, delay time.Duration) error {
 		m.record.deadline = model.consumerNowMillis() + model.ackWait
 	default:
 		return fmt.Errorf("invalid dispatch response %q", operation)
+	}
+	if model.storedPendingClock && (operation == "nak" || operation == "progress") {
+		m.record.storedDeadline = m.record.deadline
 	}
 	event.Outcome = "ok"
 	model.event(event)

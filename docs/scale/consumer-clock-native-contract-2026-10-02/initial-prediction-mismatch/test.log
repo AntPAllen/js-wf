@@ -1,0 +1,13 @@
+=== RUN   TestFiveContainerConsumerPendingClockTransition
+=== RUN   TestFiveContainerConsumerPendingClockTransition/server_clock_ahead
+    consumer_clock_transition_docker_test.go:250: ack_wait delay=13.000053972s differs from retained-clock prediction
+    consumer_clock_transition_docker_test.go:287: CONSUMER_CLOCK_CONTRACT offset=1m0s samples=3 confirmed_ack_control=true physical_drain=true
+=== RUN   TestFiveContainerConsumerPendingClockTransition/server_clock_behind
+    consumer_clock_transition_docker_test.go:253: behind ack_wait redelivery after removal=12.361472773s
+    consumer_clock_transition_docker_test.go:287: CONSUMER_CLOCK_CONTRACT offset=-1m0s samples=3 confirmed_ack_control=true physical_drain=true
+--- FAIL: TestFiveContainerConsumerPendingClockTransition (198.79s)
+    --- FAIL: TestFiveContainerConsumerPendingClockTransition/server_clock_ahead (141.95s)
+    --- FAIL: TestFiveContainerConsumerPendingClockTransition/server_clock_behind (56.83s)
+FAIL
+FAIL	js-wf/integration	198.809s
+FAIL

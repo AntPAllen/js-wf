@@ -5915,3 +5915,31 @@ under race, package33.018s. Corrected admitted behind smoke36962797494 is
 queued at410272f with both common clock and pending-timer admission enabled;
 its retained API snapshot supplies no acceptance. The same final-source100k
 handle36962606650 is now confirmed in progress. Ahead drain remains open.
+
+## Reviewed admitted canonical behind smoke and actual child-budget recovery (2026-10-02)
+
+[Run36962797494](scale/canonical-r5-native-2026-10-02/behind-budget-recovered-smoke/README.md)
+passes current independent reviewers at410272f:168 invocations,1,853 entries,
+144 waits, all five physical probes and one admitted cut removed1.508071007s
+before the earliest original duration boundary. Worst terminal/progress p99
+are5.604200392s /8.522181225s; physical drain, histories, retained invariant and
+immutable gates pass. All31 repairs are acknowledged; zero fencing events.
+Two actual unconfirmed child enqueues return at the5s whole-operation budget,
+then matching retries recover and both parents complete. All74 original files
+and exact operation/receipt correlations are retained and verified. This clears
+one35s admitted canonical seed only; sustained19-cut,200-seed and24-hour gates
+remain open, along with ahead physical drain.
+
+## Native consumer clock calibration and 18 deterministic regressions (2026-10-02)
+
+[Focused pinned-NATS proof](scale/consumer-clock-native-contract-2026-10-02/)
+passes both actual ±60s leader handoffs in102.818s package time. Initial restored
+ACK-wait uses stored message timestamps; progress and delayed NAK use consumer
+clock updates. Ahead redelivery takes73s/73s/65s; behind follows election at6.76s.
+Confirmed-ACK controls do not redeliver and final physical drain passes. The
+initial incorrect consumer-only prediction is retained as a failed attempt.
+The corrected seeded model covers18 independent stored/consumer clock and
+response combinations;1,000 seeds plus legacy characterization pass under race
+in1.457s, and24 clock pins replay in1.096s. Corpus now252 pins. Six durable native
+cases calibrate the mechanism, not all18 model combinations. Historical ahead
+workflow drain and update-commit provenance remain open; gates are unchanged.

@@ -602,9 +602,13 @@ characterize retained absolute-deadline sensitivity; these transport assumptions
 do not certify NATS or production-worker clock tolerance. See the
 [timer clock model evidence](scale/timer-clock-model-2026-10-01/). The dispatch model
 also characterizes consumer pending-deadline source transitions for ACK-wait,
-progress and delayed NAK, with six pinned traces. This remains an explicit model
-assumption until real retained pending state establishes its applicability; see
-[consumer clock model evidence](scale/consumer-clock-model-2026-10-01/).
+progress and delayed NAK. Six legacy hypothesis traces remain replayable.
+A focused pinned-NATS R5 durable-consumer test now verifies that initial restored
+pending timestamps derive from stored messages, while progress and delayed NAK
+replace them with consumer time. Eighteen new seeded combinations model these
+separate clock sources; six durable native cases calibrate the contract, not the
+whole combination matrix. See [native contract and replay evidence](scale/consumer-clock-native-contract-2026-10-02/).
+Neither characterization clears the historical ahead physical-drain failure.
 
 1. Tier 1: 100 000 seeds clean.
 2. Tier 2: 200 consecutive seeds clean across the whole matrix.
