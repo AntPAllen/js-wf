@@ -5695,3 +5695,25 @@ are retained. CLI/defaults/R5 fixtures do not enable the option yet. Provisionin
 trusted topology, repair-loop wiring, migration, pinned transition/repair models
 and native admitted-cut recovery remain required. Ahead60.27s and incomplete
 behind sustained gates remain open; all release scope is retained.
+
+## Independent clock topology, shared provider and CLI wiring (2026-10-02)
+
+The worker CLI accepts trusted topology through `-timer-clock-config` and optional
+bootstrap through `-provision-timer-clock`. Exact independent R1 probes reject
+conflicting configurations without updates. One shared monotonic provider serves
+SDK bounds and timer/suspended/fallback elected repairs; failed or expired
+refreshes fail closed. Tagged writers require upgraded readers and enabled repairs.
+Defaults and R5 fault fixtures remain legacy.
+
+Runtimeclock race passes 1.121s; native probe provisioning/conflict/one-node-loss
+contract passes 3.84s / package 4.867s. Existing CLI/reconcile suites pass
+32.501s / 13.186s. New actual CLI/plugin native and fallback timer tests plus
+configuration guards pass 25.83s / package 26.922s; these include setup and shutdown
+and do not measure recovery latency.
+[Complete logs, commands and source hashes](scale/timer-clock-topology-cli-2026-10-02/README.md)
+are retained. R5 wiring, transition/repair corpus and native admitted-cut recovery
+remain required; ahead 60.27s and incomplete behind sustained gates remain open.
+
+The historical worker-kill 31.1s miss used a 30s TTL and remains a configuration
+mismatch excluded from further runs. Current production TTL 12s, heartbeat 3s
+and AckWait 13s retain the strict under-30s recovery target.

@@ -19,6 +19,7 @@ import (
 	"js-wf/provision"
 	"js-wf/reconcile"
 	"js-wf/retention"
+	"js-wf/runtimeclock"
 	"js-wf/worker"
 
 	"github.com/nats-io/nats.go"
@@ -52,6 +53,8 @@ func run(ctx context.Context, args []string) (runErr error) {
 	retentionGrace := flags.Duration("retention-grace", 24*time.Hour, "purge tombstone lifetime")
 	eventPath := flags.String("events-file", "", "optional append-only JSONL fencing and repair event file")
 	repair := flags.Bool("reconcile", true, "run leader-elected repair loops")
+	clockFile := flags.String("timer-clock-config", "", "trusted independent clock topology JSON file")
+	bootstrapClock := flags.Bool("provision-timer-clock", false, "create/verify clock probes before starting tagged timer writers")
 	repairInterval := flags.Duration("reconcile-interval", time.Second, "repair scan cadence")
 	repairBudget := flags.Int("reconcile-budget", 500, "stream sequences scanned per repair pass")
 	if err := flags.Parse(args); err != nil {
@@ -78,6 +81,28 @@ func run(ctx context.Context, args []string) (runErr error) {
 		if *retentionGrace <= 0 {
 			return fmt.Errorf("retention grace must be positive")
 		}
+	}
+	var clockConfig *runtimeclock.Config
+	if *bootstrapClock && *clockFile == "" {
+		return fmt.Errorf("provision-timer-clock requires timer-clock-config")
+	}
+	if *clockFile != "" {
+		if !*repair {
+			return fmt.Errorf("timer-clock-config requires enabled repair loops")
+		}
+		file, err := os.Open(*clockFile)
+		if err != nil {
+			return fmt.Errorf("clock topology: %w", err)
+		}
+		cfg, readErr := runtimeclock.ReadConfig(file)
+		closeErr := file.Close()
+		if readErr != nil {
+			return fmt.Errorf("clock topology: %w", readErr)
+		}
+		if closeErr != nil {
+			return closeErr
+		}
+		clockConfig = &cfg
 	}
 	if *url == "" {
 		*url = nats.DefaultURL
@@ -107,7 +132,7 @@ func run(ctx context.Context, args []string) (runErr error) {
 		observeRepair = events.repair
 		eventErrors = events.errors
 	}
-	nc, js, backend, w, err := startWorker(ctx, *url, *id, *replicas, *journalMaxBytes, *concurrency, *timerBackend, handlers, *retentionType, *retentionGrace, continuationOptions...)
+	nc, js, backend, w, clock, err := startWorkerWithClock(ctx, *url, *id, *replicas, *journalMaxBytes, *concurrency, *timerBackend, handlers, *retentionType, *retentionGrace, clockConfig, *bootstrapClock, continuationOptions...)
 	if err != nil {
 		if ctx.Err() != nil {
 			return nil
@@ -116,6 +141,10 @@ func run(ctx context.Context, args []string) (runErr error) {
 	}
 	defer nc.Close()
 	defer w.Close()
+	var domainNow reconcile.TimerDomainClock
+	if clock != nil {
+		domainNow = clock.Lower
+	}
 	var controller *assignment.Controller
 	if *mode == "auto" {
 		startup, done := context.WithTimeout(ctx, 8*time.Second)
@@ -173,16 +202,16 @@ func run(ctx context.Context, args []string) (runErr error) {
 	if *repair {
 		start := []func(context.Context) error{
 			func(c context.Context) error {
-				return reconcile.RunRepairLoopObserved(c, js, *id, "start", *repairInterval, *repairBudget, observeRepair)
+				return reconcile.RunRepairLoopWithClock(c, js, *id, "start", *repairInterval, *repairBudget, observeRepair, domainNow)
 			},
 			func(c context.Context) error {
-				return reconcile.RunRepairLoopObserved(c, js, *id, "signal", *repairInterval, *repairBudget, observeRepair)
+				return reconcile.RunRepairLoopWithClock(c, js, *id, "signal", *repairInterval, *repairBudget, observeRepair, domainNow)
 			},
 			func(c context.Context) error {
-				return reconcile.RunRepairLoopObserved(c, js, *id, "timer", *repairInterval, *repairBudget, observeRepair)
+				return reconcile.RunRepairLoopWithClock(c, js, *id, "timer", *repairInterval, *repairBudget, observeRepair, domainNow)
 			},
 			func(c context.Context) error {
-				return reconcile.RunRepairLoopObserved(c, js, *id, "suspended", *repairInterval, *repairBudget, observeRepair)
+				return reconcile.RunRepairLoopWithClock(c, js, *id, "suspended", *repairInterval, *repairBudget, observeRepair, domainNow)
 			},
 			func(c context.Context) error {
 				return reconcile.RunTombstoneLoop(c, js, *id, *repairInterval, *repairBudget)
@@ -190,7 +219,7 @@ func run(ctx context.Context, args []string) (runErr error) {
 		}
 		if backend == provision.FallbackTimers {
 			start = append(start, func(c context.Context) error {
-				return reconcile.RunRepairLoopObserved(c, js, *id, "fallback-timer", *repairInterval, *repairBudget, observeRepair)
+				return reconcile.RunRepairLoopWithClock(c, js, *id, "fallback-timer", *repairInterval, *repairBudget, observeRepair, domainNow)
 			})
 		}
 		for _, loop := range start {
@@ -232,9 +261,15 @@ func run(ctx context.Context, args []string) (runErr error) {
 }
 
 func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBytes int64, concurrency int, timerBackend string, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration, options ...worker.Option) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, error) {
+	nc, js, backend, w, _, err := startWorkerWithClock(ctx, url, id, replicas, journalMaxBytes, concurrency, timerBackend, handlers, retentionType, retentionGrace, nil, false, options...)
+	return nc, js, backend, w, err
+}
+
+func startWorkerWithClock(ctx context.Context, url, id string, replicas int, journalMaxBytes int64, concurrency int, timerBackend string, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration, clockConfig *runtimeclock.Config, bootstrapClock bool, options ...worker.Option) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, *runtimeclock.Clock, error) {
 	startupCtx, stopStartup := context.WithTimeout(ctx, 30*time.Second)
 	defer stopStartup()
 	var lastErr error
+	var clock *runtimeclock.Clock
 	for startupCtx.Err() == nil {
 		nc, err := nats.Connect(url, nats.Timeout(2*time.Second))
 		if err == nil {
@@ -253,10 +288,28 @@ func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBy
 					if retentionType != "" {
 						workerHandlers[retentionType] = retention.Handler(js, retentionGrace)
 					}
+					workerOptions := append(append([]worker.Option(nil), options...), worker.WithPartitionConcurrency(concurrency))
+					clock = nil
+					if clockConfig != nil {
+						if bootstrapClock {
+							err = runtimeclock.EnsureProbes(startupCtx, js, *clockConfig)
+						}
+						if err == nil {
+							clock, err = runtimeclock.NewClock(js, *clockConfig)
+						}
+						if err == nil {
+							_, _, err = clock.Bounds(startupCtx)
+						}
+						if err == nil {
+							workerOptions = append(workerOptions, worker.WithTimerClock(runtimeclock.DeadlineDomain, clock.Bounds))
+						}
+					}
 					var w *worker.Worker
-					w, err = worker.New(startupCtx, js, id, workerHandlers, append(options, worker.WithPartitionConcurrency(concurrency))...)
 					if err == nil {
-						return nc, js, backend, w, nil
+						w, err = worker.New(startupCtx, js, id, workerHandlers, workerOptions...)
+					}
+					if err == nil {
+						return nc, js, backend, w, clock, nil
 					}
 				}
 			}
@@ -264,7 +317,7 @@ func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBy
 		}
 		lastErr = err
 		if !retryableStartupError(err) {
-			return nil, nil, "", nil, fmt.Errorf("start worker: %w", err)
+			return nil, nil, "", nil, nil, fmt.Errorf("start worker: %w", err)
 		}
 		select {
 		case <-startupCtx.Done():
@@ -272,9 +325,9 @@ func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBy
 		}
 	}
 	if ctx.Err() != nil {
-		return nil, nil, "", nil, ctx.Err()
+		return nil, nil, "", nil, nil, ctx.Err()
 	}
-	return nil, nil, "", nil, fmt.Errorf("start worker after 30 seconds: %w", lastErr)
+	return nil, nil, "", nil, nil, fmt.Errorf("start worker after 30 seconds: %w", lastErr)
 }
 
 func ensureTimerBackend(ctx context.Context, js jetstream.JetStream, replicas int, journalMaxBytes int64, choice string) (provision.TimerBackend, error) {

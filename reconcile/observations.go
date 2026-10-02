@@ -48,6 +48,12 @@ func reportRepair(observe func(RepairEvent), event RepairEvent, dry bool, err er
 // scanner, recording each attempted start, signal, timer, fallback timer, or
 // suspended-wait repair.
 func RunRepairLoopObserved(ctx context.Context, js jetstream.JetStream, workerID, kind string, interval time.Duration, budget int, observe func(RepairEvent)) error {
+	return RunRepairLoopWithClock(ctx, js, workerID, kind, interval, budget, observe, nil)
+}
+
+// RunRepairLoopWithClock configures the same domain clock used by tagged
+// workers, retaining the production leader lease, cursor and repair observers.
+func RunRepairLoopWithClock(ctx context.Context, js jetstream.JetStream, workerID, kind string, interval time.Duration, budget int, observe func(RepairEvent), clock TimerDomainClock) error {
 	var scan scanFunc
 	switch kind {
 	case "start":
@@ -60,14 +66,17 @@ func RunRepairLoopObserved(ctx context.Context, js jetstream.JetStream, workerID
 		scan = s.Scan
 	case "timer":
 		s := NewTimerScan(js)
+		s.DomainNow = clock
 		s.Observe = observe
 		scan = s.Scan
 	case "fallback-timer":
 		s := NewFallbackTimerScan(js)
+		s.DomainNow = clock
 		s.Observe = observe
 		scan = s.Scan
 	case "suspended":
 		s := NewSuspendedScan(js)
+		s.DomainNow = clock
 		s.Observe = observe
 		scan = s.Scan
 	default:
