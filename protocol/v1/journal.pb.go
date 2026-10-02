@@ -88,8 +88,9 @@ func (EntryKind) EnumDescriptor() ([]byte, []int) {
 	return file_protocol_v1_journal_proto_rawDescGZIP(), []int{0}
 }
 
-// Versioned interchange envelope. WF_JRN currently persists the JSON mapping
-// documented in docs/journal-protocol.md; these bytes are not a WF_JRN publish.
+// Versioned interchange envelope. Protobuf WF_JRN storage requires the WFJ-NUL
+// prefix and sequence=0, documented in docs/journal-protocol.md. Bare envelope
+// bytes are not a WF_JRN storage publish. JSON remains the default writer.
 type JournalRecord struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Version       uint32                 `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`   // Must be 1. Zero/unknown versions are rejected.

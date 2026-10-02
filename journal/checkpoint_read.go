@@ -149,7 +149,7 @@ func (s *Store) readCheckpointOnce(ctx context.Context, typ, id string, invSeq u
 		return nil, err
 	}
 	var entry Entry
-	if json.Unmarshal(raw.Data, &entry) != nil {
+	if UnmarshalEntry(raw.Data, &entry) != nil {
 		return nil, ErrGap
 	}
 	anchor := Record{Entry: entry, Sequence: raw.Sequence}
@@ -176,7 +176,7 @@ func (s *Store) readCheckpointOnce(ctx context.Context, typ, id string, invSeq u
 			return nil, err
 		}
 		var entry Entry
-		if json.Unmarshal(raw.Data, &entry) != nil {
+		if UnmarshalEntry(raw.Data, &entry) != nil {
 			return nil, ErrGap
 		}
 		if entry.Index >= MaxEntries {

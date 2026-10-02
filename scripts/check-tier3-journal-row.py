@@ -78,7 +78,7 @@ def check(events, duration, expected_row='journal'):
              else 'single five-container R5 all-server SIGKILL/restart row' if row == 'restart'
              else f'single five-container R5 {row}-leader row')
     profiles = re.findall(r'TIER3_CLOCK_TIMER_CUT_PROFILE=(\S+)', log)
-    if profiles and (profiles != ['first-wait-2s'] or not row.startswith('server_clock_')):
+    if profiles and ((len(profiles) != 1 or profiles[0] not in ('first-wait-2s', 'all-waits-2s')) or not row.startswith('server_clock_')):
         raise ValueError('invalid or duplicated clock timer cut profile')
     clocks = re.findall(r'TIER3_COMMON_TIMER_CLOCK=(\S+)', log)
     if clocks and (clocks != ['utc-quorum-v1'] or not row.startswith('server_clock_')):
@@ -773,8 +773,8 @@ if __name__ == '__main__':
     if args.row.startswith('server_clock_'):
         if args.root is None: parser.error('--root is required for server clock rows')
         required = args.require_clock_timer_cut or any('TIER3_CLOCK_TIMER_CUT_REQUIRED=true' in event.get('Output','') for event in events)
-        if required and report['clock_timer_cut_profile'] != 'first-wait-2s':
-            raise ValueError('required clock timer cut lacks its explicit first-wait-2s profile')
+        if required and report['clock_timer_cut_profile'] not in ('first-wait-2s', 'all-waits-2s'):
+            raise ValueError('required clock timer cut lacks its explicit duration profile')
         report['server_clock_artifact_checks']=check_server_clock_artifacts(args.root,report,args.row)
         controller=load('controller_latency','check-controller-latency.py')
         report['controller_latency_artifact_checks']=controller.check(args.root,report,timestamp_ns)

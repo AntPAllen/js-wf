@@ -16,6 +16,7 @@ import (
 
 	"js-wf/assignment"
 	"js-wf/identity"
+	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/reconcile"
 	"js-wf/retention"
@@ -44,6 +45,7 @@ func run(ctx context.Context, args []string) (runErr error) {
 	metricsAddr := flags.String("metrics-addr", "127.0.0.1:9090", "HTTP metrics listen address")
 	replicas := flags.Int("replicas", 3, "JetStream stream replica count")
 	journalMaxBytes := flags.Int64("journal-max-bytes", 0, "exact WF_JRN byte cap; zero adopts an uncapped stream")
+	journalEncoding := flags.String("journal-encoding", "json", "new journal entry encoding: json or protobuf-v1; requires upgraded readers")
 	timerBackend := flags.String("timer-backend", "auto", "timer storage mode: auto, native, or fallback")
 	mode := flags.String("mode", "static", "partition assignment mode: static, kv, or auto")
 	staticIndex := flags.Int("static-index", 0, "static worker index")
@@ -62,6 +64,9 @@ func run(ctx context.Context, args []string) (runErr error) {
 	}
 	if flags.NArg() != 0 || *id == "" || *pluginPath == "" || *pluginSymbol == "" || *replicas < 1 || *replicas > 5 || *journalMaxBytes < 0 || *repairInterval <= 0 || *repairInterval > 10*time.Second || *repairBudget < 2 {
 		return fmt.Errorf("usage: wf-worker -id ID -handler-plugin FILE [-mode static|kv|auto] [-metrics-addr ADDR]")
+	}
+	if journal.Encoding(*journalEncoding) != journal.JSON && journal.Encoding(*journalEncoding) != journal.ProtobufV1 {
+		return fmt.Errorf("invalid journal encoding %q", *journalEncoding)
 	}
 	if *mode != "static" && *mode != "kv" && *mode != "auto" {
 		return fmt.Errorf("invalid assignment mode %q", *mode)
@@ -111,6 +116,7 @@ func run(ctx context.Context, args []string) (runErr error) {
 	if err != nil {
 		return err
 	}
+	continuationOptions = append(continuationOptions, worker.WithJournalEncoding(journal.Encoding(*journalEncoding)))
 	if *retentionType != "" {
 		if _, exists := handlers[*retentionType]; exists {
 			return fmt.Errorf("retention workflow type %q collides with plugin handler", *retentionType)

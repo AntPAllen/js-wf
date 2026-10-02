@@ -473,7 +473,7 @@ func (c *Client) signal(ctx context.Context, typ, id, name string, payload []byt
 		}
 		if err == nil {
 			var entry journal.Entry
-			if json.Unmarshal(last.Data, &entry) != nil || entry.Kind == "" {
+			if journal.UnmarshalEntry(last.Data, &entry) != nil || entry.Kind == "" {
 				return 0, journal.ErrGap
 			}
 			switch entry.Kind {

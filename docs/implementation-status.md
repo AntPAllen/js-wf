@@ -6120,3 +6120,36 @@ at the same source. Launch snapshots are retained; neither is acceptance evidenc
 The original failed CI's actual Python vectors pass locally with the corrected
 absolute path.100k36972092297 remains confirmed in progress; million-timer service
 remains active above564,000 receipts. No live workload was restarted.
+
+## Persisted protobuf readers/writers and original SDK scope (2026-10-02)
+
+[Storage codec and verification](scale/persisted-protobuf-journal-2026-10-02/)
+add WFJ-NUL/version1 protobuf entries, mixed-format CAS/read/snapshot/checkpoint,
+auditor, client and blob-retention readers. JSON remains default. Worker option
+and CLI `-journal-encoding protobuf-v1` require reader-first upgrade; old JSON-only
+binaries cannot be rolled back while protobuf remains. A real R3 legacy lease
+prefix/higher-epoch protobuf completion, spilled-result retention, all-peer audit
+and compaction pass race4.886s. CLI retention/reuse smoke passes3.090s; affected
+race packages, whole-repository compilation and vet pass. New transport scenario
+passes1000 independently counted seeds and all six encoding/fault combinations,
+exact replay and its disk pin. Corpus259 pins/114 seeded workloads; full updated
+suite and protobuf rolling/chaos acceptance remain required.
+
+The original Go-only SDK plan does not require a second executable SDK. Earlier
+status prose treated it as an open release requirement incorrectly. It is future
+scope. Language-neutral storage/protocol and compatibility proof remain required;
+current storage support is opt-in, not a completed fleet migration.
+
+[Protocol CI36972566168](scale/journal-protocol-interop-2026-10-02/passed-ci/)
+is terminal/success atca0c6b0 with retained original vectors and metadata. It
+predates persisted storage tests; those have been added to future protocol CI.
+
+[Behind36972576844](scale/clock-admission-wait-profile-2026-10-02/native-profile-label-failure/)
+is terminal/failed CI despite the Go test passing744.60s:26 batches/728
+invocations/8009 entries/19 cuts and final audits/history/drain/latency pass.
+Artifact verification rejects later2s timers because source still labels the
+profile first-wait-2s. Current source correctly logs/checks all-waits-2s; original
+failed artifacts are retained. Fresh artifact acceptance remains required.
+Existing100k handle is still live; million-timer service is active above574,000
+receipts. Neither was restarted and the historical worker-kill TTL miss remains
+excluded from further runs.

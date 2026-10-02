@@ -1,0 +1,111 @@
+journal	Sustain the selected five-container mixed fault row	﻿2026-10-02T06:15:47.3735537Z ##[group]Run set -o pipefail
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3736097Z ^[[36;1mset -o pipefail^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3736519Z ^[[36;1mcase "$TIER3_MATRIX_ROW" in^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3737314Z ^[[36;1m  auto_journal) row_test=TestFiveContainerAutomaticMembershipWithJournalKills ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3738699Z ^[[36;1m  block_delay) row_test=TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3739901Z ^[[36;1m  block_disk) row_test=TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3741115Z ^[[36;1m  server_clock_ahead) row_test=TestFiveContainerMixedServerClockAheadWithJournalKills ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3742390Z ^[[36;1m  server_clock_behind) row_test=TestFiveContainerMixedServerClockBehindWithJournalKills ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3743732Z ^[[36;1m  worker_isolation) row_test=TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3745161Z ^[[36;1m  worker_pause) row_test=TestFiveContainerMixedWorkerPausedFortyFiveSeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3746299Z ^[[36;1m  worker_kill) row_test=TestFiveContainerMixedWorkerKilledEveryFiveSeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3747382Z ^[[36;1m  journal) row_test=TestFiveContainerMixedJournalLeaderEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3748491Z ^[[36;1m  consumer) row_test=TestFiveContainerMixedConsumerLeaderEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3749586Z ^[[36;1m  restart) row_test=TestFiveContainerMixedAllServersEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3750700Z ^[[36;1m  fanout_restart) row_test=TestFiveContainerMixedFanoutRestartEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3751846Z ^[[36;1m  route_quorum) row_test=TestFiveContainerMixedRouteQuorumEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3752997Z ^[[36;1m  route_majority) row_test=TestFiveContainerMixedRouteMajorityEveryThirtySeconds ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3753815Z ^[[36;1m  *) exit 1 ;;^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3754354Z ^[[36;1mesac^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3755479Z ^[[36;1mgo test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3756727Z ^[[36;1mcut_args=()^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3757359Z ^[[36;1mif [ "$WF_TIER3_CLOCK_TIMER_CUT" = 1 ]; then cut_args+=(--require-clock-timer-cut); fi^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3758364Z ^[[36;1mif [ "$WF_TIER3_COMMON_CLOCK" = 1 ]; then cut_args+=(--require-common-timer-clock); fi^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3760692Z ^[[36;1mpython3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --output /tmp/tier3-mixed-journal-result.json --require-checkpoint-audits "${cut_args[@]}"^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3763439Z ^[[36;1mpython3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3765455Z ^[[36;1mpython3 scripts/review-tier3-fencing.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/fencing-timeline-review.json"^[[0m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3851378Z shell: /usr/bin/bash -e {0}
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3851633Z env:
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3851828Z   WF_TIER3_MATRIX: 1
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3852061Z   TIER3_MATRIX_ROW: server_clock_behind
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3852354Z   WF_TIER3_MATRIX_DURATION: 10m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3852607Z   WF_TIER3_SYNC_INTERVAL: 2m
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3852864Z   WF_TIER3_CLOCK_TIMER_CUT: 1
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3853106Z   WF_TIER3_COMMON_CLOCK: 1
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3853391Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3853709Z   GOMEMLIMIT: 512MiB
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3853913Z   GOMAXPROCS: 2
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:47.3854352Z ##[endgroup]
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:58.2802409Z === RUN   TestFiveContainerMixedServerClockBehindWithJournalKills
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:58.2803426Z     tier3_mixed_journal_test.go:43: TIER3_CLOCK_TIMER_CUT_REQUIRED=true
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:15:58.2804373Z     tier3_mixed_journal_test.go:43: TIER3_CLOCK_TIMER_CUT_PROFILE=first-wait-2s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:16:50.3277525Z     tier3_mixed_journal_test.go:43: tier3 provisioning retry: context deadline exceeded
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:16:51.1052278Z     tier3_mixed_journal_test.go:43: TIER3_COMMON_TIMER_CLOCK=utc-quorum-v1
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:16:51.1313919Z     tier3_mixed_journal_test.go:43: TIER3_SUSPENDED_SCAN interval=100ms budget=256
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:17:10.8548834Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=1 elapsed=18.838929055s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:17:28.9852161Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=30s killed=30.137964759s healed=36.967346309s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:17:36.1113037Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=2 elapsed=44.100955564s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:18:00.1928764Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=1m0s killed=1m0.307552961s healed=1m8.165134693s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:18:00.3825605Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=3 elapsed=1m8.372021034s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:18:19.8407458Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=4 elapsed=1m27.830680675s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:18:32.0637639Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=1m30s killed=1m32.042034273s healed=1m40.034990973s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:18:46.1120748Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=5 elapsed=1m54.101686826s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:19:02.4820207Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=2m0s killed=2m2.470989178s healed=2m10.45024067s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:19:12.2772119Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=6 elapsed=2m20.267083977s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:19:31.9946338Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=2m30s killed=2m31.761828963s healed=2m39.964215365s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:19:36.7372923Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=7 elapsed=2m44.727037285s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:20:02.1938224Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=3m0s killed=3m2.300218596s healed=3m10.165619757s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:20:02.2979939Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=8 elapsed=3m10.286705642s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:20:21.9632945Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=9 elapsed=3m29.952956113s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:20:30.8593388Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=3m30s killed=3m30.198023375s healed=3m38.828183099s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:20:46.3333187Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=10 elapsed=3m54.32305159s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:20:46.3343902Z     tier3_mixed_journal_test.go:843: tier3 checkpoint audit batch=10 invocation_cutoff=280 started elapsed=3m54.324191965s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:20:48.4528069Z     tier3_mixed_journal_test.go:862: tier3 checkpoint batch=10 report={Invocations:280 Journals:280 Entries:3083 Terminal:280}
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:21:06.1813505Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=4m0s killed=4m3.130879962s healed=4m14.143814966s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:21:14.7791490Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=11 elapsed=4m22.768110977s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:21:30.7497925Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=4m30s killed=4m30.149433624s healed=4m38.713814809s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:21:40.4496340Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=12 elapsed=4m48.439460992s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:22:02.8243936Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=5m0s killed=5m2.549994452s healed=5m10.785338673s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:22:05.4197239Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=13 elapsed=5m13.409577989s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:22:32.3893342Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=14 elapsed=5m40.379146056s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:22:34.0167030Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=5m30s killed=5m32.447477335s healed=5m41.991404711s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:22:51.9568916Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=15 elapsed=5m59.946758357s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:23:00.8681224Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=6m0s killed=6m0.5580411s healed=6m8.828672333s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:23:17.8393162Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=16 elapsed=6m25.829028683s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:23:32.9337393Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=6m30s killed=6m32.105815521s healed=6m40.899704996s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:23:42.9981894Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=17 elapsed=6m50.987811609s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:24:02.8088016Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=7m0s killed=7m2.63254456s healed=7m10.768654554s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:24:07.3567719Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=18 elapsed=7m15.346636205s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:24:29.9068789Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=7m30s killed=7m30.163912611s healed=7m37.878433909s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:24:29.9080681Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=19 elapsed=7m37.89815633s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:24:49.8049464Z     tier3_mixed_journal_test.go:843: tier3 checkpoint audit batch=20 invocation_cutoff=560 started elapsed=7m57.794127591s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:24:49.8051741Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=20 elapsed=7m57.794201338s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:25:02.3445558Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=8m0s killed=8m1.648633817s healed=8m10.30965001s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:25:03.5212095Z     tier3_mixed_journal_test.go:862: tier3 checkpoint batch=20 report={Invocations:560 Journals:560 Entries:6163 Terminal:560}
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:25:14.0562835Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=21 elapsed=8m22.046061486s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:25:35.1025294Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=8m30s killed=8m34.537289682s healed=8m43.061085581s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:25:40.0060747Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=22 elapsed=8m47.995590134s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:26:00.0675772Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=9m0s killed=9m0.227941186s healed=9m8.037905013s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:26:04.8786665Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=23 elapsed=9m12.867797529s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:26:26.1698046Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=24 elapsed=9m34.159713459s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:26:35.9960463Z     tier3_mixed_journal_test.go:808: tier3 server_clock_behind fault node=4 scheduled=9m30s killed=9m34.626297528s healed=9m43.967653317s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:26:51.0760748Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=25 elapsed=9m59.058316642s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:27:10.7303716Z     tier3_mixed_journal_test.go:43: tier3 mixed batch=26 elapsed=10m18.720299554s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:18.4690816Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_CELL type=matrixshort invocations=104 terminal_p99=5.22081109s progress_p99=5.189342984s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:18.4694230Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_CELL type=matrixtimer invocations=78 terminal_p99=8.603700232s progress_p99=6.556037305s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:18.4707379Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_CELL type=matrixsignal invocations=52 terminal_p99=3.916153466s progress_p99=8.498454552s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:18.4709801Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_CELL type=matrixfanout invocations=26 terminal_p99=8.746470483s progress_p99=9.908412445s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:18.4711913Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_CELL type=matrixchild invocations=156 terminal_p99=500.725966ms progress_p99=6.129810315s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:18.4721525Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_CELL type=matrixgrandchild invocations=312 terminal_p99=317.00355ms progress_p99=168.077421ms
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:19.1470282Z     tier3_mixed_journal_test.go:43: TIER3_MIXED_RESULT row=server_clock_behind seed=1 duration=10m0s five_replicas=true batches=26 invocations=728 entries=8009 faults=19 full_matrix_release=false
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:22.8769672Z --- PASS: TestFiveContainerMixedServerClockBehindWithJournalKills (744.60s)
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:22.8770566Z PASS
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:23.8978780Z ok  	js-wf/integration	745.628s
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:24.7582638Z Traceback (most recent call last):
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:24.7583957Z   File "/home/runner/work/js-wf/js-wf/scripts/check-tier3-journal-row.py", line 780, in <module>
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:24.7585605Z     report['controller_latency_artifact_checks']=controller.check(args.root,report,timestamp_ns)
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:24.7587546Z                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:24.7588210Z   File "/home/runner/work/js-wf/js-wf/scripts/check-controller-latency.py", line 157, in check
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:24.7588961Z     raise ValueError('duplicate or incorrect controller timer duration')
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:24.7589501Z ValueError: duplicate or incorrect controller timer duration
+journal	Sustain the selected five-container mixed fault row	2026-10-02T06:28:24.7932274Z ##[error]Process completed with exit code 1.

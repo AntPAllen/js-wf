@@ -127,6 +127,19 @@ type DispatchEvent struct {
 	Error       string
 }
 
+// WithJournalEncoding selects new writes. Upgrade every reader before enabling
+// protobuf; legacy JSON and protobuf entries can coexist in one invocation.
+func WithJournalEncoding(encoding journal.Encoding) Option {
+	return func(w *Worker) error {
+		store, err := journal.NewWithEncoding(w.js, encoding)
+		if err != nil {
+			return err
+		}
+		w.jrn = store
+		return nil
+	}
+}
+
 // WithDispatchObserver supplies optional per-delivery diagnostics.
 func WithDispatchObserver(observe func(DispatchEvent)) Option {
 	return func(w *Worker) error {

@@ -2,9 +2,9 @@ name: journal-protocol-interop
 on:
   workflow_dispatch:
   push:
-    paths: ['protocol/**', 'scripts/check-protocol-interop.py', 'wf/**', 'go.mod', 'go.sum', '.github/workflows/protocol-interop.yml']
+    paths: ['protocol/**', 'journal/**', 'worker/**', 'client/**', 'integrity/**', 'retention/**', 'cmd/wf-worker/**', 'integration/journal_encoding_test.go', 'scripts/check-protocol-interop.py', 'wf/**', 'go.mod', 'go.sum', '.github/workflows/protocol-interop.yml']
   pull_request:
-    paths: ['protocol/**', 'scripts/check-protocol-interop.py', 'wf/**', 'go.mod', 'go.sum', '.github/workflows/protocol-interop.yml']
+    paths: ['protocol/**', 'journal/**', 'worker/**', 'client/**', 'integrity/**', 'retention/**', 'cmd/wf-worker/**', 'integration/journal_encoding_test.go', 'scripts/check-protocol-interop.py', 'wf/**', 'go.mod', 'go.sum', '.github/workflows/protocol-interop.yml']
 permissions:
   contents: read
 jobs:
@@ -22,7 +22,11 @@ jobs:
       - name: Install independent protobuf compiler and Python runtime
         run: sudo apt-get update && sudo apt-get install -y protobuf-compiler python3-protobuf
       - name: Check Go envelope and SDK recovery decisions
-        run: go test -p=1 -race ./protocol/...
+        run: go test -p=1 -race ./journal ./protocol/...
+      - name: Verify real protobuf worker, mixed-format compaction and CLI
+        run: |
+          go test -p=1 -race ./integration -run '^TestProtobufWorkerResumesJSONPrefixAndCompacts$' -count=1 -v
+          go test -p=1 -race ./cmd/wf-worker -run '^TestWorkerRunnerProtobufJournal$' -count=1 -v
       - name: Exchange exact uint64 and JSON payload bytes with Python
         shell: bash
         run: |

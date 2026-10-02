@@ -60,7 +60,7 @@ class ControllerLatencyChecks(unittest.TestCase):
     def test_corrupt_or_incomplete_observations_fail(self):
         for mode in ('missing_call', 'unknown_without_receipt', 'wrong_receipt', 'duplicate_receipt',
                      'wrong_bound', 'wrong_clock', 'missing_sample', 'wrong_delay', 'wrong_p99',
-                     'early_timer', 'missing_timer', 'duplicate_window', 'missing_clock_lookup', 'wrong_clock_lookup', 'missing_client_call', 'late_start_anchor', 'cut_profile_without_long_wait', 'unknown_profile'):
+                     'early_timer', 'missing_timer', 'duplicate_window', 'missing_clock_lookup', 'wrong_clock_lookup', 'missing_client_call', 'late_start_anchor', 'cut_profile_without_long_wait', 'all_cut_profile_without_long_wait', 'unknown_profile'):
             with self.subTest(mode=mode), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
                 files = {p.name: json.loads(p.read_text()) for p in FIXTURE.glob('*.json')}
@@ -69,6 +69,7 @@ class ControllerLatencyChecks(unittest.TestCase):
                 operations = files['controller-operations.json']
                 receipts = files['controller-receipts.json']
                 if mode == 'cut_profile_without_long_wait': report['clock_timer_cut_profile'] = 'first-wait-2s'
+                elif mode == 'all_cut_profile_without_long_wait': report['clock_timer_cut_profile'] = 'all-waits-2s'
                 elif mode == 'unknown_profile': report['clock_timer_cut_profile'] = 'anything'
                 elif mode == 'missing_call': operations.pop(0)
                 elif mode == 'unknown_without_receipt':

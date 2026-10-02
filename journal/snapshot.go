@@ -181,7 +181,7 @@ func (s *Store) MaybeSnapshot(ctx context.Context, typ, id string, interval, kee
 		return err
 	}
 	var entry Entry
-	if err := json.Unmarshal(last.Data, &entry); err != nil {
+	if err := UnmarshalEntry(last.Data, &entry); err != nil {
 		return ErrGap
 	}
 	var covered uint64

@@ -303,7 +303,7 @@ func diagnoseAppend(js jetstream.JetStream, id string, index int, expectedSeq ui
 	if lastErr == nil {
 		actualSeq = last.Sequence
 		var e journal.Entry
-		if json.Unmarshal(last.Data, &e) == nil {
+		if journal.UnmarshalEntry(last.Data, &e) == nil {
 			actualIndex = e.Index
 		}
 	}

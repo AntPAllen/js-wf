@@ -27,6 +27,14 @@ class JournalRowChecks(unittest.TestCase):
         self.assertEqual(row.check(alternate, '10m')['duration_seconds'], 600)
         self.assertTrue(row.check(fixture('35s'), '35s')['shortened_smoke'])
 
+    def test_explicit_clock_duration_profiles(self):
+        for profile in ('first-wait-2s', 'all-waits-2s'):
+            events = fixture()
+            events[0]['Test'] = row.TESTS['server_clock_behind']
+            events[1]['Test'] = row.TESTS['server_clock_behind']
+            events[0]['Output'] = events[0]['Output'].replace('row=journal', 'row=server_clock_behind') + f'TIER3_CLOCK_TIMER_CUT_PROFILE={profile}\n'
+            self.assertEqual(row.check(events, '10m', 'server_clock_behind')['clock_timer_cut_profile'], profile)
+
     def test_false_green_rejected(self):
         for name in ('skip', 'fail', 'missing_package', 'wrong_duration', 'replicas', 'release',
                      'missing_workload', 'count', 'p99', 'faults', 'duplicate_result'):

@@ -2,14 +2,35 @@
 
 ## Encoding and compatibility
 
-The production `WF_JRN` writer currently publishes UTF-8 JSON `journal.Entry`
-objects. A read `journal.Record` adds the physical JetStream `sequence` outside
-that stored entry. The versioned [protobuf schema](../protocol/v1/journal.proto)
-and Go `protocol` adapters define an **interchange contract** for these records.
-They do not switch the production storage encoding. Do not publish these protobuf
-bytes directly to `WF_JRN`: current readers expect JSON. Persisted protobuf,
-encoding negotiation, rolling migration and a second executable SDK remain open
-plan requirements.
+The production `WF_JRN` writer defaults to UTF-8 JSON `journal.Entry`
+objects. Updated readers also accept versioned protobuf entries. Select new
+protobuf writes with `wf-worker -journal-encoding protobuf-v1` or
+`worker.WithJournalEncoding(journal.ProtobufV1)`. Existing retained entries are
+not rewritten. JSON and protobuf can coexist within an invocation, including
+across fencing epochs. A read `journal.Record` adds the physical JetStream
+`sequence` outside the stored entry.
+
+Persisted protobuf bytes are the four-byte marker `57 46 4a 00` (`WFJ` plus NUL)
+followed by the [version-1 envelope](../protocol/v1/journal.proto). Stored envelope
+sequence must be zero: JetStream supplies the physical sequence. Bare interchange
+envelopes are not storage messages. After recognizing the marker, readers fail
+closed on invalid/unsupported envelopes and never fall back to JSON. Encoding
+errors leave decode destinations unchanged. Snapshot manifests and archived
+record arrays continue to use their existing JSON formats; compaction can compact
+JSON payload whitespace, so arbitrary payload-byte preservation through snapshot
+JSON is not claimed. Runtime hash fields still refer to the original input or
+Object Store bytes specified below.
+
+Upgrade **every reader** before enabling protobuf writes: workers, clients,
+repair scanners, auditors, snapshot/continuation tooling and retention tools.
+Older JSON-only readers cannot read protobuf entries. Keep writers on JSON during
+the reader upgrade; then enable protobuf writes. Updated writers can return to
+JSON while reading mixed history, but rolling binaries back to JSON-only readers
+is unsafe while any protobuf entry remains. There is no automatic encoding
+negotiation, fleet-version detection or in-place historical rewrite. Focused
+mixed-format recovery/compaction and CLI tests pass; full rolling-upgrade and
+chaos matrix acceptance for protobuf remains open. The original plan calls for
+a Go-only SDK; an additional executable SDK is future scope, not a release gate.
 
 Generate Go bindings with protoc 3.21.12 and protoc-gen-go v1.36.6:
 
@@ -117,4 +138,7 @@ and the four recovery states using the actual Go SDK producer and replay engine.
 to decode all Go vectors, then constructs distinct Python records for Go to decode.
 `journal-protocol-interop.yml` runs both directions under the Go race detector and
 retains vectors, tool versions and hashes. This is a codec interoperability test,
-not proof that a second SDK or persisted protobuf migration is implemented.
+not proof of a second SDK or a full rolling-upgrade/chaos matrix pass.
+The same CI also exercises a real R3 worker resuming a JSON prefix, protobuf
+persistence, all-peer audit, snapshot compaction and blob retention, plus the
+CLI encoding flag and retention/reuse workflow.

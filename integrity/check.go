@@ -3,7 +3,6 @@ package integrity
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/nats-io/nats.go"
@@ -140,7 +139,7 @@ func check(ctx context.Context, js jetstream.JetStream, cutoff *uint64) (Report,
 			}
 		}
 		var e journal.Entry
-		if err := json.Unmarshal(m.Data, &e); err != nil {
+		if err := journal.UnmarshalEntry(m.Data, &e); err != nil {
 			return err
 		}
 		groups[m.Subject] = struct{}{}

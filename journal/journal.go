@@ -88,6 +88,7 @@ func DecodeAttempt(data []byte) (AttemptPayload, error) {
 }
 
 type Store struct {
+	encoding          Encoding
 	js                jetstream.JetStream
 	appendPort        AppendPort
 	readPort          ReadPort
@@ -272,14 +273,14 @@ func (s *Store) Append(ctx context.Context, typ, id string, e Entry, expectedSeq
 			return 0, ErrStale
 		}
 		var prev Entry
-		if err := json.Unmarshal(last.Data, &prev); err != nil {
+		if err := UnmarshalEntry(last.Data, &prev); err != nil {
 			return 0, ErrGap
 		}
 		if e.Index != prev.Index+1 || e.Epoch < prev.Epoch || prev.Kind == Completed || prev.Kind == Failed || e.Kind == Started {
 			return 0, ErrStale
 		}
 	}
-	data, err := json.Marshal(e)
+	data, err := MarshalEntry(e, s.encoding)
 	if err != nil {
 		return 0, err
 	}
@@ -424,7 +425,7 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 			return nil, 0, err
 		}
 		var e Entry
-		if err := json.Unmarshal(m.Data, &e); err != nil {
+		if err := UnmarshalEntry(m.Data, &e); err != nil {
 			return nil, 0, fmt.Errorf("%w: %v", ErrGap, err)
 		}
 		out, err = verifyNext(out, Record{Entry: e, Sequence: m.Sequence})
@@ -494,7 +495,7 @@ func readLiveBatchFrom(ctx context.Context, port BatchReadPort, subject string, 
 		messages, transportErr := consumer.Fetch(ctx, 256)
 		for _, msg := range messages {
 			var entry Entry
-			if err := json.Unmarshal(msg.Data, &entry); err != nil {
+			if err := UnmarshalEntry(msg.Data, &entry); err != nil {
 				return nil, 0, false, fmt.Errorf("%w: %v", ErrGap, err)
 			}
 			var err error

@@ -270,7 +270,7 @@ func SweepBlobsQuiescentWithPort(ctx context.Context, port BlobSweepPort, minAge
 				mark(message.Header.Get("Wf-Signal-Ref"))
 			case "WF_JRN":
 				var entry journal.Entry
-				if err := json.Unmarshal(message.Data, &entry); err != nil {
+				if err := journal.UnmarshalEntry(message.Data, &entry); err != nil {
 					return BlobSweepResult{}, fmt.Errorf("journal sequence %d: %w", seq, err)
 				}
 				if err := markEntryRefs(entry, mark); err != nil {

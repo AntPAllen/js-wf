@@ -233,7 +233,7 @@ func TestWorkerRunnerRunsFallbackTimerLoop(t *testing.T) {
 	}
 }
 
-func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
+func runWorkerSmoke(t *testing.T, pluginPath, mode string, encodings ...string) {
 	t.Helper()
 	cluster, err := testcluster.Start(t.TempDir(), 1)
 	if err != nil {
@@ -278,6 +278,9 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
 		// This fixture pre-provisions native timers, so admission is explicit.
 		args = append(args, "-timer-backend", "native")
 	}
+	if len(encodings) > 0 {
+		args = append(args, "-journal-encoding", encodings[0])
+	}
 	done := make(chan error, 1)
 	go func() { done <- run(ctx, args) }()
 	httpClient := &http.Client{Timeout: time.Second}
@@ -309,6 +312,16 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
 	result, err := c.Await(ctx, "worker-smoke", "job")
 	if err != nil || string(result) != "42" {
 		t.Fatalf("runner result=%s err=%v", result, err)
+	}
+	if len(encodings) > 0 {
+		stream, err := js.Stream(ctx, "WF_JRN")
+		if err != nil {
+			t.Fatal(err)
+		}
+		raw, err := stream.GetLastMsgForSubject(ctx, identity.JournalSubject("worker-smoke", "job"))
+		if err != nil || !bytes.HasPrefix(raw.Data, []byte{'W', 'F', 'J', 0}) {
+			t.Fatal("CLI did not persist protobuf", err)
+		}
 	}
 	response, err := httpClient.Get(metricsURL)
 	if err != nil {
@@ -415,4 +428,8 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string) {
 	case <-time.After(10 * time.Second):
 		t.Fatal("worker runner did not shut down")
 	}
+}
+
+func TestWorkerRunnerProtobufJournal(t *testing.T) {
+	runWorkerSmoke(t, testWorkerPlugin(t), "static", "protobuf-v1")
 }

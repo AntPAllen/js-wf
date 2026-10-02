@@ -3,8 +3,9 @@ syntax = "proto3";
 package jetstream.workflow.v1;
 option go_package = "js-wf/protocol/v1;protocolv1";
 
-// Versioned interchange envelope. WF_JRN currently persists the JSON mapping
-// documented in docs/journal-protocol.md; these bytes are not a WF_JRN publish.
+// Versioned interchange envelope. Protobuf WF_JRN storage requires the WFJ-NUL
+// prefix and sequence=0, documented in docs/journal-protocol.md. Bare envelope
+// bytes are not a WF_JRN storage publish. JSON remains the default writer.
 message JournalRecord {
   uint32 version = 1; // Must be 1. Zero/unknown versions are rejected.
   uint64 sequence = 2; // Physical JetStream sequence; zero for an unbound entry.
