@@ -96,9 +96,15 @@ func limitKillHandlers(path string, budget uint64, replacement bool) (map[string
 			if _, err := wf.AwaitSignal(c, "gate"); err != nil {
 				return nil, err
 			}
-			_, err := wf.Run(c, "must_not_run", 10, func(context.Context) (int, error) {
+			_, err := wf.Run(c, "must_not_run", 10, func(effectCtx context.Context) (int, error) {
 				if err := limitKillLog(path, "effect"); err != nil {
 					return 0, err
+				}
+				if replacement {
+					// The controller detects this durable violation and cancels the
+					// worker. Do not require a terminal append beyond the hard cap.
+					<-effectCtx.Done()
+					return 0, effectCtx.Err()
 				}
 				return 20, nil
 			})
@@ -383,7 +389,37 @@ func runContinuationLimitKill(t *testing.T, budget uint64, cut string) {
 			}
 		}
 	}()
-	_, terminalErr := c.Await(ctx, limitKillType, limitKillID)
+	awaitCtx, cancelAwait := context.WithCancel(ctx)
+	defer cancelAwait()
+	effectObserved := make(chan struct{}, 1)
+	watchDone := make(chan struct{})
+	go func() {
+		defer close(watchDone)
+		ticker := time.NewTicker(20 * time.Millisecond)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-awaitCtx.Done():
+				return
+			case <-ticker.C:
+				data, err := os.ReadFile(path + ".handlers")
+				if err == nil && bytes.Contains(data, []byte("effect\n")) {
+					effectObserved <- struct{}{}
+					cancelAwait()
+					return
+				}
+			}
+		}
+	}()
+	_, terminalErr := c.Await(awaitCtx, limitKillType, limitKillID)
+	cancelAwait()
+	<-watchDone
+	forbiddenEffect := false
+	select {
+	case <-effectObserved:
+		forbiddenEffect = true
+	default:
+	}
 	recovery := time.Since(killedAt)
 	stop()
 	// Join before inspecting the non-concurrent frame-port counters.
@@ -397,6 +433,9 @@ func runContinuationLimitKill(t *testing.T, budget uint64, cut string) {
 		t.Fatal(err)
 	}
 	save("journal", records)
+	if forbiddenEffect {
+		t.Fatal("forbidden effect ran after takeover")
+	}
 	if terminalErr == nil || terminalErr.Error() != journal.ErrTooLong.Error() {
 		t.Fatalf("limit outcome changed: %v", terminalErr)
 	}

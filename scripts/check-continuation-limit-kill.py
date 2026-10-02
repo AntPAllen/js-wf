@@ -79,9 +79,12 @@ def main():
     status, negative, rows = run('suffix-budget', '^' + TEST + '/after_signal$', overlay)
     assert status == 1
     actual(negative, TEST + '/after_signal', 'fail')
-    assert any('limit outcome changed: <nil>' in e.get('Output', '') for e in negative), 'wrong detection'
+    assert any('forbidden effect ran after takeover' in e.get('Output', '') for e in negative), 'wrong detection'
     raw = json.loads((rows / 'after_signal/journal.json').read_text())
-    assert len(raw) > args.budget and raw[-1]['kind'] == 'Completed'
+    prefix = json.loads((rows / 'after_signal/prefix.json').read_text())
+    assert len(raw) == args.budget and raw[:len(prefix)] == prefix
+    assert raw[-1]['kind'] == 'StepRequested' and raw[-1]['index'] == args.budget - 1
+    assert raw[-1]['payload']['name'] == 'must_not_run'
     assert (rows / 'after_signal/child.handlers').read_text().count('effect\n') == 1
     assert hashes == {n: hashlib.sha256((ROOT / n).read_bytes()).hexdigest() for n in names}, 'source changed'
     report = {'head': head, 'budget': args.budget, 'actual_combined_cuts': 3, 'actual_worker_sigkills': 3,

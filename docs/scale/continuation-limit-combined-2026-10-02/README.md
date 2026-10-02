@@ -70,3 +70,26 @@ including the original positive and rejected negative events, handler logs,
 prefixes, frame/lease evidence and terminal failed-job log. Every member was
 SHA256-compared on readback. Hosted physical stores/binaries were not uploaded
 and are not claimed to be preserved in that archive.
+
+## Prompt forbidden-effect detection
+
+The replacement fixture now fsyncs the forbidden-effect log and waits for its
+activity context to be canceled. A controller watcher cancels Await immediately
+on that actual effect, then stops/joins the replacement and saves the original
+cut prefix and final raw journal before failing with
+`forbidden effect ran after takeover`. The callback is context-cooperative; it
+does not repeatedly execute while the journal's hard cap blocks completion.
+Production worker/journal code and all recovery/lease limits are unchanged.
+
+The revised runner requires the actual named semantic failure, one effect, the
+original prefix, and a full-budget journal ending at its forbidden StepRequested.
+This works at small or production budgets without requiring impossible beyond-
+cap completion. Final local budget20 race contract passes all three positive
+cuts and detects the compiled suffix-budget control; independent readback
+verifies20 entries, the unchanged prefix and exactly one effect. Vet passes.
+`prompt-effect-contract` preserves all non-store originals, exact overlay,
+source hashes and review, with SHA256 comparison of every member on readback.
+Original local stores remain in the temporary root. Source hashes name parent
+324c2c2 plus the corresponding modified fixture/runner in this commit. Hosted
+budget20 and production100000 qualification of this corrected detector remain
+required; the original25-minute negative timeout remains rejected/preserved.

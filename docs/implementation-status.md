@@ -7134,3 +7134,19 @@ remain confirmed active; current ahead1..200 run37040118844 remains queued. The
 fresh all-six mutation gate is accepted at0f. Million-timer recovery cause,
 combined production-cap negative qualification, full matrix and24h runtime soak
 remain open. The historical31.1s/30s-TTL worker-kill mismatch is not being rerun.
+
+
+## Production-cap negative detector corrected locally
+
+The [combined cap fixture](scale/continuation-limit-combined-2026-10-02/) now
+detects the first actual forbidden effect and cancels/joins the replacement
+before saving its raw journal and failing semantically. The effect callback
+waits cooperatively for cancellation after its synced log, preventing repeated
+effects while the independent hard cap prevents completion. Runtime/journal
+code and12s TTL/<30s recovery are unchanged. Revised local budget20 race
+contract passes all three positives; the compiled suffix-budget control fails
+with one effect and20 entries ending at the forbidden request. Vet and independent
+raw/source checks pass. Corrected hosted20/100000 qualification remains open.
+Original production-cap positives stay verified; original negative timeout
+remains rejected and preserved. Older117-workload100k run37012116265 is terminal
+success but raw acceptance remains pending; current119-workload run is active.
