@@ -23,3 +23,10 @@ was running concurrently throughout. These are no-fault live inline observations
 at 10M cardinality, not spilled-input evidence at 10M or a chaos/release gate.
 Timing, effects, spill and RSS are recorded observations. The retained stores
 remain at `/tmp/js-wf-scale-live-inline-10m-20260930` on the measurement VM.
+
+## Storage archival (2026-10-02)
+
+The broker-store files at the measurement root are now losslessly compressed
+under `broker-store-archive/`. Reports/audits/logs remain unchanged. Per-file
+hash verification, manifests and the fresh-directory restore command are in
+[archive evidence](../terminal-scale-store-archives-2026-10-02/).

@@ -696,6 +696,34 @@ def check_server_clock_role_artifacts(root, report, selected_row):
                 shifted_timer_clock_lookups=shifted, shifted_native_hint_lookups=hints, admits_all_in_flight_timer_cut_combinations=False)
 
 
+def check_checkpoint_audits(root, report):
+    rows = json.loads((root/'checkpoint-audits.json').read_text())
+    rows = [] if rows is None else rows
+    if not isinstance(rows, list):
+        raise ValueError('checkpoint audit evidence must be a list')
+    batches = report['invocations'] // 28
+    expected = list(range(10, batches+1, 10))
+    if [row.get('batch') for row in rows] != expected:
+        raise ValueError('missing, duplicated or out-of-order checkpoint audits')
+    previous = 0
+    for row in rows:
+        batch, cutoff = row['batch'], row.get('invocation_cutoff')
+        if type(cutoff) is not int or cutoff < batch*28 or cutoff <= previous:
+            raise ValueError('invalid completed-cohort cutoff')
+        previous = cutoff
+        started, completed = timestamp_ns(row['started']), timestamp_ns(row['completed'])
+        if started <= 0 or completed < started or row.get('error'):
+            raise ValueError('failed or incomplete checkpoint audit')
+        counts = row['report']
+        if any(type(counts.get(key)) is not int or counts[key] != batch*28
+               for key in ('Invocations', 'Journals', 'Terminal')):
+            raise ValueError('checkpoint cohort count mismatch')
+        if type(counts.get('Entries')) is not int or counts['Entries'] < batch*28*4:
+            raise ValueError('missing checkpoint journal entries')
+    return dict(completed_cohort_audits=len(rows), all_expected_checkpoints_present=True,
+                scope='Captured completed cohorts; mandatory final whole-state check remains separate.')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, help='required consumer/restart fault artifacts')
@@ -705,6 +733,7 @@ if __name__ == '__main__':
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--require-clock-timer-cut', action='store_true')
     parser.add_argument('--require-common-timer-clock', action='store_true')
+    parser.add_argument('--require-checkpoint-audits', action='store_true')
     args = parser.parse_args()
     if args.require_clock_timer_cut and not args.row.startswith('server_clock_'):
         parser.error('--require-clock-timer-cut requires a server-clock row')
@@ -755,5 +784,8 @@ if __name__ == '__main__':
         if required:
             admission=load('clock_timer_cut','check-clock-timer-cut.py')
             report['clock_timer_cut_artifact_checks']=admission.check(args.root,report,args.row,timestamp_ns)
+    if args.require_checkpoint_audits:
+        if args.root is None: parser.error('--root is required for checkpoint audits')
+        report['checkpoint_audit_checks'] = check_checkpoint_audits(args.root, report)
     args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(report, indent=2))

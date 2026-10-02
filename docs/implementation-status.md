@@ -6025,3 +6025,37 @@ Original/rechecked reports match; source-sensitive files equal the exact commit;
 service is inactive/success/exit zero. The1000 normal whole-suite gate is clear
 at this source, while100k and full race remain open. Changed-source admitted
 native behind36967016515 is confirmed in progress; no native acceptance yet.
+
+## Ten-million-subject spilled-input live cohort passes (2026-10-02)
+
+[Fresh source160cf8d measurement](scale/live-cardinality-spilled-10m-2026-10-02/)
+is terminal/success and independently offline-verified. Three R3/file processes
+retain10M background subjects per stream, then1000 exact1.1MB spilled inputs
+complete with immutable length/hash results across peers and queue drain.
+Raw cohort audit1000 invocations/journals,4000 entries,1000 terminals. Each peer
+has10,001,000 subjects per stream and10,001,000/10,004,000 inv/journal messages.
+Start-to-result p99/max1.695865211/2.800916200s; live phase33.501s; post-live
+RSS3879–3952MiB/node. Report/source/original hashes and terminal service are
+retained. This clears the outstanding10M spilled-input live measurement, not10M
+active executions or chaos/soak. The million-timer service remains live.
+
+[Lossless old-store archival](scale/terminal-scale-store-archives-2026-10-02/)
+retains7269 gzip broker files and original path/mode/mtime/SHA256 manifests,
+verifies every decompressed byte before removing originals, and frees9.16GiB.
+Reports/audits/logs are unchanged. Fresh-directory restore tool and actual block
+restores preserve recoverability. All compressed store files remain on this VM;
+live timer files are excluded.
+
+## Thirteenth admitted clock cut followed by synchronous checkpoint gap (2026-10-02)
+
+[Failed behind36967016515](scale/canonical-r5-native-2026-10-02/behind-thirteen-cut-checkpoint-failure/)
+atc477f00 reaches13 completed fault records/cut files, then fails14th admission
+while a batch50 whole-state audit blocks the next batch. Retained receipts show
+all1400 observed tails Completed before that fault; there is no final accepted
+latency/history/drain/state proof. Original artifacts and terminal/log state are
+retained. [Tier3 checkpoint scheduling change](scale/tier3-independent-checkpoints-2026-10-02/)
+uses the existing completed-cohort checker on one independent reader, captures
+cutoffs before subsequent starts, joins every checkpoint, and retains the final
+whole-state audit. Future CI requires exact expected checkpoint artifacts; all43
+Python controls and real cohort/admission race controls pass. New native evidence
+remains required; no admission or latency relaxation is introduced.

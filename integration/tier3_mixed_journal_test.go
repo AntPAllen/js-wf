@@ -23,6 +23,7 @@ import (
 	"js-wf/assignment"
 	"js-wf/client"
 	"js-wf/history"
+	"js-wf/integrity"
 	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/reconcile"
@@ -273,6 +274,15 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		repairs = append(repairs, event)
 		evidenceMu.Unlock()
 	}
+	type checkpointAudit struct {
+		Batch     int              `json:"batch"`
+		Cutoff    uint64           `json:"invocation_cutoff"`
+		Started   time.Time        `json:"started"`
+		Completed time.Time        `json:"completed"`
+		Report    integrity.Report `json:"report"`
+		Error     string           `json:"error,omitempty"`
+	}
+	var checkpointAudits []checkpointAudit
 	var scans []struct {
 		At     time.Time
 		Cursor uint64
@@ -565,6 +575,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		write("fencing.json", fencing)
 		write("repairs.json", repairs)
 		write("suspended-scans.json", scans)
+		write("checkpoint-audits.json", checkpointAudits)
 		evidenceMu.Unlock()
 		evidenceMu.Lock()
 		write("server-clock-observations.json", clockObservations)
@@ -813,8 +824,59 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			<-faultDone
 		}
 	}()
+	// Audit each completed cohort independently so raw-state reads do not stop
+	// the workload from supplying pending waits at scheduled clock cuts.
+	type checkpoint struct {
+		batch  int
+		cutoff uint64
+	}
+	checkpoints := make(chan checkpoint, 128)
+	checkpointErrors := make(chan error, 1)
+	checkpointCtx, stopCheckpoints := context.WithCancel(ctx)
+	checkpointDone := make(chan struct{})
+	go func() {
+		defer close(checkpointDone)
+		for {
+			select {
+			case <-checkpointCtx.Done():
+				return
+			case cut, ok := <-checkpoints:
+				if !ok {
+					return
+				}
+				auditStarted := time.Now().UTC()
+				t.Logf("tier3 checkpoint audit batch=%d invocation_cutoff=%d started elapsed=%s", cut.batch, cut.cutoff, time.Since(started))
+				report, err := matrixRetainedAuditUsing(checkpointCtx, func(attempt context.Context) (integrity.Report, error) {
+					return integrity.CheckThroughInvocationSequence(attempt, js, cut.cutoff)
+				})
+				message := ""
+				if err != nil {
+					message = err.Error()
+				}
+				evidenceMu.Lock()
+				checkpointAudits = append(checkpointAudits, checkpointAudit{cut.batch, cut.cutoff, auditStarted, time.Now().UTC(), report, message})
+				evidenceMu.Unlock()
+				if checkpointCtx.Err() != nil {
+					return
+				}
+				if err != nil || report.Invocations != cut.batch*28 || report.Journals != cut.batch*28 || report.Terminal != cut.batch*28 {
+					checkpointErrors <- fmt.Errorf("intermediate retained audit batch=%d cutoff=%d report=%+v err=%v", cut.batch, cut.cutoff, report, err)
+					cancel()
+					return
+				}
+				t.Logf("tier3 checkpoint batch=%d report=%+v", cut.batch, report)
+			}
+		}
+	}()
+	defer func() { stopCheckpoints(); <-checkpointDone }()
 	batches := 0
 	for time.Now().Before(end) && ctx.Err() == nil {
+		select {
+		case err := <-checkpointErrors:
+			t.Fatal(err)
+		default:
+		}
+
 		kinds := []string{"matrixshort", "matrixshort", "matrixshort", "matrixshort", "matrixtimer", "matrixtimer", "matrixtimer", "matrixsignal", "matrixsignal", "matrixfanout"}
 		rng.Shuffle(len(kinds), func(i, j int) { kinds[i], kinds[j] = kinds[j], kinds[i] })
 		batchCtx, stopBatch := context.WithTimeout(ctx, 5*time.Minute)
@@ -867,13 +929,28 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		}
 		batches++
 		if batches%10 == 0 {
-			report, err := matrixRetainedAudit(ctx, js)
-			if err != nil || report.Invocations != batches*28 || report.Journals != batches*28 || report.Terminal != batches*28 {
-				t.Fatalf("checkpoint batch=%d report=%+v err=%v", batches, report, err)
+			stream, err := matrixReadMetadata(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })
+			if err != nil {
+				t.Fatal(err)
 			}
-			t.Logf("tier3 checkpoint batch=%d report=%+v", batches, report)
+			info, err := matrixReadMetadata(ctx, func(attempt context.Context) (*jetstream.StreamInfo, error) { return stream.Info(attempt) })
+			if err != nil {
+				t.Fatal(err)
+			}
+			select {
+			case checkpoints <- checkpoint{batches, info.State.LastSeq}:
+			case <-ctx.Done():
+				t.Fatalf("enqueue checkpoint: %v", ctx.Err())
+			}
 		}
 		t.Logf("tier3 mixed batch=%d elapsed=%s", batches, time.Since(started))
+	}
+	close(checkpoints)
+	<-checkpointDone
+	select {
+	case err := <-checkpointErrors:
+		t.Fatal(err)
+	default:
 	}
 	if err := <-faultDone; err != nil {
 		faultJoined = true

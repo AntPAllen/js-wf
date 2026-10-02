@@ -30,3 +30,10 @@ retained state, rather than independently re-observing the original execution.
 The retained race log verifies the real inline/spill cohort contract and ten
 negative offline controls, including a coherent but wrong terminal result.
 The stores remain at `/tmp/js-wf-scale-live-large-5m-20260930` on the VM.
+
+## Storage archival (2026-10-02)
+
+The broker-store files at the measurement root are now losslessly compressed
+under `broker-store-archive/`. Reports/audits/logs remain unchanged. Per-file
+hash verification, manifests and the fresh-directory restore command are in
+[archive evidence](../terminal-scale-store-archives-2026-10-02/).
