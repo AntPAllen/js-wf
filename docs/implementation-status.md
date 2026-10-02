@@ -6983,3 +6983,9 @@ raw prefixes/journals/Go events: all three real worker-SIGKILL/full-cluster-rest
 cuts preserve20 entries and immutable ErrTooLong, with no live/offline forbidden
 effect. The compiled control produces22 entries and one effect. Production
 default100000 run37037256768 remains active and is not yet accepted.
+
+The enlarged119-workload100k qualification is queued as
+[run37039245566](https://github.com/AntPAllen/js-wf/actions/runs/37039245566)
+at exact7c5fb3ea468836ee95fd5b3e48318b1e5467b292. The existing118-workload
+run37028379931 and production-cap continuation run37037256768 remain active.
+No existing campaign was replaced or restarted. A queued launch is not acceptance.
