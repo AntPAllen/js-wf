@@ -34,6 +34,94 @@ type heldSerialReadStream struct {
 	owner *heldSerialReadJS
 }
 
+type heldJournalLookupJS struct {
+	jetstream.JetStream
+	proxy    *testcluster.ClientProxy
+	requests atomic.Int32
+	retried  chan struct{}
+}
+
+func (h *heldJournalLookupJS) Stream(ctx context.Context, name string) (jetstream.Stream, error) {
+	if name == "WF_JRN" {
+		switch h.requests.Add(1) {
+		case 1:
+			h.proxy.HoldResponses()
+		case 2:
+			close(h.retried)
+		}
+	}
+	return h.JetStream.Stream(ctx, name)
+}
+
+func TestInitialJournalLookupRecoversHeldNetworkResponse(t *testing.T) {
+	all, cluster := setup(t)
+	ctx, stop := context.WithTimeout(context.Background(), 12*time.Second)
+	defer stop()
+	store := journal.New(all[0])
+	var tail uint64
+	for index, kind := range []journal.Kind{journal.Started, journal.StepRequested, journal.StepCompleted, journal.Completed} {
+		var err error
+		tail, err = store.Append(ctx, "test", "held-initial-lookup", journal.Entry{Index: uint64(index), Kind: kind}, tail)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	before, _, err := store.Read(ctx, "test", "held-initial-lookup")
+	if err != nil {
+		t.Fatal(err)
+	}
+	proxy, err := testcluster.NewClientProxy(cluster.Servers[0].ClientURL())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer proxy.Close()
+	nc, err := proxy.Connect()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer nc.Close()
+	js, err := jetstream.New(nc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hooked := &heldJournalLookupJS{JetStream: js, proxy: proxy, retried: make(chan struct{})}
+	reader := journal.New(hooked)
+	done := make(chan error, 1)
+	go func() {
+		after, observed, err := reader.Read(ctx, "test", "held-initial-lookup")
+		if err == nil && (!reflect.DeepEqual(before, after) || observed != tail) {
+			err = journal.ErrGap
+		}
+		done <- err
+	}()
+	defer proxy.ResumeResponses()
+	select {
+	case <-hooked.retried:
+	case <-time.After(4 * time.Second):
+		t.Fatal("lost initial journal metadata response occupied the read deadline without a retry")
+	}
+	proxy.ResumeResponses()
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-ctx.Done():
+		t.Fatal(ctx.Err())
+	}
+	if hooked.requests.Load() != 2 {
+		t.Fatalf("initial metadata requests=%d, want 2", hooked.requests.Load())
+	}
+	// Successful lookup is cached; later reads must not reopen metadata.
+	if _, _, err := reader.Read(ctx, "test", "held-initial-lookup"); err != nil {
+		t.Fatal(err)
+	}
+	if hooked.requests.Load() != 2 {
+		t.Fatal("successful metadata handle was not cached")
+	}
+	t.Logf("initial metadata recovery requests=2 records=%d tail=%d cached=true", len(before), tail)
+}
+
 func (s *heldSerialReadStream) GetMsg(ctx context.Context, seq uint64, opts ...jetstream.GetMsgOpt) (*jetstream.RawStreamMsg, error) {
 	if !s.owner.batch {
 		s.owner.holdReadResponse()

@@ -1,0 +1,68 @@
+name: journal-read-recovery
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/journal-read-recovery.yml'
+      - 'journal/**'
+      - 'internal/handlecache/**'
+      - 'integration/journal_serial_response_test.go'
+      - 'testcluster/client_proxy.go'
+      - 'go.mod'
+      - 'go.sum'
+jobs:
+  held-replies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Recover held metadata, serial, snapshot and consumer replies
+        run: |
+          go test -p=1 -race -json ./integration -run '^(TestInitialJournalLookupRecoversHeldNetworkResponse|TestSerialJournalReadRecoversHeldNetworkResponse|TestManifestReadRecoversHeldNetworkResponse|TestJournalConsumerCreationRecoversHeldNetworkResponse)$' -count=1 -timeout=3m > "$RUNNER_TEMP/journal-read-recovery.jsonl"
+      - name: Require semantic failure when the initial metadata bound is removed
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          baseline = [json.loads(line) for line in (root / 'journal-read-recovery.jsonl').read_text().splitlines()]
+          names = ['TestInitialJournalLookupRecoversHeldNetworkResponse', 'TestSerialJournalReadRecoversHeldNetworkResponse', 'TestManifestReadRecoversHeldNetworkResponse', 'TestJournalConsumerCreationRecoversHeldNetworkResponse']
+          for name in names:
+              assert [e['Action'] for e in baseline if e.get('Test') == name and e['Action'] in ('pass','fail','skip')] == ['pass']
+          hashes = {path: hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest() for path in ['journal/journal.go', 'integration/journal_serial_response_test.go', 'internal/handlecache/cache.go']}
+          (root / 'journal-read-recovery-source-sha256.json').write_text(json.dumps(hashes, indent=2)+'\n')
+          source = pathlib.Path('journal/journal.go').resolve()
+          original = source.read_text()
+          anchor = 'boundedReadRequest(ctx, waitReadRequest, "journal stream lookup", s.journalStream)'
+          assert original.count(anchor) == 1
+          changed = root / 'unbounded-journal-lookup.go'
+          changed.write_text(original.replace(anchor, 's.journalStream(ctx)'))
+          overlay = root / 'unbounded-journal-lookup-overlay.json'
+          overlay.write_text(json.dumps({'Replace': {str(source): str(changed)}}))
+          test = 'TestInitialJournalLookupRecoversHeldNetworkResponse'
+          result = subprocess.run(['go', 'test', '-p=1', '-overlay='+str(overlay), '-json', './integration', '-run', '^'+test+'$', '-count=1', '-timeout=1m'], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=90)
+          (root / 'unbounded-journal-lookup.jsonl').write_text(result.stdout)
+          events = [json.loads(line) for line in result.stdout.splitlines() if not line.startswith('go: downloading ')]
+          actions = [e['Action'] for e in events if e.get('Test') == test and e['Action'] in ('pass','fail','skip')]
+          output = ''.join(e.get('Output','') for e in events if e.get('Test') == test)
+          assert result.returncode != 0 and actions == ['fail']
+          assert 'lost initial journal metadata response occupied the read deadline without a retry' in output
+          assert 'panic: test timed out' not in result.stdout
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: journal-read-recovery
+          path: |
+            ${{ runner.temp }}/journal-read-recovery.jsonl
+            ${{ runner.temp }}/unbounded-journal-lookup.jsonl
+            ${{ runner.temp }}/unbounded-journal-lookup-overlay.json
+            ${{ runner.temp }}/unbounded-journal-lookup.go
+            ${{ runner.temp }}/journal-read-recovery-source-sha256.json
+          if-no-files-found: warn

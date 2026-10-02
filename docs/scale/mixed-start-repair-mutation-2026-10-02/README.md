@@ -43,6 +43,15 @@ which journal-opening/read request stalled or establish a server-side cause.
 Neither the runtime recovery target nor the fixture's150-second total deadline
 was increased.
 
-This advances the fifth mixed source-mutation category. Hosted acceptance is
-pending for the new mixed-start-repair job. The purge-order category and full
-mixed-chaos release campaign remain open.
+Hosted run37007279855 at `4e7de02` is independently accepted: all six jobs
+succeed, eleven baseline/mutant pairs execute with named pass/fail outcomes,
+recorded production/fixture hashes match the Git revision, and both negative
+controls per job are rejected. Actual raw orphan receipts bind the retained
+input/hash to the generation-tagged repaired dispatch; the mutant retains its
+invocation without a dispatch. Original artifacts, full job logs and terminal
+metadata are losslessly archived in [ci-pass](ci-pass/), with independent
+acceptance and member SHA256 records.
+
+This advances the fifth mixed source-mutation category. Purge now has separate
+local evidence; its hosted acceptance and the full mixed-chaos release campaign
+remain open.

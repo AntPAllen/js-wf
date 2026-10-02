@@ -1,0 +1,132 @@
+{
+  "run": 37007279855,
+  "source": "4e7de02fcd4612322980f83f202a76a4e942da9f",
+  "jobs": 6,
+  "semantic_pairs": [
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_cas",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "independent_worker_leases",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "invocation_purged_first",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_determinism_guard",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_run_message_id",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "skipped_start_reconciler",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-cas",
+      "mutation": "missing_cas",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-determinism",
+      "mutation": "missing_determinism_guard",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-enqueue",
+      "mutation": "missing_run_message_id",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-leases",
+      "mutation": "independent_worker_leases",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-start-repair",
+      "mutation": "skipped_start_reconciler",
+      "named_baseline_pass": true,
+      "named_mutant_fail": true,
+      "source_hashes_verified": true
+    }
+  ],
+  "start_repair_receipts": {
+    "baseline": {
+      "invocation": {
+        "Subject": "wf.inv.guardshort.repair-orphan",
+        "Sequence": 29,
+        "Header": {
+          "Nats-Expected-Last-Subject-Sequence": [
+            "0"
+          ],
+          "Wf-Input-SHA256": [
+            "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+          ]
+        },
+        "Data": "MA==",
+        "Time": "2026-10-02T12:41:35.163358944Z"
+      },
+      "dispatch": [
+        {
+          "Subject": "wf.run.0",
+          "Sequence": 53,
+          "Header": {
+            "Nats-Msg-Id": [
+              "start:guardshort.repair-orphan:29"
+            ]
+          },
+          "Data": "Z3VhcmRzaG9ydC5yZXBhaXItb3JwaGFu",
+          "Time": "2026-10-02T12:41:43.371595741Z"
+        }
+      ]
+    },
+    "mutated": {
+      "invocation": {
+        "Subject": "wf.inv.guardshort.repair-orphan",
+        "Sequence": 29,
+        "Header": {
+          "Nats-Expected-Last-Subject-Sequence": [
+            "0"
+          ],
+          "Wf-Input-SHA256": [
+            "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+          ]
+        },
+        "Data": "MA==",
+        "Time": "2026-10-02T12:42:19.568302981Z"
+      },
+      "dispatch": []
+    }
+  }
+}

@@ -379,7 +379,9 @@ func (s *Store) readOnce(ctx context.Context, typ, id string) ([]Record, uint64,
 	var stream jetstream.Stream
 	if s.readPort == nil {
 		var err error
-		stream, err = s.journalStream(ctx)
+		// A first metadata reply can be lost before any serial read begins.
+		// Keep its retry budget aligned with the journal reads that follow.
+		stream, err = boundedReadRequest(ctx, waitReadRequest, "journal stream lookup", s.journalStream)
 		if err != nil {
 			return nil, 0, err
 		}

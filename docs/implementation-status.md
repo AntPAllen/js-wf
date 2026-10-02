@@ -53,7 +53,21 @@
   returns ErrNotFound. Independent generation checks and the49.91s race baseline
   pass. See [purge evidence](scale/mixed-purge-mutation-2026-10-02/).
   All six source categories now have focused mixed fixtures; hosted acceptance
-  for the new purge fixture and prior start-repair campaign remains pending.
+  for the new purge fixture remains pending.
+- [Mutation run37007279855](https://github.com/AntPAllen/js-wf/actions/runs/37007279855)
+  is independently accepted at `4e7de02`: six successful jobs, eleven actual
+  semantic pairs, matching source/fixture hashes and rejected negative controls.
+  Original start-repair receipts bind retained input/hash and dispatch message ID
+  to the same generation. See
+  [CI acceptance](scale/mixed-start-repair-mutation-2026-10-02/ci-pass/).
+- Initial journal stream metadata lookup now uses the existing bounded read
+  retry policy. Four real R3 held-network-response contracts pass under race in
+  24.323s; restoring the old unbounded lookup makes the named metadata test fail
+  because no retry starts within4s. This closes an adapter-level read-deadline
+  gap without attributing the earlier mixed failure to a server bug. See
+  [lookup evidence](scale/initial-journal-lookup-recovery-2026-10-02/).
+  Dedicated hosted contract acceptance remains pending; initial metadata replies
+  are not represented by the existing116-workload virtual transport graph.
 - Current-source [100k run37002783868](https://github.com/AntPAllen/js-wf/actions/runs/37002783868)
   remains live at `3184b65`. The
   [ten-minute ahead run37002781141](https://github.com/AntPAllen/js-wf/actions/runs/37002781141)

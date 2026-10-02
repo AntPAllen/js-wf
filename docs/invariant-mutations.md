@@ -68,9 +68,10 @@ and records the fixture source hash. Signal attempts use a three-second budget
 and retry uncertain outcomes with the same idempotency key inside the unchanged
 150-second fixture deadline; worker metadata initialization is bounded too.
 
-This advances one category of the mixed mutation requirement. The other five
-mixed categories, more fault combinations and the full matrix release gates
-remain open. The existing default command still runs all six focused categories.
+This advances the determinism category of the mixed mutation requirement.
+The modes below provide other category fixtures; more fault combinations and
+the full matrix release gates remain open. The default command still runs all
+six smaller focused categories.
 The `mixed-determinism` workflow job retains the optional mode's evidence.
 
 ## Live mixed lease exclusion challenge
@@ -92,8 +93,8 @@ startup, timeout and unrelated cohort failures cannot count as mutation detectio
 This detects the broken lease exclusion contract in a live mixed fault workload.
 It does not claim that the mutated journal necessarily violates I2: journal CAS
 provides a separate defense. The CI `mixed-leases` job retains both executions and
-negative controls. Together with I4 this covers two mixed source-mutation
-categories; four categories and the full chaos release gate remain open.
+negative controls. This covers lease exclusion; the full sustained chaos release
+gate remains open.
 
 ## Live mixed CAS challenge
 
@@ -112,5 +113,30 @@ retained corruption; the fixture does not delete the bad acknowledged entry to
 force a completed mutant cohort. Raw receipts, all three fixture/gate source hashes
 and semantic markers are retained. CI runs this as `mixed-cas`.
 
-Together with I4 and leases, this covers three mixed source mutation categories.
-Three categories and the original full chaos/invariant release gate remain open.
+This covers CAS corruption; the original full chaos/invariant release gate
+remains open.
+
+## Additional mixed modes
+
+Select exactly one mode per runner invocation, always with `--output DIR`.
+Each mode records hashes for the shared fixture and its transport helper.
+
+| Mode | Baseline proof | Required mutant evidence |
+| --- | --- | --- |
+| `--mixed-enqueue` | 64 concurrent equal-ID calls retain one actual dispatch; all28 complete | At least64 distinct retained dispatches without message IDs; all28 still complete and audit |
+| `--mixed-start-repair` | A durable29th start with all initial dispatches dropped is repaired and completes | Scanner does no work; original28 complete and audit while the orphan has no dispatch, journal or state |
+| `--mixed-purge` | Retention interrupted before signal deletion resumes idempotently; reused ID has a fresh journal/new-generation outcome | Invocation disappears while journal/state/marker remain; actual purge retry returns ErrNotFound |
+
+All three require actual mixed admission, confirmed journal-leader SIGKILL and
+retained-state checks. Enqueue filters raw dispatch reads by physical sequence,
+partition subject and invocation body. Start repair reads the original invocation
+receipt and actual generation-tagged repaired dispatch. Its readiness checks use
+bounded attempts; an expired attempt is never a liveness-failure proof. Purge
+injects its cut through the real JetStream adapter and preserves the deliberately
+broken mutant state; it does not patch the invocation back into the stream.
+
+The workflow now runs the smaller six-category gate plus all six mixed modes.
+These are focused mixed fixtures with one admitted leader kill. They do not
+replace the plan's sustained whole-chaos mutation campaign, full seed counts or
+24-hour matrix. Accepted original artifacts and independently checked receipts
+are linked from [implementation status](implementation-status.md).
