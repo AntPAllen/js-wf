@@ -14,6 +14,8 @@
   campaign37045827952 are independently accepted at2a30165. All three production
   cuts recover in12.840s/12.835s/12.937s; the compiled mutant triggers one actual
   forbidden effect and fails semantically without a timeout.
+- Full fourteen-row R5 seed1 campaign37058644370 is queued at7c5e5d1, with
+  admitted timer cuts and independent clock proofs on both clock rows.
 - All-thirteen Tier2 seed1 campaign37050644803 is independently accepted at3f483bd,
   ten minutes per row,34,636 invocations/313 faults. It cannot clear200 seeds.
 - Fresh all-six ten-minute mutation gate37030840346 is accepted at0f979d0.
@@ -7496,3 +7498,16 @@ All57 Tier3 guard tests pass, including complete200-seed planning and missing/
 duplicate/failed/live/source/seed/checkpoint/clock/release rejection controls.
 YAML parses and every shell step passes bash syntax checking. These are harness
 checks, not executed14-row evidence or24h soak. Full release remains open.
+
+
+## Current full14 R5 seed1 campaign dispatched
+
+[Run37058644370](https://github.com/AntPAllen/js-wf/actions/runs/37058644370)
+is confirmed queued at exact7c5e5d18249b14fd98f2c043e60b616bfddf442b, with
+row=all/seeds=1/start_seed=1/duration=10m and both timer-cut/common-clock proof
+flags enabled. It plans all14 actual fault variants, with strict clock admission
+on both server-clock rows. Acceptance requires the new whole-campaign raw
+artifact/log/explanation guard after all terminal jobs. No14-row result or24h
+soak is claimed by dispatch. Tier2 all13x200 run37057872230 remains queued at
+076ebad; current120-workload100k37051896032 remains in progress atad37bfc.
+No running trial was restarted or canceled.
