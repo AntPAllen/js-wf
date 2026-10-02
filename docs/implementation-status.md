@@ -6471,3 +6471,50 @@ The strict source-removal-before-duration gate remains unchanged; the full
 campaign is failed and no unchanged replacement campaign was launched.
 Behind20 finished with all20 seed jobs passing; independent original-artifact
 campaign verification is underway before acceptance.
+
+
+## Independently accepted behind20 and older100k campaigns
+
+[Behind20 run36979617411](https://github.com/AntPAllen/js-wf/actions/runs/36979617411)
+is terminal/success at `579dbe1899e5b6b46e2758a340fa71d57c04eaa6`.
+The current offline campaign command reran all20 original ten-minute artifacts
+with exact seed identity and required common-clock/cut/checkpoint checks; every
+regenerated per-seed report is byte-identical to the original upload. The exact
+21-job set (planner plus seeds1..20) is terminal/success at that source.
+Aggregate13,916 invocations/terminals,153,133 journal entries,11,928 timer waits
+and380 admitted shifted-owner kills. Worst per-type terminal/progress p99 over
+all seeds is13.981729324s/16.258838716s; physical drain and histories pass in each
+executed row. This clears one admitted behind row for20 consecutive seeds,
+not200 seeds, ahead, all clock-cut combinations, protobuf chaos or24h release.
+Original artifacts were losslessly archived and every member compared to its
+downloaded bytes. Full logs, terminal metadata and independent campaign report
+are retained under `scale/canonical-r5-native-2026-10-02/behind-clean-twenty-seeds/`.
+
+[Older100k run36972092297](https://github.com/AntPAllen/js-wf/actions/runs/36972092297)
+is terminal/success at `f81540eb5b37e841cc94128bff1f87aedda6621c` in13,719.12s.
+Independent suite verification matches the original report byte-for-byte:
+all113 inventoried workloads completed precisely seeds1..100000,157 top-level
+tests pass,258 pins replay, and only the two explicit trace commands skip.
+Aggregate11,500,032 schedules,178,046,685 choices and2,653,710,204 transport events.
+This predates persisted-protobuf modeling and confirmed worker ACK changes;
+it does not replace current115-workload/260-pin run36979997529, still active.
+Original evidence and independent report are retained under
+`scale/confirmed-dispatch-ack-2026-10-02/older-113-workload-100k/`.
+
+[Mutation CI36996790800](https://github.com/AntPAllen/js-wf/actions/runs/36996790800)
+is terminal/success at `280c1f2c317081cd791b3a153fb7cf903e20f748` in both jobs.
+Original JSON logs independently establish all six focused baseline/detection
+pairs and the live mixed I4 baseline/detection pair, including actual admission,
+SIGKILL, all28 terminals and the precise escaped-effect marker. Build and
+unrelated-test controls remain rejected as detections. Uploaded reports alone
+were not used to establish execution. Losslessly archived original artifacts,
+full logs, terminal metadata and independent checks are retained under
+`scale/mixed-determinism-mutation-2026-10-02/ci-pass/`. The other five mixed
+categories and full release remain open.
+
+The million-timer user service remains active at PID18146. Its second all-three-
+server SIGKILL/restart occurs at666,677 unique deliveries and heals in12.830760443s.
+A748,029-receipt observation records three redeliveries, zero ACK/fetch errors,
+current p99 lateness0.251579657s and max15.976507332s. These are running observations;
+final million-receipt ledger verification, audit/drain and terminal verdict remain
+required. Ahead20 remains failed at seed5; no source-exit timestamp is retrofitted.

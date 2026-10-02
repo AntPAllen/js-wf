@@ -1,0 +1,1355 @@
+sim	Set up job	﻿2026-10-02T06:09:11.5054152Z Current runner version: '2.337.0'
+sim	Set up job	2026-10-02T06:09:11.5094009Z ##[group]Runner Image Provisioner
+sim	Set up job	2026-10-02T06:09:11.5095630Z Hosted Compute Agent
+sim	Set up job	2026-10-02T06:09:11.5096660Z Version: 20260901.588
+sim	Set up job	2026-10-02T06:09:11.5098269Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+sim	Set up job	2026-10-02T06:09:11.5099639Z Build Date: 2026-09-01T19:56:44Z
+sim	Set up job	2026-10-02T06:09:11.5100837Z Worker ID: {1816b5aa-ac03-4a92-8d40-76bb6c07b75d}
+sim	Set up job	2026-10-02T06:09:11.5102561Z Azure Region: eastus
+sim	Set up job	2026-10-02T06:09:11.5103620Z ##[endgroup]
+sim	Set up job	2026-10-02T06:09:11.5106295Z ##[group]Operating System
+sim	Set up job	2026-10-02T06:09:11.5107511Z Ubuntu
+sim	Set up job	2026-10-02T06:09:11.5108644Z 24.04.5
+sim	Set up job	2026-10-02T06:09:11.5109601Z LTS
+sim	Set up job	2026-10-02T06:09:11.5110470Z ##[endgroup]
+sim	Set up job	2026-10-02T06:09:11.5111836Z ##[group]Runner Image
+sim	Set up job	2026-10-02T06:09:11.5112941Z Image: ubuntu-24.04
+sim	Set up job	2026-10-02T06:09:11.5114038Z Version: 20260927.320.1
+sim	Set up job	2026-10-02T06:09:11.5115946Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+sim	Set up job	2026-10-02T06:09:11.5119366Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+sim	Set up job	2026-10-02T06:09:11.5121448Z ##[endgroup]
+sim	Set up job	2026-10-02T06:09:11.5123787Z ##[group]GITHUB_TOKEN Permissions
+sim	Set up job	2026-10-02T06:09:11.5126716Z Contents: read
+sim	Set up job	2026-10-02T06:09:11.5127952Z Metadata: read
+sim	Set up job	2026-10-02T06:09:11.5129026Z Packages: read
+sim	Set up job	2026-10-02T06:09:11.5130141Z ##[endgroup]
+sim	Set up job	2026-10-02T06:09:11.5133675Z Secret source: Actions
+sim	Set up job	2026-10-02T06:09:11.5135416Z Cache mode: write
+sim	Set up job	2026-10-02T06:09:11.5137075Z Prepare workflow directory
+sim	Set up job	2026-10-02T06:09:11.5910031Z Prepare all required actions
+sim	Set up job	2026-10-02T06:09:11.5987271Z Getting action download info
+sim	Set up job	2026-10-02T06:09:11.7644102Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+sim	Set up job	2026-10-02T06:09:11.8645148Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+sim	Set up job	2026-10-02T06:09:12.0565368Z Download action repository 'actions/upload-artifact@v7' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+sim	Set up job	2026-10-02T06:09:12.2298455Z Complete job name: sim
+sim	Run actions/checkout@v4	﻿2026-10-02T06:09:12.2999587Z ##[group]Run actions/checkout@v4
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3000471Z with:
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3000918Z   repository: AntPAllen/js-wf
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3004674Z   token: ***
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3005099Z   ssh-strict: true
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3005525Z   ssh-user: git
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3005966Z   persist-credentials: true
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3006449Z   clean: true
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3006882Z   sparse-checkout-cone-mode: true
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3007394Z   fetch-depth: 1
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3007816Z   fetch-tags: false
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3008253Z   show-progress: true
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3008704Z   lfs: false
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3009108Z   submodules: false
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3009547Z   set-safe-directory: true
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3010041Z   allow-unsafe-pr-checkout: false
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3010783Z env:
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3011414Z   SIM_SEEDS: 100000
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3011936Z   SIM_COVERAGE_SUMMARY: 1
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3012452Z   FAULT_TRACE_OUT: sim-failure.json
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.3012965Z ##[endgroup]
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4031688Z Syncing repository: AntPAllen/js-wf
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4034725Z ##[group]Getting Git version info
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4035844Z Working directory is '/home/runner/work/js-wf/js-wf'
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4037483Z [command]/usr/bin/git version
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4111639Z git version 2.55.0
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4141573Z ##[endgroup]
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4148301Z Temporarily overriding HOME='/home/runner/work/_temp/9110ccdb-483e-4e86-be66-ccfcffe6930a' before making global git config changes
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4150948Z Adding repository directory to the temporary git global config as a safe directory
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4160089Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4235779Z Deleting the contents of '/home/runner/work/js-wf/js-wf'
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4238518Z ##[group]Initializing the repository
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4245530Z [command]/usr/bin/git init /home/runner/work/js-wf/js-wf
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4367906Z hint: Using 'master' as the name for the initial branch. This default branch name
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4369648Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4371513Z hint: to use in all of your new repositories, which will suppress this warning,
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4372793Z hint: call:
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4373461Z hint:
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4374273Z hint: 	git config --global init.defaultBranch <name>
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4375244Z hint:
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4375834Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4376748Z hint: 'development'. The just-created branch can be renamed via this command:
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4377489Z hint:
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4378003Z hint: 	git branch -m <name>
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4378842Z hint:
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4379860Z hint: Disable this message with "git config set advice.defaultBranchName false"
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4381883Z Initialized empty Git repository in /home/runner/work/js-wf/js-wf/.git/
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4388084Z [command]/usr/bin/git remote add origin https://github.com/AntPAllen/js-wf
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4449293Z ##[endgroup]
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4450795Z ##[group]Disabling automatic garbage collection
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4453657Z [command]/usr/bin/git config --local gc.auto 0
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4487382Z ##[endgroup]
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4488979Z ##[group]Setting up auth
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4495962Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.4573942Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.5003388Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.5042741Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.5302623Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.5337311Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.5604422Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.5646234Z ##[endgroup]
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.5647226Z ##[group]Fetching the repository
+sim	Run actions/checkout@v4	2026-10-02T06:09:12.5656663Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +f81540eb5b37e841cc94128bff1f87aedda6621c:refs/remotes/origin/main
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.0283997Z From https://github.com/AntPAllen/js-wf
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.0286207Z  * [new ref]         f81540eb5b37e841cc94128bff1f87aedda6621c -> origin/main
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.0289990Z ##[endgroup]
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.0322193Z ##[group]Determining the checkout info
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.0323698Z ##[endgroup]
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.0324299Z [command]/usr/bin/git sparse-checkout disable
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.0365080Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.0403724Z ##[group]Checking out the ref
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.0419827Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.6917132Z Switched to a new branch 'main'
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.6922549Z branch 'main' set up to track 'origin/main'.
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.6977323Z ##[endgroup]
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.7027357Z [command]/usr/bin/git log -1 --format=%H
+sim	Run actions/checkout@v4	2026-10-02T06:09:15.7056405Z f81540eb5b37e841cc94128bff1f87aedda6621c
+sim	Run actions/setup-go@v5	﻿2026-10-02T06:09:15.7309452Z ##[group]Run actions/setup-go@v5
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.7309848Z with:
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.7310107Z   go-version-file: go.mod
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.7310684Z   check-latest: false
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.7313329Z   token: ***
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.7313596Z   cache: true
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.7313830Z env:
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.7377166Z   SIM_SEEDS: 100000
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.7377770Z   SIM_COVERAGE_SUMMARY: 1
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.7378352Z   FAULT_TRACE_OUT: sim-failure.json
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.7378947Z ##[endgroup]
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.8699424Z Setup go version spec 1.27.1
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.8709293Z Attempting to download 1.27.1...
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.8821020Z (node:2426) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+sim	Run actions/setup-go@v5	2026-10-02T06:09:15.8822403Z (Use `node --trace-deprecation ...` to show where the warning was created)
+sim	Run actions/setup-go@v5	2026-10-02T06:09:16.2898881Z matching 1.27.1...
+sim	Run actions/setup-go@v5	2026-10-02T06:09:16.2925961Z Acquiring 1.27.1 from https://github.com/actions/go-versions/releases/download/1.27.1-33583469715/go-1.27.1-linux-x64.tar.gz
+sim	Run actions/setup-go@v5	2026-10-02T06:09:16.6820612Z Extracting Go...
+sim	Run actions/setup-go@v5	2026-10-02T06:09:16.6923933Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/dcc6035b-2d4a-44b2-97ca-06eacd30ea0b -f /home/runner/work/_temp/ce3c0a84-ffff-4e40-aafb-75ad45d63821
+sim	Run actions/setup-go@v5	2026-10-02T06:09:18.3800417Z Successfully extracted go to /home/runner/work/_temp/dcc6035b-2d4a-44b2-97ca-06eacd30ea0b
+sim	Run actions/setup-go@v5	2026-10-02T06:09:18.3801102Z Adding to the cache ...
+sim	Run actions/setup-go@v5	2026-10-02T06:09:24.1599920Z Successfully cached go to /opt/hostedtoolcache/go/1.27.1/x64
+sim	Run actions/setup-go@v5	2026-10-02T06:09:24.1603018Z Added go to the path
+sim	Run actions/setup-go@v5	2026-10-02T06:09:24.1605514Z Successfully set up Go version 1.27.1
+sim	Run actions/setup-go@v5	2026-10-02T06:09:24.1836089Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+sim	Run actions/setup-go@v5	2026-10-02T06:09:24.1876010Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+sim	Run actions/setup-go@v5	2026-10-02T06:09:24.1920694Z /home/runner/go/pkg/mod
+sim	Run actions/setup-go@v5	2026-10-02T06:09:24.1940929Z /home/runner/.cache/go-build
+sim	Run actions/setup-go@v5	2026-10-02T06:09:24.2664464Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+sim	Run actions/setup-go@v5	2026-10-02T06:09:24.2780928Z (node:2426) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+sim	Run actions/setup-go@v5	2026-10-02T06:09:25.2285597Z Received 209563510 of 209563510 (100.0%), 219.4 MBs/sec
+sim	Run actions/setup-go@v5	2026-10-02T06:09:25.2286899Z Cache Size: ~200 MB (209563510 B)
+sim	Run actions/setup-go@v5	2026-10-02T06:09:25.2350775Z [command]/usr/bin/tar -xf /home/runner/work/_temp/f758643a-f8d2-4420-8042-0e858bfc3f4f/cache.tzst -P -C /home/runner/work/js-wf/js-wf --use-compress-program unzstd
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.3685961Z Cache restored successfully
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.3786149Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.3809655Z go version go1.27.1 linux/amd64
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.3809912Z 
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.3810201Z ##[group]go env
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4870939Z AR='ar'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4871501Z CC='gcc'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4871785Z CGO_CFLAGS='-O2 -g'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4872047Z CGO_CPPFLAGS=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4872307Z CGO_CXXFLAGS='-O2 -g'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4872560Z CGO_ENABLED='1'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4872792Z CGO_FFLAGS='-O2 -g'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4873042Z CGO_LDFLAGS='-O2 -g'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4873307Z CXX='g++'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4873540Z GCCGO='gccgo'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4873793Z GO111MODULE=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4874022Z GOAMD64='v1'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4874252Z GOARCH='amd64'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4874468Z GOAUTH='netrc'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4874705Z GOBIN='/home/runner/go/bin'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4875006Z GOCACHE='/home/runner/.cache/go-build'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4875328Z GOCACHEPROG=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4875546Z GODEBUG=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4875799Z GOENV='/home/runner/.config/go/env'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4876074Z GOEXE=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4876289Z GOEXPERIMENT=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4876932Z GOFIPS140='off'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4877147Z GOFLAGS=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4878251Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build1372673112=/tmp/go-build -gno-record-gcc-switches'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4879177Z GOHOSTARCH='amd64'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4879624Z GOHOSTOS='linux'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4880126Z GOINSECURE=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4880686Z GOMOD='/home/runner/work/js-wf/js-wf/go.mod'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4881474Z GOMODCACHE='/home/runner/go/pkg/mod'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4882045Z GONOPROXY=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4882521Z GONOSUMDB=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4882985Z GOOS='linux'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4883466Z GOPACKAGESDRIVER=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4884027Z GOPATH='/home/runner/go'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4884521Z GOPRIVATE=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4885103Z GOPROXY='https://proxy.golang.org,direct'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4885715Z GOROOT='/opt/hostedtoolcache/go/1.27.1/x64'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4886285Z GOSUMDB='sum.golang.org'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4887110Z GOTELEMETRY='local'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4887513Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4887864Z GOTMPDIR=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4888089Z GOTOOLCHAIN='auto'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4888443Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.1/x64/pkg/tool/linux_amd64'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4888833Z GOVCS=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4889051Z GOVERSION='go1.27.1'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4889304Z GOWORK=''
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4889538Z PKG_CONFIG='pkg-config'
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4889703Z 
+sim	Run actions/setup-go@v5	2026-10-02T06:09:26.4890251Z ##[endgroup]
+sim	Verify suite-result guard	﻿2026-10-02T06:09:26.5144281Z ##[group]Run python3 -m unittest discover -s scripts -p 'test_tier1_suite.py'
+sim	Verify suite-result guard	2026-10-02T06:09:26.5145315Z ^[[36;1mpython3 -m unittest discover -s scripts -p 'test_tier1_suite.py'^[[0m
+sim	Verify suite-result guard	2026-10-02T06:09:26.5451508Z shell: /usr/bin/bash -e {0}
+sim	Verify suite-result guard	2026-10-02T06:09:26.5451851Z env:
+sim	Verify suite-result guard	2026-10-02T06:09:26.5452080Z   SIM_SEEDS: 100000
+sim	Verify suite-result guard	2026-10-02T06:09:26.5452329Z   SIM_COVERAGE_SUMMARY: 1
+sim	Verify suite-result guard	2026-10-02T06:09:26.5452611Z   FAULT_TRACE_OUT: sim-failure.json
+sim	Verify suite-result guard	2026-10-02T06:09:26.5452911Z ##[endgroup]
+sim	Verify suite-result guard	2026-10-02T06:09:26.6381056Z ..........
+sim	Verify suite-result guard	2026-10-02T06:09:26.6381878Z ----------------------------------------------------------------------
+sim	Verify suite-result guard	2026-10-02T06:09:26.6382539Z Ran 10 tests in 0.004s
+sim	Verify suite-result guard	2026-10-02T06:09:26.6382785Z 
+sim	Verify suite-result guard	2026-10-02T06:09:26.6382915Z OK
+sim	Run seeded transport suite	﻿2026-10-02T06:09:26.6504698Z ##[group]Run set -o pipefail
+sim	Run seeded transport suite	2026-10-02T06:09:26.6505238Z ^[[36;1mset -o pipefail^[[0m
+sim	Run seeded transport suite	2026-10-02T06:09:26.6505712Z ^[[36;1mgit rev-parse HEAD > tier1-source.txt^[[0m
+sim	Run seeded transport suite	2026-10-02T06:09:26.6506439Z ^[[36;1mSIM_COVERAGE_SUMMARY=0 go test ./sim -list '^Test' > tier1-list.log^[[0m
+sim	Run seeded transport suite	2026-10-02T06:09:26.6507291Z ^[[36;1mgrep -E '^Test[[:alnum:]_]+$' tier1-list.log > tier1-inventory.txt^[[0m
+sim	Run seeded transport suite	2026-10-02T06:09:26.6508168Z ^[[36;1mgo run ./scripts/tier1-seed-inventory > tier1-seeded-inventory.txt^[[0m
+sim	Run seeded transport suite	2026-10-02T06:09:26.6509273Z ^[[36;1mfind sim/testdata/regressions -type f -name '*.json' | sort > tier1-regression-inventory.txt^[[0m
+sim	Run seeded transport suite	2026-10-02T06:09:26.6510235Z ^[[36;1mecho "Tier 1 seeds per workload: 1..${SIM_SEEDS}"^[[0m
+sim	Run seeded transport suite	2026-10-02T06:09:26.6512010Z ^[[36;1m/usr/bin/time -o tier1-time.txt -f 'elapsed=%e user=%U system=%S' go test -json ./sim -count=1 -timeout=300m | tee tier1-events.jsonl | python3 -u scripts/render-go-test.py | tee tier1-suite.log^[[0m
+sim	Run seeded transport suite	2026-10-02T06:09:26.6514906Z ^[[36;1mpython3 scripts/check-tier1-suite.py --events tier1-events.jsonl --inventory tier1-inventory.txt --regressions tier1-regression-inventory.txt --source tier1-source.txt --seeded-inventory tier1-seeded-inventory.txt --seeds "$SIM_SEEDS" --output tier1-result.json^[[0m
+sim	Run seeded transport suite	2026-10-02T06:09:26.6601685Z shell: /usr/bin/bash -e {0}
+sim	Run seeded transport suite	2026-10-02T06:09:26.6602118Z env:
+sim	Run seeded transport suite	2026-10-02T06:09:26.6602447Z   SIM_SEEDS: 100000
+sim	Run seeded transport suite	2026-10-02T06:09:26.6602816Z   SIM_COVERAGE_SUMMARY: 1
+sim	Run seeded transport suite	2026-10-02T06:09:26.6603236Z   FAULT_TRACE_OUT: sim-failure.json
+sim	Run seeded transport suite	2026-10-02T06:09:26.6603680Z ##[endgroup]
+sim	Run seeded transport suite	2026-10-02T06:09:37.1740637Z Tier 1 seeds per workload: 1..100000
+sim	Run seeded transport suite	2026-10-02T06:09:37.5886536Z === RUN   TestSeededBlobMetadataReplay
+sim	Run seeded transport suite	2026-10-02T06:09:40.2164207Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededBlobMetadataReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:09:40.2165346Z --- PASS: TestSeededBlobMetadataReplay (2.63s)
+sim	Run seeded transport suite	2026-10-02T06:09:40.2165809Z === RUN   TestSeededBlobSweepReplay
+sim	Run seeded transport suite	2026-10-02T06:09:45.9466941Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededBlobSweepReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:09:45.9467704Z --- PASS: TestSeededBlobSweepReplay (5.73s)
+sim	Run seeded transport suite	2026-10-02T06:09:45.9468077Z === RUN   TestSeededCheckpointReadReplay
+sim	Run seeded transport suite	2026-10-02T06:11:17.4572893Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededCheckpointReadReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:11:17.4574252Z --- PASS: TestSeededCheckpointReadReplay (91.51s)
+sim	Run seeded transport suite	2026-10-02T06:11:17.4574916Z === RUN   TestSeededCheckpointSnapshotReplay
+sim	Run seeded transport suite	2026-10-02T06:11:46.4113241Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededCheckpointSnapshotReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:11:46.4114476Z --- PASS: TestSeededCheckpointSnapshotReplay (28.95s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4115241Z === RUN   TestChildWakeupLivenessNegativeControls
+sim	Run seeded transport suite	2026-10-02T06:11:46.4116042Z === RUN   TestChildWakeupLivenessNegativeControls/skipped_notifier
+sim	Run seeded transport suite	2026-10-02T06:11:46.4116893Z --- PASS: TestChildWakeupLivenessNegativeControls/skipped_notifier (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4117743Z === RUN   TestChildWakeupLivenessNegativeControls/dropped_signal
+sim	Run seeded transport suite	2026-10-02T06:11:46.4118554Z --- PASS: TestChildWakeupLivenessNegativeControls/dropped_signal (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4119413Z === RUN   TestChildWakeupLivenessNegativeControls/dropped_wakeup
+sim	Run seeded transport suite	2026-10-02T06:11:46.4120165Z --- PASS: TestChildWakeupLivenessNegativeControls/dropped_wakeup (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4120662Z === RUN   TestChildWakeupLivenessNegativeControls/removed_wakeup
+sim	Run seeded transport suite	2026-10-02T06:11:46.4121141Z --- PASS: TestChildWakeupLivenessNegativeControls/removed_wakeup (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4122114Z === RUN   TestChildWakeupLivenessNegativeControls/changed_notification
+sim	Run seeded transport suite	2026-10-02T06:11:46.4122769Z --- PASS: TestChildWakeupLivenessNegativeControls/changed_notification (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4123398Z === RUN   TestChildWakeupLivenessNegativeControls/changed_notification_hash
+sim	Run seeded transport suite	2026-10-02T06:11:46.4123982Z --- PASS: TestChildWakeupLivenessNegativeControls/changed_notification_hash (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4125483Z === RUN   TestChildWakeupLivenessNegativeControls/consumed_purged_signal
+sim	Run seeded transport suite	2026-10-02T06:11:46.4126518Z --- PASS: TestChildWakeupLivenessNegativeControls/consumed_purged_signal (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4127339Z === RUN   TestChildWakeupLivenessNegativeControls/wrong_consumed_outcome
+sim	Run seeded transport suite	2026-10-02T06:11:46.4128272Z --- PASS: TestChildWakeupLivenessNegativeControls/wrong_consumed_outcome (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4129275Z === RUN   TestChildWakeupLivenessNegativeControls/wrong_consumed_hash
+sim	Run seeded transport suite	2026-10-02T06:11:46.4130272Z --- PASS: TestChildWakeupLivenessNegativeControls/wrong_consumed_hash (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4131666Z === RUN   TestChildWakeupLivenessNegativeControls/parent_terminal
+sim	Run seeded transport suite	2026-10-02T06:11:46.4132678Z --- PASS: TestChildWakeupLivenessNegativeControls/parent_terminal (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4133701Z === RUN   TestChildWakeupLivenessNegativeControls/stale_parent_terminal
+sim	Run seeded transport suite	2026-10-02T06:11:46.4134729Z --- PASS: TestChildWakeupLivenessNegativeControls/stale_parent_terminal (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4135718Z === RUN   TestChildWakeupLivenessNegativeControls/parent_reused
+sim	Run seeded transport suite	2026-10-02T06:11:46.4136621Z --- PASS: TestChildWakeupLivenessNegativeControls/parent_reused (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4137540Z === RUN   TestChildWakeupLivenessNegativeControls/parent_absent
+sim	Run seeded transport suite	2026-10-02T06:11:46.4138448Z --- PASS: TestChildWakeupLivenessNegativeControls/parent_absent (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4139378Z === RUN   TestChildWakeupLivenessNegativeControls/child_nonterminal
+sim	Run seeded transport suite	2026-10-02T06:11:46.4140360Z --- PASS: TestChildWakeupLivenessNegativeControls/child_nonterminal (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4152449Z === RUN   TestChildWakeupLivenessNegativeControls/stale_child_terminal
+sim	Run seeded transport suite	2026-10-02T06:11:46.4153460Z --- PASS: TestChildWakeupLivenessNegativeControls/stale_child_terminal (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4154648Z --- PASS: TestChildWakeupLivenessNegativeControls (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:11:46.4155429Z === RUN   TestSeededChildNotificationReplay
+sim	Run seeded transport suite	2026-10-02T06:13:41.1619310Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededChildNotificationReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:13:41.1620223Z --- PASS: TestSeededChildNotificationReplay (114.75s)
+sim	Run seeded transport suite	2026-10-02T06:13:41.1620653Z === RUN   TestSeededContinuationCanceledTimerReplay
+sim	Run seeded transport suite	2026-10-02T06:15:39.8338943Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededContinuationCanceledTimerReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:15:39.8340361Z --- PASS: TestSeededContinuationCanceledTimerReplay (118.67s)
+sim	Run seeded transport suite	2026-10-02T06:15:39.8341410Z === RUN   TestSeededContinuationLimitReplay
+sim	Run seeded transport suite	2026-10-02T06:18:02.6702432Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededContinuationLimitReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:18:02.6707118Z --- PASS: TestSeededContinuationLimitReplay (142.84s)
+sim	Run seeded transport suite	2026-10-02T06:18:02.6708067Z === RUN   TestModeledJournalEntryLimitBounds
+sim	Run seeded transport suite	2026-10-02T06:18:02.6708615Z === RUN   TestModeledJournalEntryLimitBounds/0
+sim	Run seeded transport suite	2026-10-02T06:18:02.6709547Z --- PASS: TestModeledJournalEntryLimitBounds/0 (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:18:02.6710227Z === RUN   TestModeledJournalEntryLimitBounds/3
+sim	Run seeded transport suite	2026-10-02T06:18:02.6710880Z --- PASS: TestModeledJournalEntryLimitBounds/3 (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:18:02.6711439Z === RUN   TestModeledJournalEntryLimitBounds/4
+sim	Run seeded transport suite	2026-10-02T06:18:02.6711910Z --- PASS: TestModeledJournalEntryLimitBounds/4 (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:18:02.6712658Z === RUN   TestModeledJournalEntryLimitBounds/16
+sim	Run seeded transport suite	2026-10-02T06:18:02.6713064Z --- PASS: TestModeledJournalEntryLimitBounds/16 (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:18:02.6713699Z === RUN   TestModeledJournalEntryLimitBounds/100000
+sim	Run seeded transport suite	2026-10-02T06:18:02.6714118Z --- PASS: TestModeledJournalEntryLimitBounds/100000 (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:18:02.6714675Z === RUN   TestModeledJournalEntryLimitBounds/100001
+sim	Run seeded transport suite	2026-10-02T06:18:02.6715106Z --- PASS: TestModeledJournalEntryLimitBounds/100001 (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:18:02.6715514Z --- PASS: TestModeledJournalEntryLimitBounds (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:18:02.6716030Z === RUN   TestSeededContinuationPanicReplay
+sim	Run seeded transport suite	2026-10-02T06:20:41.0272726Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededContinuationPanicReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:20:41.0274537Z --- PASS: TestSeededContinuationPanicReplay (158.36s)
+sim	Run seeded transport suite	2026-10-02T06:20:41.0275283Z === RUN   TestSeededContinuationPromiseReplay
+sim	Run seeded transport suite	2026-10-02T06:33:57.5142675Z     continuation_promise_replay_test.go:365: mode=clean first_seed=5
+sim	Run seeded transport suite	2026-10-02T06:33:57.5145413Z     continuation_promise_replay_test.go:365: mode=resume_read_once first_seed=7
+sim	Run seeded transport suite	2026-10-02T06:33:57.5146650Z     continuation_promise_replay_test.go:365: mode=resume_read_twice first_seed=12
+sim	Run seeded transport suite	2026-10-02T06:33:57.5149468Z     continuation_promise_replay_test.go:365: mode=corrupt_child first_seed=4
+sim	Run seeded transport suite	2026-10-02T06:33:57.5150515Z     continuation_promise_replay_test.go:365: mode=terminal_drop first_seed=1
+sim	Run seeded transport suite	2026-10-02T06:33:57.5151868Z     continuation_promise_replay_test.go:365: mode=terminal_ack_lost first_seed=2
+sim	Run seeded transport suite	2026-10-02T06:33:57.5393492Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededContinuationPromiseReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:33:57.5394411Z --- PASS: TestSeededContinuationPromiseReplay (796.51s)
+sim	Run seeded transport suite	2026-10-02T06:33:57.5394848Z === RUN   TestSeededContinuationRetirementReplay
+sim	Run seeded transport suite	2026-10-02T06:35:35.6937018Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededContinuationRetirementReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:35:35.6938295Z --- PASS: TestSeededContinuationRetirementReplay (98.15s)
+sim	Run seeded transport suite	2026-10-02T06:35:35.6939016Z === RUN   TestSeededContinuationRunningCancelReplay
+sim	Run seeded transport suite	2026-10-02T06:37:09.1520416Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededContinuationRunningCancelReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:37:09.1523814Z --- PASS: TestSeededContinuationRunningCancelReplay (93.46s)
+sim	Run seeded transport suite	2026-10-02T06:37:09.1524746Z === RUN   TestSeededContinuationSDKReplay
+sim	Run seeded transport suite	2026-10-02T06:37:40.5859894Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededContinuationSDKReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:37:40.5861154Z --- PASS: TestSeededContinuationSDKReplay (31.43s)
+sim	Run seeded transport suite	2026-10-02T06:37:40.5861964Z === RUN   TestCoordinatorClaimFailsClosed
+sim	Run seeded transport suite	2026-10-02T06:37:40.5862892Z === RUN   TestCoordinatorClaimFailsClosed/read
+sim	Run seeded transport suite	2026-10-02T06:37:40.5864356Z --- PASS: TestCoordinatorClaimFailsClosed/read (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:37:40.5865064Z === RUN   TestCoordinatorClaimFailsClosed/drop
+sim	Run seeded transport suite	2026-10-02T06:37:40.5870317Z --- PASS: TestCoordinatorClaimFailsClosed/drop (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:37:40.5870990Z === RUN   TestCoordinatorClaimFailsClosed/lost_ack
+sim	Run seeded transport suite	2026-10-02T06:37:40.5875759Z --- PASS: TestCoordinatorClaimFailsClosed/lost_ack (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:37:40.5876307Z === RUN   TestCoordinatorClaimFailsClosed/conflict
+sim	Run seeded transport suite	2026-10-02T06:37:40.5881994Z --- PASS: TestCoordinatorClaimFailsClosed/conflict (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:37:40.5882507Z --- PASS: TestCoordinatorClaimFailsClosed (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:37:40.5882864Z === RUN   TestSeededDeadOwnerDrainReplay
+sim	Run seeded transport suite	2026-10-02T06:38:15.0070422Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededDeadOwnerDrainReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:38:15.0072338Z --- PASS: TestSeededDeadOwnerDrainReplay (34.42s)
+sim	Run seeded transport suite	2026-10-02T06:38:15.0073880Z === RUN   TestCooperativeTwoDispatchWorkersReplay
+sim	Run seeded transport suite	2026-10-02T06:38:27.8838189Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeTwoDispatchWorkersReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:38:27.8839012Z --- PASS: TestCooperativeTwoDispatchWorkersReplay (12.88s)
+sim	Run seeded transport suite	2026-10-02T06:38:27.8839457Z === RUN   TestSeededStoredConsumerPendingClockReplay
+sim	Run seeded transport suite	2026-10-02T06:38:31.1766929Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededStoredConsumerPendingClockReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:38:31.1768328Z --- PASS: TestSeededStoredConsumerPendingClockReplay (3.29s)
+sim	Run seeded transport suite	2026-10-02T06:38:31.1769271Z === RUN   TestSeededDispatchClockTransitionReplay
+sim	Run seeded transport suite	2026-10-02T06:38:34.5211957Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededDispatchClockTransitionReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:38:34.5213356Z --- PASS: TestSeededDispatchClockTransitionReplay (3.34s)
+sim	Run seeded transport suite	2026-10-02T06:38:34.5214062Z === RUN   TestSeededDispatchModelReplay
+sim	Run seeded transport suite	2026-10-02T06:38:42.9079167Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededDispatchModelReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:38:42.9080046Z --- PASS: TestSeededDispatchModelReplay (8.39s)
+sim	Run seeded transport suite	2026-10-02T06:38:42.9080574Z === RUN   TestDispatchLostAckCommitted
+sim	Run seeded transport suite	2026-10-02T06:38:42.9081173Z --- PASS: TestDispatchLostAckCommitted (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:38:42.9082032Z === RUN   TestDispatchDurableRestartAndSharedConsumers
+sim	Run seeded transport suite	2026-10-02T06:38:42.9082513Z --- PASS: TestDispatchDurableRestartAndSharedConsumers (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:38:42.9083044Z === RUN   TestDispatchLateAckAfterRedeliveryIsIdempotent
+sim	Run seeded transport suite	2026-10-02T06:38:42.9083501Z --- PASS: TestDispatchLateAckAfterRedeliveryIsIdempotent (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:38:42.9083947Z === RUN   TestSeededEnqueueTransportRetryReplay
+sim	Run seeded transport suite	2026-10-02T06:38:47.6965989Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededEnqueueTransportRetryReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:38:47.6967292Z --- PASS: TestSeededEnqueueTransportRetryReplay (4.79s)
+sim	Run seeded transport suite	2026-10-02T06:38:47.6968398Z === RUN   TestEnqueueWithoutMessageIDPreservesUnknownOutcome
+sim	Run seeded transport suite	2026-10-02T06:38:47.6969475Z --- PASS: TestEnqueueWithoutMessageIDPreservesUnknownOutcome (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:38:47.6970294Z === RUN   TestCooperativeFallbackScannersReplay
+sim	Run seeded transport suite	2026-10-02T06:40:27.2908473Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeFallbackScannersReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:40:27.2909877Z --- PASS: TestCooperativeFallbackScannersReplay (99.59s)
+sim	Run seeded transport suite	2026-10-02T06:40:27.2910927Z === RUN   TestSeededFallbackLoopReplay
+sim	Run seeded transport suite	2026-10-02T06:41:09.8045997Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededFallbackLoopReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:41:09.8047290Z --- PASS: TestSeededFallbackLoopReplay (42.51s)
+sim	Run seeded transport suite	2026-10-02T06:41:09.8047939Z === RUN   TestSeededFallbackTimerPipelineReplay
+sim	Run seeded transport suite	2026-10-02T06:41:28.3428445Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededFallbackTimerPipelineReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:41:28.3429296Z --- PASS: TestSeededFallbackTimerPipelineReplay (18.54s)
+sim	Run seeded transport suite	2026-10-02T06:41:28.3429726Z === RUN   TestSeededHandleCacheCancellationReplay
+sim	Run seeded transport suite	2026-10-02T06:41:30.7256726Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededHandleCacheCancellationReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:41:30.7258366Z --- PASS: TestSeededHandleCacheCancellationReplay (2.38s)
+sim	Run seeded transport suite	2026-10-02T06:41:30.7259252Z === RUN   TestSeededRetainedInvariantChecks
+sim	Run seeded transport suite	2026-10-02T06:42:02.0903656Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededRetainedInvariantChecks first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:42:02.0904688Z --- PASS: TestSeededRetainedInvariantChecks (31.36s)
+sim	Run seeded transport suite	2026-10-02T06:42:02.0905208Z === RUN   TestSeededJournalBatchReadReplay
+sim	Run seeded transport suite	2026-10-02T06:46:14.1763588Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededJournalBatchReadReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:46:14.1764371Z --- PASS: TestSeededJournalBatchReadReplay (252.09s)
+sim	Run seeded transport suite	2026-10-02T06:46:14.1764779Z === RUN   TestSeededJournalManifestReadReplay
+sim	Run seeded transport suite	2026-10-02T06:46:30.2459364Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededJournalManifestReadReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:46:30.2460689Z --- PASS: TestSeededJournalManifestReadReplay (16.07s)
+sim	Run seeded transport suite	2026-10-02T06:46:30.2461691Z === RUN   TestSeededJournalOpenFailureReplay
+sim	Run seeded transport suite	2026-10-02T06:47:15.0226654Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededJournalOpenFailureReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:47:15.0228734Z --- PASS: TestSeededJournalOpenFailureReplay (44.78s)
+sim	Run seeded transport suite	2026-10-02T06:47:15.0230549Z === RUN   TestModeledJournalReadKeepsGlobalHolesAndRejectsIndexGap
+sim	Run seeded transport suite	2026-10-02T06:47:15.0232342Z --- PASS: TestModeledJournalReadKeepsGlobalHolesAndRejectsIndexGap (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:47:15.0233687Z === RUN   TestSeededJournalSerialReadReplay
+sim	Run seeded transport suite	2026-10-02T06:47:28.2234848Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededJournalSerialReadReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:47:28.2237239Z --- PASS: TestSeededJournalSerialReadReplay (13.20s)
+sim	Run seeded transport suite	2026-10-02T06:47:28.2238438Z === RUN   TestSeededJournalDirectUnavailableReplay
+sim	Run seeded transport suite	2026-10-02T06:47:38.0700134Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededJournalDirectUnavailableReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:47:38.0701659Z --- PASS: TestSeededJournalDirectUnavailableReplay (9.85s)
+sim	Run seeded transport suite	2026-10-02T06:47:38.0702638Z === RUN   TestSeededStalledJournalCursorReplay
+sim	Run seeded transport suite	2026-10-02T06:48:24.4114475Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededStalledJournalCursorReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:48:24.4121020Z --- PASS: TestSeededStalledJournalCursorReplay (46.34s)
+sim	Run seeded transport suite	2026-10-02T06:48:24.4122023Z === RUN   TestJournalAppendFaultBoundaries
+sim	Run seeded transport suite	2026-10-02T06:48:24.4122755Z === RUN   TestJournalAppendFaultBoundaries/ack_lost_after_commit
+sim	Run seeded transport suite	2026-10-02T06:48:24.4124133Z --- PASS: TestJournalAppendFaultBoundaries/ack_lost_after_commit (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:48:24.4125219Z === RUN   TestJournalAppendFaultBoundaries/drop_before_commit
+sim	Run seeded transport suite	2026-10-02T06:48:24.4126040Z --- PASS: TestJournalAppendFaultBoundaries/drop_before_commit (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:48:24.4128766Z === RUN   TestJournalAppendFaultBoundaries/unchanged_tail_reject
+sim	Run seeded transport suite	2026-10-02T06:48:24.4129480Z --- PASS: TestJournalAppendFaultBoundaries/unchanged_tail_reject (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:48:24.4130503Z === RUN   TestJournalAppendFaultBoundaries/persistent_unchanged_tail_reject
+sim	Run seeded transport suite	2026-10-02T06:48:24.4131099Z --- PASS: TestJournalAppendFaultBoundaries/persistent_unchanged_tail_reject (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:48:24.4132150Z === RUN   TestJournalAppendFaultBoundaries/competing_writer_advances_tail
+sim	Run seeded transport suite	2026-10-02T06:48:24.4132710Z --- PASS: TestJournalAppendFaultBoundaries/competing_writer_advances_tail (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:48:24.4133510Z --- PASS: TestJournalAppendFaultBoundaries (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:48:24.4315902Z === RUN   TestSeededAppendTraceReplaysAcrossProcesses
+sim	Run seeded transport suite	2026-10-02T06:48:24.4316811Z --- PASS: TestSeededAppendTraceReplaysAcrossProcesses (0.02s)
+sim	Run seeded transport suite	2026-10-02T06:48:24.4317604Z === RUN   TestThousandSeededJournalAppendScenarios
+sim	Run seeded transport suite	2026-10-02T06:50:30.8976335Z     seed_count_test.go:32: TIER1_SEEDS test=TestThousandSeededJournalAppendScenarios first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:50:30.8977160Z --- PASS: TestThousandSeededJournalAppendScenarios (126.47s)
+sim	Run seeded transport suite	2026-10-02T06:50:30.8977610Z === RUN   TestCooperativeTwoWriterCASReplay
+sim	Run seeded transport suite	2026-10-02T06:50:42.4438284Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeTwoWriterCASReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:50:42.4439576Z --- PASS: TestCooperativeTwoWriterCASReplay (11.55s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4440175Z === RUN   TestReplayFaultTrace
+sim	Run seeded transport suite	2026-10-02T06:50:42.4441020Z     journal_transport_test.go:608: set FAULT_TRACE to replay a saved Tier 1 trace
+sim	Run seeded transport suite	2026-10-02T06:50:42.4442041Z --- SKIP: TestReplayFaultTrace (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4442573Z === RUN   TestMinimizeFaultTrace
+sim	Run seeded transport suite	2026-10-02T06:50:42.4443453Z     journal_transport_test.go:649: set FAULT_TRACE to a failing saved Tier 1 trace
+sim	Run seeded transport suite	2026-10-02T06:50:42.4444230Z --- SKIP: TestMinimizeFaultTrace (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4444767Z === RUN   TestPinnedRegressionCorpus
+sim	Run seeded transport suite	2026-10-02T06:50:42.4445430Z === RUN   TestPinnedRegressionCorpus/automatic-membership.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4474656Z --- PASS: TestPinnedRegressionCorpus/automatic-membership.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4475661Z === RUN   TestPinnedRegressionCorpus/blob-metadata-bucket.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4477161Z --- PASS: TestPinnedRegressionCorpus/blob-metadata-bucket.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4478451Z === RUN   TestPinnedRegressionCorpus/blob-metadata-json.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4479499Z --- PASS: TestPinnedRegressionCorpus/blob-metadata-json.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4480642Z === RUN   TestPinnedRegressionCorpus/blob-metadata-name.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4484206Z --- PASS: TestPinnedRegressionCorpus/blob-metadata-name.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4485373Z === RUN   TestPinnedRegressionCorpus/blob-metadata-state_operation.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4486060Z --- PASS: TestPinnedRegressionCorpus/blob-metadata-state_operation.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4487102Z === RUN   TestPinnedRegressionCorpus/blob-sweep-delete_ack_lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4488206Z --- PASS: TestPinnedRegressionCorpus/blob-sweep-delete_ack_lost.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4489268Z === RUN   TestPinnedRegressionCorpus/blob-sweep-snapshot_read_fault.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4491971Z --- PASS: TestPinnedRegressionCorpus/blob-sweep-snapshot_read_fault.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4493136Z === RUN   TestPinnedRegressionCorpus/cas-dropped-request.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4494072Z --- PASS: TestPinnedRegressionCorpus/cas-dropped-request.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4495047Z === RUN   TestPinnedRegressionCorpus/cas-hidden-ack.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4496259Z --- PASS: TestPinnedRegressionCorpus/cas-hidden-ack.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4497321Z === RUN   TestPinnedRegressionCorpus/cas-tail-lookup-retry.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4498361Z --- PASS: TestPinnedRegressionCorpus/cas-tail-lookup-retry.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4499431Z === RUN   TestPinnedRegressionCorpus/checkpoint-read-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4535242Z --- PASS: TestPinnedRegressionCorpus/checkpoint-read-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4536167Z === RUN   TestPinnedRegressionCorpus/checkpoint-snapshot-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4543959Z --- PASS: TestPinnedRegressionCorpus/checkpoint-snapshot-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4544915Z === RUN   TestPinnedRegressionCorpus/child-notification.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4561928Z --- PASS: TestPinnedRegressionCorpus/child-notification.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4563035Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-ahead_ack_wait_stream_ahead.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4565631Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-ahead_ack_wait_stream_ahead.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4566930Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-ahead_ack_wait_stream_behind.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4568972Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-ahead_ack_wait_stream_behind.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4570013Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-ahead_ack_wait_stream_healthy.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4571679Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-ahead_ack_wait_stream_healthy.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4572483Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-ahead_nak_stream_ahead.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4573403Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-ahead_nak_stream_ahead.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4574631Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-ahead_nak_stream_behind.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4575731Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-ahead_nak_stream_behind.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4576505Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-ahead_nak_stream_healthy.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4579017Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-ahead_nak_stream_healthy.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4579995Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-ahead_progress_stream_ahead.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4583828Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-ahead_progress_stream_ahead.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4584806Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-ahead_progress_stream_behind.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4587419Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-ahead_progress_stream_behind.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4588770Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-ahead_progress_stream_healthy.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4591350Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-ahead_progress_stream_healthy.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4594970Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-behind_ack_wait_stream_ahead.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4596496Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-behind_ack_wait_stream_ahead.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4598026Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-behind_ack_wait_stream_behind.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4602144Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-behind_ack_wait_stream_behind.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4658561Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-behind_ack_wait_stream_healthy.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4662341Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-behind_ack_wait_stream_healthy.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4663298Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-behind_nak_stream_ahead.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4664001Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-behind_nak_stream_ahead.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4664671Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-behind_nak_stream_behind.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4665340Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-behind_nak_stream_behind.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4666005Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-behind_nak_stream_healthy.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4666692Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-behind_nak_stream_healthy.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4667691Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-behind_progress_stream_ahead.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4668418Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-behind_progress_stream_ahead.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4669176Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-behind_progress_stream_behind.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4670121Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-behind_progress_stream_behind.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4671573Z === RUN   TestPinnedRegressionCorpus/consumer-pending-clock-behind_progress_stream_healthy.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4672427Z --- PASS: TestPinnedRegressionCorpus/consumer-pending-clock-behind_progress_stream_healthy.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4673285Z === RUN   TestPinnedRegressionCorpus/continuation-canceled-timer-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4673855Z --- PASS: TestPinnedRegressionCorpus/continuation-canceled-timer-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4674374Z === RUN   TestPinnedRegressionCorpus/continuation-limit-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4679564Z --- PASS: TestPinnedRegressionCorpus/continuation-limit-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4680499Z === RUN   TestPinnedRegressionCorpus/continuation-panic-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4695997Z --- PASS: TestPinnedRegressionCorpus/continuation-panic-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4696860Z === RUN   TestPinnedRegressionCorpus/continuation-promise-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4807698Z --- PASS: TestPinnedRegressionCorpus/continuation-promise-42.json (0.01s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4808780Z === RUN   TestPinnedRegressionCorpus/continuation-promise-corrupt-4.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4873658Z --- PASS: TestPinnedRegressionCorpus/continuation-promise-corrupt-4.json (0.01s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4874514Z === RUN   TestPinnedRegressionCorpus/continuation-retirement-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4889241Z --- PASS: TestPinnedRegressionCorpus/continuation-retirement-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4890271Z === RUN   TestPinnedRegressionCorpus/continuation-running-cancel-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4910676Z --- PASS: TestPinnedRegressionCorpus/continuation-running-cancel-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4911765Z === RUN   TestPinnedRegressionCorpus/continuation-sdk-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4917292Z --- PASS: TestPinnedRegressionCorpus/continuation-sdk-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4918237Z === RUN   TestPinnedRegressionCorpus/dispatch-clock-ahead_ack_wait.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4920675Z --- PASS: TestPinnedRegressionCorpus/dispatch-clock-ahead_ack_wait.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4921797Z === RUN   TestPinnedRegressionCorpus/dispatch-clock-ahead_nak.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4924109Z --- PASS: TestPinnedRegressionCorpus/dispatch-clock-ahead_nak.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4924666Z === RUN   TestPinnedRegressionCorpus/dispatch-clock-ahead_progress.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4927649Z --- PASS: TestPinnedRegressionCorpus/dispatch-clock-ahead_progress.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4928804Z === RUN   TestPinnedRegressionCorpus/dispatch-clock-behind_ack_wait.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4929623Z --- PASS: TestPinnedRegressionCorpus/dispatch-clock-behind_ack_wait.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4930588Z === RUN   TestPinnedRegressionCorpus/dispatch-clock-behind_nak.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4931725Z --- PASS: TestPinnedRegressionCorpus/dispatch-clock-behind_nak.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4932731Z === RUN   TestPinnedRegressionCorpus/dispatch-clock-behind_progress.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4933685Z --- PASS: TestPinnedRegressionCorpus/dispatch-clock-behind_progress.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4934208Z === RUN   TestPinnedRegressionCorpus/dispatch-two-workers.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4936663Z --- PASS: TestPinnedRegressionCorpus/dispatch-two-workers.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4937246Z === RUN   TestPinnedRegressionCorpus/enqueue-no-stream-response.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4938739Z --- PASS: TestPinnedRegressionCorpus/enqueue-no-stream-response.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4939875Z === RUN   TestPinnedRegressionCorpus/enqueue-timeout-after-commit.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4941772Z --- PASS: TestPinnedRegressionCorpus/enqueue-timeout-after-commit.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4943018Z === RUN   TestPinnedRegressionCorpus/enqueue-transport-retry.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4944060Z --- PASS: TestPinnedRegressionCorpus/enqueue-transport-retry.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4949133Z === RUN   TestPinnedRegressionCorpus/handle-cache-cancellation.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4950113Z --- PASS: TestPinnedRegressionCorpus/handle-cache-cancellation.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4951377Z === RUN   TestPinnedRegressionCorpus/journal-direct-exhausted-direct_unavailable.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4952567Z --- PASS: TestPinnedRegressionCorpus/journal-direct-exhausted-direct_unavailable.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4953762Z === RUN   TestPinnedRegressionCorpus/journal-direct-exhausted-unavailable_lookalike.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4954948Z --- PASS: TestPinnedRegressionCorpus/journal-direct-exhausted-unavailable_lookalike.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4955693Z === RUN   TestPinnedRegressionCorpus/journal-direct-exhausted-wrapped_direct_unavailable.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4956437Z --- PASS: TestPinnedRegressionCorpus/journal-direct-exhausted-wrapped_direct_unavailable.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4957127Z === RUN   TestPinnedRegressionCorpus/journal-direct-gap-direct_unavailable.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4961408Z --- PASS: TestPinnedRegressionCorpus/journal-direct-gap-direct_unavailable.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4962694Z === RUN   TestPinnedRegressionCorpus/journal-direct-gap-unavailable_lookalike.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4964824Z --- PASS: TestPinnedRegressionCorpus/journal-direct-gap-unavailable_lookalike.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4966015Z === RUN   TestPinnedRegressionCorpus/journal-direct-gap-wrapped_direct_unavailable.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4973522Z --- PASS: TestPinnedRegressionCorpus/journal-direct-gap-wrapped_direct_unavailable.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4974756Z === RUN   TestPinnedRegressionCorpus/journal-direct-one_retry-direct_unavailable.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4976944Z --- PASS: TestPinnedRegressionCorpus/journal-direct-one_retry-direct_unavailable.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4978148Z === RUN   TestPinnedRegressionCorpus/journal-direct-one_retry-unavailable_lookalike.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4979714Z --- PASS: TestPinnedRegressionCorpus/journal-direct-one_retry-unavailable_lookalike.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4980435Z === RUN   TestPinnedRegressionCorpus/journal-direct-one_retry-wrapped_direct_unavailable.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4982001Z --- PASS: TestPinnedRegressionCorpus/journal-direct-one_retry-wrapped_direct_unavailable.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4983227Z === RUN   TestPinnedRegressionCorpus/journal-direct-two_retries-direct_unavailable.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4985024Z --- PASS: TestPinnedRegressionCorpus/journal-direct-two_retries-direct_unavailable.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4986372Z === RUN   TestPinnedRegressionCorpus/journal-direct-two_retries-unavailable_lookalike.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4987670Z --- PASS: TestPinnedRegressionCorpus/journal-direct-two_retries-unavailable_lookalike.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4989002Z === RUN   TestPinnedRegressionCorpus/journal-direct-two_retries-wrapped_direct_unavailable.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.4990363Z --- PASS: TestPinnedRegressionCorpus/journal-direct-two_retries-wrapped_direct_unavailable.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.4991725Z === RUN   TestPinnedRegressionCorpus/journal-manifest-read.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5011665Z --- PASS: TestPinnedRegressionCorpus/journal-manifest-read.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5012648Z === RUN   TestPinnedRegressionCorpus/journal-open-failure.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5022324Z --- PASS: TestPinnedRegressionCorpus/journal-open-failure.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5023159Z === RUN   TestPinnedRegressionCorpus/journal-serial-read.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5030618Z --- PASS: TestPinnedRegressionCorpus/journal-serial-read.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5031666Z === RUN   TestPinnedRegressionCorpus/journal-stalled-cursor.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5039889Z --- PASS: TestPinnedRegressionCorpus/journal-stalled-cursor.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5040667Z === RUN   TestPinnedRegressionCorpus/lease-cleanup-conflict.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5042649Z --- PASS: TestPinnedRegressionCorpus/lease-cleanup-conflict.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5044139Z === RUN   TestPinnedRegressionCorpus/lease-cleanup-stale-read.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5045142Z --- PASS: TestPinnedRegressionCorpus/lease-cleanup-stale-read.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5046120Z === RUN   TestPinnedRegressionCorpus/lease-clock-skew-seed1.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5047022Z --- PASS: TestPinnedRegressionCorpus/lease-clock-skew-seed1.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5047913Z === RUN   TestPinnedRegressionCorpus/lease-clock-skew-seed2.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5049670Z --- PASS: TestPinnedRegressionCorpus/lease-clock-skew-seed2.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5050581Z === RUN   TestPinnedRegressionCorpus/lease-expiry-32-acquirers.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5064497Z --- PASS: TestPinnedRegressionCorpus/lease-expiry-32-acquirers.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5065523Z === RUN   TestPinnedRegressionCorpus/lease-gate-cancellation.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5068142Z --- PASS: TestPinnedRegressionCorpus/lease-gate-cancellation.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5069131Z === RUN   TestPinnedRegressionCorpus/lease-heartbeat-delayed-ack.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5070121Z --- PASS: TestPinnedRegressionCorpus/lease-heartbeat-delayed-ack.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5071054Z === RUN   TestPinnedRegressionCorpus/lease-heartbeat-reuse.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5072192Z --- PASS: TestPinnedRegressionCorpus/lease-heartbeat-reuse.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5073047Z === RUN   TestPinnedRegressionCorpus/manual-owner-drain.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5082260Z --- PASS: TestPinnedRegressionCorpus/manual-owner-drain.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5083254Z === RUN   TestPinnedRegressionCorpus/membership-session-drop_before_commit.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5104648Z --- PASS: TestPinnedRegressionCorpus/membership-session-drop_before_commit.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5105834Z === RUN   TestPinnedRegressionCorpus/membership-session-lose_ack_after_commit.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5120124Z --- PASS: TestPinnedRegressionCorpus/membership-session-lose_ack_after_commit.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5121549Z === RUN   TestPinnedRegressionCorpus/outcome-persistence.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5126593Z --- PASS: TestPinnedRegressionCorpus/outcome-persistence.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5127368Z === RUN   TestPinnedRegressionCorpus/parent-notification-budget-invocation_drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5129523Z --- PASS: TestPinnedRegressionCorpus/parent-notification-budget-invocation_drop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5130790Z === RUN   TestPinnedRegressionCorpus/parent-notification-budget-publish_ack_lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5133510Z --- PASS: TestPinnedRegressionCorpus/parent-notification-budget-publish_ack_lost.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5135111Z === RUN   TestPinnedRegressionCorpus/parent-notification-budget-publish_drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5136270Z --- PASS: TestPinnedRegressionCorpus/parent-notification-budget-publish_drop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5136963Z === RUN   TestPinnedRegressionCorpus/parent-notification-budget-state_drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5137599Z --- PASS: TestPinnedRegressionCorpus/parent-notification-budget-state_drop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5138182Z === RUN   TestPinnedRegressionCorpus/paused-claim-after-renew.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5148308Z --- PASS: TestPinnedRegressionCorpus/paused-claim-after-renew.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5149221Z === RUN   TestPinnedRegressionCorpus/paused-claim-before-renew.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5169676Z --- PASS: TestPinnedRegressionCorpus/paused-claim-before-renew.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5170558Z === RUN   TestPinnedRegressionCorpus/paused-coordinator-after-renew.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5188731Z --- PASS: TestPinnedRegressionCorpus/paused-coordinator-after-renew.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5189761Z === RUN   TestPinnedRegressionCorpus/paused-coordinator-before-renew.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5209116Z --- PASS: TestPinnedRegressionCorpus/paused-coordinator-before-renew.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5209976Z === RUN   TestPinnedRegressionCorpus/purge-blob-invocation_ack_lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5213843Z --- PASS: TestPinnedRegressionCorpus/purge-blob-invocation_ack_lost.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5214657Z === RUN   TestPinnedRegressionCorpus/purge-blob-missing_inv_state_read_lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5218021Z --- PASS: TestPinnedRegressionCorpus/purge-blob-missing_inv_state_read_lost.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5218962Z === RUN   TestPinnedRegressionCorpus/purge-blob-purge_event_ack_lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5222713Z --- PASS: TestPinnedRegressionCorpus/purge-blob-purge_event_ack_lost.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5223766Z === RUN   TestPinnedRegressionCorpus/purge-blob-snapshot_corrupt.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5229498Z --- PASS: TestPinnedRegressionCorpus/purge-blob-snapshot_corrupt.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5230415Z === RUN   TestPinnedRegressionCorpus/purge-blob-snapshot_delayed_read.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5234018Z --- PASS: TestPinnedRegressionCorpus/purge-blob-snapshot_delayed_read.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5234869Z === RUN   TestPinnedRegressionCorpus/retained-invariants.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5246046Z --- PASS: TestPinnedRegressionCorpus/retained-invariants.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5246965Z === RUN   TestPinnedRegressionCorpus/select-many.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5250826Z --- PASS: TestPinnedRegressionCorpus/select-many.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5251756Z === RUN   TestPinnedRegressionCorpus/select-suspended-scan-promise.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5295598Z --- PASS: TestPinnedRegressionCorpus/select-suspended-scan-promise.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5296339Z === RUN   TestPinnedRegressionCorpus/select-suspended-scan.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5324425Z --- PASS: TestPinnedRegressionCorpus/select-suspended-scan.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5325091Z === RUN   TestPinnedRegressionCorpus/signal-history-duplicate-windows.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5328193Z --- PASS: TestPinnedRegressionCorpus/signal-history-duplicate-windows.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5329062Z === RUN   TestPinnedRegressionCorpus/signal-lease-cost-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5348127Z --- PASS: TestPinnedRegressionCorpus/signal-lease-cost-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5349073Z === RUN   TestPinnedRegressionCorpus/signal-liveness.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5356027Z --- PASS: TestPinnedRegressionCorpus/signal-liveness.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5356987Z === RUN   TestPinnedRegressionCorpus/snapshot-append-after-compact.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5364799Z --- PASS: TestPinnedRegressionCorpus/snapshot-append-after-compact.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5365888Z === RUN   TestPinnedRegressionCorpus/snapshot-append-before-compact.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5371272Z --- PASS: TestPinnedRegressionCorpus/snapshot-append-before-compact.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5372323Z === RUN   TestPinnedRegressionCorpus/snapshot-append-hidden-ack.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5377048Z --- PASS: TestPinnedRegressionCorpus/snapshot-append-hidden-ack.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5378539Z === RUN   TestPinnedRegressionCorpus/snapshot-purge-after-release.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5382721Z --- PASS: TestPinnedRegressionCorpus/snapshot-purge-after-release.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5383306Z === RUN   TestPinnedRegressionCorpus/snapshot-purge-fenced.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5387484Z --- PASS: TestPinnedRegressionCorpus/snapshot-purge-fenced.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5388197Z === RUN   TestPinnedRegressionCorpus/snapshot-read-compacted.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5393810Z --- PASS: TestPinnedRegressionCorpus/snapshot-read-compacted.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5394448Z === RUN   TestPinnedRegressionCorpus/snapshot-stale-longer-compactor.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5410992Z --- PASS: TestPinnedRegressionCorpus/snapshot-stale-longer-compactor.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5412344Z === RUN   TestPinnedRegressionCorpus/snapshot-two-compactors.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5422420Z --- PASS: TestPinnedRegressionCorpus/snapshot-two-compactors.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5423244Z === RUN   TestPinnedRegressionCorpus/snapshot-write-compact.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5429646Z --- PASS: TestPinnedRegressionCorpus/snapshot-write-compact.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5430565Z === RUN   TestPinnedRegressionCorpus/start-retry-repair.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5439688Z --- PASS: TestPinnedRegressionCorpus/start-retry-repair.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5440279Z === RUN   TestPinnedRegressionCorpus/suspended-capacity-256_per_100ms_1000.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5517188Z --- PASS: TestPinnedRegressionCorpus/suspended-capacity-256_per_100ms_1000.json (0.01s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5517918Z === RUN   TestPinnedRegressionCorpus/suspended-capacity-256_per_100ms_3000.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5598928Z --- PASS: TestPinnedRegressionCorpus/suspended-capacity-256_per_100ms_3000.json (0.01s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5599681Z === RUN   TestPinnedRegressionCorpus/suspended-capacity-256_per_100ms_336.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5651517Z --- PASS: TestPinnedRegressionCorpus/suspended-capacity-256_per_100ms_336.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5652901Z === RUN   TestPinnedRegressionCorpus/suspended-capacity-eight_per_second_1000.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5700811Z --- PASS: TestPinnedRegressionCorpus/suspended-capacity-eight_per_second_1000.json (0.01s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5702371Z === RUN   TestPinnedRegressionCorpus/suspended-capacity-eight_per_second_3000.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5833627Z --- PASS: TestPinnedRegressionCorpus/suspended-capacity-eight_per_second_3000.json (0.01s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5834871Z === RUN   TestPinnedRegressionCorpus/suspended-capacity-eight_per_second_336.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5846838Z --- PASS: TestPinnedRegressionCorpus/suspended-capacity-eight_per_second_336.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5847727Z === RUN   TestPinnedRegressionCorpus/suspended-liveness.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5870834Z --- PASS: TestPinnedRegressionCorpus/suspended-liveness.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5872013Z === RUN   TestPinnedRegressionCorpus/suspended-two-scanners.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5889324Z --- PASS: TestPinnedRegressionCorpus/suspended-two-scanners.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5889869Z === RUN   TestPinnedRegressionCorpus/terminal-held-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5897333Z --- PASS: TestPinnedRegressionCorpus/terminal-held-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5898256Z === RUN   TestPinnedRegressionCorpus/timer-clock-ahead-after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5903117Z --- PASS: TestPinnedRegressionCorpus/timer-clock-ahead-after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5905616Z === RUN   TestPinnedRegressionCorpus/timer-clock-ahead-before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5907094Z --- PASS: TestPinnedRegressionCorpus/timer-clock-ahead-before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5907927Z === RUN   TestPinnedRegressionCorpus/timer-clock-behind-after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5908803Z --- PASS: TestPinnedRegressionCorpus/timer-clock-behind-after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5909574Z === RUN   TestPinnedRegressionCorpus/timer-clock-behind-before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5910277Z --- PASS: TestPinnedRegressionCorpus/timer-clock-behind-before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5910960Z === RUN   TestPinnedRegressionCorpus/tombstone-delete_ack_lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5912110Z --- PASS: TestPinnedRegressionCorpus/tombstone-delete_ack_lost.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5912909Z === RUN   TestPinnedRegressionCorpus/tombstone-revision_changed.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5913428Z --- PASS: TestPinnedRegressionCorpus/tombstone-revision_changed.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5913993Z === RUN   TestPinnedRegressionCorpus/unchanged-coordinator-after-renew.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5925936Z --- PASS: TestPinnedRegressionCorpus/unchanged-coordinator-after-renew.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5926845Z === RUN   TestPinnedRegressionCorpus/worker-cancel-durable-poll.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5930643Z --- PASS: TestPinnedRegressionCorpus/worker-cancel-durable-poll.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5931711Z === RUN   TestPinnedRegressionCorpus/worker-canceled-retained-lease.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5933385Z --- PASS: TestPinnedRegressionCorpus/worker-canceled-retained-lease.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5934229Z === RUN   TestPinnedRegressionCorpus/worker-child-execution.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5948804Z --- PASS: TestPinnedRegressionCorpus/worker-child-execution.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5949682Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_await_1s.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.5974400Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_await_1s.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.5975067Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_await_250ms.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6000042Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_await_250ms.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6000979Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_select_many_1s.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6037234Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_select_many_1s.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6038669Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_select_many_250ms.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6069607Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_select_many_250ms.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6082227Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_select_signal_1s.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6099139Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_select_signal_1s.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6100390Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_select_signal_250ms.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6138242Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_select_signal_250ms.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6139182Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_sleep_1s.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6159878Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_sleep_1s.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6160781Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-ahead_sleep_250ms.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6179285Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-ahead_sleep_250ms.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6179957Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_await_1s.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6223786Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_await_1s.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6225037Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_await_250ms.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6245960Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_await_250ms.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6247150Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_select_many_1s.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6276447Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_select_many_1s.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6277691Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_select_many_250ms.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6322409Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_select_many_250ms.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6323768Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_select_signal_1s.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6344698Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_select_signal_1s.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6345954Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_select_signal_250ms.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6385179Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_select_signal_250ms.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6386487Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_sleep_1s.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6405944Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_sleep_1s.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6407082Z === RUN   TestPinnedRegressionCorpus/worker-common-clock-behind_sleep_250ms.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6426692Z --- PASS: TestPinnedRegressionCorpus/worker-common-clock-behind_sleep_250ms.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6428077Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_await_1s_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6472174Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_await_1s_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6473896Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_await_1s_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6525069Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_await_1s_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6526006Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_await_250ms_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6553846Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_await_250ms_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6555347Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_await_250ms_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6598951Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_await_250ms_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6599867Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_1s_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6637804Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_1s_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6638694Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_1s_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6680476Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_1s_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6725618Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_250ms_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6726591Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_250ms_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6727686Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_250ms_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6765055Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_many_250ms_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6766910Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_1s_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6810735Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_1s_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6812746Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_1s_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6854961Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_1s_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6856587Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_250ms_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6895022Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_250ms_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6896699Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_250ms_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6941733Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_select_signal_250ms_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6943556Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_1s_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6975496Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_1s_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.6976434Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_1s_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.6999846Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_1s_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7001556Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_250ms_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7030949Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_250ms_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7032871Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_250ms_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7054807Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-ahead_sleep_250ms_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7056285Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_await_1s_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7087512Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_await_1s_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7088991Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_await_1s_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7128939Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_await_1s_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7130106Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_await_250ms_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7162553Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_await_250ms_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7165082Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_await_250ms_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7198073Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_await_250ms_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7199894Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_1s_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7231639Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_1s_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7233431Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_1s_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7278302Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_1s_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7282699Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_250ms_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7316728Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_250ms_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7318486Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_250ms_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7355137Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_many_250ms_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7356730Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_1s_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7393709Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_1s_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7395326Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_1s_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7431484Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_1s_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7433154Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_250ms_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7471363Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_250ms_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7472544Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_250ms_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7511382Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_select_signal_250ms_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7513117Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_1s_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7538630Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_1s_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7540407Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_1s_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7566408Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_1s_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7567926Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_250ms_after_due_without_quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7592761Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_250ms_after_due_without_quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7593969Z === RUN   TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_250ms_before_due.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7619988Z --- PASS: TestPinnedRegressionCorpus/worker-common-transition-behind_sleep_250ms_before_due.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7620679Z === RUN   TestPinnedRegressionCorpus/worker-compactor-seed1.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7651681Z --- PASS: TestPinnedRegressionCorpus/worker-compactor-seed1.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7652857Z === RUN   TestPinnedRegressionCorpus/worker-compactor-seed11508.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7708075Z --- PASS: TestPinnedRegressionCorpus/worker-compactor-seed11508.json (0.01s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7709113Z === RUN   TestPinnedRegressionCorpus/worker-continuation-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7727626Z --- PASS: TestPinnedRegressionCorpus/worker-continuation-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7728286Z === RUN   TestPinnedRegressionCorpus/worker-continuation-budget-archive-ack-lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7746542Z --- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-archive-ack-lost.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7747273Z === RUN   TestPinnedRegressionCorpus/worker-continuation-budget-archive-drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7771273Z --- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-archive-drop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7772756Z === RUN   TestPinnedRegressionCorpus/worker-continuation-budget-manifest-ack-lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7786581Z --- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-manifest-ack-lost.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7787918Z === RUN   TestPinnedRegressionCorpus/worker-continuation-budget-manifest-drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7806944Z --- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-manifest-drop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7807948Z === RUN   TestPinnedRegressionCorpus/worker-continuation-budget-purge-ack-lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7820793Z --- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-purge-ack-lost.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7821908Z === RUN   TestPinnedRegressionCorpus/worker-continuation-budget-purge-drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7840843Z --- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-purge-drop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7842777Z === RUN   TestPinnedRegressionCorpus/worker-continuation-budget-signal-purge-ack-lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7856858Z --- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-signal-purge-ack-lost.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7858444Z === RUN   TestPinnedRegressionCorpus/worker-continuation-budget-signal-purge-drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7872529Z --- PASS: TestPinnedRegressionCorpus/worker-continuation-budget-signal-purge-drop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7873662Z === RUN   TestPinnedRegressionCorpus/worker-execution.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7882341Z --- PASS: TestPinnedRegressionCorpus/worker-execution.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7883015Z === RUN   TestPinnedRegressionCorpus/worker-fallback-timer-execution.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7888770Z --- PASS: TestPinnedRegressionCorpus/worker-fallback-timer-execution.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7889384Z === RUN   TestPinnedRegressionCorpus/worker-fallback-timer-loop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7894902Z --- PASS: TestPinnedRegressionCorpus/worker-fallback-timer-loop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7895505Z === RUN   TestPinnedRegressionCorpus/worker-fanout-interruption-1.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7932850Z --- PASS: TestPinnedRegressionCorpus/worker-fanout-interruption-1.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7934235Z === RUN   TestPinnedRegressionCorpus/worker-fanout-interruption-2.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.7959316Z --- PASS: TestPinnedRegressionCorpus/worker-fanout-interruption-2.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.7960203Z === RUN   TestPinnedRegressionCorpus/worker-fanout-interruption-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8004608Z --- PASS: TestPinnedRegressionCorpus/worker-fanout-interruption-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8005545Z === RUN   TestPinnedRegressionCorpus/worker-frame-budget-frame-put-ack-lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8020427Z --- PASS: TestPinnedRegressionCorpus/worker-frame-budget-frame-put-ack-lost.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8021117Z === RUN   TestPinnedRegressionCorpus/worker-frame-budget-frame-put-drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8037819Z --- PASS: TestPinnedRegressionCorpus/worker-frame-budget-frame-put-drop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8038824Z === RUN   TestPinnedRegressionCorpus/worker-frame-budget-frame-replay-drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8057602Z --- PASS: TestPinnedRegressionCorpus/worker-frame-budget-frame-replay-drop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8058561Z === RUN   TestPinnedRegressionCorpus/worker-frame-budget-frame-verify-drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8077475Z --- PASS: TestPinnedRegressionCorpus/worker-frame-budget-frame-verify-drop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8078438Z === RUN   TestPinnedRegressionCorpus/worker-fresh-timer-behind_await_250ms.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8111871Z --- PASS: TestPinnedRegressionCorpus/worker-fresh-timer-behind_await_250ms.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8112994Z === RUN   TestPinnedRegressionCorpus/worker-fresh-timer-behind_select_many_250ms.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8138892Z --- PASS: TestPinnedRegressionCorpus/worker-fresh-timer-behind_select_many_250ms.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8139919Z === RUN   TestPinnedRegressionCorpus/worker-fresh-timer-behind_select_signal_250ms.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8172890Z --- PASS: TestPinnedRegressionCorpus/worker-fresh-timer-behind_select_signal_250ms.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8173910Z === RUN   TestPinnedRegressionCorpus/worker-fresh-timer-behind_sleep_250ms.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8193248Z --- PASS: TestPinnedRegressionCorpus/worker-fresh-timer-behind_sleep_250ms.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8194396Z === RUN   TestPinnedRegressionCorpus/worker-heartbeat-execution.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8197382Z --- PASS: TestPinnedRegressionCorpus/worker-heartbeat-execution.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8198122Z === RUN   TestPinnedRegressionCorpus/worker-heartbeat-handoff.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8202860Z --- PASS: TestPinnedRegressionCorpus/worker-heartbeat-handoff.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8203530Z === RUN   TestPinnedRegressionCorpus/worker-heartbeat-nak-drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8208761Z --- PASS: TestPinnedRegressionCorpus/worker-heartbeat-nak-drop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8209447Z === RUN   TestPinnedRegressionCorpus/worker-heartbeat-progress-drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8213637Z --- PASS: TestPinnedRegressionCorpus/worker-heartbeat-progress-drop.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8214447Z === RUN   TestPinnedRegressionCorpus/worker-heartbeat-reuse.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8217433Z --- PASS: TestPinnedRegressionCorpus/worker-heartbeat-reuse.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8218267Z === RUN   TestPinnedRegressionCorpus/worker-large-read-retry.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8405735Z --- PASS: TestPinnedRegressionCorpus/worker-large-read-retry.json (0.02s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8406601Z === RUN   TestPinnedRegressionCorpus/worker-large-result.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8597541Z --- PASS: TestPinnedRegressionCorpus/worker-large-result.json (0.02s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8598219Z === RUN   TestPinnedRegressionCorpus/worker-observed-renewal-cost-2.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8618117Z --- PASS: TestPinnedRegressionCorpus/worker-observed-renewal-cost-2.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8619234Z === RUN   TestPinnedRegressionCorpus/worker-observed-renewal-cost-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8639630Z --- PASS: TestPinnedRegressionCorpus/worker-observed-renewal-cost-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8641046Z === RUN   TestPinnedRegressionCorpus/worker-observed-renewal-cost-5.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8663951Z --- PASS: TestPinnedRegressionCorpus/worker-observed-renewal-cost-5.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8665004Z === RUN   TestPinnedRegressionCorpus/worker-pause-lease.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8666452Z --- PASS: TestPinnedRegressionCorpus/worker-pause-lease.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8667382Z === RUN   TestPinnedRegressionCorpus/worker-promise-retirement-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.8787157Z --- PASS: TestPinnedRegressionCorpus/worker-promise-retirement-42.json (0.01s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.8788028Z === RUN   TestPinnedRegressionCorpus/worker-result-budget-step-get-drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.9016763Z --- PASS: TestPinnedRegressionCorpus/worker-result-budget-step-get-drop.json (0.02s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.9018021Z === RUN   TestPinnedRegressionCorpus/worker-result-budget-step-put-ack-lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.9242768Z --- PASS: TestPinnedRegressionCorpus/worker-result-budget-step-put-ack-lost.json (0.02s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.9244006Z === RUN   TestPinnedRegressionCorpus/worker-result-budget-step-put-drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.9450115Z --- PASS: TestPinnedRegressionCorpus/worker-result-budget-step-put-drop.json (0.02s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.9450928Z === RUN   TestPinnedRegressionCorpus/worker-result-budget-terminal-put-ack-lost.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.9700106Z --- PASS: TestPinnedRegressionCorpus/worker-result-budget-terminal-put-ack-lost.json (0.02s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.9701564Z === RUN   TestPinnedRegressionCorpus/worker-result-budget-terminal-put-drop.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.9939348Z --- PASS: TestPinnedRegressionCorpus/worker-result-budget-terminal-put-drop.json (0.02s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.9940192Z === RUN   TestPinnedRegressionCorpus/worker-retirement-42.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.9968725Z --- PASS: TestPinnedRegressionCorpus/worker-retirement-42.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.9969632Z === RUN   TestPinnedRegressionCorpus/worker-running-cancel.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.9977523Z --- PASS: TestPinnedRegressionCorpus/worker-running-cancel.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.9978479Z === RUN   TestPinnedRegressionCorpus/worker-select-both-ready.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.9988901Z --- PASS: TestPinnedRegressionCorpus/worker-select-both-ready.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.9989823Z === RUN   TestPinnedRegressionCorpus/worker-select-execution.json
+sim	Run seeded transport suite	2026-10-02T06:50:42.9994144Z --- PASS: TestPinnedRegressionCorpus/worker-select-execution.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:42.9994963Z === RUN   TestPinnedRegressionCorpus/worker-signal-execution.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0000252Z --- PASS: TestPinnedRegressionCorpus/worker-signal-execution.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0000893Z === RUN   TestPinnedRegressionCorpus/worker-signal-write-latency.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0014095Z --- PASS: TestPinnedRegressionCorpus/worker-signal-write-latency.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0015151Z === RUN   TestPinnedRegressionCorpus/worker-snapshot-budget-completed-5.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0019958Z --- PASS: TestPinnedRegressionCorpus/worker-snapshot-budget-completed-5.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0021769Z === RUN   TestPinnedRegressionCorpus/worker-snapshot-budget-failed-2.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0025528Z --- PASS: TestPinnedRegressionCorpus/worker-snapshot-budget-failed-2.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0026625Z === RUN   TestPinnedRegressionCorpus/worker-snapshot-budget-suspended-1.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0033118Z --- PASS: TestPinnedRegressionCorpus/worker-snapshot-budget-suspended-1.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0033988Z === RUN   TestPinnedRegressionCorpus/worker-snapshot-execution.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0140005Z --- PASS: TestPinnedRegressionCorpus/worker-snapshot-execution.json (0.01s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0140660Z === RUN   TestPinnedRegressionCorpus/worker-successive-kills-v2.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0145745Z --- PASS: TestPinnedRegressionCorpus/worker-successive-kills-v2.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0146327Z === RUN   TestPinnedRegressionCorpus/worker-successive-kills.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0150374Z --- PASS: TestPinnedRegressionCorpus/worker-successive-kills.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0151092Z === RUN   TestPinnedRegressionCorpus/worker-tail-completed-1.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0155697Z --- PASS: TestPinnedRegressionCorpus/worker-tail-completed-1.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0156274Z === RUN   TestPinnedRegressionCorpus/worker-tail-completed-2.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0162006Z --- PASS: TestPinnedRegressionCorpus/worker-tail-completed-2.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0163007Z === RUN   TestPinnedRegressionCorpus/worker-tail-completed-3.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0168880Z --- PASS: TestPinnedRegressionCorpus/worker-tail-completed-3.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0169827Z === RUN   TestPinnedRegressionCorpus/worker-tail-requested-1.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0173091Z --- PASS: TestPinnedRegressionCorpus/worker-tail-requested-1.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0173868Z === RUN   TestPinnedRegressionCorpus/worker-tail-requested-2.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0178380Z --- PASS: TestPinnedRegressionCorpus/worker-tail-requested-2.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0178955Z === RUN   TestPinnedRegressionCorpus/worker-tail-requested-3.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0184121Z --- PASS: TestPinnedRegressionCorpus/worker-tail-requested-3.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0184855Z === RUN   TestPinnedRegressionCorpus/worker-tail-started-1.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0199395Z --- PASS: TestPinnedRegressionCorpus/worker-tail-started-1.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0200603Z === RUN   TestPinnedRegressionCorpus/worker-tail-started-2.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0202204Z --- PASS: TestPinnedRegressionCorpus/worker-tail-started-2.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0203634Z === RUN   TestPinnedRegressionCorpus/worker-tail-started-3.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0207019Z --- PASS: TestPinnedRegressionCorpus/worker-tail-started-3.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0208238Z === RUN   TestPinnedRegressionCorpus/worker-tail-terminal-1.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0212358Z --- PASS: TestPinnedRegressionCorpus/worker-tail-terminal-1.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0213282Z === RUN   TestPinnedRegressionCorpus/worker-tail-terminal-2.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0218327Z --- PASS: TestPinnedRegressionCorpus/worker-tail-terminal-2.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0219439Z === RUN   TestPinnedRegressionCorpus/worker-tail-terminal-3.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0225422Z --- PASS: TestPinnedRegressionCorpus/worker-tail-terminal-3.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0226477Z === RUN   TestPinnedRegressionCorpus/worker-terminal-owned-ack-lost-4.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0238461Z --- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-ack-lost-4.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0239618Z === RUN   TestPinnedRegressionCorpus/worker-terminal-owned-child-notify-1.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0261546Z --- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-child-notify-1.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0263714Z === RUN   TestPinnedRegressionCorpus/worker-terminal-owned-child-notify-ack-lost-7.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0284839Z --- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-child-notify-ack-lost-7.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0286180Z === RUN   TestPinnedRegressionCorpus/worker-terminal-owned-child-notify-drop-17.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0303558Z --- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-child-notify-drop-17.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0304286Z === RUN   TestPinnedRegressionCorpus/worker-terminal-owned-completed-26.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0317117Z --- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-completed-26.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0318355Z === RUN   TestPinnedRegressionCorpus/worker-terminal-owned-failed-13.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0335259Z --- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-failed-13.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0335917Z === RUN   TestPinnedRegressionCorpus/worker-terminal-owned-malformed-3.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0358066Z --- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-malformed-3.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0359211Z === RUN   TestPinnedRegressionCorpus/worker-terminal-owned-missing-state-14.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0371044Z --- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-missing-state-14.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0372191Z === RUN   TestPinnedRegressionCorpus/worker-terminal-owned-state-read-lost-5.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0393195Z --- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-state-read-lost-5.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0394358Z === RUN   TestPinnedRegressionCorpus/worker-terminal-owned-tombstone-18.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0396228Z --- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-tombstone-18.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0397409Z === RUN   TestPinnedRegressionCorpus/worker-terminal-owned-wrong-generation-2.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0416642Z --- PASS: TestPinnedRegressionCorpus/worker-terminal-owned-wrong-generation-2.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0417427Z === RUN   TestPinnedRegressionCorpus/worker-timer-clock-completed_before_controller_duration.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0444149Z --- PASS: TestPinnedRegressionCorpus/worker-timer-clock-completed_before_controller_duration.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0445599Z === RUN   TestPinnedRegressionCorpus/worker-timer-clock-exceeded_controller_recovery_gate.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0468777Z --- PASS: TestPinnedRegressionCorpus/worker-timer-clock-exceeded_controller_recovery_gate.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0470004Z === RUN   TestPinnedRegressionCorpus/worker-timer-execution.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0475476Z --- PASS: TestPinnedRegressionCorpus/worker-timer-execution.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0476477Z === RUN   TestPinnedRegressionCorpus/worker-timer-route-quorum.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0484341Z --- PASS: TestPinnedRegressionCorpus/worker-timer-route-quorum.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0485299Z === RUN   TestPinnedRegressionCorpus/workflow-determinism.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0500107Z --- PASS: TestPinnedRegressionCorpus/workflow-determinism.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0500713Z === RUN   TestPinnedRegressionCorpus/workqueue-retention-held.json
+sim	Run seeded transport suite	2026-10-02T06:50:43.0509188Z --- PASS: TestPinnedRegressionCorpus/workqueue-retention-held.json (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0510060Z --- PASS: TestPinnedRegressionCorpus (0.61s)
+sim	Run seeded transport suite	2026-10-02T06:50:43.0510701Z === RUN   TestCooperativeTwoWriterUnknownReplay
+sim	Run seeded transport suite	2026-10-02T06:50:48.0732807Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeTwoWriterUnknownReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:50:48.0734126Z --- PASS: TestCooperativeTwoWriterUnknownReplay (5.02s)
+sim	Run seeded transport suite	2026-10-02T06:50:48.0734567Z === RUN   TestCooperativeTwoWriterTailLookupRecovery
+sim	Run seeded transport suite	2026-10-02T06:50:53.4625149Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeTwoWriterTailLookupRecovery first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:50:53.4626604Z --- PASS: TestCooperativeTwoWriterTailLookupRecovery (5.39s)
+sim	Run seeded transport suite	2026-10-02T06:50:53.4627775Z === RUN   TestLeaseKVFaultBoundaries
+sim	Run seeded transport suite	2026-10-02T06:50:53.4628735Z === RUN   TestLeaseKVFaultBoundaries/stale_predecessor_read_cannot_delete_initialized_lease
+sim	Run seeded transport suite	2026-10-02T06:50:53.4629868Z --- PASS: TestLeaseKVFaultBoundaries/stale_predecessor_read_cannot_delete_initialized_lease (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:53.4630696Z === RUN   TestLeaseKVFaultBoundaries/old_uninitialized_lease_can_be_reclaimed
+sim	Run seeded transport suite	2026-10-02T06:50:53.4632066Z --- PASS: TestLeaseKVFaultBoundaries/old_uninitialized_lease_can_be_reclaimed (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:53.4633403Z === RUN   TestLeaseKVFaultBoundaries/expired_holder_cannot_renew_or_remove_successor
+sim	Run seeded transport suite	2026-10-02T06:50:53.4634836Z --- PASS: TestLeaseKVFaultBoundaries/expired_holder_cannot_renew_or_remove_successor (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:53.4636060Z === RUN   TestLeaseKVFaultBoundaries/lost_release_acknowledgment_cleans_only_old_generation
+sim	Run seeded transport suite	2026-10-02T06:50:53.4637387Z --- PASS: TestLeaseKVFaultBoundaries/lost_release_acknowledgment_cleans_only_old_generation (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:53.4638610Z === RUN   TestLeaseKVFaultBoundaries/lost_renewal_acknowledgment_cleans_committed_update
+sim	Run seeded transport suite	2026-10-02T06:50:53.4639910Z --- PASS: TestLeaseKVFaultBoundaries/lost_renewal_acknowledgment_cleans_committed_update (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:53.4641511Z === RUN   TestLeaseKVFaultBoundaries/create_acknowledgment_lost_before_initialization
+sim	Run seeded transport suite	2026-10-02T06:50:53.4642831Z --- PASS: TestLeaseKVFaultBoundaries/create_acknowledgment_lost_before_initialization (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:53.4643810Z --- PASS: TestLeaseKVFaultBoundaries (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:50:53.4644576Z === RUN   TestSeededLeaseModelReplay
+sim	Run seeded transport suite	2026-10-02T06:52:09.6152445Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededLeaseModelReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:52:09.6153582Z --- PASS: TestSeededLeaseModelReplay (76.15s)
+sim	Run seeded transport suite	2026-10-02T06:52:09.6154319Z === RUN   TestKVRevisionMismatchDoesNotDeleteReplacement
+sim	Run seeded transport suite	2026-10-02T06:52:09.6155178Z --- PASS: TestKVRevisionMismatchDoesNotDeleteReplacement (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:52:09.6156000Z === RUN   TestCooperativeLeaseAcquireRacesReplay
+sim	Run seeded transport suite	2026-10-02T06:52:30.3748911Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeLeaseAcquireRacesReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:52:30.3750455Z --- PASS: TestCooperativeLeaseAcquireRacesReplay (20.76s)
+sim	Run seeded transport suite	2026-10-02T06:52:30.3751550Z === RUN   TestSeededCleanupConflictReplay
+sim	Run seeded transport suite	2026-10-02T06:52:32.7376148Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededCleanupConflictReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:52:32.7377538Z --- PASS: TestSeededCleanupConflictReplay (2.36s)
+sim	Run seeded transport suite	2026-10-02T06:52:32.7378201Z === RUN   TestSeededCleanupStaleReadReplay
+sim	Run seeded transport suite	2026-10-02T06:52:34.6662230Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededCleanupStaleReadReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:52:34.6663194Z --- PASS: TestSeededCleanupStaleReadReplay (1.93s)
+sim	Run seeded transport suite	2026-10-02T06:52:34.6663589Z === RUN   TestSeededLeaseClockSkewReplay
+sim	Run seeded transport suite	2026-10-02T06:52:39.4463378Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededLeaseClockSkewReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:52:39.4464840Z --- PASS: TestSeededLeaseClockSkewReplay (4.78s)
+sim	Run seeded transport suite	2026-10-02T06:52:39.4465566Z === RUN   TestSeededLeaseExpiryRaceReplay
+sim	Run seeded transport suite	2026-10-02T06:53:55.2827130Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededLeaseExpiryRaceReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:53:55.2828747Z --- PASS: TestSeededLeaseExpiryRaceReplay (75.84s)
+sim	Run seeded transport suite	2026-10-02T06:53:55.2829330Z === RUN   TestSeededLeaseGateCancellationReplay
+sim	Run seeded transport suite	2026-10-02T06:53:58.1338173Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededLeaseGateCancellationReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:53:58.1339450Z --- PASS: TestSeededLeaseGateCancellationReplay (2.85s)
+sim	Run seeded transport suite	2026-10-02T06:53:58.1340113Z === RUN   TestSeededLeaseHeartbeatReuseReplay
+sim	Run seeded transport suite	2026-10-02T06:53:59.7418424Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededLeaseHeartbeatReuseReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:53:59.7419261Z --- PASS: TestSeededLeaseHeartbeatReuseReplay (1.61s)
+sim	Run seeded transport suite	2026-10-02T06:53:59.7419739Z === RUN   TestSuspendedWakeupLivenessNegativeControl
+sim	Run seeded transport suite	2026-10-02T06:53:59.7421958Z --- PASS: TestSuspendedWakeupLivenessNegativeControl (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:53:59.7422507Z === RUN   TestSeededMembershipReplay
+sim	Run seeded transport suite	2026-10-02T06:55:21.9859784Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededMembershipReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:55:21.9860779Z --- PASS: TestSeededMembershipReplay (82.24s)
+sim	Run seeded transport suite	2026-10-02T06:55:21.9861171Z === RUN   TestSeededMembershipSessionRecovery
+sim	Run seeded transport suite	2026-10-02T06:56:17.6705728Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededMembershipSessionRecovery first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:56:17.6709078Z --- PASS: TestSeededMembershipSessionRecovery (55.69s)
+sim	Run seeded transport suite	2026-10-02T06:56:17.6710396Z === RUN   TestMinimizeFailureTraceRemovesCooperativeActor
+sim	Run seeded transport suite	2026-10-02T06:56:17.6716479Z --- PASS: TestMinimizeFailureTraceRemovesCooperativeActor (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:56:17.6717126Z === RUN   TestMinimizeFailureTracePreservesInvariantAndExactReplay
+sim	Run seeded transport suite	2026-10-02T06:56:17.6721702Z --- PASS: TestMinimizeFailureTracePreservesInvariantAndExactReplay (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:56:17.6722916Z === RUN   TestMinimizerRejectsDifferentFailureAndBudget
+sim	Run seeded transport suite	2026-10-02T06:56:17.6723786Z --- PASS: TestMinimizerRejectsDifferentFailureAndBudget (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:56:17.6724532Z === RUN   TestMinimizeSavedFaultTrace
+sim	Run seeded transport suite	2026-10-02T06:56:17.6728118Z --- PASS: TestMinimizeSavedFaultTrace (0.00s)
+sim	Run seeded transport suite	2026-10-02T06:56:17.6728911Z === RUN   TestSeededOutcomePersistenceReplay
+sim	Run seeded transport suite	2026-10-02T06:56:35.3699144Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededOutcomePersistenceReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:56:35.3700483Z --- PASS: TestSeededOutcomePersistenceReplay (17.70s)
+sim	Run seeded transport suite	2026-10-02T06:56:35.3701645Z === RUN   TestSeededPausedCoordinatorClaimReplay
+sim	Run seeded transport suite	2026-10-02T06:57:22.6126417Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededPausedCoordinatorClaimReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:57:22.6128014Z --- PASS: TestSeededPausedCoordinatorClaimReplay (47.24s)
+sim	Run seeded transport suite	2026-10-02T06:57:22.6129009Z === RUN   TestSeededPausedCoordinatorReplay
+sim	Run seeded transport suite	2026-10-02T06:58:37.0278110Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededPausedCoordinatorReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:58:37.0279827Z --- PASS: TestSeededPausedCoordinatorReplay (74.42s)
+sim	Run seeded transport suite	2026-10-02T06:58:37.0280804Z === RUN   TestSeededPurgeBlobReplay
+sim	Run seeded transport suite	2026-10-02T06:58:51.8990895Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededPurgeBlobReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:58:51.8995164Z --- PASS: TestSeededPurgeBlobReplay (14.87s)
+sim	Run seeded transport suite	2026-10-02T06:58:51.8995856Z === RUN   TestCooperativeReconcileScannersReplay
+sim	Run seeded transport suite	2026-10-02T06:59:52.4816450Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeReconcileScannersReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T06:59:52.4817862Z --- PASS: TestCooperativeReconcileScannersReplay (60.58s)
+sim	Run seeded transport suite	2026-10-02T06:59:52.4818630Z === RUN   TestSeededReconcileLoopReplay
+sim	Run seeded transport suite	2026-10-02T07:00:30.3355171Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededReconcileLoopReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:00:30.3358424Z --- PASS: TestSeededReconcileLoopReplay (37.85s)
+sim	Run seeded transport suite	2026-10-02T07:00:30.3359560Z === RUN   TestRepairObservationDistinguishesDryUnknownAndAcknowledged
+sim	Run seeded transport suite	2026-10-02T07:00:30.3360667Z === RUN   TestRepairObservationDistinguishesDryUnknownAndAcknowledged/start
+sim	Run seeded transport suite	2026-10-02T07:00:30.3362034Z --- PASS: TestRepairObservationDistinguishesDryUnknownAndAcknowledged/start (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:00:30.3363020Z === RUN   TestRepairObservationDistinguishesDryUnknownAndAcknowledged/signal
+sim	Run seeded transport suite	2026-10-02T07:00:30.3363702Z --- PASS: TestRepairObservationDistinguishesDryUnknownAndAcknowledged/signal (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:00:30.3364351Z === RUN   TestRepairObservationDistinguishesDryUnknownAndAcknowledged/suspended
+sim	Run seeded transport suite	2026-10-02T07:00:30.3364995Z --- PASS: TestRepairObservationDistinguishesDryUnknownAndAcknowledged/suspended (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:00:30.3365668Z --- PASS: TestRepairObservationDistinguishesDryUnknownAndAcknowledged (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:00:30.3366181Z === RUN   TestFallbackTimerObservationDryRunAndZeroStep
+sim	Run seeded transport suite	2026-10-02T07:00:30.3366631Z --- PASS: TestFallbackTimerObservationDryRunAndZeroStep (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:00:30.3367084Z === RUN   TestStepLimitFailsWithPendingActionsAndReplays
+sim	Run seeded transport suite	2026-10-02T07:00:30.3367556Z --- PASS: TestStepLimitFailsWithPendingActionsAndReplays (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:00:30.3367998Z === RUN   TestCooperativeStallListsUnfinishedActors
+sim	Run seeded transport suite	2026-10-02T07:00:30.3562306Z --- PASS: TestCooperativeStallListsUnfinishedActors (0.02s)
+sim	Run seeded transport suite	2026-10-02T07:00:30.3563631Z === RUN   TestCooperativePendingTurnSurvivesOperationCancellation
+sim	Run seeded transport suite	2026-10-02T07:00:30.3564767Z --- PASS: TestCooperativePendingTurnSurvivesOperationCancellation (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:00:30.3565793Z === RUN   TestSchedulerRejectsVirtualClockOverflowAndInvalidTraceLimit
+sim	Run seeded transport suite	2026-10-02T07:00:30.3566844Z --- PASS: TestSchedulerRejectsVirtualClockOverflowAndInvalidTraceLimit (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:00:30.3567993Z === RUN   TestSeedIterationAccountsCompletedBodies
+sim	Run seeded transport suite	2026-10-02T07:00:30.3568676Z --- PASS: TestSeedIterationAccountsCompletedBodies (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:00:30.3569389Z === RUN   TestSeededSelectManyReplay
+sim	Run seeded transport suite	2026-10-02T07:00:41.2712896Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededSelectManyReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:00:41.2713626Z --- PASS: TestSeededSelectManyReplay (10.91s)
+sim	Run seeded transport suite	2026-10-02T07:00:41.2714067Z === RUN   TestSeededSelectSuspendedScanReplay
+sim	Run seeded transport suite	2026-10-02T07:05:21.9098345Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededSelectSuspendedScanReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:05:21.9099533Z --- PASS: TestSeededSelectSuspendedScanReplay (280.64s)
+sim	Run seeded transport suite	2026-10-02T07:05:21.9099975Z === RUN   TestCooperativeSignalPublishScanReplay
+sim	Run seeded transport suite	2026-10-02T07:05:26.3772444Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeSignalPublishScanReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:05:26.3773887Z --- PASS: TestCooperativeSignalPublishScanReplay (4.47s)
+sim	Run seeded transport suite	2026-10-02T07:05:26.3774461Z === RUN   TestCooperativeClientSignalRepairReplay
+sim	Run seeded transport suite	2026-10-02T07:05:32.3841451Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeClientSignalRepairReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:05:32.3842305Z --- PASS: TestCooperativeClientSignalRepairReplay (6.01s)
+sim	Run seeded transport suite	2026-10-02T07:05:32.3842711Z === RUN   TestSeededClientSignalReplay
+sim	Run seeded transport suite	2026-10-02T07:05:55.6038175Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededClientSignalReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:05:55.6039690Z --- PASS: TestSeededClientSignalReplay (23.22s)
+sim	Run seeded transport suite	2026-10-02T07:05:55.6040626Z === RUN   TestClientSignalTransportFaultBoundaries
+sim	Run seeded transport suite	2026-10-02T07:05:55.6041708Z --- PASS: TestClientSignalTransportFaultBoundaries (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:05:55.6042759Z === RUN   TestClientSignalTransportTombstoneAndReuse
+sim	Run seeded transport suite	2026-10-02T07:05:55.6043622Z --- PASS: TestClientSignalTransportTombstoneAndReuse (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:05:55.6044164Z === RUN   TestClientSignalTransportGenerationTerminalAndBlob
+sim	Run seeded transport suite	2026-10-02T07:05:55.6060991Z --- PASS: TestClientSignalTransportGenerationTerminalAndBlob (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:05:55.6062104Z === RUN   TestSeededWorkerSignalDrainReplay
+sim	Run seeded transport suite	2026-10-02T07:06:23.5470820Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerSignalDrainReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:06:23.5471907Z --- PASS: TestSeededWorkerSignalDrainReplay (27.94s)
+sim	Run seeded transport suite	2026-10-02T07:06:23.5472350Z === RUN   TestWorkerSignalDrainModelSkipsGapsAndReplays
+sim	Run seeded transport suite	2026-10-02T07:06:23.5522207Z --- PASS: TestWorkerSignalDrainModelSkipsGapsAndReplays (0.01s)
+sim	Run seeded transport suite	2026-10-02T07:06:23.5523413Z === RUN   TestSeededSignalHistoryWindowReplay
+sim	Run seeded transport suite	2026-10-02T07:06:26.6547759Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededSignalHistoryWindowReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:06:26.6549092Z --- PASS: TestSeededSignalHistoryWindowReplay (3.10s)
+sim	Run seeded transport suite	2026-10-02T07:06:26.6549846Z === RUN   TestSignalWakeupLivenessNegativeControl
+sim	Run seeded transport suite	2026-10-02T07:06:26.6550498Z --- PASS: TestSignalWakeupLivenessNegativeControl (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:06:26.6550901Z === RUN   TestSeededSignalPipelineReplay
+sim	Run seeded transport suite	2026-10-02T07:08:07.2745509Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededSignalPipelineReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:08:07.2747095Z --- PASS: TestSeededSignalPipelineReplay (100.62s)
+sim	Run seeded transport suite	2026-10-02T07:08:07.2747993Z === RUN   TestSeededSignalRepairReplay
+sim	Run seeded transport suite	2026-10-02T07:08:28.9493777Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededSignalRepairReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:08:28.9494998Z --- PASS: TestSeededSignalRepairReplay (21.67s)
+sim	Run seeded transport suite	2026-10-02T07:08:28.9495684Z === RUN   TestCooperativeSnapshotCompactorsReplay
+sim	Run seeded transport suite	2026-10-02T07:09:49.0917939Z     snapshot_actors_test.go:207: conflicting manifest CAS attempts: 23804
+sim	Run seeded transport suite	2026-10-02T07:09:49.1017201Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeSnapshotCompactorsReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:09:49.1018052Z --- PASS: TestCooperativeSnapshotCompactorsReplay (80.15s)
+sim	Run seeded transport suite	2026-10-02T07:09:49.1018506Z === RUN   TestCooperativeSnapshotAppendPurgeReplay
+sim	Run seeded transport suite	2026-10-02T07:10:19.4367314Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeSnapshotAppendPurgeReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:10:19.4368707Z --- PASS: TestCooperativeSnapshotAppendPurgeReplay (30.33s)
+sim	Run seeded transport suite	2026-10-02T07:10:19.4369326Z === RUN   TestCooperativeSnapshotPurgeLeaseReplay
+sim	Run seeded transport suite	2026-10-02T07:10:38.8049440Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeSnapshotPurgeLeaseReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:10:38.8050791Z --- PASS: TestCooperativeSnapshotPurgeLeaseReplay (19.37s)
+sim	Run seeded transport suite	2026-10-02T07:10:38.8052131Z === RUN   TestSeededSnapshotReadReplay
+sim	Run seeded transport suite	2026-10-02T07:11:09.5018770Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededSnapshotReadReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:11:09.5022545Z --- PASS: TestSeededSnapshotReadReplay (30.70s)
+sim	Run seeded transport suite	2026-10-02T07:11:09.5023317Z === RUN   TestSnapshotReadFailsClosedOnCorruptObject
+sim	Run seeded transport suite	2026-10-02T07:11:09.5023798Z --- PASS: TestSnapshotReadFailsClosedOnCorruptObject (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:09.5024198Z === RUN   TestSeededSnapshotWriteReplay
+sim	Run seeded transport suite	2026-10-02T07:11:58.7037859Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededSnapshotWriteReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:11:58.7042682Z --- PASS: TestSeededSnapshotWriteReplay (49.20s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7043550Z === RUN   TestStartTransportFaultBoundaries
+sim	Run seeded transport suite	2026-10-02T07:11:58.7044556Z === RUN   TestStartTransportFaultBoundaries/dropped_publish_retries_without_duplicate
+sim	Run seeded transport suite	2026-10-02T07:11:58.7045973Z --- PASS: TestStartTransportFaultBoundaries/dropped_publish_retries_without_duplicate (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7047357Z === RUN   TestStartTransportFaultBoundaries/lost_invocation_ack_repairs_its_enqueue
+sim	Run seeded transport suite	2026-10-02T07:11:58.7048675Z --- PASS: TestStartTransportFaultBoundaries/lost_invocation_ack_repairs_its_enqueue (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7050402Z === RUN   TestStartTransportFaultBoundaries/lost_enqueue_ack_commits_exactly_once
+sim	Run seeded transport suite	2026-10-02T07:11:58.7051889Z --- PASS: TestStartTransportFaultBoundaries/lost_enqueue_ack_commits_exactly_once (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7053292Z === RUN   TestStartTransportFaultBoundaries/duplicate_in_process_retries_the_same_start_wakeup
+sim	Run seeded transport suite	2026-10-02T07:11:58.7054762Z --- PASS: TestStartTransportFaultBoundaries/duplicate_in_process_retries_the_same_start_wakeup (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7056251Z === RUN   TestStartTransportFaultBoundaries/duplicate_in_process_retries_the_same_signal_wakeup
+sim	Run seeded transport suite	2026-10-02T07:11:58.7057595Z --- PASS: TestStartTransportFaultBoundaries/duplicate_in_process_retries_the_same_signal_wakeup (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7058824Z === RUN   TestStartTransportFaultBoundaries/large_input_retains_object_and_hash
+sim	Run seeded transport suite	2026-10-02T07:11:58.7086898Z --- PASS: TestStartTransportFaultBoundaries/large_input_retains_object_and_hash (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7088219Z === RUN   TestStartTransportFaultBoundaries/stale_read_after_duplicate_is_retried
+sim	Run seeded transport suite	2026-10-02T07:11:58.7089539Z --- PASS: TestStartTransportFaultBoundaries/stale_read_after_duplicate_is_retried (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7090623Z --- PASS: TestStartTransportFaultBoundaries (0.01s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7100103Z === RUN   TestStartSubjectTailCASDefendsAgainstIgnoredSubjectLimit
+sim	Run seeded transport suite	2026-10-02T07:11:58.7100921Z --- PASS: TestStartSubjectTailCASDefendsAgainstIgnoredSubjectLimit (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7101829Z === RUN   TestMissingRunMessageIDMutationRetainsDuplicate
+sim	Run seeded transport suite	2026-10-02T07:11:58.7102329Z --- PASS: TestMissingRunMessageIDMutationRetainsDuplicate (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7103049Z === RUN   TestSkippedStartReconcilerMutationIsDetected
+sim	Run seeded transport suite	2026-10-02T07:11:58.7103502Z --- PASS: TestSkippedStartReconcilerMutationIsDetected (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7104495Z === RUN   TestStartLivenessFencesReusedIDWithOldJournal
+sim	Run seeded transport suite	2026-10-02T07:11:58.7104949Z --- PASS: TestStartLivenessFencesReusedIDWithOldJournal (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7105397Z === RUN   TestStartRunDedupWindowExpiresInVirtualTime
+sim	Run seeded transport suite	2026-10-02T07:11:58.7105826Z --- PASS: TestStartRunDedupWindowExpiresInVirtualTime (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7106304Z === RUN   TestStartScanRepeatsAfterDedupExpiryUntilJournalExists
+sim	Run seeded transport suite	2026-10-02T07:11:58.7106832Z --- PASS: TestStartScanRepeatsAfterDedupExpiryUntilJournalExists (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7107309Z === RUN   TestStartScanModelCursorAndUncertainEnqueue
+sim	Run seeded transport suite	2026-10-02T07:11:58.7107728Z --- PASS: TestStartScanModelCursorAndUncertainEnqueue (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:11:58.7108100Z === RUN   TestSeededStartModelReplay
+sim	Run seeded transport suite	2026-10-02T07:12:59.3919834Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededStartModelReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:12:59.3921622Z --- PASS: TestSeededStartModelReplay (60.68s)
+sim	Run seeded transport suite	2026-10-02T07:12:59.3922518Z === RUN   TestCooperativeStartRacesReplay
+sim	Run seeded transport suite	2026-10-02T07:13:20.9057710Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeStartRacesReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:13:20.9059257Z --- PASS: TestCooperativeStartRacesReplay (21.51s)
+sim	Run seeded transport suite	2026-10-02T07:13:20.9060284Z === RUN   TestCooperativeStartAndScannerRacesReplay
+sim	Run seeded transport suite	2026-10-02T07:13:33.0452647Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeStartAndScannerRacesReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:13:33.0454366Z --- PASS: TestCooperativeStartAndScannerRacesReplay (12.14s)
+sim	Run seeded transport suite	2026-10-02T07:13:33.0455348Z === RUN   TestCooperativeSuspendedScannersReplay
+sim	Run seeded transport suite	2026-10-02T07:15:04.3001925Z     seed_count_test.go:32: TIER1_SEEDS test=TestCooperativeSuspendedScannersReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:15:04.3003407Z --- PASS: TestCooperativeSuspendedScannersReplay (91.25s)
+sim	Run seeded transport suite	2026-10-02T07:15:04.3004417Z === RUN   TestSeededSuspendedLoopReplay
+sim	Run seeded transport suite	2026-10-02T07:16:39.8261792Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededSuspendedLoopReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:16:39.8265572Z --- PASS: TestSeededSuspendedLoopReplay (95.53s)
+sim	Run seeded transport suite	2026-10-02T07:16:39.8266555Z === RUN   TestSeededSuspendedLostNakRecovery
+sim	Run seeded transport suite	2026-10-02T07:16:45.9213035Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededSuspendedLostNakRecovery first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:16:45.9214841Z --- PASS: TestSeededSuspendedLostNakRecovery (6.10s)
+sim	Run seeded transport suite	2026-10-02T07:16:45.9215866Z === RUN   TestSeededSuspendedScanCapacityReplay
+sim	Run seeded transport suite	2026-10-02T07:25:02.0041824Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededSuspendedScanCapacityReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:25:02.0043637Z --- PASS: TestSeededSuspendedScanCapacityReplay (496.08s)
+sim	Run seeded transport suite	2026-10-02T07:25:02.0044607Z === RUN   TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead
+sim	Run seeded transport suite	2026-10-02T07:25:02.0045304Z === RUN   TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead/sequence-1
+sim	Run seeded transport suite	2026-10-02T07:25:02.0046095Z --- PASS: TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead/sequence-1 (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:25:02.0046839Z === RUN   TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead/sequence-2
+sim	Run seeded transport suite	2026-10-02T07:25:02.0047550Z --- PASS: TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead/sequence-2 (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:25:02.0048250Z === RUN   TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead/sequence-3
+sim	Run seeded transport suite	2026-10-02T07:25:02.0048948Z --- PASS: TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead/sequence-3 (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:25:02.0049657Z --- PASS: TestSuspendedScanKeepsVerifiedWakeupsOnTransientRead (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:25:02.0050200Z === RUN   TestSeededSuspendedScanReplay
+sim	Run seeded transport suite	2026-10-02T07:26:10.9309523Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededSuspendedScanReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:26:10.9316560Z --- PASS: TestSeededSuspendedScanReplay (68.93s)
+sim	Run seeded transport suite	2026-10-02T07:26:10.9318467Z === RUN   TestSeededTimerClockTransitionReplay
+sim	Run seeded transport suite	2026-10-02T07:26:15.4032564Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededTimerClockTransitionReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:26:15.4033857Z --- PASS: TestSeededTimerClockTransitionReplay (4.47s)
+sim	Run seeded transport suite	2026-10-02T07:26:15.4034319Z === RUN   TestSeededTimerScanReplay
+sim	Run seeded transport suite	2026-10-02T07:26:36.2783669Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededTimerScanReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:26:36.2784389Z --- PASS: TestSeededTimerScanReplay (20.88s)
+sim	Run seeded transport suite	2026-10-02T07:26:36.2785239Z === RUN   TestSeededTimerScheduleReplay
+sim	Run seeded transport suite	2026-10-02T07:26:58.0124929Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededTimerScheduleReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:26:58.0127476Z --- PASS: TestSeededTimerScheduleReplay (21.73s)
+sim	Run seeded transport suite	2026-10-02T07:26:58.0128378Z === RUN   TestSeededTombstoneSweepReplay
+sim	Run seeded transport suite	2026-10-02T07:27:01.0729146Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededTombstoneSweepReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:27:01.0731858Z --- PASS: TestSeededTombstoneSweepReplay (3.06s)
+sim	Run seeded transport suite	2026-10-02T07:27:01.0732846Z === RUN   TestSeededUnchangedCoordinatorReplay
+sim	Run seeded transport suite	2026-10-02T07:28:16.1917019Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededUnchangedCoordinatorReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:28:16.1918208Z --- PASS: TestSeededUnchangedCoordinatorReplay (75.12s)
+sim	Run seeded transport suite	2026-10-02T07:28:16.1918954Z === RUN   TestSeededWorkerChildExecutionReplay
+sim	Run seeded transport suite	2026-10-02T07:29:02.5563628Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerChildExecutionReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:29:02.5573608Z --- PASS: TestSeededWorkerChildExecutionReplay (46.36s)
+sim	Run seeded transport suite	2026-10-02T07:29:02.5574810Z === RUN   TestSeededWorkerCompactorReplay
+sim	Run seeded transport suite	2026-10-02T07:32:54.5077618Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerCompactorReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:32:54.5078569Z --- PASS: TestSeededWorkerCompactorReplay (231.95s)
+sim	Run seeded transport suite	2026-10-02T07:32:54.5079093Z === RUN   TestSeededWorkerContinuationBudgetReplay
+sim	Run seeded transport suite	2026-10-02T07:34:47.4170769Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerContinuationBudgetReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:34:47.4172123Z --- PASS: TestSeededWorkerContinuationBudgetReplay (112.91s)
+sim	Run seeded transport suite	2026-10-02T07:34:47.4172560Z === RUN   TestSeededWorkerContinuationReplay
+sim	Run seeded transport suite	2026-10-02T07:36:37.5933506Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerContinuationReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:36:37.5934983Z --- PASS: TestSeededWorkerContinuationReplay (110.17s)
+sim	Run seeded transport suite	2026-10-02T07:36:37.5958658Z === RUN   TestSeededWorkerDeepChildReplay
+sim	Run seeded transport suite	2026-10-02T07:38:22.1836596Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerDeepChildReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:38:22.1837893Z --- PASS: TestSeededWorkerDeepChildReplay (104.59s)
+sim	Run seeded transport suite	2026-10-02T07:38:22.1838401Z === RUN   TestSeededWorkerExecutionReplay
+sim	Run seeded transport suite	2026-10-02T07:39:22.3868411Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerExecutionReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:39:22.3869354Z --- PASS: TestSeededWorkerExecutionReplay (60.20s)
+sim	Run seeded transport suite	2026-10-02T07:39:22.3869907Z === RUN   TestSeededWorkerFallbackTimerExecutionReplay
+sim	Run seeded transport suite	2026-10-02T07:39:55.5162166Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerFallbackTimerExecutionReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:39:55.5163586Z --- PASS: TestSeededWorkerFallbackTimerExecutionReplay (33.13s)
+sim	Run seeded transport suite	2026-10-02T07:39:55.5164636Z === RUN   TestSeededWorkerFallbackTimerLoopExecutionReplay
+sim	Run seeded transport suite	2026-10-02T07:40:31.1291973Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerFallbackTimerLoopExecutionReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:40:31.1293790Z --- PASS: TestSeededWorkerFallbackTimerLoopExecutionReplay (35.61s)
+sim	Run seeded transport suite	2026-10-02T07:40:31.1294860Z === RUN   TestSeededWorkerFanoutInterruptedReplay
+sim	Run seeded transport suite	2026-10-02T07:44:07.4941229Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerFanoutInterruptedReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:44:07.4942691Z --- PASS: TestSeededWorkerFanoutInterruptedReplay (216.36s)
+sim	Run seeded transport suite	2026-10-02T07:44:07.4943258Z === RUN   TestFiveHundredChildModeledParentInterruption
+sim	Run seeded transport suite	2026-10-02T07:44:07.4943952Z === RUN   TestFiveHundredChildModeledParentInterruption/seed2
+sim	Run seeded transport suite	2026-10-02T07:44:07.7318582Z     worker_fanout_replay_test.go:333: seed=2 phase=creation cut=356
+sim	Run seeded transport suite	2026-10-02T07:44:07.9929502Z --- PASS: TestFiveHundredChildModeledParentInterruption/seed2 (0.50s)
+sim	Run seeded transport suite	2026-10-02T07:44:07.9930464Z === RUN   TestFiveHundredChildModeledParentInterruption/seed42
+sim	Run seeded transport suite	2026-10-02T07:44:08.3702082Z     worker_fanout_replay_test.go:333: seed=42 phase=results cut=88
+sim	Run seeded transport suite	2026-10-02T07:44:08.7484453Z --- PASS: TestFiveHundredChildModeledParentInterruption/seed42 (0.76s)
+sim	Run seeded transport suite	2026-10-02T07:44:08.7486060Z --- PASS: TestFiveHundredChildModeledParentInterruption (1.25s)
+sim	Run seeded transport suite	2026-10-02T07:44:08.7487073Z === RUN   TestSeededWorkerFrameBudgetReplay
+sim	Run seeded transport suite	2026-10-02T07:46:17.0010952Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerFrameBudgetReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:46:17.0013154Z --- PASS: TestSeededWorkerFrameBudgetReplay (128.25s)
+sim	Run seeded transport suite	2026-10-02T07:46:17.0014195Z === RUN   TestSeededWorkerFreshTimerWakeupReplay
+sim	Run seeded transport suite	2026-10-02T07:49:32.8083138Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerFreshTimerWakeupReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:49:32.8083965Z --- PASS: TestSeededWorkerFreshTimerWakeupReplay (195.81s)
+sim	Run seeded transport suite	2026-10-02T07:49:32.8084469Z === RUN   TestSeededWorkerCommonClockAcrossSkewedDeliveryTimestamps
+sim	Run seeded transport suite	2026-10-02T07:52:58.8849540Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerCommonClockAcrossSkewedDeliveryTimestamps first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:52:58.8851613Z --- PASS: TestSeededWorkerCommonClockAcrossSkewedDeliveryTimestamps (206.08s)
+sim	Run seeded transport suite	2026-10-02T07:52:58.8852646Z === RUN   TestSeededWorkerCommonClockTransitionRepair
+sim	Run seeded transport suite	2026-10-02T07:57:09.8698835Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerCommonClockTransitionRepair first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:57:09.8700431Z --- PASS: TestSeededWorkerCommonClockTransitionRepair (250.98s)
+sim	Run seeded transport suite	2026-10-02T07:57:09.8701502Z === RUN   TestSeededHeartbeatHandoffReplay
+sim	Run seeded transport suite	2026-10-02T07:57:34.8377526Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededHeartbeatHandoffReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:57:34.8378881Z --- PASS: TestSeededHeartbeatHandoffReplay (24.97s)
+sim	Run seeded transport suite	2026-10-02T07:57:34.8388392Z === RUN   TestSeededWorkerHeartbeatReplay
+sim	Run seeded transport suite	2026-10-02T07:57:53.4609789Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerHeartbeatReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T07:57:53.4610558Z --- PASS: TestSeededWorkerHeartbeatReplay (18.62s)
+sim	Run seeded transport suite	2026-10-02T07:57:53.4610988Z === RUN   TestWorkerKillAndPauseLeaseExpiryAndFencing
+sim	Run seeded transport suite	2026-10-02T07:57:53.4624337Z --- PASS: TestWorkerKillAndPauseLeaseExpiryAndFencing (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:57:53.4626176Z === RUN   TestCanceledWorkerRetainedLeaseExpiresAndFences
+sim	Run seeded transport suite	2026-10-02T07:57:53.4626991Z --- PASS: TestCanceledWorkerRetainedLeaseExpiresAndFences (0.00s)
+sim	Run seeded transport suite	2026-10-02T07:57:53.4627733Z === RUN   TestSeededWorkerLargeResultReplay
+sim	Run seeded transport suite	2026-10-02T08:24:15.0775075Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerLargeResultReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T08:24:15.0776292Z --- PASS: TestSeededWorkerLargeResultReplay (1581.62s)
+sim	Run seeded transport suite	2026-10-02T08:24:15.0777003Z === RUN   TestSeededParentNotificationBudgetReplay
+sim	Run seeded transport suite	2026-10-02T08:24:18.8742028Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededParentNotificationBudgetReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T08:24:18.8744306Z --- PASS: TestSeededParentNotificationBudgetReplay (3.80s)
+sim	Run seeded transport suite	2026-10-02T08:24:18.8745177Z === RUN   TestSeededWorkerObservedRenewalCost
+sim	Run seeded transport suite	2026-10-02T08:26:41.0715608Z     worker_observed_renewal_cost_test.go:305: observed cost profiles=map[ceil:33334 floor:33413 zero:33253]; floor/ceil are expected failing liveness controls, zero is the clean cost control
+sim	Run seeded transport suite	2026-10-02T08:26:41.0840821Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerObservedRenewalCost first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T08:26:41.0842345Z --- PASS: TestSeededWorkerObservedRenewalCost (142.21s)
+sim	Run seeded transport suite	2026-10-02T08:26:41.0843109Z === RUN   TestSeededWorkerPromiseRetirementReplay
+sim	Run seeded transport suite	2026-10-02T08:48:11.5234598Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerPromiseRetirementReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T08:48:11.5236267Z --- PASS: TestSeededWorkerPromiseRetirementReplay (1290.44s)
+sim	Run seeded transport suite	2026-10-02T08:48:11.5237172Z === RUN   TestSeededWorkerResultBudgetReplay
+sim	Run seeded transport suite	2026-10-02T09:24:52.3990862Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerResultBudgetReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:24:52.3992711Z --- PASS: TestSeededWorkerResultBudgetReplay (2200.88s)
+sim	Run seeded transport suite	2026-10-02T09:24:52.3993565Z === RUN   TestSeededWorkerRetirementReplay
+sim	Run seeded transport suite	2026-10-02T09:28:20.3212531Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerRetirementReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:28:20.3213280Z --- PASS: TestSeededWorkerRetirementReplay (207.92s)
+sim	Run seeded transport suite	2026-10-02T09:28:20.3213688Z === RUN   TestSeededWorkerRunningCancelReplay
+sim	Run seeded transport suite	2026-10-02T09:28:42.1495479Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerRunningCancelReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:28:42.1496286Z --- PASS: TestSeededWorkerRunningCancelReplay (21.83s)
+sim	Run seeded transport suite	2026-10-02T09:28:42.1496697Z === RUN   TestSeededWorkerSelectExecutionReplay
+sim	Run seeded transport suite	2026-10-02T09:29:23.4720536Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerSelectExecutionReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:29:23.4722055Z --- PASS: TestSeededWorkerSelectExecutionReplay (41.32s)
+sim	Run seeded transport suite	2026-10-02T09:29:23.4723560Z === RUN   TestSeededWorkerSignalExecutionReplay
+sim	Run seeded transport suite	2026-10-02T09:29:51.4855445Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerSignalExecutionReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:29:51.4856832Z --- PASS: TestSeededWorkerSignalExecutionReplay (28.01s)
+sim	Run seeded transport suite	2026-10-02T09:29:51.4857591Z === RUN   TestSeededWorkerSignalWriteLatencyReplay
+sim	Run seeded transport suite	2026-10-02T09:31:19.4830295Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerSignalWriteLatencyReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:31:19.4832894Z --- PASS: TestSeededWorkerSignalWriteLatencyReplay (88.00s)
+sim	Run seeded transport suite	2026-10-02T09:31:19.4834027Z === RUN   TestSeededWorkerSignalLeaseLatencyReplay
+sim	Run seeded transport suite	2026-10-02T09:32:47.2273655Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerSignalLeaseLatencyReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:32:47.2274732Z --- PASS: TestSeededWorkerSignalLeaseLatencyReplay (87.74s)
+sim	Run seeded transport suite	2026-10-02T09:32:47.2275185Z === RUN   TestSeededWorkerSnapshotBudgetReplay
+sim	Run seeded transport suite	2026-10-02T09:33:14.1783185Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerSnapshotBudgetReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:33:14.1785380Z --- PASS: TestSeededWorkerSnapshotBudgetReplay (26.95s)
+sim	Run seeded transport suite	2026-10-02T09:33:14.1786137Z === RUN   TestSeededWorkerSnapshotExecutionReplay
+sim	Run seeded transport suite	2026-10-02T09:45:44.4508113Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerSnapshotExecutionReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:45:44.4510080Z --- PASS: TestSeededWorkerSnapshotExecutionReplay (750.27s)
+sim	Run seeded transport suite	2026-10-02T09:45:44.4510912Z === RUN   TestSuccessiveWorkerKillDeliveryRecovery
+sim	Run seeded transport suite	2026-10-02T09:46:04.0106785Z     seed_count_test.go:32: TIER1_SEEDS test=TestSuccessiveWorkerKillDeliveryRecovery first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:46:04.0107952Z --- PASS: TestSuccessiveWorkerKillDeliveryRecovery (19.56s)
+sim	Run seeded transport suite	2026-10-02T09:46:04.0108958Z === RUN   TestSeededWorkerTailLookupRecovery
+sim	Run seeded transport suite	2026-10-02T09:46:31.3670580Z     worker_tail_lookup_replay_test.go:207: API 503/10008 recovery stages/counts=map[completed/1:8328 completed/2:8412 completed/3:8378 requested/1:8341 requested/2:8292 requested/3:8423 started/1:8232 started/2:8301 started/3:8317 terminal/1:8274 terminal/2:8402 terminal/3:8300]
+sim	Run seeded transport suite	2026-10-02T09:46:31.3760049Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerTailLookupRecovery first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:46:31.3761687Z --- PASS: TestSeededWorkerTailLookupRecovery (27.37s)
+sim	Run seeded transport suite	2026-10-02T09:46:31.3762372Z === RUN   TestSeededTerminalHeldReplay
+sim	Run seeded transport suite	2026-10-02T09:47:11.6536533Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededTerminalHeldReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:47:11.6537298Z --- PASS: TestSeededTerminalHeldReplay (40.28s)
+sim	Run seeded transport suite	2026-10-02T09:47:11.6537664Z === RUN   TestSeededTerminalOwnedReplay
+sim	Run seeded transport suite	2026-10-02T09:48:47.8823898Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededTerminalOwnedReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:48:47.8824757Z --- PASS: TestSeededTerminalOwnedReplay (96.23s)
+sim	Run seeded transport suite	2026-10-02T09:48:47.8825251Z === RUN   TestTerminalOwnedFiveHundred
+sim	Run seeded transport suite	2026-10-02T09:48:48.6244847Z --- PASS: TestTerminalOwnedFiveHundred (0.74s)
+sim	Run seeded transport suite	2026-10-02T09:48:48.6245469Z === RUN   TestSeededWorkerTimerBurstReplay
+sim	Run seeded transport suite	2026-10-02T09:52:09.5246473Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerTimerBurstReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:52:09.5249434Z --- PASS: TestSeededWorkerTimerBurstReplay (200.90s)
+sim	Run seeded transport suite	2026-10-02T09:52:09.5250766Z === RUN   TestSeededWorkerTimerClockTransitionReplay
+sim	Run seeded transport suite	2026-10-02T09:55:30.5305531Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerTimerClockTransitionReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:55:30.5306851Z --- PASS: TestSeededWorkerTimerClockTransitionReplay (201.01s)
+sim	Run seeded transport suite	2026-10-02T09:55:30.5307417Z === RUN   TestSeededWorkerTimerExecutionReplay
+sim	Run seeded transport suite	2026-10-02T09:56:04.4141613Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkerTimerExecutionReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:56:04.4142711Z --- PASS: TestSeededWorkerTimerExecutionReplay (33.88s)
+sim	Run seeded transport suite	2026-10-02T09:56:04.4143112Z === RUN   TestSeededWorkflowReplay
+sim	Run seeded transport suite	2026-10-02T09:57:55.9271078Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkflowReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:57:55.9272779Z --- PASS: TestSeededWorkflowReplay (111.51s)
+sim	Run seeded transport suite	2026-10-02T09:57:55.9273482Z === RUN   TestSeededWorkQueueRetentionReplay
+sim	Run seeded transport suite	2026-10-02T09:58:16.3190890Z     seed_count_test.go:32: TIER1_SEEDS test=TestSeededWorkQueueRetentionReplay first=1 last=100000 completed=100000 requested=100000
+sim	Run seeded transport suite	2026-10-02T09:58:16.3192348Z --- PASS: TestSeededWorkQueueRetentionReplay (20.39s)
+sim	Run seeded transport suite	2026-10-02T09:58:16.3192903Z PASS
+sim	Run seeded transport suite	2026-10-02T09:58:16.3194736Z TIER1_COVERAGE model_version=3 seeds_per_workload=100000 generated_schedules=11500032 scheduler_choices=178046685 choices_per_second=12978.4 transport_events=2653710204 virtual_ms_max=7200000 virtual_buckets_zero=3963004 under_1s=1096884 under_1m=5571811 at_least_1m=868333 elapsed=3h48m38.730622587s
+sim	Run seeded transport suite	2026-10-02T09:58:16.3213300Z ok  	js-wf/sim	13718.736s
+sim	Run seeded transport suite	2026-10-02T09:58:16.3817047Z Verified Tier 1 inventory: 157 passes, two trace-only skips
+sim	Run actions/upload-artifact@v7	﻿2026-10-02T09:58:16.3943834Z ##[group]Run actions/upload-artifact@v7
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3944161Z with:
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3944385Z   name: tier1-extended-suite-evidence
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3945252Z   path: tier1-source.txt
+sim	Run actions/upload-artifact@v7	tier1-suite.log
+sim	Run actions/upload-artifact@v7	tier1-list.log
+sim	Run actions/upload-artifact@v7	tier1-inventory.txt
+sim	Run actions/upload-artifact@v7	tier1-seeded-inventory.txt
+sim	Run actions/upload-artifact@v7	tier1-regression-inventory.txt
+sim	Run actions/upload-artifact@v7	tier1-events.jsonl
+sim	Run actions/upload-artifact@v7	tier1-time.txt
+sim	Run actions/upload-artifact@v7	tier1-result.json
+sim	Run actions/upload-artifact@v7	
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3946053Z   if-no-files-found: warn
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3946296Z   compression-level: 6
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3946711Z   overwrite: false
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3946926Z   include-hidden-files: false
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3947160Z   archive: true
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3947350Z env:
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3947533Z   SIM_SEEDS: 100000
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3947737Z   SIM_COVERAGE_SUMMARY: 1
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3947970Z   FAULT_TRACE_OUT: sim-failure.json
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.3948217Z ##[endgroup]
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.5471971Z Multiple search paths detected. Calculating the least common ancestor of all paths
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.5476645Z The least common ancestor is /home/runner/work/js-wf/js-wf. This will be the root directory of the artifact
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.5477973Z With the provided path, there will be 9 files uploaded
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.5482215Z Artifact name is valid!
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.5483141Z Root directory input is valid!
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.7800120Z Uploading artifact: tier1-extended-suite-evidence.zip
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.7847361Z Beginning upload of artifact content to blob storage
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.8795678Z Uploaded bytes 50565
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.8933696Z Finished uploading artifact content to blob storage!
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.8934862Z SHA256 digest of uploaded artifact is b5c83a22d0cdac9f16528fbf5ed1acc56bd16337868b4bfebeb62180db9cc09e
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:16.8935783Z Finalizing artifact upload
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:17.1503144Z Artifact tier1-extended-suite-evidence successfully finalized. Artifact ID 11220137211
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:17.1504294Z Artifact tier1-extended-suite-evidence has been successfully uploaded! Final size is 50565 bytes. Artifact ID is 11220137211
+sim	Run actions/upload-artifact@v7	2026-10-02T09:58:17.1507095Z Artifact download URL: https://github.com/AntPAllen/js-wf/actions/runs/36972092297/artifacts/11220137211
+sim	Post Run actions/setup-go@v5	﻿2026-10-02T09:58:17.1668449Z Post job cleanup.
+sim	Post Run actions/setup-go@v5	2026-10-02T09:58:17.2896639Z (node:6850) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+sim	Post Run actions/setup-go@v5	2026-10-02T09:58:17.2898213Z (Use `node --trace-deprecation ...` to show where the warning was created)
+sim	Post Run actions/setup-go@v5	2026-10-02T09:58:17.2988377Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+sim	Post Run actions/setup-go@v5	2026-10-02T09:58:17.3032558Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+sim	Post Run actions/setup-go@v5	2026-10-02T09:58:17.3102464Z /home/runner/go/pkg/mod
+sim	Post Run actions/setup-go@v5	2026-10-02T09:58:17.3102967Z /home/runner/.cache/go-build
+sim	Post Run actions/setup-go@v5	2026-10-02T09:58:17.3122819Z Cache hit occurred on the primary key setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb, not saving cache.
+sim	Post Run actions/checkout@v4	﻿2026-10-02T09:58:17.3322230Z Post job cleanup.
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.4322175Z [command]/usr/bin/git version
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.4373101Z git version 2.55.0
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.4476788Z Temporarily overriding HOME='/home/runner/work/_temp/6dce0f4b-d08f-4807-b7ed-a0a991b96fea' before making global git config changes
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.4482045Z Adding repository directory to the temporary git global config as a safe directory
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.4483441Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.4525569Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.4578131Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.4886867Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.4925112Z http.https://github.com/.extraheader
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.4943209Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.5003769Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.5322448Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+sim	Post Run actions/checkout@v4	2026-10-02T09:58:17.5347976Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+sim	Complete job	﻿2026-10-02T09:58:17.5739707Z Cleaning up orphan processes
+sim	Complete job	2026-10-02T09:58:17.5984784Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
