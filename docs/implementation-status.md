@@ -13,6 +13,8 @@
   campaign37045827952 are independently accepted at2a30165. All three production
   cuts recover in12.840s/12.835s/12.937s; the compiled mutant triggers one actual
   forbidden effect and fails semantically without a timeout.
+- Fresh all-thirteen Tier2 seed1 campaign37050644803 is queued at3f483bd,
+  ten minutes per row. It cannot clear the200-seed gate.
 - Fresh all-six ten-minute mutation gate37030840346 is accepted at0f979d0.
   Ahead-clock seed27 ten-minute replay37030391587 is accepted at0f979d0;
   current ahead1..200 campaign37040118844 remains queued.
@@ -7279,3 +7281,18 @@ preserved. This closes this production combined-cap fixture gate only; full
 remain open. Local full120-workload1k race suite is active at clean a8e7670,
 compiled inventory120 seeded workloads/266 pins. The119-workload100k campaign
 continues independently.
+
+
+## Fresh thirteen-row sustained qualification launched
+
+[Run37050644803](https://github.com/AntPAllen/js-wf/actions/runs/37050644803)
+is confirmed queued at exact3f483bd61fba121a38c5b42e3aa84d07265ecab0 with
+row=all, seeds=1 and duration=10m. This executes all thirteen registered Tier2
+fault variants at the same source, including typed native-delete recovery and
+concurrent exit observation. It checks current harness/runtime coverage before
+launching a new200-seed campaign; one seed cannot clear the full matrix gate.
+The last accepted thirteen-row seed1 campaign was at273646a. Older200-seed
+campaigns36891850893/36850800757 remain separate preserved handles, with pending
+jobs; they were not canceled or replaced. The current119-workload100k campaign
+and the full120-workload1k race suite remain confirmed active. No historical
+TTL-mismatch run was repeated.
