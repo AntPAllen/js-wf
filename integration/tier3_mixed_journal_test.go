@@ -239,6 +239,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	c := client.NewObserved(js, &recorder)
 	var evidenceMu sync.Mutex
 	var controllerOperations []worker.OperationEvent
+	var childStartOperations []worker.OperationEvent
 	var controllerTimers = make(map[string]matrixControllerTimerCall)
 	var controllerProof matrixControllerAudit
 	var controllerReceipts []matrixControllerJournalReceipt
@@ -249,6 +250,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	var observeOperations func(worker.OperationEvent)
 	if matrixServerClockOffset(row) != 0 {
 		observeOperations = func(event worker.OperationEvent) {
+			if event.Operation == "child_start" {
+				evidenceMu.Lock()
+				childStartOperations = append(childStartOperations, event)
+				evidenceMu.Unlock()
+				return
+			}
 			if event.Operation != "journal_append" && event.Operation != "timer_clock" && event.Operation != "timer_domain_clock" && event.Operation != "timer_native_hint" {
 				return
 			}
@@ -558,6 +565,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				timers = controllerAuditTimers
 			}
 			write("controller-timers.json", timers)
+			write("child-start-operations.json", childStartOperations)
 			write("controller-client-calls.json", controllerClientCalls)
 			if receiptObserver != nil && controllerReceipts == nil {
 				controllerReceipts, _ = receiptObserver.snapshot()

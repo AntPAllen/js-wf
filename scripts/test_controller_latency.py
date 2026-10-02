@@ -1,4 +1,5 @@
 import copy
+import gzip
 import importlib.util
 import json
 from pathlib import Path
@@ -10,9 +11,45 @@ row = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(row)
 controller = row.load('controller_contract', 'check-controller-latency.py')
 FIXTURE = Path(__file__).parents[1]/'docs/scale/controller-latency-audit-2026-10-01'
+CANONICAL = Path(__file__).parents[1]/'docs/scale/canonical-timer-admission-2026-10-02'
 
 
 class ControllerLatencyChecks(unittest.TestCase):
+    def test_retained_canonical_proof_and_origin_rejections(self):
+        originals = {p.name.removesuffix('.gz'): json.loads(gzip.decompress(p.read_bytes())) for p in CANONICAL.glob('*.json.gz')}
+        samples = originals['latencies.json']
+        terminal = sorted(s['delay_ns'] for s in samples if s['event'] == 'terminal')
+        progress = sorted(s['delay_ns'] for s in samples if s['event'] != 'terminal')
+        report = dict(journal_entries=len(originals['controller-latency-audit.json']['bounds']), invocations=1,
+                      cells=dict(matrixtimer=dict(invocations=1, terminal_p99_seconds=terminal[-1]/1e9,
+                                                progress_p99_seconds=progress[(99*len(progress)+99)//100-1]/1e9)))
+        for mode in (None, 'missing_origin', 'unknown_domain', 'wrong_domain', 'bad_interval', 'shifted_bounds', 'wrong_deadline', 'ambiguous_origin', 'negative_duration', 'hint_only'):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory); files = copy.deepcopy(originals)
+                operations = files['controller-operations.json']
+                request = next(b for b in files['controller-latency-audit.json']['bounds'] if b['kind'] == 'StepRequested' and b['entry']['payload'].get('kind') == 'timer')
+                origin = next(e for e in operations if e['Operation'] == 'timer_domain_clock' and e['JournalIndex'] == request['index'])
+                if mode == 'missing_origin': operations.remove(origin)
+                elif mode == 'wrong_domain': origin['ClockDomain'] = 'unknown'
+                elif mode == 'bad_interval': origin['ClockLower'] = '2099-01-01T00:00:00Z'
+                elif mode == 'shifted_bounds': origin['ClockLower'] = origin['ClockUpper'] = '1970-01-01T00:00:00Z'
+                elif mode == 'wrong_deadline': origin['ClockUpper'] = origin['At']
+                elif mode == 'ambiguous_origin': operations.append(copy.deepcopy(origin))
+                elif mode == 'negative_duration': origin['Duration'] = -1
+                elif mode == 'hint_only': operations[:] = [e for e in operations if e['Operation'] != 'timer_domain_clock']
+                elif mode == 'unknown_domain':
+                    # Mutate both independent copies so the domain check, rather
+                    # than receipt inequality, rejects the unknown request.
+                    for b in files['controller-latency-audit.json']['bounds']:
+                        if b['kind'] == 'StepRequested' and b['entry']['payload'].get('kind') == 'timer': b['entry']['payload']['clock_domain'] = 'unknown'
+                    for r in files['controller-receipts.json']:
+                        if r['entry']['kind'] == 'StepRequested' and r['entry']['payload'].get('kind') == 'timer': r['entry']['payload']['clock_domain'] = 'unknown'
+                for name, data in files.items(): (root/name).write_text(json.dumps(data))
+                if mode:
+                    with self.assertRaises(ValueError): controller.check(root, report, row.timestamp_ns)
+                else:
+                    self.assertEqual(controller.check(root, report, row.timestamp_ns)['timer_waits'], 8)
+
     def test_retained_native_eight_timer_proof(self):
         report = json.loads((FIXTURE/'contract-report.json').read_text())
         result = controller.check(FIXTURE, report, row.timestamp_ns)

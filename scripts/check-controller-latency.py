@@ -13,8 +13,12 @@ def check(root, report, ns):
     operations = defaultdict(list)
     clock_operations = []
     for event in read('controller-operations.json'):
-        if event['Operation'] == 'timer_clock':
+        if event['Operation'] in ('timer_clock', 'timer_domain_clock'):
             clock_operations.append(event)
+            continue
+        if event['Operation'] == 'timer_native_hint':
+            # Native hint timing is independently checked by cut/role admission;
+            # it cannot establish a canonical creation or completion deadline.
             continue
         if event['Operation'] != 'journal_append':
             raise ValueError('unexpected controller operation')
@@ -70,13 +74,27 @@ def check(root, report, ns):
     for bound in bounds.values():
         payload = bound['entry'].get('payload') or {}
         if bound['kind'] != 'StepRequested' or payload.get('kind') != 'timer': continue
-        origins = [e for e in clock_operations if
+        domain = payload.get('clock_domain', '')
+        if domain not in ('', 'utc-quorum-v1'):
+            raise ValueError('unknown timer deadline domain')
+        candidates = [e for e in clock_operations if
                    (e['Type'], e['ID'], e['Worker'], e['JournalIndex']) ==
                    (bound['type'], bound['id'], bound['worker'], bound['index']) and
-                   not e.get('Error') and e.get('ServerTime') and
-                   ns(e['ServerTime'])+payload['duration_nanos'] == ns(payload['fire_at'])]
-        if len(origins) != 1 or type(origins[0]['Duration']) is not int or origins[0]['Duration'] < 0:
-            raise ValueError('timer deadline lacks its successful actual server-clock lookup')
+                   not e.get('Error') and type(e['Duration']) is int and e['Duration'] >= 0]
+        origins = []
+        for event in candidates:
+            if domain:
+                if event['Operation'] != 'timer_domain_clock' or event.get('ClockDomain') != domain or not event.get('ClockLower') or not event.get('ClockUpper'):
+                    continue
+                lower, upper = ns(event['ClockLower']), ns(event['ClockUpper'])
+                end, start = ns(event['At']), ns(event['At'])-event['Duration']
+                if lower > upper or lower > end or upper < start or upper+payload['duration_nanos'] != ns(payload['fire_at']):
+                    continue
+            elif event['Operation'] != 'timer_clock' or not event.get('ServerTime') or ns(event['ServerTime'])+payload['duration_nanos'] != ns(payload['fire_at']):
+                continue
+            origins.append(event)
+        if len(origins) != 1:
+            raise ValueError('timer deadline lacks its unique successful creation clock lookup')
         origin = origins[0]; key = (bound['id'], payload['name'])
         timer_deadlines[key] = ns(origin['At'])-origin['Duration']+payload['duration_nanos']
         timer_latest[key] = ns(origin['At'])+payload['duration_nanos']

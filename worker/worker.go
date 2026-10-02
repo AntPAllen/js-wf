@@ -1078,11 +1078,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	}
 	wctx.SetTimerObserver(w.metrics.recordTimerFired)
 	wctx.SetChildSupport(typ, id, input.Sequence, func(ctx context.Context, childType, childID string, childInput []byte, signalName string) error {
-		_, err := w.client.StartChild(ctx, childType, childID, childInput, typ, id, input.Sequence, signalName)
-		if errors.Is(err, client.ErrAlreadyStarted) {
-			return nil
-		}
-		return err
+		return w.startChild(ctx, childType, childID, childInput, typ, id, input.Sequence, signalName, ops)
 	})
 	var result json.RawMessage
 	var runErr error

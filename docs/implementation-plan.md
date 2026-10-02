@@ -273,7 +273,7 @@ This fix does not certify all clock-source transition cases.
 
 External writers must never append to a journal directly, because that would race the worker's CAS. Instead a signal is a publish to `wf.sig.<type>.<id>.<name>` followed by a `WF_RUN` wakeup with a stable message ID. A signal scanner repairs the wakeup after a crash or uncertain acknowledgment between those writes. The worker, holding the lease, reads pending signals from `WF_SIG` with an ordered consumer from the last consumed sequence (recorded in the journal as `SignalConsumed{sig_seq}`) and journals them in order. Signals are therefore delivered in `WF_SIG` sequence order, exactly once into the journal, and a signal that arrives before the invocation asks for it is buffered by the stream itself.
 
-A child call `ctx.Call(childType, childID, input)` is: journal `StepRequested{call}`, then `Start` the child with `childID` derived deterministically from parent id + index (so a retry hits `ErrAlreadyStarted`), then suspend. The child's terminal step publishes a signal `result` to the parent. A durable promise is a signal with a name the user chose and a `ctx.Await` on it; external systems resolve it through the client API.
+A child call `ctx.Call(childType, childID, input)` is: journal `StepRequested{call}`, then `Start` the child with `childID` derived deterministically from parent id + index (so a retry hits `ErrAlreadyStarted`), then suspend. Worker child creation/read/enqueue has one five-second whole-operation budget in addition to individual request deadlines. An uncertain start leaves the request unfinished for replay under the same deterministic child identity and parent generation. The child's terminal step publishes a signal `result` to the parent. A durable promise is a signal with a name the user chose and a `ctx.Await` on it; external systems resolve it through the client API.
 
 **Deliverables**
 
@@ -573,8 +573,10 @@ Pending timer cut preparation now includes a deterministic candidate selector
 with shifted clock-origin and observed suspended-prefix checks. A candidate
 alone cannot admit a fault: refresh the actual retained tail, match its exact
 sequence/entry, confirm removal before the earliest conservative duration
-boundary, and corroborate the prefix in the final audit. This wiring and artifact
-guard remain open; see [admission preparation](scale/clock-timer-admission-2026-10-01/).
+boundary, and corroborate the prefix in the final audit. The fixture and artifact
+guard implement these checks, including separate canonical creation and shifted
+native hint proofs; see [canonical admission evidence](scale/canonical-timer-admission-2026-10-02/).
+Admitted canonical native recovery and the full cut combinations remain open.
 
 No sustained clock
 row is verified by the focused controller contract; existing focused clock proofs and the full

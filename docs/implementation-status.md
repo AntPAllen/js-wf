@@ -5874,3 +5874,25 @@ and2,435,250,750 events. Elapsed12,682.31s. All11 original artifact/API/full-job
 files are retained with verified uncompressed hashes. This source predates the
 canonical clock and member-session additions; current234-pin/final-source100k
 and independent per-workload seed accounting remain open.
+
+## Canonical native attempts and bounded worker child creation (2026-10-02)
+
+[Retained native failures and fixes](scale/canonical-r5-native-2026-10-02/README.md)
+cover ahead36960942468 and behind36960953444 at0b921b7. Ahead completes168
+invocations/1,851 entries/144 waits with23.015785087s worst progress p99; current
+independent topology, cut, role and controller components pass, but physical
+drain fails with five ordinary ACK-pending messages for one terminal signal
+invocation. ACK/NAK local returns do not prove broker commits; server cause is
+unconfirmed. Behind reaches the required cut but stalls after a fan-out child
+request and fails five-minute Await; no final audit exists. Both remain failed.
+All101 original files are compressed and verified.
+
+Code inspection fixes an unbounded worker child-start sequence with one5s
+create/read/enqueue budget and separate child-start operations. Two actual
+production client/SDK/worker-port fault cases preserve and replay the unfinished
+request without another child generation; package11.016s. Full worker race
+passes41.507s. The Python controller reviewer now supports canonical creation
+intervals and rejects malformed/unknown/ambiguous origins: actual canonical
+eight-timer artifact plus negative and legacy controls pass three methods;
+all40 Tier3 artifact methods also pass. This fixes runtime budget and reviewer
+gaps but does not clear either native failure or the full release gates.

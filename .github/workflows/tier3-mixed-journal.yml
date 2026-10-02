@@ -42,7 +42,9 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Verify row-result guard
-        run: python3 -m unittest discover -s scripts -p 'test_tier3*.py'
+        run: |
+          python3 -m unittest discover -s scripts -p 'test_tier3*.py'
+          python3 -m unittest discover -s scripts -p 'test_controller_latency.py'
       - name: Verify private block-device stall capability
         if: inputs.row == 'block_disk' || inputs.row == 'block_delay'
         env:
