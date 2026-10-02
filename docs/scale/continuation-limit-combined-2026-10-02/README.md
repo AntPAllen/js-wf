@@ -31,3 +31,16 @@ This closes the local combined contract at budget20 only. The opt-in workflow
 also accepts the production default100000 without overriding the worker cap;
 that qualification is still required. This does not clear the full matrix,
 24-hour runtime soak, or Tier1 modeling of these combined cut boundaries.
+
+## Hosted budget20 acceptance
+
+[Run37037252985](https://github.com/AntPAllen/js-wf/actions/runs/37037252985)
+completed successfully at exact sourcee507a96. Downloaded source hashes match
+every corresponding Git file, and the compiled control is byte-identical to
+the specified three budget substitutions. Original positive/negative events,
+all three retained-prefix journals, final ErrTooLong outcomes, higher takeover
+epochs, and zero live/offline effects validate independently. The control
+produces22 entries and exactly one forbidden effect. All published originals
+and terminal run/job metadata are losslessly archived under `hosted-budget20`,
+with every member SHA256-compared after compression. The production100000 run
+37037256768 remains active; budget20 does not certify that gate.

@@ -777,3 +777,15 @@ The million-timer campaign must certify physical stream/consumer drain after
 all receipts, not infer drain from delivery counts or default report fields.
 The original24-hour attempt delivered all1M but failed its final deadline;
 retain that failed verdict and diagnose final drain before another long run.
+
+
+### Delivered native source retention in deterministic simulation
+
+Model target delivery separately from physical source retirement, including
+retention during delivery and source restoration after delivery. Execute production
+TimerScan/SuspendedScan cleanup from terminal journal evidence, preserve active
+work and newer generations, and inject dropped or lost delete replies. Require
+exact trace replay, a disk pin, and compiled controls detecting both the old
+delivery-implies-absence assumption and deletion across generations.
+The119th workload passes local1,000-seed/full-suite validation; current119-workload
+100k qualification and real backend persistence-cause isolation remain open.

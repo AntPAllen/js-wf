@@ -15,39 +15,41 @@ import (
 )
 
 type timerPublication struct {
-	message  *nats.Msg
-	id       string
-	due      time.Time
-	fired    bool
-	sequence uint64
-	retired  bool
+	message        *nats.Msg
+	id             string
+	due            time.Time
+	fired          bool
+	sequence       uint64
+	retired        bool
+	sourceRetained bool
 }
 
 // TimerScheduleTransport models only timer publish acknowledgment, message-ID
 // deduplication, and eventual native target delivery. Fallback records remain
 // retained for the separate fallback scanner to route.
 type TimerScheduleTransport struct {
-	schedule          *Scheduler
-	base              time.Time
-	leaderClockOffset time.Duration
-	window            int64
-	ids               map[string]int64
-	faults            []AppendFault
-	native            []timerPublication
-	fallback          []Message
-	deleted           map[uint64]bool
-	state             map[string][]byte
-	wakeupIDs         map[string]int64
-	wakeupFault       []AppendFault
-	deleteFault       []AppendFault
-	runs              []Message
-	streamSeq         uint64
-	fallbackSeq       uint64
-	scheduleQuorum    bool
-	healDelayMillis   int64
-	deliverAfter      int64
-	onNativeDelivery  func(*nats.Msg, time.Time)
-	onFallbackWakeup  func(*nats.Msg, time.Time)
+	schedule               *Scheduler
+	base                   time.Time
+	leaderClockOffset      time.Duration
+	window                 int64
+	ids                    map[string]int64
+	faults                 []AppendFault
+	native                 []timerPublication
+	fallback               []Message
+	deleted                map[uint64]bool
+	state                  map[string][]byte
+	wakeupIDs              map[string]int64
+	wakeupFault            []AppendFault
+	deleteFault            []AppendFault
+	runs                   []Message
+	streamSeq              uint64
+	fallbackSeq            uint64
+	scheduleQuorum         bool
+	healDelayMillis        int64
+	deliverAfter           int64
+	retainDeliveredSources bool
+	onNativeDelivery       func(*nats.Msg, time.Time)
+	onFallbackWakeup       func(*nats.Msg, time.Time)
 }
 
 var _ worker.TimerSchedulePort = (*TimerScheduleTransport)(nil)
@@ -234,6 +236,7 @@ func (m *TimerScheduleTransport) deliverDue() {
 			continue
 		}
 		entry.fired = true
+		entry.sourceRetained = m.retainDeliveredSources
 		m.streamSeq++
 		target := entry.message.Header.Get(jetstream.ScheduleTargetHeader)
 		m.runs = append(m.runs, Message{Subject: target, Sequence: m.streamSeq, Data: append([]byte(nil), entry.message.Data...)})
@@ -250,6 +253,27 @@ func (m *TimerScheduleTransport) NativeSources() []*nats.Msg {
 		out[i] = &nats.Msg{Subject: entry.message.Subject, Data: append([]byte(nil), entry.message.Data...), Header: cloneHeader(entry.message.Header)}
 	}
 	return out
+}
+
+// RetainDeliveredNativeSources models delivery without physical source
+// retirement. This is a transport fault boundary, not a claim about why a
+// particular server retained a source. The default preserves older traces.
+func (m *TimerScheduleTransport) RetainDeliveredNativeSources() {
+	m.retainDeliveredSources = true
+	m.event(TransportEvent{Operation: "retain_delivered_native_sources", Outcome: "enabled"})
+}
+
+// RestoreDeliveredNativeSources restores already-delivered source records
+// without replaying their target deliveries. Receipt durability and source
+// cleanup are independent state in this fault model.
+func (m *TimerScheduleTransport) RestoreDeliveredNativeSources() {
+	for i := range m.native {
+		entry := &m.native[i]
+		if entry.fired && !entry.retired {
+			entry.sourceRetained = true
+			m.event(TransportEvent{Operation: "restore_delivered_native_source", Subject: entry.message.Subject, Sequence: entry.sequence, Outcome: "retained"})
+		}
+	}
 }
 
 func (m *TimerScheduleTransport) FallbackRecords() []Message {
@@ -413,7 +437,7 @@ func (m *TimerScheduleTransport) NativeTimerSubjects(ctx context.Context, typ, i
 	subjects := map[string]bool{}
 	prefix := "wf.schedule." + typ + "." + id + "."
 	for _, hint := range m.native {
-		if !hint.fired && !hint.retired && strings.HasPrefix(hint.message.Subject, prefix) {
+		if (!hint.fired || hint.sourceRetained) && !hint.retired && strings.HasPrefix(hint.message.Subject, prefix) {
 			subjects[hint.message.Subject] = true
 		}
 	}
@@ -430,7 +454,7 @@ func (m *TimerScheduleTransport) LastNativeTimer(ctx context.Context, subject st
 	}
 	for i := len(m.native) - 1; i >= 0; i-- {
 		hint := m.native[i]
-		if !hint.fired && !hint.retired && hint.message.Subject == subject {
+		if (!hint.fired || hint.sourceRetained) && !hint.retired && hint.message.Subject == subject {
 			return &jetstream.RawStreamMsg{Subject: subject, Sequence: hint.sequence, Header: cloneHeader(hint.message.Header), Data: append([]byte(nil), hint.message.Data...)}, nil
 		}
 	}
@@ -452,7 +476,7 @@ func (m *TimerScheduleTransport) DeleteNativeTimer(ctx context.Context, sequence
 	}
 	for i := range m.native {
 		hint := &m.native[i]
-		if hint.sequence == sequence && !hint.retired && !hint.fired {
+		if hint.sequence == sequence && !hint.retired && (!hint.fired || hint.sourceRetained) {
 			hint.retired = true
 			if fault == LoseAckAfterCommit {
 				event.Outcome = string(fault)

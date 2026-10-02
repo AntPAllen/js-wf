@@ -6963,3 +6963,23 @@ verification rejects explicitly incomplete audit metadata. The full package
 race test and vet pass; an actual compiled ignore-retained-message control
 fails the named retained_sources test. This is diagnostic/guard qualification,
 not a successful million-timer drain, full runtime soak, or backend-cause proof.
+
+
+## Delivered-source model and hosted continuation budget20 accepted
+
+The [119th Tier1 workload](scale/delivered-native-source-model-2026-10-02/) separates
+target delivery from source presence and runs production TimerScan/SuspendedScan
+cleanup across24 retention/reply-loss/terminal/scanner combinations. It preserves
+active sources and newer generations while removing the terminal generation.
+Focused race, separate disk replay,265 pins and the full119-workload1,000 suite
+pass:163 top-level passes/two allowed trace-only skips,119,000 actual seed bodies.
+Two compiled semantic controls are detected. The native server's persistence
+cause and the failed million-timer collector drain remain unconfirmed/open.
+The running118-workload100k result cannot qualify the enlarged119-workload graph.
+
+The [hosted continuation budget20 proof](scale/continuation-limit-combined-2026-10-02/)
+at e507a96 is independently accepted against exact Git source bytes and original
+raw prefixes/journals/Go events: all three real worker-SIGKILL/full-cluster-restart
+cuts preserve20 entries and immutable ErrTooLong, with no live/offline forbidden
+effect. The compiled control produces22 entries and one effect. Production
+default100000 run37037256768 remains active and is not yet accepted.
