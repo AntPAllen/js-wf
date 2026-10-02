@@ -5495,3 +5495,18 @@ progress continues. A read-only mid-run report/log/service checkpoint is retaine
 [here](scale/timer-durable-receipts-2026-10-01/service-first-restart/README.md).
 The second full restart, complete1M delivery, final latency/ledger audit and
 physical drain remain pending; this is not the24h acceptance verdict.
+
+## Behind-clock admitted pending Sleep smoke verified (2026-10-02)
+
+Native36945294731 atc03994c passes96.19s, with168invocations/1850entries and144
+independently timed waits. The first-wait-2s profile admits one pending Sleep
+from the actual minus60s source, refreshes its exact suspended tail and confirms
+source removal841ms before conservative earliest due. The final retained prefix
+corroborates admission; both journal/dispatch roles change to unshifted peers.
+Current row/controller/cut guards and both event reviewers independently pass.
+Worst terminal/progress p99 are8.275s/8.578s; histories, retained invariants,
+immutable outcomes and physical queue drain pass.26repair records allacknowledged
+match final counters;0fences. Full original compressed evidence is retained
+[here](scale/clock-timer-admission-2026-10-01/behind-admitted-smoke/README.md).
+This is one35s admitted cut; sustained and other in-flight clock combinations
+and the full release matrices remain open.
