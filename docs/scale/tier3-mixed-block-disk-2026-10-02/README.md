@@ -21,7 +21,10 @@ in 1.018s. All 34 Tier 3 Python tests pass, including 14 block-stall evidence
 cases. The integration package compiles; its opt-in native test skips without
 `WF_TIER3_MATRIX=1`. Those checks do not prove native fault acceptance.
 
-A clean hosted 35-second smoke is the next gate. Sustained runs require that
+The [clean hosted 35-second smoke](https://github.com/AntPAllen/js-wf/actions/runs/36944821596)
+was dispatched at source1828d930243961232d0c2bdaa479fc2efee7eb3b;
+`smoke-launch.json` retains the API response. It is queued, with no native
+verdict yet. Sustained runs require that
 smoke's original evidence to pass the row guard and event reviewers first.
 This models actual blocked I/O, not per-request `dm-delay`, server process
 pause, power-loss durability, or all in-flight operation combinations. The
