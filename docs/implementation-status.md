@@ -2,9 +2,9 @@
 
 ## Current qualification snapshot — 2026-10-02
 
-- The 117-workload 100k gate is independently accepted at82f323a:11.7M actual
-  test bodies,161 top-level passes and262 pins. The 118/119 campaigns remain
-  active; they do not qualify the new 120-workload graph.
+- The 119-workload100k gate37039245566 is independently accepted at7c5fb3e:
+  11.9M actual bodies,163 top-level passes and265 pins. The older118 campaign
+  remains separate; this does not qualify the new120-workload graph.
 - The 120th workload combines continuation limits, a retained lease and a
   modeled outage. All27 combinations pass focused1k race/replay; the compiled
   suffix-budget control detects an actual forbidden effect. Full default1k
@@ -7355,3 +7355,23 @@ zero physical messages. All65 original qualified/rejected evidence files are
 archived losslessly with SHA256 readback, using XZ to preserve large repeated
 raw stream-state lists compactly. Physical copies/builds remain local. No original
 repair or new million/24h release claim is made.
+
+
+## Delivered-source119-workload100k gate independently accepted
+
+[Run37039245566 complete evidence](scale/delivered-native-source-model-2026-10-02/confirmed-119-workload-100k/)
+accepts exact7c5fb3e: actual package7,461.495s,163 top-level passes,
+two documented trace-only skips and265 source pins. All119 source-inventoried
+workloads complete exactly seeds1..100000:11.9M bodies. Coverage is12,100,034
+schedules/179,346,691 choices/2,669,163,306 transport events. The compiled test
+inventory and seeded AST regenerate from extracted campaign Git sources and
+match uploads; regression paths match Git. The campaign's own checker regenerates
+the report byte for byte from raw events. Terminal jobs succeed. All856 original
+files are archived losslessly with SHA256 readback before atomic publication.
+
+This clears the graph containing native-delete reply and delivered-source
+retention models. Held-lease continuation takeover adds a120th workload, so
+current120-workload100k37051896032 remains a separate confirmed active gate at
+ad37bfc. All-thirteen Tier2 seed1 campaign37050644803 remains queued at3f483bd;
+older118-workload100k37028379931 remains independently active. Full matrices,
+original million-timer persistence/drain and full-runtime24h soak remain open.
