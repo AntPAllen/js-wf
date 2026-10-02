@@ -6943,3 +6943,23 @@ The combined continuation workflow is launched at e507a96: budget20 run
 37037252985 and production default100000 run37037256768 are queued.
 Neither launch is a passed qualification. The118-workload100k run remains
 confirmed in progress; the fresh all-six ten-minute mutation run is queued.
+
+
+## Retained native sources identified; final-drain diagnostics implemented
+
+A second isolated restore of the million-timer stores was observed for60s.
+The elected leader reports141 retained native schedule sources. Eight fetched
+messages match durable delivered receipt identities, generations and step0;
+each delivery sequence follows its retained source sequence. All original store
+file hashes remain unchanged. [Raw message and receipt evidence](scale/million-timer-terminal-2026-10-02/)
+is preserved. This narrows the physical drain failure to retained delivered
+schedule sources in the copies, without confirming a server persistence cause.
+
+The production timer-volume command now fsyncs per-attempt drain audits and
+retains the latest audit in its report. Unobserved counts are null, and metadata
+errors include the stage/consumer and partial coverage. The3s audit deadline,
+physical drain gate and campaign/lateness targets are unchanged. Offline
+verification rejects explicitly incomplete audit metadata. The full package
+race test and vet pass; an actual compiled ignore-retained-message control
+fails the named retained_sources test. This is diagnostic/guard qualification,
+not a successful million-timer drain, full runtime soak, or backend-cause proof.

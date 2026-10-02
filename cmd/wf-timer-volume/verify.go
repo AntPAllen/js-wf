@@ -37,6 +37,9 @@ func verifyReport(root string, allowSmoke bool) error {
 	if rep.Status != "passed" || rep.Error != "" || rep.Count < 3 || rep.Published != rep.Count || rep.Received != rep.Count || rep.Storage != "file" || rep.Replicas != 3 || rep.Partitions != 64 || rep.FinalMessages != 0 || rep.FinalAckPending != 0 || !rep.LastDue.Equal(rep.FirstDue.Add(horizon)) || len(rep.Restarts) != 2 {
 		return fmt.Errorf("incomplete or incompatible campaign report")
 	}
+	if rep.LastDrainAudit != nil && !rep.LastDrainAudit.complete(rep.Partitions) {
+		return fmt.Errorf("incomplete final drain metadata")
+	}
 	if !allowSmoke && (rep.Count != 1000000 || horizon != 24*time.Hour || p99Limit > 2*time.Second || maxLate > 30*time.Second || rep.SourceModified != "false" || len(rep.Revision) != 40) {
 		return fmt.Errorf("report does not meet million-message/24-hour release scope")
 	}

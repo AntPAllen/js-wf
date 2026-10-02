@@ -53,3 +53,38 @@ all15 full monitoring snapshots, logs, process/port identities, exact inspection
 script, original-file hash inventory, unchanged-store proof, and summary. Every
 member was compared by SHA256 on readback. Modified copied stores remain at
 `/tmp/js-wf-million-store-copy-20261002` and are excluded from that archive.
+
+## Retained-message identity and drain diagnostics
+
+A fresh copy of the original three stores was observed for60s on isolated ports.
+The metadata API reports141 native `wf.schedule.volume.<id>.0` sources under
+the elected leader. Eight source messages were fetched without deleting or
+publishing anything. Every decoded payload, generation header and step matches
+its durable receipt slot; each delivery sequence is later than its source
+sequence. Thus the sampled sources remain despite their validated deliveries.
+All original store-file hashes remain unchanged after this second inspection.
+`message-review` preserves all45 monitoring snapshots, stream metadata, eight
+raw API messages, receipt cross-checks, logs, process identities and exact script.
+The source-retirement failure's underlying persistence/replication cause remains
+unconfirmed; copied-store observations cannot retroactively certify the failed run.
+
+The production campaign now records each final inspection in fsynced
+`drain-audits.jsonl` and exposes `last_drain_audit` in its report. Stream and
+consumer counts are nullable: null means not observed. Metadata errors retain
+the failed stage/consumer index and the count of consumers already checked.
+The original shared3s inspection deadline, campaign deadline, delivery lateness
+limits, and physical zero-message/all64-consumer drain requirement are unchanged.
+An explicitly incomplete final audit makes offline verification fail, even if
+legacy final count fields are zero. Old reports without the added field retain
+their existing verifier contract; the original failed report remains rejected.
+
+The full timer-volume package passes under race, including all new retained-source,
+partial metadata, context cancellation, nullable JSON and false-pass verification
+cases plus the actual receipt-process-kill parent test. Its child-only helper
+intentionally skips at top level. The initial review incorrectly rejected that
+helper skip; the inventory correction is retained, with no test rerun.
+The compiled control ignores retained messages in both inspection and verdict;
+the actual named retained_sources test fails with `incorrect drain verdict`.
+`drain-diagnostics` preserves original positive/negative Go JSON events, stderr,
+exact overlay/source hashes and review correction. Vet passes. Every published
+archive member is compared by SHA256 on readback. No24-hour rerun is launched.

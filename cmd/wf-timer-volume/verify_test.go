@@ -27,7 +27,7 @@ func verifierFixture() (report, []byte) {
 	return rep, data
 }
 func TestOfflineVerifierRejectsFalsePasses(t *testing.T) {
-	for _, name := range []string{"valid", "running", "missing", "duplicate", "early", "wrong_hash", "wrong_percentile", "missing_kill", "undrained", "truncated"} {
+	for _, name := range []string{"valid", "running", "missing", "duplicate", "early", "wrong_hash", "wrong_percentile", "missing_kill", "undrained", "unobserved_drain", "partial_drain", "retained_source_drain", "truncated"} {
 		t.Run(name, func(t *testing.T) {
 			rep, data := verifierFixture()
 			switch name {
@@ -45,6 +45,14 @@ func TestOfflineVerifierRejectsFalsePasses(t *testing.T) {
 				rep.Restarts[1].Killed = nil
 			case "undrained":
 				rep.FinalMessages = 1
+			case "unobserved_drain":
+				rep.LastDrainAudit = &drainAudit{}
+			case "partial_drain":
+				messages, pending := uint64(0), 0
+				rep.LastDrainAudit = &drainAudit{Messages: &messages, Pending: &pending, ConsumersChecked: 63}
+			case "retained_source_drain":
+				messages, pending := uint64(141), 0
+				rep.LastDrainAudit = &drainAudit{Messages: &messages, Pending: &pending, ConsumersChecked: 64}
 			case "truncated":
 				data = data[:47]
 			}

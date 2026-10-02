@@ -71,8 +71,9 @@ type report struct {
 	P99Limit, MaxLateLimit         string
 	P99LateSeconds, MaxLateSeconds float64
 	Restarts                       []restart
-	FinalMessages                  uint64 `json:"final_stream_messages"`
-	FinalAckPending                int    `json:"final_ack_pending"`
+	FinalMessages                  uint64      `json:"final_stream_messages"`
+	FinalAckPending                int         `json:"final_ack_pending"`
+	LastDrainAudit                 *drainAudit `json:"last_drain_audit,omitempty"`
 	Updated                        time.Time
 }
 type observation struct {
@@ -512,33 +513,40 @@ func run(cfg config) (runErr error) {
 		c.mu.Unlock()
 		if received == cfg.Count && len(c.rep.Restarts) == 2 {
 			attempt, done := context.WithTimeout(ctx, 3*time.Second)
-			stream, err := js.Stream(attempt, "WF_RUN")
-			var info *jetstream.StreamInfo
-			if err == nil {
-				info, err = stream.Info(attempt)
-			}
-			pending := 0
-			if err == nil && info.State.Msgs == 0 {
-				for p := uint32(0); p < provision.Partitions; p++ {
-					consumer, e := js.Consumer(attempt, "WF_RUN", fmt.Sprintf("volume-%d", p))
-					if e != nil {
-						err = e
-						break
+			audit := inspectDrain(attempt, drainPort{
+				stream: func(ctx context.Context) (uint64, error) {
+					stream, err := js.Stream(ctx, "WF_RUN")
+					if err != nil {
+						return 0, err
 					}
-					ci, e := consumer.Info(attempt)
-					if e != nil {
-						err = e
-						break
+					info, err := stream.Info(ctx)
+					if err != nil {
+						return 0, err
 					}
-					pending += ci.NumAckPending + int(ci.NumPending)
-				}
-			}
+					return info.State.Msgs, nil
+				},
+				consumer: func(ctx context.Context, p uint32) (int, error) {
+					consumer, err := js.Consumer(ctx, "WF_RUN", fmt.Sprintf("volume-%d", p))
+					if err != nil {
+						return 0, err
+					}
+					info, err := consumer.Info(ctx)
+					if err != nil {
+						return 0, err
+					}
+					return info.NumAckPending + int(info.NumPending), nil
+				},
+			}, provision.Partitions)
 			done()
-			if err == nil && info.State.Msgs == 0 && pending == 0 {
+			c.rep.LastDrainAudit = &audit
+			if err = appendDrainAudit(filepath.Join(cfg.Root, "drain-audits.jsonl"), audit); err != nil {
+				return err
+			}
+			if audit.complete(provision.Partitions) {
 				stopReaders()
 				stopReaders = nil
-				c.rep.FinalMessages = info.State.Msgs
-				c.rep.FinalAckPending = pending
+				c.rep.FinalMessages = *audit.Messages
+				c.rep.FinalAckPending = *audit.Pending
 				if err = c.save(); err != nil {
 					return err
 				}
