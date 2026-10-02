@@ -1383,3 +1383,14 @@ The workload honors `SIM_SEEDS`, saves failed traces and supports generic replay
 [Race evidence and exact pin replays](scale/timer-common-clock-corpus-2026-10-02/README.md)
 cover 1,000 schedules. Independent sampling, leader transitions, provider outages
 and full 100k release acceptance remain open.
+
+### Canonical deadline repair across scheduling clock transitions
+
+`TestSeededWorkerCommonClockTransitionRepair` moves an actual production worker's
+modeled scheduling clock from ±60s to unshifted while quorum is unavailable.
+The production suspended scanner uses canonical deadlines for repair, rejects
+failed providers and avoids early repair despite an hour-ahead worker clock.
+Eight sequential waits, both cut times, four APIs and two durations give32 pins.
+[Evidence and transport assumptions](scale/timer-common-clock-transition-2026-10-02/README.md)
+cover1,000 race schedules and52 exact new/existing replays. Independent sampling,
+fenced loop cadence and admitted native recovery remain separate requirements.

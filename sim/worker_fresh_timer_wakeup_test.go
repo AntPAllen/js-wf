@@ -11,12 +11,14 @@ import (
 	"testing"
 	"time"
 
+	"errors"
 	"github.com/nats-io/nats.go"
 	"js-wf/client"
 	"js-wf/integrity"
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
+	"js-wf/reconcile"
 	"js-wf/wf"
 	"js-wf/worker"
 )
@@ -27,7 +29,21 @@ func runWorkerFreshTimerWakeup(seed int64, replay *Trace) (trace Trace, runErr e
 	return runWorkerFreshTimerWakeupClock(seed, replay, false)
 }
 
-func runWorkerFreshTimerWakeupClock(seed int64, replay *Trace, common bool) (trace Trace, runErr error) {
+func runWorkerFreshTimerWakeupClock(seed int64, replay *Trace, common bool) (Trace, error) {
+	return runWorkerTimerClockScenario(seed, replay, common, false)
+}
+
+type commonClockRepairPort struct {
+	*SignalTransport
+	store *journal.Store
+}
+
+func (p commonClockRepairPort) ReadJournal(ctx context.Context, typ, id string) ([]journal.Record, error) {
+	records, _, err := p.store.Read(ctx, typ, id)
+	return records, err
+}
+
+func runWorkerTimerClockScenario(seed int64, replay *Trace, common, transition bool) (trace Trace, runErr error) {
 	s := NewScheduler(seed)
 	if replay != nil {
 		var err error
@@ -39,6 +55,9 @@ func runWorkerFreshTimerWakeupClock(seed int64, replay *Trace, common bool) (tra
 	workload := "worker_fresh_timer_wakeup"
 	if common {
 		workload = "worker_common_clock_timers"
+	}
+	if transition {
+		workload = "worker_common_clock_transition"
 	}
 	if err := s.SetWorkload(workload); err != nil {
 		return Trace{}, err
@@ -59,6 +78,13 @@ func runWorkerFreshTimerWakeupClock(seed int64, replay *Trace, common bool) (tra
 	duration, err := time.ParseDuration(durationChoice)
 	if err != nil {
 		return trace, err
+	}
+	cut := ""
+	if transition {
+		cut, err = s.Choose([]string{"before_due", "after_due_without_quorum"})
+		if err != nil {
+			return trace, err
+		}
 	}
 	base := time.Unix(1700000000, 0).UTC()
 	transport := NewWorkerTransport(s, worker.DefaultAckWait)
@@ -137,7 +163,86 @@ func runWorkerFreshTimerWakeupClock(seed int64, replay *Trace, common bool) (tra
 	if err != nil || len(initial) == 0 || initial[len(initial)-1].Kind != journal.Suspended || len(timers.NativeSources()) != 1 || s.NowMillis() != 0 {
 		return trace, fmt.Errorf("seed %d fresh timer did not suspend: entries=%d sources=%d virtual_ms=%d err=%v", seed, len(initial), len(timers.NativeSources()), s.NowMillis(), err)
 	}
-	for i := 0; i < count; i++ {
+	firstWait := 0
+	expectedCalls := 9
+	expectedMillis := int64(count) * duration.Milliseconds()
+	if transition {
+		timers.SetScheduleQuorum(false)
+		advance := duration / 2
+		if cut == "after_due_without_quorum" {
+			advance = duration + 500*time.Millisecond
+			expectedMillis += 500
+		}
+		if err := timers.Advance(advance); err != nil {
+			return trace, err
+		}
+		if transport.Dispatch.Pending() != 0 {
+			return trace, fmt.Errorf("delivery bypassed lost quorum")
+		}
+		if err := timers.SetLeaderClockOffset(0); err != nil {
+			return trace, err
+		}
+		if transport.Dispatch.Pending() != 0 {
+			return trace, fmt.Errorf("transition bypassed lost quorum")
+		}
+		timers.SetScheduleQuorum(true)
+		if sign == "behind" {
+			if transport.Dispatch.Pending() != 1 {
+				return trace, fmt.Errorf("behind hint not emitted at heal")
+			}
+			if err := deliver(); err != nil {
+				return trace, err
+			}
+			if cut == "before_due" {
+				expectedCalls++
+				records, _, err := store.Read(ctx, typ, id)
+				if err != nil || records[len(records)-1].Kind != journal.Suspended || len(timers.NativeSources()) != 1 {
+					return trace, fmt.Errorf("early hint completed timer or changed source: %v", err)
+				}
+			}
+		} else if transport.Dispatch.Pending() != 0 {
+			return trace, fmt.Errorf("ahead hint unexpectedly delivered at heal")
+		}
+		scan := reconcile.NewSuspendedScanWithPort(commonClockRepairPort{transport.SignalTransport, store})
+		scan.Grace = 0
+		// A wildly ahead worker clock may select a dedup retry window, but
+		// must never make the canonical deadline due.
+		scan.Now = func() time.Time { return base.Add(time.Hour) }
+		clockAvailable := false
+		scan.DomainNow = func(_ context.Context, domain string) (time.Time, error) {
+			if domain != "utc-quorum-v1" || !clockAvailable {
+				return time.Time{}, fmt.Errorf("common clock unavailable")
+			}
+			return base.Add(time.Duration(s.NowMillis()) * time.Millisecond), nil
+		}
+		// Ahead remains suspended after heal. Behind-before-due consumes an early
+		// hint and remains suspended. Both must fail closed when the provider fails.
+		if sign == "ahead" || cut == "before_due" {
+			result, err := scan.Scan(ctx, 1, 1, false)
+			if !errors.Is(err, reconcile.ErrTimerClock) || result.Reenqueued != 0 || transport.Dispatch.Pending() != 0 {
+				return trace, fmt.Errorf("clock outage not closed: result=%+v err=%v", result, err)
+			}
+			clockAvailable = true
+			if cut == "before_due" {
+				result, err = scan.Scan(ctx, 1, 1, false)
+				if err != nil || result.Reenqueued != 0 {
+					return trace, fmt.Errorf("repair before due: %+v %v", result, err)
+				}
+				if err := timers.Advance(duration - advance); err != nil {
+					return trace, err
+				}
+			}
+			result, err = scan.Scan(ctx, 1, 1, false)
+			if err != nil || result.Reenqueued != 1 || transport.Dispatch.Pending() != 1 {
+				return trace, fmt.Errorf("due repair failed: %+v %v", result, err)
+			}
+			if err := deliver(); err != nil {
+				return trace, err
+			}
+		}
+		firstWait = 1
+	}
+	for i := firstWait; i < count; i++ {
 		if err := timers.Advance(duration - time.Millisecond); err != nil {
 			return trace, err
 		}
@@ -159,7 +264,7 @@ func runWorkerFreshTimerWakeupClock(seed int64, replay *Trace, common bool) (tra
 	if mode == "sleep" {
 		entries = 26
 	}
-	if err != nil || len(records) != entries || records[len(records)-1].Kind != journal.Completed || calls != 9 || len(timers.NativeSources()) != count || s.NowMillis() != int64(count)*duration.Milliseconds() || transport.Dispatch.Pending() != 0 || len(transport.Dispatch.RetainedSequences()) != 0 {
+	if err != nil || len(records) != entries || records[len(records)-1].Kind != journal.Completed || calls != expectedCalls || len(timers.NativeSources()) != count || s.NowMillis() != expectedMillis || transport.Dispatch.Pending() != 0 || len(transport.Dispatch.RetainedSequences()) != 0 {
 		return trace, fmt.Errorf("seed %d terminal entries=%d calls=%d time=%d err=%v", seed, len(records), calls, s.NowMillis(), err)
 	}
 	if common {
@@ -179,6 +284,24 @@ func runWorkerFreshTimerWakeupClock(seed int64, replay *Trace, common bool) (tra
 			}
 		}
 	}
+	if transition {
+		// A delayed native hint can arrive after repair completed the invocation.
+		// Its durable terminal state and journal must remain byte-for-byte stable.
+		before, _ := json.Marshal(records)
+		if err := timers.Advance(time.Minute); err != nil {
+			return trace, err
+		}
+		if transport.Dispatch.Pending() > 0 {
+			if err := deliver(); err != nil {
+				return trace, err
+			}
+		}
+		afterRecords, _, err := store.Read(ctx, typ, id)
+		after, _ := json.Marshal(afterRecords)
+		if err != nil || string(before) != string(after) || calls != expectedCalls || len(transport.Dispatch.RetainedSequences()) != 0 {
+			return trace, fmt.Errorf("late hint changed terminal or retained run: %v", err)
+		}
+	}
 	snapshot, err := retainedModelSnapshot(transport.StartTransport, journals, outcomes)
 	if err != nil {
 		return trace, err
@@ -187,7 +310,11 @@ func runWorkerFreshTimerWakeupClock(seed int64, replay *Trace, common bool) (tra
 	if err != nil || report != (integrity.Report{Invocations: 1, Journals: 1, Entries: entries, Terminal: 1}) {
 		return trace, fmt.Errorf("seed %d retained=%+v err=%v", seed, report, err)
 	}
-	s.RecordTransport(TransportEvent{Operation: "check_worker_fresh_timer", Outcome: sign + "_" + mode + "_" + durationChoice, AtMillis: s.NowMillis()})
+	checkOutcome := sign + "_" + mode + "_" + durationChoice
+	if transition {
+		checkOutcome += "_" + cut
+	}
+	s.RecordTransport(TransportEvent{Operation: "check_worker_fresh_timer", Outcome: checkOutcome, AtMillis: s.NowMillis()})
 	if err := s.Finish(); err != nil {
 		return trace, err
 	}
@@ -264,5 +391,41 @@ func TestSeededWorkerCommonClockAcrossSkewedDeliveryTimestamps(t *testing.T) {
 	}
 	if len(covered) != 16 {
 		t.Fatalf("API/skew/duration coverage=%d want16", len(covered))
+	}
+}
+
+func TestSeededWorkerCommonClockTransitionRepair(t *testing.T) {
+	covered := map[string]bool{}
+	for seed, limit := int64(1), seededScheduleLimit(t); seed <= limit; seed++ {
+		generated, err := runWorkerTimerClockScenario(seed, nil, true, true)
+		if err != nil {
+			path := os.Getenv("FAULT_TRACE_OUT")
+			if path == "" {
+				path = filepath.Join(t.TempDir(), "common-clock-transition.json")
+			}
+			if saveErr := generated.Save(path); saveErr != nil {
+				t.Fatalf("seed%d: %v; save:%v", seed, err, saveErr)
+			}
+			t.Fatalf("FAULT_SEED=%d FAULT_TRACE=%s: %v", seed, path, err)
+		}
+		for _, e := range generated.Transport {
+			if e.Operation == "check_worker_fresh_timer" {
+				if os.Getenv("SIM_WRITE_COMMON_TRANSITION_PINS") == "1" && !covered[e.Outcome] {
+					if err := generated.Save(filepath.Join("testdata", "regressions", "worker-common-transition-"+e.Outcome+".json")); err != nil {
+						t.Fatal(err)
+					}
+				}
+				covered[e.Outcome] = true
+			}
+		}
+		if seed <= 10 {
+			replayed, err := runWorkerTimerClockScenario(seed, &generated, true, true)
+			if err != nil || !reflect.DeepEqual(generated, replayed) {
+				t.Fatalf("seed%d replay:%v", seed, err)
+			}
+		}
+	}
+	if len(covered) != 32 {
+		t.Fatalf("transition API/skew/duration/cut coverage=%d want32", len(covered))
 	}
 }

@@ -5754,3 +5754,16 @@ The instrumented automatic-membership ten-minute diagnostic is queued as
 [run36956035359](https://github.com/AntPAllen/js-wf/actions/runs/36956035359),
 source073bc01. Launch API evidence is retained beside the previous failure.
 A queued run supplies no acceptance result.
+
+## Seeded canonical timer transition and suspended repair (2026-10-02)
+
+The common-clock worker model now exercises shifted-to-unshifted scheduling
+leadership under lost quorum, before-due and after-due heal, actual suspended
+repair, failed clock providers, early behind hints and late ahead hints.
+Its1,000 race schedules pass36.26s / package37.274s across32 API/skew/duration/cut
+cells. All32 new pins and20 prior common/legacy timer pins replay exactly in
+package3.138s. Corpus inventory is232; full232/100k acceptance is not claimed.
+[Complete logs, hashes and modeled assumptions](scale/timer-common-clock-transition-2026-10-02/README.md)
+are retained. Direct repair at due/heal and an ideal common provider do not prove
+sampling, elected repair-loop cadence or native broker recovery. R5 fixture
+wiring and admitted native ahead/behind gates remain open, with full scope intact.
