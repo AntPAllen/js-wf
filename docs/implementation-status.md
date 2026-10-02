@@ -6113,3 +6113,10 @@ but the reverse test used a path relative to the package working directory.
 The workflow now passes an absolute workspace path. Failed metadata/logs and
 original vectors remain retained; a fresh CI result is required. Current-source
 100k36972092297 is confirmed in progress and remains on the same handle.
+
+Corrected-profile sustained behind36972576844 is queued atca0c6b0 with common
+clock and pending-cut proof required. Corrected protocol CI36972566168 is queued
+at the same source. Launch snapshots are retained; neither is acceptance evidence.
+The original failed CI's actual Python vectors pass locally with the corrected
+absolute path.100k36972092297 remains confirmed in progress; million-timer service
+remains active above564,000 receipts. No live workload was restarted.
