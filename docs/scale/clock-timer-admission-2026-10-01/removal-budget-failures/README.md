@@ -31,3 +31,9 @@ and longer wait admission for both clock directions. All34 Tier3 Python tests
 and both controller tests pass; controller mutation controls reject an unknown
 profile and a declared long-wait profile with only short waits. Corrected native
 smokes are required before accepting any opt-in timer cut.
+
+Corrected35s smokes dispatched at c03994c4f9a58ef388069cbb7f498caf3f27c7a6:
+[ahead36945292216](https://github.com/AntPAllen/js-wf/actions/runs/36945292216)
+and [behind36945294731](https://github.com/AntPAllen/js-wf/actions/runs/36945294731).
+Both are queued with no accepted native verdict. Their API launch records are
+retained in the parent directory as `*-removal-budget-smoke-start.json`.
