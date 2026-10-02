@@ -1,0 +1,186 @@
+{
+  "run": 37008116036,
+  "source": "82494c5335d014996f0fc7e4965164b2542f211f",
+  "purge_component_accepted": true,
+  "whole_campaign_accepted": false,
+  "failed_job": "mixed-start-repair",
+  "purge_checks": {
+    "baseline": {
+      "invocation": {
+        "Subject": "wf.inv.guardshort.guardshort-0-0",
+        "Sequence": 1,
+        "Header": {
+          "Nats-Expected-Last-Subject-Sequence": [
+            "0"
+          ],
+          "Wf-Input-SHA256": [
+            "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+          ]
+        },
+        "Data": "MA==",
+        "Time": "2026-10-02T12:44:43.819254479Z"
+      },
+      "journal": [
+        {
+          "epoch": 23,
+          "index": 0,
+          "kind": "Started",
+          "worker_id": "mixed-guard-before",
+          "sequence": 15
+        },
+        {
+          "epoch": 23,
+          "index": 1,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "run",
+            "name": "held",
+            "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "fire_at": "0001-01-01T00:00:00Z"
+          },
+          "worker_id": "mixed-guard-before",
+          "sequence": 19
+        },
+        {
+          "epoch": 233,
+          "index": 2,
+          "kind": "StepCompleted",
+          "payload": {
+            "result": 42
+          },
+          "worker_id": "mixed-guard-after",
+          "sequence": 138
+        },
+        {
+          "epoch": 233,
+          "index": 3,
+          "kind": "Completed",
+          "payload": {
+            "inv_seq": 1,
+            "result": "NDI="
+          },
+          "worker_id": "mixed-guard-after",
+          "sequence": 148
+        }
+      ],
+      "state": {
+        "inv_seq": 1,
+        "result": "NDI="
+      },
+      "named_action": "pass",
+      "tombstone": {
+        "tombstone": true,
+        "inv_seq": 1,
+        "purged_at": "2026-10-02T12:45:14.604731883Z",
+        "expires_at": "2026-10-02T12:46:14.604731883Z"
+      },
+      "reused_journal": [
+        {
+          "epoch": 853,
+          "index": 0,
+          "kind": "Started",
+          "worker_id": "mixed-purge-reused",
+          "sequence": 390
+        },
+        {
+          "epoch": 853,
+          "index": 1,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "run",
+            "name": "held",
+            "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "fire_at": "0001-01-01T00:00:00Z"
+          },
+          "worker_id": "mixed-purge-reused",
+          "sequence": 391
+        },
+        {
+          "epoch": 853,
+          "index": 2,
+          "kind": "StepCompleted",
+          "payload": {
+            "result": 42
+          },
+          "worker_id": "mixed-purge-reused",
+          "sequence": 392
+        },
+        {
+          "epoch": 853,
+          "index": 3,
+          "kind": "Completed",
+          "payload": {
+            "inv_seq": 29,
+            "result": "NDI="
+          },
+          "worker_id": "mixed-purge-reused",
+          "sequence": 393
+        }
+      ]
+    },
+    "mutated": {
+      "invocation": {
+        "Subject": "wf.inv.guardshort.guardshort-0-0",
+        "Sequence": 1,
+        "Header": {
+          "Nats-Expected-Last-Subject-Sequence": [
+            "0"
+          ],
+          "Wf-Input-SHA256": [
+            "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+          ]
+        },
+        "Data": "MA==",
+        "Time": "2026-10-02T12:45:42.157383895Z"
+      },
+      "journal": [
+        {
+          "epoch": 2,
+          "index": 0,
+          "kind": "Started",
+          "worker_id": "mixed-guard-before",
+          "sequence": 2
+        },
+        {
+          "epoch": 2,
+          "index": 1,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "run",
+            "name": "held",
+            "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "fire_at": "0001-01-01T00:00:00Z"
+          },
+          "worker_id": "mixed-guard-before",
+          "sequence": 4
+        },
+        {
+          "epoch": 279,
+          "index": 2,
+          "kind": "StepCompleted",
+          "payload": {
+            "result": 42
+          },
+          "worker_id": "mixed-guard-after",
+          "sequence": 175
+        },
+        {
+          "epoch": 279,
+          "index": 3,
+          "kind": "Completed",
+          "payload": {
+            "inv_seq": 1,
+            "result": "NDI="
+          },
+          "worker_id": "mixed-guard-after",
+          "sequence": 184
+        }
+      ],
+      "state": {
+        "inv_seq": 1,
+        "result": "NDI="
+      },
+      "named_action": "fail"
+    }
+  }
+}

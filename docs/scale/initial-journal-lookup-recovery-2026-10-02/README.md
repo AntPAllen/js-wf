@@ -30,7 +30,13 @@ The source is based on the `82494c5` worktree before commit.
 
 The dedicated journal-read-recovery workflow checks all four actual named race
 passes and the semantic negative control, preserving original events, source
-hashes and the overlay source. Hosted acceptance is pending. This is a transport
+hashes and the overlay source. Hosted run37009063667 at `e86165a` is independently
+accepted: all four named race tests pass, the exact unbounded-source overlay
+fails the initial metadata test with its required marker, and recorded source
+hashes match Git. The actual two-request/four-record/tail4/cache observations
+are verified. Original artifacts, full logs and terminal metadata are losslessly
+archived in [ci-pass](ci-pass/), with independent acceptance and member hashes.
+This is a transport
 adapter/read-recovery contract; it does not prove a server defect or clear the
 full mixed fault rows. The existing116-workload simulation campaign has no
 initial metadata reply actor and remains evidence for its recorded model graph.

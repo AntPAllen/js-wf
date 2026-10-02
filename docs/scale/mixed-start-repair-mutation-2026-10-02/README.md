@@ -55,3 +55,28 @@ acceptance and member SHA256 records.
 This advances the fifth mixed source-mutation category. Purge now has separate
 local evidence; its hosted acceptance and the full mixed-chaos release campaign
 remain open.
+
+## Subsequent fixture readiness failure and bounded evidence requests
+
+Run37008116036 at `82494c5` passes the baseline but rejects the start-repair
+mutant: after two short journal-read retries it reaches the150-second total
+deadline before emitting the invocation receipt. The remaining WF_INV metadata
+and evidence requests still used the whole fixture context. The artifact does
+not identify which request stalled or establish a server-side cause. The whole
+seven-job campaign is failed; the separately successful purge component is
+recorded with that limitation and all failed originals in
+[purge campaign evidence](../mixed-purge-mutation-2026-10-02/ci-purge-pass-campaign-failed/).
+
+The fixture now bounds every challenge request to2 seconds with at most three
+attempts and labels any exhausted request. This includes invocation/run metadata,
+source/dispatch reads, before/after snapshots and the scan. Retried repair uses
+the same invocation sequence and generation-scoped message ID. An availability
+failure cannot produce the semantic escape; the total150-second fixture deadline
+and all cohort/integrity requirements remain unchanged.
+
+The final pair passes the baseline in36.09s and detects the mutant in36.57s
+test time. The race baseline passes in36.71s (37.735s package), with all29
+terminals and no race warning. Independent source/receipt/outcome checks and
+losslessly archived originals are in [all-requests-bounded](all-requests-bounded/).
+This fixture is based on the `e86165a` worktree before commit; hosted acceptance
+of these additional bounds remains pending.

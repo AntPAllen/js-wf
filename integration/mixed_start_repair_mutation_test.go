@@ -37,11 +37,11 @@ func admitMixedMissingStart(t *testing.T, ctx context.Context, js jetstream.JetS
 func challengeMixedStartRepair(t *testing.T, ctx context.Context, js jetstream.JetStream, h client.Handle) bool {
 	t.Helper()
 	verifyMixedStartRepairOutcome(t, ctx, js, h, false)
-	inv, err := js.Stream(ctx, "WF_INV")
+	inv, err := mixedStartRequest(ctx, "invocation stream lookup", func(request context.Context) (jetstream.Stream, error) { return js.Stream(request, "WF_INV") })
 	if err != nil {
 		t.Fatal(err)
 	}
-	raw, err := inv.GetMsg(ctx, h.InvSeq)
+	raw, err := mixedStartRequest(ctx, "retained invocation read", func(request context.Context) (*jetstream.RawStreamMsg, error) { return inv.GetMsg(request, h.InvSeq) })
 	if err != nil || raw.Subject != identity.InvocationSubject(h.Type, h.ID) || string(raw.Data) != "0" {
 		t.Fatalf("retained start source %+v err=%v", raw, err)
 	}
@@ -50,25 +50,28 @@ func challengeMixedStartRepair(t *testing.T, ctx context.Context, js jetstream.J
 		t.Fatal(err)
 	}
 	t.Logf("MIXED_START_RAW_INVOCATION %s", proof)
-	run, err := js.Stream(ctx, "WF_RUN")
+	run, err := mixedStartRequest(ctx, "run stream lookup", func(request context.Context) (jetstream.Stream, error) { return js.Stream(request, "WF_RUN") })
 	if err != nil {
 		t.Fatal(err)
 	}
-	before, err := run.Info(ctx)
+	before, err := mixedStartRequest(ctx, "run snapshot before scan", func(request context.Context) (*jetstream.StreamInfo, error) { return run.Info(request) })
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := reconcile.NewStartScan(js).Scan(ctx, h.InvSeq, 1, false)
+	scanner := reconcile.NewStartScan(js)
+	result, err := mixedStartRequest(ctx, "start scan", func(request context.Context) (reconcile.ScanResult, error) {
+		return scanner.Scan(request, h.InvSeq, 1, false)
+	})
 	if err != nil {
 		t.Fatal("unrelated start scanner error", err)
 	}
-	after, err := run.Info(ctx)
+	after, err := mixedStartRequest(ctx, "run snapshot after scan", func(request context.Context) (*jetstream.StreamInfo, error) { return run.Info(request) })
 	if err != nil {
 		t.Fatal(err)
 	}
 	retained := 0
 	for seq := before.State.LastSeq + 1; seq <= after.State.LastSeq; seq++ {
-		msg, err := run.GetMsg(ctx, seq)
+		msg, err := mixedStartRequest(ctx, "retained dispatch read", func(request context.Context) (*jetstream.RawStreamMsg, error) { return run.GetMsg(request, seq) })
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			continue
 		}
@@ -161,4 +164,28 @@ func readMixedStartRepairOutcome(ctx context.Context, js jetstream.JetStream, h 
 		}
 	}
 	return nil
+}
+
+// Retrying reads and generation-deduplicated repair preserves the same source
+// sequence. Availability failures never produce a semantic mutation escape.
+func mixedStartRequest[T any](ctx context.Context, label string, request func(context.Context) (T, error)) (T, error) {
+	var zero T
+	for attempt := 0; attempt < 3; attempt++ {
+		child, stop := context.WithTimeout(ctx, 2*time.Second)
+		value, err := request(child)
+		stop()
+		if err == nil {
+			return value, nil
+		}
+		retryable := errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || natsutil.IsUnavailable(err)
+		if !retryable || attempt == 2 || ctx.Err() != nil {
+			return zero, fmt.Errorf("%s attempt %d: %w", label, attempt+1, err)
+		}
+		select {
+		case <-ctx.Done():
+			return zero, fmt.Errorf("%s: %w", label, ctx.Err())
+		case <-time.After(50 * time.Millisecond):
+		}
+	}
+	panic("unreachable mixed start request")
 }

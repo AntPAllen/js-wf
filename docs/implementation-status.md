@@ -53,7 +53,7 @@
   returns ErrNotFound. Independent generation checks and the49.91s race baseline
   pass. See [purge evidence](scale/mixed-purge-mutation-2026-10-02/).
   All six source categories now have focused mixed fixtures; hosted acceptance
-  for the new purge fixture remains pending.
+  for a complete successful seven-job campaign remains required.
 - [Mutation run37007279855](https://github.com/AntPAllen/js-wf/actions/runs/37007279855)
   is independently accepted at `4e7de02`: six successful jobs, eleven actual
   semantic pairs, matching source/fixture hashes and rejected negative controls.
@@ -66,8 +66,17 @@
   because no retry starts within4s. This closes an adapter-level read-deadline
   gap without attributing the earlier mixed failure to a server bug. See
   [lookup evidence](scale/initial-journal-lookup-recovery-2026-10-02/).
-  Dedicated hosted contract acceptance remains pending; initial metadata replies
+  Hosted contract run37009063667 at `e86165a` is independently accepted; initial metadata replies
   are not represented by the existing116-workload virtual transport graph.
+- Run37008116036 at `82494c5` passes six jobs including the new purge pair,
+  but fails the start-repair mutant before its required semantic escape. The whole
+  campaign remains rejected. Independent purge-component acceptance preserves
+  all originals with `whole_campaign_accepted=false` in
+  [campaign evidence](scale/mixed-purge-mutation-2026-10-02/ci-purge-pass-campaign-failed/).
+  The start-repair fixture now bounds/labels every remaining evidence and scan
+  request, retaining the same generation ID and total deadline. Its final local
+  baseline/mutant pair and36.71s race baseline pass; hosted acceptance remains
+  pending. See [bounded evidence](scale/mixed-start-repair-mutation-2026-10-02/all-requests-bounded/).
 - Current-source [100k run37002783868](https://github.com/AntPAllen/js-wf/actions/runs/37002783868)
   remains live at `3184b65`. The
   [ten-minute ahead run37002781141](https://github.com/AntPAllen/js-wf/actions/runs/37002781141)

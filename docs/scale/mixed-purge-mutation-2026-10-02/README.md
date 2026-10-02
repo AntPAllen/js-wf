@@ -41,7 +41,15 @@ pass/fail outcomes. Source/fixture hashes match the final worktree based on
 `4e7de02` before commit. Original events/report are losslessly archived with
 verified member SHA256 manifests; race events are losslessly compressed.
 
-This supplies the sixth focused mixed source-mutation fixture. Hosted acceptance
-is pending for the new mixed-purge job, as is the prior start-repair campaign.
-These six focused mixed fixtures complement the six smaller contracts; they do
-not clear the plan's sustained whole-chaos mutation campaign or full release gate.
+The mixed-purge job in run37008116036 at `82494c5` is independently accepted:
+actual named baseline/mutant outcomes, exact Git source hashes, both controls,
+the retained original generation and fresh reused physical journal are verified.
+The whole seven-job campaign fails because its start-repair mutant times out
+without the required semantic evidence. This is a purge-component acceptance,
+with `whole_campaign_accepted=false`; all original downloads, job logs and
+terminal metadata, including the failed start-repair proof, are losslessly
+archived in [CI component evidence](ci-purge-pass-campaign-failed/).
+
+This supplies the sixth focused mixed source-mutation fixture. These six focused
+mixed fixtures complement the six smaller contracts; they do not clear the
+plan's sustained whole-chaos mutation campaign or full release gate.
