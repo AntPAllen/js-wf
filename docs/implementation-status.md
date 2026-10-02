@@ -6059,3 +6059,9 @@ cutoffs before subsequent starts, joins every checkpoint, and retains the final
 whole-state audit. Future CI requires exact expected checkpoint artifacts; all43
 Python controls and real cohort/admission race controls pass. New native evidence
 remains required; no admission or latency relaxation is introduced.
+
+Changed-Go-source admitted behind run36969577235 is now queued at6e34939 with
+both required clock flags and mandatory checkpoint artifact verification.
+Its launch snapshot is retained, not accepted. Final43 Python artifact methods
+also reject noninteger checkpoint batch identities. The older100k handle remains
+live; the million-timer handle continues and neither has been restarted.

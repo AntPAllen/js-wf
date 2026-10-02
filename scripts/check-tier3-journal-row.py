@@ -703,7 +703,7 @@ def check_checkpoint_audits(root, report):
         raise ValueError('checkpoint audit evidence must be a list')
     batches = report['invocations'] // 28
     expected = list(range(10, batches+1, 10))
-    if [row.get('batch') for row in rows] != expected:
+    if any(not isinstance(row, dict) or type(row.get('batch')) is not int for row in rows) or [row.get('batch') for row in rows] != expected:
         raise ValueError('missing, duplicated or out-of-order checkpoint audits')
     previous = 0
     for row in rows:

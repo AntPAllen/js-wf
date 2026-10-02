@@ -679,3 +679,15 @@ input hashes, retained journal/state invariants, exact aggregate subject/message
 counts, queue drain, and process RSS. Opaque background capacity records do not
 count as completed workflow evidence. A small runner smoke does not clear the
 10-million-subject live traffic requirement.
+
+The fresh10M spilled-input live cohort now passes at160cf8d:1000 production
+workflows with1.1MB inputs, immutable cross-node outcomes, exact retained counts
+and physical drain. [Raw measurement and offline verification](scale/live-cardinality-spilled-10m-2026-10-02/)
+record p99/max1.696/2.801s and post-live RSS3879–3952MiB per node. This closes that
+measurement, not10M active executions or the chaos/soak requirements.
+
+Tier3 completed-cohort audits now use the existing high-water checker on an
+independent reader so checkpoints do not stop production of positive pending
+waits for clock cuts. Every tenth-batch checkpoint must finish with exact cohort
+counts; final whole-retained-state checking remains mandatory. Future CI also
+requires all checkpoint artifacts. See [checks and scope](scale/tier3-independent-checkpoints-2026-10-02/).

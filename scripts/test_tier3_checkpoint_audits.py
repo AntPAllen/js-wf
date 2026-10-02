@@ -23,7 +23,7 @@ class CheckpointAuditTests(unittest.TestCase):
   for broken in ([],rows[:1],rows+rows[:1],list(reversed(rows))):
    with self.assertRaises(ValueError):self.verify(broken)
  def test_failed_unfinished_wrong_cohort_or_cutoff(self):
-  for key,value in (('error','context canceled'),('completed','0001-01-01T00:00:00Z'),('invocation_cutoff',279),('invocation_cutoff',False)):
+  for key,value in (('batch',10.0),('error','context canceled'),('completed','0001-01-01T00:00:00Z'),('invocation_cutoff',279),('invocation_cutoff',False)):
    rows=self.rows();rows[0][key]=value
    with self.subTest(key=key),self.assertRaises(ValueError):self.verify(rows)
   for key in ('Invocations','Journals','Terminal','Entries'):
