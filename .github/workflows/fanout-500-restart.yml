@@ -35,3 +35,30 @@ jobs:
             fanout-consumer-500.log
             integration/fanout-consumer-500*.json
           if-no-files-found: error
+
+  parent-boundaries:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      WF_FANOUT_BOUNDARY_MATRIX: '1'
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify complete boundary result guard
+        run: python3 -m unittest discover -s scripts -p 'test_fanout_boundary_matrix.py'
+      - name: Kill parents after first, interior and last child creation and result
+        run: |
+          set -o pipefail
+          git rev-parse HEAD > fanout-parent-source.txt
+          go test -p=1 -race -json ./integration -run '^TestFiveHundredChildFanoutParentBoundaryMatrix$' -count=1 -timeout=15m | tee fanout-parent-events.jsonl | python3 -u scripts/render-go-test.py
+          python3 scripts/check-fanout-boundary-matrix.py --events fanout-parent-events.jsonl --output fanout-parent-result.json
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: fanout-parent-boundaries
+          path: fanout-parent-*
+          if-no-files-found: error

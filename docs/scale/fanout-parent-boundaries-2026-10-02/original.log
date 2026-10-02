@@ -1,0 +1,43 @@
+=== RUN   TestFiveHundredChildFanoutParentBoundaryMatrix
+=== RUN   TestFiveHundredChildFanoutParentBoundaryMatrix/create/first
+    child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_child=0
+    child_scale_test.go:500: SIGKILLed parent worker at create cut 0; retained entries=3
+    child_scale_test.go:75: FANOUT_PREFIX_PRESERVED phase=create entries=3 old_epoch=1 final_epoch=5288
+    child_scale_test.go:75: completed 500 children; 11 shared the parent partition
+=== RUN   TestFiveHundredChildFanoutParentBoundaryMatrix/create/interior
+    child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_child=381
+    child_scale_test.go:500: SIGKILLed parent worker at create cut 381; retained entries=765
+    child_scale_test.go:75: FANOUT_PREFIX_PRESERVED phase=create entries=765 old_epoch=1 final_epoch=6043
+    child_scale_test.go:75: completed 500 children; 11 shared the parent partition
+=== RUN   TestFiveHundredChildFanoutParentBoundaryMatrix/create/last
+    child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_child=499
+    child_scale_test.go:500: SIGKILLed parent worker at create cut 499; retained entries=1001
+    child_scale_test.go:75: FANOUT_PREFIX_PRESERVED phase=create entries=1001 old_epoch=1 final_epoch=4482
+    child_scale_test.go:75: completed 500 children; 11 shared the parent partition
+=== RUN   TestFiveHundredChildFanoutParentBoundaryMatrix/results/first
+    child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_child=381
+    child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_result=0
+    child_scale_test.go:75: SIGKILLed parent worker at results cut 0; retained entries=1500
+    child_scale_test.go:75: FANOUT_PREFIX_PRESERVED phase=results entries=1500 old_epoch=4456 final_epoch=5506
+    child_scale_test.go:75: completed 500 children; 11 shared the parent partition
+=== RUN   TestFiveHundredChildFanoutParentBoundaryMatrix/results/interior
+    child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_child=381
+    child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_result=363
+    child_scale_test.go:75: SIGKILLed parent worker at results cut 363; retained entries=2227
+    child_scale_test.go:75: FANOUT_PREFIX_PRESERVED phase=results entries=2227 old_epoch=5054 final_epoch=6236
+    child_scale_test.go:75: completed 500 children; 11 shared the parent partition
+=== RUN   TestFiveHundredChildFanoutParentBoundaryMatrix/results/last
+    child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_child=381
+    child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_result=499
+    child_scale_test.go:75: SIGKILLed parent worker at results cut 499; retained entries=2504
+    child_scale_test.go:75: FANOUT_PREFIX_PRESERVED phase=results entries=2504 old_epoch=6088 final_epoch=6538
+    child_scale_test.go:75: completed 500 children; 11 shared the parent partition
+--- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix (265.47s)
+    --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix/create/first (41.46s)
+    --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix/create/interior (42.08s)
+    --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix/create/last (44.87s)
+    --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix/results/first (44.91s)
+    --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix/results/interior (45.22s)
+    --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix/results/last (46.94s)
+PASS
+ok  	js-wf/integration	266.594s

@@ -49,6 +49,35 @@ func TestFiveHundredChildFanoutAfterParentResultSIGKILL(t *testing.T) {
 	runFiveHundredChildFanout(t, false, false, true)
 }
 
+// This opt-in matrix includes boundary positions that random interior cuts miss.
+func TestFiveHundredChildFanoutParentBoundaryMatrix(t *testing.T) {
+	if os.Getenv("WF_FANOUT_BOUNDARY_MATRIX") != "1" {
+		t.Skip("set WF_FANOUT_BOUNDARY_MATRIX=1 for the six full 500-child parent cuts")
+	}
+	for _, phase := range []string{"create", "results"} {
+		for _, position := range []string{"first", "interior", "last"} {
+			t.Run(phase+"/"+position, func(t *testing.T) {
+				// Empty means the production fixture's recorded seeded interior cut.
+				cut := ""
+				if position == "first" {
+					cut = "0"
+				}
+				if position == "last" {
+					cut = "499"
+				}
+				t.Setenv("WF_FANOUT_CHILD_CUT", "")
+				t.Setenv("WF_FANOUT_RESULT_CUT", "")
+				if phase == "create" {
+					t.Setenv("WF_FANOUT_CHILD_CUT", cut)
+				} else {
+					t.Setenv("WF_FANOUT_RESULT_CUT", cut)
+				}
+				runFiveHundredChildFanout(t, false, phase == "create", phase == "results")
+			})
+		}
+	}
+}
+
 func TestFiveHundredChildFanoutProcessChild(t *testing.T) {
 	if os.Getenv("WF_FANOUT_PROCESS_CHILD") != "1" {
 		t.Skip("500-child parent worker process helper")
@@ -56,7 +85,7 @@ func TestFiveHundredChildFanoutProcessChild(t *testing.T) {
 	url, marker := os.Getenv("WF_FANOUT_PROCESS_URL"), os.Getenv("WF_FANOUT_PROCESS_MARKER")
 	cut, err := strconv.Atoi(os.Getenv("WF_FANOUT_PROCESS_CUT"))
 	phase := os.Getenv("WF_FANOUT_PROCESS_PHASE")
-	if url == "" || marker == "" || err != nil || cut < 0 || cut >= 500 || (phase != "results" && (cut < 100 || cut >= 400)) {
+	if url == "" || marker == "" || err != nil || cut < 0 || cut >= 500 || (phase != "results" && phase != "create") {
 		t.Fatal("invalid 500-child process helper configuration")
 	}
 	nc, err := nats.Connect(url, nats.NoReconnect(), nats.IgnoreDiscoveredServers())
@@ -98,7 +127,13 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 	}
 	const childCount = 500
 	cut := 100 + rand.New(rand.NewSource(seed)).Intn(300)
-	resultCut := rand.New(rand.NewSource(seed)).Intn(childCount)
+	if raw := os.Getenv("WF_FANOUT_CHILD_CUT"); raw != "" {
+		cut, err = strconv.Atoi(raw)
+		if err != nil || cut < 0 || cut >= childCount {
+			t.Fatalf("invalid WF_FANOUT_CHILD_CUT=%q", raw)
+		}
+	}
+	resultCut := 100 + rand.New(rand.NewSource(seed^0x5c0115)).Intn(300)
 	if raw := os.Getenv("WF_FANOUT_RESULT_CUT"); killDuringResults && raw != "" {
 		resultCut, err = strconv.Atoi(raw)
 		if err != nil || resultCut < 0 || resultCut >= childCount {
@@ -126,8 +161,9 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 		t.Fatal(err)
 	}
 	parentPart := identity.Partition("parent", "large-fanout", provision.Partitions)
+	var creationPrefix []journal.Record
 	if killParentProcess {
-		killFanoutParentAtCut(t, ctx, all[0], cluster.Servers[1].ClientURL(), cut)
+		creationPrefix = killFanoutParentAtCut(t, ctx, all[0], cluster.Servers[1].ClientURL(), cut)
 	} else {
 		first, err := worker.New(ctx, all[1], "parent-before-cut", handlers)
 		if err != nil {
@@ -298,13 +334,22 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 			t.Fatalf("child worker: %v", err)
 		}
 	}
-	if killDuringResults {
+	if killParentProcess || killDuringResults {
 		finalRecords, _, err := j.Read(ctx, "parent", "large-fanout")
-		if err != nil || len(finalRecords) <= len(killedPrefix) || !reflect.DeepEqual(killedPrefix, finalRecords[:len(killedPrefix)]) {
-			t.Fatalf("parent changed durable result prefix after SIGKILL: %v", err)
+		if err != nil {
+			t.Fatal(err)
 		}
-		if finalRecords[len(finalRecords)-1].Epoch <= killedPrefix[len(killedPrefix)-1].Epoch {
-			t.Fatal("successor completed without a higher fencing epoch")
+		for phase, prefix := range map[string][]journal.Record{"create": creationPrefix, "results": killedPrefix} {
+			if len(prefix) == 0 {
+				continue
+			}
+			if len(finalRecords) <= len(prefix) || !reflect.DeepEqual(prefix, finalRecords[:len(prefix)]) {
+				t.Fatalf("parent changed durable %s prefix after SIGKILL", phase)
+			}
+			if finalRecords[len(finalRecords)-1].Epoch <= prefix[len(prefix)-1].Epoch {
+				t.Fatalf("%s successor completed without a higher fencing epoch", phase)
+			}
+			t.Logf("FANOUT_PREFIX_PRESERVED phase=%s entries=%d old_epoch=%d final_epoch=%d", phase, len(prefix), prefix[len(prefix)-1].Epoch, finalRecords[len(finalRecords)-1].Epoch)
 		}
 	}
 	report, err := integrity.Check(ctx, all[0])
@@ -451,8 +496,8 @@ func fanoutHandlersAtCuts(cut int, afterChild func() error, resultCut int, after
 	}
 }
 
-func killFanoutParentAtCut(t *testing.T, ctx context.Context, js jetstream.JetStream, url string, cut int) {
-	_ = killFanoutParentAtBoundary(t, ctx, js, url, cut, "create")
+func killFanoutParentAtCut(t *testing.T, ctx context.Context, js jetstream.JetStream, url string, cut int) []journal.Record {
+	return killFanoutParentAtBoundary(t, ctx, js, url, cut, "create")
 }
 
 func killFanoutParentAtBoundary(t *testing.T, ctx context.Context, js jetstream.JetStream, url string, cut int, phase string) []journal.Record {

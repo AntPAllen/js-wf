@@ -6373,3 +6373,35 @@ is queued at `2b8a216bc10456ead9f7bdc9e1e9844c7e092552` (115 seeded workloads,
 36972092297 remains in progress on its original source; it was not restarted.
 Million-timer user service remains active at PID18146 with626,514 receipts
 observed; final million receipts, second restart and terminal audit/drain are open.
+
+
+## Full 500-child parent creation/result boundary matrix
+
+`TestFiveHundredChildFanoutParentBoundaryMatrix`, enabled by
+`WF_FANOUT_BOUNDARY_MATRIX=1`, now runs six independent real R3/file clusters:
+first/interior/last child creation and first/interior/last result collection.
+Creation cuts can be selected with `WF_FANOUT_CHILD_CUT=0..499`, including the
+previously unsupported endpoints; result cuts retain their explicit override.
+The process helper validates both phases. Creation SIGKILL now preserves and
+checks the complete pre-kill parent prefix as result SIGKILL already did, and
+both require a higher terminal fencing epoch.
+
+The full local race run passed all six cases in266.594s at seed1. Creation cuts
+0/381/499 preserve3/765/1001 entries; result cuts0/363/499 preserve1500/2227/2504
+entries. Every case completes500 children and the249500 parent sum,501 retained
+invocations/journals/terminals and distinct deterministic child identities.
+The result cases also compare every child result across two pinned clients.
+The first/last cases are explicit endpoints; these six samples do not prove
+all500 positions, every fault combination or the full Tier2/Tier3 release.
+
+Original verbose output, Go-tool-generated test2json events, exact source hashes,
+command, result and guard controls are retained under
+`scale/fanout-parent-boundaries-2026-10-02/`. The event conversion represents the
+original run; conversion timestamps are not execution timing evidence.
+`scripts/check-fanout-boundary-matrix.py` verifies all six actual passing subtests,
+package success, actual SIGKILL markers, correct endpoint/interior positions,
+creation-prefix lengths, matching prefix proof, strictly higher epochs and500
+children. Three test methods reject missing/skipped/failed/duplicate executions,
+wrong cuts, prefix lengths, epochs, phases and incomplete fan-out. It accepts
+the actual converted run. `fanout-500-restart.yml` now adds this guarded full
+parent-boundary race job with direct JSON events and source/artifact retention.

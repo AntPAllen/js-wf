@@ -1,0 +1,11 @@
+{
+  "base_source": "f41604cba0d5c54b37dea56760c419ac64f1b848",
+  "local_worktree": true,
+  "command": "GOMEMLIMIT=512MiB GOMAXPROCS=2 WF_FANOUT_BOUNDARY_MATRIX=1 go test -p=1 -race ./integration -run '^TestFiveHundredChildFanoutParentBoundaryMatrix$' -count=1 -timeout=15m -v",
+  "event_conversion": "go tool test2json -p js-wf/integration -t < original.log",
+  "source_sha256": {
+    "integration/child_scale_test.go": "2de54ada44039b9d0920442eeb477a1372d86f49a071a76ab8fdcdd1536d1191",
+    "worker/worker.go": "b2814614300fefe90ed33f1e13b89e6edf88ccee25b34ad461e050696b96d96f",
+    "scripts/check-fanout-boundary-matrix.py": "d1c314f248f41df532fe9aaccc9ebe623fdbe0122da8d014febc03572d67b87c"
+  }
+}
