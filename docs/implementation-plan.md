@@ -801,3 +801,15 @@ errors. Copied million-timer stores expose retained sources behind a fully
 stamped empty scheduling index; rebuilding copied indexes emits duplicate
 targets. Preserve the original failed verdict and require backend recovery
 isolation before any index repair or new million-timer release claim.
+
+### Deterministic combined continuation-limit takeover
+
+Combine the production worker's near-cap continuation recovery with a stopped
+owner whose lease remains held and an outage preserving committed transport
+state. Require three cut positions, nonzero continuation index/step offsets,
+virtual lease-expiry boundaries, higher replacement fencing epochs for successor
+appends, immutable cut prefixes and terminal results, zero forbidden effects,
+frame-only recovery, offline staged replay and drained original dispatch.
+Keep the real-cluster combined proof as an independent gate. The 120th Tier 1
+workload implements 27 cut/budget/heal combinations; focused race/replay and the
+compiled suffix-budget negative pass. Full final-source qualification is open.

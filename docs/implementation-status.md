@@ -1,6 +1,28 @@
 # Implementation status against the supplied plan
 
-## Latest accepted evidence — 2026-10-02
+## Current qualification snapshot — 2026-10-02
+
+- The 117-workload 100k gate is independently accepted at82f323a:11.7M actual
+  test bodies,161 top-level passes and262 pins. The 118/119 campaigns remain
+  active; they do not qualify the new 120-workload graph.
+- The 120th workload combines continuation limits, a retained lease and a
+  modeled outage. All27 combinations pass focused1k race/replay; the compiled
+  suffix-budget control detects an actual forbidden effect. Final-source full
+  120-workload1k/100k gates remain open.
+- Corrected hosted budget20 combined-cap contract37045824031 is accepted at
+  2a30165; production100000 campaign37045827952 remains confirmed active.
+- Fresh all-six ten-minute mutation gate37030840346 is accepted at0f979d0.
+  Ahead-clock seed27 ten-minute replay37030391587 is accepted at0f979d0;
+  current ahead1..200 campaign37040118844 remains queued.
+- All-replica timer-volume drain guard passes its hosted contract and live
+  1000-timer diagnostic. Original million/24h campaign delivered all1M but
+  failed drain. Direct copied-store recovery confirms the empty scheduling
+  index suppresses retained sources; the initial inconsistency cause remains
+  unconfirmed. Full matrix and full-runtime24h soak remain open.
+- Historical31.1s worker-kill recovery used30s TTL and is excluded from reruns.
+  ProductionTTL12s/heartbeat3s/AckWait13s and the strict30s gate remain unchanged.
+
+## Earlier evidence and implementation overview — 2026-10-02
 
 - Native-retirement116-graph100k37002783868 is independently accepted at exact
   `3184b65`, package10,442.686s:160 top-level passes, two documented skips,
@@ -7208,3 +7230,26 @@ copies/build source remain local. Two earlier compilation setup attempts
 (module-cache overlay prohibition and copied read-only directory) are rejected
 and preserved. No original index repair, new million/24h release claim or
 historical worker-kill TTL-mismatch rerun occurred.
+
+
+## Deterministic combined continuation-limit takeover added
+
+[New120th workload evidence](scale/continuation-held-takeover-model-2026-10-02/)
+passes1,000 focused race seeds across27 cut/budget/heal combinations. Production
+SDK frames, journal appends, lease Acquire and worker takeover execute directly.
+The stopped actor's cleanup is explicitly suppressed while committed state
+survives the modeled outage; this is not a NATS delete-reply hypothesis or disk/
+Raft simulation. A rival remains ErrHeld one millisecond before productionTTL
+expires. Fresh-worker recovery preserves all cut bytes and uses higher epochs
+where a successor append is needed. Stale lease revision updates, forbidden
+effects and archive reads are rejected; terminal integrity, offline staged
+replay and original dispatch drain pass.
+
+The compiled production suffix-budget mutant executes one forbidden effect after
+takeover and fails semantically in0.038s. Existing limit workload and265 earlier
+pins pass in the46.751s focused race package. Newseed42 exact/process/disk replay
+and vet pass. Initial relative-path disk replay is rejected and preserved.
+The final helper preserves failed traces before reporting errors; exact final
+source full120-workload1k/100k qualification remains open. All20 evidence files
+are archived losslessly with SHA256 readback. Earlier119-workload qualification
+continues independently and is not canceled or broadened to120.

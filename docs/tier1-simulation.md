@@ -1421,3 +1421,18 @@ and exact completed range records for every inventoried test, in addition to
 whole-suite, pinned-regression and aggregate checks. See
 [accounting implementation and evidence](scale/tier1-per-workload-coverage-2026-10-02/).
 Historical configured counts alone do not establish per-workload completion.
+
+## Continuation cap after a stopped owner and retained-state outage
+
+`TestSeededContinuationHeldTakeoverReplay` adds 27 combinations of production
+continuation cuts, entry budgets and virtual heal delays. It retains the stopped
+actor's production lease, verifies ErrHeld just before its TTL, and restores
+committed state through a fresh production worker. Exact prefix preservation,
+higher replacement epochs where an append is needed, stale-revision rejection,
+zero effects, frame-only recovery, terminal integrity, dispatch drain and offline
+staged replay are required. The dead actor's cleanup is suppressed explicitly
+at the model boundary; no successful server delete is implied. The modeled
+outage preserves committed state and does not claim to simulate disk or Raft.
+[Transport assumptions, actual compiled control and evidence](scale/continuation-held-takeover-model-2026-10-02/)
+cover 1,000 race schedules, all 27 combinations and exact/process/disk replay.
+Final-source full 120-workload qualification remains open.

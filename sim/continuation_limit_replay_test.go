@@ -20,6 +20,7 @@ import (
 	"js-wf/integrity"
 	"js-wf/journal"
 	"js-wf/lease"
+	"js-wf/provision"
 	"js-wf/wf"
 	"js-wf/worker"
 )
@@ -55,7 +56,11 @@ func (p *continuationLimitJournal) Publish(ctx context.Context, subject string, 
 	return p.JournalTransport.Publish(ctx, subject, data, expected)
 }
 
-func runSeededContinuationLimit(seed int64, replay *Trace) (trace Trace, runErr error) {
+func runSeededContinuationLimit(seed int64, replay *Trace) (Trace, error) {
+	return runContinuationLimitScenario(seed, replay, false)
+}
+
+func runContinuationLimitScenario(seed int64, replay *Trace, killed bool) (trace Trace, runErr error) {
 	schedule := NewScheduler(seed)
 	if replay != nil {
 		var err error
@@ -64,11 +69,19 @@ func runSeededContinuationLimit(seed int64, replay *Trace) (trace Trace, runErr 
 			return trace, err
 		}
 	}
-	if err := schedule.SetWorkload("continuation_limit"); err != nil {
+	workload := "continuation_limit"
+	if killed {
+		workload = "continuation_limit_held_takeover"
+	}
+	if err := schedule.SetWorkload(workload); err != nil {
 		return trace, err
 	}
 	defer func() { trace = schedule.Trace() }()
-	mode, err := schedule.Choose([]string{"clean", "signal_drop", "signal_ack_lost", "completed_drop", "completed_ack_lost", "failed_drop", "failed_ack_lost"})
+	modes := []string{"clean", "signal_drop", "signal_ack_lost", "completed_drop", "completed_ack_lost", "failed_drop", "failed_ack_lost"}
+	if killed {
+		modes = []string{"after_signal", "after_completion", "after_failed"}
+	}
+	mode, err := schedule.Choose(modes)
 	if err != nil {
 		return trace, err
 	}
@@ -78,18 +91,36 @@ func runSeededContinuationLimit(seed int64, replay *Trace) (trace Trace, runErr 
 	}
 	budget, _ := strconv.Atoi(budgetChoice)
 	padding := (budget - 16) / 2
+	healMillis := int64(0)
+	if killed {
+		choice, err := schedule.Choose([]string{"0", "500", "2000"})
+		if err != nil {
+			return trace, err
+		}
+		healMillis, _ = strconv.ParseInt(choice, 10, 64)
+	}
 	ctx, stop := context.WithTimeout(context.Background(), 10*time.Second)
 	defer stop()
 	const typ = "test"
 	id := integratedWorkerIDs(1)[0]
 	transport := NewWorkerTransport(schedule, 3*time.Second)
 	live := NewJournalTransport(schedule)
-	appendPort := &continuationLimitJournal{JournalTransport: live, mode: mode}
+	journalMode := mode
+	if killed {
+		journalMode = "clean"
+	}
+	appendPort := &continuationLimitJournal{JournalTransport: live, mode: journalMode}
 	snapshots := &continuationWorkerSnapshots{SnapshotReadTransport: NewSnapshotReadTransport(schedule), mode: mode}
 	snapshots.BindJournal(live)
 	snapshots.BindSignals(transport.SignalTransport)
 	store := journal.NewWithSnapshotPort(appendPort, live, snapshots)
-	leasing := lease.NewWithKVPort(NewKVTransport(schedule, 30*time.Second))
+	ttl := 30 * time.Second
+	if killed {
+		ttl = provision.LeaseTTL
+	}
+	leaseKV := NewKVTransport(schedule, ttl)
+	actorKV := &continuationKilledActorKV{KVTransport: leaseKV}
+	leasing := lease.NewWithKVPort(actorKV)
 	outcomes := NewKVTransport(schedule, 0)
 	c := client.NewWithSignalPorts(transport.SignalTransport, transport.SignalTransport)
 	handle, err := c.Start(ctx, typ, id, []byte(`null`))
@@ -180,10 +211,97 @@ func runSeededContinuationLimit(seed int64, replay *Trace) (trace Trace, runErr 
 	secondCtx, stopSecond := context.WithCancel(ctx)
 	defer stopSecond()
 	transport.Dispatch.StopWhenDrained(stopSecond)
-	if err := second.RunPartitionWithTransport(secondCtx, 0, transport.Dispatch); err != nil || transport.Dispatch.Pending() != 0 {
+	var cutPrefix []journal.Record
+	var cutEpoch uint64
+	if killed {
+		// Stop only after the selected production append has committed. Cleanup
+		// from the stopped actor is suppressed at the model boundary; no successful
+		// server delete reply is being hypothesized.
+		cut := &continuationTakeoverCut{continuationLimitJournal: appendPort, kind: journal.SignalConsumed, stop: stopSecond, actor: actorKV}
+		if mode == "after_completion" {
+			cut.kind = journal.StepCompleted
+		}
+		if mode == "after_failed" {
+			cut.kind = journal.Failed
+		}
+		ports.Journal = journal.NewWithSnapshotPort(cut, live, guard)
+		second, err = worker.NewWithPorts("cut-owner", handlers, ports, worker.WithContinuations(typ, stages))
+		if err != nil {
+			return trace, err
+		}
+		if err := second.RunPartitionWithTransport(secondCtx, 0, transport.Dispatch); err != nil || !cut.fired || transport.Dispatch.Pending() != 1 {
+			return trace, fmt.Errorf("cut owner pending=%d fired=%t err=%v", transport.Dispatch.Pending(), cut.fired, err)
+		}
+		cutPrefix, _, err = store.Read(ctx, typ, id)
+		want := budget - 2
+		if mode == "after_completion" {
+			want++
+		}
+		if mode == "after_failed" {
+			want += 2
+		}
+		if err != nil || len(cutPrefix) != want || cutPrefix[len(cutPrefix)-1].Kind != cut.kind {
+			return trace, fmt.Errorf("cut prefix=%v want=%d err=%v", cutPrefix, want, err)
+		}
+		held, err := leaseKV.Get(ctx, identity.Key(typ, id))
+		if err != nil {
+			return trace, err
+		}
+		var oldOwner lease.Value
+		if err := json.Unmarshal(held.Value, &oldOwner); err != nil || oldOwner.Worker != "cut-owner" {
+			return trace, fmt.Errorf("held owner=%+v err=%v", oldOwner, err)
+		}
+		cutEpoch = oldOwner.Epoch
+		actorKV.dead = false
+		schedule.RecordTransport(TransportEvent{Operation: "continuation_cluster_outage", Outcome: "committed_state_retained", AtMillis: schedule.NowMillis()})
+		if err := schedule.AdvanceMillis(healMillis); err != nil {
+			return trace, err
+		}
+		// Fresh adapters and a fresh worker recover the retained model state.
+		leasing = lease.NewWithKVPort(leaseKV)
+		ports.Leases = leasing
+		ports.Journal = journal.NewWithSnapshotPort(live, live, guard)
+		schedule.RecordTransport(TransportEvent{Operation: "continuation_cluster_healed", Outcome: mode, AtMillis: schedule.NowMillis()})
+		expiry := held.Created.UnixMilli() + provision.LeaseTTL.Milliseconds()
+		if err := schedule.AdvanceMillis(expiry - 1 - schedule.NowMillis()); err != nil {
+			return trace, err
+		}
+		if _, err := leasing.Acquire(ctx, typ, id, "rival"); !errors.Is(err, lease.ErrHeld) {
+			return trace, fmt.Errorf("near-cap takeover before TTL: %v", err)
+		}
+		if err := schedule.AdvanceMillis(1); err != nil {
+			return trace, err
+		}
+		replacement, err := worker.NewWithPorts("replacement", handlers, ports, worker.WithContinuations(typ, stages))
+		if err != nil {
+			return trace, err
+		}
+		replacementCtx, stopReplacement := context.WithCancel(ctx)
+		transport.Dispatch.StopWhenDrained(stopReplacement)
+		err = replacement.RunPartitionWithTransport(replacementCtx, 0, transport.Dispatch)
+		stopReplacement()
+		if err != nil || transport.Dispatch.Pending() != 0 {
+			return trace, fmt.Errorf("takeover pending=%d err=%v", transport.Dispatch.Pending(), err)
+		}
+		if schedule.NowMillis()-held.Created.UnixMilli() >= 30000 {
+			return trace, fmt.Errorf("modeled cap recovery exceeded 30s")
+		}
+		if _, err := leaseKV.Update(ctx, identity.Key(typ, id), held.Value, held.Revision); err == nil {
+			return trace, fmt.Errorf("dead actor updated old lease revision")
+		}
+	} else if err := second.RunPartitionWithTransport(secondCtx, 0, transport.Dispatch); err != nil || transport.Dispatch.Pending() != 0 {
 		return trace, fmt.Errorf("second pending=%d err=%v", transport.Dispatch.Pending(), err)
 	}
 	records, tail, err := store.Read(ctx, typ, id)
+	if killed && effects != 0 {
+		return trace, fmt.Errorf("forbidden effect after held takeover: %d", effects)
+	}
+	if killed && mode != "after_failed" && len(records) > 0 && records[len(records)-1].Epoch <= cutEpoch {
+		return trace, fmt.Errorf("replacement epoch did not advance")
+	}
+	if killed && (len(records) < len(cutPrefix) || !reflect.DeepEqual(records[:len(cutPrefix)], cutPrefix)) {
+		return trace, fmt.Errorf("committed cut prefix changed")
+	}
 	if err != nil || len(records) != budget || records[budget-1].Index != uint64(budget-1) || records[budget-1].Kind != journal.Failed {
 		return trace, fmt.Errorf("terminal budget=%d records=%d err=%v", budget, len(records), err)
 	}
@@ -218,7 +336,7 @@ func runSeededContinuationLimit(seed int64, replay *Trace) (trace Trace, runErr 
 	if err != nil || report.Invocations != 1 || report.Terminal != 1 {
 		return trace, fmt.Errorf("integrity=%+v err=%v", report, err)
 	}
-	if mode != "clean" && !appendPort.fired {
+	if !killed && mode != "clean" && !appendPort.fired {
 		return trace, fmt.Errorf("unused journal fault %s", mode)
 	}
 	objects := make(map[string][]byte)

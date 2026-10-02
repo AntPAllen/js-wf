@@ -534,6 +534,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededWorkerRetirement(loaded.Seed, &loaded)
 	case "continuation_retirement":
 		replayed, err = runSeededContinuationRetirement(loaded.Seed, &loaded)
+	case "continuation_limit_held_takeover":
+		replayed, err = runSeededContinuationHeldTakeover(loaded.Seed, &loaded)
 	case "continuation_limit":
 		replayed, err = runSeededContinuationLimit(loaded.Seed, &loaded)
 	case "worker_frame_response_budget":
