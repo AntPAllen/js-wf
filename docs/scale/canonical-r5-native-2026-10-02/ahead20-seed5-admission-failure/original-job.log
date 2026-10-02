@@ -1,0 +1,376 @@
+﻿2026-10-02T07:55:50.1105222Z Current runner version: '2.337.0'
+2026-10-02T07:55:50.1128119Z ##[group]Runner Image Provisioner
+2026-10-02T07:55:50.1128942Z Hosted Compute Agent
+2026-10-02T07:55:50.1129480Z Version: 20260901.588
+2026-10-02T07:55:50.1130031Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-02T07:55:50.1130675Z Build Date: 2026-09-01T19:56:44Z
+2026-10-02T07:55:50.1131358Z Worker ID: {82a9e91e-e618-4a6b-a4c1-75fd790a504d}
+2026-10-02T07:55:50.1131921Z Azure Region: westus3
+2026-10-02T07:55:50.1132472Z ##[endgroup]
+2026-10-02T07:55:50.1133714Z ##[group]Operating System
+2026-10-02T07:55:50.1134258Z Ubuntu
+2026-10-02T07:55:50.1134744Z 24.04.5
+2026-10-02T07:55:50.1135149Z LTS
+2026-10-02T07:55:50.1135652Z ##[endgroup]
+2026-10-02T07:55:50.1136137Z ##[group]Runner Image
+2026-10-02T07:55:50.1136641Z Image: ubuntu-24.04
+2026-10-02T07:55:50.1137124Z Version: 20260927.320.1
+2026-10-02T07:55:50.1138239Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-02T07:55:50.1139473Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-02T07:55:50.1140294Z ##[endgroup]
+2026-10-02T07:55:50.1141537Z ##[group]GITHUB_TOKEN Permissions
+2026-10-02T07:55:50.1143727Z Contents: read
+2026-10-02T07:55:50.1144240Z Metadata: read
+2026-10-02T07:55:50.1144706Z Packages: read
+2026-10-02T07:55:50.1145204Z ##[endgroup]
+2026-10-02T07:55:50.1147042Z Secret source: Actions
+2026-10-02T07:55:50.1147952Z Cache mode: write
+2026-10-02T07:55:50.1148698Z Prepare workflow directory
+2026-10-02T07:55:50.1589854Z Prepare all required actions
+2026-10-02T07:55:50.1630264Z Getting action download info
+2026-10-02T07:55:50.4762743Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-02T07:55:50.6417877Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+2026-10-02T07:55:51.4761673Z Download action repository 'actions/upload-artifact@v7' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-10-02T07:55:51.6558756Z Complete job name: journal (5)
+2026-10-02T07:55:51.7165768Z ##[group]Run actions/checkout@v4
+2026-10-02T07:55:51.7166515Z with:
+2026-10-02T07:55:51.7166907Z   repository: AntPAllen/js-wf
+2026-10-02T07:55:51.7170509Z   token: ***
+2026-10-02T07:55:51.7171103Z   ssh-strict: true
+2026-10-02T07:55:51.7171479Z   ssh-user: git
+2026-10-02T07:55:51.7171864Z   persist-credentials: true
+2026-10-02T07:55:51.7172271Z   clean: true
+2026-10-02T07:55:51.7172655Z   sparse-checkout-cone-mode: true
+2026-10-02T07:55:51.7173103Z   fetch-depth: 1
+2026-10-02T07:55:51.7173477Z   fetch-tags: false
+2026-10-02T07:55:51.7173859Z   show-progress: true
+2026-10-02T07:55:51.7174264Z   lfs: false
+2026-10-02T07:55:51.7174625Z   submodules: false
+2026-10-02T07:55:51.7175005Z   set-safe-directory: true
+2026-10-02T07:55:51.7175442Z   allow-unsafe-pr-checkout: false
+2026-10-02T07:55:51.7176065Z env:
+2026-10-02T07:55:51.7176407Z   FAULT_SEED: 5
+2026-10-02T07:55:51.7176764Z   WF_TIER3_MATRIX: 1
+2026-10-02T07:55:51.7177199Z   TIER3_MATRIX_ROW: server_clock_ahead
+2026-10-02T07:55:51.7177718Z   WF_TIER3_MATRIX_DURATION: 10m
+2026-10-02T07:55:51.7178152Z   WF_TIER3_SYNC_INTERVAL: 2m
+2026-10-02T07:55:51.7178572Z   WF_TIER3_CLOCK_TIMER_CUT: 1
+2026-10-02T07:55:51.7178984Z   WF_TIER3_COMMON_CLOCK: 1
+2026-10-02T07:55:51.7179456Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+2026-10-02T07:55:51.7179981Z   GOMEMLIMIT: 512MiB
+2026-10-02T07:55:51.7180362Z   GOMAXPROCS: 2
+2026-10-02T07:55:51.7180748Z ##[endgroup]
+2026-10-02T07:55:51.8029419Z Syncing repository: AntPAllen/js-wf
+2026-10-02T07:55:51.8032132Z ##[group]Getting Git version info
+2026-10-02T07:55:51.8033065Z Working directory is '/home/runner/work/js-wf/js-wf'
+2026-10-02T07:55:51.8034427Z [command]/usr/bin/git version
+2026-10-02T07:55:51.8732660Z git version 2.55.0
+2026-10-02T07:55:51.8750248Z ##[endgroup]
+2026-10-02T07:55:51.8763428Z Temporarily overriding HOME='/home/runner/work/_temp/ca6b6411-5de8-4c28-bc3e-8f8a5b3ae694' before making global git config changes
+2026-10-02T07:55:51.8764974Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-02T07:55:51.8768853Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+2026-10-02T07:55:51.8812087Z Deleting the contents of '/home/runner/work/js-wf/js-wf'
+2026-10-02T07:55:51.8815553Z ##[group]Initializing the repository
+2026-10-02T07:55:51.8818962Z [command]/usr/bin/git init /home/runner/work/js-wf/js-wf
+2026-10-02T07:55:51.8890559Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-02T07:55:51.8892506Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-02T07:55:51.8894294Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-02T07:55:51.8895776Z hint: call:
+2026-10-02T07:55:51.8896720Z hint:
+2026-10-02T07:55:51.8897767Z hint: 	git config --global init.defaultBranch <name>
+2026-10-02T07:55:51.8898830Z hint:
+2026-10-02T07:55:51.8899935Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-02T07:55:51.8901238Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-02T07:55:51.8902051Z hint:
+2026-10-02T07:55:51.8902638Z hint: 	git branch -m <name>
+2026-10-02T07:55:51.8903130Z hint:
+2026-10-02T07:55:51.8903671Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-02T07:55:51.8904515Z Initialized empty Git repository in /home/runner/work/js-wf/js-wf/.git/
+2026-10-02T07:55:51.8906052Z [command]/usr/bin/git remote add origin https://github.com/AntPAllen/js-wf
+2026-10-02T07:55:51.8954793Z ##[endgroup]
+2026-10-02T07:55:51.8955539Z ##[group]Disabling automatic garbage collection
+2026-10-02T07:55:51.8958105Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-02T07:55:51.8990330Z ##[endgroup]
+2026-10-02T07:55:51.8991148Z ##[group]Setting up auth
+2026-10-02T07:55:51.8995899Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-02T07:55:51.9029273Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-02T07:55:51.9300626Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-02T07:55:51.9336906Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-02T07:55:51.9541473Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-02T07:55:51.9576515Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-02T07:55:51.9775997Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-02T07:55:51.9813721Z ##[endgroup]
+2026-10-02T07:55:51.9814489Z ##[group]Fetching the repository
+2026-10-02T07:55:51.9822304Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +579dbe1899e5b6b46e2758a340fa71d57c04eaa6:refs/remotes/origin/main
+2026-10-02T07:55:56.0436245Z From https://github.com/AntPAllen/js-wf
+2026-10-02T07:55:56.0437710Z  * [new ref]         579dbe1899e5b6b46e2758a340fa71d57c04eaa6 -> origin/main
+2026-10-02T07:55:56.0440536Z ##[endgroup]
+2026-10-02T07:55:56.0441727Z ##[group]Determining the checkout info
+2026-10-02T07:55:56.0442703Z ##[endgroup]
+2026-10-02T07:55:56.0447802Z [command]/usr/bin/git sparse-checkout disable
+2026-10-02T07:55:56.0494870Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-02T07:55:56.0527212Z ##[group]Checking out the ref
+2026-10-02T07:55:56.0532019Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-02T07:55:56.6522409Z Switched to a new branch 'main'
+2026-10-02T07:55:56.6528694Z branch 'main' set up to track 'origin/main'.
+2026-10-02T07:55:56.6560327Z ##[endgroup]
+2026-10-02T07:55:56.6603600Z [command]/usr/bin/git log -1 --format=%H
+2026-10-02T07:55:56.6628699Z 579dbe1899e5b6b46e2758a340fa71d57c04eaa6
+2026-10-02T07:55:56.6844285Z ##[group]Run actions/setup-go@v5
+2026-10-02T07:55:56.6844602Z with:
+2026-10-02T07:55:56.6844823Z   go-version-file: go.mod
+2026-10-02T07:55:56.6845061Z   check-latest: false
+2026-10-02T07:55:56.6847329Z   token: ***
+2026-10-02T07:55:56.6847554Z   cache: true
+2026-10-02T07:55:56.6847766Z env:
+2026-10-02T07:55:56.6847967Z   FAULT_SEED: 5
+2026-10-02T07:55:56.6848184Z   WF_TIER3_MATRIX: 1
+2026-10-02T07:55:56.6848421Z   TIER3_MATRIX_ROW: server_clock_ahead
+2026-10-02T07:55:56.6848692Z   WF_TIER3_MATRIX_DURATION: 10m
+2026-10-02T07:55:56.6848948Z   WF_TIER3_SYNC_INTERVAL: 2m
+2026-10-02T07:55:56.6849199Z   WF_TIER3_CLOCK_TIMER_CUT: 1
+2026-10-02T07:55:56.6849449Z   WF_TIER3_COMMON_CLOCK: 1
+2026-10-02T07:55:56.6849753Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+2026-10-02T07:55:56.6850099Z   GOMEMLIMIT: 512MiB
+2026-10-02T07:55:56.6850361Z   GOMAXPROCS: 2
+2026-10-02T07:55:56.6850575Z ##[endgroup]
+2026-10-02T07:55:56.7993387Z Setup go version spec 1.27.1
+2026-10-02T07:55:56.7999940Z Attempting to download 1.27.1...
+2026-10-02T07:55:56.8088755Z (node:2098) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T07:55:56.8089446Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T07:55:57.6952187Z matching 1.27.1...
+2026-10-02T07:55:57.6970641Z Acquiring 1.27.1 from https://github.com/actions/go-versions/releases/download/1.27.1-33583469715/go-1.27.1-linux-x64.tar.gz
+2026-10-02T07:55:58.2503123Z Extracting Go...
+2026-10-02T07:55:58.2595164Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/f6f6d9cd-d024-47fd-b41c-cd0cd4b41088 -f /home/runner/work/_temp/558a9cab-44c8-40a5-81d6-7533eab7ec1a
+2026-10-02T07:55:59.6750484Z Successfully extracted go to /home/runner/work/_temp/f6f6d9cd-d024-47fd-b41c-cd0cd4b41088
+2026-10-02T07:55:59.6751180Z Adding to the cache ...
+2026-10-02T07:56:04.1814690Z Successfully cached go to /opt/hostedtoolcache/go/1.27.1/x64
+2026-10-02T07:56:04.1816862Z Added go to the path
+2026-10-02T07:56:04.1819243Z Successfully set up Go version 1.27.1
+2026-10-02T07:56:04.2007186Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+2026-10-02T07:56:04.2041586Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+2026-10-02T07:56:04.2077284Z /home/runner/go/pkg/mod
+2026-10-02T07:56:04.2092299Z /home/runner/.cache/go-build
+2026-10-02T07:56:04.4234973Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+2026-10-02T07:56:04.4335565Z (node:2098) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-02T07:56:05.6324465Z Received 29360128 of 209563510 (14.0%), 28.0 MBs/sec
+2026-10-02T07:56:06.6332292Z Received 171966464 of 209563510 (82.1%), 82.0 MBs/sec
+2026-10-02T07:56:06.8858955Z Received 209563510 of 209563510 (100.0%), 88.7 MBs/sec
+2026-10-02T07:56:06.8859802Z Cache Size: ~200 MB (209563510 B)
+2026-10-02T07:56:06.9002406Z [command]/usr/bin/tar -xf /home/runner/work/_temp/069177d6-8a9e-4843-868f-32cb38a95732/cache.tzst -P -C /home/runner/work/js-wf/js-wf --use-compress-program unzstd
+2026-10-02T07:56:07.9415295Z Cache restored successfully
+2026-10-02T07:56:07.9508413Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+2026-10-02T07:56:07.9532046Z go version go1.27.1 linux/amd64
+2026-10-02T07:56:07.9532246Z 
+2026-10-02T07:56:07.9532542Z ##[group]go env
+2026-10-02T07:56:07.9633823Z AR='ar'
+2026-10-02T07:56:07.9634132Z CC='gcc'
+2026-10-02T07:56:07.9634393Z CGO_CFLAGS='-O2 -g'
+2026-10-02T07:56:07.9635000Z CGO_CPPFLAGS=''
+2026-10-02T07:56:07.9635273Z CGO_CXXFLAGS='-O2 -g'
+2026-10-02T07:56:07.9635565Z CGO_ENABLED='1'
+2026-10-02T07:56:07.9635815Z CGO_FFLAGS='-O2 -g'
+2026-10-02T07:56:07.9636082Z CGO_LDFLAGS='-O2 -g'
+2026-10-02T07:56:07.9636552Z CXX='g++'
+2026-10-02T07:56:07.9636769Z GCCGO='gccgo'
+2026-10-02T07:56:07.9636955Z GO111MODULE=''
+2026-10-02T07:56:07.9637126Z GOAMD64='v1'
+2026-10-02T07:56:07.9637310Z GOARCH='amd64'
+2026-10-02T07:56:07.9637477Z GOAUTH='netrc'
+2026-10-02T07:56:07.9637664Z GOBIN='/home/runner/go/bin'
+2026-10-02T07:56:07.9637895Z GOCACHE='/home/runner/.cache/go-build'
+2026-10-02T07:56:07.9638122Z GOCACHEPROG=''
+2026-10-02T07:56:07.9638292Z GODEBUG=''
+2026-10-02T07:56:07.9638499Z GOENV='/home/runner/.config/go/env'
+2026-10-02T07:56:07.9638711Z GOEXE=''
+2026-10-02T07:56:07.9638897Z GOEXPERIMENT=''
+2026-10-02T07:56:07.9639068Z GOFIPS140='off'
+2026-10-02T07:56:07.9639230Z GOFLAGS=''
+2026-10-02T07:56:07.9639776Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build1207714560=/tmp/go-build -gno-record-gcc-switches'
+2026-10-02T07:56:07.9640303Z GOHOSTARCH='amd64'
+2026-10-02T07:56:07.9640480Z GOHOSTOS='linux'
+2026-10-02T07:56:07.9640650Z GOINSECURE=''
+2026-10-02T07:56:07.9641035Z GOMOD='/home/runner/work/js-wf/js-wf/go.mod'
+2026-10-02T07:56:07.9641298Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-10-02T07:56:07.9641513Z GONOPROXY=''
+2026-10-02T07:56:07.9641682Z GONOSUMDB=''
+2026-10-02T07:56:07.9641852Z GOOS='linux'
+2026-10-02T07:56:07.9642024Z GOPACKAGESDRIVER=''
+2026-10-02T07:56:07.9642211Z GOPATH='/home/runner/go'
+2026-10-02T07:56:07.9642396Z GOPRIVATE=''
+2026-10-02T07:56:07.9642613Z GOPROXY='https://proxy.golang.org,direct'
+2026-10-02T07:56:07.9642907Z GOROOT='/opt/hostedtoolcache/go/1.27.1/x64'
+2026-10-02T07:56:07.9643152Z GOSUMDB='sum.golang.org'
+2026-10-02T07:56:07.9643348Z GOTELEMETRY='local'
+2026-10-02T07:56:07.9643607Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-10-02T07:56:07.9643862Z GOTMPDIR=''
+2026-10-02T07:56:07.9644033Z GOTOOLCHAIN='auto'
+2026-10-02T07:56:07.9644290Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.1/x64/pkg/tool/linux_amd64'
+2026-10-02T07:56:07.9644580Z GOVCS=''
+2026-10-02T07:56:07.9644750Z GOVERSION='go1.27.1'
+2026-10-02T07:56:07.9644928Z GOWORK=''
+2026-10-02T07:56:07.9645103Z PKG_CONFIG='pkg-config'
+2026-10-02T07:56:07.9645223Z 
+2026-10-02T07:56:07.9645527Z ##[endgroup]
+2026-10-02T07:56:07.9815949Z ##[group]Run python3 -m unittest discover -s scripts -p 'test_tier3*.py'
+2026-10-02T07:56:07.9816433Z [36;1mpython3 -m unittest discover -s scripts -p 'test_tier3*.py'[0m
+2026-10-02T07:56:07.9816854Z [36;1mpython3 -m unittest discover -s scripts -p 'test_controller_latency.py'[0m
+2026-10-02T07:56:08.0016129Z shell: /usr/bin/bash -e {0}
+2026-10-02T07:56:08.0016388Z env:
+2026-10-02T07:56:08.0016568Z   FAULT_SEED: 5
+2026-10-02T07:56:08.0016742Z   WF_TIER3_MATRIX: 1
+2026-10-02T07:56:08.0016937Z   TIER3_MATRIX_ROW: server_clock_ahead
+2026-10-02T07:56:08.0017169Z   WF_TIER3_MATRIX_DURATION: 10m
+2026-10-02T07:56:08.0017390Z   WF_TIER3_SYNC_INTERVAL: 2m
+2026-10-02T07:56:08.0017590Z   WF_TIER3_CLOCK_TIMER_CUT: 1
+2026-10-02T07:56:08.0017790Z   WF_TIER3_COMMON_CLOCK: 1
+2026-10-02T07:56:08.0018041Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+2026-10-02T07:56:08.0018348Z   GOMEMLIMIT: 512MiB
+2026-10-02T07:56:08.0018577Z   GOMAXPROCS: 2
+2026-10-02T07:56:08.0018744Z ##[endgroup]
+2026-10-02T07:56:08.3666188Z .............................................
+2026-10-02T07:56:08.3666657Z ----------------------------------------------------------------------
+2026-10-02T07:56:08.3667091Z Ran 45 tests in 0.277s
+2026-10-02T07:56:08.3667261Z 
+2026-10-02T07:56:08.3667354Z OK
+2026-10-02T07:56:08.4852249Z ...
+2026-10-02T07:56:08.4852755Z ----------------------------------------------------------------------
+2026-10-02T07:56:08.4853230Z Ran 3 tests in 0.062s
+2026-10-02T07:56:08.4853420Z 
+2026-10-02T07:56:08.4853525Z OK
+2026-10-02T07:56:08.4976224Z ##[group]Run set -o pipefail
+2026-10-02T07:56:08.4976525Z [36;1mset -o pipefail[0m
+2026-10-02T07:56:08.4976896Z [36;1mcase "$TIER3_MATRIX_ROW" in[0m
+2026-10-02T07:56:08.4977269Z [36;1m  auto_journal) row_test=TestFiveContainerAutomaticMembershipWithJournalKills ;;[0m
+2026-10-02T07:56:08.4977786Z [36;1m  block_delay) row_test=TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds ;;[0m
+2026-10-02T07:56:08.4978311Z [36;1m  block_disk) row_test=TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds ;;[0m
+2026-10-02T07:56:08.4978821Z [36;1m  server_clock_ahead) row_test=TestFiveContainerMixedServerClockAheadWithJournalKills ;;[0m
+2026-10-02T07:56:08.4979358Z [36;1m  server_clock_behind) row_test=TestFiveContainerMixedServerClockBehindWithJournalKills ;;[0m
+2026-10-02T07:56:08.4979906Z [36;1m  worker_isolation) row_test=TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds ;;[0m
+2026-10-02T07:56:08.4980459Z [36;1m  worker_pause) row_test=TestFiveContainerMixedWorkerPausedFortyFiveSeconds ;;[0m
+2026-10-02T07:56:08.4981102Z [36;1m  worker_kill) row_test=TestFiveContainerMixedWorkerKilledEveryFiveSeconds ;;[0m
+2026-10-02T07:56:08.4981574Z [36;1m  journal) row_test=TestFiveContainerMixedJournalLeaderEveryThirtySeconds ;;[0m
+2026-10-02T07:56:08.4982049Z [36;1m  consumer) row_test=TestFiveContainerMixedConsumerLeaderEveryThirtySeconds ;;[0m
+2026-10-02T07:56:08.4982508Z [36;1m  restart) row_test=TestFiveContainerMixedAllServersEveryThirtySeconds ;;[0m
+2026-10-02T07:56:08.4982978Z [36;1m  fanout_restart) row_test=TestFiveContainerMixedFanoutRestartEveryThirtySeconds ;;[0m
+2026-10-02T07:56:08.4983452Z [36;1m  route_quorum) row_test=TestFiveContainerMixedRouteQuorumEveryThirtySeconds ;;[0m
+2026-10-02T07:56:08.4983936Z [36;1m  route_majority) row_test=TestFiveContainerMixedRouteMajorityEveryThirtySeconds ;;[0m
+2026-10-02T07:56:08.4984280Z [36;1m  *) exit 1 ;;[0m
+2026-10-02T07:56:08.4984463Z [36;1mesac[0m
+2026-10-02T07:56:08.4984978Z [36;1mgo test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee /tmp/tier3-mixed-journal-events.jsonl | python3 -u scripts/render-go-test.py[0m
+2026-10-02T07:56:08.4985513Z [36;1mcut_args=()[0m
+2026-10-02T07:56:08.4985813Z [36;1mif [ "$WF_TIER3_CLOCK_TIMER_CUT" = 1 ]; then cut_args+=(--require-clock-timer-cut); fi[0m
+2026-10-02T07:56:08.4986239Z [36;1mif [ "$WF_TIER3_COMMON_CLOCK" = 1 ]; then cut_args+=(--require-common-timer-clock); fi[0m
+2026-10-02T07:56:08.4987271Z [36;1mpython3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --expected-seed "$FAULT_SEED" --output /tmp/tier3-mixed-journal-result.json --require-checkpoint-audits "${cut_args[@]}"[0m
+2026-10-02T07:56:08.4988441Z [36;1mpython3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"[0m
+2026-10-02T07:56:08.4989185Z [36;1mpython3 scripts/review-tier3-fencing.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/fencing-timeline-review.json"[0m
+2026-10-02T07:56:08.5045865Z shell: /usr/bin/bash -e {0}
+2026-10-02T07:56:08.5046082Z env:
+2026-10-02T07:56:08.5046252Z   FAULT_SEED: 5
+2026-10-02T07:56:08.5046435Z   WF_TIER3_MATRIX: 1
+2026-10-02T07:56:08.5046633Z   TIER3_MATRIX_ROW: server_clock_ahead
+2026-10-02T07:56:08.5046862Z   WF_TIER3_MATRIX_DURATION: 10m
+2026-10-02T07:56:08.5047072Z   WF_TIER3_SYNC_INTERVAL: 2m
+2026-10-02T07:56:08.5047282Z   WF_TIER3_CLOCK_TIMER_CUT: 1
+2026-10-02T07:56:08.5047480Z   WF_TIER3_COMMON_CLOCK: 1
+2026-10-02T07:56:08.5047712Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+2026-10-02T07:56:08.5047965Z   GOMEMLIMIT: 512MiB
+2026-10-02T07:56:08.5048150Z   GOMAXPROCS: 2
+2026-10-02T07:56:08.5048320Z ##[endgroup]
+2026-10-02T07:56:08.5911647Z go: downloading google.golang.org/protobuf v1.36.6
+2026-10-02T07:56:24.8763493Z === RUN   TestFiveContainerMixedServerClockAheadWithJournalKills
+2026-10-02T07:56:24.8764531Z     tier3_mixed_journal_test.go:39: TIER3_CLOCK_TIMER_CUT_REQUIRED=true
+2026-10-02T07:56:24.8765502Z     tier3_mixed_journal_test.go:39: TIER3_CLOCK_TIMER_CUT_PROFILE=all-waits-2s
+2026-10-02T07:57:13.1450807Z     tier3_mixed_journal_test.go:39: tier3 provisioning retry: context deadline exceeded
+2026-10-02T07:57:13.8966549Z     tier3_mixed_journal_test.go:39: TIER3_COMMON_TIMER_CLOCK=utc-quorum-v1
+2026-10-02T07:57:13.9182631Z     tier3_mixed_journal_test.go:39: TIER3_SUSPENDED_SCAN interval=100ms budget=256
+2026-10-02T07:57:33.0492774Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=1 elapsed=18.539575453s
+2026-10-02T07:57:54.3519463Z     tier3_mixed_journal_test.go:808: tier3 server_clock_ahead fault node=4 scheduled=30s killed=30.044449198s healed=39.831513766s
+2026-10-02T07:57:58.6890030Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=2 elapsed=44.179666135s
+2026-10-02T07:58:24.1367728Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=3 elapsed=1m9.626565108s
+2026-10-02T07:58:24.3435727Z     tier3_mixed_journal_test.go:808: tier3 server_clock_ahead fault node=4 scheduled=1m0s killed=1m0.495642171s healed=1m9.817167355s
+2026-10-02T07:58:43.3722992Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=4 elapsed=1m28.863614346s
+2026-10-02T07:58:55.0723163Z     tier3_mixed_journal_test.go:808: tier3 server_clock_ahead fault node=4 scheduled=1m30s killed=1m32.493363436s healed=1m40.549735424s
+2026-10-02T07:59:08.6084114Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=5 elapsed=1m54.099909302s
+2026-10-02T07:59:24.1754831Z     tier3_mixed_journal_test.go:808: tier3 server_clock_ahead fault node=4 scheduled=2m0s killed=2m2.033045678s healed=2m9.652923132s
+2026-10-02T07:59:35.5553567Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=6 elapsed=2m21.04676527s
+2026-10-02T07:59:52.8496368Z     tier3_mixed_journal_test.go:808: tier3 server_clock_ahead fault node=4 scheduled=2m30s killed=2m30.532591053s healed=2m38.329148102s
+2026-10-02T08:00:02.2847092Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=7 elapsed=2m47.776295739s
+2026-10-02T08:00:22.9689854Z     tier3_mixed_journal_test.go:808: tier3 server_clock_ahead fault node=4 scheduled=3m0s killed=3m0.156709809s healed=3m8.447993976s
+2026-10-02T08:00:27.3394391Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=8 elapsed=3m12.829250193s
+2026-10-02T08:00:48.3453128Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=9 elapsed=3m33.834820949s
+2026-10-02T08:00:59.7975815Z     tier3_mixed_journal_test.go:808: tier3 server_clock_ahead fault node=4 scheduled=3m30s killed=3m34.176176878s healed=3m45.267595739s
+2026-10-02T08:01:12.8082274Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=10 elapsed=3m58.298982585s
+2026-10-02T08:01:12.8101922Z     tier3_mixed_journal_test.go:843: tier3 checkpoint audit batch=10 invocation_cutoff=280 started elapsed=3m58.301534834s
+2026-10-02T08:01:14.4667433Z     tier3_mixed_journal_test.go:862: tier3 checkpoint batch=10 report={Invocations:280 Journals:280 Entries:3080 Terminal:280}
+2026-10-02T08:01:25.2161003Z     tier3_mixed_journal_test.go:808: tier3 server_clock_ahead fault node=4 scheduled=4m0s killed=4m2.200251743s healed=4m10.694459186s
+2026-10-02T08:01:38.9664277Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=11 elapsed=4m24.458014564s
+2026-10-02T08:01:55.2227023Z     tier3_mixed_journal_test.go:808: tier3 server_clock_ahead fault node=4 scheduled=4m30s killed=4m32.551012233s healed=4m40.696603197s
+2026-10-02T08:02:05.9138760Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=12 elapsed=4m51.405447081s
+2026-10-02T08:02:24.2056504Z     tier3_mixed_journal_test.go:808: tier3 server_clock_ahead fault node=4 scheduled=5m0s killed=5m0.591631881s healed=5m9.673842593s
+2026-10-02T08:02:31.7653876Z     tier3_mixed_journal_test.go:39: tier3 mixed batch=13 elapsed=5m17.256810361s
+2026-10-02T08:02:47.7251086Z     tier3_mixed_journal_test.go:803: tier3 server_clock_ahead fault failed: timer clock cut removal missed the duration boundary
+2026-10-02T08:02:47.7265637Z     tier3_mixed_journal_test.go:39: resultmatrixtimer/tier3-5-batch-13-2= err=context canceled
+2026-10-02T08:02:48.3580315Z     tier3_mixed_journal_test.go:176: server log4: docker logs js-wf-route-2517-1790927784876553426-n4: exit status 1: Error response from daemon: No such container: js-wf-route-2517-1790927784876553426-n4
+2026-10-02T08:02:52.3845417Z --- FAIL: TestFiveContainerMixedServerClockAheadWithJournalKills (387.51s)
+2026-10-02T08:02:52.3845885Z FAIL
+2026-10-02T08:02:52.3951315Z FAIL	js-wf/integration	387.529s
+2026-10-02T08:02:52.4444464Z ##[error]Process completed with exit code 1.
+2026-10-02T08:02:52.4541963Z ##[group]Run actions/upload-artifact@v7
+2026-10-02T08:02:52.4542210Z with:
+2026-10-02T08:02:52.4542388Z   name: tier3-server_clock_ahead-seed-5
+2026-10-02T08:02:52.4543146Z   path: /tmp/tier3-mixed-journal/*.json
+/tmp/tier3-mixed-journal/*.jsonl
+/tmp/tier3-mixed-journal/*.log
+/tmp/tier3-mixed-journal/*.txt
+/tmp/tier3-mixed-journal/cluster/*.conf
+/tmp/tier3-mixed-journal-events.jsonl
+/tmp/tier3-mixed-journal-result.json
+
+2026-10-02T08:02:52.4543934Z   if-no-files-found: warn
+2026-10-02T08:02:52.4544146Z   compression-level: 6
+2026-10-02T08:02:52.4544326Z   overwrite: false
+2026-10-02T08:02:52.4544501Z   include-hidden-files: false
+2026-10-02T08:02:52.4544702Z   archive: true
+2026-10-02T08:02:52.4544859Z env:
+2026-10-02T08:02:52.4545004Z   FAULT_SEED: 5
+2026-10-02T08:02:52.4545163Z   WF_TIER3_MATRIX: 1
+2026-10-02T08:02:52.4545351Z   TIER3_MATRIX_ROW: server_clock_ahead
+2026-10-02T08:02:52.4545568Z   WF_TIER3_MATRIX_DURATION: 10m
+2026-10-02T08:02:52.4545790Z   WF_TIER3_SYNC_INTERVAL: 2m
+2026-10-02T08:02:52.4545984Z   WF_TIER3_CLOCK_TIMER_CUT: 1
+2026-10-02T08:02:52.4546171Z   WF_TIER3_COMMON_CLOCK: 1
+2026-10-02T08:02:52.4546393Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+2026-10-02T08:02:52.4546641Z   GOMEMLIMIT: 512MiB
+2026-10-02T08:02:52.4546811Z   GOMAXPROCS: 2
+2026-10-02T08:02:52.4546968Z ##[endgroup]
+2026-10-02T08:02:52.5800531Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-02T08:02:52.5802525Z The least common ancestor is /tmp. This will be the root directory of the artifact
+2026-10-02T08:02:52.5803200Z With the provided path, there will be 63 files uploaded
+2026-10-02T08:02:52.5807192Z Artifact name is valid!
+2026-10-02T08:02:52.5807632Z Root directory input is valid!
+2026-10-02T08:02:52.9245355Z Uploading artifact: tier3-server_clock_ahead-seed-5.zip
+2026-10-02T08:02:52.9276446Z Beginning upload of artifact content to blob storage
+2026-10-02T08:02:53.5507004Z Uploaded bytes 446643
+2026-10-02T08:02:53.6122412Z Finished uploading artifact content to blob storage!
+2026-10-02T08:02:53.6123381Z SHA256 digest of uploaded artifact is fc3cdb69ab9d757d3f197b4fa406304280c5d75ad322447456817d2ff1d59ba9
+2026-10-02T08:02:53.6124143Z Finalizing artifact upload
+2026-10-02T08:02:53.9876745Z Artifact tier3-server_clock_ahead-seed-5 successfully finalized. Artifact ID 11215896559
+2026-10-02T08:02:53.9877754Z Artifact tier3-server_clock_ahead-seed-5 has been successfully uploaded! Final size is 446643 bytes. Artifact ID is 11215896559
+2026-10-02T08:02:53.9880668Z Artifact download URL: https://github.com/AntPAllen/js-wf/actions/runs/36979614670/artifacts/11215896559
+2026-10-02T08:02:54.0050268Z Post job cleanup.
+2026-10-02T08:02:54.0763390Z [command]/usr/bin/git version
+2026-10-02T08:02:54.0799599Z git version 2.55.0
+2026-10-02T08:02:54.0831042Z Temporarily overriding HOME='/home/runner/work/_temp/7e5b188e-fdc8-4fa4-9c78-41d69b9d1e0d' before making global git config changes
+2026-10-02T08:02:54.0832084Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-02T08:02:54.0836609Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+2026-10-02T08:02:54.0876448Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-02T08:02:54.0911597Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-02T08:02:54.1137939Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-02T08:02:54.1166672Z http.https://github.com/.extraheader
+2026-10-02T08:02:54.1177360Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-02T08:02:54.1209072Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-02T08:02:54.1434372Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-02T08:02:54.1471267Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-02T08:02:54.1823546Z Cleaning up orphan processes
+2026-10-02T08:02:54.2168738Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

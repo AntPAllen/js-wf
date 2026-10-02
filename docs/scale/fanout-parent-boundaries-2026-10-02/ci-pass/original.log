@@ -1,0 +1,816 @@
+full-restart	Set up job	﻿2026-10-02T07:58:05.2741799Z Current runner version: '2.337.0'
+full-restart	Set up job	2026-10-02T07:58:05.2773529Z ##[group]Runner Image Provisioner
+full-restart	Set up job	2026-10-02T07:58:05.2774546Z Hosted Compute Agent
+full-restart	Set up job	2026-10-02T07:58:05.2775133Z Version: 20260901.588
+full-restart	Set up job	2026-10-02T07:58:05.2775797Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+full-restart	Set up job	2026-10-02T07:58:05.2776632Z Build Date: 2026-09-01T19:56:44Z
+full-restart	Set up job	2026-10-02T07:58:05.2777371Z Worker ID: {664f635e-6126-4075-8ee9-a4cc9eb60edb}
+full-restart	Set up job	2026-10-02T07:58:05.2778159Z Azure Region: centralus
+full-restart	Set up job	2026-10-02T07:58:05.2778835Z ##[endgroup]
+full-restart	Set up job	2026-10-02T07:58:05.2780196Z ##[group]Operating System
+full-restart	Set up job	2026-10-02T07:58:05.2780843Z Ubuntu
+full-restart	Set up job	2026-10-02T07:58:05.2781374Z 24.04.5
+full-restart	Set up job	2026-10-02T07:58:05.2781899Z LTS
+full-restart	Set up job	2026-10-02T07:58:05.2782441Z ##[endgroup]
+full-restart	Set up job	2026-10-02T07:58:05.2783376Z ##[group]Runner Image
+full-restart	Set up job	2026-10-02T07:58:05.2783976Z Image: ubuntu-24.04
+full-restart	Set up job	2026-10-02T07:58:05.2784549Z Version: 20260927.320.1
+full-restart	Set up job	2026-10-02T07:58:05.2785655Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+full-restart	Set up job	2026-10-02T07:58:05.2787426Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+full-restart	Set up job	2026-10-02T07:58:05.2788411Z ##[endgroup]
+full-restart	Set up job	2026-10-02T07:58:05.2789653Z ##[group]GITHUB_TOKEN Permissions
+full-restart	Set up job	2026-10-02T07:58:05.2792101Z Contents: read
+full-restart	Set up job	2026-10-02T07:58:05.2792902Z Metadata: read
+full-restart	Set up job	2026-10-02T07:58:05.2793505Z Packages: read
+full-restart	Set up job	2026-10-02T07:58:05.2794070Z ##[endgroup]
+full-restart	Set up job	2026-10-02T07:58:05.2796107Z Secret source: Actions
+full-restart	Set up job	2026-10-02T07:58:05.2797095Z Cache mode: write
+full-restart	Set up job	2026-10-02T07:58:05.2797838Z Prepare workflow directory
+full-restart	Set up job	2026-10-02T07:58:05.3069440Z Prepare all required actions
+full-restart	Set up job	2026-10-02T07:58:05.3110621Z Getting action download info
+full-restart	Set up job	2026-10-02T07:58:05.5690686Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+full-restart	Set up job	2026-10-02T07:58:05.6611056Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+full-restart	Set up job	2026-10-02T07:58:06.3612847Z Complete job name: full-restart
+full-restart	Run actions/checkout@v4	﻿2026-10-02T07:58:06.4202487Z ##[group]Run actions/checkout@v4
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4203637Z with:
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4204205Z   repository: AntPAllen/js-wf
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4207933Z   token: ***
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4208397Z   ssh-strict: true
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4208928Z   ssh-user: git
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4209421Z   persist-credentials: true
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4209956Z   clean: true
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4210484Z   sparse-checkout-cone-mode: true
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4211051Z   fetch-depth: 1
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4211578Z   fetch-tags: false
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4212070Z   show-progress: true
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4212707Z   lfs: false
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4213250Z   submodules: false
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4213767Z   set-safe-directory: true
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4214340Z   allow-unsafe-pr-checkout: false
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.4215059Z ##[endgroup]
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5163273Z Syncing repository: AntPAllen/js-wf
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5166027Z ##[group]Getting Git version info
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5167060Z Working directory is '/home/runner/work/js-wf/js-wf'
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5168926Z [command]/usr/bin/git version
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5205855Z git version 2.55.0
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5235787Z ##[endgroup]
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5241444Z Temporarily overriding HOME='/home/runner/work/_temp/54e77d35-b623-4e9c-ad9f-584834144d1b' before making global git config changes
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5243221Z Adding repository directory to the temporary git global config as a safe directory
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5244912Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5275974Z Deleting the contents of '/home/runner/work/js-wf/js-wf'
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5279844Z ##[group]Initializing the repository
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5283449Z [command]/usr/bin/git init /home/runner/work/js-wf/js-wf
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5372109Z hint: Using 'master' as the name for the initial branch. This default branch name
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5374108Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5375300Z hint: to use in all of your new repositories, which will suppress this warning,
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5376456Z hint: call:
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5377035Z hint:
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5377617Z hint: 	git config --global init.defaultBranch <name>
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5378267Z hint:
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5378881Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5379836Z hint: 'development'. The just-created branch can be renamed via this command:
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5380697Z hint:
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5381302Z hint: 	git branch -m <name>
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5382036Z hint:
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5382909Z hint: Disable this message with "git config set advice.defaultBranchName false"
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5383929Z Initialized empty Git repository in /home/runner/work/js-wf/js-wf/.git/
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5385596Z [command]/usr/bin/git remote add origin https://github.com/AntPAllen/js-wf
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5427727Z ##[endgroup]
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5428628Z ##[group]Disabling automatic garbage collection
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5433795Z [command]/usr/bin/git config --local gc.auto 0
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5460508Z ##[endgroup]
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5461688Z ##[group]Setting up auth
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5466362Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5492380Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5795860Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5825081Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.5997998Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.6023104Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.6179988Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.6211160Z ##[endgroup]
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.6212111Z ##[group]Fetching the repository
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:06.6219286Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +3206be89a87c78f4d9c4f3de3e101b5cb0bbab07:refs/remotes/origin/main
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.0499780Z From https://github.com/AntPAllen/js-wf
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.0501384Z  * [new ref]         3206be89a87c78f4d9c4f3de3e101b5cb0bbab07 -> origin/main
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.0510590Z ##[endgroup]
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.0511840Z ##[group]Determining the checkout info
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.0518524Z ##[endgroup]
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.0518994Z [command]/usr/bin/git sparse-checkout disable
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.0555014Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.0579451Z ##[group]Checking out the ref
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.0584058Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.6067078Z Switched to a new branch 'main'
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.6068416Z branch 'main' set up to track 'origin/main'.
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.6093230Z ##[endgroup]
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.6129103Z [command]/usr/bin/git log -1 --format=%H
+full-restart	Run actions/checkout@v4	2026-10-02T07:58:10.6149607Z 3206be89a87c78f4d9c4f3de3e101b5cb0bbab07
+full-restart	Run actions/setup-go@v5	﻿2026-10-02T07:58:10.6387636Z ##[group]Run actions/setup-go@v5
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:10.6388037Z with:
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:10.6388301Z   go-version-file: go.mod
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:10.6388596Z   check-latest: false
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:10.6390591Z   token: ***
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:10.6390874Z   cache: true
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:10.6391146Z ##[endgroup]
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:10.7461712Z Setup go version spec 1.27.1
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:10.7469038Z Attempting to download 1.27.1...
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:10.7560242Z (node:2163) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:10.7561576Z (Use `node --trace-deprecation ...` to show where the warning was created)
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:11.4525812Z matching 1.27.1...
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:11.4547894Z Acquiring 1.27.1 from https://github.com/actions/go-versions/releases/download/1.27.1-33583469715/go-1.27.1-linux-x64.tar.gz
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:11.9983777Z Extracting Go...
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:12.0057728Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/69e2e552-8325-4186-8de2-807def1cb633 -f /home/runner/work/_temp/b8975818-5a46-4e3a-8964-1b3e2d7295e1
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:13.4547380Z Successfully extracted go to /home/runner/work/_temp/69e2e552-8325-4186-8de2-807def1cb633
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:13.4548054Z Adding to the cache ...
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:17.3218581Z Successfully cached go to /opt/hostedtoolcache/go/1.27.1/x64
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:17.3219330Z Added go to the path
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:17.3221565Z Successfully set up Go version 1.27.1
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:17.3394662Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:17.3418515Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:17.3445067Z /home/runner/.cache/go-build
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:17.3461793Z /home/runner/go/pkg/mod
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:17.4771861Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:17.4856994Z (node:2163) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:18.6291595Z Received 96468992 of 209563510 (46.0%), 92.1 MBs/sec
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.2094143Z Received 209563510 of 209563510 (100.0%), 126.6 MBs/sec
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.2094946Z Cache Size: ~200 MB (209563510 B)
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.2118850Z [command]/usr/bin/tar -xf /home/runner/work/_temp/be0e6cb8-8daf-4805-9429-cd15167d1aad/cache.tzst -P -C /home/runner/work/js-wf/js-wf --use-compress-program unzstd
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9144478Z Cache restored successfully
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9454842Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9478358Z go version go1.27.1 linux/amd64
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9478641Z 
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9480176Z ##[group]go env
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9644081Z AR='ar'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9644525Z CC='gcc'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9645012Z CGO_CFLAGS='-O2 -g'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9645451Z CGO_CPPFLAGS=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9645768Z CGO_CXXFLAGS='-O2 -g'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9646042Z CGO_ENABLED='1'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9646355Z CGO_FFLAGS='-O2 -g'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9646624Z CGO_LDFLAGS='-O2 -g'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9646869Z CXX='g++'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9647140Z GCCGO='gccgo'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9647418Z GO111MODULE=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9647678Z GOAMD64='v1'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9647978Z GOARCH='amd64'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9648214Z GOAUTH='netrc'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9648548Z GOBIN='/home/runner/go/bin'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9648862Z GOCACHE='/home/runner/.cache/go-build'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9649199Z GOCACHEPROG=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9649447Z GODEBUG=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9649757Z GOENV='/home/runner/.config/go/env'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9650062Z GOEXE=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9650304Z GOEXPERIMENT=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9650621Z GOFIPS140='off'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9650865Z GOFLAGS=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9651551Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build3676285139=/tmp/go-build -gno-record-gcc-switches'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9652387Z GOHOSTARCH='amd64'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9653106Z GOHOSTOS='linux'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9653432Z GOINSECURE=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9653723Z GOMOD='/home/runner/work/js-wf/js-wf/go.mod'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9654067Z GOMODCACHE='/home/runner/go/pkg/mod'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9654397Z GONOPROXY=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9654873Z GONOSUMDB=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9655136Z GOOS='linux'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9655398Z GOPACKAGESDRIVER=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9655672Z GOPATH='/home/runner/go'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9655982Z GOPRIVATE=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9656295Z GOPROXY='https://proxy.golang.org,direct'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9656672Z GOROOT='/opt/hostedtoolcache/go/1.27.1/x64'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9656996Z GOSUMDB='sum.golang.org'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9657388Z GOTELEMETRY='local'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9657708Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9658444Z GOTMPDIR=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9658770Z GOTOOLCHAIN='auto'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9659170Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.1/x64/pkg/tool/linux_amd64'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9659573Z GOVCS=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9659859Z GOVERSION='go1.27.1'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9660110Z GOWORK=''
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9660431Z PKG_CONFIG='pkg-config'
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9660584Z 
+full-restart	Run actions/setup-go@v5	2026-10-02T07:58:19.9660973Z ##[endgroup]
+full-restart	Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v	﻿2026-10-02T07:58:19.9807341Z ##[group]Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v
+full-restart	Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v	2026-10-02T07:58:19.9808208Z ^[[36;1mgo test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v^[[0m
+full-restart	Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v	2026-10-02T07:58:19.9985965Z shell: /usr/bin/bash -e {0}
+full-restart	Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v	2026-10-02T07:58:19.9986403Z env:
+full-restart	Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v	2026-10-02T07:58:19.9986668Z   WF_FULL_RESTART_FANOUT_500: 1
+full-restart	Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v	2026-10-02T07:58:19.9986950Z ##[endgroup]
+full-restart	Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v	2026-10-02T07:58:20.0613149Z go: downloading google.golang.org/protobuf v1.36.6
+full-restart	Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v	2026-10-02T07:58:34.6652021Z === RUN   TestFiveHundredChildFanoutSurvivesFullServerRestart
+full-restart	Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v	2026-10-02T07:58:52.9518723Z     fanout_full_server_restart_test.go:52: full server restart recovered parent and 500 children; retained integrity={Invocations:501 Journals:501 Entries:4504 Terminal:501}
+full-restart	Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v	2026-10-02T07:58:53.1673832Z --- PASS: TestFiveHundredChildFanoutSurvivesFullServerRestart (18.50s)
+full-restart	Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v	2026-10-02T07:58:53.1681632Z PASS
+full-restart	Run go test ./integration -run '^TestFiveHundredChildFanoutSurvivesFullServerRestart$' -count=1 -timeout=12m -v	2026-10-02T07:58:53.1682803Z ok  	js-wf/integration	18.507s
+full-restart	Post Run actions/setup-go@v5	﻿2026-10-02T07:58:53.2331469Z Post job cleanup.
+full-restart	Post Run actions/setup-go@v5	2026-10-02T07:58:53.3325764Z (node:4808) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+full-restart	Post Run actions/setup-go@v5	2026-10-02T07:58:53.3326770Z (Use `node --trace-deprecation ...` to show where the warning was created)
+full-restart	Post Run actions/setup-go@v5	2026-10-02T07:58:53.3409264Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+full-restart	Post Run actions/setup-go@v5	2026-10-02T07:58:53.3442306Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+full-restart	Post Run actions/setup-go@v5	2026-10-02T07:58:53.3465994Z /home/runner/go/pkg/mod
+full-restart	Post Run actions/setup-go@v5	2026-10-02T07:58:53.3486645Z /home/runner/.cache/go-build
+full-restart	Post Run actions/setup-go@v5	2026-10-02T07:58:53.3492077Z Cache hit occurred on the primary key setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb, not saving cache.
+full-restart	Post Run actions/checkout@v4	﻿2026-10-02T07:58:53.3647614Z Post job cleanup.
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4342737Z [command]/usr/bin/git version
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4375347Z git version 2.55.0
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4403211Z Temporarily overriding HOME='/home/runner/work/_temp/89cbdd55-aac0-4483-b815-8a0797a9f2b6' before making global git config changes
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4404379Z Adding repository directory to the temporary git global config as a safe directory
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4409435Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4437767Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4464036Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4651694Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4673780Z http.https://github.com/.extraheader
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4682339Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4711961Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4898186Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+full-restart	Post Run actions/checkout@v4	2026-10-02T07:58:53.4927366Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+full-restart	Complete job	﻿2026-10-02T07:58:53.5250751Z Cleaning up orphan processes
+full-restart	Complete job	2026-10-02T07:58:53.5462076Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+consumer-leader	Set up job	﻿2026-10-02T08:01:44.8764410Z Current runner version: '2.337.0'
+consumer-leader	Set up job	2026-10-02T08:01:44.8789619Z ##[group]Runner Image Provisioner
+consumer-leader	Set up job	2026-10-02T08:01:44.8790602Z Hosted Compute Agent
+consumer-leader	Set up job	2026-10-02T08:01:44.8791188Z Version: 20260901.588
+consumer-leader	Set up job	2026-10-02T08:01:44.8791942Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+consumer-leader	Set up job	2026-10-02T08:01:44.8792914Z Build Date: 2026-09-01T19:56:44Z
+consumer-leader	Set up job	2026-10-02T08:01:44.8793640Z Worker ID: {7dc521f6-c03b-44d6-a805-cf05c5149d8f}
+consumer-leader	Set up job	2026-10-02T08:01:44.8794398Z Azure Region: eastus
+consumer-leader	Set up job	2026-10-02T08:01:44.8794984Z ##[endgroup]
+consumer-leader	Set up job	2026-10-02T08:01:44.8796935Z ##[group]Operating System
+consumer-leader	Set up job	2026-10-02T08:01:44.8797617Z Ubuntu
+consumer-leader	Set up job	2026-10-02T08:01:44.8798176Z 24.04.5
+consumer-leader	Set up job	2026-10-02T08:01:44.8798797Z LTS
+consumer-leader	Set up job	2026-10-02T08:01:44.8799378Z ##[endgroup]
+consumer-leader	Set up job	2026-10-02T08:01:44.8800057Z ##[group]Runner Image
+consumer-leader	Set up job	2026-10-02T08:01:44.8800705Z Image: ubuntu-24.04
+consumer-leader	Set up job	2026-10-02T08:01:44.8801330Z Version: 20260927.320.1
+consumer-leader	Set up job	2026-10-02T08:01:44.8802493Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+consumer-leader	Set up job	2026-10-02T08:01:44.8804595Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+consumer-leader	Set up job	2026-10-02T08:01:44.8805576Z ##[endgroup]
+consumer-leader	Set up job	2026-10-02T08:01:44.8806794Z ##[group]GITHUB_TOKEN Permissions
+consumer-leader	Set up job	2026-10-02T08:01:44.8808896Z Contents: read
+consumer-leader	Set up job	2026-10-02T08:01:44.8809561Z Metadata: read
+consumer-leader	Set up job	2026-10-02T08:01:44.8810241Z Packages: read
+consumer-leader	Set up job	2026-10-02T08:01:44.8810894Z ##[endgroup]
+consumer-leader	Set up job	2026-10-02T08:01:44.8813312Z Secret source: Actions
+consumer-leader	Set up job	2026-10-02T08:01:44.8814376Z Cache mode: write
+consumer-leader	Set up job	2026-10-02T08:01:44.8815524Z Prepare workflow directory
+consumer-leader	Set up job	2026-10-02T08:01:44.9206709Z Prepare all required actions
+consumer-leader	Set up job	2026-10-02T08:01:44.9254438Z Getting action download info
+consumer-leader	Set up job	2026-10-02T08:01:45.2247416Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+consumer-leader	Set up job	2026-10-02T08:01:45.3350420Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+consumer-leader	Set up job	2026-10-02T08:01:45.5303318Z Download action repository 'actions/upload-artifact@v7' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+consumer-leader	Set up job	2026-10-02T08:01:45.7057344Z Complete job name: consumer-leader
+consumer-leader	Run actions/checkout@v4	﻿2026-10-02T08:01:45.7815017Z ##[group]Run actions/checkout@v4
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7815948Z with:
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7816399Z   repository: AntPAllen/js-wf
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7820247Z   token: ***
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7820681Z   ssh-strict: true
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7821121Z   ssh-user: git
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7821564Z   persist-credentials: true
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7822051Z   clean: true
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7822505Z   sparse-checkout-cone-mode: true
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7823239Z   fetch-depth: 1
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7823686Z   fetch-tags: false
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7824131Z   show-progress: true
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7824586Z   lfs: false
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7825005Z   submodules: false
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7825461Z   set-safe-directory: true
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7825972Z   allow-unsafe-pr-checkout: false
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7826729Z env:
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7827159Z   WF_FANOUT_CONSUMER_500: 1
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7827724Z   WF_FANOUT_CONSUMER_REPORT: fanout-consumer-500
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.7828338Z ##[endgroup]
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.8976550Z Syncing repository: AntPAllen/js-wf
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.8979685Z ##[group]Getting Git version info
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.8980782Z Working directory is '/home/runner/work/js-wf/js-wf'
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.8983083Z [command]/usr/bin/git version
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9164914Z git version 2.55.0
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9200395Z ##[endgroup]
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9224083Z Temporarily overriding HOME='/home/runner/work/_temp/95d0c005-638a-4034-9c27-f8fa6ee89705' before making global git config changes
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9230686Z Adding repository directory to the temporary git global config as a safe directory
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9233032Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9323580Z Deleting the contents of '/home/runner/work/js-wf/js-wf'
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9329790Z ##[group]Initializing the repository
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9346457Z [command]/usr/bin/git init /home/runner/work/js-wf/js-wf
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9509707Z hint: Using 'master' as the name for the initial branch. This default branch name
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9511544Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9513376Z hint: to use in all of your new repositories, which will suppress this warning,
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9514671Z hint: call:
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9515307Z hint:
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9516091Z hint: 	git config --global init.defaultBranch <name>
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9517064Z hint:
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9517984Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9519566Z hint: 'development'. The just-created branch can be renamed via this command:
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9520771Z hint:
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9521416Z hint: 	git branch -m <name>
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9522159Z hint:
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9523952Z hint: Disable this message with "git config set advice.defaultBranchName false"
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9525725Z Initialized empty Git repository in /home/runner/work/js-wf/js-wf/.git/
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9528445Z [command]/usr/bin/git remote add origin https://github.com/AntPAllen/js-wf
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9591984Z ##[endgroup]
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9593901Z ##[group]Disabling automatic garbage collection
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9597084Z [command]/usr/bin/git config --local gc.auto 0
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9655849Z ##[endgroup]
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9656967Z ##[group]Setting up auth
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9657947Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:45.9697949Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:46.0117927Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:46.0158657Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:46.0387686Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:46.0424257Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:46.0654497Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:46.0698168Z ##[endgroup]
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:46.0699097Z ##[group]Fetching the repository
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:46.0710999Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +3206be89a87c78f4d9c4f3de3e101b5cb0bbab07:refs/remotes/origin/main
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:48.6953369Z From https://github.com/AntPAllen/js-wf
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:48.6954634Z  * [new ref]         3206be89a87c78f4d9c4f3de3e101b5cb0bbab07 -> origin/main
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:48.6972033Z ##[endgroup]
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:48.6984537Z ##[group]Determining the checkout info
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:48.6988151Z ##[endgroup]
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:48.6989255Z [command]/usr/bin/git sparse-checkout disable
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:48.7043857Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:48.7082292Z ##[group]Checking out the ref
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:48.7089921Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:49.3850227Z Switched to a new branch 'main'
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:49.3858134Z branch 'main' set up to track 'origin/main'.
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:49.3903852Z ##[endgroup]
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:49.3951977Z [command]/usr/bin/git log -1 --format=%H
+consumer-leader	Run actions/checkout@v4	2026-10-02T08:01:49.3979058Z 3206be89a87c78f4d9c4f3de3e101b5cb0bbab07
+consumer-leader	Run actions/setup-go@v5	﻿2026-10-02T08:01:49.4227393Z ##[group]Run actions/setup-go@v5
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.4227792Z with:
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.4228051Z   go-version-file: go.mod
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.4228332Z   check-latest: false
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.4231248Z   token: ***
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.4231509Z   cache: true
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.4231745Z env:
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.4231981Z   WF_FANOUT_CONSUMER_500: 1
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.4232303Z   WF_FANOUT_CONSUMER_REPORT: fanout-consumer-500
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.4232906Z ##[endgroup]
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.5530521Z Setup go version spec 1.27.1
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.5540817Z Attempting to download 1.27.1...
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.5650332Z (node:2281) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.5651416Z (Use `node --trace-deprecation ...` to show where the warning was created)
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.9893140Z matching 1.27.1...
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:49.9918593Z Acquiring 1.27.1 from https://github.com/actions/go-versions/releases/download/1.27.1-33583469715/go-1.27.1-linux-x64.tar.gz
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:50.5137544Z Extracting Go...
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:50.5251712Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/298582bf-37a6-48fd-a84c-0c92d58c3457 -f /home/runner/work/_temp/5aac3c03-1822-4bb6-844f-6987e5b4eb15
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:52.2258011Z Successfully extracted go to /home/runner/work/_temp/298582bf-37a6-48fd-a84c-0c92d58c3457
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:52.2258951Z Adding to the cache ...
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:59.1296091Z Successfully cached go to /opt/hostedtoolcache/go/1.27.1/x64
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:59.1298675Z Added go to the path
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:59.1301074Z Successfully set up Go version 1.27.1
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:59.1556445Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:59.1599220Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:59.1648765Z /home/runner/go/pkg/mod
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:59.1671751Z /home/runner/.cache/go-build
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:59.2341689Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:01:59.2461465Z (node:2281) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:00.2608714Z Received 209563510 of 209563510 (100.0%), 205.4 MBs/sec
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:00.2613801Z Cache Size: ~200 MB (209563510 B)
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:00.2746108Z [command]/usr/bin/tar -xf /home/runner/work/_temp/7289d90d-1cee-4518-b913-4a003db32575/cache.tzst -P -C /home/runner/work/js-wf/js-wf --use-compress-program unzstd
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.3761447Z Cache restored successfully
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.3859718Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.3885456Z go version go1.27.1 linux/amd64
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.3885794Z 
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.3886238Z ##[group]go env
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4089794Z AR='ar'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4090280Z CC='gcc'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4090660Z CGO_CFLAGS='-O2 -g'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4091092Z CGO_CPPFLAGS=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4091498Z CGO_CXXFLAGS='-O2 -g'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4091898Z CGO_ENABLED='1'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4092280Z CGO_FFLAGS='-O2 -g'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4092981Z CGO_LDFLAGS='-O2 -g'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4093406Z CXX='g++'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4093748Z GCCGO='gccgo'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4094138Z GO111MODULE=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4094489Z GOAMD64='v1'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4094845Z GOARCH='amd64'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4095181Z GOAUTH='netrc'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4095573Z GOBIN='/home/runner/go/bin'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4096048Z GOCACHE='/home/runner/.cache/go-build'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4096514Z GOCACHEPROG=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4096853Z GODEBUG=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4097221Z GOENV='/home/runner/.config/go/env'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4097651Z GOEXE=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4097996Z GOEXPERIMENT=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4098353Z GOFIPS140='off'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4099247Z GOFLAGS=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4100398Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build2214850552=/tmp/go-build -gno-record-gcc-switches'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4101988Z GOHOSTARCH='amd64'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4102366Z GOHOSTOS='linux'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4102939Z GOINSECURE=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4103421Z GOMOD='/home/runner/work/js-wf/js-wf/go.mod'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4104019Z GOMODCACHE='/home/runner/go/pkg/mod'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4104513Z GONOPROXY=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4104885Z GONOSUMDB=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4105253Z GOOS='linux'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4105594Z GOPACKAGESDRIVER=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4105970Z GOPATH='/home/runner/go'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4106347Z GOPRIVATE=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4106779Z GOPROXY='https://proxy.golang.org,direct'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4107349Z GOROOT='/opt/hostedtoolcache/go/1.27.1/x64'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4107836Z GOSUMDB='sum.golang.org'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4108208Z GOTELEMETRY='local'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4108674Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4109270Z GOTMPDIR=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4109650Z GOTOOLCHAIN='auto'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4110281Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.1/x64/pkg/tool/linux_amd64'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4110870Z GOVCS=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4111177Z GOVERSION='go1.27.1'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4111522Z GOWORK=''
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4111867Z PKG_CONFIG='pkg-config'
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4112120Z 
+consumer-leader	Run actions/setup-go@v5	2026-10-02T08:02:01.4112589Z ##[endgroup]
+consumer-leader	Kill the consumer leader with 500 physically queued children	﻿2026-10-02T08:02:01.4301573Z ##[group]Run set -o pipefail
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:01.4301966Z ^[[36;1mset -o pipefail^[[0m
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:01.4303233Z ^[[36;1mgo test -race ./integration -run '^TestFiveHundredChildFanoutSurvivesConsumerLeaderKill$' -count=1 -timeout=8m -v | tee fanout-consumer-500.log^[[0m
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:01.4625293Z shell: /usr/bin/bash -e {0}
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:01.4625653Z env:
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:01.4625902Z   WF_FANOUT_CONSUMER_500: 1
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:01.4626259Z   WF_FANOUT_CONSUMER_REPORT: fanout-consumer-500
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:01.4626631Z ##[endgroup]
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:01.5508049Z go: downloading google.golang.org/protobuf v1.36.6
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:18.3504010Z === RUN   TestFiveHundredChildFanoutSurvivesConsumerLeaderKill
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:27.2405261Z     fanout_full_server_restart_test.go:48: FANOUT_QUEUED_CHILDREN count=500 stream_messages=501 first=1 last=501
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:27.2419231Z     fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_FAULT name=WF_P_39 leader=wf-process-0 node=0 pending=7 ack_pending=1 killed=2026-10-02T08:02:27.241601128Z
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:27.2438496Z     fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_KILLED pid=2883 signal=killed
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:31.4507745Z     fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_ELECTED name=WF_P_39 old=wf-process-0 new=wf-process-2 elapsed=4.208803419s
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:34.7244532Z     fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_HEALED name=WF_P_39 leader=wf-process-2 elapsed=7.482480913s
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:35.3587475Z     fanout_full_server_restart_test.go:48: FANOUT_QUEUED_CHILDREN count=500 stream_messages=501 first=1 last=501
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:47.5333554Z     fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_LATENCY children=500 child_start_p99=13.363194891s child_start_max=15.301157137s parent_last_child_delay=3.527834244s
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:48.2071424Z     fanout_full_server_restart_test.go:48: FANOUT_CONSUMER_DRAIN stream_messages=0 consumers=64 pending=0 ack_pending=0
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:48.2074008Z     fanout_full_server_restart_test.go:48: consumer leader kill recovered parent and 500 children; retained integrity={Invocations:501 Journals:501 Entries:4504 Terminal:501}
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:48.2207411Z     fanout_full_server_restart_test.go:249: FANOUT_PARENT_OPERATIONS events=6512 totals=map[dispatch_ack_confirmed:{Calls:501 Duration:402.824518ms Errors:0} invocation_read:{Calls:2 Duration:11.895694ms Errors:0} journal_append:{Calls:1501 Duration:3.021734795s Errors:0} journal_read:{Calls:2 Duration:1.00249883s Errors:0} journal_snapshot:{Calls:2 Duration:1.196123002s Errors:0} lease_acquire:{Calls:501 Duration:1.783279606s Errors:0} lease_heartbeat_recent:{Calls:2 Duration:179.904µs Errors:0} lease_release:{Calls:501 Duration:571.720508ms Errors:0} lease_renew_append:{Calls:1501 Duration:1.659770133s Errors:0} signal_info:{Calls:2 Duration:14.448537ms Errors:0} signal_read:{Calls:500 Duration:622.236896ms Errors:0} terminal_invocation_read:{Calls:499 Duration:713.130354ms Errors:0} terminal_parent_notify:{Calls:499 Duration:595.626µs Errors:0} terminal_state_read:{Calls:499 Duration:267.188859ms Errors:0}]
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:48.7695651Z --- PASS: TestFiveHundredChildFanoutSurvivesConsumerLeaderKill (30.42s)
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:48.7698697Z PASS
+consumer-leader	Kill the consumer leader with 500 physically queued children	2026-10-02T08:02:49.7811376Z ok  	js-wf/integration	31.443s
+consumer-leader	Run actions/upload-artifact@v7	﻿2026-10-02T08:02:49.8413818Z ##[group]Run actions/upload-artifact@v7
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.8414154Z with:
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.8414369Z   name: fanout-consumer-500
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.8414734Z   path: fanout-consumer-500.log
+consumer-leader	Run actions/upload-artifact@v7	integration/fanout-consumer-500*.json
+consumer-leader	Run actions/upload-artifact@v7	
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.8415129Z   if-no-files-found: error
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.8415373Z   compression-level: 6
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.8415620Z   overwrite: false
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.8415839Z   include-hidden-files: false
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.8416076Z   archive: true
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.8416265Z env:
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.8416462Z   WF_FANOUT_CONSUMER_500: 1
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.8416735Z   WF_FANOUT_CONSUMER_REPORT: fanout-consumer-500
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.8417032Z ##[endgroup]
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.9976114Z Multiple search paths detected. Calculating the least common ancestor of all paths
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.9980175Z The least common ancestor is /home/runner/work/js-wf/js-wf. This will be the root directory of the artifact
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.9981040Z With the provided path, there will be 5 files uploaded
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.9985104Z Artifact name is valid!
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:49.9985721Z Root directory input is valid!
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:50.2137266Z Uploading artifact: fanout-consumer-500.zip
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:50.2178246Z Beginning upload of artifact content to blob storage
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:50.3168302Z Uploaded bytes 141133
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:50.3285918Z Finished uploading artifact content to blob storage!
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:50.3287143Z SHA256 digest of uploaded artifact is e2ae234fdde1e24e23f50c972c0c03f65f99fc3c8d9972f51923f74ca12a2516
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:50.3287988Z Finalizing artifact upload
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:50.5387923Z Artifact fanout-consumer-500 successfully finalized. Artifact ID 11215801029
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:50.5389634Z Artifact fanout-consumer-500 has been successfully uploaded! Final size is 141133 bytes. Artifact ID is 11215801029
+consumer-leader	Run actions/upload-artifact@v7	2026-10-02T08:02:50.5393646Z Artifact download URL: https://github.com/AntPAllen/js-wf/actions/runs/36980947655/artifacts/11215801029
+consumer-leader	Post Run actions/setup-go@v5	﻿2026-10-02T08:02:50.5560556Z Post job cleanup.
+consumer-leader	Post Run actions/setup-go@v5	2026-10-02T08:02:50.6799623Z (node:2984) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+consumer-leader	Post Run actions/setup-go@v5	2026-10-02T08:02:50.6801134Z (Use `node --trace-deprecation ...` to show where the warning was created)
+consumer-leader	Post Run actions/setup-go@v5	2026-10-02T08:02:50.6875235Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+consumer-leader	Post Run actions/setup-go@v5	2026-10-02T08:02:50.6934290Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+consumer-leader	Post Run actions/setup-go@v5	2026-10-02T08:02:50.6954239Z /home/runner/go/pkg/mod
+consumer-leader	Post Run actions/setup-go@v5	2026-10-02T08:02:50.6976066Z /home/runner/.cache/go-build
+consumer-leader	Post Run actions/setup-go@v5	2026-10-02T08:02:50.6985021Z Cache hit occurred on the primary key setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb, not saving cache.
+consumer-leader	Post Run actions/checkout@v4	﻿2026-10-02T08:02:50.7189559Z Post job cleanup.
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.8199529Z [command]/usr/bin/git version
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.8240906Z git version 2.55.0
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.8285336Z Temporarily overriding HOME='/home/runner/work/_temp/3c1c9816-f007-4b8b-81f8-86830f5ad585' before making global git config changes
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.8288927Z Adding repository directory to the temporary git global config as a safe directory
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.8292164Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.8335586Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.8376063Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.8721112Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.8762421Z http.https://github.com/.extraheader
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.8781306Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.8835657Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.9210513Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+consumer-leader	Post Run actions/checkout@v4	2026-10-02T08:02:50.9251724Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+consumer-leader	Complete job	﻿2026-10-02T08:02:50.9655171Z Cleaning up orphan processes
+consumer-leader	Complete job	2026-10-02T08:02:51.0054652Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+parent-boundaries	Set up job	﻿2026-10-02T08:02:56.9836783Z Current runner version: '2.337.0'
+parent-boundaries	Set up job	2026-10-02T08:02:56.9859863Z ##[group]Runner Image Provisioner
+parent-boundaries	Set up job	2026-10-02T08:02:56.9860635Z Hosted Compute Agent
+parent-boundaries	Set up job	2026-10-02T08:02:56.9861176Z Version: 20260901.588
+parent-boundaries	Set up job	2026-10-02T08:02:56.9861736Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+parent-boundaries	Set up job	2026-10-02T08:02:56.9862298Z Build Date: 2026-09-01T19:56:44Z
+parent-boundaries	Set up job	2026-10-02T08:02:56.9862899Z Worker ID: {93b0e937-e852-408f-8aeb-dcb3edd227df}
+parent-boundaries	Set up job	2026-10-02T08:02:56.9863495Z Azure Region: westus
+parent-boundaries	Set up job	2026-10-02T08:02:56.9863974Z ##[endgroup]
+parent-boundaries	Set up job	2026-10-02T08:02:56.9865319Z ##[group]Operating System
+parent-boundaries	Set up job	2026-10-02T08:02:56.9865836Z Ubuntu
+parent-boundaries	Set up job	2026-10-02T08:02:56.9866671Z 24.04.5
+parent-boundaries	Set up job	2026-10-02T08:02:56.9867097Z LTS
+parent-boundaries	Set up job	2026-10-02T08:02:56.9867505Z ##[endgroup]
+parent-boundaries	Set up job	2026-10-02T08:02:56.9868058Z ##[group]Runner Image
+parent-boundaries	Set up job	2026-10-02T08:02:56.9868554Z Image: ubuntu-24.04
+parent-boundaries	Set up job	2026-10-02T08:02:56.9869079Z Version: 20260927.320.1
+parent-boundaries	Set up job	2026-10-02T08:02:56.9869938Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+parent-boundaries	Set up job	2026-10-02T08:02:56.9871362Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+parent-boundaries	Set up job	2026-10-02T08:02:56.9872126Z ##[endgroup]
+parent-boundaries	Set up job	2026-10-02T08:02:56.9873144Z ##[group]GITHUB_TOKEN Permissions
+parent-boundaries	Set up job	2026-10-02T08:02:56.9875022Z Contents: read
+parent-boundaries	Set up job	2026-10-02T08:02:56.9875588Z Metadata: read
+parent-boundaries	Set up job	2026-10-02T08:02:56.9876063Z Packages: read
+parent-boundaries	Set up job	2026-10-02T08:02:56.9876734Z ##[endgroup]
+parent-boundaries	Set up job	2026-10-02T08:02:56.9878579Z Secret source: Actions
+parent-boundaries	Set up job	2026-10-02T08:02:56.9879688Z Cache mode: write
+parent-boundaries	Set up job	2026-10-02T08:02:56.9880509Z Prepare workflow directory
+parent-boundaries	Set up job	2026-10-02T08:02:57.0185435Z Prepare all required actions
+parent-boundaries	Set up job	2026-10-02T08:02:57.0227081Z Getting action download info
+parent-boundaries	Set up job	2026-10-02T08:02:57.3670473Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+parent-boundaries	Set up job	2026-10-02T08:02:57.5894724Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+parent-boundaries	Set up job	2026-10-02T08:02:58.2854298Z Download action repository 'actions/upload-artifact@v7' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+parent-boundaries	Set up job	2026-10-02T08:02:58.4697019Z Complete job name: parent-boundaries
+parent-boundaries	Run actions/checkout@v4	﻿2026-10-02T08:02:58.5325350Z ##[group]Run actions/checkout@v4
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5326050Z with:
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5326543Z   repository: AntPAllen/js-wf
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5329682Z   token: ***
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5330027Z   ssh-strict: true
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5330377Z   ssh-user: git
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5330736Z   persist-credentials: true
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5331115Z   clean: true
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5331467Z   sparse-checkout-cone-mode: true
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5331875Z   fetch-depth: 1
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5332214Z   fetch-tags: false
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5332571Z   show-progress: true
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5332931Z   lfs: false
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5333275Z   submodules: false
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5333631Z   set-safe-directory: true
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5334026Z   allow-unsafe-pr-checkout: false
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5334579Z env:
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5334960Z   WF_FANOUT_BOUNDARY_MATRIX: 1
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5335361Z   GOMEMLIMIT: 512MiB
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5335744Z   GOMAXPROCS: 2
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.5336077Z ##[endgroup]
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6159982Z Syncing repository: AntPAllen/js-wf
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6162258Z ##[group]Getting Git version info
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6163078Z Working directory is '/home/runner/work/js-wf/js-wf'
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6164344Z [command]/usr/bin/git version
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6559108Z git version 2.55.0
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6583695Z ##[endgroup]
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6590379Z Temporarily overriding HOME='/home/runner/work/_temp/73e1a79d-b390-44d1-8db9-6f6a835f0051' before making global git config changes
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6592236Z Adding repository directory to the temporary git global config as a safe directory
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6594566Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6707652Z Deleting the contents of '/home/runner/work/js-wf/js-wf'
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6711372Z ##[group]Initializing the repository
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6716705Z [command]/usr/bin/git init /home/runner/work/js-wf/js-wf
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6818331Z hint: Using 'master' as the name for the initial branch. This default branch name
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6820106Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6821658Z hint: to use in all of your new repositories, which will suppress this warning,
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6822582Z hint: call:
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6823058Z hint:
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6823714Z hint: 	git config --global init.defaultBranch <name>
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6824442Z hint:
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6825121Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6826361Z hint: 'development'. The just-created branch can be renamed via this command:
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6827263Z hint:
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6827715Z hint: 	git branch -m <name>
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6828099Z hint:
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6828608Z hint: Disable this message with "git config set advice.defaultBranchName false"
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6829601Z Initialized empty Git repository in /home/runner/work/js-wf/js-wf/.git/
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6831760Z [command]/usr/bin/git remote add origin https://github.com/AntPAllen/js-wf
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6887122Z ##[endgroup]
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6887798Z ##[group]Disabling automatic garbage collection
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6890459Z [command]/usr/bin/git config --local gc.auto 0
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6919786Z ##[endgroup]
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6920394Z ##[group]Setting up auth
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6925939Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.6955103Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.7326914Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.7390223Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.7586903Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.7619658Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.7817673Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.7854025Z ##[endgroup]
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.7861361Z ##[group]Fetching the repository
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:02:58.7862614Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +3206be89a87c78f4d9c4f3de3e101b5cb0bbab07:refs/remotes/origin/main
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:02.4745135Z From https://github.com/AntPAllen/js-wf
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:02.4745975Z  * [new ref]         3206be89a87c78f4d9c4f3de3e101b5cb0bbab07 -> origin/main
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:02.4748163Z ##[endgroup]
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:02.4748710Z ##[group]Determining the checkout info
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:02.4754736Z ##[endgroup]
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:02.4755470Z [command]/usr/bin/git sparse-checkout disable
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:02.4803260Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:02.4831468Z ##[group]Checking out the ref
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:02.4842093Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:03.0251202Z Switched to a new branch 'main'
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:03.0253624Z branch 'main' set up to track 'origin/main'.
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:03.0290943Z ##[endgroup]
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:03.0339659Z [command]/usr/bin/git log -1 --format=%H
+parent-boundaries	Run actions/checkout@v4	2026-10-02T08:03:03.0366429Z 3206be89a87c78f4d9c4f3de3e101b5cb0bbab07
+parent-boundaries	Run actions/setup-go@v5	﻿2026-10-02T08:03:03.0584853Z ##[group]Run actions/setup-go@v5
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.0585136Z with:
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.0585314Z   go-version-file: go.mod
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.0585726Z   check-latest: false
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.0587938Z   token: ***
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.0588117Z   cache: true
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.0588284Z env:
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.0588449Z   WF_FANOUT_BOUNDARY_MATRIX: 1
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.0588652Z   GOMEMLIMIT: 512MiB
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.0588832Z   GOMAXPROCS: 2
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.0588997Z ##[endgroup]
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.1654716Z Setup go version spec 1.27.1
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.1661782Z Attempting to download 1.27.1...
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.1749660Z (node:2075) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.1750402Z (Use `node --trace-deprecation ...` to show where the warning was created)
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.7190669Z matching 1.27.1...
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:03.7209413Z Acquiring 1.27.1 from https://github.com/actions/go-versions/releases/download/1.27.1-33583469715/go-1.27.1-linux-x64.tar.gz
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:04.1708005Z Extracting Go...
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:04.1804026Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/02def616-8f66-4ffe-94a4-a24169754947 -f /home/runner/work/_temp/f6936f4a-db37-462c-b5da-9e667359a68f
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:05.6860914Z Successfully extracted go to /home/runner/work/_temp/02def616-8f66-4ffe-94a4-a24169754947
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:05.6861563Z Adding to the cache ...
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:18.8633607Z Successfully cached go to /opt/hostedtoolcache/go/1.27.1/x64
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:18.8636990Z Added go to the path
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:18.8639137Z Successfully set up Go version 1.27.1
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:18.8850683Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:18.8886705Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:18.8921580Z /home/runner/go/pkg/mod
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:18.8938148Z /home/runner/.cache/go-build
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:19.1698238Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:19.1787901Z (node:2075) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:20.4575255Z Received 4194304 of 209563510 (2.0%), 4.0 MBs/sec
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:21.4571279Z Received 134217728 of 209563510 (64.0%), 64.0 MBs/sec
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:22.1839562Z Received 209563510 of 209563510 (100.0%), 73.3 MBs/sec
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:22.1840039Z Cache Size: ~200 MB (209563510 B)
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:22.1941873Z [command]/usr/bin/tar -xf /home/runner/work/_temp/72cced12-aa6d-43ba-8341-b3c52c6071d9/cache.tzst -P -C /home/runner/work/js-wf/js-wf --use-compress-program unzstd
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.3749431Z Cache restored successfully
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.4549106Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.4571671Z go version go1.27.1 linux/amd64
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.4571881Z 
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.4572302Z ##[group]go env
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6791162Z AR='ar'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6791528Z CC='gcc'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6791820Z CGO_CFLAGS='-O2 -g'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6792130Z CGO_CPPFLAGS=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6792422Z CGO_CXXFLAGS='-O2 -g'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6792715Z CGO_ENABLED='1'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6792986Z CGO_FFLAGS='-O2 -g'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6793171Z CGO_LDFLAGS='-O2 -g'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6793353Z CXX='g++'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6793528Z GCCGO='gccgo'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6793824Z GO111MODULE=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6794076Z GOAMD64='v1'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6794338Z GOARCH='amd64'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6794609Z GOAUTH='netrc'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6794887Z GOBIN='/home/runner/go/bin'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6795241Z GOCACHE='/home/runner/.cache/go-build'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6795598Z GOCACHEPROG=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6795859Z GODEBUG=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6796719Z GOENV='/home/runner/.config/go/env'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6797061Z GOEXE=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6797340Z GOEXPERIMENT=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6797839Z GOFIPS140='off'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6798103Z GOFLAGS=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6798971Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build2714315993=/tmp/go-build -gno-record-gcc-switches'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6799851Z GOHOSTARCH='amd64'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6800131Z GOHOSTOS='linux'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6800406Z GOINSECURE=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6800707Z GOMOD='/home/runner/work/js-wf/js-wf/go.mod'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6801109Z GOMODCACHE='/home/runner/go/pkg/mod'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6801454Z GONOPROXY=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6801719Z GONOSUMDB=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6801959Z GOOS='linux'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6802219Z GOPACKAGESDRIVER=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6802502Z GOPATH='/home/runner/go'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6802788Z GOPRIVATE=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6803110Z GOPROXY='https://proxy.golang.org,direct'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6803522Z GOROOT='/opt/hostedtoolcache/go/1.27.1/x64'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6803883Z GOSUMDB='sum.golang.org'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6804186Z GOTELEMETRY='local'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6804537Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6804935Z GOTMPDIR=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6805229Z GOTOOLCHAIN='auto'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6805641Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.1/x64/pkg/tool/linux_amd64'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6806114Z GOVCS=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6806536Z GOVERSION='go1.27.1'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6806819Z GOWORK=''
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6807092Z PKG_CONFIG='pkg-config'
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6807289Z 
+parent-boundaries	Run actions/setup-go@v5	2026-10-02T08:03:23.6807719Z ##[endgroup]
+parent-boundaries	Verify complete boundary result guard	﻿2026-10-02T08:03:23.6987383Z ##[group]Run python3 -m unittest discover -s scripts -p 'test_fanout_boundary_matrix.py'
+parent-boundaries	Verify complete boundary result guard	2026-10-02T08:03:23.6987958Z ^[[36;1mpython3 -m unittest discover -s scripts -p 'test_fanout_boundary_matrix.py'^[[0m
+parent-boundaries	Verify complete boundary result guard	2026-10-02T08:03:23.8773179Z shell: /usr/bin/bash -e {0}
+parent-boundaries	Verify complete boundary result guard	2026-10-02T08:03:23.8773454Z env:
+parent-boundaries	Verify complete boundary result guard	2026-10-02T08:03:23.8773646Z   WF_FANOUT_BOUNDARY_MATRIX: 1
+parent-boundaries	Verify complete boundary result guard	2026-10-02T08:03:23.8773860Z   GOMEMLIMIT: 512MiB
+parent-boundaries	Verify complete boundary result guard	2026-10-02T08:03:23.8774068Z   GOMAXPROCS: 2
+parent-boundaries	Verify complete boundary result guard	2026-10-02T08:03:23.8774242Z ##[endgroup]
+parent-boundaries	Verify complete boundary result guard	2026-10-02T08:03:24.0034712Z ...
+parent-boundaries	Verify complete boundary result guard	2026-10-02T08:03:24.0035203Z ----------------------------------------------------------------------
+parent-boundaries	Verify complete boundary result guard	2026-10-02T08:03:24.0035578Z Ran 3 tests in 0.001s
+parent-boundaries	Verify complete boundary result guard	2026-10-02T08:03:24.0035703Z 
+parent-boundaries	Verify complete boundary result guard	2026-10-02T08:03:24.0035776Z OK
+parent-boundaries	Kill parents after first, interior and last child creation and result	﻿2026-10-02T08:03:24.0519910Z ##[group]Run set -o pipefail
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:24.0520243Z ^[[36;1mset -o pipefail^[[0m
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:24.0520492Z ^[[36;1mgit rev-parse HEAD > fanout-parent-source.txt^[[0m
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:24.0521200Z ^[[36;1mgo test -p=1 -race -json ./integration -run '^TestFiveHundredChildFanoutParentBoundaryMatrix$' -count=1 -timeout=15m | tee fanout-parent-events.jsonl | python3 -u scripts/render-go-test.py^[[0m
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:24.0522102Z ^[[36;1mpython3 scripts/check-fanout-boundary-matrix.py --events fanout-parent-events.jsonl --output fanout-parent-result.json^[[0m
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:24.0582010Z shell: /usr/bin/bash -e {0}
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:24.0582248Z env:
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:24.0582428Z   WF_FANOUT_BOUNDARY_MATRIX: 1
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:24.0582653Z   GOMEMLIMIT: 512MiB
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:24.0582835Z   GOMAXPROCS: 2
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:24.0583012Z ##[endgroup]
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:24.1755950Z go: downloading google.golang.org/protobuf v1.36.6
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:40.2292430Z === RUN   TestFiveHundredChildFanoutParentBoundaryMatrix
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:40.2293278Z === RUN   TestFiveHundredChildFanoutParentBoundaryMatrix/create/first
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:40.2295330Z     child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_child=0
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:03:44.2066446Z     child_scale_test.go:500: SIGKILLed parent worker at create cut 0; retained entries=3
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:04:15.9369330Z     child_scale_test.go:75: FANOUT_PREFIX_PRESERVED phase=create entries=3 old_epoch=1 final_epoch=5277
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:04:18.0025398Z     child_scale_test.go:75: completed 500 children; 11 shared the parent partition
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:04:18.5400346Z --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix/create/first (38.31s)
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:04:18.5401531Z === RUN   TestFiveHundredChildFanoutParentBoundaryMatrix/create/interior
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:04:18.5402414Z     child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_child=381
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:04:24.5310702Z     child_scale_test.go:500: SIGKILLed parent worker at create cut 381; retained entries=765
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:04:56.7888807Z     child_scale_test.go:75: FANOUT_PREFIX_PRESERVED phase=create entries=765 old_epoch=1 final_epoch=5948
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:04:58.8582590Z     child_scale_test.go:75: completed 500 children; 11 shared the parent partition
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:04:59.3865810Z --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix/create/interior (40.85s)
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:04:59.3866796Z === RUN   TestFiveHundredChildFanoutParentBoundaryMatrix/create/last
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:04:59.3867357Z     child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_child=499
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:05:07.6527254Z     child_scale_test.go:500: SIGKILLed parent worker at create cut 499; retained entries=1001
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:05:35.4063312Z     child_scale_test.go:75: FANOUT_PREFIX_PRESERVED phase=create entries=1001 old_epoch=1 final_epoch=5188
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:05:37.4535739Z     child_scale_test.go:75: completed 500 children; 11 shared the parent partition
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:05:38.2004732Z --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix/create/last (38.81s)
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:05:38.2005531Z === RUN   TestFiveHundredChildFanoutParentBoundaryMatrix/results/first
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:05:38.2006545Z     child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_child=381
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:05:52.6191199Z     child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_result=0
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:05:55.1955004Z     child_scale_test.go:75: SIGKILLed parent worker at results cut 0; retained entries=1500
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:06:13.6581983Z     child_scale_test.go:75: FANOUT_PREFIX_PRESERVED phase=results entries=1500 old_epoch=4466 final_epoch=5510
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:06:19.4695091Z     child_scale_test.go:75: completed 500 children; 11 shared the parent partition
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:06:20.0567249Z --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix/results/first (41.86s)
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:06:20.0568165Z === RUN   TestFiveHundredChildFanoutParentBoundaryMatrix/results/interior
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:06:20.0582434Z     child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_child=381
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:06:33.8920518Z     child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_result=363
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:06:38.5056058Z     child_scale_test.go:75: SIGKILLed parent worker at results cut 363; retained entries=2226
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:06:51.9510174Z     child_scale_test.go:75: FANOUT_PREFIX_PRESERVED phase=results entries=2226 old_epoch=4473 final_epoch=6232
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:06:57.7390057Z     child_scale_test.go:75: completed 500 children; 11 shared the parent partition
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:06:58.4501316Z --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix/results/interior (38.39s)
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:06:58.4501887Z === RUN   TestFiveHundredChildFanoutParentBoundaryMatrix/results/last
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:06:58.4503623Z     child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_child=381
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:07:17.0289330Z     child_scale_test.go:75: FAULT_SEED=1 parent_cut_after_result=499
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:07:24.6933554Z     child_scale_test.go:75: SIGKILLed parent worker at results cut 499; retained entries=2503
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:07:37.3031610Z     child_scale_test.go:75: FANOUT_PREFIX_PRESERVED phase=results entries=2503 old_epoch=6176 final_epoch=6537
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:07:43.0697567Z     child_scale_test.go:75: completed 500 children; 11 shared the parent partition
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:07:43.7613633Z --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix/results/last (45.31s)
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:07:43.7614495Z --- PASS: TestFiveHundredChildFanoutParentBoundaryMatrix (243.53s)
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:07:43.7618550Z PASS
+parent-boundaries	Kill parents after first, interior and last child creation and result	2026-10-02T08:07:44.8333956Z ok  	js-wf/integration	244.614s
+parent-boundaries	Run actions/upload-artifact@v7	﻿2026-10-02T08:07:44.9141157Z ##[group]Run actions/upload-artifact@v7
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9141408Z with:
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9141581Z   name: fanout-parent-boundaries
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9141796Z   path: fanout-parent-*
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9142166Z   if-no-files-found: error
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9142358Z   compression-level: 6
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9142551Z   overwrite: false
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9142727Z   include-hidden-files: false
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9142923Z   archive: true
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9143081Z env:
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9143235Z   WF_FANOUT_BOUNDARY_MATRIX: 1
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9143427Z   GOMEMLIMIT: 512MiB
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9143599Z   GOMAXPROCS: 2
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:44.9143754Z ##[endgroup]
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:45.0343744Z With the provided path, there will be 3 files uploaded
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:45.0349298Z Artifact name is valid!
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:45.0349967Z Root directory input is valid!
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:45.4071236Z Uploading artifact: fanout-parent-boundaries.zip
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:45.4104590Z Beginning upload of artifact content to blob storage
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:45.7213437Z Uploaded bytes 2243
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:45.7962696Z Finished uploading artifact content to blob storage!
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:45.7963261Z SHA256 digest of uploaded artifact is 4f5afb7b4aecbe88ee2f63026ebc57534ccf71884b2c9fcada9cec592e0571e4
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:45.7963910Z Finalizing artifact upload
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:46.2295100Z Artifact fanout-parent-boundaries successfully finalized. Artifact ID 11215876460
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:46.2296003Z Artifact fanout-parent-boundaries has been successfully uploaded! Final size is 2243 bytes. Artifact ID is 11215876460
+parent-boundaries	Run actions/upload-artifact@v7	2026-10-02T08:07:46.2298820Z Artifact download URL: https://github.com/AntPAllen/js-wf/actions/runs/36980947655/artifacts/11215876460
+parent-boundaries	Post Run actions/setup-go@v5	﻿2026-10-02T08:07:46.2456907Z Post job cleanup.
+parent-boundaries	Post Run actions/setup-go@v5	2026-10-02T08:07:46.3498439Z (node:2727) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+parent-boundaries	Post Run actions/setup-go@v5	2026-10-02T08:07:46.3499410Z (Use `node --trace-deprecation ...` to show where the warning was created)
+parent-boundaries	Post Run actions/setup-go@v5	2026-10-02T08:07:46.3560176Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+parent-boundaries	Post Run actions/setup-go@v5	2026-10-02T08:07:46.3600466Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+parent-boundaries	Post Run actions/setup-go@v5	2026-10-02T08:07:46.3632033Z /home/runner/go/pkg/mod
+parent-boundaries	Post Run actions/setup-go@v5	2026-10-02T08:07:46.3650634Z /home/runner/.cache/go-build
+parent-boundaries	Post Run actions/setup-go@v5	2026-10-02T08:07:46.3654854Z Cache hit occurred on the primary key setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb, not saving cache.
+parent-boundaries	Post Run actions/checkout@v4	﻿2026-10-02T08:07:46.3832932Z Post job cleanup.
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.4687589Z [command]/usr/bin/git version
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.4747087Z git version 2.55.0
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.4795189Z Temporarily overriding HOME='/home/runner/work/_temp/d6070123-daaf-483a-94fe-00ba1f848d9b' before making global git config changes
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.4804678Z Adding repository directory to the temporary git global config as a safe directory
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.4815382Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.4863707Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.4907713Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.5191110Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.5231281Z http.https://github.com/.extraheader
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.5320521Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.5338332Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.5553069Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+parent-boundaries	Post Run actions/checkout@v4	2026-10-02T08:07:46.5600162Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+parent-boundaries	Complete job	﻿2026-10-02T08:07:46.5947678Z Cleaning up orphan processes
+parent-boundaries	Complete job	2026-10-02T08:07:46.6192837Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

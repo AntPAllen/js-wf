@@ -6,6 +6,9 @@ on:
     paths:
       - '.github/workflows/invariant-mutations.yml'
       - 'scripts/check-invariant-mutations.py'
+      - 'integration/mixed_determinism_mutation_test.go'
+      - 'worker/*.go'
+      - 'testcluster/*.go'
       - 'journal/journal.go'
       - 'lease/lease.go'
       - 'retention/purge.go'
@@ -38,3 +41,23 @@ jobs:
           name: focused-production-mutations
           path: ${{ runner.temp }}/invariant-mutations
           if-no-files-found: warn
+
+  mixed-determinism:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Detect a removed guard through the mixed worker and real leader kill
+        run: python3 scripts/check-invariant-mutations.py --mixed-determinism --output "$RUNNER_TEMP/mixed-determinism"
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mixed-production-determinism
+          path: ${{ runner.temp }}/mixed-determinism
+          if-no-files-found: error

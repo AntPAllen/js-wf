@@ -51,13 +51,14 @@ MUTATIONS = [
 
 
 def run_fixture(mutation, output, phase, overlay=None):
-    command = ["go", "test", "-json", mutation["package"],
+    command = ["go", "test", "-p=1", "-json", mutation["package"],
                "-run", "^" + mutation["test"] + "$", "-count=1", "-timeout=3m"]
     if overlay:
         command.insert(2, "-overlay=" + str(overlay))
     environment = dict(os.environ, FAULT_SEED="42", SIM_SEEDS="1000",
                        WF_CAS_RACE_ROUNDS="1000",
                        FAULT_TRACE_OUT=str(output / (mutation["name"] + "-" + phase + "-trace.json")))
+    environment.update(mutation.get("environment", {}))
     # A pinned replay override must not replace the selected seeded fixture.
     environment.pop("FAULT_TRACE", None)
     log = output / (mutation["name"] + "-" + phase + ".jsonl")
@@ -91,7 +92,11 @@ def run_fixture(mutation, output, phase, overlay=None):
     detected = (process.returncode != 0 and top_level == ["fail"]
                 and all(marker in failed_output for marker in mutation["markers"])
                 and "panic: test timed out" not in log.read_text())
+    unrelated_control_failed = (process.returncode != 0 and top_level == ["fail"]
+                                and "unrelated runner control" in failed_output
+                                and "panic: test timed out" not in log.read_text())
     return dict(returncode=process.returncode, passed=passed, detected=detected,
+                unrelated_control_failed=unrelated_control_failed,
                 elapsed_seconds=round(time.monotonic() - started, 3), log=str(log))
 
 
@@ -99,13 +104,27 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--mutation", choices=[m["name"] for m in MUTATIONS])
+    parser.add_argument("--mixed-determinism", action="store_true", help="challenge I4 through a live mixed worker/leader-kill workload")
     args = parser.parse_args()
+    if args.mixed_determinism and args.mutation not in (None, "missing_determinism_guard"):
+        parser.error("--mixed-determinism selects only missing_determinism_guard")
     args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=True)
     selected = [m for m in MUTATIONS if not args.mutation or m["name"] == args.mutation]
+    if args.mixed_determinism:
+        mutation = dict(next(m for m in MUTATIONS if m["name"] == "missing_determinism_guard"))
+        mutation.update(package="./integration", test="TestMixedDeterminismMutationAfterJournalLeaderKill",
+                        fixture_file="integration/mixed_determinism_mutation_test.go",
+                        environment={"WF_MIXED_DETERMINISM_MUTATION": "1"},
+                        markers=["MIXED_GUARD_ADMISSION shorts_pending=4 timers_suspended=3 signals_suspended=2 fanout_suspended=1", "MIXED_GUARD_FAULT", "signal=SIGKILL", "MIXED_GUARD_COHORT shorts=4 timers=3 signals=2 fanout=1 children=6 grandchildren=12 terminal=28", "MIXED_MUTATION_ESCAPE invariant=I4 effects=1 result=42 error=<nil> terminal=Completed"])
+        selected = [mutation]
     report = dict(scope="focused production mutations; full mixed-chaos gate remains open",
                   head=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                   cas_rounds=1000, seeds_per_modeled_workload=1000, mutations=[])
+    if args.mixed_determinism:
+        report["scope"] = "one mixed production I4 mutation; the other five mixed categories and full release remain open"
+        report.pop("cas_rounds")
+        report.pop("seeds_per_modeled_workload")
     success = True
     with tempfile.TemporaryDirectory(prefix="js-wf-mutations-") as temporary:
         # A build error and a different test failure must never count as a kill.
@@ -125,13 +144,16 @@ def main():
             overlay.write_text(json.dumps({"Replace": {str(source): str(changed)}}))
             result = run_fixture(control, args.output, name, overlay)
             report["negative_controls"].append(dict(name=name, **result))
-            if result["returncode"] == 0 or result["detected"]:
+            if result["returncode"] == 0 or result["detected"] or (name == "unrelated_failure" and not result["unrelated_control_failed"]):
                 raise RuntimeError("runner counted or missed its negative control: " + name)
         for mutation in selected:
             source = ROOT / mutation["file"]
             original = source.read_text()
             entry = dict(name=mutation["name"], file=mutation["file"], test=mutation["test"],
                          source_sha256=hashlib.sha256(original.encode()).hexdigest())
+            if mutation.get("fixture_file"):
+                entry["fixture_file"] = mutation["fixture_file"]
+                entry["fixture_source_sha256"] = hashlib.sha256((ROOT / mutation["fixture_file"]).read_bytes()).hexdigest()
             report["mutations"].append(entry)
             try:
                 if original.count(mutation["before"]) != 1:

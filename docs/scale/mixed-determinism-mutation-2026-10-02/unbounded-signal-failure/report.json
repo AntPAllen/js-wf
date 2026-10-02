@@ -1,0 +1,43 @@
+{
+  "scope": "one mixed production I4 mutation; the other five mixed categories and full release remain open",
+  "head": "081f5c4966b0797dc7215a8ef9205b822d00856b",
+  "mutations": [
+    {
+      "name": "missing_determinism_guard",
+      "file": "wf/context.go",
+      "test": "TestMixedDeterminismMutationAfterJournalLeaderKill",
+      "source_sha256": "1deebe3d063a073c898c202c1a4eefe2f6ebe28160dc3892dfdead3589dc437b",
+      "fixture_file": "integration/mixed_determinism_mutation_test.go",
+      "fixture_source_sha256": "eb920d767fc603b43982c9174cef6e29008213ea7ddef31e3bb7855f1beb84d0",
+      "baseline": {
+        "returncode": 1,
+        "passed": false,
+        "detected": false,
+        "unrelated_control_failed": false,
+        "elapsed_seconds": 159.871,
+        "log": "/tmp/js-wf-mixed-determinism-mutation-final-20261002/missing_determinism_guard-baseline.jsonl"
+      },
+      "error": "unmodified fixture did not pass; detection unproven"
+    }
+  ],
+  "negative_controls": [
+    {
+      "name": "compile_error",
+      "returncode": 1,
+      "passed": false,
+      "detected": false,
+      "unrelated_control_failed": false,
+      "elapsed_seconds": 0.315,
+      "log": "/tmp/js-wf-mixed-determinism-mutation-final-20261002/independent_worker_leases-compile_error.jsonl"
+    },
+    {
+      "name": "unrelated_failure",
+      "returncode": 1,
+      "passed": false,
+      "detected": false,
+      "unrelated_control_failed": true,
+      "elapsed_seconds": 9.262,
+      "log": "/tmp/js-wf-mixed-determinism-mutation-final-20261002/independent_worker_leases-unrelated_failure.jsonl"
+    }
+  ]
+}

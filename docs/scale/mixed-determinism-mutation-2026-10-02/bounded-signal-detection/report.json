@@ -1,0 +1,50 @@
+{
+  "scope": "one mixed production I4 mutation; the other five mixed categories and full release remain open",
+  "head": "081f5c4966b0797dc7215a8ef9205b822d00856b",
+  "mutations": [
+    {
+      "name": "missing_determinism_guard",
+      "file": "wf/context.go",
+      "test": "TestMixedDeterminismMutationAfterJournalLeaderKill",
+      "source_sha256": "1deebe3d063a073c898c202c1a4eefe2f6ebe28160dc3892dfdead3589dc437b",
+      "fixture_file": "integration/mixed_determinism_mutation_test.go",
+      "fixture_source_sha256": "4caad21ae2d550d9bcd4e34f0b1547e8437af101c4de23ab3ad7012d5e91ee9c",
+      "baseline": {
+        "returncode": 0,
+        "passed": true,
+        "detected": false,
+        "unrelated_control_failed": false,
+        "elapsed_seconds": 25.204,
+        "log": "/tmp/js-wf-mixed-determinism-mutation-bounded-20261002/missing_determinism_guard-baseline.jsonl"
+      },
+      "mutated": {
+        "returncode": 1,
+        "passed": false,
+        "detected": true,
+        "unrelated_control_failed": false,
+        "elapsed_seconds": 32.915,
+        "log": "/tmp/js-wf-mixed-determinism-mutation-bounded-20261002/missing_determinism_guard-mutated.jsonl"
+      }
+    }
+  ],
+  "negative_controls": [
+    {
+      "name": "compile_error",
+      "returncode": 1,
+      "passed": false,
+      "detected": false,
+      "unrelated_control_failed": false,
+      "elapsed_seconds": 0.315,
+      "log": "/tmp/js-wf-mixed-determinism-mutation-bounded-20261002/independent_worker_leases-compile_error.jsonl"
+    },
+    {
+      "name": "unrelated_failure",
+      "returncode": 1,
+      "passed": false,
+      "detected": false,
+      "unrelated_control_failed": true,
+      "elapsed_seconds": 10.268,
+      "log": "/tmp/js-wf-mixed-determinism-mutation-bounded-20261002/independent_worker_leases-unrelated_failure.jsonl"
+    }
+  ]
+}

@@ -6413,3 +6413,61 @@ Launch metadata is retained; it is not accepted CI evidence. Both100k simulator
 handles now report in progress; ahead20 has three seed jobs passed and one live,
 behind20 has three live seed jobs. Neither campaign is accepted until complete.
 The million-timer user unit is active at PID18146 with633,573 receipts observed.
+
+
+## Live mixed production I4 mutation and hosted fan-out acceptance
+
+`TestMixedDeterminismMutationAfterJournalLeaderKill` now runs the production
+worker and all four workload classes on one R3/file process cluster. Four unique
+short effects are admitted; three eight-timer, two sixteen-signal and one
+six-child/twelve-grandchild fan-out parents must be durably suspended before the
+journal leader is SIGKILLed. Old grandchild effects stay pending until replacement;
+timers use30-second positive waits so they remain in flight during setup.
+The replacement renames one recorded short step, preserves the two-entry prefix
+and finishes under a higher epoch. All28 invocations reach terminal state and
+pass raw retained-state integrity. The intact guard rejects the step and the
+changed effect runs zero times.
+
+Final-source `--mixed-determinism` runner baseline passes; compiled removal of
+the actual wf.Context comparison is caught with effects1/result42/Completed,
+after actual admission, verified journal-leader SIGKILL and all28 terminals.
+Compiler failure and a named unrelated-test failure are rejected as detections;
+the latter now also requires actual execution of that control. The final-source
+race proof passes36.39s (37.412s package). The runner hashes the fixture and the
+mutated production source; retained evidence is under
+`scale/mixed-determinism-mutation-2026-10-02/final-unique-admission/` and
+`final-race.log`. Historical bootstrap variants and failures are retained
+separately and do not count as the final all-four-in-flight proof.
+
+One bootstrap failed worker metadata initialization immediately after restart;
+a bounded30s readiness loop resolves that fixture gap. Another consumed its
+150s caller deadline in a signal call after restart; its server-side cause is
+unconfirmed. Signal attempts now have3s budgets and uncertain results retry
+with the same idempotency key inside the unchanged overall deadline. The intact
+and mutated final fixtures both complete. This does not claim a NATS root cause
+or add a production client timeout. The new CI job runs the real mixed I4
+challenge. Five other mixed mutation categories and all full-release gates remain
+open; the default focused six-category command remains available.
+
+[Hosted fan-out run36980947655](https://github.com/AntPAllen/js-wf/actions/runs/36980947655)
+at `3206be89a87c78f4d9c4f3de3e101b5cb0bbab07` passed all three jobs: full-server
+restart18.50s, active-backlog consumer-leader kill30.42s and all six parent
+creation/result boundaries243.53s. Actual RUN/PASS and SIGKILL records were
+inspected. Current parent-boundary artifact verification produces a byte-identical
+report to the upload. Original downloads were losslessly archived and each member
+compared to its downloaded bytes; full log, terminal metadata and independent
+report are retained under `scale/fanout-parent-boundaries-2026-10-02/ci-pass/`.
+This proves the recorded three rows, not every500-child fault combination.
+
+Ahead20 run36979614670 finished with19 passing seeds and one failed seed5.
+Its11th selected cut has1.88s lead after admission but KillNode returns about
+2.44s after the refreshed tail, past the earliest duration boundary. KillNode
+waits for Docker's automatic container-name cleanup after the SIGKILL command;
+there is no separate process-exit observation in these artifacts. Thus neither
+an early physical source exit nor cleanup as the cause is proved. Original seed5
+artifact/log and a timing review are retained under
+`scale/canonical-r5-native-2026-10-02/ahead20-seed5-admission-failure/`.
+The strict source-removal-before-duration gate remains unchanged; the full
+campaign is failed and no unchanged replacement campaign was launched.
+Behind20 finished with all20 seed jobs passing; independent original-artifact
+campaign verification is underway before acceptance.
