@@ -130,3 +130,70 @@ func TestMatrixClockTimerRefreshRejectsAdvancedOrLateTail(t *testing.T) {
 		})
 	}
 }
+
+func TestMatrixCanonicalTimerAdmissionRequiresShiftedAcknowledgedHint(t *testing.T) {
+	at := time.Date(2026, 10, 2, 3, 0, 0, 0, time.UTC)
+	for _, offset := range []time.Duration{-time.Minute, time.Minute} {
+		for _, mode := range []string{"valid", "missing_hint", "wrong_domain", "wrong_bounds", "wrong_deadline", "unshifted_hint", "wrong_translation", "duplicate_ack", "unknown_ack", "ambiguous_hint", "ambiguous_origin", "late_hint", "wrong_owner"} {
+			t.Run(offset.String()+"/"+mode, func(t *testing.T) {
+				lower, upper := at.Add(-10*time.Millisecond), at.Add(20*time.Millisecond)
+				fire := upper.Add(2 * time.Second)
+				payload, _ := json.Marshal(map[string]any{"kind": "timer", "name": "wait", "duration_nanos": int64(2 * time.Second), "fire_at": fire, "clock_domain": "utc-quorum-v1"})
+				receipts := []matrixControllerJournalReceipt{
+					{Sequence: 11, Subject: "wf.jrn.matrixtimer.inv", Entry: journal.Entry{Index: 16, Kind: journal.StepRequested, WorkerID: "worker", Payload: payload}, ObservedAt: at.Add(40 * time.Millisecond)},
+					{Sequence: 12, Subject: "wf.jrn.matrixtimer.inv", Entry: journal.Entry{Index: 17, Kind: journal.Suspended, WorkerID: "worker", Payload: json.RawMessage(`{"waiting_on":"timer:wait"}`)}, ObservedAt: at.Add(50 * time.Millisecond)},
+				}
+				origin := worker.OperationEvent{Type: "matrixtimer", ID: "inv", Worker: "worker", JournalIndex: 16, Operation: "timer_domain_clock", At: at.Add(time.Millisecond), Duration: time.Millisecond, ClockDomain: "utc-quorum-v1", ClockLower: &lower, ClockUpper: &upper}
+				physical := at.Add(offset)
+				schedule := physical.Add(fire.Sub(lower))
+				published := true
+				hint := worker.OperationEvent{Type: "matrixtimer", ID: "inv", Worker: "worker", JournalIndex: 16, JournalKind: journal.StepRequested, Operation: "timer_native_hint", At: at.Add(30 * time.Millisecond), Duration: 20 * time.Millisecond, ClockDomain: "utc-quorum-v1", ServerTime: &physical, ClockLower: &lower, ClockUpper: &upper, TimerDeadline: &fire, TimerScheduleAt: &schedule, TimerPublished: &published}
+				switch mode {
+				case "wrong_domain":
+					origin.ClockDomain = "unknown"
+				case "wrong_bounds":
+					bad := upper.Add(time.Minute)
+					origin.ClockUpper = &bad
+				case "wrong_deadline":
+					bad := fire.Add(time.Second)
+					hint.TimerDeadline = &bad
+				case "unshifted_hint":
+					physical = at
+					schedule = physical.Add(fire.Sub(lower))
+				case "wrong_translation":
+					schedule = schedule.Add(time.Second)
+				case "duplicate_ack":
+					published = false
+				case "unknown_ack":
+					hint.Error = "outcome unknown"
+				case "late_hint":
+					hint.At = at.Add(time.Second)
+				case "wrong_owner":
+					hint.Worker = "other"
+				}
+				ops := []worker.OperationEvent{origin, hint}
+				if mode == "missing_hint" {
+					ops = ops[:1]
+				}
+				if mode == "ambiguous_hint" {
+					ops = append(ops, hint)
+				}
+				if mode == "ambiguous_origin" {
+					ops = append(ops, origin)
+				}
+				selected, err := selectMatrixPendingClockTimer(receipts, ops, at.Add(60*time.Millisecond), offset, 750*time.Millisecond)
+				if mode == "valid" {
+					if err != nil || selected == nil || selected.NativeHint == nil || !selected.EarliestDue.Equal(at.Add(2*time.Second)) {
+						t.Fatalf("selected=%+v err=%v", selected, err)
+					}
+				} else if mode == "ambiguous_hint" || mode == "ambiguous_origin" {
+					if err == nil {
+						t.Fatal("ambiguous proof accepted")
+					}
+				} else if err != nil || selected != nil {
+					t.Fatalf("invalid proof accepted: %+v %v", selected, err)
+				}
+			})
+		}
+	}
+}

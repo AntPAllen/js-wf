@@ -28,10 +28,13 @@ type OperationEvent struct {
 	LeaseGateWait        time.Duration
 	LeaseUpdateDuration  time.Duration
 	LeaseUpdateAttempted bool
-	// ServerTime identifies the successful SDK clock lookup that created a timer.
-	ServerTime             *time.Time `json:",omitempty"`
-	ClockDomain            string     `json:",omitempty"`
-	ClockLower, ClockUpper *time.Time `json:",omitempty"`
+	// ServerTime is the physical clock lookup for legacy creation or native
+	// hint translation, identified by Operation.
+	ServerTime                     *time.Time `json:",omitempty"`
+	ClockDomain                    string     `json:",omitempty"`
+	ClockLower, ClockUpper         *time.Time `json:",omitempty"`
+	TimerDeadline, TimerScheduleAt *time.Time `json:",omitempty"`
+	TimerPublished                 *bool      `json:",omitempty"`
 }
 
 // WithOperationObserver enables optional per-call timings. The callback may
@@ -155,4 +158,30 @@ func (o *deliveryOperations) renew(ctx context.Context, l *lease.Lease, minIdle 
 	}
 	updated, err := l.RenewIfIdle(ctx, minIdle)
 	return updated, lease.RenewalTiming{}, err
+}
+
+// finishNativeHint records the exact translation submitted to the native timer
+// port and its acknowledgment classification. A duplicate did not store a new
+// hint; a failed publication is not proof that the translated hint committed.
+func (o *deliveryOperations) finishNativeHint(start time.Time, index uint64, domain string, physical, lower, upper time.Time, deadline TimerDeadline, published bool, err error) {
+	if o == nil {
+		return
+	}
+	event := o.base
+	event.At = o.now()
+	event.Duration = event.At.Sub(start)
+	event.Operation = "timer_native_hint"
+	event.JournalIndex = index
+	event.JournalKind = journal.StepRequested
+	event.ClockDomain = domain
+	event.ServerTime = &physical
+	event.ClockLower = &lower
+	event.ClockUpper = &upper
+	event.TimerDeadline = &deadline.FireAt
+	event.TimerScheduleAt = &deadline.ScheduleAt
+	event.TimerPublished = &published
+	if err != nil {
+		event.Error = err.Error()
+	}
+	o.emit(event)
 }

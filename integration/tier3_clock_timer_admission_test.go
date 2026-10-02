@@ -26,6 +26,7 @@ type matrixClockTimerAdmission struct {
 	Observed     time.Time                      `json:"observed"`
 	EarliestDue  time.Time                      `json:"earliest_due"`
 	SourceOffset time.Duration                  `json:"source_offset_ns"`
+	NativeHint   *worker.OperationEvent         `json:"native_hint,omitempty"`
 }
 
 type matrixClockTimerCut struct {
@@ -104,41 +105,48 @@ func selectMatrixPendingClockTimer(receipts []matrixControllerJournalReceipt, op
 			continue
 		}
 		var request struct {
-			Kind     string    `json:"kind"`
-			Name     string    `json:"name"`
-			Duration int64     `json:"duration_nanos"`
-			FireAt   time.Time `json:"fire_at"`
+			Kind        string    `json:"kind"`
+			Name        string    `json:"name"`
+			Duration    int64     `json:"duration_nanos"`
+			FireAt      time.Time `json:"fire_at"`
+			ClockDomain string    `json:"clock_domain,omitempty"`
 		}
 		if json.Unmarshal(requested.Entry.Payload, &request) != nil || request.Kind != "timer" || request.Duration <= 0 || request.FireAt.IsZero() || wait.WaitingOn != "timer:"+request.Name {
 			continue
 		}
 		id := strings.TrimPrefix(subject, "wf.jrn.matrixtimer.")
-		var origins []worker.OperationEvent
-		for _, op := range operations {
-			if op.Type == "matrixtimer" && op.ID == id && op.Worker == requested.Entry.WorkerID && op.JournalIndex == requested.Entry.Index && op.JournalKind == journal.StepRequested && op.Operation == "timer_clock" && op.Error == "" && op.ServerTime != nil && op.ServerTime.Add(time.Duration(request.Duration)).Equal(request.FireAt) {
-				origins = append(origins, op)
-			}
+		found, err := matrixTimerOrigin(operations, "matrixtimer", id, requested.Entry.WorkerID, requested.Entry.Index, time.Duration(request.Duration), request.FireAt, request.ClockDomain)
+		if err != nil {
+			return nil, err
 		}
-		if len(origins) > 1 {
-			return nil, fmt.Errorf("ambiguous timer origin for %s index%d", id, requested.Entry.Index)
-		}
-		if len(origins) != 1 {
+		if found == nil {
 			continue
 		}
-		origin := origins[0]
+		origin := *found
 		before := origin.At.Add(-origin.Duration)
 		if origin.At.IsZero() || origin.Duration < 0 || origin.At.After(requested.ObservedAt) {
 			continue
 		}
-		// Same two-second observation tolerance as the actual server clock profile.
-		if origin.ServerTime.Before(before.Add(offset).Add(-2*time.Second)) || origin.ServerTime.After(origin.At.Add(offset).Add(2*time.Second)) {
-			continue
+		var nativeHint *worker.OperationEvent
+		if request.ClockDomain == "" {
+			// Legacy origins themselves used the shifted scheduling clock.
+			if origin.JournalKind != journal.StepRequested || origin.ServerTime.Before(before.Add(offset).Add(-2*time.Second)) || origin.ServerTime.After(origin.At.Add(offset).Add(2*time.Second)) {
+				continue
+			}
+		} else {
+			nativeHint, err = matrixShiftedNativeHint(operations, id, requested.Entry.WorkerID, requested.Entry.Index, request.FireAt, request.ClockDomain, offset, tail.ObservedAt)
+			if err != nil {
+				return nil, err
+			}
+			if nativeHint == nil {
+				continue
+			}
 		}
 		due := before.Add(time.Duration(request.Duration))
 		if !now.Add(lead).Before(due) {
 			continue
 		}
-		return &matrixClockTimerAdmission{id, *requested, tail, origin, now, due, offset}, nil
+		return &matrixClockTimerAdmission{ID: id, Request: *requested, Suspended: tail, Origin: origin, Observed: now, EarliestDue: due, SourceOffset: offset, NativeHint: nativeHint}, nil
 	}
 	return nil, nil
 }

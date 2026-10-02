@@ -29,14 +29,41 @@ def check(root, report, row, timestamp_ns):
         if tail['Subject'] != subject or tail['Sequence'] != suspended['sequence'] or json.loads(base64.b64decode(tail['Data'], validate=True)) != suspended['entry']:
             raise ValueError('fresh retained tail differs from selected suspended receipt')
         origin = admission['origin']; end = timestamp_ns(origin['At']); start = end-origin['Duration']
-        if origin not in operations or origin['Error'] or origin['Operation'] != 'timer_clock' or origin['Type'] != 'matrixtimer' or origin['ID'] != admission['id'] or origin['Worker'] != request['entry']['worker_id'] or origin['JournalIndex'] != request['entry']['index'] or origin['JournalKind'] != 'StepRequested' or origin['Duration'] < 0:
+        domain = payload.get('clock_domain', '')
+        if origin not in operations or origin['Error'] or origin['Type'] != 'matrixtimer' or origin['ID'] != admission['id'] or origin['Worker'] != request['entry']['worker_id'] or origin['JournalIndex'] != request['entry']['index'] or origin['Duration'] < 0:
             raise ValueError('unproven timer clock origin')
-        server = timestamp_ns(origin['ServerTime'])
-        if admission['source_offset_ns'] != offset or not start+offset-2_000_000_000 <= server <= end+offset+2_000_000_000 or start-2_000_000_000 <= server <= end+2_000_000_000:
-            raise ValueError('selected timer never used the shifted source')
+        if admission['source_offset_ns'] != offset:
+            raise ValueError('wrong selected source offset')
         earliest_due = start+duration
-        if timestamp_ns(payload['fire_at']) != server+duration or timestamp_ns(admission['earliest_due']) != earliest_due:
-            raise ValueError('selected deadline differs from its actual clock origin')
+        if domain:
+            if domain != 'utc-quorum-v1' or origin['Operation'] != 'timer_domain_clock' or origin.get('ClockDomain') != domain:
+                raise ValueError('unknown canonical timer domain')
+            lower, upper = timestamp_ns(origin['ClockLower']), timestamp_ns(origin['ClockUpper'])
+            if lower > upper or lower > end or upper < start or timestamp_ns(payload['fire_at']) != upper+duration:
+                raise ValueError('canonical deadline differs from its creation bounds')
+            hint = admission['native_hint']
+            if hint not in operations or hint['Operation'] != 'timer_native_hint' or hint.get('Error') or hint.get('TimerPublished') is not True or hint['Type'] != 'matrixtimer' or hint['ID'] != admission['id'] or hint['Worker'] != request['entry']['worker_id'] or hint['JournalIndex'] != request['entry']['index'] or hint['JournalKind'] != 'StepRequested' or hint['ClockDomain'] != domain or hint['Duration'] < 0:
+                raise ValueError('unproven acknowledged native hint')
+            hint_end = timestamp_ns(hint['At']); hint_start = hint_end-hint['Duration']
+            physical = timestamp_ns(hint['ServerTime'])
+            hint_lower, hint_upper = timestamp_ns(hint['ClockLower']), timestamp_ns(hint['ClockUpper'])
+            if hint_end > timestamp_ns(suspended['observed_at']) or hint_lower > hint_upper or hint_lower > hint_end or hint_upper < hint_start or not hint_start+offset-2_000_000_000 <= physical <= hint_end+offset+2_000_000_000:
+                raise ValueError('native hint did not use the shifted source')
+            if timestamp_ns(hint['TimerDeadline']) != timestamp_ns(payload['fire_at']) or timestamp_ns(hint['TimerScheduleAt']) != physical+max(0,timestamp_ns(payload['fire_at'])-hint_lower):
+                raise ValueError('native schedule translation changed')
+            acknowledged = [op for op in operations if op.get('Operation') == 'timer_native_hint' and op.get('Type') == 'matrixtimer' and op.get('ID') == admission['id'] and op.get('Worker') == hint['Worker'] and op.get('JournalIndex') == hint['JournalIndex'] and op.get('TimerPublished') is True and not op.get('Error') and op.get('ClockDomain') == domain and op.get('TimerDeadline') == hint['TimerDeadline']]
+            if len(acknowledged) != 1:
+                raise ValueError('ambiguous acknowledged native hint')
+        else:
+            if origin['Operation'] != 'timer_clock' or origin['JournalKind'] != 'StepRequested':
+                raise ValueError('unproven legacy timer clock origin')
+            server = timestamp_ns(origin['ServerTime'])
+            if not start+offset-2_000_000_000 <= server <= end+offset+2_000_000_000 or start-2_000_000_000 <= server <= end+2_000_000_000:
+                raise ValueError('selected timer never used the shifted source')
+            if timestamp_ns(payload['fire_at']) != server+duration:
+                raise ValueError('selected deadline differs from its actual clock origin')
+        if timestamp_ns(admission['earliest_due']) != earliest_due:
+            raise ValueError('selected duration boundary changed')
         observed = timestamp_ns(admission['observed']); refreshed = timestamp_ns(cut['refreshed']); removed = timestamp_ns(cut['removed'])
         actual_ops = json.loads((root/f'fault-{index}-journal-operations.json').read_text())
         if removed != timestamp_ns(actual_ops[0]['at']) or not timestamp_ns(request['observed_at']) <= observed or not timestamp_ns(suspended['observed_at']) <= observed or not end <= observed <= refreshed <= timestamp_ns(fault['killed']) <= removed < earliest_due:

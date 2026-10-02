@@ -638,14 +638,18 @@ def check_server_clock_role_artifacts(root, report, selected_row):
             if not lo <= at <= hi:raise ValueError('clock-role change does not belong to its actual kill boundary')
     if seen != expected:raise ValueError('incomplete timer/journal clock-role transitions')
     offset = 60_000_000_000 if selected_row == 'server_clock_ahead' else -60_000_000_000
-    shifted = 0
+    shifted = hints = 0
     for event in json.loads((root/'controller-operations.json').read_text()):
-        if event['Operation'] != 'timer_clock' or event.get('Error') or not event.get('ServerTime'):continue
+        if event['Operation'] not in ('timer_clock','timer_native_hint') or event.get('Error') or not event.get('ServerTime'):continue
+        native = event['Operation'] == 'timer_native_hint'
+        if native and (event.get('ClockDomain') != 'utc-quorum-v1' or event.get('TimerPublished') is not True):continue
         end = timestamp_ns(event['At']);start = end-event['Duration'];server = timestamp_ns(event['ServerTime'])
-        if start+offset-2_000_000_000 <= server <= end+offset+2_000_000_000 and not start-2_000_000_000 <= server <= end+2_000_000_000 and end <= timestamp_ns(faults[0]['killed']):shifted += 1
-    if not shifted:raise ValueError('timer clock lookups never used the admitted skewed source')
+        if start+offset-2_000_000_000 <= server <= end+offset+2_000_000_000 and not start-2_000_000_000 <= server <= end+2_000_000_000 and end <= timestamp_ns(faults[0]['killed']):
+            if native:hints += 1
+            else:shifted += 1
+    if not shifted and not hints:raise ValueError('timer clock lookups never used the admitted skewed source')
     return dict(role_observations=len(seen), confirmed_skewed_owner_kills=len(faults),
-                shifted_timer_clock_lookups=shifted, admits_all_in_flight_timer_cut_combinations=False)
+                shifted_timer_clock_lookups=shifted, shifted_native_hint_lookups=hints, admits_all_in_flight_timer_cut_combinations=False)
 
 
 if __name__ == '__main__':

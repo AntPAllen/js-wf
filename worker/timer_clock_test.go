@@ -46,7 +46,9 @@ func TestWorkerDomainTimerTranslatesNativeHintAndPreservesDeadline(t *testing.T)
 				t.Fatal(err)
 			}
 			due := base.Add(time.Second)
-			if err := w.scheduleDomainTimer(context.Background(), "test", "one", 1, 2, due, "utc-quorum-v1"); err != nil {
+			var hintEvents []OperationEvent
+			ops := &deliveryOperations{base: OperationEvent{Worker: "worker", Type: "test", ID: "one"}, now: time.Now, emit: func(e OperationEvent) { hintEvents = append(hintEvents, e) }}
+			if err := w.scheduleDomainTimerObserved(context.Background(), "test", "one", 1, 2, due, "utc-quorum-v1", 2, ops); err != nil {
 				t.Fatal(err)
 			}
 			if p.id != "timer:test.one:1:2" {
@@ -69,8 +71,29 @@ func TestWorkerDomainTimerTranslatesNativeHintAndPreservesDeadline(t *testing.T)
 				t.Fatalf("scheduled=%d", got)
 			}
 			p.duplicate = true
-			if err := w.scheduleDomainTimer(context.Background(), "test", "one", 1, 2, due, "utc-quorum-v1"); err != nil || w.metrics.timersScheduled.Load() != 1 {
+			if err := w.scheduleDomainTimerObserved(context.Background(), "test", "one", 1, 2, due, "utc-quorum-v1", 2, ops); err != nil || w.metrics.timersScheduled.Load() != 1 {
 				t.Fatal("duplicate counted as a new schedule")
+			}
+			if native {
+				if len(hintEvents) != 2 {
+					t.Fatalf("native hint records=%d", len(hintEvents))
+				}
+				for i, e := range hintEvents {
+					if e.Operation != "timer_native_hint" || e.JournalIndex != 2 || e.ClockDomain != "utc-quorum-v1" || e.ServerTime == nil || !e.ServerTime.Equal(base.Add(offset)) || e.ClockLower == nil || !e.ClockLower.Equal(base) || e.TimerDeadline == nil || !e.TimerDeadline.Equal(due) || e.TimerScheduleAt == nil || !e.TimerScheduleAt.Equal(due.Add(offset)) || e.TimerPublished == nil || *e.TimerPublished != (i == 0) || e.Error != "" {
+						t.Fatalf("hint evidence=%+v", e)
+					}
+				}
+				p.err = jetstream.ErrNoStreamResponse
+				p.duplicate = false
+				if err := w.scheduleDomainTimerObserved(context.Background(), "test", "one", 1, 2, due, "utc-quorum-v1", 2, ops); err == nil {
+					t.Fatal("missing publication error")
+				}
+				e := hintEvents[len(hintEvents)-1]
+				if e.Error == "" || e.TimerPublished == nil || *e.TimerPublished {
+					t.Fatalf("uncertain hint claimed success: %+v", e)
+				}
+			} else if len(hintEvents) != 0 {
+				t.Fatal("fallback emitted native hint")
 			}
 		}
 	}

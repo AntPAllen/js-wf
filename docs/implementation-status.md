@@ -5809,3 +5809,23 @@ The corrected membership sustained campaign is queued as
 sourcec7f38e2. [Launch API evidence](scale/membership-session-recovery-2026-10-02/native-ten-minute-launch.json)
 is retained; queued state supplies no acceptance result. The million-timer
 service remains active, with432,371 receipts at this observation.
+
+## Canonical clock admission and native hint provenance (2026-10-02)
+
+Native domain scheduling now optionally records exact physical/canonical hint
+translation, fresh/duplicate/uncertain publication classification and durable
+request indices, preserving transport identities and checkpoint offsets.
+Admission distinguishes canonical creation bounds from shifted native scheduling
+proof. It retains removal-before-request-start-plus-duration, refreshed suspended
+tail and final-prefix corroboration. Controller audit supports canonical domains
+without relaxing early-completion or terminal/progress gates. Python cut/role
+reviewers support the new proofs and retain legacy behavior.
+
+[Source, logs and actual controller artifacts](scale/canonical-timer-admission-2026-10-02/README.md)
+retain full worker race31.431s, combined admission/controller package19.765s,
+final canonical R3 audit7.54s / package8.570s with all eight hints matched to
+durable requests, and39 Python artifact test methods. Six actual JSON artifacts
+are compressed, hashed and verified. The actual canonical provider is ideal UTC;
+independent sampling has separate evidence. No canonical SIGKILL cut is claimed.
+R5 writer/provider/observer wiring, admitted ahead/behind recovery and full
+release scope remain open. The membership campaign36958387092 is in progress.

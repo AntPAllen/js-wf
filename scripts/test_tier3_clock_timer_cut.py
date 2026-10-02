@@ -54,3 +54,28 @@ class ClockTimerCutChecks(unittest.TestCase):
                     else:
                         with self.assertRaises((ValueError,KeyError,FileNotFoundError)):
                             checker.check(root,dict(confirmed_faults=1),'server_clock_'+direction,row.timestamp_ns)
+
+    def test_canonical_domain_requires_acknowledged_shifted_translation(self):
+        for direction in ('ahead','behind'):
+            for mode in ('valid','missing_hint','wrong_domain','wrong_bounds','unshifted','wrong_translation','duplicate_ack','unknown_ack','ambiguous_hint','late_hint'):
+                with self.subTest(direction=direction,mode=mode), tempfile.TemporaryDirectory() as directory:
+                    root=Path(directory);files=self.fixture(root,direction)
+                    admission=files['fault-1-clock-timer-cut.json']['admission']
+                    origin=admission['origin'];server=origin.pop('ServerTime')
+                    origin.update(Operation='timer_domain_clock',ClockDomain='utc-quorum-v1',ClockLower='2026-10-01T23:18:57Z',ClockUpper='2026-10-01T23:18:57Z')
+                    payload=admission['request']['entry']['payload'];payload.update(clock_domain='utc-quorum-v1',fire_at='2026-10-01T23:18:57.250Z')
+                    hint=copy.deepcopy(origin);hint.update(Operation='timer_native_hint',JournalKind='StepRequested',ServerTime=server,TimerPublished=True,TimerDeadline=payload['fire_at'],TimerScheduleAt=('2026-10-01T23:19:57.250Z' if direction=='ahead' else '2026-10-01T23:17:57.250Z'))
+                    admission['native_hint']=hint;files['controller-operations.json'].append(hint)
+                    if mode=='missing_hint':admission.pop('native_hint')
+                    elif mode=='wrong_domain':origin['ClockDomain']='unknown'
+                    elif mode=='wrong_bounds':origin['ClockUpper']='2026-10-01T23:19:57Z'
+                    elif mode=='unshifted':hint['ServerTime']='2026-10-01T23:18:57Z'
+                    elif mode=='wrong_translation':hint['TimerScheduleAt']='2026-10-01T23:18:57.251Z'
+                    elif mode=='duplicate_ack':hint['TimerPublished']=False
+                    elif mode=='unknown_ack':hint['Error']='outcome unknown'
+                    elif mode=='ambiguous_hint':files['controller-operations.json'].append(copy.deepcopy(hint))
+                    elif mode=='late_hint':hint['At']='2026-10-01T23:18:58Z'
+                    for name,data in files.items():(root/name).write_text(json.dumps(data))
+                    if mode=='valid':self.assertEqual(checker.check(root,dict(confirmed_faults=1),'server_clock_'+direction,row.timestamp_ns)['admitted_pending_sleep_cuts'],1)
+                    else:
+                        with self.assertRaises((ValueError,KeyError)):checker.check(root,dict(confirmed_faults=1),'server_clock_'+direction,row.timestamp_ns)

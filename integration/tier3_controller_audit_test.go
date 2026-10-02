@@ -157,12 +157,13 @@ func auditMatrixControllerLatencies(ctx context.Context, js jetstream.JetStream,
 		for i, entry := range entries {
 			if entry.Kind == journal.StepRequested {
 				var request struct {
-					Kind      string    `json:"kind"`
-					Name      string    `json:"name"`
-					Duration  int64     `json:"duration_nanos"`
-					FireAt    time.Time `json:"fire_at"`
-					ChildType string    `json:"child_type"`
-					ChildID   string    `json:"child_id"`
+					Kind        string    `json:"kind"`
+					Name        string    `json:"name"`
+					Duration    int64     `json:"duration_nanos"`
+					FireAt      time.Time `json:"fire_at"`
+					ClockDomain string    `json:"clock_domain,omitempty"`
+					ChildType   string    `json:"child_type"`
+					ChildID     string    `json:"child_id"`
 				}
 				if err := json.Unmarshal(entry.Payload, &request); err != nil {
 					return proof, err
@@ -172,15 +173,9 @@ func auditMatrixControllerLatencies(ctx context.Context, js jetstream.JetStream,
 					if !ok || timer.FirstCall.IsZero() || timer.FirstReturn.IsZero() || int64(timer.Duration) != request.Duration {
 						return proof, fmt.Errorf("missing controller timer call %s/%s", key, request.Name)
 					}
-					var origin *worker.OperationEvent
-					for _, clock := range operationByInvocation[key] {
-						if clock.Operation == "timer_clock" && clock.Worker == entry.WorkerID && clock.JournalIndex == entry.Index && clock.Error == "" && clock.ServerTime != nil && clock.ServerTime.Add(timer.Duration).Equal(request.FireAt) {
-							if origin != nil {
-								return proof, fmt.Errorf("ambiguous controller timer origin")
-							}
-							candidate := clock
-							origin = &candidate
-						}
+					origin, originErr := matrixTimerOrigin(operationByInvocation[key], typ, id, entry.WorkerID, entry.Index, timer.Duration, request.FireAt, request.ClockDomain)
+					if originErr != nil {
+						return proof, originErr
 					}
 					if origin == nil || origin.Duration < 0 {
 						return proof, fmt.Errorf("missing successful controller timer clock origin %s/%s", key, request.Name)

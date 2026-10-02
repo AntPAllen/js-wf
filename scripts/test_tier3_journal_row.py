@@ -481,7 +481,7 @@ class ClockRoleAdmissionChecks(unittest.TestCase):
         import json,tempfile
         stamp=lambda second:f'2026-10-01T12:00:{second:02d}Z'
         for selected,server in [('server_clock_ahead','2026-10-01T12:01:01Z'),('server_clock_behind','2026-10-01T11:59:01Z')]:
-            for mode in ('valid','idle_peer','same_clock','wrong_kill','missing_role','duplicate_role','no_skew_lookup','wrong_boundary'):
+            for mode in ('valid','native_hint','duplicate_hint','unknown_hint','idle_peer','same_clock','wrong_kill','missing_role','duplicate_role','no_skew_lookup','wrong_boundary'):
                 with self.subTest(row=selected,mode=mode),tempfile.TemporaryDirectory() as directory:
                     root=Path(directory)
                     faults=[dict(node=4,scheduled=stamp(30),killed=stamp(31),healed=stamp(36))]
@@ -491,6 +491,9 @@ class ClockRoleAdmissionChecks(unittest.TestCase):
                         for name in ('WF_RUN','WF_JRN'):
                             roles.append(dict(stage=stage,fault=fault,stream=name,observed=stamp(at),info=dict(config=dict(name=name,num_replicas=5),cluster=dict(leader=f'fixture-n{node}',replicas=[{}]*4))))
                     clocks=[dict(Operation='timer_clock',At=stamp(1),Duration=1_000_000,ServerTime=server)]
+                    if mode in ('native_hint','duplicate_hint','unknown_hint'):
+                        clocks[0].update(Operation='timer_native_hint',ClockDomain='utc-quorum-v1',TimerPublished=mode!='duplicate_hint')
+                        if mode=='unknown_hint':clocks[0]['Error']='outcome unknown'
                     if mode=='idle_peer':roles[0]['info']['cluster']['leader']='fixture-n0'
                     elif mode=='same_clock':roles[4]['info']['cluster']['leader']='fixture-n4'
                     elif mode=='wrong_kill':faults[0]['node']=1
@@ -500,7 +503,7 @@ class ClockRoleAdmissionChecks(unittest.TestCase):
                     elif mode=='wrong_boundary':roles[4]['observed']=stamp(31)
                     for name,data in [('faults.json',faults),('server-clock-roles.json',roles),('fault-1-journal-operations.json',operations),('controller-operations.json',clocks)]:
                         (root/name).write_text(json.dumps(data))
-                    if mode=='valid':
+                    if mode in ('valid','native_hint'):
                         result=row.check_server_clock_role_artifacts(root,dict(confirmed_faults=1),selected)
                         self.assertEqual(result['role_observations'],8)
                         self.assertFalse(result['admits_all_in_flight_timer_cut_combinations'])

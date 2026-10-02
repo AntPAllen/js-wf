@@ -86,6 +86,12 @@ func TestMatrixControllerReceiptRejectsChangedEntryAndDuplicate(t *testing.T) {
 }
 
 func TestMatrixControllerLatencyAuditActualTimerWorkflow(t *testing.T) {
+	runMatrixControllerLatencyAuditActualTimerWorkflow(t, false)
+}
+func TestMatrixControllerLatencyAuditCanonicalTimerWorkflow(t *testing.T) {
+	runMatrixControllerLatencyAuditActualTimerWorkflow(t, true)
+}
+func runMatrixControllerLatencyAuditActualTimerWorkflow(t *testing.T, common bool) {
 	all, _ := setup(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -122,13 +128,21 @@ func TestMatrixControllerLatencyAuditActualTimerWorkflow(t *testing.T) {
 		}
 		return json.RawMessage(`42`), nil
 	}
-	w, err := worker.New(ctx, all[0], "controller-audit-owner", map[string]worker.Handler{"matrixtimer": handler}, worker.WithOperationObserver(func(event worker.OperationEvent) {
-		if event.Operation == "journal_append" || event.Operation == "timer_clock" {
+	var clockOptions []worker.Option
+	if common {
+		clockOptions = append(clockOptions, worker.WithTimerClock("utc-quorum-v1", func(context.Context) (time.Time, time.Time, error) {
+			now := time.Now().UTC()
+			return now.Add(-20 * time.Millisecond), now.Add(20 * time.Millisecond), nil
+		}))
+	}
+	clockOptions = append(clockOptions, worker.WithOperationObserver(func(event worker.OperationEvent) {
+		if event.Operation == "journal_append" || event.Operation == "timer_clock" || event.Operation == "timer_domain_clock" || event.Operation == "timer_native_hint" {
 			mu.Lock()
 			operations = append(operations, event)
 			mu.Unlock()
 		}
 	}))
+	w, err := worker.New(ctx, all[0], "controller-audit-owner", map[string]worker.Handler{"matrixtimer": handler}, clockOptions...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -165,6 +179,37 @@ func TestMatrixControllerLatencyAuditActualTimerWorkflow(t *testing.T) {
 	}
 	if proof.Samples[1].Event != "timer_due" || proof.Samples[1].Delay < 0 || proof.Samples[9].ObservedLower == nil {
 		t.Fatalf("samples=%+v", proof.Samples)
+	}
+	if common {
+		hints := 0
+		for _, op := range ops {
+			if op.Operation != "timer_native_hint" || op.Error != "" || op.TimerPublished == nil || !*op.TimerPublished {
+				continue
+			}
+			hints++
+			matched := false
+			for _, bound := range proof.Bounds {
+				if bound.Entry.Index != op.JournalIndex || bound.Entry.Kind != journal.StepRequested {
+					continue
+				}
+				var req struct {
+					FireAt time.Time `json:"fire_at"`
+					Domain string    `json:"clock_domain"`
+				}
+				if err := json.Unmarshal(bound.Entry.Payload, &req); err != nil {
+					t.Fatal(err)
+				}
+				if op.TimerDeadline != nil && req.FireAt.Equal(*op.TimerDeadline) && req.Domain == op.ClockDomain {
+					matched = true
+				}
+			}
+			if !matched {
+				t.Fatalf("native hint does not match durable request index: %+v", op)
+			}
+		}
+		if hints != 8 {
+			t.Fatalf("fresh native hint count=%d want8", hints)
+		}
 	}
 	if root := os.Getenv("WF_CONTROLLER_AUDIT_OUT"); root != "" {
 		if err := os.MkdirAll(root, 0755); err != nil {

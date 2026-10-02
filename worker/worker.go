@@ -979,13 +979,43 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	}
 	handlerCtx, cancelHandler := context.WithCancel(ctx)
 	defer cancelHandler()
-	appender := func(ctx context.Context, k wf.Kind, p json.RawMessage) error { return appendEntry(journal.Kind(k), p) }
+	// Diagnostic mapping from SDK logical timer steps to durable journal indices.
+	// Suspensions/attempts do not occupy SDK step positions; checkpoints retain
+	// their logical offset. This mapping does not alter timer message identities.
+	stepOffset := uint64(0)
+	traceNativeHints := ops != nil && w.nativeSchedules && w.timerClockBounds != nil
+	var requestIndices map[uint64]uint64
+	if traceNativeHints {
+		requestIndices = make(map[uint64]uint64)
+	}
+	sdkNext := uint64(len(steps))
+	appender := func(ctx context.Context, k wf.Kind, p json.RawMessage) error {
+		index := nextIndex()
+		if err := appendEntry(journal.Kind(k), p); err != nil {
+			return err
+		}
+		if traceNativeHints {
+			if k == wf.StepRequested {
+				requestIndices[stepOffset+sdkNext] = index
+			}
+			if k == wf.StepRequested || k == wf.StepCompleted {
+				sdkNext++
+			}
+		}
+		return nil
+	}
 	wctx := wf.NewContext(handlerCtx, steps, appender, signals...)
 	if resumed != nil {
 		r := resumed.Snapshot.Runtime
 		wctx, checkpointInfo, err = wf.NewCheckpointContext(handlerCtx, steps, appender, resumed.Frame, wf.CheckpointLocation{Type: typ, ID: id, InvSeq: input.Sequence, Index: r.Index, Epoch: r.Epoch, Hash: r.SHA256}, signals...)
 		if err != nil {
 			return err
+		}
+	}
+	stepOffset = checkpointInfo.StepPosition
+	for i, entry := range steps {
+		if traceNativeHints && entry.Kind == wf.StepRequested {
+			requestIndices[stepOffset+uint64(i)] = entry.Index
 		}
 	}
 	if stages := w.continuations[typ]; stages != nil {
@@ -1023,7 +1053,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 		if domain == "" {
 			err = w.scheduleTimer(ctx, typ, id, input.Sequence, step, fireAt)
 		} else {
-			err = w.scheduleDomainTimer(ctx, typ, id, input.Sequence, step, fireAt, domain)
+			err = w.scheduleDomainTimerObserved(ctx, typ, id, input.Sequence, step, fireAt, domain, requestIndices[step], ops)
 		}
 		ops.finish(started, "timer_schedule", step, "", err)
 		return err
