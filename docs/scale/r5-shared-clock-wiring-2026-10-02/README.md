@@ -26,3 +26,12 @@ ahead60.27s failure and incomplete behind sustained run remain open.
 
 The worker-kill31.1s/TTL30s mismatch remains excluded from further runs. The
 productionTTL12s/heartbeat3s and strict30s recovery gate remain unchanged.
+
+Two35s native smokes were dispatched at source
+`0b921b7cc26e892538329b79496c0cf0b9e9b305`, both with
+`clock_timer_cut=true` and `common_timer_clock=true`:
+[ahead36960942468](https://github.com/AntPAllen/js-wf/actions/runs/36960942468)
+and [behind36960953444](https://github.com/AntPAllen/js-wf/actions/runs/36960953444).
+Launch API snapshots are retained. Both are queued at this observation;
+dispatch supplies no acceptance result. Review the authoritative existing runs
+before launching further clock campaigns.

@@ -5857,3 +5857,9 @@ retains compilation (native tests skipped), race admission controls1.031s and
 all40 Python artifact methods. Native ahead/behind admitted acceptance remains
 open; this wiring does not clear the historical clock failures. The million-timer
 service remains active, with454,256 receipts at this observation.
+
+Admitted35s canonical native smokes are queued at source0b921b7:
+[ahead36960942468](https://github.com/AntPAllen/js-wf/actions/runs/36960942468)
+and [behind36960953444](https://github.com/AntPAllen/js-wf/actions/runs/36960953444).
+Both enable the shared clock and pending-timer admission. Retained launch
+snapshots supply no acceptance result; review these handles before further runs.
