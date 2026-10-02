@@ -6302,3 +6302,53 @@ Changed-source full-1,000 validation is confirmed active at `1d135a1` in user
 unit `js-wf-confirmed-ack-boundary-full1000-20261002.service`, with originals
 under `/tmp/js-wf-confirmed-ack-boundary-full1000-20261002`. This is a launch,
 not a passed gate. Existing ahead, 100k and million-timer handles remain unchanged.
+
+
+## Confirmed ACK full simulator and admitted ahead-clock acceptance
+
+The full-1,000 suite at `1d135a1ebc2b4afc778a65363712efddeb31695e` is now
+terminal/success (119.25s). All 115 independently inventoried seeded workloads
+completed precisely seeds 1..1000; 159 top-level tests passed, two trace-only
+commands skipped, and all 260 pinned regressions replayed. The suite recorded
+117,032 schedules, 1,785,009 choices and 26,812,865 transport events. The retained
+original report is byte-identical to a fresh independent guard invocation.
+Evidence: `scale/confirmed-dispatch-ack-2026-10-02/full1000-pass/`. This closes
+current-source full-1,000 validation, not current-source 100k or real release.
+
+[Admitted ahead run36977810495](https://github.com/AntPAllen/js-wf/actions/runs/36977810495)
+at `d8842b6514e9929d88b25e7549ca1ffefc1d0aff` is terminal/success: 686.75s Go
+test, ten-minute workload, 25 batches, 700 invocations/terminals, 7,704 journal
+entries, 600 timer waits and 19 confirmed shifted-owner kills. Worst per-type
+terminal/progress p99 are 6.038187689s/11.679563816s. All physical-drain,
+history and retained-state gates passed without relaxing the 30s drain deadline.
+Five physical probes, 195 clock observations, 116 role observations, 42 shifted
+native hints, all 19 source-removal-before-Sleep-duration cuts, and two completed
+cohort audits pass the current offline verifier's required common-clock,
+clock-cut and checkpoint checks. Its report is byte-identical to the upload.
+Original artifacts, full logs, terminal metadata and hashes are preserved under
+`scale/canonical-r5-native-2026-10-02/ahead-clean-ten-minute/`; archive members
+were compared byte-for-byte to the downloads. This clears one admitted ahead
+seed at the recorded source. It does not establish the old failure's server-side
+cause, all timer cut combinations, protobuf chaos, 200 seeds or the 24h matrix.
+
+[ACK and lifecycle CI36977640313](https://github.com/AntPAllen/js-wf/actions/runs/36977640313)
+at the same `d8842b6` source is terminal/success. Actual RUN/PASS records confirm
+the native held-ACK-reply contract (3.24s), JSON-prefix/protobuf-worker resume
+and compaction (3.25s), both reverse JSON-writer resume cases (6.11s), both
+projection encoding lifecycles (8.00s), worker ACK parent-deadline/cancellation
+controls, protobuf worker CLI (25.34s), and both directions of eight-record
+Go/Python interchange including persisted storage envelopes. Original uploaded
+files, full log and metadata are retained and archive-member verified under
+`scale/confirmed-dispatch-ack-2026-10-02/native-ci-pass/`.
+
+The R5 row workflow now supports 1/20/200 consecutive seeds as independent jobs,
+with at most four concurrent jobs, fail-fast disabled and a unique artifact name
+for each row/seed. FAULT_SEED is passed into the actual production fixture, and
+the row guard requires the recorded executed seed to match the requested job.
+The planner was exercised for all three complete ranges and an invalid count;
+45 Tier3 artifact tests and three controller-latency tests pass, including seed
+mismatch and invalid-identity rejection. Existing single-run offline reports
+remain compatible. Multi-seed acceptance remains open until every required job
+and its original artifacts pass; adding the workflow is not a release claim.
+The million-timer process remains live under its user unit at PID18146; querying
+the system manager's same-named empty unit is not its authoritative handle.

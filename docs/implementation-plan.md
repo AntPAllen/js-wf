@@ -714,3 +714,16 @@ prove physical WorkQueue deletion, which is checked separately. The
 [held-reply R3 contract](scale/confirmed-dispatch-ack-2026-10-02/) verifies committed
 ACK with lost confirmation and successful retry. This improves provenance over
 local asynchronous ACK returns; it does not close the old ahead-clock drain miss.
+
+
+### R5 consecutive-seed campaigns
+
+`tier3-mixed-journal.yml` accepts `seeds=1|20|200` for one selected R5 row,
+including both admitted common-clock rows. Each independent job receives its
+actual `FAULT_SEED`, requires the executed seed to match, and uploads a distinct
+row/seed artifact. Four jobs run concurrently and failures do not cancel other
+seeds. Keep `duration=10m`, `common_timer_clock=true` and
+`clock_timer_cut=true` for sustained admitted clock campaigns. A campaign clears
+only its complete requested seed range at the recorded source after all original
+artifacts are verified; single-row campaigns do not replace the full-matrix or
+24-hour release gates. The 35s duration remains smoke evidence only.

@@ -31,13 +31,15 @@ TESTS = {'auto_journal': 'TestFiveContainerAutomaticMembershipWithJournalKills',
 TEST = TESTS['journal']
 
 
-def check(events, duration, expected_row='journal'):
+def check(events, duration, expected_row='journal', expected_seed=None):
     test = TESTS[expected_row]
     execution.check(events, test, duration)
     log = ''.join(e.get('Output', '') for e in events if e.get('Test') == test)
     row, seed, found_duration, replicas, batches, invocations, entries, faults, release = matrix.one(
         r'TIER3_MIXED_RESULT row=(\w+) seed=(\d+) duration=(\S+) five_replicas=(\w+) '
         r'batches=(\d+) invocations=(\d+) entries=(\d+) faults=(\d+) full_matrix_release=(\w+)', log)
+    if expected_seed is not None and (type(expected_seed) is not int or expected_seed <= 0 or int(seed) != expected_seed):
+        raise ValueError('executed seed does not match the campaign job')
     seconds = {'35s': 35, '10m': 600}[duration]
     if row != expected_row or matrix.seconds(found_duration) != seconds or replicas != 'true' or release != 'false':
         raise ValueError('incorrect row, duration, replica scope or release claim')
@@ -731,6 +733,7 @@ if __name__ == '__main__':
     parser.add_argument('--events', required=True, type=Path)
     parser.add_argument('--duration', required=True, choices=('35s', '10m'))
     parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('--expected-seed', type=int, help='require the requested campaign seed')
     parser.add_argument('--require-clock-timer-cut', action='store_true')
     parser.add_argument('--require-common-timer-clock', action='store_true')
     parser.add_argument('--require-checkpoint-audits', action='store_true')
@@ -740,7 +743,7 @@ if __name__ == '__main__':
     if args.require_common_timer_clock and not args.row.startswith('server_clock_'):
         parser.error('--require-common-timer-clock requires a server-clock row')
     events = [json.loads(line) for line in args.events.read_text().splitlines() if line.strip()]
-    report = check(events, args.duration, args.row)
+    report = check(events, args.duration, args.row, args.expected_seed)
     if args.row == 'auto_journal':
         if args.root is None: parser.error('--root is required for automatic membership')
         report['automatic_artifact_checks'] = check_automatic_artifacts(args.root, report)

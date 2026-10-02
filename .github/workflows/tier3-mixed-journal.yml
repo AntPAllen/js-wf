@@ -14,6 +14,12 @@ on:
         type: choice
         default: '10m'
         options: ['35s', '10m']
+      seeds:
+        description: Consecutive seeds for the selected R5 row
+        required: true
+        type: choice
+        default: '1'
+        options: ['1', '20', '200']
       clock_timer_cut:
         description: Require a pending positive Sleep before each server-clock cut
         type: boolean
@@ -23,10 +29,35 @@ on:
         type: boolean
         default: false
 jobs:
+  seeds:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.jobs }}
+    steps:
+      - id: matrix
+        env:
+          SEED_COUNT: ${{ inputs.seeds }}
+        run: |
+          python3 - <<'PYTHON'
+          import json, os
+          count = int(os.environ['SEED_COUNT'])
+          if count not in (1, 20, 200):
+              raise ValueError('unsupported seed count')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('jobs=' + json.dumps(list(range(1, count + 1))) + '\n')
+          PYTHON
   journal:
+    name: journal (${{ matrix.seed }})
+    needs: seeds
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        seed: ${{ fromJSON(needs.seeds.outputs.matrix) }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
+      FAULT_SEED: ${{ matrix.seed }}
       WF_TIER3_MATRIX: '1'
       TIER3_MATRIX_ROW: ${{ inputs.row }}
       WF_TIER3_MATRIX_DURATION: ${{ inputs.duration }}
@@ -86,13 +117,13 @@ jobs:
           cut_args=()
           if [ "$WF_TIER3_CLOCK_TIMER_CUT" = 1 ]; then cut_args+=(--require-clock-timer-cut); fi
           if [ "$WF_TIER3_COMMON_CLOCK" = 1 ]; then cut_args+=(--require-common-timer-clock); fi
-          python3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --output /tmp/tier3-mixed-journal-result.json --require-checkpoint-audits "${cut_args[@]}"
+          python3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events /tmp/tier3-mixed-journal-events.jsonl --duration "$WF_TIER3_MATRIX_DURATION" --expected-seed "$FAULT_SEED" --output /tmp/tier3-mixed-journal-result.json --require-checkpoint-audits "${cut_args[@]}"
           python3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"
           python3 scripts/review-tier3-fencing.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/fencing-timeline-review.json"
       - if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: tier3-mixed-journal
+          name: tier3-${{ inputs.row }}-seed-${{ matrix.seed }}
           path: |
             /tmp/tier3-mixed-journal/*.json
             /tmp/tier3-mixed-journal/*.jsonl

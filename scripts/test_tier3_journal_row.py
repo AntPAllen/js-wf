@@ -27,6 +27,12 @@ class JournalRowChecks(unittest.TestCase):
         self.assertEqual(row.check(alternate, '10m')['duration_seconds'], 600)
         self.assertTrue(row.check(fixture('35s'), '35s')['shortened_smoke'])
 
+    def test_requested_seed_identity(self):
+        self.assertEqual(row.check(fixture(), '10m', expected_seed=42)['seed'], 42)
+        for requested in (1, 0, -1, True, '42'):
+            with self.subTest(requested=requested), self.assertRaises(ValueError):
+                row.check(fixture(), '10m', expected_seed=requested)
+
     def test_explicit_clock_duration_profiles(self):
         for profile in ('first-wait-2s', 'all-waits-2s'):
             events = fixture()
