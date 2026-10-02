@@ -26,3 +26,8 @@ artifacts cannot independently re-audit the destroyed server stores. One35s
 pending Sleep cut does not admit every timer/reply/effect/continuation state,
 prove the NATS semantics behind model counterexamples, or clear the full200-seed
 and24h release matrices. Sustained admitted cuts remain required.
+
+The [ten-minute admitted-cut row](https://github.com/AntPAllen/js-wf/actions/runs/36947564272)
+was dispatched after smoke verification at 28b66c270839de5a648bd56b19a88ce017472779.
+The queued API launch is retained as `../behind-admitted-ten-minute-start.json`.
+It requires all 19 cuts to pass admission and the unchanged sustained gates.

@@ -5510,3 +5510,21 @@ match final counters;0fences. Full original compressed evidence is retained
 [here](scale/clock-timer-admission-2026-10-01/behind-admitted-smoke/README.md).
 This is one35s admitted cut; sustained and other in-flight clock combinations
 and the full release matrices remain open.
+
+## Ahead-clock valid admission exposes timer progress failure (2026-10-02)
+
+Native 36945292216 at c03994c fails the unchanged timer progress gate at
+60.270566034s. Unlike the prior removal-budget failures, this cut confirms
+source removal 1.194s before earliest due, the exact suspended prefix and both
+shifted R5 roles; final prefix corroboration and independent timing provenance
+pass. The selected timer-0's completion lower bound is 60.269s after earliest
+due. All 144 wait origins/durations and 1,849 append windows are reconstructed
+from controller calls/receipts. Diagnostics explicitly retain the failed native
+gate, with 168 final invocations, passing histories/retained/immutable/drain
+checks and 29 acknowledged repairs matching counters, with zero fences.
+[Original failure evidence](scale/clock-timer-admission-2026-10-01/ahead-admitted-progress-failure/README.md)
+is retained. Its timing agrees with the explicit absolute-deadline model's
+counterexample; the exact broker scheduling/redelivery path remains unproven.
+Clock-transition timer liveness is open. Behind admitted-cut ten-minute run
+36947564272 is queued after verified smoke; no ahead sustained acceptance or
+clock-gate relaxation is claimed.
