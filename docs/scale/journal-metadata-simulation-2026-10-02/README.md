@@ -38,7 +38,21 @@ test's temporary directory. Original control logs/sources/trace and positive
 race events are losslessly archived/compressed with verified hashes.
 
 This adds the117th modeled workload and262nd pinned trace. Focused evidence is
-based on the `4c7601f` worktree before commit. The complete117-workload1k gate,
-hosted shared-model/real contract and new graph's100k release campaign still need
-acceptance. The live116-workload campaign remains evidence for its exact prior
-graph and is not restarted or relabeled.
+based on the `4c7601f` worktree before commit. The complete1k gate at `82f323a`
+is accepted: actual1..1000 completed bodies for every117 source-inventoried
+workloads,262 pins,161 top-level passes and two permitted trace-only skips.
+It records119033 schedules,1788011 choices and26857656 transport events in
+123.68s package time. Current sim/journal source files match that exact Git
+revision; original events, compiled/source inventories and report are archived
+with verified member hashes in [full1000-pass](full1000-pass/).
+
+Hosted shared-model/real run37011695790 at `82f323a` is independently accepted:
+all five named race tests pass, the metadata loop completes actual1..1000,
+and the exact shared unbounded-source overlay makes both model and real tests
+fail semantically. The model failure trace is retained and source hashes match
+Git. Original events, overlay source, full logs and terminal metadata are
+losslessly archived with independent checks in [shared-ci-pass](shared-ci-pass/).
+
+The new graph's100k release campaign remains open. Run37012116265 is live at exact source `82f323a` for
+100000 seeds per workload. The live116-workload run37002783868 remains evidence
+for its exact prior graph and is not restarted or relabeled.

@@ -73,8 +73,15 @@
   produce identical bytes. Removing the shared bound fails both the model and
   real proxy contracts semantically. Prior116-workload traces remain unchanged.
   See [metadata simulation evidence](scale/journal-metadata-simulation-2026-10-02/).
-  Full117-workload1k, hosted shared-contract and new-graph100k acceptance remain
-  required; prior graph campaigns cannot substitute for them.
+  The full117-workload1k gate at `82f323a` is accepted:117000 actual completed
+  seed bodies,262 pins,161 top-level passes,119033 schedules,1788011 choices
+  and26857656 transport events in123.68s. See
+  [complete exact-source gate](scale/journal-metadata-simulation-2026-10-02/full1000-pass/).
+  Hosted shared-contract run37011695790 at `82f323a` is independently accepted:
+  all five named race tests, actual1..1000 metadata seeds, exact-source hashes,
+  both semantic shared-bound counterexamples and retained model failure trace.
+  See [shared CI evidence](scale/journal-metadata-simulation-2026-10-02/shared-ci-pass/).
+  New-graph100k run37012116265 is live at `82f323a`; prior graph campaigns cannot substitute.
 - Run37008116036 at `82494c5` passes six jobs including the new purge pair,
   but fails the start-repair mutant before its required semantic escape. The whole
   campaign remains rejected. Independent purge-component acceptance preserves
@@ -84,12 +91,25 @@
   request, retaining the same generation ID and total deadline. Its final local
   baseline/mutant pair and36.71s race baseline pass; hosted acceptance remains
   pending. See [bounded evidence](scale/mixed-start-repair-mutation-2026-10-02/all-requests-bounded/).
+- Run37010089975 at `4c7601f` is independently accepted for all seven jobs:
+  twelve actual baseline/semantic-mutant pairs, exact production/fixture hashes,
+  all negative controls, decoded raw CAS/enqueue/start receipts and purge reuse
+  generations. See [all-six mixed category evidence](scale/mixed-mutations-all-six-2026-10-02/).
+  This clears focused acceptance for all six mixed categories. The sustained
+  whole-chaos mutation release campaign remains open.
 - Current-source [100k run37002783868](https://github.com/AntPAllen/js-wf/actions/runs/37002783868)
   remains live at `3184b65`. The
   [ten-minute ahead run37002781141](https://github.com/AntPAllen/js-wf/actions/runs/37002781141)
   is independently accepted:672 invocations,7404 entries and19 admitted cuts.
   [Ahead20 run37004428244](https://github.com/AntPAllen/js-wf/actions/runs/37004428244)
-  is queued at `a4d57ab`. The million-timer user service is live; final ledger,
+  is independently accepted at `a4d57ab`: all20 ten-minute seeds complete,
+  13020 invocations,143273 entries and380 admitted cuts. Every original per-seed
+  report is reproduced byte-for-byte; worst terminal/progress p99 are
+  16.589348522/16.385255786s. See
+  [complete ahead20 evidence](scale/native-timer-retirement-2026-10-02/ahead-twenty-seeds-pass/).
+  Ahead200 run37014965084 is queued at `82f323a` with admitted common clock,
+  pending-duration cuts and unchanged latency/drain gates; it remains unaccepted.
+  The million-timer user service is live; final ledger,
   audit/drain and verdict remain required.
 
 The current100k gate, sustained ahead20/200 acceptance, full200-seed Tier2 matrix,

@@ -1,0 +1,355 @@
+{
+  "run": 37010089975,
+  "source": "4c7601f8c1200326ba8b6ad866bc9d1e1770e0ed",
+  "jobs": 7,
+  "pairs": [
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_cas",
+      "named_baseline_pass": true,
+      "named_semantic_mutant_failure": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "independent_worker_leases",
+      "named_baseline_pass": true,
+      "named_semantic_mutant_failure": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "invocation_purged_first",
+      "named_baseline_pass": true,
+      "named_semantic_mutant_failure": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_determinism_guard",
+      "named_baseline_pass": true,
+      "named_semantic_mutant_failure": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "missing_run_message_id",
+      "named_baseline_pass": true,
+      "named_semantic_mutant_failure": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "focused-production-mutations",
+      "mutation": "skipped_start_reconciler",
+      "named_baseline_pass": true,
+      "named_semantic_mutant_failure": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-cas",
+      "mutation": "missing_cas",
+      "named_baseline_pass": true,
+      "named_semantic_mutant_failure": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-determinism",
+      "mutation": "missing_determinism_guard",
+      "named_baseline_pass": true,
+      "named_semantic_mutant_failure": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-enqueue",
+      "mutation": "missing_run_message_id",
+      "named_baseline_pass": true,
+      "named_semantic_mutant_failure": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-leases",
+      "mutation": "independent_worker_leases",
+      "named_baseline_pass": true,
+      "named_semantic_mutant_failure": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-purge",
+      "mutation": "invocation_purged_first",
+      "named_baseline_pass": true,
+      "named_semantic_mutant_failure": true,
+      "source_hashes_verified": true
+    },
+    {
+      "artifact": "mixed-production-start-repair",
+      "mutation": "skipped_start_reconciler",
+      "named_baseline_pass": true,
+      "named_semantic_mutant_failure": true,
+      "source_hashes_verified": true
+    }
+  ],
+  "physical_and_generation_proofs": {
+    "cas": {
+      "raw_receipts": [
+        {
+          "Subject": "wf.jrn.guardshort.guardshort-0-0",
+          "Sequence": 149,
+          "Header": null,
+          "Data": "eyJlcG9jaCI6MSwiaW5kZXgiOjIsImtpbmQiOiJTdGVwQ29tcGxldGVkIiwicGF5bG9hZCI6eyJyZXN1bHQiOjQyfSwid29ya2VyX2lkIjoibWl4ZWQtZ3VhcmQtYmVmb3JlIn0=",
+          "Time": "2026-10-02T13:07:44.480031039Z"
+        },
+        {
+          "Subject": "wf.jrn.guardshort.guardshort-0-0",
+          "Sequence": 150,
+          "Header": null,
+          "Data": "eyJlcG9jaCI6MSwiaW5kZXgiOjIsImtpbmQiOiJTdGVwQ29tcGxldGVkIiwicGF5bG9hZCI6eyJyZXN1bHQiOjQyfSwid29ya2VyX2lkIjoibWl4ZWQtZ3VhcmQtYmVmb3JlIn0=",
+          "Time": "2026-10-02T13:07:44.480308006Z"
+        }
+      ],
+      "decoded_entries": [
+        {
+          "epoch": 1,
+          "index": 2,
+          "kind": "StepCompleted",
+          "payload": {
+            "result": 42
+          },
+          "worker_id": "mixed-guard-before"
+        },
+        {
+          "epoch": 1,
+          "index": 2,
+          "kind": "StepCompleted",
+          "payload": {
+            "result": 42
+          },
+          "worker_id": "mixed-guard-before"
+        }
+      ]
+    },
+    "enqueue": {
+      "baseline": {
+        "retained": 1,
+        "sequences": [
+          53
+        ],
+        "body": "guardshort.guardshort-0-0",
+        "headers_verified": true
+      },
+      "mutated": {
+        "retained": 64,
+        "sequences": [
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116
+        ],
+        "body": "guardshort.guardshort-0-0",
+        "headers_verified": true
+      }
+    },
+    "purge": {
+      "old_journal": [
+        {
+          "epoch": 3,
+          "index": 0,
+          "kind": "Started",
+          "worker_id": "mixed-guard-before",
+          "sequence": 3
+        },
+        {
+          "epoch": 3,
+          "index": 1,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "run",
+            "name": "held",
+            "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "fire_at": "0001-01-01T00:00:00Z"
+          },
+          "worker_id": "mixed-guard-before",
+          "sequence": 4
+        },
+        {
+          "epoch": 268,
+          "index": 2,
+          "kind": "StepCompleted",
+          "payload": {
+            "result": 42
+          },
+          "worker_id": "mixed-guard-after",
+          "sequence": 159
+        },
+        {
+          "epoch": 268,
+          "index": 3,
+          "kind": "Completed",
+          "payload": {
+            "inv_seq": 1,
+            "result": "NDI="
+          },
+          "worker_id": "mixed-guard-after",
+          "sequence": 179
+        }
+      ],
+      "new_journal": [
+        {
+          "epoch": 817,
+          "index": 0,
+          "kind": "Started",
+          "worker_id": "mixed-purge-reused",
+          "sequence": 388
+        },
+        {
+          "epoch": 817,
+          "index": 1,
+          "kind": "StepRequested",
+          "payload": {
+            "kind": "run",
+            "name": "held",
+            "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "fire_at": "0001-01-01T00:00:00Z"
+          },
+          "worker_id": "mixed-purge-reused",
+          "sequence": 389
+        },
+        {
+          "epoch": 817,
+          "index": 2,
+          "kind": "StepCompleted",
+          "payload": {
+            "result": 42
+          },
+          "worker_id": "mixed-purge-reused",
+          "sequence": 390
+        },
+        {
+          "epoch": 817,
+          "index": 3,
+          "kind": "Completed",
+          "payload": {
+            "inv_seq": 29,
+            "result": "NDI="
+          },
+          "worker_id": "mixed-purge-reused",
+          "sequence": 391
+        }
+      ],
+      "tombstone": {
+        "tombstone": true,
+        "inv_seq": 1,
+        "purged_at": "2026-10-02T13:06:35.325858793Z",
+        "expires_at": "2026-10-02T13:07:35.325858793Z"
+      }
+    },
+    "start": {
+      "baseline": {
+        "invocation": {
+          "Subject": "wf.inv.guardshort.repair-orphan",
+          "Sequence": 29,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Input-SHA256": [
+              "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+            ]
+          },
+          "Data": "MA==",
+          "Time": "2026-10-02T13:07:46.393782501Z"
+        },
+        "dispatch": [
+          {
+            "Subject": "wf.run.0",
+            "Sequence": 53,
+            "Header": {
+              "Nats-Msg-Id": [
+                "start:guardshort.repair-orphan:29"
+              ]
+            },
+            "Data": "Z3VhcmRzaG9ydC5yZXBhaXItb3JwaGFu",
+            "Time": "2026-10-02T13:07:54.575684942Z"
+          }
+        ]
+      },
+      "mutated": {
+        "invocation": {
+          "Subject": "wf.inv.guardshort.repair-orphan",
+          "Sequence": 29,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Input-SHA256": [
+              "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+            ]
+          },
+          "Data": "MA==",
+          "Time": "2026-10-02T13:08:28.625172985Z"
+        },
+        "dispatch": []
+      }
+    }
+  },
+  "scope": "six focused plus six mixed one-cut fixtures; sustained whole-chaos release campaign remains open"
+}
