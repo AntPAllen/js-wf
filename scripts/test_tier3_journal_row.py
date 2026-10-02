@@ -9,7 +9,8 @@ spec.loader.exec_module(row)
 
 
 def fixture(duration='10m'):
-    seconds, faults = (600, 19) if duration == '10m' else (35, 1)
+    seconds = {'35s': 35, '10m': 600, '24h': 86400}[duration]
+    faults = (seconds - 1) // 30
     lines = [f'TIER3_MIXED_RESULT row=journal seed=42 duration={'10m0s' if duration == '10m' else duration} five_replicas=true batches=2 invocations=56 entries=618 faults={faults} full_matrix_release=false\n']
     for typ, count in zip(row.matrix.TYPES, (8, 6, 4, 2, 12, 24)):
         lines.append(f'TIER3_MIXED_CELL type={typ} invocations={count} terminal_p99=2s progress_p99=250ms\n')
@@ -18,6 +19,25 @@ def fixture(duration='10m'):
 
 
 class JournalRowChecks(unittest.TestCase):
+    def test_24_hour_rows_keep_duration_cadence_and_partial_scope(self):
+        for name, faults in [('journal', 2879), ('worker_kill', 17279),
+                             ('worker_pause', 1440), ('worker_isolation', 1440)]:
+            events = fixture('24h')
+            events[0]['Output'] = events[0]['Output'].replace('row=journal', f'row={name}').replace('faults=2879', f'faults={faults}')
+            for event in events[:2]:
+                event['Test'] = row.TESTS[name]
+            report = row.check(events, '24h', name, 42)
+            self.assertEqual(report['duration_seconds'], 86400)
+            self.assertEqual(report['confirmed_faults'], faults)
+            self.assertFalse(report['clears_full_tier3_release'])
+            for change in ('short_elapsed', 'short_claim', 'missing_fault'):
+                broken = copy.deepcopy(events)
+                if change == 'short_elapsed': broken[1]['Elapsed'] = 600
+                elif change == 'short_claim': broken[0]['Output'] = broken[0]['Output'].replace('duration=24h', 'duration=10m')
+                else: broken[0]['Output'] = broken[0]['Output'].replace(f'faults={faults}', f'faults={faults - 1}')
+                with self.subTest(row=name, change=change), self.assertRaises(ValueError):
+                    row.check(broken, '24h', name, 42)
+
     def test_valid_scope_remains_partial(self):
         result = row.check(fixture(), '10m')
         self.assertEqual(result['invocations'], 56)

@@ -15,6 +15,10 @@ class MatrixResultTests(unittest.TestCase):
             module.check(events, "Target", "10m")
         events[0]["Elapsed"] = 600
         module.check(events, "Target", "10m")
+        with self.assertRaises(ValueError):
+            module.check(events, "Target", "24h")
+        events[0]["Elapsed"] = 86400
+        module.check(events, "Target", "24h")
 
     def test_no_tests_skip_failure_duplicate_and_missing_completion_rejected(self):
         for events in (

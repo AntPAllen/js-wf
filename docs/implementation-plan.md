@@ -821,3 +821,16 @@ All three worker-kill/retained-server-restart cuts preserve raw prefixes and
 recover below30s withTTL12s. The corrected compiled suffix-budget negative
 fails on one actual forbidden effect. This clears that fixture gate; current
 full Tier1 release coverage, complete fault matrices and24h soak remain required.
+
+
+### Single-row 24-hour verification support
+
+The existing five-container mixed-row Go harness accepts
+`WF_TIER3_MATRIX_DURATION=24h`. Its offline row verifier now also accepts
+`--duration 24h`, requiring actual named-test/package completion, a matching
+24-hour result and the full row-specific fault count, with the existing
+audit, latency and raw artifact checks. Short elapsed time, a ten-minute claim
+and missing fault cuts are rejected. This enables long-run evidence collection;
+a single row retains `clears_full_tier3_release=false`. The full-matrix
+24-hour requirement remains unchanged. The hosted workflow still selects
+35-second smoke or ten-minute rows; adding verifier support is not a soak pass.

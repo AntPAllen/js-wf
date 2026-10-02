@@ -14,8 +14,8 @@
   campaign37045827952 are independently accepted at2a30165. All three production
   cuts recover in12.840s/12.835s/12.937s; the compiled mutant triggers one actual
   forbidden effect and fails semantically without a timeout.
-- Fresh all-thirteen Tier2 seed1 campaign37050644803 is in progress at3f483bd,
-  ten minutes per row. It cannot clear the200-seed gate.
+- All-thirteen Tier2 seed1 campaign37050644803 is independently accepted at3f483bd,
+  ten minutes per row,34,636 invocations/313 faults. It cannot clear200 seeds.
 - Fresh all-six ten-minute mutation gate37030840346 is accepted at0f979d0.
   Ahead-clock seed27 ten-minute replay37030391587 is accepted at0f979d0;
   current ahead1..200 campaign37040118844 remains queued.
@@ -7446,3 +7446,23 @@ matrix tests pass, including those semantic rejection controls. This strengthens
 whole-campaign acceptance without bypassing its terminal-job/source checks.
 Run37050644803 remains active with blockdisk/upgrade unfinished. Eleven rows
 are partial evidence; full13 qualification and200 seeds remain open.
+
+
+## Current all13 Tier2 seed1 gate independently accepted
+
+[Confirmed thirteen-row evidence](scale/full-matrix-3f483bd-2026-10-02/confirmed-thirteen/)
+accepts37050644803 at exact3f483bd. Every terminal job, checkout revision and
+full-duration row passes the campaign-revision whole-matrix checker; its result
+matches the current checker. All13 raw Go JSON verdicts match the complete
+Actions logs. Totals34,636 invocations/313 faults; worst aggregate/cell/progress
+p99=15.010394s/18.069686s/12.938768s. The eleven-row base archive plus verified
+lossless supplement preserve all downloaded evidence. This qualifies current
+runtime fixes across the variants, not200 consecutive seeds or full24h soak.
+
+The Tier3 row verifier now accepts24h, matching the existing Go harness. It
+requires actual24h named-test elapsed time, exact duration claim, complete
+row-specific fault cadence and the same audit/latency/artifact checks. A single
+row still reports clears_full_tier3_release=false. All50 Tier3 and18 matrix
+guard tests pass, including shortened-duration/missing-fault rejection. Hosted
+workflow choices remain35s/10m; no24h run is claimed. Full matrices and original
+million-timer retirement/drain remain open.

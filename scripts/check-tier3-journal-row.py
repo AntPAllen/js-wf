@@ -40,7 +40,7 @@ def check(events, duration, expected_row='journal', expected_seed=None):
         r'batches=(\d+) invocations=(\d+) entries=(\d+) faults=(\d+) full_matrix_release=(\w+)', log)
     if expected_seed is not None and (type(expected_seed) is not int or expected_seed <= 0 or int(seed) != expected_seed):
         raise ValueError('executed seed does not match the campaign job')
-    seconds = {'35s': 35, '10m': 600}[duration]
+    seconds = {'35s': 35, '10m': 600, '24h': 86400}[duration]
     if row != expected_row or matrix.seconds(found_duration) != seconds or replicas != 'true' or release != 'false':
         raise ValueError('incorrect row, duration, replica scope or release claim')
     batches, invocations, entries, faults = map(int, (batches, invocations, entries, faults))
@@ -731,7 +731,7 @@ if __name__ == '__main__':
     parser.add_argument('--root', type=Path, help='required consumer/restart fault artifacts')
     parser.add_argument('--row', choices=tuple(TESTS), default='journal')
     parser.add_argument('--events', required=True, type=Path)
-    parser.add_argument('--duration', required=True, choices=('35s', '10m'))
+    parser.add_argument('--duration', required=True, choices=('35s', '10m', '24h'))
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--expected-seed', type=int, help='require the requested campaign seed')
     parser.add_argument('--require-clock-timer-cut', action='store_true')
