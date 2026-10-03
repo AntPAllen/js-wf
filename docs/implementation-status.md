@@ -28,7 +28,9 @@
   [Complete clock originals](scale/r5-worker-clock-2026-10-03/hosted-pass/). Version3 rolling
   [37109789443](https://github.com/AntPAllen/js-wf/actions/runs/37109789443)
   is terminal FAILED atdf07ba1 during its second post-upgrade native probe.
-  Complete originals are retained; rolling real-row acceptance remains open.
+  Complete originals are retained. Version4
+  [37113734884](https://github.com/AntPAllen/js-wf/actions/runs/37113734884)
+  is queued at59a0faa; rolling real-row acceptance remains open.
 - **Rolling readiness:** the first mixed trial is rejected after node4's actual
   third restart: its post-upgrade fallback proof hits the two-second metadata
   wrapper. The fixture now uses the existing60s whole-operation deadline;
@@ -8338,3 +8340,16 @@ not actual seed29 exit timing, ahead200 acceptance or full release. Version4
 real rolling qualification can now proceed with the accepted fallback/native
 budget contract and full before/after source capture. Original failed rolling
 trials remain rejected and preserved.
+
+
+[Version4 rolling trial37113734884](https://github.com/AntPAllen/js-wf/actions/runs/37113734884)
+is confirmed queued at exact59a0faa5e812d9ea34c54ecbb48a1f8dd89accd5: rolling_upgrade,
+ten minutes, one seed starting at1. All five actual peers start old2.11.17 and
+must individually upgrade to current2.15.0 under the existing SIGKILL profile.
+Health precedes native semantic admission and full fallback provisioning;
+accepted budget/observer contracts and strict latency/journal/drain requirements
+remain. Full clean before/after source inventories and physical stores must be
+retained, including partial proofs on failure. This is a materially corrected
+fixture qualification, not a blind repeat of either failed version2/3 trial.
+Current121100k37106469422 remains running; all13 Tier2x20037057872230 remains
+queued. No ahead200 or historical worker-kill mismatch replay is launched.
