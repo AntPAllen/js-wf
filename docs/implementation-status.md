@@ -58,7 +58,13 @@
   The Tier2 planner now supports explicit focused starting seeds. All20 planner/
   row guards and3 full-matrix guards pass. Default release ranges are unchanged;
   focused non-1 replays cannot qualify the whole default1..200 range. The five
-  corrected real-row replays are the next qualification step.
+  corrected real-row replays are dispatched atc0dc4d7: journal39
+  [37125258436](https://github.com/AntPAllen/js-wf/actions/runs/37125258436),
+  journal86 [37125258042](https://github.com/AntPAllen/js-wf/actions/runs/37125258042),
+  consumer90 [37125258423](https://github.com/AntPAllen/js-wf/actions/runs/37125258423),
+  consumer116 [37125258117](https://github.com/AntPAllen/js-wf/actions/runs/37125258117),
+  consumer139 [37125258217](https://github.com/AntPAllen/js-wf/actions/runs/37125258217).
+  All retain ten-minute duration and complete final gates; none is accepted yet.
 - **Tier3:**16 implemented row variants are now in the registry,
   including separate worker-clock and every-peer rolling upgrade. The initial
   14-row seed1 campaign failed and cannot qualify the complete original matrix.
@@ -144,6 +150,11 @@
   both candidate and baseline compile without production/dependency changes.
   No throughput result or regression is established by that failed build.
   [Original compiler failure and build validation](scale/cas-throughput-baseline-build-2026-10-03/).
+  Corrected comparison [37122546973](https://github.com/AntPAllen/js-wf/actions/runs/37122546973)
+  is independently accepted at1b03266 against unchanged4fa3119:all12 raw samples
+  validate and regenerate both median comparisons exactly. Leader hot/parallel
+  ratios=0.954251/1.006982; follower=0.999921/1.006874, all above0.8.
+  [Original paired comparison reports](scale/cas-throughput-baseline-build-2026-10-03/recovered-comparison/).
 - **Scale/release:** the new million-timer10m diagnostic is independently accepted
   at885664e with all1M receipts and all3 physical replica drains. It does not
   replace the original million/24h gate, which delivered all1M but failed drain.
