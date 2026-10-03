@@ -17,7 +17,7 @@ def load(name, file):
 
 matrix = load('matrix_row', 'check-matrix-campaign.py')
 execution = load('matrix_execution', 'check-matrix-result.py')
-TESTS = {'auto_journal': 'TestFiveContainerAutomaticMembershipWithJournalKills', 'block_delay': 'TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds', 'block_disk': 'TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds', 'server_clock_ahead': 'TestFiveContainerMixedServerClockAheadWithJournalKills',
+TESTS = {'rolling_upgrade': 'TestFiveContainerMixedRollingServerUpgrade', 'auto_journal': 'TestFiveContainerAutomaticMembershipWithJournalKills', 'block_delay': 'TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds', 'block_disk': 'TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds', 'server_clock_ahead': 'TestFiveContainerMixedServerClockAheadWithJournalKills',
          'server_clock_behind': 'TestFiveContainerMixedServerClockBehindWithJournalKills',
          'worker_isolation': 'TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds',
          'worker_pause': 'TestFiveContainerMixedWorkerPausedFortyFiveSeconds',
@@ -45,6 +45,7 @@ def check(events, duration, expected_row='journal', expected_seed=None):
         raise ValueError('incorrect row, duration, replica scope or release claim')
     batches, invocations, entries, faults = map(int, (batches, invocations, entries, faults))
     expected_faults=(seconds-6)//60+1 if row in ('worker_pause','worker_isolation') else (seconds-1)//(5 if row=='worker_kill' else 30)
+    if row == 'rolling_upgrade': expected_faults = 1 if seconds == 35 else 5
     if batches < 1 or invocations != batches*28 or entries <= invocations or faults != expected_faults:
         raise ValueError('incomplete workload, audit entries or fault count')
     active_consumer_faults = None
@@ -68,6 +69,7 @@ def check(events, duration, expected_row='journal', expected_seed=None):
             cells[typ]['raw_terminal_p99_seconds']=matrix.seconds(raw_t)
             cells[typ]['raw_progress_p99_seconds']=matrix.seconds(raw_p)
     scope = ('single five-container R5 server clock skew with journal SIGKILL row' if row.startswith('server_clock_')
+             else 'single five-container R5 rolling upgrade with retained fallback timers' if row == 'rolling_upgrade'
              else 'single five-container R5 automatic membership with journal SIGKILL row' if row == 'auto_journal'
              else 'single five-container R5 private filesystem per-request delay row' if row == 'block_delay'
              else 'single five-container R5 private filesystem I/O stall row' if row == 'block_disk'
@@ -491,6 +493,43 @@ def check_graceful_process_artifacts(root,sessions):
     return by_worker,steps_all,fences_all
 
 
+def check_upgrade_artifacts(root, report):
+    faults=json.loads((root/'faults.json').read_text())
+    if len(faults)!=report['confirmed_faults']:raise ValueError('upgrade fault count mismatch')
+    versions=['2.11.17']*5
+    upgraded=set()
+    def proof(path, expected):
+        data=json.loads(path.read_text());nodes=data['nodes']
+        if data['backend']!='fallback' or len(nodes)!=5 or [n['node'] for n in nodes]!=list(range(5)) or [n['version'] for n in nodes]!=expected or len({n['server_id'] for n in nodes})!=5 or any(not n['server_id'] for n in nodes):raise ValueError('upgrade version/identity/backend mismatch')
+        for n in nodes:
+            want='native timers require NATS 2.12+; connected server reports 2.11.17' if n['version']=='2.11.17' else 'stream WF_RUN configuration mismatch:'
+            if not n['native_rejected'].startswith(want):raise ValueError('upgrade lacks semantic native rejection')
+        for key,name in [('run_info','WF_RUN'),('timer_info','WF_TIMER')]:
+            info=data[key];config=info['config'];cluster=info['cluster']
+            if config['name']!=name or config['num_replicas']!=5 or config['storage']!='file' or not cluster['leader'] or len(cluster['replicas'])!=4 or len({r['name'] for r in cluster['replicas']}|{cluster['leader']})!=5 or any(r.get('current') is not True or r.get('offline',False) for r in cluster['replicas']):raise ValueError('upgrade missing R5 current file replicas')
+            if name=='WF_RUN' and config.get('allow_msg_schedules',False):raise ValueError('upgrade enabled native scheduling')
+        return timestamp_ns(data['at'])
+    initial=proof(root/'upgrade-initial.json',versions)
+    first=None;interval=None;previous_heal=initial
+    for i,fault in enumerate(faults,1):
+        node=fault['node'];scheduled,killed,healed=map(timestamp_ns,[fault[k] for k in ('scheduled','killed','healed')])
+        if type(node) is not int or not 0<=node<5 or node in upgraded or not previous_heal<=scheduled<=killed<=healed:raise ValueError('upgrade cut identity/order invalid')
+        before=proof(root/f'fault-{i}-upgrade-before.json',versions)
+        if not scheduled<=before<=killed:raise ValueError('upgrade before proof outside cut')
+        if fault['versions_before']!=versions:raise ValueError('upgrade before versions disagree')
+        versions=versions.copy();versions[node]='2.15.0';upgraded.add(node)
+        after=proof(root/f'fault-{i}-upgrade-after.json',versions)
+        if not killed<=after<=healed or fault['versions_after']!=versions:raise ValueError('upgrade after proof outside cut or versions disagree')
+        if first is None:first=scheduled
+        elif interval is None:
+            interval=scheduled-first
+            if interval!=(report['duration_seconds']-60)*1_000_000_000//4:raise ValueError('upgrade cadence differs from duration profile')
+        elif scheduled!=first+(i-1)*interval:raise ValueError('upgrade cadence inconsistent')
+        previous_heal=healed
+    if report['duration_seconds']!=35 and (len(upgraded)!=5 or versions!=['2.15.0']*5):raise ValueError('upgrade omitted a peer')
+    return dict(upgraded_peers=len(upgraded),pinned_endpoint_checks=5*(1+2*len(faults)),retained_backend='fallback',native_rejections=5*(1+2*len(faults)),full_five_peer_upgrade=len(upgraded)==5)
+
+
 def check_pause_artifacts(root,report):
     faults=json.loads((root/'faults.json').read_text())
     sessions=json.loads((root/'process-evidence.json').read_text())
@@ -767,6 +806,9 @@ if __name__ == '__main__':
     if args.row == 'worker_kill':
         if args.root is None: parser.error('--root is required for the worker row')
         report['worker_artifact_checks'] = check_worker_artifacts(args.root,report)
+    if args.row == 'rolling_upgrade':
+        if args.root is None: parser.error('--root is required for rolling upgrade')
+        report['upgrade_artifact_checks']=check_upgrade_artifacts(args.root,report)
     if args.row == 'worker_pause':
         if args.root is None: parser.error('--root is required for the pause row')
         report['pause_artifact_checks']=check_pause_artifacts(args.root,report)

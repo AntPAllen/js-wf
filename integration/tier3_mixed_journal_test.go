@@ -93,7 +93,7 @@ func TestFiveContainerAutomaticMembershipWithJournalKills(t *testing.T) {
 
 func runFiveContainerMixedLeader(t *testing.T, row string) {
 	t.Helper()
-	if matrixServerClockOffset(row) == 0 && row != "auto_journal" && row != "block_delay" && row != "block_disk" && row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
+	if matrixServerClockOffset(row) == 0 && row != "auto_journal" && row != "block_delay" && row != "block_disk" && row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" && row != "rolling_upgrade" {
 		t.Fatal("unsupported R5 fault row")
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
@@ -164,7 +164,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			clockTags[node] = []string{fmt.Sprintf("wf-clock-node-%d", node)}
 		}
 	}
-	cluster, err := testcluster.StartDockerClusterWithStoresAndTags(filepath.Join(root, "cluster"), 5, stores, clockTags)
+	var cluster *testcluster.DockerCluster
+	if row == "rolling_upgrade" {
+		cluster, err = testcluster.StartRollingUpgradeDockerCluster(filepath.Join(root, "cluster"), 5, os.Getenv("WF_NATS_SERVER_BIN"))
+	} else {
+		cluster, err = testcluster.StartDockerClusterWithStoresAndTags(filepath.Join(root, "cluster"), 5, stores, clockTags)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -199,7 +204,15 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	ready, stopReady := context.WithTimeout(ctx, 45*time.Second)
 	for ready.Err() == nil {
 		attempt, stop := context.WithTimeout(ready, 3*time.Second)
-		err = provision.Ensure(attempt, js, 5)
+		if row == "rolling_upgrade" {
+			var backend provision.TimerBackend
+			backend, err = provision.EnsureAuto(attempt, js, 5)
+			if err == nil && backend != provision.FallbackTimers {
+				err = fmt.Errorf("upgrade initial backend=%s", backend)
+			}
+		} else {
+			err = provision.Ensure(attempt, js, 5)
+		}
 		stop()
 		if err == nil {
 			break
@@ -485,6 +498,11 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			}
 		}
 	}
+	if row == "rolling_upgrade" {
+		launch("repair/fallback-timers", func() error {
+			return reconcile.RunFallbackTimerLoop(workCtx, js, "tier3-upgrade-timers", 100*time.Millisecond, 100)
+		})
+	}
 	launch("repair/start", func() error {
 		return reconcile.RunRepairLoopObserved(workCtx, js, "tier3-mixed-start", "start", time.Second, 32, repairObserver)
 	})
@@ -658,6 +676,14 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	if err := observeClocks("initial", 0); err != nil {
 		t.Fatal(err)
 	}
+	upgraded := make([]bool, 5)
+	var upgradeOrder []int
+	if row == "rolling_upgrade" {
+		upgradeOrder = faultRNG.Perm(5)
+		if _, err := proveFiveUpgradeDeployment(ctx, js, cluster, fiveUpgradeVersions(upgraded), filepath.Join(root, "upgrade-initial.json")); err != nil {
+			t.Fatal(err)
+		}
+	}
 	started := time.Now()
 	end := started.Add(duration)
 	faultDone := make(chan error, 1)
@@ -671,8 +697,14 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		faultInterval = 60 * time.Second
 		firstFault = 5 * time.Second
 	}
+	if row == "rolling_upgrade" && duration > 2*firstFault {
+		faultInterval = (duration - 2*firstFault) / 4
+	}
 	go func() {
 		for scheduled := started.Add(firstFault); scheduled.Before(end); scheduled = scheduled.Add(faultInterval) {
+			if row == "rolling_upgrade" && len(faults) == 5 {
+				break
+			}
 			delay := time.Until(scheduled)
 			if delay < 0 {
 				delay = 0
@@ -736,6 +768,8 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 					}
 				}
 				event, err = killFiveContainerMixedClockLeader(ctx, js, cluster, scheduled, prefix, len(faults)+1, recordRoles, admit)
+			} else if row == "rolling_upgrade" {
+				event, err = upgradeFiveMixedServer(ctx, js, cluster, upgradeOrder[len(faults)], scheduled, prefix, upgraded)
 			} else if row == "worker_isolation" {
 				event, err = isolateMatrixWorkerReplies(ctx, processes, workerProxies, faultRNG.Intn(len(processes)), scheduled, func(c context.Context, fleet []*matrixProcessWorker, first int) (int, matrixIsolationTarget, func() error, error) {
 					return armMatrixUnfinishedIsolationTarget(c, js, fleet, first)
@@ -1005,6 +1039,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		}
 	}
 	expectedFaults := int((duration-firstFault-time.Nanosecond)/faultInterval) + 1
+	if row == "rolling_upgrade" && expectedFaults > 5 {
+		expectedFaults = 5
+	}
 	if len(faults) != expectedFaults {
 		t.Fatalf("faults=%d want=%d", len(faults), expectedFaults)
 	}

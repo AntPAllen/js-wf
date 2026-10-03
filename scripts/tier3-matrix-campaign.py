@@ -18,7 +18,7 @@ def campaign(row, count, first=1, require_clock=False):
         raise ValueError('invalid positive int64 seed range')
     if require_clock and row != 'all' and not row.startswith('server_clock_'):
         raise ValueError('clock proof flags require clock rows or the full matrix')
-    width = 12 if row == 'all' else 1
+    width = 13 if row == 'all' else 1
     jobs = [dict(row=selected, first=start, last=min(start+width-1, first+count-1),
                  artifact_seed=str(start) if start == min(start+width-1, first+count-1)
                  else f'{start}-{min(start+width-1, first+count-1)}')

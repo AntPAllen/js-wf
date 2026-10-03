@@ -7783,3 +7783,55 @@ is confirmed queued at exact11ad2e468a2b66163befe4dabe373f593582d319. This follo
 the accepted full1211k execution (162.931s) and focused hosted race/control proof.
 Corrected real R5 worker-pause37105975815 is now confirmed in progress;
 upgrade37106224055 remains queued. No active trial was canceled or restarted.
+
+## Corrected R5 worker-pause and every-peer upgrade contract accepted
+
+[Pause run37105975815](https://github.com/AntPAllen/js-wf/actions/runs/37105975815)
+at exactf32ce38 is independently accepted for seed1/10m:2408 invocations,
+26667 journal entries, ten actual45s pauses of the same five process identities,
+11 matching resumed lease/epoch fencing records and complete five-process
+counter cross-checks. Every cell remains below30s; worst terminal/progress p99
+18.015269582s/0.394923796s. The raw artifact checker, event explanations and
+fencing review regenerate byte for byte. All15 fencing records are retained:
+14 completed while the original owner was stopped and one was terminal before
+fetch, with four outside confirmed fault windows. No server cause is inferred
+from those classifications. Original checker rejection remains preserved.
+
+Complete downloaded original bytes, job metadata/logs and independent reports
+are SHA256-verified in scale/worker-release-fencing-2026-10-03/hosted-r5-pause-pass/.
+Checkout metadata identifies source; this producer did not upload a full source
+manifest or physical NATS stores. The separate focused model/race/control
+qualification establishes the runtime fix, while this proves the corrected
+single real R5 row, not the full200-seed matrix or24h gate.
+
+[Upgrade contract37106224055](https://github.com/AntPAllen/js-wf/actions/runs/37106224055)
+at exact5712254 is accepted: actual race package43.486s, all five peer upgrades,
+37 exact retained payloads, independently cross-checked five-peer physical
+counts/last sequences for all six stages, and the compiled single-old-peer
+control's exact initial node1 version failure. All442 archive members and582
+source files match their manifests/exact Git source; sources remain unchanged.
+Full original stores and binaries are retained at
+scale/docker-rolling-upgrade-2026-10-03/hosted-pass/. This qualifies the Docker
+fixture contract, not the mixed-workload row.
+
+## Fifteenth R5 row prepared: rolling upgrade with retained fallback
+
+The new mixed row starts all five peers2.11.17 and upgrades each exactly once,
+in seeded order, spread over10m/24h while the six workload cells, fallback timer
+poller and existing repair/audit/latency/drain checks continue. Before/after each
+cut proves pinned actual versions/identities, retained fallback and explicit
+native version/config rejection on every endpoint plus current R5 run/timer
+file replicas. A35s smoke only upgrades one peer. The guard rejects missing,
+wrong/duplicate peers, wrong native rejection, native enablement, backend
+changes, stale replicas, bad cut vectors and timestamps/cadence. The workflow
+builds actual static old servers and archives all physical stores/evidence with
+member hash readback even on failure.
+
+Local59 Tier3 guards pass; workflow shell/embedded-Python syntax parses. The
+actual new Go fixture compiles and skips when opt-in is absent; no real-row
+qualification is claimed yet. Registry/planner/workflow now cover15 implemented
+rows with13-seed shards/340m jobs,240 jobs for200 seeds; worker-clock skew remains
+missing from R5. Original14/12-shard evidence is not reattributed. Current121
+100k37106469422 remains actively running at11ad2e4, with unchanged simulation
+and runtime sources in this fixture port. Original24h/full-release scope stays
+open.

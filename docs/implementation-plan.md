@@ -903,3 +903,21 @@ Keep the original artifact checker rejection and add an executed compiled
 release-observation omission control. Focused model proof does not clear current
 121-workload full-suite/100k or real R5 pause qualification. The prior120 graph
 100k gate remains independently accepted atad37bfc.
+
+### R5 rolling-upgrade row preparation
+
+The original rolling-upgrade requirement now has a sustained six-cell R5 row
+implementation: all five peers start2.11.17, each peer is upgraded exactly once
+in seeded order across10m (or24h), with fallback timer poller continuing during
+cuts. Each before/after deployment proof pins five unique actual server
+identities/versions, R5 file readiness for run/timer streams, retained fallback
+selection and semantic explicit-native rejection. A35s fixture smoke upgrades
+one peer and cannot qualify a full rolling upgrade. Preserve complete physical
+stores and all evidence in verified archives. Port is prepared, pending actual
+mixed-row qualification; the independent37-message five-peer constructor
+contract is accepted. Worker-clock skew remains an original R5 port gap.
+
+The implemented registry is now15 rows. Full campaigns use13-seed shards and
+340m job budgets:15xceil(200/13)=240 jobs, leaving capacity for the remaining
+worker-clock row (16x16=256). Existing14-row/12-seed evidence retains its source
+and original scope. No new registry size clears the full original matrix or24h.

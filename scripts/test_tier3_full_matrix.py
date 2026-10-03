@@ -31,8 +31,8 @@ class FullMatrixTests(unittest.TestCase):
     def test_complete_ranges_keep_partial_release_scope(self):
         for count in (1, 20, 200):
             report = full.check(*fixture(count), count, '10m', True)
-            self.assertEqual(report['executions'], 14*count)
-            self.assertEqual(report['invocations'], 14*count*56)
+            self.assertEqual(report['executions'], len(full.planner.ROWS)*count)
+            self.assertEqual(report['invocations'], len(full.planner.ROWS)*count*56)
             self.assertFalse(report['clears_full_tier3_release'])
 
     def test_missing_duplicate_failed_live_and_source_jobs(self):
