@@ -2,6 +2,15 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Full journal network acknowledgment fixture implemented:** the new
+  opt-in default-size test applies actual TCP faults to all 1,000 appends,
+  alternating committed/absent branches, with a midpoint journal-leader kill
+  and restart plus raw receipt comparisons on all three peers. The corrected
+  two-case diagnostic passes independent transcript/counter/payload/CAS/receipt
+  review; seven mutations of actual inputs are rejected. The initial missing
+  `Publish` hook is retained as a rejected fixture trial. Full-size execution
+  is still required; neither the diagnostic nor this implementation clears it.
+  [Focused raw diagnostic and verifier controls](scale/journal-network-acks-2026-10-03/diagnostic/).
 - **Full Tier3 upgrade profile review corrected:** the full reviewer now
   forwards and requires requested Start-gap/scanner-progress and shutdown
   profiles. Its old call rejects unchanged accepted SIGKILL/Lame Duck report
