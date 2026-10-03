@@ -8321,3 +8321,20 @@ local development capacity. The focused diagnostic now also compiles/runs
 locally under race in1.024s. Neither archival nor the sample restores establish
 a new broker restart/scale gate. Existing Docker37112424062 remains queued and
 current121100k37106469422 remains running; no originals or live jobs are restarted.
+
+
+## Docker reply-wakeup contract independently accepted
+
+Qualification37112424062 is accepted at exactd2b98c6705bd2f47a680048a212d76608fa4b613.
+Seven actual positive race tests pass, including both actual Docker removal
+modes and delayed real command replies. The separately compiled sequential and
+missing-wakeup controls fail their precise executed named/package deadline
+assertions, with no build/skip/global timeout. Nine inventoried source hashes
+match exact Git; attribution is limited to those files plus the hosted checkout,
+not a full source inventory. All15 original archive members pass SHA256
+readback. Reusable review and raw evidence are retained in
+scale/docker-exit-wakeup-2026-10-03/. The contract establishes observer behavior,
+not actual seed29 exit timing, ahead200 acceptance or full release. Version4
+real rolling qualification can now proceed with the accepted fallback/native
+budget contract and full before/after source capture. Original failed rolling
+trials remain rejected and preserved.
