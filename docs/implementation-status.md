@@ -2,6 +2,19 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Six sustained mutation components qualified:** the corrected Start-only
+  job 111295104283 at `649c6ce8d40c10521da1a4f0feda066db4dc0332` passes
+  independent raw review. The combined checker then accepts all six pairs
+  against exact reference `06762b6`: all 606 tracked Go/fixture/module inputs,
+  workflow bytes and selected mutation definitions match. Twelve full
+  ten-minute phases total 32,032 terminal invocations, 352,979 entries and
+  228 leader kills; worst terminal/progress p99 are
+  17.361650029 s/7.305135807 s. This clears the sustained six-mutation gate;
+  the failed original parent remains rejected. Physical stores/executables
+  were not uploaded. Final-source full100k, full matrix/200-seed and 24h
+  gates remain open. The historical 31.1 s/30 s-TTL worker-kill mismatch
+  remains closed without reruns; production TTL is 12 s and recovery gate 30 s.
+  [Accepted raw component review and equivalence ledger](scale/sustained-component-verifier-2026-10-03/accepted/).
 - **Strict targeted-retry component verifier prepared:** a separate checker
   requires six successful raw-reviewed ten-minute pairs with identical tracked
   Go/fixture/module inputs, workflow bytes and selected mutation definitions at
