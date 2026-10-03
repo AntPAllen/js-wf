@@ -71,8 +71,15 @@
   Terminal p99=7.336s, worst type terminal/progress=13.337s/7.294s; no progress
   event exceeds30s. Full uploaded originals are SHA256-readback archived.
   [Corrected journal86 evidence](scale/start-enqueue-history-2026-10-03/journal86-corrected-replay/).
-  Consumer139 is terminal success but not yet independently reviewed. Other
-  focused replays and the full current-source1..200 qualification remain open.
+  Consumer139 is independently accepted:619.45s,97 cohorts/2716 invocations/
+  29947 entries/19 positively active consumer-leader cuts. All12804 raw latency
+  samples reproduce all metrics and3492 SDK operations pass the three models.
+  Terminal p99=7.311s; worst type terminal/progress=11.988s/7.052s; no progress
+  event exceeds30s. Originals and review utilities are SHA256-readback archived.
+  [Corrected consumer139 evidence](scale/start-enqueue-history-2026-10-03/consumer139-corrected-replay/).
+  Three other focused replays and full current-source1..200 remain open. The
+  rejected original shards remain rejected; these new trials execute all final
+  gates that the old checker failures prevented.
 - **Tier3:**16 implemented row variants are now in the registry,
   including separate worker-clock and every-peer rolling upgrade. The initial
   14-row seed1 campaign failed and cannot qualify the complete original matrix.
