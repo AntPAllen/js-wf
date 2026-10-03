@@ -2,6 +2,17 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Worker-clock proof capture corrected:** full Tier3 job 111303440191
+  (`worker_clock`, seeds 1–13) failed after its seed 1 workload/package passed.
+  One retained clock-probe snapshot has a follower one entry behind, so the
+  strict reviewer correctly rejects it. The fixture now waits at most two
+  seconds for all five replicas to be current before saving the snapshot;
+  configuration, freshness and latency gates remain strict. Actual-snapshot
+  normal/race regressions and a compiled missing-wait control verify the fix.
+  The unchanged reviewer still rejects unchanged originals, and all 3,960
+  original store-archive members hash-verify. Failed seed/shard remain rejected;
+  fresh ten-minute qualification is required. Other live jobs are unchanged.
+  [Original failure and bounded correction](scale/worker-clock-replica-capture-2026-10-03/).
 - **Current-source Tier2 journal seeds 1–48 accepted:** four successful
   twelve-seed shards in 37149506857 at exact `c4fed06` pass independent review.
   All 48 full ten-minute named-test/package executions, recorded fault schedules,

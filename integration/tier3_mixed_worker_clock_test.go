@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -126,7 +127,11 @@ func captureTier3WorkerClocks(ctx context.Context, stream jetstream.Stream, proc
 		proof.Messages = append(proof.Messages, tier3ClockMessage{message.Subject, message.Sequence, message.Time, message.Data})
 	}
 	var err error
-	proof.StreamInfo, err = matrixReadMetadata(ctx, func(attempt context.Context) (*jetstream.StreamInfo, error) { return stream.Info(attempt) })
+	// PubAck confirms quorum, not that every follower has caught up. Preserve
+	// the strict five-current-replica proof by waiting before taking its snapshot.
+	readiness, stop := context.WithTimeout(ctx, 2*time.Second)
+	defer stop()
+	proof.StreamInfo, err = waitTier3WorkerClockReplicas(readiness, stream.Info)
 	proof.Observed = time.Now().UTC()
 	if err != nil {
 		return proof, err
@@ -137,6 +142,41 @@ func captureTier3WorkerClocks(ctx context.Context, stream jetstream.Stream, proc
 		}
 	}
 	return proof, nil
+}
+
+func waitTier3WorkerClockReplicas(ctx context.Context, lookup func(context.Context, ...jetstream.StreamInfoOpt) (*jetstream.StreamInfo, error)) (*jetstream.StreamInfo, error) {
+	var last *jetstream.StreamInfo
+	for {
+		info, err := matrixReadMetadata(ctx, func(attempt context.Context) (*jetstream.StreamInfo, error) {
+			return lookup(attempt)
+		})
+		if err != nil {
+			return nil, err
+		}
+		last = info
+		if info == nil || info.Config.Name != "MATRIX_CLOCK" || len(info.Config.Subjects) != 1 || info.Config.Subjects[0] != "matrix.clock.*" || info.Config.Replicas != 5 || info.Config.Storage != jetstream.FileStorage || info.Config.MaxMsgsPerSubject != 16 {
+			return nil, errors.New("clock probe stream configuration differs from R5 file contract")
+		}
+		ready := info.Cluster != nil && info.Cluster.Leader != "" && len(info.Cluster.Replicas) == 4
+		if ready {
+			names := map[string]bool{info.Cluster.Leader: true}
+			for _, replica := range info.Cluster.Replicas {
+				if replica == nil || replica.Name == "" || names[replica.Name] || !replica.Current || replica.Offline {
+					ready = false
+					break
+				}
+				names[replica.Name] = true
+			}
+		}
+		if ready {
+			return info, nil
+		}
+		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("clock probe replicas did not catch up: cluster=%+v: %w", last.Cluster, ctx.Err())
+		case <-time.After(25 * time.Millisecond):
+		}
+	}
 }
 
 func normalizeTier3WorkerClockRecords(steps []worker.DispatchEvent, fences []worker.FencingEvent) ([]worker.DispatchEvent, []worker.FencingEvent, error) {
