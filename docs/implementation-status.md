@@ -2,6 +2,16 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Strict targeted-retry component verifier prepared:** a separate checker
+  requires six successful raw-reviewed ten-minute pairs with identical tracked
+  Go/fixture/module inputs, workflow bytes and selected mutation definitions at
+  an exact reference revision. It leaves failed parent campaigns rejected and
+  cannot clear independent matrix/24h gates. All 17 harness/reviewer controls
+  pass (0.581 s). A real-input CLI control rechecks the five accepted components,
+  then rejects the original failed Start job and publishes no qualification
+  report. The corrected Start retry is still required; no six-component gate
+  is cleared by these controls.
+  [Exact negative control and verifier scope](scale/sustained-component-verifier-2026-10-03/).
 - **Current-source sustained purge mutation accepted:** successful job
   111281643016 at `c4fed061bc614488d4f89b53b216b756490f7da0` passes independent
   source/overlay/semantic-failure/negative-control review. Both ten-minute

@@ -104,6 +104,39 @@ uploads the output directory, including on failure. A survivor, fixture failure
 or missing expected semantic marker fails CI.
 
 
+### Combining independently reviewed targeted retries
+
+`check-sustained-mutation-campaign.py` continues to require a successful complete
+six-category campaign at one revision. A failed original campaign remains
+rejected even when its other component jobs pass.
+
+For a targeted harness-only retry, `check-sustained-mutation-components.py`
+can qualify the six components against an exact reference revision. It requires
+identical tracked Go sources (including fixtures), module declarations and
+workflow bytes, and identical selected mutation file/before/after definitions
+for every component. Differences in unrelated Python validation or documentation
+cannot substitute for a changed runtime or fixture. Each original source
+inventory, overlay, full ten-minute pair, semantic failure, negative controls,
+fault chronology and raw latency report is independently checked again.
+
+The input is a JSON list with exactly six entries, one per category:
+
+| Field | Required value |
+| --- | --- |
+| `mode` | `determinism`, `leases`, `cas`, `enqueue`, `start-repair` or `purge` |
+| `job_id` | Actual successful category job's numeric database ID |
+| `metadata` | Original `gh run view --json headSha,status,conclusion,jobs` observation |
+| `job_log` | Complete original category job log with checkout/result evidence |
+| `artifact_root` | Directory containing that category's downloaded originals |
+
+Paths resolve relative to the manifest; absolute paths are also accepted. Pass
+the manifest with `--components`, a full 40-character Git SHA with `--reference`,
+and a fresh result path with `--output`. A missing, failed, skipped or live
+component, source mismatch or rejected raw phase prevents any result publication.
+Only six fully reviewed ten-minute pairs can clear the sustained mutation gate.
+The result never promotes parent campaigns or clears independent full-matrix,
+200-seed or 24-hour gates.
+
 ## Live mixed determinism challenge
 
 ```sh
