@@ -2,6 +2,18 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Current-source sustained CAS mutation accepted:** campaign 37149508529
+  at exact `c4fed061bc614488d4f89b53b216b756490f7da0` has an independently
+  reviewed successful CAS job. All 608 source files and the single production
+  overlay verify; both ten-minute same-store reports regenerate exactly. The
+  baseline admits one winner; the mutant retains two distinct physical receipts
+  decoding to the same index-2 entry and the raw-state checker rejects it.
+  Totals: 5,404 terminal invocations, 59,569 entries, 38 journal-leader faults;
+  worst terminal/progress p99 13.031542858 s/7.054885611 s. Actual semantic
+  failure and negative controls verify. Physical stores/executables were not
+  uploaded. CAS, determinism and lease are three accepted components; enqueue,
+  Start repair, purge and full matrix/24h gates remain open.
+  [Complete component originals and decoded receipts](scale/current-sustained-mutations-2026-10-03/cas/).
 - **Current-source sustained determinism mutation accepted:** campaign
   37149508529 at exact `c4fed061bc614488d4f89b53b216b756490f7da0` now has
   an independently reviewed successful determinism job. All 608 source files
