@@ -1109,6 +1109,27 @@ gap when qualified; integrate the same boundary into the sustained R5 rolling
 row before claiming full R5 mixed two-write-gap coverage. The200-seed matrix and
 24-hour soak requirements remain unchanged.
 
+### Sustained R5 forced Start gap profile
+
+`WF_TIER3_UPGRADE_START_GAP=1` (`upgrade_start_gap` workflow input) reserves one
+existing `matrixshort` cohort invocation before each rolling cut. Arm reservation
+ten seconds before the scheduled upgrade so the 35-second smoke can supply a
+cohort; retain the original scheduled cut time. The child commits through the
+selected old peer and is SIGKILLed before dispatch. Only its start-repair
+publication is held; other production transports continue unchanged. Carry its
+unchanged invocation across the proven retained-store upgrade before releasing
+the production fenced scanner. Require acknowledged scanner repair, terminal
+completion within30s of kill, and an observed matching duplicate Start.
+
+Keep28 invocations per cohort and all six cell counts, histories, checkpoints,
+raw-state integrity, per-type p99 and drain gates. Record the killed SDK call as
+uncertain with no response, bounded by actual process death; preserve its raw
+commit receipt separately. The artifact verifier requires every announced cut's
+process/status/input/sequence/time proof and rejects missing or changed evidence.
+Qualification starts with35s race smoke, followed by the full ten-minute profile
+for SIGKILL and graceful upgrades. This optional profile is not qualified by
+existing R3 or earlier rolling evidence;200 seeds and24h remain required.
+
 ### Focused Tier2 consecutive seed replay
 
 `tier2-matrix-leaders` now accepts a positive `start_seed` and preserves actual

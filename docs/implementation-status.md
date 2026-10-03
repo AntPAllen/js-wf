@@ -150,6 +150,12 @@
   precise omitted-repair control fails at its named assertion15.374s.
   [Hosted original evidence](scale/start-upgrade-gap-2026-10-03/hosted-contract/).
   Sustained R5 forced-gap coverage remains open.
+  New optional cohort-short-v1 profile reserves an existing short invocation,
+  SIGKILLs its real Start child before dispatch, holds only its scanner publish
+  through the proven upgrade, and requires acknowledged production scan repair,
+  unchanged sequence/duplicate identity and verified terminal under30s. Existing
+  28-invocation cohort counts and all row gates remain. Focused gate/history
+  race checks and70 row-verifier tests pass; real R5 qualification is pending.
 - **CAS benchmark harness:** hosted37121445966 atcd59b86 is rejected before
   measurement: the shared harness used the newer UnmarshalEntry API absent at
   fixed baseline4fa3119. Its diagnostic now uses the benchmark's JSON format;

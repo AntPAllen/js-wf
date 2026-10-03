@@ -275,6 +275,15 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	var recorder history.Recorder
 	c := client.NewObserved(js, &recorder)
+	startGapEnabled := row == "rolling_upgrade" && os.Getenv("WF_TIER3_UPGRADE_START_GAP") == "1"
+	var startGapRequests chan *fiveStartGapRequest
+	var startRepairJS jetstream.JetStream = js
+	startRepairGate := &fiveStartRepairGate{JetStream: js}
+	if startGapEnabled {
+		startGapRequests = make(chan *fiveStartGapRequest)
+		startRepairJS = startRepairGate
+		t.Log("TIER3_UPGRADE_START_GAP=cohort-short-v1")
+	}
 	var evidenceMu sync.Mutex
 	var controllerOperations []worker.OperationEvent
 	var childStartOperations []worker.OperationEvent
@@ -533,7 +542,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		})
 	}
 	launch("repair/start", func() error {
-		return reconcile.RunRepairLoopObserved(workCtx, js, "tier3-mixed-start", "start", time.Second, 32, repairObserver)
+		return reconcile.RunRepairLoopObserved(workCtx, startRepairJS, "tier3-mixed-start", "start", time.Second, 32, repairObserver)
 	})
 	launch("repair/signal", func() error {
 		return reconcile.RunRepairLoopObserved(workCtx, js, "tier3-mixed-signal", "signal", time.Second, 32, repairObserver)
@@ -751,7 +760,11 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			if row == "rolling_upgrade" && len(faults) == 5 {
 				break
 			}
-			delay := time.Until(scheduled)
+			reservationAt := scheduled
+			if startGapEnabled {
+				reservationAt = scheduled.Add(-10 * time.Second)
+			}
+			delay := time.Until(reservationAt)
 			if delay < 0 {
 				delay = 0
 			}
@@ -815,7 +828,40 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				}
 				event, err = killFiveContainerMixedClockLeader(ctx, js, cluster, scheduled, prefix, len(faults)+1, recordRoles, admit)
 			} else if row == "rolling_upgrade" {
-				event, err = upgradeFiveMixedServer(ctx, js, cluster, upgradeOrder[len(faults)], scheduled, prefix, upgraded)
+				node := upgradeOrder[len(faults)]
+				var request *fiveStartGapRequest
+				var gapReady fiveStartGapReady
+				if startGapEnabled {
+					request = &fiveStartGapRequest{node: node, root: prefix + "-start-gap", ready: make(chan fiveStartGapReady, 1), released: make(chan struct{})}
+					selection, stop := context.WithTimeout(ctx, 20*time.Second)
+					select {
+					case startGapRequests <- request:
+						select {
+						case gapReady = <-request.ready:
+							err = gapReady.err
+						case <-selection.Done():
+							err = fmt.Errorf("rolling Start gap child proof: %w", selection.Err())
+						}
+					case <-selection.Done():
+						err = fmt.Errorf("rolling Start gap cohort reservation: %w", selection.Err())
+					}
+					stop()
+				}
+				if err == nil && startGapEnabled {
+					wait := time.NewTimer(max(time.Until(scheduled), 0))
+					select {
+					case <-wait.C:
+					case <-ctx.Done():
+						wait.Stop()
+						err = ctx.Err()
+					}
+				}
+				if err == nil {
+					event, err = upgradeFiveMixedServer(ctx, js, cluster, node, scheduled, prefix, upgraded)
+				}
+				if err == nil && startGapEnabled {
+					event.StartGap, err = releaseFiveStartGap(ctx, js, startRepairGate, gapReady, request)
+				}
 			} else if row == "worker_clock" {
 				event = matrixLeaderFault{Scheduled: scheduled, Killed: time.Now().UTC(), Node: -1}
 				var proof tier3WorkerClockProof
@@ -982,15 +1028,31 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				if matrixServerClockOffset(row) != 0 && typ == "matrixtimer" {
 					input, _ = json.Marshal(map[string]string{"fixture_id": id})
 				}
-				if err := matrixRetryClient(batchCtx, func(attempt context.Context) error {
-					_, err := c.Start(attempt, typ, id, input)
-					if errors.Is(err, client.ErrAlreadyStarted) {
-						return nil
+				var gapRequest *fiveStartGapRequest
+				var gapProof startGapProof
+				if typ == "matrixshort" {
+					select {
+					case gapRequest = <-startGapRequests:
+						var err error
+						gapProof, err = prepareFiveStartGap(batchCtx, js, startRepairGate, gapRequest, urls[gapRequest.node], typ, id, input, &recorder)
+						if err != nil {
+							batchErrors <- err
+							return
+						}
+					default:
 					}
-					return err
-				}); err != nil {
-					batchErrors <- err
-					return
+				}
+				if gapRequest == nil {
+					if err := matrixRetryClient(batchCtx, func(attempt context.Context) error {
+						_, err := c.Start(attempt, typ, id, input)
+						if errors.Is(err, client.ErrAlreadyStarted) {
+							return nil
+						}
+						return err
+					}); err != nil {
+						batchErrors <- err
+						return
+					}
 				}
 				if typ == "matrixsignal" {
 					for n := 0; n < 8; n++ {
@@ -1003,9 +1065,21 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 						}
 					}
 				}
-				value, err := c.Await(batchCtx, typ, id)
+				awaitCtx := batchCtx
+				stopGap := func() {}
+				if gapRequest != nil {
+					awaitCtx, stopGap = context.WithDeadline(batchCtx, gapProof.Killed.Add(30*time.Second))
+				}
+				defer stopGap()
+				value, err := c.Await(awaitCtx, typ, id)
 				if err != nil || string(value) != "42" {
 					batchErrors <- fmt.Errorf("result%s/%s=%s err=%v", typ, id, value, err)
+					return
+				}
+				if err == nil && gapRequest != nil {
+					if err := verifyFiveStartGapTerminal(awaitCtx, js, c, typ, id, input, gapProof, gapRequest.root); err != nil {
+						batchErrors <- err
+					}
 				}
 			}()
 		}

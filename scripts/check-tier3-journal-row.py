@@ -91,6 +91,9 @@ def check(events, duration, expected_row='journal', expected_seed=None):
     clocks = re.findall(r'TIER3_COMMON_TIMER_CLOCK=(\S+)', log)
     if clocks and (clocks != ['utc-quorum-v1'] or not row.startswith('server_clock_')):
         raise ValueError('invalid or duplicated common timer clock profile')
+    gaps=re.findall(r'TIER3_UPGRADE_START_GAP=(\S+)',log)
+    if gaps and (row!='rolling_upgrade' or gaps!=['cohort-short-v1']):
+        raise ValueError('invalid rolling Start gap profile')
     shutdowns=re.findall(r'TIER3_UPGRADE_SHUTDOWN=(\S+)',log)
     if shutdowns and (row!='rolling_upgrade' or len(shutdowns)!=1 or shutdowns[0] not in ('sigkill','ldm')):
         raise ValueError('invalid upgrade shutdown profile')
@@ -100,6 +103,7 @@ def check(events, duration, expected_row='journal', expected_seed=None):
                 shortened_smoke=duration == '35s', invocations=invocations, journal_entries=entries,
                 confirmed_faults=faults, active_consumer_faults=active_consumer_faults, cells=cells, clears_full_tier3_release=False)
     if shutdowns: report['upgrade_shutdown_mode']=shutdowns[0]
+    if gaps: report['upgrade_start_gap']=gaps[0]
     return report
 
 
@@ -565,6 +569,49 @@ def check_worker_clock_artifacts(root, report):
                 correction='configured Go overlay only; broker/controller unchanged',clears_full_tier3_release=False)
 
 
+def check_upgrade_start_gap(root, fault, before, after, healed):
+    import base64,hashlib
+    gap=fault.get('start_gap')
+    if not isinstance(gap,dict) or gap.get('type')!='matrixshort':raise ValueError('missing cohort Start gap')
+    name=gap['root']
+    if not re.fullmatch(r'fault-[1-5]-start-gap',name):raise ValueError('invalid Start gap evidence root')
+    directory=root/name
+    if json.loads((directory/'upgrade-gap.json').read_text())!=gap:raise ValueError('Start gap observation disagrees')
+    proof=json.loads((directory/'killed-gap.json').read_text())
+    if gap['proof']!=proof:raise ValueError('Start gap kill proof disagrees')
+    receipt=proof['receipt'];inv=proof['retained']
+    if (proof['signal']!='SIGKILL' or 'killed' not in proof['wait_error'] or receipt['pid']<=0
+        or receipt['version']!='2.11.17' or not receipt['server_id'] or not proof['journal_absent'] or proof['run_messages']!=0):
+        raise ValueError('Start gap lacks actual old-peer child kill and absent dispatch/journal')
+    if inv!=receipt['invocation'] or inv!=gap['after_upgrade'] or type(inv['Sequence']) is not int or inv['Sequence']<=0:
+        raise ValueError('Start gap invocation changed across upgrade')
+    typ,id=gap['type'],gap['id'];key=typ+'.'+id
+    if inv['Subject']!='wf.inv.'+key or receipt['run_data']!=key or not re.fullmatch(r'wf.run.\d+',receipt['run_subject']):
+        raise ValueError('Start gap identity mismatch')
+    data=base64.b64decode(inv['Data']);header={k.lower():v for k,v in inv['Header'].items()}
+    if data!=b'null' or header.get('wf-input-sha256')!=[hashlib.sha256(data).hexdigest()]:raise ValueError('Start gap input mismatch')
+    invoked,marked,kill_begin,killed,released=map(timestamp_ns,[receipt['invoked'],receipt['at'],proof['kill_started'],proof['killed'],gap['repair_released']])
+    scheduled=timestamp_ns(fault['scheduled'])
+    if not scheduled-10_000_000_000<=invoked<=marked<=kill_begin<=killed<=before<=after<=healed<=released or before<scheduled:
+        raise ValueError('Start gap does not span confirmed upgrade')
+    terminal=json.loads((directory/'terminal.json').read_text());entry=json.loads(base64.b64decode(terminal['Data']))
+    if terminal['Subject']!='wf.jrn.'+key or entry['kind']!='Completed' or entry['payload']['inv_seq']!=inv['Sequence'] or base64.b64decode(entry['payload']['result'])!=b'42':
+        raise ValueError('Start gap terminal mismatch')
+    completion=json.loads((directory/'completion.json').read_text());verified=timestamp_ns(completion['verified'])
+    if completion['inv_seq']!=inv['Sequence'] or not released<=verified or not 0<verified-killed<30_000_000_000 or completion['kill_to_terminal_ns']!=verified-killed:
+        raise ValueError('Start gap terminal exceeds30s or timing disagrees')
+    repairs=json.loads((root/'repairs.json').read_text())
+    if not any(e['kind']=='start' and e['type']==typ and e['id']==id and e['outcome']=='acknowledged' and released<=timestamp_ns(e['at'])<=verified for e in repairs):
+        raise ValueError('Start gap lacks actual acknowledged production scan repair')
+    calls=[json.loads(line) for line in (root/'history.jsonl').read_text().splitlines()]
+    calls=[e for e in calls if e.get('args',{}).get('type')==typ and e.get('args',{}).get('id')==id]
+    starts=[e for e in calls if e['op']=='start']
+    if len(starts)!=2 or [e['result']['status'] for e in starts]!=['unknown','already_started'] or starts[-1]['result']['inv_seq']!=inv['Sequence']:
+        raise ValueError('Start gap uncertain call/duplicate identity history missing')
+    if timestamp_ns(starts[0]['invoke_ts'])!=invoked or timestamp_ns(starts[0]['return_ts'])!=killed:
+        raise ValueError('Start gap history invented a client response')
+
+
 def check_upgrade_artifacts(root, report):
     faults=json.loads((root/'faults.json').read_text())
     if len(faults)!=report['confirmed_faults']:raise ValueError('upgrade fault count mismatch')
@@ -634,11 +681,16 @@ def check_upgrade_artifacts(root, report):
             if 'lame_duck_duration: 30s' not in config or 'lame_duck_grace_period: 10s' not in config:
                 raise ValueError('graceful profile lacks documented eviction configuration')
         elif fault.get('graceful_upgrade'):raise ValueError('SIGKILL profile claimed graceful shutdown')
+        if report.get('upgrade_start_gap'):
+            check_upgrade_start_gap(root, fault, before, after, healed)
+        elif fault.get('start_gap'):
+            raise ValueError('unannounced rolling Start gap profile')
         previous_heal=healed
     if report['duration_seconds']!=35 and (len(upgraded)!=5 or versions!=['2.15.0']*5):raise ValueError('upgrade omitted a peer')
     result=dict(upgraded_peers=len(upgraded),pinned_endpoint_checks=5*(1+2*len(faults)),retained_backend='fallback',native_rejections=5*(1+2*len(faults)),full_five_peer_upgrade=len(upgraded)==5)
     if 'upgrade_shutdown_mode' in report:
         result.update(shutdown_mode=report['upgrade_shutdown_mode'],graceful_shutdowns=len(faults) if report['upgrade_shutdown_mode']=='ldm' else 0)
+    if report.get('upgrade_start_gap'):result['forced_start_gaps']=len(faults)
     return result
 
 
