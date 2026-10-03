@@ -13,6 +13,21 @@ spec.loader.exec_module(module)
 
 
 class CampaignTests(unittest.TestCase):
+    def test_recorded_registry_preserves_historical_anchor_without_execution(self):
+        source = (module.runner.ROOT / "scripts/check-invariant-mutations.py").read_text()
+        current = module.recorded_mutations(source)
+        historical = module.recorded_mutations(source.replace(
+            "(result ScanResult, scanErr error)", "(ScanResult, error)"))
+        self.assertNotEqual(current["skipped_start_reconciler"]["before"],
+                            historical["skipped_start_reconciler"]["before"])
+        self.assertEqual(module.recorded_mutations(source + '\nraise RuntimeError("must not execute")\n'), current)
+        with self.assertRaises(ValueError):
+            module.recorded_mutations(source.replace('dict(name="missing_cas"',
+                                                      'dict(name=str(42)', 1))
+        with self.assertRaises(ValueError):
+            module.recorded_mutations(source.replace('name="missing_cas"',
+                                                      'name="independent_worker_leases"', 1))
+
     def metadata(self):
         return dict(headSha="a"*40, status="completed", conclusion="success",
                     jobs=[dict(name=name, status="completed", conclusion="success") for name in ["categories"] + [f"sustained ({mode})" for mode in module.MODES]])

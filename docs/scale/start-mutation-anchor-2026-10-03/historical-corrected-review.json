@@ -1,0 +1,175 @@
+{
+  "revision": "0f979d0e03d38b05136f699f53fa727dbd035e11",
+  "verdict": "accepted",
+  "review": {
+    "mode": "start-repair",
+    "phases": {
+      "baseline": {
+        "accepted": true,
+        "admission": {
+          "mode": "start-repair",
+          "seed": 42,
+          "duration_ns": 600000000000,
+          "elapsed_ns": 626887055836,
+          "release_duration": true,
+          "batches": 94,
+          "faults": 19,
+          "invocation_cutoff": 2632,
+          "retained": {
+            "Invocations": 2632,
+            "Journals": 2632,
+            "Entries": 28994,
+            "Terminal": 2632
+          },
+          "same_stores": true
+        },
+        "cells": {
+          "matrixshort": {
+            "invocations": 376,
+            "terminal_p99_seconds": 1.882175389,
+            "progress_p99_seconds": 1.878029802,
+            "progress_events": 376
+          },
+          "matrixtimer": {
+            "invocations": 282,
+            "terminal_p99_seconds": 7.060607364,
+            "progress_p99_seconds": 7.054903625,
+            "progress_events": 2538
+          },
+          "matrixsignal": {
+            "invocations": 188,
+            "terminal_p99_seconds": 15.740536085,
+            "progress_p99_seconds": 2.554810326,
+            "progress_events": 1692
+          },
+          "matrixfanout": {
+            "invocations": 94,
+            "terminal_p99_seconds": 12.05180854,
+            "progress_p99_seconds": 0.055796715,
+            "progress_events": 1222
+          },
+          "matrixchild": {
+            "invocations": 564,
+            "terminal_p99_seconds": 0.074177699,
+            "progress_p99_seconds": 0.0533371,
+            "progress_events": 2820
+          },
+          "matrixgrandchild": {
+            "invocations": 1128,
+            "terminal_p99_seconds": 0.056430826,
+            "progress_p99_seconds": 0.030980720000000003,
+            "progress_events": 1128
+          }
+        }
+      },
+      "mutated": {
+        "accepted": true,
+        "admission": {
+          "mode": "start-repair",
+          "seed": 42,
+          "duration_ns": 600000000000,
+          "elapsed_ns": 624488096938,
+          "release_duration": true,
+          "batches": 95,
+          "faults": 19,
+          "invocation_cutoff": 2660,
+          "retained": {
+            "Invocations": 2660,
+            "Journals": 2660,
+            "Entries": 29326,
+            "Terminal": 2660
+          },
+          "same_stores": true
+        },
+        "cells": {
+          "matrixshort": {
+            "invocations": 380,
+            "terminal_p99_seconds": 0.40441133300000004,
+            "progress_p99_seconds": 0.383963319,
+            "progress_events": 380
+          },
+          "matrixtimer": {
+            "invocations": 285,
+            "terminal_p99_seconds": 12.45884296,
+            "progress_p99_seconds": 7.056709821,
+            "progress_events": 2565
+          },
+          "matrixsignal": {
+            "invocations": 190,
+            "terminal_p99_seconds": 15.738511069,
+            "progress_p99_seconds": 0.35925284799999996,
+            "progress_events": 1710
+          },
+          "matrixfanout": {
+            "invocations": 95,
+            "terminal_p99_seconds": 15.732906658,
+            "progress_p99_seconds": 0.065132352,
+            "progress_events": 1235
+          },
+          "matrixchild": {
+            "invocations": 570,
+            "terminal_p99_seconds": 5.019653917,
+            "progress_p99_seconds": 0.056371997,
+            "progress_events": 2850
+          },
+          "matrixgrandchild": {
+            "invocations": 1140,
+            "terminal_p99_seconds": 0.193727967,
+            "progress_p99_seconds": 0.080757919,
+            "progress_events": 1140
+          }
+        }
+      }
+    },
+    "raw_proofs": {
+      "baseline": {
+        "invocation": {
+          "Subject": "wf.inv.guardshort.repair-orphan",
+          "Sequence": 2657,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Input-SHA256": [
+              "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+            ]
+          },
+          "Data": "MA==",
+          "Time": "2026-10-02T17:20:29.814414867Z"
+        },
+        "dispatch": [
+          {
+            "Subject": "wf.run.0",
+            "Sequence": 10422,
+            "Header": {
+              "Nats-Msg-Id": [
+                "start:guardshort.repair-orphan:2657"
+              ]
+            },
+            "Data": "Z3VhcmRzaG9ydC5yZXBhaXItb3JwaGFu",
+            "Time": "2026-10-02T17:20:38.054958724Z"
+          }
+        ]
+      },
+      "mutated": {
+        "invocation": {
+          "Subject": "wf.inv.guardshort.repair-orphan",
+          "Sequence": 2689,
+          "Header": {
+            "Nats-Expected-Last-Subject-Sequence": [
+              "0"
+            ],
+            "Wf-Input-SHA256": [
+              "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+            ]
+          },
+          "Data": "MA==",
+          "Time": "2026-10-02T17:31:55.781852863Z"
+        },
+        "dispatch": []
+      }
+    }
+  },
+  "reviewer_sha256": "e76968a006f86404fe0dafb1c825037cbec80e5bbc2c938e105290f7f926b6b0",
+  "scope": "Recheck of previously accepted historical component; no new workload execution."
+}

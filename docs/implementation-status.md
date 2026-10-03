@@ -2,6 +2,23 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Current-source sustained enqueue mutation accepted:** campaign 37149508529
+  at `c4fed061bc614488d4f89b53b216b756490f7da0` has an independently reviewed
+  successful enqueue job: all 608 source files, exact overlay and two ten-minute
+  reports verify. Raw dispatch receipts establish one baseline message versus
+  64 distinct mutant messages without message IDs. Totals: 5,236 terminal
+  invocations, 57,697 entries, 38 leader faults; worst terminal/progress p99
+  14.537925462 s/7.054302844 s. Four components are accepted; Start repair,
+  purge and independent full matrix/24h gates remain open. Physical stores and
+  executables were not uploaded.
+  [Complete component originals](scale/current-sustained-mutations-2026-10-03/enqueue/).
+- **Historical mutation review preserved:** independent checking now reads the
+  literal mutation registry at the source-verified executed revision rather
+  than using current anchors. A real unchanged previously accepted `0f979d0`
+  Start pair reproduces the erroneous rejection, then passes the revised check.
+  Twelve harness/reviewer controls pass in 0.136 s. This changes no workload or
+  runtime qualification.
+  [Historical before/after review and original archive reference](scale/start-mutation-anchor-2026-10-03/).
 - **Sustained Start mutation harness corrected:** job 111281642971 in
   37149508529 failed before baseline execution: its mutation anchor still used
   the Start scanner's old unnamed-return signature. Failed originals are

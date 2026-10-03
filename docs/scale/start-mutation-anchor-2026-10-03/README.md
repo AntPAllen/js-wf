@@ -34,3 +34,13 @@ The corrected-runner ten-minute Start-repair-only retry is
 [37154381145](https://github.com/AntPAllen/js-wf/actions/runs/37154381145)
 at exact `649c6ce8d40c10521da1a4f0feda066db4dc0332`. Its observed queued
 metadata and requested inputs are separately retained. Dispatch is not acceptance.
+
+The independent checker also now reads the literal six-mutation registry from
+the source-verified executed Git revision. It never executes that source. This
+preserves review of older artifacts after mutation anchors change. A retained
+control shows the updated local anchor incorrectly rejecting the previously
+accepted `0f979d0` Start pair; the corrected reviewer accepts those unchanged
+originals again. The original archive SHA and before/after reviews are retained
+separately. All 12 sustained harness/reviewer tests pass in 0.136 seconds,
+including rejection of nonliteral definitions and duplicate names. This adds
+no workload execution or release qualification.

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Verify all six sustained mutation pairs from original Actions artifacts."""
 import argparse
+import ast
 import base64
 from datetime import datetime
 import hashlib
@@ -129,6 +130,33 @@ def decode_proofs(mode, baseline, mutated):
     return proof
 
 
+def recorded_mutations(source):
+    """Read literal mutation definitions at the executed revision, without eval."""
+    tree = ast.parse(source)
+    assignments = [node for node in tree.body if isinstance(node, ast.Assign)
+                   and any(isinstance(target, ast.Name) and target.id == "MUTATIONS"
+                           for target in node.targets)]
+    if len(assignments) != 1 or not isinstance(assignments[0].value, ast.List):
+        raise ValueError("missing or ambiguous recorded mutation registry")
+    result = {}
+    for item in assignments[0].value.elts:
+        if (not isinstance(item, ast.Call) or not isinstance(item.func, ast.Name)
+                or item.func.id != "dict" or item.args
+                or any(keyword.arg is None for keyword in item.keywords)):
+            raise ValueError("recorded mutation registry is not literal")
+        definition = {keyword.arg: ast.literal_eval(keyword.value) for keyword in item.keywords}
+        if any(not isinstance(definition.get(field), str)
+               for field in ("name", "file", "before", "after")):
+            raise ValueError("invalid recorded mutation definition")
+        name = definition["name"]
+        if name in result:
+            raise ValueError("duplicate recorded mutation definition")
+        result[name] = definition
+    if set(result) != {mode[0] for mode in MODES.values()}:
+        raise ValueError("recorded mutation categories differ from required six")
+    return result
+
+
 def check_category(root, mode, duration, revision, sources):
     report = json.loads((root / "report.json").read_text())
     expected_hashes = {path: hashlib.sha256(contents).hexdigest() for path, contents in sources.items()}
@@ -141,7 +169,7 @@ def check_category(root, mode, duration, revision, sources):
     entry = entries[0]
     if entry.get("baseline", {}).get("passed") is not True or entry.get("baseline", {}).get("returncode") != 0 or entry.get("mutated", {}).get("detected") is not True or entry.get("mutated", {}).get("returncode", 0) == 0:
         raise ValueError("original runner did not accept the required pair")
-    mutation = next(item for item in runner.MUTATIONS if item["name"] == name)
+    mutation = recorded_mutations(sources["scripts/check-invariant-mutations.py"])[name]
     if entry.get("file") != mutation["file"]:
         raise ValueError("reported production mutation file mismatch")
     source = sources[mutation["file"]]
