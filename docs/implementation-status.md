@@ -12,8 +12,19 @@
   contracts pass race; actual cursors `1 → 4 → 7 → 8`, retained cursor 11 after
   retrying uncertain deletion, exactly one committed delete and seven protected
   values preserved. Full retention/reconciler suites pass 0.254 s/33.568 s.
-  Current complete graph qualification remains open; population bounds and
-  full fault matrices/24h remain separate.
+  Complete retained-binary normal 1k at exact
+  `4f11ca2957f6d3426a1dee227f0aadb91f23207b` is independently accepted in
+  147.900 s: 174 passes/two documented skips, all 379 pins and 121,000 bodies;
+  all 1,126 source hashes, compiled inventory and byte-identical raw report
+  regeneration verify. [Complete graph originals](scale/tombstone-partial-cursor-2026-10-03/full1k/).
+  Current-source full race
+  [37145175684](https://github.com/AntPAllen/js-wf/actions/runs/37145175684)
+  and normal 100k
+  [37145177234](https://github.com/AntPAllen/js-wf/actions/runs/37145177234)
+  are both active at that exact source, dispatched after the signal, suspended,
+  native/fallback timer and tombstone prefix corrections. Neither is accepted
+  yet. Earlier Start-only 100k remains active separately; it is not restarted.
+  Population bounds and full fault matrices/24h remain separate.
   [Focused originals and model limits](scale/tombstone-partial-cursor-2026-10-03/).
 - **Timer partial-timeout correction:** both baselines stall after 48 virtual
   seconds/cursor 1, fallback seed 2 and native seed 14. Native and fallback

@@ -69,5 +69,7 @@ GOMEMLIMIT=512MiB GOMAXPROCS=2 go test -p=1 -race ./retention ./reconcile -run '
 
 For baseline reproduction, overlay `retention/tombstone_scan.go` and
 `reconcile/tombstones.go` with archived ported baseline sources, then run the
-first command with the new fixture. Full current-source normal/race/100k,
+first command with the new fixture. The [complete normal retained-binary 1k
+graph](full1k/) is independently accepted at `4f11ca2`: 174 passes, 379 pins,
+121,000 bodies and 1,126 verified source hashes. Current-source full race/100k,
 real matrices, 24h and original scale requirements remain open.
