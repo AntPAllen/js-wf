@@ -44,11 +44,17 @@ MUTATIONS = [
          package="./integration", test="TestConcurrentEnqueueSameMessageID",
          markers=["retained run messages=", "State:{Msgs:64 ", "err=<nil>"]),
     dict(name="skipped_start_reconciler", file="reconcile/starts.go",
-         before="func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (ScanResult, error) {",
-         after="func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (ScanResult, error) {\n\tif true { return ScanResult{NextSequence: next}, nil }",
+         before="func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (result ScanResult, scanErr error) {",
+         after="func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (result ScanResult, scanErr error) {\n\tif true { return ScanResult{NextSequence: next}, nil }",
          package="./sim", test="TestSkippedStartReconcilerMutationIsDetected",
          markers=["repair missing start:", "Reenqueued:0", "err=<nil>"]),
 ]
+
+
+def check_mutation_anchor(mutation, source):
+    count = source.count(mutation["before"])
+    if count != 1:
+        raise RuntimeError(f"{mutation['name']}: mutation anchor must occur exactly once (found {count})")
 
 
 def check_sustained_evidence(events, mutation, prefix):
@@ -309,6 +315,16 @@ def main():
         report["scope"] = "same-store sustained mixed journal-leader chaos plus one controlled live mutation; all six accepted categories and independent full-matrix/soak gates required"
         report["duration"] = args.sustained
         report["release_duration"] = args.sustained == "10m"
+    # Validate the selected production edits before compiling runner controls.
+    # Source refactors must not consume a sustained campaign before failing.
+    try:
+        for mutation in selected:
+            check_mutation_anchor(mutation, (ROOT / mutation["file"]).read_text())
+    except RuntimeError as error:
+        report["preflight_error"] = str(error)
+        (args.output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
+        print(str(error), file=sys.stderr, flush=True)
+        return 1
     success = True
     # A build error and a different test failure must never count as a kill.
     control = MUTATIONS[1]
@@ -341,8 +357,7 @@ def main():
             entry["fixture_source_sha256"] = hashlib.sha256((ROOT / mutation["fixture_file"]).read_bytes()).hexdigest()
         report["mutations"].append(entry)
         try:
-            if original.count(mutation["before"]) != 1:
-                raise RuntimeError("mutation anchor must occur exactly once")
+            check_mutation_anchor(mutation, original)
             entry["baseline"] = run_fixture(mutation, args.output, "baseline")
             if not entry["baseline"]["passed"]:
                 raise RuntimeError("unmodified fixture did not pass; detection unproven")

@@ -11,6 +11,18 @@ spec.loader.exec_module(module)
 
 
 class SustainedEvidenceTests(unittest.TestCase):
+    def test_all_production_mutation_anchors_match_current_sources(self):
+        for mutation in module.MUTATIONS:
+            with self.subTest(mutation=mutation["name"]):
+                module.check_mutation_anchor(mutation, (module.ROOT / mutation["file"]).read_text())
+
+    def test_missing_and_duplicate_mutation_anchors_are_rejected(self):
+        mutation = dict(name="control", before="anchor")
+        for source, count in (("missing", 0), ("anchor anchor", 2)):
+            with self.subTest(count=count), self.assertRaisesRegex(RuntimeError, f"found {count}"):
+                module.check_mutation_anchor(mutation, source)
+        module.check_mutation_anchor(mutation, "anchor")
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)

@@ -2,6 +2,18 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Sustained Start mutation harness corrected:** job 111281642971 in
+  37149508529 failed before baseline execution: its mutation anchor still used
+  the Start scanner's old unnamed-return signature. Failed originals are
+  preserved and rejected. The anchor now matches named partial-progress returns;
+  all selected edits are validated before compiling controls, and 11 harness
+  tests pass (0.087 s), including checks of all six actual source anchors.
+  The focused model baseline passes and the corrected compiled overlay fails
+  at the intended missing-repair assertion. All 606 tracked Go/module files are
+  byte-identical to `c4fed06`; existing runtime qualification remains undisturbed.
+  Only Start repair needs a corrected-runner retry; the failed campaign and
+  complete six-category release gate are not accepted.
+  [Failed originals, focused correction and equivalence ledger](scale/start-mutation-anchor-2026-10-03/).
 - **Current-source sustained CAS mutation accepted:** campaign 37149508529
   at exact `c4fed061bc614488d4f89b53b216b756490f7da0` has an independently
   reviewed successful CAS job. All 608 source files and the single production
