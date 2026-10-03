@@ -2,6 +2,16 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Latest runtime validation:** the confirmed Start partial-timeout cursor fix
+  passes the complete retained-binary normal 1k suite: 170 top-level passes,
+  283 pins and 121,000 seeded bodies. Full race
+  [37139806593](https://github.com/AntPAllen/js-wf/actions/runs/37139806593)
+  and normal 100k
+  [37139808145](https://github.com/AntPAllen/js-wf/actions/runs/37139808145)
+  are dispatched at exact `0d3fabf33615b3bcb7e092c872f5eb7d40520369`.
+  Both were queued when recorded; neither is qualified yet. These runs cover
+  the new production cursor behavior and retain actual binaries and source hashes.
+  [Latest full1k evidence](scale/start-partial-cursor-2026-10-03/full1k/).
 - **Tier1:** current Start checker correction at9de1e72 completes all121,000
   default1k bodies,168 top-level passes/two trace-only skips/269 pins in117.749s.
   All980 clean before/after source hashes match exact Git; raw events and binary are retained.
