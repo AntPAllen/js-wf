@@ -8464,3 +8464,14 @@ four row choices for clean rounds, dirty source rejection and changed-commit
 rejection. This strengthens the next producer; earlier clock failures retain
 their narrower original evidence. It does not change production runtime,
 workload timing, pending-timer admission or p99 gates.
+
+
+[Corrected ahead-clock seed55 replay37115560031](https://github.com/AntPAllen/js-wf/actions/runs/37115560031)
+is confirmed queued at exact29ad0b2181a4c9101fd0dc6349ed1c48b5a500d9: ten minutes,
+one focused seed starting55, with both common-clock verification and pending
+positive Sleep admission required for every cut. This materially changed runtime
+uses typed repair-backed native hints and the verified observer wakeup. Full
+source/store evidence is required on success or failure. The original failure
+remains preserved and server cause unconfirmed. A passing focused replay would
+not clear1..200/full matrices/24h. Earlier121100k37106469422 remains live; no
+worker-kill mismatch smoke or duplicate existing campaign is launched.
