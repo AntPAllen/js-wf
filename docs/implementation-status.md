@@ -2,6 +2,16 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Superseded matrix work retired:** campaigns 37128612905 (`9ac3ad4`),
+  37057872230 (`076ebad`) and 36891850893 (`92586ea`) predate current scanner
+  corrections. They were explicitly cancelled to free ten active runners and
+  retire 476 queued jobs. All are terminal cancelled; every pre-existing artifact
+  ID remains listed, and ten partial artifacts were added (not accepted).
+  Current-source 37149506857 subsequently executed its planner; it now has one
+  completed planner and 221 queued row jobs. Current simulation/mutations remain
+  untouched. This supersedes earlier statements that older campaigns remain
+  active/undisturbed, and clears no runtime release gate.
+  [Verified metadata and scope](scale/superseded-matrix-cancellation-2026-10-03/).
 - **Shared sustained-duration validation:** synthetic controls exposed acceptance
   of NaN elapsed time, contradictory package failure/pass events and completion
   from an unrelated package. The common duration checker now rejects these,
@@ -20,7 +30,7 @@
   Both exact head SHAs and queued planner jobs are verified. Neither is accepted.
   They include the newer runtime scanner/marker corrections and release-verifier
   changes; older-source matrix/mutation evidence cannot substitute. Existing
-  older campaigns remain undisturbed. These do not clear the independent 24h
+  older campaigns have now been retired as recorded above. These do not clear the independent 24h
   full matrix or original million-timer gate.
   [Retained dispatch metadata and scope](scale/current-release-campaigns-2026-10-03/).
 - **Tier2 release-verifier correction:** metadata/log preflight could previously
