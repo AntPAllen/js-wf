@@ -874,7 +874,7 @@ compiled checkout against Git. Hashing stores does not independently reopen them
 
 ### Complete five-container sustained row campaigns
 
-`tier3-mixed-leaders` now accepts `row=all` for all fourteen implemented R5
+`tier3-mixed-leaders` now accepts `row=all` for all sixteen implemented R5
 fault variants at one revision, with 1,20 or200 consecutive seeds. All-row
 campaigns shard at thirteen seeds per job: the current 16-row200-seed campaign uses256 jobs,
 within the hosted256-job limit. Each seed retains separate raw events, row
@@ -955,12 +955,14 @@ selection and semantic explicit-native rejection. A35s fixture smoke upgrades
 one peer and cannot qualify a full rolling upgrade. Preserve complete physical
 stores and all evidence in verified archives. Port is prepared, pending actual
 mixed-row qualification; the independent37-message five-peer constructor
-contract is accepted. Worker-clock skew remains an original R5 port gap.
+contract is accepted. Worker-clock skew was still an R5 port gap at that
+preparation revision; the implemented row and its current qualification limits
+are recorded below and in the current status snapshot.
 
-The implemented registry is now15 rows. Full campaigns use13-seed shards and
-340m job budgets:15xceil(200/13)=240 jobs, leaving capacity for the remaining
-worker-clock row (16x16=256). Existing14-row/12-seed evidence retains its source
-and original scope. No new registry size clears the full original matrix or24h.
+The preparation registry had15 rows. The current registry includes worker-clock
+and has16 rows. Full campaigns use13-seed shards and340m job budgets:
+16xceil(200/13)=256 jobs. Existing14-row/12-seed evidence retains its source and
+original scope. No new registry size clears the full original matrix or24h.
 
 ### R5 worker-clock diagnostic provenance preparation
 
