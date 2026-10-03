@@ -8,7 +8,9 @@
   [Current qualification](scale/native-hint-recovery-2026-10-03/typed-full1k/).
   Earlier121100k [37106469422](https://github.com/AntPAllen/js-wf/actions/runs/37106469422)
   remains running at11ad2e4, before native hint recovery. Final-runtime100k
-  remains open. Previous120100k atad37bfc retains its accepted earlier scope.
+  [37117429308](https://github.com/AntPAllen/js-wf/actions/runs/37117429308)
+  is launched at63fbc03 and remains unaccepted. Previous120100k atad37bfc
+  retains its accepted earlier scope.
 - **Runtime regression:** production lost-release fencing now records the
   first ownership loss before cleanup and deduplicates one observation per
   delivery. The focused1k race/replay and exact compiled omission control are
@@ -47,6 +49,13 @@
   observation and pending-timer admission. Preserve the raw failures and keep
   the200-seed requirement open; actual seed29 exit timing is unconfirmed.
   [Failure evidence](scale/r5-ahead200-2026-10-03/rejected-seeds-29-55/).
+  Corrected seed55 [37115560031](https://github.com/AntPAllen/js-wf/actions/runs/37115560031)
+  is independently accepted at29ad0b2:644 invocations/7089 entries/19 admitted
+  cuts; all3847 archive members and702 source files verified. Terminal/progress
+  p99=9.938s/16.311s. Corrected seeds1..200
+  [37117571555](https://github.com/AntPAllen/js-wf/actions/runs/37117571555)
+  are launched at63fbc03 and remain unaccepted.
+  [Complete focused originals](scale/r5-ahead200-2026-10-03/recovered-seed55-pass/).
 - **Other accepted gates:** all6 sustained invariant mutation cases pass at0f979d0.
   The corrected production100000 continuation-cap campaign is independently
   accepted at2a30165; three fault cuts recover in12.840s/12.835s/12.937s and the
