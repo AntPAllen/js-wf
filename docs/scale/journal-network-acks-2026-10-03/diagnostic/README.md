@@ -23,6 +23,6 @@ execution remains required. Run with `WF_JOURNAL_NETWORK_ACK=1` and set
 `WF_JOURNAL_NETWORK_ACK_REPORT` to a fresh artifact directory. An explicit
 smaller even count is diagnostic only.
 
-All 24 archived members were reopened and SHA-verified before atomic rename;
+All 21 archived members were reopened and SHA-verified before atomic rename;
 actual fixture/reviewer bytes and original failure are retained with the raw
 diagnostic. Physical broker stores were automatically removed by the fixture.

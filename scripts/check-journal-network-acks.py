@@ -4,6 +4,7 @@ import argparse
 import base64
 import hashlib
 import json
+import re
 from pathlib import Path
 
 
@@ -51,18 +52,20 @@ def check(root, events_path, count=1000):
         before, after = case['before'], case['after']
         if (before['active_connections'] != 1 or after['active_connections'] != 0
                 or after['buffer_overflows'] != 0 or before['responses_held']
-                or after['server_to_client'] != before['server_to_client']):
+                or after['server_to_client'] < before['server_to_client']):
             raise ValueError('response escaped fault or relay evidence invalid')
         subject = 'wf.jrn.test.'+id
         publish = b'HPUB '+subject.encode()+b' '
         payload = frames[i+1, 'client_to_server']
+        if re.search(rb'"stream"\s*:\s*"WF_JRN"', frames[i+1, 'server_to_client']):
+            raise ValueError('publish acknowledgment escaped the network fault')
         if payload.count(publish) != int(committed):
             raise ValueError('actual TCP publication disagrees with commit branch')
         if committed:
             if (after['held_bytes'] <= before['held_bytes']
                     or case['first'] != case['last'] or case['retry_sequence'] != 0):
                 raise ValueError('committed acknowledgment loss or stale retry proof missing')
-        elif (case['first'] is not None or after['client_to_server'] != before['client_to_server']
+        elif (case['first'] is not None
               or case['retry_sequence'] != case['last']['Sequence']):
             raise ValueError('absent publication/retry proof missing')
         last = case['last']

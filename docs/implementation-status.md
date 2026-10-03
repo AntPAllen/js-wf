@@ -2,6 +2,15 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Journal network fixture counter assertion corrected:** the first full-size
+  retained-binary trial at `2134de2` is rejected after 550 cases. Its transcript
+  shows the earlier tail-read 404 accounted after the counter snapshot; no
+  publish acknowledgment escaped. The fixture/reviewer now inspect actual
+  acknowledgment bytes, and a real-input transcript with an injected escaped
+  acknowledgment is rejected. Failed executable, sources and partial originals
+  are retained; a fresh full-size execution remains required. No runtime
+  production source changes or thousand-case qualification are claimed.
+  [Complete rejected originals and corrected assertion](scale/journal-network-acks-2026-10-03/rejected-counter-assertion/).
 - **Full journal network acknowledgment fixture implemented:** the new
   opt-in default-size test applies actual TCP faults to all 1,000 appends,
   alternating committed/absent branches, with a midpoint journal-leader kill
