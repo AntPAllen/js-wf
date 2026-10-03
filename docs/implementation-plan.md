@@ -1088,3 +1088,23 @@ contract alone does not clear the mixed-row gate,200 seeds,24-hour matrix or
 forced two-write-gap requirement. Earlier SIGKILL evidence keeps its own scope.
 The documented shutdown procedure is
 [NATS Lame Duck mode](https://docs.nats.io/running-a-nats-service/nats_admin/lame_duck_mode).
+
+### Actual Start process crash across a mixed-version upgrade
+
+Extend the R3 mixed-version contract with a real child executing Client.Start
+through the production JetStream adapter. Its dispatch boundary stops after
+the invocation publish has returned and before WF_RUN reaches the broker.
+Require the retained invocation, no matching dispatch/journal and actual
+SIGKILL process status. Carry that pending invocation across the old peer's
+retained-store upgrade, then require production StartScan repair, terminal
+completion and a matching duplicate Start with the original sequence.
+Both old-peer-first and auto-fallback-on-new-peer profiles must execute.
+
+`start-upgrade-gap` compiles retained race binaries at clean committed source
+and runs the exact omission control: suppress only the gap invocation's scanner
+publication. Its absent retained journal must trigger the named semantic failure,
+with earlier mixed-version manual-repair tests preserved. Build failures, skips
+and global timeouts do not count. This closes a per-phase process-crash evidence
+gap when qualified; integrate the same boundary into the sustained R5 rolling
+row before claiming full R5 mixed two-write-gap coverage. The200-seed matrix and
+24-hour soak requirements remain unchanged.

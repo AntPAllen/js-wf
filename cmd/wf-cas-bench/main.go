@@ -303,7 +303,9 @@ func diagnoseAppend(js jetstream.JetStream, id string, index int, expectedSeq ui
 	if lastErr == nil {
 		actualSeq = last.Sequence
 		var e journal.Entry
-		if journal.UnmarshalEntry(last.Data, &e) == nil {
+		// This benchmark uses New's JSON writer on both compared revisions.
+		// Keep its shared diagnostic harness compatible with the fixed baseline.
+		if json.Unmarshal(last.Data, &e) == nil {
 			actualIndex = e.Index
 		}
 	}

@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -49,7 +50,18 @@ func TestMixedVersionRollingUpgradeFallback(t *testing.T) {
 
 func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFirst bool) {
 	t.Helper()
-	cluster, err := testcluster.StartMixedVersionProcesses(t.TempDir(), []string{oldBinary, "", ""})
+	root := t.TempDir()
+	if base := os.Getenv("WF_MIXED_UPGRADE_ARTIFACT_ROOT"); base != "" {
+		profile := "old-peer-first"
+		if newFirst {
+			profile = "auto-fallback-on-new-peer"
+		}
+		root = filepath.Join(base, profile)
+		if err := os.MkdirAll(root, 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cluster, err := testcluster.StartMixedVersionProcesses(filepath.Join(root, "cluster"), []string{oldBinary, "", ""})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,6 +133,17 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 		t.Fatal("could not find two more IDs on the same partition")
 	}
 	repairedID, postUpgradeID := matchingIDs[0], matchingIDs[1]
+	gapID := ""
+	for candidate := 0; candidate < 10_000; candidate++ {
+		value := fmt.Sprintf("gap-upgrade-%d", candidate)
+		if identity.Partition(typ, value, provision.Partitions) == partition {
+			gapID = value
+			break
+		}
+	}
+	if gapID == "" {
+		t.Fatal("could not find process-gap ID on worker partition")
+	}
 	w, err := worker.New(ctx, all[2], "upgrade-worker", map[string]worker.Handler{typ: func(c *wf.Context, _ json.RawMessage) (json.RawMessage, error) {
 		if err := wf.Sleep(c, "wait", time.Second); err != nil {
 			return nil, err
@@ -187,6 +210,14 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	if report, err := integrity.Check(ctx, all[1]); err != nil || report.Invocations != 2 || report.Journals != 2 || report.Terminal != 2 {
 		t.Fatalf("mixed-version retained audit: report=%+v err=%v", report, err)
 	}
+	gap, err := crashStartBeforeDispatch(ctx, all[1], cluster.Clients[0].ConnectedUrl(), typ, gapID, payload, filepath.Join(root, "start-gap"))
+	if err != nil {
+		t.Fatalf("actual Start gap before upgrade: %v", err)
+	}
+	if gap.Receipt.Version != "2.11.17" {
+		t.Fatalf("Start gap ran through version=%s", gap.Receipt.Version)
+	}
+	t.Logf("START_UPGRADE_GAP seq=%d pid=%d signal=%s run_messages=%d journal_absent=%t", gap.Retained.Sequence, gap.Receipt.PID, gap.Signal, gap.RunMessages, gap.JournalAbsent)
 	if err := cluster.KillNode(0); err != nil {
 		t.Fatalf("stop old peer for upgrade: %v", err)
 	}
@@ -218,6 +249,60 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 		t.Fatalf("upgraded peer changed fallback mode: backend=%q err=%v", upgradedBackend, err)
 	}
 	upgradedClient := client.New(upgraded)
+	invAfter, err := upgraded.Stream(ctx, "WF_INV")
+	if err != nil {
+		t.Fatal(err)
+	}
+	gapAfter, err := invAfter.GetLastMsgForSubject(ctx, identity.InvocationSubject(typ, gapID))
+	if err != nil || gapAfter.Sequence != gap.Retained.Sequence || string(gapAfter.Data) != string(payload) {
+		t.Fatalf("Start gap changed through upgrade: retained=%+v err=%v", gapAfter, err)
+	}
+	rawGapAfter, _ := json.MarshalIndent(gapAfter, "", "  ")
+	if err = os.WriteFile(filepath.Join(root, "start-gap", "after-upgrade.json"), rawGapAfter, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if repaired, err := reconcile.NewStartScan(upgraded).Scan(ctx, gapAfter.Sequence, 1, false); err != nil || repaired.Reenqueued != 1 {
+		t.Fatalf("post-upgrade process-gap repair: result=%+v err=%v", repaired, err)
+	}
+	gapJournal, err := upgraded.Stream(ctx, "WF_JRN")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Detect a silent omitted repair using retained state, not an Await timeout.
+	dispatched := false
+	gapCheck, stopGapCheck := context.WithTimeout(ctx, 2*time.Second)
+	for gapCheck.Err() == nil {
+		if _, err = gapJournal.GetLastMsgForSubject(gapCheck, identity.JournalSubject(typ, gapID)); err == nil {
+			dispatched = true
+			break
+		}
+		if !errors.Is(err, jetstream.ErrMsgNotFound) {
+			stopGapCheck()
+			t.Fatal(err)
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	stopGapCheck()
+	if !dispatched {
+		t.Fatal("post-upgrade process-gap repair produced no journal")
+	}
+	gapResult, err := upgradedClient.Await(ctx, typ, gapID)
+	if err != nil || string(gapResult) != `"done"` {
+		t.Fatalf("post-upgrade process-gap result=%s err=%v", gapResult, err)
+	}
+	if retry, err := upgradedClient.Start(ctx, typ, gapID, payload); !errors.Is(err, client.ErrAlreadyStarted) || retry.InvSeq != gapAfter.Sequence {
+		t.Fatalf("post-upgrade process-gap retry changed identity: %+v err=%v", retry, err)
+	}
+	finalGap, err := gapJournal.GetLastMsgForSubject(ctx, identity.JournalSubject(typ, gapID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rawGapFinal, _ := json.MarshalIndent(finalGap, "", "  ")
+	if err = os.WriteFile(filepath.Join(root, "start-gap", "terminal.json"), rawGapFinal, 0644); err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("START_UPGRADE_GAP_REPAIRED seq=%d terminal_seq=%d result=%s", gapAfter.Sequence, finalGap.Sequence, gapResult)
+
 	for _, completedID := range []string{id, repairedID} {
 		t.Logf("pre-read %s: upgraded=%s survivor=%s", completedID, mixedVersionResultProbe(ctx, upgraded, typ, completedID), mixedVersionResultProbe(ctx, all[1], typ, completedID))
 		readCtx, stopRead := context.WithTimeout(ctx, 30*time.Second)
@@ -234,7 +319,7 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	if err != nil || string(result) != `"done"` {
 		t.Fatalf("post-upgrade result=%s err=%v", result, err)
 	}
-	if report, err := integrity.Check(ctx, upgraded); err != nil || report.Invocations != 3 || report.Journals != 3 || report.Terminal != 3 {
+	if report, err := integrity.Check(ctx, upgraded); err != nil || report.Invocations != 4 || report.Journals != 4 || report.Terminal != 4 {
 		t.Fatalf("post-upgrade retained audit: report=%+v err=%v", report, err)
 	}
 }

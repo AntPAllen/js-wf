@@ -104,6 +104,17 @@
   accepted at2a30165; three fault cuts recover in12.840s/12.835s/12.937s and the
   compiled suffix-budget control detects a forbidden effect. These retain their
   focused source/coverage boundaries.
+- **Start gap across upgrade:** the R3 mixed-version fixture now SIGKILLs an
+  actual production-client child after its invocation commits and before
+  dispatch publishes, then upgrades the old peer and requires scanner repair,
+  terminal completion and unchanged duplicate identity. Both development
+  profiles pass race48.879s. Clean committed binaries and the precise omitted
+  gap-repair control remain pending; this does not clear sustained R5 gap coverage.
+- **CAS benchmark harness:** hosted37121445966 atcd59b86 is rejected before
+  measurement: the shared harness used the newer UnmarshalEntry API absent at
+  fixed baseline4fa3119. Its diagnostic now uses the benchmark's JSON format;
+  both candidate and baseline compile without production/dependency changes.
+  No throughput result or regression is established by that failed build.
 - **Scale/release:** the new million-timer10m diagnostic is independently accepted
   at885664e with all1M receipts and all3 physical replica drains. It does not
   replace the original million/24h gate, which delivered all1M but failed drain.

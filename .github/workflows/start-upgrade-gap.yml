@@ -1,0 +1,49 @@
+name: start-upgrade-gap
+on:
+  workflow_dispatch:
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build the actual old server
+        run: |
+          mkdir -p "$RUNNER_TEMP/nats-old"
+          CGO_ENABLED=0 GOBIN="$RUNNER_TEMP/nats-old" go install github.com/nats-io/nats-server/v2@v2.11.17
+          printf 'WF_NATS_SERVER_BIN=%s/nats-old/nats-server\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - name: Qualify actual client crashes across upgrade and omitted-repair control
+        run: python3 scripts/check-start-upgrade-gap.py --root "$RUNNER_TEMP/start-upgrade-gap"
+      - name: Preserve all originals and member hashes
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,tarfile
+          tmp=Path(os.environ['RUNNER_TEMP']);root=tmp/'start-upgrade-gap'
+          assert root.is_dir(), 'missing execution evidence'
+          files={str(p.relative_to(root)):p for p in root.rglob('*') if p.is_file()}
+          hashes={n:hashlib.sha256(p.read_bytes()).hexdigest() for n,p in files.items()}
+          assert hashes
+          archive=tmp/'start-upgrade-gap-originals.tmp.tar.gz'
+          with tarfile.open(archive,'w:gz') as t:
+              for n,p in files.items():t.add(p,arcname=n)
+          with tarfile.open(archive,'r:gz') as t:
+              assert {m.name:hashlib.sha256(t.extractfile(m).read()).hexdigest() for m in t.getmembers()}==hashes
+          archive.rename(tmp/'start-upgrade-gap-originals.tar.gz')
+          (tmp/'start-upgrade-gap-manifest.json').write_text(json.dumps(dict(files=hashes,every_member_sha256_readback=True),indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: start-upgrade-gap-originals
+          path: |
+            ${{ runner.temp }}/start-upgrade-gap-originals.tar.gz
+            ${{ runner.temp }}/start-upgrade-gap-manifest.json
+          if-no-files-found: error
