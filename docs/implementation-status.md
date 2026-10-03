@@ -2,6 +2,14 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Long-run storage preparation:** root disk is currently 35 GiB, initially
+  about 560 MiB free. Unused Docker build cache (643.9 MB) and lossless compression
+  of the completed inline-five-million broker fixture recover about 1.6 GiB.
+  Every one of its 2,543 original files/1,565,275,909 bytes passes archive readback
+  and a separate full restoration; compressed stores remain locally retained
+  with permissions/timestamps/hash ledger. Failed million-timer originals are
+  unchanged. Root free space is about 2.1 GiB; 24h capacity remains unproven.
+  [Manifest, restoration verdict and exact scope](scale/storage-recovery-2026-10-03/).
 - **Full Tier2 matrix partial shard review:** campaign 37128612905 at exact
   `9ac3ad44267b68d1a1ec63ce47e1fb11d9c00204` has eight successful journal
   shards (seeds 1–96) in job metadata; only the newly reviewed 37–48 shard is
