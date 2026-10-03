@@ -2,7 +2,7 @@
 
 A Go implementation of the attached durable workflow plan. It uses NATS JetStream for write-once invocations, CAS journals, dispatch, leases, terminal results, and large input objects. Integration suites use real three-node process clusters and five-container clusters.
 
-The [repository implementation plan](docs/implementation-plan.md) includes Tier 1 deterministic simulation and independent real-cluster gates. The [simulation suite](docs/tier1-simulation.md) runs 120 workloads at 1,000 seeds each in the default qualification; [implementation status](docs/implementation-status.md) records exact source revisions, verified evidence and remaining requirements.
+The [repository implementation plan](docs/implementation-plan.md) includes Tier 1 deterministic simulation and independent real-cluster gates. The [simulation suite](docs/tier1-simulation.md) runs 121 workloads at 1,000 seeds each in the default qualification; [implementation status](docs/implementation-status.md) records exact source revisions, verified evidence and remaining requirements.
 
 ## What works
 
@@ -120,7 +120,7 @@ The plan proposes one atomic batch across `WF_INV` and `WF_RUN`. [JetStream atom
 
 JetStream requires a schedule and target in the same stream, and the server rejects schedules with `DiscardNew` ([NATS scheduler discussion](https://github.com/nats-io/nats-server/discussions/7363)). `WF_RUN` therefore has scheduling enabled with `DiscardOld` and no message, byte, or age limit. Provisioning rejects later limits that could evict live work.
 
-Release qualification remains incomplete. The current three-node matrix has passed all thirteen ten-minute fault variants at one seed; the required 200-seed campaign and five-container matrix qualification are active. The original million-timer/24-hour campaign delivered all million distinct receipts but failed final drain. Current deterministic coverage includes 120 workloads at the default 1,000 seeds, with the complete current 100,000-seed campaign still active. See the [current qualification snapshot](docs/implementation-status.md) for exact revisions, evidence and remaining gates.
+Release qualification remains incomplete. The current three-node matrix has passed all thirteen ten-minute fault variants at one seed; the required 200-seed campaign and five-container matrix qualification are active. The original million-timer/24-hour campaign delivered all million distinct receipts but failed final drain. Current deterministic coverage includes 121 workloads at the default 1,000 seeds, with the complete current 100,000-seed campaign still active. See the [current qualification snapshot](docs/implementation-status.md) for exact revisions, evidence and remaining gates.
 
 Native timer provisioning checks the connected server when `WF_RUN` is absent; verify every peer before selecting native scheduling during a mixed-version rollout. The CLI cannot recover attempted-step metadata absent from older journal-capacity failures. Named SDK continuations restore materialized frames without archived-prefix reads; ordinary handlers retain logical-prefix replay. See the [continuation contract](docs/checkpoint-continuations.md) for registration and recovery requirements.
 
