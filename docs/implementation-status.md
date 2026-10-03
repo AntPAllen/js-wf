@@ -7777,3 +7777,9 @@ remains correctly attributed, while current121100k is still required.
 [Revised upgrade contract37106224055](https://github.com/AntPAllen/js-wf/actions/runs/37106224055)
 is confirmed queued at5712254afa04f96c14c36e79d76ec153493a0f0a. Corrected real
 R5 pause37105975815 remains queued atf32ce38. Neither is qualified yet.
+
+[Current121100k run37106469422](https://github.com/AntPAllen/js-wf/actions/runs/37106469422)
+is confirmed queued at exact11ad2e468a2b66163befe4dabe373f593582d319. This follows
+the accepted full1211k execution (162.931s) and focused hosted race/control proof.
+Corrected real R5 worker-pause37105975815 is now confirmed in progress;
+upgrade37106224055 remains queued. No active trial was canceled or restarted.
