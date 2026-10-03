@@ -7676,3 +7676,11 @@ The fixture's dispatch-error count consequently passed while the fencing audit
 failed. This is a concrete missing runtime fencing-observation path, not an
 unconfirmed NATS cause. A production-path Tier1 reproduction and accounting
 fix remain required; no checker weakening or passing rerun is substituted.
+
+The corrected upgrade contract37104862997 subsequently finished failed at1bd7ac7.
+Its raw positive Go events report a provisioning context deadline at line74
+(71.013s package failure), before publication; the single-old-peer control was
+not executed. Original evidence is downloaded under
+/tmp/js-wf-docker-upgrade-37104862997 for subsequent source/log/archive review.
+This is a separate setup failure, not qualification of the retry change; no
+third trial is dispatched before reviewing it.
