@@ -22,6 +22,23 @@ class StartGapChecks(unittest.TestCase):
   calls=[dict(op='start',args=dict(type='matrixshort',id='cohort'),result=dict(status=status,inv_seq=seq),invoke_ts=at(begin),return_ts=at(end)) for status,seq,begin,end in [('unknown',0,31,31.3),('already_started',12,37.8,37.9)]]
   (root/'history.jsonl').write_text('\n'.join(map(json.dumps,calls))+'\n')
   return fault,row.timestamp_ns(at(32)),row.timestamp_ns(at(34)),row.timestamp_ns(at(35))
+ def test_requested_profiles_cannot_be_omitted_or_substituted(self):
+  spec=importlib.util.spec_from_file_location('base_fixture',Path(__file__).with_name('test_tier3_journal_row.py'))
+  base=importlib.util.module_from_spec(spec);spec.loader.exec_module(base)
+  events=base.fixture('35s')
+  for event in events:
+   if 'Test' in event:event['Test']=row.TESTS['rolling_upgrade']
+  events[0]['Output']=events[0]['Output'].replace('row=journal','row=rolling_upgrade')
+  # Historic rows keep their own earlier scope, but cannot satisfy a new request.
+  row.check(events,'35s','rolling_upgrade')
+  with self.assertRaises(ValueError):row.check(events,'35s','rolling_upgrade',require_upgrade_start_gap=True)
+  with self.assertRaises(ValueError):row.check(events,'35s','rolling_upgrade',expected_upgrade_shutdown='ldm')
+  events[0]['Output']+='TIER3_UPGRADE_START_GAP=cohort-short-v1\nTIER3_UPGRADE_SHUTDOWN=sigkill\n'
+  report=row.check(events,'35s','rolling_upgrade',require_upgrade_start_gap=True,expected_upgrade_shutdown='sigkill')
+  self.assertEqual(report['upgrade_start_gap'],'cohort-short-v1')
+  with self.assertRaises(ValueError):row.check(events,'35s','rolling_upgrade',expected_upgrade_shutdown='ldm')
+  events[0]['Output']+='TIER3_UPGRADE_START_GAP=cohort-short-v1\n'
+  with self.assertRaises(ValueError):row.check(events,'35s','rolling_upgrade',require_upgrade_start_gap=True)
  def test_complete_gap_spans_upgrade_with_real_repair_and_bound(self):
   with tempfile.TemporaryDirectory() as d:
    root=Path(d);row.check_upgrade_start_gap(root,*self.fixture(root))

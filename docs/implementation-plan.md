@@ -1126,6 +1126,11 @@ raw-state integrity, per-type p99 and drain gates. Record the killed SDK call as
 uncertain with no response, bounded by actual process death; preserve its raw
 commit receipt separately. The artifact verifier requires every announced cut's
 process/status/input/sequence/time proof and rejects missing or changed evidence.
+The workflow verifier must explicitly require the requested forced-gap and
+shutdown profiles; a successful earlier row without these faults cannot satisfy
+that request. Include nested crash proofs in regular uploads and preserve their
+originals in the complete physical-store archive.
+
 Qualification starts with35s race smoke, followed by the full ten-minute profile
 for SIGKILL and graceful upgrades. This optional profile is not qualified by
 existing R3 or earlier rolling evidence;200 seeds and24h remain required.

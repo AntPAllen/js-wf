@@ -160,6 +160,14 @@
   [37127056728](https://github.com/AntPAllen/js-wf/actions/runs/37127056728)
   is dispatched with upgrade_start_gap=true. The ten-minute/graceful/200-seed
   and24h profile gates remain open; this queued run is not acceptance evidence.
+  The next producer also requires the requested gap/shutdown profiles explicitly
+  (`--require-upgrade-start-gap`, `--expected-upgrade-shutdown`), rejecting an
+  otherwise passing row that silently omitted or substituted the requested
+  fault. Nested crash JSON/logs are included in regular uploads in addition to
+  full physical-store archives. All71 Tier3 guard tests pass. Existing smoke
+  37127056728 is now live in its planner checkout; it is not restarted for this
+  verifier-only producer change. Any review of its result must explicitly
+  require its announced forced-gap/SIGKILL profiles.
 - **CAS benchmark harness:** hosted37121445966 atcd59b86 is rejected before
   measurement: the shared harness used the newer UnmarshalEntry API absent at
   fixed baseline4fa3119. Its diagnostic now uses the benchmark's JSON format;

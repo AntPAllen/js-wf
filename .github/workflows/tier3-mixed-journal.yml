@@ -167,6 +167,8 @@ jobs:
             fi
             if [ "$test_status" != 0 ]; then exit "$test_status"; fi
             cut_args=()
+            if [ "$WF_TIER3_UPGRADE_START_GAP" = 1 ]; then cut_args+=(--require-upgrade-start-gap); fi
+            if [ "$TIER3_MATRIX_ROW" = rolling_upgrade ]; then cut_args+=(--expected-upgrade-shutdown "$WF_TIER3_UPGRADE_SHUTDOWN"); fi
             if [ "$WF_TIER3_CLOCK_TIMER_CUT" = 1 ]; then cut_args+=(--require-clock-timer-cut); fi
             if [ "$WF_TIER3_COMMON_CLOCK" = 1 ]; then cut_args+=(--require-common-timer-clock); fi
             python3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events "$seed_events" --duration "$WF_TIER3_MATRIX_DURATION" --expected-seed "$FAULT_SEED" --output "$seed_result" --require-checkpoint-audits "${cut_args[@]}"
@@ -216,6 +218,8 @@ jobs:
             /tmp/tier3-mixed-journal/*.jsonl
             /tmp/tier3-mixed-journal/*.log
             /tmp/tier3-mixed-journal/*.txt
+            /tmp/tier3-mixed-journal/fault-*-start-gap/*.json
+            /tmp/tier3-mixed-journal/fault-*-start-gap/*.log
             /tmp/tier3-mixed-journal/cluster/*.conf
             /tmp/tier3-mixed-journal-events.jsonl
             /tmp/tier3-mixed-journal-result.json

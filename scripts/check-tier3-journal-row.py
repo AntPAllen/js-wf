@@ -31,7 +31,7 @@ TESTS = {'worker_clock': 'TestFiveContainerMixedWorkerClockSkew', 'rolling_upgra
 TEST = TESTS['journal']
 
 
-def check(events, duration, expected_row='journal', expected_seed=None):
+def check(events, duration, expected_row='journal', expected_seed=None, require_upgrade_start_gap=False, expected_upgrade_shutdown=None):
     test = TESTS[expected_row]
     execution.check(events, test, duration)
     if expected_row == 'worker_clock':
@@ -94,9 +94,13 @@ def check(events, duration, expected_row='journal', expected_seed=None):
     gaps=re.findall(r'TIER3_UPGRADE_START_GAP=(\S+)',log)
     if gaps and (row!='rolling_upgrade' or gaps!=['cohort-short-v1']):
         raise ValueError('invalid rolling Start gap profile')
+    if require_upgrade_start_gap and (row!='rolling_upgrade' or gaps!=['cohort-short-v1']):
+        raise ValueError('requested rolling Start gap profile did not execute')
     shutdowns=re.findall(r'TIER3_UPGRADE_SHUTDOWN=(\S+)',log)
     if shutdowns and (row!='rolling_upgrade' or len(shutdowns)!=1 or shutdowns[0] not in ('sigkill','ldm')):
         raise ValueError('invalid upgrade shutdown profile')
+    if expected_upgrade_shutdown is not None and (row!='rolling_upgrade' or shutdowns!=[expected_upgrade_shutdown]):
+        raise ValueError('requested rolling shutdown profile did not execute')
     report = dict(scope=scope, seed=int(seed), duration_seconds=seconds,
                 common_timer_clock=clocks[0] if clocks else None,
                 clock_timer_cut_profile=profiles[0] if profiles else None,
@@ -940,13 +944,15 @@ if __name__ == '__main__':
     parser.add_argument('--require-clock-timer-cut', action='store_true')
     parser.add_argument('--require-common-timer-clock', action='store_true')
     parser.add_argument('--require-checkpoint-audits', action='store_true')
+    parser.add_argument('--require-upgrade-start-gap', action='store_true')
+    parser.add_argument('--expected-upgrade-shutdown', choices=('sigkill','ldm'))
     args = parser.parse_args()
     if args.require_clock_timer_cut and not args.row.startswith('server_clock_'):
         parser.error('--require-clock-timer-cut requires a server-clock row')
     if args.require_common_timer_clock and not args.row.startswith('server_clock_'):
         parser.error('--require-common-timer-clock requires a server-clock row')
     events = [json.loads(line) for line in args.events.read_text().splitlines() if line.strip()]
-    report = check(events, args.duration, args.row, args.expected_seed)
+    report = check(events, args.duration, args.row, args.expected_seed, args.require_upgrade_start_gap, args.expected_upgrade_shutdown)
     if args.row == 'auto_journal':
         if args.root is None: parser.error('--root is required for automatic membership')
         report['automatic_artifact_checks'] = check_automatic_artifacts(args.root, report)
