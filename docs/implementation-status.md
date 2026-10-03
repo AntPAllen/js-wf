@@ -2,6 +2,17 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Current-source sustained determinism mutation accepted:** campaign
+  37149508529 at exact `c4fed061bc614488d4f89b53b216b756490f7da0` now has
+  an independently reviewed successful determinism job. All 608 source files
+  match Git; the single production overlay, actual semantic failure, negative
+  controls and both regenerated ten-minute same-store reports verify. Totals:
+  5,432 terminal invocations, 59,840 entries, 38 journal-leader faults; worst
+  terminal/progress p99 15.360881559 s/7.056596705 s. The baseline rejects the
+  changed step and the guard-removal mutant executes it once. Physical stores
+  and executables were not uploaded. Determinism plus lease are two accepted
+  components; four categories and the independent full matrix/24h gates remain.
+  [Complete component originals](scale/current-sustained-mutations-2026-10-03/determinism/).
 - **Current-source sustained lease mutation accepted:** campaign 37149508529
   at `c4fed061bc614488d4f89b53b216b756490f7da0` has a successful lease job,
   independently reviewed against all 608 reported source files and the exact
