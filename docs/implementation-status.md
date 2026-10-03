@@ -90,7 +90,15 @@
   samples regenerate metrics and3388 SDK operations pass all three models.
   Aggregate p99=7.324s; worst type terminal/progress=15.739s/7.038s; no progress
   event exceeds30s. [Corrected consumer90 originals](scale/start-enqueue-history-2026-10-03/consumer90-corrected-replay/).
-  Journal39, consumer116 and full current-source1..200 remain open. The
+  Journal39 and consumer116 are independently accepted:2744/2576 invocations,
+  30218/28393 entries,19 faults each,12936/12144 raw latency samples and3528/3324
+  SDK operations verified. Aggregate p99=7.455s/8.145s; worst type terminal=
+  12.063s/16.744s and progress=7.023s/7.043s. Consumer116 has19 positively active
+  consumer cuts; neither replay has a progress event over30s.
+  [Journal39 originals](scale/start-enqueue-history-2026-10-03/journal39-corrected-replay/),
+  [consumer116 originals](scale/start-enqueue-history-2026-10-03/consumer116-corrected-replay/).
+  All five corrected replays now execute and pass their full final gates; full
+  current-source1..200 remains open. The
   rejected original shards remain rejected; these new trials execute all final
   gates that the old checker failures prevented.
 - **Tier3:**16 implemented row variants are now in the registry,
@@ -196,6 +204,14 @@
   37127056728 is now live in its planner checkout; it is not restarted for this
   verifier-only producer change. Any review of its result must explicitly
   require its announced forced-gap/SIGKILL profiles.
+  Smoke37127056728 is now independently accepted at254392c:3237 original archive
+  members/719 clean source hashes verify;168 invocations/1849 entries/one peer
+  upgrade/15 native rejections. The actual child-gap terminal/duplicate identity
+  verifies13.995s after kill; worst type terminal/progress p99=13.959s/13.949s.
+  Required gap/SIGKILL profile checks, final raw integrity/drain, explanations,
+  fencing review and five process counters pass; all reports regenerate exactly.
+  [Complete forced-gap smoke originals](scale/r5-start-gap-2026-10-03/hosted-smoke/).
+  Five-peer ten-minute/graceful profiles,200 seeds and24h remain open.
 - **CAS benchmark harness:** hosted37121445966 atcd59b86 is rejected before
   measurement: the shared harness used the newer UnmarshalEntry API absent at
   fixed baseline4fa3119. Its diagnostic now uses the benchmark's JSON format;
