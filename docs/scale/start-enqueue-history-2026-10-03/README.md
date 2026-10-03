@@ -25,7 +25,9 @@ zero/mismatched sequence and observation before later creation.
 These fixed regressions do not increase the121 seeded workload count. No runtime
 or NATS dependency changed. Offline acceptance does not qualify failed hosted
 shards: they stopped before the final latency and drain gates. Full current-source
-1k/100k/race qualification and the full real matrices remain open.
+100k/race qualification and the full real matrices remain open. The subsequent
+[complete default1k qualification](full1k/) at9de1e72 passes all121,000 bodies,
+269 pins and168 top-level tests with only the two documented trace-only skips.
 
 `manifest.json` records SHA256 for every member, verified by reopening the complete
 temporary archive before atomic rename. Raw Go JSON, original/corrected checker

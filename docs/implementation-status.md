@@ -2,14 +2,19 @@
 
 ## Current qualification snapshot — 2026-10-03
 
-- **Tier1:** current native hint recovery at0b69e91 completes all121,000 default1k
-  bodies,167 top-level passes/two trace-only skips/267 pins in160.901s. Full
-  clean before/after source inventories match exact Git.
-  [Current qualification](scale/native-hint-recovery-2026-10-03/typed-full1k/).
+- **Tier1:** current Start checker correction at9de1e72 completes all121,000
+  default1k bodies,168 top-level passes/two trace-only skips/269 pins in117.749s.
+  All980 clean before/after source hashes match exact Git; raw events and binary are retained.
+  [Current qualification](scale/start-enqueue-history-2026-10-03/full1k/).
+  New current-source full race
+  [37120760618](https://github.com/AntPAllen/js-wf/actions/runs/37120760618)
+  and121100k
+  [37120761679](https://github.com/AntPAllen/js-wf/actions/runs/37120761679)
+  are dispatched at9de1e72 and remain unaccepted.
   Earlier121100k [37106469422](https://github.com/AntPAllen/js-wf/actions/runs/37106469422)
   remains running at11ad2e4, before native hint recovery. Final-runtime100k
   [37117429308](https://github.com/AntPAllen/js-wf/actions/runs/37117429308)
-  is launched at63fbc03 and remains unaccepted. Previous120100k atad37bfc
+  is launched at63fbc03, before the checker correction, and remains unaccepted. Previous120100k atad37bfc
   retains its accepted earlier scope.
 - **Full Tier1 race:** the corrected complete suite passes at64bef04 in2063.82s:
   167 top-level passes/two documented skips,267 pins and121,000 seeded bodies.
