@@ -11,8 +11,15 @@
   controls and a three-node lost-enqueue-ack contract pass race in 4.602 s,
   actual cursor `1 → 4 → 7 → 8` and one retained wakeup. Full reconciler suite
   passes 24.734 s. The model uses immutable admission prefixes, not arbitrary
-  concurrent read timing. Full current-source graph qualification remains open;
-  earlier complete runs keep their earlier scope.
+  concurrent read timing. Complete retained-binary normal 1k at exact
+  `27440daf4f7383b42ba764e34ea2cb808d886264` is independently accepted in
+  162.451 s: 172 passes/two documented skips, 307 pins and all 121,000 bodies.
+  All 1,048 source hashes, actual compiled inventory and byte-identical raw
+  report regeneration verify. [Complete graph originals](scale/suspended-partial-cursor-2026-10-03/full1k/).
+  Current-source full race/100k and full matrix/24h remain open; earlier complete
+  runs keep their earlier scope. After local jobs ended, disposable Go build
+  cache cleanup restored free disk from 149 MiB to 877 MiB without removing
+  retained evidence or failed original stores.
   [Focused originals and limitations](scale/suspended-partial-cursor-2026-10-03/).
 - **Signal partial-timeout correction:** production scanner baseline fails
   deterministic seed 2 after 48 virtual seconds with cursor 1/no wakeup.

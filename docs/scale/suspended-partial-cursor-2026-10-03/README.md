@@ -48,7 +48,9 @@ The archive preserves original failure trace/log, corrected sources, original
 scanner source, all focused logs, twelve pins and tracked patch. Every member was
 reopened and SHA256 verified before atomic publication. These focused runs do
 not retain test executables or physical stores, and do not independently reopen
-stores. Full current-source normal/race/100k, real matrices and 24h remain open.
+stores. The [complete retained-binary normal 1k suite](full1k/) is independently
+accepted at `27440da`: 172 passes, 307 pins, 121,000 bodies and 1,048 verified
+source hashes. Current-source full race/100k, real matrices and 24h remain open.
 
 ```sh
 GOMEMLIMIT=512MiB GOMAXPROCS=2 go test -p=1 ./sim -run '^TestSuspendedPartialCursorReplay$' -count=1
