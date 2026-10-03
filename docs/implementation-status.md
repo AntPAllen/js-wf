@@ -9,6 +9,14 @@
   and a separate full restoration; compressed stores remain locally retained
   with permissions/timestamps/hash ledger. Failed million-timer originals are
   unchanged. Root free space is about 2.1 GiB; 24h capacity remains unproven.
+  A retained-binary race ten-minute five-node journal row is now genuinely live
+  at exact `1f1abfc9ea1794a6e0d13af156bb1cbd4a516194`, isolated checkout/root
+  `/tmp/js-wf-local-journal-tenm-20261003`, producer shell session 62345.
+  Supervisor 471929 and test2json process 472576 are observed live, all five
+  Docker nodes run and the first admitted batch is observed. Source hashes and
+  actual race binary are retained; no final verdict or acceptance yet. Stores
+  use the root disk. Its growth will inform 24h capacity without substituting
+  this ten-minute profile for a full-day run.
   [Manifest, restoration verdict and exact scope](scale/storage-recovery-2026-10-03/).
 - **Full Tier2 matrix partial shard review:** campaign 37128612905 at exact
   `9ac3ad44267b68d1a1ec63ce47e1fb11d9c00204` has eight successful journal

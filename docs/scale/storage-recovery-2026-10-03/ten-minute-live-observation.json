@@ -1,0 +1,33 @@
+{
+  "observed_at": "2026-10-03T19:21:13.755392+00:00",
+  "execution": {
+    "source": "1f1abfc9ea1794a6e0d13af156bb1cbd4a516194",
+    "row": "journal",
+    "seed": 1,
+    "duration": "10m",
+    "status": "running",
+    "supervisor_pid": 471929,
+    "started": 1791055148.5221558,
+    "upgrade_shutdown": null,
+    "upgrade_start_gap": false,
+    "race": true,
+    "clears_full_tier3_release": false,
+    "test_pid": 472576
+  },
+  "live_processes": {
+    "471929": "python3 scripts/run-tier3-soak.py --root /tmp/js-wf-local-journal-tenm-20261003 --row journal --duration 10m --seed 1 ",
+    "472576": "go tool test2json -t -p js-wf/integration /tmp/js-wf-local-journal-tenm-20261003/integration.test -test.run=^TestFiveContainerMixedJournalLeaderEveryThirtySeconds$ -test.v=test2json -test.count=1 -test.timeout=20m "
+  },
+  "containers": [
+    "js-wf-route-472601-1791055186364317416-n3",
+    "js-wf-route-472601-1791055186364317416-n4",
+    "js-wf-route-472601-1791055186364317416-n2",
+    "js-wf-route-472601-1791055186364317416-n1",
+    "js-wf-route-472601-1791055186364317416-n0"
+  ],
+  "binary_sha256": "e3481cd65c318f7f205ae120ca5a437b0626f80aab37239f65a7910cfd48cea9",
+  "race": true,
+  "first_batch_observed": true,
+  "accepted": false,
+  "scope": "Live named ten-minute five-node journal-fault execution from isolated source; not a final verdict or 24h qualification."
+}
