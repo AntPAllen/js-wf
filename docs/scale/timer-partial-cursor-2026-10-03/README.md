@@ -65,5 +65,7 @@ original `timers.go.txt` and `fallback_timers.go.txt`. Use the current fixture
 for fallback seed 2, or archived `baseline-native-fixture.go.txt` for native
 seed 14, and add `-overlay=<overlay.json>` to the first command.
 
-Full current-source normal/race/100k, real matrices and 24h remain open. Earlier
+The [complete retained-binary normal 1k graph](full1k/) is independently accepted
+at `e6072da`: 173 tests, 355 pins, 121,000 bodies and 1,099 verified source hashes.
+Current-source full race/100k, real matrices and 24h remain open. Earlier
 complete-suite evidence keeps its earlier production graph scope.

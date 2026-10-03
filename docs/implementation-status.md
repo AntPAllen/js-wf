@@ -11,8 +11,12 @@
   three-node contracts and fifteen failure-stage controls pass race in 7.002 s;
   native cursor `1 → 4 → 7 → 8`, fallback `1 → 4 → 7 → 8 → 8`, one retained
   wakeup each, seven future fallback timers preserved after a hidden committed
-  delete reply. Full reconciler suite passes 29.333 s. Current complete graph
-  qualification remains open; full fault matrices/24h and population bounds
+  delete reply. Full reconciler suite passes 29.333 s. Complete retained-binary
+  normal 1k at exact `e6072da39aa751fec1a4903910d84da2bb900904` is independently
+  accepted in 158.434 s: 173 passes/two documented skips, 355 pins and all
+  121,000 bodies. All 1,099 source hashes, actual compiled inventory and raw
+  report regeneration verify. [Complete graph originals](scale/timer-partial-cursor-2026-10-03/full1k/).
+  Current-source full race/100k, full fault matrices/24h and population bounds
   are separate. [Focused originals](scale/timer-partial-cursor-2026-10-03/).
 - **Suspended partial-failure correction:** the baseline scanner fails fixed
   seed 2 after 48 virtual seconds, cursor 1/no acknowledged wakeup. Concurrent
@@ -56,8 +60,13 @@
   and normal 100k
   [37139808145](https://github.com/AntPAllen/js-wf/actions/runs/37139808145)
   are dispatched at exact `0d3fabf33615b3bcb7e092c872f5eb7d40520369`.
-  Both were queued when recorded; neither is qualified yet. These runs cover
-  the new production cursor behavior and retain actual binaries and source hashes.
+  The full race run is independently accepted: 2,134.761 s, 170 passes/two
+  documented skips, 283 pins and all 121,000 bodies; all 1,018 source hashes,
+  retained race executable and byte-identical raw report regeneration verify.
+  [Complete hosted race originals](scale/start-partial-cursor-2026-10-03/hosted-race/).
+  The 100k run remains active and unaccepted. Both runs cover the Start prefix
+  correction at that source; later signal/suspended/timer changes keep their
+  separate qualification requirements. Both retain actual binaries/source hashes.
   [Latest full1k evidence](scale/start-partial-cursor-2026-10-03/full1k/).
 - **Tier1:** current Start checker correction at9de1e72 completes all121,000
   default1k bodies,168 top-level passes/two trace-only skips/269 pins in117.749s.
