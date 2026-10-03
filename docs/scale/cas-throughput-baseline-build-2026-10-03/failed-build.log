@@ -1,0 +1,44 @@
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	﻿2026-10-03T12:02:19.9476088Z ##[group]Run mkdir -p "$RUNNER_TEMP/cas-throughput"
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9476779Z ^[[36;1mmkdir -p "$RUNNER_TEMP/cas-throughput"^[[0m
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9477537Z ^[[36;1mgit worktree add --detach "$RUNNER_TEMP/cas-baseline" "$BASELINE_REVISION"^[[0m
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9478710Z ^[[36;1mgo build -o "$RUNNER_TEMP/cas-throughput/candidate" ./cmd/wf-cas-bench^[[0m
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9479641Z ^[[36;1m# Share only the measurement harness. Journal, dependencies and fixture^[[0m
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9480531Z ^[[36;1m# remain at the fixed baseline revision, with no production overlay.^[[0m
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9481769Z ^[[36;1mcp cmd/wf-cas-bench/main.go cmd/wf-cas-bench/topology.go "$RUNNER_TEMP/cas-baseline/cmd/wf-cas-bench/"^[[0m
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9483387Z ^[[36;1msha256sum cmd/wf-cas-bench/main.go cmd/wf-cas-bench/topology.go > "$RUNNER_TEMP/cas-throughput/harness-files.sha256"^[[0m
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9484673Z ^[[36;1mcp cmd/wf-cas-bench/main.go cmd/wf-cas-bench/topology.go "$RUNNER_TEMP/cas-throughput/"^[[0m
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9485526Z ^[[36;1mcd "$RUNNER_TEMP/cas-baseline"^[[0m
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9486191Z ^[[36;1mgit diff --exit-code -- journal provision testcluster go.mod go.sum^[[0m
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9487066Z ^[[36;1mgo build -o "$RUNNER_TEMP/cas-throughput/baseline" ./cmd/wf-cas-bench^[[0m
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9572991Z shell: /usr/bin/bash -e {0}
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9573410Z env:
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9573855Z   BASELINE_REVISION: 4fa311954f42d1325a46dad12bb5d128dad2b747
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9574441Z ##[endgroup]
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:19.9707306Z Preparing worktree (detached HEAD 4fa3119)
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:20.0193735Z HEAD is now at 4fa3119 Separate renewal gate waiting from KV call duration in optional diagnostics
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:20.0526180Z go: downloading google.golang.org/protobuf v1.36.6
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:26.4179624Z # js-wf/cmd/wf-cas-bench
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:26.4211987Z ##[error]cmd/wf-cas-bench/main.go:306:14: undefined: journal.UnmarshalEntry
+paired-throughput (follower)	Build both production revisions with the same benchmark harness	2026-10-03T12:02:26.4221831Z ##[error]Process completed with exit code 1.
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	﻿2026-10-03T12:05:49.8192731Z ##[group]Run mkdir -p "$RUNNER_TEMP/cas-throughput"
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8193440Z ^[[36;1mmkdir -p "$RUNNER_TEMP/cas-throughput"^[[0m
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8194199Z ^[[36;1mgit worktree add --detach "$RUNNER_TEMP/cas-baseline" "$BASELINE_REVISION"^[[0m
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8195146Z ^[[36;1mgo build -o "$RUNNER_TEMP/cas-throughput/candidate" ./cmd/wf-cas-bench^[[0m
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8196132Z ^[[36;1m# Share only the measurement harness. Journal, dependencies and fixture^[[0m
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8197264Z ^[[36;1m# remain at the fixed baseline revision, with no production overlay.^[[0m
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8198576Z ^[[36;1mcp cmd/wf-cas-bench/main.go cmd/wf-cas-bench/topology.go "$RUNNER_TEMP/cas-baseline/cmd/wf-cas-bench/"^[[0m
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8199982Z ^[[36;1msha256sum cmd/wf-cas-bench/main.go cmd/wf-cas-bench/topology.go > "$RUNNER_TEMP/cas-throughput/harness-files.sha256"^[[0m
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8201297Z ^[[36;1mcp cmd/wf-cas-bench/main.go cmd/wf-cas-bench/topology.go "$RUNNER_TEMP/cas-throughput/"^[[0m
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8202161Z ^[[36;1mcd "$RUNNER_TEMP/cas-baseline"^[[0m
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8202833Z ^[[36;1mgit diff --exit-code -- journal provision testcluster go.mod go.sum^[[0m
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8203703Z ^[[36;1mgo build -o "$RUNNER_TEMP/cas-throughput/baseline" ./cmd/wf-cas-bench^[[0m
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8292592Z shell: /usr/bin/bash -e {0}
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8293001Z env:
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8293439Z   BASELINE_REVISION: 4fa311954f42d1325a46dad12bb5d128dad2b747
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8294018Z ##[endgroup]
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8444977Z Preparing worktree (detached HEAD 4fa3119)
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.8980512Z HEAD is now at 4fa3119 Separate renewal gate waiting from KV call duration in optional diagnostics
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:49.9297427Z go: downloading google.golang.org/protobuf v1.36.6
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:55.4838262Z # js-wf/cmd/wf-cas-bench
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:55.4874352Z ##[error]cmd/wf-cas-bench/main.go:306:14: undefined: journal.UnmarshalEntry
+paired-throughput (leader)	Build both production revisions with the same benchmark harness	2026-10-03T12:05:55.4883340Z ##[error]Process completed with exit code 1.

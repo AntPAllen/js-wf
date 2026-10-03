@@ -6,13 +6,17 @@
   default1k bodies,168 top-level passes/two trace-only skips/269 pins in117.749s.
   All980 clean before/after source hashes match exact Git; raw events and binary are retained.
   [Current qualification](scale/start-enqueue-history-2026-10-03/full1k/).
-  New current-source full race
+  Complete checker-source full race
   [37120760618](https://github.com/AntPAllen/js-wf/actions/runs/37120760618)
-  and121100k
+  is independently accepted at9de1e72:121,000 bodies/269 pins/168 passes,
+  all980 source hashes and the retained race binary verified,2108.534s.
+  [Complete hosted race originals](scale/start-enqueue-history-2026-10-03/hosted-race/).
+  Checker-source121100k
   [37120761679](https://github.com/AntPAllen/js-wf/actions/runs/37120761679)
-  are dispatched at9de1e72 and remain unaccepted.
+  is running at9de1e72 and remains unaccepted.
   Earlier121100k [37106469422](https://github.com/AntPAllen/js-wf/actions/runs/37106469422)
-  remains running at11ad2e4, before native hint recovery. Final-runtime100k
+  is terminal SUCCESS at11ad2e4, before native hint recovery; original artifact
+  review remains pending and it cannot clear the later-runtime gate. Final-runtime100k
   [37117429308](https://github.com/AntPAllen/js-wf/actions/runs/37117429308)
   is launched at63fbc03, before the checker correction, and remains unaccepted. Previous120100k atad37bfc
   retains its accepted earlier scope.
@@ -83,10 +87,19 @@
   semantic assertions;591 source hashes and six complete physical rounds match.
   [Complete contract originals](scale/r5-graceful-upgrade-2026-10-03/contract/).
   Hosted contract [37121460252](https://github.com/AntPAllen/js-wf/actions/runs/37121460252)
-  and ten-minute graceful mixed row
+  is independently accepted atcd59b86:97.329s positive, both exact semantic
+  controls, all591 source hashes and680 archive members verified.
+  [Hosted original stores and proof](scale/r5-graceful-upgrade-2026-10-03/hosted-contract/).
+  Ten-minute graceful mixed row
   [37121470960](https://github.com/AntPAllen/js-wf/actions/runs/37121470960)
-  are dispatched atcd59b86 and remain unaccepted. The constructor contract does
-  not qualify the sustained mixed row,200 seeds,24h or the forced two-write gap.
+  is independently accepted atcd59b86:2100 invocations/23128 entries,all5
+  actual graceful upgrades,55 semantic native rejections and7 checkpoint audits.
+  All3859 archive members/712 source hashes verify; raw row/event/fencing reports
+  regenerate byte-identically. Terminal/progress p99=5.025s/1.584s; all5 final
+  inprocess counters match zero fencing records.
+  [Complete sustained graceful originals](scale/r5-graceful-upgrade-2026-10-03/hosted-ten-minute/).
+  This qualifies seed1/10m at that source;200 seeds,24h and sustained forced
+  two-write-gap coverage remain open.
 - **Ahead-clock200:** [37040118844](https://github.com/AntPAllen/js-wf/actions/runs/37040118844)
   is terminal FAILED at52f4e51. Seeds29/55 respectively miss pre-due source
   observation and pending-timer admission. Preserve the raw failures and keep
@@ -114,14 +127,19 @@
   does not establish a runtime/server defect. Original binaries/stores/source
   hashes are retained. The fixture now checks actual retained dispatch or
   journal progression, then separately requires terminal recovery within30s of
-  confirmed client kill. Clean correction and the precise omitted gap-repair
-  control remain pending; this does not clear sustained R5 gap coverage.
+  confirmed client kill. Clean correction atcc0fcd1 is independently accepted:
+  both profiles pass race40.509s, kill-to-terminal12.425s/9.782s; the precise
+  omitted gap-repair control fails at the named retained-state assertion18.013s.
+  All715 source hashes, binaries, original markers and retained before/after
+  invocation bytes are verified. This does not clear sustained R5 gap coverage.
   [Original gate rejection](scale/start-upgrade-gap-2026-10-03/rejected-journal-gate/).
+  [Corrected process-crash contract](scale/start-upgrade-gap-2026-10-03/corrected-contract/).
 - **CAS benchmark harness:** hosted37121445966 atcd59b86 is rejected before
   measurement: the shared harness used the newer UnmarshalEntry API absent at
   fixed baseline4fa3119. Its diagnostic now uses the benchmark's JSON format;
   both candidate and baseline compile without production/dependency changes.
   No throughput result or regression is established by that failed build.
+  [Original compiler failure and build validation](scale/cas-throughput-baseline-build-2026-10-03/).
 - **Scale/release:** the new million-timer10m diagnostic is independently accepted
   at885664e with all1M receipts and all3 physical replica drains. It does not
   replace the original million/24h gate, which delivered all1M but failed drain.
