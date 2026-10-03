@@ -16,6 +16,10 @@ type TimerClockSupport struct {
 	Domain   string
 	Bounds   func(context.Context) (lower, upper time.Time, err error)
 	Schedule func(context.Context, uint64, time.Time, string) error
+	// ScheduleIsHint requires a domain-aware durable journal repairer. After
+	// the request commits, failed scheduling may suspend for that repairer.
+	// Cancellation and missing/mismatched support still fail closed.
+	ScheduleIsHint bool
 }
 
 // SetTimerClockSupport selects the domain for new positive timers. Legacy
@@ -83,7 +87,11 @@ func (c *Context) scheduleInDomain(step uint64, fireAt time.Time, domain string)
 		if c.timerClock == nil || c.timerClock.Domain != domain || c.timerClock.Schedule == nil {
 			return fmt.Errorf("%w: no scheduler for clock domain %q", ErrTimerSchedule, domain)
 		}
-		return c.timerClock.Schedule(c.base, step, fireAt, domain)
+		err := c.timerClock.Schedule(c.base, step, fireAt, domain)
+		if err != nil && c.timerClock.ScheduleIsHint && c.base.Err() == nil {
+			return nil
+		}
+		return err
 	}
 	if c.scheduleTimer == nil {
 		return fmt.Errorf("%w: no scheduler", ErrTimerSchedule)

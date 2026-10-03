@@ -14,14 +14,15 @@ import (
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
+	"js-wf/reconcile"
 	"js-wf/wf"
 	"js-wf/worker"
 )
 
-// Characterize the production non-cancelled timer-error retry path. The
-// pending-clock restoration is calibrated independently against pinned NATS;
-// the unapplied, locally successful NAK is an explicit transport hypothesis.
-func runTimerErrorPendingClock(seed int64, replay *Trace, lost bool) (trace Trace, runErr error) {
+// Failed native hints transfer recovery to a durable Suspended journal entry.
+// Actual production worker and scanner decisions must complete at the common
+// deadline without relying on restored consumer timestamps or a NAK.
+func runTimerHintRecovery(seed int64, replay *Trace, lost bool) (trace Trace, runErr error) {
 	s := NewScheduler(seed)
 	if replay != nil {
 		var err error
@@ -30,7 +31,7 @@ func runTimerErrorPendingClock(seed int64, replay *Trace, lost bool) (trace Trac
 			return trace, err
 		}
 	}
-	if err := s.SetWorkload("worker_timer_error_pending_clock"); err != nil {
+	if err := s.SetWorkload("worker_timer_hint_recovery"); err != nil {
 		return trace, err
 	}
 	defer func() { trace = s.Trace() }()
@@ -61,13 +62,14 @@ func runTimerErrorPendingClock(seed int64, replay *Trace, lost bool) (trace Trac
 		return json.RawMessage(`42`), nil
 	}
 	var observations []worker.DispatchEvent
+	var operations []worker.OperationEvent
 	newWorker := func(name string, fail bool) (*worker.Worker, error) {
 		return worker.NewWithPorts(name, map[string]worker.Handler{typ: handler}, worker.ModeledWorkerPorts{
 			Journal: store, Leases: leases, Outcome: outcomes, Invocation: transport.SignalTransport,
 			Signals: transport.SignalTransport, Client: c, Timer: timers, NativeTimer: true,
-			HeartbeatTicks: make(chan time.Time),
+			HeartbeatTicks: make(chan time.Time), OperationObserver: func(event worker.OperationEvent) { operations = append(operations, event) },
 			TimerNow: func(context.Context) (time.Time, error) {
-				if fail {
+				if fail && !lost {
 					return time.Time{}, context.DeadlineExceeded
 				}
 				return time.UnixMilli(s.NowMillis()), nil
@@ -85,34 +87,59 @@ func runTimerErrorPendingClock(seed int64, replay *Trace, lost bool) (trace Trac
 		return trace, err
 	}
 	if lost {
-		if err := transport.Dispatch.QueueFault(DispatchFault{Operation: "nak", Kind: "drop_before_commit_success"}); err != nil {
+		if err := timers.QueueFault(DropBeforeCommit); err != nil {
 			return trace, err
 		}
 	}
 	one, stopOne := context.WithCancel(ctx)
 	defer stopOne()
 	transport.Dispatch.StopAfterNextNak(stopOne)
+	transport.Dispatch.StopAfterNextAck(stopOne)
 	if err := first.RunPartitionWithTransport(one, 0, transport.Dispatch); err != nil {
 		return trace, err
 	}
-	var retrySeen, nakSeen bool
-	for _, event := range observations {
-		if event.Stage == "execution_retry" && event.Error == "timer schedule was not confirmed: context deadline exceeded" {
-			retrySeen = true
-		}
-		if event.Stage == "nak" {
-			nakSeen = true
-			if event.Error != "" {
-				return trace, fmt.Errorf("local NAK acceptance was not successful: %s", event.Error)
-			}
-		}
-	}
-	if !retrySeen || !nakSeen {
-		return trace, fmt.Errorf("missing timer-error retry/NAK observations")
-	}
 	records, _, err := store.Read(ctx, typ, id)
-	if err != nil || len(records) != 2 || records[0].Kind != journal.Started || records[1].Kind != journal.StepRequested || first.Metrics().HandoffEnqueues != 0 {
-		return trace, fmt.Errorf("non-cancelled timer retry journal=%+v handoffs=%d err=%v", records, first.Metrics().HandoffEnqueues, err)
+	if err != nil || len(records) != 3 || records[0].Kind != journal.Started || records[1].Kind != journal.StepRequested || records[2].Kind != journal.Suspended || first.Metrics().HandoffEnqueues != 0 || transport.Dispatch.Pending() != 0 || len(transport.Dispatch.RetainedSequences()) != 0 {
+		return trace, fmt.Errorf("missing durable timer suspension: journal=%+v pending=%d err=%v", records, transport.Dispatch.Pending(), err)
+	}
+	var ackSeen, failedHint bool
+	for _, event := range observations {
+		if event.Stage == "nak" || event.Stage == "execution_retry" {
+			return trace, fmt.Errorf("native hint failure depended on retry/NAK: %+v", event)
+		}
+		if event.Stage == "ack" && event.Error == "" {
+			ackSeen = true
+		}
+	}
+	for _, event := range operations {
+		if event.Operation == "timer_native_hint" && event.Error != "" && event.TimerPublished != nil && !*event.TimerPublished {
+			failedHint = true
+		}
+	}
+	if !ackSeen || !failedHint {
+		return trace, fmt.Errorf("missing failed hint and confirmed ACK observations")
+	}
+	scan := reconcile.NewSuspendedScanWithPort(commonClockRepairPort{transport.SignalTransport, store})
+	scan.Grace = 0
+	scan.Now = func() time.Time { return time.UnixMilli(3600000) }
+	scan.DomainNow = func(context.Context, string) (time.Time, error) { return time.UnixMilli(s.NowMillis()), nil }
+	result, err := scan.Scan(ctx, 1, 1, false)
+	if err != nil || result.Reenqueued != 0 {
+		return trace, fmt.Errorf("timer repaired before due: %+v %v", result, err)
+	}
+	if err := s.AdvanceMillis(1999); err != nil {
+		return trace, err
+	}
+	result, err = scan.Scan(ctx, 1, 1, false)
+	if err != nil || result.Reenqueued != 0 {
+		return trace, fmt.Errorf("timer repaired before deadline: %+v %v", result, err)
+	}
+	if err := s.AdvanceMillis(1); err != nil {
+		return trace, err
+	}
+	result, err = scan.Scan(ctx, 1, 1, false)
+	if err != nil || result.Reenqueued != 1 || transport.Dispatch.Pending() != 1 {
+		return trace, fmt.Errorf("missing due repair: %+v %v", result, err)
 	}
 	if err := transport.Dispatch.TransferConsumerLeadership(0); err != nil {
 		return trace, err
@@ -128,27 +155,23 @@ func runTimerErrorPendingClock(seed int64, replay *Trace, lost bool) (trace Trac
 		return trace, err
 	}
 	records, _, err = store.Read(ctx, typ, id)
-	if err != nil || len(records) != 4 || records[2].Kind != journal.StepCompleted || records[3].Kind != journal.Completed || transport.Dispatch.Pending() != 0 {
+	if err != nil || len(records) != 5 || records[3].Kind != journal.StepCompleted || records[4].Kind != journal.Completed || transport.Dispatch.Pending() != 0 || len(transport.Dispatch.RetainedSequences()) != 0 {
 		return trace, fmt.Errorf("timer retry completion journal=%+v err=%v", records, err)
 	}
-	want := int64(61000)
-	if lost {
-		want = 60000 + worker.DefaultAckWait.Milliseconds()
+	if s.NowMillis() != 2000 {
+		return trace, fmt.Errorf("timer recovery missed common deadline: %d", s.NowMillis())
 	}
-	if s.NowMillis() < want || s.NowMillis() > want+2000 {
-		return trace, fmt.Errorf("timer retry restored clock delay=%d want=%d..%d", s.NowMillis(), want, want+2000)
-	}
-	s.RecordTransport(TransportEvent{Operation: "check_timer_error_pending_clock", Outcome: fmt.Sprintf("locally_successful_unapplied_nak=%v", lost), AtMillis: s.NowMillis()})
+	s.RecordTransport(TransportEvent{Operation: "check_timer_hint_recovery", Outcome: fmt.Sprintf("unapplied_publish=%v", lost), AtMillis: s.NowMillis()})
 	if err := s.Finish(); err != nil {
 		return trace, err
 	}
 	return s.Trace(), nil
 }
 
-func TestWorkerTimerErrorPendingClockCharacterization(t *testing.T) {
+func TestWorkerTimerHintFailureRecovery(t *testing.T) {
 	for _, lost := range []bool{false, true} {
-		t.Run(fmt.Sprintf("unapplied_nak_%v", lost), func(t *testing.T) {
-			trace, err := runTimerErrorPendingClock(42, nil, lost)
+		t.Run(fmt.Sprintf("unapplied_publish_%v", lost), func(t *testing.T) {
+			trace, err := runTimerHintRecovery(42, nil, lost)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -160,11 +183,11 @@ func TestWorkerTimerErrorPendingClockCharacterization(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			replayed, err := runTimerErrorPendingClock(42, &trace, lost)
+			replayed, err := runTimerHintRecovery(42, &trace, lost)
 			if err != nil || !reflect.DeepEqual(trace, replayed) {
 				t.Fatalf("timer retry replay differs: %v", err)
 			}
-			t.Logf("TIMER_ERROR_PENDING_CLOCK unapplied_nak=%v virtual_ms=%d exact_replay=true production_timer=true", lost, trace.Transport[len(trace.Transport)-1].AtMillis)
+			t.Logf("TIMER_HINT_RECOVERY unapplied_publish=%v virtual_ms=%d exact_replay=true production_timer=true", lost, trace.Transport[len(trace.Transport)-1].AtMillis)
 		})
 	}
 }

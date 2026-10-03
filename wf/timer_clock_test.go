@@ -181,3 +181,58 @@ func TestDomainClockRejectsInvalidBoundsAndPreservesLegacy(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// Scheduling is optional only for explicitly repairable domain-tagged waits.
+// Legacy/fallback support and cancellation retain their fail-closed behavior.
+func TestDomainNativeHintFailureUsesDurableRepair(t *testing.T) {
+	for _, kind := range []string{"sleep", "await", "select_signal", "select_many"} {
+		for _, mode := range []string{"hint", "required", "cancelled", "missing_scheduler"} {
+			t.Run(kind+"/"+mode, func(t *testing.T) {
+				origin := time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC)
+				base, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				var entries []Entry
+				appendEntry := func(_ context.Context, k Kind, p json.RawMessage) error {
+					entries = append(entries, Entry{Index: uint64(len(entries) + 1), Kind: k, Payload: p})
+					return nil
+				}
+				c := NewContext(base, nil, appendEntry)
+				support := TimerClockSupport{Domain: "utc-quorum-v1", ScheduleIsHint: mode != "required", Bounds: func(context.Context) (time.Time, time.Time, error) { return origin, origin, nil }, Schedule: func(context.Context, uint64, time.Time, string) error {
+					if mode == "cancelled" {
+						cancel()
+						return context.Canceled
+					}
+					return context.DeadlineExceeded
+				}}
+				if mode == "missing_scheduler" {
+					support.Schedule = nil
+				}
+				if err := c.SetTimerClockSupport(support); err != nil {
+					t.Fatal(err)
+				}
+				err := invokeClockTimer(c, kind)
+				if mode != "hint" {
+					if !errors.Is(err, ErrTimerSchedule) || len(entries) != 1 {
+						t.Fatalf("required schedule failure: entries=%d err=%v", len(entries), err)
+					}
+					return
+				}
+				if !errors.Is(err, ErrSuspended) || c.WaitingOn() == "" {
+					t.Fatalf("repairable hint did not suspend: err=%v", err)
+				}
+				// Due is still proved by domain bounds, never by a shifted
+				// delivery timestamp or failure of the scheduling hint.
+				c = NewContext(context.Background(), entries, appendEntry)
+				support.Bounds = func(context.Context) (time.Time, time.Time, error) {
+					return origin.Add(250 * time.Millisecond), origin.Add(250 * time.Millisecond), nil
+				}
+				if err := c.SetTimerClockSupport(support); err != nil {
+					t.Fatal(err)
+				}
+				if err := invokeClockTimer(c, kind); err != nil {
+					t.Fatalf("due repair replay failed: %v", err)
+				}
+			})
+		}
+	}
+}

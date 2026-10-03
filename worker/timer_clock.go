@@ -11,7 +11,9 @@ import (
 // WithTimerClock opts all new positive timers into a common durable domain.
 // The provider must return authenticated conservative bounds and honor context
 // cancellation. Domain-aware repair loops must be active; native schedules are
-// hints that can become early or late when the scheduling leader clock changes.
+// hints that can fail or become early/late when the scheduling leader changes.
+// A failed native hint suspends durably for the domain-aware repairer; fallback
+// scheduling still requires its retained publication to succeed.
 // Upgrade every reader/repairer before enabling tagged writers.
 func WithTimerClock(domain string, bounds func(context.Context) (time.Time, time.Time, error)) Option {
 	return func(w *Worker) error {

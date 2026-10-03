@@ -1112,7 +1112,7 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			lower, upper, err := w.domainTimerBounds(ctx)
 			ops.finishDomainClock(started, nextIndex(), w.timerClockDomain, lower, upper, err)
 			return lower, upper, err
-		}, Schedule: scheduleTimer}); err != nil {
+		}, Schedule: scheduleTimer, ScheduleIsHint: w.nativeSchedules}); err != nil {
 			return err
 		}
 	}

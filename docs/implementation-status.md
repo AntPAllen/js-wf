@@ -8353,3 +8353,38 @@ retained, including partial proofs on failure. This is a materially corrected
 fixture qualification, not a blind repeat of either failed version2/3 trial.
 Current121100k37106469422 remains running; all13 Tier2x20037057872230 remains
 queued. No ahead200 or historical worker-kill mismatch replay is launched.
+
+
+## Native hint failure transfers recovery to durable suspension
+
+For opted-in common-domain timers on native backends, a scheduling hint is now
+explicitly optional after the durable timer request. SDK ScheduleIsHint support
+allows its error only while the processing context remains live and matching
+scheduler/domain support exists. Production worker selects this only for native
+scheduling with WithTimerClock. Sleep and awaitable/selectable timer handles
+retain their recorded common deadline and durable waiting state. The worker
+appends Suspended before ACK; production domain-aware repair then creates a due
+wakeup without depending on NAK or restored consumer timestamps. Error observers
+still retain the failed hint. Required/fallback publication, legacy semantics,
+missing scheduler/domain and processing cancellation keep failing closed.
+WithTimerClock continues requiring compatible active domain repairers.
+
+The former two-case diagnostic is preserved at223c665 in its verified archive;
+its current test is replaced by a recovery regression. Clock-lookup and native
+publish failures both repair at2000ms virtual time, never before the common
+deadline, with no retry/NAK, no cancellation handoff, exact replay and no retained
+run messages.16 SDK subcases cover Sleep/Await/SelectSignal/Select plus required,
+cancelled and missing scheduling support. The real three-node race comparison
+injects the native bound lookup failure, verifies suspension before ACK, due
+scan wakeup, five journal entries/one terminal and logical run drain; it passes
+in6.786s. Focused SDK/common-clock/pin race packages pass (sim73.952s), including
+all267 pins. This is an injected real transport comparison, not reproduction
+of the original server cause or all-five physical store proof.
+
+The focused producer now qualifies the SDK, production recovery model, pinned
+corpus and real three-node comparison under race. Its separately compiled
+control disables ScheduleIsHint in the actual worker and must fail the precise
+missing-durable-suspension assertion. Full clean source inventories/control
+bytes/raw events/traces are retained. Full default current-source and focused
+compiled control qualification remain pending; existing121100k at11ad2e4 and
+version4 rolling at59a0faa retain their earlier runtime scope and are not restarted.

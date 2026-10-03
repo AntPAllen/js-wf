@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Qualify the timer-error pending-clock characterization and its local-NAK control."""
+"""Qualify durable recovery from failed native timer hints and its omission control."""
 import argparse
 import hashlib
 import json
@@ -8,7 +8,7 @@ from pathlib import Path
 import subprocess
 
 REPO = Path(__file__).resolve().parents[1]
-TEST = 'TestWorkerTimerErrorPendingClockCharacterization'
+TEST = 'TestWorkerTimerHintFailureRecovery'
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument('--root', type=Path, required=True)
 a = p.parse_args()
@@ -22,19 +22,19 @@ def inventory():
 root.mkdir(parents=True)
 before = inventory()
 (root/'source-before.json').write_text(json.dumps(dict(revision=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip(), files=before), indent=2)+'\n')
-source = REPO/'sim/dispatch_transport.go'
+source = REPO/'worker/worker.go'
 original = source.read_text()
-needle = 'if fault == "drop_before_commit_success" {\n\t\t\t\treturn nil\n\t\t\t}'
+needle = 'ScheduleIsHint: w.nativeSchedules'
 assert original.count(needle) == 1
-(root/'visible-nak-control.go.txt').write_text(original.replace(needle, 'if fault == "drop_before_commit_success" {\n\t\t\t\treturn ErrTransportLost\n\t\t\t}'))
+(root/'required-hint-control.go.txt').write_text(original.replace(needle, 'ScheduleIsHint: false'))
 overlay = root/'overlay.json'
-overlay.write_text(json.dumps({'Replace': {str(source): str(root/'visible-nak-control.go.txt')}})+'\n')
+overlay.write_text(json.dumps({'Replace': {str(source): str(root/'required-hint-control.go.txt')}})+'\n')
 try:
     for mode in ('positive', 'negative'):
-        expression = '^Test(WorkerTimerErrorPendingClockCharacterization|PinnedRegressionCorpus)$' if mode == 'positive' else '^'+TEST+'$/unapplied_nak_true$'
+        expression = '^Test(WorkerTimerHintFailureRecovery|DomainNativeHintFailureUsesDurableRepair|PinnedRegressionCorpus|NativeTimerHintFailureRepairsFromDurableSuspension)$' if mode == 'positive' else '^'+TEST+'$/unapplied_publish_false$'
         command = ['go', 'test', '-p=1', '-race', '-json']
         if mode == 'negative': command += ['-overlay='+str(overlay)]
-        command += ['./sim', '-run', expression, '-count=1', '-timeout=6m']
+        command += (['./wf', './sim', './integration'] if mode == 'positive' else ['./sim']) + ['-run', expression, '-count=1', '-timeout=6m']
         (root/(mode+'-command.json')).write_text(json.dumps(command, indent=2)+'\n')
         env = dict(os.environ, GOMEMLIMIT='512MiB', GOMAXPROCS='2', TIMER_ERROR_TRACE_ROOT=str(root/'traces'))
         with (root/(mode+'-events.jsonl')).open('w') as stdout, (root/(mode+'-stderr.log')).open('w') as stderr:
@@ -44,18 +44,20 @@ try:
         output = ''.join(e.get('Output', '') for e in events)
         assert 'panic: test timed out' not in output
         def actions(test): return [e['Action'] for e in events if e.get('Test') == test and e['Action'] in ('pass', 'fail')]
-        package = [e['Action'] for e in events if not e.get('Test') and e['Action'] in ('pass', 'fail')]
+        package = {e['Package']: e['Action'] for e in events if not e.get('Test') and e['Action'] in ('pass', 'fail')}
         if mode == 'positive':
-            assert result.returncode == 0 and actions(TEST) == ['pass'] and package == ['pass']
-            for lost in ('false', 'true'): assert actions(TEST+'/unapplied_nak_'+lost) == ['pass']
+            assert result.returncode == 0 and actions(TEST) == ['pass'] and package == {'js-wf/wf':'pass','js-wf/sim':'pass','js-wf/integration':'pass'}
+            for lost in ('false', 'true'): assert actions(TEST+'/unapplied_publish_'+lost) == ['pass']
             assert actions('TestPinnedRegressionCorpus') == ['pass']
+            assert actions('TestDomainNativeHintFailureUsesDurableRepair') == ['pass']
+            assert actions('TestNativeTimerHintFailureRepairsFromDurableSuspension') == ['pass']
             assert output.count('exact_replay=true production_timer=true') == 2
         else:
-            assert result.returncode == 1 and actions(TEST) == ['fail'] and package == ['fail']
-            assert actions(TEST+'/unapplied_nak_true') == ['fail']
-            assert 'local NAK acceptance was not successful:' in output
-    (root/'result.json').write_text(json.dumps(dict(actual_race_characterization_pass=True, exact_replay_cases=2,
-        actual_local_nak_control_detected=True, production_worker_changed=False,
+            assert result.returncode == 1 and actions(TEST) == ['fail'] and package == {'js-wf/sim':'fail'}
+            assert actions(TEST+'/unapplied_publish_false') == ['fail']
+            assert 'missing durable timer suspension:' in output
+    (root/'result.json').write_text(json.dumps(dict(actual_race_recovery_pass=True, exact_replay_cases=2,
+        actual_missing_hint_recovery_control_detected=True, production_worker_changed=True, actual_three_node_comparison=True,
         qualifies_full_seed_gate=False, confirms_seed55_server_cause=False), indent=2)+'\n')
 finally:
     after = inventory()

@@ -1048,3 +1048,21 @@ handoff alone does not cover this path. Verify the chosen recovery with a
 production worker deterministic regression and a precise compiled omission
 control, then compare against a real broker case and the original mixed row.
 Do not make this diagnostic's61s/73s behavior the new recovery target.
+
+
+### Repair-backed native timer hints
+
+WithTimerClock requires active compatible domain-aware journal repairers. On a
+native backend, SDK ScheduleIsHint now permits a failed scheduling hint after
+the timer request commits, while retaining cancellation/domain/support checks.
+Worker journaling establishes Suspended before ACK; due repair enqueues the
+wake from the canonical deadline. Required fallback publications and legacy
+timers retain their previous confirmed-schedule requirement. The hint failure
+remains visible in operation records. This avoids a NAK retry whose restored
+consumer deadline can delay progress under a shifted stored timestamp.
+
+Verify full current-source seeded/race/replay coverage, a precise compiled
+ScheduleIsHint omission, the real three-node injected failure comparison and
+new admitted R5 clock evidence before claiming this closes mixed clock recovery.
+The original failed seed55 server cause remains unconfirmed; historical
+source-qualified diagnostic61s/73s results remain preserved.
