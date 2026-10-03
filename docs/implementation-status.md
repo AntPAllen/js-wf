@@ -91,6 +91,14 @@ Historical sections below preserve earlier sources, pending states at the time,
 rejected trials and narrower evidence. They do not override this snapshot or
 clear a newer graph/row/full-release gate by implication.
 
+The latest hosted paired-pressure diagnostic37115026852 at0b69e91 is rejected:
+the first delayed baseline row receives journal tail-lookup API503/10008 after
+twelve renewals for one owner, before consumer/probe traffic. Three healthy
+rows are reported; the full six-row comparison is incomplete. Final monitoring
+does not prove the earlier failing request's server cause. No duplicate trial
+or runtime/gate change was made for this observation.
+[Original pressure failure evidence](scale/lease-consumer-pressure-failure-2026-10-03/).
+
 ## Earlier evidence and implementation overview — 2026-10-02
 
 - Native-retirement116-graph100k37002783868 is independently accepted at exact
