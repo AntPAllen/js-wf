@@ -270,7 +270,15 @@
   [37129135794](https://github.com/AntPAllen/js-wf/actions/runs/37129135794)
   is confirmed queued at the same source. Neither is accepted until both actual
   verdicts, complete copied-source inventories, retained stores and offline
-  review pass. No original million-store index or production dependency changes.
+  review pass. Local execution is now independently accepted:baseline expected
+  fail0.035s/control pass0.008s, both stores retained, all598 upstream bytes and
+  module cache unchanged. Reopen schedules=1/0, callbacks0, unchanged anchor
+  and last2. Relocated review passes and rejects four evidence controls (missing
+  store, inconsistent recorded root, changed compiled inventory, missing baseline
+  failure). Complete compiled sources/stores/commands/review tools are archived
+  with every member SHA256 readback. Hosted37129135794 remains pending.
+  [Complete fresh originals](scale/scheduler-minimal-cleanup-2026-10-03/complete-originals/).
+  No original million-store index or production dependency changes.
 - **Worker-kill target:** historical31.1s withTTL30s is a configuration mismatch
   excluded from reruns. ProductionTTL12s/heartbeat3s/AckWait13s and strict
   recovery under30s remain in force. Route-quorum recovery p99 starts at the

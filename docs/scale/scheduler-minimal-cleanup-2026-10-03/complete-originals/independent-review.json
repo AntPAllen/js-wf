@@ -1,0 +1,30 @@
+{
+  "accepted": true,
+  "module_files_verified": 598,
+  "module_cache_unchanged": true,
+  "module_cache_readback_at_review": true,
+  "retained_stores_verified": 2,
+  "runner_sha256": "74eb4ab5e0547804fc5743781269323c5c09fa6628ebfbd5c8c8aacef22aebd1",
+  "fixture_sha256": "ad07c9fcb8c347ffc7958596ad590eb2e68ee69cf6a3c5144166bb8a314e8199",
+  "source_revision": "bac93561810bed2712dea7a42c487700209a9dcd",
+  "source_clean_at_execution": true,
+  "cases": [
+    {
+      "mode": "baseline",
+      "actual_test_verdict": "fail",
+      "measurement": "before=1 after=0 reopened=1 callbacks=0 physical=1 last=2",
+      "changed_upstream_files": [],
+      "package_seconds": 0.035
+    },
+    {
+      "mode": "dirty-control",
+      "actual_test_verdict": "pass",
+      "measurement": "before=1 after=0 reopened=0 callbacks=0 physical=1 last=2",
+      "changed_upstream_files": [
+        "server/filestore.go"
+      ],
+      "package_seconds": 0.008
+    }
+  ],
+  "scope": "Fresh two-message file-store cleanup reproduction and exact dirty-count control; no copied campaign data/index deletion/server/Raft; production dependency unchanged and original million retirement cause unconfirmed."
+}
