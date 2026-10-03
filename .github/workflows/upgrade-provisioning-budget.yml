@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Execute whole-operation budget proof and compiled metadata-budget control
+      - name: Execute fallback/native operation budgets and both compiled metadata-budget controls
         run: python3 scripts/check-upgrade-provisioning-budget.py --root "$RUNNER_TEMP/upgrade-budget-evidence"
       - if: always()
         uses: actions/upload-artifact@v7

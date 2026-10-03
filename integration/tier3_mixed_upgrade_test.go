@@ -26,10 +26,18 @@ func TestFiveContainerMixedRollingServerUpgrade(t *testing.T) {
 }
 
 type fiveUpgradePeer struct {
-	Node           int    `json:"node"`
-	Version        string `json:"version"`
-	ServerID       string `json:"server_id"`
-	NativeRejected string `json:"native_rejected"`
+	Node           int                     `json:"node"`
+	Version        string                  `json:"version"`
+	ServerID       string                  `json:"server_id"`
+	NativeRejected string                  `json:"native_rejected"`
+	NativeCheck    *fiveUpgradeNativeCheck `json:"native_check,omitempty"`
+}
+type fiveUpgradeNativeCheck struct {
+	Started   time.Time `json:"started"`
+	Ended     time.Time `json:"ended"`
+	Deadline  time.Time `json:"deadline"`
+	Rejection string    `json:"rejection,omitempty"`
+	Error     string    `json:"error,omitempty"`
 }
 type fiveUpgradeBackendCheck struct {
 	Started  time.Time              `json:"started"`
@@ -82,7 +90,7 @@ func fiveUpgradeVersions(upgraded []bool) []string {
 func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, cluster *testcluster.DockerCluster, versions []string, path string) (observed []string, resultErr error) {
 	bound, stop := context.WithTimeout(ctx, 60*time.Second)
 	defer stop()
-	proof := fiveUpgradeProof{Version: 3, Started: time.Now().UTC(), Phase: "peer-native-rejections"}
+	proof := fiveUpgradeProof{Version: 4, Started: time.Now().UTC(), Phase: "all-peer-health"}
 	// Preserve partial phase/timing evidence on failure as well as success.
 	defer func() {
 		proof.At = time.Now().UTC()
@@ -97,6 +105,12 @@ func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, clu
 			resultErr = errors.Join(resultErr, fmt.Errorf("upgrade proof artifact: %w", err))
 		}
 	}()
+	health, healthErr := observeFiveUpgradeHealth(bound, cluster)
+	proof.Health = health
+	if healthErr != nil {
+		return nil, healthErr
+	}
+	proof.Phase = "peer-native-rejections"
 	seen := map[string]bool{}
 	observed = make([]string, 5)
 	for node := 0; node < 5; node++ {
@@ -116,25 +130,15 @@ func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, clu
 			nc.Close()
 			return nil, err
 		}
-		_, nativeErr := matrixReadMetadata(bound, func(attempt context.Context) (struct{}, error) {
-			return struct{}{}, provision.Ensure(attempt, peerJS, 5)
+		check, nativeErr := checkFiveUpgradeNative(bound, peer.Version, func(operation context.Context) error {
+			return provision.Ensure(operation, peerJS, 5)
 		})
 		nc.Close()
-		want := "stream WF_RUN configuration mismatch:"
-		if peer.Version == "2.11.17" {
-			want = "native timers require NATS 2.12+; connected server reports 2.11.17"
-		}
-		if nativeErr == nil || !strings.HasPrefix(nativeErr.Error(), want) {
-			return nil, fmt.Errorf("upgrade node%d native rejection=%v want=%s", node, nativeErr, want)
-		}
-		peer.NativeRejected = nativeErr.Error()
+		peer.NativeCheck, peer.NativeRejected = &check, check.Rejection
 		proof.Nodes = append(proof.Nodes, peer)
-	}
-	proof.Phase = "all-peer-health"
-	health, healthErr := observeFiveUpgradeHealth(bound, cluster)
-	proof.Health = health
-	if healthErr != nil {
-		return nil, healthErr
+		if nativeErr != nil {
+			return nil, fmt.Errorf("upgrade node%d native proof: %w", node, nativeErr)
+		}
 	}
 	proof.Phase = "fallback-provisioning"
 	check, err := checkFiveUpgradeFallback(bound, func(operation context.Context) (provision.TimerBackend, error) {
@@ -226,6 +230,70 @@ func observeFiveUpgradeHealth(ctx context.Context, cluster *testcluster.DockerCl
 		}
 	}
 	return observed, ctx.Err()
+}
+
+// A semantic native rejection requires multiple stream reads on a new peer.
+// Use the remaining whole proof deadline once, after recorded asset health.
+func checkFiveUpgradeNative(ctx context.Context, version string, lookup func(context.Context) error) (fiveUpgradeNativeCheck, error) {
+	check := fiveUpgradeNativeCheck{Started: time.Now().UTC()}
+	check.Deadline, _ = ctx.Deadline()
+	nativeErr := lookup(ctx)
+	check.Ended = time.Now().UTC()
+	want := "stream WF_RUN configuration mismatch:"
+	if version == "2.11.17" {
+		want = "native timers require NATS 2.12+; connected server reports 2.11.17"
+	}
+	if nativeErr == nil {
+		check.Error = "native provisioning unexpectedly succeeded"
+		return check, fmt.Errorf("%s; want=%s", check.Error, want)
+	}
+	if !strings.HasPrefix(nativeErr.Error(), want) {
+		check.Error = nativeErr.Error()
+		return check, fmt.Errorf("upgrade native rejection=%w want=%s", nativeErr, want)
+	}
+	check.Rejection = nativeErr.Error()
+	return check, nil
+}
+
+func TestFiveUpgradeNativeUsesWholeProofBudget(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	check, err := checkFiveUpgradeNative(ctx, "2.15.0", func(operation context.Context) error {
+		for stage := 0; stage < 2; stage++ {
+			select {
+			case <-operation.Done():
+				return operation.Err()
+			case <-time.After(1100 * time.Millisecond):
+			}
+		}
+		return fmt.Errorf("stream WF_RUN configuration mismatch: retained fallback")
+	})
+	deadline, _ := ctx.Deadline()
+	if err != nil || check.Rejection != "stream WF_RUN configuration mismatch: retained fallback" || check.Error != "" || !check.Deadline.Equal(deadline) || check.Ended.Sub(check.Started) < 2200*time.Millisecond {
+		t.Fatalf("native-operation proof=%+v err=%v", check, err)
+	}
+}
+
+func TestFiveUpgradeNativeRejectsUnavailableOrSuccessfulProvisioning(t *testing.T) {
+	for _, failure := range []error{nil, context.DeadlineExceeded, context.Canceled, fmt.Errorf("unrelated configuration mismatch")} {
+		check, err := checkFiveUpgradeNative(context.Background(), "2.15.0", func(context.Context) error { return failure })
+		if err == nil || check.Rejection != "" || check.Error == "" {
+			t.Fatalf("invalid native proof=%+v err=%v", check, err)
+		}
+		if failure == context.DeadlineExceeded && !errors.Is(err, context.DeadlineExceeded) {
+			t.Fatal("deadline cause erased")
+		}
+	}
+	for _, version := range []string{"2.11.17", "2.15.0"} {
+		rejection := "stream WF_RUN configuration mismatch: retained fallback"
+		if version == "2.11.17" {
+			rejection = "native timers require NATS 2.12+; connected server reports 2.11.17"
+		}
+		check, err := checkFiveUpgradeNative(context.Background(), version, func(context.Context) error { return fmt.Errorf("%s", rejection) })
+		if err != nil || check.Rejection != rejection {
+			t.Fatalf("semantic rejection proof=%+v err=%v", check, err)
+		}
+	}
 }
 
 // EnsureAuto checks several retained stores. Its total budget is the existing

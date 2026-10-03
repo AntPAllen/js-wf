@@ -1002,3 +1002,23 @@ The original failed third cut occurred after node4 actually restarted on2.15.0,
 not before the cut; its third pre-proof passed. Metadata-leader contact returned
 about1s after the kill. Retain corrected phase attribution and require actual
 post-upgrade recovery evidence before accepting a new rolling trial.
+
+### Version4 rolling semantic admission after asset health
+
+Run default all-peer health before native semantic admission, so recovery
+responses are retained even when pinned provisioning later fails. A new peer's
+explicit native rejection also performs several stream reads; use the remaining
+existing60s proof deadline once for that operation instead of the2s single-read
+retry wrapper. Retain each peer's identity, native start/end/deadline, exact
+semantic rejection or actual failure even in an incomplete proof. All native
+operations must follow the successful health round and precede fallback
+provisioning, share its whole-proof deadline and retain strict version/config
+rejection. Nil success, transient deadline, cancellation or unrelated errors
+cannot substitute for fail-closed native admission.
+
+The focused race contract now exercises both2.2s multi-stage operations and
+cancellation/semantic cases. Two separately compiled controls restore the old
+metadata wrapper at the fallback and native call sites; each must fail its own
+executed named/package operation-budget assertion. This still proves fixture
+context handling only; actual mixed row and full-release qualification remain
+separate. Preserve both earlier rejected real trials without reinterpretation.

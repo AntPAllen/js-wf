@@ -25,8 +25,10 @@ needle='backend, err := lookup(ctx)'
 if original.count(needle)!=1:raise SystemExit('compiled control target differs')
 positive='TestFiveUpgradeProvisioningUsesWholeProofBudget'
 other='TestFiveUpgradeProvisioningPreservesCancellationAndBackendFailure'
+native='TestFiveUpgradeNativeUsesWholeProofBudget'
+native_other='TestFiveUpgradeNativeRejectsUnavailableOrSuccessfulProvisioning'
 
-def run(label,pattern,overlay=None):
+def run(label,pattern,overlay=None,test_name=positive,marker="whole-operation proof=",expected_error="err=upgrade fallback provisioning proof: context deadline exceeded"):
     command=['go','test','-p=1','-race','-json','./integration','-run',pattern,'-count=1','-timeout=2m']
     if overlay:command.insert(2,'-overlay='+str(overlay))
     env=dict(os.environ,GOMEMLIMIT='512MiB',GOMAXPROCS='2')
@@ -38,18 +40,18 @@ def run(label,pattern,overlay=None):
     actions=lambda test:[e.get('Action') for e in events if e.get('Test')==test and e.get('Action') in ('run','pass','fail','skip')]
     package=[e.get('Action') for e in events if 'Test' not in e and e.get('Action') in ('pass','fail','skip')]
     if label=='positive':
-        if completed.returncode!=0 or package!=['pass'] or actions(positive)!=['run','pass'] or actions(other)!=['run','pass']:
+        if completed.returncode!=0 or package!=['pass'] or actions(test_name)!=['run','pass'] or any(actions(n)!=['run','pass'] for n in (positive,other,native,native_other)):
             raise ValueError('positive named and package executions did not pass')
         elapsed=next(e['Elapsed'] for e in events if e.get('Test')==positive and e.get('Action')=='pass')
-        if elapsed<2.2:raise ValueError('whole-operation multi-stage body did not execute')
+        if elapsed<2.2 or next(e['Elapsed'] for e in events if e.get('Test')==native and e.get('Action')=='pass')<2.2:raise ValueError('whole-operation multi-stage body did not execute')
     else:
-        output=''.join(e.get('Output','') for e in events if e.get('Test')==positive)
-        if completed.returncode==0 or package!=['fail'] or actions(positive)!=['run','fail'] or 'whole-operation proof=' not in output or 'err=upgrade fallback provisioning proof: context deadline exceeded' not in output:
+        output=''.join(e.get('Output','') for e in events if e.get('Test')==test_name)
+        if completed.returncode==0 or package!=['fail'] or actions(test_name)!=['run','fail'] or marker not in output or expected_error not in output:
             raise ValueError('control did not produce the precise executed operation-budget failure')
-    return dict(exit_code=completed.returncode,named_test_actions=actions(positive),package_actions=package)
+    return dict(exit_code=completed.returncode,named_test_actions=actions(test_name),package_actions=package)
 
 try:
-    result=run('positive','^TestFiveUpgradeProvisioning(UsesWholeProofBudget|PreservesCancellationAndBackendFailure)$')
+    result=run('positive','^TestFiveUpgrade(Provisioning(UsesWholeProofBudget|PreservesCancellationAndBackendFailure)|Native(UsesWholeProofBudget|RejectsUnavailableOrSuccessfulProvisioning))$')
     with tempfile.TemporaryDirectory(prefix='upgrade-budget-control-') as directory:
         temporary=Path(directory)
         altered=original.replace(needle,'backend, err := matrixReadMetadata(ctx, lookup)')
@@ -57,7 +59,13 @@ try:
         (a.root/'compiled-control.go.txt').write_text(altered)
         overlay=temporary/'overlay.json';overlay.write_text(json.dumps({'Replace':{str(source):str(patched)}}))
         control=run('control','^'+positive+'$',overlay)
-    (a.root/'result.json').write_text(json.dumps(dict(positive=result,compiled_two_second_control=control,
+        native_needle='nativeErr := lookup(ctx)'
+        if original.count(native_needle)!=1:raise ValueError('native compiled control target differs')
+        native_altered=original.replace(native_needle,'_, nativeErr := matrixReadMetadata(ctx, func(attempt context.Context) (struct{}, error) { return struct{}{}, lookup(attempt) })')
+        patched.write_text(native_altered)
+        (a.root/'compiled-native-control.go.txt').write_text(native_altered)
+        native_control=run('native-control','^'+native+'$',overlay,test_name=native,marker='native-operation proof=',expected_error='err=upgrade native rejection=context deadline exceeded want=stream WF_RUN configuration mismatch:')
+    (a.root/'result.json').write_text(json.dumps(dict(positive=result,compiled_two_second_control=control,compiled_native_two_second_control=native_control,
         confirms_original_server_cause=False,qualifies_mixed_rolling_row=False),indent=2)+'\n')
 finally:
     after=sources()

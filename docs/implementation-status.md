@@ -8109,3 +8109,29 @@ retained byte-for-byte as two ordered parts with per-part and whole SHA256.
 Reassembly is verified and the reusable reviewer validates all3961 members
 from the parts directly. Row/checkpoint, explanation and fencing reports
 regenerate byte-for-byte, without extracting duplicate physical stores.
+
+## Version4 rolling admission ordering and native context prepared
+
+The preserved second trial fails before reaching health observations because
+native admission precedes asset health. Version4 reverses that ordering and
+retains all health responses before the pinned native probes. Each native probe
+now invokes actual production Ensure once under the remaining existing60s proof
+deadline; on a new peer that call performs multiple retained stream reads.
+The first incompatible WF_RUN configuration must still yield its exact semantic
+rejection. Each peer retains native start/end/deadline/rejection/error beside
+its actual version/identity, including a failed peer in a partial proof.
+
+The checker requires all native calls after successful recorded health and
+before fallback provisioning, with identical whole-proof deadlines and no
+errors. It rejects native checks before health, after backend work, with changed
+deadlines or divergent/error evidence. All67 local Python guards pass. No
+production runtime changes, latency-gate changes or source-cause conclusion
+are made. Actual Go compilation and qualification of this revision remain open.
+
+The focused hosted contract is extended to four actual positive Go tests and
+separate compiled fallback/native2s-wrapper controls. Each multi-stage body must
+span2.2s and each control must fail its precise named/package context-deadline
+assertion; builds/skips/global timeouts cannot count. Clean source inventories,
+raw events and both control source files are preserved. The earlier accepted
+fallback-only race proof retains its original source/scope; this new native
+contract must independently pass before another real rolling qualification.

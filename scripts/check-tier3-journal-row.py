@@ -567,7 +567,7 @@ def check_upgrade_artifacts(root, report):
     upgraded=set()
     def proof(path, expected):
         data=json.loads(path.read_text());nodes=data['nodes']
-        if data.get('version')!=3 or data.get('complete') is not True or data.get('phase')!='complete' or data.get('error'):
+        if data.get('version')!=4 or data.get('complete') is not True or data.get('phase')!='complete' or data.get('error'):
             raise ValueError('upgrade deployment proof is incomplete or lacks current schema')
         health=data['health']
         if len(health)<5 or len(health)%5 or [h['node'] for h in health]!=list(range(5))*(len(health)//5):
@@ -587,9 +587,15 @@ def check_upgrade_artifacts(root, report):
         if not started<=previous<=op_start<=op_end<=at<=deadline or not 0<deadline-started<=60_000_000_000 or operation['backend']!='fallback' or operation.get('error'):
             raise ValueError('upgrade fallback provisioning lacks bounded successful whole-operation evidence')
         if data['backend']!='fallback' or len(nodes)!=5 or [n['node'] for n in nodes]!=list(range(5)) or [n['version'] for n in nodes]!=expected or len({n['server_id'] for n in nodes})!=5 or any(not n['server_id'] for n in nodes):raise ValueError('upgrade version/identity/backend mismatch')
+        native_end=previous
         for n in nodes:
             want='native timers require NATS 2.12+; connected server reports 2.11.17' if n['version']=='2.11.17' else 'stream WF_RUN configuration mismatch:'
             if not n['native_rejected'].startswith(want):raise ValueError('upgrade lacks semantic native rejection')
+            check=n['native_check']
+            begin,end,native_deadline=map(timestamp_ns,[check[k] for k in ('started','ended','deadline')])
+            if not native_end<=begin<=end<=op_start or native_deadline!=deadline or check.get('error') or check.get('rejection')!=n['native_rejected']:
+                raise ValueError('native admission lacks successful ordered whole-operation evidence after health')
+            native_end=end
         for key,name in [('run_info','WF_RUN'),('timer_info','WF_TIMER')]:
             info=data[key];config=info['config'];cluster=info['cluster']
             if config['name']!=name or config['num_replicas']!=5 or config['storage']!='file' or not cluster['leader'] or len(cluster['replicas'])!=4 or len({r['name'] for r in cluster['replicas']}|{cluster['leader']})!=5 or any(r.get('current') is not True or r.get('offline',False) for r in cluster['replicas']):raise ValueError('upgrade missing R5 current file replicas')
