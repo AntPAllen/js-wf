@@ -54,3 +54,13 @@ fixture patch over `577d560`; no local executable provenance gate is claimed.
 The remaining live matrix jobs are not restarted. A targeted replacement case
 can establish the corrected capture behavior; it does not by itself qualify
 the failed 13-seed shard, 200-seed row or full Tier3/24-hour/five-VM gates.
+
+## Targeted replacement dispatched
+
+[Run 37161589577](https://github.com/AntPAllen/js-wf/actions/runs/37161589577)
+requests exactly worker-clock seed 1 for ten minutes at corrected source
+`070dd954a63eb8d36dc40040805baaf5cc00f0aa`. The API confirms that exact head,
+queued status and planner job 111315971795. [Dispatch originals and scope](replacement-dispatch/)
+retain the zero-exit command output, authoritative metadata and readback hashes.
+Dispatch is not a pass and clears no gate. It does not rerun the historical
+30-second-TTL worker-kill mismatch or replace the full matrix campaign.

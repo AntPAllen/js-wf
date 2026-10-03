@@ -12,6 +12,9 @@
   The unchanged reviewer still rejects unchanged originals, and all 3,960
   original store-archive members hash-verify. Failed seed/shard remain rejected;
   fresh ten-minute qualification is required. Other live jobs are unchanged.
+  Targeted ten-minute worker-clock seed 1 run 37161589577 is dispatched at
+  corrected `070dd95`; the API confirms exact head/queued planner identity.
+  Dispatch is unqualified and does not replace the full campaign.
   [Original failure and bounded correction](scale/worker-clock-replica-capture-2026-10-03/).
 - **Current-source Tier2 journal seeds 1–48 accepted:** four successful
   twelve-seed shards in 37149506857 at exact `c4fed06` pass independent review.
