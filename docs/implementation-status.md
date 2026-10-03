@@ -8783,6 +8783,20 @@ and five common-clock probes. Requested rolling gaps/shutdowns require matching
 proofs and scan progress. Every stopped-run original store/source/log/binary is
 archived with full member readback; live interrupted children keep their original
 root and no final-archive claim. Three producer guard/archive tests pass.
-The producer is not yet qualified by a real smoke, and no24h row has started.
+The local journal seed1/35s race smoke at exact
+65f4b7f387917b72d3e7f18b76419b95f6a1b822 now passes100.569s package/99.54s
+named test:196 invocations/2156 entries/one real journal-leader cut. All row,
+retained-state/drain/history gates and event/fencing reports pass. Independent
+archive review verifies4223 original members and999 compiled source hashes
+against Git, the actual race executable/build settings, and reproduces all
+reports exactly. Relocated positive passes; consistently hashed failed status,
+missing compiled source, false normal-binary claim, substituted seed and short
+named-test elapsed controls are rejected. Stores are hashed but not independently
+reopened by this review. This qualifies the producer's journal smoke path, not
+all producer profiles or any24h row. Originals remain intact.
+[Complete smoke originals and portable controls](scale/local-r5-soak-producer-2026-10-03/smoke/).
+Disposable Go build cache was cleared after the completed smoke when free disk
+fell to228MiB, restoring1.4GiB; no failed/native-million originals were removed.
+No24h row has started.
 Full16-row/200-seed campaigns, full-matrix24h and the original million drain
 requirement remain open.

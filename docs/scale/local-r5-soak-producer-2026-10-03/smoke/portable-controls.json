@@ -1,0 +1,31 @@
+{
+  "relocated_positive": true,
+  "negative_controls": [
+    {
+      "case": "failed_status",
+      "rejected": true,
+      "error": "row is failed/incomplete or claims incorrect release scope"
+    },
+    {
+      "case": "missing_compiled_source",
+      "rejected": true,
+      "error": "compiled checkout does not match Git:worker/worker.go"
+    },
+    {
+      "case": "false_normal_binary",
+      "rejected": true,
+      "error": "retained executable build settings mismatch"
+    },
+    {
+      "case": "substituted_seed",
+      "rejected": true,
+      "error": "Command '['python3', '/tmp/tmpgonezkmg/source/scripts/check-tier3-journal-row.py', '--root', '/tmp/tmpgonezkmg/fixture', '--events', '/tmp/tmpgonezkmg/events.jsonl', '--row', 'journal', '--duration', '35s', '--expected-seed', '2', '--output', '/tmp/tmpgonezkmg/regenerated.json', '--require-checkpoint-audits']' returned non-zero exit status 1."
+    },
+    {
+      "case": "short_named_elapsed",
+      "rejected": true,
+      "error": "Command '['python3', '/tmp/tmpo9q2f9gd/source/scripts/check-tier3-journal-row.py', '--root', '/tmp/tmpo9q2f9gd/fixture', '--events', '/tmp/tmpo9q2f9gd/events.jsonl', '--row', 'journal', '--duration', '35s', '--expected-seed', '1', '--output', '/tmp/tmpo9q2f9gd/regenerated.json', '--require-checkpoint-audits']' returned non-zero exit status 1."
+    }
+  ],
+  "original_archive_unchanged": true
+}

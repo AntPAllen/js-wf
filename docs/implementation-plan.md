@@ -844,7 +844,12 @@ clock probes; explicit rolling gap/shutdown profiles retain their proof gates.
 All stopped-run originals, including physical stores and compiled checkout, are
 archived with every-member readback. Interrupted live children retain their root
 without a final archive claim. A single row cannot clear the full matrix/soak.
-Qualify this producer with35s smoke before starting actual24h rows.
+The journal seed1/35s race producer smoke at65f4b7f passes with complete
+archive/source/binary/report review and five consistently hashed negative
+controls. Other producer profiles and all actual24h rows remain unqualified.
+Review an archive with `scripts/review-tier3-soak.py`; it regenerates the raw
+row/explanation/fencing reports using recorded source scripts and verifies the
+compiled checkout against Git. Hashing stores does not independently reopen them.
 
 
 
