@@ -11,7 +11,8 @@
   The focused model baseline passes and the corrected compiled overlay fails
   at the intended missing-repair assertion. All 606 tracked Go/module files are
   byte-identical to `c4fed06`; existing runtime qualification remains undisturbed.
-  Only Start repair needs a corrected-runner retry; the failed campaign and
+  Start-repair-only ten-minute retry 37154381145 is queued at exact
+  `649c6ce8d40c10521da1a4f0feda066db4dc0332`; dispatch is unaccepted. The failed campaign and
   complete six-category release gate are not accepted.
   [Failed originals, focused correction and equivalence ledger](scale/start-mutation-anchor-2026-10-03/).
 - **Current-source sustained CAS mutation accepted:** campaign 37149508529

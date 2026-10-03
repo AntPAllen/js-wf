@@ -29,3 +29,8 @@ six-category gate is cleared by this correction or equivalence comparison.
 `originals.tar.gz` retains the failed job/artifact and focused correction proof,
 including the complete file equivalence ledger. Every member was reopened and
 SHA-verified before atomic rename; hashes are recorded in `manifest.json`.
+
+The corrected-runner ten-minute Start-repair-only retry is
+[37154381145](https://github.com/AntPAllen/js-wf/actions/runs/37154381145)
+at exact `649c6ce8d40c10521da1a4f0feda066db4dc0332`. Its observed queued
+metadata and requested inputs are separately retained. Dispatch is not acceptance.
