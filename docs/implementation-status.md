@@ -7584,3 +7584,28 @@ workflow and runner syntax parse. Actual real-cluster contract qualification is
 still required. Hosted workflow retains positive/negative physical stores and
 all evidence in a lossless archive with SHA256 member readback. This is fixture
 preparation, not a mixed-workload upgrade row or a release claim.
+
+## Every-peer upgrade contract: first hosted failure preserved
+
+[Run37062846803](https://github.com/AntPAllen/js-wf/actions/runs/37062846803)
+finished failed at exact796ca2d. All372 archived members match the uploaded
+SHA256 manifest; the complete original physical stores, binaries and logs are
+preserved in scale/docker-rolling-upgrade-2026-10-03/rejected-listener-readiness/.
+The positive fixture retained35 messages through three upgrades, then received
+no stream response immediately after the fourth peer restarted. Logs show the
+client listener ready before routing was established. No positive pass or
+negative-control qualification is claimed.
+
+The fixture now retries only unavailable/ambiguous publication responses within
+one minute, with two-second request budgets and a stable message ID. Every ack
+must still identify the exact next sequence, and every replica's retained count
+and every payload must pass. Each retry is logged. Existing Docker regression
+unit tests pass locally (0.516s); hosted qualification remains required.
+
+Native million diagnostic37059396897 finished successfully at885664e. Its2291
+original archive member hashes have been independently checked. The report
+records1M unique receipts, p99=12.402235943s/max=15.816089163s,39 redeliveries,
+zero ack errors and one transient fetch error. The hosted offline diagnostic
+verifier passed. Independent receipt/source/physical-drain review remains open;
+this10m diagnostic does not satisfy the original24h/2s release requirement.
+The historical30s-TTL worker-kill mismatch remains closed without reruns.

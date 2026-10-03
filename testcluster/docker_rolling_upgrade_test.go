@@ -76,9 +76,28 @@ func TestFiveDockerRollingUpgradePreservesEveryReplica(t *testing.T) {
 	var payloads [][]byte
 	publish := func() {
 		data := []byte(fmt.Sprintf("retained-upgrade-message-%d", len(payloads)+1))
-		ack, err := js.Publish(ctx, "rolling.proof", data)
+		// A ready client listener can precede the stream's elected leader.
+		// Keep a stable message ID across ambiguous replies, then require the
+		// exact next sequence so a duplicate append cannot pass this contract.
+		deadline, stop := context.WithTimeout(ctx, time.Minute)
+		defer stop()
+		var ack *jetstream.PubAck
+		var err error
+		for attempt := 1; deadline.Err() == nil; attempt++ {
+			request, cancel := context.WithTimeout(deadline, 2*time.Second)
+			ack, err = js.Publish(request, "rolling.proof", data, jetstream.WithMsgID(string(data)))
+			cancel()
+			if err == nil {
+				break
+			}
+			t.Logf("publish sequence=%d attempt=%d error=%v", len(payloads)+1, attempt, err)
+			if !errors.Is(err, jetstream.ErrNoStreamResponse) && !errors.Is(err, nats.ErrNoResponders) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, context.DeadlineExceeded) {
+				break
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
 		if err != nil || ack == nil || ack.Sequence != uint64(len(payloads)+1) {
-			t.Fatalf("publish ack=%+v err=%v", ack, err)
+			t.Fatalf("publish sequence=%d ack=%+v err=%v deadline=%v", len(payloads)+1, ack, err, deadline.Err())
 		}
 		payloads = append(payloads, data)
 	}
