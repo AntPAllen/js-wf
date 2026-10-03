@@ -86,10 +86,16 @@
   compiled/seed inventory and byte-identical raw report regeneration verify.
   [Complete graph originals](scale/tombstone-marker-drain-2026-10-03/full1k/).
   Full race [37146525331](https://github.com/AntPAllen/js-wf/actions/runs/37146525331)
-  and normal 100k [37146526818](https://github.com/AntPAllen/js-wf/actions/runs/37146526818)
-  are in progress at that exact source; neither is accepted. Older prefix-only
-  campaigns remain active separately. Long-run physical retention, full fault
-  matrices and 24h qualification remain open.
+  is now terminal and independently accepted in 2,149.903 s: 175 passes/two skips,
+  all 391 pins and 121,000 bodies; all 1,140 source hashes, retained race executable,
+  compiled/AST inventories and raw report regeneration verify. A separate byte
+  comparison through main `fd92ebc` confirms all tracked non-test Go sources,
+  module declarations, simulator sources/pins and Tier1 producer/verifier remain
+  identical; later integration-test/other verifier edits are outside that claim.
+  [Complete hosted race originals](scale/tombstone-marker-drain-2026-10-03/hosted-race/).
+  Normal 100k [37146526818](https://github.com/AntPAllen/js-wf/actions/runs/37146526818)
+  remains active and unaccepted. Older campaigns remain active separately.
+  Long-run physical retention, full fault matrices and 24h remain open.
   [Originals and exact scope](scale/tombstone-marker-drain-2026-10-03/).
 - **Tombstone partial-timeout correction:** a neutral production-port refactor
   preserves the original scan decisions and exposes their baseline stall at
@@ -114,7 +120,7 @@
   [Complete hosted race originals](scale/tombstone-partial-cursor-2026-10-03/hosted-race/).
   Normal 100k [37145177234](https://github.com/AntPAllen/js-wf/actions/runs/37145177234)
   remains active and unaccepted. This source predates the physical marker cleanup
-  above; the later marker graph has both race and 100k campaigns in progress.
+  above; the later marker graph race is also accepted and its 100k remains active.
   Earlier Start-only 100k remains active separately; it is not restarted.
   Population bounds and full fault matrices/24h remain separate.
   [Focused originals and model limits](scale/tombstone-partial-cursor-2026-10-03/).
