@@ -2,6 +2,18 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Current-source release campaigns scheduled:** exact
+  `c4fed061bc614488d4f89b53b216b756490f7da0` now has a full real Tier2
+  [matrix 37149506857](https://github.com/AntPAllen/js-wf/actions/runs/37149506857)
+  scheduled: all 13 rows × seeds 1–200 × ten minutes (2,600 executions).
+  All six ten-minute sustained mutation categories are also scheduled in
+  [37149508529](https://github.com/AntPAllen/js-wf/actions/runs/37149508529).
+  Both exact head SHAs and queued planner jobs are verified. Neither is accepted.
+  They include the newer runtime scanner/marker corrections and release-verifier
+  changes; older-source matrix/mutation evidence cannot substitute. Existing
+  older campaigns remain undisturbed. These do not clear the independent 24h
+  full matrix or original million-timer gate.
+  [Retained dispatch metadata and scope](scale/current-release-campaigns-2026-10-03/).
 - **Tier2 release-verifier correction:** metadata/log preflight could previously
   emit `clears_tier2_200_seed_gate=true` without raw artifacts. A retained
   synthetic 2,600-execution control reproduces that false promotion; corrected
