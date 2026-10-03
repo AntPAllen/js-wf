@@ -242,11 +242,22 @@
   missing/wrong policy, malformed progress and absent gap coverage rejections.
   Full reconciler suite passes11.427s; focused Start gate/history race passes
   1.054s. The strict kill+30s bound and other gates remain; sustained
-  qualification is open until new runs pass. New ten-minute profiles at exact
-  c5125cd810d407e26a778ef102f2cb093ff233c6 are queued:
+  corrected ten-minute profiles at exactc5125cd are now independently accepted:
   SIGKILL [37132399483](https://github.com/AntPAllen/js-wf/actions/runs/37132399483)
   and graceful [37132401225](https://github.com/AntPAllen/js-wf/actions/runs/37132401225).
-  Each now requires explicit scan policy/progress evidence.
+  Each completes1820 invocations, all five retained-store upgrades and five real
+  Start process gaps with explicit64/100ms policy and4013/4023 scan calls.
+  Originals3911/3898 members and723 clean before/after source hashes verify;
+  all row/event/fencing reports regenerate exactly. Both have55 native
+  fail-closed rejections, six checkpoint audits and zero fencing events.
+  SIGKILL worst type terminal/progress p99=14.495s/14.478s; gap recovery max20.751s.
+  Graceful worst type p99=20.163s/20.146s; gap recovery max23.604s. All ten gaps
+  remain under30s; raw final integrity/drain and all histories pass in the named
+  tests. Recorded failed scan calls16/43 remain in the originals; temporal matches
+  to held gap enqueue failures are descriptive, not a server-root-cause claim.
+  [Complete corrected ten-minute originals](scale/r5-start-gap-2026-10-03/hosted-ten-minute/).
+  This qualifies seed1/10m atc5125cd;200 seeds/24h and the newer partial-prefix
+  runtime source remain separate. The original two rejected trials are unchanged.
 - **CAS benchmark harness:** hosted37121445966 atcd59b86 is rejected before
   measurement: the shared harness used the newer UnmarshalEntry API absent at
   fixed baseline4fa3119. Its diagnostic now uses the benchmark's JSON format;
@@ -8824,6 +8835,14 @@ retained; neither is a runtime repair failure. Corrected startup uses bounded
 attempts inside the unchanged20s contract context and the production constructor.
 [Focused reproduction, corrected sources, pins and raw logs](scale/start-partial-cursor-2026-10-03/focused/).
 This is a confirmed runtime progress defect, separate from the old R5 failure's
-unconfirmed exact cursor/server cause. Clean retained-binary full1k qualification
-at a committed source remains pending; full matrices/24h/large-population bounds
-remain open.
+unconfirmed exact cursor/server cause. Clean retained-binary full1k at exact2f9416ba4062cfe5abdc1e66e69a4ec9e0093d43
+passes135.312s:170 top-level tests, two documented trace-only skips,283 pins and
+121,000 bodies across all121 scalable workloads. Aggregate123,183 schedules,
+1,798,545 choices and27,196,095 events includes fixed/repeated cases. Independent
+review verifies1015 before/after source hashes against Git, normal executable
+56fa0ed37b2461a432ede7922ccc560b2a964a5093c657e628644edf96d9c4e2,
+actual compiled inventory and source-derived seed inventory; the complete suite
+report regenerates exactly. All archived members reopen and hash-verify.
+[Complete full1k executable and raw evidence](scale/start-partial-cursor-2026-10-03/full1k/).
+Earlier full100k/full-race evidence retains its prior graph. Full matrices/24h,
+other scanner error-prefix certification and large-population bounds remain open.
