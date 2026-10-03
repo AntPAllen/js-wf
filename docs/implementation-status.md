@@ -7835,3 +7835,10 @@ missing from R5. Original14/12-shard evidence is not reattributed. Current121
 100k37106469422 remains actively running at11ad2e4, with unchanged simulation
 and runtime sources in this fixture port. Original24h/full-release scope stays
 open.
+
+[Rolling mixed row37107421026](https://github.com/AntPAllen/js-wf/actions/runs/37107421026)
+is confirmed queued at exact0bdc8382ee8338c2f9c45f6e07e8d8655685169c, seed1/10m.
+It requests all five peer upgrades alongside the sustained mixed workload,
+with complete physical original archives. No shortened one-peer smoke replaces
+this qualification. Current121100k37106469422 remains in progress; original
+Tier2 all13x20037057872230 remains queued and retains its older source scope.
