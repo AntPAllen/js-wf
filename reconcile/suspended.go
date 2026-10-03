@@ -121,7 +121,7 @@ func (p *jetStreamSuspendedScanPort) EnqueueSuspended(ctx context.Context, typ, 
 // Scan advances a stream-sequence cursor. The budget counts holes as well as
 // retained invocations, so a heavily purged stream cannot monopolize a scan.
 // In dry-run mode Candidates reports the messages that would be published.
-func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (ScanResult, error) {
+func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (result ScanResult, scanErr error) {
 	if budget < 1 || s.Grace < 0 {
 		return ScanResult{}, fmt.Errorf("invalid suspended scan budget or grace")
 	}
@@ -148,6 +148,7 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 		retained  bool
 		retired   int
 		ready     bool
+		repaired  bool
 		candidate Candidate
 		err       error
 	}
@@ -177,12 +178,31 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 	}
 	close(jobs)
 	workers.Wait()
-	result := ScanResult{NextSequence: next + uint64(count)}
+	result = ScanResult{NextSequence: next + uint64(count)}
+	defer func() {
+		if scanErr == nil {
+			return
+		}
+		// Parallel reads can succeed beyond a failed invocation. Only the
+		// contiguous prefix with every required enqueue acknowledged can be
+		// certified; an uncertain enqueue is itself an unresolved boundary.
+		confirmed := next
+		for _, item := range items {
+			if item.err != nil || (item.ready && !item.repaired && !dryRun) {
+				break
+			}
+			confirmed++
+		}
+		if confirmed > next {
+			result.RetrySequence = confirmed
+		}
+	}()
 	if wrap {
 		result.NextSequence = 1
 	}
 	var inspectErr error
-	for _, item := range items {
+	var candidateIndexes []int
+	for index, item := range items {
 		result.Removed += item.retired
 		if item.err != nil {
 			// A transient read on one invocation must not suppress ready
@@ -198,6 +218,7 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 		}
 		if item.ready {
 			result.Candidates = append(result.Candidates, item.candidate)
+			candidateIndexes = append(candidateIndexes, index)
 		}
 	}
 	if inspectErr != nil {
@@ -211,12 +232,13 @@ func (s *SuspendedScan) Scan(ctx context.Context, next uint64, budget int, dryRu
 		// One ID per window bounds repeated wakeups while making a fresh run
 		// available before that 20-second fallback.
 		retryWindow := s.Now().UnixNano() / int64(suspendedRetryWindow)
-		for _, candidate := range result.Candidates {
+		for index, candidate := range result.Candidates {
 			err := s.port.EnqueueSuspended(ctx, candidate.Type, candidate.ID, candidate.JournalSeq, retryWindow)
 			reportRepair(s.Observe, RepairEvent{Kind: "suspended", Type: candidate.Type, ID: candidate.ID, Reason: candidate.Reason, JournalSequence: candidate.JournalSeq, RetryWindow: retryWindow}, false, err)
 			if err != nil {
 				return result, err
 			}
+			items[candidateIndexes[index]].repaired = true
 		}
 	} else {
 		for _, candidate := range result.Candidates {

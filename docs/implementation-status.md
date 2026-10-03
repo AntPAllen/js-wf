@@ -2,6 +2,18 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Suspended partial-failure correction:** the baseline scanner fails fixed
+  seed 2 after 48 virtual seconds, cursor 1/no acknowledged wakeup. Concurrent
+  reads now certify only the contiguous prefix with acknowledged enqueues and
+  completed retirement operations. All 128 fixed seeds/exact replays pass;
+  twelve new pins bring the corpus to 307 (121 scalable workloads unchanged).
+  Complete pinned corpus/model passes race in 9.181 s. Eleven failure-stage
+  controls and a three-node lost-enqueue-ack contract pass race in 4.602 s,
+  actual cursor `1 → 4 → 7 → 8` and one retained wakeup. Full reconciler suite
+  passes 24.734 s. The model uses immutable admission prefixes, not arbitrary
+  concurrent read timing. Full current-source graph qualification remains open;
+  earlier complete runs keep their earlier scope.
+  [Focused originals and limitations](scale/suspended-partial-cursor-2026-10-03/).
 - **Signal partial-timeout correction:** production scanner baseline fails
   deterministic seed 2 after 48 virtual seconds with cursor 1/no wakeup.
   Corrected certified-prefix checkpoints pass all 128 fixed seeds/exact replays,
