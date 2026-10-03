@@ -863,7 +863,7 @@ compiled checkout against Git. Hashing stores does not independently reopen them
 
 `tier3-mixed-leaders` now accepts `row=all` for all fourteen implemented R5
 fault variants at one revision, with 1,20 or200 consecutive seeds. All-row
-campaigns shard at twelve seeds per job: the200-seed campaign uses238 jobs,
+campaigns shard at thirteen seeds per job: the current 16-row200-seed campaign uses256 jobs,
 within the hosted256-job limit. Each seed retains separate raw events, row
 reports, checkpoint audits, event explanations and fencing reviews. Clock proof
 flags apply to both clock rows; focused non-clock requests with those flags
@@ -873,6 +873,10 @@ are rejected. Focused single-row campaign naming/layout remains compatible.
 checkout/seed header, regenerates every row report from raw artifacts, compares
 uploaded report bytes, and regenerates event/fencing explanations. Optional
 admitted-clock verification requires all cut/probe evidence on both clock rows.
+For the current forced-gap SIGKILL campaign, also pass
+`--require-upgrade-start-gap --expected-upgrade-shutdown sigkill`; the reviewer
+regenerates production Start-scan progress proof and rejects missing gaps or
+a substituted shutdown mode. Use `ldm` for that independently requested profile.
 A ten-minute full-row campaign still reports `clears_full_tier3_release=false`:
 complete fault coverage and the required24-hour full-matrix soak are separate
 requirements. Dispatch and planner/guard tests do not establish a campaign pass.

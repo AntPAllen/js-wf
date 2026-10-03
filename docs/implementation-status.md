@@ -2,6 +2,14 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Full Tier3 upgrade profile review corrected:** the full reviewer now
+  forwards and requires requested Start-gap/scanner-progress and shutdown
+  profiles. Its old call rejects unchanged accepted SIGKILL/Lame Duck report
+  bytes; corrected review reproduces both reports and raw event/fencing outputs
+  identically. Five full-matrix and three single-campaign controls pass,
+  including missing/substituted proof rejection. These are review corrections,
+  not new workload qualification; live full campaign 37157123048 is unchanged.
+  [Actual prior/corrected review and input hashes](scale/tier3-upgrade-profile-review-2026-10-03/).
 - **Full Tier3 artifact identity corrected:** four store-retaining rows used
   seed-only artifact names. A workflow-bound regression test proves 64 uploads
   collided on 16 identities at `f05d7ba`; adding the row yields 64 unique names.
