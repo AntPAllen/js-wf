@@ -548,17 +548,31 @@ func (c *DockerCluster) KillNodeObserved(i int) (DockerKillObservation, error) {
 	return observeDockerKill(ctx, i, c.names[i], dockerCommand)
 }
 
+type dockerKillResult struct {
+	at  time.Time
+	err error
+}
+
+// A kill reply wakes the state observer; it does not establish source exit.
+// Injecting the poll channel lets tests prove event ordering without sleeps.
+func awaitDockerKillPoll(ctx context.Context, killed <-chan dockerKillResult, poll <-chan time.Time) (*dockerKillResult, error) {
+	select {
+	case result := <-killed:
+		return &result, nil
+	case <-poll:
+		return nil, nil
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
 func observeDockerKill(ctx context.Context, node int, name string, command func(context.Context, ...string) (string, error)) (DockerKillObservation, error) {
 	receipt := DockerKillObservation{Node: node, Container: name, KillStarted: time.Now().UTC(), ConcurrentObservation: true}
 	bound, cancel := context.WithCancel(ctx)
-	type killResult struct {
-		at  time.Time
-		err error
-	}
-	killed := make(chan killResult, 1)
+	killed := make(chan dockerKillResult, 1)
 	go func() {
 		_, err := command(bound, "kill", "--signal=SIGKILL", name)
-		killed <- killResult{time.Now().UTC(), err}
+		killed <- dockerKillResult{time.Now().UTC(), err}
 	}()
 	returned := false
 	defer func() {
@@ -568,7 +582,7 @@ func observeDockerKill(ctx context.Context, node int, name string, command func(
 			<-killed
 		}
 	}()
-	acceptKill := func(result killResult) error {
+	acceptKill := func(result dockerKillResult) error {
 		returned = true
 		receipt.KillReturned = result.at
 		return result.err
@@ -614,9 +628,20 @@ func observeDockerKill(ctx context.Context, node int, name string, command func(
 			}
 			return receipt, nil
 		}
-		select {
-		case <-ctx.Done():
-		case <-time.After(100 * time.Millisecond):
+		var pending <-chan dockerKillResult
+		if !returned {
+			pending = killed
+		}
+		timer := time.NewTimer(100 * time.Millisecond)
+		result, err := awaitDockerKillPoll(ctx, pending, timer.C)
+		timer.Stop()
+		if err != nil {
+			return receipt, err
+		}
+		if result != nil {
+			if err := acceptKill(*result); err != nil {
+				return receipt, err
+			}
 		}
 	}
 	return receipt, fmt.Errorf("Docker node %d was not removed after kill: %w", node, ctx.Err())

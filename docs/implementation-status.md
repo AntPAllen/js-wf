@@ -27,12 +27,13 @@
   entries,105 broker-backed clock samples and5 final process counters.
   [Complete clock originals](scale/r5-worker-clock-2026-10-03/hosted-pass/). Version3 rolling
   [37109789443](https://github.com/AntPAllen/js-wf/actions/runs/37109789443)
-  is queued atdf07ba1. Both still require independent real-row acceptance.
+  is terminal FAILED atdf07ba1 during its second post-upgrade native probe.
+  Complete originals are retained; rolling real-row acceptance remains open.
 - **Rolling readiness:** the first mixed trial is rejected after node4's actual
   third restart: its post-upgrade fallback proof hits the two-second metadata
   wrapper. The fixture now uses the existing60s whole-operation deadline;
-  focused race/control evidence is accepted, and version3 records all-peer
-  public health responses. Temporary no-quorum warnings and later metadata
+  expanded fallback/native race/control evidence is accepted at24f2523.
+  Version4 records all-peer public health responses before native admission. Temporary no-quorum warnings and later metadata
   contact remain observations, not a confirmed server cause.
   [Failure and corrected phase evidence](scale/r5-rolling-upgrade-2026-10-03/rejected-deployment-check/),
   [accepted budget contract](scale/upgrade-provisioning-budget-2026-10-03/).
@@ -8142,3 +8143,34 @@ four actual race-test bodies and both separately compiled omission controls,
 with exact committed source hashes before/after. Current121100k37106469422
 remains in progress. No version4 real rolling trial has been launched pending
 this focused execution; prior real failures remain rejected and preserved.
+
+
+## Expanded upgrade budget proof accepted; Docker observer wakeup prepared
+
+[Focused qualification37111754630](https://github.com/AntPAllen/js-wf/actions/runs/37111754630)
+is independently accepted at exact24f2523994e11aa93ee4ad3ea95e2473d7ec75ba.
+All four named positive race tests execute; both multi-stage test bodies span
+2.2s. Both separately compiled two-second wrapper controls fail the precise
+named/package deadline assertion.690 source hashes match exact Git before and
+after; all16 retained archive members pass SHA256 readback. The reusable review
+and original evidence are in
+scale/upgrade-provisioning-budget-2026-10-03/expanded-native-pass/.
+This proves fixture deadline preservation with injected operations, not actual
+NATS provisioning or the full real rolling row.
+
+The ahead200 seed29 evidence identifies an avoidable observer delay: the Docker
+kill reply arrives before the due time, but the next state observation is late.
+The observer now wakes on a received kill reply instead of waiting for the next
+100ms poll. Only a successful exact-name Docker state query proves source exit;
+the reply itself remains insufficient. Cleanup/name reuse still requires both
+confirmed absence and successful command completion. The test supplies a ready
+reply with no poll channel, eliminating any success timing threshold. Separate
+poll/cancellation tests and a compiled missing-wakeup control supplement the
+existing sequential observer control and actual native Docker tests.
+
+Local formatting, Python compilation and67 Tier3 guards pass. Actual Go/race
+and Docker execution of the wakeup change remain pending its focused hosted
+contract. No ahead200 retry or worker-kill mismatch rerun is launched. The
+historical TTL30s/31.1s smoke is closed: production TTL12s/heartbeat3s/AckWait13s
+retain strict recovery under30s. This change does not establish the original
+seed29 exit time or resolve seed55's pending-timer admission failure.

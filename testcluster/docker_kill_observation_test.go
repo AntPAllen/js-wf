@@ -35,10 +35,39 @@ func TestDockerKillObservationSeparatesExitFromCleanup(t *testing.T) {
 				if receipt.State != "absent" || !receipt.SourceStopped.Equal(receipt.CleanupComplete) {
 					t.Fatal(receipt)
 				}
-			} else if receipt.State != state || receipt.CleanupComplete.Sub(receipt.SourceStopped) < 100*time.Millisecond {
+			} else if receipt.State != state || !receipt.SourceStopped.Before(receipt.CleanupComplete) {
 				t.Fatal(receipt)
 			}
 		})
+	}
+}
+
+func TestDockerKillObservationPollWakesOnReplyWithoutTick(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	killed := make(chan dockerKillResult, 1)
+	want := dockerKillResult{at: time.Date(2026, 10, 3, 0, 0, 0, 0, time.UTC)}
+	killed <- want
+	// No poll tick exists. Waiting for one loses an available reply and fails
+	// by context cancellation, independently of wall-clock scheduling speed.
+	result, err := awaitDockerKillPoll(ctx, killed, nil)
+	if err != nil || result == nil || !result.at.Equal(want.at) || result.err != nil {
+		t.Fatalf("kill reply did not wake state observer: result=%+v err=%v", result, err)
+	}
+}
+
+func TestDockerKillObservationPollTicksAndCancellation(t *testing.T) {
+	poll := make(chan time.Time, 1)
+	poll <- time.Time{}
+	result, err := awaitDockerKillPoll(context.Background(), nil, poll)
+	if result != nil || err != nil {
+		t.Fatalf("poll result=%+v err=%v", result, err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	result, err = awaitDockerKillPoll(ctx, nil, nil)
+	if result != nil || !errors.Is(err, context.Canceled) {
+		t.Fatalf("cancellation result=%+v err=%v", result, err)
 	}
 }
 

@@ -12,7 +12,9 @@ TESTS = ('TestDockerKillObservationSeparatesExitFromCleanup',
          'TestDockerKillObservationDoesNotWaitForKillReply',
          'TestDockerKillObservationRejectsFailedListing',
          'TestDockerKillObservationNative',
-         'TestDockerKillObservationNativeDelayedReply')
+         'TestDockerKillObservationNativeDelayedReply',
+         'TestDockerKillObservationPollWakesOnReplyWithoutTick',
+         'TestDockerKillObservationPollTicksAndCancellation')
 
 
 def main():
@@ -77,9 +79,20 @@ def main():
     actual(negative, TESTS[1], 'fail')
     assert [e['Action'] for e in negative if not e.get('Test') and e['Action'] in ('pass', 'fail')] == ['fail']
     assert any('kill reply prevented observing stopped server' in e.get('Output', '') for e in negative), 'wrong failure'
+    wake_case='\tcase result := <-killed:\n\t\treturn &result, nil\n'
+    assert original.count(wake_case)==1, 'wake control target differs'
+    no_wake=out/'no-reply-wakeup.go'
+    no_wake.write_text(original.replace(wake_case,''))
+    wake_overlay=out/'wake-overlay.json'
+    wake_overlay.write_text(json.dumps({'Replace':{str(ROOT/'testcluster/docker_cluster.go'):str(no_wake)}},indent=2)+'\n')
+    status,wake_negative=run('no-reply-wakeup','^TestDockerKillObservationPollWakesOnReplyWithoutTick$',wake_overlay)
+    assert status==1
+    actual(wake_negative,'TestDockerKillObservationPollWakesOnReplyWithoutTick','fail')
+    assert [e['Action'] for e in wake_negative if not e.get('Test') and e['Action'] in ('pass','fail')]==['fail']
+    assert any('kill reply did not wake state observer' in e.get('Output','') and 'context deadline exceeded' in e.get('Output','') for e in wake_negative), 'wrong wake control failure'
     assert hashes == {n: hashlib.sha256((ROOT / n).read_bytes()).hexdigest() for n in names}, 'source changed'
     report = {'head': head, 'actual_positive_tests': len(TESTS), 'both_auto_remove_modes': True,
-              'actual_delayed_docker_reply': True, 'sequential_source_control_detected': True,
+              'actual_delayed_docker_reply': True, 'sequential_source_control_detected': True, 'missing_reply_wakeup_control_detected':True,
               'strict_duration_gate_preserved': True, 'full_release_gate': False}
     (out / 'result.json').write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps(report, indent=2))
