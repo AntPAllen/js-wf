@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -37,7 +39,19 @@ type fiveUpgradeBackendCheck struct {
 	Error    string                 `json:"error,omitempty"`
 }
 
+type fiveUpgradeHealthObservation struct {
+	Node   int       `json:"node"`
+	URL    string    `json:"url"`
+	Before time.Time `json:"before"`
+	After  time.Time `json:"after"`
+	Status int       `json:"http_status"`
+	Body   string    `json:"body"`
+	Error  string    `json:"error,omitempty"`
+}
+
 type fiveUpgradeProof struct {
+	Health []fiveUpgradeHealthObservation `json:"health"`
+
 	Version      int                      `json:"version"`
 	Started      time.Time                `json:"started"`
 	Complete     bool                     `json:"complete"`
@@ -68,7 +82,7 @@ func fiveUpgradeVersions(upgraded []bool) []string {
 func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, cluster *testcluster.DockerCluster, versions []string, path string) (observed []string, resultErr error) {
 	bound, stop := context.WithTimeout(ctx, 60*time.Second)
 	defer stop()
-	proof := fiveUpgradeProof{Version: 2, Started: time.Now().UTC(), Phase: "peer-native-rejections"}
+	proof := fiveUpgradeProof{Version: 3, Started: time.Now().UTC(), Phase: "peer-native-rejections"}
 	// Preserve partial phase/timing evidence on failure as well as success.
 	defer func() {
 		proof.At = time.Now().UTC()
@@ -116,6 +130,12 @@ func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, clu
 		peer.NativeRejected = nativeErr.Error()
 		proof.Nodes = append(proof.Nodes, peer)
 	}
+	proof.Phase = "all-peer-health"
+	health, healthErr := observeFiveUpgradeHealth(bound, cluster)
+	proof.Health = health
+	if healthErr != nil {
+		return nil, healthErr
+	}
 	proof.Phase = "fallback-provisioning"
 	check, err := checkFiveUpgradeFallback(bound, func(operation context.Context) (provision.TimerBackend, error) {
 		return provision.EnsureAuto(operation, js, 5)
@@ -155,6 +175,57 @@ func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, clu
 	}
 	proof.Phase, proof.Complete = "complete", true
 	return observed, nil
+}
+
+// Default /healthz checks the peer's retained JetStream assets, not just TCP
+// readiness. Retain every response; advance only after one round passes all5.
+func observeFiveUpgradeHealth(ctx context.Context, cluster *testcluster.DockerCluster) ([]fiveUpgradeHealthObservation, error) {
+	var observed []fiveUpgradeHealthObservation
+	client := &http.Client{Timeout: 2 * time.Second}
+	for ctx.Err() == nil {
+		ready := true
+		for node := 0; node < 5; node++ {
+			event := fiveUpgradeHealthObservation{Node: node, URL: cluster.MonitorURL(node) + "/healthz?details=true", Before: time.Now().UTC()}
+			request, err := http.NewRequestWithContext(ctx, http.MethodGet, event.URL, nil)
+			if err == nil {
+				var response *http.Response
+				response, err = client.Do(request)
+				if err == nil {
+					event.Status = response.StatusCode
+					var body []byte
+					body, err = io.ReadAll(io.LimitReader(response.Body, 1<<20))
+					response.Body.Close()
+					event.Body = string(body)
+					var health struct {
+						Status string            `json:"status"`
+						Error  string            `json:"error"`
+						Errors []json.RawMessage `json:"errors"`
+					}
+					if err == nil {
+						err = json.Unmarshal(body, &health)
+					}
+					if err == nil && (event.Status != http.StatusOK || health.Status != "ok" || health.Error != "" || len(health.Errors) != 0) {
+						err = fmt.Errorf("peer health status=%d body=%s", event.Status, body)
+					}
+				}
+			}
+			event.After = time.Now().UTC()
+			if err != nil {
+				ready = false
+				event.Error = err.Error()
+			}
+			observed = append(observed, event)
+		}
+		if ready {
+			return observed, nil
+		}
+		select {
+		case <-ctx.Done():
+			return observed, ctx.Err()
+		case <-time.After(100 * time.Millisecond):
+		}
+	}
+	return observed, ctx.Err()
 }
 
 // EnsureAuto checks several retained stores. Its total budget is the existing

@@ -961,7 +961,7 @@ seeds, within the hosted limit. This row is prepared, pending actual compilation
 and sustained qualification; registry coverage does not prove full-matrix/24h.
 
 The first rolling mixed qualification37107421026 at0bdc838 is rejected: two
-upgrades complete, then the third cut's pre-upgrade EnsureAuto deployment check
+upgrades complete, then the third cut's post-upgrade EnsureAuto deployment check
 hits its context deadline. Preserve all3795 original archive members, terminal
 metadata and logs. This is neither a completed rolling row nor a confirmed
 server root cause; investigate the retained evidence before another attempt.
@@ -984,3 +984,21 @@ with context deadline exceeded, not a build/skip/global-timeout failure. Hosted
 upgrade-provisioning-budget captures clean committed source hashes before/after
 and all JSON events/control bytes. This validates the fixture budget contract;
 it does not establish the original NATS cause or clear the mixed rolling row.
+
+### Rolling readiness observations before full provisioning
+
+Require version3 deployment proofs with all5 default public /healthz checks
+and retain every round's HTTP status, body, error and before/after timestamps.
+The final ordered round must report200/ok with no health errors before whole
+fallback provisioning and replica checks, within the same60s proof deadline.
+This exposes local stream/consumer recovery beyond one TCP connection or one
+selected consumer. Preserve SIGKILL upgrade cuts and their actual scope; the
+[documented NATS procedure](https://github.com/nats-io/nats.docs/blob/master/running-a-nats-service/nats_admin/upgrading_cluster.md)
+uses Lame Duck shutdown and healthy endpoints, so this fixture remains a
+stronger kill-during-upgrade profile. Do not equate it with normal graceful
+upgrade evidence or infer a server defect from temporary recovery warnings.
+
+The original failed third cut occurred after node4 actually restarted on2.15.0,
+not before the cut; its third pre-proof passed. Metadata-leader contact returned
+about1s after the kill. Retain corrected phase attribution and require actual
+post-upgrade recovery evidence before accepting a new rolling trial.

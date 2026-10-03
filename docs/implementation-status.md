@@ -7892,7 +7892,7 @@ is claimed; hosted compilation/sustained execution is the next gate. Full
 original matrix/24h release and current121100k qualification remain open.
 
 Rolling mixed37107421026 is terminal FAILED at exact0bdc838: two actual upgrades
-complete, then third-cut pre-upgrade deployment proof returns
+complete, then third-cut post-upgrade deployment proof returns
 `upgrade fallback changed backend= err=context deadline exceeded` from
 EnsureAuto. Do not infer a backend change from the empty return on error.
 All3795 archive members have independent SHA256 readback; full original stores,
@@ -7936,7 +7936,7 @@ is confirmed queued at exact256d7ae47342e75ece533565a94ded25d6f32b3d. Worker-clo
 37108814121 remains queued at82069c3; current121100k37106469422 remains running.
 
 A separate inspection of retained rolling server logs also finds no-quorum
-warnings on all five peers around08:00, before the failed third pre-upgrade
+warnings on all five peers around08:00, before the failed third post-upgrade
 proof returns. Node4 reports absent metadata-leader contact. Exact member hashes
 and matching raw lines are retained in rejected-deployment-check/server-warning-review.json.
 The fixture budget mismatch alone does not explain this trial, and correcting
@@ -7962,3 +7962,33 @@ remain unresolved. The integration package including the new worker-clock
 fixture compiled at this source; the actual clock normalization/row gate still
 requires its separate running qualification37108814121. Current121100k remains
 in progress. Original full-matrix/24h requirements remain open.
+
+## Corrected third-cut attribution and all-peer upgrade health admission
+
+The raw third-cut artifacts correct the earlier pre-upgrade attribution:
+fault-3-upgrade-before.json succeeds at08:00:02.627593768, node4 is killed at
+08:00:02.628395801 and its retained server log confirms2.15.0 startup at
+08:00:03.144753. The missing third after-proof fails during post-upgrade
+fallback provisioning. Two cuts are fully confirmed; the third restart happens
+without confirmed heal. The raw logs also show metadata-leader contact returning
+to node2 at08:00:03.643794 after the earlier absent-contact warning; permanent
+metadata quorum loss is not established. Derived summaries are corrected and
+third-cut-review.json records exact original member hashes. Originals remain
+unchanged and the trial remains rejected.
+
+The next rolling proof requires recorded default /healthz?details=true rounds
+on all five direct monitoring endpoints, including failed responses. The
+module-pinned server handler checks local JetStream assets under its default
+options. The [official NATS rolling procedure](https://github.com/nats-io/nats.docs/blob/master/running-a-nats-service/nats_admin/upgrading_cluster.md)
+also requires HTTP200 health before proceeding to the next peer. This fixture
+retains its existing SIGKILL cuts; that remains an explicitly stronger fault
+profile than the documented Lame Duck shutdown procedure. No graceful shutdown
+substitution was made to obtain a pass.
+
+Version3 proof completion requires one successful ordered five-peer round,
+raw status/body/error/timestamps, followed by bounded successful full fallback
+provisioning and existing R5/native/backend checks. All failed rounds and
+partial proof phases survive in the complete archive. The checker rejects
+missing/unhealthy/wrong-peer/errored/misordered health observations. Local67
+Python guards pass; no new real-row qualification is claimed yet. Whole-proof
+60s and workload30s latency gates remain unchanged.

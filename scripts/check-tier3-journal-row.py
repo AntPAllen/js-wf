@@ -567,11 +567,24 @@ def check_upgrade_artifacts(root, report):
     upgraded=set()
     def proof(path, expected):
         data=json.loads(path.read_text());nodes=data['nodes']
-        if data.get('version')!=2 or data.get('complete') is not True or data.get('phase')!='complete' or data.get('error'):
+        if data.get('version')!=3 or data.get('complete') is not True or data.get('phase')!='complete' or data.get('error'):
             raise ValueError('upgrade deployment proof is incomplete or lacks current schema')
+        health=data['health']
+        if len(health)<5 or len(health)%5 or [h['node'] for h in health]!=list(range(5))*(len(health)//5):
+            raise ValueError('upgrade requires recorded health rounds for all five peers')
+        previous=timestamp_ns(data['started'])
+        for h in health:
+            begin,end=map(timestamp_ns,[h['before'],h['after']])
+            if not previous<=begin<=end<=timestamp_ns(data['at']) or not re.fullmatch(r'http://127\.0\.0\.1:\d+/healthz\?details=true',h['url']):
+                raise ValueError('invalid pinned peer health observation')
+            previous=end
+        for h in health[-5:]:
+            body=json.loads(h['body'])
+            if h['http_status']!=200 or h.get('error') or body.get('status')!='ok' or body.get('error') or body.get('errors'):
+                raise ValueError('upgrade health round did not confirm all five peers')
         operation=data['backend_check']
         started,at,op_start,op_end,deadline=map(timestamp_ns,[data['started'],data['at'],operation['started'],operation['ended'],operation['deadline']])
-        if not started<=op_start<=op_end<=at<=deadline or not 0<deadline-started<=60_000_000_000 or operation['backend']!='fallback' or operation.get('error'):
+        if not started<=previous<=op_start<=op_end<=at<=deadline or not 0<deadline-started<=60_000_000_000 or operation['backend']!='fallback' or operation.get('error'):
             raise ValueError('upgrade fallback provisioning lacks bounded successful whole-operation evidence')
         if data['backend']!='fallback' or len(nodes)!=5 or [n['node'] for n in nodes]!=list(range(5)) or [n['version'] for n in nodes]!=expected or len({n['server_id'] for n in nodes})!=5 or any(not n['server_id'] for n in nodes):raise ValueError('upgrade version/identity/backend mismatch')
         for n in nodes:
