@@ -315,6 +315,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	var dispatch []worker.DispatchEvent
 	var fencing []worker.FencingEvent
 	var repairs []reconcile.RepairEvent
+	var startScans []reconcile.ScanEvent
 	repairObserver := func(event reconcile.RepairEvent) {
 		evidenceMu.Lock()
 		repairs = append(repairs, event)
@@ -541,8 +542,19 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			return reconcile.RunFallbackTimerLoop(workCtx, js, "tier3-upgrade-timers", 100*time.Millisecond, 100)
 		})
 	}
+	startCadence, startBudget := time.Second, 32
+	if startGapEnabled {
+		// A full pass at 32 reads/second takes 39s at the third forced gap
+		// (sequence1270), even without network latency. Keep the kill+30s gate.
+		startCadence, startBudget = 100*time.Millisecond, 64
+	}
+	t.Logf("TIER3_START_SCAN interval=%s budget=%d", startCadence, startBudget)
 	launch("repair/start", func() error {
-		return reconcile.RunRepairLoopObserved(workCtx, startRepairJS, "tier3-mixed-start", "start", time.Second, 32, repairObserver)
+		return reconcile.RunRepairLoopWithScanObserver(workCtx, startRepairJS, "tier3-mixed-start", "start", startCadence, startBudget, repairObserver, func(event reconcile.ScanEvent) {
+			evidenceMu.Lock()
+			startScans = append(startScans, event)
+			evidenceMu.Unlock()
+		})
 	})
 	launch("repair/signal", func() error {
 		return reconcile.RunRepairLoopObserved(workCtx, js, "tier3-mixed-signal", "signal", time.Second, 32, repairObserver)
@@ -635,6 +647,8 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		write("dispatch.json", dispatch)
 		write("fencing.json", fencing)
 		write("repairs.json", repairs)
+		write("start-scans.json", startScans)
+		write("start-scan-policy.json", map[string]any{"interval_nanos": int64(startCadence), "budget": startBudget})
 		write("suspended-scans.json", scans)
 		write("checkpoint-audits.json", checkpointAudits)
 		evidenceMu.Unlock()

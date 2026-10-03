@@ -167,7 +167,7 @@ jobs:
             fi
             if [ "$test_status" != 0 ]; then exit "$test_status"; fi
             cut_args=()
-            if [ "$WF_TIER3_UPGRADE_START_GAP" = 1 ]; then cut_args+=(--require-upgrade-start-gap); fi
+            if [ "$WF_TIER3_UPGRADE_START_GAP" = 1 ]; then cut_args+=(--require-upgrade-start-gap --require-start-scan-progress); fi
             if [ "$TIER3_MATRIX_ROW" = rolling_upgrade ]; then cut_args+=(--expected-upgrade-shutdown "$WF_TIER3_UPGRADE_SHUTDOWN"); fi
             if [ "$WF_TIER3_CLOCK_TIMER_CUT" = 1 ]; then cut_args+=(--require-clock-timer-cut); fi
             if [ "$WF_TIER3_COMMON_CLOCK" = 1 ]; then cut_args+=(--require-common-timer-clock); fi

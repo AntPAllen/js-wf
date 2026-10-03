@@ -1131,6 +1131,14 @@ shutdown profiles; a successful earlier row without these faults cannot satisfy
 that request. Include nested crash proofs in regular uploads and preserve their
 originals in the complete physical-store archive.
 
+For this forced-gap profile, configure Start scanning at64 entries per100ms
+and preserve `start-scan-policy.json` plus `start-scans.json` (actual call start/end,
+cursor, result and error). The earlier32/1s policy needs39s to reach sequence1270
+from cursor1 even with instant reads; retain that fixed Tier1 counterexample and
+its1.9s configured-policy control. This does not identify the failed real run's
+cursor or server cause. Require progress evidence in the workflow verifier while
+retaining kill+30s, all cell counts, original cut scheduling and every other gate.
+
 Qualification starts with35s race smoke, followed by the full ten-minute profile
 for SIGKILL and graceful upgrades. This optional profile is not qualified by
 existing R3 or earlier rolling evidence;200 seeds and24h remain required.

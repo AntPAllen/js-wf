@@ -225,7 +225,24 @@
   [37128612942](https://github.com/AntPAllen/js-wf/actions/runs/37128612942).
   Both require announced gap/shutdown modes and every cut's retained proof,
   with existing five-peer/count/history/p99/integrity/drain/checkpoint gates.
-  They are queued, not qualified; no35s result is promoted to the full row.
+  Both are now rejected: SIGKILL fails361.244s and graceful fails359.463s.
+  Each completes its first two gaps, then misses the third at invocation1270
+  with no recorded start repair attempt. Retained invocation identity survives
+  all three upgrades; original3819/3807 members verify. Scan cursor/progress was
+  not retained, so actual cursor/server cause is unconfirmed.
+  [Rejected ten-minute originals and independent review](scale/r5-start-gap-2026-10-03/rejected-ten-minute/).
+  A fixed16-seed Tier1 model runs the production Start scanner and fenced cursor
+  loop over1270 immutable invocations from cursor1. Old32/1s reaches the missing
+  journal at39s; prospective64/100ms reaches it at1.9s, assuming instant reads.
+  Both policies replay exactly and have pinned controls; focused race/pinned
+  corpus passes7.589s. This is a capacity counterexample, not an exact recreation
+  of the failed server run. The forced-gap fixture now uses64/100ms and retains
+  each actual scan's timestamps, cursor, result/error and explicit policy.
+  New producers require this evidence. All72Tier3 guard tests pass, including
+  missing/wrong policy, malformed progress and absent gap coverage rejections.
+  Full reconciler suite passes11.427s; focused Start gate/history race passes
+  1.054s. The strict kill+30s bound and other gates remain; sustained
+  qualification is open until new runs pass.
 - **CAS benchmark harness:** hosted37121445966 atcd59b86 is rejected before
   measurement: the shared harness used the newer UnmarshalEntry API absent at
   fixed baseline4fa3119. Its diagnostic now uses the benchmark's JSON format;

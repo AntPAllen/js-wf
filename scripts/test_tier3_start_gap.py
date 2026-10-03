@@ -22,6 +22,21 @@ class StartGapChecks(unittest.TestCase):
   calls=[dict(op='start',args=dict(type='matrixshort',id='cohort'),result=dict(status=status,inv_seq=seq),invoke_ts=at(begin),return_ts=at(end)) for status,seq,begin,end in [('unknown',0,31,31.3),('already_started',12,37.8,37.9)]]
   (root/'history.jsonl').write_text('\n'.join(map(json.dumps,calls))+'\n')
   return fault,row.timestamp_ns(at(32)),row.timestamp_ns(at(34)),row.timestamp_ns(at(35))
+ def test_scan_progress_requires_policy_calls_and_gap_coverage(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d);self.fixture(root)
+   def save(name,value):(root/name).write_text(json.dumps(value))
+   save('start-scan-policy.json',dict(interval_nanos=100000000,budget=64))
+   scan=dict(started='2026-10-03T00:00:36Z',finished='2026-10-03T00:00:37Z',kind='start',cursor=1,result=dict(next_sequence=65,inspected=64,reenqueued=1))
+   save('start-scans.json',[scan])
+   self.assertEqual(row.check_start_scan_progress(root)['gaps_with_progress'],1)
+   for key,value in [('cursor',0),('finished','2026-10-03T00:00:35Z'),('kind','signal'),('result',dict(next_sequence=65,inspected=65,reenqueued=1)),('started','2026-10-03T00:00:39Z')]:
+    bad=copy.deepcopy(scan);bad[key]=value;save('start-scans.json',[bad])
+    with self.assertRaises(ValueError):row.check_start_scan_progress(root)
+   save('start-scans.json',[])
+   with self.assertRaises(ValueError):row.check_start_scan_progress(root)
+   save('start-scans.json',[scan]);save('start-scan-policy.json',dict(interval_nanos=1000000000,budget=32))
+   with self.assertRaises(ValueError):row.check_start_scan_progress(root)
  def test_requested_profiles_cannot_be_omitted_or_substituted(self):
   spec=importlib.util.spec_from_file_location('base_fixture',Path(__file__).with_name('test_tier3_journal_row.py'))
   base=importlib.util.module_from_spec(spec);spec.loader.exec_module(base)

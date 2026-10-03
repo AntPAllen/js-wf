@@ -905,6 +905,37 @@ def check_server_clock_role_artifacts(root, report, selected_row):
                 shifted_timer_clock_lookups=shifted, shifted_native_hint_lookups=hints, admits_all_in_flight_timer_cut_combinations=False)
 
 
+def check_start_scan_progress(root):
+    policy = json.loads((root/'start-scan-policy.json').read_text())
+    if policy != dict(interval_nanos=100000000, budget=64):
+        raise ValueError('forced Start-gap scan policy mismatch')
+    scans = json.loads((root/'start-scans.json').read_text())
+    if not isinstance(scans, list) or not scans:
+        raise ValueError('missing Start scan progress')
+    previous = 0
+    for scan in scans:
+        started, finished = timestamp_ns(scan['started']), timestamp_ns(scan['finished'])
+        result = scan['result']
+        if scan.get('kind') != 'start' or started < previous or finished < started:
+            raise ValueError('invalid Start scan chronology')
+        previous = finished
+        if type(scan.get('cursor')) is not int or scan['cursor'] < 1:
+            raise ValueError('invalid Start scan cursor')
+        if any(type(result.get(k)) is not int or result[k] < 0 for k in ('inspected','reenqueued','next_sequence')) or result['inspected'] > 64 or result['reenqueued'] > result['inspected']:
+            raise ValueError('invalid Start scan result')
+    gaps = sorted(root.glob('fault-*-start-gap/upgrade-gap.json'))
+    if not gaps:
+        raise ValueError('no forced Start gaps for scan progress')
+    for path in gaps:
+        gap = json.loads(path.read_text())
+        released = timestamp_ns(gap['repair_released'])
+        verified = timestamp_ns(json.loads((path.parent/'completion.json').read_text())['verified'])
+        if not any(timestamp_ns(scan['finished']) >= released and timestamp_ns(scan['started']) <= verified for scan in scans):
+            raise ValueError('no observed Start scan during released gap')
+    return dict(scans=len(scans), policy=policy, gaps_with_progress=len(gaps),
+                scope='Recorded production scan calls; network delays and lease/cursor waits are retained in wall time.')
+
+
 def check_checkpoint_audits(root, report):
     rows = json.loads((root/'checkpoint-audits.json').read_text())
     rows = [] if rows is None else rows
@@ -945,6 +976,7 @@ if __name__ == '__main__':
     parser.add_argument('--require-common-timer-clock', action='store_true')
     parser.add_argument('--require-checkpoint-audits', action='store_true')
     parser.add_argument('--require-upgrade-start-gap', action='store_true')
+    parser.add_argument('--require-start-scan-progress', action='store_true')
     parser.add_argument('--expected-upgrade-shutdown', choices=('sigkill','ldm'))
     args = parser.parse_args()
     if args.require_clock_timer_cut and not args.row.startswith('server_clock_'):
@@ -1002,6 +1034,10 @@ if __name__ == '__main__':
         if required:
             admission=load('clock_timer_cut','check-clock-timer-cut.py')
             report['clock_timer_cut_artifact_checks']=admission.check(args.root,report,args.row,timestamp_ns)
+    if args.require_start_scan_progress:
+        if args.root is None or args.row != 'rolling_upgrade' or not args.require_upgrade_start_gap:
+            parser.error('--require-start-scan-progress requires a forced-gap rolling row and root')
+        report['start_scan_progress_checks'] = check_start_scan_progress(args.root)
     if args.require_checkpoint_audits:
         if args.root is None: parser.error('--root is required for checkpoint audits')
         report['checkpoint_audit_checks'] = check_checkpoint_audits(args.root, report)

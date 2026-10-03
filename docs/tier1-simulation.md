@@ -1436,3 +1436,17 @@ outage preserves committed state and does not claim to simulate disk or Raft.
 [Transport assumptions, actual compiled control and evidence](scale/continuation-held-takeover-model-2026-10-02/)
 cover 1,000 race schedules, all 27 combinations and exact/process/disk replay.
 Final-source full 120-workload qualification remains open.
+
+### Start scanner capacity at a retained population of1,270
+
+`TestStartScanCapacityReplay` runs the production `StartScan.Scan` and fenced
+`RunLoopWithPort` over immutable invocation reads. Only sequence1,270 lacks a
+journal; the persisted cursor starts at1. Sixteen fixed seeds choose between
+32 entries/1s and64 entries/100ms. They repair at39s and1.9s respectively, verify
+one correct identity/sequence enqueue and replay exactly. Both policies are
+pinned; this adds a fixed test and two pins, not another scalable seeded workload.
+
+Reads have zero modeled latency. The test proves the old scan policy cannot
+promise a30s tail visit at that population. It does not reconstruct the cursor,
+lease waits, network delays or server behavior in the rejected R5 runs. Actual
+scan progress is now captured by the forced-gap fixture to assess that cause.

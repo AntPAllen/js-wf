@@ -1,0 +1,795 @@
+{
+  "version": 3,
+  "seed": 1,
+  "workload": "start_scan_capacity",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "32_per_second",
+        "64_per_100ms"
+      ],
+      "chosen": "64_per_100ms"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "system.start-reconciler",
+      "sequence": 1,
+      "data_sha256": "1b9cd0cf4c6b26849354c092e28def808b6fb5c709cabe0355a949b759eec1eb",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "scan.start",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "start_capacity_scan",
+      "sequence": 1,
+      "outcome": "next=65 repaired=0"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "scan.start",
+      "sequence": 1,
+      "data_sha256": "108c995b953c8a35561103e2014cf828eb654a99e310f87fab94c2f4b7d2a04f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 100,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 4,
+      "sequence": 5,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "start_capacity_scan",
+      "sequence": 65,
+      "outcome": "next=129 repaired=0"
+    },
+    {
+      "at_ms": 100,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 5,
+      "sequence": 6,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "6566230e3a3ce3774c1bbc7c18b590ae0f457bbcd511e90e3e7dca2a02e7addc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 200,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "start_capacity_scan",
+      "sequence": 129,
+      "outcome": "next=193 repaired=0"
+    },
+    {
+      "at_ms": 200,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 7,
+      "sequence": 8,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "684fe39f03758de6a882ae61fa62312b67e5b1e665928cbf3dc3d8f4f53e3562",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 300,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "start_capacity_scan",
+      "sequence": 193,
+      "outcome": "next=257 repaired=0"
+    },
+    {
+      "at_ms": 300,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 9,
+      "sequence": 10,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "4c970004b0678d439f177e77d3cabdb7e9a44df770948ddc2467cbc76b7211c3",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 400,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 400,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 10,
+      "sequence": 11,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 400,
+      "operation": "start_capacity_scan",
+      "sequence": 257,
+      "outcome": "next=321 repaired=0"
+    },
+    {
+      "at_ms": 400,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 11,
+      "sequence": 12,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 400,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 4,
+      "sequence": 5,
+      "data_sha256": "8d23cf6c86e834a7aa6eded54c26ce2bb2e74903538c61bdd5d2197997ab2f72",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 500,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 500,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 12,
+      "sequence": 13,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 500,
+      "operation": "start_capacity_scan",
+      "sequence": 321,
+      "outcome": "next=385 repaired=0"
+    },
+    {
+      "at_ms": 500,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 13,
+      "sequence": 14,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 500,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 5,
+      "sequence": 6,
+      "data_sha256": "131b0c35e2d7edef9dd63f48eff39341ef0a5f770538aa4e0017f41b9cdb135d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 600,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 14,
+      "sequence": 15,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "start_capacity_scan",
+      "sequence": 385,
+      "outcome": "next=449 repaired=0"
+    },
+    {
+      "at_ms": 600,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 15,
+      "sequence": 16,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "4a30a219a9d7663fdd35c0a5df49c8d55018f13a0c53e10dd8efe8f7e4cc5d89",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 700,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 700,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 16,
+      "sequence": 17,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 700,
+      "operation": "start_capacity_scan",
+      "sequence": 449,
+      "outcome": "next=513 repaired=0"
+    },
+    {
+      "at_ms": 700,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 17,
+      "sequence": 18,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 700,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 7,
+      "sequence": 8,
+      "data_sha256": "39700d452c77592c9710a4a34c6fe97d6150e26d550a5cfa553b0177d7b23e95",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 800,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 18,
+      "sequence": 19,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "start_capacity_scan",
+      "sequence": 513,
+      "outcome": "next=577 repaired=0"
+    },
+    {
+      "at_ms": 800,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 19,
+      "sequence": 20,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "1086d35563c495c1cecbce12135cab3b945e01dd185ea2c1dc8ace5ad988977e",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 900,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 900,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 20,
+      "sequence": 21,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 900,
+      "operation": "start_capacity_scan",
+      "sequence": 577,
+      "outcome": "next=641 repaired=0"
+    },
+    {
+      "at_ms": 900,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 21,
+      "sequence": 22,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 900,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 9,
+      "sequence": 10,
+      "data_sha256": "455ae2dfc77dd77562c06dc893a49d84795a93e4f86ea2e92006940c870ec044",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 22,
+      "sequence": 23,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "start_capacity_scan",
+      "sequence": 641,
+      "outcome": "next=705 repaired=0"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 23,
+      "sequence": 24,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 10,
+      "sequence": 11,
+      "data_sha256": "bd94717d91260895035088525e817ea10375454f03aa3bd8b28b355a4cee22c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1100,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 1100,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 24,
+      "sequence": 25,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1100,
+      "operation": "start_capacity_scan",
+      "sequence": 705,
+      "outcome": "next=769 repaired=0"
+    },
+    {
+      "at_ms": 1100,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 25,
+      "sequence": 26,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1100,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 11,
+      "sequence": 12,
+      "data_sha256": "afa472a961fbcb09314e81b2c3eb19cd2d9fd7527582f43a3b8fd9d3ed6d893d",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1200,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 1200,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 26,
+      "sequence": 27,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1200,
+      "operation": "start_capacity_scan",
+      "sequence": 769,
+      "outcome": "next=833 repaired=0"
+    },
+    {
+      "at_ms": 1200,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 27,
+      "sequence": 28,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1200,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 12,
+      "sequence": 13,
+      "data_sha256": "130790feced08212eed7d1490dd4d7abf138543be61a4744a03f69ecb9609764",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1300,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 1300,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 28,
+      "sequence": 29,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1300,
+      "operation": "start_capacity_scan",
+      "sequence": 833,
+      "outcome": "next=897 repaired=0"
+    },
+    {
+      "at_ms": 1300,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 29,
+      "sequence": 30,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1300,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 13,
+      "sequence": 14,
+      "data_sha256": "c62510afc57db491f9f993387b76dd9a7d08f09c01326953904b6586c19c4b8a",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1400,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 1400,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 30,
+      "sequence": 31,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1400,
+      "operation": "start_capacity_scan",
+      "sequence": 897,
+      "outcome": "next=961 repaired=0"
+    },
+    {
+      "at_ms": 1400,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 31,
+      "sequence": 32,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1400,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 14,
+      "sequence": 15,
+      "data_sha256": "eef79a6a04f78a54832c8891ed83f4863850ec0a7d9807e9b6ac208d23a1e59c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1500,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 1500,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 32,
+      "sequence": 33,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1500,
+      "operation": "start_capacity_scan",
+      "sequence": 961,
+      "outcome": "next=1025 repaired=0"
+    },
+    {
+      "at_ms": 1500,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 33,
+      "sequence": 34,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1500,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 15,
+      "sequence": 16,
+      "data_sha256": "46372791018924b8cbc444334300f85a211d2f29a56f2bb4890780b5983fc201",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1600,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 1600,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 34,
+      "sequence": 35,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1600,
+      "operation": "start_capacity_scan",
+      "sequence": 1025,
+      "outcome": "next=1089 repaired=0"
+    },
+    {
+      "at_ms": 1600,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 35,
+      "sequence": 36,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1600,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 16,
+      "sequence": 17,
+      "data_sha256": "8cf04f0d07191f042b1d11880ab80618c2680e8e03bbacc60f9e31160d4fa87f",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1700,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 1700,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 36,
+      "sequence": 37,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1700,
+      "operation": "start_capacity_scan",
+      "sequence": 1089,
+      "outcome": "next=1153 repaired=0"
+    },
+    {
+      "at_ms": 1700,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 37,
+      "sequence": 38,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1700,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 17,
+      "sequence": 18,
+      "data_sha256": "c28474616c0273f299e922da2138b3ba7949770067a57f40a3896a0564bb5036",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1800,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 1800,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 38,
+      "sequence": 39,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1800,
+      "operation": "start_capacity_scan",
+      "sequence": 1153,
+      "outcome": "next=1217 repaired=0"
+    },
+    {
+      "at_ms": 1800,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 39,
+      "sequence": 40,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1800,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 18,
+      "sequence": 19,
+      "data_sha256": "cb69775effd93fc34ef38dfbfcdc4c593b1a3d8e7ab70c0f05d627dbc5cbd298",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1900,
+      "operation": "reconcile_wait",
+      "outcome": "100ms"
+    },
+    {
+      "at_ms": 1900,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 40,
+      "sequence": 41,
+      "data_sha256": "52a21cde27f5504c7d4390611eafc5249468e7c56aabb793c639a4f77ccff6a0",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1900,
+      "operation": "start_capacity_repair",
+      "sequence": 1270
+    },
+    {
+      "at_ms": 1900,
+      "operation": "start_capacity_scan",
+      "sequence": 1217,
+      "outcome": "next=1 repaired=1"
+    },
+    {
+      "at_ms": 1900,
+      "operation": "kv_delete",
+      "subject": "system.start-reconciler",
+      "expected": 41,
+      "sequence": 42,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1900,
+      "operation": "characterize_start_capacity",
+      "outcome": "64_per_100ms"
+    }
+  ]
+}
