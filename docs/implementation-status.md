@@ -8282,3 +8282,12 @@ acceptance assertion. Raw events, both traces, control source and clean source
 inventories are retained. Local formatting, Python compilation and68 Tier3
 guards pass; actual Go execution remains pending. No full-source gate or real
 R5 replay is claimed by this prepared diagnostic.
+
+
+[Timer-error pending-clock qualification37113167752](https://github.com/AntPAllen/js-wf/actions/runs/37113167752)
+was dispatched at223c665 after GitHub registered the new workflow. The initial
+HTTP404 produced no job; the successful dispatch's exact revision and live
+status are checked independently. The Docker observer contract37112424062
+remains queued atd2b98c6; current121100k37106469422 remains in progress at11ad2e4.
+Neither existing job is restarted. The diagnostic extends test/model source,
+so existing historical source-qualified evidence retains its original scope.
