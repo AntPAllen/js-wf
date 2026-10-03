@@ -1108,3 +1108,14 @@ and global timeouts do not count. This closes a per-phase process-crash evidence
 gap when qualified; integrate the same boundary into the sustained R5 rolling
 row before claiming full R5 mixed two-write-gap coverage. The200-seed matrix and
 24-hour soak requirements remain unchanged.
+
+### Focused Tier2 consecutive seed replay
+
+`tier2-matrix-leaders` now accepts a positive `start_seed` and preserves actual
+seed numbers in job names, fixture environment and artifacts. Default1 retains
+the original1..200 release range. Non-1 ranges are focused diagnostic replay;
+the existing full-range verifier still requires the complete default range.
+Reject non-integer, non-positive and signed64-overflow ranges before launching.
+Use this to rerun the retained journal39/86 and consumer90/116/139 failures after
+the Start history correction, including their final latency, integrity and drain
+gates. Corrected offline histories alone cannot qualify their rejected shards.

@@ -28,6 +28,21 @@ class CampaignTests(unittest.TestCase):
     def test_smoke_does_not_change_seed_coverage(self):
         self.assertEqual(module.campaign("all", 20, "35s"), module.campaign("all", 20, "10m"))
 
+    def test_focused_replay_preserves_actual_seed_identity(self):
+        jobs = module.campaign("journal", 1, "10m", 39)
+        self.assertEqual(jobs, [dict(row="journal", first=39, last=39, artifact_seed="39")])
+        jobs = module.campaign("all", 20, "10m", 86)
+        for row in module.ROWS:
+            actual = [seed for job in jobs if job['row'] == row for seed in range(job['first'], job['last']+1)]
+            self.assertEqual(actual, list(range(86,106)))
+
+    def test_invalid_start_and_overflow_are_rejected(self):
+        for start in (0, -1, True, 1.5, "39", 2**63-10):
+            with self.assertRaises(ValueError):
+                module.campaign("all", 20, "10m", start)
+        with self.assertRaises(ValueError):
+            module.campaign("journal", True, "10m")
+
     def test_invalid_scope_fails_before_launch(self):
         for args in (("unknown", 20, "10m"), ("all", 0, "10m"), ("all", 201, "10m"), ("all", 200, "24h")):
             with self.assertRaises(ValueError):

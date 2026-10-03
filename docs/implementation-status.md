@@ -55,6 +55,10 @@
   rejected because later latency/drain gates did not execute; full current-source
   qualification remains open.
   [Original failures and deterministic correction](scale/start-enqueue-history-2026-10-03/).
+  The Tier2 planner now supports explicit focused starting seeds. All20 planner/
+  row guards and3 full-matrix guards pass. Default release ranges are unchanged;
+  focused non-1 replays cannot qualify the whole default1..200 range. The five
+  corrected real-row replays are the next qualification step.
 - **Tier3:**16 implemented row variants are now in the registry,
   including separate worker-clock and every-peer rolling upgrade. The initial
   14-row seed1 campaign failed and cannot qualify the complete original matrix.
