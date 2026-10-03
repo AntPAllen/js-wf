@@ -2,6 +2,18 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Full Tier2 matrix partial shard review:** campaign 37128612905 at exact
+  `9ac3ad44267b68d1a1ec63ce47e1fb11d9c00204` has eight successful journal
+  shards (seeds 1–96) in job metadata; only the newly reviewed 37–48 shard is
+  accepted here. Its twelve full ten-minute tests complete 31,584 invocations,
+  348,032 audited entries and 228 recorded leader faults. All uploaded raw
+  histories pass the three independently rerun source-identical models; raw
+  nanosecond samples regenerate every reported terminal/progress latency count.
+  Worst per-workflow terminal/progress p99: 18.516417018 s/7.528705382 s.
+  Named-test final integrity/drain assertions pass. Actual binaries, compiled
+  source inventories and physical stores were not uploaded. The overall
+  campaign remains active; this older source predates current scanner fixes.
+  [All originals and review scope](scale/tier2-matrix-2026-10-03/journal-37-48/).
 - **Physical tombstone marker cleanup:** actual History=1 state retained 32
   deleted-key markers after 32 expired tombstones were logically removed:
   33 messages/subjects, including one protected result. The paged scanner now
