@@ -156,6 +156,10 @@
   unchanged sequence/duplicate identity and verified terminal under30s. Existing
   28-invocation cohort counts and all row gates remain. Focused gate/history
   race checks and70 row-verifier tests pass; real R5 qualification is pending.
+  Exact254392c SIGKILL/35s/seed1 smoke
+  [37127056728](https://github.com/AntPAllen/js-wf/actions/runs/37127056728)
+  is dispatched with upgrade_start_gap=true. The ten-minute/graceful/200-seed
+  and24h profile gates remain open; this queued run is not acceptance evidence.
 - **CAS benchmark harness:** hosted37121445966 atcd59b86 is rejected before
   measurement: the shared harness used the newer UnmarshalEntry API absent at
   fixed baseline4fa3119. Its diagnostic now uses the benchmark's JSON format;
