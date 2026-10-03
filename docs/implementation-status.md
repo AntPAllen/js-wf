@@ -7900,3 +7900,9 @@ job logs, terminal metadata and verification report are preserved in
 scale/r5-rolling-upgrade-2026-10-03/rejected-deployment-check/. Source is attributed
 by hosted checkout/run metadata; no full source inventory was produced by that
 older row. No server cause is confirmed and no rerun has been launched.
+
+[Worker-clock qualification37108814121](https://github.com/AntPAllen/js-wf/actions/runs/37108814121)
+is confirmed queued at exact82069c3d45f344dae3068877f04e34ff190738c2, seed1/10m.
+It requires the actual sustained row and separate Go normalization test; no
+synthetic proof or short smoke substitutes. Current121100k37106469422 remains
+in progress. The clock producer archives all originals even on failure.
