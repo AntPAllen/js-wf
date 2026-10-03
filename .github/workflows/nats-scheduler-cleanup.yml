@@ -16,8 +16,35 @@ jobs:
         run: python3 scripts/check-nats-scheduler-cleanup.py --root "$RUNNER_TEMP/scheduler-cleanup-evidence"
       - name: Independently verify compiled inventories and actual verdicts
         run: |
-          python3 scripts/review-nats-scheduler-cleanup.py "$RUNNER_TEMP/scheduler-cleanup-evidence"
+          python3 scripts/review-nats-scheduler-cleanup.py "$RUNNER_TEMP/scheduler-cleanup-evidence" --require-retained-store
           python3 -c 'import json,os; from pathlib import Path; root=Path(os.environ["RUNNER_TEMP"])/"scheduler-cleanup-evidence"; assert json.loads((root/"source.json").read_text())["clean"], "hosted source must be clean"'
+      - name: Preserve every compiled source and original store
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,tarfile
+          tmp=Path(os.environ['RUNNER_TEMP']);root=tmp/'scheduler-cleanup-evidence'
+          assert root.is_dir(), 'execution evidence missing'
+          files={str(p.relative_to(root)):p for p in root.rglob('*') if p.is_file()}
+          assert files and not any(p.is_symlink() for p in files.values())
+          hashes={n:hashlib.sha256(p.read_bytes()).hexdigest() for n,p in files.items()}
+          archive=tmp/'scheduler-cleanup-originals.tmp.tar.gz'
+          with tarfile.open(archive,'w:gz') as tar:
+              for n,p in sorted(files.items()):tar.add(p,arcname=n)
+          with tarfile.open(archive,'r:gz') as tar:
+              assert {m.name:hashlib.sha256(tar.extractfile(m).read()).hexdigest() for m in tar.getmembers()}==hashes
+          archive.rename(tmp/'scheduler-cleanup-originals.tar.gz')
+          (tmp/'scheduler-cleanup-manifest.json').write_text(json.dumps(dict(files=hashes,every_member_sha256_readback=True),indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: scheduler-cleanup-originals
+          path: |
+            ${{ runner.temp }}/scheduler-cleanup-originals.tar.gz
+            ${{ runner.temp }}/scheduler-cleanup-manifest.json
+          if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()
         with:

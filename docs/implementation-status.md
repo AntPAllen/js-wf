@@ -255,6 +255,14 @@
   entries. The unchanged module restores1 removed schedule after reopen;
   the exact copied dirty-count control preserves0, with no callbacks and the
   anchor retained. [Minimal reproduction](scale/scheduler-minimal-cleanup-2026-10-03/).
+  The next minimal-cleanup producer preserves fresh baseline/control stores
+  explicitly instead of deleting t.TempDir data, verifies the anchor before
+  baseline's expected failure, and archives every copied compiled source/store
+  with member SHA256 readback. Its offline reviewer supports relocated roots,
+  compares harness/fixture bytes against the recorded Git revision and requires
+  both retained stores when requested. Earlier hosted reports did not upload
+  those source/store trees; no retroactive full-originals acceptance is claimed.
+  Actual clean execution of the strengthened producer is next.
 - **Worker-kill target:** historical31.1s withTTL30s is a configuration mismatch
   excluded from reruns. ProductionTTL12s/heartbeat3s/AckWait13s and strict
   recovery under30s remain in force. Route-quorum recovery p99 starts at the

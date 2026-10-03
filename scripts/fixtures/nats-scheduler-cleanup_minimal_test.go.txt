@@ -1,6 +1,7 @@
 package server
 
 import (
+	"os"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -10,6 +11,16 @@ import (
 // scheduler-map injection. Scheduling stays paused until its explicit loop cut.
 func TestWorkflowMissingSourceScheduleCleanupPersists(t *testing.T) {
 	dir := t.TempDir()
+	if retained := os.Getenv("WF_SCHEDULER_CLEANUP_STORE"); retained != "" {
+		dir = retained
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		files, err := os.ReadDir(dir)
+		if err != nil || len(files) != 0 {
+			t.Fatalf("fresh cleanup store must be empty: %d %v", len(files), err)
+		}
+	}
 	cfg := StreamConfig{Name: "CLEANUP", Subjects: []string{"foo.*"}, Storage: FileStorage, AllowMsgSchedules: true}
 	created := time.Now()
 	var fs *fileStore
@@ -74,14 +85,15 @@ func TestWorkflowMissingSourceScheduleCleanupPersists(t *testing.T) {
 	open()
 	final := schedules()
 	t.Logf("CLEANUP_RESULT fresh_source_count=1 anchor_count=1 before=%d after=%d reopened=%d callbacks=%d physical=%d last=%d", before, after, final, callbacks.Load(), fs.State().Msgs, fs.State().LastSeq)
-	if final != 0 {
-		t.Fatalf("missing-source cleanup returned after reopen: schedules=%d want=0", final)
-	}
+
 	anchor, err := fs.LoadMsg(2, nil)
 	if err != nil || anchor.subj != "foo.anchor" || string(anchor.msg) != "keep" {
 		t.Fatalf("anchor corrupted: %v", err)
 	}
 	if fs.State().Msgs != 1 || fs.State().LastSeq != 2 {
 		t.Fatalf("physical state changed: %+v", fs.State())
+	}
+	if final != 0 {
+		t.Fatalf("missing-source cleanup returned after reopen: schedules=%d want=0", final)
 	}
 }

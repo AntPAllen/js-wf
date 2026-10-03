@@ -1145,3 +1145,15 @@ Reject non-integer, non-positive and signed64-overflow ranges before launching.
 Use this to rerun the retained journal39/86 and consumer90/116/139 failures after
 the Start history correction, including their final latency, integrity and drain
 gates. Corrected offline histories alone cannot qualify their rejected shards.
+
+### Preserve minimal NATS cleanup originals
+
+The fresh two-message scheduler cleanup reproduction must retain both stores
+outside Go's automatic temporary-directory cleanup, plus every copied compiled
+upstream source, fixture/control bytes, commands, inventories and Go JSON.
+Verify the surviving anchor before the intentional baseline failure. Produce a
+complete archive with every member SHA256-readback checked before atomic rename.
+Offline review must work after relocation, require explicit retained stores,
+and compare harness/fixture bytes against the recorded Git revision. This
+strengthens evidence for the isolated missing-source cleanup defect; production
+NATS dependency and original million-timer retirement cause remain unchanged.

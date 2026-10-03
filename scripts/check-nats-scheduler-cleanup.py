@@ -63,8 +63,8 @@ def main():
             assert changed == ({'server/filestore.go'} if mode == 'dirty-control' else set())
             (out/'compiled-inventory.json').write_text(json.dumps(hashes(build),indent=2)+'\n')
             cmd = ['go','test','-p=1','-json','./server','-run','^'+TEST+'$','-count=1','-timeout=3m']
-            env = dict(os.environ,GOWORK='off',GOMEMLIMIT='512MiB',GOMAXPROCS='2')
-            (out/'command.json').write_text(json.dumps(dict(command=cmd,working_directory=str(build),environment={k:env[k] for k in ('GOWORK','GOMEMLIMIT','GOMAXPROCS')}),indent=2)+'\n')
+            env = dict(os.environ,GOWORK='off',GOMEMLIMIT='512MiB',GOMAXPROCS='2',WF_SCHEDULER_CLEANUP_STORE=str(out/'store'))
+            (out/'command.json').write_text(json.dumps(dict(command=cmd,working_directory=str(build),environment={k:env[k] for k in ('GOWORK','GOMEMLIMIT','GOMAXPROCS','WF_SCHEDULER_CLEANUP_STORE')}),indent=2)+'\n')
             with (out/'events.jsonl').open('w') as stdout, (out/'stderr.log').open('w') as stderr:
                 run = subprocess.run(cmd,cwd=build,env=env,stdout=stdout,stderr=stderr,timeout=600)
             events = [json.loads(l) for l in (out/'events.jsonl').read_text().splitlines()]
