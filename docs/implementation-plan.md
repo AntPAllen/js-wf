@@ -835,6 +835,18 @@ a single row retains `clears_full_tier3_release=false`. The full-matrix
 24-hour requirement remains unchanged. The hosted workflow still selects
 35-second smoke or ten-minute rows; adding verifier support is not a soak pass.
 
+`scripts/run-tier3-soak.py --root /external/fresh-root --row journal` now
+provides a local24h producer. It creates an isolated committed sparse checkout,
+retains the actual race binary/build settings and source hashes, records the live
+test PID, executes with24h20m Go timeout, and applies row/checkpoint/explanation/
+fencing verifiers. Clock rows require admitted timer cuts and independent common
+clock probes; explicit rolling gap/shutdown profiles retain their proof gates.
+All stopped-run originals, including physical stores and compiled checkout, are
+archived with every-member readback. Interrupted live children retain their root
+without a final archive claim. A single row cannot clear the full matrix/soak.
+Qualify this producer with35s smoke before starting actual24h rows.
+
+
 
 ### Complete five-container sustained row campaigns
 

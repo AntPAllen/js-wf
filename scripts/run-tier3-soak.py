@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+"""Run an R5 row beyond hosted limits from an isolated checkout and retained binary.
+
+A single row never qualifies the full matrix or full Tier3 release.
+"""
+import argparse
+import hashlib
+import importlib.util
+import json
+import os
+from pathlib import Path
+import subprocess
+import tarfile
+import time
+
+REPO = Path(__file__).resolve().parents[1]
+
+
+def load_rows():
+    spec = importlib.util.spec_from_file_location('soak_rows', REPO/'scripts/check-tier3-journal-row.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.TESTS
+
+
+def execution(row, duration, seed, fixture, shutdown, gap):
+    if row not in load_rows() or duration not in ('35s', '10m', '24h'):
+        raise ValueError('unsupported row or duration')
+    if type(seed) is not int or not 1 <= seed <= 2**63-1:
+        raise ValueError('seed must be positive int64')
+    if shutdown not in ('sigkill', 'ldm') or (row != 'rolling_upgrade' and (gap or shutdown != 'sigkill')):
+        raise ValueError('invalid shutdown or gap profile')
+    # Do not inherit fixture/mutation/child-process activation from another run.
+    env = {k:v for k,v in os.environ.items() if not k.startswith('WF_')}
+    env.update(GOMEMLIMIT='512MiB', GOMAXPROCS='2', WF_TIER3_MATRIX='1',
+               WF_TIER3_MATRIX_DURATION=duration, WF_TIER3_SYNC_INTERVAL='2m',
+               TIER3_MATRIX_ARTIFACT_ROOT=str(fixture), FAULT_SEED=str(seed))
+    flags = ['--require-checkpoint-audits']
+    if row == 'rolling_upgrade':
+        env['WF_TIER3_UPGRADE_SHUTDOWN'] = shutdown
+        flags += ['--expected-upgrade-shutdown', shutdown]
+        if gap:
+            env['WF_TIER3_UPGRADE_START_GAP'] = '1'
+            flags += ['--require-upgrade-start-gap', '--require-start-scan-progress']
+    if row.startswith('server_clock_'):
+        env.update(WF_TIER3_CLOCK_TIMER_CUT='1', WF_TIER3_COMMON_CLOCK='1')
+        flags += ['--require-clock-timer-cut', '--require-common-timer-clock']
+    test = load_rows()[row]
+    if row == 'worker_clock':
+        test = '('+test+'|TestTier3WorkerClockNormalizationPreservesRawEvidence)'
+    # Reserve ample cleanup time past the harness's duration+6m context.
+    timeout = '24h20m' if duration == '24h' else '20m'
+    return env, ['-test.run=^'+test+'$', '-test.v=test2json', '-test.count=1',
+                 '-test.timeout='+timeout], flags
+
+
+def sha(path):
+    digest = hashlib.sha256()
+    with path.open('rb') as stream:
+        for block in iter(lambda: stream.read(1024*1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def archive_originals(root):
+    # Include the actual compiled checkout, binary, broker stores and raw logs.
+    # .git is only a pointer to the parent repository, not execution evidence.
+    files = sorted(p for p in root.rglob('*') if p.is_file() and p.name != '.git'
+                   and '__pycache__' not in p.parts and p.name not in
+                   ('originals.tmp.tar.gz', 'originals.tar.gz', 'archive-manifest.json'))
+    hashes = {str(p.relative_to(root)):sha(p) for p in files}
+    temporary = root/'originals.tmp.tar.gz'
+    with tarfile.open(temporary, 'w:gz') as tar:
+        for path in files:
+            tar.add(path, arcname=str(path.relative_to(root)))
+    with tarfile.open(temporary) as tar:
+        observed = {}
+        for member in tar.getmembers():
+            if not member.isfile():
+                raise ValueError('unexpected non-file archive member')
+            digest = hashlib.sha256()
+            with tar.extractfile(member) as stream:
+                for block in iter(lambda:stream.read(1024*1024), b''):
+                    digest.update(block)
+            observed[member.name] = digest.hexdigest()
+        if observed != hashes or len(observed) != len(files):
+            raise ValueError('archive member readback mismatch')
+    temporary.rename(root/'originals.tar.gz')
+    (root/'archive-manifest.json').write_text(json.dumps(dict(files=hashes,
+        archive_sha256=sha(root/'originals.tar.gz')),indent=2)+'\n')
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--root', type=Path, required=True)
+    p.add_argument('--row', choices=tuple(load_rows()), required=True)
+    p.add_argument('--duration', choices=('35s','10m','24h'), default='24h')
+    p.add_argument('--seed', type=int, default=1)
+    p.add_argument('--upgrade-shutdown', choices=('sigkill','ldm'), default='sigkill')
+    p.add_argument('--upgrade-start-gap', action='store_true')
+    p.add_argument('--no-race', action='store_true')
+    a = p.parse_args()
+    root = a.root.resolve()
+    if root.exists() or root.is_relative_to(REPO):
+        p.error('root must be fresh and outside the repository')
+    env, testargs, flags = execution(a.row,a.duration,a.seed,root/'fixture',
+                                     a.upgrade_shutdown,a.upgrade_start_gap)
+    if subprocess.check_output(['git','status','--porcelain'],cwd=REPO):
+        p.error('execution requires a clean committed checkout')
+    revision = subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip()
+    root.mkdir(parents=True)
+    commands = []
+    source = root/'source'
+    state = dict(source=revision,row=a.row,seed=a.seed,duration=a.duration,
+                 status='preparing',supervisor_pid=os.getpid(),started=time.time(),
+                 upgrade_shutdown=a.upgrade_shutdown if a.row=='rolling_upgrade' else None,
+                 upgrade_start_gap=a.upgrade_start_gap,race=not a.no_race,
+                 clears_full_tier3_release=False)
+    def save():
+        temporary=root/'execution.tmp.json'
+        temporary.write_text(json.dumps(state,indent=2)+'\n')
+        temporary.replace(root/'execution.json')
+    def call(command, cwd=source, **kwargs):
+        commands.append(dict(command=command,working_directory=str(cwd)))
+        (root/'commands.json').write_text(json.dumps(commands,indent=2)+'\n')
+        return subprocess.run(command,cwd=cwd,env=kwargs.pop('env',env),check=True,**kwargs)
+    save()
+    child = None
+    try:
+        # Keep source stable while the main checkout continues progressing.
+        call(['git','worktree','add','--detach','--no-checkout',str(source),revision],cwd=REPO)
+        names=subprocess.check_output(['git','ls-tree','-r','--name-only',revision],cwd=REPO,text=True).splitlines()
+        included=[n for n in names if not n.startswith('docs/') or n.endswith(('.go','.py','.yml'))]
+        (root/'checkout-files.json').write_text(json.dumps(included,indent=2)+'\n')
+        call(['git','sparse-checkout','set','--no-cone','--stdin'],input=''.join('/'+n+'\n' for n in included),text=True)
+        call(['git','read-tree','-mu','HEAD'])
+        selected=[n for n in names if n.endswith(('.go','.py','.yml')) or n in ('go.mod','go.sum') or n.startswith('sim/testdata/')]
+        def inventory():
+            assert not subprocess.check_output(['git','status','--porcelain'],cwd=source)
+            assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=source,text=True).strip()==revision
+            return dict(revision=revision,files={n:sha(source/n) for n in selected})
+        before=inventory()
+        (root/'source-before.json').write_text(json.dumps(before,indent=2)+'\n')
+        call(['docker','info'],stdout=(root/'docker-info.txt').open('w'))
+        binary=root/'integration.test'
+        call(['go','test','-p=1',* ([] if a.no_race else ['-race']),'-c','-o',str(binary),'./integration'])
+        info=subprocess.check_output(['go','version','-m',str(binary)],text=True)
+        assert ('-race=true' in info)==(not a.no_race)
+        (root/'binary.json').write_text(json.dumps(dict(sha256=sha(binary),race=not a.no_race,build_info=info),indent=2)+'\n')
+        if a.row=='rolling_upgrade':
+            old=root/'old-server';old.mkdir()
+            call(['go','install','github.com/nats-io/nats-server/v2@v2.11.17'],env=dict(env,CGO_ENABLED='0',GOBIN=str(old)))
+            env['WF_NATS_SERVER_BIN']=str(old/'nats-server')
+        observed=a.row in ('worker_clock','rolling_upgrade','server_clock_ahead','server_clock_behind')
+        def capture(stage):
+            call(['python3','scripts/capture-tier3-clock-source.py','--row',a.row,'--root',str(root/'fixture'),'--stage',stage])
+        if observed:capture('before')
+        (root/'test-environment.json').write_text(json.dumps({k:v for k,v in env.items() if k.startswith('WF_') or k in ('GOMEMLIMIT','GOMAXPROCS','FAULT_SEED','TIER3_MATRIX_ARTIFACT_ROOT')},indent=2)+'\n')
+        command=['go','tool','test2json','-t','-p','js-wf/integration',str(binary),*testargs]
+        commands.append(dict(command=command,working_directory=str(source/'integration')))
+        (root/'commands.json').write_text(json.dumps(commands,indent=2)+'\n')
+        with (root/'events.jsonl').open('w') as out,(root/'stderr.log').open('w') as err:
+            child=subprocess.Popen(command,cwd=source/'integration',env=env,stdout=out,stderr=err)
+            state.update(status='running',test_pid=child.pid);save()
+            status=child.wait()
+        state['test_exit_code']=status
+        if observed:capture('after')
+        after=inventory();(root/'source-after.json').write_text(json.dumps(after,indent=2)+'\n');assert after==before
+        assert sha(binary)==json.loads((root/'binary.json').read_text())['sha256']
+        if status:raise RuntimeError(f'named test failed with exit{status}')
+        call(['python3','scripts/check-tier3-journal-row.py','--root',str(root/'fixture'),
+              '--events',str(root/'events.jsonl'),'--row',a.row,'--duration',a.duration,
+              '--expected-seed',str(a.seed),'--output',str(root/'result.json'),*flags])
+        for script,name in [('explain-tier3-events.py','event-explanations.json'),('review-tier3-fencing.py','fencing-timeline-review.json')]:
+            call(['python3','scripts/'+script,'--root',str(root/'fixture'),'--output',str(root/'fixture'/name)])
+        state['status']='row_verified'
+    except BaseException as error:
+        live = child is not None and child.poll() is None
+        state.update(status='supervisor_interrupted' if live else 'failed',error=str(error))
+        raise
+    finally:
+        state['finished']=time.time();save()
+        # KeyboardInterrupt while a child is live must leave its original root
+        # intact for observation, never archive changing stores as final proof.
+        if child is None or child.poll() is not None:
+            archive_originals(root)
+    print(json.dumps(state,indent=2))
+
+
+if __name__=='__main__':main()

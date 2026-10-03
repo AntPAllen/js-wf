@@ -8771,3 +8771,18 @@ member hashed before publication.
 This qualifies the new fixed capacity model and normal-mode producer at1k;
 prior100k/full-race evidence keeps its earlier exact graph and scope. Sustained
 R5 forced-gap runs and the full-release/24h gates remain open.
+
+## Local R5 producer beyond hosted runner limits
+
+Added `scripts/run-tier3-soak.py` with24h default (35s/10m qualification modes).
+It retains an isolated sparse committed checkout, actual race/normal executable,
+build settings, source before/after hashes, PID/terminal state and raw Go JSON.
+It executes the existing five-container row harness and existing strict artifact,
+checkpoint, explanation and fencing verifiers; clock rows require admitted cuts
+and five common-clock probes. Requested rolling gaps/shutdowns require matching
+proofs and scan progress. Every stopped-run original store/source/log/binary is
+archived with full member readback; live interrupted children keep their original
+root and no final-archive claim. Three producer guard/archive tests pass.
+The producer is not yet qualified by a real smoke, and no24h row has started.
+Full16-row/200-seed campaigns, full-matrix24h and the original million drain
+requirement remain open.
