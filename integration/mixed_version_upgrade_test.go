@@ -268,6 +268,11 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	gapRuns, err := upgraded.Stream(ctx, "WF_RUN")
+	if err != nil {
+		t.Fatal(err)
+	}
 	// Detect a silent omitted repair using retained state, not an Await timeout.
 	dispatched := false
 	gapCheck, stopGapCheck := context.WithTimeout(ctx, 2*time.Second)
@@ -280,13 +285,42 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 			stopGapCheck()
 			t.Fatal(err)
 		}
+		info, err := gapRuns.Info(gapCheck)
+		if err != nil {
+			stopGapCheck()
+			t.Fatal(err)
+		}
+		for sequence := info.State.FirstSeq; sequence <= info.State.LastSeq; sequence++ {
+			msg, err := gapRuns.GetMsg(gapCheck, sequence)
+			if errors.Is(err, jetstream.ErrMsgNotFound) {
+				continue
+			}
+			if err != nil {
+				stopGapCheck()
+				t.Fatal(err)
+			}
+			if string(msg.Data) == identity.Key(typ, gapID) {
+				rawDispatch, _ := json.MarshalIndent(msg, "", "  ")
+				if err = os.WriteFile(filepath.Join(root, "start-gap", "repaired-dispatch.json"), rawDispatch, 0644); err != nil {
+					stopGapCheck()
+					t.Fatal(err)
+				}
+				dispatched = true
+				break
+			}
+		}
+		if dispatched {
+			break
+		}
 		time.Sleep(10 * time.Millisecond)
 	}
 	stopGapCheck()
 	if !dispatched {
-		t.Fatal("post-upgrade process-gap repair produced no journal")
+		t.Fatal("post-upgrade process-gap repair produced no dispatch or journal")
 	}
-	gapResult, err := upgradedClient.Await(ctx, typ, gapID)
+	gapDeadline, stopGapDeadline := context.WithDeadline(ctx, gap.Killed.Add(30*time.Second))
+	gapResult, err := upgradedClient.Await(gapDeadline, typ, gapID)
+	stopGapDeadline()
 	if err != nil || string(gapResult) != `"done"` {
 		t.Fatalf("post-upgrade process-gap result=%s err=%v", gapResult, err)
 	}
@@ -301,7 +335,11 @@ func runMixedVersionRollingUpgradeFallback(t *testing.T, oldBinary string, newFi
 	if err = os.WriteFile(filepath.Join(root, "start-gap", "terminal.json"), rawGapFinal, 0644); err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("START_UPGRADE_GAP_REPAIRED seq=%d terminal_seq=%d result=%s", gapAfter.Sequence, finalGap.Sequence, gapResult)
+	recovery := time.Since(gap.Killed)
+	if recovery >= 30*time.Second {
+		t.Fatalf("post-upgrade process-gap recovery=%s exceeds30s", recovery)
+	}
+	t.Logf("START_UPGRADE_GAP_REPAIRED seq=%d terminal_seq=%d result=%s recovery=%s", gapAfter.Sequence, finalGap.Sequence, gapResult, recovery)
 
 	for _, completedID := range []string{id, repairedID} {
 		t.Logf("pre-read %s: upgraded=%s survivor=%s", completedID, mixedVersionResultProbe(ctx, upgraded, typ, completedID), mixedVersionResultProbe(ctx, all[1], typ, completedID))

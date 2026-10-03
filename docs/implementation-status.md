@@ -108,8 +108,15 @@
   actual production-client child after its invocation commits and before
   dispatch publishes, then upgrades the old peer and requires scanner repair,
   terminal completion and unchanged duplicate identity. Both development
-  profiles pass race48.879s. Clean committed binaries and the precise omitted
-  gap-repair control remain pending; this does not clear sustained R5 gap coverage.
+  profiles pass race48.879s. Initial clean qualification at1b03266 is rejected:
+  the old-peer-first case fails an overly specific immediate2s journal predicate;
+  the other profile passes. No contemporaneous queue cut was captured, so this
+  does not establish a runtime/server defect. Original binaries/stores/source
+  hashes are retained. The fixture now checks actual retained dispatch or
+  journal progression, then separately requires terminal recovery within30s of
+  confirmed client kill. Clean correction and the precise omitted gap-repair
+  control remain pending; this does not clear sustained R5 gap coverage.
+  [Original gate rejection](scale/start-upgrade-gap-2026-10-03/rejected-journal-gate/).
 - **CAS benchmark harness:** hosted37121445966 atcd59b86 is rejected before
   measurement: the shared harness used the newer UnmarshalEntry API absent at
   fixed baseline4fa3119. Its diagnostic now uses the benchmark's JSON format;

@@ -46,7 +46,7 @@ try:
    for profile in profiles:assert [e['Action'] for e in events if e.get('Test')==TEST+'/'+profile and e['Action'] in ('pass','fail')]==['pass']
    assert output.count('START_UPGRADE_GAP_REPAIRED ')==2
   else:
-   assert result.returncode!=0 and output.count('post-upgrade process-gap repair produced no journal')==1
+   assert result.returncode!=0 and output.count('post-upgrade process-gap repair produced no dispatch or journal')==1
   cases.append(dict(mode=mode,verdict=want,package_seconds=next(e['Elapsed'] for e in events if not e.get('Test') and e['Action']==want)))
  (root/'result.json').write_text(json.dumps(dict(accepted=True,source=revision,cases=cases,scope='Real R3 mixed-version Start process crash, retained upgrade and scanner repair; not the full R5 mixed row/200 seeds/24h.'),indent=2)+'\n')
 finally:
