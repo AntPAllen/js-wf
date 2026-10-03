@@ -276,7 +276,12 @@
   and last2. Relocated review passes and rejects four evidence controls (missing
   store, inconsistent recorded root, changed compiled inventory, missing baseline
   failure). Complete compiled sources/stores/commands/review tools are archived
-  with every member SHA256 readback. Hosted37129135794 remains pending.
+  with every member SHA256 readback. Hosted37129135794 is independently accepted
+  at the samebac9356:all1225 original members, both stores,598 compiled upstream
+  files and exact Git harness/fixture bytes verify. Baseline fails0.007s/control
+  passes0.008s, reopened schedules1/0, callbacks0, anchor/last2 unchanged.
+  Relocated report matches except for honest absent original cache-path readback.
+  [Hosted complete originals](scale/scheduler-minimal-cleanup-2026-10-03/hosted-complete-originals/).
   [Complete fresh originals](scale/scheduler-minimal-cleanup-2026-10-03/complete-originals/).
   No original million-store index or production dependency changes.
 - **Worker-kill target:** historical31.1s withTTL30s is a configuration mismatch
