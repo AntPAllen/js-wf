@@ -7906,3 +7906,27 @@ is confirmed queued at exact82069c3d45f344dae3068877f04e34ff190738c2, seed1/10m.
 It requires the actual sustained row and separate Go normalization test; no
 synthetic proof or short smoke substitutes. Current121100k37106469422 remains
 in progress. The clock producer archives all originals even on failure.
+
+## Rolling proof budget mismatch corrected; focused compiled control prepared
+
+Source inspection confirms the failed mixed rolling trial wrapped the entire
+production EnsureAuto sequence in matrixReadMetadata's2s-per-attempt context.
+EnsureAuto checks several retained streams, four KV stores and object storage;
+the wrapper repeatedly restarts this operation instead of giving it the
+existing60s whole-proof budget. The fixture now invokes this operation once
+with that existing deadline. All individual metadata checks and real latency
+acceptance gates retain their limits; production provisioning is unchanged.
+
+Version2 deployment proofs retain partial phase/errors on failure and record
+fallback operation start/end/deadline/backend/error. The artifact checker
+requires completed successful bounded proofs, rejecting partial/old-schema,
+operation errors and invalid deadlines in addition to existing peer/native/R5
+checks. Local67 Python guards pass; workflow YAML and shell syntax parse.
+
+A focused Go race test spans2.2s in two sequential stages, checks exact parent
+budget preservation and cancellation/changed-backend errors. The hosted runner
+compiles a precise negative overlay restoring the old2s wrapper and requires
+actual named/package failure with the expected context deadline message.
+Source hashes and original/control JSON bytes are retained. Actual compilation
+and execution are pending; this preparation does not qualify the mixed rolling
+row or confirm its original server cause. No real rolling trial was restarted.

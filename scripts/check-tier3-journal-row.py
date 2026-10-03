@@ -567,6 +567,12 @@ def check_upgrade_artifacts(root, report):
     upgraded=set()
     def proof(path, expected):
         data=json.loads(path.read_text());nodes=data['nodes']
+        if data.get('version')!=2 or data.get('complete') is not True or data.get('phase')!='complete' or data.get('error'):
+            raise ValueError('upgrade deployment proof is incomplete or lacks current schema')
+        operation=data['backend_check']
+        started,at,op_start,op_end,deadline=map(timestamp_ns,[data['started'],data['at'],operation['started'],operation['ended'],operation['deadline']])
+        if not started<=op_start<=op_end<=at<=deadline or not 0<deadline-started<=60_000_000_000 or operation['backend']!='fallback' or operation.get('error'):
+            raise ValueError('upgrade fallback provisioning lacks bounded successful whole-operation evidence')
         if data['backend']!='fallback' or len(nodes)!=5 or [n['node'] for n in nodes]!=list(range(5)) or [n['version'] for n in nodes]!=expected or len({n['server_id'] for n in nodes})!=5 or any(not n['server_id'] for n in nodes):raise ValueError('upgrade version/identity/backend mismatch')
         for n in nodes:
             want='native timers require NATS 2.12+; connected server reports 2.11.17' if n['version']=='2.11.17' else 'stream WF_RUN configuration mismatch:'

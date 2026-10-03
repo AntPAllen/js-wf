@@ -1,0 +1,23 @@
+name: upgrade-provisioning-budget
+on:
+  workflow_dispatch:
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Execute whole-operation budget proof and compiled metadata-budget control
+        run: python3 scripts/check-upgrade-provisioning-budget.py --root "$RUNNER_TEMP/upgrade-budget-evidence"
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: upgrade-provisioning-budget-evidence
+          path: ${{ runner.temp }}/upgrade-budget-evidence
+          if-no-files-found: error

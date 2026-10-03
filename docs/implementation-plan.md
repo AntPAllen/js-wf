@@ -965,3 +965,22 @@ upgrades complete, then the third cut's pre-upgrade EnsureAuto deployment check
 hits its context deadline. Preserve all3795 original archive members, terminal
 metadata and logs. This is neither a completed rolling row nor a confirmed
 server root cause; investigate the retained evidence before another attempt.
+
+### Rolling deployment-proof budget correction
+
+The rejected first mixed rolling trial uses matrixReadMetadata's2s attempt
+context around the entire production EnsureAuto call, which sequentially
+checks retained streams, KV buckets and object storage. That helper's budget
+is for one metadata lookup. Use the existing whole60s deployment-proof context
+for EnsureAuto once; keep individual metadata-read retries and the latency
+acceptance gates unchanged. Preserve partial proof phase/error/timestamps on
+failure, and record the fallback operation's start/end/deadline/backend/error.
+Require completed version2 proofs with successful bounded operation evidence.
+
+A focused actual Go race proof executes two sequential stages spanning2.2s and
+preserves cancellation/changed-backend rejection. Its compiled negative restores
+the old2s metadata wrapper and must fail the exact named operation-budget test
+with context deadline exceeded, not a build/skip/global-timeout failure. Hosted
+upgrade-provisioning-budget captures clean committed source hashes before/after
+and all JSON events/control bytes. This validates the fixture budget contract;
+it does not establish the original NATS cause or clear the mixed rolling row.

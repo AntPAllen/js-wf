@@ -5,6 +5,7 @@ package integration_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -28,12 +29,26 @@ type fiveUpgradePeer struct {
 	ServerID       string `json:"server_id"`
 	NativeRejected string `json:"native_rejected"`
 }
+type fiveUpgradeBackendCheck struct {
+	Started  time.Time              `json:"started"`
+	Ended    time.Time              `json:"ended"`
+	Deadline time.Time              `json:"deadline"`
+	Backend  provision.TimerBackend `json:"backend"`
+	Error    string                 `json:"error,omitempty"`
+}
+
 type fiveUpgradeProof struct {
-	At      time.Time              `json:"at"`
-	Nodes   []fiveUpgradePeer      `json:"nodes"`
-	Backend provision.TimerBackend `json:"backend"`
-	Run     *jetstream.StreamInfo  `json:"run_info"`
-	Timer   *jetstream.StreamInfo  `json:"timer_info"`
+	Version      int                      `json:"version"`
+	Started      time.Time                `json:"started"`
+	Complete     bool                     `json:"complete"`
+	Phase        string                   `json:"phase"`
+	Error        string                   `json:"error,omitempty"`
+	BackendCheck *fiveUpgradeBackendCheck `json:"backend_check,omitempty"`
+	At           time.Time                `json:"at"`
+	Nodes        []fiveUpgradePeer        `json:"nodes"`
+	Backend      provision.TimerBackend   `json:"backend"`
+	Run          *jetstream.StreamInfo    `json:"run_info"`
+	Timer        *jetstream.StreamInfo    `json:"timer_info"`
 }
 
 func fiveUpgradeVersions(upgraded []bool) []string {
@@ -50,12 +65,26 @@ func fiveUpgradeVersions(upgraded []bool) []string {
 // Pin every direct endpoint; reconnect/discovery cannot substitute a peer.
 // Retained fallback selection must survive each binary change, and explicit
 // native provisioning must fail with its semantic version/configuration error.
-func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, cluster *testcluster.DockerCluster, versions []string, path string) ([]string, error) {
+func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, cluster *testcluster.DockerCluster, versions []string, path string) (observed []string, resultErr error) {
 	bound, stop := context.WithTimeout(ctx, 60*time.Second)
 	defer stop()
-	proof := fiveUpgradeProof{At: time.Now().UTC()}
+	proof := fiveUpgradeProof{Version: 2, Started: time.Now().UTC(), Phase: "peer-native-rejections"}
+	// Preserve partial phase/timing evidence on failure as well as success.
+	defer func() {
+		proof.At = time.Now().UTC()
+		if resultErr != nil {
+			proof.Error = resultErr.Error()
+		}
+		data, err := json.MarshalIndent(proof, "", "  ")
+		if err == nil {
+			err = os.WriteFile(path, data, 0644)
+		}
+		if err != nil {
+			resultErr = errors.Join(resultErr, fmt.Errorf("upgrade proof artifact: %w", err))
+		}
+	}()
 	seen := map[string]bool{}
-	observed := make([]string, 5)
+	observed = make([]string, 5)
 	for node := 0; node < 5; node++ {
 		nc, err := nats.Connect(cluster.ClientURL(node), nats.NoReconnect(), nats.IgnoreDiscoveredServers(), nats.Timeout(time.Second))
 		if err != nil {
@@ -87,13 +116,15 @@ func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, clu
 		peer.NativeRejected = nativeErr.Error()
 		proof.Nodes = append(proof.Nodes, peer)
 	}
-	var err error
-	proof.Backend, err = matrixReadMetadata(bound, func(attempt context.Context) (provision.TimerBackend, error) {
-		return provision.EnsureAuto(attempt, js, 5)
+	proof.Phase = "fallback-provisioning"
+	check, err := checkFiveUpgradeFallback(bound, func(operation context.Context) (provision.TimerBackend, error) {
+		return provision.EnsureAuto(operation, js, 5)
 	})
-	if err != nil || proof.Backend != provision.FallbackTimers {
-		return nil, fmt.Errorf("upgrade fallback changed backend=%s err=%v", proof.Backend, err)
+	proof.BackendCheck, proof.Backend = &check, check.Backend
+	if err != nil {
+		return nil, err
 	}
+	proof.Phase = "replica-readiness"
 	if err := waitFiveReplicaReadiness(bound, js, 0); err != nil {
 		return nil, err
 	}
@@ -122,12 +153,61 @@ func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, clu
 			proof.Timer = info
 		}
 	}
-	proof.At = time.Now().UTC()
-	data, err := json.MarshalIndent(proof, "", "  ")
-	if err == nil {
-		err = os.WriteFile(path, data, 0644)
+	proof.Phase, proof.Complete = "complete", true
+	return observed, nil
+}
+
+// EnsureAuto checks several retained stores. Its total budget is the existing
+// deployment-proof deadline, not the single metadata-read retry helper's 2s.
+func checkFiveUpgradeFallback(ctx context.Context, lookup func(context.Context) (provision.TimerBackend, error)) (fiveUpgradeBackendCheck, error) {
+	check := fiveUpgradeBackendCheck{Started: time.Now().UTC()}
+	check.Deadline, _ = ctx.Deadline()
+	backend, err := lookup(ctx)
+	check.Ended, check.Backend = time.Now().UTC(), backend
+	if err != nil {
+		check.Error = err.Error()
+		return check, fmt.Errorf("upgrade fallback provisioning proof: %w", err)
 	}
-	return observed, err
+	if backend != provision.FallbackTimers {
+		err = fmt.Errorf("upgrade fallback changed backend=%s", backend)
+		check.Error = err.Error()
+		return check, err
+	}
+	return check, nil
+}
+
+func TestFiveUpgradeProvisioningUsesWholeProofBudget(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	check, err := checkFiveUpgradeFallback(ctx, func(operation context.Context) (provision.TimerBackend, error) {
+		// Two sequential stages exceed one metadata-read budget. Restoring the
+		// previous helper around this whole operation cancels before stage two.
+		for stage := 0; stage < 2; stage++ {
+			select {
+			case <-operation.Done():
+				return "", operation.Err()
+			case <-time.After(1100 * time.Millisecond):
+			}
+		}
+		return provision.FallbackTimers, nil
+	})
+	deadline, _ := ctx.Deadline()
+	if err != nil || check.Backend != provision.FallbackTimers || check.Error != "" || !check.Deadline.Equal(deadline) || check.Ended.Sub(check.Started) < 2200*time.Millisecond {
+		t.Fatalf("whole-operation proof=%+v err=%v", check, err)
+	}
+}
+
+func TestFiveUpgradeProvisioningPreservesCancellationAndBackendFailure(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	check, err := checkFiveUpgradeFallback(ctx, func(operation context.Context) (provision.TimerBackend, error) { return "", operation.Err() })
+	if !errors.Is(err, context.Canceled) || check.Backend != "" || check.Error != context.Canceled.Error() {
+		t.Fatalf("cancellation proof=%+v err=%v", check, err)
+	}
+	check, err = checkFiveUpgradeFallback(context.Background(), func(context.Context) (provision.TimerBackend, error) { return provision.NativeTimers, nil })
+	if err == nil || check.Backend != provision.NativeTimers || check.Error == "" {
+		t.Fatalf("changed backend proof=%+v err=%v", check, err)
+	}
 }
 
 func upgradeFiveMixedServer(ctx context.Context, js jetstream.JetStream, cluster *testcluster.DockerCluster, node int, scheduled time.Time, prefix string, upgraded []bool) (matrixLeaderFault, error) {
