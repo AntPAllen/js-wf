@@ -44,7 +44,7 @@ func buildMatrixClockWorkers(troot string) ([]string, error) {
 		}
 		binaries[i] = filepath.Join(root, "integration-clock.test")
 		// Instrument the worker even when the parent smoke command is not -race.
-		command := exec.Command("go", "test", "-c", "-race", "-overlay="+overlay, "-o", binaries[i], ".")
+		command := exec.Command("go", "test", "-p=1", "-c", "-race", "-overlay="+overlay, "-o", binaries[i], ".")
 		if output, err := command.CombinedOutput(); err != nil {
 			return nil, fmt.Errorf("build %s worker: %w: %s", offset, err, output)
 		}

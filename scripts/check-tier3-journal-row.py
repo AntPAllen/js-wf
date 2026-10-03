@@ -17,7 +17,7 @@ def load(name, file):
 
 matrix = load('matrix_row', 'check-matrix-campaign.py')
 execution = load('matrix_execution', 'check-matrix-result.py')
-TESTS = {'rolling_upgrade': 'TestFiveContainerMixedRollingServerUpgrade', 'auto_journal': 'TestFiveContainerAutomaticMembershipWithJournalKills', 'block_delay': 'TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds', 'block_disk': 'TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds', 'server_clock_ahead': 'TestFiveContainerMixedServerClockAheadWithJournalKills',
+TESTS = {'worker_clock': 'TestFiveContainerMixedWorkerClockSkew', 'rolling_upgrade': 'TestFiveContainerMixedRollingServerUpgrade', 'auto_journal': 'TestFiveContainerAutomaticMembershipWithJournalKills', 'block_delay': 'TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds', 'block_disk': 'TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds', 'server_clock_ahead': 'TestFiveContainerMixedServerClockAheadWithJournalKills',
          'server_clock_behind': 'TestFiveContainerMixedServerClockBehindWithJournalKills',
          'worker_isolation': 'TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds',
          'worker_pause': 'TestFiveContainerMixedWorkerPausedFortyFiveSeconds',
@@ -34,6 +34,9 @@ TEST = TESTS['journal']
 def check(events, duration, expected_row='journal', expected_seed=None):
     test = TESTS[expected_row]
     execution.check(events, test, duration)
+    if expected_row == 'worker_clock':
+        actions=[e.get('Action') for e in events if e.get('Test')=='TestTier3WorkerClockNormalizationPreservesRawEvidence' and e.get('Action') in ('run','pass','fail','skip')]
+        if actions!=['run','pass']: raise ValueError('clock normalization guard did not execute and pass')
     log = ''.join(e.get('Output', '') for e in events if e.get('Test') == test)
     row, seed, found_duration, replicas, batches, invocations, entries, faults, release = matrix.one(
         r'TIER3_MIXED_RESULT row=(\w+) seed=(\d+) duration=(\S+) five_replicas=(\w+) '
@@ -68,7 +71,8 @@ def check(events, duration, expected_row='journal', expected_seed=None):
             raw_t,raw_p=matrix.one(r'TIER3_ROUTE_RAW_CELL type='+typ+r' terminal_p99=(\S+) progress_p99=(\S+)',log)
             cells[typ]['raw_terminal_p99_seconds']=matrix.seconds(raw_t)
             cells[typ]['raw_progress_p99_seconds']=matrix.seconds(raw_p)
-    scope = ('single five-container R5 server clock skew with journal SIGKILL row' if row.startswith('server_clock_')
+    scope = ('single five-container R5 worker clock skew row' if row == 'worker_clock'
+             else 'single five-container R5 server clock skew with journal SIGKILL row' if row.startswith('server_clock_')
              else 'single five-container R5 rolling upgrade with retained fallback timers' if row == 'rolling_upgrade'
              else 'single five-container R5 automatic membership with journal SIGKILL row' if row == 'auto_journal'
              else 'single five-container R5 private filesystem per-request delay row' if row == 'block_delay'
@@ -467,7 +471,7 @@ def check_worker_artifacts(root,report):
                 complete_hard_kill_attribution=False)
 
 
-def check_graceful_process_artifacts(root,sessions):
+def check_graceful_process_artifacts(root,sessions,clock_normalized=False):
     by_worker={s['worker_id']:s for s in sessions}
     if set(by_worker)!={f'matrix-process-{i}-generation-0' for i in range(5)} or len({s['pid'] for s in sessions})!=5:
         raise ValueError('pause must keep the original five process identities')
@@ -488,9 +492,72 @@ def check_graceful_process_artifacts(root,sessions):
         for i,r in enumerate(records,1):
             if r['pid']!=session['pid'] or r['sequence']!=i or r['event']['Worker']!=worker:raise ValueError('pause fencing PID/identity/sequence mismatch')
         steps_all+=steps;fences_all += [r['event'] for r in records]
-    if json.loads((root/'dispatch.json').read_text())!=steps_all or (json.loads((root/'fencing.json').read_text()) or [])!=fences_all:
+    if clock_normalized:
+        clocks=load('worker_clock_evidence','tier3-worker-clock-evidence.py')
+        if (json.loads((root/'dispatch-worker-clock-raw.json').read_text()) or [])!=steps_all or (json.loads((root/'fencing-worker-clock-raw.json').read_text()) or [])!=fences_all:
+            raise ValueError('clock raw aggregate differs from original child records')
+        clocks.check_normalized_records(steps_all,json.loads((root/'dispatch.json').read_text()) or [])
+        clocks.check_normalized_records(fences_all,json.loads((root/'fencing.json').read_text()) or [])
+    elif json.loads((root/'dispatch.json').read_text())!=steps_all or (json.loads((root/'fencing.json').read_text()) or [])!=fences_all:
         raise ValueError('pause aggregate evidence differs from original records')
     return by_worker,steps_all,fences_all
+
+
+def check_worker_clock_artifacts(root, report):
+    import hashlib
+    clocks=load('worker_clock_evidence','tier3-worker-clock-evidence.py')
+    sessions=json.loads((root/'process-evidence.json').read_text())
+    workers,steps,fences=check_graceful_process_artifacts(root,sessions,clock_normalized=True)
+    proofs=json.loads((root/'worker-clock-proofs.json').read_text())
+    faults=json.loads((root/'faults.json').read_text())
+    if len(faults)!=report['confirmed_faults'] or len(proofs)!=len(faults)+2 or [p['stage'] for p in proofs]!=['initial']+['periodic']*len(faults)+['final']:
+        raise ValueError('clock proof stages or fault count mismatch')
+    times=[clocks.timestamp_ns(p['observed']) for p in proofs]
+    if times!=sorted(times) or len(set(times))!=len(times): raise ValueError('clock observations regress or duplicate')
+    sequences={w:0 for w in clocks.OFFSETS}
+    for proof in proofs:
+        clocks.check_probe(proof)
+        for sample in proof['samples']:
+            if sample['sequence']<=sequences[sample['worker']]: raise ValueError('clock sequence did not advance')
+            sequences[sample['worker']]=sample['sequence']
+        info=proof['stream_info'];config=info['config'];cluster=info['cluster']
+        if config['name']!='MATRIX_CLOCK' or config['subjects']!=['matrix.clock.*'] or config['num_replicas']!=5 or config['storage']!='file' or config['max_msgs_per_subject']!=16 or not cluster['leader'] or len(cluster['replicas'])!=4 or any(not p['current'] or p.get('offline',False) for p in cluster['replicas']) or len({cluster['leader'],*[r['name'] for r in cluster['replicas']]})!=5:
+            raise ValueError('clock probe stream lacks current five file replicas')
+    previous=None
+    for fault,proof in zip(faults,proofs[1:-1]):
+        scheduled,killed,healed=map(clocks.timestamp_ns,[fault[k] for k in ('scheduled','killed','healed')])
+        if not times[0]<=scheduled<=killed<=healed<=times[-1] or healed!=clocks.timestamp_ns(proof['observed']) or fault['node']!=-1 or fault['clock_samples']!=proof['samples']:
+            raise ValueError('clock fault does not match its five broker proofs')
+        if previous is not None and scheduled-previous!=30_000_000_000: raise ValueError('clock probe cadence differs')
+        previous=scheduled
+    binaries=json.loads((root/'worker-clock-binaries.json').read_text())
+    if len(binaries)!=5 or {b['worker'] for b in binaries}!=set(workers): raise ValueError('missing clock binaries')
+    paths={}
+    for binary in binaries:
+        relative=Path(binary['path']);path=root/relative
+        if relative.is_absolute() or '..' in relative.parts or binary['offset_ns']!=clocks.OFFSETS[binary['worker']] or hashlib.sha256(path.read_bytes()).hexdigest()!=binary['sha256']:
+            raise ValueError('clock binary provenance mismatch')
+        paths.setdefault(binary['offset_ns'],set()).add(binary['path'])
+    if len(paths)!=3 or any(len(p)!=1 for p in paths.values()) or len(set.union(*paths.values()))!=3:
+        raise ValueError('clock offsets do not use three distinct retained executables')
+    original=(root/'clock-original-time.go').read_text()
+    call='\tsec, nsec, mono := runtimeNow()\n'
+    if original.count(call)!=1: raise ValueError('retained Go time source shape differs')
+    for index, seconds in [(0,5),(1,-5)]:
+        patched=root/f'clock-{index}'/'skew-time.go'
+        expected=original.replace(call,call+f'\tsec += {seconds} // test-only wall-clock skew\n')
+        if patched.read_text()!=expected: raise ValueError('clock overlay differs from requested wall-time patch')
+        overlay=json.loads((patched.parent/'skew-overlay.json').read_text())
+        entries=overlay['Replace']
+        if len(entries)!=1 or not next(iter(entries)).endswith('/src/time/time.go') or not next(iter(entries.values())).endswith(f'/clock-{index}/skew-time.go'):
+            raise ValueError('compiler overlay mapping differs')
+    before=json.loads((root/'worker-clock-source-before.json').read_text())
+    after=json.loads((root/'worker-clock-source-after.json').read_text())
+    if before!=after or not re.fullmatch('[0-9a-f]{40}',before['revision']) or not before['clean'] or not before['files']:
+        raise ValueError('worker-clock source changed or lacks clean commit provenance')
+    return dict(graceful_counter_cross_checks=5,clock_probes=len(proofs),broker_clock_messages=5*len(proofs),
+                raw_dispatch_records=len(steps),raw_fencing_records=len(fences),
+                correction='configured Go overlay only; broker/controller unchanged',clears_full_tier3_release=False)
 
 
 def check_upgrade_artifacts(root, report):
@@ -809,6 +876,9 @@ if __name__ == '__main__':
     if args.row == 'rolling_upgrade':
         if args.root is None: parser.error('--root is required for rolling upgrade')
         report['upgrade_artifact_checks']=check_upgrade_artifacts(args.root,report)
+    if args.row == 'worker_clock':
+        if args.root is None: parser.error('--root is required for worker clocks')
+        report['worker_clock_artifact_checks']=check_worker_clock_artifacts(args.root,report)
     if args.row == 'worker_pause':
         if args.root is None: parser.error('--root is required for the pause row')
         report['pause_artifact_checks']=check_pause_artifacts(args.root,report)

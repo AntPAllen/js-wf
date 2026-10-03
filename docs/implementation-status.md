@@ -7869,3 +7869,34 @@ Authoritative polls confirm rolling mixed row37107421026 at0bdc838 and current12
 Tier2 all13x20037057872230 at076ebad remains queued. None was restarted. Local
 root has324MiB free; failed/live original stores were preserved and no new
 local Go build was attempted during this Python evidence preparation.
+
+## Sixteenth R5 worker-clock row wired; first rolling mixed run rejected
+
+The worker-clock port now uses five real child workers with +5s/-5s/0/+5s/-5s
+Go wall-clock overlays and the normal unshifted five-peer NATS deployment.
+Initial,30s periodic and final proofs retain samples and actual broker message
+subject/sequence/time/payload plus current R5 file stream information. Exact
+worker binaries (including the unshifted parent copy), Go time source and
+compiler overlay files are retained with hashes and clean source inventories
+before/after the executed row. Original JSONL and raw aggregates stay intact;
+only diagnostic aggregate copies subtract the deliberately configured offset.
+All five process identities/counters and nanosecond-preserving corrections are
+independently checked. An executed Go normalization test is required too.
+
+Registry/workflow/planner now cover16 implemented rows: all200 uses256 jobs
+with13-seed shards. Complete physical stores/overlays/binaries are archived
+with member readback on both clock and rolling runs. Local67 Python guards
+pass and workflow YAML/all shell blocks parse, including twelve complete
+artifact positive/negative cases. No local Go compile or real row qualification
+is claimed; hosted compilation/sustained execution is the next gate. Full
+original matrix/24h release and current121100k qualification remain open.
+
+Rolling mixed37107421026 is terminal FAILED at exact0bdc838: two actual upgrades
+complete, then third-cut pre-upgrade deployment proof returns
+`upgrade fallback changed backend= err=context deadline exceeded` from
+EnsureAuto. Do not infer a backend change from the empty return on error.
+All3795 archive members have independent SHA256 readback; full original stores,
+job logs, terminal metadata and verification report are preserved in
+scale/r5-rolling-upgrade-2026-10-03/rejected-deployment-check/. Source is attributed
+by hosted checkout/run metadata; no full source inventory was produced by that
+older row. No server cause is confirmed and no rerun has been launched.

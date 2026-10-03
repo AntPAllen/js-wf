@@ -7,7 +7,7 @@ on:
         type: choice
         required: true
         default: journal
-        options: [all, rolling_upgrade, auto_journal, block_delay, block_disk, journal, consumer, restart, fanout_restart, route_quorum, route_majority, worker_kill, worker_pause, worker_isolation, server_clock_ahead, server_clock_behind]
+        options: [all, worker_clock, rolling_upgrade, auto_journal, block_delay, block_disk, journal, consumer, restart, fanout_restart, route_quorum, route_majority, worker_kill, worker_pause, worker_isolation, server_clock_ahead, server_clock_behind]
       duration:
         description: Ten minutes is sustained; 35 seconds is fixture smoke only
         required: true
@@ -110,6 +110,7 @@ jobs:
         run: |
           set -o pipefail
           case "$TIER3_MATRIX_ROW" in
+            worker_clock) row_test='(TestFiveContainerMixedWorkerClockSkew|TestTier3WorkerClockNormalizationPreservesRawEvidence)' ;;
             rolling_upgrade) row_test=TestFiveContainerMixedRollingServerUpgrade ;;
             auto_journal) row_test=TestFiveContainerAutomaticMembershipWithJournalKills ;;
             block_delay) row_test=TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds ;;
@@ -140,7 +141,19 @@ jobs:
               seed_events=/tmp/tier3-mixed-journal-events.jsonl
               seed_result=/tmp/tier3-mixed-journal-result.json
             fi
-            go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee "$seed_events" | python3 -u scripts/render-go-test.py
+            if [ "$TIER3_MATRIX_ROW" = worker_clock ]; then
+              python3 scripts/capture-tier3-clock-source.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --stage before
+            fi
+            test_status=0
+            if go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee "$seed_events" | python3 -u scripts/render-go-test.py; then
+              test_status=0
+            else
+              test_status=$?
+            fi
+            if [ "$TIER3_MATRIX_ROW" = worker_clock ]; then
+              python3 scripts/capture-tier3-clock-source.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --stage after
+            fi
+            if [ "$test_status" != 0 ]; then exit "$test_status"; fi
             cut_args=()
             if [ "$WF_TIER3_CLOCK_TIMER_CUT" = 1 ]; then cut_args+=(--require-clock-timer-cut); fi
             if [ "$WF_TIER3_COMMON_CLOCK" = 1 ]; then cut_args+=(--require-common-timer-clock); fi
@@ -148,8 +161,8 @@ jobs:
             python3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"
             python3 scripts/review-tier3-fencing.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/fencing-timeline-review.json"
           done
-      - name: Preserve rolling upgrade original stores and evidence
-        if: always() && matrix.row == 'rolling_upgrade'
+      - name: Preserve rolling upgrade or worker-clock original stores and evidence
+        if: always() && (matrix.row == 'rolling_upgrade' || matrix.row == 'worker_clock')
         run: |
           python3 - <<'PY'
           import hashlib, json, os, tarfile
@@ -170,7 +183,7 @@ jobs:
           (archive.parent/'rolling-manifest.json').write_text(json.dumps(dict(files=hashes), indent=2)+'\n')
           PY
       - uses: actions/upload-artifact@v7
-        if: always() && matrix.row == 'rolling_upgrade'
+        if: always() && (matrix.row == 'rolling_upgrade' || matrix.row == 'worker_clock')
         with:
           name: rolling-original-stores-seed-${{ matrix.artifact_seed }}
           path: |

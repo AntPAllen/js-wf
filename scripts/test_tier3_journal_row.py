@@ -38,6 +38,20 @@ class JournalRowChecks(unittest.TestCase):
                 with self.subTest(row=name, change=change), self.assertRaises(ValueError):
                     row.check(broken, '24h', name, 42)
 
+    def test_worker_clock_requires_executed_normalization_and_keeps_row_scope(self):
+        for duration in ('35s','10m','24h'):
+            events=fixture(duration)
+            events[0]['Output']=events[0]['Output'].replace('row=journal','row=worker_clock')
+            for event in events[:2]:event['Test']=row.TESTS['worker_clock']
+            with self.assertRaises(ValueError):row.check(events,duration,'worker_clock',42)
+            guard='TestTier3WorkerClockNormalizationPreservesRawEvidence'
+            events.extend([dict(Test=guard,Action='run'),dict(Test=guard,Action='pass')])
+            result=row.check(events,duration,'worker_clock',42)
+            self.assertFalse(result['clears_full_tier3_release'])
+            for action in ('skip','fail'):
+                broken=copy.deepcopy(events);broken[-1]['Action']=action
+                with self.assertRaises(ValueError):row.check(broken,duration,'worker_clock',42)
+
     def test_valid_scope_remains_partial(self):
         result = row.check(fixture(), '10m')
         self.assertEqual(result['invocations'], 56)

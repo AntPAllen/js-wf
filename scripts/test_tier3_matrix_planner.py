@@ -12,7 +12,7 @@ class PlannerTests(unittest.TestCase):
         for count in (1, 20, 200):
             jobs = planner.campaign('all', count)
             self.assertLessEqual(len(jobs), 256)
-            self.assertEqual(len(planner.ROWS), 15)
+            self.assertEqual(len(planner.ROWS), 16)
             for row in planner.ROWS:
                 selected = [job for job in jobs if job['row'] == row]
                 self.assertEqual([seed for job in selected for seed in range(job['first'], job['last']+1)], list(range(1, count+1)))
@@ -29,7 +29,7 @@ class PlannerTests(unittest.TestCase):
                      ('all', 1, True), ('all', 20, 2**63-10)]:
             with self.assertRaises(ValueError): planner.campaign(*args)
         with self.assertRaises(ValueError): planner.campaign('journal', 1, 1, True)
-        self.assertEqual(len(planner.campaign('all', 1, 1, True)), 15)
+        self.assertEqual(len(planner.campaign('all', 1, 1, True)), 16)
 
     def test_registry_matches_workflow(self):
         workflow = Path('.github/workflows/tier3-mixed-journal.yml').read_text()

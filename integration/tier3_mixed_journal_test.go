@@ -93,7 +93,7 @@ func TestFiveContainerAutomaticMembershipWithJournalKills(t *testing.T) {
 
 func runFiveContainerMixedLeader(t *testing.T, row string) {
 	t.Helper()
-	if matrixServerClockOffset(row) == 0 && row != "auto_journal" && row != "block_delay" && row != "block_disk" && row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" && row != "rolling_upgrade" {
+	if matrixServerClockOffset(row) == 0 && row != "auto_journal" && row != "block_delay" && row != "block_disk" && row != "journal" && row != "consumer" && row != "restart" && row != "fanout_restart" && row != "route_quorum" && row != "route_majority" && row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" && row != "worker_clock" && row != "rolling_upgrade" {
 		t.Fatal("unsupported R5 fault row")
 	}
 	if os.Getenv("WF_TIER3_MATRIX") != "1" {
@@ -131,6 +131,14 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	if err := os.MkdirAll(root, 0755); err != nil {
 		t.Fatal(err)
+	}
+	var clockBinaries []string
+	var workerClockProofs []tier3WorkerClockProof
+	if row == "worker_clock" {
+		clockBinaries, err = prepareTier3ClockBinaries(root)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 	if row == "route_quorum" || row == "route_majority" {
 		// The default route ping can take30s before stale sockets disappear,
@@ -234,6 +242,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	if row == "route_quorum" || row == "route_majority" {
 		if _, err := js.CreateStream(ctx, jetstream.StreamConfig{Name: "TIER3_ROUTE_PROBE", Subjects: []string{"tier3.route.probe"}, Replicas: 5, Storage: jetstream.FileStorage}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var workerClockStream jetstream.Stream
+	if row == "worker_clock" {
+		workerClockStream, err = js.CreateStream(ctx, jetstream.StreamConfig{Name: "MATRIX_CLOCK", Subjects: []string{"matrix.clock.*"}, Storage: jetstream.FileStorage, Replicas: 5, MaxMsgsPerSubject: 16})
+		if err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -404,7 +419,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			return json.RawMessage(`42`), nil
 		}
 	}
-	if row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" {
+	if row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" && row != "worker_clock" {
 		for node := 0; node < 5; node++ {
 			options := []worker.Option{worker.WithPartitionConcurrency(4), worker.WithOperationObserver(observeOperations), worker.WithDispatchObserver(func(event worker.DispatchEvent) {
 				evidenceMu.Lock()
@@ -487,7 +502,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				}
 				workerURLs = []string{proxy.URL()}
 			}
-			process, err := startMatrixProcessWorker(ctx, root, workerURLs, slot, 0)
+			var process *matrixProcessWorker
+			if row == "worker_clock" {
+				process, err = startMatrixProcessWorkerExecutable(ctx, root, workerURLs, slot, 0, clockBinaries[slot%3], true)
+			} else {
+				process, err = startMatrixProcessWorker(ctx, root, workerURLs, slot, 0)
+			}
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -555,7 +575,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				t.Error(err)
 			}
 		}
-		if row == "worker_kill" || row == "worker_pause" || row == "worker_isolation" {
+		if row == "worker_kill" || row == "worker_pause" || row == "worker_isolation" || row == "worker_clock" {
 			for _, p := range processes {
 				stopMatrixProcessWorker(p)
 			}
@@ -569,6 +589,16 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				sessions = append(sessions, proof)
 				dispatch = append(dispatch, steps...)
 				fencing = append(fencing, fences...)
+			}
+			if row == "worker_clock" {
+				write("dispatch-worker-clock-raw.json", dispatch)
+				write("fencing-worker-clock-raw.json", fencing)
+				var err error
+				dispatch, fencing, err = normalizeTier3WorkerClockRecords(dispatch, fencing)
+				if err != nil {
+					t.Error(err)
+				}
+				write("worker-clock-proofs.json", workerClockProofs)
 			}
 			write("process-evidence.json", sessions)
 			if row == "worker_isolation" {
@@ -628,7 +658,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		for _, m := range metrics {
 			fenceCount += m.FencingEvents
 		}
-		if row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" && fenceCount != uint64(len(fencing)) {
+		if row != "worker_kill" && row != "worker_pause" && row != "worker_isolation" && row != "worker_clock" && fenceCount != uint64(len(fencing)) {
 			t.Errorf("fencing evidence=%d counter=%d", len(fencing), fenceCount)
 		}
 		f, err := os.Create(filepath.Join(root, "history.jsonl"))
@@ -683,6 +713,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		if _, err := proveFiveUpgradeDeployment(ctx, js, cluster, fiveUpgradeVersions(upgraded), filepath.Join(root, "upgrade-initial.json")); err != nil {
 			t.Fatal(err)
 		}
+	}
+	if row == "worker_clock" {
+		initial, err := captureTier3WorkerClocks(ctx, workerClockStream, processes, "initial")
+		if err != nil {
+			t.Fatal(err)
+		}
+		workerClockProofs = append(workerClockProofs, initial)
 	}
 	started := time.Now()
 	end := started.Add(duration)
@@ -770,6 +807,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				event, err = killFiveContainerMixedClockLeader(ctx, js, cluster, scheduled, prefix, len(faults)+1, recordRoles, admit)
 			} else if row == "rolling_upgrade" {
 				event, err = upgradeFiveMixedServer(ctx, js, cluster, upgradeOrder[len(faults)], scheduled, prefix, upgraded)
+			} else if row == "worker_clock" {
+				event = matrixLeaderFault{Scheduled: scheduled, Killed: time.Now().UTC(), Node: -1}
+				var proof tier3WorkerClockProof
+				proof, err = captureTier3WorkerClocks(ctx, workerClockStream, processes, "periodic")
+				workerClockProofs = append(workerClockProofs, proof)
+				event.ClockSamples, event.Healed = proof.Samples, proof.Observed
 			} else if row == "worker_isolation" {
 				event, err = isolateMatrixWorkerReplies(ctx, processes, workerProxies, faultRNG.Intn(len(processes)), scheduled, func(c context.Context, fleet []*matrixProcessWorker, first int) (int, matrixIsolationTarget, func() error, error) {
 					return armMatrixUnfinishedIsolationTarget(c, js, fleet, first)
@@ -1265,6 +1308,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		if active == 0 {
 			t.Fatal("consumer row never selected a consumer with active deliveries")
 		}
+	}
+	if row == "worker_clock" {
+		final, err := captureTier3WorkerClocks(ctx, workerClockStream, processes, "final")
+		if err != nil {
+			t.Fatal(err)
+		}
+		workerClockProofs = append(workerClockProofs, final)
 	}
 	t.Logf("TIER3_MIXED_RESULT row=%s seed=%d duration=%s five_replicas=true batches=%d invocations=%d entries=%d faults=%d full_matrix_release=false", row, seed, duration, batches, want, report.Entries, len(faults))
 }

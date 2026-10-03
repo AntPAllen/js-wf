@@ -940,3 +940,28 @@ its raw child records. Never adjust controller/broker latency samples or use
 network-delay-contaminated measured offsets as timestamp corrections. This
 helper and its synthetic controls are preparation; the actual sustained R5
 clock row, source/binary provenance and all-row qualification remain required.
+
+### Sixteenth R5 row prepared: separate worker clock skew
+
+`TestFiveContainerMixedWorkerClockSkew` now ports the original worker-clock row
+to the sustained R5 six-cell fixture. It starts five actual processes using
+three retained race-instrumented executables (+5s/-5s/0/+5s/-5s), keeps NATS and
+the controller unshifted, and verifies initial, every30s and final samples
+against retained broker messages. Preserve Go time source, exact overlay maps
+and patched sources, executable hashes, clean source inventories before/after,
+raw child JSONL and original aggregates. Normalize aggregate diagnostic copies
+by the fixed configured offset only; independently compare them to originals.
+A separate executed Go normalization check is mandatory alongside the row.
+
+The artifact guard requires all five graceful counters, current R5 probe file
+replicas, advancing broker sequences and matching fault/probe times. Retain all
+physical stores/binaries in member-SHA256-verified archives on success/failure.
+The registry now covers16 implemented rows;13-seed shards yield256 jobs for200
+seeds, within the hosted limit. This row is prepared, pending actual compilation
+and sustained qualification; registry coverage does not prove full-matrix/24h.
+
+The first rolling mixed qualification37107421026 at0bdc838 is rejected: two
+upgrades complete, then the third cut's pre-upgrade EnsureAuto deployment check
+hits its context deadline. Preserve all3795 original archive members, terminal
+metadata and logs. This is neither a completed rolling row nor a confirmed
+server root cause; investigate the retained evidence before another attempt.
