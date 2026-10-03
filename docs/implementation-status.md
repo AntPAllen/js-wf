@@ -2,6 +2,18 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Current-source Tier2 journal seeds 1–48 accepted:** four successful
+  twelve-seed shards in 37149506857 at exact `c4fed06` pass independent review.
+  All 48 full ten-minute named-test/package executions, recorded fault schedules,
+  raw nanosecond latency reports and all three production history models verify.
+  Totals: 126,756 completed invocations, 1,396,598 audited journal entries and
+  912 leader kills; worst terminal/progress type p99 17.457496447/7.305191192 s.
+  All 394 original archive members reopen and SHA-verify. Workflow uploads have
+  no actual test binaries, before/after compiled-source ledgers or physical
+  stores; checkout/API binding and named final audit assertions define scope.
+  Later journal shards 49–60 and 61–72 are observed active. This accepts only
+  the 48 journal seeds; full 13-row × 200-seed, Tier3 and 24h gates remain open.
+  [All four complete raw shard proofs](scale/current-tier2-matrix-2026-10-03/).
 - **Complete current-runtime normal100k simulation accepted:** run 37146526818
   at exact `9ecc37c74979132a8a2bae5877eb44bc175cbf89` passes all 121
   workloads × seeds 1–100,000 (12,100,000 completed bodies), 175 top-level
