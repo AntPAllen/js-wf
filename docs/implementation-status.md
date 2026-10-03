@@ -15,8 +15,17 @@
   Complete pins/new model pass race in 7.383 s. Six real three-node concurrent
   reuse cases pass normal and race, including dropped requests and hidden
   acknowledgments. Full retention/reconciler packages pass 3.670 s/43.766 s.
-  Focused binaries and physical stores are not retained; complete latest-source
-  qualification and long-run physical retention remain open.
+  Focused binaries and physical stores are not retained. Complete retained-binary
+  normal 1k at exact `9ecc37c74979132a8a2bae5877eb44bc175cbf89` is independently
+  accepted in 126.114 s: 175 passes/two documented skips, 391 pins and 121,000
+  scalable seeded bodies; 1,140 before/after source hashes, actual executable,
+  compiled/seed inventory and byte-identical raw report regeneration verify.
+  [Complete graph originals](scale/tombstone-marker-drain-2026-10-03/full1k/).
+  Full race [37146525331](https://github.com/AntPAllen/js-wf/actions/runs/37146525331)
+  and normal 100k [37146526818](https://github.com/AntPAllen/js-wf/actions/runs/37146526818)
+  are queued at that exact source; neither is accepted. Older prefix-only
+  campaigns remain active separately. Long-run physical retention, full fault
+  matrices and 24h qualification remain open.
   [Originals and exact scope](scale/tombstone-marker-drain-2026-10-03/).
 - **Tombstone partial-timeout correction:** a neutral production-port refactor
   preserves the original scan decisions and exposes their baseline stall at
@@ -33,13 +42,14 @@
   147.900 s: 174 passes/two documented skips, all 379 pins and 121,000 bodies;
   all 1,126 source hashes, compiled inventory and byte-identical raw report
   regeneration verify. [Complete graph originals](scale/tombstone-partial-cursor-2026-10-03/full1k/).
-  Current-source full race
+  Prefix-corrected-source full race
   [37145175684](https://github.com/AntPAllen/js-wf/actions/runs/37145175684)
   and normal 100k
   [37145177234](https://github.com/AntPAllen/js-wf/actions/runs/37145177234)
   are both active at that exact source, dispatched after the signal, suspended,
   native/fallback timer and tombstone prefix corrections. Neither is accepted
-  yet. Earlier Start-only 100k remains active separately; it is not restarted.
+  yet. This source predates the physical marker cleanup above. Earlier Start-only
+  100k remains active separately; it is not restarted.
   Population bounds and full fault matrices/24h remain separate.
   [Focused originals and model limits](scale/tombstone-partial-cursor-2026-10-03/).
 - **Timer partial-timeout correction:** both baselines stall after 48 virtual
