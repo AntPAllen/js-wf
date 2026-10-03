@@ -34,7 +34,7 @@ class SourceCaptureTest(unittest.TestCase):
                                        '--row', row, '--stage', stage], cwd=repo,
                                       capture_output=True, text=True)
 
-            for row in ('worker_clock', 'rolling_upgrade'):
+            for row in ('worker_clock', 'rolling_upgrade', 'server_clock_ahead', 'server_clock_behind'):
                 with self.subTest(row=row):
                     self.assertEqual(capture('before', row).returncode, 0)
                     self.assertEqual(capture('after', row).returncode, 0)
@@ -44,13 +44,13 @@ class SourceCaptureTest(unittest.TestCase):
                     self.assertEqual(proof['files']['runtime.go'], hashlib.sha256(source.read_bytes()).hexdigest())
 
             source.write_text('package changed\n')
-            for row in ('worker_clock', 'rolling_upgrade'):
+            for row in ('worker_clock', 'rolling_upgrade', 'server_clock_ahead', 'server_clock_behind'):
                 result = capture('after', row)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn('requires a clean committed source', result.stderr)
             git('add', '.')
             git('commit', '-qm', 'changed')
-            for row in ('worker_clock', 'rolling_upgrade'):
+            for row in ('worker_clock', 'rolling_upgrade', 'server_clock_ahead', 'server_clock_behind'):
                 result = capture('after', row)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn('source changed during execution', result.stderr)

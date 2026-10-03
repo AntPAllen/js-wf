@@ -8452,3 +8452,15 @@ real ten-minute rolling row on its earlier runtime; it does not clear200/full
 matrix/24h or establish normal graceful upgrade/forced two-write-gap coverage.
 The two rejected original trials remain rejected. No server root cause is
 inferred from the corrected successful fixture.
+
+
+## Preserve complete originals for the corrected clock replay
+
+Server-clock ahead/behind rows now join rolling and worker-clock rows in full
+clean source capture before/after each execution and complete physical-store
+archival, including failure. Original archive readback/atomic rename and current
+artifact naming are retained. The isolated Git capture test now exercises all
+four row choices for clean rounds, dirty source rejection and changed-commit
+rejection. This strengthens the next producer; earlier clock failures retain
+their narrower original evidence. It does not change production runtime,
+workload timing, pending-timer admission or p99 gates.

@@ -141,7 +141,7 @@ jobs:
               seed_events=/tmp/tier3-mixed-journal-events.jsonl
               seed_result=/tmp/tier3-mixed-journal-result.json
             fi
-            if [ "$TIER3_MATRIX_ROW" = worker_clock ] || [ "$TIER3_MATRIX_ROW" = rolling_upgrade ]; then
+            if [ "$TIER3_MATRIX_ROW" = worker_clock ] || [ "$TIER3_MATRIX_ROW" = rolling_upgrade ] || [[ "$TIER3_MATRIX_ROW" == server_clock_* ]]; then
               python3 scripts/capture-tier3-clock-source.py --row "$TIER3_MATRIX_ROW" --root "$TIER3_MATRIX_ARTIFACT_ROOT" --stage before
             fi
             test_status=0
@@ -150,7 +150,7 @@ jobs:
             else
               test_status=$?
             fi
-            if [ "$TIER3_MATRIX_ROW" = worker_clock ] || [ "$TIER3_MATRIX_ROW" = rolling_upgrade ]; then
+            if [ "$TIER3_MATRIX_ROW" = worker_clock ] || [ "$TIER3_MATRIX_ROW" = rolling_upgrade ] || [[ "$TIER3_MATRIX_ROW" == server_clock_* ]]; then
               python3 scripts/capture-tier3-clock-source.py --row "$TIER3_MATRIX_ROW" --root "$TIER3_MATRIX_ARTIFACT_ROOT" --stage after
             fi
             if [ "$test_status" != 0 ]; then exit "$test_status"; fi
@@ -161,8 +161,8 @@ jobs:
             python3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"
             python3 scripts/review-tier3-fencing.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/fencing-timeline-review.json"
           done
-      - name: Preserve rolling upgrade or worker-clock original stores and evidence
-        if: always() && (matrix.row == 'rolling_upgrade' || matrix.row == 'worker_clock')
+      - name: Preserve rolling and clock-row original stores and evidence
+        if: always() && (matrix.row == 'rolling_upgrade' || matrix.row == 'worker_clock' || startsWith(matrix.row, 'server_clock_'))
         run: |
           python3 - <<'PY'
           import hashlib, json, os, tarfile
@@ -183,7 +183,7 @@ jobs:
           (archive.parent/'rolling-manifest.json').write_text(json.dumps(dict(files=hashes), indent=2)+'\n')
           PY
       - uses: actions/upload-artifact@v7
-        if: always() && (matrix.row == 'rolling_upgrade' || matrix.row == 'worker_clock')
+        if: always() && (matrix.row == 'rolling_upgrade' || matrix.row == 'worker_clock' || startsWith(matrix.row, 'server_clock_'))
         with:
           name: rolling-original-stores-seed-${{ matrix.artifact_seed }}
           path: |

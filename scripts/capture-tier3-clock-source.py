@@ -9,7 +9,7 @@ import subprocess
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--root',type=Path,required=True)
 p.add_argument('--stage',choices=['before','after'],required=True)
-p.add_argument('--row',choices=['worker_clock','rolling_upgrade'],default='worker_clock')
+p.add_argument('--row',choices=['worker_clock','rolling_upgrade','server_clock_ahead','server_clock_behind'],default='worker_clock')
 a=p.parse_args()
 def git(*args): return subprocess.check_output(['git',*args]).decode().strip()
 files=git('ls-files').splitlines()
