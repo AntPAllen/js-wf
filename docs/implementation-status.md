@@ -8256,3 +8256,29 @@ reproduction must cover the production retry path, lost/unapplied NAK and this
 stored timestamp across consumer handoff, with exact replay and a real broker
 comparison. Existing heartbeat-cancellation handoff coverage does not prove
 this non-cancelled execution-error path.
+
+
+## Production timer-error retry characterization prepared
+
+A focused deterministic characterization now executes actual production Sleep,
+journal, lease and worker retry decisions. The native clock lookup fails after
+the durable timer StepRequested; the processing context stays live and heartbeat
+cancellation is excluded. The first worker must retain Started/StepRequested,
+record the timer scheduling retry, and produce no cancellation handoff. Two
+explicit transport cases compare a processed delayed NAK with one accepted
+locally but never applied. The dispatch model adds a separate
+nak/drop_before_commit_success fault; existing reported-loss semantics remain.
+After consumer handoff restores stored pending timestamps, a successor must
+complete the original timer journal and drain, with exact trace replay.
+
+This is a two-case diagnostic using seed42, not a new 1,000/100k seeded workload
+or proof of the original NAK outcome. It predicts61s/73s virtual retry delay from
+calibrated pending-clock semantics. It intentionally exposes the existing
+non-cancelled error path rather than declaring the latency requirement satisfied.
+Production worker code has not changed. The hosted focused race contract also
+replays the full pinned corpus and compiles a precise control that turns the
+locally successful NAK into a visible error; that control must fail the local
+acceptance assertion. Raw events, both traces, control source and clean source
+inventories are retained. Local formatting, Python compilation and68 Tier3
+guards pass; actual Go execution remains pending. No full-source gate or real
+R5 replay is claimed by this prepared diagnostic.

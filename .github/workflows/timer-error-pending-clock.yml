@@ -1,0 +1,22 @@
+name: timer-error-pending-clock
+on: workflow_dispatch
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Characterize production timer retry and verify local NAK control
+        run: python3 scripts/check-timer-error-pending-clock.py --root "$RUNNER_TEMP/timer-error-evidence"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: timer-error-evidence
+          path: ${{ runner.temp }}/timer-error-evidence
+          if-no-files-found: error
