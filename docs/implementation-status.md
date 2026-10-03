@@ -8230,3 +8230,29 @@ existing independent pending-consumer clock-transition characterization provides
 a relevant broker boundary, but no new native characterization or production
 fix is claimed here. Server cause remains unconfirmed. The observer contract
 37112424062 is still queued and is not restarted.
+
+
+## Seed55 physical pending state corroborates the retry boundary
+
+The same reusable archived-original review now reads all five retained public
+JetStream monitoring snapshots taken after the second admission failure. Every
+replica reports WF_RUN messages=1 and first_seq=216, with the same stored
+first_ts22:59:43.488253032Z. Every snapshot reports WF_P_43 ack_pending=1,
+pending=0, redelivered=0 and ack_floor.stream_seq=211. The consumer leader is
+unshifted node1; its own snapshot records leadership since22:58:48.213871347Z
+and all four current replicas. That leader's controller-bracketed snapshot ends
+before the retained message timestamp. All five snapshot source hashes and raw
+consumer/state records are included in seed55-retry-review.json.
+
+This corroborates retained pending work instead of a deleted delivery or an
+empty run stream. The previously accepted native pending-clock calibration and
+18 modeled cells describe the relevant stored-timestamp restoration mechanism.
+If the observed NAK did not update durable pending state, restored AckWait13s
+would use the future stored timestamp; that is a conditional explanation, not
+proof of NAK application or the exact pending deadline. These monitoring replies
+do not expose the original internal pending timestamp. No production behavior,
+latency target, admission window or acceptance result is changed. The next
+reproduction must cover the production retry path, lost/unapplied NAK and this
+stored timestamp across consumer handoff, with exact replay and a real broker
+comparison. Existing heartbeat-cancellation handoff coverage does not prove
+this non-cancelled execution-error path.

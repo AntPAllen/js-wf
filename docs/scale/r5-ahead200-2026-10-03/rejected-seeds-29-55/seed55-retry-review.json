@@ -120,11 +120,364 @@
     "Test": "TestFiveContainerMixedServerClockAheadWithJournalKills",
     "Output": "    tier3_mixed_journal_test.go:803: tier3 server_clock_ahead fault failed: no provable pending timer for clock cut: context deadline exceeded\n"
   },
+  "all_five_physical_pending_snapshots": [
+    {
+      "node": 0,
+      "before": "2026-10-02T22:59:23.59918975Z",
+      "after": "2026-10-02T22:59:23.635751617Z",
+      "stream_state": {
+        "messages": 1,
+        "bytes": 303,
+        "first_seq": 216,
+        "first_ts": "2026-10-02T22:59:43.488253032Z",
+        "last_seq": 229,
+        "last_ts": "2026-10-02T22:58:56.702334546Z",
+        "num_subjects": 1,
+        "num_deleted": 13,
+        "consumer_count": 64
+      },
+      "consumer": {
+        "stream_name": "WF_RUN",
+        "name": "WF_P_43",
+        "created": "2026-10-02T22:58:10.441873599Z",
+        "delivered": {
+          "consumer_seq": 15,
+          "stream_seq": 228,
+          "last_active": "2026-10-02T22:58:43.489534577Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 14,
+          "stream_seq": 211,
+          "last_active": "2026-10-02T22:58:41.399488984Z"
+        },
+        "num_ack_pending": 1,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 0,
+        "cluster": {
+          "name": "js-wf-route-2507-1790981833617903542",
+          "raft_group": "C-R5F-g7zie5Yv",
+          "leader": "js-wf-route-2507-1790981833617903542-n1",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n1",
+              "current": true,
+              "active": 608490081,
+              "peer": "QFQRCjyn"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n2",
+              "current": false,
+              "active": 0,
+              "peer": "J7M3Gvp8"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n3",
+              "current": false,
+              "active": 0,
+              "peer": "OyAD7zo9"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n4",
+              "current": false,
+              "active": 0,
+              "peer": "7ZR08Hhv"
+            }
+          ]
+        },
+        "ts": "2026-10-02T22:59:23.603119482Z"
+      }
+    },
+    {
+      "node": 1,
+      "before": "2026-10-02T22:59:23.598951467Z",
+      "after": "2026-10-02T22:59:23.62231443Z",
+      "stream_state": {
+        "messages": 1,
+        "bytes": 303,
+        "first_seq": 216,
+        "first_ts": "2026-10-02T22:59:43.488253032Z",
+        "last_seq": 229,
+        "last_ts": "2026-10-02T22:58:56.702334546Z",
+        "num_subjects": 1,
+        "num_deleted": 13,
+        "consumer_count": 64
+      },
+      "consumer": {
+        "stream_name": "WF_RUN",
+        "name": "WF_P_43",
+        "created": "2026-10-02T22:58:10.441873599Z",
+        "delivered": {
+          "consumer_seq": 15,
+          "stream_seq": 228,
+          "last_active": "2026-10-02T22:58:43.489683449Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 14,
+          "stream_seq": 211,
+          "last_active": "2026-10-02T22:58:41.399489316Z"
+        },
+        "num_ack_pending": 1,
+        "num_redelivered": 0,
+        "num_waiting": 1,
+        "num_pending": 0,
+        "cluster": {
+          "name": "js-wf-route-2507-1790981833617903542",
+          "raft_group": "C-R5F-g7zie5Yv",
+          "leader": "js-wf-route-2507-1790981833617903542-n1",
+          "leader_since": "2026-10-02T22:58:48.213871347Z",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n0",
+              "current": true,
+              "active": 606587107,
+              "peer": "xT5i0Loy"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n2",
+              "current": true,
+              "active": 606289164,
+              "peer": "J7M3Gvp8"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n3",
+              "current": true,
+              "active": 606514531,
+              "peer": "OyAD7zo9"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n4",
+              "current": true,
+              "active": 606355541,
+              "peer": "7ZR08Hhv"
+            }
+          ]
+        },
+        "ts": "2026-10-02T22:59:23.601238044Z"
+      }
+    },
+    {
+      "node": 2,
+      "before": "2026-10-02T22:59:23.599102066Z",
+      "after": "2026-10-02T22:59:23.604281187Z",
+      "stream_state": {
+        "messages": 1,
+        "bytes": 303,
+        "first_seq": 216,
+        "first_ts": "2026-10-02T22:59:43.488253032Z",
+        "last_seq": 229,
+        "last_ts": "2026-10-02T22:58:56.702334546Z",
+        "num_subjects": 1,
+        "num_deleted": 13,
+        "consumer_count": 64
+      },
+      "consumer": {
+        "stream_name": "WF_RUN",
+        "name": "WF_P_43",
+        "created": "2026-10-02T22:58:10.441873599Z",
+        "delivered": {
+          "consumer_seq": 15,
+          "stream_seq": 228,
+          "last_active": "2026-10-02T22:58:43.490900409Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 14,
+          "stream_seq": 211,
+          "last_active": "2026-10-02T22:58:41.399508222Z"
+        },
+        "num_ack_pending": 1,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 0,
+        "cluster": {
+          "name": "js-wf-route-2507-1790981833617903542",
+          "raft_group": "C-R5F-g7zie5Yv",
+          "leader": "js-wf-route-2507-1790981833617903542-n1",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n0",
+              "current": false,
+              "active": 0,
+              "peer": "xT5i0Loy"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n1",
+              "current": true,
+              "active": 604618507,
+              "peer": "QFQRCjyn"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n3",
+              "current": false,
+              "active": 0,
+              "peer": "OyAD7zo9"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n4",
+              "current": false,
+              "active": 0,
+              "peer": "7ZR08Hhv"
+            }
+          ]
+        },
+        "ts": "2026-10-02T22:59:23.599525747Z"
+      }
+    },
+    {
+      "node": 3,
+      "before": "2026-10-02T22:59:23.597982477Z",
+      "after": "2026-10-02T22:59:23.607137206Z",
+      "stream_state": {
+        "messages": 1,
+        "bytes": 303,
+        "first_seq": 216,
+        "first_ts": "2026-10-02T22:59:43.488253032Z",
+        "last_seq": 229,
+        "last_ts": "2026-10-02T22:58:56.702334546Z",
+        "num_subjects": 1,
+        "num_deleted": 13,
+        "consumer_count": 64
+      },
+      "consumer": {
+        "stream_name": "WF_RUN",
+        "name": "WF_P_43",
+        "created": "2026-10-02T22:58:10.441873599Z",
+        "delivered": {
+          "consumer_seq": 15,
+          "stream_seq": 228,
+          "last_active": "2026-10-02T22:58:43.489751919Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 14,
+          "stream_seq": 211,
+          "last_active": "2026-10-02T22:58:41.39960852Z"
+        },
+        "num_ack_pending": 1,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 0,
+        "cluster": {
+          "name": "js-wf-route-2507-1790981833617903542",
+          "raft_group": "C-R5F-g7zie5Yv",
+          "leader": "js-wf-route-2507-1790981833617903542-n1",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n0",
+              "current": false,
+              "active": 0,
+              "peer": "xT5i0Loy"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n1",
+              "current": true,
+              "active": 607100160,
+              "peer": "QFQRCjyn"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n2",
+              "current": false,
+              "active": 0,
+              "peer": "J7M3Gvp8"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n4",
+              "current": false,
+              "active": 0,
+              "peer": "7ZR08Hhv"
+            }
+          ]
+        },
+        "ts": "2026-10-02T22:59:23.601792866Z"
+      }
+    },
+    {
+      "node": 4,
+      "before": "2026-10-02T22:59:23.599287068Z",
+      "after": "2026-10-02T22:59:23.636173136Z",
+      "stream_state": {
+        "messages": 1,
+        "bytes": 303,
+        "first_seq": 216,
+        "first_ts": "2026-10-02T22:59:43.488253032Z",
+        "last_seq": 229,
+        "last_ts": "2026-10-02T22:58:56.702334546Z",
+        "num_subjects": 1,
+        "num_deleted": 13,
+        "consumer_count": 64
+      },
+      "consumer": {
+        "stream_name": "WF_RUN",
+        "name": "WF_P_43",
+        "created": "2026-10-02T22:58:10.441873599Z",
+        "delivered": {
+          "consumer_seq": 15,
+          "stream_seq": 228,
+          "last_active": "2026-10-02T22:59:50.121362866Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 14,
+          "stream_seq": 211,
+          "last_active": "2026-10-02T22:59:50.121360534Z"
+        },
+        "num_ack_pending": 1,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 0,
+        "cluster": {
+          "name": "js-wf-route-2507-1790981833617903542",
+          "raft_group": "C-R5F-g7zie5Yv",
+          "leader": "js-wf-route-2507-1790981833617903542-n1",
+          "system_account": true,
+          "traffic_account": "$SYS",
+          "replicas": [
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n0",
+              "current": false,
+              "active": 0,
+              "peer": "xT5i0Loy"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n1",
+              "current": true,
+              "active": 605656778,
+              "peer": "QFQRCjyn"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n2",
+              "current": false,
+              "active": 0,
+              "peer": "J7M3Gvp8"
+            },
+            {
+              "name": "js-wf-route-2507-1790981833617903542-n3",
+              "current": false,
+              "active": 0,
+              "peer": "OyAD7zo9"
+            }
+          ]
+        },
+        "ts": "2026-10-02T23:00:23.600389295Z"
+      }
+    }
+  ],
   "source_hashes": {
     "seed-55/tier3-mixed-journal/controller-receipts.json": "01ae5dfebd6c838376bb0579dc20921059e31ca0c076d3c645f9034b67504007",
     "seed-55/tier3-mixed-journal/controller-operations.json": "5db377a0ced83c1f27218809d00f9e94d3b4055d6d8be1545a75acd5ec95d7ac",
     "seed-55/tier3-mixed-journal/dispatch.json": "1277fbfc76cb9ac4811b906cf4438a5fe78228f10478103e6734404d9711733b",
     "seed-55/tier3-mixed-journal/faults.json": "cefe4d8af8b58867bed33a92bd82409773eee9955695f99283a710cd1b97a371",
+    "seed-55/tier3-mixed-journal/fault-2-failure-node0-jetstream.json": "2457f50d1fcec342a9513e9ef8d6c37761efd232d7449076e700d4eea4f96e20",
+    "seed-55/tier3-mixed-journal/fault-2-failure-node1-jetstream.json": "96420a45a4fc6bca6e2463f34319aaa6bcf5e0f6932ec109f2dc6e04c995309f",
+    "seed-55/tier3-mixed-journal/fault-2-failure-node2-jetstream.json": "24b581ba068e451cd142bbe9df81023477e911c233ca1b54b50dd44c00511cd6",
+    "seed-55/tier3-mixed-journal/fault-2-failure-node3-jetstream.json": "1178cec5a8836bfc06af464266185de4dade903520e4a5ce263a4096d3fc5fee",
+    "seed-55/tier3-mixed-journal/fault-2-failure-node4-jetstream.json": "3f2072dcca36c3ba5adb41f9258cf69c7545a9b996b76a35bf025c50d0c55ccb",
     "seed-55/tier3-mixed-journal-events.jsonl": "dcc87777dbfadd5ea1107e4029140103651c927e2d2eade0c2bc287aae3467ca"
   },
   "later_fetch_observed": false,
