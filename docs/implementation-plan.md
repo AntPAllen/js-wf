@@ -1022,3 +1022,29 @@ metadata wrapper at the fallback and native call sites; each must fail its own
 executed named/package operation-budget assertion. This still proves fixture
 context handling only; actual mixed row and full-release qualification remain
 separate. Preserve both earlier rejected real trials without reinterpretation.
+
+
+### Non-cancelled timer scheduling retry and restored consumer clocks
+
+The seed55 ahead-clock failure is retained with all five physical pending
+snapshots. Its timer stops at StepRequested after a native clock lookup timeout;
+a locally successful NAK is followed by no observed fetch before admission
+cancellation. The batch stalls and cannot supply another pending timer.
+This does not establish server application of the NAK or the original pending
+deadline. Preserve the latency and admission gates.
+
+The focused production-worker deterministic diagnostic at223c665 is accepted
+under race with two exact replay cases and267 pins. Applied and locally accepted
+but unapplied NAK cases take61s/73s virtual time under calibrated stored pending
+restoration. This is a diagnostic, not full seeded coverage or a real-row pass.
+[Verified raw evidence](scale/timer-error-pending-clock-2026-10-03/).
+
+Next implement and verify bounded recovery for a durable timer request whose
+scheduling hint fails while the processing context remains live. The recovery
+must preserve the common timer deadline, ownership fencing, durable transfer
+before ACK, bounded retry backoff, terminal/journal uniqueness and eventual
+physical drain of original and replacement deliveries. A cancelled-heartbeat
+handoff alone does not cover this path. Verify the chosen recovery with a
+production worker deterministic regression and a precise compiled omission
+control, then compare against a real broker case and the original mixed row.
+Do not make this diagnostic's61s/73s behavior the new recovery target.

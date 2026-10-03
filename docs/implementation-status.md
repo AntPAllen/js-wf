@@ -8291,3 +8291,33 @@ status are checked independently. The Docker observer contract37112424062
 remains queued atd2b98c6; current121100k37106469422 remains in progress at11ad2e4.
 Neither existing job is restarted. The diagnostic extends test/model source,
 so existing historical source-qualified evidence retains its original scope.
+
+
+## Timer-error diagnostic accepted and local compilation restored
+
+Qualification37113167752 is independently accepted at exact
+223c665d41ba436e1cbd2b47f2f69ed9970c0e7c.963 source hashes match exact Git and
+unchanged before/after inventories. Both actual production-worker timer retry
+cases pass under race, exact replay reproduces61,000/73,000ms virtual completion,
+and all267 pinned regressions pass. The separately compiled local-acceptance
+control fails the actual named/subtest assertion, with no build/skip/global
+timeout. All15 original archive members pass SHA256 readback. The reusable
+review and complete originals are in
+scale/timer-error-pending-clock-2026-10-03/. Production runtime is unchanged;
+this does not qualify the full seeded gate, confirm seed55's server cause or
+satisfy the bounded recovery requirement. The plan now records the next recovery
+criteria, including durable transfer before ACK, backoff, fencing and drain.
+
+The accepted completed10M spilled-input scale store has been losslessly archived
+using archive-completed-fixture.py, with exact accepted-report equality and no
+open descriptors under its root.2,833 files/6,408,420,043 original bytes compress
+to1,106,876,537 bytes. Every decompressed byte was checked before duplicate raw
+removal; synced manifests retain paths/hashes/modes/mtime and compressed hashes.
+Three actual broker blocks restore with matching bytes and metadata. Reports,
+audits and logs are unchanged; failed/live stores are excluded. Full manifests,
+summary and restore evidence are in
+scale/terminal-scale-store-archives-2026-10-03/.5,301,543,506 bytes freed restore
+local development capacity. The focused diagnostic now also compiles/runs
+locally under race in1.024s. Neither archival nor the sample restores establish
+a new broker restart/scale gate. Existing Docker37112424062 remains queued and
+current121100k37106469422 remains running; no originals or live jobs are restarted.
