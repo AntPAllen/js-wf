@@ -7684,3 +7684,42 @@ not executed. Original evidence is downloaded under
 /tmp/js-wf-docker-upgrade-37104862997 for subsequent source/log/archive review.
 This is a separate setup failure, not qualification of the retry change; no
 third trial is dispatched before reviewing it.
+
+## Lost-release ownership accounting fixed; seeded reproduction added
+
+The121st Tier1 workload worker_release_fencing reproduces the preserved R5
+accounting bug at seed3: expired ownership, execution retry, failed Release,
+successful Cleanup, zero fencing counter/events on the original runtime. The
+fixed production worker records the first ownership failure before cleanup and
+uses one shared observation across execution, release and deferred cleanup.
+Completed and already-fenced executions preserve the earlier reason; cleanup
+cannot erase or double count the observation. Lease ownership/cleanup semantics
+are unchanged. The seed3 pin retains the transport boundary without attributing
+a server cause or modeling SIGSTOP itself.
+
+Five modes exercise retry/completion, absent/successor leases and preexisting
+execution loss, with exact fresh-process replay. Every mode requires one
+counter/event with delivery identity and epoch, preserved successor, unchanged
+Started journal and unacked dispatch. Local1k new-model + heartbeat-handoff +
+all267 pins pass in0.848s. A compiled overlay that omits only the initial release
+observation fails at the exact retry_missing counter=0/events=0 assertion;
+build failure or timeout is not used as detection. The original pre-fix failure
+and both executions are retained in scale/worker-release-fencing-2026-10-03/.
+
+The real pause injector now counts actual fencing JSONL records for the selected
+PID/worker and observed paused key/epoch after resume. Another invocation's
+release diagnostic cannot satisfy it. The artifact checker remains strict.
+A hosted focused race + compiled-control workflow is prepared; actual hosted
+qualification, current121 full-suite/100k and corrected real R5 pause gate
+remain required. The independently accepted120 graph is not relabeled121.
+
+The pause selector's focused integration test passes (actual named/package Go
+JSON pass0.010s), rejecting unrelated key/epoch, pre-resume records, wrong PID
+and noncontiguous record sequences while ignoring an incomplete live tail.
+An earlier plain-Go build-failed result with no emitted compiler explanation
+is preserved as rejected evidence; it is not used as verification. The JSON
+execution subsequently compiled and ran the exact requested test successfully.
+Verified original archives remain intact. To free local compiler space, all57
+redundant files from the terminal accepted hosted production-cap download were
+rehashed against its fully read-back archive before removing those copies
+(224,639,387 bytes). The repo archive and failed/live original stores remain.

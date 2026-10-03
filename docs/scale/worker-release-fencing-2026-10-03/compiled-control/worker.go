@@ -619,7 +619,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		}
 		emit("release_initial_error", err)
 		if errors.Is(err, lease.ErrLost) {
-			recordFencing("lease_release_lost", err)
+			// omit release ownership accounting
 		}
 		for releaseCtx.Err() == nil {
 			attempt, stopAttempt := context.WithTimeout(releaseCtx, 2*time.Second)

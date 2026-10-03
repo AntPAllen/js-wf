@@ -514,7 +514,7 @@ func pauseMatrixProcessWorker(ctx context.Context, js jetstream.JetStream, fleet
 		fenced, stop := context.WithTimeout(ctx, 10*time.Second)
 		defer stop()
 		for fenced.Err() == nil {
-			after, err := matrixWorkerFencingEvents(process.base+"-dispatch.jsonl", event.Resumed)
+			after, err := matrixPausedLeaseFencingEvents(process.base+"-fencing.jsonl", event.PID, event.Worker, event.Resumed, event.PausedLeases)
 			if err != nil {
 				return event, err
 			}
@@ -595,6 +595,36 @@ func matrixWorkerActiveLeaseKeys(path string) ([]string, error) {
 	}
 	sort.Strings(keys)
 	return keys, nil
+}
+
+// Only an actual fencing record for an observed paused lease can heal the
+// pause fault. A release diagnostic or another invocation's loss is insufficient.
+func matrixPausedLeaseFencingEvents(path string, pid int, workerID string, since time.Time, leases []matrixPausedLease) (int, error) {
+	records, _, err := readTier3ProcessRecords[matrixProcessFencingRecord](path)
+	if os.IsNotExist(err) {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+	held := map[string]map[uint64]bool{}
+	for _, l := range leases {
+		if held[l.Key] == nil {
+			held[l.Key] = map[uint64]bool{}
+		}
+		held[l.Key][l.Epoch] = true
+	}
+	count := 0
+	for i, r := range records {
+		e := r.Event
+		if r.PID != pid || r.Sequence != uint64(i+1) || e.Worker != workerID {
+			return 0, fmt.Errorf("paused fencing record identity/sequence mismatch")
+		}
+		if !e.At.Before(since) && held[identity.Key(e.Type, e.ID)][e.Epoch] {
+			count++
+		}
+	}
+	return count, nil
 }
 
 func matrixWorkerFencingEvents(path string, since time.Time) (int, error) {

@@ -1,0 +1,22 @@
+name: worker-release-fencing
+on: workflow_dispatch
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Qualify lost-release accounting and compiled omission control
+        run: python3 scripts/check-worker-release-fencing.py --root "$RUNNER_TEMP/release-fencing-evidence"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: worker-release-fencing-evidence
+          path: ${{ runner.temp }}/release-fencing-evidence
+          if-no-files-found: error

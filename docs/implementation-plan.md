@@ -888,3 +888,18 @@ retained R5 message bytes and physical local counts after each transition. Its
 compiled single-old-peer control must fail on the initial version observation.
 This constructor/retention contract does not substitute for the mixed-workload
 rolling-upgrade row, fail-closed feature checks or24-hour matrix soak.
+
+### Lost-release fencing regression (121st Tier1 workload)
+
+R5 worker-pause run37058644370 exposes a missing observation: execution retries,
+Release detects expired ownership, Cleanup returns nil, and no FencingEvent is
+recorded. Reproduce through production Worker/Lease/Journal paths with seeded
+virtual TTL expiry, missing/successor retained keys and preexisting execution
+fencing. Pin seed3; require one event/counter per delivery, original identity and
+epoch, successor preservation, unchanged Started journal and unacked dispatch.
+Record the first lost ownership before cleanup, with per-delivery deduplication.
+The pause fault must wait for an actual matching paused-lease fencing record.
+Keep the original artifact checker rejection and add an executed compiled
+release-observation omission control. Focused model proof does not clear current
+121-workload full-suite/100k or real R5 pause qualification. The prior120 graph
+100k gate remains independently accepted atad37bfc.

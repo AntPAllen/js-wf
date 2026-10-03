@@ -460,6 +460,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededWorkerRunningCancel(loaded.Seed, &loaded)
 	case "worker_heartbeat_execution":
 		replayed, err = runSeededWorkerHeartbeat(loaded.Seed, &loaded)
+	case "worker_release_fencing":
+		replayed, err = runWorkerReleaseFencing(loaded.Seed, &loaded)
 	case "worker_heartbeat_handoff":
 		replayed, err = runSeededHeartbeatHandoff(loaded.Seed, &loaded)
 	case "worker_tail_lookup_unavailable":
