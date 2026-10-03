@@ -2,6 +2,15 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Shared sustained-duration validation:** synthetic controls exposed acceptance
+  of NaN elapsed time, contradictory package failure/pass events and completion
+  from an unrelated package. The common duration checker now rejects these,
+  requires finite numeric duration and exactly one matching passing package.
+  All 24 matrix verifier/planner controls pass in 1.954 s, and unchanged raw
+  events from the accepted local five-node ten-minute journal row still pass.
+  The whole Tier2 checker already separately rejected failure events. This
+  correction adds no workload qualification and does not restart live campaigns.
+  [Controls and exact scope](scale/matrix-duration-validation-2026-10-03/).
 - **Current-source release campaigns scheduled:** exact
   `c4fed061bc614488d4f89b53b216b756490f7da0` now has a full real Tier2
   [matrix 37149506857](https://github.com/AntPAllen/js-wf/actions/runs/37149506857)

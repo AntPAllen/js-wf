@@ -8,6 +8,26 @@ spec.loader.exec_module(module)
 
 
 class MatrixResultTests(unittest.TestCase):
+    def test_invalid_duration_cannot_establish_sustained_execution(self):
+        for elapsed in (None, True, "600", -1, float("nan"), float("inf"), -float("inf")):
+            with self.subTest(elapsed=elapsed), self.assertRaises(ValueError):
+                module.check([{"Test": "Target", "Action": "pass", "Elapsed": elapsed},
+                              {"Action": "pass"}], "Target", "10m")
+
+    def test_failed_duplicate_or_unrelated_package_cannot_complete_test(self):
+        target = {"Test": "Target", "Package": "one", "Action": "pass", "Elapsed": 600}
+        for suffix in (
+            [{"Package": "two", "Action": "pass"}],
+            [{"Package": "one", "Action": "pass"}] * 2,
+            [{"Package": "one", "Action": "skip"}],
+            [{"Package": "one", "Action": "fail"}, {"Package": "one", "Action": "pass"}],
+            [{"Action": "build-fail"}, {"Package": "one", "Action": "pass"}],
+            [{"Test": "Other", "Action": "fail"}, {"Package": "one", "Action": "pass"}],
+        ):
+            with self.subTest(suffix=suffix), self.assertRaises(ValueError):
+                module.check([target, *suffix], "Target", "10m")
+        module.check([target, {"Package": "one", "Action": "pass"}], "Target", "10m")
+
     def test_full_duration_and_smoke_are_distinct(self):
         events = [{"Test": "Target", "Action": "pass", "Elapsed": 45}, {"Action": "pass"}]
         module.check(events, "Target", "35s")
