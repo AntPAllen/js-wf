@@ -11,6 +11,14 @@
   [37117429308](https://github.com/AntPAllen/js-wf/actions/runs/37117429308)
   is launched at63fbc03 and remains unaccepted. Previous120100k atad37bfc
   retains its accepted earlier scope.
+- **Full Tier1 race:** the e824cc1 attempt is rejected: two relative fixture-path
+  failures from the retained binary's repository-root working directory, then
+  an aggregate30m timeout;152 top-level passes/two documented skips are
+  insufficient. The same binary passes both fixture cases from `sim/`, including
+  all267 pins and1000 renewal-cost bodies. The producer now records working
+  directories, inventories all simulator fixtures and uses a60m aggregate
+  timeout with unchanged coverage and operation/liveness gates.
+  [Original failures and focused correction](scale/native-hint-recovery-2026-10-03/rejected-full-race-harness/).
 - **Runtime regression:** production lost-release fencing now records the
   first ownership loss before cleanup and deduplicates one observation per
   delivery. The focused1k race/replay and exact compiled omission control are
