@@ -1,0 +1,52 @@
+{
+  "version": 3,
+  "seed": 9,
+  "workload": "tombstone_marker_drain",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "DEL",
+        "PURGE"
+      ],
+      "chosen": "PURGE"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ack",
+        "drop",
+        "lost_ack"
+      ],
+      "chosen": "drop"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "absent",
+        "reuse"
+      ],
+      "chosen": "absent"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "marker_purge",
+      "sequence": 2,
+      "outcome": "dropped_before_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "marker_purge",
+      "sequence": 2,
+      "outcome": "acknowledged"
+    },
+    {
+      "at_ms": 0,
+      "operation": "characterize_marker_drain",
+      "outcome": "PURGE_drop_absent"
+    }
+  ]
+}

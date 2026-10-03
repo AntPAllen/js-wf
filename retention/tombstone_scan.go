@@ -31,6 +31,9 @@ type TombstoneScanSession interface {
 	TombstoneSweepPort
 	LastStateSequence(context.Context) (uint64, error)
 	GetStateMessage(context.Context, uint64) (*jetstream.RawStreamMsg, error)
+	// DeleteStateMarker purges a marker subject only through the observed
+	// immutable sequence. A concurrently reused key at a later sequence is safe.
+	DeleteStateMarker(context.Context, string, uint64) error
 }
 
 func NewTombstoneScanWithPort(port TombstoneScanPort) *TombstoneScan {
@@ -71,17 +74,23 @@ func (p jetStreamTombstoneScanSession) LastStateSequence(ctx context.Context) (u
 func (p jetStreamTombstoneScanSession) GetStateMessage(ctx context.Context, seq uint64) (*jetstream.RawStreamMsg, error) {
 	return p.stream.GetMsg(ctx, seq)
 }
+func (p jetStreamTombstoneScanSession) DeleteStateMarker(ctx context.Context, key string, seq uint64) error {
+	// KV streams deny single-message deletion. A sequence-bounded subject
+	// purge is permitted and cannot remove a concurrently written revision.
+	return p.stream.Purge(ctx, jetstream.WithPurgeSubject("$KV.WF_STATE."+key), jetstream.WithPurgeSequence(seq+1))
+}
 
 type TombstonePage struct {
 	// RetrySequence certifies the first unresolved stream sequence after a
 	// completed prefix. Uncertain reads or deletes cannot skip that sequence.
-	RetrySequence uint64   `json:"retry_sequence,omitempty"`
-	NextSequence  uint64   `json:"next_sequence"`
-	Inspected     int      `json:"inspected"`
-	Expired       int      `json:"expired"`
-	Eligible      int      `json:"eligible"`
-	Deleted       int      `json:"deleted"`
-	Keys          []string `json:"keys,omitempty"`
+	RetrySequence  uint64   `json:"retry_sequence,omitempty"`
+	NextSequence   uint64   `json:"next_sequence"`
+	Inspected      int      `json:"inspected"`
+	Expired        int      `json:"expired"`
+	Eligible       int      `json:"eligible"`
+	Deleted        int      `json:"deleted"`
+	MarkersDeleted int      `json:"markers_deleted,omitempty"`
+	Keys           []string `json:"keys,omitempty"`
 }
 
 // Scan examines at most budget KV stream sequences. It checks each candidate
@@ -138,6 +147,23 @@ func (s *TombstoneScan) Scan(ctx context.Context, next uint64, budget int, now t
 		if len(parts) != 2 || identity.Validate(parts[0], parts[1]) != nil {
 			confirmed = seq + 1
 			continue
+		}
+		// KV Delete creates a new DEL revision even with History=1. Leaving
+		// those records behind leaks one retained subject per retired ID.
+		// Bounded purging cannot remove a newer value written after this read.
+		switch message.Header.Get("KV-Operation") {
+		case "DEL", "PURGE":
+			if !dryRun {
+				if err := session.DeleteStateMarker(ctx, key, seq); err != nil && !errors.Is(err, jetstream.ErrMsgNotFound) {
+					return result, err
+				}
+				result.MarkersDeleted++
+			}
+			confirmed = seq + 1
+			continue
+		case "":
+		default:
+			return result, fmt.Errorf("unknown state operation for %q", key)
 		}
 		value, revision, err := session.StateValue(ctx, key)
 		if errors.Is(err, jetstream.ErrKeyNotFound) {

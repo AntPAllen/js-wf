@@ -24,6 +24,10 @@ type partialTombstonePort struct {
 	replace, replaced bool
 }
 
+func (p *partialTombstonePort) DeleteStateMarker(context.Context, string, uint64) error {
+	return fmt.Errorf("partial-cursor model exposes delete markers as holes")
+}
+
 func (p *partialTombstonePort) Open(context.Context) (retention.TombstoneScanSession, error) {
 	p.deadline = p.schedule.NowMillis() + 5000
 	for _, op := range []string{"partial_tombstone_open_state", "partial_tombstone_open_stream", "partial_tombstone_open_invocation"} {

@@ -16,6 +16,10 @@ type tombstonePrefixSession struct {
 	deletes int
 }
 
+func (p *tombstonePrefixSession) DeleteStateMarker(context.Context, string, uint64) error {
+	panic("fixture has no raw delete markers")
+}
+
 func (p *tombstonePrefixSession) Open(context.Context) (TombstoneScanSession, error) {
 	if p.stage == "open" {
 		return nil, nats.ErrTimeout

@@ -431,6 +431,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runTimerPartialCursor(loaded.Seed, &loaded)
 	case "tombstone_partial_cursor":
 		replayed, err = runTombstonePartialCursor(loaded.Seed, &loaded)
+	case "tombstone_marker_drain":
+		replayed, err = runTombstoneMarkerDrain(loaded.Seed, &loaded)
 	case "start_scan_capacity":
 		replayed, err = runStartScanCapacity(loaded.Seed, &loaded)
 	case "suspended_scan_capacity":

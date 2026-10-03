@@ -2,6 +2,22 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Physical tombstone marker cleanup:** actual History=1 state retained 32
+  deleted-key markers after 32 expired tombstones were logically removed:
+  33 messages/subjects, including one protected result. The paged scanner now
+  purges each `DEL`/`PURGE` subject only through its observed sequence;
+  concurrently written later revisions are preserved. KV single-message delete
+  is prohibited, so the rejected raw-delete attempt is retained alongside the
+  sequence-bounded correction. The physical count falls to one protected
+  result/subject and KV Create succeeds after marker removal. All 128 fixed
+  seeds/exact replays cover 12 operation/acknowledgment/reuse cells, adding
+  12 pins (391 total); the legacy scan control fails at seed 1 in 0.009 s.
+  Complete pins/new model pass race in 7.383 s. Six real three-node concurrent
+  reuse cases pass normal and race, including dropped requests and hidden
+  acknowledgments. Full retention/reconciler packages pass 3.670 s/43.766 s.
+  Focused binaries and physical stores are not retained; complete latest-source
+  qualification and long-run physical retention remain open.
+  [Originals and exact scope](scale/tombstone-marker-drain-2026-10-03/).
 - **Tombstone partial-timeout correction:** a neutral production-port refactor
   preserves the original scan decisions and exposes their baseline stall at
   fixed seed 2: 48 virtual seconds, cursor 1 and target retained. The scanner
