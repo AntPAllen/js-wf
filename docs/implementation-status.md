@@ -18,6 +18,12 @@
   report regeneration verify. [Complete graph originals](scale/timer-partial-cursor-2026-10-03/full1k/).
   Current-source full race/100k, full fault matrices/24h and population bounds
   are separate. [Focused originals](scale/timer-partial-cursor-2026-10-03/).
+  After local Go jobs ended, 4,933 disposable build-cache files (580,794,059
+  bytes) were copied to `/dev/shm/js-wf-go-build-cache-20261003` and every copy
+  SHA256 verified. Clearing only the disk cache restored free disk from 172 MiB
+  to 744 MiB. Subsequent local commands can set
+  `GOCACHE=/dev/shm/js-wf-go-build-cache-20261003` to reuse the RAM cache.
+  Go's persistent configuration and all retained evidence/stores are unchanged.
 - **Suspended partial-failure correction:** the baseline scanner fails fixed
   seed 2 after 48 virtual seconds, cursor 1/no acknowledged wakeup. Concurrent
   reads now certify only the contiguous prefix with acknowledged enqueues and
