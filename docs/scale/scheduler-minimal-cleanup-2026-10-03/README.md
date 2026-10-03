@@ -54,3 +54,10 @@ bytes, commands and reviewer. Every member was SHA256 checked by readback
 before atomic publication. Full copied module trees remain at the paths in
 `manifest.json`; each synthetic store was created in Go's `t.TempDir` and
 cleaned after its test completed.
+
+The manual `nats-scheduler-cleanup` CI workflow executes the pair on a clean
+checkout, then runs `scripts/review-nats-scheduler-cleanup.py` to independently
+verify all compiled inputs and raw verdicts. It retains the exact reviewer
+bytes/hash with the evidence. Hosted success remains unaccepted until actual
+terminal artifacts are reviewed; this workflow does not qualify the original
+million-timer campaign or the full release matrix.

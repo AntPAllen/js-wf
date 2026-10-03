@@ -1,0 +1,33 @@
+name: nats-scheduler-cleanup
+on: workflow_dispatch
+jobs:
+  copied-source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Execute fresh-store baseline and precise dirty-count control
+        run: python3 scripts/check-nats-scheduler-cleanup.py --root "$RUNNER_TEMP/scheduler-cleanup-evidence"
+      - name: Independently verify compiled inventories and actual verdicts
+        run: |
+          python3 scripts/review-nats-scheduler-cleanup.py "$RUNNER_TEMP/scheduler-cleanup-evidence"
+          python3 -c 'import json,os; from pathlib import Path; root=Path(os.environ["RUNNER_TEMP"])/"scheduler-cleanup-evidence"; assert json.loads((root/"source.json").read_text())["clean"], "hosted source must be clean"'
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: scheduler-cleanup-evidence
+          path: |
+            ${{ runner.temp }}/scheduler-cleanup-evidence/*.json
+            ${{ runner.temp }}/scheduler-cleanup-evidence/*.py
+            ${{ runner.temp }}/scheduler-cleanup-evidence/*.txt
+            ${{ runner.temp }}/scheduler-cleanup-evidence/*/*.json
+            ${{ runner.temp }}/scheduler-cleanup-evidence/*/*.jsonl
+            ${{ runner.temp }}/scheduler-cleanup-evidence/*/*.log
+            ${{ runner.temp }}/scheduler-cleanup-evidence/*/*.txt
+          if-no-files-found: error
