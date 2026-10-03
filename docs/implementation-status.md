@@ -51,7 +51,7 @@
   [Complete graph originals](scale/tombstone-marker-drain-2026-10-03/full1k/).
   Full race [37146525331](https://github.com/AntPAllen/js-wf/actions/runs/37146525331)
   and normal 100k [37146526818](https://github.com/AntPAllen/js-wf/actions/runs/37146526818)
-  are queued at that exact source; neither is accepted. Older prefix-only
+  are in progress at that exact source; neither is accepted. Older prefix-only
   campaigns remain active separately. Long-run physical retention, full fault
   matrices and 24h qualification remain open.
   [Originals and exact scope](scale/tombstone-marker-drain-2026-10-03/).
@@ -72,12 +72,14 @@
   regeneration verify. [Complete graph originals](scale/tombstone-partial-cursor-2026-10-03/full1k/).
   Prefix-corrected-source full race
   [37145175684](https://github.com/AntPAllen/js-wf/actions/runs/37145175684)
-  and normal 100k
-  [37145177234](https://github.com/AntPAllen/js-wf/actions/runs/37145177234)
-  are both active at that exact source, dispatched after the signal, suspended,
-  native/fallback timer and tombstone prefix corrections. Neither is accepted
-  yet. This source predates the physical marker cleanup above. Earlier Start-only
-  100k remains active separately; it is not restarted.
+  is terminal and independently accepted: 174 passes/two skips, all 379 pins and
+  121,000 bodies; all 1,126 exact source hashes, retained race binary, inventories
+  and raw report regeneration verify. Producer wall time is 2,160.43 s.
+  [Complete hosted race originals](scale/tombstone-partial-cursor-2026-10-03/hosted-race/).
+  Normal 100k [37145177234](https://github.com/AntPAllen/js-wf/actions/runs/37145177234)
+  remains active and unaccepted. This source predates the physical marker cleanup
+  above; the later marker graph has both race and 100k campaigns in progress.
+  Earlier Start-only 100k remains active separately; it is not restarted.
   Population bounds and full fault matrices/24h remain separate.
   [Focused originals and model limits](scale/tombstone-partial-cursor-2026-10-03/).
 - **Timer partial-timeout correction:** both baselines stall after 48 virtual
