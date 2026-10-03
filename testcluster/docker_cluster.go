@@ -77,7 +77,16 @@ func StartRollingUpgradeDockerCluster(root string, count int, oldBinary string) 
 	if oldBinary == "" {
 		return nil, fmt.Errorf("old server binary is required")
 	}
-	return startDockerClusterVersioned(root, count, oldBinary, 0, nil, nil, true)
+	return startDockerClusterVersioned(root, count, oldBinary, 0, nil, nil, true, false)
+}
+
+// StartLameDuckRollingUpgradeDockerCluster uses the documented minimum30s
+// eviction duration and10s grace period for an explicitly graceful profile.
+func StartLameDuckRollingUpgradeDockerCluster(root string, count int, oldBinary string) (*DockerCluster, error) {
+	if oldBinary == "" {
+		return nil, fmt.Errorf("old server binary is required")
+	}
+	return startDockerClusterVersioned(root, count, oldBinary, 0, nil, nil, true, true)
 }
 
 // StartAdvancingClockDockerCluster prepares an initially unshifted cluster
@@ -139,10 +148,10 @@ func (c *DockerCluster) serverConfig(i int) (string, error) {
 }
 
 func startDockerCluster(root string, count int, oldBinary string, advance time.Duration, overrides map[int]string, tags map[int][]string) (*DockerCluster, error) {
-	return startDockerClusterVersioned(root, count, oldBinary, advance, overrides, tags, false)
+	return startDockerClusterVersioned(root, count, oldBinary, advance, overrides, tags, false, false)
 }
 
-func startDockerClusterVersioned(root string, count int, oldBinary string, advance time.Duration, overrides map[int]string, tags map[int][]string, allOld bool) (_ *DockerCluster, err error) {
+func startDockerClusterVersioned(root string, count int, oldBinary string, advance time.Duration, overrides map[int]string, tags map[int][]string, allOld, lameDuck bool) (_ *DockerCluster, err error) {
 	if count < 3 || count > 5 {
 		return nil, fmt.Errorf("docker cluster count must be 3..5")
 	}
@@ -244,6 +253,9 @@ func startDockerClusterVersioned(root string, count int, oldBinary string, advan
 		return nil, err
 	}
 	config := fmt.Sprintf("jetstream: { sync_interval: %q }\n", c.syncInterval)
+	if lameDuck {
+		config += "lame_duck_duration: 30s\nlame_duck_grace_period: 10s\n"
+	}
 	if value := os.Getenv("WF_TIER3_ROUTE_PING_INTERVAL"); value != "" {
 		interval, err := time.ParseDuration(value)
 		if err != nil || interval <= 0 || interval > 30*time.Second {

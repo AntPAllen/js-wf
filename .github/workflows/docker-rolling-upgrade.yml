@@ -1,6 +1,13 @@
 name: docker-rolling-upgrade-contract
 on:
   workflow_dispatch:
+    inputs:
+      shutdown:
+        description: Shutdown profile
+        type: choice
+        required: true
+        default: 'sigkill'
+        options: ['sigkill', 'ldm']
 jobs:
   contract:
     runs-on: ubuntu-latest
@@ -19,7 +26,7 @@ jobs:
           CGO_ENABLED=0 GOBIN="$RUNNER_TEMP/nats-old" go install github.com/nats-io/nats-server/v2@v2.11.17
           printf 'WF_NATS_SERVER_BIN=%s/nats-old/nats-server\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - name: Verify all peers upgrade with retained data and reject single-old-node startup
-        run: python3 scripts/check-docker-rolling-upgrade.py --root "$RUNNER_TEMP/docker-upgrade-evidence"
+        run: python3 scripts/check-docker-rolling-upgrade.py --shutdown "${{ inputs.shutdown }}" --root "$RUNNER_TEMP/docker-upgrade-evidence"
       - name: Archive all contract evidence and physical stores
         if: always()
         run: |

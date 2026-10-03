@@ -1066,3 +1066,25 @@ ScheduleIsHint omission, the real three-node injected failure comparison and
 new admitted R5 clock evidence before claiming this closes mixed clock recovery.
 The original failed seed55 server cause remains unconfirmed; historical
 source-qualified diagnostic61s/73s results remain preserved.
+
+### Normal graceful rolling upgrade profile
+
+The existing SIGKILL upgrade profile does not establish the normal graceful
+upgrade requirement. `docker-rolling-upgrade-contract` and the sustained
+`tier3-mixed-leaders` rolling row now select `shutdown=ldm` and
+`upgrade_shutdown=ldm`, respectively. The graceful constructor starts all five
+old peers with the documented30s Lame Duck eviction duration and10s grace.
+Each upgrade signals SIGUSR2, records a direct original-peer client notification
+and ordered old-process shutdown logs, observes stopped state and exact-name
+removal, then starts the new binary on the same store. No timeout escalates to
+SIGKILL. Per-cut mode/identity/times/logs are retained and checked offline.
+
+Qualify the five-peer retained-message contract at one clean source, including
+the existing single-old-peer constructor control and a new compiled SIGKILL
+substitution that must fail for missing Lame Duck notification. Then require
+the actual ten-minute graceful mixed row, its histories, raw audits, fault
+cadence, latency and drain at the same profile. Preparation or the constructor
+contract alone does not clear the mixed-row gate,200 seeds,24-hour matrix or
+forced two-write-gap requirement. Earlier SIGKILL evidence keeps its own scope.
+The documented shutdown procedure is
+[NATS Lame Duck mode](https://docs.nats.io/running-a-nats-service/nats_admin/lame_duck_mode).

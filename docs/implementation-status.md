@@ -74,6 +74,13 @@
   contact remain observations, not a confirmed server cause.
   [Failure and corrected phase evidence](scale/r5-rolling-upgrade-2026-10-03/rejected-deployment-check/),
   [accepted budget contract](scale/upgrade-provisioning-budget-2026-10-03/).
+- **Normal rolling upgrade:** an explicit Lame Duck profile is now implemented
+  alongside the existing SIGKILL profile. It requires the original-peer client
+  notification, ordered shutdown logs, observed exit/name removal and retained
+  store replacement. The development five-peer contract passes105.39s with37
+  retained messages on all replicas; clean committed qualification, compiled
+  SIGKILL-substitution control and sustained graceful mixed row remain open.
+  No development result qualifies200 seeds,24h or the forced two-write gap.
 - **Ahead-clock200:** [37040118844](https://github.com/AntPAllen/js-wf/actions/runs/37040118844)
   is terminal FAILED at52f4e51. Seeds29/55 respectively miss pre-due source
   observation and pending-timer admission. Preserve the raw failures and keep

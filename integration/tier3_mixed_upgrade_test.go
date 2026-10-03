@@ -21,6 +21,17 @@ import (
 	"js-wf/testcluster"
 )
 
+func fiveUpgradeShutdownMode() (string, error) {
+	mode := os.Getenv("WF_TIER3_UPGRADE_SHUTDOWN")
+	if mode == "" {
+		mode = "sigkill"
+	}
+	if mode != "sigkill" && mode != "ldm" {
+		return "", fmt.Errorf("invalid WF_TIER3_UPGRADE_SHUTDOWN %q", mode)
+	}
+	return mode, nil
+}
+
 func TestFiveContainerMixedRollingServerUpgrade(t *testing.T) {
 	runFiveContainerMixedLeader(t, "rolling_upgrade")
 }
@@ -360,7 +371,18 @@ func upgradeFiveMixedServer(ctx context.Context, js jetstream.JetStream, cluster
 	if upgraded[node] {
 		return event, fmt.Errorf("upgrade node%d selected twice", node)
 	}
-	if err := cluster.UpgradeNode(node); err != nil {
+	mode, err := fiveUpgradeShutdownMode()
+	if err != nil {
+		return event, err
+	}
+	event.UpgradeShutdownMode = mode
+	if mode == "ldm" {
+		proof, err := cluster.UpgradeNodeGracefully(ctx, node)
+		event.GracefulUpgrade = &proof
+		if err != nil {
+			return event, err
+		}
+	} else if err := cluster.UpgradeNode(node); err != nil {
 		return event, err
 	}
 	upgraded[node] = true

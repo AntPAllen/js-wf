@@ -91,11 +91,16 @@ def check(events, duration, expected_row='journal', expected_seed=None):
     clocks = re.findall(r'TIER3_COMMON_TIMER_CLOCK=(\S+)', log)
     if clocks and (clocks != ['utc-quorum-v1'] or not row.startswith('server_clock_')):
         raise ValueError('invalid or duplicated common timer clock profile')
-    return dict(scope=scope, seed=int(seed), duration_seconds=seconds,
+    shutdowns=re.findall(r'TIER3_UPGRADE_SHUTDOWN=(\S+)',log)
+    if shutdowns and (row!='rolling_upgrade' or len(shutdowns)!=1 or shutdowns[0] not in ('sigkill','ldm')):
+        raise ValueError('invalid upgrade shutdown profile')
+    report = dict(scope=scope, seed=int(seed), duration_seconds=seconds,
                 common_timer_clock=clocks[0] if clocks else None,
                 clock_timer_cut_profile=profiles[0] if profiles else None,
                 shortened_smoke=duration == '35s', invocations=invocations, journal_entries=entries,
                 confirmed_faults=faults, active_consumer_faults=active_consumer_faults, cells=cells, clears_full_tier3_release=False)
+    if shutdowns: report['upgrade_shutdown_mode']=shutdowns[0]
+    return report
 
 
 def check_automatic_sessions(events, members):
@@ -617,9 +622,24 @@ def check_upgrade_artifacts(root, report):
             interval=scheduled-first
             if interval!=(report['duration_seconds']-60)*1_000_000_000//4:raise ValueError('upgrade cadence differs from duration profile')
         elif scheduled!=first+(i-1)*interval:raise ValueError('upgrade cadence inconsistent')
+        mode=report.get('upgrade_shutdown_mode','sigkill')
+        if fault.get('upgrade_shutdown_mode','sigkill')!=mode:raise ValueError('upgrade shutdown mode differs from executed profile')
+        if mode=='ldm':
+            graceful=load('graceful_upgrade','check-graceful-upgrade.py')
+            observation=fault.get('graceful_upgrade')
+            graceful.check(observation,node)
+            if not killed<=timestamp_ns(observation['signal_started'])<=timestamp_ns(observation['cleanup_complete'])<=after:
+                raise ValueError('graceful shutdown outside upgrade cut')
+            config=(root/'cluster'/'nats.conf').read_text()
+            if 'lame_duck_duration: 30s' not in config or 'lame_duck_grace_period: 10s' not in config:
+                raise ValueError('graceful profile lacks documented eviction configuration')
+        elif fault.get('graceful_upgrade'):raise ValueError('SIGKILL profile claimed graceful shutdown')
         previous_heal=healed
     if report['duration_seconds']!=35 and (len(upgraded)!=5 or versions!=['2.15.0']*5):raise ValueError('upgrade omitted a peer')
-    return dict(upgraded_peers=len(upgraded),pinned_endpoint_checks=5*(1+2*len(faults)),retained_backend='fallback',native_rejections=5*(1+2*len(faults)),full_five_peer_upgrade=len(upgraded)==5)
+    result=dict(upgraded_peers=len(upgraded),pinned_endpoint_checks=5*(1+2*len(faults)),retained_backend='fallback',native_rejections=5*(1+2*len(faults)),full_five_peer_upgrade=len(upgraded)==5)
+    if 'upgrade_shutdown_mode' in report:
+        result.update(shutdown_mode=report['upgrade_shutdown_mode'],graceful_shutdowns=len(faults) if report['upgrade_shutdown_mode']=='ldm' else 0)
+    return result
 
 
 def check_pause_artifacts(root,report):

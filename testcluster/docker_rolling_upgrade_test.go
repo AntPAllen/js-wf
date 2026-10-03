@@ -18,6 +18,14 @@ import (
 )
 
 func TestFiveDockerRollingUpgradePreservesEveryReplica(t *testing.T) {
+	runFiveDockerRollingUpgrade(t, "sigkill")
+}
+
+func TestFiveDockerGracefulRollingUpgradePreservesEveryReplica(t *testing.T) {
+	runFiveDockerRollingUpgrade(t, "ldm")
+}
+
+func runFiveDockerRollingUpgrade(t *testing.T, shutdownMode string) {
 	if os.Getenv("WF_DOCKER_ROLLING_UPGRADE") != "1" {
 		t.Skip("set WF_DOCKER_ROLLING_UPGRADE=1 with an actual NATS2.11.17 executable")
 	}
@@ -28,7 +36,11 @@ func TestFiveDockerRollingUpgradePreservesEveryReplica(t *testing.T) {
 	if err := os.MkdirAll(root, 0755); err != nil {
 		t.Fatal(err)
 	}
-	cluster, err := StartRollingUpgradeDockerCluster(filepath.Join(root, "cluster"), 5, os.Getenv("WF_NATS_SERVER_BIN"))
+	constructor := StartRollingUpgradeDockerCluster
+	if shutdownMode == "ldm" {
+		constructor = StartLameDuckRollingUpgradeDockerCluster
+	}
+	cluster, err := constructor(filepath.Join(root, "cluster"), 5, os.Getenv("WF_NATS_SERVER_BIN"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -231,8 +243,19 @@ func TestFiveDockerRollingUpgradePreservesEveryReplica(t *testing.T) {
 	}
 	check("initial")
 	order := []int{2, 0, 4, 1, 3}
+	var shutdowns []DockerGracefulUpgradeObservation
 	for cut, node := range order {
-		if err := cluster.UpgradeNode(node); err != nil {
+		if shutdownMode == "ldm" {
+			proof, err := cluster.UpgradeNodeGracefully(ctx, node)
+			shutdowns = append(shutdowns, proof)
+			raw, _ := json.MarshalIndent(proof, "", "  ")
+			if writeErr := os.WriteFile(filepath.Join(root, fmt.Sprintf("shutdown-%d.json", cut+1)), raw, 0644); writeErr != nil {
+				t.Fatal(writeErr)
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+		} else if err := cluster.UpgradeNode(node); err != nil {
 			t.Fatal(err)
 		}
 		upgraded[node] = true
@@ -240,11 +263,13 @@ func TestFiveDockerRollingUpgradePreservesEveryReplica(t *testing.T) {
 		check(fmt.Sprintf("upgrade-%d", cut+1))
 	}
 	data, err := json.MarshalIndent(struct {
-		Order    []int               `json:"order"`
-		Versions map[string][]string `json:"versions"`
-		Messages int                 `json:"retained_messages"`
-		Replicas int                 `json:"replicas"`
-	}{order, versions, len(payloads), 5}, "", "  ")
+		ShutdownMode string                             `json:"shutdown_mode"`
+		Shutdowns    []DockerGracefulUpgradeObservation `json:"shutdowns"`
+		Order        []int                              `json:"order"`
+		Versions     map[string][]string                `json:"versions"`
+		Messages     int                                `json:"retained_messages"`
+		Replicas     int                                `json:"replicas"`
+	}{shutdownMode, shutdowns, order, versions, len(payloads), 5}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}

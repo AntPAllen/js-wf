@@ -174,7 +174,16 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	var cluster *testcluster.DockerCluster
 	if row == "rolling_upgrade" {
-		cluster, err = testcluster.StartRollingUpgradeDockerCluster(filepath.Join(root, "cluster"), 5, os.Getenv("WF_NATS_SERVER_BIN"))
+		mode, modeErr := fiveUpgradeShutdownMode()
+		if modeErr != nil {
+			t.Fatal(modeErr)
+		}
+		t.Logf("TIER3_UPGRADE_SHUTDOWN=%s", mode)
+		constructor := testcluster.StartRollingUpgradeDockerCluster
+		if mode == "ldm" {
+			constructor = testcluster.StartLameDuckRollingUpgradeDockerCluster
+		}
+		cluster, err = constructor(filepath.Join(root, "cluster"), 5, os.Getenv("WF_NATS_SERVER_BIN"))
 	} else {
 		cluster, err = testcluster.StartDockerClusterWithStoresAndTags(filepath.Join(root, "cluster"), 5, stores, clockTags)
 	}
