@@ -1,33 +1,65 @@
 # Implementation status against the supplied plan
 
-## Current qualification snapshot — 2026-10-02
+## Current qualification snapshot — 2026-10-03
 
-- The 119-workload100k gate37039245566 is independently accepted at7c5fb3e:
-  11.9M actual bodies,163 top-level passes and265 pins. The older118 campaign
-  remains separate; this does not qualify the new120-workload graph.
-- The 120th workload combines continuation limits, a retained lease and a
-  modeled outage. All27 combinations pass focused1k race/replay; the compiled
-  suffix-budget control detects an actual forbidden effect. Full default1k
-  gate passes at3a5452e in120.296s; current120-workload100k37051896032
-  is in progress atad37bfc and remains unaccepted.
-- Corrected hosted budget20 contract37045824031 and production100000 combined-cap
-  campaign37045827952 are independently accepted at2a30165. All three production
-  cuts recover in12.840s/12.835s/12.937s; the compiled mutant triggers one actual
-  forbidden effect and fails semantically without a timeout.
-- Full fourteen-row R5 seed1 campaign37058644370 is queued at7c5e5d1, with
-  admitted timer cuts and independent clock proofs on both clock rows.
-- All-thirteen Tier2 seed1 campaign37050644803 is independently accepted at3f483bd,
-  ten minutes per row,34,636 invocations/313 faults. It cannot clear200 seeds.
-- Fresh all-six ten-minute mutation gate37030840346 is accepted at0f979d0.
-  Ahead-clock seed27 ten-minute replay37030391587 is accepted at0f979d0;
-  current ahead1..200 campaign37040118844 remains queued.
-- All-replica timer-volume drain guard passes its hosted contract and live
-  1000-timer diagnostic. Original million/24h campaign delivered all1M but
-  failed drain. Direct copied-store recovery confirms the empty scheduling
-  index suppresses retained sources; the initial inconsistency cause remains
-  unconfirmed. Full matrix and full-runtime24h soak remain open.
-- Historical31.1s worker-kill recovery used30s TTL and is excluded from reruns.
-  ProductionTTL12s/heartbeat3s/AckWait13s and the strict30s gate remain unchanged.
+- **Tier1:** the current121-workload default1k gate is independently accepted
+  at5712254:121,000 actual bodies,165 top-level passes and267 pins in162.931s.
+  [Verified originals](scale/worker-release-fencing-2026-10-03/full121-1k/).
+  Current121100k [37106469422](https://github.com/AntPAllen/js-wf/actions/runs/37106469422)
+  remains running at11ad2e4. The previous120100k gate is accepted atad37bfc:
+  12M bodies/266 pins/14,363.912s, with its earlier scope preserved.
+  [Previous graph evidence](scale/tier1-current120-100k-2026-10-03/).
+- **Runtime regression:** production lost-release fencing now records the
+  first ownership loss before cleanup and deduplicates one observation per
+  delivery. The focused1k race/replay and exact compiled omission control are
+  accepted atf32ce38; corrected real R5 pause seed1/10m is independently accepted
+  with10 actual45s pauses and11 matching resumed-lease fencing records.
+  [Model and real-row evidence](scale/worker-release-fencing-2026-10-03/).
+- **Tier2:** all13 ten-minute rows at seed1 are independently accepted at3f483bd:
+  34,636 invocations/313 faults. All13x200
+  [37057872230](https://github.com/AntPAllen/js-wf/actions/runs/37057872230)
+  remains queued at076ebad. Neither single-seed coverage nor queued work clears200.
+- **Tier3:**16 implemented row variants are now in the registry,
+  including separate worker-clock and every-peer rolling upgrade. The initial
+  14-row seed1 campaign failed and cannot qualify the complete original matrix.
+  Worker-clock [37108814121](https://github.com/AntPAllen/js-wf/actions/runs/37108814121)
+  is independently accepted at82069c3 for seed1/10m:2912 invocations,32197
+  entries,105 broker-backed clock samples and5 final process counters.
+  [Complete clock originals](scale/r5-worker-clock-2026-10-03/hosted-pass/). Version3 rolling
+  [37109789443](https://github.com/AntPAllen/js-wf/actions/runs/37109789443)
+  is queued atdf07ba1. Both still require independent real-row acceptance.
+- **Rolling readiness:** the first mixed trial is rejected after node4's actual
+  third restart: its post-upgrade fallback proof hits the two-second metadata
+  wrapper. The fixture now uses the existing60s whole-operation deadline;
+  focused race/control evidence is accepted, and version3 records all-peer
+  public health responses. Temporary no-quorum warnings and later metadata
+  contact remain observations, not a confirmed server cause.
+  [Failure and corrected phase evidence](scale/r5-rolling-upgrade-2026-10-03/rejected-deployment-check/),
+  [accepted budget contract](scale/upgrade-provisioning-budget-2026-10-03/).
+- **Ahead-clock200:** [37040118844](https://github.com/AntPAllen/js-wf/actions/runs/37040118844)
+  is terminal FAILED at52f4e51. Seeds29/55 respectively miss pre-due source
+  observation and pending-timer admission. Preserve the raw failures and keep
+  the200-seed requirement open; actual seed29 exit timing is unconfirmed.
+  [Failure evidence](scale/r5-ahead200-2026-10-03/rejected-seeds-29-55/).
+- **Other accepted gates:** all6 sustained invariant mutation cases pass at0f979d0.
+  The corrected production100000 continuation-cap campaign is independently
+  accepted at2a30165; three fault cuts recover in12.840s/12.835s/12.937s and the
+  compiled suffix-budget control detects a forbidden effect. These retain their
+  focused source/coverage boundaries.
+- **Scale/release:** the new million-timer10m diagnostic is independently accepted
+  at885664e with all1M receipts and all3 physical replica drains. It does not
+  replace the original million/24h gate, which delivered all1M but failed drain.
+  Original scheduling-index inconsistency cause, full fault/seed matrices,
+  full-runtime24h soak and remaining original release requirements stay open.
+  [Short diagnostic evidence](scale/native-million-diagnostic-2026-10-03/).
+- **Worker-kill target:** historical31.1s withTTL30s is a configuration mismatch
+  excluded from reruns. ProductionTTL12s/heartbeat3s/AckWait13s and strict
+  recovery under30s remain in force. Route-quorum recovery p99 starts at the
+  later enabling event/final confirmed heal; raw outage delays are retained.
+
+Historical sections below preserve earlier sources, pending states at the time,
+rejected trials and narrower evidence. They do not override this snapshot or
+clear a newer graph/row/full-release gate by implication.
 
 ## Earlier evidence and implementation overview — 2026-10-02
 
@@ -8008,3 +8040,72 @@ The committed archive and metadata remain intact. This recovers~50MiB; local
 root has248MiB free, while failed/live original stores remain preserved.
 Worker-clock37108814121 and current121100k37106469422 remain running;
 Tier2 all13x20037057872230 remains queued at its older source scope.
+
+## R5 worker-clock seed1/10m independently accepted
+
+[Run37108814121](https://github.com/AntPAllen/js-wf/actions/runs/37108814121)
+at exact82069c3 is terminal success and independently accepted:2912 invocations,
+32197 entries,19 periodic clock observations plus initial/final rounds,105
+broker-backed samples,47208 raw dispatch records,4 fencing records and five
+complete graceful counter cross-checks. All104 workload batches and ten captured
+cohort audits pass. Worst per-cell terminal/progress p99 is5.125314797s /
+0.398445073s. The mandatory separate Go normalization body and package actually
+pass. Original child records/raw aggregates remain unchanged; diagnostic copies
+subtract only fixed offsets with every other field/nanosecond preserved.
+
+All3961 complete archive members pass independent SHA256 readback. All686
+source hashes match exact Git and before/after inventories agree. Worker binary
+hashes, three distinct retained executables, original Go time source and both
+exact compiled overlay maps/patches are checked. Broker clock subject/sequence,
+payload/time, requested offsets, freshness, phase/cadence and current R5 file
+replicas are checked for every sample. Raw process identities/counts/counters
+agree. Row/checkpoint report, event explanations and fencing review regenerate;
+complete stores/binaries/evidence and reusable archive-backed reviewer are in
+scale/r5-worker-clock-2026-10-03/. This establishes one real sustained clock row,
+not200 seeds, all16 rows or original24h release.
+
+## Older ahead200 campaign terminal failure preserved
+
+Run37040118844 at52f4e51 is terminal FAILED with jobs29/55. Both actual named
+Go tests and packages fail. Seed29's source-stopped observation is8,641,219ns
+later than earliest due; the kill reply returns beforehand, but that reply alone
+cannot prove when the source exited. Seed55's first cut succeeds and the second
+cannot establish a pending timer before its deadline. Raw controller/cut/server
+records, Go events, terminal job metadata and logs for both failures have member
+hash readback in scale/r5-ahead200-2026-10-03/rejected-seeds-29-55/. The producer
+has no full source inventory or physical-store upload. No broad passing-seed
+qualification or server cause is inferred, and no failed seed was restarted.
+
+To retain the new complete clock archive with limited local space,136 members
+of the accepted sustained mutation archive were reverified.132 byte-identical
+terminal download duplicates (149,356,964 bytes) were removed, preserving the
+committed archive and review metadata. Failed/live originals remain intact.
+The top snapshot now reflects accepted current1211k/previous120100k, accepted
+clock/pause rows, the failed ahead200 result and open release gates; historical
+pending-state narratives below remain source-scoped records of their time.
+
+## Version3 rolling second after-proof rejected; originals retained
+
+Trial37109789443 is terminal FAILED atdf07ba1. Initial/all-peer before proofs
+complete, the first upgrade heals after17 retained health rounds, and the second
+before-proof completes. The second peer actually restarts, then its after-proof
+fails during peer-native-rejections: pinned node0 returns context deadline
+exceeded instead of the mandatory WF_RUN configuration mismatch. The partial
+version3 proof preserves phase/error with zero health rounds, since current
+ordering runs native admission before health. An unavailable probe is not a
+semantic fail-closed rejection and cannot count toward rolling qualification.
+
+All3793 original archive members are independently SHA256-verified, including
+physical stores and complete/partial proof files, in
+scale/r5-rolling-upgrade-2026-10-03/rejected-native-probe/. Terminal metadata and
+full failed-job log remain alongside the archive. No server root cause is
+confirmed and no repeat trial is launched. The evidence identifies readiness
+ordering/native-probe budget as the next fixture boundary to examine; it does
+not justify weakening semantic rejection, workload latency or full-release
+requirements. Current121100k remains active; all13 Tier2x200 remains queued.
+
+The accepted clock producer's107,929,449-byte original compressed archive is
+retained byte-for-byte as two ordered parts with per-part and whole SHA256.
+Reassembly is verified and the reusable reviewer validates all3961 members
+from the parts directly. Row/checkpoint, explanation and fencing reports
+regenerate byte-for-byte, without extracting duplicate physical stores.
