@@ -10,7 +10,12 @@
   contract and six failure-stage controls pass race in 4.544 s, with actual
   cursor `1 → 4 → 7 → 8` and one retained wakeup. Full reconciler suite passes
   17.595 s. Focused originals include the rejected invalid-journal fixture;
-  binaries/stores are not retained by these focused runs. Queued full runs below
+  binaries/stores are not retained by these focused runs. Complete normal 1k
+  at exact `175300af804a39ae3e1e4ce77409ec7ebad367a6` is independently accepted
+  in 159.302 s: 171 passes/two documented skips, all 295 pins and 121,000
+  bodies; all 1,033 source hashes, retained binary and raw report regeneration
+  verify. [Complete graph originals](scale/signal-partial-cursor-2026-10-03/full1k/).
+  Hosted full runs below
   precede this production signal change; latest full-suite qualification remains
   open. [Focused evidence](scale/signal-partial-cursor-2026-10-03/).
 - **Latest runtime validation:** the confirmed Start partial-timeout cursor fix

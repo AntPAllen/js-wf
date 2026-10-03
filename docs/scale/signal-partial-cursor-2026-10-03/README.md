@@ -60,5 +60,7 @@ overlay mapping the checkout's absolute `reconcile/signals.go` to that file,
 and add `-overlay=<overlay.json>` to the first command. The final model and
 other source files stay corrected; only the scanner reverts.
 
-Full current-source normal/race suites and extended seeds remain open. Queued
+The [complete retained-binary normal 1k suite](full1k/) is independently accepted
+at `175300a`: 171 passes, 295 pins, 121,000 bodies and 1,033 verified source
+hashes. Full current-source race suites and extended seeds remain open. Hosted
 runs at `0d3fabf` precede this signal correction and retain their narrower scope.
