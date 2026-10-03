@@ -8203,3 +8203,30 @@ checkout-only source attribution; this addition cannot retroactively strengthen
 them. The queued observer qualification37112424062 remains atd2b98c6 and is
 not restarted for this evidence-producer change. No version4 real rolling trial
 has yet launched.
+
+
+## Seed55 failure narrowed to retry after a timer scheduling timeout
+
+The reusable review in
+scale/r5-ahead200-2026-10-03/rejected-seeds-29-55/review-seed55.py revalidates all
+102 archived original hashes and retains the exact second-cut retry timeline in
+seed55-retry-review.json. Invocation tier3-55-batch-1-2 ends at journal index16,
+StepRequested(timer-5), sequence589. Its native scheduling hint fails after
+3.000768249s with context deadline exceeded and TimerPublished=false. Delivery
+216 then records execution_retry, NAK and lease release, with no later fetch for
+that invocation observed before the controller cancels the failed trial.
+
+The latest receipt for any invocation is sequence608 at22:58:56.791518988Z;
+the second fault is scheduled at22:59:13.478662786Z. The workload's batch waits
+for this invocation, so no new batch replenishes pending timer candidates during
+the ten-second admission window. The retained tail is StepRequested rather than
+Suspended and must not be treated as an admissible cut. This is a workload/retry
+boundary to reproduce, not grounds to extend the deadline, fabricate admission
+or reinterpret the seed as passing.
+
+The NAK observation proves the client call returned without error; it does not
+prove the server applied it or establish the reason for absent redelivery. The
+existing independent pending-consumer clock-transition characterization provides
+a relevant broker boundary, but no new native characterization or production
+fix is claimed here. Server cause remains unconfirmed. The observer contract
+37112424062 is still queued and is not restarted.

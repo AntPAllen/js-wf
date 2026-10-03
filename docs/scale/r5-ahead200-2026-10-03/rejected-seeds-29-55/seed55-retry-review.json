@@ -1,0 +1,135 @@
+{
+  "run_id": 37040118844,
+  "revision": "52f4e51ba190e24132933de967d5317c481b21fd",
+  "verified_archive_members": 102,
+  "seed": 55,
+  "identity": "tier3-55-batch-1-2",
+  "final_receipt": {
+    "sequence": 589,
+    "subject": "wf.jrn.matrixtimer.tier3-55-batch-1-2",
+    "entry": {
+      "epoch": 1857,
+      "index": 16,
+      "kind": "StepRequested",
+      "payload": {
+        "kind": "timer",
+        "name": "timer-5",
+        "input_hash": "",
+        "duration_nanos": 2000000000,
+        "fire_at": "2026-10-02T22:58:45.648016008Z",
+        "clock_domain": "utc-quorum-v1"
+      },
+      "worker_id": "tier3-mixed-3"
+    },
+    "observed_at": "2026-10-02T22:58:43.58708753Z"
+  },
+  "failed_native_hint": {
+    "At": "2026-10-02T22:58:46.588497781Z",
+    "Duration": 3000768249,
+    "Worker": "tier3-mixed-3",
+    "Type": "matrixtimer",
+    "ID": "tier3-55-batch-1-2",
+    "RunSequence": 216,
+    "Delivery": 1,
+    "Operation": "timer_native_hint",
+    "JournalIndex": 16,
+    "JournalKind": "StepRequested",
+    "Error": "context deadline exceeded",
+    "LeaseGateWait": 0,
+    "LeaseUpdateDuration": 0,
+    "LeaseUpdateAttempted": false,
+    "ServerTime": "0001-01-01T00:00:00Z",
+    "ClockDomain": "utc-quorum-v1",
+    "ClockLower": "0001-01-01T00:00:00Z",
+    "ClockUpper": "0001-01-01T00:00:00Z",
+    "TimerDeadline": "2026-10-02T22:58:45.648016008Z",
+    "TimerScheduleAt": "0001-01-01T00:00:00Z",
+    "TimerPublished": false
+  },
+  "retry_delivery": [
+    {
+      "At": "2026-10-02T22:58:43.490121551Z",
+      "Worker": "tier3-mixed-3",
+      "Type": "matrixtimer",
+      "ID": "tier3-55-batch-1-2",
+      "Stage": "fetched",
+      "RunSequence": 216,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-02T22:58:43.498077483Z",
+      "Worker": "tier3-mixed-3",
+      "Type": "matrixtimer",
+      "ID": "tier3-55-batch-1-2",
+      "Stage": "lease_acquired",
+      "RunSequence": 216,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-02T22:58:46.588578744Z",
+      "Worker": "tier3-mixed-3",
+      "Type": "matrixtimer",
+      "ID": "tier3-55-batch-1-2",
+      "Stage": "execution_retry",
+      "RunSequence": 216,
+      "Delivery": 1,
+      "Error": "timer schedule was not confirmed: context deadline exceeded"
+    },
+    {
+      "At": "2026-10-02T22:58:46.588612304Z",
+      "Worker": "tier3-mixed-3",
+      "Type": "matrixtimer",
+      "ID": "tier3-55-batch-1-2",
+      "Stage": "nak",
+      "RunSequence": 216,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-02T22:58:46.589176754Z",
+      "Worker": "tier3-mixed-3",
+      "Type": "matrixtimer",
+      "ID": "tier3-55-batch-1-2",
+      "Stage": "released",
+      "RunSequence": 216,
+      "Delivery": 1,
+      "Error": ""
+    }
+  ],
+  "latest_any_receipt": {
+    "sequence": 608,
+    "subject": "wf.jrn.matrixtimer.tier3-55-batch-1-3",
+    "entry": {
+      "epoch": 2098,
+      "index": 25,
+      "kind": "Completed",
+      "payload": {
+        "inv_seq": 33,
+        "result": "NDI="
+      },
+      "worker_id": "tier3-mixed-4"
+    },
+    "observed_at": "2026-10-02T22:58:56.791518988Z"
+  },
+  "admission_failure": {
+    "Time": "2026-10-02T22:59:23.597998812Z",
+    "Action": "output",
+    "Package": "js-wf/integration",
+    "Test": "TestFiveContainerMixedServerClockAheadWithJournalKills",
+    "Output": "    tier3_mixed_journal_test.go:803: tier3 server_clock_ahead fault failed: no provable pending timer for clock cut: context deadline exceeded\n"
+  },
+  "source_hashes": {
+    "seed-55/tier3-mixed-journal/controller-receipts.json": "01ae5dfebd6c838376bb0579dc20921059e31ca0c076d3c645f9034b67504007",
+    "seed-55/tier3-mixed-journal/controller-operations.json": "5db377a0ced83c1f27218809d00f9e94d3b4055d6d8be1545a75acd5ec95d7ac",
+    "seed-55/tier3-mixed-journal/dispatch.json": "1277fbfc76cb9ac4811b906cf4438a5fe78228f10478103e6734404d9711733b",
+    "seed-55/tier3-mixed-journal/faults.json": "cefe4d8af8b58867bed33a92bd82409773eee9955695f99283a710cd1b97a371",
+    "seed-55/tier3-mixed-journal-events.jsonl": "dcc87777dbfadd5ea1107e4029140103651c927e2d2eade0c2bc287aae3467ca"
+  },
+  "later_fetch_observed": false,
+  "actual_nak_application_confirmed": false,
+  "server_cause_confirmed": false,
+  "qualifies_seed": false,
+  "next_boundary": "Retained StepRequested plus NAK during skewed leader transition; no subsequent fetch observed before cancellation"
+}
