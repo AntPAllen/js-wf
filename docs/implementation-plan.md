@@ -375,7 +375,9 @@ Per-phase tests prove each mechanism; this layer proves the whole thing under ad
   through reference `9c5fce3`; later integration-only fixtures are excluded.
   The full race1k at the same tested source is separately accepted.
   [Complete normal100k originals and qualification scope](scale/tombstone-marker-drain-2026-10-03/hosted-full100k/)
-  does not replace the real full-matrix, five-VM or 24-hour gates.
+  does not replace the real full-matrix or 24-hour gates. Tier3 permits five
+  real VMs or five containers; a separate cross-VM run is optional deployment
+  validation, not an additional release requirement in the supplied plan.
 
 Start with the journal CAS/lost-ack vertical slice because it has a real three-node fixture and an unresolved server-side observation in the status record. The first useful result is a trace showing whether the runtime mishandles an unchanged-tail rejection under the modeled server contract; any real-only discrepancy then has a small API-level fixture to investigate. Follow with consumer-leader movement and timer route faults, where real runs have likewise exposed unexplained latency.
 

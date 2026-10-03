@@ -9,7 +9,7 @@ inventories and regenerates the entire report. All 686 runtime/model/producer
 inputs match reference `9c5fce3`; later real integration fixtures are outside
 this equivalence claim. The full race1k suite is separately accepted at the
 same tested source. [Complete normal100k evidence](scale/tombstone-marker-drain-2026-10-03/hosted-full100k/)
-closes the normal seeded release gate; real matrix/24h and five-VM gates remain
+closes the normal seeded release gate; real matrix/24h gates remain
 independent. Earlier sections retain their historical graph sizes and scope.
 
 ## Native timer deletion reply recovery
