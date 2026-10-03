@@ -242,7 +242,11 @@
   missing/wrong policy, malformed progress and absent gap coverage rejections.
   Full reconciler suite passes11.427s; focused Start gate/history race passes
   1.054s. The strict kill+30s bound and other gates remain; sustained
-  qualification is open until new runs pass.
+  qualification is open until new runs pass. New ten-minute profiles at exact
+  c5125cd810d407e26a778ef102f2cb093ff233c6 are queued:
+  SIGKILL [37132399483](https://github.com/AntPAllen/js-wf/actions/runs/37132399483)
+  and graceful [37132401225](https://github.com/AntPAllen/js-wf/actions/runs/37132401225).
+  Each now requires explicit scan policy/progress evidence.
 - **CAS benchmark harness:** hosted37121445966 atcd59b86 is rejected before
   measurement: the shared harness used the newer UnmarshalEntry API absent at
   fixed baseline4fa3119. Its diagnostic now uses the benchmark's JSON format;
@@ -8742,3 +8746,15 @@ not alter per-operation contexts, modeled time or workflow latency targets.
 The earlier whole-package900s timeout remains rejected. This new final-runtime
 full-sim race attempt does not substitute for100k or full application/real-matrix
 qualification. Ten suite-guard tests pass; actual execution is next.
+
+## Retained binaries for future extended Tier1 runs
+
+The extended workflow now uses the existing retained-binary producer with
+`--no-race --seeds 10000|100000`. Its default remains the prior race/1,000-seed
+contract. Both modes retain the actual executable, build settings, binary SHA,
+raw Go JSON, exact source/pin/test/seed inventories and identical before/after
+source hashes. Suite guards receive the requested seed count. Extended failures
+retain and minimize their absolute-path trace. Ten suite-guard tests pass.
+The existing accepted100k evidence is unchanged and keeps its original narrower
+producer provenance; this change does not retroactively establish its binary.
+A clean-source local full1k execution of the new normal mode remains pending.

@@ -1450,3 +1450,14 @@ Reads have zero modeled latency. The test proves the old scan policy cannot
 promise a30s tail visit at that population. It does not reconstruct the cursor,
 lease waits, network delays or server behavior in the rejected R5 runs. Actual
 scan progress is now captured by the forced-gap fixture to assess that cause.
+
+### Retained extended-suite executable
+
+The extended workflow invokes `scripts/check-tier1-race.py --no-race --seeds`
+with10,000 or100,000 seeds. The runner requires a clean checkout and fresh
+external evidence root, saves exact source inventories before/after, builds
+one executable, records its hash/build settings, executes that same binary
+through `go tool test2json`, and verifies the full suite at the requested count.
+The default runner mode remains race-instrumented with1,000 seeds. The workflow
+uploads the whole evidence directory, including the executable. Earlier extended
+runs without a retained binary keep their original provenance limitation.

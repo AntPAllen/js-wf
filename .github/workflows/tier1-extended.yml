@@ -25,42 +25,24 @@ jobs:
           go-version-file: go.mod
       - name: Verify suite-result guard
         run: python3 -m unittest discover -s scripts -p 'test_tier1_suite.py'
-      - name: Run seeded transport suite
-        run: |
-          set -o pipefail
-          git rev-parse HEAD > tier1-source.txt
-          SIM_COVERAGE_SUMMARY=0 go test ./sim -list '^Test' > tier1-list.log
-          grep -E '^Test[[:alnum:]_]+$' tier1-list.log > tier1-inventory.txt
-          go run ./scripts/tier1-seed-inventory > tier1-seeded-inventory.txt
-          find sim/testdata/regressions -type f -name '*.json' | sort > tier1-regression-inventory.txt
-          echo "Tier 1 seeds per workload: 1..${SIM_SEEDS}"
-          /usr/bin/time -o tier1-time.txt -f 'elapsed=%e user=%U system=%S' go test -json ./sim -count=1 -timeout=300m | tee tier1-events.jsonl | python3 -u scripts/render-go-test.py | tee tier1-suite.log
-          python3 scripts/check-tier1-suite.py --events tier1-events.jsonl --inventory tier1-inventory.txt --regressions tier1-regression-inventory.txt --source tier1-source.txt --seeded-inventory tier1-seeded-inventory.txt --seeds "$SIM_SEEDS" --output tier1-result.json
+      - name: Run seeded transport suite from a retained binary
+        run: python3 scripts/check-tier1-race.py --root "$RUNNER_TEMP/tier1-extended-evidence" --no-race --seeds "$SIM_SEEDS"
       - if: failure()
         timeout-minutes: 4
         run: |
-          if test -f sim/sim-failure.json; then
+          if test -f "$RUNNER_TEMP/tier1-extended-evidence/failure-trace.json"; then
             cd sim
-            FAULT_TRACE=sim-failure.json FAULT_TRACE_MIN_OUT=sim-failure-minimized.json go test -run '^TestMinimizeFaultTrace$' -count=1 -timeout=3m
+            FAULT_TRACE="$RUNNER_TEMP/tier1-extended-evidence/failure-trace.json" FAULT_TRACE_MIN_OUT="$RUNNER_TEMP/tier1-extended-evidence/failure-trace-minimized.json" go test -run '^TestMinimizeFaultTrace$' -count=1 -timeout=3m
           fi
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
           name: tier1-extended-failure-trace
-          path: sim/sim-failure*.json
+          path: ${{ runner.temp }}/tier1-extended-evidence/failure-trace*.json
           if-no-files-found: ignore
       - if: always()
         uses: actions/upload-artifact@v7
         with:
           name: tier1-extended-suite-evidence
-          path: |
-            tier1-source.txt
-            tier1-suite.log
-            tier1-list.log
-            tier1-inventory.txt
-            tier1-seeded-inventory.txt
-            tier1-regression-inventory.txt
-            tier1-events.jsonl
-            tier1-time.txt
-            tier1-result.json
+          path: ${{ runner.temp }}/tier1-extended-evidence/
           if-no-files-found: warn
