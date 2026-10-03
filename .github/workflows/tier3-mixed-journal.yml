@@ -199,7 +199,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always() && (matrix.row == 'rolling_upgrade' || matrix.row == 'worker_clock' || startsWith(matrix.row, 'server_clock_'))
         with:
-          name: rolling-original-stores-seed-${{ matrix.artifact_seed }}
+          name: rolling-original-stores-${{ matrix.row }}-seed-${{ matrix.artifact_seed }}
           path: |
             ${{ runner.temp }}/rolling-originals.tar.gz
             ${{ runner.temp }}/rolling-manifest.json

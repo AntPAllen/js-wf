@@ -2,6 +2,14 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Full Tier3 artifact identity corrected:** four store-retaining rows used
+  seed-only artifact names. A workflow-bound regression test proves 64 uploads
+  collided on 16 identities at `f05d7ba`; adding the row yields 64 unique names.
+  All five planner controls pass. Full dispatch 37156883771 is rejected for
+  this workflow defect and cancellation is requested before replacement;
+  cancellation completion is not yet claimed. Runtime inputs are unchanged
+  and no workload gate is cleared.
+  [Original failure and corrected controls](scale/tier3-artifact-name-fix-2026-10-03/).
 - **Current-source full Tier3 matrix dispatched:** run 37156883771 at exact
   `f05d7ba21442474767d3e204d601a486d7e6b054` requests all 16 R5 rows,
   seeds 1–200, ten minutes each: 3,200 actual executions in 256 shards,

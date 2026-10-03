@@ -37,6 +37,23 @@ class PlannerTests(unittest.TestCase):
             self.assertIn(row, workflow)
             self.assertIn(test, workflow)
 
+    def test_store_artifact_names_are_unique_across_rows(self):
+        workflow = Path('.github/workflows/tier3-mixed-journal.yml').read_text()
+        line = next(line.strip() for line in workflow.splitlines()
+                    if 'name: rolling-original-stores-' in line)
+        names = []
+        for job in planner.campaign('all', 200):
+            if job['row'] not in ('rolling_upgrade', 'worker_clock',
+                                  'server_clock_ahead', 'server_clock_behind'):
+                continue
+            name = line.removeprefix('name: ')
+            for key in ('row', 'artifact_seed'):
+                name = name.replace('${{ matrix.' + key + ' }}', str(job[key]))
+            self.assertNotIn('${{', name)
+            names.append(name)
+        self.assertEqual(len(names), 64)
+        self.assertEqual(len(set(names)), len(names))
+
 
 if __name__ == '__main__':
     unittest.main()
