@@ -13,7 +13,15 @@
   [Complete hosted race originals](scale/start-enqueue-history-2026-10-03/hosted-race/).
   Checker-source121100k
   [37120761679](https://github.com/AntPAllen/js-wf/actions/runs/37120761679)
-  is running at9de1e72 and remains unaccepted.
+  is independently accepted at9de1e72:all121 workloads complete1..100000
+  (12.1M seed bodies), all269 pins/168 top-level tests pass with only two
+  documented trace-only skips, package7106.148s. Raw Go JSON regenerates the
+  report byte-for-byte;170 test names/269 pin paths match exact Git source and
+  the121-workload AST inventory regenerates exactly. Aggregate schedules/
+  choices/events=12,300,039 /179,746,693 /2,694,012,558. The100k producer did not
+  retain its binary or clean before/after source hashes; separate exact-source
+  full1k/race evidence preserves those build checks within its narrower scope.
+  [Complete current100k originals](scale/start-enqueue-history-2026-10-03/current100k/).
   Earlier121100k [37106469422](https://github.com/AntPAllen/js-wf/actions/runs/37106469422)
   is terminal SUCCESS at11ad2e4, before native hint recovery; original artifact
   review remains pending and it cannot clear the later-runtime gate. Final-runtime100k
@@ -77,7 +85,12 @@
   Terminal p99=7.311s; worst type terminal/progress=11.988s/7.052s; no progress
   event exceeds30s. Originals and review utilities are SHA256-readback archived.
   [Corrected consumer139 evidence](scale/start-enqueue-history-2026-10-03/consumer139-corrected-replay/).
-  Three other focused replays and full current-source1..200 remain open. The
+  Consumer90 is independently accepted:633.46s,94 cohorts/2632 invocations/
+  29028 entries/19 positively active consumer-leader cuts; all12408 raw latency
+  samples regenerate metrics and3388 SDK operations pass all three models.
+  Aggregate p99=7.324s; worst type terminal/progress=15.739s/7.038s; no progress
+  event exceeds30s. [Corrected consumer90 originals](scale/start-enqueue-history-2026-10-03/consumer90-corrected-replay/).
+  Journal39, consumer116 and full current-source1..200 remain open. The
   rejected original shards remain rejected; these new trials execute all final
   gates that the old checker failures prevented.
 - **Tier3:**16 implemented row variants are now in the registry,
