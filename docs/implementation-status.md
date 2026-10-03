@@ -33,7 +33,8 @@
   third restart: its post-upgrade fallback proof hits the two-second metadata
   wrapper. The fixture now uses the existing60s whole-operation deadline;
   expanded fallback/native race/control evidence is accepted at24f2523.
-  Version4 records all-peer public health responses before native admission. Temporary no-quorum warnings and later metadata
+  Version4 records all-peer public health responses before native admission.
+  Temporary no-quorum warnings and later metadata
   contact remain observations, not a confirmed server cause.
   [Failure and corrected phase evidence](scale/r5-rolling-upgrade-2026-10-03/rejected-deployment-check/),
   [accepted budget contract](scale/upgrade-provisioning-budget-2026-10-03/).
@@ -8174,3 +8175,13 @@ contract. No ahead200 retry or worker-kill mismatch rerun is launched. The
 historical TTL30s/31.1s smoke is closed: production TTL12s/heartbeat3s/AckWait13s
 retain strict recovery under30s. This change does not establish the original
 seed29 exit time or resolve seed55's pending-timer admission failure.
+
+
+[Docker observer qualification37112424062](https://github.com/AntPAllen/js-wf/actions/runs/37112424062)
+is confirmed queued at exactd2b98c6705bd2f47a680048a212d76608fa4b613.
+It requires seven actual positive race-test bodies, actual pinned-server Docker
+observations in both removal modes, and separate compiled sequential and
+missing-wakeup controls. It is a focused observer contract, not a worker-kill
+smoke or an ahead200 replay. Current121100k37106469422 remains in progress;
+all13 Tier2x20037057872230 remains queued. Version4 real rolling qualification
+has not yet launched.
