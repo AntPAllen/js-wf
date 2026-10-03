@@ -48,3 +48,28 @@ remains about 956 MiB. The canonical compressed archive, accepted report and
 failed original stores were retained. The script records a successful audit
 before deletion and a completion verdict afterward; it requires the original
 duplicate to exist and is not an idempotent maintenance command.
+
+## Completed local R5 proof expansion removed
+
+At 23:52 UTC, all 5,000 members of the accepted local ten-minute R5 archive
+were checked against both the archive manifest and expanded files. The retained
+local archive and all three committed parts independently matched SHA256
+`9cfbc99123cec3a47e2264ca23f8dd843075dd9ca4cd743747d8bb17f1b28abf`.
+After checking open descriptors and confirming no local Docker containers,
+only the redundant `fixture` directory and `integration.test` under
+`/tmp/js-wf-local-journal-tenm-20261003` were removed. The canonical archive,
+manifest, reports and source worktree remain. Re-extract the retained archive
+before any future use of its removed expanded files.
+
+The first inventory audit stopped before deletion: the source tree contains a
+Git worktree pointer and Python caches outside the archive manifest. Its
+[rejected script](rejected-local-proof-inventory-audit.py) is retained to record
+that guard; the source tree was then excluded from removal. The executed
+[corrected audit](verify-local-proof-duplicate-removal.py) and
+[verdict](local-proof-duplicate-removal.json) record the final exact paths.
+
+This recovered 207,073,280 allocated bytes (about 197.5 MiB) across 3,842
+expanded files; free root space increased from about 739 to 944 MiB. Failed
+stores remain unchanged. This affects storage representation only, with no
+change to the [original single-row qualification](../local-r5-journal-ten-minute-2026-10-03/).
+It does not establish sufficient disk capacity for a 24-hour soak.
