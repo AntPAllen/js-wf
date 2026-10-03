@@ -2,6 +2,17 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Current-source full Tier3 matrix dispatched:** run 37156883771 at exact
+  `f05d7ba21442474767d3e204d601a486d7e6b054` requests all 16 R5 rows,
+  seeds 1–200, ten minutes each: 3,200 actual executions in 256 shards,
+  four parallel. Rolling SIGKILL upgrades require Start gaps; server-clock
+  rows require positive timer cuts and independent common-clock probes.
+  Four planner controls and explicit complete seed enumeration pass. Actual
+  queued planner identity/head are verified; dispatch clears no gate.
+  Current full100k and four Tier2 shards are independently observed live,
+  and the older ahead-clock-only campaign remains running. Separate Lame Duck,
+  24h and five-VM gates remain open; root disk has only 1.6 GiB free.
+  [Exact dispatch and scope](scale/current-tier3-full-campaign-2026-10-03/).
 - **Six sustained mutation components qualified:** the corrected Start-only
   job 111295104283 at `649c6ce8d40c10521da1a4f0feda066db4dc0332` passes
   independent raw review. The combined checker then accepts all six pairs
