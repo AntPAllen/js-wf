@@ -7992,3 +7992,19 @@ partial proof phases survive in the complete archive. The checker rejects
 missing/unhealthy/wrong-peer/errored/misordered health observations. Local67
 Python guards pass; no new real-row qualification is claimed yet. Whole-proof
 60s and workload30s latency gates remain unchanged.
+
+[Version3 rolling mixed trial37109789443](https://github.com/AntPAllen/js-wf/actions/runs/37109789443)
+is confirmed queued at exactdf07ba1bf271086b31ce6d3805b4b085227f681c, seed1/10m.
+This new trial follows the accepted compiled operation-budget control and
+corrected post-upgrade evidence, with recorded all-peer health admission.
+It preserves SIGKILL upgrades, all5 transitions and the sustained workload;
+no shortened or graceful substitute clears the rejected prior trial. Actual
+compilation/execution and original matrix/24h qualification remain pending.
+
+The duplicate52,134,408-byte download of accepted Docker contract37106224055
+was removed only after its archive SHA256 matched the committed archive and
+all442 committed members were independently rehashed against the manifest.
+The committed archive and metadata remain intact. This recovers~50MiB; local
+root has248MiB free, while failed/live original stores remain preserved.
+Worker-clock37108814121 and current121100k37106469422 remain running;
+Tier2 all13x20037057872230 remains queued at its older source scope.
