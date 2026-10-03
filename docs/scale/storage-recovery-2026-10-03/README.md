@@ -30,3 +30,21 @@ here. This changes evidence storage representation, not its qualification or
 runtime behavior. Original failed million-timer stores remain untouched.
 Free root space after these operations was approximately 2.1 GiB; this alone
 does not establish capacity for the full 24-hour matrix.
+
+## Completed restoration duplicate removed
+
+At 23:12 UTC, the canonical archive and completed temporary restoration were
+checked again before removing only the restoration directory. All 2,543 members
+passed compressed and decompressed SHA256/length checks; restored bytes, modes
+and nanosecond timestamps also matched the manifest. Manifest and accepted
+report hashes matched the values above. No process had an open descriptor into
+the duplicate, and its complete file inventory matched the manifest.
+
+The [verification and removal script](verify-duplicate-removal.py) and
+[verdict](duplicate-removal.json) retain the checks and exact paths. Removal
+recovered 1,565,275,909 raw bytes (approximately 1.46 GiB) of RAM space:
+`/dev/shm` free space increased from about 1.8 to 3.2 GiB. Root disk free space
+remains about 956 MiB. The canonical compressed archive, accepted report and
+failed original stores were retained. The script records a successful audit
+before deletion and a completion verdict afterward; it requires the original
+duplicate to exist and is not an idempotent maintenance command.
