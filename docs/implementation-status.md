@@ -7930,3 +7930,15 @@ actual named/package failure with the expected context deadline message.
 Source hashes and original/control JSON bytes are retained. Actual compilation
 and execution are pending; this preparation does not qualify the mixed rolling
 row or confirm its original server cause. No real rolling trial was restarted.
+
+[Focused budget proof37109195828](https://github.com/AntPAllen/js-wf/actions/runs/37109195828)
+is confirmed queued at exact256d7ae47342e75ece533565a94ded25d6f32b3d. Worker-clock
+37108814121 remains queued at82069c3; current121100k37106469422 remains running.
+
+A separate inspection of retained rolling server logs also finds no-quorum
+warnings on all five peers around08:00, before the failed third pre-upgrade
+proof returns. Node4 reports absent metadata-leader contact. Exact member hashes
+and matching raw lines are retained in rejected-deployment-check/server-warning-review.json.
+The fixture budget mismatch alone does not explain this trial, and correcting
+it does not prove convergence. Keep the failed trial rejected and investigate
+cluster readiness independently before qualifying a new real mixed run.
