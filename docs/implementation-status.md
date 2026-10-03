@@ -2,13 +2,13 @@
 
 ## Current qualification snapshot — 2026-10-03
 
-- **Tier1:** the current121-workload default1k gate is independently accepted
-  at5712254:121,000 actual bodies,165 top-level passes and267 pins in162.931s.
-  [Verified originals](scale/worker-release-fencing-2026-10-03/full121-1k/).
-  Current121100k [37106469422](https://github.com/AntPAllen/js-wf/actions/runs/37106469422)
-  remains running at11ad2e4. The previous120100k gate is accepted atad37bfc:
-  12M bodies/266 pins/14,363.912s, with its earlier scope preserved.
-  [Previous graph evidence](scale/tier1-current120-100k-2026-10-03/).
+- **Tier1:** current native hint recovery at0b69e91 completes all121,000 default1k
+  bodies,167 top-level passes/two trace-only skips/267 pins in160.901s. Full
+  clean before/after source inventories match exact Git.
+  [Current qualification](scale/native-hint-recovery-2026-10-03/typed-full1k/).
+  Earlier121100k [37106469422](https://github.com/AntPAllen/js-wf/actions/runs/37106469422)
+  remains running at11ad2e4, before native hint recovery. Final-runtime100k
+  remains open. Previous120100k atad37bfc retains its accepted earlier scope.
 - **Runtime regression:** production lost-release fencing now records the
   first ownership loss before cleanup and deduplicates one observation per
   delivery. The focused1k race/replay and exact compiled omission control are
@@ -30,7 +30,9 @@
   is terminal FAILED atdf07ba1 during its second post-upgrade native probe.
   Complete originals are retained. Version4
   [37113734884](https://github.com/AntPAllen/js-wf/actions/runs/37113734884)
-  is queued at59a0faa; rolling real-row acceptance remains open.
+  is independently accepted at59a0faa for seed1/10m:five actual peer upgrades,
+  55 semantic native rejections and1960 invocations. Its earlier runtime scope
+  is retained; full current-source matrices remain open.
 - **Rolling readiness:** the first mixed trial is rejected after node4's actual
   third restart: its post-upgrade fallback proof hits the two-second metadata
   wrapper. The fixture now uses the existing60s whole-operation deadline;
@@ -8421,3 +8423,32 @@ Version4 rolling37113734884 is terminal success at59a0faa; its originals have
 been downloaded for independent review, without a rolling acceptance claim yet.
 Earlier121100k37106469422 remains live at11ad2e4; full current-source100k/race
 and new admitted R5 clock qualification remain open.
+
+
+## Typed recovery full default1k and rolling version4 accepted
+
+At exact0b69e91dce0514c37e83ca855eb3686edca64ed7, all121,000 seed bodies/167
+top-level passes/two documented trace-only skips/267 pins complete in160.901s
+package time (161.66s wall).123,037 schedules/1,798,015 choices/27,159,069 events
+are recorded. All967 committed source hashes match clean before/unchanged after
+inventories. Typed focused race qualification also executes20 SDK cases, two
+2000ms recovery/replay cases, actual renewal-failure non-suppression, all267
+pins and the injected real three-node case; the precise compiled worker omission
+fails the actual missing-suspension assertion.14/12 original archive members are
+SHA256-readback verified in typed-focused/ and typed-full1k/ under
+scale/native-hint-recovery-2026-10-03/. The reusable focused review is retained.
+No final-runtime100k/full-package race or R5 clock acceptance is inferred.
+
+Rolling version4 trial37113734884 is independently accepted at exact
+59a0faa5e812d9ea34c54ecbb48a1f8dd89accd5. All3863 original archive members and699
+committed clean before/after source hashes verify. Five actual peers upgrade
+from2.11.17 to2.15.0;55 pinned semantic rejections, seven checkpoint audits,
+1960 invocations and21571 entries pass. Worst terminal/progress cell p99 are
+8.179701480/2.758303918s. Row/checkpoint report, event explanations and fencing
+review regenerate byte-for-byte. Complete physical stores, logs and version4
+health/native/backend proofs remain in
+scale/r5-rolling-upgrade-2026-10-03/hosted-version4-pass/. This accepts one
+real ten-minute rolling row on its earlier runtime; it does not clear200/full
+matrix/24h or establish normal graceful upgrade/forced two-write-gap coverage.
+The two rejected original trials remain rejected. No server root cause is
+inferred from the corrected successful fixture.
