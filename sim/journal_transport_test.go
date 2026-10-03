@@ -376,6 +376,15 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSeededLeaseScenario(loaded.Seed, &loaded)
 	case "client_start_repair_20":
 		replayed, err = runSeededStartScenario(loaded.Seed, &loaded)
+	case "start_enqueue_unknown_history":
+		if len(loaded.Decisions) != 1 {
+			return Trace{}, fmt.Errorf("start enqueue history requires its fault choice")
+		}
+		fault := loaded.Decisions[0].Chosen
+		if fault != "drop_before_commit" && fault != "lose_ack_after_commit" {
+			return Trace{}, fmt.Errorf("unknown start enqueue history fault %q", fault)
+		}
+		replayed, err = runStartEnqueueUnknownHistory(fault, &loaded)
 	case "journal_two_writer_cas":
 		replayed, err = runTwoWriterCAS(loaded.Seed, &loaded)
 	case "journal_two_writer_unknown":

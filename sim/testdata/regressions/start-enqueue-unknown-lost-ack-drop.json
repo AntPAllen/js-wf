@@ -1,0 +1,91 @@
+{
+  "version": 3,
+  "seed": 42,
+  "workload": "start_enqueue_unknown_history",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "lose_ack_after_commit"
+      ],
+      "chosen": "lose_ack_after_commit"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.enqueue-history",
+      "sequence": 1,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.52",
+      "sequence": 1,
+      "data_sha256": "4e0ed2015e92d4c4f57ee6fa81c56ab851f1b163168e7f06bfc8401fe3ee1994",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.enqueue-history",
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "cas_reject"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.test.enqueue-history",
+      "sequence": 1,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.52",
+      "data_sha256": "4e0ed2015e92d4c4f57ee6fa81c56ab851f1b163168e7f06bfc8401fe3ee1994",
+      "outcome": "drop_before_commit"
+    },
+    {
+      "at_ms": 0,
+      "operation": "publish_invocation",
+      "subject": "wf.inv.test.enqueue-history",
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "cas_reject"
+    },
+    {
+      "at_ms": 0,
+      "operation": "last_invocation",
+      "subject": "wf.inv.test.enqueue-history",
+      "sequence": 1,
+      "data_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "enqueue_run",
+      "subject": "wf.run.52",
+      "sequence": 1,
+      "data_sha256": "4e0ed2015e92d4c4f57ee6fa81c56ab851f1b163168e7f06bfc8401fe3ee1994",
+      "outcome": "duplicate"
+    },
+    {
+      "at_ms": 0,
+      "operation": "invocation_stream_info",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "check_start_enqueue_unknown_history",
+      "subject": "wf.inv.test.enqueue-history",
+      "sequence": 1,
+      "outcome": "legal_once"
+    }
+  ]
+}

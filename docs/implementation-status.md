@@ -11,7 +11,12 @@
   [37117429308](https://github.com/AntPAllen/js-wf/actions/runs/37117429308)
   is launched at63fbc03 and remains unaccepted. Previous120100k atad37bfc
   retains its accepted earlier scope.
-- **Full Tier1 race:** the e824cc1 attempt is rejected: two relative fixture-path
+- **Full Tier1 race:** the corrected complete suite passes at64bef04 in2063.82s:
+  167 top-level passes/two documented skips,267 pins and121,000 seeded bodies.
+  All973 before/after source files match Git; retained binary race metadata and
+  every archived member hash are verified. This precedes the Start checker fix.
+  [Complete corrected race evidence](scale/native-hint-recovery-2026-10-03/corrected-full-race-pass/).
+  The e824cc1 attempt is rejected: two relative fixture-path
   failures from the retained binary's repository-root working directory, then
   an aggregate30m timeout;152 top-level passes/two documented skips are
   insufficient. The same binary passes both fixture cases from `sim/`, including
@@ -28,7 +33,19 @@
 - **Tier2:** all13 ten-minute rows at seed1 are independently accepted at3f483bd:
   34,636 invocations/313 faults. All13x200
   [37057872230](https://github.com/AntPAllen/js-wf/actions/runs/37057872230)
-  remains queued at076ebad. Neither single-seed coverage nor queued work clears200.
+  is running at076ebad, with five failed shards observed in actual job metadata:
+  journal seeds39/86 and consumer seeds90/116/139. Run-level queued status does
+  not describe its executing jobs. All five fail Start history checking.
+  The checker incorrectly treated repeated enqueue failures as repeated creators;
+  production retries can return enqueue_unknown for an existing invocation.
+  Corrected offline Start/Signal/Result checks pass all five original histories.
+  Fixed production-client Tier1 replays and all269 pins pass race; the original
+  checker fails both replay cases at the expected semantic assertion. Controls
+  still reject double creation and inconsistent identity. These are two fixed
+  regression pins, not additional seeded workloads. Failed real shards remain
+  rejected because later latency/drain gates did not execute; full current-source
+  qualification remains open.
+  [Original failures and deterministic correction](scale/start-enqueue-history-2026-10-03/).
 - **Tier3:**16 implemented row variants are now in the registry,
   including separate worker-clock and every-peer rolling upgrade. The initial
   14-row seed1 campaign failed and cannot qualify the complete original matrix.

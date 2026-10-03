@@ -109,7 +109,7 @@ func CheckStarts(operations []client.Operation, timeout time.Duration) (porcupin
 	for _, operation := range converted {
 		input := operation.Input.(startInput)
 		output := operation.Output.(startOutput)
-		if output.Status == "started" || output.Status == "enqueue_unknown" {
+		if output.Status == "started" {
 			confirmed[input.Type+"."+input.ID] = true
 		}
 	}
@@ -118,8 +118,9 @@ func CheckStarts(operations []client.Operation, timeout time.Duration) (porcupin
 		input.HasConfirmedStart = confirmed[input.Type+"."+input.ID]
 		converted[i].Input = input
 	}
-	// A large same-input burst has a direct linearizability proof. Exactly one
-	// call reports a confirmed invocation publish; every matching duplicate can be
+	// A large same-input burst has a direct linearizability proof. At most one
+	// call reports creation; enqueue_unknown confirms a stored invocation but can
+	// also be returned by a matching retry. Every matching observation can be
 	// placed after that call's invocation if its own interval reaches it, and
 	// every unknown call may be placed as an uncommitted attempt. This avoids
 	// factorial search over hundreds of equivalent overlapping duplicates.
@@ -154,9 +155,23 @@ func CheckStarts(operations []client.Operation, timeout time.Duration) (porcupin
 			output := rawOutput.(startOutput)
 			matches := state.InputHash == input.InputHash && state.ParentType == input.ParentType && state.ParentID == input.ParentID && state.SignalName == input.SignalName
 			switch output.Status {
-			case "started", "enqueue_unknown":
+			case "started":
 				if state.Stored || output.InvSeq == 0 {
 					return nil
+				}
+				return []interface{}{startState{Stored: true, InputHash: input.InputHash, ParentType: input.ParentType, ParentID: input.ParentID, SignalName: input.SignalName, InvSeq: output.InvSeq}}
+			case "enqueue_unknown":
+				// Enqueue failure says the invocation is stored. It does not
+				// distinguish its creator from a retry of an existing invocation.
+				if output.InvSeq == 0 {
+					return nil
+				}
+				if state.Stored {
+					if !matches || state.InvSeq != 0 && state.InvSeq != output.InvSeq {
+						return nil
+					}
+					state.InvSeq = output.InvSeq
+					return []interface{}{state}
 				}
 				return []interface{}{startState{Stored: true, InputHash: input.InputHash, ParentType: input.ParentType, ParentID: input.ParentID, SignalName: input.SignalName, InvSeq: output.InvSeq}}
 			case "already_started":
@@ -214,12 +229,12 @@ func checkUniformStartBurst(operations []porcupine.Operation) (porcupine.CheckRe
 			return porcupine.Unknown, false
 		}
 		switch output.Status {
-		case "started", "enqueue_unknown":
+		case "started":
 			if started != nil {
 				return porcupine.Illegal, true
 			}
 			started, sequence = operation, output.InvSeq
-		case "already_started", "unknown":
+		case "already_started", "enqueue_unknown", "unknown":
 		default:
 			return porcupine.Unknown, false
 		}
@@ -232,7 +247,7 @@ func checkUniformStartBurst(operations []porcupine.Operation) (porcupine.CheckRe
 		for _, operation := range operations {
 			output := operation.Output.(startOutput)
 			switch output.Status {
-			case "already_started":
+			case "already_started", "enqueue_unknown":
 				if output.InvSeq == 0 || sequence != 0 && output.InvSeq != sequence {
 					return porcupine.Illegal, true
 				}
@@ -251,7 +266,7 @@ func checkUniformStartBurst(operations []porcupine.Operation) (porcupine.CheckRe
 	for _, operation := range operations {
 		output := operation.Output.(startOutput)
 		switch output.Status {
-		case "already_started":
+		case "already_started", "enqueue_unknown":
 			if output.InvSeq != sequence || operation.Return < started.Call {
 				return porcupine.Illegal, true
 			}
