@@ -7639,3 +7639,40 @@ run37051896032 has terminal success, pending independent artifact acceptance.
 Initial14-row R5 run37058644370 has terminal failure, pending failure review;
 Tier2 all13x20037057872230 is still queued. No trial was restarted solely for
 an observation timeout. No24h/full-matrix release claim is made.
+
+## Current120 Tier1 100k gate accepted; initial14 R5 failure triaged
+
+[Run37051896032](https://github.com/AntPAllen/js-wf/actions/runs/37051896032)
+at exactad37bfc is independently accepted:164 top-level passes, two documented
+trace-only skips,266 pins, all120 workloads executing every seed1..100000,
+12M completed bodies,12,200,034 generated schedules,179,646,691 scheduler
+choices and2,691,932,157 transport events. Actual package pass14363.912s.
+The campaign-revision checker regenerates its report byte for byte. All845
+Go/module/checker/workflow/pin source files are retained from exact Git bytes.
+Compiled and AST inventories match the independently accepted3a5452e1k run;
+all Go/module source bytes are identical between those revisions, so that
+inventory evidence is reused without another compilation. Original evidence,
+executed review, exact sources and verified archive are in
+scale/tier1-current120-100k-2026-10-03/. This clears the current120 graph's
+100k gate; whole-package race and real-cluster/full-release gates remain separate.
+
+[Initial14 R5 run37058644370](https://github.com/AntPAllen/js-wf/actions/runs/37058644370)
+failed at7c5e5d1: ten row jobs passed, four failed. Passing jobs alone are not
+independent acceptance. Behind-clock admission missed the actual source-removal
+before-due boundary; majority-route publication received no stream response;
+automatic membership timed out awaiting a timer invocation. The worker-pause
+Go test passed but its original artifact checker correctly rejected missing
+fencing attribution in faults4,6,7. The complete raw pause upload, checked
+member hashes, terminal metadata and all four failed-job logs are preserved in
+scale/r5-initial14-2026-10-03/. This workflow did not retain physical stores.
+
+Concrete pause counterexample: worker matrix-process-1-generation-0 held
+matrixtimer.tier3-1-batch-29-7 epoch18899 during45s SIGSTOP. On resume, delivery
+3322 emitted release_initial_error wrapping lease.ErrLost, followed by successful
+cleanup; no FencingEvent for that invocation exists anywhere in the retained
+stream. The production release closure emits that failed ownership check but
+can return nil after Cleanup, bypassing the later release-error fencing branch.
+The fixture's dispatch-error count consequently passed while the fencing audit
+failed. This is a concrete missing runtime fencing-observation path, not an
+unconfirmed NATS cause. A production-path Tier1 reproduction and accounting
+fix remain required; no checker weakening or passing rerun is substituted.

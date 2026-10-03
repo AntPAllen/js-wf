@@ -1,0 +1,28 @@
+{
+  "run": 37058644370,
+  "revision": "7c5e5d18249b14fd98f2c043e60b616bfddf442b",
+  "verdict": "rejected",
+  "passing_job_count": 10,
+  "failed_rows": [
+    "worker_pause",
+    "server_clock_behind",
+    "auto_journal",
+    "route_majority"
+  ],
+  "pause_members_verified": 77,
+  "pause_failed_fault_indices": [
+    3,
+    5,
+    6
+  ],
+  "pause_counterexample": {
+    "worker": "matrix-process-1-generation-0",
+    "key": "matrixtimer.tier3-1-batch-29-7",
+    "epoch": 18899,
+    "run_sequence": 3322,
+    "stage": "release_initial_error",
+    "error": "workflow lease was lost",
+    "fencing_records_for_invocation": 0
+  },
+  "scope": "Failed campaign; successful row jobs have not yet been independently accepted. Raw pause artifacts and four failed-job logs preserved. Physical NATS stores were not uploaded by this workflow."
+}

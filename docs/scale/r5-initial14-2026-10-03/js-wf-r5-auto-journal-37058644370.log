@@ -1,0 +1,1094 @@
+﻿2026-10-02T20:39:39.2404621Z Current runner version: '2.337.0'
+2026-10-02T20:39:39.2429553Z ##[group]Runner Image Provisioner
+2026-10-02T20:39:39.2430516Z Hosted Compute Agent
+2026-10-02T20:39:39.2431191Z Version: 20260901.588
+2026-10-02T20:39:39.2431819Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-02T20:39:39.2432622Z Build Date: 2026-09-01T19:56:44Z
+2026-10-02T20:39:39.2433352Z Worker ID: {28d3b428-bd6a-477e-9998-e587cf7ee697}
+2026-10-02T20:39:39.2434068Z Azure Region: westus
+2026-10-02T20:39:39.2434929Z ##[endgroup]
+2026-10-02T20:39:39.2436613Z ##[group]Operating System
+2026-10-02T20:39:39.2437357Z Ubuntu
+2026-10-02T20:39:39.2437892Z 24.04.5
+2026-10-02T20:39:39.2438400Z LTS
+2026-10-02T20:39:39.2438964Z ##[endgroup]
+2026-10-02T20:39:39.2439527Z ##[group]Runner Image
+2026-10-02T20:39:39.2440141Z Image: ubuntu-24.04
+2026-10-02T20:39:39.2440767Z Version: 20260927.320.1
+2026-10-02T20:39:39.2442324Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-02T20:39:39.2444060Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-02T20:39:39.2445283Z ##[endgroup]
+2026-10-02T20:39:39.2446563Z ##[group]GITHUB_TOKEN Permissions
+2026-10-02T20:39:39.2448754Z Contents: read
+2026-10-02T20:39:39.2449382Z Metadata: read
+2026-10-02T20:39:39.2449976Z Packages: read
+2026-10-02T20:39:39.2450574Z ##[endgroup]
+2026-10-02T20:39:39.2452591Z Secret source: Actions
+2026-10-02T20:39:39.2453719Z Cache mode: write
+2026-10-02T20:39:39.2455145Z Prepare workflow directory
+2026-10-02T20:39:39.3023023Z Prepare all required actions
+2026-10-02T20:39:39.3072249Z Getting action download info
+2026-10-02T20:39:39.6951048Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-02T20:39:39.7863751Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+2026-10-02T20:39:40.2716303Z Download action repository 'actions/upload-artifact@v7' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-10-02T20:39:40.5173215Z Complete job name: journal (auto_journal, 1)
+2026-10-02T20:39:40.5911748Z ##[group]Run actions/checkout@v4
+2026-10-02T20:39:40.5912895Z with:
+2026-10-02T20:39:40.5913400Z   repository: AntPAllen/js-wf
+2026-10-02T20:39:40.5918170Z   token: ***
+2026-10-02T20:39:40.5918667Z   ssh-strict: true
+2026-10-02T20:39:40.5919154Z   ssh-user: git
+2026-10-02T20:39:40.5919657Z   persist-credentials: true
+2026-10-02T20:39:40.5920192Z   clean: true
+2026-10-02T20:39:40.5920678Z   sparse-checkout-cone-mode: true
+2026-10-02T20:39:40.5921264Z   fetch-depth: 1
+2026-10-02T20:39:40.5921743Z   fetch-tags: false
+2026-10-02T20:39:40.5922230Z   show-progress: true
+2026-10-02T20:39:40.5922722Z   lfs: false
+2026-10-02T20:39:40.5923174Z   submodules: false
+2026-10-02T20:39:40.5923696Z   set-safe-directory: true
+2026-10-02T20:39:40.5924248Z   allow-unsafe-pr-checkout: false
+2026-10-02T20:39:40.5925613Z env:
+2026-10-02T20:39:40.5926120Z   FAULT_SEED: 1
+2026-10-02T20:39:40.5926599Z   FIRST_SEED: 1
+2026-10-02T20:39:40.5927094Z   LAST_SEED: 1
+2026-10-02T20:39:40.5927598Z   CAMPAIGN_ALL: 1
+2026-10-02T20:39:40.5928077Z   WF_TIER3_MATRIX: 1
+2026-10-02T20:39:40.5928584Z   TIER3_MATRIX_ROW: auto_journal
+2026-10-02T20:39:40.5929164Z   WF_TIER3_MATRIX_DURATION: 10m
+2026-10-02T20:39:40.5929719Z   WF_TIER3_SYNC_INTERVAL: 2m
+2026-10-02T20:39:40.5930263Z   WF_TIER3_CLOCK_TIMER_CUT: 
+2026-10-02T20:39:40.5930813Z   WF_TIER3_COMMON_CLOCK: 
+2026-10-02T20:39:40.5931455Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+2026-10-02T20:39:40.5932162Z   GOMEMLIMIT: 512MiB
+2026-10-02T20:39:40.5932674Z   GOMAXPROCS: 2
+2026-10-02T20:39:40.5933138Z ##[endgroup]
+2026-10-02T20:39:40.6962331Z Syncing repository: AntPAllen/js-wf
+2026-10-02T20:39:40.6965293Z ##[group]Getting Git version info
+2026-10-02T20:39:40.6966828Z Working directory is '/home/runner/work/js-wf/js-wf'
+2026-10-02T20:39:40.6968790Z [command]/usr/bin/git version
+2026-10-02T20:39:40.7025215Z git version 2.55.0
+2026-10-02T20:39:40.7048171Z ##[endgroup]
+2026-10-02T20:39:40.7063300Z Temporarily overriding HOME='/home/runner/work/_temp/56c51842-8713-4f73-be0c-89619dd1edad' before making global git config changes
+2026-10-02T20:39:40.7066206Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-02T20:39:40.7070103Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+2026-10-02T20:39:40.7127836Z Deleting the contents of '/home/runner/work/js-wf/js-wf'
+2026-10-02T20:39:40.7132018Z ##[group]Initializing the repository
+2026-10-02T20:39:40.7136205Z [command]/usr/bin/git init /home/runner/work/js-wf/js-wf
+2026-10-02T20:39:40.7257814Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-02T20:39:40.7259780Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-02T20:39:40.7261504Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-02T20:39:40.7262830Z hint: call:
+2026-10-02T20:39:40.7263735Z hint:
+2026-10-02T20:39:40.7265025Z hint: 	git config --global init.defaultBranch <name>
+2026-10-02T20:39:40.7266161Z hint:
+2026-10-02T20:39:40.7267176Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-02T20:39:40.7268904Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-02T20:39:40.7270367Z hint:
+2026-10-02T20:39:40.7271128Z hint: 	git branch -m <name>
+2026-10-02T20:39:40.7271960Z hint:
+2026-10-02T20:39:40.7273082Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-02T20:39:40.7275125Z Initialized empty Git repository in /home/runner/work/js-wf/js-wf/.git/
+2026-10-02T20:39:40.7280440Z [command]/usr/bin/git remote add origin https://github.com/AntPAllen/js-wf
+2026-10-02T20:39:40.7337340Z ##[endgroup]
+2026-10-02T20:39:40.7338697Z ##[group]Disabling automatic garbage collection
+2026-10-02T20:39:40.7342581Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-02T20:39:40.7380841Z ##[endgroup]
+2026-10-02T20:39:40.7382640Z ##[group]Setting up auth
+2026-10-02T20:39:40.7384966Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-02T20:39:40.7419235Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-02T20:39:40.7812610Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-02T20:39:40.7858394Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-02T20:39:40.8090450Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-02T20:39:40.8129072Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-02T20:39:40.8353776Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-02T20:39:40.8395679Z ##[endgroup]
+2026-10-02T20:39:40.8396616Z ##[group]Fetching the repository
+2026-10-02T20:39:40.8405558Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +7c5e5d18249b14fd98f2c043e60b616bfddf442b:refs/remotes/origin/main
+2026-10-02T20:39:56.6329264Z From https://github.com/AntPAllen/js-wf
+2026-10-02T20:39:56.6330184Z  * [new ref]         7c5e5d18249b14fd98f2c043e60b616bfddf442b -> origin/main
+2026-10-02T20:39:56.6340617Z ##[endgroup]
+2026-10-02T20:39:56.6341238Z ##[group]Determining the checkout info
+2026-10-02T20:39:56.6343908Z ##[endgroup]
+2026-10-02T20:39:56.6350299Z [command]/usr/bin/git sparse-checkout disable
+2026-10-02T20:39:56.6415273Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-02T20:39:56.6462414Z ##[group]Checking out the ref
+2026-10-02T20:39:56.6467587Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-02T20:39:57.6593655Z Updating files:  38% (2983/7669)
+2026-10-02T20:39:57.6626631Z Updating files:  39% (2991/7669)
+2026-10-02T20:39:57.6666631Z Updating files:  40% (3068/7669)
+2026-10-02T20:39:57.6729191Z Updating files:  41% (3145/7669)
+2026-10-02T20:39:57.6790480Z Updating files:  42% (3221/7669)
+2026-10-02T20:39:57.6838715Z Updating files:  43% (3298/7669)
+2026-10-02T20:39:57.6906843Z Updating files:  44% (3375/7669)
+2026-10-02T20:39:57.6951555Z Updating files:  45% (3452/7669)
+2026-10-02T20:39:57.6998616Z Updating files:  46% (3528/7669)
+2026-10-02T20:39:57.7044716Z Updating files:  47% (3605/7669)
+2026-10-02T20:39:57.7098445Z Updating files:  48% (3682/7669)
+2026-10-02T20:39:57.7145103Z Updating files:  49% (3758/7669)
+2026-10-02T20:39:57.7205703Z Updating files:  50% (3835/7669)
+2026-10-02T20:39:57.7243683Z Updating files:  51% (3912/7669)
+2026-10-02T20:39:57.7283744Z Updating files:  52% (3988/7669)
+2026-10-02T20:39:57.7338445Z Updating files:  53% (4065/7669)
+2026-10-02T20:39:57.7390926Z Updating files:  54% (4142/7669)
+2026-10-02T20:39:57.7454900Z Updating files:  55% (4218/7669)
+2026-10-02T20:39:57.7517873Z Updating files:  56% (4295/7669)
+2026-10-02T20:39:57.7548714Z Updating files:  57% (4372/7669)
+2026-10-02T20:39:57.7612401Z Updating files:  58% (4449/7669)
+2026-10-02T20:39:57.7677406Z Updating files:  59% (4525/7669)
+2026-10-02T20:39:57.7732891Z Updating files:  60% (4602/7669)
+2026-10-02T20:39:57.7770086Z Updating files:  61% (4679/7669)
+2026-10-02T20:39:57.7813899Z Updating files:  62% (4755/7669)
+2026-10-02T20:39:57.7853713Z Updating files:  63% (4832/7669)
+2026-10-02T20:39:57.7904229Z Updating files:  64% (4909/7669)
+2026-10-02T20:39:57.7951766Z Updating files:  65% (4985/7669)
+2026-10-02T20:39:57.8100420Z Updating files:  66% (5062/7669)
+2026-10-02T20:39:57.8151543Z Updating files:  67% (5139/7669)
+2026-10-02T20:39:57.8309024Z Updating files:  68% (5215/7669)
+2026-10-02T20:39:57.8367707Z Updating files:  69% (5292/7669)
+2026-10-02T20:39:57.8514174Z Updating files:  70% (5369/7669)
+2026-10-02T20:39:57.8563906Z Updating files:  71% (5445/7669)
+2026-10-02T20:39:57.8682774Z Updating files:  72% (5522/7669)
+2026-10-02T20:39:57.8789105Z Updating files:  73% (5599/7669)
+2026-10-02T20:39:57.8822184Z Updating files:  74% (5676/7669)
+2026-10-02T20:39:57.8867700Z Updating files:  75% (5752/7669)
+2026-10-02T20:39:57.8903989Z Updating files:  76% (5829/7669)
+2026-10-02T20:39:57.8938763Z Updating files:  77% (5906/7669)
+2026-10-02T20:39:57.8969169Z Updating files:  78% (5982/7669)
+2026-10-02T20:39:57.9002581Z Updating files:  79% (6059/7669)
+2026-10-02T20:39:57.9036237Z Updating files:  80% (6136/7669)
+2026-10-02T20:39:57.9064223Z Updating files:  81% (6212/7669)
+2026-10-02T20:39:57.9095283Z Updating files:  82% (6289/7669)
+2026-10-02T20:39:57.9133791Z Updating files:  83% (6366/7669)
+2026-10-02T20:39:57.9168429Z Updating files:  84% (6442/7669)
+2026-10-02T20:39:57.9232745Z Updating files:  85% (6519/7669)
+2026-10-02T20:39:57.9269168Z Updating files:  86% (6596/7669)
+2026-10-02T20:39:57.9315488Z Updating files:  87% (6673/7669)
+2026-10-02T20:39:57.9491215Z Updating files:  88% (6749/7669)
+2026-10-02T20:39:57.9543123Z Updating files:  89% (6826/7669)
+2026-10-02T20:39:57.9594769Z Updating files:  90% (6903/7669)
+2026-10-02T20:39:57.9646430Z Updating files:  91% (6979/7669)
+2026-10-02T20:39:57.9693960Z Updating files:  92% (7056/7669)
+2026-10-02T20:39:57.9744227Z Updating files:  93% (7133/7669)
+2026-10-02T20:39:57.9801177Z Updating files:  94% (7209/7669)
+2026-10-02T20:39:57.9853740Z Updating files:  95% (7286/7669)
+2026-10-02T20:39:57.9943861Z Updating files:  96% (7363/7669)
+2026-10-02T20:39:58.0019381Z Updating files:  97% (7439/7669)
+2026-10-02T20:39:58.0072713Z Updating files:  98% (7516/7669)
+2026-10-02T20:39:58.0115197Z Updating files:  99% (7593/7669)
+2026-10-02T20:39:58.0115908Z Updating files: 100% (7669/7669)
+2026-10-02T20:39:58.0116362Z Updating files: 100% (7669/7669), done.
+2026-10-02T20:39:58.0222555Z Switched to a new branch 'main'
+2026-10-02T20:39:58.0228884Z branch 'main' set up to track 'origin/main'.
+2026-10-02T20:39:58.0295741Z ##[endgroup]
+2026-10-02T20:39:58.0347214Z [command]/usr/bin/git log -1 --format=%H
+2026-10-02T20:39:58.0383016Z 7c5e5d18249b14fd98f2c043e60b616bfddf442b
+2026-10-02T20:39:58.0691487Z ##[group]Run actions/setup-go@v5
+2026-10-02T20:39:58.0691780Z with:
+2026-10-02T20:39:58.0691987Z   go-version-file: go.mod
+2026-10-02T20:39:58.0692220Z   check-latest: false
+2026-10-02T20:39:58.0695435Z   token: ***
+2026-10-02T20:39:58.0695653Z   cache: true
+2026-10-02T20:39:58.0695845Z env:
+2026-10-02T20:39:58.0696023Z   FAULT_SEED: 1
+2026-10-02T20:39:58.0696219Z   FIRST_SEED: 1
+2026-10-02T20:39:58.0696405Z   LAST_SEED: 1
+2026-10-02T20:39:58.0696597Z   CAMPAIGN_ALL: 1
+2026-10-02T20:39:58.0696804Z   WF_TIER3_MATRIX: 1
+2026-10-02T20:39:58.0697028Z   TIER3_MATRIX_ROW: auto_journal
+2026-10-02T20:39:58.0697291Z   WF_TIER3_MATRIX_DURATION: 10m
+2026-10-02T20:39:58.0697539Z   WF_TIER3_SYNC_INTERVAL: 2m
+2026-10-02T20:39:58.0697805Z   WF_TIER3_CLOCK_TIMER_CUT: 
+2026-10-02T20:39:58.0698036Z   WF_TIER3_COMMON_CLOCK: 
+2026-10-02T20:39:58.0698322Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+2026-10-02T20:39:58.0698635Z   GOMEMLIMIT: 512MiB
+2026-10-02T20:39:58.0698878Z   GOMAXPROCS: 2
+2026-10-02T20:39:58.0699088Z ##[endgroup]
+2026-10-02T20:39:58.1988990Z Setup go version spec 1.27.1
+2026-10-02T20:39:58.1999935Z Attempting to download 1.27.1...
+2026-10-02T20:39:58.2112645Z (node:2360) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T20:39:58.2113926Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T20:39:58.8044036Z matching 1.27.1...
+2026-10-02T20:39:58.8069816Z Acquiring 1.27.1 from https://github.com/actions/go-versions/releases/download/1.27.1-33583469715/go-1.27.1-linux-x64.tar.gz
+2026-10-02T20:39:59.4006066Z Extracting Go...
+2026-10-02T20:39:59.4148739Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/cea9c7a5-28bc-4444-bf76-98706f5d9a27 -f /home/runner/work/_temp/7b508979-e00b-4795-abac-60f8c1052573
+2026-10-02T20:40:01.1106073Z Successfully extracted go to /home/runner/work/_temp/cea9c7a5-28bc-4444-bf76-98706f5d9a27
+2026-10-02T20:40:01.1106804Z Adding to the cache ...
+2026-10-02T20:40:07.0966585Z Successfully cached go to /opt/hostedtoolcache/go/1.27.1/x64
+2026-10-02T20:40:07.0969692Z Added go to the path
+2026-10-02T20:40:07.0972547Z Successfully set up Go version 1.27.1
+2026-10-02T20:40:07.1228591Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+2026-10-02T20:40:07.1280032Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+2026-10-02T20:40:07.1324689Z /home/runner/go/pkg/mod
+2026-10-02T20:40:07.1345201Z /home/runner/.cache/go-build
+2026-10-02T20:40:07.3945817Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+2026-10-02T20:40:07.4085735Z (node:2360) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-02T20:40:08.6631496Z Received 8388608 of 209563510 (4.0%), 8.0 MBs/sec
+2026-10-02T20:40:09.6680059Z Received 134217728 of 209563510 (64.0%), 63.8 MBs/sec
+2026-10-02T20:40:10.0615739Z Received 209563510 of 209563510 (100.0%), 83.3 MBs/sec
+2026-10-02T20:40:10.0616776Z Cache Size: ~200 MB (209563510 B)
+2026-10-02T20:40:10.0772432Z [command]/usr/bin/tar -xf /home/runner/work/_temp/44ad4fb6-915e-4c09-99f1-1b18202f502b/cache.tzst -P -C /home/runner/work/js-wf/js-wf --use-compress-program unzstd
+2026-10-02T20:40:11.1583578Z Cache restored successfully
+2026-10-02T20:40:11.1690019Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+2026-10-02T20:40:11.1715830Z go version go1.27.1 linux/amd64
+2026-10-02T20:40:11.1716108Z 
+2026-10-02T20:40:11.1717013Z ##[group]go env
+2026-10-02T20:40:11.3318698Z AR='ar'
+2026-10-02T20:40:11.3319293Z CC='gcc'
+2026-10-02T20:40:11.3319822Z CGO_CFLAGS='-O2 -g'
+2026-10-02T20:40:11.3320395Z CGO_CPPFLAGS=''
+2026-10-02T20:40:11.3320957Z CGO_CXXFLAGS='-O2 -g'
+2026-10-02T20:40:11.3321943Z CGO_ENABLED='1'
+2026-10-02T20:40:11.3322495Z CGO_FFLAGS='-O2 -g'
+2026-10-02T20:40:11.3323054Z CGO_LDFLAGS='-O2 -g'
+2026-10-02T20:40:11.3323588Z CXX='g++'
+2026-10-02T20:40:11.3323899Z GCCGO='gccgo'
+2026-10-02T20:40:11.3324217Z GO111MODULE=''
+2026-10-02T20:40:11.3324903Z GOAMD64='v1'
+2026-10-02T20:40:11.3325242Z GOARCH='amd64'
+2026-10-02T20:40:11.3325579Z GOAUTH='netrc'
+2026-10-02T20:40:11.3325925Z GOBIN='/home/runner/go/bin'
+2026-10-02T20:40:11.3326365Z GOCACHE='/home/runner/.cache/go-build'
+2026-10-02T20:40:11.3326812Z GOCACHEPROG=''
+2026-10-02T20:40:11.3327137Z GODEBUG=''
+2026-10-02T20:40:11.3327488Z GOENV='/home/runner/.config/go/env'
+2026-10-02T20:40:11.3327915Z GOEXE=''
+2026-10-02T20:40:11.3328227Z GOEXPERIMENT=''
+2026-10-02T20:40:11.3328591Z GOFIPS140='off'
+2026-10-02T20:40:11.3328911Z GOFLAGS=''
+2026-10-02T20:40:11.3330030Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build3924606440=/tmp/go-build -gno-record-gcc-switches'
+2026-10-02T20:40:11.3330943Z GOHOSTARCH='amd64'
+2026-10-02T20:40:11.3331206Z GOHOSTOS='linux'
+2026-10-02T20:40:11.3331460Z GOINSECURE=''
+2026-10-02T20:40:11.3331751Z GOMOD='/home/runner/work/js-wf/js-wf/go.mod'
+2026-10-02T20:40:11.3332153Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-10-02T20:40:11.3332480Z GONOPROXY=''
+2026-10-02T20:40:11.3332721Z GONOSUMDB=''
+2026-10-02T20:40:11.3332964Z GOOS='linux'
+2026-10-02T20:40:11.3333227Z GOPACKAGESDRIVER=''
+2026-10-02T20:40:11.3333515Z GOPATH='/home/runner/go'
+2026-10-02T20:40:11.3334083Z GOPRIVATE=''
+2026-10-02T20:40:11.3334422Z GOPROXY='https://proxy.golang.org,direct'
+2026-10-02T20:40:11.3335199Z GOROOT='/opt/hostedtoolcache/go/1.27.1/x64'
+2026-10-02T20:40:11.3335605Z GOSUMDB='sum.golang.org'
+2026-10-02T20:40:11.3335905Z GOTELEMETRY='local'
+2026-10-02T20:40:11.3336320Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-10-02T20:40:11.3336708Z GOTMPDIR=''
+2026-10-02T20:40:11.3336966Z GOTOOLCHAIN='auto'
+2026-10-02T20:40:11.3337370Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.1/x64/pkg/tool/linux_amd64'
+2026-10-02T20:40:11.3337859Z GOVCS=''
+2026-10-02T20:40:11.3338106Z GOVERSION='go1.27.1'
+2026-10-02T20:40:11.3338371Z GOWORK=''
+2026-10-02T20:40:11.3338618Z PKG_CONFIG='pkg-config'
+2026-10-02T20:40:11.3338797Z 
+2026-10-02T20:40:11.3339203Z ##[endgroup]
+2026-10-02T20:40:11.3541995Z ##[group]Run python3 -m unittest discover -s scripts -p 'test_tier3*.py'
+2026-10-02T20:40:11.3542611Z [36;1mpython3 -m unittest discover -s scripts -p 'test_tier3*.py'[0m
+2026-10-02T20:40:11.3543165Z [36;1mpython3 -m unittest discover -s scripts -p 'test_controller_latency.py'[0m
+2026-10-02T20:40:11.3876751Z shell: /usr/bin/bash -e {0}
+2026-10-02T20:40:11.3877203Z env:
+2026-10-02T20:40:11.3877516Z   FAULT_SEED: 1
+2026-10-02T20:40:11.3877856Z   FIRST_SEED: 1
+2026-10-02T20:40:11.3878185Z   LAST_SEED: 1
+2026-10-02T20:40:11.3878494Z   CAMPAIGN_ALL: 1
+2026-10-02T20:40:11.3878821Z   WF_TIER3_MATRIX: 1
+2026-10-02T20:40:11.3879185Z   TIER3_MATRIX_ROW: auto_journal
+2026-10-02T20:40:11.3879603Z   WF_TIER3_MATRIX_DURATION: 10m
+2026-10-02T20:40:11.3880000Z   WF_TIER3_SYNC_INTERVAL: 2m
+2026-10-02T20:40:11.3880384Z   WF_TIER3_CLOCK_TIMER_CUT: 
+2026-10-02T20:40:11.3880758Z   WF_TIER3_COMMON_CLOCK: 
+2026-10-02T20:40:11.3881212Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+2026-10-02T20:40:11.3881701Z   GOMEMLIMIT: 512MiB
+2026-10-02T20:40:11.3881976Z   GOMAXPROCS: 2
+2026-10-02T20:40:11.3882237Z ##[endgroup]
+2026-10-02T20:40:11.9886989Z .........................................................
+2026-10-02T20:40:11.9887725Z ----------------------------------------------------------------------
+2026-10-02T20:40:11.9888349Z Ran 57 tests in 0.432s
+2026-10-02T20:40:11.9888588Z 
+2026-10-02T20:40:11.9888713Z OK
+2026-10-02T20:40:12.1494873Z ...
+2026-10-02T20:40:12.1495925Z ----------------------------------------------------------------------
+2026-10-02T20:40:12.1497469Z Ran 3 tests in 0.090s
+2026-10-02T20:40:12.1497827Z 
+2026-10-02T20:40:12.1498014Z OK
+2026-10-02T20:40:12.1668969Z ##[group]Run set -o pipefail
+2026-10-02T20:40:12.1669384Z [36;1mset -o pipefail[0m
+2026-10-02T20:40:12.1669655Z [36;1mcase "$TIER3_MATRIX_ROW" in[0m
+2026-10-02T20:40:12.1670128Z [36;1m  auto_journal) row_test=TestFiveContainerAutomaticMembershipWithJournalKills ;;[0m
+2026-10-02T20:40:12.1670824Z [36;1m  block_delay) row_test=TestFiveContainerMixedBlockDiskDelayedEveryThirtySeconds ;;[0m
+2026-10-02T20:40:12.1671520Z [36;1m  block_disk) row_test=TestFiveContainerMixedBlockDiskStalledEveryThirtySeconds ;;[0m
+2026-10-02T20:40:12.1672212Z [36;1m  server_clock_ahead) row_test=TestFiveContainerMixedServerClockAheadWithJournalKills ;;[0m
+2026-10-02T20:40:12.1672929Z [36;1m  server_clock_behind) row_test=TestFiveContainerMixedServerClockBehindWithJournalKills ;;[0m
+2026-10-02T20:40:12.1673657Z [36;1m  worker_isolation) row_test=TestFiveContainerMixedWorkerRepliesIsolatedFortyFiveSeconds ;;[0m
+2026-10-02T20:40:12.1674395Z [36;1m  worker_pause) row_test=TestFiveContainerMixedWorkerPausedFortyFiveSeconds ;;[0m
+2026-10-02T20:40:12.1675199Z [36;1m  worker_kill) row_test=TestFiveContainerMixedWorkerKilledEveryFiveSeconds ;;[0m
+2026-10-02T20:40:12.1675807Z [36;1m  journal) row_test=TestFiveContainerMixedJournalLeaderEveryThirtySeconds ;;[0m
+2026-10-02T20:40:12.1676421Z [36;1m  consumer) row_test=TestFiveContainerMixedConsumerLeaderEveryThirtySeconds ;;[0m
+2026-10-02T20:40:12.1677027Z [36;1m  restart) row_test=TestFiveContainerMixedAllServersEveryThirtySeconds ;;[0m
+2026-10-02T20:40:12.1677638Z [36;1m  fanout_restart) row_test=TestFiveContainerMixedFanoutRestartEveryThirtySeconds ;;[0m
+2026-10-02T20:40:12.1678274Z [36;1m  route_quorum) row_test=TestFiveContainerMixedRouteQuorumEveryThirtySeconds ;;[0m
+2026-10-02T20:40:12.1678907Z [36;1m  route_majority) row_test=TestFiveContainerMixedRouteMajorityEveryThirtySeconds ;;[0m
+2026-10-02T20:40:12.1679381Z [36;1m  *) exit 1 ;;[0m
+2026-10-02T20:40:12.1679606Z [36;1mesac[0m
+2026-10-02T20:40:12.1679869Z [36;1mfor seed in $(seq "$FIRST_SEED" "$LAST_SEED"); do[0m
+2026-10-02T20:40:12.1680371Z [36;1m  echo "TIER3_CAMPAIGN row=$TIER3_MATRIX_ROW seed=$seed duration=$WF_TIER3_MATRIX_DURATION"[0m
+2026-10-02T20:40:12.1680835Z [36;1m  export FAULT_SEED="$seed"[0m
+2026-10-02T20:40:12.1681120Z [36;1m  if [ "$CAMPAIGN_ALL" = 1 ]; then[0m
+2026-10-02T20:40:12.1681460Z [36;1m    seed_root="/tmp/tier3-matrix-range/seed-$seed"[0m
+2026-10-02T20:40:12.1681804Z [36;1m    mkdir -p "$seed_root"[0m
+2026-10-02T20:40:12.1682196Z [36;1m    export TIER3_MATRIX_ARTIFACT_ROOT="$seed_root/tier3-mixed-journal"[0m
+2026-10-02T20:40:12.1682687Z [36;1m    seed_events="$seed_root/tier3-mixed-journal-events.jsonl"[0m
+2026-10-02T20:40:12.1683147Z [36;1m    seed_result="$seed_root/tier3-mixed-journal-result.json"[0m
+2026-10-02T20:40:12.1683498Z [36;1m  else[0m
+2026-10-02T20:40:12.1683785Z [36;1m    seed_events=/tmp/tier3-mixed-journal-events.jsonl[0m
+2026-10-02T20:40:12.1684197Z [36;1m    seed_result=/tmp/tier3-mixed-journal-result.json[0m
+2026-10-02T20:40:12.1685044Z [36;1m  fi[0m
+2026-10-02T20:40:12.1685612Z [36;1m  go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee "$seed_events" | python3 -u scripts/render-go-test.py[0m
+2026-10-02T20:40:12.1686218Z [36;1m  cut_args=()[0m
+2026-10-02T20:40:12.1686601Z [36;1m  if [ "$WF_TIER3_CLOCK_TIMER_CUT" = 1 ]; then cut_args+=(--require-clock-timer-cut); fi[0m
+2026-10-02T20:40:12.1687189Z [36;1m  if [ "$WF_TIER3_COMMON_CLOCK" = 1 ]; then cut_args+=(--require-common-timer-clock); fi[0m
+2026-10-02T20:40:12.1688410Z [36;1m  python3 scripts/check-tier3-journal-row.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --row "$TIER3_MATRIX_ROW" --events "$seed_events" --duration "$WF_TIER3_MATRIX_DURATION" --expected-seed "$FAULT_SEED" --output "$seed_result" --require-checkpoint-audits "${cut_args[@]}"[0m
+2026-10-02T20:40:12.1690190Z [36;1m  python3 scripts/explain-tier3-events.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/event-explanations.json"[0m
+2026-10-02T20:40:12.1691273Z [36;1m  python3 scripts/review-tier3-fencing.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --output "$TIER3_MATRIX_ARTIFACT_ROOT/fencing-timeline-review.json"[0m
+2026-10-02T20:40:12.1691928Z [36;1mdone[0m
+2026-10-02T20:40:12.1756961Z shell: /usr/bin/bash -e {0}
+2026-10-02T20:40:12.1757246Z env:
+2026-10-02T20:40:12.1757460Z   FAULT_SEED: 1
+2026-10-02T20:40:12.1757669Z   FIRST_SEED: 1
+2026-10-02T20:40:12.1757869Z   LAST_SEED: 1
+2026-10-02T20:40:12.1758085Z   CAMPAIGN_ALL: 1
+2026-10-02T20:40:12.1758294Z   WF_TIER3_MATRIX: 1
+2026-10-02T20:40:12.1758522Z   TIER3_MATRIX_ROW: auto_journal
+2026-10-02T20:40:12.1758782Z   WF_TIER3_MATRIX_DURATION: 10m
+2026-10-02T20:40:12.1759036Z   WF_TIER3_SYNC_INTERVAL: 2m
+2026-10-02T20:40:12.1759271Z   WF_TIER3_CLOCK_TIMER_CUT: 
+2026-10-02T20:40:12.1759498Z   WF_TIER3_COMMON_CLOCK: 
+2026-10-02T20:40:12.1759794Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+2026-10-02T20:40:12.1760117Z   GOMEMLIMIT: 512MiB
+2026-10-02T20:40:12.1760337Z   GOMAXPROCS: 2
+2026-10-02T20:40:12.1760586Z ##[endgroup]
+2026-10-02T20:40:12.1988833Z TIER3_CAMPAIGN row=auto_journal seed=1 duration=10m
+2026-10-02T20:40:12.3205295Z go: downloading google.golang.org/protobuf v1.36.6
+2026-10-02T20:40:34.6517983Z === RUN   TestFiveContainerAutomaticMembershipWithJournalKills
+2026-10-02T20:41:04.9521148Z     tier3_mixed_journal_test.go:91: tier3 provisioning retry: context deadline exceeded
+2026-10-02T20:41:07.5920262Z     tier3_mixed_journal_test.go:91: TIER3_SUSPENDED_SCAN interval=1s budget=8
+2026-10-02T20:41:24.7511189Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=1 elapsed=17.127873101s
+2026-10-02T20:41:28.7815061Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=2 elapsed=21.15865249s
+2026-10-02T20:41:32.8181712Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=3 elapsed=25.194826372s
+2026-10-02T20:41:36.8521437Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=4 elapsed=29.229282557s
+2026-10-02T20:41:39.3713446Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=stopped previous=9 epoch=9 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:41:39.3716619Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=stopped previous=5 epoch=5 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:41:39.3723618Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=stopped previous=3 epoch=3 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:41:39.3726744Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=stopped previous=7 epoch=7 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:41:39.3729635Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=stopped previous=1 epoch=1 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:41:40.1330565Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:40.1332693Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:40.1334971Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:40.1337437Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:40.1362963Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoined previous=3 epoch=194 error=
+2026-10-02T20:41:40.3862815Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:40.3864823Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:40.3866032Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:40.3867171Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:40.6390007Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:40.6391210Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:40.6392354Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:40.6393539Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:40.8919885Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:40.8921598Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:40.8922738Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:40.8923847Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:41.1442758Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:41.1447608Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:41.1449606Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:41.1451888Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:41.3967452Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:41.3972064Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:41.3977677Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:41.3979713Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:41.6493865Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:41.6497427Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:41.6506932Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:41.6508179Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:41.9020390Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:41.9026008Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:41.9028168Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:41.9029895Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:42.1585574Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:42.1593554Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:42.1595953Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:42.1598607Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:42.4102442Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:42.4105169Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:42.4106817Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:42.4120431Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:42.5962876Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=4 scheduled=30s killed=30.031393246s healed=34.973498872s
+2026-10-02T20:41:42.6641928Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:42.6645071Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:42.6647997Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:42.6657228Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:42.9167623Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:42.9170286Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:42.9173038Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:42.9176977Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:43.1697889Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:43.1700417Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:43.1702331Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:43.1705359Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:43.4233381Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:43.4234929Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:43.4236362Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:43.4237508Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:43.6765928Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:43.6768442Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:43.6770987Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:43.6773083Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:43.9289615Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:43.9292309Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:43.9293923Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:43.9295637Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:44.1811651Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:44.1817898Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:44.1820201Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:44.1822099Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:44.4346129Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:44.4347787Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:44.4349744Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:44.4350847Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:44.6880151Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:44.6883693Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:44.6887071Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:44.6890322Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:44.9403691Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:44.9406233Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:44.9407906Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:44.9410490Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:45.1933617Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:45.1935120Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:45.1936263Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:45.1937354Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:45.4466824Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:45.4468037Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:45.4469184Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:45.4470303Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:45.7001794Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:45.7005208Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:45.7007369Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:45.7009540Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:45.9543261Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:45.9545710Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:45.9546971Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:45.9548162Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:46.2078416Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:46.2079660Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:46.2081590Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:46.2082706Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:46.4607732Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:46.4609446Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:46.4610635Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:46.4611776Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:46.7144266Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:46.7146787Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:46.7147959Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:46.7149063Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:46.9678566Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:46.9679805Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:46.9680973Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:46.9682058Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:47.2215996Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:47.2218094Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:47.2219280Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:47.2220440Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:47.4743731Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:47.4745625Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:47.4746993Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:47.4753877Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:47.7281949Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=7 epoch=7 error=workflow lease is held
+2026-10-02T20:41:47.7283215Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=5 epoch=5 error=workflow lease is held
+2026-10-02T20:41:47.7285361Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=1 epoch=1 error=workflow lease is held
+2026-10-02T20:41:47.7286552Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=9 epoch=9 error=workflow lease is held
+2026-10-02T20:41:47.9836336Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoined previous=1 epoch=204 error=
+2026-10-02T20:41:47.9853533Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoined previous=5 epoch=205 error=
+2026-10-02T20:41:47.9864802Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoined previous=7 epoch=207 error=
+2026-10-02T20:41:47.9871722Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoined previous=9 epoch=206 error=
+2026-10-02T20:41:51.1814221Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=5 elapsed=43.558122812s
+2026-10-02T20:41:55.2222532Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=6 elapsed=47.599502595s
+2026-10-02T20:41:59.2535477Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=7 elapsed=51.630846938s
+2026-10-02T20:42:03.1798515Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=8 elapsed=55.557023934s
+2026-10-02T20:42:07.2158883Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=9 elapsed=59.593155827s
+2026-10-02T20:42:09.5028456Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=stopped previous=204 epoch=204 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:42:09.5041425Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=stopped previous=205 epoch=205 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:42:09.5050132Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=stopped previous=207 epoch=207 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:42:09.5064377Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=stopped previous=206 epoch=206 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:42:10.5124789Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=nats: no response from stream
+2026-10-02T20:42:10.5127254Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=nats: no response from stream
+2026-10-02T20:42:10.5138849Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=nats: no response from stream
+2026-10-02T20:42:10.6435458Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=stopped previous=194 epoch=194 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:42:11.0144377Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=nats: no response from stream
+2026-10-02T20:42:11.2668947Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=nats: no response from stream
+2026-10-02T20:42:11.2671970Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=nats: no response from stream
+2026-10-02T20:42:11.2674299Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=nats: no response from stream
+2026-10-02T20:42:11.6504874Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=nats: no response from stream
+2026-10-02T20:42:11.7686257Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=nats: no response from stream
+2026-10-02T20:42:12.0205847Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=nats: no response from stream
+2026-10-02T20:42:12.0207763Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=nats: no response from stream
+2026-10-02T20:42:12.0209599Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=nats: no response from stream
+2026-10-02T20:42:12.4043435Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=nats: no response from stream
+2026-10-02T20:42:12.5226186Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=nats: no response from stream
+2026-10-02T20:42:12.7750220Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=nats: no response from stream
+2026-10-02T20:42:12.7752185Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=nats: no response from stream
+2026-10-02T20:42:12.7753943Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=nats: no response from stream
+2026-10-02T20:42:13.1589908Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:13.2785403Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:13.2787176Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:13.2789005Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:13.2790863Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:13.4120219Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:13.4503559Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=0 scheduled=1m0s killed=1m0.043809748s healed=1m5.827544743s
+2026-10-02T20:42:13.5315903Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:13.5317614Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:13.5318874Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:13.5320119Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:13.6650540Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:13.7851492Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:13.7854123Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:13.7857011Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:13.7858298Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:13.9185891Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:14.0383749Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:14.0385341Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:14.0386619Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:14.0387929Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:14.1718089Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:14.2922994Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:14.2925628Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:14.2926967Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:14.2928183Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:14.4248427Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:14.5459583Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:14.5461406Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:14.5463104Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:14.5464328Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:14.6816392Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:14.7997635Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:14.8000476Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:14.8001780Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:14.8003379Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:14.9335743Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:15.0534825Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:15.0537532Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:15.0539552Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:15.0543580Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:15.1864076Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:15.3075236Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:15.3077373Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:15.3078583Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:15.3079729Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:15.4396914Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:15.5606526Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:15.5608909Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:15.5610485Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:15.5611698Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:15.6926458Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:15.8136777Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:15.8138680Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:15.8139989Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:15.8141212Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:15.9460174Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:16.0700779Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:16.0703018Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:16.0704323Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:16.0706735Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:16.1990664Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:16.3238401Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:16.3239801Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:16.3241061Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:16.3242286Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:16.4521707Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:16.5770658Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:16.5772288Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:16.5773816Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:16.5775578Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:16.7046694Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:16.8306353Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:16.8309258Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:16.8310780Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:16.8312109Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:16.9580766Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:17.0835586Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:17.0836869Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:17.0838012Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:17.0840212Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:17.2113862Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:17.3373231Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:17.3376166Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:17.3377546Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:17.3378859Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:17.4640028Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:17.5906825Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:17.5908984Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:17.5910259Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:17.5911416Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:17.7167746Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:17.8437550Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:17.8439133Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:17.8440517Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:17.8441850Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:17.9688549Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:18.0977406Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=205 epoch=205 error=workflow lease is held
+2026-10-02T20:42:18.0978955Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=206 epoch=206 error=workflow lease is held
+2026-10-02T20:42:18.0980137Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=204 epoch=204 error=workflow lease is held
+2026-10-02T20:42:18.0982273Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=207 epoch=207 error=workflow lease is held
+2026-10-02T20:42:18.2216351Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:18.3529039Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoined previous=204 epoch=325 error=
+2026-10-02T20:42:18.3530456Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoined previous=205 epoch=326 error=
+2026-10-02T20:42:18.3534670Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoined previous=207 epoch=327 error=
+2026-10-02T20:42:18.3543832Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoined previous=206 epoch=324 error=
+2026-10-02T20:42:18.4870761Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:18.7461209Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:18.9982829Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=194 epoch=194 error=workflow lease is held
+2026-10-02T20:42:19.2531939Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoined previous=194 epoch=403 error=
+2026-10-02T20:42:23.7487407Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=10 elapsed=1m16.125681548s
+2026-10-02T20:42:23.7491633Z     tier3_mixed_journal_test.go:850: tier3 checkpoint audit batch=10 invocation_cutoff=280 started elapsed=1m16.125689641s
+2026-10-02T20:42:25.3745503Z     tier3_mixed_journal_test.go:869: tier3 checkpoint batch=10 report={Invocations:280 Journals:280 Entries:3083 Terminal:280}
+2026-10-02T20:42:29.7855874Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=11 elapsed=1m22.162625669s
+2026-10-02T20:42:35.6197867Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=12 elapsed=1m27.996752011s
+2026-10-02T20:42:39.8575267Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=stopped previous=325 epoch=325 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:42:39.8692833Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=stopped previous=324 epoch=324 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:42:39.8698712Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=stopped previous=327 epoch=327 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:42:39.8703611Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=stopped previous=326 epoch=326 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:42:40.7567657Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=stopped previous=403 epoch=403 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:42:40.8667732Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=nats: no response from stream
+2026-10-02T20:42:40.8778744Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=nats: no response from stream
+2026-10-02T20:42:40.8780650Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=nats: no response from stream
+2026-10-02T20:42:41.3816588Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=nats: no response from stream
+2026-10-02T20:42:41.5145843Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:41.6221992Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:41.6336201Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:41.6338786Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:41.6342382Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:41.7678886Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:41.8741739Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:41.8869691Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:41.8871028Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:41.8872280Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:42.0208957Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:42.1271976Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:42.1396689Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:42.1398602Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:42.1399836Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:42.2731524Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:42.3799735Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:42.3935162Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:42.3936510Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:42.3937694Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:42.5258166Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:42.5509194Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=0 scheduled=1m30s killed=1m30.034135947s healed=1m34.928176617s
+2026-10-02T20:42:42.6336388Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:42.6485308Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:42.6487713Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:42.6494064Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:42.7794704Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:42.8860962Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:42.9006984Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:42.9010058Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:42.9012016Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:43.0325554Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:43.1389907Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:43.1538014Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:43.1539374Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:43.1542328Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:43.2854714Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:43.3917308Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:43.4072094Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:43.4073933Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:43.4075522Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:43.5395169Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:43.6484153Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:43.6618066Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:43.6622015Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:43.6634237Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:43.7924109Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:43.9005326Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:43.9147330Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:43.9153528Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:43.9156650Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:44.0456331Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:44.1539512Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:44.1668929Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:44.1685007Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:44.1686635Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:44.2980698Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:44.4068284Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:44.4192383Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:44.4204182Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:44.4206155Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:44.5511737Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:44.6603285Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:44.6736827Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:44.6742600Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:44.6745188Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:44.8037915Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:44.9121691Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:44.9251590Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:44.9258728Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:44.9261328Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:45.0560609Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:45.1649486Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:45.1782344Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:45.1784819Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:45.1786668Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:45.3089818Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:45.4180656Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:45.4316212Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:45.4317542Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:45.4318739Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:45.5615309Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:45.6714395Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:45.6853963Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:45.6856853Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:45.6858177Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:45.8143278Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:45.9242321Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:45.9386193Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:45.9388677Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:45.9391096Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:46.0662965Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:46.1770251Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:46.1910144Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:46.1912642Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:46.1914856Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:46.3194838Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:46.4301081Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:46.4436502Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:46.4438216Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:46.4439497Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:46.5717722Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:46.6841035Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:46.6971100Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:46.6973323Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:46.6977572Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:46.8245371Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:46.9361686Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:46.9497649Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:46.9499170Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:46.9500633Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:47.0769813Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:47.1882977Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:47.2028886Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:47.2030151Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:47.2031310Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:47.3297657Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:47.4410807Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:47.4555020Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:47.4556687Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:47.4557950Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:47.5821565Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:47.6943081Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:47.7085826Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:47.7088787Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:47.7094034Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:47.8346152Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:47.9469464Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:47.9615990Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:47.9617314Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:47.9618559Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:48.0876279Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:48.1996826Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:48.2158518Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:48.2160820Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:48.2162303Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:48.3405809Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:48.4535458Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=325 epoch=325 error=workflow lease is held
+2026-10-02T20:42:48.4688593Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=324 epoch=324 error=workflow lease is held
+2026-10-02T20:42:48.4690036Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=326 epoch=326 error=workflow lease is held
+2026-10-02T20:42:48.4691308Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=327 epoch=327 error=workflow lease is held
+2026-10-02T20:42:48.5956394Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:48.7077309Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoined previous=325 epoch=447 error=
+2026-10-02T20:42:48.7425680Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoined previous=324 epoch=455 error=
+2026-10-02T20:42:48.7427592Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoined previous=327 epoch=453 error=
+2026-10-02T20:42:48.7438113Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoined previous=326 epoch=454 error=
+2026-10-02T20:42:48.8707014Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:49.1231530Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:49.3756422Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=403 epoch=403 error=workflow lease is held
+2026-10-02T20:42:49.6399086Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoined previous=403 epoch=526 error=
+2026-10-02T20:42:50.3628257Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=13 elapsed=1m42.739933572s
+2026-10-02T20:42:56.2012861Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=14 elapsed=1m48.578316646s
+2026-10-02T20:43:01.9398801Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=15 elapsed=1m54.31608898s
+2026-10-02T20:43:07.5750511Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=16 elapsed=1m59.952381242s
+2026-10-02T20:43:15.1049714Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=3 scheduled=2m0s killed=2m0.037444062s healed=2m7.48195332s
+2026-10-02T20:43:21.0090911Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=17 elapsed=2m13.385102708s
+2026-10-02T20:43:26.7386723Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=18 elapsed=2m19.115878932s
+2026-10-02T20:43:30.8683385Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=19 elapsed=2m23.24559873s
+2026-10-02T20:43:34.9143773Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=20 elapsed=2m27.290858261s
+2026-10-02T20:43:34.9145493Z     tier3_mixed_journal_test.go:850: tier3 checkpoint audit batch=20 invocation_cutoff=560 started elapsed=2m27.291109072s
+2026-10-02T20:43:39.8005827Z     tier3_mixed_journal_test.go:869: tier3 checkpoint batch=20 report={Invocations:560 Journals:560 Entries:6172 Terminal:560}
+2026-10-02T20:43:42.8246878Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=1 scheduled=2m30s killed=2m30.057331183s healed=2m35.201863701s
+2026-10-02T20:43:47.7103686Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=stopped previous=447 epoch=447 error=context deadline exceeded
+2026-10-02T20:43:47.7224067Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoined previous=447 epoch=641 error=
+2026-10-02T20:43:48.7610301Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=21 elapsed=2m41.138250736s
+2026-10-02T20:43:54.4903146Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=22 elapsed=2m46.867569434s
+2026-10-02T20:44:00.3170139Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=23 elapsed=2m52.693715068s
+2026-10-02T20:44:06.1440055Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=24 elapsed=2m58.520964661s
+2026-10-02T20:44:12.6710245Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=3 scheduled=3m0s killed=3m0.045422332s healed=3m5.046511202s
+2026-10-02T20:44:16.9760619Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=25 elapsed=3m9.353305119s
+2026-10-02T20:44:22.6082113Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=26 elapsed=3m14.985554973s
+2026-10-02T20:44:28.3499075Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=27 elapsed=3m20.727252604s
+2026-10-02T20:44:34.0815029Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=28 elapsed=3m26.458713305s
+2026-10-02T20:44:43.6797547Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=0 scheduled=3m30s killed=3m30.039253843s healed=3m36.056941968s
+2026-10-02T20:44:45.1078820Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=29 elapsed=3m37.484955651s
+2026-10-02T20:44:49.0421441Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=30 elapsed=3m41.419405866s
+2026-10-02T20:44:49.0431723Z     tier3_mixed_journal_test.go:850: tier3 checkpoint audit batch=30 invocation_cutoff=840 started elapsed=3m41.419435842s
+2026-10-02T20:44:52.8058246Z     tier3_mixed_journal_test.go:869: tier3 checkpoint batch=30 report={Invocations:840 Journals:840 Entries:9252 Terminal:840}
+2026-10-02T20:44:55.0694344Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=31 elapsed=3m47.446235867s
+2026-10-02T20:45:00.8023967Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=32 elapsed=3m53.179650852s
+2026-10-02T20:45:06.5379809Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=33 elapsed=3m58.915187834s
+2026-10-02T20:45:14.9054344Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=3 scheduled=4m0s killed=4m0.04186558s healed=4m7.282466422s
+2026-10-02T20:45:17.3714807Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=34 elapsed=4m9.745661257s
+2026-10-02T20:45:23.2076831Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=35 elapsed=4m15.58495617s
+2026-10-02T20:45:28.9343005Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=36 elapsed=4m21.311377209s
+2026-10-02T20:45:34.6616260Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=37 elapsed=4m27.038810495s
+2026-10-02T20:45:42.1645334Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=1 scheduled=4m30s killed=4m30.033929039s healed=4m34.541336876s
+2026-10-02T20:45:42.4986398Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=38 elapsed=4m34.874940909s
+2026-10-02T20:45:49.8392252Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=39 elapsed=4m42.215956609s
+2026-10-02T20:45:55.5720328Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=40 elapsed=4m47.948983642s
+2026-10-02T20:45:55.5722578Z     tier3_mixed_journal_test.go:850: tier3 checkpoint audit batch=40 invocation_cutoff=1120 started elapsed=4m47.949295879s
+2026-10-02T20:46:00.5068207Z     tier3_mixed_journal_test.go:869: tier3 checkpoint batch=40 report={Invocations:1120 Journals:1120 Entries:12333 Terminal:1120}
+2026-10-02T20:46:01.6043327Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=41 elapsed=4m53.981260848s
+2026-10-02T20:46:07.4478704Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=42 elapsed=4m59.825056222s
+2026-10-02T20:46:09.2292521Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=stopped previous=641 epoch=641 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:46:10.2486906Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=stopped previous=453 epoch=453 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:46:10.2505489Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=stopped previous=455 epoch=455 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:46:10.2549065Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=stopped previous=454 epoch=454 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:46:10.7389779Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=nats: no response from stream
+2026-10-02T20:46:11.1431952Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=stopped previous=526 epoch=526 error=workflow lease was lost: nats: no response from stream
+2026-10-02T20:46:11.2591442Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=nats: no response from stream
+2026-10-02T20:46:11.2593003Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=nats: no response from stream
+2026-10-02T20:46:11.2609309Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=nats: no response from stream
+2026-10-02T20:46:11.4926080Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=nats: no response from stream
+2026-10-02T20:46:12.0132218Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=nats: no response from stream
+2026-10-02T20:46:12.0135495Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=nats: no response from stream
+2026-10-02T20:46:12.0169611Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=nats: no response from stream
+2026-10-02T20:46:12.1505914Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=nats: no response from stream
+2026-10-02T20:46:12.2460218Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=nats: no response from stream
+2026-10-02T20:46:12.7673161Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=nats: no response from stream
+2026-10-02T20:46:12.7674993Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=nats: no response from stream
+2026-10-02T20:46:12.7700353Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=nats: no response from stream
+2026-10-02T20:46:12.9057449Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=nats: no response from stream
+2026-10-02T20:46:13.0001207Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=nats: no response from stream
+2026-10-02T20:46:13.5209129Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=nats: no response from stream
+2026-10-02T20:46:13.5211284Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=nats: no response from stream
+2026-10-02T20:46:13.5239027Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=nats: no response from stream
+2026-10-02T20:46:13.6588751Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=nats: no response from stream
+2026-10-02T20:46:13.7547394Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=nats: no response from stream
+2026-10-02T20:46:14.0072758Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:14.0236581Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:14.0238724Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:14.0274793Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:14.1622290Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:14.2601430Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:14.2766044Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:14.2767803Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:14.2793016Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:14.4148260Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:14.5126313Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:14.5287047Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:14.5288835Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:14.5316975Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:14.6674251Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:14.7653325Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:14.7813206Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:14.7815159Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:14.7840548Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:14.9201916Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:15.0170754Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:15.0359475Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:15.0361249Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:15.0362446Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:15.1722921Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:15.2693974Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:15.2869418Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:15.2871556Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:15.2878272Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:15.4254053Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:15.5212150Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:15.5400163Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:15.5402254Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:15.5404272Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:15.6780982Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:15.7734521Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:15.7930538Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:15.7933885Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:15.7943289Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:15.9299982Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:16.0264068Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:16.0462146Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:16.0464121Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:16.0465591Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:16.1825611Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:16.2785404Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:16.2986384Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:16.2989690Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:16.2991007Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:16.4349383Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:16.5314933Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:16.5514754Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:16.5516221Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:16.5518022Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:16.6876118Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:16.7843075Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:16.8040057Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:16.8043757Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:16.8048206Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:16.9399446Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:16.9550780Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=4 scheduled=5m0s killed=5m0.053878604s healed=5m9.332508937s
+2026-10-02T20:46:17.0373156Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:17.0572234Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:17.0573805Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:17.0575439Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:17.1929021Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:17.2896618Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:17.3096288Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:17.3099204Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:17.3100674Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:17.4453025Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:17.5417689Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:17.5618935Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:17.5625753Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:17.5628267Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:17.6993156Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:17.7947067Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoin_wait previous=641 epoch=641 error=workflow lease is held
+2026-10-02T20:46:17.8146874Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:17.8149223Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:17.8152920Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:17.9510491Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:18.0483875Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoined previous=641 epoch=992 error=
+2026-10-02T20:46:18.0794306Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:18.0820643Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:18.0828729Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:18.2038879Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:18.3304768Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:18.3342073Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:18.3343389Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:18.4560392Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:18.5827462Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:18.5866073Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:18.5867447Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:18.7083255Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:18.8349414Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoin_wait previous=454 epoch=454 error=workflow lease is held
+2026-10-02T20:46:18.8390178Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoin_wait previous=453 epoch=453 error=workflow lease is held
+2026-10-02T20:46:18.8391428Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoin_wait previous=455 epoch=455 error=workflow lease is held
+2026-10-02T20:46:18.9610741Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:19.0897486Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-2 phase=rejoined previous=454 epoch=1064 error=
+2026-10-02T20:46:19.0964152Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-4 phase=rejoined previous=455 epoch=1067 error=
+2026-10-02T20:46:19.0966553Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-3 phase=rejoined previous=453 epoch=1068 error=
+2026-10-02T20:46:19.2218177Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:19.4735577Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:19.7255217Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoin_wait previous=526 epoch=526 error=workflow lease is held
+2026-10-02T20:46:19.9795015Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-1 phase=rejoined previous=526 epoch=1074 error=
+2026-10-02T20:46:22.7762881Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=43 elapsed=5m15.153165929s
+2026-10-02T20:46:28.5051939Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=44 elapsed=5m20.882422176s
+2026-10-02T20:46:34.2333583Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=45 elapsed=5m26.610429096s
+2026-10-02T20:46:42.7924406Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=3 scheduled=5m30s killed=5m30.038684279s healed=5m35.169494831s
+2026-10-02T20:46:44.3638914Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=46 elapsed=5m36.740798461s
+2026-10-02T20:46:48.3941897Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=47 elapsed=5m40.771383318s
+2026-10-02T20:46:54.1281961Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=48 elapsed=5m46.504432316s
+2026-10-02T20:46:59.9542526Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=49 elapsed=5m52.331482783s
+2026-10-02T20:47:05.6951049Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=50 elapsed=5m58.070924204s
+2026-10-02T20:47:05.6962293Z     tier3_mixed_journal_test.go:850: tier3 checkpoint audit batch=50 invocation_cutoff=1400 started elapsed=5m58.071060635s
+2026-10-02T20:47:12.9370416Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=4 scheduled=6m0s killed=6m0.042935505s healed=6m5.313901121s
+2026-10-02T20:47:15.4617741Z     tier3_mixed_journal_test.go:869: tier3 checkpoint batch=50 report={Invocations:1400 Journals:1400 Entries:15415 Terminal:1400}
+2026-10-02T20:47:17.7360575Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=51 elapsed=6m10.11342157s
+2026-10-02T20:47:21.8688115Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=52 elapsed=6m14.246109792s
+2026-10-02T20:47:25.8951845Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=53 elapsed=6m18.272405472s
+2026-10-02T20:47:29.8297149Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=54 elapsed=6m22.20578438s
+2026-10-02T20:47:33.8663896Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=55 elapsed=6m26.243032929s
+2026-10-02T20:47:43.4720824Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=1 scheduled=6m30s killed=6m30.041524947s healed=6m35.849359391s
+2026-10-02T20:47:44.9029656Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=56 elapsed=6m37.280178227s
+2026-10-02T20:47:50.0782408Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=57 elapsed=6m42.455375778s
+2026-10-02T20:47:55.8083671Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=58 elapsed=6m48.185282893s
+2026-10-02T20:48:01.4307495Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=59 elapsed=6m53.807998529s
+2026-10-02T20:48:07.1627318Z     tier3_mixed_journal_test.go:91: tier3 mixed batch=60 elapsed=6m59.53987606s
+2026-10-02T20:48:07.1631862Z     tier3_mixed_journal_test.go:850: tier3 checkpoint audit batch=60 invocation_cutoff=1680 started elapsed=6m59.539910022s
+2026-10-02T20:48:13.8836617Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=2 scheduled=7m0s killed=7m0.062377112s healed=7m6.260935719s
+2026-10-02T20:48:17.0502382Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=stopped previous=992 epoch=992 error=context deadline exceeded
+2026-10-02T20:48:17.0566636Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoined previous=992 epoch=1309 error=
+2026-10-02T20:48:22.1332241Z     tier3_mixed_journal_test.go:869: tier3 checkpoint batch=60 report={Invocations:1680 Journals:1680 Entries:18504 Terminal:1680}
+2026-10-02T20:48:42.8668819Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=1 scheduled=7m30s killed=7m30.032512881s healed=7m35.244065187s
+2026-10-02T20:48:46.0590546Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=stopped previous=1309 epoch=1309 error=context deadline exceeded
+2026-10-02T20:48:46.0679198Z     tier3_mixed_journal_test.go:450: tier3 member session worker=tier3-mixed-0 phase=rejoined previous=1309 epoch=1430 error=
+2026-10-02T20:49:12.7650296Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=2 scheduled=8m0s killed=8m0.030013476s healed=8m5.142025824s
+2026-10-02T20:49:42.7454051Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=1 scheduled=8m30s killed=8m30.028369362s healed=8m35.122674537s
+2026-10-02T20:50:14.9687859Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=2 scheduled=9m0s killed=9m0.035913882s healed=9m7.346023651s
+2026-10-02T20:50:42.8434186Z     tier3_mixed_journal_test.go:815: tier3 auto_journal fault node=3 scheduled=9m30s killed=9m30.031724996s healed=9m35.220236657s
+2026-10-02T20:53:07.1641663Z     tier3_mixed_journal_test.go:91: resultmatrixtimer/tier3-1-batch-60-4= err=context deadline exceeded
+2026-10-02T20:53:09.8167163Z --- FAIL: TestFiveContainerAutomaticMembershipWithJournalKills (755.17s)
+2026-10-02T20:53:09.8185128Z FAIL
+2026-10-02T20:53:09.8329306Z FAIL	js-wf/integration	755.195s
+2026-10-02T20:53:09.8809737Z ##[error]Process completed with exit code 1.
+2026-10-02T20:53:09.8908971Z ##[group]Run actions/upload-artifact@v7
+2026-10-02T20:53:09.8909298Z with:
+2026-10-02T20:53:09.8909514Z   name: tier3-auto_journal-seed-1
+2026-10-02T20:53:09.8911100Z   path: /tmp/tier3-matrix-range/**/*.json
+/tmp/tier3-matrix-range/**/*.jsonl
+/tmp/tier3-matrix-range/**/*.log
+/tmp/tier3-matrix-range/**/*.txt
+/tmp/tier3-matrix-range/**/cluster/*.conf
+/tmp/tier3-mixed-journal/*.json
+/tmp/tier3-mixed-journal/*.jsonl
+/tmp/tier3-mixed-journal/*.log
+/tmp/tier3-mixed-journal/*.txt
+/tmp/tier3-mixed-journal/cluster/*.conf
+/tmp/tier3-mixed-journal-events.jsonl
+/tmp/tier3-mixed-journal-result.json
+
+2026-10-02T20:53:09.8912712Z   if-no-files-found: error
+2026-10-02T20:53:09.8912956Z   compression-level: 6
+2026-10-02T20:53:09.8913175Z   overwrite: false
+2026-10-02T20:53:09.8913395Z   include-hidden-files: false
+2026-10-02T20:53:09.8913634Z   archive: true
+2026-10-02T20:53:09.8913824Z env:
+2026-10-02T20:53:09.8913997Z   FAULT_SEED: 1
+2026-10-02T20:53:09.8914191Z   FIRST_SEED: 1
+2026-10-02T20:53:09.8914405Z   LAST_SEED: 1
+2026-10-02T20:53:09.8914925Z   CAMPAIGN_ALL: 1
+2026-10-02T20:53:09.8915128Z   WF_TIER3_MATRIX: 1
+2026-10-02T20:53:09.8915342Z   TIER3_MATRIX_ROW: auto_journal
+2026-10-02T20:53:09.8915594Z   WF_TIER3_MATRIX_DURATION: 10m
+2026-10-02T20:53:09.8915844Z   WF_TIER3_SYNC_INTERVAL: 2m
+2026-10-02T20:53:09.8916075Z   WF_TIER3_CLOCK_TIMER_CUT: 
+2026-10-02T20:53:09.8916301Z   WF_TIER3_COMMON_CLOCK: 
+2026-10-02T20:53:09.8916574Z   TIER3_MATRIX_ARTIFACT_ROOT: /tmp/tier3-mixed-journal
+2026-10-02T20:53:09.8916886Z   GOMEMLIMIT: 512MiB
+2026-10-02T20:53:09.8917094Z   GOMAXPROCS: 2
+2026-10-02T20:53:09.8917286Z ##[endgroup]
+2026-10-02T20:53:11.0301814Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-02T20:53:11.0306404Z The least common ancestor is /tmp. This will be the root directory of the artifact
+2026-10-02T20:53:11.0306936Z With the provided path, there will be 80 files uploaded
+2026-10-02T20:53:11.0310280Z Artifact name is valid!
+2026-10-02T20:53:11.0311102Z Root directory input is valid!
+2026-10-02T20:53:11.4290497Z Uploading artifact: tier3-auto_journal-seed-1.zip
+2026-10-02T20:53:11.4332337Z Beginning upload of artifact content to blob storage
+2026-10-02T20:53:12.1751200Z Uploaded bytes 607255
+2026-10-02T20:53:12.2463897Z Finished uploading artifact content to blob storage!
+2026-10-02T20:53:12.2465143Z SHA256 digest of uploaded artifact is c29177db577546eac214474dd2e57fb4d9a3edac7f26025519c5431340a99546
+2026-10-02T20:53:12.2465903Z Finalizing artifact upload
+2026-10-02T20:53:12.6719079Z Artifact tier3-auto_journal-seed-1 successfully finalized. Artifact ID 11251403174
+2026-10-02T20:53:12.6720712Z Artifact tier3-auto_journal-seed-1 has been successfully uploaded! Final size is 607255 bytes. Artifact ID is 11251403174
+2026-10-02T20:53:12.6724710Z Artifact download URL: https://github.com/AntPAllen/js-wf/actions/runs/37058644370/artifacts/11251403174
+2026-10-02T20:53:12.6940935Z Post job cleanup.
+2026-10-02T20:53:12.7776148Z [command]/usr/bin/git version
+2026-10-02T20:53:12.7818311Z git version 2.55.0
+2026-10-02T20:53:12.7857279Z Temporarily overriding HOME='/home/runner/work/_temp/1bc0ec3c-c225-4cfc-99a7-17cdc3e44a5b' before making global git config changes
+2026-10-02T20:53:12.7858726Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-02T20:53:12.7862403Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+2026-10-02T20:53:12.7900777Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-02T20:53:12.7935344Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-02T20:53:12.8204953Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-02T20:53:12.8228772Z http.https://github.com/.extraheader
+2026-10-02T20:53:12.8240651Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-02T20:53:12.8276039Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-02T20:53:12.8585693Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-02T20:53:12.8606963Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-02T20:53:12.9006546Z Cleaning up orphan processes
+2026-10-02T20:53:12.9388492Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
