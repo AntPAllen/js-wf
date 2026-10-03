@@ -1,0 +1,22 @@
+name: tier1-race
+on: workflow_dispatch
+jobs:
+  sim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Qualify complete default Tier1 race suite
+        run: python3 scripts/check-tier1-race.py --root "$RUNNER_TEMP/tier1-race-evidence"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: tier1-race-evidence
+          path: ${{ runner.temp }}/tier1-race-evidence
+          if-no-files-found: error

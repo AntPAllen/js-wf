@@ -8475,3 +8475,19 @@ source/store evidence is required on success or failure. The original failure
 remains preserved and server cause unconfirmed. A passing focused replay would
 not clear1..200/full matrices/24h. Earlier121100k37106469422 remains live; no
 worker-kill mismatch smoke or duplicate existing campaign is launched.
+
+
+## Complete default Tier1 race producer prepared
+
+The new tier1-race producer compiles one retained race-instrumented sim test
+binary from a clean checkout, captures its SHA256 and actual Go build information,
+extracts the executable's test inventory and the source AST seed inventory,
+then runs every default test body through Go's test2json. All1,000 seeds per121
+workloads and every pin are required by the existing exact suite checker; only
+the two documented trace-only skips are allowed. Source hashes before/after,
+commands, binary, raw JSON, stderr, timing and failure traces are retained.
+The thirty-minute test process limit is for instrumentation wall time; it does
+not alter per-operation contexts, modeled time or workflow latency targets.
+The earlier whole-package900s timeout remains rejected. This new final-runtime
+full-sim race attempt does not substitute for100k or full application/real-matrix
+qualification. Ten suite-guard tests pass; actual execution is next.
