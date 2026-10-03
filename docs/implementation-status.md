@@ -98,7 +98,13 @@
   [Journal39 originals](scale/start-enqueue-history-2026-10-03/journal39-corrected-replay/),
   [consumer116 originals](scale/start-enqueue-history-2026-10-03/consumer116-corrected-replay/).
   All five corrected replays now execute and pass their full final gates; full
-  current-source1..200 remains open. The
+  current-source1..200 remains open.
+  Corrected full13x200 campaign
+  [37128612905](https://github.com/AntPAllen/js-wf/actions/runs/37128612905)
+  is dispatched at exact9ac3ad44267b68d1a1ec63ce47e1fb11d9c00204 with row=all,
+  seeds200/start1/duration10m. It follows the concrete checker correction and
+  five independently green targeted replays. Its queued state is not evidence
+  of qualification; the original earlier-source campaigns are not restarted. The
   rejected original shards remain rejected; these new trials execute all final
   gates that the old checker failures prevented.
 - **Tier3:**16 implemented row variants are now in the registry,
@@ -212,6 +218,14 @@
   fencing review and five process counters pass; all reports regenerate exactly.
   [Complete forced-gap smoke originals](scale/r5-start-gap-2026-10-03/hosted-smoke/).
   Five-peer ten-minute/graceful profiles,200 seeds and24h remain open.
+  Ten-minute forced-gap seed1 profiles are dispatched at exact
+  9ac3ad44267b68d1a1ec63ce47e1fb11d9c00204:
+  SIGKILL [37128612951](https://github.com/AntPAllen/js-wf/actions/runs/37128612951)
+  and graceful Lame Duck
+  [37128612942](https://github.com/AntPAllen/js-wf/actions/runs/37128612942).
+  Both require announced gap/shutdown modes and every cut's retained proof,
+  with existing five-peer/count/history/p99/integrity/drain/checkpoint gates.
+  They are queued, not qualified; no35s result is promoted to the full row.
 - **CAS benchmark harness:** hosted37121445966 atcd59b86 is rejected before
   measurement: the shared harness used the newer UnmarshalEntry API absent at
   fixed baseline4fa3119. Its diagnostic now uses the benchmark's JSON format;
