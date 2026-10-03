@@ -99,11 +99,15 @@ func (p *jetStreamStartScanPort) EnqueueStart(ctx context.Context, typ, id strin
 }
 
 type ScanResult struct {
-	NextSequence uint64      `json:"next_sequence"`
-	Inspected    int         `json:"inspected"` // retained messages; holes also consume budget
-	Reenqueued   int         `json:"reenqueued"`
-	Removed      int         `json:"removed,omitempty"`
-	Candidates   []Candidate `json:"candidates,omitempty"`
+	// RetrySequence is an optional checkpoint of a fully inspected prefix when
+	// Scan returns a transient error. The failing invocation is never skipped.
+	// Scanners that do not certify such a prefix leave it zero.
+	RetrySequence uint64      `json:"retry_sequence,omitempty"`
+	NextSequence  uint64      `json:"next_sequence"`
+	Inspected     int         `json:"inspected"` // retained messages; holes also consume budget
+	Reenqueued    int         `json:"reenqueued"`
+	Removed       int         `json:"removed,omitempty"`
+	Candidates    []Candidate `json:"candidates,omitempty"`
 }
 
 type Candidate struct {
@@ -117,14 +121,20 @@ type Candidate struct {
 // next is a stream sequence cursor; zero starts at the beginning. The caller
 // persists the cursor and runs the scan periodically. An extra wakeup is safe
 // only once the worker treats an existing terminal journal as a no-op.
-func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (ScanResult, error) {
+func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (result ScanResult, scanErr error) {
 	if budget < 1 {
 		return ScanResult{}, fmt.Errorf("scan budget must be positive")
 	}
 	if next == 0 {
 		next = 1
 	}
-	result := ScanResult{NextSequence: next}
+	result = ScanResult{NextSequence: next}
+	initial, confirmed := next, next
+	defer func() {
+		if scanErr != nil && confirmed > initial {
+			result.RetrySequence = confirmed
+		}
+	}()
 	for scanned := 0; scanned < budget; scanned++ {
 		m, err := s.port.GetInvocation(ctx, next)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
@@ -138,6 +148,7 @@ func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			}
 			next++
 			result.NextSequence = next
+			confirmed = next
 			continue
 		}
 		if err != nil {
@@ -156,12 +167,14 @@ func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			return result, err
 		}
 		if exists {
+			confirmed = next
 			continue
 		}
 		result.Reenqueued++
 		event := RepairEvent{Kind: "start", Type: typ, ID: id, Reason: "missing_journal", SourceSequence: m.Sequence, InvocationSequence: m.Sequence}
 		if dryRun {
 			reportRepair(s.Observe, event, true, nil)
+			confirmed = next
 			continue
 		}
 		err = s.port.EnqueueStart(ctx, typ, id, m.Sequence)
@@ -169,6 +182,7 @@ func (s *StartScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 		if err != nil {
 			return result, err
 		}
+		confirmed = next
 	}
 	return result, nil
 }

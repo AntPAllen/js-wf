@@ -1461,3 +1461,24 @@ through `go tool test2json`, and verifies the full suite at the requested count.
 The default runner mode remains race-instrumented with1,000 seeds. The workflow
 uploads the whole evidence directory, including the executable. Earlier extended
 runs without a retained binary keep their original provenance limitation.
+
+### Start scanner progress across repeated bounded attempts
+
+`TestStartPartialCursorReplay` executes the production scanner, lease acquisition
+and persistent cursor CAS with immutable reads costing100ms or150ms per request.
+Each virtual scan attempt has a5s deadline and budget500, matching the runtime
+worker budget and bounded-loop deadline. At128 fixed seeds it chooses prefix
+checkpoint versus legacy discard, cursor commit/drop/lost-ack and enqueue
+ack/lost-ack. All12 policy cells replay exactly and have pinned controls. The
+legacy control repeats eight failed passes over the same prefix:48 virtual
+seconds, cursor1 and no target repair. Prefix checkpointing completes the target
+within30s for these cases and retries the same unconfirmed invocation identity.
+The loop transport models a30s lease clock; real12s ownership is checked by the
+three-node contract, while the unit lost-owner control prevents checkpointing.
+
+The scanner now certifies only a fully inspected prefix on error. The loop
+persists that prefix only for transient errors, after fresh-context ownership
+renewal; uncertain cursor replies trigger lease reacquisition and a real cursor
+read. Other scanner kinds do not yet certify error prefixes. This reproduces a
+client progress defect; it does not identify the earlier R5 server/cursor cause
+or prove population-independent30s recovery at arbitrary retained cardinality.

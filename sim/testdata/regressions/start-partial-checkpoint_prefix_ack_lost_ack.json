@@ -1,0 +1,680 @@
+{
+  "version": 3,
+  "seed": 7,
+  "workload": "start_partial_cursor",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "checkpoint_prefix",
+        "discard_prefix"
+      ],
+      "chosen": "checkpoint_prefix"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "100ms",
+        "150ms"
+      ],
+      "chosen": "100ms"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ack",
+        "lost_ack"
+      ],
+      "chosen": "lost_ack"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ack",
+        "drop",
+        "lost_ack"
+      ],
+      "chosen": "ack"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "system.start-reconciler",
+      "sequence": 1,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "59d7c7c0c1763582d6851cb5eaff48879b2b3a840f9689dcd197acfc75f265cf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "scan.start",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "59d7c7c0c1763582d6851cb5eaff48879b2b3a840f9689dcd197acfc75f265cf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "partial_invocation_read",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "partial_invocation_read",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 400,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 500,
+      "operation": "partial_invocation_read",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 700,
+      "operation": "partial_invocation_read",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 900,
+      "operation": "partial_invocation_read",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1100,
+      "operation": "partial_invocation_read",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1200,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1300,
+      "operation": "partial_invocation_read",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1400,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1500,
+      "operation": "partial_invocation_read",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1600,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1700,
+      "operation": "partial_invocation_read",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1800,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1900,
+      "operation": "partial_invocation_read",
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2100,
+      "operation": "partial_invocation_read",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2200,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2300,
+      "operation": "partial_invocation_read",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2400,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2500,
+      "operation": "partial_invocation_read",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2600,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2700,
+      "operation": "partial_invocation_read",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2800,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2900,
+      "operation": "partial_invocation_read",
+      "sequence": 15,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3000,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3100,
+      "operation": "partial_invocation_read",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3200,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3300,
+      "operation": "partial_invocation_read",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3400,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3500,
+      "operation": "partial_invocation_read",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3600,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3700,
+      "operation": "partial_invocation_read",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3800,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3900,
+      "operation": "partial_invocation_read",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4000,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4100,
+      "operation": "partial_invocation_read",
+      "sequence": 21,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4200,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4300,
+      "operation": "partial_invocation_read",
+      "sequence": 22,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4400,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4500,
+      "operation": "partial_invocation_read",
+      "sequence": 23,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4600,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4700,
+      "operation": "partial_invocation_read",
+      "sequence": 24,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4800,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4900,
+      "operation": "partial_invocation_read",
+      "sequence": 25,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "partial_journal_read",
+      "outcome": "deadline_exceeded"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "partial_scan",
+      "sequence": 1,
+      "outcome": "retry=25 error=true"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "59d7c7c0c1763582d6851cb5eaff48879b2b3a840f9689dcd197acfc75f265cf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_create",
+      "subject": "scan.start",
+      "sequence": 1,
+      "data_sha256": "b7a56873cd771f2c446d369b649430b65a756ba278ff97ec81bb6f55b2e73569",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_delete",
+      "subject": "system.start-reconciler",
+      "expected": 4,
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_create",
+      "subject": "system.start-reconciler",
+      "sequence": 6,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "a23e59d2e1f66b09f777903f1decec497b825e1b5c84157905fa29faceea3a44",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_get",
+      "subject": "scan.start",
+      "sequence": 1,
+      "data_sha256": "b7a56873cd771f2c446d369b649430b65a756ba278ff97ec81bb6f55b2e73569",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 7,
+      "sequence": 8,
+      "data_sha256": "a23e59d2e1f66b09f777903f1decec497b825e1b5c84157905fa29faceea3a44",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6100,
+      "operation": "partial_invocation_read",
+      "sequence": 25,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6200,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6300,
+      "operation": "partial_invocation_read",
+      "sequence": 26,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6400,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6500,
+      "operation": "partial_invocation_read",
+      "sequence": 27,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6600,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6700,
+      "operation": "partial_invocation_read",
+      "sequence": 28,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6800,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6900,
+      "operation": "partial_invocation_read",
+      "sequence": 29,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7000,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7100,
+      "operation": "partial_invocation_read",
+      "sequence": 30,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7200,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7300,
+      "operation": "partial_invocation_read",
+      "sequence": 31,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7400,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7500,
+      "operation": "partial_invocation_read",
+      "sequence": 32,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7600,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7700,
+      "operation": "partial_invocation_read",
+      "sequence": 33,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7800,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7900,
+      "operation": "partial_invocation_read",
+      "sequence": 34,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8000,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8100,
+      "operation": "partial_invocation_read",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8200,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "partial_start_enqueue",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "partial_enqueue_ack",
+      "sequence": 35,
+      "outcome": "committed_ack_lost"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "partial_scan",
+      "sequence": 25,
+      "outcome": "retry=35 error=true"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "a23e59d2e1f66b09f777903f1decec497b825e1b5c84157905fa29faceea3a44",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "kv_update",
+      "subject": "scan.start",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "9f14025af0065b30e47e23ebb3b491d39ae8ed17d33739e5ff3827ffb3634953",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "kv_delete",
+      "subject": "system.start-reconciler",
+      "expected": 9,
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9300,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 9300,
+      "operation": "kv_create",
+      "subject": "system.start-reconciler",
+      "sequence": 11,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9300,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 11,
+      "sequence": 12,
+      "data_sha256": "a0889623d4f102fab3ecf9552ed4b513514d36d43216446f8b1d38ea0bed42cc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9300,
+      "operation": "kv_get",
+      "subject": "scan.start",
+      "sequence": 2,
+      "data_sha256": "9f14025af0065b30e47e23ebb3b491d39ae8ed17d33739e5ff3827ffb3634953",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9300,
+      "operation": "kv_update",
+      "subject": "system.start-reconciler",
+      "expected": 12,
+      "sequence": 13,
+      "data_sha256": "a0889623d4f102fab3ecf9552ed4b513514d36d43216446f8b1d38ea0bed42cc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9400,
+      "operation": "partial_invocation_read",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9500,
+      "operation": "partial_journal_read",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9600,
+      "operation": "partial_start_enqueue",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9700,
+      "operation": "partial_invocation_read",
+      "sequence": 36,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9800,
+      "operation": "partial_last_sequence",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9800,
+      "operation": "partial_scan",
+      "sequence": 35,
+      "outcome": "retry=0 error=false"
+    },
+    {
+      "at_ms": 9800,
+      "operation": "kv_delete",
+      "subject": "system.start-reconciler",
+      "expected": 13,
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9800,
+      "operation": "kv_get",
+      "subject": "scan.start",
+      "sequence": 2,
+      "data_sha256": "9f14025af0065b30e47e23ebb3b491d39ae8ed17d33739e5ff3827ffb3634953",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9800,
+      "operation": "characterize_partial_cursor",
+      "outcome": "checkpoint_prefix_ack_lost_ack"
+    }
+  ]
+}

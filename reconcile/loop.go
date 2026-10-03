@@ -209,6 +209,24 @@ func RunLoopWithPort(ctx context.Context, port LoopPort, workerID, kind string, 
 					release(l)
 					return err
 				}
+				// Only scanners that certify a completed prefix may checkpoint
+				// a failed pass. Renew ownership with a fresh attempt before
+				// cursor CAS; an expired scan context cannot authorize a save.
+				if ctx.Err() == nil && result.RetrySequence > cursor {
+					attempt, stop = context.WithTimeout(ctx, 5*time.Second)
+					checkpointErr := l.Renew(attempt)
+					stop()
+					if checkpointErr == nil {
+						attempt, stop = context.WithTimeout(ctx, 5*time.Second)
+						_, checkpointErr = port.SaveCursor(attempt, kind, result.RetrySequence, revision)
+						stop()
+					}
+					if checkpointErr != nil && ctx.Err() == nil && !retryableReconcileError(checkpointErr) && !errors.Is(checkpointErr, ErrCursorStale) {
+						release(l)
+						return checkpointErr
+					}
+				}
+				// Reacquire and reread after uncertain checkpoint replies.
 				break
 			}
 			attempt, stop = context.WithTimeout(ctx, 5*time.Second)

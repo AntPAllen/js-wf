@@ -1182,3 +1182,22 @@ Offline review must work after relocation, require explicit retained stores,
 and compare harness/fixture bytes against the recorded Git revision. This
 strengthens evidence for the isolated missing-source cleanup defect; production
 NATS dependency and original million-timer retirement cause remain unchanged.
+
+### Start scan checkpoints after bounded transient failures
+
+A failed Start scan must not repeatedly restart a confirmed prefix while a large
+configured budget exceeds the5s scan-attempt deadline. `ScanResult.RetrySequence`
+certifies the first invocation not fully inspected; a journal-read or uncertain
+enqueue error keeps that invocation at the retry position. Only a forward,
+confirmed prefix may be saved, and only after renewing ownership with a fresh
+context. Fatal errors, parent cancellation and lost ownership do not checkpoint.
+Lost cursor acknowledgements require reacquisition and rereading the persisted
+cursor. Scanners without this certificate retain their existing error behavior.
+
+A fixed128-seed model preserves the old48s/no-progress control and tests cursor
+commit/drop/lost-ack plus enqueue acknowledgement uncertainty. A three-node
+contract requires actual cursor1→4→7→8 and one retained run message despite a
+committed enqueue's hidden acknowledgement. Fencing/fatal/cancellation guards,
+all pinned traces and the reconciler package must pass. This fixes partial-timeout
+progress; large-population latency and certification for other scan kinds remain
+separate work.

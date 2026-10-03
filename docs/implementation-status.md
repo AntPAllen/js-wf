@@ -8800,3 +8800,30 @@ fell to228MiB, restoring1.4GiB; no failed/native-million originals were removed.
 No24h row has started.
 Full16-row/200-seed campaigns, full-matrix24h and the original million drain
 requirement remain open.
+
+## Confirmed Start scanner partial-timeout progress defect
+
+A deterministic reproduction using production Start scan and fenced cursor loop
+fails at seed2 before the fix: eight5s attempts plus1s cadence,48 virtual seconds,
+no repair and persisted cursor1. The scan discarded its confirmed prefix every
+time. `ScanResult.RetrySequence` now certifies the first unconfirmed invocation;
+only transient failures can checkpoint it after fresh-context ownership renewal.
+Journal-read and uncertain enqueue failures never skip their invocation. Lost
+cursor replies reacquire/reread; fatal errors, caller cancellation and lost leases
+cannot checkpoint. Other scanner kinds retain their existing error behavior.
+
+All128 fixed seeds and exact replays pass0.048s; twelve control/policy pins are
+added without a new scalable workload. Full pinned corpus passes0.550s and its
+race-instrumented/model package passes7.999s. Three-node contract passes3.374s;
+its real persisted cursor follows1→4→7→8 and an actual committed/lost-ack enqueue
+retries with exactly one retained run message. Fencing/fatal/cancellation unit
+controls and the real contract pass race4.353s; full reconciler suite passes
+14.609s. Two rejected fixture trials (unbounded initial provisioning request,
+then an incompletely initialized private port) and their race rejection logs are
+retained; neither is a runtime repair failure. Corrected startup uses bounded
+attempts inside the unchanged20s contract context and the production constructor.
+[Focused reproduction, corrected sources, pins and raw logs](scale/start-partial-cursor-2026-10-03/focused/).
+This is a confirmed runtime progress defect, separate from the old R5 failure's
+unconfirmed exact cursor/server cause. Clean retained-binary full1k qualification
+at a committed source remains pending; full matrices/24h/large-population bounds
+remain open.
