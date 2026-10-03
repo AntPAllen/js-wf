@@ -56,15 +56,55 @@ func TestFiveDockerRollingUpgradePreservesEveryReplica(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Verify the constructor before provisioning: the compiled single-old-peer
+	// control must fail on actual version identity even if metadata is unavailable.
+	initialIDs := map[string]bool{}
+	initialVersions := make([]string, 5)
+	for node := 0; node < 5; node++ {
+		peer, err := nats.Connect(cluster.ClientURL(node), nats.NoReconnect(), nats.IgnoreDiscoveredServers(), nats.Timeout(time.Second))
+		if err != nil {
+			t.Fatal(err)
+		}
+		version, id := peer.ConnectedServerVersion(), peer.ConnectedServerId()
+		peer.Close()
+		if version != "2.11.17" || id == "" || initialIDs[id] {
+			t.Fatalf("stage=initial node%d version=%s want=2.11.17 identity=%s", node, version, id)
+		}
+		initialIDs[id] = true
+		initialVersions[node] = version
+	}
+	initialData, err := json.MarshalIndent(initialVersions, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "versions-before-provisioning.json"), initialData, 0644); err != nil {
+		t.Fatal(err)
+	}
 	var stream jetstream.Stream
 	ready, stopReady := context.WithTimeout(ctx, 45*time.Second)
-	for ready.Err() == nil {
-		stream, err = js.CreateStream(ready, jetstream.StreamConfig{Name: "ROLLING_PROOF", Subjects: []string{"rolling.proof"}, Storage: jetstream.FileStorage, Replicas: 5})
+	for attempt := 1; ready.Err() == nil; attempt++ {
+		request, stopRequest := context.WithTimeout(ready, 2*time.Second)
+		stream, err = js.CreateStream(request, jetstream.StreamConfig{Name: "ROLLING_PROOF", Subjects: []string{"rolling.proof"}, Storage: jetstream.FileStorage, Replicas: 5})
+		stopRequest()
 		if err == nil {
 			break
 		}
+		t.Logf("provision attempt=%d error=%v", attempt, err)
+		for node := 0; node < 5; node++ {
+			diagnostic, stopDiagnostic := context.WithTimeout(ready, 200*time.Millisecond)
+			raw, diagnosticErr := cluster.Diagnostic(diagnostic, node, "jetstream")
+			stopDiagnostic()
+			if diagnosticErr != nil {
+				t.Logf("provision attempt=%d node=%d monitoring error=%v", attempt, node, diagnosticErr)
+				continue
+			}
+			if writeErr := os.WriteFile(filepath.Join(root, fmt.Sprintf("provision-attempt-%d-node-%d.json", attempt, node)), raw, 0644); writeErr != nil {
+				t.Fatal(writeErr)
+			}
+		}
 		var api *jetstream.APIError
-		if !errors.As(err, &api) || api.ErrorCode != 10005 {
+		retryable := errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || errors.As(err, &api) && api.ErrorCode == 10005
+		if !retryable {
 			break
 		}
 		time.Sleep(100 * time.Millisecond)

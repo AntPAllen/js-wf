@@ -7733,3 +7733,23 @@ fixture attribution fix. No original failed trial was overwritten or restarted.
 The compiled control Go source remains losslessly retained inside the verified
 archive, avoiding accidental Go package discovery in the documentation tree.
 No hosted verdict is claimed while queued.
+
+## Upgrade provisioning budget made observable and bounded per request
+
+All51 members from failed upgrade run37104862997 match its uploaded archive
+manifest. Full original stores, binaries and logs are now preserved in
+scale/docker-rolling-upgrade-2026-10-03/rejected-provisioning/. The original
+single CreateStream request consumed the45s setup deadline without retaining
+attempt-level monitoring; the NATS cause remains unconfirmed.
+
+The fixture now verifies actual pinned endpoint identities/old versions before
+provisioning, ensuring the compiled one-old-peer control can fail independently
+of metadata availability. CreateStream uses2s per-request deadlines inside the
+same45s total budget, retries only unavailable/deadline/placement-pending
+responses and retains five-node monitoring snapshots plus every attempt error.
+Unexpected API errors still fail immediately; exact retained messages and all
+five physical checks remain required. Docker unit regressions compile the
+fixture and pass locally (0.514s). Hosted qualification remains required.
+The accepted native-million archive's redundant downloaded copy was rehashed
+byte-for-byte against its Git archive before removal, freeing61,111,444 bytes;
+its verified complete originals remain retained in the repository.
