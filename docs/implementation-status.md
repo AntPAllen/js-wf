@@ -7753,3 +7753,27 @@ fixture and pass locally (0.514s). Hosted qualification remains required.
 The accepted native-million archive's redundant downloaded copy was rehashed
 byte-for-byte against its Git archive before removal, freeing61,111,444 bytes;
 its verified complete originals remain retained in the repository.
+
+## Lost-release focused race/control and full121 default gate accepted
+
+[Focused run37105974385](https://github.com/AntPAllen/js-wf/actions/runs/37105974385)
+at exactf32ce38 passed. Independent artifact review verifies849 exact Git
+source hashes and unchanged post-run sources, actual positive race named/package
+pass13.667s, exact1..1000 completed bodies for both release-fencing and heartbeat
+handoff, all267 pins, and the precise compiled release-observation omission.
+That actual negative execution fails with retry_missing counter=0/events=0,
+not a build failure, skip or timeout. All14 original files are retained in a
+SHA256 read-back archive at scale/worker-release-fencing-2026-10-03/hosted-pass/.
+
+The full current121 default suite also passes locally at clean5712254:165
+passes, two documented trace-only skips,267 pins and121,000 actual seed bodies.
+Compiled test/AST/pin inventories are from the matching checkout; every
+Go/module/checker/pin hash matches exact Git and is unchanged during execution.
+The independent checker regenerates the result byte for byte; full originals
+and executed runner are in the verified archive at the same evidence directory's
+full121-1k/. This clears the121 graph's default1k gate; prior120100k proof
+remains correctly attributed, while current121100k is still required.
+
+[Revised upgrade contract37106224055](https://github.com/AntPAllen/js-wf/actions/runs/37106224055)
+is confirmed queued at5712254afa04f96c14c36e79d76ec153493a0f0a. Corrected real
+R5 pause37105975815 remains queued atf32ce38. Neither is qualified yet.
