@@ -141,8 +141,8 @@ jobs:
               seed_events=/tmp/tier3-mixed-journal-events.jsonl
               seed_result=/tmp/tier3-mixed-journal-result.json
             fi
-            if [ "$TIER3_MATRIX_ROW" = worker_clock ]; then
-              python3 scripts/capture-tier3-clock-source.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --stage before
+            if [ "$TIER3_MATRIX_ROW" = worker_clock ] || [ "$TIER3_MATRIX_ROW" = rolling_upgrade ]; then
+              python3 scripts/capture-tier3-clock-source.py --row "$TIER3_MATRIX_ROW" --root "$TIER3_MATRIX_ARTIFACT_ROOT" --stage before
             fi
             test_status=0
             if go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee "$seed_events" | python3 -u scripts/render-go-test.py; then
@@ -150,8 +150,8 @@ jobs:
             else
               test_status=$?
             fi
-            if [ "$TIER3_MATRIX_ROW" = worker_clock ]; then
-              python3 scripts/capture-tier3-clock-source.py --root "$TIER3_MATRIX_ARTIFACT_ROOT" --stage after
+            if [ "$TIER3_MATRIX_ROW" = worker_clock ] || [ "$TIER3_MATRIX_ROW" = rolling_upgrade ]; then
+              python3 scripts/capture-tier3-clock-source.py --row "$TIER3_MATRIX_ROW" --root "$TIER3_MATRIX_ARTIFACT_ROOT" --stage after
             fi
             if [ "$test_status" != 0 ]; then exit "$test_status"; fi
             cut_args=()

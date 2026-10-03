@@ -8185,3 +8185,21 @@ missing-wakeup controls. It is a focused observer contract, not a worker-kill
 smoke or an ahead200 replay. Current121100k37106469422 remains in progress;
 all13 Tier2x20037057872230 remains queued. Version4 real rolling qualification
 has not yet launched.
+
+
+## Full source attribution added to the next rolling producer
+
+The rolling-upgrade workflow now captures clean committed Go, Python, workflow
+and module file hashes before and after each actual seed execution, including
+failed tests. The after inventory must match both hashes and revision. These
+inventories are included in the existing complete store/evidence archive. The
+worker-clock producer keeps its established inventory names and behavior.
+
+A real isolated Git checkout test exercises both producers: clean before/after
+round trips succeed, an uncommitted source change is rejected, and a subsequently
+committed source change is rejected against the original before inventory.
+All68 local Tier3 guard methods pass. Earlier rolling failures retain their
+checkout-only source attribution; this addition cannot retroactively strengthen
+them. The queued observer qualification37112424062 remains atd2b98c6 and is
+not restarted for this evidence-producer change. No version4 real rolling trial
+has yet launched.
