@@ -9,14 +9,19 @@
   and a separate full restoration; compressed stores remain locally retained
   with permissions/timestamps/hash ledger. Failed million-timer originals are
   unchanged. Root free space is about 2.1 GiB; 24h capacity remains unproven.
-  A retained-binary race ten-minute five-node journal row is now genuinely live
-  at exact `1f1abfc9ea1794a6e0d13af156bb1cbd4a516194`, isolated checkout/root
-  `/tmp/js-wf-local-journal-tenm-20261003`, producer shell session 62345.
-  Supervisor 471929 and test2json process 472576 are observed live, all five
-  Docker nodes run and the first admitted batch is observed. Source hashes and
-  actual race binary are retained; no final verdict or acceptance yet. Stores
-  use the root disk. Its growth will inform 24h capacity without substituting
-  this ten-minute profile for a full-day run.
+  The retained-binary race ten-minute five-node journal row is now independently
+  accepted at exact `1f1abfc9ea1794a6e0d13af156bb1cbd4a516194`: 714.110 s named
+  test, 2,380 invocations/26,217 entries, 19 faults and 21 reviewed fencing records.
+  All 5,000 archive members, 1,140 before/after Git source hashes, actual race
+  executable and regenerated raw reports/checkpoint/explanation/fencing reviews
+  verify. Worst per-workflow terminal/progress p99: 14.018474603 s/7.048139213 s.
+  All Docker nodes are stopped. Physical stores are hash-verified but not
+  independently reopened. Allocated cluster storage peaks in the observations
+  at 166,961,152 bytes and falls to 127,594,496 after shutdown; live growth has
+  a rough linear 13.35 GB/day extrapolation, not a steady-state prediction or
+  capacity proof. Root free space after the run is about 1.87 GB. One ten-minute
+  row does not clear full-matrix/24h gates; 24h disk capacity remains unproven.
+  [Complete retained current-source row](scale/local-r5-journal-ten-minute-2026-10-03/).
   [Manifest, restoration verdict and exact scope](scale/storage-recovery-2026-10-03/).
 - **Full Tier2 matrix partial shard review:** campaign 37128612905 at exact
   `9ac3ad44267b68d1a1ec63ce47e1fb11d9c00204` has eight successful journal

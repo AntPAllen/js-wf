@@ -1,0 +1,105 @@
+Preparing worktree (detached HEAD 1f1abfc)
+{
+  "scope": "single five-container R5 journal-leader row",
+  "seed": 1,
+  "duration_seconds": 600,
+  "common_timer_clock": null,
+  "clock_timer_cut_profile": null,
+  "shortened_smoke": false,
+  "invocations": 2380,
+  "journal_entries": 26217,
+  "confirmed_faults": 19,
+  "active_consumer_faults": null,
+  "cells": {
+    "matrixshort": {
+      "invocations": 340,
+      "terminal_p99_seconds": 2.378167989,
+      "progress_p99_seconds": 2.276785104
+    },
+    "matrixtimer": {
+      "invocations": 255,
+      "terminal_p99_seconds": 4.326016402,
+      "progress_p99_seconds": 7.048139213
+    },
+    "matrixsignal": {
+      "invocations": 170,
+      "terminal_p99_seconds": 7.530905726,
+      "progress_p99_seconds": 2.496996681
+    },
+    "matrixfanout": {
+      "invocations": 85,
+      "terminal_p99_seconds": 14.018474603,
+      "progress_p99_seconds": 6.205806541
+    },
+    "matrixchild": {
+      "invocations": 510,
+      "terminal_p99_seconds": 5.03923297,
+      "progress_p99_seconds": 0.404073801
+    },
+    "matrixgrandchild": {
+      "invocations": 1020,
+      "terminal_p99_seconds": 2.223553689,
+      "progress_p99_seconds": 1.025946469
+    }
+  },
+  "clears_full_tier3_release": false,
+  "checkpoint_audit_checks": {
+    "completed_cohort_audits": 8,
+    "all_expected_checkpoints_present": true,
+    "scope": "Captured completed cohorts; mandatory final whole-state check remains separate."
+  }
+}
+{
+  "scope": "recorded R5 worker and repair decisions",
+  "counter_cross_checks_complete": true,
+  "fencing_records": 21,
+  "repair_records": 114,
+  "fencing_per_worker": {
+    "tier3-mixed-1": 7,
+    "tier3-mixed-2": 4,
+    "tier3-mixed-4": 6,
+    "tier3-mixed-0": 3,
+    "tier3-mixed-3": 1
+  },
+  "repairs_by_outcome": {
+    "start/acknowledged": 18,
+    "signal/acknowledged": 81,
+    "suspended/acknowledged": 15
+  },
+  "server_root_causes_confirmed": false,
+  "independently_reaudits_server_state": false,
+  "clears_full_tier3_release": false,
+  "input_sha256": {
+    "worker-metrics.json": "65ecc82337edf320c9efe5f763d84738d83a0d700507f8ac028c75098e27a528",
+    "fencing.json": "c5e5ce75f3b17ef9c0decea1041f587cd4b338ddfccf35dec9dd118ec30dc66e",
+    "repairs.json": "4e79a8ccb8510244efc5c54cdd3f9da7644ae33bc09c20dff98f9cbbbe543e87"
+  }
+}
+{
+  "scope": "retained delivery and terminal timelines",
+  "fencing_records": 21,
+  "classifications": {
+    "completed_after_fencing": 19,
+    "completed_during_original_delivery": 2
+  },
+  "outside_confirmed_faults": 0,
+  "ack_observations_prove_broker_commit": false,
+  "independently_reaudits_server_state": false,
+  "clears_full_tier3_release": false
+}
+{
+  "source": "1f1abfc9ea1794a6e0d13af156bb1cbd4a516194",
+  "row": "journal",
+  "seed": 1,
+  "duration": "10m",
+  "status": "row_verified",
+  "supervisor_pid": 471929,
+  "started": 1791055148.5221558,
+  "upgrade_shutdown": null,
+  "upgrade_start_gap": false,
+  "race": true,
+  "clears_full_tier3_release": false,
+  "test_pid": 472576,
+  "test_exit_code": 0,
+  "finished": 1791055902.114472
+}
