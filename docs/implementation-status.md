@@ -8135,3 +8135,10 @@ assertion; builds/skips/global timeouts cannot count. Clean source inventories,
 raw events and both control source files are preserved. The earlier accepted
 fallback-only race proof retains its original source/scope; this new native
 contract must independently pass before another real rolling qualification.
+
+[Expanded focused budget qualification37111754630](https://github.com/AntPAllen/js-wf/actions/runs/37111754630)
+is confirmed queued at exact24f2523994e11aa93ee4ad3ea95e2473d7ec75ba. It requires
+four actual race-test bodies and both separately compiled omission controls,
+with exact committed source hashes before/after. Current121100k37106469422
+remains in progress. No version4 real rolling trial has been launched pending
+this focused execution; prior real failures remain rejected and preserved.
