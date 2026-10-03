@@ -7942,3 +7942,23 @@ and matching raw lines are retained in rejected-deployment-check/server-warning-
 The fixture budget mismatch alone does not explain this trial, and correcting
 it does not prove convergence. Keep the failed trial rejected and investigate
 cluster readiness independently before qualifying a new real mixed run.
+
+## Focused whole-operation upgrade budget qualification accepted
+
+[Run37109195828](https://github.com/AntPAllen/js-wf/actions/runs/37109195828)
+at exact256d7ae is terminal success and independently accepted for the fixture
+budget contract. The actual race-instrumented named test completes its injected
+two-stage operation in2.2s; cancellation/backend-error test and package pass.
+The precise compiled overlay restoring matrixReadMetadata around the entire
+operation produces the expected named/package deadline failure in5s, rather
+than a build/skip/global-timeout failure. All688 source hashes match exact Git
+bytes and before/after inventories are identical; control bytes equal only the
+intended call replacement. All12 original/review archive members pass SHA256
+readback in scale/upgrade-provisioning-budget-2026-10-03/, with reusable reviewer.
+
+This qualifies deadline propagation with an injected operation, not real NATS
+provisioning or the mixed rolling row. Original trial no-quorum observations
+remain unresolved. The integration package including the new worker-clock
+fixture compiled at this source; the actual clock normalization/row gate still
+requires its separate running qualification37108814121. Current121100k remains
+in progress. Original full-matrix/24h requirements remain open.
