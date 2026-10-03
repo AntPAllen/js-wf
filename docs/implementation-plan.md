@@ -369,6 +369,13 @@ Per-phase tests prove each mechanism; this layer proves the whole thing under ad
   [Combined raw review and source-equivalence evidence](scale/sustained-component-verifier-2026-10-03/accepted/)
   clears this gate only; full 200-seed matrix and 24-hour soak remain open.
 - CI: first gate a fixed regression corpus plus 1,000 seeded schedules per commit; raise to 10,000 per commit once measured on CI hardware within a few minutes. Record seeds, trace paths, model version, steps/s, and virtual-time coverage. Keep 100,000 clean seeds and all known regression traces as the release gate. A timeout, unexplained skipped action, or model/real contract mismatch fails the gate rather than counting as a clean seed.
+  The complete current 121-workload graph's normal100k gate is independently
+  accepted at `9ecc37c`, including all 391 pins and the actual retained binary.
+  A 686-file ledger establishes unchanged runtime/model/Tier1 producer inputs
+  through reference `9c5fce3`; later integration-only fixtures are excluded.
+  The full race1k at the same tested source is separately accepted.
+  [Complete normal100k originals and qualification scope](scale/tombstone-marker-drain-2026-10-03/hosted-full100k/)
+  does not replace the real full-matrix, five-VM or 24-hour gates.
 
 Start with the journal CAS/lost-ack vertical slice because it has a real three-node fixture and an unresolved server-side observation in the status record. The first useful result is a trace showing whether the runtime mishandles an unchanged-tail rejection under the modeled server contract; any real-only discrepancy then has a small API-level fixture to investigate. Follow with consumer-leader movement and timer route faults, where real runs have likewise exposed unexplained latency.
 

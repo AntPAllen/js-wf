@@ -1,5 +1,17 @@
 # Tier 1 deterministic simulation: journal, lease, start, signals, timers, dispatch, and worker slices
 
+## Current full-suite qualification — 2026-10-03
+
+The complete 121-workload graph now passes 100,000 seeds per workload,
+12,100,000 actual bodies and all 391 pinned regressions at exact `9ecc37c`.
+Independent retained-binary review verifies the full source/compiled/seed
+inventories and regenerates the entire report. All 686 runtime/model/producer
+inputs match reference `9c5fce3`; later real integration fixtures are outside
+this equivalence claim. The full race1k suite is separately accepted at the
+same tested source. [Complete normal100k evidence](scale/tombstone-marker-drain-2026-10-03/hosted-full100k/)
+closes the normal seeded release gate; real matrix/24h and five-VM gates remain
+independent. Earlier sections retain their historical graph sizes and scope.
+
 ## Native timer deletion reply recovery
 
 `TestSeededNativeTimerDeleteReplies` runs production `TimerScan`,

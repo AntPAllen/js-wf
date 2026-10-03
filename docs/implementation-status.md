@@ -2,6 +2,20 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Complete current-runtime normal100k simulation accepted:** run 37146526818
+  at exact `9ecc37c74979132a8a2bae5877eb44bc175cbf89` passes all 121
+  workloads × seeds 1–100,000 (12,100,000 completed bodies), 175 top-level
+  tests and all 391 pins, with exactly two documented trace-only skips.
+  Package/wall elapsed is 12,288.631/12,288.98 s. Independent review verifies
+  all 1,140 unchanged Git source hashes, retained normal executable/settings,
+  compiled test/seed inventories and byte-identical report regeneration.
+  All 686 non-test Go/module, simulator/pin, Tier1 producer/verifier/workflow
+  inputs equal reference `9c5fce3`; later integration-only fixtures are excluded
+  explicitly. The normal100k gate is now qualified for that runtime/model graph,
+  alongside the already accepted full race1k at the same tested source.
+  All 23 archive members reopen and hash-verify. Full real matrices/24h,
+  five-VM and the original physical million-timer drain remain open.
+  [Full executable, raw suite and equivalence ledger](scale/tombstone-marker-drain-2026-10-03/hosted-full100k/).
 - **Full thousand real-network journal recovery accepted:** retained normal
   executable at exact `eacff61ee832e75e59ae96bd8aa6d1747f28151d` passes
   1,000 actual TCP-fault attempts: 500 committed/500 absent, one confirmed
