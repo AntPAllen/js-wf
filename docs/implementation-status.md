@@ -2,6 +2,17 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Current-source sustained lease mutation accepted:** campaign 37149508529
+  at `c4fed061bc614488d4f89b53b216b756490f7da0` has a successful lease job,
+  independently reviewed against all 608 reported source files and the exact
+  production overlay. Both full ten-minute same-store phase reports regenerate:
+  5,236 terminal invocations, 57,723 entries and 38 journal-leader faults total;
+  worst terminal/progress p99 12.734851098 s/7.305135807 s. The baseline rejects
+  the rival lease and the intended private-key mutant admits it. Actual semantic
+  failure and rejected compile/unrelated-failure controls verify. Physical
+  stores/executables were not uploaded. This accepts one category only; the
+  campaign remains live and the other five categories/full release remain open.
+  [Complete component originals](scale/current-sustained-mutations-2026-10-03/leases/).
 - **Superseded matrix work retired:** campaigns 37128612905 (`9ac3ad4`),
   37057872230 (`076ebad`) and 36891850893 (`92586ea`) predate current scanner
   corrections. They were explicitly cancelled to free ten active runners and
