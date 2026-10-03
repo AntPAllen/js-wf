@@ -112,7 +112,7 @@ type signalJournalState struct {
 // Scan repairs signal publishes whose matching wakeup was interrupted. The
 // cursor is a WF_SIG stream sequence. It is safe to scan the same range again;
 // the worker's lease and terminal check make duplicate wakeups harmless.
-func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (ScanResult, error) {
+func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (result ScanResult, scanErr error) {
 	if budget < 1 {
 		return ScanResult{}, fmt.Errorf("scan budget must be positive")
 	}
@@ -120,7 +120,13 @@ func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun b
 		next = 1
 	}
 	cache := map[string]signalJournalState{}
-	result := ScanResult{NextSequence: next}
+	result = ScanResult{NextSequence: next}
+	initial, confirmed := next, next
+	defer func() {
+		if scanErr != nil && confirmed > initial {
+			result.RetrySequence = confirmed
+		}
+	}()
 	for scanned := 0; scanned < budget; scanned++ {
 		m, err := s.port.GetSignal(ctx, next)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
@@ -134,6 +140,7 @@ func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun b
 			}
 			next++
 			result.NextSequence = next
+			confirmed = next
 			continue
 		}
 		if err != nil {
@@ -175,21 +182,25 @@ func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun b
 			cache[key] = state
 		}
 		if state.terminal || state.consumed[m.Sequence] {
+			confirmed = next
 			continue
 		}
 		invocation, err := s.port.LastInvocation(ctx, identity.InvocationSubject(typ, id))
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
+			confirmed = next
 			continue
 		} else if err != nil {
 			return result, err
 		}
 		if generation := m.Header.Get("Wf-Inv-Seq"); generation != "" && generation != strconv.FormatUint(invocation.Sequence, 10) {
+			confirmed = next
 			continue
 		}
 		result.Reenqueued++
 		event := RepairEvent{Kind: "signal", Type: typ, ID: id, Reason: "unconsumed_signal_nonterminal_generation", SourceSequence: m.Sequence, InvocationSequence: invocation.Sequence}
 		if dryRun {
 			reportRepair(s.Observe, event, true, nil)
+			confirmed = next
 			continue
 		}
 		err = s.port.EnqueueSignal(ctx, typ, id, m.Sequence)
@@ -197,6 +208,7 @@ func (s *SignalScan) Scan(ctx context.Context, next uint64, budget int, dryRun b
 		if err != nil {
 			return result, err
 		}
+		confirmed = next
 	}
 	return result, nil
 }

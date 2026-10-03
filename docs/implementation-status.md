@@ -2,6 +2,17 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Signal partial-timeout correction:** production scanner baseline fails
+  deterministic seed 2 after 48 virtual seconds with cursor 1/no wakeup.
+  Corrected certified-prefix checkpoints pass all 128 fixed seeds/exact replays,
+  adding twelve pins (295 total; 121 scalable workloads unchanged). Complete
+  pinned corpus/model passes race in 8.117 s; three-node cursor/lost-enqueue-ack
+  contract and six failure-stage controls pass race in 4.544 s, with actual
+  cursor `1 → 4 → 7 → 8` and one retained wakeup. Full reconciler suite passes
+  17.595 s. Focused originals include the rejected invalid-journal fixture;
+  binaries/stores are not retained by these focused runs. Queued full runs below
+  precede this production signal change; latest full-suite qualification remains
+  open. [Focused evidence](scale/signal-partial-cursor-2026-10-03/).
 - **Latest runtime validation:** the confirmed Start partial-timeout cursor fix
   passes the complete retained-binary normal 1k suite: 170 top-level passes,
   283 pins and 121,000 seeded bodies. Full race

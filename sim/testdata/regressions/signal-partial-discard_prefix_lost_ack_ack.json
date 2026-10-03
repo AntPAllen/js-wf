@@ -1,0 +1,2862 @@
+{
+  "version": 3,
+  "seed": 9,
+  "workload": "signal_partial_cursor",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "checkpoint_prefix",
+        "discard_prefix"
+      ],
+      "chosen": "discard_prefix"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "100ms",
+        "150ms"
+      ],
+      "chosen": "100ms"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ack",
+        "lost_ack"
+      ],
+      "chosen": "ack"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ack",
+        "drop",
+        "lost_ack"
+      ],
+      "chosen": "lost_ack"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "system.signal-reconciler",
+      "sequence": 1,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "59d7c7c0c1763582d6851cb5eaff48879b2b3a840f9689dcd197acfc75f265cf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "scan.signal",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "59d7c7c0c1763582d6851cb5eaff48879b2b3a840f9689dcd197acfc75f265cf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "partial_signal_read",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "partial_signal_journal",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "partial_signal_read",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 400,
+      "operation": "partial_signal_journal",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 500,
+      "operation": "partial_signal_read",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "partial_signal_journal",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 700,
+      "operation": "partial_signal_invocation",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "partial_signal_read",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 900,
+      "operation": "partial_signal_journal",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "partial_signal_invocation",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1100,
+      "operation": "partial_signal_read",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1200,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1300,
+      "operation": "partial_signal_read",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1400,
+      "operation": "partial_signal_journal",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1500,
+      "operation": "partial_signal_read",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1600,
+      "operation": "partial_signal_journal",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1700,
+      "operation": "partial_signal_read",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1800,
+      "operation": "partial_signal_journal",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1900,
+      "operation": "partial_signal_invocation",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "partial_signal_read",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2100,
+      "operation": "partial_signal_journal",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2200,
+      "operation": "partial_signal_invocation",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2300,
+      "operation": "partial_signal_read",
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2400,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2500,
+      "operation": "partial_signal_read",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2600,
+      "operation": "partial_signal_journal",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2700,
+      "operation": "partial_signal_read",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2800,
+      "operation": "partial_signal_journal",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2900,
+      "operation": "partial_signal_read",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3000,
+      "operation": "partial_signal_journal",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3100,
+      "operation": "partial_signal_invocation",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3200,
+      "operation": "partial_signal_read",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3300,
+      "operation": "partial_signal_journal",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3400,
+      "operation": "partial_signal_invocation",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3500,
+      "operation": "partial_signal_read",
+      "sequence": 15,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3600,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3700,
+      "operation": "partial_signal_read",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3800,
+      "operation": "partial_signal_journal",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3900,
+      "operation": "partial_signal_read",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4000,
+      "operation": "partial_signal_journal",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4100,
+      "operation": "partial_signal_read",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4200,
+      "operation": "partial_signal_journal",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4300,
+      "operation": "partial_signal_invocation",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4400,
+      "operation": "partial_signal_read",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4500,
+      "operation": "partial_signal_journal",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4600,
+      "operation": "partial_signal_invocation",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4700,
+      "operation": "partial_signal_read",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4800,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4900,
+      "operation": "partial_signal_read",
+      "sequence": 21,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "partial_signal_journal",
+      "sequence": 21,
+      "outcome": "deadline_exceeded"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "partial_scan",
+      "sequence": 1,
+      "outcome": "retry=0 error=true"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_delete",
+      "subject": "system.signal-reconciler",
+      "expected": 3,
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_create",
+      "subject": "system.signal-reconciler",
+      "sequence": 5,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 5,
+      "sequence": 6,
+      "data_sha256": "bc935cfd9957d022cc363d84d1d09634ccce40495d2bb72fd4483a2132e64698",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_get",
+      "subject": "scan.signal",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "bc935cfd9957d022cc363d84d1d09634ccce40495d2bb72fd4483a2132e64698",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6100,
+      "operation": "partial_signal_read",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6200,
+      "operation": "partial_signal_journal",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6300,
+      "operation": "partial_signal_read",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6400,
+      "operation": "partial_signal_journal",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6500,
+      "operation": "partial_signal_read",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6600,
+      "operation": "partial_signal_journal",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6700,
+      "operation": "partial_signal_invocation",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6800,
+      "operation": "partial_signal_read",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6900,
+      "operation": "partial_signal_journal",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7000,
+      "operation": "partial_signal_invocation",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7100,
+      "operation": "partial_signal_read",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7200,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7300,
+      "operation": "partial_signal_read",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7400,
+      "operation": "partial_signal_journal",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7500,
+      "operation": "partial_signal_read",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7600,
+      "operation": "partial_signal_journal",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7700,
+      "operation": "partial_signal_read",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7800,
+      "operation": "partial_signal_journal",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7900,
+      "operation": "partial_signal_invocation",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8000,
+      "operation": "partial_signal_read",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8100,
+      "operation": "partial_signal_journal",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8200,
+      "operation": "partial_signal_invocation",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "partial_signal_read",
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8400,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8500,
+      "operation": "partial_signal_read",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8600,
+      "operation": "partial_signal_journal",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8700,
+      "operation": "partial_signal_read",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8800,
+      "operation": "partial_signal_journal",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8900,
+      "operation": "partial_signal_read",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9000,
+      "operation": "partial_signal_journal",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9100,
+      "operation": "partial_signal_invocation",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9200,
+      "operation": "partial_signal_read",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9300,
+      "operation": "partial_signal_journal",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9400,
+      "operation": "partial_signal_invocation",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9500,
+      "operation": "partial_signal_read",
+      "sequence": 15,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9600,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9700,
+      "operation": "partial_signal_read",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9800,
+      "operation": "partial_signal_journal",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9900,
+      "operation": "partial_signal_read",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10000,
+      "operation": "partial_signal_journal",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10100,
+      "operation": "partial_signal_read",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10200,
+      "operation": "partial_signal_journal",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10300,
+      "operation": "partial_signal_invocation",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10400,
+      "operation": "partial_signal_read",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10500,
+      "operation": "partial_signal_journal",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10600,
+      "operation": "partial_signal_invocation",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10700,
+      "operation": "partial_signal_read",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10800,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 10900,
+      "operation": "partial_signal_read",
+      "sequence": 21,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 11000,
+      "operation": "partial_signal_journal",
+      "sequence": 21,
+      "outcome": "deadline_exceeded"
+    },
+    {
+      "at_ms": 11000,
+      "operation": "partial_scan",
+      "sequence": 1,
+      "outcome": "retry=0 error=true"
+    },
+    {
+      "at_ms": 11000,
+      "operation": "kv_delete",
+      "subject": "system.signal-reconciler",
+      "expected": 7,
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "kv_create",
+      "subject": "system.signal-reconciler",
+      "sequence": 9,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 9,
+      "sequence": 10,
+      "data_sha256": "5fa4b8d8638b68cff771b2aaa05de0e29e3afeb4a330f250d2a22a5f04e4f56b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "kv_get",
+      "subject": "scan.signal",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 12000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 10,
+      "sequence": 11,
+      "data_sha256": "5fa4b8d8638b68cff771b2aaa05de0e29e3afeb4a330f250d2a22a5f04e4f56b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12100,
+      "operation": "partial_signal_read",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12200,
+      "operation": "partial_signal_journal",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12300,
+      "operation": "partial_signal_read",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12400,
+      "operation": "partial_signal_journal",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12500,
+      "operation": "partial_signal_read",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12600,
+      "operation": "partial_signal_journal",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12700,
+      "operation": "partial_signal_invocation",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12800,
+      "operation": "partial_signal_read",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 12900,
+      "operation": "partial_signal_journal",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13000,
+      "operation": "partial_signal_invocation",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13100,
+      "operation": "partial_signal_read",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13200,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13300,
+      "operation": "partial_signal_read",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13400,
+      "operation": "partial_signal_journal",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13500,
+      "operation": "partial_signal_read",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13600,
+      "operation": "partial_signal_journal",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13700,
+      "operation": "partial_signal_read",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13800,
+      "operation": "partial_signal_journal",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 13900,
+      "operation": "partial_signal_invocation",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14000,
+      "operation": "partial_signal_read",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14100,
+      "operation": "partial_signal_journal",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14200,
+      "operation": "partial_signal_invocation",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14300,
+      "operation": "partial_signal_read",
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14400,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14500,
+      "operation": "partial_signal_read",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14600,
+      "operation": "partial_signal_journal",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14700,
+      "operation": "partial_signal_read",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14800,
+      "operation": "partial_signal_journal",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 14900,
+      "operation": "partial_signal_read",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15000,
+      "operation": "partial_signal_journal",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15100,
+      "operation": "partial_signal_invocation",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15200,
+      "operation": "partial_signal_read",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15300,
+      "operation": "partial_signal_journal",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15400,
+      "operation": "partial_signal_invocation",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15500,
+      "operation": "partial_signal_read",
+      "sequence": 15,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15600,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15700,
+      "operation": "partial_signal_read",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15800,
+      "operation": "partial_signal_journal",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 15900,
+      "operation": "partial_signal_read",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16000,
+      "operation": "partial_signal_journal",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16100,
+      "operation": "partial_signal_read",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16200,
+      "operation": "partial_signal_journal",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16300,
+      "operation": "partial_signal_invocation",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16400,
+      "operation": "partial_signal_read",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16500,
+      "operation": "partial_signal_journal",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16600,
+      "operation": "partial_signal_invocation",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16700,
+      "operation": "partial_signal_read",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16800,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 16900,
+      "operation": "partial_signal_read",
+      "sequence": 21,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 17000,
+      "operation": "partial_signal_journal",
+      "sequence": 21,
+      "outcome": "deadline_exceeded"
+    },
+    {
+      "at_ms": 17000,
+      "operation": "partial_scan",
+      "sequence": 1,
+      "outcome": "retry=0 error=true"
+    },
+    {
+      "at_ms": 17000,
+      "operation": "kv_delete",
+      "subject": "system.signal-reconciler",
+      "expected": 11,
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 18000,
+      "operation": "kv_create",
+      "subject": "system.signal-reconciler",
+      "sequence": 13,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 13,
+      "sequence": 14,
+      "data_sha256": "7b1c89a29793f8a22148f9d144242121c77c0b3e2950aff4722e9c9668e75e41",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18000,
+      "operation": "kv_get",
+      "subject": "scan.signal",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 18000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 14,
+      "sequence": 15,
+      "data_sha256": "7b1c89a29793f8a22148f9d144242121c77c0b3e2950aff4722e9c9668e75e41",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18100,
+      "operation": "partial_signal_read",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18200,
+      "operation": "partial_signal_journal",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18300,
+      "operation": "partial_signal_read",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18400,
+      "operation": "partial_signal_journal",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18500,
+      "operation": "partial_signal_read",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18600,
+      "operation": "partial_signal_journal",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18700,
+      "operation": "partial_signal_invocation",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18800,
+      "operation": "partial_signal_read",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 18900,
+      "operation": "partial_signal_journal",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19000,
+      "operation": "partial_signal_invocation",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19100,
+      "operation": "partial_signal_read",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19200,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19300,
+      "operation": "partial_signal_read",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19400,
+      "operation": "partial_signal_journal",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19500,
+      "operation": "partial_signal_read",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19600,
+      "operation": "partial_signal_journal",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19700,
+      "operation": "partial_signal_read",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19800,
+      "operation": "partial_signal_journal",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 19900,
+      "operation": "partial_signal_invocation",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20000,
+      "operation": "partial_signal_read",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20100,
+      "operation": "partial_signal_journal",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20200,
+      "operation": "partial_signal_invocation",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20300,
+      "operation": "partial_signal_read",
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20400,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20500,
+      "operation": "partial_signal_read",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20600,
+      "operation": "partial_signal_journal",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20700,
+      "operation": "partial_signal_read",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20800,
+      "operation": "partial_signal_journal",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 20900,
+      "operation": "partial_signal_read",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21000,
+      "operation": "partial_signal_journal",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21100,
+      "operation": "partial_signal_invocation",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21200,
+      "operation": "partial_signal_read",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21300,
+      "operation": "partial_signal_journal",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21400,
+      "operation": "partial_signal_invocation",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21500,
+      "operation": "partial_signal_read",
+      "sequence": 15,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21600,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21700,
+      "operation": "partial_signal_read",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21800,
+      "operation": "partial_signal_journal",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 21900,
+      "operation": "partial_signal_read",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22000,
+      "operation": "partial_signal_journal",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22100,
+      "operation": "partial_signal_read",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22200,
+      "operation": "partial_signal_journal",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22300,
+      "operation": "partial_signal_invocation",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22400,
+      "operation": "partial_signal_read",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22500,
+      "operation": "partial_signal_journal",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22600,
+      "operation": "partial_signal_invocation",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22700,
+      "operation": "partial_signal_read",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22800,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 22900,
+      "operation": "partial_signal_read",
+      "sequence": 21,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 23000,
+      "operation": "partial_signal_journal",
+      "sequence": 21,
+      "outcome": "deadline_exceeded"
+    },
+    {
+      "at_ms": 23000,
+      "operation": "partial_scan",
+      "sequence": 1,
+      "outcome": "retry=0 error=true"
+    },
+    {
+      "at_ms": 23000,
+      "operation": "kv_delete",
+      "subject": "system.signal-reconciler",
+      "expected": 15,
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 24000,
+      "operation": "kv_create",
+      "subject": "system.signal-reconciler",
+      "sequence": 17,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 17,
+      "sequence": 18,
+      "data_sha256": "801c9fb67b6a3820cb30e361df49ce2eee9e826321b6d69c7e508216c59d73de",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24000,
+      "operation": "kv_get",
+      "subject": "scan.signal",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 24000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 18,
+      "sequence": 19,
+      "data_sha256": "801c9fb67b6a3820cb30e361df49ce2eee9e826321b6d69c7e508216c59d73de",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24100,
+      "operation": "partial_signal_read",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24200,
+      "operation": "partial_signal_journal",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24300,
+      "operation": "partial_signal_read",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24400,
+      "operation": "partial_signal_journal",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24500,
+      "operation": "partial_signal_read",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24600,
+      "operation": "partial_signal_journal",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24700,
+      "operation": "partial_signal_invocation",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24800,
+      "operation": "partial_signal_read",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 24900,
+      "operation": "partial_signal_journal",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25000,
+      "operation": "partial_signal_invocation",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25100,
+      "operation": "partial_signal_read",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25200,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25300,
+      "operation": "partial_signal_read",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25400,
+      "operation": "partial_signal_journal",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25500,
+      "operation": "partial_signal_read",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25600,
+      "operation": "partial_signal_journal",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25700,
+      "operation": "partial_signal_read",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25800,
+      "operation": "partial_signal_journal",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 25900,
+      "operation": "partial_signal_invocation",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26000,
+      "operation": "partial_signal_read",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26100,
+      "operation": "partial_signal_journal",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26200,
+      "operation": "partial_signal_invocation",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26300,
+      "operation": "partial_signal_read",
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26400,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26500,
+      "operation": "partial_signal_read",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26600,
+      "operation": "partial_signal_journal",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26700,
+      "operation": "partial_signal_read",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26800,
+      "operation": "partial_signal_journal",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 26900,
+      "operation": "partial_signal_read",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27000,
+      "operation": "partial_signal_journal",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27100,
+      "operation": "partial_signal_invocation",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27200,
+      "operation": "partial_signal_read",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27300,
+      "operation": "partial_signal_journal",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27400,
+      "operation": "partial_signal_invocation",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27500,
+      "operation": "partial_signal_read",
+      "sequence": 15,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27600,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27700,
+      "operation": "partial_signal_read",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27800,
+      "operation": "partial_signal_journal",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 27900,
+      "operation": "partial_signal_read",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28000,
+      "operation": "partial_signal_journal",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28100,
+      "operation": "partial_signal_read",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28200,
+      "operation": "partial_signal_journal",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28300,
+      "operation": "partial_signal_invocation",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28400,
+      "operation": "partial_signal_read",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28500,
+      "operation": "partial_signal_journal",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28600,
+      "operation": "partial_signal_invocation",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28700,
+      "operation": "partial_signal_read",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28800,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 28900,
+      "operation": "partial_signal_read",
+      "sequence": 21,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 29000,
+      "operation": "partial_signal_journal",
+      "sequence": 21,
+      "outcome": "deadline_exceeded"
+    },
+    {
+      "at_ms": 29000,
+      "operation": "partial_scan",
+      "sequence": 1,
+      "outcome": "retry=0 error=true"
+    },
+    {
+      "at_ms": 29000,
+      "operation": "kv_delete",
+      "subject": "system.signal-reconciler",
+      "expected": 19,
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "kv_create",
+      "subject": "system.signal-reconciler",
+      "sequence": 21,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 21,
+      "sequence": 22,
+      "data_sha256": "6b5ec545c0ebd3a1a8a0cb1683ed50d4e4df89b23d1fb685575932eec44f42c2",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "kv_get",
+      "subject": "scan.signal",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 30000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 22,
+      "sequence": 23,
+      "data_sha256": "6b5ec545c0ebd3a1a8a0cb1683ed50d4e4df89b23d1fb685575932eec44f42c2",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30100,
+      "operation": "partial_signal_read",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30200,
+      "operation": "partial_signal_journal",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30300,
+      "operation": "partial_signal_read",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30400,
+      "operation": "partial_signal_journal",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30500,
+      "operation": "partial_signal_read",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30600,
+      "operation": "partial_signal_journal",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30700,
+      "operation": "partial_signal_invocation",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30800,
+      "operation": "partial_signal_read",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 30900,
+      "operation": "partial_signal_journal",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31000,
+      "operation": "partial_signal_invocation",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31100,
+      "operation": "partial_signal_read",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31200,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31300,
+      "operation": "partial_signal_read",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31400,
+      "operation": "partial_signal_journal",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31500,
+      "operation": "partial_signal_read",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31600,
+      "operation": "partial_signal_journal",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31700,
+      "operation": "partial_signal_read",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31800,
+      "operation": "partial_signal_journal",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 31900,
+      "operation": "partial_signal_invocation",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32000,
+      "operation": "partial_signal_read",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32100,
+      "operation": "partial_signal_journal",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32200,
+      "operation": "partial_signal_invocation",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32300,
+      "operation": "partial_signal_read",
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32400,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32500,
+      "operation": "partial_signal_read",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32600,
+      "operation": "partial_signal_journal",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32700,
+      "operation": "partial_signal_read",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32800,
+      "operation": "partial_signal_journal",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 32900,
+      "operation": "partial_signal_read",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33000,
+      "operation": "partial_signal_journal",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33100,
+      "operation": "partial_signal_invocation",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33200,
+      "operation": "partial_signal_read",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33300,
+      "operation": "partial_signal_journal",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33400,
+      "operation": "partial_signal_invocation",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33500,
+      "operation": "partial_signal_read",
+      "sequence": 15,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33600,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33700,
+      "operation": "partial_signal_read",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33800,
+      "operation": "partial_signal_journal",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 33900,
+      "operation": "partial_signal_read",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34000,
+      "operation": "partial_signal_journal",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34100,
+      "operation": "partial_signal_read",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34200,
+      "operation": "partial_signal_journal",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34300,
+      "operation": "partial_signal_invocation",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34400,
+      "operation": "partial_signal_read",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34500,
+      "operation": "partial_signal_journal",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34600,
+      "operation": "partial_signal_invocation",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34700,
+      "operation": "partial_signal_read",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34800,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 34900,
+      "operation": "partial_signal_read",
+      "sequence": 21,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 35000,
+      "operation": "partial_signal_journal",
+      "sequence": 21,
+      "outcome": "deadline_exceeded"
+    },
+    {
+      "at_ms": 35000,
+      "operation": "partial_scan",
+      "sequence": 1,
+      "outcome": "retry=0 error=true"
+    },
+    {
+      "at_ms": 35000,
+      "operation": "kv_delete",
+      "subject": "system.signal-reconciler",
+      "expected": 23,
+      "sequence": 24,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 36000,
+      "operation": "kv_create",
+      "subject": "system.signal-reconciler",
+      "sequence": 25,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 25,
+      "sequence": 26,
+      "data_sha256": "1d652bc7c8628d6086349990a405e43cc18361f560740975a486f54e9e62c296",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36000,
+      "operation": "kv_get",
+      "subject": "scan.signal",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 36000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 26,
+      "sequence": 27,
+      "data_sha256": "1d652bc7c8628d6086349990a405e43cc18361f560740975a486f54e9e62c296",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36100,
+      "operation": "partial_signal_read",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36200,
+      "operation": "partial_signal_journal",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36300,
+      "operation": "partial_signal_read",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36400,
+      "operation": "partial_signal_journal",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36500,
+      "operation": "partial_signal_read",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36600,
+      "operation": "partial_signal_journal",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36700,
+      "operation": "partial_signal_invocation",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36800,
+      "operation": "partial_signal_read",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 36900,
+      "operation": "partial_signal_journal",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37000,
+      "operation": "partial_signal_invocation",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37100,
+      "operation": "partial_signal_read",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37200,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37300,
+      "operation": "partial_signal_read",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37400,
+      "operation": "partial_signal_journal",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37500,
+      "operation": "partial_signal_read",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37600,
+      "operation": "partial_signal_journal",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37700,
+      "operation": "partial_signal_read",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37800,
+      "operation": "partial_signal_journal",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 37900,
+      "operation": "partial_signal_invocation",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38000,
+      "operation": "partial_signal_read",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38100,
+      "operation": "partial_signal_journal",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38200,
+      "operation": "partial_signal_invocation",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38300,
+      "operation": "partial_signal_read",
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38400,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38500,
+      "operation": "partial_signal_read",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38600,
+      "operation": "partial_signal_journal",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38700,
+      "operation": "partial_signal_read",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38800,
+      "operation": "partial_signal_journal",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 38900,
+      "operation": "partial_signal_read",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39000,
+      "operation": "partial_signal_journal",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39100,
+      "operation": "partial_signal_invocation",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39200,
+      "operation": "partial_signal_read",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39300,
+      "operation": "partial_signal_journal",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39400,
+      "operation": "partial_signal_invocation",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39500,
+      "operation": "partial_signal_read",
+      "sequence": 15,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39600,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39700,
+      "operation": "partial_signal_read",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39800,
+      "operation": "partial_signal_journal",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 39900,
+      "operation": "partial_signal_read",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40000,
+      "operation": "partial_signal_journal",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40100,
+      "operation": "partial_signal_read",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40200,
+      "operation": "partial_signal_journal",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40300,
+      "operation": "partial_signal_invocation",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40400,
+      "operation": "partial_signal_read",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40500,
+      "operation": "partial_signal_journal",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40600,
+      "operation": "partial_signal_invocation",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40700,
+      "operation": "partial_signal_read",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40800,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 40900,
+      "operation": "partial_signal_read",
+      "sequence": 21,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 41000,
+      "operation": "partial_signal_journal",
+      "sequence": 21,
+      "outcome": "deadline_exceeded"
+    },
+    {
+      "at_ms": 41000,
+      "operation": "partial_scan",
+      "sequence": 1,
+      "outcome": "retry=0 error=true"
+    },
+    {
+      "at_ms": 41000,
+      "operation": "kv_delete",
+      "subject": "system.signal-reconciler",
+      "expected": 27,
+      "sequence": 28,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 42000,
+      "operation": "kv_create",
+      "subject": "system.signal-reconciler",
+      "sequence": 29,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 29,
+      "sequence": 30,
+      "data_sha256": "75c36b6edf610d7555d45c8a22ab6e24207af47ea82c8664bddec4ab7053457b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42000,
+      "operation": "kv_get",
+      "subject": "scan.signal",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 42000,
+      "operation": "kv_update",
+      "subject": "system.signal-reconciler",
+      "expected": 30,
+      "sequence": 31,
+      "data_sha256": "75c36b6edf610d7555d45c8a22ab6e24207af47ea82c8664bddec4ab7053457b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42100,
+      "operation": "partial_signal_read",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42200,
+      "operation": "partial_signal_journal",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42300,
+      "operation": "partial_signal_read",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42400,
+      "operation": "partial_signal_journal",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42500,
+      "operation": "partial_signal_read",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42600,
+      "operation": "partial_signal_journal",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42700,
+      "operation": "partial_signal_invocation",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42800,
+      "operation": "partial_signal_read",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 42900,
+      "operation": "partial_signal_journal",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43000,
+      "operation": "partial_signal_invocation",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43100,
+      "operation": "partial_signal_read",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43200,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43300,
+      "operation": "partial_signal_read",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43400,
+      "operation": "partial_signal_journal",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43500,
+      "operation": "partial_signal_read",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43600,
+      "operation": "partial_signal_journal",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43700,
+      "operation": "partial_signal_read",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43800,
+      "operation": "partial_signal_journal",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 43900,
+      "operation": "partial_signal_invocation",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44000,
+      "operation": "partial_signal_read",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44100,
+      "operation": "partial_signal_journal",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44200,
+      "operation": "partial_signal_invocation",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44300,
+      "operation": "partial_signal_read",
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44400,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44500,
+      "operation": "partial_signal_read",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44600,
+      "operation": "partial_signal_journal",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44700,
+      "operation": "partial_signal_read",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44800,
+      "operation": "partial_signal_journal",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 44900,
+      "operation": "partial_signal_read",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45000,
+      "operation": "partial_signal_journal",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45100,
+      "operation": "partial_signal_invocation",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45200,
+      "operation": "partial_signal_read",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45300,
+      "operation": "partial_signal_journal",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45400,
+      "operation": "partial_signal_invocation",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45500,
+      "operation": "partial_signal_read",
+      "sequence": 15,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45600,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45700,
+      "operation": "partial_signal_read",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45800,
+      "operation": "partial_signal_journal",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 45900,
+      "operation": "partial_signal_read",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46000,
+      "operation": "partial_signal_journal",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46100,
+      "operation": "partial_signal_read",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46200,
+      "operation": "partial_signal_journal",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46300,
+      "operation": "partial_signal_invocation",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46400,
+      "operation": "partial_signal_read",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46500,
+      "operation": "partial_signal_journal",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46600,
+      "operation": "partial_signal_invocation",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46700,
+      "operation": "partial_signal_read",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46800,
+      "operation": "partial_signal_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 46900,
+      "operation": "partial_signal_read",
+      "sequence": 21,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 47000,
+      "operation": "partial_signal_journal",
+      "sequence": 21,
+      "outcome": "deadline_exceeded"
+    },
+    {
+      "at_ms": 47000,
+      "operation": "partial_scan",
+      "sequence": 1,
+      "outcome": "retry=0 error=true"
+    },
+    {
+      "at_ms": 47000,
+      "operation": "kv_delete",
+      "subject": "system.signal-reconciler",
+      "expected": 31,
+      "sequence": 32,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 48000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 48000,
+      "operation": "kv_get",
+      "subject": "scan.signal",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 48000,
+      "operation": "characterize_partial_cursor",
+      "outcome": "discard_prefix_lost_ack_ack"
+    }
+  ]
+}
