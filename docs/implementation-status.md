@@ -82,6 +82,11 @@
   This establishes the narrow cleanup persistence behavior, while original
   missed-retirement cause and the million/24h drain gate remain open.
   [Raw control and baseline evidence](scale/million-timer-terminal-2026-10-02/scheduler-dirty-control/).
+  A fresh two-message file-store fixture now reproduces the same cleanup
+  persistence defect without campaign data, index deletion or injected map
+  entries. The unchanged module restores1 removed schedule after reopen;
+  the exact copied dirty-count control preserves0, with no callbacks and the
+  anchor retained. [Minimal reproduction](scale/scheduler-minimal-cleanup-2026-10-03/).
 - **Worker-kill target:** historical31.1s withTTL30s is a configuration mismatch
   excluded from reruns. ProductionTTL12s/heartbeat3s/AckWait13s and strict
   recovery under30s remain in force. Route-quorum recovery p99 starts at the
