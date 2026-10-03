@@ -37,6 +37,6 @@ func RunTombstoneLoopWithPorts(ctx context.Context, loop LoopPort, scans retenti
 	scanner := retention.NewTombstoneScanWithPort(scans)
 	return RunLoopWithPort(ctx, loop, workerID, "tombstone", interval, budget, func(ctx context.Context, next uint64, budget int, dryRun bool) (ScanResult, error) {
 		page, err := scanner.Scan(ctx, next, budget, now().UTC(), dryRun)
-		return ScanResult{NextSequence: page.NextSequence, Inspected: page.Inspected, Removed: page.Deleted}, err
+		return ScanResult{RetrySequence: page.RetrySequence, NextSequence: page.NextSequence, Inspected: page.Inspected, Removed: page.Deleted}, err
 	})
 }

@@ -2,6 +2,19 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Tombstone partial-timeout correction:** a neutral production-port refactor
+  preserves the original scan decisions and exposes their baseline stall at
+  fixed seed 2: 48 virtual seconds, cursor 1 and target retained. The scanner
+  now certifies completed prefixes and the production loop propagates them.
+  All 256 fixed seeds/exact replays pass in 0.220 s; 24 new pins bring the corpus
+  to 379, with the same 121 scalable workloads. Complete pins/model pass race
+  in 9.583 s. Thirteen failure/prefix controls and two real three-node deletion
+  contracts pass race; actual cursors `1 → 4 → 7 → 8`, retained cursor 11 after
+  retrying uncertain deletion, exactly one committed delete and seven protected
+  values preserved. Full retention/reconciler suites pass 0.254 s/33.568 s.
+  Current complete graph qualification remains open; population bounds and
+  full fault matrices/24h remain separate.
+  [Focused originals and model limits](scale/tombstone-partial-cursor-2026-10-03/).
 - **Timer partial-timeout correction:** both baselines stall after 48 virtual
   seconds/cursor 1, fallback seed 2 and native seed 14. Native and fallback
   scanners now certify confirmed prefixes; uncertain wakeup publication and

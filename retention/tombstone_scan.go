@@ -73,6 +73,8 @@ func (p jetStreamTombstoneScanSession) GetStateMessage(ctx context.Context, seq 
 }
 
 type TombstonePage struct {
+	// RetrySequence certifies the first unresolved stream sequence after a
+	// completed prefix. Uncertain reads or deletes cannot skip that sequence.
 	RetrySequence uint64   `json:"retry_sequence,omitempty"`
 	NextSequence  uint64   `json:"next_sequence"`
 	Inspected     int      `json:"inspected"`
@@ -85,7 +87,7 @@ type TombstonePage struct {
 // Scan examines at most budget KV stream sequences. It checks each candidate
 // against the latest KV revision before deleting, so a newer generation or
 // cursor update cannot be removed through an older stream entry.
-func (s *TombstoneScan) Scan(ctx context.Context, next uint64, budget int, now time.Time, dryRun bool) (TombstonePage, error) {
+func (s *TombstoneScan) Scan(ctx context.Context, next uint64, budget int, now time.Time, dryRun bool) (result TombstonePage, scanErr error) {
 	if budget < 1 || now.IsZero() {
 		return TombstonePage{}, fmt.Errorf("invalid tombstone scan budget or clock")
 	}
@@ -109,13 +111,20 @@ func (s *TombstoneScan) Scan(ctx context.Context, next uint64, budget int, now t
 	if wrap {
 		count = int(available)
 	}
-	result := TombstonePage{NextSequence: next}
+	result = TombstonePage{NextSequence: next}
+	confirmed := next
+	defer func() {
+		if scanErr != nil && confirmed > next {
+			result.RetrySequence = confirmed
+		}
+	}()
 	const prefix = "$KV.WF_STATE."
 	for offset := 0; offset < count; offset++ {
 		seq := next + uint64(offset)
 		result.NextSequence = seq + 1
 		message, err := session.GetStateMessage(ctx, seq)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
+			confirmed = seq + 1
 			continue
 		}
 		if err != nil {
@@ -127,16 +136,19 @@ func (s *TombstoneScan) Scan(ctx context.Context, next uint64, budget int, now t
 		key := strings.TrimPrefix(message.Subject, prefix)
 		parts := strings.Split(key, ".")
 		if len(parts) != 2 || identity.Validate(parts[0], parts[1]) != nil {
+			confirmed = seq + 1
 			continue
 		}
 		value, revision, err := session.StateValue(ctx, key)
 		if errors.Is(err, jetstream.ErrKeyNotFound) {
+			confirmed = seq + 1
 			continue
 		}
 		if err != nil {
 			return result, err
 		}
 		if revision != seq {
+			confirmed = seq + 1
 			continue
 		}
 		result.Inspected++
@@ -154,6 +166,7 @@ func (s *TombstoneScan) Scan(ctx context.Context, next uint64, budget int, now t
 		if deleted {
 			result.Deleted++
 		}
+		confirmed = seq + 1
 	}
 	if wrap {
 		result.NextSequence = 1
