@@ -7723,3 +7723,13 @@ Verified original archives remain intact. To free local compiler space, all57
 redundant files from the terminal accepted hosted production-cap download were
 rehashed against its fully read-back archive before removing those copies
 (224,639,387 bytes). The repo archive and failed/live original stores remain.
+
+Both qualification runs are confirmed queued at exact
+f32ce387a5f871e8749e2c92d0c4f6c5abc4ae86:
+[focused race/control37105974385](https://github.com/AntPAllen/js-wf/actions/runs/37105974385)
+and [corrected ten-minute worker-pause37105975815](https://github.com/AntPAllen/js-wf/actions/runs/37105975815).
+These are new-source qualifications following a reproduced runtime bug and
+fixture attribution fix. No original failed trial was overwritten or restarted.
+The compiled control Go source remains losslessly retained inside the verified
+archive, avoiding accidental Go package discovery in the documentation tree.
+No hosted verdict is claimed while queued.
