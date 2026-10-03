@@ -7609,3 +7609,33 @@ zero ack errors and one transient fetch error. The hosted offline diagnostic
 verifier passed. Independent receipt/source/physical-drain review remains open;
 this10m diagnostic does not satisfy the original24h/2s release requirement.
 The historical30s-TTL worker-kill mismatch remains closed without reruns.
+
+## Million-population ten-minute diagnostic independently accepted
+
+[Run37059396897](https://github.com/AntPAllen/js-wf/actions/runs/37059396897)
+at exact885664e is accepted for its fixed1M/10m/15m-runway/64-publisher,
+30s/60s diagnostic profile. Evidence and executed independent Python review
+are in scale/native-million-diagnostic-2026-10-03/. All2291 original archive
+members, exact-revision source hashes and archived binary hash match. All1M
+receipt slot checksums pass, match the observation archive, carry distinct
+stream sequences, and are no earlier than their due time in both client and
+server timestamps. Independently recomputed p99/max match12.402235943s and
+15.816089163s. Both actual all-three SIGKILL exit records pass the cut-order
+checks. Final logical and physical audits match their raw JSONL; all three
+unique physical replicas retain zero WF_RUN messages and all64 consumers have
+zero pending/ack-pending, with the same positive last sequence.
+
+The successful hosted offline-verifier output is preserved. This local review
+does not execute the archived binary.39 redeliveries, zero ack errors and one
+transient no-responder fetch error are retained rather than normalized away.
+This narrows the original retirement problem: a million-population shorter
+campaign can drain every replica, but the original24h failure cause and its
+24h/2s/30s release gate remain open.
+
+The corrected Docker upgrade contract is confirmed queued as
+[run37104862997](https://github.com/AntPAllen/js-wf/actions/runs/37104862997)
+at exact1bd7ac7fba3a73803b3df9955fadb893c5a67e79. Current120-workload100k
+run37051896032 has terminal success, pending independent artifact acceptance.
+Initial14-row R5 run37058644370 has terminal failure, pending failure review;
+Tier2 all13x20037057872230 is still queued. No trial was restarted solely for
+an observation timeout. No24h/full-matrix release claim is made.
