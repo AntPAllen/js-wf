@@ -91,7 +91,10 @@ def check_full_matrix(metadata, logs, count):
         "duration_seconds_per_seed": 600,
         "fault_variants": len(rows),
         "executions": len(flattened),
-        "clears_tier2_200_seed_gate": count == 200,
+        # Metadata/log checks are a preflight. Release qualification also needs
+        # every uploaded named-test/package event sequence checked below.
+        "clears_tier2_200_seed_gate": False,
+        "raw_artifacts_verified": False,
         "clears_tier3_24_hour_soak": False,
         "invocations": sum(seed["invocations"] for seed in flattened),
         "faults": sum(seed["faults"] for seed in flattened),
@@ -105,11 +108,14 @@ def check_full_matrix(metadata, logs, count):
 def check_artifacts(report, root):
     """Cross-check raw Go JSON against every log-derived row verdict."""
     hashes = {}
+    indexed = {}
+    for path in root.rglob("*-test.jsonl"):
+        indexed.setdefault(path.name, []).append(path)
     for row, seeds in report["rows"].items():
         runtime_row, test = ROWS[row]
         for expected in seeds:
             seed = expected["seed"]
-            matches = list(root.rglob(f"matrix-{row}-{seed}-test.jsonl"))
+            matches = indexed.get(f"matrix-{row}-{seed}-test.jsonl", [])
             if len(matches) != 1 or not matches[0].is_file():
                 raise ValueError(f"{row}/{seed}: missing or duplicate raw events")
             path = matches[0]
@@ -123,6 +129,13 @@ def check_artifacts(report, root):
                 raise ValueError(f"{row}/{seed}: raw events disagree with job log verdict")
             hashes[str(path.relative_to(root))] = hashlib.sha256(raw).hexdigest()
     return hashes
+
+
+def qualify_artifacts(report, root):
+    """Promote a metadata preflight only after all raw event checks succeed."""
+    hashes = check_artifacts(report, root)
+    return dict(report, raw_event_sha256=hashes, raw_artifacts_verified=True,
+                clears_tier2_200_seed_gate=report["consecutive_seeds_per_row"] == 200)
 
 
 def load_logs(path):
@@ -144,11 +157,13 @@ if __name__ == "__main__":
     parser.add_argument("--logs", required=True, type=Path)
     parser.add_argument("--seeds", required=True, type=int, choices=(1, 20, 200))
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--artifacts", type=Path, help="also require matching raw Go JSON for every row/seed")
+    parser.add_argument("--artifacts", type=Path, help="matching raw Go JSON for every row/seed; required for 200 seeds")
     args = parser.parse_args()
+    if args.seeds == 200 and args.artifacts is None:
+        parser.error("the 200-seed release gate requires --artifacts")
     report = check_full_matrix(json.loads(args.jobs.read_text()), load_logs(args.logs), args.seeds)
     if args.artifacts is not None:
-        report["raw_event_sha256"] = check_artifacts(report, args.artifacts)
+        report = qualify_artifacts(report, args.artifacts)
     report["input_sha256"] = {label: hashlib.sha256(path.read_bytes()).hexdigest() for label, path in (("jobs", args.jobs), ("logs_zip", args.logs))}
     args.output.write_text(json.dumps(report, indent=2)+"\n")
     print(json.dumps({key: value for key, value in report.items() if key != "rows"}, indent=2))

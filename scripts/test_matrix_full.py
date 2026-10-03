@@ -1,6 +1,8 @@
 import copy
 import importlib.util
 import json
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -36,6 +38,18 @@ def fixture(count):
 
 
 class FullMatrixTests(unittest.TestCase):
+    def test_cli_rejects_release_without_raw_artifacts_before_reading_inputs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            result = subprocess.run([sys.executable, str(Path(__file__).with_name("check-full-matrix.py")),
+                                     "--jobs", str(root / "absent-jobs.json"),
+                                     "--logs", str(root / "absent-logs.zip"),
+                                     "--seeds", "200", "--output", str(root / "result.json")],
+                                    text=True, capture_output=True)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("requires --artifacts", result.stderr)
+            self.assertFalse((root / "result.json").exists())
+
     def test_raw_artifacts_match_and_reject_missing_duplicate_incomplete_or_disagreement(self):
         metadata, logs = fixture(1)
         report = full.check_full_matrix(metadata, logs, 1)
@@ -70,8 +84,36 @@ class FullMatrixTests(unittest.TestCase):
             report = full.check_full_matrix(metadata, logs, count)
             self.assertEqual(report["executions"], 13 * count)
             self.assertEqual(report["invocations"], 13 * count * 28)
-            self.assertEqual(report["clears_tier2_200_seed_gate"], count == 200)
+            self.assertFalse(report["clears_tier2_200_seed_gate"])
+            self.assertFalse(report["raw_artifacts_verified"])
             self.assertFalse(report["clears_tier3_24_hour_soak"])
+
+    def test_200_seed_release_requires_all_raw_events_and_rejects_failed_promotion(self):
+        metadata, logs = fixture(200)
+        preflight = full.check_full_matrix(metadata, logs, 200)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with self.assertRaises(ValueError):
+                full.qualify_artifacts(preflight, root)
+            for row in full.ROWS:
+                test = full.ROWS[row][1]
+                for seed in range(1, 201):
+                    events = [{"Action": "output", "Test": test, "Output": seed_log(row, seed)},
+                              {"Action": "pass", "Test": test, "Elapsed": 628.65},
+                              {"Action": "pass"}]
+                    (root / f"matrix-{row}-{seed}-test.jsonl").write_text("\n".join(json.dumps(e) for e in events))
+            qualified = full.qualify_artifacts(preflight, root)
+            self.assertTrue(qualified["clears_tier2_200_seed_gate"])
+            self.assertTrue(qualified["raw_artifacts_verified"])
+            self.assertEqual(len(qualified["raw_event_sha256"]), 2600)
+            # A bad final raw seed cannot promote the original preflight.
+            path = root / "matrix-upgrade-200-test.jsonl"
+            events = [json.loads(line) for line in path.read_text().splitlines()]
+            events[-1]["Action"] = "fail"
+            path.write_text("\n".join(json.dumps(e) for e in events))
+            with self.assertRaises(ValueError):
+                full.qualify_artifacts(preflight, root)
+            self.assertFalse(preflight["clears_tier2_200_seed_gate"])
 
     def test_missing_duplicate_failed_live_and_revision_jobs(self):
         for change in ("missing", "duplicate", "failed", "live", "revision"):

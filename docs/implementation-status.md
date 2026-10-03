@@ -2,6 +2,15 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Tier2 release-verifier correction:** metadata/log preflight could previously
+  emit `clears_tier2_200_seed_gate=true` without raw artifacts. A retained
+  synthetic 2,600-execution control reproduces that false promotion; corrected
+  preflight leaves it false. The CLI now requires `--artifacts` for 200 seeds,
+  and only all matching raw named-test/package events can promote the flag.
+  One directory traversal indexes all events. Eight controls pass in 2.325 s,
+  including all 2,600 synthetic files and rejection of a failed final seed;
+  these are verifier controls, not real release workload qualification.
+  [Source/control originals](scale/tier2-raw-release-gate-2026-10-03/).
 - **Full-size physical tombstone drain:** the existing 100,000-key proof now
   requires an empty physical subject census, rather than logical KV absence
   alone. The actual three-node elected production loop passes at its default
