@@ -921,3 +921,22 @@ The implemented registry is now15 rows. Full campaigns use13-seed shards and
 340m job budgets:15xceil(200/13)=240 jobs, leaving capacity for the remaining
 worker-clock row (16x16=256). Existing14-row/12-seed evidence retains its source
 and original scope. No new registry size clears the full original matrix or24h.
+
+### R5 worker-clock diagnostic provenance preparation
+
+The missing R5 worker-clock row must run five separate workers with deliberate
+Go wall-clock offsets +5s/-5s/0/+5s/-5s. Preserve the original child JSONL,
+compiled overlays/binaries and final process counters. Each initial, periodic
+and final clock proof must retain the actual MATRIX_CLOCK GetMsg reply
+(subject, sequence, broker time and published payload) beside the worker sample.
+Validate all five identities, fresh broker timestamps and requested offsets.
+The prepared scripts/tier3-worker-clock-evidence.py helper checks this proof
+shape and rejects missing, duplicate, unshifted, stale or fabricated samples.
+
+Diagnostic aggregate copies may subtract only the configured Go overlay from
+worker At timestamps, retaining nanoseconds and every other field. Archive raw
+aggregates alongside normalized copies and independently compare each copy to
+its raw child records. Never adjust controller/broker latency samples or use
+network-delay-contaminated measured offsets as timestamp corrections. This
+helper and its synthetic controls are preparation; the actual sustained R5
+clock row, source/binary provenance and all-row qualification remain required.

@@ -12,7 +12,8 @@ FENCING = {
     'lease_heartbeat_lost': 'Heartbeat renewal could not confirm continuing ownership and returned ErrLost; processing was canceled.',
     'lease_execution_lost': 'Execution renewal could not confirm ownership and returned ErrLost; the worker stops this delivery.',
     'journal_stale': 'The journal rejected this owner’s epoch or expected tail; the delivery retries.',
-    'lease_release_lost': 'Lease cleanup returned ErrLost; cleanup must preserve successor safety.',
+    'lease_release_lost': 'The initial lease release returned ErrLost; subsequent cleanup cannot erase the lost ownership observation.',
+    'lease_cleanup_lost': 'Lease cleanup returned ErrLost; cleanup must preserve successor safety.',
 }
 REPAIRS = {
     ('timer','timer'): 'A retained incomplete sleep request was due; the scanner attempted its journal-sequence wakeup.',

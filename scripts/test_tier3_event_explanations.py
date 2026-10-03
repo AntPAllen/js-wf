@@ -1,6 +1,7 @@
 import copy
 import importlib.util
 from pathlib import Path
+import re
 import unittest
 
 spec = importlib.util.spec_from_file_location('explain', Path(__file__).with_name('explain-tier3-events.py'))
@@ -31,6 +32,22 @@ class EventExplanations(unittest.TestCase):
             m,f,r = self.fixture(); r[0][field]=value; cases.append((m,f,r))
         for data in cases:
             with self.subTest(data=data), self.assertRaises(ValueError): explain.check(*data)
+
+    def test_initial_release_and_cleanup_losses_have_distinct_explanations(self):
+        for reason, text in [('lease_release_lost', 'initial lease release'),
+                             ('lease_cleanup_lost', 'Lease cleanup')]:
+            m,f,r = self.fixture()
+            f[0]['Reason'] = reason
+            result = explain.check(m,f,r)
+            self.assertIn(text, result['explanations'][0]['explanation'])
+            self.assertEqual(result['fencing_per_worker'], {'tier3-mixed-0': 1})
+            m[0]['fencing_events'] = 0
+            with self.assertRaises(ValueError): explain.check(m,f,r)
+
+    def test_every_current_runtime_fencing_reason_has_an_explanation(self):
+        source = (Path(__file__).parents[1] / 'worker' / 'worker.go').read_text()
+        reasons = set(re.findall(r'"((?:lease_[a-z_]+_lost)|journal_stale)"', source))
+        self.assertEqual(reasons, set(explain.FENCING))
 
     def test_suspended_requires_tail_and_window_and_dry_run_never_publishes(self):
         m,f,_ = self.fixture()

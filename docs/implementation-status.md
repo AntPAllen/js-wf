@@ -7842,3 +7842,30 @@ It requests all five peer upgrades alongside the sustained mixed workload,
 with complete physical original archives. No shortened one-peer smoke replaces
 this qualification. Current121100k37106469422 remains in progress; original
 Tier2 all13x20037057872230 remains queued and retains its older source scope.
+
+## R5 clock evidence rules prepared; fencing explanation gap closed
+
+The event reviewer now explains lease_release_lost as initial Release ownership
+loss and accepts the separate lease_cleanup_lost reason emitted by the runtime.
+A source reason-inventory guard prevents current production fencing reasons
+from being silently omitted; counter mismatches remain rejected. Runtime code
+and previously accepted evidence are unchanged.
+
+The pending R5 worker-clock port now has an independent evidence helper for
+five fixed process identities at +5s/-5s/0/+5s/-5s. It checks worker samples
+against retained broker GetMsg subject, sequence, timestamp and original
+published payload, with freshness and measured-offset checks. Diagnostic
+normalization copies subtract only the configured overlay, preserve nanoseconds
+and all other fields, and leave originals unchanged. Controls reject missing
+or duplicated identities/sequences, stale/future/unshifted samples, mismatched
+broker messages, invented acknowledgment fields and altered/rounded/dropped
+normalized records. All65 local Tier3 Python guard tests pass. These are
+synthetic guard checks; no executed R5 worker-clock qualification is claimed.
+The actual fixture wiring, compiled overlay provenance and sustained row remain
+open, as do original full-matrix/24h requirements.
+
+Authoritative polls confirm rolling mixed row37107421026 at0bdc838 and current121
+100k37106469422 at11ad2e4 in progress. Their test steps are actively running;
+Tier2 all13x20037057872230 at076ebad remains queued. None was restarted. Local
+root has324MiB free; failed/live original stores were preserved and no new
+local Go build was attempted during this Python evidence preparation.
