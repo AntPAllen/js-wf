@@ -58,6 +58,13 @@
   Original scheduling-index inconsistency cause, full fault/seed matrices,
   full-runtime24h soak and remaining original release requirements stay open.
   [Short diagnostic evidence](scale/native-million-diagnostic-2026-10-03/).
+- **Copied-store cleanup:** a single-file dirty-count control in a fresh NATS
+  2.15.0 source copy makes all six isolated scheduler-resume cases pass;
+  rebuilt entries768/141 now remain zero after the second clean reopen.
+  All4998 original files and598 upstream module files are verified unchanged.
+  This establishes the narrow cleanup persistence behavior, while original
+  missed-retirement cause and the million/24h drain gate remain open.
+  [Raw control and baseline evidence](scale/million-timer-terminal-2026-10-02/scheduler-dirty-control/).
 - **Worker-kill target:** historical31.1s withTTL30s is a configuration mismatch
   excluded from reruns. ProductionTTL12s/heartbeat3s/AckWait13s and strict
   recovery under30s remain in force. Route-quorum recovery p99 starts at the
