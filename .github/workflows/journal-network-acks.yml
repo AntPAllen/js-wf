@@ -1,0 +1,57 @@
+name: journal-network-acks
+on: workflow_dispatch
+jobs:
+  thousand-real-network-cuts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      WF_JOURNAL_NETWORK_ACK: '1'
+      WF_JOURNAL_NETWORK_ACK_REPORT: ${{ runner.temp }}/journal-network/fixture
+      GOMEMLIMIT: 512MiB
+      GOMAXPROCS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Retain compilation inputs and execute the full network proof
+        run: |
+          set -o pipefail
+          root="$RUNNER_TEMP/journal-network"
+          mkdir -p "$root"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])/'journal-network'
+          paths = [p for p in subprocess.check_output(['git', 'ls-files'], text=True).splitlines()
+                   if p.endswith('.go') or p in ('go.mod', 'go.sum', 'scripts/check-journal-network-acks.py')]
+          files = {}
+          for path in paths:
+              body = pathlib.Path(path).read_bytes()
+              target = root/'source'/path
+              target.parent.mkdir(parents=True, exist_ok=True)
+              target.write_bytes(body)
+              files[path] = hashlib.sha256(body).hexdigest()
+          (root/'source-before.json').write_text(json.dumps(dict(source=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),files=files),indent=2)+'\n')
+          PY
+          go test -p=1 -c -o "$root/integration.test" ./integration
+          go version -m "$root/integration.test" > "$root/binary-build-info.txt"
+          sha256sum "$root/integration.test" > "$root/binary.sha256"
+          go tool test2json -p js-wf/integration -t "$root/integration.test" \
+            '-test.run=^TestThousandJournalNetworkLostAckRecoveries$' \
+            -test.v=test2json -test.timeout=12m | tee "$root/events.jsonl" | python3 -u scripts/render-go-test.py
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])/'journal-network'
+          before = json.loads((root/'source-before.json').read_text())
+          after = dict(source=before['source'], files={p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in before['files']})
+          (root/'source-after.json').write_text(json.dumps(after,indent=2)+'\n')
+          assert before == after, 'compilation inputs changed during execution'
+          PY
+          python3 scripts/check-journal-network-acks.py --root "$root/fixture" \
+            --events "$root/events.jsonl" --output "$root/independent-raw.json"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: journal-network-ack-originals
+          path: ${{ runner.temp }}/journal-network/
+          if-no-files-found: error

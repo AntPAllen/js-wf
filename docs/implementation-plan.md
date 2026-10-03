@@ -109,6 +109,12 @@ The journal reader is an ordered consumer filtered to the subject, started from 
 - Test: two writers holding the same `expectedSeq` race to append 10 000 times; exactly one wins each round, the loser always sees `ErrStale`, never a silent success. Run with the stream leader killed every 500 appends.
 - Test: append 5 000 entries with snapshots every 256 and purges after each; `Read` returns the same logical sequence as an un-snapshotted control run.
 - Test: on `ErrUnknown`, the writer re-reads the tail and finds either its entry (retry succeeded) or not (retry needed), never a foreign entry at its intended index. This is the ack-lost case and it must be exercised 1 000 times under `chaos`.
+  The default-size `TestThousandJournalNetworkLostAckRecoveries` now applies
+  actual TCP faults to all 1,000 attempts, with committed/absent branches and
+  a midpoint real R3 journal-leader stop/restart. The normal retained-binary
+  run at `eacff61` is independently accepted, including all raw peer receipts
+  and complete wire transcript. [Full evidence and scope](scale/journal-network-acks-2026-10-03/full/)
+  closes this specific gate; it does not replace final-source matrix/24h gates.
 - Throughput baseline recorded: appends per second per invocation and across 1 000 concurrent invocations on the 3-node fixture (`Replicas=3`, file storage). Regressions of more than 20% fail CI. `cas-throughput` builds a pinned reference and candidate on the same isolated runner, alternates three rounds, and requires both median rates to meet the 80% bar. Preserve every report and reject incompatible runtimes, malformed measurements and failed benchmark processes. The reference changes through an explicit source edit. The first hosted-runner gate passed at `7446a8f`; retain this check for future relevant changes.
 
 **Edge cases**
