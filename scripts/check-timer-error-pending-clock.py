@@ -31,7 +31,7 @@ overlay = root/'overlay.json'
 overlay.write_text(json.dumps({'Replace': {str(source): str(root/'required-hint-control.go.txt')}})+'\n')
 try:
     for mode in ('positive', 'negative'):
-        expression = '^Test(WorkerTimerHintFailureRecovery|DomainNativeHintFailureUsesDurableRepair|PinnedRegressionCorpus|NativeTimerHintFailureRepairsFromDurableSuspension)$' if mode == 'positive' else '^'+TEST+'$/unapplied_publish_false$'
+        expression = '^Test(WorkerTimerHintFailureRecovery|WorkerTimerHintOwnershipFailureNotSuppressed|DomainNativeHintFailureUsesDurableRepair|PinnedRegressionCorpus|NativeTimerHintFailureRepairsFromDurableSuspension)$' if mode == 'positive' else '^'+TEST+'$/unapplied_publish_false$'
         command = ['go', 'test', '-p=1', '-race', '-json']
         if mode == 'negative': command += ['-overlay='+str(overlay)]
         command += (['./wf', './sim', './integration'] if mode == 'positive' else ['./sim']) + ['-run', expression, '-count=1', '-timeout=6m']
@@ -50,6 +50,7 @@ try:
             for lost in ('false', 'true'): assert actions(TEST+'/unapplied_publish_'+lost) == ['pass']
             assert actions('TestPinnedRegressionCorpus') == ['pass']
             assert actions('TestDomainNativeHintFailureUsesDurableRepair') == ['pass']
+            assert actions('TestWorkerTimerHintOwnershipFailureNotSuppressed') == ['pass']
             assert actions('TestNativeTimerHintFailureRepairsFromDurableSuspension') == ['pass']
             assert output.count('exact_replay=true production_timer=true') == 2
         else:

@@ -22,7 +22,7 @@ import (
 // Failed native hints transfer recovery to a durable Suspended journal entry.
 // Actual production worker and scanner decisions must complete at the common
 // deadline without relying on restored consumer timestamps or a NAK.
-func runTimerHintRecovery(seed int64, replay *Trace, lost bool) (trace Trace, runErr error) {
+func runTimerHintRecovery(seed int64, replay *Trace, lost, ownershipFailure bool) (trace Trace, runErr error) {
 	s := NewScheduler(seed)
 	if replay != nil {
 		var err error
@@ -51,7 +51,8 @@ func runTimerHintRecovery(seed int64, replay *Trace, lost bool) (trace Trace, ru
 	})
 	journals := NewJournalTransport(s)
 	store := journal.NewWithPorts(journals, journals)
-	leases := lease.NewWithKVPort(NewKVTransport(s, provision.LeaseTTL))
+	leaseTransport := NewKVTransport(s, provision.LeaseTTL)
+	leases := lease.NewWithKVPort(leaseTransport)
 	outcomes := NewKVTransport(s, 0)
 	c := client.NewWithSignalPorts(transport.SignalTransport, transport.SignalTransport)
 	timers := NewTimerScheduleTransport(s, time.UnixMilli(0))
@@ -61,13 +62,22 @@ func runTimerHintRecovery(seed int64, replay *Trace, lost bool) (trace Trace, ru
 		}
 		return json.RawMessage(`42`), nil
 	}
+	renewFaultArmed := false
 	var observations []worker.DispatchEvent
 	var operations []worker.OperationEvent
 	newWorker := func(name string, fail bool) (*worker.Worker, error) {
 		return worker.NewWithPorts(name, map[string]worker.Handler{typ: handler}, worker.ModeledWorkerPorts{
 			Journal: store, Leases: leases, Outcome: outcomes, Invocation: transport.SignalTransport,
 			Signals: transport.SignalTransport, Client: c, Timer: timers, NativeTimer: true,
-			HeartbeatTicks: make(chan time.Time), OperationObserver: func(event worker.OperationEvent) { operations = append(operations, event) },
+			HeartbeatTicks: make(chan time.Time), OperationObserver: func(event worker.OperationEvent) {
+				operations = append(operations, event)
+				// Configure the next port fault after the request commits; this does
+				// not make a durable call or advance virtual time in the observer.
+				if ownershipFailure && event.Operation == "journal_append" && event.JournalKind == journal.StepRequested && event.Error == "" && !renewFaultArmed {
+					renewFaultArmed = true
+					_ = leaseTransport.QueueFault(KVFault{Operation: "update", Kind: KVDropBeforeCommit})
+				}
+			},
 			TimerNow: func(context.Context) (time.Time, error) {
 				if fail && !lost {
 					return time.Time{}, context.DeadlineExceeded
@@ -99,6 +109,36 @@ func runTimerHintRecovery(seed int64, replay *Trace, lost bool) (trace Trace, ru
 		return trace, err
 	}
 	records, _, err := store.Read(ctx, typ, id)
+	if ownershipFailure {
+		var renewalFailed, retrySeen, nakSeen bool
+		for _, event := range operations {
+			if event.Operation == "lease_renew_timer" && event.Error != "" {
+				renewalFailed = true
+			}
+			if event.Operation == "timer_native_hint" {
+				return trace, fmt.Errorf("hint ran after failed ownership renewal")
+			}
+		}
+		for _, event := range observations {
+			if event.Stage == "ack" {
+				return trace, fmt.Errorf("ownership failure was ACKed")
+			}
+			if event.Stage == "execution_retry" {
+				retrySeen = true
+			}
+			if event.Stage == "nak" {
+				nakSeen = true
+			}
+		}
+		if err != nil || len(records) != 2 || records[1].Kind != journal.StepRequested || !renewalFailed || !retrySeen || !nakSeen || transport.Dispatch.Pending() != 1 {
+			return trace, fmt.Errorf("ownership failure was suppressed: records=%+v renewal=%v retry=%v NAK=%v pending=%d err=%v", records, renewalFailed, retrySeen, nakSeen, transport.Dispatch.Pending(), err)
+		}
+		s.RecordTransport(TransportEvent{Operation: "check_timer_hint_ownership", Outcome: "renewal_error_not_suppressed", AtMillis: s.NowMillis()})
+		if err := s.Finish(); err != nil {
+			return trace, err
+		}
+		return s.Trace(), nil
+	}
 	if err != nil || len(records) != 3 || records[0].Kind != journal.Started || records[1].Kind != journal.StepRequested || records[2].Kind != journal.Suspended || first.Metrics().HandoffEnqueues != 0 || transport.Dispatch.Pending() != 0 || len(transport.Dispatch.RetainedSequences()) != 0 {
 		return trace, fmt.Errorf("missing durable timer suspension: journal=%+v pending=%d err=%v", records, transport.Dispatch.Pending(), err)
 	}
@@ -171,7 +211,7 @@ func runTimerHintRecovery(seed int64, replay *Trace, lost bool) (trace Trace, ru
 func TestWorkerTimerHintFailureRecovery(t *testing.T) {
 	for _, lost := range []bool{false, true} {
 		t.Run(fmt.Sprintf("unapplied_publish_%v", lost), func(t *testing.T) {
-			trace, err := runTimerHintRecovery(42, nil, lost)
+			trace, err := runTimerHintRecovery(42, nil, lost, false)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -183,11 +223,22 @@ func TestWorkerTimerHintFailureRecovery(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			replayed, err := runTimerHintRecovery(42, &trace, lost)
+			replayed, err := runTimerHintRecovery(42, &trace, lost, false)
 			if err != nil || !reflect.DeepEqual(trace, replayed) {
 				t.Fatalf("timer retry replay differs: %v", err)
 			}
 			t.Logf("TIMER_HINT_RECOVERY unapplied_publish=%v virtual_ms=%d exact_replay=true production_timer=true", lost, trace.Transport[len(trace.Transport)-1].AtMillis)
 		})
+	}
+}
+
+func TestWorkerTimerHintOwnershipFailureNotSuppressed(t *testing.T) {
+	trace, err := runTimerHintRecovery(42, nil, false, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	replayed, err := runTimerHintRecovery(42, &trace, false, true)
+	if err != nil || !reflect.DeepEqual(trace, replayed) {
+		t.Fatalf("ownership failure replay: %v", err)
 	}
 }

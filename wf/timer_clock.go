@@ -2,11 +2,17 @@ package wf
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"js-wf/identity"
 )
+
+// ErrTimerHint marks failure of an optional native scheduling hint after the
+// durable request and ownership checks. Renewal and journal errors must not
+// carry this marker.
+var ErrTimerHint = errors.New("native timer hint unavailable")
 
 // TimerClockSupport supplies a common durable deadline domain. Bounds must
 // conservatively enclose current time in that domain without worker wall time.
@@ -17,7 +23,7 @@ type TimerClockSupport struct {
 	Bounds   func(context.Context) (lower, upper time.Time, err error)
 	Schedule func(context.Context, uint64, time.Time, string) error
 	// ScheduleIsHint requires a domain-aware durable journal repairer. After
-	// the request commits, failed scheduling may suspend for that repairer.
+	// the request commits, ErrTimerHint may suspend for that repairer.
 	// Cancellation and missing/mismatched support still fail closed.
 	ScheduleIsHint bool
 }
@@ -88,7 +94,7 @@ func (c *Context) scheduleInDomain(step uint64, fireAt time.Time, domain string)
 			return fmt.Errorf("%w: no scheduler for clock domain %q", ErrTimerSchedule, domain)
 		}
 		err := c.timerClock.Schedule(c.base, step, fireAt, domain)
-		if err != nil && c.timerClock.ScheduleIsHint && c.base.Err() == nil {
+		if errors.Is(err, ErrTimerHint) && c.timerClock.ScheduleIsHint && c.base.Err() == nil {
 			return nil
 		}
 		return err

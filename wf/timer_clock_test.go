@@ -186,7 +186,7 @@ func TestDomainClockRejectsInvalidBoundsAndPreservesLegacy(t *testing.T) {
 // Legacy/fallback support and cancellation retain their fail-closed behavior.
 func TestDomainNativeHintFailureUsesDurableRepair(t *testing.T) {
 	for _, kind := range []string{"sleep", "await", "select_signal", "select_many"} {
-		for _, mode := range []string{"hint", "required", "cancelled", "missing_scheduler"} {
+		for _, mode := range []string{"hint", "required", "cancelled", "missing_scheduler", "ownership_error"} {
 			t.Run(kind+"/"+mode, func(t *testing.T) {
 				origin := time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC)
 				base, cancel := context.WithCancel(context.Background())
@@ -200,9 +200,12 @@ func TestDomainNativeHintFailureUsesDurableRepair(t *testing.T) {
 				support := TimerClockSupport{Domain: "utc-quorum-v1", ScheduleIsHint: mode != "required", Bounds: func(context.Context) (time.Time, time.Time, error) { return origin, origin, nil }, Schedule: func(context.Context, uint64, time.Time, string) error {
 					if mode == "cancelled" {
 						cancel()
-						return context.Canceled
+						return fmt.Errorf("%w: %w", ErrTimerHint, context.Canceled)
 					}
-					return context.DeadlineExceeded
+					if mode == "ownership_error" {
+						return fmt.Errorf("lease renewal: %w", context.DeadlineExceeded)
+					}
+					return fmt.Errorf("%w: %w", ErrTimerHint, context.DeadlineExceeded)
 				}}
 				if mode == "missing_scheduler" {
 					support.Schedule = nil

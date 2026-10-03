@@ -1096,6 +1096,9 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 			err = w.scheduleDomainTimerObserved(ctx, typ, id, input.Sequence, step, fireAt, domain, requestIndices[step], ops)
 		}
 		ops.finish(started, "timer_schedule", step, "", err)
+		if err != nil && domain != "" && w.nativeSchedules {
+			return fmt.Errorf("%w: %w", wf.ErrTimerHint, err)
+		}
 		return err
 	}
 	wctx.SetTimerSupport(wakeupAt, func(ctx context.Context) (time.Time, error) {

@@ -8388,3 +8388,36 @@ missing-durable-suspension assertion. Full clean source inventories/control
 bytes/raw events/traces are retained. Full default current-source and focused
 compiled control qualification remain pending; existing121100k at11ad2e4 and
 version4 rolling at59a0faa retain their earlier runtime scope and are not restarted.
+
+
+## Hint error marker preserves timer ownership failures
+
+Review of the scheduling callback identified a necessary distinction: it renews
+ownership before attempting a native hint. ScheduleIsHint now suppresses only
+explicit wf.ErrTimerHint errors, marked by the worker after successful renewal
+and the actual native scheduling attempt. Renewal and journal errors do not
+carry that marker. Processing cancellation and unavailable scheduler/domain
+still propagate.20 SDK subcases and an actual production-worker modeled renewal
+failure prove that a failed ownership check neither runs a native hint nor ACKs
+the delivery; it retains StepRequested and follows retry/NAK. Exact replay
+passes. The initial renewal-fault probe armed too early and hit the journal
+append instead; the corrected test arms after observed committed StepRequested
+without a durable observer call or virtual-time advance.
+
+The prior db08ac9 default1k qualification completed all121,000 seeded bodies,
+166 top-level passes/two documented trace-only skips/267 pins in157.655s.
+All967 before/after source hashes match exact Git. Its focused actual SDK/model/
+three-node race and compiled missing-suspension control also pass. All13/10
+original archive members are SHA256-readback verified in
+scale/native-hint-recovery-2026-10-03/pre-marker-focused/ and pre-marker-full1k/.
+These retain their pre-marker source/scope and cannot qualify the later ownership
+guard by implication. The later guarded recovery passes focused SDK/model races
+and the actual three-node race in6.912s; fresh whole-source and compiled-control
+qualification remain pending.
+
+Hosted focused recovery37114495789 was dispatched at exact
+db08ac96be878899f3236b08f5f5b6ff15c6bd8f and is not restarted for this later guard.
+Version4 rolling37113734884 is terminal success at59a0faa; its originals have
+been downloaded for independent review, without a rolling acceptance claim yet.
+Earlier121100k37106469422 remains live at11ad2e4; full current-source100k/race
+and new admitted R5 clock qualification remain open.
