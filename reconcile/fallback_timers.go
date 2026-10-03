@@ -142,7 +142,7 @@ func NewFallbackTimerScanWithPort(port FallbackTimerScanPort, now func(context.C
 	return &FallbackTimerScan{port: port, Now: now}
 }
 
-func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (ScanResult, error) {
+func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (result ScanResult, scanErr error) {
 	if budget < 1 {
 		return ScanResult{}, fmt.Errorf("scan budget must be positive")
 	}
@@ -166,7 +166,13 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 		}
 		return now, nil
 	}
-	result := ScanResult{NextSequence: next}
+	result = ScanResult{NextSequence: next}
+	initial, confirmed := next, next
+	defer func() {
+		if scanErr != nil && confirmed > initial {
+			result.RetrySequence = confirmed
+		}
+	}()
 	for scanned := 0; scanned < budget; scanned++ {
 		if next > last {
 			result.NextSequence = 1
@@ -176,6 +182,7 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
 			next++
 			result.NextSequence = next
+			confirmed = next
 			continue
 		}
 		if err != nil {
@@ -211,6 +218,7 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 					return result, err
 				}
 			}
+			confirmed = next
 			continue
 		}
 		due, err := timerDeadlineDue(ctx, s.DomainNow, legacyNow, timer.ClockDomain, timer.FireAt, 0)
@@ -218,12 +226,14 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 			return result, err
 		}
 		if !due {
+			confirmed = next
 			continue
 		}
 		result.Reenqueued++
 		event := RepairEvent{Kind: "fallback-timer", Type: parts[2], ID: parts[3], Reason: "due_fallback_timer", SourceSequence: message.Sequence, InvocationSequence: generation, FireAt: &timer.FireAt, ClockDomain: timer.ClockDomain, TimerStep: &step}
 		if dryRun {
 			reportRepair(s.Observe, event, true, nil)
+			confirmed = next
 			continue
 		}
 		wakeup := &nats.Msg{Subject: identity.RunSubject(parts[2], parts[3], provision.Partitions), Data: []byte(identity.Key(parts[2], parts[3])), Header: nats.Header{}}
@@ -240,6 +250,7 @@ func (s *FallbackTimerScan) Scan(ctx context.Context, next uint64, budget int, d
 		if err := s.port.DeleteTimer(ctx, message.Sequence); err != nil {
 			return result, err
 		}
+		confirmed = next
 	}
 	return result, nil
 }

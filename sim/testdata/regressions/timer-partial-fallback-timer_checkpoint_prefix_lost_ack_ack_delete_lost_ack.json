@@ -1,0 +1,636 @@
+{
+  "version": 3,
+  "seed": 2,
+  "workload": "timer_partial_cursor",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "fallback-timer",
+        "timer"
+      ],
+      "chosen": "fallback-timer"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "checkpoint_prefix",
+        "discard_prefix"
+      ],
+      "chosen": "checkpoint_prefix"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "100ms",
+        "150ms"
+      ],
+      "chosen": "100ms"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ack",
+        "lost_ack"
+      ],
+      "chosen": "ack"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ack",
+        "drop",
+        "lost_ack"
+      ],
+      "chosen": "lost_ack"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ack",
+        "drop",
+        "lost_ack"
+      ],
+      "chosen": "lost_ack"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "system.fallback-timer-reconciler",
+      "sequence": 1,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.fallback-timer-reconciler",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "59d7c7c0c1763582d6851cb5eaff48879b2b3a840f9689dcd197acfc75f265cf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "scan.fallback-timer",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.fallback-timer-reconciler",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "59d7c7c0c1763582d6851cb5eaff48879b2b3a840f9689dcd197acfc75f265cf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "partial_fallback_last",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "partial_fallback_read",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 400,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 500,
+      "operation": "partial_fallback_read",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 700,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "partial_fallback_read",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 900,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1100,
+      "operation": "partial_fallback_read",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1200,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1300,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1400,
+      "operation": "partial_fallback_read",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1500,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1600,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1700,
+      "operation": "partial_fallback_read",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1800,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1900,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "partial_fallback_read",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2100,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2200,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2300,
+      "operation": "partial_fallback_read",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2400,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2500,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2600,
+      "operation": "partial_fallback_read",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2700,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2800,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2900,
+      "operation": "partial_fallback_read",
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3000,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3100,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3200,
+      "operation": "partial_fallback_read",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3300,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3400,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3500,
+      "operation": "partial_fallback_read",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3600,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3700,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3800,
+      "operation": "partial_fallback_read",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3900,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4000,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4100,
+      "operation": "partial_fallback_read",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4200,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4300,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4400,
+      "operation": "partial_fallback_read",
+      "sequence": 15,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4500,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4600,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4700,
+      "operation": "partial_fallback_read",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4800,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4900,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "partial_fallback_read",
+      "sequence": 17,
+      "outcome": "deadline_exceeded"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "partial_scan",
+      "sequence": 1,
+      "outcome": "retry=17 error=true"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_update",
+      "subject": "system.fallback-timer-reconciler",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "59d7c7c0c1763582d6851cb5eaff48879b2b3a840f9689dcd197acfc75f265cf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_create",
+      "subject": "scan.fallback-timer",
+      "sequence": 1,
+      "data_sha256": "4523540f1504cd17100c4835e85b7eefd49911580f8efff0599a8f283be6b9e3",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_delete",
+      "subject": "system.fallback-timer-reconciler",
+      "expected": 4,
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_create",
+      "subject": "system.fallback-timer-reconciler",
+      "sequence": 6,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_update",
+      "subject": "system.fallback-timer-reconciler",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "a23e59d2e1f66b09f777903f1decec497b825e1b5c84157905fa29faceea3a44",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_get",
+      "subject": "scan.fallback-timer",
+      "sequence": 1,
+      "data_sha256": "4523540f1504cd17100c4835e85b7eefd49911580f8efff0599a8f283be6b9e3",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_update",
+      "subject": "system.fallback-timer-reconciler",
+      "expected": 7,
+      "sequence": 8,
+      "data_sha256": "a23e59d2e1f66b09f777903f1decec497b825e1b5c84157905fa29faceea3a44",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6100,
+      "operation": "partial_fallback_last",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6200,
+      "operation": "partial_fallback_read",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6300,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6400,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6500,
+      "operation": "partial_fallback_read",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6600,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6700,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6800,
+      "operation": "partial_fallback_read",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6900,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7000,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7100,
+      "operation": "partial_fallback_read",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7200,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7300,
+      "operation": "partial_fallback_state",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7400,
+      "operation": "partial_fallback_publish",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7400,
+      "operation": "enqueue_run",
+      "subject": "wf.run.15",
+      "sequence": 1,
+      "data_sha256": "90ef0aaf89206d45a59b023e1747ed996399db690b7b5ad5062edca7a458ca7c",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7500,
+      "operation": "partial_fallback_delete",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7500,
+      "operation": "partial_fallback_delete_commit",
+      "sequence": 20,
+      "outcome": "committed_ack_lost"
+    },
+    {
+      "at_ms": 7500,
+      "operation": "partial_scan",
+      "sequence": 17,
+      "outcome": "retry=20 error=true"
+    },
+    {
+      "at_ms": 7500,
+      "operation": "kv_update",
+      "subject": "system.fallback-timer-reconciler",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "a23e59d2e1f66b09f777903f1decec497b825e1b5c84157905fa29faceea3a44",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7500,
+      "operation": "kv_update",
+      "subject": "scan.fallback-timer",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "f5ca38f748a1d6eaf726b8a42fb575c3c71f1864a8143301782de13da2d9202b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7500,
+      "operation": "kv_delete",
+      "subject": "system.fallback-timer-reconciler",
+      "expected": 9,
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8500,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 8500,
+      "operation": "kv_create",
+      "subject": "system.fallback-timer-reconciler",
+      "sequence": 11,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8500,
+      "operation": "kv_update",
+      "subject": "system.fallback-timer-reconciler",
+      "expected": 11,
+      "sequence": 12,
+      "data_sha256": "a0889623d4f102fab3ecf9552ed4b513514d36d43216446f8b1d38ea0bed42cc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8500,
+      "operation": "kv_get",
+      "subject": "scan.fallback-timer",
+      "sequence": 2,
+      "data_sha256": "f5ca38f748a1d6eaf726b8a42fb575c3c71f1864a8143301782de13da2d9202b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8500,
+      "operation": "kv_update",
+      "subject": "system.fallback-timer-reconciler",
+      "expected": 12,
+      "sequence": 13,
+      "data_sha256": "a0889623d4f102fab3ecf9552ed4b513514d36d43216446f8b1d38ea0bed42cc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8600,
+      "operation": "partial_fallback_last",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8700,
+      "operation": "partial_fallback_read",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8700,
+      "operation": "partial_scan",
+      "sequence": 20,
+      "outcome": "retry=0 error=false"
+    },
+    {
+      "at_ms": 8700,
+      "operation": "kv_delete",
+      "subject": "system.fallback-timer-reconciler",
+      "expected": 13,
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8700,
+      "operation": "kv_get",
+      "subject": "scan.fallback-timer",
+      "sequence": 2,
+      "data_sha256": "f5ca38f748a1d6eaf726b8a42fb575c3c71f1864a8143301782de13da2d9202b",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8700,
+      "operation": "characterize_partial_cursor",
+      "outcome": "fallback-timer_checkpoint_prefix_lost_ack_ack_delete_lost_ack"
+    }
+  ]
+}

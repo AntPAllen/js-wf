@@ -1,0 +1,713 @@
+{
+  "version": 3,
+  "seed": 59,
+  "workload": "timer_partial_cursor",
+  "step_limit": 100000,
+  "decisions": [
+    {
+      "at_ms": 0,
+      "enabled": [
+        "fallback-timer",
+        "timer"
+      ],
+      "chosen": "timer"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "checkpoint_prefix",
+        "discard_prefix"
+      ],
+      "chosen": "checkpoint_prefix"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "100ms",
+        "150ms"
+      ],
+      "chosen": "100ms"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ack",
+        "lost_ack"
+      ],
+      "chosen": "lost_ack"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ack",
+        "drop",
+        "lost_ack"
+      ],
+      "chosen": "lost_ack"
+    },
+    {
+      "at_ms": 0,
+      "enabled": [
+        "ack",
+        "drop",
+        "lost_ack"
+      ],
+      "chosen": "ack"
+    }
+  ],
+  "transport": [
+    {
+      "at_ms": 0,
+      "operation": "kv_create",
+      "subject": "system.timer-reconciler",
+      "sequence": 1,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.timer-reconciler",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "59d7c7c0c1763582d6851cb5eaff48879b2b3a840f9689dcd197acfc75f265cf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_get",
+      "subject": "scan.timer",
+      "outcome": "not_found"
+    },
+    {
+      "at_ms": 0,
+      "operation": "kv_update",
+      "subject": "system.timer-reconciler",
+      "expected": 2,
+      "sequence": 3,
+      "data_sha256": "59d7c7c0c1763582d6851cb5eaff48879b2b3a840f9689dcd197acfc75f265cf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 100,
+      "operation": "partial_timer_invocation",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 200,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 300,
+      "operation": "partial_timer_invocation",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 400,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 500,
+      "operation": "partial_timer_invocation",
+      "sequence": 3,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 600,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 700,
+      "operation": "partial_timer_invocation",
+      "sequence": 4,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 800,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 900,
+      "operation": "partial_timer_invocation",
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1000,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1100,
+      "operation": "partial_timer_invocation",
+      "sequence": 6,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1200,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1300,
+      "operation": "partial_timer_invocation",
+      "sequence": 7,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1400,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1500,
+      "operation": "partial_timer_invocation",
+      "sequence": 8,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1600,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1700,
+      "operation": "partial_timer_invocation",
+      "sequence": 9,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1800,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 1900,
+      "operation": "partial_timer_invocation",
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2000,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2100,
+      "operation": "partial_timer_invocation",
+      "sequence": 11,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2200,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2300,
+      "operation": "partial_timer_invocation",
+      "sequence": 12,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2400,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2500,
+      "operation": "partial_timer_invocation",
+      "sequence": 13,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2600,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2700,
+      "operation": "partial_timer_invocation",
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2800,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 2900,
+      "operation": "partial_timer_invocation",
+      "sequence": 15,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3000,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3100,
+      "operation": "partial_timer_invocation",
+      "sequence": 16,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3200,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3300,
+      "operation": "partial_timer_invocation",
+      "sequence": 17,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3400,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3500,
+      "operation": "partial_timer_invocation",
+      "sequence": 18,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3600,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3700,
+      "operation": "partial_timer_invocation",
+      "sequence": 19,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3800,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 3900,
+      "operation": "partial_timer_invocation",
+      "sequence": 20,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4000,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4100,
+      "operation": "partial_timer_invocation",
+      "sequence": 21,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4200,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4300,
+      "operation": "partial_timer_invocation",
+      "sequence": 22,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4400,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4500,
+      "operation": "partial_timer_invocation",
+      "sequence": 23,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4600,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4700,
+      "operation": "partial_timer_invocation",
+      "sequence": 24,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4800,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 4900,
+      "operation": "partial_timer_invocation",
+      "sequence": 25,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "partial_timer_journal",
+      "outcome": "deadline_exceeded"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "partial_scan",
+      "sequence": 1,
+      "outcome": "retry=25 error=true"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_update",
+      "subject": "system.timer-reconciler",
+      "expected": 3,
+      "sequence": 4,
+      "data_sha256": "59d7c7c0c1763582d6851cb5eaff48879b2b3a840f9689dcd197acfc75f265cf",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_create",
+      "subject": "scan.timer",
+      "sequence": 1,
+      "data_sha256": "b7a56873cd771f2c446d369b649430b65a756ba278ff97ec81bb6f55b2e73569",
+      "outcome": "lose_ack_after_commit"
+    },
+    {
+      "at_ms": 5000,
+      "operation": "kv_delete",
+      "subject": "system.timer-reconciler",
+      "expected": 4,
+      "sequence": 5,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_create",
+      "subject": "system.timer-reconciler",
+      "sequence": 6,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_update",
+      "subject": "system.timer-reconciler",
+      "expected": 6,
+      "sequence": 7,
+      "data_sha256": "a23e59d2e1f66b09f777903f1decec497b825e1b5c84157905fa29faceea3a44",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_get",
+      "subject": "scan.timer",
+      "sequence": 1,
+      "data_sha256": "b7a56873cd771f2c446d369b649430b65a756ba278ff97ec81bb6f55b2e73569",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6000,
+      "operation": "kv_update",
+      "subject": "system.timer-reconciler",
+      "expected": 7,
+      "sequence": 8,
+      "data_sha256": "a23e59d2e1f66b09f777903f1decec497b825e1b5c84157905fa29faceea3a44",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6100,
+      "operation": "partial_timer_invocation",
+      "sequence": 25,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6200,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6300,
+      "operation": "partial_timer_invocation",
+      "sequence": 26,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6400,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6500,
+      "operation": "partial_timer_invocation",
+      "sequence": 27,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6600,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6700,
+      "operation": "partial_timer_invocation",
+      "sequence": 28,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6800,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 6900,
+      "operation": "partial_timer_invocation",
+      "sequence": 29,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7000,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7100,
+      "operation": "partial_timer_invocation",
+      "sequence": 30,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7200,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7300,
+      "operation": "partial_timer_invocation",
+      "sequence": 31,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7400,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7500,
+      "operation": "partial_timer_invocation",
+      "sequence": 32,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7600,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7700,
+      "operation": "partial_timer_invocation",
+      "sequence": 33,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7800,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 7900,
+      "operation": "partial_timer_invocation",
+      "sequence": 34,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8000,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8100,
+      "operation": "partial_timer_invocation",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8200,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "partial_timer_enqueue",
+      "sequence": 70,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "enqueue_run",
+      "subject": "wf.run.37",
+      "sequence": 1,
+      "data_sha256": "b9295eafbe0d0b75ff4de5c5a634903544df9f0b79b8553c6553ed0906cb1126",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "partial_timer_enqueue_ack",
+      "sequence": 70,
+      "outcome": "committed_ack_lost"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "partial_scan",
+      "sequence": 25,
+      "outcome": "retry=35 error=true"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "kv_update",
+      "subject": "system.timer-reconciler",
+      "expected": 8,
+      "sequence": 9,
+      "data_sha256": "a23e59d2e1f66b09f777903f1decec497b825e1b5c84157905fa29faceea3a44",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "kv_update",
+      "subject": "scan.timer",
+      "expected": 1,
+      "sequence": 2,
+      "data_sha256": "9f14025af0065b30e47e23ebb3b491d39ae8ed17d33739e5ff3827ffb3634953",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 8300,
+      "operation": "kv_delete",
+      "subject": "system.timer-reconciler",
+      "expected": 9,
+      "sequence": 10,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9300,
+      "operation": "reconcile_wait",
+      "outcome": "1000ms"
+    },
+    {
+      "at_ms": 9300,
+      "operation": "kv_create",
+      "subject": "system.timer-reconciler",
+      "sequence": 11,
+      "data_sha256": "79c3f3ee8c0f902a6189ec93b3614e881288c6a900ea371719c52fe0d20621c5",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9300,
+      "operation": "kv_update",
+      "subject": "system.timer-reconciler",
+      "expected": 11,
+      "sequence": 12,
+      "data_sha256": "a0889623d4f102fab3ecf9552ed4b513514d36d43216446f8b1d38ea0bed42cc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9300,
+      "operation": "kv_get",
+      "subject": "scan.timer",
+      "sequence": 2,
+      "data_sha256": "9f14025af0065b30e47e23ebb3b491d39ae8ed17d33739e5ff3827ffb3634953",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9300,
+      "operation": "kv_update",
+      "subject": "system.timer-reconciler",
+      "expected": 12,
+      "sequence": 13,
+      "data_sha256": "a0889623d4f102fab3ecf9552ed4b513514d36d43216446f8b1d38ea0bed42cc",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9400,
+      "operation": "partial_timer_invocation",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9500,
+      "operation": "partial_timer_journal",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9600,
+      "operation": "partial_timer_enqueue",
+      "sequence": 70,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9600,
+      "operation": "enqueue_run",
+      "subject": "wf.run.37",
+      "sequence": 1,
+      "data_sha256": "b9295eafbe0d0b75ff4de5c5a634903544df9f0b79b8553c6553ed0906cb1126",
+      "outcome": "duplicate"
+    },
+    {
+      "at_ms": 9700,
+      "operation": "partial_timer_invocation",
+      "sequence": 36,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9800,
+      "operation": "partial_timer_last",
+      "sequence": 35,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9800,
+      "operation": "partial_scan",
+      "sequence": 35,
+      "outcome": "retry=0 error=false"
+    },
+    {
+      "at_ms": 9800,
+      "operation": "kv_delete",
+      "subject": "system.timer-reconciler",
+      "expected": 13,
+      "sequence": 14,
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9800,
+      "operation": "kv_get",
+      "subject": "scan.timer",
+      "sequence": 2,
+      "data_sha256": "9f14025af0065b30e47e23ebb3b491d39ae8ed17d33739e5ff3827ffb3634953",
+      "outcome": "ok"
+    },
+    {
+      "at_ms": 9800,
+      "operation": "characterize_partial_cursor",
+      "outcome": "timer_checkpoint_prefix_lost_ack_lost_ack"
+    }
+  ]
+}

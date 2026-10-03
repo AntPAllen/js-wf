@@ -2,6 +2,18 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Timer partial-timeout correction:** both baselines stall after 48 virtual
+  seconds/cursor 1, fallback seed 2 and native seed 14. Native and fallback
+  scanners now certify confirmed prefixes; uncertain wakeup publication and
+  timer deletion remain retry boundaries. All 1,024 fixed seeds/exact replays
+  pass in 0.497 s; 48 new pins bring the corpus to 355, with the same 121
+  scalable workloads. Complete pins/model pass race in 12.760 s. Both real
+  three-node contracts and fifteen failure-stage controls pass race in 7.002 s;
+  native cursor `1 → 4 → 7 → 8`, fallback `1 → 4 → 7 → 8 → 8`, one retained
+  wakeup each, seven future fallback timers preserved after a hidden committed
+  delete reply. Full reconciler suite passes 29.333 s. Current complete graph
+  qualification remains open; full fault matrices/24h and population bounds
+  are separate. [Focused originals](scale/timer-partial-cursor-2026-10-03/).
 - **Suspended partial-failure correction:** the baseline scanner fails fixed
   seed 2 after 48 virtual seconds, cursor 1/no acknowledged wakeup. Concurrent
   reads now certify only the contiguous prefix with acknowledged enqueues and

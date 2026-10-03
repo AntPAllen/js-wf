@@ -93,14 +93,20 @@ func (p *jetStreamTimerScanPort) EnqueueTimer(ctx context.Context, typ, id strin
 // Scan enqueues a fresh run for each invocation whose journal still has an
 // uncompleted sleep, timer creation, or timer await past its fire time. It
 // repairs missing schedules: a due timer can use this wakeup's server time.
-func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (ScanResult, error) {
+func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bool) (result ScanResult, scanErr error) {
 	if budget < 1 {
 		return ScanResult{}, fmt.Errorf("scan budget must be positive")
 	}
 	if next == 0 {
 		next = 1
 	}
-	result := ScanResult{NextSequence: next}
+	result = ScanResult{NextSequence: next}
+	initial, confirmed := next, next
+	defer func() {
+		if scanErr != nil && confirmed > initial {
+			result.RetrySequence = confirmed
+		}
+	}()
 	for scanned := 0; scanned < budget; scanned++ {
 		m, err := s.port.GetInvocation(ctx, next)
 		if errors.Is(err, jetstream.ErrMsgNotFound) {
@@ -114,6 +120,7 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			}
 			next++
 			result.NextSequence = next
+			confirmed = next
 			continue
 		}
 		if err != nil {
@@ -132,6 +139,7 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			return result, err
 		}
 		if len(records) == 0 {
+			confirmed = next
 			continue
 		}
 		if records[len(records)-1].Kind == journal.Completed || records[len(records)-1].Kind == journal.Failed {
@@ -142,6 +150,7 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 					return result, err
 				}
 			}
+			confirmed = next
 			continue
 		}
 		var pending *journal.Record
@@ -155,6 +164,7 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			}
 		}
 		if pending == nil {
+			confirmed = next
 			continue
 		}
 		var req struct {
@@ -166,6 +176,7 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			return result, err
 		}
 		if req.Kind != "timer" && req.Kind != "timer_start" && req.Kind != "timer_await" || req.FireAt.IsZero() {
+			confirmed = next
 			continue
 		}
 		due, err := timerDeadlineDue(ctx, s.DomainNow, func() (time.Time, error) { return s.Now(), nil }, req.ClockDomain, req.FireAt, 0)
@@ -173,6 +184,7 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 			return result, err
 		}
 		if !due {
+			confirmed = next
 			continue
 		}
 		result.Reenqueued++
@@ -184,6 +196,7 @@ func (s *TimerScan) Scan(ctx context.Context, next uint64, budget int, dryRun bo
 		if enqueueErr != nil {
 			return result, enqueueErr
 		}
+		confirmed = next
 	}
 	return result, nil
 }

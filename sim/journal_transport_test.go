@@ -427,6 +427,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runSignalPartialCursor(loaded.Seed, &loaded)
 	case "suspended_partial_cursor":
 		replayed, err = runSuspendedPartialCursor(loaded.Seed, &loaded)
+	case "timer_partial_cursor":
+		replayed, err = runTimerPartialCursor(loaded.Seed, &loaded)
 	case "start_scan_capacity":
 		replayed, err = runStartScanCapacity(loaded.Seed, &loaded)
 	case "suspended_scan_capacity":

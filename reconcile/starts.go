@@ -100,7 +100,7 @@ func (p *jetStreamStartScanPort) EnqueueStart(ctx context.Context, typ, id strin
 
 type ScanResult struct {
 	// RetrySequence is an optional checkpoint of a fully inspected prefix when
-	// Scan returns a transient error. The failing invocation is never skipped.
+	// Scan returns a transient error. The failing stream sequence is never skipped.
 	// Scanners that do not certify such a prefix leave it zero.
 	RetrySequence uint64      `json:"retry_sequence,omitempty"`
 	NextSequence  uint64      `json:"next_sequence"`
