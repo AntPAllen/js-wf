@@ -8757,4 +8757,17 @@ source hashes. Suite guards receive the requested seed count. Extended failures
 retain and minimize their absolute-path trace. Ten suite-guard tests pass.
 The existing accepted100k evidence is unchanged and keeps its original narrower
 producer provenance; this change does not retroactively establish its binary.
-A clean-source local full1k execution of the new normal mode remains pending.
+Clean-source local full1k at534bcd99e00b288df1368adc6b4fe6bc5f46ae63 passes
+127.861s:169 top-level tests,2 documented trace-only skips,271pins and121,000
+seed bodies across all121 scalable workloads. Aggregate123,055 schedules,
+1,798,033 choices and27,161,737 events includes fixed/repeated cases.
+Independent review verifies all995 source hashes against Git, exact retained
+normal binary47a741d9acb68d1498e396326be22f262a3da2409db78e229655c1cf8fb4683c,
+compiled inventory and source-derived seed inventory, and regenerates the full
+report. Relocated positive passes; wrong source/binary hashes, omitted pin and
+substituted seed count are rejected. The complete archive is reopened and every
+member hashed before publication.
+[Full1k executable, raw evidence and portable controls](scale/start-scan-capacity-2026-10-03/full1k/).
+This qualifies the new fixed capacity model and normal-mode producer at1k;
+prior100k/full-race evidence keeps its earlier exact graph and scope. Sustained
+R5 forced-gap runs and the full-release/24h gates remain open.
