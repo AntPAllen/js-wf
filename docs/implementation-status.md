@@ -6,9 +6,12 @@
   seed-only artifact names. A workflow-bound regression test proves 64 uploads
   collided on 16 identities at `f05d7ba`; adding the row yields 64 unique names.
   All five planner controls pass. Full dispatch 37156883771 is rejected for
-  this workflow defect and cancellation is requested before replacement;
-  cancellation completion is not yet claimed. Runtime inputs are unchanged
-  and no workload gate is cleared.
+  this workflow defect and confirmed terminal cancelled: no row job succeeds.
+  Replacement 37157123048 uses exact corrected source
+  `98a9254a6674fef5e413e985dd0b2ff4f1c4fba5` with the same full 16-row,
+  200-seed, ten-minute request and mandatory upgrade/clock controls. Its
+  observed head matches dispatch; it remains unaccepted. Runtime inputs are
+  unchanged and no workload gate is cleared.
   [Original failure and corrected controls](scale/tier3-artifact-name-fix-2026-10-03/).
 - **Current-source full Tier3 matrix dispatched:** run 37156883771 at exact
   `f05d7ba21442474767d3e204d601a486d7e6b054` requests all 16 R5 rows,

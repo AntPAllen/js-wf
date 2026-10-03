@@ -14,5 +14,9 @@ for this workflow defect; its cancellation has been requested before replacement
 
 The five-member archive contains original/corrected workflow bytes, executed
 test and actual negative/positive results. All members reopen and SHA-verify.
-Cancellation completion and replacement dispatch are recorded separately once
-confirmed; request acceptance is not evidence of terminal cancellation.
+Cancellation completion and replacement dispatch are now retained in
+[separate verified metadata](replacement/). The original campaign is terminal
+cancelled with no successful row jobs. Replacement `37157123048` uses exact
+`98a9254a6674fef5e413e985dd0b2ff4f1c4fba5`, with identical full matrix inputs.
+It is unaccepted pending actual raw-reviewed completion. This supersedes the
+earlier request-only observation without altering its original evidence.
