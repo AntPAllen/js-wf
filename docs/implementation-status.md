@@ -262,7 +262,15 @@
   compares harness/fixture bytes against the recorded Git revision and requires
   both retained stores when requested. Earlier hosted reports did not upload
   those source/store trees; no retroactive full-originals acceptance is claimed.
-  Actual clean execution of the strengthened producer is next.
+  Local clean execution is live at exact
+  bac93561810bed2712dea7a42c487700209a9dcd in
+  /tmp/js-wf-scheduler-complete-originals-20261003:baseline reaches the expected
+  named missing-source persistence failure with its original store retained;
+  the precise dirty-count control is compiling. Hosted full-originals replay
+  [37129135794](https://github.com/AntPAllen/js-wf/actions/runs/37129135794)
+  is confirmed queued at the same source. Neither is accepted until both actual
+  verdicts, complete copied-source inventories, retained stores and offline
+  review pass. No original million-store index or production dependency changes.
 - **Worker-kill target:** historical31.1s withTTL30s is a configuration mismatch
   excluded from reruns. ProductionTTL12s/heartbeat3s/AckWait13s and strict
   recovery under30s remain in force. Route-quorum recovery p99 starts at the
