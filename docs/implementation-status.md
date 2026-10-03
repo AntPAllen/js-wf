@@ -2,6 +2,18 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Current-source sustained purge mutation accepted:** successful job
+  111281643016 at `c4fed061bc614488d4f89b53b216b756490f7da0` passes independent
+  source/overlay/semantic-failure/negative-control review. Both ten-minute
+  same-store reports regenerate exactly: 5,376 terminal invocations, 59,248
+  entries, 38 leader faults; worst terminal/progress p99
+  14.034845404 s/7.055703865 s. Raw receipts prove disjoint old/reused journals
+  and a newer invocation generation in the baseline; invocation-first retirement
+  produces the intended unrecoverable mutant state. All 608 source files match
+  Git. Physical stores/executables were not uploaded. Five components are
+  accepted; the parent campaign remains rejected for its Start anchor failure,
+  and the corrected Start-only retry/full matrix/24h gates remain open.
+  [Complete component originals and generation receipts](scale/current-sustained-mutations-2026-10-03/purge/).
 - **Current-source sustained enqueue mutation accepted:** campaign 37149508529
   at `c4fed061bc614488d4f89b53b216b756490f7da0` has an independently reviewed
   successful enqueue job: all 608 source files, exact overlay and two ten-minute
