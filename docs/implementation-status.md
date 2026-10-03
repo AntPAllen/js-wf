@@ -77,10 +77,16 @@
 - **Normal rolling upgrade:** an explicit Lame Duck profile is now implemented
   alongside the existing SIGKILL profile. It requires the original-peer client
   notification, ordered shutdown logs, observed exit/name removal and retained
-  store replacement. The development five-peer contract passes105.39s with37
-  retained messages on all replicas; clean committed qualification, compiled
-  SIGKILL-substitution control and sustained graceful mixed row remain open.
-  No development result qualifies200 seeds,24h or the forced two-write gap.
+  store replacement. Clean qualification atcd59b86 passes race79.348s with37
+  retained messages on all replicas after all five upgrades. The actual
+  single-old-peer and SIGKILL-substitution controls fail at their required
+  semantic assertions;591 source hashes and six complete physical rounds match.
+  [Complete contract originals](scale/r5-graceful-upgrade-2026-10-03/contract/).
+  Hosted contract [37121460252](https://github.com/AntPAllen/js-wf/actions/runs/37121460252)
+  and ten-minute graceful mixed row
+  [37121470960](https://github.com/AntPAllen/js-wf/actions/runs/37121470960)
+  are dispatched atcd59b86 and remain unaccepted. The constructor contract does
+  not qualify the sustained mixed row,200 seeds,24h or the forced two-write gap.
 - **Ahead-clock200:** [37040118844](https://github.com/AntPAllen/js-wf/actions/runs/37040118844)
   is terminal FAILED at52f4e51. Seeds29/55 respectively miss pre-due source
   observation and pending-timer admission. Preserve the raw failures and keep
