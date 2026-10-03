@@ -64,7 +64,15 @@
   consumer90 [37125258423](https://github.com/AntPAllen/js-wf/actions/runs/37125258423),
   consumer116 [37125258117](https://github.com/AntPAllen/js-wf/actions/runs/37125258117),
   consumer139 [37125258217](https://github.com/AntPAllen/js-wf/actions/runs/37125258217).
-  All retain ten-minute duration and complete final gates; none is accepted yet.
+  All retain ten-minute duration and complete final gates. Journal86 is now
+  independently accepted:642.85s,94 cohorts/2632 invocations/28991 entries/19
+  faults; all12408 raw latency samples regenerate aggregate/six-cell metrics
+  and3384 client operations pass all three source-identical history models.
+  Terminal p99=7.336s, worst type terminal/progress=13.337s/7.294s; no progress
+  event exceeds30s. Full uploaded originals are SHA256-readback archived.
+  [Corrected journal86 evidence](scale/start-enqueue-history-2026-10-03/journal86-corrected-replay/).
+  Consumer139 is terminal success but not yet independently reviewed. Other
+  focused replays and the full current-source1..200 qualification remain open.
 - **Tier3:**16 implemented row variants are now in the registry,
   including separate worker-clock and every-peer rolling upgrade. The initial
   14-row seed1 campaign failed and cannot qualify the complete original matrix.

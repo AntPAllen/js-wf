@@ -1,0 +1,21 @@
+# Corrected journal seed 86 replay
+
+[Run37125258042](https://github.com/AntPAllen/js-wf/actions/runs/37125258042)
+executes source `c0dc4d707e3c4c9d04dfb189fda0f2da0d3fcb97`, seed86/10m.
+The named test passes in642.85s:94 full cohorts,2632 terminal invocations,
+28991 journal entries and19 scheduled leader faults.
+
+Independent review verifies terminal job/test/package metadata, every raw fault
+and all12408 latency samples, recomputes the aggregate and six-cell terminal
+and progress statistics exactly, and reruns all three production history models
+on3384 original SDK operations. The checker source matches the campaign revision.
+Aggregate terminal p99 is7.335699542s; worst type terminal/progress p99 are
+13.336761809s /7.294340317s. No progress event exceeds30s.
+
+All uploaded originals, metadata and review utilities are in originals.tar.gz;
+each member was SHA256-readback checked before atomic rename. Extract into a
+temporary directory and run its review.py with that directory and a repository
+checkout as arguments. The named final passing test establishes that its raw
+integrity and queue-drain assertions ran; physical stores were not uploaded,
+so this is not an independent retained-store audit. The original rejected seed86
+remains rejected. This replay does not qualify the default1..200/full matrix.
