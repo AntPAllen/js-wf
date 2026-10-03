@@ -144,6 +144,12 @@
   invocation bytes are verified. This does not clear sustained R5 gap coverage.
   [Original gate rejection](scale/start-upgrade-gap-2026-10-03/rejected-journal-gate/).
   [Corrected process-crash contract](scale/start-upgrade-gap-2026-10-03/corrected-contract/).
+  Hosted corrected37122997232 at the samecc0fcd1 is independently accepted:
+  1287 original members/715 source hashes and both actual race build settings
+  verify. Both profiles recover in7.502s/7.519s; positive package31.971s;
+  precise omitted-repair control fails at its named assertion15.374s.
+  [Hosted original evidence](scale/start-upgrade-gap-2026-10-03/hosted-contract/).
+  Sustained R5 forced-gap coverage remains open.
 - **CAS benchmark harness:** hosted37121445966 atcd59b86 is rejected before
   measurement: the shared harness used the newer UnmarshalEntry API absent at
   fixed baseline4fa3119. Its diagnostic now uses the benchmark's JSON format;
