@@ -2,6 +2,15 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Complete Tier3 shard reviewer prepared:** successful terminal shards can
+  now be independently reviewed without promoting an active/failed parent.
+  Exact run/job/artifact/head/header binding, complete ten-minute seed evidence,
+  raw row/event/fencing regeneration and applicable captured Git source ledgers
+  are required. Seven controls pass; actual failed job 111303440191 is rejected,
+  its 750-file pre/post ledgers match exact Git, and unchanged accepted SIGKILL
+  inputs regenerate while a substituted Lame Duck request is rejected. This
+  calibrates review only; no new workload, full-row or release gate is cleared.
+  [Executed reviewer and actual-input controls](scale/tier3-shard-reviewer-2026-10-03/).
 - **Original Tier3 infrastructure scope restored:** the supplied plan permits
   five real VMs **or containers**. A separate five-VM campaign is not a required
   release gate. Earlier summaries and evidence scope notes that listed it as

@@ -896,6 +896,15 @@ A ten-minute full-row campaign still reports `clears_full_tier3_release=false`:
 complete fault coverage and the required24-hour full-matrix soak are separate
 requirements. Dispatch and planner/guard tests do not establish a campaign pass.
 
+`check-tier3-matrix-shard.py` supplements that whole-campaign review with
+complete successful terminal-shard checks while a parent is active or failed.
+It requires exact job/run/artifact/source binding, every requested ten-minute
+seed, raw report/event/fencing regeneration and applicable complete source
+ledgers. Missing cases and failed jobs do not count. Parent, whole-row and full
+release qualification remain false; it cannot convert a failed parent into a
+passed campaign. [Reviewer calibration and scope](scale/tier3-shard-reviewer-2026-10-03/)
+retain the actual prior-input checks and their provenance limits.
+
 
 ### Million-population native timer diagnostic
 
