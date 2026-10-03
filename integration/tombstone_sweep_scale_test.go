@@ -145,6 +145,40 @@ produce:
 	if remaining, err := countLive(state[2]); err != nil || remaining != 0 {
 		t.Fatalf("surviving node retains %d tombstones: %v", remaining, err)
 	}
+	// KV key absence is logical deletion: History=1 retains a DEL revision.
+	// Keep the production loop running until a later page removes the physical
+	// marker subjects. A subject-filtered stream census observes retained records.
+	stream, err := all[0].Stream(ctx, "KV_WF_STATE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var physical uint64
+	for ctx.Err() == nil {
+		info, err := stream.Info(ctx, jetstream.WithSubjectFilter("$KV.WF_STATE.tombscale.>"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		physical = 0
+		for subject, messages := range info.State.Subjects {
+			if !strings.HasPrefix(subject, "$KV.WF_STATE.tombscale.") {
+				t.Fatalf("unexpected filtered subject %q", subject)
+			}
+			physical += messages
+		}
+		if physical == 0 {
+			break
+		}
+		select {
+		case loopErr := <-loopDone:
+			loopFinished = true
+			t.Fatalf("tombstone loop stopped with %d physical markers: %v", physical, loopErr)
+		case <-time.After(time.Second):
+		}
+	}
+	if ctx.Err() != nil {
+		t.Fatalf("physical tombstone drain stopped with %d markers: %v", physical, ctx.Err())
+	}
+	t.Logf("physical tombstone subjects drained: count=%d retained_marker_messages=%d", count, physical)
 	if _, err := state[2].Get(ctx, "scan.tombstone"); err != nil {
 		t.Fatalf("missing persisted sweep cursor: %v", err)
 	}

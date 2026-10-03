@@ -2,6 +2,16 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **Full-size physical tombstone drain:** the existing 100,000-key proof now
+  requires an empty physical subject census, rather than logical KV absence
+  alone. The actual three-node elected production loop passes at its default
+  100,000 size: 153.420 s named test/153.433 s package, zero retained marker
+  messages and a surviving persisted scanner cursor. Actual live binary, fixture
+  patch, raw logs and source hashes observed during execution are retained;
+  those hashes remain unchanged through completion. There was no pre-build
+  source inventory, and physical test stores are not retained/reopened. This is
+  full-size cleanup evidence, not a population-independent recovery bound or
+  full fault matrix. [Originals and scope](scale/tombstone-physical-scale-2026-10-03/).
 - **Long-run storage preparation:** root disk is currently 35 GiB, initially
   about 560 MiB free. Unused Docker build cache (643.9 MB) and lossless compression
   of the completed inline-five-million broker fixture recover about 1.6 GiB.
