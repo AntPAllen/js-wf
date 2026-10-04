@@ -1394,9 +1394,13 @@ keep those ranges, full parent/row/matrix and original 24-hour gate open.
 The failed clock seeds 112/121 now have separate current-source instrumented
 10-minute diagnostics at exact `3b2999e` (runs 37183948633 / 37183950090), using
 existing per-attempt checkpoint timing and primary-error preservation with
-unchanged three 20-second attempts / 60-second total audit limits. Live workload
-jobs are confirmed; dispatch is not qualification, an original server-cause fix,
-or repair of the full parent. [Exact diagnostic scope and runtime graph](scale/worker-clock-checkpoint-2026-10-04/seeds112-121-diagnostics/)
+unchanged three 20-second attempts / 60-second total audit limits. Both diagnostics are independently accepted: all ten checkpoints per seed pass
+on their first attempt, with maximum durations 18.675611114 / 19.351887878 s.
+Actual clock/model executables, all three models over 7,560 history operations,
+source inputs and complete raw evidence are retained and SHA-verified. Both full
+original-store archives and their members verify, but stores were not reopened.
+These runs did not reproduce the historical failures; their cause and failed
+full-parent qualification remain open. [Complete diagnostic proof](scale/worker-clock-checkpoint-2026-10-04/seeds112-121-diagnostics/accepted/). [Exact diagnostic scope and runtime graph](scale/worker-clock-checkpoint-2026-10-04/seeds112-121-diagnostics/)
 preserve those boundaries while full campaigns continue.
 
 The complete Tier2 journal-leader row at exact `c4fed06` now independently

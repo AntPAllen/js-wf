@@ -16,12 +16,28 @@
   open. No independent store reopening or original workload binary is claimed.
   [Complete row qualification and exact retained evidence](scale/current-tier2-matrix-2026-10-04/journal-full200-qualification/).
 
-- **Clock diagnostics 112/121 now terminal successful, review pending:** workload
-  jobs 111381924505 / 111381922136 finish successfully in runs 37183948633 /
-  37183950090 at `3b2999e`. Raw artifacts 11296283029 / 11296382740 and original
-  store artifacts 11296412730 / 11296327992 are available. Completed raw timing,
-  actual executables and models still require independent review; no original
-  server cause or failed-parent repair is inferred from terminal success.
+- **Clock diagnostics 112/121 independently accepted:** both focused ten-minute
+  runs at `3b2999e` pass all ten checkpoints on their first attempt without retries.
+  Maximum attempt durations are 18.675611114 / 19.351887878 s under unchanged
+  20 s / 60 s limits. Combined: 5,880 invocations, 65,064 entries, 38 faults and
+  7,560 history operations passing all three production models. Actual clock/model
+  executables, source inputs, complete raw evidence and reviewers are retained in
+  a fully SHA-verified compact proof. Both canonical physical-store archives and
+  all 3,963 members each verify; stores are retained RAM/GitHub, not duplicated
+  into Git or independently reopened. These successes do not reproduce the prior
+  failures, identify their cause or repair the failed parent/full release gates.
+  [Complete independent diagnostic proof](scale/worker-clock-checkpoint-2026-10-04/seeds112-121-diagnostics/accepted/).
+
+- **Historical worker-kill smoke closed:** 31.1 s with TTL30 s is a configuration
+  mismatch. Production uses TTL12 s, heartbeat3 s and AckWait13 s; retain strict
+  recovery below30 s. No further runs target the old TTL-bound miss.
+
+- **Sixth sparse recovery:** forty committed archive working copies recover
+  135,835,648 allocated root bytes at pushed `836863f`; all 791 previously tracked
+  source inputs stay materialized and identical. Exact Git blob/hash/size and
+  open-FD checks pass. Complete archives remain local/pushed Git; failed originals
+  outside Git remain untouched.
+  [Exact recovery evidence](scale/local-proof-sparse-checkout-2026-10-04/sixth-extension/).
 
 - **Further exact sparse recovery:** seven committed archive working copies
   recover 155,779,072 allocated root bytes at pushed `4d98b2d`, with exact Git
@@ -56,16 +72,11 @@
   [169–180](scale/current-tier2-matrix-2026-10-04/journal-169-180/) /
   [181–192](scale/current-tier2-matrix-2026-10-04/journal-181-192/).
 
-- **Focused instrumented diagnostics for failed clock seeds 112 and 121 are live:**
-  runs 37183948633 / 37183950090 at exact `3b2999e`, workload jobs 111381924505 /
-  111381922136, are independently confirmed in progress. Existing per-attempt
-  checkpoint timing and primary-error records run under unchanged 20 s / 60 s
-  audit limits, ten-minute workload and clock cadence. All 685 selected runtime /
-  simulation / Tier1 producer bytes match the accepted `283ba32` race graph;
-  these are current-source diagnostics, not identical historical binaries.
-  No production fix or timeout/server-cause claim is made. Raw outcomes and actual
-  executables await review; failed parent and full release gates remain open.
-  [Exact dispatches, API bindings and source graph](scale/worker-clock-checkpoint-2026-10-04/seeds112-121-diagnostics/).
+- **Historical dispatch of instrumented clock diagnostics 112/121:** the initial
+  live API snapshots and exact dispatch commands remain preserved. The terminal
+  independent outcomes now supersede that observation; see the accepted proof
+  above. Original audit limits and failed-parent boundaries remain unchanged.
+  [Dispatch evidence](scale/worker-clock-checkpoint-2026-10-04/seeds112-121-diagnostics/).
 
 - **Further verified archive working-copy recovery:** 11 newly materialized
   committed archives recover 280,809,472 root bytes after exact Git hash/size
