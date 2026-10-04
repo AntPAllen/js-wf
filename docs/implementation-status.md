@@ -11,7 +11,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source; all-server-kill seeds 1–144 qualified. Full 13-row × 200 current-source gate remains open. |
-| Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds and disk-delay seeds 1–13 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
+| Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds and disk-delay seeds 1–104 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. No24h row qualified; full-matrix soak remains. |
@@ -32,6 +32,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
+
+- **Tier3 real disk-delay coverage extended through104:** eight complete600s
+  shards at79915ca checkout/header binding independently qualify325192
+  invocations /3581807 entries /1976 real faults /
+  418104 exactOk model operations. Bound node4 writable stores,
+  admitted R5 leaders,100ms dm-delay/minimum5s/delayed sync/restoration verify;
+  all1108 expected checkpoint audits and raw report/explanation/fencing match.
+  Worst terminal/progress p99=5.953s/0.851s under original30s;
+  45 actual dependencies per model match Git. Complete proofs/parts read back.
+  Full captured workload source/SDK/stores unavailable, integrity/drain named-test
+  scope. Full200/final-source/full16×200/24h/million-drain remain open.
+  [Complete disk-delay range proofs](scale/current-tier3-block-delay-2026-10-04/).
 
 - **Tier3 real disk-delay1–13 independently accepted:** exact79915ca job checkout
   binding;13 complete600s seeds qualify41188 invocations /453656 entries /247

@@ -2018,3 +2018,16 @@ Workload source attribution is checkout/header binding, without captured full
 source inventory or actual SDK/native stores. Integrity/drain named-test scope.
 Full200/final-source/full16×200/24h remain open.
 [Complete disk-delay proof](scale/current-tier3-block-delay-2026-10-04/seeds-1-13/).
+
+### Recorded-source real disk-delay coverage through104
+
+Eight complete600s-per-seed shards at79915ca bind via checkout/header and qualify
+325,192 invocations/3,581,807 entries/
+1,976 actual100ms dm-delay faults/418,104
+exactOk history operations. Writable stores/R5 leader admission/five-second delay/
+sync/restoration, all1108 checkpoints and exact raw reports verify. Worst
+terminal/progress p99=5.953s/0.851s under original30s gates.
+Every actual model's45 dependencies match Git; all canonical members/parts read
+back. Captured full workload source/SDK/stores unavailable, integrity/drain
+named-test scope. Full200/final-source/full16×200/24h/million-drain remain open.
+[Complete recorded-source proof ranges](scale/current-tier3-block-delay-2026-10-04/).
