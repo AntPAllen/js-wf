@@ -19,3 +19,7 @@ For actual proof capture, compile once to a retained executable first and use `g
 ## Focused diagnostic accepted
 
 The actual `after_manifest` cut now passes with independently reviewed retained executable/source/original evidence: [complete proof](after-manifest/). The preparation described above remains historical; the other seven cuts and full current-source combined gate remain open. Original failure cause remains unconfirmed.
+
+## Full native test accepted
+
+All eight cuts now pass once at executed `58fd143` with independently reviewed source/executable/original evidence: [complete eight-cut proof](full-eight-cuts/). This supersedes the earlier pending other-seven-cut qualification. Historical failure cause and full matrices/24h remain open.

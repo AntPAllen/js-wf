@@ -30,6 +30,16 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
 
 ## Latest accepted evidence
 
+- **Full eight-cut continuation/promise native test independently accepted:** all
+  eight cuts pass once at executed `58fd143`; package142.322s, worst kill recovery
+  13.085523217s under unchanged30s gate. Each cuts the actual worker with SIGKILL
+  and restarts all three servers on original stores. All3,849 selected inputs /
+  562 Git-local sources and3,416 original files verify. Actual SDK/NATS binaries,
+  events and originals are retained in7,290 SHA-verified archive members.
+  Original lookup failure was not reproduced or explained; historical parent,
+  full matrices, other combined cases and actual24h remain open.
+  [Complete native proof](scale/continuation-promise-retained-diagnostic-2026-10-04/full-eight-cuts/).
+
 - **Clock157–169 independently qualified:**39,368 invocations /436,869 entries /
   247 faults and50,616 operations passing all three source-bound production
   models;759 captured source inputs,45 model dependencies,273 clock proofs /
@@ -47,7 +57,7 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
   46.217022/2.565629ms without errors. Actual SDK/NATS executables, all3,849
   selected inputs (562 Git-local),427 original files and complete events/commands
   are retained in4,294 SHA-verified members. Historical failure was not reproduced;
-  cause remains unconfirmed. Other seven cuts/full matrix/24h stay open.
+  cause remains unconfirmed. Other seven cuts are now accepted in the full native proof above; full matrix/24h stay open.
   [Exact focused proof](scale/continuation-promise-retained-diagnostic-2026-10-04/after-manifest/).
 
 - **Tier3 worker-clock144–156 independently qualified:**41,272 invocations,
