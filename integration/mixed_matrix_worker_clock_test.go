@@ -3,6 +3,7 @@
 package integration_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -59,9 +60,18 @@ func writeMatrixWorkerClock(ctx context.Context, js jetstream.JetStream, stream 
 	if err != nil {
 		return fmt.Errorf("publish clock probe for %s: %w", id, err)
 	}
+	if ack == nil || ack.Stream != "MATRIX_CLOCK" || ack.Sequence == 0 {
+		return fmt.Errorf("clock probe for %s: invalid publication receipt", id)
+	}
 	message, err := stream.GetMsg(ctx, ack.Sequence)
 	if err != nil {
 		return fmt.Errorf("read clock probe for %s sequence=%d: %w", id, ack.Sequence, err)
+	}
+	// A timestamp is evidence only when it belongs to this exact publication.
+	// Reject an unrelated read before replacing the last confirmed sample.
+	if message == nil || message.Sequence != ack.Sequence || message.Subject != "matrix.clock."+id ||
+		!bytes.Equal(message.Data, payload) || message.Time.IsZero() {
+		return fmt.Errorf("clock probe for %s sequence=%d: response does not match publication", id, ack.Sequence)
 	}
 	sample.ServerAt, sample.Sequence = message.Time, message.Sequence
 	sample.Offset = sample.WorkerAt.Sub(sample.ServerAt)

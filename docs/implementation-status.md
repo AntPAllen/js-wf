@@ -2,6 +2,20 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Clock observer rejects unrelated replies; original failure phase narrowed:**
+  receipt stream/sequence and returned message sequence/subject/payload/timestamp
+  must match the exact publication before replacing the prior sample. Nine
+  controlled reply cases and publication/read cause checks pass normal0.005 s /
+  race1.021 s. Compiled original wrong-sequence control fails0.005 s by accepting
+  unrelated evidence. Four actual source/module inputs verify before/after;
+  test executables are not retained. Original seed-6 samples/logs separately
+  prove initial writes succeeded and failure came from periodic updates; at
+  least two children had updated again. Publish-versus-read/server cause remains
+  unconfirmed. Probe/freshness/workload bounds are unchanged; all 685 runtime/
+  simulator/producer bytes still match race-qualified `283ba32`. Normal100k
+  continues without restart; this is no new real-cluster or full qualification.
+  [Exact reply controls, original phase evidence and source scope](scale/worker-clock-reply-identity-2026-10-04/).
+
 - **Complete worker-clock shard 27–39 independently accepted:** terminal job
   111324439636 at exact `79915ca` passes all thirteen ten-minute seeds with
   39,452 invocations, 437,316 entries, 247 faults and all three independently
