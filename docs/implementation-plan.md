@@ -951,20 +951,23 @@ last takes 11.195881565 s under the unchanged bound. The complete canonical
 original archive, executable/source provenance and physical stores are preserved
 in Git and hashed, not reopened. [Accepted individual diagnostic](scale/worker-clock-checkpoint-2026-10-04/accepted-seed-6/)
 does not establish the original startup-timeout cause or qualify the failed
-parent, full worker-clock row, full matrix or actual 24-hour gate.
+parent, full worker-clock row, full matrix or actual 24-hour gate. Another old-source
+full-campaign shard subsequently fails seed 61 with a batch-90 retained-audit
+60-second timeout; primary error and complete raw/source proofs are preserved
+[without attributing a server cause or relaxing bounds](scale/worker-clock-checkpoint-2026-10-04/failed-shard-53-65/).
 
 
 
-Current Tier2 journal seeds 1–96 pass independent raw fault/latency and production
-history-model review at exact `c4fed06`: 252,896 invocations, 2,786,187 entries,
-1,824 leader kills and worst terminal/progress type p99 17.457496447/8.533582526 s.
+Current Tier2 journal seeds 1–108 pass independent raw fault/latency and production
+history-model review at exact `c4fed06`: 283,920 invocations, 3,127,908 entries,
+2,052 leader kills and worst terminal/progress type p99 17.457496447/8.533582526 s.
 The reusable journal-shard reviewer binds the complete requested range and actual
 local model dependency inputs to executed Git; it never promotes a parent, full
 row, full matrix or soak.
 If main has changed, use `--model-root` with a source-isolated campaign checkout;
 the entire actual local dependency graph and module hashes must still match
 executed Git before/after compilation/review. [Executed source-isolation controls](scale/tier2-model-source-root-2026-10-04/)
-prove that selecting a directory cannot bypass a dependency mismatch. [New seeds 49–96](scale/current-tier2-matrix-2026-10-04/)
+prove that selecting a directory cannot bypass a dependency mismatch. [New seeds 49–108](scale/current-tier2-matrix-2026-10-04/)
 extend individual journal coverage only. Remaining full 13×200, 16×200 and actual
 24-hour full-matrix requirements are unchanged.
 

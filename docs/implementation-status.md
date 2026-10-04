@@ -2,6 +2,25 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Tier2 journal coverage extended to seeds 1–108:** terminal successful shard
+  97–108 passes source-isolated raw/model review at exact `c4fed06`: 31,024
+  invocations, 341,721 entries and 228 faults, all three history models and
+  45 actual dependency inputs. Combined accepted journal coverage now totals
+  283,920 invocations, 3,127,908 entries and 2,052 leader kills; worst terminal/
+  progress type p99 remains 17.457496447/8.533582526 s. Producer successes
+  109–144 await review. This does not qualify current main or full release gates.
+  [Complete raw evidence and exact model inputs](scale/current-tier2-matrix-2026-10-04/journal-97-108/).
+
+- **Additional full-campaign clock failure retained:** job 111324439563 fails
+  seed 61 at exact `79915ca`; batch-90 audit times out after 60.004493079 s.
+  The later timer cancellation is secondary. Previous batch-80 audit passes in
+  16.396120238 s. All 759 pre/post source inputs match Git for seeds 53–61;
+  complete raw upload verifies. Large original store/executable artifact is
+  referenced, not downloaded. Missing/corrupt state and server cause remain
+  unconfirmed; old source predates existing per-attempt/primary-error diagnostics.
+  Failed full parent remains ineligible. No bound change or rerun is dispatched.
+  [Retained primary error and exact provenance limits](scale/worker-clock-checkpoint-2026-10-04/failed-shard-53-65/).
+
 - **Older campaign models isolated from current main:** the journal reviewer
   accepts an explicit model source checkout, retaining all raw checks and exact
   actual dependency pre/post hashes. A clean c4fed06 worktree re-reviews already

@@ -61,3 +61,15 @@ Tier3 and 24-hour full-matrix gates remain open. The parent continues without
 restart; journal seeds 97–144 are observed running. All four archives here contain
 320 independently verified outer members. Seeds 73–96 add 63,896 invocations,
 703,922 entries and 456 kills; they are reviewed with the same unchanged command.
+
+## Subsequently accepted seeds 97–108
+
+[Source-isolated review of seeds 97–108](journal-97-108/) adds 31,024 invocations,
+341,721 entries and 228 kills at the same executed c4fed06 revision. All three
+models and 45 actual dependency inputs verify; current main is not used for
+older-source models. Accepted seeds 1–108 now total **283,920 invocations,
+3,127,908 journal entries and 2,052 leader kills**. Worst terminal/progress type
+p99 remains **17.457496447/8.533582526 s**. The newer archive retains every raw
+file plus all reviewer/model source inputs; consult its own manifest for scope.
+Other terminal producer successes still require independent review. Full gates
+remain open.
