@@ -146,7 +146,11 @@ func runPhaseThreeRepeatedFaults(t *testing.T, rebalance bool) {
 			t.Error(err)
 		}
 	}()
-	cluster, err := testcluster.Start(filepath.Join(root, "stores"), 3)
+	startCluster := testcluster.Start
+	if rebalance {
+		startCluster = testcluster.StartPartitionable
+	}
+	cluster, err := startCluster(filepath.Join(root, "stores"), 3)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -328,7 +332,9 @@ func runPhaseThreeRepeatedFaults(t *testing.T, rebalance bool) {
 		close(movesDone)
 	}
 	defer func() { stopMoves(); <-movesDone }()
-	defer cluster.RouteMesh().Heal()
+	if rebalance {
+		defer cluster.RouteMesh().Heal()
+	}
 	routeHeld := false
 	for report.Completed < 200 || pendingHolds > 0 || routeHeld {
 		if rebalance && routeHeld && time.Since(report.RouteCut) >= 45*time.Second {

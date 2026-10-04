@@ -30,6 +30,14 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **First combined-rebalance execution rejected; route setup fixed:** retained
+  race SDK at88fbad0 fails19.857s because the plain cluster has no route proxies;
+  attempted route cut panics. Actual executable/source/events/original stores
+  remain in `/tmp/js-wf-phase3-rebalance-full-20261004`; no qualification follows.
+  New mode now uses existing StartPartitionable constructor; original mode keeps
+  its plain cluster and conditional route cleanup. Corrected full run pending.
+  Completion5min and fault schedule unchanged; this is a fixture setup fix.
+
 - **Combined repeated rebalance fixture prepared; execution pending:** optional
   `TestPhaseThreeCountersRebalanceWithRepeatedFaults` extends the existing200/50/6
   real-process cohort with four busy partitions, revision-fenced ownership moves
