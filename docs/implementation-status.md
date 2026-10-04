@@ -2,6 +2,20 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **2026-10-04 corrected worker-clock case qualified; full replacement live:**
+  job 111317377477/run 37161589577 at `070dd95` passes one full ten-minute seed:
+  2,940 invocations, 32,539 entries and 19 periodic proofs. All 21 clock snapshots,
+  755 pre/post source hashes, 3,963 original archive members and regenerated raw
+  reports verify. All three independent history models pass 3,780 operations;
+  worst terminal/progress type p99 is 5.145831729/0.404114782 s. Additional old
+  seeds 43 and 53 reproduce the same one-entry-behind snapshot rejection.
+  Defective parent 37157123048 is terminal cancelled: all 257 jobs terminal,
+  253 cancelled/3 failed/1 planner success, zero successful row jobs. Full
+  replacement 37164231641 at `79915ca` requests unchanged 16×200×10m coverage
+  and mandatory upgrade/clock profiles; exact head/planner identity verify.
+  Only the corrected individual case is qualified. Full matrix, 24h and
+  other original acceptance gates remain open; Tier2 is not restarted.
+  [Accepted proof, additional failures and complete replacement audit](scale/worker-clock-recovery-2026-10-04/).
 - **Complete Tier3 shard reviewer prepared:** successful terminal shards can
   now be independently reviewed without promoting an active/failed parent.
   Exact run/job/artifact/head/header binding, complete ten-minute seed evidence,

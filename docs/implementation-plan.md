@@ -905,6 +905,16 @@ release qualification remain false; it cannot convert a failed parent into a
 passed campaign. [Reviewer calibration and scope](scale/tier3-shard-reviewer-2026-10-03/)
 retain the actual prior-input checks and their provenance limits.
 
+The corrected worker-clock capture has a full ten-minute seed 1 qualification
+at `070dd95`: all 21 snapshots prove five current replicas, complete original
+archives/source ledgers verify and all three independent history models pass.
+Old full campaign 37157123048 is cancelled after three repeated capture
+rejections and no successful row jobs. Replacement 37164231641 at `79915ca`
+retains all 16×200 ten-minute executions and requested upgrade/clock profiles.
+[Qualification and replacement proof](scale/worker-clock-recovery-2026-10-04/)
+clear only the corrected individual case; neither dispatch nor cancellation
+clears the whole matrix or 24-hour release requirement.
+
 
 ### Million-population native timer diagnostic
 
