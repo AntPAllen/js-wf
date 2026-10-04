@@ -33,6 +33,21 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Fresh KV watch audit candidate prepared:** opt-in reader uses a fresh
+  latest-value WatchAll set per audit and requires the initial completion marker.
+  Partial closure, cancellation, invalid identity/revision/operation and ordering
+  fail closed; delete/purge keys retain missing semantics. No inter-audit cache.
+  Existing checker body and CheckSnapshot bytes/default readers unchanged.
+  Integrity race/unit controls pass; native point/batch/snapshot corruption,
+  compaction/cohort/terminal equivalence and same-store100k comparison prepared,
+  still pending. No production-harness adoption or release qualification.
+
+- **Normal2GiB five-container ten-minute run terminal success, review pending:**
+  exact4a875f0 named journal test and producer checks pass2436 invocations /
+  26869 entries /19 journal-leader faults. Supervisor/SDK terminal; producer
+  complete-original archive exists. Independent full-original review/publication
+  still required. No race/full matrix/24h claim; launch snapshot below historical.
+
 - **All-server-kill25–48 independently accepted:** two complete600s shards
   atc4fed06 qualify57232 invocations /630935 journal entries /456 all-three-node
   kill/restart events. Exact raw nodes[0,1,2]/node-1,30s cadence and enabling

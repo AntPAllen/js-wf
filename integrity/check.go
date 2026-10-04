@@ -126,6 +126,23 @@ func check(ctx context.Context, js jetstream.JetStream, cutoff *uint64) (Report,
 }
 
 func checkUsing(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner) (Report, error) {
+	return checkUsingState(ctx, js, cutoff, read, false)
+}
+
+// CheckWithBatchedStateReads adds a fresh initial KV watch snapshot to the
+// batched stream reader. The complete retained state must be quiescent.
+func CheckWithBatchedStateReads(ctx context.Context, js jetstream.JetStream) (Report, error) {
+	return checkUsingState(ctx, js, nil, scanBatchThrough, true)
+}
+
+// CheckThroughInvocationSequenceWithBatchedStateReads requires the same
+// quiescent-cohort/no-purge/no-reuse contract as the point-read checker. Every
+// call obtains a new state snapshot; no result survives between audits.
+func CheckThroughInvocationSequenceWithBatchedStateReads(ctx context.Context, js jetstream.JetStream, cutoff uint64) (Report, error) {
+	return checkUsingState(ctx, js, &cutoff, scanBatchThrough, true)
+}
+
+func checkUsingState(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner, snapshotState bool) (Report, error) {
 	var report Report
 	inv, err := auditRead(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })
 	if err != nil {
@@ -168,6 +185,20 @@ func checkUsing(ctx context.Context, js jetstream.JetStream, cutoff *uint64, rea
 		return nil
 	}); err != nil {
 		return report, err
+	}
+	if snapshotState {
+		state, err = auditRead(ctx, func(attempt context.Context) (jetstream.KeyValue, error) {
+			return initialAuditState(attempt, state, func(key string) bool {
+				if cutoff == nil {
+					return true
+				}
+				_, ok := seen["wf.inv."+strings.TrimPrefix(key, "snap.")]
+				return ok
+			})
+		})
+		if err != nil {
+			return report, err
+		}
 	}
 	keys, err := auditRead(ctx, func(attempt context.Context) ([]string, error) { return state.Keys(attempt) })
 	if err != nil && !errors.Is(err, jetstream.ErrNoKeysFound) {

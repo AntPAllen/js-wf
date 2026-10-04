@@ -98,6 +98,12 @@ func compareFullAudits(t *testing.T, ctx context.Context, js jetstream.JetStream
 		bulk, bulkErr = CheckThroughInvocationSequenceWithBatchedReads(bulkCtx, js, *cutoff)
 	}
 	stop()
+	stateCtx, stateStop := context.WithTimeout(ctx, 20*time.Second)
+	withState, stateErr := checkUsingState(stateCtx, js, cutoff, scanBatchThrough, true)
+	stateStop()
+	if withState != point || (stateErr == nil) != (pointErr == nil) || stateErr != nil && stateErr.Error() != pointErr.Error() {
+		t.Fatalf("state snapshot mismatch: point=%+v state=%+v errors=%v / %v", point, withState, pointErr, stateErr)
+	}
 	if point != bulk {
 		t.Fatalf("report mismatch: point=%+v bulk=%+v point_err=%v bulk_err=%v", point, bulk, pointErr, bulkErr)
 	}
@@ -432,14 +438,7 @@ func TestBatchedInvariantAuditNativePhaseProfile(t *testing.T) {
 	if profileRoot == "" {
 		t.Skip("set WF_AUDIT_BATCH_PROFILE_ROOT for the native CPU/phase profile")
 	}
-	count := 12000
-	if value := os.Getenv("WF_AUDIT_BATCH_PROFILE_INVOCATIONS"); value != "" {
-		var err error
-		count, err = strconv.Atoi(value)
-		if err != nil || count < 1 || count > 100000 {
-			t.Fatal("WF_AUDIT_BATCH_PROFILE_INVOCATIONS must be between 1 and 100000")
-		}
-	}
+	count := nativeAuditProfileCount(t)
 	js, ctx, want := batchAuditLargeCohort(t, count)
 	if !filepath.IsAbs(profileRoot) {
 		t.Fatal("profile root must be absolute")
@@ -465,7 +464,7 @@ func TestBatchedInvariantAuditNativePhaseProfile(t *testing.T) {
 	var phases []phase
 	attempt, stop := context.WithTimeout(ctx, 20*time.Second)
 	started := time.Now()
-	report, auditErr := checkUsing(attempt, js, nil, func(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+	report, auditErr := checkUsingState(attempt, js, nil, func(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 		p := phase{Stream: stream.CachedInfo().Config.Name}
 		began := time.Now()
 		var failure error
@@ -482,7 +481,7 @@ func TestBatchedInvariantAuditNativePhaseProfile(t *testing.T) {
 		p.ScanElapsed = time.Since(began)
 		phases = append(phases, p)
 		return failure
-	})
+	}, os.Getenv("WF_AUDIT_BATCH_STATE_SNAPSHOT") == "1")
 	elapsed := time.Since(started)
 	stop()
 	pprof.StopCPUProfile()
@@ -502,4 +501,72 @@ func TestBatchedInvariantAuditNativePhaseProfile(t *testing.T) {
 		t.Fatalf("profiled audit report=%+v phases=%+v err=%v", report, phases, auditErr)
 	}
 	t.Logf("profiled-audit invocations=%d entries=%d terminal=%d elapsed=%s phases=%+v cpu_profile=%s", report.Invocations, report.Entries, report.Terminal, elapsed, phases, filepath.Join(profileRoot, "audit-cpu.pprof"))
+}
+
+func nativeAuditProfileCount(t *testing.T) int {
+	t.Helper()
+	count := 12000
+	if value := os.Getenv("WF_AUDIT_BATCH_PROFILE_INVOCATIONS"); value != "" {
+		var err error
+		count, err = strconv.Atoi(value)
+		if err != nil || count < 1 || count > 100000 {
+			t.Fatal("WF_AUDIT_BATCH_PROFILE_INVOCATIONS must be between 1 and 100000")
+		}
+	}
+	return count
+}
+
+func TestBatchedInvariantAuditNativeStateSnapshotComparison(t *testing.T) {
+	if os.Getenv("WF_AUDIT_BATCH_CANDIDATE") != "1" {
+		t.Skip("opt-in native same-store state read comparison")
+	}
+	js, ctx, want := batchAuditLargeCohort(t, nativeAuditProfileCount(t))
+	audit := func(snapshot bool) (Report, error, time.Duration) {
+		attempt, stop := context.WithTimeout(ctx, 20*time.Second)
+		defer stop()
+		began := time.Now()
+		report, err := checkUsingState(attempt, js, nil, scanBatchThrough, snapshot)
+		return report, err, time.Since(began)
+	}
+	before, beforeErr, beforeElapsed := audit(false)
+	state, stateErr, stateElapsed := audit(true)
+	after, afterErr, afterElapsed := audit(false)
+	if beforeErr != nil || stateErr != nil || afterErr != nil || before != want || state != want || after != want {
+		t.Fatalf("state comparison before=%+v/%v state=%+v/%v after=%+v/%v", before, beforeErr, state, stateErr, after, afterErr)
+	}
+	t.Logf("state-snapshot-audit invocations=%d entries=%d terminal=%d point_state_before=%s snapshot_state=%s point_state_after=%s errors=<nil>,<nil>,<nil>", state.Invocations, state.Entries, state.Terminal, beforeElapsed, stateElapsed, afterElapsed)
+}
+
+func TestBatchedInvariantAuditNativeStateValues(t *testing.T) {
+	if os.Getenv("WF_AUDIT_BATCH_CANDIDATE") != "1" {
+		t.Skip("opt-in native state snapshot comparison")
+	}
+	js, ctx := batchedAuditCluster(t)
+	cutoff := batchAuditPublish(t, ctx, js, "state-first", batchAuditEntries())
+	batchAuditPublish(t, ctx, js, "state-later", batchAuditEntries())
+	state, err := js.KeyValue(ctx, "WF_STATE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := Report{Invocations: 1, Journals: 1, Entries: 4, Terminal: 1}
+	compareFullAudits(t, ctx, js, &cutoff, want, "")
+	key := identity.Key("audit", "state-first")
+	if _, err := state.Put(ctx, key, []byte(`"corrupt"`)); err != nil {
+		t.Fatal(err)
+	}
+	compareFullAudits(t, ctx, js, &cutoff, Report{}, "terminal state differs")
+	for _, remove := range []func(context.Context, string, ...jetstream.KVDeleteOpt) error{state.Delete, state.Purge} {
+		if _, err := state.Put(ctx, key, []byte(`"ok"`)); err != nil {
+			t.Fatal(err)
+		}
+		if err := remove(ctx, key); err != nil {
+			t.Fatal(err)
+		}
+		compareFullAudits(t, ctx, js, &cutoff, Report{}, "terminal state missing")
+	}
+	if _, err := state.Put(ctx, key, []byte(`"ok"`)); err != nil {
+		t.Fatal(err)
+	}
+	compareFullAudits(t, ctx, js, &cutoff, want, "")
+	compareFullAudits(t, ctx, js, nil, Report{Invocations: 2, Journals: 2, Entries: 8, Terminal: 2}, "")
 }

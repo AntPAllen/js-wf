@@ -1673,3 +1673,29 @@ live at4a875f0; actual SDK/environment and persistent supervisor observed.
 Original20s/60s audits,512 batches and30s liveness unchanged. No terminal/full
 original/fault-row/24h qualification follows from launch.
 [Live snapshot](scale/local-r5-audit-memory-2026-10-04/normal-2g-ten-minute-launch/).
+
+### Fresh KV snapshot candidate for complete audits
+
+The100k profile leaves about4.866s outside stream scans, including100000
+terminal Get calls. A separate opt-in state reader now obtains a new documented
+WatchAll latest-value set for each audit, accepts only the initial nil completion
+marker, stops/drains the watcher, preserves delete/purge absence, and limits
+cohort retention to eligible invocation/snapshot keys. Closed partial watches,
+invalid entry identities/revisions/operations, cancellation and out-of-order
+revisions fail closed. Each complete watch attempt uses the existing bounded
+read/retry helper. No values or results persist between audits.
+
+The same checker's body and checkJournalRecords remain; CheckSnapshot bytes
+and existing default point/batched readers are unchanged. Native comparison
+controls now compare the point, batched and fresh-state readers on compaction,
+cohort exclusion, fresh corruption and I1/I2/I3/orphan cases, plus terminal
+replacement/Delete/Purge/recreation. A same-store native100k comparison uses
+point-state before, snapshot-state, point-state after under original20s limits.
+Unit/race integrity passes; native equivalence/performance/fault qualification
+is still pending. Production harness has not adopted this reader.
+
+The normal2GiB real five-container ten-minute journal diagnostic at4a875f0
+passes its named test and producer row checks:2436 invocations /26869 entries /
+19 faults. SDK/supervisor terminal and complete producer original archive made;
+independent complete-original review and publication remain pending. This is
+recorded normal-profile evidence, not race/full-matrix/24h qualification.
