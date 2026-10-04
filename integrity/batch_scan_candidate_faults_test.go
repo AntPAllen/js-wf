@@ -185,7 +185,16 @@ func TestAuditBatchScanCandidateNativeLegacy211(t *testing.T) {
 	if legacy == "" {
 		t.Skip("set WF_AUDIT_BATCH_LEGACY_BINARY to the supported NATS 2.11.17 executable")
 	}
-	cluster, err := testcluster.StartMixedVersionProcesses(candidateNativeRoot(t), []string{legacy, legacy, legacy})
+	root := candidateNativeRoot(t)
+	data, err := os.ReadFile(legacy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	legacy = filepath.Join(root, "nats-server-2.11.17")
+	if err := os.WriteFile(legacy, data, 0755); err != nil {
+		t.Fatal(err)
+	}
+	cluster, err := testcluster.StartMixedVersionProcesses(filepath.Join(root, "stores"), []string{legacy, legacy, legacy})
 	if err != nil {
 		t.Fatal(err)
 	}
