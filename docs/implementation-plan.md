@@ -1764,3 +1764,20 @@ unchanged; all selected/Git/actual SDK/build-info/member/part proofs verify.
 soak restart. Next full-cohort leader-loss/cancellation/state-watch/legacy faults,
 then real five-container qualification under unchanged20s/60s.
 [Complete native proofs](scale/retained-audit-streaming-2026-10-04/).
+
+### Full streaming audit journal-fault controls prepared
+
+New opt-in native controls publish500 invocations /2000 journal entries /
+500 terminal values, establish an original full-audit baseline, then run each
+streaming mode with point or fresh-state reads. During WF_JRN delivery128,
+observe the actual named memory/AckNone/R3 consumer, require nonzero pending,
+identify its consumer leader and shut down that real in-process NATS node.
+Require all2000 records and the same500/2000/500 full report under original20s,
+with no remaining invocation/journal audit consumers. Client reconnects across
+all three fixture URLs. This is library shutdown, not OS SIGKILL.
+
+Paired cancellation at the same delivery boundary must stop callbacks at128,
+return context.Canceled and the same invocation-only partial report; no partial
+journal result can certify completion. Unit/race package passes; actual retained
+native fault execution remains pending. This does not test interruption during
+state-watch delivery, large-population transport failure, legacy or R5 adoption.

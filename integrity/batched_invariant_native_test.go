@@ -23,6 +23,11 @@ import (
 )
 
 func batchedAuditCluster(t *testing.T) (jetstream.JetStream, context.Context) {
+	js, ctx, _ := batchedAuditClusterWithServers(t)
+	return js, ctx
+}
+
+func batchedAuditClusterWithServers(t *testing.T) (jetstream.JetStream, context.Context, *testcluster.Cluster) {
 	t.Helper()
 	cluster, err := testcluster.Start(candidateNativeRoot(t), 3)
 	if err != nil {
@@ -47,7 +52,7 @@ func batchedAuditCluster(t *testing.T) (jetstream.JetStream, context.Context) {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
-	return js, ctx
+	return js, ctx, cluster
 }
 func batchAuditEntries() []journal.Entry {
 	return []journal.Entry{

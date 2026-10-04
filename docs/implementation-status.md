@@ -33,6 +33,14 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Full streaming journal-fault native controls prepared:** 500 invocations /
+  2000 records /500 terminals, baseline checked; actual pending R3 consumer
+  leader shut down during delivery128 with reconnect-capable client. Both
+  point/state streaming modes must restore complete reports under original20s;
+  paired cancellation must stop at128 with invocation-only partial report.
+  Race package passes; retained native execution pending. Library shutdown,
+  not OS SIGKILL; state-watch/large-population/legacy/R5 capacity still open.
+
 - **Streaming native equivalence and combined100k gain observed:** exact1d43a2b,
   race controls match point/batched/state/streaming reports and exact errors for
   compaction/cohort/fresh corruption/I1/I2/I3/orphan/terminal mutations. Same-store
