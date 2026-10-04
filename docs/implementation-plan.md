@@ -1480,3 +1480,21 @@ physical-store artifact is reference-only. [Complete144–156 proof](scale/curre
 brings accepted same-source clock coverage to91 seeds /277,424 invocations /
 3,074,726 entries /1,729 faults /356,688 history operations, without repairing
 failed historical ranges/parent or qualifying full current-source matrices/24h.
+
+
+Clock157–169 at executed799 now independently qualifies39,368 invocations /
+436,869 entries /247 faults, with all three models passing50,616 operations.
+Source759/model45 inputs,273 clock proofs/1,365 messages/131 cohort audits verify;
+worst terminal/progress p99 is5.251218399 /0.592107855s under unchanged30s /10s
+limits. [Complete proof](scale/current-tier3-clock-2026-10-04/worker-clock-157-169/)
+retains original raw/model bytes and verified pinned SDK restoration. Own new
+physical stores remain reference-only. Accepted same-source clock coverage is104
+seeds /316,792 invocations /3,511,595 entries /1,976 faults /407,304 history ops;
+failed parent/current-source matrices/original24h stay open.
+
+The unresolved continuation/promise after-manifest boundary now has optional
+retained original stores and exact pre-kill read timing/error classification.
+[Prepared diagnostic](scale/continuation-promise-retained-diagnostic-2026-10-04/)
+compiles with the disabled profile; no native cut, runtime fix, timeout relaxation
+or original server-cause resolution is claimed. Captured actual-executable/source/
+store diagnostics and complete eight-cut qualification remain required.

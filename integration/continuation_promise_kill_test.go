@@ -197,7 +197,62 @@ func TestContinuationPromiseSIGKILLAndFullServerRestart(t *testing.T) {
 
 func runPromiseKillRestart(t *testing.T, cut string) {
 	t.Helper()
-	root := t.TempDir()
+	started := time.Now()
+	root := ""
+	retained := os.Getenv("WF_PROMISE_ARTIFACT_PARENT") != ""
+	if retained {
+		parent := os.Getenv("WF_PROMISE_ARTIFACT_PARENT")
+		if err := os.MkdirAll(parent, 0700); err != nil {
+			t.Fatal(err)
+		}
+		var err error
+		root, err = os.MkdirTemp(parent, "promise-"+cut+"-")
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("retained promise cut=%s artifacts=%s", cut, root)
+	} else {
+		root = t.TempDir()
+	}
+	type auditEvent struct {
+		Stage            string    `json:"stage"`
+		At               time.Time `json:"at"`
+		ElapsedNS        int64     `json:"elapsed_ns"`
+		Error            string    `json:"error,omitempty"`
+		DeadlineExceeded bool      `json:"deadline_exceeded"`
+	}
+	var events []auditEvent
+	record := func(stage string, err error) {
+		if !retained {
+			return
+		}
+		event := auditEvent{Stage: stage, At: time.Now().UTC(), ElapsedNS: time.Since(started).Nanoseconds(), DeadlineExceeded: errors.Is(err, context.DeadlineExceeded)}
+		if err != nil {
+			event.Error = err.Error()
+		}
+		events = append(events, event)
+	}
+	// Registered before cluster/worker cleanup, so the report records the final
+	// verdict after those processes stop. The retained stores are never reopened.
+	defer func() {
+		if !retained {
+			return
+		}
+		report := struct {
+			Cut     string       `json:"cut"`
+			Failed  bool         `json:"failed"`
+			Started time.Time    `json:"started"`
+			Ended   time.Time    `json:"ended"`
+			Events  []auditEvent `json:"events"`
+		}{cut, t.Failed(), started.UTC(), time.Now().UTC(), events}
+		raw, err := json.MarshalIndent(report, "", "  ")
+		if err == nil {
+			err = os.WriteFile(filepath.Join(root, "promise-cut-audit.json"), append(raw, '\n'), 0600)
+		}
+		if err != nil {
+			t.Errorf("retain promise cut audit: %v", err)
+		}
+	}()
 	cluster, err := testcluster.StartPartitionableProcesses(filepath.Join(root, "servers"), 3)
 	if err != nil {
 		t.Fatal(err)
@@ -286,8 +341,11 @@ func runPromiseKillRestart(t *testing.T, cut string) {
 		case <-time.After(10 * time.Millisecond):
 		}
 	}
+	record("cut_observed", nil)
 	store := journal.New(all[0])
+	record("journal_read_begin", nil)
 	before, _, err := store.Read(ctx, promiseKillType, promiseKillID)
+	record("journal_read_end", err)
 	if err != nil || len(before) == 0 {
 		t.Fatalf("cut history=%v err=%v", before, err)
 	}
@@ -372,7 +430,9 @@ func runPromiseKillRestart(t *testing.T, cut string) {
 			abandoned = frame.Name
 		}
 	} else {
+		record("checkpoint_read_begin", nil)
 		view, err := store.ReadCheckpoint(ctx, promiseKillType, promiseKillID, handle.InvSeq)
+		record("checkpoint_read_end", err)
 		if err != nil || view == nil {
 			t.Fatalf("published frame=%v err=%v", view, err)
 		}

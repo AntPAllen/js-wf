@@ -11,7 +11,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–36 qualified. Full 13-row × 200 current-source gate remains open. |
-| Tier3 fault matrix | Worker-clock 91 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
+| Tier3 fault matrix | Worker-clock 104 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Other finite combined fault cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Not run/qualified. Full-matrix soak and required retained-original audits remain. |
@@ -29,6 +29,25 @@ and million-timer physical-drain failures, finish combined continuation/promise/
 retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Clock157–169 independently qualified:**39,368 invocations /436,869 entries /
+  247 faults and50,616 operations passing all three source-bound production
+  models;759 captured source inputs,45 model dependencies,273 clock proofs /
+  1,365 broker messages /131 cohort audits verify. Worst terminal/progress p99
+  is5.251218399 /0.592107855s under unchanged30s /10s gates. All original raw
+  uploads and actual model executable are retained; pinned SDK provider hashes
+  and full39-path restoration verify. Own physical stores remain reference-only.
+  Accepted same-source clock coverage:104 seeds /316,792 invocations /3,511,595
+  entries /1,976 faults /407,304 history operations. Failed parent and full gates
+  stay open. [Complete proof](scale/current-tier3-clock-2026-10-04/worker-clock-157-169/).
+
+- **Continuation/promise failure diagnostics prepared:** optional retained artifact
+  parent preserves original stores/logs/markers and records exact pre-kill
+  journal/checkpoint read timing/error classifications after cleanup. Integration
+  package compiles; disabled profile0.035s is not a native cut qualification.
+  No runtime fix or timeout relaxation is claimed; focused after-manifest run
+  and independent actual-executable/source/store review remain required.
+  [Preparation and exact diagnostic scope](scale/continuation-promise-retained-diagnostic-2026-10-04/).
 
 - **Tier3 worker-clock144–156 independently qualified:**41,272 invocations,
   457,464 entries,247 faults and53,064 operations passing all three models;
