@@ -1,0 +1,70 @@
+{
+  "source": "722305aeaebfd6ae1b1363ebef77efebaec2f80b",
+  "exit_code": 0,
+  "race": true,
+  "selected_inputs": 2895,
+  "local_git_inputs": 65,
+  "all_captured_source_hashes_verified": true,
+  "all_local_inputs_match_executed_git": true,
+  "actual_runner_matches_executed_git": true,
+  "actual_binary_sha256": "40b1079460e1cc3f813cdab81bff256d4beacd10c94ff0dc45733cbbb0c36c42",
+  "actual_binary_retained": true,
+  "all_actual_build_info_fields_match": true,
+  "live_proc_identity_captured": true,
+  "actual_live_environment_verified": true,
+  "named_results": {
+    "TestStreamingAuditNativeStateWatchFaults/consumer-leader-loss": {
+      "status": "pass",
+      "seconds": 81.03
+    },
+    "TestStreamingAuditNativeStateWatchFaults/cancellation": {
+      "status": "pass",
+      "seconds": 74
+    },
+    "TestStreamingAuditNativeStateWatchFaults": {
+      "status": "pass",
+      "seconds": 155.03
+    }
+  },
+  "fault_rows": [
+    {
+      "fault": "consumer-leader-loss",
+      "consumer": "63bmTs2v",
+      "leader": 1,
+      "pending": 11125,
+      "replicas": 1,
+      "delivered": 23019,
+      "seconds": 12.80705601,
+      "invocations": 12000,
+      "journals": 12000,
+      "entries": 144000,
+      "terminal": 12000,
+      "error": "<nil>",
+      "injection_error": "<nil>",
+      "passed": true
+    },
+    {
+      "fault": "cancellation",
+      "consumer": "",
+      "leader": -1,
+      "pending": 0,
+      "replicas": 0,
+      "delivered": 128,
+      "seconds": 11.393537711,
+      "invocations": 12000,
+      "journals": 0,
+      "entries": 0,
+      "terminal": 0,
+      "error": "context canceled",
+      "injection_error": "<nil>",
+      "passed": true
+    }
+  ],
+  "native_files": 726,
+  "native_file_bytes": 126524428,
+  "raw_result_log": "=== RUN   TestStreamingAuditNativeStateWatchFaults\n=== RUN   TestStreamingAuditNativeStateWatchFaults/consumer-leader-loss\n    state_scan_native_fault_test.go:203: state-watch-fault fault=consumer-leader-loss consumer=63bmTs2v leader=1 pending_at_kill=11125 consumer_replicas=1 delivered=23019 elapsed=12.80705601s report={Invocations:12000 Journals:12000 Entries:144000 Terminal:12000} err=<nil> injection_err=<nil>\n=== RUN   TestStreamingAuditNativeStateWatchFaults/cancellation\n    state_scan_native_fault_test.go:203: state-watch-fault fault=cancellation consumer= leader=-1 pending_at_kill=0 consumer_replicas=0 delivered=128 elapsed=11.393537711s report={Invocations:12000 Journals:0 Entries:0 Terminal:0} err=context canceled injection_err=<nil>\n--- PASS: TestStreamingAuditNativeStateWatchFaults (155.03s)\n    --- PASS: TestStreamingAuditNativeStateWatchFaults/consumer-leader-loss (81.03s)\n    --- PASS: TestStreamingAuditNativeStateWatchFaults/cancellation (74.00s)\nPASS\n",
+  "physical_stores_reopened": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false,
+  "scope": "Full 12000-invocation/144000-entry streaming audits interrupted during real KV WatchAll delivery. Actual native watch-consumer leader shutdown and cancellation outcomes independently retained. No synthetic entries/completion marker; unchanged20s limits. OS SIGKILL, legacy, five-container/full-matrix/24h qualification absent."
+}

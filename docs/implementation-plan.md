@@ -1800,3 +1800,20 @@ consumer cleanup and actual live SDK/environment/source inputs verify.
 [Complete 100k fault proof](scale/retained-audit-streaming-2026-10-04/large-journal-fault-100k/).
 This is normal2GiB/GOMAXPROCS2 native capacity, not race100k/five-container/
 state-watch interruption/OS SIGKILL/legacy or actual24h qualification.
+
+
+### Full streaming audit state-watch fault controls
+
+Retained race controls at722305a now interrupt real WatchAll deliveries inside
+full12000-invocation/144000-entry audits, after a mandatory full baseline. At
+initial delivery128, identify the actual pending watch consumer and shut down
+its leader. The SDK-created consumer has one replica, with11125 pending at the
+kill. All12000 journals/144000 entries/12000 terminals validate in12.807s under
+the original20s deadline. Paired cancellation stops at128 and returns only the
+invocation count with context.Canceled in11.394s. No test-generated values or
+completion marker enter the checker. All selected/Git inputs, live SDK/env,
+full build-info and complete original archive verify.
+[Complete state-watch controls](scale/retained-audit-streaming-2026-10-04/state-watch-faults/).
+This closes the native12k watch-interruption control, not OS SIGKILL, legacy,
+five-container/full-matrix or actual24h qualification. Default readers stay
+unchanged; next expose the combined candidate explicitly in the real harness.

@@ -86,3 +86,13 @@ original20s. Complete baseline/cleanup/source/executable/live environment and
 originals verify. This closes this normal native journal-fault capacity check;
 state-watch interruption, OS SIGKILL, race100k, legacy/five-container and full
 release qualification remain open.
+
+
+## Native state-watch interruption
+
+[Full race controls](state-watch-faults/) pass real KV WatchAll consumer-leader
+loss and cancellation at delivery128 inside12000/144000/12000 audits. The
+SDK-created watch consumer is single-replica;11125 pending at shutdown. Complete
+recovery takes12.807s; cancellation returns invocation-only count at128 in11.394s.
+No synthetic values or completion marker; all source/live SDK/build-info/original
+proofs verify. Legacy/five-container/OS SIGKILL/full matrices/actual24h remain open.

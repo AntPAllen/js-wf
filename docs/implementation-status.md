@@ -33,13 +33,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
-- **Full streaming state-watch fault controls prepared:** new native tests use
-  12000 invocations /144000 entries, mandatory full baseline, and real WatchAll
-  delivery interception. At delivery128, identify the single actual pending
-  watch consumer and shut down its leader, or cancel. Require complete recovery
-  within original20s or invocation-only cancellation; no synthetic entries or
-  completion marker. Native execution pending. Library shutdown, not SIGKILL;
-  default readers and original20s/60s limits remain unchanged.
+- **Full streaming state-watch fault controls independently reviewed:** exact722305a,
+  both race cases pass on fresh12000-invocation/144000-entry fixtures. At real
+  watch delivery128, single-replica SDK consumer leader shutdown leaves11125
+  pending; exact full report recovers in12.807s. Cancellation stops at128 with
+  invocation-only report in11.394s. Actual watch entries/completion marker flow
+  unchanged; no injected marker. All2895 selected inputs/65 Git files, live SDK/
+  env/all build-info and3639 originals verify;52273791-byte complete two-part
+  archive reads back. Library shutdown, not OS SIGKILL; stores not reopened.
+  Legacy/five-container/full-matrix/24h qualification remain open; defaults
+  and original20s/60s limits unchanged.
+  [Complete state-watch fault proof](scale/retained-audit-streaming-2026-10-04/state-watch-faults/).
 
 - **100k streaming journal-fault capacity independently reviewed:** exact878c341,
   normal build, 100000 invocations / 1.2M entries / 100000 terminals. Complete
