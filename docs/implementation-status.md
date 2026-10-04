@@ -33,6 +33,14 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Combined five-container ten-minute race row is live:** executed d7e075d,
+  journal/seed1, explicit2GiB/GOMAXPROCS2, combined checkpoint/final reader,
+  tracing, original20s/60s/30s and2m sync. Actual live race SDK/full build-info/
+  environment,1259 source inputs matching Git and five containers verify;
+  persistent supervisor active. Batch10/cutoff280 checkpoint has started.
+  No terminal result or reviewed full originals; no row/full-matrix/24h claim.
+  [Observed launch](scale/local-r5-streaming-audit-2026-10-04/race-2g-ten-minute-launch/).
+
 - **Combined reader explicitly exposed in real harness:** public full/cohort
   streaming-state APIs and --streaming-state-retained-audit select the same
   reader for checkpoint and final audits. Default point reader stays; conflicting
