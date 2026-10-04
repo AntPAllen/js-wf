@@ -42,10 +42,11 @@ python3 docs/scale/retained-audit-batch-candidate-2026-10-04/review.py --repo "$
 
 ## Scope and next qualification
 
+This records the candidate at834daa8. Later changes are separately qualified.
 This is a candidate reader experiment, not a full invariant audit, fault-matrix
 pass or24-hour qualification. Native source and logs are retained; the successful
 native executable and original stores are not retained. `review.py` proves the
-current reader helper bytes match the executed helper; the native opt-in guard
+reader helper bytes at834daa8 match the executed helper; the native opt-in guard
 was added after that comparison. It verifies recorded logs, not independent
 replay of those deleted stores. Timing is one comparison, not a general speedup
 or an extrapolated24-hour capacity guarantee.

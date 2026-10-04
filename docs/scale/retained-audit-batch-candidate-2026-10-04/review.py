@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import subprocess
 
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument('--repo', type=Path, required=True)
@@ -11,7 +12,7 @@ p.add_argument('--output', type=Path, required=True)
 a = p.parse_args()
 root = Path(__file__).resolve().parent
 executed = (root / 'executed-native-source.go.txt').read_text()
-current = (a.repo / 'integrity/batch_scan_candidate_test.go').read_text()
+current = subprocess.check_output(['git', 'show', '834daa86fbb0ae0450b3b82cc46fdba6b99d11f1:integrity/batch_scan_candidate_test.go'], cwd=a.repo, text=True)
 def helper(source):
     return source[source.index('func candidateBatchScan('):source.index('func candidateDigest(')]
 assert helper(executed) == helper(current)

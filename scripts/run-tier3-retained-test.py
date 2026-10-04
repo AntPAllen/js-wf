@@ -25,7 +25,9 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2)+'\n')
 
 
-def run(root, pattern, timeout, race):
+def run(root, pattern, timeout, race, selected_package="./integration"):
+    if selected_package not in ("./integration", "./integrity"):
+        raise ValueError("unsupported retained test package")
     repo = Path.cwd().resolve()
     revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
     if subprocess.check_output(['git', 'status', '--porcelain']):
@@ -36,9 +38,9 @@ def run(root, pattern, timeout, race):
     (root/'runner.py').write_bytes(Path(__file__).read_bytes())
     (root/'source.txt').write_text(revision+'\n')
     fmt = '{{.Dir}}|{{join .GoFiles " "}}|{{join .CgoFiles " "}}|{{join .TestGoFiles " "}}|{{join .XTestGoFiles " "}}'
-    dependencies = subprocess.check_output(['go', 'list', '-deps', '-test', '-f', fmt, './integration'], text=True)
+    dependencies = subprocess.check_output(['go', 'list', '-deps', '-test', '-f', fmt, selected_package], text=True)
     (root/'dependencies.txt').write_text(dependencies)
-    package = subprocess.check_output(['go', 'list', '-f', '{{.ImportPath}}', './integration'], text=True).strip()
+    package = subprocess.check_output(['go', 'list', '-f', '{{.ImportPath}}', selected_package], text=True).strip()
     goroot = Path(subprocess.check_output(['go', 'env', 'GOROOT'], text=True).strip()).resolve()
     modules = Path(subprocess.check_output(['go', 'env', 'GOMODCACHE'], text=True).strip()).resolve()
     selected = set()
@@ -77,11 +79,11 @@ def run(root, pattern, timeout, race):
     write(root/'source-before.json', before)
     write(root/'captured-paths.json', captured)
     write(root/'ignored-generated-inputs.json', ignored)
-    binary = root/'integration.test'
-    build = ['go', 'test', '-p=1']+(['-race'] if race else [])+['-c', '-o', str(binary), './integration']
+    binary = root/(Path(selected_package).name+'.test')
+    build = ['go', 'test', '-p=1']+(['-race'] if race else [])+['-c', '-o', str(binary), selected_package]
     execute = ['go', 'tool', 'test2json', '-t', '-p', package, str(binary), '-test.run='+pattern, '-test.count=1', '-test.timeout='+timeout, '-test.v']
-    write(root/'commands.json', dict(source=revision, build=build, run=execute, package=package, build_cwd=str(repo), run_cwd=str(repo/'integration'),
-        environment={k:v for k,v in os.environ.items() if k in ('GOCACHE', 'GOTMPDIR', 'GOMEMLIMIT', 'GOMAXPROCS') or k.startswith(('WF_TIER3_', 'TIER3_MATRIX_', 'FAULT_SEED'))}))
+    write(root/'commands.json', dict(source=revision, build=build, run=execute, package=package, build_cwd=str(repo), run_cwd=str(repo/selected_package),
+        environment={k:v for k,v in os.environ.items() if k in ('GOCACHE', 'GOTMPDIR', 'GOMEMLIMIT', 'GOMAXPROCS') or k.startswith(('WF_TIER3_', 'TIER3_MATRIX_', 'FAULT_SEED', 'WF_AUDIT_BATCH_'))}))
     with (root/'build.log').open('wb') as log:
         subprocess.run(build, stdout=log, stderr=subprocess.STDOUT, check=True)
     if {str(path):sha(path) for path in selected} != before:
@@ -92,7 +94,7 @@ def run(root, pattern, timeout, race):
     begin = time.monotonic()
     # Keep a local copy as well as the existing workflow's tee/render pipeline.
     with (root/'events.jsonl').open('wb') as events, (root/'stderr.log').open('wb') as errors:
-        child = subprocess.Popen(execute, cwd=repo/'integration', stdout=subprocess.PIPE, stderr=errors)
+        child = subprocess.Popen(execute, cwd=repo/selected_package, stdout=subprocess.PIPE, stderr=errors)
         for line in child.stdout:
             events.write(line)
             sys.stdout.buffer.write(line)
@@ -117,5 +119,6 @@ if __name__ == '__main__':
     parser.add_argument('--test', required=True)
     parser.add_argument('--timeout', default='20m')
     parser.add_argument('--race', action='store_true')
+    parser.add_argument('--package', choices=('integration', 'integrity'), default='integration')
     args = parser.parse_args()
-    raise SystemExit(run(args.root.resolve(), args.test, args.timeout, args.race))
+    raise SystemExit(run(args.root.resolve(), args.test, args.timeout, args.race, './'+args.package))

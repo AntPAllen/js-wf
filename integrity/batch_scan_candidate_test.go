@@ -16,6 +16,7 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
+	"github.com/nats-io/nuid"
 )
 
 func candidateBatchScan(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
@@ -30,9 +31,24 @@ func candidateBatchScan(ctx context.Context, stream jetstream.Stream, cutoff *ui
 	if first == 0 || first > last {
 		return nil
 	}
+	// Stable identity makes a lost create reply safe to retry. Cleanup also
+	// covers a successful create whose replies were all lost. The original
+	// context bounds cleanup; inactivity expires consumers after cancellation.
+	consumerName := "wf-audit-" + nuid.Next()
+	defer func() {
+		cleanup := context.WithoutCancel(ctx)
+		if deadline, ok := ctx.Deadline(); ok {
+			var stop context.CancelFunc
+			cleanup, stop = context.WithDeadline(cleanup, deadline)
+			defer stop()
+		}
+		call, stop := context.WithTimeout(cleanup, 2*time.Second)
+		defer stop()
+		_ = stream.DeleteConsumer(call, consumerName)
+	}()
 	consumer, err := auditRead(ctx, func(call context.Context) (jetstream.Consumer, error) {
 		return stream.CreateConsumer(call, jetstream.ConsumerConfig{
-			DeliverPolicy: jetstream.DeliverByStartSequencePolicy, OptStartSeq: first,
+			Name: consumerName, DeliverPolicy: jetstream.DeliverByStartSequencePolicy, OptStartSeq: first,
 			AckPolicy: jetstream.AckNonePolicy, ReplayPolicy: jetstream.ReplayInstantPolicy,
 			MemoryStorage: true, InactiveThreshold: 30 * time.Second,
 		})
@@ -40,24 +56,32 @@ func candidateBatchScan(ctx context.Context, stream jetstream.Stream, cutoff *ui
 	if err != nil {
 		return err
 	}
-	defer func() { _ = stream.DeleteConsumer(ctx, consumer.CachedInfo().Name) }()
-	// A consumer skipping records can never prove their absence. Resolve each
-	// gap and tail against exact leader GetMsg reads; existing entries are visited.
+	// Consumer delivery cannot prove absence. The leader's documented next
+	// message query checks gaps/tails without one request per deleted sequence.
+	// An existing omitted record is visited before later consumer delivery.
 	resolve := func(end uint64) error {
 		for first <= end {
-			msg, err := auditRead(ctx, func(call context.Context) (*jetstream.RawStreamMsg, error) { return stream.GetMsg(call, first) })
-			if !errors.Is(err, jetstream.ErrMsgNotFound) {
-				if err != nil {
-					return err
-				}
-				if msg == nil || msg.Sequence != first {
-					return fmt.Errorf("candidate scan: wrong gap sequence %d", first)
-				}
-				if err := visit(msg); err != nil {
-					return err
-				}
+			msg, err := auditRead(ctx, func(call context.Context) (*jetstream.RawStreamMsg, error) {
+				return stream.GetMsg(call, first, jetstream.WithGetMsgSubject(">"))
+			})
+			if errors.Is(err, jetstream.ErrMsgNotFound) {
+				first = end + 1
+				return nil
 			}
-			first++
+			if err != nil {
+				return err
+			}
+			if msg == nil || msg.Sequence < first {
+				return fmt.Errorf("candidate scan: invalid next sequence at %d", first)
+			}
+			if msg.Sequence > end {
+				first = end + 1
+				return nil
+			}
+			if err := visit(msg); err != nil {
+				return err
+			}
+			first = msg.Sequence + 1
 		}
 		return nil
 	}
@@ -73,12 +97,20 @@ func candidateBatchScan(ctx context.Context, stream jetstream.Stream, cutoff *ui
 		delivered := 0
 		for msg := range batch.Messages() {
 			delivered++
+			if visitErr == nil && ctx.Err() != nil {
+				visitErr = ctx.Err()
+				stop()
+			}
 			if visitErr != nil {
 				continue
 			} // Drain before cancellation/cleanup.
 			meta, err := msg.Metadata()
 			if err != nil {
 				visitErr = err
+				continue
+			}
+			if meta == nil {
+				visitErr = errors.New("candidate scan: missing metadata")
 				continue
 			}
 			seq := meta.Sequence.Stream

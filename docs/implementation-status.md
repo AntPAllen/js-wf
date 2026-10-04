@@ -33,6 +33,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Bulk scan candidate fault/compatibility qualification prepared:** creation
+  retries reuse one generated consumer name and attempt cleanup even after lost
+  create replies; cleanup respects the original audit deadline. Explicit
+  cancellation stops visits and allows bounded cleanup before that deadline.
+  Deleted gaps/tails now use documented leader next-message queries, preserving
+  omitted-record readback without one RPC per deleted sequence. Updated race
+  controls including uncertain create identity/cleanup pass1.016s. Native leader
+  loss/cancellation/consumer deletion and three-process NATS2.11.17 cases are
+  prepared; outcomes pending. Retained producer can now select integrity package
+  with the same clean-source/input/actual-executable guards. Production unchanged;
+  earlier performance comparison binds834daa8, not these new reader bytes.
+
 - **Test-only bulk audit reader candidate validated:** on three real NATS nodes,
   both readers visit34993 retained records with matching ordered payload/header/
   timestamp/subject/sequence digests. Existing point scan12.758667811s versus

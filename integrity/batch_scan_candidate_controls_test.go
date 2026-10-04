@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/nats-io/nats.go"
@@ -52,36 +53,54 @@ func (c candidateControlConsumer) Fetch(_ int, _ ...jetstream.FetchOpt) (jetstre
 
 type candidateControlStream struct {
 	jetstream.Stream
-	consumer      candidateControlConsumer
-	requests      []uint64
-	deleted       bool
-	readError     error
-	wrongSequence bool
+	consumer        candidateControlConsumer
+	requests        []uint64
+	deleted         bool
+	readError       error
+	wrongSequence   bool
+	createNames     []string
+	deleteName      string
+	createLostReply bool
+	createError     error
 }
 
 func (s *candidateControlStream) Info(context.Context, ...jetstream.StreamInfoOpt) (*jetstream.StreamInfo, error) {
 	return &jetstream.StreamInfo{Config: jetstream.StreamConfig{Name: "CONTROL"}, State: jetstream.StreamState{FirstSeq: 1, LastSeq: 6}}, nil
 }
 func (s *candidateControlStream) CreateConsumer(_ context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
+	s.createNames = append(s.createNames, cfg.Name)
+	if !strings.HasPrefix(cfg.Name, "wf-audit-") {
+		return nil, errors.New("missing stable audit consumer identity")
+	}
+	if s.createError != nil {
+		return nil, s.createError
+	}
+	if s.createLostReply && len(s.createNames) == 1 {
+		return nil, nats.ErrTimeout
+	}
 	if cfg.DeliverPolicy != jetstream.DeliverByStartSequencePolicy || cfg.OptStartSeq != 1 || cfg.AckPolicy != jetstream.AckNonePolicy || !cfg.MemoryStorage || cfg.InactiveThreshold <= 0 {
 		return nil, errors.New("incorrect consumer configuration")
 	}
 	return s.consumer, nil
 }
-func (s *candidateControlStream) DeleteConsumer(context.Context, string) error {
+func (s *candidateControlStream) DeleteConsumer(_ context.Context, name string) error {
+	s.deleteName = name
 	s.deleted = true
 	return nil
 }
-func (s *candidateControlStream) GetMsg(_ context.Context, seq uint64, _ ...jetstream.GetMsgOpt) (*jetstream.RawStreamMsg, error) {
+func (s *candidateControlStream) GetMsg(_ context.Context, seq uint64, opts ...jetstream.GetMsgOpt) (*jetstream.RawStreamMsg, error) {
 	s.requests = append(s.requests, seq)
 	if s.readError != nil {
 		return nil, s.readError
 	}
+	if len(opts) != 1 {
+		return nil, errors.New("missing next-message option")
+	}
 	if seq == 4 {
-		return nil, jetstream.ErrMsgNotFound
+		seq = 5
 	}
 	if s.wrongSequence {
-		return &jetstream.RawStreamMsg{Sequence: seq + 1}, nil
+		return &jetstream.RawStreamMsg{Sequence: 0}, nil
 	}
 	return &jetstream.RawStreamMsg{Sequence: seq}, nil
 }
@@ -129,5 +148,22 @@ func TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures(t *testing
 	s := &candidateControlStream{}
 	if err := candidateBatchScan(ctx, s, nil, func(*jetstream.RawStreamMsg) error { t.Fatal("visit after cancel"); return nil }); !errors.Is(err, context.Canceled) {
 		t.Fatal(err)
+	}
+}
+
+func TestAuditBatchScanCandidateCreateRetryKeepsIdentityAndCleansUncertainCreate(t *testing.T) {
+	s := &candidateControlStream{consumer: candidateControlConsumer{sequences: []uint64{1, 2, 3, 5, 6}, stream: "CONTROL"}, createLostReply: true}
+	if err := candidateBatchScan(context.Background(), s, nil, func(*jetstream.RawStreamMsg) error { return nil }); err != nil {
+		t.Fatal(err)
+	}
+	if len(s.createNames) != 2 || s.createNames[0] != s.createNames[1] || s.deleteName != s.createNames[0] {
+		t.Fatalf("create identities=%v cleanup=%s", s.createNames, s.deleteName)
+	}
+	s = &candidateControlStream{createError: nats.ErrTimeout}
+	if err := candidateBatchScan(context.Background(), s, nil, func(*jetstream.RawStreamMsg) error { t.Fatal("visit after failed create"); return nil }); !errors.Is(err, nats.ErrTimeout) {
+		t.Fatal(err)
+	}
+	if len(s.createNames) != 3 || s.createNames[0] != s.createNames[1] || s.createNames[1] != s.createNames[2] || s.deleteName != s.createNames[0] {
+		t.Fatalf("uncertain create identities=%v cleanup=%s", s.createNames, s.deleteName)
 	}
 }
