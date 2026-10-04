@@ -14,6 +14,7 @@ import tarfile
 import time
 
 REPO = Path(__file__).resolve().parents[1]
+MEMORY_LIMITS = ('512MiB', '1GiB', '2GiB', '4GiB')
 
 
 def load_rows():
@@ -23,16 +24,18 @@ def load_rows():
     return module.TESTS
 
 
-def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=False, batched_retained_audit=False):
+def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=False, batched_retained_audit=False, memory_limit='512MiB'):
     if row not in load_rows() or duration not in ('35s', '10m', '24h'):
         raise ValueError('unsupported row or duration')
     if type(seed) is not int or not 1 <= seed <= 2**63-1:
         raise ValueError('seed must be positive int64')
     if shutdown not in ('sigkill', 'ldm') or (row != 'rolling_upgrade' and (gap or shutdown != 'sigkill')):
         raise ValueError('invalid shutdown or gap profile')
+    if memory_limit not in MEMORY_LIMITS:
+        raise ValueError('unsupported explicit memory budget')
     # Do not inherit fixture/mutation/child-process activation from another run.
     env = {k:v for k,v in os.environ.items() if not k.startswith('WF_')}
-    env.update(GOMEMLIMIT='512MiB', GOMAXPROCS='2', WF_TIER3_MATRIX='1',
+    env.update(GOMEMLIMIT=memory_limit, GOMAXPROCS='2', WF_TIER3_MATRIX='1',
                WF_TIER3_MATRIX_DURATION=duration, WF_TIER3_SYNC_INTERVAL='2m',
                TIER3_MATRIX_ARTIFACT_ROOT=str(fixture), FAULT_SEED=str(seed))
     if retained_audit_trace:
@@ -105,13 +108,15 @@ def main():
     p.add_argument('--retained-audit-trace', action='store_true')
     p.add_argument('--batched-retained-audit', action='store_true')
     p.add_argument('--no-race', action='store_true')
+    p.add_argument('--memory-limit', choices=MEMORY_LIMITS, default='512MiB',
+                   help='Explicit Go memory budget, captured with execution evidence')
     a = p.parse_args()
     root = a.root.resolve()
     if root.exists() or root.is_relative_to(REPO):
         p.error('root must be fresh and outside the repository')
     env, testargs, flags = execution(a.row,a.duration,a.seed,root/'fixture',
                                      a.upgrade_shutdown,a.upgrade_start_gap,
-                                     a.retained_audit_trace,a.batched_retained_audit)
+                                     a.retained_audit_trace,a.batched_retained_audit,a.memory_limit)
     if subprocess.check_output(['git','status','--porcelain'],cwd=REPO):
         p.error('execution requires a clean committed checkout')
     revision = subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip()
@@ -122,6 +127,7 @@ def main():
                  status='preparing',supervisor_pid=os.getpid(),started=time.time(),
                  upgrade_shutdown=a.upgrade_shutdown if a.row=='rolling_upgrade' else None,
                  upgrade_start_gap=a.upgrade_start_gap,race=not a.no_race,
+                 memory_limit=a.memory_limit,
                  retained_audit_trace=a.retained_audit_trace,
                  batched_retained_audit=a.batched_retained_audit,
                  clears_full_tier3_release=False)

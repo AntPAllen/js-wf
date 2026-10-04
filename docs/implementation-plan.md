@@ -1634,3 +1634,22 @@ instrumentation alone is insufficient; measure memory sensitivity next while
 retaining this failure, then address complete-audit memory/scaling. No budget,
 production setting or release requirement changes.
 [Complete failed100k proof](scale/retained-audit-phase-profile-2026-10-04/normal-100k/).
+
+### Explicit audit memory profile and five-container comparison
+
+Actual source4b7531e uses the byte-identical100k normal SDK with2GiB:
+full100000 journals /1.2M entries /100000 terminals complete in15.487657247s
+under the original20s deadline. All original sources, live SDK, CPU profile,
+native stores and full five-part archive verify; stores are not reopened.
+This demonstrates embedded-fixture memory sensitivity, not race/fault/full-matrix
+or24h qualification. The original512MiB failure remains failed.
+[Complete comparison](scale/retained-audit-phase-profile-2026-10-04/normal-100k-2g/).
+
+The real five-container runner now accepts --memory-limit (512MiB default,
+1GiB,2GiB,4GiB), validates before starting, and captures selection in execution
+and test-environment evidence. Inherited budgets cannot silently override it.
+Fault schedules, checkpoint audits, budgets, SyncInterval, default race and
+all semantic release gates stay unchanged. Five producer controls pass. Next
+bounded10m journal diagnostic uses explicit2GiB/normal plus full audit traces;
+review its actual original evidence before longer campaigns. Complete-audit
+memory/scaling, large-population faults and original24h/full matrices remain.

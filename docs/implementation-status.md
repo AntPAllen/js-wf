@@ -33,6 +33,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Same actual100k SDK completes with explicit2GiB:** source4b7531e,
+  byte-identical normal binary to failed512MiB case; full100000 journals /
+  1.2M entries /100000 terminals in15.487657247s under original20s. INV/JRN
+  scans1.526/9.096s. Exact env, all2889 inputs/59 Git files, live SDK/build info
+  and3326 original members/111206526-byte five-part proof verify. Embedded
+  client/server memory sensitivity, not five-container/race/fault/24h qualification.
+  Failed512MiB stays failed. Runner accepts explicit bounded --memory-limit and
+  records choice; default512MiB/race and original audit gates remain unchanged.
+  Five producer guards pass; next10m normal2GiB journal diagnostic is prepared.
+  [Complete100k memory comparison](scale/retained-audit-phase-profile-2026-10-04/normal-100k-2g/).
+
 - **Normal100k full audit also hits the original20s limit:** actual6a38a7c,
   GOMAXPROCS2/GOMEMLIMIT512MiB, reads all100000 invocations and1.2M journal
   records in1.924s/17.208s, then fails at20.092516379s before journal/terminal

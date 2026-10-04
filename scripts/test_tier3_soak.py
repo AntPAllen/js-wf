@@ -5,6 +5,18 @@ spec=importlib.util.spec_from_file_location('soak',Path(__file__).with_name('run
 soak=importlib.util.module_from_spec(spec);spec.loader.exec_module(soak)
 
 class SoakProducerTests(unittest.TestCase):
+ def test_memory_budget_is_explicit_and_does_not_inherit_or_change_fault_gates(self):
+  with patch.dict(os.environ,{'GOMEMLIMIT':'off','GOMAXPROCS':'99'}):
+   plain,args,flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False)
+   larger,larger_args,larger_flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,memory_limit='2GiB')
+  self.assertEqual(plain['GOMEMLIMIT'],'512MiB')
+  self.assertEqual(larger['GOMEMLIMIT'],'2GiB')
+  self.assertEqual(larger['GOMAXPROCS'],'2')
+  self.assertEqual(args,larger_args)
+  self.assertEqual(flags,larger_flags)
+  self.assertEqual(plain['WF_TIER3_SYNC_INTERVAL'],larger['WF_TIER3_SYNC_INTERVAL'])
+  for value in ['off','0','16GiB','2GB',None]:
+   with self.assertRaises(ValueError):soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,memory_limit=value)
  def test_long_clock_execution_requires_actual_admission_and_matching_deadline(self):
   with patch.dict(os.environ,{'WF_TIER3_UPGRADE_START_GAP':'1','WF_TIER3_MATRIX_MUTATION':'omit_terminal','WF_TIER3_WORKER_KILL_CHILD':'1'}):
    env,args,flags=soak.execution('server_clock_ahead','24h',7,Path('/tmp/isolated'),'sigkill',False)

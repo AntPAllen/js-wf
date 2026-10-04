@@ -1,0 +1,54 @@
+{
+  "source": "4b7531e552c71ef7d2971b80073c16f7dd97950f",
+  "exit_code": 0,
+  "race": false,
+  "selected_inputs": 2889,
+  "local_git_inputs": 59,
+  "all_captured_source_hashes_verified": true,
+  "all_local_inputs_match_executed_git": true,
+  "actual_runner_matches_executed_git": true,
+  "actual_binary_sha256": "84564d8c5f8746174e4b96fb0f5e647974ccb4e3763d554511d0b96289325dbb",
+  "actual_binary_retained": true,
+  "all_actual_build_info_fields_match": true,
+  "live_proc_identity_captured": true,
+  "named_results": {
+    "TestBatchedInvariantAuditNativePhaseProfile": {
+      "status": "pass",
+      "seconds": 84.01
+    }
+  },
+  "native_files": 414,
+  "native_file_bytes": 523657954,
+  "phases": {
+    "phases": [
+      {
+        "stream": "WF_INV",
+        "records": 100000,
+        "bytes": 500000,
+        "scan_ns": 1526244348,
+        "visit_ns": 105656349
+      },
+      {
+        "stream": "WF_JRN",
+        "records": 1200000,
+        "bytes": 84700000,
+        "scan_ns": 9095523142,
+        "visit_ns": 2167972438
+      }
+    ],
+    "report": {
+      "Invocations": 100000,
+      "Journals": 100000,
+      "Entries": 1200000,
+      "Terminal": 100000
+    },
+    "elapsed_ns": 15487657247,
+    "error": "<nil>"
+  },
+  "cpu_profile_sha256": "9b1b758dc339be02340b92698f8a00e5559a09a6599f83e8e5aaab9ddad1c9cb",
+  "raw_result_log": "=== RUN   TestBatchedInvariantAuditNativePhaseProfile\n    batched_invariant_native_test.go:504: profiled-audit invocations=100000 entries=1200000 terminal=100000 elapsed=15.487657247s phases=[{Stream:WF_INV Records:100000 Bytes:500000 ScanElapsed:1.526244348s VisitElapsed:105.656349ms} {Stream:WF_JRN Records:1200000 Bytes:84700000 ScanElapsed:9.095523142s VisitElapsed:2.167972438s}] cpu_profile=/tmp/js-wf-audit-phase-profile-100k-2g-native-20261004/profile/audit-cpu.pprof\n--- PASS: TestBatchedInvariantAuditNativePhaseProfile (84.01s)\nPASS\n",
+  "physical_stores_reopened": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false,
+  "scope": "Complete native 100k/1.2M audit with2GiB within original20s; includes embedded servers and client. Selected inputs/runner/SDK match retained execution; live proc identity matches; no store reopening, fault capacity or release qualification."
+}
