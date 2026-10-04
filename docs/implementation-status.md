@@ -30,6 +30,19 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Armed retained-audit run started:** persistent service executes exact18ddf04,
+  journal/seed1/race/24h with new audit method tracer, actual isolated SDK/source
+  and unchanged20s/60s limits. Supervisor29878 /launcher30172 are live. This is
+  one instrumented execution; old failed originals stay separate. No qualification
+  or causal conclusion yet. [Exact launch](scale/local-r5-soak-24h-2026-10-04/journal-audit-trace-launch/).
+
+- **Traced upgrade74 producer success awaits independent review:** job111447943161
+  at883b73b passes full600s/five upgrades/forced Start gaps, reports1876 invocations
+  /20651 entries. Raw11304862814 /1636831 ZIP bytes and originals11304882721
+  /81769900 ZIP bytes downloaded completely. Actual SDK/source/readiness/API/
+  history/original-member review pending; this does not repair the historical
+  failed shard or qualify full matrices/actual24h.
+
 - **Retained audit operation tracing prepared:** opt-in
   `WF_TIER3_RETAINED_AUDIT_TRACE=1` decorates only the checkpoint audit client.
   Per-method counts/bytes/timings/errors and latest64 completed calls are captured

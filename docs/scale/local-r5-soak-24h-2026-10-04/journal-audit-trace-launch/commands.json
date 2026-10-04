@@ -1,0 +1,69 @@
+[
+  {
+    "command": [
+      "git",
+      "worktree",
+      "add",
+      "--detach",
+      "--no-checkout",
+      "/tmp/js-wf-soak-journal-audit-trace-20261004/source",
+      "18ddf0454de13a2d5df2c1a8b22efc5f765f2de0"
+    ],
+    "working_directory": "/home/exedev/js-wf"
+  },
+  {
+    "command": [
+      "git",
+      "sparse-checkout",
+      "set",
+      "--no-cone",
+      "--stdin"
+    ],
+    "working_directory": "/tmp/js-wf-soak-journal-audit-trace-20261004/source"
+  },
+  {
+    "command": [
+      "git",
+      "read-tree",
+      "-mu",
+      "HEAD"
+    ],
+    "working_directory": "/tmp/js-wf-soak-journal-audit-trace-20261004/source"
+  },
+  {
+    "command": [
+      "docker",
+      "info"
+    ],
+    "working_directory": "/tmp/js-wf-soak-journal-audit-trace-20261004/source"
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "-race",
+      "-c",
+      "-o",
+      "/tmp/js-wf-soak-journal-audit-trace-20261004/integration.test",
+      "./integration"
+    ],
+    "working_directory": "/tmp/js-wf-soak-journal-audit-trace-20261004/source"
+  },
+  {
+    "command": [
+      "go",
+      "tool",
+      "test2json",
+      "-t",
+      "-p",
+      "js-wf/integration",
+      "/tmp/js-wf-soak-journal-audit-trace-20261004/integration.test",
+      "-test.run=^TestFiveContainerMixedJournalLeaderEveryThirtySeconds$",
+      "-test.v=test2json",
+      "-test.count=1",
+      "-test.timeout=24h20m"
+    ],
+    "working_directory": "/tmp/js-wf-soak-journal-audit-trace-20261004/source/integration"
+  }
+]
