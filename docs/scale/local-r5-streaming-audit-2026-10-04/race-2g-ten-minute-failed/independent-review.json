@@ -1,0 +1,81 @@
+{
+  "source": "d7e075d8a1d2fce8b1b5c32e5a9f2d370213f83e",
+  "row": "journal",
+  "seed": 1,
+  "requested_duration": "10m",
+  "race": true,
+  "memory_limit": "2GiB",
+  "named_test_seconds": 346.89,
+  "status": "failed",
+  "failure": "Restarted WF_JRN replica not current at unchanged60s heal deadline; reported lag9058. Cause unconfirmed.",
+  "completed_faults": 8,
+  "failed_fault": {
+    "worker_ping_at": "0001-01-01T00:00:00Z",
+    "scheduled": "2026-10-04T20:23:53.85864424Z",
+    "killed": "2026-10-04T20:23:53.887761283Z",
+    "healed": "0001-01-01T00:00:00Z",
+    "node": 3,
+    "partition_routes": [
+      0,
+      0,
+      0
+    ],
+    "paused": "0001-01-01T00:00:00Z",
+    "resumed": "0001-01-01T00:00:00Z"
+  },
+  "failed_node_operations": [
+    {
+      "node": 3,
+      "action": "sigkill_removed",
+      "at": "2026-10-04T20:23:54.754996491Z"
+    },
+    {
+      "node": 3,
+      "action": "restarted",
+      "at": "2026-10-04T20:23:55.189215998Z"
+    }
+  ],
+  "checkpoint_audits": 4,
+  "max_checkpoint_attempt_seconds": 2.658804,
+  "last_completed_checkpoint": {
+    "Invocations": 1120,
+    "Journals": 1120,
+    "Entries": 12346,
+    "Terminal": 1120
+  },
+  "actual_sdk_sha256": "8447a34b56a4ac64a08454f48f1a7882c74ee9483faa5242eedf68abd7bf3107",
+  "source_inputs": 1259,
+  "all_local_inputs_match_executed_git": true,
+  "all_actual_build_info_fields_match": true,
+  "actual_live_sdk_identity_verified": true,
+  "actual_environment_verified": true,
+  "all_sdk_supervisor_processes_terminal": true,
+  "all_fixture_containers_removed": true,
+  "all_original_member_hashes_verified": true,
+  "archive_members": 4976,
+  "archive_member_bytes": 189964740,
+  "archive_bytes": 58282422,
+  "archive_sha256": "8d875b96c3ac07f7d89b0315c192153970307c45bd4783c3cf809b770ac436e4",
+  "diagnostic_files": [
+    "fixture/fault-9-failure-node0-connections.json",
+    "fixture/fault-9-failure-node0-jetstream.json",
+    "fixture/fault-9-failure-node0-routes.json",
+    "fixture/fault-9-failure-node1-connections.json",
+    "fixture/fault-9-failure-node1-jetstream.json",
+    "fixture/fault-9-failure-node1-routes.json",
+    "fixture/fault-9-failure-node2-connections.json",
+    "fixture/fault-9-failure-node2-jetstream.json",
+    "fixture/fault-9-failure-node2-routes.json",
+    "fixture/fault-9-failure-node3-connections.json",
+    "fixture/fault-9-failure-node3-jetstream.json",
+    "fixture/fault-9-failure-node3-routes.json",
+    "fixture/fault-9-failure-node4-connections.json",
+    "fixture/fault-9-failure-node4-jetstream.json",
+    "fixture/fault-9-failure-node4-routes.json"
+  ],
+  "physical_stores_reopened": false,
+  "qualifies_full_matrix": false,
+  "qualifies_24h_row": false,
+  "qualifies_ten_minute_row": false,
+  "scope": "Complete failed combined audit race2GiB journal originals retained. Four checkpoint audits pass; no complete-row/final-integrity/drain/model qualification. Actual SDK/stores retained, not reopened; replica failure cause unconfirmed."
+}

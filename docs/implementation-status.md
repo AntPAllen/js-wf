@@ -33,6 +33,28 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Combined five-container race row failed, originals reviewed:** exactd7e075d,
+  terminal346.89s. Eight faults heal; ninth actual SIGKILL/restart ofnode3 leaves
+  WF_JRN replica non-current (lag9058) at unchanged60s heal deadline. Four full
+  checkpoint audits pass (last1120 invocations/12346 entries/1120 terminals;
+  maxattempt2.659s); this is not an audit deadline failure or complete row pass.
+  Actual live SDK/env/all build-info,1259 source inputs,4976 original members
+  and58282422-byte complete three-part archive verify; all processes/fixtures
+  terminal. Failure diagnostics show restartednode3 has four route connections,
+  all tonode0, versus12–16 elsewhere. Cause unconfirmed; no unchanged rerun.
+  Stores retained, not reopened; no final-integrity/drain/model/full/24h claim.
+  [Complete failed original](scale/local-r5-streaming-audit-2026-10-04/race-2g-ten-minute-failed/).
+
+- **Full legacy combined-audit compatibility passes:** corrected sourceb3c64f1,
+  actual three2.11.17 processes, all reader reports/exact errors agree through
+  compaction/cohort/later malformed records/terminal corruption/Delete/recreation/
+  snapshot corruption and repair/orphan detection; both public combined APIs pass.
+  All2896 selected inputs/66 Git files, actual SDK/all build-info, live legacy
+  executable digests and3284 original members verify;58021062-byte complete
+  three-part archive reads back. External live SDK capture omitted; native stores
+  not reopened. This is compatibility, not scale/fault/five-container/full/24h.
+  [Complete legacy control](scale/retained-audit-streaming-2026-10-04/legacy-full/).
+
 - **First full legacy control failed on new test expectation:** exact9c46e34,
   actual three2.11.17 processes and all audit modes agree through compaction/
   cohort/corruption controls, then agree on orphan error "has no invocation".

@@ -1830,3 +1830,20 @@ sync remain unchanged. Producer controls ensure environment flags cannot
 silently activate the candidate. Next run the actual five-container journal
 row for ten minutes with race and explicit2GiB memory, then independently review
 all originals before making any longer-run qualification claim.
+
+
+### Combined audit legacy compatibility and first real race outcome
+
+Full legacy compatibility atb3c64f1 passes real three-process NATS2.11.17,
+compaction/cohort/fresh corruption/snapshot/orphan controls and both public
+combined APIs. Exact errors match the original oracle. First wrong-error-string
+run is preserved as failed. [Complete legacy proof](scale/retained-audit-streaming-2026-10-04/legacy-full/).
+
+The actual five-container race2GiB ten-minute journal row atd7e075d fails at346.89s:
+node3 is restarted after the ninth SIGKILL, but WF_JRN does not become current
+within the original60s heal deadline (reported lag9058). Four checkpoint audits
+pass, max2.659s; the final row is not qualified. Complete originals, source,
+live SDK/build-info/environment and raw failure diagnostics independently verify.
+Node3 route snapshot has onlynode0 as peer (four pooled routes); cause unconfirmed.
+Next diagnose route discovery/rejoin and replication before an unchanged rerun
+or longer soak. [Complete failed original](scale/local-r5-streaming-audit-2026-10-04/race-2g-ten-minute-failed/).

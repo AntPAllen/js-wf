@@ -1,0 +1,48 @@
+{
+  "source": "b3c64f185b49b270391beb730a12e39263c64910",
+  "exit_code": 0,
+  "race": true,
+  "selected_inputs": 2896,
+  "local_git_inputs": 66,
+  "all_captured_source_hashes_verified": true,
+  "all_local_inputs_match_executed_git": true,
+  "actual_runner_matches_executed_git": true,
+  "actual_binary_sha256": "863346696d8fbc417b6c12a9d3314b0219bb76971b3de9556e9fb7927973f822",
+  "actual_binary_retained": true,
+  "all_actual_build_info_fields_match": true,
+  "live_proc_identity_captured": false,
+  "actual_legacy_server_sha256": "dc3a94debfc18ee9762c783d941db36a8360955d9686c86bd660a9acc63701aa",
+  "actual_legacy_nodes": [
+    [
+      "0",
+      "117089",
+      "2.11.17",
+      "dc3a94debfc18ee9762c783d941db36a8360955d9686c86bd660a9acc63701aa"
+    ],
+    [
+      "1",
+      "117090",
+      "2.11.17",
+      "dc3a94debfc18ee9762c783d941db36a8360955d9686c86bd660a9acc63701aa"
+    ],
+    [
+      "2",
+      "117091",
+      "2.11.17",
+      "dc3a94debfc18ee9762c783d941db36a8360955d9686c86bd660a9acc63701aa"
+    ]
+  ],
+  "named_results": {
+    "TestStreamingAuditNativeLegacy211": {
+      "status": "pass",
+      "seconds": 34.55
+    }
+  },
+  "native_files": 371,
+  "native_file_bytes": 49800396,
+  "raw_result_log": "=== RUN   TestStreamingAuditNativeLegacy211\n    streaming_legacy_native_test.go:57: legacy-node node=0 pid=117089 version=2.11.17 actual_sha256=dc3a94debfc18ee9762c783d941db36a8360955d9686c86bd660a9acc63701aa\n    streaming_legacy_native_test.go:57: legacy-node node=1 pid=117090 version=2.11.17 actual_sha256=dc3a94debfc18ee9762c783d941db36a8360955d9686c86bd660a9acc63701aa\n    streaming_legacy_native_test.go:57: legacy-node node=2 pid=117091 version=2.11.17 actual_sha256=dc3a94debfc18ee9762c783d941db36a8360955d9686c86bd660a9acc63701aa\n    streaming_legacy_native_test.go:84: cohort=false report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n    streaming_legacy_native_test.go:100: cohort=true report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n    streaming_legacy_native_test.go:107: cohort=false report={Invocations:3 Journals:0 Entries:0 Terminal:0} matched_error=invalid character 'i' looking for beginning of value\n    streaming_legacy_native_test.go:116: cohort=true report={Invocations:2 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.legacy-first: terminal state differs\n    streaming_legacy_native_test.go:123: cohort=true report={Invocations:2 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.legacy-first: terminal state missing: nats: key not found\n    streaming_legacy_native_test.go:138: cohort=true report={Invocations:2 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.legacy-first: journal gap or corrupt entry: snapshot object \"snapshot-caf42c5f0b262b84-3-88db2a2d59cd5942\": snapshot SHA256 differs\n    streaming_legacy_native_test.go:142: cohort=true report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n    streaming_legacy_native_test.go:150: cohort=true report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n    streaming_legacy_native_test.go:151: cohort=false report={Invocations:3 Journals:2 Entries:4 Terminal:1} matched_error=journal wf.jrn.audit.legacy-orphan has no invocation\n    streaming_legacy_native_test.go:152: legacy-full-audit version=2.11.17 replicas=3 compaction/cohort/fresh-terminal/tombstone/snapshot-corruption/orphan/public-apis matched\n--- PASS: TestStreamingAuditNativeLegacy211 (34.55s)\nPASS\n",
+  "physical_stores_reopened": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false,
+  "scope": "Native legacy compatibility control passes exact point/batched/state/streaming reports and errors, compaction/cohort/fresh corruption/snapshot and orphan controls; both public combined APIs pass. Actual legacy process digests verified, SDK retained but external live proc identity not captured. Stores not reopened; no scale/fault/full-matrix/24h qualification."
+}
