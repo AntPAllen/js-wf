@@ -33,6 +33,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Actual audit-consumer leader role independently qualified:** retained race SDK
+  at7d5d0b0 targets observed consumer leader0 after128 visits, recovers all3000
+  records/digest via2488 leader reads in2.031391228s, consumer replicas3 and zero
+  remaining consumers. In-process real NATS shutdown, not OS SIGKILL. All2889
+  captured inputs /59 Git-local files, actual runner/SDK/all build-info fields
+  and2962 complete proof members verify;32125725-byte proof in two parts retains
+  original SDK/source/stores, not independently reopened. Serial-tail capacity
+  at larger populations remains open. New actual24h journal row can now measure
+  full opted-in checkpoint/final audits with trace under unchanged20s/60s limits;
+  previous failed attempts remain separately preserved.
+  [Complete consumer-role proof](scale/retained-audit-batch-candidate-2026-10-04/consumer-leader-accepted/).
+
 - **Full opt-in batched invariant audits independently accepted:** actual race SDK
   at9a88946 gives identical3000-invocation /36000-entry /3000-terminal reports:
   point12.429541066s, bulk2.606781530s under20s. Compacted-prefix/cohort filtering,
