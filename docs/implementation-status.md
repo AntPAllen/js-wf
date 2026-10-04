@@ -33,6 +33,22 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Scheduler-fix candidate built; compressed native failure preserved:**
+  at81bc1d4 the copied pinned2.15 server changes onlyfilestore.go among598
+  upstream files;1435 selected inputs/actual binary/build-info verify, cache and
+  dependency unchanged. Actual300-timer /90s SDK completes both three-node
+  SIGKILL restarts and all300 receipts; all three physical replicas show zero
+  messages/pending. Unchanged raw2s p99 fails at10.482509603s (max13.232558335s)
+  with both outages in the compressed population. Actual program/server process
+  identities and all selected/Git/prepost inputs verify; offline verifier rejects
+  failed report. Original stores/executables/sources retained, not reopened;
+  no campaign pass, million/24h/production-server qualification or rerun.
+  Explicit candidate flag retains executable/digest across restarts; verifier
+  rejects candidate release promotion even with complete million ledger. Command
+  tests pass2.998s. First build VCS discovery failure preserved; corrected copied
+  module build disables stamping and binds module/captured bytes explicitly.
+  [Complete candidate preparation and failed-native evidence](scale/scheduler-server-candidate-2026-10-04/).
+
 - **All-server-kill1–24 independently accepted:** two complete600-second
   shards atc4fed06 qualify56056 invocations /617750 entries /456 three-node
   kill/restart events. Raw identities require node-1 and exact nodes[0,1,2];

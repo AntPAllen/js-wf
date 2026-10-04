@@ -1542,3 +1542,21 @@ were not uploaded; final integrity/drain assertions retain named-test scope.
 [Seeds13–24](scale/current-tier2-matrix-2026-10-04/cluster-13-24/)
 qualify those ranges only; complete cluster200/current-source matrices and
 actual24h remain open. Five reviewer identity/substitution guards pass.
+
+
+### Reproducible scheduler server candidate and native diagnostic
+
+A builder copies pinnedNATS2.15 outside the checkout, applies the reviewed
+scheduler dirty-count fix onlytofilestore.go, captures1435 Go/module compiler
+inputs and retains actual binary/build info. All598 upstream inventories,
+selected pre/post bytes and actual process identities verify. Module cache and
+production dependency remain unchanged. The timer-volume command can explicitly
+retain/use this binary across both all-node SIGKILL restarts; offline verification
+checks its digest and rejects candidate release promotion even at million scale.
+Command tests pass2.998s. Actual300 timers over90s finish both full restarts and
+all300 receipts with zero messages/pending on all physical replicas, but raw
+p99=10.482509603s fails unchanged2s gate. Failure and all stores/executables/sources
+are preserved, not independently reopened; no campaign pass or rerun. Both
+outages fall in the compressed population; original million/24h requirement stays
+open. [Complete preparation and failed-native proof](scale/scheduler-server-candidate-2026-10-04/)
+records the source, first build/VCS failure and corrected build identities.
