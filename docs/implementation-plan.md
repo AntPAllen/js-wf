@@ -78,7 +78,7 @@ The start must also enqueue the first run. Publish `WF_INV` first, then `WF_RUN`
 **Proof of completion**
 
 - Test: 500 goroutines across 3 clients pinned to 3 different nodes call `Start` with the same id simultaneously. Assert exactly one `WF_INV` message, exactly one `WF_RUN` message, 499 `ErrAlreadyStarted`, 0 other errors. Run under `chaos` with `KillNode(leader)` during the burst.
-- Test: 100 000 distinct ids, then count subjects in `WF_INV` equals 100 000 and `WF_RUN` message count equals 100 000. Repeat with `PartitionNodes` toggling every 200 ms.
+- Test: 100 000 distinct ids, then count subjects in `WF_INV` equals 100 000 and `WF_RUN` message count equals 100 000. Repeat with `PartitionNodes` toggling every 200 ms. Keep route toggles active until every Start producer finishes, rather than stopping after a fixed initial twelve ticks. The [continuous-fault fixture and semantic control](scale/partition-start-fault-duration-2026-10-04/) retain route timestamps, final confirmed heal and optional original stores; lifecycle controls alone do not qualify the full count proof.
 - Linearizability: Porcupine model where `Start` is a register write-once; the recorded history must be linearizable under all chaos seeds.
 
 **Edge cases**

@@ -2,6 +2,17 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Phase1 partitioned-Start fault-duration gap fixed:** route toggles now remain
+  active every200 ms until all96 producers finish, then join and confirm final
+  heal before unchanged exact invocation/run counts. Actual route times/counts
+  and optional original stores can be retained. Normal0.005 s/race1.019 s
+  lifecycle controls pass; compiled twelve-tick control fails0.005 s with a
+  precise premature-stop error. Seven source inputs match before/after; focused
+  executables are not retained. All685 runtime/simulator/producer bytes still
+  match race-qualified `283ba32`; existing full gates continue without restart.
+  Full100,000-ID continuous-fault execution remains unqualified.
+  [Exact lifecycle proof, original scope and retained-store preparation](scale/partition-start-fault-duration-2026-10-04/).
+
 - **New pressure failure separated from modeled worker recovery:** terminal job
   111362365148 at `f149b87` fails26.98 s after one delayed baseline owner receives
   pre-publication tail API503/10008 after six renewals. Consumer/probe load has

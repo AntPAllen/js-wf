@@ -2,9 +2,11 @@ package integration_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -26,7 +28,21 @@ func TestDistinctStartsUnderRoutePartitions(t *testing.T) {
 	if err != nil || count < 1 || count > 100000 {
 		t.Fatalf("invalid WF_PARTITION_STARTS %q", value)
 	}
-	cluster, err := testcluster.StartPartitionable(t.TempDir(), 3)
+	storeRoot := t.TempDir()
+	if parent := os.Getenv("WF_PARTITION_START_STORE_PARENT"); parent != "" {
+		if err := os.MkdirAll(parent, 0700); err != nil {
+			t.Fatal(err)
+		}
+		storeRoot, err = os.MkdirTemp(parent, "partition-start-")
+		if err != nil {
+			t.Fatal(err)
+		}
+		storeRoot, err = filepath.Abs(storeRoot)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	cluster, err := testcluster.StartPartitionable(storeRoot, 3)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,10 +58,37 @@ func TestDistinctStartsUnderRoutePartitions(t *testing.T) {
 	var isolatedAttempts atomic.Int64
 	var firstErr string
 	var firstErrorOnce sync.Once
-	if err := cluster.RouteMesh().PartitionNode(2); err != nil {
+	var events []partitionStartFaultEvent
+	applyPartition := func(attempt context.Context, partitioned bool) error {
+		at := time.Now().UTC()
+		mesh := cluster.RouteMesh()
+		if partitioned {
+			if err := mesh.PartitionNode(2); err != nil {
+				return err
+			}
+			deadline := time.NewTimer(150 * time.Millisecond)
+			defer deadline.Stop()
+			poll := time.NewTicker(5 * time.Millisecond)
+			defer poll.Stop()
+			for cluster.Servers[2].NumRoutes() != 0 || cluster.Servers[0].NumRoutes() < 1 || cluster.Servers[1].NumRoutes() < 1 {
+				select {
+				case <-attempt.Done():
+					return attempt.Err()
+				case <-deadline.C:
+					return fmt.Errorf("route partition did not isolate node 2: routes=%d,%d,%d", cluster.Servers[0].NumRoutes(), cluster.Servers[1].NumRoutes(), cluster.Servers[2].NumRoutes())
+				case <-poll.C:
+				}
+			}
+		} else {
+			mesh.Heal()
+		}
+		isolated.Store(partitioned)
+		events = append(events, partitionStartFaultEvent{RequestedAt: at, ObservedAt: time.Now().UTC(), Partitioned: partitioned, Completed: completed.Load(), Routes: [3]int{cluster.Servers[0].NumRoutes(), cluster.Servers[1].NumRoutes(), cluster.Servers[2].NumRoutes()}})
+		return nil
+	}
+	if err := applyPartition(ctx, true); err != nil {
 		t.Fatal(err)
 	}
-	isolated.Store(true)
 	start := time.Now()
 	for workerID := 0; workerID < 96; workerID++ {
 		wg.Add(1)
@@ -86,40 +129,48 @@ func TestDistinctStartsUnderRoutePartitions(t *testing.T) {
 			}
 		}(workerID)
 	}
-	faultDone := make(chan error, 1)
+	workloadDone := make(chan struct{})
+	faultStopped := make(chan struct{})
+	var faultErr error
+	ticks := time.NewTicker(200 * time.Millisecond)
 	go func() {
-		mesh := cluster.RouteMesh()
-		defer mesh.Heal()
-		for cycle := 0; cycle < 12; cycle++ {
-			if cycle%2 == 0 {
-				if err := mesh.PartitionNode(2); err != nil {
-					faultDone <- err
-					return
-				}
-				deadline := time.Now().Add(150 * time.Millisecond)
-				for {
-					if cluster.Servers[2].NumRoutes() == 0 && cluster.Servers[0].NumRoutes() >= 1 && cluster.Servers[1].NumRoutes() >= 1 {
-						break
-					}
-					isolated.Store(true)
-					if time.Now().After(deadline) {
-						faultDone <- fmt.Errorf("route partition did not isolate node 2: routes=%d,%d,%d", cluster.Servers[0].NumRoutes(), cluster.Servers[1].NumRoutes(), cluster.Servers[2].NumRoutes())
-						return
-					}
-					time.Sleep(5 * time.Millisecond)
-				}
-			} else {
-				mesh.Heal()
-				isolated.Store(false)
+		defer close(faultStopped)
+		defer ticks.Stop()
+		defer cluster.RouteMesh().Heal()
+		faultErr = runPartitionStartFaults(ctx, workloadDone, ticks.C, applyPartition)
+		if faultErr != nil {
+			cancel()
+		}
+	}()
+	var invMessages, invSubjects, runMessages uint64
+	var completedAt time.Time
+	var healConfirmedAt time.Time
+	defer func() {
+		cancel()
+		<-faultStopped
+		if path := os.Getenv("WF_PARTITION_START_REPORT"); path != "" {
+			data, err := json.MarshalIndent(struct {
+				Requested        int                        `json:"requested"`
+				Completed        int64                      `json:"completed"`
+				Retries          int64                      `json:"retries"`
+				IsolatedAttempts int64                      `json:"isolated_attempts"`
+				StoreRoot        string                     `json:"store_root"`
+				StartedAt        time.Time                  `json:"started_at"`
+				CompletedAt      time.Time                  `json:"completed_at"`
+				HealConfirmedAt  time.Time                  `json:"heal_confirmed_at"`
+				Events           []partitionStartFaultEvent `json:"events"`
+				InvMessages      uint64                     `json:"inv_messages"`
+				InvSubjects      uint64                     `json:"inv_subjects"`
+				RunMessages      uint64                     `json:"run_messages"`
+				Failed           bool                       `json:"failed"`
+			}{count, completed.Load(), retried.Load(), isolatedAttempts.Load(), storeRoot, start, completedAt, healConfirmedAt, events, invMessages, invSubjects, runMessages, t.Failed()}, "", "  ")
+			if err == nil {
+				err = os.WriteFile(path, data, 0600)
 			}
-			select {
-			case <-ctx.Done():
-				faultDone <- ctx.Err()
-				return
-			case <-time.After(200 * time.Millisecond):
+			if err != nil {
+				t.Error(err)
 			}
 		}
-		faultDone <- nil
 	}()
 	for id := 0; id < count; id++ {
 		select {
@@ -131,10 +182,13 @@ func TestDistinctStartsUnderRoutePartitions(t *testing.T) {
 		}
 	}
 	close(jobs)
-	if err := <-faultDone; err != nil {
-		t.Fatal(err)
-	}
 	wg.Wait()
+	completedAt = time.Now().UTC()
+	close(workloadDone)
+	<-faultStopped
+	if faultErr != nil {
+		t.Fatal(faultErr)
+	}
 	if firstErr != "" || completed.Load() != int64(count) {
 		t.Fatalf("partitioned starts completed=%d/%d retries=%d first_error=%s context=%v", completed.Load(), count, retried.Load(), firstErr, ctx.Err())
 	}
@@ -148,6 +202,7 @@ func TestDistinctStartsUnderRoutePartitions(t *testing.T) {
 		}
 		time.Sleep(20 * time.Millisecond)
 	}
+	healConfirmedAt = time.Now().UTC()
 	inv, err := all[0].Stream(ctx, "WF_INV")
 	if err != nil {
 		t.Fatal(err)
@@ -164,8 +219,40 @@ func TestDistinctStartsUnderRoutePartitions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	invMessages, invSubjects, runMessages = invInfo.State.Msgs, invInfo.State.NumSubjects, runInfo.State.Msgs
 	if invInfo.State.Msgs != uint64(count) || invInfo.State.NumSubjects != uint64(count) || runInfo.State.Msgs != uint64(count) {
 		t.Fatalf("partitioned start counts: inv_messages=%d inv_subjects=%d run_messages=%d want=%d", invInfo.State.Msgs, invInfo.State.NumSubjects, runInfo.State.Msgs, count)
 	}
-	t.Logf("partitioned starts=%d elapsed=%s retries=%d attempts_started_on_isolated_node=%d", count, time.Since(start), retried.Load(), isolatedAttempts.Load())
+	t.Logf("partitioned starts=%d elapsed=%s retries=%d attempts_started_on_isolated_node=%d route_changes=%d", count, time.Since(start), retried.Load(), isolatedAttempts.Load(), len(events))
+}
+
+// Routes keep toggling until every producer finishes, rather than only the first
+// twelve ticks. A supplied tick channel makes the lifecycle contract testable
+// without real sleeps or another cluster campaign.
+func runPartitionStartFaults(ctx context.Context, workloadDone <-chan struct{}, ticks <-chan time.Time, apply func(context.Context, bool) error) error {
+	partitioned := true // The initial isolation is confirmed before producers start.
+	for {
+		select {
+		case <-workloadDone:
+			return nil
+		case <-ctx.Done():
+			return ctx.Err()
+		case _, ok := <-ticks:
+			if !ok {
+				return fmt.Errorf("partition fault ticks closed before workload completion")
+			}
+			partitioned = !partitioned
+			if err := apply(ctx, partitioned); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+type partitionStartFaultEvent struct {
+	RequestedAt time.Time `json:"requested_at"`
+	ObservedAt  time.Time `json:"observed_at"`
+	Partitioned bool      `json:"partitioned"`
+	Completed   int64     `json:"completed"`
+	Routes      [3]int    `json:"routes"`
 }
