@@ -2,6 +2,19 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Complete worker-clock shard 27–39 independently accepted:** terminal job
+  111324439636 at exact `79915ca` passes all thirteen ten-minute seeds with
+  39,452 invocations, 437,316 entries, 247 faults and all three independently
+  rebuilt models over 50,724 operations. Worst terminal/progress type p99 is
+  5.254787923/0.80936262 s. All 759 pre/post source inputs, 273 clock proofs,
+  1,365 broker messages, 135 checkpoint audits and 51,520 canonical members
+  verify. Compact Git proof retains actual clock/model executables and complete
+  raw/source/model evidence. Full 1.39 GB physical-store archive is retained in
+  RAM/GitHub, not Git; its availability limit is explicit. Stores are hashed,
+  not reopened. Failed full parent remains ineligible; no full row/matrix/24h
+  promotion or attribution of the separate original failures is made.
+  [Complete individual shard review and exact preservation limits](scale/current-tier3-clock-2026-10-04/worker-clock-27-39/).
+
 - **First 48 accepted journal duplicate expansions recovered:** all 394 canonical
   archive members, 288 raw files and four committed Git archive blobs reverify;
   no open descriptors. All four targets verify before deletion. Removing only

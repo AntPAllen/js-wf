@@ -940,6 +940,13 @@ the failed full parent. The shard reviewer accepts the actual flat focused-store
 archive only with exact single-seed original-store identity; raw/range archives
 still require their nested fixture layout. [Accepted diagnostic evidence](scale/worker-clock-checkpoint-2026-10-04/accepted-seed-15/)
 defines this limit. Other campaign jobs remain useful individual evidence.
+Complete worker-clock shard 27–39 at `79915ca` is now independently accepted:
+39,452 invocations, 437,316 entries, 247 faults and all three production models
+over 50,724 operations. All captured source/clock/checkpoint and 51,520 canonical
+member hashes verify; actual workload/model executables and full raw proofs are
+retained. [Thirteen-seed qualification and physical-archive availability limits](scale/current-tier3-clock-2026-10-04/worker-clock-27-39/)
+keep the failed full parent, full 200-seed row/matrix and actual 24-hour gate open.
+
 
 Worker-clock seed 6 in that same full parent separately fails after all five
 child processes exit on a two-second clock-proof timeout. The later parent
