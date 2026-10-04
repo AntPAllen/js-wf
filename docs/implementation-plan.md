@@ -1438,3 +1438,17 @@ Worst new terminal/progress type p99 is 17.358545411 / 7.069948845 s under
 unchanged 30 s / 10 s gates. [Complete 1–12 proof](scale/current-tier2-matrix-2026-10-04/consumer-1-12/)
 plus accepted13–24 establishes 61,992 invocations / 683,158 entries / 456 kills;
 full consumer/current-source matrices and original actual24h gate remain open.
+
+
+The consumer-leader row at executed `c4fed06` now independently qualifies seeds
+1–36. New25–36 adds 31,108 invocations, 342,890 entries, 228 kills and 40,040
+history operations passing all three models with exact45 actual dependency checks.
+Worst new terminal/progress type p99 is 16.754409553 / 7.335288524 s under
+unchanged 30 s / 10 s gates. [Complete 25–36 proof](scale/current-tier2-matrix-2026-10-04/consumer-25-36/)
+retains actual model executable and complete hash-verified raw/source/API/reviewer
+bindings. Accepted1–36 totals93,100 invocations / 1,026,048 entries / 684kills /
+119,812 history operations. Full consumer200/current-source matrices and original
+actual24h gate remain open. [Post-restart evidence availability](scale/post-restart-evidence-2026-10-04/)
+records the50 GiB root expansion, lost historical RAM paths and verified durable
+disk restoration of both clock-diagnostic physical originals without changing
+qualification or attributing the original audit failures.

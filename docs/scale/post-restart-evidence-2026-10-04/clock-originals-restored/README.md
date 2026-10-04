@@ -1,0 +1,5 @@
+# Clock diagnostic original archives restored to disk
+
+The original GitHub artifacts for seeds112/121 are downloaded again on root disk after their previously recorded RAM paths disappeared at reboot. Canonical archive SHA/byte counts match the existing accepted summary; each rolling manifest matches the committed proof member. All **3,963** members per archive are independently SHA-verified. Source/run/artifact identities and expiry dates verify. Files and parent directories are fsynced; exact current paths, hashes, bytes and executed verifier are retained in `restoration.json` and `verify-restored.py`.
+
+The approximately 106 MB physical archives remain local at those root-disk paths and in their original GitHub artifacts until recorded expiry; physical bytes are not duplicated into Git. Stores are not extracted/reopened or rewritten. These storage restorations do not qualify the failed historical parent or identify the original audit timeout cause. Actual clock/model executables remain in the separately pushed compact accepted diagnostic proof.

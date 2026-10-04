@@ -1,5 +1,27 @@
 # Implementation status against the supplied plan
 
+- **Tier2 consumer-leader seeds 25–36 independently qualified:** twelve actual
+  ten-minute seeds at executed `c4fed06`: 31,108 invocations, 342,890 entries,
+  228 kills and 40,040 operations passing all three production history models.
+  All 45 actual dependency inputs match source before/after; actual model binary,
+  complete raw/API/reviewer/command proof and every member/part readback verify.
+  Worst terminal/progress type p99 is 16.754409553 / 7.335288524 s under unchanged
+  30 s / 10 s gates. Contiguous accepted consumer1–36 totals: 93,100 invocations,
+  1,026,048 entries, 684 recorded kills and 119,812 history operations.
+  Full consumer200/current-source matrix and actual24h remain open.
+  [Complete 25–36 proof](scale/current-tier2-matrix-2026-10-04/consumer-25-36/).
+
+- **VM restart and disk expansion observed:** root now50 GiB/about14 GiB free;
+  RAM-backed evidence paths are absent after boot at08:14:07 UTC. All 796 selected
+  tracked source bytes match observed Git. Committed proofs remain retained in Git.
+  Both seed112/121 clock original physical archives are restored to root disk,
+  matching accepted canonical hashes and all 3,963 members each, with files/parent
+  directories fsynced. No reopening, failed-parent repair or server-cause claim.
+  Other historical RAM-only physical originals need GitHub restoration before use.
+  Interrupted uncommitted cleanup outputs are empty and provide no recovery proof;
+  no byte-recovery claim is made for those pending attempts.
+  [Current evidence availability](scale/post-restart-evidence-2026-10-04/).
+
 - **Tier2 consumer-leader seeds 1–12 independently qualified:** twelve actual
   ten-minute seeds at executed `c4fed06`: 30,912 invocations, 340,629 entries,
   228 leader kills and 39,786 history operations passing all three production
@@ -8,7 +30,7 @@
   proof are retained. Worst terminal/progress type p99 is 17.358545411 /
   7.069948845 s under unchanged 30 s / 10 s gates. Accepted consumer coverage
   is now contiguous 1–24: 61,992 invocations, 683,158 entries and 456 kills.
-  Seeds 25–36 are terminal successful but await independent review; full consumer
+  Seeds 25–36 are now independently qualified above; full consumer
   row/current-source matrix and actual24h remain open.
   [Exact 1–12 proof](scale/current-tier2-matrix-2026-10-04/consumer-1-12/).
 
@@ -31,8 +53,8 @@
   history models pass 39,986 operations with 45 dependency inputs matching
   source before/after; actual model executable and complete raw proof are retained.
   Worst terminal/progress type p99 is 18.076655685 / 7.320884037 s under unchanged
-  30 s / 10 s gates. Consumer 1–12 is now independently qualified above; 25–36 is terminal
-  successful but awaits independent raw review. Full consumer row/current-source matrix and soak remain
+  30 s / 10 s gates. Consumer 1–12 is now independently qualified above; 25–36 is now
+  independently qualified above. Full consumer row/current-source matrix and soak remain
   open; native workload executables/physical stores were not uploaded.
   [Exact twelve-seed proof](scale/current-tier2-matrix-2026-10-04/consumer-13-24/).
 
