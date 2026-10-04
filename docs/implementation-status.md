@@ -33,6 +33,14 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Full legacy combined-audit controls prepared:** three actual NATS2.11.17
+  processes, connected versions and live executable digests required. Original,
+  batch/state/streaming reports and exact errors compared through compaction,
+  cohort filtering, later malformed raw records, terminal corruption/Delete/
+  recreation, snapshot corruption/repair and orphan detection. Both public
+  combined APIs checked; every audit has original20s bound. Native execution
+  pending; this compatibility control is separate from scale/fault/full release.
+
 - **Combined five-container ten-minute race row is live:** executed d7e075d,
   journal/seed1, explicit2GiB/GOMAXPROCS2, combined checkpoint/final reader,
   tracing, original20s/60s/30s and2m sync. Actual live race SDK/full build-info/
