@@ -2,6 +2,24 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **2026-10-04 Tier2 journal seeds 1–96 accepted:** new terminal successful
+  jobs 111287264479/111287264439 qualify seeds 73–96. All raw events, fault
+  timestamps, latency statistics and three independently executed production
+  history models pass; 45 model/module inputs match executed Git before/after
+  compilation. New shards add 63,896 invocations, 703,922 entries and 456 kills;
+  all 160 original archive members and published parts hash-verify. Accepted
+  seeds 1–96 total 252,896 invocations, 2,786,187 entries and 1,824 kills;
+  worst terminal/progress type p99 remains 17.457496447/8.533582526 s. No workload
+  executable/source-ledger/physical-store proof is claimed. Full row/matrix/24h
+  gates remain open; journal seeds 97–144 are running. No campaign is restarted.
+  [Complete new shard proofs](scale/current-tier2-matrix-2026-10-04/).
+- **Journal-network manual workflow validity corrected:** job-level runner
+  context caused zero-job validation failures, including run 37167264632.
+  The report path now uses step-level `env`; official actionlint 1.7.12 rejects
+  the exact original and accepts the correction. This is static validation,
+  not a new hosted workload qualification. The accepted local 1,000-case proof
+  remains unchanged.
+  [Exact workflow, validation and failed zero-job metadata](scale/journal-network-acks-2026-10-03/workflow-context/).
 - **2026-10-04 Tier2 journal seeds 1–72 accepted:** new terminal successful
   jobs 111287264426/111287264403 qualify seeds 49–72 after complete independent
   raw fault/latency/event review and all three production history models.

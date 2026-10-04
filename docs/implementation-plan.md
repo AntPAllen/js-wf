@@ -925,12 +925,12 @@ ten-minute diagnostic 37166976657 at `c2e8c01` requests seed 15 only; dispatch
 does not establish recovery. [Failure and diagnostic evidence](scale/worker-clock-checkpoint-2026-10-04/)
 define this limit. Other campaign jobs remain useful individual evidence.
 
-Current Tier2 journal seeds 1–72 pass independent raw fault/latency and production
-history-model review at exact `c4fed06`: 189,000 invocations, 2,082,265 entries,
-1,368 leader kills and worst terminal/progress type p99 17.457496447/8.533582526 s.
+Current Tier2 journal seeds 1–96 pass independent raw fault/latency and production
+history-model review at exact `c4fed06`: 252,896 invocations, 2,786,187 entries,
+1,824 leader kills and worst terminal/progress type p99 17.457496447/8.533582526 s.
 The reusable journal-shard reviewer binds the complete requested range and actual
 local model dependency inputs to executed Git; it never promotes a parent, full
-row, full matrix or soak. [New seeds 49–72](scale/current-tier2-matrix-2026-10-04/)
+row, full matrix or soak. [New seeds 49–96](scale/current-tier2-matrix-2026-10-04/)
 extend individual journal coverage only. Remaining full 13×200, 16×200 and actual
 24-hour full-matrix requirements are unchanged.
 
