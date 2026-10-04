@@ -30,6 +30,15 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Combined-rebalance third trial rejected; startup caller contract corrected:**
+  retained race SDK atf2acad6 fails24.04s on a majority replacement's bounded
+  lease metadata timeout. Worker.New explicitly requires callers to retry named
+  transport failures; this new child mode had treated the first failure as fatal.
+  It now uses500ms attempts within8s, inside the existing parent readiness10s.
+  Semantic failures still fail immediately. No production constructor/recovery
+  limit change. Failed actual SDK/source/stores retained at
+  `/tmp/js-wf-phase3-rebalance-majority-20261004`; corrected full trial pending.
+
 - **Combined-rebalance second trial rejected; fault selection corrected:** actual
   retained race SDK at12552cb fails31.21s after three completions/eight moves:
   a killed worker's replacement, pinned to the deliberately isolated minority,

@@ -22,6 +22,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/identity"
+	"js-wf/internal/natsutil"
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
@@ -157,7 +158,35 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 		options = append(options, worker.WithDispatchTiming(ackWait, 3*time.Second))
 		t.Logf("experimental worker AckWait=%s heartbeat=3s", ackWait)
 	}
-	w, err := worker.New(ctx, js, id, handlers, options...)
+	var w *worker.Worker
+	if phaseThreeCounter && os.Getenv("WF_PHASE3_REBALANCE_CHILD") == "1" {
+		// New deliberately bounds metadata I/O and leaves retry to its caller.
+		// Retry only named transport failures inside the existing 10s parent
+		// readiness allowance; semantic setup errors still fail immediately.
+		ready, stopReady := context.WithTimeout(ctx, 8*time.Second)
+		for ready.Err() == nil {
+			attempt, stopAttempt := context.WithTimeout(ready, 500*time.Millisecond)
+			w, err = worker.New(attempt, js, id, handlers, options...)
+			stopAttempt()
+			if err == nil {
+				break
+			}
+			if !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, jetstream.ErrNoStreamResponse) && !errors.Is(err, nats.ErrNoResponders) && !natsutil.IsUnavailable(err) {
+				break
+			}
+			t.Logf("bounded constructor retry: %v", err)
+			select {
+			case <-ready.Done():
+			case <-time.After(50 * time.Millisecond):
+			}
+		}
+		if w == nil && err == nil {
+			err = ready.Err()
+		}
+		stopReady()
+	} else {
+		w, err = worker.New(ctx, js, id, handlers, options...)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
