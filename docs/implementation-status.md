@@ -1,5 +1,20 @@
 # Implementation status against the supplied plan
 
+- **Tier3 worker-clock seeds 131–143 independently qualified at executed799:**
+  thirteen actual ten-minute seeds: 41,076 invocations, 455,262 journal entries,
+  247 recorded faults and 52,812 operations passing all three production models.
+  All 759 captured inputs per seed and 45 actual model dependencies match executed
+  source; 273 clock proofs, 1,365 broker messages and 143 cohort audits verify.
+  Worst terminal/progress type p99 is 5.075736715 / 0.282275176 s under unchanged
+  30 s / 10 s gates. Own original archive (51,519 members / 1,408,552,144 bytes)
+  and every member hash verify; actual clock/model executables are retained in
+  compact Git proof. The physical archive is retained on root disk/GitHub and
+  not independently reopened. Accepted same-source clock coverage is now78 seeds:
+  236,152 invocations, 2,617,262 entries, 1,482 faults and 303,624 history operations.
+  Failed historical ranges/parent and full current-source matrices/actual24h stay
+  open. Successful144–156 awaits review; no runtime trial is repeated.
+  [Complete 131–143 proof and partial coverage](scale/current-tier3-clock-2026-10-04/worker-clock-131-143/).
+
 - **Tier2 consumer-leader seeds 25–36 independently qualified:** twelve actual
   ten-minute seeds at executed `c4fed06`: 31,108 invocations, 342,890 entries,
   228 kills and 40,040 operations passing all three production history models.

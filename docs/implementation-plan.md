@@ -1452,3 +1452,17 @@ actual24h gate remain open. [Post-restart evidence availability](scale/post-rest
 records the50 GiB root expansion, lost historical RAM paths and verified durable
 disk restoration of both clock-diagnostic physical originals without changing
 qualification or attributing the original audit failures.
+
+
+Tier3 worker-clock seeds131–143 at executed799 are independently qualified:
+41,076 invocations / 455,262 entries / 247 faults, with all three production
+history models passing52,812 operations and all45 actual dependencies matching
+source. All759 captured pre/post inputs per seed,273 clock proofs,1,365 broker
+messages and143 cohort audits verify. Worst terminal/progress type p99 is
+5.075736715 / 0.282275176 s under unchanged30 s /10 s gates. Every51,519 own
+canonical original member verifies; actual workload/model executables and complete
+compact proof are retained in Git, while physical originals remain on root disk/
+GitHub without reopening. [Complete131–143 proof](scale/current-tier3-clock-2026-10-04/worker-clock-131-143/)
+brings accepted same-source coverage to78 seeds /236,152 invocations /2,617,262
+entries /1,482 faults /303,624 history operations. The original failed ranges/
+parent, full200-seed row/current-source matrices and actual24h gate remain open.
