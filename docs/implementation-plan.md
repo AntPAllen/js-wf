@@ -1960,3 +1960,13 @@ verify, including actual SDK/process stores and selected source ledgers.
 First startup failures are separately preserved; readiness now retries4s attempts
 within the same30s budget. Worker SIGKILL/active-GC/lease/TTL/limit/p99/final-source
 full-matrix/24h combinations remain open. No stores were independently reopened.
+
+### Combined retirement/reuse with actual lease expiry across server SIGKILL
+
+Focused race cut passes57.78s after confirmed all-three-server SIGKILL,13.0003s
+outage against unchanged12s TTL, manifest response loss and generation reuse.
+Terminal epoch78 exceeds captured54; three effects/two terminals and shared
+references remain exact. Complete438-member SDK/process-store proof verifies.
+[Originals and scope](scale/continuation-retirement-lease-expiry-2026-10-04/).
+Budgets unchanged; no physical reopening or worker SIGKILL/active-GC/other TTL/
+limit/p99/final-source full-matrix/24h qualification is claimed.

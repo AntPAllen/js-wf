@@ -905,3 +905,16 @@ verify; [first startup failures](scale/continuation-retirement-process-2026-10-0
 remain separate. The new fixture uses bounded provisioning retries within its
 original30s readiness budget. Worker SIGKILL, active-writer GC, lease/TTL/limit,
 p99 and final-source matrix/24h combinations remain open; stores were not reopened.
+
+## Retirement/reuse with manifest loss and lease expiry across server SIGKILL
+
+A focused race cut now verifies the held owner/configured12s TTL, kills all three
+servers, holds them down13.0003s and restarts. It passes57.78s with terminal epoch
+78 above captured54, three effects, two terminals and preserved shared/survivor/
+fresh references. Fresh initial repair executes three times without repeating its
+recorded effect. Actual SDK/stores/logs and438 archive members verify;629 selected
+inputs unchanged,628 Git matches plus exact test overlay. Original startup/
+publication/scenario budgets and production TTL remain unchanged.
+[Complete focused originals](scale/continuation-retirement-lease-expiry-2026-10-04/).
+Stores were not reopened; worker SIGKILL, active-writer GC, other TTL/limit cuts,
+p99 and final-source full-matrix/24h qualification remain open.

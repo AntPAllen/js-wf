@@ -1,0 +1,15 @@
+=== RUN   TestContinuationRetirementReuseWithManifestLossAndLeaseExpiryAcrossServerSIGKILL
+    continuation_retirement_process_test.go:134: retirement lease before outage: epoch=54 ttl=12s revision=63 created=2026-10-04T21:54:34.131643827Z
+    continuation_retirement_process_test.go:150: retirement fresh manifest cut: state_leader=wf-process-2 killed_node=0 pid=162023 signal=killed
+    continuation_retirement_process_test.go:150: retirement fresh manifest cut: state_leader=wf-process-2 killed_node=1 pid=162024 signal=killed
+    continuation_retirement_process_test.go:150: retirement fresh manifest cut: state_leader=wf-process-2 killed_node=2 pid=162025 signal=killed
+read tcp 127.0.0.1:49510->127.0.0.1:43491: read: connection reset by peer on connection [92]
+read tcp 127.0.0.1:49496->127.0.0.1:43491: read: connection reset by peer on connection [93]
+    continuation_retirement_process_test.go:160: retirement all-server outage: held=13.000311269s ttl=12s
+    continuation_retirement_process_test.go:166: retirement restarted node=0 pid=162322
+    continuation_retirement_process_test.go:166: retirement restarted node=1 pid=162333
+    continuation_retirement_process_test.go:166: retirement restarted node=2 pid=162343
+    continuation_retirement_test.go:373: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=5 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=3 manifest_drops=1
+    continuation_retirement_process_test.go:35: retirement lease-expiry recovery: prior_epoch=54 terminal_epoch=78 records=11
+--- PASS: TestContinuationRetirementReuseWithManifestLossAndLeaseExpiryAcrossServerSIGKILL (57.78s)
+PASS

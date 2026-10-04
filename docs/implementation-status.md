@@ -33,6 +33,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Retirement/reuse lease-expiry SIGKILL control passes:** race57.78s, actual
+  held lease/12s TTL confirmed, all three processes SIGKILLed and held down13.0003s
+  before distinct replacements. Terminal epoch78 exceeds captured54,11 records;
+  two retired objects reclaimed/three effects/two terminals/shared references exact.
+  Fresh repair enters three times without repeating the fresh recorded effect.
+  Live SDK/env/all build-info,629 unchanged selected inputs/628 Git matches and438
+  original archive members/two parts verify. Stores retained, not reopened;
+  named-test integrity/GC scope. Budgets/production TTL unchanged. Worker SIGKILL/
+  active-GC/other TTL/limit/p99/final-source/full-matrix/24h remain open.
+  [Complete focused proof](scale/continuation-retirement-lease-expiry-2026-10-04/).
+
 - **Retirement/reuse actual server SIGKILL controls pass:** fresh-manifest response
   loss with confirmed state leader kill/restart and full three-server kill/restart,
   race67.74s; library control25.74s. Every exit/replacement verified, generation1→3,
