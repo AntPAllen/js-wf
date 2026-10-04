@@ -33,6 +33,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **100k streaming journal-fault capacity independently reviewed:** exact878c341,
+  normal build, 100000 invocations / 1.2M entries / 100000 terminals. Complete
+  baseline first; actual R3 memory consumer leader library shutdown at visitor128
+  leaves1199488 pending. Full combined streaming/watch-state report recovers in
+  11.675s under original20s; consumer cleanup passes. All2894 selected inputs /
+  64 Git files, actual live SDK/env/all build-info and3328 original members verify;
+  110317753-byte five-part complete archive reads back.
+  Normal2GiB/GOMAXPROCS2 native scope only; state-watch interruption, OS SIGKILL,
+  legacy/five-container/race100k/full matrix/24h qualification remain open.
+  [Complete 100k fault proof](scale/retained-audit-streaming-2026-10-04/large-journal-fault-100k/).
+
 - **Large streaming journal-fault race control independently reviewed:**
   exact71e6ad7,12000 invocations/144000 entries/12000 terminals. Full combined
   baseline required first; actual pending R3 memory consumer leader library

@@ -63,3 +63,26 @@ state-watch fault recovery, legacy/five-container adoption and full matrices /
 24h qualification remain open. Production/default audit mode and20s/60s limits
 stay unchanged; no soak is restarted. Next qualify actual full-cohort recovery
 under faults before exposing the combined mode in the production harness.
+
+
+## Native journal-fault recovery
+
+[Small race controls](journal-faults/) pass both state modes through actual
+pending R3 consumer leader library shutdown and cancellation. Exact500/2000/500
+reports recover in0.557s/0.445s; cancellation stops at128.
+
+[Large race control](large-journal-fault-race/) passes12000/144000/12000 full
+baseline and recovery after actual leader shutdown with143488 pending, in10.745s.
+Both controls require temporary consumer cleanup and retain complete verified
+originals. Larger live-process identity captured; small controls omit it.
+State-watch interruption, OS SIGKILL,100k fault capacity, legacy/five-container
+and complete release qualification remain open.
+
+
+[Normal 100k fault control](large-journal-fault-100k/) extends the same test to
+100000 invocations /1.2M journal entries /100000 terminals. Actual R3 consumer
+leader shutdown leaves1199488 pending; full report recovery takes11.675s under
+original20s. Complete baseline/cleanup/source/executable/live environment and
+originals verify. This closes this normal native journal-fault capacity check;
+state-watch interruption, OS SIGKILL, race100k, legacy/five-container and full
+release qualification remain open.

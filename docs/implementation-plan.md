@@ -1765,7 +1765,7 @@ soak restart. Next full-cohort leader-loss/cancellation/state-watch/legacy fault
 then real five-container qualification under unchanged20s/60s.
 [Complete native proofs](scale/retained-audit-streaming-2026-10-04/).
 
-### Full streaming audit journal-fault controls prepared
+### Full streaming audit journal-fault controls
 
 New opt-in native controls publish500 invocations /2000 journal entries /
 500 terminal values, establish an original full-audit baseline, then run each
@@ -1778,6 +1778,25 @@ all three fixture URLs. This is library shutdown, not OS SIGKILL.
 
 Paired cancellation at the same delivery boundary must stop callbacks at128,
 return context.Canceled and the same invocation-only partial report; no partial
-journal result can certify completion. Unit/race package passes; actual retained
-native fault execution remains pending. This does not test interruption during
-state-watch delivery, large-population transport failure, legacy or R5 adoption.
+journal result can certify completion. Actual retained race execution at4616d47
+passes all four cases; recovery0.557s/0.445s and cancellation boundaries are
+independently reviewed with complete originals.
+[Complete controls](scale/retained-audit-streaming-2026-10-04/journal-faults/).
+
+A larger race control at71e6ad7 first establishes a full combined baseline for
+12000 invocations/144000 entries/12000 terminals. It shuts down the actual R3
+consumer leader atvisitor128 with143488 pending and restores the exact full
+report in10.745s under original20s. Consumer cleanup, captured live executable,
+all selected/Git inputs and complete originals verify.
+[Complete large-tail control](scale/retained-audit-streaming-2026-10-04/large-journal-fault-race/).
+These controls do not test interruption during state-watch delivery, OS SIGKILL,
+legacy or R5 adoption;100k fault capacity and full release gates remain open.
+
+
+The normal-build 100k fault capacity control at878c341 now passes the same
+complete baseline and actual consumer-leader shutdown with1199488 pending.
+All1.2M entries and100000 terminal results validate in11.675s under original20s;
+consumer cleanup and actual live SDK/environment/source inputs verify.
+[Complete 100k fault proof](scale/retained-audit-streaming-2026-10-04/large-journal-fault-100k/).
+This is normal2GiB/GOMAXPROCS2 native capacity, not race100k/five-container/
+state-watch interruption/OS SIGKILL/legacy or actual24h qualification.
