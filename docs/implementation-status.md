@@ -11,14 +11,14 @@
   the required 24-hour full-matrix soak remains capacity-limited.
   [Exact executed recovery and preserved canonical paths](scale/accepted-proof-duplicate-recovery-2026-10-04/).
 
-- **Tier2 journal coverage extended to seeds 1–120:** new terminal successful
-  shard 109–120 passes source-isolated raw/model review at exact `c4fed06`:
-  31,332 invocations, 345,237 entries and 228 faults, all three
+- **Tier2 journal coverage extended to seeds 1–132:** new terminal successful
+  shard 121–132 passes source-isolated raw/model review at exact `c4fed06`:
+  31,416 invocations, 346,088 entries and 228 faults, all three
   history models and 45 actual dependency inputs. Combined accepted coverage
-  totals 315,252 invocations, 3,473,145 entries and 2,280 leader kills;
+  totals 346,668 invocations, 3,819,233 entries and 2,508 leader kills;
   worst terminal/progress type p99 remains 17.457496447/8.533582526 s.
   Other producer successes await review; full release gates remain open.
-  [Complete raw evidence and exact model inputs](scale/current-tier2-matrix-2026-10-04/journal-109-120/).
+  [Complete raw evidence and exact model inputs](scale/current-tier2-matrix-2026-10-04/journal-121-132/).
 
 - **Additional full-campaign clock failure retained:** job 111324439563 fails
   seed 61 at exact `79915ca`; batch-90 audit times out after 60.004493079 s.
