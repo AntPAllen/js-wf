@@ -145,7 +145,7 @@ func TestAuditBatchScanCandidateNativeLeaderLossAndCancellation(t *testing.T) {
 			actual := sha256.New()
 			count := 0
 			started := time.Now()
-			err = candidateBatchScan(auditCtx, observed, nil, func(msg *jetstream.RawStreamMsg) error {
+			err = scanBatchThrough(auditCtx, observed, nil, func(msg *jetstream.RawStreamMsg) error {
 				count++
 				if count == 128 {
 					switch fault {
@@ -237,7 +237,7 @@ func TestAuditBatchScanCandidateNativeLegacy211(t *testing.T) {
 	auditCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
 	started := time.Now()
-	if err := candidateBatchScan(auditCtx, observed, nil, func(msg *jetstream.RawStreamMsg) error { count++; return candidateDigest(actual, msg) }); err != nil {
+	if err := scanBatchThrough(auditCtx, observed, nil, func(msg *jetstream.RawStreamMsg) error { count++; return candidateDigest(actual, msg) }); err != nil {
 		t.Fatal(err)
 	}
 	if count != records-3 || fmt.Sprintf("%x", expected.Sum(nil)) != fmt.Sprintf("%x", actual.Sum(nil)) {
@@ -325,7 +325,7 @@ func TestAuditBatchScanCandidateNativeSparseHundredThousandSpan(t *testing.T) {
 	auditCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
 	started := time.Now()
-	if err := candidateBatchScan(auditCtx, observed, nil, func(msg *jetstream.RawStreamMsg) error { count++; return candidateDigest(actual, msg) }); err != nil {
+	if err := scanBatchThrough(auditCtx, observed, nil, func(msg *jetstream.RawStreamMsg) error { count++; return candidateDigest(actual, msg) }); err != nil {
 		t.Fatal(err)
 	}
 	if count != 2 || observed.gapCalls != 1 || fmt.Sprintf("%x", actual.Sum(nil)) != fmt.Sprintf("%x", expected.Sum(nil)) {

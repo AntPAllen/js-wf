@@ -104,7 +104,28 @@ func CheckThroughInvocationSequence(ctx context.Context, js jetstream.JetStream,
 	return check(ctx, js, &cutoff)
 }
 
+// CheckWithBatchedReads applies the same full retained-state invariants as Check
+// using bounded pull batches. Gap and tail coverage is confirmed by leader
+// next-message reads. Consumers are temporary; no stream config is changed.
+func CheckWithBatchedReads(ctx context.Context, js jetstream.JetStream) (Report, error) {
+	return checkUsing(ctx, js, nil, scanBatchThrough)
+}
+
+// CheckThroughInvocationSequenceWithBatchedReads has the same quiescent-cohort
+// and no-purge/no-reuse requirements as CheckThroughInvocationSequence. Each
+// call rereads retained journals, snapshots and terminal values; no old audit
+// result is cached as evidence. A final full check still covers orphan journals.
+func CheckThroughInvocationSequenceWithBatchedReads(ctx context.Context, js jetstream.JetStream, cutoff uint64) (Report, error) {
+	return checkUsing(ctx, js, &cutoff, scanBatchThrough)
+}
+
+type retainedScanner func(context.Context, jetstream.Stream, *uint64, func(*jetstream.RawStreamMsg) error) error
+
 func check(ctx context.Context, js jetstream.JetStream, cutoff *uint64) (Report, error) {
+	return checkUsing(ctx, js, cutoff, scanThrough)
+}
+
+func checkUsing(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner) (Report, error) {
 	var report Report
 	inv, err := auditRead(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })
 	if err != nil {
@@ -119,7 +140,7 @@ func check(ctx context.Context, js jetstream.JetStream, cutoff *uint64) (Report,
 		return report, err
 	}
 	seen := map[string]struct{}{}
-	if err := scanThrough(ctx, inv, cutoff, func(m *jetstream.RawStreamMsg) error {
+	if err := read(ctx, inv, cutoff, func(m *jetstream.RawStreamMsg) error {
 		if _, ok := seen[m.Subject]; ok {
 			return fmt.Errorf("duplicate invocation %s", m.Subject)
 		}
@@ -132,7 +153,7 @@ func check(ctx context.Context, js jetstream.JetStream, cutoff *uint64) (Report,
 	groups := map[string]struct{}{}
 	live := map[string][]journal.Record{}
 	compacted := map[string]bool{}
-	if err := scan(ctx, jrn, func(m *jetstream.RawStreamMsg) error {
+	if err := read(ctx, jrn, nil, func(m *jetstream.RawStreamMsg) error {
 		if cutoff != nil {
 			if _, ok := seen[strings.Replace(m.Subject, "wf.jrn.", "wf.inv.", 1)]; !ok {
 				return nil

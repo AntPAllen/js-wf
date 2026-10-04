@@ -33,6 +33,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Opt-in full batched invariant APIs prepared:** qualified raw reader moved to
+  integrity's reusable bulk reader; new full/cohort entry points share the exact
+  invariant-checking body with existing point readers. Existing Check APIs keep
+  their signatures/default reader. Snapshot reconstruction, sorted journal
+  reduction and terminal-state comparisons remain common. Unit/race integrity
+  suite passes1.925s with native cases inactive. Native compacted-prefix/cohort/
+  post-audit-corruption/orphan/I1/I2/I3/I6 and3000-invocation /36000-entry full
+  audit cases prepared, actual outcomes pending. No soak restart or audit-budget
+  relaxation. Modeled snapshot checker bytes remain identical to283ba32; prior
+  Tier1 qualification remains recorded against its executed source.
+
 - **Consumer-leader145–156 independently accepted:** twelve complete600s seeds
   atc4fed06 qualify31360 invocations /345664 entries /228 kills and all three
   models /40356 operations. Worst terminal/progress per-type p99

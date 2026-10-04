@@ -107,7 +107,7 @@ func (s *candidateControlStream) GetMsg(_ context.Context, seq uint64, opts ...j
 func TestAuditBatchScanCandidateResolvesConsumerOmissionsAndTail(t *testing.T) {
 	s := &candidateControlStream{consumer: candidateControlConsumer{sequences: []uint64{1, 3, 5}, stream: "CONTROL"}}
 	var visited []uint64
-	err := candidateBatchScan(context.Background(), s, nil, func(msg *jetstream.RawStreamMsg) error { visited = append(visited, msg.Sequence); return nil })
+	err := scanBatchThrough(context.Background(), s, nil, func(msg *jetstream.RawStreamMsg) error { visited = append(visited, msg.Sequence); return nil })
 	if err != nil || !reflect.DeepEqual(visited, []uint64{1, 2, 3, 5, 6}) || !reflect.DeepEqual(s.requests, []uint64{2, 4, 6}) || !s.deleted {
 		t.Fatalf("visited=%v reads=%v cleanup=%v err=%v", visited, s.requests, s.deleted, err)
 	}
@@ -128,7 +128,7 @@ func TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures(t *testing
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			var visited []uint64
-			err := candidateBatchScan(context.Background(), tc.stream, nil, func(msg *jetstream.RawStreamMsg) error {
+			err := scanBatchThrough(context.Background(), tc.stream, nil, func(msg *jetstream.RawStreamMsg) error {
 				visited = append(visited, msg.Sequence)
 				return tc.visitorError
 			})
@@ -146,21 +146,21 @@ func TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures(t *testing
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	s := &candidateControlStream{}
-	if err := candidateBatchScan(ctx, s, nil, func(*jetstream.RawStreamMsg) error { t.Fatal("visit after cancel"); return nil }); !errors.Is(err, context.Canceled) {
+	if err := scanBatchThrough(ctx, s, nil, func(*jetstream.RawStreamMsg) error { t.Fatal("visit after cancel"); return nil }); !errors.Is(err, context.Canceled) {
 		t.Fatal(err)
 	}
 }
 
 func TestAuditBatchScanCandidateCreateRetryKeepsIdentityAndCleansUncertainCreate(t *testing.T) {
 	s := &candidateControlStream{consumer: candidateControlConsumer{sequences: []uint64{1, 2, 3, 5, 6}, stream: "CONTROL"}, createLostReply: true}
-	if err := candidateBatchScan(context.Background(), s, nil, func(*jetstream.RawStreamMsg) error { return nil }); err != nil {
+	if err := scanBatchThrough(context.Background(), s, nil, func(*jetstream.RawStreamMsg) error { return nil }); err != nil {
 		t.Fatal(err)
 	}
 	if len(s.createNames) != 2 || s.createNames[0] != s.createNames[1] || s.deleteName != s.createNames[0] {
 		t.Fatalf("create identities=%v cleanup=%s", s.createNames, s.deleteName)
 	}
 	s = &candidateControlStream{createError: nats.ErrTimeout}
-	if err := candidateBatchScan(context.Background(), s, nil, func(*jetstream.RawStreamMsg) error { t.Fatal("visit after failed create"); return nil }); !errors.Is(err, nats.ErrTimeout) {
+	if err := scanBatchThrough(context.Background(), s, nil, func(*jetstream.RawStreamMsg) error { t.Fatal("visit after failed create"); return nil }); !errors.Is(err, nats.ErrTimeout) {
 		t.Fatal(err)
 	}
 	if len(s.createNames) != 3 || s.createNames[0] != s.createNames[1] || s.createNames[1] != s.createNames[2] || s.deleteName != s.createNames[0] {
@@ -172,7 +172,7 @@ func TestAuditBatchScanCandidateTransportFallbackResumesUnvisitedTail(t *testing
 	for _, interrupted := range []error{nats.ErrNoResponders, nats.ErrTimeout, jetstream.ErrNoStreamResponse, context.DeadlineExceeded, &jetstream.APIError{ErrorCode: 10008}} {
 		s := &candidateControlStream{consumer: candidateControlConsumer{sequences: []uint64{1, 2}, stream: "CONTROL", err: interrupted}}
 		var visited []uint64
-		if err := candidateBatchScan(context.Background(), s, nil, func(msg *jetstream.RawStreamMsg) error { visited = append(visited, msg.Sequence); return nil }); err != nil {
+		if err := scanBatchThrough(context.Background(), s, nil, func(msg *jetstream.RawStreamMsg) error { visited = append(visited, msg.Sequence); return nil }); err != nil {
 			t.Fatal(err)
 		}
 		if !reflect.DeepEqual(visited, []uint64{1, 2, 3, 5, 6}) || !reflect.DeepEqual(s.requests, []uint64{3, 4, 6}) || !s.deleted {
