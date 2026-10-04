@@ -33,6 +33,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Test-only bulk audit reader candidate validated:** on three real NATS nodes,
+  both readers visit34993 retained records with matching ordered payload/header/
+  timestamp/subject/sequence digests. Existing point scan12.758667811s versus
+  candidate batch scan1.869967735s; deleted holes/captured tail and newer writes
+  excluded correctly, consumer count0 after cleanup, fresh scan sees new deletion.
+  Final-source race omission/order/semantic/cancellation controls pass1.015s.
+  Production reader unchanged; candidate native test opt-in. Successful native
+  executable/stores not retained; executed helper bytes/logs retained and match
+  current helper. Full fault/compatibility/large-population/invariant audit and
+  actual24h still required; no general throughput or final-source matrix claim.
+  [Candidate, comparison and remaining qualification](scale/retained-audit-batch-candidate-2026-10-04/).
+
 - **Instrumented failed24h originals independently preserved:** source18ddf04,
   race/journal/seed1, batch100/cutoff2800 after798.65s. All4937 original members
   /263756084 bytes and1207 selected source files verify against manifests/Git;
