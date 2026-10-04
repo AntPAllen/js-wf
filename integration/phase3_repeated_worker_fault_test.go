@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"testing"
 	"time"
@@ -258,6 +259,8 @@ func runPhaseThreeRepeatedFaults(t *testing.T, rebalance bool) {
 		err  error
 	}
 	moveResults := make(chan moveResult, 256)
+	var availableWorkers atomic.Uint64
+	availableWorkers.Store((1 << len(fleet)) - 1)
 	moveCtx, stopMoves := context.WithCancel(cohort)
 	defer stopMoves()
 	movesDone := make(chan struct{})
@@ -309,9 +312,26 @@ func runPhaseThreeRepeatedFaults(t *testing.T, rebalance bool) {
 							}
 						}
 					}
-					to := owners[(cycle+int(partition))%len(owners)]
+					// Snapshot availability without sharing the mutable fleet/hold
+					// arrays with this controller. Held workers remain in the test,
+					// but are not eligible destinations for new ownership moves.
+					mask := availableWorkers.Load()
+					eligible := []string{}
+					for slot, candidate := range owners {
+						if mask&(1<<slot) != 0 {
+							eligible = append(eligible, candidate)
+						}
+					}
+					if len(eligible) == 0 {
+						continue
+					}
+					to := eligible[(cycle+int(partition))%len(eligible)]
 					if to == owner {
-						to = owners[(cycle+int(partition)+1)%len(owners)]
+						if len(eligible) == 1 {
+							// A replacement can briefly leave only the current owner.
+							continue
+						}
+						to = eligible[(cycle+int(partition)+1)%len(eligible)]
 					}
 					var next uint64
 					if err == nil {
@@ -365,6 +385,13 @@ func runPhaseThreeRepeatedFaults(t *testing.T, rebalance bool) {
 				pendingHolds--
 			}
 		}
+		var available uint64
+		for slot := range fleet {
+			if holds[slot] < 0 && !(routeHeld && slot%3 == 2) {
+				available |= 1 << slot
+			}
+		}
+		availableWorkers.Store(available)
 		select {
 		case result := <-results:
 			if result.err != nil || result.value != 50 {
@@ -389,6 +416,14 @@ func runPhaseThreeRepeatedFaults(t *testing.T, rebalance bool) {
 			}
 		case scheduled := <-tickC:
 			if rebalance && report.RouteCut.IsZero() && time.Since(report.Started) >= 10*time.Second {
+				// Publish minority ineligibility before applying the route cut.
+				mask := availableWorkers.Load()
+				for slot := range fleet {
+					if slot%3 == 2 {
+						mask &^= 1 << slot
+					}
+				}
+				availableWorkers.Store(mask)
 				if err := cluster.RouteMesh().PartitionNode(2); err != nil {
 					t.Fatal(err)
 				}
@@ -447,6 +482,8 @@ func runPhaseThreeRepeatedFaults(t *testing.T, rebalance bool) {
 				kind = "kill"
 			}
 			event := phaseThreeFault{Kind: kind, Scheduled: scheduled.UTC(), Applied: time.Now().UTC(), Slot: i, Worker: p.id, PID: p.cmd.Process.Pid, ActiveLeases: activeCounts[i]}
+			// Exclude a process while its replacement is initializing too.
+			availableWorkers.Store(availableWorkers.Load() &^ (1 << i))
 			switch kind {
 			case "kill":
 				observation, err := killMatrixProcessWorker(ctx, root, []string{proxies[i].URL()}, fleet, i, scheduled)

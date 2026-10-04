@@ -30,6 +30,24 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Repeated-rebalance held-destination omission identified and corrected:**
+  analysis of the failed eb5fbd6 trial finds130/231 assignment moves onto workers
+  already held by pause/client-partition faults. The asynchronous controller lost
+  its earlier availability filter; an atomic mask restores it and excludes the
+  server minority and initializing replacements. Original fault durations,
+  schedules and5min target remain.128 ordered Await reads are not a global
+  terminal count;175 ACK observations do not prove final integrity. This is a
+  fixture correction, not an established sole cause or qualification. Final-source
+  race compilation/disabled-profile check passes1.018s; native execution pending.
+  [Diagnostic and scope](scale/phase3-repeated-rebalance-2026-10-04/held-destination-analysis/).
+
+- **Disk capacity recovered from unfinished Git repack:** an orphan temporary
+  pack of1,250,848,768 bytes had no index, live Git maintenance process or open
+  descriptor. Removing only that unfinished file restores about1.2GiB free;
+  published packs and all retained test evidence remain. The VM subsequently
+  reports99GiB disk /49GiB free; compilation and retained runs can use disk again.
+  The interrupted compile has no acceptance result; no build/test process remained.
+
 - **Traced upgrade41 independently accepted, actual SDK retained:** full600s
   native diagnostic at837fb9d verifies1848 invocations /20341 entries /five
   retained-store SIGKILL upgrades/Start gaps. Worst terminal/progress p99
