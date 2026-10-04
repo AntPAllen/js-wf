@@ -10,9 +10,9 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–84 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–96 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
-| Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Other finite combined fault cases remain. |
+| Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Not run/qualified. Full-matrix soak and required retained-original audits remain. |
 
@@ -29,6 +29,34 @@ and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Repeated faults plus busy partition rebalance independently accepted:**
+  retained race SDK ate9ad9ab completes200×50 counters on6 workers in192.806390s
+  under unchanged5min target.96 faults (81kill/11pause/4partition),148 moves
+  /129 active hints and45.055304s route hold verify.200 raw journals /20400
+  entries and all200 independent SDK replays pass;29 replay dependencies and
+  all3850 captured selected inputs /563 Git-local bytes match executed source.
+  Actual SDK/replay executables and477 original store files retained; stores
+  not independently reopened. No separate queue-drain/full-matrix/24h claim.
+  [Complete focused proof](scale/phase3-repeated-rebalance-2026-10-04/accepted/).
+
+- **Consumer-leader85–96 independently accepted:** twelve full600s seeds atc4fed06;
+  31108 invocations /342835 entries /228 kills, all three models /40048 operations.
+  Worst terminal/progress per-type p99 is16.749003928/8.752031488s under unchanged
+  R3 gates30/10s.45 actual model dependencies match source; actual model and
+  complete raw proof retained. Contiguous1–96 now covers250656 invocations /
+  2762815 entries /1824 kills /322562 history operations. Original SDK/stores
+  not uploaded; full200/current-source matrices/24h remain open.
+  [Complete proof](scale/current-tier2-matrix-2026-10-04/consumer-85-96/).
+
+- **New rolling-upgrade failure localized before fifth replacement:** completed
+  job111324440317 fails seed74 before fault5: deployment proof returns
+  `upgrade WF_RUN stale replica` in replica-readiness, after fallback admission.
+  It follows an earlier readiness wait; raw proof does not retain the rejected
+  StreamInfo. Source/request/cause investigation remains open. Raw artifact
+  11302499431 and original-stores artifact11302644144 downloaded completely to
+  `/tmp/js-wf-rolling-upgrade66-78-failure-37164231641`; member/source review and
+  canonical publication pending. No failed-shard or earlier-seed promotion.
 
 - **Repeated-rebalance held-destination omission identified and corrected:**
   analysis of the failed eb5fbd6 trial finds130/231 assignment moves onto workers

@@ -1498,3 +1498,16 @@ retained original stores and exact pre-kill read timing/error classification.
 compiles with the disabled profile; no native cut, runtime fix, timeout relaxation
 or original server-cause resolution is claimed. Captured actual-executable/source/
 store diagnostics and complete eight-cut qualification remain required.
+
+
+### Repeated worker faults with busy partition reassignment
+
+The focused combined Phase3 case now qualifies at executed `e9ad9ab`:200 workflows
+×50 steps on six workers complete in192.806390s under the original five-minute
+target, with two-second worker faults, five-second assignment scheduling, actual
+45-second holds and a confirmed server minority route cut. Independent raw
+journal checks and200 SDK replays pass. The asynchronous assignment controller
+restores available destinations; held workers remain under faults but are excluded
+from new assignment placement. [Complete proof](scale/phase3-repeated-rebalance-2026-10-04/accepted/)
+retains actual SDK/source/replay/store bytes. This qualifies this combined case
+only; remaining Phase3 requirements, full matrices and actual24h stay open.
