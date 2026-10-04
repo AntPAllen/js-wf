@@ -958,6 +958,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			evidenceMu.Lock()
 			faults = append(faults, event)
 			evidenceMu.Unlock()
+			if os.Getenv("WF_TIER3_EXPLICIT_ROUTE_SEEDS") == "1" {
+				diagnosticCtx, diagnosticStop := context.WithTimeout(context.Background(), 2*time.Second)
+				if censusErr := saveFiveContainerRouteCensus(diagnosticCtx, cluster, prefix); censusErr != nil {
+					t.Errorf("save route census: %v", censusErr)
+				}
+				diagnosticStop()
+			}
 			if err != nil {
 				t.Logf("tier3 %s fault failed: %v", row, err)
 				cancel()

@@ -9,6 +9,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"js-wf/testcluster"
 )
 
 // Snapshots have controller observation brackets. They are diagnostic evidence,
@@ -55,4 +57,36 @@ func saveFiveContainerFaultDiagnostics(ctx context.Context, read func(context.Co
 	}
 	wg.Wait()
 	return writeErrors
+}
+
+func saveFiveContainerRouteCensus(ctx context.Context, cluster *testcluster.DockerCluster, prefix string) error {
+	type observation struct {
+		Node   int                     `json:"node"`
+		Before time.Time               `json:"before"`
+		After  time.Time               `json:"after"`
+		Census testcluster.RouteCensus `json:"census"`
+		Error  string                  `json:"error,omitempty"`
+	}
+	rows := make([]observation, 5)
+	var wg sync.WaitGroup
+	for node := range rows {
+		wg.Add(1)
+		go func(node int) {
+			defer wg.Done()
+			rows[node].Node = node
+			rows[node].Before = time.Now().UTC()
+			census, err := cluster.RoutePeerCensus(ctx, node)
+			rows[node].After = time.Now().UTC()
+			rows[node].Census = census
+			if err != nil {
+				rows[node].Error = err.Error()
+			}
+		}(node)
+	}
+	wg.Wait()
+	data, err := json.MarshalIndent(rows, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(prefix+"-route-census.json", data, 0600)
 }

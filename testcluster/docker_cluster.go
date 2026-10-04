@@ -21,22 +21,23 @@ import (
 // DockerCluster runs NATS nodes with separate network namespaces and file
 // stores. It is opt-in: callers must have a working Docker daemon.
 type DockerCluster struct {
-	root          string
-	image         string
-	network       string
-	clientNetwork string
-	names         []string
-	routeNames    []string
-	urls          []string
-	monitorURLs   []string
-	stores        []string
-	serverTags    map[int][]string
-	syncInterval  string
-	skewNode      int
-	skewSeconds   int64
-	oldNodes      []bool
-	clockAdvance  time.Duration
-	clockAdvanced bool
+	root               string
+	image              string
+	network            string
+	clientNetwork      string
+	names              []string
+	routeNames         []string
+	urls               []string
+	monitorURLs        []string
+	stores             []string
+	serverTags         map[int][]string
+	syncInterval       string
+	skewNode           int
+	skewSeconds        int64
+	oldNodes           []bool
+	clockAdvance       time.Duration
+	clockAdvanced      bool
+	explicitRouteSeeds bool
 }
 
 func dockerCommand(ctx context.Context, args ...string) (string, error) {
@@ -197,6 +198,11 @@ func startDockerClusterVersioned(root string, count int, oldBinary string, advan
 			return nil, fmt.Errorf("old server node %d cannot also use the skewed binary", c.skewNode)
 		}
 	}
+	routeMode := os.Getenv("WF_TIER3_EXPLICIT_ROUTE_SEEDS")
+	if routeMode != "" && routeMode != "0" && routeMode != "1" {
+		return nil, fmt.Errorf("invalid explicit route seed mode %q", routeMode)
+	}
+	c.explicitRouteSeeds = routeMode == "1"
 	c.syncInterval = os.Getenv("WF_TIER3_SYNC_INTERVAL")
 	if c.syncInterval == "" {
 		c.syncInterval = "2m" // pinned nats-server v2.15.0 file-store default
@@ -327,6 +333,23 @@ func (c *DockerCluster) AdvanceStoppedClusterClock() error {
 	return nil
 }
 
+func (c *DockerCluster) routeSeeds(node int) string {
+	if c.explicitRouteSeeds {
+		var routes []string
+		for peer, name := range c.routeNames {
+			if peer != node {
+				routes = append(routes, "nats://"+name+":6222")
+			}
+		}
+		return strings.Join(routes, ",")
+	}
+	peer := 0
+	if node == 0 {
+		peer = 1
+	}
+	return "nats://" + c.routeNames[peer] + ":6222"
+}
+
 func (c *DockerCluster) RestartNode(i int) error {
 	if i < 0 || i >= len(c.names) || c.names[i] == "" {
 		return fmt.Errorf("invalid Docker node %d", i)
@@ -340,15 +363,10 @@ func (c *DockerCluster) RestartNode(i int) error {
 		return err
 	}
 	serverArgs := []string{"-c", "/etc/nats.conf", "-a", "0.0.0.0", "-p", "4222", "-m", "8222", "-n", c.names[i], "-js", "-sd", "/data", "-cluster_name", c.network, "-cluster", "nats://0.0.0.0:6222"}
-	peer := 0
-	if i == 0 {
-		peer = 1
-	}
-	// Explicitly advertise the route-only alias. With two container networks,
-	// default interface discovery can advertise the client bridge or loopback,
-	// allowing routes to survive DisconnectNode's route-network cut.
+	// Advertise only the route bridge. Explicit seeds are a diagnostic option:
+	// they remove dependence on implicit discovery after replacement containers.
 	serverArgs = append(serverArgs, "-cluster_advertise", c.routeNames[i]+":6222")
-	serverArgs = append(serverArgs, "-routes", "nats://"+c.routeNames[peer]+":6222")
+	serverArgs = append(serverArgs, "-routes", c.routeSeeds(i))
 	// Retain published ports across replacement containers. Long-lived clients
 	// must be able to reconnect after every original peer has been restarted.
 	clientBinding, monitorBinding := "127.0.0.1::4222", "127.0.0.1::8222"

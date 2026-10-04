@@ -1847,3 +1847,21 @@ live SDK/build-info/environment and raw failure diagnostics independently verify
 Node3 route snapshot has onlynode0 as peer (four pooled routes); cause unconfirmed.
 Next diagnose route discovery/rejoin and replication before an unchanged rerun
 or longer soak. [Complete failed original](scale/local-r5-streaming-audit-2026-10-04/race-2g-ten-minute-failed/).
+
+
+### Explicit route-seed diagnostic comparison
+
+The failed original atd7e075d observed restartednode3 with onlynode0 as route
+peer, despite four pooled connections. Existing fixture bootstrap seeds one
+peer and relies on discovery. Add explicit `--explicit-route-seeds` to seed all
+other route-only aliases on every container restart, while recording the choice
+and clearing inherited activation flags. Defaults remain single-peer discovery.
+A per-fault census validates the monitoring identity/count and groups pooled
+connections by actual peer names/IDs, recording missing members. Four pooled
+routes to one peer must not be mistaken for a four-peer mesh.
+
+Run the same journal/seed1/10m/race2GiB profile with explicit seeds and retained
+census after every fault. Keep original cadence,20s/60s audit deadlines,60s heal
+and30s liveness gates. This is a configuration comparison; a pass alone does
+not establish the cause of the original failure or qualify default/full-matrix/
+actual24h release. Review complete originals and topology observations first.

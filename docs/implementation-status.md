@@ -33,6 +33,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Explicit route-seed comparison prepared:** --explicit-route-seeds opts
+  the real fixture into seeding every other route-only alias on each restart;
+  default single-peer/discovery remains. Per-fault census groups pooled routes
+  by distinct peer name/ID and records missing peers plus observation brackets.
+  Wrong identity/count/foreign peer/inconsistent pooled IDs fail census decoding.
+  Unit controls reproduce four pooled connections to one peer versus four distinct
+  peers; seven producer guards and fixture/integration race controls pass.
+  Same journal/seed1/10m/race2GiB comparison is next. Original fault cadence,
+  20s/60s audit and60s heal/30s liveness gates retained. Diagnostic profile only,
+  no cause/fix/row/full-matrix/24h qualification yet.
+
 - **Combined five-container race row failed, originals reviewed:** exactd7e075d,
   terminal346.89s. Eight faults heal; ninth actual SIGKILL/restart ofnode3 leaves
   WF_JRN replica non-current (lag9058) at unchanged60s heal deadline. Four full

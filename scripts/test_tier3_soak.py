@@ -63,6 +63,16 @@ class SoakProducerTests(unittest.TestCase):
   self.assertEqual(plain['WF_TIER3_SYNC_INTERVAL'],streaming['WF_TIER3_SYNC_INTERVAL'])
   with self.assertRaises(ValueError):
    soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,batched_retained_audit=True,streaming_state_retained_audit=True)
+ def test_explicit_route_seeds_are_diagnostic_and_do_not_change_gate_arguments(self):
+  with patch.dict(os.environ,{'WF_TIER3_EXPLICIT_ROUTE_SEEDS':'1'}):
+   plain,args,flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False)
+   seeded,new_args,new_flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,explicit_route_seeds=True)
+  self.assertNotIn('WF_TIER3_EXPLICIT_ROUTE_SEEDS',plain)
+  self.assertEqual(seeded['WF_TIER3_EXPLICIT_ROUTE_SEEDS'],'1')
+  self.assertEqual(args,new_args)
+  self.assertEqual(flags,new_flags)
+  self.assertEqual(plain['GOMEMLIMIT'],seeded['GOMEMLIMIT'])
+  self.assertEqual(plain['WF_TIER3_SYNC_INTERVAL'],seeded['WF_TIER3_SYNC_INTERVAL'])
  def test_archive_keeps_original_store_bytes_and_compiled_source_with_full_readback(self):
   with tempfile.TemporaryDirectory() as d:
    root=Path(d);(root/'fixture').mkdir();(root/'source').mkdir()

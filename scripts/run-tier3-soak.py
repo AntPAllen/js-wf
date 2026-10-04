@@ -24,7 +24,7 @@ def load_rows():
     return module.TESTS
 
 
-def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=False, batched_retained_audit=False, memory_limit='512MiB', streaming_state_retained_audit=False):
+def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=False, batched_retained_audit=False, memory_limit='512MiB', streaming_state_retained_audit=False, explicit_route_seeds=False):
     if row not in load_rows() or duration not in ('35s', '10m', '24h'):
         raise ValueError('unsupported row or duration')
     if type(seed) is not int or not 1 <= seed <= 2**63-1:
@@ -46,6 +46,8 @@ def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=
         env['WF_TIER3_BATCHED_RETAINED_AUDIT'] = '1'
     if streaming_state_retained_audit:
         env['WF_TIER3_STREAMING_STATE_RETAINED_AUDIT'] = '1'
+    if explicit_route_seeds:
+        env['WF_TIER3_EXPLICIT_ROUTE_SEEDS']='1'
     flags = ['--require-checkpoint-audits']
     if row == 'rolling_upgrade':
         env['WF_TIER3_UPGRADE_SHUTDOWN'] = shutdown
@@ -113,6 +115,7 @@ def main():
     readers = p.add_mutually_exclusive_group()
     readers.add_argument('--batched-retained-audit', action='store_true')
     readers.add_argument('--streaming-state-retained-audit', action='store_true')
+    p.add_argument('--explicit-route-seeds', action='store_true', help='Diagnostic: seed every other route-only peer on each restart')
     p.add_argument('--no-race', action='store_true')
     p.add_argument('--memory-limit', choices=MEMORY_LIMITS, default='512MiB',
                    help='Explicit Go memory budget, captured with execution evidence')
@@ -122,7 +125,7 @@ def main():
         p.error('root must be fresh and outside the repository')
     env, testargs, flags = execution(a.row,a.duration,a.seed,root/'fixture',
                                      a.upgrade_shutdown,a.upgrade_start_gap,
-                                     a.retained_audit_trace,a.batched_retained_audit,a.memory_limit,a.streaming_state_retained_audit)
+                                     a.retained_audit_trace,a.batched_retained_audit,a.memory_limit,a.streaming_state_retained_audit,a.explicit_route_seeds)
     if subprocess.check_output(['git','status','--porcelain'],cwd=REPO):
         p.error('execution requires a clean committed checkout')
     revision = subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip()
@@ -137,6 +140,7 @@ def main():
                  retained_audit_trace=a.retained_audit_trace,
                  batched_retained_audit=a.batched_retained_audit,
                  streaming_state_retained_audit=a.streaming_state_retained_audit,
+                 explicit_route_seeds=a.explicit_route_seeds,
                  clears_full_tier3_release=False)
     def save():
         temporary=root/'execution.tmp.json'
