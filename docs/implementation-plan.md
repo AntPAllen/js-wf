@@ -1511,3 +1511,17 @@ restores available destinations; held workers remain under faults but are exclud
 from new assignment placement. [Complete proof](scale/phase3-repeated-rebalance-2026-10-04/accepted/)
 retains actual SDK/source/replay/store bytes. This qualifies this combined case
 only; remaining Phase3 requirements, full matrices and actual24h stay open.
+
+
+### Complete Tier2 consumer-leader row accepted
+
+All200 consumer-leader seeds at executedc4fed06 are independently accepted across
+17 complete600-second shards:519960 invocations /5730955 entries /3800 kills,
+all three models for669084 operations. Complete archive/member hashes, unique
+seed coverage, every retained actual model and45 Git-matched dependencies verify.
+Worst terminal/progress type p99:18.076655685/9.110842432s under unchanged R3
+30/10 gates. [Complete row proof and aggregation](scale/current-tier2-matrix-2026-10-04/consumer-full200-qualification/)
+qualifies this executed-source row, alongside journal200, not the final-source
+full13-row matrix, Tier3 matrix, original million-timer physical drain or actual
+24-hour full-matrix soak. Native SDK/stores were not uploaded; final integrity/
+drain assertions retain named-test scope, without independent store reopening.
