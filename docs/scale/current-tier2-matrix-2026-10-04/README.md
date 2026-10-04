@@ -123,3 +123,12 @@ c4fed06 revision. Accepted seeds 1–156 now total **410,368 invocations,
 4,521,039 journal entries and 2,964 leader kills**; worst terminal/progress
 p99 remains **17.457496447/8.533582526 s**. Other producer successes await review;
 current-main full qualification, full matrices and actual 24-hour soak remain open.
+
+## Subsequently accepted seeds 157–168
+
+[Source-isolated independent review](journal-157-168/) adds 32,032
+invocations, 352,975 entries and 228 kills at the same executed
+c4fed06 revision. Accepted seeds 1–168 now total **442,400 invocations,
+4,874,014 journal entries and 3,192 leader kills**; worst terminal/progress
+p99 is **17.457496447/9.067125521 s**. Other producer successes await review;
+current-main full qualification, full matrices and actual 24-hour soak remain open.
