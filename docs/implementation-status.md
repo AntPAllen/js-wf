@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–96 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–108 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -29,6 +29,22 @@ and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Consumer-leader97–108 independently accepted:** twelve complete600s seeds
+  atc4fed06 qualify31360 invocations /345633 entries /228 kills and all three
+  models /40355 operations. Worst terminal/progress per-type p99
+  17.335263672/7.318625836s passes unchanged R3 gates30/10s;
+  all45 actual model dependencies match executed source. Actual model and complete
+  raw proof retained; original SDK/stores not uploaded. Contiguous1–108 now covers
+  282016 invocations /3108448 entries /2052 kills /
+  362917 history operations. Full200/current-source matrices/24h remain open.
+  [Complete proof](scale/current-tier2-matrix-2026-10-04/consumer-97-108/).
+
+- **Corrected traced upgrade74 queued:** run37206187497 at exact883b73b executes
+  one600s seed with SIGKILL/forced Start gaps/API trace/actual SDK retention.
+  Stream readiness observations now include rejected metadata and bounded catch-up.
+  Original whole-proof60s/audit/R5 gates unchanged; native review remains pending.
+  [Exact launch](scale/rolling-upgrade-fallback-failure-2026-10-04/api-trace/seed74-launch/).
 
 - **Upgrade74 complete failed evidence preserved; readiness observation corrected:**
   before-fault5 proof fails a one-shot WF_RUN stale replica check after earlier
