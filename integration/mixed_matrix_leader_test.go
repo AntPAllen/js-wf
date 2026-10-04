@@ -919,7 +919,12 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 // duration. Every attempt still checks the whole retained state; only named
 // transient transport failures get a fresh context, never invariant errors.
 func matrixRetainedAudit(ctx context.Context, js jetstream.JetStream) (integrity.Report, error) {
-	return matrixRetainedAuditUsing(ctx, func(attempt context.Context) (integrity.Report, error) { return integrity.Check(attempt, js) })
+	return matrixRetainedAuditUsing(ctx, func(attempt context.Context) (integrity.Report, error) {
+		if os.Getenv("WF_TIER3_BATCHED_RETAINED_AUDIT") == "1" {
+			return integrity.CheckWithBatchedReads(attempt, js)
+		}
+		return integrity.Check(attempt, js)
+	})
 }
 
 func matrixRetainedAuditUsing(ctx context.Context, check func(context.Context) (integrity.Report, error)) (integrity.Report, error) {

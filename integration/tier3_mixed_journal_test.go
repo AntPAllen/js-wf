@@ -1017,7 +1017,11 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 						trace = &retainedAuditTrace{}
 						auditJS = tracedAuditJS{JetStream: js, trace: trace}
 					}
-					result, failure := integrity.CheckThroughInvocationSequence(attempt, auditJS, cut.cutoff)
+					check := integrity.CheckThroughInvocationSequence
+					if os.Getenv("WF_TIER3_BATCHED_RETAINED_AUDIT") == "1" {
+						check = integrity.CheckThroughInvocationSequenceWithBatchedReads
+					}
+					result, failure := check(attempt, auditJS, cut.cutoff)
 					if trace != nil {
 						data, err := json.MarshalIndent(trace.snapshot(), "", "  ")
 						if err == nil {

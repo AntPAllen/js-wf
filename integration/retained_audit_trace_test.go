@@ -4,6 +4,7 @@ package integration_test
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -142,6 +143,53 @@ func (s tracedAuditStream) GetLastMsgForSubject(ctx context.Context, subject str
 	}
 	done(err, bytes)
 	return msg, err
+}
+
+// Bulk bytes and the Fetch context are not inspected: the options and message
+// channel are delegated unchanged. Fetch elapsed time spans delivery and caller
+// processing, and completion is observed when the caller checks batch.Error.
+func (s tracedAuditStream) CreateConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
+	done := s.trace.begin(ctx, s.name+".CreateConsumer", fmt.Sprintf("name=%s replicas=%d", cfg.Name, cfg.Replicas))
+	consumer, err := s.Stream.CreateConsumer(ctx, cfg)
+	done(err, 0)
+	if err != nil {
+		return consumer, err
+	}
+	return tracedAuditConsumer{Consumer: consumer, name: s.name, trace: s.trace}, nil
+}
+func (s tracedAuditStream) DeleteConsumer(ctx context.Context, name string) error {
+	done := s.trace.begin(ctx, s.name+".DeleteConsumer", name)
+	err := s.Stream.DeleteConsumer(ctx, name)
+	done(err, 0)
+	return err
+}
+
+type tracedAuditConsumer struct {
+	jetstream.Consumer
+	name  string
+	trace *retainedAuditTrace
+}
+
+func (c tracedAuditConsumer) Fetch(batch int, opts ...jetstream.FetchOpt) (jetstream.MessageBatch, error) {
+	done := c.trace.begin(context.Background(), c.name+".Fetch", strconv.Itoa(batch))
+	messages, err := c.Consumer.Fetch(batch, opts...)
+	if err != nil {
+		done(err, 0)
+		return messages, err
+	}
+	return &tracedAuditBatch{MessageBatch: messages, done: done}, nil
+}
+
+type tracedAuditBatch struct {
+	jetstream.MessageBatch
+	once sync.Once
+	done func(error, int)
+}
+
+func (b *tracedAuditBatch) Error() error {
+	err := b.MessageBatch.Error()
+	b.once.Do(func() { b.done(err, 0) })
+	return err
 }
 
 type tracedAuditKV struct {

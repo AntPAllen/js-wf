@@ -33,6 +33,21 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Full opt-in batched invariant audits independently accepted:** actual race SDK
+  at9a88946 gives identical3000-invocation /36000-entry /3000-terminal reports:
+  point12.429541066s, bulk2.606781530s under20s. Compacted-prefix/cohort filtering,
+  fresh snapshot/terminal corruption, orphan journals, duplicate starts and
+  I2/I3 negative controls yield identical reports/errors. All2889 captured inputs
+  /59 Git-local bytes, actual runner/SDK/all build-info fields and3977 proof
+  member hashes verify;35636496-byte complete proof in two parts. Original stores
+  retained, not reopened; some intentionally end corrupted. Default point reader
+  preserved. New soak opt-in selects batched checkpoint AND final audits; bulk
+  trace delegates options/channel unchanged and records completion once. Trace
+  contracts pass race1.058s; four producer guard/archive/mode tests pass0.043s.
+  Actual consumer-leader role kill prepared to probe pull-cursor recovery before
+  the next long run; full workload/large-population/24h qualification pending.
+  [Complete full-audit acceptance](scale/retained-audit-batch-candidate-2026-10-04/full-invariant-accepted/).
+
 - **Opt-in full batched invariant APIs prepared:** qualified raw reader moved to
   integrity's reusable bulk reader; new full/cohort entry points share the exact
   invariant-checking body with existing point readers. Existing Check APIs keep

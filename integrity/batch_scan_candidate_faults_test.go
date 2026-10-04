@@ -13,6 +13,7 @@ import (
 
 	"js-wf/testcluster"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -68,6 +69,7 @@ type candidateObservedStream struct {
 	name             string
 	gapCalls         int
 	consumerReplicas int
+	consumer         jetstream.Consumer
 }
 
 func (s *candidateObservedStream) CreateConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
@@ -76,6 +78,7 @@ func (s *candidateObservedStream) CreateConsumer(ctx context.Context, cfg jetstr
 	if err != nil {
 		return consumer, err
 	}
+	s.consumer = consumer
 	s.consumerReplicas = consumer.CachedInfo().Config.Replicas
 	if s.consumerReplicas != cfg.Replicas {
 		return nil, fmt.Errorf("consumer replicas=%d requested=%d", s.consumerReplicas, cfg.Replicas)
@@ -336,4 +339,80 @@ func TestAuditBatchScanCandidateNativeSparseHundredThousandSpan(t *testing.T) {
 		t.Fatalf("cleanup err=%v info=%+v", err, info)
 	}
 	t.Logf("span=%d retained=%d deleted=%d elapsed=%s leader_gap_reads=%d digest=%x consumers=%d", last.Sequence, count, holes, time.Since(started), observed.gapCalls, actual.Sum(nil), info.State.Consumers)
+}
+
+func TestAuditBatchScanNativeConsumerLeaderLoss(t *testing.T) {
+	if os.Getenv("WF_AUDIT_BATCH_CANDIDATE") != "1" {
+		t.Skip("opt-in native consumer leader qualification")
+	}
+	cluster, err := testcluster.Start(candidateNativeRoot(t), 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	urls := make([]string, 0, 3)
+	for _, server := range cluster.Servers {
+		urls = append(urls, server.ClientURL())
+	}
+	nc, err := nats.Connect(strings.Join(urls, ","), nats.MaxReconnects(-1), nats.ReconnectWait(20*time.Millisecond))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer nc.Close()
+	js, err := jetstream.New(nc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, stop := context.WithTimeout(context.Background(), time.Minute)
+	defer stop()
+	stream := candidateNativeStream(t, js, ctx)
+	const count = 3000
+	candidatePublish(t, js, ctx, count)
+	expected := sha256.New()
+	for seq := uint64(1); seq <= count; seq++ {
+		msg, err := stream.GetMsg(ctx, seq)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := candidateDigest(expected, msg); err != nil {
+			t.Fatal(err)
+		}
+	}
+	observed := &candidateObservedStream{Stream: stream}
+	actual := sha256.New()
+	visited := 0
+	leader := -1
+	auditCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+	started := time.Now()
+	err = scanBatchThrough(auditCtx, observed, nil, func(msg *jetstream.RawStreamMsg) error {
+		visited++
+		if visited == 128 {
+			info, err := observed.consumer.Info(auditCtx)
+			if err != nil {
+				return err
+			}
+			if info.Cluster == nil {
+				return errors.New("consumer cluster metadata missing")
+			}
+			for i, server := range cluster.Servers {
+				if server.Name() == info.Cluster.Leader {
+					leader = i
+				}
+			}
+			if leader < 0 {
+				return errors.New("consumer leader not found")
+			}
+			cluster.KillNode(leader)
+		}
+		return candidateDigest(actual, msg)
+	})
+	if err != nil || visited != count || fmt.Sprintf("%x", expected.Sum(nil)) != fmt.Sprintf("%x", actual.Sum(nil)) {
+		t.Fatalf("consumer leader recovery leader=%d visited=%d err=%v", leader, visited, err)
+	}
+	info, err := stream.Info(ctx)
+	if err != nil || info.State.Consumers != 0 {
+		t.Fatalf("cleanup err=%v info=%+v", err, info)
+	}
+	t.Logf("consumer_leader=%d visited=%d elapsed=%s gap_reads=%d consumer_replicas=%d reconnects=%d consumers=%d", leader, visited, time.Since(started), observed.gapCalls, observed.consumerReplicas, nc.Stats().Reconnects, info.State.Consumers)
 }

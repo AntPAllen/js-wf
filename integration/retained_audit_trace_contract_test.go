@@ -78,3 +78,80 @@ func TestRetainedAuditTracePreservesDeadlineFailure(t *testing.T) {
 		t.Fatalf("snapshot=%+v", snapshot)
 	}
 }
+
+type auditTraceBulkControlStream struct {
+	jetstream.Stream
+	expected context.Context
+	cfg      jetstream.ConsumerConfig
+	consumer jetstream.Consumer
+}
+
+func (s auditTraceBulkControlStream) CreateConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
+	if ctx != s.expected || cfg.Name != s.cfg.Name || cfg.Replicas != s.cfg.Replicas {
+		return nil, errors.New("create delegation changed")
+	}
+	return s.consumer, nil
+}
+func (s auditTraceBulkControlStream) DeleteConsumer(ctx context.Context, name string) error {
+	if ctx != s.expected || name != s.cfg.Name {
+		return errors.New("delete delegation changed")
+	}
+	return auditTraceSentinel
+}
+
+type auditTraceBulkControlConsumer struct {
+	jetstream.Consumer
+	batch jetstream.MessageBatch
+}
+
+func (c auditTraceBulkControlConsumer) Fetch(batch int, opts ...jetstream.FetchOpt) (jetstream.MessageBatch, error) {
+	if batch != 17 || len(opts) != 1 || opts[0] != nil {
+		return nil, errors.New("fetch delegation changed")
+	}
+	return c.batch, nil
+}
+
+type auditTraceBulkControlBatch struct{ messages chan jetstream.Msg }
+
+func (b auditTraceBulkControlBatch) Messages() <-chan jetstream.Msg { return b.messages }
+func (b auditTraceBulkControlBatch) Error() error                   { return auditTraceSentinel }
+func TestRetainedAuditTraceBulkDelegatesChannelAndCompletesOnce(t *testing.T) {
+	ctx := context.Background()
+	trace := &retainedAuditTrace{}
+	messages := make(chan jetstream.Msg)
+	close(messages)
+	cfg := jetstream.ConsumerConfig{Name: "audit-proof", Replicas: 3}
+	stream := tracedAuditStream{Stream: auditTraceBulkControlStream{expected: ctx, cfg: cfg, consumer: auditTraceBulkControlConsumer{batch: auditTraceBulkControlBatch{messages: messages}}}, name: "WF_JRN", trace: trace}
+	consumer, err := stream.CreateConsumer(ctx, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	batch, err := consumer.Fetch(17, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if batch.Messages() != messages {
+		t.Fatal("message channel replaced")
+	}
+	if batch.Error() != auditTraceSentinel || batch.Error() != auditTraceSentinel {
+		t.Fatal("batch error changed")
+	}
+	if err := stream.DeleteConsumer(ctx, cfg.Name); err != auditTraceSentinel {
+		t.Fatal(err)
+	}
+	snapshot := trace.snapshot()
+	if c := snapshot.Counts["WF_JRN.Fetch"]; c.Started != 1 || c.Completed != 1 || c.Errors != 1 || c.Bytes != 0 {
+		t.Fatalf("fetch count=%+v", c)
+	}
+	if c := snapshot.Counts["WF_JRN.CreateConsumer"]; c.Started != 1 || c.Completed != 1 || c.Errors != 0 {
+		t.Fatalf("create count=%+v", c)
+	}
+	if c := snapshot.Counts["WF_JRN.DeleteConsumer"]; c.Started != 1 || c.Completed != 1 || c.Errors != 1 {
+		t.Fatalf("delete count=%+v", c)
+	}
+	for _, call := range snapshot.Recent {
+		if call.Operation == "WF_JRN.Fetch" && !call.Deadline.IsZero() {
+			t.Fatal("invented fetch deadline")
+		}
+	}
+}

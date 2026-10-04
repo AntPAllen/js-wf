@@ -28,6 +28,16 @@ class SoakProducerTests(unittest.TestCase):
   self.assertIn('TestTier3WorkerClockNormalizationPreservesRawEvidence',args[0])
   for row,duration,seed,shutdown,gap in [('journal','24h',1,'ldm',False),('journal','24h',1,'sigkill',True),('journal','24h',0,'sigkill',False),('journal','1h',1,'sigkill',False)]:
    with self.assertRaises(ValueError):soak.execution(row,duration,seed,Path('/tmp/f'),shutdown,gap)
+ def test_batched_audit_and_trace_are_explicit_and_do_not_change_budget(self):
+  with patch.dict(os.environ,{'WF_TIER3_BATCHED_RETAINED_AUDIT':'1','WF_TIER3_RETAINED_AUDIT_TRACE':'1'}):
+   plain,plain_args,plain_flags=soak.execution('journal','24h',1,Path('/tmp/f'),'sigkill',False)
+   bulk,bulk_args,bulk_flags=soak.execution('journal','24h',1,Path('/tmp/f'),'sigkill',False,True,True)
+  self.assertNotIn('WF_TIER3_BATCHED_RETAINED_AUDIT',plain)
+  self.assertNotIn('WF_TIER3_RETAINED_AUDIT_TRACE',plain)
+  self.assertEqual(bulk['WF_TIER3_BATCHED_RETAINED_AUDIT'],'1')
+  self.assertEqual(bulk['WF_TIER3_RETAINED_AUDIT_TRACE'],'1')
+  self.assertEqual(plain_args,bulk_args)
+  self.assertEqual(plain_flags,bulk_flags)
  def test_archive_keeps_original_store_bytes_and_compiled_source_with_full_readback(self):
   with tempfile.TemporaryDirectory() as d:
    root=Path(d);(root/'fixture').mkdir();(root/'source').mkdir()
