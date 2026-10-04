@@ -1865,3 +1865,27 @@ census after every fault. Keep original cadence,20s/60s audit deadlines,60s heal
 and30s liveness gates. This is a configuration comparison; a pass alone does
 not establish the cause of the original failure or qualify default/full-matrix/
 actual24h release. Review complete originals and topology observations first.
+
+
+### Explicit-route comparison accepted at its executed source
+
+The five-container race2GiB/combined-reader journal row at0393caa passes the
+original ten-minute workload, 19 faults, all eight audits and final named checks:
+2324 invocations/25596 entries; worst terminal/progress p99 12.029s/6.628s,
+max checkpoint3.959s. All19 post-fault censuses show all four peers per node.
+Complete originals, raw row, three independently rebuilt exactOk models, live
+SDK/env/build-info and all1266 source inputs verify. Stores are retained, not
+reopened. [Complete reviewed comparison](scale/local-r5-streaming-audit-2026-10-04/explicit-routes-race-2g-ten-minute/).
+This qualifies this explicit-route row, not the cause of the previous failure,
+the default profile, complete matrices or actual24h. Longer qualification remains.
+
+### Recorded-source all-server matrix coverage through seed72
+
+Two more independently reviewed600s shards atc4fed06 qualify all-server-kill
+seeds49–72, extending accepted coverage to1–72:170520 invocations/1879560 entries/
+1368 faults/219419 model operations. Worst terminal/progress p99 remain18.295s/
+13.015s under original30s gates. Complete original/member/model/part proofs read
+back. Native SDK/stores not uploaded; named final integrity/drain scope only.
+[49–60](scale/current-tier2-matrix-2026-10-04/cluster-49-60/) ·
+[61–72](scale/current-tier2-matrix-2026-10-04/cluster-61-72/).
+Successful73–96 await review; full200/current-source/full matrices and24h remain.

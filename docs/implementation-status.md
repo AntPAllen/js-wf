@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source; all-server-kill seeds 1–48 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source; all-server-kill seeds 1–72 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -32,6 +32,33 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
+
+- **Explicit-route combined ten-minute race row independently accepted:** exact0393caa,
+  2324 invocations /25596 entries /19 faults, named test737.40s. All19 censuses
+  show five nodes with every four-peer mesh; original30s clocks,20s/60s audits,
+  60s heal and2m sync retained. Worst terminal/progress p99=12.029s/6.628s; eight
+  mandatory checkpoints pass, maxattempt3.959s. Raw row exactly matches original;
+  three rebuilt models exactOk for2990 operations,48 actual dependencies match Git.
+  Live SDK/env/all build-info,1266 inputs and5228 original members verify;58773165-
+  byte three-part original plus58-member reviewer/model archive all read back.
+  SDK/supervisor/fixtures terminal; stores not reopened. First reviewer summary
+  variable error preserved, corrected review passes unchanged originals. Explicit
+  route profile only; no original-cause/default/full-matrix/24h promotion.
+  [Complete reviewed comparison](scale/local-r5-streaming-audit-2026-10-04/explicit-routes-race-2g-ten-minute/).
+
+- **All-server-kill49–72 independently accepted:** exactc4fed06, two complete600s
+  shards qualify57232 invocations /630875 entries /456 faults /73640 model
+  operations. Raw identities[0,1,2]/node-1,30s cadence, original latency/completion
+  clocks and all three exactOk models verify;45 model dependencies match executed
+  Git and actual executables retained. Both208-member complete proofs /89078274
+  and89161095 compressed bytes /four parts each fully read back. Accepted cluster
+  range now1–72:170520 invocations /1879560 entries /1368 faults /219419 operations;
+  worst terminal/progress p99 stays18.295s/13.015s under original30s gates. No native
+  SDK/stores upload or independent reopening; final integrity/drain named scope.
+  Parent queued at latest observation:43 successful,175 queued,4 running jobs;
+  successful73–96 await review. Fullcluster200/final-source/full matrices remain.
+  [Seeds49–60](scale/current-tier2-matrix-2026-10-04/cluster-49-60/) ·
+  [Seeds61–72](scale/current-tier2-matrix-2026-10-04/cluster-61-72/).
 
 - **Explicit route-seed real comparison is live:** executed0393caa, same
   journal/seed1/10m/race2GiB/combined audit profile. Actual five-container args
