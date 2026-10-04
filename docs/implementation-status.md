@@ -1,5 +1,48 @@
 # Implementation status against the supplied plan
 
+## Summary — 2026-10-04
+
+The core runtime is implemented and broadly exercised. Full release qualification
+against the complete supplied plan is still incomplete; no percentage is claimed.
+
+| Area | Accepted evidence / current state |
+| --- | --- |
+| Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
+| Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
+| Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–36 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier3 fault matrix | Worker-clock 91 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
+| Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Other finite combined fault cases remain. |
+| Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
+| Original 24-hour soak | Not run/qualified. Full-matrix soak and required retained-original audits remain. |
+
+Requested adjustments are in place: Tier1 simulation is implemented; R5 route
+recovery p99 measures from confirmed healing; the historical 31.1 s / TTL 30 s worker
+smoke is closed as a configuration mismatch. Production TTL 12 s / heartbeat 3 s /
+AckWait 13 s retains strict recovery below 30 s. Original audit 20 s / 60 s limits stay.
+Real-cluster failures with unconfirmed causes remain recorded; successful focused
+diagnostics do not erase them. Current-main full matrices require final-source
+qualification, rather than treating older executed-source rows as a blanket pass.
+
+Immediate work: review live matrix results, diagnose remaining clock/checkpoint
+and million-timer physical-drain failures, finish combined continuation/promise/
+retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate.
+
+## Latest accepted evidence
+
+- **Tier3 worker-clock144–156 independently qualified:**41,272 invocations,
+  457,464 entries,247 faults and53,064 operations passing all three models;
+  source759/model45 input checks,273 clock proofs,1,365 broker messages and143
+  cohort audits verify. Worst terminal/progress p99 is5.076522145 /0.284237615s
+  under unchanged30s /10s gates. All original raw data and actual model binary
+  are retained. Actual workload binaries use hash/source/job-bound pinned Git
+  provider references, with complete39-path restoration and four safety guards
+  verified; duplicate executable payloads are omitted. Own new physical-store
+  artifact remains unverified/reference-only; no reopening is claimed.
+  Accepted clock coverage is now91 seeds:277,424 invocations /3,074,726 entries /
+  1,729 faults /356,688 history operations. Failed parent/full release gates stay
+  open. [Complete proof and restore contract](scale/current-tier3-clock-2026-10-04/worker-clock-144-156/).
+
 - **Tier3 worker-clock seeds 131–143 independently qualified at executed799:**
   thirteen actual ten-minute seeds: 41,076 invocations, 455,262 journal entries,
   247 recorded faults and 52,812 operations passing all three production models.

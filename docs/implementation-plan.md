@@ -1466,3 +1466,17 @@ GitHub without reopening. [Complete131–143 proof](scale/current-tier3-clock-20
 brings accepted same-source coverage to78 seeds /236,152 invocations /2,617,262
 entries /1,482 faults /303,624 history operations. The original failed ranges/
 parent, full200-seed row/current-source matrices and actual24h gate remain open.
+
+
+Tier3 worker-clock144–156 at executed799 independently qualifies41,272 invocations,
+457,464 entries,247 faults and53,064 operations passing all three production
+models. All759 captured selected inputs per seed/45 actual model dependencies,
+273 clock proofs/1,365 messages/143 cohort audits verify; worst terminal/progress
+p99 is5.076522145 /0.284237615s under unchanged30s /10s gates. All original raw
+uploads and actual model binary are retained. Three byte-identical workload
+executables share full-revision/member/hash-bound references to accepted131–143,
+with a verified39-path restore command; duplicate payloads are omitted. Own new
+physical-store artifact is reference-only. [Complete144–156 proof](scale/current-tier3-clock-2026-10-04/worker-clock-144-156/)
+brings accepted same-source clock coverage to91 seeds /277,424 invocations /
+3,074,726 entries /1,729 faults /356,688 history operations, without repairing
+failed historical ranges/parent or qualifying full current-source matrices/24h.
