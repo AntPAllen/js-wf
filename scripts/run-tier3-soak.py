@@ -24,13 +24,15 @@ def load_rows():
     return module.TESTS
 
 
-def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=False, batched_retained_audit=False, memory_limit='512MiB'):
+def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=False, batched_retained_audit=False, memory_limit='512MiB', streaming_state_retained_audit=False):
     if row not in load_rows() or duration not in ('35s', '10m', '24h'):
         raise ValueError('unsupported row or duration')
     if type(seed) is not int or not 1 <= seed <= 2**63-1:
         raise ValueError('seed must be positive int64')
     if shutdown not in ('sigkill', 'ldm') or (row != 'rolling_upgrade' and (gap or shutdown != 'sigkill')):
         raise ValueError('invalid shutdown or gap profile')
+    if batched_retained_audit and streaming_state_retained_audit:
+        raise ValueError('conflicting retained audit modes')
     if memory_limit not in MEMORY_LIMITS:
         raise ValueError('unsupported explicit memory budget')
     # Do not inherit fixture/mutation/child-process activation from another run.
@@ -42,6 +44,8 @@ def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=
         env['WF_TIER3_RETAINED_AUDIT_TRACE'] = '1'
     if batched_retained_audit:
         env['WF_TIER3_BATCHED_RETAINED_AUDIT'] = '1'
+    if streaming_state_retained_audit:
+        env['WF_TIER3_STREAMING_STATE_RETAINED_AUDIT'] = '1'
     flags = ['--require-checkpoint-audits']
     if row == 'rolling_upgrade':
         env['WF_TIER3_UPGRADE_SHUTDOWN'] = shutdown
@@ -106,7 +110,9 @@ def main():
     p.add_argument('--upgrade-shutdown', choices=('sigkill','ldm'), default='sigkill')
     p.add_argument('--upgrade-start-gap', action='store_true')
     p.add_argument('--retained-audit-trace', action='store_true')
-    p.add_argument('--batched-retained-audit', action='store_true')
+    readers = p.add_mutually_exclusive_group()
+    readers.add_argument('--batched-retained-audit', action='store_true')
+    readers.add_argument('--streaming-state-retained-audit', action='store_true')
     p.add_argument('--no-race', action='store_true')
     p.add_argument('--memory-limit', choices=MEMORY_LIMITS, default='512MiB',
                    help='Explicit Go memory budget, captured with execution evidence')
@@ -116,7 +122,7 @@ def main():
         p.error('root must be fresh and outside the repository')
     env, testargs, flags = execution(a.row,a.duration,a.seed,root/'fixture',
                                      a.upgrade_shutdown,a.upgrade_start_gap,
-                                     a.retained_audit_trace,a.batched_retained_audit,a.memory_limit)
+                                     a.retained_audit_trace,a.batched_retained_audit,a.memory_limit,a.streaming_state_retained_audit)
     if subprocess.check_output(['git','status','--porcelain'],cwd=REPO):
         p.error('execution requires a clean committed checkout')
     revision = subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip()
@@ -130,6 +136,7 @@ def main():
                  memory_limit=a.memory_limit,
                  retained_audit_trace=a.retained_audit_trace,
                  batched_retained_audit=a.batched_retained_audit,
+                 streaming_state_retained_audit=a.streaming_state_retained_audit,
                  clears_full_tier3_release=False)
     def save():
         temporary=root/'execution.tmp.json'

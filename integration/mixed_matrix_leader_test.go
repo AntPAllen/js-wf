@@ -920,11 +920,33 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 // transient transport failures get a fresh context, never invariant errors.
 func matrixRetainedAudit(ctx context.Context, js jetstream.JetStream) (integrity.Report, error) {
 	return matrixRetainedAuditUsing(ctx, func(attempt context.Context) (integrity.Report, error) {
-		if os.Getenv("WF_TIER3_BATCHED_RETAINED_AUDIT") == "1" {
-			return integrity.CheckWithBatchedReads(attempt, js)
-		}
-		return integrity.Check(attempt, js)
+		return matrixRetainedCheck(attempt, js, nil)
 	})
+}
+
+// Select the same explicit reader for checkpoint and final full audits.
+func matrixRetainedCheck(ctx context.Context, js jetstream.JetStream, cutoff *uint64) (integrity.Report, error) {
+	streaming := os.Getenv("WF_TIER3_STREAMING_STATE_RETAINED_AUDIT") == "1"
+	batched := os.Getenv("WF_TIER3_BATCHED_RETAINED_AUDIT") == "1"
+	if streaming && batched {
+		return integrity.Report{}, errors.New("conflicting retained audit modes")
+	}
+	if cutoff != nil {
+		if streaming {
+			return integrity.CheckThroughInvocationSequenceWithStreamingStateReads(ctx, js, *cutoff)
+		}
+		if batched {
+			return integrity.CheckThroughInvocationSequenceWithBatchedReads(ctx, js, *cutoff)
+		}
+		return integrity.CheckThroughInvocationSequence(ctx, js, *cutoff)
+	}
+	if streaming {
+		return integrity.CheckWithStreamingStateReads(ctx, js)
+	}
+	if batched {
+		return integrity.CheckWithBatchedReads(ctx, js)
+	}
+	return integrity.Check(ctx, js)
 }
 
 func matrixRetainedAuditUsing(ctx context.Context, check func(context.Context) (integrity.Report, error)) (integrity.Report, error) {

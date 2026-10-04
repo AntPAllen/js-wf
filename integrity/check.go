@@ -159,6 +159,19 @@ func CheckThroughInvocationSequenceWithStreamingReads(ctx context.Context, js je
 	return checkUsingOptions(ctx, js, &cutoff, scanBatchThrough, false, true)
 }
 
+// CheckWithStreamingStateReads combines the streaming journal accumulator with
+// a fresh complete KV watch snapshot. The retained state must be quiescent.
+func CheckWithStreamingStateReads(ctx context.Context, js jetstream.JetStream) (Report, error) {
+	return checkUsingOptions(ctx, js, nil, scanBatchThrough, true, true)
+}
+
+// CheckThroughInvocationSequenceWithStreamingStateReads keeps the original
+// quiescent-cohort/no-purge/no-reuse contract. Every call obtains fresh records
+// and state; a final full audit remains necessary to cover orphan journals.
+func CheckThroughInvocationSequenceWithStreamingStateReads(ctx context.Context, js jetstream.JetStream, cutoff uint64) (Report, error) {
+	return checkUsingOptions(ctx, js, &cutoff, scanBatchThrough, true, true)
+}
+
 func checkUsingOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner, snapshotState, streaming bool) (Report, error) {
 	var report Report
 	inv, err := auditRead(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })

@@ -50,6 +50,19 @@ class SoakProducerTests(unittest.TestCase):
   self.assertEqual(bulk['WF_TIER3_RETAINED_AUDIT_TRACE'],'1')
   self.assertEqual(plain_args,bulk_args)
   self.assertEqual(plain_flags,bulk_flags)
+ def test_streaming_state_mode_is_explicit_and_preserves_gate_arguments(self):
+  with patch.dict(os.environ,{'WF_TIER3_STREAMING_STATE_RETAINED_AUDIT':'1'}):
+   plain,args,flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False)
+   streaming,new_args,new_flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,streaming_state_retained_audit=True)
+  self.assertNotIn('WF_TIER3_STREAMING_STATE_RETAINED_AUDIT',plain)
+  self.assertEqual(streaming['WF_TIER3_STREAMING_STATE_RETAINED_AUDIT'],'1')
+  self.assertNotIn('WF_TIER3_BATCHED_RETAINED_AUDIT',streaming)
+  self.assertEqual(args,new_args)
+  self.assertEqual(flags,new_flags)
+  self.assertEqual(plain['GOMEMLIMIT'],streaming['GOMEMLIMIT'])
+  self.assertEqual(plain['WF_TIER3_SYNC_INTERVAL'],streaming['WF_TIER3_SYNC_INTERVAL'])
+  with self.assertRaises(ValueError):
+   soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,batched_retained_audit=True,streaming_state_retained_audit=True)
  def test_archive_keeps_original_store_bytes_and_compiled_source_with_full_readback(self):
   with tempfile.TemporaryDirectory() as d:
    root=Path(d);(root/'fixture').mkdir();(root/'source').mkdir()

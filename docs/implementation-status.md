@@ -33,6 +33,14 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Combined reader explicitly exposed in real harness:** public full/cohort
+  streaming-state APIs and --streaming-state-retained-audit select the same
+  reader for checkpoint and final audits. Default point reader stays; conflicting
+  batch/combined modes fail before transport reads, inherited WF flags cleared.
+  Six producer guards and integrity/retained-audit retry/conflict race tests pass.
+  Original20s/60s/30s gates and2m sync remain. Five-container ten-minute race
+  journal control with explicit2GiB is next; no actual row/24h claim yet.
+
 - **Full streaming state-watch fault controls independently reviewed:** exact722305a,
   both race cases pass on fresh12000-invocation/144000-entry fixtures. At real
   watch delivery128, single-replica SDK consumer leader shutdown leaves11125

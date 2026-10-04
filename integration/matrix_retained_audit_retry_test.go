@@ -76,3 +76,16 @@ func TestMatrixRetainedAuditHonorsCancellationDuringWait(t *testing.T) {
 		t.Fatalf("err=%v calls=%d", err, calls)
 	}
 }
+
+func TestMatrixRetainedAuditRejectsConflictingReaders(t *testing.T) {
+	t.Setenv("WF_TIER3_BATCHED_RETAINED_AUDIT", "1")
+	t.Setenv("WF_TIER3_STREAMING_STATE_RETAINED_AUDIT", "1")
+	cutoff := uint64(1)
+	for _, cut := range []*uint64{nil, &cutoff} {
+		// A nil transport proves invalid configuration is rejected before reads.
+		report, err := matrixRetainedCheck(context.Background(), nil, cut)
+		if err == nil || err.Error() != "conflicting retained audit modes" || report != (integrity.Report{}) {
+			t.Fatalf("report=%+v err=%v", report, err)
+		}
+	}
+}

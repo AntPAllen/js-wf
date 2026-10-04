@@ -1817,3 +1817,16 @@ full build-info and complete original archive verify.
 This closes the native12k watch-interruption control, not OS SIGKILL, legacy,
 five-container/full-matrix or actual24h qualification. Default readers stay
 unchanged; next expose the combined candidate explicitly in the real harness.
+
+
+### Explicit combined reader in the real cluster harness
+
+`CheckWithStreamingStateReads` and its captured-cohort counterpart expose the
+already controlled combined algorithm. `run-tier3-soak.py` now accepts
+`--streaming-state-retained-audit` and records the choice. The checkpoint and
+final whole-state audit select the same reader. Conflicting batch/combined modes
+fail closed; default readers,20s/60s audit deadlines,30s fault gates and2m server
+sync remain unchanged. Producer controls ensure environment flags cannot
+silently activate the candidate. Next run the actual five-container journal
+row for ten minutes with race and explicit2GiB memory, then independently review
+all originals before making any longer-run qualification claim.
