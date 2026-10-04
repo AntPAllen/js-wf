@@ -22,3 +22,8 @@ The workload SDK and native stores were not uploaded. Process kills, final
 integrity and drain retain named-test scope; no independent store reopening.
 This qualifies these recorded-source shards only, not the parent campaign,
 full 200-seed row, final-source matrices, million-timer drain or actual 24h gate.
+
+After proof publication and complete hash readback, only the duplicate local
+`raw` expansion was removed. Original ZIP/canonical archive, model executable
+and Git parts remain retained. Restore before replaying raw review. See the
+[executed recovery and per-directory evidence](../duplicate-expansion-recovery/).

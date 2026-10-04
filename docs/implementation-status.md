@@ -33,6 +33,13 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Positive matrix duplicate expansions recovered:** seeds73–120 free2464092160
+  exclusive allocated bytes after pushed Git parts, canonical archives, ZIPs and
+  every expanded input independently hash-verify; no visible input descriptor open.
+  Only duplicate raw directories removed. ZIPs/proofs/models and failed evidence
+  remain retained; restore before raw replay. Qualification scope is unchanged.
+  [Exact executed recovery](scale/current-tier2-matrix-2026-10-04/duplicate-expansion-recovery/).
+
 - **All-server-kill109–120 independently accepted:** exactc4fed06, twelve complete
   600s seeds qualify28924 invocations /318815 entries /228 faults /37206 model
   operations. Original30s gates, raw identities/timing/latencies and all three
