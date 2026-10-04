@@ -168,7 +168,12 @@ jobs:
               python3 scripts/capture-tier3-clock-source.py --row "$TIER3_MATRIX_ROW" --root "$TIER3_MATRIX_ARTIFACT_ROOT" --stage before
             fi
             test_status=0
-            if go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m | tee "$seed_events" | python3 -u scripts/render-go-test.py; then
+            if [ "$WF_TIER3_UPGRADE_API_TRACE" = 1 ]; then
+              test_command=(python3 scripts/run-tier3-retained-test.py --root "$TIER3_MATRIX_ARTIFACT_ROOT/retained-sdk" --test "^${row_test}$" --timeout 20m --race)
+            else
+              test_command=(go test -p=1 -race -json ./integration -run "^${row_test}$" -count=1 -timeout=20m)
+            fi
+            if "${test_command[@]}" | tee "$seed_events" | python3 -u scripts/render-go-test.py; then
               test_status=0
             else
               test_status=$?
@@ -228,6 +233,10 @@ jobs:
             /tmp/tier3-mixed-journal/*.json
             /tmp/tier3-mixed-journal/*.jsonl
             /tmp/tier3-mixed-journal/*.log
+            /tmp/tier3-mixed-journal/retained-sdk/*.json
+            /tmp/tier3-mixed-journal/retained-sdk/*.jsonl
+            /tmp/tier3-mixed-journal/retained-sdk/*.txt
+            /tmp/tier3-mixed-journal/retained-sdk/*.log
             /tmp/tier3-mixed-journal/*.txt
             /tmp/tier3-mixed-journal/fault-*-start-gap/*.json
             /tmp/tier3-mixed-journal/fault-*-start-gap/*.log

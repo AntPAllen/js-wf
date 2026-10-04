@@ -30,6 +30,15 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
 
 ## Latest accepted evidence
 
+- **Future traced diagnostics retain actual SDK executable:** opt-in driver
+  compiles once with race and preserves selector/count/timeout/package cwd,
+  complete events, actual binary/build info and selected pre/post/Git/captured
+  inputs in the original archive. Real Git/Go pass/fail/mutation/overwrite controls
+  pass3.879s; whole integration driver validation pending after commit. No core/
+  Tier1/deadline/retry change. Existing run37194088941 has terminal job success at
+  older520; native/API/original review still pending and executable not retrofilled.
+  [Retention scope and controls](scale/rolling-upgrade-fallback-failure-2026-10-04/api-trace/retained-execution/).
+
 - **Tier2 consumer61–72 independently qualified:** twelve ten-minute seeds atc4,
   31,164 invocations /343,412 entries /228 kills and40,114 history operations
   passing all three production models. All45 dependency inputs match source
