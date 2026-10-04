@@ -2,6 +2,15 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Additional worker-clock shard failure:** job 111324439684 in full parent
+  37164231641 fails seed 6 on an approximately 30-second-old clock sample;
+  cancellation/process-counter errors follow. This differs from seed 15's audit
+  deadline. Complete original job log, terminal API metadata and artifact
+  references are preserved; large artifact payloads are not independently
+  verified. Seeds 1–5 have producer passes only. Cause remains unconfirmed,
+  the parent cannot qualify and other live jobs continue.
+  [Exact log and preservation scope](scale/worker-clock-checkpoint-2026-10-04/failed-shard-1-13/).
+
 - **Focused worker-clock seed 15 independently accepted:** run 37166976657 at
   exact `c2e8c01` passes 2,884 invocations, 31,915 entries, 19 faults, all ten
   first-attempt checkpoint audits and terminal/progress type p99
