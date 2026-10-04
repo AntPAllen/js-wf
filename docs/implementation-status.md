@@ -30,6 +30,14 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Clock183–195 verified duplicate expansion recovered:** all1313 expanded
+  file hashes,1436 canonical member contents, pushed parts, actual model and39
+  restored SDK paths verify before removal, with no accessible open descriptors.
+  Recovered547,315,712 exclusive allocated bytes;175,476,736 shared bytes remain
+  preserved elsewhere and are excluded from recovery. Canonical/Git raw proof,
+  actual model and SDK provider/restored paths remain. Failed evidence and scope
+  unchanged. [Exact proof](scale/current-tier3-clock-2026-10-04/worker-clock-183-195/duplicate-removal.json).
+
 - **Clock183–195 independently accepted:** full600s13-seed shard at79915ca;
   39396 invocations /436886 journal entries /247 faults, worst terminal/progress
   p99 5.222196017/0.672171905s under unchanged R5 gates30/30s. All759 source

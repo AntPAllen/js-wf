@@ -9,3 +9,9 @@ Recorded actual SDK hashes match all39 logical executable paths from the accepte
 Proof:1436 included members /36 source hardlinks /48,041,924 compressed bytes, plus39 SDK references. Every included member content, unchanged input, part and concatenated archive SHA verifies. Concatenate parts in manifest order, check canonical SHA256 and safely extract into a fresh directory. Actual model executable is in this archive. Own physical-store artifact11301602093 /1,392,019,845 ZIP bytes remains reference-only: not downloaded, hashed or reopened. Final integrity/drain assertions are attributed to the source-bound named test.
 
 Coverage helper binds eleven independently accepted same-source summaries, old summaries against pinned Git and unique ranges:135 seeds27–52,66–104,131–200;410844 invocations /4554597 journal entries /2565 faults /528228 history operations. Failed ranges1–26,53–65,105–130 remain excluded. This does not repair the failed parent, qualify200 clean seeds/full current-main matrices, or satisfy actual24h.
+
+## Verified duplicate expansion recovery
+
+At pushed925add4, all1313 expanded files (1235 original raw files plus78 verified source/executable assets), all1436 canonical member contents, every committed part and model executable SHA verify. No accessible process descriptor references the expanded directory. All39 omitted executable references are also checked against independently restored destinations.
+
+Only the redundant raw expansion was removed:547,315,712 exclusive allocated bytes recovered. Another175,476,736 shared allocated bytes remain referenced elsewhere and are not counted as recovered. Canonical raw proof, pinned Git SDK provider, independently restored SDK paths and actual model executable remain. Restore raw paths from the compact proof and executable reference helper before further review. Failed evidence and qualification scope are unchanged. Exact executed script and duplicate-removal.json are retained here.
