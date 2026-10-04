@@ -1653,3 +1653,23 @@ all semantic release gates stay unchanged. Five producer controls pass. Next
 bounded10m journal diagnostic uses explicit2GiB/normal plus full audit traces;
 review its actual original evidence before longer campaigns. Complete-audit
 memory/scaling, large-population faults and original24h/full matrices remain.
+
+### All-server-kill qualification extended through48
+
+Complete600s cluster25–36 and37–48 shards atc4fed06 are independently accepted:
+57232 invocations /630935 entries /456 all-three-node fault events /73649
+exactOk history-model operations. Raw fault identities/cadence/latency clocks
+and five-minute completion deadline verify;45 actual model inputs match Git;
+actual models and complete original proofs retained with member/part readback.
+Totalcluster1–48 now113288 invocations /1248685 entries /912 events; worst
+terminal/progress per-type p99 remains18.295491603/13.014859048s under original30s.
+Native SDK/stores not uploaded, so integrity/drain stays named-test scope.
+Full200/final-source/full matrices and actual24h remain open.
+[25–36](scale/current-tier2-matrix-2026-10-04/cluster-25-36/) ·
+[37–48](scale/current-tier2-matrix-2026-10-04/cluster-37-48/).
+
+A bounded normal2GiB journal/seed1/10m real five-container diagnostic is now
+live at4a875f0; actual SDK/environment and persistent supervisor observed.
+Original20s/60s audits,512 batches and30s liveness unchanged. No terminal/full
+original/fault-row/24h qualification follows from launch.
+[Live snapshot](scale/local-r5-audit-memory-2026-10-04/normal-2g-ten-minute-launch/).

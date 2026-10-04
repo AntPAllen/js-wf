@@ -1,0 +1,68 @@
+[
+  {
+    "command": [
+      "git",
+      "worktree",
+      "add",
+      "--detach",
+      "--no-checkout",
+      "/tmp/js-wf-journal-normal-2g-10m-20261004/source",
+      "4a875f030a3c8bb9dd0994864d16c34cd833ba90"
+    ],
+    "working_directory": "/home/exedev/js-wf"
+  },
+  {
+    "command": [
+      "git",
+      "sparse-checkout",
+      "set",
+      "--no-cone",
+      "--stdin"
+    ],
+    "working_directory": "/tmp/js-wf-journal-normal-2g-10m-20261004/source"
+  },
+  {
+    "command": [
+      "git",
+      "read-tree",
+      "-mu",
+      "HEAD"
+    ],
+    "working_directory": "/tmp/js-wf-journal-normal-2g-10m-20261004/source"
+  },
+  {
+    "command": [
+      "docker",
+      "info"
+    ],
+    "working_directory": "/tmp/js-wf-journal-normal-2g-10m-20261004/source"
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "-p=1",
+      "-c",
+      "-o",
+      "/tmp/js-wf-journal-normal-2g-10m-20261004/integration.test",
+      "./integration"
+    ],
+    "working_directory": "/tmp/js-wf-journal-normal-2g-10m-20261004/source"
+  },
+  {
+    "command": [
+      "go",
+      "tool",
+      "test2json",
+      "-t",
+      "-p",
+      "js-wf/integration",
+      "/tmp/js-wf-journal-normal-2g-10m-20261004/integration.test",
+      "-test.run=^TestFiveContainerMixedJournalLeaderEveryThirtySeconds$",
+      "-test.v=test2json",
+      "-test.count=1",
+      "-test.timeout=20m"
+    ],
+    "working_directory": "/tmp/js-wf-journal-normal-2g-10m-20261004/source/integration"
+  }
+]

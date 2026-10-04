@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source; all-server-kill seeds 1–24 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source; all-server-kill seeds 1–48 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -32,6 +32,29 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
+
+- **All-server-kill25–48 independently accepted:** two complete600s shards
+  atc4fed06 qualify57232 invocations /630935 journal entries /456 all-three-node
+  kill/restart events. Exact raw nodes[0,1,2]/node-1,30s cadence and enabling
+  latency/completion deadlines verify. All three rebuilt models return exactOk
+  for73649 operations;45 model dependencies match executed Git and actual
+  executables/complete originals are preserved. Both207-member archives,
+  89106901/88163941 compressed bytes, all originals/members/parts verify.
+  This extends acceptedcluster range to1–48:113288 invocations /1248685 entries /
+  912 faults /145779 model operations. Worst terminal/progress per-type p99
+  18.295491603/13.014859048s under original30s. Native SDK/stores not uploaded;
+  final integrity/drain keeps named-test scope. Cluster200/final-source/full
+  matrices/million-timer/actual24h remain open.
+  [Seeds25–36](scale/current-tier2-matrix-2026-10-04/cluster-25-36/) ·
+  [Seeds37–48](scale/current-tier2-matrix-2026-10-04/cluster-37-48/).
+
+- **Bounded normal2GiB real five-container diagnostic is live:** exact4a875f0,
+  journal/seed1/10m, checkpoint audits,512 batches and full method tracing.
+  Original20s/60s audit and30s liveness gates remain. Actual live SDK/all build
+  info/env, isolated source revision, five containers and persistent unit verify.
+  Initial traces copied; no terminal report, independent complete-original review,
+  row/full-matrix/24h claim. Existing failed24h profiles remain failed.
+  [Observed launch](scale/local-r5-audit-memory-2026-10-04/normal-2g-ten-minute-launch/).
 
 - **Same actual100k SDK completes with explicit2GiB:** source4b7531e,
   byte-identical normal binary to failed512MiB case; full100000 journals /
