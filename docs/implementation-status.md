@@ -30,6 +30,19 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Verified consumer duplicate expansions recovered:** consumer49–60,61–72,
+  73–84 raw expansions removed only after all216 original file hashes,621
+  canonical member contents, actual model executables and pushed Git parts
+  verified, with no accessible open descriptors and unshared file inodes.
+  Recovered2,020,028,416 exclusive allocated bytes. Canonical/committed raw proof
+  and model executables remain; reconstruct raw paths before reuse. The first
+  cleanup's final redundant script-copy failed after recovery.json was saved;
+  archive/removed-path checks were revalidated without repeating deletion.
+  Failed evidence and qualification scopes are unchanged.
+  [49–60](scale/current-tier2-matrix-2026-10-04/consumer-49-60/expansion-recovery/),
+  [61–72](scale/current-tier2-matrix-2026-10-04/consumer-61-72/expansion-recovery/),
+  [73–84](scale/current-tier2-matrix-2026-10-04/consumer-73-84/expansion-recovery/).
+
 - **Focused native/fallback trace41 queued:** run37197193507 executes exact837fb9d
   with600s/one seed/SIGKILL/Start-gap/API trace and actual SDK retention. Native
   and fallback requests are traced under original limits. Terminal review pending;
