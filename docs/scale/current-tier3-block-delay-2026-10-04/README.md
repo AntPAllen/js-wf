@@ -26,3 +26,7 @@ source inventories, actual SDK and native stores are unavailable; integrity/drai
 retain named-test scope. No physical reopening or server cause claim. Full200/
 final-source/full16×200/24h and million-drain gates remain open; failed originals
 remain preserved and the parent has other failed rows.
+
+Duplicate raw expansions were removed only after published proof, canonical,
+ZIP and expanded-input verification. Retained ZIPs/proofs restore every byte.
+[Exact executed recovery](duplicate-expansion-recovery/).

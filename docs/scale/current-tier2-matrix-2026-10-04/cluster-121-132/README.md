@@ -19,3 +19,7 @@ Workload SDK and native stores were not uploaded. Integrity and drain retain
 named-test scope; no independent physical reopening is claimed. This qualifies
 these recorded-source seeds only, not the full row, parent campaign, final-source
 matrices, million-timer drain or actual 24-hour gate.
+
+After published proof and complete canonical/ZIP/input verification, the local
+raw duplicate was removed. ZIP/canonical/model/Git proofs remain; restore before
+raw replay. [Exact recovery](../duplicate-expansion-recovery-121-144/).

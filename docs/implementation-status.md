@@ -33,6 +33,16 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Verified positive duplicate expansions recovered:** eight disk-delay1–104 and
+  two all-server121–144 raw directories free3222515712 exclusive allocated bytes.
+  Pushed proof parts/canonical archives/all ZIP and expanded inputs hash-verify;
+  no visible target descriptors remain. Only duplicate raw expansions removed.
+  Original ZIPs/proofs/models and failed/live originals remain, restore before
+  replay; qualifications unchanged. Compressed proof parts now disable Git delta
+  searches (attribute checks pass); proof bytes/verification remain unchanged.
+  [Disk-delay recovery](scale/current-tier3-block-delay-2026-10-04/duplicate-expansion-recovery/) ·
+  [All-server recovery](scale/current-tier2-matrix-2026-10-04/duplicate-expansion-recovery-121-144/).
+
 - **Tier3 real disk-delay coverage extended through104:** eight complete600s
   shards at79915ca checkout/header binding independently qualify325192
   invocations /3581807 entries /1976 real faults /

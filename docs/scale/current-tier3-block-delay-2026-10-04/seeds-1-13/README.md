@@ -29,3 +29,7 @@ actual model inputs are separately verified against Git. Final integrity/drain
 remain original named-test assertions; no physical reopening is claimed. Only
 seeds1–13 of this recorded-source profile qualify. Full200/final-source/full16×200/
 24h/million-timer gates remain open; the parent has failed other rows.
+
+The local duplicate raw expansion was removed after complete published proof,
+canonical/ZIP/input verification and no open descriptors. ZIPs/canonical/model
+files remain; restore before replay. [Exact recovery](../duplicate-expansion-recovery/).

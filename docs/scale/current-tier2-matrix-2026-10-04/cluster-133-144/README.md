@@ -18,3 +18,7 @@ pending status is superseded by the terminal independent review.
 Workload SDK and native stores were not uploaded. Integrity/drain retain original
 named-test scope; no independent physical reopening. These recorded-source seeds
 qualify only; full200/parent/final-source matrices/million-drain/24h remain open.
+
+After published proof and complete canonical/ZIP/input verification, the local
+raw duplicate was removed. ZIP/canonical/model/Git proofs remain; restore before
+raw replay. [Exact recovery](../duplicate-expansion-recovery-121-144/).

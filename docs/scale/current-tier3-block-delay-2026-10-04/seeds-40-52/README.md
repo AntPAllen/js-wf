@@ -23,3 +23,7 @@ dependencies are independently verified against Git; final integrity/drain retai
 named-test scope. No physical reopening. These recorded-source seeds only qualify;
 full200/final-source/full matrices/24h/million-drain remain open. Failed originals
 are unchanged. Exact batch/model/preservation scripts are retained in the proof.
+
+The local duplicate raw expansion was removed after complete published proof,
+canonical/ZIP/input verification and no open descriptors. ZIPs/canonical/model
+files remain; restore before replay. [Exact recovery](../duplicate-expansion-recovery/).
