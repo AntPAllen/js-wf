@@ -30,6 +30,12 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Focused native/fallback trace41 queued:** run37197193507 executes exact837fb9d
+  with600s/one seed/SIGKILL/Start-gap/API trace and actual SDK retention. Native
+  and fallback requests are traced under original limits. Terminal review pending;
+  this does not qualify historical failures/full matrices/actual24h.
+  [Exact launch](scale/rolling-upgrade-fallback-failure-2026-10-04/api-trace/seed41-launch/).
+
 - **Upgrade seed41 native timeout preserved; opt-in coverage extended:** job
   111324440230 at79915ca fails fault5 during peer-native-rejections, before any
   fallback call. Node0 reports2.15.0; native lookup returns original deadline
