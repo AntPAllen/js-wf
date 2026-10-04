@@ -2,6 +2,18 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Original Phase1 100,000-ID continuous-partition count proof qualified:** actual
+  R3 test at exact `3b859aa` passes44.17 s with100,000 invocation messages,
+  invocation subjects and run messages. Independent timeline verifies206 route
+  changes/103 confirmed isolations, through99,994 completions at41.000998 s of
+  41.103117 s producer work. Actual executable, selected3,848 Go/Cgo/test/module
+  pre/post inputs (561 Git-exact local), all375 original store files and complete
+  raw report/commands/review scripts are retained. All4,241 archive members and
+  concatenated parts reverify. The source inventory's superset/hermetic limits
+  and non-reopened store scope are explicit. This qualifies this original count
+  case only; full Phase1/history, matrices, million-timer and24h remain open.
+  [Full population, continuous route timeline and preserved originals](scale/partition-start-fault-duration-2026-10-04/full100000/).
+
 - **Phase1 partitioned-Start fault-duration gap fixed:** route toggles now remain
   active every200 ms until all96 producers finish, then join and confirm final
   heal before unchanged exact invocation/run counts. Actual route times/counts
@@ -10,7 +22,7 @@
   precise premature-stop error. Seven source inputs match before/after; focused
   executables are not retained. All685 runtime/simulator/producer bytes still
   match race-qualified `283ba32`; existing full gates continue without restart.
-  Full100,000-ID continuous-fault execution remains unqualified.
+  Subsequent full100,000-ID execution is independently accepted above.
   [Exact lifecycle proof, original scope and retained-store preparation](scale/partition-start-fault-duration-2026-10-04/).
 
 - **New pressure failure separated from modeled worker recovery:** terminal job
