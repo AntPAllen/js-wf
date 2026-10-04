@@ -934,6 +934,17 @@ row, full matrix or soak. [New seeds 49–96](scale/current-tier2-matrix-2026-10
 extend individual journal coverage only. Remaining full 13×200, 16×200 and actual
 24-hour full-matrix requirements are unchanged.
 
+The isolation acquisition handoff fixture must publish its arm token atomically:
+write and close a staging file, then rename it into place. A direct WriteFile
+allows a worker to read the created/truncated marker before token publication
+and produce readiness for the wrong token. Deterministically force that
+filesystem boundary for initial and replacement tokens; a partial-write error
+must preserve the prior published token. Existing acquisition/disarm behavior
+must still pass normal/race, and a compiled direct-publication control must fail.
+[Executed fixture correction](scale/isolation-arm-publication-2026-10-04/)
+closes this local visibility hazard only. The original CI timeout's exact cause,
+real fault-row acceptance and full matrix/24h requirements remain separate.
+
 
 ### Million-population native timer diagnostic
 

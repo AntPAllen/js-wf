@@ -1,6 +1,17 @@
 # Implementation status against the supplied plan
 
-## Current qualification snapshot — 2026-10-03
+## Current qualification snapshot — 2026-10-04
+
+- **Isolation handoff publication hazard deterministically fixed:** the local
+  fixture's direct arm-file WriteFile exposes an incomplete token between
+  create/truncate and write. Atomic staging/rename now keeps initial/replacement
+  tokens complete and preserves the old token on write failure. Deterministic
+  actual-filesystem controls and existing handoff/disarm pass normal/race in
+  0.017/1.037 s; a compiled direct-publication overlay fails in 0.007 s. All ten
+  archive members verify. The exact original CI timeout cause remains unconfirmed;
+  mixed-latency/pressure failures are separate. This changes only the integration
+  fixture, not runtime/simulation gates or any real-matrix/24h qualification.
+  [Fixed source, exact interleaving and compiled negative control](scale/isolation-arm-publication-2026-10-04/).
 
 - **2026-10-04 ordinary CI failures retained:** source `f70a990` has a local
   filesystem isolation-handoff timeout, mixed terminal p99 46.012754875 s and

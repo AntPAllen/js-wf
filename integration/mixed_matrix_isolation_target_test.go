@@ -30,6 +30,21 @@ type matrixIsolationTarget struct {
 	Delivery              worker.DispatchEvent `json:"delivery"`
 }
 
+func publishMatrixIsolationArm(path string, token []byte) error {
+	return publishMatrixIsolationArmWithWriter(path, token, os.WriteFile)
+}
+
+// The worker can read the marker immediately after it becomes visible. A
+// direct WriteFile exposes its create/truncate phase before the token write.
+func publishMatrixIsolationArmWithWriter(path string, token []byte, write func(string, []byte, os.FileMode) error) error {
+	staged := path + ".tmp"
+	defer os.Remove(staged)
+	if err := write(staged, token, 0600); err != nil {
+		return err
+	}
+	return os.Rename(staged, path)
+}
+
 func holdMatrixIsolationTarget(ctx context.Context, base string, delivery worker.DispatchEvent) error {
 	armed, err := os.ReadFile(base + "-isolation-arm")
 	if os.IsNotExist(err) {
@@ -86,7 +101,7 @@ func armMatrixIsolationTarget(ctx context.Context, fleet []*matrixProcessWorker,
 	}()
 	token := time.Now().UTC().Format(time.RFC3339Nano)
 	for _, process := range fleet {
-		if err = os.WriteFile(process.base+"-isolation-arm", []byte(token), 0600); err != nil {
+		if err = publishMatrixIsolationArm(process.base+"-isolation-arm", []byte(token)); err != nil {
 			return
 		}
 	}
