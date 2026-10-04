@@ -33,6 +33,14 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **New actual24h journal run launched:** executed95b63c0, five containers,
+  normal2GiB/GOMAXPROCS2, combined streaming/state audits and explicit route seeds.
+  Live SDK/all build-info/environment,1266 Git inputs and actual all-peer container
+  commands independently verified. Started2026-10-04 21:08:58UTC; persistent service
+  active at launch review, original20s/60s/30s gates retained. No terminal result
+  or24h/race/full-matrix qualification yet; failed originals remain preserved.
+  [Launch provenance](scale/local-r5-streaming-audit-2026-10-04/explicit-routes-normal-2g-24h-launch/).
+
 - **Explicit-route combined ten-minute race row independently accepted:** exact0393caa,
   2324 invocations /25596 entries /19 faults, named test737.40s. All19 censuses
   show five nodes with every four-peer mesh; original30s clocks,20s/60s audits,

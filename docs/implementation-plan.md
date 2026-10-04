@@ -1889,3 +1889,12 @@ back. Native SDK/stores not uploaded; named final integrity/drain scope only.
 [49–60](scale/current-tier2-matrix-2026-10-04/cluster-49-60/) ·
 [61–72](scale/current-tier2-matrix-2026-10-04/cluster-61-72/).
 Successful73–96 await review; full200/current-source/full matrices and24h remain.
+
+### New actual24h explicit-route normal-profile launch
+
+The journal/seed1 24-hour run started at executed `95b63c0` on 2026-10-04
+21:08:58 UTC. Five containers, normal build, explicit 2 GiB/GOMAXPROCS2, combined
+streaming/state retained audits and all-peer route seeds are recorded in the
+[verified launch](scale/local-r5-streaming-audit-2026-10-04/explicit-routes-normal-2g-24h-launch/).
+Original audit/liveness/heal/sync gates remain. This is observed launch evidence;
+terminal originals, model review and actual24h acceptance remain pending.
