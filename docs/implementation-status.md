@@ -2,6 +2,17 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Local proof checkout disk recovered:** exact-path sparse checkout omits
+  55 large already-committed archive working files after their materialized/Git
+  blob identities and streamed SHA256 values match. Local Git and pushed proof
+  bytes remain intact; all 767 source inputs and clean HEAD remain unchanged.
+  All 156 script controls pass in 3.688 s. About 1.82 GiB is recovered, leaving
+  about 2.2 GiB root free for upcoming shard proofs. Broker stores, failed
+  originals and qualification are unchanged. Restore recorded archive paths
+  before reviews that require them; whole restoration uses sparse-checkout
+  disable with adequate disk. This does not fund the full 24-hour store scope.
+  [Exact blob ledger, source hashes and restoration instructions](scale/local-proof-sparse-checkout-2026-10-04/).
+
 - **Tier3 planner checkout reduced:** the planner's checkout now fetches
   `.github`, `scripts` and root files, omitting retained broker/executable
   archives. Actual isolated remote filtered/sparse checkout is 3.1 MiB;
