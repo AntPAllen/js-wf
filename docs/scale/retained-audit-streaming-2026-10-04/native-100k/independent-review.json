@@ -1,0 +1,51 @@
+{
+  "source": "1d43a2b2cdf2fe82e3d1fcf5bbabf0c42ad38986",
+  "exit_code": 0,
+  "race": false,
+  "selected_inputs": 2893,
+  "local_git_inputs": 63,
+  "all_captured_source_hashes_verified": true,
+  "all_local_inputs_match_executed_git": true,
+  "actual_runner_matches_executed_git": true,
+  "actual_binary_sha256": "9f86c17ebf8862fa2c1a60ecf05544a2289f6f482dcc280909fb44014edeacb3",
+  "actual_binary_retained": true,
+  "all_actual_build_info_fields_match": true,
+  "live_proc_identity_captured": true,
+  "actual_live_environment_verified": true,
+  "named_results": {
+    "TestBatchedInvariantAuditNativeStreamingComparison": {
+      "status": "pass",
+      "seconds": 126.42
+    }
+  },
+  "native_files": 414,
+  "native_file_bytes": 520054895,
+  "raw_result_log": "=== RUN   TestBatchedInvariantAuditNativeStreamingComparison\n    batched_invariant_native_test.go:571: streaming-audit reader=baseline elapsed=17.401056545s report={Invocations:100000 Journals:100000 Entries:1200000 Terminal:100000} err=<nil> allocated_bytes=4476760112 gc_cycles=10\n    batched_invariant_native_test.go:571: streaming-audit reader=streaming elapsed=17.299744988s report={Invocations:100000 Journals:100000 Entries:1200000 Terminal:100000} err=<nil> allocated_bytes=4264822056 gc_cycles=17\n    batched_invariant_native_test.go:571: streaming-audit reader=streaming_state elapsed=11.809901342s report={Invocations:100000 Journals:100000 Entries:1200000 Terminal:100000} err=<nil> allocated_bytes=3253372288 gc_cycles=13\n    batched_invariant_native_test.go:571: streaming-audit reader=baseline_recheck elapsed=18.983371485s report={Invocations:100000 Journals:100000 Entries:1200000 Terminal:100000} err=<nil> allocated_bytes=4545273816 gc_cycles=15\n--- PASS: TestBatchedInvariantAuditNativeStreamingComparison (126.42s)\nPASS\n",
+  "measurements": {
+    "baseline": {
+      "seconds": 17.401056545,
+      "allocated_bytes": 4476760112,
+      "gc_cycles": 10
+    },
+    "streaming": {
+      "seconds": 17.299744988,
+      "allocated_bytes": 4264822056,
+      "gc_cycles": 17
+    },
+    "streaming_state": {
+      "seconds": 11.809901342,
+      "allocated_bytes": 3253372288,
+      "gc_cycles": 13
+    },
+    "baseline_recheck": {
+      "seconds": 18.983371485,
+      "allocated_bytes": 4545273816,
+      "gc_cycles": 15
+    }
+  },
+  "all_reports_match": true,
+  "physical_stores_reopened": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false,
+  "scope": "Four same-store full100k/1.2M reads agree under20s. Combined mode faster in this fixture; streaming alone is close to baseline. Allocation/GC covers embedded servers and client, not peak/checker-only memory. No fault/production/five-container/race/24h qualification."
+}

@@ -33,6 +33,21 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Streaming native equivalence and combined100k gain observed:** exact1d43a2b,
+  race controls match point/batched/state/streaming reports and exact errors for
+  compaction/cohort/fresh corruption/I1/I2/I3/orphan/terminal mutations. Same-store
+  normal2GiB100k/1.2M full reports all agree under20s: baseline17.401s,
+  streaming-point17.300s, streaming-state11.810s, baseline recheck18.983s.
+  Combined mode is faster in this fixture; streaming alone close to baseline.
+  Whole embedded-process allocations4.477/4.265/3.253/4.545GB, not peak/checker
+  memory or a general performance guarantee. All2893 selected inputs/63 Git files,
+  actual SDK/build-info and3981/3325 proof members verify;31842651/110287055-byte
+  complete archives and all parts read back. Live/proc/env captured for100k only;
+  native stores retained, not reopened. Original slice/snapshot oracle bytes
+  unchanged. Full-audit fault/legacy/five-container qualification pending; default
+  and harness remain unchanged, no soak restart or budget change.
+  [Complete controlled proofs](scale/retained-audit-streaming-2026-10-04/).
+
 - **Streaming-prefix audit candidate prepared:** opt-in mode retains current
   protocol state per invocation instead of decoded prefixes, decoding all records
   freshly and saving errors until original sorted reduction. Compacted subjects

@@ -1751,3 +1751,16 @@ with point/batched/state readers; native equivalence still pending. A same-store
 under unchanged20s. Whole embedded-process cumulative allocations/GC cycles
 are recorded, not pure checker cost or peak RSS. No performance, fault-recovery
 or release qualification is inferred from unit tests or preparation.
+
+Native qualification at1d43a2b now verifies point/batched/state/streaming exact
+reports/errors through compaction/cohort/fresh corruption/I1/I2/I3/orphan and
+terminal replacement/Delete/Purge/recreation. Same-store100k/1.2M normal2GiB
+four complete audits under20s: baseline17.401s, streaming-point17.300s,
+streaming-state11.810s, baseline recheck18.983s. Combined mode faster in this
+fixture, streaming alone close to baseline; allocation/GC counters include
+embedded servers and client, not peak/checker-only memory. Original oracles
+unchanged; all selected/Git/actual SDK/build-info/member/part proofs verify.
+100k live/proc/env captured, controls not; stores not reopened. No adoption or
+soak restart. Next full-cohort leader-loss/cancellation/state-watch/legacy faults,
+then real five-container qualification under unchanged20s/60s.
+[Complete native proofs](scale/retained-audit-streaming-2026-10-04/).

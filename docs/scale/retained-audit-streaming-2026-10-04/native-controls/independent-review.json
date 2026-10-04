@@ -1,0 +1,55 @@
+{
+  "source": "1d43a2b2cdf2fe82e3d1fcf5bbabf0c42ad38986",
+  "exit_code": 0,
+  "race": true,
+  "selected_inputs": 2893,
+  "local_git_inputs": 63,
+  "all_captured_source_hashes_verified": true,
+  "all_local_inputs_match_executed_git": true,
+  "actual_runner_matches_executed_git": true,
+  "actual_binary_sha256": "66bcdd32d496803b831c792020af5c5a4560c1c71cecb62ca6383976cff55654",
+  "actual_binary_retained": true,
+  "all_actual_build_info_fields_match": true,
+  "live_proc_identity_captured": false,
+  "named_results": {
+    "TestBatchedInvariantAuditNativeCompactionCohortAndFreshCorruption": {
+      "status": "pass",
+      "seconds": 35.64
+    },
+    "TestBatchedInvariantAuditNativeJournalCorruption/epoch-owner": {
+      "status": "pass",
+      "seconds": 0.91
+    },
+    "TestBatchedInvariantAuditNativeJournalCorruption/index-gap": {
+      "status": "pass",
+      "seconds": 0.89
+    },
+    "TestBatchedInvariantAuditNativeJournalCorruption/descending-epoch": {
+      "status": "pass",
+      "seconds": 0.91
+    },
+    "TestBatchedInvariantAuditNativeJournalCorruption/unresolved-terminal": {
+      "status": "pass",
+      "seconds": 0.94
+    },
+    "TestBatchedInvariantAuditNativeJournalCorruption/completion-without-request": {
+      "status": "pass",
+      "seconds": 0.99
+    },
+    "TestBatchedInvariantAuditNativeJournalCorruption": {
+      "status": "pass",
+      "seconds": 9.25
+    },
+    "TestBatchedInvariantAuditNativeStateValues": {
+      "status": "pass",
+      "seconds": 9.68
+    }
+  },
+  "native_files": 1071,
+  "native_file_bytes": 975109,
+  "raw_result_log": "=== RUN   TestBatchedInvariantAuditNativeCompactionCohortAndFreshCorruption\n    batched_invariant_native_test.go:141: cohort=false report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n    batched_invariant_native_test.go:150: cohort=true report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n    batched_invariant_native_test.go:151: cohort=false report={Invocations:3 Journals:0 Entries:0 Terminal:0} matched_error=invalid character 'i' looking for beginning of value\n    batched_invariant_native_test.go:159: cohort=true report={Invocations:2 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.first: terminal state differs\n    batched_invariant_native_test.go:166: cohort=true report={Invocations:2 Journals:2 Entries:4 Terminal:1} matched_error=wf.jrn.audit.second: terminal state missing: nats: key not found\n    batched_invariant_native_test.go:181: cohort=true report={Invocations:2 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.first: journal gap or corrupt entry: snapshot object \"snapshot-35ad1f9ad87ef7b2-3-88db2a2d59cd5942\": snapshot SHA256 differs\n    batched_invariant_native_test.go:185: cohort=true report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n    batched_invariant_native_test.go:198: cohort=true report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n    batched_invariant_native_test.go:199: cohort=false report={Invocations:3 Journals:2 Entries:4 Terminal:1} matched_error=journal wf.jrn.audit.orphan has no invocation\n--- PASS: TestBatchedInvariantAuditNativeCompactionCohortAndFreshCorruption (35.64s)\n=== RUN   TestBatchedInvariantAuditNativeJournalCorruption\n=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/epoch-owner\n    batched_invariant_native_test.go:233: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.epoch-owner: epoch 1 used by workers audit-proof and other-owner\n=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/index-gap\n    batched_invariant_native_test.go:233: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.index-gap: index 9 at position 2\n=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/descending-epoch\n    batched_invariant_native_test.go:233: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.descending-epoch: epoch or Started violation\n=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/unresolved-terminal\n    batched_invariant_native_test.go:233: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.unresolved-terminal: successful terminal with unresolved request\n=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/completion-without-request\n    batched_invariant_native_test.go:233: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.completion-without-request: completion without request\n    batched_invariant_native_test.go:262: cohort=false report={Invocations:1 Journals:0 Entries:0 Terminal:0} matched_error=duplicate invocation wf.inv.audit.duplicate\n--- PASS: TestBatchedInvariantAuditNativeJournalCorruption (9.25s)\n    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/epoch-owner (0.91s)\n    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/index-gap (0.89s)\n    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/descending-epoch (0.91s)\n    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/unresolved-terminal (0.94s)\n    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/completion-without-request (0.99s)\n=== RUN   TestBatchedInvariantAuditNativeStateValues\n    batched_invariant_native_test.go:594: cohort=true report={Invocations:1 Journals:1 Entries:4 Terminal:1} matched_error=<nil>\n    batched_invariant_native_test.go:599: cohort=true report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.state-first: terminal state differs\n    batched_invariant_native_test.go:607: cohort=true report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.state-first: terminal state missing: nats: key not found\n    batched_invariant_native_test.go:607: cohort=true report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.state-first: terminal state missing: nats: key not found\n    batched_invariant_native_test.go:612: cohort=true report={Invocations:1 Journals:1 Entries:4 Terminal:1} matched_error=<nil>\n    batched_invariant_native_test.go:613: cohort=false report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n--- PASS: TestBatchedInvariantAuditNativeStateValues (9.68s)\nPASS\n",
+  "physical_stores_reopened": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false,
+  "scope": "Point/batched/state-snapshot/streaming reports and errors match through native compaction/cohort/fresh corruption and terminal replacement/Delete/Purge/recreation. No fault recovery/performance/release qualification; live proc identity not captured."
+}
