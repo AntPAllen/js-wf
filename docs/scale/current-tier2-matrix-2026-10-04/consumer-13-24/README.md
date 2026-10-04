@@ -9,3 +9,7 @@ The proof has **204 members / 53,021,058 bytes**. Every archive member, each par
 The native workflow did not upload original workload executables, source capture ledgers or physical stores; these are not claimed. Final integrity/queue-drain assertions come from the source-bound named test, not independent physical-store reopening. This qualifies only consumer seeds 13–24 at c4fed06, not all 200 consumer seeds, a full current-source matrix, the failed Tier3 parent or the actual 24-hour soak. Other completed consumer shards await independent review.
 
 The existing journal reviewer now accepts explicit `--row consumer`; journal remains its default. Row names, artifact prefixes, named tests and report identities must agree. Four CLI binding guards pass, including rejection of a substituted journal row and unsupported rows; the complete twelve-seed consumer proof exercises the full reviewer and retains the actual executed model binary. No runtime or Tier1 producer bytes are changed, and no workload is rerun.
+
+## Current local evidence availability
+
+After complete canonical/member/Git-part SHA verification, all 72 raw files in the duplicate RAM expansion were removed, recovering 663,900,160 allocated bytes. The canonical proof and actual model executable remain retained; complete raw bytes remain in the pushed proof. [Exact recovery](expansion-recovery/) records the checks. Old raw paths require restoration from the verified proof; this does not change qualification.

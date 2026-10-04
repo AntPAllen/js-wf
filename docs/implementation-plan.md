@@ -1428,3 +1428,13 @@ now supports explicit consumer selection while retaining journal defaults and
 rejecting row substitutions. [Complete consumer shard proof](scale/current-tier2-matrix-2026-10-04/consumer-13-24/)
 qualifies only this twelve-seed range; full consumer/current-source matrices,
 physical million-timer drain and the actual 24-hour soak remain open.
+
+
+The consumer-leader row at executed `c4fed06` now independently qualifies seeds
+1–24: newly reviewed 1–12 adds 30,912 invocations, 340,629 entries, 228 kills
+and 39,786 source-bound history operations. Raw faults/latencies and all three
+models pass, with actual model executable and complete hash-verified proof retained.
+Worst new terminal/progress type p99 is 17.358545411 / 7.069948845 s under
+unchanged 30 s / 10 s gates. [Complete 1–12 proof](scale/current-tier2-matrix-2026-10-04/consumer-1-12/)
+plus accepted13–24 establishes 61,992 invocations / 683,158 entries / 456 kills;
+full consumer/current-source matrices and original actual24h gate remain open.

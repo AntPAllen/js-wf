@@ -1,5 +1,29 @@
 # Implementation status against the supplied plan
 
+- **Tier2 consumer-leader seeds 1–12 independently qualified:** twelve actual
+  ten-minute seeds at executed `c4fed06`: 30,912 invocations, 340,629 entries,
+  228 leader kills and 39,786 history operations passing all three production
+  models. All 45 actual dependency inputs match executed source; actual model
+  executable, complete raw/API/command/reviewer evidence and readback-verified
+  proof are retained. Worst terminal/progress type p99 is 17.358545411 /
+  7.069948845 s under unchanged 30 s / 10 s gates. Accepted consumer coverage
+  is now contiguous 1–24: 61,992 invocations, 683,158 entries and 456 kills.
+  Seeds 25–36 are terminal successful but await independent review; full consumer
+  row/current-source matrix and actual24h remain open.
+  [Exact 1–12 proof](scale/current-tier2-matrix-2026-10-04/consumer-1-12/).
+
+- **Verified duplicate recovery for continued review:** accepted consumer13–24
+  raw expansion recovers 663,900,160 RAM bytes after all 72 files, 204 canonical
+  members and pushed Git parts verify. Accepted 100k-start expanded stores recover
+  111,857,664 root bytes after all 375 files, 4,241 members and pushed parts verify.
+  Canonical archives/actual executables remain retained; complete originals remain
+  local/pushed Git. No original failed evidence or qualification changes.
+  [Consumer recovery](scale/current-tier2-matrix-2026-10-04/consumer-13-24/expansion-recovery/) /
+  [100k-start store recovery](scale/partition-start-fault-duration-2026-10-04/full100000/expansion-recovery/).
+  [Eighth sparse extension](scale/local-proof-sparse-checkout-2026-10-04/eighth-extension/)
+  separately recovers 52,428,800 root bytes from two committed archive working
+  copies, with all 793 previously tracked source inputs unchanged.
+
 - **Tier2 consumer-leader seeds 13–24 independently qualified:** twelve actual
   ten-minute seeds at executed `c4fed06` produce 31,080 invocations, 342,529
   entries and 228 recorded leader kills. Raw fault identities/cadence/heal times,
@@ -7,8 +31,8 @@
   history models pass 39,986 operations with 45 dependency inputs matching
   source before/after; actual model executable and complete raw proof are retained.
   Worst terminal/progress type p99 is 18.076655685 / 7.320884037 s under unchanged
-  30 s / 10 s gates. Consumer 1–12 and 25–36 are terminal successful but await
-  independent raw review. Full consumer row/current-source matrix and soak remain
+  30 s / 10 s gates. Consumer 1–12 is now independently qualified above; 25–36 is terminal
+  successful but awaits independent raw review. Full consumer row/current-source matrix and soak remain
   open; native workload executables/physical stores were not uploaded.
   [Exact twelve-seed proof](scale/current-tier2-matrix-2026-10-04/consumer-13-24/).
 

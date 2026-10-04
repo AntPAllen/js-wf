@@ -1,0 +1,3 @@
+# Verified duplicate expansion recovery
+
+The executed verifier and complete recovery ledger record the exact removed expansion, pushed HEAD, retained canonical archive, complete member/file SHA checks, independently streamed Git part checks and open-FD checks. Only the recorded expansion is removed. The actual executable and canonical archive remain at their recorded paths, and complete original bytes remain in local/pushed Git. Failed originals are untouched; qualification is unchanged. Restore the required archive from Git, verify its canonical/member hashes, then extract before using old expanded paths.

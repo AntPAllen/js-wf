@@ -1,0 +1,3 @@
+# Eighth exact archive checkout recovery
+
+At pushed `81a86567133d0efa9c87092b20a18181f0462892`, two committed archive working copies are omitted after exact Git blob/SHA/size and open-FD checks, recovering 52,428,800 allocated root bytes. All 793 previously tracked source inputs remain materialized and identical. Executed verifier, exact ledger and sparse/source pre/post records are retained here. Complete archive bytes remain local/pushed Git, and failed originals outside Git are untouched. Restore an individual path from Git and verify its recorded SHA before use. Qualification is unchanged.
