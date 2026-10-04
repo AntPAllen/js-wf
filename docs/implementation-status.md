@@ -11,7 +11,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source; all-server-kill seeds 1–132 qualified. Full 13-row × 200 current-source gate remains open. |
-| Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
+| Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. No24h row qualified; full-matrix soak remains. |
@@ -32,6 +32,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
+
+- **Complete ahead-clock200 recorded-source row independently accepted:** exact63fbc03,
+  200 complete600s seeds qualify128996 invocations /1419968 entries /3800 faults /
+  167272 operations. Admitted clock cuts, all-five common clocks, checkpoints,
+  byte-identical raw reports/explanations/fencing and all704 source inputs verify.
+  All three rebuilt history models exactOk;45 actual dependencies match Git.
+  Worst terminal/progress p99=18.793s/28.101s under unchanged30s gates. Complete
+  downloaded raw originals/model/reviewer archive members and parts read back.
+  Workload SDK/physical stores not downloaded; metadata references only, final
+  integrity/drain named-test scope. Final-source/full16×200/24h remain open.
+  [Complete raw row proof](scale/r5-ahead200-2026-10-04/complete-recorded-source-raw/).
 
 - **All-server-kill121–132 independently accepted:** exactc4fed06, twelve complete
   600s seeds qualify28392 invocations /312903 entries /228 faults /36518 model

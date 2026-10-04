@@ -1980,3 +1980,17 @@ read back. Combined1–132:313,964 invocations/3,460,609 entries/2,508 faults/
 403,960 operations. Worst terminal/progress p99 remains18.295s/13.015s.
 SDK/stores unavailable; named-test integrity/drain scope. Full200/final-source/
 13×200 gate remains open. [Complete shard proof](scale/current-tier2-matrix-2026-10-04/cluster-121-132/).
+
+### Complete recorded-source ahead-clock200 row accepted
+
+All200 complete600-second seeds at `63fbc03` independently qualify128,996
+invocations/1,419,968 entries/3,800 admitted faults/167,272 exactOk history
+operations. All-five common clock and pending timer admission, checkpoint/raw
+report/explanation/fencing regeneration,704 clean source inputs and45 actual
+model dependencies verify. Worst terminal/progress p99 is18.793s/28.101s under
+unchanged30s gates. Complete downloaded raw evidence/model/reviewer originals
+and parts read back. Physical-store metadata remains references only; actual
+workload SDK/stores not downloaded or reopened, integrity/drain named-test scope.
+This clears the complete recorded-source ahead-clock row only; final-source/
+full16×200/behind-clock/million-drain/24h gates remain open.
+[Complete ahead-clock raw proof](scale/r5-ahead200-2026-10-04/complete-recorded-source-raw/).
