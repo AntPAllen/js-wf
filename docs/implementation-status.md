@@ -30,14 +30,30 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
 
 ## Latest accepted evidence
 
-- **Future traced diagnostics retain actual SDK executable:** opt-in driver
-  compiles once with race and preserves selector/count/timeout/package cwd,
-  complete events, actual binary/build info and selected pre/post/Git/captured
-  inputs in the original archive. Real Git/Go pass/fail/mutation/overwrite controls
-  pass3.879s; whole integration driver validation pending after commit. No core/
-  Tier1/deadline/retry change. Existing run37194088941 has terminal job success at
-  older520; native/API/original review still pending and executable not retrofilled.
-  [Retention scope and controls](scale/rolling-upgrade-fallback-failure-2026-10-04/api-trace/retained-execution/).
+- **Traced native upgrade seed15 independently accepted:** full600s five-container
+  diagnostic at520316e completes1848 invocations /20355 journal entries, all five
+  SIGKILL upgrades/Start gaps, six cohort audits and all three history models
+  /2381 operations. Worst terminal/progress p99 is13.072342745/13.046293003s,
+  both below executed R5 gates30/30s. All120 API requests have responses;
+  fallback checks22–35ms do not reproduce the historical60s timeout. All801
+  source inputs and3892 original members verify; actual model/NATS executables
+  and original stores retained in1048-member /51,603,904-byte compact proof.
+  SDK executable was not uploaded; originals not independently reopened.
+  Historical cause/failed parent, full200/current-source matrices and actual24h
+  remain open. [Accepted diagnostic](scale/rolling-upgrade-fallback-failure-2026-10-04/api-trace/seed15-accepted/).
+
+- **Actual SDK retention driver independently validated:** opt-in driver compiles
+  once under race and preserves commands/events/executable/build info/input bytes.
+  Isolated controls pass3.879s. Whole integration request/reply contract atcd9468d
+  passes0.24s/package1.253s; all3850 selected inputs /563 Git-local sources verify,
+  source before/after and actual binary unchanged. Actual executable retained.
+  This validates instrumentation, not five-container upgrades/full matrices/24h.
+  [Driver scope and proof](scale/rolling-upgrade-fallback-failure-2026-10-04/api-trace/retained-execution/).
+
+- **R5 clock gate descriptions corrected:** executed fixture and verifier both
+  require terminal and progress p99 below30s. Recent clock proof summaries
+  incorrectly said30/10s; their measured values remain accepted. R3 progress10s,
+  implementation gates and audit20s/60s are unchanged.
 
 - **Tier2 consumer61–72 independently qualified:** twelve ten-minute seeds atc4,
   31,164 invocations /343,412 entries /228 kills and40,114 history operations
@@ -81,7 +97,7 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
   15,092 invocations /167,415 entries /95 faults and19,404 operations passing all
   three models. All759 source inputs /45 model dependencies,105 clock proofs /
   525 broker messages /50 cohort audits verify. Worst terminal/progress p99:
-  5.49413901 /0.657032846s under unchanged30s /10s gates. Complete raw/model proof
+  5.49413901 /0.657032846s under unchanged30s /30s gates. Complete raw/model proof
   has643 members /23,764,267 bytes, plus15 fully verified pinned SDK references.
   Own stores remain reference-only. Accepted clock coverage:122 unique seeds /
   371,448 invocations /4,117,711 entries /2,318 faults /477,576 history operations.
@@ -124,7 +140,7 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
   39,564 invocations /438,701 entries /247 faults and50,868 operations passing
   all three production models. All759 source inputs /45 model dependencies,
   273 clock proofs /1,365 broker messages /132 cohort audits verify. Worst
-  terminal/progress p99 is5.120032435 /0.410530676s under unchanged30s /10s gates.
+  terminal/progress p99 is5.120032435 /0.410530676s under unchanged30s /30s gates.
   Complete raw data/model executable and verified39-path pinned SDK restoration
   are retained in1,435 archive members /48,242,841 bytes. Own stores remain
   reference-only. Same-source clock coverage:117 seeds /356,356 invocations /
@@ -146,7 +162,7 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
   247 faults and50,616 operations passing all three source-bound production
   models;759 captured source inputs,45 model dependencies,273 clock proofs /
   1,365 broker messages /131 cohort audits verify. Worst terminal/progress p99
-  is5.251218399 /0.592107855s under unchanged30s /10s gates. All original raw
+  is5.251218399 /0.592107855s under unchanged30s /30s gates. All original raw
   uploads and actual model executable are retained; pinned SDK provider hashes
   and full39-path restoration verify. Own physical stores remain reference-only.
   Accepted same-source clock coverage:104 seeds /316,792 invocations /3,511,595
@@ -166,7 +182,7 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
   457,464 entries,247 faults and53,064 operations passing all three models;
   source759/model45 input checks,273 clock proofs,1,365 broker messages and143
   cohort audits verify. Worst terminal/progress p99 is5.076522145 /0.284237615s
-  under unchanged30s /10s gates. All original raw data and actual model binary
+  under unchanged30s /30s gates. All original raw data and actual model binary
   are retained. Actual workload binaries use hash/source/job-bound pinned Git
   provider references, with complete39-path restoration and four safety guards
   verified; duplicate executable payloads are omitted. Own new physical-store
@@ -181,7 +197,7 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
   All 759 captured inputs per seed and 45 actual model dependencies match executed
   source; 273 clock proofs, 1,365 broker messages and 143 cohort audits verify.
   Worst terminal/progress type p99 is 5.075736715 / 0.282275176 s under unchanged
-  30 s / 10 s gates. Own original archive (51,519 members / 1,408,552,144 bytes)
+  30s /30s gates. Own original archive (51,519 members / 1,408,552,144 bytes)
   and every member hash verify; actual clock/model executables are retained in
   compact Git proof. The physical archive is retained on root disk/GitHub and
   not independently reopened. Accepted same-source clock coverage is now78 seeds:

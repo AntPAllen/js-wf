@@ -10,8 +10,8 @@ The hosted workflow exposes boolean `upgrade_api_trace` (default false), limited
 GOCACHE=/tmp/js-wf-go-build-cache-20261004 GOTMPDIR=/tmp/js-wf-tier2-model-review-20261004/gotmp GOMEMLIMIT=512MiB GOMAXPROCS=2 go test -p=1 -race ./integration   -run '^TestFiveUpgradeProvisioningTraceRetainsUnansweredRequest$'   -count=1 -timeout=1m
 ```
 
-A focused hosted seed15 ten-minute diagnostic must still execute at the pushed prepared source with `upgrade_api_trace=true`, the original SIGKILL profile and Start-gap cut. Preserve its actual API proof, original stores and source attribution before interpreting the outcome. No old parent repair or full-matrix/24-hour qualification follows from a focused success.
+The focused hosted seed15 ten-minute diagnostic has completed with `upgrade_api_trace=true`, the original SIGKILL profile and Start-gap cut. Its native/API/original/history review is accepted below. No old parent repair or full-matrix/24-hour qualification follows from this focused success.
 
 ## Focused diagnostic dispatched
 
-[Run37194088941](https://github.com/AntPAllen/js-wf/actions/runs/37194088941) executes source `520316e04bb3b7174fd013817d375f5f6135a44a` with the exact settings above. Source/API/dispatch observations are retained in `seed15-launch/`. Terminal raw/original review remains pending; dispatch does not qualify the diagnostic or historical parent.
+[Run37194088941](https://github.com/AntPAllen/js-wf/actions/runs/37194088941) executes source `520316e04bb3b7174fd013817d375f5f6135a44a` with the exact settings above. Source/API/dispatch observations are retained in `seed15-launch/`. The focused diagnostic is now independently accepted:1848 invocations,20355 journal entries, five upgrades and all three history models /2381 operations. All120 API requests received responses; fallback checks took22–35ms and did not reproduce the earlier timeout. Complete original/member hashes verify, but stores were not reopened and the older run did not retain its SDK executable. [Accepted proof and scope](seed15-accepted/). Historical parent and full-matrix/24h gates remain open.
