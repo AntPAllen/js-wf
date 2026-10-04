@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/testcluster"
 )
 
 type matrixClockPublisher struct {
@@ -128,5 +129,76 @@ func TestMatrixWorkerClockTransportFailurePreservesCause(t *testing.T) {
 				t.Fatalf("failed transport published clock evidence: %v", err)
 			}
 		})
+	}
+}
+
+func TestMatrixWorkerClockReplyIdentityRealCluster(t *testing.T) {
+	cluster, err := testcluster.Start(t.TempDir(), 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	var clients []jetstream.JetStream
+	for _, nc := range cluster.Clients {
+		js, err := jetstream.New(nc)
+		if err != nil {
+			t.Fatal(err)
+		}
+		clients = append(clients, js)
+	}
+	var stream jetstream.Stream
+	for {
+		attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+		stream, err = clients[0].CreateStream(attempt, jetstream.StreamConfig{
+			Name: "MATRIX_CLOCK", Subjects: []string{"matrix.clock.*"},
+			Storage: jetstream.FileStorage, Replicas: 3, MaxMsgsPerSubject: 16,
+		})
+		stop()
+		if err == nil {
+			break
+		}
+		if ctx.Err() != nil {
+			t.Fatalf("clock stream ready: %v", err)
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	for index, js := range clients {
+		peerStream, err := js.Stream(ctx, "MATRIX_CLOCK")
+		if err != nil {
+			t.Fatal(err)
+		}
+		id := []string{"one", "two", "three"}[index]
+		base := filepath.Join(t.TempDir(), id)
+		var previous uint64
+		for probe := 0; probe < 2; probe++ {
+			attempt, stop := context.WithTimeout(ctx, 2*time.Second)
+			err := writeMatrixWorkerClock(attempt, js, peerStream, base, id)
+			stop()
+			if err != nil {
+				t.Fatal(err)
+			}
+			data, err := os.ReadFile(base + "-clock.json")
+			if err != nil {
+				t.Fatal(err)
+			}
+			var sample matrixWorkerClockSample
+			if err := json.Unmarshal(data, &sample); err != nil {
+				t.Fatal(err)
+			}
+			if sample.Worker != id || sample.Sequence <= previous {
+				t.Fatalf("real reply did not advance the correct worker: %+v", sample)
+			}
+			if err := validateMatrixWorkerClock(sample, 0, time.Now()); err != nil {
+				t.Fatal(err)
+			}
+			previous = sample.Sequence
+			t.Logf("real clock reply peer=%d sample=%s", index, data)
+		}
+	}
+	info, err := stream.Info(ctx)
+	if err != nil || info.State.Msgs != 6 || info.State.LastSeq != 6 {
+		t.Fatalf("six exact clock publications: info=%+v err=%v", info, err)
 	}
 }

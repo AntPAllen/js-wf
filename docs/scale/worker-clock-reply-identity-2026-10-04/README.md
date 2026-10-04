@@ -13,3 +13,10 @@ Original failed campaign source `79915ca`, job 111324439684, has a separate find
 All **685** runtime/simulator/Tier1 producer inputs remain byte-identical to already race-qualified `283ba32`; only integration fixture files change. The running normal100k gate and older cluster campaigns keep their executed-source scope. No full gate was restarted, no real-cluster qualification is claimed from these controls, and the historical TTL30s worker-kill mismatch was not rerun.
 
 `proof.tar.gz` preserves all 30 source, overlay, control/log, phase-evidence, provenance and exact final preservation-script members. Every member reopens and SHA256-verifies before atomic publication; `manifest.json` records the full digest and member hashes. `analysis.json` records exact scope and executable limits.
+
+A subsequent [healthy real API contract](real-api/) verifies two exact probes
+through each of three file-backed peers, normal2.169 s/race3.239 s. All six
+stream messages and existing freshness/offset checks pass. This establishes
+actual API compatibility, without qualifying the five-container fault row or
+attributing the old periodic timeout. Its independent ledgers and preservation
+limits are recorded separately.

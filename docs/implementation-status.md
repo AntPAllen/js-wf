@@ -2,6 +2,17 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Strict clock observer accepts actual API replies:** a three-node real NATS
+  file-store contract publishes/reads two probes through each pinned peer with
+  the unchanged two-second deadline. Normal2.169 s/race3.239 s pass; sequences
+  1–6, six stored messages and all existing freshness/offset checks verify.
+  Five observed source/module inputs match before/after; all 685 runtime/
+  simulator/producer bytes still match race-qualified `283ba32`. This complements
+  deterministic wrong-reply rejection. Test executables/stores are not retained
+  or reopened; five-container fault-row/matrix/24h gates remain open, and the old
+  timeout cause remains unconfirmed. Existing full gates are not restarted.
+  [Actual peer samples, source provenance and exact contract scope](scale/worker-clock-reply-identity-2026-10-04/real-api/).
+
 - **Clock observer rejects unrelated replies; original failure phase narrowed:**
   receipt stream/sequence and returned message sequence/subject/payload/timestamp
   must match the exact publication before replacing the prior sample. Nine

@@ -963,6 +963,10 @@ must match before replacing the prior sample. Controlled mismatches must leave
 that sample unchanged; the compiled original wrong-sequence path must fail.
 [Executed normal/race controls and original timeout-phase evidence](scale/worker-clock-reply-identity-2026-10-04/)
 prove this fixture correction without changing any deadline or workload gate.
+A [three-node real API contract](scale/worker-clock-reply-identity-2026-10-04/real-api/)
+then confirms six exact peer publications and existing freshness/offset checks,
+normal/race, without treating healthy API conformance as full R5 fault-row evidence.
+
 The old seed-6 timeout was in periodic updates after successful initial writes;
 publish versus read and the server cause remain unconfirmed. Runtime/Tier1
 producer bytes are unchanged, so existing gates keep their executed-source scope.
