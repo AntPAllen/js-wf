@@ -14,7 +14,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds and disk-delay seeds 1–104 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
-| Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. No24h row qualified; full-matrix soak remains. |
+| Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. No24h row qualified; full-matrix soak remains. |
 
 Requested adjustments are in place: Tier1 simulation is implemented; R5 route
 recovery p99 measures from confirmed healing; the historical 31.1 s / TTL 30 s worker
@@ -32,6 +32,32 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
+
+- **Full million/24h scheduler candidate comparison is live:** isolated247eeff,
+  all1,000,000 publishes acknowledge;15m runway/64 publishers/fileR3/original2s
+  p99/30s max/two all-node SIGKILL cuts unchanged. First/last dueOct4/Oct5 at
+  23:31:49UTC. Actual SDK and all three candidate executables/all build fields,
+  1693 selected Go/module inputs/83 Git inputs and complete snapshot parts verify.
+  Candidateff73356 remains diagnostic, production release verification rejects it.
+  Live stores unchanged; terminal receipt/latency/physical-drain review pending.
+  [Verified full-profile launch](scale/scheduler-server-candidate-2026-10-04/million-24h-launch/).
+
+- **Explicit-route actual24h journal attempt failed:** exact95b63c0, normal2GiB,
+  test7751.58s; checkpoint1050/cutoff29400 exhausts all three original20s attempts /
+  60s total. Last1040 audits29120 invocations/321244 entries. First failure uses205
+  pulls then2869 serial journal reads; remaining attempts exhaust budgets too.
+  Concurrent native-million load overlaps failure; resource/server causality
+  unconfirmed. Actual SDK/all build fields/1266 source inputs/6144 originals and
+  publication parts read back. Stores retained, not reopened. No unchanged rerun;
+  bulk-reader interruption recovery is next. Full24h/full matrices remain open.
+  [Complete failed originals](scale/local-r5-streaming-audit-2026-10-04/explicit-routes-normal-2g-24h-failed/).
+
+- **Compressed candidate timing independently decoded:** all300 slots/checksums
+  and non-early receipts verify; unchanged p99/max regenerate. All60 >2s receipt
+  intervals intersect one of the two recorded outages,30 each; sole causality
+  unproved. Original failed status/2s gate unchanged. This motivates full-profile
+  comparison, not candidate adoption or original-million qualification.
+  [Exact decoder/raw inputs/per-receipt timing](scale/scheduler-server-candidate-2026-10-04/compressed-outage-timing/).
 
 - **Verified positive duplicate expansions recovered:** eight disk-delay1–104 and
   two all-server121–144 raw directories free3222515712 exclusive allocated bytes.

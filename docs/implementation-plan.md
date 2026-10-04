@@ -2031,3 +2031,23 @@ Every actual model's45 dependencies match Git; all canonical members/parts read
 back. Captured full workload source/SDK/stores unavailable, integrity/drain
 named-test scope. Full200/final-source/full16×200/24h/million-drain remain open.
 [Complete recorded-source proof ranges](scale/current-tier3-block-delay-2026-10-04/).
+
+### Explicit-route24h failure and full-profile scheduler comparison
+
+Normal2GiB95b63c0 journal attempt fails7751.58s at checkpoint1050/cutoff29400:
+three original20s audits exhaust60s total. Last1040 passes29120 invocations/
+321244 entries. First trace uses205 pulls then2869 serial journal reads; bulk
+interruption recovery is next. The native-million loading burst overlapped this
+failure; resource/server causality remains unconfirmed. SDK/all build fields/
+1266 source inputs/6144 original members and parts verify; stores not reopened.
+[Complete failure](scale/local-r5-streaming-audit-2026-10-04/explicit-routes-normal-2g-24h-failed/).
+
+The retained300-timer90s candidate remains failed: exact decoding verifies all
+300 receipts and original p99/max; all60 >2s intervals intersect recorded outages,
+without proving sole cause. A new isolated247eeff million/24h candidate comparison
+acknowledges all1M publishes with15m runway/64 publishers/original2s/30s limits and
+both all-node SIGKILL cuts unchanged. First/last dueOct4/5 at23:31:49UTC. Live SDK/
+all three candidate binaries/all build fields and1693 selected inputs/83 Git inputs
+verify. Snapshot proof only; live stores and terminal gates pending. Candidate
+remains diagnostic; production adoption/original million/full24h/full matrices
+remain open. [Full-profile launch](scale/scheduler-server-candidate-2026-10-04/million-24h-launch/).
