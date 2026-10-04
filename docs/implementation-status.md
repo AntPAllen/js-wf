@@ -14,7 +14,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
-| Original 24-hour soak | Actual journal-leader row running at pinned20babb5; none qualified yet. Other rows/full matrix and retained-original audits remain. |
+| Original 24-hour soak | Actual journal-leader attempt failed retained audit at batch110 after950s; originals preserved. No24h row qualified; full-matrix soak remains. |
 
 Requested adjustments are in place: Tier1 simulation is implemented; R5 route
 recovery p99 measures from confirmed healing; the historical 31.1 s / TTL 30 s worker
@@ -29,6 +29,17 @@ and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Actual24h attempt failed; originals independently preserved:** pinned20babb5
+  journal/seed1/race fails after950.33s at retained audit batch110/cutoff3080.
+  All three20s attempts exhaust unchanged60s total; later fanout cancellation
+  is secondary. Exact failed request/cause unconfirmed; no blind restart.
+  Service is terminal failed/MainPID0; archive completed. All1203 selected
+  pre/post source files match Git, actual SDK SHA/all build-info fields and all
+  4960 original member hashes verify. Complete72084648-byte archive
+  retains actual SDK/source/raw/store bytes in3 parts; stores not reopened.
+  No24h or full-matrix qualification. Earlier launch/live snapshots are historical.
+  [Complete failed originals and scope](scale/local-r5-soak-24h-2026-10-04/journal-audit-failure/).
 
 - **Consumer-leader121–144 independently accepted in two complete shards:**
   121–132: 31080 invocations /342557 entries /228 kills /40010 history ops,
