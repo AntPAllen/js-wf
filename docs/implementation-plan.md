@@ -1928,3 +1928,13 @@ peer-name pool counts. Race controls verify serialized identities for single-pee
 pools and full meshes and reject identity aliasing. Historical census outputs
 retain their original scope; the live95b63c0 soak is unchanged. Saved topology
 identities help independent review but do not prove quorum/catch-up or causes.
+
+### Recorded-source all-server matrix coverage through seed120
+
+Exact `c4fed06` coverage now accepts all-server-kill seeds1–120. New109–120
+passes raw checks and three rebuilt models over37206 operations, original30s
+gates retained. Aggregate285572 invocations /3147706 entries /2280 faults /367442
+operations has worst terminal/progress p99 18.295s/13.015s. Complete original archive
+and all members/parts verify. Native SDK/stores unavailable; final integrity/drain
+remains named-test scope. Full200/final-source/full matrices remain open.
+[Complete new shard](scale/current-tier2-matrix-2026-10-04/cluster-109-120/).
