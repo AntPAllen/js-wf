@@ -1,0 +1,3 @@
+# Disposable Go build cache recovered for evidence review
+
+No local Go/compiler/linker process or cache file descriptor was live when the explicit RAM build cache was cleared with `go clean -cache`. This recovered **1,974,112,256 allocated file bytes** from 7,087 cache files. The command targets only `/dev/shm/js-wf-go-build-cache-20261003`; retained proof archives, actual captured executables and failed raw evidence are stored separately and remain untouched. No source or qualification changed. Future builds regenerate the cache. Exact command, inventory and verification script are retained here.

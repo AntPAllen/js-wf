@@ -1019,16 +1019,16 @@ full-campaign shard subsequently fails seed 61 with a batch-90 retained-audit
 
 
 
-Current Tier2 journal seeds 1–168 pass independent raw fault/latency and production
-history-model review at exact `c4fed06`: 442,400 invocations, 4,874,014 entries,
-3,192 leader kills and worst terminal/progress type p99 17.457496447/9.067125521 s.
+Current Tier2 journal seeds 1–192 pass independent raw fault/latency and production
+history-model review at exact `c4fed06`: 505,512 invocations, 5,569,185 entries,
+3,648 leader kills and worst terminal/progress type p99 17.457496447/9.067125521 s.
 The reusable journal-shard reviewer binds the complete requested range and actual
 local model dependency inputs to executed Git; it never promotes a parent, full
 row, full matrix or soak.
 If main has changed, use `--model-root` with a source-isolated campaign checkout;
 the entire actual local dependency graph and module hashes must still match
 executed Git before/after compilation/review. [Executed source-isolation controls](scale/tier2-model-source-root-2026-10-04/)
-prove that selecting a directory cannot bypass a dependency mismatch. [New seeds 49–168](scale/current-tier2-matrix-2026-10-04/)
+prove that selecting a directory cannot bypass a dependency mismatch. [New seeds 49–192](scale/current-tier2-matrix-2026-10-04/)
 extend individual journal coverage only. Remaining full 13×200, 16×200 and actual
 24-hour full-matrix requirements are unchanged.
 
