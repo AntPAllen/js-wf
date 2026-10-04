@@ -407,6 +407,13 @@ func runPhaseThreeRepeatedFaults(t *testing.T, rebalance bool) {
 			active := []int{}
 			activeCounts := map[int]int{}
 			for i, p := range fleet {
+				// A worker pinned to the deliberately isolated minority cannot
+				// initialize a replacement through that endpoint before heal.
+				// Keep those existing processes under the network fault, while
+				// applying new process faults on the reachable majority.
+				if rebalance && routeHeld && i%3 == 2 {
+					continue
+				}
 				if holds[i] >= 0 {
 					continue
 				}

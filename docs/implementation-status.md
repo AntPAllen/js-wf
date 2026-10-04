@@ -30,6 +30,15 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Combined-rebalance second trial rejected; fault selection corrected:** actual
+  retained race SDK at12552cb fails31.21s after three completions/eight moves:
+  a killed worker's replacement, pinned to the deliberately isolated minority,
+  cannot read its lease bucket before startup readiness. The existing minority
+  processes remain under the route cut; subsequent process faults now select
+  reachable majority slots until heal. Ownership still moves among all six IDs.
+  Original2s schedule/45s holds/5min target remain. Failed SDK/source/store roots
+  retained at `/tmp/js-wf-phase3-rebalance-corrected-20261004`; no qualification.
+
 - **First combined-rebalance execution rejected; route setup fixed:** retained
   race SDK at88fbad0 fails19.857s because the plain cluster has no route proxies;
   attempted route cut panics. Actual executable/source/events/original stores
