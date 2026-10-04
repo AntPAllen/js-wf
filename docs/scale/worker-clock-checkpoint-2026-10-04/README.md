@@ -62,3 +62,11 @@ because local disk is constrained. It remains unchanged at
 and in the [original GitHub artifact](https://github.com/AntPAllen/js-wf/actions/runs/37164231641/artifacts/11289735245),
 whose recorded expiry is 2027-01-02. The RAM copy does not survive VM reboot;
 restore from the GitHub artifact and verify the recorded digest/manifest.
+
+## Focused diagnostic result
+
+The requested seed-15 run now passes independent raw/source/clock review and
+all three separately executed history models with unchanged audit bounds.
+[Accepted case, controls and preservation limits](accepted-seed-15/) qualify
+only that single case; the original deadline cause and failed full parent
+remain unchanged.

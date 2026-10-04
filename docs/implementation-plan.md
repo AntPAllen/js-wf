@@ -921,9 +921,15 @@ capacity remain unconfirmed. All original archive/source hashes verify. Retain
 each checkpoint attempt's timing/deadline/partial report and log the primary
 failure before cancellation masks it. Keep the existing three 20-second attempts
 inside 60 seconds and all workload gates unchanged while investigating. Focused
-ten-minute diagnostic 37166976657 at `c2e8c01` requests seed 15 only; dispatch
-does not establish recovery. [Failure and diagnostic evidence](scale/worker-clock-checkpoint-2026-10-04/)
-define this limit. Other campaign jobs remain useful individual evidence.
+ten-minute diagnostic 37166976657 at `c2e8c01` qualifies seed 15 only after
+independent raw/source/clock and three-model review: 2,884 invocations,
+31,915 entries and 19 faults. All ten checkpoints pass on their first attempt;
+the last takes 18.782 seconds against the unchanged 20-second attempt bound.
+The successful case does not establish the original failure cause or repair
+the failed full parent. The shard reviewer accepts the actual flat focused-store
+archive only with exact single-seed original-store identity; raw/range archives
+still require their nested fixture layout. [Accepted diagnostic evidence](scale/worker-clock-checkpoint-2026-10-04/accepted-seed-15/)
+defines this limit. Other campaign jobs remain useful individual evidence.
 
 Current Tier2 journal seeds 1–96 pass independent raw fault/latency and production
 history-model review at exact `c4fed06`: 252,896 invocations, 2,786,187 entries,

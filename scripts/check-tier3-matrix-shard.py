@@ -132,15 +132,28 @@ def review(run, job, artifact, log, root, row, first, last,
     with tempfile.TemporaryDirectory(prefix='tier3-shard-review-') as temporary:
         for seed in range(first, last+1):
             path = locations[seed]
+            fixture = path.parent/'tier3-mixed-journal'
+            flat_store_archive = False
+            if not fixture.is_dir():
+                # Focused original-store archives place the fixture's contents
+                # at their root. Raw uploads and range archives use the nested
+                # layout; missing nested data there must still be rejected.
+                span = str(first) if first == last else f'{first}-{last}'
+                if (row not in CAPTURED or first != last or path.parent != root
+                        or artifact['name'] != f'rolling-original-stores-{row}-seed-{span}'):
+                    raise ValueError('missing expected nested fixture directory')
+                fixture = root
+                flat_store_archive = True
             if sources is not None:
                 prefix = row.replace('_', '-')
-                proofs = [json.loads((path.parent/'tier3-mixed-journal'/f'{prefix}-source-{stage}.json').read_text())
+                proofs = [json.loads((fixture/f'{prefix}-source-{stage}.json').read_text())
                           for stage in ('before', 'after')]
                 expected = dict(revision=source, clean=True, files=sources)
                 if proofs != [expected, expected]:
                     raise ValueError('captured pre/post inputs differ from exact Git source inventory')
             reports.append(full.verify_seed(path, Path(temporary)/'review.json', row, seed, '10m',
-                                            require_clock, require_upgrade_start_gap, upgrade_shutdown))
+                                            require_clock, require_upgrade_start_gap, upgrade_shutdown,
+                                            **({'fixture_root': fixture} if flat_store_archive else {})))
     if inventory(root) != before:
         raise ValueError('original evidence changed during review')
     return dict(source=source, run_id=run['id'], job_id=job['id'], artifact_id=artifact['id'],

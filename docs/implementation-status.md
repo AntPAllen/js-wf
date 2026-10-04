@@ -2,6 +2,20 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Focused worker-clock seed 15 independently accepted:** run 37166976657 at
+  exact `c2e8c01` passes 2,884 invocations, 31,915 entries, 19 faults, all ten
+  first-attempt checkpoint audits and terminal/progress type p99
+  5.148231271/0.402368402 s. All 761 pre/post source inputs and 3,963 original
+  store-archive members verify; all three independent history models pass
+  3,708 operations with 45 source-identical model/module inputs. The reviewer
+  now supports the actual flat focused-store layout with exact artifact identity;
+  raw/range layout rejection and all 13 controls remain enforced. Checkpoint
+  attempts reach 18.782 s against the unchanged 20 s bound. This does not prove
+  the original deadline cause or clear failed full parent 37164231641. Compact
+  proof retains 233 verified members; the large store/executable tar remains
+  unchanged in RAM/GitHub with recorded expiry, and stores are not reopened.
+  [Accepted case and precise scope](scale/worker-clock-checkpoint-2026-10-04/accepted-seed-15/).
+
 - **Isolation handoff publication hazard deterministically fixed:** the local
   fixture's direct arm-file WriteFile exposes an incomplete token between
   create/truncate and write. Atomic staging/rename now keeps initial/replacement

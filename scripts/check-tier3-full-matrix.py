@@ -92,9 +92,11 @@ def locate_seed_events(artifact, seed):
 
 
 def verify_seed(events, output, row, seed, duration, require_clock,
-                require_upgrade_start_gap=False, expected_upgrade_shutdown=None):
+                require_upgrade_start_gap=False, expected_upgrade_shutdown=None,
+                fixture_root=None):
+    fixture = fixture_root if fixture_root is not None else events.parent/'tier3-mixed-journal'
     args = [sys.executable, str(Path(__file__).with_name('check-tier3-journal-row.py')),
-            '--row', row, '--root', str(events.parent/'tier3-mixed-journal'),
+            '--row', row, '--root', str(fixture),
             '--events', str(events), '--duration', duration, '--expected-seed', str(seed),
             '--output', str(output), '--require-checkpoint-audits']
     if require_clock and row.startswith('server_clock_'):
@@ -111,9 +113,9 @@ def verify_seed(events, output, row, seed, duration, require_clock,
     for script, name in [('explain-tier3-events.py', 'event-explanations.json'),
                          ('review-tier3-fencing.py', 'fencing-timeline-review.json')]:
         subprocess.run([sys.executable, str(Path(__file__).with_name(script)),
-                        '--root', str(events.parent/'tier3-mixed-journal'),
+                        '--root', str(fixture),
                         '--output', str(output)], check=True, stdout=subprocess.DEVNULL)
-        if output.read_bytes() != (events.parent/'tier3-mixed-journal'/name).read_bytes():
+        if output.read_bytes() != (fixture/name).read_bytes():
             raise ValueError('uploaded event explanation/fencing review disagrees with raw artifacts')
     return report
 

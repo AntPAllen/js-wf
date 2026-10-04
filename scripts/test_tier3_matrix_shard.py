@@ -23,6 +23,29 @@ def fixture(row='journal', first=1, last=2):
 
 
 class MatrixShardTests(unittest.TestCase):
+    def test_flat_focused_store_archive_requires_explicit_original_store_identity(self):
+        run, job, artifact, log = fixture('worker_clock', 15, 15)
+        artifact['name'] = 'rolling-original-stores-worker_clock-seed-15'
+        sources = {'go.mod': '0'*64, 'go.sum': '1'*64}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root/'tier3-mixed-journal-events.jsonl').write_text('{}\n')
+            proof = dict(revision=run['head_sha'], clean=True, files=sources)
+            for stage in ('before', 'after'):
+                (root/f'worker-clock-source-{stage}.json').write_text(json.dumps(proof))
+            with mock.patch.object(shard, 'source_hashes', return_value=sources), mock.patch.object(
+                    shard.full, 'verify_seed', return_value=dict(invocations=28, journal_entries=308, confirmed_faults=19)) as raw:
+                result = shard.review(run, job, artifact, log, root, 'worker_clock', 15, 15)
+                self.assertTrue(result['shard_qualified'])
+                self.assertEqual(raw.call_args.kwargs, {'fixture_root': root})
+                for flag in ('qualifies_parent_campaign', 'qualifies_full_row', 'clears_full_tier3_release'):
+                    self.assertFalse(result[flag])
+                raw.reset_mock()
+                artifact['name'] = 'tier3-worker_clock-seed-15'
+                with self.assertRaisesRegex(ValueError, 'nested fixture'):
+                    shard.review(run, job, artifact, log, root, 'worker_clock', 15, 15)
+                raw.assert_not_called()
+
     def test_terminal_job_can_be_reviewed_without_promoting_failed_parent(self):
         run, job, artifact, log = fixture()
         for status, conclusion in [('in_progress', None), ('completed', 'failure')]:
@@ -32,6 +55,7 @@ class MatrixShardTests(unittest.TestCase):
                 for seed in (1, 2):
                     folder = root/f'seed-{seed}'
                     folder.mkdir()
+                    (folder/'tier3-mixed-journal').mkdir()
                     (folder/'tier3-mixed-journal-events.jsonl').write_text('{}\n')
                 def reviewed(path, output, row, seed, duration, *profiles):
                     return dict(seed=seed, invocations=28, journal_entries=308, confirmed_faults=19)
@@ -83,6 +107,7 @@ class MatrixShardTests(unittest.TestCase):
             root = Path(directory)
             events = root/'tier3-mixed-journal-events.jsonl'
             events.write_text('{}\n')
+            (root/'tier3-mixed-journal').mkdir()
             with mock.patch.object(shard.full, 'verify_seed', side_effect=ValueError('raw counterexample')):
                 with self.assertRaisesRegex(ValueError, 'raw counterexample'):
                     shard.review(run, job, artifact, log, root, 'journal', 1, 1)
