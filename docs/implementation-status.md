@@ -12,6 +12,9 @@
   verified. Combined accepted 39 seeds (27–52 and 66–78) total 117,068
   invocations, 1,297,409 entries, 741 faults and 150,516 history operations.
   Failed parent, missing ranges and full row/matrix/24h gates remain open.
+  After pushed-proof verification, only its duplicate raw expansion is removed:
+  553,779,200 exclusive allocated bytes recovered; shared provider data remains.
+  Compressed proofs and failed originals are preserved; restore before replay.
   [Complete raw/model proof and explicit provider scope](scale/current-tier3-clock-2026-10-04/worker-clock-66-78/).
 
 - **Complete clock coverage extends to seeds 27–52 at exact `79915ca`:** new
