@@ -33,6 +33,14 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Full streaming state-watch fault controls prepared:** new native tests use
+  12000 invocations /144000 entries, mandatory full baseline, and real WatchAll
+  delivery interception. At delivery128, identify the single actual pending
+  watch consumer and shut down its leader, or cancel. Require complete recovery
+  within original20s or invocation-only cancellation; no synthetic entries or
+  completion marker. Native execution pending. Library shutdown, not SIGKILL;
+  default readers and original20s/60s limits remain unchanged.
+
 - **100k streaming journal-fault capacity independently reviewed:** exact878c341,
   normal build, 100000 invocations / 1.2M entries / 100000 terminals. Complete
   baseline first; actual R3 memory consumer leader library shutdown at visitor128
