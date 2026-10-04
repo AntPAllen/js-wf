@@ -1970,3 +1970,13 @@ references remain exact. Complete438-member SDK/process-store proof verifies.
 [Originals and scope](scale/continuation-retirement-lease-expiry-2026-10-04/).
 Budgets unchanged; no physical reopening or worker SIGKILL/active-GC/other TTL/
 limit/p99/final-source full-matrix/24h qualification is claimed.
+
+### Recorded-source all-server matrix coverage through seed132
+
+Seeds121–132 at `c4fed06` independently qualify28,392 invocations/312,903 entries,
+228 faults and36,518 exactOk history operations under unchanged30s gates.
+All45 actual model dependencies match Git; complete archive members and parts
+read back. Combined1–132:313,964 invocations/3,460,609 entries/2,508 faults/
+403,960 operations. Worst terminal/progress p99 remains18.295s/13.015s.
+SDK/stores unavailable; named-test integrity/drain scope. Full200/final-source/
+13×200 gate remains open. [Complete shard proof](scale/current-tier2-matrix-2026-10-04/cluster-121-132/).
