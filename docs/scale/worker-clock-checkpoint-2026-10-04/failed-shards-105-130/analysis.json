@@ -1,0 +1,161 @@
+{
+  "source": "79915ca41a5c5a23b9997eea5f3f66d82530ee30",
+  "run": 37164231641,
+  "cases": [
+    {
+      "job": 111324439576,
+      "range": "105-117",
+      "failed_seed": 112,
+      "producer_passed_seeds": [
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111
+      ],
+      "unexecuted_seeds": [
+        113,
+        114,
+        115,
+        116,
+        117
+      ],
+      "prior_producer_passes_independently_qualified": false,
+      "source_inputs": 759,
+      "all_executed_pre_post_source_match": true,
+      "primary_checkpoint": {
+        "batch": 90,
+        "invocation_cutoff": 2520,
+        "started": "2026-10-04T05:20:29.131314442Z",
+        "completed": "2026-10-04T05:21:29.133389006Z",
+        "report": {
+          "Invocations": 2520,
+          "Journals": 1921,
+          "Entries": 15351,
+          "Terminal": 1920
+        },
+        "error": "retained audit: wf.jrn.matrixshort.tier3-112-batch-56-5: terminal state missing: context deadline exceeded"
+      },
+      "audit_duration_ns": 60002074564,
+      "previous_checkpoint": {
+        "batch": 80,
+        "invocation_cutoff": 2240,
+        "started": "2026-10-04T05:19:26.324180486Z",
+        "completed": "2026-10-04T05:19:45.036859374Z",
+        "report": {
+          "Invocations": 2240,
+          "Journals": 2240,
+          "Entries": 24824,
+          "Terminal": 2240
+        }
+      },
+      "previous_audit_duration_ns": 18712678888,
+      "all_five_child_logs_pass": true,
+      "secondary_cancellations": [
+        {
+          "time": "2026-10-04T05:21:29.134227833Z",
+          "output": "    tier3_mixed_worker_clock_test.go:23: resultmatrixfanout/tier3-112-batch-99-7= err=context canceled\n"
+        }
+      ],
+      "raw_artifact_id": 11294386997,
+      "raw_downloaded_in_full": true,
+      "store_artifact_id": 11295046238,
+      "store_artifact_zip_bytes": 853938728,
+      "stores_downloaded": false,
+      "stores_reopened": false,
+      "actual_workload_binaries_verified": false,
+      "server_cause_confirmed": false,
+      "qualifies_parent": false,
+      "affected_workflow_completed_client_result": {
+        "invoke_ts": "2026-10-04T05:17:03.871823676Z",
+        "return_ts": "2026-10-04T05:17:06.096772791Z",
+        "op": "getResult",
+        "args": {
+          "type": "matrixshort",
+          "id": "tier3-112-batch-56-5"
+        },
+        "result": {
+          "status": "completed",
+          "inv_seq": 1574,
+          "result_hash": "73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049"
+        }
+      },
+      "completed_result_to_audit_start_ns": 203034541651
+    },
+    {
+      "job": 111324439574,
+      "range": "118-130",
+      "failed_seed": 121,
+      "producer_passed_seeds": [
+        118,
+        119,
+        120
+      ],
+      "unexecuted_seeds": [
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130
+      ],
+      "prior_producer_passes_independently_qualified": false,
+      "source_inputs": 759,
+      "all_executed_pre_post_source_match": true,
+      "primary_checkpoint": {
+        "batch": 90,
+        "invocation_cutoff": 2520,
+        "started": "2026-10-04T05:38:58.457169943Z",
+        "completed": "2026-10-04T05:39:58.457650232Z",
+        "report": {
+          "Invocations": 2520,
+          "Journals": 500,
+          "Entries": 6538,
+          "Terminal": 499
+        },
+        "error": "retained audit: wf.jrn.matrixchild.c-eb42d3702a54780427471bdf687f910e: terminal state missing: context deadline exceeded"
+      },
+      "audit_duration_ns": 60000480289,
+      "previous_checkpoint": {
+        "batch": 80,
+        "invocation_cutoff": 2240,
+        "started": "2026-10-04T05:37:57.836139495Z",
+        "completed": "2026-10-04T05:38:16.850760012Z",
+        "report": {
+          "Invocations": 2240,
+          "Journals": 2240,
+          "Entries": 24822,
+          "Terminal": 2240
+        }
+      },
+      "previous_audit_duration_ns": 19014620517,
+      "all_five_child_logs_pass": true,
+      "secondary_cancellations": [
+        {
+          "time": "2026-10-04T05:39:58.458593071Z",
+          "output": "    tier3_mixed_worker_clock_test.go:23: resultmatrixsignal/tier3-121-batch-99-0= err=context canceled\n"
+        }
+      ],
+      "raw_artifact_id": 11295271287,
+      "raw_downloaded_in_full": true,
+      "store_artifact_id": 11294219833,
+      "store_artifact_zip_bytes": 440020294,
+      "stores_downloaded": false,
+      "stores_reopened": false,
+      "actual_workload_binaries_verified": false,
+      "server_cause_confirmed": false,
+      "qualifies_parent": false
+    }
+  ],
+  "primary_failure": "Batch-90 retained-state audit exhausts unchanged 60-second budget before canceling in-flight workloads",
+  "old_source_lacks_per_attempt_timing": true,
+  "server_cause_confirmed": false,
+  "timeout_gate_changed": false,
+  "new_trial_started": false,
+  "full_parent_qualified": false
+}

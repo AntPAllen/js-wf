@@ -1,5 +1,27 @@
 # Implementation status against the supplied plan
 
+- **Two additional clock-shard failures independently bound to original raw evidence:**
+  at exact `79915ca`, seed 112 (shard 105–117) and seed 121 (118–130) fail their
+  batch-90 retained-state audit after 60.002074564/60.000480289 s. Terminal lookup
+  deadline errors precede secondary workflow cancellation; all five subprocess
+  logs pass in each case. Seed 112's affected workflow has a completed client
+  result 203.034541651 s before the audit begins. This proves an earlier completed
+  client result, not the server cause or physical terminal-state durability.
+  All 759 selected source hashes verify pre/post every executed seed. Earlier
+  named passes are not independently qualified, later seeds remain unexecuted,
+  and original stores/executables are not downloaded or verified here.
+  Complete raw/API/log/source/analysis proof: 1,160 members / 34,190,830 bytes,
+  every member SHA-verified with original inputs unchanged. No new trial or gate
+  change is made; full parent and release requirements remain open.
+  [Exact failure evidence and causal limits](scale/worker-clock-checkpoint-2026-10-04/failed-shards-105-130/).
+
+- **Accepted clock 92–104 duplicate RAM recovery:** after pushed `5fdd42c`, every
+  expanded input/canonical/Git part SHA-verifies with no open descriptors; only
+  duplicate raw files are removed, recovering 528,924,672 exclusive allocated bytes.
+  Shared provider executables, canonical/Git proofs and actual model executable
+  remain available. Failed evidence is unchanged; restore raw inputs before reuse.
+  [Exact checks](scale/current-tier3-clock-2026-10-04/worker-clock-92-104/duplicate-removal.json).
+
 - **Clock seeds 92–104 independently accepted at exact `79915ca`:** all thirteen
   ten-minute seeds pass raw/source/clock review and all three production history
   models: 37,996 invocations, 420,849 entries, 247 faults and 48,852 operations.

@@ -1375,3 +1375,13 @@ committed enqueue's hidden acknowledgement. Fencing/fatal/cancellation guards,
 all pinned traces and the reconciler package must pass. This fixes partial-timeout
 progress; large-population latency and certification for other scan kinds remain
 separate work.
+
+Additional full clock-parent failures at executed `79915ca` are independently
+retained: seed 112 in 105–117 and seed 121 in 118–130 exhaust the unchanged
+60-second batch-90 retained-state audit before secondary cancellation. All five
+worker logs pass in each case; seed 112's affected workflow has a completed
+client result 203.034541651 s before audit start. This is a lookup-timeout boundary,
+not confirmed missing/corrupt data or a server-cause attribution. Complete raw
+artifacts and exact pre/post source hashes are preserved; new stores/executables
+are reference-only. [Failure proof and qualification limits](scale/worker-clock-checkpoint-2026-10-04/failed-shards-105-130/)
+keep those ranges, full parent/row/matrix and original 24-hour gate open.
