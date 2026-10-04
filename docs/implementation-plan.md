@@ -1592,3 +1592,19 @@ explicit native512/4096 comparison remains. No soak restart or deadline change.
 Per-record delivery/validation and efficient fault recovery need further work
 before the original24h gate can qualify. All original full-matrix/million gates
 remain open.
+
+
+### Consumer replication cost comparison and phase profiling
+
+Actual race SDK atddd5396 audits identical12k/144k stores withR3, R1 thenR3
+temporary consumers:12.024088088 /12.653120485 /14.682479197s, all complete.
+Source streams remainR3; actualR1 configs and zero consumer leakage verify.
+All2889 selected inputs /59 Git-local files, actual live SDK/build info and3270
+complete original proof members verify, stores not reopened. No clear gain is
+demonstrated. [Complete comparison](scale/retained-audit-consumer-replication-2026-10-04/).
+
+Production replicas/batch size and original20s/60s budgets stay unchanged. R1
+consumer fault recovery and full release gates remain open. A test-only native
+CPU profile and stream-scan/visitor timing diagnostic is prepared to locate
+per-record cost; it includes embedded server activity and does not establish
+five-container performance or a server-cause claim. No soak restart.

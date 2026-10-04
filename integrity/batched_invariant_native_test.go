@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime/pprof"
 	"strings"
 	"testing"
 	"time"
@@ -422,4 +424,73 @@ func TestBatchedInvariantAuditNativeConsumerReplication(t *testing.T) {
 		}
 	}
 	t.Logf("replication-audit invocations=%d entries=%d terminal=%d stream_replicas=3 replicated_consumer_seconds=%s replicated_error=%v single_consumer_seconds=%s single_error=%v replicated_recheck_seconds=%s replicated_recheck_error=%v actual_single_consumers=%s consumers=0", candidate.Invocations, candidate.Entries, candidate.Terminal, baselineElapsed, baselineErr, candidateElapsed, candidateErr, recheckElapsed, recheckErr, strings.Join(observed, ","))
+}
+
+func TestBatchedInvariantAuditNativePhaseProfile(t *testing.T) {
+	profileRoot := os.Getenv("WF_AUDIT_BATCH_PROFILE_ROOT")
+	if profileRoot == "" {
+		t.Skip("set WF_AUDIT_BATCH_PROFILE_ROOT for the native CPU/phase profile")
+	}
+	js, ctx, want := batchAuditLargeCohort(t, 12000)
+	if !filepath.IsAbs(profileRoot) {
+		t.Fatal("profile root must be absolute")
+	}
+	if err := os.Mkdir(profileRoot, 0755); err != nil {
+		t.Fatal(err)
+	}
+	profile, err := os.Create(filepath.Join(profileRoot, "audit-cpu.pprof"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer profile.Close()
+	if err := pprof.StartCPUProfile(profile); err != nil {
+		t.Fatal(err)
+	}
+	type phase struct {
+		Stream       string        `json:"stream"`
+		Records      int           `json:"records"`
+		Bytes        int           `json:"bytes"`
+		ScanElapsed  time.Duration `json:"scan_ns"`
+		VisitElapsed time.Duration `json:"visit_ns"`
+	}
+	var phases []phase
+	attempt, stop := context.WithTimeout(ctx, 20*time.Second)
+	started := time.Now()
+	report, auditErr := checkUsing(attempt, js, nil, func(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+		p := phase{Stream: stream.CachedInfo().Config.Name}
+		began := time.Now()
+		var failure error
+		pprof.Do(ctx, pprof.Labels("audit_phase", p.Stream), func(ctx context.Context) {
+			failure = scanBatchThrough(ctx, stream, cutoff, func(msg *jetstream.RawStreamMsg) error {
+				p.Records++
+				p.Bytes += len(msg.Data)
+				entered := time.Now()
+				err := visit(msg)
+				p.VisitElapsed += time.Since(entered)
+				return err
+			})
+		})
+		p.ScanElapsed = time.Since(began)
+		phases = append(phases, p)
+		return failure
+	})
+	elapsed := time.Since(started)
+	stop()
+	pprof.StopCPUProfile()
+	data, err := json.MarshalIndent(struct {
+		Phases  []phase       `json:"phases"`
+		Report  Report        `json:"report"`
+		Elapsed time.Duration `json:"elapsed_ns"`
+		Error   string        `json:"error"`
+	}{Phases: phases, Report: report, Elapsed: elapsed, Error: fmt.Sprint(auditErr)}, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(profileRoot, "audit-phases.json"), data, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if auditErr != nil || report != want || len(phases) != 2 || phases[0].Records != 12000 || phases[1].Records != 144000 {
+		t.Fatalf("profiled audit report=%+v phases=%+v err=%v", report, phases, auditErr)
+	}
+	t.Logf("profiled-audit invocations=%d entries=%d terminal=%d elapsed=%s phases=%+v cpu_profile=%s", report.Invocations, report.Entries, report.Terminal, elapsed, phases, filepath.Join(profileRoot, "audit-cpu.pprof"))
 }

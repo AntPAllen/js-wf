@@ -33,6 +33,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Consumer replication comparison also shows no clear speedup:** retained
+  race SDK atddd5396 runs three same-store12k/144k full audits: consumerR3 before
+  12.024088088s, actualR1 consumers12.653120485s, consumerR3 after14.682479197s.
+  All reports match; source streams remainR3 and consumers clean up tozero.
+  All2889 inputs /59 Git bytes, actual live SDK/all build-info fields and3270
+  proof members verify;43533179-byte complete proof retains original stores,
+  not reopened. Production still uses stream-matched consumers and512 batches;
+  no R1 fault qualification or soak restart. Next native diagnostic prepares CPU
+  profiling and stream-scan/visitor timings under unchanged20s, so later changes
+  can address measured cost. No NATS-cause or broad capacity claim.
+  [Complete controlled comparison](scale/retained-audit-consumer-replication-2026-10-04/).
+
 - **4096 audit window offers no material speedup;512 restored:** retained
   race SDK ate638a93 gives identical12000-invocation /144000-entry /12000-terminal
   reports:512=14.853547828s,4096=14.851015237s; point reaches original20s cap.

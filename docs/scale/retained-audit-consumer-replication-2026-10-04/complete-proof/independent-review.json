@@ -1,0 +1,39 @@
+{
+  "source": "ddd5396065c3d1fbe41ef7720d6b14948283059d",
+  "exit_code": 0,
+  "selected_inputs": 2889,
+  "local_git_inputs": 59,
+  "all_captured_source_hashes_verified": true,
+  "all_local_inputs_match_executed_git": true,
+  "actual_runner_matches_executed_git": true,
+  "actual_binary_sha256": "a928981c462d457dc9c18358775c120e2af19ab00fa56326007ff1cff63450cf",
+  "actual_binary_retained": true,
+  "all_actual_build_info_fields_match": true,
+  "actual_live_sdk_identity_verified": true,
+  "named_results": {
+    "TestBatchedInvariantAuditNativeConsumerReplication": {
+      "status": "pass",
+      "seconds": 86.4
+    }
+  },
+  "native_files": 363,
+  "native_file_bytes": 71467655,
+  "raw_result_log": "=== RUN   TestBatchedInvariantAuditNativeConsumerReplication\n    batched_invariant_native_test.go:424: replication-audit invocations=12000 entries=144000 terminal=12000 stream_replicas=3 replicated_consumer_seconds=12.024088088s replicated_error=<nil> single_consumer_seconds=12.653120485s single_error=<nil> replicated_recheck_seconds=14.682479197s replicated_recheck_error=<nil> actual_single_consumers=WF_INV,WF_JRN consumers=0\n--- PASS: TestBatchedInvariantAuditNativeConsumerReplication (86.40s)\nPASS\n",
+  "physical_stores_reopened": false,
+  "production_consumer_replication_changed": false,
+  "fixture_invocations": 12000,
+  "fixture_entries": 144000,
+  "source_stream_replicas": 3,
+  "actual_single_replica_consumers": [
+    "WF_INV",
+    "WF_JRN"
+  ],
+  "replicated_baseline_seconds": 12.024088088,
+  "single_replica_seconds": 12.653120485,
+  "replicated_recheck_seconds": 14.682479197,
+  "material_speedup_demonstrated": false,
+  "qualifies_consumer_fault_recovery": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false,
+  "scope": "Same-store three reads agree at12k/144k, single-replica actual consumer config verified and source streams remain3. No clear speedup or candidate fault qualification. Production unchanged; no soak restart."
+}
