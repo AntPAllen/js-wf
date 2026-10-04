@@ -33,6 +33,16 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Streaming-prefix audit candidate prepared:** opt-in mode retains current
+  protocol state per invocation instead of decoded prefixes, decoding all records
+  freshly and saving errors until original sorted reduction. Compacted subjects
+  still use original reconstruction/checker. Slice oracle and CheckSnapshot bytes
+  unchanged; no cache or production-harness switch. Race differential tests pass
+  1000 seeded histories/prefixes/mutations and continuation/epoch-owner edges;
+  200001 entries/100000 epochs have no per-entry/epoch allocations. Native
+  equivalence and same-store100k time/allocation comparison pending. Original
+ 20s/60s and release requirements remain; no speedup/fault-capacity claim.
+
 - **Normal2GiB real ten-minute originals independently reviewed:** exact4a875f0,
   2436 invocations /26869 entries /19 journal-leader faults,678.38s. Raw row,
   original30s clocks, eight mandatory audits (max1.851s under20s/60s) verify.

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"runtime/pprof"
 	"strconv"
 	"strings"
@@ -103,6 +104,14 @@ func compareFullAudits(t *testing.T, ctx context.Context, js jetstream.JetStream
 	stateStop()
 	if withState != point || (stateErr == nil) != (pointErr == nil) || stateErr != nil && stateErr.Error() != pointErr.Error() {
 		t.Fatalf("state snapshot mismatch: point=%+v state=%+v errors=%v / %v", point, withState, pointErr, stateErr)
+	}
+	for _, snapshot := range []bool{false, true} {
+		streamCtx, streamStop := context.WithTimeout(ctx, 20*time.Second)
+		streamed, streamErr := checkUsingOptions(streamCtx, js, cutoff, scanBatchThrough, snapshot, true)
+		streamStop()
+		if streamed != point || (streamErr == nil) != (pointErr == nil) || streamErr != nil && streamErr.Error() != pointErr.Error() {
+			t.Fatalf("streamed snapshot=%v mismatch: point=%+v streamed=%+v errors=%v / %v", snapshot, point, streamed, pointErr, streamErr)
+		}
 	}
 	if point != bulk {
 		t.Fatalf("report mismatch: point=%+v bulk=%+v point_err=%v bulk_err=%v", point, bulk, pointErr, bulkErr)
@@ -535,6 +544,39 @@ func TestBatchedInvariantAuditNativeStateSnapshotComparison(t *testing.T) {
 		t.Fatalf("state comparison before=%+v/%v state=%+v/%v after=%+v/%v", before, beforeErr, state, stateErr, after, afterErr)
 	}
 	t.Logf("state-snapshot-audit invocations=%d entries=%d terminal=%d point_state_before=%s snapshot_state=%s point_state_after=%s errors=<nil>,<nil>,<nil>", state.Invocations, state.Entries, state.Terminal, beforeElapsed, stateElapsed, afterElapsed)
+}
+
+func TestBatchedInvariantAuditNativeStreamingComparison(t *testing.T) {
+	if os.Getenv("WF_AUDIT_BATCH_CANDIDATE") != "1" {
+		t.Skip("opt-in native same-store streaming comparison")
+	}
+	js, ctx, want := batchAuditLargeCohort(t, nativeAuditProfileCount(t))
+	for _, mode := range []struct {
+		name                string
+		streaming, snapshot bool
+	}{
+		{"baseline", false, false},
+		{"streaming", true, false},
+		{"streaming_state", true, true},
+		{"baseline_recheck", false, false},
+	} {
+		var before, after runtime.MemStats
+		runtime.ReadMemStats(&before)
+		attempt, stop := context.WithTimeout(ctx, 20*time.Second)
+		started := time.Now()
+		report, err := checkUsingOptions(attempt, js, nil, scanBatchThrough, mode.snapshot, mode.streaming)
+		elapsed := time.Since(started)
+		stop()
+		runtime.ReadMemStats(&after)
+		t.Logf("streaming-audit reader=%s elapsed=%s report=%+v err=%v allocated_bytes=%d gc_cycles=%d", mode.name, elapsed, report, err, after.TotalAlloc-before.TotalAlloc, after.NumGC-before.NumGC)
+		if err == nil {
+			if report != want {
+				t.Fatalf("%s report=%+v want=%+v", mode.name, report, want)
+			}
+		} else if mode.streaming || !errors.Is(err, context.DeadlineExceeded) {
+			t.Fatalf("%s audit error: %v", mode.name, err)
+		}
+	}
 }
 
 func TestBatchedInvariantAuditNativeStateValues(t *testing.T) {

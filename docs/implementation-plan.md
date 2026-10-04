@@ -1723,3 +1723,31 @@ SDK/supervisor terminal; no containers remain. This is normal-profile diagnostic
 qualification, not race/full200/current-source/full-matrix/24h acceptance. Older
 24h failures remain failed; no new longer run follows.
 [Reviewed complete originals](scale/local-r5-audit-memory-2026-10-04/normal-2g-ten-minute/).
+
+### Streaming retained journal audit candidate
+
+The next opt-in audit mode decodes every eligible retained record freshly but
+keeps per-invocation protocol state rather than all decoded prefixes. It tracks
+index/sequence/epoch/owner, pending/completed request payloads, signals/attempts
+and terminal bytes. Monotonic epochs permit retaining only the current epoch's
+owner. Terminal records release request/completion payloads. Memory remains
+proportional to invocation count and current payloads, not complete entry count.
+No journal/state result is reused between audits.
+
+Errors are saved until the existing sorted subject reduction, preserving
+raw-decode-before-invariant precedence and orphan/key validation. Compacted
+subjects ignore the raw-prefix summary and use the original logical journal
+reconstruction and slice-based checker. Original checkJournalRecords and
+modeled CheckSnapshot bytes remain unchanged as differential oracles; default
+readers and production harness are not switched.
+
+Race unit tests compare1000 seeded valid histories, every prefix, terminal
+lookup errors/mismatches, twelve mutation classes, arbitrary mixed histories,
+blank owners/epoch changes and committed continuation matching. A200001-entry
+prefix with100000 epochs performs no per-entry/epoch allocations. Native
+compaction/cohort/corruption/terminal controls now also compare streaming modes
+with point/batched/state readers; native equivalence still pending. A same-store
+100k benchmark compares old, streaming, streaming-plus-state and old recheck
+under unchanged20s. Whole embedded-process cumulative allocations/GC cycles
+are recorded, not pure checker cost or peak RSS. No performance, fault-recovery
+or release qualification is inferred from unit tests or preparation.

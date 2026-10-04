@@ -143,6 +143,23 @@ func CheckThroughInvocationSequenceWithBatchedStateReads(ctx context.Context, js
 }
 
 func checkUsingState(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner, snapshotState bool) (Report, error) {
+	return checkUsingOptions(ctx, js, cutoff, read, snapshotState, false)
+}
+
+// CheckWithStreamingReads validates every freshly decoded retained record while
+// keeping protocol state per invocation instead of a complete decoded prefix.
+// Compacted journals still use the original reconstruction and checker.
+func CheckWithStreamingReads(ctx context.Context, js jetstream.JetStream) (Report, error) {
+	return checkUsingOptions(ctx, js, nil, scanBatchThrough, false, true)
+}
+
+// CheckThroughInvocationSequenceWithStreamingReads keeps the original captured
+// quiescent-cohort/no-purge/no-reuse contract and rereads all retained records.
+func CheckThroughInvocationSequenceWithStreamingReads(ctx context.Context, js jetstream.JetStream, cutoff uint64) (Report, error) {
+	return checkUsingOptions(ctx, js, &cutoff, scanBatchThrough, false, true)
+}
+
+func checkUsingOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner, snapshotState, streaming bool) (Report, error) {
 	var report Report
 	inv, err := auditRead(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })
 	if err != nil {
@@ -169,6 +186,7 @@ func checkUsingState(ctx context.Context, js jetstream.JetStream, cutoff *uint64
 	}
 	groups := map[string]struct{}{}
 	live := map[string][]journal.Record{}
+	summaries := map[string]*journalAudit{}
 	compacted := map[string]bool{}
 	if err := read(ctx, jrn, nil, func(m *jetstream.RawStreamMsg) error {
 		if cutoff != nil {
@@ -181,7 +199,15 @@ func checkUsingState(ctx context.Context, js jetstream.JetStream, cutoff *uint64
 			return err
 		}
 		groups[m.Subject] = struct{}{}
-		live[m.Subject] = append(live[m.Subject], journal.Record{Entry: e, Sequence: m.Sequence})
+		record := journal.Record{Entry: e, Sequence: m.Sequence}
+		if streaming {
+			if summaries[m.Subject] == nil {
+				summaries[m.Subject] = &journalAudit{}
+			}
+			summaries[m.Subject].add(m.Subject, record)
+		} else {
+			live[m.Subject] = append(live[m.Subject], record)
+		}
 		return nil
 	}); err != nil {
 		return report, err
@@ -239,13 +265,24 @@ func checkUsingState(ctx context.Context, js jetstream.JetStream, cutoff *uint64
 				return 0, false, fmt.Errorf("%s: %w", subject, err)
 			}
 		}
-		entries, terminal, err := checkJournalRecords(subject, records, func() ([]byte, error) {
+		terminalValue := func() ([]byte, error) {
 			value, err := auditRead(ctx, func(attempt context.Context) (jetstream.KeyValueEntry, error) { return state.Get(attempt, key) })
 			if err != nil {
 				return nil, err
 			}
 			return value.Value(), nil
-		})
+		}
+		var entries int
+		var terminal bool
+		if streaming && !compacted[subject] {
+			summary := summaries[subject]
+			if summary == nil {
+				return 0, false, fmt.Errorf("%s: missing streamed journal state", subject)
+			}
+			entries, terminal, err = summary.finish(subject, terminalValue)
+		} else {
+			entries, terminal, err = checkJournalRecords(subject, records, terminalValue)
+		}
 		if err != nil {
 			return 0, false, err
 		}
