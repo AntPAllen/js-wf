@@ -5,18 +5,24 @@ package integration_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
 
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/assignment"
 	"js-wf/client"
 	"js-wf/identity"
 	"js-wf/integrity"
+	"js-wf/internal/natsutil"
 	"js-wf/journal"
 	"js-wf/lease"
 	"js-wf/provision"
@@ -62,18 +68,32 @@ type phaseThreeFault struct {
 	ProxyBlocked    *testcluster.ClientProxyStats `json:"proxy_blocked,omitempty"`
 }
 
+type phaseThreeAssignmentMove struct {
+	Partition    uint32    `json:"partition"`
+	From         string    `json:"from"`
+	To           string    `json:"to"`
+	Revision     uint64    `json:"revision"`
+	At           time.Time `json:"at"`
+	ActiveLeases int       `json:"active_leases"`
+}
+
 type phaseThreeWorkerReport struct {
-	Seed        int64             `json:"seed"`
-	Started     time.Time         `json:"started"`
-	CompletedAt time.Time         `json:"completed_at"`
-	Finished    time.Time         `json:"finished"`
-	Completed   int               `json:"completed"`
-	Workers     int               `json:"workers"`
-	Steps       int               `json:"steps"`
-	IDs         []string          `json:"ids"`
-	Faults      []phaseThreeFault `json:"faults"`
-	Integrity   integrity.Report  `json:"integrity"`
-	Failed      bool              `json:"failed"`
+	MoveErrors  []string                   `json:"move_errors,omitempty"`
+	Moves       []phaseThreeAssignmentMove `json:"moves,omitempty"`
+	RouteCut    time.Time                  `json:"route_cut,omitempty"`
+	RouteHeal   time.Time                  `json:"route_heal,omitempty"`
+	RouteCounts [3]int                     `json:"route_counts"`
+	Seed        int64                      `json:"seed"`
+	Started     time.Time                  `json:"started"`
+	CompletedAt time.Time                  `json:"completed_at"`
+	Finished    time.Time                  `json:"finished"`
+	Completed   int                        `json:"completed"`
+	Workers     int                        `json:"workers"`
+	Steps       int                        `json:"steps"`
+	IDs         []string                   `json:"ids"`
+	Faults      []phaseThreeFault          `json:"faults"`
+	Integrity   integrity.Report           `json:"integrity"`
+	Failed      bool                       `json:"failed"`
 }
 
 // The Phase3 cohort uses six actual worker processes and the production lease,
@@ -83,6 +103,18 @@ func TestPhaseThreeTwoHundredCountersWithRepeatedWorkerFaults(t *testing.T) {
 	if os.Getenv("WF_PHASE3_REPEATED_FAULTS") != "1" {
 		t.Skip("set WF_PHASE3_REPEATED_FAULTS=1 for the original 200/50/6 repeated-worker-fault proof")
 	}
+	runPhaseThreeRepeatedFaults(t, false)
+}
+
+func TestPhaseThreeCountersRebalanceWithRepeatedFaults(t *testing.T) {
+	if os.Getenv("WF_PHASE3_REBALANCE_FAULTS") != "1" {
+		t.Skip("set WF_PHASE3_REBALANCE_FAULTS=1 for four busy partitions moving during repeated process and route faults")
+	}
+	runPhaseThreeRepeatedFaults(t, true)
+}
+
+func runPhaseThreeRepeatedFaults(t *testing.T, rebalance bool) {
+	t.Helper()
 	seed := int64(1)
 	if raw := os.Getenv("FAULT_SEED"); raw != "" {
 		var err error
@@ -122,6 +154,9 @@ func TestPhaseThreeTwoHundredCountersWithRepeatedWorkerFaults(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Minute)
 	defer cancel()
 	t.Setenv("WF_PHASE3_COUNTER_CHILD", "1")
+	if rebalance {
+		t.Setenv("WF_PHASE3_REBALANCE_CHILD", "1")
+	}
 	proxies := make([]*testcluster.ClientProxy, 6)
 	fleet := make([]*matrixProcessWorker, 6)
 	holds := make([]int, 6)
@@ -154,10 +189,25 @@ func TestPhaseThreeTwoHundredCountersWithRepeatedWorkerFaults(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+	var assignments *assignment.Store
+	if rebalance {
+		assignments, err = assignment.New(ctx, all[0])
+		if err != nil {
+			t.Fatal(err)
+		}
+		for partition := uint32(0); partition < 4; partition++ {
+			if _, err := assignments.Assign(ctx, partition, fleet[partition].id, 0); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	partitionCounts := [4]int{}
 	c := client.New(all[0])
 	for candidate := 0; len(report.IDs) < 200; candidate++ {
 		id := fmt.Sprintf("counter-%06d", candidate)
-		if identity.Partition("phase3counter", id, provision.Partitions) == 0 {
+		partition := identity.Partition("phase3counter", id, provision.Partitions)
+		if (!rebalance && partition == 0) || (rebalance && partition < 4 && partitionCounts[partition] < 50) {
+			partitionCounts[partition]++
 			report.IDs = append(report.IDs, id)
 		}
 	}
@@ -199,7 +249,93 @@ func TestPhaseThreeTwoHundredCountersWithRepeatedWorkerFaults(t *testing.T) {
 	counts := map[string]int{}
 	inFlight := map[string]int{}
 	pendingHolds := 0
-	for report.Completed < 200 || pendingHolds > 0 {
+	type moveResult struct {
+		move phaseThreeAssignmentMove
+		err  error
+	}
+	moveResults := make(chan moveResult, 256)
+	moveCtx, stopMoves := context.WithCancel(cohort)
+	defer stopMoves()
+	movesDone := make(chan struct{})
+	if rebalance {
+		owners := make([]string, len(fleet))
+		for i, p := range fleet {
+			owners[i] = p.id
+		}
+		go func() {
+			defer close(movesDone)
+			ticker := time.NewTicker(5 * time.Second)
+			defer ticker.Stop()
+			cycle := 0
+			for {
+				select {
+				case <-moveCtx.Done():
+					return
+				case <-ticker.C:
+				}
+				cycle++
+				for partition := uint32(0); partition < 4; partition++ {
+					attempt, done := context.WithTimeout(moveCtx, time.Second)
+					owner, revision, err := assignments.Get(attempt, partition)
+					done()
+					active := 0
+					if err == nil {
+						for slot, candidate := range owners {
+							if candidate != owner {
+								continue
+							}
+							paths, _ := filepath.Glob(filepath.Join(root, fmt.Sprintf("matrix-process-%d-generation-*-active.json", slot)))
+							sort.Slice(paths, func(i, j int) bool {
+								generation := func(p string) int {
+									n, _ := strconv.Atoi(strings.TrimSuffix(strings.Split(p, "-generation-")[1], "-active.json"))
+									return n
+								}
+								return generation(paths[i]) < generation(paths[j])
+							})
+							if len(paths) > 0 {
+								var sample struct {
+									Active int `json:"active_leases"`
+								}
+								if data, readErr := os.ReadFile(paths[len(paths)-1]); readErr == nil {
+									if decodeErr := json.Unmarshal(data, &sample); decodeErr != nil {
+										err = decodeErr
+									}
+									active = sample.Active
+								}
+							}
+						}
+					}
+					to := owners[(cycle+int(partition))%len(owners)]
+					if to == owner {
+						to = owners[(cycle+int(partition)+1)%len(owners)]
+					}
+					var next uint64
+					if err == nil {
+						attempt, done = context.WithTimeout(moveCtx, time.Second)
+						next, err = assignments.Assign(attempt, partition, to, revision)
+						done()
+					}
+					result := moveResult{phaseThreeAssignmentMove{partition, owner, to, next, time.Now().UTC(), active}, err}
+					select {
+					case moveResults <- result:
+					case <-moveCtx.Done():
+						return
+					}
+				}
+			}
+		}()
+	} else {
+		close(movesDone)
+	}
+	defer func() { stopMoves(); <-movesDone }()
+	defer cluster.RouteMesh().Heal()
+	routeHeld := false
+	for report.Completed < 200 || pendingHolds > 0 || routeHeld {
+		if rebalance && routeHeld && time.Since(report.RouteCut) >= 45*time.Second {
+			cluster.RouteMesh().Heal()
+			report.RouteHeal = time.Now().UTC()
+			routeHeld = false
+		}
 		for i, p := range fleet {
 			select {
 			case exitErr := <-p.exited:
@@ -233,9 +369,34 @@ func TestPhaseThreeTwoHundredCountersWithRepeatedWorkerFaults(t *testing.T) {
 				report.CompletedAt = result.at
 				ticks.Stop()
 				tickC = nil
+				stopMoves()
 				cohortDone = nil
 			}
+		case result := <-moveResults:
+			if result.err != nil {
+				if !errors.Is(result.err, context.DeadlineExceeded) && !errors.Is(result.err, context.Canceled) && !errors.Is(result.err, jetstream.ErrNoStreamResponse) && !errors.Is(result.err, assignment.ErrConflict) && !natsutil.IsUnavailable(result.err) {
+					t.Fatalf("assignment move: %v", result.err)
+				}
+				report.MoveErrors = append(report.MoveErrors, result.err.Error())
+			} else {
+				report.Moves = append(report.Moves, result.move)
+			}
 		case scheduled := <-tickC:
+			if rebalance && report.RouteCut.IsZero() && time.Since(report.Started) >= 10*time.Second {
+				if err := cluster.RouteMesh().PartitionNode(2); err != nil {
+					t.Fatal(err)
+				}
+				until := time.Now().Add(2 * time.Second)
+				for cluster.Servers[2].NumRoutes() != 0 || cluster.Servers[0].NumRoutes() == 0 || cluster.Servers[1].NumRoutes() == 0 {
+					if time.Now().After(until) {
+						t.Fatal("route cut not observed")
+					}
+					time.Sleep(10 * time.Millisecond)
+				}
+				report.RouteCounts = [3]int{cluster.Servers[0].NumRoutes(), cluster.Servers[1].NumRoutes(), cluster.Servers[2].NumRoutes()}
+				report.RouteCut = time.Now().UTC()
+				routeHeld = true
+			}
 			available := []int{}
 			active := []int{}
 			activeCounts := map[int]int{}
@@ -348,6 +509,17 @@ func TestPhaseThreeTwoHundredCountersWithRepeatedWorkerFaults(t *testing.T) {
 			t.Fatal("five-minute completion deadline reached")
 		case <-ctx.Done():
 			t.Fatal("fixture cleanup budget exhausted: ", ctx.Err())
+		}
+	}
+	if rebalance {
+		activeMoves := 0
+		for _, move := range report.Moves {
+			if move.ActiveLeases > 0 {
+				activeMoves++
+			}
+		}
+		if len(report.Moves) < 8 || activeMoves == 0 || report.RouteCut.IsZero() || report.RouteHeal.Sub(report.RouteCut) < 45*time.Second {
+			t.Fatalf("combined rebalance evidence: moves=%d active=%d route_cut=%s route_heal=%s", len(report.Moves), activeMoves, report.RouteCut, report.RouteHeal)
 		}
 	}
 	ownedPauses := 0

@@ -30,6 +30,16 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Combined repeated rebalance fixture prepared; execution pending:** optional
+  `TestPhaseThreeCountersRebalanceWithRepeatedFaults` extends the existing200/50/6
+  real-process cohort with four busy partitions, revision-fenced ownership moves
+  every5s, independent original2s worker fault schedule and a confirmed45s server
+  route cut. Stable logical worker IDs preserve assignments across SIGKILL;
+  generation-specific logs preserve each process instance. Movement metadata
+  deadlines do not block the fault controller; named transient errors are recorded.
+  Original completion5min and audit budgets remain. Race compile/skip validation
+  passes1.024s; this is not a native acceptance. No production/Tier1 producer change.
+
 - **Clock183–195 verified duplicate expansion recovered:** all1313 expanded
   file hashes,1436 canonical member contents, pushed parts, actual model and39
   restored SDK paths verify before removal, with no accessible open descriptors.

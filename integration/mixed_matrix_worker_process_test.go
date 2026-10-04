@@ -259,8 +259,18 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 			}
 		}()
 	}
+	if phaseThreeCounter && os.Getenv("WF_PHASE3_REBALANCE_CHILD") == "1" {
+		fleet.Add(1)
+		go func() {
+			defer fleet.Done()
+			if err := w.RunKVAssignments(ctx); err != nil && ctx.Err() == nil {
+				failures <- err
+				stop()
+			}
+		}()
+	}
 	for partition := uint32(0); partition < provision.Partitions; partition++ {
-		if phaseThreeCounter && partition != 0 {
+		if phaseThreeCounter && (partition != 0 || os.Getenv("WF_PHASE3_REBALANCE_CHILD") == "1") {
 			continue
 		}
 		fleet.Add(1)
@@ -337,6 +347,9 @@ func startMatrixProcessWorker(ctx context.Context, root string, urls []string, i
 func startMatrixProcessWorkerExecutable(ctx context.Context, root string, urls []string, index, generation int, executable string, clock bool) (*matrixProcessWorker, error) {
 	id := fmt.Sprintf("matrix-process-%d-generation-%d", index, generation)
 	base := filepath.Join(root, id)
+	if os.Getenv("WF_PHASE3_REBALANCE_CHILD") == "1" {
+		id = fmt.Sprintf("phase3-rebalance-%d", index)
+	}
 	log, err := os.Create(base + ".log")
 	if err != nil {
 		return nil, err
