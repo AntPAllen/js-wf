@@ -1994,3 +1994,13 @@ workload SDK/stores not downloaded or reopened, integrity/drain named-test scope
 This clears the complete recorded-source ahead-clock row only; final-source/
 full16×200/behind-clock/million-drain/24h gates remain open.
 [Complete ahead-clock raw proof](scale/r5-ahead200-2026-10-04/complete-recorded-source-raw/).
+
+### Recorded-source all-server matrix coverage through seed144
+
+Seeds133–144 at `c4fed06` independently qualify28,728 invocations/316,699 entries,
+228 faults and36,950 exactOk history operations under unchanged30s gates. All45
+actual model dependencies match Git; complete archive members/parts read back.
+Combined1–144:342,692 invocations/3,777,308 entries/2,736 faults/440,910 operations;
+worst terminal/progress p99 remains18.295s/13.015s. SDK/stores unavailable,
+integrity/drain named-test scope. Full200/final-source/13×200 remains open.
+[Complete shard proof](scale/current-tier2-matrix-2026-10-04/cluster-133-144/).

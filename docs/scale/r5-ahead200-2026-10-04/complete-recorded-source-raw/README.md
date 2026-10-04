@@ -24,3 +24,7 @@ retained as references only. Final integrity/drain remain original named-test
 assertions. This qualifies the complete ahead-clock row at its recorded source;
 it does not qualify final-source/full16×200 matrices, behind-clock failures,
 million-timer physical drain or the actual24-hour gate. Failed originals remain.
+
+After publication and complete hash verification, local duplicate `seed-N/raw`
+expansions were removed. ZIPs/canonical proof/model files remain; restore before
+raw replay. [Exact recovery evidence](../duplicate-expansion-recovery/).
