@@ -1,0 +1,13 @@
+=== RUN   TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL
+=== RUN   TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL/all_servers=false
+    continuation_retirement_process_test.go:52: context deadline exceeded
+=== RUN   TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL/all_servers=true
+    continuation_retirement_process_test.go:52: context deadline exceeded
+--- FAIL: TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL (63.86s)
+    --- FAIL: TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL/all_servers=false (32.06s)
+    --- FAIL: TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL/all_servers=true (31.80s)
+=== RUN   TestContinuationRetirementReuseWithManifestLossAndStateLeaderRestart
+    continuation_retirement_test.go:108: retirement fresh manifest response lost; actual state leader wf-test-2 library shutdown/restart
+    continuation_retirement_test.go:373: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=4 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=2 manifest_drops=1
+--- PASS: TestContinuationRetirementReuseWithManifestLossAndStateLeaderRestart (22.03s)
+FAIL
