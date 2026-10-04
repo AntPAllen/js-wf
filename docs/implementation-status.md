@@ -30,6 +30,14 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
 
 ## Latest accepted evidence
 
+- **Rolling-upgrade API diagnostic prepared:** opt-in fallback provisioning
+  request/response tracing records exact metadata subject/payload/timing in the
+  retained backend proof. A real NATS replied-then-unanswered contract passes
+  under race1.252s, preserving deadline cause; five planner guards pass. Default
+  fixture/provisioning/deadline and production/Tier1 code are unchanged. Focused
+  actual seed15 diagnostic still required; no cause/fix/native qualification claim.
+  [Trace scope and validation](scale/rolling-upgrade-fallback-failure-2026-10-04/api-trace/).
+
 - **New rolling-upgrade failure preserved:** source799 shard14–26 fails atseed15,
   fault4, fallback provisioning's unchanged60s proof deadline. All five native
   rejection checks complete first; earlier health200 does not prove availability

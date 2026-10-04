@@ -51,11 +51,12 @@ type fiveUpgradeNativeCheck struct {
 	Error     string    `json:"error,omitempty"`
 }
 type fiveUpgradeBackendCheck struct {
-	Started  time.Time              `json:"started"`
-	Ended    time.Time              `json:"ended"`
-	Deadline time.Time              `json:"deadline"`
-	Backend  provision.TimerBackend `json:"backend"`
-	Error    string                 `json:"error,omitempty"`
+	Started  time.Time                   `json:"started"`
+	Ended    time.Time                   `json:"ended"`
+	Deadline time.Time                   `json:"deadline"`
+	Backend  provision.TimerBackend      `json:"backend"`
+	Error    string                      `json:"error,omitempty"`
+	API      []fiveUpgradeAPIObservation `json:"api,omitempty"`
 }
 
 type fiveUpgradeHealthObservation struct {
@@ -152,9 +153,21 @@ func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, clu
 		}
 	}
 	proof.Phase = "fallback-provisioning"
+	fallbackJS := js
+	var snapshotAPI func() []fiveUpgradeAPIObservation
+	if os.Getenv("WF_TIER3_UPGRADE_API_TRACE") == "1" {
+		var err error
+		fallbackJS, snapshotAPI, err = newFiveUpgradeProvisioningTrace(js.Conn())
+		if err != nil {
+			return nil, fmt.Errorf("upgrade provisioning trace: %w", err)
+		}
+	}
 	check, err := checkFiveUpgradeFallback(bound, func(operation context.Context) (provision.TimerBackend, error) {
-		return provision.EnsureAuto(operation, js, 5)
+		return provision.EnsureAuto(operation, fallbackJS, 5)
 	})
+	if snapshotAPI != nil {
+		check.API = snapshotAPI()
+	}
 	proof.BackendCheck, proof.Backend = &check, check.Backend
 	if err != nil {
 		return nil, err

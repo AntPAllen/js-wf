@@ -12,6 +12,10 @@ on:
         description: Kill one cohort Start before dispatch at every rolling upgrade
         type: boolean
         default: false
+      upgrade_api_trace:
+        description: Retain fallback provisioning API requests/responses for rolling-upgrade diagnostics
+        type: boolean
+        default: false
       upgrade_shutdown:
         description: Rolling upgrade shutdown profile (SIGKILL or graceful Lame Duck)
         required: true
@@ -86,6 +90,7 @@ jobs:
       WF_TIER3_MATRIX_DURATION: ${{ inputs.duration }}
       WF_TIER3_SYNC_INTERVAL: '2m'
       WF_TIER3_UPGRADE_START_GAP: ${{ matrix.row == 'rolling_upgrade' && inputs.upgrade_start_gap && '1' || '' }}
+      WF_TIER3_UPGRADE_API_TRACE: ${{ matrix.row == 'rolling_upgrade' && inputs.upgrade_api_trace && '1' || '' }}
       WF_TIER3_UPGRADE_SHUTDOWN: ${{ matrix.row == 'rolling_upgrade' && inputs.upgrade_shutdown || '' }}
       WF_TIER3_CLOCK_TIMER_CUT: ${{ inputs.clock_timer_cut && startsWith(matrix.row, 'server_clock_') && '1' || '' }}
       WF_TIER3_COMMON_CLOCK: ${{ inputs.common_timer_clock && startsWith(matrix.row, 'server_clock_') && '1' || '' }}
