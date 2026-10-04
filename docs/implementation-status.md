@@ -30,6 +30,27 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Traced upgrade74 independently accepted:** full600s at883b73b qualifies1876
+  invocations /20651 entries /five retained-store SIGKILL upgrades/Start gaps.
+  Worst terminal/progress p99 15.140749415/12.913045483s passes R5 gates30/30s.
+  All three models /2417 operations,45 dependencies,811 producer source hashes,
+  actual SDK/build info /3851 captured inputs /564 Git-local inputs and7792
+  original member hashes verify.340 native/fallback pairs all have responses;
+  20 readiness reads all current, so the historical stale observation is not
+  reproduced or explained.1070-member /93237446-byte proof retains actual SDK,
+  NATS/model/source/store bytes. Stores not reopened; full gates/24h remain open.
+  [Complete focused proof](scale/rolling-upgrade-fallback-failure-2026-10-04/api-trace/seed74-accepted/).
+
+- **Armed audit run failed with localized read evidence:** at18ddf04, batch100
+  /cutoff2800 fails after798.65s. One20s attempt completes31154 journal GetMsg
+  calls without journal-read errors, then expires near the end of terminal-state
+  validation (2736 terminal records reported). Other attempts fail in journal
+  reads across leader faults; three-attempt run stops after38.097s, below60s cap.
+  No state-corruption or NATS-cause claim, no gate relaxation or automatic restart.
+  Actual failed originals/SDK/source/traces retained at
+  `/tmp/js-wf-soak-journal-audit-trace-20261004`; independent archive/publication
+  pending. Next work is efficient retained scans with full invariant coverage.
+
 - **Armed retained-audit run started:** persistent service executes exact18ddf04,
   journal/seed1/race/24h with new audit method tracer, actual isolated SDK/source
   and unchanged20s/60s limits. Supervisor29878 /launcher30172 are live. This is
