@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source; all-server-kill seeds 1–72 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source; all-server-kill seeds 1–96 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -32,6 +32,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
+
+- **All-server-kill73–96 independently accepted:** exactc4fed06, two complete600s
+  shards qualify57148 invocations /629934 entries /456 faults /73534 model
+  operations. Raw seed/fault/latency binding, original30s gates and three exactOk
+  models pass;45 actual model dependencies match executed Git. Complete original
+  archives, all members and parts independently read back. Accepted range now1–96:
+  227668 invocations /2509494 entries /1824 faults /292953 model operations;
+  worst terminal/progress p99 remains18.295s/13.015s. Native SDK/stores not uploaded,
+  final integrity/drain named-test scope. Parent remainsqueued, not qualified;
+  fullcluster200/final-source/full matrices remain open.
+  [Seeds73–84](scale/current-tier2-matrix-2026-10-04/cluster-73-84/) ·
+  [Seeds85–96](scale/current-tier2-matrix-2026-10-04/cluster-85-96/).
 
 - **New actual24h journal run launched:** executed95b63c0, five containers,
   normal2GiB/GOMAXPROCS2, combined streaming/state audits and explicit route seeds.

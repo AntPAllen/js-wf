@@ -1898,3 +1898,15 @@ streaming/state retained audits and all-peer route seeds are recorded in the
 [verified launch](scale/local-r5-streaming-audit-2026-10-04/explicit-routes-normal-2g-24h-launch/).
 Original audit/liveness/heal/sync gates remain. This is observed launch evidence;
 terminal originals, model review and actual24h acceptance remain pending.
+
+### Recorded-source all-server matrix coverage through seed96
+
+Independent review now accepts exact `c4fed06` all-server-kill seeds1–96.
+New seeds73–96 retain complete originals, raw fault/latency checks and three
+rebuilt exactOk history models; model dependencies match executed Git. Aggregate
+227668 invocations /2509494 entries /1824 faults /292953 operations pass original
+30s gates (worst terminal/progress p99 18.295s/13.015s). Full200/current-source/full
+matrices remain open; native SDK/stores were not uploaded and final integrity/
+drain remains named-test scope.
+[73–84 proof](scale/current-tier2-matrix-2026-10-04/cluster-73-84/) ·
+[85–96 proof](scale/current-tier2-matrix-2026-10-04/cluster-85-96/).
