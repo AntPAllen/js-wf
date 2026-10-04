@@ -70,8 +70,16 @@ type fiveUpgradeHealthObservation struct {
 	Error  string    `json:"error,omitempty"`
 }
 
+type fiveUpgradeStreamObservation struct {
+	Name  string                `json:"name"`
+	At    time.Time             `json:"at"`
+	Info  *jetstream.StreamInfo `json:"info"`
+	Error string                `json:"error,omitempty"`
+}
+
 type fiveUpgradeProof struct {
-	Health []fiveUpgradeHealthObservation `json:"health"`
+	Health    []fiveUpgradeHealthObservation `json:"health"`
+	Readiness []fiveUpgradeStreamObservation `json:"readiness,omitempty"`
 
 	Version      int                      `json:"version"`
 	Started      time.Time                `json:"started"`
@@ -176,28 +184,28 @@ func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, clu
 		return nil, err
 	}
 	for _, name := range []string{"WF_RUN", "WF_TIMER"} {
-		info, err := matrixReadMetadata(bound, func(attempt context.Context) (*jetstream.StreamInfo, error) {
-			s, err := js.Stream(attempt, name)
+		info, err := waitFiveUpgradeStreamReadiness(bound, name, func(attempt context.Context) (*jetstream.StreamInfo, error) {
+			return matrixReadMetadata(attempt, func(operation context.Context) (*jetstream.StreamInfo, error) {
+				s, err := js.Stream(operation, name)
+				if err != nil {
+					return nil, err
+				}
+				return s.Info(operation)
+			})
+		}, func(info *jetstream.StreamInfo, err error) {
+			observation := fiveUpgradeStreamObservation{Name: name, At: time.Now().UTC(), Info: info}
 			if err != nil {
-				return nil, err
+				observation.Error = err.Error()
 			}
-			return s.Info(attempt)
+			proof.Readiness = append(proof.Readiness, observation)
 		})
-		if err != nil || info == nil || info.Config.Replicas != 5 || info.Config.Storage != jetstream.FileStorage || info.Cluster == nil || info.Cluster.Leader == "" || len(info.Cluster.Replicas) != 4 {
-			return nil, fmt.Errorf("upgrade %s missing R5 file readiness: %v", name, err)
-		}
-		for _, replica := range info.Cluster.Replicas {
-			if replica == nil || !replica.Current || replica.Offline {
-				return nil, fmt.Errorf("upgrade %s stale replica", name)
-			}
-		}
 		if name == "WF_RUN" {
-			if info.Config.AllowMsgSchedules {
-				return nil, fmt.Errorf("upgrade unexpectedly enabled native scheduling")
-			}
 			proof.Run = info
 		} else {
 			proof.Timer = info
+		}
+		if err != nil {
+			return nil, err
 		}
 	}
 	proof.Phase, proof.Complete = "complete", true
@@ -424,4 +432,51 @@ func upgradeFiveMixedServer(ctx context.Context, js jetstream.JetStream, cluster
 	}
 	event.Healed = time.Now().UTC()
 	return event, nil
+}
+
+// Recheck dynamic replica state under the original whole-proof context. A prior
+// readiness observation cannot guarantee that a later metadata read is current.
+// Configuration errors remain immediate; replica catch-up gets no extra budget.
+func waitFiveUpgradeStreamReadiness(ctx context.Context, name string,
+	read func(context.Context) (*jetstream.StreamInfo, error), observe func(*jetstream.StreamInfo, error)) (*jetstream.StreamInfo, error) {
+	var last *jetstream.StreamInfo
+	for {
+		if err := ctx.Err(); err != nil {
+			return last, fmt.Errorf("upgrade %s replica readiness: %w", name, err)
+		}
+		info, err := read(ctx)
+		observe(info, err)
+		last = info
+		if err != nil {
+			return info, fmt.Errorf("upgrade %s metadata: %w", name, err)
+		}
+		if info == nil {
+			return nil, fmt.Errorf("upgrade %s missing stream metadata", name)
+		}
+		if info.Config.Replicas != 5 || info.Config.Storage != jetstream.FileStorage {
+			return info, fmt.Errorf("upgrade %s configuration mismatch: want five file replicas", name)
+		}
+		if name == "WF_RUN" && info.Config.AllowMsgSchedules {
+			return info, fmt.Errorf("upgrade unexpectedly enabled native scheduling")
+		}
+		ready := info.Cluster != nil && info.Cluster.Leader != "" && len(info.Cluster.Replicas) == 4
+		if ready {
+			for _, replica := range info.Cluster.Replicas {
+				if replica == nil || !replica.Current || replica.Offline {
+					ready = false
+					break
+				}
+			}
+		}
+		if ready {
+			return info, nil
+		}
+		timer := time.NewTimer(200 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return info, fmt.Errorf("upgrade %s replica readiness: %w", name, ctx.Err())
+		case <-timer.C:
+		}
+	}
 }

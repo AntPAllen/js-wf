@@ -30,6 +30,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Upgrade74 complete failed evidence preserved; readiness observation corrected:**
+  before-fault5 proof fails a one-shot WF_RUN stale replica check after earlier
+  readiness polling, within0.564s. All9 executed pre/post captures /759 inputs
+  and35151 original member hashes verify; actual NATS/original stores retained
+  in1638-member /378670183-byte compact proof. SDK not uploaded; originals not
+  reopened; earlier seeds/parent not promoted. Dynamic replica checks now poll
+  under the same original whole-proof60s context and retain each StreamInfo;
+  semantic configuration mismatches remain immediate. Race controls pass1.896s
+  for transient catch-up/persistent deadline/cancellation/configuration failure.
+  No production/Tier1 producer change or historical server-cause claim.
+  [Complete failed proof and correction scope](scale/rolling-upgrade-fallback-failure-2026-10-04/seed74/).
+
 - **Repeated faults plus busy partition rebalance independently accepted:**
   retained race SDK ate9ad9ab completes200×50 counters on6 workers in192.806390s
   under unchanged5min target.96 faults (81kill/11pause/4partition),148 moves
