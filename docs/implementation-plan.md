@@ -944,6 +944,15 @@ Actual-child exit, cleanup, unexpected-success and cancellation controls must
 pass normal/race; disabling observation must fail. [Executed observation and
 raw failure evidence](scale/worker-clock-checkpoint-2026-10-04/process-exit-observation/)
 resolve error masking only; broker cause and real-matrix qualification remain open.
+Focused ten-minute seed 6 diagnostic 37170797762 at `19f3cb3` subsequently passes
+independent review: 3,052 invocations, 33,907 entries, 19 faults and all three
+production models over 3,924 operations. All ten checkpoint first attempts pass;
+last takes 11.195881565 s under the unchanged bound. The complete canonical
+original archive, executable/source provenance and physical stores are preserved
+in Git and hashed, not reopened. [Accepted individual diagnostic](scale/worker-clock-checkpoint-2026-10-04/accepted-seed-6/)
+does not establish the original startup-timeout cause or qualify the failed
+parent, full worker-clock row, full matrix or actual 24-hour gate.
+
 
 
 Current Tier2 journal seeds 1–96 pass independent raw fault/latency and production

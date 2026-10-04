@@ -13,10 +13,11 @@
   while the updated-source full Tier1 gates proceed.
   [Exact source root, complete re-review and mismatch controls](scale/tier2-model-source-root-2026-10-04/).
 
-- **Fresh full Tier1 gates queued at the corrected production source:** normal
+- **Fresh full Tier1 gates running at the corrected production source:** normal
   100k run 37172700747 and complete race1k run 37172701931 bind exact `283ba32`.
-  These preserve full corpus/seed scope after the snapshot error-cause change;
-  dispatch and queue metadata prove no executed seeds or pass. Previous `9ecc37c`
+  Both job APIs now confirm in_progress. These preserve full corpus/seed scope
+  after the snapshot error-cause change; running status proves no accepted seeds
+  or terminal pass. Previous `9ecc37c`
   complete gates remain historical. Older live Tier2/Tier3 campaigns keep their
   executed-source scope; independent history-model rebuilds must use their
   source-identical dependency inputs, not modified main, without bypassing
@@ -58,13 +59,19 @@
   claimed. Current diagnostic/campaign revisions are unchanged.
   [Exact sparse inputs, complete output and scope](scale/tier3-planner-checkout-2026-10-04/).
 
-- **Focused primary clock-error diagnostic queued:** run 37170797762 requests
-  seed 6 for ten minutes at exact `19f3cb3`; API confirms that head and queued
-  planner 111343180483. This seeks publish-versus-read evidence with unchanged
-  gates, not a replacement full matrix. Startup consumer creation overlaps clock
-  probes; its role in the original timeout remains a hypothesis. No execution
-  or qualification is claimed from dispatch. Other live campaigns continue.
-  [Exact command/source/API](scale/worker-clock-checkpoint-2026-10-04/process-exit-diagnostic-dispatch/).
+- **Focused worker-clock seed 6 independently accepted:** terminal run
+  37170797762/job 111344671177 at exact `19f3cb3` passes raw/source/clock review
+  and all three independently executed production models: 3,052 invocations,
+  33,907 entries, 19 faults and 3,924 history operations. Worst terminal/progress
+  type p99 is 5.151790801/0.411139508 s. All ten checkpoints pass first attempt;
+  last takes 11.195881565 s under the unchanged 20-second attempt bound. All
+  765 captured source inputs and 3,963 original/restored members verify. The
+  full canonical archive, actual workload/model executables and physical stores
+  are now preserved in Git; stores were not reopened. This clears only the
+  requested individual diagnostic, not the original timeout cause or failed
+  full parent. Consumer-startup pressure remains a hypothesis.
+  [Complete originals, source-correct models and independent review](scale/worker-clock-checkpoint-2026-10-04/accepted-seed-6/).
+
 - **Accepted clock restoration duplicate recovered:** 3,963 canonical/restored
   members and the committed compact proof Git blob reverify; no open input file
   descriptors. Removing only the accepted RAM restoration recovers 360,767,488
