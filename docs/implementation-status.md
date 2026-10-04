@@ -11,7 +11,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–84 qualified. Full 13-row × 200 current-source gate remains open. |
-| Tier3 fault matrix | Worker-clock 122 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
+| Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Other finite combined fault cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Not run/qualified. Full-matrix soak and required retained-original audits remain. |
@@ -29,6 +29,18 @@ and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Clock183–195 independently accepted:** full600s13-seed shard at79915ca;
+  39396 invocations /436886 journal entries /247 faults, worst terminal/progress
+  p99 5.222196017/0.672171905s under unchanged R5 gates30/30s. All759 source
+  inputs,273 clock proofs /1365 messages and all three models /50652 operations
+  verify; actual model retained and all45 dependencies match source before/after.
+  All39 actual SDK paths independently restored against pinned provider hashes.
+  Complete1235 raw files retained in1436-member /48,041,924-byte compact proof.
+  Own physical stores reference-only. Eleven accepted same-source summaries now
+  cover135 unique seeds /410844 invocations /4554597 entries /2565 faults /
+  528228 model operations. Failed ranges, current-main full matrices and actual24h
+  remain open. [Complete proof and coverage](scale/current-tier3-clock-2026-10-04/worker-clock-183-195/).
 
 - **Upgrade seed8 lease-bucket timeout preserved:** job111324440201 at79915ca
   passes producer seeds1–7 then fails8/fault4 after five native semantic checks.
