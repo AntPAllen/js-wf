@@ -2,6 +2,18 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **2026-10-04 Tier2 journal seeds 1–72 accepted:** new terminal successful
+  jobs 111287264426/111287264403 qualify seeds 49–72 after complete independent
+  raw fault/latency/event review and all three production history models.
+  All 45 actual local model/module inputs match the executed source before/after
+  compilation. The two new shards add 62,244 invocations, 685,667 entries and
+  456 leader kills; all 160 archive members and published parts hash-verify.
+  Accepted seeds 1–72 total 189,000 invocations, 2,082,265 entries and 1,368 kills,
+  with worst terminal/progress type p99 17.457496447/8.533582526 s. Workflow
+  binaries/source ledgers/stores are not uploaded; named-test integrity/drain
+  assertions define scope. Full row/matrix/Tier3/24h gates remain open. Later
+  journal seeds 73–96 report success and await independent review.
+  [Two complete new shard proofs](scale/current-tier2-matrix-2026-10-04/).
 - **2026-10-04 new worker-clock checkpoint failure retained:** full replacement
   37164231641/job 111324439617 fails at seed 15; seed 14 passes producer checks and
   seeds 16–26 are not run. Batch 90's retained-state read reaches the 60-second
@@ -12,6 +24,9 @@
   attempt's timing/deadline/partial report. Existing bounds/gates remain unchanged;
   focused audit tests pass. The failed shard and full parent cannot qualify.
   Other live jobs and Tier2 remain unchanged while this is investigated.
+  Focused ten-minute diagnostic seed 15 is dispatched as 37166976657 at exact
+  `c2e8c01`; its source and live planner 111331818100 verify. This is observation
+  only, not a recovery fix, relaxed gate or full-matrix replacement.
   [Original failure, hash verification and diagnostic-only change](scale/worker-clock-checkpoint-2026-10-04/).
 - **2026-10-04 reusable Tier2 journal shard reviewer calibrated:** independent
   review is now range-parameterized, with exact API/source/artifact/header binding,

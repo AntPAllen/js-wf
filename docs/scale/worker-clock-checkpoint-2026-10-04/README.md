@@ -45,6 +45,12 @@ unchanged. The focused existing audit cadence, invariant/exhaustion and
 cancellation tests pass (`js-wf/integration`, 0.004 s); the updated fixture
 compiles. This adds observation, not a recovery fix or new qualification.
 
+A focused full ten-minute seed-15 diagnostic is dispatched as run **37166976657**
+at exact `c2e8c0122c15ef2d31ffa11c24ccd53c203a233f`. The API confirms that head
+and live planner **111331818100**. [Exact dispatch metadata](diagnostic-dispatch/)
+retains the command, source and API handles. This is one diagnostic execution;
+it is not a full-matrix replacement or qualification. Existing jobs continue.
+
 `proof.tar.gz` retains complete raw JSON/logs, terminal metadata, full original
 producer manifest, independently verified original-archive digest, source
 comparison, failure analysis, exact diagnostic diff and the focused test log.
