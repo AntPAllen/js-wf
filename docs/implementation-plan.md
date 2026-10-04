@@ -954,6 +954,13 @@ from their provider. New physical-store artifact is referenced only, not verifie
 [Raw-source/model proof and explicit material provenance](scale/current-tier3-clock-2026-10-04/worker-clock-40-52/)
 extend same-source clock coverage to 26 seeds 27–52 without promoting the failed
 parent, complete row/matrix or original 24-hour gate.
+Complete shard 66–78 at the same source also qualifies: 39,984 invocations,
+443,511 entries, 247 faults and 51,408 independent model operations. All captured
+source/clock/cohort proofs and exact provider executable hashes verify; new
+physical stores remain reference-only. [Complete raw/model proof and scope](scale/current-tier3-clock-2026-10-04/worker-clock-66-78/)
+extends accepted coverage to 39 seeds (27–52 and 66–78), 117,068 invocations,
+1,297,409 entries, 741 faults and 150,516 history operations. The failed parent,
+missing ranges, full row/matrix and actual 24-hour gate remain open.
 
 
 

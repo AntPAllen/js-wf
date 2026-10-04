@@ -2,6 +2,18 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Clock seeds 66–78 independently accepted at exact `79915ca`:** all thirteen
+  ten-minute seeds pass raw/source/clock review and three source-identical
+  production models: 39,984 invocations, 443,511 entries, 247 faults and 51,408
+  history operations. All 759 source inputs, 273 clock proofs, 1,365 broker
+  messages and 138 cohort audits verify. Actual executable bytes match recorded
+  hashes and the committed provider proof; SDK material is explicitly
+  reconstructed. New physical stores are referenced only, not downloaded or
+  verified. Combined accepted 39 seeds (27–52 and 66–78) total 117,068
+  invocations, 1,297,409 entries, 741 faults and 150,516 history operations.
+  Failed parent, missing ranges and full row/matrix/24h gates remain open.
+  [Complete raw/model proof and explicit provider scope](scale/current-tier3-clock-2026-10-04/worker-clock-66-78/).
+
 - **Complete clock coverage extends to seeds 27–52 at exact `79915ca`:** new
   terminal shard 40–52 independently verifies 37,632 invocations, 416,582
   entries, 247 faults and all three models over 48,384 operations. All 759
