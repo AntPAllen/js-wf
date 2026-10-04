@@ -49,6 +49,13 @@ verified, and no open input descriptors were found before either deletion.
 archives, committed archive parts and failed evidence remain intact. Restore the
 raw artifacts from those archives before repeating offline review.
 
+After the independently confirmed `5529ecd` push, the same checks verify and
+remove the redundant seeds 73–96 RAM expansions. Their 144 original files,
+canonical archive hashes, all committed parts and absence of open input
+descriptors verify before deletion. `duplicate-removal-73-96.json` records
+**1,365,814,017 bytes** recovered; complete canonical archives and committed
+parts remain intact. Failed evidence is untouched.
+
 Only these requested journal seeds qualify. Full 200-seed row, 13-row full Tier2,
 Tier3 and 24-hour full-matrix gates remain open. The parent continues without
 restart; journal seeds 97–144 are observed running. All four archives here contain

@@ -2,6 +2,16 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **2026-10-04 ordinary CI failures retained:** source `f70a990` has a local
+  filesystem isolation-handoff timeout, mixed terminal p99 46.012754875 s and
+  steady-placement append-pressure tail lookup API 503/10008. Complete terminal
+  metadata/logs and available failed mixed/pressure uploads are independently
+  archived and hash-verified. No broker cause is established. The handoff's arm
+  token publication interleaving needs deterministic investigation; it uses no
+  NATS. These failures remain failed and all original assertions/gates remain
+  unchanged. Existing independently accepted journal shards have their stated
+  individual scope and do not turn these ordinary CI runs green.
+  [Exact failed CI originals and investigation limits](scale/ci-failures-2026-10-04/).
 - **2026-10-04 Tier2 journal seeds 1–96 accepted:** new terminal successful
   jobs 111287264479/111287264439 qualify seeds 73–96. All raw events, fault
   timestamps, latency statistics and three independently executed production
