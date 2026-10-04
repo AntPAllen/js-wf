@@ -1,5 +1,24 @@
 # Implementation status against the supplied plan
 
+- **Clock seeds79–91 independently accepted at exact `79915ca`:** thirteen ten-minute
+  seeds pass raw/source/clock review and all three production history models:
+  40,012 invocations,443,742 entries,247 faults and51,444 history operations.
+  All759 source inputs,273 clock proofs,1,365 broker messages and137 cohort audits
+  verify. Actual provider executable bytes match all39 new recorded references;
+  SDK material is explicitly reconstructed from the preserved provider proof.
+  Actual workload/model executables and complete raw/model evidence are archived.
+  New physical stores remain referenced only, not downloaded/hashed/reopened.
+  Combined52 accepted seeds (27–52 and66–91) total157,080 invocations,1,741,151
+  entries,988 faults and201,960 history operations. Worst p99 remains
+  5.254787923/0.80936262 s. Failed parent, missing ranges and full gates remain open.
+  [Exact raw/model proof](scale/current-tier3-clock-2026-10-04/worker-clock-79-91/).
+
+- **Additional verified sparse recovery:**32 already committed archive working
+  copies recover427,372,544 root bytes after exact Git blob/size and open-FD checks.
+  All783 previously tracked source inputs remain materialized/identical; archives
+  remain in local/pushed Git, and failed originals are unchanged.
+  [Exact inventories and executed operation](scale/local-proof-sparse-checkout-2026-10-04/third-extension/).
+
 After pushed1d8b92c, accepted journal157–168 raw duplicates were removed only after all72 files/canonical archive/committed Git parts SHA-verified with no open descriptors, recovering686,211,072 RAM bytes. Complete compressed local/Git proofs remain. A separate verified sparse extension omitted eight archive working copies and recovered189,964,288 root bytes; all781 previously tracked source inputs remained materialized/identical, and failed originals were untouched. [Exact storage checks](scale/local-proof-sparse-checkout-2026-10-04/second-extension/).
 
 Accepted clock27–39 duplicate RAM expansion was removed only after all1,378 inputs, canonical member contents and committed Git parts verified at pushed821b1bb, with no open descriptors. Recovery:722,939,904 exclusive allocated bytes. Clock executables/SDK sources remain in canonical/Git compact proofs; actual model executable and original-store archive remain retained. Provider raw paths must be restored before reuse; failed evidence and qualification scope are unchanged. [Exact preservation checks](scale/current-tier3-clock-2026-10-04/worker-clock-27-39/duplicate-removal.json).
@@ -70,7 +89,7 @@ Accepted clock27–39 duplicate RAM expansion was removed only after all1,378 in
   tracked source inputs remain materialized and identical; every archive remains
   in local/pushed Git. Exact sparse patterns/ledgers and executed script are
   retained. Original failed stores and qualification remain unchanged. Root free
-  space is about896 MiB; original full24h soak capacity is still insufficient.
+  space was about896 MiB at that recovery; original full24h soak capacity remains insufficient.
   [Reversible exact-path omission and complete archive availability](scale/local-proof-sparse-checkout-2026-10-04/extension/).
 
 - **Clock seeds 66–78 independently accepted at exact `79915ca`:** all thirteen

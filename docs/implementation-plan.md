@@ -961,6 +961,15 @@ physical stores remain reference-only. [Complete raw/model proof and scope](scal
 extends accepted coverage to 39 seeds (27–52 and 66–78), 117,068 invocations,
 1,297,409 entries, 741 faults and 150,516 history operations. The failed parent,
 missing ranges, full row/matrix and actual 24-hour gate remain open.
+Complete shard79–91 at the same executed source now qualifies:40,012 invocations,
+443,742 entries,247 faults and51,444 independent model operations. All759 source
+inputs,273 clock proofs,1,365 broker messages and137 cohort audits verify;
+actual provider-matched workload and model executables remain in the compact
+proof. New stores are reference-only, not downloaded/verified/reopened.
+[Complete raw/model evidence](scale/current-tier3-clock-2026-10-04/worker-clock-79-91/)
+extends accepted coverage to52 seeds (27–52 and66–91),157,080 invocations,
+1,741,151 entries,988 faults and201,960 history operations; the failed parent,
+missing ranges, full row/matrix and actual24h gate remain open.
 
 
 
