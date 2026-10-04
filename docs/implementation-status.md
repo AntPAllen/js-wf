@@ -170,14 +170,14 @@ Accepted clock27–39 duplicate RAM expansion was removed only after all1,378 in
   the required 24-hour full-matrix soak remains capacity-limited.
   [Exact executed recovery and preserved canonical paths](scale/accepted-proof-duplicate-recovery-2026-10-04/).
 
-- **Tier2 journal coverage extended to seeds 1–144:** new terminal successful
-  shard 133–144 passes source-isolated raw/model review at exact `c4fed06`:
-  31,948 invocations, 352,004 entries and 228 faults, all three
+- **Tier2 journal coverage extended to seeds 1–156:** new terminal successful
+  shard 145–156 passes source-isolated raw/model review at exact `c4fed06`:
+  31,752 invocations, 349,802 entries and 228 faults, all three
   history models and 45 actual dependency inputs. Combined accepted coverage
-  totals 378,616 invocations, 4,171,237 entries and 2,736 leader kills;
+  totals 410,368 invocations, 4,521,039 entries and 2,964 leader kills;
   worst terminal/progress type p99 remains 17.457496447/8.533582526 s.
   Other producer successes await review; full release gates remain open.
-  [Complete raw evidence and exact model inputs](scale/current-tier2-matrix-2026-10-04/journal-133-144/).
+  [Complete raw evidence and exact model inputs](scale/current-tier2-matrix-2026-10-04/journal-145-156/).
 
 - **Additional full-campaign clock failure retained:** job 111324439563 fails
   seed 61 at exact `79915ca`; batch-90 audit times out after 60.004493079 s.

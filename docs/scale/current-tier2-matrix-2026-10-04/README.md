@@ -114,3 +114,12 @@ unchanged. Restore raw inputs from the preserved canonical proofs before offline
 review. The script is the exact executed audit, restricted to these three ranges;
 it is not a general cleanup tool and its now-removed paths reject an immediate
 rerun. All recovery byte counts are independent of qualification scope.
+
+## Subsequently accepted seeds 145–156
+
+[Source-isolated independent review](journal-145-156/) adds 31,752
+invocations, 349,802 entries and 228 kills at the same executed
+c4fed06 revision. Accepted seeds 1–156 now total **410,368 invocations,
+4,521,039 journal entries and 2,964 leader kills**; worst terminal/progress
+p99 remains **17.457496447/8.533582526 s**. Other producer successes await review;
+current-main full qualification, full matrices and actual 24-hour soak remain open.
