@@ -1624,3 +1624,13 @@ through100000, retaining default12000 and exact12-record-per-invocation/report
 assertions. Next measure a full100k normal cohort under the original20s audit
 limit. This is a scaling diagnostic, not full workload/fault/24h qualification.
 Production code, race gates, audit budgets and all release requirements stay.
+
+The100k normal diagnostic at6a38a7c fails original20s at20.092516379s after
+both exact stream populations are read (INV1.924s/JRN17.208s), before full
+per-journal/terminal validation. GC scanning/assistance is substantial in the
+embedded-server/client CPU profile under512MiB. All original evidence and live
+SDK/input/archive identities are independently verified and preserved. Normal
+instrumentation alone is insufficient; measure memory sensitivity next while
+retaining this failure, then address complete-audit memory/scaling. No budget,
+production setting or release requirement changes.
+[Complete failed100k proof](scale/retained-audit-phase-profile-2026-10-04/normal-100k/).

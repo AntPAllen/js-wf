@@ -1,0 +1,54 @@
+{
+  "source": "6a38a7c41d040cbf6d259f98dcd0a7fc4a9704b7",
+  "exit_code": 1,
+  "race": false,
+  "selected_inputs": 2889,
+  "local_git_inputs": 59,
+  "all_captured_source_hashes_verified": true,
+  "all_local_inputs_match_executed_git": true,
+  "actual_runner_matches_executed_git": true,
+  "actual_binary_sha256": "84564d8c5f8746174e4b96fb0f5e647974ccb4e3763d554511d0b96289325dbb",
+  "actual_binary_retained": true,
+  "all_actual_build_info_fields_match": true,
+  "live_proc_identity_captured": true,
+  "named_results": {
+    "TestBatchedInvariantAuditNativePhaseProfile": {
+      "status": "fail",
+      "seconds": 137.66
+    }
+  },
+  "native_files": 414,
+  "native_file_bytes": 517547626,
+  "phases": {
+    "phases": [
+      {
+        "stream": "WF_INV",
+        "records": 100000,
+        "bytes": 500000,
+        "scan_ns": 1923800261,
+        "visit_ns": 73243178
+      },
+      {
+        "stream": "WF_JRN",
+        "records": 1200000,
+        "bytes": 84700000,
+        "scan_ns": 17208463306,
+        "visit_ns": 2520930176
+      }
+    ],
+    "report": {
+      "Invocations": 100000,
+      "Journals": 0,
+      "Entries": 0,
+      "Terminal": 0
+    },
+    "elapsed_ns": 20092516379,
+    "error": "context deadline exceeded"
+  },
+  "cpu_profile_sha256": "4ecfe6b513c3ff6eba133c6cc6f02e5405c2cdec9690deacdae453c0ff654440",
+  "raw_result_log": "=== RUN   TestBatchedInvariantAuditNativePhaseProfile\n    batched_invariant_native_test.go:502: profiled audit report={Invocations:100000 Journals:0 Entries:0 Terminal:0} phases=[{Stream:WF_INV Records:100000 Bytes:500000 ScanElapsed:1.923800261s VisitElapsed:73.243178ms} {Stream:WF_JRN Records:1200000 Bytes:84700000 ScanElapsed:17.208463306s VisitElapsed:2.520930176s}] err=context deadline exceeded\n--- FAIL: TestBatchedInvariantAuditNativePhaseProfile (137.66s)\nFAIL\n",
+  "physical_stores_reopened": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false,
+  "scope": "Failed native 100k/1.2M audit profile reads all records then hits original20s cap; includes embedded servers and client. Selected inputs/runner/SDK match retained execution; live proc identity matches; no store reopening, fault capacity or release qualification."
+}

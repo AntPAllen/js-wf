@@ -33,6 +33,16 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Normal100k full audit also hits the original20s limit:** actual6a38a7c,
+  GOMAXPROCS2/GOMEMLIMIT512MiB, reads all100000 invocations and1.2M journal
+  records in1.924s/17.208s, then fails at20.092516379s before journal/terminal
+  validation completes. No missing-data or NATS-cause inference. GC occupies
+  substantial embedded-server/client CPU; memory sensitivity is next diagnostic.
+  All2889 inputs/59 Git files, actual live SDK/build-info,3326 original members,
+  complete110062697-byte five-part proof verify. Stores retained, not reopened;
+  SDK terminal. No normal-build capacity, release qualification or soak restart.
+  [Original failed100k profile](scale/retained-audit-phase-profile-2026-10-04/normal-100k/).
+
 - **Audit profiles isolate substantial instrumentation overhead:** actual
   source1c9fb4d runs full12k/144k fresh embedded-cluster audits in14.672637649s
   with race and1.669375955s normally. Exact reports and scan counts agree.
