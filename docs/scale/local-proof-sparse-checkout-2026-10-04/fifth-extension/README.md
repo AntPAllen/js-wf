@@ -1,0 +1,3 @@
+# Additional exact archive working-copy recovery
+
+At pushed `4d98b2d`, seven newly materialized committed archives are verified against exact Git blob hashes/sizes with no open descriptors, then omitted through the existing noncone sparse checkout. **155,779,072 allocated bytes** are recovered. All 790 previously tracked Go/Python/YAML/module inputs remain materialized and byte-identical; HEAD and clean status remain unchanged. Full archives stay in local/pushed Git. Failed originals outside Git and qualification are unchanged. Exact paths, hashes, source inventories, patterns and executed script are retained here. Disabling sparse checkout requires sufficient space for every omitted archive.

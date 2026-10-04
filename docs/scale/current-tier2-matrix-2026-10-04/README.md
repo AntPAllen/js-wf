@@ -159,3 +159,14 @@ c4fed06 revision. Accepted seeds 1–200 now total **526,232 invocations,
 5,797,467 journal entries and 3,800 leader kills**; worst terminal/progress
 p99 is **17.457496447/9.067125521 s**. Other producer successes await review;
 current-main full qualification, full matrices and actual 24-hour soak remain open.
+
+## Complete journal row qualified at executed source
+
+[Independent full-row audit](journal-full200-qualification/) now verifies all 17
+shards, exactly seeds 1–200, original canonical/Git archive/member hashes and all
+three source-bound production models. Earlier seeds 1–48 are rechecked from their
+original raw inputs with the complete 45-dependency guard, without rerunning the
+cluster workloads. Total: **526,232 invocations, 5,797,467 entries, 3,800 leader
+kills and 676,814 history operations**. Worst p99: **17.457496447/9.067125521 s**.
+This qualifies the journal-leader 200-seed row at c4fed06 only; current-source full
+matrix, other rows and physical/24-hour gates remain open.

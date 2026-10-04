@@ -1398,3 +1398,17 @@ unchanged three 20-second attempts / 60-second total audit limits. Live workload
 jobs are confirmed; dispatch is not qualification, an original server-cause fix,
 or repair of the full parent. [Exact diagnostic scope and runtime graph](scale/worker-clock-checkpoint-2026-10-04/seeds112-121-diagnostics/)
 preserve those boundaries while full campaigns continue.
+
+The complete Tier2 journal-leader row at exact `c4fed06` now independently
+qualifies all 200 seeds across 17 terminal successful shards: 526,232 invocations,
+5,797,467 entries, 3,800 recorded leader kills and all three production models
+for 676,814 operations. Original archive/Git parts/member hashes, unique complete
+range coverage, source/job identities and common 45 model dependency bytes verify.
+Earlier 1–48 raw histories are restored and rechecked to close their narrower
+recorded dependency comparison, without repeating runtime trials. Worst terminal/
+progress p99 is 17.457496447/9.067125521 s under unchanged 30 s / 10 s gates.
+[Complete executed-source row proof](scale/current-tier2-matrix-2026-10-04/journal-full200-qualification/)
+qualifies this row at c4fed06, not the current-source complete matrix, other twelve
+rows, the original physical million-timer drain or actual 24-hour full-matrix soak.
+Actual workload binaries/physical stores were not uploaded; final integrity/drain
+assertions retain named-test scope, with no independent store reopening claimed.

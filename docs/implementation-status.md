@@ -1,5 +1,35 @@
 # Implementation status against the supplied plan
 
+- **Complete Tier2 journal-leader row independently qualified at executed `c4fed06`:**
+  all 17 terminal successful shards cover seeds 1–200 exactly once, each with
+  ten-minute requested workload: 526,232 invocations, 5,797,467 entries and
+  3,800 recorded leader kills. All three source-bound production history models
+  pass 676,814 operations; the common 45 actual dependency inputs and helper
+  hash match executed Git. Earlier 1–48 raw inputs are independently restored and
+  rechecked to close their narrower recorded dependency check, with actual model
+  binaries retained; no runtime trial is repeated. All original canonical/Git
+  archives and member hashes verify, and p99 remains 17.457496447/9.067125521 s
+  under unchanged 30 s / 10 s gates. The aggregate proof retains exact range/API/
+  source/model checks, commands, original hash bindings and four model executables.
+  This qualifies the journal row at c4fed06 only: current-source full matrix,
+  other twelve rows, physical million-timer drain and original 24-hour soak remain
+  open. No independent store reopening or original workload binary is claimed.
+  [Complete row qualification and exact retained evidence](scale/current-tier2-matrix-2026-10-04/journal-full200-qualification/).
+
+- **Clock diagnostics 112/121 now terminal successful, review pending:** workload
+  jobs 111381924505 / 111381922136 finish successfully in runs 37183948633 /
+  37183950090 at `3b2999e`. Raw artifacts 11296283029 / 11296382740 and original
+  store artifacts 11296412730 / 11296327992 are available. Completed raw timing,
+  actual executables and models still require independent review; no original
+  server cause or failed-parent repair is inferred from terminal success.
+
+- **Further exact sparse recovery:** seven committed archive working copies
+  recover 155,779,072 allocated root bytes at pushed `4d98b2d`, with exact Git
+  hash/size and open-FD checks. All 790 previously tracked source inputs remain
+  materialized/identical; complete archives remain in local/pushed Git and failed
+  originals outside Git are untouched.
+  [Exact operation](scale/local-proof-sparse-checkout-2026-10-04/fifth-extension/).
+
 - **Full corrected-runtime Tier1 normal 100,000-seed gate independently qualified:**
   terminal successful run 37172700747 / job 111348766626 at exact `283ba32`
   verifies all 121 workloads over contiguous seeds 1–100,000: 12,100,000 bodies,
