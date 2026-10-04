@@ -30,6 +30,30 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Traced upgrade41 independently accepted, actual SDK retained:** full600s
+  native diagnostic at837fb9d verifies1848 invocations /20341 entries /five
+  retained-store SIGKILL upgrades/Start gaps. Worst terminal/progress p99
+  13.442085391/10.898387153s passes R5 gates30/30s. All three models /2381
+  operations and45 dependencies match source. All340 native/fallback requests
+  have responses across ten before/after proofs. Actual SDK hash/build info,
+  all3850 captured inputs /563 Git-local inputs,805 producer sources and7758
+  original member contents verify.1061-member /94,113,918-byte compact proof
+  retains actual SDK/NATS/model/input/store bytes. Originals not reopened;
+  historical cause/parent/full matrices/actual24h remain open.
+  [Complete diagnostic proof](scale/rolling-upgrade-fallback-failure-2026-10-04/api-trace/seed41-accepted/).
+
+- **Combined repeated-rebalance completion gate remains failed:** corrected
+  retained race SDK ateb5fbd6 executes149 worker faults /231 assignment moves
+  and the confirmed45s route hold, then hits the unchanged5min cohort deadline
+  after128 ordered result reads. Cause not established; no gate relaxation or
+  blind rerun. Actual SDK/source/events/stores remain at
+  `/tmp/js-wf-phase3-rebalance-ready-20261004`. Diagnostic analysis remains open.
+
+- **Disposable Go cache cleared for capacity:** dedicated804MiB Go build cache
+  removed with go clean after all local builds/tests/review processes finished.
+  Retained actual binaries, captured source/input bytes and original stores are
+  separate and preserved. Future builds regenerate compiler outputs.
+
 - **Combined-rebalance third trial rejected; startup caller contract corrected:**
   retained race SDK atf2acad6 fails24.04s on a majority replacement's bounded
   lease metadata timeout. Worker.New explicitly requires callers to retry named

@@ -1,0 +1,15 @@
+# Accepted traced rolling-upgrade diagnostic — seed41
+
+[Run37197193507](https://github.com/AntPAllen/js-wf/actions/runs/37197193507), successful job111423229416, executes exact `837fb9dd075e3e74b7413de791418a4648bcd37a`: full600s, five containers, five retained-store SIGKILL upgrades, forced Start gaps and opt-in API trace for native and fallback provisioning. Complete raw artifact11302276836 /1,620,604 ZIP bytes and original artifact11301648565 /82,670,709 ZIP bytes are downloaded. Native review accepts1848 invocations /20341 journal entries /five faults. Worst terminal/progress per-type p99 is13.442085391/10.898387153s, under executed R5 gates30/30s. Mandatory final integrity/drain assertions remain source-bound named-test evidence.
+
+All three production Start/Signal/Await models independently pass2381 history operations. All45 actual Go/module dependency inputs match executed source before/after. Actual model executable/build info/helper/dependency bytes/outputs retained. All805 selected native producer source inputs match exact Git and are retained as bytes.
+
+All ten before/after upgrade proofs complete. Across native checks and fallback calls:340 requests /340 responses, consisting of100 native and240 fallback metadata requests. Every subject pair/order/monotonic time/base64 response verifies; no unanswered requests or API errors. Historical60s failures are not reproduced or explained; this is not a causal fix claim.
+
+Unlike earlier diagnostics, the actual SDK executable was uploaded: SHA256 `37583f42cd52ab048901d6a9021a938bf57c3a7132916ff74436e4b1313da3ed`. All3850 captured selected input byte hashes verify, including563 exact Git-local inputs, unchanged pre/post source and exact runner bytes from the executed Git revision. Actual extracted binary build info matches the retained output after excluding the extraction-dependent filename header. Race/selector/count/timeout/package cwd and successful emitted test events are verified. Selected Go/Cgo/test/module input capture is a superset, not exhaustive assembly/embed/generated/hermetic provenance.
+
+Canonical original archive82,534,363 bytes /SHA256 `ffc2f26f91276fbc8a061ff4af3332a5a0434e819e954e867ca0f89896830503`; all7758 member contents /260,239,446 bytes match the original manifest. Actual SDK/NATS executables, captured inputs and original stores remain inside that canonical archive. Stores were hashed, not independently reopened.
+
+Compact proof:1061 members /94,113,918 compressed bytes /four parts. Every member, unchanged input, part and concatenated archive readback verifies. Manifest binds all member/part/canonical hashes. Concatenate in listed order, check canonical SHA256 and safely extract into a fresh directory; the nested original archive and original manifest contain the actual SDK/input/store payloads. Complete raw/run/job/artifact/source/API/reviewer/model evidence is included.
+
+This accepts one focused seed at837fb9d. It does not repair the failed79915ca parent, establish historical cause, qualify200 seeds/full current-source matrices, or satisfy actual24h soak.
