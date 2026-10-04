@@ -1385,3 +1385,11 @@ not confirmed missing/corrupt data or a server-cause attribution. Complete raw
 artifacts and exact pre/post source hashes are preserved; new stores/executables
 are reference-only. [Failure proof and qualification limits](scale/worker-clock-checkpoint-2026-10-04/failed-shards-105-130/)
 keep those ranges, full parent/row/matrix and original 24-hour gate open.
+
+The failed clock seeds 112/121 now have separate current-source instrumented
+10-minute diagnostics at exact `3b2999e` (runs 37183948633 / 37183950090), using
+existing per-attempt checkpoint timing and primary-error preservation with
+unchanged three 20-second attempts / 60-second total audit limits. Live workload
+jobs are confirmed; dispatch is not qualification, an original server-cause fix,
+or repair of the full parent. [Exact diagnostic scope and runtime graph](scale/worker-clock-checkpoint-2026-10-04/seeds112-121-diagnostics/)
+preserve those boundaries while full campaigns continue.

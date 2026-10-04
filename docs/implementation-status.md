@@ -1,5 +1,23 @@
 # Implementation status against the supplied plan
 
+- **Focused instrumented diagnostics for failed clock seeds 112 and 121 are live:**
+  runs 37183948633 / 37183950090 at exact `3b2999e`, workload jobs 111381924505 /
+  111381922136, are independently confirmed in progress. Existing per-attempt
+  checkpoint timing and primary-error records run under unchanged 20 s / 60 s
+  audit limits, ten-minute workload and clock cadence. All 685 selected runtime /
+  simulation / Tier1 producer bytes match the accepted `283ba32` race graph;
+  these are current-source diagnostics, not identical historical binaries.
+  No production fix or timeout/server-cause claim is made. Raw outcomes and actual
+  executables await review; failed parent and full release gates remain open.
+  [Exact dispatches, API bindings and source graph](scale/worker-clock-checkpoint-2026-10-04/seeds112-121-diagnostics/).
+
+- **Further verified archive working-copy recovery:** 11 newly materialized
+  committed archives recover 280,809,472 root bytes after exact Git hash/size
+  and open-FD checks. All 786 previously tracked source inputs stay materialized
+  and identical. Full archives remain in local/pushed Git; failed originals
+  outside Git are untouched, and qualification is unchanged.
+  [Exact operation](scale/local-proof-sparse-checkout-2026-10-04/fourth-extension/).
+
 - **Two additional clock-shard failures independently bound to original raw evidence:**
   at exact `79915ca`, seed 112 (shard 105–117) and seed 121 (118–130) fail their
   batch-90 retained-state audit after 60.002074564/60.000480289 s. Terminal lookup
