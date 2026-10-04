@@ -51,7 +51,11 @@ def bind(run, job, artifact, log, first, last):
 
 
 def review(run, job, artifact, job_log, artifact_root, first, last, temporary_root=None,
-           model_root=None):
+           model_root=None, model_binary_out=None):
+    if model_binary_out is not None:
+        model_binary_out = Path(model_binary_out).resolve()
+        if model_binary_out.exists() or model_binary_out.is_relative_to(artifact_root.resolve()):
+            raise ValueError('model executable output must be fresh and outside original artifacts')
     revision = bind(run, job, artifact, job_log, first, last)
     repo = REPO if model_root is None else Path(model_root).resolve()
     before = shared.inventory(artifact_root)
@@ -177,17 +181,29 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
                 raise ValueError("raw evidence check failed: result == ''.join((f'whole {name} operations={operations} verdict=Ok error=<nil>\\n' for name in ('starts', 'signals', 'results')))")
             reports.append(dict(seed=seed, report=report, raw_latency_samples=len(samples), raw_faults_verified=len(faults), raw_history_operations=operations, independent_history_output=result))
 
+        retained_binary = binary.read_bytes() if model_binary_out is not None else None
+        if retained_binary is not None and hashlib.sha256(retained_binary).hexdigest() != binary_hash:
+            raise ValueError('model executable changed during review')
+
     if shared.inventory(artifact_root) != before:
         raise ValueError('original evidence changed during review')
     if any(hashlib.sha256((repo/name).read_bytes()).hexdigest() != digest
            for name,digest in model_hashes.items()):
         raise ValueError('model dependency inputs changed during review')
+    if model_binary_out is not None:
+        with model_binary_out.open('xb') as output:
+            output.write(retained_binary)
+        model_binary_out.chmod(0o755)
+        if hashlib.sha256(model_binary_out.read_bytes()).hexdigest() != binary_hash:
+            raise ValueError('retained model executable failed readback verification')
     return dict(shard_qualified=True, revision=revision, run=run['id'], job=job['id'],
                 artifact=artifact['id'], row='journal', first=first, last=last,
                 duration_seconds_per_seed=600, seeds=reports,
                 all_three_independent_history_models_pass=True,
                 model_source_root=str(repo),
                 model_dependency_sha256=model_hashes, model_binary_sha256=binary_hash,
+                model_binary_retained=model_binary_out is not None,
+                model_binary_path=str(model_binary_out) if model_binary_out is not None else None,
                 model_helper_sha256=hashlib.sha256(Path(__file__).with_name('tier2-history-review.go.txt').read_bytes()).hexdigest(),
                 invocations=sum(s['report']['invocations'] for s in reports),
                 journal_entries=sum(s['report']['journal_entries'] for s in reports),
@@ -207,6 +223,8 @@ def main():
     parser.add_argument('--temporary-root', type=Path)
     parser.add_argument('--model-root', type=Path,
                         help='Source checkout for models; dependencies must match the executed revision')
+    parser.add_argument('--model-binary-out', type=Path,
+                        help='Retain the actual model executable at a fresh path outside original artifacts')
     args = parser.parse_args()
     root = args.root.resolve()
     output = args.output.resolve()
@@ -214,7 +232,7 @@ def main():
         parser.error('output must be fresh and outside original artifacts')
     report = review(read(args.run), read(args.job), read(args.artifact),
                     args.log.read_text(), root, args.first, args.last, args.temporary_root,
-                    args.model_root)
+                    args.model_root, args.model_binary_out)
     report['metadata_sha256'] = {name:hashlib.sha256(getattr(args,name).read_bytes()).hexdigest()
                                 for name in ('run','job','artifact','log')}
     output.write_text(json.dumps(report, indent=2)+'\n')
