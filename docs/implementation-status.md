@@ -30,6 +30,16 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
 
 ## Latest accepted evidence
 
+- **Second upgrade fallback timeout preserved:** source799 shard27–39 fails at
+  seed27/fault5 after all five pinned peers report2.15.0. All five native rejection
+  checks complete; fallback provisioning then exhausts its unchanged60s proof
+  deadline. Exact blocked request/cause remains unconfirmed. All759 selected
+  source inputs and3,875 original members verify; complete raw/source/actual NATS
+  binaries/stores retained in846 outer members /42,486,478 bytes. Seeds28–39
+  unrun; failed shard/parent stay excluded. Traced diagnostic37194088941 is now
+  observed in progress at source520316e; terminal review pending.
+  [Second failure and original archive](scale/rolling-upgrade-fallback-failure-2026-10-04/seed27/).
+
 - **Tier2 consumer49–60 independently qualified:** twelve ten-minute seeds atc4,
   31,472 invocations /347,094 entries /228 kills and40,482 history operations
   passing all three production models. All45 dependency inputs match source
