@@ -931,6 +931,17 @@ archive only with exact single-seed original-store identity; raw/range archives
 still require their nested fixture layout. [Accepted diagnostic evidence](scale/worker-clock-checkpoint-2026-10-04/accepted-seed-15/)
 defines this limit. Other campaign jobs remain useful individual evidence.
 
+Worker-clock seed 6 in that same full parent separately fails after all five
+child processes exit on a two-second clock-proof timeout. The later parent
+stale-sample failure is secondary. Observe each actual clock-worker exit through
+the existing fleet error path and preserve the child error before cancellation;
+identify publish versus broker-read errors while retaining original deadlines.
+Actual-child exit, cleanup, unexpected-success and cancellation controls must
+pass normal/race; disabling observation must fail. [Executed observation and
+raw failure evidence](scale/worker-clock-checkpoint-2026-10-04/process-exit-observation/)
+resolve error masking only; broker cause and real-matrix qualification remain open.
+
+
 Current Tier2 journal seeds 1–96 pass independent raw fault/latency and production
 history-model review at exact `c4fed06`: 252,896 invocations, 2,786,187 entries,
 1,824 leader kills and worst terminal/progress type p99 17.457496447/8.533582526 s.

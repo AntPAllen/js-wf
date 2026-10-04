@@ -12,6 +12,15 @@ The archive retains terminal job metadata, the complete original job log,
 full current API artifact inventory, selected references and scoped analysis.
 Every outer archive member hash-verifies. Raw artifact **11289888005**
 (14,697,884 bytes) and store artifact **11290782676** (617,981,262 bytes) are
-referenced only: their payloads have not been downloaded or independently
-hash-verified. No physical stores are reopened. The original full parent
+initially referenced only in the compact metadata archive. The supplemental
+`raw-proof.tar.gz` now retains the complete downloaded raw upload with all
+552 outer members independently read back and hash-verified. Its 759 pre/post
+source inputs for every executed seed 1–6 match exact Git. All five seed-6
+child logs show a two-second clock-proof timeout and exit after 4.67–5.21 s,
+before the parent periodic check reports a stale sample. Publish versus read
+timeout and server cause remain unconfirmed. The large original store/executable
+payload is still undownloaded and unverified. No physical stores are reopened. The original full parent
 remains failed; other ongoing jobs and the Tier2 campaign are unchanged.
+
+[Primary child failure observation and deterministic controls](../process-exit-observation/)
+prevent this secondary stale-sample error from masking the actual worker exit.

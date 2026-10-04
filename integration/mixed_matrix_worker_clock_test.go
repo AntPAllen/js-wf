@@ -57,11 +57,11 @@ func writeMatrixWorkerClock(ctx context.Context, js jetstream.JetStream, stream 
 	payload, _ := json.Marshal(sample)
 	ack, err := js.Publish(ctx, "matrix.clock."+id, payload)
 	if err != nil {
-		return err
+		return fmt.Errorf("publish clock probe for %s: %w", id, err)
 	}
 	message, err := stream.GetMsg(ctx, ack.Sequence)
 	if err != nil {
-		return err
+		return fmt.Errorf("read clock probe for %s sequence=%d: %w", id, ack.Sequence, err)
 	}
 	sample.ServerAt, sample.Sequence = message.Time, message.Sequence
 	sample.Offset = sample.WorkerAt.Sub(sample.ServerAt)

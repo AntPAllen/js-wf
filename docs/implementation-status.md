@@ -2,6 +2,19 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Worker-clock primary exit failure exposed:** the complete failed seed-6
+  raw upload shows all five children exit on a two-second clock-proof timeout
+  after 4.67–5.21 s, before the parent's 30-second stale-sample check. All
+  759 pre/post source inputs for seeds 1–6 match Git; 552 raw-proof members
+  verify. Large original executable/store payload remains undownloaded.
+  The fixture now observes actual clock-worker exits through its fleet error
+  path, preserves child error text and identifies publish/read probe phases.
+  Actual-child/cleanup/cancellation controls pass normal/race 0.006/1.027 s;
+  a compiled disabled-observation overlay fails all three in 0.004 s. All
+  probe/freshness/workload gates remain unchanged. Broker timeout cause remains
+  unconfirmed; no new matrix pass or full-campaign replacement is claimed.
+  [Exact failed raw evidence and primary error correction](scale/worker-clock-checkpoint-2026-10-04/process-exit-observation/).
+
 - **Additional worker-clock shard failure:** job 111324439684 in full parent
   37164231641 fails seed 6 on an approximately 30-second-old clock sample;
   cancellation/process-counter errors follow. This differs from seed 15's audit

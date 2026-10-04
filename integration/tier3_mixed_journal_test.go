@@ -540,6 +540,11 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			}
 			processes = append(processes, process)
 			processSessions = append(processSessions, process)
+			if row == "worker_clock" {
+				launch("process/"+process.id, func() error {
+					return waitMatrixProcessWorkerExit(workCtx, process)
+				})
+			}
 			if row == "worker_isolation" {
 				proxySpecs = append(proxySpecs, tier3ProxySpec{Worker: process.id, PID: process.cmd.Process.Pid, ProxyURL: workerURLs[0], ServerURL: urls[slot], Slot: slot})
 			}

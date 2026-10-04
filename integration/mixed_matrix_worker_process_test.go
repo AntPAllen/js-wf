@@ -383,6 +383,33 @@ func stopMatrixProcessWorker(process *matrixProcessWorker) {
 	}
 }
 
+// Clock workers have no scheduled process exits. Observe their actual Wait
+// result before a later clock check masks the child failure as a stale sample.
+// Cleanup cancels this observer before signaling children; the closed exit
+// channel still lets stopMatrixProcessWorker recognize an already reaped child.
+func waitMatrixProcessWorkerExit(ctx context.Context, process *matrixProcessWorker) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case err := <-process.exited:
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		logPath := process.base + ".log"
+		log, readErr := os.ReadFile(logPath)
+		if len(log) > 4096 {
+			log = log[len(log)-4096:]
+		}
+		if err == nil {
+			return fmt.Errorf("worker %s exited unexpectedly with success; log=%s read_error=%v tail=%s", process.id, logPath, readErr, log)
+		}
+		return fmt.Errorf("worker %s exited unexpectedly; log=%s read_error=%v tail=%s: %w", process.id, logPath, readErr, log, err)
+	}
+}
+
 func killMatrixProcessWorker(ctx context.Context, root string, urls []string, fleet []*matrixProcessWorker, index int, scheduled time.Time) (matrixLeaderFault, error) {
 	process := fleet[index]
 	event := matrixLeaderFault{Scheduled: scheduled, Node: -1, WorkerSlot: &index, Worker: process.id, PID: process.cmd.Process.Pid, Killed: time.Now()}
