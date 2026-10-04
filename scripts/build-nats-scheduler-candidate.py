@@ -65,7 +65,10 @@ def build(root):
     write(root/'candidate-inventory.json', candidate)
     environment = dict(os.environ, GOWORK='off', GOFLAGS='', CGO_ENABLED='0', GOMAXPROCS='1', GOMEMLIMIT='512MiB')
     fmt = '{{.Dir}}|{{join .GoFiles " "}}|{{join .CgoFiles " "}}'
-    listing = subprocess.check_output(['go', 'list', '-deps', '-f', fmt, '.'], cwd=source, env=environment, text=True)
+    # A copied module is not a Git checkout. Its identity is the pinned module
+    # checksum plus complete source inventories, not the VM's parent Git state.
+    list_command = ['go', 'list', '-buildvcs=false', '-deps', '-f', fmt, '.']
+    listing = subprocess.check_output(list_command, cwd=source, env=environment, text=True)
     (root/'dependencies.txt').write_text(listing)
     inputs = set()
     for line in listing.splitlines():
@@ -84,8 +87,8 @@ def build(root):
     write(root/'source-before.json', hashes)
     write(root/'captured-paths.json', captures)
     binary = root/'nats-server'
-    command = ['go', 'build', '-p=1', '-o', str(binary), '.']
-    write(root/'command.json', dict(command=command, cwd=str(source), environment={k:environment[k] for k in ['GOWORK', 'GOFLAGS', 'CGO_ENABLED', 'GOMAXPROCS', 'GOMEMLIMIT']}, revision=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip()))
+    command = ['go', 'build', '-buildvcs=false', '-p=1', '-o', str(binary), '.']
+    write(root/'command.json', dict(command=command, list_command=list_command, cwd=str(source), environment={k:environment[k] for k in ['GOWORK', 'GOFLAGS', 'CGO_ENABLED', 'GOMAXPROCS', 'GOMEMLIMIT']}, revision=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip()))
     with (root/'build.log').open('wb') as log:
         subprocess.run(command, cwd=source, env=environment, stdout=log, stderr=subprocess.STDOUT, check=True)
     after = {str(p): sha(p) for p in inputs}
