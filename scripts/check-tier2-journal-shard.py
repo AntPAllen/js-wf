@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Review a complete Tier2 journal shard using raw faults, latency and history.
+"""Review a complete Tier2 journal or consumer leader shard using raw faults, latency and history.
 
-Only the requested consecutive journal seeds qualify. The parent campaign,
+Only the requested consecutive seeds of the selected row qualify. The parent campaign,
 200-seed row, full matrix and 24h soak are never promoted by this command.
 """
 import argparse
@@ -14,7 +14,15 @@ import subprocess
 import tempfile
 
 REPO = Path(__file__).resolve().parents[1]
-TEST = 'TestMixedMatrixJournalLeaderEveryThirtySeconds'
+ROWS = {
+    'journal': ('journal_leader', 'TestMixedMatrixJournalLeaderEveryThirtySeconds'),
+    'consumer': ('consumer_leader', 'TestMixedMatrixConsumerLeaderEveryThirtySeconds'),
+}
+
+def row_contract(row):
+    if row not in ROWS:
+        raise ValueError('unsupported leader row')
+    return ROWS[row]
 
 def read(path):
     return json.loads(path.read_text())
@@ -27,7 +35,8 @@ def module(name, path):
 
 shared = module('tier2_shard_inventory', Path(__file__).with_name('check-tier3-matrix-shard.py'))
 
-def bind(run, job, artifact, log, first, last):
+def bind(run, job, artifact, log, first, last, row='journal'):
+    row_contract(row)
     source = run.get('head_sha', '')
     if (type(first) is not int or type(last) is not int or not 1 <= first <= last <= 200
             or not isinstance(source, str) or not re.fullmatch('[0-9a-f]{40}', source)):
@@ -35,34 +44,35 @@ def bind(run, job, artifact, log, first, last):
     span = str(first) if first == last else f'{first}-{last}'
     if (type(run.get('id')) is not int or type(job.get('id')) is not int
             or job.get('run_id') != run['id'] or job.get('head_sha') != source
-            or job.get('name') != f'leader (journal, {span})'
+            or job.get('name') != f'leader ({row}, {span})'
             or (job.get('status'), job.get('conclusion')) != ('completed', 'success')
             or source not in log):
         raise ValueError('job identity, source, checkout or terminal success differs')
     origin = artifact.get('workflow_run', {})
     if (type(artifact.get('id')) is not int or artifact.get('expired') is not False
-            or artifact.get('name') != f'matrix-journal-{span}-10m'
+            or artifact.get('name') != f'matrix-{row}-{span}-10m'
             or origin.get('id') != run['id'] or origin.get('head_sha') != source):
         raise ValueError('artifact identity, expiry, source or run differs')
     headers = re.findall(r'Sustained matrix row=(\w+) seed=(\d+) duration=(\S+)', log)
-    if headers != [('journal', str(seed), '10m') for seed in range(first,last+1)]:
+    if headers != [(row, str(seed), '10m') for seed in range(first,last+1)]:
         raise ValueError('missing, duplicate or substituted actual ten-minute seed execution')
     return source
 
 
 def review(run, job, artifact, job_log, artifact_root, first, last, temporary_root=None,
-           model_root=None, model_binary_out=None):
+           model_root=None, model_binary_out=None, row='journal'):
+    report_row, test = row_contract(row)
     if model_binary_out is not None:
         model_binary_out = Path(model_binary_out).resolve()
         if model_binary_out.exists() or model_binary_out.is_relative_to(artifact_root.resolve()):
             raise ValueError('model executable output must be fresh and outside original artifacts')
-    revision = bind(run, job, artifact, job_log, first, last)
+    revision = bind(run, job, artifact, job_log, first, last, row)
     repo = REPO if model_root is None else Path(model_root).resolve()
     before = shared.inventory(artifact_root)
-    required = {f'matrix-journal-{seed}-{suffix}' for seed in range(first,last+1)
+    required = {f'matrix-{row}-{seed}-{suffix}' for seed in range(first,last+1)
                 for suffix in ('test.jsonl', 'faults.json', 'latencies.json', 'history.jsonl')}
     if not required <= set(before) or {p for p in before if p.endswith('test.jsonl')} != {
-            f'matrix-journal-{seed}-test.jsonl' for seed in range(first,last+1)}:
+            f'matrix-{row}-{seed}-test.jsonl' for seed in range(first,last+1)}:
         raise ValueError('missing, duplicate or unexpected raw seed evidence')
     # Compile production models only after proving the model dependency inputs
     # match the actually executed revision. Captured runtime binaries/stores are
@@ -109,19 +119,18 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
         headers = list(re.finditer(r'Sustained matrix row=(\w+) seed=(\d+) duration=(\S+)', job_log))
         for seed in range(first, last + 1):
             r = artifact_root
-            prefix = f'matrix-journal-{seed}-'
-            test = 'TestMixedMatrixJournalLeaderEveryThirtySeconds'
+            prefix = f'matrix-{row}-{seed}-'
             events = [json.loads(l) for l in (r / (prefix + 'test.jsonl')).read_text().splitlines()]
             if any(e['Action'] in ('skip', 'fail', 'build-fail') for e in events):
                 raise ValueError("raw evidence check failed: not any((e['Action'] in ('skip', 'fail', 'build-fail') for e in events))")
             execution.check(events, test, '10m')
             log = ''.join((e.get('Output', '') for e in events))
-            report = campaign.check_seed(log, 'journal_leader', seed, test)
+            report = campaign.check_seed(log, report_row, seed, test)
             index = seed-first
             segment = job_log[headers[index].end():headers[index+1].start()
                               if index+1 < len(headers) else len(job_log)]
             guard = f'Verified executed sustained test {test} duration=10m'
-            if segment.count(guard) != 1 or campaign.check_seed(segment, 'journal_leader', seed, test) != report:
+            if segment.count(guard) != 1 or campaign.check_seed(segment, report_row, seed, test) != report:
                 raise ValueError('raw events differ from bound job log or its duration guard')
             fault_data = read(r / (prefix + 'faults.json'))
             faults = fault_data['faults']
@@ -132,6 +141,13 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
                 scheduled, killed, healed = map(clock.timestamp_ns, [fault[k] for k in ('scheduled', 'killed', 'healed')])
                 if not (scheduled <= killed <= healed and type(fault['node']) is int and (0 <= fault['node'] < 3) and (not fault.get('error'))):
                     raise ValueError("raw evidence check failed: scheduled <= killed <= healed and type(fault['node']) is int and (0 <= fault['node'] < 3) and (not fault.get('error'))")
+                if row == 'consumer':
+                    consumer = fault.get('consumer', '')
+                    if (not isinstance(consumer, str) or not re.fullmatch(r'WF_P_[0-9]{2}', consumer)
+                            or not 0 <= int(consumer[-2:]) < 64
+                            or any(type(fault.get(k, 0)) is not int or fault.get(k, 0) < 0
+                                   for k in ('pending', 'ack_pending'))):
+                        raise ValueError('consumer fault lacks valid durable identity or pending counts')
                 if previous is not None:
                     if not scheduled - previous == 30000000000:
                         raise ValueError('raw evidence check failed: scheduled - previous == 30000000000')
@@ -197,7 +213,7 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
         if hashlib.sha256(model_binary_out.read_bytes()).hexdigest() != binary_hash:
             raise ValueError('retained model executable failed readback verification')
     return dict(shard_qualified=True, revision=revision, run=run['id'], job=job['id'],
-                artifact=artifact['id'], row='journal', first=first, last=last,
+                artifact=artifact['id'], row=row, first=first, last=last,
                 duration_seconds_per_seed=600, seeds=reports,
                 all_three_independent_history_models_pass=True,
                 model_source_root=str(repo),
@@ -211,13 +227,14 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
                 input_sha256=before, executed_source_hashes=source_inputs,
                 qualifies_parent_campaign=False, qualifies_full_row=False,
                 clears_tier2_200_seed_gate=False, clears_tier3_24_hour_soak=False,
-                scope='Requested complete journal shard only. Raw faults/latencies and independent history models verified. Named-test final integrity/drain assertions; no captured workload binary, source ledgers or physical stores.')
+                scope='Requested complete selected leader shard only. Raw faults/latencies and independent history models verified. Named-test final integrity/drain assertions; no captured workload binary, source ledgers or physical stores.')
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('run', 'job', 'artifact', 'log', 'root', 'output'):
         parser.add_argument('--'+name, required=True, type=Path)
+    parser.add_argument('--row', choices=tuple(ROWS), default='journal')
     parser.add_argument('--first', required=True, type=int)
     parser.add_argument('--last', required=True, type=int)
     parser.add_argument('--temporary-root', type=Path)
@@ -232,7 +249,7 @@ def main():
         parser.error('output must be fresh and outside original artifacts')
     report = review(read(args.run), read(args.job), read(args.artifact),
                     args.log.read_text(), root, args.first, args.last, args.temporary_root,
-                    args.model_root, args.model_binary_out)
+                    args.model_root, args.model_binary_out, args.row)
     report['metadata_sha256'] = {name:hashlib.sha256(getattr(args,name).read_bytes()).hexdigest()
                                 for name in ('run','job','artifact','log')}
     output.write_text(json.dumps(report, indent=2)+'\n')

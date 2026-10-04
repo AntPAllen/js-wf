@@ -44,6 +44,19 @@ class JournalShardTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 shard.bind(run, job, artifact, log, 1, 2)
 
+    def test_consumer_binding_rejects_journal_substitution(self):
+        run, job, artifact, log = fixture()
+        job['name'] = 'leader (consumer, 1-2)'
+        artifact['name'] = 'matrix-consumer-1-2-10m'
+        log = log.replace('row=journal', 'row=consumer')
+        self.assertEqual(shard.bind(run, job, artifact, log, 1, 2, 'consumer'), 'a'*40)
+        with self.assertRaises(ValueError):
+            shard.bind(run, job, artifact, log, 1, 2)
+        with self.assertRaises(ValueError):
+            shard.bind(run, job, artifact, log.replace('row=consumer', 'row=journal'), 1, 2, 'consumer')
+        with self.assertRaises(ValueError):
+            shard.bind(run, job, artifact, log, 1, 2, 'cluster')
+
     def test_metadata_without_all_raw_inputs_cannot_qualify(self):
         run, job, artifact, log = fixture()
         with tempfile.TemporaryDirectory() as directory:

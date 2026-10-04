@@ -1,5 +1,23 @@
 # Implementation status against the supplied plan
 
+- **Tier2 consumer-leader seeds 13–24 independently qualified:** twelve actual
+  ten-minute seeds at executed `c4fed06` produce 31,080 invocations, 342,529
+  entries and 228 recorded leader kills. Raw fault identities/cadence/heal times,
+  latency samples and source-bound job outputs verify. All three production
+  history models pass 39,986 operations with 45 dependency inputs matching
+  source before/after; actual model executable and complete raw proof are retained.
+  Worst terminal/progress type p99 is 18.076655685 / 7.320884037 s under unchanged
+  30 s / 10 s gates. Consumer 1–12 and 25–36 are terminal successful but await
+  independent raw review. Full consumer row/current-source matrix and soak remain
+  open; native workload executables/physical stores were not uploaded.
+  [Exact twelve-seed proof](scale/current-tier2-matrix-2026-10-04/consumer-13-24/).
+
+- **Seventh sparse recovery:** four committed diagnostic proof working copies
+  recover 90,779,648 allocated root bytes at pushed `070df49`; all 792 previously
+  tracked source inputs remain identical. Exact blob/SHA/size and open-FD checks
+  pass. Original failures and local/pushed archive bytes remain preserved.
+  [Recovery ledger](scale/local-proof-sparse-checkout-2026-10-04/seventh-extension/).
+
 - **Complete Tier2 journal-leader row independently qualified at executed `c4fed06`:**
   all 17 terminal successful shards cover seeds 1–200 exactly once, each with
   ten-minute requested workload: 526,232 invocations, 5,797,467 entries and

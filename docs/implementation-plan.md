@@ -1416,3 +1416,15 @@ qualifies this row at c4fed06, not the current-source complete matrix, other twe
 rows, the original physical million-timer drain or actual 24-hour full-matrix soak.
 Actual workload binaries/physical stores were not uploaded; final integrity/drain
 assertions retain named-test scope, with no independent store reopening claimed.
+
+
+Tier2 consumer-leader seeds 13–24 at executed `c4fed06` are now independently
+qualified from complete raw faults/latencies and all three production history
+models: 31,080 invocations, 342,529 entries, 228 kills and 39,986 history
+operations, with all 45 model dependency inputs matching source. Actual model
+executable and complete proof are retained. Worst terminal/progress type p99 is
+18.076655685 / 7.320884037 s under unchanged 30 s / 10 s gates. The shard reviewer
+now supports explicit consumer selection while retaining journal defaults and
+rejecting row substitutions. [Complete consumer shard proof](scale/current-tier2-matrix-2026-10-04/consumer-13-24/)
+qualifies only this twelve-seed range; full consumer/current-source matrices,
+physical million-timer drain and the actual 24-hour soak remain open.
