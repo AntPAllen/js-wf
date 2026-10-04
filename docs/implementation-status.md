@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–120 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–144 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -29,6 +29,19 @@ and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Consumer-leader121–144 independently accepted in two complete shards:**
+  121–132: 31080 invocations /342557 entries /228 kills /40010 history ops,
+  terminal/progress per-type p99 17.353136587/7.321467864s.
+  133–144: 30800 invocations /339427 entries /228 kills /39628 history ops,
+  terminal/progress per-type p99 17.878953227/7.246087352s.
+  All24 full600s seeds atc4fed06 pass unchanged R3 gates30/10s and all three
+  history models.45 actual model dependencies match executed source; actual models
+  and complete raw proofs retained. Contiguous1–144: 375116 invocations /
+  4134557 entries /2736 kills /482741 history operations.
+  Original SDK/stores not uploaded; full200/current-source matrices/24h stay open.
+  [121–132](scale/current-tier2-matrix-2026-10-04/consumer-121-132/),
+  [133–144](scale/current-tier2-matrix-2026-10-04/consumer-133-144/).
 
 - **Actual24h journal-leader row started:** persistent user service executes
   pinned20babb5/seed1/race/24h from an isolated checkout, actual retained SDK,
