@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–144 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–156 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -32,6 +32,29 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
+
+- **Consumer-leader145–156 independently accepted:** twelve complete600s seeds
+  atc4fed06 qualify31360 invocations /345664 entries /228 kills and all three
+  models /40356 operations. Worst terminal/progress per-type p99
+  17.306140086/7.071356710s passes unchanged R3 gates30/10s. All45 actual model
+  dependencies match source; actual model and complete raw proof retained.
+  Contiguous1–156:406476 invocations /4480221 entries /2964 kills /523097 ops.
+  Original native SDK/stores not uploaded; full200/current-main gates stay open.
+  [Complete source-bound proof](scale/current-tier2-matrix-2026-10-04/consumer-145-156/).
+
+- **Replicated bulk reader candidate independently accepted in focused cases:**
+  retained race SDK at097c275 completes3000 records after real in-process stream
+  leader loss in258.261756ms; cancellation stops128 visits/99.488017ms; consumer
+  deletion recovers3000 records/2488 leader reads in2.854176880s. Three actual
+  NATS2.11.17 processes match997-record digest in1.888964078s with verified
+  consumer replicas3. A100002 sequence span/100000 deleted records verifies its
+  two anchors in1.927674630s with one leader gap query. All2884 captured inputs
+  /54 Git-local files, actual runner/SDK/all build-info fields and3181 original
+  member hashes verify;68093646-byte complete proof in three parts. Original
+  stores/executables retained, not independently reopened. This is a raw-reader
+  candidate, still test-only: full invariant audit/large-population/OS-kill/route
+  qualification and actual24h remain. Production/20s/60s limits unchanged.
+  [Complete focused acceptance](scale/retained-audit-batch-candidate-2026-10-04/replicated-accepted/).
 
 - **Bulk candidate native failure retained and addressed:** actual race run at
   7daea56 fails leader loss after512/3000 reads with no responders. Explicit
