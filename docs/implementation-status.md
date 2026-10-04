@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–36 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–48 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Worker-clock 117 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Other finite combined fault cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -29,6 +29,16 @@ and million-timer physical-drain failures, finish combined continuation/promise/
 retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Tier2 consumer-leader37–48 independently qualified:** twelve ten-minute seeds
+  at executedc4;31,780 invocations /350,284 entries /228 kills, all three models
+  passing40,898 history operations. All45 dependency inputs match source before/
+  after; actual model binary and complete raw proof retained in206 SHA-verified
+  members /53,802,841 bytes. Worst terminal/progress p99:16.7335777 /7.055787809s
+  under unchanged30s /10s gates. Contiguous consumer1–48:124,880 invocations /
+  1,376,332 entries /912 kills /160,710 history operations. Full consumer200/
+  current-source matrix/actual24h remain open.
+  [Complete twelve-seed proof](scale/current-tier2-matrix-2026-10-04/consumer-37-48/).
 
 - **Clock170–182 independently qualified:** thirteen ten-minute seeds at799,
   39,564 invocations /438,701 entries /247 faults and50,868 operations passing
