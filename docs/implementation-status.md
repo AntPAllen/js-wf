@@ -2,6 +2,16 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **First 48 accepted journal duplicate expansions recovered:** all 394 canonical
+  archive members, 288 raw files and four committed Git archive blobs reverify;
+  no open descriptors. All four targets verify before deletion. Removing only
+  accepted raw expansions recovers 2,712,244,224 allocated RAM bytes; complete
+  compressed proofs are reconstructed locally and remain in pushed Git. Failed
+  evidence, model inputs and qualification are unchanged. Restore raw inputs
+  before further offline review. This enables completed clock-shard review,
+  not the root-disk-limited original 24-hour soak.
+  [Exact executed verification and canonical archive paths](scale/tier2-first48-duplicate-recovery-2026-10-04/).
+
 - **Journal 109–144 complete proofs pushed; duplicate RAM expansions recovered:**
   each accepted shard's original 72 files, canonical archive and committed Git
   parts reverify after its push; no open descriptors. Removing only those three
