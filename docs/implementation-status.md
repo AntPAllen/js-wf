@@ -30,6 +30,17 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
 
 ## Latest accepted evidence
 
+- **New rolling-upgrade failure preserved:** source799 shard14–26 fails atseed15,
+  fault4, fallback provisioning's unchanged60s proof deadline. All five native
+  rejection checks complete first; earlier health200 does not prove availability
+  throughout provisioning. Concurrent consumer NO-quorum warnings are observed,
+  exact blocked request/cause unconfirmed. Full raw and original archives are
+  retained; all759 pre/post source inputs and7,741 original members verify, with
+  complete evidence in937 outer archive members /82,749,802 bytes. Seed14's prior
+  producer pass is not independent qualification;16–26 unrun. Failed shard/parent
+  stay excluded; no runtime fix/timeout relaxation.
+  [Exact failure and stopped originals](scale/rolling-upgrade-fallback-failure-2026-10-04/).
+
 - **Tier2 consumer-leader37–48 independently qualified:** twelve ten-minute seeds
   at executedc4;31,780 invocations /350,284 entries /228 kills, all three models
   passing40,898 history operations. All45 dependency inputs match source before/
