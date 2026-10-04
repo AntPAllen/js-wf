@@ -50,6 +50,12 @@ jobs:
       matrix: ${{ steps.matrix.outputs.jobs }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The planner needs its scripts and workflow registry, not the
+          # retained broker/binary archives. Workload jobs keep full checkout.
+          sparse-checkout: |
+            .github
+            scripts
       - id: matrix
         env:
           MATRIX_ROW: ${{ inputs.row }}

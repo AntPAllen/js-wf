@@ -2,6 +2,16 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Tier3 planner checkout reduced:** the planner's checkout now fetches
+  `.github`, `scripts` and root files, omitting retained broker/executable
+  archives. Actual isolated remote filtered/sparse checkout is 3.1 MiB;
+  all five planner controls pass in 0.004 s and full 16×200 planning produces
+  the same complete 256 shards. All materialized tracked inputs match the
+  edited worktree after execution. Workload full checkout and all gates remain
+  unchanged. Hosted speed improvement and workload qualification are not
+  claimed. Current diagnostic/campaign revisions are unchanged.
+  [Exact sparse inputs, complete output and scope](scale/tier3-planner-checkout-2026-10-04/).
+
 - **Focused primary clock-error diagnostic queued:** run 37170797762 requests
   seed 6 for ten minutes at exact `19f3cb3`; API confirms that head and queued
   planner 111343180483. This seeks publish-versus-read evidence with unchanged
