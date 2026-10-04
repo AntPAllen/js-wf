@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/pprof"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -431,7 +432,15 @@ func TestBatchedInvariantAuditNativePhaseProfile(t *testing.T) {
 	if profileRoot == "" {
 		t.Skip("set WF_AUDIT_BATCH_PROFILE_ROOT for the native CPU/phase profile")
 	}
-	js, ctx, want := batchAuditLargeCohort(t, 12000)
+	count := 12000
+	if value := os.Getenv("WF_AUDIT_BATCH_PROFILE_INVOCATIONS"); value != "" {
+		var err error
+		count, err = strconv.Atoi(value)
+		if err != nil || count < 1 || count > 100000 {
+			t.Fatal("WF_AUDIT_BATCH_PROFILE_INVOCATIONS must be between 1 and 100000")
+		}
+	}
+	js, ctx, want := batchAuditLargeCohort(t, count)
 	if !filepath.IsAbs(profileRoot) {
 		t.Fatal("profile root must be absolute")
 	}
@@ -489,7 +498,7 @@ func TestBatchedInvariantAuditNativePhaseProfile(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(profileRoot, "audit-phases.json"), data, 0644); err != nil {
 		t.Fatal(err)
 	}
-	if auditErr != nil || report != want || len(phases) != 2 || phases[0].Records != 12000 || phases[1].Records != 144000 {
+	if auditErr != nil || report != want || len(phases) != 2 || phases[0].Records != count || phases[1].Records != count*12 {
 		t.Fatalf("profiled audit report=%+v phases=%+v err=%v", report, phases, auditErr)
 	}
 	t.Logf("profiled-audit invocations=%d entries=%d terminal=%d elapsed=%s phases=%+v cpu_profile=%s", report.Invocations, report.Entries, report.Terminal, elapsed, phases, filepath.Join(profileRoot, "audit-cpu.pprof"))

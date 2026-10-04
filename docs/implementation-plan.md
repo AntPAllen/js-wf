@@ -1608,3 +1608,19 @@ consumer fault recovery and full release gates remain open. A test-only native
 CPU profile and stream-scan/visitor timing diagnostic is prepared to locate
 per-record cost; it includes embedded server activity and does not establish
 five-container performance or a server-cause claim. No soak restart.
+
+### Native audit instrumentation and population scaling
+
+Actual source1c9fb4d completes equivalent fresh12k/144k full audits in
+14.672637649s with race instrumentation and1.669375955s normally. Both exact
+reports agree. Independent source/SDK/profile/complete-archive reviews verify;
+live/proc identity was not captured and stores were not reopened. Embedded
+server/client CPU profiling shows substantial TSAN overhead; this does not
+establish five-container capacity or justify promoting earlier deadline failures.
+[Full profiles](scale/retained-audit-phase-profile-2026-10-04/).
+
+The native test now accepts explicit WF_AUDIT_BATCH_PROFILE_INVOCATIONS from1
+through100000, retaining default12000 and exact12-record-per-invocation/report
+assertions. Next measure a full100k normal cohort under the original20s audit
+limit. This is a scaling diagnostic, not full workload/fault/24h qualification.
+Production code, race gates, audit budgets and all release requirements stay.

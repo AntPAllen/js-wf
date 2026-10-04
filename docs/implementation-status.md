@@ -33,6 +33,16 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Audit profiles isolate substantial instrumentation overhead:** actual
+  source1c9fb4d runs full12k/144k fresh embedded-cluster audits in14.672637649s
+  with race and1.669375955s normally. Exact reports and scan counts agree.
+  Race TSAN dominates flat CPU samples; this is not a five-container/NATS-cause
+  or release claim. All2889 inputs/59 Git files, actual SDK/build-info fields,
+  both complete3274-member archives and every part hash verify. Live/proc identity
+  not captured; stores retained but not reopened. No soak restart or budget change.
+  Test-only population parameter prepares full100k scaling measurement.
+  [Complete profiles and scope](scale/retained-audit-phase-profile-2026-10-04/).
+
 - **Consumer replication comparison also shows no clear speedup:** retained
   race SDK atddd5396 runs three same-store12k/144k full audits: consumerR3 before
   12.024088088s, actualR1 consumers12.653120485s, consumerR3 after14.682479197s.

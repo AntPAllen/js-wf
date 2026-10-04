@@ -1,0 +1,54 @@
+{
+  "source": "1c9fb4d40bf46dbf6a44779d2f2c060a69504ae5",
+  "exit_code": 0,
+  "race": true,
+  "selected_inputs": 2889,
+  "local_git_inputs": 59,
+  "all_captured_source_hashes_verified": true,
+  "all_local_inputs_match_executed_git": true,
+  "actual_runner_matches_executed_git": true,
+  "actual_binary_sha256": "c70d810d5377a17af327daa5c7811fc35f8220d2445215dac7be5f02efe19bac",
+  "actual_binary_retained": true,
+  "all_actual_build_info_fields_match": true,
+  "live_proc_identity_captured": false,
+  "named_results": {
+    "TestBatchedInvariantAuditNativePhaseProfile": {
+      "status": "pass",
+      "seconds": 62.6
+    }
+  },
+  "native_files": 363,
+  "native_file_bytes": 68217164,
+  "phases": {
+    "phases": [
+      {
+        "stream": "WF_INV",
+        "records": 12000,
+        "bytes": 60000,
+        "scan_ns": 595234083,
+        "visit_ns": 36400012
+      },
+      {
+        "stream": "WF_JRN",
+        "records": 144000,
+        "bytes": 10164000,
+        "scan_ns": 8878759272,
+        "visit_ns": 3964196141
+      }
+    ],
+    "report": {
+      "Invocations": 12000,
+      "Journals": 12000,
+      "Entries": 144000,
+      "Terminal": 12000
+    },
+    "elapsed_ns": 14672637649,
+    "error": "<nil>"
+  },
+  "cpu_profile_sha256": "d478bdad01f37d44203b4648e7471b0580a99d20028e19b46effbd0745d41245",
+  "raw_result_log": "=== RUN   TestBatchedInvariantAuditNativePhaseProfile\n    batched_invariant_native_test.go:495: profiled-audit invocations=12000 entries=144000 terminal=12000 elapsed=14.672637649s phases=[{Stream:WF_INV Records:12000 Bytes:60000 ScanElapsed:595.234083ms VisitElapsed:36.400012ms} {Stream:WF_JRN Records:144000 Bytes:10164000 ScanElapsed:8.878759272s VisitElapsed:3.964196141s}] cpu_profile=/tmp/js-wf-audit-phase-profile-native-20261004/profile/audit-cpu.pprof\n--- PASS: TestBatchedInvariantAuditNativePhaseProfile (62.60s)\nPASS\n",
+  "physical_stores_reopened": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false,
+  "scope": "Full native 12k/144k audit profile includes embedded servers and client. Selected inputs/runner/SDK match retained execution; no live proc identity captured, store reopening, fault capacity or release qualification."
+}
