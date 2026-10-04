@@ -14,7 +14,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
-| Original 24-hour soak | Two actual journal-leader attempts failed retained audits at batch110/100 after950/799s. Complete originals independently preserved; instrumented scan throughput localized. New batched-audit journal attempt is live; no24h row qualified, full-matrix soak remains. |
+| Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. No24h row qualified; full-matrix soak remains. |
 
 Requested adjustments are in place: Tier1 simulation is implemented; R5 route
 recovery p99 measures from confirmed healing; the historical 31.1 s / TTL 30 s worker
@@ -32,6 +32,19 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
+
+- **Actual24h batched journal failure independently preserved:** exactb287e98,
+  race/seed1, terminal failed after3223.15s atbatch400/cutoff11200. All three
+  original20s attempts reach total60s cap; two complete bulk scans without fetch
+  errors then expire during invariant/terminal validation. Middle239 fetches
+  has one error and both leader fallback reads time out. Last successful cohort:
+  10920 invocations /120353 entries /10920 terminals. Trace time includes caller
+  processing and overlapping concurrent methods; no missing-state/corruption or
+  NATS-cause claim. All5271 originals /475521380 bytes,1222 Git inputs, actual
+  race SDK/all build-info fields and99209919-byte four-part archive verify.
+  SDK/supervisor terminal, no fixture containers remain; no rerun or relaxation.
+  Bounded4096 window and same-store12k comparison prepared; qualification pending.
+  [Complete failed actual24h proof](scale/local-r5-soak-24h-2026-10-04/journal-batched-audit-failure/).
 
 - **Scheduler-fix candidate built; compressed native failure preserved:**
   at81bc1d4 the copied pinned2.15 server changes onlyfilestore.go among598

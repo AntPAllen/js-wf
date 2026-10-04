@@ -1560,3 +1560,20 @@ are preserved, not independently reopened; no campaign pass or rerun. Both
 outages fall in the compressed population; original million/24h requirement stays
 open. [Complete preparation and failed-native proof](scale/scheduler-server-candidate-2026-10-04/)
 records the source, first build/VCS failure and corrected build identities.
+
+
+### Batched actual24h audit capacity failure and larger bounded delivery window
+
+The actual b287e98 batched24h journal attempt terminal fails after3223.15s at
+batch400/cutoff11200, after accepting cohort10920. Three20s attempts reach the
+original60s cap. Two complete bulk scans without fetch errors then expire in
+validation; middle fetch/fallback reads time out. No absent-state/corruption or
+NATS-cause claim. All5271 original members,1222 Git inputs and actual race SDK/
+build info verify; complete99209919-byte proof is retained in four hashed parts,
+with original stores not reopened. [Complete failure](scale/local-r5-soak-24h-2026-10-04/journal-batched-audit-failure/).
+
+The opt-in reader now prepares bounded4096-record pulls to reduce repeated
+request overhead; capture bounds, gap/tail proof, full invariant body, no-cache
+behavior and20s/60s budgets remain unchanged. New12k invocation/144k entry native
+case compares previous512 and new4096 windows over identical retained state.
+Actual outcomes and large-population/fault capacity remain pending; no soak rerun.

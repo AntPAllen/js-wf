@@ -244,11 +244,19 @@ func TestBatchedInvariantAuditNativeJournalCorruption(t *testing.T) {
 	compareFullAudits(t, ctx, js, nil, Report{}, "duplicate invocation")
 }
 func TestBatchedInvariantAuditNativeThreeThousandCohort(t *testing.T) {
+	runBatchedInvariantAuditNativeCohort(t, 3000)
+}
+
+func TestBatchedInvariantAuditNativeTwelveThousandCohort(t *testing.T) {
+	runBatchedInvariantAuditNativeCohort(t, 12000)
+}
+
+func runBatchedInvariantAuditNativeCohort(t *testing.T, count int) {
+	t.Helper()
 	if os.Getenv("WF_AUDIT_BATCH_CANDIDATE") != "1" {
 		t.Skip("opt-in full native batched invariant audit")
 	}
 	js, ctx := batchedAuditCluster(t)
-	const count = 3000
 	futures := make([]jetstream.PubAckFuture, 0, count*13)
 	state, err := js.KeyValue(ctx, "WF_STATE")
 	if err != nil {
@@ -299,6 +307,20 @@ func TestBatchedInvariantAuditNativeThreeThousandCohort(t *testing.T) {
 	done()
 	pointElapsed := time.Since(started)
 	started = time.Now()
+	previousCtx, done := context.WithTimeout(ctx, 20*time.Second)
+	previous, previousErr := checkUsing(previousCtx, js, nil, func(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+		return scanBatchThroughWithSize(ctx, stream, cutoff, visit, 512)
+	})
+	done()
+	previousElapsed := time.Since(started)
+	if previousErr == nil {
+		if previous != want {
+			t.Fatalf("previous bulk report=%+v", previous)
+		}
+	} else if !errors.Is(previousErr, context.DeadlineExceeded) {
+		t.Fatalf("unexpected previous bulk failure %v", previousErr)
+	}
+	started = time.Now()
 	bulkCtx, done := context.WithTimeout(ctx, 20*time.Second)
 	bulk, bulkErr := CheckWithBatchedReads(bulkCtx, js)
 	done()
@@ -313,5 +335,5 @@ func TestBatchedInvariantAuditNativeThreeThousandCohort(t *testing.T) {
 	} else if !errors.Is(pointErr, context.DeadlineExceeded) {
 		t.Fatalf("unexpected point failure %v", pointErr)
 	}
-	t.Logf("full-audit invocations=%d entries=%d terminal=%d point_elapsed=%s point_error=%v bulk_elapsed=%s bulk_error=%v", bulk.Invocations, bulk.Entries, bulk.Terminal, pointElapsed, pointErr, bulkElapsed, bulkErr)
+	t.Logf("full-audit invocations=%d entries=%d terminal=%d point_elapsed=%s point_error=%v previous_batch512_elapsed=%s previous_batch512_error=%v bulk_batch4096_elapsed=%s bulk_error=%v", bulk.Invocations, bulk.Entries, bulk.Terminal, pointElapsed, pointErr, previousElapsed, previousErr, bulkElapsed, bulkErr)
 }

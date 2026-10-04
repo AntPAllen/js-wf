@@ -13,6 +13,16 @@ import (
 )
 
 func scanBatchThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+	return scanBatchThroughWithSize(ctx, stream, cutoff, visit, 4096)
+}
+
+// Size controls one bounded delivery window, not the captured audit cohort or
+// its deadline. Native controls compare the previous 512-record window on the
+// same retained stores using the same invariant-checking body.
+func scanBatchThroughWithSize(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, batchSize uint64) error {
+	if batchSize == 0 || batchSize > 4096 {
+		return errors.New("retained batch scan: invalid delivery window")
+	}
 	info, err := auditRead(ctx, func(call context.Context) (*jetstream.StreamInfo, error) { return stream.Info(call) })
 	if err != nil {
 		return err
@@ -80,7 +90,7 @@ func scanBatchThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint
 	}
 	for first <= last {
 		call, stop := context.WithTimeout(ctx, 2*time.Second)
-		requested := int(min(uint64(512), last-first+1))
+		requested := int(min(batchSize, last-first+1))
 		batch, err := consumer.Fetch(requested, jetstream.FetchContext(call))
 		if err != nil {
 			stop()
