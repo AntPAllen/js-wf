@@ -373,6 +373,12 @@ Per-phase tests prove each mechanism; this layer proves the whole thing under ad
   accepted, including all 391 pins and the actual retained binary. A later
   snapshot first-lookup timeout cause fix changes production source and requires
   fresh normal100k/race1k qualification; the previous result remains historical.
+  The corrected `283ba32` full race1k is now independently accepted: all 121
+  workloads complete 121,000 bodies; actual race executable, all 1,160 captured
+  source hashes and complete raw inventories verify. Normal100k at the same
+  production source remains running. [Corrected-source race proof](scale/snapshot-timeout-cause-2026-10-04/hosted-race/)
+  does not qualify failed real-cluster cases or the remaining full release gates.
+
   [Diagnostic correction and unchanged failure bounds](scale/snapshot-timeout-cause-2026-10-04/)
   do not qualify the failed combined continuation/promise restart case.
   A 686-file ledger establishes unchanged runtime/model/Tier1 producer inputs

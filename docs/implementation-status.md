@@ -61,16 +61,18 @@
   while the updated-source full Tier1 gates proceed.
   [Exact source root, complete re-review and mismatch controls](scale/tier2-model-source-root-2026-10-04/).
 
-- **Fresh full Tier1 gates running at the corrected production source:** normal
-  100k run 37172700747 and complete race1k run 37172701931 bind exact `283ba32`.
-  Both job APIs now confirm in_progress. These preserve full corpus/seed scope
-  after the snapshot error-cause change; running status proves no accepted seeds
-  or terminal pass. Previous `9ecc37c`
-  complete gates remain historical. Older live Tier2/Tier3 campaigns keep their
-  executed-source scope; independent history-model rebuilds must use their
-  source-identical dependency inputs, not modified main, without bypassing
-  hashes. Full matrices, original million-timer drain and actual24h remain open.
-  [Exact commands, workflow inputs and API handles](scale/snapshot-timeout-cause-2026-10-04/tier1-dispatch/).
+- **Corrected-source complete Tier1 race1k independently accepted:** terminal
+  run 37172701931/job 111348770188 at exact `283ba32` verifies the actual race
+  executable, 1,160 pre/post Git-exact source inputs, all 175 top-level tests,
+  two documented trace-only skips, 391 pins and 121 workloads × seeds 1–1,000.
+  All 121,000 bodies complete; package/wall time is 2,183.371/2,183.75 s.
+  Complete raw events and exact-source inventories regenerate; all 25 proof
+  members verify. A separate 685-input ledger matches the current runtime/
+  simulator/producer bytes. Normal100k run 37172700747 remains in_progress;
+  prior normal result stays historical. Older cluster campaigns retain their
+  executed-source scope. Full matrices, original million-timer drain and actual
+  24-hour gate remain open.
+  [Actual binary, complete source/suite proof and scope](scale/snapshot-timeout-cause-2026-10-04/hosted-race/).
 
 - **Snapshot timeout cause deterministically fixed:** failed ordinary CI
   37168567962 at `32651f0` reports a nil-cause snapshot object gap after the
