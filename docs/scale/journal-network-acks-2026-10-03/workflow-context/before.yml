@@ -6,6 +6,7 @@ jobs:
     timeout-minutes: 20
     env:
       WF_JOURNAL_NETWORK_ACK: '1'
+      WF_JOURNAL_NETWORK_ACK_REPORT: ${{ runner.temp }}/journal-network/fixture
       GOMEMLIMIT: 512MiB
       GOMAXPROCS: '2'
     steps:
@@ -14,8 +15,6 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Retain compilation inputs and execute the full network proof
-        env:
-          WF_JOURNAL_NETWORK_ACK_REPORT: ${{ runner.temp }}/journal-network/fixture
         run: |
           set -o pipefail
           root="$RUNNER_TEMP/journal-network"
