@@ -149,6 +149,13 @@ func TestMillionReleaseVerifierCannotDowngradeLedgerEvidence(t *testing.T) {
 	if err := verifyReport(root, false); err != nil {
 		t.Fatalf("valid million-record artifact rejected: %v", err)
 	}
+	rep.ServerCandidateSHA256 = strings.Repeat("a", 64)
+	save()
+	if err := verifyReport(root, false); err == nil || !strings.Contains(err.Error(), "diagnostic server candidate") {
+		t.Fatalf("candidate million-record artifact promoted: %v", err)
+	}
+	rep.ServerCandidateSHA256 = ""
+	save()
 	// Deleting the declaration must not bypass ledger checking, even when the
 	// archive, all million deadlines, hashes and release configuration still pass.
 	for _, field := range []string{"physical", "logical"} {
@@ -183,5 +190,39 @@ func TestMillionReleaseVerifierCannotDowngradeLedgerEvidence(t *testing.T) {
 	save()
 	if err := verifyReport(root, false); err == nil || !strings.Contains(err.Error(), "checksum mismatch") {
 		t.Fatalf("corrupt declared ledger accepted: %v", err)
+	}
+}
+
+func TestServerCandidateSmokeRequiresRetainedExecutable(t *testing.T) {
+	root := t.TempDir()
+	rep, data := verifierFixture()
+	sum := sha256.Sum256(data)
+	rep.ObservationsSHA256 = hex.EncodeToString(sum[:])
+	candidate := []byte("candidate executable fixture")
+	sum = sha256.Sum256(candidate)
+	rep.ServerCandidateSHA256 = hex.EncodeToString(sum[:])
+	encoded, err := json.Marshal(rep)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, raw := range map[string][]byte{"report.json": encoded, "observations.bin": data, "nats-server-candidate": candidate} {
+		if err := os.WriteFile(filepath.Join(root, name), raw, 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := verifyReport(root, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "nats-server-candidate"), []byte("changed"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := verifyReport(root, true); err == nil || !strings.Contains(err.Error(), "candidate digest differs") {
+		t.Fatalf("changed candidate accepted: %v", err)
+	}
+	if err := os.Remove(filepath.Join(root, "nats-server-candidate")); err != nil {
+		t.Fatal(err)
+	}
+	if err := verifyReport(root, true); err == nil {
+		t.Fatal("missing candidate accepted")
 	}
 }

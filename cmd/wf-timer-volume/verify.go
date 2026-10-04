@@ -22,6 +22,19 @@ func verifyReport(root string, allowSmoke bool) error {
 	if err = json.Unmarshal(data, &rep); err != nil {
 		return err
 	}
+	if rep.ServerCandidateSHA256 != "" {
+		if !allowSmoke {
+			return fmt.Errorf("diagnostic server candidate does not qualify the release server profile")
+		}
+		binary, err := os.ReadFile(filepath.Join(root, "nats-server-candidate"))
+		if err != nil {
+			return err
+		}
+		digest := sha256.Sum256(binary)
+		if hex.EncodeToString(digest[:]) != rep.ServerCandidateSHA256 {
+			return fmt.Errorf("retained server candidate digest differs")
+		}
+	}
 	horizon, err := time.ParseDuration(rep.Horizon)
 	if err != nil {
 		return err

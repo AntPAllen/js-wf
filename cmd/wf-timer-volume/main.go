@@ -34,6 +34,7 @@ type config struct {
 	Count, Publishers                int
 	Horizon, Lead, P99Limit, MaxLate time.Duration
 	Root                             string
+	ServerCandidate                  string
 }
 type killedProcess struct {
 	PID    int
@@ -59,6 +60,7 @@ type report struct {
 	Error                          string `json:"error,omitempty"`
 	GoVersion                      string `json:"go_version"`
 	ServerVersion                  string `json:"server_version"`
+	ServerCandidateSHA256          string `json:"server_candidate_sha256,omitempty"`
 	Count                          int    `json:"scheduled_count"`
 	Published                      int    `json:"acknowledged_publishes"`
 	Received                       int    `json:"unique_received"`
@@ -100,6 +102,7 @@ func main() {
 	flag.DurationVar(&c.P99Limit, "p99-limit", 2*time.Second, "maximum raw delivery lateness p99")
 	flag.DurationVar(&c.MaxLate, "max-late", 30*time.Second, "maximum individual raw delivery lateness")
 	flag.StringVar(&c.Root, "root", "", "new directory for stores, logs and progress/results; required")
+	flag.StringVar(&c.ServerCandidate, "server-candidate", "", "diagnostic server binary for all three nodes; excludes release qualification")
 	recoverReceipts := flag.Bool("recover-observations", false, "read durable receipts after interruption without resuming or certifying a campaign")
 	verify := flag.Bool("verify", false, "verify a completed campaign report and every observation offline")
 	allowSmoke := flag.Bool("allow-smoke", false, "allow verification below the million-message/24-hour release workload")
@@ -328,7 +331,29 @@ func run(cfg config) (runErr error) {
 			runErr = err
 		}
 	}()
-	cluster, err := testcluster.StartProcesses(filepath.Join(cfg.Root, "cluster"), 3)
+	var cluster *testcluster.ProcessCluster
+	var err error
+	if cfg.ServerCandidate != "" {
+		// Retain the exact executable used on every initial start and restart.
+		// The candidate profile is explicit in the report and offline verifier.
+		data, readErr := os.ReadFile(cfg.ServerCandidate)
+		if readErr != nil {
+			return readErr
+		}
+		digest := sha256.Sum256(data)
+		c.rep.ServerCandidateSHA256 = hex.EncodeToString(digest[:])
+		binary := filepath.Join(cfg.Root, "nats-server-candidate")
+		if err := os.WriteFile(binary, data, 0755); err != nil {
+			return err
+		}
+		binary, err = filepath.Abs(binary)
+		if err != nil {
+			return err
+		}
+		cluster, err = testcluster.StartMixedVersionProcesses(filepath.Join(cfg.Root, "cluster"), []string{binary, binary, binary})
+	} else {
+		cluster, err = testcluster.StartProcesses(filepath.Join(cfg.Root, "cluster"), 3)
+	}
 	if err != nil {
 		return err
 	}
