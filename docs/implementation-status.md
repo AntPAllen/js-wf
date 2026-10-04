@@ -14,7 +14,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
-| Original 24-hour soak | Actual journal-leader attempt failed retained audit at batch110 after950s; originals preserved. No24h row qualified; full-matrix soak remains. |
+| Original 24-hour soak | Two actual journal-leader attempts failed retained audits at batch110/100 after950/799s. Complete originals independently preserved; instrumented scan throughput localized. No24h row qualified; full-matrix soak remains. |
 
 Requested adjustments are in place: Tier1 simulation is implemented; R5 route
 recovery p99 measures from confirmed healing; the historical 31.1 s / TTL 30 s worker
@@ -29,6 +29,20 @@ and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+Entries are chronological snapshots, newest first. Earlier launch/live/pending
+notes are historical; later terminal results and accepted reviews supersede them.
+
+- **Instrumented failed24h originals independently preserved:** source18ddf04,
+  race/journal/seed1, batch100/cutoff2800 after798.65s. All4937 original members
+  /263756084 bytes and1207 selected source files verify against manifests/Git;
+  actual SDK SHA and every build-info field match. Complete69995410-byte archive
+  preserved in three hash-verified parts. Attempts8.019572/20.003247/8.092592s
+  stop at38.097082s under unchanged20s/60s limits. Middle attempt completes31154
+  error-free journal reads, then expires during terminal-state validation.
+  No absent-state/corruption/NATS-cause claim; stores not independently reopened.
+  Both actual24h attempts are terminal failed, with no automatic rerun.
+  [Complete original evidence and reproducible review](scale/local-r5-soak-24h-2026-10-04/journal-audit-trace-failure/).
 
 - **Traced upgrade74 independently accepted:** full600s at883b73b qualifies1876
   invocations /20651 entries /five retained-store SIGKILL upgrades/Start gaps.
@@ -48,8 +62,8 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
   reads across leader faults; three-attempt run stops after38.097s, below60s cap.
   No state-corruption or NATS-cause claim, no gate relaxation or automatic restart.
   Actual failed originals/SDK/source/traces retained at
-  `/tmp/js-wf-soak-journal-audit-trace-20261004`; independent archive/publication
-  pending. Next work is efficient retained scans with full invariant coverage.
+  `/tmp/js-wf-soak-journal-audit-trace-20261004`; complete independent archive
+  and publication now recorded above. Next work is efficient retained scans with full invariant coverage.
 
 - **Armed retained-audit run started:** persistent service executes exact18ddf04,
   journal/seed1/race/24h with new audit method tracer, actual isolated SDK/source

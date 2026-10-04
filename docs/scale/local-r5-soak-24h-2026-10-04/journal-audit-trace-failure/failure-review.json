@@ -1,0 +1,66 @@
+{
+  "source": "18ddf0454de13a2d5df2c1a8b22efc5f765f2de0",
+  "row": "journal",
+  "seed": 1,
+  "requested_duration": "24h",
+  "named_test_seconds": 798.65,
+  "test_exit_code": 1,
+  "failed_checkpoint_batch": 100,
+  "invocation_cutoff": 2800,
+  "attempt_seconds": [
+    8.019572,
+    20.003247,
+    8.092592
+  ],
+  "total_audit_seconds": 38.097082,
+  "attempt_budget_seconds": 20,
+  "total_budget_seconds": 60,
+  "three_attempt_limit": true,
+  "journal_read_counts": [
+    {
+      "started": 292,
+      "completed": 292,
+      "errors": 6,
+      "bytes": 41677,
+      "elapsed_ns": 17039180314,
+      "max_ns": 2000671348
+    },
+    {
+      "started": 31154,
+      "completed": 31154,
+      "errors": 0,
+      "bytes": 4636307,
+      "elapsed_ns": 314610941967,
+      "max_ns": 75159384
+    },
+    {
+      "started": 1664,
+      "completed": 1664,
+      "errors": 96,
+      "bytes": 229948,
+      "elapsed_ns": 210959090489,
+      "max_ns": 2006388507
+    }
+  ],
+  "middle_report": {
+    "Invocations": 2800,
+    "Journals": 2737,
+    "Entries": 29188,
+    "Terminal": 2736
+  },
+  "middle_error": "wf.jrn.matrixtimer.tier3-1-batch-8-6: terminal state missing: context deadline exceeded",
+  "source_inputs": 1207,
+  "source_before_after_matches_git": true,
+  "actual_sdk_sha256": "35bd9e0740815f6a0f3b969bb481e5e42a44ddfa629a6fe9bb23e6d1551f75be",
+  "all_actual_sdk_build_info_fields_match": true,
+  "archive_members": 4937,
+  "original_member_bytes": 263756084,
+  "archive_bytes": 69995410,
+  "archive_sha256": "809abcc2632a4eca2c5107569cba39836e5225c40be4f6dfa8295883642bb17d",
+  "all_original_member_hashes_verified": true,
+  "physical_stores_reopened": false,
+  "cause_confirmed": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false,
+  "scope": "Instrumented attempt failed. Error-free journal scan exhausts its 20-second attempt during terminal-state validation; other attempts fail journal reads. This establishes neither missing terminal state nor NATS cause. No audit budget relaxation."
+}
