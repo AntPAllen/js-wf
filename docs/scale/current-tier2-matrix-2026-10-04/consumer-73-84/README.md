@@ -1,0 +1,9 @@
+# Consumer-leader seeds73–84 independently qualified
+
+[Run37149506857](https://github.com/AntPAllen/js-wf/actions/runs/37149506857), successful job111287265541, executes twelve consecutive600s seeds at exact `c4fed061bc614488d4f89b53b216b756490f7da0`. Artifact11299987849 /43,214,940 ZIP bytes is downloaded completely. Independent review binds run/job/artifact/source/headers and checks full raw results,228 consumer-leader faults and cadence, selected durable consumer identities/pending counts, cut/heal order and raw latency samples against all reported aggregate/per-type counts/p99 values.
+
+Qualified:32032 invocations /353142 journal entries /228 recorded kills. Worst terminal/progress type p99 is16.00806024/7.05545813s, inside unchanged R3 gates30/10s. All three production Start/Signal/Await models pass41208 history operations. All45 actual Go/module dependency inputs match executed source before/after. Actual model executable, build info, exact command/environment, reviewer scripts, API/job/log evidence and all72 raw artifact files are retained.
+
+Canonical proof: 209 members /96460960 bytes /4 parts. Every member, unchanged original input, part and concatenated archive readback verifies. Manifest binds exact member/part/archive hashes; concatenate in listed order, check canonical hash and safely extract into a fresh directory.
+
+Original workload executable, source capture ledger and physical NATS stores were not uploaded by this native workflow. Final integrity/drain assertions are attributed to the source-bound named test, not independent store reopening. This qualifies consumer73–84 only atc4fed06. Together with accepted1–72:219548 invocations /2419980 entries /1596 recorded kills /282514 independently reviewed history operations across contiguous1–84. Full200/current-source matrices and actual24h remain open. No runtime/Tier1 producer changes or workload reruns.

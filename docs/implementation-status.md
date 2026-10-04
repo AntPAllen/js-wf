@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–72 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–84 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Worker-clock 122 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Other finite combined fault cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -25,10 +25,19 @@ diagnostics do not erase them. Current-main full matrices require final-source
 qualification, rather than treating older executed-source rows as a blanket pass.
 
 Immediate work: review live matrix results, diagnose remaining clock/checkpoint
-and million-timer physical-drain failures, finish combined continuation/promise/
-retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate.
+and million-timer physical-drain failures, finish outstanding combined
+retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Consumer-leader73–84 accepted:** twelve full600s seeds atc4fed06;
+  32032 invocations /353142 journal entries /228 kills, all three models
+  /41208 operations. Worst terminal/progress p99 is16.00806024/7.05545813s,
+  inside unchanged R3 gates30/10s. Actual model executable, all45 dependencies
+  and complete raw evidence retained; original SDK/stores were not uploaded.
+  Contiguous1–84:219548 invocations /2419980 entries /1596 kills /282514 model
+  operations. Full200/current-source matrices and actual24h remain open.
+  [Complete proof](scale/current-tier2-matrix-2026-10-04/consumer-73-84/).
 
 - **Traced native upgrade seed15 independently accepted:** full600s five-container
   diagnostic at520316e completes1848 invocations /20355 journal entries, all five
