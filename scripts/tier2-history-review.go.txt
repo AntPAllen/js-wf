@@ -1,0 +1,25 @@
+package main
+import (
+ "encoding/json"
+ "fmt"
+ "os"
+ "sort"
+ "time"
+ "js-wf/client"
+ "js-wf/history"
+ "github.com/anishathalye/porcupine"
+)
+func main() {
+ f,err:=os.Open(os.Args[1]);if err!=nil {panic(err)};defer f.Close()
+ dec:=json.NewDecoder(f);var ops []client.Operation
+ for dec.More(){var op client.Operation;if err:=dec.Decode(&op);err!=nil{panic(err)};ops=append(ops,op)}
+ checks:=[]struct{name string;fn func([]client.Operation,time.Duration)(porcupine.CheckResult,error)}{{"starts",history.CheckStarts},{"signals",history.CheckSignals},{"results",history.CheckResults}}
+ for _,check:=range checks {
+  verdict,err:=check.fn(ops,30*time.Second);fmt.Printf("whole %s operations=%d verdict=%s error=%v\n",check.name,len(ops),verdict,err)
+  if verdict==porcupine.Ok && err==nil {continue}
+  partitions:=map[string][]client.Operation{}
+  for _,op:=range ops {var a struct{Type,ID string};if err:=json.Unmarshal(op.Args,&a);err!=nil{panic(err)};key:=a.Type+"/"+a.ID;partitions[key]=append(partitions[key],op)}
+  keys:=make([]string,0,len(partitions));for k:=range partitions{keys=append(keys,k)};sort.Strings(keys)
+  for _,key:=range keys {v,e:=check.fn(partitions[key],time.Second);if v!=porcupine.Ok || e!=nil {fmt.Printf("partition %s %s operations=%d verdict=%s error=%v\n",check.name,key,len(partitions[key]),v,e);for _,op:=range partitions[key]{raw,_:=json.Marshal(op);fmt.Println(string(raw))}}}
+ }
+}

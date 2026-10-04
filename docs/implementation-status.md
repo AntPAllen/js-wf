@@ -2,6 +2,17 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **2026-10-04 reusable Tier2 journal shard reviewer calibrated:** independent
+  review is now range-parameterized, with exact API/source/artifact/header binding,
+  raw fault/latency regeneration and all three independently executed production
+  history models. The full local model dependency graph is source-checked before
+  compilation and after review, including `retention` omitted by the old manual
+  directory list. Unchanged previously accepted seeds 1–12 reproduce all totals;
+  three controls pass and an actual one-nanosecond raw latency mutation is
+  rejected under Python optimization without creating output. Only existing
+  journal shard evidence is calibrated; no new workload or full gate qualifies.
+  Both full campaigns remain unchanged and live.
+  [Reviewer, exact calibration and rejected mutation](scale/tier2-journal-shard-reviewer-2026-10-04/).
 - **2026-10-04 corrected worker-clock case qualified; full replacement live:**
   job 111317377477/run 37161589577 at `070dd95` passes one full ten-minute seed:
   2,940 invocations, 32,539 entries and 19 periodic proofs. All 21 clock snapshots,
