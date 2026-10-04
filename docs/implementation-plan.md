@@ -375,8 +375,13 @@ Per-phase tests prove each mechanism; this layer proves the whole thing under ad
   fresh normal100k/race1k qualification; the previous result remains historical.
   The corrected `283ba32` full race1k is now independently accepted: all 121
   workloads complete 121,000 bodies; actual race executable, all 1,160 captured
-  source hashes and complete raw inventories verify. Normal100k at the same
-  production source remains running. [Corrected-source race proof](scale/snapshot-timeout-cause-2026-10-04/hosted-race/)
+  source hashes and complete raw inventories verify. Normal100k at that same
+  production source now independently qualifies all 12,100,000 bodies: all 391
+  pins, 175 top-level tests and 1,160 captured source hashes verify, with the
+  actual normal executable preserved. A 686-input ledger establishes identical
+  current runtime/simulation/Tier1 producer bytes.
+  [Complete corrected-source normal proof](scale/snapshot-timeout-cause-2026-10-04/hosted-normal100k/)
+  and the [Corrected-source race proof](scale/snapshot-timeout-cause-2026-10-04/hosted-race/)
   does not qualify failed real-cluster cases or the remaining full release gates.
 
   [Diagnostic correction and unchanged failure bounds](scale/snapshot-timeout-cause-2026-10-04/)

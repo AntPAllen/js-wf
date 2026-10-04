@@ -1,5 +1,31 @@
 # Implementation status against the supplied plan
 
+- **Full corrected-runtime Tier1 normal 100,000-seed gate independently qualified:**
+  terminal successful run 37172700747 / job 111348766626 at exact `283ba32`
+  verifies all 121 workloads over contiguous seeds 1–100,000: 12,100,000 bodies,
+  175 top-level tests and all 391 pins. Actual binary/build info/list, source AST
+  inventories, 1,160 pre/post source hashes and raw suite report regenerate exactly.
+  Aggregate counters: 12,301,847 schedules, 179,755,797 scheduler choices and
+  2,694,460,058 transport events; package/wall 13,358.16/13,358.53 s.
+  Actual executable and complete API/raw/source/reviewer evidence are preserved
+  with every archive member read back and SHA-verified. All 686 selected runtime,
+  simulation and Tier1 producer inputs match observed main `9ea02d2`.
+  Combined with accepted full race1k, this closes the fresh Tier1 requirement after
+  the snapshot error-cause fix. Real-cluster failures/full matrices, original
+  million-timer physical drain and actual full-matrix 24-hour soak remain open.
+  [Complete normal proof](scale/snapshot-timeout-cause-2026-10-04/hosted-normal100k/).
+
+- **Tier2 journal seeds 169–192 qualified with retained model executables:** all
+  24 ten-minute seeds pass raw fault/latency review and all three production
+  history models at executed `c4fed06`, with all 45 dependency bytes verified.
+  Newly added coverage: 63,112 invocations, 695,171 entries and 456 kills.
+  Accepted 1–192 totals: 505,512 invocations, 5,569,185 entries, 3,648 kills;
+  worst terminal/progress p99 remains 17.457496447/9.067125521 s.
+  These two proofs retain the actual hash-verified model executables and build
+  info; workload binaries/physical stores were not uploaded and are not claimed.
+  [169–180](scale/current-tier2-matrix-2026-10-04/journal-169-180/) /
+  [181–192](scale/current-tier2-matrix-2026-10-04/journal-181-192/).
+
 - **Focused instrumented diagnostics for failed clock seeds 112 and 121 are live:**
   runs 37183948633 / 37183950090 at exact `3b2999e`, workload jobs 111381924505 /
   111381922136, are independently confirmed in progress. Existing per-attempt
@@ -289,7 +315,7 @@ Accepted clock27–39 duplicate RAM expansion was removed only after all1,378 in
   All 121,000 bodies complete; package/wall time is 2,183.371/2,183.75 s.
   Complete raw events and exact-source inventories regenerate; all 25 proof
   members verify. A separate 685-input ledger matches the current runtime/
-  simulator/producer bytes. Normal100k run 37172700747 remains in_progress;
+  simulator/producer bytes. Normal100k run 37172700747 was in_progress at that observation; its later complete proof is accepted above.
   prior normal result stays historical. Older cluster campaigns retain their
   executed-source scope. Full matrices, original million-timer drain and actual
   24-hour gate remain open.
