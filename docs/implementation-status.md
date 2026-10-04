@@ -2,6 +2,17 @@
 
 ## Current qualification snapshot — 2026-10-03
 
+- **2026-10-04 new worker-clock checkpoint failure retained:** full replacement
+  37164231641/job 111324439617 fails at seed 15; seed 14 passes producer checks and
+  seeds 16–26 are not run. Batch 90's retained-state read reaches the 60-second
+  audit deadline, then cancellation surfaces as an unrelated fanout Await error.
+  Missing state, server cause and audit capacity are unconfirmed. All 759 pre/post
+  source hashes for both seeds match Git; all 7,892 original archive members verify.
+  The fixture now logs the primary cause before cancellation and retains each
+  attempt's timing/deadline/partial report. Existing bounds/gates remain unchanged;
+  focused audit tests pass. The failed shard and full parent cannot qualify.
+  Other live jobs and Tier2 remain unchanged while this is investigated.
+  [Original failure, hash verification and diagnostic-only change](scale/worker-clock-checkpoint-2026-10-04/).
 - **2026-10-04 reusable Tier2 journal shard reviewer calibrated:** independent
   review is now range-parameterized, with exact API/source/artifact/header binding,
   raw fault/latency regeneration and all three independently executed production

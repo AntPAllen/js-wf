@@ -321,13 +321,21 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		repairs = append(repairs, event)
 		evidenceMu.Unlock()
 	}
-	type checkpointAudit struct {
-		Batch     int              `json:"batch"`
-		Cutoff    uint64           `json:"invocation_cutoff"`
+	type checkpointAttempt struct {
 		Started   time.Time        `json:"started"`
 		Completed time.Time        `json:"completed"`
+		Deadline  time.Time        `json:"deadline"`
 		Report    integrity.Report `json:"report"`
 		Error     string           `json:"error,omitempty"`
+	}
+	type checkpointAudit struct {
+		Batch     int                 `json:"batch"`
+		Cutoff    uint64              `json:"invocation_cutoff"`
+		Started   time.Time           `json:"started"`
+		Completed time.Time           `json:"completed"`
+		Report    integrity.Report    `json:"report"`
+		Error     string              `json:"error,omitempty"`
+		Attempts  []checkpointAttempt `json:"attempts"`
 	}
 	var checkpointAudits []checkpointAudit
 	var scans []struct {
@@ -994,21 +1002,37 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				}
 				auditStarted := time.Now().UTC()
 				t.Logf("tier3 checkpoint audit batch=%d invocation_cutoff=%d started elapsed=%s", cut.batch, cut.cutoff, time.Since(started))
+				var attempts []checkpointAttempt
 				report, err := matrixRetainedAuditUsing(checkpointCtx, func(attempt context.Context) (integrity.Report, error) {
-					return integrity.CheckThroughInvocationSequence(attempt, js, cut.cutoff)
+					began := time.Now().UTC()
+					deadline, _ := attempt.Deadline()
+					result, failure := integrity.CheckThroughInvocationSequence(attempt, js, cut.cutoff)
+					message := ""
+					if failure != nil {
+						message = failure.Error()
+					}
+					attempts = append(attempts, checkpointAttempt{began, time.Now().UTC(), deadline, result, message})
+					if failure != nil {
+						t.Logf("tier3 checkpoint attempt batch=%d attempt=%d elapsed=%s report=%+v err=%v", cut.batch, len(attempts), time.Since(began), result, failure)
+					}
+					return result, failure
 				})
 				message := ""
 				if err != nil {
 					message = err.Error()
 				}
 				evidenceMu.Lock()
-				checkpointAudits = append(checkpointAudits, checkpointAudit{cut.batch, cut.cutoff, auditStarted, time.Now().UTC(), report, message})
+				checkpointAudits = append(checkpointAudits, checkpointAudit{cut.batch, cut.cutoff, auditStarted, time.Now().UTC(), report, message, attempts})
 				evidenceMu.Unlock()
 				if checkpointCtx.Err() != nil {
 					return
 				}
 				if err != nil || report.Invocations != cut.batch*28 || report.Journals != cut.batch*28 || report.Terminal != cut.batch*28 {
-					checkpointErrors <- fmt.Errorf("intermediate retained audit batch=%d cutoff=%d report=%+v err=%v", cut.batch, cut.cutoff, report, err)
+					failure := fmt.Errorf("intermediate retained audit batch=%d cutoff=%d report=%+v err=%v", cut.batch, cut.cutoff, report, err)
+					// Log the cause before cancellation can surface as an unrelated
+					// in-flight client's context-canceled error.
+					t.Logf("tier3 checkpoint failed: %v", failure)
+					checkpointErrors <- failure
 					cancel()
 					return
 				}
