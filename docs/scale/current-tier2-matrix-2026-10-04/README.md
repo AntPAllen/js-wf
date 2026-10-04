@@ -39,6 +39,14 @@ and verified against the canonical archive. For restoration concatenate each
 directory's sorted `proof.tar.gz.part*` files and extract the resulting archive
 outside the repository; raw inputs are under `artifact/`.
 
+After push `1ab3fa9` was independently confirmed, the redundant RAM expansions
+under the two accepted shard roots were removed. All 144 expanded raw files were
+rehash-checked, canonical archive hashes and every committed archive part were
+verified, and no open input descriptors were found before either deletion.
+`duplicate-removal.json` records **1,334,663,715 bytes** recovered. Canonical RAM
+archives, committed archive parts and failed evidence remain intact. Restore the
+raw artifacts from those archives before repeating offline review.
+
 Only these requested journal seeds qualify. Full 200-seed row, 13-row full Tier2,
 Tier3 and 24-hour full-matrix gates remain open. The parent continues without
 restart; later journal seeds 73–96 have now reported success and still need
