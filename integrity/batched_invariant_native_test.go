@@ -251,7 +251,7 @@ func TestBatchedInvariantAuditNativeTwelveThousandCohort(t *testing.T) {
 	runBatchedInvariantAuditNativeCohort(t, 12000)
 }
 
-func runBatchedInvariantAuditNativeCohort(t *testing.T, count int) {
+func batchAuditLargeCohort(t *testing.T, count int) (jetstream.JetStream, context.Context, Report) {
 	t.Helper()
 	if os.Getenv("WF_AUDIT_BATCH_CANDIDATE") != "1" {
 		t.Skip("opt-in full native batched invariant audit")
@@ -301,6 +301,12 @@ func runBatchedInvariantAuditNativeCohort(t *testing.T, count int) {
 		}
 	}
 	want := Report{Invocations: count, Journals: count, Entries: count * 12, Terminal: count}
+	return js, ctx, want
+}
+
+func runBatchedInvariantAuditNativeCohort(t *testing.T, count int) {
+	t.Helper()
+	js, ctx, want := batchAuditLargeCohort(t, count)
 	started := time.Now()
 	pointCtx, done := context.WithTimeout(ctx, 20*time.Second)
 	point, pointErr := Check(pointCtx, js)
@@ -338,4 +344,82 @@ func runBatchedInvariantAuditNativeCohort(t *testing.T, count int) {
 		t.Fatalf("unexpected point failure %v", pointErr)
 	}
 	t.Logf("full-audit invocations=%d entries=%d terminal=%d point_elapsed=%s point_error=%v previous_batch512_elapsed=%s previous_batch512_error=%v bulk_batch4096_elapsed=%s bulk_error=%v", bulk.Invocations, bulk.Entries, bulk.Terminal, pointElapsed, pointErr, previousElapsed, previousErr, bulkElapsed, bulkErr)
+}
+
+// Test-only override: source streams retain all three replicas. The temporary
+// audit consumer's delivery state is the sole difference in this comparison.
+// This does not qualify single-replica consumer recovery after leader loss.
+type nativeSingleReplicaAuditStream struct {
+	jetstream.Stream
+	observed *[]string
+}
+
+func (s nativeSingleReplicaAuditStream) CreateConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
+	if cfg.Replicas != 3 || !cfg.MemoryStorage || cfg.AckPolicy != jetstream.AckNonePolicy {
+		return nil, fmt.Errorf("unexpected baseline audit consumer config: %+v", cfg)
+	}
+	cfg.Replicas = 1
+	consumer, err := s.Stream.CreateConsumer(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+	info, err := consumer.Info(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if info.Config.Replicas != 1 || !info.Config.MemoryStorage || info.Config.AckPolicy != jetstream.AckNonePolicy {
+		return nil, fmt.Errorf("unexpected actual candidate consumer config: %+v", info.Config)
+	}
+	*s.observed = append(*s.observed, info.Stream)
+	return consumer, nil
+}
+
+func TestBatchedInvariantAuditNativeConsumerReplication(t *testing.T) {
+	js, ctx, want := batchAuditLargeCohort(t, 12000)
+	audit := func(singleReplica bool) (Report, error, time.Duration, []string) {
+		started := time.Now()
+		attempt, stop := context.WithTimeout(ctx, 20*time.Second)
+		defer stop()
+		var observed []string
+		result, err := checkUsing(attempt, js, nil, func(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+			if singleReplica {
+				stream = nativeSingleReplicaAuditStream{Stream: stream, observed: &observed}
+			}
+			return scanBatchThrough(ctx, stream, cutoff, visit)
+		})
+		return result, err, time.Since(started), observed
+	}
+	baseline, baselineErr, baselineElapsed, _ := audit(false)
+	if baselineErr == nil {
+		if baseline != want {
+			t.Fatalf("replicated report=%+v", baseline)
+		}
+	} else if !errors.Is(baselineErr, context.DeadlineExceeded) {
+		t.Fatalf("unexpected replicated audit failure: %v", baselineErr)
+	}
+	candidate, candidateErr, candidateElapsed, observed := audit(true)
+	if candidateErr != nil || candidate != want || strings.Join(observed, ",") != "WF_INV,WF_JRN" {
+		t.Fatalf("single-replica report=%+v observed=%v err=%v", candidate, observed, candidateErr)
+	}
+	// Recheck the replicated reader after the candidate to expose an ordering
+	// or warm-cache effect rather than interpreting a single pair as speedup.
+	recheck, recheckErr, recheckElapsed, _ := audit(false)
+	if recheckErr == nil {
+		if recheck != want {
+			t.Fatalf("replicated recheck report=%+v", recheck)
+		}
+	} else if !errors.Is(recheckErr, context.DeadlineExceeded) {
+		t.Fatalf("unexpected replicated recheck failure: %v", recheckErr)
+	}
+	for _, name := range []string{"WF_INV", "WF_JRN"} {
+		stream, err := js.Stream(ctx, name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		info, err := stream.Info(ctx)
+		if err != nil || info.Config.Replicas != 3 || info.State.Consumers != 0 {
+			t.Fatalf("source stream changed or audit consumer leaked: %s info=%+v err=%v", name, info, err)
+		}
+	}
+	t.Logf("replication-audit invocations=%d entries=%d terminal=%d stream_replicas=3 replicated_consumer_seconds=%s replicated_error=%v single_consumer_seconds=%s single_error=%v replicated_recheck_seconds=%s replicated_recheck_error=%v actual_single_consumers=%s consumers=0", candidate.Invocations, candidate.Entries, candidate.Terminal, baselineElapsed, baselineErr, candidateElapsed, candidateErr, recheckElapsed, recheckErr, strings.Join(observed, ","))
 }
