@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"js-wf/internal/natsutil"
 	"js-wf/testcluster"
 
 	"github.com/nats-io/nats.go"
@@ -50,7 +51,7 @@ func candidateBatchScan(ctx context.Context, stream jetstream.Stream, cutoff *ui
 		return stream.CreateConsumer(call, jetstream.ConsumerConfig{
 			Name: consumerName, DeliverPolicy: jetstream.DeliverByStartSequencePolicy, OptStartSeq: first,
 			AckPolicy: jetstream.AckNonePolicy, ReplayPolicy: jetstream.ReplayInstantPolicy,
-			MemoryStorage: true, InactiveThreshold: 30 * time.Second,
+			MemoryStorage: true, Replicas: info.Config.Replicas, InactiveThreshold: 30 * time.Second,
 		})
 	})
 	if err != nil {
@@ -91,6 +92,9 @@ func candidateBatchScan(ctx context.Context, stream jetstream.Stream, cutoff *ui
 		batch, err := consumer.Fetch(requested, jetstream.FetchContext(call))
 		if err != nil {
 			stop()
+			if candidateReadTransportError(err) {
+				return resolve(last)
+			}
 			return err
 		}
 		var visitErr error
@@ -140,7 +144,7 @@ func candidateBatchScan(ctx context.Context, stream jetstream.Stream, cutoff *ui
 			return ctx.Err()
 		}
 		if batchErr != nil {
-			if !errors.Is(batchErr, context.DeadlineExceeded) && !errors.Is(batchErr, nats.ErrTimeout) {
+			if !candidateReadTransportError(batchErr) {
 				return batchErr
 			}
 			return resolve(last)
@@ -150,6 +154,13 @@ func candidateBatchScan(ctx context.Context, stream jetstream.Stream, cutoff *ui
 		}
 	}
 	return nil
+}
+
+// Recover a transport-interrupted consumer through leader reads at the next
+// unvisited position. Semantic metadata/payload/visitor errors never fall back.
+func candidateReadTransportError(err error) bool {
+	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) ||
+		errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || natsutil.IsUnavailable(err)
 }
 
 func candidateDigest(h hash.Hash, msg *jetstream.RawStreamMsg) error {

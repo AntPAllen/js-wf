@@ -1,0 +1,77 @@
+{
+  "source": "7daea560dfa68b4b270d6b43d920f24aabcef652",
+  "exit_code": 1,
+  "selected_inputs": 2884,
+  "local_git_inputs": 54,
+  "all_captured_source_hashes_verified": true,
+  "all_local_inputs_match_executed_git": true,
+  "actual_binary_sha256": "c859d7e9e8e752ea2d4e5344938fa64d2f83ff7b5e181d931a94ca0889cfd0e2",
+  "actual_binary_retained": true,
+  "all_actual_build_info_fields_match": true,
+  "named_results": {
+    "TestAuditBatchScanCandidateResolvesConsumerOmissionsAndTail": {
+      "status": "pass",
+      "seconds": 0
+    },
+    "TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/duplicate": {
+      "status": "pass",
+      "seconds": 0
+    },
+    "TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/wrong_stream": {
+      "status": "pass",
+      "seconds": 0
+    },
+    "TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/gap_semantic_error": {
+      "status": "pass",
+      "seconds": 0
+    },
+    "TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/wrong_gap_sequence": {
+      "status": "pass",
+      "seconds": 0
+    },
+    "TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/batch_semantic_error": {
+      "status": "pass",
+      "seconds": 0
+    },
+    "TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/visitor_error": {
+      "status": "pass",
+      "seconds": 0
+    },
+    "TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures": {
+      "status": "pass",
+      "seconds": 0
+    },
+    "TestAuditBatchScanCandidateCreateRetryKeepsIdentityAndCleansUncertainCreate": {
+      "status": "pass",
+      "seconds": 0
+    },
+    "TestAuditBatchScanCandidateNativeLeaderLossAndCancellation/leader-loss": {
+      "status": "fail",
+      "seconds": 6.25
+    },
+    "TestAuditBatchScanCandidateNativeLeaderLossAndCancellation/cancellation": {
+      "status": "pass",
+      "seconds": 6.7
+    },
+    "TestAuditBatchScanCandidateNativeLeaderLossAndCancellation/consumer-deletion": {
+      "status": "pass",
+      "seconds": 6.64
+    },
+    "TestAuditBatchScanCandidateNativeLeaderLossAndCancellation": {
+      "status": "fail",
+      "seconds": 19.6
+    },
+    "TestAuditBatchScanCandidateNativeLegacy211": {
+      "status": "pass",
+      "seconds": 30.3
+    }
+  },
+  "native_files": 222,
+  "native_file_bytes": 53536858,
+  "raw_result_log": "=== RUN   TestAuditBatchScanCandidateResolvesConsumerOmissionsAndTail\n--- PASS: TestAuditBatchScanCandidateResolvesConsumerOmissionsAndTail (0.00s)\n=== RUN   TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures\n=== RUN   TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/duplicate\n=== RUN   TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/wrong_stream\n=== RUN   TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/gap_semantic_error\n=== RUN   TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/wrong_gap_sequence\n=== RUN   TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/batch_semantic_error\n=== RUN   TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/visitor_error\n--- PASS: TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures (0.00s)\n    --- PASS: TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/duplicate (0.00s)\n    --- PASS: TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/wrong_stream (0.00s)\n    --- PASS: TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/gap_semantic_error (0.00s)\n    --- PASS: TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/wrong_gap_sequence (0.00s)\n    --- PASS: TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/batch_semantic_error (0.00s)\n    --- PASS: TestAuditBatchScanCandidateRejectsOrderSourceAndSemanticFailures/visitor_error (0.00s)\n=== RUN   TestAuditBatchScanCandidateCreateRetryKeepsIdentityAndCleansUncertainCreate\n--- PASS: TestAuditBatchScanCandidateCreateRetryKeepsIdentityAndCleansUncertainCreate (0.00s)\n=== RUN   TestAuditBatchScanCandidateNativeLeaderLossAndCancellation\n=== RUN   TestAuditBatchScanCandidateNativeLeaderLossAndCancellation/leader-loss\n    batch_scan_candidate_faults_test.go:166: leader recovery err=nats: no responders available for request count=512\n=== RUN   TestAuditBatchScanCandidateNativeLeaderLossAndCancellation/cancellation\n    batch_scan_candidate_faults_test.go:175: fault=cancellation leader=2 client=0 visited=128 elapsed=19.932983ms gap_reads=0 scan_error=context canceled consumers=0\n=== RUN   TestAuditBatchScanCandidateNativeLeaderLossAndCancellation/consumer-deletion\n    batch_scan_candidate_faults_test.go:175: fault=consumer-deletion leader=1 client=2 visited=512 elapsed=32.167185ms gap_reads=0 scan_error=nats: no responders available for request consumers=0\n--- FAIL: TestAuditBatchScanCandidateNativeLeaderLossAndCancellation (19.60s)\n    --- FAIL: TestAuditBatchScanCandidateNativeLeaderLossAndCancellation/leader-loss (6.25s)\n    --- PASS: TestAuditBatchScanCandidateNativeLeaderLossAndCancellation/cancellation (6.70s)\n    --- PASS: TestAuditBatchScanCandidateNativeLeaderLossAndCancellation/consumer-deletion (6.64s)\n=== RUN   TestAuditBatchScanCandidateNativeLegacy211\n    batch_scan_candidate_faults_test.go:241: version=2.11.17 replicas=3 count=997 elapsed=1.825612704s gap_reads=3 digest=b13e4be18c523588842d3c768de5b3031b1ff33cd955c40926ca4867a3f5d9c8 consumers=0\n--- PASS: TestAuditBatchScanCandidateNativeLegacy211 (30.30s)\nFAIL\n",
+  "physical_stores_reopened": false,
+  "production_reader_changed": false,
+  "qualifies_full_audit": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false
+}

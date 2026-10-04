@@ -65,13 +65,22 @@ func candidatePublish(t *testing.T, js jetstream.JetStream, ctx context.Context,
 
 type candidateObservedStream struct {
 	jetstream.Stream
-	name     string
-	gapCalls int
+	name             string
+	gapCalls         int
+	consumerReplicas int
 }
 
 func (s *candidateObservedStream) CreateConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
 	s.name = cfg.Name
-	return s.Stream.CreateConsumer(ctx, cfg)
+	consumer, err := s.Stream.CreateConsumer(ctx, cfg)
+	if err != nil {
+		return consumer, err
+	}
+	s.consumerReplicas = consumer.CachedInfo().Config.Replicas
+	if s.consumerReplicas != cfg.Replicas {
+		return nil, fmt.Errorf("consumer replicas=%d requested=%d", s.consumerReplicas, cfg.Replicas)
+	}
+	return consumer, nil
 }
 func (s *candidateObservedStream) GetMsg(ctx context.Context, seq uint64, opts ...jetstream.GetMsgOpt) (*jetstream.RawStreamMsg, error) {
 	s.gapCalls++
@@ -172,7 +181,7 @@ func TestAuditBatchScanCandidateNativeLeaderLossAndCancellation(t *testing.T) {
 			if infoErr != nil || info.State.Consumers != 0 {
 				t.Fatalf("consumer cleanup err=%v info=%+v", infoErr, info)
 			}
-			t.Logf("fault=%s leader=%d client=%d visited=%d elapsed=%s gap_reads=%d scan_error=%v consumers=%d", fault, leader, clientNode, count, time.Since(started), observed.gapCalls, err, info.State.Consumers)
+			t.Logf("fault=%s leader=%d client=%d visited=%d elapsed=%s gap_reads=%d consumer_replicas=%d scan_error=%v consumers=%d", fault, leader, clientNode, count, time.Since(started), observed.gapCalls, observed.consumerReplicas, err, info.State.Consumers)
 		})
 	}
 }
@@ -238,5 +247,93 @@ func TestAuditBatchScanCandidateNativeLegacy211(t *testing.T) {
 	if err != nil || info.State.Consumers != 0 {
 		t.Fatalf("cleanup err=%v info=%+v", err, info)
 	}
-	t.Logf("version=2.11.17 replicas=3 count=%d elapsed=%s gap_reads=%d digest=%x consumers=%d", count, time.Since(started), observed.gapCalls, actual.Sum(nil), info.State.Consumers)
+	t.Logf("version=2.11.17 replicas=3 count=%d elapsed=%s gap_reads=%d consumer_replicas=%d digest=%x consumers=%d", count, time.Since(started), observed.gapCalls, observed.consumerReplicas, actual.Sum(nil), info.State.Consumers)
+}
+
+func TestAuditBatchScanCandidateNativeSparseHundredThousandSpan(t *testing.T) {
+	if os.Getenv("WF_AUDIT_BATCH_CANDIDATE") != "1" {
+		t.Skip("opt-in native batch candidate qualification")
+	}
+	cluster, err := testcluster.Start(candidateNativeRoot(t), 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cluster.Close()
+	js, err := jetstream.New(cluster.Clients[0], jetstream.WithPublishAsyncMaxPending(512))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, stop := context.WithTimeout(context.Background(), time.Minute)
+	defer stop()
+	stream := candidateNativeStream(t, js, ctx)
+	if _, err := js.Publish(ctx, "audit.fault.anchor", []byte("first")); err != nil {
+		t.Fatal(err)
+	}
+	const holes = 100000
+	futures := make([]jetstream.PubAckFuture, 0, holes)
+	for i := 0; i < holes; i++ {
+		future, err := js.PublishAsync("audit.fault.hole", []byte("deleted-span"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		futures = append(futures, future)
+	}
+	select {
+	case <-js.PublishAsyncComplete():
+	case <-ctx.Done():
+		t.Fatal(ctx.Err())
+	}
+	for i, future := range futures {
+		select {
+		case ack := <-future.Ok():
+			if ack.Sequence != uint64(i+2) {
+				t.Fatalf("publication sequence=%d expected=%d", ack.Sequence, i+2)
+			}
+		case err := <-future.Err():
+			t.Fatal(err)
+		case <-ctx.Done():
+			t.Fatal(ctx.Err())
+		}
+	}
+	last, err := js.Publish(ctx, "audit.fault.anchor", []byte("last"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := stream.Purge(ctx, jetstream.WithPurgeSubject("audit.fault.hole")); err != nil {
+		t.Fatal(err)
+	}
+	info, err := stream.Info(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.State.FirstSeq != 1 || info.State.LastSeq != holes+2 || info.State.Msgs != 2 {
+		t.Fatalf("incorrect sparse fixture %+v", info.State)
+	}
+	expected := sha256.New()
+	for _, seq := range []uint64{1, last.Sequence} {
+		msg, err := stream.GetMsg(ctx, seq)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := candidateDigest(expected, msg); err != nil {
+			t.Fatal(err)
+		}
+	}
+	observed := &candidateObservedStream{Stream: stream}
+	actual := sha256.New()
+	count := 0
+	auditCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+	started := time.Now()
+	if err := candidateBatchScan(auditCtx, observed, nil, func(msg *jetstream.RawStreamMsg) error { count++; return candidateDigest(actual, msg) }); err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 || observed.gapCalls != 1 || fmt.Sprintf("%x", actual.Sum(nil)) != fmt.Sprintf("%x", expected.Sum(nil)) {
+		t.Fatalf("sparse scan count=%d gap_reads=%d", count, observed.gapCalls)
+	}
+	info, err = stream.Info(ctx)
+	if err != nil || info.State.Consumers != 0 {
+		t.Fatalf("cleanup err=%v info=%+v", err, info)
+	}
+	t.Logf("span=%d retained=%d deleted=%d elapsed=%s leader_gap_reads=%d digest=%x consumers=%d", last.Sequence, count, holes, time.Since(started), observed.gapCalls, actual.Sum(nil), info.State.Consumers)
 }

@@ -65,7 +65,7 @@ type candidateControlStream struct {
 }
 
 func (s *candidateControlStream) Info(context.Context, ...jetstream.StreamInfoOpt) (*jetstream.StreamInfo, error) {
-	return &jetstream.StreamInfo{Config: jetstream.StreamConfig{Name: "CONTROL"}, State: jetstream.StreamState{FirstSeq: 1, LastSeq: 6}}, nil
+	return &jetstream.StreamInfo{Config: jetstream.StreamConfig{Name: "CONTROL", Replicas: 3}, State: jetstream.StreamState{FirstSeq: 1, LastSeq: 6}}, nil
 }
 func (s *candidateControlStream) CreateConsumer(_ context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
 	s.createNames = append(s.createNames, cfg.Name)
@@ -78,7 +78,7 @@ func (s *candidateControlStream) CreateConsumer(_ context.Context, cfg jetstream
 	if s.createLostReply && len(s.createNames) == 1 {
 		return nil, nats.ErrTimeout
 	}
-	if cfg.DeliverPolicy != jetstream.DeliverByStartSequencePolicy || cfg.OptStartSeq != 1 || cfg.AckPolicy != jetstream.AckNonePolicy || !cfg.MemoryStorage || cfg.InactiveThreshold <= 0 {
+	if cfg.DeliverPolicy != jetstream.DeliverByStartSequencePolicy || cfg.OptStartSeq != 1 || cfg.AckPolicy != jetstream.AckNonePolicy || !cfg.MemoryStorage || cfg.Replicas != 3 || cfg.InactiveThreshold <= 0 {
 		return nil, errors.New("incorrect consumer configuration")
 	}
 	return s.consumer, nil
@@ -165,5 +165,18 @@ func TestAuditBatchScanCandidateCreateRetryKeepsIdentityAndCleansUncertainCreate
 	}
 	if len(s.createNames) != 3 || s.createNames[0] != s.createNames[1] || s.createNames[1] != s.createNames[2] || s.deleteName != s.createNames[0] {
 		t.Fatalf("uncertain create identities=%v cleanup=%s", s.createNames, s.deleteName)
+	}
+}
+
+func TestAuditBatchScanCandidateTransportFallbackResumesUnvisitedTail(t *testing.T) {
+	for _, interrupted := range []error{nats.ErrNoResponders, nats.ErrTimeout, jetstream.ErrNoStreamResponse, context.DeadlineExceeded, &jetstream.APIError{ErrorCode: 10008}} {
+		s := &candidateControlStream{consumer: candidateControlConsumer{sequences: []uint64{1, 2}, stream: "CONTROL", err: interrupted}}
+		var visited []uint64
+		if err := candidateBatchScan(context.Background(), s, nil, func(msg *jetstream.RawStreamMsg) error { visited = append(visited, msg.Sequence); return nil }); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(visited, []uint64{1, 2, 3, 5, 6}) || !reflect.DeepEqual(s.requests, []uint64{3, 4, 6}) || !s.deleted {
+			t.Fatalf("tail not recovered: visited=%v reads=%v cleanup=%v", visited, s.requests, s.deleted)
+		}
 	}
 }

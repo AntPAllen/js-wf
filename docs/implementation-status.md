@@ -33,6 +33,20 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Bulk candidate native failure retained and addressed:** actual race run at
+  7daea56 fails leader loss after512/3000 reads with no responders. Explicit
+  cancellation passes128 visits/19.932983ms/zero consumers; narrow three-process
+  NATS2.11.17 compatibility passes997-record digest/1.825612704s/three gap reads.
+  Consumer deletion is an explicit-failure safety control, not liveness proof.
+  All2884 captured inputs /54 Git-local bytes, actual SDK/all build-info fields
+  and3123 complete proof member hashes verify;59146636-byte proof in three parts
+  retains original stores/executables/source/raw data. Stores not reopened.
+  New test-only candidate explicitly requests stream-matched consumer replicas
+  and resumes interrupted transport through leader reads at the next unvisited
+  position. Updated transport/semantic/identity controls pass race1.016s;
+  actual new fault/legacy/sparse-span qualification pending. Production unchanged.
+  [Complete failed run and correction scope](scale/retained-audit-batch-candidate-2026-10-04/leader-failure/).
+
 - **Bulk scan candidate fault/compatibility qualification prepared:** creation
   retries reuse one generated consumer name and attempt cleanup even after lost
   create replies; cleanup respects the original audit deadline. Explicit
