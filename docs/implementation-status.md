@@ -33,6 +33,30 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Normal2GiB real ten-minute originals independently reviewed:** exact4a875f0,
+  2436 invocations /26869 entries /19 journal-leader faults,678.38s. Raw row,
+  original30s clocks, eight mandatory audits (max1.851s under20s/60s) verify.
+  Three rebuilt models give exactOk for3132 operations,45 local dependencies
+  match Git and actual model retained. All1237 local source inputs, actual live
+  SDK/all build-info fields,5094 original members /57073796-byte three-part proof
+  and54-member reviewer/model proof verify. Native stores retained, not reopened.
+  SDK/supervisor terminal, no fixtures remain. Normal2GiB diagnostic only;
+  race/full matrices/actual24h remain. No new longer campaign.
+  [Complete reviewed originals](scale/local-r5-audit-memory-2026-10-04/normal-2g-ten-minute/).
+
+- **Fresh KV candidate native equivalence passes; speedup unproven:** exact9b2a182
+  race controls match point/batched/state reports and exact errors through
+  compaction/cohort/fresh corruption, I1/I2/I3/orphan and terminal replacement /
+  Delete/Purge/recreation. Same-store normal100k/1.2M reads all agree under20s:
+  point-state15.043925816s, snapshot14.468247646s, point recheck19.93021917s.
+  Before/after variability prevents reliable speedup claim; harness unchanged.
+  All2891 selected inputs/61 Git files, actual SDK/all build-info fields and both
+  complete original archives verify (3979/3323 members,31870908/109965360 bytes).
+  Live/proc capture for100k only; stores retained, not reopened. Snapshot checker
+  bytes match283ba32. Candidate fault/legacy/production capacity and release
+  gates stay open; no soak restart.
+  [Complete native controls and comparison](scale/retained-audit-state-snapshot-2026-10-04/).
+
 - **Fresh KV watch audit candidate prepared:** opt-in reader uses a fresh
   latest-value WatchAll set per audit and requires the initial completion marker.
   Partial closure, cancellation, invalid identity/revision/operation and ordering

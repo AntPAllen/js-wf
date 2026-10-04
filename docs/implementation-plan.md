@@ -1699,3 +1699,27 @@ passes its named test and producer row checks:2436 invocations /26869 entries /
 19 faults. SDK/supervisor terminal and complete producer original archive made;
 independent complete-original review and publication remain pending. This is
 recorded normal-profile evidence, not race/full-matrix/24h qualification.
+
+### Fresh state reader equivalence and normal-profile originals reviewed
+
+At9b2a182 the race native controls prove point/batched/state-snapshot exact
+reports and errors through compaction/cohort/fresh corruption/I1/I2/I3/orphan
+and terminal replacement/Delete/Purge/recreation. Same-store normal2GiB100k /
+1.2M reads agree:point-state15.043925816s, snapshot14.468247646s, point recheck
+19.93021917s under original20s. Variability prevents reliable speedup claim;
+no production-harness adoption. All selected/Git/actual SDK/build-info/archive
+member/part identities verify;100k live/proc captured, controls not; stores not
+reopened. Snapshot checker bytes match283ba32. Candidate fault/legacy/scaling
+qualification and full release requirements remain.
+[Native complete proofs](scale/retained-audit-state-snapshot-2026-10-04/).
+
+The normal2GiB real five-container journal10m at4a875f0 now has independently
+reviewed complete originals:2436 invocations /26869 entries /19 faults, eight
+mandatory audits max1.851s under original20s/60s, raw30s liveness checks and
+three exactOk models for3132 operations. Actual SDK/stores,1237 local source
+files,45 model source inputs and actual model retained; complete original and
+review/model archives read back/hash verify. Stores not independently reopened.
+SDK/supervisor terminal; no containers remain. This is normal-profile diagnostic
+qualification, not race/full200/current-source/full-matrix/24h acceptance. Older
+24h failures remain failed; no new longer run follows.
+[Reviewed complete originals](scale/local-r5-audit-memory-2026-10-04/normal-2g-ten-minute/).
