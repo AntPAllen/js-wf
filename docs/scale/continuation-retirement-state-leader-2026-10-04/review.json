@@ -1,0 +1,28 @@
+{
+  "base_commit": "9296a81136423e74a7ad8a3168ff1c4e659eb7d5",
+  "modified_test": "integration/continuation_retirement_test.go",
+  "modified_test_sha256": "55218356d34a6501b0c013ef8b4a9eb5d862ab75ccf7e4431c9c5450f6168af8",
+  "command": "go test -race ./integration -run '^TestContinuationRetirementReuseWithManifestLossAndStateLeaderRestart$' -count=1 -timeout=90s -v",
+  "environment": {
+    "GOCACHE": "/tmp/js-wf-go-build-cache-20261004",
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "2GiB"
+  },
+  "combined_test_pass": true,
+  "combined_test_seconds": 22.05,
+  "package_seconds": 23.101,
+  "fault": "Confirmed KV_WF_STATE leader library shutdown/restart at pre-commit controlled fresh manifest response loss",
+  "original_publication_budget_unchanged": true,
+  "actual_sdk_retained": false,
+  "native_stores_retained": false,
+  "qualifies_full_matrices": false,
+  "qualifies_24h": false,
+  "baseline_tests_pass": true,
+  "baseline_test_seconds": 43.4,
+  "retained_file_sha256": {
+    "source-overlay.patch": "5aae6b89cf8b8239c32329f6e3968448655f74ddefba0b1e92769a2d2e418c74",
+    "combined-race.log": "fa819f4fc812d809b3e1d9e75481222760e9597663bee86a697e0b74d12b142d",
+    "README.md": "095b6a9ee147bb840ad1d37e55fccd7f4f5f7fd37c653fdf3925e35f3c75043d",
+    "baselines-race.log": "48ebc1e3b4263dfec93d8eb9378b3a921d000d504e2ede7c0f5297e11b1dc97b"
+  }
+}

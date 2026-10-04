@@ -1938,3 +1938,13 @@ operations has worst terminal/progress p99 18.295s/13.015s. Complete original ar
 and all members/parts verify. Native SDK/stores unavailable; final integrity/drain
 remains named-test scope. Full200/final-source/full matrices remain open.
 [Complete new shard](scale/current-tier2-matrix-2026-10-04/cluster-109-120/).
+
+### Combined continuation retirement and state-leader restart control
+
+The retirement/GC/generation-reuse fixture now combines fresh manifest response
+loss with actual confirmed state-stream leader library shutdown/restart. Local
+race control passes22.05s; both original baselines pass43.40s. Raw integrity,
+old-generation rejection, peer-visible results and shared reference preservation
+remain strict. [Overlay and logs](scale/continuation-retirement-state-leader-2026-10-04/)
+record exact local scope; SDK/stores were not retained. OS SIGKILL, active-writer
+GC, lease/TTL/limit combinations and final-source matrices/24h remain open.

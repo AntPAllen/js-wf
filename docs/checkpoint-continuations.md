@@ -879,3 +879,15 @@ frames are reused unchanged; a frame stored before completion can be orphaned
 and replaced by a newly anchored frame. The first 100,000-seed campaign was
 interrupted by the VM reboot; a fresh memory-bounded campaign is pending.
 Further combined limits, lease/TTL and server/process faults remain open.
+
+## Retirement reuse with manifest loss and actual state leader restart
+
+A focused race control now combines quiescent retirement/GC, generation reuse,
+rejection of an old collected frame and a controlled fresh-manifest response loss
+with library shutdown/restart of the confirmed state-stream leader. It passes22.05s
+with exactly one leader restart and manifest loss, two retired objects reclaimed,
+three effects and two correct terminal generations; shared/survivor/fresh references
+remain after collection. Original no-loss/loss controls pass43.40s through the same
+helper. [Exact test overlay and local logs](scale/continuation-retirement-state-leader-2026-10-04/)
+retain scope: ephemeral SDK/stores were not preserved. This is not OS SIGKILL,
+concurrent-writer GC, lease/TTL/limit combinations or full-matrix/24h qualification.

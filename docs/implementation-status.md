@@ -33,6 +33,16 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Combined continuation retirement/reuse native control passes:** fresh manifest
+  pre-commit response loss plus actual confirmed state leader library shutdown/
+  restart, local race22.05s. Exactly one drop/restart; retired objects reclaimed,
+  stale generation rejected before effects, both terminals audited and shared/
+  survivor/fresh blobs retained after GC. Existing no-loss/loss baselines race
+  pass43.40s through refactored helper. Exact modified test overlay/logs retained;
+  SDK/stores not preserved. OS SIGKILL/active-GC/lease/TTL/limit/full-matrix/24h
+  gates remain open. Production runtime unchanged; running95b63c0 soak continues.
+  [Focused native control](scale/continuation-retirement-state-leader-2026-10-04/).
+
 - **Positive matrix duplicate expansions recovered:** seeds73–120 free2464092160
   exclusive allocated bytes after pushed Git parts, canonical archives, ZIPs and
   every expanded input independently hash-verify; no visible input descriptor open.

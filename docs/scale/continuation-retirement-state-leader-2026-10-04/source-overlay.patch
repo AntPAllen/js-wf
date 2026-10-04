@@ -1,0 +1,121 @@
+diff --git a/integration/continuation_retirement_test.go b/integration/continuation_retirement_test.go
+index 474b1e3..03ef82d 100644
+--- a/integration/continuation_retirement_test.go
++++ b/integration/continuation_retirement_test.go
+@@ -8,6 +8,7 @@ import (
+ 	"encoding/json"
+ 	"errors"
+ 	"fmt"
++	"strconv"
+ 	"strings"
+ 	"sync/atomic"
+ 	"testing"
+@@ -22,6 +23,7 @@ import (
+ 	"js-wf/wf"
+ 	"js-wf/worker"
+ 
++	"github.com/nats-io/nats.go"
+ 	"github.com/nats-io/nats.go/jetstream"
+ )
+ 
+@@ -30,6 +32,7 @@ type retirementManifestPort struct {
+ 	failFresh  atomic.Bool
+ 	generation atomic.Uint64
+ 	dropped    atomic.Int64
++	onDrop     func(context.Context) error
+ }
+ 
+ func (p *retirementManifestPort) CreateManifest(ctx context.Context, key string, data []byte) error {
+@@ -39,11 +42,20 @@ func (p *retirementManifestPort) CreateManifest(ctx context.Context, key string,
+ 	}
+ 	if snap.Runtime != nil && snap.Runtime.InvSeq == p.generation.Load() && p.failFresh.Swap(false) {
+ 		p.dropped.Add(1)
++		if p.onDrop != nil {
++			if err := p.onDrop(ctx); err != nil {
++				return err
++			}
++		}
+ 		return journal.ErrUnknown
+ 	}
+ 	return p.SnapshotWritePort.CreateManifest(ctx, key, data)
+ }
+ 
++func TestContinuationRetirementReuseWithManifestLossAndStateLeaderRestart(t *testing.T) {
++	runContinuationRetirementWithServerFault(t, true, true)
++}
++
+ func TestContinuationRetirementGCAndGenerationReuse(t *testing.T) {
+ 	for _, fault := range []bool{false, true} {
+ 		t.Run(fmt.Sprintf("manifest_drop=%t", fault), func(t *testing.T) { runContinuationRetirementGCAndGenerationReuse(t, fault) })
+@@ -51,7 +63,26 @@ func TestContinuationRetirementGCAndGenerationReuse(t *testing.T) {
+ }
+ 
+ func runContinuationRetirementGCAndGenerationReuse(t *testing.T, manifestDrop bool) {
+-	all, _ := setup(t)
++	runContinuationRetirementWithServerFault(t, manifestDrop, false)
++}
++
++func runContinuationRetirementWithServerFault(t *testing.T, manifestDrop, serverFault bool) {
++	all, cluster := setup(t)
++	if serverFault {
++		// Keep the SDK connections alive across the library server restart.
++		// The fixture's original NoReconnect clients are replaced by RestartNode.
++		for i, server := range cluster.Servers {
++			nc, err := nats.Connect(server.ClientURL(), nats.MaxReconnects(-1), nats.ReconnectWait(25*time.Millisecond))
++			if err != nil {
++				t.Fatal(err)
++			}
++			t.Cleanup(nc.Close)
++			all[i], err = jetstream.New(nc)
++			if err != nil {
++				t.Fatal(err)
++			}
++		}
++	}
+ 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+ 	defer cancel()
+ 	const typ = "checkpoint-retire"
+@@ -65,6 +96,33 @@ func runContinuationRetirementGCAndGenerationReuse(t *testing.T, manifestDrop bo
+ 	var freshGeneration atomic.Uint64
+ 	var freshInitialCalls atomic.Int64
+ 	port := &retirementManifestPort{SnapshotWritePort: journal.NewSnapshotPort(all[1])}
++	var leaderRestarts atomic.Int64
++	if serverFault {
++		port.onDrop = func(ctx context.Context) error {
++			stream, err := all[0].Stream(ctx, "KV_WF_STATE")
++			if err != nil {
++				return err
++			}
++			info, err := stream.Info(ctx)
++			if err != nil || info.Cluster == nil || info.Cluster.Leader == "" {
++				return fmt.Errorf("state leader unconfirmed: info=%+v err=%v", info, err)
++			}
++			node, err := strconv.Atoi(strings.TrimPrefix(info.Cluster.Leader, "wf-test-"))
++			if err != nil || node < 0 || node >= len(cluster.Servers) {
++				return fmt.Errorf("invalid state leader %q", info.Cluster.Leader)
++			}
++			cluster.KillNode(node)
++			if cluster.Servers[node].Running() {
++				return fmt.Errorf("state leader remained running")
++			}
++			if err := cluster.RestartNode(node); err != nil {
++				return err
++			}
++			leaderRestarts.Add(1)
++			t.Logf("retirement fresh manifest response lost; actual state leader %s library shutdown/restart", info.Cluster.Leader)
++			return nil
++		}
++	}
+ 	var initialCalls, effects atomic.Int64
+ 	handlers := map[string]worker.Handler{typ: func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
+ 		initialCalls.Add(1)
+@@ -267,6 +325,9 @@ func runContinuationRetirementGCAndGenerationReuse(t *testing.T, manifestDrop bo
+ 	if !manifestDrop && port.dropped.Load() != 0 {
+ 		t.Fatal("unexpected injected drop")
+ 	}
++	if serverFault && leaderRestarts.Load() != 1 {
++		t.Fatalf("state leader restarts=%d", leaderRestarts.Load())
++	}
+ 	fresh, err := store.ReadCheckpoint(ctx, typ, retired, second.InvSeq)
+ 	if err != nil || fresh == nil || fresh.Snapshot.Runtime.InvSeq != second.InvSeq || fresh.Snapshot.Runtime.Object == old.Snapshot.Runtime.Object {
+ 		t.Fatalf("fresh checkpoint=%+v err=%v", fresh, err)
