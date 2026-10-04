@@ -382,7 +382,7 @@ Per-phase tests prove each mechanism; this layer proves the whole thing under ad
   current runtime/simulation/Tier1 producer bytes.
   [Complete corrected-source normal proof](scale/snapshot-timeout-cause-2026-10-04/hosted-normal100k/)
   and the [Corrected-source race proof](scale/snapshot-timeout-cause-2026-10-04/hosted-race/)
-  does not qualify failed real-cluster cases or the remaining full release gates.
+  do not qualify failed real-cluster cases or the remaining full release gates.
 
   [Diagnostic correction and unchanged failure bounds](scale/snapshot-timeout-cause-2026-10-04/)
   do not qualify the failed combined continuation/promise restart case.
@@ -1024,16 +1024,16 @@ full-campaign shard subsequently fails seed 61 with a batch-90 retained-audit
 
 
 
-Current Tier2 journal seeds 1–192 pass independent raw fault/latency and production
-history-model review at exact `c4fed06`: 505,512 invocations, 5,569,185 entries,
-3,648 leader kills and worst terminal/progress type p99 17.457496447/9.067125521 s.
+Current Tier2 journal seeds 1–200 pass independent raw fault/latency and production
+history-model review at exact `c4fed06`: 526,232 invocations, 5,797,467 entries,
+3,800 leader kills and worst terminal/progress type p99 17.457496447/9.067125521 s.
 The reusable journal-shard reviewer binds the complete requested range and actual
 local model dependency inputs to executed Git; it never promotes a parent, full
 row, full matrix or soak.
 If main has changed, use `--model-root` with a source-isolated campaign checkout;
 the entire actual local dependency graph and module hashes must still match
 executed Git before/after compilation/review. [Executed source-isolation controls](scale/tier2-model-source-root-2026-10-04/)
-prove that selecting a directory cannot bypass a dependency mismatch. [New seeds 49–192](scale/current-tier2-matrix-2026-10-04/)
+prove that selecting a directory cannot bypass a dependency mismatch. [New seeds 49–200](scale/current-tier2-matrix-2026-10-04/)
 extend individual journal coverage only. Remaining full 13×200, 16×200 and actual
 24-hour full-matrix requirements are unchanged.
 
