@@ -1,5 +1,7 @@
 # Implementation status against the supplied plan
 
+Accepted clock27–39 duplicate RAM expansion was removed only after all1,378 inputs, canonical member contents and committed Git parts verified at pushed821b1bb, with no open descriptors. Recovery:722,939,904 exclusive allocated bytes. Clock executables/SDK sources remain in canonical/Git compact proofs; actual model executable and original-store archive remain retained. Provider raw paths must be restored before reuse; failed evidence and qualification scope are unchanged. [Exact preservation checks](scale/current-tier3-clock-2026-10-04/worker-clock-27-39/duplicate-removal.json).
+
 ## Current qualification snapshot — 2026-10-04
 
 - **Original Phase3 200/50/6 repeated-worker-fault cohort qualified:** actual
