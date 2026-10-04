@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Upgrade seed8 lease-bucket timeout preserved:** job111324440201 at79915ca
+  passes producer seeds1–7 then fails8/fault4 after five native semantic checks.
+  Fallback returns `bucket WF_LEASE: context deadline exceeded` under original
+  whole-proof60s budget. Source localizes lookup/create/retry path, not exact
+  request/cause. All eight source captures and31209 original member contents
+  verify;1531-member /332,448,704-byte compact proof retains actual NATS/original
+  stores and complete raw/log/source/reviewer evidence. SDK executable not
+  uploaded; originals not reopened;1–7 are not independently qualified here.
+  Historical parent/cause/full matrices/actual24h remain open.
+  [Failure scope and proof](scale/rolling-upgrade-fallback-failure-2026-10-04/seed8/).
+
 - **Verified consumer duplicate expansions recovered:** consumer49–60,61–72,
   73–84 raw expansions removed only after all216 original file hashes,621
   canonical member contents, actual model executables and pushed Git parts
