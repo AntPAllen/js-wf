@@ -1011,7 +1011,23 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				report, err := matrixRetainedAuditUsing(checkpointCtx, func(attempt context.Context) (integrity.Report, error) {
 					began := time.Now().UTC()
 					deadline, _ := attempt.Deadline()
-					result, failure := integrity.CheckThroughInvocationSequence(attempt, js, cut.cutoff)
+					auditJS := js
+					var trace *retainedAuditTrace
+					if os.Getenv("WF_TIER3_RETAINED_AUDIT_TRACE") == "1" {
+						trace = &retainedAuditTrace{}
+						auditJS = tracedAuditJS{JetStream: js, trace: trace}
+					}
+					result, failure := integrity.CheckThroughInvocationSequence(attempt, auditJS, cut.cutoff)
+					if trace != nil {
+						data, err := json.MarshalIndent(trace.snapshot(), "", "  ")
+						if err == nil {
+							name := fmt.Sprintf("audit-batch-%d-attempt-%d-trace.json", cut.batch, len(attempts)+1)
+							err = os.WriteFile(filepath.Join(root, name), data, 0600)
+						}
+						if err != nil {
+							failure = errors.Join(failure, fmt.Errorf("retained audit trace: %w", err))
+						}
+					}
 					message := ""
 					if failure != nil {
 						message = failure.Error()

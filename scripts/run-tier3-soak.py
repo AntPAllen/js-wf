@@ -98,6 +98,7 @@ def main():
     p.add_argument('--seed', type=int, default=1)
     p.add_argument('--upgrade-shutdown', choices=('sigkill','ldm'), default='sigkill')
     p.add_argument('--upgrade-start-gap', action='store_true')
+    p.add_argument('--retained-audit-trace', action='store_true')
     p.add_argument('--no-race', action='store_true')
     a = p.parse_args()
     root = a.root.resolve()
@@ -105,6 +106,8 @@ def main():
         p.error('root must be fresh and outside the repository')
     env, testargs, flags = execution(a.row,a.duration,a.seed,root/'fixture',
                                      a.upgrade_shutdown,a.upgrade_start_gap)
+    if a.retained_audit_trace:
+        env['WF_TIER3_RETAINED_AUDIT_TRACE'] = '1'
     if subprocess.check_output(['git','status','--porcelain'],cwd=REPO):
         p.error('execution requires a clean committed checkout')
     revision = subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip()
@@ -115,6 +118,7 @@ def main():
                  status='preparing',supervisor_pid=os.getpid(),started=time.time(),
                  upgrade_shutdown=a.upgrade_shutdown if a.row=='rolling_upgrade' else None,
                  upgrade_start_gap=a.upgrade_start_gap,race=not a.no_race,
+                 retained_audit_trace=a.retained_audit_trace,
                  clears_full_tier3_release=False)
     def save():
         temporary=root/'execution.tmp.json'

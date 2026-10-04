@@ -30,6 +30,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Retained audit operation tracing prepared:** opt-in
+  `WF_TIER3_RETAINED_AUDIT_TRACE=1` decorates only the checkpoint audit client.
+  Per-method counts/bytes/timings/errors and latest64 completed calls are captured
+  per attempt; Stream/Info/GetMsg/GetLastMsgForSubject and KV Keys/Get delegation
+  preserve original contexts/options/results/errors. No production/Tier1 producer
+  change, retry change or audit20s/60s relaxation. Concurrent history-bound,
+  snapshot isolation, semantic-error and deadline controls pass race1.042s;
+  producer's three guard/archive tests pass0.029s. `run-tier3-soak.py` now exposes
+  `--retained-audit-trace` with isolated source/actual SDK/original retention.
+  An armed native run is required to localize the failed batch110 phase;
+  no throughput or server-cause conclusion is claimed from the old zero counters.
+
 - **Actual24h attempt failed; originals independently preserved:** pinned20babb5
   journal/seed1/race fails after950.33s at retained audit batch110/cutoff3080.
   All three20s attempts exhaust unchanged60s total; later fanout cancellation
