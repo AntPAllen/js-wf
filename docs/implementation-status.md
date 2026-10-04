@@ -2,6 +2,17 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Original Phase3 200/50/6 two-second worker-fault profile prepared:** actual
+  worker processes can be repeatedly SIGKILLed/replaced, SIGSTOPed45 s or
+  proxy-isolated45 s while fault choices continue every2 s. Five-minute cohort
+  completion, all50 step pairs, offline replay and raw epoch integrity remain
+  strict. Separate cleanup budget accounts for final holds; active targets,
+  confirmed paused ownership, child exits and original artifacts are checked.
+  Compilation/disabled invocation is not qualification; actual full run and
+  independent retained-original review are required. Runtime/simulator source
+  is unchanged and existing full gates continue.
+  [Prepared exact cohort and explicit acceptance boundary](scale/phase3-repeated-worker-faults-2026-10-04/).
+
 - **Original Phase1 100,000-ID continuous-partition count proof qualified:** actual
   R3 test at exact `3b859aa` passes44.17 s with100,000 invocation messages,
   invocation subjects and run messages. Independent timeline verifies206 route

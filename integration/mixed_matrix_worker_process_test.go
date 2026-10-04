@@ -141,7 +141,14 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 		}
 		return json.Marshal(value)
 	}
+	phaseThreeCounter := os.Getenv("WF_PHASE3_COUNTER_CHILD") == "1"
+	if phaseThreeCounter {
+		handlers = map[string]worker.Handler{"phase3counter": phaseThreeCounterHandler}
+	}
 	options := []worker.Option{worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(observe), worker.WithFencingObserver(observeFence)}
+	if phaseThreeCounter {
+		options[0] = worker.WithPartitionConcurrency(1)
+	}
 	if raw := os.Getenv("WF_MATRIX_WORKER_ACK_WAIT"); raw != "" {
 		ackWait, err := time.ParseDuration(raw)
 		if err != nil {
@@ -253,6 +260,9 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 		}()
 	}
 	for partition := uint32(0); partition < provision.Partitions; partition++ {
+		if phaseThreeCounter && partition != 0 {
+			continue
+		}
 		fleet.Add(1)
 		go func() {
 			defer fleet.Done()
