@@ -33,6 +33,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Actual24h batched journal row started and mode observed:** persistent unit
+  executes exactb287e98 from isolated source, race/journal/seed1/24h with explicit
+  batched checkpoint AND final audit mode plus trace. Supervisor52069 /launcher
+  52360 /actual SDK52384 and five containers live; named test started. Batch10/20
+  traces complete CreateConsumer/Fetch/DeleteConsumer without method errors,
+  proving actual bulk activation. Early creation metadata falls outside latest64
+  calls; no consumer-replica observation claim from those traces. Original audit
+  20s/60s, schedules and latency gates unchanged;37GiB free at launch, actual
+  growth/capacity to monitor. No terminal/24h/full-matrix qualification. Earlier
+  failed runs remain stopped and separately preserved.
+  [Exact launch, active identity and initial bulk traces](scale/local-r5-soak-24h-2026-10-04/journal-batched-launch/).
+
 - **Actual audit-consumer leader role independently qualified:** retained race SDK
   at7d5d0b0 targets observed consumer leader0 after128 visits, recovers all3000
   records/digest via2488 leader reads in2.031391228s, consumer replicas3 and zero
