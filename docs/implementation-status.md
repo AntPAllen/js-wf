@@ -1,5 +1,7 @@
 # Implementation status against the supplied plan
 
+After pushed1d8b92c, accepted journal157–168 raw duplicates were removed only after all72 files/canonical archive/committed Git parts SHA-verified with no open descriptors, recovering686,211,072 RAM bytes. Complete compressed local/Git proofs remain. A separate verified sparse extension omitted eight archive working copies and recovered189,964,288 root bytes; all781 previously tracked source inputs remained materialized/identical, and failed originals were untouched. [Exact storage checks](scale/local-proof-sparse-checkout-2026-10-04/second-extension/).
+
 Accepted clock27–39 duplicate RAM expansion was removed only after all1,378 inputs, canonical member contents and committed Git parts verified at pushed821b1bb, with no open descriptors. Recovery:722,939,904 exclusive allocated bytes. Clock executables/SDK sources remain in canonical/Git compact proofs; actual model executable and original-store archive remain retained. Provider raw paths must be restored before reuse; failed evidence and qualification scope are unchanged. [Exact preservation checks](scale/current-tier3-clock-2026-10-04/worker-clock-27-39/duplicate-removal.json).
 
 ## Current qualification snapshot — 2026-10-04
