@@ -2004,3 +2004,17 @@ Combined1–144:342,692 invocations/3,777,308 entries/2,736 faults/440,910 opera
 worst terminal/progress p99 remains18.295s/13.015s. SDK/stores unavailable,
 integrity/drain named-test scope. Full200/final-source/13×200 remains open.
 [Complete shard proof](scale/current-tier2-matrix-2026-10-04/cluster-133-144/).
+
+### Recorded-source real disk-delay seeds1–13 accepted
+
+Complete13×600s shard at79915ca independently qualifies41,188 invocations,
+453,656 entries,247 actual100ms dm-delay faults and52,956 exactOk history
+operations. Writable node4 mounts, admitted R5 journal/dispatch leaders,
+five-second intervals, delayed sync and same-device restoration verify per cut.
+All raw result/explanation/fencing reports and143 checkpoint audits pass;
+terminal/progress p99=5.488s/0.642s under original30s gates. All45 actual model
+dependencies match Git; complete1394-member archive/two parts read back.
+Workload source attribution is checkout/header binding, without captured full
+source inventory or actual SDK/native stores. Integrity/drain named-test scope.
+Full200/final-source/full16×200/24h remain open.
+[Complete disk-delay proof](scale/current-tier3-block-delay-2026-10-04/seeds-1-13/).
