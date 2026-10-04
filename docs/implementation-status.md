@@ -33,6 +33,16 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Explicit route-seed real comparison is live:** executed0393caa, same
+  journal/seed1/10m/race2GiB/combined audit profile. Actual five-container args
+  independently confirm all four other route-only aliases seeded. Live SDK/
+  environment/all build-info and1266 inventoried Git inputs verify. First two
+  post-fault censuses show each node has all four peers/16 pooled connections.
+  Persistent supervisor running; terminal/full-original review pending. This is
+  early topology evidence, not cause/fix/default/full-matrix/24h qualification.
+  Original cadence and20s/60s/30s gates remain; no original failure erased.
+  [Observed launch and first two censuses](scale/local-r5-streaming-audit-2026-10-04/explicit-routes-race-2g-ten-minute-launch/).
+
 - **Explicit route-seed comparison prepared:** --explicit-route-seeds opts
   the real fixture into seeding every other route-only alias on each restart;
   default single-peer/discovery remains. Per-fault census groups pooled routes
