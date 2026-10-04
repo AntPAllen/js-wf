@@ -11,7 +11,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–48 qualified. Full 13-row × 200 current-source gate remains open. |
-| Tier3 fault matrix | Worker-clock 117 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
+| Tier3 fault matrix | Worker-clock 122 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Other finite combined fault cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Not run/qualified. Full-matrix soak and required retained-original audits remain. |
@@ -29,6 +29,18 @@ and million-timer physical-drain failures, finish combined continuation/promise/
 retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Clock196–200 independently qualified:** five ten-minute seeds at799,
+  15,092 invocations /167,415 entries /95 faults and19,404 operations passing all
+  three models. All759 source inputs /45 model dependencies,105 clock proofs /
+  525 broker messages /50 cohort audits verify. Worst terminal/progress p99:
+  5.49413901 /0.657032846s under unchanged30s /10s gates. Complete raw/model proof
+  has643 members /23,764,267 bytes, plus15 fully verified pinned SDK references.
+  Own stores remain reference-only. Accepted clock coverage:122 unique seeds /
+  371,448 invocations /4,117,711 entries /2,318 faults /477,576 history operations.
+  Failed historical ranges/parent, full current-source matrices and actual24h
+  remain open. Traced upgrade diagnostic37194088941 remains queued at last poll.
+  [Complete proof and coverage](scale/current-tier3-clock-2026-10-04/worker-clock-196-200/).
 
 - **Rolling-upgrade API diagnostic prepared:** opt-in fallback provisioning
   request/response tracing records exact metadata subject/payload/timing in the
