@@ -483,6 +483,11 @@ func verifiedSnapshotObject(ctx context.Context, get func(context.Context, strin
 			lastErr = err
 		} else if retryCtx.Err() == nil {
 			return nil, fmt.Errorf("%w: snapshot object: %v", ErrGap, err)
+		} else if lastErr == nil {
+			// The first lookup can use the entire visibility window. Retain its
+			// error instead of reporting a gap with a nil cause. A prior missing
+			// object or digest failure remains the more specific observation.
+			lastErr = err
 		}
 		if ctx.Err() != nil {
 			return nil, ctx.Err()

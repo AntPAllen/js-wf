@@ -2,6 +2,20 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Snapshot timeout cause deterministically fixed:** failed ordinary CI
+  37168567962 at `32651f0` reports a nil-cause snapshot object gap after the
+  continuation/promise `after_manifest` restart cut; seven other cuts pass.
+  Original upload is console-only, without executable/stores. Exact original
+  reader code reproduces the diagnostic in 2.007 s when its first lookup consumes
+  the two-second window. The reader now preserves that error, retaining prior
+  domain failures and unchanged bounds/classification. Controls pass normal
+  4.009 s and full journal race 5.031 s; original-source overlay fails 4.007 s.
+  Original server cause and combined-case recovery remain unconfirmed. This
+  changes production source: previous 121-workload normal100k/race1k qualifications
+  are historical; fresh full gates are required. Other live campaigns keep their
+  executed-source scope; full matrices, million-timer and 24h remain open.
+  [Failed original, exact reproduction and corrected diagnostic](scale/snapshot-timeout-cause-2026-10-04/).
+
 - **Local proof checkout disk recovered:** exact-path sparse checkout omits
   55 large already-committed archive working files after their materialized/Git
   blob identities and streamed SHA256 values match. Local Git and pushed proof

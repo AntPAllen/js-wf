@@ -369,8 +369,12 @@ Per-phase tests prove each mechanism; this layer proves the whole thing under ad
   [Combined raw review and source-equivalence evidence](scale/sustained-component-verifier-2026-10-03/accepted/)
   clears this gate only; full 200-seed matrix and 24-hour soak remain open.
 - CI: first gate a fixed regression corpus plus 1,000 seeded schedules per commit; raise to 10,000 per commit once measured on CI hardware within a few minutes. Record seeds, trace paths, model version, steps/s, and virtual-time coverage. Keep 100,000 clean seeds and all known regression traces as the release gate. A timeout, unexplained skipped action, or model/real contract mismatch fails the gate rather than counting as a clean seed.
-  The complete current 121-workload graph's normal100k gate is independently
-  accepted at `9ecc37c`, including all 391 pins and the actual retained binary.
+  The 121-workload graph's normal100k gate at `9ecc37c` is independently
+  accepted, including all 391 pins and the actual retained binary. A later
+  snapshot first-lookup timeout cause fix changes production source and requires
+  fresh normal100k/race1k qualification; the previous result remains historical.
+  [Diagnostic correction and unchanged failure bounds](scale/snapshot-timeout-cause-2026-10-04/)
+  do not qualify the failed combined continuation/promise restart case.
   A 686-file ledger establishes unchanged runtime/model/Tier1 producer inputs
   through reference `9c5fce3`; later integration-only fixtures are excluded.
   The full race1k at the same tested source is separately accepted.
