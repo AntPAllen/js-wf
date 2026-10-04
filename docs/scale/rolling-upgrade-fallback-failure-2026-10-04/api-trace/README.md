@@ -11,3 +11,7 @@ GOCACHE=/tmp/js-wf-go-build-cache-20261004 GOTMPDIR=/tmp/js-wf-tier2-model-revie
 ```
 
 A focused hosted seed15 ten-minute diagnostic must still execute at the pushed prepared source with `upgrade_api_trace=true`, the original SIGKILL profile and Start-gap cut. Preserve its actual API proof, original stores and source attribution before interpreting the outcome. No old parent repair or full-matrix/24-hour qualification follows from a focused success.
+
+## Focused diagnostic dispatched
+
+[Run37194088941](https://github.com/AntPAllen/js-wf/actions/runs/37194088941) executes source `520316e04bb3b7174fd013817d375f5f6135a44a` with the exact settings above. Source/API/dispatch observations are retained in `seed15-launch/`. Terminal raw/original review remains pending; dispatch does not qualify the diagnostic or historical parent.

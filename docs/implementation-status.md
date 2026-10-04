@@ -35,7 +35,9 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
   retained backend proof. A real NATS replied-then-unanswered contract passes
   under race1.252s, preserving deadline cause; five planner guards pass. Default
   fixture/provisioning/deadline and production/Tier1 code are unchanged. Focused
-  actual seed15 diagnostic still required; no cause/fix/native qualification claim.
+  seed15 diagnostic dispatched as37194088941 at520316e, with ten-minute duration,
+  original SIGKILL/Start-gap and API trace enabled. Terminal review remains pending;
+  no cause/fix/native qualification claim.
   [Trace scope and validation](scale/rolling-upgrade-fallback-failure-2026-10-04/api-trace/).
 
 - **New rolling-upgrade failure preserved:** source799 shard14–26 fails atseed15,
