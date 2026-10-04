@@ -1525,3 +1525,20 @@ qualifies this executed-source row, alongside journal200, not the final-source
 full13-row matrix, Tier3 matrix, original million-timer physical drain or actual
 24-hour full-matrix soak. Native SDK/stores were not uploaded; final integrity/
 drain assertions retain named-test scope, without independent store reopening.
+
+
+### Tier2 all-server-kill shards accepted
+
+Two completed shards independently qualify seeds1–24 atc4fed06:56056 invocations,
+617750 entries,456 events recording every node killed before restart, and all
+three models for72130 operations with45 Git-matched dependencies. Original ZIP,
+raw evidence, actual model executables and complete SHA-verified proof archives
+are retained. Worst terminal/progress p99:18.295491603/12.629939729s under the
+original distributed-verification30s fault gates, measured from enabling events.
+Journal/consumer progress below10s also satisfies a stronger observed bound;
+the original full-matrix fault progress requirement is30s. Native SDK/stores
+were not uploaded; final integrity/drain assertions retain named-test scope.
+[Seeds1–12](scale/current-tier2-matrix-2026-10-04/cluster-1-12/) and
+[Seeds13–24](scale/current-tier2-matrix-2026-10-04/cluster-13-24/)
+qualify those ranges only; complete cluster200/current-source matrices and
+actual24h remain open. Five reviewer identity/substitution guards pass.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Review a complete Tier2 journal or consumer leader shard using raw faults, latency and history.
+"""Review a complete Tier2 leader or all-server-kill shard using raw faults, latency and history.
 
 Only the requested consecutive seeds of the selected row qualify. The parent campaign,
 200-seed row, full matrix and 24h soak are never promoted by this command.
@@ -17,15 +17,34 @@ REPO = Path(__file__).resolve().parents[1]
 ROWS = {
     'journal': ('journal_leader', 'TestMixedMatrixJournalLeaderEveryThirtySeconds'),
     'consumer': ('consumer_leader', 'TestMixedMatrixConsumerLeaderEveryThirtySeconds'),
+    'cluster': ('all_servers', 'TestMixedMatrixAllServersKilledEveryThirtySeconds'),
 }
 
 def row_contract(row):
     if row not in ROWS:
-        raise ValueError('unsupported leader row')
+        raise ValueError('unsupported Tier2 row')
     return ROWS[row]
 
 def read(path):
     return json.loads(path.read_text())
+
+def check_fault_identity(fault, row):
+    if type(fault.get('node')) is not int:
+        raise ValueError('fault node must be an integer')
+    if row == 'cluster':
+        nodes = fault.get('nodes')
+        if (fault['node'] != -1 or not isinstance(nodes, list)
+                or any(type(node) is not int for node in nodes) or nodes != [0, 1, 2]):
+            raise ValueError('all-server fault must record every node before restart')
+    elif not 0 <= fault['node'] < 3:
+        raise ValueError('leader fault lacks a valid node')
+    if row == 'consumer':
+        consumer = fault.get('consumer', '')
+        if (not isinstance(consumer, str) or not re.fullmatch(r'WF_P_[0-9]{2}', consumer)
+                or not 0 <= int(consumer[-2:]) < 64
+                or any(type(fault.get(k, 0)) is not int or fault.get(k, 0) < 0
+                       for k in ('pending', 'ack_pending'))):
+            raise ValueError('consumer fault lacks valid durable identity or pending counts')
 
 def module(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -139,15 +158,9 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
             previous = None
             for fault in faults:
                 scheduled, killed, healed = map(clock.timestamp_ns, [fault[k] for k in ('scheduled', 'killed', 'healed')])
-                if not (scheduled <= killed <= healed and type(fault['node']) is int and (0 <= fault['node'] < 3) and (not fault.get('error'))):
-                    raise ValueError("raw evidence check failed: scheduled <= killed <= healed and type(fault['node']) is int and (0 <= fault['node'] < 3) and (not fault.get('error'))")
-                if row == 'consumer':
-                    consumer = fault.get('consumer', '')
-                    if (not isinstance(consumer, str) or not re.fullmatch(r'WF_P_[0-9]{2}', consumer)
-                            or not 0 <= int(consumer[-2:]) < 64
-                            or any(type(fault.get(k, 0)) is not int or fault.get(k, 0) < 0
-                                   for k in ('pending', 'ack_pending'))):
-                        raise ValueError('consumer fault lacks valid durable identity or pending counts')
+                if not (scheduled <= killed <= healed and not fault.get('error')):
+                    raise ValueError('invalid fault timing or recorded fault error')
+                check_fault_identity(fault, row)
                 if previous is not None:
                     if not scheduled - previous == 30000000000:
                         raise ValueError('raw evidence check failed: scheduled - previous == 30000000000')

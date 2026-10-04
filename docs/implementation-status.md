@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source; all-server-kill seeds 1–24 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -32,6 +32,21 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
+
+- **All-server-kill1–24 independently accepted:** two complete600-second
+  shards atc4fed06 qualify56056 invocations /617750 entries /456 three-node
+  kill/restart events. Raw identities require node-1 and exact nodes[0,1,2];
+  30-second cadence, fault timestamps, enabling-to-observed quantiles and
+  five-minute final-heal completion check pass. All three exact models qualify
+  72130 operations,45 actual dependencies match Git, actual models and complete
+  raw proofs retained. Worst terminal/progress type p99:18.295491603/12.629939729s
+  under original distributed-verification30s fault gates. The previously reported
+  journal/consumer progress below10s is a stronger observed result; the original
+  full-matrix fault progress gate is30s. No native SDK/stores uploaded; final
+  integrity/drain have named-test scope. Cluster200/current-main/13×200/16×200
+  and actual24h remain open. Reviewer identity/substitution guards:five pass.
+  [Seeds1–12 proof](scale/current-tier2-matrix-2026-10-04/cluster-1-12/),
+  [Seeds13–24 proof](scale/current-tier2-matrix-2026-10-04/cluster-13-24/).
 
 - **Complete Tier2 consumer-leader200 independently accepted:** all17 successful
   shards atc4fed06 cover1–200 exactly once. Complete archive parts/member hashes,

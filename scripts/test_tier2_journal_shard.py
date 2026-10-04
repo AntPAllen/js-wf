@@ -55,7 +55,26 @@ class JournalShardTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             shard.bind(run, job, artifact, log.replace('row=consumer', 'row=journal'), 1, 2, 'consumer')
         with self.assertRaises(ValueError):
-            shard.bind(run, job, artifact, log, 1, 2, 'cluster')
+            shard.bind(run, job, artifact, log, 1, 2, 'partition')
+
+    def test_cluster_binding_and_complete_node_identity(self):
+        run, job, artifact, log = fixture()
+        job['name'] = 'leader (cluster, 1-2)'
+        artifact['name'] = 'matrix-cluster-1-2-10m'
+        log = log.replace('row=journal', 'row=cluster')
+        self.assertEqual(shard.bind(run, job, artifact, log, 1, 2, 'cluster'), 'a'*40)
+        for substituted in ('journal', 'consumer'):
+            with self.assertRaises(ValueError):
+                shard.bind(run, job, artifact, log, 1, 2, substituted)
+        shard.check_fault_identity(dict(node=-1, nodes=[0, 1, 2]), 'cluster')
+        for fault in (dict(node=0, nodes=[0, 1, 2]), dict(node=-1),
+                      dict(node=-1, nodes=[0, 1]), dict(node=-1, nodes=[0, 1, 1]),
+                      dict(node=-1, nodes=[0, True, 2]), dict(node=-1, nodes=[2, 1, 0]),
+                      dict(node=True, nodes=[0, 1, 2])):
+            with self.subTest(fault=fault), self.assertRaises(ValueError):
+                shard.check_fault_identity(fault, 'cluster')
+        with self.assertRaises(ValueError):
+            shard.check_fault_identity(dict(node=-1, nodes=[0, 1, 2]), 'journal')
 
     def test_metadata_without_all_raw_inputs_cannot_qualify(self):
         run, job, artifact, log = fixture()
