@@ -10,11 +10,11 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–108 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–120 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Worker-clock 135 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
-| Original 24-hour soak | Not run/qualified. Full-matrix soak and required retained-original audits remain. |
+| Original 24-hour soak | Actual journal-leader row running at pinned20babb5; none qualified yet. Other rows/full matrix and retained-original audits remain. |
 
 Requested adjustments are in place: Tier1 simulation is implemented; R5 route
 recovery p99 measures from confirmed healing; the historical 31.1 s / TTL 30 s worker
@@ -29,6 +29,23 @@ and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Actual24h journal-leader row started:** persistent user service executes
+  pinned20babb5/seed1/race/24h from an isolated checkout, actual retained SDK,
+  five containers and unchanged fault/audit/latency gates. Supervisor15697 and
+  launcher16037 are live; named test has started.44GiB free at launch permits
+  measuring actual growth; earlier13.35GB/day estimate is not a guarantee.
+  No terminal outcome or24h qualification. Other rows/full matrix remain required.
+  [Pinned launch and live process identity](scale/local-r5-soak-24h-2026-10-04/journal-launch/).
+
+- **Consumer-leader109–120 independently accepted:** twelve complete600s seeds
+  atc4fed06 qualify31220 invocations /344125 entries /228 kills /40186 operations
+  passing all three models. Worst terminal/progress per-type p99
+  17.360381424/7.076255991s passes unchanged R3 gates30/10s.
+  All45 model dependencies match source; actual model and raw proof retained.
+  Contiguous1–120:313236 invocations /3452573 entries /2280 kills /403103
+  history operations. Original SDK/stores not uploaded; current-source full gates
+  remain open. [Complete proof](scale/current-tier2-matrix-2026-10-04/consumer-109-120/).
 
 - **Consumer-leader97–108 independently accepted:** twelve complete600s seeds
   atc4fed06 qualify31360 invocations /345633 entries /228 kills and all three

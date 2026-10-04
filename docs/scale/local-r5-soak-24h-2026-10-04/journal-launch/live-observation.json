@@ -1,0 +1,39 @@
+{
+  "observed_at": "2026-10-04T13:45:21.768958+00:00",
+  "boot_id": "093cf11f-248b-479e-baea-940494f5ed86",
+  "processes": {
+    "15697": {
+      "start_ticks": "161531",
+      "argv": [
+        "/usr/bin/python3",
+        "/home/exedev/js-wf/scripts/run-tier3-soak.py",
+        "--root",
+        "/tmp/js-wf-soak-journal-24h-20261004",
+        "--row",
+        "journal",
+        "--duration",
+        "24h",
+        "--seed",
+        "1"
+      ]
+    },
+    "16037": {
+      "start_ticks": "163967",
+      "argv": [
+        "go",
+        "tool",
+        "test2json",
+        "-t",
+        "-p",
+        "js-wf/integration",
+        "/tmp/js-wf-soak-journal-24h-20261004/integration.test",
+        "-test.run=^TestFiveContainerMixedJournalLeaderEveryThirtySeconds$",
+        "-test.v=test2json",
+        "-test.count=1",
+        "-test.timeout=24h20m"
+      ]
+    }
+  },
+  "free_disk_bytes": 45638537216,
+  "scope": "Live launch snapshot only; no terminal outcome or archival qualification."
+}
