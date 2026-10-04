@@ -1,5 +1,26 @@
 # Implementation status against the supplied plan
 
+- **Clock seeds 92–104 independently accepted at exact `79915ca`:** all thirteen
+  ten-minute seeds pass raw/source/clock review and all three production history
+  models: 37,996 invocations, 420,849 entries, 247 faults and 48,852 operations.
+  All 759 selected source inputs, 273 clock proofs, 1,365 broker messages and 130
+  completed-cohort audits verify. Recorded workload executable hashes match actual
+  retained provider bytes; SDK sources are explicitly reconstructed. Actual
+  workload/model executables and complete raw/model evidence are preserved.
+  New physical stores are referenced only, not downloaded, hashed or reopened.
+  Combined 65 accepted seeds (27–52 and 66–104) total 195,076 invocations,
+  2,162,000 entries, 1,235 faults and 250,812 history operations. Worst p99 remains
+  5.254787923/0.80936262 s. Failed parent, missing ranges and full gates remain open.
+  [Exact raw/model proof and scope](scale/current-tier3-clock-2026-10-04/worker-clock-92-104/).
+
+- **Accepted clock 79–91 duplicate RAM expansion recovered:** at pushed `4e0c214`,
+  all 1,313 expanded files, canonical archive and committed parts SHA-verify with
+  no open descriptors. Removing only duplicate raw files recovers 555,134,976
+  exclusive allocated bytes; 175,476,736 shared executable bytes remain retained.
+  Complete canonical/Git proofs, actual model executable and provider assets remain.
+  Failed originals and qualification are unchanged; restore raw files before review.
+  [Exact checks and executed script](scale/current-tier3-clock-2026-10-04/worker-clock-79-91/duplicate-removal.json).
+
 - **Clock seeds79–91 independently accepted at exact `79915ca`:** thirteen ten-minute
   seeds pass raw/source/clock review and all three production history models:
   40,012 invocations,443,742 entries,247 faults and51,444 history operations.

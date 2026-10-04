@@ -970,6 +970,15 @@ proof. New stores are reference-only, not downloaded/verified/reopened.
 extends accepted coverage to52 seeds (27–52 and66–91),157,080 invocations,
 1,741,151 entries,988 faults and201,960 history operations; the failed parent,
 missing ranges, full row/matrix and actual24h gate remain open.
+Complete shard 92–104 at the same executed source qualifies with 37,996 invocations,
+420,849 entries, 247 faults and 48,852 independent history operations. All 759
+selected source inputs, 273 clock proofs, 1,365 broker messages and 130 cohort
+audits verify. Actual provider-matched workload and model executables are retained;
+new physical stores remain reference-only, not downloaded, hashed or reopened.
+[Complete raw/model proof](scale/current-tier3-clock-2026-10-04/worker-clock-92-104/)
+extends accepted clock coverage to 65 seeds (27–52 and 66–104), 195,076 invocations,
+2,162,000 entries, 1,235 faults and 250,812 history operations. The failed parent,
+missing ranges, complete row/matrix and original 24-hour gate remain open.
 
 
 
