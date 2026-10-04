@@ -2,14 +2,28 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Original Phase3 200/50/6 repeated-worker-fault cohort qualified:** actual
+  subprocess run at exact `24cf857` completes all200 counters at50 in141.438603 s,
+  under5min. Seventy consecutive2 s faults comprise58 confirmed kills, six
+  confirmed45 s pauses and six45 s proxy cuts;59 target active workers. All200
+  raw journals/20,400 entries verify indices, pairs, hashes and59 epoch changes
+  without interleaving. All200 independent production SDK replays pass with29
+  source-identical actual dependencies. Actual executables, selected3,849
+  pre/post sources (562 Git-exact local), complete process evidence/journals and
+  all387 original store files are preserved; every4,847 archive member verifies.
+  Timestamp/hermetic limits and non-reopened store scope are explicit. This
+  qualifies the original cohort only; full Phase3, mixed matrices and24h remain
+  open, with existing gates continuing without restart.
+  [Full cohort, independent replay and complete original preservation](scale/phase3-repeated-worker-faults-2026-10-04/full-cohort/).
+
 - **Original Phase3 200/50/6 two-second worker-fault profile prepared:** actual
   worker processes can be repeatedly SIGKILLed/replaced, SIGSTOPed45 s or
   proxy-isolated45 s while fault choices continue every2 s. Five-minute cohort
   completion, all50 step pairs, offline replay and raw epoch integrity remain
   strict. Separate cleanup budget accounts for final holds; active targets,
   confirmed paused ownership, child exits and original artifacts are checked.
-  Compilation/disabled invocation is not qualification; actual full run and
-  independent retained-original review are required. Runtime/simulator source
+  Compilation/disabled invocation alone is not qualification; the subsequent
+  full run and independent retained-original review are accepted above. Runtime/simulator source
   is unchanged and existing full gates continue.
   [Prepared exact cohort and explicit acceptance boundary](scale/phase3-repeated-worker-faults-2026-10-04/).
 
