@@ -1,0 +1,7 @@
+# Additional committed proof working files omitted locally
+
+At pushed `aa5e86a`, root free space was only 246 MiB. The exact executed verifier SHA256-checked **28 materialized archive files** of at least 16 MiB against their streamed committed Git blobs, confirmed no open descriptors, and added only their exact paths to this worktree's existing non-cone sparse exclusions. It recovered **683,163,648 allocated bytes**. All **776 tracked Go/Python/YAML/module inputs** remain materialized and byte-identical before/after. HEAD and clean tracked status were unchanged.
+
+The complete archive bytes remain in local Git objects and pushed main. Original failed stores outside Git, workload/model executables, source and qualification scope are unchanged. No tests are rerun for this mechanical local omission of verified documentation archives. `recovery.json`, both source ledgers, exact before/after sparse patterns and `verify-and-omit.py` retain every check and selected path. This is the executed one-time recovery, not a general cleanup tool.
+
+Combined with the previous 55 omissions, 83 archives are now absent only from this local working copy, recovering about 2.45 GiB in total. To use one, stream `git show HEAD:<recorded-path>` into a separate location and verify its ledger hash. Restoring the complete checkout with `git sparse-checkout disable` needs room for all omitted working files. This creates review space; it does not provide capacity for the original 24-hour full-matrix soak.

@@ -47,3 +47,7 @@ git sparse-checkout disable
 This rematerializes the original committed files. It does not require fetching
 or rewriting broker data. Future reviews requiring a recorded archive path
 must restore that input first; an absent working file is not lost evidence.
+
+## Subsequent archive additions
+
+[The additional recovery](extension/) omits 28 newly committed archive working files after exact blob verification, recovering another 683,163,648 allocated bytes. All 776 current tracked source inputs remain unchanged. The complete checkout now requires room to restore all 83 omitted archives (about 2.45 GiB total), rather than only the original 55. All archive bytes remain retained in local/pushed Git.

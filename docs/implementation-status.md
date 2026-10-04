@@ -2,6 +2,25 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **New pressure failure separated from modeled worker recovery:** terminal job
+  111362365148 at `f149b87` fails26.98 s after one delayed baseline owner receives
+  pre-publication tail API503/10008 after six renewals. Consumer/probe load has
+  not begun; later current-peer snapshots do not establish the earlier cause.
+  Complete raw upload/terminal logs and exact Git source selections are retained;
+  failed executable/stores/producer captures were not uploaded. Already accepted
+  Tier1 race evidence independently binds all1–1000 seeds and12 stage/error-count
+  combinations of actual Worker recovery to the same685 runtime/simulator inputs.
+  No duplicate trial, speculative fix or failed-comparison promotion is made.
+  [Complete failure and source-identical modeled recovery boundary](scale/lease-consumer-pressure-failure-2026-10-04/).
+
+- **Additional local archive working files omitted after blob verification:**
+  28 new committed archives recover683,163,648 allocated root bytes. All776
+  tracked source inputs remain materialized and identical; every archive remains
+  in local/pushed Git. Exact sparse patterns/ledgers and executed script are
+  retained. Original failed stores and qualification remain unchanged. Root free
+  space is about896 MiB; original full24h soak capacity is still insufficient.
+  [Reversible exact-path omission and complete archive availability](scale/local-proof-sparse-checkout-2026-10-04/extension/).
+
 - **Clock seeds 66–78 independently accepted at exact `79915ca`:** all thirteen
   ten-minute seeds pass raw/source/clock review and three source-identical
   production models: 39,984 invocations, 443,511 entries, 247 faults and 51,408

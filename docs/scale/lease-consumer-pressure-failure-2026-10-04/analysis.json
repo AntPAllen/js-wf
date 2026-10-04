@@ -1,0 +1,105 @@
+{
+  "run": 37177259306,
+  "job": 111362365148,
+  "source": "f149b873b349f6def63b50a29d79abb1c142739f",
+  "artifact": 11293764137,
+  "artifact_zip_bytes": 38045,
+  "named_test_seconds": "26.98s",
+  "package_seconds": 26.992,
+  "report_rows": 4,
+  "successful_rows": 3,
+  "failed_row_delayed": true,
+  "failed_row_consumer_traffic": false,
+  "failed_row_contenders": false,
+  "failed_owner": {
+    "id": "dtrue-atrue-w8-2",
+    "calls": 6,
+    "renew_ns": 1190974228,
+    "append_ns": 740670341,
+    "max_renew_ns": 411981995,
+    "epoch": 1233,
+    "revision_before": 1234,
+    "revision_after": 0,
+    "gate_ns": 31749,
+    "update_ns": 1190667678,
+    "error": "append: journal append outcome unknown: tail lookup: nats: API error: code=503 err_code=10008 description=JetStream system temporarily unavailable"
+  },
+  "other_seven_owners_calls": 48,
+  "later_monitoring": {
+    "0": {
+      "WF_JRN": {
+        "leader": "wf-process-1",
+        "surviving_peer_current": true,
+        "messages": 1494
+      },
+      "KV_WF_LEASE": {
+        "leader": "wf-process-0",
+        "surviving_peer_current": true,
+        "messages": 33
+      },
+      "KV_WF_STATE": {
+        "leader": "wf-process-0",
+        "surviving_peer_current": true,
+        "messages": 0
+      }
+    },
+    "1": {
+      "WF_JRN": {
+        "leader": "wf-process-1",
+        "surviving_peer_current": true,
+        "messages": 1494
+      },
+      "KV_WF_LEASE": {
+        "leader": "wf-process-0",
+        "surviving_peer_current": true,
+        "messages": 33
+      },
+      "KV_WF_STATE": {
+        "leader": "wf-process-0",
+        "surviving_peer_current": true,
+        "messages": 0
+      }
+    }
+  },
+  "stopped_node": {
+    "captured_at": "2026-10-04T04:45:40.387736928Z",
+    "diagnostic_error": "Get \"http://127.0.0.1:38897/jsz?accounts=true&streams=true&consumers=true&raft=true\": dial tcp 127.0.0.1:38897: connect: connection refused",
+    "node": 2
+  },
+  "server_cause_confirmed": false,
+  "physical_stores_retained": false,
+  "failed_workload_executable_retained": false,
+  "producer_source_capture_available": false,
+  "selected_git_source_sha256": {
+    "integration/lease_append_pressure_test.go": "de5fa6fb2419e093a0e3e15f1d19d56e24012a405adefb18110fbe96a90b50af",
+    "journal/journal.go": "4dc8ea95f582294040b676ff225a6d6ff7c981e69c3596b945a454a55a7ff028",
+    "worker/worker.go": "dc5c7a8f5da80f9d7004a43c86487c48a67ee437ab1b68c98ec3ab06a29b7019",
+    "sim/worker_tail_lookup_replay_test.go": "e7fd11bcc6b93aec419768044d547064e2c13362387d5903abe9203b808e58f8",
+    ".github/workflows/tier2-mixed.yml": "b2379effdec63fba92aa03d5d32b27b89f9891c6486332a21d717dfdc04d6d13"
+  },
+  "accepted_race_run": 37172701931,
+  "accepted_race_job": 111348770188,
+  "accepted_race_source": "283ba325c31fe67194f0a0d7e11665b0bea405ed",
+  "accepted_race_binary_sha256": "86c87adc0a3955ca45724300bd25b4d6400c7f5ba0873a2502b88570e779d023",
+  "accepted_race_proof": "docs/scale/snapshot-timeout-cause-2026-10-04/hosted-race/",
+  "accepted_workload": "TestSeededWorkerTailLookupRecovery",
+  "accepted_workload_contiguous_seeds": 1000,
+  "accepted_stage_count_coverage": {
+    "completed/1": 84,
+    "completed/2": 87,
+    "completed/3": 73,
+    "requested/1": 95,
+    "requested/2": 89,
+    "requested/3": 87,
+    "started/1": 91,
+    "started/2": 78,
+    "started/3": 69,
+    "terminal/1": 87,
+    "terminal/2": 88,
+    "terminal/3": 72
+  },
+  "runtime_simulator_selected_inputs_match": 685,
+  "qualification_promoted": false,
+  "new_test_or_campaign_started": false,
+  "scope": "Rejected steady-pressure measurement. The harness exits on ErrUnknown; existing source-identical simulation exercises actual Worker redelivery, preserved prefixes, released leases and final retained integrity after injected API errors. This does not reproduce the server cause or qualify this failed pressure comparison."
+}
