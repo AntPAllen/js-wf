@@ -1,4 +1,4 @@
-# Current-source Tier2 journal seeds 49–96
+# Executed-source Tier2 journal seeds 49–144
 
 Run **37149506857**, exact source
 `c4fed061bc614488d4f89b53b216b756490f7da0`, continues the unchanged 13-row ×
@@ -100,3 +100,17 @@ c4fed06 revision. Accepted seeds 1–144 now total **378,616 invocations,
 4,171,237 journal entries and 2,736 leader kills**; worst terminal/progress
 p99 remains **17.457496447/8.533582526 s**. Other producer successes await review;
 current-main full qualification, full matrices and actual 24-hour soak remain open.
+
+## Verified recovery of accepted shards 109–144
+
+After each independent proof push is confirmed, the exact
+`executed-shard-recovery.py` rechecks all 72 original files per shard, compressed
+canonical archive, every committed Git archive part and concatenated complete
+proof SHA256. No open input descriptors are found before removing only that
+shard's expanded RAM artifact directory. The three `duplicate-removal.json`
+reports record **2,033,614,848 allocated bytes** recovered from 216 raw files;
+compressed local archives and full pushed proof parts remain. Failed evidence is
+unchanged. Restore raw inputs from the preserved canonical proofs before offline
+review. The script is the exact executed audit, restricted to these three ranges;
+it is not a general cleanup tool and its now-removed paths reject an immediate
+rerun. All recovery byte counts are independent of qualification scope.

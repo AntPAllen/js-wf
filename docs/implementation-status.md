@@ -2,6 +2,16 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Journal 109–144 complete proofs pushed; duplicate RAM expansions recovered:**
+  each accepted shard's original 72 files, canonical archive and committed Git
+  parts reverify after its push; no open descriptors. Removing only those three
+  expansions recovers 2,033,614,848 allocated bytes. Complete compressed local/
+  Git proofs remain and failed originals are unchanged. Restore inputs before
+  repeating review. Full Tier1 jobs 111348766626/111348770188 and subsequent
+  journal jobs 111287264409/111287264430 remain confirmed in_progress; no parent
+  or full gate is promoted from those states.
+  [Exact recovery scripts, three reports and preserved raw proofs](scale/current-tier2-matrix-2026-10-04/).
+
 - **Accepted duplicate expansions recovered:** all 72 journal 97–108 raw files
   and 3,963 clock seed-6 restoration members, compressed originals and committed
   Git parts reverify after their proof push; no open descriptors. Only the two

@@ -7,3 +7,10 @@ The reviewer explicitly builds from the clean source-isolated c4fed06 checkout; 
 `manifest.json` verifies all 201 proof members, complete archive SHA256 and concatenated 25 MiB parts. All 72 original raw files, API/logs, independent model outputs, exact reviewer/helper sources, 45 model dependencies and executed preservation script are retained. Reassemble sorted `proof.tar.gz.part-*` outside the repository and verify the concatenated SHA256 before extracting; raw inputs are under `artifact/`.
 
 The temporary model executable hash is recorded, but the executable is not retained. Actual workload executables, compiled-source ledgers and physical broker stores were not uploaded; final integrity/drain assertions retain their named-test scope. No independent store reopening is claimed. This qualifies only the complete requested journal shard at its executed revision, not current-main full qualification, the full 200-seed row, either full matrix or actual 24-hour soak.
+
+After the proof push is independently confirmed, the expanded accepted RAM raw
+files are rehashed against the retained inventory, canonical archive and every
+committed Git archive part. No open descriptors are found. Only this duplicate
+expansion is then removed; `duplicate-removal.json` records exact checks and
+bytes. Complete compressed local/Git originals remain. Restore raw inputs before
+repeating review; failed evidence is unchanged.
