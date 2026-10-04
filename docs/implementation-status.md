@@ -41,13 +41,14 @@ retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate
   entries /1,976 faults /407,304 history operations. Failed parent and full gates
   stay open. [Complete proof](scale/current-tier3-clock-2026-10-04/worker-clock-157-169/).
 
-- **Continuation/promise failure diagnostics prepared:** optional retained artifact
-  parent preserves original stores/logs/markers and records exact pre-kill
-  journal/checkpoint read timing/error classifications after cleanup. Integration
-  package compiles; disabled profile0.035s is not a native cut qualification.
-  No runtime fix or timeout relaxation is claimed; focused after-manifest run
-  and independent actual-executable/source/store review remain required.
-  [Preparation and exact diagnostic scope](scale/continuation-promise-retained-diagnostic-2026-10-04/).
+- **Continuation/promise after-manifest diagnostic independently accepted:** only
+  this cut ran at `7796c7c`, passing in18.56s with actual worker SIGKILL/all-three
+  server restart. Kill recovery12.657790989s; pre-kill journal/checkpoint reads
+  46.217022/2.565629ms without errors. Actual SDK/NATS executables, all3,849
+  selected inputs (562 Git-local),427 original files and complete events/commands
+  are retained in4,294 SHA-verified members. Historical failure was not reproduced;
+  cause remains unconfirmed. Other seven cuts/full matrix/24h stay open.
+  [Exact focused proof](scale/continuation-promise-retained-diagnostic-2026-10-04/after-manifest/).
 
 - **Tier3 worker-clock144–156 independently qualified:**41,272 invocations,
   457,464 entries,247 faults and53,064 operations passing all three models;

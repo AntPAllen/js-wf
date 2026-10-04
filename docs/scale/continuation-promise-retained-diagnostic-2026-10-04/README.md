@@ -15,3 +15,7 @@ go test ./integration \
 ```
 
 For actual proof capture, compile once to a retained executable first and use `go tool test2json` with the same subtest pattern; the simple command above does not itself preserve a Go temporary executable or source provenance. Do not infer an original missing/corrupt snapshot or NATS bug from a deadline alone. The JSON report captures stopped-state originals; it does not independently reopen stores or prove their state at the earlier failed lookup.
+
+## Focused diagnostic accepted
+
+The actual `after_manifest` cut now passes with independently reviewed retained executable/source/original evidence: [complete proof](after-manifest/). The preparation described above remains historical; the other seven cuts and full current-source combined gate remain open. Original failure cause remains unconfirmed.
