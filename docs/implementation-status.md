@@ -2,6 +2,21 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Focused primary clock-error diagnostic queued:** run 37170797762 requests
+  seed 6 for ten minutes at exact `19f3cb3`; API confirms that head and queued
+  planner 111343180483. This seeks publish-versus-read evidence with unchanged
+  gates, not a replacement full matrix. Startup consumer creation overlaps clock
+  probes; its role in the original timeout remains a hypothesis. No execution
+  or qualification is claimed from dispatch. Other live campaigns continue.
+  [Exact command/source/API](scale/worker-clock-checkpoint-2026-10-04/process-exit-diagnostic-dispatch/).
+- **Accepted clock restoration duplicate recovered:** 3,963 canonical/restored
+  members and the committed compact proof Git blob reverify; no open input file
+  descriptors. Removing only the accepted RAM restoration recovers 360,767,488
+  allocated bytes. Original tar, GitHub artifact, raw upload and committed proof
+  remain; failed originals and qualification are unchanged. Root disk remains
+  35 GiB with about 304 MiB free, insufficient for the required full 24-hour soak.
+  [Executed verifier and verdict](scale/worker-clock-checkpoint-2026-10-04/accepted-seed-15/).
+
 - **Worker-clock primary exit failure exposed:** the complete failed seed-6
   raw upload shows all five children exit on a two-second clock-proof timeout
   after 4.67–5.21 s, before the parent's 30-second stale-sample check. All

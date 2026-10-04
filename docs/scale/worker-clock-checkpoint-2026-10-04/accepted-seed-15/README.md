@@ -59,3 +59,16 @@ local disk is constrained. That tar remains unchanged under
 whose recorded expiry is **2027-01-02T01:06:05Z**. The RAM copy cannot survive
 VM reboot. Restore the original GitHub artifact and verify the recorded digest
 and complete producer manifest before further physical-store analysis.
+
+## Accepted restoration duplicate recovery
+
+After the accepted proof was pushed at `19f3cb3`, all **3,963** canonical tar
+members and expanded restoration files were rehashed, the committed compact
+proof Git blob was read back and verified, and no process held an input file
+open. Only the accepted RAM `restored/` directory was removed, recovering
+**360,767,488 allocated bytes** (345,995,309 raw bytes). The original canonical
+108,320,313-byte tar, full producer manifest, GitHub artifact, raw upload and
+committed proofs remain unchanged; failed originals are untouched. Exact
+executed verifier and verdict are retained alongside this README. Restore from
+the canonical tar before any future review requiring that expanded directory.
+This creates no new qualification and does not reopen broker stores.
