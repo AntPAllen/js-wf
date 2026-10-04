@@ -33,6 +33,15 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **First full legacy control failed on new test expectation:** exact9c46e34,
+  actual three2.11.17 processes and all audit modes agree through compaction/
+  cohort/corruption controls, then agree on orphan error "has no invocation".
+  New test incorrectly expected "journal without invocation". Named test remains
+  failed; actual SDK/servers,2896 selected inputs/66 Git files and complete
+  originals independently verified and preserved. Exact original error expectation
+  corrected; fresh retained execution required before compatibility acceptance.
+  [Complete failed original](scale/retained-audit-streaming-2026-10-04/legacy-full-failed/).
+
 - **Full legacy combined-audit controls prepared:** three actual NATS2.11.17
   processes, connected versions and live executable digests required. Original,
   batch/state/streaming reports and exact errors compared through compaction,

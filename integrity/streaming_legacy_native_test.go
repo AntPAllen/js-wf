@@ -148,6 +148,6 @@ func TestStreamingAuditNativeLegacy211(t *testing.T) {
 		t.Fatal(err)
 	}
 	compareFullAudits(t, ctx, js, &cutoff, want, "")
-	compareFullAudits(t, ctx, js, nil, Report{}, "journal without invocation")
+	compareFullAudits(t, ctx, js, nil, Report{}, "journal wf.jrn.audit.legacy-orphan has no invocation")
 	t.Log("legacy-full-audit version=2.11.17 replicas=3 compaction/cohort/fresh-terminal/tombstone/snapshot-corruption/orphan/public-apis matched")
 }
