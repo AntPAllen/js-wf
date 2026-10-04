@@ -52,7 +52,10 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 - **Disposable Go cache cleared for capacity:** dedicated804MiB Go build cache
   removed with go clean after all local builds/tests/review processes finished.
   Retained actual binaries, captured source/input bytes and original stores are
-  separate and preserved. Future builds regenerate compiler outputs.
+  separate and preserved. Future builds regenerate compiler outputs. Repository
+  gc.auto is disabled locally to avoid future unplanned repacks on this nearly
+  full disk; the already-started incremental Git maintenance is observed, not
+  confused with a runtime qualification process.
 
 - **Combined-rebalance third trial rejected; startup caller contract corrected:**
   retained race SDK atf2acad6 fails24.04s on a majority replacement's bounded
