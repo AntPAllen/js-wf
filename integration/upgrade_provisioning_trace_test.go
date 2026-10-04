@@ -111,3 +111,56 @@ func TestFiveUpgradeProvisioningTraceRetainsUnansweredRequest(t *testing.T) {
 		t.Fatal("response bytes absent")
 	}
 }
+
+func TestFiveUpgradeNativeTraceRetainsUnansweredRequest(t *testing.T) {
+	s, err := server.NewServer(&server.Options{Host: "127.0.0.1", Port: -1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	go s.Start()
+	if !s.ReadyForConnections(2 * time.Second) {
+		t.Fatal("server not ready")
+	}
+	t.Cleanup(func() { s.Shutdown(); s.WaitForShutdown() })
+	nc, err := nats.Connect(s.ClientURL())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(nc.Close)
+	requests := 0
+	_, err = nc.Subscribe("$JS.API.STREAM.INFO.WF_INV", func(msg *nats.Msg) {
+		requests++
+		if requests == 1 {
+			_ = msg.Respond([]byte(`{"type":"io.nats.jetstream.api.v1.stream_info_response","config":{"name":"WF_INV"},"state":{}}`))
+		}
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := nc.Flush(); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("WF_TIER3_UPGRADE_API_TRACE", "1")
+	js, err := jetstream.New(nc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, stop := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer stop()
+	check, err := checkFiveUpgradeNativeProvisioning(ctx, nc.ConnectedServerVersion(), js)
+	if !errors.Is(err, context.DeadlineExceeded) || check.Error != context.DeadlineExceeded.Error() {
+		t.Fatalf("cause changed: check=%+v err=%v", check, err)
+	}
+	events := check.API
+	if len(events) != 3 || events[0].Direction != "request" || events[1].Direction != "response" || events[2].Direction != "request" {
+		t.Fatalf("request/response boundary=%+v", events)
+	}
+	for index, event := range events {
+		if event.Subject != "$JS.API.STREAM.INFO.WF_INV" || event.At.IsZero() || event.ElapsedNS < 0 || (index > 0 && event.ElapsedNS < events[index-1].ElapsedNS) {
+			t.Fatalf("invalid event=%+v", event)
+		}
+	}
+	if len(events[1].Payload) == 0 {
+		t.Fatal("response bytes absent")
+	}
+}

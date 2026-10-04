@@ -30,6 +30,19 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Upgrade seed41 native timeout preserved; opt-in coverage extended:** job
+  111324440230 at79915ca fails fault5 during peer-native-rejections, before any
+  fallback call. Node0 reports2.15.0; native lookup returns original deadline
+  cause after59.68s despite earlier five-peer health200. Exact request/cause is
+  unconfirmed. All759 source inputs and7795 original members verify;945-member
+  /82,758,766-byte proof retains raw/log/source/actual NATS/original stores.
+  SDK executable not uploaded; originals not reopened. Native check API trace
+  now joins fallback trace under the same opt-in flag, with unchanged contexts,
+  deadlines and rejection rules. Both real request/reply contracts plus native
+  semantic/deadline controls pass race3.696s. No core/Tier1 producer change.
+  [Failed evidence](scale/rolling-upgrade-fallback-failure-2026-10-04/seed41/)
+  / [trace scope](scale/rolling-upgrade-fallback-failure-2026-10-04/api-trace/).
+
 - **Consumer-leader73–84 accepted:** twelve full600s seeds atc4fed06;
   32032 invocations /353142 journal entries /228 kills, all three models
   /41208 operations. Worst terminal/progress p99 is16.00806024/7.05545813s,

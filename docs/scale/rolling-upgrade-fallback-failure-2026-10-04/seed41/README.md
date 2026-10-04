@@ -1,0 +1,11 @@
+# Rolling-upgrade seed41: native check deadline failure
+
+[Run37164231641](https://github.com/AntPAllen/js-wf/actions/runs/37164231641), job111324440230 /rolling_upgrade40–52, executes `79915ca41a5c5a23b9997eea5f3f66d82530ee30`. Seed40 has a producer pass but is not independently qualified. Seed41 fails at fault5;42–52 do not run. Full raw artifact11300382644 /1,886,183 ZIP bytes and original artifact11300228412 /79,794,887 ZIP bytes were downloaded.
+
+The version4 after-upgrade proof stops in `peer-native-rejections`. Node0, reporting2.15.0, begins production native provisioning at10:10:23.102352105Z; it returns `context deadline exceeded` at10:11:22.783801277Z against the unchanged whole-proof deadline10:11:22.783038346Z. No semantic rejection completes and fallback provisioning does not begin. Final pre-call health observations are200 for all five peers, following brief node2 meta recovery503s. They do not establish availability throughout the call. Node0 subsequently logs consumer and stream NO-quorum warnings; this does not identify the blocked request or confirm cause. The older proof contains no API trace.
+
+Independent review verifies identical pre/post source captures for both seeds, all759 selected local inputs against executed Git and retained input bytes. Canonical original archive79,707,068 bytes /SHA256 `b91b64c25f29ad6ede214723a2b9e8ff6035d9b6a24e653449ce9245cbfd35c0`; all7795 members /274,038,846 bytes match their original manifest hashes. Actual NATS executables and original stores are retained; stores are not independently reopened. Actual SDK workload executable was not uploaded and is not claimed.
+
+`manifest.json` binds945 proof members,82,758,766 compressed bytes and four parts. Every member, unchanged input, part and concatenated canonical archive readback verifies. Restore by concatenating parts in listed order, checking canonical SHA256 and safely extracting into a fresh directory. Complete raw/run/job/artifact/log/source/reviewer evidence and the canonical original archive are included.
+
+This preserves a failure, not a qualification or runtime fix. Historical cause/parent, full matrices and actual24h remain open. The opt-in API diagnostic now traces native checks as well as fallback, retaining original deadlines/semantics; the real unanswered-request contract passes under race.

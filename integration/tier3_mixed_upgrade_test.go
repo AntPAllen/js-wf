@@ -44,11 +44,12 @@ type fiveUpgradePeer struct {
 	NativeCheck    *fiveUpgradeNativeCheck `json:"native_check,omitempty"`
 }
 type fiveUpgradeNativeCheck struct {
-	Started   time.Time `json:"started"`
-	Ended     time.Time `json:"ended"`
-	Deadline  time.Time `json:"deadline"`
-	Rejection string    `json:"rejection,omitempty"`
-	Error     string    `json:"error,omitempty"`
+	Started   time.Time                   `json:"started"`
+	Ended     time.Time                   `json:"ended"`
+	Deadline  time.Time                   `json:"deadline"`
+	Rejection string                      `json:"rejection,omitempty"`
+	Error     string                      `json:"error,omitempty"`
+	API       []fiveUpgradeAPIObservation `json:"api,omitempty"`
 }
 type fiveUpgradeBackendCheck struct {
 	Started  time.Time                   `json:"started"`
@@ -142,9 +143,7 @@ func proveFiveUpgradeDeployment(ctx context.Context, js jetstream.JetStream, clu
 			nc.Close()
 			return nil, err
 		}
-		check, nativeErr := checkFiveUpgradeNative(bound, peer.Version, func(operation context.Context) error {
-			return provision.Ensure(operation, peerJS, 5)
-		})
+		check, nativeErr := checkFiveUpgradeNativeProvisioning(bound, peer.Version, peerJS)
 		nc.Close()
 		peer.NativeCheck, peer.NativeRejected = &check, check.Rejection
 		proof.Nodes = append(proof.Nodes, peer)
@@ -254,6 +253,26 @@ func observeFiveUpgradeHealth(ctx context.Context, cluster *testcluster.DockerCl
 		}
 	}
 	return observed, ctx.Err()
+}
+
+// Retain the same default API behavior and whole proof context while tracing
+// each pinned peer's native check. Partial traces survive a failed lookup.
+func checkFiveUpgradeNativeProvisioning(ctx context.Context, version string, js jetstream.JetStream) (fiveUpgradeNativeCheck, error) {
+	var snapshot func() []fiveUpgradeAPIObservation
+	if os.Getenv("WF_TIER3_UPGRADE_API_TRACE") == "1" {
+		var err error
+		js, snapshot, err = newFiveUpgradeProvisioningTrace(js.Conn())
+		if err != nil {
+			return fiveUpgradeNativeCheck{}, fmt.Errorf("upgrade native provisioning trace: %w", err)
+		}
+	}
+	check, err := checkFiveUpgradeNative(ctx, version, func(operation context.Context) error {
+		return provision.Ensure(operation, js, 5)
+	})
+	if snapshot != nil {
+		check.API = snapshot()
+	}
+	return check, err
 }
 
 // A semantic native rejection requires multiple stream reads on a new peer.
