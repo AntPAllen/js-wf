@@ -1,0 +1,48 @@
+name: tier1-extended
+on:
+  workflow_dispatch:
+    inputs:
+      seeds:
+        description: Seed count per Tier 1 workload
+        required: true
+        type: choice
+        default: '10000'
+        options:
+          - '10000'
+          - '100000'
+jobs:
+  sim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 320
+    env:
+      SIM_SEEDS: ${{ inputs.seeds }}
+      SIM_COVERAGE_SUMMARY: '1'
+      FAULT_TRACE_OUT: sim-failure.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify suite-result guard
+        run: python3 -m unittest discover -s scripts -p 'test_tier1_suite.py'
+      - name: Run seeded transport suite from a retained binary
+        run: python3 scripts/check-tier1-race.py --root "$RUNNER_TEMP/tier1-extended-evidence" --no-race --seeds "$SIM_SEEDS"
+      - if: failure()
+        timeout-minutes: 4
+        run: |
+          if test -f "$RUNNER_TEMP/tier1-extended-evidence/failure-trace.json"; then
+            cd sim
+            FAULT_TRACE="$RUNNER_TEMP/tier1-extended-evidence/failure-trace.json" FAULT_TRACE_MIN_OUT="$RUNNER_TEMP/tier1-extended-evidence/failure-trace-minimized.json" go test -run '^TestMinimizeFaultTrace$' -count=1 -timeout=3m
+          fi
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tier1-extended-failure-trace
+          path: ${{ runner.temp }}/tier1-extended-evidence/failure-trace*.json
+          if-no-files-found: ignore
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tier1-extended-suite-evidence
+          path: ${{ runner.temp }}/tier1-extended-evidence/
+          if-no-files-found: warn

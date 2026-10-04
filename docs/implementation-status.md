@@ -2,6 +2,16 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Fresh full Tier1 gates queued at the corrected production source:** normal
+  100k run 37172700747 and complete race1k run 37172701931 bind exact `283ba32`.
+  These preserve full corpus/seed scope after the snapshot error-cause change;
+  dispatch and queue metadata prove no executed seeds or pass. Previous `9ecc37c`
+  complete gates remain historical. Older live Tier2/Tier3 campaigns keep their
+  executed-source scope; independent history-model rebuilds must use their
+  source-identical dependency inputs, not modified main, without bypassing
+  hashes. Full matrices, original million-timer drain and actual24h remain open.
+  [Exact commands, workflow inputs and API handles](scale/snapshot-timeout-cause-2026-10-04/tier1-dispatch/).
+
 - **Snapshot timeout cause deterministically fixed:** failed ordinary CI
   37168567962 at `32651f0` reports a nil-cause snapshot object gap after the
   continuation/promise `after_manifest` restart cut; seven other cuts pass.
