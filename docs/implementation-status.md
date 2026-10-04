@@ -33,6 +33,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **4096 audit window offers no material speedup;512 restored:** retained
+  race SDK ate638a93 gives identical12000-invocation /144000-entry /12000-terminal
+  reports:512=14.853547828s,4096=14.851015237s; point reaches original20s cap.
+  Fresh compaction/cohort/corruption/I1/I2/I3/orphan checks pass. All2889 captured
+  inputs /59 Git-local files, actual live SDK/all build-info fields and3984 proof
+  members verify;43346429-byte proof retains all originals, stores not reopened.
+  Default opt-in window restored to512, comparison retained explicitly in native
+  helper. No performance-gain claim, soak restart or audit-budget relaxation.
+  Future work must target measured per-record delivery/validation cost and fault
+  resume capacity rather than assuming fewer pull calls solve the long-run gate.
+  [Complete same-store comparison](scale/retained-audit-batch4096-2026-10-04/).
+
 - **Actual24h batched journal failure independently preserved:** exactb287e98,
   race/seed1, terminal failed after3223.15s atbatch400/cutoff11200. All three
   original20s attempts reach total60s cap; two complete bulk scans without fetch

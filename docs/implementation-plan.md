@@ -1577,3 +1577,18 @@ request overhead; capture bounds, gap/tail proof, full invariant body, no-cache
 behavior and20s/60s budgets remain unchanged. New12k invocation/144k entry native
 case compares previous512 and new4096 windows over identical retained state.
 Actual outcomes and large-population/fault capacity remain pending; no soak rerun.
+
+
+### Larger-window comparison completed without material speedup
+
+Retained race SDK ate638a93 completes full12000/144000/12000 audits of identical
+stores:512 window14.853547828s,4096 window14.851015237s; point reaches original20s
+deadline. Fresh corruption/cohort/compaction controls pass. All2889 captured inputs,
+59 Git-local files, actual live SDK/build info and3984 complete proof members
+verify, stores not reopened. [Complete comparison](scale/retained-audit-batch4096-2026-10-04/).
+
+No material gain is demonstrated. Default opt-in batch size is restored to512;
+explicit native512/4096 comparison remains. No soak restart or deadline change.
+Per-record delivery/validation and efficient fault recovery need further work
+before the original24h gate can qualify. All original full-matrix/million gates
+remain open.

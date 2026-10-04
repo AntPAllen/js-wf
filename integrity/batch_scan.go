@@ -13,7 +13,7 @@ import (
 )
 
 func scanBatchThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
-	return scanBatchThroughWithSize(ctx, stream, cutoff, visit, 4096)
+	return scanBatchThroughWithSize(ctx, stream, cutoff, visit, 512)
 }
 
 // Size controls one bounded delivery window, not the captured audit cohort or

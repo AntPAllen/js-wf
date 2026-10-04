@@ -322,7 +322,9 @@ func runBatchedInvariantAuditNativeCohort(t *testing.T, count int) {
 	}
 	started = time.Now()
 	bulkCtx, done := context.WithTimeout(ctx, 20*time.Second)
-	bulk, bulkErr := CheckWithBatchedReads(bulkCtx, js)
+	bulk, bulkErr := checkUsing(bulkCtx, js, nil, func(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+		return scanBatchThroughWithSize(ctx, stream, cutoff, visit, 4096)
+	})
 	done()
 	bulkElapsed := time.Since(started)
 	if bulkErr != nil || bulk != want {

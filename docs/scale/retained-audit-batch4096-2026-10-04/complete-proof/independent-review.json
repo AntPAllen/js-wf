@@ -1,0 +1,61 @@
+{
+  "source": "e638a932b5b6d17c327db1ca9bd6fb1256b1aed9",
+  "exit_code": 0,
+  "selected_inputs": 2889,
+  "local_git_inputs": 59,
+  "all_captured_source_hashes_verified": true,
+  "all_local_inputs_match_executed_git": true,
+  "actual_runner_matches_executed_git": true,
+  "actual_binary_sha256": "b5ce41f652297c6594b33f1bfedc0a2ae1004b5ba285a3878cb1aae383ee7b7b",
+  "actual_binary_retained": true,
+  "all_actual_build_info_fields_match": true,
+  "actual_live_sdk_identity_verified": true,
+  "named_results": {
+    "TestBatchedInvariantAuditNativeCompactionCohortAndFreshCorruption": {
+      "status": "pass",
+      "seconds": 14.81
+    },
+    "TestBatchedInvariantAuditNativeJournalCorruption/epoch-owner": {
+      "status": "pass",
+      "seconds": 0.27
+    },
+    "TestBatchedInvariantAuditNativeJournalCorruption/index-gap": {
+      "status": "pass",
+      "seconds": 0.26
+    },
+    "TestBatchedInvariantAuditNativeJournalCorruption/descending-epoch": {
+      "status": "pass",
+      "seconds": 0.24
+    },
+    "TestBatchedInvariantAuditNativeJournalCorruption/unresolved-terminal": {
+      "status": "pass",
+      "seconds": 0.26
+    },
+    "TestBatchedInvariantAuditNativeJournalCorruption/completion-without-request": {
+      "status": "pass",
+      "seconds": 0.25
+    },
+    "TestBatchedInvariantAuditNativeJournalCorruption": {
+      "status": "pass",
+      "seconds": 5.75
+    },
+    "TestBatchedInvariantAuditNativeTwelveThousandCohort": {
+      "status": "pass",
+      "seconds": 103.14
+    }
+  },
+  "native_files": 1077,
+  "native_file_bytes": 69893651,
+  "raw_result_log": "=== RUN   TestBatchedInvariantAuditNativeCompactionCohortAndFreshCorruption\n    batched_invariant_native_test.go:123: cohort=false report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n    batched_invariant_native_test.go:132: cohort=true report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n    batched_invariant_native_test.go:133: cohort=false report={Invocations:3 Journals:0 Entries:0 Terminal:0} matched_error=invalid character 'i' looking for beginning of value\n    batched_invariant_native_test.go:141: cohort=true report={Invocations:2 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.first: terminal state differs\n    batched_invariant_native_test.go:148: cohort=true report={Invocations:2 Journals:2 Entries:4 Terminal:1} matched_error=wf.jrn.audit.second: terminal state missing: nats: key not found\n    batched_invariant_native_test.go:163: cohort=true report={Invocations:2 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.first: journal gap or corrupt entry: snapshot object \"snapshot-35ad1f9ad87ef7b2-3-88db2a2d59cd5942\": snapshot SHA256 differs\n    batched_invariant_native_test.go:167: cohort=true report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n    batched_invariant_native_test.go:180: cohort=true report={Invocations:2 Journals:2 Entries:8 Terminal:2} matched_error=<nil>\n    batched_invariant_native_test.go:181: cohort=false report={Invocations:3 Journals:2 Entries:4 Terminal:1} matched_error=journal wf.jrn.audit.orphan has no invocation\n--- PASS: TestBatchedInvariantAuditNativeCompactionCohortAndFreshCorruption (14.81s)\n=== RUN   TestBatchedInvariantAuditNativeJournalCorruption\n=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/epoch-owner\n    batched_invariant_native_test.go:215: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.epoch-owner: epoch 1 used by workers audit-proof and other-owner\n=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/index-gap\n    batched_invariant_native_test.go:215: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.index-gap: index 9 at position 2\n=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/descending-epoch\n    batched_invariant_native_test.go:215: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.descending-epoch: epoch or Started violation\n=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/unresolved-terminal\n    batched_invariant_native_test.go:215: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.unresolved-terminal: successful terminal with unresolved request\n=== RUN   TestBatchedInvariantAuditNativeJournalCorruption/completion-without-request\n    batched_invariant_native_test.go:215: cohort=false report={Invocations:1 Journals:1 Entries:0 Terminal:0} matched_error=wf.jrn.audit.completion-without-request: completion without request\n    batched_invariant_native_test.go:244: cohort=false report={Invocations:1 Journals:0 Entries:0 Terminal:0} matched_error=duplicate invocation wf.inv.audit.duplicate\n--- PASS: TestBatchedInvariantAuditNativeJournalCorruption (5.75s)\n    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/epoch-owner (0.27s)\n    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/index-gap (0.26s)\n    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/descending-epoch (0.24s)\n    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/unresolved-terminal (0.26s)\n    --- PASS: TestBatchedInvariantAuditNativeJournalCorruption/completion-without-request (0.25s)\n=== RUN   TestBatchedInvariantAuditNativeTwelveThousandCohort\n    batched_invariant_native_test.go:251: full-audit invocations=12000 entries=144000 terminal=12000 point_elapsed=20.020236665s point_error=context deadline exceeded previous_batch512_elapsed=14.853547828s previous_batch512_error=<nil> bulk_batch4096_elapsed=14.851015237s bulk_error=<nil>\n--- PASS: TestBatchedInvariantAuditNativeTwelveThousandCohort (103.14s)\nPASS\n",
+  "physical_stores_reopened": false,
+  "production_default_reader_changed": false,
+  "fixture_invocations": 12000,
+  "fixture_entries": 144000,
+  "point_audit_seconds": 20.020236665,
+  "previous_batch512_seconds": 14.853547828,
+  "candidate_batch4096_seconds": 14.851015237,
+  "material_speedup_demonstrated": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false,
+  "scope": "Same-store race comparison and fresh corruption controls pass. No material performance gain from4096 observed. Both full bulk reports agree at12k/144k; point reaches original20s deadline. No soak restart or budget relaxation."
+}
