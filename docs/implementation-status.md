@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–60 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; consumer seeds 1–72 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Worker-clock 122 seeds qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Other finite combined fault cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -29,6 +29,24 @@ and million-timer physical-drain failures, finish combined continuation/promise/
 retirement/fanout/rebalance fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Tier2 consumer61–72 independently qualified:** twelve ten-minute seeds atc4,
+  31,164 invocations /343,412 entries /228 kills and40,114 history operations
+  passing all three production models. All45 dependency inputs match source
+  before/after; actual model binary and complete raw evidence retained in206
+  SHA-verified members /53,246,777 bytes. Worst terminal/progress type p99:
+  16.338133333 /8.646560181s under unchanged30s /10s gates. Consumer1–72 totals:
+  187,516 invocations /2,066,838 entries /1,368 kills /241,306 history operations.
+  Full200/current-source matrices/actual24h remain open.
+  [Complete twelve-seed proof](scale/current-tier2-matrix-2026-10-04/consumer-61-72/).
+
+- **Accepted consumer37–48 duplicate expansion recovered:** all72 raw files,
+  all206 canonical members, pushed Git parts and model executable verify before
+  removing only the raw expansion;678,916,096 exclusive allocated root bytes
+  recovered. Complete raw/archive/model evidence remains retained; failed originals
+  and qualification unchanged. Traced upgrade37194088941/job111413132310 is live
+  in its sustained workload step at last poll; no terminal claim.
+  [Exact verifier and recovery](scale/current-tier2-matrix-2026-10-04/consumer-37-48/expansion-recovery/).
 
 - **Second upgrade fallback timeout preserved:** source799 shard27–39 fails at
   seed27/fault5 after all five pinned peers report2.15.0. All five native rejection
