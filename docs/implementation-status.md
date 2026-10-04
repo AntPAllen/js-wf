@@ -33,13 +33,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
-- **Full streaming journal-fault native controls prepared:** 500 invocations /
-  2000 records /500 terminals, baseline checked; actual pending R3 consumer
-  leader shut down during delivery128 with reconnect-capable client. Both
-  point/state streaming modes must restore complete reports under original20s;
-  paired cancellation must stop at128 with invocation-only partial report.
-  Race package passes; retained native execution pending. Library shutdown,
-  not OS SIGKILL; state-watch/large-population/legacy/R5 capacity still open.
+- **Streaming journal-fault controls independently reviewed:** exact4616d47,
+  all four race cases pass. Pending R3 consumer leader library shutdown at
+  visitor128 recovers exact500-invocation/2000-entry/500-terminal reports in
+  0.557s/0.445s; cancellation stops at128 with invocation-only partial reports.
+  Named tests require both stream consumer counts return tozero. All2894
+  selected inputs/64 Git files, actual SDK/all build-info and4343 original
+  members verify;33770113-byte two-part complete archive read back. No live
+  proc capture or physical store reopening. This is library shutdown, not
+  OS SIGKILL; state-watch interruption, large-population/legacy/five-container
+  and full release qualification remain open. Large remaining-tail native test
+  prepared with the same20s limit and mandatory complete baseline.
+  [Complete fault controls](scale/retained-audit-streaming-2026-10-04/journal-faults/).
 
 - **Streaming native equivalence and combined100k gain observed:** exact1d43a2b,
   race controls match point/batched/state/streaming reports and exact errors for

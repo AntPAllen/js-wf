@@ -276,10 +276,16 @@ func TestBatchedInvariantAuditNativeTwelveThousandCohort(t *testing.T) {
 
 func batchAuditLargeCohort(t *testing.T, count int) (jetstream.JetStream, context.Context, Report) {
 	t.Helper()
+	js, ctx, want, _ := batchAuditLargeCohortWithServers(t, count)
+	return js, ctx, want
+}
+
+func batchAuditLargeCohortWithServers(t *testing.T, count int) (jetstream.JetStream, context.Context, Report, *testcluster.Cluster) {
+	t.Helper()
 	if os.Getenv("WF_AUDIT_BATCH_CANDIDATE") != "1" {
 		t.Skip("opt-in full native batched invariant audit")
 	}
-	js, ctx := batchedAuditCluster(t)
+	js, ctx, cluster := batchedAuditClusterWithServers(t)
 	futures := make([]jetstream.PubAckFuture, 0, count*13)
 	state, err := js.KeyValue(ctx, "WF_STATE")
 	if err != nil {
@@ -324,7 +330,7 @@ func batchAuditLargeCohort(t *testing.T, count int) (jetstream.JetStream, contex
 		}
 	}
 	want := Report{Invocations: count, Journals: count, Entries: count * 12, Terminal: count}
-	return js, ctx, want
+	return js, ctx, want, cluster
 }
 
 func runBatchedInvariantAuditNativeCohort(t *testing.T, count int) {

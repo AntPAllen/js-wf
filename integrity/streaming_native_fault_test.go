@@ -107,3 +107,80 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 		}
 	}
 }
+
+// A large remaining tail exercises transport recovery beyond the small control.
+// Both complete reports must fit the original per-attempt budget.
+func TestStreamingAuditNativeLargeJournalFault(t *testing.T) {
+	if os.Getenv("WF_AUDIT_BATCH_CANDIDATE") != "1" {
+		t.Skip("opt-in full streaming audit large fault qualification")
+	}
+	_, ctx, want, cluster := batchAuditLargeCohortWithServers(t, nativeAuditProfileCount(t))
+	var urls []string
+	for _, server := range cluster.Servers {
+		urls = append(urls, server.ClientURL())
+	}
+	nc, err := nats.Connect(strings.Join(urls, ","), nats.MaxReconnects(-1), nats.ReconnectWait(20*time.Millisecond))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(nc.Close)
+	js, err := jetstream.New(nc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	baselineCtx, baselineStop := context.WithTimeout(ctx, 20*time.Second)
+	baseline, baselineErr := checkUsingOptions(baselineCtx, js, nil, scanBatchThrough, true, true)
+	baselineStop()
+	if baselineErr != nil || baseline != want {
+		t.Fatalf("baseline=%+v want=%+v err=%v", baseline, want, baselineErr)
+	}
+	attempt, stop := context.WithTimeout(ctx, 20*time.Second)
+	defer stop()
+	visited, leader, pending := 0, -1, uint64(0)
+	consumerName := ""
+	started := time.Now()
+	report, err := checkUsingOptions(attempt, js, nil, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+		if stream.CachedInfo().Config.Name != "WF_JRN" {
+			return scanBatchThrough(call, stream, cutoff, visit)
+		}
+		observed := &candidateObservedStream{Stream: stream}
+		return scanBatchThrough(call, observed, cutoff, func(msg *jetstream.RawStreamMsg) error {
+			visited++
+			if visited == 128 {
+				info, err := observed.consumer.Info(call)
+				if err != nil {
+					return err
+				}
+				if info.Cluster == nil || info.NumPending == 0 || info.Config.Replicas != 3 || !info.Config.MemoryStorage || info.Config.AckPolicy != jetstream.AckNonePolicy {
+					return errors.New("missing active replicated consumer identity")
+				}
+				consumerName, pending = info.Name, info.NumPending
+				for i, server := range cluster.Servers {
+					if server.Name() == info.Cluster.Leader {
+						leader = i
+					}
+				}
+				if leader < 0 {
+					return errors.New("consumer leader not found")
+				}
+				cluster.KillNode(leader)
+			}
+			return visit(msg)
+		})
+	}, true, true)
+	elapsed := time.Since(started)
+	t.Logf("streaming-large-fault consumer=%s leader=%d pending_at_kill=%d visited=%d elapsed=%s report=%+v err=%v reconnects=%d", consumerName, leader, pending, visited, elapsed, report, err, nc.Stats().Reconnects)
+	if err != nil || report != want || visited != want.Entries || leader < 0 || pending == 0 || elapsed >= 20*time.Second {
+		t.Fatalf("recovery report=%+v want=%+v visited=%d leader=%d pending=%d elapsed=%s err=%v", report, want, visited, leader, pending, elapsed, err)
+	}
+	for _, name := range []string{"WF_INV", "WF_JRN"} {
+		stream, err := js.Stream(ctx, name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		info, err := stream.Info(ctx)
+		if err != nil || info.State.Consumers != 0 {
+			t.Fatalf("cleanup stream=%s info=%+v err=%v", name, info, err)
+		}
+	}
+}

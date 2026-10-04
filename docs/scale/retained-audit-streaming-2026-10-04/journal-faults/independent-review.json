@@ -1,0 +1,77 @@
+{
+  "source": "4616d4795300fbfcba8396d6da001760273773f1",
+  "exit_code": 0,
+  "race": true,
+  "selected_inputs": 2894,
+  "local_git_inputs": 64,
+  "all_captured_source_hashes_verified": true,
+  "all_local_inputs_match_executed_git": true,
+  "actual_runner_matches_executed_git": true,
+  "actual_binary_sha256": "761ac7776d08c1d3b04dd9c2bb448c07a9fbd7bf3950f0e083303c3fc803bba9",
+  "actual_binary_retained": true,
+  "all_actual_build_info_fields_match": true,
+  "live_proc_identity_captured": false,
+  "named_results": {
+    "TestStreamingAuditNativeJournalFaults/state-false/consumer-leader-loss": {
+      "status": "pass",
+      "seconds": 9.45
+    },
+    "TestStreamingAuditNativeJournalFaults/state-false/cancellation": {
+      "status": "pass",
+      "seconds": 8.82
+    },
+    "TestStreamingAuditNativeJournalFaults/state-true/consumer-leader-loss": {
+      "status": "pass",
+      "seconds": 9.3
+    },
+    "TestStreamingAuditNativeJournalFaults/state-true/cancellation": {
+      "status": "pass",
+      "seconds": 8.86
+    },
+    "TestStreamingAuditNativeJournalFaults": {
+      "status": "pass",
+      "seconds": 36.44
+    }
+  },
+  "fault_rows": [
+    {
+      "snapshot": false,
+      "fault": "consumer-leader-loss",
+      "leader": 1,
+      "pending": 1488,
+      "visited": 2000,
+      "seconds": 0.556725911
+    },
+    {
+      "snapshot": false,
+      "fault": "cancellation",
+      "leader": -1,
+      "pending": 0,
+      "visited": 128,
+      "seconds": 0.23066678200000001
+    },
+    {
+      "snapshot": true,
+      "fault": "consumer-leader-loss",
+      "leader": 0,
+      "pending": 1488,
+      "visited": 2000,
+      "seconds": 0.445003641
+    },
+    {
+      "snapshot": true,
+      "fault": "cancellation",
+      "leader": -1,
+      "pending": 0,
+      "visited": 128,
+      "seconds": 0.26212602199999996
+    }
+  ],
+  "native_files": 1432,
+  "native_file_bytes": 9315433,
+  "raw_result_log": "=== RUN   TestStreamingAuditNativeJournalFaults\n=== RUN   TestStreamingAuditNativeJournalFaults/state-false/consumer-leader-loss\n    streaming_native_fault_test.go:105: streaming-fault state_snapshot=false fault=consumer-leader-loss consumer=wf-audit-0L1MX4zi9ZjSgHCFQtknCw leader=1 pending_at_kill=1488 consumer_replicas=3 visited=2000 elapsed=556.725911ms report={Invocations:500 Journals:500 Entries:2000 Terminal:500} err=<nil> reconnects=1\n=== RUN   TestStreamingAuditNativeJournalFaults/state-false/cancellation\n    streaming_native_fault_test.go:105: streaming-fault state_snapshot=false fault=cancellation consumer= leader=-1 pending_at_kill=0 consumer_replicas=0 visited=128 elapsed=230.666782ms report={Invocations:500 Journals:0 Entries:0 Terminal:0} err=context canceled reconnects=0\n=== RUN   TestStreamingAuditNativeJournalFaults/state-true/consumer-leader-loss\n    streaming_native_fault_test.go:105: streaming-fault state_snapshot=true fault=consumer-leader-loss consumer=wf-audit-0L1MX4zi9ZjSgHCFQtm6xU leader=0 pending_at_kill=1488 consumer_replicas=3 visited=2000 elapsed=445.003641ms report={Invocations:500 Journals:500 Entries:2000 Terminal:500} err=<nil> reconnects=0\n=== RUN   TestStreamingAuditNativeJournalFaults/state-true/cancellation\n    streaming_native_fault_test.go:105: streaming-fault state_snapshot=true fault=cancellation consumer= leader=-1 pending_at_kill=0 consumer_replicas=0 visited=128 elapsed=262.126022ms report={Invocations:500 Journals:0 Entries:0 Terminal:0} err=context canceled reconnects=0\n--- PASS: TestStreamingAuditNativeJournalFaults (36.44s)\n    --- PASS: TestStreamingAuditNativeJournalFaults/state-false/consumer-leader-loss (9.45s)\n    --- PASS: TestStreamingAuditNativeJournalFaults/state-false/cancellation (8.82s)\n    --- PASS: TestStreamingAuditNativeJournalFaults/state-true/consumer-leader-loss (9.30s)\n    --- PASS: TestStreamingAuditNativeJournalFaults/state-true/cancellation (8.86s)\nPASS\n",
+  "physical_stores_reopened": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false,
+  "scope": "Native full streaming audits recover exact 500/2000/500 reports after actual pending R3 consumer leader library shutdown; cancellation stops at128. Consumer cleanup asserted by named test. State-watch interruption, OS SIGKILL, large-population recovery, five-container/full-matrix/24h qualification absent; live proc identity not captured."
+}
