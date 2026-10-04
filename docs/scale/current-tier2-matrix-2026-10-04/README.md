@@ -73,3 +73,12 @@ p99 remains **17.457496447/8.533582526 s**. The newer archive retains every raw
 file plus all reviewer/model source inputs; consult its own manifest for scope.
 Other terminal producer successes still require independent review. Full gates
 remain open.
+
+## Subsequently accepted seeds 109–120
+
+[Source-isolated independent review](journal-109-120/) adds 31,332
+invocations, 345,237 entries and 228 kills at the same executed
+c4fed06 revision. Accepted seeds 1–120 now total **315,252 invocations,
+3,473,145 journal entries and 2,280 leader kills**; worst terminal/progress
+p99 remains **17.457496447/8.533582526 s**. Other producer successes await review;
+current-main full qualification, full matrices and actual 24-hour soak remain open.
