@@ -1910,3 +1910,13 @@ matrices remain open; native SDK/stores were not uploaded and final integrity/
 drain remains named-test scope.
 [73–84 proof](scale/current-tier2-matrix-2026-10-04/cluster-73-84/) ·
 [85–96 proof](scale/current-tier2-matrix-2026-10-04/cluster-85-96/).
+
+### Recorded-source all-server matrix coverage through seed108
+
+Exact `c4fed06` all-server-kill coverage now accepts seeds1–108 after raw checks
+and three rebuilt models over37283 new operations for97–108. Original30s gates
+remain; aggregate256648 invocations /2828891 entries /2052 faults /330236 operations
+has worst terminal/progress p99 18.295s/13.015s. Complete originals and all archive
+members/parts verify. Native SDK/stores unavailable; final integrity/drain remains
+named-test scope. Full200/final-source/full matrices remain open.
+[Complete new shard](scale/current-tier2-matrix-2026-10-04/cluster-97-108/).
