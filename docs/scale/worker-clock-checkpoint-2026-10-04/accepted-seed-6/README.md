@@ -21,3 +21,8 @@ tar -xzf /tmp/clock-seed6-proof.tar.gz -C /tmp/clock-seed6-proof
 The bundle includes full raw upload, terminal API metadata/log, complete canonical `original-stores/rolling-originals.tar.gz` and manifest, independent reviews, all 75 actual reviewer sources, 45 model dependencies, model helper/executable, and exact executed preservation script. The original canonical tar is 108,405,901 bytes with SHA256 `13f5983e70dcb8a05d4fd4e34c50ec307f8564141af03af0f0b9c57a8cb755ff`.
 
 `independent-review.log` retains an initial ambiguous CLI argument rejection; the corrected invocation is in `independent-review-final.log`. Generic shard review does not independently rerun history models; `history-model-proof.json`, the retained executable and exact `Ok` outputs provide that additional scope. Original failure artifacts and deadlines remain unchanged. No old 30-second-TTL recovery smoke was rerun.
+
+The accepted expanded local restoration is subsequently removed only after every
+member, compressed original, committed Git archive part and absence of open file
+descriptors reverify. Complete compressed originals remain. [Executed recovery](../../accepted-proof-duplicate-recovery-2026-10-04/)
+records scope; restore the raw/fixture inputs before repeating offline review.

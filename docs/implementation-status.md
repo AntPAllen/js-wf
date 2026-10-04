@@ -2,6 +2,15 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Accepted duplicate expansions recovered:** all 72 journal 97–108 raw files
+  and 3,963 clock seed-6 restoration members, compressed originals and committed
+  Git parts reverify after their proof push; no open descriptors. Only the two
+  accepted expansions are removed, recovering 1,025,204,224 allocated bytes.
+  Complete compressed original proofs remain; failed evidence is unchanged.
+  Restore inputs before offline re-review. Root free space is about 1.3 GiB;
+  the required 24-hour full-matrix soak remains capacity-limited.
+  [Exact executed recovery and preserved canonical paths](scale/accepted-proof-duplicate-recovery-2026-10-04/).
+
 - **Tier2 journal coverage extended to seeds 1–108:** terminal successful shard
   97–108 passes source-isolated raw/model review at exact `c4fed06`: 31,024
   invocations, 341,721 entries and 228 faults, all three history models and

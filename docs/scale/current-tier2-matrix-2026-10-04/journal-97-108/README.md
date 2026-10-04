@@ -7,3 +7,8 @@ The current reviewer explicitly builds from `/tmp/js-wf-tier2-model-c4fed06`; al
 `manifest.json` verifies all 201 proof members, complete archive SHA256 and concatenated 25 MiB parts. The bundle retains all 72 raw files, metadata/logs, independent model outputs, exact reviewer/helper sources, 45 model dependencies and the executed preservation script. Reassemble sorted `proof.tar.gz.part-*` outside the repository and verify its SHA256 before extracting; raw files are under `artifact/`.
 
 The temporary model executable's hash is recorded, but the executable is not retained. Actual workload executables, compiled-source ledgers and physical broker stores were not uploaded. Final integrity/drain scope remains the executed named test; no independent store reopening is claimed. This extends accepted journal coverage to 1–108 at c4fed06, not current-main full qualification, the 200-seed row, full 13×200/16×200 matrices or actual 24-hour soak.
+
+The accepted expanded local restoration is subsequently removed only after every
+member, compressed original, committed Git archive part and absence of open file
+descriptors reverify. Complete compressed originals remain. [Executed recovery](../../accepted-proof-duplicate-recovery-2026-10-04/)
+records scope; restore the raw/fixture inputs before repeating offline review.
