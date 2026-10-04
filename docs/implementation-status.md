@@ -13,6 +13,10 @@
   retains actual binaries and every raw/model input. Combined accepted 26 seeds
   total 77,084 invocations, 853,898 entries, 494 faults and 99,108 history ops.
   Failed full parent and complete row/matrix/24h gates remain open.
+  After pushed-proof and member/archive/Git-part verification, its duplicate raw
+  expansion is removed: 525,266,944 exclusive allocated bytes recovered; shared
+  executable data remains retained and is excluded from that count. Restore the
+  compact archive before replaying raw review; failed evidence is unchanged.
   [Exact raw binding, byte-identical executable provider and scope](scale/current-tier3-clock-2026-10-04/worker-clock-40-52/).
 
 - **Strict clock observer accepts actual API replies:** a three-node real NATS
