@@ -33,6 +33,13 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Future route censuses retain remote IDs:** decoded peer IDs now survive saved
+  census JSON beside pooled connection counts, allowing independent identity review.
+  Race controls verify persisted one-peer pools and four-peer meshes, and reject
+  inconsistent IDs/shared IDs across names. This changes fixture diagnostics only;
+  older census files do not gain IDs and the running95b63c0 soak keeps its source.
+  No quorum/catch-up/cause/full-matrix qualification follows from a census.
+
 - **All-server-kill97–108 independently accepted:** exactc4fed06, twelve complete
   600s seeds qualify28980 invocations /319397 entries /228 faults /37283 model
   operations. Original30s gates, raw identities/timing/latencies and all three

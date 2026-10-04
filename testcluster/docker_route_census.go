@@ -11,12 +11,13 @@ import (
 // RouteCensus counts distinct peers separately from pooled route connections.
 // It describes one monitoring response, not quorum or stream catch-up.
 type RouteCensus struct {
-	ServerName  string         `json:"server_name"`
-	ServerID    string         `json:"server_id"`
-	Connections int            `json:"connections"`
-	Peers       map[string]int `json:"peers"`
-	Missing     []string       `json:"missing_peers"`
-	FullMesh    bool           `json:"full_mesh"`
+	ServerName  string            `json:"server_name"`
+	ServerID    string            `json:"server_id"`
+	Connections int               `json:"connections"`
+	Peers       map[string]int    `json:"peers"`
+	PeerIDs     map[string]string `json:"peer_ids"`
+	Missing     []string          `json:"missing_peers"`
+	FullMesh    bool              `json:"full_mesh"`
 }
 
 func (c *DockerCluster) RoutePeerCensus(ctx context.Context, node int) (RouteCensus, error) {
@@ -48,13 +49,14 @@ func decodeRouteCensus(data []byte, expected string, members []string) (RouteCen
 			allowed[name] = true
 		}
 	}
-	out := RouteCensus{ServerName: response.ServerName, ServerID: response.ServerID, Connections: response.NumRoutes, Peers: map[string]int{}, Missing: []string{}}
+	out := RouteCensus{ServerName: response.ServerName, ServerID: response.ServerID, Connections: response.NumRoutes, Peers: map[string]int{}, PeerIDs: map[string]string{}, Missing: []string{}}
 	ids, names := map[string]string{}, map[string]string{}
 	for _, route := range response.Routes {
 		if !allowed[route.Name] || route.ID == "" || route.ID == response.ServerID || ids[route.Name] != "" && ids[route.Name] != route.ID || names[route.ID] != "" && names[route.ID] != route.Name {
 			return RouteCensus{}, fmt.Errorf("invalid route peer identity %s/%s", route.Name, route.ID)
 		}
 		ids[route.Name], names[route.ID] = route.ID, route.Name
+		out.PeerIDs[route.Name] = route.ID
 		out.Peers[route.Name]++
 	}
 	for _, name := range members {

@@ -67,6 +67,25 @@ func TestDockerRouteCensusDistinguishesPoolsFromPeers(t *testing.T) {
 		if !full && (len(census.Peers) != 1 || len(census.Missing) != 3) {
 			t.Fatal(census)
 		}
+		// Reviewers must be able to recover validated identities from the saved
+		// JSON, including when multiple pooled connections share one peer.
+		encoded, err := json.Marshal(census)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var saved RouteCensus
+		if err := json.Unmarshal(encoded, &saved); err != nil {
+			t.Fatal(err)
+		}
+		if len(saved.PeerIDs) != len(saved.Peers) {
+			t.Fatalf("saved identity count differs: %s", encoded)
+		}
+		for name := range saved.Peers {
+			want := "id" + strings.TrimPrefix(name, "n")
+			if saved.PeerIDs[name] != want {
+				t.Fatalf("saved peer %s ID=%q want=%q", name, saved.PeerIDs[name], want)
+			}
+		}
 	}
 }
 func TestDockerRouteCensusRejectsWrongIdentityAndCounts(t *testing.T) {
@@ -75,8 +94,9 @@ func TestDockerRouteCensusRejectsWrongIdentityAndCounts(t *testing.T) {
 		`{"server_name":"n0","server_id":"id0","num_routes":4,"routes":[]}`,
 		`{"server_name":"n0","server_id":"id0","num_routes":1,"routes":[{"remote_name":"foreign","remote_id":"id1"}]}`,
 		`{"server_name":"n0","server_id":"id0","num_routes":2,"routes":[{"remote_name":"n1","remote_id":"id1"},{"remote_name":"n1","remote_id":"different"}]}`,
+		`{"server_name":"n0","server_id":"id0","num_routes":2,"routes":[{"remote_name":"n1","remote_id":"id1"},{"remote_name":"n2","remote_id":"id1"}]}`,
 	} {
-		if _, err := decodeRouteCensus([]byte(data), "n0", []string{"n0", "n1"}); err == nil {
+		if _, err := decodeRouteCensus([]byte(data), "n0", []string{"n0", "n1", "n2"}); err == nil {
 			t.Fatalf("accepted %s", data)
 		}
 	}

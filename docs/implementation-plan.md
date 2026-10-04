@@ -1920,3 +1920,11 @@ has worst terminal/progress p99 18.295s/13.015s. Complete originals and all arch
 members/parts verify. Native SDK/stores unavailable; final integrity/drain remains
 named-test scope. Full200/final-source/full matrices remain open.
 [Complete new shard](scale/current-tier2-matrix-2026-10-04/cluster-97-108/).
+
+### Persist validated route peer identities
+
+Future explicit-route diagnostics save each validated remote server ID beside
+peer-name pool counts. Race controls verify serialized identities for single-peer
+pools and full meshes and reject identity aliasing. Historical census outputs
+retain their original scope; the live95b63c0 soak is unchanged. Saved topology
+identities help independent review but do not prove quorum/catch-up or causes.
