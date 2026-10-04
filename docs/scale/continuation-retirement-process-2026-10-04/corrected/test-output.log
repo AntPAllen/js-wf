@@ -1,0 +1,23 @@
+=== RUN   TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL
+=== RUN   TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL/all_servers=false
+    continuation_retirement_process_test.go:103: retirement fresh manifest cut: state_leader=wf-process-0 killed_node=0 pid=155455 signal=killed
+    continuation_retirement_process_test.go:109: retirement restarted node=0 pid=155747
+    continuation_retirement_test.go:373: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=4 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=2 manifest_drops=1
+=== RUN   TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL/all_servers=true
+    continuation_retirement_process_test.go:103: retirement fresh manifest cut: state_leader=wf-process-2 killed_node=0 pid=155797 signal=killed
+EOF on connection [86]
+    continuation_retirement_process_test.go:103: retirement fresh manifest cut: state_leader=wf-process-2 killed_node=1 pid=155798 signal=killed
+read tcp 127.0.0.1:49334->127.0.0.1:32899: read: connection reset by peer on connection [69]
+    continuation_retirement_process_test.go:103: retirement fresh manifest cut: state_leader=wf-process-2 killed_node=2 pid=155799 signal=killed
+    continuation_retirement_process_test.go:109: retirement restarted node=0 pid=156193
+    continuation_retirement_process_test.go:109: retirement restarted node=1 pid=156204
+    continuation_retirement_process_test.go:109: retirement restarted node=2 pid=156213
+    continuation_retirement_test.go:373: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=4 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=2 manifest_drops=1
+--- PASS: TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL (67.74s)
+    --- PASS: TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL/all_servers=false (34.10s)
+    --- PASS: TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL/all_servers=true (33.64s)
+=== RUN   TestContinuationRetirementReuseWithManifestLossAndStateLeaderRestart
+    continuation_retirement_test.go:108: retirement fresh manifest response lost; actual state leader wf-test-0 library shutdown/restart
+    continuation_retirement_test.go:373: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=4 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=2 manifest_drops=1
+--- PASS: TestContinuationRetirementReuseWithManifestLossAndStateLeaderRestart (25.74s)
+PASS

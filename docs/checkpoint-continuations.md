@@ -891,3 +891,17 @@ remain after collection. Original no-loss/loss controls pass43.40s through the s
 helper. [Exact test overlay and local logs](scale/continuation-retirement-state-leader-2026-10-04/)
 retain scope: ephemeral SDK/stores were not preserved. This is not OS SIGKILL,
 concurrent-writer GC, lease/TTL/limit combinations or full-matrix/24h qualification.
+
+## Retirement reuse with actual server SIGKILL
+
+Both fresh-manifest response-loss cuts now pass under race with the confirmed
+state leader killed/restarted and with all three servers killed before restart.
+Observed SIGKILL wait statuses and distinct replacement PIDs are required.
+Process test67.74s, library control25.74s; old-generation rejection, raw integrity,
+exact effects and shared/survivor/fresh references remain strict. Actual SDK and
+process stores/logs are preserved, with629 unchanged selected inputs and627 Git
+matches plus exact test overlays. [Complete focused originals](scale/continuation-retirement-process-2026-10-04/corrected/)
+verify; [first startup failures](scale/continuation-retirement-process-2026-10-04/first-startup-failed/)
+remain separate. The new fixture uses bounded provisioning retries within its
+original30s readiness budget. Worker SIGKILL, active-writer GC, lease/TTL/limit,
+p99 and final-source matrix/24h combinations remain open; stores were not reopened.

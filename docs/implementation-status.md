@@ -33,6 +33,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Retirement/reuse actual server SIGKILL controls pass:** fresh-manifest response
+  loss with confirmed state leader kill/restart and full three-server kill/restart,
+  race67.74s; library control25.74s. Every exit/replacement verified, generation1→3,
+  two reclaimed objects/three effects/two terminals and shared references checked.
+  Live actual SDK/env/all build-info,629 unchanged selected inputs/627 Git matches
+  and855 original archive members/three parts verify. SDK/process stores retained,
+  not reopened; named-test integrity/GC scope. First startup failures separately
+  preserved; bounded4s readiness attempts retain original30s startup budget.
+  Worker SIGKILL/active-GC/lease/TTL/limit/p99/final-source/full/24h remain open.
+  [Complete focused originals](scale/continuation-retirement-process-2026-10-04/corrected/).
+
 - **Combined continuation retirement/reuse native control passes:** fresh manifest
   pre-commit response loss plus actual confirmed state leader library shutdown/
   restart, local race22.05s. Exactly one drop/restart; retired objects reclaimed,

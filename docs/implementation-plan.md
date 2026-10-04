@@ -1948,3 +1948,15 @@ old-generation rejection, peer-visible results and shared reference preservation
 remain strict. [Overlay and logs](scale/continuation-retirement-state-leader-2026-10-04/)
 record exact local scope; SDK/stores were not retained. OS SIGKILL, active-writer
 GC, lease/TTL/limit combinations and final-source matrices/24h remain open.
+
+### Combined retirement/reuse with actual server SIGKILL
+
+Focused race cuts pass for fresh-manifest response loss plus confirmed state
+leader SIGKILL/restart and all-three-server SIGKILL/restart. Test67.74s; original
+library control25.74s. Actual exits/replacements, raw integrity, generation
+rejection and shared object preservation remain checked. All855 retained members
+verify, including actual SDK/process stores and selected source ledgers.
+[Complete originals and scope](scale/continuation-retirement-process-2026-10-04/corrected/).
+First startup failures are separately preserved; readiness now retries4s attempts
+within the same30s budget. Worker SIGKILL/active-GC/lease/TTL/limit/p99/final-source
+full-matrix/24h combinations remain open. No stores were independently reopened.

@@ -83,22 +83,9 @@ func runContinuationRetirementWithServerFault(t *testing.T, manifestDrop, server
 			}
 		}
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-	const typ = "checkpoint-retire"
-	const retired = "reused"
-	const survivor = "survivor"
-	payload := strings.Repeat("x", wf.MaxInlineResult)
-	sharedJSON, _ := json.Marshal(payload)
-	digest := sha256.Sum256(sharedJSON)
-	sharedObject := "step-result-" + hex.EncodeToString(digest[:])
-	store := journal.New(all[2])
-	var freshGeneration atomic.Uint64
-	var freshInitialCalls atomic.Int64
-	port := &retirementManifestPort{SnapshotWritePort: journal.NewSnapshotPort(all[1])}
-	var leaderRestarts atomic.Int64
+	var onDrop func(context.Context) error
 	if serverFault {
-		port.onDrop = func(ctx context.Context) error {
+		onDrop = func(ctx context.Context) error {
 			stream, err := all[0].Stream(ctx, "KV_WF_STATE")
 			if err != nil {
 				return err
@@ -118,8 +105,34 @@ func runContinuationRetirementWithServerFault(t *testing.T, manifestDrop, server
 			if err := cluster.RestartNode(node); err != nil {
 				return err
 			}
-			leaderRestarts.Add(1)
 			t.Logf("retirement fresh manifest response lost; actual state leader %s library shutdown/restart", info.Cluster.Leader)
+			return nil
+		}
+	}
+	runContinuationRetirementOnCluster(t, all, manifestDrop, onDrop)
+}
+
+func runContinuationRetirementOnCluster(t *testing.T, all []jetstream.JetStream, manifestDrop bool, onDrop func(context.Context) error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	const typ = "checkpoint-retire"
+	const retired = "reused"
+	const survivor = "survivor"
+	payload := strings.Repeat("x", wf.MaxInlineResult)
+	sharedJSON, _ := json.Marshal(payload)
+	digest := sha256.Sum256(sharedJSON)
+	sharedObject := "step-result-" + hex.EncodeToString(digest[:])
+	store := journal.New(all[2])
+	var freshGeneration atomic.Uint64
+	var freshInitialCalls atomic.Int64
+	port := &retirementManifestPort{SnapshotWritePort: journal.NewSnapshotPort(all[1])}
+	var serverFaults atomic.Int64
+	if onDrop != nil {
+		port.onDrop = func(ctx context.Context) error {
+			if err := onDrop(ctx); err != nil {
+				return err
+			}
+			serverFaults.Add(1)
 			return nil
 		}
 	}
@@ -325,8 +338,8 @@ func runContinuationRetirementWithServerFault(t *testing.T, manifestDrop, server
 	if !manifestDrop && port.dropped.Load() != 0 {
 		t.Fatal("unexpected injected drop")
 	}
-	if serverFault && leaderRestarts.Load() != 1 {
-		t.Fatalf("state leader restarts=%d", leaderRestarts.Load())
+	if onDrop != nil && serverFaults.Load() != 1 {
+		t.Fatalf("completed server fault batches=%d", serverFaults.Load())
 	}
 	fresh, err := store.ReadCheckpoint(ctx, typ, retired, second.InvSeq)
 	if err != nil || fresh == nil || fresh.Snapshot.Runtime.InvSeq != second.InvSeq || fresh.Snapshot.Runtime.Object == old.Snapshot.Runtime.Object {
