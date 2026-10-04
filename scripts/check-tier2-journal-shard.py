@@ -50,9 +50,10 @@ def bind(run, job, artifact, log, first, last):
     return source
 
 
-def review(run, job, artifact, job_log, artifact_root, first, last, temporary_root=None):
+def review(run, job, artifact, job_log, artifact_root, first, last, temporary_root=None,
+           model_root=None):
     revision = bind(run, job, artifact, job_log, first, last)
-    repo = REPO
+    repo = REPO if model_root is None else Path(model_root).resolve()
     before = shared.inventory(artifact_root)
     required = {f'matrix-journal-{seed}-{suffix}' for seed in range(first,last+1)
                 for suffix in ('test.jsonl', 'faults.json', 'latencies.json', 'history.jsonl')}
@@ -185,6 +186,7 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
                 artifact=artifact['id'], row='journal', first=first, last=last,
                 duration_seconds_per_seed=600, seeds=reports,
                 all_three_independent_history_models_pass=True,
+                model_source_root=str(repo),
                 model_dependency_sha256=model_hashes, model_binary_sha256=binary_hash,
                 model_helper_sha256=hashlib.sha256(Path(__file__).with_name('tier2-history-review.go.txt').read_bytes()).hexdigest(),
                 invocations=sum(s['report']['invocations'] for s in reports),
@@ -203,13 +205,16 @@ def main():
     parser.add_argument('--first', required=True, type=int)
     parser.add_argument('--last', required=True, type=int)
     parser.add_argument('--temporary-root', type=Path)
+    parser.add_argument('--model-root', type=Path,
+                        help='Source checkout for models; dependencies must match the executed revision')
     args = parser.parse_args()
     root = args.root.resolve()
     output = args.output.resolve()
     if output.exists() or output.is_relative_to(root):
         parser.error('output must be fresh and outside original artifacts')
     report = review(read(args.run), read(args.job), read(args.artifact),
-                    args.log.read_text(), root, args.first, args.last, args.temporary_root)
+                    args.log.read_text(), root, args.first, args.last, args.temporary_root,
+                    args.model_root)
     report['metadata_sha256'] = {name:hashlib.sha256(getattr(args,name).read_bytes()).hexdigest()
                                 for name in ('run','job','artifact','log')}
     output.write_text(json.dumps(report, indent=2)+'\n')

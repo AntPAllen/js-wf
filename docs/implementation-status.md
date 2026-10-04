@@ -2,6 +2,17 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Older campaign models isolated from current main:** the journal reviewer
+  accepts an explicit model source checkout, retaining all raw checks and exact
+  actual dependency pre/post hashes. A clean c4fed06 worktree re-reviews already
+  accepted seeds 1–12: 31,472 invocations, 346,713 entries, 228 faults and all
+  three production models, with 45 source-identical dependency inputs. Default
+  main, explicit main and an altered isolated dependency are each rejected
+  without a report. Three unit controls pass. This adds no seed coverage or
+  full gate promotion; it enables source-correct review of forthcoming shards
+  while the updated-source full Tier1 gates proceed.
+  [Exact source root, complete re-review and mismatch controls](scale/tier2-model-source-root-2026-10-04/).
+
 - **Fresh full Tier1 gates queued at the corrected production source:** normal
   100k run 37172700747 and complete race1k run 37172701931 bind exact `283ba32`.
   These preserve full corpus/seed scope after the snapshot error-cause change;
