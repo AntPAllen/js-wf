@@ -2,6 +2,19 @@
 
 ## Current qualification snapshot — 2026-10-04
 
+- **Complete clock coverage extends to seeds 27–52 at exact `79915ca`:** new
+  terminal shard 40–52 independently verifies 37,632 invocations, 416,582
+  entries, 247 faults and all three models over 48,384 operations. All 759
+  pre/post source inputs, 273 clock proofs, 1,365 broker messages and 130
+  checkpoint audits verify. Every new recorded executable hash matches actual
+  verified provider bytes; SDK material is explicitly reconstructed from that
+  provider. All 1,235 uploaded raw files remain unchanged; new physical-store
+  artifact is referenced only, not downloaded/hashed/reopened. Compact proof
+  retains actual binaries and every raw/model input. Combined accepted 26 seeds
+  total 77,084 invocations, 853,898 entries, 494 faults and 99,108 history ops.
+  Failed full parent and complete row/matrix/24h gates remain open.
+  [Exact raw binding, byte-identical executable provider and scope](scale/current-tier3-clock-2026-10-04/worker-clock-40-52/).
+
 - **Strict clock observer accepts actual API replies:** a three-node real NATS
   file-store contract publishes/reads two probes through each pinned peer with
   the unchanged two-second deadline. Normal2.169 s/race3.239 s pass; sequences

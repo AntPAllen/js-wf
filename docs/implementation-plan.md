@@ -946,6 +946,15 @@ over 50,724 operations. All captured source/clock/checkpoint and 51,520 canonica
 member hashes verify; actual workload/model executables and full raw proofs are
 retained. [Thirteen-seed qualification and physical-archive availability limits](scale/current-tier3-clock-2026-10-04/worker-clock-27-39/)
 keep the failed full parent, full 200-seed row/matrix and actual 24-hour gate open.
+Complete shard 40–52 at that same executed source subsequently qualifies with
+37,632 invocations, 416,582 entries, 247 faults and all three independent models
+for 48,384 operations. Exact recorded executable hashes match previously
+verified retained bytes; associated SDK material is explicitly reconstructed
+from their provider. New physical-store artifact is referenced only, not verified.
+[Raw-source/model proof and explicit material provenance](scale/current-tier3-clock-2026-10-04/worker-clock-40-52/)
+extend same-source clock coverage to 26 seeds 27–52 without promoting the failed
+parent, complete row/matrix or original 24-hour gate.
+
 
 
 Worker-clock seed 6 in that same full parent separately fails after all five
