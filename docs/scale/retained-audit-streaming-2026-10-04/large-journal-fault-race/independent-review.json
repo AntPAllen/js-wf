@@ -1,0 +1,42 @@
+{
+  "source": "71e6ad7332e3baa691273100dc4ed2d8873c3f9c",
+  "exit_code": 0,
+  "race": true,
+  "selected_inputs": 2894,
+  "local_git_inputs": 64,
+  "all_captured_source_hashes_verified": true,
+  "all_local_inputs_match_executed_git": true,
+  "actual_runner_matches_executed_git": true,
+  "actual_binary_sha256": "f980acc69093f0efbf586c410661f8fe8168114548efe39c924beea6b3826458",
+  "actual_binary_retained": true,
+  "all_actual_build_info_fields_match": true,
+  "live_proc_identity_captured": true,
+  "actual_live_environment_verified": true,
+  "named_results": {
+    "TestStreamingAuditNativeLargeJournalFault": {
+      "status": "pass",
+      "seconds": 71.56
+    }
+  },
+  "fault_rows": [
+    {
+      "leader": 1,
+      "pending": 143488,
+      "visited": 144000,
+      "seconds": 10.745176241,
+      "invocations": 12000,
+      "journals": 12000,
+      "entries": 144000,
+      "terminal": 12000,
+      "error": "<nil>",
+      "passed": true
+    }
+  ],
+  "native_files": 365,
+  "native_file_bytes": 69829997,
+  "raw_result_log": "=== RUN   TestStreamingAuditNativeLargeJournalFault\n    streaming_native_fault_test.go:172: streaming-large-fault consumer=wf-audit-1cwoPi3tRbySNV5wQrWVWv leader=1 pending_at_kill=143488 visited=144000 elapsed=10.745176241s report={Invocations:12000 Journals:12000 Entries:144000 Terminal:12000} err=<nil> reconnects=0\n--- PASS: TestStreamingAuditNativeLargeJournalFault (71.56s)\nPASS\n",
+  "physical_stores_reopened": false,
+  "qualifies_24h_row": false,
+  "qualifies_full_matrix": false,
+  "scope": "Native 12000-invocation/144000-entry streaming watch-state audit interrupted by actual pending R3 consumer leader library shutdown. Outcome and raw rows retained without relaxing20s. State-watch interruption, OS SIGKILL, five-container/full-matrix/24h qualification absent."
+}

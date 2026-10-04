@@ -33,6 +33,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
+- **Large streaming journal-fault race control independently reviewed:**
+  exact71e6ad7,12000 invocations/144000 entries/12000 terminals. Full combined
+  baseline required first; actual pending R3 memory consumer leader library
+  shutdown atvisitor128 leaves143488 pending. Streaming/watch-state full report
+  recovers in10.745s under original20s; named consumer cleanup passes.
+  All2894 selected inputs/64 Git files, live SDK/env/all build-info and3277
+  original members verify;43412854-byte two-part complete archive read back.
+  Stores retained, not reopened; state-watch interruption/OS SIGKILL/100k-fault/
+  legacy/five-container/full matrix/24h remain unqualified. Defaults unchanged.
+  [Complete large fault control](scale/retained-audit-streaming-2026-10-04/large-journal-fault-race/).
+
 - **Streaming journal-fault controls independently reviewed:** exact4616d47,
   all four race cases pass. Pending R3 consumer leader library shutdown at
   visitor128 recovers exact500-invocation/2000-entry/500-terminal reports in
