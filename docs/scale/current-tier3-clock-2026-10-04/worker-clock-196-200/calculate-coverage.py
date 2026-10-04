@@ -4,7 +4,7 @@ previous=repo/'docs/scale/current-tier3-clock-2026-10-04/worker-clock-170-182/pa
 old=json.loads(previous.read_text());source=old['source'];summaries=[];seeds=set()
 for item in old['summaries']:
  p=repo/item['path'];data=p.read_bytes();assert hashlib.sha256(data).hexdigest()==item['sha256']
- assert subprocess.check_output(['git','show','8b69a31eed72c5973af144b802fdea19a3bdcd88':'+item['path']],cwd=repo)==data
+ assert subprocess.check_output(['git','show','8b69a31eed72c5973af144b802fdea19a3bdcd88:'+item['path']],cwd=repo)==data
  assert json.loads(data)==item['summary'];summaries.append(item)
 p=out/'summary.json';data=p.read_bytes();summaries.append(dict(path=str(p.relative_to(repo)),sha256=hashlib.sha256(data).hexdigest(),summary=json.loads(data)))
 for item in summaries:
