@@ -2726,3 +2726,25 @@ terminal result andretain all originals, compareheldmetadata/leaseoperation/
 ownerdeath/redelivery timing before proposing a runtime fix. Overlaps live
 millioncandidate; observercoverage/default/fullmatrix/24h remain pending.
 [Immutable launch and early held entries](scale/held-lease-observation-2026-10-05/10m-launch/).
+
+
+### 2026-10-05 sustained mixed-encoding and state-watch terminal review
+
+The instrumented ten-minute opt-in worker_kill seed1 at97a037e qualifies its
+recordedscope:PASS641.43s/840inv/9268entries/119kills/threecohortaudits, worst
+terminal/progressp99 17.975/13.258s. Independent747protobuf/8521JSON/29mixedwire,
+three rebuilt exactOk1080operationmodels/52Gitdeps, actual124workerSDKs+parent/
+1355Gitsourceinputs/all6997originalmembers verified. Finalheldages12.185s do not
+establishserverexpiry orhistoricalcause; earlierfailedparent remainsfailed.
+No defaultwriter/fullrolling-chaos/fullmatrix/actual24h claim.
+[Qualified sustained profile](scale/held-lease-observation-2026-10-05/10m-qualified/).
+
+The copied29177state consumerleader-loss diagnostic at7a70440 fails after
+11685updates/nobarrier, three2s calls exhausted6.001s; actualR1memoryconsumer/
+pending27058/node3SIGKILL observed. AllactualSDK/serverbuilds/source/copy/archive
+verified, originalsunchanged; killedpostcutlog unavailable/secondarycleanupfail.
+Its clientpolicy differsfromactualmatrix (discovery/dialtimeout/reconnectwait).
+Correctfixturepolicy andretainconnection/metadata/attemptobservations before
+changingruntime; failuredoesnotprovehistoricalcheckpoint1040cause. Original
+20s/60s/threecheckpointattempt gatesremain.
+[Full failed copied-state proof](scale/state-watch-leader-loss-2026-10-05/).

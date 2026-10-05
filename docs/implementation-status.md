@@ -30,15 +30,28 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
-- **Sustained held-metadata rollout live:** clean97a037e, original10m workerkill /
-  five-second cadence / seed1 / protobuf-to-json / normal2GiB/GOMAX2 and all
-  original gates. ActualSDK143072/17 capturedSDK observations/five native Docker
-  process hashes/buildfields/1355selectedGitinputs verify; immutable1372member/
-  fourpart launchproof. Readonly non-atomic snapshot336heldrecords, twoobserved
-  client-minus-serverages≥12s/max12.185s, independently recomputed. Clockdifference
-  isnotexpiry authority orcauseconfirmation. Observerstartedbeforeinitialworkers,
-  finalgenerationcoverage/latency/integrity/drain pending; overlapsmillionVM.
-  [Live launch and captured held entries](scale/held-lease-observation-2026-10-05/10m-launch/).
+- **Sustained opt-in protobuf-to-JSON worker-kill seed1 qualified:** executed
+  97a037e normal2GiB/GOMAX2/original10m, nativePASS641.43s,840inv/9268entries/
+  119kills/threecohortaudits. Worstterminal/progressp99 17.975/13.258s; original
+  gates unchanged. Independentwire747protobuf/8521JSON/29mixedinv; three rebuilt
+  models exactOk1080operations/52Gitdeps. All124 worker generation SDKs+parent
+  actualhash/builds verify; fiveDockerprocessbuilds referencedimmutablelaunch;
+  1355selectedGitsourceinputs/all6997originalmembers/1043outermembers/threeparts
+  verify. Named-testdrain/stoppedstoresnotreopened/killedfinalcounters unavailable.
+  Final1407heldrecords/twoages≥12s/max12.185s afteroldownerSIGKILL; clockdifference
+  notexpiry authority/cause. Earlierfailedparent unpromoted; millionVM overlap.
+  Opt-inseed/sourceonly, no default/fullrolling/matrix/24h qualification.
+  [Complete qualified profile and review](scale/held-lease-observation-2026-10-05/10m-qualified/).
+
+- **Copied-state watch leaderloss fails original retry cap:** executed7a70440,
+  consumerR1memory/AckNone/pending27058, node3observedSIGKILL;11685realupdates/no
+  initialbarrier, three2s calls exhausted6.001s; nativeFAIL17.18 inclcleanup.
+  ActualSDK/fiveDockerbuilds/657Gitinputs/all4193archive members/eightpartsverify;
+  originalsunchanged. Killedcontainerpostcutlog unavailable/secondarycleanuperror.
+  Fixtureclient permitsdiscoveredendpoints/defaultdialtimeout, unlikeactualmatrix
+  parent; correctpolicy beforeattributingcause. Originalgatesunchanged, no
+  unchangedrerun/historicalcause/fault/matrix/24h qualification.
+  [Failed originals and cut admission](scale/state-watch-leader-loss-2026-10-05/).
 
 - **Held-lease metadata captured without additional broker requests:** executed
   ad92227, exactErrHeld/Acquire decisions/requestsequence and originaltiming

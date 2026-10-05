@@ -1,0 +1,68 @@
+{
+  "fault": {
+    "triggered": true,
+    "consumer": {
+      "stream_name": "KV_WF_STATE",
+      "name": "xZUkTY1y",
+      "created": "2026-10-05T11:00:03.965495666Z",
+      "config": {
+        "name": "xZUkTY1y",
+        "deliver_policy": "last_per_subject",
+        "ack_policy": "none",
+        "ack_wait": 79200000000000,
+        "max_deliver": 1,
+        "filter_subject": "$KV.WF_STATE.\u003e",
+        "replay_policy": "instant",
+        "inactive_threshold": 5000000000,
+        "num_replicas": 1,
+        "mem_storage": true,
+        "metadata": {
+          "_nats.req.level": "0"
+        },
+        "deliver_subject": "_INBOX.dRTtYsRCzFRRlC2gZrfX1C",
+        "flow_control": true,
+        "idle_heartbeat": 5000000000
+      },
+      "delivered": {
+        "consumer_seq": 2119,
+        "stream_seq": 3230,
+        "last_active": "2026-10-05T11:00:03.986394718Z"
+      },
+      "ack_floor": {
+        "consumer_seq": 2119,
+        "stream_seq": 3230
+      },
+      "num_ack_pending": 0,
+      "num_redelivered": 0,
+      "num_waiting": 0,
+      "num_pending": 27058,
+      "cluster": {
+        "name": "js-wf-route-6821-1791186805419314937",
+        "leader": "js-wf-route-6821-1791186805419314937-n3"
+      },
+      "push_bound": true,
+      "ts": "2026-10-05T11:00:03.986397692Z"
+    },
+    "node": 3,
+    "kill": {
+      "node": 3,
+      "container": "js-wf-route-148990-1791197993393344100-n3",
+      "kill_started": "2026-10-05T11:00:03.998220687Z",
+      "kill_returned": "2026-10-05T11:00:04.53011769Z",
+      "source_stopped": "2026-10-05T11:00:04.558957084Z",
+      "cleanup_complete": "2026-10-05T11:00:04.674595003Z",
+      "state": "dead",
+      "concurrent_observation": true
+    },
+    "injection_error": ""
+  },
+  "attempts": [
+    {
+      "records": 11685,
+      "complete": false
+    }
+  ],
+  "elapsed_ns": 6001406245,
+  "values": 0,
+  "error": "retained state snapshot watch creation: received=0 included=0 last_revision=0 initial_complete=false: context deadline exceeded"
+}
