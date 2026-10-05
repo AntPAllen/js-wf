@@ -20,6 +20,7 @@ type BlockDisk struct {
 	StoreDir         string
 	root, loop, name string
 	mounted, mapped  bool
+	retainMedia      bool
 }
 
 func NewBlockDisk(parent string) (_ *BlockDisk, err error) {
@@ -203,6 +204,14 @@ func (d *BlockDisk) Stall(ctx context.Context, duration time.Duration) (proof Bl
 	}
 }
 
+// RetainMediaOnClose preserves the closed backing image for independent review.
+// Call only for a successfully created fixture whose servers will be joined
+// before Close. Close still resumes, unmounts and detaches all owned devices.
+func (d *BlockDisk) RetainMediaOnClose() { d.retainMedia = true }
+
+// ImagePath identifies the private filesystem image, never a host block device.
+func (d *BlockDisk) ImagePath() string { return filepath.Join(d.root, "backing.img") }
+
 func (d *BlockDisk) Close() error {
 	ctx, done := context.WithTimeout(context.Background(), 30*time.Second)
 	defer done()
@@ -226,6 +235,9 @@ func (d *BlockDisk) Close() error {
 			return err
 		}
 		d.loop = ""
+	}
+	if d.retainMedia {
+		return nil
 	}
 	return os.RemoveAll(d.root)
 }

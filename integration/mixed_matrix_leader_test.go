@@ -214,6 +214,10 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 			if err != nil {
 				return nil, err
 			}
+			if os.Getenv("WF_MATRIX_PROCESS_ROOT") != "" {
+				blockDisk.RetainMediaOnClose()
+				t.Logf("retained block filesystem image=%s", blockDisk.ImagePath())
+			}
 			if err := os.Symlink(blockDisk.StoreDir, filepath.Join(root, "node-2")); err != nil {
 				return nil, err
 			}

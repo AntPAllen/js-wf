@@ -3401,3 +3401,14 @@ helper121b061/1695selectedinputs andthreeactualserverexecutables verified.
 Audit414.343ms/read4.424010s withinoriginal20s; completecopiedproof readback.
 [Complete independent audit](scale/tier2-retained-row-2026-10-05/partition-seed2-copied-audit/).
 Only original ten-minute seed2 is qualified; full13x200/current-source remainsopen.
+
+### Retained block-fault filesystem media preparation — 2026-10-05
+
+Retained process-matrix campaigns now ask `BlockDisk.RetainMediaOnClose` to keep
+its private backing image after servers join and all owned devices are resumed,
+unmounted, removed and detached. Ordinary fixtures keep deleting their private
+images. The retained image path is logged for closed-copy review; a symlink to an
+unmounted store is not filesystem evidence. A real Linux test prepares a file,
+closes the fixture, copies the image, mounts only that copy read-only with noload,
+checks the file and verifies both image hashes unchanged. Test execution and
+actual retained block-row qualification remain pending.
