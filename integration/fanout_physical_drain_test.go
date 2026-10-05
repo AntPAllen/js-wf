@@ -22,10 +22,15 @@ type fanoutDrainPeer struct {
 
 // Drain only after the original parent/child workers have been stopped and
 // joined. These are production deliveries and acknowledgments, never purges.
-// Both the extra 30-second bound and every read stay inside the original case.
+// Every read and worker join stays inside the original five-minute case.
+// A terminal-wakeup backlog has no separate recovery-p99/30-second contract.
 func drainFanoutTerminalWakeups(t *testing.T, ctx context.Context, all []jetstream.JetStream, handlers map[string]worker.Handler, root string) {
 	t.Helper()
-	bound, stop := context.WithTimeout(ctx, 30*time.Second)
+	caseDeadline, hasDeadline := ctx.Deadline()
+	if !hasDeadline {
+		t.Fatal("fanout drain requires original case deadline")
+	}
+	bound, stop := context.WithCancel(ctx)
 	defer stop()
 	w, err := worker.New(bound, all[1], "fanout-terminal-drain", handlers)
 	if err != nil {
@@ -81,9 +86,10 @@ func drainFanoutTerminalWakeups(t *testing.T, ctx context.Context, all []jetstre
 	}
 	data, err := json.MarshalIndent(struct {
 		ElapsedNS     int64             `json:"elapsed_ns"`
+		CaseDeadline  time.Time         `json:"case_deadline"`
 		Peers         []fanoutDrainPeer `json:"all_three_peers"`
 		WorkersJoined bool              `json:"workers_joined"`
-	}{time.Since(began).Nanoseconds(), peers, joined}, "", "  ")
+	}{time.Since(began).Nanoseconds(), caseDeadline, peers, joined}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}

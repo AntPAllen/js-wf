@@ -28,11 +28,12 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
-## Latest live verification — 2026-10-05 15:51 UTC
+## Latest live verification — 2026-10-05 16:20 UTC
 
 The actual24-hour journal-leader campaign remains running at executedaace912;
-actualSDK162125 checkedlive, native batch1746 / approximately4h03m. The diagnostic
-million-timer campaign remains running (actualprogram101283). Both original
+actualSDK162125 checkedlive, native batch1935 / approximately4h33m. The diagnostic
+million-timer campaign remains running (actualprogram101283),270272 receipts
+observed. Both original
 terminal gates remain pending; running observations do not resolve prior failures.
 
 The original hosted six-boundary fanout run at7a4d739 completed successfully:
@@ -48,7 +49,10 @@ passes zeroqueue/all64durables throughallthree peers afterjoins. Five extra30s
 checks fail (four snapshots138/121/80/113 messages; creationinterior readdeadline).
 ActualSDK/exactproducer/668Gitinputs/3287external inputs/sixchildSDKs verified;
 completeclosedproof preserved. Original5mcase/30scut unchanged. No unchanged
-rerun orphysicaldrainmatrix qualification; diagnose from freshcopies.
+rerun orphysicaldrainmatrix qualification. Freshcopies identify137terminalparent
+wakeups with all500children Completed. Nextdrainqualification uses the original
+five-minute case deadline, with30-second cut admission unchanged; diagnostic30s
+failure remains preserved. No productionruntimechange.
 [Complete failed profile](scale/fanout-combined-boundaries-2026-10-05/physical-drain-failed/).
 
 ## Latest preserved failures
@@ -130,6 +134,16 @@ no-responder cause remains unconfirmed. Correct fixture lifecycle/readiness and
 trace dependencies before another full run. [Preserved failed proof](scale/postgres-projection-fault-50000-2026-10-05/failed/).
 
 ## Latest accepted evidence
+
+- **New failed-drain residualqueue identified withchanged observation:** fresh
+  3413731 creationfirst copies,137terminal-parent wakeups onpartition52; parent
+  Completed/result249500,500Completedchildren/exact2×indexresults/preservedprefix/
+  higher epoch. Read4.331s/nativewhole4.351s under20s; consumercensus4.006s.
+  Only52nonzero136pending1ackpending of64. ActualSDK/b3268e7helper/1655inputs/
+  2090originalfiles unchanged verified; completecopy proof archived. Earlierbare
+  copieddeadline remainsfailed; no originaltimeoutcause/drain/fullmatrix claim.
+  [Complete changed observation](scale/fanout-combined-boundaries-2026-10-05/failed-drain-queue-trace/).
+
 
 - **Hosted fullsix combined fanout boundaries qualified at7a4d739:** native
   racePASS257.12s, sixactualparentSIGKILL/libraryR3journal restarts;500childresults/

@@ -3264,3 +3264,28 @@ source/executable/process/error archive readback. Helperprepared withstage
 logging and19sboundedcomplete stack insideunchanged20s, beforeanotherfreshcopy.
 No unchangedrerun/productionchange/budgetextension/servercause attribution.
 [Complete failed copied observation](scale/fanout-combined-boundaries-2026-10-05/failed-drain-queue-diagnosis/).
+
+### Instrumented failed-drain copied queue identified — 2026-10-05
+
+Changedb3268e7helper fresh3413731 creationfirst copies pass4.331sread/4.351s
+nativewhole underunchanged20s. Parent2504records27ms/500childtails300ms/consumer
+census4.006s/rawqueue10ms;19spredeadline timer canceled, no stackclaim. All137
+remainingmessages terminalparent onpartition52, stablecount/tail;64durables/
+only52nonzero136pending1ackpending. ParentCompleted249500/all500Completedchild
+exact2×indexresults/preservedthree-recordprefix/higher epoch verified. ActualSDK/
+helperGit/1655inputs/2090originalfiles unchanged verified, completecopyproofarchive
+readback. Original livefailure138beforejoin vsclosed137. Earlierbarecopydeadline
+remainsfailed; no originaloperationtiming/causefix/drain/fullmatrix/24h claim.
+[Complete changed observation](scale/fanout-combined-boundaries-2026-10-05/failed-drain-queue-trace/).
+
+### Fanout drain target aligned to original case deadline — 2026-10-05
+
+The separately added30-second terminal-backlog drain bound in3413731 was a
+diagnostic target; the suppliedfanout proof uses its existingfive-minute case,
+and30-second cut admission is a separate unchanged limit. Nextphysicaldrain
+qualification inherits that originalcase deadline for workers/reads/joins and
+retainsallthree currentR3 zeroqueues/exact64zeropendingdurables, committedprefix,
+higher epoch/501integrity/exactresults. No separate recovery-p99 claim is derived
+from terminal-backlog drainage. The same drain witness now recordscase_deadline.
+Earlierstrict30s profile remainsfailed/preserved; earliercopieddeadline remains
+failed. Fullchanged nativeprofile pending. No productionruntimechange.

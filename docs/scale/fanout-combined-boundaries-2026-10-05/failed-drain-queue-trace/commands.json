@@ -1,0 +1,21 @@
+{
+  "build": [
+    "go",
+    "build",
+    "-p=1",
+    "-buildvcs=true",
+    "-o",
+    "/tmp/js-wf-fanout-failed-drain-queue-diagnosis-first-20261005-v2/review-sdk",
+    "/tmp/js-wf-fanout-failed-drain-queue-diagnosis-first-20261005-v2/helper.go"
+  ],
+  "run": [
+    "/tmp/js-wf-fanout-failed-drain-queue-diagnosis-first-20261005-v2/review-sdk",
+    "/tmp/js-wf-fanout-failed-drain-queue-diagnosis-first-20261005-v2/cluster",
+    "/tmp/js-wf-fanout-failed-drain-queue-diagnosis-first-20261005-v2/retained-review.json"
+  ],
+  "environment": {
+    "GOCACHE": "/tmp/js-wf-go-build-cache-20261004",
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "2GiB"
+  }
+}
