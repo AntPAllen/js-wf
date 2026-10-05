@@ -208,13 +208,12 @@ func TestStreamingAuditR5RetainedProfileDiagnostic(t *testing.T) {
 					return err
 				}
 				if p.Stream == "WF_JRN" && (variant.label == "r5-byte-error" || variant.label == "r5-byte-short") {
-					scanErr = scanBatchThroughWithFetcher(call, observed, cutoff, visitor, 4096, func(fetchCtx context.Context, c jetstream.Consumer, n int) (jetstream.MessageBatch, error) {
-						batch, err := fetchByteBounded(fetchCtx, c, n, 8<<20)
-						if err != nil || p.Interrupted {
-							return batch, err
+					scanErr = scanByteBoundedThroughWithBatchTransform(call, observed, cutoff, visitor, func(batch jetstream.MessageBatch) jetstream.MessageBatch {
+						if p.Interrupted {
+							return batch
 						}
 						p.Interrupted = true
-						return interruptNativeBatch(batch, variant.label == "r5-byte-short"), nil
+						return interruptNativeBatch(batch, variant.label == "r5-byte-short")
 					})
 				} else if variant.byteBounded {
 					scanErr = scanByteBoundedThrough(call, observed, cutoff, visitor)

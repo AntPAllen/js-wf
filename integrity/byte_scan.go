@@ -13,6 +13,12 @@ import (
 // Streaming audit delivery shares the bulk reader's invariant algorithm and
 // captured bounds. The point reader and non-streaming bulk reader are separate.
 func scanByteBoundedThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+	return scanByteBoundedThroughWithBatchTransform(ctx, stream, cutoff, visit, nil)
+}
+
+// The nil transform is the production path. Native controls may interrupt a
+// batch without replacing the production iterator lifecycle or recovery logic.
+func scanByteBoundedThroughWithBatchTransform(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, transform func(jetstream.MessageBatch) jetstream.MessageBatch) error {
 	// Keep the byte-bounded iterator across record batches. Stopping it at each
 	// record cap would discard prefetched AckNone messages and force gap reads.
 	var iterator jetstream.MessagesContext
@@ -47,7 +53,11 @@ func scanByteBoundedThrough(ctx context.Context, stream jetstream.Stream, cutoff
 				initialLeader = cached.Cluster.Leader
 			}
 		}
-		return byteIteratorBatch(call, iterator, n, false), nil
+		batch := byteIteratorBatch(call, iterator, n, false)
+		if transform != nil {
+			batch = transform(batch)
+		}
+		return batch, nil
 	}, func(call context.Context, c jetstream.Consumer) (bool, error) {
 		return confirmedByteConsumerLeaderMove(call, c, consumerName, consumerStream, initialLeader)
 	})
