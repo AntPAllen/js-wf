@@ -2367,3 +2367,15 @@ identity. [Failure and diagnostic originals](scale/current-tier3-automatic-membe
 A fresh single ten-minute diagnostic can establish a new-source verdict and
 capture its blocking path on failure; it does not qualify full200/full matrices
 or establish this older-source failure's cause.
+
+### Fresh automatic-membership seed1 diagnostic launch — 2026-10-05
+
+Clean isolated cadb346 now runs original10m/R5/seed1/race512MiB/default-route/2m
+sync automatic membership with unchanged20s60s30s5m gates. Actual SDK VCS/live
+hash/environment and all five server binary copies/arguments verify;1307
+selected repository bytes match Git and captured SHA. Original stores remain
+live; immutable1332-member/four-part launch facts independently read back.
+[Live unit/source/profile and preserved launch](scale/current-tier3-automatic-membership-2026-10-05/seed1-launch/).
+First batches and real cuts/rejoins establish execution, not a terminal verdict.
+Two existing long campaigns overlap the VM. No single newer-source outcome can
+explain the old failed case or qualify full200/full16-row/current-source/24h.

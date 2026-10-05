@@ -30,6 +30,16 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Fresh automatic-membership seed1 diagnostic confirmed live:** isolated clean
+ cadb346/original10m/R5/race512MiB/default routes/2m sync/20s60s30s5m gates.
+ Actual live SDK/VCS/environment/hash and all five server copies/arguments verify;
+ 1307 selected Git/SHA inputs match. First batches, actual journal kills/heals and
+ membership stop/rejoin events observed. Immutable1332-member/four-part launch
+ archive read back; primary original stores remain live. Shared VM with existing
+ journal24h and million candidate; no terminal/full-row/full-matrix/24h promotion
+ or older-source cause claim. Future active-workload failure retains parent stack.
+ [Complete launch facts and actual identities](scale/current-tier3-automatic-membership-2026-10-05/seed1-launch/).
+
 - **Automatic-membership first failed case narrowed to an unfetched dispatch:**
   original79915ca seed1 acknowledges fanout invocation2194 then Await exhausts5m;
   captured partition31 assignment CAS chain ends at owner1/revision340 and that
