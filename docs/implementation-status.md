@@ -12518,3 +12518,14 @@ and differential/cancellation/error/cursor controls pass1.034s; R3 native full
 correctness comparisons prepared, no default/capacity/fault/legacy/24h acceptance.
 Previous closed profile copy reclaimed after complete canonical verification.
 [Preparation](scale/direct-callback-audit-2026-10-05/preparation/).
+
+## Direct callback native full correctness controls accepted — 2026-10-05
+
+At8b9b48b allfour R3 native race suites pass: compaction/cohort/fresh corruption,
+journal corruption, state values and116x256KiB payload refill/holes/cutoff/cancel.
+Direct callback matches independent point oracle reports/errors/digests; cancellation
+visits1 and consumers0. Selected680 Git inputs/actual SDK/race/module/closure and
+complete2163-member archive readback independently reviewed. Race times not speed
+proof; no default/R1 recovery/full400k/legacy/24h claim. Native consumer-leader-loss
+and cancellation fault controls prepared next.
+[Native proof](scale/direct-callback-audit-2026-10-05/native-controls/).
