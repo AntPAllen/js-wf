@@ -29,6 +29,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05: focused R1 recovery accepted
+
+Initial8000503 owner-loss fixture failed on typed SDK server-shutdown status;
+complete original retained. The exact status now enters existing bounded transport
+recovery, while visitor/untyped/semantic errors remain fatal. Atd779882 allthree
+R1 native R3-library race controls pass55.04s: owner shutdown complete1500/6000
+in1.505354s, acknowledged cursor deletion in1.309517s, cancellation128/97ms and
+zero audit consumers. Source/actual SDK/closure and complete1791-member archive
+reviewed. R5 OS SIGKILL, same-owner process restart, larger fault capacity/live/
+default/final matrices/24h still open; no broader replay allowance introduced.
+[Proof](scale/direct-callback-audit-2026-10-05/single-replica-shutdown-recovery/).
+
 ## Latest follow-up — 2026-10-05: full400k explicit capacity pass
 
 At08a90c8 the direct R1 reader passes the exact400k INV/journals/terminal and4.8M

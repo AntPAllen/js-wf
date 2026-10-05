@@ -4120,3 +4120,15 @@ controls pass1.040s; changed three-fixture native qualification prepared. No R1
 failure/default/R5/largepopulation/24h claim.
 [Original failure](scale/direct-callback-audit-2026-10-05/single-replica-native-fault-controls/).
 [Correction](scale/direct-callback-audit-2026-10-05/single-replica-recovery-preparation/).
+
+## Focused R1 shutdown/deletion/cancellation recovery accepted — 2026-10-05
+
+Changed reader atd779882 native racePASS55.04s: actualR1 owner library Shutdown
+with4374 pending recovers exact1500/6000 report in1.505354s; acknowledged deletion
+with4121pending recovers in1.309517s; cancellation128/97ms, all zero consumer
+assertions. Exact SDK shutdown sentinel now enters existing bounded recovery;
+visitor/untyped/semantic errors remain fatal and replay rules unchanged. Original
+8000503 failure stays preserved. Independent source/actual SDK/module/closure and
+full1791-member archive readback verified. R5 process SIGKILL/same-owner restart/
+larger faultcapacity/live/default/finalmatrix/actual24h remain open.
+[Evidence](scale/direct-callback-audit-2026-10-05/single-replica-shutdown-recovery/).
