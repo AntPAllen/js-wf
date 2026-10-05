@@ -3678,3 +3678,14 @@ sixteenpartsreadback. Quiescentcopiesonly,nofault/writers; candidateexperimental
 notoriginal24h qualification. [Proof](scale/concurrent-state-audit-2026-10-05/copied-87920-comparison/).
 Fullcohort observedstatewatchleaderSIGKILL testprepared; original20sreport gate
 unchanged. Compile/opt-inskip verified,actualfaultexecutionpending.
+
+### Full87,920 concurrent copied-cohort state-leader fault accepted — 2026-10-05
+
+Executed44c3f6e SDK560589 nativePASS23.24s,complete87920invocations/journals/
+terminals/969925entries in9.830075s underoriginal20s. Actualstatewatchconsumer
+leadernode3SIGKILL admitted with86144pendingentries; processstopped confirmed.
+Firstwatch11685records/noinitialbarrier discarded; second88068records/complete
+initialbarrier accepted. All3886originalstorefiles unchanged andindependently
+verifiedagainstoriginalarchive;669Gitinputs/fiveactualNATS/closedPIDs verified.
+Completeclosedproof archiving underway. No runtimewriters/original24h qualification
+orconcurrentcandidate adoption. [Independentreview](scale/concurrent-state-audit-2026-10-05/copied-87920-state-leader-loss/independent-review.json).
