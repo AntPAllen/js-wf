@@ -3666,3 +3666,15 @@ validation remainunchanged. Snapshotiscancelled/joined onjournalfailure.
 Nativecompaction/corruption/state racecomparisons pass65.995s; cancellation/initial
 barrier racecontrols pass1.017s. Full87,920copiedcohort comparison isnext; noadoption
 or24hqualification. [Controls](scale/concurrent-state-audit-2026-10-05/controls/).
+
+### Complete87,920 copied-cohort concurrent state comparison accepted — 2026-10-05
+
+Executed8947bba SDK556940 nativePASS55.02s. Original20s sequential/concurrent/
+sequentialrecheck allpass8.106896/7.876084/7.555520s,identical87920invocations,
+journals,terminals/969925entries. No speedup attribution. All3886originalstore
+files unchanged andverifiedagainstoriginalarchive;669Gitinputs/fiveactualNATS
+bytes/mounts/closedPID independentlyreviewed. Complete4419archive members/
+sixteenpartsreadback. Quiescentcopiesonly,nofault/writers; candidateexperimental,
+notoriginal24h qualification. [Proof](scale/concurrent-state-audit-2026-10-05/copied-87920-comparison/).
+Fullcohort observedstatewatchleaderSIGKILL testprepared; original20sreport gate
+unchanged. Compile/opt-inskip verified,actualfaultexecutionpending.

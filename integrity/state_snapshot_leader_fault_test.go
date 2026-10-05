@@ -190,3 +190,49 @@ func TestRetainedStateSnapshotCopiedStoreLeaderLoss(t *testing.T) {
 		t.Fatalf("original-budget state snapshot did not qualify: %+v", proof)
 	}
 }
+
+// Inject the existing observed watch-consumer leader kill while the full
+// checkpoint3140 cohort's journal and initial state set are read concurrently.
+type concurrentSnapshotFaultJS struct {
+	jetstream.JetStream
+	state jetstream.KeyValue
+}
+
+func (j concurrentSnapshotFaultJS) KeyValue(ctx context.Context, name string) (jetstream.KeyValue, error) {
+	if name == "WF_STATE" {
+		return j.state, nil
+	}
+	return j.JetStream.KeyValue(ctx, name)
+}
+
+func TestConcurrentRetainedAuditCopiedStoreStateLeaderLoss(t *testing.T) {
+	ctx, js, kv, cluster, _, root := stateSnapshotCopiedFixture(t)
+	stream, err := js.Stream(ctx, "KV_WF_STATE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fault := &stateSnapshotLeaderFault{cluster: cluster, stream: stream, Node: -1, Root: root}
+	call, stop := context.WithTimeout(ctx, 20*time.Second)
+	began := time.Now()
+	report, err := CheckThroughInvocationSequenceWithConcurrentStreamingStateReads(call, concurrentSnapshotFaultJS{JetStream: js, state: stateSnapshotFaultKV{KeyValue: kv, fault: fault}}, 87920)
+	elapsed := time.Since(began)
+	stop()
+	proof := struct {
+		Fault     *stateSnapshotLeaderFault    `json:"fault"`
+		Attempts  []*stateSnapshotWatchAttempt `json:"attempts"`
+		Report    Report                       `json:"report"`
+		ElapsedNS int64                        `json:"elapsed_ns"`
+		Error     string                       `json:"error"`
+	}{fault, fault.attempts, report, int64(elapsed), fmt.Sprint(err)}
+	data, writeErr := json.MarshalIndent(proof, "", "  ")
+	if writeErr != nil {
+		t.Fatal(writeErr)
+	}
+	if writeErr := os.WriteFile(filepath.Join(root, "state-watch-leader-loss.json"), append(data, '\n'), 0600); writeErr != nil {
+		t.Fatal(writeErr)
+	}
+	t.Logf("concurrent copied cohort state-leader loss elapsed=%s report=%+v attempts=%d fault=%+v err=%v", elapsed, report, len(fault.attempts), fault, err)
+	if !fault.Triggered || fault.Consumer == nil || fault.Kill == nil || fault.InjectionError != "" || err != nil || elapsed >= 20*time.Second || report != (Report{Invocations: 87920, Journals: 87920, Entries: 969925, Terminal: 87920}) {
+		t.Fatalf("original-budget concurrent copied fault audit did not qualify: %+v", proof)
+	}
+}
