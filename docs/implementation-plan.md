@@ -3438,3 +3438,14 @@ copiedmountdetached andclosedcopyproof readback. No originalimage mount orNATS
 store reopen; no workers/manualACK/provisioning. [Nativeproof](scale/retained-block-media-2026-10-05/block-row-smoke/);
 [copiedrawaudit](scale/retained-block-media-2026-10-05/block-row-copied-audit/).
 Ten-minute blockrow/full13x200gate remainpending.
+
+### Retained ordinary worker-process executable observation prepared — 2026-10-05
+
+`scripts/matrix_worker_observer.py` prepares periodic owned worker-generation
+captures for the Tier2 worker-kill/pause/isolation rows. Ancestry includes all Go
+task threads, exact child test selection and fixture identity/root fields are
+checked, and actual live `/proc` executable bytes are retained with PID/start
+rechecks. Other environment values are not recorded. One owned identity and six
+foreign/malformed controls pass; real worker-row execution and producer integration
+remain pending. Polling cannot establish exhaustive generation coverage. Current
+live disk-row producer and its captured source files stay unchanged.
