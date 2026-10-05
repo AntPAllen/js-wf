@@ -150,6 +150,17 @@ trace dependencies before another full run. [Preserved failed proof](scale/postg
 
 ## Latest accepted evidence
 
+- **Retained real block media smoke and copied-image audit accepted:** native2774fd2
+  normal35s seed1 PASS45.13s/224terminals/2474entries/one5sstall. Closed512MiB
+  originalimage retained after cleanup; fullproof preserved. Freshimagecopy mounted
+  only forcopiednode-2 andjoined withothertwoclosednodecopies: threehistorymodels,
+  full224/2474integrity/allthreequeue64durable drain pass in4.217606s under20s.
+  Original1397files/rawhashunchanged;copiedmountdetached. No ten-minute qualification.
+  Originalten-minute seed1 nowruns atf57da4d, actualSDK481227 verifiedlive.
+  [Native smoke](scale/retained-block-media-2026-10-05/block-row-smoke/),
+  [copied raw audit](scale/retained-block-media-2026-10-05/block-row-copied-audit/),
+  [ten-minute launch](scale/retained-block-media-2026-10-05/ten-minute-launch/).
+
 - **Independent integrity/results/prefix/drain audits passed for allsixdc8422a
   fanout clusters:** freshcopies only;501invocations/journals/terminals,500exactchild
   results/parent249500 throughallthreeclients, identicalpre-SIGKILL prefixes/higher
