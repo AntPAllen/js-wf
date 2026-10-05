@@ -12538,3 +12538,16 @@ zero audit consumers asserted. Selected source/actual SDK/race/module/closure an
 complete1427-member archive independently reviewed. No OS SIGKILL/R1 failover/
 legacy/full400k/default/24h claim. Legacy and capacity qualification remain next.
 [Fault proof](scale/direct-callback-audit-2026-10-05/native-fault-controls/).
+
+## Direct callback legacy accepted; fullcapacity prepared — 2026-10-05
+
+At1bf66ca legacy2.11.17 native race comparisons pass67.84s. Full/cohort/compaction/
+corruption/state point oracles include direct callback; actual SDK/three server
+executable hashes and closedPIDs independently verified, complete1065-member
+archive read back. FixedR1 callback/direct/callback full400k comparison prepared;
+original20s/4.8M cardinality unchanged. Compile/skip preparation passes. No R1
+failover/default/fullcapacity/24h claim.314345594 bytes of redundant temporary
+proofs reclaimed only after pushed canonical part/base verification and descriptor
+checks; stores/source/media untouched. Fullcapacity launch awaits disk headroom.
+[Legacy proof](scale/direct-callback-audit-2026-10-05/legacy-controls/).
+[Capacity preparation](scale/direct-callback-audit-2026-10-05/capacity-preparation/).

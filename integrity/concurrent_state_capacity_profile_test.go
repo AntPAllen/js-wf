@@ -250,19 +250,24 @@ func compareCompactCopiedCapacity(t *testing.T, js jetstream.JetStream, root str
 	var cursorReplicas []int
 	var cursorStarts []uint64
 	var cursorPointReads int
-	if os.Getenv("WF_AUDIT_CAPACITY_SINGLE_REPLICA_COMPARISON") == "1" {
+	observeCursors := os.Getenv("WF_AUDIT_CAPACITY_SINGLE_REPLICA_COMPARISON") == "1" || os.Getenv("WF_AUDIT_CAPACITY_DIRECT_CALLBACK_COMPARISON") == "1"
+	if observeCursors {
 		candidate = "single_replica_callback"
-		observedReader := func(replicas int) retainedScanner {
+		observedReader := func(replicas int, read retainedScanner) retainedScanner {
 			return func(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 				observed := &profileCursorStream{Stream: stream, replicas: replicas}
-				err := scanConsumeByteBoundedThrough(ctx, observed, cutoff, visit)
+				err := read(ctx, observed, cutoff, visit)
 				cursorReplicas = append(cursorReplicas, observed.creates...)
 				cursorStarts = append(cursorStarts, observed.starts...)
 				cursorPointReads += observed.pointReads
 				return err
 			}
 		}
-		modes = []readerMode{{"replicated_callback", observedReader(5)}, {candidate, observedReader(1)}, {"replicated_callback_recheck", observedReader(5)}}
+		modes = []readerMode{{"replicated_callback", observedReader(5, scanConsumeByteBoundedThrough)}, {candidate, observedReader(1, scanConsumeByteBoundedThrough)}, {"replicated_callback_recheck", observedReader(5, scanConsumeByteBoundedThrough)}}
+		if os.Getenv("WF_AUDIT_CAPACITY_DIRECT_CALLBACK_COMPARISON") == "1" {
+			candidate = "single_replica_direct_callback"
+			modes = []readerMode{{"single_replica_callback", observedReader(1, scanConsumeByteBoundedThrough)}, {candidate, observedReader(1, scanConsumeDirectWindowsThrough)}, {"single_replica_callback_recheck", observedReader(1, scanConsumeByteBoundedThrough)}}
+		}
 	}
 	for _, mode := range modes {
 		cursorReplicas, cursorStarts, cursorPointReads = nil, nil, 0
@@ -275,7 +280,7 @@ func compareCompactCopiedCapacity(t *testing.T, js jetstream.JetStream, root str
 		cancel()
 		runtime.ReadMemStats(&after)
 		r := result{Mode: mode.name, Report: report, Error: fmt.Sprint(err), ElapsedNS: int64(elapsed), AllocatedBytes: after.TotalAlloc - before.TotalAlloc, GCCycles: after.NumGC - before.NumGC}
-		if os.Getenv("WF_AUDIT_CAPACITY_SINGLE_REPLICA_COMPARISON") == "1" {
+		if observeCursors {
 			r.CursorReplicas, r.CursorStarts, r.CursorPointReads = cursorReplicas, cursorStarts, cursorPointReads
 			if len(cursorReplicas) < 2 {
 				t.Errorf("%s missing actual INV/JRN cursor observations: %v", mode.name, cursorReplicas)
