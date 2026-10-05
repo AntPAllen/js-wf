@@ -3819,3 +3819,24 @@ crossesrecord/bytewindows. Libraryshutdown, notprocessSIGKILL. Source/actualSDK/
 race/VCS/closure andcompleteclosedarchive independentlyverified. No400kcapacity,
 legacy/fullmatrix/24h qualification ordefaultadoption.
 [Faultproof](scale/compact-audit-metadata-2026-10-05/native-fault-controls/).
+
+### Plain full400k compact metadata comparison prepared — 2026-10-05
+
+An explicitcopied-store plaincomparison skipsprofiling overhead, recordsSDK
+concurrent /compactconcurrent /SDKrecheck fullreports, elapsed/allocation/GC for
+original20s attempts. Compactmustreturnexact400k/4.8M/400k fullreport within20s;
+failed baselines andcandidate preserved. RestoredR5file stream/state400k/4.8M/400k
+metadata readiness andoriginalcopy guards unchanged. Compile/opt-inskip passes.
+Fullnative comparison pending, nodefaultadoption. Closedearlierprofile copy
+reclaimed3.58GB onlyafter1013files/canonicalpushedarchive/manifest/PID/FD verification;
+originalnative400k stores untouched. Additionalverifiedpushedworktreeparts sparse
+recovery2.041GB recorded, canonicalGit retained.
+
+### Compact metadata legacy2.11.17 native race comparison accepted — 2026-10-05
+
+Executeda4a1b05 nativePASS49.91s, sharedoracle/compactmetadata full/cohort,
+compaction/corruption/terminal/tombstone/snapshot/orphan cases match. Actualthree
+legacyserver executablebytes checked/retained, allPIDsgone, selectedGitbeforeafter/
+SDK/race/VCS independentlyreviewed. Complete1057-member/twopart archive readback.
+Not400kcapacity/fullmatrix/24h qualification ordefaultadoption.
+[Legacyproof](scale/compact-audit-metadata-2026-10-05/legacy-controls/).

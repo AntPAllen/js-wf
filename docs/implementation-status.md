@@ -44,8 +44,10 @@ observed SDK/race/VCS and closure independently reviewed; complete2,114-member
 archive read back. [Native controls](scale/compact-audit-metadata-2026-10-05/native-controls/).
 Compact consumer-leader-loss/cancellation cases now pass at18b8fae: library node
 shutdown with4039pending, full1500/6000 in1.927858s; cancellation/cleanup408ms.
-[Fault evidence](scale/compact-audit-metadata-2026-10-05/native-fault-controls/). Legacy,400k capacity,
-full fault matrix and24h qualification remain open; no default adoption.
+[Fault evidence](scale/compact-audit-metadata-2026-10-05/native-fault-controls/). Legacy2.11.17 native race comparison now passes49.91s at a4a1b05; actualthree
+server bytes/closedPIDs verified. [Legacy proof](scale/compact-audit-metadata-2026-10-05/legacy-controls/).
+Plain400k copied comparison is prepared; capacity, full fault matrix and24h
+qualification remain open; no default adoption.
 
 ## Latest follow-up — 2026-10-05 20:12 UTC
 

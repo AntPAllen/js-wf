@@ -95,6 +95,10 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
+	if os.Getenv("WF_AUDIT_CAPACITY_PLAIN_COMPARISON") == "1" {
+		compareCompactCopiedCapacity(t, js, root)
+		return
+	}
 	type phase struct {
 		Stream  string
 		Records int
@@ -187,5 +191,48 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 	}
 	if len(phases) == 0 {
 		t.Fatal("no scanned phase recorded")
+	}
+}
+
+// Compare the metadata readers on the same quiet population without CPU/visitor
+// profiling. Each full invocation/journal/state reread retains its own20s limit.
+func compareCompactCopiedCapacity(t *testing.T, js jetstream.JetStream, root string) {
+	type result struct {
+		Mode           string
+		Report         Report
+		Error          string
+		ElapsedNS      int64
+		AllocatedBytes uint64
+		GCCycles       uint32
+	}
+	var results []result
+	want := Report{Invocations: 400000, Journals: 400000, Entries: 4800000, Terminal: 400000}
+	for _, mode := range []struct {
+		name string
+		read retainedScanner
+	}{{"sdk_concurrent", scanByteBoundedThrough}, {"compact_concurrent", scanCompactByteBoundedThrough}, {"sdk_recheck", scanByteBoundedThrough}} {
+		var before, after runtime.MemStats
+		runtime.ReadMemStats(&before)
+		call, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		began := time.Now()
+		report, err := checkUsingConcurrentOptions(call, js, nil, mode.read, true, true, true)
+		elapsed := time.Since(began)
+		cancel()
+		runtime.ReadMemStats(&after)
+		results = append(results, result{mode.name, report, fmt.Sprint(err), int64(elapsed), after.TotalAlloc - before.TotalAlloc, after.NumGC - before.NumGC})
+		data, e := json.MarshalIndent(results, "", "  ")
+		if e != nil {
+			t.Fatal(e)
+		}
+		if e = os.WriteFile(filepath.Join(root, "compact-capacity-comparison.json"), append(data, '\n'), 0600); e != nil {
+			t.Fatal(e)
+		}
+		t.Logf("plain400k mode=%s elapsed=%s report=%+v err=%v allocated=%d gc=%d", mode.name, elapsed, report, err, results[len(results)-1].AllocatedBytes, results[len(results)-1].GCCycles)
+		if err == nil && report != want {
+			t.Errorf("%s incomplete successful report %+v", mode.name, report)
+		}
+		if mode.name == "compact_concurrent" && (err != nil || report != want || elapsed >= 20*time.Second) {
+			t.Errorf("compact400k capacity gate missed: %+v", results[len(results)-1])
+		}
 	}
 }
