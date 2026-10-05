@@ -1069,6 +1069,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		}
 	}()
 	defer func() { stopCheckpoints(); <-checkpointDone }()
+	// Run before joining workers/reconcilers on failure. The stack records
+	// blocked assignment/dispatch paths without guessing their server-side cause.
+	defer func() {
+		if err := saveMatrixFailureStack(root, t.Failed()); err != nil {
+			t.Logf("capture failed parent SDK goroutines: %v", err)
+		}
+	}()
 	batches := 0
 	for time.Now().Before(end) && ctx.Err() == nil {
 		select {

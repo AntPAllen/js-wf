@@ -169,9 +169,10 @@ def main():
         (root/'source-before.json').write_text(json.dumps(before,indent=2)+'\n')
         call(['docker','info'],stdout=(root/'docker-info.txt').open('w'))
         binary=root/'integration.test'
-        call(['go','test','-p=1',* ([] if a.no_race else ['-race']),'-c','-o',str(binary),'./integration'])
+        call(['go','test','-p=1',* ([] if a.no_race else ['-race']),'-buildvcs=true','-c','-o',str(binary),'./integration'])
         info=subprocess.check_output(['go','version','-m',str(binary)],text=True)
         assert ('-race=true' in info)==(not a.no_race)
+        assert f'vcs.revision={revision}' in info and 'vcs.modified=false' in info
         (root/'binary.json').write_text(json.dumps(dict(sha256=sha(binary),race=not a.no_race,build_info=info),indent=2)+'\n')
         if a.row=='rolling_upgrade':
             old=root/'old-server';old.mkdir()

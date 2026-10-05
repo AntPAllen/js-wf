@@ -30,6 +30,19 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Automatic-membership first failed case narrowed to an unfetched dispatch:**
+  original79915ca seed1 acknowledges fanout invocation2194 then Await exhausts5m;
+  captured partition31 assignment CAS chain ends at owner1/revision340 and that
+  owner rejoins epoch1368 before Start. No target dispatch record appears; four
+  missing-journal repair publications acknowledge. ZIP/API/logs/all82 raw files
+  verify and original failure remains. No final consumer/assignment snapshot,
+  actual workload SDK/full source/stores or server cause established. R5 harness
+  now records parent goroutines on active-workload failure before cleanup joins,
+  with truncation/PID/time scope; normal/race controls pass, caller-only mutation
+  fails. Isolated row producer asserts clean VCS-stamped future SDK builds.
+  Diagnostic only, no production recovery fix or matrix pass.
+  [Original failed case, analysis and controls](scale/current-tier3-automatic-membership-2026-10-05/failed-seed1/).
+
 - **First recorded-source actual disk-stall shard independently accepted:**
   Tier3 block_disk seeds1–13 at79915ca complete original600s/19 cuts per seed,
  40964 invocations/451209 entries/247 real five-second device suspensions/

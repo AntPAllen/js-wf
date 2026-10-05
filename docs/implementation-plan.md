@@ -2348,3 +2348,22 @@ unavailable and final integrity/drain remains named-test scope.
 [Raw/model/provenance and complete verified parts](scale/current-tier3-block-stall-2026-10-05/seeds-1-13/).
 Seeds14–200/current-source/full16-row/actual24h/million-drain remain open; existing
 live job and soak handles continue. No native workload is rerun for this review.
+
+### Automatic-membership parent-stack diagnostic — 2026-10-05
+
+Recorded79915ca auto_journal seed1 has an acknowledged Start, captured owner
+CAS/rejoined session and four acknowledged missing-journal repair dispatches,
+but no uploaded target fetch event before five-minute Await expiry. Complete
+raw/API/logs are preserved; consumer/assignment final snapshot, actual SDK/full
+source/store bytes and native/runtime cause remain unavailable. No recovery fix
+or original failed-parent promotion is claimed.
+
+The active R5 workload now dumps parent goroutines on test failure before cleanup
+joins, retaining PID/time/size/truncation. Subprocess workers and earlier startup
+failures are outside that dump scope. Normal/race blocked-goroutine controls pass;
+a caller-only capture mutant fails. All original workload/audit/latency/deadline
+bounds stay. The isolated producer additionally asserts clean VCS-stamped SDK
+identity. [Failure and diagnostic originals](scale/current-tier3-automatic-membership-2026-10-05/failed-seed1/).
+A fresh single ten-minute diagnostic can establish a new-source verdict and
+capture its blocking path on failure; it does not qualify full200/full matrices
+or establish this older-source failure's cause.
