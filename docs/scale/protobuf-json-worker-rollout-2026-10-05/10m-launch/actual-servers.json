@@ -1,0 +1,252 @@
+[
+  {
+    "node": 0,
+    "container_id": "2d006ac3022354931d2bb42ff1630981f382bb7f03ea6bc3d4e1034cb904ef44",
+    "name": "/js-wf-route-116782-1791194058870250494-n0",
+    "pid": 117087,
+    "executable_sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+    "build_info": "/proc/117087/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+    "path": "/nats-server",
+    "args": [
+      "-c",
+      "/etc/nats.conf",
+      "-a",
+      "0.0.0.0",
+      "-p",
+      "4222",
+      "-m",
+      "8222",
+      "-n",
+      "js-wf-route-116782-1791194058870250494-n0",
+      "-js",
+      "-sd",
+      "/data",
+      "-cluster_name",
+      "js-wf-route-116782-1791194058870250494",
+      "-cluster",
+      "nats://0.0.0.0:6222",
+      "-cluster_advertise",
+      "js-wf-route-116782-1791194058870250494-route-n0:6222",
+      "-routes",
+      "nats://js-wf-route-116782-1791194058870250494-route-n1:6222,nats://js-wf-route-116782-1791194058870250494-route-n2:6222,nats://js-wf-route-116782-1791194058870250494-route-n3:6222,nats://js-wf-route-116782-1791194058870250494-route-n4:6222"
+    ],
+    "mounts": [
+      {
+        "Type": "bind",
+        "Source": "/tmp/js-wf-protobuf-json-worker-10m-20261005/fixture/cluster/node-0",
+        "Destination": "/data",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/tmp/js-wf-protobuf-json-worker-10m-20261005/fixture/cluster/nats.conf",
+        "Destination": "/etc/nats.conf",
+        "Mode": "ro",
+        "RW": false,
+        "Propagation": "rprivate"
+      }
+    ]
+  },
+  {
+    "node": 1,
+    "container_id": "f5360bf4031d47f48dd8654d8fcb9e243393dd1ccdc32d5431c78625532b8139",
+    "name": "/js-wf-route-116782-1791194058870250494-n1",
+    "pid": 117347,
+    "executable_sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+    "build_info": "/proc/117347/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+    "path": "/nats-server",
+    "args": [
+      "-c",
+      "/etc/nats.conf",
+      "-a",
+      "0.0.0.0",
+      "-p",
+      "4222",
+      "-m",
+      "8222",
+      "-n",
+      "js-wf-route-116782-1791194058870250494-n1",
+      "-js",
+      "-sd",
+      "/data",
+      "-cluster_name",
+      "js-wf-route-116782-1791194058870250494",
+      "-cluster",
+      "nats://0.0.0.0:6222",
+      "-cluster_advertise",
+      "js-wf-route-116782-1791194058870250494-route-n1:6222",
+      "-routes",
+      "nats://js-wf-route-116782-1791194058870250494-route-n0:6222,nats://js-wf-route-116782-1791194058870250494-route-n2:6222,nats://js-wf-route-116782-1791194058870250494-route-n3:6222,nats://js-wf-route-116782-1791194058870250494-route-n4:6222"
+    ],
+    "mounts": [
+      {
+        "Type": "bind",
+        "Source": "/tmp/js-wf-protobuf-json-worker-10m-20261005/fixture/cluster/node-1",
+        "Destination": "/data",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/tmp/js-wf-protobuf-json-worker-10m-20261005/fixture/cluster/nats.conf",
+        "Destination": "/etc/nats.conf",
+        "Mode": "ro",
+        "RW": false,
+        "Propagation": "rprivate"
+      }
+    ]
+  },
+  {
+    "node": 2,
+    "container_id": "85a787bd93484d3f2c922bc7b4361643c3338cd7605f153c92ed2e723c3aa104",
+    "name": "/js-wf-route-116782-1791194058870250494-n2",
+    "pid": 117479,
+    "executable_sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+    "build_info": "/proc/117479/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+    "path": "/nats-server",
+    "args": [
+      "-c",
+      "/etc/nats.conf",
+      "-a",
+      "0.0.0.0",
+      "-p",
+      "4222",
+      "-m",
+      "8222",
+      "-n",
+      "js-wf-route-116782-1791194058870250494-n2",
+      "-js",
+      "-sd",
+      "/data",
+      "-cluster_name",
+      "js-wf-route-116782-1791194058870250494",
+      "-cluster",
+      "nats://0.0.0.0:6222",
+      "-cluster_advertise",
+      "js-wf-route-116782-1791194058870250494-route-n2:6222",
+      "-routes",
+      "nats://js-wf-route-116782-1791194058870250494-route-n0:6222,nats://js-wf-route-116782-1791194058870250494-route-n1:6222,nats://js-wf-route-116782-1791194058870250494-route-n3:6222,nats://js-wf-route-116782-1791194058870250494-route-n4:6222"
+    ],
+    "mounts": [
+      {
+        "Type": "bind",
+        "Source": "/tmp/js-wf-protobuf-json-worker-10m-20261005/fixture/cluster/node-2",
+        "Destination": "/data",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/tmp/js-wf-protobuf-json-worker-10m-20261005/fixture/cluster/nats.conf",
+        "Destination": "/etc/nats.conf",
+        "Mode": "ro",
+        "RW": false,
+        "Propagation": "rprivate"
+      }
+    ]
+  },
+  {
+    "node": 3,
+    "container_id": "9ffaddc869e8d7c928be299a0eea277d5a87ddc56b4451e017ad22d54b5ca420",
+    "name": "/js-wf-route-116782-1791194058870250494-n3",
+    "pid": 117614,
+    "executable_sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+    "build_info": "/proc/117614/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+    "path": "/nats-server",
+    "args": [
+      "-c",
+      "/etc/nats.conf",
+      "-a",
+      "0.0.0.0",
+      "-p",
+      "4222",
+      "-m",
+      "8222",
+      "-n",
+      "js-wf-route-116782-1791194058870250494-n3",
+      "-js",
+      "-sd",
+      "/data",
+      "-cluster_name",
+      "js-wf-route-116782-1791194058870250494",
+      "-cluster",
+      "nats://0.0.0.0:6222",
+      "-cluster_advertise",
+      "js-wf-route-116782-1791194058870250494-route-n3:6222",
+      "-routes",
+      "nats://js-wf-route-116782-1791194058870250494-route-n0:6222,nats://js-wf-route-116782-1791194058870250494-route-n1:6222,nats://js-wf-route-116782-1791194058870250494-route-n2:6222,nats://js-wf-route-116782-1791194058870250494-route-n4:6222"
+    ],
+    "mounts": [
+      {
+        "Type": "bind",
+        "Source": "/tmp/js-wf-protobuf-json-worker-10m-20261005/fixture/cluster/nats.conf",
+        "Destination": "/etc/nats.conf",
+        "Mode": "ro",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/tmp/js-wf-protobuf-json-worker-10m-20261005/fixture/cluster/node-3",
+        "Destination": "/data",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      }
+    ]
+  },
+  {
+    "node": 4,
+    "container_id": "35470733d170df40ee53129d46d2474a3d0422a06c91a59ab0fb4a397f3c122e",
+    "name": "/js-wf-route-116782-1791194058870250494-n4",
+    "pid": 117751,
+    "executable_sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+    "build_info": "/proc/117751/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+    "path": "/nats-server",
+    "args": [
+      "-c",
+      "/etc/nats.conf",
+      "-a",
+      "0.0.0.0",
+      "-p",
+      "4222",
+      "-m",
+      "8222",
+      "-n",
+      "js-wf-route-116782-1791194058870250494-n4",
+      "-js",
+      "-sd",
+      "/data",
+      "-cluster_name",
+      "js-wf-route-116782-1791194058870250494",
+      "-cluster",
+      "nats://0.0.0.0:6222",
+      "-cluster_advertise",
+      "js-wf-route-116782-1791194058870250494-route-n4:6222",
+      "-routes",
+      "nats://js-wf-route-116782-1791194058870250494-route-n0:6222,nats://js-wf-route-116782-1791194058870250494-route-n1:6222,nats://js-wf-route-116782-1791194058870250494-route-n2:6222,nats://js-wf-route-116782-1791194058870250494-route-n3:6222"
+    ],
+    "mounts": [
+      {
+        "Type": "bind",
+        "Source": "/tmp/js-wf-protobuf-json-worker-10m-20261005/fixture/cluster/node-4",
+        "Destination": "/data",
+        "Mode": "",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/tmp/js-wf-protobuf-json-worker-10m-20261005/fixture/cluster/nats.conf",
+        "Destination": "/etc/nats.conf",
+        "Mode": "ro",
+        "RW": false,
+        "Propagation": "rprivate"
+      }
+    ]
+  }
+]

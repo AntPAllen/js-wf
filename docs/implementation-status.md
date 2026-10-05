@@ -30,6 +30,16 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Sustained mixed-encoding worker-kill run is live:** cleanab5cd71 normal2GiB/
+  GOMAX2/seed1/original10m, initialprotobuf/replacementJSON, original5s kill cadence
+  and all timing/integrity/drain gates. Actual parent116782/17 captured SDK records,
+  allfive live native-container executables/copied bytes/full buildfields,1,334
+  Git-bound selected source inputs and1,350 immutable launch members/fourparts
+  verify. SDK observer continues; full generation coverage/terminal result pending.
+  Actual accepted native smoke rejected by default-profile verifier without rollout
+  flag/no default report. No sustained/default/fullmatrix/24h promotion.
+  [Immutable launch and rejection control](scale/protobuf-json-worker-rollout-2026-10-05/10m-launch/).
+
 - **Mixed-encoding worker replacement admission smoke passed:** bb79fa2 normal
   2GiB/GOMAX2/35s, native140.67s inclstartup/cleanup,56inv/621entries/6SIGKILL.
   Three invocations cross protobuf initial owner/JSON successor; independent

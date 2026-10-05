@@ -2616,3 +2616,15 @@ and70outer archive members/parts verify. Native broker executable/store provenan
 is named-test scope, not independently captured live-container binary hashes.
 Smoke only; ten-minute/24h mixed-encoding, default-profile/current-source matrices
 and full rolling/chaos remain open. No deadlines or fault gates changed.
+
+### Sustained mixed-encoding launch identity verified — 2026-10-05
+
+The original ten-minute worker_kill profile now runs at cleanab5cd71 with explicit
+protobuf-to-json rollout, five-second kill cadence and unchanged workload/audit/
+lease/liveness/p99/drain targets. Actual parent SDK/17 captured SDK processes,
+allfive live native container executables/full buildfields and1,334 selected
+Git source inputs verified; all1,350 immutable launch members/fourparts read back.
+A continuous SDK observer records later generations; final coverage pending.
+Real accepted smoke artifact is rejected by default-profile verifier without the
+rollout flag, with no report created. Terminal sustained/wire/history/integrity/
+drain review and full rolling/chaos/matrices/24h qualification remain required.

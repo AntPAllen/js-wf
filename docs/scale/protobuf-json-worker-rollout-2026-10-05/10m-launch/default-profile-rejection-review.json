@@ -1,0 +1,22 @@
+{
+  "command": [
+    "python3",
+    "/home/exedev/js-wf/scripts/check-tier3-journal-row.py",
+    "--root",
+    "/tmp/js-wf-protobuf-json-worker-smoke-20261005/fixture",
+    "--row",
+    "worker_kill",
+    "--events",
+    "/tmp/js-wf-protobuf-json-worker-smoke-20261005/events.jsonl",
+    "--duration",
+    "35s",
+    "--expected-seed",
+    "1",
+    "--require-checkpoint-audits",
+    "--output",
+    "/tmp/js-wf-rollout-default-rejection-20261005/unexpected-default-report.json"
+  ],
+  "exit_code": 1,
+  "actual_specialized_native_smoke_rejected_as_default": true,
+  "no_default_report_created": true
+}
