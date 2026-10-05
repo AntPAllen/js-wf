@@ -30,6 +30,16 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **New actual24h journal-leader soak is live with adopted byte reader:** isolated
+  clean e278ffb, original24h/seed1/R5/normal2GiB/explicit-route workload and20s/60s
+  audit limits. Actual live SDK SHA/build/environment and all five server copies/
+  arguments verify;1284 selected source inputs match Git. Early checkpoint80
+  completes2240 invocations/24724 entries; launch facts/early snapshot archived.
+  Existing Fetch-only trace does not count Messages/Next; limitation recorded.
+  Million candidate overlaps this VM. No terminal/full/24h promotion; monitor the
+  confirmed live unit, preserve prior failures and final receipts/store evidence.
+  [Launch proof](scale/byte-bounded-audit-2026-10-05/24h-launch/).
+
 - **Verified positive duplicate expansions recovered for soak headroom:**
   accepted all-server1–72 and consumer85–192 /1080 raw files match original ZIPs,
   every canonical member and pushed68ebd26 proof parts. Only duplicate raw

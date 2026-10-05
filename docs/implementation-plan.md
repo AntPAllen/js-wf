@@ -2155,3 +2155,16 @@ Existing streaming-state matrix/soak mode uses this materially changed reader;
 full final-source matrices and actual24h gate remain open, older failures intact.
 [Native proof](scale/byte-bounded-audit-2026-10-05/native-faults/) ·
 [Public proof](scale/byte-bounded-audit-2026-10-05/public-adoption/).
+
+### Actual24h qualification relaunched with adopted byte reader — 2026-10-05
+
+Verified disk recovery retains ZIP/canonical/model and failed/live originals.
+New isolated e278ffb journal row /seed1 uses original24h/R5/normal2GiB/explicit
+routes and20s/60s audit limits with the adopted streaming delivery. Live actual
+SDK/all build fields/environment, five server copies/arguments and1284 selected
+Git/source inputs verify. Early checkpoint80 completes2240/24724; launch and
+snapshot bytes archived, live stores untouched. Legacy Fetch trace does not count
+Messages/Next; diagnostic limitation recorded. Native-million campaign shares the
+VM. Keep the new unit observed without restarting on timeouts; terminal complete
+raw/model/integrity/drain review is still required. No full matrix/24h promotion.
+[Launch evidence](scale/byte-bounded-audit-2026-10-05/24h-launch/).
