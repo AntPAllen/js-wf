@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and independent copied integrity/history/drain also qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and independent copied integrity/history/drain also qualified. Retained normal ten-minute block-disk seed1 at f57da4d plus copied raw-image integrity/history/drain qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries, physical drain and independent copied audits qualified at executed dc8422a. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -28,14 +28,17 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
-## Latest live verification — 2026-10-05 17:01 UTC
+## Latest live verification — 2026-10-05 18:06 UTC
 
-The actual24-hour journal-leader campaign remains running at executed aace912;
-actualSDK162125 checked live after approximately5h14m. Retained checkpoint2260
-passed with63280 invocations/journals/terminals and698240 entries. The diagnostic
-million-timer candidate remains running (actualprogram101283),299219 receipts
-observed. Both terminal gates remain pending; live observations do not resolve
-previous failures.
+Actual24-hour journal-leader SDK162125 remains live at aace912, approximately6h19m.
+Retained checkpoint2810 passed with78680 invocations/journals/terminals and868050
+entries. No24h verdict yet. Diagnosticmillion-timer actualprogram101283 also live;
+savedrunningreport18:04 records342992receipts. First plannedrestart confirms
+allthreeoriginalserverPIDs SIGKILL after333341receipts, healed16.875646s; second
+restart/finaldelivery/physicaldrain pending. Servercandidate remainsnotadopted;
+running finalzero fields are placeholders. [First restart observation](scale/million-candidate-24h-2026-10-05/first-restart/).
+Hostedretained partition seed3 run37347246576/job111888806507 remainsqueued as
+checkednow; noSDK orpassing hostedresult yet. No restart/replacement dispatched.
 
 The retained Tier2 runner's first journal smoke passed natively46.69s, but its
 producer acceptance failed because JSON conversion omitted elapsed. That result
@@ -149,6 +152,23 @@ no-responder cause remains unconfirmed. Correct fixture lifecycle/readiness and
 trace dependencies before another full run. [Preserved failed proof](scale/postgres-projection-fault-50000-2026-10-05/failed/).
 
 ## Latest accepted evidence
+
+- **Ten-minute retained block-disk seed1 and portable copied raw audit qualified:**
+  executedf57da4d normalPASS657.37s/3192terminals/35153entries/19verified5sstalls,
+  aggregatep99=5.0263s/allcells<30s. Original512MiB image retained aftercleanup;
+  complete nativeproof/source/SDK reviewed. Repositorycopiedcommand at6612ffd
+  rechecks allhistories/fullcounts/allthreequeue/64durable drain in4.524316s under20s;
+  original1525files/rawhashunchanged,copiedmountdetached/fullproof readback.
+  [Native proof](scale/retained-block-media-2026-10-05/ten-minute-native/),
+  [portable copied audit](scale/retained-block-media-2026-10-05/ten-minute-copied-audit/).
+- **Retained worker observation smoke and ordinary portable copied path verified:**
+  ede2fbd35sPASS54.47s/140terminals/1550entries/sixSIGKILLs/twoactivefaults.
+  Nineactualworker generations includeallsixfaulttargets, sameSDKbytes andclosedPIDs;
+  fullsource/originalstore proofreadback. d893389portablecopiedcommand rechecks
+  histories/140/1550integrity/allthreequeue/64durable drain in4.208218s under20s,
+  original2091filesunchanged. No ten-minute/fullmatrix workeracceptance yet.
+  [Native smoke](scale/tier2-retained-row-2026-10-05/worker-smoke/),
+  [ordinary copied review](scale/tier2-retained-row-2026-10-05/worker-smoke-copied-audit/).
 
 - **Retained real block media smoke and copied-image audit accepted:** native2774fd2
   normal35s seed1 PASS45.13s/224terminals/2474entries/one5sstall. Closed512MiB

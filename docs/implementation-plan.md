@@ -3496,3 +3496,16 @@ all sixfaulttargets, eachsamebytesasparentSDK; allPIDs gone. Fullsource/closed
 stores/executables/review readback. [Complete worker smoke](scale/tier2-retained-row-2026-10-05/worker-smoke/).
 Worker ten-minute/full13x200 gates remainopen; copiedordinaryworker-path review
 follows separately.
+
+### Portable ordinary copied review and first diagnostic timer restart — 2026-10-05
+
+Repositorycopiedcommand atd893389 verifiesordinary worker-smoke path: allthree
+histories/140terminals/1550entries/allthreequeue64durable drain in4.208218s under20s,
+actualSDK/1695inputs/threeobservedservers andoriginal2091filesunchanged. Fullclosed
+proofreadback. [Complete ordinary copied proof](scale/tier2-retained-row-2026-10-05/worker-smoke-copied-audit/).
+Live diagnosticmillion candidate at68d69c04 records firstplanned allthreeSIGKILL
+PIDs101317/101318/101319, after333341receipts, healed16.875646s; deliverycontinues.
+Actualprogram101283 checkedlive, savedrunningreport342992receipts. No finaldrain
+orserveradoption qualification. [Point restart evidence](scale/million-candidate-24h-2026-10-05/first-restart/).
+Actual24h journalSDK162125 also live; checkpoint2810/78680terminals accepted.
+Fullmatrix/24h/originalmillion terminalgates remainpending.
