@@ -1,0 +1,39 @@
+{
+  "source": "ee2f53dc55d21fcdaedafd5b09539cf6735e0368",
+  "actual_sdk_sha256": "2e163bac4e2b74750a4583fc6d13d68c8069521a29136949ea8838bd42dc5e5a",
+  "selected_git_inputs_verified": 661,
+  "selected_external_go_cgo_test_inputs_verified": 3287,
+  "input_inventory_not_exhaustive_race_assembly_embed_compiler_provenance": true,
+  "native_R3_servers_embedded_in_actual_sdk": true,
+  "separate_server_process_hashes": false,
+  "native_race_pass_seconds": 14.96,
+  "recovery_from_observed_fence_ns": 1209558533,
+  "old_epoch": 1,
+  "successor_epoch": 7,
+  "effects": 2,
+  "retained_journal_entries": 4,
+  "terminal_records": 1,
+  "independent_terminal_bytes": "42",
+  "proxy_forwarded_lease_puback_sequences": [
+    1,
+    2,
+    3,
+    4,
+    6
+  ],
+  "committed_renewal_puback_absent_from_forwarded_trace": true,
+  "all_three_peer_post_stale_result_assertions_passed": true,
+  "production_decisions_or_timing_changed": false,
+  "qualifies_native_sdk_effect_ignoring_cancellation_under_lease_loss": true,
+  "qualifies_raw_handler_blocking_outside_sdk_effects": false,
+  "qualifies_full_matrix_or_24h": false,
+  "historical_server_cause_confirmed": false,
+  "limitations": [
+    "The abandoned external effect can continue; downstream idempotency remains required.",
+    "No worker process SIGKILL, Raft partition, independent stopped-store reopen or physical replica drain qualification.",
+    "Three embedded native server instances have file stores; no separate server executable processes or server logs (NoLog fixture).",
+    "Dispatch drain and all-peer invariants have captured named-test assertion scope.",
+    "First worker handoff enqueue count0: confirmed local recovery here uses NAK/redelivery, not durable handoff enqueue coverage.",
+    "Shares VM with live million candidate and actual24h diagnostic; no pressure cause inferred."
+  ]
+}

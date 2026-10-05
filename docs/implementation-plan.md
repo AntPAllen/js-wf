@@ -2841,3 +2841,18 @@ and terminal journal, proxy traffic, peer verification, integrity and stopped
 stores are retained. Callback context cancellation does not forcibly terminate
 external code; effect idempotency remains necessary. Raw outer handlers blocking
 outside SDK effects are not covered. Native opt-in execution/review pending.
+
+### 2026-10-05 native cancellation-ignoring SDK effect qualified
+
+Executedee2f53d nativeR3 racePASS14.96s/recovery1.210s fromobservedfencing,
+strict30s/TTL12/AckWait13 unchanged. Nativelease renewalrevision4→5 committed,
+correspondingPubAck absentfromuntruncatedforwardedproxytrace. Oldeffect remains
+blocked through workerstop and successor epoch7 terminal42, then returnsstale7;
+allthreepeer journal/results unchanged, twoeffects/fourrecords/oneterminal/
+raw integrity pass. SDK/661Gitinputs/3287selectedexternalinputs/4350archive
+members/twoparts independently verify. Servers embeddedinactualSDK/NoLog;
+queue/allpeer checks named-test scope/stoppedstores notindependentlyreopened.
+This closes the focused native SDK step-effect late-result case. Raw outer
+handlers outside SDK effects, combined process/partition cuts, fullmatrices/24h
+remain open. No productiondecisionchange or unchanged simulation rerun.
+[Complete native proof](scale/ignored-effect-lease-loss-2026-10-05/).

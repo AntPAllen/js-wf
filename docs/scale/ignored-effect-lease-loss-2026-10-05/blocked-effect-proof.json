@@ -1,0 +1,251 @@
+{
+  "abandoned_effect_blocked_through_successor_terminal": true,
+  "abandoned_effect_returned": "2026-10-05T12:07:31.96583939Z",
+  "all_three_peer_journals_and_results_unchanged_after_stale_result": true,
+  "committed_lease_revision": 5,
+  "committed_lease_value": {
+    "worker": "lost-renew-first",
+    "epoch": 1
+  },
+  "dispatch_consumer_info": {
+    "stream_name": "WF_RUN",
+    "name": "WF_P_02",
+    "created": "2026-10-05T12:07:21.613180155Z",
+    "config": {
+      "name": "WF_P_02",
+      "durable_name": "WF_P_02",
+      "deliver_policy": "all",
+      "ack_policy": "explicit",
+      "ack_wait": 13000000000,
+      "max_deliver": -1,
+      "filter_subject": "wf.run.2",
+      "replay_policy": "instant",
+      "max_waiting": 512,
+      "max_ack_pending": 1000,
+      "num_replicas": 0,
+      "metadata": {
+        "_nats.level": "5",
+        "_nats.req.level": "0",
+        "_nats.ver": "2.15.0"
+      }
+    },
+    "delivered": {
+      "consumer_seq": 2,
+      "stream_seq": 1,
+      "last_active": "2026-10-05T12:07:31.864531807Z"
+    },
+    "ack_floor": {
+      "consumer_seq": 2,
+      "stream_seq": 1,
+      "last_active": "2026-10-05T12:07:31.894291693Z"
+    },
+    "num_ack_pending": 0,
+    "num_redelivered": 0,
+    "num_waiting": 1,
+    "num_pending": 0,
+    "cluster": {
+      "name": "wf-test",
+      "raft_group": "C-R3F-1wcFkJrk",
+      "leader": "wf-test-1",
+      "leader_since": "2026-10-05T12:07:21.737380927Z",
+      "system_account": true,
+      "traffic_account": "$SYS",
+      "replicas": [
+        {
+          "name": "wf-test-0",
+          "current": true,
+          "active": 153526415,
+          "peer": "fPPVT2kZ"
+        },
+        {
+          "name": "wf-test-2",
+          "current": true,
+          "active": 153677975,
+          "peer": "80zpbVEM"
+        }
+      ]
+    },
+    "ts": "2026-10-05T12:07:32.050655892Z"
+  },
+  "effect_released": "2026-10-05T12:07:31.96580646Z",
+  "effects": 2,
+  "fence_observed": "2026-10-05T12:07:30.74780498Z",
+  "first_worker_metrics": {
+    "lease_acquisitions": 1,
+    "lease_contentions": 0,
+    "lease_acquire_failures": 0,
+    "fencing_events": 1,
+    "handoff_enqueues": 0,
+    "redeliveries": 0,
+    "enqueue_to_lease_samples": 1,
+    "enqueue_to_lease_total": 130102826,
+    "enqueue_to_lease_maximum": 130102826,
+    "enqueue_to_lease_buckets": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "timers_scheduled": 0,
+    "timers_fired": 0,
+    "timer_late_total": 0,
+    "timer_late_maximum": 0,
+    "timer_late_buckets": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "cancelled_timer_no_ops": 0
+  },
+  "first_worker_stopped": "2026-10-05T12:07:30.866222199Z",
+  "ignores_cancellation": true,
+  "initial_lease_revision": 4,
+  "integrity_report": {
+    "Invocations": 1,
+    "Journals": 1,
+    "Entries": 4,
+    "Terminal": 1
+  },
+  "lease_stream_info": {
+    "config": {
+      "name": "KV_WF_LEASE",
+      "subjects": [
+        "$KV.WF_LEASE.\u003e"
+      ],
+      "retention": "limits",
+      "max_consumers": -1,
+      "max_msgs": -1,
+      "max_bytes": -1,
+      "discard": "new",
+      "max_age": 12000000000,
+      "max_msgs_per_subject": 1,
+      "max_msg_size": -1,
+      "storage": "file",
+      "num_replicas": 3,
+      "duplicate_window": 12000000000,
+      "deny_delete": true,
+      "allow_rollup_hdrs": true,
+      "compression": "none",
+      "allow_direct": true,
+      "mirror_direct": false,
+      "consumer_limits": {},
+      "metadata": {
+        "_nats.level": "5",
+        "_nats.req.level": "1",
+        "_nats.ver": "2.15.0"
+      },
+      "allow_msg_ttl": true,
+      "subject_delete_marker_ttl": 60000000000
+    },
+    "created": "2026-10-05T12:07:20.673312814Z",
+    "state": {
+      "messages": 1,
+      "bytes": 147,
+      "first_seq": 11,
+      "first_ts": "2026-10-05T12:07:31.891196958Z",
+      "last_seq": 11,
+      "last_ts": "2026-10-05T12:07:31.891196958Z",
+      "consumer_count": 0,
+      "deleted": null,
+      "num_deleted": 0,
+      "num_subjects": 1,
+      "subjects": null
+    },
+    "cluster": {
+      "name": "wf-test",
+      "raft_group": "S-R3F-5ImO5O6m",
+      "leader": "wf-test-0",
+      "leader_since": "2026-10-05T12:07:20.858760633Z",
+      "system_account": true,
+      "traffic_account": "$SYS",
+      "replicas": [
+        {
+          "name": "wf-test-1",
+          "current": true,
+          "active": 155825320,
+          "peer": "OFrOUlB0"
+        },
+        {
+          "name": "wf-test-2",
+          "current": true,
+          "active": 155903499,
+          "peer": "80zpbVEM"
+        }
+      ]
+    },
+    "ts": "2026-10-05T12:07:32.04851027Z"
+  },
+  "native_test_failed": false,
+  "partial_journal": [
+    {
+      "epoch": 1,
+      "index": 0,
+      "kind": "Started",
+      "worker_id": "lost-renew-first",
+      "sequence": 1
+    },
+    {
+      "epoch": 1,
+      "index": 1,
+      "kind": "StepRequested",
+      "payload": {
+        "kind": "run",
+        "name": "held",
+        "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+        "fire_at": "0001-01-01T00:00:00Z"
+      },
+      "worker_id": "lost-renew-first",
+      "sequence": 2
+    }
+  ],
+  "recovery_from_observed_fence_ns": 1209558533,
+  "successor_journal": [
+    {
+      "epoch": 1,
+      "index": 0,
+      "kind": "Started",
+      "worker_id": "lost-renew-first",
+      "sequence": 1
+    },
+    {
+      "epoch": 1,
+      "index": 1,
+      "kind": "StepRequested",
+      "payload": {
+        "kind": "run",
+        "name": "held",
+        "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+        "fire_at": "0001-01-01T00:00:00Z"
+      },
+      "worker_id": "lost-renew-first",
+      "sequence": 2
+    },
+    {
+      "epoch": 7,
+      "index": 2,
+      "kind": "StepCompleted",
+      "payload": {
+        "result": 42
+      },
+      "worker_id": "lost-renew-second",
+      "sequence": 3
+    },
+    {
+      "epoch": 7,
+      "index": 3,
+      "kind": "Completed",
+      "payload": {
+        "inv_seq": 1,
+        "result": "NDI="
+      },
+      "worker_id": "lost-renew-second",
+      "sequence": 4
+    }
+  ],
+  "successor_terminal_observed": "2026-10-05T12:07:31.957362041Z"
+}

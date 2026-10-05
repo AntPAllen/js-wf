@@ -30,6 +30,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Native lease loss with cancellation-ignoring SDK effect qualified:** executed
+  ee2f53d racePASS14.96s, recovery1.210s fromobservedfencing/strict30s. RealR3
+  filelease revision4→5 committed/renewalPubAck absentfromuntruncatedforwarded
+  proxytrace; oldeffect remainsblocked through workerstop and successor epoch7
+  terminal42, then stale7 returns. Allthreepeer journals/results unchanged,
+  twoeffects/fourrecords/oneterminal/raw integrity pass. ActualSDK/661Gitinputs/
+  3287selectedexternalinputs/all4350archive members/twoparts verify. Native
+  servers embeddedinSDK/NoLog, queue/allpeer named-test scope/stoppedstores not
+  independentlyreopened. No productiondecision/timingchange, outerrawhandler/
+  processkill/combinedpartition/fullmatrix/24h orhistoriccause qualification.
+  [Complete native late-effect proof](scale/ignored-effect-lease-loss-2026-10-05/).
+
 - **Recorded-source disk-stall coverage extended to143 seeds:** executed79915ca,
   newshards105–117/118–130/131–143/144–156 accepted after nativejob/artifact/log
   binding, originalfault/latency/cohort regeneration and three separatelyrebuilt
