@@ -113,7 +113,7 @@ func TestRetainedAuditTraceR5FullCohort(t *testing.T) {
 		}
 		call, done := context.WithTimeout(context.Background(), 20*time.Second)
 		began := time.Now()
-		report, err := integrity.CheckWithStreamingState(call, auditJS)
+		report, err := integrity.CheckWithStreamingStateReads(call, auditJS)
 		elapsed := time.Since(began)
 		done()
 		r := result{Label: label, ElapsedNS: int64(elapsed), Report: report, Error: fmt.Sprint(err)}
