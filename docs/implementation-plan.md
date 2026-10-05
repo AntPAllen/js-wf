@@ -2562,3 +2562,13 @@ Native07a419c racePASS35.43s/recovery12.747s/epoch51→62; actual protobuf
 anchor independently decoded by generated Python codec and successor JSON
 terminal decoded. One frame/zero archive/exact effects/all-peer/raw integrity/
 quiescent GC checks pass; full protobuf rolling/chaos remains open.
+
+### Protobuf journal repair before manifest publication — 2026-10-05
+
+Add the before-manifest counterpart of the mixed-encoding worker crash: confirm
+the durable protobuf StepCompleted and prepared frame while no manifest exists,
+reap SIGKILL, then require a JSON writer to replay the journal, repair the same
+frame and finish with a higher lease epoch. Exact effects, all-peer/raw integrity
+and quiescent retention remain mandatory under original30s recovery/12s TTL/60s
+scenario. Read counters are unobserved for this cut; no bounded-resume claim.
+Native qualification pending; full rolling/chaos remains open.

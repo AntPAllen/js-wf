@@ -139,6 +139,10 @@ func TestContinuationRetirementProtobufWorkerSIGKILLToJSONSuccessor(t *testing.T
 	runRetirementWorkerKill(t, "after_manifest", journal.ProtobufV1)
 }
 
+func TestContinuationRetirementProtobufBeforeManifestSIGKILLToJSONSuccessor(t *testing.T) {
+	runRetirementWorkerKill(t, "before_manifest", journal.ProtobufV1)
+}
+
 func runRetirementWorkerKill(t *testing.T, cut string, encoding journal.Encoding) {
 	t.Helper()
 	root := os.Getenv("WF_RETIREMENT_KILL_ROOT")
@@ -381,10 +385,12 @@ func runRetirementWorkerKill(t *testing.T, cut string, encoding journal.Encoding
 	}
 	published, err := store.ReadCheckpoint(ctx, retirementKillType, retirementKillID, fresh.InvSeq)
 	preparedFrame := ""
+	var preparedRuntime *journal.RuntimeCheckpoint
 	if cut == "after_manifest" {
 		if err != nil || published == nil || published.Snapshot.Runtime.InvSeq != fresh.InvSeq || published.Snapshot.Runtime.Object == old.Snapshot.Runtime.Object {
 			t.Fatalf("fresh publication=%+v err=%v", published, err)
 		}
+		preparedRuntime = published.Snapshot.Runtime
 	} else {
 		if err != nil || published != nil {
 			t.Fatalf("unpublished frame accepted: view=%+v err=%v", published, err)
@@ -397,6 +403,7 @@ func runRetirementWorkerKill(t *testing.T, cut string, encoding journal.Encoding
 		if err := json.Unmarshal(data, &prepared); err != nil || prepared.Runtime == nil || prepared.Runtime.InvSeq != fresh.InvSeq || prepared.Runtime.Object == old.Snapshot.Runtime.Object {
 			t.Fatalf("prepared frame unconfirmed: %+v err=%v", prepared, err)
 		}
+		preparedRuntime = prepared.Runtime
 		preparedFrame = prepared.Runtime.Object
 		if _, err := objects.GetBytes(ctx, preparedFrame); err != nil {
 			t.Fatalf("prepared object missing: %v", err)
@@ -407,9 +414,9 @@ func runRetirementWorkerKill(t *testing.T, cut string, encoding journal.Encoding
 		if err != nil {
 			t.Fatal(err)
 		}
-		raw, err := stream.GetMsg(ctx, published.Anchor.Sequence)
+		raw, err := stream.GetMsg(ctx, preparedRuntime.Sequence)
 		var entry journal.Entry
-		if err != nil || !bytes.HasPrefix(raw.Data, []byte{'W', 'F', 'J', 0}) || journal.UnmarshalEntry(raw.Data, &entry) != nil || entry.Kind != journal.StepCompleted || entry.Epoch != published.Anchor.Epoch {
+		if err != nil || !bytes.HasPrefix(raw.Data, []byte{'W', 'F', 'J', 0}) || journal.UnmarshalEntry(raw.Data, &entry) != nil || entry.Kind != journal.StepCompleted || entry.Epoch != preparedRuntime.Epoch || entry.Index != preparedRuntime.Index {
 			t.Fatalf("protobuf anchor not retained: err=%v entry=%+v", err, entry)
 		}
 		if err := os.WriteFile(filepath.Join(root, "protobuf-anchor.bin"), raw.Data, 0600); err != nil {
