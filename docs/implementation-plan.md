@@ -3610,3 +3610,15 @@ verification passes; suppliedlegacybytes matchactual2.11.17processes. Complete
 6173archive members/fourparts readback. No unchangednative rerun ororiginalstore
 reopen. Newread-onlycopiedqueuehelper retainsresidualmessage/journal/state/lease/
 consumercensus; diagnosticexecutionpending. [Failed proof](scale/tier2-retained-row-2026-10-05/upgrade-smoke-failed/).
+
+### Upgrade queue discrepancy localized on copied stores — 2026-10-05
+
+Originalfailedsmoke rawartifact identifiesseq494/wf.run.45,signal-wakeup:193,
+keymatrixchild.c-8e42390a21f5c779a68ee1399bb48a2e. All64nativeconsumers reportzero
+pending/ackpending despiterawstreammessage1. Freshcopies reopened undercurrentR3
+findzeroqueue/64durableszero withoutworkers/ACKs/provisioning;2175originalfiles
+unchanged,1655inputs/actualSDK547767 verified. Complete3987archive members/twoparts
+readback. Cause/timeofdisappearance unconfirmed; nomixed-versionlifecycle
+reproduction orrecoveryqualification. Helper nowacceptsexplicitTYPE.ID for
+journal/state/lease inspection evenifresidualqueueisabsent.
+[Copied diagnosis](scale/tier2-retained-row-2026-10-05/upgrade-smoke-copied-queue-diagnosis/).

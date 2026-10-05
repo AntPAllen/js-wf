@@ -31,8 +31,8 @@ func queueStage(name string) {
 }
 
 func run() error {
-	if len(os.Args) != 3 || !filepath.IsAbs(os.Args[1]) {
-		return fmt.Errorf("usage: workflow-queue-diagnosis ABSOLUTE_COPIED_CLUSTER_ROOT OUTPUT_JSON")
+	if (len(os.Args) != 3 && len(os.Args) != 4) || !filepath.IsAbs(os.Args[1]) {
+		return fmt.Errorf("usage: workflow-queue-diagnosis ABSOLUTE_COPIED_CLUSTER_ROOT OUTPUT_JSON [TYPE.ID]")
 	}
 	root := os.Args[1]
 	// External observer gets time to capture /proc executable identity before
@@ -189,8 +189,11 @@ func run() error {
  if err != nil { return err }
  leases, err := all[0].KeyValue(ctx, "WF_LEASE")
  if err != nil { return err }
+ inspectKeys := map[string]bool{}
+ for key := range keys { inspectKeys[key]=true }
+ if len(os.Args)==4 { inspectKeys[os.Args[3]]=true; result["requested_key"]=os.Args[3] }
  rows := map[string]any{}
- for key := range keys {
+ for key := range inspectKeys {
   typ, id, ok := strings.Cut(key, ".")
   if !ok { return fmt.Errorf("invalid retained queue key %q", key) }
   if err := identity.Validate(typ, id); err != nil { return err }
