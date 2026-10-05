@@ -3482,3 +3482,17 @@ and identity fields. Native fault/audit/history/latency/drain gates and duration
 remain unchanged; observation errors retain failed evidence. Clock/upgrade rows
 still need their generated overlay/legacy executable retention paths. CLI/import
 checks pass; real new worker-row verification remains pending. Full13x200open.
+
+### Portable copied ten-minute block audit and retained worker smoke accepted — 2026-10-05
+
+Newrepository copiedcommand at6612ffd passes full3192/35153integrity, allthree
+historymodels andallthreequeue/64durable drain in4.524316s underoriginal20s.
+ActualSDK/1695inputs/threeobservedservers verified; original1525files/rawimage
+unchanged, copiedmountdetached andfullclosedproof readback.
+[Complete portable audit](scale/retained-block-media-2026-10-05/ten-minute-copied-audit/).
+Extendedworker producer atede2fbd passes original35ssmoke54.47s/140terminals/
+1550entries/sixSIGKILLs/twoactivefaults. Nineactualworker generationcaptures include
+all sixfaulttargets, eachsamebytesasparentSDK; allPIDs gone. Fullsource/closed
+stores/executables/review readback. [Complete worker smoke](scale/tier2-retained-row-2026-10-05/worker-smoke/).
+Worker ten-minute/full13x200 gates remainopen; copiedordinaryworker-path review
+follows separately.
