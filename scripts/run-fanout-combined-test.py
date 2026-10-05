@@ -4,6 +4,8 @@ import subprocess,json,hashlib,os,shutil,time,datetime,argparse
 parser=argparse.ArgumentParser(description="Retain the complete six-boundary 500-child combined parent SIGKILL and library journal restart race run.")
 parser.add_argument('--root',type=Path,required=True,help='Fresh absolute evidence directory outside the checkout')
 parser.add_argument('--seed',type=int,default=1)
+parser.add_argument('--diagnostic-trace',action='store_true',help='opt-in worker timings and stack before the existing cut deadline')
+parser.add_argument('--case',choices=[p+'/'+c for p in ('create','results') for c in ('first','interior','last')],help='focused diagnostic only; cannot qualify the full matrix')
 args=parser.parse_args()
 repo=Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip()).resolve()
 root=args.root
@@ -35,14 +37,18 @@ for line in deps.splitlines():
   dest=root/'selected-external-source'/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,dest);assert sha(dest)==digest;captured[str(p)]=str(dest.relative_to(root))
 (root/'external-source-before.json').write_text(json.dumps(inputs,indent=2)+'\n');(root/'external-captured-paths.json').write_text(json.dumps(captured,indent=2)+'\n')
 env={k:v for k,v in os.environ.items() if not k.startswith('WF_')};env.update(GOMAXPROCS='2',GOMEMLIMIT='2GiB',WF_FANOUT_COMBINED_ROOT=str(root/'originals'),FAULT_SEED=str(args.seed))
+if args.diagnostic_trace:env['WF_FANOUT_DIAGNOSTIC_TRACE']='1'
+selected_case=args.case
+selection='^TestFiveHundredChildFanoutCombinedParentAndJournalBoundaryMatrix$'
+if args.case:selection+='/'+ '/'.join('^'+part+'$' for part in args.case.split('/'))
 build=['go','test','-race','-p=1','-buildvcs=true','-c','-o',str(root/'integration.test'),'./integration']
 with (root/'build.log').open('w') as log:subprocess.run(build,cwd=repo,env=env,stdout=log,stderr=subprocess.STDOUT,check=True)
 info=subprocess.check_output(['go','version','-m',str(root/'integration.test')],text=True);assert 'vcs.modified=false' in info and f'vcs.revision={revision}' in info and '-race=true' in info
 (root/'binary.json').write_text(json.dumps({'sha256':sha(root/'integration.test'),'build_info':info},indent=2)+'\n')
-args=[str(root/'integration.test'),'-test.run=^TestFiveHundredChildFanoutCombinedParentAndJournalBoundaryMatrix$','-test.count=1','-test.v','-test.timeout=35m']
-(root/'commands.json').write_text(json.dumps({'build':build,'test':args,'environment':{k:v for k,v in env.items() if k.startswith('WF_') or k in ['GOMEMLIMIT','GOMAXPROCS','GOCACHE','FAULT_SEED']}},indent=2)+'\n')
+args=[str(root/'integration.test'),'-test.run='+selection,'-test.count=1','-test.v','-test.timeout=35m']
+(root/'commands.json').write_text(json.dumps({'build':build,'test':args,'selected_case':selected_case,'full_six_boundary_selection':selected_case is None,'environment':{k:v for k,v in env.items() if k.startswith('WF_') or k in ['GOMEMLIMIT','GOMAXPROCS','GOCACHE','FAULT_SEED']}},indent=2)+'\n')
 with (root/'native.log').open('w') as log:
- p=subprocess.Popen(args,cwd=repo,env=env,stdout=log,stderr=subprocess.STDOUT);exe=Path(f'/proc/{p.pid}/exe');actual={'pid':p.pid,'sha256':sha(exe),'exe':os.readlink(exe),'build_info':subprocess.check_output(['go','version','-m',str(exe)],text=True),'source':revision,'status':'running','started_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'native_R3_servers_embedded_in_actual_sdk':True,'separate_server_process_hashes':False};assert actual['sha256']==sha(root/'integration.test');(root/'execution.json').write_text(json.dumps(actual,indent=2)+'\n');print('NATIVE_STARTED',p.pid,revision,flush=True)
+ p=subprocess.Popen(args,cwd=repo,env=env,stdout=log,stderr=subprocess.STDOUT);exe=Path(f'/proc/{p.pid}/exe');actual={'pid':p.pid,'sha256':sha(exe),'exe':os.readlink(exe),'build_info':subprocess.check_output(['go','version','-m',str(exe)],text=True),'source':revision,'selected_case':selected_case,'full_six_boundary_selection':selected_case is None,'status':'running','started_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'native_R3_servers_embedded_in_actual_sdk':True,'separate_server_process_hashes':False};assert actual['sha256']==sha(root/'integration.test');(root/'execution.json').write_text(json.dumps(actual,indent=2)+'\n');print('NATIVE_STARTED',p.pid,revision,flush=True)
  code=p.wait();actual.update(status='passed' if code==0 else 'failed',exit_code=code,finished_utc=datetime.datetime.now(datetime.timezone.utc).isoformat());(root/'execution.json').write_text(json.dumps(actual,indent=2)+'\n')
 after={n:sha(repo/n) for n in names};assert before==after;(root/'source-after.json').write_text(json.dumps({'revision':revision,'files':after},indent=2)+'\n')
 external_after={n:sha(Path(n)) for n in inputs};assert inputs==external_after;(root/'external-source-after.json').write_text(json.dumps(external_after,indent=2)+'\n');assert Path(__file__).read_bytes()==producer_bytes;shutil.copy2(__file__,root/'executed-producer.py');print('NATIVE_FINISHED',code,flush=True)

@@ -88,6 +88,7 @@ func TestFiveHundredChildFanoutProcessChild(t *testing.T) {
 	if url == "" || marker == "" || err != nil || cut < 0 || cut >= 500 || (phase != "results" && phase != "create") {
 		t.Fatal("invalid 500-child process helper configuration")
 	}
+	traceOptions := fanoutProcessTrace(t, marker)
 	nc, err := nats.Connect(url, nats.NoReconnect(), nats.IgnoreDiscoveredServers())
 	if err != nil {
 		t.Fatal(err)
@@ -110,7 +111,7 @@ func TestFiveHundredChildFanoutProcessChild(t *testing.T) {
 	if phase == "results" {
 		handlers = fanoutHandlersAtResults(cut, pause)
 	}
-	w, err := worker.New(context.Background(), js, "parent-process-before-kill", handlers)
+	w, err := worker.New(context.Background(), js, "parent-process-before-kill", handlers, traceOptions...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -599,6 +600,9 @@ func killFanoutParentAtBoundary(t *testing.T, ctx context.Context, js jetstream.
 		}
 	}()
 	until := time.Now().Add(30 * time.Second)
+	if os.Getenv("WF_FANOUT_DIAGNOSTIC_TRACE") == "1" && os.Getenv("WF_FANOUT_COMBINED_ROOT") != "" {
+		captureFanoutParentSDKAt(t, cmd, root, "actual-parent-sdk-start.json", nil)
+	}
 	for {
 		data, err := os.ReadFile(marker)
 		if err == nil {

@@ -47,6 +47,10 @@ func TestFiveHundredChildFanoutCombinedParentAndJournalBoundaryMatrix(t *testing
 }
 func captureFanoutParentSDK(t *testing.T, cmd *exec.Cmd, root string, prefix []journal.Record) {
 	t.Helper()
+	captureFanoutParentSDKAt(t, cmd, root, "actual-parent-sdk.json", prefix)
+}
+func captureFanoutParentSDKAt(t *testing.T, cmd *exec.Cmd, root, name string, prefix []journal.Record) {
+	t.Helper()
 	live := fmt.Sprintf("/proc/%d/exe", cmd.Process.Pid)
 	file, err := os.Open(live)
 	if err != nil {
@@ -77,7 +81,7 @@ func captureFanoutParentSDK(t *testing.T, cmd *exec.Cmd, root string, prefix []j
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(root, "actual-parent-sdk.json"), append(data, '\n'), 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, name), append(data, '\n'), 0600); err != nil {
 		t.Fatal(err)
 	}
 }

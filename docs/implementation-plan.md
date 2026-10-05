@@ -3079,3 +3079,16 @@ or blocked-call cause unconfirmed; prepare opt-in operation/dispatch timings
 and predeadline stack before a changed diagnostic. Original500/five-minute/30s
 limits unchanged. Whole matrix remains failed; no release/physicaldrain claim.
 [Complete failed proof and copy diagnosis](scale/fanout-combined-boundaries-2026-10-05/).
+
+### Predeadline fanout parent observations prepared — 2026-10-05
+
+Opt-in `--diagnostic-trace` records child dispatch and per-operation timings,
+actual child SDK identity immediately after start (also on non-admitted cuts),
+and a bounded complete/truncated goroutine stack at29s. Original30s marker
+budget begins before capture; five-minute case unchanged. Default profile has
+no trace callbacks or timer. `--case results/last` selects a focused full500-child
+diagnostic and labels metadata accordingly; it cannot qualify the six-boundary
+matrix. Allnine existing guard controls pass, trace integration race compile/
+opt-in skip passed1.059s. Prepare one changed-observation last-case run to locate
+partition52's four missing children/493pending; do not promote focused result,
+rerun the unchanged full graph or relax the deadline.
