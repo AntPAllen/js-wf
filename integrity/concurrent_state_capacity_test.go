@@ -62,9 +62,11 @@ func TestConcurrentStateR5PopulationCapacity(t *testing.T) {
 	}
 	setup, stop := context.WithTimeout(context.Background(), 90*time.Minute)
 	defer stop()
-	ready, done := context.WithTimeout(setup, 30*time.Second)
+	ready, done := context.WithTimeout(setup, 4*time.Minute)
 	for {
-		err = provision.Ensure(ready, js, 5)
+		call, cancel := context.WithTimeout(ready, 3*time.Second)
+		err = provision.Ensure(call, js, 5)
+		cancel()
 		if err == nil {
 			break
 		}

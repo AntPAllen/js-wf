@@ -3731,3 +3731,13 @@ not a live24h workload/fault qualification orcandidateadoption. Compile/opt-in
 skip passes; nativepopulation execution pending. Closed earlierstateleader
 copy reclaimed onlyafter3722files verifiedagainstcommittedcompletearchive,
 allobserved processesgone/noopenFDs; originalfailedsoakstores remainintact.
+
+### Full400k capacity preparation deadline failure preserved — 2026-10-05
+
+Originalfb0cc9e fails35.96s in provisioning beforepopulation/audit. ActualSDK591181,
+five actualserverobservations/selectedGitinputs/closedprocesses verified;
+complete727-member archive readback/twoparts preserved. This isnot a400kcapacity
+verdict. Changedpreparation adoptsbounded3s provision callswithin4m; population
+setup90m and original20s audit limits remainseparate/unchanged. Compile/opt-inskip
+passes. No unchangednative rerun orservercause claim.
+[Originalfailure](scale/concurrent-state-audit-2026-10-05/capacity-preparation-failed/).
