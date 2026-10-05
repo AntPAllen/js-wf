@@ -3519,3 +3519,17 @@ module from a dependency/unrelated module. Actualprocess executable observations
 remain separate from suppliedbytes/buildinfo. Integration into producer, generated
 worker-clock overlay retention andreal clock/upgrade verification remainpending.
 Current live worker SDK andits source captures are unchanged.
+
+### Generated test-main cache lifetime correction — 2026-10-05
+
+The original75bcf76 worker ten-minute native row passes632.43s/1708terminals/
+18918entries/119confirmedSIGKILLs/31activefaults/p99=15.033519329s; all122worker
+captures includeall119targets. Its producer after-check fails because the selected
+external inventory included a Go-generated test-main cache file, removed by
+explicit build-cache cleanup after nativebuild. Failure preserved; no native rerun.
+All668Git and3286durableexternal inputs remain unchanged; generatedfile's captured
+bytes match initialSHA. Separate duration/source/fault review accepts native
+results without asserting the missing cachepath survived. Futureproducer separates
+retained generatedinputs from durableexternal before/after checks. Copiedcommand
+`--reviewed-donor` uses this explicit separate review path; originalproducer failure
+is retained. Real correctedproducer/copiedpath verification remainspending.
