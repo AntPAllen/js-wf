@@ -43,3 +43,7 @@ Earlier duplicate raw expansions were recovered only after complete published/
 ZIP/canonical/member verification. Retained ZIPs/proofs restore every byte.
 [Recovery1–104](duplicate-expansion-recovery/) ·
 [Recovery105–156/196–200](duplicate-expansion-recovery-105-156-and-196-200/).
+
+Final157–195 duplicate expansions likewise verify against pushedf569cde/all
+ZIP/canonical/committed parts/members, recovering742,850,560 allocated bytes.
+[Final executed recovery](duplicate-expansion-recovery-157-195/).

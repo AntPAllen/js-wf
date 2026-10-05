@@ -30,6 +30,13 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Final disk-delay duplicate expansions recovered:** all3666 raw files
+  in accepted157–195 match pushedf569cde parts, every canonical member and original
+  ZIPs; no visible descriptors remain. Only duplicate expansions removed,
+  recovering742850560 allocated bytes. ZIPs/proofs/models and failed/live originals
+  retained; complete200 recorded-source qualification unchanged.
+  [Executed final recovery](scale/current-tier3-block-delay-2026-10-04/duplicate-expansion-recovery-157-195/).
+
 - **Complete recorded-source Tier3 real disk-delay200 row accepted:** final26
   seeds170–195 pass raw/device/admission/latency/explanation/fencing/cohort controls
   and three rebuilt models. All16 proof parts/canonical members verify; exact1–200
