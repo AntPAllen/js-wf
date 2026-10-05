@@ -4195,3 +4195,14 @@ full reports/original20s/unchanged2s cleanup/two-resume/gap proof hold. Independ
 1668-member69.327MB archive/readback reviewed. Prior failures remain failed;
 large fault capacity/legacyR1/live/default/fullmatrix/actual24h stay open.
 [Evidence](scale/direct-callback-audit-2026-10-05/r5-position-loss-recovery/).
+
+## Actual R1 legacy cursor oracle compatibility prepared — 2026-10-05
+
+Common full-oracle native comparisons now include explicit directR1 with actual
+server-verified memory/AckNone replica1 config against independent point reports/
+errors. Fresh three-process2.11.17 legacy test will cover full/cohort/compaction/
+corruption/state/tombstone/orphan cases with R3 sources and fallback provisioning.
+Original20s/public defaults unchanged. Compile/skip passes; native verdict and
+complete closed fixture proof pending. Legacy process faults/largefault/live/
+default/final matrices/actual24h remain open.
+[Preparation](scale/direct-callback-audit-2026-10-05/r1-legacy-preparation/).

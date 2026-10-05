@@ -12699,3 +12699,14 @@ Race proof/scanner controls PASS1.207s. Native recovery qualification pending;
 no default/largefault/live/finalmatrix/24h claim.
 [Evidence](scale/direct-callback-audit-2026-10-05/r5-independent-cleanup/).
 [Preparation](scale/direct-callback-audit-2026-10-05/r5-position-recovery-preparation/).
+
+## Actual R1 legacy full-oracle controls prepared — 2026-10-05
+
+Full native oracle comparisons now include actual verified R1 direct callback
+cursors, exact point reports/errors, original20s. Fresh actual2.11.17 three-process
+legacy compaction/cohort/corruption/state/orphan compatibility prepared; native
+verdict pending. Compile/skip passes. Verified69.327MB temporary proof duplicate
+and428.769MB physical pushed worktree proof parts reclaimed after whole canonical
+archive/member or part/Git SHA checks and all-task descriptor checks. CanonicalGit
+parts/closedoriginal stores/source/binaries/livecampaign/caches retained.
+[Preparation](scale/direct-callback-audit-2026-10-05/r1-legacy-preparation/).

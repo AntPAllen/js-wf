@@ -154,6 +154,23 @@ func compareFullAudits(t *testing.T, ctx context.Context, js jetstream.JetStream
 	if direct != point || (directErr == nil) != (pointErr == nil) || directErr != nil && directErr.Error() != pointErr.Error() {
 		t.Fatalf("direct callback delivery mismatch: point=%+v callback=%+v errors=%v / %v", point, direct, pointErr, directErr)
 	}
+	singleCtx, singleStop := context.WithTimeout(ctx, 20*time.Second)
+	single, singleErr := checkUsingConcurrentOptions(singleCtx, js, cutoff, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+		observed := &candidateObservedStream{Stream: stream, cursorReplicas: 1}
+		failure := scanConsumeDirectWindowsThrough(call, observed, cutoff, visit)
+		if observed.consumer != nil {
+			info := observed.consumer.CachedInfo()
+			if info == nil || info.Config.Replicas != 1 || !info.Config.MemoryStorage || info.Config.AckPolicy != jetstream.AckNonePolicy {
+				t.Fatalf("invalid actual R1 direct cursor: %+v", info)
+			}
+			t.Logf("full-oracle R1-direct stream=%s source_replicas=%d cursor=%s cursor_replicas=%d", stream.CachedInfo().Config.Name, stream.CachedInfo().Config.Replicas, info.Name, info.Config.Replicas)
+		}
+		return failure
+	}, true, true, true)
+	singleStop()
+	if single != point || (singleErr == nil) != (pointErr == nil) || singleErr != nil && singleErr.Error() != pointErr.Error() {
+		t.Fatalf("R1 direct callback mismatch: point=%+v candidate=%+v errors=%v / %v", point, single, pointErr, singleErr)
+	}
 	if point != bulk {
 		t.Fatalf("report mismatch: point=%+v bulk=%+v point_err=%v bulk_err=%v", point, bulk, pointErr, bulkErr)
 	}
