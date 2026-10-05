@@ -11,7 +11,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Full 13-row × 200 current-source gate remains open. |
-| Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds and disk-delay seeds 1–169 and 196–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
+| Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds and disk-delay seeds 1–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. No24h row qualified; full-matrix soak remains. |
@@ -29,6 +29,17 @@ and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Complete recorded-source Tier3 real disk-delay200 row accepted:** final26
+  seeds170–195 pass raw/device/admission/latency/explanation/fencing/cohort controls
+  and three rebuilt models. All16 proof parts/canonical members verify; exact1–200
+  coverage/600s/19 real cuts per seed/original30s gates and45 common model inputs
+  match79915ca. Whole row621040 invocations/6840266 entries/3800 faults/798480 exactOk
+  operations/2104 cohort audits; worst terminal/progress p99=5.954s/0.851s. This
+  completes a second recorded-source Tier3 row. SDK/full captured workload source/
+  native stores unavailable; integrity/drain named-test scope. Final-source/full
+  matrices/24h/million-drain and historical failed parent verdicts stay open/unchanged.
+  [Complete200 proof aggregation](scale/current-tier3-block-delay-2026-10-04/full200-qualification/).
 
 - **Tier3 disk-delay174 accepted seeds:** new157–169 shard independently
   qualifies39284 invocations/432842 entries/247 real faults/50508 exactOk operations.

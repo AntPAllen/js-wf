@@ -1,9 +1,9 @@
-# Recorded-source Tier3 disk-delay qualification
+# Complete recorded-source Tier3 disk-delay row
 
-Fourteen completed successful shards bind to79915ca in run37164231641.
-Seeds1–169 and196–200 qualify;170–195 are not yet accepted. All174 accepted
-seeds pass independent raw fault/admission/report/explanation/fencing checks
-and all three rebuilt history models.
+All200 consecutive seeds qualify at79915ca in run37164231641. Sixteen successful
+600s-per-seed shards pass raw actual-device/R5 leader/delay/sync/restoration,
+report/explanation/fencing/cohort controls and all three independently rebuilt
+history models.
 
 | Seeds | Job | Invocations | Entries | Faults | Model operations |
 | --- | --- | ---: | ---: | ---: | ---: |
@@ -20,22 +20,26 @@ and all three rebuilt history models.
 | [131–143](seeds-131-143/) | 111324442880 | 39,368 | 433,567 | 247 | 50,616 |
 | [144–156](seeds-144-156/) | 111324442886 | 41,944 | 461,967 | 247 | 53,928 |
 | [157–169](seeds-157-169/) | 111324442961 | 39,284 | 432,842 | 247 | 50,508 |
+| [170–182](seeds-170-182/) | 111324443016 | 39,172 | 431,443 | 247 | 50,364 |
+| [183–195](seeds-183-195/) | 111324443077 | 41,832 | 460,742 | 247 | 53,784 |
 | [196–200](seeds-196-200/) | 111324443131 | 15,176 | 167,133 | 95 | 19,512 |
-| Total | | 540,036 | 5,948,081 | 3,306 | 694,332 |
+| Total | | 621,040 | 6,840,266 | 3,800 | 798,480 |
 
-All1831 expected completed-cohort audits verify. Worst
+All2104 expected completed-cohort audits verify. Worst
 terminal/progress p99=5.953648817s/
 0.850642187s under original30s gates. Every actual model's
-45 local dependencies matches executed Git. Combined review reads every part and
-canonical member in all14 proofs, verifies actual model/source identities, raw
-history counts/exact outputs and original600s/30s gates.
-[Latest combined review](coverage-1-169-and-196-200/).
+45 local dependencies matches executed Git. Combined reviewer reads every part/
+canonical member in all16 archives and verifies exact200-seed coverage, actual
+model/source identities, raw history counts/exact outputs and original600s/19
+confirmed real faults/30s p99/cohort requirements.
+[Complete200 qualification](full200-qualification/).
 
-Workload source attribution is checkout/header binding. Full captured workload
-source/SDK/native stores are unavailable; final integrity/drain is named-test
-scope. Full200/final-source/full16×200/24h/million physical drain remain open.
-Historical failed originals and parent verdicts are unchanged. Prior duplicate
-raw expansions were recovered only after complete published/ZIP/canonical/member
-verification; retained ZIPs/proofs restore every byte.
+Workload source attribution is checkout/header binding. SDK/full captured workload
+source/native stores unavailable; integrity/drain retains named-test scope. The
+executed-source row qualifies, not final-source/full16×200/24h or million physical
+drain. Historical failed parent campaigns remain failed; no reopening/causal claim.
+
+Earlier duplicate raw expansions were recovered only after complete published/
+ZIP/canonical/member verification. Retained ZIPs/proofs restore every byte.
 [Recovery1–104](duplicate-expansion-recovery/) ·
 [Recovery105–156/196–200](duplicate-expansion-recovery-105-156-and-196-200/).

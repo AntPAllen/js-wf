@@ -2271,3 +2271,17 @@ captured source/native stores unavailable; integrity/drain named-test scope.
 Missing170–195/full200/final-source/full16×200/24h/million-drain remain open;
 historical failed parents are unchanged.
 [Complete14-proof aggregation](scale/current-tier3-block-delay-2026-10-04/coverage-1-169-and-196-200/).
+
+### Complete recorded-source Tier3 real disk-delay200 row — 2026-10-05
+
+All200 consecutive600s seeds at79915ca qualify. Full16-proof aggregation reads
+all parts/canonical members and verifies actual model binaries/45 common Git
+inputs, raw history counts/exact three-model outputs, exact seed coverage/19 real
+faults per seed/expected cohort audits and original30s gates. Whole row621040
+invocations/6840266 journal entries/3800 actual dm-delay faults/798480 exactOk
+operations/2104 cohort audits; worst terminal/progress p99=5.954s/0.851s.
+This completes two recorded-source Tier3 rows (ahead-clock and real disk delay).
+Workload SDK/full captured source/native stores unavailable; final integrity/drain
+named-test scope. Full/final-source matrices/24h/million-drain and historical
+failed parent verdicts remain open/unchanged.
+[Complete200 qualification](scale/current-tier3-block-delay-2026-10-04/full200-qualification/).
