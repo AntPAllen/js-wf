@@ -125,6 +125,7 @@ type DispatchEvent struct {
 	RunSequence uint64
 	Delivery    uint64
 	Error       string
+	HeldLease   *lease.HeldObservation `json:"HeldLease,omitempty"`
 }
 
 // WithJournalEncoding selects new writes. Upgrade every reader before enabling
@@ -545,6 +546,7 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		_ = msg.NakWithDelay(time.Second)
 		return
 	}
+	var heldObservation *lease.HeldObservation
 	emit := func(stage string, eventErr error) {
 		if w.dispatchObserver == nil {
 			return
@@ -553,6 +555,9 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 		if eventErr != nil {
 			event.Error = eventErr.Error()
 		}
+		if stage == "lease_held" {
+			event.HeldLease = heldObservation
+		}
 		w.dispatchObserver(event)
 	}
 	ops := w.deliveryOperations(typ, id, metadata.Sequence.Stream, metadata.NumDelivered)
@@ -560,7 +565,11 @@ func (w *Worker) handle(parent context.Context, msg jetstream.Msg) {
 	w.metrics.recordRedelivery(metadata)
 	acquireStarted := ops.begin()
 	acquireCtx, stopAcquire := context.WithTimeout(ctx, 5*time.Second)
-	l, err := w.leases.Acquire(acquireCtx, typ, id, w.ID)
+	var observeHeld func(lease.HeldObservation)
+	if w.dispatchObserver != nil {
+		observeHeld = func(o lease.HeldObservation) { heldObservation = &o }
+	}
+	l, err := w.leases.AcquireWithHeldObserver(acquireCtx, typ, id, w.ID, observeHeld)
 	stopAcquire()
 	ops.finish(acquireStarted, "lease_acquire", 0, "", err)
 	if errors.Is(err, lease.ErrHeld) {

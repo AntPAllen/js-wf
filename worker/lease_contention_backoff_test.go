@@ -52,3 +52,54 @@ func TestHeldLeaseRunUsesBoundedRedeliveryDelay(t *testing.T) {
 		t.Fatalf("held lease delivery: naks=%d delay=%s contentions=%d", msg.naks, msg.delay, w.Metrics().LeaseContentions)
 	}
 }
+
+type observedHeldLeasePort struct {
+	heldLeasePort
+	creates, gets int
+	created       time.Time
+}
+
+func (p *observedHeldLeasePort) Create(ctx context.Context, key string, value []byte) (uint64, error) {
+	p.creates++
+	return p.heldLeasePort.Create(ctx, key, value)
+}
+func (p *observedHeldLeasePort) Get(context.Context, string) (lease.KVEntry, error) {
+	p.gets++
+	return lease.KVEntry{Value: []byte(`{"worker":"other","epoch":1}`), Revision: 2, Created: p.created}, nil
+}
+
+func TestHeldLeaseDispatchReportsExistingEntryWithoutExtraRead(t *testing.T) {
+	for _, observe := range []bool{false, true} {
+		port := &observedHeldLeasePort{created: time.Unix(20, 0)}
+		w := &Worker{ID: "contender", leases: lease.NewWithKVPort(port)}
+		var events []DispatchEvent
+		if observe {
+			w.dispatchObserver = func(e DispatchEvent) { events = append(events, e) }
+		}
+		msg := &heldLeaseMessage{}
+		w.handle(context.Background(), msg)
+		if port.creates != 1 || port.gets != 1 || msg.naks != 1 || msg.delay != heldLeaseNakDelay {
+			t.Fatalf("observe=%t requests=%d/%d naks=%d delay=%s", observe, port.creates, port.gets, msg.naks, msg.delay)
+		}
+		if !observe {
+			continue
+		}
+		held := 0
+		for _, e := range events {
+			if e.Stage != "lease_held" {
+				if e.HeldLease != nil {
+					t.Fatalf("metadata on unrelated event: %+v", e)
+				}
+				continue
+			}
+			held++
+			o := e.HeldLease
+			if o == nil || o.Key != "test.one" || o.Reason != "held_entry" || !o.EntryObserved || !o.ValueValid || o.Revision != 2 || o.Epoch != 1 || o.Worker != "other" || !o.Created.Equal(port.created) || o.ObservedAt.IsZero() {
+				t.Fatalf("incorrect held event: %+v", e)
+			}
+		}
+		if held != 1 {
+			t.Fatalf("held events=%d", held)
+		}
+	}
+}

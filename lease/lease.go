@@ -112,9 +112,36 @@ type Lease struct {
 
 func (l *Lease) Epoch() uint64 { return l.value.Epoch }
 
+// HeldObservation describes the entry already read during a failed acquisition.
+// Created is the KV/server timestamp; ObservedAt is the client's clock. Neither
+// proves server-side expiry, and reclaim_revision_conflict describes a prior
+// read rather than the winning owner's current value.
+type HeldObservation struct {
+	Key           string    `json:"key"`
+	Reason        string    `json:"reason"`
+	EntryObserved bool      `json:"entry_observed"`
+	Revision      uint64    `json:"revision,omitempty"`
+	Created       time.Time `json:"created"`
+	ObservedAt    time.Time `json:"observed_at"`
+	ValueValid    bool      `json:"value_valid"`
+	Worker        string    `json:"worker,omitempty"`
+	Epoch         uint64    `json:"epoch,omitempty"`
+}
+
+// AcquireWithHeldObserver reports a held decision without another KV request.
+// The observer must be fast and must not call back into this Store. Error and
+// acquisition decisions are identical to Acquire, including ErrHeld identity.
+func (s *Store) AcquireWithHeldObserver(ctx context.Context, typ, id, worker string, observe func(HeldObservation)) (*Lease, error) {
+	return s.acquire(ctx, typ, id, worker, observe)
+}
+
 // Acquire uses the KV create CAS. The creation revision is the fencing epoch:
 // it stays unique even when an earlier lease expires without a journal write.
 func (s *Store) Acquire(ctx context.Context, typ, id, worker string) (*Lease, error) {
+	return s.acquire(ctx, typ, id, worker, nil)
+}
+
+func (s *Store) acquire(ctx context.Context, typ, id, worker string, observe func(HeldObservation)) (*Lease, error) {
 	if err := identity.Validate(typ, id); err != nil {
 		return nil, err
 	}
@@ -123,6 +150,20 @@ func (s *Store) Acquire(ctx context.Context, typ, id, worker string) (*Lease, er
 	}
 	key := identity.Key(typ, id)
 	port := s.operations()
+	heldError := func(reason string, entry *KVEntry) error {
+		if observe != nil {
+			o := HeldObservation{Key: key, Reason: reason, ObservedAt: port.Now()}
+			if entry != nil {
+				o.EntryObserved, o.Revision, o.Created = true, entry.Revision, entry.Created
+				var value Value
+				if json.Unmarshal(entry.Value, &value) == nil {
+					o.ValueValid, o.Worker, o.Epoch = true, value.Worker, value.Epoch
+				}
+			}
+			observe(o)
+		}
+		return ErrHeld
+	}
 	// The revision itself becomes the epoch, so the value is updated once by
 	// its owner after Create. Until that update, other acquirers still fail.
 	data, _ := json.Marshal(Value{Worker: worker})
@@ -137,7 +178,7 @@ func (s *Store) Acquire(ctx context.Context, typ, id, worker string) (*Lease, er
 			return nil, err
 		}
 		if attempt > 0 {
-			return nil, ErrHeld
+			return nil, heldError("create_race_after_missing_entry", nil)
 		}
 		entry, getErr := port.Get(ctx, key)
 		if errors.Is(getErr, jetstream.ErrKeyNotFound) {
@@ -148,14 +189,14 @@ func (s *Store) Acquire(ctx context.Context, typ, id, worker string) (*Lease, er
 		}
 		var held Value
 		if json.Unmarshal(entry.Value, &held) != nil || held.Worker == "" || held.Epoch != 0 || port.Now().Sub(entry.Created) < time.Second {
-			return nil, ErrHeld
+			return nil, heldError("held_entry", &entry)
 		}
 		// Create succeeded, but its owner never finished epoch initialization.
 		// The revision CAS makes reclaim safe against an in-flight Update: only
 		// one of Delete and Update can win, and no handler has started yet.
 		if deleteErr := port.Delete(ctx, key, entry.Revision); deleteErr != nil {
 			if errors.Is(deleteErr, jetstream.ErrKeyRevisionMismatch) {
-				return nil, ErrHeld
+				return nil, heldError("reclaim_revision_conflict", &entry)
 			}
 			return nil, deleteErr
 		}
