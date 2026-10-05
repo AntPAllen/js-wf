@@ -1,0 +1,300 @@
+{
+  "wire_check": {
+    "profile": "protobuf-to-json",
+    "invocations": 392,
+    "mixed_invocations": 7,
+    "protobuf_worker_entries": 211,
+    "json_worker_entries": 4134,
+    "schema_sha256": "244a4755a90afe0ffb72ffa843a1b2ff7f7afb6b78adbbd919d302a36c83ef94",
+    "generated_codec_sha256": "205e4da5a338e8a22818030f51d310d8918d8cafc404ab99e2795ba6aa8b9504",
+    "all_retained_wire_bytes_independently_decoded": true,
+    "qualifies_default_writer_profile": false,
+    "clears_full_tier3_release": false
+  },
+  "short_terminal_p99": {
+    "type": "matrixshort",
+    "id": "tier3-1-batch-4-5",
+    "event": "terminal",
+    "enabled": "2026-10-05T09:57:23.225153614Z",
+    "observed": "2026-10-05T09:57:57.136094894Z",
+    "delay_ns": 33910941280
+  },
+  "short_terminal_sample_count": 56,
+  "short_terminal_above_30s": 1,
+  "outlier_raw_decoded_records": [
+    {
+      "epoch": 3378,
+      "index": 0,
+      "kind": "Started",
+      "worker_id": "matrix-process-0-generation-7"
+    },
+    {
+      "epoch": 3378,
+      "index": 1,
+      "kind": "StepRequested",
+      "payload": {
+        "kind": "run",
+        "name": "effect",
+        "input_hash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+        "fire_at": "0001-01-01T00:00:00Z"
+      },
+      "worker_id": "matrix-process-0-generation-7"
+    },
+    {
+      "epoch": 4048,
+      "index": 2,
+      "kind": "StepCompleted",
+      "payload": {
+        "result": 42
+      },
+      "worker_id": "matrix-process-4-generation-11"
+    },
+    {
+      "epoch": 4048,
+      "index": 3,
+      "kind": "Completed",
+      "payload": {
+        "inv_seq": 121,
+        "result": "NDI="
+      },
+      "worker_id": "matrix-process-4-generation-11"
+    }
+  ],
+  "outlier_dispatch_timeline": [
+    {
+      "At": "2026-10-05T09:57:23.352259878Z",
+      "Worker": "matrix-process-0-generation-7",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-4-5",
+      "Stage": "fetched",
+      "RunSequence": 477,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T09:57:23.529832324Z",
+      "Worker": "matrix-process-0-generation-7",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-4-5",
+      "Stage": "lease_acquired",
+      "RunSequence": 477,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T09:57:36.46889573Z",
+      "Worker": "matrix-process-3-generation-5",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-4-5",
+      "Stage": "fetched",
+      "RunSequence": 477,
+      "Delivery": 2,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T09:57:36.525361699Z",
+      "Worker": "matrix-process-3-generation-5",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-4-5",
+      "Stage": "lease_held",
+      "RunSequence": 477,
+      "Delivery": 2,
+      "Error": "workflow lease is held"
+    },
+    {
+      "At": "2026-10-05T09:57:36.532719057Z",
+      "Worker": "matrix-process-3-generation-5",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-4-5",
+      "Stage": "terminal_probe_error",
+      "RunSequence": 477,
+      "Delivery": 2,
+      "Error": "nats: key not found"
+    },
+    {
+      "At": "2026-10-05T09:57:36.532781242Z",
+      "Worker": "matrix-process-3-generation-5",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-4-5",
+      "Stage": "nak",
+      "RunSequence": 477,
+      "Delivery": 2,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T09:57:41.546010592Z",
+      "Worker": "matrix-process-2-generation-8",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-4-5",
+      "Stage": "fetched",
+      "RunSequence": 477,
+      "Delivery": 3,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T09:57:41.749007278Z",
+      "Worker": "matrix-process-2-generation-8",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-4-5",
+      "Stage": "lease_acquired",
+      "RunSequence": 477,
+      "Delivery": 3,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T09:57:54.548394126Z",
+      "Worker": "matrix-process-4-generation-11",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-4-5",
+      "Stage": "fetched",
+      "RunSequence": 477,
+      "Delivery": 4,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T09:57:54.649341834Z",
+      "Worker": "matrix-process-4-generation-11",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-4-5",
+      "Stage": "lease_acquired",
+      "RunSequence": 477,
+      "Delivery": 4,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T09:57:57.155653209Z",
+      "Worker": "matrix-process-4-generation-11",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-4-5",
+      "Stage": "released",
+      "RunSequence": 477,
+      "Delivery": 4,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T09:57:57.160835352Z",
+      "Worker": "matrix-process-4-generation-11",
+      "Type": "matrixshort",
+      "ID": "tier3-1-batch-4-5",
+      "Stage": "ack",
+      "RunSequence": 477,
+      "Delivery": 4,
+      "Error": ""
+    }
+  ],
+  "outlier_owner_faults": [
+    {
+      "worker_ping_at": "0001-01-01T00:00:00Z",
+      "worker_selection": "no_new_acquisition_within_500ms",
+      "worker_sigkill_confirmed": true,
+      "scheduled": "2026-10-05T09:57:24.122767687Z",
+      "killed": "2026-10-05T09:57:24.636429119Z",
+      "healed": "2026-10-05T09:57:24.863362299Z",
+      "node": -1,
+      "partition_routes": [
+        0,
+        0,
+        0
+      ],
+      "worker": "matrix-process-0-generation-7",
+      "worker_slot": 0,
+      "pid": 119733,
+      "active_leases": 5,
+      "paused": "0001-01-01T00:00:00Z",
+      "resumed": "0001-01-01T00:00:00Z"
+    },
+    {
+      "worker_ping_at": "0001-01-01T00:00:00Z",
+      "worker_selection": "held_delivery",
+      "worker_target": {
+        "journal_prefix": null,
+        "journal_tail": 0,
+        "nonterminal_observed_at": "0001-01-01T00:00:00Z",
+        "token": "2026-10-05T09:57:44.123311357Z",
+        "delivery": {
+          "At": "2026-10-05T09:57:44.333126344Z",
+          "Worker": "matrix-process-2-generation-8",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-4-3",
+          "Stage": "lease_acquired",
+          "RunSequence": 557,
+          "Delivery": 1,
+          "Error": ""
+        }
+      },
+      "worker_sigkill_confirmed": true,
+      "scheduled": "2026-10-05T09:57:44.122767687Z",
+      "killed": "2026-10-05T09:57:44.339544439Z",
+      "healed": "2026-10-05T09:57:44.842450073Z",
+      "node": -1,
+      "partition_routes": [
+        0,
+        0,
+        0
+      ],
+      "worker": "matrix-process-2-generation-8",
+      "worker_slot": 2,
+      "pid": 122096,
+      "active_leases": 2,
+      "paused": "0001-01-01T00:00:00Z",
+      "resumed": "0001-01-01T00:00:00Z"
+    },
+    {
+      "worker_ping_at": "0001-01-01T00:00:00Z",
+      "worker_selection": "held_delivery",
+      "worker_target": {
+        "journal_prefix": null,
+        "journal_tail": 0,
+        "nonterminal_observed_at": "0001-01-01T00:00:00Z",
+        "token": "2026-10-05T09:58:04.126435745Z",
+        "delivery": {
+          "At": "2026-10-05T09:58:04.169147072Z",
+          "Worker": "matrix-process-4-generation-11",
+          "Type": "matrixtimer",
+          "ID": "tier3-1-batch-4-3",
+          "Stage": "lease_acquired",
+          "RunSequence": 577,
+          "Delivery": 2,
+          "Error": ""
+        }
+      },
+      "worker_sigkill_confirmed": true,
+      "scheduled": "2026-10-05T09:58:04.122767687Z",
+      "killed": "2026-10-05T09:58:04.172407081Z",
+      "healed": "2026-10-05T09:58:04.342821086Z",
+      "node": -1,
+      "partition_routes": [
+        0,
+        0,
+        0
+      ],
+      "worker": "matrix-process-4-generation-11",
+      "worker_slot": 4,
+      "pid": 122151,
+      "active_leases": 1,
+      "paused": "0001-01-01T00:00:00Z",
+      "resumed": "0001-01-01T00:00:00Z"
+    }
+  ],
+  "worker_session_count": 124,
+  "actual_observer_matched_worker_pids": 110,
+  "unobserved_worker_pids": [
+    117890,
+    117898,
+    117909,
+    117918,
+    117929,
+    118020,
+    118040,
+    118063,
+    118164,
+    118457,
+    118488,
+    118497,
+    118616,
+    118848
+  ],
+  "inference": "Outlier uses only JSON; two owners were killed before completion, with delivery 2 lease-held then delivery 3 acquired before second kill. This evidence does not prove complete latency causality or qualify the failed parent.",
+  "native_rerun": false,
+  "failed_parent_remains_unqualified": true
+}

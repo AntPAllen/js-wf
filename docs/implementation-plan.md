@@ -2662,3 +2662,23 @@ with each other and the still-running million candidate is recorded, not causal.
 The next source reports initial-state-watch failure phase and delivered-prefix
 counts while preserving underlying retry errors and all original budgets.
 Focused state-snapshot tests pass; no native soak rerun or cause/fix claim.
+
+
+### 2026-10-05 focused diagnostic follow-up
+
+Healthy restored copies of checkpoint1040's five stores deliver all29177 state
+values within0.131–0.295s, including both existing2s wrappers. Retained cardinality
+alone does not reproduce the timeout; no production deadline change is justified
+by this result. Live-fault/watch-progress diagnosis remains open. Source886de67,
+actualSDK/five server builds/fullcopied-store proof and original before/after
+hash equality retained.
+[Complete diagnostic](scale/state-snapshot-copied-2026-10-05/).
+
+The failed sustained rollout's392inv/4345rawrecords independently decode,
+including sevenmixedwriterinv. Its sole ≥30s short terminal is entirelyJSON and
+loses two consecutive owners toSIGKILL before a third completes delivery4;
+delivery2observedleaseheld/NAK. Next add this concrete repeated-owner-loss sequence
+to seeded simulation and analyze lease/ack/redelivery clocks before sustained
+rerun. Original strict30s remains; this is separate from the closed single-kill
+TTL30 mismatch. Parent remainsfailed, observercoverage110/124PIDs.
+[Bound original wire and timeline](scale/protobuf-json-worker-rollout-2026-10-05/10m-outlier-review/).

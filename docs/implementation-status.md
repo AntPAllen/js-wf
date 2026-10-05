@@ -30,6 +30,24 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Healthy failed-soak copied-state diagnostic completed:** source886de67,
+  original five stores verified before/after; only copies reopened with recorded
+  identity. All29177 values reach initial barrier in0.131/0.146/0.295s for
+  existing2s/direct20s/existing2s recheck. ActualSDK/five server executable builds
+  retained;4190 archive members/eight parts verify. Cardinality alone does not
+  reproduce timeout; production limits unchanged, no historic cause/audit/fault/
+  matrix/24h qualification.
+  [Copied-store observations and full proof](scale/state-snapshot-copied-2026-10-05/).
+
+- **Failed sustained rollout wire/outlier independently reviewed:** all392inv /
+  4345records decode (211protobuf/4134JSON), sevenmixedinv; sourceschema andchecker
+  bind to executedab5cd71. The33.911s outlier containsonlyJSON and loses two owners
+  to reapedSIGKILL before delivery4 completes; delivery2 observedleaseheld/NAK.
+  Actualobserver covers110/124workerPIDs,14unobserved. Originalstrict30s gate
+  remainsfailed; model repeatedownerloss before another sustainedrun. All653
+  copied-analysis archive members/part verify; no originalmutation/native rerun.
+  [Wire and repeated-kill timeline](scale/protobuf-json-worker-rollout-2026-10-05/10m-outlier-review/).
+
 - **State snapshot failure diagnostics added:** failures report watch creation
   versus initial-set phase, received/included counts, last revision and missing
   initial completion barrier. Error wrapping preserves retry identity; original
