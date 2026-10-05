@@ -30,6 +30,19 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Terminal point-state audits now request the stream leader:** pinned SDK KV.Get
+  automatically uses direct reads on direct-enabled state streams. Controlled
+  synthetic stale absence fails the old public checker at4.70s; corrected R3
+  regression passes4.38s with two actual administrative reads/zero wrapped KV gets,
+  and rejects actual DEL/PURGE. Modern compaction/corruption controls39.11s/9.93s
+  and legacy2.11.17 compatibility42.79s pass; focused race regression5.31s plus
+  byte/state/journal controls pass. Normal/race actual SDK identities and641
+  unchanged selected inputs/original stores preserved. Baseline source hashes
+  observed after execution; no live baseline identity or before/after proof.
+  No stream configuration or audit budgets changed. Snapshot-watch consistency,
+  historical partition causality, full matrices and24h remain open.
+  [Baseline, corrected and race originals](scale/terminal-state-leader-2026-10-05/).
+
 - **All-server157–200 duplicate expansions recovered after publication:**
   pushed6760708 parts, all canonical members/ZIPs and264 raw files verify;
   only duplicate expansions removed, recovering2254528512 allocated bytes.

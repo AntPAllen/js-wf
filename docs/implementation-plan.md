@@ -2181,3 +2181,23 @@ source/stores not uploaded; integrity/drain retain named-test scope. This comple
 three recorded-source Tier2 rows (journal/consumer/all-server); full13×200/final
 source, Tier3/full24h and native-million physical drain remain open.
 [Complete raw references and aggregation](scale/current-tier2-matrix-2026-10-04/cluster-full200-qualification/).
+
+### Terminal point-state leader routing — 2026-10-05
+
+The pinned nats.go1.54 modern KV.Get automatically selects DIRECT.GET when
+KV_WF_STATE has AllowDirect=true. Direct reads can be served by followers and do
+not establish read-after-write coherence. Non-snapshot terminal invariant checks
+now use the documented administrative GetLastMsg API, routed to the stream
+leader, preserving API prefix/domain, client trace, existing retry/deadline
+budgets and DEL/PURGE/expiry-marker absence semantics. Shared initialization is
+concurrency-safe; no stream configuration changes.
+
+A synthetic stale-absence wrapper makes the old public Check fail at4.70s.
+Corrected real file R3 Check bypasses it, issues two administrative reads and
+rejects actual deletion/purge in4.38s. Modern compaction/corruption controls and
+legacy2.11.17 compatibility pass; focused race regression passes5.31s. Actual
+normal/race SDK identities,641 unchanged selected inputs and original stores
+are retained; baseline lacks live identity/before-after capture. This establishes
+the point-read correction, not actual follower lag or the historical partition
+failure's cause. Fresh snapshot-watch consistency, final-source/full-matrix/24h
+qualification remain open. [Complete proof](scale/terminal-state-leader-2026-10-05/).

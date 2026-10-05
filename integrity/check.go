@@ -266,6 +266,7 @@ func checkUsingOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint
 		subjects = append(subjects, subject)
 	}
 	sort.Strings(subjects)
+	leaderTerminal := terminalLeaderReader(js)
 	audited, err := auditJournals(ctx, subjects, func(ctx context.Context, subject string) (int, bool, error) {
 		key, err := journalKey(subject, seen)
 		if err != nil {
@@ -280,6 +281,9 @@ func checkUsingOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint
 			}
 		}
 		terminalValue := func() ([]byte, error) {
+			if !snapshotState {
+				return auditRead(ctx, func(attempt context.Context) ([]byte, error) { return leaderTerminal(attempt, key) })
+			}
 			value, err := auditRead(ctx, func(attempt context.Context) (jetstream.KeyValueEntry, error) { return state.Get(attempt, key) })
 			if err != nil {
 				return nil, err
