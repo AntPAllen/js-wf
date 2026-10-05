@@ -1,0 +1,53 @@
+{
+  "source": "4ab4bdd6277b4bc5bc72fac63c2ce107bd563443",
+  "actual_live_parent_sdk_sha256": "1fc015665daa9b2d90c45b778d79c8f3f7af74d86e743e75713ab9e40697224b",
+  "actual_live_child_sdk_sha256": "1fc015665daa9b2d90c45b778d79c8f3f7af74d86e743e75713ab9e40697224b",
+  "clean_full_build_info_and_race_verified": true,
+  "source_inputs": 651,
+  "source_before_after_and_git_match": true,
+  "actual_native_server_processes": 3,
+  "actual_native_server_sha256": "24759ea94c030a9c5f1cd7fc61c74e14615a3c35650b5bb28b29891b5899ba9d",
+  "all_live_server_and_retained_binary_build_fields_match": true,
+  "named_pass_seconds": 35.39,
+  "kill_admission": {
+    "child_live_sdk_sha256": "1fc015665daa9b2d90c45b778d79c8f3f7af74d86e743e75713ab9e40697224b",
+    "child_pid": 65983,
+    "cut": "after_manifest",
+    "fresh_generation": 3,
+    "held_epoch": 51,
+    "killed_at": "2026-10-05T08:56:39.678794643Z",
+    "lease_revision": 60,
+    "lease_ttl": "12s",
+    "old_generation": 1,
+    "parent_sdk_sha256": "1fc015665daa9b2d90c45b778d79c8f3f7af74d86e743e75713ab9e40697224b",
+    "reclaimed_objects": 2,
+    "signal": "SIGKILL"
+  },
+  "result": {
+    "all_peer_fresh_results_verified": true,
+    "archive_reads": 0,
+    "effects": 3,
+    "frame_reads": 1,
+    "fresh_generation": 3,
+    "held_epoch": 51,
+    "invocations": 2,
+    "ledger_counts": {
+      "effect:1": 2,
+      "effect:2": 1,
+      "initial:1": 2,
+      "initial:2": 1,
+      "stage:1": 2,
+      "stage:2": 1
+    },
+    "old_generation": 1,
+    "reclaimed_objects": 2,
+    "recovery_seconds": 12.650599017,
+    "shared_and_survivor_and_fresh_references_verified": true,
+    "terminal_epoch": 62,
+    "terminals": 2
+  },
+  "exact_effect_ledger_verified": true,
+  "kill_and_fence_scope": "Named-test actual reaped SIGKILL WaitStatus, published fresh generation checkpoint and held owner before cut, terminal epoch above held epoch after successor recovery",
+  "physical_stores_scope": "Stopped originals archived/hash-verified, not independently reopened",
+  "scope": "Focused retirement/quiescent-GC/generation-reuse plus fresh-manifest worker SIGKILL; not every retirement timing cut, server simultaneous outage, online GC, domain/legacy faults, full matrices or24h qualification. Production TTL12/heartbeat3/AckWait13 and original30s startup/60s scenario/under30 recovery unchanged; Tier1 graph unchanged"
+}

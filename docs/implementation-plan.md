@@ -2508,3 +2508,19 @@ leadership returned; failures retained, no server-defect attribution. No unchang
 5s rerun. Library restart accepted, not SIGKILL/lease-expiry or full domain matrix.
 Legacy/worker SIGKILL/online GC/current-source full matrices/actual24h remain open.
 [Complete proof and earlier failures](scale/continuation-domain-all-server-restart-2026-10-05/).
+
+
+### Retirement/reuse with fresh-manifest worker SIGKILL — 2026-10-05
+
+Clean4ab4bdd actual racePASS35.39s/recovery12.651s under30s; original30s startup,
+60s scenario and productionTTL12/heartbeat3/AckWait13 stay. Retire generation1,
+collect two old objects while preserving survivor/shared bytes, reuse3 and reject
+old manifest. Actual child publishes fresh checkpoint/holds epoch51, is reaped
+SIGKILL, successor completes at epoch62 with zero archived-prefix/one frame read.
+Three effects/two raw terminals/all-peer fresh2/survivor1/fresh/shared references
+verify after quiescent collection. Actual SDK parent/child, three live native
+server binaries/build fields,651 Git inputs and1,084 original members verify.
+This closes the focused fresh-manifest retirement worker kill combination at
+executed source; other publication timings/combined server/domain/legacy faults,
+active-writer GC/full current-source matrices/actual24h remain open.
+[Complete proof](scale/continuation-retirement-worker-sigkill-2026-10-05/).

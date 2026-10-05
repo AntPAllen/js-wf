@@ -948,3 +948,19 @@ Earlier added5s metadata gate failures stay preserved; reconnect alone did not
 prove metadata leadership. Focused library restart accepted at executed source;
 domain SIGKILL/forced absence confirmation/legacy versions, worker SIGKILL,
 active-writer GC/full matrices/actual24h remain open. No unchanged Tier1 rerun.
+
+
+## Retirement generation reuse across fresh-manifest worker SIGKILL
+
+Actual clean4ab4bdd race35.39s, kill-to-result12.651s under original30s target.
+Retired generation1/two collected objects, preserved survivor/shared content,
+new generation3/old-manifest rejection, actual child fresh-manifest publication,
+held epoch51 and reapedSIGKILL. Successor62 resumes one frame without archive
+reads; exact three effects/two terminals/all-peer fresh2/survivor1/shared/fresh
+references pass. Original30s startup/60s scenario/production12s lease stay.
+Actual parent/child SDKs, three native server binaries/build fields,651 Git inputs,
+stopped originals and1,084 archive members verify; stores not independently
+reopened. [Complete worker-kill proof](scale/continuation-retirement-worker-sigkill-2026-10-05/).
+Focused after-manifest retirement worker kill accepted at recorded source;
+other retirement timing/server/domain/legacy combinations, active-writer GC,
+full current-source matrices and actual24h remain. No unchanged Tier1 graph rerun.

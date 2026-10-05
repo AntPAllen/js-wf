@@ -30,6 +30,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Retirement/reuse with actual worker SIGKILL qualified:** clean4ab4bdd
+racePASS35.39s, kill recovery12.651s under30s with original12s lease/60s scenario.
+Generation1 retired/two objects collected/survivor shared bytes retained; reuse3
+rejects old manifest then child publishes fresh frame and holds epoch51 before
+reapedSIGKILL. Successor epoch62 returns2 with zero archive/one frame read,
+exactly three effects/two terminals; all peers/survivor/fresh/shared references
+verify after quiescent GC. Actual parent/child race SDKs, three live native server
+binaries/build fields,651 Git inputs/before-after ledgers and1,084 original archive
+members verify. Focused after-manifest cut, not every retirement timing/combined
+server/domain/legacy fault, active-writer GC or full matrix/24h qualification.
+ [Complete originals and independent review](scale/continuation-retirement-worker-sigkill-2026-10-05/).
+
 - **Real-domain all-three library restart qualified at original target:** clean
 7a6531f racePASS31.78s, whole cut5.810s under30s, three old server IDs stopped
 before replacements, three new IDs/domain API responses confirmed. Original60s
