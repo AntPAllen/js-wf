@@ -13,11 +13,13 @@ failed; thesetimings do not establish itscause or aproductionfix. ActualSDK/proc
 sixchildSDKs/exactproducer/668Gitinputs/3287external inputs independently verified.
 Twelve-control allsixphysicaldrain guard accepts. All16760 completearchive members
 andthreeparts readback verified, includingclosedoriginalstores/source/executable/
-metadata/logs. Originalstores not reopened; independentfresh-copy audits pending.
+metadata/logs. Originalstores not reopened; separate [sixfresh-copy audits](../drained-copied-audits/)
+now independently verify all501outcomes/exactresults/prefixes and physicaldrain.
 
 Thisqualifies sixspecified combinedboundaries withphysicaldrain atits recorded
 source. Itdoesnotqualify all500positions, actualNATS processSIGKILL, fullfault
 matrices/current-source qualification or24h. Servers embedded inSDK. Nativefinal
-integrity/prefix/results retain named-testscope until separatecopied review.
+integrity/prefix/results have native named-testscope, with separatecopied proof
+recorded independently.
 See [independent review](independent-review.json) and
 [archive verification](archive-verification.json).

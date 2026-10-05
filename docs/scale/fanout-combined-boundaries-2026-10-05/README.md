@@ -7,7 +7,9 @@ race579.62s, retainingoriginal5mcase/30scut. Each admitsactualparentSIGKILL/libr
 journalrestart,501retainedoutcomes/exactresults/prefix/higherepoch, joins64workers,
 andchecksallthree currentR3 zeroqueues/exact64durables withzero pending/ackbefore
 case_deadline. ActualSDK/source/fault/guard/full16760member/threepart reviewverify.
-Independentfresh-copy audits pending; nofullmatrix/24h orolderfailure promotion.
+[Independentfresh-copy audits](drained-copied-audits/) nowverifyall501outcomes/
+exactresults/prefixes andzeroqueue/durables inallsixcases. No fullmatrix/24h or
+olderfailure promotion.
 
 ## Earlier six-boundary qualification
 

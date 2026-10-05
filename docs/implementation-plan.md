@@ -3303,3 +3303,16 @@ olderdiagnostic30s failure remainsfailed, no causefixattribution. Originalstores
 closed; independentfresh-copy audits pending. Noall500positions/serverprocess
 SIGKILL/current-source fullmatrices/24h qualification.
 [Complete successful physical-drain proof](scale/fanout-combined-boundaries-2026-10-05/case-deadline-drain/).
+
+### Independent full six-case fanout integrity and drain audits — 2026-10-05
+
+Each successfuldc8422a cluster was independently audited onlyas a freshbyte-
+identical copy. Each501invocations/journals/terminals matchsnative report;500unique
+childrequests/allthreeclient exact2×indexresults/parent249500, preservedactual
+pre-SIGKILL prefixes/higher epochs. Allthreequeueszero/exact64durableszero pending/
+ack. Audit2.358–2.612s/whole6.100–6.869s underoriginal20s excludingstartup/readiness.
+ActualSDK/proc/1687selectedinputs/helperGit/original2093/2091/2090/2156/2157/2160
+filesunchanged verified; all23907archive members/elevenparts readback. No workers/
+manualacks/originalreopen/historicalcause/all500positions/fullmatrix/final-source/
+24h promotion. This closesindependentcopy integrity/result/prefix/drain scope for
+sixcombinedboundaries. [Complete copied audits](scale/fanout-combined-boundaries-2026-10-05/drained-copied-audits/).

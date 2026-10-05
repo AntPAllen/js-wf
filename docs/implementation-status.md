@@ -12,7 +12,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
-| Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries qualified at executed25b327c. Other finite combined cases remain. |
+| Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries, physical drain and independent copied audits qualified at executed dc8422a. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. Corrected continuous-byte attempt also failed checkpoint1040 /29120 after7986.85s; originals independently preserved, state snapshot phase is the next diagnostic target. No24h row qualified; full-matrix soak remains. |
 
@@ -135,6 +135,16 @@ trace dependencies before another full run. [Preserved failed proof](scale/postg
 
 ## Latest accepted evidence
 
+- **Independent integrity/results/prefix/drain audits passed for allsixdc8422a
+  fanout clusters:** freshcopies only;501invocations/journals/terminals,500exactchild
+  results/parent249500 throughallthreeclients, identicalpre-SIGKILL prefixes/higher
+  epochs. Allthreequeueszero/all64durableszero pending/ack. Audit2.358–2.612s,
+  whole6.100–6.869s under20s. ActualSDK/proc/1687selectedinputs/helperGit andall
+  originalfilesunchanged verified;23907archive members/elevenparts readback.
+  Originalstoresclosed; no fullmatrix/24h/all500positions/historicalcause claim.
+  [Complete six copied drain audits](scale/fanout-combined-boundaries-2026-10-05/drained-copied-audits/).
+
+
 - **Fullsix fanout boundaries plusphysical drain qualified atdc8422a:** native
   racePASS579.62s. Allsix500-child cuts/actualparentSIGKILL/libraryR3journal restarts/
   exactprefix/higher epoch/parent249500/501retained report. All64workers joined,
@@ -142,7 +152,7 @@ trace dependencies before another full run. [Preserved failed proof](scale/postg
   beforeoriginal5mcase deadline; original30scut unchanged. ActualSDK/sixchildSDKs/
   exactproducer/668Gitinputs/3287external inputs/12-control guard verified; all16760
   archive members/threeparts readback. Drain10.047–25.611s. Originalstores closed,
-  independentfresh-copy audits pending; noall500positions/serverprocessSIGKILL/
+  independentfresh-copy audits now pass as recorded separately; noall500positions/serverprocessSIGKILL/
   fullfaultmatrix/24h orolderfailure causefixclaim.
   [Complete physical-drain proof](scale/fanout-combined-boundaries-2026-10-05/case-deadline-drain/).
 
