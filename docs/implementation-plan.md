@@ -2413,3 +2413,20 @@ controls pass. Original/intermediate failures and closed native stores preserved
 No1750 historical-cause claim or24h/full-matrix pass; verify100k/R5 performance,
 legacy/domain and final-source release gates before promotion.
 [Complete evidence](scale/byte-refill-diagnosis-2026-10-05/).
+
+
+### Full R5 continuous-reader and tracing qualification — 2026-10-05
+
+Executed clean ee4c272:100k inv/1.2M entries, three original20s audits complete
+12.501/14.316/13.692s with3.6M exactly-once journal visits and correct interrupted
+cursors/leader-point counts. Fixture injects interruption into production
+continuous batches. Clean6176205 plain/traced public full audits complete
+14.964/14.064s; tracer accounts1.3M records/85.2MB with zero iterator errors.
+SDK/live identity/server copies/selected Git inputs/clone ledgers/proof members
+verify. This closes focused full-cohort performance/interruption/tracing gates;
+actual24h/full-final-source matrices/legacy-domain remain. Shared-VM sequential
+numbers are not a stable speedup estimate or historical-cause proof.
+Existing million candidate first three-server SIGKILL heals17.092s and receipts
+resume, maxlateness17.681s; final physical drain and campaign verdict remain open.
+Secure retained-store disk headroom before another growing24h fixture.
+[Complete evidence](scale/continuous-byte-r5-2026-10-05/).

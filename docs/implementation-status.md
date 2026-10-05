@@ -30,6 +30,22 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Full R5 continuous-byte and tracing deadline gates qualified:** clean ee4c272
+ original100k inv/1.2M entries, baseline/error/short audits complete12.501/14.316/
+13.692s under20s,3.6M exact-once journal visits and correct1/129/130 cursors with
+0/0/1 gap reads. Interruption fixture wraps production continuous batches. Clean
+6176205 plain/traced public audits complete14.964/14.064s; trace accounts all1.3M
+records/85.2MB, zero iterator errors, one cursor per stream and bounded64 history.
+Actual SDK/servers,647/648 Git inputs/before-after ledgers, clone continuation and
+all1364 archive members verify. No stable speedup/old-cause/full-matrix/24h claim.
+Existing million candidate completes first planned three-server SIGKILL/heal in
+17.092s and resumes receipts; observed maxlateness17.681s, transient errors kept.
+Its SDK/unit remain live; physical drain/final pass/candidate adoption stay open.
+Derived inactive build cache recovered1.64GB; original/proof binaries and stores
+retained. Secure growing-fixture disk headroom before another24h launch.
+[Complete qualification and live restart observation](scale/continuous-byte-r5-2026-10-05/).
+
+
 - **Byte-reader healthy refill fixed and delivery tracing added:** pinnedSDK
  PullMaxBytes+StopAfter stalls a plain8MiB iterator and production regression at
 31/48 records; primary SDK source matches module ZIP. Continuous iterator retains
