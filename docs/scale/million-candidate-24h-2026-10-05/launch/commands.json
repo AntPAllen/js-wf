@@ -1,0 +1,42 @@
+{
+  "revision": "68d69c04a0c83273c8b3a0a5fad72d3a352753bf",
+  "build": [
+    "go",
+    "build",
+    "-p=1",
+    "-o",
+    "/tmp/js-wf-million-candidate-24h-20261005/wf-timer-volume",
+    "./cmd/wf-timer-volume"
+  ],
+  "run": [
+    "/tmp/js-wf-million-candidate-24h-20261005/wf-timer-volume",
+    "-root",
+    "/tmp/js-wf-million-candidate-24h-20261005/campaign",
+    "-server-candidate",
+    "/tmp/js-wf-nats-scheduler-server-candidate-v2-20261004/nats-server",
+    "-count",
+    "1000000",
+    "-publishers",
+    "64",
+    "-horizon",
+    "24h",
+    "-lead",
+    "15m",
+    "-p99-limit",
+    "2s",
+    "-max-late",
+    "30s"
+  ],
+  "cwd": "/tmp/js-wf-million-candidate-24h-20261005/source",
+  "candidate_sha256": "ff7335643d02125ec50b8abaa0ca80fe4da36473aa14402c2dbcf029e63c9fe8",
+  "local_git_inputs": 87,
+  "selected_inputs": 1697,
+  "environment": {
+    "GOCACHE": "/tmp/js-wf-go-build-cache-20261004",
+    "GOFLAGS": "",
+    "CGO_ENABLED": "0",
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "1GiB"
+  },
+  "scope": "Full million/24h diagnostic candidate comparison, not production release qualification. Original raw lateness and physical drain gates unchanged."
+}

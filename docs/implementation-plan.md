@@ -2575,3 +2575,16 @@ Native de673be racePASS34.62s/recovery12.846s/epoch51→69, exact effects,
 all-peer/raw integrity/quiescent retention verified. Independent generated Python
 codec binds actual protobuf completion to prepared/repaired frame; JSON terminal
 decoded. Full rolling/chaos remains open.
+
+### Fresh full-profile timer candidate after VM reboot — 2026-10-05
+
+The earlier million-message/24h diagnostic stopped in the VM reboot, with342,191
+receipts recovered offline; original stores/report/ledger retained unchanged.
+Fresh clean68d69c0 comparison now runs in an isolated source/campaign root with
+actual retained program and allthree candidate servers/live executables/source
+inputs independently verified. Original1M/24h/64publishers/15mlead/p99≤2s/max≤30s/
+two all-serverSIGKILL/physical replica drain targets unchanged. Full publication
+and terminal outcome pending at launch. This candidate is still rejected by the
+release verifier; no production source pin or default changed. Terminal review
+and adoption qualification remain required. Shared-VM overlap with runtime24h
+recorded, not attributed as cause of any performance result.

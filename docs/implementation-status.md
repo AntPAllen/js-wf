@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Fresh million/24h candidate comparison launched after reboot interruption:**
+  clean68d69c0, live supervisor101005/program101283 and three native processes
+  independently confirmed. Original1M/24h/64publishers/15mlead/rawp99≤2s/max≤30s/
+  two all-serverSIGKILL/physicaldrain profile, unitMemoryMax6G/RuntimeMax26h.
+  Actual program/allserver hashes/buildfields,1,697 selected inputs/87Git inputs,
+  three monitoring responses and1,716 immutable launch members/two parts verify.
+  Snapshot full-publication unobserved (ack0/received0); terminal pending.
+  Diagnostic candidate still excluded by release verifier; old reboot-interrupted
+  campaign/originalmillion gate unchanged. Overlaps correctedruntime24h on VM.
+  [New launch proof](scale/million-candidate-24h-2026-10-05/launch/).
+
 - **Pre-manifest protobuf worker SIGKILL to JSON journal repair qualified:** clean
   de673be racePASS34.62s/recovery12.846s/epoch51→69. Missing manifest and durable
   prepared frame/protobuf completion admitted before reapedSIGKILL; successor
