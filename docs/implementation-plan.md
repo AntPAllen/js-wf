@@ -3135,3 +3135,12 @@ final integrity/results/prefix named-test scope. No independent copied integrity
 physicaldrain, every500position, NATSprocessSIGKILL, fullmatrix/24h or priorfailed
 parent promotion. Production runtime behavior/timing unchanged.
 [Complete successful proof and preserved failures](scale/fanout-combined-boundaries-2026-10-05/).
+
+### Combined fanout CI dispatch schema correction — 2026-10-05
+
+Dispatch at140c5eb rejected by GitHub before a run: job-level env cannot use
+runner.temp. Use a fresh absolute /tmp root keyed by GitHub runid/attempt instead,
+and shallow HEAD checkout (exact selected HEAD Git bytes remain available;
+historical artifact objects are unnecessary to the producer). Corrected workflow
+will be dispatched after push. No CI native result or qualification claimed by
+registration/dispatch; local25b327c six-boundary qualification remains accepted.

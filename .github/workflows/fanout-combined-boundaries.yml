@@ -16,12 +16,12 @@ jobs:
     env:
       GOMAXPROCS: '2'
       GOMEMLIMIT: 2GiB
-      EVIDENCE_ROOT: ${{ runner.temp }}/fanout-combined-proof
+      EVIDENCE_ROOT: /tmp/fanout-combined-${{ github.run_id }}-${{ github.run_attempt }}
       FAULT_SEED_INPUT: ${{ inputs.seed }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
