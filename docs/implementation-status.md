@@ -30,6 +30,14 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Sustained mixed-encoding worker replacement fixture prepared:** explicit
+  protobuf-to-json worker_kill profile, initial5 protobuf writers/replacementsJSON,
+  raw per-invocation wire capture and mandatory mixed-writer recovery. Generated
+  Python codec verifies formats against worker generation/PID; explicit row flag
+  prevents default-profile promotion. Go format controls and Python positive/six
+  corrupt-missing controls/wrong-row producer guard pass. Original timing and
+  fault gates unchanged; native sustained profile/rolling-chaos still pending.
+
 - **Fresh million/24h candidate comparison launched after reboot interruption:**
   clean68d69c0, live supervisor101005/program101283 and three native processes
   independently confirmed. Original1M/24h/64publishers/15mlead/rawp99≤2s/max≤30s/

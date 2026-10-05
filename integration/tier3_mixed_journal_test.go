@@ -110,6 +110,13 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	if duration != 35*time.Second && duration != 10*time.Minute && duration != 24*time.Hour {
 		t.Fatal("duration must be35s smoke,10m row,or24h single-row soak")
 	}
+	rollout := os.Getenv("WF_MATRIX_JOURNAL_ROLLOUT")
+	if rollout != "" {
+		t.Log("TIER3_JOURNAL_ROLLOUT=" + rollout)
+	}
+	if rollout != "" && (rollout != matrixProtobufToJSON || row != "worker_kill") {
+		t.Fatal("journal rollout requires protobuf-to-json worker_kill profile")
+	}
 	timerCutRequired := os.Getenv("WF_TIER3_CLOCK_TIMER_CUT") == "1"
 	commonClockEnabled := matrixServerClockOffset(row) != 0 && os.Getenv("WF_TIER3_COMMON_CLOCK") == "1"
 	if timerCutRequired && matrixServerClockOffset(row) == 0 {
@@ -1264,6 +1271,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			t.Fatal("worker row never killed a confirmed held delivery")
 		}
 	}
+	mixedEncodingInvocations := 0
 	completionDeadline := faults[len(faults)-1].Healed.Add(5 * time.Minute)
 	inv, err := matrixReadMetadata(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })
 	if err != nil {
@@ -1301,11 +1309,30 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				var next []matrixLatencySample
 				next, err = matrixInvocationLatencies(attempt, js, parts[2], parts[3], msg.Time, completionDeadline)
 				samples = append(samples, next...)
+				if err == nil && rollout != "" {
+					var mixed bool
+					mixed, err = auditMatrixRolloutInvocation(attempt, js, root, parts[2], parts[3])
+					if mixed {
+						mixedEncodingInvocations++
+					}
+				}
 			}
 			stop()
 			if err != nil {
 				t.Fatal(err)
 			}
+		}
+	}
+	if rollout != "" {
+		if mixedEncodingInvocations == 0 {
+			t.Fatal("rollout never recovered an invocation across protobuf and JSON writers")
+		}
+		data, err := json.MarshalIndent(map[string]any{"profile": rollout, "mixed_invocations": mixedEncodingInvocations, "all_retained_wire_formats_verified": true}, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(root, "journal-rollout.json"), data, 0600); err != nil {
+			t.Fatal(err)
 		}
 	}
 	report, err := matrixRetainedAudit(ctx, js)

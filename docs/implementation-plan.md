@@ -2588,3 +2588,19 @@ and terminal outcome pending at launch. This candidate is still rejected by the
 release verifier; no production source pin or default changed. Terminal review
 and adoption qualification remain required. Shared-VM overlap with runtime24h
 recorded, not attributed as cause of any performance result.
+
+### Sustained mixed protobuf-to-JSON worker replacement profile — 2026-10-05
+
+The opt-in worker_kill profile `--journal-rollout protobuf-to-json` starts five
+protobuf-v1 writers; every replacement generation writes JSON. Preserve original
+five-second kill cadence, lease/fencing, six workload cells, ten-minute/24h scopes,
+checkpoint audits and latency/integrity/history/drain gates. Final audit captures
+actual raw retained entries per invocation and requires at least one invocation
+with protobuf initial-owner and JSON successor writes. Independent generated
+Python codec verifies every wire format against admitted worker generation/PID,
+counts and mixed-invocation admission. Row verifier requires explicit profile
+flag and rejects promotion as the default writer profile. Go format controls,
+Python positive/six corrupt-missing controls and wrong-row producer rejection
+pass; native profile qualification pending. Needs protoc/Python protobuf for
+independent decoding. Full protobuf rolling/chaos and current-source matrices
+remain open; this profile is additive and does not replace an original row.

@@ -974,6 +974,7 @@ if __name__ == '__main__':
     parser.add_argument('--expected-seed', type=int, help='require the requested campaign seed')
     parser.add_argument('--require-clock-timer-cut', action='store_true')
     parser.add_argument('--require-common-timer-clock', action='store_true')
+    parser.add_argument('--require-journal-rollout', action='store_true')
     parser.add_argument('--require-checkpoint-audits', action='store_true')
     parser.add_argument('--require-upgrade-start-gap', action='store_true')
     parser.add_argument('--require-start-scan-progress', action='store_true')
@@ -985,6 +986,13 @@ if __name__ == '__main__':
         parser.error('--require-common-timer-clock requires a server-clock row')
     events = [json.loads(line) for line in args.events.read_text().splitlines() if line.strip()]
     report = check(events, args.duration, args.row, args.expected_seed, args.require_upgrade_start_gap, args.expected_upgrade_shutdown)
+    rollout_claim = any('TIER3_JOURNAL_ROLLOUT=' in event.get('Output','') for event in events)
+    rollout_present = args.root is not None and (args.root/'journal-rollout.json').exists()
+    if rollout_claim or rollout_present or args.require_journal_rollout:
+        if not args.require_journal_rollout or args.root is None or args.row != 'worker_kill' or not rollout_claim:
+            raise ValueError('journal rollout requires explicit worker_kill verification; cannot qualify default profile')
+        rollout = load('journal_rollout','check-journal-rollout.py')
+        report['journal_rollout_checks'] = rollout.check(args.root, report)
     if args.row == 'auto_journal':
         if args.root is None: parser.error('--root is required for automatic membership')
         report['automatic_artifact_checks'] = check_automatic_artifacts(args.root, report)

@@ -147,6 +147,16 @@ func TestMixedMatrixWorkerProcessChild(t *testing.T) {
 		handlers = map[string]worker.Handler{"phase3counter": phaseThreeCounterHandler}
 	}
 	options := []worker.Option{worker.WithPartitionConcurrency(4), worker.WithDispatchObserver(observe), worker.WithFencingObserver(observeFence)}
+	if encoding := os.Getenv("WF_MATRIX_WORKER_JOURNAL_ENCODING"); encoding != "" {
+		options = append(options, worker.WithJournalEncoding(journal.Encoding(encoding)))
+		data, err := json.Marshal(map[string]any{"pid": os.Getpid(), "worker": id, "encoding": encoding})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(base+"-encoding.json", data, 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
 	if phaseThreeCounter {
 		options[0] = worker.WithPartitionConcurrency(1)
 	}
@@ -385,6 +395,9 @@ func startMatrixProcessWorkerExecutable(ctx context.Context, root string, urls [
 	}
 	child := exec.Command(executable, "-test.run=^TestMixedMatrixWorkerProcessChild$")
 	child.Env = append(os.Environ(), "WF_MATRIX_WORKER_CHILD=1", "WF_MATRIX_WORKER_ID="+id, "WF_MATRIX_WORKER_URLS="+strings.Join(urls, ","), "WF_MATRIX_WORKER_BASE="+base)
+	if os.Getenv("WF_MATRIX_JOURNAL_ROLLOUT") == matrixProtobufToJSON {
+		child.Env = append(child.Env, "WF_MATRIX_WORKER_JOURNAL_ENCODING="+string(matrixRolloutEncoding(generation)))
+	}
 	if clock {
 		child.Env = append(child.Env, "WF_MATRIX_WORKER_CLOCK=1")
 	}
