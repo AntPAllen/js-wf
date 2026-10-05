@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Live-campaign disk headroom recovered through existing sparse checkout:**
+ 169 accepted Tier2 all-server/consumer and Tier3 disk-delay archive-part copies
+ match their manifests, pushed83682bb Git identities and streamed canonical Git
+ bytes. Exact numeric-range selector/50 directories/no visible descriptors;
+ existing patterns preserved and all objects remain readable. Recovered3650080768
+ allocated bytes; available space rises3.58GB→7.23GB. Original ZIPs, `/tmp`
+ canonical archives and failed/live fixtures retained. Restore selected parts
+ from Git before raw replay; acceptance unchanged. Initial aggregate-directory
+ selector rejected before mutation and retained.
+ [Executed sparse recovery and restoration](scale/qualified-proof-sparse-headroom-2026-10-05/).
+
 - **Worker/client object absence decisions now confirmed by the leader:**
   pinned SDK direct metadata can report follower absence. Baseline public worker
   and Await controls fail3.71s on one synthetic absence of a committed object;
