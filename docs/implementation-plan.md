@@ -4020,3 +4020,13 @@ SelectedGit/actual SDK/five servers/closure/original1058 files and complete1708-
 base-plus-delta inventory independently verified. Next changed candidate removes
 one per-record adapter handoff while retaining shared invariant/recovery logic.
 [Full profile](scale/single-replica-audit-cursor-2026-10-05/phase-profile/).
+
+## Direct callback windows prepared — 2026-10-05
+
+Explicit direct callback candidate removes the extra batch relay goroutine/channel
+while retaining shared bounds/gap/order/replay/two-resume/invariant logic and
+4096-record/2s windows. Original adapters still drain their channels. Race unit
+and differential/cancellation/error/cursor controls pass1.034s; R3 native full
+correctness comparisons prepared, no default/capacity/fault/legacy/24h acceptance.
+Previous closed profile copy reclaimed after complete canonical verification.
+[Preparation](scale/direct-callback-audit-2026-10-05/preparation/).

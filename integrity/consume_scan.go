@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -50,6 +51,72 @@ func scanConsumeByteBoundedThrough(ctx context.Context, stream jetstream.Stream,
 	}, func(call context.Context, c jetstream.Consumer) (bool, error) {
 		return confirmedByteConsumerLeaderMove(call, c, name, consumerStream, initialLeader)
 	}, compactMessageCoordinates)
+}
+
+// Explicit candidate removing only the additional batch relay goroutine/channel.
+func scanConsumeDirectWindowsThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) (failure error) {
+	var delivery *callbackDelivery
+	var name, consumerStream, initialLeader string
+	defer func() {
+		if delivery != nil {
+			failure = errors.Join(failure, delivery.stopAndJoin(ctx))
+		}
+	}()
+	return scanRetainedThroughWithWindow(ctx, stream, cutoff, visit, 4096, func(call context.Context, c jetstream.Consumer, n int) (retainedMessageWindow, error) {
+		if err := call.Err(); err != nil {
+			return nil, err
+		}
+		info := c.CachedInfo()
+		if info == nil || info.Name == "" {
+			return nil, fmt.Errorf("retained callback scan: missing consumer identity")
+		}
+		if delivery == nil || name != info.Name {
+			if delivery != nil {
+				if err := delivery.stopAndJoin(ctx); err != nil {
+					return nil, err
+				}
+			}
+			var err error
+			delivery, err = newCallbackDelivery(c)
+			if err != nil {
+				return nil, err
+			}
+			name, consumerStream, initialLeader = info.Name, info.Stream, ""
+			if info.Cluster != nil {
+				initialLeader = info.Cluster.Leader
+			}
+		}
+		current := delivery
+		return func(accept func(jetstream.Msg)) error { return walkCallbackWindow(call, n, current, accept) }, nil
+	}, func(call context.Context, c jetstream.Consumer) (bool, error) {
+		return confirmedByteConsumerLeaderMove(call, c, name, consumerStream, initialLeader)
+	}, compactMessageCoordinates)
+}
+
+func walkCallbackWindow(ctx context.Context, n int, d *callbackDelivery, accept func(jetstream.Msg)) error {
+	stopOnCancel := context.AfterFunc(ctx, d.stop)
+	defer stopOnCancel()
+	for i := 0; i < n; i++ {
+		msg, err := d.next(ctx)
+		if err != nil {
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
+			if errors.Is(err, jetstream.ErrMsgIteratorClosed) {
+				return nil
+			}
+			if errors.Is(err, jetstream.ErrNoHeartbeat) {
+				return errors.Join(nats.ErrTimeout, err)
+			}
+			return err
+		}
+		// A window cancellation wins over a just-received message as in the relay.
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		accept(msg)
+	}
+	return nil
 }
 
 type callbackDelivery struct {

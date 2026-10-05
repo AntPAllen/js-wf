@@ -54,6 +54,28 @@ func scanBatchThroughWithCoordinates(ctx context.Context, stream jetstream.Strea
 			return c.Fetch(n, jetstream.FetchContext(call))
 		}
 	}
+	return scanRetainedThroughWithWindow(ctx, stream, cutoff, visit, batchSize, func(call context.Context, c jetstream.Consumer, n int) (retainedMessageWindow, error) {
+		batch, err := fetch(call, c, n)
+		if err != nil {
+			return nil, err
+		}
+		return func(accept func(jetstream.Msg)) error {
+			for msg := range batch.Messages() {
+				accept(msg)
+			}
+			return batch.Error()
+		}, nil
+	}, replayCheck, coordinates)
+}
+
+// A window owns transport delivery only. The common scanner owns every accepted
+// sequence, captured bound, gap oracle and recovery decision. The channel-backed
+// adapter drains a MessageBatch as before; synchronous windows need no relay.
+type retainedMessageWindow func(accept func(jetstream.Msg)) error
+type retainedWindowOpener func(context.Context, jetstream.Consumer, int) (retainedMessageWindow, error)
+
+func scanRetainedThroughWithWindow(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, batchSize uint64, open retainedWindowOpener, replayCheck func(context.Context, jetstream.Consumer) (bool, error), coordinates retainedCoordinateReader) error {
+
 	if batchSize == 0 || batchSize > 4096 {
 		return errors.New("retained batch scan: invalid delivery window")
 	}
@@ -156,7 +178,7 @@ func scanBatchThroughWithCoordinates(ctx context.Context, stream jetstream.Strea
 	for first <= last {
 		call, stop := context.WithTimeout(ctx, 2*time.Second)
 		requested := int(min(batchSize, last-first+1))
-		batch, err := fetch(call, consumer, requested)
+		window, err := open(call, consumer, requested)
 		if err != nil {
 			stop()
 			if batchReadTransportError(err) {
@@ -174,19 +196,19 @@ func scanBatchThroughWithCoordinates(ctx context.Context, stream jetstream.Strea
 		var visitErr error
 		replayedAfterMove := false
 		delivered := 0
-		for msg := range batch.Messages() {
+		accept := func(msg jetstream.Msg) {
 			delivered++
 			if visitErr == nil && ctx.Err() != nil {
 				visitErr = ctx.Err()
 				stop()
 			}
 			if visitErr != nil {
-				continue
+				return
 			} // Drain before cancellation/cleanup.
 			metaStream, seq, metaTime, err := coordinates(msg)
 			if err != nil {
 				visitErr = err
-				continue
+				return
 			}
 			if metaStream != info.Config.Name || seq < first {
 				if metaStream == info.Config.Name && replayCheck != nil {
@@ -194,32 +216,32 @@ func scanBatchThroughWithCoordinates(ctx context.Context, stream jetstream.Strea
 					if err != nil {
 						visitErr = err
 						stop()
-						continue
+						return
 					}
 					if confirmed {
 						replayedAfterMove = true
 						visitErr = nats.ErrTimeout
 						stop()
-						continue
+						return
 					}
 				}
 				visitErr = fmt.Errorf("retained batch scan: unexpected stream/order %s/%d", metaStream, seq)
-				continue
+				return
 			}
 			if seq > last {
 				visitErr = resolve(last)
-				continue
+				return
 			}
 			if seq > first {
 				visitErr = resolve(seq - 1)
 			}
 			if visitErr != nil {
-				continue
+				return
 			}
 			visitErr = visit(&jetstream.RawStreamMsg{Subject: msg.Subject(), Sequence: seq, Header: msg.Headers(), Data: msg.Data(), Time: metaTime})
 			first = seq + 1
 		}
-		batchErr := batch.Error()
+		batchErr := window(accept)
 		stop()
 		if replayedAfterMove {
 			resumed, err := resume()

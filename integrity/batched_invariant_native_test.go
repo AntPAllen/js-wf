@@ -148,6 +148,12 @@ func compareFullAudits(t *testing.T, ctx context.Context, js jetstream.JetStream
 	if callback != point || (callbackErr == nil) != (pointErr == nil) || callbackErr != nil && callbackErr.Error() != pointErr.Error() {
 		t.Fatalf("callback delivery mismatch: point=%+v callback=%+v errors=%v / %v", point, callback, pointErr, callbackErr)
 	}
+	directCtx, directStop := context.WithTimeout(ctx, 20*time.Second)
+	direct, directErr := checkUsingConcurrentOptions(directCtx, js, cutoff, scanConsumeDirectWindowsThrough, true, true, true)
+	directStop()
+	if direct != point || (directErr == nil) != (pointErr == nil) || directErr != nil && directErr.Error() != pointErr.Error() {
+		t.Fatalf("direct callback delivery mismatch: point=%+v callback=%+v errors=%v / %v", point, direct, pointErr, directErr)
+	}
 	if point != bulk {
 		t.Fatalf("report mismatch: point=%+v bulk=%+v point_err=%v bulk_err=%v", point, bulk, pointErr, bulkErr)
 	}

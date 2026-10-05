@@ -86,6 +86,28 @@ func TestByteBoundedScanNativePayloadRefillHolesCutoffAndCancel(t *testing.T) {
 	if !errors.Is(err, context.Canceled) || callbackVisits != 1 {
 		t.Fatalf("callback cancel visits=%d err=%v", callbackVisits, err)
 	}
+	directDigest := sha256.New()
+	directCount := 0
+	call, stop = context.WithTimeout(ctx, 20*time.Second)
+	err = scanConsumeDirectWindowsThrough(call, stream, &cutoff, func(m *jetstream.RawStreamMsg) error {
+		directCount++
+		return candidateDigest(directDigest, m)
+	})
+	stop()
+	if err != nil || directCount != pointCount || !bytes.Equal(point.Sum(nil), directDigest.Sum(nil)) {
+		t.Fatalf("direct holes/cutoff: count=%d err=%v digest=%x/%x", directCount, err, point.Sum(nil), directDigest.Sum(nil))
+	}
+	call, stop = context.WithCancel(ctx)
+	directVisits := 0
+	err = scanConsumeDirectWindowsThrough(call, stream, nil, func(*jetstream.RawStreamMsg) error {
+		directVisits++
+		stop()
+		return context.Canceled
+	})
+	stop()
+	if !errors.Is(err, context.Canceled) || directVisits != 1 {
+		t.Fatalf("direct cancel visits=%d err=%v", directVisits, err)
+	}
 	// With no caller deadline cleanup gets its independent two-second budget.
 	info, err := stream.Info(ctx)
 	if err != nil || info.State.Consumers != 0 {
