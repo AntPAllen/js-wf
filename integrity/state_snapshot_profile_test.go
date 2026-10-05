@@ -21,7 +21,8 @@ import (
 // Diagnostic only: callers supply verified disposable copies of closed stores.
 // It compares the existing per-request retry wrapper with the original overall
 // audit deadline for one fresh state snapshot, without changing production.
-func TestRetainedStateSnapshotCopiedStoreDiagnostic(t *testing.T) {
+func stateSnapshotCopiedFixture(t *testing.T) (context.Context, jetstream.JetStream, jetstream.KeyValue, *testcluster.DockerCluster, string) {
+	t.Helper()
 	storesRoot := os.Getenv("WF_AUDIT_STATE_PROFILE_STORES")
 	if storesRoot == "" {
 		t.Skip("opt-in verified copied-store state snapshot diagnostic")
@@ -65,7 +66,7 @@ func TestRetainedStateSnapshotCopiedStoreDiagnostic(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-	defer cancel()
+	t.Cleanup(cancel)
 	var kv jetstream.KeyValue
 	for {
 		call, stop := context.WithTimeout(ctx, 2*time.Second)
@@ -89,6 +90,12 @@ func TestRetainedStateSnapshotCopiedStoreDiagnostic(t *testing.T) {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
+	return ctx, js, kv, cluster, root
+}
+
+func TestRetainedStateSnapshotCopiedStoreDiagnostic(t *testing.T) {
+	ctx, _, kv, _, root := stateSnapshotCopiedFixture(t)
+	var err error
 	type result struct {
 		Label         string `json:"label"`
 		ElapsedNS     int64  `json:"elapsed_ns"`
