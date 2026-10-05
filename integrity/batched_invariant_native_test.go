@@ -130,6 +130,12 @@ func compareFullAudits(t *testing.T, ctx context.Context, js jetstream.JetStream
 			t.Fatalf("streamed snapshot=%v mismatch: point=%+v streamed=%+v errors=%v / %v", snapshot, point, streamed, pointErr, streamErr)
 		}
 	}
+	concurrentCtx, concurrentStop := context.WithTimeout(ctx, 20*time.Second)
+	concurrent, concurrentErr := checkUsingConcurrentOptions(concurrentCtx, js, cutoff, scanByteBoundedThrough, true, true, true)
+	concurrentStop()
+	if concurrent != point || (concurrentErr == nil) != (pointErr == nil) || concurrentErr != nil && concurrentErr.Error() != pointErr.Error() {
+		t.Fatalf("concurrent state mismatch: point=%+v concurrent=%+v errors=%v / %v", point, concurrent, pointErr, concurrentErr)
+	}
 	if point != bulk {
 		t.Fatalf("report mismatch: point=%+v bulk=%+v point_err=%v bulk_err=%v", point, bulk, pointErr, bulkErr)
 	}

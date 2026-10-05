@@ -173,7 +173,25 @@ func CheckThroughInvocationSequenceWithStreamingStateReads(ctx context.Context, 
 	return checkUsingOptions(ctx, js, &cutoff, scanByteBoundedThrough, true, true)
 }
 
+// CheckWithConcurrentStreamingStateReads is an experimental audit that overlaps
+// a fresh complete state snapshot with journal scanning. Retained data must be
+// quiescent; all normal integrity checks and caller budgets still apply.
+func CheckWithConcurrentStreamingStateReads(ctx context.Context, js jetstream.JetStream) (Report, error) {
+	return checkUsingConcurrentOptions(ctx, js, nil, scanByteBoundedThrough, true, true, true)
+}
+
+// CheckThroughInvocationSequenceWithConcurrentStreamingStateReads requires the
+// same quiescent-cohort/no-purge/no-reuse contract as the sequential checker.
+// Each call rereads all retained records and obtains a new complete state set.
+func CheckThroughInvocationSequenceWithConcurrentStreamingStateReads(ctx context.Context, js jetstream.JetStream, cutoff uint64) (Report, error) {
+	return checkUsingConcurrentOptions(ctx, js, &cutoff, scanByteBoundedThrough, true, true, true)
+}
+
 func checkUsingOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner, snapshotState, streaming bool) (Report, error) {
+	return checkUsingConcurrentOptions(ctx, js, cutoff, read, snapshotState, streaming, false)
+}
+
+func checkUsingConcurrentOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner, snapshotState, streaming, concurrentSnapshot bool) (Report, error) {
 	var report Report
 	inv, err := auditRead(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })
 	if err != nil {
@@ -197,6 +215,37 @@ func checkUsingOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint
 		return nil
 	}); err != nil {
 		return report, err
+	}
+	// The invocation set is immutable after this point. Both readers use the
+	// same captured cohort, and terminal/snapshot validation below remains exact.
+	sourceState := state
+	snapshot := func(call context.Context) (jetstream.KeyValue, error) {
+		return auditRead(call, func(attempt context.Context) (jetstream.KeyValue, error) {
+			return initialAuditState(attempt, sourceState, func(key string) bool {
+				if cutoff == nil {
+					return true
+				}
+				_, ok := seen["wf.inv."+strings.TrimPrefix(key, "snap.")]
+				return ok
+			})
+		})
+	}
+	type snapshotResult struct {
+		state jetstream.KeyValue
+		err   error
+	}
+	var snapshotResults chan snapshotResult
+	if snapshotState && concurrentSnapshot {
+		snapshotCtx, cancelSnapshot := context.WithCancel(ctx)
+		snapshotResults = make(chan snapshotResult, 1)
+		snapshotDone := make(chan struct{})
+		go func() {
+			defer close(snapshotDone)
+			value, err := snapshot(snapshotCtx)
+			snapshotResults <- snapshotResult{value, err}
+		}()
+		// Even a journal error cancels and joins the snapshot and its watch cleanup.
+		defer func() { cancelSnapshot(); <-snapshotDone }()
 	}
 	groups := map[string]struct{}{}
 	live := map[string][]journal.Record{}
@@ -227,15 +276,12 @@ func checkUsingOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint
 		return report, err
 	}
 	if snapshotState {
-		state, err = auditRead(ctx, func(attempt context.Context) (jetstream.KeyValue, error) {
-			return initialAuditState(attempt, state, func(key string) bool {
-				if cutoff == nil {
-					return true
-				}
-				_, ok := seen["wf.inv."+strings.TrimPrefix(key, "snap.")]
-				return ok
-			})
-		})
+		if snapshotResults != nil {
+			result := <-snapshotResults
+			state, err = result.state, result.err
+		} else {
+			state, err = snapshot(ctx)
+		}
 		if err != nil {
 			return report, err
 		}

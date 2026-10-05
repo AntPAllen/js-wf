@@ -1,0 +1,18 @@
+{
+  "scope": "Experimental concurrent snapshot checker controls; no original soak or final-source matrix qualification",
+  "code_sha256": {
+    "integrity/check.go": "2b9ad3ae9c2bce0700cdcd46693f5d01b99c22067acdfb92e98046a4a465e937",
+    "integrity/concurrent_state_test.go": "5877ec464b7fe5f4c10150263dc36799598536b6b2359878c8a6e5e961a1d717",
+    "integrity/batched_invariant_native_test.go": "07e10d30f5da051576e4aad08a04071414eb17c59acea436ec77d26b42ae684f",
+    "integration/retained_audit_trace_failed_soak_test.go": "bc0ee50dc4ab5c32bc67565dd3afc5c166e0063bcaa4796b54595c0ac5f1f33d"
+  },
+  "commands": [
+    "go test -race -p=1 ./integrity -run ^(TestBatchedInvariantAuditNative|TestAuditState|TestInitial) -count=1 -timeout=3m",
+    "WF_AUDIT_BATCH_CANDIDATE=1 go test -race -p=1 ./integrity -run ^TestBatchedInvariantAuditNative(CompactionCohortAndFreshCorruption|JournalCorruption|StateValues)$ -count=1 -timeout=3m -v",
+    "go test -race -p=1 ./integrity -run ^(TestConcurrentStateStartsDuringJournalAndJoinsOnFailure|TestInitialAuditState) -count=1 -timeout=30s",
+    "go test -p=1 ./integration -run ^TestRetainedAuditTraceFailedSoakConcurrentStateComparison$ -count=1 -timeout=30s"
+  ],
+  "native_race_elapsed_seconds": 65.995,
+  "cancellation_race_elapsed_seconds": 1.017,
+  "copied_cohort_run": "pending"
+}

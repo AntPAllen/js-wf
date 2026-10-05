@@ -125,3 +125,120 @@ func TestRetainedAuditTraceFailedSoakCopiedCohort(t *testing.T) {
 		t.Fatalf("watch cleanup: %+v", c)
 	}
 }
+
+// Diagnostic comparison on fresh copies of the checkpoint3140 retained cohort.
+// Sequential observations retain their individual verdicts; the concurrent
+// candidate must pass its complete audit within the original20s attempt budget.
+func TestRetainedAuditTraceFailedSoakConcurrentStateComparison(t *testing.T) {
+	storesRoot := os.Getenv("WF_AUDIT_FAILED_SOAK_STORES")
+	artifact := os.Getenv("WF_AUDIT_FAILED_SOAK_ROOT")
+	if storesRoot == "" || artifact == "" {
+		t.Skip("opt-in verified copied-store R5 trace qualification")
+	}
+	if !filepath.IsAbs(storesRoot) || !filepath.IsAbs(artifact) {
+		t.Fatal("absolute artifact and copied-store paths required")
+	}
+	root := filepath.Join(artifact, t.Name())
+	if err := os.Mkdir(root, 0700); err != nil {
+		t.Fatal(err)
+	}
+	stores := map[int]string{}
+	for node := 0; node < 5; node++ {
+		stores[node] = filepath.Join(storesRoot, fmt.Sprintf("node-%d", node))
+	}
+	cluster, err := testcluster.StartDockerClusterWithRestoredIdentity(filepath.Join(root, "cluster"), 5, stores, os.Getenv("WF_AUDIT_FAILED_SOAK_IDENTITY"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(cluster.Close)
+	t.Cleanup(func() {
+		for node := 0; node < 5; node++ {
+			logs, err := cluster.Logs(node)
+			if err != nil {
+				t.Error(err)
+				continue
+			}
+			if err := os.WriteFile(filepath.Join(root, fmt.Sprintf("server-%d.log", node)), []byte(logs), 0600); err != nil {
+				t.Error(err)
+			}
+		}
+	})
+	var urls []string
+	for node := 0; node < 5; node++ {
+		urls = append(urls, cluster.ClientURL(node))
+	}
+	nc, err := nats.Connect(strings.Join(urls, ","), nats.MaxReconnects(-1), nats.ReconnectWait(100*time.Millisecond), nats.IgnoreDiscoveredServers(), nats.Timeout(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(nc.Close)
+	js, err := jetstream.New(nc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	startup, stop := context.WithTimeout(context.Background(), 4*time.Minute)
+	defer stop()
+	for {
+		ready := true
+		for _, name := range []string{"WF_INV", "WF_JRN"} {
+			call, done := context.WithTimeout(startup, 2*time.Second)
+			stream, err := js.Stream(call, name)
+			done()
+			if err != nil || stream.CachedInfo().Cluster == nil || stream.CachedInfo().Cluster.Leader == "" {
+				ready = false
+				break
+			}
+			info := stream.CachedInfo()
+			expected := uint64(87920)
+			if info.Config.Replicas != 5 || info.Config.Storage != jetstream.FileStorage || (name == "WF_INV" && info.State.Msgs < expected) || (name == "WF_JRN" && info.State.Msgs == 0) {
+				t.Fatalf("%s: incorrect full R5 cohort %+v", name, info)
+			}
+		}
+		if ready {
+			break
+		}
+		if startup.Err() != nil {
+			t.Fatal(startup.Err())
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	type result struct {
+		Mode      string                     `json:"mode"`
+		Cutoff    uint64                     `json:"cutoff"`
+		ElapsedNS int64                      `json:"elapsed_ns"`
+		Report    integrity.Report           `json:"report"`
+		Error     string                     `json:"error"`
+		Trace     retainedAuditTraceSnapshot `json:"trace"`
+	}
+	results := []result{}
+	for _, mode := range []struct {
+		name  string
+		check func(context.Context, jetstream.JetStream, uint64) (integrity.Report, error)
+	}{
+		{"sequential", integrity.CheckThroughInvocationSequenceWithStreamingStateReads},
+		{"concurrent", integrity.CheckThroughInvocationSequenceWithConcurrentStreamingStateReads},
+		{"sequential_recheck", integrity.CheckThroughInvocationSequenceWithStreamingStateReads},
+	} {
+		trace := &retainedAuditTrace{}
+		call, done := context.WithTimeout(context.Background(), 20*time.Second)
+		began := time.Now()
+		report, failure := mode.check(call, tracedAuditJS{JetStream: js, trace: trace}, 87920)
+		elapsed := time.Since(began)
+		done()
+		results = append(results, result{mode.name, 87920, int64(elapsed), report, fmt.Sprint(failure), trace.snapshot()})
+		data, err := json.MarshalIndent(results, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(root, "copied-state-comparison.json"), append(data, '\n'), 0600); err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("copied state comparison mode=%s elapsed=%s report=%+v err=%v", mode.name, elapsed, report, failure)
+		if failure == nil && (report.Invocations != 87920 || report.Journals != 87920 || report.Terminal != 87920 || report.Entries == 0) {
+			t.Errorf("incorrect full report: %+v", report)
+		}
+		if mode.name == "concurrent" && (failure != nil || elapsed >= 20*time.Second) {
+			t.Errorf("original-budget concurrent audit: %+v", results[len(results)-1])
+		}
+	}
+}

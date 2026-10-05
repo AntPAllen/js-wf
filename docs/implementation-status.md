@@ -12164,3 +12164,16 @@ allthreehistorymodels andthreeclient64durable drain in4.431885s underoriginal20s
 2317originalfilesunchanged/1695inputs/actualSDK551527/threeNATS verified.
 Complete4037members/threepartsreadback. Fullmatrix gate remainsopen.
 [Copiedproof](scale/tier2-retained-row-2026-10-05/workerclock-ten-minute-copied-audit/).
+
+### Concurrent retained-state audit candidate prepared — 2026-10-05
+
+Checkpoint3140 attempt2 finishesjournal18:46:43.760318 andwatchcreation
+18:46:43.861157 against18:46:44.013deadline: approximately265ms leftafterjournal,
+152ms afterwatchcreation. Passing3130 attempt2 watchspendsapproximately1.366s.
+Incompletewatchtherefore doesnotalone establishserverfailure. Explicitexperimental
+concurrentstate APIs now overlap completefreshKVsnapshot withjournalreading once
+invocationcohortisfixed. Originalsequentialdefaults/20s/60s/threeattempts andfull
+validation remainunchanged. Snapshotiscancelled/joined onjournalfailure.
+Nativecompaction/corruption/state racecomparisons pass65.995s; cancellation/initial
+barrier racecontrols pass1.017s. Full87,920copiedcohort comparison isnext; noadoption
+or24hqualification. [Controls](scale/concurrent-state-audit-2026-10-05/controls/).
