@@ -19,8 +19,10 @@ native run. All16750 archive members/threeparts read back; SHA:
 
 This qualifies the six specified combined boundaries at the executed source.
 It does not cover every500 position, actual NATS process SIGKILL, physical queue
-drain, independent copied integrity, full fault matrices or24h. Original stores
-remain closed; final integrity/results/prefix checks have named-test scope.
+drain, full fault matrices or24h. Original stores remain closed. The native
+proof has named-test scope; separate [six copied audits](copied-audits/) now
+independently verify complete integrity/results/prefixes under20s. Those copies
+retain nonzero queues through allthree peers, so physical drain is unqualified.
 Earlier failed parent runs remain failed and preserved below. No historical
 NATS cause or production runtime timing change is claimed.
 

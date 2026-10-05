@@ -3165,3 +3165,17 @@ blob filter; actual checkout and terminal native proof remain pending. This is
 launch evidence only; local six-boundary25b327c qualification remains accepted,
 with full current-source matrices and actual24h still open.
 [Complete launch proof](scale/fanout-combined-boundaries-2026-10-05/ci-launch/).
+
+### Independent full six-case fanout retained audits — 2026-10-05
+
+Each successful25b327c cluster was independently reopened only as a fresh
+byte-identical copy. Actual review SDK/b815450helper/selectedoriginalsource inputs
+are verified;501invocations/journals/terminals match native reports,500 exactchild
+results plusparent249500 readthrough allthree clients. Fullcopiedparent prefixes
+match pre-SIGKILL records with higher successor epochs. Audits0.214–2.718s,
+whole2.270–6.876s underoriginal20s. Originalsunchanged; completecopiedmedia/source/
+executable/process/review archives readback verified. All64durables observed,
+queuesnonzero throughallthree: creation500/493/500, eachresults501. Physicaldrain
+is unqualified; no originalreopen/historicalcause/fullmatrix/24h promotion.
+Initial helper compile failure preserved separately; no native SDK ran there.
+[Complete six copied audits](scale/fanout-combined-boundaries-2026-10-05/copied-audits/).

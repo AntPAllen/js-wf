@@ -117,6 +117,18 @@ trace dependencies before another full run. [Preserved failed proof](scale/postg
 
 ## Latest accepted evidence
 
+- **Independent six-case fanout retained audits passed:** fresh copies only of
+  the successful25b327c clusters. Each verifies501 invocations/journals/terminals,
+  all500 exact child results and parent249500 through allthree clients, exact
+  pre-crash parentprefix and higher successor epoch. Audit0.214–2.718s and whole
+  review2.270–6.876s underoriginal20s. ActualSDK/selectedproduction inputs/helperGit/
+  originalunchanged files independently verified; complete archives retained.
+  Allthree runqueues remain nonzero (creation500/493/500; results501each), so
+  physicaldrain remains unqualified. No original reopen, historicalfailure,
+  final-source fullmatrix or24h promotion.
+  [Complete six copied audits](scale/fanout-combined-boundaries-2026-10-05/copied-audits/).
+
+
 - **Full500-child six combined boundaries qualified:** executed25b327c native
   racePASS777.42s. First/interior/last creation and result collection each admit
   actualparentSDK SIGKILL plus library journal-leader restart;500child results/
