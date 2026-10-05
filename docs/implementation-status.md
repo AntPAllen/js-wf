@@ -12111,3 +12111,18 @@ readback. Cause/timeofdisappearance unconfirmed; nomixed-versionlifecycle
 reproduction orrecoveryqualification. Helper nowacceptsexplicitTYPE.ID for
 journal/state/lease inspection evenifresidualqueueisabsent.
 [Copied diagnosis](scale/tier2-retained-row-2026-10-05/upgrade-smoke-copied-queue-diagnosis/).
+
+### Original ten-minute worker-clock seed1 and targeted upgrade diagnosis — 2026-10-05
+
+Retainedworkerclockat0b8ee59 normalPASS638.48s/103batches/2884terminals/
+31877entries/19verified+5s/-5s events/p99=5.152018311s. Producer/checker/source/
+actualSDK/overlays/workerandNATSbytes independentlyverified;6337archive members/
+ninepartsreadback. Originalten-minute seed1qualifies; copiedaudit/fullmatrix open.
+[Nativeproof](scale/tier2-retained-row-2026-10-05/workerclock-ten-minute-native/).
+
+Targetedfreshcopyofthefailed123bc4b upgrade provesresidualwakeup'schild consumed
+signal193/completedstep193,has13contiguousjournalentries/Completedresult7,
+matchingsnapshotinv_seq154 andnolease. All2175originalfilesunchanged; no workers/
+ACKs/provisioning. Nativequeue1/64durableszero inconsistency remainsunconfirmed;
+currentR3copiedrestartisnotoriginalmixed-versionlifecycle reproduction.
+[Targetedproof](scale/tier2-retained-row-2026-10-05/upgrade-smoke-copied-child-diagnosis/).

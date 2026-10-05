@@ -1,0 +1,16 @@
+# Targeted copied upgrade child diagnosis
+
+Freshcopies oftheclosedfailed123bc4b originals; helper15102b3. ActualSDK551005,
+selectedsource/executable/unchanged2175originalfiles independentlyverified.
+Explicitkeymatrixchild.c-8e42390a21f5c779a68ee1399bb48a2e fromnative rawqueueartifact.
+Originalsignal-wakeup:193 sequence494 belonged tothispartition45 child.
+
+Targetjournal has13contiguousentries: SignalConsumed193, StepCompleted193 and
+terminalCompleted(inv_seq154,result7). Snapshotresultmatches; leaseabsent.
+Copiedqueue andall64consumerpending/ackpendingzero withnoworkers/ACK/provisioning.
+Nativequeue1/all64consumerszero discrepancy remainsunexplained. Thisnarrows
+investigationtoqueue deletion/acknowledgement state; noservercauseclaim orrecovery
+qualification. CopiedrestartusescurrentR3,notoriginalmixed-versionlifecycle.
+
+Completeclosedcopy/source/helper/executable/independentreviewer archive readback,
+withoriginalnativequeueartifact retained foridentitymatching.
