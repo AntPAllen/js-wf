@@ -2871,3 +2871,18 @@ Original20minute fixture budget/defaultcount50000 maintained; optional smaller
 count remains diagnostic. DefaultKV proof retains its behavior. Native run and
 independent raw/source/process/store review are pending. No SIGKILL claim for
 in-process library servers, PostgreSQL server crash or actual24h qualification.
+
+### 2026-10-05 full PostgreSQL projection combined fault failed
+
+Executed f87c422 nativeFAIL405.60s under original20m/default50000. All50000
+results checked while observed/reapedSIGKILL projection was down; lag100000.
+SQLwriter backend termination and library journal-leader restart admitted at31
+rows; faulted writer exits lostsession, allthreejournal replicas current.
+Replacement later fails noresponders, before lagzero/rebuild equality. Worker
+cleanup also reports closedconnections; libraryrestart replaces pinnedclients.
+Replacement used survivorclient and wrote rows, so primarycause unconfirmed.
+Independent actualSDK/PostgreSQLexe/662Gitinputs/3287selectedexternalinputs/
+1281closedSQLmedia files and7609archive members/threeparts verified. Preserve
+failure, correct fixtureclient/worker lifecycle and readiness, add dependency
+trace before changed fullrun. No recovery/currentmatrix/24h qualification.
+[Complete failed native proof](scale/postgres-projection-fault-50000-2026-10-05/failed/).

@@ -1,0 +1,29 @@
+{
+  "source": "f87c4223a075db29ab99a19981fe3059109c5871",
+  "actual_parent_sdk_sha256": "0ad93a080416be63d2e567ee1ad11e8babc5fd3d514bec20102c134627c6834f",
+  "actual_killed_projection_sdk_sha256": "0ad93a080416be63d2e567ee1ad11e8babc5fd3d514bec20102c134627c6834f",
+  "selected_git_inputs_verified": 662,
+  "selected_external_inputs_verified": 3287,
+  "actual_postgres_executable_sha256": "6705048937384211b3879ce38b670ff7ae4c699d1d9d7e7aba664a610dcccf57",
+  "actual_postgres_version": "postgres (PostgreSQL) 16.15",
+  "closed_postgres_media_files_verified": 1281,
+  "native_failed_seconds": 405.6,
+  "count": 50000,
+  "results_checked_before_fault": 50000,
+  "stopped_projection_lag": 100000,
+  "confirmed_partial_catchup_rows": 31,
+  "writer_session_termination_and_library_journal_restart_admitted": true,
+  "replacement_projection_failed_no_responders": true,
+  "secondary_cleanup_connection_closed_errors": true,
+  "library_restart_replaces_pinned_client_handles": true,
+  "no_responder_cause_confirmed": false,
+  "full_lag_zero_and_rebuild_equality_not_reached": true,
+  "qualifies_fault_recovery_or_full_matrix_or_24h": false,
+  "limitations": [
+    "Real R3 servers are embedded in SDK, no separate NATS server process hashes or logs.",
+    "PostgreSQL server process remained live until post-SDK graceful stop; no SQL server SIGKILL claim.",
+    "Source/API assertions bind full workflow results and fault admission; original failed run stays failed.",
+    "Selected input inventory excludes exhaustive race/assembly/embed/compiler provenance.",
+    "Shares VM with two live campaigns; no pressure attribution."
+  ]
+}

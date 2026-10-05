@@ -28,6 +28,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest unresolved result
+
+The full PostgreSQL 50,000-invocation combined projection case at `f87c422`
+failed after 405.60s. All results and 100,000 stopped-projection lag were checked;
+SQL writer-session termination and library journal-leader restart were admitted
+at 31 rows. Replacement catch-up exited with `nats: no responders available for
+request`; zero lag and rebuild equality were not reached. Independent source,
+actual SDK/PostgreSQL executable, closed SQL media and complete archive review
+passed. A pinned-client replacement lifecycle issue was identified; the primary
+no-responder cause remains unconfirmed. Correct fixture lifecycle/readiness and
+trace dependencies before another full run. [Preserved failed proof](scale/postgres-projection-fault-50000-2026-10-05/failed/).
+
 ## Latest accepted evidence
 
 - **Native lease loss with cancellation-ignoring SDK effect qualified:** executed
