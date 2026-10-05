@@ -12529,3 +12529,12 @@ complete2163-member archive readback independently reviewed. Race times not spee
 proof; no default/R1 recovery/full400k/legacy/24h claim. Native consumer-leader-loss
 and cancellation fault controls prepared next.
 [Native proof](scale/direct-callback-audit-2026-10-05/native-controls/).
+
+## Direct callback consumer-fault controls accepted — 2026-10-05
+
+At4f47f0b nativeR3 race controls pass37.05s: consumerleader library shutdown with
+4039pending, complete1500/6000 audit in1.946858s; cancellation128/cleanup354ms,
+zero audit consumers asserted. Selected source/actual SDK/race/module/closure and
+complete1427-member archive independently reviewed. No OS SIGKILL/R1 failover/
+legacy/full400k/default/24h claim. Legacy and capacity qualification remain next.
+[Fault proof](scale/direct-callback-audit-2026-10-05/native-fault-controls/).
