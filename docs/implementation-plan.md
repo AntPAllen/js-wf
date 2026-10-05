@@ -3809,3 +3809,13 @@ proof retained. Parserbenchmarknot400kcapacity qualification; defaultsremainSDK.
 [Nativeproof](scale/compact-audit-metadata-2026-10-05/native-controls/).
 Compact-mode consumerleaderloss/cancellation rowpreparedwith unchanged20s limits;
 legacy/full400k/profile/fault qualification remainpending.
+
+### Compact metadata native journal consumer faults accepted — 2026-10-05
+
+Executed18b8fae raceparentPASS37.58s. Actuallibraryconsumerleaderloss with4039
+pending/R3 memoryAckNone admits; full1500/6000 passes1.927858s under20s.
+Cancellationvisited128/contextCanceled/cleanup passes408.287928ms. Highpayload
+crossesrecord/bytewindows. Libraryshutdown, notprocessSIGKILL. Source/actualSDK/
+race/VCS/closure andcompleteclosedarchive independentlyverified. No400kcapacity,
+legacy/fullmatrix/24h qualification ordefaultadoption.
+[Faultproof](scale/compact-audit-metadata-2026-10-05/native-fault-controls/).
