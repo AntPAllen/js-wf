@@ -2748,3 +2748,30 @@ Correctfixturepolicy andretainconnection/metadata/attemptobservations before
 changingruntime; failuredoesnotprovehistoricalcheckpoint1040cause. Original
 20s/60s/threecheckpointattempt gatesremain.
 [Full failed copied-state proof](scale/state-watch-leader-loss-2026-10-05/).
+
+### 2026-10-05 corrected copied watch recovery and audit trace coverage
+
+The copied-state leader-loss case at06a34af passes at the original budget:
+first2s watch expires after11685values/noinitialbarrier; second completes all29177
+values, total2.241s/native14.49s. Node0 R1memory consumer had27221pending before
+observedSIGKILL. SDK/fiveactualserverbuilds/657Gitsourceinputs/3706originalstore
+files and4194archive members/eightparts independently verified. Original bytes
+unchanged. Client policy matches the real matrix; its five mapped endpoints and
+empty discovered pool were observed after recovery. Different killed leader and
+unobserved previous pool prevent discoverycause attribution. Historical1040/
+fullcombinedaudit/matrices/actual24h remain open.
+[Focused proof](scale/state-watch-leader-loss-2026-10-05/mapped-client-qualified/).
+
+The opt-in retained-audit tracer now delegates WatchAll creation and WatchStop
+cleanup, preserving the original context/options, update channel/buffering,
+constructor results/error identity and each Stop call. It adds no update relay,
+extra broker requests, retry or deadline. Successful cleanup does not certify
+an initial completion barrier. Focused delegation/trace controls pass; this is
+preparation for a changed diagnostic, not a successful native soak or cause fix.
+
+A new opt-in copied-checkpoint1040 diagnostic runs the complete streaming
+journal/state cohort checker through invocation sequence29120, under the original
+20s single-attempt budget and actual matrix client policy. It records the full
+report and creation/cleanup trace. Original stores must be independently verified
+and copied before launch. Its native result is pending; it does not recreate
+concurrent faults or qualify the historical failed soak.

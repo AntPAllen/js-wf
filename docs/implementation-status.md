@@ -30,6 +30,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Corrected copied-state watch leader loss qualified in focused scope:** executed
+  06a34af, matrix client policy, observed node0 SIGKILL with pending27221 R1memory
+  consumer. First watch11685values/noinitialbarrier expired; fresh second watch
+  completed29177values in2.241s total/nativePASS14.49s. ActualSDK/five server
+  builds/657Gitinputs/3706originalstorefiles/4194archive members/eightparts verify;
+  originals unchanged. Five mapped endpoints/no discovered URLs recorded. Earlier
+  failed copied fixture remainsfailed; different leader/previous endpointpool
+  unobserved. Real matrix already had thispolicy: no discoverycause confirmation,
+  historical1040fix, combinedaudit/fullmatrix/24h qualification.
+  [Complete focused recovery proof](scale/state-watch-leader-loss-2026-10-05/mapped-client-qualified/).
+
+
 - **Sustained opt-in protobuf-to-JSON worker-kill seed1 qualified:** executed
   97a037e normal2GiB/GOMAX2/original10m, nativePASS641.43s,840inv/9268entries/
   119kills/threecohortaudits. Worstterminal/progressp99 17.975/13.258s; original

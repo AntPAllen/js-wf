@@ -246,6 +246,31 @@ type tracedAuditKV struct {
 	trace *retainedAuditTrace
 }
 
+func (s tracedAuditKV) WatchAll(ctx context.Context, opts ...jetstream.WatchOpt) (jetstream.KeyWatcher, error) {
+	done := s.trace.begin(ctx, s.name+".WatchAll", "")
+	watch, err := s.KeyValue.WatchAll(ctx, opts...)
+	done(err, 0)
+	if err != nil {
+		return watch, err
+	}
+	return tracedAuditWatch{KeyWatcher: watch, name: s.name, trace: s.trace}, nil
+}
+
+// Keep the native update channel and its buffering. A successful Stop is only
+// cleanup evidence; it does not certify the initial-set completion barrier.
+type tracedAuditWatch struct {
+	jetstream.KeyWatcher
+	name  string
+	trace *retainedAuditTrace
+}
+
+func (w tracedAuditWatch) Stop() error {
+	done := w.trace.begin(context.Background(), w.name+".WatchStop", "")
+	err := w.KeyWatcher.Stop()
+	done(err, 0)
+	return err
+}
+
 func (s tracedAuditKV) Keys(ctx context.Context, opts ...jetstream.WatchOpt) ([]string, error) {
 	done := s.trace.begin(ctx, s.name+".Keys", "")
 	keys, err := s.KeyValue.Keys(ctx, opts...)

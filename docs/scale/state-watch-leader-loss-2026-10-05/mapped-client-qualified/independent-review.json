@@ -1,0 +1,108 @@
+{
+  "source": "06a34afdaf24931a5ca843691efdda516cbe819c",
+  "actual_sdk_sha256": "40d7fd5c05a8db84015347fa8d8f946e8e7c3026adb2183915e9df2fcf725b00",
+  "five_actual_server_executables_and_builds_verified": true,
+  "selected_git_inputs_verified": 657,
+  "original_archive_and_store_files_independently_verified": 3706,
+  "original_store_bytes_unchanged": true,
+  "native_pass_seconds": 14.49,
+  "snapshot_elapsed_ns": 2241321269,
+  "values": 29177,
+  "attempts": [
+    {
+      "records": 11685,
+      "complete": false,
+      "started": "2026-10-05T11:18:44.238934822Z",
+      "creation_error": "",
+      "read_error": "retained state snapshot initial set: received=11685 included=11685 last_revision=18253 initial_complete=false: context deadline exceeded"
+    },
+    {
+      "records": 29177,
+      "complete": true,
+      "started": "2026-10-05T11:18:46.239426245Z",
+      "creation_error": "",
+      "read_error": "<nil>"
+    }
+  ],
+  "client": {
+    "status": 1,
+    "connected_url": "nats://127.0.0.1:32844",
+    "servers": [
+      "nats://127.0.0.1:32844",
+      "nats://127.0.0.1:32846",
+      "nats://127.0.0.1:32842",
+      "nats://127.0.0.1:32840",
+      "nats://127.0.0.1:32838"
+    ],
+    "discovered": [],
+    "policy": "IgnoreDiscoveredServers/dial1s/reconnect100ms"
+  },
+  "fault": {
+    "triggered": true,
+    "consumer": {
+      "stream_name": "KV_WF_STATE",
+      "name": "82Qq5cPE",
+      "created": "2026-10-05T11:18:44.240185594Z",
+      "config": {
+        "name": "82Qq5cPE",
+        "deliver_policy": "last_per_subject",
+        "ack_policy": "none",
+        "ack_wait": 79200000000000,
+        "max_deliver": 1,
+        "filter_subject": "$KV.WF_STATE.>",
+        "replay_policy": "instant",
+        "inactive_threshold": 5000000000,
+        "num_replicas": 1,
+        "mem_storage": true,
+        "metadata": {
+          "_nats.req.level": "0"
+        },
+        "deliver_subject": "_INBOX.rUSw1eJJIojqwb4hn1gY4j",
+        "flow_control": true,
+        "idle_heartbeat": 5000000000
+      },
+      "delivered": {
+        "consumer_seq": 1956,
+        "stream_seq": 2993,
+        "last_active": "2026-10-05T11:18:44.258427152Z"
+      },
+      "ack_floor": {
+        "consumer_seq": 1956,
+        "stream_seq": 2993
+      },
+      "num_ack_pending": 0,
+      "num_redelivered": 0,
+      "num_waiting": 0,
+      "num_pending": 27221,
+      "cluster": {
+        "name": "js-wf-route-6821-1791186805419314937",
+        "leader": "js-wf-route-6821-1791186805419314937-n0"
+      },
+      "push_bound": true,
+      "ts": "2026-10-05T11:18:44.258429996Z"
+    },
+    "node": 0,
+    "kill": {
+      "node": 0,
+      "container": "js-wf-route-153852-1791199114879470260-n0",
+      "kill_started": "2026-10-05T11:18:44.343228107Z",
+      "kill_returned": "2026-10-05T11:18:45.103524422Z",
+      "source_stopped": "2026-10-05T11:18:45.160836018Z",
+      "cleanup_complete": "2026-10-05T11:18:45.280733891Z",
+      "state": "dead",
+      "concurrent_observation": true
+    },
+    "injection_error": ""
+  },
+  "qualifies_focused_copied_state_watch_leader_loss": true,
+  "production_budgets_changed": false,
+  "historical_24h_cause_confirmed": false,
+  "discovery_as_failure_cause_confirmed": false,
+  "qualifies_full_matrix_or_24h": false,
+  "limitations": [
+    "Different killed leader from prior failed copied fixture; endpoint pool previously unobserved.",
+    "Real matrix already used the corrected client policy.",
+    "Copied-store snapshot only; no concurrent full runtime workload or journal audit.",
+    "Killed server log is pre-cut only; other four logs captured after snapshot."
+  ]
+}
