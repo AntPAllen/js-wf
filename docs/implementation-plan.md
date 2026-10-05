@@ -3985,3 +3985,15 @@ No native result/default adoption/fault qualification yet. Lossless base-plus-de
 fixture preservation passes four reconstruction tests and full committed400k base
 readback (1751 data files / 3670153990 bytes).
 [Preparation](scale/single-replica-audit-cursor-2026-10-05/preparation/).
+
+## Full400k R5/R1 cursor capacity failure preserved — 2026-10-05
+
+The changed quiet R5/R1/R5 callback comparison at f2361d9 fails77.24s; all modes
+miss unchanged20s full400k/4.8M gates. Actual cursor configs5/5,1/1,5/5 verified.
+R1 reaches final validation and reduces219008 journals/2628096 entries before
+deadline; no default/fault/legacy/24h adoption. Selected source/actual SDK/five
+servers/mounts/closure and1058 unchanged original store files reviewed. Complete
+1698-file logical fixture preserved with verified49.95MB delta plus pinned
+canonical base (824 unchanged file references). Next changed measurement targets
+R1 scan/state/final-validation phase costs; no unchanged rerun.
+[Result and preservation](scale/single-replica-audit-cursor-2026-10-05/capacity-400k/).
