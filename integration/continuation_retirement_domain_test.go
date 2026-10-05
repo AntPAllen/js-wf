@@ -157,11 +157,28 @@ func runContinuationRetirementDomain(t *testing.T, restart bool) {
 			observe, stopObserve := context.WithTimeout(context.Background(), 5*time.Second)
 			defer stopObserve()
 			for node := 0; node < 3; node++ {
-				account, err := all[node].AccountInfo(observe)
-				if err != nil || account.Domain != domain {
-					return fmt.Errorf("restarted domain node%d: info=%+v err=%v", node, account, err)
+				// One request issued during reconnect may exhaust its context.
+				// Retry this read only within the original shared5s observation
+				// budget; a successful wrong-domain response is immediately fatal.
+				for {
+					attempt, finish := context.WithTimeout(observe, 250*time.Millisecond)
+					account, err := all[node].AccountInfo(attempt)
+					finish()
+					if err == nil {
+						if account.Domain != domain {
+							return fmt.Errorf("restarted domain node%d: wrong domain %+v", node, account)
+						}
+						cut.Healed = append(cut.Healed, map[string]string{"name": cluster.Servers[node].Name(), "id": cluster.Servers[node].ID(), "domain": account.Domain})
+						break
+					}
+					if observe.Err() != nil || !matrixTransientTransport(err) {
+						return fmt.Errorf("restarted domain node%d: err=%v observation=%v", node, err, observe.Err())
+					}
+					select {
+					case <-observe.Done():
+					case <-time.After(25 * time.Millisecond):
+					}
 				}
-				cut.Healed = append(cut.Healed, map[string]string{"name": cluster.Servers[node].Name(), "id": cluster.Servers[node].ID(), "domain": account.Domain})
 			}
 			cut.Stage = "healed"
 			return nil
