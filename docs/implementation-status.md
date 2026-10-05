@@ -14,7 +14,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds and disk-delay seeds 1–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
-| Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. No24h row qualified; full-matrix soak remains. |
+| Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. No24h row qualified; full-matrix soak remains. |
 
 Requested adjustments are in place: Tier1 simulation is implemented; R5 route
 recovery p99 measures from confirmed healing; the historical 31.1 s / TTL 30 s worker
@@ -29,6 +29,21 @@ and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Latest terminal results preserved:** clean e278ffb original24h journal row
+ fails after13096.14s at checkpoint1750/cutoff49000; last1740 passes48720
+ invocations/537620entries. Three attempts exhaust20s within60s. First attempt
+ reaches journal scan; zero report journal counts are pre-reduction, not proof
+ of zero bytes. Messages/Next are unobserved by old Fetch-only trace. Concurrent
+ auto-diagnostic startup/faults and million campaign recorded; cause unconfirmed.
+ All6976 archive members/physical originals and source-before/after verify.
+ Fresh cadb346 original10m automatic-membership seed1 passes770.03s with1764
+ invocations/19427entries/19faults/six cohort audits; producer row/event/fencing
+ checks pass. All5324 archived/physical originals verify. Independent model
+ replay/qualification pending; no old-cause/full-row/full-matrix/24h promotion.
+ [Failed soak](scale/byte-bounded-audit-2026-10-05/24h-failed-1750/) ·
+ [Terminal automatic-membership pass](scale/current-tier3-automatic-membership-2026-10-05/seed1-terminal/).
+
 
 - **Fresh automatic-membership seed1 diagnostic confirmed live:** isolated clean
  cadb346/original10m/R5/race512MiB/default routes/2m sync/20s60s30s5m gates.

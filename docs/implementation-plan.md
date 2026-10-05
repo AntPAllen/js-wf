@@ -2379,3 +2379,18 @@ live; immutable1332-member/four-part launch facts independently read back.
 First batches and real cuts/rejoins establish execution, not a terminal verdict.
 Two existing long campaigns overlap the VM. No single newer-source outcome can
 explain the old failed case or qualify full200/full16-row/current-source/24h.
+
+
+### Terminal byte-reader soak and automatic-membership diagnostic — 2026-10-05
+
+The original e278ffb24h journal row fails after13096.14s at checkpoint1750,
+cutoff49000, under unchanged20s/60s budgets. First attempt reaches journal scanning;
+report counts are reduced only later and do not measure bytes received. Old trace
+omits Messages/Next, so delivery versus throughput remains unresolved. Preserve
+all originals and instrument this gap before another unchanged soak. Concurrent
+fresh automatic-membership startup/faults and million campaign are recorded;
+no causality established. Fresh cadb346 original10m/race/default-route seed1
+passes native/producer checks (1764inv/19427entries/19faults), with independent
+model qualification pending. Both complete originals independently read back.
+[Failed soak](scale/byte-bounded-audit-2026-10-05/24h-failed-1750/) ·
+[Terminal diagnostic](scale/current-tier3-automatic-membership-2026-10-05/seed1-terminal/).
