@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime/pprof"
 	"strings"
 	"testing"
@@ -21,8 +22,10 @@ import (
 
 type profileCursorStream struct {
 	jetstream.Stream
-	replicas int
-	creates  []int
+	replicas   int
+	creates    []int
+	starts     []uint64
+	pointReads int
 }
 
 func (s *profileCursorStream) CreateConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
@@ -42,7 +45,13 @@ func (s *profileCursorStream) CreateConsumer(ctx context.Context, cfg jetstream.
 		return nil, fmt.Errorf("cursor replicas differ")
 	}
 	s.creates = append(s.creates, actual.Config.Replicas)
+	s.starts = append(s.starts, cfg.OptStartSeq)
 	return consumer, nil
+}
+
+func (s *profileCursorStream) GetMsg(ctx context.Context, seq uint64, opts ...jetstream.GetMsgOpt) (*jetstream.RawStreamMsg, error) {
+	s.pointReads++
+	return s.Stream.GetMsg(ctx, seq, opts...)
 }
 
 // A diagnostic PASS means the comparisons ran and produced reports; each
@@ -141,6 +150,9 @@ func TestStreamingAuditR5RetainedProfileDiagnostic(t *testing.T) {
 		ScanNS         int64
 		VisitNS        int64
 		CursorReplicas []int
+		CursorStarts   []uint64
+		PointReads     int
+		Interrupted    bool
 	}
 	type result struct {
 		Label     string
@@ -163,6 +175,10 @@ func TestStreamingAuditR5RetainedProfileDiagnostic(t *testing.T) {
 	if os.Getenv("WF_AUDIT_R5_PROFILE_BYTE_BOUNDED") == "1" {
 		variants = []variantConfig{{"r5-512", 512, 5, false}, {"r5-byte-4096", 4096, 5, true}, {"r5-byte-4096-recheck", 4096, 5, true}, {"r5-512-recheck", 512, 5, false}}
 	}
+	interruptionGate := os.Getenv("WF_AUDIT_R5_PROFILE_BYTE_INTERRUPTED") == "1"
+	if interruptionGate {
+		variants = []variantConfig{{"r5-byte-baseline", 4096, 5, true}, {"r5-byte-error", 4096, 5, true}, {"r5-byte-short", 4096, 5, true}}
+	}
 	for _, variant := range variants {
 		profile, err := os.Create(filepath.Join(root, variant.label+".pprof"))
 		if err != nil {
@@ -182,13 +198,25 @@ func TestStreamingAuditR5RetainedProfileDiagnostic(t *testing.T) {
 			pprof.Do(call, pprof.Labels("audit_phase", p.Stream), func(call context.Context) {
 				visitor := func(msg *jetstream.RawStreamMsg) error {
 					p.Records++
+					if interruptionGate && msg.Sequence != uint64(p.Records) {
+						return fmt.Errorf("%s: expected sequence%d got%d", p.Stream, p.Records, msg.Sequence)
+					}
 					p.Bytes += len(msg.Data)
 					entered := time.Now()
 					err := visit(msg)
 					p.VisitNS += time.Since(entered).Nanoseconds()
 					return err
 				}
-				if variant.byteBounded {
+				if p.Stream == "WF_JRN" && (variant.label == "r5-byte-error" || variant.label == "r5-byte-short") {
+					scanErr = scanBatchThroughWithFetcher(call, observed, cutoff, visitor, 4096, func(fetchCtx context.Context, c jetstream.Consumer, n int) (jetstream.MessageBatch, error) {
+						batch, err := fetchByteBounded(fetchCtx, c, n, 8<<20)
+						if err != nil || p.Interrupted {
+							return batch, err
+						}
+						p.Interrupted = true
+						return interruptNativeBatch(batch, variant.label == "r5-byte-short"), nil
+					})
+				} else if variant.byteBounded {
 					scanErr = scanByteBoundedThrough(call, observed, cutoff, visitor)
 				} else {
 					scanErr = scanBatchThroughWithSize(call, observed, cutoff, visitor, variant.window)
@@ -196,6 +224,8 @@ func TestStreamingAuditR5RetainedProfileDiagnostic(t *testing.T) {
 			})
 			p.ScanNS = time.Since(began).Nanoseconds()
 			p.CursorReplicas = observed.creates
+			p.CursorStarts = observed.starts
+			p.PointReads = observed.pointReads
 			r.Phases = append(r.Phases, p)
 			return scanErr
 		}, true, true)
@@ -216,6 +246,39 @@ func TestStreamingAuditR5RetainedProfileDiagnostic(t *testing.T) {
 		}
 		if err == nil && !r.Complete {
 			t.Fatalf("incorrect report=%+v want=%+v", r.Report, want)
+		}
+		if interruptionGate {
+			if !r.Complete {
+				t.Errorf("interrupted-window gate incomplete: %s", variant.label)
+			}
+			for _, p := range r.Phases {
+				if p.Stream != "WF_JRN" {
+					continue
+				}
+				wantStarts, wantPoints := []uint64{1}, 0
+				if variant.label == "r5-byte-error" {
+					wantStarts = []uint64{1, 129}
+				}
+				if variant.label == "r5-byte-short" {
+					wantStarts, wantPoints = []uint64{1, 130}, 1
+				}
+				if !reflect.DeepEqual(p.CursorStarts, wantStarts) || p.PointReads != wantPoints || p.Interrupted != (variant.label != "r5-byte-baseline") {
+					t.Errorf("%s interruption admission: phase=%+v expected starts=%v points=%d", variant.label, p, wantStarts, wantPoints)
+				}
+			}
+			cleanup, stop := context.WithTimeout(context.Background(), 2*time.Second)
+			for _, name := range []string{"WF_INV", "WF_JRN"} {
+				stream, err := js.Stream(cleanup, name)
+				if err != nil {
+					t.Error(err)
+					continue
+				}
+				info := stream.CachedInfo()
+				if info.State.Consumers != 0 {
+					t.Errorf("%s: leaked %d audit consumers", name, info.State.Consumers)
+				}
+			}
+			stop()
 		}
 	}
 }

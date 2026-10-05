@@ -47,6 +47,10 @@ func (c *interruptedNativeConsumer) Fetch(n int, opts ...jetstream.FetchOpt) (je
 		return batch, err
 	}
 	c.interrupted = true
+	return interruptNativeBatch(batch, c.short), nil
+}
+
+func interruptNativeBatch(batch jetstream.MessageBatch, short bool) jetstream.MessageBatch {
 	messages := make(chan jetstream.Msg)
 	go func() {
 		defer close(messages)
@@ -59,10 +63,10 @@ func (c *interruptedNativeConsumer) Fetch(n int, opts ...jetstream.FetchOpt) (je
 		}
 	}()
 	var failure error = nats.ErrTimeout
-	if c.short {
+	if short {
 		failure = nil
 	}
-	return interruptedNativeBatch{MessageBatch: batch, messages: messages, failure: failure}, nil
+	return interruptedNativeBatch{MessageBatch: batch, messages: messages, failure: failure}
 }
 
 type interruptedNativeStream struct {

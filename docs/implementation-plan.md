@@ -2125,3 +2125,17 @@ selected Go/module inputs and four CPU profiles retained. No synthetic or natura
 fault cut is admitted by this comparison; validate explicit-error and nil-error
 short windows on the full cohort before adoption. Defaults and full/24h gates
 remain unchanged. [Evidence](scale/byte-bounded-audit-2026-10-05/r5-100k-profile/).
+
+### Full R5 byte-bounded interruption acceptance — 2026-10-05
+
+Verified continued640-file clone /100k completed invocations /1.2M entries,
+original20s each, R5 read cursors. Baseline17.824s, explicit-error15.906s and
+nil-error short13.956s complete;3.6M journal visits check every sequence exactly
+once. Explicit resumes129/zero point reads; short oracle visits129 then resumes130
+with one point read. Zero audit consumers required after each case. Named60.17s
+PASS in interruption mode requires all reports complete, unlike comparison mode.
+Actual executables/639 unchanged selected Go/module inputs/CPU/clone ledgers and
+focused race controls retained. Client-suffix loss is deliberately synthetic;
+natural transport/leader-loss and semantic-corruption acceptance precede adoption.
+Defaults/full-source matrices/actual24h gate unchanged/open.
+[Complete proof](scale/byte-bounded-audit-2026-10-05/r5-100k-interrupted/).

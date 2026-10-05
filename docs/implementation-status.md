@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Full R5 byte-bounded interrupted-window gate passes:** same verified continued
+  clone/100k invocations/1.2M entries, normal2GiB, original20s. Baseline17.824s,
+  admitted client explicit-error15.906s and nil-error short13.956s complete exact
+  terminal reports;3.6M exactly-once journal visits. Explicit resumes129/zero leader
+  reads; short resumes130/one oracle read; all R5/zero audit consumers asserted.
+  Named test60.17s now requires every complete report in interruption mode.
+  Actual SDK/five container binaries/639 unchanged selected inputs/CPU/store ledgers
+  retained; focused race controls pass. Synthetic client cuts only; natural transport
+  and corruption controls/adoption/full matrices/24h remain open/defaults unchanged.
+  [Complete admission and proof](scale/byte-bounded-audit-2026-10-05/r5-100k-interrupted/).
+
 - **Full R5 byte-bounded audit comparison completes under original20s:**
   verified655-file continued clone/100k invocations/1.2M journals, actual R5 cursors,
   normal2GiB. Candidate completes17.099s and15.209s with exact100k terminal reports;
