@@ -2911,3 +2911,18 @@ progressp99 9.743/2.980s. Failed66–78 stayunqualified; remaining170–200 live
 No workloadSDK/fullsource/physicalstore upload; finaldrain named-test scope.
 Full200/final-source/fullmatrix/24h and failedparent remainopen.
 [Complete156-seed ledger](scale/current-tier3-block-stall-2026-10-05/).
+
+### 2026-10-05 corrected PostgreSQL full fault locates ordered Fetch failure
+
+Executede6c124f full50000/nativeFAIL494.71s/original20m. Allresults/lag100000;
+workflowqueue drain/allsix workers joined beforefault, SQLbackend termination
+at78rows and libraryjournalnode2 restart confirmed. Refreshedclients and allfour
+R3 projection sources current. Faultedwriter exits API503/10008; replacement
+boundedtrace locates fatal WF_INV orderedFetch(256)/noresponders aftercatchup.
+No workercleanup errors; lagzero/rebuild equality not reached. All7610archive
+members/threeparts/actualSDK/PostgreSQLexe/selectedinputs/closedSQLmedia verified.
+CapturedSDK source resets orderedconsumer on everyFetch and recommendscontinuous
+Messages/Consume; sourceobservation not servercause proof. Investigate continuous
+iterator/context/cleanup controls before changedfullrun; no unchangedrerun,
+smallerpopulation qualification or historicalfailure promotion. Fullgates open.
+[Complete refreshed failed proof](scale/postgres-projection-fault-50000-2026-10-05/refreshed/).

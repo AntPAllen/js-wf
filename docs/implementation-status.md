@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest unresolved result
 
+The corrected full PostgreSQL case at `e6c124f` also failed (494.71s). All50000
+results/lag100000 and faults at78rows verified; workflowqueue drained/workers
+joined, clients refreshed, allfour R3 projection sources current. Bounded trace
+locates replacement failure at WF_INV orderedconsumer Fetch(256)/noresponders;
+no secondary workercleanup errors. Zero lag/rebuild equality not reached;
+servercause stillunconfirmed. CapturedSDK orderedFetch recreates a consumer per
+batch; investigate continuousiteration/context/cleanup controls before a changed
+fullrun. Complete originals/source/process/closedSQLmedia/archive reviewed.
+[Refreshed failed proof](scale/postgres-projection-fault-50000-2026-10-05/refreshed/).
+
+
 The full PostgreSQL 50,000-invocation combined projection case at `f87c422`
 failed after 405.60s. All results and 100,000 stopped-projection lag were checked;
 SQL writer-session termination and library journal-leader restart were admitted
