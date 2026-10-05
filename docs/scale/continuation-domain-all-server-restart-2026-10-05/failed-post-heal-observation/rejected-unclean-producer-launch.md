@@ -1,0 +1,1 @@
+The diagnostic producer correctly rejected its launch because the newly preserved failed-proof files were not committed. No executable or fixture started; empty /tmp/js-wf-domain-restart-admission-race-20261005 remains. Commit the evidence before using a fresh root.
