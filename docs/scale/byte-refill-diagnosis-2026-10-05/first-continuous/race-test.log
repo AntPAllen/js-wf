@@ -1,0 +1,20 @@
+=== RUN   TestByteBoundedScanNativePayloadRefillHolesCutoffAndCancel
+    byte_scan_native_test.go:72: retained_records=116 payload_bytes=30408704 digest=5bd3b17e5e3595a3ec8b10e0621a453db2b888839e98d65a013c100a441fa748 cancellation_visits=1 consumers=0
+--- PASS: TestByteBoundedScanNativePayloadRefillHolesCutoffAndCancel (15.89s)
+=== RUN   TestByteBoundedFetchNativeHealthyRefill
+    byte_scan_native_test.go:113: healthy_refill records=48 bytes=12582912 published=64 byte_window=8388608 recovery_errors=0
+--- PASS: TestByteBoundedFetchNativeHealthyRefill (6.52s)
+=== RUN   TestByteBoundedScanNativeRetainsPrefetchAcrossWindows
+    byte_scan_native_test.go:157: cleanup=&{Config:{Name:AUDIT_FAULT Description: Subjects:[audit.fault.>] Retention:Limits MaxConsumers:-1 MaxMsgs:-1 MaxBytes:-1 Discard:DiscardOld DiscardNewPerSubject:false MaxAge:0s MaxMsgsPerSubject:-1 MaxMsgSize:-1 Storage:File Replicas:3 NoAck:false Duplicates:2m0s Placement:<nil> Mirror:<nil> Sources:[] Sealed:false DenyDelete:false DenyPurge:false AllowRollup:false Compression:None FirstSeq:0 SubjectTransform:<nil> RePublish:<nil> AllowDirect:false MirrorDirect:false ConsumerLimits:{InactiveThreshold:0s MaxAckPending:0} Metadata:map[_nats.level:5 _nats.req.level:0 _nats.ver:2.15.0] Template: AllowMsgTTL:false SubjectDeleteMarkerTTL:0s AllowMsgCounter:false AllowAtomicPublish:false AllowMsgSchedules:false PersistMode:Default AllowBatchPublish:false} Created:2026-10-05 06:24:17.637892737 +0000 UTC State:{Msgs:4100 Bytes:16994500 FirstSeq:1 FirstTime:2026-10-05 06:24:17.782326331 +0000 UTC LastSeq:4100 LastTime:2026-10-05 06:24:25.240071623 +0000 UTC Consumers:1 Deleted:[] NumDeleted:0 NumSubjects:1 Subjects:map[]} Cluster:0xc0073b6d20 Mirror:<nil> Sources:[] TimeStamp:2026-10-05 06:24:25.966739426 +0000 UTC} err=<nil>
+--- FAIL: TestByteBoundedScanNativeRetainsPrefetchAcrossWindows (12.98s)
+=== RUN   TestByteBoundedFetchStopsAtRecordLimit
+--- PASS: TestByteBoundedFetchStopsAtRecordLimit (0.00s)
+=== RUN   TestByteBoundedFetchCancellationStopsBlockedIterator
+--- PASS: TestByteBoundedFetchCancellationStopsBlockedIterator (0.00s)
+=== RUN   TestByteBoundedFetchRetainsSemanticErrorAndRejectsInvalidWindow
+--- PASS: TestByteBoundedFetchRetainsSemanticErrorAndRejectsInvalidWindow (0.00s)
+=== RUN   TestByteBoundedFetchHeartbeatAdmitsTransportRecovery
+--- PASS: TestByteBoundedFetchHeartbeatAdmitsTransportRecovery (0.00s)
+=== RUN   TestByteIteratorBatchRetainsPrefetchAcrossRecordWindows
+--- PASS: TestByteIteratorBatchRetainsPrefetchAcrossRecordWindows (0.00s)
+FAIL

@@ -1,0 +1,15 @@
+=== RUN   TestStreamingAuditNativeJournalFaults
+=== RUN   TestStreamingAuditNativeJournalFaults/state-false/consumer-leader-loss
+    streaming_native_fault_test.go:98: recovery report={Invocations:1500 Journals:0 Entries:0 Terminal:0} visited=128 leader=-1 pending=0 err=missing active replicated consumer identity
+=== RUN   TestStreamingAuditNativeJournalFaults/state-false/cancellation
+    streaming_native_fault_test.go:110: streaming-fault state_snapshot=false fault=cancellation consumer= leader=-1 pending_at_kill=0 consumer_replicas=0 visited=128 elapsed=220.215734ms report={Invocations:1500 Journals:0 Entries:0 Terminal:0} err=context canceled reconnects=0
+=== RUN   TestStreamingAuditNativeJournalFaults/state-true/consumer-leader-loss
+    streaming_native_fault_test.go:98: recovery report={Invocations:1500 Journals:0 Entries:0 Terminal:0} visited=3915 leader=0 pending=5235 err=retained batch scan: unexpected stream/order WF_JRN/3001
+=== RUN   TestStreamingAuditNativeJournalFaults/state-true/cancellation
+    streaming_native_fault_test.go:110: streaming-fault state_snapshot=true fault=cancellation consumer= leader=-1 pending_at_kill=0 consumer_replicas=0 visited=128 elapsed=311.301791ms report={Invocations:1500 Journals:0 Entries:0 Terminal:0} err=context canceled reconnects=0
+--- FAIL: TestStreamingAuditNativeJournalFaults (37.02s)
+    --- FAIL: TestStreamingAuditNativeJournalFaults/state-false/consumer-leader-loss (9.30s)
+    --- PASS: TestStreamingAuditNativeJournalFaults/state-false/cancellation (10.12s)
+    --- FAIL: TestStreamingAuditNativeJournalFaults/state-true/consumer-leader-loss (9.19s)
+    --- PASS: TestStreamingAuditNativeJournalFaults/state-true/cancellation (8.41s)
+FAIL

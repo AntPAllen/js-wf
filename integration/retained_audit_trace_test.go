@@ -20,12 +20,14 @@ type retainedAuditTrace struct {
 	recent []retainedAuditCall
 }
 type retainedAuditCount struct {
-	Started   int   `json:"started"`
-	Completed int   `json:"completed"`
-	Errors    int   `json:"errors"`
-	Bytes     int   `json:"bytes"`
-	ElapsedNS int64 `json:"elapsed_ns"`
-	MaxNS     int64 `json:"max_ns"`
+	Started       int       `json:"started"`
+	Completed     int       `json:"completed"`
+	Errors        int       `json:"errors"`
+	Bytes         int       `json:"bytes"`
+	ElapsedNS     int64     `json:"elapsed_ns"`
+	MaxNS         int64     `json:"max_ns"`
+	LastCompleted time.Time `json:"last_completed,omitempty"`
+	LastSuccess   time.Time `json:"last_success,omitempty"`
 }
 type retainedAuditCall struct {
 	Operation string    `json:"operation"`
@@ -41,6 +43,12 @@ type retainedAuditTraceSnapshot struct {
 }
 
 func (t *retainedAuditTrace) begin(ctx context.Context, operation, detail string) func(error, int) {
+	return t.beginSampled(ctx, operation, detail, true)
+}
+
+// Iterator calls aggregate every returned byte; only slow/error calls enter the
+// bounded recent history so buffered delivery does not evict recovery evidence.
+func (t *retainedAuditTrace) beginSampled(ctx context.Context, operation, detail string, retainFast bool) func(error, int) {
 	began := time.Now().UTC()
 	deadline, _ := ctx.Deadline()
 	t.mu.Lock()
@@ -62,6 +70,12 @@ func (t *retainedAuditTrace) begin(ctx context.Context, operation, detail string
 		defer t.mu.Unlock()
 		count := t.counts[operation]
 		count.Completed++
+		if completed.After(count.LastCompleted) {
+			count.LastCompleted = completed
+		}
+		if err == nil && completed.After(count.LastSuccess) {
+			count.LastSuccess = completed
+		}
 		count.Bytes += bytes
 		count.ElapsedNS += elapsed
 		if elapsed > count.MaxNS {
@@ -71,6 +85,9 @@ func (t *retainedAuditTrace) begin(ctx context.Context, operation, detail string
 			count.Errors++
 		}
 		t.counts[operation] = count
+		if !retainFast && err == nil && elapsed < int64(10*time.Millisecond) {
+			return
+		}
 		if len(t.recent) == 64 {
 			copy(t.recent, t.recent[1:])
 			t.recent = t.recent[:63]
@@ -155,7 +172,7 @@ func (s tracedAuditStream) CreateConsumer(ctx context.Context, cfg jetstream.Con
 	if err != nil {
 		return consumer, err
 	}
-	return tracedAuditConsumer{Consumer: consumer, name: s.name, trace: s.trace}, nil
+	return tracedAuditConsumer{Consumer: consumer, name: s.name, consumer: cfg.Name, trace: s.trace}, nil
 }
 func (s tracedAuditStream) DeleteConsumer(ctx context.Context, name string) error {
 	done := s.trace.begin(ctx, s.name+".DeleteConsumer", name)
@@ -166,8 +183,9 @@ func (s tracedAuditStream) DeleteConsumer(ctx context.Context, name string) erro
 
 type tracedAuditConsumer struct {
 	jetstream.Consumer
-	name  string
-	trace *retainedAuditTrace
+	consumer string
+	name     string
+	trace    *retainedAuditTrace
 }
 
 func (c tracedAuditConsumer) Fetch(batch int, opts ...jetstream.FetchOpt) (jetstream.MessageBatch, error) {
@@ -178,6 +196,36 @@ func (c tracedAuditConsumer) Fetch(batch int, opts ...jetstream.FetchOpt) (jetst
 		return messages, err
 	}
 	return &tracedAuditBatch{MessageBatch: messages, done: done}, nil
+}
+
+// Pull/Next options are opaque SDK interfaces. Forward them exactly; no caller
+// context or deadline is invented for these trace records. Next measures only
+// the SDK delivery wait, excluding the audit's later decoding and reduction.
+func (c tracedAuditConsumer) Messages(opts ...jetstream.PullMessagesOpt) (jetstream.MessagesContext, error) {
+	done := c.trace.begin(context.Background(), c.name+".Messages", c.consumer)
+	iterator, err := c.Consumer.Messages(opts...)
+	done(err, 0)
+	if err != nil {
+		return iterator, err
+	}
+	return tracedAuditIterator{MessagesContext: iterator, name: c.name, consumer: c.consumer, trace: c.trace}, nil
+}
+
+type tracedAuditIterator struct {
+	jetstream.MessagesContext
+	name, consumer string
+	trace          *retainedAuditTrace
+}
+
+func (i tracedAuditIterator) Next(opts ...jetstream.NextOpt) (jetstream.Msg, error) {
+	done := i.trace.beginSampled(context.Background(), i.name+".Next", i.consumer, false)
+	msg, err := i.MessagesContext.Next(opts...)
+	size := 0
+	if msg != nil {
+		size = len(msg.Data())
+	}
+	done(err, size)
+	return msg, err
 }
 
 type tracedAuditBatch struct {

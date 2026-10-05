@@ -2,9 +2,11 @@ package integrity
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -38,10 +40,13 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				// More than one4096-record window keeps a live server-side tail.
+				// Cross both the record and production byte windows, keeping a
+				// server-side tail after healthy client prefetch at the fault point.
 				const invocations = 1500
 				for i := 0; i < invocations; i++ {
-					batchAuditPublish(t, ctx, js, fmt.Sprintf("fault-%06d", i), batchAuditEntries())
+					entries := batchAuditEntries()
+					entries[1].Payload = json.RawMessage(strconv.Quote(strings.Repeat("p", 16<<10)))
+					batchAuditPublish(t, ctx, js, fmt.Sprintf("fault-%06d", i), entries)
 				}
 				want := Report{Invocations: invocations, Journals: invocations, Entries: 4 * invocations, Terminal: invocations}
 				baseline, err := CheckWithBatchedReads(ctx, js)

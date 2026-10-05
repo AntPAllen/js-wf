@@ -26,6 +26,12 @@ func scanBatchThroughWithSize(ctx context.Context, stream jetstream.Stream, cuto
 type retainedBatchFetcher func(context.Context, jetstream.Consumer, int) (jetstream.MessageBatch, error)
 
 func scanBatchThroughWithFetcher(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, batchSize uint64, fetch retainedBatchFetcher) error {
+	return scanBatchThroughWithReplayCheck(ctx, stream, cutoff, visit, batchSize, fetch, nil)
+}
+
+// Only a transport-specific proof may recover overlapping replay. Ordinary
+// fetches and unconfirmed/wrong-stream order violations remain semantic errors.
+func scanBatchThroughWithReplayCheck(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, batchSize uint64, fetch retainedBatchFetcher, replayCheck func(context.Context, jetstream.Consumer) (bool, error)) error {
 	if fetch == nil {
 		fetch = func(call context.Context, c jetstream.Consumer, n int) (jetstream.MessageBatch, error) {
 			return c.Fetch(n, jetstream.FetchContext(call))
@@ -149,6 +155,7 @@ func scanBatchThroughWithFetcher(ctx context.Context, stream jetstream.Stream, c
 			return err
 		}
 		var visitErr error
+		replayedAfterMove := false
 		delivered := 0
 		for msg := range batch.Messages() {
 			delivered++
@@ -170,6 +177,20 @@ func scanBatchThroughWithFetcher(ctx context.Context, stream jetstream.Stream, c
 			}
 			seq := meta.Sequence.Stream
 			if meta.Stream != info.Config.Name || seq < first {
+				if meta.Stream == info.Config.Name && replayCheck != nil {
+					confirmed, err := replayCheck(call, consumer)
+					if err != nil {
+						visitErr = err
+						stop()
+						continue
+					}
+					if confirmed {
+						replayedAfterMove = true
+						visitErr = nats.ErrTimeout
+						stop()
+						continue
+					}
+				}
 				visitErr = fmt.Errorf("retained batch scan: unexpected stream/order %s/%d", meta.Stream, seq)
 				continue
 			}
@@ -188,6 +209,16 @@ func scanBatchThroughWithFetcher(ctx context.Context, stream jetstream.Stream, c
 		}
 		batchErr := batch.Error()
 		stop()
+		if replayedAfterMove {
+			resumed, err := resume()
+			if err != nil {
+				return err
+			}
+			if resumed {
+				continue
+			}
+			return resolve(last)
+		}
 		if visitErr != nil {
 			return visitErr
 		}

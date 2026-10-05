@@ -2395,3 +2395,21 @@ operations pass three independently rebuilt exactOk models. This accepts only
 the focused executed-source seed1. Both complete originals independently read back.
 [Failed soak](scale/byte-bounded-audit-2026-10-05/24h-failed-1750/) ·
 [Terminal diagnostic](scale/current-tier3-automatic-membership-2026-10-05/seed1-terminal/).
+
+
+### Healthy byte refill and observable delivery — 2026-10-05
+
+A focused native control separates a reproducible client failure from the
+historical unconfirmed soak failures: pinnedSDK1.54.0 PullMaxBytes+StopAfter
+stalls a plain8MiB iterator at31/48 quarter-MiB records. Retain one continuous
+iterator across4096-record batches with adapter-owned caps. Normal/race healthy
+4100-record scans use one cursor and zero gap reads. Recover overlapping replay
+only after same replicated memory/AckNone consumer metadata proves a leader move,
+within the existing two-resume budget. Both state modes recover1500inv/6000entries
+after actual consumer kills with4039 pending records. Original20s/60s budgets stay.
+Trace Messages/Next bytes, waits and outstanding calls; retain bounded slow/error
+history and forward opaque options. Positive and negative delegation/context
+controls pass. Original/intermediate failures and closed native stores preserved.
+No1750 historical-cause claim or24h/full-matrix pass; verify100k/R5 performance,
+legacy/domain and final-source release gates before promotion.
+[Complete evidence](scale/byte-refill-diagnosis-2026-10-05/).

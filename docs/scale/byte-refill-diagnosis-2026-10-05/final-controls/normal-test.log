@@ -1,0 +1,58 @@
+=== RUN   TestByteBoundedScanNativePayloadRefillHolesCutoffAndCancel
+    byte_scan_native_test.go:72: retained_records=116 payload_bytes=30408704 digest=edb165f97542893edebee316809160b8a5b00bad1edbad8afecc51346191d15a cancellation_visits=1 consumers=0
+--- PASS: TestByteBoundedScanNativePayloadRefillHolesCutoffAndCancel (7.26s)
+=== RUN   TestByteBoundedFetchNativeHealthyRefill
+    byte_scan_native_test.go:113: healthy_refill records=48 bytes=12582912 published=64 byte_window=8388608 recovery_errors=0
+--- PASS: TestByteBoundedFetchNativeHealthyRefill (4.81s)
+=== RUN   TestByteBoundedScanNativeRetainsPrefetchAcrossWindows
+    byte_scan_native_test.go:169: records=4100 bytes=16793600 record_window=4096 byte_window=8388608 consumers_created=1 leader_gap_reads=0 remaining_consumers=0
+--- PASS: TestByteBoundedScanNativeRetainsPrefetchAcrossWindows (5.83s)
+=== RUN   TestByteBoundedFetchStopsAtRecordLimit
+--- PASS: TestByteBoundedFetchStopsAtRecordLimit (0.00s)
+=== RUN   TestByteBoundedFetchCancellationStopsBlockedIterator
+--- PASS: TestByteBoundedFetchCancellationStopsBlockedIterator (0.00s)
+=== RUN   TestByteBoundedFetchRetainsSemanticErrorAndRejectsInvalidWindow
+--- PASS: TestByteBoundedFetchRetainsSemanticErrorAndRejectsInvalidWindow (0.00s)
+=== RUN   TestByteBoundedFetchHeartbeatAdmitsTransportRecovery
+--- PASS: TestByteBoundedFetchHeartbeatAdmitsTransportRecovery (0.00s)
+=== RUN   TestByteIteratorBatchRetainsPrefetchAcrossRecordWindows
+--- PASS: TestByteIteratorBatchRetainsPrefetchAcrossRecordWindows (0.00s)
+=== RUN   TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove
+=== RUN   TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/moved
+=== RUN   TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/same-leader
+=== RUN   TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/unknown-initial
+=== RUN   TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/unknown-current
+=== RUN   TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/other-name
+=== RUN   TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/other-stream
+=== RUN   TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/disk-consumer
+=== RUN   TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/single-replica
+=== RUN   TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/explicit-ack
+=== RUN   TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/api-error
+--- PASS: TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove (0.00s)
+    --- PASS: TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/moved (0.00s)
+    --- PASS: TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/same-leader (0.00s)
+    --- PASS: TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/unknown-initial (0.00s)
+    --- PASS: TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/unknown-current (0.00s)
+    --- PASS: TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/other-name (0.00s)
+    --- PASS: TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/other-stream (0.00s)
+    --- PASS: TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/disk-consumer (0.00s)
+    --- PASS: TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/single-replica (0.00s)
+    --- PASS: TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/explicit-ack (0.00s)
+    --- PASS: TestByteReplayRequiresConfirmedReplicatedConsumerLeaderMove/api-error (0.00s)
+=== RUN   TestByteReplayRecoveryKeepsUnconfirmedOrderSemantic
+--- PASS: TestByteReplayRecoveryKeepsUnconfirmedOrderSemantic (0.00s)
+=== RUN   TestStreamingAuditNativeJournalFaults
+=== RUN   TestStreamingAuditNativeJournalFaults/state-false/consumer-leader-loss
+    streaming_native_fault_test.go:115: streaming-fault state_snapshot=false fault=consumer-leader-loss consumer=wf-audit-T2Qox0FXAxbA357apEJcLH leader=0 pending_at_kill=4039 consumer_replicas=3 visited=6000 elapsed=591.210877ms report={Invocations:1500 Journals:1500 Entries:6000 Terminal:1500} err=<nil> reconnects=0
+=== RUN   TestStreamingAuditNativeJournalFaults/state-false/cancellation
+    streaming_native_fault_test.go:115: streaming-fault state_snapshot=false fault=cancellation consumer= leader=-1 pending_at_kill=0 consumer_replicas=0 visited=128 elapsed=211.702182ms report={Invocations:1500 Journals:0 Entries:0 Terminal:0} err=context canceled reconnects=0
+=== RUN   TestStreamingAuditNativeJournalFaults/state-true/consumer-leader-loss
+    streaming_native_fault_test.go:115: streaming-fault state_snapshot=true fault=consumer-leader-loss consumer=wf-audit-T2Qox0FXAxbA357apENxmR leader=1 pending_at_kill=4039 consumer_replicas=3 visited=6000 elapsed=418.123949ms report={Invocations:1500 Journals:1500 Entries:6000 Terminal:1500} err=<nil> reconnects=1
+=== RUN   TestStreamingAuditNativeJournalFaults/state-true/cancellation
+    streaming_native_fault_test.go:115: streaming-fault state_snapshot=true fault=cancellation consumer= leader=-1 pending_at_kill=0 consumer_replicas=0 visited=128 elapsed=217.055276ms report={Invocations:1500 Journals:0 Entries:0 Terminal:0} err=context canceled reconnects=0
+--- PASS: TestStreamingAuditNativeJournalFaults (35.65s)
+    --- PASS: TestStreamingAuditNativeJournalFaults/state-false/consumer-leader-loss (8.64s)
+    --- PASS: TestStreamingAuditNativeJournalFaults/state-false/cancellation (8.77s)
+    --- PASS: TestStreamingAuditNativeJournalFaults/state-true/consumer-leader-loss (8.96s)
+    --- PASS: TestStreamingAuditNativeJournalFaults/state-true/cancellation (9.28s)
+PASS

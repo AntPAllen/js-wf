@@ -1,0 +1,20 @@
+=== RUN   TestByteBoundedScanNativePayloadRefillHolesCutoffAndCancel
+    byte_scan_native_test.go:72: retained_records=116 payload_bytes=30408704 digest=f39e549538101d26b3c75d70bab4ebbc969f68d3e4627fe85d1dcacaf3a11b87 cancellation_visits=1 consumers=0
+--- PASS: TestByteBoundedScanNativePayloadRefillHolesCutoffAndCancel (7.10s)
+=== RUN   TestByteBoundedFetchNativeHealthyRefill
+    byte_scan_native_test.go:113: healthy_refill records=48 bytes=12582912 published=64 byte_window=8388608 recovery_errors=0
+--- PASS: TestByteBoundedFetchNativeHealthyRefill (4.56s)
+=== RUN   TestByteBoundedScanNativeRetainsPrefetchAcrossWindows
+    byte_scan_native_test.go:159: records=4100 bytes=16793600 record_window=4096 byte_window=8388608 consumers_created=1 leader_gap_reads=0 remaining_consumers=0
+--- PASS: TestByteBoundedScanNativeRetainsPrefetchAcrossWindows (6.32s)
+=== RUN   TestByteBoundedFetchStopsAtRecordLimit
+--- PASS: TestByteBoundedFetchStopsAtRecordLimit (0.00s)
+=== RUN   TestByteBoundedFetchCancellationStopsBlockedIterator
+--- PASS: TestByteBoundedFetchCancellationStopsBlockedIterator (0.00s)
+=== RUN   TestByteBoundedFetchRetainsSemanticErrorAndRejectsInvalidWindow
+--- PASS: TestByteBoundedFetchRetainsSemanticErrorAndRejectsInvalidWindow (0.00s)
+=== RUN   TestByteBoundedFetchHeartbeatAdmitsTransportRecovery
+--- PASS: TestByteBoundedFetchHeartbeatAdmitsTransportRecovery (0.00s)
+=== RUN   TestByteIteratorBatchRetainsPrefetchAcrossRecordWindows
+--- PASS: TestByteIteratorBatchRetainsPrefetchAcrossRecordWindows (0.00s)
+PASS

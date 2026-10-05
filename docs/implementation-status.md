@@ -30,6 +30,22 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Byte-reader healthy refill fixed and delivery tracing added:** pinnedSDK
+ PullMaxBytes+StopAfter stalls a plain8MiB iterator and production regression at
+31/48 records; primary SDK source matches module ZIP. Continuous iterator retains
+prefetch across4096-record windows; normal/race4100 records pass with one cursor,
+zero gap reads. Replay only recovers after current same-consumer replicated
+memory/AckNone metadata confirms a different leader; unconfirmed order remains
+fatal and original two-resume/20s60s limits hold. Both state modes recover1500
+inv/6000entries after actual admitted consumer-leader kills, normal/race, and
+cancellation passes. Messages/Next byte/wait/outstanding counters and bounded
+slow/error history now expose delivery; real context/delegation controls pass,
+dropped-options mutant fails. SDK/source/original stores and intermediate
+failures preserved/read back. Does not establish historical1750/soak cause;
+100k/R5 performance, legacy/domain, final-source matrices and actual24h remain.
+[Full baseline, corrected, failed intermediates and controls](scale/byte-refill-diagnosis-2026-10-05/).
+
+
 - **Latest terminal results preserved:** clean e278ffb original24h journal row
  fails after13096.14s at checkpoint1750/cutoff49000; last1740 passes48720
  invocations/537620entries. Three attempts exhaust20s within60s. First attempt
