@@ -1,0 +1,98 @@
+{
+  "cases": [
+    {
+      "phase": "create",
+      "position": "first",
+      "cut": 0,
+      "preserved_entries": 3,
+      "old_epoch": 1,
+      "final_epoch": 5493,
+      "children": 500,
+      "journal_restart": {
+        "node": 1,
+        "retained_journal_messages": 3,
+        "journal_tail_sequence": 3,
+        "captured_prefix_tail_sequence": 3
+      }
+    },
+    {
+      "phase": "create",
+      "position": "interior",
+      "cut": 381,
+      "preserved_entries": 765,
+      "old_epoch": 1,
+      "final_epoch": 6336,
+      "children": 500,
+      "journal_restart": {
+        "node": 0,
+        "retained_journal_messages": 765,
+        "journal_tail_sequence": 765,
+        "captured_prefix_tail_sequence": 765
+      }
+    },
+    {
+      "phase": "create",
+      "position": "last",
+      "cut": 499,
+      "preserved_entries": 1001,
+      "old_epoch": 1,
+      "final_epoch": 4643,
+      "children": 500,
+      "journal_restart": {
+        "node": 2,
+        "retained_journal_messages": 1001,
+        "journal_tail_sequence": 1001,
+        "captured_prefix_tail_sequence": 1001
+      }
+    },
+    {
+      "phase": "results",
+      "position": "first",
+      "cut": 0,
+      "preserved_entries": 1504,
+      "old_epoch": 5549,
+      "final_epoch": 5553,
+      "children": 500,
+      "journal_restart": {
+        "node": 2,
+        "retained_journal_messages": 3504,
+        "journal_tail_sequence": 3504,
+        "captured_prefix_tail_sequence": 3504
+      }
+    },
+    {
+      "phase": "results",
+      "position": "interior",
+      "cut": 363,
+      "preserved_entries": 2230,
+      "old_epoch": 5560,
+      "final_epoch": 6290,
+      "children": 500,
+      "journal_restart": {
+        "node": 2,
+        "retained_journal_messages": 4230,
+        "journal_tail_sequence": 4230,
+        "captured_prefix_tail_sequence": 4230
+      }
+    },
+    {
+      "phase": "results",
+      "position": "last",
+      "cut": 499,
+      "preserved_entries": 2502,
+      "old_epoch": 5305,
+      "final_epoch": 6520,
+      "children": 500,
+      "journal_restart": {
+        "node": 1,
+        "retained_journal_messages": 4502,
+        "journal_tail_sequence": 4502,
+        "captured_prefix_tail_sequence": 4502
+      }
+    }
+  ],
+  "invocations_per_case": 501,
+  "scope": "Six R3 parent SIGKILL + library journal restart boundaries with 500 children each; not server SIGKILL or the whole chaos matrix.",
+  "physical_drain_required": true,
+  "clears_full_release": false
+}

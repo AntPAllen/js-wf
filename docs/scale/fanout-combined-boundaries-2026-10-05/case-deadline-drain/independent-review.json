@@ -1,0 +1,103 @@
+{
+  "source": "dc8422a44db31d62675f5d7a5c502fefa9053c6a",
+  "actual_parent_sdk_sha256": "ffe0ad5de9324b4140970425b01e7453211d23f02cc04ae6414b81095a7fb77f",
+  "selected_git_inputs_verified": 668,
+  "selected_external_inputs_verified": 3287,
+  "native_status": "passed",
+  "native_seconds": 579.62,
+  "cases": [
+    {
+      "case": "create/first",
+      "native_status": "PASS",
+      "seconds": 63.31,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 3,
+      "prefix_tail_sequence": 3,
+      "journal_live_messages": 3,
+      "journal_tail_sequence": 3,
+      "physical_drain_elapsed_ns": 10713535268,
+      "original_case_deadline": "2026-10-05T16:29:30.551592074Z",
+      "all_three_queue_and_64_durable_zero_after_joins": true
+    },
+    {
+      "case": "create/interior",
+      "native_status": "PASS",
+      "seconds": 110.66,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 765,
+      "prefix_tail_sequence": 765,
+      "journal_live_messages": 765,
+      "journal_tail_sequence": 765,
+      "physical_drain_elapsed_ns": 25610582077,
+      "original_case_deadline": "2026-10-05T16:30:33.529249012Z",
+      "all_three_queue_and_64_durable_zero_after_joins": true
+    },
+    {
+      "case": "create/last",
+      "native_status": "PASS",
+      "seconds": 100.24,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 1001,
+      "prefix_tail_sequence": 1001,
+      "journal_live_messages": 1001,
+      "journal_tail_sequence": 1001,
+      "physical_drain_elapsed_ns": 21509976115,
+      "original_case_deadline": "2026-10-05T16:32:24.186991607Z",
+      "all_three_queue_and_64_durable_zero_after_joins": true
+    },
+    {
+      "case": "results/first",
+      "native_status": "PASS",
+      "seconds": 115.46,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 1504,
+      "prefix_tail_sequence": 3504,
+      "journal_live_messages": 3504,
+      "journal_tail_sequence": 3504,
+      "physical_drain_elapsed_ns": 18826922194,
+      "original_case_deadline": "2026-10-05T16:34:04.243259355Z",
+      "all_three_queue_and_64_durable_zero_after_joins": true
+    },
+    {
+      "case": "results/interior",
+      "native_status": "PASS",
+      "seconds": 119.55,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 2230,
+      "prefix_tail_sequence": 4230,
+      "journal_live_messages": 4230,
+      "journal_tail_sequence": 4230,
+      "physical_drain_elapsed_ns": 20848980260,
+      "original_case_deadline": "2026-10-05T16:36:00.65382675Z",
+      "all_three_queue_and_64_durable_zero_after_joins": true
+    },
+    {
+      "case": "results/last",
+      "native_status": "PASS",
+      "seconds": 70.39,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 2502,
+      "prefix_tail_sequence": 4502,
+      "journal_live_messages": 4502,
+      "journal_tail_sequence": 4502,
+      "physical_drain_elapsed_ns": 10046852297,
+      "original_case_deadline": "2026-10-05T16:37:59.325542562Z",
+      "all_three_queue_and_64_durable_zero_after_joins": true
+    }
+  ],
+  "full_combined_matrix_qualified": true,
+  "six_named_physical_drain_cases_qualified": true,
+  "acceptance_checker_requires_all_six_passes": true,
+  "qualifies_full_release_matrix_or_24h": false,
+  "checker_git_source": "dc8422a44db31d62675f5d7a5c502fefa9053c6a",
+  "checker_sha256": "0bc2a72a5135527133df9c3316a7432f948616971dc0978b501ec3c1fc8cad0f",
+  "limitations": [
+    "Native R3 servers embedded in race SDK; no separate server process SIGKILL.",
+    "Original stores closed; no independent reopen yet.",
+    "All six final integrity/prefix/child-result assertions have named-test scope; all-peer physical drain verified after joins; independent copied audit pending.",
+    "Conversion timestamps are not original execution timestamps.",
+    "Sequence coverage checked across snapshot purging; named-test final prefix equality/higher-epoch assertions.",
+    "Prior failed parent remains failed; no historical server-fault cause claim.",
+    "Selected source inventory excludes exhaustive assembly/embed/compiler inputs."
+  ]
+}

@@ -1,6 +1,15 @@
 # Combined 500-child parent crash and journal restart matrix
 
-## Current qualification
+## Current physical-drain qualification
+
+The later [fullsix physical-drain profile](case-deadline-drain/) atdc8422a passed
+race579.62s, retainingoriginal5mcase/30scut. Each admitsactualparentSIGKILL/library
+journalrestart,501retainedoutcomes/exactresults/prefix/higherepoch, joins64workers,
+andchecksallthree currentR3 zeroqueues/exact64durables withzero pending/ackbefore
+case_deadline. ActualSDK/source/fault/guard/full16760member/threepart reviewverify.
+Independentfresh-copy audits pending; nofullmatrix/24h orolderfailure promotion.
+
+## Earlier six-boundary qualification
 
 The complete six-boundary race test **passed777.42s at executed25b327c**.
 Creation and result collection first/interior/last each admit an actual parent
@@ -30,7 +39,7 @@ A separate [hosted source-bound run](hosted-37333174296/) at7a4d739 passed allsi
 in257.12s; completeexactGitHubZIP/source/executable/fault/guard review verified.
 [Rawqueue diagnosis](accepted-queue-diagnosis/) ofthe earlier acceptedcreationfirst
 copy identifies500terminal-parent wakeups onpartition52, not incompletechildren.
-Newphysicaldrain profile remains underreview; originalgate budgets unchanged.
+The laterphysicaldrain profile passed asrecorded above; originalgate budgets unchanged.
 
 ## Earlier failed preparation
 

@@ -3289,3 +3289,17 @@ higher epoch/501integrity/exactresults. No separate recovery-p99 claim is derive
 from terminal-backlog drainage. The same drain witness now recordscase_deadline.
 Earlierstrict30s profile remainsfailed/preserved; earliercopieddeadline remains
 failed. Fullchanged nativeprofile pending. No productionruntimechange.
+
+### Full six fanout boundaries with physical drain accepted — 2026-10-05
+
+Executeddc8422a racePASS579.62s. Allsixfull500creation/result actualparentSIGKILL/
+libraryR3journal restarts admitcuts; exactprefix/higher epoch/parent249500/501final
+retained report. Each all64productionloops joined; allthreecurrentR3 zeroqueues/
+exact64zero pending/ackdurables, allrawmetadata timestampsbeforeoriginalcase
+five-minute deadline. Original30scut unchanged. ActualSDK/sixchildSDKs/exactproducer/
+668Gitinputs/3287externalinputs verified;12-control allsixphysicaldrain guardaccepts.
+Complete16760archive members/threeparts readbackverified. Drain10.047–25.611s;
+olderdiagnostic30s failure remainsfailed, no causefixattribution. Originalstores
+closed; independentfresh-copy audits pending. Noall500positions/serverprocess
+SIGKILL/current-source fullmatrices/24h qualification.
+[Complete successful physical-drain proof](scale/fanout-combined-boundaries-2026-10-05/case-deadline-drain/).

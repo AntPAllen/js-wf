@@ -135,6 +135,18 @@ trace dependencies before another full run. [Preserved failed proof](scale/postg
 
 ## Latest accepted evidence
 
+- **Fullsix fanout boundaries plusphysical drain qualified atdc8422a:** native
+  racePASS579.62s. Allsix500-child cuts/actualparentSIGKILL/libraryR3journal restarts/
+  exactprefix/higher epoch/parent249500/501retained report. All64workers joined,
+  allthree currentR3 queues zero/exact64durables zero pending/ack, rawtimestamps
+  beforeoriginal5mcase deadline; original30scut unchanged. ActualSDK/sixchildSDKs/
+  exactproducer/668Gitinputs/3287external inputs/12-control guard verified; all16760
+  archive members/threeparts readback. Drain10.047–25.611s. Originalstores closed,
+  independentfresh-copy audits pending; noall500positions/serverprocessSIGKILL/
+  fullfaultmatrix/24h orolderfailure causefixclaim.
+  [Complete physical-drain proof](scale/fanout-combined-boundaries-2026-10-05/case-deadline-drain/).
+
+
 - **New failed-drain residualqueue identified withchanged observation:** fresh
   3413731 creationfirst copies,137terminal-parent wakeups onpartition52; parent
   Completed/result249500,500Completedchildren/exact2×indexresults/preservedprefix/
