@@ -2216,3 +2216,15 @@ Workload SDK/full captured source/native stores unavailable; final integrity/dra
 named-test scope. Missing157–195/full200/final-source/full16×200/24h/million drain
 remain open; original failed parents are not promoted.
 [Complete coverage review](scale/current-tier3-block-delay-2026-10-04/coverage-1-156-and-196-200/).
+
+### Retained native partition replay preparation — 2026-10-05
+
+The Tier2 process harness now accepts optional WF_MATRIX_PROCESS_ROOT to retain
+original server binaries/logs/stores after a focused case. It creates a fresh
+per-test directory and rejects an existing one; fault scheduling, replication,
+runtime, checker and budgets are unchanged. Integration compilation passes.
+This prepares a ten-minute seed1 partition replay after the terminal point-read
+correction, matching the historical normal-build profile. Native execution and
+terminal review remain pending; the historical failure/cause/full gates remain
+unchanged. Captured source and actual executable identities are required before
+promoting the replay result.

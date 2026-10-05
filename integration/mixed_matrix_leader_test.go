@@ -228,7 +228,20 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 	} else if row == "worker_isolation" {
 		startCluster = testcluster.StartProfiledProcesses
 	}
-	cluster, err := startCluster(t.TempDir(), 3)
+	clusterRoot := t.TempDir()
+	if base := os.Getenv("WF_MATRIX_PROCESS_ROOT"); base != "" {
+		// Retain original process stores for a focused campaign. Refuse an
+		// existing case directory so a replay cannot silently reuse old state.
+		if err := os.MkdirAll(base, 0700); err != nil {
+			t.Fatal(err)
+		}
+		clusterRoot = filepath.Join(base, strings.ReplaceAll(t.Name(), "/", "_"))
+		if err := os.Mkdir(clusterRoot, 0700); err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("retained matrix process stores=%s", clusterRoot)
+	}
+	cluster, err := startCluster(clusterRoot, 3)
 	if err != nil {
 		t.Fatal(err)
 	}
