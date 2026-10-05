@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/provision"
 	"js-wf/testcluster"
@@ -100,7 +101,9 @@ func runContinuationRetirementDomain(t *testing.T, restart bool) {
 	if restart {
 		onDrop = func(ctx context.Context) error {
 			stream, err := all[0].Stream(ctx, "KV_WF_STATE")
-			if err != nil { return err }
+			if err != nil {
+				return err
+			}
 			info, err := stream.Info(ctx)
 			if err != nil || info.Cluster == nil || info.Cluster.Leader == "" {
 				return fmt.Errorf("domain state leader unconfirmed: info=%+v err=%v", info, err)
@@ -110,34 +113,44 @@ func runContinuationRetirementDomain(t *testing.T, restart bool) {
 				return fmt.Errorf("invalid domain state leader %q", info.Cluster.Leader)
 			}
 			cut := struct {
-				Leader string `json:"state_leader"`
-				Before []map[string]string `json:"before"`
-				Stopped []string `json:"stopped"`
-				Healed []map[string]string `json:"healed"`
-				Started time.Time `json:"started"`
-				Finished time.Time `json:"finished"`
-				Scope string `json:"scope"`
-			}{Leader:info.Cluster.Leader, Before:identities, Started:time.Now().UTC(), Scope:"All three actual library servers shutdown and restarted; not SIGKILL or lease-expiry admission"}
+				Leader   string              `json:"state_leader"`
+				Before   []map[string]string `json:"before"`
+				Stopped  []string            `json:"stopped"`
+				Healed   []map[string]string `json:"healed"`
+				Started  time.Time           `json:"started"`
+				Finished time.Time           `json:"finished"`
+				Scope    string              `json:"scope"`
+			}{Leader: info.Cluster.Leader, Before: identities, Started: time.Now().UTC(), Scope: "All three actual library servers shutdown and restarted; not SIGKILL or lease-expiry admission"}
 			for node := 0; node < 3; node++ {
 				cluster.KillNode(node)
-				if cluster.Servers[node].Running() { return fmt.Errorf("domain node%d remained running", node) }
+				if cluster.Servers[node].Running() {
+					return fmt.Errorf("domain node%d remained running", node)
+				}
 				cut.Stopped = append(cut.Stopped, cluster.Servers[node].ID())
 			}
 			// Every original must be stopped before any replacement begins.
 			for node := 0; node < 3; node++ {
-				if err := cluster.RestartNode(node); err != nil { return err }
+				if err := cluster.RestartNode(node); err != nil {
+					return err
+				}
 			}
 			observe, stopObserve := context.WithTimeout(context.Background(), 5*time.Second)
 			defer stopObserve()
 			for node := 0; node < 3; node++ {
 				account, err := all[node].AccountInfo(observe)
-				if err != nil || account.Domain != domain { return fmt.Errorf("restarted domain node%d: info=%+v err=%v", node, account, err) }
-				cut.Healed = append(cut.Healed, map[string]string{"name":cluster.Servers[node].Name(), "id":cluster.Servers[node].ID(), "domain":account.Domain})
+				if err != nil || account.Domain != domain {
+					return fmt.Errorf("restarted domain node%d: info=%+v err=%v", node, account, err)
+				}
+				cut.Healed = append(cut.Healed, map[string]string{"name": cluster.Servers[node].Name(), "id": cluster.Servers[node].ID(), "domain": account.Domain})
 			}
 			cut.Finished = time.Now().UTC()
 			data, err := json.MarshalIndent(cut, "", "  ")
-			if err != nil { return err }
-			if err := os.WriteFile(filepath.Join(root, "domain-all-server-restart.json"), data, 0600); err != nil { return err }
+			if err != nil {
+				return err
+			}
+			if err := os.WriteFile(filepath.Join(root, "domain-all-server-restart.json"), data, 0600); err != nil {
+				return err
+			}
 			t.Logf("domain fresh manifest response lost; state_leader=%s all_three_stopped=true restart=%s", cut.Leader, cut.Finished.Sub(cut.Started))
 			return nil
 		}
@@ -150,4 +163,3 @@ func runContinuationRetirementDomain(t *testing.T, restart bool) {
 		t.Fatal(err)
 	}
 }
-	"github.com/nats-io/nats.go"
