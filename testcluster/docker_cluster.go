@@ -38,6 +38,7 @@ type DockerCluster struct {
 	clockAdvance       time.Duration
 	clockAdvanced      bool
 	explicitRouteSeeds bool
+	restoredIdentity   string
 }
 
 func dockerCommand(ctx context.Context, args ...string) (string, error) {
@@ -61,6 +62,38 @@ func StartDockerCluster(root string, count int) (_ *DockerCluster, err error) {
 // the same bindings. This supports private device-mapper fault fixtures.
 func StartDockerClusterWithStores(root string, count int, stores map[int]string) (*DockerCluster, error) {
 	return startDockerCluster(root, count, "", 0, stores, nil)
+}
+
+// StartDockerClusterWithRestoredIdentity reopens verified copies of a previous
+// fixture's stores. NATS cluster/server names retain their Raft identities;
+// Docker containers, networks and route aliases receive fresh unique names.
+// identity is the old fixture's cluster name (servers were identity-nN).
+func StartDockerClusterWithRestoredIdentity(root string, count int, stores map[int]string, identity string) (*DockerCluster, error) {
+	if err := validateRestoredDockerIdentity(identity); err != nil {
+		return nil, err
+	}
+	if len(stores) != count {
+		return nil, fmt.Errorf("restored identity requires every node store")
+	}
+	for node := 0; node < count; node++ {
+		if stores[node] == "" {
+			return nil, fmt.Errorf("missing restored store for node %d", node)
+		}
+	}
+	return startDockerClusterVersionedWithIdentity(root, count, "", 0, stores, nil, false, false, identity)
+}
+
+func validateRestoredDockerIdentity(identity string) error {
+	if len(identity) == 0 || len(identity) > 128 {
+		return fmt.Errorf("invalid restored Docker identity length")
+	}
+	for i, c := range identity {
+		alphaNum := c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9'
+		if !alphaNum && (i == 0 || c != '-' && c != '_' && c != '.') {
+			return fmt.Errorf("invalid restored Docker identity")
+		}
+	}
+	return nil
 }
 
 // StartMixedVersionDockerCluster starts node zero on oldBinary while the other
@@ -152,7 +185,11 @@ func startDockerCluster(root string, count int, oldBinary string, advance time.D
 	return startDockerClusterVersioned(root, count, oldBinary, advance, overrides, tags, false, false)
 }
 
-func startDockerClusterVersioned(root string, count int, oldBinary string, advance time.Duration, overrides map[int]string, tags map[int][]string, allOld, lameDuck bool) (_ *DockerCluster, err error) {
+func startDockerClusterVersioned(root string, count int, oldBinary string, advance time.Duration, overrides map[int]string, tags map[int][]string, allOld, lameDuck bool) (*DockerCluster, error) {
+	return startDockerClusterVersionedWithIdentity(root, count, oldBinary, advance, overrides, tags, allOld, lameDuck, "")
+}
+
+func startDockerClusterVersionedWithIdentity(root string, count int, oldBinary string, advance time.Duration, overrides map[int]string, tags map[int][]string, allOld, lameDuck bool, identity string) (_ *DockerCluster, err error) {
 	if count < 3 || count > 5 {
 		return nil, fmt.Errorf("docker cluster count must be 3..5")
 	}
@@ -167,7 +204,7 @@ func startDockerClusterVersioned(root string, count int, oldBinary string, advan
 	if err := os.MkdirAll(root, 0755); err != nil {
 		return nil, err
 	}
-	c := &DockerCluster{root: root, stores: stores, serverTags: serverTags, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1, oldNodes: make([]bool, count), clockAdvance: advance}
+	c := &DockerCluster{root: root, stores: stores, serverTags: serverTags, names: make([]string, count), routeNames: make([]string, count), urls: make([]string, count), monitorURLs: make([]string, count), skewNode: -1, oldNodes: make([]bool, count), clockAdvance: advance, restoredIdentity: identity}
 	if oldBinary != "" {
 		for node := range c.oldNodes {
 			c.oldNodes[node] = allOld || node == 0
@@ -309,7 +346,17 @@ func (c *DockerCluster) NodeName(i int) string {
 	if i < 0 || i >= len(c.names) {
 		return ""
 	}
+	if c.restoredIdentity != "" {
+		return fmt.Sprintf("%s-n%d", c.restoredIdentity, i)
+	}
 	return c.names[i]
+}
+
+func (c *DockerCluster) serverClusterName() string {
+	if c.restoredIdentity != "" {
+		return c.restoredIdentity
+	}
+	return c.network
 }
 
 // AdvanceStoppedClusterClock selects the future-clock binary for all peers.
@@ -362,7 +409,7 @@ func (c *DockerCluster) RestartNode(i int) error {
 	if err != nil {
 		return err
 	}
-	serverArgs := []string{"-c", "/etc/nats.conf", "-a", "0.0.0.0", "-p", "4222", "-m", "8222", "-n", c.names[i], "-js", "-sd", "/data", "-cluster_name", c.network, "-cluster", "nats://0.0.0.0:6222"}
+	serverArgs := []string{"-c", "/etc/nats.conf", "-a", "0.0.0.0", "-p", "4222", "-m", "8222", "-n", c.NodeName(i), "-js", "-sd", "/data", "-cluster_name", c.serverClusterName(), "-cluster", "nats://0.0.0.0:6222"}
 	// Advertise only the route bridge. Explicit seeds are a diagnostic option:
 	// they remove dependence on implicit discovery after replacement containers.
 	serverArgs = append(serverArgs, "-cluster_advertise", c.routeNames[i]+":6222")

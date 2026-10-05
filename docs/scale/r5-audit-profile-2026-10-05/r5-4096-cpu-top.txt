@@ -1,0 +1,23 @@
+File: integrity.test
+Build ID: 3c1f528c3167466c1f68e51427d672d7dd104835
+Type: cpu
+Time: 2026-10-05 01:05:57 UTC
+Duration: 15.74s, Total samples = 8130ms (51.66%)
+Showing nodes accounting for 3340ms, 41.08% of 8130ms total
+Dropped 237 nodes (cum <= 40.65ms)
+Showing top 14 nodes out of 180
+      flat  flat%   sum%        cum   cum%
+     600ms  7.38%  7.38%     1610ms 19.80%  github.com/nats-io/nats%2ego.(*Conn).parse
+     400ms  4.92% 12.30%      400ms  4.92%  runtime.spanClass.sizeclass (inline)
+     360ms  4.43% 16.73%      430ms  5.29%  github.com/nats-io/nats%2ego.(*Conn).processMsgArgs
+     340ms  4.18% 20.91%      860ms 10.58%  github.com/nats-io/nats.go/internal/parser.GetMetadataFields
+     330ms  4.06% 24.97%      800ms  9.84%  runtime.tryDeferToSpanScan
+     200ms  2.46% 27.43%      200ms  2.46%  internal/runtime/gc/scan.scanSpanPackedAVX512
+     190ms  2.34% 29.77%      190ms  2.34%  github.com/nats-io/nats.go/internal/parser.ParseNum
+     150ms  1.85% 31.61%      280ms  3.44%  encoding/json/jsontext.(*decoderState).ReadValue
+     150ms  1.85% 33.46%      150ms  1.85%  internal/runtime/maps.ctrlGroup.matchH2
+     140ms  1.72% 35.18%      150ms  1.85%  encoding/json/internal/jsonwire.ConsumeWhitespace (inline)
+     140ms  1.72% 36.90%     1220ms 15.01%  runtime.mallocgc
+     120ms  1.48% 38.38%      350ms  4.31%  encoding/json/jsontext.(*decoderState).consumeValue
+     110ms  1.35% 39.73%      110ms  1.35%  runtime.asyncPreempt
+     110ms  1.35% 41.08%      110ms  1.35%  runtime.futex

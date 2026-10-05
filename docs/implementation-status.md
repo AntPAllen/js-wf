@@ -30,6 +30,22 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Copied-store R5 audit profile completes:** all720 original store files still
+  match the published failed archive. Restored logical NATS identities/fresh Docker
+  names reopen100k/1.2M cohort. Diagnostic512/R5 baseline and recheck hit20s;
+ 512/R1 completes16.813s and4096/R5 completes15.739s with exact reports. Visitor
+  takes2–3s; delivery/client work remains substantial. Three startup/collector
+  attempts, actual executable/source/container proof and CPU/phase outputs retained.
+  Production defaults/deadlines unchanged; payload-byte buffering and interruption
+  acceptance are required before candidate adoption. No full/24h qualification.
+  [Complete diagnostic and failed attempts](scale/r5-audit-profile-2026-10-05/).
+
+- **Verified all-server145–156 duplicate expansion recovered:** all72 raw files,
+  original ZIP, canonical members and pushed4b920ea parts verify; no visible target
+  descriptors remain. Only duplicate raw expansion removed, freeing618,897,408
+  allocated bytes. ZIP/proofs/models and failed/live originals remain intact.
+  [Exact recovery evidence](scale/current-tier2-matrix-2026-10-04/cluster-145-156/duplicate-expansion-recovery.json).
+
 - **Short successful pulls now resume bulk, but native budget fails:** installed
   SDK suppresses timeout/no-message errors, so nil-error short batches require a
   leader absence oracle. New unit regressions/race controls pass with one oracle

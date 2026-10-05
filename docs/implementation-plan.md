@@ -2086,3 +2086,17 @@ cursor-replication costs before another soak. No deadlines or release gates rela
 [All-server-kill145–156](scale/current-tier2-matrix-2026-10-04/cluster-145-156/)
 now extends accepted recorded-source coverage through156; full200/final-source
 matrices and actual24h remain open.
+
+
+### R5 audit throughput diagnostic — 2026-10-05
+
+The [verified copied-store CPU/phase/window/cursor comparison](scale/r5-audit-profile-2026-10-05/)
+reopens the same100k/1.2M cohort with its original logical NATS identities.
+Both512-record/R5 attempts hit the unchanged20s budget;512/R1 completes16.813s
+and4096/R5 completes15.739s. Production defaults remain unchanged. The next
+candidate must bound both bytes and message count, preserve captured cutoffs,
+leader gap/absence checks, cancellation and semantic error behavior, and pass
+full interruption controls before adoption. Larger known-small-payload windows
+and single-replica diagnostics do not qualify worst-case buffering or recovery.
+All failed startup/collector attempts remain preserved, and original store files
+still match their published archive. Full matrices and actual24h remain open.

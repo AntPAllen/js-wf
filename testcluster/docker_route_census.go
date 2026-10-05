@@ -25,7 +25,11 @@ func (c *DockerCluster) RoutePeerCensus(ctx context.Context, node int) (RouteCen
 	if err != nil {
 		return RouteCensus{}, err
 	}
-	return decodeRouteCensus(data, c.names[node], c.names)
+	members := make([]string, len(c.names))
+	for peer := range members {
+		members[peer] = c.NodeName(peer)
+	}
+	return decodeRouteCensus(data, c.NodeName(node), members)
 }
 func decodeRouteCensus(data []byte, expected string, members []string) (RouteCensus, error) {
 	var response struct {

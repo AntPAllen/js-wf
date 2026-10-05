@@ -22,3 +22,10 @@ Runtime workload executables/full captured source ledgers/physical stores were
 not uploaded. Final integrity/drain are named-test assertions, not independently
 reopened-store evidence. Only this recorded-source shard qualifies; full200,
 final-source/full13-row/full16-row and24h gates remain open.
+
+
+After pushed4b920ea, all published parts, canonical members, ZIP and72 expanded
+inputs verify with no visible open target descriptors. Only duplicate raw
+expansion is removed, recovering618,897,408 exclusive allocated bytes.
+Original ZIP/canonical proofs/models/source and failed/live originals remain.
+Restore the raw directory before offline replay; acceptance scope is unchanged.
