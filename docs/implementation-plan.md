@@ -2955,3 +2955,15 @@ must bind source/executable and original/copy byte hashes before and after the
 review. Helper compiles; copied50k nativeexecution pending. This is an independent
 raw-state gate, not a substitute for original projection recovery/rebuild verdict,
 concurrentfaults, historicalcauses, fullmatrices or24h. No originalstore reopen.
+
+### 2026-10-05 recorded-source disk-stall161 seeds accepted
+
+New196–200 actual nativejob success/metadata/log/ZIP bound; originaldevicefault,
+latency and cohort gates regenerated. Three rebuilt models exactOk19476operations/
+45 executed79915ca dependencies; all630archive members/twoparts verified.
+Combined1–65,79–169,196–200 (161seeds):490784inv/5405195entries/3059faults/
+631018modelops/1676cohortaudits; worstterminal/progressp99 9.743/2.980s.
+Failed66–78 stayunqualified; remaining170–195 live. No workloadSDK/fullsource/
+physicalstore upload, finaldrain named-test scope. Full200/final-source/fullmatrix/
+24h and failedparent remainopen.
+[Complete161-seed ledger](scale/current-tier3-block-stall-2026-10-05/).
