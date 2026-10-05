@@ -4085,3 +4085,14 @@ and sampled SDK RSS/highwater. Compile/skip passes; native result pending. Earli
 2GiB/GOGC200 failures remain failed; no R1 recovery/default/24h claim. Last closed
 copy reclaimed only after full canonical and byte/descriptor/process verification.
 [Preparation](scale/direct-callback-audit-2026-10-05/gc-headroom-preparation/).
+
+## Full400k explicit GC-headroom capacity accepted — 2026-10-05
+
+At08a90c8 mandatory directR1 quiet audit passes18.350496s with exact400k INV,
+journals and terminal /4.8M entries under4-core/GOGC500/4GiB. Actual4GiB runtime
+metric and R1 cursor configs verified. NativePASS74.00s includes two failed20s
+callback controls; no blanket pass/speed ratio or earlier2GiB promotion. Selected
+source/actual SDK/five servers/mounts/closure/1058 unchanged original files and
+complete1686-file base-plus-delta inventory independently verified. R1 cursor/
+server loss/replay, cancellation/live/default adoption and actual24h remain open.
+[Full evidence](scale/direct-callback-audit-2026-10-05/gc-headroom-capacity/).
