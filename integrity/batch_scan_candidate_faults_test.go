@@ -69,11 +69,15 @@ type candidateObservedStream struct {
 	name             string
 	gapCalls         int
 	consumerReplicas int
+	cursorReplicas   int
 	consumer         jetstream.Consumer
 }
 
 func (s *candidateObservedStream) CreateConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
 	s.name = cfg.Name
+	if s.cursorReplicas > 0 {
+		cfg.Replicas = s.cursorReplicas
+	}
 	consumer, err := s.Stream.CreateConsumer(ctx, cfg)
 	if err != nil {
 		return consumer, err

@@ -12585,3 +12585,14 @@ preserved in verified49.998MB delta plus pinned canonical base. No speedup/defau
 R1 failover/fullcapacity/24h claim. Next changed measurement considers enlarged-VM
 CPU/GC headroom while retaining fullpopulation/deadline and recording configuration.
 [Full failure proof](scale/direct-callback-audit-2026-10-05/capacity-400k/).
+
+## Direct R1 native loss controls prepared — 2026-10-05
+
+A new native1500/6000 directR1 mode prepares three independent owner-library-
+shutdown, acknowledged consumer-deletion and cancellation fixtures. Actual cursor
+identity/replicas/pending tail verified; fullreport/visits/original20s and consumer
+cleanup gates retained. Existing replay/transport/retry rules unchanged. Race
+compile/unit controls pass1.037s; native verdict pending and either outcome will
+be preserved. Previous closed fullcapacity copy reclaimed after complete canonical
+verification. No R1 failure/default/R5/24h qualification yet.
+[Preparation](scale/direct-callback-audit-2026-10-05/single-replica-fault-preparation/).

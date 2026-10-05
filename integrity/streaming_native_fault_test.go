@@ -26,8 +26,9 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 	for _, mode := range []struct {
 		name                                            string
 		snapshot, concurrent, compact, callback, direct bool
+		singleReplica                                   bool
 	}{
-		{"state-false", false, false, false, false, false}, {"state-true", true, false, false, false, false}, {"concurrent-state", true, true, false, false, false}, {"compact-metadata", true, true, true, false, false}, {"callback-delivery", true, true, true, true, false}, {"direct-callback", true, true, true, false, true},
+		{"state-false", false, false, false, false, false, false}, {"state-true", true, false, false, false, false, false}, {"concurrent-state", true, true, false, false, false, false}, {"compact-metadata", true, true, true, false, false, false}, {"callback-delivery", true, true, true, true, false, false}, {"direct-callback", true, true, true, false, true, false}, {"direct-single-replica", true, true, true, false, true, true},
 	} {
 		snapshot := mode.snapshot
 		read := nativeStreamingScanner()
@@ -40,7 +41,11 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 		if mode.direct {
 			read = scanConsumeDirectWindowsThrough
 		}
-		for _, fault := range []string{"consumer-leader-loss", "cancellation"} {
+		faults := []string{"consumer-leader-loss", "cancellation"}
+		if mode.singleReplica {
+			faults = append(faults, "consumer-deletion")
+		}
+		for _, fault := range faults {
 			t.Run(fmt.Sprintf("%s/%s", mode.name, fault), func(t *testing.T) {
 				_, ctx, cluster := batchedAuditClusterWithServers(t)
 				var urls []string
@@ -76,9 +81,15 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 				started := time.Now()
 				report, err := checkUsingConcurrentOptions(auditCtx, js, nil, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 					if stream.CachedInfo().Config.Name != "WF_JRN" {
+						if mode.singleReplica {
+							return read(call, &candidateObservedStream{Stream: stream, cursorReplicas: 1}, cutoff, visit)
+						}
 						return read(call, stream, cutoff, visit)
 					}
 					observed := &candidateObservedStream{Stream: stream}
+					if mode.singleReplica {
+						observed.cursorReplicas = 1
+					}
 					return read(call, observed, cutoff, func(msg *jetstream.RawStreamMsg) error {
 						visited++
 						if visited == 128 {
@@ -89,10 +100,21 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 								if err != nil {
 									return err
 								}
-								if info.Cluster == nil || info.NumPending == 0 || info.Config.Replicas != 3 || !info.Config.MemoryStorage || info.Config.AckPolicy != jetstream.AckNonePolicy {
-									return errors.New("missing active replicated consumer identity")
+								t.Logf("cursor-target consumer=%s stream=%s replicas=%d pending=%d cluster=%+v", info.Name, info.Stream, info.Config.Replicas, info.NumPending, info.Cluster)
+								wantReplicas := 3
+								if mode.singleReplica {
+									wantReplicas = 1
+								}
+								if info.Name != observed.name || info.Stream != "WF_JRN" || (info.Cluster == nil && fault != "consumer-deletion") || info.NumPending == 0 || info.Config.Replicas != wantReplicas || !info.Config.MemoryStorage || info.Config.AckPolicy != jetstream.AckNonePolicy {
+									return errors.New("missing active memory/AckNone consumer identity")
 								}
 								consumerName, pending, replicas = info.Name, info.NumPending, info.Config.Replicas
+								if fault == "consumer-deletion" {
+									if err := stream.DeleteConsumer(call, info.Name); err != nil {
+										return err
+									}
+									return visit(msg)
+								}
 								for i, server := range cluster.Servers {
 									if server.Name() == info.Cluster.Leader {
 										leader = i
@@ -115,7 +137,7 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 					if !errors.Is(err, context.Canceled) || visited != 128 || report != (Report{Invocations: invocations}) {
 						t.Fatalf("cancel report=%+v visited=%d err=%v", report, visited, err)
 					}
-				} else if err != nil || report != want || visited != 4*invocations || leader < 0 || pending == 0 {
+				} else if err != nil || report != want || visited != 4*invocations || (leader < 0 && fault != "consumer-deletion") || pending == 0 {
 					t.Fatalf("recovery report=%+v visited=%d leader=%d pending=%d err=%v", report, visited, leader, pending, err)
 				}
 				for _, name := range []string{"WF_INV", "WF_JRN"} {
