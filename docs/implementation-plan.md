@@ -2537,3 +2537,14 @@ complete originals retained. Corrected8da5935 native racePASS35.61s with12.614s
 recovery and epoch51→69; exact effects/all-peer/raw integrity/reachable-frame
 retention under quiescent GC verified. This cut
 allows journal replay and does not claim bounded resume before manifest repair.
+
+### Recorded-source disk-stall coverage extended to91 seeds — 2026-10-05
+
+Original79915ca successful jobs111324443616/111324443667, artifacts11334565286/
+11333539393, seeds79–91/92–104: independently bound API/log/ZIP/raw fault evidence,
+494 admitted5s device suspensions, 273 completed cohorts,
+102,528 exactOk operations across three rebuilt models/45 executed Go/module
+dependencies. Full originals/all members/parts verify. Accepted91-seed coverage
+is1–65 plus79–104; failed66–78 and105–200 stay unqualified. No uploaded workload
+SDK/physical stores/full source inventory; final integrity/drain named-test scope.
+Original full200/current-source/full matrices and24h remain required.
