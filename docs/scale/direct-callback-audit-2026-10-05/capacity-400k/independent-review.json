@@ -1,0 +1,113 @@
+{
+  "explicit_configuration": {
+    "GOMAXPROCS": "4",
+    "GOGC": "200",
+    "GOMEMLIMIT": "2GiB",
+    "WF_AUDIT_CAPACITY_PLAIN_COMPARISON": "1",
+    "WF_AUDIT_CAPACITY_DIRECT_CALLBACK_COMPARISON": "1",
+    "WF_AUDIT_CAPACITY_PROFILE_STORES": "/tmp/js-wf-direct-callback-400k-copied-comparison-20261005/copied-stores",
+    "WF_AUDIT_CAPACITY_PROFILE_IDENTITY": "js-wf-route-595173-1791229859953606113",
+    "WF_AUDIT_BATCH_ROOT": "/tmp/js-wf-direct-callback-400k-copied-comparison-20261005/originals",
+    "WF_TIER3_EXPLICIT_ROUTE_SEEDS": "1",
+    "WF_TIER3_SYNC_INTERVAL": "2m"
+  },
+  "execution": {
+    "pid": 682479,
+    "source": "4ea20c176280557a43a68668a63c823333c41dfd",
+    "sha256": "966b5b54d2effa991fa391e3db822943366c23a36243559966ea6ba8e9d2f668",
+    "build_info": "/proc/682479/exe: go1.27.1\n\tpath\tjs-wf/integrity.test\n\tmod\tjs-wf\tv0.0.0-20261005224027-4ea20c176280\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=4ea20c176280557a43a68668a63c823333c41dfd\n\tbuild\tvcs.time=2026-10-05T22:40:27Z\n\tbuild\tvcs.modified=false\n",
+    "args": [
+      "/tmp/js-wf-direct-callback-400k-copied-comparison-20261005/integrity.test",
+      "-test.run=^TestConcurrentStateR5CopiedCapacityProfile$",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=6m"
+    ],
+    "stat": "682479 (integrity.test) S 682228 682228 682228 0 -1 4194304 744 0 0 0 0 0 0 0 20 0 6 0 5379269 1692798976 3985 18446744073709551615 4194304 16085488 140727601279184 0 0 0 0 0 2143420159 0 0 0 17 1 0 0 0 0 0 27877376 28344448 407199744 140727601285692 140727601285860 140727601285860 140727601287086 0\n",
+    "status": "failed",
+    "started_utc": "2026-10-05T22:41:11.170985+00:00",
+    "scope": "Explicit four-core GOGC200 2GiB verified copied-store plain callback/direct callback/callback R1 400k original20s full capacity comparison; candidate must pass exact full report; every verdict preserved",
+    "exit_code": 1,
+    "finished_utc": "2026-10-05T22:42:29.060660+00:00"
+  },
+  "selected_git_source_inputs_verified": 680,
+  "actual_server_observations": 5,
+  "server_sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+  "observed_processes_closed": true,
+  "copied_data_mounts_verified": true,
+  "original_store_files_unchanged": 1058,
+  "canonical_original_archive_sha256": "970b0adbddef8d8fb76ab8d1b523b26820217c9a1ffd8994544887d26d1c84a0",
+  "results": [
+    {
+      "Mode": "single_replica_callback",
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 6469,
+        "Entries": 77616,
+        "Terminal": 6468
+      },
+      "Error": "wf.jrn.audit.capacity-006468: terminal state missing: context deadline exceeded",
+      "ElapsedNS": 20000136337,
+      "AllocatedBytes": 3136526224,
+      "GCCycles": 19,
+      "CursorReplicas": [
+        1,
+        1
+      ],
+      "CursorStarts": [
+        1,
+        1
+      ],
+      "CursorPointReads": 0
+    },
+    {
+      "Mode": "single_replica_direct_callback",
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "Error": "context deadline exceeded\nretained callback cleanup: context deadline exceeded",
+      "ElapsedNS": 20000773836,
+      "AllocatedBytes": 3028756880,
+      "GCCycles": 15,
+      "CursorReplicas": [
+        1,
+        1
+      ],
+      "CursorStarts": [
+        1,
+        1
+      ],
+      "CursorPointReads": 0
+    },
+    {
+      "Mode": "single_replica_callback_recheck",
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "Error": "context deadline exceeded\nretained callback cleanup: context deadline exceeded",
+      "ElapsedNS": 20000053672,
+      "AllocatedBytes": 2772851776,
+      "GCCycles": 11,
+      "CursorReplicas": [
+        1,
+        1
+      ],
+      "CursorStarts": [
+        1,
+        1
+      ],
+      "CursorPointReads": 0
+    }
+  ],
+  "direct_single_replica_400k_quiet_capacity_pass": false,
+  "qualifies_24h": false,
+  "candidate_adopted": false,
+  "original_20s_limits_retained": true,
+  "source_capture_scope": "Selected Git Go/module source and observed executables; not exhaustive external toolchain/compiler inputs"
+}

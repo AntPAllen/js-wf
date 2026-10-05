@@ -4063,3 +4063,16 @@ proofs reclaimed only after pushed canonical part/base verification and descript
 checks; stores/source/media untouched. Fullcapacity launch awaits disk headroom.
 [Legacy proof](scale/direct-callback-audit-2026-10-05/legacy-controls/).
 [Capacity preparation](scale/direct-callback-audit-2026-10-05/capacity-preparation/).
+
+## Full400k direct callback capacity failure preserved — 2026-10-05
+
+FixedR1 callback/direct/callback comparison at4ea20c1 fails77.37s; all original20s
+full400k/4.8M gates missed. First callback reaches6469 journal checks/77616 entries/
+6468 terminal before terminal lookup context deadline; no stored-state absence
+claim. Direct/recheck expire before final reduction. Actual R1 configs/starts
+verified. Selected source/actual SDK/five servers/mounts/closure and1058 unchanged
+original store files independently reviewed; complete1685-file logical fixture
+preserved in verified49.998MB delta plus pinned canonical base. No speedup/default/
+R1 failover/fullcapacity/24h claim. Next changed measurement considers enlarged-VM
+CPU/GC headroom while retaining fullpopulation/deadline and recording configuration.
+[Full failure proof](scale/direct-callback-audit-2026-10-05/capacity-400k/).
