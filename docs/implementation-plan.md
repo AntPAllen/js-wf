@@ -2814,3 +2814,16 @@ fills prior observation gap, no historicalcause/fix, budgetchange or fullmatrix/
 24h qualification. SDKobserver live; launchsnapshot doesnotcover allfuture
 serverreplacements. Candidate million sharesVM; no pressureattribution.
 [Complete launch proof](scale/watch-observed-journal-24h-2026-10-05/launch/).
+
+### 2026-10-05 recorded-source disk-stall143 seeds accepted
+
+New executed79915ca shards105–156 qualify after originaljob/artifact/log binding,
+strictfault/latency/cohort checks and three rebuiltmodels exactOk202186operations
+with45actualexecuted-source dependencies; reviewhelper Gitidentity also retained.
+Allfour1398memberarchives andparts readbackverified. Combinedaccepted1–65 and
+79–156:143seeds/435540inv/4796595entries/2717faults/1488cohorts, worstterminal/
+progressp99 9.530/2.980s. Failed66–78 stayunqualified,157–200 running/queued.
+No additionaldispatch/failedparent promotion. Actual workloadSDK/fullsource/
+physicalstores were notuploaded; finaldrain named-test assertion scope. Fullrow/
+current-source/fullmatrix/24h stayopen.
+[Complete ledger](scale/current-tier3-block-stall-2026-10-05/).
