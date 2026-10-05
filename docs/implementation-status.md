@@ -42,18 +42,24 @@ independently reviewed. Complete16758 ZIPfiles/threeparts/GitHubdigest verified.
 [Complete hosted proof](scale/fanout-combined-boundaries-2026-10-05/hosted-37333174296/). Earlier HTTP422 and corrected dispatch
 remain preserved in the [CI launch proof](scale/fanout-combined-boundaries-2026-10-05/ci-launch/).
 
-A new fullsix-case physicaldrain profile at3413731 is running locally, actual
-raceSDK405574 verifiedlive and exactsource/producer/668Gitinputs/3287external
-inputs checked. After originalworkers join it drains terminal wakeups through
-productionworkers on64partitions; allthree currentR3 queues and exact64durables
-must be zero after joins within30s/original5mcase. Twelveguardcontrols pass;
-racecompile/optinskip1.022s. Creationfirst parentSIGKILL/libraryjournal restart
-admitted; its new30s physicaldrain assertion subsequently failed with138queue
-messages remaining atpeer0. Othercases/fullnative verdict and rawqueue diagnosis
-remainpending. No physicaldrain qualification or originalbudget change.
-[Complete immutable launch proof](scale/fanout-combined-boundaries-2026-10-05/physical-drain-launch/).
+The fullsix-case diagnosticphysicaldrain profile at3413731 has now failed963.02s.
+AllsixactualparentSIGKILL/libraryjournal restarts admitted; onlyresults/interior
+passes zeroqueue/all64durables throughallthree peers afterjoins. Five extra30s
+checks fail (four snapshots138/121/80/113 messages; creationinterior readdeadline).
+ActualSDK/exactproducer/668Gitinputs/3287external inputs/sixchildSDKs verified;
+completeclosedproof preserved. Original5mcase/30scut unchanged. No unchanged
+rerun orphysicaldrainmatrix qualification; diagnose from freshcopies.
+[Complete failed profile](scale/fanout-combined-boundaries-2026-10-05/physical-drain-failed/).
 
 ## Latest preserved failures
+
+The additionalphysicaldrain six-case3413731 race profile failed963.02s. Allsix
+faults admitted, onecomplete resultinterior drain/finalproof, five newdiagnostic
+30s failures. Strictchecker rejectsfailedmatrix. Originalruntime gates unchanged;
+completeoriginals/source/actualSDK/review retained. Copy-only queue diagnosis
+follows preservation, no unchangedrerun orservercause attribution.
+[Complete failed profile](scale/fanout-combined-boundaries-2026-10-05/physical-drain-failed/).
+
 
 Focused last-boundary9e759ae failed95.28s without admitting faults.3156 trace
 records show six parent deliveries/1298journal appends12.580s/lease appends4.599s,

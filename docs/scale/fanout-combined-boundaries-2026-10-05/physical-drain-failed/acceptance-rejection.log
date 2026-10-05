@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/tmp/js-wf-fanout-combined-physical-drain-20261005/executed-acceptance-checker.py", line 89, in <module>
+    report = check([json.loads(line) for line in args.events.read_text().splitlines() if line.strip()], combined=args.combined, physical_drain=args.physical_drain)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/js-wf-fanout-combined-physical-drain-20261005/executed-acceptance-checker.py", line 19, in check
+    raise ValueError(f'missing or nonpassing boundary {name}')
+ValueError: missing or nonpassing boundary TestFiveHundredChildFanoutCombinedParentAndJournalBoundaryMatrix

@@ -1,0 +1,405 @@
+{
+  "source": "3413731ff2e1a40c6e00a1064694609fb948f5a1",
+  "actual_parent_sdk_sha256": "96b9efe09d5a426a5e5fbc31ea2cb6f308dc3f9206ff525422c5283961eca646",
+  "selected_git_inputs_verified": 668,
+  "selected_external_inputs_verified": 3287,
+  "native_status": "failed",
+  "native_seconds": 963.02,
+  "cases": [
+    {
+      "case": "create/first",
+      "native_status": "FAIL",
+      "seconds": 152.63,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 3,
+      "prefix_tail_sequence": 3,
+      "journal_live_messages": 3,
+      "journal_tail_sequence": 3,
+      "physical_drain_failure": {
+        "all_observed_peers": [
+          {
+            "queue": {
+              "config": {
+                "name": "WF_RUN",
+                "subjects": [
+                  "wf.run.*",
+                  "wf.schedule.*.*.*"
+                ],
+                "retention": "workqueue",
+                "max_consumers": -1,
+                "max_msgs": -1,
+                "max_bytes": -1,
+                "discard": "old",
+                "max_age": 0,
+                "max_msgs_per_subject": -1,
+                "max_msg_size": -1,
+                "storage": "file",
+                "num_replicas": 3,
+                "duplicate_window": 120000000000,
+                "allow_rollup_hdrs": true,
+                "compression": "none",
+                "allow_direct": false,
+                "mirror_direct": false,
+                "consumer_limits": {},
+                "metadata": {
+                  "_nats.level": "5",
+                  "_nats.req.level": "2",
+                  "_nats.ver": "2.15.0"
+                },
+                "allow_msg_schedules": true
+              },
+              "created": "2026-10-05T15:50:53.658340003Z",
+              "state": {
+                "messages": 138,
+                "bytes": 14628,
+                "first_seq": 864,
+                "first_ts": "2026-10-05T15:52:04.560269833Z",
+                "last_seq": 1001,
+                "last_ts": "2026-10-05T15:52:38.861032297Z",
+                "consumer_count": 64,
+                "deleted": null,
+                "num_deleted": 0,
+                "num_subjects": 1,
+                "subjects": null
+              },
+              "cluster": {
+                "name": "wf-test",
+                "raft_group": "S-R3F-ZRreVUke",
+                "leader": "wf-test-1",
+                "leader_since": "2026-10-05T15:50:53.776317781Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-test-0",
+                    "current": true,
+                    "active": 7666437,
+                    "peer": "fPPVT2kZ"
+                  },
+                  {
+                    "name": "wf-test-2",
+                    "current": true,
+                    "active": 7669101,
+                    "peer": "80zpbVEM"
+                  }
+                ]
+              },
+              "ts": "2026-10-05T15:53:22.139503446Z"
+            },
+            "consumers": null
+          }
+        ],
+        "deadline_error": "context deadline exceeded",
+        "elapsed_ns": 29992689313,
+        "last_error": "peer0 queue messages=138 consumers=64"
+      }
+    },
+    {
+      "case": "create/interior",
+      "native_status": "FAIL",
+      "seconds": 160.46,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 765,
+      "prefix_tail_sequence": 765,
+      "journal_live_messages": 765,
+      "journal_tail_sequence": 765,
+      "physical_drain_failure": {
+        "all_observed_peers": [],
+        "deadline_error": "context deadline exceeded",
+        "elapsed_ns": 29987398190,
+        "last_error": "context deadline exceeded"
+      }
+    },
+    {
+      "case": "create/last",
+      "native_status": "FAIL",
+      "seconds": 146.3,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 1001,
+      "prefix_tail_sequence": 1001,
+      "journal_live_messages": 1001,
+      "journal_tail_sequence": 1001,
+      "physical_drain_failure": {
+        "all_observed_peers": [
+          {
+            "queue": {
+              "config": {
+                "name": "WF_RUN",
+                "subjects": [
+                  "wf.run.*",
+                  "wf.schedule.*.*.*"
+                ],
+                "retention": "workqueue",
+                "max_consumers": -1,
+                "max_msgs": -1,
+                "max_bytes": -1,
+                "discard": "old",
+                "max_age": 0,
+                "max_msgs_per_subject": -1,
+                "max_msg_size": -1,
+                "storage": "file",
+                "num_replicas": 3,
+                "duplicate_window": 120000000000,
+                "allow_rollup_hdrs": true,
+                "compression": "none",
+                "allow_direct": false,
+                "mirror_direct": false,
+                "consumer_limits": {},
+                "metadata": {
+                  "_nats.level": "5",
+                  "_nats.req.level": "2",
+                  "_nats.ver": "2.15.0"
+                },
+                "allow_msg_schedules": true
+              },
+              "created": "2026-10-05T15:56:06.552974851Z",
+              "state": {
+                "messages": 121,
+                "bytes": 12826,
+                "first_seq": 881,
+                "first_ts": "2026-10-05T15:57:18.237687643Z",
+                "last_seq": 1001,
+                "last_ts": "2026-10-05T15:57:26.94656067Z",
+                "consumer_count": 64,
+                "deleted": null,
+                "num_deleted": 0,
+                "num_subjects": 1,
+                "subjects": null
+              },
+              "cluster": {
+                "name": "wf-test",
+                "raft_group": "S-R3F-kfd2ofY5",
+                "leader": "wf-test-1",
+                "leader_since": "2026-10-05T15:56:32.128319758Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-test-0",
+                    "current": true,
+                    "active": 48867188,
+                    "peer": "fPPVT2kZ"
+                  },
+                  {
+                    "name": "wf-test-2",
+                    "current": true,
+                    "active": 50722067,
+                    "peer": "80zpbVEM"
+                  }
+                ]
+              },
+              "ts": "2026-10-05T15:58:29.423502748Z"
+            },
+            "consumers": null
+          }
+        ],
+        "deadline_error": "context deadline exceeded",
+        "elapsed_ns": 29931884097,
+        "last_error": "peer0 queue messages=121 consumers=64"
+      }
+    },
+    {
+      "case": "results/first",
+      "native_status": "FAIL",
+      "seconds": 149.43,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 1504,
+      "prefix_tail_sequence": 3504,
+      "journal_live_messages": 3504,
+      "journal_tail_sequence": 3504,
+      "physical_drain_failure": {
+        "all_observed_peers": [
+          {
+            "queue": {
+              "config": {
+                "name": "WF_RUN",
+                "subjects": [
+                  "wf.run.*",
+                  "wf.schedule.*.*.*"
+                ],
+                "retention": "workqueue",
+                "max_consumers": -1,
+                "max_msgs": -1,
+                "max_bytes": -1,
+                "discard": "old",
+                "max_age": 0,
+                "max_msgs_per_subject": -1,
+                "max_msg_size": -1,
+                "storage": "file",
+                "num_replicas": 3,
+                "duplicate_window": 120000000000,
+                "allow_rollup_hdrs": true,
+                "compression": "none",
+                "allow_direct": false,
+                "mirror_direct": false,
+                "consumer_limits": {},
+                "metadata": {
+                  "_nats.level": "5",
+                  "_nats.req.level": "2",
+                  "_nats.ver": "2.15.0"
+                },
+                "allow_msg_schedules": true
+              },
+              "created": "2026-10-05T15:58:32.927283523Z",
+              "state": {
+                "messages": 80,
+                "bytes": 8480,
+                "first_seq": 922,
+                "first_ts": "2026-10-05T15:59:25.447338691Z",
+                "last_seq": 1001,
+                "last_ts": "2026-10-05T15:59:30.258275683Z",
+                "consumer_count": 64,
+                "deleted": null,
+                "num_deleted": 0,
+                "num_subjects": 1,
+                "subjects": null
+              },
+              "cluster": {
+                "name": "wf-test",
+                "raft_group": "S-R3F-uwUj8dCv",
+                "leader": "wf-test-1",
+                "leader_since": "2026-10-05T15:58:33.233585134Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-test-0",
+                    "current": true,
+                    "active": 65448309,
+                    "peer": "fPPVT2kZ"
+                  },
+                  {
+                    "name": "wf-test-2",
+                    "current": true,
+                    "active": 65488961,
+                    "peer": "80zpbVEM"
+                  }
+                ]
+              },
+              "ts": "2026-10-05T16:00:57.434236996Z"
+            },
+            "consumers": null
+          }
+        ],
+        "deadline_error": "context deadline exceeded",
+        "elapsed_ns": 29944823252,
+        "last_error": "peer0 queue messages=80 consumers=64"
+      }
+    },
+    {
+      "case": "results/interior",
+      "native_status": "PASS",
+      "seconds": 192.21,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 2230,
+      "prefix_tail_sequence": 4230,
+      "journal_live_messages": 4230,
+      "journal_tail_sequence": 4230,
+      "physical_drain_verified_in_named_test": true
+    },
+    {
+      "case": "results/last",
+      "native_status": "FAIL",
+      "seconds": 161.99,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 2502,
+      "prefix_tail_sequence": 4502,
+      "journal_live_messages": 4502,
+      "journal_tail_sequence": 4502,
+      "physical_drain_failure": {
+        "all_observed_peers": [
+          {
+            "queue": {
+              "config": {
+                "name": "WF_RUN",
+                "subjects": [
+                  "wf.run.*",
+                  "wf.schedule.*.*.*"
+                ],
+                "retention": "workqueue",
+                "max_consumers": -1,
+                "max_msgs": -1,
+                "max_bytes": -1,
+                "discard": "old",
+                "max_age": 0,
+                "max_msgs_per_subject": -1,
+                "max_msg_size": -1,
+                "storage": "file",
+                "num_replicas": 3,
+                "duplicate_window": 120000000000,
+                "allow_rollup_hdrs": true,
+                "compression": "none",
+                "allow_direct": false,
+                "mirror_direct": false,
+                "consumer_limits": {},
+                "metadata": {
+                  "_nats.level": "5",
+                  "_nats.req.level": "2",
+                  "_nats.ver": "2.15.0"
+                },
+                "allow_msg_schedules": true
+              },
+              "created": "2026-10-05T16:04:14.472855615Z",
+              "state": {
+                "messages": 113,
+                "bytes": 11978,
+                "first_seq": 889,
+                "first_ts": "2026-10-05T16:05:10.624788276Z",
+                "last_seq": 1001,
+                "last_ts": "2026-10-05T16:05:19.447065769Z",
+                "consumer_count": 64,
+                "deleted": null,
+                "num_deleted": 0,
+                "num_subjects": 1,
+                "subjects": null
+              },
+              "cluster": {
+                "name": "wf-test",
+                "raft_group": "S-R3F-7iYHlRly",
+                "leader": "wf-test-0",
+                "leader_since": "2026-10-05T16:04:14.641581232Z",
+                "system_account": true,
+                "traffic_account": "$SYS",
+                "replicas": [
+                  {
+                    "name": "wf-test-1",
+                    "current": true,
+                    "active": 54363641,
+                    "peer": "OFrOUlB0"
+                  },
+                  {
+                    "name": "wf-test-2",
+                    "current": true,
+                    "active": 54360816,
+                    "peer": "80zpbVEM"
+                  }
+                ]
+              },
+              "ts": "2026-10-05T16:06:53.026804421Z"
+            },
+            "consumers": null
+          }
+        ],
+        "deadline_error": "context deadline exceeded",
+        "elapsed_ns": 29992079787,
+        "last_error": "peer0 queue messages=113 consumers=64"
+      }
+    }
+  ],
+  "full_combined_matrix_qualified": false,
+  "physical_drain_matrix_qualified": false,
+  "one_named_physical_drain_case_passed": true,
+  "acceptance_checker_requires_all_six_passes": true,
+  "qualifies_full_release_matrix_or_24h": false,
+  "checker_git_source": "3413731ff2e1a40c6e00a1064694609fb948f5a1",
+  "checker_sha256": "0bc2a72a5135527133df9c3316a7432f948616971dc0978b501ec3c1fc8cad0f",
+  "limitations": [
+    "Native R3 servers embedded in race SDK; no separate server process SIGKILL.",
+    "Original stores closed; no independent reopen yet.",
+    "Only results/interior reached final integrity/prefix/child-result and all-peer physical drain assertions; named-test scope. Five failed new diagnostic30s drain bounds; original5m/30scut intact.",
+    "Conversion timestamps are not original execution timestamps.",
+    "Sequence coverage checked across snapshot purging; named-test final prefix equality/higher-epoch assertions.",
+    "Prior failed parent remains failed; no historical server-fault cause claim.",
+    "Selected source inventory excludes exhaustive assembly/embed/compiler inputs."
+  ]
+}

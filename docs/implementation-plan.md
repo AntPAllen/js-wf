@@ -3240,3 +3240,17 @@ unchanged verified; completecopy/source/executable/process/diagnosis archived.
 Thislocalizes residualterminalwakeups; itdoesnotprove later3413731 timeoutcause
 orqualifyphysicaldrain. Newprofile fullterminalverdict stillpending.
 [Complete queue diagnosis](scale/fanout-combined-boundaries-2026-10-05/accepted-queue-diagnosis/).
+
+### Complete diagnostic physical-drain matrix failed — 2026-10-05
+
+Executed3413731 raceFAIL963.02s; allsixfull500parentSIGKILL/libraryR3restarts
+admitted. Onlyresults/interior passes64joinedworkers/allthreezeroqueues/64durables/
+exactprefix/higher epoch/501retainedfinalproof; named-testscope. Five extra30s
+checks fail; fourlastsnapshots138/121/80/113messages, creationinterior readdeadline.
+ActualSDK/exactproducer/668Gitinputs/3287externalinputs/sixchildSDKs verified;
+completeclosedoriginalmedia/source/SDK/fault/failure/review proofreadback. Original
+5mcase/30scut unchanged; no physicaldrainmatrix/fullrelease qualification. Strict
+originalchecker rejectsfailedmatrix. Diagnosefreshcopies afterpreservation; first
+copylaunch stopped atopen-file safety before SDK/root creation whilearchiveractive.
+No unchangedrerun orservercause attribution.
+[Complete failed profile](scale/fanout-combined-boundaries-2026-10-05/physical-drain-failed/).
