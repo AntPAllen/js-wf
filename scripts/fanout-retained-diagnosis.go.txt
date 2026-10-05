@@ -1,0 +1,127 @@
+// Standalone read-only fanout diagnosis: build from a copied .go file in this module.
+// The caller supplies ONLY a fresh copy of closed R3 testcluster stores and
+// retains executable/source identity and original/copy hashes externally.
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+		"time"
+
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/identity"
+	"js-wf/journal"
+	"js-wf/testcluster"
+)
+
+func main() {
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+func run() error {
+	if len(os.Args) != 3 || !filepath.IsAbs(os.Args[1]) {
+		return fmt.Errorf("usage: fanout-retained-diagnosis ABSOLUTE_COPIED_CLUSTER_ROOT OUTPUT_JSON")
+	}
+	root := os.Args[1]
+	// External observer gets time to capture /proc executable identity before
+	// opening copies. This delay is outside admission/audit budgets.
+	time.Sleep(250 * time.Millisecond)
+	cluster, err := testcluster.Start(root, 3)
+	if err != nil {
+		return err
+	}
+	defer cluster.Close()
+	all := make([]jetstream.JetStream, 3)
+	for i, nc := range cluster.Clients {
+		all[i], err = jetstream.New(nc)
+		if err != nil {
+			return err
+		}
+	}
+	// Readiness observes existing assets; it never provisions or alters them.
+	ready, stopReady := context.WithTimeout(context.Background(), 15*time.Second)
+	var roles = []string{"WF_INV", "WF_JRN", "WF_RUN", "KV_WF_STATE"}
+	for _, name := range roles {
+		admitted := false
+		for ready.Err() == nil {
+			call, stop := context.WithTimeout(ready, 2*time.Second)
+			stream, readErr := all[0].Stream(call, name)
+			var info *jetstream.StreamInfo
+			if readErr == nil {
+				info, readErr = stream.Info(call)
+			}
+			stop()
+			if readErr == nil && info.Cluster != nil && info.Cluster.Leader != "" && len(info.Cluster.Replicas) == 2 {
+				current := true
+				for _, peer := range info.Cluster.Replicas {
+					current = current && peer.Current && !peer.Offline
+				}
+				if current {
+					admitted = true
+					break
+				}
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+		if !admitted {
+			stopReady()
+			return fmt.Errorf("copied source %s not current: %w", name, ready.Err())
+		}
+	}
+	stopReady()
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	began := time.Now()
+	result := map[string]any{"scope": "read-only diagnosis of fresh closed-store copies; not original recovery qualification"}
+	parent, _, err := journal.New(all[0]).Read(ctx, "parent", "large-fanout")
+	if err != nil { return fmt.Errorf("copied parent read: %w", err) }
+	result["parent_records"] = parent
+	ids := []string{}
+	for _, record := range parent {
+		if record.Kind != journal.StepRequested { continue }
+		var request struct { Kind string `json:"kind"`; ChildID string `json:"child_id"` }
+		if err := json.Unmarshal(record.Payload, &request); err != nil { return err }
+		if request.Kind == "call_async" { ids = append(ids, request.ChildID) }
+	}
+	jrn, err := all[0].Stream(ctx, "WF_JRN"); if err != nil { return err }
+	children := []map[string]any{}
+	terminal := 0
+	for _, id := range ids {
+		row := map[string]any{"id": id, "partition": identity.Partition("child", id, 64)}
+		m, err := jrn.GetLastMsgForSubject(ctx, identity.JournalSubject("child", id))
+		if err != nil { row["error"] = err.Error() } else {
+			var entry journal.Entry
+			if err := json.Unmarshal(m.Data, &entry); err != nil { return err }
+			row["tail"] = entry; row["tail_sequence"] = m.Sequence
+			if entry.Kind == journal.Completed || entry.Kind == journal.Failed { terminal++ }
+		}
+		children = append(children, row)
+	}
+	result["children"] = children; result["child_terminal_count"] = terminal
+	streams := map[string]any{}
+	for _, name := range []string{"WF_INV", "WF_JRN", "WF_RUN", "WF_SIG", "KV_WF_STATE", "KV_WF_LEASE"} {
+		stream, err := all[0].Stream(ctx, name); if err != nil { return err }
+		info, err := stream.Info(ctx); if err != nil { return err }; streams[name] = info
+	}
+	result["streams"] = streams
+	run, err := all[0].Stream(ctx, "WF_RUN"); if err != nil { return err }
+	consumers := run.ListConsumers(ctx); infos := []*jetstream.ConsumerInfo{}
+	for info := range consumers.Info() { infos = append(infos, info) }
+	if err := consumers.Err(); err != nil { return err }; result["consumers"] = infos
+	leases, err := all[0].KeyValue(ctx, "WF_LEASE"); if err != nil { return err }
+	entry, err := leases.Get(ctx, identity.Key("parent", "large-fanout"))
+	if err != nil { result["parent_lease_error"] = err.Error() } else {
+		result["parent_lease"] = map[string]any{"value": json.RawMessage(entry.Value()), "revision": entry.Revision(), "created": entry.Created()}
+	}
+	if ctx.Err() != nil { return ctx.Err() }
+	result["review_ns"] = time.Since(began).Nanoseconds()
+	data, err := json.MarshalIndent(result, "", "  "); if err != nil { return err }
+	if err := os.WriteFile(os.Args[2], append(data, '\n'), 0600); err != nil { return err }
+	fmt.Printf("copied parent_records=%d child_requests=%d child_terminals=%d elapsed=%s\n", len(parent), len(ids), terminal, time.Since(began))
+	return nil
+}
