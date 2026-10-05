@@ -1,0 +1,34 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-c",
+    "-o",
+    "/tmp/js-wf-tier2-retained-partition-ten-minute-20261005/integration.test",
+    "./integration"
+  ],
+  "test_command": [
+    "/tmp/js-wf-tier2-retained-partition-ten-minute-20261005/integration.test",
+    "-test.run=^TestMixedMatrixServerPartitionEveryThirtySeconds$",
+    "-test.count=1",
+    "-test.v",
+    "-test.timeout=18m"
+  ],
+  "row": "partition",
+  "test": "TestMixedMatrixServerPartitionEveryThirtySeconds",
+  "duration": "10m",
+  "race": false,
+  "sustained_ten_minutes": true,
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "2GiB",
+    "WF_MATRIX_CHAOS": "1",
+    "WF_MATRIX_OPERATION_TIMINGS": "1",
+    "WF_MATRIX_DURATION": "10m",
+    "WF_MATRIX_PROCESS_ROOT": "/tmp/js-wf-tier2-retained-partition-ten-minute-20261005/originals",
+    "MATRIX_ARTIFACT_PREFIX": "/tmp/js-wf-tier2-retained-partition-ten-minute-20261005/matrix-partition-2",
+    "FAULT_SEED": "2"
+  }
+}

@@ -28,13 +28,23 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
-## Latest live verification — 2026-10-05 16:20 UTC
+## Latest live verification — 2026-10-05 17:01 UTC
 
-The actual24-hour journal-leader campaign remains running at executedaace912;
-actualSDK162125 checkedlive, native batch1935 / approximately4h33m. The diagnostic
-million-timer campaign remains running (actualprogram101283),270272 receipts
-observed. Both original
-terminal gates remain pending; running observations do not resolve prior failures.
+The actual24-hour journal-leader campaign remains running at executed aace912;
+actualSDK162125 checked live after approximately5h14m. Retained checkpoint2260
+passed with63280 invocations/journals/terminals and698240 entries. The diagnostic
+million-timer candidate remains running (actualprogram101283),299219 receipts
+observed. Both terminal gates remain pending; live observations do not resolve
+previous failures.
+
+The retained Tier2 runner's first journal smoke passed natively46.69s, but its
+producer acceptance failed because JSON conversion omitted elapsed. That result
+is preserved. Independent corrected conversion passes the unchanged checker;
+668 Git/3287 external selected inputs and four actual server observations reviewed.
+[Complete smoke evidence](scale/tier2-retained-row-2026-10-05/journal-smoke/).
+Corrected producer now runs original ten-minute partition seed2 at ec60e83,
+actualSDK456626 checked live. No sustained acceptance yet.
+[Launch identity](scale/tier2-retained-row-2026-10-05/partition-seed2-launch/).
 
 The original hosted six-boundary fanout run at7a4d739 completed successfully:
 [run37333174296](https://github.com/AntPAllen/js-wf/actions/runs/37333174296),
@@ -50,9 +60,10 @@ checks fail (four snapshots138/121/80/113 messages; creationinterior readdeadlin
 ActualSDK/exactproducer/668Gitinputs/3287external inputs/sixchildSDKs verified;
 completeclosedproof preserved. Original5mcase/30scut unchanged. No unchanged
 rerun orphysicaldrainmatrix qualification. Freshcopies identify137terminalparent
-wakeups with all500children Completed. Nextdrainqualification uses the original
-five-minute case deadline, with30-second cut admission unchanged; diagnostic30s
-failure remains preserved. No productionruntimechange.
+wakeups with all500children Completed. Subsequent qualification under the original
+five-minute case deadline passed allsix boundaries and independent copied drain
+audits, with30-second cut admission unchanged; diagnostic30s failure remains
+preserved. No productionruntimechange.
 [Complete failed profile](scale/fanout-combined-boundaries-2026-10-05/physical-drain-failed/).
 
 ## Latest preserved failures
