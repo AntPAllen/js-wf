@@ -11,7 +11,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Full 13-row × 200 current-source gate remains open. |
-| Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds and disk-delay seeds 1–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
+| Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. No24h row qualified; full-matrix soak remains. |
@@ -30,6 +30,28 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **VM reboot interruption preserved; corrected24h run started:** expanded VM
+ disk now provides about50GiB free. Original million-candidate unit/PIDs are
+ absent after reboot; stale running report and default unit success do not prove
+ completion. Offline recovery validates342,191 original receipts with original
+ report/ledger hashes unchanged; p99/max0.291773/18.041029s. Full6,188-member
+ originals archive read back. No physical-drain,24h or candidate-adoption claim.
+ Fresh cleanb2d7011 journal seed1/24h/normal2GiB/R5/explicit routes/2m sync
+ runs with corrected continuous reader, Messages/Next trace and failure stacks,
+ unchanged20s/60s audit gates. Actual SDK/hash/build/environment,1,318 Git inputs
+ and five server copies/routes verify live. Terminal result remains pending.
+ [Interrupted million originals](scale/million-candidate-interrupted-2026-10-05/) ·
+ [Fresh24h launch](scale/continuous-byte-journal-24h-2026-10-05/launch/).
+
+- **Recorded-source disk-stall seeds1–65 independently accepted:**198,548
+ invocations/2,186,660 journal entries/1,235 admitted5s device stalls/682 completed
+ cohorts/255,276 exactOk history operations across three rebuilt models. Worst
+ terminal/progress p99=9.530/2.660s. All five shard artifacts/archives/parts and
+45 model dependencies verify. Workload SDK and physical stores were not uploaded;
+final drain remains named-test assertion scope. Original66–78 job failed at seed75 initial provisioning (no suitable peers);
+complete867-member upload archived, prefix66–74 unqualified, cause unconfirmed. Full200/current-source matrix/24h remain open.
+ [Complete shard proofs and aggregate](scale/current-tier3-block-stall-2026-10-05/).
+
 - **Full R5 continuous-byte and tracing deadline gates qualified:** clean ee4c272
  original100k inv/1.2M entries, baseline/error/short audits complete12.501/14.316/
 13.692s under20s,3.6M exact-once journal visits and correct1/129/130 cursors with
@@ -40,9 +62,9 @@ Actual SDK/servers,647/648 Git inputs/before-after ledgers, clone continuation a
 all1364 archive members verify. No stable speedup/old-cause/full-matrix/24h claim.
 Existing million candidate completes first planned three-server SIGKILL/heal in
 17.092s and resumes receipts; observed maxlateness17.681s, transient errors kept.
-Its SDK/unit remain live; physical drain/final pass/candidate adoption stay open.
+This earlier SDK/unit observation was live; a later VM reboot interrupted the campaign (see latest update below). Physical drain/final pass/candidate adoption stay open.
 Derived inactive build cache recovered1.64GB; original/proof binaries and stores
-retained. Secure growing-fixture disk headroom before another24h launch.
+retained. Disk was subsequently expanded; a fresh corrected24h launch is recorded below.
 [Complete qualification and live restart observation](scale/continuous-byte-r5-2026-10-05/).
 
 

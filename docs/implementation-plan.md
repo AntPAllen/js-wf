@@ -2430,3 +2430,24 @@ Existing million candidate first three-server SIGKILL heals17.092s and receipts
 resume, maxlateness17.681s; final physical drain and campaign verdict remain open.
 Secure retained-store disk headroom before another growing24h fixture.
 [Complete evidence](scale/continuous-byte-r5-2026-10-05/).
+
+
+### Reboot interruption and fresh corrected soak — 2026-10-05
+
+VM disk expanded to148GiB, about50GiB free at observation. Reboot interrupted
+original million-candidate campaign: unit/PIDs absent, last running report341,740,
+offline recovery342,191 receipts. Original report/ledger hashes unchanged;
+complete originals archived/read back. No completion/drain/candidate adoption.
+Fresh cleanb2d7011 original journal seed1/24h/normal2GiB/R5 explicit-route/2m-sync
+campaign runs with corrected continuous byte reader and actual delivery tracing,
+unchanged20s/60s gates. Live SDK/fullbuild/environment/1,318 Git inputs and five
+server copies/routes verify. No terminal24h qualification yet.
+[Interrupted original](scale/million-candidate-interrupted-2026-10-05/) ·
+[Fresh launch](scale/continuous-byte-journal-24h-2026-10-05/launch/).
+
+Recorded-source79915ca disk-stall seeds1–65 now accepted:198,548inv/2,186,660
+entries/1,235 actual5s stalls/682 cohort audits/255,276 exactOk operations across
+three models. Complete shards/parts/model dependencies verify. SDK/stores absent
+from original uploads, final integrity/drain has named-test scope.66–78 failed;
+full200/final-source matrices remain open.
+[Complete shard evidence](scale/current-tier3-block-stall-2026-10-05/).

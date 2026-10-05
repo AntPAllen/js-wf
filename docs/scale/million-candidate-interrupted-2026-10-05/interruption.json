@@ -1,0 +1,64 @@
+{
+  "observed_at": "2026-10-05T07:52:40.804801+00:00",
+  "boot_id": "dfb1558d-51ab-4d65-959d-5b4d9beb8cc4",
+  "uptime": "482.36 1828.81",
+  "visible_open_descriptors": [],
+  "qualification": "interrupted: no terminal result or physical drain; stale running report is not live evidence",
+  "unit": {
+    "command": [
+      "systemctl",
+      "--user",
+      "show",
+      "js-wf-native-million-scheduler-candidate-24h-20261004.service",
+      "-p",
+      "ActiveState",
+      "-p",
+      "SubState",
+      "-p",
+      "MainPID",
+      "-p",
+      "Result"
+    ],
+    "exit_code": 0,
+    "stdout": "MainPID=0\nResult=success\nActiveState=inactive\nSubState=dead\n",
+    "stderr": ""
+  },
+  "actual-old-pids": {
+    "command": [
+      "ps",
+      "-p",
+      "215701,215956",
+      "-o",
+      "pid,stat,etime,args"
+    ],
+    "exit_code": 1,
+    "stdout": "    PID STAT     ELAPSED COMMAND\n",
+    "stderr": ""
+  },
+  "journal": {
+    "command": [
+      "journalctl",
+      "--user",
+      "-u",
+      "js-wf-native-million-scheduler-candidate-24h-20261004.service",
+      "--no-pager"
+    ],
+    "exit_code": 0,
+    "stdout": "Oct 04 23:16:35 jetstream-wf systemd[353]: Started js-wf-native-million-scheduler-candidate-24h-20261004.service - /usr/bin/python3 /tmp/js-wf-native-million-scheduler-candidate-24h-20261004/producer.py.\n",
+    "stderr": ""
+  },
+  "offline_recovery": {
+    "command": [
+      "/tmp/js-wf-native-million-scheduler-candidate-24h-20261004/wf-timer-volume",
+      "-root",
+      "/tmp/js-wf-native-million-scheduler-candidate-24h-20261004/campaign",
+      "-recover-observations"
+    ],
+    "exit_code": 0,
+    "before_after_original_report_and_receipts": {
+      "campaign/report.json": "169321d1b5a12a40dddc920d4de3008a36a4696dd66f72b36d743de86c07c2d6",
+      "campaign/receipts.bin": "223d59b46f3d67dd7b956886b5c39b947aa5e24ca063f7aac36b4dde6338ca6b"
+    },
+    "originals_unchanged": true
+  }
+}
