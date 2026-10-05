@@ -30,6 +30,16 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Sustained held-metadata rollout live:** clean97a037e, original10m workerkill /
+  five-second cadence / seed1 / protobuf-to-json / normal2GiB/GOMAX2 and all
+  original gates. ActualSDK143072/17 capturedSDK observations/five native Docker
+  process hashes/buildfields/1355selectedGitinputs verify; immutable1372member/
+  fourpart launchproof. Readonly non-atomic snapshot336heldrecords, twoobserved
+  client-minus-serverages≥12s/max12.185s, independently recomputed. Clockdifference
+  isnotexpiry authority orcauseconfirmation. Observerstartedbeforeinitialworkers,
+  finalgenerationcoverage/latency/integrity/drain pending; overlapsmillionVM.
+  [Live launch and captured held entries](scale/held-lease-observation-2026-10-05/10m-launch/).
+
 - **Held-lease metadata captured without additional broker requests:** executed
   ad92227, exactErrHeld/Acquire decisions/requestsequence and originaltiming
   preserved. Optionalleaseheld dispatch reports priorreadrevision/worker/epoch/

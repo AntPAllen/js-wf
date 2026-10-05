@@ -2714,3 +2714,15 @@ Next observe a sustained original worker-kill rollout with these fields to
 separate renewal/expiryvisibility/delivery effects. Strict30s remains; this
 instrumentation doesnotresolve historicalcause orqualifyfullmatrices/actual24h.
 [Full focused observer proof](scale/held-lease-observation-2026-10-05/).
+
+
+The original ten-minute workerkill rollout nowruns at97a037e withnoadditional
+brokerreads andunchangedstrict30s/audit/integrity/drain gates. ActualSDK143072/
+17observerrecords/fiveDockerprocessbuilds/1355Gitsourceinputs andfull1372member
+launch proof verify. Early336heldentryrecords include two client-observed minus
+server-created ages≥12s (max12.185s), independently recalculated. These are
+clockdifferences, notserverexpiry authority orhistoriccausality. Wait for actual
+terminal result andretain all originals, compareheldmetadata/leaseoperation/
+ownerdeath/redelivery timing before proposing a runtime fix. Overlaps live
+millioncandidate; observercoverage/default/fullmatrix/24h remain pending.
+[Immutable launch and early held entries](scale/held-lease-observation-2026-10-05/10m-launch/).
