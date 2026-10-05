@@ -3471,3 +3471,14 @@ terminalp99=5.026275634s. ActualSDK/allthreeobservedservers/668Git+3287external
 inputs reviewed. Closed512MiB originalimage retained after cleanup; full5512member/
 fourpart proofreadback. [Complete native proof](scale/retained-block-media-2026-10-05/ten-minute-native/).
 Independentcopiedrawaudit follows. Originalgate budgets unchanged; full13x200open.
+
+### Retained ordinary worker and fanout-restart rows prepared — 2026-10-05
+
+After the live block SDK completed, the portable producer/workflow now select
+worker-kill, worker-pause, worker-reply-isolation and fanout-restart in addition
+to the prior five rows. Worker and server observers are each bound to exact Git
+bytes before/after; owned worker generations retain actual executable captures
+and identity fields. Native fault/audit/history/latency/drain gates and durations
+remain unchanged; observation errors retain failed evidence. Clock/upgrade rows
+still need their generated overlay/legacy executable retention paths. CLI/import
+checks pass; real new worker-row verification remains pending. Full13x200open.

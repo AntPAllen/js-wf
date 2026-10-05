@@ -2,12 +2,17 @@
 from pathlib import Path
 import subprocess,json,hashlib,os,shutil,time,datetime,argparse,signal,traceback
 from matrix_process_observer import observe_servers
+from matrix_worker_observer import observe_workers
 ROWS = {
  'journal':'TestMixedMatrixJournalLeaderEveryThirtySeconds',
  'consumer':'TestMixedMatrixConsumerLeaderEveryThirtySeconds',
  'cluster':'TestMixedMatrixAllServersKilledEveryThirtySeconds',
  'partition':'TestMixedMatrixServerPartitionEveryThirtySeconds',
  'blockdisk':'TestMixedMatrixBlockDiskStallEveryThirtySeconds',
+ 'worker':'TestMixedMatrixRandomWorkerKilledEveryFiveSeconds',
+ 'pause':'TestMixedMatrixWorkerPausedFortyFiveSeconds',
+ 'isolation':'TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds',
+ 'fanoutrestart':'TestMixedMatrixFanoutRestartEveryThirtySeconds',
 }
 parser=argparse.ArgumentParser(description='Retain one original Tier2 row, actual SDK, selected source, observed NATS executables and closed process stores. Full13x200 gate remains separate.')
 parser.add_argument('--root',type=Path,required=True)
@@ -28,6 +33,7 @@ root.mkdir(mode=0o700);(root/'originals').mkdir(mode=0o700)
 producer_bytes=Path(__file__).read_bytes();producer_path=str(Path(__file__).resolve().relative_to(repo))
 assert producer_bytes==subprocess.check_output(['git','show',revision+':'+producer_path],cwd=repo)
 observer=Path(__file__).with_name('matrix_process_observer.py');observer_bytes=observer.read_bytes();assert observer_bytes==subprocess.check_output(['git','show',revision+':scripts/matrix_process_observer.py'],cwd=repo);(root/'matrix_process_observer.py').write_bytes(observer_bytes)
+worker_observer=Path(__file__).with_name('matrix_worker_observer.py');worker_observer_bytes=worker_observer.read_bytes();assert worker_observer_bytes==subprocess.check_output(['git','show',revision+':scripts/matrix_worker_observer.py'],cwd=repo);(root/'matrix_worker_observer.py').write_bytes(worker_observer_bytes)
 (root/'producer-source.json').write_text(json.dumps({'revision':revision,'path':producer_path,'sha256':hashlib.sha256(producer_bytes).hexdigest()},indent=2)+'\n')
 names=subprocess.check_output(['git','ls-files','*.go','go.mod','go.sum'],cwd=repo,text=True).splitlines();before={n:sha(repo/n) for n in names}
 for n,d in before.items():
@@ -69,15 +75,17 @@ with (root/'native.log').open('w') as log:
    os.killpg(p.pid,signal.SIGKILL);p.wait()
   raise
 
- seen=set();servers=[];observation_errors=[]
+ seen=set();servers=[];workers_seen=set();workers=[];observation_errors=[]
  try:
   while p.poll() is None:
    try:
     observe_servers(p.pid,root,seen,servers)
+    observe_workers(p.pid,root,workers_seen,workers)
    except Exception:
     observation_errors.append({'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'error':traceback.format_exc()})
     (root/'observer-errors.json').write_text(json.dumps(observation_errors,indent=2)+'\n')
    (root/'observed-servers.json').write_text(json.dumps(servers,indent=2)+'\n')
+   (root/'observed-workers.json').write_text(json.dumps(workers,indent=2)+'\n')
    try:p.wait(timeout=0.25)
    except subprocess.TimeoutExpired:pass
   code=p.wait()
@@ -94,7 +102,7 @@ with (root/'native.log').open('w') as log:
  (root/'execution.json').write_text(json.dumps(actual,indent=2)+'\n')
 
 after={n:sha(repo/n) for n in names};assert before==after;(root/'source-after.json').write_text(json.dumps({'revision':revision,'files':after},indent=2)+'\n')
-external_after={n:sha(Path(n)) for n in inputs};assert inputs==external_after;(root/'external-source-after.json').write_text(json.dumps(external_after,indent=2)+'\n');assert Path(__file__).read_bytes()==producer_bytes and observer.read_bytes()==observer_bytes;shutil.copy2(__file__,root/'executed-producer.py');print('NATIVE_FINISHED',code,flush=True)
+external_after={n:sha(Path(n)) for n in inputs};assert inputs==external_after;(root/'external-source-after.json').write_text(json.dumps(external_after,indent=2)+'\n');assert Path(__file__).read_bytes()==producer_bytes and observer.read_bytes()==observer_bytes and worker_observer.read_bytes()==worker_observer_bytes;shutil.copy2(__file__,root/'executed-producer.py');print('NATIVE_FINISHED',code,flush=True)
 
 if row=='blockdisk':
  images=list((root/'originals').glob('*/wf-block-*/backing.img'))
