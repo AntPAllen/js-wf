@@ -104,12 +104,18 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 		Error   string
 	}
 	var phases []phase
+	metadataReader := "sdk"
+	read := scanByteBoundedThrough
+	if os.Getenv("WF_AUDIT_CAPACITY_COMPACT_METADATA") == "1" {
+		metadataReader = "compact-ack-candidate"
+		read = scanCompactByteBoundedThrough
+	}
 	scanner := func(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 		p := phase{Stream: stream.CachedInfo().Config.Name}
 		began := time.Now()
 		var failure error
 		pprof.Do(ctx, pprof.Labels("audit_phase", p.Stream), func(ctx context.Context) {
-			failure = scanByteBoundedThrough(ctx, stream, cutoff, func(msg *jetstream.RawStreamMsg) error {
+			failure = read(ctx, stream, cutoff, func(msg *jetstream.RawStreamMsg) error {
 				p.Records++
 				p.Bytes += int64(len(msg.Data))
 				entered := time.Now()
@@ -163,7 +169,8 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 		GCCycles       uint32
 		HeapAllocBytes uint64
 		DiagnosticOnly bool
-	}{phases, report, int64(elapsed), fmt.Sprint(failure), after.TotalAlloc - before.TotalAlloc, after.NumGC - before.NumGC, after.HeapAlloc, true}
+		MetadataReader string
+	}{Phases: phases, Report: report, ElapsedNS: int64(elapsed), Error: fmt.Sprint(failure), AllocatedBytes: after.TotalAlloc - before.TotalAlloc, GCCycles: after.NumGC - before.NumGC, HeapAllocBytes: after.HeapAlloc, DiagnosticOnly: true, MetadataReader: metadataReader}
 	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		t.Fatal(err)

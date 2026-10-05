@@ -3785,3 +3785,16 @@ record. PinnedSDK implementation onlyassigns the captured context tolocalnextOpt
 same context/deadline/cancellation remain. Existing racecancellation/error/heartbeat/
 prefetch/replay controls pass1.019s. This isasmallallocation reduction, not a400k
 capacityfix ortransport/metadata/timer optimization. No fullcapacitypass claimed.
+
+### Experimental compact audit metadata reader prepared — 2026-10-05
+
+An explicitscanner candidate avoids allocating SDKmetadata/token slices for
+ordinarypinned v1/v2 ACK replies, returningstream/sequence/timestampbyvalue.
+Unsupportedsyntax delegates toSDK; nonSDK wrappers retain Metadata overrides.
+Defaults/publicAPIs remainSDK-based. Timestamp visitorcontract preserved after
+initialcompilecheck caughtomission; failedcompilelog retained. Differential20010
+subjects/edgecases againstpinnedSDK parser andzeroallocation checks pass; parser
+benchmark SDK252.1ns/304B/2alloc versuscandidate155.9ns/0B/0alloc. This isnot a
+fullaudit speedup or400kpass. Existingrace controls pass; sharednative compaction/
+corruption/state comparisons nowinclude candidate. An explicitcopiedprofile flag
+selects candidate withsame20s budget. Realnative controls/capacity remainpending.

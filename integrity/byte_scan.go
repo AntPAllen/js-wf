@@ -19,6 +19,15 @@ func scanByteBoundedThrough(ctx context.Context, stream jetstream.Stream, cutoff
 // The nil transform is the production path. Native controls may interrupt a
 // batch without replacing the production iterator lifecycle or recovery logic.
 func scanByteBoundedThroughWithBatchTransform(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, transform func(jetstream.MessageBatch) jetstream.MessageBatch) error {
+	return scanByteBoundedThroughWithCoordinates(ctx, stream, cutoff, visit, transform, sdkMessageCoordinates)
+}
+
+// Explicit experimental scanner; defaults retain the SDK metadata reader.
+func scanCompactByteBoundedThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+	return scanByteBoundedThroughWithCoordinates(ctx, stream, cutoff, visit, nil, compactMessageCoordinates)
+}
+
+func scanByteBoundedThroughWithCoordinates(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, transform func(jetstream.MessageBatch) jetstream.MessageBatch, coordinates retainedCoordinateReader) error {
 	// Keep the byte-bounded iterator across record batches. Stopping it at each
 	// record cap would discard prefetched AckNone messages and force gap reads.
 	var iterator jetstream.MessagesContext
@@ -28,7 +37,7 @@ func scanByteBoundedThroughWithBatchTransform(ctx context.Context, stream jetstr
 			iterator.Stop()
 		}
 	}()
-	return scanBatchThroughWithReplayCheck(ctx, stream, cutoff, visit, 4096, func(call context.Context, c jetstream.Consumer, n int) (jetstream.MessageBatch, error) {
+	return scanBatchThroughWithCoordinates(ctx, stream, cutoff, visit, 4096, func(call context.Context, c jetstream.Consumer, n int) (jetstream.MessageBatch, error) {
 		if err := call.Err(); err != nil {
 			return nil, err
 		}
@@ -60,7 +69,7 @@ func scanByteBoundedThroughWithBatchTransform(ctx context.Context, stream jetstr
 		return batch, nil
 	}, func(call context.Context, c jetstream.Consumer) (bool, error) {
 		return confirmedByteConsumerLeaderMove(call, c, consumerName, consumerStream, initialLeader)
-	})
+	}, coordinates)
 }
 
 // A backward sequence alone cannot justify recovery. Compare the actual current

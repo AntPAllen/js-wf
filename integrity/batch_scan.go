@@ -32,6 +32,23 @@ func scanBatchThroughWithFetcher(ctx context.Context, stream jetstream.Stream, c
 // Only a transport-specific proof may recover overlapping replay. Ordinary
 // fetches and unconfirmed/wrong-stream order violations remain semantic errors.
 func scanBatchThroughWithReplayCheck(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, batchSize uint64, fetch retainedBatchFetcher, replayCheck func(context.Context, jetstream.Consumer) (bool, error)) error {
+	return scanBatchThroughWithCoordinates(ctx, stream, cutoff, visit, batchSize, fetch, replayCheck, sdkMessageCoordinates)
+}
+
+type retainedCoordinateReader func(jetstream.Msg) (string, uint64, time.Time, error)
+
+func sdkMessageCoordinates(msg jetstream.Msg) (string, uint64, time.Time, error) {
+	meta, err := msg.Metadata()
+	if err != nil {
+		return "", 0, time.Time{}, err
+	}
+	if meta == nil {
+		return "", 0, time.Time{}, errors.New("retained batch scan: missing metadata")
+	}
+	return meta.Stream, meta.Sequence.Stream, meta.Timestamp, nil
+}
+
+func scanBatchThroughWithCoordinates(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, batchSize uint64, fetch retainedBatchFetcher, replayCheck func(context.Context, jetstream.Consumer) (bool, error), coordinates retainedCoordinateReader) error {
 	if fetch == nil {
 		fetch = func(call context.Context, c jetstream.Consumer, n int) (jetstream.MessageBatch, error) {
 			return c.Fetch(n, jetstream.FetchContext(call))
@@ -166,18 +183,13 @@ func scanBatchThroughWithReplayCheck(ctx context.Context, stream jetstream.Strea
 			if visitErr != nil {
 				continue
 			} // Drain before cancellation/cleanup.
-			meta, err := msg.Metadata()
+			metaStream, seq, metaTime, err := coordinates(msg)
 			if err != nil {
 				visitErr = err
 				continue
 			}
-			if meta == nil {
-				visitErr = errors.New("retained batch scan: missing metadata")
-				continue
-			}
-			seq := meta.Sequence.Stream
-			if meta.Stream != info.Config.Name || seq < first {
-				if meta.Stream == info.Config.Name && replayCheck != nil {
+			if metaStream != info.Config.Name || seq < first {
+				if metaStream == info.Config.Name && replayCheck != nil {
 					confirmed, err := replayCheck(call, consumer)
 					if err != nil {
 						visitErr = err
@@ -191,7 +203,7 @@ func scanBatchThroughWithReplayCheck(ctx context.Context, stream jetstream.Strea
 						continue
 					}
 				}
-				visitErr = fmt.Errorf("retained batch scan: unexpected stream/order %s/%d", meta.Stream, seq)
+				visitErr = fmt.Errorf("retained batch scan: unexpected stream/order %s/%d", metaStream, seq)
 				continue
 			}
 			if seq > last {
@@ -204,7 +216,7 @@ func scanBatchThroughWithReplayCheck(ctx context.Context, stream jetstream.Strea
 			if visitErr != nil {
 				continue
 			}
-			visitErr = visit(&jetstream.RawStreamMsg{Subject: msg.Subject(), Sequence: seq, Header: msg.Headers(), Data: msg.Data(), Time: meta.Timestamp})
+			visitErr = visit(&jetstream.RawStreamMsg{Subject: msg.Subject(), Sequence: seq, Header: msg.Headers(), Data: msg.Data(), Time: metaTime})
 			first = seq + 1
 		}
 		batchErr := batch.Error()

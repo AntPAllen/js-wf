@@ -136,6 +136,12 @@ func compareFullAudits(t *testing.T, ctx context.Context, js jetstream.JetStream
 	if concurrent != point || (concurrentErr == nil) != (pointErr == nil) || concurrentErr != nil && concurrentErr.Error() != pointErr.Error() {
 		t.Fatalf("concurrent state mismatch: point=%+v concurrent=%+v errors=%v / %v", point, concurrent, pointErr, concurrentErr)
 	}
+	compactCtx, compactStop := context.WithTimeout(ctx, 20*time.Second)
+	compact, compactErr := checkUsingConcurrentOptions(compactCtx, js, cutoff, scanCompactByteBoundedThrough, true, true, true)
+	compactStop()
+	if compact != point || (compactErr == nil) != (pointErr == nil) || compactErr != nil && compactErr.Error() != pointErr.Error() {
+		t.Fatalf("compact metadata mismatch: point=%+v compact=%+v errors=%v / %v", point, compact, pointErr, compactErr)
+	}
 	if point != bulk {
 		t.Fatalf("report mismatch: point=%+v bulk=%+v point_err=%v bulk_err=%v", point, bulk, pointErr, bulkErr)
 	}
