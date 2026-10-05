@@ -58,9 +58,11 @@ class CombinedBoundaryGateChecks(unittest.TestCase):
             if 'Output' in event:
                 phase = 'create' if '/create/' in event['Test'] else 'results'
                 text = event['Output']
+                if phase == 'results':
+                    text = 'confirmed 489 outside child results before worker stop\n' + text
                 import re
                 entries = int(re.search(r'retained entries=(\d+)', text).group(1))
-                event['Output'] = text.replace('FANOUT_PREFIX_PRESERVED', f'combined journal restart phase={phase} node=1 messages={entries}\nFANOUT_PREFIX_PRESERVED')
+                event['Output'] = text.replace('FANOUT_PREFIX_PRESERVED', f'combined journal restart phase={phase} node=1 messages={entries} tail_seq={entries} prefix_tail_seq={entries}\nFANOUT_PREFIX_PRESERVED')
         return events
 
     def test_full_combined_matrix_still_partial_release(self):
@@ -74,7 +76,7 @@ class CombinedBoundaryGateChecks(unittest.TestCase):
 
     def test_missing_wrong_phase_node_count_duplicate_or_reordered_fault(self):
         text = self.events()[3]['Output']
-        restart = 'combined journal restart phase=create node=1 messages=3\n'
+        restart = 'combined journal restart phase=create node=1 messages=3 tail_seq=3 prefix_tail_seq=3\n'
         for changed in (text.replace(restart, ''), text.replace('restart phase=create', 'restart phase=results'),
                         text.replace('node=1', 'node=3'), text.replace('messages=3', 'messages=2'),
                         text.replace(restart, restart + restart), restart + text.replace(restart, ''),
@@ -82,3 +84,27 @@ class CombinedBoundaryGateChecks(unittest.TestCase):
             with self.subTest(changed=changed):
                 events = self.events(); events[3]['Output'] = changed
                 with self.assertRaises(ValueError): gate.check(events, combined=True)
+
+    def test_archived_prefix_uses_sequence_not_live_count(self):
+        events = self.events()
+        event = next(e for e in events if e.get('Test', '').endswith('/results/interior') and 'Output' in e)
+        original = event['Output']
+        event['Output'] = original.replace('messages=2000 tail_seq=2000 prefix_tail_seq=2000', 'messages=1500 tail_seq=4194 prefix_tail_seq=4194')
+        report = gate.check(events, combined=True)
+        self.assertEqual(report['cases'][4]['journal_restart']['retained_journal_messages'], 1500)
+        for wrong in ('messages=0 tail_seq=4194 prefix_tail_seq=4194', 'messages=1500 tail_seq=4193 prefix_tail_seq=4194', 'messages=1500 tail_seq=4194 prefix_tail_seq=1999'):
+            event['Output'] = original.replace('messages=2000 tail_seq=2000 prefix_tail_seq=2000', wrong)
+            with self.assertRaises(ValueError): gate.check(events, combined=True)
+
+    def test_missing_sequence_evidence_is_rejected(self):
+        events = self.events()
+        events[3]['Output'] = events[3]['Output'].replace(' tail_seq=3 prefix_tail_seq=3', '')
+        with self.assertRaises(ValueError): gate.check(events, combined=True)
+
+    def test_outside_children_must_be_confirmed_before_kill(self):
+        events = self.events()
+        event = next(e for e in events if e.get('Test', '').endswith('/results/first') and 'Output' in e)
+        original = event['Output']; marker = 'confirmed 489 outside child results before worker stop\n'
+        for wrong in (original.replace(marker, ''), original.replace('confirmed 489', 'confirmed 488'), original.replace(marker, '') + marker, marker + original):
+            event['Output'] = wrong
+            with self.assertRaises(ValueError): gate.check(events, combined=True)

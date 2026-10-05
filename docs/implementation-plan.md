@@ -3034,3 +3034,19 @@ read-only fresh copied-store diagnosis prepared. Snapshot-purged count cannot
 bound reconstructed prefix length; require tail-sequence observation plus exact
 prefix equality in future guard instrumentation. Original gates unchanged.
 [Complete failed matrix proof](scale/fanout-combined-boundaries-2026-10-05/).
+
+### Combined fanout outside-child admission correction — 2026-10-05
+
+Three actual SDKs opened only fresh closed-store copies. First/interior/last
+parents await an incomplete outside child;496/496/493 of500 child terminals,
+4/4/7 outside children incomplete. Original files remain identical; exact helper/
+1655selected inputs/3951archive members each/four total parts verified.
+Aggregate WF_SIG count includes parent-partition children, so it cannot admit
+outside-child worker shutdown. Changed fixture confirms every outside result
+before worker stop. Restart trace/checker cover captured prefix tail and stream
+tail sequences across purging and require unchanged restart count/tail, original
+prefix equality and higher successor epoch. Allnine acceptance controls passed;
+race compile/opt-in skip passed1.083s. Original500children/five-minute case and
+30s cut-admission budgets unchanged. Full changed matrix pending; original failed
+matrix stays failed, no production decision or historical server-cause claim.
+[Complete diagnostics and correction](scale/fanout-combined-boundaries-2026-10-05/).

@@ -42,19 +42,23 @@ def check(events, combined=False):
             raise ValueError(f'{case}: incomplete fanout')
         restart = None
         if combined:
-            matches = list(re.finditer(r'combined journal restart phase=(\w+) node=(\d+) messages=(\d+)', log))
+            matches = list(re.finditer(r'combined journal restart phase=(\w+) node=(\d+) messages=(\d+) tail_seq=(\d+) prefix_tail_seq=(\d+)', log))
             if len(matches) != 1:
                 raise ValueError(f'{case}: missing or ambiguous combined journal restart')
             match = matches[0]
-            actual_phase, node, messages = match.groups()
-            node, messages = int(node), int(messages)
+            actual_phase, node, messages, tail, prefix_tail = match.groups()
+            node, messages, tail, prefix_tail = map(int, (node, messages, tail, prefix_tail))
             kill = re.search(r'SIGKILLed parent worker at ', log)
             prefix = re.search(r'FANOUT_PREFIX_PRESERVED ', log)
-            if actual_phase != phase or not 0 <= node < 3 or messages < entries or not kill.start() < match.start() < prefix.start():
+            if actual_phase != phase or not 0 <= node < 3 or messages < 1 or prefix_tail < entries or tail < prefix_tail or not kill.start() < match.start() < prefix.start():
                 raise ValueError(f'{case}: incorrect combined fault ordering/identity/count')
-            if phase == 'create' and messages != entries:
+            if phase == 'create' and (messages != entries or tail != entries or prefix_tail != entries):
                 raise ValueError(f'{case}: creation boundary journal count mismatch')
-            restart = dict(node=node, retained_journal_messages=messages)
+            if phase == 'results':
+                outside = list(re.finditer(r'confirmed (\d+) outside child results before worker stop', log))
+                if len(outside) != 1 or int(outside[0].group(1)) + int(completions[0][1]) != 500 or outside[0].start() >= kill.start():
+                    raise ValueError(f'{case}: outside children not confirmed before worker stop and kill')
+            restart = dict(node=node, retained_journal_messages=messages, journal_tail_sequence=tail, captured_prefix_tail_sequence=prefix_tail)
         result.append(dict(phase=phase, position=position, cut=cut, preserved_entries=entries,
                            old_epoch=old_epoch, final_epoch=final_epoch, children=500,
                            **({"journal_restart": restart} if combined else {})))

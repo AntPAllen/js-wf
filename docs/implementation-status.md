@@ -50,6 +50,18 @@ reopen or completed combined-matrix qualification claimed.
 
 ## Latest preserved failures
 
+Copied fanout diagnosis localized a fixture admission error: first/interior/last
+parents wait on missing outside child results; copied stores have496/496/493
+terminal children of500, with4/4/7 incomplete outside children. All originals
+unchanged,1655selected inputs per actual diagnosisSDK/3951archive members each/
+fourparts verified. Aggregate signal count also includes parent-partition children
+and cannot prove outside completion. Combined fixture now confirms every outside
+result before stopping those workers. Restart guard uses captured-prefix/stream
+sequence coverage plus exact final prefix/higher epoch; nine controls PASS and
+race compile/opt-in skip1.083s. Corrected full matrix pending; original failed
+matrix remains failed, no production change/gate extension/server-cause claim.
+[Complete copied diagnoses and correction](scale/fanout-combined-boundaries-2026-10-05/).
+
 The full combined500-child six-boundary race matrix at e20cf89 failed1046.21s.
 Creation first/interior/last passed; results first/interior admitted parentSIGKILL
 plus library journal restart then hit original five-minute deadline. Results last

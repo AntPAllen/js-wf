@@ -81,7 +81,7 @@ func captureFanoutParentSDK(t *testing.T, cmd *exec.Cmd, root string, prefix []j
 		t.Fatal(err)
 	}
 }
-func restartFanoutJournalAtBoundary(t *testing.T, ctx context.Context, all []jetstream.JetStream, cluster *testcluster.Cluster, root, phase string) {
+func restartFanoutJournalAtBoundary(t *testing.T, ctx context.Context, all []jetstream.JetStream, cluster *testcluster.Cluster, root, phase string, prefix []journal.Record) {
 	t.Helper()
 	stream, err := all[0].Stream(ctx, "WF_JRN")
 	if err != nil {
@@ -99,6 +99,9 @@ func restartFanoutJournalAtBoundary(t *testing.T, ctx context.Context, all []jet
 	}
 	if node < 0 {
 		t.Fatal("unknown journal leader", before.Cluster.Leader)
+	}
+	if len(prefix) == 0 || before.State.LastSeq < prefix[len(prefix)-1].Sequence {
+		t.Fatal("journal does not cover captured parent prefix")
 	}
 	oldID := cluster.Servers[node].ID()
 	began := time.Now().UTC()
@@ -118,12 +121,15 @@ func restartFanoutJournalAtBoundary(t *testing.T, ctx context.Context, all []jet
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := json.MarshalIndent(map[string]any{"phase": phase, "node": node, "old_server_id": oldID, "new_server_id": cluster.Servers[node].ID(), "started": began, "healed": time.Now().UTC(), "before": before, "after": after, "library_restart_not_server_sigkill": true}, "", "  ")
+	if after.State.Msgs != before.State.Msgs || after.State.LastSeq != before.State.LastSeq {
+		t.Fatal("journal changed across quiescent boundary restart")
+	}
+	data, err := json.MarshalIndent(map[string]any{"phase": phase, "node": node, "old_server_id": oldID, "new_server_id": cluster.Servers[node].ID(), "started": began, "healed": time.Now().UTC(), "before": before, "after": after, "library_restart_not_server_sigkill": true, "captured_prefix_tail_sequence": prefix[len(prefix)-1].Sequence}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(root, "journal-restart.json"), append(data, '\n'), 0600); err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("combined journal restart phase=%s node=%d messages=%d", phase, node, before.State.Msgs)
+	t.Logf("combined journal restart phase=%s node=%d messages=%d tail_seq=%d prefix_tail_seq=%d", phase, node, before.State.Msgs, before.State.LastSeq, prefix[len(prefix)-1].Sequence)
 }

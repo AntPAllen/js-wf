@@ -215,7 +215,7 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 		}
 		nodes := [3]jetstream.JetStream{all[0], all[1], all[2]}
 		if retainedRoot != "" {
-			restartFanoutJournalAtBoundary(t, ctx, all, cluster, retainedRoot, "create")
+			restartFanoutJournalAtBoundary(t, ctx, all, cluster, retainedRoot, "create", creationPrefix)
 		} else if err := restartJournalLeader(ctx, &nodes, cluster, before.State.Msgs); err != nil {
 			t.Fatal(err)
 		}
@@ -335,6 +335,21 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 	}
 	childrenJoined := false
 	if retainedRoot != "" && killDuringResults {
+		// Aggregate signal counts include children already run in the parent's
+		// partition. Confirm each outside child before stopping its only worker;
+		// otherwise the successor can wait forever on an unprocessed child.
+		outsideChecked := 0
+		for index, id := range childIDs {
+			if identity.Partition("child", id, provision.Partitions) == parentPart {
+				continue
+			}
+			value, err := client.New(all[0]).Await(ctx, "child", id)
+			if err != nil || string(value) != strconv.Itoa(2*index) {
+				t.Fatalf("outside child %d result=%s err=%v", index, value, err)
+			}
+			outsideChecked++
+		}
+		t.Logf("confirmed %d outside child results before worker stop", outsideChecked)
 		stopChildren()
 		for _, done := range childDone {
 			if err := <-done; err != nil && !errors.Is(err, context.Canceled) {
@@ -348,7 +363,7 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 		t.Logf("FAULT_SEED=%d parent_cut_after_result=%d", seed, resultCut)
 		killedPrefix = killFanoutParentAtBoundary(t, ctx, all[0], cluster.Servers[1].ClientURL(), resultCut, "results")
 		if restartLeader {
-			restartFanoutJournalAtBoundary(t, ctx, all, cluster, retainedRoot, "results")
+			restartFanoutJournalAtBoundary(t, ctx, all, cluster, retainedRoot, "results", killedPrefix)
 			j = journal.New(all[0])
 		}
 	}

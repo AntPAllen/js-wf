@@ -1,0 +1,107 @@
+{
+  "position": "last",
+  "original_source": "e20cf89b4ac9e1d687d3b883ccaf2cb7b2ec53e0",
+  "actual_copied_diagnosis_sdk_sha256": "cedbd7f4397a360eb390135008aa6406dd6f3bbeaca14aa8c0e453552da8c593",
+  "helper_git_source": "16bb8f3cb30f5ac29f95431dfb28b3403db1ca06",
+  "helper_git_sha256": "4b613b0858365dad725d05d8baa28014345c94bda08b840865d28719b86db96c",
+  "selected_inputs_verified": 1655,
+  "original_closed_files_unchanged": 2095,
+  "parent_partition": 52,
+  "parent_tail": {
+    "epoch": 6186,
+    "index": 2205,
+    "kind": "Suspended",
+    "payload": {
+      "waiting_on": "signal:child_708"
+    },
+    "worker_id": "parent-process-before-kill",
+    "sequence": 4183
+  },
+  "child_requests": 500,
+  "child_terminals": 493,
+  "incomplete_outside_children": [
+    {
+      "id": "c-6d7fbab6bd11eb6f4d2c9da08c932f8f",
+      "partition": 16,
+      "tail": {
+        "epoch": 4686,
+        "index": 1,
+        "kind": "StepRequested",
+        "payload": {
+          "kind": "run",
+          "name": "double",
+          "input_hash": "09a1b036b82baba3177d83c27c1f7d0beacaac6de1c5fdcc9680c49f638c5fb9",
+          "fire_at": "0001-01-01T00:00:00Z"
+        },
+        "worker_id": "child-fanout-worker"
+      },
+      "tail_sequence": 2970
+    },
+    {
+      "error": "nats: API error: code=404 err_code=10037 description=message not found",
+      "id": "c-f37efd2619d9b9ebebacfd56acaf552b",
+      "partition": 16
+    },
+    {
+      "error": "nats: API error: code=404 err_code=10037 description=message not found",
+      "id": "c-9f70ed2862b63ef5ee38afbc23ac29e7",
+      "partition": 16
+    },
+    {
+      "error": "nats: API error: code=404 err_code=10037 description=message not found",
+      "id": "c-9ba2103aa568d83bb671ddaa12747d3e",
+      "partition": 16
+    },
+    {
+      "id": "c-4ca0aa74ff15ef0badd8d157e9bdbd9f",
+      "partition": 44,
+      "tail": {
+        "epoch": 4682,
+        "index": 2,
+        "kind": "StepCompleted",
+        "payload": {
+          "result": 918
+        },
+        "worker_id": "child-fanout-worker"
+      },
+      "tail_sequence": 2971
+    },
+    {
+      "error": "nats: API error: code=404 err_code=10037 description=message not found",
+      "id": "c-2f48d74ab2ecc2da02e15a5ff852c190",
+      "partition": 44
+    },
+    {
+      "error": "nats: API error: code=404 err_code=10037 description=message not found",
+      "id": "c-033e86c6a7bf5cd2a6d7816c7e60ec6a",
+      "partition": 16
+    }
+  ],
+  "parent_waits_on_an_incomplete_outside_child": true,
+  "original_captured_prefix_unchanged_in_copy": false,
+  "pending_consumers": [
+    {
+      "name": "WF_P_16",
+      "pending": 4,
+      "ack_pending": 1
+    },
+    {
+      "name": "WF_P_44",
+      "pending": 1,
+      "ack_pending": 1
+    },
+    {
+      "name": "WF_P_52",
+      "pending": 482,
+      "ack_pending": 1
+    }
+  ],
+  "read_review_ns": 4397804974,
+  "qualifies_original_recovery": false,
+  "limitations": [
+    "Read-only fresh copy observations after shutdown; not original server-fault causality.",
+    "Original stores not reopened.",
+    "Copied streams observed through node0; not full integrity or all-peer physical drain.",
+    "Native parent matrix remains failed."
+  ]
+}

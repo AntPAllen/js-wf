@@ -1,0 +1,90 @@
+{
+  "position": "interior",
+  "original_source": "e20cf89b4ac9e1d687d3b883ccaf2cb7b2ec53e0",
+  "actual_copied_diagnosis_sdk_sha256": "d9dac0d42124badf534dec348babc1ab2771d7000169637c7d649b0a0578f906",
+  "helper_git_source": "16bb8f3cb30f5ac29f95431dfb28b3403db1ca06",
+  "helper_git_sha256": "4b613b0858365dad725d05d8baa28014345c94bda08b840865d28719b86db96c",
+  "selected_inputs_verified": 1655,
+  "original_closed_files_unchanged": 2277,
+  "parent_partition": 52,
+  "parent_tail": {
+    "epoch": 6208,
+    "index": 2398,
+    "kind": "Suspended",
+    "payload": {
+      "waiting_on": "signal:child_898"
+    },
+    "worker_id": "parent-after-children",
+    "sequence": 4386
+  },
+  "child_requests": 500,
+  "child_terminals": 496,
+  "incomplete_outside_children": [
+    {
+      "id": "c-9f70ed2862b63ef5ee38afbc23ac29e7",
+      "partition": 16,
+      "tail": {
+        "epoch": 4731,
+        "index": 2,
+        "kind": "StepCompleted",
+        "payload": {
+          "result": 898
+        },
+        "worker_id": "child-fanout-worker"
+      },
+      "tail_sequence": 2971
+    },
+    {
+      "error": "nats: API error: code=404 err_code=10037 description=message not found",
+      "id": "c-9ba2103aa568d83bb671ddaa12747d3e",
+      "partition": 16
+    },
+    {
+      "error": "nats: API error: code=404 err_code=10037 description=message not found",
+      "id": "c-ee44e7143027bb00b5fd778cfcc3454b",
+      "partition": 34
+    },
+    {
+      "error": "nats: API error: code=404 err_code=10037 description=message not found",
+      "id": "c-033e86c6a7bf5cd2a6d7816c7e60ec6a",
+      "partition": 16
+    }
+  ],
+  "parent_waits_on_an_incomplete_outside_child": true,
+  "original_captured_prefix_unchanged_in_copy": true,
+  "pending_consumers": [
+    {
+      "name": "WF_P_16",
+      "pending": 2,
+      "ack_pending": 1
+    },
+    {
+      "name": "WF_P_34",
+      "pending": 1,
+      "ack_pending": 1
+    },
+    {
+      "name": "WF_P_38",
+      "pending": 0,
+      "ack_pending": 1
+    },
+    {
+      "name": "WF_P_44",
+      "pending": 0,
+      "ack_pending": 1
+    },
+    {
+      "name": "WF_P_52",
+      "pending": 140,
+      "ack_pending": 137
+    }
+  ],
+  "read_review_ns": 4563091086,
+  "qualifies_original_recovery": false,
+  "limitations": [
+    "Read-only fresh copy observations after shutdown; not original server-fault causality.",
+    "Original stores not reopened.",
+    "Copied streams observed through node0; not full integrity or all-peer physical drain.",
+    "Native parent matrix remains failed."
+  ]
+}

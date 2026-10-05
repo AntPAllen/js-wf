@@ -1,0 +1,66 @@
+{
+  "position": "first",
+  "original_source": "e20cf89b4ac9e1d687d3b883ccaf2cb7b2ec53e0",
+  "actual_copied_diagnosis_sdk_sha256": "82b8911ea1cb1b31c776c941875fca97f64742478620083eb0cdf4c95e4f2c53",
+  "helper_git_source": "fe719fee70547c187a73872dd31ce16d558e6423",
+  "helper_git_sha256": "4b613b0858365dad725d05d8baa28014345c94bda08b840865d28719b86db96c",
+  "selected_inputs_verified": 1655,
+  "original_closed_files_unchanged": 2277,
+  "parent_partition": 52,
+  "parent_tail": {
+    "epoch": 5472,
+    "index": 2287,
+    "kind": "Suspended",
+    "payload": {
+      "waiting_on": "signal:child_788"
+    },
+    "worker_id": "parent-after-children",
+    "sequence": 4272
+  },
+  "child_requests": 500,
+  "child_terminals": 496,
+  "incomplete_outside_children": [
+    {
+      "error": "nats: API error: code=404 err_code=10037 description=message not found",
+      "id": "c-f37efd2619d9b9ebebacfd56acaf552b",
+      "partition": 16
+    },
+    {
+      "error": "nats: API error: code=404 err_code=10037 description=message not found",
+      "id": "c-9f70ed2862b63ef5ee38afbc23ac29e7",
+      "partition": 16
+    },
+    {
+      "error": "nats: API error: code=404 err_code=10037 description=message not found",
+      "id": "c-9ba2103aa568d83bb671ddaa12747d3e",
+      "partition": 16
+    },
+    {
+      "error": "nats: API error: code=404 err_code=10037 description=message not found",
+      "id": "c-033e86c6a7bf5cd2a6d7816c7e60ec6a",
+      "partition": 16
+    }
+  ],
+  "parent_waits_on_an_incomplete_outside_child": true,
+  "original_captured_prefix_unchanged_in_copy": true,
+  "pending_consumers": [
+    {
+      "name": "WF_P_16",
+      "pending": 3,
+      "ack_pending": 1
+    },
+    {
+      "name": "WF_P_52",
+      "pending": 83,
+      "ack_pending": 194
+    }
+  ],
+  "read_review_ns": 4304043465,
+  "qualifies_original_recovery": false,
+  "limitations": [
+    "Read-only fresh copy observations after shutdown; not original server-fault causality.",
+    "Original stores not reopened.",
+    "Copied streams observed through node0; not full integrity or all-peer physical drain.",
+    "Native parent matrix remains failed."
+  ]
+}
