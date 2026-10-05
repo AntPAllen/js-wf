@@ -247,6 +247,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	stopReady()
 	if err != nil {
+		diagnostic, stopDiagnostic := context.WithTimeout(context.Background(), 2*time.Second)
+		captureErr := saveMatrixProvisionFailure(diagnostic, root, cluster, err)
+		stopDiagnostic()
+		if captureErr != nil {
+			t.Logf("capture failed provisioning observations: %v", captureErr)
+		}
 		t.Fatal(err)
 	}
 	if row == "route_quorum" || row == "route_majority" {
