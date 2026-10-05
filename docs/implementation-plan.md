@@ -3764,3 +3764,24 @@ capacitypass. Compile/opt-inskip passes; nativeprofiling pending. Copies require
 independent canonicalarchive/originalbyte verification beforeopening; originals
 remainclosed. Verifiedpushed worktreearchive copies reclaimed4.019GB forheadroom;
 canonicalGit/originalstores retained, exactparts/blobs/FDchecks recorded.
+
+### Copied400k deadline localized during journal scanning — 2026-10-05
+
+Executed64ece3e diagnosticPASS35.37s; individualaudit failsoriginal20sdeadline.
+Invocation400k scan2.860823s, thenjournal2,610,401/4.8M records in17.136284s;
+visitor6.343280s withinjournalphase. Measuredallocation3.7566GB/62GCcycles.
+CPU18.17s total: labelsWF_JRN8.82s/WF_INV1.13s excludeunlabelledclientgoroutines.
+Sampledallocation dominatedbyNATSprocessMsg/metadata/timers ratherthan journal
+encoding. Copies boundtocanonicalarchive; originalsunchanged, source/actualSDK/
+servers/closedprocess review retained. Profilinginstrumentation adds overhead;
+no clean400kpass/defaultadoption/24h qualification orservercause attribution.
+[PhaseandCPUevidence](scale/concurrent-state-audit-2026-10-05/copied-400k-phase-profile/).
+
+### Bounded iterator context option reuse — 2026-10-05
+
+The profile attributes59MiB of sampled allocation toNextContext. The byteiterator
+now constructs one immutable context option per4096-record window instead ofper
+record. PinnedSDK implementation onlyassigns the captured context tolocalnextOpts;
+same context/deadline/cancellation remain. Existing racecancellation/error/heartbeat/
+prefetch/replay controls pass1.019s. This isasmallallocation reduction, not a400k
+capacityfix ortransport/metadata/timer optimization. No fullcapacitypass claimed.

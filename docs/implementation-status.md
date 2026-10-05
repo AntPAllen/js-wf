@@ -28,6 +28,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 20:12 UTC
+
+A canonical-archive-verified400k store copy at `64ece3e` localizes the measured
+20s audit deadline to journal scanning: invocation scan2.86s; journal scan17.14s
+accepts2.61M of4.8M records, with6.34s in visitors. Allocation delta3.76GB/62GCcycles.
+Samples show large NATS message/metadata/iterator timer allocation costs; journal
+decoding is smaller. This supports measuring client delivery overhead next.
+The diagnostic test completed, but the audit itself failed; instrumentation adds
+overhead and no400k capacity or24h pass is claimed. Originals remain unchanged;
+independent review and complete source/store/profile preservation recorded in
+[the copied phase profile](scale/concurrent-state-audit-2026-10-05/copied-400k-phase-profile/).
+
 ## Latest follow-up — 2026-10-05 19:56 UTC
 
 Fresh quiet R5 capacity profile at `a124b69` populated400,000 workflows and4.8M

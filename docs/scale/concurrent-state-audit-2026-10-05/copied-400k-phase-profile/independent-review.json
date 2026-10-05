@@ -1,0 +1,63 @@
+{
+  "execution": {
+    "pid": 610767,
+    "source": "64ece3e52952c08ce75af8b81ff6daf284c5cf5f",
+    "sha256": "4ac2cd8ec3a0fdb08238f248ffc7381c8f80ddc8d3ccbee8629eaee28ff3a8e6",
+    "build_info": "/proc/610767/exe: go1.27.1\n\tpath\tjs-wf/integrity.test\n\tmod\tjs-wf\tv0.0.0-20261005200540-64ece3e52952\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=64ece3e52952c08ce75af8b81ff6daf284c5cf5f\n\tbuild\tvcs.time=2026-10-05T20:05:40Z\n\tbuild\tvcs.modified=false\n",
+    "args": [
+      "/tmp/js-wf-400k-copied-capacity-profile-20261005/integrity.test",
+      "-test.run=^TestConcurrentStateR5CopiedCapacityProfile$",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=6m"
+    ],
+    "stat": "610767 (integrity.test) S 610542 610542 610542 0 -1 4194304 748 0 0 0 0 0 0 0 20 0 6 0 4454431 1692598272 3876 18446744073709551615 4194304 15978992 140730814842576 0 0 0 0 0 2143420159 0 0 0 17 1 0 0 0 0 0 27676672 28143168 101183488 140730814847691 140730814847849 140730814847849 140730814848952 0\n",
+    "status": "passed",
+    "started_utc": "2026-10-05T20:07:02.782747+00:00",
+    "scope": "Verified copied-store 400k original20s phase/CPU diagnostic; each audit verdict preserved",
+    "exit_code": 0,
+    "finished_utc": "2026-10-05T20:07:38.591516+00:00"
+  },
+  "selected_git_source_inputs_verified": 671,
+  "all_observed_processes_closed": true,
+  "original_store_files_unchanged": 1058,
+  "canonical_original_archive_sha256": "970b0adbddef8d8fb76ab8d1b523b26820217c9a1ffd8994544887d26d1c84a0",
+  "server_observations": 5,
+  "profile": {
+    "Phases": [
+      {
+        "Stream": "WF_INV",
+        "Records": 400000,
+        "Bytes": 2000000,
+        "ScanNS": 2860822618,
+        "VisitNS": 702321831,
+        "Error": "<nil>"
+      },
+      {
+        "Stream": "WF_JRN",
+        "Records": 2610401,
+        "Bytes": 184250795,
+        "ScanNS": 17136283884,
+        "VisitNS": 6343279853,
+        "Error": "context deadline exceeded"
+      }
+    ],
+    "Report": {
+      "Invocations": 400000,
+      "Journals": 0,
+      "Entries": 0,
+      "Terminal": 0
+    },
+    "ElapsedNS": 20000048073,
+    "Error": "context deadline exceeded",
+    "AllocatedBytes": 3756611480,
+    "GCCycles": 62,
+    "HeapAllocBytes": 201962744,
+    "DiagnosticOnly": true
+  },
+  "original_audit_failed": true,
+  "diagnostic_test_completed": true,
+  "qualifies_24h": false,
+  "candidate_adopted": false,
+  "cause_attribution": "None; CPU/allocation samples and phase counts are diagnostic evidence"
+}

@@ -117,8 +117,11 @@ func byteIteratorBatch(ctx context.Context, iterator jetstream.MessagesContext, 
 			defer iterator.Stop()
 		}
 		defer stopOnCancel()
+		// NextContext only assigns this window's immutable context. Reuse its
+		// option rather than allocating a new closure for every delivered record.
+		nextContext := jetstream.NextContext(ctx)
 		for i := 0; i < n; i++ {
-			msg, err := iterator.Next(jetstream.NextContext(ctx))
+			msg, err := iterator.Next(nextContext)
 			if err != nil {
 				if ctx.Err() != nil {
 					batch.err = ctx.Err()
