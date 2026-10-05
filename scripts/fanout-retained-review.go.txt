@@ -180,7 +180,7 @@ func run() error {
 		Report            integrity.Report        `json:"report"`
 		AuditNS           int64                   `json:"audit_ns"`
 		WholeReviewNS     int64                   `json:"whole_review_ns"`
-		ParentRecords     []journal.Entry         `json:"parent_records"`
+		ParentRecords     []journal.Record         `json:"parent_records"`
 		ChildIDs          []string                `json:"child_ids"`
 		PhysicallyDrained bool                    `json:"physically_drained"`
 		Queue             []*jetstream.StreamInfo `json:"queue_all_three_peers"`
