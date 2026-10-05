@@ -975,4 +975,7 @@ fixture incorrectly required a replacement frame and orphan collection; its
 failed native originals are preserved in
 [the failure proof](scale/continuation-retirement-before-manifest-2026-10-05/failed-replacement-assumption/).
 Corrected assertions retain the original recovery/effect/fencing targets; native
-qualification is pending. No bounded prefix-resume claim applies to this cut.
+qualification passed at8da5935: race35.61s, recovery12.614s, epoch51→69,
+exact effects/all-peer results/raw integrity and GC retention verified.
+[Qualified originals](scale/continuation-retirement-before-manifest-2026-10-05/qualified/).
+No bounded prefix-resume claim applies to this cut.

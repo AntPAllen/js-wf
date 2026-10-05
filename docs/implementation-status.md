@@ -30,13 +30,25 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Before-manifest retirement worker SIGKILL qualified:** clean8da5935 race
+  PASS35.61s, recovery12.614s under30, owner epoch51→69. Manifest absent/prepared
+  frame present before reapedSIGKILL; successor replays recorded completion,
+  repairs its manifest using the same reachable frame, and resumes with one fresh
+  effect/stage despite two initial calls. Three effects/two terminals/all-peer
+  results/raw integrity and reachable-frame/survivor/shared quiescent GC checks
+  pass. Actual parent/child race SDKs/three native server process build captures/
+  651 selected Git source inputs independently verified. Earlier incorrect
+  replacement/collection failure retained. No bounded-resume/counter, onlineGC,
+  full combined matrix or24h claim; original targets unchanged.
+  [Qualified originals and review](scale/continuation-retirement-before-manifest-2026-10-05/qualified/).
+
 - **Before-manifest retirement worker-kill candidate failed an incorrect assertion:**
   `08835e7` race test failed35.00s after successful journal repair, requiring a
   different frame and GC of the original. The recorded StepCompleted still
   references that frame; replay preserves its anchor and republishes the manifest.
   All1,082 original archive members/651 selected source inputs and actual parent/
   child SDK identity verified. Corrected fixture requires reachable-frame reuse
-  and retention; native qualification pending, original budgets unchanged.
+  and retention; subsequently qualified above, original budgets unchanged.
   [Preserved failure](scale/continuation-retirement-before-manifest-2026-10-05/failed-replacement-assumption/).
 
 - **Retirement/reuse with actual worker SIGKILL qualified:** clean4ab4bdd

@@ -2533,5 +2533,7 @@ ledger, successor fencing, recovery under30s with production TTL12, all-peer
 results and quiescent GC retention. Replay must reuse the recorded checkpoint
 anchor and frame; that frame is reachable and must not be collected as an orphan.
 The initial08835e7 fixture wrongly required replacement/collection and failed;
-complete originals retained, corrected native qualification pending. This cut
+complete originals retained. Corrected8da5935 native racePASS35.61s with12.614s
+recovery and epoch51→69; exact effects/all-peer/raw integrity/reachable-frame
+retention under quiescent GC verified. This cut
 allows journal replay and does not claim bounded resume before manifest repair.
