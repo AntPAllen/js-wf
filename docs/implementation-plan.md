@@ -3462,3 +3462,12 @@ toolchain relative paths, allowing matching source across host cache locations.
 No original store is reopened; failed/native-live donors are rejected. Native and
 full-matrix verdicts remain separate. CLI/import checks pass; real command
 execution remains pending. Current live disk producer source stays unchanged.
+
+### Original retained ten-minute block-disk seed1 accepted — 2026-10-05
+
+Executedf57da4d normal/originaltenminutes passes657.37s:114batches/3192terminals/
+35153entries,19verified5sdevice-mapper stalls andalllatencycells<30s,aggregate
+terminalp99=5.026275634s. ActualSDK/allthreeobservedservers/668Git+3287external
+inputs reviewed. Closed512MiB originalimage retained after cleanup; full5512member/
+fourpart proofreadback. [Complete native proof](scale/retained-block-media-2026-10-05/ten-minute-native/).
+Independentcopiedrawaudit follows. Originalgate budgets unchanged; full13x200open.
