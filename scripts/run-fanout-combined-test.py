@@ -4,6 +4,7 @@ import subprocess,json,hashlib,os,shutil,time,datetime,argparse
 parser=argparse.ArgumentParser(description="Retain the complete six-boundary 500-child combined parent SIGKILL and library journal restart race run.")
 parser.add_argument('--root',type=Path,required=True,help='Fresh absolute evidence directory outside the checkout')
 parser.add_argument('--seed',type=int,default=1)
+parser.add_argument('--physical-drain',action='store_true',help='require production worker drain and all-three-peer zero queue/64 durable witness inside original case limit')
 parser.add_argument('--diagnostic-trace',action='store_true',help='opt-in worker timings and stack before the existing cut deadline')
 parser.add_argument('--case',choices=[p+'/'+c for p in ('create','results') for c in ('first','interior','last')],help='focused diagnostic only; cannot qualify the full matrix')
 args=parser.parse_args()
@@ -37,6 +38,7 @@ for line in deps.splitlines():
   dest=root/'selected-external-source'/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,dest);assert sha(dest)==digest;captured[str(p)]=str(dest.relative_to(root))
 (root/'external-source-before.json').write_text(json.dumps(inputs,indent=2)+'\n');(root/'external-captured-paths.json').write_text(json.dumps(captured,indent=2)+'\n')
 env={k:v for k,v in os.environ.items() if not k.startswith('WF_')};env.update(GOMAXPROCS='2',GOMEMLIMIT='2GiB',WF_FANOUT_COMBINED_ROOT=str(root/'originals'),FAULT_SEED=str(args.seed))
+if args.physical_drain:env['WF_FANOUT_PHYSICAL_DRAIN']='1'
 if args.diagnostic_trace:env['WF_FANOUT_DIAGNOSTIC_TRACE']='1'
 selected_case=args.case
 selection='^TestFiveHundredChildFanoutCombinedParentAndJournalBoundaryMatrix$'

@@ -39,11 +39,11 @@ jobs:
         run: python3 -m unittest discover -s scripts -p test_fanout_boundary_matrix.py
       - name: Full six-boundary race run with original limits
         timeout-minutes: 40
-        run: python3 scripts/run-fanout-combined-test.py --root "$EVIDENCE_ROOT" --seed "$FAULT_SEED_INPUT"
+        run: python3 scripts/run-fanout-combined-test.py --root "$EVIDENCE_ROOT" --seed "$FAULT_SEED_INPUT" --physical-drain
       - name: Require all six combined boundaries
         run: |
           go tool test2json -p js-wf/integration < "$EVIDENCE_ROOT/native.log" > "$EVIDENCE_ROOT/converted-events.jsonl"
-          python3 scripts/check-fanout-boundary-matrix.py --combined --events "$EVIDENCE_ROOT/converted-events.jsonl" --output "$EVIDENCE_ROOT/acceptance.json"
+          python3 scripts/check-fanout-boundary-matrix.py --combined --physical-drain --events "$EVIDENCE_ROOT/converted-events.jsonl" --output "$EVIDENCE_ROOT/acceptance.json"
       - name: Retain complete originals and executable evidence
         if: always()
         uses: actions/upload-artifact@v4

@@ -120,3 +120,32 @@ class CombinedBoundaryGateChecks(unittest.TestCase):
         for wrong in (original.replace(prepared, ''), original.replace(all_children, ''), original.replace('including 11', 'including 10'), original.replace('prepared 500', 'prepared 499'), original.replace(prepared, '') + prepared, prepared + original.replace(prepared, ''), original + all_children):
             event['Output'] = wrong
             with self.assertRaises(ValueError): gate.check(events, combined=True)
+
+
+class PhysicalDrainGateChecks(unittest.TestCase):
+    events = CombinedBoundaryGateChecks.events
+    marker = 'FANOUT_PHYSICAL_DRAIN peers=3 stream_messages=0 consumers=64 pending=0 ack_pending=0 workers_joined=64\n'
+
+    def drained_events(self):
+        events = self.events()
+        for event in events:
+            if 'Output' in event:
+                event['Output'] = event['Output'].replace('FANOUT_PREFIX_PRESERVED', self.marker + 'FANOUT_PREFIX_PRESERVED')
+        return events
+
+    def test_complete_drain_remains_partial_release(self):
+        report = gate.check(self.drained_events(), combined=True, physical_drain=True)
+        self.assertTrue(report['physical_drain_required'])
+        self.assertFalse(report['clears_full_release'])
+
+    def test_missing_wrong_duplicate_and_reordered_drain(self):
+        original = self.drained_events()[3]['Output']
+        for changed in (original.replace(self.marker, ''), original.replace('stream_messages=0','stream_messages=1'),
+                        original.replace('consumers=64','consumers=63'), original.replace('peers=3','peers=2'),
+                        original.replace('ack_pending=0','ack_pending=1'), original.replace('workers_joined=64','workers_joined=63'), original.replace('workers_joined=64','workers_joined=640'),
+                        original.replace(self.marker,self.marker+self.marker), self.marker+original.replace(self.marker,''),
+                        original.replace(self.marker,'')+self.marker,
+                        original.replace(self.marker,'').replace('combined journal restart',self.marker+'combined journal restart')):
+            with self.subTest(changed=changed):
+                events = self.drained_events(); events[3]['Output'] = changed
+                with self.assertRaises(ValueError): gate.check(events,combined=True,physical_drain=True)

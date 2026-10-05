@@ -10,7 +10,7 @@ COMBINED_TEST = 'TestFiveHundredChildFanoutCombinedParentAndJournalBoundaryMatri
 CASES = tuple(f'{phase}/{position}' for phase in ('create', 'results') for position in ('first', 'interior', 'last'))
 
 
-def check(events, combined=False):
+def check(events, combined=False, physical_drain=False):
     test = COMBINED_TEST if combined else TEST
     terminals = [e for e in events if e.get('Action') in ('pass', 'fail', 'skip')]
     for name in (test, *(test + '/' + case for case in CASES)):
@@ -40,6 +40,12 @@ def check(events, combined=False):
             raise ValueError(f'{case}: incorrect committed creation prefix length')
         if completions[0][0] != '500' or not 0 <= int(completions[0][1]) <= 500:
             raise ValueError(f'{case}: incomplete fanout')
+        if physical_drain:
+            drains = list(re.finditer(r'FANOUT_PHYSICAL_DRAIN peers=3 stream_messages=0 consumers=64 pending=0 ack_pending=0 workers_joined=64(?=\s|$)', log))
+            prefix = re.search(r'FANOUT_PREFIX_PRESERVED ', log)
+            kill = re.search(r'SIGKILLed parent worker at ', log)
+            if len(drains) != 1 or not kill.start() < drains[0].start() < prefix.start():
+                raise ValueError(f'{case}: missing, ambiguous or reordered physical drain')
         restart = None
         if combined:
             matches = list(re.finditer(r'combined journal restart phase=(\w+) node=(\d+) messages=(\d+) tail_seq=(\d+) prefix_tail_seq=(\d+)', log))
@@ -52,6 +58,8 @@ def check(events, combined=False):
             prefix = re.search(r'FANOUT_PREFIX_PRESERVED ', log)
             if actual_phase != phase or not 0 <= node < 3 or messages < 1 or prefix_tail < entries or tail < prefix_tail or not kill.start() < match.start() < prefix.start():
                 raise ValueError(f'{case}: incorrect combined fault ordering/identity/count')
+            if physical_drain and match.start() >= drains[0].start():
+                raise ValueError(f'{case}: physical drain precedes journal fault')
             if phase == 'create' and (messages != entries or tail != entries or prefix_tail != entries):
                 raise ValueError(f'{case}: creation boundary journal count mismatch')
             if phase == 'results':
@@ -68,14 +76,15 @@ def check(events, combined=False):
                            **({"journal_restart": restart} if combined else {})))
     return dict(cases=result, invocations_per_case=501,
                 scope=('Six R3 parent SIGKILL + library journal restart boundaries with 500 children each; not server SIGKILL or the whole chaos matrix.' if combined else 'Six R3 parent process SIGKILL boundaries with 500 children each; not the whole chaos matrix.'),
-                clears_full_release=False)
+                physical_drain_required=physical_drain, clears_full_release=False)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--physical-drain', action='store_true', help='require post-worker-join all-peer queue and 64-durable zero witness')
     parser.add_argument('--combined', action='store_true', help='require journal restart after each parent kill')
     parser.add_argument('--events', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    report = check([json.loads(line) for line in args.events.read_text().splitlines() if line.strip()], combined=args.combined)
+    report = check([json.loads(line) for line in args.events.read_text().splitlines() if line.strip()], combined=args.combined, physical_drain=args.physical_drain)
     args.output.write_text(json.dumps(report, indent=2) + '\n')

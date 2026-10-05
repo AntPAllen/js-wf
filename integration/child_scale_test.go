@@ -404,6 +404,9 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 			}
 		}
 	}
+	if retainedRoot != "" && os.Getenv("WF_FANOUT_PHYSICAL_DRAIN") == "1" {
+		drainFanoutTerminalWakeups(t, ctx, all, handlers, retainedRoot)
+	}
 	if killParentProcess || killDuringResults {
 		finalRecords, _, err := j.Read(ctx, "parent", "large-fanout")
 		if err != nil {

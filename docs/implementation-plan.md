@@ -3179,3 +3179,18 @@ queuesnonzero throughallthree: creation500/493/500, eachresults501. Physicaldrai
 is unqualified; no originalreopen/historicalcause/fullmatrix/24h promotion.
 Initial helper compile failure preserved separately; no native SDK ran there.
 [Complete six copied audits](scale/fanout-combined-boundaries-2026-10-05/copied-audits/).
+
+### Combined fanout physical-drain profile prepared — 2026-10-05
+
+Independent copies of the accepted25b327c six-case clusters retain493–501 run
+messages despite501terminal workflows. The fixture canceled its workers as soon
+as the parent result was visible. A new opt-in `--physical-drain` producer profile
+starts production workers on all64partitions after joining the original workers;
+no purge/manual acknowledgment. Within30s and the original5mcase it requires
+zero queue messages/currentR3 and all64 exact durable names with zero pending/
+ackpending through allthree clients, joins all64loops, then repeats the witness.
+Rawstream/durable metadata are retained; bounded failures retain last observations.
+Prefix/higherepoch/integrity/result checks follow drain; original30scut unchanged.
+Acceptance optionally requires the drain witness after bothfaults/beforeprefix;
+12guard controls pass. Hosted workflow adopts the profile; fullnative run and
+independentcopied post-drain audit pending, no new physicaldrain qualification.
