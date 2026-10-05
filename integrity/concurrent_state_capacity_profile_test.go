@@ -100,23 +100,43 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 		return
 	}
 	type phase struct {
-		Stream  string
-		Records int
-		Bytes   int64
-		ScanNS  int64
-		VisitNS int64
-		Error   string
+		Stream     string
+		StartedNS  int64
+		FinishedNS int64
+		Records    int
+		Bytes      int64
+		ScanNS     int64
+		VisitNS    int64
+		Error      string
 	}
 	var phases []phase
+	var profileBegan time.Time
+	var cursorReplicas []int
+	var cursorStarts []uint64
+	var cursorPointReads int
+	stateTrace := &capacityStateTrace{origin: &profileBegan}
 	metadataReader := "sdk"
 	read := scanByteBoundedThrough
 	if os.Getenv("WF_AUDIT_CAPACITY_COMPACT_METADATA") == "1" {
 		metadataReader = "compact-ack-candidate"
 		read = scanCompactByteBoundedThrough
 	}
+	if os.Getenv("WF_AUDIT_CAPACITY_SINGLE_REPLICA_PROFILE") == "1" {
+		metadataReader = "single-replica-callback-profile"
+		read = func(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+			observed := &profileCursorStream{Stream: stream, replicas: 1}
+			err := scanConsumeByteBoundedThrough(ctx, observed, cutoff, visit)
+			cursorReplicas = append(cursorReplicas, observed.creates...)
+			cursorStarts = append(cursorStarts, observed.starts...)
+			cursorPointReads += observed.pointReads
+			return err
+		}
+		js = capacityStateTraceJS{JetStream: js, trace: stateTrace}
+	}
 	scanner := func(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 		p := phase{Stream: stream.CachedInfo().Config.Name}
 		began := time.Now()
+		p.StartedNS = int64(began.Sub(profileBegan))
 		var failure error
 		pprof.Do(ctx, pprof.Labels("audit_phase", p.Stream), func(ctx context.Context) {
 			failure = read(ctx, stream, cutoff, func(msg *jetstream.RawStreamMsg) error {
@@ -129,6 +149,7 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 			})
 		})
 		p.ScanNS = int64(time.Since(began))
+		p.FinishedNS = int64(time.Since(profileBegan))
 		p.Error = fmt.Sprint(failure)
 		phases = append(phases, p)
 		return failure
@@ -145,6 +166,7 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 	runtime.ReadMemStats(&before)
 	call, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	began := time.Now()
+	profileBegan = began
 	report, failure := checkUsingConcurrentOptions(call, js, nil, scanner, true, true, true)
 	elapsed := time.Since(began)
 	cancel()
@@ -165,16 +187,20 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 	result := struct {
-		Phases         []phase
-		Report         Report
-		ElapsedNS      int64
-		Error          string
-		AllocatedBytes uint64
-		GCCycles       uint32
-		HeapAllocBytes uint64
-		DiagnosticOnly bool
-		MetadataReader string
-	}{Phases: phases, Report: report, ElapsedNS: int64(elapsed), Error: fmt.Sprint(failure), AllocatedBytes: after.TotalAlloc - before.TotalAlloc, GCCycles: after.NumGC - before.NumGC, HeapAllocBytes: after.HeapAlloc, DiagnosticOnly: true, MetadataReader: metadataReader}
+		Phases           []phase
+		Report           Report
+		ElapsedNS        int64
+		Error            string
+		AllocatedBytes   uint64
+		GCCycles         uint32
+		HeapAllocBytes   uint64
+		DiagnosticOnly   bool
+		MetadataReader   string
+		CursorReplicas   []int
+		CursorStarts     []uint64
+		CursorPointReads int
+		StateWatches     []capacityWatchTiming
+	}{Phases: phases, Report: report, ElapsedNS: int64(elapsed), Error: fmt.Sprint(failure), AllocatedBytes: after.TotalAlloc - before.TotalAlloc, GCCycles: after.NumGC - before.NumGC, HeapAllocBytes: after.HeapAlloc, DiagnosticOnly: true, MetadataReader: metadataReader, CursorReplicas: cursorReplicas, CursorStarts: cursorStarts, CursorPointReads: cursorPointReads, StateWatches: stateTrace.snapshot()}
 	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		t.Fatal(err)

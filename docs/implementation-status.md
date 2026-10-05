@@ -12485,3 +12485,13 @@ servers/mounts/closure and1058 unchanged original store files reviewed. Complete
 canonical base (824 unchanged file references). Next changed measurement targets
 R1 scan/state/final-validation phase costs; no unchanged rerun.
 [Result and preservation](scale/single-replica-audit-cursor-2026-10-05/capacity-400k/).
+
+## R1 phase diagnostic preparation and canonical copy reclamation — 2026-10-05
+
+Full pushed base-plus-delta/current copy hashes and all visible task descriptors
+verified before reclaiming993 closed disposable store files /3580353716 bytes;
+original stores and complete pinned proof retained. A changed R1 full400k profile
+records scanner/visitor timing, CPU/alloc samples and direct state-watch lifecycle
+without relay overhead. Initial-set contract race controls pass1.023s; native
+measurement pending. Original20s gate/full cardinalities remain unchanged.
+[Preparation](scale/single-replica-audit-cursor-2026-10-05/phase-preparation/).
