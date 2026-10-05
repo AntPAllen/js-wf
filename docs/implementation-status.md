@@ -28,6 +28,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 21:23 UTC
+
+Legacy2.11.17 callback fullaudit race controls at010d5ef pass59.92s. Allthree
+actual oldserver executable hashes/module identities and closedPIDs verified;
+full/cohort/compaction/corruption/state oracle comparisons include callback reader.
+Complete closed archive/readback plus selectedGit/actualSDK/race/closure reviewed.
+[Legacy proof](scale/callback-audit-delivery-2026-10-05/legacy-controls/).
+Explicit full400k callback comparison prepared with unchangedfour-core/GOGC200/
+2GiB profile and exactpopulation/original20s deadlines. Nativecapacity pending
+verified diskheadroom. Defaults/full400k/24h not qualified.
+[Preparation](scale/callback-audit-delivery-2026-10-05/capacity-preparation/).
+
 ## Latest follow-up — 2026-10-05 21:20 UTC
 
 Explicit callback fullaudit native race faults at e792fa8 pass38.70s: library

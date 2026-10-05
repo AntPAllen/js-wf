@@ -3910,3 +3910,15 @@ shutdown (not OS SIGKILL) with4039 pending leads to exact1500/6000 report in
 340ms; zero auditconsumers checked. Complete closed archive/readback and selected
 source/actualSDK/race/module/closure reviewed. Legacy/full400k/24h remain pending.
 [Fault proof](scale/callback-audit-delivery-2026-10-05/native-fault-controls/).
+
+### Callback legacy race compatibility and full400k comparison prepared — 2026-10-05
+
+At010d5ef legacy2.11.17 full/cohort/compaction/corruption/state callback oracle
+comparisons pass59.92s under race. Actualthree legacyserver bytes/modules and
+closedPIDs plus selectedGit/actualSDK/race/closure and fullarchive readback verified.
+A new explicit callbackcapacity mode retains SDK/compact baselines, requires
+exact400k/4.8M/400k and eachoriginal20s deadline, and uses the samefour-core/
+GOGC200/2GiB profile. Opt-in compile/skip passes; actual capacity remains pending
+verified headroom. Defaults and full24h qualification remain open.
+[Legacy](scale/callback-audit-delivery-2026-10-05/legacy-controls/) ·
+[Capacity preparation](scale/callback-audit-delivery-2026-10-05/capacity-preparation/).

@@ -207,10 +207,18 @@ func compareCompactCopiedCapacity(t *testing.T, js jetstream.JetStream, root str
 	}
 	var results []result
 	want := Report{Invocations: 400000, Journals: 400000, Entries: 4800000, Terminal: 400000}
-	for _, mode := range []struct {
+	type readerMode struct {
 		name string
 		read retainedScanner
-	}{{"sdk_concurrent", scanByteBoundedThrough}, {"compact_concurrent", scanCompactByteBoundedThrough}, {"sdk_recheck", scanByteBoundedThrough}} {
+	}
+	modes := []readerMode{{"sdk_concurrent", scanByteBoundedThrough}, {"compact_concurrent", scanCompactByteBoundedThrough}}
+	candidate := "compact_concurrent"
+	if os.Getenv("WF_AUDIT_CAPACITY_CALLBACK_COMPARISON") == "1" {
+		candidate = "callback_concurrent"
+		modes = append(modes, readerMode{candidate, scanConsumeByteBoundedThrough})
+	}
+	modes = append(modes, readerMode{"sdk_recheck", scanByteBoundedThrough})
+	for _, mode := range modes {
 		var before, after runtime.MemStats
 		runtime.ReadMemStats(&before)
 		call, cancel := context.WithTimeout(context.Background(), 20*time.Second)
@@ -231,8 +239,8 @@ func compareCompactCopiedCapacity(t *testing.T, js jetstream.JetStream, root str
 		if err == nil && report != want {
 			t.Errorf("%s incomplete successful report %+v", mode.name, report)
 		}
-		if mode.name == "compact_concurrent" && (err != nil || report != want || elapsed >= 20*time.Second) {
-			t.Errorf("compact400k capacity gate missed: %+v", results[len(results)-1])
+		if mode.name == candidate && (err != nil || report != want || elapsed >= 20*time.Second) {
+			t.Errorf("%s 400k capacity gate missed: %+v", candidate, results[len(results)-1])
 		}
 	}
 }
