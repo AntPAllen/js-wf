@@ -1,0 +1,10 @@
+=== RUN   TestStreamingAuditNativeJournalFaults
+=== RUN   TestStreamingAuditNativeJournalFaults/concurrent-state/consumer-leader-loss
+    streaming_native_fault_test.go:121: streaming-fault concurrent_state=true state_snapshot=true fault=consumer-leader-loss consumer=wf-audit-wbxP5PkshZk1xK396iicC6 leader=1 pending_at_kill=4039 consumer_replicas=3 visited=6000 elapsed=1.915392349s report={Invocations:1500 Journals:1500 Entries:6000 Terminal:1500} err=<nil> reconnects=0
+=== RUN   TestStreamingAuditNativeJournalFaults/concurrent-state/cancellation
+    streaming_native_fault_test.go:121: streaming-fault concurrent_state=true state_snapshot=true fault=cancellation consumer= leader=-1 pending_at_kill=0 consumer_replicas=0 visited=128 elapsed=273.516783ms report={Invocations:1500 Journals:0 Entries:0 Terminal:0} err=context canceled reconnects=0
+--- PASS: TestStreamingAuditNativeJournalFaults (46.47s)
+    --- PASS: TestStreamingAuditNativeJournalFaults/concurrent-state/consumer-leader-loss (27.40s)
+    --- PASS: TestStreamingAuditNativeJournalFaults/concurrent-state/cancellation (19.06s)
+PASS
+ok  	js-wf/integrity	47.536s

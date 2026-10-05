@@ -23,9 +23,15 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 	if os.Getenv("WF_AUDIT_BATCH_CANDIDATE") != "1" {
 		t.Skip("opt-in full streaming audit fault qualification")
 	}
-	for _, snapshot := range []bool{false, true} {
+	for _, mode := range []struct {
+		name                 string
+		snapshot, concurrent bool
+	}{
+		{"state-false", false, false}, {"state-true", true, false}, {"concurrent-state", true, true},
+	} {
+		snapshot := mode.snapshot
 		for _, fault := range []string{"consumer-leader-loss", "cancellation"} {
-			t.Run(fmt.Sprintf("state-%v/%s", snapshot, fault), func(t *testing.T) {
+			t.Run(fmt.Sprintf("%s/%s", mode.name, fault), func(t *testing.T) {
 				_, ctx, cluster := batchedAuditClusterWithServers(t)
 				var urls []string
 				for _, server := range cluster.Servers {
@@ -58,7 +64,7 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 				visited, leader, pending, replicas := 0, -1, uint64(0), 0
 				consumerName := ""
 				started := time.Now()
-				report, err := checkUsingOptions(auditCtx, js, nil, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+				report, err := checkUsingConcurrentOptions(auditCtx, js, nil, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 					if stream.CachedInfo().Config.Name != "WF_JRN" {
 						return nativeStreamingScanner()(call, stream, cutoff, visit)
 					}
@@ -90,7 +96,7 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 						}
 						return visit(msg)
 					})
-				}, snapshot, true)
+				}, snapshot, true, mode.concurrent)
 				elapsed := time.Since(started)
 				if elapsed >= 20*time.Second {
 					t.Fatalf("original budget exceeded: %s", elapsed)
@@ -112,7 +118,7 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 						t.Fatalf("cleanup stream=%s info=%+v err=%v", name, info, err)
 					}
 				}
-				t.Logf("streaming-fault state_snapshot=%v fault=%s consumer=%s leader=%d pending_at_kill=%d consumer_replicas=%d visited=%d elapsed=%s report=%+v err=%v reconnects=%d", snapshot, fault, consumerName, leader, pending, replicas, visited, elapsed, report, err, nc.Stats().Reconnects)
+				t.Logf("streaming-fault concurrent_state=%v state_snapshot=%v fault=%s consumer=%s leader=%d pending_at_kill=%d consumer_replicas=%d visited=%d elapsed=%s report=%+v err=%v reconnects=%d", mode.concurrent, snapshot, fault, consumerName, leader, pending, replicas, visited, elapsed, report, err, nc.Stats().Reconnects)
 			})
 		}
 	}

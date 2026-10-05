@@ -3689,3 +3689,20 @@ initialbarrier accepted. All3886originalstorefiles unchanged andindependently
 verifiedagainstoriginalarchive;669Gitinputs/fiveactualNATS/closedPIDs verified.
 Completeclosedproof archiving underway. No runtimewriters/original24h qualification
 orconcurrentcandidate adoption. [Independentreview](scale/concurrent-state-audit-2026-10-05/copied-87920-state-leader-loss/independent-review.json).
+
+### Concurrent reader journal/legacy controls and explicit live profile — 2026-10-05
+
+Concurrentjournal consumerleaderloss/cancellation racecontrols pass47.536s,
+full1500/6000 reportrecovery1.915392s/4039pendingatcut; cancellation128visits/
+273.517ms/context.Canceled. Existinglegacy2.11.17 comparisonsincludeconcurrent
+mode andpass48.448s. NinePythonprofile controls/Go routingrace1.017s pass.
+Explicit--concurrent-state-retained-audit routescheckpoint andfinalaudits;
+originalsequentialdefaults/20s/60s/threeattempts/sync/memory/gate arguments stay.
+Fullcopiedstateleaderloss4421members/sixteenparts nowpreserved/readback.
+Live10m journalfault/workloadverification isnext; no24h qualification/adoption.
+[Controls](scale/concurrent-state-audit-2026-10-05/live-profile-controls/).
+
+Closeddiagnosticcomparison copied-stores reclaimedonlyafter all3720files match
+committedarchive,allactualPIDs gone andnoopenFDs. Originalstores/source/logs/
+executables andcompletecommittedarchive retained; copycanbereconstructed.
+Reclaimed1,964,510,320bytes. [Record](scale/verified-duplicate-archive-cleanup-2026-10-05/archived-comparison-copy/).

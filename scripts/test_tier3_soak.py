@@ -74,6 +74,18 @@ class SoakProducerTests(unittest.TestCase):
   self.assertEqual(plain['WF_TIER3_SYNC_INTERVAL'],streaming['WF_TIER3_SYNC_INTERVAL'])
   with self.assertRaises(ValueError):
    soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,batched_retained_audit=True,streaming_state_retained_audit=True)
+ def test_concurrent_state_mode_is_explicit_and_preserves_original_gates(self):
+  with patch.dict(os.environ,{'WF_TIER3_CONCURRENT_STATE_RETAINED_AUDIT':'1'}):
+   plain,args,flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False)
+   parallel,new_args,new_flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,concurrent_state_retained_audit=True)
+  self.assertNotIn('WF_TIER3_CONCURRENT_STATE_RETAINED_AUDIT',plain)
+  self.assertEqual(parallel['WF_TIER3_CONCURRENT_STATE_RETAINED_AUDIT'],'1')
+  self.assertEqual(args,new_args)
+  self.assertEqual(flags,new_flags)
+  self.assertEqual(plain['GOMEMLIMIT'],parallel['GOMEMLIMIT'])
+  for mode in ['batched_retained_audit','streaming_state_retained_audit']:
+   with self.assertRaises(ValueError):
+    soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,concurrent_state_retained_audit=True,**{mode:True})
  def test_explicit_route_seeds_are_diagnostic_and_do_not_change_gate_arguments(self):
   with patch.dict(os.environ,{'WF_TIER3_EXPLICIT_ROUTE_SEEDS':'1'}):
    plain,args,flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False)

@@ -78,14 +78,21 @@ func TestMatrixRetainedAuditHonorsCancellationDuringWait(t *testing.T) {
 }
 
 func TestMatrixRetainedAuditRejectsConflictingReaders(t *testing.T) {
-	t.Setenv("WF_TIER3_BATCHED_RETAINED_AUDIT", "1")
-	t.Setenv("WF_TIER3_STREAMING_STATE_RETAINED_AUDIT", "1")
-	cutoff := uint64(1)
-	for _, cut := range []*uint64{nil, &cutoff} {
-		// A nil transport proves invalid configuration is rejected before reads.
-		report, err := matrixRetainedCheck(context.Background(), nil, cut)
-		if err == nil || err.Error() != "conflicting retained audit modes" || report != (integrity.Report{}) {
-			t.Fatalf("report=%+v err=%v", report, err)
-		}
+	names := []string{"WF_TIER3_BATCHED_RETAINED_AUDIT", "WF_TIER3_STREAMING_STATE_RETAINED_AUDIT", "WF_TIER3_CONCURRENT_STATE_RETAINED_AUDIT"}
+	for _, pair := range [][2]int{{0, 1}, {0, 2}, {1, 2}} {
+		t.Run(fmt.Sprintf("%d-%d", pair[0], pair[1]), func(t *testing.T) {
+			for _, name := range names {
+				t.Setenv(name, "0")
+			}
+			t.Setenv(names[pair[0]], "1")
+			t.Setenv(names[pair[1]], "1")
+			cutoff := uint64(1)
+			for _, cut := range []*uint64{nil, &cutoff} {
+				report, err := matrixRetainedCheck(context.Background(), nil, cut)
+				if err == nil || err.Error() != "conflicting retained audit modes" || report != (integrity.Report{}) {
+					t.Fatalf("report=%+v err=%v", report, err)
+				}
+			}
+		})
 	}
 }

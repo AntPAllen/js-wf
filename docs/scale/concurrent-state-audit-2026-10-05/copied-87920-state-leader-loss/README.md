@@ -1,0 +1,16 @@
+# Full87,920 copied cohort with state-watch leader SIGKILL
+
+Executed44c3f6e,actualSDK560589 / SHA256
+`f13447fcff32b255be2ff47cd817d8ca85ee2a4ef77b6d8ead6f89a5a66870ed`.
+NativePASS23.24s includingfivecontainerstartup. Fulloriginal20s auditpasses
+9.830075s with87920invocations/journals/terminals/969925entries.
+Observedstatewatchleadernode3 waskilledwith86144consumerentries pending;
+processstopped/dead observation confirmsactualcut. Firstwatch11685records lacked
+initialbarrier andwasdiscarded; second88068records reachedcompleteinitialset.
+Fullreport equality andterminal/snapshot checksremainrequired.
+
+Independent669Gitinputs/fiveactualNATSexecutables/mounts/closedPIDs verified.
+All3886originalstorefiles matchverifiedoriginalarchive andremainunchanged.
+Originalstores neveropened; nowriters/manualACK/provisioning. Complete4421closed
+archive members/sixteenparts readback. Thisqualifies thisfocusedcopiedfault;
+original24h/fullmatrix qualification andcandidate adoption remainseparate.

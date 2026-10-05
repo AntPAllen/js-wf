@@ -1,0 +1,20 @@
+{
+  "scope": "Standard race and launcher controls; live profile not yet qualified",
+  "code_sha256": {
+    "integrity/streaming_native_fault_test.go": "cdc1bbcdb0c024ae302ab0ac27030d846be2b3bc8e9ca57150e8109751e5fe9b",
+    "integrity/check.go": "2b9ad3ae9c2bce0700cdcd46693f5d01b99c22067acdfb92e98046a4a465e937",
+    "integration/mixed_matrix_leader_test.go": "bcf488de51afa606fe2d2f0ff8af07a9575e8b81d7f0665cb1ff701f3d125003",
+    "integration/matrix_retained_audit_retry_test.go": "ca6e0122704b184ad5734c27dcb5c399565a455301038992e56ffcc834e6d997",
+    "scripts/run-tier3-soak.py": "655a0c1dec41174ab665802fc3948572e241e6d92f3fc7ae54da58c44919b7f0",
+    "scripts/test_tier3_soak.py": "f209ed1c0c29b1a3e29c0fb498f4015652d77fa8664792a9513727dbf00592f6"
+  },
+  "journal_native_race_seconds": 47.536,
+  "journal_recovery_audit_ns": 1915392349,
+  "cancellation_audit_ns": 273516783,
+  "legacy_native_race_seconds": 48.448,
+  "routing_race_seconds": 1.017,
+  "python_controls": 9,
+  "legacy_actual_executable_sha256": "dc3a94debfc18ee9762c783d941db36a8360955d9686c86bd660a9acc63701aa",
+  "selector_note": "Initial combined selector ran the legacy top-level test only. Corrected journal selector explicitly ran both concurrent-state subtests.",
+  "journal_command": "WF_AUDIT_BATCH_CANDIDATE=1 go test -race -p=1 ./integrity -run ^TestStreamingAuditNativeJournalFaults$/^concurrent-state$ -count=1 -timeout=4m -v"
+}

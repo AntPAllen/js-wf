@@ -956,10 +956,14 @@ func matrixRetainedAudit(ctx context.Context, js jetstream.JetStream) (integrity
 func matrixRetainedCheck(ctx context.Context, js jetstream.JetStream, cutoff *uint64) (integrity.Report, error) {
 	streaming := os.Getenv("WF_TIER3_STREAMING_STATE_RETAINED_AUDIT") == "1"
 	batched := os.Getenv("WF_TIER3_BATCHED_RETAINED_AUDIT") == "1"
-	if streaming && batched {
+	concurrent := os.Getenv("WF_TIER3_CONCURRENT_STATE_RETAINED_AUDIT") == "1"
+	if (streaming && batched) || (concurrent && (streaming || batched)) {
 		return integrity.Report{}, errors.New("conflicting retained audit modes")
 	}
 	if cutoff != nil {
+		if concurrent {
+			return integrity.CheckThroughInvocationSequenceWithConcurrentStreamingStateReads(ctx, js, *cutoff)
+		}
 		if streaming {
 			return integrity.CheckThroughInvocationSequenceWithStreamingStateReads(ctx, js, *cutoff)
 		}
@@ -967,6 +971,9 @@ func matrixRetainedCheck(ctx context.Context, js jetstream.JetStream, cutoff *ui
 			return integrity.CheckThroughInvocationSequenceWithBatchedReads(ctx, js, *cutoff)
 		}
 		return integrity.CheckThroughInvocationSequence(ctx, js, *cutoff)
+	}
+	if concurrent {
+		return integrity.CheckWithConcurrentStreamingStateReads(ctx, js)
 	}
 	if streaming {
 		return integrity.CheckWithStreamingStateReads(ctx, js)
