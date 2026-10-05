@@ -4143,3 +4143,16 @@ once-only journal visits, original20s including fault/restart, and zero audit
 consumers are required. No replay/retry/default change. Native verdict and archive
 review pending; full fault capacity/live/legacy/final matrices/24h stay open.
 [Preparation](scale/direct-callback-audit-2026-10-05/r5-process-preparation/).
+
+## R5 process restart replay failure preserved — 2026-10-05
+
+Actual five-container controls at69f2dc7 FAIL334.46s: owner-left-down audit completes
+1500/6000 in4.040516s but post-audit stream-info request expires at outer5m context;
+independent surviving-server requests report zero audit consumers. Same-store
+restart rejects sequence1 replay after1960accepted journal entries,3.563312s.
+681 selected inputs/actualSDK/11actualserver processes/mounts/closure and full
+1777-member archive independently verified. Neither parent qualifies. Changed
+fresh diagnostic records actual consumer API positions/identity at replay proof
+and uses short cleanup requests within original20s. Strict replay unchanged.
+[Failure](scale/direct-callback-audit-2026-10-05/r5-process-owner-loss/).
+[Diagnostic](scale/direct-callback-audit-2026-10-05/r5-replay-diagnostic-preparation/).

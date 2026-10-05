@@ -5,6 +5,7 @@ package integrity
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,6 +19,36 @@ import (
 	"js-wf/provision"
 	"js-wf/testcluster"
 )
+
+// Record actual API consumer identities and positions when the scanner asks
+// for replay proof. This supplies evidence without changing replay admission.
+type processObservedConsumer struct {
+	jetstream.Consumer
+	record func(*jetstream.ConsumerInfo, error)
+}
+
+func (c processObservedConsumer) Info(ctx context.Context) (*jetstream.ConsumerInfo, error) {
+	info, err := c.Consumer.Info(ctx)
+	c.record(info, err)
+	return info, err
+}
+
+type processObservedStream struct {
+	*candidateObservedStream
+	record func(*jetstream.ConsumerInfo, error)
+}
+
+func (s processObservedStream) CreateConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
+	c, err := s.candidateObservedStream.CreateConsumer(ctx, cfg)
+	if err != nil {
+		s.record(nil, err)
+		return nil, err
+	}
+	s.record(c.CachedInfo(), nil)
+	observed := processObservedConsumer{Consumer: c, record: s.record}
+	s.consumer = observed
+	return observed, nil
+}
 
 // Fresh disposable stores only. The fault targets the actual R1 cursor owner,
 // rather than inferring ownership from the R5 source stream's leader.
@@ -108,7 +139,34 @@ func TestDirectR1AuditR5ProcessOwnerLoss(t *testing.T) {
 			started := time.Now()
 			report, failure := checkUsingConcurrentOptions(attempt, js, nil, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 				observed := &candidateObservedStream{Stream: stream, cursorReplicas: 1}
-				return scanConsumeDirectWindowsThrough(call, observed, cutoff, func(msg *jetstream.RawStreamMsg) error {
+				var snapshots []struct {
+					Info  *jetstream.ConsumerInfo `json:"info"`
+					Error string                  `json:"error"`
+					At    time.Time               `json:"at"`
+				}
+				record := func(info *jetstream.ConsumerInfo, failure error) {
+					snapshot := struct {
+						Info  *jetstream.ConsumerInfo `json:"info"`
+						Error string                  `json:"error"`
+						At    time.Time               `json:"at"`
+					}{Info: info, At: time.Now().UTC()}
+					if failure != nil {
+						snapshot.Error = failure.Error()
+					}
+					snapshots = append(snapshots, snapshot)
+					t.Logf("cursor API snapshot stream=%s info=%+v err=%v", stream.CachedInfo().Config.Name, info, failure)
+				}
+				defer func() {
+					data, e := json.MarshalIndent(snapshots, "", "  ")
+					if e != nil {
+						t.Error(e)
+						return
+					}
+					if e = os.WriteFile(filepath.Join(root, stream.CachedInfo().Config.Name+"-cursor-snapshots.json"), data, 0600); e != nil {
+						t.Error(e)
+					}
+				}()
+				return scanConsumeDirectWindowsThrough(call, processObservedStream{candidateObservedStream: observed, record: record}, cutoff, func(msg *jetstream.RawStreamMsg) error {
 					if stream.CachedInfo().Config.Name != "WF_JRN" {
 						return visit(msg)
 					}
@@ -179,14 +237,54 @@ func TestDirectR1AuditR5ProcessOwnerLoss(t *testing.T) {
 			if failure != nil || report != want || visited != want.Entries || killed < 0 || elapsed >= 20*time.Second {
 				t.Fatalf("process recovery failed: %s", data)
 			}
-			for _, name := range []string{"WF_INV", "WF_JRN"} {
-				stream, e := js.Stream(ctx, name)
+			// Observe cleanup through short independent requests within the same
+			// original audit deadline. One lost reply must not consume the
+			// five-minute population context or hide the failed observation.
+			type cleanupObservation struct {
+				Stream    string        `json:"stream"`
+				Elapsed   time.Duration `json:"elapsed_ns"`
+				Consumers int           `json:"consumers"`
+				Error     string        `json:"error"`
+			}
+			var cleanup []cleanupObservation
+			defer func() {
+				data, e := json.MarshalIndent(cleanup, "", "  ")
 				if e != nil {
-					t.Fatal(e)
+					t.Error(e)
+					return
 				}
-				info, e := stream.Info(ctx)
-				if e != nil || info.State.Consumers != 0 {
-					t.Fatalf("cleanup %s: %+v err=%v", name, info, e)
+				if e = os.WriteFile(filepath.Join(root, "cleanup-observations.json"), data, 0600); e != nil {
+					t.Error(e)
+				}
+			}()
+			for _, name := range []string{"WF_INV", "WF_JRN"} {
+				for {
+					call, done := context.WithTimeout(attempt, time.Second)
+					stream, e := js.Stream(call, name)
+					observation := cleanupObservation{Stream: name, Elapsed: time.Since(started), Consumers: -1}
+					if e == nil {
+						observation.Consumers = stream.CachedInfo().State.Consumers
+					}
+					done()
+					if e != nil {
+						observation.Error = e.Error()
+					}
+					cleanup = append(cleanup, observation)
+					t.Logf("cleanup observation=%+v", observation)
+					if e == nil && observation.Consumers == 0 {
+						break
+					}
+					if attempt.Err() != nil {
+						t.Fatalf("original audit/cleanup budget exhausted: %v", attempt.Err())
+					}
+					if e != nil && !errors.Is(e, context.DeadlineExceeded) && !batchReadTransportError(e) {
+						t.Fatalf("cleanup %s: %v", name, e)
+					}
+					select {
+					case <-attempt.Done():
+						t.Fatalf("original audit/cleanup budget exhausted: %v", attempt.Err())
+					case <-time.After(50 * time.Millisecond):
+					}
 				}
 			}
 		})

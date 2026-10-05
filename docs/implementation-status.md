@@ -12642,3 +12642,17 @@ consumers on allfour survivors. No parent qualification or server-cause claim.
 Existing producer/SDK handles remain live; retain same run through existing
 12m timeout and preserve its verdict/lifecycle evidence. Reviewer awaits closure.
 [Live observations](scale/direct-callback-audit-2026-10-05/r5-process-preparation/).
+
+## Actual R5 fault parent failed; restart overlap diagnostic prepared — 2026-10-05
+
+69f2dc7 parentFAIL334.46s, all original fixtures closed/preserved: left-down audit
+complete1500/6000 in4.040516s then stream-info call expires at5m outercontext;
+independent four-survivor requests show zero audit consumers. Restart case fails
+3.563312s after1960accepted journal entries when sequence1 replays. Existing
+strict R1 replay guard rejects it. No data-absence/server-cause claim.
+Independent681selected inputs/actualSDK/11externalprocesses/module/mounts/closure,
+complete1777-member67.835MB archive/readback accepted. Changed fresh diagnostic
+records actual cursor Info positions/identity around replay, and short cleanup
+requests within original20s. Compile/skip passes; no production replay/retry change.
+[Failure](scale/direct-callback-audit-2026-10-05/r5-process-owner-loss/).
+[Preparation](scale/direct-callback-audit-2026-10-05/r5-replay-diagnostic-preparation/).

@@ -1,0 +1,159 @@
+{
+  "r5_process_owner_loss_pass": false,
+  "execution": {
+    "pid": 702605,
+    "source": "69f2dc79ffec6902cca467d35f6e8dcd7b532168",
+    "sha256": "4e9f43fa4bd5d90546be3734b23ecceee24a26bf8929871e3a815c3ee56c2130",
+    "build_info": "/proc/702605/exe: go1.27.1\n\tpath\tjs-wf/integrity.test\n\tmod\tjs-wf\tv0.0.0-20261005231814-69f2dc79ffec\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=69f2dc79ffec6902cca467d35f6e8dcd7b532168\n\tbuild\tvcs.time=2026-10-05T23:18:14Z\n\tbuild\tvcs.modified=false\n",
+    "args": [
+      "/tmp/js-wf-direct-r1-r5-process-owner-loss-20261005/integrity.test",
+      "-test.run=^TestDirectR1AuditR5ProcessOwnerLoss$",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=12m"
+    ],
+    "stat": "702605 (integrity.test) S 702383 702383 702383 0 -1 4194304 4690 0 0 0 0 0 0 0 20 0 6 0 5602722 2030321664 8577 18446744073709551615 4194304 24575760 140728473309872 0 0 0 0 0 2143420159 0 0 0 17 0 0 0 0 0 0 37752832 38247456 352878592 140728473316170 140728473316325 140728473316325 140728473317301 0\n",
+    "status": "failed",
+    "started_utc": "2026-10-05T23:18:25.703642+00:00",
+    "scope": "Race R1 direct-window audit with actual R5 file sources: verified cursor-owner SIGKILL, owner left down and same-store owner restart; finite 1500 workflows / 6000 entries, not 400k fault capacity qualification",
+    "exit_code": 1,
+    "finished_utc": "2026-10-05T23:24:01.045148+00:00"
+  },
+  "actual_sdk_sha256": "4e9f43fa4bd5d90546be3734b23ecceee24a26bf8929871e3a815c3ee56c2130",
+  "selected_source_inputs_verified": 681,
+  "observed_external_server_processes": 11,
+  "external_server_sha256": [
+    "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d"
+  ],
+  "all_observed_processes_closed": true,
+  "cases": [
+    {
+      "target": {
+        "stream_name": "WF_JRN",
+        "name": "wf-audit-X475CxDYdYXmsNgfhZxrF0",
+        "created": "2026-10-05T23:18:47.321594747Z",
+        "config": {
+          "name": "wf-audit-X475CxDYdYXmsNgfhZxrF0",
+          "deliver_policy": "by_start_sequence",
+          "opt_start_seq": 1,
+          "ack_policy": "none",
+          "max_deliver": -1,
+          "replay_policy": "instant",
+          "max_waiting": 512,
+          "inactive_threshold": 30000000000,
+          "num_replicas": 1,
+          "mem_storage": true,
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "delivered": {
+          "consumer_seq": 1961,
+          "stream_seq": 1961,
+          "last_active": "2026-10-05T23:18:47.343040662Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 1961,
+          "stream_seq": 1961
+        },
+        "num_ack_pending": 0,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 4039,
+        "cluster": {
+          "name": "js-wf-route-702605-1791242305672959192",
+          "leader": "js-wf-route-702605-1791242305672959192-n0"
+        },
+        "ts": "2026-10-05T23:18:47.382826183Z"
+      },
+      "kill": {
+        "node": 0,
+        "container": "js-wf-route-702605-1791242305672959192-n0",
+        "kill_started": "2026-10-05T23:18:47.406944097Z",
+        "kill_returned": "2026-10-05T23:18:47.907655829Z",
+        "source_stopped": "2026-10-05T23:18:47.926912015Z",
+        "cleanup_complete": "2026-10-05T23:18:48.042921686Z",
+        "state": "dead",
+        "concurrent_observation": true
+      },
+      "restart": false,
+      "visited": 6000,
+      "elapsed_ns": 4040516067,
+      "report": {
+        "Invocations": 1500,
+        "Journals": 1500,
+        "Entries": 6000,
+        "Terminal": 1500
+      },
+      "error": ""
+    },
+    {
+      "target": {
+        "stream_name": "WF_JRN",
+        "name": "wf-audit-X475CxDYdYXmsNgfhZxrc0",
+        "created": "2026-10-05T23:23:53.462674255Z",
+        "config": {
+          "name": "wf-audit-X475CxDYdYXmsNgfhZxrc0",
+          "deliver_policy": "by_start_sequence",
+          "opt_start_seq": 1,
+          "ack_policy": "none",
+          "max_deliver": -1,
+          "replay_policy": "instant",
+          "max_waiting": 512,
+          "inactive_threshold": 30000000000,
+          "num_replicas": 1,
+          "mem_storage": true,
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "delivered": {
+          "consumer_seq": 1961,
+          "stream_seq": 1961,
+          "last_active": "2026-10-05T23:23:53.494668785Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 1961,
+          "stream_seq": 1961
+        },
+        "num_ack_pending": 0,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 4039,
+        "cluster": {
+          "name": "js-wf-route-702605-1791242611228408489",
+          "leader": "js-wf-route-702605-1791242611228408489-n2"
+        },
+        "ts": "2026-10-05T23:23:53.521977178Z"
+      },
+      "kill": {
+        "node": 2,
+        "container": "js-wf-route-702605-1791242611228408489-n2",
+        "kill_started": "2026-10-05T23:23:53.537800239Z",
+        "kill_returned": "2026-10-05T23:23:54.116812383Z",
+        "source_stopped": "2026-10-05T23:23:54.141140385Z",
+        "cleanup_complete": "2026-10-05T23:23:54.259080963Z",
+        "state": "dead",
+        "concurrent_observation": true
+      },
+      "restart": true,
+      "visited": 1961,
+      "elapsed_ns": 3563312441,
+      "report": {
+        "Invocations": 1500,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "error": "retained batch scan: unexpected stream/order WF_JRN/1"
+    }
+  ],
+  "source_capture_scope": "Selected Git Go/module and actual SDK/external server metadata; not exhaustive compiler/toolchain inputs",
+  "candidate_adopted": false,
+  "qualifies_large_fault_capacity": false,
+  "qualifies_24h": false
+}
