@@ -30,6 +30,13 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **All-server157–200 duplicate expansions recovered after publication:**
+  pushed6760708 parts, all canonical members/ZIPs and264 raw files verify;
+  only duplicate expansions removed, recovering2254528512 allocated bytes.
+  ZIPs/canonical/models and failed/live originals remain; restore before replay.
+  Complete200 recorded-source acceptance unchanged.
+  [Recovery evidence](scale/current-tier2-matrix-2026-10-04/duplicate-expansion-recovery-157-200/).
+
 - **Complete recorded-source all-server-kill200 row independently accepted:**
   final44 seeds157–200 /four successful shards independently verify105252 invocations,
   1160209 entries/836 faults/135362 exactOk model operations. Aggregation reads every
