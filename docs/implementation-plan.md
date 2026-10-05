@@ -3108,3 +3108,15 @@ Ten acceptance controls pass; race compile/opt-in skip1.058s; full changed run
 pending. No default production decision/timing change, historical servercause,
 failedparent, full faultmatrix or24h promotion.
 [Complete trace and changed preparation](scale/fanout-combined-boundaries-2026-10-05/).
+
+### Recorded-source disk-stall successful coverage complete at187 seeds — 2026-10-05
+
+Final183–195 job111324444117/artifact11353020473 accepted after exactmetadata/
+originalfault/latency/cohort regeneration and three separately rebuiltmodels
+exactOk49644operations/45executed-source dependencies. All1399archive members/
+threeparts readback. Combined1–65 and79–200:187seeds/570192inv/6279811entries/
+3553faults/733114modelops/1948cohortaudits. Allrowshards terminal; failed66–78
+stayunqualified. Executed79915ca only; workloadSDK/fullsourceinventory/physical
+stores absentfromoriginalupload, finaldrain named-test scope. Full200/current
+source/fullmatrix/24h and failedparent remainopen.
+[Complete187-seed ledger](scale/current-tier3-block-stall-2026-10-05/).
