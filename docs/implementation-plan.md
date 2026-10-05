@@ -2465,3 +2465,17 @@ eight real responses/four route IDs/two deadline errors. Actual SDK/server copie
 named-test/API-call scope. Original disk-stall75 placement cause remains unconfirmed;
 no full/current-source matrix or24h claim. Existingb2d7011 soak continues unchanged.
 [Complete proof](scale/provision-failure-observation-2026-10-05/).
+
+
+### Positive real-domain retirement/reuse — 2026-10-05
+
+Clean9581ebc R3 real WFRETIRE domain clients/servers execute strict continuation
+retirement/reuse under race23.44s with original30s startup/60s scenario contexts.
+Generation1→3, two old objects collected, old manifest rejected before user code,
+one fresh-manifest response lost and repaired, three effects/two terminals.
+All peers return fresh2, survivor1 and exact shared/fresh references survive
+quiescent GC. Actual race SDK/650 Git inputs/1,076 archive members verify.
+This closes the focused positive domain path for this scenario; forced object
+absence confirmation, domain server faults, legacy versions, worker SIGKILL,
+active-writer GC and final-source full matrices/24h remain separate requirements.
+[Complete proof](scale/continuation-retirement-domain-2026-10-05/).

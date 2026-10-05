@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Real-domain continuation retirement/reuse qualified:** clean9581ebc
+ actual R3 WFRETIRE servers/domain clients, racePASS23.44s under original30s
+ startup/60s scenario limits. Generation1→3, two reclaimed objects, old manifest
+ rejected before user code, one fresh-manifest response drop/two fresh initial
+ calls, exactly three effects/two terminals. All peers return fresh result2;
+ survivor1/shared bytes and fresh frames survive quiescent GC. Actual race SDK,
+650 Git inputs/before-after ledgers and1,076 original archive members verify.
+Focused positive domain compatibility; no forced absence-oracle/domain-server
+fault/legacy-version/worker-SIGKILL/online-GC/full-matrix/24h claim.
+ [Complete domain originals and independent review](scale/continuation-retirement-domain-2026-10-05/).
+
 - **Initial provisioning failures now retain boundary diagnostics:** clean
  f9aaa5b captures parent stack and all five pinned JetStream/route responses,
  concurrently under a separate2s observation budget after the failed verdict.

@@ -918,3 +918,18 @@ publication/scenario budgets and production TTL remain unchanged.
 [Complete focused originals](scale/continuation-retirement-lease-expiry-2026-10-04/).
 Stores were not reopened; worker SIGKILL, active-writer GC, other TTL/limit cuts,
 p99 and final-source full-matrix/24h qualification remain open.
+
+
+## Real JetStream domain retirement and generation reuse
+
+Actual R3 WFRETIRE servers and domain-routed public clients/workers pass the
+original strict retirement/reuse scenario under race23.44s at9581ebc. Generation
+1→3, exactly two retired objects collected, old manifest rejected before user
+code, one lost fresh-manifest reply repaired with three effects/two terminals.
+All peers return fresh2; survivor1, exact shared bytes and fresh references remain.
+Actual race SDK/650 Git inputs/stopped stores/1,076 archive members verify;
+stores were not independently reopened. Original30s startup/60s scenario budgets
+stay. [Complete domain proof](scale/continuation-retirement-domain-2026-10-05/).
+Positive domain path accepted at recorded source; forced absence confirmation,
+domain server faults/legacy versions, worker SIGKILL, active-writer GC and full
+final-source matrices/24h remain open. No unchanged Tier1 graph rerun.
