@@ -28,6 +28,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 21:05 UTC
+
+The explicit four-core/GOGC200/same2GiB full400k comparison fails77.25s at
+1f53653. All three original20s attempts hit deadline; compact/concurrent allocates
+3.396GB/11GC cycles, but incomplete attempts do not prove per-record speedup.
+Independent review confirms selected source, actual SDK/five server processes,
+mounts/closure and1058 unchanged original files. Complete closed-fixture archive
+preservation is running under the tracked reviewer service; archive acceptance
+is pending. No capacity/default/24h pass.
+[Recorded result](scale/compact-audit-metadata-2026-10-05/four-core-400k-comparison/).
+Next measurement targets iterator heartbeat and adapter delivery overhead.
+
 ## Latest follow-up — 2026-10-05 21:03 UTC
 
 Full400k plain capacity failure and verified duplicate-archive cleanup are pushed

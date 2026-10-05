@@ -3862,3 +3862,12 @@ This jointly changes CPU/GC configuration; no isolated CPU-cause or capacity pas
 is inferred. Original stores remain closed; redundant disposable-copy reclamation
 is verified against pushed canonical archive parts.
 [Preparation](scale/compact-audit-metadata-2026-10-05/four-core-400k-preparation/).
+
+### Four-core full400k comparison still misses capacity — 2026-10-05
+
+The changed configuration at1f53653 fails77.25s; SDK/concurrent, compact/concurrent
+and SDK/recheck each exceed unchanged20s. Alloriginal1058files remain unchanged.
+Independent source/executable/server/mount/closure review completes; fullclosed
+archive preservation is running, not yet accepted. ChangedCPU/GC alone doesnot
+qualify capacity. Iterator heartbeat and adapter delivery overhead are next.
+[Result](scale/compact-audit-metadata-2026-10-05/four-core-400k-comparison/).
