@@ -3840,3 +3840,15 @@ legacyserver executablebytes checked/retained, allPIDsgone, selectedGitbeforeaft
 SDK/race/VCS independentlyreviewed. Complete1057-member/twopart archive readback.
 Not400kcapacity/fullmatrix/24h qualification ordefaultadoption.
 [Legacyproof](scale/compact-audit-metadata-2026-10-05/legacy-controls/).
+
+### Plain400k compact metadata capacity failure preserved — 2026-10-05
+
+Executedce885e0 normal2CPU/2GiB R5 freshverified copies nativeFAIL77.08s.
+SDKconcurrent/compactconcurrent/SDKrecheck allhitunchanged20s deadlines;
+allocated4.212/3.521/4.702GB and46/28/53GCcycles. Incompleteattemptallocations
+notper-record/fullthroughput proof. Original1058storefiles unchanged, allactual
+SDK/fiveNATS bytes/mounts/closedPIDs/sourcebeforeafter reviewed. Completeclosed
+proof retained. No unchangednative rerun/defaultadoption/400kcapacity/24h pass.
+[Plainfailure](scale/compact-audit-metadata-2026-10-05/plain-400k-comparison/).
+Nextmeasure clientiterator timer/delivery overhead and explicitavailableVM CPU/GC
+configuration; original fullpopulation/auditlimits remainunchanged.

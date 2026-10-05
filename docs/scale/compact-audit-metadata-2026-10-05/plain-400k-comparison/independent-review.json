@@ -1,0 +1,74 @@
+{
+  "execution": {
+    "pid": 622717,
+    "source": "ce885e021a6f7dba28fede12ef2f3d3d49edd437",
+    "sha256": "11f903cc1404f7f959645c772a94a421f932717287f583ebada213a0762a97b5",
+    "build_info": "/proc/622717/exe: go1.27.1\n\tpath\tjs-wf/integrity.test\n\tmod\tjs-wf\tv0.0.0-20261005204557-ce885e021a6f\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=ce885e021a6f7dba28fede12ef2f3d3d49edd437\n\tbuild\tvcs.time=2026-10-05T20:45:57Z\n\tbuild\tvcs.modified=false\n",
+    "args": [
+      "/tmp/js-wf-compact-400k-plain-copied-comparison-20261005/integrity.test",
+      "-test.run=^TestConcurrentStateR5CopiedCapacityProfile$",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=6m"
+    ],
+    "stat": "622717 (integrity.test) S 622502 622502 622502 0 -1 4194304 752 0 0 0 0 0 0 0 20 0 5 0 4699421 1617121280 3919 18446744073709551615 4194304 15994864 140720616792384 0 0 0 0 0 2143420159 0 0 0 17 1 0 0 0 0 0 27701248 28167872 908066816 140720616798846 140720616799012 140720616799012 140720616800176 0\n",
+    "status": "failed",
+    "started_utc": "2026-10-05T20:47:52.680023+00:00",
+    "scope": "Verified copied-store plain SDK/compact/SDK400k original20s full capacity comparison; candidate must pass exact full report; every verdict preserved",
+    "exit_code": 1,
+    "finished_utc": "2026-10-05T20:49:10.224091+00:00"
+  },
+  "selected_git_source_inputs_verified": 673,
+  "actual_server_observations": 5,
+  "server_sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+  "observed_processes_closed": true,
+  "copied_data_mounts_verified": true,
+  "original_store_files_unchanged": 1058,
+  "canonical_original_archive_sha256": "970b0adbddef8d8fb76ab8d1b523b26820217c9a1ffd8994544887d26d1c84a0",
+  "results": [
+    {
+      "Mode": "sdk_concurrent",
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "Error": "context deadline exceeded",
+      "ElapsedNS": 20000731154,
+      "AllocatedBytes": 4211864608,
+      "GCCycles": 46
+    },
+    {
+      "Mode": "compact_concurrent",
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "Error": "context deadline exceeded",
+      "ElapsedNS": 20000075684,
+      "AllocatedBytes": 3521392712,
+      "GCCycles": 28
+    },
+    {
+      "Mode": "sdk_recheck",
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "Error": "context deadline exceeded",
+      "ElapsedNS": 20000083065,
+      "AllocatedBytes": 4701667072,
+      "GCCycles": 53
+    }
+  ],
+  "compact_400k_quiet_capacity_pass": false,
+  "qualifies_24h": false,
+  "candidate_adopted": false,
+  "original_20s_limits_retained": true,
+  "source_capture_scope": "Selected Git Go/module source and observed executables; not exhaustive external toolchain/compiler inputs"
+}

@@ -28,6 +28,21 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 20:52 UTC
+
+The plain full400k comparison at `ce885e0` fails77.08s: SDKconcurrent, compact
+concurrent and SDKrecheck each hit unchanged20s deadlines. Allocation totals
+4.212/3.521/4.702GB and GCcycles46/28/53 are incomplete-attempt measurements,
+not throughput or per-record speedup proof. No400kcapacity pass/default adoption.
+All1058 original store files unchanged; observed SDK/five NATS/source/mount/closure
+review complete, full closed evidence retained in
+[the plain comparison](scale/compact-audit-metadata-2026-10-05/plain-400k-comparison/).
+
+Legacy2.11.17 native race suite passes49.91s, including compactmetadata against
+full/cohort/compaction/corruption/state oracle. Fullmatrix/24h remain open.
+Next work targets iterator/delivery overhead and explicit available-VM CPU/GC
+configuration while retaining full400k population and original20s limits.
+
 ## Latest follow-up — 2026-10-05 20:31 UTC
 
 An explicit compact metadata scanner candidate now preserves stream, sequence
