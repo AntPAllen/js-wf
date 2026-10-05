@@ -2775,3 +2775,17 @@ journal/state cohort checker through invocation sequence29120, under the origina
 report and creation/cleanup trace. Original stores must be independently verified
 and copied before launch. Its native result is pending; it does not recreate
 concurrent faults or qualify the historical failed soak.
+
+### 2026-10-05 complete failed-soak copied cohort audit accepted
+
+The full checkpoint1040 cohort at executed e8bce87 passes in5.184s/native17.27s
+under original20s attempt:29120inv/journals/terminals,321151entries. Complete
+freshjournal delivery321746records/48299508bytes/zeroNext errors; an initial2s
+KVlookup retried, WatchAll andcleanup pass. ActualSDK/fiveDockerbuilds/659Git
+inputs/3706originalstorefiles/4197archive members/nineparts independently verify.
+Originalstoresunchanged. Historical attempts2/3 had only1.861/0.863s remaining
+afterjournalcleanup, bounding subsequentwatchbudget by source inference;
+originalwatchwait/initialbarrier unobserved. No budgetchange, pressurecause,
+historicalfix/fullmatrix/24h qualification. Next observe complete phases under
+concurrent faulting workload rather than rerun unchanged instrumentation.
+[Full copied audit proof](scale/failed-soak-copied-cohort-2026-10-05/).

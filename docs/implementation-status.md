@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Complete checkpoint1040 copied cohort audit qualified:** executede8bce87,
+  original20s singleattempt/matrixclient/streamingjournal+state, nativePASS17.27s,
+  audit5.184s;29120inv/journals/terminals and321151entries. Journaldelivery321746/
+  48299508bytes/zeroNext errors; first2sKVlookup retried, WatchAll/Stop succeeded.
+  ActualSDK/fiveDockerbuilds/659Gitinputs/3706originalstorefiles/4197archive
+  members/nineparts independently verified; originalsunchanged. No concurrent
+  writers/injectedfault, no historicalcause/fullmatrix/24h qualification.
+  Originalfailed attempts2/3 had only1.861/0.863s left afterjournalcleanup;
+  nextstatewatch inferredfromsource, unobserved then. Originallimitsunchanged.
+  [Complete copied cohort and remaining-budget evidence](scale/failed-soak-copied-cohort-2026-10-05/).
+
 - **Corrected copied-state watch leader loss qualified in focused scope:** executed
   06a34af, matrix client policy, observed node0 SIGKILL with pending27221 R1memory
   consumer. First watch11685values/noinitialbarrier expired; fresh second watch
