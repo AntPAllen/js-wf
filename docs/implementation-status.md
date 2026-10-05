@@ -28,6 +28,26 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Live combined fanout observation — 2026-10-05 14:04 UTC
+
+The race six-boundary combined500-child matrix at executede20cf89 remains
+running (actualSDK323458). Creation first/interior/last each logged500 completions,
+unchanged durable prefix and higher successor epoch. Results/first admitted
+actual parentSIGKILL plus library journal restart, then parent Await hit the
+original five-minute context deadline. Full matrix cannot qualify from this run;
+remaining result cases still executing, complete terminal proof review pending.
+No source change or unchanged rerun while source-after capture is pending.
+
+A separate acceptance-checker assumption is contradicted by captured
+results/interior metadata: reconstructed prefix2223 records ends at streamseq4194,
+while live stream has2210 messages after snapshot purging (firstseq766,
+num_deleted1219). Before/after restart preserve messages2210 and lastseq4194.
+The current check messages>=prefix length is invalid for archived-prefix reads.
+Correct the next instrumentation/guard using captured prefix tail and stream
+sequence plus original prefix equality; do not treat this as a cause or resolution
+of the results/first deadline. Original stores remain retained; no independent
+reopen or completed combined-matrix qualification claimed.
+
 ## Latest preserved failures
 
 The corrected full PostgreSQL case at `e6c124f` also failed (494.71s). All50000
