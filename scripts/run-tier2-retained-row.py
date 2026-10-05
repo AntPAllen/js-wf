@@ -7,6 +7,7 @@ ROWS = {
  'consumer':'TestMixedMatrixConsumerLeaderEveryThirtySeconds',
  'cluster':'TestMixedMatrixAllServersKilledEveryThirtySeconds',
  'partition':'TestMixedMatrixServerPartitionEveryThirtySeconds',
+ 'blockdisk':'TestMixedMatrixBlockDiskStallEveryThirtySeconds',
 }
 parser=argparse.ArgumentParser(description='Retain one original Tier2 row, actual SDK, selected source, observed NATS executables and closed process stores. Full13x200 gate remains separate.')
 parser.add_argument('--root',type=Path,required=True)
@@ -48,6 +49,7 @@ for line in deps.splitlines():
 (root/'external-source-before.json').write_text(json.dumps(inputs,indent=2)+'\n');(root/'external-captured-paths.json').write_text(json.dumps(captured,indent=2)+'\n')
 env={k:v for k,v in os.environ.items() if not k.startswith(('WF_','MATRIX_','TIER3_MATRIX_'))};env.update(GOMAXPROCS='2',GOMEMLIMIT='2GiB',WF_MATRIX_CHAOS='1',WF_MATRIX_OPERATION_TIMINGS='1',WF_MATRIX_DURATION=args.duration,WF_MATRIX_PROCESS_ROOT=str(root/'originals'),MATRIX_ARTIFACT_PREFIX=str(root/('matrix-'+args.row+'-'+str(args.seed))),FAULT_SEED=str(args.seed))
 row=args.row;duration=args.duration;race=args.race;test=ROWS[row]
+if row=='blockdisk':env['WF_BLOCK_DISK']='1'
 selection='^'+test+'$'
 build=['go','test']+(['-race'] if race else [])+['-p=1','-buildvcs=true','-c','-o',str(root/'integration.test'),'./integration']
 with (root/'build.log').open('w') as log:subprocess.run(build,cwd=repo,env=env,stdout=log,stderr=subprocess.STDOUT,check=True)
@@ -94,6 +96,12 @@ with (root/'native.log').open('w') as log:
 after={n:sha(repo/n) for n in names};assert before==after;(root/'source-after.json').write_text(json.dumps({'revision':revision,'files':after},indent=2)+'\n')
 external_after={n:sha(Path(n)) for n in inputs};assert inputs==external_after;(root/'external-source-after.json').write_text(json.dumps(external_after,indent=2)+'\n');assert Path(__file__).read_bytes()==producer_bytes and observer.read_bytes()==observer_bytes;shutil.copy2(__file__,root/'executed-producer.py');print('NATIVE_FINISHED',code,flush=True)
 
+if row=='blockdisk':
+ images=list((root/'originals').glob('*/wf-block-*/backing.img'))
+ media=[{'path':str(p.relative_to(root)),'bytes':p.stat().st_size,'sha256':sha(p)} for p in images]
+ (root/'block-media.json').write_text(json.dumps({'images':media,'scope':'Closed original raw filesystem images; copied mount review remains separate.'},indent=2)+'\n')
+ if code==0:
+  assert len(media)==1 and media[0]['bytes']==512*1024*1024, 'passing block row must retain its closed backing image'
 checker=repo/'scripts/check-matrix-result.py'
 checker_bytes=subprocess.check_output(['git','show',revision+':scripts/check-matrix-result.py'],cwd=repo)
 assert checker.read_bytes()==checker_bytes

@@ -4,7 +4,7 @@ on:
     inputs:
       row:
         type: choice
-        options: [journal, consumer, cluster, partition]
+        options: [journal, consumer, cluster, partition, blockdisk]
         default: journal
       seed:
         type: number
@@ -45,6 +45,13 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Verify real block device prerequisites and cleanup
+        if: inputs.row == 'blockdisk'
+        run: |
+          sudo -n dmsetup version
+          sudo -n losetup --find
+          command -v mkfs.ext4
+          WF_BLOCK_DISK=1 go test -race ./testcluster -run '^(TestBlockDiskStallBlocksSyncAndCleansUp|TestBlockDiskRetainsClosedMediaForCopiedReview)$' -count=1 -timeout=3m -v
       - name: Retain original native row and process evidence
         run: |
           race_args=()

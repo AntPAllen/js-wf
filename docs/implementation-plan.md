@@ -3412,3 +3412,15 @@ unmounted store is not filesystem evidence. A real Linux test prepares a file,
 closes the fixture, copies the image, mounts only that copy read-only with noload,
 checks the file and verifies both image hashes unchanged. Test execution and
 actual retained block-row qualification remain pending.
+
+### Real retained-media control accepted; portable block row prepared — 2026-10-05
+
+At executede453ed6, actual raceSDK472174 passed real loop/device-mapper ordinary
+stall/cleanup5.55s and closed-image retention/copied-read-only check3.78s.
+The copied file and unchanged original/copy image SHA verified before test-temp
+cleanup; this is fixture correctness evidence, not retained native block-row
+qualification. The portable retained runner/workflow now select blockdisk,
+verify prerequisites and require a passing row to retain exactly one512MiB
+closed backing image with recorded hash. Original durations/audit/fault/drain
+bounds unchanged; real row execution and independent copied filesystem audit
+remain pending.
