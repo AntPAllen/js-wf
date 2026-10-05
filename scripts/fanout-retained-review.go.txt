@@ -1,0 +1,198 @@
+// Standalone review helper: build from a copied .go file in this module.
+// The caller supplies ONLY a fresh copy of closed R3 testcluster stores and
+// retains executable/source identity and original/copy hashes externally.
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"time"
+
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/client"
+	"js-wf/integrity"
+	"js-wf/journal"
+	"js-wf/provision"
+	"js-wf/testcluster"
+)
+
+func main() {
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+func run() error {
+	if len(os.Args) != 4 || !filepath.IsAbs(os.Args[1]) {
+		return fmt.Errorf("usage: fanout-retained-review ABSOLUTE_COPIED_CLUSTER_ROOT COUNT OUTPUT_JSON")
+	}
+	count, err := strconv.Atoi(os.Args[2])
+	if err != nil || count != 501 {
+		return fmt.Errorf("invalid expected count")
+	}
+	root := os.Args[1]
+	// External observer gets time to capture /proc executable identity before
+	// opening copies. This delay is outside admission/audit budgets.
+	time.Sleep(250 * time.Millisecond)
+	cluster, err := testcluster.Start(root, 3)
+	if err != nil {
+		return err
+	}
+	defer cluster.Close()
+	all := make([]jetstream.JetStream, 3)
+	for i, nc := range cluster.Clients {
+		all[i], err = jetstream.New(nc)
+		if err != nil {
+			return err
+		}
+	}
+	// Readiness observes existing assets; it never provisions or alters them.
+	ready, stopReady := context.WithTimeout(context.Background(), 15*time.Second)
+	var roles = []string{"WF_INV", "WF_JRN", "WF_RUN", "KV_WF_STATE"}
+	for _, name := range roles {
+		admitted := false
+		for ready.Err() == nil {
+			call, stop := context.WithTimeout(ready, 2*time.Second)
+			stream, readErr := all[0].Stream(call, name)
+			var info *jetstream.StreamInfo
+			if readErr == nil {
+				info, readErr = stream.Info(call)
+			}
+			stop()
+			if readErr == nil && info.Cluster != nil && info.Cluster.Leader != "" && len(info.Cluster.Replicas) == 2 {
+				current := true
+				for _, peer := range info.Cluster.Replicas {
+					current = current && peer.Current && !peer.Offline
+				}
+				if current {
+					admitted = true
+					break
+				}
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+		if !admitted {
+			stopReady()
+			return fmt.Errorf("copied source %s not current: %w", name, ready.Err())
+		}
+	}
+	stopReady()
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	began := time.Now()
+	report, err := integrity.CheckWithStreamingStateReads(ctx, all[0])
+	if err != nil {
+		return fmt.Errorf("full copied retained audit: %w", err)
+	}
+	elapsed := time.Since(began)
+	if report.Invocations != count || report.Journals != count || report.Terminal != count {
+		return fmt.Errorf("full copied retained counts %+v expected=%d", report, count)
+	}
+	parent, _, err := journal.New(all[0]).Read(ctx, "parent", "large-fanout")
+	if err != nil {
+		return err
+	}
+	ids := []string{}
+	seen := map[string]bool{}
+	for _, entry := range parent {
+		if entry.Kind != journal.StepRequested {
+			continue
+		}
+		var request struct {
+			Kind      string `json:"kind"`
+			ChildID   string `json:"child_id"`
+			ChildType string `json:"child_type"`
+		}
+		if err := json.Unmarshal(entry.Payload, &request); err != nil {
+			return err
+		}
+		if request.Kind != "call_async" {
+			continue
+		}
+		if request.ChildType != "child" || request.ChildID == "" || seen[request.ChildID] {
+			return fmt.Errorf("invalid or duplicate child request %+v", request)
+		}
+		seen[request.ChildID] = true
+		ids = append(ids, request.ChildID)
+	}
+	if len(ids) != 500 {
+		return fmt.Errorf("child request count %d", len(ids))
+	}
+	for peer, js := range all {
+		c := client.New(js)
+		for index, id := range ids {
+			value, err := c.Await(ctx, "child", id)
+			if err != nil || string(value) != strconv.Itoa(2*index) {
+				return fmt.Errorf("peer%d child%d result=%q: %w", peer, index, value, err)
+			}
+		}
+		value, err := c.Await(ctx, "parent", "large-fanout")
+		if err != nil || string(value) != "249500" {
+			return fmt.Errorf("peer%d parent result=%q: %w", peer, value, err)
+		}
+	}
+	// Observe queue state without running workers or acknowledging messages.
+	// A completed parent can leave a redelivery when its final worker is canceled.
+	drained := true
+	// Confirm physical queue and every partition's durable state after audit.
+	var queue = []*jetstream.StreamInfo{}
+	for _, js := range all {
+		stream, err := js.Stream(ctx, "WF_RUN")
+		if err != nil {
+			return err
+		}
+		info, err := stream.Info(ctx)
+		if err != nil {
+			return err
+		}
+		if info.State.Msgs != 0 || info.State.Consumers != int(provision.Partitions) {
+			drained = false
+		}
+		queue = append(queue, info)
+	}
+	run, err := all[0].Stream(ctx, "WF_RUN")
+	if err != nil {
+		return err
+	}
+	consumers := run.ListConsumers(ctx)
+	checked := 0
+	for info := range consumers.Info() {
+		if info.NumPending != 0 || info.NumAckPending != 0 {
+			drained = false
+		}
+		checked++
+	}
+	if err := consumers.Err(); err != nil {
+		return err
+	}
+	if checked != int(provision.Partitions) {
+		return fmt.Errorf("incomplete durable census %d expected=%d", checked, provision.Partitions)
+	}
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+	result := struct {
+		Scope             string                  `json:"scope"`
+		Report            integrity.Report        `json:"report"`
+		AuditNS           int64                   `json:"audit_ns"`
+		WholeReviewNS     int64                   `json:"whole_review_ns"`
+		ParentRecords     []journal.Entry         `json:"parent_records"`
+		ChildIDs          []string                `json:"child_ids"`
+		PhysicallyDrained bool                    `json:"physically_drained"`
+		Queue             []*jetstream.StreamInfo `json:"queue_all_three_peers"`
+		Consumers         int                     `json:"observed_partition_consumers"`
+	}{"complete copied retained fanout integrity/results and queue observation; not original fault verdict or every-cut qualification", report, elapsed.Nanoseconds(), time.Since(began).Nanoseconds(), parent, ids, drained, queue, checked}
+	data, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(os.Args[3], append(data, '\n'), 0600); err != nil {
+		return err
+	}
+	fmt.Printf("full retained audit invocations=%d journals=%d entries=%d terminal=%d audit=%s review=%s observed_consumers=%d\n", report.Invocations, report.Journals, report.Entries, report.Terminal, elapsed, time.Since(began), checked)
+	return nil
+}
