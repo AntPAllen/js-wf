@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"js-wf/identity"
+	"js-wf/internal/natsutil"
 	"js-wf/journal"
 	"js-wf/provision"
 	"js-wf/retention"
@@ -687,14 +688,11 @@ func (c *Client) Await(ctx context.Context, typ, id string) (value []byte, err e
 			if out.ResultRef == "" {
 				return out.ResultBytes(ctx, nil)
 			}
-			objects, err := retryAwaitRead(ctx, func(attempt context.Context) (jetstream.ObjectStore, error) {
-				return c.js.ObjectStore(attempt, "WF_BLOB")
-			})
-			if err != nil {
-				return nil, err
-			}
+
 			return out.ResultBytes(ctx, func(ctx context.Context, name string) ([]byte, error) {
-				return retryAwaitRead(ctx, func(attempt context.Context) ([]byte, error) { return objects.GetBytes(attempt, name) })
+				return retryAwaitRead(ctx, func(attempt context.Context) ([]byte, error) {
+					return natsutil.GetObjectBytes(attempt, c.js, "WF_BLOB", name)
+				})
 			})
 		}
 		if !errors.Is(err, jetstream.ErrKeyNotFound) {

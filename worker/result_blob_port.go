@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"js-wf/internal/natsutil"
+
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -54,11 +56,7 @@ func (p jetStreamResultBlobPort) PutBytes(ctx context.Context, name string, data
 }
 
 func (p jetStreamResultBlobPort) GetBytes(ctx context.Context, name string) ([]byte, error) {
-	objects, err := p.js.ObjectStore(ctx, "WF_BLOB")
-	if err != nil {
-		return nil, fmt.Errorf("%w: open object store: %w", ErrResultBlobUnavailable, err)
-	}
-	data, err := objects.GetBytes(ctx, name)
+	data, err := natsutil.GetObjectBytes(ctx, p.js, "WF_BLOB", name)
 	if err != nil {
 		return nil, fmt.Errorf("%w: get %s: %w", ErrResultBlobUnavailable, name, err)
 	}

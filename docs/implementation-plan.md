@@ -2285,3 +2285,26 @@ Workload SDK/full captured source/native stores unavailable; final integrity/dra
 named-test scope. Full/final-source matrices/24h/million-drain and historical
 failed parent verdicts remain open/unchanged.
 [Complete200 qualification](scale/current-tier3-block-delay-2026-10-04/full200-qualification/).
+
+### Result-object absence confirmation — 2026-10-05
+
+Worker result transport and client Await now confirm Object Store missing
+metadata against the stream leader before treating it as semantic absence.
+Confirmed existing metadata permits a bounded modern payload retry; confirmed
+missing/deleted metadata preserves ErrObjectNotFound. Explicit administrative
+request context preserves cancellation, API prefix/domain and trace routing.
+Normal reads and content-hash verification retain their existing behavior;
+worker15s and Await5s attempt budgets remain. The pinned legacy GetInfo/factory
+context cannot bound administrative metadata requests, so the implementation
+uses explicit GetLastMsg context and keeps the modern chunk reader.
+
+Controlled synthetic absence fails baseline public worker/client paths3.71s;
+corrected normal4.89s/race6.02s pass, including real deletion/hash corruption,
+malformed metadata and blocked oracle deadline/cancel/prefix/domain controls.
+Existing large-result replay/Await and missing-reply worker budget controls pass.
+Actual executed binaries, selected source snapshots and original R3 fixture files
+are preserved in [result absence evidence](scale/result-absence-2026-10-05/).
+Snapshot/manifest/other object reads, forced native follower-lag evidence,
+historical server-side causality, legacy-server and final-source/full matrix
+qualification remain open. Unchanged Tier1 state-machine bodies were not rerun
+for this real-transport adapter change.

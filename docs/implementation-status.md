@@ -30,6 +30,22 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Worker/client object absence decisions now confirmed by the leader:**
+  pinned SDK direct metadata can report follower absence. Baseline public worker
+  and Await controls fail3.71s on one synthetic absence of a committed object;
+  corrected normal4.89s/race6.02s pass with exactly one administrative confirmation
+  and real SDK payload retrieval per path. Real deletion/hash corruption/malformed
+  leader metadata/permanent absence deadlines and blocked leader deadline/cancel
+  controls pass, including prefix/domain routing. Existing5MiB step/terminal
+  controls4.71s/5.79s and bounded worker missing-read-reply21.91s pass. Actual SDK
+  identities,1173/1174 unchanged selected inputs and357 original fixture files per
+  campaign preserved/read back. Modern payload reads and existing5s/15s budgets
+  retained; no additional request on success. Snapshot/manifest/other object reads,
+  natural follower-lag causality, legacy-server and full/final-source qualification
+  remain open. Live journal soak passes prior batch1050; both campaigns still run,
+  candidate transient errors retained as observations, not a terminal pass.
+  [Baseline, corrected and race originals](scale/result-absence-2026-10-05/).
+
 - **Final disk-delay duplicate expansions recovered:** all3666 raw files
   in accepted157–195 match pushedf569cde parts, every canonical member and original
   ZIPs; no visible descriptors remain. Only duplicate expansions removed,
