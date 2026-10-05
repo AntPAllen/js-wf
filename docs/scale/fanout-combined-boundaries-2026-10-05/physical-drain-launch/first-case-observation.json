@@ -1,0 +1,87 @@
+{
+  "observed_at": "2026-10-05T15:55:27.841547+00:00",
+  "source": "3413731ff2e1a40c6e00a1064694609fb948f5a1",
+  "full_matrix_terminal_pending": true,
+  "first_case_physical_drain_assertion_failed": true,
+  "raw_failure_sha256": "da1e1a2765357f730cc8cd3d07bf48729197c940560758a8d7fc223adfc06dff",
+  "raw_failure": {
+    "all_observed_peers": [
+      {
+        "queue": {
+          "config": {
+            "name": "WF_RUN",
+            "subjects": [
+              "wf.run.*",
+              "wf.schedule.*.*.*"
+            ],
+            "retention": "workqueue",
+            "max_consumers": -1,
+            "max_msgs": -1,
+            "max_bytes": -1,
+            "discard": "old",
+            "max_age": 0,
+            "max_msgs_per_subject": -1,
+            "max_msg_size": -1,
+            "storage": "file",
+            "num_replicas": 3,
+            "duplicate_window": 120000000000,
+            "allow_rollup_hdrs": true,
+            "compression": "none",
+            "allow_direct": false,
+            "mirror_direct": false,
+            "consumer_limits": {},
+            "metadata": {
+              "_nats.level": "5",
+              "_nats.req.level": "2",
+              "_nats.ver": "2.15.0"
+            },
+            "allow_msg_schedules": true
+          },
+          "created": "2026-10-05T15:50:53.658340003Z",
+          "state": {
+            "messages": 138,
+            "bytes": 14628,
+            "first_seq": 864,
+            "first_ts": "2026-10-05T15:52:04.560269833Z",
+            "last_seq": 1001,
+            "last_ts": "2026-10-05T15:52:38.861032297Z",
+            "consumer_count": 64,
+            "deleted": null,
+            "num_deleted": 0,
+            "num_subjects": 1,
+            "subjects": null
+          },
+          "cluster": {
+            "name": "wf-test",
+            "raft_group": "S-R3F-ZRreVUke",
+            "leader": "wf-test-1",
+            "leader_since": "2026-10-05T15:50:53.776317781Z",
+            "system_account": true,
+            "traffic_account": "$SYS",
+            "replicas": [
+              {
+                "name": "wf-test-0",
+                "current": true,
+                "active": 7666437,
+                "peer": "fPPVT2kZ"
+              },
+              {
+                "name": "wf-test-2",
+                "current": true,
+                "active": 7669101,
+                "peer": "80zpbVEM"
+              }
+            ]
+          },
+          "ts": "2026-10-05T15:53:22.139503446Z"
+        },
+        "consumers": null
+      }
+    ],
+    "deadline_error": "context deadline exceeded",
+    "elapsed_ns": 29992689313,
+    "last_error": "peer0 queue messages=138 consumers=64"
+  },
+  "native_log_slice": "=== RUN   TestFiveHundredChildFanoutCombinedParentAndJournalBoundaryMatrix\n=== RUN   TestFiveHundredChildFanoutCombinedParentAndJournalBoundaryMatrix/create/first\n    fanout_combined_test.go:43: FAULT_SEED=1 parent_cut_after_child=0\n    child_scale_test.go:582: SIGKILLed parent worker at create cut 0; retained entries=3\n    fanout_combined_test.go:43: combined journal restart phase=create node=2 messages=3 tail_seq=3 prefix_tail_seq=3\n    fanout_combined_test.go:43: restarted WF_JRN leader after 1 child requests; retained journal messages=3\n    fanout_combined_test.go:43: fanout physical drain: peer0 queue messages=138 consumers=64 deadline=context deadline exceeded\n",
+  "scope": "live first-case observation outside immutable launch archive; no full native verdict or cause attribution"
+}

@@ -3194,3 +3194,25 @@ Prefix/higherepoch/integrity/result checks follow drain; original30scut unchange
 Acceptance optionally requires the drain witness after bothfaults/beforeprefix;
 12guard controls pass. Hosted workflow adopts the profile; fullnative run and
 independentcopied post-drain audit pending, no new physicaldrain qualification.
+
+### Full physical-drain fanout native launch verified — 2026-10-05
+
+Fullsix-case seed1 raceproducer at3413731 started actualSDK405574; actual/proc
+SDK/exactproducer/668Gitinputs/3287external inputs independently verified. Opt-in
+physicaldrain profile uses production64partition deliveries/confirmedallpeerqueue/
+durable state and joins inside30s/original5m. Firstcreationcut admittedactual
+parentSIGKILL/libraryjournal restart; terminalcase/matrix/copy review pending.
+Twelveguardcontrols pass, racecompile/optinskip1.022s. Hostedolder7a4d739 run
+nowinprogress, checkout/setup/controls passed; nativeproducerstep running.
+No new physicaldrain/final-source/fullmatrix/24h qualification claimed.
+[Complete immutable launch proof](scale/fanout-combined-boundaries-2026-10-05/physical-drain-launch/).
+
+### First physical-drain case assertion failed; full run pending — 2026-10-05
+
+Creationfirst3413731 recoveredworkflows but new30s drainassertion failed with
+peer0queue138messages/64consumers atdeadline. Rawlaststream metadata and native
+log slice preserved separately from immutable launch archive. ActualSDK405574
+remainslive executinginterior; fullnative verdict pending. Diagnose remaining
+messageidentities/operations from freshcopies afterterminal before any changed
+profile; no unchangedrerun, originaltimeout extension or servercause claim.
+[Live first-case observation](scale/fanout-combined-boundaries-2026-10-05/physical-drain-launch/first-case-observation.json).

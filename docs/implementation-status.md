@@ -28,22 +28,29 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
-## Latest live verification — 2026-10-05 15:33 UTC
+## Latest live verification — 2026-10-05 15:51 UTC
 
-The actual 24-hour journal-leader campaign remains running at executed `aace912`;
-its actual SDK process162125 and user unit were checked live. Native output
-reached batch1625 / approximately3h46m. No terminal24h verdict is available.
-The million-timer diagnostic candidate remains running (actual program101283),
-with237798 receipts observed; final latency, two restarts and physical-drain gates
-remain unqualified. These running observations do not resolve historical failures.
+The actual24-hour journal-leader campaign remains running at executedaace912;
+actualSDK162125 checkedlive, native batch1746 / approximately4h03m. The diagnostic
+million-timer campaign remains running (actualprogram101283). Both original
+terminal gates remain pending; running observations do not resolve prior failures.
 
-The six-boundary fanout hosted workflow was accepted at executed `7a4d739`:
+The original hosted six-boundary fanout run at7a4d739 is now in progress:
 [run37333174296](https://github.com/AntPAllen/js-wf/actions/runs/37333174296),
-job111841179439 observed queued. The original HTTP422 workflow schema rejection
-is preserved alongside corrected dispatch, exact workflow bytes, native run/job
-metadata and checkout action source review. Native checkout/test/artifact review
-is pending; the local six-boundary qualification below remains the accepted proof.
-[Complete CI launch proof](scale/fanout-combined-boundaries-2026-10-05/ci-launch/).
+job111841179439. Checkout/setup/acceptance controls passed; raceproducer step
+running, terminal artifact review pending. Earlier HTTP422 and corrected dispatch
+remain preserved in the [CI launch proof](scale/fanout-combined-boundaries-2026-10-05/ci-launch/).
+
+A new fullsix-case physicaldrain profile at3413731 is running locally, actual
+raceSDK405574 verifiedlive and exactsource/producer/668Gitinputs/3287external
+inputs checked. After originalworkers join it drains terminal wakeups through
+productionworkers on64partitions; allthree currentR3 queues and exact64durables
+must be zero after joins within30s/original5mcase. Twelveguardcontrols pass;
+racecompile/optinskip1.022s. Creationfirst parentSIGKILL/libraryjournal restart
+admitted; its new30s physicaldrain assertion subsequently failed with138queue
+messages remaining atpeer0. Othercases/fullnative verdict and rawqueue diagnosis
+remainpending. No physicaldrain qualification or originalbudget change.
+[Complete immutable launch proof](scale/fanout-combined-boundaries-2026-10-05/physical-drain-launch/).
 
 ## Latest preserved failures
 
