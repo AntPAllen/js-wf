@@ -2201,3 +2201,18 @@ are retained; baseline lacks live identity/before-after capture. This establishe
 the point-read correction, not actual follower lag or the historical partition
 failure's cause. Fresh snapshot-watch consistency, final-source/full-matrix/24h
 qualification remain open. [Complete proof](scale/terminal-state-leader-2026-10-05/).
+
+### Recorded-source disk-delay161-seed coverage — 2026-10-05
+
+Five newly completed shards at79915ca extend accepted continuous coverage to1–156
+and separately196–200. Full13-proof aggregation verifies all parts/canonical
+members, actual model binaries/45 common Git dependency inputs, raw history
+operation counts/exact three-model outputs and600s/30s original gates. All161
+accepted seeds total500,752 invocations/5,515,239 entries/
+3,059 real faults/643,824 model operations/
+1700 cohort audits. Worst terminal/progress p99=
+5.953s/0.851s.
+Workload SDK/full captured source/native stores unavailable; final integrity/drain
+named-test scope. Missing157–195/full200/final-source/full16×200/24h/million drain
+remain open; original failed parents are not promoted.
+[Complete coverage review](scale/current-tier3-block-delay-2026-10-04/coverage-1-156-and-196-200/).

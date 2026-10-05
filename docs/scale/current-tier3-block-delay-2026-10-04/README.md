@@ -1,8 +1,9 @@
 # Recorded-source Tier3 disk-delay qualification
 
-Eight complete terminal successful shards bind to79915ca in run37164231641.
-All seeds1–104 pass independently regenerated raw rows/explanations/fencing,
-real device-delay/admission proofs and all three history models.
+Thirteen completed successful shards bind to79915ca in run37164231641.
+Seeds1–156 and196–200 qualify;157–195 are not yet accepted. All161 accepted
+seeds pass independently regenerated raw fault/admission/report/explanation/
+fencing checks and all three rebuilt history models.
 
 | Seeds | Job | Invocations | Entries | Faults | Model operations |
 | --- | --- | ---: | ---: | ---: | ---: |
@@ -14,12 +15,20 @@ real device-delay/admission proofs and all three history models.
 | [66–78](seeds-66-78/) | 111324442440 | 39,396 | 433,986 | 247 | 50,652 |
 | [79–91](seeds-79-91/) | 111324442415 | 40,964 | 451,324 | 247 | 52,668 |
 | [92–104](seeds-92-104/) | 111324442605 | 39,480 | 434,792 | 247 | 50,760 |
-| Total | | 325,192 | 3,581,807 | 1,976 | 418,104 |
+| [105–117](seeds-105-117/) | 111324442672 | 39,648 | 436,542 | 247 | 50,976 |
+| [118–130](seeds-118-130/) | 111324442703 | 39,424 | 434,223 | 247 | 50,688 |
+| [131–143](seeds-131-143/) | 111324442880 | 39,368 | 433,567 | 247 | 50,616 |
+| [144–156](seeds-144-156/) | 111324442886 | 41,944 | 461,967 | 247 | 53,928 |
+| [196–200](seeds-196-200/) | 111324443131 | 15,176 | 167,133 | 95 | 19,512 |
+| Total | | 500,752 | 5,515,239 | 3,059 | 643,824 |
 
-All1108 expected completed-cohort audits verify. Worst terminal/progress p99
-is5.952607040s/0.850642187s under unchanged30s gates. Every actual model's
-45 local dependencies match executed Git. Complete per-shard canonical members
-and publication parts independently read back; consult manifests and summaries.
+All1700 expected completed-cohort audits verify. Worst
+terminal/progress p99=5.952607040s/
+0.850642187s under original30s gates. Each actual model's
+45 local dependencies matches executed Git. The combined reviewer reads every
+part/canonical member in all13 proofs, verifies model executables/source inputs,
+raw history operation counts, exact three-model outputs and600s/30s gates.
+[Combined executed review](coverage-1-156-and-196-200/).
 
 Workload source attribution is checkout/header binding. Full captured workload
 source inventories, actual SDK and native stores are unavailable; integrity/drain
@@ -27,6 +36,6 @@ retain named-test scope. No physical reopening or server cause claim. Full200/
 final-source/full16×200/24h and million-drain gates remain open; failed originals
 remain preserved and the parent has other failed rows.
 
-Duplicate raw expansions were removed only after published proof, canonical,
-ZIP and expanded-input verification. Retained ZIPs/proofs restore every byte.
+Older accepted raw expansions1–104 were removed only after complete ZIP/canonical/
+published-input verification. Retained ZIPs/proofs restore every byte.
 [Exact executed recovery](duplicate-expansion-recovery/).
