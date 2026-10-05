@@ -198,12 +198,15 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 // profiling. Each full invocation/journal/state reread retains its own20s limit.
 func compareCompactCopiedCapacity(t *testing.T, js jetstream.JetStream, root string) {
 	type result struct {
-		Mode           string
-		Report         Report
-		Error          string
-		ElapsedNS      int64
-		AllocatedBytes uint64
-		GCCycles       uint32
+		Mode             string
+		Report           Report
+		Error            string
+		ElapsedNS        int64
+		AllocatedBytes   uint64
+		GCCycles         uint32
+		CursorReplicas   []int
+		CursorStarts     []uint64
+		CursorPointReads int
 	}
 	var results []result
 	want := Report{Invocations: 400000, Journals: 400000, Entries: 4800000, Terminal: 400000}
@@ -218,7 +221,25 @@ func compareCompactCopiedCapacity(t *testing.T, js jetstream.JetStream, root str
 		modes = append(modes, readerMode{candidate, scanConsumeByteBoundedThrough})
 	}
 	modes = append(modes, readerMode{"sdk_recheck", scanByteBoundedThrough})
+	var cursorReplicas []int
+	var cursorStarts []uint64
+	var cursorPointReads int
+	if os.Getenv("WF_AUDIT_CAPACITY_SINGLE_REPLICA_COMPARISON") == "1" {
+		candidate = "single_replica_callback"
+		observedReader := func(replicas int) retainedScanner {
+			return func(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+				observed := &profileCursorStream{Stream: stream, replicas: replicas}
+				err := scanConsumeByteBoundedThrough(ctx, observed, cutoff, visit)
+				cursorReplicas = append(cursorReplicas, observed.creates...)
+				cursorStarts = append(cursorStarts, observed.starts...)
+				cursorPointReads += observed.pointReads
+				return err
+			}
+		}
+		modes = []readerMode{{"replicated_callback", observedReader(5)}, {candidate, observedReader(1)}, {"replicated_callback_recheck", observedReader(5)}}
+	}
 	for _, mode := range modes {
+		cursorReplicas, cursorStarts, cursorPointReads = nil, nil, 0
 		var before, after runtime.MemStats
 		runtime.ReadMemStats(&before)
 		call, cancel := context.WithTimeout(context.Background(), 20*time.Second)
@@ -227,7 +248,14 @@ func compareCompactCopiedCapacity(t *testing.T, js jetstream.JetStream, root str
 		elapsed := time.Since(began)
 		cancel()
 		runtime.ReadMemStats(&after)
-		results = append(results, result{mode.name, report, fmt.Sprint(err), int64(elapsed), after.TotalAlloc - before.TotalAlloc, after.NumGC - before.NumGC})
+		r := result{Mode: mode.name, Report: report, Error: fmt.Sprint(err), ElapsedNS: int64(elapsed), AllocatedBytes: after.TotalAlloc - before.TotalAlloc, GCCycles: after.NumGC - before.NumGC}
+		if os.Getenv("WF_AUDIT_CAPACITY_SINGLE_REPLICA_COMPARISON") == "1" {
+			r.CursorReplicas, r.CursorStarts, r.CursorPointReads = cursorReplicas, cursorStarts, cursorPointReads
+			if len(cursorReplicas) < 2 {
+				t.Errorf("%s missing actual INV/JRN cursor observations: %v", mode.name, cursorReplicas)
+			}
+		}
+		results = append(results, r)
 		data, e := json.MarshalIndent(results, "", "  ")
 		if e != nil {
 			t.Fatal(e)

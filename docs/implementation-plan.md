@@ -3976,3 +3976,12 @@ production callback source restored exactly to a39bb6c, unit race lifecycle/
 byte/compact controls pass1.216s. Full1087-member archive/readback and selected
 Git/actualSDK/module/closure reviewed. Defaults/full400k/24h still open.
 [Cleanup measurement](scale/buffered-callback-audit-2026-10-05/observed-cleanup-measurement/).
+
+## Quiet cursor replication diagnostic preparation — 2026-10-05
+
+Explicit temporary R5/R1/R5 cursor comparison is prepared with actual consumer
+configuration observations, full400k/4.8M cardinalities and original20s deadlines.
+No native result/default adoption/fault qualification yet. Lossless base-plus-delta
+fixture preservation passes four reconstruction tests and full committed400k base
+readback (1751 data files / 3670153990 bytes).
+[Preparation](scale/single-replica-audit-cursor-2026-10-05/preparation/).

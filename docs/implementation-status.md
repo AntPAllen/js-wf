@@ -12464,3 +12464,12 @@ Closeddiagnosticcomparison copied-stores reclaimedonlyafter all3720files match
 committedarchive,allactualPIDs gone andnoopenFDs. Originalstores/source/logs/
 executables andcompletecommittedarchive retained; copycanbereconstructed.
 Reclaimed1,964,510,320bytes. [Record](scale/verified-duplicate-archive-cleanup-2026-10-05/archived-comparison-copy/).
+
+## Follow-up — 2026-10-05
+
+Explicit temporary R5/R1/R5 cursor comparison is prepared with actual consumer
+configuration observations, full400k/4.8M cardinalities and original20s deadlines.
+No native result/default adoption/fault qualification yet. Lossless base-plus-delta
+fixture preservation passes four reconstruction tests and full committed400k base
+readback (1751 data files / 3670153990 bytes).
+[Preparation](scale/single-replica-audit-cursor-2026-10-05/preparation/).
