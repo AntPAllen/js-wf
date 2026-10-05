@@ -2827,3 +2827,17 @@ No additionaldispatch/failedparent promotion. Actual workloadSDK/fullsource/
 physicalstores were notuploaded; finaldrain named-test assertion scope. Fullrow/
 current-source/fullmatrix/24h stayopen.
 [Complete ledger](scale/current-tier3-block-stall-2026-10-05/).
+
+### 2026-10-05 native lease loss with a cancellation-ignoring effect prepared
+
+A retained opt-in variant of the existing real R3 lost-renewal-ack worker proof
+keeps the old SDK step effect blocked despite cancellation, requires the worker
+loop to stop and a successor to finish before releasing the old effect's stale7
+result, then requires all three peer journals/results to remain unchanged at42.
+The ordinary cooperative test retains its transport/request sequence. Native
+50s fixture context,12s lease TTL/defaultAckWait and strict30s recovery from
+observed fencing are unchanged. Actual committed lease renewal/revision, partial
+and terminal journal, proxy traffic, peer verification, integrity and stopped
+stores are retained. Callback context cancellation does not forcibly terminate
+external code; effect idempotency remains necessary. Raw outer handlers blocking
+outside SDK effects are not covered. Native opt-in execution/review pending.
