@@ -3064,3 +3064,18 @@ always uploads the whole root including hidden files and SDK/store bytes.
 Source and workflow syntax checked. Workflow not dispatched/qualified yet;
 corrected local actualSDK342837 at161dfa9 remains live and separately bound.
 No full fault matrix or24h promotion.
+
+### Confirmed-outside fanout matrix: last cut still missing — 2026-10-05
+
+Executed161dfa9 native raceFAIL729.17s. Creation allthree and results first/
+interior passed500children/result249500/prefix/higher epoch; outside489results
+confirmed before stopping workers. Interior prefix2227/tail4211 survives while
+live messages2178. Last result cut not admitted within30s; completeactualSDK/
+source/five childSDKs and16656archive members/threeparts verified. Freshlastcopy
+has496terminal children; four incompleteallparentpartition52, parent Suspended
+waitingon one,493pending/1ackpending. Original2086files unchanged,1655inputs/
+3951members/onepart verify. Outside admission corrected, remaining processing
+or blocked-call cause unconfirmed; prepare opt-in operation/dispatch timings
+and predeadline stack before a changed diagnostic. Original500/five-minute/30s
+limits unchanged. Whole matrix remains failed; no release/physicaldrain claim.
+[Complete failed proof and copy diagnosis](scale/fanout-combined-boundaries-2026-10-05/).

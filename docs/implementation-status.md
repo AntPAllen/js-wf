@@ -50,6 +50,19 @@ reopen or completed combined-matrix qualification claimed.
 
 ## Latest preserved failures
 
+The confirmed-outside full500 matrix at161dfa9 failed729.17s: allthree creation
+and first/interior result cases pass, each500 children/result249500/prefix/higher
+epoch. All489 outside results confirmed before stopping workers. Interior trace
+preserves prefix2227 throughseq4211 with2178 live messages. Last cut still not
+admitted under30s. CompleteactualSDK/665Gitinputs/3287selectedexternal inputs/
+five childSDKs/16656archive members/threeparts verified. Last-case fresh copy
+shows four incomplete children allin parent partition52, Suspended waits on one,
+493pending/1ackpending;2086originalfiles unchanged/1655inputs/3951members/onepart
+verified. Next diagnostic: timings and predeadline stack; no unchanged rerun,
+timeout extension, original reopen or fullmatrix qualification. Portable producer
+and manualCI atc24e70f registered active, not dispatched yet.
+[Complete changed failed run and last-copy diagnosis](scale/fanout-combined-boundaries-2026-10-05/).
+
 Copied fanout diagnosis localized a fixture admission error: first/interior/last
 parents wait on missing outside child results; copied stores have496/496/493
 terminal children of500, with4/4/7 incomplete outside children. All originals
