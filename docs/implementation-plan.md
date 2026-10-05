@@ -2789,3 +2789,16 @@ originalwatchwait/initialbarrier unobserved. No budgetchange, pressurecause,
 historicalfix/fullmatrix/24h qualification. Next observe complete phases under
 concurrent faulting workload rather than rerun unchanged instrumentation.
 [Full copied audit proof](scale/failed-soak-copied-cohort-2026-10-05/).
+
+### 2026-10-05 pre-deadline audit observation prepared
+
+Opt-in `--audit-wait-stack` requires retained audit tracing and captures the
+parent SDK goroutines plus current trace one second before a pending attempt's
+existing deadline. Completed/cancelled calls skip capture; actual observer errors
+are retained, no capture produces no error wrapping. The source preserves20s
+attempt/60s total/three attempts and original fault gates. Parent-only snapshots
+are not child stacks, failure verdicts or historicalcause proof. Normal diagnostic
+controls and race checks verify cancellation, pending trace, actual blocked parent
+stack, metadata deadline and capture error identity. The producer clears inherited
+activation and records the explicit flag; arguments and verifier gates unchanged.
+Native changed-instrumentation actual24h observation remains pending.

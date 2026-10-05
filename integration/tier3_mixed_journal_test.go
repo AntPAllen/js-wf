@@ -1037,7 +1037,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 						trace = &retainedAuditTrace{}
 						auditJS = tracedAuditJS{JetStream: js, trace: trace}
 					}
+					waitName := fmt.Sprintf("audit-batch-%d-attempt-%d-wait", cut.batch, len(attempts)+1)
+					stopWaitObservation := startMatrixAuditWaitObservation(attempt, root, waitName, trace)
 					result, failure := matrixRetainedCheck(attempt, auditJS, &cut.cutoff)
+					if observationErr := stopWaitObservation(); observationErr != nil {
+						failure = errors.Join(failure, observationErr)
+					}
 					if trace != nil {
 						data, err := json.MarshalIndent(trace.snapshot(), "", "  ")
 						if err == nil {

@@ -17,6 +17,10 @@ func saveMatrixFailureStack(root string, failed bool) error {
 	if !failed {
 		return nil
 	}
+	return saveMatrixParentStack(root, "failure-goroutines", "Parent SDK process at failed-test boundary, before fixture cleanup; child process stacks excluded", time.Time{})
+}
+
+func saveMatrixParentStack(root, name, scope string, deadline time.Time) error {
 	const maximum = 32 * 1024 * 1024
 	buffer := make([]byte, 64*1024)
 	var size int
@@ -28,7 +32,7 @@ func saveMatrixFailureStack(root string, failed bool) error {
 		buffer = make([]byte, min(len(buffer)*2, maximum))
 	}
 	observed := time.Now().UTC()
-	if err := os.WriteFile(filepath.Join(root, "failure-goroutines.txt"), buffer[:size], 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, name+".txt"), buffer[:size], 0600); err != nil {
 		return err
 	}
 	meta := struct {
@@ -37,12 +41,13 @@ func saveMatrixFailureStack(root string, failed bool) error {
 		Bytes     int       `json:"bytes"`
 		Truncated bool      `json:"truncated"`
 		Scope     string    `json:"scope"`
-	}{observed, os.Getpid(), size, size == len(buffer), "Parent SDK process at failed-test boundary, before fixture cleanup; child process stacks excluded"}
+		Deadline  time.Time `json:"deadline,omitempty"`
+	}{observed, os.Getpid(), size, size == len(buffer), scope, deadline}
 	data, err := json.MarshalIndent(meta, "", "  ")
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(root, "failure-goroutines.json"), data, 0600)
+	return os.WriteFile(filepath.Join(root, name+".json"), data, 0600)
 }
 
 // An actual blocked goroutine must be represented; healthy fixtures must not

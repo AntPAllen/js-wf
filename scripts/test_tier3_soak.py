@@ -5,6 +5,17 @@ spec=importlib.util.spec_from_file_location('soak',Path(__file__).with_name('run
 soak=importlib.util.module_from_spec(spec);spec.loader.exec_module(soak)
 
 class SoakProducerTests(unittest.TestCase):
+ def test_wait_stack_is_opt_in_and_preserves_original_budget_and_trace(self):
+  with patch.dict(os.environ,{'WF_TIER3_AUDIT_WAIT_STACK':'1'}):
+   plain,args,flags=soak.execution('journal','24h',1,Path('/tmp/f'),'sigkill',False,retained_audit_trace=True)
+   observed,new_args,new_flags=soak.execution('journal','24h',1,Path('/tmp/f'),'sigkill',False,retained_audit_trace=True,audit_wait_stack=True)
+  self.assertNotIn('WF_TIER3_AUDIT_WAIT_STACK',plain)
+  self.assertEqual(observed['WF_TIER3_AUDIT_WAIT_STACK'],'1')
+  self.assertEqual(observed['WF_TIER3_RETAINED_AUDIT_TRACE'],'1')
+  self.assertEqual(args,new_args)
+  self.assertEqual(flags,new_flags)
+  self.assertEqual(plain['WF_TIER3_SYNC_INTERVAL'],observed['WF_TIER3_SYNC_INTERVAL'])
+  with self.assertRaises(ValueError):soak.execution('journal','24h',1,Path('/tmp/f'),'sigkill',False,audit_wait_stack=True)
  def test_memory_budget_is_explicit_and_does_not_inherit_or_change_fault_gates(self):
   with patch.dict(os.environ,{'GOMEMLIMIT':'off','GOMAXPROCS':'99'}):
    plain,args,flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False)
