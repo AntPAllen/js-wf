@@ -1,0 +1,21 @@
+{
+  "build": [
+    "go",
+    "build",
+    "-p=1",
+    "-buildvcs=true",
+    "-o",
+    "/tmp/js-wf-fanout-accepted-queue-diagnosis-first-20261005/review-sdk",
+    "/tmp/js-wf-fanout-accepted-queue-diagnosis-first-20261005/helper.go"
+  ],
+  "run": [
+    "/tmp/js-wf-fanout-accepted-queue-diagnosis-first-20261005/review-sdk",
+    "/tmp/js-wf-fanout-accepted-queue-diagnosis-first-20261005/cluster",
+    "/tmp/js-wf-fanout-accepted-queue-diagnosis-first-20261005/retained-review.json"
+  ],
+  "environment": {
+    "GOCACHE": "/tmp/js-wf-go-build-cache-20261004",
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "2GiB"
+  }
+}

@@ -3216,3 +3216,27 @@ remainslive executinginterior; fullnative verdict pending. Diagnose remaining
 messageidentities/operations from freshcopies afterterminal before any changed
 profile; no unchangedrerun, originaltimeout extension or servercause claim.
 [Live first-case observation](scale/fanout-combined-boundaries-2026-10-05/physical-drain-launch/first-case-observation.json).
+
+### Hosted fullsix combined500 fanout accepted — 2026-10-05
+
+Executed7a4d739 native racePASS257.12s; run37333174296/job111841179439/artifact
+11355718693 source-bound terminalsuccess. ExactuploadedZIP/GitHubdigest/all16758
+filemembers/threeparts readbackverified; noduplicate expanded archive. ActualSDK/
+cleanGit/race/childSDKcaptures/exactproducer/667Gitinputs/3287selectedexternal
+inputs verified, originalchecker acceptance regenerated equal. Six actualparent
+SIGKILL/libraryR3restarts/currentreplicas/prefix/higher epoch/500childresults/
+parent249500/501invocations-journals-terminals verified. Hostedproc provenance
+through exactproducer/nativejoblog; finalintegrity/result/prefix named-testscope,
+noindependentcopy/physicaldrain/fullmatrix/24h orhistoricalfailure promotion.
+[Complete hosted proof](scale/fanout-combined-boundaries-2026-10-05/hosted-37333174296/).
+
+### Accepted fanout terminal-parent queue identified — 2026-10-05
+
+Freshcopies ofaccepted25b327c creationfirst show all500rawWF_RUNmessages are
+parent.large-fanout onwf.run.52; parentCompleted/all500childterminal/64durables,
+onlyWF_P_52nonzero499pending1ackpending. Stablecount/tail/fullcensus,1.023swhole
+underoriginal20s. ActualSDK/helperGit/selectedsource inputs/2093originalfiles
+unchanged verified; completecopy/source/executable/process/diagnosis archived.
+Thislocalizes residualterminalwakeups; itdoesnotprove later3413731 timeoutcause
+orqualifyphysicaldrain. Newprofile fullterminalverdict stillpending.
+[Complete queue diagnosis](scale/fanout-combined-boundaries-2026-10-05/accepted-queue-diagnosis/).

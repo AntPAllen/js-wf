@@ -1,0 +1,355 @@
+﻿2026-10-05T15:47:14.6623031Z Current runner version: '2.337.0'
+2026-10-05T15:47:14.6649720Z ##[group]Runner Image Provisioner
+2026-10-05T15:47:14.6650725Z Hosted Compute Agent
+2026-10-05T15:47:14.6651432Z Version: 20260901.588
+2026-10-05T15:47:14.6652123Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-05T15:47:14.6652977Z Build Date: 2026-09-01T19:56:44Z
+2026-10-05T15:47:14.6653758Z Worker ID: {00b0ffc2-0d8e-4a48-b4a3-f7e628dad762}
+2026-10-05T15:47:14.6654613Z Azure Region: northcentralus
+2026-10-05T15:47:14.6655297Z ##[endgroup]
+2026-10-05T15:47:14.6657025Z ##[group]Operating System
+2026-10-05T15:47:14.6657803Z Ubuntu
+2026-10-05T15:47:14.6658420Z 24.04.5
+2026-10-05T15:47:14.6659021Z LTS
+2026-10-05T15:47:14.6659612Z ##[endgroup]
+2026-10-05T15:47:14.6660223Z ##[group]Runner Image
+2026-10-05T15:47:14.6660925Z Image: ubuntu-24.04
+2026-10-05T15:47:14.6661583Z Version: 20260927.320.1
+2026-10-05T15:47:14.6663477Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-05T15:47:14.6665099Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-05T15:47:14.6666326Z ##[endgroup]
+2026-10-05T15:47:14.6667624Z ##[group]GITHUB_TOKEN Permissions
+2026-10-05T15:47:14.6670070Z Contents: read
+2026-10-05T15:47:14.6670709Z Metadata: read
+2026-10-05T15:47:14.6671429Z ##[endgroup]
+2026-10-05T15:47:14.6673732Z Secret source: Actions
+2026-10-05T15:47:14.6674813Z Cache mode: write
+2026-10-05T15:47:14.6675991Z Prepare workflow directory
+2026-10-05T15:47:14.7248399Z Prepare all required actions
+2026-10-05T15:47:14.7298403Z Getting action download info
+2026-10-05T15:47:15.0101749Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-05T15:47:15.1115246Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+2026-10-05T15:47:15.5030054Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-05T15:47:15.7110881Z Complete job name: combined
+2026-10-05T15:47:15.7961503Z ##[group]Run actions/checkout@v4
+2026-10-05T15:47:15.7962657Z with:
+2026-10-05T15:47:15.7963165Z   fetch-depth: 1
+2026-10-05T15:47:15.7963684Z   filter: blob:none
+2026-10-05T15:47:15.7964230Z   sparse-checkout-cone-mode: false
+2026-10-05T15:47:15.7965174Z   sparse-checkout: **/*.go
+/go.mod
+/go.sum
+/scripts/
+/.github/
+/integration/
+/docs/monitoring/
+
+2026-10-05T15:47:15.7966810Z   repository: AntPAllen/js-wf
+2026-10-05T15:47:15.7971929Z   token: ***
+2026-10-05T15:47:15.7972450Z   ssh-strict: true
+2026-10-05T15:47:15.7972969Z   ssh-user: git
+2026-10-05T15:47:15.7973499Z   persist-credentials: true
+2026-10-05T15:47:15.7974061Z   clean: true
+2026-10-05T15:47:15.7974551Z   fetch-tags: false
+2026-10-05T15:47:15.7975077Z   show-progress: true
+2026-10-05T15:47:15.7975586Z   lfs: false
+2026-10-05T15:47:15.7976211Z   submodules: false
+2026-10-05T15:47:15.7976730Z   set-safe-directory: true
+2026-10-05T15:47:15.7977326Z   allow-unsafe-pr-checkout: false
+2026-10-05T15:47:15.7978930Z env:
+2026-10-05T15:47:15.7979759Z   GOMAXPROCS: 2
+2026-10-05T15:47:15.7980595Z   GOMEMLIMIT: 2GiB
+2026-10-05T15:47:15.7981523Z   EVIDENCE_ROOT: /tmp/fanout-combined-37333174296-1
+2026-10-05T15:47:15.7982713Z   FAULT_SEED_INPUT: 1
+2026-10-05T15:47:15.7983564Z ##[endgroup]
+2026-10-05T15:47:15.9060930Z Syncing repository: AntPAllen/js-wf
+2026-10-05T15:47:15.9064425Z ##[group]Getting Git version info
+2026-10-05T15:47:15.9065620Z Working directory is '/home/runner/work/js-wf/js-wf'
+2026-10-05T15:47:15.9067744Z [command]/usr/bin/git version
+2026-10-05T15:47:15.9079000Z git version 2.55.0
+2026-10-05T15:47:15.9099313Z ##[endgroup]
+2026-10-05T15:47:15.9114621Z Temporarily overriding HOME='/home/runner/work/_temp/c3287ea9-1e65-4bff-a1ff-d0a61a01b00b' before making global git config changes
+2026-10-05T15:47:15.9117111Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-05T15:47:15.9123359Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+2026-10-05T15:47:15.9177056Z Deleting the contents of '/home/runner/work/js-wf/js-wf'
+2026-10-05T15:47:15.9181153Z ##[group]Initializing the repository
+2026-10-05T15:47:15.9190653Z [command]/usr/bin/git init /home/runner/work/js-wf/js-wf
+2026-10-05T15:47:15.9290592Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-05T15:47:15.9292780Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-05T15:47:15.9296895Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-05T15:47:15.9298541Z hint: call:
+2026-10-05T15:47:15.9299571Z hint:
+2026-10-05T15:47:15.9301508Z hint: 	git config --global init.defaultBranch <name>
+2026-10-05T15:47:15.9302853Z hint:
+2026-10-05T15:47:15.9304190Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-05T15:47:15.9306293Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-05T15:47:15.9307885Z hint:
+2026-10-05T15:47:15.9308976Z hint: 	git branch -m <name>
+2026-10-05T15:47:15.9310125Z hint:
+2026-10-05T15:47:15.9311461Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-05T15:47:15.9313647Z Initialized empty Git repository in /home/runner/work/js-wf/js-wf/.git/
+2026-10-05T15:47:15.9318522Z [command]/usr/bin/git remote add origin https://github.com/AntPAllen/js-wf
+2026-10-05T15:47:15.9357026Z ##[endgroup]
+2026-10-05T15:47:15.9358456Z ##[group]Disabling automatic garbage collection
+2026-10-05T15:47:15.9362195Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-05T15:47:15.9398848Z ##[endgroup]
+2026-10-05T15:47:15.9400769Z ##[group]Setting up auth
+2026-10-05T15:47:15.9406965Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-05T15:47:15.9446665Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-05T15:47:15.9822829Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-05T15:47:15.9868121Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-05T15:47:16.0130452Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-05T15:47:16.0171558Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-05T15:47:16.0424586Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-05T15:47:16.0469740Z ##[endgroup]
+2026-10-05T15:47:16.0479300Z ##[group]Fetching the repository
+2026-10-05T15:47:16.0481251Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin +7a4d7392e0d2e28b624b7ea504e41223ec9a9f04:refs/remotes/origin/main
+2026-10-05T15:47:16.4366731Z From https://github.com/AntPAllen/js-wf
+2026-10-05T15:47:16.4368581Z  * [new ref]         7a4d7392e0d2e28b624b7ea504e41223ec9a9f04 -> origin/main
+2026-10-05T15:47:16.4379609Z ##[endgroup]
+2026-10-05T15:47:16.4381454Z ##[group]Determining the checkout info
+2026-10-05T15:47:16.4390465Z ##[endgroup]
+2026-10-05T15:47:16.4392201Z ##[group]Setting up sparse checkout
+2026-10-05T15:47:16.4393909Z [command]/usr/bin/git config core.sparseCheckout true
+2026-10-05T15:47:16.4424782Z [command]/usr/bin/git rev-parse --git-path info/sparse-checkout
+2026-10-05T15:47:16.4453727Z .git/info/sparse-checkout
+2026-10-05T15:47:16.4463094Z ##[endgroup]
+2026-10-05T15:47:16.4465233Z ##[group]Checking out the ref
+2026-10-05T15:47:16.4469441Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-05T15:47:17.5202684Z Updating files:  56% (453/801)
+2026-10-05T15:47:17.5208168Z Updating files:  57% (457/801)
+2026-10-05T15:47:17.5213974Z Updating files:  58% (465/801)
+2026-10-05T15:47:17.5223584Z Updating files:  59% (473/801)
+2026-10-05T15:47:17.5229128Z Updating files:  60% (481/801)
+2026-10-05T15:47:17.5234483Z Updating files:  61% (489/801)
+2026-10-05T15:47:17.5240739Z Updating files:  62% (497/801)
+2026-10-05T15:47:17.5245764Z Updating files:  63% (505/801)
+2026-10-05T15:47:17.5250719Z Updating files:  64% (513/801)
+2026-10-05T15:47:17.5257232Z Updating files:  65% (521/801)
+2026-10-05T15:47:17.5262534Z Updating files:  66% (529/801)
+2026-10-05T15:47:17.5268666Z Updating files:  67% (537/801)
+2026-10-05T15:47:17.5276583Z Updating files:  68% (545/801)
+2026-10-05T15:47:17.5281859Z Updating files:  69% (553/801)
+2026-10-05T15:47:17.5287668Z Updating files:  70% (561/801)
+2026-10-05T15:47:17.5293815Z Updating files:  71% (569/801)
+2026-10-05T15:47:17.5300353Z Updating files:  72% (577/801)
+2026-10-05T15:47:17.5306065Z Updating files:  73% (585/801)
+2026-10-05T15:47:17.5311508Z Updating files:  74% (593/801)
+2026-10-05T15:47:17.5318016Z Updating files:  75% (601/801)
+2026-10-05T15:47:17.5322534Z Updating files:  76% (609/801)
+2026-10-05T15:47:17.5328039Z Updating files:  77% (617/801)
+2026-10-05T15:47:17.5333358Z Updating files:  78% (625/801)
+2026-10-05T15:47:17.5340730Z Updating files:  79% (633/801)
+2026-10-05T15:47:17.5346822Z Updating files:  80% (641/801)
+2026-10-05T15:47:17.5351882Z Updating files:  81% (649/801)
+2026-10-05T15:47:17.5357763Z Updating files:  82% (657/801)
+2026-10-05T15:47:17.5363481Z Updating files:  83% (665/801)
+2026-10-05T15:47:17.5370338Z Updating files:  84% (673/801)
+2026-10-05T15:47:17.5376624Z Updating files:  85% (681/801)
+2026-10-05T15:47:17.5382104Z Updating files:  86% (689/801)
+2026-10-05T15:47:17.5387806Z Updating files:  87% (697/801)
+2026-10-05T15:47:17.5393555Z Updating files:  88% (705/801)
+2026-10-05T15:47:17.5399277Z Updating files:  89% (713/801)
+2026-10-05T15:47:17.5404196Z Updating files:  90% (721/801)
+2026-10-05T15:47:17.5410254Z Updating files:  91% (729/801)
+2026-10-05T15:47:17.5417142Z Updating files:  92% (737/801)
+2026-10-05T15:47:17.5422357Z Updating files:  93% (745/801)
+2026-10-05T15:47:17.5426733Z Updating files:  94% (753/801)
+2026-10-05T15:47:17.5431274Z Updating files:  95% (761/801)
+2026-10-05T15:47:17.5436807Z Updating files:  96% (769/801)
+2026-10-05T15:47:17.5440849Z Updating files:  97% (777/801)
+2026-10-05T15:47:17.5445149Z Updating files:  98% (785/801)
+2026-10-05T15:47:17.5452554Z Updating files:  99% (793/801)
+2026-10-05T15:47:17.5452984Z Updating files: 100% (801/801)
+2026-10-05T15:47:17.5453378Z Updating files: 100% (801/801), done.
+2026-10-05T15:47:17.5579136Z Switched to a new branch 'main'
+2026-10-05T15:47:17.5583856Z branch 'main' set up to track 'origin/main'.
+2026-10-05T15:47:17.5594223Z ##[endgroup]
+2026-10-05T15:47:17.5647804Z [command]/usr/bin/git log -1 --format=%H
+2026-10-05T15:47:17.5682347Z 7a4d7392e0d2e28b624b7ea504e41223ec9a9f04
+2026-10-05T15:47:17.6030008Z ##[group]Run actions/setup-go@v5
+2026-10-05T15:47:17.6030419Z with:
+2026-10-05T15:47:17.6030718Z   go-version-file: go.mod
+2026-10-05T15:47:17.6031060Z   check-latest: false
+2026-10-05T15:47:17.6033714Z   token: ***
+2026-10-05T15:47:17.6034001Z   cache: true
+2026-10-05T15:47:17.6034284Z env:
+2026-10-05T15:47:17.6034557Z   GOMAXPROCS: 2
+2026-10-05T15:47:17.6034855Z   GOMEMLIMIT: 2GiB
+2026-10-05T15:47:17.6035206Z   EVIDENCE_ROOT: /tmp/fanout-combined-37333174296-1
+2026-10-05T15:47:17.6035611Z   FAULT_SEED_INPUT: 1
+2026-10-05T15:47:17.6036066Z ##[endgroup]
+2026-10-05T15:47:17.7470246Z Setup go version spec 1.27.1
+2026-10-05T15:47:17.7484073Z Attempting to download 1.27.1...
+2026-10-05T15:47:17.7645020Z (node:2336) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-05T15:47:17.7646437Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-05T15:47:18.4776509Z matching 1.27.1...
+2026-10-05T15:47:18.4804860Z Acquiring 1.27.1 from https://github.com/actions/go-versions/releases/download/1.27.1-33583469715/go-1.27.1-linux-x64.tar.gz
+2026-10-05T15:47:18.9217698Z Extracting Go...
+2026-10-05T15:47:18.9340710Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/4ca7cb3f-2af4-48da-911d-7d703a4313ca -f /home/runner/work/_temp/4c298f9a-728d-445f-a79b-fac634380b22
+2026-10-05T15:47:20.7894368Z Successfully extracted go to /home/runner/work/_temp/4ca7cb3f-2af4-48da-911d-7d703a4313ca
+2026-10-05T15:47:20.7895047Z Adding to the cache ...
+2026-10-05T15:47:26.9265626Z Successfully cached go to /opt/hostedtoolcache/go/1.27.1/x64
+2026-10-05T15:47:26.9267393Z Added go to the path
+2026-10-05T15:47:26.9270463Z Successfully set up Go version 1.27.1
+2026-10-05T15:47:26.9640979Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+2026-10-05T15:47:26.9690146Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+2026-10-05T15:47:26.9740706Z /home/runner/go/pkg/mod
+2026-10-05T15:47:26.9760396Z /home/runner/.cache/go-build
+2026-10-05T15:47:27.1281142Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+2026-10-05T15:47:27.1397051Z (node:2336) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-05T15:47:28.2447259Z Received 130023424 of 209563510 (62.0%), 123.9 MBs/sec
+2026-10-05T15:47:28.8453471Z Received 209563510 of 209563510 (100.0%), 124.6 MBs/sec
+2026-10-05T15:47:28.8453908Z Cache Size: ~200 MB (209563510 B)
+2026-10-05T15:47:28.8571083Z [command]/usr/bin/tar -xf /home/runner/work/_temp/5208e791-1db6-498c-9859-571eea09b622/cache.tzst -P -C /home/runner/work/js-wf/js-wf --use-compress-program unzstd
+2026-10-05T15:47:29.9363956Z Cache restored successfully
+2026-10-05T15:47:29.9473478Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+2026-10-05T15:47:29.9503547Z go version go1.27.1 linux/amd64
+2026-10-05T15:47:29.9503850Z 
+2026-10-05T15:47:29.9504278Z ##[group]go env
+2026-10-05T15:47:29.9638791Z AR='ar'
+2026-10-05T15:47:29.9639168Z CC='gcc'
+2026-10-05T15:47:29.9639501Z CGO_CFLAGS='-O2 -g'
+2026-10-05T15:47:29.9639873Z CGO_CPPFLAGS=''
+2026-10-05T15:47:29.9640230Z CGO_CXXFLAGS='-O2 -g'
+2026-10-05T15:47:29.9640611Z CGO_ENABLED='1'
+2026-10-05T15:47:29.9640931Z CGO_FFLAGS='-O2 -g'
+2026-10-05T15:47:29.9641303Z CGO_LDFLAGS='-O2 -g'
+2026-10-05T15:47:29.9641727Z CXX='g++'
+2026-10-05T15:47:29.9642026Z GCCGO='gccgo'
+2026-10-05T15:47:29.9642320Z GO111MODULE=''
+2026-10-05T15:47:29.9642614Z GOAMD64='v1'
+2026-10-05T15:47:29.9642893Z GOARCH='amd64'
+2026-10-05T15:47:29.9643175Z GOAUTH='netrc'
+2026-10-05T15:47:29.9643480Z GOBIN='/home/runner/go/bin'
+2026-10-05T15:47:29.9643894Z GOCACHE='/home/runner/.cache/go-build'
+2026-10-05T15:47:29.9644308Z GOCACHEPROG=''
+2026-10-05T15:47:29.9644991Z GODEBUG=''
+2026-10-05T15:47:29.9645314Z GOENV='/home/runner/.config/go/env'
+2026-10-05T15:47:29.9645706Z GOEXE=''
+2026-10-05T15:47:29.9646180Z GOEXPERIMENT=''
+2026-10-05T15:47:29.9646478Z GOFIPS140='off'
+2026-10-05T15:47:29.9646763Z GOFLAGS=''
+2026-10-05T15:47:29.9647742Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build1042057516=/tmp/go-build -gno-record-gcc-switches'
+2026-10-05T15:47:29.9648769Z GOHOSTARCH='amd64'
+2026-10-05T15:47:29.9649074Z GOHOSTOS='linux'
+2026-10-05T15:47:29.9649445Z GOINSECURE=''
+2026-10-05T15:47:29.9649860Z GOMOD='/home/runner/work/js-wf/js-wf/go.mod'
+2026-10-05T15:47:29.9650348Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-10-05T15:47:29.9650740Z GONOPROXY=''
+2026-10-05T15:47:29.9651032Z GONOSUMDB=''
+2026-10-05T15:47:29.9651321Z GOOS='linux'
+2026-10-05T15:47:29.9651627Z GOPACKAGESDRIVER=''
+2026-10-05T15:47:29.9651975Z GOPATH='/home/runner/go'
+2026-10-05T15:47:29.9652326Z GOPRIVATE=''
+2026-10-05T15:47:29.9652721Z GOPROXY='https://proxy.golang.org,direct'
+2026-10-05T15:47:29.9653206Z GOROOT='/opt/hostedtoolcache/go/1.27.1/x64'
+2026-10-05T15:47:29.9653882Z GOSUMDB='sum.golang.org'
+2026-10-05T15:47:29.9654222Z GOTELEMETRY='local'
+2026-10-05T15:47:29.9654649Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-10-05T15:47:29.9655122Z GOTMPDIR=''
+2026-10-05T15:47:29.9655443Z GOTOOLCHAIN='auto'
+2026-10-05T15:47:29.9656073Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.1/x64/pkg/tool/linux_amd64'
+2026-10-05T15:47:29.9656616Z GOVCS=''
+2026-10-05T15:47:29.9656915Z GOVERSION='go1.27.1'
+2026-10-05T15:47:29.9657232Z GOWORK=''
+2026-10-05T15:47:29.9657539Z PKG_CONFIG='pkg-config'
+2026-10-05T15:47:29.9657749Z 
+2026-10-05T15:47:29.9658214Z ##[endgroup]
+2026-10-05T15:47:29.9869863Z ##[group]Run python3 -m unittest discover -s scripts -p test_fanout_boundary_matrix.py
+2026-10-05T15:47:29.9870586Z [36;1mpython3 -m unittest discover -s scripts -p test_fanout_boundary_matrix.py[0m
+2026-10-05T15:47:30.0117004Z shell: /usr/bin/bash -e {0}
+2026-10-05T15:47:30.0117340Z env:
+2026-10-05T15:47:30.0117588Z   GOMAXPROCS: 2
+2026-10-05T15:47:30.0117845Z   GOMEMLIMIT: 2GiB
+2026-10-05T15:47:30.0118133Z   EVIDENCE_ROOT: /tmp/fanout-combined-37333174296-1
+2026-10-05T15:47:30.0118482Z   FAULT_SEED_INPUT: 1
+2026-10-05T15:47:30.0118730Z ##[endgroup]
+2026-10-05T15:47:30.1310445Z ..........
+2026-10-05T15:47:30.1310835Z ----------------------------------------------------------------------
+2026-10-05T15:47:30.1311282Z Ran 10 tests in 0.004s
+2026-10-05T15:47:30.1311445Z 
+2026-10-05T15:47:30.1311547Z OK
+2026-10-05T15:47:30.1440876Z ##[group]Run python3 scripts/run-fanout-combined-test.py --root "$EVIDENCE_ROOT" --seed "$FAULT_SEED_INPUT"
+2026-10-05T15:47:30.1441676Z [36;1mpython3 scripts/run-fanout-combined-test.py --root "$EVIDENCE_ROOT" --seed "$FAULT_SEED_INPUT"[0m
+2026-10-05T15:47:30.1516823Z shell: /usr/bin/bash -e {0}
+2026-10-05T15:47:30.1517142Z env:
+2026-10-05T15:47:30.1517413Z   GOMAXPROCS: 2
+2026-10-05T15:47:30.1517720Z   GOMEMLIMIT: 2GiB
+2026-10-05T15:47:30.1518012Z   EVIDENCE_ROOT: /tmp/fanout-combined-37333174296-1
+2026-10-05T15:47:30.1518357Z   FAULT_SEED_INPUT: 1
+2026-10-05T15:47:30.1518629Z ##[endgroup]
+2026-10-05T15:47:32.2440238Z go: downloading google.golang.org/protobuf v1.36.6
+2026-10-05T15:47:58.9620101Z NATIVE_STARTED 3554 7a4d7392e0d2e28b624b7ea504e41223ec9a9f04
+2026-10-05T15:52:17.2051030Z NATIVE_FINISHED 0
+2026-10-05T15:52:17.2160010Z ##[group]Run go tool test2json -p js-wf/integration < "$EVIDENCE_ROOT/native.log" > "$EVIDENCE_ROOT/converted-events.jsonl"
+2026-10-05T15:52:17.2160856Z [36;1mgo tool test2json -p js-wf/integration < "$EVIDENCE_ROOT/native.log" > "$EVIDENCE_ROOT/converted-events.jsonl"[0m
+2026-10-05T15:52:17.2161836Z [36;1mpython3 scripts/check-fanout-boundary-matrix.py --combined --events "$EVIDENCE_ROOT/converted-events.jsonl" --output "$EVIDENCE_ROOT/acceptance.json"[0m
+2026-10-05T15:52:17.2234409Z shell: /usr/bin/bash -e {0}
+2026-10-05T15:52:17.2234700Z env:
+2026-10-05T15:52:17.2234917Z   GOMAXPROCS: 2
+2026-10-05T15:52:17.2235156Z   GOMEMLIMIT: 2GiB
+2026-10-05T15:52:17.2235436Z   EVIDENCE_ROOT: /tmp/fanout-combined-37333174296-1
+2026-10-05T15:52:17.2235792Z   FAULT_SEED_INPUT: 1
+2026-10-05T15:52:17.2236220Z ##[endgroup]
+2026-10-05T15:52:17.6654376Z ##[group]Run actions/upload-artifact@v4
+2026-10-05T15:52:17.6654696Z with:
+2026-10-05T15:52:17.6654957Z   name: fanout-combined-boundaries-37333174296-1
+2026-10-05T15:52:17.6655299Z   path: /tmp/fanout-combined-37333174296-1
+2026-10-05T15:52:17.6655609Z   include-hidden-files: true
+2026-10-05T15:52:17.6656167Z   if-no-files-found: error
+2026-10-05T15:52:17.6656474Z   retention-days: 30
+2026-10-05T15:52:17.6656709Z   compression-level: 6
+2026-10-05T15:52:17.6656942Z   overwrite: false
+2026-10-05T15:52:17.6657222Z env:
+2026-10-05T15:52:17.6657504Z   GOMAXPROCS: 2
+2026-10-05T15:52:17.6657804Z   GOMEMLIMIT: 2GiB
+2026-10-05T15:52:17.6658176Z   EVIDENCE_ROOT: /tmp/fanout-combined-37333174296-1
+2026-10-05T15:52:17.6658650Z   FAULT_SEED_INPUT: 1
+2026-10-05T15:52:17.6658880Z ##[endgroup]
+2026-10-05T15:52:17.8401885Z (node:3783) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-05T15:52:17.8403737Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-05T15:52:20.9447781Z With the provided path, there will be 16758 files uploaded
+2026-10-05T15:52:20.9453061Z Artifact name is valid!
+2026-10-05T15:52:20.9453800Z Root directory input is valid!
+2026-10-05T15:52:21.3736719Z Beginning upload of artifact content to blob storage
+2026-10-05T15:52:22.7152677Z (node:3783) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-05T15:52:23.0499431Z Uploaded bytes 8388608
+2026-10-05T15:52:23.8086931Z Uploaded bytes 16777216
+2026-10-05T15:52:24.1202222Z Uploaded bytes 25165824
+2026-10-05T15:52:25.4138483Z Uploaded bytes 33554432
+2026-10-05T15:52:28.1988736Z Uploaded bytes 41943040
+2026-10-05T15:52:30.1433256Z Uploaded bytes 50331648
+2026-10-05T15:52:31.7383810Z Uploaded bytes 58720256
+2026-10-05T15:52:33.2808752Z Uploaded bytes 67108864
+2026-10-05T15:52:34.1708342Z Uploaded bytes 72944376
+2026-10-05T15:52:34.2021599Z Finished uploading artifact content to blob storage!
+2026-10-05T15:52:34.2024739Z SHA256 digest of uploaded artifact zip is b5ccffbebf4afd59c499cc1d2b4a392b43d70c3bcc9069ae29974cf535a3df68
+2026-10-05T15:52:34.2027122Z Finalizing artifact upload
+2026-10-05T15:52:34.5527765Z Artifact fanout-combined-boundaries-37333174296-1.zip successfully finalized. Artifact ID 11355718693
+2026-10-05T15:52:34.5528728Z Artifact fanout-combined-boundaries-37333174296-1 has been successfully uploaded! Final size is 72944376 bytes. Artifact ID is 11355718693
+2026-10-05T15:52:34.5537205Z Artifact download URL: https://github.com/AntPAllen/js-wf/actions/runs/37333174296/artifacts/11355718693
+2026-10-05T15:52:34.6122239Z Post job cleanup.
+2026-10-05T15:52:34.7375051Z (node:3799) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-05T15:52:34.7376534Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-05T15:52:34.7470783Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+2026-10-05T15:52:34.7517076Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+2026-10-05T15:52:34.7551231Z /home/runner/go/pkg/mod
+2026-10-05T15:52:34.7571892Z /home/runner/.cache/go-build
+2026-10-05T15:52:34.7579305Z Cache hit occurred on the primary key setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb, not saving cache.
+2026-10-05T15:52:34.7774829Z Post job cleanup.
+2026-10-05T15:52:34.8767452Z [command]/usr/bin/git version
+2026-10-05T15:52:34.8815007Z git version 2.55.0
+2026-10-05T15:52:34.8855680Z Temporarily overriding HOME='/home/runner/work/_temp/bf0b44eb-a6fa-4d97-8e91-1cc4c24ee789' before making global git config changes
+2026-10-05T15:52:34.8857960Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-05T15:52:34.8862827Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+2026-10-05T15:52:34.8912840Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-05T15:52:34.8954331Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-05T15:52:34.9300161Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-05T15:52:34.9360325Z http.https://github.com/.extraheader
+2026-10-05T15:52:34.9383891Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-05T15:52:34.9433147Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-05T15:52:34.9721279Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-05T15:52:34.9762420Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-05T15:52:35.0203239Z Cleaning up orphan processes
+2026-10-05T15:52:35.0544399Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

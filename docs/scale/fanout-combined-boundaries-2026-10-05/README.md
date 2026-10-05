@@ -26,6 +26,12 @@ retain nonzero queues through allthree peers, so physical drain is unqualified.
 Earlier failed parent runs remain failed and preserved below. No historical
 NATS cause or production runtime timing change is claimed.
 
+A separate [hosted source-bound run](hosted-37333174296/) at7a4d739 passed allsix
+in257.12s; completeexactGitHubZIP/source/executable/fault/guard review verified.
+[Rawqueue diagnosis](accepted-queue-diagnosis/) ofthe earlier acceptedcreationfirst
+copy identifies500terminal-parent wakeups onpartition52, not incompletechildren.
+Newphysicaldrain profile remains underreview; originalgate budgets unchanged.
+
 ## Earlier failed preparation
 
 The six-boundary race run at executed `e20cf89` failed after 1046.21 seconds.

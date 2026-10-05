@@ -35,10 +35,11 @@ actualSDK162125 checkedlive, native batch1746 / approximately4h03m. The diagnost
 million-timer campaign remains running (actualprogram101283). Both original
 terminal gates remain pending; running observations do not resolve prior failures.
 
-The original hosted six-boundary fanout run at7a4d739 is now in progress:
+The original hosted six-boundary fanout run at7a4d739 completed successfully:
 [run37333174296](https://github.com/AntPAllen/js-wf/actions/runs/37333174296),
-job111841179439. Checkout/setup/acceptance controls passed; raceproducer step
-running, terminal artifact review pending. Earlier HTTP422 and corrected dispatch
+job111841179439, nativePASS257.12s; allsixboundaries and terminalartifact
+independently reviewed. Complete16758 ZIPfiles/threeparts/GitHubdigest verified.
+[Complete hosted proof](scale/fanout-combined-boundaries-2026-10-05/hosted-37333174296/). Earlier HTTP422 and corrected dispatch
 remain preserved in the [CI launch proof](scale/fanout-combined-boundaries-2026-10-05/ci-launch/).
 
 A new fullsix-case physicaldrain profile at3413731 is running locally, actual
@@ -123,6 +124,24 @@ no-responder cause remains unconfirmed. Correct fixture lifecycle/readiness and
 trace dependencies before another full run. [Preserved failed proof](scale/postgres-projection-fault-50000-2026-10-05/failed/).
 
 ## Latest accepted evidence
+
+- **Hosted fullsix combined fanout boundaries qualified at7a4d739:** native
+  racePASS257.12s, sixactualparentSIGKILL/libraryR3journal restarts;500childresults/
+  parent249500/501invocations-journals-terminals/exactprefix/higher successor epoch.
+  Source-bound terminalrun/job/artifact, actualSDK/childcaptures/exactproducer/
+  667Gitinputs/3287externalinputs and originalchecker acceptance independently
+  verified; all16758 exactZIPfiles/threeparts matchGitHubdigest. Finalintegrity/
+  prefix/results named-test scope; no independentcopied audit, physicaldrain,
+  fullfaultmatrix or24h/historicalfailure promotion.
+  [Complete hosted proof](scale/fanout-combined-boundaries-2026-10-05/hosted-37333174296/).
+
+- **Residualfanout queue localized in accepted25b327c creationfirst:** fresh
+  copies only, full500rawmessages allterminalparent onpartition52; parentCompleted/
+  500terminalchildren,64durables/only52nonzero499pending1ackpending. Whole1.023s
+  under20s,2093originalfiles unchanged, actualSDK/helperGit/selectedinputs verified.
+  Doesnotidentify cause oflater3413731 physicaldrain timeouts orqualifydrain.
+  [Complete queue diagnosis](scale/fanout-combined-boundaries-2026-10-05/accepted-queue-diagnosis/).
+
 
 - **Independent six-case fanout retained audits passed:** fresh copies only of
   the successful25b327c clusters. Each verifies501 invocations/journals/terminals,
