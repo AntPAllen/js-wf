@@ -1,0 +1,147 @@
+// Standalone review helper: build from a copied .go file in this module.
+// The caller supplies ONLY a fresh copy of closed R3 testcluster stores and
+// retains executable/source identity and original/copy hashes externally.
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"time"
+
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/integrity"
+	"js-wf/provision"
+	"js-wf/testcluster"
+)
+
+func main() {
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+func run() error {
+	if len(os.Args) != 4 || !filepath.IsAbs(os.Args[1]) {
+		return fmt.Errorf("usage: projection-retained-review ABSOLUTE_COPIED_CLUSTER_ROOT COUNT OUTPUT_JSON")
+	}
+	count, err := strconv.Atoi(os.Args[2])
+	if err != nil || count < 1 {
+		return fmt.Errorf("invalid expected count")
+	}
+	root := os.Args[1]
+	// External observer gets time to capture /proc executable identity before
+	// opening copies. This delay is outside admission/audit budgets.
+	time.Sleep(250 * time.Millisecond)
+	cluster, err := testcluster.Start(root, 3)
+	if err != nil {
+		return err
+	}
+	defer cluster.Close()
+	all := make([]jetstream.JetStream, 3)
+	for i, nc := range cluster.Clients {
+		all[i], err = jetstream.New(nc)
+		if err != nil {
+			return err
+		}
+	}
+	// Readiness observes existing assets; it never provisions or alters them.
+	ready, stopReady := context.WithTimeout(context.Background(), 15*time.Second)
+	var roles = []string{"WF_INV", "WF_JRN", "WF_RUN", "KV_WF_STATE"}
+	for _, name := range roles {
+		admitted := false
+		for ready.Err() == nil {
+			call, stop := context.WithTimeout(ready, 2*time.Second)
+			stream, readErr := all[0].Stream(call, name)
+			var info *jetstream.StreamInfo
+			if readErr == nil {
+				info, readErr = stream.Info(call)
+			}
+			stop()
+			if readErr == nil && info.Cluster != nil && info.Cluster.Leader != "" && len(info.Cluster.Replicas) == 2 {
+				current := true
+				for _, peer := range info.Cluster.Replicas {
+					current = current && peer.Current && !peer.Offline
+				}
+				if current {
+					admitted = true
+					break
+				}
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+		if !admitted {
+			stopReady()
+			return fmt.Errorf("copied source %s not current: %w", name, ready.Err())
+		}
+	}
+	stopReady()
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	began := time.Now()
+	report, err := integrity.CheckWithStreamingStateReads(ctx, all[0])
+	if err != nil {
+		return fmt.Errorf("full copied retained audit: %w", err)
+	}
+	elapsed := time.Since(began)
+	if report.Invocations != count || report.Journals != count || report.Entries != 2*count || report.Terminal != count {
+		return fmt.Errorf("full copied retained counts %+v expected=%d", report, count)
+	}
+	// Confirm physical queue and every partition's durable state after audit.
+	var queue = []*jetstream.StreamInfo{}
+	for i, js := range all {
+		stream, err := js.Stream(ctx, "WF_RUN")
+		if err != nil {
+			return err
+		}
+		info, err := stream.Info(ctx)
+		if err != nil {
+			return err
+		}
+		if info.State.Msgs != 0 || info.State.Consumers != int(provision.Partitions) {
+			return fmt.Errorf("peer%d queue not drained: %+v", i, info.State)
+		}
+		queue = append(queue, info)
+	}
+	run, err := all[0].Stream(ctx, "WF_RUN")
+	if err != nil {
+		return err
+	}
+	consumers := run.ListConsumers(ctx)
+	checked := 0
+	for info := range consumers.Info() {
+		if info.NumPending != 0 || info.NumAckPending != 0 {
+			return fmt.Errorf("durable %s not drained pending=%d ack=%d", info.Name, info.NumPending, info.NumAckPending)
+		}
+		checked++
+	}
+	if err := consumers.Err(); err != nil {
+		return err
+	}
+	if checked != int(provision.Partitions) {
+		return fmt.Errorf("incomplete durable census %d expected=%d", checked, provision.Partitions)
+	}
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+	result := struct {
+		Scope         string                  `json:"scope"`
+		Report        integrity.Report        `json:"report"`
+		AuditNS       int64                   `json:"audit_ns"`
+		WholeReviewNS int64                   `json:"whole_review_ns"`
+		Queue         []*jetstream.StreamInfo `json:"queue_all_three_peers"`
+		Consumers     int                     `json:"drained_partition_consumers"`
+	}{"complete copied retained state; not historical fault cause or original projection recovery verdict", report, elapsed.Nanoseconds(), time.Since(began).Nanoseconds(), queue, checked}
+	data, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(os.Args[3], append(data, '\n'), 0600); err != nil {
+		return err
+	}
+	fmt.Printf("full retained audit invocations=%d journals=%d entries=%d terminal=%d audit=%s review=%s drained_consumers=%d\n", report.Invocations, report.Journals, report.Entries, report.Terminal, elapsed, time.Since(began), checked)
+	return nil
+}

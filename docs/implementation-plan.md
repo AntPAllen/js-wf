@@ -2942,3 +2942,16 @@ Initial nativecontrol failed beforefault at streamcreation; source/log retained,
 corrected with boundedreadiness under same30s control deadline. Full50000 original
 20m combinedcase stillneeds changedsource qualification; historicservercause and
 failedparents unconfirmed/unpromoted. DefaultKV path unchanged.
+
+### 2026-10-05 independent full projection retained audit prepared
+
+A standalone review helper opens only fresh copies of closed three-node
+retained stores. It observes existing R3 INV/JRN/RUN/STATE readiness without
+provisioning, then applies the complete streaming retained-state checker under
+original20s singleattempt: exact50000inv/journals/terminals and100000entries.
+It also requires physicalzero WF_RUN on allthreepeers and zero pending/ackpending
+on every partition durable, under that same review context. External producer
+must bind source/executable and original/copy byte hashes before and after the
+review. Helper compiles; copied50k nativeexecution pending. This is an independent
+raw-state gate, not a substitute for original projection recovery/rebuild verdict,
+concurrentfaults, historicalcauses, fullmatrices or24h. No originalstore reopen.
