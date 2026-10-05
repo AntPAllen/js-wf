@@ -28,12 +28,39 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 19:36 UTC
+
+The experimental concurrent retained-state reader is integrated behind an explicit
+flag; sequential defaults and the original 20 s / 60 s / three-attempt limits remain.
+It passes native corruption, compaction, cancellation, journal-leader fault and
+legacy 2.11 controls. A complete copied cohort of 87,920 workflows / 969,925 entries
+passes both readers with identical reports. Quiet-copy timings do not demonstrate
+meaningful speedup. With an actual state-watch consumer leader SIGKILL, the
+concurrent reader discards the incomplete initial set, retries, and passes the full
+cohort in 9.830075 s. Complete evidence is committed.
+[Concurrent reader evidence](scale/concurrent-state-audit-2026-10-05/).
+
+The seven-hour original soak remains failed. Trace review shows attempt2 completed
+its journal scan with approximately 265 ms remaining; watch creation left about
+152 ms. The incomplete state snapshot alone does not establish a server defect.
+A changed ten-minute live journal campaign at `bc02e68` is running with continuous
+workloads, confirmed leader SIGKILLs every 30 s and the experimental concurrent
+reader. Checkpoint40 passes 1,120 workflows / 12,337 entries; no final verdict yet.
+Actual SDK PID564524 and executable bytes are observed. Full 24-hour qualification
+and final-source matrices remain open.
+
+The diagnostic million-timer report at 19:36 UTC records 406,535 unique receipts
+and all one million publish acknowledgments. First all-server restart is confirmed;
+second restart, final delivery and physical drain remain pending. The experimental
+server candidate is not adopted, and running final-zero fields are placeholders.
+
 ## Latest follow-up — 2026-10-05 18:57 UTC
 
 The actual24-hour journal attempt at `aace912` has failed after25,201.93s
 (approximately7h). Checkpoint3140 cutoff87,920 exhausted allthree attempts in
 the original60s audit budget. Attempt2 reports an incomplete retained-state
-snapshot (11,190 included / last_revision17,741); no journal phase completion.
+snapshot (11,190 included / last_revision17,741). Attempt2 completed its journal
+scan before the state snapshot exhausted the remaining deadline.
 Last passing checkpoint3130 reports87,640 terminals /966,835 entries. Actual
 observedSDK162125 is gone andthe owned producer service is failed. Complete
 closed originals are archived bythe producer; independent archive/source/actualSDK
