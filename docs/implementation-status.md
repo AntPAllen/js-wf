@@ -12088,3 +12088,14 @@ invocations/journals/terminals/22537entries,allthreehistorymodels andthreeclient
 1695selectedinputs/actualSDK542506/threeactualNATS verified. Complete4036archive
 members/twoparts readback. Initialpreparation source mismatch remainspreserved;
 no originalstore reopen ornative rerun. [Proof](scale/tier2-retained-row-2026-10-05/hosted-partition-seed3-copied-audit/).
+
+### Retained upgrade smoke queue-drain failure preserved — 2026-10-05
+
+ActualSDK545168 at123bc4b normal35s upgrade seed1 fails86.82s. Full168terminals/
+1852entries andoneupgrade admitted,allterminal/progress cells<30s; finaloriginal
+30s queue drain leavesone rawmessage. Identity/causeunconfirmed. Independent
+668Git/3286external/onegenerated/actualSDK/threeinitiallegacy+onecurrentNATS
+verification passes; suppliedlegacybytes matchactual2.11.17processes. Complete
+6173archive members/fourparts readback. No unchangednative rerun ororiginalstore
+reopen. Newread-onlycopiedqueuehelper retainsresidualmessage/journal/state/lease/
+consumercensus; diagnosticexecutionpending. [Failed proof](scale/tier2-retained-row-2026-10-05/upgrade-smoke-failed/).
