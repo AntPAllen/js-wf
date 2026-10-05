@@ -1,0 +1,142 @@
+diff --git a/testcluster/block_disk_linux.go b/testcluster/block_disk_linux.go
+index a910b0b..ef0a78a 100644
+--- a/testcluster/block_disk_linux.go
++++ b/testcluster/block_disk_linux.go
+@@ -20,7 +20,6 @@ type BlockDisk struct {
+ 	StoreDir         string
+ 	root, loop, name string
+ 	mounted, mapped  bool
+-	retainMedia      bool
+ }
+ 
+ func NewBlockDisk(parent string) (_ *BlockDisk, err error) {
+@@ -204,14 +203,6 @@ func (d *BlockDisk) Stall(ctx context.Context, duration time.Duration) (proof Bl
+ 	}
+ }
+ 
+-// RetainMediaOnClose preserves the closed backing image for independent review.
+-// Call only for a successfully created fixture whose servers will be joined
+-// before Close. Close still resumes, unmounts and detaches all owned devices.
+-func (d *BlockDisk) RetainMediaOnClose() { d.retainMedia = true }
+-
+-// ImagePath identifies the private filesystem image, never a host block device.
+-func (d *BlockDisk) ImagePath() string { return filepath.Join(d.root, "backing.img") }
+-
+ func (d *BlockDisk) Close() error {
+ 	ctx, done := context.WithTimeout(context.Background(), 30*time.Second)
+ 	defer done()
+@@ -236,8 +227,5 @@ func (d *BlockDisk) Close() error {
+ 		}
+ 		d.loop = ""
+ 	}
+-	if d.retainMedia {
+-		return nil
+-	}
+ 	return os.RemoveAll(d.root)
+ }
+diff --git a/testcluster/block_disk_linux_test.go b/testcluster/block_disk_linux_test.go
+index 35a864c..8b16250 100644
+--- a/testcluster/block_disk_linux_test.go
++++ b/testcluster/block_disk_linux_test.go
+@@ -4,10 +4,7 @@ package testcluster
+ 
+ import (
+ 	"context"
+-	"crypto/sha256"
+-	"io"
+ 	"os"
+-	"path/filepath"
+ 	"testing"
+ 	"time"
+ )
+@@ -99,90 +96,3 @@ func TestBlockDiskDelaySlowsSyncAndRestoresOnCancellation(t *testing.T) {
+ 		t.Fatalf("private delay image remains: %v", err)
+ 	}
+ }
+-
+-// Inspect only a copy after cleanup: retain original filesystem bytes and prove
+-// that ordinary Close releases the devices while preserving a readable image.
+-func TestBlockDiskRetainsClosedMediaForCopiedReview(t *testing.T) {
+-	if os.Getenv("WF_BLOCK_DISK") != "1" {
+-		t.Skip("set WF_BLOCK_DISK=1 for real loop/device-mapper media retention")
+-	}
+-	disk, err := NewBlockDisk(t.TempDir())
+-	if err != nil {
+-		t.Fatal(err)
+-	}
+-	defer func() {
+-		if err := disk.Close(); err != nil {
+-			t.Error(err)
+-		}
+-	}()
+-	disk.RetainMediaOnClose()
+-	payload := []byte("retained closed block fixture evidence")
+-	if err := os.WriteFile(filepath.Join(disk.StoreDir, "retained-proof"), payload, 0600); err != nil {
+-		t.Fatal(err)
+-	}
+-	if err := disk.Close(); err != nil {
+-		t.Fatal(err)
+-	}
+-	if disk.mounted || disk.mapped || disk.loop != "" {
+-		t.Fatal("owned block resources remain after close")
+-	}
+-	hash := func(path string) [32]byte {
+-		t.Helper()
+-		f, err := os.Open(path)
+-		if err != nil {
+-			t.Fatal(err)
+-		}
+-		defer f.Close()
+-		h := sha256.New()
+-		if _, err := io.Copy(h, f); err != nil {
+-			t.Fatal(err)
+-		}
+-		var result [32]byte
+-		copy(result[:], h.Sum(nil))
+-		return result
+-	}
+-	before := hash(disk.ImagePath())
+-	copied := filepath.Join(t.TempDir(), "copied.img")
+-	source, err := os.Open(disk.ImagePath())
+-	if err != nil {
+-		t.Fatal(err)
+-	}
+-	target, err := os.Create(copied)
+-	if err != nil {
+-		source.Close()
+-		t.Fatal(err)
+-	}
+-	_, copyErr := io.Copy(target, source)
+-	source.Close()
+-	closeErr := target.Close()
+-	if copyErr != nil || closeErr != nil {
+-		t.Fatalf("copy image: %v close=%v", copyErr, closeErr)
+-	}
+-	if hash(copied) != before {
+-		t.Fatal("initial copied image bytes differ")
+-	}
+-	mount := filepath.Join(t.TempDir(), "review")
+-	if err := os.Mkdir(mount, 0700); err != nil {
+-		t.Fatal(err)
+-	}
+-	ctx, done := context.WithTimeout(context.Background(), 30*time.Second)
+-	defer done()
+-	if _, err := blockDiskCommand(ctx, "mount", "-o", "loop,ro,noload", copied, mount); err != nil {
+-		t.Fatal(err)
+-	}
+-	defer func() {
+-		cleanup, stop := context.WithTimeout(context.Background(), 30*time.Second)
+-		defer stop()
+-		if _, err := blockDiskCommand(cleanup, "umount", mount); err != nil {
+-			t.Error(err)
+-		}
+-	}()
+-	got, err := os.ReadFile(filepath.Join(mount, "retained-proof"))
+-	if err != nil || string(got) != string(payload) {
+-		t.Fatalf("closed copied proof=%q err=%v", got, err)
+-	}
+-	if hash(disk.ImagePath()) != before || hash(copied) != before {
+-		t.Fatal("read-only copied review changed filesystem image bytes")
+-	}
+-	t.Logf("closed image sha256=%x, copied read-only proof verified, original media unchanged", before)
+-}

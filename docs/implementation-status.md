@@ -12064,3 +12064,18 @@ checker exit0. Independent source/fault/cell/duration review passes;668Git/3287
 external inputs andactualSDK/threeNATS binaries verified. ExactoriginalZIP6295
 members/fourparts readback; SHA256matchesGitHub digest. Copied-store audit and
 full13×200/final-source gates remainseparate. [Proof](scale/tier2-retained-row-2026-10-05/hosted-partition-seed3/).
+
+### Worker-clock copied smoke audit and hosted source compatibility — 2026-10-05
+
+Portablecopiedclock audit at0b8ee59 passes full196/2171integrity/allthreehistory
+models/threeclient64durable drain in312.719ms under20s;2124originalfiles unchanged.
+Independent reviewer/source/SDK/threeNATS verified;4034archive members/twoparts
+readback. [Proof](scale/tier2-retained-row-2026-10-05/workerclock-smoke-copied-audit/).
+Originalten-minuteclock seed1 nowruns at0b8ee59,actualSDK539522.
+
+Hostedpartition copiedpreparation usingcurrent inputs fails beforeSDKbuild/store
+opening: laterblock-media retention changedtestcluster/block_disk_linux.go from
+hosteddonora517d2e. Originalfiles verifiedunchanged; failure retained. Isolated
+sparsehelpercheckout605a78a restoresdonorproduction inputs while retaining the
+portablehelper; changedpreparation runs inafreshroot. No runtime failure or
+copiedaudit passclaimed. [Preparation record](scale/tier2-retained-row-2026-10-05/hosted-partition-seed3/copied-preparation/).
