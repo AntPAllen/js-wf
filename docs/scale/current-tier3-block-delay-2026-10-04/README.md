@@ -39,3 +39,7 @@ remain preserved and the parent has other failed rows.
 Older accepted raw expansions1–104 were removed only after complete ZIP/canonical/
 published-input verification. Retained ZIPs/proofs restore every byte.
 [Exact executed recovery](duplicate-expansion-recovery/).
+
+New accepted105–156/196–200 duplicate expansions were likewise removed after
+pushed97cb7fb/all canonical/ZIP/member verification, recovering1,083,498,496 bytes.
+[Exact additional recovery](duplicate-expansion-recovery-105-156-and-196-200/).

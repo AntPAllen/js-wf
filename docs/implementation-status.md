@@ -30,6 +30,13 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Verified new disk-delay duplicate expansions recovered:** all5358 raw
+  files in accepted105–156/196–200 match pushed97cb7fb parts, complete canonical
+  members and original ZIPs; no visible target descriptors remain. Only duplicate
+  expansions removed, recovering1083498496 allocated bytes. ZIPs/proofs/models and
+  failed/live originals retained;161-seed qualification unchanged.
+  [Executed recovery](scale/current-tier3-block-delay-2026-10-04/duplicate-expansion-recovery-105-156-and-196-200/).
+
 - **Tier3 disk-delay coverage extends to161 accepted seeds:** five additional
   successful shards independently qualify57 seeds /175560 invocations /1933432
   entries /1083 real dm-delay faults /225720 exactOk model operations. Combined
