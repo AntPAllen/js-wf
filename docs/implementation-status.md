@@ -30,6 +30,19 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Initial provisioning failures now retain boundary diagnostics:** clean
+ f9aaa5b captures parent stack and all five pinned JetStream/route responses,
+ concurrently under a separate2s observation budget after the failed verdict.
+ Original45s provisioning admission is unchanged; partial bytes/errors and node
+ identities persist before cleanup. Concurrent/cancellation/partial controls
+ pass, race1.017s; native five-container paused-monitor control passes13.04s
+ with eight real responses/four IDs and two2s deadline errors. Actual SDK/servers,
+649 Git inputs/before-after ledgers and728 archive members verify. Injected
+verdict and named-test pause scope; no historical seed75 cause/fix claim.
+Existingb2d7011 journal24h remains live and has passed checkpoint120; its older
+source does not include this new initial-provisioning observation path.
+ [Complete focused originals and scope](scale/provision-failure-observation-2026-10-05/).
+
 - **VM reboot interruption preserved; corrected24h run started:** expanded VM
  disk now provides about50GiB free. Original million-candidate unit/PIDs are
  absent after reboot; stale running report and default unit success do not prove

@@ -2451,3 +2451,17 @@ three models. Complete shards/parts/model dependencies verify. SDK/stores absent
 from original uploads, final integrity/drain has named-test scope.66–78 failed;
 full200/final-source matrices remain open.
 [Complete shard evidence](scale/current-tier3-block-stall-2026-10-05/).
+
+
+### Initial provisioning boundary evidence — 2026-10-05
+
+At cleanf9aaa5b, retain parent stacks plus concurrent pinned JetStream/route
+monitoring for every node after initial provisioning fails. Original45s admission
+stays; separate2s observation budget cannot promote a failed verdict. Raw partial
+responses/errors and identities survive cleanup. Normal/race cancellation and
+partial controls pass; actual five-container paused-monitor control passes13.04s,
+eight real responses/four route IDs/two deadline errors. Actual SDK/server copies,
+649 Git inputs and728 original archive members verify. Pause admission has
+named-test/API-call scope. Original disk-stall75 placement cause remains unconfirmed;
+no full/current-source matrix or24h claim. Existingb2d7011 soak continues unchanged.
+[Complete proof](scale/provision-failure-observation-2026-10-05/).
