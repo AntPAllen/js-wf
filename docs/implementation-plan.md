@@ -2985,3 +2985,16 @@ PostgreSQL serverSIGKILL/currentmatrices/24h qualification. InternalrandomSQL
 rebuild generations excluded from exposed-row comparison. Libraryservers embedded/
 NoLog, selectedprovenance excludes exhaustivecompiler/assembly/embed inputs.
 [Complete native and full copied-integrity evidence](scale/postgres-projection-fault-50000-2026-10-05/).
+
+### 2026-10-05 combined full fanout parent/journal boundaries prepared
+
+A retainedoptin six-case full500child fixture combines actualparent SIGKILL at
+first/interior/last creation and resultcollection positions with a libraryjournal
+leader stop/restart at the same boundary, before successor execution. Eachcase
+keeps original5m/500children/prefix-preservation/higher-epoch/fullintegrity gates.
+It retains observedchild SDKidentity/buildfields/prekillprefix, restartedserver
+identity/stream beforeafter and finalcounts/results. Resultphase joins completed
+outside-child loops before replacing clients, then refreshes journal/client
+handles for successor reads. Defaultisolated fixtures retain their behavior.
+Compiled optin skipped; native combined six-case execution remains pending.
+No serverSIGKILL/fullfaultcrossproduct/fullmatrix/24h qualification claimed.

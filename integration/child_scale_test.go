@@ -141,7 +141,28 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 		}
 	}
 	t.Logf("FAULT_SEED=%d parent_cut_after_child=%d", seed, cut)
-	all, cluster := setup(t)
+	var all []jetstream.JetStream
+	var cluster *testcluster.Cluster
+	retainedRoot := ""
+	if base := os.Getenv("WF_FANOUT_COMBINED_ROOT"); base != "" {
+		if !filepath.IsAbs(base) {
+			t.Fatal("absolute combined fanout root required")
+		}
+		retainedRoot = filepath.Join(base, t.Name())
+		if err := os.MkdirAll(filepath.Dir(retainedRoot), 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Mkdir(retainedRoot, 0700); err != nil {
+			t.Fatal(err)
+		}
+		cluster, err = testcluster.Start(filepath.Join(retainedRoot, "cluster"), 3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		all, cluster = setupCluster(t, cluster)
+	} else {
+		all, cluster = setup(t)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 	reached := make(chan struct{})
@@ -183,7 +204,7 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 			t.Fatalf("first parent worker: %v", err)
 		}
 	}
-	if restartLeader {
+	if restartLeader && !killDuringResults {
 		stream, err := all[0].Stream(ctx, "WF_JRN")
 		if err != nil {
 			t.Fatal(err)
@@ -193,8 +214,13 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 			t.Fatal(err)
 		}
 		nodes := [3]jetstream.JetStream{all[0], all[1], all[2]}
-		if err := restartJournalLeader(ctx, &nodes, cluster, before.State.Msgs); err != nil {
+		if retainedRoot != "" {
+			restartFanoutJournalAtBoundary(t, ctx, all, cluster, retainedRoot, "create")
+		} else if err := restartJournalLeader(ctx, &nodes, cluster, before.State.Msgs); err != nil {
 			t.Fatal(err)
+		}
+		if retainedRoot != "" {
+			copy(nodes[:], all)
 		}
 		copy(all, nodes[:])
 		t.Logf("restarted WF_JRN leader after %d child requests; retained journal messages=%d", cut+1, before.State.Msgs)
@@ -307,10 +333,24 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 	if ctx.Err() != nil {
 		t.Fatalf("children outside parent partition did not finish: %v", ctx.Err())
 	}
+	childrenJoined := false
+	if retainedRoot != "" && killDuringResults {
+		stopChildren()
+		for _, done := range childDone {
+			if err := <-done; err != nil && !errors.Is(err, context.Canceled) {
+				t.Fatal(err)
+			}
+		}
+		childrenJoined = true
+	}
 	var killedPrefix []journal.Record
 	if killDuringResults {
 		t.Logf("FAULT_SEED=%d parent_cut_after_result=%d", seed, resultCut)
 		killedPrefix = killFanoutParentAtBoundary(t, ctx, all[0], cluster.Servers[1].ClientURL(), resultCut, "results")
+		if restartLeader {
+			restartFanoutJournalAtBoundary(t, ctx, all, cluster, retainedRoot, "results")
+			j = journal.New(all[0])
+		}
 	}
 	final, err := worker.New(ctx, all[1], "parent-after-children", handlers)
 	if err != nil {
@@ -329,9 +369,11 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 		t.Fatalf("final parent worker: %v", err)
 	}
 	stopChildren()
-	for _, done := range childDone {
-		if err := <-done; err != nil && !errors.Is(err, context.Canceled) {
-			t.Fatalf("child worker: %v", err)
+	if !childrenJoined {
+		for _, done := range childDone {
+			if err := <-done; err != nil && !errors.Is(err, context.Canceled) {
+				t.Fatalf("child worker: %v", err)
+			}
 		}
 	}
 	if killParentProcess || killDuringResults {
@@ -382,6 +424,15 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 		message, err := inv.GetLastMsgForSubject(ctx, identity.InvocationSubject("child", id))
 		if err != nil || message.Header.Get(client.ParentTypeHeader) != "parent" || message.Header.Get(client.ParentIDHeader) != "large-fanout" {
 			t.Fatalf("child %s invocation=%+v err=%v", id, message, err)
+		}
+	}
+	if retainedRoot != "" {
+		data, err := json.MarshalIndent(map[string]any{"child_count": childCount, "parent_result": string(value), "retained_integrity": report, "creation_prefix": creationPrefix, "result_prefix": killedPrefix, "seed": seed, "creation_cut": cut, "result_cut": resultCut}, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(retainedRoot, "final-proof.json"), append(data, '\n'), 0600); err != nil {
+			t.Fatal(err)
 		}
 	}
 	t.Logf("completed %d children; %d shared the parent partition", childCount, insideParent)
@@ -507,6 +558,12 @@ func killFanoutParentAtBoundary(t *testing.T, ctx context.Context, js jetstream.
 		t.Fatal(err)
 	}
 	root := t.TempDir()
+	if base := os.Getenv("WF_FANOUT_COMBINED_ROOT"); base != "" {
+		root = filepath.Join(base, t.Name())
+		if err := os.MkdirAll(root, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
 	marker := filepath.Join(root, "parent-cut")
 	logFile, err := os.Create(filepath.Join(root, "parent.log"))
 	if err != nil {
@@ -554,6 +611,9 @@ func killFanoutParentAtBoundary(t *testing.T, ctx context.Context, js jetstream.
 	}
 	if err != nil || !fanoutCutMatches(records, cut, phase) {
 		t.Fatalf("parent journal before SIGKILL: phase=%s cut=%d entries=%d err=%v", phase, cut, len(records), err)
+	}
+	if os.Getenv("WF_FANOUT_COMBINED_ROOT") != "" {
+		captureFanoutParentSDK(t, cmd, root, records)
 	}
 	if err := cmd.Process.Kill(); err != nil {
 		t.Fatal(err)
