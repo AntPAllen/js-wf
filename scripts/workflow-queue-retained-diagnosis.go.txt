@@ -1,0 +1,223 @@
+// Standalone read-only workflow queue diagnosis: build from a copied .go file in this module.
+// The caller supplies ONLY a fresh copy of closed R3 testcluster stores and
+// retains executable/source identity and original/copy hashes externally.
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+ "strings"
+	"time"
+
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/identity"
+	"js-wf/journal"
+	"js-wf/testcluster"
+)
+
+func main() {
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+func queueStage(name string) {
+	fmt.Printf("WORKFLOW_QUEUE_STAGE at=%s stage=%s\n", time.Now().UTC().Format(time.RFC3339Nano), name)
+}
+
+func run() error {
+	if len(os.Args) != 3 || !filepath.IsAbs(os.Args[1]) {
+		return fmt.Errorf("usage: workflow-queue-diagnosis ABSOLUTE_COPIED_CLUSTER_ROOT OUTPUT_JSON")
+	}
+	root := os.Args[1]
+	// External observer gets time to capture /proc executable identity before
+	// opening copies. This delay is outside admission/audit budgets.
+	time.Sleep(250 * time.Millisecond)
+	cluster, err := testcluster.StartProcesses(root, 3)
+	if err != nil {
+		return err
+	}
+	defer cluster.Close()
+	all := make([]jetstream.JetStream, 3)
+	for i, nc := range cluster.Clients {
+		all[i], err = jetstream.New(nc)
+		if err != nil {
+			return err
+		}
+	}
+	// Readiness observes existing assets; it never provisions or alters them.
+	ready, stopReady := context.WithTimeout(context.Background(), 15*time.Second)
+	var roles = []string{"WF_INV", "WF_JRN", "WF_RUN", "KV_WF_STATE"}
+	for _, name := range roles {
+		admitted := false
+		for ready.Err() == nil {
+			call, stop := context.WithTimeout(ready, 2*time.Second)
+			stream, readErr := all[0].Stream(call, name)
+			var info *jetstream.StreamInfo
+			if readErr == nil {
+				info, readErr = stream.Info(call)
+			}
+			stop()
+			if readErr == nil && info.Cluster != nil && info.Cluster.Leader != "" && len(info.Cluster.Replicas) == 2 {
+				current := true
+				for _, peer := range info.Cluster.Replicas {
+					current = current && peer.Current && !peer.Offline
+				}
+				if current {
+					admitted = true
+					break
+				}
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+		if !admitted {
+			stopReady()
+			return fmt.Errorf("copied source %s not current: %w", name, ready.Err())
+		}
+	}
+	stopReady()
+	queueStage("ready")
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	began := time.Now()
+	captured := make(chan struct{})
+	timer := time.AfterFunc(19*time.Second, func() {
+		defer close(captured)
+		queueStage("predeadline-stack")
+		size := 64 * 1024
+		for {
+			data := make([]byte, size)
+			n := runtime.Stack(data, true)
+			complete := n < len(data)
+			if complete || size >= 16*1024*1024 {
+				path := filepath.Join(filepath.Dir(os.Args[2]), "predeadline-stack.txt")
+				err := os.WriteFile(path, data[:n], 0600)
+				fmt.Printf("WORKFLOW_QUEUE_STACK bytes=%d complete=%v write_error=%v\n", n, complete, err)
+				break
+			}
+			size *= 2
+		}
+	})
+	defer func() {
+		if !timer.Stop() {
+			<-captured
+		}
+	}()
+ result := map[string]any{"scope": "read-only queue diagnosis of fresh closed-store copies; not original recovery qualification"}
+	queueStage("stream-metadata-start")
+	streams := map[string]any{}
+	for _, name := range []string{"WF_INV", "WF_JRN", "WF_RUN", "WF_SIG", "KV_WF_STATE", "KV_WF_LEASE"} {
+		stream, err := all[0].Stream(ctx, name)
+		if err != nil {
+			return err
+		}
+		info, err := stream.Info(ctx)
+		if err != nil {
+			return err
+		}
+		streams[name] = info
+	}
+	result["streams"] = streams
+	run, err := all[0].Stream(ctx, "WF_RUN")
+	if err != nil {
+		return err
+	}
+	queueStage("consumer-census-start")
+	consumers := run.ListConsumers(ctx)
+	infos := []*jetstream.ConsumerInfo{}
+	for info := range consumers.Info() {
+		infos = append(infos, info)
+	}
+	if err := consumers.Err(); err != nil {
+		return err
+	}
+	result["consumers"] = infos
+	queueStage("raw-queue-census-start")
+	before, err := run.Info(ctx)
+	if err != nil {
+		return err
+	}
+	messages := []*jetstream.RawStreamMsg{}
+	keys := map[string]int{}
+	subjects := map[string]int{}
+	type readResult struct {
+		message *jetstream.RawStreamMsg
+		err     error
+	}
+	for first := before.State.FirstSeq; first != 0 && first <= before.State.LastSeq; {
+		count := uint64(32)
+		if remaining := before.State.LastSeq - first + 1; remaining < count {
+			count = remaining
+		}
+		replies := make(chan readResult, count)
+		for offset := uint64(0); offset < count; offset++ {
+			go func(sequence uint64) { m, e := run.GetMsg(ctx, sequence); replies <- readResult{m, e} }(first + offset)
+		}
+		for offset := uint64(0); offset < count; offset++ {
+			reply := <-replies
+			if errors.Is(reply.err, jetstream.ErrMsgNotFound) {
+				continue
+			}
+			if reply.err != nil {
+				return reply.err
+			}
+			messages = append(messages, reply.message)
+			keys[string(reply.message.Data)]++
+			subjects[reply.message.Subject]++
+		}
+		first += count
+	}
+	after, err := run.Info(ctx)
+	if err != nil {
+		return err
+	}
+	if before.State.Msgs != after.State.Msgs || before.State.LastSeq != after.State.LastSeq || uint64(len(messages)) != before.State.Msgs {
+		return fmt.Errorf("copied queue changed or incomplete: before=%d after=%d read=%d", before.State.Msgs, after.State.Msgs, len(messages))
+	}
+	queueStage(fmt.Sprintf("raw-queue-census-done messages=%d", len(messages)))
+	result["queue_raw_messages"] = messages
+	result["queue_keys"] = keys
+	result["queue_subjects"] = subjects
+	result["queue_before"] = before
+	result["queue_after"] = after
+ states, err := all[0].KeyValue(ctx, "WF_STATE")
+ if err != nil { return err }
+ leases, err := all[0].KeyValue(ctx, "WF_LEASE")
+ if err != nil { return err }
+ rows := map[string]any{}
+ for key := range keys {
+  typ, id, ok := strings.Cut(key, ".")
+  if !ok { return fmt.Errorf("invalid retained queue key %q", key) }
+  if err := identity.Validate(typ, id); err != nil { return err }
+  row := map[string]any{"partition":identity.Partition(typ,id,64)}
+  records, _, err := journal.New(all[0]).Read(ctx,typ,id)
+  if err != nil { return fmt.Errorf("queue invocation %s: %w",key,err) }
+  row["journal"] = records
+  for name, bucket := range map[string]jetstream.KeyValue{"state":states,"lease":leases} {
+   entry, err := bucket.Get(ctx,key)
+   if err != nil { row[name+"_error"]=err.Error() } else {
+    row[name]=map[string]any{"value":json.RawMessage(entry.Value()),"revision":entry.Revision(),"created":entry.Created()}
+   }
+  }
+  rows[key]=row
+ }
+ result["queue_invocations"]=rows
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+	result["review_ns"] = time.Since(began).Nanoseconds()
+	data, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(os.Args[2], append(data, '\n'), 0600); err != nil {
+		return err
+	}
+	fmt.Printf("copied queue_messages=%d queue_invocations=%d elapsed=%s\n", len(messages), len(rows), time.Since(began))
+	return nil
+}
