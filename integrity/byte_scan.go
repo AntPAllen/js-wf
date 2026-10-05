@@ -10,8 +10,8 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 )
 
-// Experimental reader: the invariant algorithm and captured bounds are shared
-// with the bulk reader; defaults do not select this transport yet.
+// Streaming audit delivery shares the bulk reader's invariant algorithm and
+// captured bounds. The point reader and non-streaming bulk reader are separate.
 func scanByteBoundedThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 	return scanBatchThroughWithFetcher(ctx, stream, cutoff, visit, 4096, func(call context.Context, c jetstream.Consumer, n int) (jetstream.MessageBatch, error) {
 		return fetchByteBounded(call, c, n, 8<<20)

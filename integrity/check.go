@@ -149,27 +149,28 @@ func checkUsingState(ctx context.Context, js jetstream.JetStream, cutoff *uint64
 // CheckWithStreamingReads validates every freshly decoded retained record while
 // keeping protocol state per invocation instead of a complete decoded prefix.
 // Compacted journals still use the original reconstruction and checker.
+// Delivery windows retain at most4096 records and use the SDK's8MiB byte buffer.
 func CheckWithStreamingReads(ctx context.Context, js jetstream.JetStream) (Report, error) {
-	return checkUsingOptions(ctx, js, nil, scanBatchThrough, false, true)
+	return checkUsingOptions(ctx, js, nil, scanByteBoundedThrough, false, true)
 }
 
 // CheckThroughInvocationSequenceWithStreamingReads keeps the original captured
 // quiescent-cohort/no-purge/no-reuse contract and rereads all retained records.
 func CheckThroughInvocationSequenceWithStreamingReads(ctx context.Context, js jetstream.JetStream, cutoff uint64) (Report, error) {
-	return checkUsingOptions(ctx, js, &cutoff, scanBatchThrough, false, true)
+	return checkUsingOptions(ctx, js, &cutoff, scanByteBoundedThrough, false, true)
 }
 
 // CheckWithStreamingStateReads combines the streaming journal accumulator with
 // a fresh complete KV watch snapshot. The retained state must be quiescent.
 func CheckWithStreamingStateReads(ctx context.Context, js jetstream.JetStream) (Report, error) {
-	return checkUsingOptions(ctx, js, nil, scanBatchThrough, true, true)
+	return checkUsingOptions(ctx, js, nil, scanByteBoundedThrough, true, true)
 }
 
 // CheckThroughInvocationSequenceWithStreamingStateReads keeps the original
 // quiescent-cohort/no-purge/no-reuse contract. Every call obtains fresh records
 // and state; a final full audit remains necessary to cover orphan journals.
 func CheckThroughInvocationSequenceWithStreamingStateReads(ctx context.Context, js jetstream.JetStream, cutoff uint64) (Report, error) {
-	return checkUsingOptions(ctx, js, &cutoff, scanBatchThrough, true, true)
+	return checkUsingOptions(ctx, js, &cutoff, scanByteBoundedThrough, true, true)
 }
 
 func checkUsingOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner, snapshotState, streaming bool) (Report, error) {

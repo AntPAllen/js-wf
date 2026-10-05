@@ -2139,3 +2139,19 @@ focused race controls retained. Client-suffix loss is deliberately synthetic;
 natural transport/leader-loss and semantic-corruption acceptance precede adoption.
 Defaults/full-source matrices/actual24h gate unchanged/open.
 [Complete proof](scale/byte-bounded-audit-2026-10-05/r5-100k-interrupted/).
+
+### Byte-bounded streaming audit adoption — 2026-10-05
+
+Native R3 actual consumer-leader loss/cancellation and12k/144k large-tail controls
+pass original20s attempts with admitted pending tails; compaction/cohort/fresh
+state/snapshot/orphan and protocol corruption match point-read oracles. Following
+full R5 population/interruption acceptance, all four public streaming APIs select
+4096-record/SDK8MiB windows. Public entry-point compatibility passes NATS2.15.0
+and2.11.17/R3, including actual legacy executable identity; focused race controls
+pass. Actual executables/639 unchanged selected inputs/original stores archived.
+SDK pointer allocation/oversized-message caveats retained; point/non-streaming
+bulk APIs, original replication, invariant/deadline/recovery limits unchanged.
+Existing streaming-state matrix/soak mode uses this materially changed reader;
+full final-source matrices and actual24h gate remain open, older failures intact.
+[Native proof](scale/byte-bounded-audit-2026-10-05/native-faults/) ·
+[Public proof](scale/byte-bounded-audit-2026-10-05/public-adoption/).

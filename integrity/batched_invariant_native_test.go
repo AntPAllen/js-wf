@@ -112,7 +112,19 @@ func compareFullAudits(t *testing.T, ctx context.Context, js jetstream.JetStream
 	}
 	for _, snapshot := range []bool{false, true} {
 		streamCtx, streamStop := context.WithTimeout(ctx, 20*time.Second)
-		streamed, streamErr := checkUsingOptions(streamCtx, js, cutoff, scanBatchThrough, snapshot, true)
+		var streamed Report
+		var streamErr error
+		if cutoff == nil {
+			if snapshot {
+				streamed, streamErr = CheckWithStreamingStateReads(streamCtx, js)
+			} else {
+				streamed, streamErr = CheckWithStreamingReads(streamCtx, js)
+			}
+		} else if snapshot {
+			streamed, streamErr = CheckThroughInvocationSequenceWithStreamingStateReads(streamCtx, js, *cutoff)
+		} else {
+			streamed, streamErr = CheckThroughInvocationSequenceWithStreamingReads(streamCtx, js, *cutoff)
+		}
 		streamStop()
 		if streamed != point || (streamErr == nil) != (pointErr == nil) || streamErr != nil && streamErr.Error() != pointErr.Error() {
 			t.Fatalf("streamed snapshot=%v mismatch: point=%+v streamed=%+v errors=%v / %v", snapshot, point, streamed, pointErr, streamErr)

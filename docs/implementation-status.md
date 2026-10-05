@@ -30,6 +30,20 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Byte-bounded streaming audits adopted after native acceptance:** four public
+  full/cohort streaming APIs now use4096-record/SDK8MiB delivery, original replication/
+  checker/deadlines unchanged. Native R3 actual consumer-leader kills with positive
+  pending tails recover6000-entry cases in2.411s/2.408s;12k/144k large tail1.960s;
+  cancellation/cleanup and corruption-oracle controls pass. Public APIs subsequently
+  pass NATS2.15.0 and2.11.17 compaction/cohort/fresh-state/snapshot/orphan/protocol
+  controls;639 selected source inputs match in each campaign, actual executables/
+  original stores preserved. Focused race controls3.411s pass. Point/non-streaming
+  bulk readers unchanged; SDK allocation/oversized-message limitations retained.
+  Existing streaming-state matrix mode now selects the adopted reader. Final-source
+  matrix/actual24h qualification remains open; failed prior campaigns unchanged.
+  [Native acceptance](scale/byte-bounded-audit-2026-10-05/native-faults/) ·
+  [Public adoption](scale/byte-bounded-audit-2026-10-05/public-adoption/).
+
 - **Full R5 byte-bounded interrupted-window gate passes:** same verified continued
   clone/100k invocations/1.2M entries, normal2GiB, original20s. Baseline17.824s,
   admitted client explicit-error15.906s and nil-error short13.956s complete exact

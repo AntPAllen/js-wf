@@ -13,6 +13,10 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 )
 
+func nativeStreamingScanner() retainedScanner {
+	return scanByteBoundedThrough
+}
+
 func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 	if os.Getenv("WF_AUDIT_BATCH_CANDIDATE") != "1" {
 		t.Skip("opt-in full streaming audit fault qualification")
@@ -34,7 +38,8 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				const invocations = 500
+				// More than one4096-record window keeps a live server-side tail.
+				const invocations = 1500
 				for i := 0; i < invocations; i++ {
 					batchAuditPublish(t, ctx, js, fmt.Sprintf("fault-%06d", i), batchAuditEntries())
 				}
@@ -50,10 +55,10 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 				started := time.Now()
 				report, err := checkUsingOptions(auditCtx, js, nil, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 					if stream.CachedInfo().Config.Name != "WF_JRN" {
-						return scanBatchThrough(call, stream, cutoff, visit)
+						return nativeStreamingScanner()(call, stream, cutoff, visit)
 					}
 					observed := &candidateObservedStream{Stream: stream}
-					return scanBatchThrough(call, observed, cutoff, func(msg *jetstream.RawStreamMsg) error {
+					return nativeStreamingScanner()(call, observed, cutoff, func(msg *jetstream.RawStreamMsg) error {
 						visited++
 						if visited == 128 {
 							if fault == "cancellation" {
@@ -129,7 +134,7 @@ func TestStreamingAuditNativeLargeJournalFault(t *testing.T) {
 		t.Fatal(err)
 	}
 	baselineCtx, baselineStop := context.WithTimeout(ctx, 20*time.Second)
-	baseline, baselineErr := checkUsingOptions(baselineCtx, js, nil, scanBatchThrough, true, true)
+	baseline, baselineErr := checkUsingOptions(baselineCtx, js, nil, nativeStreamingScanner(), true, true)
 	baselineStop()
 	if baselineErr != nil || baseline != want {
 		t.Fatalf("baseline=%+v want=%+v err=%v", baseline, want, baselineErr)
@@ -141,10 +146,10 @@ func TestStreamingAuditNativeLargeJournalFault(t *testing.T) {
 	started := time.Now()
 	report, err := checkUsingOptions(attempt, js, nil, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 		if stream.CachedInfo().Config.Name != "WF_JRN" {
-			return scanBatchThrough(call, stream, cutoff, visit)
+			return nativeStreamingScanner()(call, stream, cutoff, visit)
 		}
 		observed := &candidateObservedStream{Stream: stream}
-		return scanBatchThrough(call, observed, cutoff, func(msg *jetstream.RawStreamMsg) error {
+		return nativeStreamingScanner()(call, observed, cutoff, func(msg *jetstream.RawStreamMsg) error {
 			visited++
 			if visited == 128 {
 				info, err := observed.consumer.Info(call)
