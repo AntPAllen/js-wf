@@ -1,0 +1,28 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-race",
+    "-buildvcs=true",
+    "-c",
+    "-o",
+    "/tmp/js-wf-retirement-before-manifest-sigkill-race-20261005/integrity.test",
+    "./integration"
+  ],
+  "test": [
+    "/tmp/js-wf-retirement-before-manifest-sigkill-race-20261005/integrity.test",
+    "-test.run=^TestContinuationRetirementReuseBeforeManifestWorkerSIGKILL$",
+    "-test.count=1",
+    "-test.v",
+    "-test.timeout=12m"
+  ],
+  "cwd": "/home/exedev/js-wf",
+  "environment": {
+    "GOCACHE": "/tmp/js-wf-go-build-cache-20261004",
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "2GiB",
+    "WF_RETIREMENT_KILL_ROOT": "/tmp/js-wf-retirement-before-manifest-sigkill-race-20261005/originals",
+    "WF_TIER3_SYNC_INTERVAL": "2m"
+  }
+}

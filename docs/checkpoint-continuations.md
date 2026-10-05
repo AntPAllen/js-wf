@@ -964,3 +964,15 @@ reopened. [Complete worker-kill proof](scale/continuation-retirement-worker-sigk
 Focused after-manifest retirement worker kill accepted at recorded source;
 other retirement timing/server/domain/legacy combinations, active-writer GC,
 full current-source matrices and actual24h remain. No unchanged Tier1 graph rerun.
+
+### Worker crash before fresh manifest publication (2026-10-05)
+
+The prepared frame is already referenced by the checkpoint StepCompleted in the
+journal. A successor replays that record and republishes its manifest with the
+recorded anchor, then resumes the continuation under a higher owner epoch.
+Quiescent GC must retain this reachable frame. The initial retirement/reuse
+fixture incorrectly required a replacement frame and orphan collection; its
+failed native originals are preserved in
+[the failure proof](scale/continuation-retirement-before-manifest-2026-10-05/failed-replacement-assumption/).
+Corrected assertions retain the original recovery/effect/fencing targets; native
+qualification is pending. No bounded prefix-resume claim applies to this cut.

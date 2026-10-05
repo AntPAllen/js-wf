@@ -372,7 +372,7 @@ func runRetirementWorkerKill(t *testing.T, cut string) {
 		t.Fatalf("child SDK mismatch %v", err)
 	}
 	published, err := store.ReadCheckpoint(ctx, retirementKillType, retirementKillID, fresh.InvSeq)
-	abandonedFrame := ""
+	preparedFrame := ""
 	if cut == "after_manifest" {
 		if err != nil || published == nil || published.Snapshot.Runtime.InvSeq != fresh.InvSeq || published.Snapshot.Runtime.Object == old.Snapshot.Runtime.Object {
 			t.Fatalf("fresh publication=%+v err=%v", published, err)
@@ -389,8 +389,8 @@ func runRetirementWorkerKill(t *testing.T, cut string) {
 		if err := json.Unmarshal(data, &prepared); err != nil || prepared.Runtime == nil || prepared.Runtime.InvSeq != fresh.InvSeq || prepared.Runtime.Object == old.Snapshot.Runtime.Object {
 			t.Fatalf("prepared frame unconfirmed: %+v err=%v", prepared, err)
 		}
-		abandonedFrame = prepared.Runtime.Object
-		if _, err := objects.GetBytes(ctx, abandonedFrame); err != nil {
+		preparedFrame = prepared.Runtime.Object
+		if _, err := objects.GetBytes(ctx, preparedFrame); err != nil {
 			t.Fatalf("prepared object missing: %v", err)
 		}
 	}
@@ -420,7 +420,7 @@ func runRetirementWorkerKill(t *testing.T, cut string) {
 	if !ok || !waitStatus.Signaled() || waitStatus.Signal() != syscall.SIGKILL {
 		t.Fatalf("child did not exit SIGKILL: %v", child.ProcessState)
 	}
-	write("kill-admission.json", map[string]any{"child_pid": child.Process.Pid, "child_live_sdk_sha256": childHash, "parent_sdk_sha256": parentHash, "signal": "SIGKILL", "cut": cut, "old_generation": first.InvSeq, "fresh_generation": fresh.InvSeq, "held_epoch": held.Epoch, "lease_ttl": status.TTL().String(), "lease_revision": heldEntry.Revision(), "killed_at": killedAt.UTC(), "reclaimed_objects": swept.Deleted, "abandoned_frame": abandonedFrame, "manifest_published": published != nil})
+	write("kill-admission.json", map[string]any{"child_pid": child.Process.Pid, "child_live_sdk_sha256": childHash, "parent_sdk_sha256": parentHash, "signal": "SIGKILL", "cut": cut, "old_generation": first.InvSeq, "fresh_generation": fresh.InvSeq, "held_epoch": held.Epoch, "lease_ttl": status.TTL().String(), "lease_revision": heldEntry.Revision(), "killed_at": killedAt.UTC(), "reclaimed_objects": swept.Deleted, "prepared_frame": preparedFrame, "manifest_published": published != nil})
 	guard := &checkpointNoArchivePort{SnapshotWritePort: journal.NewSnapshotPort(all[2])}
 	options := []worker.Option{worker.WithContinuations(retirementKillType, stages)}
 	if cut == "after_manifest" {
@@ -486,18 +486,18 @@ func runRetirementWorkerKill(t *testing.T, cut string) {
 		t.Fatalf("raw integrity=%+v err=%v", report, err)
 	}
 	completed, err := store.ReadCheckpoint(ctx, retirementKillType, retirementKillID, fresh.InvSeq)
-	if err != nil || completed == nil || (abandonedFrame != "" && completed.Snapshot.Runtime.Object == abandonedFrame) {
-		t.Fatalf("replacement frame=%+v err=%v", completed, err)
+	if err != nil || completed == nil || (preparedFrame != "" && completed.Snapshot.Runtime.Object != preparedFrame) {
+		t.Fatalf("repaired frame=%+v err=%v", completed, err)
 	}
 	if _, err := retention.SweepBlobsQuiescent(ctx, all[0], 0, time.Now().Add(time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 	assertKept(completed.Snapshot.Runtime.Object, kept.Snapshot.Runtime.Object, sharedObject)
-	if abandonedFrame != "" {
-		if _, err := objects.GetInfo(ctx, abandonedFrame); !errors.Is(err, jetstream.ErrObjectNotFound) {
-			t.Fatalf("orphan frame survived quiescent GC: %v", err)
-		}
+	if preparedFrame != "" {
+		// StepCompleted already references this content-addressed frame. Replay
+		// republishes its manifest using the recorded anchor, so it stays live.
+		assertKept(preparedFrame)
 	}
-	write("result.json", map[string]any{"cut": cut, "old_generation": first.InvSeq, "fresh_generation": fresh.InvSeq, "held_epoch": held.Epoch, "terminal_epoch": terminal.Epoch, "recovery_seconds": latency.Seconds(), "reclaimed_objects": swept.Deleted, "archive_reads": guard.archives, "frame_reads": guard.frames, "bounded_resume_required": cut == "after_manifest", "abandoned_frame": abandonedFrame, "completed_frame": completed.Snapshot.Runtime.Object, "abandoned_frame_collected": abandonedFrame != "", "effects": 3, "terminals": report.Terminal, "invocations": report.Invocations, "ledger_counts": counts, "shared_and_survivor_and_fresh_references_verified": true, "all_peer_fresh_results_verified": true})
+	write("result.json", map[string]any{"cut": cut, "old_generation": first.InvSeq, "fresh_generation": fresh.InvSeq, "held_epoch": held.Epoch, "terminal_epoch": terminal.Epoch, "recovery_seconds": latency.Seconds(), "reclaimed_objects": swept.Deleted, "archive_reads": guard.archives, "frame_reads": guard.frames, "bounded_resume_required": cut == "after_manifest", "prepared_frame": preparedFrame, "completed_frame": completed.Snapshot.Runtime.Object, "prepared_frame_reused": preparedFrame != "", "read_counters_observed": cut == "after_manifest", "effects": 3, "terminals": report.Terminal, "invocations": report.Invocations, "ledger_counts": counts, "shared_and_survivor_and_fresh_references_verified": true, "all_peer_fresh_results_verified": true})
 	t.Logf("retirement SIGKILL recovery=%s old=%d fresh=%d epoch=%d→%d reclaimed=%d archives=%d frames=%d effects=3 terminals=2", latency, first.InvSeq, fresh.InvSeq, held.Epoch, terminal.Epoch, swept.Deleted, guard.archives, guard.frames)
 }

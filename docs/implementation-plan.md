@@ -2524,3 +2524,14 @@ This closes the focused fresh-manifest retirement worker kill combination at
 executed source; other publication timings/combined server/domain/legacy faults,
 active-writer GC/full current-source matrices/actual24h remain open.
 [Complete proof](scale/continuation-retirement-worker-sigkill-2026-10-05/).
+
+### Before-manifest retirement worker crash — 2026-10-05
+
+Kill the fresh-generation worker after a durable frame and StepCompleted but
+before manifest publication. Verify manifest absence at admission, exact effect
+ledger, successor fencing, recovery under30s with production TTL12, all-peer
+results and quiescent GC retention. Replay must reuse the recorded checkpoint
+anchor and frame; that frame is reachable and must not be collected as an orphan.
+The initial08835e7 fixture wrongly required replacement/collection and failed;
+complete originals retained, corrected native qualification pending. This cut
+allows journal replay and does not claim bounded resume before manifest repair.

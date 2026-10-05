@@ -30,6 +30,15 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Before-manifest retirement worker-kill candidate failed an incorrect assertion:**
+  `08835e7` race test failed35.00s after successful journal repair, requiring a
+  different frame and GC of the original. The recorded StepCompleted still
+  references that frame; replay preserves its anchor and republishes the manifest.
+  All1,082 original archive members/651 selected source inputs and actual parent/
+  child SDK identity verified. Corrected fixture requires reachable-frame reuse
+  and retention; native qualification pending, original budgets unchanged.
+  [Preserved failure](scale/continuation-retirement-before-manifest-2026-10-05/failed-replacement-assumption/).
+
 - **Retirement/reuse with actual worker SIGKILL qualified:** clean4ab4bdd
 racePASS35.39s, kill recovery12.651s under30s with original12s lease/60s scenario.
 Generation1 retired/two objects collected/survivor shared bytes retained; reuse3
