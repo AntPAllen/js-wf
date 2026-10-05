@@ -3953,3 +3953,15 @@ Reused rawbytes/contiguoussubjects/constantterminal lookup/noINV/KV/transport/
 faults explicit. This supports measuring bounded delivery buffering/pipeline
 cost next, without claiming isolatedcause or nativecapacity/24h/default adoption.
 [Profile](scale/audit-reduction-cost-2026-10-05/profile/).
+
+### Bounded callback queue and failed native measurement preserved — 2026-10-05
+
+Explicit candidate adds256records/1MiB payload queue or one oversized record to
+the retained SDK8MiB pullbuffer; unit race budget/credit/stop controls pass. Native
+83d318b six-reader100k diagnostic fails7.91s on consumerCount1 after API deletes,
+with allsix deliveries logged. No convincing speedup or confirmed residualcause.
+Full1088-member failure archive and selectedsource/SDK/closure verified, including
+initial wrong PASS-only reviewer. A changed diagnostic records names/counts per
+delete within original30s reader context. No buffered/fullcapacity/default/24h
+promotion or unchanged rerun.
+[Failure proof](scale/buffered-callback-audit-2026-10-05/failed-delivery-measurement/).

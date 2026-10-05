@@ -28,6 +28,20 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 21:49 UTC
+
+A bounded buffered callback candidate is explicit only: SDK8MiB buffer plus
+256record/1MiB queued payload (or one oversized record); headers/objects/active
+visitor outside payload accounting. Unit race byte/record/oversize/stop controls
+pass. Native six-reader100k measurement83d318b fails7.91s on final consumer
+count1 after successful deletion calls, while allsix full deliveries complete.
+No convincing buffered speedup; residual identity/cause unconfirmed. Original
+closed failure and initial reviewer error are preserved in verified1088-member
+archive. [Failure](scale/buffered-callback-audit-2026-10-05/failed-delivery-measurement/).
+Changed diagnostic observes per-delete names/count convergence within each
+original30s reader context, timed separately. No unchanged native rerun/large
+capacity/default adoption.
+
 ## Latest follow-up — 2026-10-05 21:37 UTC
 
 CPU-only full400k/4.8M JSON-template diagnostic at6adad6e passes7.69s: decode

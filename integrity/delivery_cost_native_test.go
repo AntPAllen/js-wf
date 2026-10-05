@@ -56,14 +56,40 @@ func TestAuditDeliveryNativeCostComparison(t *testing.T) {
 		ElapsedNS      int64
 		AllocatedBytes uint64
 		GCCycles       uint32
+		CleanupNS      int64
 	}
 	var results []measurement
+	type cleanupObservation struct {
+		Mode                string
+		DeletedConsumer     string
+		ElapsedNS           int64
+		StreamConsumerCount int
+		Names               []string
+		StreamLeader        string
+		Error               string
+	}
+	var cleanups []cleanupObservation
+	persist := func() error {
+		if root := os.Getenv("WF_AUDIT_BATCH_ROOT"); root != "" {
+			data, err := json.MarshalIndent(struct {
+				Results  []measurement
+				Cleanups []cleanupObservation
+				Scope    string
+			}{results, cleanups, "Quiet R3 100k x128B delivery; linked server allocations included; cleanup name/count convergence shares original30s reader context and is timed separately; not400k integrity/fault/default adoption"}, "", "  ")
+			if err != nil {
+				return err
+			}
+			return os.WriteFile(filepath.Join(root, t.Name(), "delivery-cost.json"), append(data, '\n'), 0600)
+		}
+		return nil
+	}
 	for _, mode := range []string{"next", "adapter", "consume", "callback_adapter", "buffered_callback_adapter", "next_recheck"} {
 		c, err := stream.CreateConsumer(ctx, jetstream.ConsumerConfig{Name: "cost-" + mode, MemoryStorage: true, Replicas: 3, AckPolicy: jetstream.AckNonePolicy})
 		if err != nil {
 			t.Fatal(err)
 		}
 		call, cancel := context.WithTimeout(ctx, 30*time.Second)
+		t.Cleanup(cancel)
 		seen := 0
 		validate := func(msg jetstream.Msg) error {
 			s, seq, _, e := compactMessageCoordinates(msg)
@@ -166,30 +192,70 @@ func TestAuditDeliveryNativeCostComparison(t *testing.T) {
 		}
 		elapsed := time.Since(began)
 		runtime.ReadMemStats(&after)
-		cancel()
-		if e := stream.DeleteConsumer(ctx, c.CachedInfo().Name); e != nil {
-			t.Fatal(e)
-		}
 		if err != nil || seen != count {
+			cancel()
 			t.Fatalf("%s count=%d err=%v", mode, seen, err)
 		}
-		results = append(results, measurement{mode, seen, int64(elapsed), after.TotalAlloc - before.TotalAlloc, after.NumGC - before.NumGC})
+		results = append(results, measurement{Mode: mode, Records: seen, ElapsedNS: int64(elapsed), AllocatedBytes: after.TotalAlloc - before.TotalAlloc, GCCycles: after.NumGC - before.NumGC})
 		t.Logf("delivery cost %+v", results[len(results)-1])
+		beganCleanup := time.Now()
+		if e := stream.DeleteConsumer(call, c.CachedInfo().Name); e != nil {
+			results[len(results)-1].CleanupNS = int64(time.Since(beganCleanup))
+			cleanups = append(cleanups, cleanupObservation{Mode: mode, DeletedConsumer: c.CachedInfo().Name, ElapsedNS: results[len(results)-1].CleanupNS, Error: e.Error()})
+			if saveErr := persist(); saveErr != nil {
+				t.Fatal(saveErr)
+			}
+			t.Fatal(e)
+		}
+		for {
+			observation := cleanupObservation{Mode: mode, DeletedConsumer: c.CachedInfo().Name, ElapsedNS: int64(time.Since(beganCleanup))}
+			info, e := stream.Info(call)
+			if e == nil {
+				observation.StreamConsumerCount = info.State.Consumers
+				if info.Cluster != nil {
+					observation.StreamLeader = info.Cluster.Leader
+				}
+				if info.State.Msgs != count {
+					e = fmt.Errorf("population changed to %d", info.State.Msgs)
+				}
+			}
+			if e == nil {
+				listed := stream.ConsumerNames(call)
+				for name := range listed.Name() {
+					observation.Names = append(observation.Names, name)
+				}
+				e = listed.Err()
+			}
+			if e != nil {
+				observation.Error = e.Error()
+			}
+			cleanups = append(cleanups, observation)
+			results[len(results)-1].CleanupNS = int64(time.Since(beganCleanup))
+			if e := persist(); e != nil {
+				t.Fatal(e)
+			}
+			t.Logf("delivery cleanup %+v", observation)
+			if e != nil {
+				t.Fatal(e)
+			}
+			if observation.StreamConsumerCount == 0 && len(observation.Names) == 0 {
+				break
+			}
+			timer := time.NewTimer(10 * time.Millisecond)
+			select {
+			case <-timer.C:
+			case <-call.Done():
+				timer.Stop()
+				t.Fatal(call.Err())
+			}
+		}
+		cancel()
 	}
 	info, err := stream.Info(ctx)
 	if err != nil || info.State.Consumers != 0 || info.State.Msgs != count {
 		t.Fatalf("cleanup/population %+v/%v", info, err)
 	}
-	if root := os.Getenv("WF_AUDIT_BATCH_ROOT"); root != "" {
-		data, err := json.MarshalIndent(struct {
-			Results []measurement
-			Scope   string
-		}{results, "Quiet R3 100k x128B delivery only; allocations include linked in-process server activity; not 400k integrity, fault recovery, or default adoption"}, "", "  ")
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err := os.WriteFile(filepath.Join(root, t.Name(), "delivery-cost.json"), append(data, '\n'), 0600); err != nil {
-			t.Fatal(err)
-		}
+	if err := persist(); err != nil {
+		t.Fatal(err)
 	}
 }

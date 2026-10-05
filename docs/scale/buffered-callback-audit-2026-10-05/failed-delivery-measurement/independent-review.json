@@ -1,0 +1,86 @@
+{
+  "execution": {
+    "pid": 658968,
+    "source": "83d318bf0ddaf2d8cb96bcf06a00ef3cdad65119",
+    "sha256": "d5090e7696fa6f58245184e7099ffcaae8a740054355baaa338a89755bd4d3ee",
+    "build_info": "/proc/658968/exe: go1.27.1\n\tpath\tjs-wf/integrity.test\n\tmod\tjs-wf\tv0.0.0-20261005214347-83d318bf0dda\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=83d318bf0ddaf2d8cb96bcf06a00ef3cdad65119\n\tbuild\tvcs.time=2026-10-05T21:43:47Z\n\tbuild\tvcs.modified=false\n",
+    "args": [
+      "/tmp/js-wf-buffered-callback-delivery-cost-native-20261005/integrity.test",
+      "-test.run=^TestAuditDeliveryNativeCostComparison$",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=6m"
+    ],
+    "stat": "658968 (integrity.test) S 658758 658758 658758 0 -1 4194304 1486 0 0 0 0 0 0 0 20 0 8 0 5035365 1843965952 5745 18446744073709551615 4194304 16036080 140724798598032 0 0 0 0 0 2143420159 0 0 0 17 0 0 0 0 0 0 27779072 28245952 415068160 140724798602032 140724798602195 140724798602195 140724798603182 0\n",
+    "status": "failed",
+    "started_utc": "2026-10-05T21:43:52.125340+00:00",
+    "scope": "Normal quiet native R3 100k x128B Next/adapter/Consume/callback-adapter/buffered-callback-adapter/Next delivery comparison; in-process R3 server library is linked into observed SDK; not 400k capacity qualification",
+    "exit_code": 1,
+    "finished_utc": "2026-10-05T21:44:00.318261+00:00"
+  },
+  "actual_sdk_sha256": "d5090e7696fa6f58245184e7099ffcaae8a740054355baaa338a89755bd4d3ee",
+  "selected_source_inputs_verified": 677,
+  "observed_sdk_closed": true,
+  "native_failed_cleanup": true,
+  "final_observed_consumer_count": 1,
+  "final_observed_stream_messages": 100000,
+  "parsed_logged_delivery_measurements": [
+    {
+      "Mode": "next",
+      "Records": 100000,
+      "ElapsedNS": 341974544,
+      "AllocatedBytes": 260903128,
+      "GCCycles": 3
+    },
+    {
+      "Mode": "adapter",
+      "Records": 100000,
+      "ElapsedNS": 335280835,
+      "AllocatedBytes": 249091920,
+      "GCCycles": 2
+    },
+    {
+      "Mode": "consume",
+      "Records": 100000,
+      "ElapsedNS": 361276967,
+      "AllocatedBytes": 211208424,
+      "GCCycles": 2
+    },
+    {
+      "Mode": "callback_adapter",
+      "Records": 100000,
+      "ElapsedNS": 361278769,
+      "AllocatedBytes": 230334200,
+      "GCCycles": 2
+    },
+    {
+      "Mode": "buffered_callback_adapter",
+      "Records": 100000,
+      "ElapsedNS": 354047413,
+      "AllocatedBytes": 228114088,
+      "GCCycles": 2
+    },
+    {
+      "Mode": "next_recheck",
+      "Records": 100000,
+      "ElapsedNS": 281896637,
+      "AllocatedBytes": 212785048,
+      "GCCycles": 2
+    }
+  ],
+  "explicit_configuration": {
+    "GOMAXPROCS": "2",
+    "GOGC": "100",
+    "GOMEMLIMIT": "2GiB",
+    "WF_AUDIT_DELIVERY_COST": "1",
+    "WF_AUDIT_BATCH_ROOT": "/tmp/js-wf-buffered-callback-delivery-cost-native-20261005/originals",
+    "WF_TIER3_EXPLICIT_ROUTE_SEEDS": "1",
+    "WF_TIER3_SYNC_INTERVAL": "2m"
+  },
+  "native_result_json_absent_after_failure": true,
+  "candidate_adopted": false,
+  "qualifies_400k_capacity": false,
+  "qualifies_24h": false,
+  "scope": "Every delivery mode logged full100k; final stream consumer-count check failed; residual consumer identity/cause unconfirmed; timings do not establish speedup; in-process R3 server linked into observed SDK",
+  "source_capture_scope": "Selected Git Go/module and executable metadata, not exhaustive compiler/toolchain inputs"
+}
