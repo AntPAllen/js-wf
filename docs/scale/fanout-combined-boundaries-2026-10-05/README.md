@@ -90,3 +90,26 @@ No timeout relaxation, original-store reopen, physical-drain or full-matrix clai
 Portable producer/manual CI prepared atc24e70f; workflow375497385 registered
 active, not dispatched yet. Root retains actualSDK/full originals/selectedsource
 before-after and exactproducerGit bytes; guard requires allsix combined passes.
+
+## Last-boundary predeadline observations
+
+Focused9e759ae full500 last case failed95.28s, without admitting either fault.
+3156 trace records: six parent deliveries,1298journal appends (12.580s total),
+1298lease-renew append calls (4.599s),489signal reads, five confirmed releases/
+acks; no child dispatch observed and no completed-operation errors. Complete6341
+byte stack at29.003s shows snapshot JSON decoding in the next parent delivery.
+These observations support a preparation/scheduling problem; call timings do
+not separate server/client cost and one stack does not prove exhaustive causality.
+Actualparent/childSDK, exactproducerGit,666Gitinputs/3287selectedexternal inputs
+verified. All6065 archive members/twoparts read back, SHA:
+`78d6ad52df5110aa5845c521eb6816886a041fc024f97c047d27b8d26b281816`.
+[Complete predeadline proof](last-predeadline/). Original stores remain closed.
+
+Changed result preparation now runs allchild partitions with bounded concurrency4
+and holds parent handler before SDK result steps. All500 child results (including
+11shared-partition children) must be confirmed, allworkers joined, and all500
+named child signals durably consumed before launching the actual cut worker.
+The preparation barrier checks no parent terminal or completed SDK signal result.
+The actual SDK still collects all500 results; marker30s and wholecase5m unchanged.
+Ten guard controls pass; race compile/opt-in skip1.058s. Full changed run pending;
+no focused/failed-parent/fullrelease promotion or production timing change.

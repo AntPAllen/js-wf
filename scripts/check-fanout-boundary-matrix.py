@@ -58,6 +58,10 @@ def check(events, combined=False):
                 outside = list(re.finditer(r'confirmed (\d+) outside child results before worker stop', log))
                 if len(outside) != 1 or int(outside[0].group(1)) + int(completions[0][1]) != 500 or outside[0].start() >= kill.start():
                     raise ValueError(f'{case}: outside children not confirmed before worker stop and kill')
+                all_children = list(re.finditer(r'confirmed (\d+) child results including (\d+) parent-partition children before worker stop', log))
+                prepared = list(re.finditer(r'prepared (\d+) child signals before result cut without parent terminal', log))
+                if len(all_children) != 1 or all_children[0].groups() != ('500', completions[0][1]) or len(prepared) != 1 or prepared[0].group(1) != '500' or not outside[0].start() < all_children[0].start() < prepared[0].start() < kill.start():
+                    raise ValueError(f'{case}: shared children or signal preparation missing or unordered')
             restart = dict(node=node, retained_journal_messages=messages, journal_tail_sequence=tail, captured_prefix_tail_sequence=prefix_tail)
         result.append(dict(phase=phase, position=position, cut=cut, preserved_entries=entries,
                            old_epoch=old_epoch, final_epoch=final_epoch, children=500,

@@ -59,7 +59,9 @@ class CombinedBoundaryGateChecks(unittest.TestCase):
                 phase = 'create' if '/create/' in event['Test'] else 'results'
                 text = event['Output']
                 if phase == 'results':
-                    text = 'confirmed 489 outside child results before worker stop\n' + text
+                    text = ('confirmed 489 outside child results before worker stop\n'
+                            'confirmed 500 child results including 11 parent-partition children before worker stop\n'
+                            'prepared 500 child signals before result cut without parent terminal\n') + text
                 import re
                 entries = int(re.search(r'retained entries=(\d+)', text).group(1))
                 event['Output'] = text.replace('FANOUT_PREFIX_PRESERVED', f'combined journal restart phase={phase} node=1 messages={entries} tail_seq={entries} prefix_tail_seq={entries}\nFANOUT_PREFIX_PRESERVED')
@@ -106,5 +108,15 @@ class CombinedBoundaryGateChecks(unittest.TestCase):
         event = next(e for e in events if e.get('Test', '').endswith('/results/first') and 'Output' in e)
         original = event['Output']; marker = 'confirmed 489 outside child results before worker stop\n'
         for wrong in (original.replace(marker, ''), original.replace('confirmed 489', 'confirmed 488'), original.replace(marker, '') + marker, marker + original):
+            event['Output'] = wrong
+            with self.assertRaises(ValueError): gate.check(events, combined=True)
+
+    def test_all_children_and_signal_preparation_must_precede_kill(self):
+        events = self.events()
+        event = next(e for e in events if e.get('Test', '').endswith('/results/last') and 'Output' in e)
+        original = event['Output']
+        prepared = 'prepared 500 child signals before result cut without parent terminal\n'
+        all_children = 'confirmed 500 child results including 11 parent-partition children before worker stop\n'
+        for wrong in (original.replace(prepared, ''), original.replace(all_children, ''), original.replace('including 11', 'including 10'), original.replace('prepared 500', 'prepared 499'), original.replace(prepared, '') + prepared, prepared + original.replace(prepared, ''), original + all_children):
             event['Output'] = wrong
             with self.assertRaises(ValueError): gate.check(events, combined=True)

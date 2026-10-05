@@ -3092,3 +3092,19 @@ matrix. Allnine existing guard controls pass, trace integration race compile/
 opt-in skip passed1.059s. Prepare one changed-observation last-case run to locate
 partition52's four missing children/493pending; do not promote focused result,
 rerun the unchanged full graph or relax the deadline.
+
+### Fanout shared-partition child preparation and signal barrier — 2026-10-05
+
+Focused9e759ae lastcase FAIL95.28s; predeadline trace shows1298journal appends/
+489signal reads/sixparent deliveries/nochild dispatch, snapshot JSONdecode at29s.
+ActualSDK/producer/666Gitinputs/3287external inputs and6065archive members/two
+parts verified. New result fixture prepares all500child results, including shared
+partition, through production workers with bounded concurrency4 and parent
+handler held before SDK collection. Joins workers; separate production signal
+barrier consumes all500names, checks no earlyparent terminal or SDK result.
+Then realcutworker collects normal500SDK results at exactfirst/interior/last
+boundaries. Creation profile unchanged, five-minute case and30s marker unchanged.
+Ten acceptance controls pass; race compile/opt-in skip1.058s; full changed run
+pending. No default production decision/timing change, historical servercause,
+failedparent, full faultmatrix or24h promotion.
+[Complete trace and changed preparation](scale/fanout-combined-boundaries-2026-10-05/).

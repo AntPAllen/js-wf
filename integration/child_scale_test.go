@@ -305,7 +305,17 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 			parts[part] = true
 		}
 	}
-	childWorker, err := worker.New(ctx, all[2], "child-fanout-worker", handlers)
+	childHandlers := handlers
+	var childOptions []worker.Option
+	if retainedRoot != "" && killDuringResults {
+		// Complete children sharing the parent's partition without collecting
+		// parent results before the requested cut. A paused parent may hold one
+		// slot while other slots run children and fence duplicate wakeups.
+		parts[parentPart] = true
+		childHandlers = map[string]worker.Handler{"child": handlers["child"], "parent": holdFanoutParent}
+		childOptions = append(childOptions, worker.WithPartitionConcurrency(4))
+	}
+	childWorker, err := worker.New(ctx, all[2], "child-fanout-worker", childHandlers, childOptions...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -317,40 +327,41 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 		childDone = append(childDone, done)
 		go func(part uint32, done chan error) { done <- childWorker.RunPartition(childCtx, part) }(part, done)
 	}
-	sig, err := all[0].Stream(ctx, "WF_SIG")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for ctx.Err() == nil {
-		info, err := sig.Info(ctx)
+	if retainedRoot == "" || !killDuringResults {
+		sig, err := all[0].Stream(ctx, "WF_SIG")
 		if err != nil {
 			t.Fatal(err)
 		}
-		if info.State.Msgs >= uint64(childCount-insideParent) {
-			break
+		for ctx.Err() == nil {
+			info, err := sig.Info(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if info.State.Msgs >= uint64(childCount-insideParent) {
+				break
+			}
+			time.Sleep(50 * time.Millisecond)
 		}
-		time.Sleep(50 * time.Millisecond)
-	}
-	if ctx.Err() != nil {
-		t.Fatalf("children outside parent partition did not finish: %v", ctx.Err())
+		if ctx.Err() != nil {
+			t.Fatalf("children outside parent partition did not finish: %v", ctx.Err())
+		}
 	}
 	childrenJoined := false
 	if retainedRoot != "" && killDuringResults {
-		// Aggregate signal counts include children already run in the parent's
-		// partition. Confirm each outside child before stopping its only worker;
-		// otherwise the successor can wait forever on an unprocessed child.
+		// Admit every child by identity; aggregate signal counts can include
+		// shared-partition children and can shrink after signal consumption.
 		outsideChecked := 0
 		for index, id := range childIDs {
-			if identity.Partition("child", id, provision.Partitions) == parentPart {
-				continue
-			}
 			value, err := client.New(all[0]).Await(ctx, "child", id)
 			if err != nil || string(value) != strconv.Itoa(2*index) {
-				t.Fatalf("outside child %d result=%s err=%v", index, value, err)
+				t.Fatalf("prepared child %d result=%s err=%v", index, value, err)
 			}
-			outsideChecked++
+			if identity.Partition("child", id, provision.Partitions) != parentPart {
+				outsideChecked++
+			}
 		}
 		t.Logf("confirmed %d outside child results before worker stop", outsideChecked)
+		t.Logf("confirmed %d child results including %d parent-partition children before worker stop", childCount, insideParent)
 		stopChildren()
 		for _, done := range childDone {
 			if err := <-done; err != nil && !errors.Is(err, context.Canceled) {
@@ -358,6 +369,7 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 			}
 		}
 		childrenJoined = true
+		prepareFanoutResultSignals(t, ctx, all[0], parentPart, childCount)
 	}
 	var killedPrefix []journal.Record
 	if killDuringResults {

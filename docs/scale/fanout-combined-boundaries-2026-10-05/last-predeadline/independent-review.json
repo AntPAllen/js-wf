@@ -1,0 +1,79 @@
+{
+  "source": "9e759ae1e7f8a9402c7234521720ed3924dfdaf0",
+  "actual_parent_and_child_sdk_sha256": "5987dd27b6ef0c4eb137394d4ffbabd30c5739c503e6592117379e215196fc18",
+  "native_status": "failed",
+  "native_seconds": 95.28,
+  "focused_case": "results/last",
+  "actual_fault_admitted": false,
+  "selected_git_inputs_verified": 666,
+  "selected_external_inputs_verified": 3287,
+  "exact_producer_git_sha256": "1ed3a0c88077be170f6869b1482838d49ec872a17c8d2c08b0b43a726a89e3c7",
+  "trace_records": 3156,
+  "operation_counts": {
+    "lease_acquire": 6,
+    "journal_read": 6,
+    "invocation_read": 6,
+    "signal_info": 6,
+    "signal_read": 489,
+    "lease_renew_append": 1298,
+    "journal_append": 1298,
+    "lease_heartbeat_recent": 8,
+    "journal_snapshot": 5,
+    "lease_release": 5,
+    "dispatch_ack_confirmed": 5
+  },
+  "completed_operation_errors_observed": 0,
+  "dispatch_stages_per_delivery": {
+    "1/2": [
+      "fetched",
+      "lease_acquired",
+      "released",
+      "ack"
+    ],
+    "384/2": [
+      "fetched",
+      "lease_acquired",
+      "released",
+      "ack"
+    ],
+    "385/1": [
+      "fetched",
+      "lease_acquired",
+      "released",
+      "ack"
+    ],
+    "386/1": [
+      "fetched",
+      "lease_acquired",
+      "released",
+      "ack"
+    ],
+    "387/1": [
+      "fetched",
+      "lease_acquired",
+      "released",
+      "ack"
+    ],
+    "388/1": [
+      "fetched",
+      "lease_acquired"
+    ]
+  },
+  "no_child_dispatch_observed": true,
+  "predeadline_stack_seconds": 29.002905,
+  "stack_complete_bytes": 6341,
+  "stack_observed_snapshot_json_decode": true,
+  "total_journal_append_seconds": 12.580253152,
+  "total_lease_renew_append_seconds": 4.599083052,
+  "full_matrix_guard_rejected": true,
+  "qualifies_full_combined_matrix": false,
+  "qualifies_release_matrix_or_24h": false,
+  "limitations": [
+    "Observations include instrumentation overhead.",
+    "Completed call timings do not isolate server from client/network/local cost or prove absence of unobserved errors.",
+    "One stack sample shows local decoding, not exhaustive causality.",
+    "Actual R3 library servers embedded in SDK; no separate server SIGKILL.",
+    "Original stores closed and not reopened.",
+    "Selected source excludes exhaustive assembly/embed/compiler provenance."
+  ]
+}

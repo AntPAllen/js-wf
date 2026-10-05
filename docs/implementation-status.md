@@ -50,6 +50,18 @@ reopen or completed combined-matrix qualification claimed.
 
 ## Latest preserved failures
 
+Focused last-boundary9e759ae failed95.28s without admitting faults.3156 trace
+records show six parent deliveries/1298journal appends12.580s/lease appends4.599s,
+489signal reads/five confirmed release-acks/nochild dispatch/no completed-call
+errors. Complete stack29.003s shows local snapshot JSON decode. Actualparent/
+childSDK/exactproducerGit/666Gitinputs/3287selectedexternal inputs verified;
+6065archive members/twoparts read back. Changed preparation runs shared-partition
+children with bounded concurrency4 while parent SDK collection held; admits all
+500results, joinsworkers and confirms500durable child signals/no earlySDK result
+before actualcutworker. Ten guard controls pass; race compile/opt-in skip1.058s.
+Original30s/5m preserved; full changed case pending, no production or servercause
+fix/fullmatrix claim. [Complete predeadline proof](scale/fanout-combined-boundaries-2026-10-05/).
+
 The confirmed-outside full500 matrix at161dfa9 failed729.17s: allthree creation
 and first/interior result cases pass, each500 children/result249500/prefix/higher
 epoch. All489 outside results confirmed before stopping workers. Interior trace
