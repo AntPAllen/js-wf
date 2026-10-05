@@ -3144,3 +3144,13 @@ and shallow HEAD checkout (exact selected HEAD Git bytes remain available;
 historical artifact objects are unnecessary to the producer). Corrected workflow
 will be dispatched after push. No CI native result or qualification claimed by
 registration/dispatch; local25b327c six-boundary qualification remains accepted.
+
+### Sparse combined fanout CI source checkout — 2026-10-05
+
+The repository has18GiB Git history and9.7GiB scale artifacts locally. The new
+manual CI needs every tracked Go source (including four historical docs Go files)
+plus modules/scripts/integration fixtures, not proof archives. Checkout uses
+blob:none and non-cone **/*.go plus explicit required paths. Producer still
+verifies/captures allselected HEAD Go inputs and exact producer Git bytes; sparse
+status must remain clean. Native actual500/six/race/5m/30s requirements unchanged.
+CI execution pending; no environment qualification from this preparation.
