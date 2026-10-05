@@ -99,7 +99,7 @@ checker_bytes=subprocess.check_output(['git','show',revision+':scripts/check-mat
 assert checker.read_bytes()==checker_bytes
 (root/'executed-checker.py').write_bytes(checker_bytes)
 with (root/'native.log').open('rb') as native, (root/'converted-events.jsonl').open('wb') as converted:
- subprocess.run(['go','tool','test2json','-p','js-wf/integration'],stdin=native,stdout=converted,check=True)
+ subprocess.run(['go','tool','test2json','-t','-p','js-wf/integration'],stdin=native,stdout=converted,check=True)
 with (root/'acceptance.log').open('w') as log:
  acceptance=subprocess.run(['python3',str(root/'executed-checker.py'),str(root/'converted-events.jsonl'),test,duration],stdout=log,stderr=subprocess.STDOUT)
 (root/'acceptance.json').write_text(json.dumps({'exit_code':acceptance.returncode,'native_exit_code':code,'duration':duration,'row':row,'source':revision,'server_observer_errors':len(observation_errors),'scope':'Native duration acceptance only; independent fault/history/store review still required.'},indent=2)+'\n')

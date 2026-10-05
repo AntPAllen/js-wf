@@ -3332,3 +3332,15 @@ server executables read through `/proc`. Polling can miss short-lived processes;
 it does not establish exhaustive executable coverage. Independent fault/history
 and copied-store review remains necessary. The full thirteen-row/200-seed
 requirement is unchanged. Initial runner verification is pending.
+
+### Retained Tier2 smoke and duration conversion correction — 2026-10-05
+
+The new journal-row producer executed normal seed1/original35s smoke at584aac5:
+native PASS46.69s,196 terminal invocations, one admitted journal-leader restart.
+ActualSDK and four observed server processes,668 selected Git and3287 selected
+external inputs independently verified. Producer acceptance failed because
+conversion omitted elapsed fields; that failed result is preserved. Independent
+`test2json -t` conversion of the same native log passes the unchanged checker.
+The producer now requests `-t`; generated timestamps are conversion observations.
+[Complete smoke evidence](scale/tier2-retained-row-2026-10-05/journal-smoke/).
+No ten-minute, independent copied-store or full-matrix qualification is claimed.
