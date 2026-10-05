@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source; all-server-kill seeds 1–156 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds and disk-delay seeds 1–104 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -29,6 +29,17 @@ and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Complete recorded-source all-server-kill200 row independently accepted:**
+  final44 seeds157–200 /four successful shards independently verify105252 invocations,
+  1160209 entries/836 faults/135362 exactOk model operations. Aggregation reads every
+  part/member in all17 proofs, verifies actual model executables/45 common dependency
+  inputs againstc4fed06, all200 exact seed/model verdicts and original600s/30s gates.
+  Full row476840 invocations/5256067 entries/3800 faults/613446 model operations;
+  worst terminal/progress p99=18.295s/13.020s. Workload SDK/full captured source/stores
+  unavailable; final integrity/drain named-test scope. Other parent rows fail;
+  full/final-source/24h/million-drain gates stay open.
+  [Complete200 qualification](scale/current-tier2-matrix-2026-10-04/cluster-full200-qualification/).
 
 - **New actual24h journal-leader soak is live with adopted byte reader:** isolated
   clean e278ffb, original24h/seed1/R5/normal2GiB/explicit-route workload and20s/60s

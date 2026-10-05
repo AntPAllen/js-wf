@@ -2168,3 +2168,16 @@ Messages/Next; diagnostic limitation recorded. Native-million campaign shares th
 VM. Keep the new unit observed without restarting on timeouts; terminal complete
 raw/model/integrity/drain review is still required. No full matrix/24h promotion.
 [Launch evidence](scale/byte-bounded-audit-2026-10-05/24h-launch/).
+
+### Complete recorded-source Tier2 all-server-kill200 acceptance — 2026-10-05
+
+Final157–200 shards qualify105252 invocations/1160209 entries/836 faults/
+135362 independent operations. Full17-shard aggregation verifies all parts/members,
+actual model binaries/45 common source dependencies, exactly200 complete600s seeds
+and all three exactOk histories under unchanged30s terminal/progress gates.
+Recorded c4fed06 row totals476840 invocations/5256067 entries/3800 faults/
+613446 operations; worstp99=18.295s/13.020s. Workload executable/complete captured
+source/stores not uploaded; integrity/drain retain named-test scope. This completes
+three recorded-source Tier2 rows (journal/consumer/all-server); full13×200/final
+source, Tier3/full24h and native-million physical drain remain open.
+[Complete raw references and aggregation](scale/current-tier2-matrix-2026-10-04/cluster-full200-qualification/).
