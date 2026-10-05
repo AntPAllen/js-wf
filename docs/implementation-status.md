@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Changed-instrumentation actual24h journal run launch independently verified:**
+  executedaace912, originalseed1/normal2GiB/GOMAX2/explicitroutes/2msync/streaming
+  retainedaudit and originalgates. Actualparent162125/supervisor161783 live;
+  SDK/environment/fiveactualDockerexecutablebuilds/routes/mounts/1374Gitinputs
+  and1393immutablearchive members/fourparts verify. Watchcreation/cleanup trace
+  and opt-in one-second-before-deadline parentstack/currenttrace added; pending
+  snapshot notfailureverdict. Firstthree cohort audits passed, terminalpending.
+  MillioncandidateVM overlap, liveSDKobserver; future serverbuilds not covered
+  by launchsnapshot. Historicalcauses/fixes/fullmatrix/24h remainunconfirmed.
+  [Immutable launch and independent review](scale/watch-observed-journal-24h-2026-10-05/launch/).
+
 - **Complete checkpoint1040 copied cohort audit qualified:** executede8bce87,
   original20s singleattempt/matrixclient/streamingjournal+state, nativePASS17.27s,
   audit5.184s;29120inv/journals/terminals and321151entries. Journaldelivery321746/

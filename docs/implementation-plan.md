@@ -2802,3 +2802,15 @@ controls and race checks verify cancellation, pending trace, actual blocked pare
 stack, metadata deadline and capture error identity. The producer clears inherited
 activation and records the explicit flag; arguments and verifier gates unchanged.
 Native changed-instrumentation actual24h observation remains pending.
+
+### 2026-10-05 changed-instrumentation actual24h journal launch verified
+
+Executed aace912 original24h seed1 normal2GiB/GOMAX2/explicitroutes/2msync/
+streamingstate profile started with pending-audit observation. ActualSDK162125/
+supervisor161783 live, parentenvironment/fiveDockerprocessbuilds/routes/mounts/
+1374Gitinputs/1393immutablearchive members/fourparts independently verified.
+Firstthree cohort audits passed; terminal pending. Parentonlywatch/stack capture
+fills prior observation gap, no historicalcause/fix, budgetchange or fullmatrix/
+24h qualification. SDKobserver live; launchsnapshot doesnotcover allfuture
+serverreplacements. Candidate million sharesVM; no pressureattribution.
+[Complete launch proof](scale/watch-observed-journal-24h-2026-10-05/launch/).
