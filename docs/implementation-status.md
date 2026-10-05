@@ -28,6 +28,15 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 21:12 UTC
+
+The delivery diagnostic also passes27.13s under race at ff6ba0a, with allfour
+100k fullreads and consumer cleanup; no race report. Selectedsource/actualSDK
+race/module/closure independently reviewed and full1084-member archive verified.
+Race timings are not performance evidence. Fullfour-core failure and normal
+delivery archives are committed/pushed at ae9f608.
+[Race control](scale/audit-delivery-cost-2026-10-05/race-control/).
+
 ## Latest follow-up — 2026-10-05 21:10 UTC
 
 Four-core failed400k comparison archive is complete and independently read back.

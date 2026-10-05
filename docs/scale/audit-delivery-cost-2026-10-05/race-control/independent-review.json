@@ -1,0 +1,75 @@
+{
+  "execution": {
+    "pid": 640276,
+    "source": "ff6ba0a0884dac45133e3dd2f274bc1fa904e61e",
+    "sha256": "aa0e26fa645bed6d00f03feff2538be859c4024d061115e6eab8a68f843e02d7",
+    "build_info": "/proc/640276/exe: go1.27.1\n\tpath\tjs-wf/integrity.test\n\tmod\tjs-wf\tv0.0.0-20261005211048-ff6ba0a0884d\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=ff6ba0a0884dac45133e3dd2f274bc1fa904e61e\n\tbuild\tvcs.time=2026-10-05T21:10:48Z\n\tbuild\tvcs.modified=false\n",
+    "args": [
+      "/tmp/js-wf-audit-delivery-cost-race-control-20261005/integrity.test",
+      "-test.run=^TestAuditDeliveryNativeCostComparison$",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=6m"
+    ],
+    "stat": "640276 (integrity.test) S 640085 640085 640085 0 -1 4194304 7257 0 0 0 3 1 0 0 20 0 8 0 4839962 2195206144 12510 18446744073709551615 4194304 24393968 140725545835712 0 0 0 0 0 2143420159 0 0 0 17 1 0 0 0 0 0 37457920 37948672 399519744 140725545843528 140725545843685 140725545843685 140725545844660 0\n",
+    "status": "passed",
+    "started_utc": "2026-10-05T21:11:18.107741+00:00",
+    "scope": "Race lifecycle control for quiet native R3 100k x128B Next/adapter/Consume/Next delivery comparison; in-process R3 server library is linked into observed SDK; not 400k capacity qualification",
+    "exit_code": 0,
+    "finished_utc": "2026-10-05T21:11:46.736018+00:00"
+  },
+  "explicit_configuration": {
+    "GOMAXPROCS": "2",
+    "GOGC": "100",
+    "GOMEMLIMIT": "2GiB",
+    "WF_AUDIT_DELIVERY_COST": "1",
+    "WF_AUDIT_BATCH_ROOT": "/tmp/js-wf-audit-delivery-cost-race-control-20261005/originals",
+    "WF_TIER3_EXPLICIT_ROUTE_SEEDS": "1",
+    "WF_TIER3_SYNC_INTERVAL": "2m"
+  },
+  "actual_sdk_sha256": "aa0e26fa645bed6d00f03feff2538be859c4024d061115e6eab8a68f843e02d7",
+  "selected_source_inputs_verified": 674,
+  "observed_sdk_closed": true,
+  "native_race_test_passes_seconds": {
+    "TestAuditDeliveryNativeCostComparison": 27.13
+  },
+  "race_timings_not_performance_evidence": true,
+  "delivery_measurements": {
+    "Results": [
+      {
+        "Mode": "next",
+        "Records": 100000,
+        "ElapsedNS": 2572814454,
+        "AllocatedBytes": 225366680,
+        "GCCycles": 4
+      },
+      {
+        "Mode": "adapter",
+        "Records": 100000,
+        "ElapsedNS": 3626037991,
+        "AllocatedBytes": 259447992,
+        "GCCycles": 3
+      },
+      {
+        "Mode": "consume",
+        "Records": 100000,
+        "ElapsedNS": 2344409510,
+        "AllocatedBytes": 194938816,
+        "GCCycles": 3
+      },
+      {
+        "Mode": "next_recheck",
+        "Records": 100000,
+        "ElapsedNS": 3908591344,
+        "AllocatedBytes": 262727272,
+        "GCCycles": 4
+      }
+    ],
+    "Scope": "Quiet R3 100k x128B delivery only; allocations include linked in-process server activity; not 400k integrity, fault recovery, or default adoption"
+  },
+  "server_scope": "In-process R3 current server library compiled into observed SDK; allocation totals include server activity",
+  "source_capture_scope": "Selected Git Go/module inputs and actual executable metadata, not exhaustive external compiler/toolchain inputs",
+  "candidate_adopted": false,
+  "qualifies_400k_capacity": false,
+  "qualifies_24h": false
+}

@@ -3881,3 +3881,12 @@ with linkedserver allocation activity included. This supports a callback deliver
 candidate measurement, not a fullcapacity/integrity/fault/default adoption.
 Complete1084-member archive and selectedsource/actualSDK closure reviewed.
 [Delivery measurement](scale/audit-delivery-cost-2026-10-05/native-comparison/).
+
+### Delivery diagnostic callback lifecycle race control accepted — 2026-10-05
+
+At ff6ba0a the same full100k coordinate/payload diagnostic passes27.13s under
+race, with allfour consumers removed and no race report. Fullclosed1084-member
+archive/readback and selectedsource/actualSDK/race/module/closure verified.
+Race timings are not performance proof. Integrated callback scanner recovery and
+full400k/24h qualification remain pending.
+[Race control](scale/audit-delivery-cost-2026-10-05/race-control/).
