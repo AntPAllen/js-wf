@@ -28,6 +28,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 21:28 UTC
+
+The full400k explicit callback capacity gate at b943074 fails97.60s. SDK/compact/
+callback/SDKrecheck all hit unchanged20s deadlines; callback also records a cleanup
+join deadline. Allocation2.658GB/19GC is incomplete-attempt data, not throughput
+proof. Actual SDK/five servers close;676 selectedGit inputs/mounts/closure and
+1058 unchanged original files independently verified. Full closed-fixture archive
+preservation is running; acceptance pending. The million campaign shares theVM,
+so the quiet workflow dataset is not an isolated-machine benchmark.
+No default/full400k/24h pass. Next diagnosis measures integrated per-record
+delivery/reduction overhead.
+[Capacity failure](scale/callback-audit-delivery-2026-10-05/capacity-400k/).
+
 ## Latest follow-up — 2026-10-05 21:23 UTC
 
 Legacy2.11.17 callback fullaudit race controls at010d5ef pass59.92s. Allthree

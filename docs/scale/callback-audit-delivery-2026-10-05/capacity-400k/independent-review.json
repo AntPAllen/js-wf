@@ -1,0 +1,99 @@
+{
+  "explicit_configuration": {
+    "GOMAXPROCS": "4",
+    "GOGC": "200",
+    "GOMEMLIMIT": "2GiB",
+    "WF_AUDIT_CAPACITY_PLAIN_COMPARISON": "1",
+    "WF_AUDIT_CAPACITY_CALLBACK_COMPARISON": "1",
+    "WF_AUDIT_CAPACITY_PROFILE_STORES": "/tmp/js-wf-callback-400k-four-core-copied-comparison-20261005/copied-stores",
+    "WF_AUDIT_CAPACITY_PROFILE_IDENTITY": "js-wf-route-595173-1791229859953606113",
+    "WF_AUDIT_BATCH_ROOT": "/tmp/js-wf-callback-400k-four-core-copied-comparison-20261005/originals",
+    "WF_TIER3_EXPLICIT_ROUTE_SEEDS": "1",
+    "WF_TIER3_SYNC_INTERVAL": "2m"
+  },
+  "execution": {
+    "pid": 647782,
+    "source": "b943074c0627ebcb9a2c045a5f70a8b1974a26f3",
+    "sha256": "3ad63783fee831d78b623100dbdabbebcb001ca104babc6131cecd2c222a75dd",
+    "build_info": "/proc/647782/exe: go1.27.1\n\tpath\tjs-wf/integrity.test\n\tmod\tjs-wf\tv0.0.0-20261005212521-b943074c0627\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=b943074c0627ebcb9a2c045a5f70a8b1974a26f3\n\tbuild\tvcs.time=2026-10-05T21:25:21Z\n\tbuild\tvcs.modified=false\n",
+    "args": [
+      "/tmp/js-wf-callback-400k-four-core-copied-comparison-20261005/integrity.test",
+      "-test.run=^TestConcurrentStateR5CopiedCapacityProfile$",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=6m"
+    ],
+    "stat": "647782 (integrity.test) S 647485 647485 647485 0 -1 4194304 774 0 0 0 0 0 0 0 20 0 6 0 4926433 1692663808 3957 18446744073709551615 4194304 16017296 140735529033504 0 0 0 0 0 2143420159 0 0 0 17 0 0 0 0 0 0 27742208 28208992 739663872 140735529036340 140735529036511 140735529036511 140735529037739 0\n",
+    "status": "failed",
+    "started_utc": "2026-10-05T21:25:42.813217+00:00",
+    "scope": "Explicit four-core GOGC200 2GiB verified copied-store plain SDK/compact/callback/SDK400k original20s full capacity comparison; candidate must pass exact full report; every verdict preserved",
+    "exit_code": 1,
+    "finished_utc": "2026-10-05T21:27:20.856446+00:00"
+  },
+  "selected_git_source_inputs_verified": 676,
+  "actual_server_observations": 5,
+  "server_sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+  "observed_processes_closed": true,
+  "copied_data_mounts_verified": true,
+  "original_store_files_unchanged": 1058,
+  "canonical_original_archive_sha256": "970b0adbddef8d8fb76ab8d1b523b26820217c9a1ffd8994544887d26d1c84a0",
+  "results": [
+    {
+      "Mode": "sdk_concurrent",
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "Error": "context deadline exceeded",
+      "ElapsedNS": 20000050691,
+      "AllocatedBytes": 5015732616,
+      "GCCycles": 26
+    },
+    {
+      "Mode": "compact_concurrent",
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "Error": "context deadline exceeded",
+      "ElapsedNS": 20000192587,
+      "AllocatedBytes": 3084729656,
+      "GCCycles": 12
+    },
+    {
+      "Mode": "callback_concurrent",
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "Error": "context deadline exceeded\nretained callback cleanup: context deadline exceeded",
+      "ElapsedNS": 20000072258,
+      "AllocatedBytes": 2657940080,
+      "GCCycles": 19
+    },
+    {
+      "Mode": "sdk_recheck",
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "Error": "context deadline exceeded",
+      "ElapsedNS": 20000700383,
+      "AllocatedBytes": 4716156720,
+      "GCCycles": 24
+    }
+  ],
+  "callback_400k_quiet_capacity_pass": false,
+  "qualifies_24h": false,
+  "candidate_adopted": false,
+  "original_20s_limits_retained": true,
+  "source_capture_scope": "Selected Git Go/module source and observed executables; not exhaustive external toolchain/compiler inputs"
+}

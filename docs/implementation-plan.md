@@ -3922,3 +3922,14 @@ GOGC200/2GiB profile. Opt-in compile/skip passes; actual capacity remains pendin
 verified headroom. Defaults and full24h qualification remain open.
 [Legacy](scale/callback-audit-delivery-2026-10-05/legacy-controls/) ·
 [Capacity preparation](scale/callback-audit-delivery-2026-10-05/capacity-preparation/).
+
+### Full400k callback candidate capacity failure — 2026-10-05
+
+At b943074 the samefour-core/GOGC200/2GiB quietworkflow R5 profile fails97.60s:
+allfour SDK/compact/callback/SDKrecheck original20s attempts expire. Callback
+reports a cleanupjoin deadline and doesnot claim synchronouscleanup success.
+ObservedSDK/five servers subsequently close;676 selectedGit/actualexecutables/
+modules/mounts and1058 unchangedoriginalfiles independentlyverified. Fullclosed
+archive preservation running, notyet accepted. Milliondiagnostic sharesVM.
+No default/fullcapacity/24h promotion; integrated per-record reduction/delivery
+cost is next. [Failure](scale/callback-audit-delivery-2026-10-05/capacity-400k/).
