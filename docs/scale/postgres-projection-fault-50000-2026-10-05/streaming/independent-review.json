@@ -1,0 +1,108 @@
+{
+  "source": "9fbfa1637264a9314da65c297d34332b0f01bdcb",
+  "actual_parent_sdk_sha256": "acfbe36aa91e45507fd70198755346989c058448b3949b9549a2f49821bd81d0",
+  "actual_killed_projection_sdk_sha256": "acfbe36aa91e45507fd70198755346989c058448b3949b9549a2f49821bd81d0",
+  "selected_git_inputs_verified": 664,
+  "selected_external_inputs_verified": 3287,
+  "actual_postgres_executable_sha256": "6705048937384211b3879ce38b670ff7ae4c699d1d9d7e7aba664a610dcccf57",
+  "actual_postgres_version": "postgres (PostgreSQL) 16.15",
+  "closed_postgres_media_files_verified": 1284,
+  "native_status": "passed",
+  "count": 50000,
+  "results_checked_before_fault": 50000,
+  "stopped_projection_lag": 100000,
+  "confirmed_partial_catchup_rows": 81,
+  "writer_session_termination_and_library_journal_restart_admitted": true,
+  "workflow_queue_drained_and_workers_joined_before_fault": true,
+  "pinned_clients_refreshed": true,
+  "all_four_projection_sources_current_before_replacement": true,
+  "bounded_dependency_trace_error_calls": [
+    {
+      "operation": "WF_JRN.GetMsg",
+      "detail": "99844",
+      "started": "2026-10-05T13:29:43.181133711Z",
+      "completed": "2026-10-05T13:29:43.181450333Z",
+      "deadline": "2026-10-05T13:29:45.181132499Z",
+      "error": "nats: API error: code=404 err_code=10037 description=message not found"
+    },
+    {
+      "operation": "WF_JRN.GetMsg",
+      "detail": "99998",
+      "started": "2026-10-05T13:29:43.183647268Z",
+      "completed": "2026-10-05T13:29:43.184349126Z",
+      "deadline": "2026-10-05T13:29:45.183646437Z",
+      "error": "nats: API error: code=404 err_code=10037 description=message not found"
+    },
+    {
+      "operation": "WF_JRN.GetMsg",
+      "detail": "99956",
+      "started": "2026-10-05T13:29:43.184332601Z",
+      "completed": "2026-10-05T13:29:43.185171098Z",
+      "deadline": "2026-10-05T13:29:45.184330458Z",
+      "error": "nats: API error: code=404 err_code=10037 description=message not found"
+    },
+    {
+      "operation": "WF_JRN.GetMsg",
+      "detail": "99860",
+      "started": "2026-10-05T13:29:43.186166233Z",
+      "completed": "2026-10-05T13:29:43.186598431Z",
+      "deadline": "2026-10-05T13:29:45.186163809Z",
+      "error": "nats: API error: code=404 err_code=10037 description=message not found"
+    },
+    {
+      "operation": "WF_JRN.GetMsg",
+      "detail": "99982",
+      "started": "2026-10-05T13:29:43.188039835Z",
+      "completed": "2026-10-05T13:29:43.189649676Z",
+      "deadline": "2026-10-05T13:29:45.188037972Z",
+      "error": "nats: API error: code=404 err_code=10037 description=message not found"
+    },
+    {
+      "operation": "WF_JRN.GetMsg",
+      "detail": "99995",
+      "started": "2026-10-05T13:29:43.188224576Z",
+      "completed": "2026-10-05T13:29:43.189764651Z",
+      "deadline": "2026-10-05T13:29:45.188222083Z",
+      "error": "nats: API error: code=404 err_code=10037 description=message not found"
+    },
+    {
+      "operation": "WF_JRN.GetMsg",
+      "detail": "99855",
+      "started": "2026-10-05T13:29:43.18956667Z",
+      "completed": "2026-10-05T13:29:43.190709409Z",
+      "deadline": "2026-10-05T13:29:45.189561572Z",
+      "error": "nats: API error: code=404 err_code=10037 description=message not found"
+    },
+    {
+      "operation": "WF_JRN.GetMsg",
+      "detail": "99941",
+      "started": "2026-10-05T13:29:43.189624908Z",
+      "completed": "2026-10-05T13:29:43.190830584Z",
+      "deadline": "2026-10-05T13:29:45.189621313Z",
+      "error": "nats: API error: code=404 err_code=10037 description=message not found"
+    },
+    {
+      "operation": "WF_JRN.GetMsg",
+      "detail": "100001",
+      "started": "2026-10-05T13:29:43.191827031Z",
+      "completed": "2026-10-05T13:29:43.193513188Z",
+      "deadline": "2026-10-05T13:29:45.191824948Z",
+      "error": "nats: API error: code=404 err_code=10037 description=message not found"
+    }
+  ],
+  "continuous_WF_INV_iterator_observed": true,
+  "fatal_dependency_confirmed": false,
+  "faulted_projection_error": "PostgreSQL visibility writer lock session lost: driver: bad connection",
+  "native_seconds": 1030.97,
+  "full_lag_zero_and_rebuild_equality_qualified_in_this_case": true,
+  "qualifies_full_matrix_or_24h": false,
+  "no_historical_failure_cause_or_fix_claim": true,
+  "limitations": [
+    "Real R3 servers embedded in SDK, no separate NATS server process hashes or logs.",
+    "SQL server gracefully stopped after SDK; no PostgreSQL server SIGKILL.",
+    "SQL exposed rows and indexed columns compared; internal random generations intentionally excluded.",
+    "Selected input inventory excludes exhaustive race/assembly/embed/compiler provenance.",
+    "Native retained-state assertions have named-test scope; original NATS stores are closed and not independently reopened.",
+    "Shares VM with two live campaigns; no pressure attribution."
+  ]
+}

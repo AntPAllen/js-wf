@@ -1,0 +1,30 @@
+{
+  "original_source": "9fbfa1637264a9314da65c297d34332b0f01bdcb",
+  "original_native_status": "passed",
+  "original_sdk_sha256": "acfbe36aa91e45507fd70198755346989c058448b3949b9549a2f49821bd81d0",
+  "helper_git_source": "11997cdb7c00eb111cdd38ddec819274e401ac9d",
+  "helper_git_sha256": "e99d4f0bf6f85c54e07dc186ee9abcc7204291636764bc8222bea9bbe9caef6c",
+  "actual_review_sdk_sha256": "27869b010f08032fb28a883fbfe7b2d504f0b6b0fdf271ce53041305b3a3d0a8",
+  "selected_inputs_verified": 1664,
+  "original_closed_files_verified_unchanged": 2352,
+  "report": {
+    "Invocations": 50000,
+    "Journals": 50000,
+    "Entries": 100000,
+    "Terminal": 50000
+  },
+  "audit_seconds": 5.48997445,
+  "whole_review_seconds": 5.531369521,
+  "drained_partition_consumers": 64,
+  "all_three_peer_queues_physically_zero": true,
+  "full_copied_retained_state_and_drain_qualified": true,
+  "qualifies_original_projection_fault_recovery": false,
+  "qualifies_historical_cause_or_full_matrix_or_24h": false,
+  "limitations": [
+    "Only fresh copies reopened; no concurrent writers or injected faults during copied audit.",
+    "Library NATS servers embedded in actual captured review SDK, no separate process hashes/logs.",
+    "Selected inputs do not capture exhaustive compiler/assembly/embed provenance.",
+    "Does not replace original projection native verdict; original bytes unchanged.",
+    "Shares VM with two live campaigns; no pressure-cause claim."
+  ]
+}

@@ -28,7 +28,7 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
-## Latest unresolved result
+## Latest preserved failures
 
 The corrected full PostgreSQL case at `e6c124f` also failed (494.71s). All50000
 results/lag100000 and faults at78rows verified; workflowqueue drained/workers
@@ -52,6 +52,22 @@ no-responder cause remains unconfirmed. Correct fixture lifecycle/readiness and
 trace dependencies before another full run. [Preserved failed proof](scale/postgres-projection-fault-50000-2026-10-05/failed/).
 
 ## Latest accepted evidence
+
+- **Full PostgreSQL projection crash + combined catch-up fault qualified:**
+  executed9fbfa16 nativePASS1030.97s/original20m/default50000. Actual/reapedSIGKILL
+  projection down while all50000 results checked; lag100000. SQL writer backend
+  termination at81rows plus library journal-leader restart, refreshedclients/
+  allfour R3 sources current. Replacement continuousiterator drains lagzero;
+  independent50000-row parse and fullSQL row/indexed-column rebuild equality.
+  ActualSDK/664Gitinputs/3287selectedexternalinputs/PostgreSQLexe/1284closedSQL
+  mediafiles/all7617archive members/fourparts verified. Separate actualSDK opens
+  only byte-identical copies: fullretained50000inv/journals/terminals+100000entries
+  audit5.490s/whole5.531s underoriginal20s, allthreequeueszero/all64durableszero;
+  2352originalfiles unchanged/1664selectedinputs/4035archive members/twoparts verify.
+  No SQLserverSIGKILL, originalstore reopen, historicalcause/failedparent/fullmatrix/
+  24h promotion. Original library servers embedded/NoLog; internalrandomSQL
+  generation excluded from exposed-row equality.
+  [Complete native and copied-integrity proofs](scale/postgres-projection-fault-50000-2026-10-05/).
 
 - **Recorded-source disk-stall coverage extended to161 seeds:** new196–200
   nativejob/artifact/log bound, originaldevicefault/latency/cohort checks

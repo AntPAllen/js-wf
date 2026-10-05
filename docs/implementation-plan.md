@@ -2967,3 +2967,21 @@ Failed66–78 stayunqualified; remaining170–195 live. No workloadSDK/fullsourc
 physicalstore upload, finaldrain named-test scope. Full200/final-source/fullmatrix/
 24h and failedparent remainopen.
 [Complete161-seed ledger](scale/current-tier3-block-stall-2026-10-05/).
+
+### 2026-10-05 full PostgreSQL combined projection recovery and raw integrity qualified
+
+Executed9fbfa16 nativePASS1030.97s/original20m/default50000. Observed/reapedSIGKILL
+projection down while all50000results checked; lag100000. SQLwriterbackend terminated
+at81rows, actuallibraryjournal leader stop/restart; refreshedclients/four R3 sources
+current. Continuousreplacement drains lagzero; fullrebuild preserves every exposed
+SQLrow/indexedcolumn byte-for-byte, all50000 canonicalrows independently parsed.
+ActualSDK/664Gitinputs/3287selectedexternalinputs/PostgreSQLexe/1284closedSQLmedia/
+all7617archive members/fourparts verified. Fullcopyaudit uses separatelycaptured SDK
+and only byte-identical closedstore copies: 50000inv/journals/terminals/100000entries,
+audit5.490s/whole5.531s underoriginal20s; allthree physicalqueues and64partition
+durables zero. All2352 originalfiles unchanged/1664selectedinputs/4035archive
+members/twoparts verify. Historicalfailedparents/causes remainunconfirmed; no
+PostgreSQL serverSIGKILL/currentmatrices/24h qualification. InternalrandomSQL
+rebuild generations excluded from exposed-row comparison. Libraryservers embedded/
+NoLog, selectedprovenance excludes exhaustivecompiler/assembly/embed inputs.
+[Complete native and full copied-integrity evidence](scale/postgres-projection-fault-50000-2026-10-05/).
