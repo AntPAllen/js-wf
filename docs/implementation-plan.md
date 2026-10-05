@@ -2308,3 +2308,28 @@ Snapshot/manifest/other object reads, forced native follower-lag evidence,
 historical server-side causality, legacy-server and final-source/full matrix
 qualification remain open. Unchanged Tier1 state-machine bodies were not rerun
 for this real-transport adapter change.
+
+### Compacted journal snapshot roots read from leader — 2026-10-05
+
+Default snapshot manifest reads now request the state stream leader's latest
+value/exact revision before reconstructing a purged journal prefix. Snapshot
+object reads use bounded missing-metadata confirmation with the existing cached
+Object Store handle. DEL/PURGE/recognized markers remain missing; malformed
+manifests and hash/anchor mismatch fail closed. Existing CAS writes, purge
+bounds, metadata caches and2s reconstruction/object windows remain unchanged.
+
+A real R3 double-compaction regression with synthetic weak missing/older
+manifests fails baseline10.58s, then passes normal7.18s/race7.85s with200 exact
+records/revision2/two administrative and zero direct state reads per control.
+Native deletion/malformed/oracle deadline-cancel controls, existing compactor,
+moving-snapshot, result and purge-lease bodies and journal package controls pass.
+One ordinary clean append fixture fails while initially populating objects;
+original log retained and exact missing body replay passes3.23s. No claim of
+server-side causality or failed parent-group promotion.
+[Captured originals and scope](scale/snapshot-manifest-leader-2026-10-05/).
+
+New manifest helper domain/legacy-server coverage, other state/input/blob reads,
+natural follower-lag reproduction and full/final-source matrices remain open.
+Unchanged Tier1 state-machine bodies are not rerun for default transport changes.
+Actual24h campaigns remain at their isolated earlier sources; no restart or
+blanket final-source qualification follows from this focused adapter acceptance.

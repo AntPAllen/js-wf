@@ -30,6 +30,21 @@ func GetObjectBytes(ctx context.Context, js jetstream.JetStream, bucket, name st
 	if err != nil {
 		return nil, err
 	}
+	return GetObjectBytesFromStore(ctx, js, objects, bucket, name)
+}
+
+// GetObjectBytesFromStore applies the same absence confirmation to a caller's
+// cached Object Store handle, preserving metadata lookup costs on snapshot reads.
+// The caller owns the handle and verifies the recorded content hash.
+func GetObjectBytesFromStore(ctx context.Context, js jetstream.JetStream, objects jetstream.ObjectStore, bucket, name string) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if _, ok := ctx.Deadline(); !ok {
+		var stop context.CancelFunc
+		ctx, stop = context.WithTimeout(ctx, js.Options().DefaultTimeout)
+		defer stop()
+	}
 	var admin nats.JetStreamContext
 	for {
 		if err := ctx.Err(); err != nil {

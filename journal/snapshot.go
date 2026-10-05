@@ -11,6 +11,7 @@ import (
 
 	"js-wf/identity"
 	"js-wf/internal/handlecache"
+	"js-wf/internal/natsutil"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -77,15 +78,15 @@ func (p *jetStreamSnapshotReadPort) GetManifest(ctx context.Context, key string)
 }
 
 func (p *jetStreamSnapshotReadPort) GetManifestRevision(ctx context.Context, key string) (SnapshotManifestValue, error) {
-	state, err := p.stateBucket(ctx)
+	_, err := p.stateBucket(ctx)
 	if err != nil {
 		return SnapshotManifestValue{}, err
 	}
-	entry, err := state.Get(ctx, key)
+	entry, err := natsutil.GetStateMsgFromLeader(ctx, p.js, key)
 	if err != nil {
 		return SnapshotManifestValue{}, err
 	}
-	return SnapshotManifestValue{Value: entry.Value(), Revision: entry.Revision()}, nil
+	return SnapshotManifestValue{Value: entry.Data, Revision: entry.Sequence}, nil
 }
 
 func (p *jetStreamSnapshotReadPort) PutObject(ctx context.Context, name string, data []byte) error {
@@ -132,7 +133,7 @@ func (p *jetStreamSnapshotReadPort) GetObject(ctx context.Context, name string) 
 	if err != nil {
 		return nil, err
 	}
-	return objects.GetBytes(ctx, name)
+	return natsutil.GetObjectBytesFromStore(ctx, p.js, objects, "WF_BLOB", name)
 }
 
 func (p *jetStreamSnapshotReadPort) stateBucket(ctx context.Context) (jetstream.KeyValue, error) {

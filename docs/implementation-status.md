@@ -30,6 +30,22 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Compacted-journal reconstruction now uses leader snapshot manifests:**
+  baseline synthetic missing/older KV roots after two real compactions fail10.58s
+  with expected index0/104 versus actual184. Corrected normal7.18s/race7.85s
+  reconstruct200 exact records, preserve committed manifest revision2 and issue
+  two administrative/zero direct state requests per control. Snapshot objects
+  reuse bounded absence confirmation with cached handles. Genuine DEL/PURGE,
+  malformed metadata and blocked-prefix leader deadline/cancel controls pass.
+  Existing result/purge-lease/concurrent-compactor/moving-snapshot controls pass;
+  append-before-purge clean setup fails at initial object population, retained,
+  and exact missing clean body replay passes3.23s. Journal/natsutil controls pass.
+  Actual SDKs/source snapshots/native fixtures preserved; ordinary existing
+  fixture stores and additional live process identities unavailable. No natural
+  lag/historical-cause/final-source/full-matrix promotion. New manifest helper
+  domain/legacy compatibility and other read paths remain open.
+  [Baseline, corrected, race and original setup failure](scale/snapshot-manifest-leader-2026-10-05/).
+
 - **Live-campaign disk headroom recovered through existing sparse checkout:**
  169 accepted Tier2 all-server/consumer and Tier3 disk-delay archive-part copies
  match their manifests, pushed83682bb Git identities and streamed canonical Git
