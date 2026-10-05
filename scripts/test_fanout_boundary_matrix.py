@@ -47,3 +47,38 @@ class BoundaryGateChecks(unittest.TestCase):
                 events = fixture()
                 events[3]['Output'] = changed
                 with self.assertRaises(ValueError): gate.check(events)
+
+
+class CombinedBoundaryGateChecks(unittest.TestCase):
+    def events(self):
+        events = fixture()
+        for event in events:
+            if 'Test' in event:
+                event['Test'] = event['Test'].replace(gate.TEST, gate.COMBINED_TEST)
+            if 'Output' in event:
+                phase = 'create' if '/create/' in event['Test'] else 'results'
+                text = event['Output']
+                import re
+                entries = int(re.search(r'retained entries=(\d+)', text).group(1))
+                event['Output'] = text.replace('FANOUT_PREFIX_PRESERVED', f'combined journal restart phase={phase} node=1 messages={entries}\nFANOUT_PREFIX_PRESERVED')
+        return events
+
+    def test_full_combined_matrix_still_partial_release(self):
+        report = gate.check(self.events(), combined=True)
+        self.assertEqual(len(report['cases']), 6)
+        self.assertTrue(all(c['journal_restart']['node'] == 1 for c in report['cases']))
+        self.assertFalse(report['clears_full_release'])
+
+    def test_isolated_run_does_not_qualify_combined(self):
+        with self.assertRaises(ValueError): gate.check(fixture(), combined=True)
+
+    def test_missing_wrong_phase_node_count_duplicate_or_reordered_fault(self):
+        text = self.events()[3]['Output']
+        restart = 'combined journal restart phase=create node=1 messages=3\n'
+        for changed in (text.replace(restart, ''), text.replace('restart phase=create', 'restart phase=results'),
+                        text.replace('node=1', 'node=3'), text.replace('messages=3', 'messages=2'),
+                        text.replace(restart, restart + restart), restart + text.replace(restart, ''),
+                        text.replace(restart, '') + restart):
+            with self.subTest(changed=changed):
+                events = self.events(); events[3]['Output'] = changed
+                with self.assertRaises(ValueError): gate.check(events, combined=True)

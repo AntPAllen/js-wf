@@ -2998,3 +2998,14 @@ outside-child loops before replacing clients, then refreshes journal/client
 handles for successor reads. Defaultisolated fixtures retain their behavior.
 Compiled optin skipped; native combined six-case execution remains pending.
 No serverSIGKILL/fullfaultcrossproduct/fullmatrix/24h qualification claimed.
+
+### 2026-10-05 combined fanout acceptance guard
+
+The six-boundary result guard now has an explicit combinedmode requiring the new
+actual test identity, all six terminalpasses, one journalrestart marker percase,
+correctphase/node/messagecount and strict parentSIGKILL→journalrestart→preserved
+prefix order. It retains exactpositions/childcount/higher-epoch and refuses full
+release promotion. Six Python controlmethods pass; missing/skipped/failed/duplicate
+execution, isolatedrun substitution, missing/reordered/wrongphase/wrongnode/wrong
+count/repeatedfault and prefix/epoch/count mutations rejected. Defaultisolated
+mode unchanged. Combinednative six-case terminal proof remains pending.
