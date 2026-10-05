@@ -3368,3 +3368,14 @@ processes from another thread. Existing observed executable records remain valid
 exhaustive coverage was never claimed. V2 traverses every task's children. Current
 live partition producer's source stays unchanged; changed copied observation will
 use v2. Full independent server provenance review remains pending.
+
+### All-task-thread copied process review accepted — 2026-10-05
+
+Changed observer on a freshcopy captures allthree actual NATS process executable
+bytes, each hash matching originalsmoke captures. ActualSDK460234 /helpera1abbaf,
+1695selected inputs bound,2154originalfilesunchanged. Allthree histories rechecked,
+full196/2156 integrity/drain;304.296ms audit/4.327874s reads underoriginal20s.
+Complete original zero-observation copy and changed copiedproof retained separately.
+[First copied review](scale/tier2-retained-row-2026-10-05/copied-smoke-v1/);
+[changed observer qualification](scale/tier2-retained-row-2026-10-05/copied-smoke-v2/).
+Current native partition row remains live at ec60e83; no ten-minute verdict yet.
