@@ -28,6 +28,28 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 18:57 UTC
+
+The actual24-hour journal attempt at `aace912` has failed after25,201.93s
+(approximately7h). Checkpoint3140 cutoff87,920 exhausted allthree attempts in
+the original60s audit budget. Attempt2 reports an incomplete retained-state
+snapshot (11,190 included / last_revision17,741); no journal phase completion.
+Last passing checkpoint3130 reports87,640 terminals /966,835 entries. Actual
+observedSDK162125 is gone andthe owned producer service is failed. Complete
+closed originals are archived bythe producer; independent archive/source/actualSDK
+review and preservation are underway. No unchangednative rerun orservercause
+attribution. Original24h/fullmatrix gates remain open.
+
+Ten-minute worker-clock seed1 at `0b8ee59` passes638.48s/2,884terminals/
+31,877entries/19verified clockevents/p99=5.152018311s. Fullnativeproof committed.
+Independentcopiedaudit nowpasses counts/history/threeclient64durable drain;
+alloriginalfiles unchanged, actualSDK/source/observer reviewed. Its complete
+copiedarchive preservation is next. The upgrade smoke remains failed; targeted
+copies show its residualwakeup'schild completed signal193 andresult7, witha
+matching snapshot andnolease. Nativequeue1/64consumerszero discrepancy remains
+unexplained. Diagnosticmillion remainsrunning,378,294 receipts at18:55:28;
+secondrestart/finaldelivery/drain andservercandidate adoption remainpending.
+
 ## Latest follow-up — 2026-10-05 18:34 UTC
 
 The ten-minute worker seed1 native test at `75bcf76` passed 632.43 s:
