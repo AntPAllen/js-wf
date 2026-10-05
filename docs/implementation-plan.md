@@ -3890,3 +3890,14 @@ archive/readback and selectedsource/actualSDK/race/module/closure verified.
 Race timings are not performance proof. Integrated callback scanner recovery and
 full400k/24h qualification remain pending.
 [Race control](scale/audit-delivery-cost-2026-10-05/race-control/).
+
+### Experimental callback scanner current native race controls accepted — 2026-10-05
+
+At a9e29ea the explicit callback scanner passes current R3 fullaudit oracle
+comparisons for compaction/cohort/corruption/state plus30MiB payload windows,
+deletedsequence/cutoff and cancellation. Shared invariant/gap/replay/retry body
+retained; Stop releases blockedcallback and joins within originaldeadline.
+Unit race lifecycle/error/join controls pass. Complete2159-member native archive
+and selectedsource/actualSDK/race/module/closure independently reviewed.
+No default adoption or fullcapacity/24h pass; nativeleaderloss/legacy next.
+[Controls](scale/callback-audit-delivery-2026-10-05/native-controls/).

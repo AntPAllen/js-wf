@@ -28,6 +28,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 21:18 UTC
+
+An explicit callback delivery retained scanner at a9e29ea now passes current R3
+native race compaction/cohort/freshcorruption, journal corruption, state values
+and payload/refill/deletedsequence/cutoff/cancellation controls. It shares the
+existing captured bounds/gap oracle/replay proof/two-resume invariant body.
+Unit race cursor continuity, blockedproducer cancellation, error preservation and
+boundedjoin controls pass. Public/default APIs retain Next.
+Independent selectedsource/actualSDK/race/module/closure and full2159-member
+archive/readback verified. Consumer-leaderloss/legacy/full400k/24h remain pending.
+[Native controls](scale/callback-audit-delivery-2026-10-05/native-controls/).
+
 ## Latest follow-up — 2026-10-05 21:12 UTC
 
 The delivery diagnostic also passes27.13s under race at ff6ba0a, with allfour
