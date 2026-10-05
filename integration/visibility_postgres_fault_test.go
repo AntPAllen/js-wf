@@ -65,7 +65,7 @@ func assertProjectionSIGKILL(t *testing.T, process *exec.Cmd, proof map[string]a
 	proof["projection_process_reaped_sigkill"] = true
 }
 
-func applyPostgresProjectionCatchupFault(t *testing.T, ctx context.Context, db *sql.DB, cluster *testcluster.Cluster, stream jetstream.Stream, done <-chan error, proof map[string]any) {
+func applyPostgresProjectionCatchupFault(t *testing.T, ctx context.Context, db *sql.DB, cluster *testcluster.Cluster, all []jetstream.JetStream, stream jetstream.Stream, done <-chan error, proof map[string]any) {
 	t.Helper()
 	var pid, count int
 	target := proof["count"].(int)
@@ -129,6 +129,19 @@ func applyPostgresProjectionCatchupFault(t *testing.T, ctx context.Context, db *
 	proof["journal_leader_old_server_id"] = oldID
 	proof["journal_leader_new_server_id"] = cluster.Servers[leader].ID()
 	proof["journal_leader_restarted"] = time.Now().UTC()
+	// RestartNode closes/replaces the pinned connection on this node. Refresh
+	// every JS handle before replacement construction or readiness queries.
+	for i := range all {
+		var err error
+		all[i], err = jetstream.New(cluster.Clients[i])
+		if err != nil {
+			t.Fatal(err)
+		}
+		if all[i].Conn().IsClosed() {
+			t.Fatal("refreshed client is closed", i)
+		}
+	}
+	proof["pinned_clients_refreshed_after_restart"] = time.Now().UTC()
 	select {
 	case err := <-done:
 		if err == nil {
@@ -139,23 +152,36 @@ func applyPostgresProjectionCatchupFault(t *testing.T, ctx context.Context, db *
 	case <-ctx.Done():
 		t.Fatal("faulted writer did not exit", ctx.Err())
 	}
-	for ctx.Err() == nil {
-		call, stop := context.WithTimeout(ctx, 2*time.Second)
-		info, err := stream.Info(call)
-		stop()
-		if err == nil && info.Cluster != nil && info.Cluster.Leader != "" && len(info.Cluster.Replicas) == 2 {
-			current := true
-			for _, peer := range info.Cluster.Replicas {
-				current = current && peer.Current && !peer.Offline
+	// Journal readiness alone does not certify the invocation/state/purge
+	// sources used by a replacement full rebuild. Keep the original deadline.
+	for _, name := range []string{"WF_INV", "WF_JRN", "KV_WF_STATE", "WF_PURGE"} {
+		healed := false
+		for ctx.Err() == nil {
+			call, stop := context.WithTimeout(ctx, 2*time.Second)
+			source, err := all[2].Stream(call, name)
+			var info *jetstream.StreamInfo
+			if err == nil {
+				info, err = source.Info(call)
 			}
-			if current {
-				proof["journal_all_three_replicas_current"] = time.Now().UTC()
-				return
+			stop()
+			if err == nil && info.Cluster != nil && info.Cluster.Leader != "" && len(info.Cluster.Replicas) == 2 {
+				current := true
+				for _, peer := range info.Cluster.Replicas {
+					current = current && peer.Current && !peer.Offline
+				}
+				if current {
+					proof[name+"_all_three_replicas_current"] = time.Now().UTC()
+					healed = true
+					break
+				}
 			}
+			time.Sleep(20 * time.Millisecond)
 		}
-		time.Sleep(20 * time.Millisecond)
+		if !healed {
+			t.Fatal("projection source did not heal within original fixture context", name, ctx.Err())
+		}
 	}
-	t.Fatal("journal replicas did not heal within original fixture context", ctx.Err())
+	proof["journal_all_three_replicas_current"] = proof["WF_JRN_all_three_replicas_current"]
 }
 
 // Compare exposed row_data and actual indexed columns byte-for-byte. The random

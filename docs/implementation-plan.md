@@ -2886,3 +2886,16 @@ Independent actualSDK/PostgreSQLexe/662Gitinputs/3287selectedexternalinputs/
 failure, correct fixtureclient/worker lifecycle and readiness, add dependency
 trace before changed fullrun. No recovery/currentmatrix/24h qualification.
 [Complete failed native proof](scale/postgres-projection-fault-50000-2026-10-05/failed/).
+
+### 2026-10-05 PostgreSQL projection fixture lifecycle correction
+
+The next full50000 PG case requires a physically drained workflow queue and joins
+allsix completed workers before the projection-only fault, refreshes pinned JS
+handles after libraryRestartNode, and requires R3-current WF_INV/WF_JRN/
+KV_WF_STATE/WF_PURGE sources before replacement construction. DefaultKV child
+backend is explicitly selected to avoid inherited PG configuration. Bounded
+trace delegates original projection source reads, orderedconsumer creation,
+consumerInfo/Fetch/nativebatch errors and journalreset with original arguments,
+contexts/results. PureGo trace wrappers are shared across platform fixtures.
+Original20m/default50000 and failure semantics unchanged; no added projection
+retry or primarycause claim. Full changed native result pending.

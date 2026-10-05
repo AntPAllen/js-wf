@@ -1,5 +1,3 @@
-//go:build linux
-
 package integration_test
 
 import (
@@ -286,4 +284,30 @@ func (s tracedAuditKV) Get(ctx context.Context, key string) (jetstream.KeyValueE
 	}
 	done(err, bytes)
 	return value, err
+}
+
+// Projection rebuild uses an ordered source reader. Preserve its config and
+// native batch channel exactly, while locating consumer creation/fetch errors.
+func (s tracedAuditStream) OrderedConsumer(ctx context.Context, cfg jetstream.OrderedConsumerConfig) (jetstream.Consumer, error) {
+	done := s.trace.begin(ctx, s.name+".OrderedConsumer", "")
+	consumer, err := s.Stream.OrderedConsumer(ctx, cfg)
+	done(err, 0)
+	if err != nil {
+		return consumer, err
+	}
+	return tracedAuditConsumer{Consumer: consumer, name: s.name, consumer: "ordered", trace: s.trace}, nil
+}
+
+func (c tracedAuditConsumer) Info(ctx context.Context) (*jetstream.ConsumerInfo, error) {
+	done := c.trace.begin(ctx, c.name+".ConsumerInfo", c.consumer)
+	info, err := c.Consumer.Info(ctx)
+	done(err, 0)
+	return info, err
+}
+
+func (s tracedAuditStream) ResetConsumerToSequence(ctx context.Context, name string, sequence uint64) (*jetstream.ConsumerResetResponse, error) {
+	done := s.trace.begin(ctx, s.name+".ResetConsumerToSequence", fmt.Sprintf("%s/%d", name, sequence))
+	info, err := s.Stream.ResetConsumerToSequence(ctx, name, sequence)
+	done(err, 0)
+	return info, err
 }

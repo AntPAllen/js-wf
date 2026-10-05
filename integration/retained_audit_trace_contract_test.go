@@ -5,6 +5,7 @@ package integration_test
 import (
 	"context"
 	"errors"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -152,6 +153,67 @@ func TestRetainedAuditTraceBulkDelegatesChannelAndCompletesOnce(t *testing.T) {
 	for _, call := range snapshot.Recent {
 		if call.Operation == "WF_JRN.Fetch" && !call.Deadline.IsZero() {
 			t.Fatal("invented fetch deadline")
+		}
+	}
+}
+
+// Exercise the newly traced projection paths with exact context/config/result
+// identity, including an error accompanying a nonnil SDK response.
+type projectionTraceStreamControl struct {
+	jetstream.Stream
+	expected context.Context
+	cfg      jetstream.OrderedConsumerConfig
+	consumer jetstream.Consumer
+	reset    *jetstream.ConsumerResetResponse
+}
+
+func (s projectionTraceStreamControl) OrderedConsumer(ctx context.Context, cfg jetstream.OrderedConsumerConfig) (jetstream.Consumer, error) {
+	if ctx != s.expected || !reflect.DeepEqual(cfg, s.cfg) {
+		return nil, errors.New("ordered consumer arguments changed")
+	}
+	return s.consumer, nil
+}
+func (s projectionTraceStreamControl) ResetConsumerToSequence(ctx context.Context, name string, seq uint64) (*jetstream.ConsumerResetResponse, error) {
+	if ctx != s.expected || name != "WF_VIEW_PG" || seq != 100001 {
+		return nil, errors.New("reset arguments changed")
+	}
+	return s.reset, auditTraceSentinel
+}
+
+type projectionTraceConsumerControl struct {
+	jetstream.Consumer
+	expected context.Context
+	info     *jetstream.ConsumerInfo
+}
+
+func (c projectionTraceConsumerControl) Info(ctx context.Context) (*jetstream.ConsumerInfo, error) {
+	if ctx != c.expected {
+		return nil, errors.New("consumer info context changed")
+	}
+	return c.info, auditTraceSentinel
+}
+func TestRetainedAuditTraceProjectionConsumerDelegation(t *testing.T) {
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
+	trace := &retainedAuditTrace{}
+	cfg := jetstream.OrderedConsumerConfig{DeliverPolicy: jetstream.DeliverAllPolicy, HeadersOnly: true, InactiveThreshold: time.Minute, FilterSubjects: []string{"wf.inv.*.*"}}
+	info := &jetstream.ConsumerInfo{NumPending: 50000}
+	reset := &jetstream.ConsumerResetResponse{}
+	stream := tracedAuditStream{Stream: projectionTraceStreamControl{expected: ctx, cfg: cfg, consumer: projectionTraceConsumerControl{expected: ctx, info: info}, reset: reset}, name: "WF_INV", trace: trace}
+	consumer, err := stream.OrderedConsumer(ctx, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, err := consumer.Info(ctx); got != info || err != auditTraceSentinel {
+		t.Fatalf("info identity changed: %v %v", got, err)
+	}
+	if got, err := stream.ResetConsumerToSequence(ctx, "WF_VIEW_PG", 100001); got != reset || err != auditTraceSentinel {
+		t.Fatalf("reset identity changed: %v %v", got, err)
+	}
+	for operation, errors := range map[string]int{"WF_INV.OrderedConsumer": 0, "WF_INV.ConsumerInfo": 1, "WF_INV.ResetConsumerToSequence": 1} {
+		c := trace.snapshot().Counts[operation]
+		if c.Started != 1 || c.Completed != 1 || c.Errors != errors {
+			t.Fatalf("%s: %+v", operation, c)
 		}
 	}
 }

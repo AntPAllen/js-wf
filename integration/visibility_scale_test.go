@@ -154,9 +154,11 @@ func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault b
 	}
 	process := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestProjectionProcessHelper$")
 	process.Env = append(os.Environ(), "WF_PROJECTION_HELPER=1", "WF_PROJECTION_URL="+cluster.Servers[0].ClientURL(), "WF_PROJECTION_READY_FILE="+readyFile)
+	backend := "kv"
 	if postgresFault {
-		process.Env = append(process.Env, "WF_PROJECTION_BACKEND=postgres")
+		backend = "postgres"
 	}
+	process.Env = append(process.Env, "WF_PROJECTION_BACKEND="+backend)
 	var processOutput bytes.Buffer
 	process.Stdout, process.Stderr = &processOutput, &processOutput
 	if err := process.Start(); err != nil {
@@ -203,14 +205,16 @@ func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault b
 	workerCtx, stopWorkers := context.WithCancel(ctx)
 	workerDone := make(chan error, 6)
 	startedWorkers := 0
-	defer func() {
+	joinWorkers := func() {
 		stopWorkers()
-		for i := 0; i < startedWorkers; i++ {
+		for startedWorkers > 0 {
 			if err := <-workerDone; err != nil && !errors.Is(err, context.Canceled) {
 				t.Errorf("worker exit: %v", err)
 			}
+			startedWorkers--
 		}
-	}()
+	}
+	defer joinWorkers()
 	for index := 0; index < 6; index++ {
 		w, err := worker.New(ctx, all[index%len(all)], fmt.Sprintf("view-scale-%d", index), map[string]worker.Handler{typ: func(_ *wf.Context, input json.RawMessage) (json.RawMessage, error) {
 			return input, nil
@@ -310,17 +314,56 @@ func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault b
 		t.Fatalf("stopped projection lag=%d want=%d err=%v", lag, 2*count, err)
 	}
 	proof["stopped_projection_lag"] = 2 * count
-	restarted, err := visibility.New(ctx, all[2], options...)
+	if postgresFault {
+		// Await observes the terminal before its delivery is necessarily acked.
+		// Require physical queue drain before stopping completed workers.
+		for ctx.Err() == nil {
+			call, stop := context.WithTimeout(ctx, 2*time.Second)
+			info, err := run.Info(call)
+			stop()
+			if err == nil && info.State.Msgs == 0 {
+				proof["run_queue_drained_before_fault"] = time.Now().UTC()
+				break
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+		if ctx.Err() != nil {
+			t.Fatal("workflow queue did not drain before projection fault", ctx.Err())
+		}
+		joinWorkers()
+		if t.Failed() {
+			t.Fatal("workflow workers failed before projection fault")
+		}
+		proof["all_workflow_workers_joined_before_fault"] = time.Now().UTC()
+	}
+	var projectionJS jetstream.JetStream = all[2]
+	var dependencyTrace *retainedAuditTrace
+	if postgresFault {
+		dependencyTrace = &retainedAuditTrace{}
+		projectionJS = tracedAuditJS{JetStream: all[2], trace: dependencyTrace}
+		defer func() {
+			data, err := json.MarshalIndent(dependencyTrace.snapshot(), "", "  ")
+			if err == nil {
+				err = os.WriteFile(filepath.Join(root, "projection-dependency-trace.json"), append(data, '\n'), 0600)
+			}
+			if err != nil {
+				t.Error(err)
+			}
+		}()
+	}
+	restarted, err := visibility.New(ctx, projectionJS, options...)
 	if err != nil {
 		t.Fatal(err)
 	}
 	projectionCtx, stopProjection := context.WithCancel(ctx)
+	defer stopProjection()
 	projectionDone := make(chan error, 1)
 	go func() { projectionDone <- restarted.Run(projectionCtx) }()
 	if postgresFault {
-		applyPostgresProjectionCatchupFault(t, ctx, db, cluster, journalStream, projectionDone, proof)
+		applyPostgresProjectionCatchupFault(t, ctx, db, cluster, all, journalStream, projectionDone, proof)
 		stopProjection()
-		restarted, err = visibility.New(ctx, all[2], options...)
+		projectionJS = tracedAuditJS{JetStream: all[2], trace: dependencyTrace}
+		restarted, err = visibility.New(ctx, projectionJS, options...)
 		if err != nil {
 			t.Fatal(err)
 		}
