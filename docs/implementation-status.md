@@ -28,6 +28,24 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 19:44 UTC
+
+The changed concurrent-state live journal campaign at `bc02e68` passes648.01s:
+97batches, 2,716 completed workflows /29,930 journal entries, 19 confirmed leader
+SIGKILLs, all six terminal/progress p99 cells below30s. Nine completed-cohort
+checkpoints and the final whole-state audit/drain pass under original limits.
+Independent review verifies the original archive, retained selected source, actual
+SDK executable,14 observed server process incarnations across five logical nodes,
+process closure and a fresh matching row-checker result. Complete originals are
+preserved in a read-back-verified three-part archive. An initial reviewer failed
+an incorrect five-container-ID assumption; that script/log remain preserved and
+only the reviewer was corrected. No native rerun.
+[Complete live proof](scale/concurrent-state-audit-2026-10-05/live-journal-ten-minute/).
+
+The reader remains explicit and experimental. No24h capacity, original failed
+soak, full matrix or final-source qualification is claimed. Next capacity work
+must measure complete large-population audits within the original20s deadline.
+
 ## Latest follow-up — 2026-10-05 19:36 UTC
 
 The experimental concurrent retained-state reader is integrated behind an explicit

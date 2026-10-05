@@ -3706,3 +3706,14 @@ Closeddiagnosticcomparison copied-stores reclaimedonlyafter all3720files match
 committedarchive,allactualPIDs gone andnoopenFDs. Originalstores/source/logs/
 executables andcompletecommittedarchive retained; copycanbereconstructed.
 Reclaimed1,964,510,320bytes. [Record](scale/verified-duplicate-archive-cleanup-2026-10-05/archived-comparison-copy/).
+
+### Experimental concurrent reader live journal profile accepted — 2026-10-05
+
+Executedbc02e68 normal seed1 PASS648.01s: continuous ten-minute workloads,
+97batches/2716completedworkflows/29930entries/19confirmed journal leaderSIGKILLs.
+Allsix terminal/progressp99cells below30s; nine completedcohort checkpoints and
+final fullstate/drain pass with original20s/60s/threeattempt limits unchanged.
+Independent source/archive/actualSDK/server/row review and preservation recorded
+in [complete proof](scale/concurrent-state-audit-2026-10-05/live-journal-ten-minute/).
+Concurrent reader remains explicitexperimental; this doesnot qualify24h capacity,
+originalfailedsoak, fullmatrix or finalsource. No unchangednative rerun.
