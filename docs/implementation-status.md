@@ -12055,3 +12055,12 @@ clockoverlays withmatchingactualshiftedSDKbytes. Producer/checker exit0,three
 workers/threeNATSobservations/closedPIDs. Fullproof readback. Smokeonly;
 copiedaudit,ten-minuteclock andfullmatrix remainseparate.
 [Proof](scale/tier2-retained-row-2026-10-05/workerclock-smoke/).
+
+### Hosted retained ten-minute partition seed3 accepted — 2026-10-05
+
+Run37347246576/job111888806507 executed a517d2e normalPASS625.04s;
+2044terminals/22537entries/19partitions/p99=13.56736368s. Producer andduration
+checker exit0. Independent source/fault/cell/duration review passes;668Git/3287
+external inputs andactualSDK/threeNATS binaries verified. ExactoriginalZIP6295
+members/fourparts readback; SHA256matchesGitHub digest. Copied-store audit and
+full13×200/final-source gates remainseparate. [Proof](scale/tier2-retained-row-2026-10-05/hosted-partition-seed3/).
