@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -33,9 +34,25 @@ func (c processObservedConsumer) Info(ctx context.Context) (*jetstream.ConsumerI
 	return info, err
 }
 
+type processDeleteObservation struct {
+	Name  string    `json:"name"`
+	Error string    `json:"error"`
+	At    time.Time `json:"at"`
+}
 type processObservedStream struct {
 	*candidateObservedStream
-	record func(*jetstream.ConsumerInfo, error)
+	record  func(*jetstream.ConsumerInfo, error)
+	deleted func(processDeleteObservation)
+}
+
+func (s processObservedStream) DeleteConsumer(ctx context.Context, name string) error {
+	err := s.Stream.DeleteConsumer(ctx, name)
+	observation := processDeleteObservation{Name: name, At: time.Now().UTC()}
+	if err != nil {
+		observation.Error = err.Error()
+	}
+	s.deleted(observation)
+	return err
 }
 
 func (s processObservedStream) CreateConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
@@ -139,6 +156,24 @@ func TestDirectR1AuditR5ProcessOwnerLoss(t *testing.T) {
 			started := time.Now()
 			report, failure := checkUsingConcurrentOptions(attempt, js, nil, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 				observed := &candidateObservedStream{Stream: stream, cursorReplicas: 1}
+				var deleteMu sync.Mutex
+				var deletions []processDeleteObservation
+				deleted := func(observation processDeleteObservation) {
+					deleteMu.Lock()
+					defer deleteMu.Unlock()
+					deletions = append(deletions, observation)
+					t.Logf("cursor deletion stream=%s observation=%+v", stream.CachedInfo().Config.Name, observation)
+				}
+				defer func() {
+					data, e := json.MarshalIndent(deletions, "", "  ")
+					if e != nil {
+						t.Error(e)
+						return
+					}
+					if e = os.WriteFile(filepath.Join(root, stream.CachedInfo().Config.Name+"-delete-observations.json"), data, 0600); e != nil {
+						t.Error(e)
+					}
+				}()
 				var snapshots []struct {
 					Info  *jetstream.ConsumerInfo `json:"info"`
 					Error string                  `json:"error"`
@@ -166,7 +201,7 @@ func TestDirectR1AuditR5ProcessOwnerLoss(t *testing.T) {
 						t.Error(e)
 					}
 				}()
-				return scanConsumeDirectWindowsThrough(call, processObservedStream{candidateObservedStream: observed, record: record}, cutoff, func(msg *jetstream.RawStreamMsg) error {
+				return scanConsumeDirectWindowsThrough(call, processObservedStream{candidateObservedStream: observed, record: record, deleted: deleted}, cutoff, func(msg *jetstream.RawStreamMsg) error {
 					if stream.CachedInfo().Config.Name != "WF_JRN" {
 						return visit(msg)
 					}

@@ -4156,3 +4156,16 @@ fresh diagnostic records actual consumer API positions/identity at replay proof
 and uses short cleanup requests within original20s. Strict replay unchanged.
 [Failure](scale/direct-callback-audit-2026-10-05/r5-process-owner-loss/).
 [Diagnostic](scale/direct-callback-audit-2026-10-05/r5-replay-diagnostic-preparation/).
+
+## Independent retained cursor cleanup prepared — 2026-10-05
+
+eb0f5ca diagnosticFAIL70.11s: left-down audit complete1500/6000 then WF_JRN
+consumer count1 through original20s; same-store restart passes in that schedule
+via new cursor1962, without reproducing/explaining prior overlap. Full1667-member
+archive/source/actual processes/closure independently reviewed. Shared scanner
+sequential deletes use one2s context: unanswered old-owner deletion can starve
+replacement cleanup. Independent deletions now join under unchanged2s/original
+deadline; targeted race regression/controls PASS1.209s after synchronizing fake
+bookkeeping. Fresh native per-name deletion diagnostic prepared. Replay unchanged.
+[Diagnostic](scale/direct-callback-audit-2026-10-05/r5-replay-diagnostic/).
+[Cleanup preparation](scale/direct-callback-audit-2026-10-05/r5-cleanup-preparation/).

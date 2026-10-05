@@ -9,6 +9,7 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/nats-io/nuid"
 	"js-wf/internal/natsutil"
+	"sync"
 	"time"
 )
 
@@ -93,19 +94,7 @@ func scanRetainedThroughWithWindow(ctx context.Context, stream jetstream.Stream,
 	// Each cursor has a stable identity across lost-create retries. A resumed
 	// cursor starts at the first record not yet accepted by the visitor.
 	var consumerNames []string
-	defer func() {
-		cleanup := context.WithoutCancel(ctx)
-		if deadline, ok := ctx.Deadline(); ok {
-			var stop context.CancelFunc
-			cleanup, stop = context.WithDeadline(cleanup, deadline)
-			defer stop()
-		}
-		call, stop := context.WithTimeout(cleanup, 2*time.Second)
-		defer stop()
-		for _, name := range consumerNames {
-			_ = stream.DeleteConsumer(call, name)
-		}
-	}()
+	defer func() { cleanupRetainedConsumers(ctx, stream, consumerNames) }()
 	create := func() (jetstream.Consumer, error) {
 		name := "wf-audit-" + nuid.Next()
 		consumerNames = append(consumerNames, name)
@@ -297,4 +286,27 @@ func scanRetainedThroughWithWindow(ctx context.Context, stream jetstream.Stream,
 func batchReadTransportError(err error) bool {
 	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) ||
 		errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrServerShutdown) || errors.Is(err, jetstream.ErrNoStreamResponse) || natsutil.IsUnavailable(err)
+}
+
+// All cursor deletions share the existing two-second cleanup ceiling. A lost
+// reply for an unavailable old owner must not prevent deleting a resumed cursor.
+// At most the initial cursor and two bounded replacements can be present.
+func cleanupRetainedConsumers(ctx context.Context, stream jetstream.Stream, names []string) {
+	cleanup := context.WithoutCancel(ctx)
+	if deadline, ok := ctx.Deadline(); ok {
+		var stop context.CancelFunc
+		cleanup, stop = context.WithDeadline(cleanup, deadline)
+		defer stop()
+	}
+	call, stop := context.WithTimeout(cleanup, 2*time.Second)
+	defer stop()
+	var joined sync.WaitGroup
+	for _, name := range names {
+		joined.Add(1)
+		go func(name string) {
+			defer joined.Done()
+			_ = stream.DeleteConsumer(call, name)
+		}(name)
+	}
+	joined.Wait()
 }

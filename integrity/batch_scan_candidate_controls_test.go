@@ -5,6 +5,7 @@ import (
 	"errors"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -53,6 +54,7 @@ func (c candidateControlConsumer) Fetch(_ int, _ ...jetstream.FetchOpt) (jetstre
 }
 
 type candidateControlStream struct {
+	deleteMu sync.Mutex
 	jetstream.Stream
 	consumer        candidateControlConsumer
 	requests        []uint64
@@ -108,6 +110,8 @@ func (s *candidateControlStream) CreateConsumer(_ context.Context, cfg jetstream
 	return c, nil
 }
 func (s *candidateControlStream) DeleteConsumer(_ context.Context, name string) error {
+	s.deleteMu.Lock()
+	defer s.deleteMu.Unlock()
 	s.deleteName = name
 	s.deleteNames = append(s.deleteNames, name)
 	s.deleted = true

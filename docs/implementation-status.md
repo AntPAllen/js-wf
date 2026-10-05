@@ -12656,3 +12656,18 @@ records actual cursor Info positions/identity around replay, and short cleanup
 requests within original20s. Compile/skip passes; no production replay/retry change.
 [Failure](scale/direct-callback-audit-2026-10-05/r5-process-owner-loss/).
 [Preparation](scale/direct-callback-audit-2026-10-05/r5-replay-diagnostic-preparation/).
+
+## Retained cursor deletion starvation correction prepared — 2026-10-05
+
+eb0f5ca diagnosticFAIL70.11s: left-down audit completes1500/6000 but JRN count1
+persists through same20s; same-owner restart passes via fresh cursor1962, not an
+explanation/qualification of prior overlap. Full1667-member69.245MB archive and
+actual process/source/closure/readback independently verified. Initial reviewer
+destination collision preserved in service log; corrected new-destination review
+succeeds. Sequential cleanup's single2s context can starve replacement deletion
+behind unavailable old owner. Independent deletions now join under unchanged2s
+ceiling/original caller deadline. Race regression/controls PASS1.209s after fake
+bookkeeping mutex correction. Fresh native captures per-name delete replies.
+Replay/retry/default and large-fault/live/24h qualification unchanged/open.
+[Diagnostic](scale/direct-callback-audit-2026-10-05/r5-replay-diagnostic/).
+[Preparation](scale/direct-callback-audit-2026-10-05/r5-cleanup-preparation/).
