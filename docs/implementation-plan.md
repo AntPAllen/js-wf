@@ -3509,3 +3509,13 @@ Actualprogram101283 checkedlive, savedrunningreport342992receipts. No finaldrain
 orserveradoption qualification. [Point restart evidence](scale/million-candidate-24h-2026-10-05/first-restart/).
 Actual24h journalSDK162125 also live; checkpoint2810/78680terminals accepted.
 Fullmatrix/24h/originalmillion terminalgates remainpending.
+
+### Complete retained Tier2 profile selection prepared — 2026-10-05
+
+`scripts/tier2_retained_profiles.py` prepares allthirteen originalrow mappings,
+original18m/clock20m SDKtimeouts andsupplied NATS2.11.17 executable retention.
+Mappings match the originalcampaign planner; identity controls distinguish a main
+module from a dependency/unrelated module. Actualprocess executable observations
+remain separate from suppliedbytes/buildinfo. Integration into producer, generated
+worker-clock overlay retention andreal clock/upgrade verification remainpending.
+Current live worker SDK andits source captures are unchanged.
