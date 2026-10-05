@@ -1,5 +1,31 @@
 # Combined 500-child parent crash and journal restart matrix
 
+## Current qualification
+
+The complete six-boundary race test **passed777.42s at executed25b327c**.
+Creation and result collection first/interior/last each admit an actual parent
+SDK SIGKILL plus library journal-leader restart on a separate retained R3 cluster.
+Each verifies500 children/result249500,501invocations/journals/terminals, exact
+committed parent prefix and higher successor epoch. Result cases confirm every
+child and all500 named durable signals before actual SDK collection begins.
+The original five-minute cases and30-second cut allowance remain intact.
+
+[Complete successful proof](all-results-prepared/) independently verifies the
+actual parent and six child SDKs, exact producer Git bytes,667 selected Git inputs
+and3287 selected external inputs before/after, allsix fault/current-replica/
+sequence witnesses and final proofs. The ten-control guard accepts the complete
+native run. All16750 archive members/threeparts read back; SHA:
+`f5b01315b1e6f67ee914fbc715ee8a1394ee3610d0ce6ec3abb8c758587445ad`.
+
+This qualifies the six specified combined boundaries at the executed source.
+It does not cover every500 position, actual NATS process SIGKILL, physical queue
+drain, independent copied integrity, full fault matrices or24h. Original stores
+remain closed; final integrity/results/prefix checks have named-test scope.
+Earlier failed parent runs remain failed and preserved below. No historical
+NATS cause or production runtime timing change is claimed.
+
+## Earlier failed preparation
+
 The six-boundary race run at executed `e20cf89` failed after 1046.21 seconds.
 Creation first/interior/last passed with 500 children, result249500, unchanged
 parent prefixes and higher successor epochs. Results first/interior admitted

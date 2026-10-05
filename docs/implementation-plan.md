@@ -3120,3 +3120,18 @@ stayunqualified. Executed79915ca only; workloadSDK/fullsourceinventory/physical
 stores absentfromoriginalupload, finaldrain named-test scope. Full200/current
 source/fullmatrix/24h and failedparent remainopen.
 [Complete187-seed ledger](scale/current-tier3-block-stall-2026-10-05/).
+
+### Full six-boundary combined500-child race qualification — 2026-10-05
+
+Executed25b327c actualSDK nativePASS777.42s, allsix independentR3 creation/
+results first-interior-last cases. Each actualparentSDK SIGKILL plus library
+journal leader restart admitted;500children/result249500/501invocations-journals-
+terminals/exactprefix/higher successor epoch. All500result signals prepared
+before SDK collection, no earlyterminal/result; original5m case/30s cut retained.
+Actualparent/sixchildSDKs/producerGit/667Gitinputs/3287selectedexternal inputs/
+R3fault sequence metadata and16750completearchive members/threeparts verify.
+Ten-control guard requires/accepts allsix passes. Original stores remain closed;
+final integrity/results/prefix named-test scope. No independent copied integrity,
+physicaldrain, every500position, NATSprocessSIGKILL, fullmatrix/24h or priorfailed
+parent promotion. Production runtime behavior/timing unchanged.
+[Complete successful proof and preserved failures](scale/fanout-combined-boundaries-2026-10-05/).

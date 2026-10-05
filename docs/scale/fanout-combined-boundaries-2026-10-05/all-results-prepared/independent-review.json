@@ -1,0 +1,84 @@
+{
+  "source": "25b327ce22679e81956df11f8d312ee7aca4dcfa",
+  "actual_parent_sdk_sha256": "87f82a2b004516ac0ba94f8e146305759a8bb012b0ea64d96f3479206fc9d5b1",
+  "selected_git_inputs_verified": 667,
+  "selected_external_inputs_verified": 3287,
+  "native_status": "passed",
+  "native_seconds": 777.42,
+  "cases": [
+    {
+      "case": "create/first",
+      "native_status": "PASS",
+      "seconds": 104.93,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 3,
+      "prefix_tail_sequence": 3,
+      "journal_live_messages": 3,
+      "journal_tail_sequence": 3
+    },
+    {
+      "case": "create/interior",
+      "native_status": "PASS",
+      "seconds": 111.78,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 765,
+      "prefix_tail_sequence": 765,
+      "journal_live_messages": 765,
+      "journal_tail_sequence": 765
+    },
+    {
+      "case": "create/last",
+      "native_status": "PASS",
+      "seconds": 125.82,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 1001,
+      "prefix_tail_sequence": 1001,
+      "journal_live_messages": 1001,
+      "journal_tail_sequence": 1001
+    },
+    {
+      "case": "results/first",
+      "native_status": "PASS",
+      "seconds": 141.59,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 1504,
+      "prefix_tail_sequence": 3504,
+      "journal_live_messages": 3504,
+      "journal_tail_sequence": 3504
+    },
+    {
+      "case": "results/interior",
+      "native_status": "PASS",
+      "seconds": 139.71,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 2230,
+      "prefix_tail_sequence": 4230,
+      "journal_live_messages": 4230,
+      "journal_tail_sequence": 4230
+    },
+    {
+      "case": "results/last",
+      "native_status": "PASS",
+      "seconds": 153.58,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 2502,
+      "prefix_tail_sequence": 4502,
+      "journal_live_messages": 4502,
+      "journal_tail_sequence": 4502
+    }
+  ],
+  "full_combined_matrix_qualified": true,
+  "acceptance_checker_requires_all_six_passes": true,
+  "qualifies_full_release_matrix_or_24h": false,
+  "checker_git_source": "f9dd797f75922c75efbf2a79a714f224ee1b0c27",
+  "checker_sha256": "3c93fad07d0b12b7e3b7168d9802fb3b0bb66d23a0c16b951073b1329e9c367b",
+  "limitations": [
+    "Native R3 servers embedded in race SDK; no separate server process SIGKILL.",
+    "Original stores closed; no independent reopen yet.",
+    "All six final integrity/prefix/child-result assertions have named-test scope; no independent copied audit or physical-drain qualification.",
+    "Conversion timestamps are not original execution timestamps.",
+    "Sequence coverage checked across snapshot purging; named-test final prefix equality/higher-epoch assertions.",
+    "Prior failed parent remains failed; no historical server-fault cause claim.",
+    "Selected source inventory excludes exhaustive assembly/embed/compiler inputs."
+  ]
+}

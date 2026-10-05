@@ -12,7 +12,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
-| Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
+| Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries qualified at executed25b327c. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. Corrected continuous-byte attempt also failed checkpoint1040 /29120 after7986.85s; originals independently preserved, state snapshot phase is the next diagnostic target. No24h row qualified; full-matrix soak remains. |
 
@@ -119,6 +119,19 @@ no-responder cause remains unconfirmed. Correct fixture lifecycle/readiness and
 trace dependencies before another full run. [Preserved failed proof](scale/postgres-projection-fault-50000-2026-10-05/failed/).
 
 ## Latest accepted evidence
+
+- **Full500-child six combined boundaries qualified:** executed25b327c native
+  racePASS777.42s. First/interior/last creation and result collection each admit
+  actualparentSDK SIGKILL plus library journal-leader restart;500child results/
+  parent249500/501inv-journals-terminals/exactprefix/higher successor epoch.
+  Result prep admitsall500children and500durable named signals, no earlyparent
+  terminal or SDK collection; original5m/30s unchanged. Actualparent/sixchildSDKs/
+  exactproducerGit/667Gitinputs/3287external inputs/currentR3fault witnesses/
+  all16750archive members/threeparts verify; ten-control allsixguard accepts.
+  Final integrity/prefix/results named-test scope; originalclosedstores not
+  reopened, no independent copied audit/physicaldrain/all500positions/server
+  processSIGKILL/fullfaultmatrix/24h or failedparent promotion.
+  [Complete successful and prior failed proofs](scale/fanout-combined-boundaries-2026-10-05/).
 
 - **Recorded-source disk-stall coverage extended to187 seeds:** final183–195
   nativejob111324444117/artifact11353020473 independently bound; originalfault/
