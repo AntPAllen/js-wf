@@ -27,6 +27,8 @@ func TestDirectWindowSharedScannerMatchesBatchControls(t *testing.T) {
 		{name: "wrong-stream", seq: []uint64{1, 2}, stream: "OTHER"},
 		{name: "backward", seq: []uint64{1, 1}, stream: "CONTROL"},
 		{name: "visitor-error", seq: []uint64{1, 2, 3}, stream: "CONTROL", visitorErr: visitorFailure},
+		{name: "server-shutdown", seq: []uint64{1, 2, 3}, stream: "CONTROL", batchErr: jetstream.ErrServerShutdown},
+		{name: "visitor-server-shutdown", seq: []uint64{1, 2, 3}, stream: "CONTROL", visitorErr: jetstream.ErrServerShutdown},
 		{name: "bounded-recovery", seq: []uint64{1, 2, 3}, stream: "CONTROL", batchErr: nats.ErrTimeout},
 		{name: "semantic-delivery-error", seq: []uint64{1, 2}, stream: "CONTROL", batchErr: errors.New("semantic delivery failure")},
 	} {
@@ -143,5 +145,18 @@ func TestDirectCallbackWindowCancellationAndTransportErrors(t *testing.T) {
 				t.Fatal(err)
 			}
 		})
+	}
+}
+
+func TestServerShutdownIsTypedTransportFailure(t *testing.T) {
+	for _, err := range []error{jetstream.ErrServerShutdown, errors.Join(errors.New("pull status"), jetstream.ErrServerShutdown)} {
+		if !batchReadTransportError(err) {
+			t.Fatalf("typed shutdown rejected: %v", err)
+		}
+	}
+	for _, err := range []error{errors.New(jetstream.ErrServerShutdown.Error()), errors.New("corrupt journal"), jetstream.ErrConsumerDeleted} {
+		if batchReadTransportError(err) {
+			t.Fatalf("semantic/unqualified error admitted: %v", err)
+		}
 	}
 }

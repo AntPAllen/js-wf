@@ -4107,3 +4107,16 @@ compile/unit controls pass1.037s; native verdict pending and either outcome will
 be preserved. Previous closed fullcapacity copy reclaimed after complete canonical
 verification. No R1 failure/default/R5/24h qualification yet.
 [Preparation](scale/direct-callback-audit-2026-10-05/single-replica-fault-preparation/).
+
+## R1 shutdown failure localized and typed-status correction prepared — 2026-10-05
+
+Initial R1 fault parent8000503 FAIL53.17s: confirmed cursor-owner library shutdown
+with4423 pending,1947 accepted records then SDK ErrServerShutdown. The transport
+classifier omitted this typed status. Cancellation128/135ms and consumer-deletion
+complete1500/6000 in1.369s pass independently; parent remains failed. Full1791-member
+archive independently reviewed/read back. Exact typed shutdown now enters existing
+bounded transport recovery; visitor/untyped/semantic errors stay fatal. Race
+controls pass1.040s; changed three-fixture native qualification prepared. No R1
+failure/default/R5/largepopulation/24h claim.
+[Original failure](scale/direct-callback-audit-2026-10-05/single-replica-native-fault-controls/).
+[Correction](scale/direct-callback-audit-2026-10-05/single-replica-recovery-preparation/).

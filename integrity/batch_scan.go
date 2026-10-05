@@ -296,5 +296,5 @@ func scanRetainedThroughWithWindow(ctx context.Context, stream jetstream.Stream,
 // Semantic metadata/payload/visitor errors never fall back.
 func batchReadTransportError(err error) bool {
 	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) ||
-		errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || natsutil.IsUnavailable(err)
+		errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrServerShutdown) || errors.Is(err, jetstream.ErrNoStreamResponse) || natsutil.IsUnavailable(err)
 }
