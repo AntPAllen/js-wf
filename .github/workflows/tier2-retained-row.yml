@@ -1,0 +1,61 @@
+name: tier2-retained-row
+on:
+  workflow_dispatch:
+    inputs:
+      row:
+        type: choice
+        options: [journal, consumer, cluster, partition]
+        default: journal
+      seed:
+        type: number
+        default: 1
+      duration:
+        type: choice
+        options: [10m, 35s]
+        default: 10m
+      race:
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  retained:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      EVIDENCE_ROOT: /tmp/tier2-retained-${{ github.run_id }}-${{ github.run_attempt }}
+      ROW_INPUT: ${{ inputs.row }}
+      SEED_INPUT: ${{ inputs.seed }}
+      DURATION_INPUT: ${{ inputs.duration }}
+      RACE_INPUT: ${{ inputs.race }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            **/*.go
+            /go.mod
+            /go.sum
+            /scripts/
+            /.github/
+            /integration/
+            /docs/monitoring/
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Retain original native row and process evidence
+        run: |
+          race_args=()
+          if [ "$RACE_INPUT" = true ]; then race_args+=(--race); fi
+          python3 scripts/run-tier2-retained-row.py --root "$EVIDENCE_ROOT" --row "$ROW_INPUT" --seed "$SEED_INPUT" --duration "$DURATION_INPUT" "${race_args[@]}"
+      - name: Preserve originals including failed attempts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tier2-retained-${{ inputs.row }}-${{ inputs.seed }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.EVIDENCE_ROOT }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30

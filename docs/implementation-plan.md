@@ -3316,3 +3316,19 @@ filesunchanged verified; all23907archive members/elevenparts readback. No worker
 manualacks/originalreopen/historicalcause/all500positions/fullmatrix/final-source/
 24h promotion. This closesindependentcopy integrity/result/prefix/drain scope for
 sixcombinedboundaries. [Complete copied audits](scale/fanout-combined-boundaries-2026-10-05/drained-copied-audits/).
+
+### Retained Tier2 process-row producer — 2026-10-05
+
+`scripts/run-tier2-retained-row.py` and the manual `tier2-retained-row`
+workflow prepare retained execution for journal-leader, consumer-leader,
+all-server-kill and server-partition rows. The default remains the original
+normal ten-minute Tier2 profile; optional race and 35-second smoke profiles
+are explicitly recorded. Smoke does not qualify the ten-minute gate.
+
+Evidence includes the actual live SDK executable identity, clean committed
+source and selected dependency bytes before/after, native output and duration
+acceptance, original closed process stores and point observations of owned NATS
+server executables read through `/proc`. Polling can miss short-lived processes;
+it does not establish exhaustive executable coverage. Independent fault/history
+and copied-store review remains necessary. The full thirteen-row/200-seed
+requirement is unchanged. Initial runner verification is pending.
