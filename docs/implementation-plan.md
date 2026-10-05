@@ -3254,3 +3254,13 @@ originalchecker rejectsfailedmatrix. Diagnosefreshcopies afterpreservation; firs
 copylaunch stopped atopen-file safety before SDK/root creation whilearchiveractive.
 No unchangedrerun orservercause attribution.
 [Complete failed profile](scale/fanout-combined-boundaries-2026-10-05/physical-drain-failed/).
+
+### New failed-drain copy observation deadline retained — 2026-10-05
+
+Actualread-onlySDK onfresh3413731 creationfirst copies failed withbarecontext
+deadline; noqueue census orreport, stagecauseunconfirmed. ActualSDK/helperGit/
+1655selectedinputs/originalfilesunchanged verified, completeclosedcopystore/
+source/executable/process/error archive readback. Helperprepared withstage
+logging and19sboundedcomplete stack insideunchanged20s, beforeanotherfreshcopy.
+No unchangedrerun/productionchange/budgetextension/servercause attribution.
+[Complete failed copied observation](scale/fanout-combined-boundaries-2026-10-05/failed-drain-queue-diagnosis/).

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
@@ -24,6 +25,10 @@ func main() {
 		os.Exit(1)
 	}
 }
+func queueStage(name string) {
+	fmt.Printf("FANOUT_QUEUE_STAGE at=%s stage=%s\n", time.Now().UTC().Format(time.RFC3339Nano), name)
+}
+
 func run() error {
 	if len(os.Args) != 3 || !filepath.IsAbs(os.Args[1]) {
 		return fmt.Errorf("usage: fanout-retained-diagnosis ABSOLUTE_COPIED_CLUSTER_ROOT OUTPUT_JSON")
@@ -75,14 +80,40 @@ func run() error {
 		}
 	}
 	stopReady()
+	queueStage("ready")
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	began := time.Now()
+	captured := make(chan struct{})
+	timer := time.AfterFunc(19*time.Second, func() {
+		defer close(captured)
+		queueStage("predeadline-stack")
+		size := 64 * 1024
+		for {
+			data := make([]byte, size)
+			n := runtime.Stack(data, true)
+			complete := n < len(data)
+			if complete || size >= 16*1024*1024 {
+				path := filepath.Join(filepath.Dir(os.Args[2]), "predeadline-stack.txt")
+				err := os.WriteFile(path, data[:n], 0600)
+				fmt.Printf("FANOUT_QUEUE_STACK bytes=%d complete=%v write_error=%v\n", n, complete, err)
+				break
+			}
+			size *= 2
+		}
+	})
+	defer func() {
+		if !timer.Stop() {
+			<-captured
+		}
+	}()
+	queueStage("parent-read-start")
 	result := map[string]any{"scope": "read-only diagnosis of fresh closed-store copies; not original recovery qualification"}
 	parent, _, err := journal.New(all[0]).Read(ctx, "parent", "large-fanout")
 	if err != nil {
 		return fmt.Errorf("copied parent read: %w", err)
 	}
+	queueStage(fmt.Sprintf("parent-read-done records=%d", len(parent)))
 	result["parent_records"] = parent
 	ids := []string{}
 	for _, record := range parent {
@@ -123,9 +154,13 @@ func run() error {
 			}
 		}
 		children = append(children, row)
+		if len(children)%100 == 0 {
+			queueStage(fmt.Sprintf("child-tails count=%d terminal=%d", len(children), terminal))
+		}
 	}
 	result["children"] = children
 	result["child_terminal_count"] = terminal
+	queueStage("stream-metadata-start")
 	streams := map[string]any{}
 	for _, name := range []string{"WF_INV", "WF_JRN", "WF_RUN", "WF_SIG", "KV_WF_STATE", "KV_WF_LEASE"} {
 		stream, err := all[0].Stream(ctx, name)
@@ -143,6 +178,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	queueStage("consumer-census-start")
 	consumers := run.ListConsumers(ctx)
 	infos := []*jetstream.ConsumerInfo{}
 	for info := range consumers.Info() {
@@ -152,6 +188,7 @@ func run() error {
 		return err
 	}
 	result["consumers"] = infos
+	queueStage("raw-queue-census-start")
 	before, err := run.Info(ctx)
 	if err != nil {
 		return err
@@ -193,6 +230,7 @@ func run() error {
 	if before.State.Msgs != after.State.Msgs || before.State.LastSeq != after.State.LastSeq || uint64(len(messages)) != before.State.Msgs {
 		return fmt.Errorf("copied queue changed or incomplete: before=%d after=%d read=%d", before.State.Msgs, after.State.Msgs, len(messages))
 	}
+	queueStage(fmt.Sprintf("raw-queue-census-done messages=%d", len(messages)))
 	result["queue_raw_messages"] = messages
 	result["queue_keys"] = keys
 	result["queue_subjects"] = subjects
