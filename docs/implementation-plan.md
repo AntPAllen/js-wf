@@ -2699,3 +2699,18 @@ additionalbrokerreads, distinguishrenewal/replicaexpiry/delivery beforeanother
 sustainedrun. Prior121workloadqualification remainsatitsrecordedscope; theadded
 workloadand392pins do notaloneprovefullcurrent-sourcegate.
 [Full model proof](scale/delayed-expiry-worker-kills-2026-10-05/).
+
+
+### 2026-10-05 held-entry diagnostics prepared and verified
+
+Atad92227, optionalobserver reports already-read heldentryrevision/epoch/worker/
+servercreated/clientobserved with explicitmissing/race/malformed scope, and adds
+it onlytolease_held dispatch events. No additionalbrokerrequest, Acquire/error
+identity/timingunchanged. Sixleasecontrols/worker controls, nativeR3file12sTTL
+renewalmetadata(PASS2.66s),1000held-terminalraceseeds/all392pins pass. ActualSDKs/
+1049Gitinputs/full1122memberproof retained. NativeNATSembeddedinSDK; preliminary
+fullprovisiontimeout source/reportonlyretained (noactualSDK/stores), unqualified.
+Next observe a sustained original worker-kill rollout with these fields to
+separate renewal/expiryvisibility/delivery effects. Strict30s remains; this
+instrumentation doesnotresolve historicalcause orqualifyfullmatrices/actual24h.
+[Full focused observer proof](scale/held-lease-observation-2026-10-05/).

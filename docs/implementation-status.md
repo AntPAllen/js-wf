@@ -30,6 +30,19 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Held-lease metadata captured without additional broker requests:** executed
+  ad92227, exactErrHeld/Acquire decisions/requestsequence and originaltiming
+  preserved. Optionalleaseheld dispatch reports priorreadrevision/worker/epoch/
+  servercreated/clientobserved; unavailable/raced/malformed values explicit.
+  Sixleasecontrols/workerobserver controls pass. ActualR3fileKV/12sTTL native
+  PASS2.66s, renewalrevision2→3/createdadvances/epoch1stable, twoCreates/twoGets
+  total. Held-terminal1000race seeds/all392pins exact; actualthree testSDKs/
+  1049Gitinputs/all1122archive members/threeparts verify. Native servers embedded
+  in capturedSDK, not separateprocesshashes. Preliminaryfullprovisiontimeout
+  source/report onlyretained, SDK/stores unobserved/unqualified. No historical
+  latencycause/fullprovision/matrix/24h qualification; originaltargets unchanged.
+  [Full focused proof and limitations](scale/held-lease-observation-2026-10-05/).
+
 - **Delayed first expiry / successive worker kills modeled:** executede63bb02,
   addedworkload100000normal/1000race completedbodies, nine timingcombinations;
   all392 racepins exact, crossprocessseed42 identical. Productionlease/journal

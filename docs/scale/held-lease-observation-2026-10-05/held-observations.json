@@ -1,0 +1,102 @@
+{
+  "observations": [
+    {
+      "key": "test.held",
+      "reason": "held_entry",
+      "entry_observed": true,
+      "revision": 2,
+      "created": "2026-10-05T10:43:19.632502984Z",
+      "observed_at": "2026-10-05T10:43:19.633061561Z",
+      "value_valid": true,
+      "worker": "prior",
+      "epoch": 1
+    },
+    {
+      "key": "test.held",
+      "reason": "held_entry",
+      "entry_observed": true,
+      "revision": 3,
+      "created": "2026-10-05T10:43:19.633091256Z",
+      "observed_at": "2026-10-05T10:43:19.633478733Z",
+      "value_valid": true,
+      "worker": "prior",
+      "epoch": 1
+    }
+  ],
+  "Creates": 2,
+  "Gets": 2,
+  "Updates": 0,
+  "Deletes": 0,
+  "server_ids": [
+    "NCK3IJPGJKLN3F34HBOFDVO725HJXMYDHBI3WV4BO6GC5PACW2JJO4IB",
+    "NCIY74QHXUIUWULL7D6UZ232WDPHK5OZB4EFG44MCJELURX3RY67TXQD",
+    "NB6PWJVNBZ6GNJRY6NHPROVUMTILIZGWRGIL6H5ODCVNJVO2YUEJDLCI"
+  ],
+  "stream": {
+    "config": {
+      "name": "KV_WF_LEASE",
+      "subjects": [
+        "$KV.WF_LEASE.\u003e"
+      ],
+      "retention": "limits",
+      "max_consumers": -1,
+      "max_msgs": -1,
+      "max_bytes": -1,
+      "discard": "new",
+      "max_age": 12000000000,
+      "max_msgs_per_subject": 1,
+      "max_msg_size": -1,
+      "storage": "file",
+      "num_replicas": 3,
+      "duplicate_window": 12000000000,
+      "deny_delete": true,
+      "allow_rollup_hdrs": true,
+      "compression": "none",
+      "allow_direct": true,
+      "mirror_direct": false,
+      "consumer_limits": {},
+      "metadata": {
+        "_nats.level": "5",
+        "_nats.req.level": "0",
+        "_nats.ver": "2.15.0"
+      }
+    },
+    "created": "2026-10-05T10:43:19.549830154Z",
+    "state": {
+      "messages": 1,
+      "bytes": 136,
+      "first_seq": 3,
+      "first_ts": "2026-10-05T10:43:19.633091256Z",
+      "last_seq": 3,
+      "last_ts": "2026-10-05T10:43:19.633091256Z",
+      "consumer_count": 0,
+      "deleted": null,
+      "num_deleted": 0,
+      "num_subjects": 1,
+      "subjects": null
+    },
+    "cluster": {
+      "name": "wf-test",
+      "raft_group": "S-R3F-uLsHXNie",
+      "leader": "wf-test-1",
+      "leader_since": "2026-10-05T10:43:19.630850208Z",
+      "system_account": true,
+      "traffic_account": "$SYS",
+      "replicas": [
+        {
+          "name": "wf-test-0",
+          "current": true,
+          "active": 363421,
+          "peer": "fPPVT2kZ"
+        },
+        {
+          "name": "wf-test-2",
+          "current": true,
+          "active": 366396,
+          "peer": "80zpbVEM"
+        }
+      ]
+    },
+    "ts": "2026-10-05T10:43:19.633582541Z"
+  }
+}
