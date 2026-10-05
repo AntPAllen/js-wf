@@ -1,0 +1,36 @@
+{
+  "execution": {
+    "pid": 644081,
+    "source": "e792fa8d58f040b5559afb1573d8ebf82f72d584",
+    "sha256": "1891d8b4c7960054915a6a00623c60374f88c8af6b48617801157105a6a7ce44",
+    "build_info": "/proc/644081/exe: go1.27.1\n\tpath\tjs-wf/integrity.test\n\tmod\tjs-wf\tv0.0.0-20261005211904-e792fa8d58f0\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=e792fa8d58f040b5559afb1573d8ebf82f72d584\n\tbuild\tvcs.time=2026-10-05T21:19:04Z\n\tbuild\tvcs.modified=false\n",
+    "args": [
+      "/tmp/js-wf-callback-audit-native-fault-controls-20261005/integrity.test",
+      "-test.run=^TestStreamingAuditNativeJournalFaults$/^callback-delivery$",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=6m"
+    ],
+    "stat": "644081 (integrity.test) R 643867 643867 643867 0 -1 4194304 7471 0 0 0 2 1 0 0 20 0 5 0 4887252 1965400064 12867 18446744073709551615 4194304 24419792 140720597946976 0 0 0 0 0 2143420159 0 0 0 17 1 0 0 0 0 0 37494784 37985664 440053760 140720597953323 140720597953504 140720597953504 140720597954480 0\n",
+    "status": "passed",
+    "started_utc": "2026-10-05T21:19:11.000548+00:00",
+    "scope": "Race callback delivery consumer leader loss and cancellation controls; in-process R3 server library is linked into observed SDK; not 400k capacity qualification",
+    "exit_code": 0,
+    "finished_utc": "2026-10-05T21:19:50.764392+00:00"
+  },
+  "actual_sdk_sha256": "1891d8b4c7960054915a6a00623c60374f88c8af6b48617801157105a6a7ce44",
+  "selected_source_inputs_verified": 676,
+  "observed_sdk_closed": true,
+  "native_race_test_passes_seconds": {
+    "TestStreamingAuditNativeJournalFaults": 38.7
+  },
+  "native_selected_fault_cases": [
+    "callback-delivery/consumer-leader-loss",
+    "callback-delivery/cancellation"
+  ],
+  "server_scope": "In-process R3 current server library compiled into observed SDK; no separate external server process bytes claimed",
+  "source_capture_scope": "Selected Git Go/module inputs and actual executable metadata, not exhaustive external compiler/toolchain inputs",
+  "candidate_adopted": false,
+  "qualifies_400k_capacity": false,
+  "qualifies_24h": false
+}

@@ -3901,3 +3901,12 @@ Unit race lifecycle/error/join controls pass. Complete2159-member native archive
 and selectedsource/actualSDK/race/module/closure independently reviewed.
 No default adoption or fullcapacity/24h pass; nativeleaderloss/legacy next.
 [Controls](scale/callback-audit-delivery-2026-10-05/native-controls/).
+
+### Callback fullaudit native consumerleader/cancellation accepted — 2026-10-05
+
+At e792fa8 selected callback race cases pass38.70s. Library consumerleader
+shutdown (not OS SIGKILL) with4039 pending leads to exact1500/6000 report in
+1.938723s within original20s. Cancellation at128 returns context.Canceled in
+340ms; zero auditconsumers checked. Complete closed archive/readback and selected
+source/actualSDK/race/module/closure reviewed. Legacy/full400k/24h remain pending.
+[Fault proof](scale/callback-audit-delivery-2026-10-05/native-fault-controls/).

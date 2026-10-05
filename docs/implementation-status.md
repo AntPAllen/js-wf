@@ -28,6 +28,15 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 21:20 UTC
+
+Explicit callback fullaudit native race faults at e792fa8 pass38.70s: library
+consumerleader shutdown with4039pending, full1500/6000 audit in1.938723s;
+cancel at128 and cleanup340ms. Both auditstreams have zero consumers.
+Selectedsource/actualSDK/race/module/closure and complete closed archive reviewed.
+Not OS SIGKILL/default adoption/full400k/24h. Legacy and capacity remain next.
+[Fault controls](scale/callback-audit-delivery-2026-10-05/native-fault-controls/).
+
 ## Latest follow-up — 2026-10-05 21:18 UTC
 
 An explicit callback delivery retained scanner at a9e29ea now passes current R3
