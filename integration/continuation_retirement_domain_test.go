@@ -3,6 +3,7 @@ package integration_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -99,7 +100,31 @@ func runContinuationRetirementDomain(t *testing.T, restart bool) {
 	}
 	var onDrop func(context.Context) error
 	if restart {
-		onDrop = func(ctx context.Context) error {
+		onDrop = func(ctx context.Context) (result error) {
+			cut := struct {
+				Leader    string              `json:"state_leader"`
+				Before    []map[string]string `json:"before"`
+				Stopped   []string            `json:"stopped"`
+				Restarted []string            `json:"restarted"`
+				Healed    []map[string]string `json:"healed"`
+				Started   time.Time           `json:"started"`
+				Finished  time.Time           `json:"finished"`
+				Stage     string              `json:"stage"`
+				Error     string              `json:"error,omitempty"`
+				Scope     string              `json:"scope"`
+			}{Before: identities, Started: time.Now().UTC(), Stage: "state-leader", Scope: "All three actual library servers shutdown and restarted; not SIGKILL or lease-expiry admission"}
+			defer func() {
+				cut.Finished = time.Now().UTC()
+				if result != nil {
+					cut.Error = result.Error()
+				}
+				data, err := json.MarshalIndent(cut, "", "  ")
+				if err == nil {
+					err = os.WriteFile(filepath.Join(root, "domain-all-server-restart.json"), data, 0600)
+				}
+				result = errors.Join(result, err)
+				t.Logf("domain manifest cut: stage=%s state_leader=%s stopped=%d restarted=%d healed=%d elapsed=%s error=%v", cut.Stage, cut.Leader, len(cut.Stopped), len(cut.Restarted), len(cut.Healed), cut.Finished.Sub(cut.Started), result)
+			}()
 			stream, err := all[0].Stream(ctx, "KV_WF_STATE")
 			if err != nil {
 				return err
@@ -112,15 +137,7 @@ func runContinuationRetirementDomain(t *testing.T, restart bool) {
 			if err != nil || leader < 0 || leader >= 3 {
 				return fmt.Errorf("invalid domain state leader %q", info.Cluster.Leader)
 			}
-			cut := struct {
-				Leader   string              `json:"state_leader"`
-				Before   []map[string]string `json:"before"`
-				Stopped  []string            `json:"stopped"`
-				Healed   []map[string]string `json:"healed"`
-				Started  time.Time           `json:"started"`
-				Finished time.Time           `json:"finished"`
-				Scope    string              `json:"scope"`
-			}{Leader: info.Cluster.Leader, Before: identities, Started: time.Now().UTC(), Scope: "All three actual library servers shutdown and restarted; not SIGKILL or lease-expiry admission"}
+			cut.Leader, cut.Stage = info.Cluster.Leader, "stopping"
 			for node := 0; node < 3; node++ {
 				cluster.KillNode(node)
 				if cluster.Servers[node].Running() {
@@ -129,11 +146,14 @@ func runContinuationRetirementDomain(t *testing.T, restart bool) {
 				cut.Stopped = append(cut.Stopped, cluster.Servers[node].ID())
 			}
 			// Every original must be stopped before any replacement begins.
+			cut.Stage = "restarting"
 			for node := 0; node < 3; node++ {
 				if err := cluster.RestartNode(node); err != nil {
 					return err
 				}
+				cut.Restarted = append(cut.Restarted, cluster.Servers[node].ID())
 			}
+			cut.Stage = "checking-domain"
 			observe, stopObserve := context.WithTimeout(context.Background(), 5*time.Second)
 			defer stopObserve()
 			for node := 0; node < 3; node++ {
@@ -143,15 +163,7 @@ func runContinuationRetirementDomain(t *testing.T, restart bool) {
 				}
 				cut.Healed = append(cut.Healed, map[string]string{"name": cluster.Servers[node].Name(), "id": cluster.Servers[node].ID(), "domain": account.Domain})
 			}
-			cut.Finished = time.Now().UTC()
-			data, err := json.MarshalIndent(cut, "", "  ")
-			if err != nil {
-				return err
-			}
-			if err := os.WriteFile(filepath.Join(root, "domain-all-server-restart.json"), data, 0600); err != nil {
-				return err
-			}
-			t.Logf("domain fresh manifest response lost; state_leader=%s all_three_stopped=true restart=%s", cut.Leader, cut.Finished.Sub(cut.Started))
+			cut.Stage = "healed"
 			return nil
 		}
 	}
