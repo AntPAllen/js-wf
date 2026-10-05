@@ -2682,3 +2682,20 @@ to seeded simulation and analyze lease/ack/redelivery clocks before sustained
 rerun. Original strict30s remains; this is separate from the closed single-kill
 TTL30 mismatch. Parent remainsfailed, observercoverage110/124PIDs.
 [Bound original wire and timeline](scale/protobuf-json-worker-rollout-2026-10-05/10m-outlier-review/).
+
+
+### 2026-10-05 seeded repeated-owner-loss sensitivity
+
+Addedworkload at e63bb02:100000normal/1000race seeds completed, nine combinations,
+392 exact racepins and crossprocessseed42 trace. An explicit delayedfirstexpiry
+hypothesis adds observedhelddelivery/5sNAK thenexposuretosecondownerloss; modeled
+completion34.1–34.5s vs15.6–16s withidealexpiry. This usesproductionlease/journal
+andmodeleddispatchports, notfullworker/heartbeat/NATSexpiry. Persistentexpiry
+lagaddsanotherheldretry anddiffersfromnativeoneheldtimeline. First-generation
+lag plusmodeledservicecost/cut/pollclocks areassumptions, nothistoriccausality.
+ProductionTTL12/AckWait13/strict30s unchanged; failednativeparent remainsfailed.
+Next retainheldentryrevision/epoch/creationtime andoperationtiming without
+additionalbrokerreads, distinguishrenewal/replicaexpiry/delivery beforeanother
+sustainedrun. Prior121workloadqualification remainsatitsrecordedscope; theadded
+workloadand392pins do notaloneprovefullcurrent-sourcegate.
+[Full model proof](scale/delayed-expiry-worker-kills-2026-10-05/).

@@ -30,6 +30,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Delayed first expiry / successive worker kills modeled:** executede63bb02,
+  addedworkload100000normal/1000race completedbodies, nine timingcombinations;
+  all392 racepins exact, crossprocessseed42 identical. Productionlease/journal
+  decisions and modeleddispatch/physicaldrain pass. Explicitfirst-generation
+  delayedvisibility hypothesis adds helddelivery/5sNAK and exposuretosecondkill;
+  diagnostic15.6–16s becomes34.1–34.5s. Persistentdelay addsanotherheldretry and
+  doesnotmatchnativeoneheldsequence. ActualmodelSDKs/1047Gitsourceinputs/all1060
+  archive members/twoparts verify. Nofullhandler/heartbeat/NATSexpiryinternals,
+  historiccause confirmation, productiontimingchange orfailednativepromotion.
+  Next retain heldentrymetadata without extra reads; fullcurrent-sourcegatesopen.
+  [Seeded model and complete proof](scale/delayed-expiry-worker-kills-2026-10-05/).
+
 - **Healthy failed-soak copied-state diagnostic completed:** source886de67,
   original five stores verified before/after; only copies reopened with recorded
   identity. All29177 values reach initial barrier in0.131/0.146/0.295s for
