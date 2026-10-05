@@ -28,6 +28,23 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 20:31 UTC
+
+An explicit compact metadata scanner candidate now preserves stream, sequence
+and forwarded timestamp without ordinary ACK token/metadata allocations. Unsupported
+syntax and wrappers use SDK Metadata; public audit defaults remain unchanged.
+20,010 subjects differential against the pinned SDK parser and zero-allocation
+checks pass. Parser benchmark252.1ns/304B/2alloc SDK versus155.9ns/0B/0alloc
+candidate is not a full-audit capacity result.
+
+Current R3 native race controls at `2c4995e` pass compaction/cohort/freshcorruption,
+journal corruption, state values and64 actual SDK deliveries, including exact
+forwarded timestamps and zero allocations on the actual candidate path. Source,
+observed SDK/race/VCS and closure independently reviewed; complete2,114-member
+archive read back. [Native controls](scale/compact-audit-metadata-2026-10-05/native-controls/).
+Compact consumer-leader-loss/cancellation cases are prepared. Legacy,400k capacity,
+full fault matrix and24h qualification remain open; no default adoption.
+
 ## Latest follow-up — 2026-10-05 20:12 UTC
 
 A canonical-archive-verified400k store copy at `64ece3e` localizes the measured

@@ -3798,3 +3798,14 @@ benchmark SDK252.1ns/304B/2alloc versuscandidate155.9ns/0B/0alloc. This isnot a
 fullaudit speedup or400kpass. Existingrace controls pass; sharednative compaction/
 corruption/state comparisons nowinclude candidate. An explicitcopiedprofile flag
 selects candidate withsame20s budget. Realnative controls/capacity remainpending.
+
+### Compact metadata current native race contracts accepted — 2026-10-05
+
+Executed2c4995e actualSDK616708/race/current2.15 libraryR3:
+compaction/cohort/freshcorruption PASS56.09s, journalcorruption13.87s,
+statevalues11.89s, native64delivery SDKcoordinates/timestamps/zeroalloc contract
+4.39s. Sourcebeforeafter/actualSDK/race/VCS independentlyreviewed; completeclosed
+proof retained. Parserbenchmarknot400kcapacity qualification; defaultsremainSDK.
+[Nativeproof](scale/compact-audit-metadata-2026-10-05/native-controls/).
+Compact-mode consumerleaderloss/cancellation rowpreparedwith unchanged20s limits;
+legacy/full400k/profile/fault qualification remainpending.

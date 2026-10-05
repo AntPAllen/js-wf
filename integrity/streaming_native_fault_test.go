@@ -24,12 +24,16 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 		t.Skip("opt-in full streaming audit fault qualification")
 	}
 	for _, mode := range []struct {
-		name                 string
-		snapshot, concurrent bool
+		name                          string
+		snapshot, concurrent, compact bool
 	}{
-		{"state-false", false, false}, {"state-true", true, false}, {"concurrent-state", true, true},
+		{"state-false", false, false, false}, {"state-true", true, false, false}, {"concurrent-state", true, true, false}, {"compact-metadata", true, true, true},
 	} {
 		snapshot := mode.snapshot
+		read := nativeStreamingScanner()
+		if mode.compact {
+			read = scanCompactByteBoundedThrough
+		}
 		for _, fault := range []string{"consumer-leader-loss", "cancellation"} {
 			t.Run(fmt.Sprintf("%s/%s", mode.name, fault), func(t *testing.T) {
 				_, ctx, cluster := batchedAuditClusterWithServers(t)
@@ -66,10 +70,10 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 				started := time.Now()
 				report, err := checkUsingConcurrentOptions(auditCtx, js, nil, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 					if stream.CachedInfo().Config.Name != "WF_JRN" {
-						return nativeStreamingScanner()(call, stream, cutoff, visit)
+						return read(call, stream, cutoff, visit)
 					}
 					observed := &candidateObservedStream{Stream: stream}
-					return nativeStreamingScanner()(call, observed, cutoff, func(msg *jetstream.RawStreamMsg) error {
+					return read(call, observed, cutoff, func(msg *jetstream.RawStreamMsg) error {
 						visited++
 						if visited == 128 {
 							if fault == "cancellation" {
