@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and independent copied integrity/history/drain also qualified. Retained normal ten-minute block-disk seed1 at f57da4d plus copied raw-image integrity/history/drain qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and hosted seed3 at a517d2e, each with independent copied integrity/history/drain, qualified. Retained normal ten-minute block-disk seed1 at f57da4d plus copied raw-image integrity/history/drain qualified. Ten-minute worker seed1 native and copied audits also pass, with the original producer generated-cache failure separately preserved. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries, physical drain and independent copied audits qualified at executed dc8422a. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -12079,3 +12079,12 @@ hosteddonora517d2e. Originalfiles verifiedunchanged; failure retained. Isolated
 sparsehelpercheckout605a78a restoresdonorproduction inputs while retaining the
 portablehelper; changedpreparation runs inafreshroot. No runtime failure or
 copiedaudit passclaimed. [Preparation record](scale/tier2-retained-row-2026-10-05/hosted-partition-seed3/copied-preparation/).
+
+### Independent hosted partition seed3 copied audit accepted — 2026-10-05
+
+Bound-source helper605a78a completes hosted a517d2e donor review: full2044
+invocations/journals/terminals/22537entries,allthreehistorymodels andthreeclient/
+64durable drain in1.046703s underoriginal20s. All2314originalfiles unchanged,
+1695selectedinputs/actualSDK542506/threeactualNATS verified. Complete4036archive
+members/twoparts readback. Initialpreparation source mismatch remainspreserved;
+no originalstore reopen ornative rerun. [Proof](scale/tier2-retained-row-2026-10-05/hosted-partition-seed3-copied-audit/).

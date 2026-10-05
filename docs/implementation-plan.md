@@ -3590,3 +3590,12 @@ hosteddonora517d2e. Originalfiles verifiedunchanged; failure retained. Isolated
 sparsehelpercheckout605a78a restoresdonorproduction inputs while retaining the
 portablehelper; changedpreparation runs inafreshroot. No runtime failure or
 copiedaudit passclaimed. [Preparation record](scale/tier2-retained-row-2026-10-05/hosted-partition-seed3/copied-preparation/).
+
+### Independent hosted partition seed3 copied audit accepted — 2026-10-05
+
+Bound-source helper605a78a completes hosted a517d2e donor review: full2044
+invocations/journals/terminals/22537entries,allthreehistorymodels andthreeclient/
+64durable drain in1.046703s underoriginal20s. All2314originalfiles unchanged,
+1695selectedinputs/actualSDK542506/threeactualNATS verified. Complete4036archive
+members/twoparts readback. Initialpreparation source mismatch remainspreserved;
+no originalstore reopen ornative rerun. [Proof](scale/tier2-retained-row-2026-10-05/hosted-partition-seed3-copied-audit/).
