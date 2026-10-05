@@ -3391,3 +3391,13 @@ completeclosed originalstore/executable/source proof retained. Reviewer's initia
 schedule/count/cells. [Complete native proof](scale/tier2-retained-row-2026-10-05/partition-seed2-ten-minute/).
 Independentcopied review follows; full13x200 gate remains. All-task-thread
 observation is now adopted for future portableproducers after this run closed.
+
+### Independent copied ten-minute partition audit accepted — 2026-10-05
+
+Freshcopies of closed ec60e83 partition seed2 after nativepreservation pass all
+three historymodels, full1988/21931 retainedintegrity and allthreeclient queues/
+64durables zero pending/ack. Original2314files unchanged. ActualSDK467006,
+helper121b061/1695selectedinputs andthreeactualserverexecutables verified.
+Audit414.343ms/read4.424010s withinoriginal20s; completecopiedproof readback.
+[Complete independent audit](scale/tier2-retained-row-2026-10-05/partition-seed2-copied-audit/).
+Only original ten-minute seed2 is qualified; full13x200/current-source remainsopen.

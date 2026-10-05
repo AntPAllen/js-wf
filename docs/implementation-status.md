@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and independent copied integrity/history/drain also qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries, physical drain and independent copied audits qualified at executed dc8422a. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -42,9 +42,13 @@ producer acceptance failed because JSON conversion omitted elapsed. That result
 is preserved. Independent corrected conversion passes the unchanged checker;
 668 Git/3287 external selected inputs and four actual server observations reviewed.
 [Complete smoke evidence](scale/tier2-retained-row-2026-10-05/journal-smoke/).
-Corrected producer now runs original ten-minute partition seed2 at ec60e83,
-actualSDK456626 checked live. No sustained acceptance yet.
-[Launch identity](scale/tier2-retained-row-2026-10-05/partition-seed2-launch/).
+The corrected producer has now completed original ten-minute partition seed2
+at ec60e83: PASS651.13s,1988terminals/21931entries/19faults,aggregate p99=13.3247s.
+Native source/executable/fault/cell/duration review passes. Independent freshcopy
+also passes allthreehistory models, fullretainedintegrity andallthreequeue/64durable
+drain in4.424s underoriginal20s;2314originalfiles unchanged. Fullmatrix remainsopen.
+[Native proof](scale/tier2-retained-row-2026-10-05/partition-seed2-ten-minute/);
+[copied audit](scale/tier2-retained-row-2026-10-05/partition-seed2-copied-audit/).
 
 The original hosted six-boundary fanout run at7a4d739 completed successfully:
 [run37333174296](https://github.com/AntPAllen/js-wf/actions/runs/37333174296),
