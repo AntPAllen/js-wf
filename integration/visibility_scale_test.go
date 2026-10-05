@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"hash"
+	"js-wf/testcluster"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -45,7 +47,16 @@ func TestProjectionProcessHelper(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
-	projection, err := visibility.New(ctx, js)
+	var options []visibility.Option
+	if os.Getenv("WF_PROJECTION_BACKEND") == "postgres" {
+		db, err := sql.Open("pgx", os.Getenv("WF_TEST_POSTGRES_DSN"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer db.Close()
+		options = append(options, visibility.WithPostgres(&visibility.PostgresStore{DB: db}))
+	}
+	projection, err := visibility.New(ctx, js, options...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,6 +81,18 @@ func TestProjectionRecoversFiftyThousandInvocations(t *testing.T) {
 	if os.Getenv("WF_PROJECTION_SCALE") == "" {
 		t.Skip("set WF_PROJECTION_SCALE=1 for the 50,000-invocation projection proof")
 	}
+	runProjectionRecoversFiftyThousandInvocations(t, false)
+}
+
+func TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocations(t *testing.T) {
+	if os.Getenv("WF_PROJECTION_POSTGRES_FAULT_ROOT") == "" || os.Getenv("WF_TEST_POSTGRES_DSN") == "" {
+		t.Skip("opt-in retained PostgreSQL full projection fault proof")
+	}
+	runProjectionRecoversFiftyThousandInvocations(t, true)
+}
+
+func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault bool) {
+	t.Helper()
 	count := 50000
 	if value := os.Getenv("WF_PROJECTION_COUNT"); value != "" {
 		parsed, err := strconv.Atoi(value)
@@ -78,13 +101,62 @@ func TestProjectionRecoversFiftyThousandInvocations(t *testing.T) {
 		}
 		count = parsed
 	}
-	all, cluster := setup(t)
+	var all []jetstream.JetStream
+	var cluster *testcluster.Cluster
+	root := ""
+	proof := map[string]any{"count": count, "postgres_fault": postgresFault}
+	if postgresFault {
+		base := os.Getenv("WF_PROJECTION_POSTGRES_FAULT_ROOT")
+		if !filepath.IsAbs(base) {
+			t.Fatal("absolute retained root required")
+		}
+		root = filepath.Join(base, t.Name())
+		if err := os.Mkdir(root, 0700); err != nil {
+			t.Fatal(err)
+		}
+		defer func() {
+			proof["native_test_failed"] = t.Failed()
+			data, err := json.MarshalIndent(proof, "", "  ")
+			if err == nil {
+				err = os.WriteFile(filepath.Join(root, "projection-fault-proof.json"), append(data, '\n'), 0600)
+			}
+			if err != nil {
+				t.Error(err)
+			}
+		}()
+		var err error
+		cluster, err = testcluster.Start(filepath.Join(root, "cluster"), 3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		all, cluster = setupCluster(t, cluster)
+	} else {
+		all, cluster = setup(t)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 	defer cancel()
+	var db *sql.DB
+	var options []visibility.Option
+	if postgresFault {
+		var err error
+		db, err = sql.Open("pgx", os.Getenv("WF_TEST_POSTGRES_DSN"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer db.Close()
+		db.SetMaxOpenConns(40)
+		options = append(options, visibility.WithPostgres(&visibility.PostgresStore{DB: db}))
+	}
 	const typ = "view-scale"
 	readyFile := filepath.Join(t.TempDir(), "projection-ready")
+	if postgresFault {
+		readyFile = filepath.Join(root, "projection-ready")
+	}
 	process := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestProjectionProcessHelper$")
 	process.Env = append(os.Environ(), "WF_PROJECTION_HELPER=1", "WF_PROJECTION_URL="+cluster.Servers[0].ClientURL(), "WF_PROJECTION_READY_FILE="+readyFile)
+	if postgresFault {
+		process.Env = append(process.Env, "WF_PROJECTION_BACKEND=postgres")
+	}
 	var processOutput bytes.Buffer
 	process.Stdout, process.Stderr = &processOutput, &processOutput
 	if err := process.Start(); err != nil {
@@ -107,6 +179,9 @@ func TestProjectionRecoversFiftyThousandInvocations(t *testing.T) {
 	if _, err := os.Stat(readyFile); err != nil {
 		t.Fatalf("projection process did not become ready: %v; output=%s", err, processOutput.String())
 	}
+	if postgresFault {
+		captureProjectionProcess(t, process, root, proof)
+	}
 	if err := process.Process.Kill(); err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +189,14 @@ func TestProjectionRecoversFiftyThousandInvocations(t *testing.T) {
 		t.Fatal("projection process exited without SIGKILL")
 	}
 	processReaped = true
-	projection, err := visibility.New(ctx, all[0])
+	if postgresFault {
+		assertProjectionSIGKILL(t, process, proof)
+		proof["projection_process_stopped"] = time.Now().UTC()
+		if err := os.WriteFile(filepath.Join(root, "killed-projection.log"), processOutput.Bytes(), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	projection, err := visibility.New(ctx, all[0], options...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -215,6 +297,7 @@ func TestProjectionRecoversFiftyThousandInvocations(t *testing.T) {
 		return nil
 	})
 	t.Logf("completed and checked %d results in %s", count, time.Since(started))
+	proof["all_results_checked_while_projection_stopped"] = true
 	journalStream, err := all[1].Stream(ctx, "WF_JRN")
 	if err != nil {
 		t.Fatal(err)
@@ -226,13 +309,26 @@ func TestProjectionRecoversFiftyThousandInvocations(t *testing.T) {
 	if lag, err := projection.Lag(ctx); err != nil || lag != uint64(2*count) {
 		t.Fatalf("stopped projection lag=%d want=%d err=%v", lag, 2*count, err)
 	}
-	restarted, err := visibility.New(ctx, all[2])
+	proof["stopped_projection_lag"] = 2 * count
+	restarted, err := visibility.New(ctx, all[2], options...)
 	if err != nil {
 		t.Fatal(err)
 	}
 	projectionCtx, stopProjection := context.WithCancel(ctx)
 	projectionDone := make(chan error, 1)
 	go func() { projectionDone <- restarted.Run(projectionCtx) }()
+	if postgresFault {
+		applyPostgresProjectionCatchupFault(t, ctx, db, cluster, journalStream, projectionDone, proof)
+		stopProjection()
+		restarted, err = visibility.New(ctx, all[2], options...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		projectionCtx, stopProjection = context.WithCancel(ctx)
+		defer stopProjection()
+		projectionDone = make(chan error, 1)
+		go func() { projectionDone <- restarted.Run(projectionCtx) }()
+	}
 	for ctx.Err() == nil {
 		select {
 		case err := <-projectionDone:
@@ -255,6 +351,20 @@ func TestProjectionRecoversFiftyThousandInvocations(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("projection lag drained in %s", time.Since(started))
+	if postgresFault {
+		proof["final_lag"] = 0
+		before := postgresProjectionState(t, ctx, db, count, filepath.Join(root, "before-rebuild.jsonl"))
+		if err := restarted.Rebuild(ctx); err != nil {
+			t.Fatal(err)
+		}
+		after := postgresProjectionState(t, ctx, db, count, filepath.Join(root, "after-rebuild.jsonl"))
+		if before != after {
+			t.Fatalf("PostgreSQL projection changed across full rebuild: %x/%x", before, after)
+		}
+		proof["row_and_indexed_column_sha256"] = fmt.Sprintf("%x", before)
+		proof["elapsed_ns"] = time.Since(started).Nanoseconds()
+		return
+	}
 	view, err := all[0].KeyValue(ctx, "WF_VIEW")
 	if err != nil {
 		t.Fatal(err)

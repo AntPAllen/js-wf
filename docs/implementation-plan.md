@@ -2856,3 +2856,18 @@ This closes the focused native SDK step-effect late-result case. Raw outer
 handlers outside SDK effects, combined process/partition cuts, fullmatrices/24h
 remain open. No productiondecisionchange or unchanged simulation rerun.
 [Complete native proof](scale/ignored-effect-lease-loss-2026-10-05/).
+
+### 2026-10-05 full PostgreSQL projection fault proof prepared
+
+The original50k projection-process crash case now has an explicit PostgreSQL
+variant: actual projection SDK verified/reapedSIGKILL, all50000 results checked
+while it is down, exact100000journal-message lag, then a confirmed SQL writer
+backend termination and library journal-leader stop/restart during partial SQL
+catch-up. After the faulted writer exits and allthree journal replicas are current,
+a replacement drains lag and fullRebuild must preserve every exposed SQL row
+and indexed type/id/status/attribute column byte-for-byte. Internal random rebuild
+generation tokens intentionally change and are excluded from exposed state.
+Original20minute fixture budget/defaultcount50000 maintained; optional smaller
+count remains diagnostic. DefaultKV proof retains its behavior. Native run and
+independent raw/source/process/store review are pending. No SIGKILL claim for
+in-process library servers, PostgreSQL server crash or actual24h qualification.
