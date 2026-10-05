@@ -11,7 +11,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Full 13-row × 200 current-source gate remains open. |
-| Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–156 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
+| Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–169 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. Corrected continuous-byte attempt also failed checkpoint1040 /29120 after7986.85s; originals independently preserved, state snapshot phase is the next diagnostic target. No24h row qualified; full-matrix soak remains. |
@@ -41,6 +41,17 @@ no-responder cause remains unconfirmed. Correct fixture lifecycle/readiness and
 trace dependencies before another full run. [Preserved failed proof](scale/postgres-projection-fault-50000-2026-10-05/failed/).
 
 ## Latest accepted evidence
+
+- **Recorded-source disk-stall coverage extended to156 seeds:** new157–169
+  nativejob/artifact/log, originaldevicefault/latency/cohort checks and three
+  rebuiltmodels exactOk51552operations/45executed-source dependencies accepted.
+  All1398archive members/threeparts readback verified. Combinedranges1–65 and
+  79–169:475636inv/5238317entries/2964faults/611542modelops/1626cohortaudits,
+  worstterminal/progressp99 9.743/2.980s. Failed66–78 remainunqualified;
+  remaining170–200 stillrunning. Executed79915ca only; runner didnotupload
+  actualworkloadSDK/exhaustivesource/physicalstores. Named-test finaldrain scope;
+  no failedparent/full200/current-source/fullmatrix/24h promotion.
+  [Complete156-seed ledger](scale/current-tier3-block-stall-2026-10-05/).
 
 - **Native lease loss with cancellation-ignoring SDK effect qualified:** executed
   ee2f53d racePASS14.96s, recovery1.210s fromobservedfencing/strict30s. RealR3

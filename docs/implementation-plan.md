@@ -2899,3 +2899,15 @@ consumerInfo/Fetch/nativebatch errors and journalreset with original arguments,
 contexts/results. PureGo trace wrappers are shared across platform fixtures.
 Original20m/default50000 and failure semantics unchanged; no added projection
 retry or primarycause claim. Full changed native result pending.
+
+### 2026-10-05 recorded-source disk-stall156 seeds accepted
+
+New157–169 nativejob success bound to actual artifact/log/ZIP; original fault,
+latency and cohort gates regenerated. Three rebuilt history models exactOk51552
+operations/45 executed79915ca dependencies, helperGitidentity retained; all1398
+completearchive members/threeparts verified. Combined1–65 and79–169 (156seeds)
+475636inv/5238317entries/2964faults/611542modelops/1626cohortaudits, worstterminal/
+progressp99 9.743/2.980s. Failed66–78 stayunqualified; remaining170–200 live.
+No workloadSDK/fullsource/physicalstore upload; finaldrain named-test scope.
+Full200/final-source/fullmatrix/24h and failedparent remainopen.
+[Complete156-seed ledger](scale/current-tier3-block-stall-2026-10-05/).
