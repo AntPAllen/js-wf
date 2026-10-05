@@ -30,6 +30,15 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Verified positive duplicate expansions recovered for soak headroom:**
+  accepted all-server1–72 and consumer85–192 /1080 raw files match original ZIPs,
+  every canonical member and pushed68ebd26 proof parts. Only duplicate raw
+  expansions removed; ZIPs/canonical/models and failed/live originals retained.
+  Initial archive traversal corrected to sequential verification; already-recovered
+  all-server73–120 assertion is retained, no new removal there. Acceptance unchanged.
+  [All-server recovery](scale/current-tier2-matrix-2026-10-04/duplicate-expansion-recovery-1-72/) ·
+  [Consumer recovery](scale/current-tier2-matrix-2026-10-04/consumer-duplicate-expansion-recovery-85-192/).
+
 - **Byte-bounded streaming audits adopted after native acceptance:** four public
   full/cohort streaming APIs now use4096-record/SDK8MiB delivery, original replication/
   checker/deadlines unchanged. Native R3 actual consumer-leader kills with positive
