@@ -3752,3 +3752,15 @@ Noquietcapacitypass, actual24h/faultqualification, candidateadoption orservercau
 claim. ActualSDK595173/fiveNATS/selectedGitbeforeafter/processclosure independently
 reviewed; complete1752-member/24-part proof readbackverified. Measurephase/CPU/allocation
 onverifiedcopies beforeanother24hlaunch. [Capacityfailure](scale/concurrent-state-audit-2026-10-05/capacity-400k/).
+
+### Full400k copied capacity phase/CPU profiling prepared — 2026-10-05
+
+A separate copied-store diagnostic records invocation/journal scan and visitor
+elapsed time, delivered records/bytes, CPU phase labels and sampled allocations
+for the same concurrent reader under its original20s deadline. Restoredexisting
+R5 file streams mustretain exact400k/4.8M/400k sourcecounts; noprovisioning or
+workers. Diagnostic testcompletion doesnot turnan individualfailed auditinto a
+capacitypass. Compile/opt-inskip passes; nativeprofiling pending. Copies require
+independent canonicalarchive/originalbyte verification beforeopening; originals
+remainclosed. Verifiedpushed worktreearchive copies reclaimed4.019GB forheadroom;
+canonicalGit/originalstores retained, exactparts/blobs/FDchecks recorded.
