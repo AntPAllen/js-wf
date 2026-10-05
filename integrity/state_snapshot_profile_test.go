@@ -21,7 +21,7 @@ import (
 // Diagnostic only: callers supply verified disposable copies of closed stores.
 // It compares the existing per-request retry wrapper with the original overall
 // audit deadline for one fresh state snapshot, without changing production.
-func stateSnapshotCopiedFixture(t *testing.T) (context.Context, jetstream.JetStream, jetstream.KeyValue, *testcluster.DockerCluster, string) {
+func stateSnapshotCopiedFixture(t *testing.T) (context.Context, jetstream.JetStream, jetstream.KeyValue, *testcluster.DockerCluster, *nats.Conn, string) {
 	t.Helper()
 	storesRoot := os.Getenv("WF_AUDIT_STATE_PROFILE_STORES")
 	if storesRoot == "" {
@@ -44,6 +44,19 @@ func stateSnapshotCopiedFixture(t *testing.T) (context.Context, jetstream.JetStr
 		for i := 0; i < 5; i++ {
 			logs, err := cluster.Logs(i)
 			if err != nil {
+				// An admitted SIGKILL removes that container. Its log was saved
+				// immediately before the cut; do not mislabel it as post-cut.
+				var proof struct {
+					Fault struct {
+						Node int                                `json:"node"`
+						Kill *testcluster.DockerKillObservation `json:"kill"`
+					} `json:"fault"`
+				}
+				data, readErr := os.ReadFile(filepath.Join(root, "state-watch-leader-loss.json"))
+				_, logErr := os.Stat(filepath.Join(root, fmt.Sprintf("server-%d-before-kill.log", i)))
+				if readErr == nil && json.Unmarshal(data, &proof) == nil && proof.Fault.Node == i && proof.Fault.Kill != nil && !proof.Fault.Kill.SourceStopped.IsZero() && logErr == nil {
+					continue
+				}
 				t.Error(err)
 				continue
 			}
@@ -56,7 +69,7 @@ func stateSnapshotCopiedFixture(t *testing.T) (context.Context, jetstream.JetStr
 	for i := 0; i < 5; i++ {
 		urls = append(urls, cluster.ClientURL(i))
 	}
-	nc, err := nats.Connect(strings.Join(urls, ","), nats.MaxReconnects(-1), nats.ReconnectWait(20*time.Millisecond))
+	nc, err := nats.Connect(strings.Join(urls, ","), nats.MaxReconnects(-1), nats.ReconnectWait(100*time.Millisecond), nats.IgnoreDiscoveredServers(), nats.Timeout(time.Second))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,11 +103,11 @@ func stateSnapshotCopiedFixture(t *testing.T) (context.Context, jetstream.JetStr
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
-	return ctx, js, kv, cluster, root
+	return ctx, js, kv, cluster, nc, root
 }
 
 func TestRetainedStateSnapshotCopiedStoreDiagnostic(t *testing.T) {
-	ctx, _, kv, _, root := stateSnapshotCopiedFixture(t)
+	ctx, _, kv, _, _, root := stateSnapshotCopiedFixture(t)
 	var err error
 	type result struct {
 		Label         string `json:"label"`

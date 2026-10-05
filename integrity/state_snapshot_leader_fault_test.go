@@ -13,13 +13,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/testcluster"
 )
 
 type stateSnapshotWatchAttempt struct {
-	Records  int  `json:"records"`
-	Complete bool `json:"complete"`
+	Records       int       `json:"records"`
+	Complete      bool      `json:"complete"`
+	Started       time.Time `json:"started"`
+	CreationError string    `json:"creation_error"`
+	ReadError     string    `json:"read_error"`
 }
 type stateSnapshotLeaderFault struct {
 	cluster        *testcluster.DockerCluster
@@ -29,6 +33,7 @@ type stateSnapshotLeaderFault struct {
 	Consumer       *jetstream.ConsumerInfo            `json:"consumer"`
 	Node           int                                `json:"node"`
 	Kill           *testcluster.DockerKillObservation `json:"kill"`
+	Root           string                             `json:"-"`
 	InjectionError string                             `json:"injection_error"`
 }
 type stateSnapshotFaultKV struct {
@@ -37,6 +42,8 @@ type stateSnapshotFaultKV struct {
 }
 
 func (s stateSnapshotFaultKV) WatchAll(ctx context.Context, opts ...jetstream.WatchOpt) (jetstream.KeyWatcher, error) {
+	attempt := &stateSnapshotWatchAttempt{Started: time.Now().UTC()}
+	s.fault.attempts = append(s.fault.attempts, attempt)
 	prior := map[string]bool{}
 	if !s.fault.Triggered {
 		listed := s.fault.stream.ListConsumers(ctx)
@@ -44,15 +51,15 @@ func (s stateSnapshotFaultKV) WatchAll(ctx context.Context, opts ...jetstream.Wa
 			prior[info.Name] = true
 		}
 		if err := listed.Err(); err != nil {
+			attempt.CreationError = err.Error()
 			return nil, err
 		}
 	}
 	native, err := s.KeyValue.WatchAll(ctx, opts...)
 	if err != nil {
+		attempt.CreationError = err.Error()
 		return nil, err
 	}
-	attempt := &stateSnapshotWatchAttempt{}
-	s.fault.attempts = append(s.fault.attempts, attempt)
 	relay := &faultRelayWatch{KeyWatcher: native, updates: make(chan jetstream.KeyValueEntry), done: make(chan struct{}), finished: make(chan struct{})}
 	go func() {
 		defer close(relay.finished)
@@ -101,6 +108,15 @@ func (s stateSnapshotFaultKV) WatchAll(ctx context.Context, opts ...jetstream.Wa
 						return
 					}
 					s.fault.Node = node
+					logs, err := s.fault.cluster.Logs(node)
+					if err != nil {
+						s.fault.InjectionError = err.Error()
+						return
+					}
+					if err := os.WriteFile(filepath.Join(s.fault.Root, fmt.Sprintf("server-%d-before-kill.log", node)), []byte(logs), 0644); err != nil {
+						s.fault.InjectionError = err.Error()
+						return
+					}
 					kill, err := s.fault.cluster.KillNodeObserved(node)
 					if err != nil {
 						s.fault.InjectionError = err.Error()
@@ -125,22 +141,35 @@ func (s stateSnapshotFaultKV) WatchAll(ctx context.Context, opts ...jetstream.Wa
 }
 
 func TestRetainedStateSnapshotCopiedStoreLeaderLoss(t *testing.T) {
-	ctx, js, kv, cluster, root := stateSnapshotCopiedFixture(t)
+	ctx, js, kv, cluster, nc, root := stateSnapshotCopiedFixture(t)
 	stream, err := js.Stream(ctx, "KV_WF_STATE")
 	if err != nil {
 		t.Fatal(err)
 	}
-	fault := &stateSnapshotLeaderFault{cluster: cluster, stream: stream, Node: -1}
+	fault := &stateSnapshotLeaderFault{cluster: cluster, stream: stream, Node: -1, Root: root}
 	call, stop := context.WithTimeout(ctx, 20*time.Second)
 	defer stop()
 	began := time.Now()
 	result, err := auditRead(call, func(attempt context.Context) (jetstream.KeyValue, error) {
-		return initialAuditState(attempt, stateSnapshotFaultKV{KeyValue: kv, fault: fault}, func(string) bool { return true })
+		value, readErr := initialAuditState(attempt, stateSnapshotFaultKV{KeyValue: kv, fault: fault}, func(string) bool { return true })
+		fault.attempts[len(fault.attempts)-1].ReadError = fmt.Sprint(readErr)
+		return value, readErr
 	})
 	elapsed := time.Since(began)
 	values := 0
 	if snapshot, ok := result.(*auditStateSnapshot); ok {
 		values = len(snapshot.values)
+	}
+	client := struct {
+		Status       nats.Status `json:"status"`
+		ConnectedURL string      `json:"connected_url"`
+		Servers      []string    `json:"servers"`
+		Discovered   []string    `json:"discovered"`
+		Policy       string      `json:"policy"`
+	}{nc.Status(), nc.ConnectedUrl(), nc.Servers(), nc.DiscoveredServers(), "IgnoreDiscoveredServers/dial1s/reconnect100ms"}
+	clientData, _ := json.MarshalIndent(client, "", "  ")
+	if err := os.WriteFile(filepath.Join(root, "client-after-snapshot.json"), append(clientData, '\n'), 0644); err != nil {
+		t.Fatal(err)
 	}
 	proof := struct {
 		Fault     *stateSnapshotLeaderFault    `json:"fault"`
