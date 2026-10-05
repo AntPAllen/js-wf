@@ -28,6 +28,14 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 21:03 UTC
+
+Full400k plain capacity failure and verified duplicate-archive cleanup are pushed
+at e6eb7cb. An explicit four-core/GOGC200 comparison is prepared, using a fresh
+verified disposable copy with the same2GiB target, exact400k/4.8M/400k population
+and unchanged20s deadlines. No result or default adoption claimed.
+[Preparation](scale/compact-audit-metadata-2026-10-05/four-core-400k-preparation/).
+
 ## Latest follow-up — 2026-10-05 20:52 UTC
 
 The plain full400k comparison at `ce885e0` fails77.08s: SDKconcurrent, compact

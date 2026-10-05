@@ -3852,3 +3852,13 @@ proof retained. No unchangednative rerun/defaultadoption/400kcapacity/24h pass.
 [Plainfailure](scale/compact-audit-metadata-2026-10-05/plain-400k-comparison/).
 Nextmeasure clientiterator timer/delivery overhead and explicitavailableVM CPU/GC
 configuration; original fullpopulation/auditlimits remainunchanged.
+
+### Explicit available-VM four-core capacity comparison prepared — 2026-10-05
+
+The full plain400k two-core comparison remains failed. A fresh verified-copy
+comparison is prepared with GOMAXPROCS4, GOGC200 and the same2GiB Go memory target.
+Exact400k/4.8M/400k population and each original20s deadline remain required.
+This jointly changes CPU/GC configuration; no isolated CPU-cause or capacity pass
+is inferred. Original stores remain closed; redundant disposable-copy reclamation
+is verified against pushed canonical archive parts.
+[Preparation](scale/compact-audit-metadata-2026-10-05/four-core-400k-preparation/).
