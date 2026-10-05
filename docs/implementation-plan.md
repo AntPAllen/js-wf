@@ -2061,3 +2061,12 @@ captured cutoff and audit deadline. Semantic errors stay fatal; leader reads
 still resolve gaps and short tails. The [focused regression/race/native proof](scale/bulk-read-resumption-2026-10-05/)
 qualifies this reader change only. Large native interrupted-tail/R5 and actual
 24-hour qualification remain open; the failed explicit-route soak is retained.
+
+
+The [native R5 100k retained-cohort interruption control](scale/bulk-read-resumption-2026-10-05/r5-100k/)
+now qualifies admitted client bulk-resumption at scale:1.2M entries, replacement
+cursor at129, no journal point reads, baseline18.777s/recovery19.372s under the
+original20s attempt. This is direct retained-cohort checker evidence; longer-soak
+scaling, natural fault causes, final-source full matrices and actual24h remain open.
+The [new failed Tier2 partition shard](scale/current-tier2-matrix-2026-10-04/partition-1-12-failed/)
+retains its missing-terminal-state observation and unconfirmed cause.

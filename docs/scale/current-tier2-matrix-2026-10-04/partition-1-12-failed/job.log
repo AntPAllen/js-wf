@@ -1,0 +1,541 @@
+﻿2026-10-04T23:46:22.0620276Z Current runner version: '2.337.0'
+2026-10-04T23:46:22.0648535Z ##[group]Runner Image Provisioner
+2026-10-04T23:46:22.0649774Z Hosted Compute Agent
+2026-10-04T23:46:22.0650441Z Version: 20260901.588
+2026-10-04T23:46:22.0651211Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-04T23:46:22.0652337Z Build Date: 2026-09-01T19:56:44Z
+2026-10-04T23:46:22.0653157Z Worker ID: {99c86b6c-ee23-47ab-bc96-826863ea7ee6}
+2026-10-04T23:46:22.0653961Z Azure Region: northcentralus
+2026-10-04T23:46:22.0654595Z ##[endgroup]
+2026-10-04T23:46:22.0656872Z ##[group]Operating System
+2026-10-04T23:46:22.0657552Z Ubuntu
+2026-10-04T23:46:22.0658071Z 24.04.5
+2026-10-04T23:46:22.0658731Z LTS
+2026-10-04T23:46:22.0659299Z ##[endgroup]
+2026-10-04T23:46:22.0659943Z ##[group]Runner Image
+2026-10-04T23:46:22.0660557Z Image: ubuntu-24.04
+2026-10-04T23:46:22.0661108Z Version: 20260927.320.1
+2026-10-04T23:46:22.0662810Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-04T23:46:22.0665004Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-04T23:46:22.0665995Z ##[endgroup]
+2026-10-04T23:46:22.0667192Z ##[group]GITHUB_TOKEN Permissions
+2026-10-04T23:46:22.0669740Z Contents: read
+2026-10-04T23:46:22.0670377Z Metadata: read
+2026-10-04T23:46:22.0671063Z Packages: read
+2026-10-04T23:46:22.0671648Z ##[endgroup]
+2026-10-04T23:46:22.0674216Z Secret source: Actions
+2026-10-04T23:46:22.0675257Z Cache mode: write
+2026-10-04T23:46:22.0676301Z Prepare workflow directory
+2026-10-04T23:46:22.1258469Z Prepare all required actions
+2026-10-04T23:46:22.1307906Z Getting action download info
+2026-10-04T23:46:22.3718810Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-04T23:46:22.4839492Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+2026-10-04T23:46:22.9061351Z Download action repository 'actions/upload-artifact@v7' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-10-04T23:46:23.0783319Z Complete job name: leader (partition, 1-12)
+2026-10-04T23:46:23.1556749Z ##[group]Run actions/checkout@v4
+2026-10-04T23:46:23.1558064Z with:
+2026-10-04T23:46:23.1558611Z   repository: AntPAllen/js-wf
+2026-10-04T23:46:23.1562949Z   token: ***
+2026-10-04T23:46:23.1563494Z   ssh-strict: true
+2026-10-04T23:46:23.1564021Z   ssh-user: git
+2026-10-04T23:46:23.1564553Z   persist-credentials: true
+2026-10-04T23:46:23.1565108Z   clean: true
+2026-10-04T23:46:23.1565634Z   sparse-checkout-cone-mode: true
+2026-10-04T23:46:23.1566231Z   fetch-depth: 1
+2026-10-04T23:46:23.1566748Z   fetch-tags: false
+2026-10-04T23:46:23.1567272Z   show-progress: true
+2026-10-04T23:46:23.1567810Z   lfs: false
+2026-10-04T23:46:23.1568317Z   submodules: false
+2026-10-04T23:46:23.1568838Z   set-safe-directory: true
+2026-10-04T23:46:23.1569435Z   allow-unsafe-pr-checkout: false
+2026-10-04T23:46:23.1570401Z env:
+2026-10-04T23:46:23.1570895Z   WF_MATRIX_CHAOS: 1
+2026-10-04T23:46:23.1571470Z   WF_MATRIX_OPERATION_TIMINGS: 1
+2026-10-04T23:46:23.1572242Z   WF_MATRIX_DURATION: 10m
+2026-10-04T23:46:23.1572834Z   FIRST_SEED: 1
+2026-10-04T23:46:23.1573329Z   LAST_SEED: 12
+2026-10-04T23:46:23.1573825Z   MATRIX_ROW: partition
+2026-10-04T23:46:23.1574365Z   MATRIX_TIMEOUT: 18m
+2026-10-04T23:46:23.1575052Z   MATRIX_TEST: TestMixedMatrixServerPartitionEveryThirtySeconds
+2026-10-04T23:46:23.1575826Z ##[endgroup]
+2026-10-04T23:46:23.2554182Z Syncing repository: AntPAllen/js-wf
+2026-10-04T23:46:23.2556841Z ##[group]Getting Git version info
+2026-10-04T23:46:23.2558046Z Working directory is '/home/runner/work/js-wf/js-wf'
+2026-10-04T23:46:23.2559779Z [command]/usr/bin/git version
+2026-10-04T23:46:23.2616413Z git version 2.55.0
+2026-10-04T23:46:23.2638758Z ##[endgroup]
+2026-10-04T23:46:23.2653660Z Temporarily overriding HOME='/home/runner/work/_temp/29fe484a-471d-4e25-8b84-e4aa4da1c96d' before making global git config changes
+2026-10-04T23:46:23.2656389Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-04T23:46:23.2659416Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+2026-10-04T23:46:23.2715709Z Deleting the contents of '/home/runner/work/js-wf/js-wf'
+2026-10-04T23:46:23.2720593Z ##[group]Initializing the repository
+2026-10-04T23:46:23.2726057Z [command]/usr/bin/git init /home/runner/work/js-wf/js-wf
+2026-10-04T23:46:23.2835916Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-04T23:46:23.2837285Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-04T23:46:23.2839238Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-04T23:46:23.2840787Z hint: call:
+2026-10-04T23:46:23.2842401Z hint:
+2026-10-04T23:46:23.2844015Z hint: 	git config --global init.defaultBranch <name>
+2026-10-04T23:46:23.2845885Z hint:
+2026-10-04T23:46:23.2847600Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-04T23:46:23.2849927Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-04T23:46:23.2852609Z hint:
+2026-10-04T23:46:23.2853995Z hint: 	git branch -m <name>
+2026-10-04T23:46:23.2855377Z hint:
+2026-10-04T23:46:23.2856979Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-04T23:46:23.2859396Z Initialized empty Git repository in /home/runner/work/js-wf/js-wf/.git/
+2026-10-04T23:46:23.2863599Z [command]/usr/bin/git remote add origin https://github.com/AntPAllen/js-wf
+2026-10-04T23:46:23.2907727Z ##[endgroup]
+2026-10-04T23:46:23.2909057Z ##[group]Disabling automatic garbage collection
+2026-10-04T23:46:23.2912897Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-04T23:46:23.2955545Z ##[endgroup]
+2026-10-04T23:46:23.2956913Z ##[group]Setting up auth
+2026-10-04T23:46:23.2958100Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-04T23:46:23.2988111Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-04T23:46:23.3377384Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-04T23:46:23.3424719Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-04T23:46:23.3652810Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-04T23:46:23.3690388Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-04T23:46:23.3913901Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-04T23:46:23.3955692Z ##[endgroup]
+2026-10-04T23:46:23.3957381Z ##[group]Fetching the repository
+2026-10-04T23:46:23.3967975Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +c4fed061bc614488d4f89b53b216b756490f7da0:refs/remotes/origin/main
+2026-10-04T23:46:50.3003805Z From https://github.com/AntPAllen/js-wf
+2026-10-04T23:46:50.3005556Z  * [new ref]         c4fed061bc614488d4f89b53b216b756490f7da0 -> origin/main
+2026-10-04T23:46:50.3009585Z ##[endgroup]
+2026-10-04T23:46:50.3010441Z ##[group]Determining the checkout info
+2026-10-04T23:46:50.3012685Z ##[endgroup]
+2026-10-04T23:46:50.3019271Z [command]/usr/bin/git sparse-checkout disable
+2026-10-04T23:46:50.3084967Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-04T23:46:50.3118636Z ##[group]Checking out the ref
+2026-10-04T23:46:50.3124123Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-04T23:46:51.3440668Z Updating files:  28% (2317/8223)
+2026-10-04T23:46:51.3684703Z Updating files:  29% (2385/8223)
+2026-10-04T23:46:51.6244923Z Updating files:  30% (2467/8223)
+2026-10-04T23:46:51.7118297Z Updating files:  31% (2550/8223)
+2026-10-04T23:46:51.8918480Z Updating files:  32% (2632/8223)
+2026-10-04T23:46:52.3790299Z Updating files:  33% (2714/8223)
+2026-10-04T23:46:52.7048285Z Updating files:  33% (2767/8223)
+2026-10-04T23:46:52.9058290Z Updating files:  34% (2796/8223)
+2026-10-04T23:46:53.3319911Z Updating files:  35% (2879/8223)
+2026-10-04T23:46:53.4341245Z Updating files:  35% (2946/8223)
+2026-10-04T23:46:53.5149011Z Updating files:  36% (2961/8223)
+2026-10-04T23:46:53.5226181Z Updating files:  37% (3043/8223)
+2026-10-04T23:46:53.5305819Z Updating files:  38% (3125/8223)
+2026-10-04T23:46:53.5924651Z Updating files:  39% (3207/8223)
+2026-10-04T23:46:53.5959567Z Updating files:  40% (3290/8223)
+2026-10-04T23:46:53.6006463Z Updating files:  41% (3372/8223)
+2026-10-04T23:46:53.6070901Z Updating files:  42% (3454/8223)
+2026-10-04T23:46:53.6136863Z Updating files:  43% (3536/8223)
+2026-10-04T23:46:53.6183933Z Updating files:  44% (3619/8223)
+2026-10-04T23:46:53.6233559Z Updating files:  45% (3701/8223)
+2026-10-04T23:46:53.6281527Z Updating files:  46% (3783/8223)
+2026-10-04T23:46:53.6342814Z Updating files:  47% (3865/8223)
+2026-10-04T23:46:53.6380407Z Updating files:  48% (3948/8223)
+2026-10-04T23:46:53.6432498Z Updating files:  49% (4030/8223)
+2026-10-04T23:46:53.6517022Z Updating files:  50% (4112/8223)
+2026-10-04T23:46:53.6557588Z Updating files:  51% (4194/8223)
+2026-10-04T23:46:53.6599737Z Updating files:  52% (4276/8223)
+2026-10-04T23:46:53.6657477Z Updating files:  53% (4359/8223)
+2026-10-04T23:46:53.6709821Z Updating files:  54% (4441/8223)
+2026-10-04T23:46:53.6775062Z Updating files:  55% (4523/8223)
+2026-10-04T23:46:53.6839861Z Updating files:  56% (4605/8223)
+2026-10-04T23:46:53.6871265Z Updating files:  57% (4688/8223)
+2026-10-04T23:46:53.6917545Z Updating files:  58% (4770/8223)
+2026-10-04T23:46:53.6957143Z Updating files:  59% (4852/8223)
+2026-10-04T23:46:53.7001527Z Updating files:  60% (4934/8223)
+2026-10-04T23:46:53.7048923Z Updating files:  61% (5017/8223)
+2026-10-04T23:46:53.7094559Z Updating files:  62% (5099/8223)
+2026-10-04T23:46:53.7140105Z Updating files:  63% (5181/8223)
+2026-10-04T23:46:53.7186455Z Updating files:  64% (5263/8223)
+2026-10-04T23:46:53.7235526Z Updating files:  65% (5345/8223)
+2026-10-04T23:46:53.7384363Z Updating files:  66% (5428/8223)
+2026-10-04T23:46:53.7431520Z Updating files:  67% (5510/8223)
+2026-10-04T23:46:53.7571673Z Updating files:  68% (5592/8223)
+2026-10-04T23:46:53.7700815Z Updating files:  69% (5674/8223)
+2026-10-04T23:46:53.7750920Z Updating files:  70% (5757/8223)
+2026-10-04T23:46:53.7868559Z Updating files:  71% (5839/8223)
+2026-10-04T23:46:53.7988566Z Updating files:  72% (5921/8223)
+2026-10-04T23:46:53.8023925Z Updating files:  73% (6003/8223)
+2026-10-04T23:46:53.8078136Z Updating files:  74% (6086/8223)
+2026-10-04T23:46:53.8111596Z Updating files:  75% (6168/8223)
+2026-10-04T23:46:53.8146143Z Updating files:  76% (6250/8223)
+2026-10-04T23:46:53.8180137Z Updating files:  77% (6332/8223)
+2026-10-04T23:46:53.8220514Z Updating files:  78% (6414/8223)
+2026-10-04T23:46:53.8262401Z Updating files:  79% (6497/8223)
+2026-10-04T23:46:53.8306752Z Updating files:  80% (6579/8223)
+2026-10-04T23:46:53.8351655Z Updating files:  81% (6661/8223)
+2026-10-04T23:46:53.8386865Z Updating files:  82% (6743/8223)
+2026-10-04T23:46:53.8452834Z Updating files:  83% (6826/8223)
+2026-10-04T23:46:53.8491709Z Updating files:  84% (6908/8223)
+2026-10-04T23:46:53.8711780Z Updating files:  85% (6990/8223)
+2026-10-04T23:46:53.9636421Z Updating files:  86% (7072/8223)
+2026-10-04T23:46:53.9719722Z Updating files:  87% (7155/8223)
+2026-10-04T23:46:53.9774995Z Updating files:  88% (7237/8223)
+2026-10-04T23:46:53.9830648Z Updating files:  89% (7319/8223)
+2026-10-04T23:46:53.9882327Z Updating files:  90% (7401/8223)
+2026-10-04T23:46:53.9935093Z Updating files:  91% (7483/8223)
+2026-10-04T23:46:54.0005688Z Updating files:  92% (7566/8223)
+2026-10-04T23:46:54.0079317Z Updating files:  93% (7648/8223)
+2026-10-04T23:46:54.0146621Z Updating files:  94% (7730/8223)
+2026-10-04T23:46:54.0207798Z Updating files:  95% (7812/8223)
+2026-10-04T23:46:54.0283878Z Updating files:  96% (7895/8223)
+2026-10-04T23:46:54.0367812Z Updating files:  97% (7977/8223)
+2026-10-04T23:46:54.0424894Z Updating files:  98% (8059/8223)
+2026-10-04T23:46:54.0469710Z Updating files:  99% (8141/8223)
+2026-10-04T23:46:54.0470289Z Updating files: 100% (8223/8223)
+2026-10-04T23:46:54.0470851Z Updating files: 100% (8223/8223), done.
+2026-10-04T23:46:54.2931587Z Switched to a new branch 'main'
+2026-10-04T23:46:54.2935021Z branch 'main' set up to track 'origin/main'.
+2026-10-04T23:46:54.3171440Z ##[endgroup]
+2026-10-04T23:46:54.3232847Z [command]/usr/bin/git log -1 --format=%H
+2026-10-04T23:46:54.3273196Z c4fed061bc614488d4f89b53b216b756490f7da0
+2026-10-04T23:46:54.4385208Z ##[group]Run actions/setup-go@v5
+2026-10-04T23:46:54.4385511Z with:
+2026-10-04T23:46:54.4385730Z   go-version-file: go.mod
+2026-10-04T23:46:54.4385984Z   check-latest: false
+2026-10-04T23:46:54.4388330Z   token: ***
+2026-10-04T23:46:54.4388547Z   cache: true
+2026-10-04T23:46:54.4388736Z env:
+2026-10-04T23:46:54.4388918Z   WF_MATRIX_CHAOS: 1
+2026-10-04T23:46:54.4389150Z   WF_MATRIX_OPERATION_TIMINGS: 1
+2026-10-04T23:46:54.4389436Z   WF_MATRIX_DURATION: 10m
+2026-10-04T23:46:54.4389658Z   FIRST_SEED: 1
+2026-10-04T23:46:54.4389854Z   LAST_SEED: 12
+2026-10-04T23:46:54.4390055Z   MATRIX_ROW: partition
+2026-10-04T23:46:54.4390279Z   MATRIX_TIMEOUT: 18m
+2026-10-04T23:46:54.4390604Z   MATRIX_TEST: TestMixedMatrixServerPartitionEveryThirtySeconds
+2026-10-04T23:46:54.4390979Z ##[endgroup]
+2026-10-04T23:46:54.5657033Z Setup go version spec 1.27.1
+2026-10-04T23:46:54.5667716Z Attempting to download 1.27.1...
+2026-10-04T23:46:54.5777087Z (node:2317) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-04T23:46:54.5777958Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-04T23:46:55.1166853Z matching 1.27.1...
+2026-10-04T23:46:55.1216175Z Acquiring 1.27.1 from https://github.com/actions/go-versions/releases/download/1.27.1-33583469715/go-1.27.1-linux-x64.tar.gz
+2026-10-04T23:46:55.5713524Z Extracting Go...
+2026-10-04T23:46:55.5862205Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/779aa9ce-6ab7-4a17-a682-2cf872de6503 -f /home/runner/work/_temp/312c4423-e115-4b12-9758-38c3a9252b13
+2026-10-04T23:46:57.3013680Z Successfully extracted go to /home/runner/work/_temp/779aa9ce-6ab7-4a17-a682-2cf872de6503
+2026-10-04T23:46:57.3014164Z Adding to the cache ...
+2026-10-04T23:47:03.9870694Z Successfully cached go to /opt/hostedtoolcache/go/1.27.1/x64
+2026-10-04T23:47:03.9873921Z Added go to the path
+2026-10-04T23:47:03.9876742Z Successfully set up Go version 1.27.1
+2026-10-04T23:47:04.0105500Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+2026-10-04T23:47:04.0146972Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+2026-10-04T23:47:04.0190699Z /home/runner/go/pkg/mod
+2026-10-04T23:47:04.0207284Z /home/runner/.cache/go-build
+2026-10-04T23:47:04.1279987Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+2026-10-04T23:47:04.1377661Z (node:2317) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-04T23:47:05.2354769Z Received 134217728 of 209563510 (64.0%), 128.1 MBs/sec
+2026-10-04T23:47:05.6368530Z Received 209563510 of 209563510 (100.0%), 142.8 MBs/sec
+2026-10-04T23:47:05.6369448Z Cache Size: ~200 MB (209563510 B)
+2026-10-04T23:47:05.6482590Z [command]/usr/bin/tar -xf /home/runner/work/_temp/fb18e6b0-e1c1-478e-a82f-d54a6a2cc6d5/cache.tzst -P -C /home/runner/work/js-wf/js-wf --use-compress-program unzstd
+2026-10-04T23:47:06.7408008Z Cache restored successfully
+2026-10-04T23:47:06.7512597Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+2026-10-04T23:47:06.7535548Z go version go1.27.1 linux/amd64
+2026-10-04T23:47:06.7535757Z 
+2026-10-04T23:47:06.7536175Z ##[group]go env
+2026-10-04T23:47:06.8462860Z AR='ar'
+2026-10-04T23:47:06.8463243Z CC='gcc'
+2026-10-04T23:47:06.8463616Z CGO_CFLAGS='-O2 -g'
+2026-10-04T23:47:06.8464033Z CGO_CPPFLAGS=''
+2026-10-04T23:47:06.8464443Z CGO_CXXFLAGS='-O2 -g'
+2026-10-04T23:47:06.8464860Z CGO_ENABLED='1'
+2026-10-04T23:47:06.8465228Z CGO_FFLAGS='-O2 -g'
+2026-10-04T23:47:06.8465597Z CGO_LDFLAGS='-O2 -g'
+2026-10-04T23:47:06.8465951Z CXX='g++'
+2026-10-04T23:47:06.8466256Z GCCGO='gccgo'
+2026-10-04T23:47:06.8466586Z GO111MODULE=''
+2026-10-04T23:47:06.8466916Z GOAMD64='v1'
+2026-10-04T23:47:06.8467244Z GOARCH='amd64'
+2026-10-04T23:47:06.8467857Z GOAUTH='netrc'
+2026-10-04T23:47:06.8468223Z GOBIN='/home/runner/go/bin'
+2026-10-04T23:47:06.8468780Z GOCACHE='/home/runner/.cache/go-build'
+2026-10-04T23:47:06.8469240Z GOCACHEPROG=''
+2026-10-04T23:47:06.8469574Z GODEBUG=''
+2026-10-04T23:47:06.8469945Z GOENV='/home/runner/.config/go/env'
+2026-10-04T23:47:06.8470367Z GOEXE=''
+2026-10-04T23:47:06.8470682Z GOEXPERIMENT=''
+2026-10-04T23:47:06.8471029Z GOFIPS140='off'
+2026-10-04T23:47:06.8471352Z GOFLAGS=''
+2026-10-04T23:47:06.8472723Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build1655604564=/tmp/go-build -gno-record-gcc-switches'
+2026-10-04T23:47:06.8473867Z GOHOSTARCH='amd64'
+2026-10-04T23:47:06.8474238Z GOHOSTOS='linux'
+2026-10-04T23:47:06.8474590Z GOINSECURE=''
+2026-10-04T23:47:06.8474991Z GOMOD='/home/runner/work/js-wf/js-wf/go.mod'
+2026-10-04T23:47:06.8475515Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-10-04T23:47:06.8475963Z GONOPROXY=''
+2026-10-04T23:47:06.8476317Z GONOSUMDB=''
+2026-10-04T23:47:06.8476647Z GOOS='linux'
+2026-10-04T23:47:06.8476987Z GOPACKAGESDRIVER=''
+2026-10-04T23:47:06.8477378Z GOPATH='/home/runner/go'
+2026-10-04T23:47:06.8477763Z GOPRIVATE=''
+2026-10-04T23:47:06.8478173Z GOPROXY='https://proxy.golang.org,direct'
+2026-10-04T23:47:06.8478721Z GOROOT='/opt/hostedtoolcache/go/1.27.1/x64'
+2026-10-04T23:47:06.8479223Z GOSUMDB='sum.golang.org'
+2026-10-04T23:47:06.8479625Z GOTELEMETRY='local'
+2026-10-04T23:47:06.8480068Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-10-04T23:47:06.8480560Z GOTMPDIR=''
+2026-10-04T23:47:06.8480892Z GOTOOLCHAIN='auto'
+2026-10-04T23:47:06.8481488Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.1/x64/pkg/tool/linux_amd64'
+2026-10-04T23:47:06.8482441Z GOVCS=''
+2026-10-04T23:47:06.8482788Z GOVERSION='go1.27.1'
+2026-10-04T23:47:06.8483117Z GOWORK=''
+2026-10-04T23:47:06.8483434Z PKG_CONFIG='pkg-config'
+2026-10-04T23:47:06.8483667Z 
+2026-10-04T23:47:06.8484081Z ##[endgroup]
+2026-10-04T23:47:06.8683764Z ##[group]Run set -o pipefail
+2026-10-04T23:47:06.8684131Z [36;1mset -o pipefail[0m
+2026-10-04T23:47:06.8684470Z [36;1mfor seed in $(seq "$FIRST_SEED" "$LAST_SEED"); do[0m
+2026-10-04T23:47:06.8684956Z [36;1m  echo "Sustained matrix row=$MATRIX_ROW seed=$seed duration=$WF_MATRIX_DURATION"[0m
+2026-10-04T23:47:06.8685535Z [36;1m  result_log="integration/matrix-${MATRIX_ROW}-${seed}-test.jsonl"[0m
+2026-10-04T23:47:06.8686534Z [36;1m  FAULT_SEED="$seed" MATRIX_ARTIFACT_PREFIX="matrix-${MATRIX_ROW}-${seed}" go test -json ./integration -run "^${MATRIX_TEST}$" -count=1 -timeout="${MATRIX_TIMEOUT}" | tee "$result_log" | python3 -u scripts/render-go-test.py[0m
+2026-10-04T23:47:06.8687619Z [36;1m  python3 scripts/check-matrix-result.py "$result_log" "$MATRIX_TEST" "$WF_MATRIX_DURATION"[0m
+2026-10-04T23:47:06.8688088Z [36;1mdone[0m
+2026-10-04T23:47:06.8970178Z shell: /usr/bin/bash -e {0}
+2026-10-04T23:47:06.8970508Z env:
+2026-10-04T23:47:06.8970743Z   WF_MATRIX_CHAOS: 1
+2026-10-04T23:47:06.8971077Z   WF_MATRIX_OPERATION_TIMINGS: 1
+2026-10-04T23:47:06.8971393Z   WF_MATRIX_DURATION: 10m
+2026-10-04T23:47:06.8971674Z   FIRST_SEED: 1
+2026-10-04T23:47:06.8972179Z   LAST_SEED: 12
+2026-10-04T23:47:06.8972437Z   MATRIX_ROW: partition
+2026-10-04T23:47:06.8972711Z   MATRIX_TIMEOUT: 18m
+2026-10-04T23:47:06.8973347Z   MATRIX_TEST: TestMixedMatrixServerPartitionEveryThirtySeconds
+2026-10-04T23:47:06.8973863Z ##[endgroup]
+2026-10-04T23:47:06.9098582Z Sustained matrix row=partition seed=1 duration=10m
+2026-10-04T23:47:06.9928449Z go: downloading google.golang.org/protobuf v1.36.6
+2026-10-04T23:47:25.3270715Z === RUN   TestMixedMatrixServerPartitionEveryThirtySeconds
+2026-10-04T23:47:34.4099236Z     mixed_matrix_leader_test.go:150: mixed batch=1 elapsed=4.626762155s
+2026-10-04T23:47:38.4290566Z     mixed_matrix_leader_test.go:150: mixed batch=2 elapsed=8.645790173s
+2026-10-04T23:47:42.4428000Z     mixed_matrix_leader_test.go:150: mixed batch=3 elapsed=12.659691923s
+2026-10-04T23:47:46.4553219Z     mixed_matrix_leader_test.go:150: mixed batch=4 elapsed=16.671925789s
+2026-10-04T23:47:50.4696276Z     mixed_matrix_leader_test.go:150: mixed batch=5 elapsed=20.686358281s
+2026-10-04T23:47:54.4840260Z     mixed_matrix_leader_test.go:150: mixed batch=6 elapsed=24.700809548s
+2026-10-04T23:47:58.4959680Z     mixed_matrix_leader_test.go:150: mixed batch=7 elapsed=28.712786298s
+2026-10-04T23:48:09.4223245Z     mixed_matrix_leader_test.go:150: mixed batch=8 elapsed=39.631648338s
+2026-10-04T23:48:16.2160090Z     mixed_matrix_leader_test.go:623: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=1 consumer= pending=0 ack_pending=0 scheduled=30s killed=30.00103726s healed=46.43286917s
+2026-10-04T23:48:27.0501789Z     mixed_matrix_leader_test.go:150: mixed batch=9 elapsed=57.266955709s
+2026-10-04T23:48:32.2220480Z     mixed_matrix_leader_test.go:150: mixed batch=10 elapsed=1m2.438690101s
+2026-10-04T23:48:32.2226277Z     mixed_matrix_leader_test.go:647: checkpoint audit batch=10 invocation_cutoff=280 started elapsed=1m2.438818051s
+2026-10-04T23:48:32.6734780Z     mixed_matrix_leader_test.go:659: checkpoint audit batch=10 complete report={Invocations:280 Journals:280 Entries:3094 Terminal:280} elapsed=1m2.889611942s
+2026-10-04T23:48:36.1394235Z     mixed_matrix_leader_test.go:150: mixed batch=11 elapsed=1m6.355487518s
+2026-10-04T23:48:49.3482174Z     mixed_matrix_leader_test.go:623: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=2 consumer= pending=0 ack_pending=0 scheduled=1m0s killed=1m0.00048838s healed=1m19.565043054s
+2026-10-04T23:48:52.7616716Z     mixed_matrix_leader_test.go:150: mixed batch=12 elapsed=1m22.978531933s
+2026-10-04T23:48:57.9434696Z     mixed_matrix_leader_test.go:150: mixed batch=13 elapsed=1m28.160264766s
+2026-10-04T23:49:03.2533104Z     mixed_matrix_leader_test.go:150: mixed batch=14 elapsed=1m33.470087614s
+2026-10-04T23:49:08.6656893Z     mixed_matrix_leader_test.go:150: mixed batch=15 elapsed=1m38.88242109s
+2026-10-04T23:49:18.0323694Z     mixed_matrix_leader_test.go:623: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=3 consumer= pending=0 ack_pending=0 scheduled=1m30s killed=1m30.000425348s healed=1m48.249148219s
+2026-10-04T23:49:25.4025224Z     mixed_matrix_leader_test.go:150: mixed batch=16 elapsed=1m55.619266914s
+2026-10-04T23:49:30.7150378Z     mixed_matrix_leader_test.go:150: mixed batch=17 elapsed=2m0.930925812s
+2026-10-04T23:49:36.0243472Z     mixed_matrix_leader_test.go:150: mixed batch=18 elapsed=2m6.240862804s
+2026-10-04T23:49:47.2977727Z     mixed_matrix_leader_test.go:623: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=4 consumer= pending=0 ack_pending=0 scheduled=2m0s killed=2m0.000195563s healed=2m17.514670919s
+2026-10-04T23:49:54.5484277Z     mixed_matrix_leader_test.go:150: mixed batch=19 elapsed=2m24.764816648s
+2026-10-04T23:49:58.4576896Z     mixed_matrix_leader_test.go:150: mixed batch=20 elapsed=2m28.674512779s
+2026-10-04T23:49:58.4583129Z     mixed_matrix_leader_test.go:647: checkpoint audit batch=20 invocation_cutoff=560 started elapsed=2m28.674643644s
+2026-10-04T23:49:59.2484487Z     mixed_matrix_leader_test.go:659: checkpoint audit batch=20 complete report={Invocations:560 Journals:560 Entries:6179 Terminal:560} elapsed=2m29.465333286s
+2026-10-04T23:50:02.4779143Z     mixed_matrix_leader_test.go:150: mixed batch=21 elapsed=2m32.692225242s
+2026-10-04T23:50:06.5069913Z     mixed_matrix_leader_test.go:150: mixed batch=22 elapsed=2m36.721605165s
+2026-10-04T23:50:19.7848964Z     mixed_matrix_leader_test.go:623: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=5 consumer= pending=0 ack_pending=0 scheduled=2m30s killed=2m30.000078351s healed=2m50.00162573s
+2026-10-04T23:50:22.8272316Z     mixed_matrix_leader_test.go:150: mixed batch=23 elapsed=2m53.044093136s
+2026-10-04T23:50:28.0156890Z     mixed_matrix_leader_test.go:150: mixed batch=24 elapsed=2m58.232546942s
+2026-10-04T23:50:33.3260519Z     mixed_matrix_leader_test.go:150: mixed batch=25 elapsed=3m3.542907896s
+2026-10-04T23:50:38.8387270Z     mixed_matrix_leader_test.go:150: mixed batch=26 elapsed=3m9.055044253s
+2026-10-04T23:50:48.0707466Z     mixed_matrix_leader_test.go:623: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=6 consumer= pending=0 ack_pending=0 scheduled=3m0s killed=3m0.001080301s healed=3m18.287594263s
+2026-10-04T23:50:56.3667520Z     mixed_matrix_leader_test.go:150: mixed batch=27 elapsed=3m26.583664619s
+2026-10-04T23:51:01.6776624Z     mixed_matrix_leader_test.go:150: mixed batch=28 elapsed=3m31.89443717s
+2026-10-04T23:51:07.0957629Z     mixed_matrix_leader_test.go:150: mixed batch=29 elapsed=3m37.310016469s
+2026-10-04T23:51:18.7295616Z     mixed_matrix_leader_test.go:623: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=7 consumer= pending=0 ack_pending=0 scheduled=3m30s killed=3m30.000126705s healed=3m48.946174073s
+2026-10-04T23:51:23.8125320Z     mixed_matrix_leader_test.go:150: mixed batch=30 elapsed=3m54.029229875s
+2026-10-04T23:51:23.8131476Z     mixed_matrix_leader_test.go:647: checkpoint audit batch=30 invocation_cutoff=840 started elapsed=3m54.029399813s
+2026-10-04T23:51:24.9724539Z     mixed_matrix_leader_test.go:659: checkpoint audit batch=30 complete report={Invocations:840 Journals:840 Entries:9262 Terminal:840} elapsed=3m55.188868689s
+2026-10-04T23:51:29.2281050Z     mixed_matrix_leader_test.go:150: mixed batch=31 elapsed=3m59.4450242s
+2026-10-04T23:51:34.5393312Z     mixed_matrix_leader_test.go:150: mixed batch=32 elapsed=4m4.756135961s
+2026-10-04T23:51:49.6445260Z     mixed_matrix_leader_test.go:623: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=8 consumer= pending=0 ack_pending=0 scheduled=4m0s killed=4m0.000829106s healed=4m19.861353371s
+2026-10-04T23:51:49.8342252Z     mixed_matrix_leader_test.go:150: mixed batch=33 elapsed=4m20.050973474s
+2026-10-04T23:51:55.4456231Z     mixed_matrix_leader_test.go:150: mixed batch=34 elapsed=4m25.662322086s
+2026-10-04T23:52:00.7577844Z     mixed_matrix_leader_test.go:150: mixed batch=35 elapsed=4m30.974256104s
+2026-10-04T23:52:06.1688043Z     mixed_matrix_leader_test.go:150: mixed batch=36 elapsed=4m36.385049783s
+2026-10-04T23:52:19.0178504Z     mixed_matrix_leader_test.go:623: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=9 consumer= pending=0 ack_pending=0 scheduled=4m30s killed=4m30.000966827s healed=4m49.23459492s
+2026-10-04T23:52:22.6910035Z     mixed_matrix_leader_test.go:150: mixed batch=37 elapsed=4m52.907877574s
+2026-10-04T23:52:28.0021126Z     mixed_matrix_leader_test.go:150: mixed batch=38 elapsed=4m58.21892892s
+2026-10-04T23:52:33.3146581Z     mixed_matrix_leader_test.go:150: mixed batch=39 elapsed=5m3.530599042s
+2026-10-04T23:52:38.7379003Z     mixed_matrix_leader_test.go:150: mixed batch=40 elapsed=5m8.953162801s
+2026-10-04T23:52:38.7383150Z     mixed_matrix_leader_test.go:647: checkpoint audit batch=40 invocation_cutoff=1120 started elapsed=5m8.953290992s
+2026-10-04T23:52:49.5767597Z     mixed_matrix_leader_test.go:623: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=10 consumer= pending=0 ack_pending=0 scheduled=5m0s killed=5m0.000319446s healed=5m19.792934096s
+2026-10-04T23:52:49.8486382Z     mixed_matrix_leader_test.go:659: checkpoint audit batch=40 complete report={Invocations:1120 Journals:1120 Entries:12344 Terminal:1120} elapsed=5m20.065351884s
+2026-10-04T23:52:57.4677399Z     mixed_matrix_leader_test.go:150: mixed batch=41 elapsed=5m27.6846599s
+2026-10-04T23:53:02.7804842Z     mixed_matrix_leader_test.go:150: mixed batch=42 elapsed=5m32.997241638s
+2026-10-04T23:53:06.6977493Z     mixed_matrix_leader_test.go:150: mixed batch=43 elapsed=5m36.914607801s
+2026-10-04T23:53:18.5843362Z     mixed_matrix_leader_test.go:623: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=11 consumer= pending=0 ack_pending=0 scheduled=5m30s killed=5m30.000708711s healed=5m48.801148348s
+2026-10-04T23:53:23.3308292Z     mixed_matrix_leader_test.go:150: mixed batch=44 elapsed=5m53.547433722s
+2026-10-04T23:53:28.6425952Z     mixed_matrix_leader_test.go:150: mixed batch=45 elapsed=5m58.859235951s
+2026-10-04T23:53:33.9524993Z     mixed_matrix_leader_test.go:150: mixed batch=46 elapsed=6m4.169008338s
+2026-10-04T23:53:39.4733842Z     mixed_matrix_leader_test.go:150: mixed batch=47 elapsed=6m9.689194002s
+2026-10-04T23:53:48.6696598Z     mixed_matrix_leader_test.go:623: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=12 consumer= pending=0 ack_pending=0 scheduled=6m0s killed=6m0.000994683s healed=6m18.886489123s
+2026-10-04T23:53:57.0036041Z     mixed_matrix_leader_test.go:150: mixed batch=48 elapsed=6m27.220447951s
+2026-10-04T23:54:02.2161675Z     mixed_matrix_leader_test.go:150: mixed batch=49 elapsed=6m32.43215833s
+2026-10-04T23:54:06.1334173Z     mixed_matrix_leader_test.go:150: mixed batch=50 elapsed=6m36.349995727s
+2026-10-04T23:54:06.1339284Z     mixed_matrix_leader_test.go:647: checkpoint audit batch=50 invocation_cutoff=1400 started elapsed=6m36.350206862s
+2026-10-04T23:54:09.8891454Z     mixed_matrix_leader_test.go:150: intermediate retained audit batch=50 cutoff=1400 report={Invocations:1400 Journals:1130 Entries:8745 Terminal:1129} err=retained audit: wf.jrn.matrixshort.seed-1-batch-49-5: terminal state missing: nats: key not found
+2026-10-04T23:54:09.9101513Z     mixed_matrix_leader_test.go:604: server_partition fault failed: context canceled
+2026-10-04T23:54:10.8780487Z     mixed_matrix_leader_test.go:249: server 0 log tail:
+2026-10-04T23:54:10.8781970Z         cted another leader with higher term, will stepdown
+2026-10-04T23:54:10.8783383Z         [4850] 2026/10/04 23:54:10.248773 [INF] 127.0.0.1:56232 - rid:984611 - Route connection created
+2026-10-04T23:54:10.8785221Z         [4850] 2026/10/04 23:54:10.249119 [INF] 127.0.0.1:56232 - rid:984611 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8787158Z         [4850] 2026/10/04 23:54:10.249697 [WRN] RAFT [0m6vARoZ - C-R3F-7Zqa6Xqr] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8788568Z         [4850] 2026/10/04 23:54:10.253242 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_04' has NO quorum, stalled.
+2026-10-04T23:54:10.8789696Z         [4850] 2026/10/04 23:54:10.253747 [INF] 127.0.0.1:56244 - rid:984612 - Route connection created
+2026-10-04T23:54:10.8790791Z         [4850] 2026/10/04 23:54:10.254057 [INF] 127.0.0.1:56244 - rid:984612 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8792245Z         [4850] 2026/10/04 23:54:10.313896 [WRN] RAFT [0m6vARoZ - C-R3F-pAtha53q] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8793608Z         [4850] 2026/10/04 23:54:10.334887 [WRN] RAFT [0m6vARoZ - C-R3F-kCSQ6xmg] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8794891Z         [4850] 2026/10/04 23:54:10.360076 [WRN] RAFT [0m6vARoZ - C-R3F-A0Onnc7L] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8796155Z         [4850] 2026/10/04 23:54:10.370978 [WRN] RAFT [0m6vARoZ - C-R3F-v3m3VGVz] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8797760Z         [4850] 2026/10/04 23:54:10.375477 [WRN] RAFT [0m6vARoZ - C-R3F-nTmBnUCG] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8799024Z         [4850] 2026/10/04 23:54:10.390340 [WRN] RAFT [0m6vARoZ - C-R3F-EhGNUMYy] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8800352Z         [4850] 2026/10/04 23:54:10.393120 [WRN] RAFT [0m6vARoZ - C-R3F-q07yU6Az] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8801583Z         [4850] 2026/10/04 23:54:10.404021 [WRN] RAFT [0m6vARoZ - C-R3F-mnQKoXkt] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8803532Z         [4850] 2026/10/04 23:54:10.432008 [WRN] RAFT [0m6vARoZ - S-R3F-f9BlCM2r] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8805557Z         [4850] 2026/10/04 23:54:10.433894 [WRN] RAFT [0m6vARoZ - C-R3F-SkKWevWg] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8807620Z         [4850] 2026/10/04 23:54:10.454877 [WRN] RAFT [0m6vARoZ - C-R3F-im3Zzp86] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8809694Z         [4850] 2026/10/04 23:54:10.461526 [WRN] RAFT [0m6vARoZ - C-R3F-lGXlVBsR] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8811489Z         [4850] 2026/10/04 23:54:10.472390 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_04'
+2026-10-04T23:54:10.8813226Z         [4850] 2026/10/04 23:54:10.482909 [INF] 127.0.0.1:56254 - rid:984613 - Route connection created
+2026-10-04T23:54:10.8815081Z         [4850] 2026/10/04 23:54:10.483303 [INF] 127.0.0.1:56254 - rid:984613 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8824329Z         [4850] 2026/10/04 23:54:10.535620 [WRN] RAFT [0m6vARoZ - C-R3F-eJqEHQVP] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8826272Z         [4850] 2026/10/04 23:54:10.536335 [WRN] RAFT [0m6vARoZ - C-R3F-VpRDnnYu] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8828090Z         [4850] 2026/10/04 23:54:10.536342 [WRN] RAFT [0m6vARoZ - C-R3F-1HoTcTPI] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8829946Z         [4850] 2026/10/04 23:54:10.562595 [WRN] RAFT [0m6vARoZ - C-R3F-jaRJd3GZ] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8831705Z         [4850] 2026/10/04 23:54:10.575141 [WRN] RAFT [0m6vARoZ - C-R3F-JjYX4t1w] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8837892Z         [4850] 2026/10/04 23:54:10.607000 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_24'
+2026-10-04T23:54:10.8840618Z         [4850] 2026/10/04 23:54:10.618480 [WRN] RAFT [0m6vARoZ - C-R3F-0ZZRILD1] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8868298Z         [4850] 2026/10/04 23:54:10.641527 [WRN] RAFT [0m6vARoZ - C-R3F-wi3kgiMv] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8870348Z         [4850] 2026/10/04 23:54:10.659360 [WRN] RAFT [0m6vARoZ - C-R3F-QNZPIutZ] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8872567Z         [4850] 2026/10/04 23:54:10.697664 [WRN] RAFT [0m6vARoZ - C-R3F-wNHWrmua] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8874650Z         [4850] 2026/10/04 23:54:10.708265 [WRN] RAFT [0m6vARoZ - C-R3F-OIcli55b] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8876758Z         [4850] 2026/10/04 23:54:10.727324 [WRN] RAFT [0m6vARoZ - C-R3F-bbmWUM9g] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8877974Z     mixed_matrix_leader_test.go:249: server 1 log tail:
+2026-10-04T23:54:10.8879026Z         3:54:09.956566 [INF] 127.0.0.1:43005 - rid:64941 - Router connection closed: Duplicate Route - Remote: wf-process-2
+2026-10-04T23:54:10.8880886Z         [4851] 2026/10/04 23:54:09.957935 [INF] 127.0.0.1:43005 - rid:64942 - Router connection closed: Duplicate Route - Remote: wf-process-2
+2026-10-04T23:54:10.8885967Z         [4851] 2026/10/04 23:54:09.958638 [INF] 127.0.0.1:43005 - rid:64943 - Router connection closed: Duplicate Route - Remote: wf-process-2
+2026-10-04T23:54:10.8888116Z         [4851] 2026/10/04 23:54:09.966628 [INF] 127.0.0.1:43005 - rid:64945 - Router connection closed: Duplicate Route - Remote: wf-process-2
+2026-10-04T23:54:10.8890190Z         [4851] 2026/10/04 23:54:10.031509 [WRN] RAFT [St9I6EVH - S-R3F-q1sV4quI] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8892760Z         [4851] 2026/10/04 23:54:10.058895 [WRN] RAFT [St9I6EVH - C-R3F-58Y47Tob] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8895209Z         [4851] 2026/10/04 23:54:10.128611 [WRN] RAFT [St9I6EVH - C-R3F-tRqt5F01] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8897848Z         [4851] 2026/10/04 23:54:10.139720 [WRN] RAFT [St9I6EVH - C-R3F-TwuYiMtP] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8900577Z         [4851] 2026/10/04 23:54:10.145719 [WRN] RAFT [St9I6EVH - C-R3F-WAP0LaB1] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8903261Z         [4851] 2026/10/04 23:54:10.176270 [WRN] RAFT [St9I6EVH - C-R3F-ASCDuDfI] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8905843Z         [4851] 2026/10/04 23:54:10.214080 [WRN] RAFT [St9I6EVH - C-R3F-Z2CsTo2i] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8908802Z         [4851] 2026/10/04 23:54:10.264867 [WRN] RAFT [St9I6EVH - C-R3F-SYx7416f] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8911434Z         [4851] 2026/10/04 23:54:10.335144 [WRN] RAFT [St9I6EVH - S-R3F-r23QOr6w] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8914149Z         [4851] 2026/10/04 23:54:10.352471 [WRN] RAFT [St9I6EVH - C-R3F-nmirVX0h] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8916451Z         [4851] 2026/10/04 23:54:10.417778 [WRN] RAFT [St9I6EVH - C-R3F-Xwvk82k1] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8918258Z         [4851] 2026/10/04 23:54:10.420214 [WRN] RAFT [St9I6EVH - C-R3F-ukLgtSzZ] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8922691Z         [4851] 2026/10/04 23:54:10.433522 [WRN] RAFT [St9I6EVH - C-R3F-HLVBgG8p] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8927331Z         [4851] 2026/10/04 23:54:10.461184 [WRN] RAFT [St9I6EVH - C-R3F-GEWr4L2v] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8930415Z         [4851] 2026/10/04 23:54:10.461441 [WRN] RAFT [St9I6EVH - C-R3F-HA4fhP2k] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8933110Z         [4851] 2026/10/04 23:54:10.469678 [WRN] RAFT [St9I6EVH - C-R3F-aEAYJzR8] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8936508Z         [4851] 2026/10/04 23:54:10.510248 [WRN] RAFT [St9I6EVH - C-R3F-bvcUI648] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8939205Z         [4851] 2026/10/04 23:54:10.525682 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_46'
+2026-10-04T23:54:10.8941380Z         [4851] 2026/10/04 23:54:10.535023 [WRN] RAFT [St9I6EVH - C-R3F-Le4UpARH] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8943775Z         [4851] 2026/10/04 23:54:10.537195 [WRN] RAFT [St9I6EVH - C-R3F-AROpFmbG] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8946366Z         [4851] 2026/10/04 23:54:10.537212 [WRN] RAFT [St9I6EVH - C-R3F-S4pJE2q4] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8949289Z         [4851] 2026/10/04 23:54:10.579769 [WRN] RAFT [St9I6EVH - C-R3F-B0NwyOWA] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8951687Z         [4851] 2026/10/04 23:54:10.582327 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_54' has NO quorum, stalled.
+2026-10-04T23:54:10.8954083Z         [4851] 2026/10/04 23:54:10.617269 [WRN] RAFT [St9I6EVH - S-R3F-C04r82RK] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8957042Z         [4851] 2026/10/04 23:54:10.626498 [WRN] RAFT [St9I6EVH - C-R3F-6zoaFM0e] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8961057Z         [4851] 2026/10/04 23:54:10.626504 [WRN] RAFT [St9I6EVH - C-R3F-Xbugf3Gb] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8965321Z         [4851] 2026/10/04 23:54:10.738533 [WRN] RAFT [St9I6EVH - C-R3F-8X7tk4WV] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8968443Z         [4851] 2026/10/04 23:54:10.830034 [WRN] RAFT [St9I6EVH - S-R3F-TcX2aumz] Detected another leader with higher term, will stepdown
+2026-10-04T23:54:10.8969625Z     mixed_matrix_leader_test.go:249: server 2 log tail:
+2026-10-04T23:54:10.8970712Z         er connection closed: Client Closed
+2026-10-04T23:54:10.8971791Z         [4852] 2026/10/04 23:54:09.967057 [INF] 127.0.0.1:35596 - rid:21435 - Route connection created
+2026-10-04T23:54:10.8973496Z         [4852] 2026/10/04 23:54:09.967059 [INF] 127.0.0.1:35540 - rid:21429 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8974727Z         [4852] 2026/10/04 23:54:09.967341 [INF] 127.0.0.1:35586 - rid:21434 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8975748Z         [4852] 2026/10/04 23:54:09.967448 [INF] 127.0.0.1:35610 - rid:21436 - Route connection created
+2026-10-04T23:54:10.8976876Z         [4852] 2026/10/04 23:54:09.967576 [INF] 127.0.0.1:35620 - rid:21437 - Route connection created
+2026-10-04T23:54:10.8977905Z         [4852] 2026/10/04 23:54:09.967724 [INF] 127.0.0.1:35626 - rid:21438 - Route connection created
+2026-10-04T23:54:10.8979089Z         [4852] 2026/10/04 23:54:09.967755 [INF] 127.0.0.1:35596 - rid:21435 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8980172Z         [4852] 2026/10/04 23:54:09.967974 [INF] 127.0.0.1:35634 - rid:21439 - Route connection created
+2026-10-04T23:54:10.8981043Z         [4852] 2026/10/04 23:54:09.968030 [INF] 127.0.0.1:35630 - rid:21440 - Route connection created
+2026-10-04T23:54:10.8982681Z         [4852] 2026/10/04 23:54:09.968037 [INF] 127.0.0.1:35610 - rid:21436 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8984005Z         [4852] 2026/10/04 23:54:09.968083 [INF] 127.0.0.1:35620 - rid:21437 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8985156Z         [4852] 2026/10/04 23:54:09.968092 [INF] 127.0.0.1:35626 - rid:21438 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8987033Z         [4852] 2026/10/04 23:54:09.968415 [INF] 127.0.0.1:35646 - rid:21441 - Route connection created
+2026-10-04T23:54:10.8988344Z         [4852] 2026/10/04 23:54:09.968468 [INF] 127.0.0.1:35630 - rid:21440 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8989600Z         [4852] 2026/10/04 23:54:09.968564 [INF] 127.0.0.1:35652 - rid:21442 - Route connection created
+2026-10-04T23:54:10.8991264Z         [4852] 2026/10/04 23:54:09.968780 [INF] 127.0.0.1:35634 - rid:21439 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8993138Z         [4852] 2026/10/04 23:54:09.968790 [INF] 127.0.0.1:35646 - rid:21441 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8994610Z         [4852] 2026/10/04 23:54:09.968884 [INF] 127.0.0.1:35664 - rid:21443 - Route connection created
+2026-10-04T23:54:10.8996313Z         [4852] 2026/10/04 23:54:09.968960 [INF] 127.0.0.1:35652 - rid:21442 - Router connection closed: Client Closed
+2026-10-04T23:54:10.8997944Z         [4852] 2026/10/04 23:54:09.968991 [INF] 127.0.0.1:35672 - rid:21444 - Route connection created
+2026-10-04T23:54:10.8998817Z         [4852] 2026/10/04 23:54:09.969139 [INF] 127.0.0.1:35688 - rid:21445 - Route connection created
+2026-10-04T23:54:10.8999815Z         [4852] 2026/10/04 23:54:09.969207 [INF] 127.0.0.1:35664 - rid:21443 - Router connection closed: Client Closed
+2026-10-04T23:54:10.9001652Z         [4852] 2026/10/04 23:54:09.969306 [INF] 127.0.0.1:35696 - rid:21446 - Route connection created
+2026-10-04T23:54:10.9003453Z         [4852] 2026/10/04 23:54:09.969525 [INF] 127.0.0.1:35688 - rid:21445 - Router connection closed: Client Closed
+2026-10-04T23:54:10.9004698Z         [4852] 2026/10/04 23:54:09.969526 [INF] 127.0.0.1:35672 - rid:21444 - Router connection closed: Client Closed
+2026-10-04T23:54:10.9005886Z         [4852] 2026/10/04 23:54:09.969575 [INF] 127.0.0.1:35696 - rid:21446 - Router connection closed: Client Closed
+2026-10-04T23:54:10.9007178Z         [4852] 2026/10/04 23:54:10.064903 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_46' has NO quorum, stalled.
+2026-10-04T23:54:10.9008451Z         [4852] 2026/10/04 23:54:10.105205 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_24' has NO quorum, stalled.
+2026-10-04T23:54:10.9010004Z         [4852] 2026/10/04 23:54:10.225851 [INF] 127.0.0.1:46575 - rid:21447 - Route connection created
+2026-10-04T23:54:10.9012164Z         [4852] 2026/10/04 23:54:10.226173 [INF] 127.0.0.1:46575 - rid:21447 - Router connection closed: Duplicate Route - Remote: wf-process-0
+2026-10-04T23:54:10.9013964Z         [4852] 2026/10/04 23:54:10.248622 [INF] 127.0.0.1:46575 - rid:21448 - Route connection created
+2026-10-04T23:54:10.9015725Z         [4852] 2026/10/04 23:54:10.248918 [INF] 127.0.0.1:46575 - rid:21448 - Router connection closed: Duplicate Route - Remote: wf-process-0
+2026-10-04T23:54:10.9017169Z         [4852] 2026/10/04 23:54:10.251720 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_04' has NO quorum, stalled.
+2026-10-04T23:54:10.9018419Z         [4852] 2026/10/04 23:54:10.253666 [INF] 127.0.0.1:46575 - rid:21449 - Route connection created
+2026-10-04T23:54:10.9019389Z         [4852] 2026/10/04 23:54:10.253900 [INF] 127.0.0.1:46575 - rid:21449 - Router connection closed: Duplicate Route - Remote: wf-process-0
+2026-10-04T23:54:10.9020928Z         [4852] 2026/10/04 23:54:10.482718 [INF] 127.0.0.1:46575 - rid:21450 - Route connection created
+2026-10-04T23:54:10.9022420Z         [4852] 2026/10/04 23:54:10.483089 [INF] 127.0.0.1:46575 - rid:21450 - Router connection closed: Duplicate Route - Remote: wf-process-0
+2026-10-04T23:54:10.9024424Z         [4852] 2026/10/04 23:54:10.580717 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_54' has NO quorum, stalled.
+2026-10-04T23:54:11.2269331Z --- FAIL: TestMixedMatrixServerPartitionEveryThirtySeconds (405.90s)
+2026-10-04T23:54:11.2270045Z FAIL
+2026-10-04T23:54:11.2318589Z FAIL	js-wf/integration	405.909s
+2026-10-04T23:54:11.3440558Z ##[error]Process completed with exit code 1.
+2026-10-04T23:54:11.3540927Z ##[group]Run actions/upload-artifact@v7
+2026-10-04T23:54:11.3541236Z with:
+2026-10-04T23:54:11.3541452Z   name: matrix-partition-1-12-10m
+2026-10-04T23:54:11.3541773Z   path: integration/matrix-partition-*-*
+2026-10-04T23:54:11.3542456Z   if-no-files-found: error
+2026-10-04T23:54:11.3542703Z   compression-level: 6
+2026-10-04T23:54:11.3542921Z   overwrite: false
+2026-10-04T23:54:11.3543159Z   include-hidden-files: false
+2026-10-04T23:54:11.3543397Z   archive: true
+2026-10-04T23:54:11.3543588Z env:
+2026-10-04T23:54:11.3543770Z   WF_MATRIX_CHAOS: 1
+2026-10-04T23:54:11.3543997Z   WF_MATRIX_OPERATION_TIMINGS: 1
+2026-10-04T23:54:11.3544248Z   WF_MATRIX_DURATION: 10m
+2026-10-04T23:54:11.3544468Z   FIRST_SEED: 1
+2026-10-04T23:54:11.3544660Z   LAST_SEED: 12
+2026-10-04T23:54:11.3544858Z   MATRIX_ROW: partition
+2026-10-04T23:54:11.3545085Z   MATRIX_TIMEOUT: 18m
+2026-10-04T23:54:11.3545415Z   MATRIX_TEST: TestMixedMatrixServerPartitionEveryThirtySeconds
+2026-10-04T23:54:11.3545822Z ##[endgroup]
+2026-10-04T23:54:11.5036678Z With the provided path, there will be 9 files uploaded
+2026-10-04T23:54:11.5062607Z Artifact name is valid!
+2026-10-04T23:54:11.5063064Z Root directory input is valid!
+2026-10-04T23:54:11.7828097Z Uploading artifact: matrix-partition-1-12-10m.zip
+2026-10-04T23:54:11.7870371Z Beginning upload of artifact content to blob storage
+2026-10-04T23:54:13.6603028Z Uploaded bytes 8388608
+2026-10-04T23:54:14.5986392Z Uploaded bytes 16777216
+2026-10-04T23:54:14.6745305Z Uploaded bytes 17531161
+2026-10-04T23:54:14.7061879Z Finished uploading artifact content to blob storage!
+2026-10-04T23:54:14.7065362Z SHA256 digest of uploaded artifact is 59dcbf915da1bc9701f543f3088eeb8d111300c5d5b2177f95261ed884d57181
+2026-10-04T23:54:14.7068211Z Finalizing artifact upload
+2026-10-04T23:54:14.9725349Z Artifact matrix-partition-1-12-10m successfully finalized. Artifact ID 11319330127
+2026-10-04T23:54:14.9727084Z Artifact matrix-partition-1-12-10m has been successfully uploaded! Final size is 17531161 bytes. Artifact ID is 11319330127
+2026-10-04T23:54:14.9730883Z Artifact download URL: https://github.com/AntPAllen/js-wf/actions/runs/37149506857/artifacts/11319330127
+2026-10-04T23:54:14.9944207Z Post job cleanup.
+2026-10-04T23:54:15.0801465Z [command]/usr/bin/git version
+2026-10-04T23:54:15.0841633Z git version 2.55.0
+2026-10-04T23:54:15.0880081Z Temporarily overriding HOME='/home/runner/work/_temp/3ecba7a4-d5d8-4dca-b742-b0b328b3aced' before making global git config changes
+2026-10-04T23:54:15.0881547Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-04T23:54:15.0887125Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+2026-10-04T23:54:15.0924980Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-04T23:54:15.0959979Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-04T23:54:15.1218355Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-04T23:54:15.1244461Z http.https://github.com/.extraheader
+2026-10-04T23:54:15.1257396Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-04T23:54:15.1299292Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-04T23:54:15.1569047Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-04T23:54:15.1607010Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-04T23:54:15.2030453Z Cleaning up orphan processes
+2026-10-04T23:54:15.2362142Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

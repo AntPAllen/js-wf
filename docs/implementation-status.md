@@ -1,6 +1,6 @@
 # Implementation status against the supplied plan
 
-## Summary — 2026-10-04
+## Summary — 2026-10-05
 
 The core runtime is implemented and broadly exercised. Full release qualification
 against the complete supplied plan is still incomplete; no percentage is claimed.
@@ -29,6 +29,26 @@ and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **R5 large interrupted bulk audit accepted:** native five-container explicit-route
+  file replicas, normal2GiB, directly populated100k completed invocations/1.2M entries.
+  Baseline18.777s and admitted client-pull suffix-loss recovery19.372s both fit the
+  original20s attempt. New cursor starts129 after128 confirmed visits; all1.2M
+  sequences visited exactly once, zero journal point reads, zero audit consumers.
+  Actual test executable/all five copied container binaries/build information,
+  634 unchanged tracked Go/module inputs and original stores retained/read back.
+  Stores not reopened; synthetic client interruption, not natural server cause.
+  Margin small; installed NATS client can also return short batches without an
+  error, whose serial-tail fallback needs follow-up. Longer-soak audit scaling/
+  full matrices/24h remain open.
+  [Complete focused R5 proof](scale/bulk-read-resumption-2026-10-05/r5-100k/).
+
+- **Tier2 partition1–12 shard failed in seed1:** recordedc4fed06 /405.90s,
+  checkpoint50/cutoff1400 reports a terminal journal without terminal state.
+  Earlier checkpoint40 passes. All nine raw files/authenticated ZIP and job/run/
+  artifact binding preserved/read back; SDK/full source/stores unavailable.
+  Cause unconfirmed; seeds2–12 not executed, no parent/full-matrix promotion.
+  [Failed original shard](scale/current-tier2-matrix-2026-10-04/partition-1-12-failed/).
 
 - **Bounded bulk-read resumption implemented:** interrupted opt-in audit cursors
   resume from the first unvisited sequence, at most twice, within the original
