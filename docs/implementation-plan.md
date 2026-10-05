@@ -3424,3 +3424,17 @@ verify prerequisites and require a passing row to retain exactly one512MiB
 closed backing image with recorded hash. Original durations/audit/fault/drain
 bounds unchanged; real row execution and independent copied filesystem audit
 remain pending.
+
+### Retained block-row smoke and copied raw-image audit accepted — 2026-10-05
+
+Executed2774fd2 normal/original35s seed1 passes45.13s:224terminals/2474entries,
+one real5s stall/alllatencycells<30s. ActualSDK/allthreeobservedserverexecutables/
+668Git+3287externalinputs reviewed. Exactlyone512MiB originalimage retained after
+ownedmount/device cleanup; fullclosedproof readback. A fresh rawimagecopy mounts
+only undercopiednode-2, alongsidecopiesofotherclosednodes. Allthreehistorymodels,
+224/2474integrity andallthreeclient queue/64durable drain pass in4.217606s under20s.
+ActualSDK/1695inputs/threeobservedserversverified, original1397files/rawhash unchanged,
+copiedmountdetached andclosedcopyproof readback. No originalimage mount orNATS
+store reopen; no workers/manualACK/provisioning. [Nativeproof](scale/retained-block-media-2026-10-05/block-row-smoke/);
+[copiedrawaudit](scale/retained-block-media-2026-10-05/block-row-copied-audit/).
+Ten-minute blockrow/full13x200gate remainpending.
