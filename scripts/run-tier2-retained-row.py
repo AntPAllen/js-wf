@@ -3,28 +3,21 @@ from pathlib import Path
 import subprocess,json,hashlib,os,shutil,time,datetime,argparse,signal,traceback
 from matrix_process_observer import observe_servers
 from matrix_worker_observer import observe_workers
-ROWS = {
- 'journal':'TestMixedMatrixJournalLeaderEveryThirtySeconds',
- 'consumer':'TestMixedMatrixConsumerLeaderEveryThirtySeconds',
- 'cluster':'TestMixedMatrixAllServersKilledEveryThirtySeconds',
- 'partition':'TestMixedMatrixServerPartitionEveryThirtySeconds',
- 'blockdisk':'TestMixedMatrixBlockDiskStallEveryThirtySeconds',
- 'worker':'TestMixedMatrixRandomWorkerKilledEveryFiveSeconds',
- 'pause':'TestMixedMatrixWorkerPausedFortyFiveSeconds',
- 'isolation':'TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds',
- 'fanoutrestart':'TestMixedMatrixFanoutRestartEveryThirtySeconds',
-}
+from tier2_retained_profiles import ROWS, CLOCK_ROWS, sdk_timeout, capture_legacy_server
+
 parser=argparse.ArgumentParser(description='Retain one original Tier2 row, actual SDK, selected source, observed NATS executables and closed process stores. Full13x200 gate remains separate.')
 parser.add_argument('--root',type=Path,required=True)
 parser.add_argument('--row',choices=ROWS,required=True)
 parser.add_argument('--seed',type=int,default=1)
 parser.add_argument('--duration',choices=['10m','35s'],default='10m',help='35s smoke never qualifies sustained duration')
+parser.add_argument('--old-server',type=Path,help='Absolute NATS 2.11.17 executable for the upgrade row; retained before use')
 parser.add_argument('--race',action='store_true',help='explicit race profile; default preserves standard Tier2 normal execution')
 args=parser.parse_args()
 repo=Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip()).resolve()
 root=args.root
 if not root.is_absolute() or root.resolve().is_relative_to(repo) or not -(2**63)<=args.seed<2**63:
  parser.error('require an absolute evidence root outside the checkout and an int64 seed')
+if (args.row=='upgrade') != (args.old_server is not None):parser.error('--old-server is required only for upgrade')
 root=root.resolve()
 def sha(p):
  with p.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
@@ -34,6 +27,7 @@ producer_bytes=Path(__file__).read_bytes();producer_path=str(Path(__file__).reso
 assert producer_bytes==subprocess.check_output(['git','show',revision+':'+producer_path],cwd=repo)
 observer=Path(__file__).with_name('matrix_process_observer.py');observer_bytes=observer.read_bytes();assert observer_bytes==subprocess.check_output(['git','show',revision+':scripts/matrix_process_observer.py'],cwd=repo);(root/'matrix_process_observer.py').write_bytes(observer_bytes)
 worker_observer=Path(__file__).with_name('matrix_worker_observer.py');worker_observer_bytes=worker_observer.read_bytes();assert worker_observer_bytes==subprocess.check_output(['git','show',revision+':scripts/matrix_worker_observer.py'],cwd=repo);(root/'matrix_worker_observer.py').write_bytes(worker_observer_bytes)
+profiles=Path(__file__).with_name('tier2_retained_profiles.py');profiles_bytes=profiles.read_bytes();assert profiles_bytes==subprocess.check_output(['git','show',revision+':scripts/tier2_retained_profiles.py'],cwd=repo);(root/'tier2_retained_profiles.py').write_bytes(profiles_bytes)
 (root/'producer-source.json').write_text(json.dumps({'revision':revision,'path':producer_path,'sha256':hashlib.sha256(producer_bytes).hexdigest()},indent=2)+'\n')
 names=subprocess.check_output(['git','ls-files','*.go','go.mod','go.sum'],cwd=repo,text=True).splitlines();before={n:sha(repo/n) for n in names}
 for n,d in before.items():
@@ -61,12 +55,13 @@ for line in deps.splitlines():
 env={k:v for k,v in os.environ.items() if not k.startswith(('WF_','MATRIX_','TIER3_MATRIX_'))};env.update(GOMAXPROCS='2',GOMEMLIMIT='2GiB',WF_MATRIX_CHAOS='1',WF_MATRIX_OPERATION_TIMINGS='1',WF_MATRIX_DURATION=args.duration,WF_MATRIX_PROCESS_ROOT=str(root/'originals'),MATRIX_ARTIFACT_PREFIX=str(root/('matrix-'+args.row+'-'+str(args.seed))),FAULT_SEED=str(args.seed))
 row=args.row;duration=args.duration;race=args.race;test=ROWS[row]
 if row=='blockdisk':env['WF_BLOCK_DISK']='1'
+if row=='upgrade':env['WF_NATS_SERVER_BIN']=str(capture_legacy_server(args.old_server,root))
 selection='^'+test+'$'
 build=['go','test']+(['-race'] if race else [])+['-p=1','-buildvcs=true','-c','-o',str(root/'integration.test'),'./integration']
 with (root/'build.log').open('w') as log:subprocess.run(build,cwd=repo,env=env,stdout=log,stderr=subprocess.STDOUT,check=True)
 info=subprocess.check_output(['go','version','-m',str(root/'integration.test')],text=True);assert 'vcs.modified=false' in info and f'vcs.revision={revision}' in info and (('-race=true' in info)==race)
 (root/'binary.json').write_text(json.dumps({'sha256':sha(root/'integration.test'),'build_info':info},indent=2)+'\n')
-args=[str(root/'integration.test'),'-test.run='+selection,'-test.count=1','-test.v','-test.timeout=18m']
+args=[str(root/'integration.test'),'-test.run='+selection,'-test.count=1','-test.v','-test.timeout='+sdk_timeout(row)]
 (root/'commands.json').write_text(json.dumps({'build':build,'test_command':args,'row':row,'test':test,'duration':duration,'race':race,'sustained_ten_minutes':duration=='10m','environment':{k:v for k,v in env.items() if k.startswith(('WF_','MATRIX_')) or k in ['GOMEMLIMIT','GOMAXPROCS','GOCACHE','FAULT_SEED']}},indent=2)+'\n')
 with (root/'native.log').open('w') as log:
  p=subprocess.Popen(args,cwd=repo/'integration',env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
@@ -108,7 +103,7 @@ with (root/'native.log').open('w') as log:
 
 after={n:sha(repo/n) for n in names};assert before==after;(root/'source-after.json').write_text(json.dumps({'revision':revision,'files':after},indent=2)+'\n')
 assert all(sha(root/d['captured'])==d['sha256'] for d in generated.values())
-external_after={n:sha(Path(n)) for n in inputs};assert inputs==external_after;(root/'external-source-after.json').write_text(json.dumps(external_after,indent=2)+'\n');assert Path(__file__).read_bytes()==producer_bytes and observer.read_bytes()==observer_bytes and worker_observer.read_bytes()==worker_observer_bytes;shutil.copy2(__file__,root/'executed-producer.py');print('NATIVE_FINISHED',code,flush=True)
+external_after={n:sha(Path(n)) for n in inputs};assert inputs==external_after;(root/'external-source-after.json').write_text(json.dumps(external_after,indent=2)+'\n');assert Path(__file__).read_bytes()==producer_bytes and observer.read_bytes()==observer_bytes and worker_observer.read_bytes()==worker_observer_bytes and profiles.read_bytes()==profiles_bytes;shutil.copy2(__file__,root/'executed-producer.py');print('NATIVE_FINISHED',code,flush=True)
 
 if row=='blockdisk':
  images=list((root/'originals').glob('*/wf-block-*/backing.img'))

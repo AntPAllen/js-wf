@@ -4,7 +4,7 @@ on:
     inputs:
       row:
         type: choice
-        options: [journal, consumer, cluster, partition, blockdisk, worker, pause, isolation, fanoutrestart]
+        options: [journal, consumer, cluster, partition, blockdisk, worker, pause, isolation, fanoutrestart, workerclock, serverclockplus, serverclockminus, upgrade]
         default: journal
       seed:
         type: number
@@ -45,6 +45,11 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Build initial legacy server for upgrade
+        if: inputs.row == 'upgrade'
+        run: |
+          mkdir -p "$RUNNER_TEMP/nats-legacy"
+          GOBIN="$RUNNER_TEMP/nats-legacy" go install github.com/nats-io/nats-server/v2@v2.11.17
       - name: Verify real block device prerequisites and cleanup
         if: inputs.row == 'blockdisk'
         run: |
@@ -55,8 +60,10 @@ jobs:
       - name: Retain original native row and process evidence
         run: |
           race_args=()
+          legacy_args=()
+          if [ "$ROW_INPUT" = upgrade ]; then legacy_args+=(--old-server "$RUNNER_TEMP/nats-legacy/nats-server"); fi
           if [ "$RACE_INPUT" = true ]; then race_args+=(--race); fi
-          python3 scripts/run-tier2-retained-row.py --root "$EVIDENCE_ROOT" --row "$ROW_INPUT" --seed "$SEED_INPUT" --duration "$DURATION_INPUT" "${race_args[@]}"
+          python3 scripts/run-tier2-retained-row.py --root "$EVIDENCE_ROOT" --row "$ROW_INPUT" --seed "$SEED_INPUT" --duration "$DURATION_INPUT" "${race_args[@]}" "${legacy_args[@]}"
       - name: Preserve originals including failed attempts
         if: always()
         uses: actions/upload-artifact@v4

@@ -178,7 +178,18 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 	}
 	var clockBinaries []string
 	if row == "worker_clock" {
-		clockBinaries, err = buildMatrixClockWorkers(t.TempDir())
+		clockRoot := t.TempDir()
+		if base := os.Getenv("WF_MATRIX_PROCESS_ROOT"); base != "" {
+			if err := os.MkdirAll(base, 0700); err != nil {
+				t.Fatal(err)
+			}
+			clockRoot = filepath.Join(base, strings.ReplaceAll(t.Name(), "/", "_")+"-worker-clocks")
+			if err := os.Mkdir(clockRoot, 0700); err != nil {
+				t.Fatal(err)
+			}
+			t.Logf("retained worker clock builds=%s", clockRoot)
+		}
+		clockBinaries, err = buildMatrixClockWorkers(clockRoot)
 		if err != nil {
 			t.Fatal(err)
 		}

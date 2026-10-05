@@ -3533,3 +3533,14 @@ results without asserting the missing cachepath survived. Futureproducer separat
 retained generatedinputs from durableexternal before/after checks. Copiedcommand
 `--reviewed-donor` uses this explicit separate review path; originalproducer failure
 is retained. Real correctedproducer/copiedpath verification remainspending.
+
+### Allthirteen retained Tier2 rows integrated — 2026-10-05
+
+Portableproducer/workflow now selectallthirteen originalrows, retaining original
+clock20m/other18m SDKtimeouts. Upgrade requires suppliedcaptured NATS2.11.17
+executable; workflow builds pinnedlegacyversion andliveobservers recordactual
+old/new processbytes. Worker-clock generatedGo overlays/skewedSDK builds now live
+underretainedroot; server-clock overlay/serverbuilds already reside in retained
+case roots. Profilemodulebytes boundbefore/after. Clock/upgrade realexecution and
+updated generated-input classification verification remainpending. No fullmatrix
+orolderfailure causefix qualification. Ordinaryruntime source behavior unchanged.
