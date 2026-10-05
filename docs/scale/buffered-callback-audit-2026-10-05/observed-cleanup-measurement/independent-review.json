@@ -1,0 +1,150 @@
+{
+  "execution": {
+    "pid": 660263,
+    "source": "e43d1b335f2562a5705a7bf365760b0b4c590e92",
+    "sha256": "cbf2ee23307a5e45cea119138859c9d8439b583cc9fed58791345fd5b18535d2",
+    "build_info": "/proc/660263/exe: go1.27.1\n\tpath\tjs-wf/integrity.test\n\tmod\tjs-wf\tv0.0.0-20261005214931-e43d1b335f25\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=e43d1b335f2562a5705a7bf365760b0b4c590e92\n\tbuild\tvcs.time=2026-10-05T21:49:31Z\n\tbuild\tvcs.modified=false\n",
+    "args": [
+      "/tmp/js-wf-buffered-callback-delivery-observed-cleanup-20261005/integrity.test",
+      "-test.run=^TestAuditDeliveryNativeCostComparison$",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=6m"
+    ],
+    "stat": "660263 (integrity.test) D 660053 660053 660053 0 -1 4194304 1334 0 0 0 0 1 0 0 20 0 7 0 5069857 1768464384 5549 18446744073709551615 4194304 16038864 140731572065440 0 0 0 0 0 2143420159 0 0 0 17 2 0 0 0 0 0 27779072 28245952 770306048 140731572067100 140731572067268 140731572067268 140731572068265 0\n",
+    "status": "passed",
+    "started_utc": "2026-10-05T21:49:37.048132+00:00",
+    "scope": "Normal quiet native R3 100k x128B Next/adapter/Consume/callback-adapter/buffered-callback-adapter/Next delivery comparison with per-delete names/count observations under original30s reader contexts; in-process R3 server library is linked into observed SDK; not 400k capacity qualification",
+    "exit_code": 0,
+    "finished_utc": "2026-10-05T21:49:45.277079+00:00"
+  },
+  "explicit_configuration": {
+    "GOMAXPROCS": "2",
+    "GOGC": "100",
+    "GOMEMLIMIT": "2GiB",
+    "WF_AUDIT_DELIVERY_COST": "1",
+    "WF_AUDIT_BATCH_ROOT": "/tmp/js-wf-buffered-callback-delivery-observed-cleanup-20261005/originals",
+    "WF_TIER3_EXPLICIT_ROUTE_SEEDS": "1",
+    "WF_TIER3_SYNC_INTERVAL": "2m"
+  },
+  "actual_sdk_sha256": "cbf2ee23307a5e45cea119138859c9d8439b583cc9fed58791345fd5b18535d2",
+  "selected_source_inputs_verified": 677,
+  "observed_sdk_closed": true,
+  "native_normal_test_passes_seconds": {
+    "TestAuditDeliveryNativeCostComparison": 7.89
+  },
+  "delivery_measurements": {
+    "Results": [
+      {
+        "Mode": "next",
+        "Records": 100000,
+        "ElapsedNS": 368058079,
+        "AllocatedBytes": 263594448,
+        "GCCycles": 3,
+        "CleanupNS": 2903792
+      },
+      {
+        "Mode": "adapter",
+        "Records": 100000,
+        "ElapsedNS": 393065418,
+        "AllocatedBytes": 237400136,
+        "GCCycles": 3,
+        "CleanupNS": 2475591
+      },
+      {
+        "Mode": "consume",
+        "Records": 100000,
+        "ElapsedNS": 209716482,
+        "AllocatedBytes": 174020064,
+        "GCCycles": 1,
+        "CleanupNS": 2588102
+      },
+      {
+        "Mode": "callback_adapter",
+        "Records": 100000,
+        "ElapsedNS": 257028764,
+        "AllocatedBytes": 187378144,
+        "GCCycles": 2,
+        "CleanupNS": 1957804
+      },
+      {
+        "Mode": "buffered_callback_adapter",
+        "Records": 100000,
+        "ElapsedNS": 389724563,
+        "AllocatedBytes": 234768976,
+        "GCCycles": 2,
+        "CleanupNS": 3036833
+      },
+      {
+        "Mode": "next_recheck",
+        "Records": 100000,
+        "ElapsedNS": 349205901,
+        "AllocatedBytes": 252433072,
+        "GCCycles": 2,
+        "CleanupNS": 1940027
+      }
+    ],
+    "Cleanups": [
+      {
+        "Mode": "next",
+        "DeletedConsumer": "cost-next",
+        "ElapsedNS": 2070936,
+        "StreamConsumerCount": 0,
+        "Names": null,
+        "StreamLeader": "wf-test-2",
+        "Error": ""
+      },
+      {
+        "Mode": "adapter",
+        "DeletedConsumer": "cost-adapter",
+        "ElapsedNS": 2066089,
+        "StreamConsumerCount": 0,
+        "Names": null,
+        "StreamLeader": "wf-test-2",
+        "Error": ""
+      },
+      {
+        "Mode": "consume",
+        "DeletedConsumer": "cost-consume",
+        "ElapsedNS": 1934839,
+        "StreamConsumerCount": 0,
+        "Names": null,
+        "StreamLeader": "wf-test-2",
+        "Error": ""
+      },
+      {
+        "Mode": "callback_adapter",
+        "DeletedConsumer": "cost-callback_adapter",
+        "ElapsedNS": 1456723,
+        "StreamConsumerCount": 0,
+        "Names": null,
+        "StreamLeader": "wf-test-2",
+        "Error": ""
+      },
+      {
+        "Mode": "buffered_callback_adapter",
+        "DeletedConsumer": "cost-buffered_callback_adapter",
+        "ElapsedNS": 2309919,
+        "StreamConsumerCount": 0,
+        "Names": null,
+        "StreamLeader": "wf-test-2",
+        "Error": ""
+      },
+      {
+        "Mode": "next_recheck",
+        "DeletedConsumer": "cost-next_recheck",
+        "ElapsedNS": 1412746,
+        "StreamConsumerCount": 0,
+        "Names": null,
+        "StreamLeader": "wf-test-2",
+        "Error": ""
+      }
+    ],
+    "Scope": "Quiet R3 100k x128B delivery; linked server allocations included; cleanup name/count convergence shares original30s reader context and is timed separately; not400k integrity/fault/default adoption"
+  },
+  "server_scope": "In-process R3 current server library compiled into observed SDK; allocation totals include server activity",
+  "source_capture_scope": "Selected Git Go/module inputs and actual executable metadata, not exhaustive external compiler/toolchain inputs",
+  "candidate_adopted": false,
+  "qualifies_400k_capacity": false,
+  "qualifies_24h": false
+}

@@ -137,13 +137,13 @@ func TestAuditDeliveryNativeCostComparison(t *testing.T) {
 				}
 			}
 		} else if mode == "callback_adapter" || mode == "buffered_callback_adapter" {
-			create := newCallbackDelivery
+			var d callbackDiagnosticReader
+			var e error
 			if mode == "buffered_callback_adapter" {
-				create = func(c jetstream.Consumer) (*callbackDelivery, error) {
-					return newCallbackDeliveryWithBuffer(c, 256, 1<<20)
-				}
+				d, e = newCallbackDeliveryWithBuffer(c, 256, 1<<20)
+			} else {
+				d, e = newCallbackDelivery(c)
 			}
-			d, e := create(c)
 			err = e
 			if e == nil {
 				for seen < count && err == nil {

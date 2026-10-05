@@ -28,6 +28,20 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 21:54 UTC
+
+Changed per-delete diagnostic e43d1b3 passes7.89s: allsix100k deliveries and
+zero consumer names/count under original30s contexts. No positive intermediate
+count observed; previouscount1 failure/cause remains unresolved and preserved.
+Buffered callback390ms versus unbuffered257ms doesnot support adoption. The
+rejected queue is now test-only; production callback source restored exactly
+to a39bb6c and lifecycle/byte/compact unit race controls pass1.216s.
+SelectedGit/actualSDK/module/closure and full1087-member archive/readback reviewed.
+No buffered fullintegrity/capacity/default/24h claim.
+[Observed cleanup proof](scale/buffered-callback-audit-2026-10-05/observed-cleanup-measurement/).
+Next candidates remove per-record adapter overhead or measure safe cursor
+replication cost while retaining all cardinalities/deadlines.
+
 ## Latest follow-up — 2026-10-05 21:49 UTC
 
 A bounded buffered callback candidate is explicit only: SDK8MiB buffer plus

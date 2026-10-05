@@ -3965,3 +3965,14 @@ initial wrong PASS-only reviewer. A changed diagnostic records names/counts per
 delete within original30s reader context. No buffered/fullcapacity/default/24h
 promotion or unchanged rerun.
 [Failure proof](scale/buffered-callback-audit-2026-10-05/failed-delivery-measurement/).
+
+### Buffered queue rejected after observed-cleanup measurement — 2026-10-05
+
+At e43d1b3 changed diagnostic passes7.89s, with allsix100k deliveries and
+per-delete count0/namesempty within original30s contexts. Previouscount1 failure
+is preserved; no originalcause confirmation. Buffered390ms vsunbuffered257ms
+doesnot support adopting a queue. Experimental queue moves to test-only;
+production callback source restored exactly to a39bb6c, unit race lifecycle/
+byte/compact controls pass1.216s. Full1087-member archive/readback and selected
+Git/actualSDK/module/closure reviewed. Defaults/full400k/24h still open.
+[Cleanup measurement](scale/buffered-callback-audit-2026-10-05/observed-cleanup-measurement/).

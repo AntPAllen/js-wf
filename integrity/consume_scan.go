@@ -14,19 +14,6 @@ import (
 // order checks, two-resume recovery and all invariant reductions. No public
 // reader selects this path. Consume reuses its heartbeat monitor across records.
 func scanConsumeByteBoundedThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) (failure error) {
-	return scanConsumeThroughWithFactory(ctx, stream, cutoff, visit, newCallbackDelivery)
-}
-
-// Explicit additional candidate: retain the SDK's8MiB pull buffer and add at
-// most256 queued records/1MiB payload, or one oversized record. Header/object
-// overhead and the active callback record are outside that payload accounting.
-func scanBufferedConsumeByteBoundedThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
-	return scanConsumeThroughWithFactory(ctx, stream, cutoff, visit, func(c jetstream.Consumer) (*callbackDelivery, error) {
-		return newCallbackDeliveryWithBuffer(c, 256, 1<<20)
-	})
-}
-
-func scanConsumeThroughWithFactory(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, create func(jetstream.Consumer) (*callbackDelivery, error)) (failure error) {
 	var delivery *callbackDelivery
 	var name, consumerStream, initialLeader string
 	defer func() {
@@ -49,7 +36,7 @@ func scanConsumeThroughWithFactory(ctx context.Context, stream jetstream.Stream,
 				}
 			}
 			var err error
-			delivery, err = create(c)
+			delivery, err = newCallbackDelivery(c)
 			if err != nil {
 				return nil, err
 			}
@@ -66,37 +53,22 @@ func scanConsumeThroughWithFactory(ctx context.Context, stream jetstream.Stream,
 }
 
 type callbackDelivery struct {
-	messages                                   chan jetstream.Msg
-	errors                                     chan error
-	stopped                                    chan struct{}
-	once                                       sync.Once
-	consume                                    jetstream.ConsumeContext
-	closed                                     <-chan struct{}
-	budgetMu                                   sync.Mutex
-	budgetChanged                              *sync.Cond
-	queuedPayload, queuedRecords, payloadLimit int
+	messages chan jetstream.Msg
+	errors   chan error
+	stopped  chan struct{}
+	once     sync.Once
+	consume  jetstream.ConsumeContext
+	closed   <-chan struct{}
 }
 
 func newCallbackDelivery(c jetstream.Consumer) (*callbackDelivery, error) {
-	return newCallbackDeliveryWithBuffer(c, 0, 0)
-}
-
-func newCallbackDeliveryWithBuffer(c jetstream.Consumer, records, payloadBytes int) (*callbackDelivery, error) {
-	if records < 0 || records > 256 || records == 0 && payloadBytes != 0 || records > 0 && payloadBytes < 1 {
-		return nil, errors.New("retained callback scan: invalid queue bounds")
-	}
-	d := &callbackDelivery{messages: make(chan jetstream.Msg, records), errors: make(chan error, 1), stopped: make(chan struct{}), payloadLimit: payloadBytes}
-	d.budgetChanged = sync.NewCond(&d.budgetMu)
+	d := &callbackDelivery{messages: make(chan jetstream.Msg), errors: make(chan error, 1), stopped: make(chan struct{})}
 	cc, err := c.Consume(func(msg jetstream.Msg) {
-		if !d.reserve(msg) {
-			return
-		}
-		// Stop unblocks both queue-byte reservation and a channel send before
-		// unsubscribing, so shutdown cannot strand the handler.
+		// No additional payload queue. Stop unblocks a callback waiting for the
+		// adapter before unsubscribing, so shutdown cannot strand the handler.
 		select {
 		case d.messages <- msg:
 		case <-d.stopped:
-			d.release(msg)
 		}
 	}, jetstream.PullMaxBytes(8<<20), jetstream.PullExpiry(2*time.Second), jetstream.ConsumeErrHandler(func(_ jetstream.ConsumeContext, err error) {
 		select {
@@ -111,42 +83,6 @@ func newCallbackDeliveryWithBuffer(c jetstream.Consumer, records, payloadBytes i
 	return d, nil
 }
 
-func (d *callbackDelivery) reserve(msg jetstream.Msg) bool {
-	if d.payloadLimit == 0 {
-		return true
-	}
-	size := len(msg.Data())
-	d.budgetMu.Lock()
-	defer d.budgetMu.Unlock()
-	for {
-		select {
-		case <-d.stopped:
-			return false
-		default:
-		}
-		// A single oversized payload remains deliverable. No second record
-		// is admitted until that record leaves the queue.
-		if d.queuedRecords == 0 || d.queuedPayload+size <= d.payloadLimit {
-			break
-		}
-		d.budgetChanged.Wait()
-	}
-	d.queuedPayload += size
-	d.queuedRecords++
-	return true
-}
-
-func (d *callbackDelivery) release(msg jetstream.Msg) {
-	if d.payloadLimit == 0 {
-		return
-	}
-	d.budgetMu.Lock()
-	d.queuedPayload -= len(msg.Data())
-	d.queuedRecords--
-	d.budgetChanged.Broadcast()
-	d.budgetMu.Unlock()
-}
-
 func (d *callbackDelivery) next(ctx context.Context) (jetstream.Msg, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -158,7 +94,6 @@ func (d *callbackDelivery) next(ctx context.Context) (jetstream.Msg, error) {
 	}
 	select {
 	case msg := <-d.messages:
-		d.release(msg)
 		return msg, nil
 	case err := <-d.errors:
 		return nil, err
@@ -177,15 +112,7 @@ func (d *callbackDelivery) next(ctx context.Context) (jetstream.Msg, error) {
 }
 
 func (d *callbackDelivery) stop() {
-	d.once.Do(func() {
-		close(d.stopped)
-		if d.budgetChanged != nil {
-			d.budgetMu.Lock()
-			d.budgetChanged.Broadcast()
-			d.budgetMu.Unlock()
-		}
-		d.consume.Stop()
-	})
+	d.once.Do(func() { close(d.stopped); d.consume.Stop() })
 }
 
 func (d *callbackDelivery) stopAndJoin(ctx context.Context) error {
