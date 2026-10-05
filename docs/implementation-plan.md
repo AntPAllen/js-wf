@@ -3379,3 +3379,15 @@ Complete original zero-observation copy and changed copiedproof retained separat
 [First copied review](scale/tier2-retained-row-2026-10-05/copied-smoke-v1/);
 [changed observer qualification](scale/tier2-retained-row-2026-10-05/copied-smoke-v2/).
 Current native partition row remains live at ec60e83; no ten-minute verdict yet.
+
+### Original retained Tier2 partition seed2 accepted — 2026-10-05
+
+Executedec60e83 normal seed2/tenminutes, nativePASS651.13s and producer acceptance0.
+71batches/1988terminalinvocations/21931entries/19admittedpartitions;
+aggregate terminalp99=13.324673134s, allsix terminal/progress cells below30s.
+ActualSDK/three observed servers/exactproducer/668Git+3287external inputs bound;
+completeclosed originalstore/executable/source proof retained. Reviewer's initial
+10m0s-vs10m formatting error preserved; existing durationparser confirms native
+schedule/count/cells. [Complete native proof](scale/tier2-retained-row-2026-10-05/partition-seed2-ten-minute/).
+Independentcopied review follows; full13x200 gate remains. All-task-thread
+observation is now adopted for future portableproducers after this run closed.

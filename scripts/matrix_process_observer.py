@@ -1,6 +1,6 @@
 """Point-in-time /proc observations of owned matrix NATS descendants.
 
-Polling can miss short-lived processes. Never infer a server's executable from
+Polling scans every task thread for child processes and can miss short-lived processes. Never infer a server's executable from
 its command name; retain bytes read from its live /proc executable instead.
 """
 from pathlib import Path
@@ -34,7 +34,12 @@ def descendants(pid):
     while pending:
         parent = pending.pop()
         try:
-            children = Path(f'/proc/{parent}/task/{parent}/children').read_text().split()
+            children = []
+            for task in Path(f'/proc/{parent}/task').iterdir():
+                try:
+                    children.extend(task.joinpath('children').read_text().split())
+                except (FileNotFoundError, ProcessLookupError, PermissionError):
+                    continue
         except (FileNotFoundError, ProcessLookupError, PermissionError):
             continue
         for child in map(int, children):
