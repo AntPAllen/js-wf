@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Live million candidate receipt snapshot independently validated:** original
+  campaign stillrunning, all1M publishes acknowledged;8,755 snapshot receipts/
+  991,245zero slots. Checksums/unique stream sequences/exact deadlines/noearly
+  server-or-client timestamps pass; snapshotp99/max0.691/2.053s. Actual program/
+  three native initial server executable hashes/full buildfields stillmatch
+  launch. Readonly non-atomic report/ledger copy, no independentfsync observation,
+  no originalmutation/store reopen/interruption verdict; all9 immutable archive
+  members/part verify. Full delivery/restarts/24h/drain/adoption stillpending;
+  running final-count zeroes remain placeholders.
+  [Receipt bytes and independent decoder](scale/million-candidate-24h-2026-10-05/live-receipts/).
+
 - **Sustained mixed-encoding worker-kill run is live:** cleanab5cd71 normal2GiB/
   GOMAX2/seed1/original10m, initialprotobuf/replacementJSON, original5s kill cadence
   and all timing/integrity/drain gates. Actual parent116782/17 captured SDK records,

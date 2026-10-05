@@ -1,0 +1,7 @@
+# Live million-timer receipt snapshot
+
+Read-only snapshot at10:03:21UTC Oct5. Actual program101283 and allthree initial native candidate server process hashes/full build fields still match the retained launch executables. Report observes all1M publishes acknowledged. Independent Python decoder validates8,755 nonzero40-byte slots: SHA256-128 checksums, unique nonzero stream sequences, exact scheduled-index deadlines and both receive/server timestamps not early. 991,245 zero slots remain. Snapshot p99/max lateness0.690598185/2.053487488s. Original report remains running; no restart admission or final drain claim.
+
+The report-before had8,387 receipts; the copied ledger captures later writes. This is not an atomic cross-file snapshot and does not independently observe fsync. The actual SDK's retained sync-before-ack receipt protocol remains the durability evidence. The reader writes only separate snapshot files; it does not stop the campaign, reopen its stores, mutate its originals or assign an interrupted verdict. All9 immutable snapshot archive members and its split part read back/hash verify. Executables/full selected source copies remain in the independently verified launch proof; this snapshot does not duplicate them.
+
+Partial live delivery evidence only. Full million delivery/two restarts/24h/raw latency/physical replica drain and candidate adoption remain unqualified. Final-stream zeroes in the running report are placeholders, not observed drain evidence.

@@ -2628,3 +2628,15 @@ A continuous SDK observer records later generations; final coverage pending.
 Real accepted smoke artifact is rejected by default-profile verifier without the
 rollout flag, with no report created. Terminal sustained/wire/history/integrity/
 drain review and full rolling/chaos/matrices/24h qualification remain required.
+
+### Live candidate ledger observation without interrupting the campaign — 2026-10-05
+
+A separate immutable snapshot of the running candidate report/receipt ledger
+independently validates8,755 checksum slots/unique sequences/exact deadlines/no
+server-or-client early timestamps; snapshotp99/max0.691/2.053s. Actual live program
+and allthree initial candidate servers stillmatch retained hashes/buildfields.
+This does not stop/mutate the original or reopen its stores; report/ledger are
+not an atomic snapshot and copied slots do not independently prove fsync.
+All9 snapshot members/part verify. Original campaign remainsrunning; full1M/
+24h/two restarts/raw latency/physical drain/adoption stayopen. Running final
+stream/ack-pending zeroes are unobserved placeholders, never drain evidence.
