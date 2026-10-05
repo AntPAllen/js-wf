@@ -36,6 +36,21 @@ import (
 const retirementKillType = "checkpoint-retire-kill"
 const retirementKillID = "reused"
 
+type retirementKillSnapshotPort struct {
+	journal.SnapshotWritePort
+	cut, marker string
+}
+
+func (p *retirementKillSnapshotPort) CreateManifest(ctx context.Context, key string, data []byte) error {
+	if p.cut == "before_manifest" {
+		if err := os.WriteFile(p.marker+".manifest", data, 0600); err != nil {
+			return err
+		}
+	}
+	port := &continuationKillSnapshotPort{SnapshotWritePort: p.SnapshotWritePort, cut: p.cut, marker: p.marker}
+	return port.CreateManifest(ctx, key, data)
+}
+
 func retirementKillHandlers(log string) (map[string]worker.Handler, map[string]worker.ContinuationHandler) {
 	payload := strings.Repeat("x", wf.MaxInlineResult)
 	initial := map[string]worker.Handler{retirementKillType: func(c *wf.Context, input json.RawMessage) (json.RawMessage, error) {
@@ -80,7 +95,11 @@ func TestRetirementKillChild(t *testing.T) {
 		t.Fatal(err)
 	}
 	initial, stages := retirementKillHandlers(os.Getenv("WF_RETIREMENT_KILL_LOG"))
-	port := &continuationKillSnapshotPort{SnapshotWritePort: journal.NewSnapshotPort(js), cut: "after_manifest", marker: os.Getenv("WF_RETIREMENT_KILL_MARKER")}
+	cut := os.Getenv("WF_RETIREMENT_KILL_CUT")
+	if cut != "before_manifest" && cut != "after_manifest" {
+		t.Fatal("unsupported retirement kill cut")
+	}
+	port := &retirementKillSnapshotPort{SnapshotWritePort: journal.NewSnapshotPort(js), cut: cut, marker: os.Getenv("WF_RETIREMENT_KILL_MARKER")}
 	w, err := worker.New(context.Background(), js, "retirement-killed", initial, worker.WithContinuations(retirementKillType, stages), worker.WithJournalStore(journal.NewWithJetStreamSnapshotPort(js, port)))
 	if err != nil {
 		t.Fatal(err)
@@ -105,6 +124,15 @@ func retirementKillFileHash(path string) (string, error) {
 }
 
 func TestContinuationRetirementReuseAcrossWorkerSIGKILL(t *testing.T) {
+	runRetirementWorkerKill(t, "after_manifest")
+}
+
+func TestContinuationRetirementReuseBeforeManifestWorkerSIGKILL(t *testing.T) {
+	runRetirementWorkerKill(t, "before_manifest")
+}
+
+func runRetirementWorkerKill(t *testing.T, cut string) {
+	t.Helper()
 	root := os.Getenv("WF_RETIREMENT_KILL_ROOT")
 	if root == "" {
 		t.Skip("set WF_RETIREMENT_KILL_ROOT to a fresh absolute artifact directory")
@@ -307,7 +335,7 @@ func TestContinuationRetirementReuseAcrossWorkerSIGKILL(t *testing.T) {
 		t.Fatal(err)
 	}
 	child := exec.Command(executable, "-test.run=^TestRetirementKillChild$")
-	child.Env = append(os.Environ(), "WF_RETIREMENT_KILL_CHILD=1", "WF_RETIREMENT_KILL_URL="+cluster.ClientURL(0), "WF_RETIREMENT_KILL_LOG="+effectLog, "WF_RETIREMENT_KILL_MARKER="+marker)
+	child.Env = append(os.Environ(), "WF_RETIREMENT_KILL_CHILD=1", "WF_RETIREMENT_KILL_URL="+cluster.ClientURL(0), "WF_RETIREMENT_KILL_LOG="+effectLog, "WF_RETIREMENT_KILL_MARKER="+marker, "WF_RETIREMENT_KILL_CUT="+cut)
 	child.Stdout, child.Stderr = output, output
 	if err := child.Start(); err != nil {
 		t.Fatal(err)
@@ -322,7 +350,7 @@ func TestContinuationRetirementReuseAcrossWorkerSIGKILL(t *testing.T) {
 		}
 	}()
 	for {
-		if data, err := os.ReadFile(marker); err == nil && string(data) == "after_manifest" {
+		if data, err := os.ReadFile(marker); err == nil && string(data) == cut {
 			break
 		}
 		select {
@@ -344,8 +372,27 @@ func TestContinuationRetirementReuseAcrossWorkerSIGKILL(t *testing.T) {
 		t.Fatalf("child SDK mismatch %v", err)
 	}
 	published, err := store.ReadCheckpoint(ctx, retirementKillType, retirementKillID, fresh.InvSeq)
-	if err != nil || published == nil || published.Snapshot.Runtime.InvSeq != fresh.InvSeq || published.Snapshot.Runtime.Object == old.Snapshot.Runtime.Object {
-		t.Fatalf("fresh publication=%+v err=%v", published, err)
+	abandonedFrame := ""
+	if cut == "after_manifest" {
+		if err != nil || published == nil || published.Snapshot.Runtime.InvSeq != fresh.InvSeq || published.Snapshot.Runtime.Object == old.Snapshot.Runtime.Object {
+			t.Fatalf("fresh publication=%+v err=%v", published, err)
+		}
+	} else {
+		if err != nil || published != nil {
+			t.Fatalf("unpublished frame accepted: view=%+v err=%v", published, err)
+		}
+		data, err := os.ReadFile(marker + ".manifest")
+		if err != nil {
+			t.Fatal(err)
+		}
+		var prepared journal.Snapshot
+		if err := json.Unmarshal(data, &prepared); err != nil || prepared.Runtime == nil || prepared.Runtime.InvSeq != fresh.InvSeq || prepared.Runtime.Object == old.Snapshot.Runtime.Object {
+			t.Fatalf("prepared frame unconfirmed: %+v err=%v", prepared, err)
+		}
+		abandonedFrame = prepared.Runtime.Object
+		if _, err := objects.GetBytes(ctx, abandonedFrame); err != nil {
+			t.Fatalf("prepared object missing: %v", err)
+		}
 	}
 	leases, err := all[0].KeyValue(ctx, "WF_LEASE")
 	if err != nil {
@@ -373,9 +420,13 @@ func TestContinuationRetirementReuseAcrossWorkerSIGKILL(t *testing.T) {
 	if !ok || !waitStatus.Signaled() || waitStatus.Signal() != syscall.SIGKILL {
 		t.Fatalf("child did not exit SIGKILL: %v", child.ProcessState)
 	}
-	write("kill-admission.json", map[string]any{"child_pid": child.Process.Pid, "child_live_sdk_sha256": childHash, "parent_sdk_sha256": parentHash, "signal": "SIGKILL", "cut": "after_manifest", "old_generation": first.InvSeq, "fresh_generation": fresh.InvSeq, "held_epoch": held.Epoch, "lease_ttl": status.TTL().String(), "lease_revision": heldEntry.Revision(), "killed_at": killedAt.UTC(), "reclaimed_objects": swept.Deleted})
+	write("kill-admission.json", map[string]any{"child_pid": child.Process.Pid, "child_live_sdk_sha256": childHash, "parent_sdk_sha256": parentHash, "signal": "SIGKILL", "cut": cut, "old_generation": first.InvSeq, "fresh_generation": fresh.InvSeq, "held_epoch": held.Epoch, "lease_ttl": status.TTL().String(), "lease_revision": heldEntry.Revision(), "killed_at": killedAt.UTC(), "reclaimed_objects": swept.Deleted, "abandoned_frame": abandonedFrame, "manifest_published": published != nil})
 	guard := &checkpointNoArchivePort{SnapshotWritePort: journal.NewSnapshotPort(all[2])}
-	successor, err := worker.New(ctx, all[2], "retirement-successor", initial, worker.WithContinuations(retirementKillType, stages), worker.WithJournalStore(journal.NewWithJetStreamSnapshotPort(all[2], guard)))
+	options := []worker.Option{worker.WithContinuations(retirementKillType, stages)}
+	if cut == "after_manifest" {
+		options = append(options, worker.WithJournalStore(journal.NewWithJetStreamSnapshotPort(all[2], guard)))
+	}
+	successor, err := worker.New(ctx, all[2], "retirement-successor", initial, options...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -390,7 +441,7 @@ func TestContinuationRetirementReuseAcrossWorkerSIGKILL(t *testing.T) {
 	if err != nil || string(value) != "2" || latency >= 30*time.Second {
 		t.Fatalf("recovery value=%s elapsed=%s err=%v", value, latency, err)
 	}
-	if guard.archives != 0 || guard.frames == 0 {
+	if cut == "after_manifest" && (guard.archives != 0 || guard.frames == 0) {
 		t.Fatalf("archived prefix accessed: archives=%d frames=%d", guard.archives, guard.frames)
 	}
 	records, _, err := store.Read(ctx, retirementKillType, retirementKillID)
@@ -419,6 +470,9 @@ func TestContinuationRetirementReuseAcrossWorkerSIGKILL(t *testing.T) {
 		counts[line]++
 	}
 	expected := map[string]int{"initial:1": 2, "effect:1": 2, "stage:1": 2, "initial:2": 1, "effect:2": 1, "stage:2": 1}
+	if cut == "before_manifest" {
+		expected["initial:2"] = 2
+	}
 	if len(counts) != len(expected) {
 		t.Fatalf("unknown effect records: %s", data)
 	}
@@ -431,10 +485,19 @@ func TestContinuationRetirementReuseAcrossWorkerSIGKILL(t *testing.T) {
 	if err != nil || report.Invocations != 2 || report.Terminal != 2 {
 		t.Fatalf("raw integrity=%+v err=%v", report, err)
 	}
+	completed, err := store.ReadCheckpoint(ctx, retirementKillType, retirementKillID, fresh.InvSeq)
+	if err != nil || completed == nil || (abandonedFrame != "" && completed.Snapshot.Runtime.Object == abandonedFrame) {
+		t.Fatalf("replacement frame=%+v err=%v", completed, err)
+	}
 	if _, err := retention.SweepBlobsQuiescent(ctx, all[0], 0, time.Now().Add(time.Minute)); err != nil {
 		t.Fatal(err)
 	}
-	assertKept(published.Snapshot.Runtime.Object, kept.Snapshot.Runtime.Object, sharedObject)
-	write("result.json", map[string]any{"old_generation": first.InvSeq, "fresh_generation": fresh.InvSeq, "held_epoch": held.Epoch, "terminal_epoch": terminal.Epoch, "recovery_seconds": latency.Seconds(), "reclaimed_objects": swept.Deleted, "archive_reads": guard.archives, "frame_reads": guard.frames, "effects": 3, "terminals": report.Terminal, "invocations": report.Invocations, "ledger_counts": counts, "shared_and_survivor_and_fresh_references_verified": true, "all_peer_fresh_results_verified": true})
+	assertKept(completed.Snapshot.Runtime.Object, kept.Snapshot.Runtime.Object, sharedObject)
+	if abandonedFrame != "" {
+		if _, err := objects.GetInfo(ctx, abandonedFrame); !errors.Is(err, jetstream.ErrObjectNotFound) {
+			t.Fatalf("orphan frame survived quiescent GC: %v", err)
+		}
+	}
+	write("result.json", map[string]any{"cut": cut, "old_generation": first.InvSeq, "fresh_generation": fresh.InvSeq, "held_epoch": held.Epoch, "terminal_epoch": terminal.Epoch, "recovery_seconds": latency.Seconds(), "reclaimed_objects": swept.Deleted, "archive_reads": guard.archives, "frame_reads": guard.frames, "bounded_resume_required": cut == "after_manifest", "abandoned_frame": abandonedFrame, "completed_frame": completed.Snapshot.Runtime.Object, "abandoned_frame_collected": abandonedFrame != "", "effects": 3, "terminals": report.Terminal, "invocations": report.Invocations, "ledger_counts": counts, "shared_and_survivor_and_fresh_references_verified": true, "all_peer_fresh_results_verified": true})
 	t.Logf("retirement SIGKILL recovery=%s old=%d fresh=%d epoch=%d→%d reclaimed=%d archives=%d frames=%d effects=3 terminals=2", latency, first.InvSeq, fresh.InvSeq, held.Epoch, terminal.Epoch, swept.Deleted, guard.archives, guard.frames)
 }
