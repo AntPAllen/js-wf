@@ -2479,3 +2479,17 @@ This closes the focused positive domain path for this scenario; forced object
 absence confirmation, domain server faults, legacy versions, worker SIGKILL,
 active-writer GC and final-source full matrices/24h remain separate requirements.
 [Complete proof](scale/continuation-retirement-domain-2026-10-05/).
+
+
+### Domain all-three restart admission failure — 2026-10-05
+
+Real-domain retirement candidate actual race runs at444bd43/506ab50/c0252af
+remain failed. Partial records prove all three stopped/new library IDs, but
+post-restart account-info reads yield no healed-domain responses under shared5s
+observation budget;250ms retries do not close it. Completed-fault counter0 fails.
+Fresh workflow result alone does not qualify fault recovery; final peer/integrity
+assertions are not reached. Failed SDK/source/stores/raw admissions preserved.
+Add local server domain/metadata-leader/running and client connection observations
+before cleanup to distinguish fixture routing/reconnect/metadata cases. No server
+cause or domain fault/full-matrix/24h pass. Original30s startup/60s scenario stay.
+[Failed originals](scale/continuation-domain-all-server-restart-2026-10-05/).

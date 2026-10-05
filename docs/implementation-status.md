@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Real-domain all-three restart candidate remains unqualified:**444bd43/
+506ab50/c0252af retained race attempts fail completed-fault admission; the latter
+records three stopped/new server IDs, then zero account-info heal responses under
+shared5s context even with bounded250ms retries. Workflow fresh-result recovery
+alone is not a fault pass; final all-peer/integrity gates are not reached. Complete
+failed originals preserved. Later fixture capture records local configured domain,
+server metadata-leader/running and client connection state before cleanup;
+causality remains unconfirmed. Earlier positive9581ebc domain qualification stays
+within its no-server-outage scope.
+ [Failed original admissions](scale/continuation-domain-all-server-restart-2026-10-05/).
+
 - **Real-domain continuation retirement/reuse qualified:** clean9581ebc
  actual R3 WFRETIRE servers/domain clients, racePASS23.44s under original30s
  startup/60s scenario limits. Generation1→3, two reclaimed objects, old manifest

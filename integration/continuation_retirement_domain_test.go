@@ -102,21 +102,35 @@ func runContinuationRetirementDomain(t *testing.T, restart bool) {
 	if restart {
 		onDrop = func(ctx context.Context) (result error) {
 			cut := struct {
-				Leader    string              `json:"state_leader"`
-				Before    []map[string]string `json:"before"`
-				Stopped   []string            `json:"stopped"`
-				Restarted []string            `json:"restarted"`
-				Healed    []map[string]string `json:"healed"`
-				Started   time.Time           `json:"started"`
-				Finished  time.Time           `json:"finished"`
-				Stage     string              `json:"stage"`
-				Error     string              `json:"error,omitempty"`
-				Scope     string              `json:"scope"`
+				Leader       string              `json:"state_leader"`
+				Before       []map[string]string `json:"before"`
+				Stopped      []string            `json:"stopped"`
+				Restarted    []string            `json:"restarted"`
+				Healed       []map[string]string `json:"healed"`
+				Started      time.Time           `json:"started"`
+				Finished     time.Time           `json:"finished"`
+				Stage        string              `json:"stage"`
+				Error        string              `json:"error,omitempty"`
+				FailureState []map[string]string `json:"failure_state,omitempty"`
+				Scope        string              `json:"scope"`
 			}{Before: identities, Started: time.Now().UTC(), Stage: "state-leader", Scope: "All three actual library servers shutdown and restarted; not SIGKILL or lease-expiry admission"}
 			defer func() {
 				cut.Finished = time.Now().UTC()
 				if result != nil {
 					cut.Error = result.Error()
+					for node := 0; node < 3; node++ {
+						configured := ""
+						if config := cluster.Servers[node].JetStreamConfig(); config != nil {
+							configured = config.Domain
+						}
+						connection := all[node].Conn()
+						cut.FailureState = append(cut.FailureState, map[string]string{
+							"name": cluster.Servers[node].Name(), "id": cluster.Servers[node].ID(),
+							"running":           strconv.FormatBool(cluster.Servers[node].Running()),
+							"meta_leader":       strconv.FormatBool(cluster.Servers[node].JetStreamIsLeader()),
+							"configured_domain": configured, "connection_status": connection.Status().String(), "connected_url": connection.ConnectedUrl(),
+						})
+					}
 				}
 				data, err := json.MarshalIndent(cut, "", "  ")
 				if err == nil {
