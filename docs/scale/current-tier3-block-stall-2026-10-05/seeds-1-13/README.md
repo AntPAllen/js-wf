@@ -4,7 +4,7 @@ Run37164231641/job111324443122/artifact11326530113 completes thirteen original
 600s workloads at recorded79915ca. Independent metadata/raw fault/history/
 latency/cohort checks and three rebuilt history models accept40964 invocations,
 451209 journal entries,247 actual five-second device stalls and52668 exactOk
-operations. There are143 completed cohort audits. Worst terminal/progress type
+operations. There are142 completed cohort audits. Worst terminal/progress type
 p99=9.044138040s/0.647209096s, within the original30s gates.
 
 Each fault admits both R5 WF_RUN/WF_JRN leaders on node4's same writable `/data`

@@ -33,7 +33,7 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 - **First recorded-source actual disk-stall shard independently accepted:**
   Tier3 block_disk seeds1–13 at79915ca complete original600s/19 cuts per seed,
  40964 invocations/451209 entries/247 real five-second device suspensions/
- 52668 exactOk operations and143 completed cohort audits. Same writable node4
+ 52668 exactOk operations and142 completed cohort audits. Same writable node4
  store/device and both R5 journal/dispatch leaders admitted before each cut;
  blocked sync/resume/recovery identities and original30s gates verified. Worst
  terminal/progress p99=9.044s/0.647s. Actual models/45 Git-bound dependencies/raw

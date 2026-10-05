@@ -2338,7 +2338,7 @@ blanket final-source qualification follows from this focused adapter acceptance.
 
 The first complete Tier3 block_disk shard at79915ca independently qualifies
 thirteen original600s cases/247 real five-second device-mapper suspensions,
-40964 invocations/451209 entries/52668 exactOk history operations/143 cohort
+40964 invocations/451209 entries/52668 exactOk history operations/142 cohort
 checks. Node4 same writable filesystem/device and both R5 WF_RUN/WF_JRN leaders
 are admitted at every cut; blocked sync returns after resume starts. Original
 30s gates hold (worst terminal/progress p99=9.044s/0.647s). Three model builds
