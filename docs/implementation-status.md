@@ -166,7 +166,7 @@ trace dependencies before another full run. [Preserved failed proof](scale/postg
   Nineactualworker generations includeallsixfaulttargets, sameSDKbytes andclosedPIDs;
   fullsource/originalstore proofreadback. d893389portablecopiedcommand rechecks
   histories/140/1550integrity/allthreequeue/64durable drain in4.208218s under20s,
-  original2091filesunchanged. No ten-minute/fullmatrix workeracceptance yet.
+  original2091filesunchanged. No ten-minute/fullmatrix workeracceptance yet. Originalten-minute seed1 nowruns at75bcf76, actualSDK506536 verifiedlive.
   [Native smoke](scale/tier2-retained-row-2026-10-05/worker-smoke/),
   [ordinary copied review](scale/tier2-retained-row-2026-10-05/worker-smoke-copied-audit/).
 
