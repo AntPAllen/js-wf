@@ -2604,3 +2604,15 @@ Python positive/six corrupt-missing controls and wrong-row producer rejection
 pass; native profile qualification pending. Needs protoc/Python protobuf for
 independent decoding. Full protobuf rolling/chaos and current-source matrices
 remain open; this profile is additive and does not replace an original row.
+
+### Mixed-encoding worker replacement admission smoke accepted — 2026-10-05
+
+Cleanbb79fa2 native normal seed1/35s smoke passes140.67s including startup/cleanup:
+56inv/621entries/6SIGKILL, three mixed-owner invocations. Independent Python codec
+decodes266protobuf/355JSON worker entries and checks admitted generation/PID.
+Actual parent/five then-running SDKs/1,333 selected source inputs verify; three
+rebuilt history models exactOk72operations/52Git dependencies. All5,206 original
+and70outer archive members/parts verify. Native broker executable/store provenance
+is named-test scope, not independently captured live-container binary hashes.
+Smoke only; ten-minute/24h mixed-encoding, default-profile/current-source matrices
+and full rolling/chaos remain open. No deadlines or fault gates changed.

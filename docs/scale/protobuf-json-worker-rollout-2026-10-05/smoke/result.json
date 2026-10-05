@@ -1,0 +1,71 @@
+{
+  "scope": "single five-container R5 worker SIGKILL row",
+  "seed": 1,
+  "duration_seconds": 35,
+  "common_timer_clock": null,
+  "clock_timer_cut_profile": null,
+  "shortened_smoke": true,
+  "invocations": 56,
+  "journal_entries": 621,
+  "confirmed_faults": 6,
+  "active_consumer_faults": null,
+  "cells": {
+    "matrixshort": {
+      "invocations": 8,
+      "terminal_p99_seconds": 9.604502746,
+      "progress_p99_seconds": 7.332348239
+    },
+    "matrixtimer": {
+      "invocations": 6,
+      "terminal_p99_seconds": 0.748887995,
+      "progress_p99_seconds": 13.418064308
+    },
+    "matrixsignal": {
+      "invocations": 4,
+      "terminal_p99_seconds": 4.709702289,
+      "progress_p99_seconds": 0.29504411399999997
+    },
+    "matrixfanout": {
+      "invocations": 2,
+      "terminal_p99_seconds": 1.388567832,
+      "progress_p99_seconds": 3.414387109
+    },
+    "matrixchild": {
+      "invocations": 12,
+      "terminal_p99_seconds": 2.793131333,
+      "progress_p99_seconds": 4.990464584
+    },
+    "matrixgrandchild": {
+      "invocations": 24,
+      "terminal_p99_seconds": 5.409276664,
+      "progress_p99_seconds": 4.925623696
+    }
+  },
+  "clears_full_tier3_release": false,
+  "journal_rollout_checks": {
+    "profile": "protobuf-to-json",
+    "invocations": 56,
+    "mixed_invocations": 3,
+    "protobuf_worker_entries": 266,
+    "json_worker_entries": 355,
+    "schema_sha256": "244a4755a90afe0ffb72ffa843a1b2ff7f7afb6b78adbbd919d302a36c83ef94",
+    "generated_codec_sha256": "205e4da5a338e8a22818030f51d310d8918d8cafc404ab99e2795ba6aa8b9504",
+    "all_retained_wire_bytes_independently_decoded": true,
+    "qualifies_default_writer_profile": false,
+    "clears_full_tier3_release": false
+  },
+  "worker_artifact_checks": {
+    "confirmed_sigkills": 6,
+    "confirmed_held_delivery_kills": 3,
+    "process_generations": 11,
+    "graceful_counter_cross_checks": 5,
+    "interrupted_tails": 0,
+    "killed_process_final_counters_available": false,
+    "complete_hard_kill_attribution": false
+  },
+  "checkpoint_audit_checks": {
+    "completed_cohort_audits": 0,
+    "all_expected_checkpoints_present": true,
+    "scope": "Captured completed cohorts; mandatory final whole-state check remains separate."
+  }
+}

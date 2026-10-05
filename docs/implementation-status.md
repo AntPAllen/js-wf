@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Mixed-encoding worker replacement admission smoke passed:** bb79fa2 normal
+  2GiB/GOMAX2/35s, native140.67s inclstartup/cleanup,56inv/621entries/6SIGKILL.
+  Three invocations cross protobuf initial owner/JSON successor; independent
+  Python codec decodes266protobuf/355JSON worker entries against generation/PID.
+  Actual live parent/five then-running child SDK hashes/buildfields and1,333
+  Git/before-after inputs verify. Rebuilt three models exactOk72operations with
+  52Git dependencies. All5,206 original and70outer archive members/parts verify.
+  Broker binary/store named-test scope; not every SDK generation/live container
+  independently captured. Smoke only, no sustained/default/fullmatrix/24h pass.
+  [Complete smoke originals and review](scale/protobuf-json-worker-rollout-2026-10-05/smoke/).
+
 - **Sustained mixed-encoding worker replacement fixture prepared:** explicit
   protobuf-to-json worker_kill profile, initial5 protobuf writers/replacementsJSON,
   raw per-invocation wire capture and mandatory mixed-writer recovery. Generated
