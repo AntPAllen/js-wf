@@ -3050,3 +3050,17 @@ race compile/opt-in skip passed1.083s. Original500children/five-minute case and
 30s cut-admission budgets unchanged. Full changed matrix pending; original failed
 matrix stays failed, no production decision or historical server-cause claim.
 [Complete diagnostics and correction](scale/fanout-combined-boundaries-2026-10-05/).
+
+### Reproducible combined fanout campaign producer and CI — 2026-10-05
+
+`scripts/run-fanout-combined-test.py` ports the retained local campaign to a
+fresh absolute root outside a clean checkout, selectable int64 seed, unchanged
+500children/six first-interior-last boundaries/five-minute cases/35-minute native
+limit/race/GOMAX2/2GiB. Captures exact producer Git bytes, selected Go/module and
+external inputs before/after, actual parent executable and native outcome,
+commands and alloriginals. Manual `fanout-combined-boundaries.yml` runs nine
+acceptance controls and the full producer, then requires allsix combined passes;
+always uploads the whole root including hidden files and SDK/store bytes.
+Source and workflow syntax checked. Workflow not dispatched/qualified yet;
+corrected local actualSDK342837 at161dfa9 remains live and separately bound.
+No full fault matrix or24h promotion.

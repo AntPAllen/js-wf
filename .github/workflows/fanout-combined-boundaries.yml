@@ -1,0 +1,45 @@
+name: fanout-combined-boundaries
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: Seed for interior boundaries; endpoints remain 0 and 499
+        required: true
+        type: number
+        default: 1
+permissions:
+  contents: read
+jobs:
+  combined:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 2GiB
+      EVIDENCE_ROOT: ${{ runner.temp }}/fanout-combined-proof
+      FAULT_SEED_INPUT: ${{ inputs.seed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Acceptance controls
+        run: python3 -m unittest discover -s scripts -p test_fanout_boundary_matrix.py
+      - name: Full six-boundary race run with original limits
+        timeout-minutes: 40
+        run: python3 scripts/run-fanout-combined-test.py --root "$EVIDENCE_ROOT" --seed "$FAULT_SEED_INPUT"
+      - name: Require all six combined boundaries
+        run: |
+          go tool test2json -p js-wf/integration < "$EVIDENCE_ROOT/native.log" > "$EVIDENCE_ROOT/converted-events.jsonl"
+          python3 scripts/check-fanout-boundary-matrix.py --combined --events "$EVIDENCE_ROOT/converted-events.jsonl" --output "$EVIDENCE_ROOT/acceptance.json"
+      - name: Retain complete originals and executable evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fanout-combined-boundaries-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.EVIDENCE_ROOT }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
