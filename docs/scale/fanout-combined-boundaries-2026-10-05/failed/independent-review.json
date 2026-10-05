@@ -1,0 +1,79 @@
+{
+  "source": "e20cf89b4ac9e1d687d3b883ccaf2cb7b2ec53e0",
+  "actual_parent_sdk_sha256": "c78f63640d3bee637800163374f3975c81636cff6513b847096dc5cd5475c98f",
+  "selected_git_inputs_verified": 665,
+  "selected_external_inputs_verified": 3287,
+  "native_status": "failed",
+  "native_seconds": 1046.21,
+  "cases": [
+    {
+      "case": "create/first",
+      "native_status": "PASS",
+      "seconds": 109.59,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 3,
+      "prefix_tail_sequence": 3,
+      "journal_live_messages": 3,
+      "journal_tail_sequence": 3
+    },
+    {
+      "case": "create/interior",
+      "native_status": "PASS",
+      "seconds": 117.42,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 765,
+      "prefix_tail_sequence": 765,
+      "journal_live_messages": 765,
+      "journal_tail_sequence": 765
+    },
+    {
+      "case": "create/last",
+      "native_status": "PASS",
+      "seconds": 122.51,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 1001,
+      "prefix_tail_sequence": 1001,
+      "journal_live_messages": 1001,
+      "journal_tail_sequence": 1001
+    },
+    {
+      "case": "results/first",
+      "native_status": "FAIL",
+      "seconds": 306.2,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 1494,
+      "prefix_tail_sequence": 3454,
+      "journal_live_messages": 3454,
+      "journal_tail_sequence": 3454
+    },
+    {
+      "case": "results/interior",
+      "native_status": "FAIL",
+      "seconds": 305.23,
+      "actual_parent_sigkill_and_library_restart_admitted": true,
+      "prefix_records": 2223,
+      "prefix_tail_sequence": 4194,
+      "journal_live_messages": 2210,
+      "journal_tail_sequence": 4194
+    },
+    {
+      "case": "results/last",
+      "native_status": "FAIL",
+      "seconds": 85.26,
+      "actual_parent_sigkill_and_library_restart_admitted": false
+    }
+  ],
+  "full_combined_matrix_qualified": false,
+  "acceptance_checker_rejects_failed_matrix": true,
+  "checker_git_source": "5018d4765abe81caa86df1175eb105771e58ac9e",
+  "checker_sha256": "616b77e01bf2a8260a676407fa2085c9596da759ae6411888b796aebb43c1d2a",
+  "limitations": [
+    "Native R3 servers embedded in race SDK; no separate server process SIGKILL.",
+    "Original stores closed; no independent reopen yet.",
+    "Creation integrity/prefix assertions have named-test scope.",
+    "Conversion timestamps are not original execution timestamps.",
+    "Snapshot-purged live message count cannot bound reconstructed prefix length.",
+    "First/interior recovery cause and last boundary non-admission cause unconfirmed.",
+    "Selected source inventory excludes exhaustive assembly/embed/compiler inputs."
+  ]
+}

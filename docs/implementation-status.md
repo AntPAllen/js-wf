@@ -50,6 +50,16 @@ reopen or completed combined-matrix qualification claimed.
 
 ## Latest preserved failures
 
+The full combined500-child six-boundary race matrix at e20cf89 failed1046.21s.
+Creation first/interior/last passed; results first/interior admitted parentSIGKILL
+plus library journal restart then hit original five-minute deadline. Results last
+failed cut admission within original30s; no combinedfault there. ActualSDK/
+665Gitinputs/3287selectedexternal inputs verified, all16913 archive members/
+threeparts read back. Guard rejects failed matrix; original stores closed,
+copy-only diagnosis prepared. Causes remain unconfirmed; no combinedmatrix/
+fullmatrix/24h qualification. Snapshot-count guard issue separately recorded.
+[Complete failed matrix proof](scale/fanout-combined-boundaries-2026-10-05/).
+
 The corrected full PostgreSQL case at `e6c124f` also failed (494.71s). All50000
 results/lag100000 and faults at78rows verified; workflowqueue drained/workers
 joined, clients refreshed, allfour R3 projection sources current. Bounded trace

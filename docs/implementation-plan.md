@@ -3022,3 +3022,15 @@ is only at executed79915ca. Original runner did not retain workloadSDK,
 exhaustive source inventory or physical stores; final drain named-test scope.
 Full200/current-source/full matrices/24h and failed parent remain open.
 [Complete174-seed ledger](scale/current-tier3-block-stall-2026-10-05/).
+
+### Combined500-child boundary matrix failure preserved — 2026-10-05
+
+Executed e20cf89 race matrix failed1046.21s. All three creation boundaries passed;
+first/interior result boundaries admitted both faults then hit original five-minute
+deadline, last result did not reach its cut within original30s. ActualSDK/source
+before-after/childSDK/restart proof verified;16913 archive members/threeparts
+readback. Failed matrix remains failed. Causes unconfirmed, no unchanged rerun;
+read-only fresh copied-store diagnosis prepared. Snapshot-purged count cannot
+bound reconstructed prefix length; require tail-sequence observation plus exact
+prefix equality in future guard instrumentation. Original gates unchanged.
+[Complete failed matrix proof](scale/fanout-combined-boundaries-2026-10-05/).
