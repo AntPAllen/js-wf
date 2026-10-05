@@ -3871,3 +3871,13 @@ Independent source/executable/server/mount/closure review completes; fullclosed
 archive preservation is running, not yet accepted. ChangedCPU/GC alone doesnot
 qualify capacity. Iterator heartbeat and adapter delivery overhead are next.
 [Result](scale/compact-audit-metadata-2026-10-05/four-core-400k-comparison/).
+
+### Native delivery cost comparison and fullfour-core evidence accepted — 2026-10-05
+
+The failed400k changedCPU/GC profile is fully archived/read back. Normal R3
+delivery-only diagnostic atd0a08e6 passes6.99s, validates every100k x128Brecord
+and consumercleanup. DirectNext/adapter/Consume/Nextrecheck370/380/327/361ms,
+with linkedserver allocation activity included. This supports a callback delivery
+candidate measurement, not a fullcapacity/integrity/fault/default adoption.
+Complete1084-member archive and selectedsource/actualSDK closure reviewed.
+[Delivery measurement](scale/audit-delivery-cost-2026-10-05/native-comparison/).

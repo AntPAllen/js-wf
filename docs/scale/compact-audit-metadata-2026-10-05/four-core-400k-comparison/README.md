@@ -18,9 +18,7 @@ capacity; no reader default adoption, server defect or24h qualification is claim
 Independent review checks673 selected Git inputs, actual SDK executable, five
 observed server binaries/modules/mounts, closed processes and1058 unchanged original
 store files. This source capture does not cover every external compiler input.
-The reviewer is preserving the complete closed fixture in a verified archive;
-archive qualification is pending until archive-verification.json is present and
-the tracked reviewer service exits successfully.
+Complete closed evidence is preserved in a read-back-verified1707-member /24-part archive (605,617,086bytes). The tracked reviewer service exits successfully; archive metadata records every part and concatenated SHA.
 
 Next work should measure iterator heartbeat and adapter delivery overhead.
 Another unchanged configuration rerun would not resolve the capacity failure.

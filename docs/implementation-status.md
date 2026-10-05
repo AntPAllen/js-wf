@@ -28,6 +28,17 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 21:10 UTC
+
+Four-core failed400k comparison archive is complete and independently read back.
+An opt-in normal R3 delivery diagnostic at d0a08e6 passes6.99s: exact100k x128B
+records on directNext/adapter/Consume/Nextrecheck take370/380/327/361ms.
+Consume allocates212MB versus252MB Nextrecheck, including linkedserver activity.
+Single ordered quiet test supports investigating callback delivery but doesnot
+isolate heartbeat cost or qualify full400k integrity/fault/cancel/24h/defaults.
+Complete1084-member onepart archive verified; selected Git/actual SDK/closure
+independently reviewed. [Delivery evidence](scale/audit-delivery-cost-2026-10-05/native-comparison/).
+
 ## Latest follow-up — 2026-10-05 21:05 UTC
 
 The explicit four-core/GOGC200/same2GiB full400k comparison fails77.25s at
