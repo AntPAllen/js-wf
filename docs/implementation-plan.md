@@ -3355,3 +3355,16 @@ full retained integrity/counts plus all-three-client physical queue and64durable
 pending/ack state within the original20s audit deadline. No workers/manualACK
 or original-store reopen. Helper compilation and copied execution remain pending;
 this does not replace native fault or full-matrix qualification.
+
+### Copied matrix smoke succeeds; observer task-thread gap identified — 2026-10-05
+
+Fresh copies of closed journal-smoke process stores passed full196/2156 retained
+integrity, independently rechecked three history models and all-three-client
+queue/64durable drain. Audit198.5ms/full read4.212s under20s. Originalfiles unchanged.
+The helper's actualSDK was observed, but zero server executable observations were
+captured. Inspection identifies a coverage gap: Linux children files belong to
+individual task threads, and v1 only traverses the main task. Go may launch server
+processes from another thread. Existing observed executable records remain valid;
+exhaustive coverage was never claimed. V2 traverses every task's children. Current
+live partition producer's source stays unchanged; changed copied observation will
+use v2. Full independent server provenance review remains pending.
