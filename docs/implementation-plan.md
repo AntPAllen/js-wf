@@ -2558,4 +2558,7 @@ raw JSON terminal bytes, higher successor epoch, bounded checkpoint resume,
 exact effects and all-peer result/integrity/GC checks under original deadlines.
 The new journal constructor combines existing encoding selection and supplied
 snapshot transport so fault injection does not replace the selected writer.
-Native qualification pending; full protobuf rolling/chaos remains open.
+Native07a419c racePASS35.43s/recovery12.747s/epoch51→62; actual protobuf
+anchor independently decoded by generated Python codec and successor JSON
+terminal decoded. One frame/zero archive/exact effects/all-peer/raw integrity/
+quiescent GC checks pass; full protobuf rolling/chaos remains open.

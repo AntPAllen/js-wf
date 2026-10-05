@@ -1,0 +1,9 @@
+# Protobuf continuation worker SIGKILL to JSON successor
+
+Clean source `07a419c`, retained race SDK, actual three-process R3 cluster. Native PASS35.43s, recovery12.746817344s, owner epoch51→62. Original TTL12/startup30s/scenario60s/recovery under30s unchanged.
+
+Retire generation1/collect two objects while survivor/shared references remain live; reuse generation3 rejects old manifest. Fresh child writes protobuf-v1 entries and publishes checkpoint, then parent verifies held owner, actual stored protobuf anchor and actual live child executable before reaping SIGKILL. JSON-writing successor resumes using one checkpoint frame and zero archived-prefix reads, executes fresh effect/stage once, and all three peers return2. Three effects/two terminals/raw integrity plus survivor/shared/fresh frame retention after quiescent GC pass.
+
+Independent reviewer regenerates Python protobuf codec from the schema matching recorded Git and decodes actual persisted anchor (version1/storage sequence0/StepCompleted/epoch51/content reference). It independently decodes raw JSON terminal(epoch62/Completed/successor owner). Initial reviewer expected uppercase JSON fields and rejected; exact rejected script retained, lower-case schema reader corrected without repeating native work.
+
+Actual parent/child race SDK hashes/full clean build fields, three actual native server executable/build captures and651 selected repository Go/module inputs/copied source/Git/before-after ledgers verify. Full archived original member/part readback documented in archive-verification.json. Stores retained, not independently reopened; repository input inventory is not exhaustive toolchain/external/assembly provenance. Focused protobuf-write to JSON-write crash recovery, not complete rolling version/chaos/domain fault coverage, online GC, matrices or24h. Tier1 modeled graph unchanged; existing encoding/write paths merely composed with snapshot fault transport.

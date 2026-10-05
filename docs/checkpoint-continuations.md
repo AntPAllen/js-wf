@@ -987,4 +987,7 @@ protobuf checkpoint anchor, reaps the owner with SIGKILL, then resumes with a
 JSON writer. It verifies persisted wire formats, successor fencing, bounded
 checkpoint reads, effect counts and quiescent GC retention. The opt-in fixture
 uses the original30s recovery/12s lease/60s scenario gates. Native qualification
-is pending; this does not yet qualify a rolling/chaos matrix.
+passed at07a419c: race35.43s, recovery12.747s, epoch51→62, actual stored
+protobuf anchor independently decoded with generated Python codec and raw JSON
+terminal decoded. One frame/zero archive/exact effects/all-peer/integrity/GC
+checks pass. Full rolling/chaos remains open.

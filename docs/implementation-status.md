@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Protobuf checkpoint worker SIGKILL to JSON successor qualified:** clean
+  07a419c racePASS35.43s, recovery12.747s under30s, epoch51→62. Actual persisted
+  protobuf checkpoint anchor before reapedSIGKILL, successor raw JSON terminal,
+  one frame/zero archive reads, exactly three effects/two terminals, all-peer/raw
+  integrity/shared-survivor-fresh GC retention pass. Independently generated
+  Python codec decodes stored anchor using recorded-Git schema; JSON terminal
+  decoded independently. Actual SDKs/three native servers/651 selected source
+  inputs verify. Rejected uppercase reviewer retained/corrected without rerun.
+  Full rolling/chaos/domain/onlineGC/matrices/24h remain open.
+  [Complete mixed-encoding crash originals](scale/continuation-retirement-protobuf-sigkill-2026-10-05/).
+
 - **Disk-stall seeds79–104 independently accepted:** two original thirteen-seed
   shards at79915ca, 79,744inv/878,223entries,
   494 admitted5s device stalls, 273 completed cohort audits and
