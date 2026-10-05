@@ -10,8 +10,9 @@ all originals and exited successfully. Result: 63 batches, 1,764 invocations,
 Worst terminal/progress p99 15.689s/10.203s, within original30s gates.
 865 acknowledged coordinator writes, 64 partitions, five workers,36 rejoin events.
 
-This is a fresh native and producer-checked single-seed pass. Independent model
-replay and final qualification review remain pending. It does not explain or
+This is a fresh native and producer-checked single-seed pass. Independent replay of all2,272 history operations now passes all three exactOk
+models at the executed revision; dependencies/binary/outputs are preserved in
+../seed1-model-review. This accepts the focused executed-source seed1. It does not explain or
 erase the older79915ca automatic-membership failures, qualify seeds2–200, or
 clear the full Tier3/current-source/24h gates. Shared VM load includes the failed
 journal soak and live million campaign. No failed-workload stack is expected on

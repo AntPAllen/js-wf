@@ -2390,7 +2390,8 @@ omits Messages/Next, so delivery versus throughput remains unresolved. Preserve
 all originals and instrument this gap before another unchanged soak. Concurrent
 fresh automatic-membership startup/faults and million campaign are recorded;
 no causality established. Fresh cadb346 original10m/race/default-route seed1
-passes native/producer checks (1764inv/19427entries/19faults), with independent
-model qualification pending. Both complete originals independently read back.
+passes native/producer checks (1764inv/19427entries/19faults), and all2272 history
+operations pass three independently rebuilt exactOk models. This accepts only
+the focused executed-source seed1. Both complete originals independently read back.
 [Failed soak](scale/byte-bounded-audit-2026-10-05/24h-failed-1750/) ·
 [Terminal diagnostic](scale/current-tier3-automatic-membership-2026-10-05/seed1-terminal/).

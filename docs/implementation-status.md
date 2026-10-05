@@ -39,10 +39,12 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
  All6976 archive members/physical originals and source-before/after verify.
  Fresh cadb346 original10m automatic-membership seed1 passes770.03s with1764
  invocations/19427entries/19faults/six cohort audits; producer row/event/fencing
- checks pass. All5324 archived/physical originals verify. Independent model
- replay/qualification pending; no old-cause/full-row/full-matrix/24h promotion.
+ checks pass. All5324 archived/physical originals verify. All2272 history operations pass three independently rebuilt exactOk models;
+ actual dependency inputs/binary retained. Focused executed-source seed1 accepted;
+ no old-cause/full-row/full-matrix/24h promotion.
  [Failed soak](scale/byte-bounded-audit-2026-10-05/24h-failed-1750/) ·
- [Terminal automatic-membership pass](scale/current-tier3-automatic-membership-2026-10-05/seed1-terminal/).
+ [Terminal automatic-membership pass](scale/current-tier3-automatic-membership-2026-10-05/seed1-terminal/) ·
+ [Independent history models](scale/current-tier3-automatic-membership-2026-10-05/seed1-model-review/).
 
 
 - **Fresh automatic-membership seed1 diagnostic confirmed live:** isolated clean
