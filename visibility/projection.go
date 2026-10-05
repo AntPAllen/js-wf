@@ -533,47 +533,67 @@ func (p *Projection) enqueueRetainedInvocations(ctx context.Context, through uin
 	if err != nil {
 		return err
 	}
+	return enqueueProjectionInvocations(ctx, consumer, through, jobs)
+}
+
+// Keep one continuous ordered iterator. Ordered Fetch recreates its consumer
+// for every batch, whereas Messages retains it and recovers a lost consumer.
+// A missing delivery never proves the source is empty: confirm the remaining
+// count after a quiet read, and preserve any permanent or unexpected error.
+func enqueueProjectionInvocations(ctx context.Context, consumer jetstream.Consumer, through uint64, jobs chan<- uint64) error {
+	iterator, err := consumer.Messages(jetstream.PullMaxMessages(256), jetstream.PullExpiry(time.Second))
+	if err != nil {
+		return err
+	}
+	stopped := make(chan struct{})
+	stopOnCancel := context.AfterFunc(ctx, func() {
+		iterator.Stop()
+		close(stopped)
+	})
+	defer func() {
+		if !stopOnCancel() {
+			<-stopped
+		}
+		iterator.Stop()
+	}()
+	var observed uint64
 	for ctx.Err() == nil {
-		batch, err := consumer.Fetch(256, jetstream.FetchMaxWait(time.Second))
+		call, cancel := context.WithTimeout(ctx, time.Second)
+		msg, err := iterator.Next(jetstream.NextContext(call))
+		cancel()
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
 		if err != nil {
-			if !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
+			if !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
 				return err
 			}
-			info, infoErr := consumer.Info(ctx)
-			if infoErr != nil {
-				return infoErr
+			info, err := consumer.Info(ctx)
+			if err != nil {
+				return err
 			}
-			if info.NumPending == 0 {
+			// AckNone delivery can be buffered or in flight after the server's
+			// pending count reaches zero. Finish only after every reported
+			// delivery was actually observed by this reader.
+			if info.NumPending == 0 && info.Delivered.Stream == observed {
 				return nil
 			}
 			continue
 		}
-		var done bool
-		for msg := range batch.Messages() {
-			metadata, err := msg.Metadata()
-			if err != nil {
-				return err
-			}
-			if metadata.Sequence.Stream > through {
-				done = true
-				continue
-			}
-			if done {
-				continue
-			}
-			select {
-			case jobs <- metadata.Sequence.Stream:
-			case <-ctx.Done():
-				return ctx.Err()
-			}
-			if metadata.NumPending == 0 {
-				done = true
-			}
-		}
-		if err := batch.Error(); err != nil && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, jetstream.ErrNoMessages) {
+		metadata, err := msg.Metadata()
+		if err != nil {
 			return err
 		}
-		if done {
+		if metadata.Sequence.Stream > through {
+			return nil
+		}
+		select {
+		case jobs <- metadata.Sequence.Stream:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+		observed = metadata.Sequence.Stream
+		if metadata.NumPending == 0 {
 			return nil
 		}
 	}

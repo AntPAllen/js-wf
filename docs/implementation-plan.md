@@ -2926,3 +2926,19 @@ Messages/Consume; sourceobservation not servercause proof. Investigate continuou
 iterator/context/cleanup controls before changedfullrun; no unchangedrerun,
 smallerpopulation qualification or historicalfailure promotion. Fullgates open.
 [Complete refreshed failed proof](scale/postgres-projection-fault-50000-2026-10-05/refreshed/).
+
+### 2026-10-05 continuous PostgreSQL rebuild source reader
+
+The source now keeps one ordered Messages iterator with a256-message buffer,
+originalretainedinput watermark and context-driven stop/join. It no longer
+recreates an ordered consumer on eachFetch batch. SDK iterator recovery handles
+consumer deletion; surfaced permanent/iterator/noresponder failures remainerrors,
+not an empty-source pass. Quiet reads require zero serverpending AND equality of
+serverdelivered and actuallyobserved sequence, preventing an in-flight delivery
+from certifying completeness. Native R3file control deletes the actual consumer
+and recovers exactly600 retainedinputs across real sequenceholes, racePASS5.91s;
+1000 seededhole/watermark controls and errors/cleanup/cancellation controls pass.
+Initial nativecontrol failed beforefault at streamcreation; source/log retained,
+corrected with boundedreadiness under same30s control deadline. Full50000 original
+20m combinedcase stillneeds changedsource qualification; historicservercause and
+failedparents unconfirmed/unpromoted. DefaultKV path unchanged.
