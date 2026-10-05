@@ -37,6 +37,17 @@ func NewWithEncoding(js jetstream.JetStream, encoding Encoding) (*Store, error) 
 	return store, nil
 }
 
+// NewWithEncodingAndSnapshotPort combines selected journal writes with a snapshot
+// transport. Readers continue accepting both JSON and versioned protobuf.
+func NewWithEncodingAndSnapshotPort(js jetstream.JetStream, encoding Encoding, port SnapshotWritePort) (*Store, error) {
+	if err := validateEncoding(encoding); err != nil {
+		return nil, err
+	}
+	store := NewWithJetStreamSnapshotPort(js, port)
+	store.encoding = encoding
+	return store, nil
+}
+
 // NewWithEncodedPorts exercises the same writer and decoder through modeled I/O.
 func NewWithEncodedPorts(appendPort AppendPort, readPort ReadPort, encoding Encoding) (*Store, error) {
 	if err := validateEncoding(encoding); err != nil {

@@ -100,7 +100,11 @@ func TestRetirementKillChild(t *testing.T) {
 		t.Fatal("unsupported retirement kill cut")
 	}
 	port := &retirementKillSnapshotPort{SnapshotWritePort: journal.NewSnapshotPort(js), cut: cut, marker: os.Getenv("WF_RETIREMENT_KILL_MARKER")}
-	w, err := worker.New(context.Background(), js, "retirement-killed", initial, worker.WithContinuations(retirementKillType, stages), worker.WithJournalStore(journal.NewWithJetStreamSnapshotPort(js, port)))
+	store, err := journal.NewWithEncodingAndSnapshotPort(js, journal.Encoding(os.Getenv("WF_RETIREMENT_KILL_ENCODING")), port)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, err := worker.New(context.Background(), js, "retirement-killed", initial, worker.WithContinuations(retirementKillType, stages), worker.WithJournalStore(store))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,14 +128,18 @@ func retirementKillFileHash(path string) (string, error) {
 }
 
 func TestContinuationRetirementReuseAcrossWorkerSIGKILL(t *testing.T) {
-	runRetirementWorkerKill(t, "after_manifest")
+	runRetirementWorkerKill(t, "after_manifest", journal.JSON)
 }
 
 func TestContinuationRetirementReuseBeforeManifestWorkerSIGKILL(t *testing.T) {
-	runRetirementWorkerKill(t, "before_manifest")
+	runRetirementWorkerKill(t, "before_manifest", journal.JSON)
 }
 
-func runRetirementWorkerKill(t *testing.T, cut string) {
+func TestContinuationRetirementProtobufWorkerSIGKILLToJSONSuccessor(t *testing.T) {
+	runRetirementWorkerKill(t, "after_manifest", journal.ProtobufV1)
+}
+
+func runRetirementWorkerKill(t *testing.T, cut string, encoding journal.Encoding) {
 	t.Helper()
 	root := os.Getenv("WF_RETIREMENT_KILL_ROOT")
 	if root == "" {
@@ -335,7 +343,7 @@ func runRetirementWorkerKill(t *testing.T, cut string) {
 		t.Fatal(err)
 	}
 	child := exec.Command(executable, "-test.run=^TestRetirementKillChild$")
-	child.Env = append(os.Environ(), "WF_RETIREMENT_KILL_CHILD=1", "WF_RETIREMENT_KILL_URL="+cluster.ClientURL(0), "WF_RETIREMENT_KILL_LOG="+effectLog, "WF_RETIREMENT_KILL_MARKER="+marker, "WF_RETIREMENT_KILL_CUT="+cut)
+	child.Env = append(os.Environ(), "WF_RETIREMENT_KILL_CHILD=1", "WF_RETIREMENT_KILL_URL="+cluster.ClientURL(0), "WF_RETIREMENT_KILL_LOG="+effectLog, "WF_RETIREMENT_KILL_MARKER="+marker, "WF_RETIREMENT_KILL_CUT="+cut, "WF_RETIREMENT_KILL_ENCODING="+string(encoding))
 	child.Stdout, child.Stderr = output, output
 	if err := child.Start(); err != nil {
 		t.Fatal(err)
@@ -393,6 +401,21 @@ func runRetirementWorkerKill(t *testing.T, cut string) {
 		if _, err := objects.GetBytes(ctx, preparedFrame); err != nil {
 			t.Fatalf("prepared object missing: %v", err)
 		}
+	}
+	if encoding == journal.ProtobufV1 {
+		stream, err := all[2].Stream(ctx, "WF_JRN")
+		if err != nil {
+			t.Fatal(err)
+		}
+		raw, err := stream.GetMsg(ctx, published.Anchor.Sequence)
+		var entry journal.Entry
+		if err != nil || !bytes.HasPrefix(raw.Data, []byte{'W', 'F', 'J', 0}) || journal.UnmarshalEntry(raw.Data, &entry) != nil || entry.Kind != journal.StepCompleted || entry.Epoch != published.Anchor.Epoch {
+			t.Fatalf("protobuf anchor not retained: err=%v entry=%+v", err, entry)
+		}
+		if err := os.WriteFile(filepath.Join(root, "protobuf-anchor.bin"), raw.Data, 0600); err != nil {
+			t.Fatal(err)
+		}
+		write("encoding-admission.json", map[string]any{"encoding": encoding, "sequence": raw.Sequence, "epoch": entry.Epoch, "kind": entry.Kind, "sha256": fmt.Sprintf("%x", sha256.Sum256(raw.Data))})
 	}
 	leases, err := all[0].KeyValue(ctx, "WF_LEASE")
 	if err != nil {
@@ -452,6 +475,20 @@ func runRetirementWorkerKill(t *testing.T, cut string) {
 	if terminal.Kind != journal.Completed || terminal.Epoch <= held.Epoch {
 		t.Fatalf("terminal did not fence killed owner: %+v held=%d", terminal, held.Epoch)
 	}
+	if encoding == journal.ProtobufV1 {
+		stream, err := all[2].Stream(ctx, "WF_JRN")
+		if err != nil {
+			t.Fatal(err)
+		}
+		raw, err := stream.GetMsg(ctx, terminal.Sequence)
+		var entry journal.Entry
+		if err != nil || bytes.HasPrefix(raw.Data, []byte{'W', 'F', 'J', 0}) || json.Unmarshal(raw.Data, &entry) != nil || entry.Kind != journal.Completed || entry.Epoch != terminal.Epoch {
+			t.Fatalf("JSON successor terminal unconfirmed: err=%v entry=%+v", err, entry)
+		}
+		if err := os.WriteFile(filepath.Join(root, "json-terminal.json"), raw.Data, 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
 	for _, peer := range all {
 		value, err := client.New(peer).Await(ctx, retirementKillType, retirementKillID)
 		if err != nil || string(value) != "2" {
@@ -498,6 +535,6 @@ func runRetirementWorkerKill(t *testing.T, cut string) {
 		// republishes its manifest using the recorded anchor, so it stays live.
 		assertKept(preparedFrame)
 	}
-	write("result.json", map[string]any{"cut": cut, "old_generation": first.InvSeq, "fresh_generation": fresh.InvSeq, "held_epoch": held.Epoch, "terminal_epoch": terminal.Epoch, "recovery_seconds": latency.Seconds(), "reclaimed_objects": swept.Deleted, "archive_reads": guard.archives, "frame_reads": guard.frames, "bounded_resume_required": cut == "after_manifest", "prepared_frame": preparedFrame, "completed_frame": completed.Snapshot.Runtime.Object, "prepared_frame_reused": preparedFrame != "", "read_counters_observed": cut == "after_manifest", "effects": 3, "terminals": report.Terminal, "invocations": report.Invocations, "ledger_counts": counts, "shared_and_survivor_and_fresh_references_verified": true, "all_peer_fresh_results_verified": true})
+	write("result.json", map[string]any{"child_encoding": encoding, "successor_encoding": journal.JSON, "cut": cut, "old_generation": first.InvSeq, "fresh_generation": fresh.InvSeq, "held_epoch": held.Epoch, "terminal_epoch": terminal.Epoch, "recovery_seconds": latency.Seconds(), "reclaimed_objects": swept.Deleted, "archive_reads": guard.archives, "frame_reads": guard.frames, "bounded_resume_required": cut == "after_manifest", "prepared_frame": preparedFrame, "completed_frame": completed.Snapshot.Runtime.Object, "prepared_frame_reused": preparedFrame != "", "read_counters_observed": cut == "after_manifest", "effects": 3, "terminals": report.Terminal, "invocations": report.Invocations, "ledger_counts": counts, "shared_and_survivor_and_fresh_references_verified": true, "all_peer_fresh_results_verified": true})
 	t.Logf("retirement SIGKILL recovery=%s old=%d fresh=%d epoch=%d→%d reclaimed=%d archives=%d frames=%d effects=3 terminals=2", latency, first.InvSeq, fresh.InvSeq, held.Epoch, terminal.Epoch, swept.Deleted, guard.archives, guard.frames)
 }

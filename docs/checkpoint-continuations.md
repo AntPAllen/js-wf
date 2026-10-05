@@ -979,3 +979,12 @@ qualification passed at8da5935: race35.61s, recovery12.614s, epoch51→69,
 exact effects/all-peer results/raw integrity and GC retention verified.
 [Qualified originals](scale/continuation-retirement-before-manifest-2026-10-05/qualified/).
 No bounded prefix-resume claim applies to this cut.
+
+### Mixed encoding crash fixture — 2026-10-05
+
+`TestContinuationRetirementProtobufWorkerSIGKILLToJSONSuccessor` prepares a
+protobuf checkpoint anchor, reaps the owner with SIGKILL, then resumes with a
+JSON writer. It verifies persisted wire formats, successor fencing, bounded
+checkpoint reads, effect counts and quiescent GC retention. The opt-in fixture
+uses the original30s recovery/12s lease/60s scenario gates. Native qualification
+is pending; this does not yet qualify a rolling/chaos matrix.

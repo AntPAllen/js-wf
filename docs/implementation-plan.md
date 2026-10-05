@@ -2548,3 +2548,14 @@ dependencies. Full originals/all members/parts verify. Accepted91-seed coverage
 is1–65 plus79–104; failed66–78 and105–200 stay unqualified. No uploaded workload
 SDK/physical stores/full source inventory; final integrity/drain named-test scope.
 Original full200/current-source/full matrices and24h remain required.
+
+### Protobuf continuation worker crash with JSON successor — 2026-10-05
+
+Extend the retirement/reuse worker-SIGKILL case with protobuf-v1 fresh-generation
+writes and a JSON-writing successor. Admit actual retained protobuf checkpoint
+anchor bytes before killing the held owner after manifest publication. Require
+raw JSON terminal bytes, higher successor epoch, bounded checkpoint resume,
+exact effects and all-peer result/integrity/GC checks under original deadlines.
+The new journal constructor combines existing encoding selection and supplied
+snapshot transport so fault injection does not replace the selected writer.
+Native qualification pending; full protobuf rolling/chaos remains open.
