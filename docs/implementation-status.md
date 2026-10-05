@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Experimental byte-bounded audit transport passes focused native controls:**
+  documented SDK client8MiB buffer /4096 delivered-record windows share existing
+  scan invariants and recovery bounds. First R3 attempt fails at93 records with
+  missing heartbeat; corrected transport classification preserves that identity
+  and admits bounded recovery. Native116-record/30.4MB exact point-read comparison,
+  holes/cutoff/cancellation/zero-consumer cleanup passes11.44s; focused race controls
+  pass. Both actual executables/source overlays/original stores preserved.
+  SDK pointer-channel allocation and oversized-message limitations documented;
+  production defaults unchanged. Full100k/R5 performance/fault qualification open.
+  [Both attempts and scope](scale/byte-bounded-audit-2026-10-05/).
+
 - **Copied-store R5 audit profile completes:** all720 original store files still
   match the published failed archive. Restored logical NATS identities/fresh Docker
   names reopen100k/1.2M cohort. Diagnostic512/R5 baseline and recheck hit20s;

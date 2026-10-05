@@ -20,6 +20,17 @@ func scanBatchThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint
 // its deadline. Native controls compare the previous 512-record window on the
 // same retained stores using the same invariant-checking body.
 func scanBatchThroughWithSize(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, batchSize uint64) error {
+	return scanBatchThroughWithFetcher(ctx, stream, cutoff, visit, batchSize, nil)
+}
+
+type retainedBatchFetcher func(context.Context, jetstream.Consumer, int) (jetstream.MessageBatch, error)
+
+func scanBatchThroughWithFetcher(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, batchSize uint64, fetch retainedBatchFetcher) error {
+	if fetch == nil {
+		fetch = func(call context.Context, c jetstream.Consumer, n int) (jetstream.MessageBatch, error) {
+			return c.Fetch(n, jetstream.FetchContext(call))
+		}
+	}
 	if batchSize == 0 || batchSize > 4096 {
 		return errors.New("retained batch scan: invalid delivery window")
 	}
@@ -122,7 +133,7 @@ func scanBatchThroughWithSize(ctx context.Context, stream jetstream.Stream, cuto
 	for first <= last {
 		call, stop := context.WithTimeout(ctx, 2*time.Second)
 		requested := int(min(batchSize, last-first+1))
-		batch, err := consumer.Fetch(requested, jetstream.FetchContext(call))
+		batch, err := fetch(call, consumer, requested)
 		if err != nil {
 			stop()
 			if batchReadTransportError(err) {

@@ -2100,3 +2100,16 @@ full interruption controls before adoption. Larger known-small-payload windows
 and single-replica diagnostics do not qualify worst-case buffering or recovery.
 All failed startup/collector attempts remain preserved, and original store files
 still match their published archive. Full matrices and actual24h remain open.
+
+### Experimental byte-bounded audit delivery — 2026-10-05
+
+A candidate uses the documented SDK `PullMaxBytes(8 MiB)` client-buffer limit
+with `StopAfter(4096)`, sharing the existing captured-bounds scan and two-resume
+budget. Production selection remains unchanged. Missing delivery heartbeats
+retain their identity and admit transport-timeout recovery; semantic errors do
+not. Initial native failure and corrected R3 exact 116-record/30.4MB comparison,
+holes, cutoff, cancellation and cleanup are preserved; focused race controls pass.
+The SDK byte-mode pointer array adds approximately8MB per iterator, and oversized
+records can stall until bounded fallback. Measure actual full100k/R5 latency and
+interruption correctness before adoption; the original20s audit target remains.
+[Complete evidence and limitations](scale/byte-bounded-audit-2026-10-05/).
