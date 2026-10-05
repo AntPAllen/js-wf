@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"runtime/metrics"
 	"runtime/pprof"
 	"strings"
 	"testing"
@@ -224,15 +225,23 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 // profiling. Each full invocation/journal/state reread retains its own20s limit.
 func compareCompactCopiedCapacity(t *testing.T, js jetstream.JetStream, root string) {
 	type result struct {
-		Mode             string
-		Report           Report
-		Error            string
-		ElapsedNS        int64
-		AllocatedBytes   uint64
-		GCCycles         uint32
-		CursorReplicas   []int
-		CursorStarts     []uint64
-		CursorPointReads int
+		Mode                    string
+		Report                  Report
+		Error                   string
+		ElapsedNS               int64
+		AllocatedBytes          uint64
+		GCCycles                uint32
+		CursorReplicas          []int
+		CursorStarts            []uint64
+		CursorPointReads        int
+		HeapAllocBefore         uint64
+		HeapAllocAfter          uint64
+		HeapSysAfter            uint64
+		RuntimeSysAfter         uint64
+		NextGCAfter             uint64
+		GCPauseNS               uint64
+		GCCPUFractionCumulative float64
+		MemoryLimitBytes        uint64
 	}
 	var results []result
 	want := Report{Invocations: 400000, Journals: 400000, Entries: 4800000, Terminal: 400000}
@@ -279,7 +288,12 @@ func compareCompactCopiedCapacity(t *testing.T, js jetstream.JetStream, root str
 		elapsed := time.Since(began)
 		cancel()
 		runtime.ReadMemStats(&after)
-		r := result{Mode: mode.name, Report: report, Error: fmt.Sprint(err), ElapsedNS: int64(elapsed), AllocatedBytes: after.TotalAlloc - before.TotalAlloc, GCCycles: after.NumGC - before.NumGC}
+		memoryLimit := []metrics.Sample{{Name: "/gc/gomemlimit:bytes"}}
+		metrics.Read(memoryLimit)
+		if memoryLimit[0].Value.Kind() != metrics.KindUint64 {
+			t.Fatal("runtime memory limit metric unavailable")
+		}
+		r := result{Mode: mode.name, Report: report, Error: fmt.Sprint(err), ElapsedNS: int64(elapsed), AllocatedBytes: after.TotalAlloc - before.TotalAlloc, GCCycles: after.NumGC - before.NumGC, HeapAllocBefore: before.HeapAlloc, HeapAllocAfter: after.HeapAlloc, HeapSysAfter: after.HeapSys, RuntimeSysAfter: after.Sys, NextGCAfter: after.NextGC, GCPauseNS: after.PauseTotalNs - before.PauseTotalNs, GCCPUFractionCumulative: after.GCCPUFraction, MemoryLimitBytes: memoryLimit[0].Value.Uint64()}
 		if observeCursors {
 			r.CursorReplicas, r.CursorStarts, r.CursorPointReads = cursorReplicas, cursorStarts, cursorPointReads
 			if len(cursorReplicas) < 2 {

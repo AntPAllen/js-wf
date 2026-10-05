@@ -4076,3 +4076,12 @@ preserved in verified49.998MB delta plus pinned canonical base. No speedup/defau
 R1 failover/fullcapacity/24h claim. Next changed measurement considers enlarged-VM
 CPU/GC headroom while retaining fullpopulation/deadline and recording configuration.
 [Full failure proof](scale/direct-callback-audit-2026-10-05/capacity-400k/).
+
+## Enlarged-VM audit GC headroom prepared — 2026-10-05
+
+Explicit4-core/GOGC500/4GiB profile prepared against exact400k/4.8M population and
+original20s deadlines, adding runtime GC/heap/pause/actual memory-limit metrics
+and sampled SDK RSS/highwater. Compile/skip passes; native result pending. Earlier
+2GiB/GOGC200 failures remain failed; no R1 recovery/default/24h claim. Last closed
+copy reclaimed only after full canonical and byte/descriptor/process verification.
+[Preparation](scale/direct-callback-audit-2026-10-05/gc-headroom-preparation/).

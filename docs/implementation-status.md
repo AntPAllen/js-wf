@@ -28,6 +28,15 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05: GC-headroom preparation
+
+The enlarged-VM four-core/GOGC500/4GiB full400k comparison is prepared, with
+runtime heap/GC/pause/actual-memory-limit fields and sampled SDK RSS/highwater.
+Original20s/full4.8M cardinalities unchanged. Previous2GiB/GOGC200 failures stay
+failed; no R1 failover/default/24h adoption. Native execution pending disk
+headroom. Last closed978-file copy reclaimed after full canonical verification.
+[Preparation](scale/direct-callback-audit-2026-10-05/gc-headroom-preparation/).
+
 ## Latest follow-up — 2026-10-05 21:54 UTC
 
 Changed per-delete diagnostic e43d1b3 passes7.89s: allsix100k deliveries and
