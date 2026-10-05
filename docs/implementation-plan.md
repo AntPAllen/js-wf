@@ -3544,3 +3544,14 @@ underretainedroot; server-clock overlay/serverbuilds already reside in retained
 case roots. Profilemodulebytes boundbefore/after. Clock/upgrade realexecution and
 updated generated-input classification verification remainpending. No fullmatrix
 orolderfailure causefix qualification. Ordinaryruntime source behavior unchanged.
+
+### Independent copied ten-minute worker audit accepted — 2026-10-05
+
+The explicit reviewed-donor path at79fc537 completes the original75bcf76 worker
+seed1 copied audit: allthreehistorymodels,1708invocations/journals/terminals,
+18918entries andallthreeclient/64durable queue drain. Fullreads401.033ms under
+original20s;2281originalfiles unchanged. ActualSDK522835 andthreeactualNATS
+executables observed;1695selectedinputs bound. Complete4001archive members and
+bothparts readback. Originalproducer generated-cache failure stays preserved;
+this is separate copied integrity/history/drain proof, not an originalproducerpass
+orfullmatrix qualification. [Proof](scale/tier2-retained-row-2026-10-05/worker-ten-minute-copied-audit/).
