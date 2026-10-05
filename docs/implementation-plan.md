@@ -3741,3 +3741,14 @@ verdict. Changedpreparation adoptsbounded3s provision callswithin4m; population
 setup90m and original20s audit limits remainseparate/unchanged. Compile/opt-inskip
 passes. No unchangednative rerun orservercause claim.
 [Originalfailure](scale/concurrent-state-audit-2026-10-05/capacity-preparation-failed/).
+
+### Full400k quiet R5 audit capacity failure — 2026-10-05
+
+Changedpreparation a124b69 populates400k invocations /4.8M contiguousentries/
+400k matching terminalstates, allpublishACKs checked. NativeFAIL276.09s:
+sequential/concurrent/sequentialrecheck eachhits original20sdeadline. Concurrent
+allocated4.76GB/39GCcycles underGOMEMLIMIT2GiB; partialreportsnotfullcounts.
+Noquietcapacitypass, actual24h/faultqualification, candidateadoption orservercause
+claim. ActualSDK595173/fiveNATS/selectedGitbeforeafter/processclosure independently
+reviewed; complete1752-member/24-part proof readbackverified. Measurephase/CPU/allocation
+onverifiedcopies beforeanother24hlaunch. [Capacityfailure](scale/concurrent-state-audit-2026-10-05/capacity-400k/).

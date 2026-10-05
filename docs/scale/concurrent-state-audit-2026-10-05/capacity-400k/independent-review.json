@@ -1,0 +1,71 @@
+{
+  "execution": {
+    "pid": 595173,
+    "source": "a124b698d9793d92f59154a9380416d7f125790b",
+    "sha256": "6c43fd3c18676a00a256104cd7f7f70ddee10c010a16f45061dd25f8a1883dca",
+    "build_info": "/proc/595173/exe: go1.27.1\n\tpath\tjs-wf/integrity.test\n\tmod\tjs-wf\tv0.0.0-20261005195041-a124b698d979\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=a124b698d9793d92f59154a9380416d7f125790b\n\tbuild\tvcs.time=2026-10-05T19:50:41Z\n\tbuild\tvcs.modified=false\n",
+    "args": [
+      "/tmp/js-wf-concurrent-state-400k-capacity-bounded-preparation-20261005/integrity.test",
+      "-test.run=^TestConcurrentStateR5PopulationCapacity$",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=100m"
+    ],
+    "stat": "595173 (integrity.test) S 594985 594985 594985 0 -1 4194304 713 0 0 0 0 0 0 0 20 0 6 0 4358150 1692585984 3945 18446744073709551615 4194304 15971280 140720324830192 0 0 0 0 0 2143420159 0 0 0 17 0 0 0 0 0 0 27664384 28130848 843771904 140720324836095 140720324836274 140720324836274 140720324837282 0\n",
+    "status": "failed",
+    "started_utc": "2026-10-05T19:50:59.984380+00:00",
+    "scope": "Quiet synthetic R5 400k/4.8M population capacity gate; not live soak qualification",
+    "exit_code": 1,
+    "finished_utc": "2026-10-05T19:55:36.580177+00:00"
+  },
+  "selected_git_source_inputs_verified": 670,
+  "all_observed_processes_closed": true,
+  "sdk_sha256": "6c43fd3c18676a00a256104cd7f7f70ddee10c010a16f45061dd25f8a1883dca",
+  "server_observations": 5,
+  "comparisons": [
+    {
+      "Mode": "sequential",
+      "ElapsedNS": 20000098239,
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "Error": "context deadline exceeded",
+      "AllocatedBytes": 4551692856,
+      "GCCycles": 73
+    },
+    {
+      "Mode": "concurrent",
+      "ElapsedNS": 20000093818,
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "Error": "context deadline exceeded",
+      "AllocatedBytes": 4761258400,
+      "GCCycles": 39
+    },
+    {
+      "Mode": "sequential_recheck",
+      "ElapsedNS": 20000118637,
+      "Report": {
+        "Invocations": 400000,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "Error": "context deadline exceeded",
+      "AllocatedBytes": 4365056616,
+      "GCCycles": 56
+    }
+  ],
+  "scope": "Full synthetic quiet R5 400k/4.8M capacity profile; not live 24h or fault qualification",
+  "qualifies_24h": false,
+  "candidate_adopted": false,
+  "original_20s_deadlines_retained": true,
+  "unchanged_native_rerun": false
+}

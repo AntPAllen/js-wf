@@ -28,6 +28,24 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 19:56 UTC
+
+Fresh quiet R5 capacity profile at `a124b69` populated400,000 workflows and4.8M
+journal entries with checked publish acknowledgments and matching terminal state.
+The native gate fails276.09s: sequential, concurrent and sequentialrecheck audits
+all hit the unchanged20s limit. Concurrent allocates4.76GB /39GCcycles under2GiB
+memory target. Partial report counters are not complete integrity results.
+This proves the experimental concurrent reader is insufficient for this quiet
+population within the current budget/profile; no server-cause attribution.
+Closed complete evidence is independently reviewed and preserved in a verified
+1,752-member /24-part archive; see the
+[400k capacity failure](scale/concurrent-state-audit-2026-10-05/capacity-400k/).
+
+The initial provisioning failure is preserved separately; changed bounded-call
+preparation succeeds. Next work should measure audit phase/CPU/allocation costs
+against these verified copies before another actual24h launch. Original limits,
+full matrix requirements and failed-soak verdicts remain unchanged.
+
 ## Latest follow-up — 2026-10-05 19:44 UTC
 
 The changed concurrent-state live journal campaign at `bc02e68` passes648.01s:
