@@ -28,6 +28,16 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 21:32 UTC
+
+The complete callback400k failed fixture archive is now independently read back;
+reviewer exits successfully. Original fullcapacity failure remains.
+A fullcardinality CPU-only measurement is prepared to separate JSON decoding
+from protocol/map/sorted finish reduction using the same12-entry template.
+It uses reused raw bytes/contiguous subjects/constant terminal lookup and has no
+NATS/INV/KV/fault model. Counts are enforced; no nativecapacity pass claimed.
+[Preparation](scale/audit-reduction-cost-2026-10-05/preparation/).
+
 ## Latest follow-up — 2026-10-05 21:28 UTC
 
 The full400k explicit callback capacity gate at b943074 fails97.60s. SDK/compact/

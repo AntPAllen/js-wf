@@ -20,9 +20,7 @@ do not establish per-record throughput. Correctness controls do not qualify capa
 
 Independent review verifies676 selected Git inputs, actual SDK/five server bytes/
 modules/mounts/closure, initial copy hashes and1058 unchanged original files.
-This does not cover every external compiler input. Complete closed-fixture archive
-preservation is running under the tracked reviewer service. Archive acceptance
-is pending until metadata exists and that service exits successfully.
+This does not cover every external compiler input. Complete closed-fixture 1710-member /24-part archive (605,653,675bytes) is independently read back. The tracked reviewer exits successfully; exact SHA/parts are in archive-verification.json.
 
 No default adoption, server-defect attribution or24h qualification. Next diagnosis
 should measure integrated delivery/reduction costs and eliminate remaining per-record

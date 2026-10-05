@@ -3933,3 +3933,12 @@ modules/mounts and1058 unchangedoriginalfiles independentlyverified. Fullclosed
 archive preservation running, notyet accepted. Milliondiagnostic sharesVM.
 No default/fullcapacity/24h promotion; integrated per-record reduction/delivery
 cost is next. [Failure](scale/callback-audit-delivery-2026-10-05/capacity-400k/).
+
+### Callbackcapacity archive complete; fullcardinality CPU reduction profile prepared — 2026-10-05
+
+Fullclosed callback400k failure archive/readback is complete. A CPU-only full
+400k/4.8M template profile separates decode, predecoded protocol/map reduction
+and combined decode/reduction with production sorted finish. Exactcounts required;
+reused encodedbytes/contiguoussubjects/constantterminal lookup and profiling are
+explicit. No transport/INV/KV/fault/retained-state or capacity claim.
+[CPU preparation](scale/audit-reduction-cost-2026-10-05/preparation/).
