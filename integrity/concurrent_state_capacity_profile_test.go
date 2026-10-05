@@ -32,6 +32,10 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 	if !filepath.IsAbs(storesRoot) || os.Getenv("WF_AUDIT_CAPACITY_PROFILE_IDENTITY") == "" {
 		t.Fatal("absolute copied-store path and original identity required")
 	}
+	fault := os.Getenv("WF_AUDIT_CAPACITY_R1_PROCESS_FAULT")
+	if fault != "" && fault != "owner-down" && fault != "owner-restart" {
+		t.Fatal("WF_AUDIT_CAPACITY_R1_PROCESS_FAULT must be owner-down or owner-restart")
+	}
 	root := candidateNativeRoot(t)
 	stores := map[int]string{}
 	for n := 0; n < 5; n++ {
@@ -46,6 +50,25 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 		for n := 0; n < 5; n++ {
 			data, e := cluster.Logs(n)
 			if e != nil {
+				if fault == "owner-down" {
+					data, readErr := os.ReadFile(filepath.Join(root, "direct-r1-capacity-fault.json"))
+					var results []struct {
+						Kind string                            `json:"kind"`
+						Kill testcluster.DockerKillObservation `json:"kill"`
+					}
+					if readErr == nil && json.Unmarshal(data, &results) == nil {
+						expectedAbsent := false
+						for _, result := range results {
+							if result.Kind == fault && result.Kill.Node == n && !result.Kill.SourceStopped.IsZero() {
+								expectedAbsent = true
+							}
+						}
+						if _, logErr := os.Stat(filepath.Join(root, "capacity-owner-before-kill.log")); expectedAbsent && logErr == nil {
+							t.Logf("confirmed killed node%d pre-kill log retained", n)
+							continue
+						}
+					}
+				}
 				t.Error(e)
 				continue
 			}
@@ -95,6 +118,10 @@ func TestConcurrentStateR5CopiedCapacityProfile(t *testing.T) {
 			t.Fatal(startup.Err())
 		}
 		time.Sleep(50 * time.Millisecond)
+	}
+	if fault != "" {
+		directR1CopiedCapacityFault(t, js, cluster, root, fault)
+		return
 	}
 	if os.Getenv("WF_AUDIT_CAPACITY_PLAIN_COMPARISON") == "1" {
 		compareCompactCopiedCapacity(t, js, root)

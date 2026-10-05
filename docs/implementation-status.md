@@ -29,6 +29,20 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05: actual R1 legacy oracle compatibility accepted
+
+At26c33ad actualthree-process NATS2.11.17 race full-oracle testPASS72.45s.
+All18 R1 cursor observations verify replica1 against R3 sources; full/cohort/
+compaction/corruption/terminal-state/tombstone/snapshot/orphan reports/errors
+match independent point oracle. ActualSDK/683selected inputs/three actual legacy
+server byte identities/module/closedPIDs and full1067-member archive/readback
+verified. Legacy process faults/large faultcapacity/live/default/fullmatrix/24h
+remain open. Full400k/4.8M copied fault harness now prepared, original20s per
+baseline/fault including cleanup, native execution pending sufficient fresh-copy
+disk headroom. No smaller dataset substitutes for this full fault qualification.
+[Legacy evidence](scale/direct-callback-audit-2026-10-05/r1-legacy-controls/).
+[Full fault preparation](scale/direct-callback-audit-2026-10-05/full400k-fault-preparation/).
+
 ## Latest follow-up — 2026-10-05: actual R5 process-loss recovery accepted
 
 At889a70c both fresh race native R5 file-source/R1 cursor-owner SIGKILL fixtures

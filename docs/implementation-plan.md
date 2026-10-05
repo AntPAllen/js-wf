@@ -4206,3 +4206,20 @@ Original20s/public defaults unchanged. Compile/skip passes; native verdict and
 complete closed fixture proof pending. Legacy process faults/largefault/live/
 default/final matrices/actual24h remain open.
 [Preparation](scale/direct-callback-audit-2026-10-05/r1-legacy-preparation/).
+
+## Actual R1 legacy compatibility accepted; full fault capacity prepared — 2026-10-05
+
+26c33ad actualthree-process2.11.17 native racePASS72.45s, all18 actualR1 cursor
+observations againstR3 sources, exact full/cohort/compaction/corruption/state/
+snapshot/orphan point-oracle reports/errors. Independent683selected inputs/
+actualSDK/three server executable/module/PID closure and full1067-member48.895MB
+archive/readback accepted. Legacy processfault/live/default/fullmatrix/24h open.
+Full400k/4.8M copied capacity harness now admits explicit owner-down/restart, each
+on fresh fullcopies, current-source healthy baseline before fault, allR5 replicas
+caught up, actual pending cursor owner SIGKILL/restart proof, contiguous once-only
+entries/exactreport/zero consumers under original20s each. API/deletion/cleanup/
+allocation/GC/actualmemoryCPU observations persist before verdict. Compile/skip
+passes; native pending sufficient fresh-copy+archive disk. Smaller populations
+will not certify this full fault gate.
+[Legacy](scale/direct-callback-audit-2026-10-05/r1-legacy-controls/).
+[Full capacity faults](scale/direct-callback-audit-2026-10-05/full400k-fault-preparation/).
