@@ -30,6 +30,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Pre-manifest protobuf worker SIGKILL to JSON journal repair qualified:** clean
+  de673be racePASS34.62s/recovery12.846s/epoch51→69. Missing manifest and durable
+  prepared frame/protobuf completion admitted before reapedSIGKILL; successor
+  journal replay repairs the same reachable frame and writes JSON terminal.
+  Fresh initial runs twice/effect and stage once; three total effects/two
+  terminals/all-peer/raw integrity/GC retention pass. Independent generated Python
+  codec binds protobuf completion index/epoch/content reference/hash to prepared
+  manifest/repaired frame; raw JSON terminal decoded. Actual parent/childSDK/
+  three native servers/651 selected source inputs verify. Read counters unobserved,
+  no bounded resume; full rolling/chaos/domain/onlineGC/matrices/24h stay open.
+  [Complete original proof](scale/continuation-retirement-protobuf-before-manifest-2026-10-05/).
+
 - **Protobuf checkpoint worker SIGKILL to JSON successor qualified:** clean
   07a419c racePASS35.43s, recovery12.747s under30s, epoch51→62. Actual persisted
   protobuf checkpoint anchor before reapedSIGKILL, successor raw JSON terminal,

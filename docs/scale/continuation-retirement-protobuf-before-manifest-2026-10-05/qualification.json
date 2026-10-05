@@ -1,0 +1,88 @@
+{
+  "source": "de673be222ecafc82dc49b07fb9439ea487905d2",
+  "actual_live_parent_sdk_sha256": "17d36d5a19f232737007c12ded0615e76cab22427c0a150310a7832619231efd",
+  "actual_live_child_sdk_sha256": "17d36d5a19f232737007c12ded0615e76cab22427c0a150310a7832619231efd",
+  "clean_full_build_info_and_race_verified": true,
+  "source_inputs": 651,
+  "source_before_after_and_git_match": true,
+  "actual_native_server_processes": 3,
+  "actual_native_server_sha256": "24759ea94c030a9c5f1cd7fc61c74e14615a3c35650b5bb28b29891b5899ba9d",
+  "all_live_server_and_retained_binary_build_fields_match": true,
+  "mixed_encoding_independent_python_decode": {
+    "schema_sha256": "244a4755a90afe0ffb72ffa843a1b2ff7f7afb6b78adbbd919d302a36c83ef94",
+    "schema_matches_recorded_git": true,
+    "protoc_version": "libprotoc 3.21.12",
+    "python_protobuf_version": "4.21.12",
+    "generated_codec_sha256": "205e4da5a338e8a22818030f51d310d8918d8cafc404ab99e2795ba6aa8b9504",
+    "actual_protobuf_anchor_decoded": true,
+    "anchor_epoch": 51,
+    "anchor_index": 6,
+    "anchor_payload": {
+      "result_ref": "step-result-28bfca8f6eab8e566dd69e70795d78974fedc5755605f9643dba2fa0824a4f9e",
+      "result_hash": "28bfca8f6eab8e566dd69e70795d78974fedc5755605f9643dba2fa0824a4f9e"
+    },
+    "actual_json_terminal_decoded": true,
+    "terminal": {
+      "epoch": 69,
+      "index": 10,
+      "kind": "Completed",
+      "payload": {
+        "inv_seq": 3,
+        "result": "Mg=="
+      },
+      "worker_id": "retirement-successor"
+    }
+  },
+  "named_pass_seconds": 34.62,
+  "kill_admission": {
+    "child_live_sdk_sha256": "17d36d5a19f232737007c12ded0615e76cab22427c0a150310a7832619231efd",
+    "child_pid": 97974,
+    "cut": "before_manifest",
+    "fresh_generation": 3,
+    "held_epoch": 51,
+    "killed_at": "2026-10-05T09:31:51.680804603Z",
+    "lease_revision": 60,
+    "lease_ttl": "12s",
+    "manifest_published": false,
+    "old_generation": 1,
+    "parent_sdk_sha256": "17d36d5a19f232737007c12ded0615e76cab22427c0a150310a7832619231efd",
+    "prepared_frame": "step-result-28bfca8f6eab8e566dd69e70795d78974fedc5755605f9643dba2fa0824a4f9e",
+    "reclaimed_objects": 2,
+    "signal": "SIGKILL"
+  },
+  "result": {
+    "all_peer_fresh_results_verified": true,
+    "archive_reads": 0,
+    "bounded_resume_required": false,
+    "child_encoding": "protobuf-v1",
+    "completed_frame": "step-result-28bfca8f6eab8e566dd69e70795d78974fedc5755605f9643dba2fa0824a4f9e",
+    "cut": "before_manifest",
+    "effects": 3,
+    "frame_reads": 0,
+    "fresh_generation": 3,
+    "held_epoch": 51,
+    "invocations": 2,
+    "ledger_counts": {
+      "effect:1": 2,
+      "effect:2": 1,
+      "initial:1": 2,
+      "initial:2": 2,
+      "stage:1": 2,
+      "stage:2": 1
+    },
+    "old_generation": 1,
+    "prepared_frame": "step-result-28bfca8f6eab8e566dd69e70795d78974fedc5755605f9643dba2fa0824a4f9e",
+    "prepared_frame_reused": true,
+    "read_counters_observed": false,
+    "reclaimed_objects": 2,
+    "recovery_seconds": 12.846002656,
+    "shared_and_survivor_and_fresh_references_verified": true,
+    "successor_encoding": "json",
+    "terminal_epoch": 69,
+    "terminals": 2
+  },
+  "exact_effect_ledger_verified": true,
+  "kill_and_fence_scope": "Named-test actual reaped SIGKILL WaitStatus, no published manifest; durable protobuf completion and prepared frame with held owner before cut; JSON successor repaired the same reachable frame, terminal epoch above held epoch after successor recovery",
+  "physical_stores_scope": "Stopped originals archived/hash-verified, not independently reopened",
+  "scope": "Focused retirement/quiescent-GC/generation-reuse plus protobuf worker SIGKILL before manifest publication to JSON successor; read counters unobserved and no bounded-resume claim; not every retirement timing cut, server simultaneous outage, online GC, domain/legacy faults, full matrices or24h qualification. Production TTL12/heartbeat3/AckWait13 and original30s startup/60s scenario/under30 recovery unchanged; Tier1 graph unchanged"
+}

@@ -991,3 +991,14 @@ passed at07a419c: race35.43s, recovery12.747s, epoch51→62, actual stored
 protobuf anchor independently decoded with generated Python codec and raw JSON
 terminal decoded. One frame/zero archive/exact effects/all-peer/integrity/GC
 checks pass. Full rolling/chaos remains open.
+
+### Protobuf pre-manifest journal repair qualified — 2026-10-05
+
+Atde673be the before-manifest counterpart passes under race34.62s, recovery12.846s,
+epoch51→69. Missing manifest/prepared frame/durable protobuf completion verified
+before reapedSIGKILL; JSON successor replays completion, republishes the same
+reachable frame and finishes. Exact effects/all-peer/raw integrity/GC retention
+pass. Independent Python codec binds actual protobuf content reference/hash/
+index/epoch to the prospective manifest and repaired frame; JSON terminal decoded.
+Read counters unobserved; no bounded-resume claim. Full rolling/chaos stays open.
+[Complete originals](scale/continuation-retirement-protobuf-before-manifest-2026-10-05/).

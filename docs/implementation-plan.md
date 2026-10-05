@@ -2571,4 +2571,7 @@ reap SIGKILL, then require a JSON writer to replay the journal, repair the same
 frame and finish with a higher lease epoch. Exact effects, all-peer/raw integrity
 and quiescent retention remain mandatory under original30s recovery/12s TTL/60s
 scenario. Read counters are unobserved for this cut; no bounded-resume claim.
-Native qualification pending; full rolling/chaos remains open.
+Native de673be racePASS34.62s/recovery12.846s/epoch51→69, exact effects,
+all-peer/raw integrity/quiescent retention verified. Independent generated Python
+codec binds actual protobuf completion to prepared/repaired frame; JSON terminal
+decoded. Full rolling/chaos remains open.
