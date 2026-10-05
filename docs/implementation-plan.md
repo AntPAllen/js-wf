@@ -3344,3 +3344,14 @@ conversion omitted elapsed fields; that failed result is preserved. Independent
 The producer now requests `-t`; generated timestamps are conversion observations.
 [Complete smoke evidence](scale/tier2-retained-row-2026-10-05/journal-smoke/).
 No ten-minute, independent copied-store or full-matrix qualification is claimed.
+
+### Copied Tier2 matrix review preparation — 2026-10-05
+
+`scripts/matrix-retained-review.go.txt` prepares independent review of fresh
+copies of closed process-matrix stores. It rechecks all three recorded client
+history models with the existing30s checker budgets, starts the copied R3
+process identities, observes existing assets without provisioning, and audits
+full retained integrity/counts plus all-three-client physical queue and64durable
+pending/ack state within the original20s audit deadline. No workers/manualACK
+or original-store reopen. Helper compilation and copied execution remain pending;
+this does not replace native fault or full-matrix qualification.
