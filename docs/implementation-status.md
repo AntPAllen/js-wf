@@ -12495,3 +12495,16 @@ records scanner/visitor timing, CPU/alloc samples and direct state-watch lifecyc
 without relay overhead. Initial-set contract race controls pass1.023s; native
 measurement pending. Original20s gate/full cardinalities remain unchanged.
 [Preparation](scale/single-replica-audit-cursor-2026-10-05/phase-preparation/).
+
+## Instrumented R1 journal delivery cost localized — 2026-10-05
+
+Full400k R1 profile at6184597 diagnosticPASS36.43s retains auditFAIL20.004s plus
+cleanup deadline: INV1.158s, JRN18.844s/4.190M of4.8M records, visitors8.040s;
+state-watch stop finishes3.001s from audit start. No state barrier/capacity claim
+from lifecycle alone. Profiling adds cost; earlier unprofiled final reduction
+progress is not reproduced under instrumentation. SDK samples show parser/select/
+message allocation and visitor work, without server-defect attribution.
+SelectedGit/actual SDK/five servers/closure/original1058 files and complete1708-file
+base-plus-delta inventory independently verified. Next changed candidate removes
+one per-record adapter handoff while retaining shared invariant/recovery logic.
+[Full profile](scale/single-replica-audit-cursor-2026-10-05/phase-profile/).

@@ -1,0 +1,49 @@
+File: integrity.test
+Build ID: c0a87258860f4b25555ba90c3ac9efb43842e356
+Type: cpu
+Time: 2026-10-05 22:22:41 UTC
+Duration: 20.01s, Total samples = 21.19s (105.92%)
+Showing nodes accounting for 13.29s, 62.72% of 21.19s total
+Dropped 306 nodes (cum <= 0.11s)
+Showing top 40 nodes out of 180
+      flat  flat%   sum%        cum   cum%
+     2.07s  9.77%  9.77%      3.89s 18.36%  github.com/nats-io/nats%2ego.(*Conn).parse
+     1.25s  5.90% 15.67%      3.19s 15.05%  runtime.selectgo
+     0.59s  2.78% 18.45%      0.62s  2.93%  github.com/nats-io/nats%2ego.(*Conn).processMsgArgs
+     0.57s  2.69% 21.14%      0.57s  2.69%  internal/runtime/maps.memHashAES
+     0.52s  2.45% 23.60%      0.52s  2.45%  runtime.nanotime (inline)
+     0.47s  2.22% 25.81%      0.47s  2.22%  internal/runtime/maps.ctrlGroup.matchH2 (inline)
+     0.43s  2.03% 27.84%      0.43s  2.03%  runtime.futex
+     0.39s  1.84% 29.68%      0.39s  1.84%  internal/strconv.ParseUint
+     0.37s  1.75% 31.43%      0.77s  3.63%  encoding/json/jsontext.(*decoderState).ReadValue
+     0.35s  1.65% 33.08%      0.35s  1.65%  encoding/json/internal/jsonwire.ConsumeSimpleString (inline)
+     0.34s  1.60% 34.69%      0.34s  1.60%  internal/runtime/syscall/linux.Syscall6
+     0.34s  1.60% 36.29%      0.72s  3.40%  runtime.tryDeferToSpanScan
+     0.34s  1.60% 37.90%      0.55s  2.60%  runtime.unlock2
+     0.33s  1.56% 39.45%      0.80s  3.78%  encoding/json/jsontext.(*decoderState).consumeObject
+     0.32s  1.51% 40.96%      0.32s  1.51%  encoding/json/internal/jsonwire.ConsumeWhitespace (inline)
+     0.31s  1.46% 42.43%      0.31s  1.46%  time.runtimeNow
+     0.30s  1.42% 43.84%      0.30s  1.42%  runtime.spanClass.sizeclass (inline)
+     0.24s  1.13% 44.97%      2.46s 11.61%  encoding/json/v2.makeStructArshaler.func3
+     0.22s  1.04% 46.01%      1.89s  8.92%  github.com/nats-io/nats%2ego.(*Conn).waitForMsgs
+     0.22s  1.04% 47.05%      0.40s  1.89%  runtime.sellock
+     0.21s  0.99% 48.04%      0.24s  1.13%  runtime.lock2
+     0.21s  0.99% 49.03%      0.21s  0.99%  runtime.memclrNoHeapPointers
+     0.21s  0.99% 50.02%      0.53s  2.50%  runtime.selunlock
+     0.20s  0.94% 50.97%      1.09s  5.14%  encoding/json/jsontext.(*decoderState).consumeValue
+     0.19s   0.9% 51.86%      0.19s   0.9%  runtime.memmove
+     0.18s  0.85% 52.71%      0.18s  0.85%  runtime.(*mLockProfile).store (inline)
+     0.18s  0.85% 53.56%      0.18s  0.85%  runtime.(*mspan).moveInlineMarks
+     0.18s  0.85% 54.41%      1.09s  5.14%  runtime.mapassign_faststr
+     0.17s   0.8% 55.21%      0.17s   0.8%  memeqbody
+     0.17s   0.8% 56.02%      0.18s  0.85%  runtime.(*waitq).dequeue (inline)
+     0.17s   0.8% 56.82%      0.19s   0.9%  runtime.acquireSudog
+     0.15s  0.71% 57.53%      0.15s  0.71%  indexbytebody
+     0.15s  0.71% 58.24%      1.08s  5.10%  js-wf/integrity.compactAckCoordinates
+     0.15s  0.71% 58.94%      0.80s  3.78%  runtime.mapaccess2_faststr
+     0.14s  0.66% 59.60%      9.02s 42.57%  js-wf/integrity.scanBatchThroughWithCoordinates
+     0.14s  0.66% 60.26%      0.94s  4.44%  runtime.findRunnable
+     0.13s  0.61% 60.88%      0.27s  1.27%  internal/runtime/maps.(*Map).getWithoutKeySmallFastStr
+     0.13s  0.61% 61.49%      0.39s  1.84%  runtime.mallocgcSmallScanNoHeaderSC7
+     0.13s  0.61% 62.10%      0.15s  0.71%  runtime.scanObjectsSmall
+     0.13s  0.61% 62.72%      0.62s  2.93%  runtime.scanSpan
