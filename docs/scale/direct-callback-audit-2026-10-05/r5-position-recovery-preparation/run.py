@@ -47,7 +47,7 @@ with (root/'native.log').open('w') as log:
     assert '\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0' in record['actual_proc_build_info']
     records.append(record);seen.add((cid,pid));save('actual-containers/actual-servers.json',records)
    except (FileNotFoundError,ProcessLookupError,subprocess.CalledProcessError):continue
-  time.sleep(1)
+  time.sleep(0.1)
  code=p.wait();actual.update(status='passed' if code==0 else 'failed',exit_code=code,finished_utc=datetime.datetime.now(datetime.timezone.utc).isoformat());save('execution.json',actual)
 after=inventory();save('source-after.json',after);assert before==after
 assert sha(root/'integrity.test')==actual['sha256']
