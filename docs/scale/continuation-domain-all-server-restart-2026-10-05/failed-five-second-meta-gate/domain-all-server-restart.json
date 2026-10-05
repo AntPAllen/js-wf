@@ -1,0 +1,65 @@
+{
+  "state_leader": "wf-test-1",
+  "before": [
+    {
+      "domain": "WFRETIRE",
+      "id": "NA6EB2GJKQDYODK5NTZ7GKJ4HHGI2OGSARXXN5UDS23TRSF2P4HKI6PI",
+      "name": "wf-test-0"
+    },
+    {
+      "domain": "WFRETIRE",
+      "id": "NCN5ZAUFTY2XXI66ZK6PETYSW64KQQSBQO3HKXEE7NJJXRCQL2IMHXWZ",
+      "name": "wf-test-1"
+    },
+    {
+      "domain": "WFRETIRE",
+      "id": "NA33VU5HMFSEXCGR2XAR5Q3AWQLIFH2N25OJ7SVZXPD6XRVWD4OM7QYN",
+      "name": "wf-test-2"
+    }
+  ],
+  "stopped": [
+    "NA6EB2GJKQDYODK5NTZ7GKJ4HHGI2OGSARXXN5UDS23TRSF2P4HKI6PI",
+    "NCN5ZAUFTY2XXI66ZK6PETYSW64KQQSBQO3HKXEE7NJJXRCQL2IMHXWZ",
+    "NA33VU5HMFSEXCGR2XAR5Q3AWQLIFH2N25OJ7SVZXPD6XRVWD4OM7QYN"
+  ],
+  "restarted": [
+    "NBKCKYBNRSR3LBAQUFKGQBPCOKEJ7GMG7GAYV24WW4JLZA4ARULCZ2F6",
+    "NDXBHNA32FOZQ3QZFTLGDR7VTF3H4V7QJYSGSE7Y5JJWKILXBZYMVNFI",
+    "NDBMJ4O3FSIXY7I5HYMMWVWBBFPZTP66SLV5DRPZ4JQLZCQ5BHZPCDLT"
+  ],
+  "healed": null,
+  "started": "2026-10-05T08:38:36.165826252Z",
+  "finished": "2026-10-05T08:38:41.876029276Z",
+  "stage": "checking-domain",
+  "error": "restarted domain node0: err=context deadline exceeded observation=context deadline exceeded",
+  "failure_state": [
+    {
+      "configured_domain": "WFRETIRE",
+      "connected_url": "nats://127.0.0.1:41251",
+      "connection_status": "CONNECTED",
+      "id": "NBKCKYBNRSR3LBAQUFKGQBPCOKEJ7GMG7GAYV24WW4JLZA4ARULCZ2F6",
+      "meta_leader": "false",
+      "name": "wf-test-0",
+      "running": "true"
+    },
+    {
+      "configured_domain": "WFRETIRE",
+      "connected_url": "nats://127.0.0.1:40893",
+      "connection_status": "CONNECTED",
+      "id": "NDXBHNA32FOZQ3QZFTLGDR7VTF3H4V7QJYSGSE7Y5JJWKILXBZYMVNFI",
+      "meta_leader": "false",
+      "name": "wf-test-1",
+      "running": "true"
+    },
+    {
+      "configured_domain": "WFRETIRE",
+      "connected_url": "nats://127.0.0.1:42205",
+      "connection_status": "CONNECTED",
+      "id": "NDBMJ4O3FSIXY7I5HYMMWVWBBFPZTP66SLV5DRPZ4JQLZCQ5BHZPCDLT",
+      "meta_leader": "false",
+      "name": "wf-test-2",
+      "running": "true"
+    }
+  ],
+  "scope": "All three actual library servers shutdown and restarted; not SIGKILL or lease-expiry admission"
+}

@@ -168,11 +168,14 @@ func runContinuationRetirementDomain(t *testing.T, restart bool) {
 				cut.Restarted = append(cut.Restarted, cluster.Servers[node].ID())
 			}
 			cut.Stage = "checking-domain"
-			observe, stopObserve := context.WithTimeout(context.Background(), 5*time.Second)
+			// Use the original30s recovery target for the entire cut, including
+			// shutdown/restart. An invented5s metadata-election gate previously
+			// rejected connected servers whose metadata leader had not recovered.
+			observe, stopObserve := context.WithDeadline(context.Background(), cut.Started.Add(30*time.Second))
 			defer stopObserve()
 			for node := 0; node < 3; node++ {
 				// One request issued during reconnect may exhaust its context.
-				// Retry this read only within the original shared5s observation
+				// Retry this read only within the shared recovery deadline;
 				// budget; a successful wrong-domain response is immediately fatal.
 				for {
 					attempt, finish := context.WithTimeout(observe, 250*time.Millisecond)
