@@ -12621,3 +12621,13 @@ controls pass1.040s; changed three-fixture native qualification prepared. No R1
 failure/default/R5/largepopulation/24h claim.
 [Original failure](scale/direct-callback-audit-2026-10-05/single-replica-native-fault-controls/).
 [Correction](scale/direct-callback-audit-2026-10-05/single-replica-recovery-preparation/).
+
+## Actual R5 process-owner loss controls prepared — 2026-10-05
+
+Fresh five-container directR1 controls verify R5 file sources and actual pending
+cursor owner before observed SIGKILL. Separate1500/6000 fixtures leave owner down
+or restart same node/store; require exact report, contiguous once-only journal
+visits, original20s including fault/restart and zero consumers. Compile/opt-in
+skip passes; native verdict and closed archive review pending. No reader replay,
+retry or default change; large fault/live/legacy/finalmatrix/24h stay open.
+[Preparation](scale/direct-callback-audit-2026-10-05/r5-process-preparation/).

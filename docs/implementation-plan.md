@@ -4132,3 +4132,14 @@ visitor/untyped/semantic errors remain fatal and replay rules unchanged. Origina
 full1791-member archive readback verified. R5 process SIGKILL/same-owner restart/
 larger faultcapacity/live/default/finalmatrix/actual24h remain open.
 [Evidence](scale/direct-callback-audit-2026-10-05/single-replica-shutdown-recovery/).
+
+## Actual R5 process-owner loss qualification prepared — 2026-10-05
+
+The explicit R1 direct reader now has fresh five-container SIGKILL controls with
+R5 file INV/JRN/STATE sources. The actual pending R1 cursor owner is verified at
+visit128, then killed with observed source exit. Separate fixtures leave it down
+or restart its same node/store. Exact1500/6000 baseline and recovery, contiguous
+once-only journal visits, original20s including fault/restart, and zero audit
+consumers are required. No replay/retry/default change. Native verdict and archive
+review pending; full fault capacity/live/legacy/final matrices/24h stay open.
+[Preparation](scale/direct-callback-audit-2026-10-05/r5-process-preparation/).
