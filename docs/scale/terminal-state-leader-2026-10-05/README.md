@@ -62,4 +62,6 @@ these tests share VM resources with them.
 [Captured seed1 launch](partition-seed1-launch/) starts the original ten-minute
 partition case at clean93c5133 after the point-read correction. Normal executable
 identities, selected Git input bytes and fresh original stores are captured.
-The case is live; terminal verdict and historical cause remain unconfirmed.
+The launch note is historical. The case subsequently passes its original gate;
+[complete terminal proof](partition-seed1-terminal/) retains raw checks/models and
+original stores. Historical causality and full-matrix qualification remain open.

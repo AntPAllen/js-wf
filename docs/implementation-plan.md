@@ -2242,3 +2242,32 @@ three parts reads back. Primary stores/unit continue untouched; terminal/source
 after/native integrity/model review is pending. No historical causal conclusion,
 full-matrix/final-source/24h/million-drain promotion.
 [Complete launch proof](scale/terminal-state-leader-2026-10-05/partition-seed1-launch/).
+
+### Corrected-reader native partition seed1 accepted — 2026-10-05
+
+The original ten-minute normal R3 partition case completes at93c5133 in726.25s:
+1680 invocations/18573 entries/19 confirmed cuts/six complete checkpoints and2160
+exactOk operations under all three independently rebuilt history models. Raw
+fault/timestamp/majority/latency metrics verify; worst terminal/progress p99=
+19.320s/13.168s under original30s gates, original20s/60s audits and5m completion.
+Actual SDK/three native server/model identities,1172 unchanged selected Git
+inputs/50 actual model dependency inputs and2314 original store files are retained;
+all3528 archive members/four parts read back. First review's older45 dependency
+assumption corrected by deriving/verifying the actual graph; both attempts kept.
+Final integrity/dispatch drain retain native named-test scope; stores not reopened.
+This qualifies the executed-source focused seed, not the historical failure's
+cause, full/final-source matrices,24h soak or million physical drain.
+[Complete terminal proof](scale/terminal-state-leader-2026-10-05/partition-seed1-terminal/).
+
+### Recorded-source disk-delay174 accepted seeds — 2026-10-05
+
+New157–169 shard passes raw real-device/R5 leader/delay/sync/restoration,
+latency/explanation/fencing/cohort controls and three exactOk models. Full14-proof
+aggregation reads every part/member, verifies actual model executables/45 common
+Git inputs, raw history counts/exact outputs and original600s/30s requirements.
+Continuous1–169 plus196–200 totals540036 invocations/5948081 entries/3306 faults/
+694332 model operations/1831 cohort audits; worstp99=5.954s/0.851s. SDK/full
+captured source/native stores unavailable; integrity/drain named-test scope.
+Missing170–195/full200/final-source/full16×200/24h/million-drain remain open;
+historical failed parents are unchanged.
+[Complete14-proof aggregation](scale/current-tier3-block-delay-2026-10-04/coverage-1-169-and-196-200/).
