@@ -253,3 +253,53 @@ func TestAuditBatchScanCancellationAfterPrefixDoesNotResume(t *testing.T) {
 		t.Fatalf("visited=%v starts=%v reads=%v deleted=%v err=%v", visited, s.createStarts, s.requests, s.deleteNames, err)
 	}
 }
+
+func TestAuditBatchScanShortLargeTailKeepsBulkReads(t *testing.T) {
+	prefix, tail := make([]uint64, 128), make([]uint64, 4096-128)
+	for i := range prefix {
+		prefix[i] = uint64(i + 1)
+	}
+	for i := range tail {
+		tail[i] = uint64(i + 129)
+	}
+	s := &candidateControlStream{last: 5000, consumer: candidateControlConsumer{sequences: prefix, stream: "CONTROL"}, resumed: &candidateControlConsumer{sequences: tail, stream: "CONTROL"}}
+	cutoff := uint64(4096)
+	next := uint64(1)
+	err := scanBatchThroughWithSize(context.Background(), s, &cutoff, func(msg *jetstream.RawStreamMsg) error {
+		if msg.Sequence != next {
+			return errors.New("record duplicated or omitted")
+		}
+		next++
+		return nil
+	}, 4096)
+	if err != nil || next != 4097 || !reflect.DeepEqual(s.requests, []uint64{129}) || !reflect.DeepEqual(s.createStarts, []uint64{1, 130}) || len(s.deleteNames) != 2 {
+		t.Fatalf("next=%d reads=%v starts=%v deletes=%v err=%v", next, s.requests, s.createStarts, s.deleteNames, err)
+	}
+}
+
+func TestAuditBatchScanEmptyShortBatchesAreBounded(t *testing.T) {
+	s := &candidateControlStream{consumer: candidateControlConsumer{stream: "CONTROL"}}
+	var visited []uint64
+	err := scanBatchThrough(context.Background(), s, nil, func(msg *jetstream.RawStreamMsg) error { visited = append(visited, msg.Sequence); return nil })
+	if err != nil || !reflect.DeepEqual(visited, []uint64{1, 2, 3, 5, 6}) || !reflect.DeepEqual(s.createStarts, []uint64{1, 2, 3}) || len(s.deleteNames) != 3 {
+		t.Fatalf("visited=%v starts=%v deleted=%v err=%v", visited, s.createStarts, s.deleteNames, err)
+	}
+}
+
+func TestAuditBatchScanShortTailAbsenceAndSemanticErrors(t *testing.T) {
+	for _, readErr := range []error{jetstream.ErrMsgNotFound, errors.New("semantic leader read failure")} {
+		s := &candidateControlStream{consumer: candidateControlConsumer{sequences: []uint64{1, 2}, stream: "CONTROL"}, readError: readErr}
+		var visited []uint64
+		err := scanBatchThrough(context.Background(), s, nil, func(msg *jetstream.RawStreamMsg) error { visited = append(visited, msg.Sequence); return nil })
+		if errors.Is(readErr, jetstream.ErrMsgNotFound) {
+			if err != nil {
+				t.Fatal(err)
+			}
+		} else if !errors.Is(err, readErr) {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(visited, []uint64{1, 2}) || !reflect.DeepEqual(s.requests, []uint64{3}) || len(s.createNames) != 1 || len(s.deleteNames) != 1 {
+			t.Fatalf("visited=%v reads=%v creates=%v deletes=%v", visited, s.requests, s.createNames, s.deleteNames)
+		}
+	}
+}

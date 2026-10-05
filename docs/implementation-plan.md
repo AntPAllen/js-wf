@@ -2070,3 +2070,19 @@ original20s attempt. This is direct retained-cohort checker evidence; longer-soa
 scaling, natural fault causes, final-source full matrices and actual24h remain open.
 The [new failed Tier2 partition shard](scale/current-tier2-matrix-2026-10-04/partition-1-12-failed/)
 retains its missing-terminal-state observation and unconfirmed cause.
+
+
+### Short successful bulk pulls — 2026-10-05
+
+The installed SDK may return a short batch without an error. The reader now
+uses one leader next-message read to establish a retained tail, then bulk resumes
+under the same shared two-resumption cap and original audit deadline. The
+[regression/race controls and failed native R5 qualification](scale/bulk-read-resumption-2026-10-05/short-success-r5-failed/)
+separate the fixed serial fallback from the remaining throughput failure:
+short-success recovery visits1,022,814 of1.2M entries before the original20s
+budget expires. The native parent remains failed; measure delivery-window and
+cursor-replication costs before another soak. No deadlines or release gates relax.
+
+[All-server-kill145–156](scale/current-tier2-matrix-2026-10-04/cluster-145-156/)
+now extends accepted recorded-source coverage through156; full200/final-source
+matrices and actual24h remain open.

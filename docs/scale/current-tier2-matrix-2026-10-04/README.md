@@ -170,3 +170,12 @@ cluster workloads. Total: **526,232 invocations, 5,797,467 entries, 3,800 leader
 kills and 676,814 history operations**. Worst p99: **17.457496447/9.067125521 s**.
 This qualifies the journal-leader 200-seed row at c4fed06 only; current-source full
 matrix, other rows and physical/24-hour gates remain open.
+
+
+## Subsequently accepted all-server-kill145–156
+
+The [complete independent shard proof](cluster-145-156/) adds28,896 invocations,
+318,550 entries,228 faults and37,174 model operations at recordedc4fed06.
+Accepted all-server1–156 totals371,588 invocations /4,095,858 entries /
+2,964 admitted faults /478,084 model operations. Worst terminal/progress p99
+remains18.295s/13.015s. Full200/final-source/full matrices/24h stay open.

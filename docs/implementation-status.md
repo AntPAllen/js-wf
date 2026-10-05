@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source; all-server-kill seeds 1–144 qualified. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader seeds 1–200 qualified at executed `c4fed06`; complete consumer-leader seeds 1–200 qualified at that same source; all-server-kill seeds 1–156 qualified. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds and disk-delay seeds 1–104 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
@@ -29,6 +29,25 @@ and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
 ## Latest accepted evidence
+
+- **Short successful pulls now resume bulk, but native budget fails:** installed
+  SDK suppresses timeout/no-message errors, so nil-error short batches require a
+  leader absence oracle. New unit regressions/race controls pass with one oracle
+  read then bounded bulk resumption. Fresh R5 direct100k/1.2M cohort: baseline
+  18.742s and explicit-timeout18.305s complete; short-success resumes130/one point
+  read but reaches only1,022,814 visits before original20s deadline. Named parent
+  fails305.82s; complete executable/source/container/store originals retained.
+  No current-source native/full/24h promotion. Audit throughput is next to measure.
+  [Failed full native proof and regressions](scale/bulk-read-resumption-2026-10-05/short-success-r5-failed/).
+
+- **All-server-kill145–156 independently accepted:** twelve complete600s cases at
+  recordedc4fed06 qualify28,896 invocations/318,550 entries/228 faults/37,174 model
+  operations. Raw latency/fault identities and all three exactOk models/45 actual
+  dependencies verify. Four final archive parts/all213 members/current inputs
+  read back. Accepted1–156 totals371,588 invocations/4,095,858 entries/2,964 faults/
+  478,084 model operations; worst terminal/progress p99 stays18.295s/13.015s.
+  SDK/stores unavailable, final integrity/drain named-test scope. Full gates open.
+  [Complete seeds145–156 proof](scale/current-tier2-matrix-2026-10-04/cluster-145-156/).
 
 - **R5 large interrupted bulk audit accepted:** native five-container explicit-route
   file replicas, normal2GiB, directly populated100k completed invocations/1.2M entries.

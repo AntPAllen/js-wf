@@ -1,0 +1,7 @@
+=== RUN   TestStreamingAuditR5LargeInterruptedPull
+    streaming_r5_resumption_test.go:153: R5 baseline count=100000 elapsed=18.742181336s report={Invocations:100000 Journals:100000 Entries:1200000 Terminal:100000} err=<nil>
+    streaming_r5_resumption_test.go:176: R5 interrupted short=false count=100000 visited=1200000 starts=[1 129] names=[wf-audit-WwtdtXnmYjI2BAo9EMbRZ2 wf-audit-WwtdtXnmYjI2BAo9EMbRau] point_reads=0 elapsed=18.304644725s report={Invocations:100000 Journals:100000 Entries:1200000 Terminal:100000} err=<nil>
+    streaming_r5_resumption_test.go:176: R5 interrupted short=true count=100000 visited=1022814 starts=[1 130] names=[wf-audit-WwtdtXnmYjI2BAo9EMc3ym wf-audit-WwtdtXnmYjI2BAo9EMc40e] point_reads=1 elapsed=19.997030413s report={Invocations:100000 Journals:0 Entries:0 Terminal:0} err=context deadline exceeded
+    streaming_r5_resumption_test.go:182: interruption recovery failed: report={Invocations:100000 Journals:0 Entries:0 Terminal:0} want={Invocations:100000 Journals:100000 Entries:1200000 Terminal:100000} err=context deadline exceeded
+--- FAIL: TestStreamingAuditR5LargeInterruptedPull (305.82s)
+FAIL

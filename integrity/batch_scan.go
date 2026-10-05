@@ -87,7 +87,8 @@ func scanBatchThroughWithSize(ctx context.Context, stream jetstream.Stream, cuto
 	// Consumer delivery cannot prove absence. The leader's documented next
 	// message query checks gaps/tails without one request per deleted sequence.
 	// An existing omitted record is visited before later consumer delivery.
-	resolve := func(end uint64) error {
+	resolveRecords := func(end uint64, limit int) error {
+		resolved := 0
 		for first <= end {
 			msg, err := auditRead(ctx, func(call context.Context) (*jetstream.RawStreamMsg, error) {
 				return stream.GetMsg(call, first, jetstream.WithGetMsgSubject(">"))
@@ -110,9 +111,14 @@ func scanBatchThroughWithSize(ctx context.Context, stream jetstream.Stream, cuto
 				return err
 			}
 			first = msg.Sequence + 1
+			resolved++
+			if limit > 0 && resolved >= limit {
+				return nil
+			}
 		}
 		return nil
 	}
+	resolve := func(end uint64) error { return resolveRecords(end, 0) }
 	for first <= last {
 		call, stop := context.WithTimeout(ctx, 2*time.Second)
 		requested := int(min(batchSize, last-first+1))
@@ -191,6 +197,19 @@ func scanBatchThroughWithSize(ctx context.Context, stream jetstream.Stream, cuto
 			return resolve(last)
 		}
 		if delivered < requested {
+			// Fetch may report timeout/no-message status as a successful short
+			// batch. Prove whether the tail exists through the stream leader,
+			// accepting at most one record before restarting bulk delivery.
+			if err := resolveRecords(last, 1); err != nil {
+				return err
+			}
+			resumed, resumeErr := resume()
+			if resumeErr != nil {
+				return resumeErr
+			}
+			if resumed {
+				continue
+			}
 			return resolve(last)
 		}
 	}

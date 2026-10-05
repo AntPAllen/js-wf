@@ -22,6 +22,7 @@ import (
 type interruptedNativeBatch struct {
 	jetstream.MessageBatch
 	messages chan jetstream.Msg
+	failure  error
 }
 
 func (b interruptedNativeBatch) Messages() <-chan jetstream.Msg { return b.messages }
@@ -29,12 +30,13 @@ func (b interruptedNativeBatch) Error() error {
 	if err := b.MessageBatch.Error(); err != nil {
 		return err
 	}
-	return nats.ErrTimeout
+	return b.failure
 }
 
 type interruptedNativeConsumer struct {
 	jetstream.Consumer
 	interrupted bool
+	short       bool
 }
 
 func (c *interruptedNativeConsumer) Fetch(n int, opts ...jetstream.FetchOpt) (jetstream.MessageBatch, error) {
@@ -54,7 +56,11 @@ func (c *interruptedNativeConsumer) Fetch(n int, opts ...jetstream.FetchOpt) (je
 			delivered++
 		}
 	}()
-	return interruptedNativeBatch{MessageBatch: batch, messages: messages}, nil
+	var failure error = nats.ErrTimeout
+	if c.short {
+		failure = nil
+	}
+	return interruptedNativeBatch{MessageBatch: batch, messages: messages, failure: failure}, nil
 }
 
 type interruptedNativeStream struct {
@@ -62,6 +68,7 @@ type interruptedNativeStream struct {
 	starts     []uint64
 	names      []string
 	pointReads int
+	short      bool
 }
 
 func (s *interruptedNativeStream) CreateConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
@@ -75,7 +82,7 @@ func (s *interruptedNativeStream) CreateConsumer(ctx context.Context, cfg jetstr
 		return nil, fmt.Errorf("expected R5 read cursor")
 	}
 	if len(s.starts) == 1 {
-		return &interruptedNativeConsumer{Consumer: consumer}, nil
+		return &interruptedNativeConsumer{Consumer: consumer, short: s.short}, nil
 	}
 	return consumer, nil
 }
@@ -147,36 +154,42 @@ func TestStreamingAuditR5LargeInterruptedPull(t *testing.T) {
 	if err != nil || baseline != want || elapsed >= 20*time.Second {
 		t.Fatalf("baseline failed: %+v want=%+v elapsed=%s err=%v", baseline, want, elapsed, err)
 	}
-	var observed *interruptedNativeStream
-	visited := 0
-	report, err, elapsed := audit(func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
-		if stream.CachedInfo().Config.Name != "WF_JRN" {
-			return scanBatchThrough(call, stream, cutoff, visit)
-		}
-		observed = &interruptedNativeStream{Stream: stream}
-		return scanBatchThrough(call, observed, cutoff, func(msg *jetstream.RawStreamMsg) error {
-			visited++
-			if msg.Sequence != uint64(visited) {
-				return fmt.Errorf("duplicate or omitted retained record: visited=%d sequence=%d", visited, msg.Sequence)
+	for _, short := range []bool{false, true} {
+		var observed *interruptedNativeStream
+		visited := 0
+		report, err, elapsed := audit(func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+			if stream.CachedInfo().Config.Name != "WF_JRN" {
+				return scanBatchThrough(call, stream, cutoff, visit)
 			}
-			return visit(msg)
+			observed = &interruptedNativeStream{Stream: stream, short: short}
+			return scanBatchThrough(call, observed, cutoff, func(msg *jetstream.RawStreamMsg) error {
+				visited++
+				if msg.Sequence != uint64(visited) {
+					return fmt.Errorf("duplicate or omitted retained record: visited=%d sequence=%d", visited, msg.Sequence)
+				}
+				return visit(msg)
+			})
 		})
-	})
-	if observed == nil {
-		t.Fatalf("journal scan not reached: report=%+v err=%v", report, err)
-	}
-	t.Logf("R5 interrupted count=%d visited=%d starts=%v names=%v point_reads=%d elapsed=%s report=%+v err=%v", count, visited, observed.starts, observed.names, observed.pointReads, elapsed, report, err)
-	if err != nil || report != want || visited != want.Entries || !reflect.DeepEqual(observed.starts, []uint64{1, 129}) || observed.pointReads != 0 || observed.names[0] == observed.names[1] || elapsed >= 20*time.Second {
-		t.Fatalf("interruption recovery failed: report=%+v want=%+v err=%v", report, want, err)
-	}
-	for _, name := range []string{"WF_INV", "WF_JRN"} {
-		stream, err := js.Stream(ctx, name)
-		if err != nil {
-			t.Fatal(err)
+		if observed == nil {
+			t.Fatalf("journal scan not reached: report=%+v err=%v", report, err)
 		}
-		info, err := stream.Info(ctx)
-		if err != nil || info.State.Consumers != 0 {
-			t.Fatalf("consumer cleanup: stream=%s info=%+v err=%v", name, info, err)
+		t.Logf("R5 interrupted short=%v count=%d visited=%d starts=%v names=%v point_reads=%d elapsed=%s report=%+v err=%v", short, count, visited, observed.starts, observed.names, observed.pointReads, elapsed, report, err)
+		wantStart, wantReads := uint64(129), 0
+		if short {
+			wantStart, wantReads = 130, 1
+		}
+		if err != nil || report != want || visited != want.Entries || !reflect.DeepEqual(observed.starts, []uint64{1, wantStart}) || observed.pointReads != wantReads || observed.names[0] == observed.names[1] || elapsed >= 20*time.Second {
+			t.Fatalf("interruption recovery failed: report=%+v want=%+v err=%v", report, want, err)
+		}
+		for _, name := range []string{"WF_INV", "WF_JRN"} {
+			stream, err := js.Stream(ctx, name)
+			if err != nil {
+				t.Fatal(err)
+			}
+			info, err := stream.Info(ctx)
+			if err != nil || info.State.Consumers != 0 {
+				t.Fatalf("consumer cleanup: stream=%s info=%+v err=%v", name, info, err)
+			}
 		}
 	}
 }
