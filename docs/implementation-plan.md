@@ -3637,3 +3637,19 @@ matchingsnapshotinv_seq154 andnolease. All2175originalfilesunchanged; no workers
 ACKs/provisioning. Nativequeue1/64durableszero inconsistency remainsunconfirmed;
 currentR3copiedrestartisnotoriginalmixed-versionlifecycle reproduction.
 [Targetedproof](scale/tier2-retained-row-2026-10-05/upgrade-smoke-copied-child-diagnosis/).
+
+### Complete seven-hour failed soak preservation and copied clock acceptance — 2026-10-05
+
+Actual24h aace912 fails25201.93s atcheckpoint3140/cutoff87920 underoriginal
+20s/60s/threeattemptlimits. Independentcomplete9063originalarchivefiles/1374
+sourceinputs/actualobservedSDK162125 verified. Outer25members/fifteenpartsreadback.
+Attempts1/2read970142/970546journalentries beforestate-watch failure; attempt3
+expiresduringjournalread. Countersnotacceptedreports; lastaccepted3130/87640/
+966835. Originalstoresclosed,no unchangednative rerun orservercauseclaim.
+[Completefailedproof](scale/watch-observed-journal-24h-2026-10-05/failed-3140/).
+
+Independentcopiedworkerclockten-minute audit atf0f37c8 qualifies full2884/31877,
+allthreehistorymodels andthreeclient64durable drain in4.431885s underoriginal20s;
+2317originalfilesunchanged/1695inputs/actualSDK551527/threeNATS verified.
+Complete4037members/threepartsreadback. Fullmatrix gate remainsopen.
+[Copiedproof](scale/tier2-retained-row-2026-10-05/workerclock-ten-minute-copied-audit/).
