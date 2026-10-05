@@ -2658,3 +2658,7 @@ accepted35s smoke does not qualify this sustained case. Both failed originals
 and selected executed-Git inputs are independently verified. SharedVM overlap
 with each other and the still-running million candidate is recorded, not causal.
 [Full sustained failed originals](scale/protobuf-json-worker-rollout-2026-10-05/10m-failed/).
+
+The next source reports initial-state-watch failure phase and delivered-prefix
+counts while preserving underlying retry errors and all original budgets.
+Focused state-snapshot tests pass; no native soak rerun or cause/fix claim.

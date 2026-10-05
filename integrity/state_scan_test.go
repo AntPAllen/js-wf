@@ -3,6 +3,7 @@ package integrity
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/nats-io/nats.go/jetstream"
@@ -96,5 +97,24 @@ func TestInitialAuditStateTombstonesAndCohortFilter(t *testing.T) {
 		if _, err := state.Get(context.Background(), key); !errors.Is(err, jetstream.ErrKeyNotFound) {
 			t.Fatalf("key=%s err=%v", key, err)
 		}
+	}
+}
+
+// A deadline after a delivered prefix must retain retry identity and report the
+// missing initial-set barrier, rather than imply the stream scan read nothing.
+func TestInitialAuditStateFailureReportsDeliveredPrefix(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	watch := &auditWatch{updates: make(chan jetstream.KeyValueEntry, 1)}
+	watch.updates <- auditWatchEntry{key: "completed", rev: 17}
+	state, err := initialAuditState(ctx, auditWatchState{watch: watch}, func(string) bool {
+		cancel()
+		return true
+	})
+	if state != nil || !errors.Is(err, context.Canceled) || !watch.stopped {
+		t.Fatalf("state=%v err=%v stopped=%v", state, err, watch.stopped)
+	}
+	if !strings.Contains(err.Error(), "initial set: received=1 included=1 last_revision=17 initial_complete=false") {
+		t.Fatalf("missing partial snapshot diagnosis: %v", err)
 	}
 }

@@ -30,6 +30,13 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **State snapshot failure diagnostics added:** failures report watch creation
+  versus initial-set phase, received/included counts, last revision and missing
+  initial completion barrier. Error wrapping preserves retry identity; original
+  2s per-call/20s attempt/60s total budgets unchanged. Focused initial-state tests
+  pass, including canceled partial-prefix count and cleanup. This improves the
+  next observation; it does not establish the checkpoint1040 cause or a fix.
+
 - **Live million candidate receipt snapshot independently validated:** original
   campaign stillrunning, all1M publishes acknowledged;8,755 snapshot receipts/
   991,245zero slots. Checksums/unique stream sequences/exact deadlines/noearly
