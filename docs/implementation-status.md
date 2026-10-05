@@ -30,6 +30,18 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Real-domain all-three library restart qualified at original target:** clean
+7a6531f racePASS31.78s, whole cut5.810s under30s, three old server IDs stopped
+before replacements, three new IDs/domain API responses confirmed. Original60s
+scenario passes generation1→3, two reclaimed objects, old-manifest rejection,
+one lost fresh-manifest reply repaired, three effects/two terminals and all-peer
+fresh2/survivor1/shared-reference checks. Actual race SDK/650 Git inputs/before-
+after ledgers/all1,082 archive members verify. Earlier five-second gate failures
+preserved; boundary snapshot showed reconnected domain nodes without metadata
+leader at5s. The added5s election gate was stricter than original30s recovery.
+No SIGKILL/lease-expiry/online-GC/legacy/full-matrix/24h claim or NATS defect claim.
+ [Qualified result and all failed originals](scale/continuation-domain-all-server-restart-2026-10-05/).
+
 - **Real-domain all-three restart candidate remains unqualified:**444bd43/
 506ab50/c0252af retained race attempts fail completed-fault admission; the latter
 records three stopped/new server IDs, then zero account-info heal responses under

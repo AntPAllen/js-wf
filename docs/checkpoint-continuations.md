@@ -933,3 +933,18 @@ stay. [Complete domain proof](scale/continuation-retirement-domain-2026-10-05/).
 Positive domain path accepted at recorded source; forced absence confirmation,
 domain server faults/legacy versions, worker SIGKILL, active-writer GC and full
 final-source matrices/24h remain open. No unchanged Tier1 graph rerun.
+
+
+## Domain retirement/reuse with all-three library restart
+
+Clean7a6531f racePASS31.78s; three old servers stopped before replacements,
+three new IDs and WFRETIRE account API responses recover in5.810s under original
+30s whole-cut target.60s scenario remains. Generation1→3, two reclaimed objects,
+old-manifest rejection before user code, one lost fresh-manifest reply, three
+effects/two terminals and all-peer/shared/survivor/fresh references verify.
+Actual SDK/650 Git inputs/stopped stores/1,082 archive members verify; no store
+reopen claim. [Complete proof and failures](scale/continuation-domain-all-server-restart-2026-10-05/).
+Earlier added5s metadata gate failures stay preserved; reconnect alone did not
+prove metadata leadership. Focused library restart accepted at executed source;
+domain SIGKILL/forced absence confirmation/legacy versions, worker SIGKILL,
+active-writer GC/full matrices/actual24h remain open. No unchanged Tier1 rerun.

@@ -2493,3 +2493,18 @@ Add local server domain/metadata-leader/running and client connection observatio
 before cleanup to distinguish fixture routing/reconnect/metadata cases. No server
 cause or domain fault/full-matrix/24h pass. Original30s startup/60s scenario stay.
 [Failed originals](scale/continuation-domain-all-server-restart-2026-10-05/).
+
+
+### Domain all-three library restart qualified at original recovery target — 2026-10-05
+
+Clean7a6531f actual racePASS31.78s. Three original servers stop before any new
+instance starts; three new IDs and WFRETIRE domain API responses confirm recovery
+in5.810s, within30s from cut start including shutdown/restart. Original60s whole
+scenario holds. Generation1→3/two collected objects/old-manifest rejection/one
+fresh manifest loss/three effects/two terminals/all-peer fresh2/survivor1/shared
+references remain strict. Actual race SDK/650 Git inputs/1,082 originals verify.
+Added5s metadata gate had rejected connected/running domain nodes before metadata
+leadership returned; failures retained, no server-defect attribution. No unchanged
+5s rerun. Library restart accepted, not SIGKILL/lease-expiry or full domain matrix.
+Legacy/worker SIGKILL/online GC/current-source full matrices/actual24h remain open.
+[Complete proof and earlier failures](scale/continuation-domain-all-server-restart-2026-10-05/).
