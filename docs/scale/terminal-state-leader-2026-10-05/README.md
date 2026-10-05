@@ -56,3 +56,10 @@ consistency admission remains separate. This does not qualify arbitrary mirrored
 KV layouts, runtime KV paths, R5/final-source matrices, 24h soak or million-timer
 physical drain. The two existing live campaigns continue on their isolated sources;
 these tests share VM resources with them.
+
+## Focused original partition seed replay
+
+[Captured seed1 launch](partition-seed1-launch/) starts the original ten-minute
+partition case at clean93c5133 after the point-read correction. Normal executable
+identities, selected Git input bytes and fresh original stores are captured.
+The case is live; terminal verdict and historical cause remain unconfirmed.

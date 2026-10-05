@@ -2228,3 +2228,17 @@ correction, matching the historical normal-build profile. Native execution and
 terminal review remain pending; the historical failure/cause/full gates remain
 unchanged. Captured source and actual executable identities are required before
 promoting the replay result.
+
+### Captured native partition seed1 replay launch — 2026-10-05
+
+The focused ten-minute partition case is now live at clean93c5133 with normal
+SDK/three actual NATS2.15.0 file-replica processes. SDK binary explicitly stamps
+the clean Git revision; all live executable hashes/full build fields/arguments/
+selected environments and1172 repository Git input bytes verify. Retained roots
+are fresh, repeated actual proxy cuts observed; original20s/60s audit,30s p99 and
+5m completion limits are unchanged. Normal2GiB/GOMAX2/5G service ceiling and
+shared VM with both long campaigns are recorded. Launch archive1193 members/
+three parts reads back. Primary stores/unit continue untouched; terminal/source
+after/native integrity/model review is pending. No historical causal conclusion,
+full-matrix/final-source/24h/million-drain promotion.
+[Complete launch proof](scale/terminal-state-leader-2026-10-05/partition-seed1-launch/).

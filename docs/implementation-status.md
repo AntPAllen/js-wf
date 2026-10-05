@@ -30,6 +30,17 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Focused partition seed1 replay is live after terminal leader-read correction:**
+  clean93c5133/normal file R3/original10m and20s/60s/30s/5m gates, GOMAX2/2GiB
+  with5G service memory ceiling. Actual SDK/VCS clean revision and all three
+  NATS2.15.0 processes captured;1172 selected Git repository inputs match.
+  Fresh retained stores/early workload and repeated route cuts observed. Launch
+  archive1193 members/three parts reads back; primary process/stores stay live.
+  Preparation VCS-stamp assertion failure occurred before native launch and is
+  retained separately. Shares VM with both existing campaigns; original partition
+  failure cause, terminal verdict and full/final-source qualification stay open.
+  [Complete launch facts](scale/terminal-state-leader-2026-10-05/partition-seed1-launch/).
+
 - **Verified new disk-delay duplicate expansions recovered:** all5358 raw
   files in accepted105–156/196–200 match pushed97cb7fb parts, complete canonical
   members and original ZIPs; no visible target descriptors remain. Only duplicate
