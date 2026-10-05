@@ -30,6 +30,15 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Bounded bulk-read resumption implemented:** interrupted opt-in audit cursors
+  resume from the first unvisited sequence, at most twice, within the original
+  captured bounds and audit deadline. A regression fails against the old serial
+  fallback and passes with 4,096 exactly-once visits/zero point reads; race controls
+  and native retained-hole/high-water, leader-loss and cancellation cases pass.
+  Actual executable/build info/source overlay/logs retained; native stores temporary,
+  native branch admission unproved. R5/large native interrupted tail/24h remain open.
+  [Focused reader proof](scale/bulk-read-resumption-2026-10-05/).
+
 Entries are chronological snapshots, newest first. Earlier launch/live/pending
 notes are historical; later terminal results and accepted reviews supersede them.
 
@@ -49,7 +58,8 @@ notes are historical; later terminal results and accepted reviews supersede them
   Concurrent native-million load overlaps failure; resource/server causality
   unconfirmed. Actual SDK/all build fields/1266 source inputs/6144 originals and
   publication parts read back. Stores retained, not reopened. No unchanged rerun;
-  bulk-reader interruption recovery is next. Full24h/full matrices remain open.
+  bounded bulk-reader resumption is now implemented (see newer entry).
+  Full24h/full matrices remain open.
   [Complete failed originals](scale/local-r5-streaming-audit-2026-10-04/explicit-routes-normal-2g-24h-failed/).
 
 - **Compressed candidate timing independently decoded:** all300 slots/checksums

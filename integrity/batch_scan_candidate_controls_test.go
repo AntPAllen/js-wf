@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -62,13 +63,22 @@ type candidateControlStream struct {
 	deleteName      string
 	createLostReply bool
 	createError     error
+	createStarts    []uint64
+	deleteNames     []string
+	last            uint64
+	resumed         *candidateControlConsumer
 }
 
 func (s *candidateControlStream) Info(context.Context, ...jetstream.StreamInfoOpt) (*jetstream.StreamInfo, error) {
-	return &jetstream.StreamInfo{Config: jetstream.StreamConfig{Name: "CONTROL", Replicas: 3}, State: jetstream.StreamState{FirstSeq: 1, LastSeq: 6}}, nil
+	last := s.last
+	if last == 0 {
+		last = 6
+	}
+	return &jetstream.StreamInfo{Config: jetstream.StreamConfig{Name: "CONTROL", Replicas: 3}, State: jetstream.StreamState{FirstSeq: 1, LastSeq: last}}, nil
 }
 func (s *candidateControlStream) CreateConsumer(_ context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
 	s.createNames = append(s.createNames, cfg.Name)
+	s.createStarts = append(s.createStarts, cfg.OptStartSeq)
 	if !strings.HasPrefix(cfg.Name, "wf-audit-") {
 		return nil, errors.New("missing stable audit consumer identity")
 	}
@@ -78,13 +88,28 @@ func (s *candidateControlStream) CreateConsumer(_ context.Context, cfg jetstream
 	if s.createLostReply && len(s.createNames) == 1 {
 		return nil, nats.ErrTimeout
 	}
-	if cfg.DeliverPolicy != jetstream.DeliverByStartSequencePolicy || cfg.OptStartSeq != 1 || cfg.AckPolicy != jetstream.AckNonePolicy || !cfg.MemoryStorage || cfg.Replicas != 3 || cfg.InactiveThreshold <= 0 {
+	if cfg.DeliverPolicy != jetstream.DeliverByStartSequencePolicy || cfg.OptStartSeq == 0 || cfg.AckPolicy != jetstream.AckNonePolicy || !cfg.MemoryStorage || cfg.Replicas != 3 || cfg.InactiveThreshold <= 0 {
 		return nil, errors.New("incorrect consumer configuration")
 	}
-	return s.consumer, nil
+	c := s.consumer
+	if cfg.OptStartSeq > 1 && s.resumed != nil {
+		c = *s.resumed
+	}
+	c.sequences = nil
+	source := s.consumer.sequences
+	if cfg.OptStartSeq > 1 && s.resumed != nil {
+		source = s.resumed.sequences
+	}
+	for _, seq := range source {
+		if seq >= cfg.OptStartSeq {
+			c.sequences = append(c.sequences, seq)
+		}
+	}
+	return c, nil
 }
 func (s *candidateControlStream) DeleteConsumer(_ context.Context, name string) error {
 	s.deleteName = name
+	s.deleteNames = append(s.deleteNames, name)
 	s.deleted = true
 	return nil
 }
@@ -178,5 +203,53 @@ func TestAuditBatchScanCandidateTransportFallbackResumesUnvisitedTail(t *testing
 		if !reflect.DeepEqual(visited, []uint64{1, 2, 3, 5, 6}) || !reflect.DeepEqual(s.requests, []uint64{3, 4, 6}) || !s.deleted {
 			t.Fatalf("tail not recovered: visited=%v reads=%v cleanup=%v", visited, s.requests, s.deleted)
 		}
+	}
+}
+
+// A lost pull after a confirmed prefix must not turn thousands of retained
+// records into point reads. Every record remains subject to the same visitor.
+func TestAuditBatchScanInterruptedLargeTailKeepsBulkReads(t *testing.T) {
+	prefix := make([]uint64, 128)
+	tail := make([]uint64, 4096-128)
+	for i := range prefix {
+		prefix[i] = uint64(i + 1)
+	}
+	for i := range tail {
+		tail[i] = uint64(i + 129)
+	}
+	s := &candidateControlStream{last: 5000, consumer: candidateControlConsumer{sequences: prefix, stream: "CONTROL", err: nats.ErrTimeout}, resumed: &candidateControlConsumer{sequences: tail, stream: "CONTROL"}, readError: errors.New("serial tail fallback would exhaust audit budget")}
+	cutoff := uint64(4096)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	next := uint64(1)
+	err := scanBatchThroughWithSize(ctx, s, &cutoff, func(msg *jetstream.RawStreamMsg) error {
+		if msg.Sequence != next {
+			return errors.New("record duplicated or omitted")
+		}
+		next++
+		return nil
+	}, 4096)
+	if err != nil || next != 4097 || len(s.requests) != 0 || !reflect.DeepEqual(s.createStarts, []uint64{1, 129}) || len(s.deleteNames) != 2 || s.createNames[0] == s.createNames[1] {
+		t.Fatalf("next=%d starts=%v reads=%v deleted=%v err=%v", next, s.createStarts, s.requests, s.deleteNames, err)
+	}
+}
+
+func TestAuditBatchScanRepeatedInterruptionIsBounded(t *testing.T) {
+	s := &candidateControlStream{consumer: candidateControlConsumer{sequences: []uint64{1, 2}, stream: "CONTROL", err: nats.ErrTimeout}}
+	var visited []uint64
+	err := scanBatchThrough(context.Background(), s, nil, func(msg *jetstream.RawStreamMsg) error { visited = append(visited, msg.Sequence); return nil })
+	if err != nil || !reflect.DeepEqual(visited, []uint64{1, 2, 3, 5, 6}) || !reflect.DeepEqual(s.createStarts, []uint64{1, 3, 3}) || len(s.deleteNames) != 3 {
+		t.Fatalf("visited=%v starts=%v deleted=%v err=%v", visited, s.createStarts, s.deleteNames, err)
+	}
+}
+
+func TestAuditBatchScanCancellationAfterPrefixDoesNotResume(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	s := &candidateControlStream{consumer: candidateControlConsumer{sequences: []uint64{1, 2}, stream: "CONTROL", err: nats.ErrTimeout}}
+	var visited []uint64
+	err := scanBatchThrough(ctx, s, nil, func(msg *jetstream.RawStreamMsg) error { visited = append(visited, msg.Sequence); cancel(); return nil })
+	if !errors.Is(err, context.Canceled) || !reflect.DeepEqual(visited, []uint64{1}) || len(s.createNames) != 1 || len(s.requests) != 0 || len(s.deleteNames) != 1 {
+		t.Fatalf("visited=%v starts=%v reads=%v deleted=%v err=%v", visited, s.createStarts, s.requests, s.deleteNames, err)
 	}
 }

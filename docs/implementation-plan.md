@@ -2051,3 +2051,13 @@ all three candidate binaries/all build fields and1693 selected inputs/83 Git inp
 verify. Snapshot proof only; live stores and terminal gates pending. Candidate
 remains diagnostic; production adoption/original million/full24h/full matrices
 remain open. [Full-profile launch](scale/scheduler-server-candidate-2026-10-04/million-24h-launch/).
+
+
+### Bounded retained bulk-read recovery — 2026-10-05
+
+The opt-in retained bulk reader recreates transport-interrupted consumers from
+its first unvisited sequence, with at most two resumptions under the original
+captured cutoff and audit deadline. Semantic errors stay fatal; leader reads
+still resolve gaps and short tails. The [focused regression/race/native proof](scale/bulk-read-resumption-2026-10-05/)
+qualifies this reader change only. Large native interrupted-tail/R5 and actual
+24-hour qualification remain open; the failed explicit-route soak is retained.

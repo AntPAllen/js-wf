@@ -34,10 +34,9 @@ func scanBatchThroughWithSize(ctx context.Context, stream jetstream.Stream, cuto
 	if first == 0 || first > last {
 		return nil
 	}
-	// Stable identity makes a lost create reply safe to retry. Cleanup also
-	// covers a successful create whose replies were all lost. The original
-	// context bounds cleanup; inactivity expires consumers after cancellation.
-	consumerName := "wf-audit-" + nuid.Next()
+	// Each cursor has a stable identity across lost-create retries. A resumed
+	// cursor starts at the first record not yet accepted by the visitor.
+	var consumerNames []string
 	defer func() {
 		cleanup := context.WithoutCancel(ctx)
 		if deadline, ok := ctx.Deadline(); ok {
@@ -47,17 +46,43 @@ func scanBatchThroughWithSize(ctx context.Context, stream jetstream.Stream, cuto
 		}
 		call, stop := context.WithTimeout(cleanup, 2*time.Second)
 		defer stop()
-		_ = stream.DeleteConsumer(call, consumerName)
+		for _, name := range consumerNames {
+			_ = stream.DeleteConsumer(call, name)
+		}
 	}()
-	consumer, err := auditRead(ctx, func(call context.Context) (jetstream.Consumer, error) {
-		return stream.CreateConsumer(call, jetstream.ConsumerConfig{
-			Name: consumerName, DeliverPolicy: jetstream.DeliverByStartSequencePolicy, OptStartSeq: first,
-			AckPolicy: jetstream.AckNonePolicy, ReplayPolicy: jetstream.ReplayInstantPolicy,
-			MemoryStorage: true, Replicas: info.Config.Replicas, InactiveThreshold: 30 * time.Second,
+	create := func() (jetstream.Consumer, error) {
+		name := "wf-audit-" + nuid.Next()
+		consumerNames = append(consumerNames, name)
+		return auditRead(ctx, func(call context.Context) (jetstream.Consumer, error) {
+			return stream.CreateConsumer(call, jetstream.ConsumerConfig{
+				Name: name, DeliverPolicy: jetstream.DeliverByStartSequencePolicy, OptStartSeq: first,
+				AckPolicy: jetstream.AckNonePolicy, ReplayPolicy: jetstream.ReplayInstantPolicy,
+				MemoryStorage: true, Replicas: info.Config.Replicas, InactiveThreshold: 30 * time.Second,
+			})
 		})
-	})
+	}
+	consumer, err := create()
 	if err != nil {
 		return err
+	}
+	resumes := 0
+	// Bound recovery even for callers without a deadline; creation retries and
+	// fetches share the original audit context. Exhaustion keeps the leader-read
+	// fallback, and semantic errors remain fatal.
+	resume := func() (bool, error) {
+		if ctx.Err() != nil {
+			return false, ctx.Err()
+		}
+		if first > last || resumes >= 2 {
+			return false, nil
+		}
+		resumes++
+		replacement, err := create()
+		if err != nil {
+			return false, err
+		}
+		consumer = replacement
+		return true, nil
 	}
 	// Consumer delivery cannot prove absence. The leader's documented next
 	// message query checks gaps/tails without one request per deleted sequence.
@@ -95,6 +120,13 @@ func scanBatchThroughWithSize(ctx context.Context, stream jetstream.Stream, cuto
 		if err != nil {
 			stop()
 			if batchReadTransportError(err) {
+				resumed, resumeErr := resume()
+				if resumeErr != nil {
+					return resumeErr
+				}
+				if resumed {
+					continue
+				}
 				return resolve(last)
 			}
 			return err
@@ -149,6 +181,13 @@ func scanBatchThroughWithSize(ctx context.Context, stream jetstream.Stream, cuto
 			if !batchReadTransportError(batchErr) {
 				return batchErr
 			}
+			resumed, resumeErr := resume()
+			if resumeErr != nil {
+				return resumeErr
+			}
+			if resumed {
+				continue
+			}
 			return resolve(last)
 		}
 		if delivered < requested {
@@ -158,8 +197,8 @@ func scanBatchThroughWithSize(ctx context.Context, stream jetstream.Stream, cuto
 	return nil
 }
 
-// Recover a transport-interrupted consumer through leader reads at the next
-// unvisited position. Semantic metadata/payload/visitor errors never fall back.
+// Only transport interruptions permit cursor recovery or leader-read fallback.
+// Semantic metadata/payload/visitor errors never fall back.
 func batchReadTransportError(err error) bool {
 	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) ||
 		errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || natsutil.IsUnavailable(err)

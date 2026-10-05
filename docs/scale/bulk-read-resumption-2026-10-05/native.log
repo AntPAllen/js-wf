@@ -1,0 +1,18 @@
+=== RUN   TestAuditBatchScanCandidateNativeHighWaterHolesAndReadback
+    batch_scan_candidate_test.go:101: records=34993 point=2.191613757s batch=322.978356ms digest=253500ad6f22d454558be85ce29e9722213c3823dcdae6117838204025495aee consumers=0
+--- PASS: TestAuditBatchScanCandidateNativeHighWaterHolesAndReadback (14.31s)
+=== RUN   TestStreamingAuditNativeJournalFaults
+=== RUN   TestStreamingAuditNativeJournalFaults/state-false/consumer-leader-loss
+    streaming_native_fault_test.go:105: streaming-fault state_snapshot=false fault=consumer-leader-loss consumer=wf-audit-Rim827M6fpXOGZokB6Fizo leader=2 pending_at_kill=1488 consumer_replicas=3 visited=2000 elapsed=291.790457ms report={Invocations:500 Journals:500 Entries:2000 Terminal:500} err=<nil> reconnects=1
+=== RUN   TestStreamingAuditNativeJournalFaults/state-false/cancellation
+    streaming_native_fault_test.go:105: streaming-fault state_snapshot=false fault=cancellation consumer= leader=-1 pending_at_kill=0 consumer_replicas=0 visited=128 elapsed=176.137881ms report={Invocations:500 Journals:0 Entries:0 Terminal:0} err=context canceled reconnects=0
+=== RUN   TestStreamingAuditNativeJournalFaults/state-true/consumer-leader-loss
+    streaming_native_fault_test.go:105: streaming-fault state_snapshot=true fault=consumer-leader-loss consumer=wf-audit-Rim827M6fpXOGZokB6Gxl4 leader=0 pending_at_kill=1488 consumer_replicas=3 visited=2000 elapsed=296.052242ms report={Invocations:500 Journals:500 Entries:2000 Terminal:500} err=<nil> reconnects=1
+=== RUN   TestStreamingAuditNativeJournalFaults/state-true/cancellation
+    streaming_native_fault_test.go:105: streaming-fault state_snapshot=true fault=cancellation consumer= leader=-1 pending_at_kill=0 consumer_replicas=0 visited=128 elapsed=189.732311ms report={Invocations:500 Journals:0 Entries:0 Terminal:0} err=context canceled reconnects=0
+--- PASS: TestStreamingAuditNativeJournalFaults (22.28s)
+    --- PASS: TestStreamingAuditNativeJournalFaults/state-false/consumer-leader-loss (5.70s)
+    --- PASS: TestStreamingAuditNativeJournalFaults/state-false/cancellation (5.40s)
+    --- PASS: TestStreamingAuditNativeJournalFaults/state-true/consumer-leader-loss (5.73s)
+    --- PASS: TestStreamingAuditNativeJournalFaults/state-true/cancellation (5.46s)
+PASS
