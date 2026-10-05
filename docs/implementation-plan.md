@@ -3154,3 +3154,14 @@ blob:none and non-cone **/*.go plus explicit required paths. Producer still
 verifies/captures allselected HEAD Go inputs and exact producer Git bytes; sparse
 status must remain clean. Native actual500/six/race/5m/30s requirements unchanged.
 CI execution pending; no environment qualification from this preparation.
+
+### Accepted hosted combined fanout launch — 2026-10-05
+
+The corrected manual seed1 dispatch at executed7a4d739 was accepted as
+run37333174296/job111841179439, observed queued. Original HTTP422/schema rejection,
+corrected request/response, exact workflow and native source-bound metadata are
+retained. Primary checkout@v4 source separately applies sparse patterns with the
+blob filter; actual checkout and terminal native proof remain pending. This is
+launch evidence only; local six-boundary25b327c qualification remains accepted,
+with full current-source matrices and actual24h still open.
+[Complete launch proof](scale/fanout-combined-boundaries-2026-10-05/ci-launch/).

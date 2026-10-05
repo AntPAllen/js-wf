@@ -28,25 +28,22 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
-## Live combined fanout observation — 2026-10-05 14:04 UTC
+## Latest live verification — 2026-10-05 15:33 UTC
 
-The race six-boundary combined500-child matrix at executede20cf89 remains
-running (actualSDK323458). Creation first/interior/last each logged500 completions,
-unchanged durable prefix and higher successor epoch. Results/first admitted
-actual parentSIGKILL plus library journal restart, then parent Await hit the
-original five-minute context deadline. Full matrix cannot qualify from this run;
-remaining result cases still executing, complete terminal proof review pending.
-No source change or unchanged rerun while source-after capture is pending.
+The actual 24-hour journal-leader campaign remains running at executed `aace912`;
+its actual SDK process162125 and user unit were checked live. Native output
+reached batch1625 / approximately3h46m. No terminal24h verdict is available.
+The million-timer diagnostic candidate remains running (actual program101283),
+with237798 receipts observed; final latency, two restarts and physical-drain gates
+remain unqualified. These running observations do not resolve historical failures.
 
-A separate acceptance-checker assumption is contradicted by captured
-results/interior metadata: reconstructed prefix2223 records ends at streamseq4194,
-while live stream has2210 messages after snapshot purging (firstseq766,
-num_deleted1219). Before/after restart preserve messages2210 and lastseq4194.
-The current check messages>=prefix length is invalid for archived-prefix reads.
-Correct the next instrumentation/guard using captured prefix tail and stream
-sequence plus original prefix equality; do not treat this as a cause or resolution
-of the results/first deadline. Original stores remain retained; no independent
-reopen or completed combined-matrix qualification claimed.
+The six-boundary fanout hosted workflow was accepted at executed `7a4d739`:
+[run37333174296](https://github.com/AntPAllen/js-wf/actions/runs/37333174296),
+job111841179439 observed queued. The original HTTP422 workflow schema rejection
+is preserved alongside corrected dispatch, exact workflow bytes, native run/job
+metadata and checkout action source review. Native checkout/test/artifact review
+is pending; the local six-boundary qualification below remains the accepted proof.
+[Complete CI launch proof](scale/fanout-combined-boundaries-2026-10-05/ci-launch/).
 
 ## Latest preserved failures
 
@@ -59,8 +56,8 @@ childSDK/exactproducerGit/666Gitinputs/3287selectedexternal inputs verified;
 children with bounded concurrency4 while parent SDK collection held; admits all
 500results, joinsworkers and confirms500durable child signals/no earlySDK result
 before actualcutworker. Ten guard controls pass; race compile/opt-in skip1.058s.
-Original30s/5m preserved; full changed case pending, no production or servercause
-fix/fullmatrix claim. [Complete predeadline proof](scale/fanout-combined-boundaries-2026-10-05/).
+Original30s/5m preserved. The later changed six-case run passed as recorded
+below; this diagnostic failure itself remains failed, with no servercause claim. [Complete predeadline proof](scale/fanout-combined-boundaries-2026-10-05/).
 
 The confirmed-outside full500 matrix at161dfa9 failed729.17s: allthree creation
 and first/interior result cases pass, each500 children/result249500/prefix/higher
@@ -70,9 +67,9 @@ admitted under30s. CompleteactualSDK/665Gitinputs/3287selectedexternal inputs/
 five childSDKs/16656archive members/threeparts verified. Last-case fresh copy
 shows four incomplete children allin parent partition52, Suspended waits on one,
 493pending/1ackpending;2086originalfiles unchanged/1655inputs/3951members/onepart
-verified. Next diagnostic: timings and predeadline stack; no unchanged rerun,
-timeout extension, original reopen or fullmatrix qualification. Portable producer
-and manualCI atc24e70f registered active, not dispatched yet.
+verified. Subsequent timings/predeadline stack diagnosis and the later successful
+preparation are recorded separately. This failed run remains failed; no timeout
+extension, original reopen or full-release qualification is claimed.
 [Complete changed failed run and last-copy diagnosis](scale/fanout-combined-boundaries-2026-10-05/).
 
 Copied fanout diagnosis localized a fixture admission error: first/interior/last
@@ -83,8 +80,8 @@ fourparts verified. Aggregate signal count also includes parent-partition childr
 and cannot prove outside completion. Combined fixture now confirms every outside
 result before stopping those workers. Restart guard uses captured-prefix/stream
 sequence coverage plus exact final prefix/higher epoch; nine controls PASS and
-race compile/opt-in skip1.083s. Corrected full matrix pending; original failed
-matrix remains failed, no production change/gate extension/server-cause claim.
+race compile/opt-in skip1.083s. Subsequent changed runs are recorded separately;
+this original failed matrix remains failed, no production change/gate extension/server-cause claim.
 [Complete copied diagnoses and correction](scale/fanout-combined-boundaries-2026-10-05/).
 
 The full combined500-child six-boundary race matrix at e20cf89 failed1046.21s.
