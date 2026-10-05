@@ -14,7 +14,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–104 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. Other finite combined cases remain. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
-| Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. No24h row qualified; full-matrix soak remains. |
+| Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. Corrected continuous-byte attempt also failed checkpoint1040 /29120 after7986.85s; originals independently preserved, state snapshot phase is the next diagnostic target. No24h row qualified; full-matrix soak remains. |
 
 Requested adjustments are in place: Tier1 simulation is implemented; R5 route
 recovery p99 measures from confirmed healing; the historical 31.1 s / TTL 30 s worker
@@ -41,15 +41,24 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
   running final-count zeroes remain placeholders.
   [Receipt bytes and independent decoder](scale/million-candidate-24h-2026-10-05/live-receipts/).
 
-- **Sustained mixed-encoding worker-kill run is live:** cleanab5cd71 normal2GiB/
-  GOMAX2/seed1/original10m, initialprotobuf/replacementJSON, original5s kill cadence
-  and all timing/integrity/drain gates. Actual parent116782/17 captured SDK records,
-  allfive live native-container executables/copied bytes/full buildfields,1,334
-  Git-bound selected source inputs and1,350 immutable launch members/fourparts
-  verify. SDK observer continues; full generation coverage/terminal result pending.
-  Actual accepted native smoke rejected by default-profile verifier without rollout
-  flag/no default report. No sustained/default/fullmatrix/24h promotion.
-  [Immutable launch and rejection control](scale/protobuf-json-worker-rollout-2026-10-05/10m-launch/).
+- **Sustained mixed-encoding worker-kill run failed its original latency gate:**
+  cleanab5cd71 ten-minute profile,392inv/4345entries/119faults; nativeFAIL775.92s.
+  Short-workflow terminalp99 **33.911s** exceeds30s; progress23.511s, otherfive
+  cells below30s. All6,531 original files and1,334 Git-bound selected source
+  inputs independently verify; final SDK observer retained, full generation
+  coverage unclaimed. Shared-VM overlap recorded, cause unconfirmed. No sustained
+  or default/fullmatrix promotion; focused smoke remains accepted only in scope.
+  [Complete failed originals](scale/protobuf-json-worker-rollout-2026-10-05/10m-failed/).
+
+- **Corrected continuous-byte 24-hour soak failed checkpoint1040:** native
+  FAIL7986.85s/29120inv, threeoriginal20s audit attempts. Attempts2/3 deliver
+  321442/321543journal records withzerojournalNext errors, then consumer cleanup;
+  noWF_STATE.Keys trace. Recorded source places initialKVwatch between those
+  phases; state snapshot is the next diagnostic target, cause unconfirmed.
+  Post-return parentstack retained, not a snapshot of the expired watch wait.
+  All6,249 original files and1,318 Git-bound selected source inputs independently
+  verify. SharedVM overlap recorded, no unchanged rerun/stores reopen/24h pass.
+  [Complete failed originals and trace comparison](scale/continuous-byte-journal-24h-2026-10-05/failed-1040/).
 
 - **Mixed-encoding worker replacement admission smoke passed:** bb79fa2 normal
   2GiB/GOMAX2/35s, native140.67s inclstartup/cleanup,56inv/621entries/6SIGKILL.

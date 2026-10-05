@@ -2640,3 +2640,21 @@ not an atomic snapshot and copied slots do not independently prove fsync.
 All9 snapshot members/part verify. Original campaign remainsrunning; full1M/
 24h/two restarts/raw latency/physical drain/adoption stayopen. Running final
 stream/ack-pending zeroes are unobserved placeholders, never drain evidence.
+
+
+### 2026-10-05 terminal follow-up: original gates remain open
+
+The corrected continuous-byte journal 24h run at b2d7011 failed checkpoint1040 /
+29120inv after7986.85s. Attempts2/3 return321442/321543 journal records withzero
+journalNext errors and reach consumer cleanup; initial state watch is untraced
+and precedes the absent Keys call. Diagnose this phase under the existing20s /
+60s / three-attempt budget before another long run. Cause remains unconfirmed.
+[Full failed originals and independent trace comparison](scale/continuous-byte-journal-24h-2026-10-05/failed-1040/).
+
+The opt-in protobuf-to-json ten-minute worker_kill run at ab5cd71 failed the
+original strict30s terminalp99 gate: shortworkflows33.911s,392inv/4345entries/
+119faults. Preserve and inspect individual latency/fencing history before rerun;
+accepted35s smoke does not qualify this sustained case. Both failed originals
+and selected executed-Git inputs are independently verified. SharedVM overlap
+with each other and the still-running million candidate is recorded, not causal.
+[Full sustained failed originals](scale/protobuf-json-worker-rollout-2026-10-05/10m-failed/).
