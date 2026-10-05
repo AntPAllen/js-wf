@@ -3717,3 +3717,17 @@ Independent source/archive/actualSDK/server/row review and preservation recorded
 in [complete proof](scale/concurrent-state-audit-2026-10-05/live-journal-ten-minute/).
 Concurrent reader remains explicitexperimental; this doesnot qualify24h capacity,
 originalfailedsoak, fullmatrix or finalsource. No unchangednative rerun.
+
+### Full400k R5 concurrent audit capacity profile prepared — 2026-10-05
+
+A fresh synthetic quiet population gate prepares400,000 invocations, contiguous
+12-entry completed journals (4.8M entries) and matching terminal state acrossfive
+file-backed replicas. Eight independent publishers retain13 futures each, check
+every ACK and preserve per-invocation ordering; setup deadline is separatefrom
+unchanged20s audit attempts. Sequential/concurrent/sequentialrecheck verdicts,
+complete reports, allocation andGC measurements persist beforeassertions.
+Concurrent mustreturn exact fullreport within20s. This is capacity preparation,
+not a live24h workload/fault qualification orcandidateadoption. Compile/opt-in
+skip passes; nativepopulation execution pending. Closed earlierstateleader
+copy reclaimed onlyafter3722files verifiedagainstcommittedcompletearchive,
+allobserved processesgone/noopenFDs; originalfailedsoakstores remainintact.
