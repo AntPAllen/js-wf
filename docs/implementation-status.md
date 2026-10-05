@@ -12671,3 +12671,19 @@ bookkeeping mutex correction. Fresh native captures per-name delete replies.
 Replay/retry/default and large-fault/live/24h qualification unchanged/open.
 [Diagnostic](scale/direct-callback-audit-2026-10-05/r5-replay-diagnostic/).
 [Preparation](scale/direct-callback-audit-2026-10-05/r5-cleanup-preparation/).
+
+## Independent cleanup confirmed; actual position-loss recovery prepared — 2026-10-05
+
+7d79d13 parentFAIL52.73s; leave-owner-down fixture passes27.61s overall,
+exact1500/6000 and zero INV/JRN at4.056609/4.057684s. Old-owner delete times out
+while independent replacement delete succeeds. Restart overlap still fails,
+1.392990s. Actual same assignment/name/created/config/owner delivery+AckNone floor
+regress1961→1126. Full1666-member69.305MB actualSDK/server/source/mount/closure
+archive independently verified. Explicit directR1 candidate now admits only fresh
+API-confirmed matching positive positions behind accepted sequence under identical
+complete config/identity/owner; ordinary overlap/API semantic errors stay fatal.
+Fresh cursor resumes unvisited sequence under original20s/two-resume/gap oracle.
+Race proof/scanner controls PASS1.207s. Native recovery qualification pending;
+no default/largefault/live/finalmatrix/24h claim.
+[Evidence](scale/direct-callback-audit-2026-10-05/r5-independent-cleanup/).
+[Preparation](scale/direct-callback-audit-2026-10-05/r5-position-recovery-preparation/).

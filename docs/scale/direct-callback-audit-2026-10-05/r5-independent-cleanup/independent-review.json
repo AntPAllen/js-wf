@@ -1,0 +1,573 @@
+{
+  "r5_process_owner_loss_pass": false,
+  "execution": {
+    "pid": 727890,
+    "source": "7d79d130b4e7d1b7d7cf6b0d5ae7579fa046d2d5",
+    "sha256": "2b794616d8108b9c9d42cd50da0b618b4fb08012b3b23e6bdf8b592d59d1cf10",
+    "build_info": "/proc/727890/exe: go1.27.1\n\tpath\tjs-wf/integrity.test\n\tmod\tjs-wf\tv0.0.0-20261005232948-7d79d130b4e7\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=7d79d130b4e7d1b7d7cf6b0d5ae7579fa046d2d5\n\tbuild\tvcs.time=2026-10-05T23:29:48Z\n\tbuild\tvcs.modified=false\n",
+    "args": [
+      "/tmp/js-wf-direct-r1-r5-independent-cleanup-20261005/integrity.test",
+      "-test.run=^TestDirectR1AuditR5ProcessOwnerLoss$",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=12m"
+    ],
+    "stat": "727890 (integrity.test) S 727669 727669 727669 0 -1 4194304 4751 0 0 0 0 0 0 0 20 0 6 0 5673495 2030792704 8607 18446744073709551615 4194304 24619664 140730488772544 0 0 0 0 0 2143420159 0 0 0 17 0 0 0 0 0 0 37830656 38325312 319401984 140730488777542 140730488777698 140730488777698 140730488778676 0\n",
+    "status": "failed",
+    "started_utc": "2026-10-05T23:30:13.433385+00:00",
+    "scope": "Race R1 direct-window audit with actual R5 file sources: verified cursor-owner SIGKILL, owner left down and same-store owner restart; finite 1500 workflows / 6000 entries, not 400k fault capacity qualification",
+    "exit_code": 1,
+    "finished_utc": "2026-10-05T23:31:06.662993+00:00"
+  },
+  "actual_sdk_sha256": "2b794616d8108b9c9d42cd50da0b618b4fb08012b3b23e6bdf8b592d59d1cf10",
+  "selected_source_inputs_verified": 682,
+  "observed_external_server_processes": 10,
+  "external_server_sha256": [
+    "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d"
+  ],
+  "all_observed_processes_closed": true,
+  "cases": [
+    {
+      "target": {
+        "stream_name": "WF_JRN",
+        "name": "wf-audit-jb3jPpEdIAYf339pLMi2qZ",
+        "created": "2026-10-05T23:30:34.513313754Z",
+        "config": {
+          "name": "wf-audit-jb3jPpEdIAYf339pLMi2qZ",
+          "deliver_policy": "by_start_sequence",
+          "opt_start_seq": 1,
+          "ack_policy": "none",
+          "max_deliver": -1,
+          "replay_policy": "instant",
+          "max_waiting": 512,
+          "inactive_threshold": 30000000000,
+          "num_replicas": 1,
+          "mem_storage": true,
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "delivered": {
+          "consumer_seq": 1961,
+          "stream_seq": 1961,
+          "last_active": "2026-10-05T23:30:34.54159215Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 1961,
+          "stream_seq": 1961
+        },
+        "num_ack_pending": 0,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 4039,
+        "cluster": {
+          "name": "js-wf-route-727890-1791243013401807974",
+          "leader": "js-wf-route-727890-1791243013401807974-n0"
+        },
+        "ts": "2026-10-05T23:30:34.564962888Z"
+      },
+      "kill": {
+        "node": 0,
+        "container": "js-wf-route-727890-1791243013401807974-n0",
+        "kill_started": "2026-10-05T23:30:34.579555945Z",
+        "kill_returned": "2026-10-05T23:30:35.095035694Z",
+        "source_stopped": "2026-10-05T23:30:35.117277379Z",
+        "cleanup_complete": "2026-10-05T23:30:35.229522175Z",
+        "state": "dead",
+        "concurrent_observation": true
+      },
+      "restart": false,
+      "visited": 6000,
+      "elapsed_ns": 4053639669,
+      "report": {
+        "Invocations": 1500,
+        "Journals": 1500,
+        "Entries": 6000,
+        "Terminal": 1500
+      },
+      "error": ""
+    },
+    {
+      "target": {
+        "stream_name": "WF_JRN",
+        "name": "wf-audit-jb3jPpEdIAYf339pLMi5P4",
+        "created": "2026-10-05T23:31:01.961296408Z",
+        "config": {
+          "name": "wf-audit-jb3jPpEdIAYf339pLMi5P4",
+          "deliver_policy": "by_start_sequence",
+          "opt_start_seq": 1,
+          "ack_policy": "none",
+          "max_deliver": -1,
+          "replay_policy": "instant",
+          "max_waiting": 512,
+          "inactive_threshold": 30000000000,
+          "num_replicas": 1,
+          "mem_storage": true,
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "delivered": {
+          "consumer_seq": 1961,
+          "stream_seq": 1961,
+          "last_active": "2026-10-05T23:31:01.9779487Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 1961,
+          "stream_seq": 1961
+        },
+        "num_ack_pending": 0,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 4039,
+        "cluster": {
+          "name": "js-wf-route-727890-1791243041011129171",
+          "leader": "js-wf-route-727890-1791243041011129171-n0"
+        },
+        "ts": "2026-10-05T23:31:02.009452482Z"
+      },
+      "kill": {
+        "node": 0,
+        "container": "js-wf-route-727890-1791243041011129171-n0",
+        "kill_started": "2026-10-05T23:31:02.033905884Z",
+        "kill_returned": "2026-10-05T23:31:02.471819422Z",
+        "source_stopped": "2026-10-05T23:31:02.495193126Z",
+        "cleanup_complete": "2026-10-05T23:31:02.608562052Z",
+        "state": "dead",
+        "concurrent_observation": true
+      },
+      "restart": true,
+      "visited": 1961,
+      "elapsed_ns": 1392989636,
+      "report": {
+        "Invocations": 1500,
+        "Journals": 0,
+        "Entries": 0,
+        "Terminal": 0
+      },
+      "error": "retained batch scan: unexpected stream/order WF_JRN/1"
+    }
+  ],
+  "cursor_api_snapshots": {
+    "TestDirectR1AuditR5ProcessOwnerLoss/restart-false/WF_INV": [
+      {
+        "info": {
+          "stream_name": "WF_INV",
+          "name": "wf-audit-jb3jPpEdIAYf339pLMi2R0",
+          "created": "2026-10-05T23:30:34.486382782Z",
+          "config": {
+            "name": "wf-audit-jb3jPpEdIAYf339pLMi2R0",
+            "deliver_policy": "by_start_sequence",
+            "opt_start_seq": 1,
+            "ack_policy": "none",
+            "max_deliver": -1,
+            "replay_policy": "instant",
+            "max_waiting": 512,
+            "inactive_threshold": 30000000000,
+            "num_replicas": 1,
+            "mem_storage": true,
+            "metadata": {
+              "_nats.level": "5",
+              "_nats.req.level": "0",
+              "_nats.ver": "2.15.0"
+            }
+          },
+          "delivered": {
+            "consumer_seq": 0,
+            "stream_seq": 0
+          },
+          "ack_floor": {
+            "consumer_seq": 0,
+            "stream_seq": 0
+          },
+          "num_ack_pending": 0,
+          "num_redelivered": 0,
+          "num_waiting": 0,
+          "num_pending": 1500,
+          "cluster": {
+            "name": "js-wf-route-727890-1791243013401807974",
+            "leader": "js-wf-route-727890-1791243013401807974-n3"
+          },
+          "ts": "2026-10-05T23:30:34.487374567Z"
+        },
+        "error": "",
+        "at": "2026-10-05T23:30:34.48801574Z"
+      }
+    ],
+    "TestDirectR1AuditR5ProcessOwnerLoss/restart-false/WF_JRN": [
+      {
+        "info": {
+          "stream_name": "WF_JRN",
+          "name": "wf-audit-jb3jPpEdIAYf339pLMi2qZ",
+          "created": "2026-10-05T23:30:34.513313754Z",
+          "config": {
+            "name": "wf-audit-jb3jPpEdIAYf339pLMi2qZ",
+            "deliver_policy": "by_start_sequence",
+            "opt_start_seq": 1,
+            "ack_policy": "none",
+            "max_deliver": -1,
+            "replay_policy": "instant",
+            "max_waiting": 512,
+            "inactive_threshold": 30000000000,
+            "num_replicas": 1,
+            "mem_storage": true,
+            "metadata": {
+              "_nats.level": "5",
+              "_nats.req.level": "0",
+              "_nats.ver": "2.15.0"
+            }
+          },
+          "delivered": {
+            "consumer_seq": 0,
+            "stream_seq": 0
+          },
+          "ack_floor": {
+            "consumer_seq": 0,
+            "stream_seq": 0
+          },
+          "num_ack_pending": 0,
+          "num_redelivered": 0,
+          "num_waiting": 0,
+          "num_pending": 6000,
+          "cluster": {
+            "name": "js-wf-route-727890-1791243013401807974",
+            "leader": "js-wf-route-727890-1791243013401807974-n0"
+          },
+          "ts": "2026-10-05T23:30:34.514120218Z"
+        },
+        "error": "",
+        "at": "2026-10-05T23:30:34.515850954Z"
+      },
+      {
+        "info": {
+          "stream_name": "WF_JRN",
+          "name": "wf-audit-jb3jPpEdIAYf339pLMi2qZ",
+          "created": "2026-10-05T23:30:34.513313754Z",
+          "config": {
+            "name": "wf-audit-jb3jPpEdIAYf339pLMi2qZ",
+            "deliver_policy": "by_start_sequence",
+            "opt_start_seq": 1,
+            "ack_policy": "none",
+            "max_deliver": -1,
+            "replay_policy": "instant",
+            "max_waiting": 512,
+            "inactive_threshold": 30000000000,
+            "num_replicas": 1,
+            "mem_storage": true,
+            "metadata": {
+              "_nats.level": "5",
+              "_nats.req.level": "0",
+              "_nats.ver": "2.15.0"
+            }
+          },
+          "delivered": {
+            "consumer_seq": 1961,
+            "stream_seq": 1961,
+            "last_active": "2026-10-05T23:30:34.54159215Z"
+          },
+          "ack_floor": {
+            "consumer_seq": 1961,
+            "stream_seq": 1961
+          },
+          "num_ack_pending": 0,
+          "num_redelivered": 0,
+          "num_waiting": 0,
+          "num_pending": 4039,
+          "cluster": {
+            "name": "js-wf-route-727890-1791243013401807974",
+            "leader": "js-wf-route-727890-1791243013401807974-n0"
+          },
+          "ts": "2026-10-05T23:30:34.564962888Z"
+        },
+        "error": "",
+        "at": "2026-10-05T23:30:34.567375269Z"
+      },
+      {
+        "info": {
+          "stream_name": "WF_JRN",
+          "name": "wf-audit-jb3jPpEdIAYf339pLMi35u",
+          "created": "2026-10-05T23:30:35.603470102Z",
+          "config": {
+            "name": "wf-audit-jb3jPpEdIAYf339pLMi35u",
+            "deliver_policy": "by_start_sequence",
+            "opt_start_seq": 1962,
+            "ack_policy": "none",
+            "max_deliver": -1,
+            "replay_policy": "instant",
+            "max_waiting": 512,
+            "inactive_threshold": 30000000000,
+            "num_replicas": 1,
+            "mem_storage": true,
+            "metadata": {
+              "_nats.level": "5",
+              "_nats.req.level": "0",
+              "_nats.ver": "2.15.0"
+            }
+          },
+          "delivered": {
+            "consumer_seq": 0,
+            "stream_seq": 1961
+          },
+          "ack_floor": {
+            "consumer_seq": 0,
+            "stream_seq": 1961
+          },
+          "num_ack_pending": 0,
+          "num_redelivered": 0,
+          "num_waiting": 0,
+          "num_pending": 4039,
+          "cluster": {
+            "name": "js-wf-route-727890-1791243013401807974",
+            "leader": "js-wf-route-727890-1791243013401807974-n4"
+          },
+          "ts": "2026-10-05T23:30:35.604394365Z"
+        },
+        "error": "",
+        "at": "2026-10-05T23:30:35.604954605Z"
+      }
+    ],
+    "TestDirectR1AuditR5ProcessOwnerLoss/restart-true/WF_INV": [
+      {
+        "info": {
+          "stream_name": "WF_INV",
+          "name": "wf-audit-jb3jPpEdIAYf339pLMi4zV",
+          "created": "2026-10-05T23:31:01.940442729Z",
+          "config": {
+            "name": "wf-audit-jb3jPpEdIAYf339pLMi4zV",
+            "deliver_policy": "by_start_sequence",
+            "opt_start_seq": 1,
+            "ack_policy": "none",
+            "max_deliver": -1,
+            "replay_policy": "instant",
+            "max_waiting": 512,
+            "inactive_threshold": 30000000000,
+            "num_replicas": 1,
+            "mem_storage": true,
+            "metadata": {
+              "_nats.level": "5",
+              "_nats.req.level": "0",
+              "_nats.ver": "2.15.0"
+            }
+          },
+          "delivered": {
+            "consumer_seq": 0,
+            "stream_seq": 0
+          },
+          "ack_floor": {
+            "consumer_seq": 0,
+            "stream_seq": 0
+          },
+          "num_ack_pending": 0,
+          "num_redelivered": 0,
+          "num_waiting": 0,
+          "num_pending": 1500,
+          "cluster": {
+            "name": "js-wf-route-727890-1791243041011129171",
+            "leader": "js-wf-route-727890-1791243041011129171-n4"
+          },
+          "ts": "2026-10-05T23:31:01.941366661Z"
+        },
+        "error": "",
+        "at": "2026-10-05T23:31:01.941902083Z"
+      }
+    ],
+    "TestDirectR1AuditR5ProcessOwnerLoss/restart-true/WF_JRN": [
+      {
+        "info": {
+          "stream_name": "WF_JRN",
+          "name": "wf-audit-jb3jPpEdIAYf339pLMi5P4",
+          "created": "2026-10-05T23:31:01.961296408Z",
+          "config": {
+            "name": "wf-audit-jb3jPpEdIAYf339pLMi5P4",
+            "deliver_policy": "by_start_sequence",
+            "opt_start_seq": 1,
+            "ack_policy": "none",
+            "max_deliver": -1,
+            "replay_policy": "instant",
+            "max_waiting": 512,
+            "inactive_threshold": 30000000000,
+            "num_replicas": 1,
+            "mem_storage": true,
+            "metadata": {
+              "_nats.level": "5",
+              "_nats.req.level": "0",
+              "_nats.ver": "2.15.0"
+            }
+          },
+          "delivered": {
+            "consumer_seq": 0,
+            "stream_seq": 0
+          },
+          "ack_floor": {
+            "consumer_seq": 0,
+            "stream_seq": 0
+          },
+          "num_ack_pending": 0,
+          "num_redelivered": 0,
+          "num_waiting": 0,
+          "num_pending": 6000,
+          "cluster": {
+            "name": "js-wf-route-727890-1791243041011129171",
+            "leader": "js-wf-route-727890-1791243041011129171-n0"
+          },
+          "ts": "2026-10-05T23:31:01.961776236Z"
+        },
+        "error": "",
+        "at": "2026-10-05T23:31:01.965690426Z"
+      },
+      {
+        "info": {
+          "stream_name": "WF_JRN",
+          "name": "wf-audit-jb3jPpEdIAYf339pLMi5P4",
+          "created": "2026-10-05T23:31:01.961296408Z",
+          "config": {
+            "name": "wf-audit-jb3jPpEdIAYf339pLMi5P4",
+            "deliver_policy": "by_start_sequence",
+            "opt_start_seq": 1,
+            "ack_policy": "none",
+            "max_deliver": -1,
+            "replay_policy": "instant",
+            "max_waiting": 512,
+            "inactive_threshold": 30000000000,
+            "num_replicas": 1,
+            "mem_storage": true,
+            "metadata": {
+              "_nats.level": "5",
+              "_nats.req.level": "0",
+              "_nats.ver": "2.15.0"
+            }
+          },
+          "delivered": {
+            "consumer_seq": 1961,
+            "stream_seq": 1961,
+            "last_active": "2026-10-05T23:31:01.9779487Z"
+          },
+          "ack_floor": {
+            "consumer_seq": 1961,
+            "stream_seq": 1961
+          },
+          "num_ack_pending": 0,
+          "num_redelivered": 0,
+          "num_waiting": 0,
+          "num_pending": 4039,
+          "cluster": {
+            "name": "js-wf-route-727890-1791243041011129171",
+            "leader": "js-wf-route-727890-1791243041011129171-n0"
+          },
+          "ts": "2026-10-05T23:31:02.009452482Z"
+        },
+        "error": "",
+        "at": "2026-10-05T23:31:02.018034046Z"
+      },
+      {
+        "info": {
+          "stream_name": "WF_JRN",
+          "name": "wf-audit-jb3jPpEdIAYf339pLMi5P4",
+          "created": "2026-10-05T23:31:01.961296408Z",
+          "config": {
+            "name": "wf-audit-jb3jPpEdIAYf339pLMi5P4",
+            "deliver_policy": "by_start_sequence",
+            "opt_start_seq": 1,
+            "ack_policy": "none",
+            "max_deliver": -1,
+            "replay_policy": "instant",
+            "max_waiting": 512,
+            "inactive_threshold": 30000000000,
+            "num_replicas": 1,
+            "mem_storage": true,
+            "metadata": {
+              "_nats.level": "5",
+              "_nats.req.level": "0",
+              "_nats.ver": "2.15.0"
+            }
+          },
+          "delivered": {
+            "consumer_seq": 1126,
+            "stream_seq": 1126,
+            "last_active": "2026-10-05T23:31:03.259254608Z"
+          },
+          "ack_floor": {
+            "consumer_seq": 1126,
+            "stream_seq": 1126
+          },
+          "num_ack_pending": 0,
+          "num_redelivered": 0,
+          "num_waiting": 1,
+          "num_pending": 4874,
+          "cluster": {
+            "name": "js-wf-route-727890-1791243041011129171",
+            "leader": "js-wf-route-727890-1791243041011129171-n0"
+          },
+          "ts": "2026-10-05T23:31:03.259268098Z"
+        },
+        "error": "",
+        "at": "2026-10-05T23:31:03.269860744Z"
+      }
+    ]
+  },
+  "cleanup_observations": {
+    "TestDirectR1AuditR5ProcessOwnerLoss/restart-false": [
+      {
+        "stream": "WF_INV",
+        "elapsed_ns": 4056608986,
+        "consumers": 0,
+        "error": ""
+      },
+      {
+        "stream": "WF_JRN",
+        "elapsed_ns": 4057683887,
+        "consumers": 0,
+        "error": ""
+      }
+    ]
+  },
+  "delete_observations": {
+    "TestDirectR1AuditR5ProcessOwnerLoss/restart-false/WF_INV": [
+      {
+        "name": "wf-audit-jb3jPpEdIAYf339pLMi2R0",
+        "error": "",
+        "at": "2026-10-05T23:30:34.510857146Z"
+      }
+    ],
+    "TestDirectR1AuditR5ProcessOwnerLoss/restart-false/WF_JRN": [
+      {
+        "name": "wf-audit-jb3jPpEdIAYf339pLMi35u",
+        "error": "",
+        "at": "2026-10-05T23:30:36.515362502Z"
+      },
+      {
+        "name": "wf-audit-jb3jPpEdIAYf339pLMi2qZ",
+        "error": "context deadline exceeded",
+        "at": "2026-10-05T23:30:38.512882293Z"
+      }
+    ],
+    "TestDirectR1AuditR5ProcessOwnerLoss/restart-true/WF_INV": [
+      {
+        "name": "wf-audit-jb3jPpEdIAYf339pLMi4zV",
+        "error": "",
+        "at": "2026-10-05T23:31:01.959124621Z"
+      }
+    ],
+    "TestDirectR1AuditR5ProcessOwnerLoss/restart-true/WF_JRN": [
+      {
+        "name": "wf-audit-jb3jPpEdIAYf339pLMi5P4",
+        "error": "",
+        "at": "2026-10-05T23:31:03.327588375Z"
+      }
+    ]
+  },
+  "individual_native_passes": [
+    [
+      "TestDirectR1AuditR5ProcessOwnerLoss/restart-false",
+      "27.61"
+    ]
+  ],
+  "source_capture_scope": "Selected Git Go/module and actual SDK/external server metadata; not exhaustive compiler/toolchain inputs",
+  "candidate_adopted": false,
+  "qualifies_large_fault_capacity": false,
+  "qualifies_24h": false
+}

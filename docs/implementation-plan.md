@@ -4169,3 +4169,17 @@ deadline; targeted race regression/controls PASS1.209s after synchronizing fake
 bookkeeping. Fresh native per-name deletion diagnostic prepared. Replay unchanged.
 [Diagnostic](scale/direct-callback-audit-2026-10-05/r5-replay-diagnostic/).
 [Cleanup preparation](scale/direct-callback-audit-2026-10-05/r5-cleanup-preparation/).
+
+## Verified R1 volatile position loss recovery prepared — 2026-10-05
+
+7d79d13 owner-left-down native fixture passes exact1500/6000 with zero consumers
+at4.058s; old delete expires while independent replacement delete succeeds.
+ParentFAIL52.73s on same-owner restart overlap. Actual cursor name/created/config/
+owner unchanged, API delivery and AckNone floor regress1961→1126 behind accepted
+source position. Full1666-member/source/actual process/closure proof reviewed.
+Explicit directR1 reader now admits only fresh API-confirmed positive delivery/
+floor regression with identical complete config/identity/owner, no outstanding
+acks/redeliveries. Common recovery creates fresh cursor at unvisited sequence;
+ordinary overlap stays fatal. Race controls PASS1.207s; fresh R5 verdict pending.
+[Cleanup/failure evidence](scale/direct-callback-audit-2026-10-05/r5-independent-cleanup/).
+[Recovery preparation](scale/direct-callback-audit-2026-10-05/r5-position-recovery-preparation/).

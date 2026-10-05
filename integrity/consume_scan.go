@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"sync"
 	"time"
 
@@ -57,12 +58,20 @@ func scanConsumeByteBoundedThrough(ctx context.Context, stream jetstream.Stream,
 func scanConsumeDirectWindowsThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) (failure error) {
 	var delivery *callbackDelivery
 	var name, consumerStream, initialLeader string
+	var initial *jetstream.ConsumerInfo
+	var lastAccepted uint64
 	defer func() {
 		if delivery != nil {
 			failure = errors.Join(failure, delivery.stopAndJoin(ctx))
 		}
 	}()
-	return scanRetainedThroughWithWindow(ctx, stream, cutoff, visit, 4096, func(call context.Context, c jetstream.Consumer, n int) (retainedMessageWindow, error) {
+	return scanRetainedThroughWithWindow(ctx, stream, cutoff, func(msg *jetstream.RawStreamMsg) error {
+		if err := visit(msg); err != nil {
+			return err
+		}
+		lastAccepted = msg.Sequence
+		return nil
+	}, 4096, func(call context.Context, c jetstream.Consumer, n int) (retainedMessageWindow, error) {
 		if err := call.Err(); err != nil {
 			return nil, err
 		}
@@ -82,6 +91,7 @@ func scanConsumeDirectWindowsThrough(ctx context.Context, stream jetstream.Strea
 				return nil, err
 			}
 			name, consumerStream, initialLeader = info.Name, info.Stream, ""
+			initial = info
 			if info.Cluster != nil {
 				initialLeader = info.Cluster.Leader
 			}
@@ -89,6 +99,9 @@ func scanConsumeDirectWindowsThrough(ctx context.Context, stream jetstream.Strea
 		current := delivery
 		return func(accept func(jetstream.Msg)) error { return walkCallbackWindow(call, n, current, accept) }, nil
 	}, func(call context.Context, c jetstream.Consumer) (bool, error) {
+		if initial != nil && initial.Config.Replicas == 1 {
+			return confirmedCallbackConsumerPositionLoss(call, c, initial, lastAccepted)
+		}
 		return confirmedByteConsumerLeaderMove(call, c, name, consumerStream, initialLeader)
 	}, compactMessageCoordinates)
 }
@@ -204,4 +217,21 @@ func (d *callbackDelivery) stopAndJoin(ctx context.Context) error {
 	case <-call.Done():
 		return fmt.Errorf("retained callback cleanup: %w", call.Err())
 	}
+}
+
+// R1 memory consumer assignments survive owner restart, but their volatile
+// delivery position can reset. Same name/created/leader alone is not recovery
+// proof: require a fresh API observation of both AckNone positions behind an
+// already accepted source sequence, with the original complete config unchanged.
+// The common scanner replaces the cursor at the unvisited sequence; replayed
+// messages never reach the visitor. Ordinary overlap remains a semantic error.
+func confirmedCallbackConsumerPositionLoss(ctx context.Context, c jetstream.Consumer, initial *jetstream.ConsumerInfo, accepted uint64) (bool, error) {
+	if initial == nil || accepted == 0 || initial.Name == "" || initial.Stream == "" || initial.Created.IsZero() || initial.Cluster == nil || initial.Cluster.Leader == "" || initial.Config.Replicas != 1 || !initial.Config.MemoryStorage || initial.Config.AckPolicy != jetstream.AckNonePolicy {
+		return false, nil
+	}
+	info, err := auditRead(ctx, func(call context.Context) (*jetstream.ConsumerInfo, error) { return c.Info(call) })
+	if err != nil {
+		return false, err
+	}
+	return info != nil && info.Name == initial.Name && info.Stream == initial.Stream && info.Created.Equal(initial.Created) && info.Cluster != nil && info.Cluster.Leader == initial.Cluster.Leader && reflect.DeepEqual(info.Config, initial.Config) && info.NumAckPending == 0 && info.NumRedelivered == 0 && info.Delivered.Consumer > 0 && info.Delivered.Stream > 0 && info.Delivered.Stream < accepted && info.AckFloor.Consumer == info.Delivered.Consumer && info.AckFloor.Stream == info.Delivered.Stream, nil
 }
