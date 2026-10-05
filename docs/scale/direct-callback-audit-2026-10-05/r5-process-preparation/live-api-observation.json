@@ -1,0 +1,746 @@
+[
+  {
+    "container": "/js-wf-route-702605-1791242305672959192-n1",
+    "stream": "WF_INV",
+    "at": "2026-10-05T23:22:21.525869+00:00",
+    "greeting": "INFO {\"server_id\":\"NCL54GZYWPHSQ47DXEV7H3TNODATSFO57VSQUCEJTXLXGDYGTCMNQKUD\",\"server_name\":\"js-wf-route-702605-1791242305672959192-n1\",\"version\":\"2.15.0\",\"proto\":1,\"go\":\"go1.27.1\",\"host\":\"0.0.0.0\",\"port\":4222,\"headers\":true,\"max_payload\":1048576,\"jetstream\":true,\"client_id\":79,\"client_ip\":\"172.18.0.1\",\"cluster\":\"js-wf-route-702605-1791242305672959192\",\"connect_urls\":[\"172.18.0.3:4222\",\"172.18.0.6:4222\",\"172.18.0.5:4222\",\"172.18.0.4:4222\"],\"api_lvl\":5,\"xkey\":\"XDLHB3F3EGGM5BLSRDN7KDVMGAAD25WYLXQPN4FG4LT75OYJFMGROMZD\"}",
+    "response": {
+      "type": "io.nats.jetstream.api.v1.stream_info_response",
+      "total": 0,
+      "offset": 0,
+      "limit": 0,
+      "config": {
+        "name": "WF_INV",
+        "subjects": [
+          "wf.inv.*.*"
+        ],
+        "retention": "limits",
+        "max_consumers": -1,
+        "max_msgs": -1,
+        "max_bytes": -1,
+        "max_age": 0,
+        "max_msgs_per_subject": 1,
+        "max_msg_size": -1,
+        "discard": "new",
+        "storage": "file",
+        "num_replicas": 5,
+        "duplicate_window": 120000000000,
+        "compression": "none",
+        "allow_direct": false,
+        "mirror_direct": false,
+        "discard_new_per_subject": true,
+        "sealed": false,
+        "deny_delete": false,
+        "deny_purge": false,
+        "allow_rollup_hdrs": false,
+        "consumer_limits": {},
+        "allow_msg_ttl": false,
+        "metadata": {
+          "_nats.level": "5",
+          "_nats.req.level": "0",
+          "_nats.ver": "2.15.0"
+        }
+      },
+      "created": "2026-10-05T23:18:34.679477534Z",
+      "state": {
+        "messages": 1500,
+        "bytes": 93000,
+        "first_seq": 1,
+        "first_ts": "2026-10-05T23:18:35.589748862Z",
+        "last_seq": 1500,
+        "last_ts": "2026-10-05T23:18:45.586815612Z",
+        "num_subjects": 1500,
+        "consumer_count": 0
+      },
+      "cluster": {
+        "name": "js-wf-route-702605-1791242305672959192",
+        "raft_group": "S-R5F-pvjaa4M7",
+        "leader": "js-wf-route-702605-1791242305672959192-n1",
+        "leader_since": "2026-10-05T23:18:51.133362023Z",
+        "system_account": true,
+        "traffic_account": "$SYS",
+        "replicas": [
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n0",
+            "current": false,
+            "offline": true,
+            "active": 0,
+            "lag": 1502,
+            "peer": "YR4kkQZe"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n2",
+            "current": true,
+            "active": 395389063,
+            "peer": "kPM390kO"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n3",
+            "current": true,
+            "active": 395387000,
+            "peer": "7eKUxXRX"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n4",
+            "current": true,
+            "active": 395261059,
+            "peer": "qZbSbSRl"
+          }
+        ]
+      },
+      "ts": "2026-10-05T23:22:21.528036618Z"
+    }
+  },
+  {
+    "container": "/js-wf-route-702605-1791242305672959192-n1",
+    "stream": "WF_JRN",
+    "at": "2026-10-05T23:22:21.528382+00:00",
+    "greeting": "INFO {\"server_id\":\"NCL54GZYWPHSQ47DXEV7H3TNODATSFO57VSQUCEJTXLXGDYGTCMNQKUD\",\"server_name\":\"js-wf-route-702605-1791242305672959192-n1\",\"version\":\"2.15.0\",\"proto\":1,\"go\":\"go1.27.1\",\"host\":\"0.0.0.0\",\"port\":4222,\"headers\":true,\"max_payload\":1048576,\"jetstream\":true,\"client_id\":80,\"client_ip\":\"172.18.0.1\",\"cluster\":\"js-wf-route-702605-1791242305672959192\",\"connect_urls\":[\"172.18.0.3:4222\",\"172.18.0.6:4222\",\"172.18.0.5:4222\",\"172.18.0.4:4222\"],\"api_lvl\":5,\"xkey\":\"XDLHB3F3EGGM5BLSRDN7KDVMGAAD25WYLXQPN4FG4LT75OYJFMGROMZD\"}",
+    "response": {
+      "type": "io.nats.jetstream.api.v1.stream_info_response",
+      "total": 0,
+      "offset": 0,
+      "limit": 0,
+      "config": {
+        "name": "WF_JRN",
+        "subjects": [
+          "wf.jrn.*.*"
+        ],
+        "retention": "limits",
+        "max_consumers": -1,
+        "max_msgs": -1,
+        "max_bytes": -1,
+        "max_age": 0,
+        "max_msgs_per_subject": -1,
+        "max_msg_size": -1,
+        "discard": "new",
+        "storage": "file",
+        "num_replicas": 5,
+        "duplicate_window": 120000000000,
+        "compression": "none",
+        "allow_direct": false,
+        "mirror_direct": false,
+        "sealed": false,
+        "deny_delete": false,
+        "deny_purge": false,
+        "allow_rollup_hdrs": false,
+        "consumer_limits": {},
+        "allow_msg_ttl": false,
+        "metadata": {
+          "_nats.level": "5",
+          "_nats.req.level": "0",
+          "_nats.ver": "2.15.0"
+        }
+      },
+      "created": "2026-10-05T23:18:34.867970915Z",
+      "state": {
+        "messages": 6000,
+        "bytes": 25365000,
+        "first_seq": 1,
+        "first_ts": "2026-10-05T23:18:35.591678317Z",
+        "last_seq": 6000,
+        "last_ts": "2026-10-05T23:18:45.589489134Z",
+        "num_subjects": 1500,
+        "consumer_count": 0
+      },
+      "cluster": {
+        "name": "js-wf-route-702605-1791242305672959192",
+        "raft_group": "S-R5F-W3qZsYQ9",
+        "leader": "js-wf-route-702605-1791242305672959192-n2",
+        "leader_since": "2026-10-05T23:18:51.5441252Z",
+        "system_account": true,
+        "traffic_account": "$SYS",
+        "replicas": [
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n0",
+            "current": false,
+            "offline": true,
+            "active": 0,
+            "lag": 6002,
+            "peer": "YR4kkQZe"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n1",
+            "current": true,
+            "active": 984933623,
+            "peer": "0AsdRXmj"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n3",
+            "current": true,
+            "active": 984732919,
+            "peer": "7eKUxXRX"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n4",
+            "current": true,
+            "active": 984803926,
+            "peer": "qZbSbSRl"
+          }
+        ]
+      },
+      "ts": "2026-10-05T23:22:21.529404462Z"
+    }
+  },
+  {
+    "container": "/js-wf-route-702605-1791242305672959192-n0",
+    "stream": "WF_INV",
+    "at": "2026-10-05T23:22:21.529818+00:00",
+    "error": "[Errno 111] Connection refused"
+  },
+  {
+    "container": "/js-wf-route-702605-1791242305672959192-n0",
+    "stream": "WF_JRN",
+    "at": "2026-10-05T23:22:21.529894+00:00",
+    "error": "[Errno 111] Connection refused"
+  },
+  {
+    "container": "/js-wf-route-702605-1791242305672959192-n4",
+    "stream": "WF_INV",
+    "at": "2026-10-05T23:22:21.529929+00:00",
+    "greeting": "INFO {\"server_id\":\"NBLLDM6WTAKUVE34SCJ2UROEDHYCMV3EO5NDC546YEFAHM3XRIKJ4WZE\",\"server_name\":\"js-wf-route-702605-1791242305672959192-n4\",\"version\":\"2.15.0\",\"proto\":1,\"go\":\"go1.27.1\",\"host\":\"0.0.0.0\",\"port\":4222,\"headers\":true,\"max_payload\":1048576,\"jetstream\":true,\"client_id\":85,\"client_ip\":\"172.18.0.1\",\"cluster\":\"js-wf-route-702605-1791242305672959192\",\"connect_urls\":[\"172.18.0.6:4222\",\"172.18.0.3:4222\",\"172.18.0.4:4222\",\"172.18.0.5:4222\"],\"api_lvl\":5,\"xkey\":\"XDTQHAOTXKELFNF4HH4XTJ32H43QVQS5BTN6SJ6PTTWEI62ODWSCFTY6\"}",
+    "response": {
+      "type": "io.nats.jetstream.api.v1.stream_info_response",
+      "total": 0,
+      "offset": 0,
+      "limit": 0,
+      "config": {
+        "name": "WF_INV",
+        "subjects": [
+          "wf.inv.*.*"
+        ],
+        "retention": "limits",
+        "max_consumers": -1,
+        "max_msgs": -1,
+        "max_bytes": -1,
+        "max_age": 0,
+        "max_msgs_per_subject": 1,
+        "max_msg_size": -1,
+        "discard": "new",
+        "storage": "file",
+        "num_replicas": 5,
+        "duplicate_window": 120000000000,
+        "compression": "none",
+        "allow_direct": false,
+        "mirror_direct": false,
+        "discard_new_per_subject": true,
+        "sealed": false,
+        "deny_delete": false,
+        "deny_purge": false,
+        "allow_rollup_hdrs": false,
+        "consumer_limits": {},
+        "allow_msg_ttl": false,
+        "metadata": {
+          "_nats.level": "5",
+          "_nats.req.level": "0",
+          "_nats.ver": "2.15.0"
+        }
+      },
+      "created": "2026-10-05T23:18:34.679477534Z",
+      "state": {
+        "messages": 1500,
+        "bytes": 93000,
+        "first_seq": 1,
+        "first_ts": "2026-10-05T23:18:35.589748862Z",
+        "last_seq": 1500,
+        "last_ts": "2026-10-05T23:18:45.586815612Z",
+        "num_subjects": 1500,
+        "consumer_count": 0
+      },
+      "cluster": {
+        "name": "js-wf-route-702605-1791242305672959192",
+        "raft_group": "S-R5F-pvjaa4M7",
+        "leader": "js-wf-route-702605-1791242305672959192-n1",
+        "leader_since": "2026-10-05T23:18:51.133362023Z",
+        "system_account": true,
+        "traffic_account": "$SYS",
+        "replicas": [
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n0",
+            "current": false,
+            "offline": true,
+            "active": 0,
+            "lag": 1502,
+            "peer": "YR4kkQZe"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n2",
+            "current": true,
+            "active": 398338556,
+            "peer": "kPM390kO"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n3",
+            "current": true,
+            "active": 398336493,
+            "peer": "7eKUxXRX"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n4",
+            "current": true,
+            "active": 398210552,
+            "peer": "qZbSbSRl"
+          }
+        ]
+      },
+      "ts": "2026-10-05T23:22:21.530815752Z"
+    }
+  },
+  {
+    "container": "/js-wf-route-702605-1791242305672959192-n4",
+    "stream": "WF_JRN",
+    "at": "2026-10-05T23:22:21.531331+00:00",
+    "greeting": "INFO {\"server_id\":\"NBLLDM6WTAKUVE34SCJ2UROEDHYCMV3EO5NDC546YEFAHM3XRIKJ4WZE\",\"server_name\":\"js-wf-route-702605-1791242305672959192-n4\",\"version\":\"2.15.0\",\"proto\":1,\"go\":\"go1.27.1\",\"host\":\"0.0.0.0\",\"port\":4222,\"headers\":true,\"max_payload\":1048576,\"jetstream\":true,\"client_id\":86,\"client_ip\":\"172.18.0.1\",\"cluster\":\"js-wf-route-702605-1791242305672959192\",\"connect_urls\":[\"172.18.0.6:4222\",\"172.18.0.3:4222\",\"172.18.0.4:4222\",\"172.18.0.5:4222\"],\"api_lvl\":5,\"xkey\":\"XDTQHAOTXKELFNF4HH4XTJ32H43QVQS5BTN6SJ6PTTWEI62ODWSCFTY6\"}",
+    "response": {
+      "type": "io.nats.jetstream.api.v1.stream_info_response",
+      "total": 0,
+      "offset": 0,
+      "limit": 0,
+      "config": {
+        "name": "WF_JRN",
+        "subjects": [
+          "wf.jrn.*.*"
+        ],
+        "retention": "limits",
+        "max_consumers": -1,
+        "max_msgs": -1,
+        "max_bytes": -1,
+        "max_age": 0,
+        "max_msgs_per_subject": -1,
+        "max_msg_size": -1,
+        "discard": "new",
+        "storage": "file",
+        "num_replicas": 5,
+        "duplicate_window": 120000000000,
+        "compression": "none",
+        "allow_direct": false,
+        "mirror_direct": false,
+        "sealed": false,
+        "deny_delete": false,
+        "deny_purge": false,
+        "allow_rollup_hdrs": false,
+        "consumer_limits": {},
+        "allow_msg_ttl": false,
+        "metadata": {
+          "_nats.level": "5",
+          "_nats.req.level": "0",
+          "_nats.ver": "2.15.0"
+        }
+      },
+      "created": "2026-10-05T23:18:34.867970915Z",
+      "state": {
+        "messages": 6000,
+        "bytes": 25365000,
+        "first_seq": 1,
+        "first_ts": "2026-10-05T23:18:35.591678317Z",
+        "last_seq": 6000,
+        "last_ts": "2026-10-05T23:18:45.589489134Z",
+        "num_subjects": 1500,
+        "consumer_count": 0
+      },
+      "cluster": {
+        "name": "js-wf-route-702605-1791242305672959192",
+        "raft_group": "S-R5F-W3qZsYQ9",
+        "leader": "js-wf-route-702605-1791242305672959192-n2",
+        "leader_since": "2026-10-05T23:18:51.5441252Z",
+        "system_account": true,
+        "traffic_account": "$SYS",
+        "replicas": [
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n0",
+            "current": false,
+            "offline": true,
+            "active": 0,
+            "lag": 6002,
+            "peer": "YR4kkQZe"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n1",
+            "current": true,
+            "active": 987724465,
+            "peer": "0AsdRXmj"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n3",
+            "current": true,
+            "active": 987523761,
+            "peer": "7eKUxXRX"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n4",
+            "current": true,
+            "active": 987594768,
+            "peer": "qZbSbSRl"
+          }
+        ]
+      },
+      "ts": "2026-10-05T23:22:21.532197678Z"
+    }
+  },
+  {
+    "container": "/js-wf-route-702605-1791242305672959192-n3",
+    "stream": "WF_INV",
+    "at": "2026-10-05T23:22:21.532477+00:00",
+    "greeting": "INFO {\"server_id\":\"NBOSCPFJNSNXL5XZ346URXKPOLR4XOXR7IBUEQUXE2L7HMQF5GWHYDRS\",\"server_name\":\"js-wf-route-702605-1791242305672959192-n3\",\"version\":\"2.15.0\",\"proto\":1,\"go\":\"go1.27.1\",\"host\":\"0.0.0.0\",\"port\":4222,\"headers\":true,\"max_payload\":1048576,\"jetstream\":true,\"client_id\":82,\"client_ip\":\"172.18.0.1\",\"cluster\":\"js-wf-route-702605-1791242305672959192\",\"connect_urls\":[\"172.18.0.5:4222\",\"172.18.0.3:4222\",\"172.18.0.4:4222\",\"172.18.0.6:4222\"],\"api_lvl\":5,\"xkey\":\"XD2ATKJ6EN4T6HGP6YWBHP563OIHC2C44FBQEWY667FE3WZ34CZBMOE6\"}",
+    "response": {
+      "type": "io.nats.jetstream.api.v1.stream_info_response",
+      "total": 0,
+      "offset": 0,
+      "limit": 0,
+      "config": {
+        "name": "WF_INV",
+        "subjects": [
+          "wf.inv.*.*"
+        ],
+        "retention": "limits",
+        "max_consumers": -1,
+        "max_msgs": -1,
+        "max_bytes": -1,
+        "max_age": 0,
+        "max_msgs_per_subject": 1,
+        "max_msg_size": -1,
+        "discard": "new",
+        "storage": "file",
+        "num_replicas": 5,
+        "duplicate_window": 120000000000,
+        "compression": "none",
+        "allow_direct": false,
+        "mirror_direct": false,
+        "discard_new_per_subject": true,
+        "sealed": false,
+        "deny_delete": false,
+        "deny_purge": false,
+        "allow_rollup_hdrs": false,
+        "consumer_limits": {},
+        "allow_msg_ttl": false,
+        "metadata": {
+          "_nats.level": "5",
+          "_nats.req.level": "0",
+          "_nats.ver": "2.15.0"
+        }
+      },
+      "created": "2026-10-05T23:18:34.679477534Z",
+      "state": {
+        "messages": 1500,
+        "bytes": 93000,
+        "first_seq": 1,
+        "first_ts": "2026-10-05T23:18:35.589748862Z",
+        "last_seq": 1500,
+        "last_ts": "2026-10-05T23:18:45.586815612Z",
+        "num_subjects": 1500,
+        "consumer_count": 0
+      },
+      "cluster": {
+        "name": "js-wf-route-702605-1791242305672959192",
+        "raft_group": "S-R5F-pvjaa4M7",
+        "leader": "js-wf-route-702605-1791242305672959192-n1",
+        "leader_since": "2026-10-05T23:18:51.133362023Z",
+        "system_account": true,
+        "traffic_account": "$SYS",
+        "replicas": [
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n0",
+            "current": false,
+            "offline": true,
+            "active": 0,
+            "lag": 1502,
+            "peer": "YR4kkQZe"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n2",
+            "current": true,
+            "active": 401545419,
+            "peer": "kPM390kO"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n3",
+            "current": true,
+            "active": 401543356,
+            "peer": "7eKUxXRX"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n4",
+            "current": true,
+            "active": 401417415,
+            "peer": "qZbSbSRl"
+          }
+        ]
+      },
+      "ts": "2026-10-05T23:22:21.53401903Z"
+    }
+  },
+  {
+    "container": "/js-wf-route-702605-1791242305672959192-n3",
+    "stream": "WF_JRN",
+    "at": "2026-10-05T23:22:21.534312+00:00",
+    "greeting": "INFO {\"server_id\":\"NBOSCPFJNSNXL5XZ346URXKPOLR4XOXR7IBUEQUXE2L7HMQF5GWHYDRS\",\"server_name\":\"js-wf-route-702605-1791242305672959192-n3\",\"version\":\"2.15.0\",\"proto\":1,\"go\":\"go1.27.1\",\"host\":\"0.0.0.0\",\"port\":4222,\"headers\":true,\"max_payload\":1048576,\"jetstream\":true,\"client_id\":83,\"client_ip\":\"172.18.0.1\",\"cluster\":\"js-wf-route-702605-1791242305672959192\",\"connect_urls\":[\"172.18.0.5:4222\",\"172.18.0.3:4222\",\"172.18.0.4:4222\",\"172.18.0.6:4222\"],\"api_lvl\":5,\"xkey\":\"XD2ATKJ6EN4T6HGP6YWBHP563OIHC2C44FBQEWY667FE3WZ34CZBMOE6\"}",
+    "response": {
+      "type": "io.nats.jetstream.api.v1.stream_info_response",
+      "total": 0,
+      "offset": 0,
+      "limit": 0,
+      "config": {
+        "name": "WF_JRN",
+        "subjects": [
+          "wf.jrn.*.*"
+        ],
+        "retention": "limits",
+        "max_consumers": -1,
+        "max_msgs": -1,
+        "max_bytes": -1,
+        "max_age": 0,
+        "max_msgs_per_subject": -1,
+        "max_msg_size": -1,
+        "discard": "new",
+        "storage": "file",
+        "num_replicas": 5,
+        "duplicate_window": 120000000000,
+        "compression": "none",
+        "allow_direct": false,
+        "mirror_direct": false,
+        "sealed": false,
+        "deny_delete": false,
+        "deny_purge": false,
+        "allow_rollup_hdrs": false,
+        "consumer_limits": {},
+        "allow_msg_ttl": false,
+        "metadata": {
+          "_nats.level": "5",
+          "_nats.req.level": "0",
+          "_nats.ver": "2.15.0"
+        }
+      },
+      "created": "2026-10-05T23:18:34.867970915Z",
+      "state": {
+        "messages": 6000,
+        "bytes": 25365000,
+        "first_seq": 1,
+        "first_ts": "2026-10-05T23:18:35.591678317Z",
+        "last_seq": 6000,
+        "last_ts": "2026-10-05T23:18:45.589489134Z",
+        "num_subjects": 1500,
+        "consumer_count": 0
+      },
+      "cluster": {
+        "name": "js-wf-route-702605-1791242305672959192",
+        "raft_group": "S-R5F-W3qZsYQ9",
+        "leader": "js-wf-route-702605-1791242305672959192-n2",
+        "leader_since": "2026-10-05T23:18:51.5441252Z",
+        "system_account": true,
+        "traffic_account": "$SYS",
+        "replicas": [
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n0",
+            "current": false,
+            "offline": true,
+            "active": 0,
+            "lag": 6002,
+            "peer": "YR4kkQZe"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n1",
+            "current": true,
+            "active": 990479714,
+            "peer": "0AsdRXmj"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n3",
+            "current": true,
+            "active": 990279010,
+            "peer": "7eKUxXRX"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n4",
+            "current": true,
+            "active": 990350017,
+            "peer": "qZbSbSRl"
+          }
+        ]
+      },
+      "ts": "2026-10-05T23:22:21.534947608Z"
+    }
+  },
+  {
+    "container": "/js-wf-route-702605-1791242305672959192-n2",
+    "stream": "WF_INV",
+    "at": "2026-10-05T23:22:21.535175+00:00",
+    "greeting": "INFO {\"server_id\":\"NC2EHCVCUU6BARS75YKJLSOCACCKOMYH3WR3CPYW4RIZY6FMNQALZK5E\",\"server_name\":\"js-wf-route-702605-1791242305672959192-n2\",\"version\":\"2.15.0\",\"proto\":1,\"go\":\"go1.27.1\",\"host\":\"0.0.0.0\",\"port\":4222,\"headers\":true,\"max_payload\":1048576,\"jetstream\":true,\"client_id\":79,\"client_ip\":\"172.18.0.1\",\"cluster\":\"js-wf-route-702605-1791242305672959192\",\"connect_urls\":[\"172.18.0.4:4222\",\"172.18.0.3:4222\",\"172.18.0.6:4222\",\"172.18.0.5:4222\"],\"api_lvl\":5,\"xkey\":\"XBPAUOPWFFCGEBX7JE3QXJ6F5QI63XBMU2QDSIK7YRJGNZBX3UPWY2RB\"}",
+    "response": {
+      "type": "io.nats.jetstream.api.v1.stream_info_response",
+      "total": 0,
+      "offset": 0,
+      "limit": 0,
+      "config": {
+        "name": "WF_INV",
+        "subjects": [
+          "wf.inv.*.*"
+        ],
+        "retention": "limits",
+        "max_consumers": -1,
+        "max_msgs": -1,
+        "max_bytes": -1,
+        "max_age": 0,
+        "max_msgs_per_subject": 1,
+        "max_msg_size": -1,
+        "discard": "new",
+        "storage": "file",
+        "num_replicas": 5,
+        "duplicate_window": 120000000000,
+        "compression": "none",
+        "allow_direct": false,
+        "mirror_direct": false,
+        "discard_new_per_subject": true,
+        "sealed": false,
+        "deny_delete": false,
+        "deny_purge": false,
+        "allow_rollup_hdrs": false,
+        "consumer_limits": {},
+        "allow_msg_ttl": false,
+        "metadata": {
+          "_nats.level": "5",
+          "_nats.req.level": "0",
+          "_nats.ver": "2.15.0"
+        }
+      },
+      "created": "2026-10-05T23:18:34.679477534Z",
+      "state": {
+        "messages": 1500,
+        "bytes": 93000,
+        "first_seq": 1,
+        "first_ts": "2026-10-05T23:18:35.589748862Z",
+        "last_seq": 1500,
+        "last_ts": "2026-10-05T23:18:45.586815612Z",
+        "num_subjects": 1500,
+        "consumer_count": 0
+      },
+      "cluster": {
+        "name": "js-wf-route-702605-1791242305672959192",
+        "raft_group": "S-R5F-pvjaa4M7",
+        "leader": "js-wf-route-702605-1791242305672959192-n1",
+        "leader_since": "2026-10-05T23:18:51.133362023Z",
+        "system_account": true,
+        "traffic_account": "$SYS",
+        "replicas": [
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n0",
+            "current": false,
+            "offline": true,
+            "active": 0,
+            "lag": 1502,
+            "peer": "YR4kkQZe"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n2",
+            "current": true,
+            "active": 403481225,
+            "peer": "kPM390kO"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n3",
+            "current": true,
+            "active": 403479162,
+            "peer": "7eKUxXRX"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n4",
+            "current": true,
+            "active": 403353221,
+            "peer": "qZbSbSRl"
+          }
+        ]
+      },
+      "ts": "2026-10-05T23:22:21.535955437Z"
+    }
+  },
+  {
+    "container": "/js-wf-route-702605-1791242305672959192-n2",
+    "stream": "WF_JRN",
+    "at": "2026-10-05T23:22:21.536219+00:00",
+    "greeting": "INFO {\"server_id\":\"NC2EHCVCUU6BARS75YKJLSOCACCKOMYH3WR3CPYW4RIZY6FMNQALZK5E\",\"server_name\":\"js-wf-route-702605-1791242305672959192-n2\",\"version\":\"2.15.0\",\"proto\":1,\"go\":\"go1.27.1\",\"host\":\"0.0.0.0\",\"port\":4222,\"headers\":true,\"max_payload\":1048576,\"jetstream\":true,\"client_id\":80,\"client_ip\":\"172.18.0.1\",\"cluster\":\"js-wf-route-702605-1791242305672959192\",\"connect_urls\":[\"172.18.0.4:4222\",\"172.18.0.3:4222\",\"172.18.0.6:4222\",\"172.18.0.5:4222\"],\"api_lvl\":5,\"xkey\":\"XBPAUOPWFFCGEBX7JE3QXJ6F5QI63XBMU2QDSIK7YRJGNZBX3UPWY2RB\"}",
+    "response": {
+      "type": "io.nats.jetstream.api.v1.stream_info_response",
+      "total": 0,
+      "offset": 0,
+      "limit": 0,
+      "config": {
+        "name": "WF_JRN",
+        "subjects": [
+          "wf.jrn.*.*"
+        ],
+        "retention": "limits",
+        "max_consumers": -1,
+        "max_msgs": -1,
+        "max_bytes": -1,
+        "max_age": 0,
+        "max_msgs_per_subject": -1,
+        "max_msg_size": -1,
+        "discard": "new",
+        "storage": "file",
+        "num_replicas": 5,
+        "duplicate_window": 120000000000,
+        "compression": "none",
+        "allow_direct": false,
+        "mirror_direct": false,
+        "sealed": false,
+        "deny_delete": false,
+        "deny_purge": false,
+        "allow_rollup_hdrs": false,
+        "consumer_limits": {},
+        "allow_msg_ttl": false,
+        "metadata": {
+          "_nats.level": "5",
+          "_nats.req.level": "0",
+          "_nats.ver": "2.15.0"
+        }
+      },
+      "created": "2026-10-05T23:18:34.867970915Z",
+      "state": {
+        "messages": 6000,
+        "bytes": 25365000,
+        "first_seq": 1,
+        "first_ts": "2026-10-05T23:18:35.591678317Z",
+        "last_seq": 6000,
+        "last_ts": "2026-10-05T23:18:45.589489134Z",
+        "num_subjects": 1500,
+        "consumer_count": 0
+      },
+      "cluster": {
+        "name": "js-wf-route-702605-1791242305672959192",
+        "raft_group": "S-R5F-W3qZsYQ9",
+        "leader": "js-wf-route-702605-1791242305672959192-n2",
+        "leader_since": "2026-10-05T23:18:51.5441252Z",
+        "system_account": true,
+        "traffic_account": "$SYS",
+        "replicas": [
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n0",
+            "current": false,
+            "offline": true,
+            "active": 0,
+            "lag": 6002,
+            "peer": "YR4kkQZe"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n1",
+            "current": true,
+            "active": 992305763,
+            "peer": "0AsdRXmj"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n3",
+            "current": true,
+            "active": 992105059,
+            "peer": "7eKUxXRX"
+          },
+          {
+            "name": "js-wf-route-702605-1791242305672959192-n4",
+            "current": true,
+            "active": 992176066,
+            "peer": "qZbSbSRl"
+          }
+        ]
+      },
+      "ts": "2026-10-05T23:22:21.536772947Z"
+    }
+  }
+]

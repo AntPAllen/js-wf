@@ -17,3 +17,15 @@ The retained producer captures clean selected Git Go/module inputs, actual race 
 bytes/metadata and observed external server bytes/module/container/PID/mounts,
 then verifies source and closure. This preparation does not qualify large fault
 capacity, live traffic, legacy R1 configuration, current-source matrices or24h.
+
+## Live observation at executed69f2dc7
+
+Producer service `js-wf-direct-r1-r5-process-owner-loss-20261005.service` remains
+active with actual SDK PID702605. First leave-owner-down audit returns exact
+1500/6000 report in4.040516067s, no error, pending4039 at actual owner SIGKILL.
+The fixture has not returned its final verdict or advanced to same-store restart.
+Independent read-only standard NATS stream-info requests and `/jsz` observations
+show zero INV/JRN consumer counts on allfour survivors. These are live metadata
+observations, not a closed-fixture archive or parent qualification. The client/test
+lifecycle blocking location and cause are unconfirmed; retain the same run through
+its existing deadline. Reviewer service is pending terminal source/closure proof.

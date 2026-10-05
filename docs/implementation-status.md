@@ -12631,3 +12631,14 @@ visits, original20s including fault/restart and zero consumers. Compile/opt-in
 skip passes; native verdict and closed archive review pending. No reader replay,
 retry or default change; large fault/live/legacy/finalmatrix/24h stay open.
 [Preparation](scale/direct-callback-audit-2026-10-05/r5-process-preparation/).
+
+## R5 process-loss audit completes; fixture lifecycle pending — 2026-10-05
+
+At executed69f2dc7 first leave-owner-down audit returns exact1500/6000 in4.040516s,
+4039 pending at actual R1 owner SIGKILL, no duplicate/omitted journal visits or
+error. Parent fixture remains live after audit; same-store restart not reached.
+Independent read-only stream-info and monitoring observations report zero INV/JRN
+consumers on allfour survivors. No parent qualification or server-cause claim.
+Existing producer/SDK handles remain live; retain same run through existing
+12m timeout and preserve its verdict/lifecycle evidence. Reviewer awaits closure.
+[Live observations](scale/direct-callback-audit-2026-10-05/r5-process-preparation/).
