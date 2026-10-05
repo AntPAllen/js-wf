@@ -30,6 +30,16 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **Full R5 byte-bounded audit comparison completes under original20s:**
+  verified655-file continued clone/100k invocations/1.2M journals, actual R5 cursors,
+  normal2GiB. Candidate completes17.099s and15.209s with exact100k terminal reports;
+  both512 Fetch baselines deliver all journals but exhaust20s before full validation.
+  Named diagnostic129.41s PASS retains individual failed baseline verdicts.
+  Actual executable/five container binaries/639 matching Go/module inputs and
+  CPU/phase outputs preserved. No admitted interruption/full fault gate; defaults
+  unchanged, full-cohort interrupted-window acceptance is next.
+  [Complete comparison](scale/byte-bounded-audit-2026-10-05/r5-100k-profile/).
+
 - **Experimental byte-bounded audit transport passes focused native controls:**
   documented SDK client8MiB buffer /4096 delivered-record windows share existing
   scan invariants and recovery bounds. First R3 attempt fails at93 records with

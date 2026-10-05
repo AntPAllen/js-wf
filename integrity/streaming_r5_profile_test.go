@@ -153,11 +153,17 @@ func TestStreamingAuditR5RetainedProfileDiagnostic(t *testing.T) {
 		Complete  bool
 	}
 	var results []result
-	for _, variant := range []struct {
-		label    string
-		window   uint64
-		replicas int
-	}{{"r5-512", 512, 5}, {"r1-512", 512, 1}, {"r5-4096", 4096, 5}, {"r5-512-recheck", 512, 5}} {
+	type variantConfig struct {
+		label       string
+		window      uint64
+		replicas    int
+		byteBounded bool
+	}
+	variants := []variantConfig{{"r5-512", 512, 5, false}, {"r1-512", 512, 1, false}, {"r5-4096", 4096, 5, false}, {"r5-512-recheck", 512, 5, false}}
+	if os.Getenv("WF_AUDIT_R5_PROFILE_BYTE_BOUNDED") == "1" {
+		variants = []variantConfig{{"r5-512", 512, 5, false}, {"r5-byte-4096", 4096, 5, true}, {"r5-byte-4096-recheck", 4096, 5, true}, {"r5-512-recheck", 512, 5, false}}
+	}
+	for _, variant := range variants {
 		profile, err := os.Create(filepath.Join(root, variant.label+".pprof"))
 		if err != nil {
 			t.Fatal(err)
@@ -174,14 +180,19 @@ func TestStreamingAuditR5RetainedProfileDiagnostic(t *testing.T) {
 			began := time.Now()
 			var scanErr error
 			pprof.Do(call, pprof.Labels("audit_phase", p.Stream), func(call context.Context) {
-				scanErr = scanBatchThroughWithSize(call, observed, cutoff, func(msg *jetstream.RawStreamMsg) error {
+				visitor := func(msg *jetstream.RawStreamMsg) error {
 					p.Records++
 					p.Bytes += len(msg.Data)
 					entered := time.Now()
 					err := visit(msg)
 					p.VisitNS += time.Since(entered).Nanoseconds()
 					return err
-				}, variant.window)
+				}
+				if variant.byteBounded {
+					scanErr = scanByteBoundedThrough(call, observed, cutoff, visitor)
+				} else {
+					scanErr = scanBatchThroughWithSize(call, observed, cutoff, visitor, variant.window)
+				}
 			})
 			p.ScanNS = time.Since(began).Nanoseconds()
 			p.CursorReplicas = observed.creates

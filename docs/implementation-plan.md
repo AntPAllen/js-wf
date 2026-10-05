@@ -2113,3 +2113,15 @@ The SDK byte-mode pointer array adds approximately8MB per iterator, and oversize
 records can stall until bounded fallback. Measure actual full100k/R5 latency and
 interruption correctness before adoption; the original20s audit target remains.
 [Complete evidence and limitations](scale/byte-bounded-audit-2026-10-05/).
+
+### Full R5 byte-bounded retained-cohort comparison — 2026-10-05
+
+Continued verified655-file clone reopens100k completed invocations /1.2M entries
+with original logical identities, fresh Docker names and verified R5 cursors.
+Byte-bounded4096 candidate finishes complete invariant/state reports17.099s and
+15.209s under original20s; both512 baselines deliver all journals but exhaust the
+budget before final validation. Actual SDK/five container binaries/639 unchanged
+selected Go/module inputs and four CPU profiles retained. No synthetic or natural
+fault cut is admitted by this comparison; validate explicit-error and nil-error
+short windows on the full cohort before adoption. Defaults and full/24h gates
+remain unchanged. [Evidence](scale/byte-bounded-audit-2026-10-05/r5-100k-profile/).
