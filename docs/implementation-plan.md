@@ -3942,3 +3942,14 @@ and combined decode/reduction with production sorted finish. Exactcounts require
 reused encodedbytes/contiguoussubjects/constantterminal lookup and profiling are
 explicit. No transport/INV/KV/fault/retained-state or capacity claim.
 [CPU preparation](scale/audit-reduction-cost-2026-10-05/preparation/).
+
+### Fullcardinality isolated reduction CPU evidence accepted — 2026-10-05
+
+At6adad6e instrumented CPU-only diagnostic passes7.69s: full4.8M JSON decode
+2.856s, predecoded protocol/maps/sortedfinish1.047s, combined3.737s. Bothreduction
+phases report400k journals/4.8M entries/400k terminals; no invocation scan.
+Source/executable/module/closure and full696-member archive/readback verified.
+Reused rawbytes/contiguoussubjects/constantterminal lookup/noINV/KV/transport/
+faults explicit. This supports measuring bounded delivery buffering/pipeline
+cost next, without claiming isolatedcause or nativecapacity/24h/default adoption.
+[Profile](scale/audit-reduction-cost-2026-10-05/profile/).

@@ -1,0 +1,87 @@
+{
+  "execution": {
+    "pid": 657111,
+    "source": "6adad6e3247fa964e366e93a16dab631bc8c0e40",
+    "sha256": "3d52edf1053196d276179418332cf3dbdaae691ae67516d2afaf97b250afa16a",
+    "build_info": "/proc/657111/exe: go1.27.1\n\tpath\tjs-wf/integrity.test\n\tmod\tjs-wf\tv0.0.0-20261005213406-6adad6e3247f\t\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=6adad6e3247fa964e366e93a16dab631bc8c0e40\n\tbuild\tvcs.time=2026-10-05T21:34:06Z\n\tbuild\tvcs.modified=false\n",
+    "args": [
+      "/tmp/js-wf-audit-reduction-full-population-profile-20261005/integrity.test",
+      "-test.run=^TestAuditReductionFullPopulationCost$",
+      "-test.v",
+      "-test.count=1",
+      "-test.timeout=6m",
+      "-test.cpuprofile=/tmp/js-wf-audit-reduction-full-population-profile-20261005/reduction-cpu.pprof",
+      "-test.memprofile=/tmp/js-wf-audit-reduction-full-population-profile-20261005/reduction-allocs.pprof"
+    ],
+    "stat": "657111 (integrity.test) S 656871 656871 656871 0 -1 4194304 5026 0 0 0 2 0 0 0 20 0 8 0 4977248 1844604928 6565 18446744073709551615 4194304 16025488 140723202965232 0 0 0 0 0 2143420159 0 0 0 17 0 0 0 0 0 0 27754496 28221312 939773952 140723202972260 140723202972620 140723202972620 140723202973613 0\n",
+    "status": "passed",
+    "started_utc": "2026-10-05T21:34:10.948791+00:00",
+    "scope": "Instrumented CPU-only full400k/4.8M JSON template decoder/reducer diagnostic; no NATS server launched; not retained-state or native capacity qualification",
+    "exit_code": 0,
+    "finished_utc": "2026-10-05T21:34:19.118912+00:00"
+  },
+  "explicit_configuration": {
+    "GOMAXPROCS": "4",
+    "GOGC": "200",
+    "GOMEMLIMIT": "2GiB",
+    "WF_AUDIT_REDUCTION_PROFILE": "1",
+    "WF_AUDIT_BATCH_ROOT": "/tmp/js-wf-audit-reduction-full-population-profile-20261005/originals",
+    "WF_TIER3_EXPLICIT_ROUTE_SEEDS": "1",
+    "WF_TIER3_SYNC_INTERVAL": "2m"
+  },
+  "actual_sdk_sha256": "3d52edf1053196d276179418332cf3dbdaae691ae67516d2afaf97b250afa16a",
+  "selected_source_inputs_verified": 677,
+  "observed_sdk_closed": true,
+  "native_normal_test_passes_seconds": {
+    "TestAuditReductionFullPopulationCost": 7.69
+  },
+  "reduction_measurements": {
+    "Results": [
+      {
+        "Mode": "decode_only",
+        "Records": 4800000,
+        "Report": {
+          "Invocations": 0,
+          "Journals": 0,
+          "Entries": 0,
+          "Terminal": 0
+        },
+        "ElapsedNS": 2855939965,
+        "AllocatedBytes": 387234152,
+        "GCCycles": 10
+      },
+      {
+        "Mode": "reduce_predecoded",
+        "Records": 4800000,
+        "Report": {
+          "Invocations": 0,
+          "Journals": 400000,
+          "Entries": 4800000,
+          "Terminal": 400000
+        },
+        "ElapsedNS": 1047043257,
+        "AllocatedBytes": 186237256,
+        "GCCycles": 2
+      },
+      {
+        "Mode": "decode_and_reduce",
+        "Records": 4800000,
+        "Report": {
+          "Invocations": 0,
+          "Journals": 400000,
+          "Entries": 4800000,
+          "Terminal": 400000
+        },
+        "ElapsedNS": 3737463105,
+        "AllocatedBytes": 573374872,
+        "GCCycles": 5
+      }
+    ],
+    "Scope": "CPU-only full400k/4.8M JSON template; contiguous subjects, reused raw bytes and constant terminal lookup; no INV/state/transport/retained data/faults; profile instrumentation and decode identity checks included"
+  },
+  "server_scope": "CPU-only diagnostic; no NATS server launched by selected test",
+  "source_capture_scope": "Selected Git Go/module inputs and actual executable metadata, not exhaustive external compiler/toolchain inputs",
+  "candidate_adopted": false,
+  "qualifies_400k_capacity": false,
+  "qualifies_24h": false
+}

@@ -1,0 +1,119 @@
+File: integrity.test
+Build ID: d01b136e7bd9e50f54f0b84e6a002e8da96f5b5b
+Type: cpu
+Time: 2026-10-05 21:34:10 UTC
+Duration: 7.69s, Total samples = 7.96s (103.48%)
+Showing nodes accounting for 6.81s, 85.55% of 7.96s total
+Dropped 166 nodes (cum <= 0.04s)
+      flat  flat%   sum%        cum   cum%
+     0.63s  7.91%  7.91%      0.63s  7.91%  internal/runtime/maps.memHashAES
+     0.52s  6.53% 14.45%      0.52s  6.53%  encoding/json/internal/jsonwire.ConsumeSimpleString (inline)
+     0.49s  6.16% 20.60%      0.50s  6.28%  encoding/json/internal/jsonwire.ConsumeWhitespace (inline)
+     0.42s  5.28% 25.88%      0.42s  5.28%  internal/runtime/maps.ctrlGroup.matchH2 (inline)
+     0.41s  5.15% 31.03%      1.06s 13.32%  encoding/json/jsontext.(*decoderState).ReadValue
+     0.31s  3.89% 34.92%      1.39s 17.46%  encoding/json/jsontext.(*decoderState).consumeValue
+     0.29s  3.64% 38.57%      7.10s 89.20%  js-wf/integrity.TestAuditReductionFullPopulationCost.func2
+     0.28s  3.52% 42.09%      0.95s 11.93%  encoding/json/jsontext.(*decoderState).consumeObject
+     0.28s  3.52% 45.60%      1.20s 15.08%  runtime.mapaccess2_faststr
+     0.26s  3.27% 48.87%      3.19s 40.08%  encoding/json/v2.makeStructArshaler.func3
+     0.25s  3.14% 52.01%      0.29s  3.64%  encoding/json/jsontext.(*decoderState).reset
+     0.18s  2.26% 54.27%      0.18s  2.26%  cmpbody
+     0.17s  2.14% 56.41%      0.17s  2.14%  memeqbody
+     0.13s  1.63% 58.04%      0.14s  1.76%  js-wf/integrity.(*journalAudit).advance
+     0.12s  1.51% 59.55%      0.56s  7.04%  internal/runtime/maps.(*Map).getWithoutKeySmallFastStr
+     0.12s  1.51% 61.06%      0.26s  3.27%  js-wf/integrity.(*journalAudit).add (inline)
+     0.11s  1.38% 62.44%      0.59s  7.41%  runtime.mapassign_faststr
+     0.10s  1.26% 63.69%      0.31s  3.89%  encoding/json/jsontext.(*Decoder).PeekKind
+     0.10s  1.26% 64.95%      0.22s  2.76%  encoding/json/jsontext.(*decoderState).PeekKind
+     0.10s  1.26% 66.21%      0.16s  2.01%  runtime.tryDeferToSpanScan
+     0.08s  1.01% 67.21%      0.62s  7.79%  encoding/json/v2.makeStringArshaler.func2
+     0.08s  1.01% 68.22%      0.18s  2.26%  internal/sync.(*HashTrieMap[go.shape.interface {},go.shape.interface {}]).Load
+     0.07s  0.88% 69.10%      0.13s  1.63%  encoding/json/jsontext.(*decoderState).ReadToken
+     0.07s  0.88% 69.97%      0.14s  1.76%  runtime.mallocgcSmallScanNoHeaderSC7
+     0.06s  0.75% 70.73%      0.38s  4.77%  encoding/json/v2.makeUintArshaler.func2
+     0.05s  0.63% 71.36%      0.05s  0.63%  internal/abi.Name.IsExported (inline)
+     0.05s  0.63% 71.98%      0.05s  0.63%  internal/runtime/maps.h2 (inline)
+     0.05s  0.63% 72.61%      0.05s  0.63%  runtime.spanClass.sizeclass (inline)
+     0.04s   0.5% 73.12%      0.04s   0.5%  encoding/json/internal/jsonwire.ConsumeSimpleNumber (inline)
+     0.04s   0.5% 73.62%      0.04s   0.5%  encoding/json/internal/jsonwire.UnquoteMayCopy
+     0.04s   0.5% 74.12%      0.06s  0.75%  encoding/json/jsontext.(*decoderState).consumeWhitespace
+     0.04s   0.5% 74.62%      0.04s   0.5%  encoding/json/jsontext.Kind.normalize (inline)
+     0.04s   0.5% 75.13%      0.07s  0.88%  encoding/json/jsontext.Value.Kind
+     0.04s   0.5% 75.63%      4.98s 62.56%  encoding/json/v2.Unmarshal
+     0.04s   0.5% 76.13%      0.04s   0.5%  encoding/json/v2.hash64 (inline)
+     0.04s   0.5% 76.63%      0.12s  1.51%  encoding/json/v2.makeString
+     0.04s   0.5% 77.14%      0.10s  1.26%  reflect.Value.Field
+     0.04s   0.5% 77.64%      0.04s   0.5%  runtime.memclrNoHeapPointers
+     0.04s   0.5% 78.14%      0.08s  1.01%  sync.(*Pool).pin
+     0.03s  0.38% 78.52%      0.16s  2.01%  encoding/json/jsontext.(*Decoder).ReadToken
+     0.03s  0.38% 78.89%      0.35s  4.40%  encoding/json/jsontext.getBufferedDecoder
+     0.03s  0.38% 79.27%      4.54s 57.04%  encoding/json/v2.unmarshalDecode
+     0.03s  0.38% 79.65%      0.07s  0.88%  js-wf/integrity.(*journalAudit).finish
+     0.03s  0.38% 80.03%      0.16s  2.01%  js-wf/integrity.auditJournals
+     0.03s  0.38% 80.40%      5.20s 65.33%  js-wf/journal.UnmarshalEntry
+     0.03s  0.38% 80.78%      0.05s  0.63%  reflect.Value.SetUint
+     0.03s  0.38% 81.16%      1.23s 15.45%  runtime.mapaccess1_faststr
+     0.03s  0.38% 81.53%      0.08s  1.01%  runtime.scanSpan
+     0.03s  0.38% 81.91%      0.22s  2.76%  slices.partitionOrdered[go.shape.string]
+     0.03s  0.38% 82.29%      0.04s   0.5%  sync.runtime_procPin
+     0.02s  0.25% 82.54%      0.11s  1.38%  encoding/json/jsontext.(*decoderState).checkEOF
+     0.02s  0.25% 82.79%      0.05s  0.63%  runtime.casgstatus
+     0.02s  0.25% 83.04%      0.08s  1.01%  runtime.nilinterhash
+     0.02s  0.25% 83.29%      0.17s  2.14%  runtime.scanObject
+     0.02s  0.25% 83.54%      0.06s  0.75%  runtime.typehash
+     0.01s  0.13% 83.67%      0.08s  1.01%  bytes.Equal (inline)
+     0.01s  0.13% 83.79%      0.05s  0.63%  bytes.HasPrefix (inline)
+     0.01s  0.13% 83.92%      0.20s  2.51%  cmp.Less[go.shape.string] (inline)
+     0.01s  0.13% 84.05%      0.04s   0.5%  encoding/json/jsontext.(*stateMachine).appendString (inline)
+     0.01s  0.13% 84.17%      0.19s  2.39%  encoding/json/v2.lookupArshaler
+     0.01s  0.13% 84.30%      0.05s  0.63%  internal/runtime/maps.(*table).uncheckedPutSlot
+     0.01s  0.13% 84.42%      0.04s   0.5%  internal/runtime/maps.MemHash64
+     0.01s  0.13% 84.55%      7.15s 89.82%  js-wf/integrity.TestAuditReductionFullPopulationCost
+     0.01s  0.13% 84.67%      0.34s  4.27%  js-wf/integrity.auditJournals.func1
+     0.01s  0.13% 84.80%      0.04s   0.5%  reflect.ptrTo (inline)
+     0.01s  0.13% 84.92%      0.05s  0.63%  runtime.gdestroy
+     0.01s  0.13% 85.05%      0.12s  1.51%  runtime.mallocgc
+     0.01s  0.13% 85.18%      0.09s  1.13%  runtime.mallocgcSmallScanNoHeader
+     0.01s  0.13% 85.30%      0.09s  1.13%  runtime.newobject
+     0.01s  0.13% 85.43%      0.05s  0.63%  runtime.sweepone
+     0.01s  0.13% 85.55%      0.06s  0.75%  sync.(*Pool).Put
+         0     0% 85.55%      4.98s 62.56%  encoding/json.Unmarshal (inline)
+         0     0% 85.55%      1.06s 13.32%  encoding/json/jsontext.(*decoderState).CheckNextValue
+         0     0% 85.55%      0.35s  4.40%  encoding/json/jsontext.export.GetBufferedDecoder (inline)
+         0     0% 85.55%      0.05s  0.63%  encoding/json/jsontext.export.PutBufferedDecoder
+         0     0% 85.55%      0.05s  0.63%  encoding/json/jsontext.putBufferedDecoder (inline)
+         0     0% 85.55%      0.07s  0.88%  encoding/json/v2.makeMethodArshaler.func6
+         0     0% 85.55%      0.04s   0.5%  fmt.Sprintf
+         0     0% 85.55%      0.22s  2.76%  internal/runtime/maps.(*table).rehash
+         0     0% 85.55%      0.22s  2.76%  internal/runtime/maps.(*table).split
+         0     0% 85.55%      0.16s  2.01%  internal/runtime/maps.MemHash
+         0     0% 85.55%      0.16s  2.01%  internal/runtime/maps.StrHash (inline)
+         0     0% 85.55%      0.32s  4.02%  js-wf/integrity.TestAuditReductionFullPopulationCost.func2.1
+         0     0% 85.55%      0.04s   0.5%  reflect.Value.Addr
+         0     0% 85.55%      0.10s  1.26%  runtime.(*mcache).nextFree
+         0     0% 85.55%      0.10s  1.26%  runtime.(*mcache).refill
+         0     0% 85.55%      0.08s  1.01%  runtime.(*mcentral).cacheSpan
+         0     0% 85.55%      0.08s  1.01%  runtime.(*mcentral).grow
+         0     0% 85.55%      0.05s  0.63%  runtime.(*mspan).initHeapBits
+         0     0% 85.55%      0.05s  0.63%  runtime.bgsweep
+         0     0% 85.55%      0.05s  0.63%  runtime.findRunnable
+         0     0% 85.55%      0.25s  3.14%  runtime.gcBgMarkWorker
+         0     0% 85.55%      0.25s  3.14%  runtime.gcBgMarkWorker.func2
+         0     0% 85.55%      0.25s  3.14%  runtime.gcDrain
+         0     0% 85.55%      0.11s  1.38%  runtime.gcDrainMarkWorkerDedicated (inline)
+         0     0% 85.55%      0.14s  1.76%  runtime.gcDrainMarkWorkerIdle (inline)
+         0     0% 85.55%      0.15s  1.88%  runtime.goexit0
+         0     0% 85.55%      0.15s  1.88%  runtime.mcall
+         0     0% 85.55%      0.04s   0.5%  runtime.memhash64 (inline)
+         0     0% 85.55%      0.04s   0.5%  runtime.newproc
+         0     0% 85.55%      0.04s   0.5%  runtime.newproc.func1
+         0     0% 85.55%      0.04s   0.5%  runtime.newproc1
+         0     0% 85.55%      0.11s  1.38%  runtime.schedule
+         0     0% 85.55%      0.16s  2.01%  runtime.strhash
+         0     0% 85.55%      0.37s  4.65%  runtime.systemstack
+         0     0% 85.55%      7.10s 89.20%  runtime/pprof.Do
+         0     0% 85.55%      0.25s  3.14%  slices.Sort[go.shape.[]string,go.shape.string] (inline)
+         0     0% 85.55%      0.25s  3.14%  slices.pdqsortOrdered[go.shape.string]
+         0     0% 85.55%      0.25s  3.14%  sort.Strings
+         0     0% 85.55%      0.18s  2.26%  sync.(*Map).Load (inline)
+         0     0% 85.55%      7.15s 89.82%  testing.tRunner

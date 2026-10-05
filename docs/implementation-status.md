@@ -28,6 +28,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05 21:37 UTC
+
+CPU-only full400k/4.8M JSON-template diagnostic at6adad6e passes7.69s: decode
+2.856s/387MB, predecoded maps/protocol/sortedfinish1.047s/186MB, combined
+3.737s/573MB. Allphase recordcounts and both fulljournal reports checked.
+No invocation/KV/transport/retainedstate/fault model; reused rawbytes/contiguous
+subjects/constantterminal lookup and profiling/validation are explicit.
+Selectedsource/actualSDK/module/closure plus full696-member archive reviewed.
+This suggests measuring bounded delivery buffering next; no isolated transport
+cause or nativecapacity/24h/default claim.
+[CPU evidence](scale/audit-reduction-cost-2026-10-05/profile/).
+
 ## Latest follow-up — 2026-10-05 21:32 UTC
 
 The complete callback400k failed fixture archive is now independently read back;
