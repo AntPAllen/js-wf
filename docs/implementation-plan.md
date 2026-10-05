@@ -2333,3 +2333,18 @@ natural follower-lag reproduction and full/final-source matrices remain open.
 Unchanged Tier1 state-machine bodies are not rerun for default transport changes.
 Actual24h campaigns remain at their isolated earlier sources; no restart or
 blanket final-source qualification follows from this focused adapter acceptance.
+
+### Recorded-source actual disk-stall seeds1–13 accepted — 2026-10-05
+
+The first complete Tier3 block_disk shard at79915ca independently qualifies
+thirteen original600s cases/247 real five-second device-mapper suspensions,
+40964 invocations/451209 entries/52668 exactOk history operations/143 cohort
+checks. Node4 same writable filesystem/device and both R5 WF_RUN/WF_JRN leaders
+are admitted at every cut; blocked sync returns after resume starts. Original
+30s gates hold (worst terminal/progress p99=9.044s/0.647s). Three model builds
+use45 actual repository inputs matching executed source. Source checkout/API/
+header binds the workload; actual workload SDK/full source/store bytes are
+unavailable and final integrity/drain remains named-test scope.
+[Raw/model/provenance and complete verified parts](scale/current-tier3-block-stall-2026-10-05/seeds-1-13/).
+Seeds14–200/current-source/full16-row/actual24h/million-drain remain open; existing
+live job and soak handles continue. No native workload is rerun for this review.

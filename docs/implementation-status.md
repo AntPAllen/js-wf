@@ -30,6 +30,19 @@ retirement/fanout/rebalance and operational fault coverage, then qualify the act
 
 ## Latest accepted evidence
 
+- **First recorded-source actual disk-stall shard independently accepted:**
+  Tier3 block_disk seeds1–13 at79915ca complete original600s/19 cuts per seed,
+ 40964 invocations/451209 entries/247 real five-second device suspensions/
+ 52668 exactOk operations and143 completed cohort audits. Same writable node4
+ store/device and both R5 journal/dispatch leaders admitted before each cut;
+ blocked sync/resume/recovery identities and original30s gates verified. Worst
+ terminal/progress p99=9.044s/0.647s. Actual models/45 Git-bound dependencies/raw
+ files/API/logs retained in1396-member/three-part readback-verified archive;
+ workload SDK/full captured source/stores unavailable, integrity/drain named-test
+ scope. Seeds14–200/current-source/full matrices/24h/million-drain remain open.
+ Both long campaigns still active; no new native run or parent promotion.
+ [Complete first disk-stall shard](scale/current-tier3-block-stall-2026-10-05/seeds-1-13/).
+
 - **Compacted-journal reconstruction now uses leader snapshot manifests:**
   baseline synthetic missing/older KV roots after two real compactions fail10.58s
   with expected index0/104 versus actual184. Corrected normal7.18s/race7.85s
