@@ -3009,3 +3009,16 @@ release promotion. Six Python controlmethods pass; missing/skipped/failed/duplic
 execution, isolatedrun substitution, missing/reordered/wrongphase/wrongnode/wrong
 count/repeatedfault and prefix/epoch/count mutations rejected. Defaultisolated
 mode unchanged. Combinednative six-case terminal proof remains pending.
+
+### Recorded-source disk-stall coverage through174 seeds — 2026-10-05
+
+Native seeds170–182 accepted after original job/artifact/log binding,
+regenerated device fault/latency/cohort checks and all three separately rebuilt
+history models:52452 new operations/45 executed-source dependencies. Full1398
+archive members/three parts readback verified. Combined seeds1–65,79–182 and
+196–200 total174/531580inv/5854582entries/3306faults/683470modelops/
+1818cohortaudits. Failed66–78 remain unqualified;183–195 pending. Qualification
+is only at executed79915ca. Original runner did not retain workloadSDK,
+exhaustive source inventory or physical stores; final drain named-test scope.
+Full200/current-source/full matrices/24h and failed parent remain open.
+[Complete174-seed ledger](scale/current-tier3-block-stall-2026-10-05/).
