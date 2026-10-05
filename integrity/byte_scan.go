@@ -118,19 +118,25 @@ func fetchByteBounded(ctx context.Context, c jetstream.Consumer, n, maxBytes int
 }
 
 func byteIteratorBatch(ctx context.Context, iterator jetstream.MessagesContext, n int, stopAfterBatch bool) jetstream.MessageBatch {
+	// NextContext only assigns this window's immutable context; reuse it for
+	// every delivered record instead of allocating a closure per record.
+	nextContext := jetstream.NextContext(ctx)
+	return byteDeliveryBatch(ctx, n, func() (jetstream.Msg, error) { return iterator.Next(nextContext) }, iterator.Stop, stopAfterBatch)
+}
+
+// The adapter's record cap and cancellation/error contract are shared by the
+// SDK iterator and the explicit callback-delivery candidate.
+func byteDeliveryBatch(ctx context.Context, n int, next func() (jetstream.Msg, error), stop func(), stopAfterBatch bool) jetstream.MessageBatch {
 	batch := &byteBoundedBatch{messages: make(chan jetstream.Msg)}
-	stopOnCancel := context.AfterFunc(ctx, iterator.Stop)
+	stopOnCancel := context.AfterFunc(ctx, stop)
 	go func() {
 		defer close(batch.messages)
 		if stopAfterBatch {
-			defer iterator.Stop()
+			defer stop()
 		}
 		defer stopOnCancel()
-		// NextContext only assigns this window's immutable context. Reuse its
-		// option rather than allocating a new closure for every delivered record.
-		nextContext := jetstream.NextContext(ctx)
 		for i := 0; i < n; i++ {
-			msg, err := iterator.Next(nextContext)
+			msg, err := next()
 			if err != nil {
 				if ctx.Err() != nil {
 					batch.err = ctx.Err()

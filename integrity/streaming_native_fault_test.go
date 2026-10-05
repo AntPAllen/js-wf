@@ -24,15 +24,18 @@ func TestStreamingAuditNativeJournalFaults(t *testing.T) {
 		t.Skip("opt-in full streaming audit fault qualification")
 	}
 	for _, mode := range []struct {
-		name                          string
-		snapshot, concurrent, compact bool
+		name                                    string
+		snapshot, concurrent, compact, callback bool
 	}{
-		{"state-false", false, false, false}, {"state-true", true, false, false}, {"concurrent-state", true, true, false}, {"compact-metadata", true, true, true},
+		{"state-false", false, false, false, false}, {"state-true", true, false, false, false}, {"concurrent-state", true, true, false, false}, {"compact-metadata", true, true, true, false}, {"callback-delivery", true, true, true, true},
 	} {
 		snapshot := mode.snapshot
 		read := nativeStreamingScanner()
 		if mode.compact {
 			read = scanCompactByteBoundedThrough
+		}
+		if mode.callback {
+			read = scanConsumeByteBoundedThrough
 		}
 		for _, fault := range []string{"consumer-leader-loss", "cancellation"} {
 			t.Run(fmt.Sprintf("%s/%s", mode.name, fault), func(t *testing.T) {

@@ -64,6 +64,28 @@ func TestByteBoundedScanNativePayloadRefillHolesCutoffAndCancel(t *testing.T) {
 	if !errors.Is(err, context.Canceled) || visits != 1 {
 		t.Fatalf("cancel visits=%d err=%v", visits, err)
 	}
+	callbackDigest := sha256.New()
+	callbackCount := 0
+	call, stop = context.WithTimeout(ctx, 20*time.Second)
+	err = scanConsumeByteBoundedThrough(call, stream, &cutoff, func(m *jetstream.RawStreamMsg) error {
+		callbackCount++
+		return candidateDigest(callbackDigest, m)
+	})
+	stop()
+	if err != nil || callbackCount != pointCount || !bytes.Equal(point.Sum(nil), callbackDigest.Sum(nil)) {
+		t.Fatalf("callback holes/cutoff: count=%d err=%v digest=%x/%x", callbackCount, err, point.Sum(nil), callbackDigest.Sum(nil))
+	}
+	call, stop = context.WithCancel(ctx)
+	callbackVisits := 0
+	err = scanConsumeByteBoundedThrough(call, stream, nil, func(*jetstream.RawStreamMsg) error {
+		callbackVisits++
+		stop()
+		return context.Canceled
+	})
+	stop()
+	if !errors.Is(err, context.Canceled) || callbackVisits != 1 {
+		t.Fatalf("callback cancel visits=%d err=%v", callbackVisits, err)
+	}
 	// With no caller deadline cleanup gets its independent two-second budget.
 	info, err := stream.Info(ctx)
 	if err != nil || info.State.Consumers != 0 {
