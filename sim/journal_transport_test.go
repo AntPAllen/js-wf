@@ -501,6 +501,8 @@ func replayTrace(loaded Trace) (Trace, error) {
 		replayed, err = runHandleCacheCancellation(loaded.Seed, &loaded)
 	case "worker_successive_kills", "worker_successive_kills_v2":
 		replayed, err = runSuccessiveWorkerKills(loaded.Seed, &loaded)
+	case "worker_delayed_expiry_successive_kills":
+		replayed, err = runDelayedExpirySuccessiveKills(loaded.Seed, &loaded)
 	case "worker_kill_lease_expiry":
 		replayed, err = runWorkerKillLeaseExpiry(&loaded)
 	case "worker_canceled_retained_lease":

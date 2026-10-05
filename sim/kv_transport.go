@@ -35,19 +35,49 @@ type kvItem struct {
 // KVTransport models the revision CAS and expiry behavior used by workflow
 // leases. Its revisions are global across keys, including delete markers.
 type KVTransport struct {
-	mu       sync.Mutex
-	schedule *Scheduler
-	ttl      time.Duration
-	revision uint64
-	items    map[string]kvItem
-	previous map[string]kvItem
-	faults   []KVFault
+	mu                    sync.Mutex
+	schedule              *Scheduler
+	ttl                   time.Duration
+	expiryVisibilityDelay time.Duration
+	revision              uint64
+	items                 map[string]kvItem
+	previous              map[string]kvItem
+	faults                []KVFault
 }
 
 var _ lease.KVPort = (*KVTransport)(nil)
 
 func NewKVTransport(schedule *Scheduler, ttl time.Duration) *KVTransport {
 	return &KVTransport{schedule: schedule, ttl: ttl, items: map[string]kvItem{}, previous: map[string]kvItem{}}
+}
+
+// SetExpiryVisibilityDelay models a retained lease remaining visible after
+// its configured TTL. This is an explicit diagnostic assumption, not a claim
+// about NATS expiry scheduling or replication. Existing workloads keep zero.
+func (m *KVTransport) SetExpiryVisibilityDelay(delay time.Duration) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if delay < 0 || delay%time.Millisecond != 0 || m.revision != 0 {
+		return fmt.Errorf("expiry visibility delay must be nonnegative milliseconds before KV use")
+	}
+	m.expiryVisibilityDelay = delay
+	m.event(TransportEvent{Operation: "kv_expiry_visibility_delay", Outcome: delay.String()})
+	return nil
+}
+
+// ClearExpiryVisibilityDelay starts a new assumption only after the old keys
+// have expired. Existing live generations cannot have their expiry changed.
+func (m *KVTransport) ClearExpiryVisibilityDelay() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for key := range m.items {
+		if _, live := m.current(key); live {
+			return fmt.Errorf("cannot clear expiry visibility delay with live keys")
+		}
+	}
+	m.expiryVisibilityDelay = 0
+	m.event(TransportEvent{Operation: "kv_expiry_visibility_delay", Outcome: "cleared_after_expiry"})
+	return nil
 }
 
 func (m *KVTransport) Now() time.Time {
@@ -245,7 +275,7 @@ func (m *KVTransport) current(key string) (kvItem, bool) {
 	if !exists {
 		return kvItem{}, false
 	}
-	if m.ttl > 0 && !m.now().Before(item.created.Add(m.ttl)) {
+	if m.ttl > 0 && !m.now().Before(item.created.Add(m.ttl+m.expiryVisibilityDelay)) {
 		delete(m.items, key)
 		return kvItem{}, false
 	}
