@@ -3555,3 +3555,14 @@ executables observed;1695selectedinputs bound. Complete4001archive members and
 bothparts readback. Originalproducer generated-cache failure stays preserved;
 this is separate copied integrity/history/drain proof, not an originalproducerpass
 orfullmatrix qualification. [Proof](scale/tier2-retained-row-2026-10-05/worker-ten-minute-copied-audit/).
+
+### Retained worker-clock smoke and generated-input handling verified — 2026-10-05
+
+Executed828db48 native35s worker-clock smoke PASS266.00s including shiftedSDK
+builds;196terminals/2171entries/p99=5.088019049s. Actual+5s/-5s samples atinitial
+and30s cuts, allsix terminal/progress cells<30s. Independent source/actualprocess
+review verifies668Git/3286durableexternal/onegeneratedinput andbothretained
+clockoverlays withmatchingactualshiftedSDKbytes. Producer/checker exit0,three
+workers/threeNATSobservations/closedPIDs. Fullproof readback. Smokeonly;
+copiedaudit,ten-minuteclock andfullmatrix remainseparate.
+[Proof](scale/tier2-retained-row-2026-10-05/workerclock-smoke/).
