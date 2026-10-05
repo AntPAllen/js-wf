@@ -12724,3 +12724,17 @@ and428.769MB physical pushed worktree proof parts reclaimed after whole canonica
 archive/member or part/Git SHA checks and all-task descriptor checks. CanonicalGit
 parts/closedoriginal stores/source/binaries/livecampaign/caches retained.
 [Preparation](scale/direct-callback-audit-2026-10-05/r1-legacy-preparation/).
+
+## Full fault-capacity headroom restored; owner-down producer prepared — 2026-10-05
+
+84 recognized closed duplicate proofs found through additional explicitly
+supported archive schemas. Reclaimed4,756,862,989bytes after exact pushed Git
+part/concat/metadata verification, fresh primary GitHub terminal states and visible
+task-FD checks. All original stores/media/source/binaries/livecampaign/caches/
+canonicalGit parts retained. Now enough headroom for fresh full400k/4.8M copy.
+Owner-left-down normal4CPU/GOGC500/4GiB producer prepared: current-source baseline
+before actual verified R5 cursor-owner SIGKILL; original20s per baseline/fault,
+including zero-consumer cleanup. ActualSDK/server/mount/closure/unchanged donor and
+complete pinned base-plus-delta proof required. Native verdict pending.
+[Preparation](scale/direct-callback-audit-2026-10-05/full400k-owner-down-preparation/).
+[Headroom evidence](scale/direct-callback-audit-2026-10-05/full-capacity-proof-headroom/).

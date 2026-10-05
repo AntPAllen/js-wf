@@ -4223,3 +4223,16 @@ passes; native pending sufficient fresh-copy+archive disk. Smaller populations
 will not certify this full fault gate.
 [Legacy](scale/direct-callback-audit-2026-10-05/r1-legacy-controls/).
 [Full capacity faults](scale/direct-callback-audit-2026-10-05/full400k-fault-preparation/).
+
+## Full400k owner-loss execution headroom restored — 2026-10-05
+
+Supported older canonical archive schemas expose84 closed duplicate combined
+proofs. Fresh primary GitHub terminal job/run states, exact pushed metadata/part/
+concat hashes and visible task descriptors verified before reclaiming4,756,862,989
+bytes. Original stores/provider media/source/executables/livecampaign/caches/Git
+parts retained. Full400k/4.8M owner-left-down producer prepared with current-source
+baseline, actual R5 owner SIGKILL, original20s per baseline/fault including cleanup,
+4CPU/GOGC500/4GiB and whole donor/source/actual process verification. No verdict yet;
+each outcome will receive complete pinned base-plus-delta review/preservation.
+[Producer](scale/direct-callback-audit-2026-10-05/full400k-owner-down-preparation/).
+[Reclamation proof](scale/direct-callback-audit-2026-10-05/full-capacity-proof-headroom/).
