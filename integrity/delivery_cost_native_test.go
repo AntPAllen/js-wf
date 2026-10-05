@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -57,7 +58,7 @@ func TestAuditDeliveryNativeCostComparison(t *testing.T) {
 		GCCycles       uint32
 	}
 	var results []measurement
-	for _, mode := range []string{"next", "adapter", "consume", "next_recheck"} {
+	for _, mode := range []string{"next", "adapter", "consume", "callback_adapter", "buffered_callback_adapter", "next_recheck"} {
 		c, err := stream.CreateConsumer(ctx, jetstream.ConsumerConfig{Name: "cost-" + mode, MemoryStorage: true, Replicas: 3, AckPolicy: jetstream.AckNonePolicy})
 		if err != nil {
 			t.Fatal(err)
@@ -108,6 +109,29 @@ func TestAuditDeliveryNativeCostComparison(t *testing.T) {
 				case <-call.Done():
 					err = call.Err()
 				}
+			}
+		} else if mode == "callback_adapter" || mode == "buffered_callback_adapter" {
+			create := newCallbackDelivery
+			if mode == "buffered_callback_adapter" {
+				create = func(c jetstream.Consumer) (*callbackDelivery, error) {
+					return newCallbackDeliveryWithBuffer(c, 256, 1<<20)
+				}
+			}
+			d, e := create(c)
+			err = e
+			if e == nil {
+				for seen < count && err == nil {
+					batch := byteDeliveryBatch(call, min(4096, count-seen), func() (jetstream.Msg, error) { return d.next(call) }, d.stop, false)
+					for msg := range batch.Messages() {
+						if e := validate(msg); e != nil && err == nil {
+							err = e
+						}
+					}
+					if err == nil {
+						err = batch.Error()
+					}
+				}
+				err = errors.Join(err, d.stopAndJoin(call))
 			}
 		} else {
 			it, e := c.Messages(jetstream.PullMaxBytes(8<<20), jetstream.PullExpiry(2*time.Second))

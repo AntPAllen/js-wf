@@ -3,6 +3,7 @@ package integrity
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -21,24 +22,139 @@ func (c *callbackTestContext) Closed() <-chan struct{} { return c.closed }
 
 type callbackTestConsumer struct {
 	jetstream.Consumer
-	ctx   *callbackTestContext
-	count int
+	ctx               *callbackTestContext
+	count             int
+	messages          []jetstream.Msg
+	entered, returned chan int
 }
 
 func (c *callbackTestConsumer) Consume(handler jetstream.MessageHandler, _ ...jetstream.PullConsumeOpt) (jetstream.ConsumeContext, error) {
 	go func() {
 		defer close(c.ctx.closed)
-		for n := 1; n <= c.count; n++ {
+		count := c.count
+		if c.messages != nil {
+			count = len(c.messages)
+		}
+		for n := 1; n <= count; n++ {
 			select {
 			case <-c.ctx.requested:
 				return
 			default:
 			}
-			handler(candidateControlMsg{stream: "CONTROL", seq: uint64(n)})
+			if c.entered != nil {
+				c.entered <- n
+			}
+			if c.messages != nil {
+				handler(c.messages[n-1])
+			} else {
+				handler(candidateControlMsg{stream: "CONTROL", seq: uint64(n)})
+			}
+			if c.returned != nil {
+				c.returned <- n
+			}
 		}
 		<-c.ctx.requested
 	}()
 	return c.ctx, nil
+}
+
+type callbackPayloadMsg struct {
+	candidateControlMsg
+	data []byte
+}
+
+func (m callbackPayloadMsg) Data() []byte { return m.data }
+
+func TestCallbackBufferedPayloadBoundOversizeAndStop(t *testing.T) {
+	for _, size := range []int{6, 20} {
+		t.Run(fmt.Sprint(size), func(t *testing.T) {
+			c := &callbackTestConsumer{ctx: &callbackTestContext{requested: make(chan struct{}), closed: make(chan struct{})}, entered: make(chan int, 2), returned: make(chan int, 2)}
+			c.messages = []jetstream.Msg{callbackPayloadMsg{data: make([]byte, size)}, callbackPayloadMsg{data: make([]byte, 6)}}
+			d, err := newCallbackDeliveryWithBuffer(c, 2, 10)
+			if err != nil {
+				t.Fatal(err)
+			}
+			call, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			for _, ch := range []chan int{c.entered, c.returned, c.entered} {
+				select {
+				case <-ch:
+				case <-call.Done():
+					t.Fatal("callback did not reach byte pressure")
+				}
+			}
+			d.budgetMu.Lock()
+			used, records := d.queuedPayload, d.queuedRecords
+			d.budgetMu.Unlock()
+			if used != size || records != 1 || len(d.messages) != 1 {
+				t.Fatalf("used=%d records=%d queue=%d", used, records, len(d.messages))
+			}
+			select {
+			case <-c.returned:
+				t.Fatal("second payload exceeded byte bound")
+			default:
+			}
+			msg, err := d.next(call)
+			if err != nil || len(msg.Data()) != size {
+				t.Fatalf("first payload %v/%v", msg, err)
+			}
+			select {
+			case <-c.returned:
+			case <-call.Done():
+				t.Fatal("byte credit did not release producer")
+			}
+			if err := d.stopAndJoin(call); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestCallbackBufferedStopUnblocksByteAndRecordPressure(t *testing.T) {
+	for _, bytes := range []int{0, 6} {
+		c := &callbackTestConsumer{ctx: &callbackTestContext{requested: make(chan struct{}), closed: make(chan struct{})}, entered: make(chan int, 5), returned: make(chan int, 5)}
+		for n := 0; n < 4; n++ {
+			c.messages = append(c.messages, callbackPayloadMsg{data: make([]byte, bytes)})
+		}
+		d, err := newCallbackDeliveryWithBuffer(c, 2, 10)
+		if err != nil {
+			t.Fatal(err)
+		}
+		call, cancel := context.WithTimeout(context.Background(), time.Second)
+		// Empty payloads fill the record queue; six-byte payloads fill the
+		// byte budget. Both leave the callback blocked on the next record.
+		target := 3
+		if bytes != 0 {
+			target = 2
+		}
+		for n := 0; n < target; n++ {
+			select {
+			case <-c.entered:
+			case <-call.Done():
+				t.Fatal("producer did not fill queue")
+			}
+		}
+		if len(d.messages) > 2 {
+			t.Fatal("record bound exceeded")
+		}
+		if err := d.stopAndJoin(call); err != nil {
+			t.Fatal(err)
+		}
+		cancel()
+		select {
+		case <-c.ctx.closed:
+		default:
+			t.Fatal("pressured callback leaked")
+		}
+	}
+}
+
+func TestCallbackBufferedRejectsInvalidBounds(t *testing.T) {
+	for _, bounds := range [][2]int{{-1, 1}, {257, 1}, {0, 1}, {1, 0}} {
+		if _, err := newCallbackDeliveryWithBuffer(&callbackTestConsumer{}, bounds[0], bounds[1]); err == nil {
+			t.Fatal(bounds)
+		}
+	}
 }
 
 func TestCallbackDeliveryKeepsCursorBetweenWindowsAndJoins(t *testing.T) {
