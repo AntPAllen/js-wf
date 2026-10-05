@@ -29,6 +29,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-05: actual R5 process-loss recovery accepted
+
+At889a70c both fresh race native R5 file-source/R1 cursor-owner SIGKILL fixtures
+pass61.26s. Left-down exact1500/6000 audit4.341273s and zero consumers4.344642s;
+same-store restart exact1500/6000 audit2.409395s and zero consumers2.412256s.
+Restart actually confirms same-assignment API position regression1961→1726,
+then resumes distinct cursor1962; visitor sees each journal entry exactly once.
+Independent source/actualSDK/11server processes/mounts/closure and full1668-member
+archive/readback accepted. This qualifies focused actual process faults; larger
+fault capacity, legacyR1/live/default/final matrices/actual24h remain open.
+[Evidence](scale/direct-callback-audit-2026-10-05/r5-position-loss-recovery/).
+
 ## Latest follow-up — 2026-10-05: focused R1 recovery accepted
 
 Initial8000503 owner-loss fixture failed on typed SDK server-shutdown status;
@@ -12648,7 +12660,7 @@ Existing producer/SDK handles remain live; retain same run through existing
 69f2dc7 parentFAIL334.46s, all original fixtures closed/preserved: left-down audit
 complete1500/6000 in4.040516s then stream-info call expires at5m outercontext;
 independent four-survivor requests show zero audit consumers. Restart case fails
-3.563312s after1960accepted journal entries when sequence1 replays. Existing
+3.563312s after1961accepted journal entries when sequence1 replays. Existing
 strict R1 replay guard rejects it. No data-absence/server-cause claim.
 Independent681selected inputs/actualSDK/11externalprocesses/module/mounts/closure,
 complete1777-member67.835MB archive/readback accepted. Changed fresh diagnostic

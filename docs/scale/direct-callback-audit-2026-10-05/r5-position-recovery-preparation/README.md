@@ -2,7 +2,7 @@
 
 Observed same-owner restart preserved at7d79d13: assignment name/created/config/
 owner survives, but actual API delivery and AckNone floor regress1961→1126 while
-reader already accepted1960 source entries. Explicit direct callback reader now
+reader already accepted1961 source entries. Explicit direct callback reader now
 captures its initial cursor identity/config and last successfully visited sequence.
 On overlap it requires a fresh actual Info with identical name/stream/creation/
 leader/complete config, R1 memory/AckNone, no outstanding acks/redeliveries and

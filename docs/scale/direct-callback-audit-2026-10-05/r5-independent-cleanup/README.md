@@ -6,7 +6,7 @@ Actual old-owner deletion times out; independent replacement deletion succeeds.
 Both retain original20s audit and2s cleanup ceiling. This qualifies the focused
 left-down schedule and confirms the deletion-starvation correction, not the parent.
 
-Same-store restart fails1.392990s after1960accepted records on sequence1 replay.
+Same-store restart fails1.392990s after1961accepted records on sequence1 replay.
 Actual same-name/created/owner cursor Info changes delivery and AckNone floor
 from1961/1961 before kill to1126/1126 at overlap, pending4039→4874. This confirms
 volatile position regression while assignment identity/config survives. Existing

@@ -4149,7 +4149,7 @@ review pending; full fault capacity/live/legacy/final matrices/24h stay open.
 Actual five-container controls at69f2dc7 FAIL334.46s: owner-left-down audit completes
 1500/6000 in4.040516s but post-audit stream-info request expires at outer5m context;
 independent surviving-server requests report zero audit consumers. Same-store
-restart rejects sequence1 replay after1960accepted journal entries,3.563312s.
+restart rejects sequence1 replay after1961accepted journal entries,3.563312s.
 681 selected inputs/actualSDK/11actualserver processes/mounts/closure and full
 1777-member archive independently verified. Neither parent qualifies. Changed
 fresh diagnostic records actual consumer API positions/identity at replay proof
@@ -4183,3 +4183,15 @@ acks/redeliveries. Common recovery creates fresh cursor at unvisited sequence;
 ordinary overlap stays fatal. Race controls PASS1.207s; fresh R5 verdict pending.
 [Cleanup/failure evidence](scale/direct-callback-audit-2026-10-05/r5-independent-cleanup/).
 [Recovery preparation](scale/direct-callback-audit-2026-10-05/r5-position-recovery-preparation/).
+
+## Actual R5 SIGKILL/same-store R1 position recovery accepted — 2026-10-05
+
+Executed889a70c native racePASS61.26s, both fresh1500/6000 fixtures. Owner-left-down
+audit4.341273s/zero consumers4.344642s; same-store restart audit2.409395s/zero
+consumers2.412256s. Restart actually observes same assignment/config/owner API
+position1961→1726, then fresh cursor1962. Exact contiguous once-only journal visits,
+full reports/original20s/unchanged2s cleanup/two-resume/gap proof hold. Independent
+683selected inputs/actualSDK/11server processes/module/mounts/closure and full
+1668-member69.327MB archive/readback reviewed. Prior failures remain failed;
+large fault capacity/legacyR1/live/default/fullmatrix/actual24h stay open.
+[Evidence](scale/direct-callback-audit-2026-10-05/r5-position-loss-recovery/).
