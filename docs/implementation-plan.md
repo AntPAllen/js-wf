@@ -3449,3 +3449,16 @@ rechecks. Other environment values are not recorded. One owned identity and six
 foreign/malformed controls pass; real worker-row execution and producer integration
 remain pending. Polling cannot establish exhaustive generation coverage. Current
 live disk-row producer and its captured source files stay unchanged.
+
+### Portable copied Tier2 review command prepared — 2026-10-05
+
+`scripts/run-tier2-copied-audit.py --donor ABSOLUTE_CLOSED_ROOT --root FRESH_ROOT`
+prepares independent copies, binds helper/producer/observer and selected source,
+checks counts from the native retained report and rechecks all histories plus
+integrity/drain using the existing helper. `--mount-copied-block-image` is required
+for block donors and mounts only matching copied raw media; cleanup stops owned
+processes and detaches that mount. Dependency comparison uses captured module/
+toolchain relative paths, allowing matching source across host cache locations.
+No original store is reopened; failed/native-live donors are rejected. Native and
+full-matrix verdicts remain separate. CLI/import checks pass; real command
+execution remains pending. Current live disk producer source stays unchanged.
