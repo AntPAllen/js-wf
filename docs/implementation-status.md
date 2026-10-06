@@ -35,6 +35,23 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Legacy domain combined control prepared; first failure preserved — 2026-10-06
+
+The existing domain retirement/manifest-loss/weak-frame/lease-expiry case now
+has an explicit actual2.11.17 variant with fallback provisioning. The first
+native race run at01dee30 failed after41.52s after admitting three legacy peers,
+SIGKILLing all originals, holding13.0002s beyond production12s TTL and observing
+three replacements. The underlying callback error was not logged; no domain
+heal/frame/epoch-successor/integrity/GC qualification is claimed. Independent
+preservation binds1893 source files, actual SDK profile, all six closed legacy
+executables and2351 complete archive members. [Original failure](scale/domain-retirement-legacy-weak-frame-expiry-2026-10-06/initial-failure/).
+
+The new fallback stream-info check now retries transient metadata errors under
+the original30s whole-cut deadline, and shared fault callbacks explicitly log
+errors. No deadline, production lease or strict retirement assertion changes.
+Nine verifier guard groups and integration compilation pass; corrected native
+legacy qualification remains pending. [Preparation](scale/domain-retirement-legacy-weak-frame-expiry-2026-10-06/).
+
 ## Partition200 generator corrected after native terminal failure — 2026-10-06
 
 Original hosted run37486948256 at `fcf2e9` failed its generator registry test:

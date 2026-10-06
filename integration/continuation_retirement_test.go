@@ -137,6 +137,7 @@ func runContinuationRetirementOnCluster(t *testing.T, all []jetstream.JetStream,
 	if onDrop != nil {
 		port.onDrop = func(ctx context.Context) error {
 			if err := onDrop(ctx); err != nil {
+				t.Logf("retirement server fault failed: %v", err)
 				return err
 			}
 			serverFaults.Add(1)

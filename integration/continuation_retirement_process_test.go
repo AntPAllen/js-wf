@@ -353,26 +353,26 @@ func runContinuationRetirementProcessFaultWithBinary(t *testing.T, full, expireL
 					attempt, stopAttempt := context.WithTimeout(observe, time.Second)
 					info, err := all[node].AccountInfo(attempt)
 					stopAttempt()
-					if err == nil {
-						if legacyBinary != "" {
-							if all[node].Conn().ConnectedServerVersion() != "2.11.17" {
-								return fmt.Errorf("legacy restarted node%d wrong version", node)
+					if err == nil && legacyBinary != "" {
+						if all[node].Conn().ConnectedServerVersion() != "2.11.17" {
+							return fmt.Errorf("legacy restarted node%d wrong version", node)
+						}
+						attempt, stopAttempt := context.WithTimeout(observe, time.Second)
+						run, readErr := all[node].Stream(attempt, "WF_RUN")
+						if readErr == nil {
+							var streamInfo *jetstream.StreamInfo
+							streamInfo, readErr = run.Info(attempt)
+							if readErr == nil && streamInfo.Config.AllowMsgSchedules {
+								readErr = fmt.Errorf("legacy domain restart changed fallback backend")
 							}
-							attempt, stopAttempt := context.WithTimeout(observe, time.Second)
-							run, readErr := all[node].Stream(attempt, "WF_RUN")
-							if readErr == nil {
-								var streamInfo *jetstream.StreamInfo
-								streamInfo, readErr = run.Info(attempt)
-								if readErr == nil && streamInfo.Config.AllowMsgSchedules {
-									readErr = fmt.Errorf("legacy domain restart changed fallback backend")
-								}
-							}
-							stopAttempt()
-							if readErr != nil {
-								return readErr
-							}
+						}
+						stopAttempt()
+						err = readErr
+						if err == nil {
 							t.Logf("legacy domain healed node=%d version=%s timer_backend=fallback", node, all[node].Conn().ConnectedServerVersion())
 						}
+					}
+					if err == nil {
 						if info.Domain != domain || all[node].Conn().ConnectedDomain() != domain || all[node].Conn().ConnectedServerId() == originalIDs[node] {
 							return fmt.Errorf("restarted node%d wrong domain %q", node, info.Domain)
 						}
