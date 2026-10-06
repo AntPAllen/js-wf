@@ -29,6 +29,15 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: explicit chunked ten-minute journal running
+
+Actual clean2f74289 normalSDK799942 source/executable/VCS and /proc4CPU/GOGC500/
+4GiB/chunked mode verified; five actual R5 node roles observed. Seed1 ten-minute
+journal campaign remains live with repeated actual leaderSIGKILL, retained audit
+checkpoints/final/drain and original20s/60s/threeattempts. Supervised watcher and
+independent terminal reviewer active; no live stores read/copied. Initial identity
+is not a sustained/default/currentmatrix/24h pass. [Launch](scale/chunked-callback-audit-2026-10-06/live-journal-initial/).
+
 ## Latest follow-up — 2026-10-06: current chunked entry oracles accepted
 
 Clean9eaf35f actual current2.15library race compaction/cohort/freshcorruption75.41s,

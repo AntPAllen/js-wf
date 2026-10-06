@@ -4375,3 +4375,12 @@ readback accepted. Live runner recordsCPU/GC profile. Next explicitnormal10m
 R5journal/repeatedSIGKILL/checkpoint/final/drain gate matchesqualified4CPU/GOGC500/
 4GiB; original20s/60s/threeattempts unchanged. No live/default/matrix/24h pass.
 [Evidence](scale/chunked-callback-audit-2026-10-06/current-oracles/).
+
+## Explicit chunked ten-minute journal launch verified — 2026-10-06
+
+Live clean2f74289 normalSDK799942 actual executable/VCS and /proc4CPU/GOGC500/
+4GiB/chunked mode verified, five R5 node roles observed. Seed1 ten-minute journal
+campaign/repeatedSIGKILL/checkpoint/final/drain gates retain20s/60s/threeattempts.
+Supervised watcher/independent terminal review active; no live stores read/copied.
+No sustained/default/currentmatrix/24h pass from launch metadata.
+[Launch](scale/chunked-callback-audit-2026-10-06/live-journal-initial/).
