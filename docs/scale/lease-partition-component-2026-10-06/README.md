@@ -43,3 +43,9 @@ This supports investigating expiry/subject-retirement interaction at this traffi
 Second fresh fixture executeddd50e7b: production12sTTL acknowledges6440 complete cycles/60 errors and majority-cut probe11935. Routes heal at10.000s and allfinal peer views show8/8/8; minority remains non-current at35.001s whole-cut. Current leader reportslag6660, majority local heads23998 versus minority11736, with repeated snapshot/peerstate catch-up warnings. Independent review binds1954 source files/1494 dependencies, the helper and all3actual original-matrix NATS binaries, exact configuration/routes/local identities/state and all3529complete archive members. [Repeat evidence](fresh-key-repeat/).
 
 Two production-TTL fresh-key runs now reproduce the component symptom, while one fixed192-key and one fresh-key MaxAge0 control recover within the original bound. This narrows a practical diagnostic path to expiry/subject-retirement interactions; it still does not establish causal server protocol behavior or a Tier1 reproduction. Next diagnosis should capture Raft debug term/index and catch-up decisions in this short component, retaining actual executed NATS bytes and preserving the original bound. Production configuration, matrix gate, original24h handle and hosted queued run remain unchanged.
+
+## Raft debug capture
+
+`--raft-debug` starts the same pinned NATS executable with its `-D` logging option on all three servers. Normal fixture constructors keep their existing logging. The component retains actual server argv/executable hashes and complete node logs. This changes diagnostic logging and may affect scheduling; it does not change the traffic, bucket settings, isolation or recovery bound. The helper race build passed before execution.
+
+    python3 scripts/run-lease-partition-component.py --root /tmp/js-wf-lease-partition-component-raft-debug-20261006 --key-profile fresh --expiry-profile production --raft-debug

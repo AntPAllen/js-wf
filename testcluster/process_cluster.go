@@ -128,6 +128,12 @@ func StartPartitionableProcesses(root string, count int) (*ProcessCluster, error
 	return startProcesses(root, count, true)
 }
 
+// StartPartitionableDebugProcesses enables the documented NATS -D option.
+// It retains the same executable, stores, route relay and startup admission.
+func StartPartitionableDebugProcesses(root string, count int) (*ProcessCluster, error) {
+	return startProcessesWithDiagnostics(root, count, true, nil, false, "", true)
+}
+
 func startProcesses(root string, count int, partitionable bool) (_ *ProcessCluster, err error) {
 	return startProcessesWithBinaries(root, count, partitionable, nil, false)
 }
@@ -136,7 +142,11 @@ func startProcessesWithBinaries(root string, count int, partitionable bool, bina
 	return startProcessesWithDomain(root, count, partitionable, binaries, profiling, "")
 }
 
-func startProcessesWithDomain(root string, count int, partitionable bool, binaries []string, profiling bool, domain string) (_ *ProcessCluster, err error) {
+func startProcessesWithDomain(root string, count int, partitionable bool, binaries []string, profiling bool, domain string) (*ProcessCluster, error) {
+	return startProcessesWithDiagnostics(root, count, partitionable, binaries, profiling, domain, false)
+}
+
+func startProcessesWithDiagnostics(root string, count int, partitionable bool, binaries []string, profiling bool, domain string, debug bool) (_ *ProcessCluster, err error) {
 	if count < 1 || count > 3 {
 		return nil, fmt.Errorf("count must be 1..3")
 	}
@@ -199,6 +209,9 @@ func startProcessesWithDomain(root string, count int, partitionable bool, binari
 	}
 	for i := 0; i < count; i++ {
 		args := []string{"-a", "127.0.0.1", "-p", strconv.Itoa(c.ports[i]), "-m", strconv.Itoa(c.monitors[i]), "-n", fmt.Sprintf("wf-process-%d", i), "-js", "-sd", filepath.Join(root, fmt.Sprintf("node-%d", i))}
+		if debug {
+			args = append(args, "-D")
+		}
 		if domain != "" {
 			config := filepath.Join(root, fmt.Sprintf("node-%d-domain.conf", i))
 			if err := os.WriteFile(config, []byte("jetstream { domain: "+strconv.Quote(domain)+" }\n"), 0600); err != nil {

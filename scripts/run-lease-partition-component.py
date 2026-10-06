@@ -28,6 +28,7 @@ def main():
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--key-profile',choices=['fixed','fresh'],default='fixed')
     parser.add_argument('--expiry-profile',choices=['production','disabled'],default='production')
+    parser.add_argument('--raft-debug',action='store_true')
     args = parser.parse_args()
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
@@ -67,7 +68,7 @@ def main():
     build = ['go','build','-p=1','-buildvcs=true','-o',str(binary),str(helper)]
     with (root/'build.log').open('w') as output:
         subprocess.run(build,cwd=REPO,env=env,stdout=output,stderr=subprocess.STDOUT,check=True)
-    command = [str(binary),str(root),args.key_profile,args.expiry_profile]
+    command = [str(binary),str(root),args.key_profile,args.expiry_profile,'debug' if args.raft_debug else 'normal']
     save('commands.json',dict(build=build,run=command,source=revision,helper_sha256=shared.sha(helper)))
     records=[];seen=set()
     with (root/'native.log').open('w') as output:
