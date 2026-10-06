@@ -32,6 +32,25 @@ coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
 
+## Second failed soak media offload complete — 2026-10-06
+
+The closed failed watch-observed journal24h root at executed aace912 is now fully
+preserved in a new committed9,066-member/382,450,967-byte canonical S3 archive.
+Recorded source, actual SDK hash and existing9,063-file hash ledger were checked;
+complete present9,065-file census includes all original/partial evidence. Fresh
+full remote compressed SHA/member/embedded-manifest verification and repeated
+current census/process/mount/visible-descriptor closure preceded removal of only
+five primary JetStream store directories. Recovered1,981,448,192 allocated media
+bytes; verified raw archive duplicate also removed382,459,904bytes. Remaining
+source/executables/configs/logs/artifacts/metadata have unchanged bytes/modes/mtimes.
+Full store bytes remain remotely canonical; future audits require fresh verified
+restores. Initial missing committed receipt guard stopped without media mutation;
+receipt location corrected byte-for-byte and pushed before successful verification.
+Native failed verdict remains; no24h qualification or independent S3 durability
+claim. Free space is now approximately4.1GiB, still below16GiB admission.
+[Complete proof](scale/watch-observed-journal-24h-2026-10-05/complete-offload-proof-2026-10-06/).
+[Offload and guard evidence](scale/watch-observed-journal-24h-2026-10-05/store-media-offload-2026-10-06/).
+
 ## Failed campaign media offloaded after complete verification — 2026-10-06
 
 The closed failed chunked-journal24h campaign's complete 431,060,062-byte S3
