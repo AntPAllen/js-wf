@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: original retained Tier2 reply isolation live
+
+Clean85c4cf2 actual normal SDK1389090/three worker SDKs/three NATS processes and
+2CPU/2GiB original ten-minute seed1 profile verified. Native producer and terminal
+reviewer run on existing user service handles. Review checks ten45-second reply
+holds with forwarded requests/zero buffer overflow/fresh PING recovery and exact
+selected-delivery fencing, native cells/gates/source/closure/full archive. Native
+terminal and independent copied-store qualification pending; full13x200 remains.
+Main Go/module/producer inputs stay unchanged until original after-checks complete.
+Long journal and million-timer campaigns remain live on original sources/handles.
+[Observation](scale/tier2-retained-isolation-2026-10-06/live-initial/).
+[Preparation](scale/tier2-retained-isolation-2026-10-06/preparation/).
+
 ## Latest follow-up — 2026-10-06: original Tier2 pause copied audit accepted
 
 Fresh copies only: full2,324/25,675/2,324 report, independent histories, allthree
