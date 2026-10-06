@@ -51,10 +51,29 @@ def verify_daemon_log(log):
                 scope='Default/domain operator daemon startup/steady SIGTERM/SIGINT with controlled startup client-trace delay; no SQL/domain fullscale, native server fault or fullrelease qualification.')
 
 
+
+STANDALONE_TESTS=['TestOperatorStandaloneCommands','TestOperatorStandaloneCommandsInJetStreamDomain']
+
+def verify_standalone_log(log):
+    assert log.rstrip().endswith('PASS') and not any(s in log for s in ('DATA RACE','--- FAIL:','--- SKIP:'))
+    assert sorted(re.findall(r'^--- PASS: (\w+) \([0-9.]+s\)$',log,re.M))==sorted(STANDALONE_TESTS)
+    peers=re.findall(r'operator domain admitted node=(\d) domain=WFOPS server_id=(\w+)',log)
+    assert sorted(n for n,_ in peers)==['0','1','2'] and len({i for _,i in peers})==3
+    summaries=re.findall(r'operator standalone commands domain="(WFOPS)?" processes=(\d+) exe_sha256=([0-9a-f]{64})',log)
+    assert len(summaries)==2 and sorted(d for d,_,_ in summaries)==['','WFOPS'] and len({h for _,_,h in summaries})==1
+    processes=re.findall(r'operator standalone process domain="(WFOPS)?" pid=(\d+) exit=(-?\d+)',log)
+    assert len({p for _,p,_ in processes})==len(processes)
+    for domain,count,_ in summaries:
+        group=[code for d,_,code in processes if d==domain]
+        assert len(group)==int(count) and len(group)>=20 and set(group)=={'0','1'}
+    return dict(tests=STANDALONE_TESTS,real_domain_peers=3,actual_standalone_processes=len(processes),
+                scope='Compiled wf default/domain command process coverage and actual exit/stdout contracts; no outgoing wire-prefix trace, daemon/SQL/fault/fullrelease qualification.')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
-    parser.add_argument('--case', choices=['commands','daemon-signals'],default='commands')
+    parser.add_argument('--case', choices=['commands','daemon-signals','standalone-commands'],default='commands')
     args = parser.parse_args()
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
@@ -70,10 +89,10 @@ def main():
         target = root/'selected-source'/name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(REPO/name, target)
-    env = dict(os.environ, GOMAXPROCS='2', GOMEMLIMIT='1GiB', GOWORK='off', GOFLAGS='', WF_OPERATOR_TEST_ROOT=str(root/'stores'))
+    env = dict(os.environ, GOMAXPROCS='2', GOMEMLIMIT='1GiB', GOWORK='off', GOFLAGS='', WF_OPERATOR_TEST_ROOT=str(root/'stores'), WF_OPERATOR_STANDALONE='1')
     binary = root/'operator-race.test'
-    build = ['go', 'test', '-race', '-c', '-o', str(binary), './cmd/wf']
-    tests = TESTS if args.case=='commands' else DAEMON_TESTS
+    build = ['go', 'test', '-race', '-buildvcs=true', '-c', '-o', str(binary), './cmd/wf']
+    tests = TESTS if args.case=='commands' else DAEMON_TESTS if args.case=='daemon-signals' else STANDALONE_TESTS
     command = [str(binary), '-test.v', '-test.run=^('+'|'.join(tests)+')$', '-test.count=1', '-test.timeout=3m']
     run_directory = REPO/'cmd/wf'
     save('commands.json', dict(build=build, build_working_directory=str(REPO), run=command, run_working_directory=str(run_directory)))
@@ -90,7 +109,7 @@ def main():
         actual = dict(pid=child.pid, stat=(proc/'stat').read_text(), exe=str((proc/'exe').resolve()), working_directory=str((proc/'cwd').resolve()),
                       exe_sha256=shared.sha(proc/'exe'),
                       args=[os.fsdecode(v) for v in (proc/'cmdline').read_bytes().split(b'\0') if v],
-                      environment={k:os.fsdecode(actual_env[k.encode()]) for k in ('GOMAXPROCS','GOMEMLIMIT','GOWORK','GOFLAGS','WF_OPERATOR_TEST_ROOT')})
+                      environment={k:os.fsdecode(actual_env[k.encode()]) for k in ('GOMAXPROCS','GOMEMLIMIT','GOWORK','GOFLAGS','WF_OPERATOR_TEST_ROOT','WF_OPERATOR_STANDALONE')})
         assert actual['args']==command and actual['exe_sha256']==shared.sha(binary) and actual['exe']==str(binary) and actual['working_directory']==str(run_directory)
         save('actual-sdk.json', actual)
         print('ACTUAL_OPERATOR_SDK', child.pid, flush=True)
@@ -110,12 +129,19 @@ def main():
         if args.case=='commands':
             assert len(plugin_records)==1 and '-race=true' in plugin_records[0]['build_info'], 'exact retained race plugin missing'
             result = verify_log((root/'native.log').read_text())
-        else:
+        elif args.case=='daemon-signals':
             records=[json.loads(p.read_text()) for p in (root/'stores').rglob('*.process.json')]
             assert len(records)==8 and len({r['pid'] for r in records})==8
             assert all(r['exe_sha256']==shared.sha(binary) and r['argv']==[str(binary),'-test.run=^TestOperatorDaemonProcessHelper$'] and not Path('/proc',str(r['pid'])).exists() for r in records)
             save('daemon-processes.json',records)
             result=verify_daemon_log((root/'native.log').read_text())
+        else:
+            assert len(plugin_records)==1 and '-race=true' in plugin_records[0]['build_info'], 'exact retained race plugin missing'
+            records=[json.loads(p.read_text()) for p in (root/'stores').rglob('standalone.process.json')]
+            result=verify_standalone_log((root/'native.log').read_text())
+            assert len(records)==result['actual_standalone_processes']
+            assert all(r['argv'][0].startswith(str(root/'stores')) and shared.sha(r['argv'][0])==r['exe_sha256'] and 'vcs.revision='+revision in r['build_info'] and 'vcs.modified=false' in r['build_info'] and '-race=true' in r['build_info'] and not Path('/proc',str(r['pid'])).exists() for r in records)
+            save('standalone-processes.json',records)
     except AssertionError as exc:
         error = str(exc) or 'native coverage rejected'
     save('row-review.json', dict(qualification=result, rejection=error))

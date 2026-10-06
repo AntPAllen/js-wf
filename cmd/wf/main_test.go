@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -37,6 +38,9 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 	if replayPluginDir != "" && os.Getenv("WF_OPERATOR_TEST_ROOT") == "" {
 		_ = os.RemoveAll(replayPluginDir)
+	}
+	if operatorStandaloneDir != "" && os.Getenv("WF_OPERATOR_TEST_ROOT") == "" {
+		_ = os.RemoveAll(operatorStandaloneDir)
 	}
 	os.Exit(code)
 }
@@ -87,7 +91,13 @@ func TestOperatorCommandsInJetStreamDomain(t *testing.T) {
 	runOperatorCommands(t, "WFOPS")
 }
 
+type operatorCommandInvoker func(context.Context, []string, io.Writer, ...jetstream.JetStreamOpt) error
+
 func runOperatorCommands(t *testing.T, domain string) {
+	runOperatorCommandsWithInvoker(t, domain, nil)
+}
+
+func runOperatorCommandsWithInvoker(t *testing.T, domain string, external operatorCommandInvoker) {
 	count := 1
 	if domain != "" {
 		count = 3
@@ -168,33 +178,48 @@ func runOperatorCommands(t *testing.T, domain string) {
 	if _, err := state.Put(ctx, identity.Key(typ, id), terminal); err != nil {
 		t.Fatal(err)
 	}
+	invoke := func(args []string, output io.Writer, options ...jetstream.JetStreamOpt) error {
+		if external != nil {
+			return external(ctx, args, output, options...)
+		}
+		return runWithJetStreamOptions(args, output, options...)
+	}
+	matchesError := func(err, target error) bool {
+		if external == nil {
+			return errors.Is(err, target)
+		}
+		var child *operatorCommandProcessError
+		return errors.As(err, &child) && child.exitCode == 1 && strings.Contains(child.stderr, target.Error())
+	}
 	base := []string{"-url", cluster.Servers[0].ClientURL()}
 	var options []jetstream.JetStreamOpt
 	if domain != "" {
 		base = append(base, "-domain", domain)
 		var output bytes.Buffer
-		if err := run([]string{"-url", cluster.Servers[0].ClientURL(), "-domain", "MISSING", "-timeout", "1s", "describe", typ, id}, &output); err == nil {
+		if err := invoke([]string{"-url", cluster.Servers[0].ClientURL(), "-domain", "MISSING", "-timeout", "1s", "describe", typ, id}, &output); err == nil {
 			t.Fatal("unknown domain silently read the local workflow")
 		}
-		var observed, wrong atomic.Int64
-		options = append(options, jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent: func(subject string, _ []byte) {
-			if strings.HasPrefix(subject, "$JS."+domain+".API.") {
-				observed.Add(1)
-			} else {
-				wrong.Add(1)
-			}
-		}}))
-		defer func() {
-			if observed.Load() == 0 || wrong.Load() != 0 {
-				t.Errorf("operator domain API routing: observed=%d wrong=%d", observed.Load(), wrong.Load())
-			}
-			t.Logf("operator real domain=%s peers=%d domain_api_requests=%d wrong_prefix_requests=%d", domain, count, observed.Load(), wrong.Load())
-		}()
+		if external == nil {
+			var observed, wrong atomic.Int64
+			options = append(options, jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent: func(subject string, _ []byte) {
+				if strings.HasPrefix(subject, "$JS."+domain+".API.") {
+					observed.Add(1)
+				} else {
+					wrong.Add(1)
+				}
+			}}))
+			defer func() {
+				if observed.Load() == 0 || wrong.Load() != 0 {
+					t.Errorf("operator domain API routing: observed=%d wrong=%d", observed.Load(), wrong.Load())
+				}
+				t.Logf("operator real domain=%s peers=%d domain_api_requests=%d wrong_prefix_requests=%d", domain, count, observed.Load(), wrong.Load())
+			}()
+		}
 	}
 	call := func(args ...string) []byte {
 		t.Helper()
 		var output bytes.Buffer
-		if err := runWithJetStreamOptions(append(append([]string{}, base...), args...), &output, options...); err != nil {
+		if err := invoke(append(append([]string{}, base...), args...), &output, options...); err != nil {
 			t.Fatalf("operator command %v: %v", args, err)
 		}
 		return output.Bytes()
@@ -212,7 +237,7 @@ func runOperatorCommands(t *testing.T, domain string) {
 		t.Fatalf("moved assignment=%+v err=%v", assignmentRow, err)
 	}
 	var ignored bytes.Buffer
-	if err := run(append(append([]string{}, base...), "assignment-move", "0", "owner-a", strconv.FormatUint(oldRevision, 10)), &ignored); !errors.Is(err, assignment.ErrConflict) {
+	if err := invoke(append(append([]string{}, base...), "assignment-move", "0", "owner-a", strconv.FormatUint(oldRevision, 10)), &ignored); !matchesError(err, assignment.ErrConflict) {
 		t.Fatalf("stale move: %v", err)
 	}
 	var rows []visibility.Row
@@ -289,11 +314,11 @@ func runOperatorCommands(t *testing.T, domain string) {
 		t.Fatalf("effect ran during replay: %v", err)
 	}
 	var ignoredReplay bytes.Buffer
-	if err := run(append(append([]string{}, base...), "-handler-plugin", pluginPath, "-handler-symbol", "ChangedWorkflow", "replay", typ, replayID), &ignoredReplay); !errors.Is(err, wf.ErrNonDeterministic) {
+	if err := invoke(append(append([]string{}, base...), "-handler-plugin", pluginPath, "-handler-symbol", "ChangedWorkflow", "replay", typ, replayID), &ignoredReplay); !matchesError(err, wf.ErrNonDeterministic) {
 		t.Fatalf("changed workflow replay: %v", err)
 	}
 	ignoredReplay.Reset()
-	if err := run(append(append([]string{}, base...), "-handler-plugin", pluginPath, "-handler-symbol", "ChangedResult", "replay", typ, replayID), &ignoredReplay); err == nil || !strings.Contains(err.Error(), "differs from terminal outcome") {
+	if err := invoke(append(append([]string{}, base...), "-handler-plugin", pluginPath, "-handler-symbol", "ChangedResult", "replay", typ, replayID), &ignoredReplay); err == nil || !strings.Contains(err.Error(), "differs from terminal outcome") {
 		t.Fatalf("changed result replay: %v", err)
 	}
 	const blobID = "replay-blobs"
@@ -343,7 +368,7 @@ func runOperatorCommands(t *testing.T, domain string) {
 		t.Fatal(err)
 	}
 	var offline bytes.Buffer
-	if err := run([]string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", "LargeWorkflow", "-replay-bundle", bundlePath, "replay"}, &offline); err != nil {
+	if err := invoke([]string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", "LargeWorkflow", "-replay-bundle", bundlePath, "replay"}, &offline); err != nil {
 		t.Fatalf("offline replay with unreachable NATS: %v", err)
 	}
 	var offlineReport replayReport
@@ -366,7 +391,7 @@ func runOperatorCommands(t *testing.T, domain string) {
 	if err := os.WriteFile(corruptPath, corruptBytes, 0600); err != nil {
 		t.Fatal(err)
 	}
-	if err := run([]string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", "LargeWorkflow", "-replay-bundle", corruptPath, "replay"}, &offline); !errors.Is(err, wf.ErrCorruptJournal) {
+	if err := invoke([]string{"-url", "nats://127.0.0.1:1", "-handler-plugin", pluginPath, "-handler-symbol", "LargeWorkflow", "-replay-bundle", corruptPath, "replay"}, &offline); !matchesError(err, wf.ErrCorruptJournal) {
 		t.Fatalf("corrupt offline replay object: %v", err)
 	}
 	if _, err := client.New(js).Start(ctx, typ, "cancel-target", []byte(`null`)); err != nil {

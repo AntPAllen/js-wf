@@ -1,0 +1,7 @@
+# Actual standalone operator CLI controls
+
+Prepared explicit `WF_OPERATOR_STANDALONE=1` default/R3WFOPS tests build clean `wf` with matching race/plugin instrumentation and execute the entire existing operator command fixture through OS subprocesses. The original60s contexts remain unchanged. Compiled executable bytes, live child birth/actual argv, stdout/stderr and actual exit codes are retained. The same assignment/list/paging/rebuild/lag/scan/describe/cancel/purge/export/replay assertions run; stale assignment, nondeterminism, changed result, corrupt offline blob and unknown domain controls must fail through the real executable. In-process typed errors remain tested separately; executable errors are checked by actual exit1 plus diagnostic text.
+
+`python3 scripts/run-operator-domain-controls.py --case standalone-commands --root /tmp/FRESH-ROOT` selects the actual process pair under race, retains one matching replay plugin, every child record and closed original stores, and creates a complete verified archive on success or native coverage rejection. A fourth persistent CI row invokes this case. Existing default command and daemon cases keep their independent named selections. No outgoing client-wire prefix trace is claimed for standalone processes. SQL/daemon/native server fault/fullrelease qualification remains separate.
+
+Preparation compile and four existing native command/daemon coverage-control groups pass. Actual standalone native qualification is still pending; source cleanliness is enforced by compiled executable VCS information.
