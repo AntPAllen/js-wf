@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: reusable closed-original copy verification
+
+Repository command binds pushed canonical native proof parts/fullarchive/embedded
+manifest/current SDK+process records/exes, all original store files and observed
+process closure before fresh copy. Visible task descriptors checked; unreadable
+host tasks explicitly recorded, not treated as globally proven closed. Accepted
+isolation original rechecks2,281files; three controls reject corrupted files,
+forged/missing/duplicate manifest and real open original descriptor. Copy producer
+opt-in --canonical-proof retains executed verifier/report and rebinds copied hashes
+to reviewed manifest. No NATS rerun/originalstore reopen. Fanout native/reviewer
+and both long handles remain active; original gates and fullmatrix scope unchanged.
+[Verification](scale/tier2-closed-originals-review-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: retained fanout restart ten-minute live
 
 Clean e3399bf actual normal SDK1507357/three current externalNATS/profile2CPU/2GiB

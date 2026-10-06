@@ -4554,3 +4554,14 @@ six-child/two-grandchild completions. Valid fixture/19 corrupted-evidence contro
 pass; integration compiles. Native ten-minute seed1 and independent copied-store
 qualification pending; full13x200/current-source gate remains open.
 [Preparation](scale/tier2-retained-fanout-2026-10-06/preparation/).
+
+## Reusable closed Tier2 original-byte verification — 2026-10-06
+
+Repository verifier binds pushed canonical proof/fullarchive/single embedded
+manifest/current SDK and process evidence, exact originalfiles and owned process
+closure before a fresh copy. Visible task descriptors checked; permission limits
+explicitly recorded. Three controls and accepted2,281file isolation fixture pass.
+Copied producer opt-in --canonical-proof records verifier/report and binds initial
+copy hashes to reviewed manifest. No original stores reopened. Pending fanout
+native/copied qualification continues on existing handles; full13x200/24h remain.
+[Verification](scale/tier2-closed-originals-review-2026-10-06/).

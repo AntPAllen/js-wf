@@ -6,6 +6,7 @@ parser.add_argument('--donor',type=Path,required=True)
 parser.add_argument('--root',type=Path,required=True)
 parser.add_argument('--mount-copied-block-image',action='store_true')
 parser.add_argument('--reviewed-donor',action='store_true',help='Use separately reviewed native/durable evidence after a producer generated-cache after-check failure; original failure stays recorded.')
+parser.add_argument('--canonical-proof',type=Path,help='Repository relative pushed native proof directory; verify archive/original bytes and visible task descriptors before copying. Applies to successful ordinary non-block donors.')
 options=parser.parse_args()
 repo=Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip()).resolve()
 donor=options.donor.resolve();r=options.root.resolve()
@@ -13,6 +14,15 @@ if not options.donor.is_absolute() or not options.root.is_absolute() or r.is_rel
  parser.error('require absolute donor/root, fresh root outside donor and checkout')
 assert not subprocess.check_output(['git','status','--porcelain'],cwd=repo)
 from matrix_process_observer import observe_servers
+canonical_verification=None
+if options.canonical_proof:
+ if options.reviewed_donor or options.mount_copied_block_image:parser.error('--canonical-proof supports ordinary successful non-block donors only')
+ import importlib.util
+ verifier=Path(__file__).with_name('verify-tier2-closed-originals.py')
+ spec=importlib.util.spec_from_file_location('copied_original_verifier',verifier);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+ verifier_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()
+ assert verifier.read_bytes()==subprocess.check_output(['git','show',verifier_head+':scripts/verify-tier2-closed-originals.py'],cwd=repo)
+ canonical_verification=module.verify(donor,options.canonical_proof)
 
 def sha(p):
  with p.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
@@ -40,6 +50,11 @@ for process in Path('/proc').glob('[0-9]*'):
    except (FileNotFoundError,PermissionError):pass
  except (FileNotFoundError,PermissionError):pass
 r.mkdir(mode=0o700);shutil.copy2(repo/'scripts/matrix_process_observer.py',r/'executed-observer.py');(r/'originals').mkdir();original=hashes(source);assert original
+if canonical_verification:
+ assert sha(donor/'archive-manifest.json')==canonical_verification['archive_manifest_sha256']
+ manifest=json.loads((donor/'archive-manifest.json').read_text());prefix=str(source.relative_to(donor))+'/'
+ assert original=={name[len(prefix):]:value['sha256'] for name,value in manifest.items() if name.startswith(prefix)}
+ (r/'precopy-verification.json').write_text(json.dumps(canonical_verification,indent=2)+'\n');shutil.copy2(verifier,r/'executed-precopy-verifier.py')
 shutil.copytree(source,r/'originals'/'cluster',symlinks=True);assert hashes(r/'originals'/'cluster')==original
 (r/'copy-before.json').write_text(json.dumps({'original_root':str(source),'original_source':e['source'],'original_native_status':e['status'],'original_sdk_sha256':e['sha256'],'files':original,'all_initial_copy_bytes_match':True},indent=2)+'\n')
 shutil.copy2(__file__,r/'executed-producer.py')
