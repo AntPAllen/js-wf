@@ -29,6 +29,22 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: state initial-set deadline instrumentation
+
+Opt-in observer records actual per-attempt deadline/budget, creation, sampled
+10k progress, exact completion/error and stop lifecycle without relaying watch
+updates or retaining outcome values. Barrier/partial/creation/filter controls and
+existing initial-state/trace controls pass under race. Default result semantics
+and request budgets remain unchanged.
+
+Code inspection confirms the complete initial state stream currently runs inside
+`auditRead`'s2s per-call/3-attempt wrapper, within the20s overall audit. The new
+fresh-copy diagnostic compares standalone whole-state20s acquisition with existing
+concurrent full87920 admission, records public consumer metadata and stable source
+counts/cleanup, and assigns a separate verdict to each phase. A diagnostic test
+PASS certifies retained observations, not admission or release success. Native
+execution pending; no earlier failure is reclassified or server cause inferred.
+
 ## Latest follow-up — 2026-10-06 07:00 UTC: failed cohort mirrored and copy reclaimed
 
 Complete364,060,327-byte failed cohort archive additionally uploaded to S3;

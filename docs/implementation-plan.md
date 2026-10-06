@@ -4814,3 +4814,15 @@ complete source inventories and original budgets. No cached outcome values, long
 release budget, reopened failed fixture or assumed NATS/runtime cause can qualify
 this gate. A faster state transport must independently preserve complete KV latest
 values, deletion/purge semantics, snapshot/terminal validation and cursor cleanup.
+
+### Initial-state per-call versus whole-stream deadline observation
+
+Use `integrity.WithStateSnapshotObserver` to record actual state-watch attempt
+budgets and distinguish creation, delivered prefix, initial completion and stop.
+The complete watch currently sits inside the generic2s/3-attempt API wrapper.
+On fresh verified complete copies, run standalone20s state collection followed by
+existing concurrent87920 full admission; retain consumer creation metadata, source
+censuses, every attempt's deadline/counters and cleanup. Each phase has its own
+verdict. This ordered diagnostic is not an isolated speed ratio or a release pass.
+Keep original20s/60s/3 retained-audit and6m final-latency gates; qualify any deadline
+scope correction against exact initial-set/terminal/snapshot and fault controls.

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -18,17 +19,40 @@ func initialAuditState(ctx context.Context, state jetstream.KeyValue, include fu
 	phase := "watch creation"
 	received, included := 0, 0
 	var lastRevision uint64
+	observer, _ := ctx.Value(stateSnapshotObserverKey{}).(func(StateSnapshotObservation))
+	started := time.Now()
+	deadline, hasDeadline := ctx.Deadline()
+	complete := false
+	emit := func(event string, failure error) {
+		if observer == nil {
+			return
+		}
+		frame := StateSnapshotObservation{Event: event, Time: time.Now().UTC(), ElapsedNS: time.Since(started).Nanoseconds(), Received: received, Included: included, LastRevision: lastRevision, InitialComplete: complete}
+		if hasDeadline {
+			frame.Deadline, frame.BudgetNS = deadline.UTC(), deadline.Sub(started).Nanoseconds()
+		}
+		if failure != nil {
+			frame.Error = failure.Error()
+		}
+		observer(frame)
+	}
+	emit("watch_start", nil)
 	defer func() {
 		if err != nil {
 			err = fmt.Errorf("retained state snapshot %s: received=%d included=%d last_revision=%d initial_complete=false: %w", phase, received, included, lastRevision, err)
 		}
+		emit("attempt_return", err)
 	}()
 	watch, err := state.WatchAll(ctx)
 	if err != nil {
+		emit("watch_creation_error", err)
 		return nil, err
 	}
+	emit("watch_created", nil)
 	defer func() {
-		_ = watch.Stop()
+		emit("watch_stop_start", nil)
+		stopError := watch.Stop()
+		defer emit("watch_stopped", stopError)
 		// Release buffered sends from the SDK's synchronous watch callback.
 		// After unsubscribe, only already queued updates can remain.
 		for {
@@ -56,6 +80,8 @@ func initialAuditState(ctx context.Context, state jetstream.KeyValue, include fu
 				return nil, ctx.Err()
 			}
 			if entry == nil {
+				complete = true
+				emit("initial_complete", nil)
 				return &auditStateSnapshot{KeyValue: state, values: values}, nil
 			}
 			received++
@@ -69,6 +95,9 @@ func initialAuditState(ctx context.Context, state jetstream.KeyValue, include fu
 				return nil, fmt.Errorf("retained state watch invalid operation %v", entry.Operation())
 			}
 			if !include(entry.Key()) {
+				if received%10000 == 0 {
+					emit("progress", nil)
+				}
 				continue
 			}
 			if prior := values[entry.Key()]; prior != nil && entry.Revision() <= prior.Revision() {
@@ -76,6 +105,9 @@ func initialAuditState(ctx context.Context, state jetstream.KeyValue, include fu
 			}
 			included++
 			values[entry.Key()] = entry
+			if received%10000 == 0 {
+				emit("progress", nil)
+			}
 		}
 	}
 }
