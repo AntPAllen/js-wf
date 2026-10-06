@@ -240,7 +240,7 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 		}
 		parentDispatch = append(parentDispatch, event)
 	}
-	second, err := worker.New(ctx, all[1], "parent-after-cut", handlers, worker.WithDispatchObserver(observeParent))
+	second, err := newFanoutWorkerAfterRestart(t, ctx, all[1], "parent-after-cut", handlers, retainedRoot, worker.WithDispatchObserver(observeParent))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -315,7 +315,7 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 		childHandlers = map[string]worker.Handler{"child": handlers["child"], "parent": holdFanoutParent}
 		childOptions = append(childOptions, worker.WithPartitionConcurrency(4))
 	}
-	childWorker, err := worker.New(ctx, all[2], "child-fanout-worker", childHandlers, childOptions...)
+	childWorker, err := newFanoutWorkerAfterRestart(t, ctx, all[2], "child-fanout-worker", childHandlers, retainedRoot, childOptions...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -380,7 +380,7 @@ func runFiveHundredChildFanout(t *testing.T, restartLeader, killParentProcess, k
 			j = journal.New(all[0])
 		}
 	}
-	final, err := worker.New(ctx, all[1], "parent-after-children", handlers)
+	final, err := newFanoutWorkerAfterRestart(t, ctx, all[1], "parent-after-children", handlers, retainedRoot)
 	if err != nil {
 		t.Fatal(err)
 	}

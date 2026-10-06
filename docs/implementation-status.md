@@ -29,6 +29,23 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: fullsix local physical failure and bounded startup retry
+
+Originalaa2015a fullsix race campaign FAIL370.79s: five cases pass and local
+physical queues/64durables/after-join witnesses independently recheck; results/first
+fails40.84s at Worker.New signal-stream metadata after journal restart, before drain.
+Wholecampaign remains failed. ActualSDK/694source/3,286external/closure verified;
+full16,793member65,523,988byte/threepart archive passes. Underlyingtimeoutcause
+unconfirmed. Original5-minute case remains; constructor's5-second attempt is exhausted.
+
+Fanout callers now retry only typed transient constructor errors under unchanged
+originalcase context; permanent/cancel errors fail fast, all attempts retained and
+late success rejected/closed. ProductionWorker.New/runtime untouched. Three race
+controls pass; fullsix fresh originalcardinality requalification prepared. Both
+long handles continue unchanged. Fullmatrix/24h/million physical gates remain open.
+[Failed campaign/analysis](scale/fanout-combined-local-physical-2026-10-06/native/).
+[Retry preparation](scale/fanout-combined-local-physical-2026-10-06/startup-retry-preparation/).
+
 ## Latest follow-up — 2026-10-06: negative clock copied accepted; full500 physical repair prepared
 
 Fresh copied SDK1873157/helpera3cb577 binds original0b24a84 full3,332/36,768/3,332

@@ -4691,3 +4691,15 @@ original5-minute case deadline, retains failures, and requires local_monitors=3.
 Fourteen controls/integrationcompile pass; reusable sixcase independent reviewer
 prepared. Fullsix native/copy localphysical qualification pending; fullmatrix/
 current-source/24h/million gates remain open. No original long handle restarted.
+
+## Fullsix fanout physical failure; bounded constructor retry prepared — 2026-10-06
+
+Originalaa2015a fullsix raceFAIL370.79s; five localphysicaldrains recheck, results/first
+fails40.84s at constructor signal-stream metadata, beforedrain. Complete16,793member/
+65,523,988byte/threepart failedproof preserved; SDK/source694/external3286/closure
+verified. Metadata timeoutcause unconfirmed. Worker.New has5s startupattempt and
+expects callerretry; originalcase retains5min. Fanout callers now retry only typed
+transients within originalcase; permanent/cancel errors failfast, allattempts retained,
+late success rejected/unusedworkerclosed. Productionruntimeunchanged. Three race
+controls pass. Fullsix fresh500-child samecuts/prefix/results/localdrain requalification
+prepared; no originalstore reopened/longhandle restart/fullmatrix or24h promotion.
