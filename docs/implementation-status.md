@@ -34,6 +34,48 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier is live; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Original all-server row failed before bulk; retry window localized — 2026-10-06
+
+Original10m all-server SIGKILL/restart seed1 ate09442a fails611.10s before bulk:
+original30s client retry expires with503/10008. No final bulk artifact, comparison,
+full final integrity or row qualification. Retained history identifies two
+matrixsignal batch61 invocations:25 attempts each on signal-5 span29.940s with
+unknown/not-published outcomes; neither sends signal-6/7. Fault18 kills/heals in
+35.205s, including29.848s after last actual restart; fault19 begins0.173s after
+healing. Five kill removals precede every restart. Actual node1 logs include
+WF_INV/WF_SIG NO-quorum warnings near healing; source/server/CPU/disk cause remains
+unconfirmed. This proves observed retry exhaustion and controller timings, not
+lost signal/data or a runtime/server regression.
+
+Independent source/actual SDK/profile and100 observed server incarnation closure
+verified. Complete5,421-member/152,988,357-byte archive, every current file and
+compressed/member/global visible process/descriptor/mount closure pass; limits
+retained. Initial failure reviewer stopped on absent bulk artifact; corrected
+failure reviewer preserves absence. Reused free-text comparison wording corrected
+in a separate authoritative report, original bytes retained. Original deadlines,
+fault cadence and p99 targets remain. Harness failures now include operation,
+workflow ID, signal index and idempotency key using error wrapping; compile/skip
+passes, with no runtime/retry change or new native qualification. Full100k normal
+qualifier continues from its unchanged isolated4f93039 source.
+[Corrected failed review](scale/sustained-bulk-final-latency-2026-10-06/joined-restart-ten-minute/corrected-independent-review.json).
+[Retained retry timeline](scale/sustained-bulk-final-latency-2026-10-06/joined-restart-ten-minute/retry-window-analysis.json).
+
+## Interrupted million-candidate complete archive verified — 2026-10-06
+
+Closed interrupted million candidate at247eeff now captured as complete6,189-
+member/182,268,794-byte archive. Current program and actual candidate executable
+hashes/PIDs/source revision bind to committed launch;1,693 captured compile inputs
+and6,187-file size/hash ledger verify. Known SDK/supervisor/native processes absent,
+missing historical unit and global visible process/descriptor/mount closure recorded.
+Original report still says running; no terminal SDK exit or physical drain is
+invented. Initial guard selected unused base server and stopped without fixture
+mutation; actual argv identifies separately retained candidate executable, whose
+fingerprint matches committed launch. Corrected full capture/member/current census
+passes. All current/partial/source/executable/receipt evidence retained; candidate
+unadopted, originalmillion/24h unqualified. S3 offload must follow committed complete
+proof and full remote verification before any media removal.
+[Capture and guard](scale/scheduler-server-candidate-2026-10-04/million-interrupted-complete-offload-2026-10-06/).
+
 ## Original ten-minute bulk all-server restart row live — 2026-10-06
 
 Fresh original10m all-server SIGKILL/restart seed1 at e09442a runs with explicit

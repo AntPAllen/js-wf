@@ -1173,7 +1173,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 						}
 						return err
 					}); err != nil {
-						batchErrors <- err
+						batchErrors <- fmt.Errorf("start %s/%s: %w", typ, id, err)
 						return
 					}
 				}
@@ -1183,7 +1183,7 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 							_, err := c.Signal(attempt, typ, id, "go", []byte(strconv.Itoa(n)), fmt.Sprintf("signal-%d", n))
 							return err
 						}); err != nil {
-							batchErrors <- err
+							batchErrors <- fmt.Errorf("signal %s/%s go[%d] key=signal-%d: %w", typ, id, n, n, err)
 							return
 						}
 					}

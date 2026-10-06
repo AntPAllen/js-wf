@@ -1,0 +1,18 @@
+Oct 06 11:47:34 jetstream-wf systemd[351]: Started js-wf-capture-native-million-interrupted-offload-20261006.service - /usr/bin/python3 /tmp/js-wf-capture-native-million-interrupted-offload-20261006.py.
+Oct 06 11:47:35 jetstream-wf python3[3434833]: Traceback (most recent call last):
+Oct 06 11:47:35 jetstream-wf python3[3434833]:   File "/tmp/js-wf-capture-native-million-interrupted-offload-20261006.py", line 39, in <module>
+Oct 06 11:47:35 jetstream-wf python3[3434833]:     server=hashlib.sha256((root/'campaign/cluster/nats-server').read_bytes()).hexdigest();assert server==launch['actual_candidate_sha256']=='ff7335643d02125ec50b8abaa0ca80fe4da36473aa14402c2dbcf029e63c9fe8'
+Oct 06 11:47:35 jetstream-wf python3[3434833]:                                                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 11:47:35 jetstream-wf python3[3434833]: AssertionError
+Oct 06 11:47:35 jetstream-wf systemd[351]: js-wf-capture-native-million-interrupted-offload-20261006.service: Main process exited, code=exited, status=1/FAILURE
+Oct 06 11:47:35 jetstream-wf systemd[351]: js-wf-capture-native-million-interrupted-offload-20261006.service: Failed with result 'exit-code'.
+Oct 06 11:48:36 jetstream-wf systemd[351]: Started js-wf-capture-native-million-interrupted-offload-20261006.service - /usr/bin/python3 /tmp/js-wf-capture-native-million-interrupted-offload-20261006.py.
+Oct 06 11:49:02 jetstream-wf sudo[3443411]:   exedev : PWD=/home/exedev ; USER=root ; COMMAND=/usr/sbin/losetup --list --json
+Oct 06 11:49:02 jetstream-wf sudo[3443411]: pam_unix(sudo:session): session opened for user root(uid=0) by exedev(uid=1000)
+Oct 06 11:49:02 jetstream-wf sudo[3443411]: pam_unix(sudo:session): session closed for user root
+Oct 06 11:49:02 jetstream-wf python3[3442415]: INTERRUPTED_SDK_CANDIDATE_SOURCE_LEDGER_CLOSURE_VERIFIED 6187
+Oct 06 11:50:09 jetstream-wf sudo[3448626]:   exedev : PWD=/home/exedev ; USER=root ; COMMAND=/usr/sbin/losetup --list --json
+Oct 06 11:50:09 jetstream-wf sudo[3448626]: pam_unix(sudo:session): session opened for user root(uid=0) by exedev(uid=1000)
+Oct 06 11:50:09 jetstream-wf sudo[3448626]: pam_unix(sudo:session): session closed for user root
+Oct 06 11:50:11 jetstream-wf python3[3442415]: COMPLETE_INTERRUPTED_MILLION_CAPTURE_VERIFIED {'schema': 'js-wf-full-fixture-archive-v1', 'archive_sha256': '86549223516af4f226a2b94ae37460586b44a43037ab6c93746cc2387762853b', 'archive_bytes': 182268794, 'members': 6189, 'all_archive_members_read_back': True, 'all_current_fixture_files_unchanged_after_capture': True, 'inventory_file': 'fixture-inventory.json', 'inventory_sha256': 'b700f04403dbeae460dd977fe6dc4286be48ca26659d03d9271769b9e60708f5', 'storage': 'Full archive for S3 content-addressed storage; manifests/receipts in Git. No local or Git archive-part copies.'}
+Oct 06 11:50:11 jetstream-wf systemd[351]: js-wf-capture-native-million-interrupted-offload-20261006.service: Consumed 53.258s CPU time.

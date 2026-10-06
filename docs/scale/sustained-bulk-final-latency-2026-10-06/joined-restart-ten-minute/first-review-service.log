@@ -1,0 +1,18 @@
+Oct 06 11:38:59 jetstream-wf systemd[351]: Started js-wf-review-bulk-restart-ten-minute-joined-20261006.service - /usr/bin/python3 /tmp/js-wf-review-bulk-restart-ten-minute-joined-20261006.py.
+Oct 06 11:50:06 jetstream-wf python3[3375550]: Traceback (most recent call last):
+Oct 06 11:50:06 jetstream-wf python3[3375550]:   File "/tmp/js-wf-review-bulk-restart-ten-minute-joined-20261006.py", line 78, in <module>
+Oct 06 11:50:06 jetstream-wf python3[3375550]:     review['bulk_latency']=read(root/'fixture/bulk-latency-audit.json')
+Oct 06 11:50:06 jetstream-wf python3[3375550]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 11:50:06 jetstream-wf python3[3375550]:   File "/tmp/js-wf-review-bulk-restart-ten-minute-joined-20261006.py", line 8, in read
+Oct 06 11:50:06 jetstream-wf python3[3375550]:     def read(p):return json.loads(p.read_text())
+Oct 06 11:50:06 jetstream-wf python3[3375550]:                                   ^^^^^^^^^^^^^
+Oct 06 11:50:06 jetstream-wf python3[3375550]:   File "/usr/lib/python3.12/pathlib.py", line 1029, in read_text
+Oct 06 11:50:06 jetstream-wf python3[3375550]:     with self.open(mode='r', encoding=encoding, errors=errors) as f:
+Oct 06 11:50:06 jetstream-wf python3[3375550]:          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 11:50:06 jetstream-wf python3[3375550]:   File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+Oct 06 11:50:06 jetstream-wf python3[3375550]:     return io.open(self, mode, buffering, encoding, errors, newline)
+Oct 06 11:50:06 jetstream-wf python3[3375550]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 11:50:06 jetstream-wf python3[3375550]: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/js-wf-bulk-restart-ten-minute-joined-20261006/fixture/bulk-latency-audit.json'
+Oct 06 11:50:06 jetstream-wf systemd[351]: js-wf-review-bulk-restart-ten-minute-joined-20261006.service: Main process exited, code=exited, status=1/FAILURE
+Oct 06 11:50:06 jetstream-wf systemd[351]: js-wf-review-bulk-restart-ten-minute-joined-20261006.service: Failed with result 'exit-code'.
+Oct 06 11:50:06 jetstream-wf systemd[351]: js-wf-review-bulk-restart-ten-minute-joined-20261006.service: Consumed 5.125s CPU time.

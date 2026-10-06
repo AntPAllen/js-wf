@@ -5114,3 +5114,22 @@ completion/p99/history/checkpoint/drain and full all-fault operation gates retai
 Terminal/source-after/full row-artifact checks/closure/canonical proof remain
 mandatory; no live-launch qualification or default/fullmatrix/24h promotion.
 [Launch](scale/sustained-bulk-final-latency-2026-10-06/joined-restart-ten-minute-launch/).
+
+### Original all-server retry failure preserved and localized — 2026-10-06
+
+Original10m all-server row seed1 ate09442a fails611.10s before bulk final audit:
+original30s client retry ends with503. Two matrixsignal batch61 signal-5 histories
+show25 attempts each across29.940s with uncertain/not-published outcomes, no
+signal-6/7. Fault18 requires35.205s heal (29.848s after last actual restart), next
+kill begins0.173s afterheal. These timings and NO-quorum logs establish observed
+unavailability/retry exhaustion, not server/root CPU/disk causality or lost data.
+Source/actual SDK/profile/100 observed server incarnations closed; full5,421-member/
+152,988,357-byte fixture/current-census/compressed/member/global visible closure
+proof verified. Missing final bulk artifact explicitly retained, initial missing-
+artifact reviewer failure and corrected scope preserved. No final comparison/full
+integrity/row promotion. Original budgets/cadence/p99 remain unchanged. Native harness
+error messages now identify operation/workflow/signal index/idempotency key while
+preserving wrapped error; compile/skip passes. Current100k normal continues from
+unchanged isolated source. Next diagnosis must use retained timelines/logs and
+fresh controlled cases with an explicit hypothesis; no blind campaign rerun.
+[Corrected failed proof](scale/sustained-bulk-final-latency-2026-10-06/joined-restart-ten-minute/corrected-independent-review.json).
