@@ -61,7 +61,7 @@ def main():
     # Newly downloaded staging is a verified duplicate of the canonical S3 object.
     archive.unlink()
     original = root/'restored'/'originals'/execution['test']
-    copied = root/'copied-cluster'
+    copied = root/'originals'/'cluster'
     initial = fixture_archive.inventory(original)
     shutil.copytree(original,copied)
     assert fixture_archive.inventory(copied)==initial
