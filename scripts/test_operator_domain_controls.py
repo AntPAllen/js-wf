@@ -52,5 +52,22 @@ class OperatorDaemonCoverageTests(unittest.TestCase):
         with self.assertRaises(AssertionError):controls.verify_daemon_log(log)
 
 
+class OperatorStandaloneCoverageTests(unittest.TestCase):
+    def test_actual_standalone_pair_rejects_missing_processes_bad_exits_and_wrong_source_markers(self):
+        log=(REPO/'docs/scale/operator-standalone-cli-2026-10-06/native-race/native.log').read_text()
+        result=controls.verify_standalone_log(log)
+        self.assertEqual(result['actual_standalone_processes'],45)
+        lines=log.splitlines(keepends=True)
+        process=next(l for l in lines if 'operator standalone process domain=""' in l and 'exit=1' in l)
+        bad=[log.replace(process,''),log.replace(process,process.replace('exit=1','exit=0')),
+             log.replace('domain="WFOPS" processes=23','domain="WFOPS" processes=22'),
+             log.replace('domain admitted node=2','domain admitted node=1'),
+             log.replace('--- PASS: TestOperatorStandaloneCommandsInJetStreamDomain','--- SKIP: TestOperatorStandaloneCommandsInJetStreamDomain'),
+             log.replace('exe_sha256=7e55d291','exe_sha256=0e55d291',1),log+'DATA RACE\n','PASS\n']
+        for changed in bad:
+            self.assertNotEqual(log,changed)
+            with self.assertRaises(AssertionError):controls.verify_standalone_log(changed)
+
+
 if __name__ == '__main__':
     unittest.main()

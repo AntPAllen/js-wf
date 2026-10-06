@@ -65,7 +65,8 @@ def verify_standalone_log(log):
     assert len({p for _,p,_ in processes})==len(processes)
     for domain,count,_ in summaries:
         group=[code for d,_,code in processes if d==domain]
-        assert len(group)==int(count) and len(group)>=20 and set(group)=={'0','1'}
+        assert len(group)==int(count)==(23 if domain else 22) and set(group)=={'0','1'}
+        assert group.count('1')==(5 if domain else 4)
     return dict(tests=STANDALONE_TESTS,real_domain_peers=3,actual_standalone_processes=len(processes),
                 scope='Compiled wf default/domain command process coverage and actual exit/stdout contracts; no outgoing wire-prefix trace, daemon/SQL/fault/fullrelease qualification.')
 
