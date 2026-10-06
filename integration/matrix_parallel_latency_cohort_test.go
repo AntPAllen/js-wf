@@ -79,7 +79,7 @@ func TestMatrixParallelInvocationAuditsRetainedCohort(t *testing.T) {
 		t.Fatal(err)
 	}
 	ready, stopReady := context.WithTimeout(context.Background(), time.Minute)
-	err = waitMatrixWorkflowReplicas(ready, js)
+	err = waitFiveReplicaReadiness(ready, js, 0)
 	stopReady()
 	if err != nil {
 		t.Fatal(err)
