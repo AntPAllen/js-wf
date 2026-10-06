@@ -4594,3 +4594,20 @@ allthree/fullnative/copied qualification pending. Original30s/5m/9m30s cadence
 retained; reviewer corrected before terminal. Long handles continue unchanged.
 [Preparation](scale/tier2-retained-upgrade-2026-10-06/preparation/).
 [Live evidence](scale/tier2-retained-upgrade-2026-10-06/live-initial/).
+
+## Original retained rolling upgrade seed1 qualified — 2026-10-06
+
+Normal ten-minute661239d PASS649.10s:2,016terminals/22,252entries, three actual
+legacy2.11.17→2.15.0 transitions at30s/5m/9m30s, allsixcells/latency/history/integrity/
+drain. Corrected closed-evidence review binds source/executables/profile/closure/
+sevencomplete three-peer physicalsnapshots; allfinalphysicalWF_RUN queueszero.
+Initial report variable-shadowing failure/fullproof preserved; corrected report
+outside immutablearchive, no native rerun. Full6,338member101,144,198byte/fourpart
+native archive readback passes. Separate fresh-copy helper7134e12 actualSDK1677774/
+threeexternalNATS/1,698inputs/closure, exactfullreport/history/allthreequeues/
+64durables verify; audit523.857828ms/combined4.537360143s under20s. All2,312original
+files unchanged; no originalstore reopen. Full4,038member50,541,217byte/twopart copied
+archive readback passes. Historical35s mixed-version residual cause unconfirmed;
+this full all-upgraded row does not erase it. Full13x200/current-source/24h remain.
+[Native proof/corrected review](scale/tier2-retained-upgrade-2026-10-06/native-ten-minute/).
+[Copied proof](scale/tier2-retained-upgrade-2026-10-06/copied-audit/).
