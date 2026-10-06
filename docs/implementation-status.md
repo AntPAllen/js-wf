@@ -42,7 +42,8 @@ consumer counts0. Bulk and every-point comparison pass8.697232942s under the
 original6m stage; original20s/60s,5m completion,p99/history/fault/checkpoint/drain
 gates pass unchanged. Independent row/artifact checks verify all samples,
 actual SDK/source/profile and all24 observed NATS incarnations closed. Complete
-closed originals archived with full member/current-file verification. This accepts
+closed originals archived with full member/current-file verification; complete archive,
+metadata and inventory also pass full S3 GET hash/size readback. This accepts
 explicit bulk use for this recorded-source sustained component; default, other
 rows/fullmatrix and24h remain open.
 [Accepted proof](scale/sustained-bulk-final-latency-2026-10-06/joined-journal-ten-minute/).
