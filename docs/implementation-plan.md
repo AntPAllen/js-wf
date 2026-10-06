@@ -4869,3 +4869,18 @@ are invalid for the original point latency evaluator. Future capacity preparatio
 writes valid activity request JSON while preserving400k/4.8M counts. Earlier
 retained-read qualification remains unchanged in scope; full400k valid latency
 and RSS qualification still require native evidence.
+
+### Disk-pressure terminal campaigns and archive storage — 2026-10-06
+
+Original journal24h row is terminal at6h48m with replica-readiness failure followed
+by no-space evidence/archive errors. Million wrapper is terminal with no-space
+source-after failure; its stale921,929-receipt report is not a final delivery or
+physical-drain pass. Preserve all current files, including partial artifacts,
+without restarting old handles or reconstructing missing original ledgers as if
+they were producer evidence. Complete closed archives now reside in S3 after full
+GET byte readback; complete file inventories, archive hashes and receipts are in
+Git. No archive-part duplicates are needed for this format. Original primary
+stores/source/exes remain local. Future long/native runs must reserve space for
+remaining campaign growth, copy allocation and final archival across concurrent
+jobs; a short-copy-only reserve cannot qualify safe campaign admission.
+[Terminal evidence and full proofs](scale/terminal-campaigns-disk-pressure-2026-10-06/).

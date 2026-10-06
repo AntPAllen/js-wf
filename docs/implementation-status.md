@@ -29,6 +29,20 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest preservation — 2026-10-06: both closed campaigns completely archived to S3
+
+Journal9,205 current files /431,060,062-byte archive and million6,729 current files /
+85,409,095-byte archive are completely captured. Every tar member/hash/mode and
+embedded inventory read back; each original fixture's full file census/bytes/modes/
+mtimes unchanged after capture. Full S3 GET hash/size verifies both complete archives,
+committed archive metadata and inventories. Git holds inventories/hashes/receipts,
+without local/Git part duplicates. Original stores/source/exes/metadata, including
+partial no-space artifacts, remain local. Both terminal failures unchanged; original
+million program exit status/final source ledger were not durably recorded by its
+failed wrapper, and stale running metrics do not prove final delivery/drain.
+[Journal full proof](scale/terminal-campaigns-disk-pressure-2026-10-06/complete-journal/),
+[million full proof](scale/terminal-campaigns-disk-pressure-2026-10-06/complete-million/).
+
 ## Current terminal status — 2026-10-06 08:00 UTC
 
 Both long campaign handles are now terminal failures. Original journal row fails
