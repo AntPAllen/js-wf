@@ -117,6 +117,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	if rollout != "" && (rollout != matrixProtobufToJSON || row != "worker_kill") {
 		t.Fatal("journal rollout requires protobuf-to-json worker_kill profile")
 	}
+	if os.Getenv("WF_MATRIX_CACHED_LATENCY_METADATA") == "1" && matrixServerClockOffset(row) != 0 {
+		t.Fatal("cached latency metadata requires a point audit row")
+	}
 	timerCutRequired := os.Getenv("WF_TIER3_CLOCK_TIMER_CUT") == "1"
 	commonClockEnabled := matrixServerClockOffset(row) != 0 && os.Getenv("WF_TIER3_COMMON_CLOCK") == "1"
 	if timerCutRequired && matrixServerClockOffset(row) == 0 {
@@ -1306,6 +1309,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		}
 		samples = controllerProof.Samples
 	} else {
+		pointJS := js
+		var metadata *matrixLatencyMetadataJS
+		if os.Getenv("WF_MATRIX_CACHED_LATENCY_METADATA") == "1" {
+			metadata = &matrixLatencyMetadataJS{JetStream: js}
+			pointJS = metadata
+		}
 		results, err := matrixParallelInvocationAudits(ctx, info.State.FirstSeq, info.State.LastSeq, func(attempt context.Context, sequence uint64) (matrixInvocationAuditResult, error) {
 			var result matrixInvocationAuditResult
 			msg, err := inv.GetMsg(attempt, sequence)
@@ -1316,14 +1325,23 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			if len(parts) != 4 {
 				return result, fmt.Errorf("invalid invocation subject %q", msg.Subject)
 			}
-			result.samples, err = matrixInvocationLatencies(attempt, js, parts[2], parts[3], msg.Time, completionDeadline)
+			result.samples, err = matrixInvocationLatencies(attempt, pointJS, parts[2], parts[3], msg.Time, completionDeadline)
 			if err == nil && rollout != "" {
-				result.mixed, err = auditMatrixRolloutInvocation(attempt, js, root, parts[2], parts[3])
+				result.mixed, err = auditMatrixRolloutInvocation(attempt, pointJS, root, parts[2], parts[3])
 			}
 			return result, err
 		})
 		if err != nil {
 			t.Fatal(err)
+		}
+		if metadata != nil {
+			data, err := json.MarshalIndent(map[string]any{"enabled": true, "metadata_handle_lookups": metadata.lookupCounts(), "scope": "successful metadata handles only; record and snapshot queries remain fresh"}, "", "  ")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(root, "latency-metadata.json"), data, 0600); err != nil {
+				t.Fatal(err)
+			}
 		}
 		for _, result := range results {
 			samples = append(samples, result.samples...)

@@ -29,6 +29,15 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: live point metadata option implemented
+
+An explicit `--cached-latency-metadata` option now wires successful handle reuse
+into final non-clock point and rollout audits, records diagnostic lookup counts,
+and preserves all data queries, predicates and timing gates. Clock controller rows
+reject the option. All 11 producer controls and selected Go helper controls pass
+(0.047 seconds); changed sustained live-source qualification remains pending.
+Existing campaigns retain their isolated sources and handles.
+
 ## Latest follow-up — 2026-10-06: cached real-cohort measurement launched
 
 Clean `14cea25` actual normal SDK `1173935` and five live server processes verified.

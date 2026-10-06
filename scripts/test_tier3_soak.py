@@ -5,6 +5,17 @@ spec=importlib.util.spec_from_file_location('soak',Path(__file__).with_name('run
 soak=importlib.util.module_from_spec(spec);spec.loader.exec_module(soak)
 
 class SoakProducerTests(unittest.TestCase):
+ def test_cached_latency_metadata_is_explicit_and_keeps_point_gate_arguments(self):
+  with patch.dict(os.environ,{'WF_MATRIX_CACHED_LATENCY_METADATA':'1'}):
+   plain,args,flags=soak.execution('journal','24h',1,Path('/tmp/f'),'sigkill',False)
+   cached,new_args,new_flags=soak.execution('journal','24h',1,Path('/tmp/f'),'sigkill',False,cached_latency_metadata=True)
+  self.assertNotIn('WF_MATRIX_CACHED_LATENCY_METADATA',plain)
+  self.assertEqual(cached['WF_MATRIX_CACHED_LATENCY_METADATA'],'1')
+  self.assertEqual((args,flags),(new_args,new_flags))
+  self.assertEqual(plain['WF_TIER3_SYNC_INTERVAL'],cached['WF_TIER3_SYNC_INTERVAL'])
+  for row in ('server_clock_ahead','server_clock_behind'):
+   with self.assertRaises(ValueError):
+    soak.execution(row,'24h',1,Path('/tmp/f'),'sigkill',False,cached_latency_metadata=True)
  def test_wait_stack_is_opt_in_and_preserves_original_budget_and_trace(self):
   with patch.dict(os.environ,{'WF_TIER3_AUDIT_WAIT_STACK':'1'}):
    plain,args,flags=soak.execution('journal','24h',1,Path('/tmp/f'),'sigkill',False,retained_audit_trace=True)

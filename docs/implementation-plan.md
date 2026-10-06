@@ -4481,3 +4481,18 @@ cachedmetadata measurementprepared withR5ready/original6min/20s/terminaldeadline
 no original/failedstore reopen. No fullscale/default/currentmatrix/24h qualification.
 [Oracle](scale/cached-final-latency-2026-10-06/native-oracle/).
 [Preparation](scale/cached-final-latency-2026-10-06/cohort-preparation/).
+
+## Explicit final point metadata reuse in live qualification — 2026-10-06
+
+`run-tier3-soak.py --cached-latency-metadata` now selects successful metadata
+handle reuse for non-clock final point and rollout audits. Each record, snapshot
+and timestamp query remains fresh; original ordered reduction, cancellation,
+20-second request limits and parent deadline remain. The final audit writes
+`latency-metadata.json` with diagnostic lookup attempts. Clock controller rows
+reject the option because they use a different audit path. The producer records
+the explicit option and strips inherited activation.
+
+All 11 soak producer controls pass; the selected Go metadata/parallel controls
+pass in 0.047 seconds and compile the integration harness. Native cached/serial
+oracle acceptance is already retained. Large real-cohort and sustained changed
+live-source qualification remain pending; existing isolated campaigns continue.
