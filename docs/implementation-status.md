@@ -34,6 +34,28 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier is live; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Original24h bulk-journal preparation and closed-scale preservation — 2026-10-06
+
+Five closed historical cardinality fixtures now have complete modern archives:
+every present file plus legacy gzip broker media, native report exact Git bytes,
+every decompressed SHA/size and recorded compressed size. Four old manifests
+also match committed bytes; inline5m binds its current summary/manifest and
+committed native report. Original schema without compressed SHA explicitly
+preserved; initial schema guard stopped before capture and is retained. No new
+SDK/source/terminal lifetime or native qualification claim. Current visible
+root process/descriptor/mount closure verified, no stores reopened. S3 full
+readback and fresh complete census/member/closure verification must precede
+removal. Canonical ledgers/reports/logs stay local; full400k donors stay local.
+[Full capture summary](scale/closed-scale-s3-2026-10-06/capture-summary.json).
+
+Fresh original24h journal seed1 producer and25h process observer prepared for
+explicit chunked retained audit + bulk/full point comparison. Original20s/60s
+and6m/24h20m deadlines unchanged. Admission requires16GiB plus128MiB observed
+normal-qualifier/observer growth reserve; no launch until actual free meets it.
+Old chunked24h row failed24497.34s with replica-heal timeout plus no-space
+artifact writes, cause not established. No old campaign restarts and no24h
+qualification. [Prepared exact producer/observer](scale/bulk-journal-24h-2026-10-06/preparation/).
+
 ## R5 100k pull-resumption complete archive verified — 2026-10-06
 
 Closed recorded8ba0b61 R5 explicit suffix-loss case now captured as complete1,368-

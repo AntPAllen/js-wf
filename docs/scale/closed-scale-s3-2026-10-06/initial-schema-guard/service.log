@@ -1,0 +1,8 @@
+Oct 06 12:36:31 jetstream-wf systemd[351]: Started js-wf-capture-legacy-scale-s3-20261006.service - /usr/bin/python3 /tmp/js-wf-capture-legacy-scale-s3-20261006.py.
+Oct 06 12:36:31 jetstream-wf python3[3456065]: Traceback (most recent call last):
+Oct 06 12:36:31 jetstream-wf python3[3456065]:   File "/tmp/js-wf-capture-legacy-scale-s3-20261006.py", line 61, in <module>
+Oct 06 12:36:31 jetstream-wf python3[3456065]:     with file.open('rb') as stream:assert s3.digest(stream)==dict(bytes=r['archive_bytes'],sha256=r['archive_sha256'])
+Oct 06 12:36:31 jetstream-wf python3[3456065]:                                                                                                   ~^^^^^^^^^^^^^^^^^^
+Oct 06 12:36:31 jetstream-wf python3[3456065]: KeyError: 'archive_sha256'
+Oct 06 12:36:31 jetstream-wf systemd[351]: js-wf-capture-legacy-scale-s3-20261006.service: Main process exited, code=exited, status=1/FAILURE
+Oct 06 12:36:31 jetstream-wf systemd[351]: js-wf-capture-legacy-scale-s3-20261006.service: Failed with result 'exit-code'.
