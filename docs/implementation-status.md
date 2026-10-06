@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: live qualification storage headroom
+
+Six pushed full canonical archives/parts/concat/member/manifest reverified before
+20working-tree proof part exclusions:454,299,648allocatedbytes recovered. One
+closed disposable failed-soak copied cohort reverified against full canonical proof/
+allcurrentbytes/SDK+five server closure/container state/mounts/visibleFD before
+removal:686,923,776allocatedbytes recovered. CanonicalGit/rawarchives/originaldonors/
+originalfixtures/sources/exes/caches/live stores retained; historical outcomes unchanged.
+About3.3GiB free;12GiB target still unmet. Negative clock advances beyond3min with
+confirmed -60s; original24h and million handles continue unchanged.
+[Proof exclusions](scale/recent-canonical-proof-headroom-2026-10-06/).
+[Copied cohort recovery](scale/preserved-failed-soak-copy-headroom-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: original negative server-clock row live
 
 Clean0b24a84 normal ten-minute seed1 SDK1802177/source694/profile2CPU/2GiB and
