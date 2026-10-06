@@ -4623,3 +4623,16 @@ Threecontrols acceptvalidpatterns and reject24clock+4latency variants. Native
 terminal/independentcopy/full13x200 remainpending; long24h/million sources unchanged.
 [Preparation](scale/tier2-retained-server-clock-2026-10-06/preparation/).
 [Live evidence](scale/tier2-retained-server-clock-2026-10-06/positive-live-initial/).
+
+## Positive server-clock native pass and copied physical evidence correction — 2026-10-06
+
+Original835d19e normal ten-minute seed1 native/review passes with3,136terminals,
+34,530entries/allcells/19actual+60s observations; full6,305member104,490,832byte
+four-part proof verified. Copied qualification pending. Historical copied helper's
+three pinned clients use leader-routed Stream.Info: those records prove logical
+queue/64durable drain, not three local physical stores. New helper and reviewer
+add distinct pinned /jsz local queue checks under unchanged20-second audit budget.
+Legacy API evidence explicitly reports copied physical verification false; native
+upgrade physical snapshots remain valid. Four controls reject24 corruptions and
+closed upgrade crosscheck passes without NATS/store reopen. Fullmatrix/currentmain/
+24h/million physical gates remain open.

@@ -4,13 +4,13 @@
 package main
 
 import (
+	"bufio"
 	"context"
- "bufio"
- "github.com/anishathalye/porcupine"
- "js-wf/client"
- "js-wf/history"
 	"encoding/json"
 	"fmt"
+	"github.com/anishathalye/porcupine"
+	"js-wf/client"
+	"js-wf/history"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -37,17 +37,39 @@ func run() error {
 		return fmt.Errorf("invalid expected count")
 	}
 	entries, err := strconv.Atoi(os.Args[3])
- if err != nil || entries < count { return fmt.Errorf("invalid expected entries") }
- file, err := os.Open(os.Args[4]); if err != nil { return err }
- var operations []client.Operation
- scanner := bufio.NewScanner(file); scanner.Buffer(make([]byte, 64*1024), 2*1024*1024)
- for scanner.Scan() { var op client.Operation; if err := json.Unmarshal(scanner.Bytes(), &op); err != nil { file.Close(); return err }; operations=append(operations, op) }
- scanErr := scanner.Err(); file.Close(); if scanErr != nil { return scanErr }
- if len(operations)==0 { return fmt.Errorf("empty history") }
- for _, check := range []func([]client.Operation,time.Duration)(porcupine.CheckResult,error){history.CheckStarts,history.CheckSignals,history.CheckResults} {
-  result, err := check(operations,30*time.Second); if err != nil || result != porcupine.Ok { return fmt.Errorf("copied history=%v: %w",result,err) }
- }
- root := os.Args[1]
+	if err != nil || entries < count {
+		return fmt.Errorf("invalid expected entries")
+	}
+	file, err := os.Open(os.Args[4])
+	if err != nil {
+		return err
+	}
+	var operations []client.Operation
+	scanner := bufio.NewScanner(file)
+	scanner.Buffer(make([]byte, 64*1024), 2*1024*1024)
+	for scanner.Scan() {
+		var op client.Operation
+		if err := json.Unmarshal(scanner.Bytes(), &op); err != nil {
+			file.Close()
+			return err
+		}
+		operations = append(operations, op)
+	}
+	scanErr := scanner.Err()
+	file.Close()
+	if scanErr != nil {
+		return scanErr
+	}
+	if len(operations) == 0 {
+		return fmt.Errorf("empty history")
+	}
+	for _, check := range []func([]client.Operation, time.Duration) (porcupine.CheckResult, error){history.CheckStarts, history.CheckSignals, history.CheckResults} {
+		result, err := check(operations, 30*time.Second)
+		if err != nil || result != porcupine.Ok {
+			return fmt.Errorf("copied history=%v: %w", result, err)
+		}
+	}
+	root := os.Args[1]
 	// External observer gets time to capture /proc executable identity before
 	// opening copies. This delay is outside admission/audit budgets.
 	time.Sleep(250 * time.Millisecond)
@@ -105,7 +127,8 @@ func run() error {
 	if report.Invocations != count || report.Journals != count || report.Entries != entries || report.Terminal != count {
 		return fmt.Errorf("full copied retained counts %+v expected=%d", report, count)
 	}
-	// Confirm physical queue and every partition's durable state after audit.
+	// Stream.Info is leader-routed even through pinned clients. Retain these
+	// API views and separately read each server's local monitoring state below.
 	var queue = []*jetstream.StreamInfo{}
 	for i, js := range all {
 		stream, err := js.Stream(ctx, "WF_RUN")
@@ -139,6 +162,60 @@ func run() error {
 	if checked != int(provision.Partitions) {
 		return fmt.Errorf("incomplete durable census %d expected=%d", checked, provision.Partitions)
 	}
+	// These sequential pinned monitoring reads share the original 20-second
+	// audit budget. They observe local stores, but are not simultaneous.
+	type physicalPeer struct {
+		Node     int             `json:"node"`
+		Started  time.Time       `json:"started"`
+		Finished time.Time       `json:"finished"`
+		State    json.RawMessage `json:"state"`
+	}
+	physical := make([]physicalPeer, 3)
+	identities := make(map[string]bool)
+	for node := range physical {
+		p := &physical[node]
+		p.Node, p.Started = node, time.Now().UTC()
+		data, err := cluster.Diagnostic(ctx, node, "jetstream")
+		p.Finished = time.Now().UTC()
+		if err != nil {
+			return fmt.Errorf("peer%d local monitoring: %w", node, err)
+		}
+		var snapshot struct {
+			ServerID string `json:"server_id"`
+			Accounts []struct {
+				Streams []struct {
+					Name  string `json:"name"`
+					State struct {
+						Messages  *uint64 `json:"messages"`
+						Consumers *int    `json:"consumer_count"`
+					} `json:"state"`
+				} `json:"stream_detail"`
+			} `json:"account_details"`
+		}
+		if err := json.Unmarshal(data, &snapshot); err != nil {
+			return err
+		}
+		if snapshot.ServerID == "" || identities[snapshot.ServerID] {
+			return fmt.Errorf("missing or duplicate physical server identity")
+		}
+		identities[snapshot.ServerID] = true
+		found := 0
+		for _, account := range snapshot.Accounts {
+			for _, stream := range account.Streams {
+				if stream.Name != "WF_RUN" {
+					continue
+				}
+				found++
+				if stream.State.Messages == nil || *stream.State.Messages != 0 || stream.State.Consumers == nil || *stream.State.Consumers != int(provision.Partitions) {
+					return fmt.Errorf("peer%d local physical queue not drained: %+v", node, stream.State)
+				}
+			}
+		}
+		if found != 1 {
+			return fmt.Errorf("peer%d local WF_RUN census=%d", node, found)
+		}
+		p.State = data
+	}
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
@@ -148,8 +225,9 @@ func run() error {
 		AuditNS       int64                   `json:"audit_ns"`
 		WholeReviewNS int64                   `json:"whole_review_ns"`
 		Queue         []*jetstream.StreamInfo `json:"queue_all_three_peers"`
+		Physical      []physicalPeer          `json:"physical_queue_peers"`
 		Consumers     int                     `json:"drained_partition_consumers"`
-	}{"complete copied process-matrix retained integrity/drain and independently rechecked history; not original fault verdict or full-matrix qualification", report, elapsed.Nanoseconds(), time.Since(began).Nanoseconds(), queue, checked}
+	}{"complete copied process-matrix retained integrity/drain and independently rechecked history; not original fault verdict or full-matrix qualification", report, elapsed.Nanoseconds(), time.Since(began).Nanoseconds(), queue, physical, checked}
 	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		return err

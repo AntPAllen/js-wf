@@ -29,6 +29,23 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: positive clock native pass and copied evidence correction
+
+Original835d19e normal ten-minute positive-clock seed1 passes native and independent
+review: 3,136 terminals /34,530 journal entries, all six workload cells and exactly
+19 confirmed +60-second observations. Full6,305-member104,490,832-byte four-part
+archive readback passes. Independent copied audit remains pending.
+
+Historical copied `queue_all_three_peers` is three leader-routed Stream.Info API
+views, not three local physical stores. Earlier copied-audit physical wording is
+corrected: integrity/history/logical drain remains proven; stronger copied physical
+coverage is missing. Native upgrade's pinned /jsz physical proof is unaffected.
+The helper now adds pinned local /jsz snapshots within the same20-second budget;
+review controls and legacy upgrade crosscheck pass. Full matrices/24h/million final
+physical drain remain open.
+[Native proof](scale/tier2-retained-server-clock-2026-10-06/positive-native-ten-minute/).
+[Correction and controls](scale/tier2-copied-physical-review-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: original positive server-clock row live
 
 Clean835d19e actualnormalSDK1715508/source694/profile2CPU/2GiB/threeexternalNATS
@@ -151,7 +168,7 @@ million campaigns stay live on original handles/sources; full13x200/currentgate 
 ## Latest follow-up — 2026-10-06: original reply isolation copied audit accepted
 
 Fresh copies verify full2,296/25,336/2,296 report, independent histories and allthree
-physicalqueues/64durables drained. Audit530.008518ms/combined535.525980ms under20s;
+leader-routed API queue views/64durables drained. Audit530.008518ms/combined535.525980ms under20s;
 history/startup separately bounded. Actual helperSDK/three externalNATS/closure,
 1,698selected inputs and2,281unchanged originalfiles verified. Full4,006member/
 49,749,651byte/twopart archive readback passes. Native plus copied audit qualifies
@@ -198,7 +215,7 @@ Long journal and million-timer campaigns remain live on original sources/handles
 ## Latest follow-up — 2026-10-06: original Tier2 pause copied audit accepted
 
 Fresh copies only: full2,324/25,675/2,324 report, independent histories, allthree
-physicalqueues/64durables drained, audit451.842ms/combined4.459724s under20s.
+leader-routed API queue views/64durables drained, audit451.842ms/combined4.459724s under20s.
 ActualhelperSDK/threeexternalNATS binaries/closure/1,698selected inputs verified;
 all2,281original files unchanged. Full4,006member49,939,893byte proof/twoparts
 readback passes. Combined with complete native ten-minute source d893bb0, retained
