@@ -14617,3 +14617,12 @@ Extended the existing Tier2 shard reviewer to the partition row and explicitly s
 Eight parser/binding/control tests pass. A fresh actual provider ZIP/digest/member readback of historical82a7d6c partition seed1 fully passes:1568 invocations/17307 entries/19 faults/7392 samples/2016 operations, three whole-history models Ok. Three disposable real-data mutations reject missing majority commit,1ns delay mismatch and a second successful Start; original bytes unchanged. Complete control/model/provenance archive preserved. [Proof and usage](scale/current-tier2-partition-2026-10-06/).
 
 This validates independent review for the new200-seed queued run37486948256; the new row is still unqualified, with only its generator job queued at observation. No native rerun or store opening occurred. Historical selected-seed scope only; no parent/fullcurrentmatrix/24h acceptance or unavailable native SDK/store proof is claimed. Original normal100k and actual24h handles remain active.
+
+
+## Complete outer-handler normal100k simulation accepted — 2026-10-06
+
+The original full normal100k handle finished successfully at executed `4f9303953eeac96fc7dd0d825168e1fa9ea9f1b6`, without restart or timeout changes. All122 seeded workloads complete seeds1–100000 (12,200,000 bodies), all392 pinned regressions and179 top-level tests pass; only the two prescribed trace replay/minimization utility tests skip. Actual SDK elapsed16631.84s is within its original300m timeout. Recorded model counters cover12,402,947 generated schedules,179,962,817 scheduler choices and2,709,420,449 transport events.
+
+The independent terminal reviewer binds1803 Git/before/after/current source inputs, the actual observed SDK binary/profile and closed producer identities. A second full event-stream and complete archive/current-file census check confirms all1840 members. The actual SDK uses normal instrumentation, GOMAXPROCS2/GOMEMLIMIT512MiB and SIM_SEEDS100000. Complete proof is in [the terminal directory](scale/outer-handler-cancellation-2026-10-06/full-normal100k-terminal/).
+
+Together with the already accepted full122×1000 race run and392 pins, this closes the outer-handler simulation normal/race graph gates at their recorded sources. It does not establish NATS disk/Raft behavior, newer unrelated source acceptance, full13×200 Tier2/full16×200 Tier3, million physical timer drain, active-writer GC or actual24h completion. The original24h journal handle remains active; new partition200 run37486948256 remains queued with only its generator job at the latest observation.
