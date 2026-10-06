@@ -4505,3 +4505,14 @@ passes original20s. Actualsource/SDK/profile/five servers/mounts/closure/unchang
 originals and full4,787member363,467,422byte proof/14parts readback verified.
 Data values remain fresh; lookups diagnostic1JRN/1SIG/1STATE/0OBJ. Sustained changed
 live-source/full400k final point/currentmatrix/24h gates remain open.
+
+## Cached final point sustained journal qualification — 2026-10-06
+
+At727b950 explicit cached metadata/chunked reader normal4CPU/GOGC500/4GiB R5
+journal seed1 ten-minute PASS633.03s:2,240terminals/24,707entries/19actual leader
+SIGKILL/heals/eight checkpoints/final integrity/history/physicaldrain. Worst
+terminal12.329512s/progress7.208195s under30s; original20s/60s/threeattempts andfresh
+data queries retained. ActualSDK/source/profile/originalarchive/servers/closure
+and independent row result/full1,678member99,886,746byte proof/fourparts verified.
+This explicit changedsource row qualifies; full400k final point/currentmatrix/
+defaultretainedreader/original24h gates remain open. Existing long handles unchanged.

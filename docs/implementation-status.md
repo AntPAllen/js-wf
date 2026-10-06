@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: cached final point live journal accepted
+
+Clean727b950 normal native PASS633.03s:80batches/2,240terminals/24,707entries,
+19actual leaderSIGKILL/heals, eight complete checkpoints/final whole integrity/
+histories/physicaldrain. Worst terminal12.329512s/progress7.208195s under30s.
+Explicit metadata reuse/chunked reader/4CPU/GOGC500/4GiB, all original gates/data
+reads preserved. SDK/source/profile/1,658Git inputs/5,430original files/currentbytes/
+24periodic server observations/closure verified; independent row result matches.
+Full1,678member99,886,746byte proof/fourparts readback passes. Explicit changedsource
+sustained row qualifies, not full400k final points/currentfullmatrices/default
+retained reader/original24h/candidate adoption. Existing long/pause handles continue.
+[Accepted proof](scale/cached-final-latency-2026-10-06/live-journal-ten-minute/).
+
 ## Latest follow-up — 2026-10-06: duplicate archive headroom
 
 Removed seven exact closed temporary proof duplicates totaling1,218,708,182bytes,
