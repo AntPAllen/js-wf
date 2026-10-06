@@ -157,13 +157,17 @@ func compareFullAudits(t *testing.T, ctx context.Context, js jetstream.JetStream
 	singleCtx, singleStop := context.WithTimeout(ctx, 20*time.Second)
 	single, singleErr := checkUsingConcurrentOptions(singleCtx, js, cutoff, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 		observed := &candidateObservedStream{Stream: stream, cursorReplicas: 1}
-		failure := scanConsumeDirectWindowsThrough(call, observed, cutoff, visit)
+		reader := scanConsumeDirectWindowsThrough
+		if os.Getenv("WF_AUDIT_CHUNKED_CALLBACK") == "1" {
+			reader = scanConsumeChunkedWindowsThrough
+		}
+		failure := reader(call, observed, cutoff, visit)
 		if observed.consumer != nil {
 			info := observed.consumer.CachedInfo()
 			if info == nil || info.Config.Replicas != 1 || !info.Config.MemoryStorage || info.Config.AckPolicy != jetstream.AckNonePolicy {
 				t.Fatalf("invalid actual R1 direct cursor: %+v", info)
 			}
-			t.Logf("full-oracle R1-direct stream=%s source_replicas=%d cursor=%s cursor_replicas=%d", stream.CachedInfo().Config.Name, stream.CachedInfo().Config.Replicas, info.Name, info.Config.Replicas)
+			t.Logf("full-oracle R1-direct stream=%s source_replicas=%d cursor=%s cursor_replicas=%d chunked=%v", stream.CachedInfo().Config.Name, stream.CachedInfo().Config.Replicas, info.Name, info.Config.Replicas, os.Getenv("WF_AUDIT_CHUNKED_CALLBACK") == "1")
 		}
 		return failure
 	}, true, true, true)

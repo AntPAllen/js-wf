@@ -4262,3 +4262,13 @@ GC pause21.295ms does not establish isolated causality. Successful Watch Stop al
 is not initial-set barrier proof. Measure bounded handoff/decoding alternatives;
 retain all semantic/recovery/cleanup/cardinality/deadline gates. No default,
 full fault, current matrix, or24h qualification. [Evidence](scale/direct-callback-audit-2026-10-05/full400k-cold-profile/).
+
+## Explicit bounded chunk handoff prepared — 2026-10-06
+
+Measured full-capacity client select/decode costs motivate amortized handoff.
+Private chunk candidate keeps visitors on scanner goroutine and shares all gap,
+semantic, recovery and cleanup gates. Two bounded256-record/1MiB payload buffers
+(or one oversized record each), SDK/in-flight/header/object accounting separate.
+Race pressure/order/cancel/error/join controls accepted; native legacy oracle and
+fresh full400k/4.8M original20s CPU/fault qualification pending. No adoption or
+speedup claim. [Preparation](scale/chunked-callback-audit-2026-10-06/preparation/).

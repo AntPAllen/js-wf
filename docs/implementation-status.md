@@ -29,6 +29,16 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: bounded chunk handoff prepared
+
+An explicit candidate transfers bounded chunks, preserving scanner-owned visitors
+and all shared semantic/recovery/cleanup gates. Two adapter buffers each hold up
+to256 records/1MiB payload or one oversized record; SDK/in-flight/objects separate.
+Race pressure/order/cancel/error/join controls pass1.195s. Legacy full-oracle and
+fresh full400k/4.8M original20s CPU/fault gates prepared; no adoption or performance
+claim. Closed prior998-file3,580,395,671byte copy reclaimed only after pushed whole
+proof/current-file/FD/process verification. [Preparation](scale/chunked-callback-audit-2026-10-06/preparation/).
+
 ## Latest follow-up — 2026-10-06: cold CPU diagnostic verified
 
 Fresh clean4086e44 full400k/4.8M diagnostic fails20.000090s after4,282,850

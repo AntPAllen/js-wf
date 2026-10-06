@@ -54,9 +54,29 @@ func scanConsumeByteBoundedThrough(ctx context.Context, stream jetstream.Stream,
 	}, compactMessageCoordinates)
 }
 
+type callbackWindowDelivery interface {
+	next(context.Context) (jetstream.Msg, error)
+	stop()
+	stopAndJoin(context.Context) error
+}
+
 // Explicit candidate removing only the additional batch relay goroutine/channel.
-func scanConsumeDirectWindowsThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) (failure error) {
-	var delivery *callbackDelivery
+func scanConsumeDirectWindowsThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+	return scanConsumeDirectWindowsWithFactory(ctx, stream, cutoff, visit, func(c jetstream.Consumer) (callbackWindowDelivery, error) {
+		return newCallbackDelivery(c)
+	})
+}
+
+// Explicit diagnostic candidate: transfer bounded chunks to amortize adapter
+// waits. The common scanner retains all ordering, gap, recovery and reductions.
+func scanConsumeChunkedWindowsThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+	return scanConsumeDirectWindowsWithFactory(ctx, stream, cutoff, visit, func(c jetstream.Consumer) (callbackWindowDelivery, error) {
+		return newChunkedCallbackDelivery(c)
+	})
+}
+
+func scanConsumeDirectWindowsWithFactory(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, create func(jetstream.Consumer) (callbackWindowDelivery, error)) (failure error) {
+	var delivery callbackWindowDelivery
 	var name, consumerStream, initialLeader string
 	var initial *jetstream.ConsumerInfo
 	var lastAccepted uint64
@@ -86,7 +106,7 @@ func scanConsumeDirectWindowsThrough(ctx context.Context, stream jetstream.Strea
 				}
 			}
 			var err error
-			delivery, err = newCallbackDelivery(c)
+			delivery, err = create(c)
 			if err != nil {
 				return nil, err
 			}
@@ -106,7 +126,7 @@ func scanConsumeDirectWindowsThrough(ctx context.Context, stream jetstream.Strea
 	}, compactMessageCoordinates)
 }
 
-func walkCallbackWindow(ctx context.Context, n int, d *callbackDelivery, accept func(jetstream.Msg)) error {
+func walkCallbackWindow(ctx context.Context, n int, d callbackWindowDelivery, accept func(jetstream.Msg)) error {
 	stopOnCancel := context.AfterFunc(ctx, d.stop)
 	defer stopOnCancel()
 	for i := 0; i < n; i++ {

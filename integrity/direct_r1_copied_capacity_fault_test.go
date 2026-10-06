@@ -94,6 +94,7 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 		NextGCAfter      uint64                            `json:"next_gc_after"`
 		GCPauseNS        uint64                            `json:"gc_pause_ns"`
 		CPUProfile       bool                              `json:"cpu_profile"`
+		ChunkedCallback  bool                              `json:"chunked_callback"`
 		Phases           []struct {
 			Stream     string `json:"stream"`
 			StartedNS  int64  `json:"started_ns"`
@@ -102,11 +103,17 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 		StateWatches []capacityWatchTiming `json:"state_watches,omitempty"`
 	}
 	profileCPU := os.Getenv("WF_AUDIT_CAPACITY_R1_CPU_PROFILE") == "1"
+	reader := scanConsumeDirectWindowsThrough
+	chunked := os.Getenv("WF_AUDIT_CHUNKED_CALLBACK") == "1"
+	if chunked {
+		reader = scanConsumeChunkedWindowsThrough
+	}
+	t.Logf("full-capacity chunked callback candidate=%v", chunked)
 	var results []result
 	// A current-source healthy baseline precedes the one fault in the same fresh
 	// fixture. A baseline failure stops before injecting any destructive fault.
 	for _, mode := range []string{"baseline", kind} {
-		r := result{Kind: mode}
+		r := result{Kind: mode, ChunkedCallback: chunked}
 		var deletionMu sync.Mutex
 		var before, after runtime.MemStats
 		runtime.ReadMemStats(&before)
@@ -158,7 +165,7 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 				r.Deletions = append(r.Deletions, o)
 			}}
 			read := func(call context.Context) error {
-				return scanConsumeDirectWindowsThrough(call, wrapped, cutoff, func(msg *jetstream.RawStreamMsg) error {
+				return reader(call, wrapped, cutoff, func(msg *jetstream.RawStreamMsg) error {
 					if streamName != "WF_JRN" {
 						return visit(msg)
 					}
