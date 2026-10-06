@@ -29,6 +29,17 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: fully preserved state-copy headroom
+
+Three closed disposablecopied-stores reclaimed after full canonical archive/member/
+manifest/currentfile byte checks, SDK+five server closure/stopped-or-absent containers/
+no running container mounts/visible taskFD. Recovered2,060,595,200allocatedbytes;
+about4.4GiB free,12GiB target unmet. Original failed/pass outcomes, donors/originals/
+source/exes/caches/canonicalGit/fullproof/live stores retained. First Docker message
+capitalization assertion failed before deletion and is preserved; corrected check
+passes. Original upgrade/24h/million handles remain active on unchanged sources.
+[Verification](scale/preserved-state-copy-headroom-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: original rolling upgrade physical diagnostics live
 
 Canonical failed123bc4b proof confirms residualseq494's delivery4 successful
