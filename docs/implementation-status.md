@@ -29,6 +29,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: complete closed R5 derived clone preserved
+
+Current closed827MiB R5 profile clone now has byte-complete lossless preservation;
+prior profile archive contained only its post-state hashes. Full canonical base
+verified;422unchangedfiles/856,159,377bytes referenced, remaining bytes in99,772,923byte/
+fourpart delta. Complete1,314logicalfiles/893physicalmembers including640storefiles,
+sources/exes/metadata/logs and closure/mount/visibleFD checks independently verify.
+HistoricalSDK/fiveobservedserverPIDs absent, fivecontainersremoved, currentactive
+mounts excludeclone; permissionlimits explicit. NoNATS/originalstore reopen.
+Reclamation pending pushed proof/final verification; diagnostic verdicts unchanged.
+[Lossless preservation](scale/r5-profile-derived-store-preservation-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: copied proof duplicate headroom
 
 Six full pushed canonical copied fanout archives reverified before raw/staging
