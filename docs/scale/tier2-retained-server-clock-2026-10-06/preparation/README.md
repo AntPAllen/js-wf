@@ -1,0 +1,5 @@
+# Retained original server-clock qualification preparation
+
+Repository reviewer covers positive/negative original ten-minute seed rows: SDK/source/external/helper/profile/observed closure/full native cells and gates, nineteen original30-second clock observations, actual node2±60s versus neutral peers within original±2s tolerance. Exact Go time overlay binds retained toolchain time.go bytes, single patched source and actual shifted/neutral server executable bytes. Complete latency artifact is a list; every sample must carry the same signed correction and all terminals must be present.
+
+Three test groups accept both original patterns and reject24 corrupted clock patterns plus four incomplete/wrong-sign latency artifacts. No native/full-matrix qualification from these controls. Positive native producer/terminal reviewer prepared to preserve pass/failure and full archive. Copied integrity/history/drain follows native acceptance; full13x200/current-source/24h remain separate. Original long campaigns stay on their existing handles and source.
