@@ -7,7 +7,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 
 | Area | Accepted evidence / current state |
 | --- | --- |
-| Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Focused domain retirement now combines native all-server SIGKILL, production lease expiry and controlled weak fresh-frame absence at0b2716b. Focused legacy2.11.17 combined domain/weak-frame/lease-expiry cut also qualifies at97d12e8. Other combined fault and operational cases remain open. |
+| Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Focused domain retirement now combines native all-server SIGKILL, production lease expiry and controlled weak fresh-frame absence at0b2716b. Focused legacy2.11.17 combined domain/weak-frame/lease-expiry cut also qualifies at97d12e8. Committed-manifest lost-ack combination qualifies at782d525. Other combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Earlier recorded runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. Current handler runtime at3e35e7c: full122 workloads ×1,000 race seeds (122,000 bodies),179 top-level passes/two trace-only skips and392 pins independently accepted. Full122×100000 normal at4f93039 is now independently accepted:12.2M bodies/392 pins/179 passes, with full S3 proof. Simulation does not model NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and hosted seed3 at a517d2e, each with independent copied integrity/history/drain, qualified. Retained normal ten-minute block-disk seed1 at f57da4d plus copied raw-image integrity/history/drain qualified. Ten-minute worker seed1 native and copied audits also pass, with the original producer generated-cache failure separately preserved. Retained normal ten-minute pause seed1 at d893bb0 and reply-isolation seed1 at85c4cf2, each with independent copied integrity/history/drain, qualify. Original retained fanout-restart seed1 at e3399bf and full rolling-upgrade seed1 at661239d, each with native plus independent copied audits, qualify. Full 13-row × 200 current-source gate remains open. |
@@ -34,6 +34,26 @@ no24h row is accepted. Their complete current files, including
 partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
+
+## Committed manifest lost-ack/domain/expiry/frame case accepted — 2026-10-06
+
+Clean782d525 race case passes41.39s/42.4173s SDK. Real generation3 manifest
+is committed and exactly read back at KV sequence11 before all-server SIGKILL;
+it matches the final restored frame. Production12s TTL is exceeded by13.0001s
+outage; three replacement2.15.0 peers heal within18.43795s under unchanged30s.
+Fresh initial handler enters exactly once, one real commit/one dropped ack;
+strict generation1→3/reclaimed2/shared blob/effects3/terminals2 all verify.
+Controlled weak frame drop has two reads/one native domain leader oracle/zero
+target-body direct requests; terminal epoch54→68/10 records. Final integrity,
+stale-frame rejection and quiescentGC pass. Independent review binds1896 source
+inputs, actual SDKrace/count1/3m and six closed executable identities; full2333-
+member51,368,451-byte archive verifies. Twelve verifier groups reject malformed
+publication/ordering/generation/object/sequence/re-entry/commit coverage.
+[Complete proof](scale/domain-retirement-committed-manifest-2026-10-06/).
+Original92c5e16 failure remains preserved: its prepublication re-entry assertion
+was inappropriate for an already committed continuation. No deadline was relaxed.
+Natural network loss/follower lag/active-writerGC/legacy committed case/fullmatrix/
+originalmillion physical drain/actual24h remain open. Original journal remains live.
 
 ## Legacy domain retirement/weak-frame/lease-expiry accepted — 2026-10-06
 

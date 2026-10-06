@@ -10,6 +10,24 @@ spec.loader.exec_module(controls)
 
 
 class DomainCoverageControls(unittest.TestCase):
+    def test_actual_committed_case_requires_publication_before_kill_and_no_initial_reentry(self):
+        log = (REPO/'docs/scale/domain-retirement-committed-manifest-2026-10-06/native-race/native.log').read_text()
+        controls.verify_log('retirement-committed-weak-frame-expiry', log)
+        publication = re.search(r'^.*retirement manifest committed before SIGKILL:.*\n', log, re.M)[0]
+        without = log.replace(publication, '')
+        kill = re.search(r'^.*retirement fresh manifest cut:.*\n', without, re.M)[0]
+        bad = [without,
+               log.replace('before SIGKILL: generation=3', 'before SIGKILL: generation=1'),
+               re.sub(r'(before SIGKILL:.*sequence=)\d+', r'\g<1>0', log),
+               re.sub(r'(before SIGKILL: generation=3 object=)step-result-[a-f0-9]{64}', r'\g<1>step-result-'+'0'*64, log),
+               without.replace(kill, kill+publication),
+               log.replace('fresh_initial_calls=1', 'fresh_initial_calls=2'),
+               log.replace('manifest_commits=1', 'manifest_commits=0')]
+        for malformed in bad:
+            self.assertNotEqual(log, malformed)
+            with self.assertRaisesRegex(ValueError, 'durable manifest publication'):
+                controls.verify_log('retirement-committed-weak-frame-expiry', malformed)
+
     def test_prepublication_expiry_row_cannot_substitute_for_committed_ack_loss(self):
         log = (REPO/'docs/scale/domain-retirement-weak-frame-expiry-2026-10-06/native-race/native.log').read_text()
         with self.assertRaisesRegex(ValueError, 'coverage'):

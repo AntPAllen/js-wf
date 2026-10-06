@@ -5319,3 +5319,16 @@ budgets. Prove commit occurs before every kill and final frame matches it;
 prepublication or renamed evidence is insufficient. Eleven verifier groups and
 compilation pass; native acceptance remains pending.
 [Prepared fixture](scale/domain-retirement-committed-manifest-2026-10-06/).
+
+## Committed manifest lost-ack domain retirement accepted — 2026-10-06
+
+Actual clean782d525 race case passes after real generation3 manifest commit and
+exact byte readback at positive KV sequence11 before all-server SIGKILL. Outage
+exceeds production12s TTL; all domain peers heal18.43795s under original30s.
+Committed frame restores with exactly one fresh initial entry/one commit/drop,
+strict reuse/shared effects/integrity/GC, native weak-frame confirmation and
+higher epoch54→68.1896 exact inputs/six closed incarnations/full2333-member
+original archive independently verify. Twelve verifier groups pass. Initial
+failed prepublication-count assertion remains preserved; no deadline relaxation.
+Other publication/legacy/natural-lag/fullmatrix/million/actual24h gates remain
+open. [Focused accepted proof](scale/domain-retirement-committed-manifest-2026-10-06/).
