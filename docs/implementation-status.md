@@ -29,6 +29,25 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: native bulk prefix oracle accepted
+
+At8a1b0cd actual R3 race160 PASS54.11s: complete samples and97-invocation prefix
+exactly match frozen point oracle; the prefix exercises a child beyond its cutoff.
+Complete source counts/stability/160 snapshot fallbacks/purged missing-timestamp
+and deadline negative controls pass. ObservedSDK2726418 closed; full2,807member/
+32,411,982byte proof read back. Large87920/400k/memory/fault/24h still open; bulk
+notenabled in matrix/soak.
+[Native prefix evidence](scale/bulk-final-latency-preparation-2026-10-06/native-bulk-prefix-json/).
+
+Byte-soak/promise fullcanonical parts/member inventories verified; only redundant
+raw archives removed, recovering298,459,136 +145,424,384 allocated bytes.
+3,274,424,320 bytes free atlatestcompletion; original stores/source/exes/cache/live
+and canonical Git proof retained. Real87920 producer now prepared to verify all
+original donor file hashes against committed inner inventory, verify the complete
+accepted cached point archive and bind its108,752,647-byte oracle, then open fresh
+copies under original20s/6m budgets. Execution and final review remain pending.
+[Additional recovery evidence](scale/nested-raw-proof-recovery-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: real-cohort headroom and prefix bulk preparation
 
 Six complete canonical outer proofs/five inner member inventories read back;
