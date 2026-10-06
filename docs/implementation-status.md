@@ -14626,3 +14626,12 @@ The original full normal100k handle finished successfully at executed `4f9303953
 The independent terminal reviewer binds1803 Git/before/after/current source inputs, the actual observed SDK binary/profile and closed producer identities. A second full event-stream and complete archive/current-file census check confirms all1840 members. The actual SDK uses normal instrumentation, GOMAXPROCS2/GOMEMLIMIT512MiB and SIM_SEEDS100000. Complete proof is in [the terminal directory](scale/outer-handler-cancellation-2026-10-06/full-normal100k-terminal/).
 
 Together with the already accepted full122×1000 race run and392 pins, this closes the outer-handler simulation normal/race graph gates at their recorded sources. It does not establish NATS disk/Raft behavior, newer unrelated source acceptance, full13×200 Tier2/full16×200 Tier3, million physical timer drain, active-writer GC or actual24h completion. The original24h journal handle remains active; new partition200 run37486948256 remains queued with only its generator job at the latest observation.
+
+
+## Full Tier2 200-seed singleton row review prepared — 2026-10-06
+
+Added public REST collection and independent full-row review requiring exactly201 terminal successful job identities and400 raw/source provider artifacts, exact singleton seeds1–200, full provider ZIP digest/member readback and complete recorded Git source selection. Every seed runs the existing raw named10m/fault/latency/three-history-model reviewer; stored green summaries cannot replace raw evidence. Duplicate/missing/failed/mixed-source jobs, incomplete provider listings and changed extraction/source inputs reject. Whole collection bytes must remain unchanged.
+
+Six collector/full-row guard groups plus eight shard groups pass. The actual historical partition ZIP validates all five original members with no original changes; sourcefcf2e94 selects1893 inputs/28040118 bytes. Actual queued37486948256 is refused before collection-root creation, with the refusal retained as a tool control rather than a native failure. [Validation and commands](scale/current-tier2-partition-2026-10-06/full-row-review-preparation/).
+
+This prepares the concrete complete200-row gate while the original new campaign remains queued. No new seed/fullrow/fullmatrix/native SDK/store/actual24h acceptance is claimed. Existing hosted and24h handles continue unchanged. Fullnormal100k at4f93039 is now accepted separately; its full archive passed S3 body readback.

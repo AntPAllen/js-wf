@@ -1,0 +1,55 @@
+{
+  "observed_utc": "2026-10-06T16:09:28.562861+00:00",
+  "tests": [
+    {
+      "pattern": "test_tier2_full_row.py",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.083s\n\nOK\n"
+    },
+    {
+      "pattern": "test_tier2_journal_shard.py",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.003s\n\nOK\n"
+    }
+  ],
+  "actual_historical_provider_control": {
+    "run": 36845868029,
+    "artifact": 11153871883,
+    "digest": "sha256:b575f003464e55dbd5bc8e46923944a782580811825000bc37882e1dd5db1711",
+    "members": 5,
+    "all_original_bytes_unchanged": true
+  },
+  "pinned_new_source_selection": {
+    "revision": "fcf2e940ee22f2dda7116d1d860683bcaa3bc329",
+    "materialized_paths": 1893,
+    "materialized_bytes": 28040118
+  },
+  "queued_collection_refused_before_root_creation": true,
+  "tools": {
+    "scripts/review-tier2-row.py": "b5454c55d288d5d8f15044d609e0908c60d08a42f0179b7f710856335b24c1ed",
+    "scripts/collect-tier2-row.py": "6dbe9cad661a6c4ffd06b5768a7b3678f71fc2be4ff223aa776a5373fb091ec2",
+    "scripts/check-tier2-journal-shard.py": "b2f09e55d726922bdf537f0977dc6c4ea0be3f60e34389641215f896c3d9260d",
+    "scripts/test_tier2_full_row.py": "2646a0b68a9d84bd1da057495a29ebc5f8084b12b90db4dbe214423707f5ab44"
+  },
+  "scope": "Reviewer/collector guard validation and historical provider ZIP positive control only. No synthetic fixture qualifies a native row. New partition200 remains queued and unqualified; no native restart or original store opening.",
+  "actual_queued_refusal": {
+    "command": [
+      "python3",
+      "scripts/collect-tier2-row.py",
+      "--root",
+      "/tmp/js-wf-tier2-partition200-terminal-provider-37486948256-20261006",
+      "--run-id",
+      "37486948256",
+      "--revision",
+      "fcf2e940ee22f2dda7116d1d860683bcaa3bc329",
+      "--row",
+      "partition"
+    ],
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\n  File \"/home/exedev/js-wf/scripts/collect-tier2-row.py\", line 122, in <module>\n    collect(args.root.resolve(),args.run_id,args.revision,args.row)\n  File \"/home/exedev/js-wf/scripts/collect-tier2-row.py\", line 57, in collect\n    reviewer.require(run.get('id') == run_id and run.get('head_sha') == revision\n  File \"/home/exedev/js-wf/scripts/review-tier2-row.py\", line 31, in require\n    raise ValueError(message)\nValueError: requested original run is not terminal successful at pinned source; no restart is authorized\n",
+    "scope": "Collector refusal, not a native workload failure or observation-expiry restart."
+  }
+}
