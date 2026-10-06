@@ -29,6 +29,21 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: metadata reuse native oracle accepted
+
+Clean037bed8 actualcurrentR3libraryracePASS18.46s: all160actualshort/timer/signal/
+parent/child samples match serial/uncachedparallel; impossibledeadline remainsfatal
+withwarmmetadatahandles. Top-levelJRN/SIG/STATElookups1each/OBJ0; not networkcounts,
+no snapshotsinfixture/cachedstage timing/speedratio claim. SDK/modules/source/closure/
+2807member32,217,100byte proof independently verified/readback. Default/live24h
+unchanged. Fresh real87920 cachedmetadata measurementprepared underoriginal6min/
+20s/predicates. Faileduncachedcopy4064files/1,919,850,876bytes reclaimed afterpushed
+wholeproof/part/manifest/currentbytes/closure/allvisibletaskFDchecks; originals/exes/
+source/cache/canonicalGit/livecampaigns retained.
+[Oracle](scale/cached-final-latency-2026-10-06/native-oracle/).
+[Preparation](scale/cached-final-latency-2026-10-06/cohort-preparation/).
+[Reclamation](scale/parallel-final-latency-2026-10-06/reclaimed-point-deadline-copy/).
+
 ## Latest follow-up — 2026-10-06: larger point deadline failure and metadata reuse prepared
 
 Clean38a0a8e normalnativeFAIL377.62s, correctR5ready passes. Real87920 pointstage

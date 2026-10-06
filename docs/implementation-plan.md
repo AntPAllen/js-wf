@@ -4470,3 +4470,14 @@ pass1.061s; nativecached/uncached/serialoracle prepared. No fullscale/default/
 currentmatrix/24h qualification from preparation; existing24h source unchanged.
 [Failure](scale/parallel-final-latency-2026-10-06/retained-cohort-r5-v2/).
 [Preparation](scale/cached-final-latency-2026-10-06/preparation/).
+
+## Metadata reuse native oracle accepted; fresh larger measurement prepared — 2026-10-06
+
+Clean037bed8 actualcurrentR3libraryrace160point samples matchoriginalserial and
+uncachedparallel exactly, impossibledeadline stillfatal; native18.46s. Top-level
+JRN/SIG/STATEhandlelookups1each, no cachedvalues/networkcount/speedratio claim.
+SDK/source/closure/complete32,217,100byte proof verified/readback. Fresh real87920
+cachedmetadata measurementprepared withR5ready/original6min/20s/terminaldeadline;
+no original/failedstore reopen. No fullscale/default/currentmatrix/24h qualification.
+[Oracle](scale/cached-final-latency-2026-10-06/native-oracle/).
+[Preparation](scale/cached-final-latency-2026-10-06/cohort-preparation/).
