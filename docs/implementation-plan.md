@@ -231,7 +231,7 @@ Suspension: when an await cannot complete, the runtime appends `Suspended{waitin
 - **Goroutines spawned inside workflow code.** Not supported in v1; the determinism guard catches reordering. Test that two steps issued from two goroutines produce `ErrNonDeterministic` on replay at least sometimes, which proves the guard rather than the feature.
 - **Very long-running invocation crossing a code deploy.** `ctx.Version` test: old journal + new code with the version branch replays clean; old journal + new code without the branch fails clean.
 - **Panic inside a step.** Caught, recorded as `StepCompleted{error}`, surfaced to user code as an error; retry policy is user code's choice via `ctx.Run` options. Test panic, `runtime.Goexit`, and a step that blocks forever (must respect `ctx` cancellation from lease loss).
-- **Outer handler or named continuation blocks outside a step and ignores cancellation.** Stop waiting at the handler boundary when delivery/handler context is cancelled; leave its SDK/journal buffers owned by that goroutine and discard any late result. Every SDK append must reject cancellation before accessing the durable append closure. A retained cancel is drained on redelivery. Outer Goexit follows the bounded panic-attempt policy. Prove successor completion, unchanged accepted journal after a late SDK call, worker shutdown and native bounded Goexit attempts; ignored external effects still require idempotency. Focused race/model/R3 Goexit controls now pass; combined native lease-loss and full release qualification remain open.
+- **Outer handler or named continuation blocks outside a step and ignores cancellation.** Stop waiting at the handler boundary when delivery/handler context is cancelled; leave its SDK/journal buffers owned by that goroutine and discard any late result. Every SDK append must reject cancellation before accessing the durable append closure. A retained cancel is drained on redelivery. Outer Goexit follows the bounded panic-attempt policy. Prove successor completion, unchanged accepted journal after a late SDK call, worker shutdown and native bounded Goexit attempts; ignored external effects still require idempotency. Focused race/model/R3 Goexit controls pass. Focused real R3 race lease-expiry controls for both an ordinary handler and named continuation now qualify at `fb1e515`: real productionTTL12s/AckWait13s takeover, old heartbeat CAS fencing, shutdown with ignored handler held, unchanged journal/no late effect and all-three public local queue drain. [Complete native evidence](scale/outer-handler-lease-expiry-2026-10-06/). Other network/process/clock/checkpoint cut combinations and full release qualification remain open.
 - **Step result identical across a retry but with a different epoch.** Both writers cannot both succeed (I2); assert the surviving completion's epoch equals the lease epoch at the time.
 - **Journal cursor and snapshot disagree** (snapshot says index 300, journal tail says 298 because a purge kept too little). Refuse to run with `ErrJournalGap`; test by hand-corrupting a fixture.
 
@@ -5159,3 +5159,14 @@ at13af4d2; the corrected assertion preserves reason/owner/epoch checks and
 requires the lost-lease prefix plus underlying cause. This changes observation
 only, with no runtime, TTL, AckWait, counts or deadlines changed. Original
 output/stores must be retained before a fresh corrected-source qualification.
+
+## Focused native lease-expiry combinations accepted — 2026-10-06
+
+Corrected ordinary-handler and named-continuation cases atfb1e515 pass race
+35.32s, with productionTTL12s/AckWait13s takeovers13.0728/13.0774s. Independent
+source/actual-SDK/raw-config/closure and complete archive checks pass; full S3
+readback preserves all original files. Late SDK calls cause no effect or journal
+change after successor completion and old heartbeat fencing. The original failed
+wrapped-error observer guard remains separately preserved. No production change
+or deadline relaxation. [Accepted component and limits](scale/outer-handler-lease-expiry-2026-10-06/).
+Broader combined cut, current fullmatrix, million physical-drain and24h gates remain.

@@ -14534,3 +14534,24 @@ The correction retains reason, owner, epoch and real key-revision-mismatch cause
 no runtime or target changes. Fresh corrected-source race qualification pending.
 [Original failed guard](scale/outer-handler-lease-expiry-2026-10-06/initial-error-guard/review.json).
 No native/fullmatrix/24h acceptance inferred from partial takeovers.
+
+### Native ignored outer-handler lease expiry accepted — 2026-10-06
+
+Atfb1e515, complete R3 race ordinary-handler and named-continuation cases pass
+35.32s. Real production12s leases expire while old heartbeat ticks are held;
+unchanged13s consumer redelivery lets a live successor complete in a higher
+epoch at13.0728/13.0774s. Resuming the old heartbeat proves actual CAS fencing
+while its handler still ignores cancellation. Worker shutdown, all-three public
+local physical queue drain, late SDK rejection/no effect, unchanged journal and
+production integrity pass. All1,862 source inputs bind to Git/current/before/
+after, actual SDK/race/profile/argv and visible closure verify; all six closed
+replica configurations independently confirm13s AckWait/12s TTL/R3 leases.
+Complete originals and both rejected/accepted native records have verified S3
+readbacks. The initial wrapped-error observer guard is retained; runtime/targets
+are unchanged. [Focused qualification and scope](scale/outer-handler-lease-expiry-2026-10-06/).
+
+Normal100k at4f93039 and original24h journal at757454a remain active on their
+original handles. The normal has156 top-level passes/no failures in the latest
+observation; the journal has passed67 minutes. These observations are not terminal
+acceptance. Broader combined cuts, full matrices, million physical drain and
+actual24h qualification remain open.
