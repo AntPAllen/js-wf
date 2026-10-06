@@ -1,6 +1,6 @@
 # /tmp storage review — 2026-10-06
 
-Completed guarded S3 offloads recovered **29.10 GiB of older data**, including **1.39 GiB** in the latest three-root consumer/partition pass. Including verified staging copies, this pass recovered **2.47 GiB**. The latest observation has **36.99 GiB available**. Live runs continue writing, so free space changes. See [latest offload](consumer-partition-evidence/README.md).
+Completed guarded S3 offloads now total **33.28 GiB of older data**. This latest pass recovered **4.46 GiB of pre-existing data**, including verified staging copies. The latest observation has **39.64 GiB available**. The live run continues writing, so free space changes. See [latest summary](latest-pass-summary.json), [existing-custody cleanup](closed-fixture-duplicates/README.md) and [six additional historical roots](additional-historical-roots/README.md).
 
 | Completed cleanup | Older allocated bytes recovered |
 | --- | ---: |
@@ -11,11 +11,13 @@ Completed guarded S3 offloads recovered **29.10 GiB of older data**, including *
 | Historical matrix raw evidence and media, five closed roots | 3,157,147,648 |
 | Historical disk-stall and upgrade evidence, seventeen closed roots | 4,671,275,008 |
 | Closed consumer and partition raw evidence/media, three roots | 1,495,064,576 |
-| Total | 31,240,757,248 |
+| Further closed fixture source/media, 24 roots | 1,759,395,840 |
+| Six further closed historical evidence roots | 2,734,481,408 |
+| Total | 35,734,634,496 |
 
-Temporary archive staging removed separately totals 17,247,199,232 bytes. The disposable exact restoration control is also excluded from old-data recovery.
+Temporary archive staging removed separately totals 18,576,576,512 bytes. The disposable exact restoration control is also excluded from old-data recovery.
 
-Every removed original was covered by committed S3 proof metadata and a full remote body readback. Removal additionally checked remote archive members, original hashes/modes/mtimes and fresh visible closure. Process inspection limits are retained. Source, native logs and provenance remain local; binary restoration uses the complete content-addressed archive plus original-path index. See [binary removal](closed-test-binaries/offload/offload.json), [refill removal](byte-refill-final-controls/media-offload/offload.json) and [final inventory](inventory-final/summary.json).
+Every removed original was covered by committed S3 proof metadata and a full remote body readback. Removal additionally checked remote archive members, original hashes/modes/mtimes and fresh visible closure. Process inspection limits are retained. Root logs and provenance remain local; selected closed source/media were also offloaded in the latest pass; binary restoration uses the complete content-addressed archive plus original-path index. See [binary removal](closed-test-binaries/offload/offload.json), [refill removal](byte-refill-final-controls/media-offload/offload.json) and [final inventory](inventory-final/summary.json).
 
 The original24h journal campaign remains active. The normal100k simulation and its terminal reviewer have finished; their evidence is retained for review. Both full400k capacity donors are retained. User attachments, hidden/system temporary directories, caches and Git storage were not cleared. Remaining closed source/store/proof roots are candidates for a later verified offload, rather than automatic deletion based on their age or filename.
 
