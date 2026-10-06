@@ -9,3 +9,11 @@ Preparation: helper race compile passed. Actual retained diagnostic remains pend
     python3 scripts/run-lease-partition-component.py --root /tmp/js-wf-lease-partition-component-20261006
 
 Initial setup attempt at698634a expired before bucket creation/observations; no partition or recovery result. Full failure is retained under `initial-setup-failure`. API-readiness attempts and bucket setup now have explicit short bounds and stage labels, and the majority-probe request deadline is strictly the ten-second isolation end. Whole120s helper and35s recovery reference remain.
+
+## Verified fixed-key control
+
+Executed46772ba recovered after14.016s wholecut /4.015s after routes heal.4200complete cycles acknowledged,60transactions errored, and an acknowledged majority-cut probe hasrevision9721. Final local snapshots on all three servers showlast_seq12613; the current lease leader reports both replicas current. Independent review binds1948 Git/current/retained/before/after sources,1494external inputs and all3actual NATS binaries equal to the original matrix byteSHA24759ea... . R3/12sTTL/history1/file configuration is read back. Complete3523member archive verified. [Control evidence](fixed-key-control/). This profile is a non-reproduction, not a matrix acceptance or cause.
+
+A selectable fresh-key profile uses a new subject every cycle so expiry and subject retirement occur while traffic continues. The fixed192-key control refreshes its heads well within the12sTTL; this differs from the original matrix’s distinct invocation identities. Fresh profile preserves all other actor pacing/configuration/topology/fault timing. Actual fresh-key run remains pending.
+
+    python3 scripts/run-lease-partition-component.py --root /tmp/js-wf-lease-partition-component-fresh-20261006 --key-profile fresh
