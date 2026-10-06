@@ -17,9 +17,10 @@ import (
 )
 
 type fanoutStartupAttempt struct {
-	Started  time.Time `json:"started"`
-	Finished time.Time `json:"finished"`
-	Error    string    `json:"error,omitempty"`
+	Started   time.Time `json:"started"`
+	Finished  time.Time `json:"finished"`
+	Error     string    `json:"error,omitempty"`
+	Retryable bool      `json:"retryable"`
 }
 
 // Worker.New bounds each startup to five seconds. Metadata leaders may still
@@ -43,6 +44,7 @@ func retryFanoutWorkerStartup(ctx context.Context, build func(context.Context) (
 		if err != nil {
 			attempt.Error = err.Error()
 		}
+		attempt.Retryable = err != nil && ctx.Err() == nil && (errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || natsutil.IsUnavailable(err))
 		attempts = append(attempts, attempt)
 		if err == nil {
 			return w, attempts, nil
@@ -50,7 +52,7 @@ func retryFanoutWorkerStartup(ctx context.Context, build func(context.Context) (
 		if ctx.Err() != nil {
 			return nil, attempts, ctx.Err()
 		}
-		if !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, nats.ErrTimeout) && !errors.Is(err, nats.ErrNoResponders) && !natsutil.IsUnavailable(err) {
+		if !attempt.Retryable {
 			return nil, attempts, err
 		}
 		timer := time.NewTimer(100 * time.Millisecond)

@@ -25,14 +25,14 @@ func TestFanoutWorkerStartupRetriesOnlyTransientErrors(t *testing.T) {
 			return expected, nil
 		})
 		stop()
-		if err != nil || actual != expected || calls != 2 || len(attempts) != 2 || attempts[0].Error == "" || attempts[1].Error != "" {
+		if err != nil || actual != expected || calls != 2 || len(attempts) != 2 || attempts[0].Error == "" || attempts[1].Error != "" || !attempts[0].Retryable || attempts[1].Retryable {
 			t.Fatalf("retry cause=%v calls=%d attempts=%+v err=%v", cause, calls, attempts, err)
 		}
 	}
 	for _, cause := range []error{errors.New("invalid worker option"), jetstream.ErrStreamNotFound, jetstream.ErrBucketNotFound, context.Canceled} {
 		calls := 0
 		_, attempts, err := retryFanoutWorkerStartup(context.Background(), func(context.Context) (*worker.Worker, error) { calls++; return nil, cause })
-		if err != cause || calls != 1 || len(attempts) != 1 {
+		if err != cause || calls != 1 || len(attempts) != 1 || attempts[0].Retryable {
 			t.Fatalf("permanent failure retried: %v calls=%d", err, calls)
 		}
 	}

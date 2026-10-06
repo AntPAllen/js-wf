@@ -46,6 +46,23 @@ def review_drain(drain,healed):
     return True
 
 
+def review_startup(record, worker_id, deadline):
+    require(record['worker']==worker_id and record['error']=='<nil>' and
+            record['original_case_deadline']==deadline and bool(record['attempts']),
+            'missing successful original-case worker startup record')
+    end=ns(deadline);start=end-300_000_000_000;previous=start
+    for index,attempt in enumerate(record['attempts']):
+        began,finished=ns(attempt['started']),ns(attempt['finished'])
+        require(previous<=began<=finished<=end, 'worker startup outside original case or reordered')
+        last=index==len(record['attempts'])-1
+        require(type(attempt['retryable']) is bool and
+                (not attempt.get('error') and not attempt['retryable'] if last else
+                 bool(attempt.get('error')) and attempt['retryable']),
+                'permanent failure retried or final worker startup failed')
+        previous=finished
+    return len(record['attempts'])
+
+
 def review(root):
     e=read(root/'execution.json');binary=read(root/'binary.json');revision=e['source']
     require(e['status']=='passed' and e['exit_code']==0 and not Path('/proc',str(e['pid'])).exists(),
@@ -104,7 +121,9 @@ def review(root):
                 report['Invocations']==report['Journals']==report['Terminal']==501,
                 'final original prefix/results/cohort differs')
         drain=read(leaf/'physical-drain.json');review_drain(drain,restart['healed'])
-        cases.append(dict(**item,retained_report=report,physical_drain_elapsed_ns=drain['elapsed_ns'],
+        starts={name:review_startup(read(leaf/('worker-start-'+name+'.json')),name,drain['case_deadline'])
+                for name in ('parent-after-cut','child-fanout-worker','parent-after-children')}
+        cases.append(dict(**item,retained_report=report,worker_startup_attempts=starts,physical_drain_elapsed_ns=drain['elapsed_ns'],
                           distinct_local_physical_queues_drained=True,original_case_deadline=drain['case_deadline']))
     return dict(source=revision,actual_sdk_pid=e['pid'],actual_sdk_sha256=e['sha256'],
                 source_files=len(before['files']),external_files=len(external),cases=cases,

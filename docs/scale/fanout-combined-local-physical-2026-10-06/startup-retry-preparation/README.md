@@ -19,3 +19,9 @@ original deadline/backoff/pre-cancellation and late-success rejection. Fullsix
 first/interior/last creation/results requalification runs on a fresh root, with
 full500children/actualparentSIGKILL/journalrestart/prefix/results/localphysicaldrain.
 Original failed stores are not reopened; both longhandles remain unchanged.
+
+Every attempt now retains its typed retryable classification. The independent
+review requires all three caller startup records, successful final attempts,
+transient-only retries, ordered intervals and the exact original case deadline.
+Two additional review groups accept valid startup records and reject9identity/
+classification/order/deadline corruptions.

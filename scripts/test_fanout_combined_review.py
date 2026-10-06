@@ -37,4 +37,28 @@ class CombinedPhysicalDrain(unittest.TestCase):
                 elif mutation=='durable_late':peer['consumers'][0]['ts']='2026-10-06T04:05:00.000000001Z'
                 elif mutation=='api_late':peer['queue']['ts']='2026-10-06T04:05:00.000000001Z'
                 with self.assertRaises(ValueError):r.review_drain(drain,heal)
+
+class CombinedStartupReview(unittest.TestCase):
+    def fixture(self):
+        deadline='2026-10-06T04:05:00Z'
+        return dict(worker='parent-after-children',error='<nil>',original_case_deadline=deadline,
+                    attempts=[dict(started='2026-10-06T04:01:00Z',finished='2026-10-06T04:01:05Z',error='signal stream: context deadline exceeded',retryable=True),
+                              dict(started='2026-10-06T04:01:05.1Z',finished='2026-10-06T04:01:06Z',retryable=False)]),deadline
+    def test_bounded_transient_startup_and_success(self):
+        record,deadline=self.fixture();self.assertEqual(r.review_startup(record,'parent-after-children',deadline),2)
+    def test_invalid_startup_records(self):
+        for mutation in ('identity','error','deadline','missing','permanent','retryable_success','failed_final','reordered','late'):
+            with self.subTest(mutation=mutation):
+                record,deadline=self.fixture()
+                if mutation=='identity':record['worker']='wrong'
+                elif mutation=='error':record['error']='deadline exceeded'
+                elif mutation=='deadline':record['original_case_deadline']='2026-10-06T04:06:00Z'
+                elif mutation=='missing':record['attempts']=[]
+                elif mutation=='permanent':record['attempts'][0]['retryable']=False
+                elif mutation=='retryable_success':record['attempts'][1]['retryable']=True
+                elif mutation=='failed_final':record['attempts'][1]['error']='unavailable'
+                elif mutation=='reordered':record['attempts'][1]['started']='2026-10-06T04:01:00Z'
+                elif mutation=='late':record['attempts'][1]['finished']='2026-10-06T04:05:00.000000001Z'
+                with self.assertRaises(ValueError):r.review_startup(record,'parent-after-children',deadline)
+
 if __name__=='__main__':unittest.main()
