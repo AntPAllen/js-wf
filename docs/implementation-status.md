@@ -29,6 +29,17 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: original reply isolation native accepted
+
+Original85c4cf2 normal ten-minute seed1 PASS649.01s:82batches/2,296terminals/
+25,336entries, ten45-second active reply holds, exact delivery fencing/recovery,
+all cells/native integrity/history/drain. Reusable reviewer confirms SDK/three
+workers/three servers closure and694Go/module/3,286external inputs. Original ad hoc
+report's external_files=8 variable-shadowing error preserved and corrected by the
+supplementary independent report. Full6,326member97,696,483byte/fourpart archive
+readback passes. Independent copied audit pending; full13x200/currentmatrix open.
+[Native proof](scale/tier2-retained-isolation-2026-10-06/native-ten-minute/).
+
 ## Latest follow-up — 2026-10-06: reusable retained worker review
 
 A repository command now reviews closed normal ten-minute Tier2 pause and reply
