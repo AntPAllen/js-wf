@@ -4300,3 +4300,14 @@ plus each current cursor's named API/typednot-found. Preserve zero assertion,
 original20s/full400k/4.8M; do not delete restored consumers or infer cause from
 unnamed count. Compile/opt-in skip accepted; new fresh-copy execution pending.
 [Preparation](scale/chunked-callback-audit-2026-10-06/named-cleanup-preparation/).
+
+## Copied pre-audit consumer count confirmed — 2026-10-06
+
+Fresh058040c full400k/4.8M preflightFAIL16.30s before any current cursor or bulk
+scan. INVcount0/list empty; JRNcount2 pre-existing, Info listtimes out1s. Doesnot
+prove identities/liveassignments/servercause. Full1714file830alias proof and
+source/SDK/fiveservers/closure/unchanged1058donorfiles verified. Initial review
+failure retained/corrected. Next bounded probe captures ConsumerNames before Info;
+resolve fixtureprecondition before more bulk runs. No deletion/zeroassertion
+relaxation/capacity/fault/default/24h acceptance.
+[Evidence](scale/chunked-callback-audit-2026-10-06/initial-consumer-failure/).

@@ -29,6 +29,17 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: pre-existing copied consumer count confirmed
+
+Fresh clean058040c full400k/4.8M preflightFAIL16.30s before any current cursor or
+bulk audit. INVcount0/list empty; JRNcount2 already present and consumer Info list
+times out1s. Confirms pre-existing count, not identity/live assignment/server cause.
+Whole1714-file830alias proof and unchanged1058donorfiles independently verified;
+initial review assertion failure retained and corrected review succeeds. Next
+probe lists assignment names before Info; no repeated bulk scan, deletion or gate
+relaxation follows. Earlier17.11s exact read remains scoped to failed cleanup gate.
+[Evidence](scale/chunked-callback-audit-2026-10-06/initial-consumer-failure/).
+
 ## Latest follow-up — 2026-10-06: named cleanup diagnostic prepared
 
 Opt-in instrumentation now captures full consumer identities/configs before any

@@ -351,12 +351,14 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 // Diagnostic-only named APIs. They do not delete any pre-existing consumer or
 // relax the gate's zero-consumer assertion. Post-delete probes share original20s.
 type capacityConsumerInventory struct {
-	Stream    string                    `json:"stream"`
-	At        time.Time                 `json:"at"`
-	Count     int                       `json:"count"`
-	Consumers []*jetstream.ConsumerInfo `json:"consumers"`
-	Owned     []capacityOwnedConsumer   `json:"owned,omitempty"`
-	Error     string                    `json:"error"`
+	Stream     string                    `json:"stream"`
+	At         time.Time                 `json:"at"`
+	Count      int                       `json:"count"`
+	Consumers  []*jetstream.ConsumerInfo `json:"consumers"`
+	Names      []string                  `json:"names"`
+	NamesError string                    `json:"names_error"`
+	Owned      []capacityOwnedConsumer   `json:"owned,omitempty"`
+	Error      string                    `json:"error"`
 }
 type capacityOwnedConsumer struct {
 	Name    string                  `json:"name"`
@@ -373,6 +375,17 @@ func capacityReadConsumerInventory(ctx context.Context, js jetstream.JetStream, 
 		return r
 	}
 	r.Count = stream.CachedInfo().State.Consumers
+	// Assignment-name listing can succeed when consumer Info has no responder.
+	// Preserve both APIs independently; an empty Info list is not absence proof.
+	names := stream.ConsumerNames(ctx)
+	for name := range names.Name() {
+		r.Names = append(r.Names, name)
+	}
+	if err := names.Err(); err != nil {
+		r.NamesError = err.Error()
+		r.Error = err.Error()
+		return r
+	}
 	lister := stream.ListConsumers(ctx)
 	for info := range lister.Info() {
 		r.Consumers = append(r.Consumers, info)
