@@ -52,7 +52,8 @@ def main():
     binary = root/'operator-race.test'
     build = ['go', 'test', '-race', '-c', '-o', str(binary), './cmd/wf']
     command = [str(binary), '-test.v', '-test.run=^('+'|'.join(TESTS)+')$', '-test.count=1', '-test.timeout=3m']
-    save('commands.json', dict(build=build, run=command))
+    run_directory = REPO/'cmd/wf'
+    save('commands.json', dict(build=build, build_working_directory=str(REPO), run=command, run_working_directory=str(run_directory)))
     with (root/'build.log').open('w') as log:
         subprocess.run(build, cwd=REPO, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
     info = subprocess.check_output(['go', 'version', '-m', str(binary)], text=True)
@@ -60,14 +61,14 @@ def main():
     save('binary.json', dict(sha256=shared.sha(binary), build_info=info))
     started = time.monotonic()
     with (root/'native.log').open('w') as log:
-        child = subprocess.Popen(command, cwd=REPO, env=env, stdout=log, stderr=subprocess.STDOUT)
+        child = subprocess.Popen(command, cwd=run_directory, env=env, stdout=log, stderr=subprocess.STDOUT)
         proc = Path('/proc', str(child.pid))
         actual_env = dict(v.split(b'=', 1) for v in (proc/'environ').read_bytes().split(b'\0') if b'=' in v)
-        actual = dict(pid=child.pid, stat=(proc/'stat').read_text(), exe=str((proc/'exe').resolve()),
+        actual = dict(pid=child.pid, stat=(proc/'stat').read_text(), exe=str((proc/'exe').resolve()), working_directory=str((proc/'cwd').resolve()),
                       exe_sha256=shared.sha(proc/'exe'),
                       args=[os.fsdecode(v) for v in (proc/'cmdline').read_bytes().split(b'\0') if v],
                       environment={k:os.fsdecode(actual_env[k.encode()]) for k in ('GOMAXPROCS','GOMEMLIMIT','GOWORK','GOFLAGS','WF_OPERATOR_TEST_ROOT')})
-        assert actual['args']==command and actual['exe_sha256']==shared.sha(binary) and actual['exe']==str(binary)
+        assert actual['args']==command and actual['exe_sha256']==shared.sha(binary) and actual['exe']==str(binary) and actual['working_directory']==str(run_directory)
         save('actual-sdk.json', actual)
         print('ACTUAL_OPERATOR_SDK', child.pid, flush=True)
         code = child.wait()
@@ -77,12 +78,13 @@ def main():
     save('source-after.json', after); assert before==after
     save('closure.json', shared.closure(root))
     plugins = list((root/'stores').glob('js-wf-replay-plugin-*/handler.so'))
-    assert len(plugins)==1
-    save('plugin.json', dict(path=str(plugins[0]), sha256=shared.sha(plugins[0]),
-                            build_info=subprocess.check_output(['go','version','-m',str(plugins[0])],text=True)))
+    plugin_records = [dict(path=str(p), sha256=shared.sha(p),
+                      build_info=subprocess.check_output(['go','version','-m',str(p)],text=True)) for p in plugins]
+    save('plugins.json', plugin_records)
     result = None; error = None
     try:
         assert code==0, 'native command tests failed'
+        assert len(plugin_records)==1 and '-race=true' in plugin_records[0]['build_info'], 'exact retained race plugin missing'
         result = verify_log((root/'native.log').read_text())
     except AssertionError as exc:
         error = str(exc) or 'native coverage rejected'
