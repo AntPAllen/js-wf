@@ -29,6 +29,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: full real cached point cohort accepted
+
+Clean `14cea25` normal native PASS345.87s. All87,920 point checks/terminal samples
+complete in319.641087962s underoriginal6min/20s contexts; full retained report
+87,920 invocations/journals/terminals and969,925 entries passes original20s.
+ActualSDK/profile/source/five servers/mounts/closure/3,887 original files unchanged
+independently verified. Full4,787member363,467,422byte proof/14parts readback passes.
+Successful handle reuse only; all data queries fresh, JRN/SIG/STATE1each/OBJ0.
+Overlapping campaigns recorded; no isolated ratio/full400k final point/current
+matrix/original24h claim. Changed live sustained qualification is next.
+[Accepted proof](scale/cached-final-latency-2026-10-06/retained-cohort/).
+
 ## Latest follow-up — 2026-10-06: cached live sustained review prepared
 
 Fresh ten-minute journal observer and reviewer now verify the explicit metadata

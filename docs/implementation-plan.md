@@ -4496,3 +4496,12 @@ All 11 soak producer controls pass; the selected Go metadata/parallel controls
 pass in 0.047 seconds and compile the integration harness. Native cached/serial
 oracle acceptance is already retained. Large real-cohort and sustained changed
 live-source qualification remain pending; existing isolated campaigns continue.
+
+## Real cached point audit cohort accepted — 2026-10-06
+
+At clean14cea25 all87,920 real-workflow point checks and terminals complete in
+319.641087962s underoriginal6min/20s contexts; complete969,925-entry retained report
+passes original20s. Actualsource/SDK/profile/five servers/mounts/closure/unchanged
+originals and full4,787member363,467,422byte proof/14parts readback verified.
+Data values remain fresh; lookups diagnostic1JRN/1SIG/1STATE/0OBJ. Sustained changed
+live-source/full400k final point/currentmatrix/24h gates remain open.
