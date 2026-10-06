@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/exedev/js-wf/scripts/review-bulk-soak-terminal.py", line 222, in <module>
+    result = review(a.root, a.watch, a.repo, a.duration, a.expected_source, a.expected_sdk_pid, a.original_root)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/exedev/js-wf/scripts/review-bulk-soak-terminal.py", line 139, in review
+    validate_profile(state, read(root / "test-environment.json"), parent,
+  File "/home/exedev/js-wf/scripts/review-bulk-soak-terminal.py", line 59, in validate_profile
+    require(state["source"] == revision and state["duration"] == duration
+  File "/home/exedev/js-wf/scripts/review-bulk-soak-terminal.py", line 22, in require
+    raise ValueError(message)
+ValueError: wrong source, row, seed, duration, race or release scope

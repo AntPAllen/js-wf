@@ -1,0 +1,9 @@
+# Original24h terminal review preparation
+
+The pinned checker waits for the same original producer `js-wf-bulk-journal-24h-joined-20261006.service` and observer unit to become terminal. It requires the original source757454a/SDK3461745, full24h/native24h20m deadline, production2m disk sync, explicit routes/chunked/bulk/full point profile, source/binary/incarnation closure, complete original archive and identical regenerated row/event/fencing reports. Original checkpoint/history/p99/drain/count and6m final gates remain. PID reuse is distinguished by process birth, and the current actual processes cannot be mistaken for closed original incarnations.
+
+The complete checker passes on a fresh verified S3 restore of the accepted original10m journal atca7a1fa, including all5,633 file bytes/modes/mtimes unchanged. Compiled-source and current complete reports regenerate; no broker or native SDK was started. The same evidence is rejected as24h. Three control groups reject live processes, shortened/over-deadline native terminals, incompatible/missing profiles and insufficient original admission.
+
+The pinned source hash is in `current-control-state.json`; checker code and the waiter are retained here. Checker subprocesses use a fresh Python cache prefix and avoid writes to the fixture. The waiter preserves a failed or rejected review with complete closed current files and observer records, without promoting an observation timeout into a native verdict or restarting the campaign. Global visible process/descriptor/container/mount/loop closure is required before capture. Archive metadata and full S3 readback must still be committed/verified separately. No original data is removed by the waiter.
+
+This is tested terminal-review preparation; the actual24h native gate remains running and unqualified. Passing one component does not qualify all-row/fullmatrix/default adoption.
