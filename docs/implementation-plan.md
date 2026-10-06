@@ -4982,7 +4982,8 @@ passes2,604 invocations/journals/terminals and28,689 entries; bulk stage rejects
 a KV_WF_STATE source-cut change after2.241896878s. No samples accepted and no
 point-equivalence/row/default/fullmatrix/24h promotion. Actual SDK3166840 and24
 observed NATS2.15 incarnations closed; source unchanged. Complete5,502-file
-fixture/5,503-member archive141,763,935 bytes verified; S3 transfer next.
+fixture/5,503-member archive141,763,935 bytes verified; complete archive,
+metadata and inventory pass full S3 GET hash/size readback.
 
 Original error does not identify whether data coordinates/counts or consumer
 cleanup changed, so a server-side cause is unconfirmed. Future bulk stats capture

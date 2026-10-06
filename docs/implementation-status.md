@@ -47,7 +47,8 @@ NATS2.15 roles captured. Native failed620.54s after the bulk stage rejected a
 KV_WF_STATE cut change in2.241896878s. Before full integrity was
 2,604/28,689/2,604; all partial samples discarded, no point equivalence or row
 qualification. SDK and24 actual server incarnations closed. Complete5,502-file
-fixture/5,503-member archive141,763,935 bytes fully read back; S3 transfer next.
+fixture/5,503-member archive141,763,935 bytes fully read back; complete archive,
+metadata and inventory pass full S3 GET hash/size readback.
 Default unchanged; the differing field/server-side cause was not recorded by the
 original generic error. Future bulk stats now retain final cuts for all four
 sources and errors include exact before/after values; rejection remains strict.
