@@ -1,0 +1,36 @@
+=== RUN   TestOperatorDaemonSignals
+=== RUN   TestOperatorDaemonSignals/project/startup
+    daemon_test.go:262: operator daemon stopped command=project stage=startup domain="" signal=terminated exit=0 pid=664419
+=== RUN   TestOperatorDaemonSignals/project/running
+    daemon_test.go:262: operator daemon stopped command=project stage=running domain="" signal=interrupt exit=0 pid=664608
+=== RUN   TestOperatorDaemonSignals/tombstone-loop/startup
+    daemon_test.go:262: operator daemon stopped command=tombstone-loop stage=startup domain="" signal=terminated exit=0 pid=664739
+=== RUN   TestOperatorDaemonSignals/tombstone-loop/running
+    daemon_test.go:262: operator daemon stopped command=tombstone-loop stage=running domain="" signal=interrupt exit=0 pid=664919
+=== NAME  TestOperatorDaemonSignals
+    daemon_test.go:287: operator daemon fatal startup domain="" error=stream-not-found exit=1
+--- PASS: TestOperatorDaemonSignals (9.43s)
+    --- PASS: TestOperatorDaemonSignals/project/startup (3.02s)
+    --- PASS: TestOperatorDaemonSignals/project/running (2.04s)
+    --- PASS: TestOperatorDaemonSignals/tombstone-loop/startup (3.06s)
+    --- PASS: TestOperatorDaemonSignals/tombstone-loop/running (1.14s)
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain
+    daemon_test.go:113: operator daemon domain admitted node=0 domain=WFOPS server_id=NBUIFDH4IOXUADCMC65OWWLFBOCXN4SD3VMYGIYK3ESPY3T5BZLYEVJO
+    daemon_test.go:113: operator daemon domain admitted node=1 domain=WFOPS server_id=NBTWQBXXSF42G7RDI67GFBSQRYTTJISOFUBLKJQ2IT7KVLTBL6PZ7BNI
+    daemon_test.go:113: operator daemon domain admitted node=2 domain=WFOPS server_id=NCC2OCN3EEE3RGBHBZLMUZ7OTAB4NK3ZOHR5ZV5PTEFMX4GFG6OJ5FUH
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/project/startup
+    daemon_test.go:262: operator daemon stopped command=project stage=startup domain="WFOPS" signal=terminated exit=0 pid=665515
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/project/running
+    daemon_test.go:242: context deadline exceeded
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/startup
+    daemon_test.go:141: context deadline exceeded
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/running
+    daemon_test.go:141: context deadline exceeded
+=== NAME  TestOperatorDaemonSignalsInJetStreamDomain
+    daemon_test.go:267: context deadline exceeded
+--- FAIL: TestOperatorDaemonSignalsInJetStreamDomain (60.29s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/project/startup (3.03s)
+    --- FAIL: TestOperatorDaemonSignalsInJetStreamDomain/project/running (51.87s)
+    --- FAIL: TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/startup (0.00s)
+    --- FAIL: TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/running (0.00s)
+FAIL

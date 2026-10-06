@@ -35,6 +35,7 @@ func TestOperatorDaemonProcessHelper(t *testing.T) {
 	}
 	var once sync.Once
 	trace := &jetstream.ClientTrace{RequestSent: func(subject string, _ []byte) {
+		fmt.Printf("operator daemon API request=%s\n", subject)
 		once.Do(func() {
 			fmt.Printf("operator daemon first request=%s\n", subject)
 			if err := os.WriteFile(os.Getenv("WF_OPERATOR_DAEMON_READY"), []byte(subject), 0600); err != nil {
@@ -205,14 +206,27 @@ func runOperatorDaemonSignals(t *testing.T, domain string) {
 				if stage == "running" {
 					if command == "project" {
 						for ctx.Err() == nil {
+							select {
+							case err := <-done:
+								joined = true
+								data, _ := os.ReadFile(logPath)
+								t.Fatalf("projection exited during readiness: %v log=%s", err, data)
+							default:
+							}
 							consumer, err := js.Consumer(ctx, "WF_JRN", "WF_VIEW")
 							if err == nil {
 								info, err := consumer.Info(ctx)
+								if err != nil {
+									t.Logf("projection readiness info: %v", err)
+								}
 								if err == nil && info.NumWaiting > 0 {
 									break
 								}
 							}
-							time.Sleep(10 * time.Millisecond)
+							if err != nil {
+								t.Logf("projection readiness consumer: %v", err)
+							}
+							time.Sleep(50 * time.Millisecond)
 						}
 					} else {
 						state, err := js.KeyValue(ctx, "WF_STATE")
