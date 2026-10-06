@@ -29,6 +29,21 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: bounded final latency point audit oracle accepted
+
+Non-clock R5 final latency point checks now use32joined readers, source-ordered
+output, original20s requests/parentdeadline, sameallinvocation/journal/timer/signal/
+child/rollout semantics. Any error invalidates whole output and cancels/joins.
+Race bound/order/error/deadline/empty/overflow controlsPASS1.061/1.071s. Cleana84c879
+actualcurrentR3libraryrace nativePASS16.81s, all160 completed short/timer/signal/
+parent/child samples exactlymatch serial oracle; impossibledeadline failsboth.
+SDK/source/PIDclosure and2800member31,740,808byte fullproof/twoparts/readback verified.
+Initialreview JSON Type/type mismatch preserved; corrected fresh review succeeds.
+Ordered951ms/3.072s measurements are not an isolated speed ratio/fullsize estimate.
+Sustainedten-minute changedsource gate prepared; existing24h source remains21b4729.
+[Native proof](scale/parallel-final-latency-2026-10-06/native-oracle-reviewed/).
+[Live preparation](scale/parallel-final-latency-2026-10-06/live-journal-preparation/).
+
 ## Latest follow-up — 2026-10-06: actual24h chunked journal launch verified
 
 Clean21b4729 actual normalSDK862338 running24h journalseed1;1628sourceinputs/

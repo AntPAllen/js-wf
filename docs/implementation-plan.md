@@ -4413,3 +4413,15 @@ currentR5 server roles observed. Named user systemd producer/observer/reviewer l
 First actual leaderSIGKILL/heal recorded, no live stores read/copied. Terminal
 24h/default/fullmatrix qualification remains open.
 [Launch](scale/chunked-callback-audit-2026-10-06/live-journal-24h-initial/).
+
+## Bounded final point latency audit prepared and native oracle accepted — 2026-10-06
+
+Non-clock R5 final phase schedules32independent original20s point audits under
+sameparentdeadline; allinvocation/journal/enablingevent/rollout checks and ordered
+output retained, errors cancel/join and invalidate wholeoutput. Racecontrols pass.
+Cleana84c879 currentR3libraryrace160actualshort/timer/signal/parent/child invocations
+match serialpointoracle exactly; impossibleterminaldeadline failsboth, native16.81s.
+ActualSDK/source/closure/complete31,740,808byte proof independently verified/readback.
+Changedsource normalten-minute adoption prepared; original24h pinnedsource unchanged.
+No fullscale/fault/currentmatrix/24h qualification from nativeoracle alone.
+[Evidence](scale/parallel-final-latency-2026-10-06/native-oracle-reviewed/).
