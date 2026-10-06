@@ -32,6 +32,19 @@ coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
 
+## Corrected bulk final-audit smoke — 2026-10-06
+
+Fresh35s journal seed1 atf2f6983 passes53.93s with seven cohorts,196 completed
+invocations/journals and2,163 entries, one actual journal-leader fault. Repair
+writers join in about1ms; original bulk plus every-point comparison passes
+2.569577064s. All four full source cuts match exactly, cursor consumers0, full
+before/after integrity counts equal, and original p99/history/drain checks pass.
+This accepts the short correction control only, not the original ten-minute row,
+default/fullmatrix or24h gate. Independent row/artifact checks, source/binary/
+actual SDK profile and all six observed server incarnations verify; complete
+closed originals archived with full member/current-file verification. No old
+store reopened. [Smoke proof](scale/sustained-bulk-final-latency-2026-10-06/joined-state-cut-smoke/).
+
 ## Repair-cursor audit diagnostic — 2026-10-06
 
 Fresh35s journal diagnostic at009de76 reproduces the bulk cut failure in
@@ -51,13 +64,13 @@ keeps repair loops running. Seeded Tier1 regression uses the production scanner
 loop state machine and shared modeled terminal/cursor KV:100 schedules pass
 under race, first10 exact replays match. It proves cursor-only revision drift and
 stability after joining, without modeling Raft or server metadata. Integration
-compile/skip passes. Corrected native and original ten-minute qualification pending.
+compile/skip passes. Corrected native smoke now passes; original ten-minute qualification pending.
 
 Diagnostic original archive/source/binary/profile and five late-observed server
 processes independently verified closed; periodic observation is not exhaustive
 lifetime coverage. The first observer failed before launching because its script
 was absent; its terminal failure and corrected observer logs are preserved.
-Complete diagnostic fixture archived with full member/current-file verification.
+Complete diagnostic fixture archived with full member/current-file verification. Complete archive, metadata and inventory also pass full S3 GET readback.
 [Diagnostic proof](scale/sustained-bulk-final-latency-2026-10-06/diagnostic-state-cut/).
 Only the earlier failed ten-minute redundant archive was reclaimed after full
 committed S3/member/current-file and process/descriptor checks:141,770,752 allocated

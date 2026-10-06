@@ -1,0 +1,226 @@
+{
+  "execution": {
+    "source": "f2f6983642782247f0bb71646bbe4ced0fc5f275",
+    "row": "journal",
+    "seed": 1,
+    "duration": "35s",
+    "status": "row_verified",
+    "supervisor_pid": 3229816,
+    "started": 1791280660.9721968,
+    "upgrade_shutdown": null,
+    "upgrade_start_gap": false,
+    "race": false,
+    "memory_limit": "4GiB",
+    "gomaxprocs": "4",
+    "gc_percent": "500",
+    "disk_admission": {
+      "filesystem_probe": "/tmp",
+      "free_bytes": 681803776,
+      "minimum_free_bytes": 536870912,
+      "additional_reserve_bytes": 536870912,
+      "scope": "Launch-time estimate, not a filesystem reservation. 24h baseline16GiB covers observed retained growth and archival; callers must add overlapping job budgets."
+    },
+    "retained_audit_trace": false,
+    "audit_wait_stack": false,
+    "batched_retained_audit": false,
+    "streaming_state_retained_audit": false,
+    "concurrent_state_retained_audit": false,
+    "chunked_state_retained_audit": true,
+    "cached_latency_metadata": false,
+    "bulk_final_latency": true,
+    "compare_bulk_point": true,
+    "explicit_route_seeds": true,
+    "journal_rollout": "none",
+    "clears_full_tier3_release": false,
+    "test_pid": 3230213,
+    "test_exit_code": 0,
+    "finished": 1791280726.8980954
+  },
+  "native_terminal": {
+    "Time": "2026-10-06T09:58:46.503215086Z",
+    "Action": "pass",
+    "Package": "js-wf/integration",
+    "Test": "TestFiveContainerMixedJournalLeaderEveryThirtySeconds",
+    "Elapsed": 53.93
+  },
+  "source_inputs_verified": 1783,
+  "original_files_verified": 5016,
+  "original_archive_sha256": "ea1a48ddc901f99dd448ec2062030fdf3e45780a9ffe3d84fef221a25c75138c",
+  "actual_sdk_pid": 3230242,
+  "sdk_sha256": "56817a9acd0fca5b2bec63ef1e235eeb7b45048f98cdc38fce8aa97a7969fb08",
+  "server_observations": 6,
+  "server_sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+  "observed_processes_closed": true,
+  "observation_scope": "Periodic server observations began during campaign; not exhaustive lifetime coverage",
+  "clears_full_tier3_release": false,
+  "qualifies_24h": false,
+  "candidate_adopted": false,
+  "stores_not_reopened": true,
+  "bulk_latency_artifact_checks": {
+    "invocations": 196,
+    "samples": 924,
+    "stage_elapsed_ns": 2569577064,
+    "full_integrity_before_after_verified": true,
+    "all_source_censuses_verified": true,
+    "complete_point_equivalence": true,
+    "scope": "Explicit bulk final audit within original row gates; not default/full-matrix or 24h qualification."
+  },
+  "bulk_latency": {
+    "after_error": "<nil>",
+    "after_report": {
+      "Invocations": 196,
+      "Journals": 196,
+      "Entries": 2163,
+      "Terminal": 196
+    },
+    "before_report": {
+      "Invocations": 196,
+      "Journals": 196,
+      "Entries": 2163,
+      "Terminal": 196
+    },
+    "bulk_stats": {
+      "source_cuts": {
+        "KV_WF_STATE": {
+          "First": 4,
+          "Last": 302,
+          "Messages": 199,
+          "Bytes": 33985,
+          "Consumers": 0
+        },
+        "WF_INV": {
+          "First": 1,
+          "Last": 196,
+          "Messages": 196,
+          "Bytes": 59190,
+          "Consumers": 0
+        },
+        "WF_JRN": {
+          "First": 1,
+          "Last": 2163,
+          "Messages": 2163,
+          "Bytes": 604518,
+          "Consumers": 0
+        },
+        "WF_SIG": {
+          "First": 1,
+          "Last": 238,
+          "Messages": 238,
+          "Bytes": 75881,
+          "Consumers": 0
+        }
+      },
+      "final_source_cuts": {
+        "KV_WF_STATE": {
+          "First": 4,
+          "Last": 302,
+          "Messages": 199,
+          "Bytes": 33985,
+          "Consumers": 0
+        },
+        "WF_INV": {
+          "First": 1,
+          "Last": 196,
+          "Messages": 196,
+          "Bytes": 59190,
+          "Consumers": 0
+        },
+        "WF_JRN": {
+          "First": 1,
+          "Last": 2163,
+          "Messages": 2163,
+          "Bytes": 604518,
+          "Consumers": 0
+        },
+        "WF_SIG": {
+          "First": 1,
+          "Last": 238,
+          "Messages": 238,
+          "Bytes": 75881,
+          "Consumers": 0
+        }
+      },
+      "records": {
+        "KV_WF_STATE": 199,
+        "WF_INV": 196,
+        "WF_JRN": 2163,
+        "WF_SIG": 238
+      },
+      "invocation_cutoff": 196,
+      "out_of_prefix_child_lookups": 0,
+      "snapshot_fallbacks": 0,
+      "charged_bytes": 884485
+    },
+    "elapsed_ns": 2569577064,
+    "error": "<nil>",
+    "every_sample_matches_point": true,
+    "final_integrity_verified": true,
+    "point_comparison_requested": true,
+    "repair_stop_requested_at": "2026-10-06T09:58:40.874148844Z",
+    "repair_writers_joined_at": "2026-10-06T09:58:40.87518166Z",
+    "repair_writers_stopped": true,
+    "scope": "explicit bulk final latency; original retained audit budgets, completion deadline, history/p99/drain gates retained",
+    "stage_limit_ns": 360000000000
+  },
+  "independent_bulk_checker_sha256": "8f1d2cdc2f0c340cce3faeca17e130602e48079ec799e944d23ff3412a132d36",
+  "row_result": {
+    "scope": "single five-container R5 journal-leader row",
+    "seed": 1,
+    "duration_seconds": 35,
+    "common_timer_clock": null,
+    "clock_timer_cut_profile": null,
+    "shortened_smoke": true,
+    "invocations": 196,
+    "journal_entries": 2163,
+    "confirmed_faults": 1,
+    "active_consumer_faults": null,
+    "cells": {
+      "matrixshort": {
+        "invocations": 28,
+        "terminal_p99_seconds": 5.517621215,
+        "progress_p99_seconds": 5.49852959
+      },
+      "matrixtimer": {
+        "invocations": 21,
+        "terminal_p99_seconds": 0.29563503500000005,
+        "progress_p99_seconds": 7.314063615
+      },
+      "matrixsignal": {
+        "invocations": 14,
+        "terminal_p99_seconds": 5.498379877,
+        "progress_p99_seconds": 5.481138625
+      },
+      "matrixfanout": {
+        "invocations": 7,
+        "terminal_p99_seconds": 9.052966075,
+        "progress_p99_seconds": 0.818147178
+      },
+      "matrixchild": {
+        "invocations": 42,
+        "terminal_p99_seconds": 1.653626152,
+        "progress_p99_seconds": 0.07494884
+      },
+      "matrixgrandchild": {
+        "invocations": 84,
+        "terminal_p99_seconds": 4.553168391,
+        "progress_p99_seconds": 4.53926341
+      }
+    },
+    "clears_full_tier3_release": false,
+    "bulk_latency_artifact_checks": {
+      "invocations": 196,
+      "samples": 924,
+      "stage_elapsed_ns": 2569577064,
+      "full_integrity_before_after_verified": true,
+      "all_source_censuses_verified": true,
+      "complete_point_equivalence": true,
+      "scope": "Explicit bulk final audit within original row gates; not default/full-matrix or 24h qualification."
+    },
+    "checkpoint_audit_checks": {
+      "completed_cohort_audits": 0,
+      "all_expected_checkpoints_present": true,
+      "scope": "Captured completed cohorts; mandatory final whole-state check remains separate."
+    }
+  },
+  "scope": "Diagnostic35s R5 journal faults (not a ten-minute qualification) with explicit bulk final audit, every sample matches point in same6m stage, original full counts/checkpoint/p99/history/drain gates retained; no default/fullmatrix/24h qualification. Complete original fixture and observer files preserved; no stores reopened."
+}
