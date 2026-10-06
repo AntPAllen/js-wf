@@ -5047,3 +5047,17 @@ Accepted capacity donors remain local while needed. The actual24h admission floo
 of16GiB plus concurrent growth/copy/archive headroom remains unchanged.
 [First media offload](scale/terminal-campaigns-disk-pressure-2026-10-06/journal-store-media-offload/).
 [Second media offload](scale/watch-observed-journal-24h-2026-10-05/store-media-offload-2026-10-06/).
+
+### Full corrected outer-handler Tier1 race qualification accepted — 2026-10-06
+
+At executed3e35e7c, full original1,000-seed race qualification passes1856.59s
+under unchanged60m: all122 workloads complete1–1,000 (122,000 bodies),392 pins,
+179 top-level passes and only two prescribed trace-replay/minimize skips. Independent
+complete checker matches retained result; all1,793 captured source files exactly
+match Git/before/after/current inventory, actual SDK binary/profile match retained
+launch evidence, producer/SDK/supervisor closed. Complete archived fixture members
+and unchanged current census verified. Aggregate126,947 generated schedules and
+27,815,980 transport events are accounted for. Current100k-normal qualification
+and broader native fault combinations/current full real matrices/million physical
+drain/actual24h remain open. NATS Raft/disk internals are outside model scope.
+[Terminal review](scale/outer-handler-cancellation-2026-10-06/full-race-terminal/).

@@ -8,7 +8,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Area | Accepted evidence / current state |
 | --- | --- |
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
-| Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
+| Tier1 deterministic simulation | Earlier recorded runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. Current handler runtime at3e35e7c: full122 workloads ×1,000 race seeds (122,000 bodies),179 top-level passes/two trace-only skips and392 pins independently accepted. Current100k normal remains open. Simulation does not model NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and hosted seed3 at a517d2e, each with independent copied integrity/history/drain, qualified. Retained normal ten-minute block-disk seed1 at f57da4d plus copied raw-image integrity/history/drain qualified. Ten-minute worker seed1 native and copied audits also pass, with the original producer generated-cache failure separately preserved. Retained normal ten-minute pause seed1 at d893bb0 and reply-isolation seed1 at85c4cf2, each with independent copied integrity/history/drain, qualify. Original retained fanout-restart seed1 at e3399bf and full rolling-upgrade seed1 at661239d, each with native plus independent copied audits, qualify. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
@@ -31,6 +31,38 @@ use, finish remaining clock/checkpoint, million-timer physical-drain, combined a
 coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
+
+## Complete corrected Tier1 race qualification accepted — 2026-10-06
+
+Full suite at3e35e7c passes1856.59s within original60m:179 top-level passes,
+only two prescribed trace-only skips,392 pins and all122 seeded workloads complete
+exact contiguous1–1,000 ranges (122,000 bodies). Aggregate126,947 schedules,
+1,816,141 scheduler choices,27,815,980 transport events; virtual buckets account
+for every schedule. Independent checker reproduces retained terminal result,
+1,793 before/after/current source files bind byte-for-byte to Git and expected
+complete inventory. Actual observed SDK binary/profile match retained provenance;
+producer, SDK and supervisor closed, user unit inactive/status0. Complete closed
+fixture archive/member/current-census verification passes. This accepts full race
+at executed source; current100k-normal, broader native fault combinations/current
+real matrices/million physical drain and actual24h remain open.
+[Independent terminal proof](scale/outer-handler-cancellation-2026-10-06/full-race-terminal/).
+
+## Fourth failed soak media offload complete — 2026-10-06
+
+Closed failed byte-bounded journal24h ate278ffb preserved in complete6,979-member/
+299,106,597-byte canonical S3 archive. Source, actual SDK, existing6,976-file ledger
+and complete current census verified; known SDK/supervisor absent and fresh global
+visible process/mount/descriptor closure checked. Historical producer unit is no
+longer loaded; its missing handle is recorded, not promoted as a terminal exit
+observation. Fresh full remote compressed/member/embedded-manifest verification
+and repeated census/closure preceded offload of five primary store directories,
+recovering1,126,572,032 allocated bytes; verified raw duplicate removed299,114,496.
+All remaining local source/executables/configs/logs/artifacts/metadata unchanged.
+Full store bytes are canonical remotely; future audits restore verified copies.
+Native failure remains, no24h qualification/provider-durability claim. Free space
+approximately11.8GiB, still below16GiB admission and overlap reserve.
+[Proof](scale/byte-bounded-audit-2026-10-05/complete-offload-proof-2026-10-06/).
+[Offload](scale/byte-bounded-audit-2026-10-05/store-media-offload-2026-10-06/).
 
 ## Third failed soak media offload complete — 2026-10-06
 
