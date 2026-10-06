@@ -97,3 +97,13 @@ The `matrix-seed6` case restores the complete original failed campaign archive, 
     python3 scripts/run-lease-raft-offline-review.py --root /tmp/js-wf-matrix-seed6-offline-bound-20261006 --case matrix-seed6
 
 This preserves the original failed native verdict and does not resume the seed, rerun the matrix or open any original media.
+
+## Original matrix seed6 confirms expiry-generated divergent lease tail — 2026-10-06
+
+The bound offline review at `8b1a2c8` restores the original failed seed6 archive (executed native source `300a36a`) into a fresh directory. All 3,546 retained lease append records match the pinned NATS decoders and pass file-record checksum checks. The minority retains nine term-1 records at WAL sequences 2,688–2,696, all carrying commit 2,687. Their operations are exactly 19 `MaxAge` marker writes and 32 `no_erase` stream deletes, written within the first 2.04 seconds after the recorded minority cut. All marker timestamps also lie within the scheduled ten-second isolation. The retained minority snapshot is named `snap.1.2687`.
+
+Eight retained indices (2,689–2,696) overlap the majority WAL, with term 2 on the majority versus term 1 on the minority and different record bodies. This directly confirms the expiry-created divergent tail and term conflict in the original matrix failure, beyond the bare-component reproduction. It does not reconstruct records already discarded during rollback or compaction. The original failed fault record's `healed` timestamp is zero; no actual successful heal timestamp is inferred from it.
+
+Independent review binds 1,960 selected sources, 1,452 decoder dependencies, 91 server files equal to the original captured failure inputs, unchanged copied media, both decoder binaries, the rejected corrupt-checksum control and every member of the complete 10,205-member archive. [Original-seed offline evidence](matrix-seed6-offline-wal-review/). Archive: 100,332,214 bytes, SHA256 `5b5c4b6f24a025f2e0791f33f402077144bf5a4e42599e9dcea78e0486999041`.
+
+This confirms the observed failure mechanism on the server lease-replication path; it is not a demonstrated workflow SDK invariant failure. The next candidate investigation is obsolete modern catch-up callbacks entering catch-up state after their subscription is canceled, with requests then directed to a progress inbox that ignores negative responses. That state-machine hypothesis needs a deterministic upstream regression and a contract-preserving fix experiment before qualification. Production TTL and LimitMarkerTTL, the 35-second native recovery bound, the original failed200 campaign and the running24h handle remain unchanged. No native pass, causal Tier1 reproduction or fullmatrix acceptance is claimed.
