@@ -1,0 +1,166 @@
+[
+  {
+    "kind": "baseline",
+    "report": {
+      "Invocations": 400000,
+      "Journals": 0,
+      "Entries": 0,
+      "Terminal": 0
+    },
+    "error": "context deadline exceeded\nretained callback cleanup: context deadline exceeded",
+    "audit_ns": 20000089969,
+    "total_ns": 20000090390,
+    "journal_visits": 4282850,
+    "target": null,
+    "kill": {
+      "node": 0,
+      "container": "",
+      "kill_started": "0001-01-01T00:00:00Z",
+      "kill_returned": "0001-01-01T00:00:00Z",
+      "source_stopped": "0001-01-01T00:00:00Z",
+      "cleanup_complete": "0001-01-01T00:00:00Z",
+      "state": ""
+    },
+    "restart_completed": "0001-01-01T00:00:00Z",
+    "cursors": [
+      {
+        "stream": "WF_INV",
+        "consumer": "wf-audit-PKzcZCwYBDoxdDcS5Ed61X",
+        "replicas": 1,
+        "start": 1
+      },
+      {
+        "stream": "WF_JRN",
+        "consumer": "wf-audit-PKzcZCwYBDoxdDcS5Ed68T",
+        "replicas": 1,
+        "start": 1
+      }
+    ],
+    "cursor_info": [
+      {
+        "stream_name": "WF_INV",
+        "name": "wf-audit-PKzcZCwYBDoxdDcS5Ed61X",
+        "created": "2026-10-06T00:04:48.043820387Z",
+        "config": {
+          "name": "wf-audit-PKzcZCwYBDoxdDcS5Ed61X",
+          "deliver_policy": "by_start_sequence",
+          "opt_start_seq": 1,
+          "ack_policy": "none",
+          "max_deliver": -1,
+          "replay_policy": "instant",
+          "max_waiting": 512,
+          "inactive_threshold": 30000000000,
+          "num_replicas": 1,
+          "mem_storage": true,
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "delivered": {
+          "consumer_seq": 0,
+          "stream_seq": 0
+        },
+        "ack_floor": {
+          "consumer_seq": 0,
+          "stream_seq": 0
+        },
+        "num_ack_pending": 0,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 400000,
+        "cluster": {
+          "name": "js-wf-route-595173-1791229859953606113",
+          "leader": "js-wf-route-595173-1791229859953606113-n1"
+        },
+        "ts": "2026-10-06T00:04:48.044386908Z"
+      },
+      {
+        "stream_name": "WF_JRN",
+        "name": "wf-audit-PKzcZCwYBDoxdDcS5Ed68T",
+        "created": "2026-10-06T00:04:49.266630474Z",
+        "config": {
+          "name": "wf-audit-PKzcZCwYBDoxdDcS5Ed68T",
+          "deliver_policy": "by_start_sequence",
+          "opt_start_seq": 1,
+          "ack_policy": "none",
+          "max_deliver": -1,
+          "replay_policy": "instant",
+          "max_waiting": 512,
+          "inactive_threshold": 30000000000,
+          "num_replicas": 1,
+          "mem_storage": true,
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "delivered": {
+          "consumer_seq": 0,
+          "stream_seq": 0
+        },
+        "ack_floor": {
+          "consumer_seq": 0,
+          "stream_seq": 0
+        },
+        "num_ack_pending": 0,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 4800000,
+        "cluster": {
+          "name": "js-wf-route-595173-1791229859953606113",
+          "leader": "js-wf-route-595173-1791229859953606113-n2"
+        },
+        "ts": "2026-10-06T00:04:49.26864058Z"
+      }
+    ],
+    "cursor_info_errors": null,
+    "deletions": [
+      {
+        "name": "wf-audit-PKzcZCwYBDoxdDcS5Ed61X",
+        "error": "",
+        "at": "2026-10-06T00:04:49.265415117Z"
+      },
+      {
+        "name": "wf-audit-PKzcZCwYBDoxdDcS5Ed68T",
+        "error": "context deadline exceeded",
+        "at": "2026-10-06T00:05:08.041343584Z"
+      }
+    ],
+    "cleanup": null,
+    "allocated_bytes": 2831061512,
+    "gc_cycles": 8,
+    "memory_limit_bytes": 4294967296,
+    "gomaxprocs": 4,
+    "heap_before": 3240680,
+    "heap_after": 903150840,
+    "next_gc_before": 20971520,
+    "next_gc_after": 1327804130,
+    "gc_pause_ns": 21295157,
+    "cpu_profile": true,
+    "phases": [
+      {
+        "stream": "WF_INV",
+        "started_ns": 1449003,
+        "finished_ns": 1224158828
+      },
+      {
+        "stream": "WF_JRN",
+        "started_ns": 1224167280,
+        "finished_ns": 20000087225
+      }
+    ],
+    "state_watches": [
+      {
+        "StartedNS": 1224243687,
+        "CreatedNS": 1268910505,
+        "CreationError": "\u003cnil\u003e",
+        "StopStartedNS": 3222124761,
+        "StopFinishedNS": 3248882552,
+        "StopError": "\u003cnil\u003e"
+      }
+    ]
+  }
+]

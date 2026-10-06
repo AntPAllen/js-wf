@@ -4251,3 +4251,14 @@ watch lifecycle with no per-record clock/update relay, hoisted constant lookup a
 unchanged; compile/skip passes, native pending verified fresh-copy headroom.
 [Failure](scale/direct-callback-audit-2026-10-05/full400k-owner-down/).
 [Preparation](scale/direct-callback-audit-2026-10-05/full400k-cold-profile-preparation/).
+
+## Cold full400k CPU diagnostic verified — 2026-10-06
+
+Fresh clean4086e44 normal4CPU/GOGC500/4GiB full400k/4.8M baseline fails original20s
+after4,282,850 journal visits; owner fault never injected. Complete1711-file/819alias
+lossless proof and unchanged1058 donor files independently verified. CPU profile
+shows overlapping cumulative JSON decode5.02s/client parse4.09s/select2.69s;
+GC pause21.295ms does not establish isolated causality. Successful Watch Stop alone
+is not initial-set barrier proof. Measure bounded handoff/decoding alternatives;
+retain all semantic/recovery/cleanup/cardinality/deadline gates. No default,
+full fault, current matrix, or24h qualification. [Evidence](scale/direct-callback-audit-2026-10-05/full400k-cold-profile/).

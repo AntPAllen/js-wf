@@ -29,6 +29,17 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: cold CPU diagnostic verified
+
+Fresh clean4086e44 full400k/4.8M diagnostic fails20.000090s after4,282,850
+journal visits, before any owner kill. Normal4CPU/GOGC500/4GiB and original20s
+remain unchanged. CPU profile records20.33CPU seconds: cumulative JSON decode
+5.02s, client parse4.09s, select2.69s (overlapping; do not sum). GC pause21.295ms
+and successful Watch creation/Stop do not establish an isolated cause or snapshot
+barrier completion. Complete1711-file/819alias base+delta and unchanged1058 donor
+files independently verified. Next work targets measured decoding/handoff costs;
+no capacity/fault/default/24h acceptance. [Evidence](scale/direct-callback-audit-2026-10-05/full400k-cold-profile/).
+
 ## Latest follow-up — 2026-10-06: current full-capacity baseline fails
 
 Actual bb6f75c full400k/4.8M cold/instrumented baseline fails original20s after
