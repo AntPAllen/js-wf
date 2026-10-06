@@ -143,3 +143,13 @@ python3 scripts/run-tier2-retained-row.py --root /tmp/js-wf-partition-seed6-cand
 ```
 
 This selects the original ten-minute workload, count1, normal2CPU/2GiB profile and 18-minute SDK timeout. It starts fresh stores and preserves the native recovery, fault schedule, operation latency, history and final invariants. The failed original200 campaign and hosted handle remain separate.
+
+## Candidate passes original ten-minute SDK partition seed6 — 2026-10-06
+
+The normal SDK at executed `6a9bd09` passes the original ten-minute partition workload with the exact experimental server executable from component source `e815c3b`. Count1, normal2CPU/2GiB, 18-minute SDK timeout, fresh stores, production lease/marker configuration and the 35-second whole-cut replica-current gate are retained. The actual test body passes in633.90 seconds. All19 confirmed minority4/4/0 cuts acknowledge majority writes and heal; recovery ranges16.459–20.237 seconds from cut.
+
+Independent review verifies1,960 invocations/21,630 journal entries, all19 raw faults,9,240 latency samples and2,520 operation-history records. All three independent Start/Signal/Result history models returnOk. Terminal p99 is12.173 seconds; every workload's progress has zero samples at or above30 seconds. Actual SDK executable/argv/environment/birth and all three candidate server executable/argv/birth captures match their retained bytes and committed parent source proof.723 selected Git source inputs and3,286 external inputs agree with before/after/current/retained records. The closed original fixture remains unchanged during review; no broker or original store is opened. Complete6,373-member archive:100,303,547 bytes, SHA256 `c3fa3272500143d6d5cf3e657f103772c4402246321b0d998c71602045e3e45f`.
+
+[Independent candidate-native evidence](candidate-native-seed6/). This demonstrates sustained recovery for this one candidate seed; it does not promote the original failed upstream200 campaign or default-server/fullmatrix gates. Candidate input admission also accepts the exact source-bound executable and rejects a one-byte mutation before launch. The default dependency remains unchanged. Next: execute all170 pinned upstream Raft `TestNRG` cases against the already source-bound upstream and candidate race binaries, then decide the dependency delivery and broader qualification path from that evidence. The full 24-hour, million physical-drain, broader combined/operational and matrix requirements remain open.
+
+The exact overlay text is retained as `candidate-component/candidate-raft.go.txt`; its original fixture path remains `candidate-raft.go` in the full S3 archive. The text extension keeps diagnostic source from becoming an unintended standalone Go package in this repository.
