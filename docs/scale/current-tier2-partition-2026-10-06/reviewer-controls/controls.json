@@ -1,0 +1,21 @@
+{
+  "provider_artifact_digest_verified": "sha256:b575f003464e55dbd5bc8e46923944a782580811825000bc37882e1dd5db1711",
+  "extracted_members_equal_provider_zip": 5,
+  "original_bytes_unchanged": true,
+  "controls": {
+    "majority_write_missing": {
+      "rejected": true,
+      "error": "partition lacks exact minority isolation and acknowledged majority write"
+    },
+    "latency_mismatch": {
+      "rejected": true,
+      "error": "raw evidence check failed: observed - enabled == delay"
+    },
+    "second_successful_start": {
+      "rejected": true,
+      "error": "raw evidence check failed: result == ''.join((f'whole {name} operations={operations} verdict=Ok error=<nil>\\n' for name in ('starts', 'signals', 'results')))"
+    }
+  },
+  "reviewer_sha256": "b2f09e55d726922bdf537f0977dc6c4ea0be3f60e34389641215f896c3d9260d",
+  "scope": "Fresh provider-copy positive control and three independently mutated disposable copies; no NATS or original stores opened. Historical executed-source control only; no current200/fullmatrix qualification."
+}

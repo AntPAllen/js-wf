@@ -5,6 +5,7 @@ Only the requested consecutive seeds of the selected row qualify. The parent cam
 200-seed row, full matrix and 24h soak are never promoted by this command.
 """
 import argparse
+from datetime import datetime
 import hashlib
 import importlib.util
 import json
@@ -18,12 +19,24 @@ ROWS = {
     'journal': ('journal_leader', 'TestMixedMatrixJournalLeaderEveryThirtySeconds'),
     'consumer': ('consumer_leader', 'TestMixedMatrixConsumerLeaderEveryThirtySeconds'),
     'cluster': ('all_servers', 'TestMixedMatrixAllServersKilledEveryThirtySeconds'),
+    'partition': ('server_partition', 'TestMixedMatrixServerPartitionEveryThirtySeconds'),
 }
 
 def row_contract(row):
     if row not in ROWS:
         raise ValueError('unsupported Tier2 row')
     return ROWS[row]
+
+def timestamp_ns(value):
+    # Independent RFC3339Nano evidence parsing; no R5 runtime helper dependency.
+    if not isinstance(value, str) or not re.fullmatch(
+            r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})', value):
+        raise ValueError('invalid evidence timestamp')
+    dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
+    fraction = re.search(r'\.(\d+)', value)
+    return int(dt.replace(microsecond=0).timestamp()) * 1_000_000_000 + int(
+        (fraction[1] if fraction else '').ljust(9, '0'))
+
 
 def read(path):
     return json.loads(path.read_text())
@@ -38,6 +51,12 @@ def check_fault_identity(fault, row):
             raise ValueError('all-server fault must record every node before restart')
     elif not 0 <= fault['node'] < 3:
         raise ValueError('leader fault lacks a valid node')
+    if row == 'partition':
+        routes = fault.get('partition_routes')
+        if (fault['node'] != 2 or not isinstance(routes, list) or len(routes) != 3
+                or any(type(v) is not int for v in routes) or routes != [4, 4, 0]
+                or type(fault.get('majority_sequence')) is not int or fault['majority_sequence'] <= 0):
+            raise ValueError('partition lacks exact minority isolation and acknowledged majority write')
     if row == 'consumer':
         consumer = fault.get('consumer', '')
         if (not isinstance(consumer, str) or not re.fullmatch(r'WF_P_[0-9]{2}', consumer)
@@ -54,16 +73,19 @@ def module(name, path):
 
 shared = module('tier2_shard_inventory', Path(__file__).with_name('check-tier3-matrix-shard.py'))
 
-def bind(run, job, artifact, log, first, last, row='journal'):
+def bind(run, job, artifact, log, first, last, row='journal', job_layout='shard'):
     row_contract(row)
     source = run.get('head_sha', '')
     if (type(first) is not int or type(last) is not int or not 1 <= first <= last <= 200
             or not isinstance(source, str) or not re.fullmatch('[0-9a-f]{40}', source)):
         raise ValueError('invalid seed range or exact source')
+    if job_layout not in ('shard', 'single') or job_layout == 'single' and first != last:
+        raise ValueError('single-job layout requires exactly one seed')
     span = str(first) if first == last else f'{first}-{last}'
+    expected_name = f'leader ({first})' if job_layout == 'single' else f'leader ({row}, {span})'
     if (type(run.get('id')) is not int or type(job.get('id')) is not int
             or job.get('run_id') != run['id'] or job.get('head_sha') != source
-            or job.get('name') != f'leader ({row}, {span})'
+            or job.get('name') != expected_name
             or (job.get('status'), job.get('conclusion')) != ('completed', 'success')
             or source not in log):
         raise ValueError('job identity, source, checkout or terminal success differs')
@@ -79,13 +101,13 @@ def bind(run, job, artifact, log, first, last, row='journal'):
 
 
 def review(run, job, artifact, job_log, artifact_root, first, last, temporary_root=None,
-           model_root=None, model_binary_out=None, row='journal'):
+           model_root=None, model_binary_out=None, row='journal', job_layout='shard'):
     report_row, test = row_contract(row)
     if model_binary_out is not None:
         model_binary_out = Path(model_binary_out).resolve()
         if model_binary_out.exists() or model_binary_out.is_relative_to(artifact_root.resolve()):
             raise ValueError('model executable output must be fresh and outside original artifacts')
-    revision = bind(run, job, artifact, job_log, first, last, row)
+    revision = bind(run, job, artifact, job_log, first, last, row, job_layout)
     repo = REPO if model_root is None else Path(model_root).resolve()
     before = shared.inventory(artifact_root)
     required = {f'matrix-{row}-{seed}-{suffix}' for seed in range(first,last+1)
@@ -120,14 +142,6 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
             return module(name, path)
         campaign = load('journal_campaign', 'check-matrix-campaign.py')
         execution = load('journal_execution', 'check-matrix-result.py')
-        for file in ('tier3-worker-clock-evidence.py', 'explain-tier3-events.py',
-                     'review-tier3-fencing.py', 'review-tier3-soak.py'):
-            # Only files actually present in that source revision are copied.
-            result = subprocess.run(['git', 'show', revision+':scripts/'+file], cwd=repo,
-                                    capture_output=True)
-            if result.returncode == 0:
-                (recorded/file).write_bytes(result.stdout)
-        clock = load('journal_clock', 'check-tier3-journal-row.py')
     reports = []
     with tempfile.TemporaryDirectory(prefix='tier2-history-shard-', dir=temporary_root) as temporary:
         binary = Path(temporary) / 'history-review'
@@ -157,10 +171,12 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
                 raise ValueError("raw evidence check failed: fault_data['seed'] == seed and campaign.seconds(fault_data['duration']) == 600 and (len(faults) == report['faults'] == 19)")
             previous = None
             for fault in faults:
-                scheduled, killed, healed = map(clock.timestamp_ns, [fault[k] for k in ('scheduled', 'killed', 'healed')])
+                scheduled, killed, healed = map(timestamp_ns, [fault[k] for k in ('scheduled', 'killed', 'healed')])
                 if not (scheduled <= killed <= healed and not fault.get('error')):
                     raise ValueError('invalid fault timing or recorded fault error')
                 check_fault_identity(fault, row)
+                if row == 'partition' and healed - killed > 35000000000:
+                    raise ValueError('partition whole-cut fault recovery exceeds original35s budget')
                 if previous is not None:
                     if not scheduled - previous == 30000000000:
                         raise ValueError('raw evidence check failed: scheduled - previous == 30000000000')
@@ -168,13 +184,13 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
             samples = read(r / (prefix + 'latencies.json'))
             terminal = {}
             progress = {t: [] for t in campaign.TYPES}
-            last_deadline = clock.timestamp_ns(faults[-1]['healed']) + 300000000000
+            last_deadline = timestamp_ns(faults[-1]['healed']) + 300000000000
             for sample in samples:
                 typ, id, event = (sample['type'], sample['id'], sample['event'])
                 delay = sample['delay_ns']
                 if not (typ in campaign.TYPES and type(delay) is int and (delay >= 0)):
                     raise ValueError('raw evidence check failed: typ in campaign.TYPES and type(delay) is int and (delay >= 0)')
-                enabled, observed = map(clock.timestamp_ns, [sample['enabled'], sample['observed']])
+                enabled, observed = map(timestamp_ns, [sample['enabled'], sample['observed']])
                 if not observed - enabled == delay:
                     raise ValueError('raw evidence check failed: observed - enabled == delay')
                 if event == 'terminal':
@@ -226,13 +242,15 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
         if hashlib.sha256(model_binary_out.read_bytes()).hexdigest() != binary_hash:
             raise ValueError('retained model executable failed readback verification')
     return dict(shard_qualified=True, revision=revision, run=run['id'], job=job['id'],
-                artifact=artifact['id'], row=row, first=first, last=last,
+                artifact=artifact['id'], row=row, job_layout=job_layout, first=first, last=last,
                 duration_seconds_per_seed=600, seeds=reports,
                 all_three_independent_history_models_pass=True,
                 model_source_root=str(repo),
                 model_dependency_sha256=model_hashes, model_binary_sha256=binary_hash,
                 model_binary_retained=model_binary_out is not None,
                 model_binary_path=str(model_binary_out) if model_binary_out is not None else None,
+                independent_reviewer_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                timestamp_parser_scope='Independent strict RFC3339Nano parser; campaign/duration and history models remain bound to executed source.',
                 model_helper_sha256=hashlib.sha256(Path(__file__).with_name('tier2-history-review.go.txt').read_bytes()).hexdigest(),
                 invocations=sum(s['report']['invocations'] for s in reports),
                 journal_entries=sum(s['report']['journal_entries'] for s in reports),
@@ -240,7 +258,7 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
                 input_sha256=before, executed_source_hashes=source_inputs,
                 qualifies_parent_campaign=False, qualifies_full_row=False,
                 clears_tier2_200_seed_gate=False, clears_tier3_24_hour_soak=False,
-                scope='Requested complete selected leader shard only. Raw faults/latencies and independent history models verified. Named-test final integrity/drain assertions; no captured workload binary, source ledgers or physical stores.')
+                scope='Requested complete selected fault shard only. Raw faults/latencies and independent history models verified. Named-test final integrity/drain assertions; no captured workload binary, source ledgers or physical stores.')
 
 
 def main():
@@ -248,6 +266,8 @@ def main():
     for name in ('run', 'job', 'artifact', 'log', 'root', 'output'):
         parser.add_argument('--'+name, required=True, type=Path)
     parser.add_argument('--row', choices=tuple(ROWS), default='journal')
+    parser.add_argument('--job-layout', choices=('shard', 'single'), default='shard',
+                        help='Require the exact selected workflow job naming layout; single requires one seed')
     parser.add_argument('--first', required=True, type=int)
     parser.add_argument('--last', required=True, type=int)
     parser.add_argument('--temporary-root', type=Path)
@@ -262,7 +282,7 @@ def main():
         parser.error('output must be fresh and outside original artifacts')
     report = review(read(args.run), read(args.job), read(args.artifact),
                     args.log.read_text(), root, args.first, args.last, args.temporary_root,
-                    args.model_root, args.model_binary_out, args.row)
+                    args.model_root, args.model_binary_out, args.row, args.job_layout)
     report['metadata_sha256'] = {name:hashlib.sha256(getattr(args,name).read_bytes()).hexdigest()
                                 for name in ('run','job','artifact','log')}
     output.write_text(json.dumps(report, indent=2)+'\n')

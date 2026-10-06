@@ -85,6 +85,42 @@ class JournalShardTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'symlink'):
                 shard.review(run, job, artifact, log, Path(directory), 1, 2)
 
+    def test_partition_binding_requires_selected_layout_source_and_seed(self):
+        run, job, artifact, log = fixture()
+        job['name'] = 'leader (partition, 1-2)'
+        artifact['name'] = 'matrix-partition-1-2-10m'
+        log = log.replace('row=journal', 'row=partition')
+        self.assertEqual(shard.bind(run, job, artifact, log, 1, 2, 'partition'), 'a'*40)
+        with self.assertRaises(ValueError):
+            shard.bind(run, job, artifact, log, 1, 2, 'partition', 'single')
+        job['name'] = 'leader (1)'
+        artifact['name'] = 'matrix-partition-1-10m'
+        log = log.rsplit('\n', 1)[0]
+        self.assertEqual(shard.bind(run, job, artifact, log, 1, 1, 'partition', 'single'), 'a'*40)
+        for layout in ('shard', 'automatic'):
+            with self.assertRaises(ValueError):
+                shard.bind(run, job, artifact, log, 1, 1, 'partition', layout)
+        for modified in (log.replace('row=partition', 'row=journal'), log.replace('10m', '35s'), log+'\n'+log.splitlines()[-1]):
+            with self.assertRaises(ValueError):
+                shard.bind(run, job, artifact, modified, 1, 1, 'partition', 'single')
+
+    def test_partition_requires_real_isolation_and_majority_commit(self):
+        good = dict(node=2, partition_routes=[4, 4, 0], majority_sequence=91)
+        shard.check_fault_identity(good, 'partition')
+        for key, value in [('node', 0), ('node', True), ('partition_routes', [8, 8, 8]),
+                           ('partition_routes', [4, 4, False]), ('partition_routes', [4, 0]),
+                           ('majority_sequence', 0), ('majority_sequence', True), ('majority_sequence', -1)]:
+            with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                shard.check_fault_identity(dict(good, **{key:value}), 'partition')
+
+    def test_timestamp_precision_timezone_and_malformed_values(self):
+        a = shard.timestamp_ns('2026-10-01T12:00:00.123456789Z')
+        self.assertEqual(a, shard.timestamp_ns('2026-10-01T14:00:00.123456789+02:00'))
+        self.assertEqual(a+1, shard.timestamp_ns('2026-10-01T12:00:00.123456790Z'))
+        for value in ('2026-10-01T12:00:00', '2026-10-01T12:00:00.1234567891Z', 'bad', None):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                shard.timestamp_ns(value)
+
 
 if __name__ == '__main__':
     unittest.main()
