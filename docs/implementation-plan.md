@@ -4648,3 +4648,12 @@ Legacy pause/isolation/fanout copied fixtures also recheck complete counts/histo
 logical drain, explicitly no local physical evidence. No original store opened or
 legacy NATS rerun. Negativeclock/full13x200/current-source/24h/million finalphysical
 gates remain open.
+
+## Original retained negative server-clock row launch verified — 2026-10-06
+
+Clean0b24a84 normal ten-minute seed1 SDK1802177/694source/profile2CPU/2GiB and
+three actualNATS binarypaths verified. Exacttime.go -60wallseconds overlay preserves
+monotonic clock. Independent public pinnedvarz measures node2-59.987814811s;
+neutral peers within2s. Same original producer/reviewer handles remain active;
+native terminal/fullproof/copy/full13x200 gates pending. Positiveclock native/copy
+accepted at recordedsource/seed; long24h/million processes unchanged.
