@@ -29,6 +29,22 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: real87920 pre-bulk state admission failure preserved
+
+At4d03dd1 fresh copied R5 nativeFAIL51.57s before bulk acquisition: the independent
+original20s retained check timed out on state initial set58,403 records/revision96,250,
+barrier notseen. Bulk comparison never ran; no target changes or cause attribution.
+SDK2754218/five actual servers closed, 3,887 donor file hashes unchanged, complete
+accepted point oracle proof verified. Review ordering/output-directory errors
+preserved and corrected in read-only review; native fixture never restarted.
+Full4,455member/364,060,327byte/14part failedproof readback accepted. State snapshot
+capacity diagnosis is next; realbulk/memory/fault/24h gates remain open.
+[Failed native evidence](scale/bulk-final-latency-preparation-2026-10-06/retained-cohort/).
+
+Additional immutable raw/worktree duplicates reclaimed after fullcanonical/member/
+execution/visibleFD checks; originalstores/source/exes/cache/live retained.
+[Additional recovery records](scale/nested-raw-proof-recovery-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: native bulk prefix oracle accepted
 
 At8a1b0cd actual R3 race160 PASS54.11s: complete samples and97-invocation prefix
