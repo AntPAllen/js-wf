@@ -14522,3 +14522,15 @@ Proof: [storage review](scale/tmp-storage-review-2026-10-06/byte-refill-final-co
 A further 10,588,585,984 allocated bytes (9.86 GiB) of closed single-link SDK/test binaries were offloaded: 214 original paths, 203 unique exact bodies. The complete 5,163,635,939-byte S3 archive and canonical metadata were fully read back; a second fresh remote member/body verification, full original hash/mode/mtime catalogue and visible global closure preceded removal. Sources/stores/logs/provenance remain local. Historical references to these binaries being local are superseded by the [original-path index](scale/tmp-storage-review-2026-10-06/closed-test-binaries/complete/original-paths.json) and verified fresh restoration instructions. Additional hard links and protected/live roots were excluded.
 
 Recorded older-data recovery now totals 16.61 GiB, excluding staging/disposable copies; final available space is 29.11 GiB. Both original campaigns remain active. [Cleanup summary](scale/tmp-storage-review-2026-10-06/README.md). No runtime verdict or release gate changes.
+
+### Native handler/continuation lease-expiry controls prepared — 2026-10-06
+
+Both real R3 ordinary-handler and named-continuation cases at13af4d2 reach
+successor completion in13.10/13.03s with productionTTL12s/AckWait13s. Both then
+fail a new observer assertion that wrongly compares the wrapped lost-lease CAS
+error with its bare sentinel string. The entire failed SDK/source/raw-store
+fixture is independently hash/source/binary/visible-closure verified and archived.
+The correction retains reason, owner, epoch and real key-revision-mismatch cause;
+no runtime or target changes. Fresh corrected-source race qualification pending.
+[Original failed guard](scale/outer-handler-lease-expiry-2026-10-06/initial-error-guard/review.json).
+No native/fullmatrix/24h acceptance inferred from partial takeovers.
