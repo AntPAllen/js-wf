@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
@@ -47,6 +48,32 @@ func captureProjectionProcess(t *testing.T, process *exec.Cmd, root string, proo
 	if err != nil {
 		t.Fatal(err)
 	}
+	proc := filepath.Join("/proc", fmt.Sprint(process.Process.Pid))
+	environment, err := os.ReadFile(filepath.Join(proc, "environ"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	domain, _ := proof["projection_domain"].(string)
+	actualDomain := ""
+	for _, entry := range strings.Split(string(environment), "\x00") {
+		if strings.HasPrefix(entry, "WF_PROJECTION_DOMAIN=") {
+			actualDomain = strings.TrimPrefix(entry, "WF_PROJECTION_DOMAIN=")
+		}
+	}
+	if actualDomain != domain {
+		t.Fatalf("actual projection domain=%q expected=%q", actualDomain, domain)
+	}
+	proof["actual_projection_sdk_domain"] = actualDomain
+	args, err := os.ReadFile(filepath.Join(proc, "cmdline"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	proof["actual_projection_sdk_args"] = strings.Split(strings.TrimRight(string(args), "\x00"), "\x00")
+	stat, err := os.ReadFile(filepath.Join(proc, "stat"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	proof["actual_projection_sdk_stat"] = string(stat)
 	proof["actual_projection_sdk_pid"] = process.Process.Pid
 	proof["actual_projection_sdk_sha256"] = fmt.Sprintf("%x", digest.Sum(nil))
 	proof["actual_projection_sdk_build_info"] = string(info)
@@ -65,7 +92,7 @@ func assertProjectionSIGKILL(t *testing.T, process *exec.Cmd, proof map[string]a
 	proof["projection_process_reaped_sigkill"] = true
 }
 
-func applyPostgresProjectionCatchupFault(t *testing.T, ctx context.Context, db *sql.DB, cluster *testcluster.Cluster, all []jetstream.JetStream, stream jetstream.Stream, done <-chan error, proof map[string]any) {
+func applyPostgresProjectionCatchupFault(t *testing.T, ctx context.Context, db *sql.DB, cluster *testcluster.Cluster, all []jetstream.JetStream, stream jetstream.Stream, done <-chan error, proof map[string]any, jsOptions ...jetstream.JetStreamOpt) {
 	t.Helper()
 	var pid, count int
 	target := proof["count"].(int)
@@ -133,7 +160,8 @@ func applyPostgresProjectionCatchupFault(t *testing.T, ctx context.Context, db *
 	// every JS handle before replacement construction or readiness queries.
 	for i := range all {
 		var err error
-		all[i], err = jetstream.New(cluster.Clients[i])
+		domain, _ := proof["projection_domain"].(string)
+		all[i], err = newTestJetStreamDomain(cluster.Clients[i], domain, jsOptions...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -180,6 +208,32 @@ func applyPostgresProjectionCatchupFault(t *testing.T, ctx context.Context, db *
 		if !healed {
 			t.Fatal("projection source did not heal within original fixture context", name, ctx.Err())
 		}
+	}
+	if domain, _ := proof["projection_domain"].(string); domain != "" {
+		admitted := []map[string]string{}
+		for node, js := range all {
+			for {
+				call, stop := context.WithTimeout(ctx, 4*time.Second)
+				info, err := js.AccountInfo(call)
+				stop()
+				if err == nil {
+					if info.Domain != domain || js.Conn().ConnectedDomain() != domain || js.Conn().ConnectedServerId() != cluster.Servers[node].ID() {
+						t.Fatalf("projection healed domain node=%d info=%+v connected=%s", node, info, js.Conn().ConnectedDomain())
+					}
+					admitted = append(admitted, map[string]string{"node": fmt.Sprint(node), "domain": domain, "server_id": js.Conn().ConnectedServerId()})
+					t.Logf("projection healed domain node=%d domain=%s server_id=%s", node, domain, js.Conn().ConnectedServerId())
+					break
+				}
+				if ctx.Err() != nil {
+					t.Fatalf("projection healed domain node=%d: %v", node, err)
+				}
+				select {
+				case <-ctx.Done():
+				case <-time.After(50 * time.Millisecond):
+				}
+			}
+		}
+		proof["healed_domain_peers"] = admitted
 	}
 	proof["journal_all_three_replicas_current"] = proof["WF_JRN_all_three_replicas_current"]
 }

@@ -1,0 +1,30 @@
+name: postgres-domain-projection
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  full-domain-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Obtain PostgreSQL image and record exact executed identity in runner
+        run: docker pull postgres:16-alpine
+      - name: Run original full50000 projection fault and rebuild in domain
+        run: python3 scripts/run-postgres-domain-projection.py --root '${{ runner.temp }}/postgres-domain-projection-full50000'
+      - name: Require independent complete domain and rebuild evidence
+        run: python3 scripts/review-postgres-domain-projection.py --root '${{ runner.temp }}/postgres-domain-projection-full50000' --output '${{ runner.temp }}/postgres-domain-projection-full50000-proof/independent-review.json'
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: postgres-domain-projection-full50000
+          path: |
+            ${{ runner.temp }}/postgres-domain-projection-full50000.tar.gz
+            ${{ runner.temp }}/postgres-domain-projection-full50000-proof/
+            ${{ runner.temp }}/postgres-domain-projection-full50000/*.json
+            ${{ runner.temp }}/postgres-domain-projection-full50000/*.log
+          if-no-files-found: error

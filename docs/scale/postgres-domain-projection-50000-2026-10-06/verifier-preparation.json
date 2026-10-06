@@ -1,0 +1,25 @@
+{
+  "recorded_full_default_fixture": "/tmp/js-wf-postgres-projection-fault-streaming-50000-20261005",
+  "actual_50000_canonical_rows_verified": {
+    "rows": 50000,
+    "canonical_sha256": "02c50f3836990cc0ffd39e76f53ba318753e06ed8be6d318775d597aae6c604a"
+  },
+  "default_fixture_cannot_qualify_domain": "exact named full case required",
+  "guards": [
+    {
+      "name": "one-row-missing",
+      "rejection": "all50000 rows required",
+      "bytes": 15322115,
+      "sha256": "e3f22bfd99ee965ebd019f8b3100c5359b55128549e49ca9091159036bd51eae",
+      "path": "/tmp/js-wf-projection-domain-review-control-sjoizgc_/rows.jsonl"
+    },
+    {
+      "name": "wrong-indexed-status",
+      "rejection": "exact canonical completed SQL identity required",
+      "bytes": 15322424,
+      "sha256": "e409d49d7ae6c1819498146350e79d26c9c9d9eeebabd3f76674c661f52d65cf",
+      "path": "/tmp/js-wf-projection-domain-review-control-8dcwxwzu/rows.jsonl"
+    }
+  ],
+  "scope": "Offline verifier preparation from actual recorded50000 SQL rows. No original broker reopened; no new domain native qualification."
+}

@@ -18,6 +18,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -41,12 +42,19 @@ func TestProjectionProcessHelper(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer connection.Close()
-	js, err := jetstream.New(connection)
+	js, err := newTestJetStreamDomain(connection, os.Getenv("WF_PROJECTION_DOMAIN"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
+	if domain := os.Getenv("WF_PROJECTION_DOMAIN"); domain != "" {
+		info, err := js.AccountInfo(ctx)
+		if err != nil || info.Domain != domain || connection.ConnectedDomain() != domain {
+			t.Fatalf("projection helper domain: info=%+v err=%v", info, err)
+		}
+		fmt.Printf("projection helper real domain=%s server_id=%s\n", domain, connection.ConnectedServerId())
+	}
 	var options []visibility.Option
 	if os.Getenv("WF_PROJECTION_BACKEND") == "postgres" {
 		db, err := sql.Open("pgx", os.Getenv("WF_TEST_POSTGRES_DSN"))
@@ -91,7 +99,17 @@ func TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocations(t *testin
 	runProjectionRecoversFiftyThousandInvocations(t, true)
 }
 
-func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault bool) {
+func TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain(t *testing.T) {
+	if os.Getenv("WF_PROJECTION_POSTGRES_FAULT_ROOT") == "" || os.Getenv("WF_TEST_POSTGRES_DSN") == "" {
+		t.Skip("opt-in retained PostgreSQL full domain projection fault proof")
+	}
+	if os.Getenv("WF_PROJECTION_COUNT") != "" {
+		t.Fatal("full domain proof requires default50000 count")
+	}
+	runProjectionRecoversFiftyThousandInvocations(t, true, "WFVIEW")
+}
+
+func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault bool, domains ...string) {
 	t.Helper()
 	count := 50000
 	if value := os.Getenv("WF_PROJECTION_COUNT"); value != "" {
@@ -104,7 +122,23 @@ func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault b
 	var all []jetstream.JetStream
 	var cluster *testcluster.Cluster
 	root := ""
-	proof := map[string]any{"count": count, "postgres_fault": postgresFault}
+	domain := ""
+	if len(domains) > 0 {
+		domain = domains[0]
+	}
+	proof := map[string]any{"count": count, "postgres_fault": postgresFault, "projection_domain": domain}
+	var observed, wrong atomic.Int64
+	var jsOptions []jetstream.JetStreamOpt
+	if domain != "" {
+		jsOptions = append(jsOptions, jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent: func(subject string, _ []byte) {
+			if strings.HasPrefix(subject, "$JS."+domain+".API.") {
+				observed.Add(1)
+			} else {
+				wrong.Add(1)
+			}
+		}}))
+
+	}
 	if postgresFault {
 		base := os.Getenv("WF_PROJECTION_POSTGRES_FAULT_ROOT")
 		if !filepath.IsAbs(base) {
@@ -115,6 +149,14 @@ func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault b
 			t.Fatal(err)
 		}
 		defer func() {
+			if domain != "" {
+				proof["domain_api_requests"] = observed.Load()
+				proof["wrong_domain_api_prefix_requests"] = wrong.Load()
+				if observed.Load() == 0 || wrong.Load() != 0 {
+					t.Errorf("projection domain API routing: observed=%d wrong=%d", observed.Load(), wrong.Load())
+				}
+				t.Logf("projection real domain=%s domain_api_requests=%d wrong_prefix_requests=%d", domain, observed.Load(), wrong.Load())
+			}
 			proof["native_test_failed"] = t.Failed()
 			data, err := json.MarshalIndent(proof, "", "  ")
 			if err == nil {
@@ -125,11 +167,23 @@ func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault b
 			}
 		}()
 		var err error
-		cluster, err = testcluster.Start(filepath.Join(root, "cluster"), 3)
+		if domain == "" {
+			cluster, err = testcluster.Start(filepath.Join(root, "cluster"), 3)
+		} else {
+			cluster, err = testcluster.StartWithDomain(filepath.Join(root, "cluster"), 3, domain)
+		}
 		if err != nil {
 			t.Fatal(err)
 		}
-		all, cluster = setupCluster(t, cluster)
+		all, cluster = setupClusterDomain(t, cluster, domain)
+		if domain != "" {
+			for i, nc := range cluster.Clients {
+				all[i], err = newTestJetStreamDomain(nc, domain, jsOptions...)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+		}
 	} else {
 		all, cluster = setup(t)
 	}
@@ -153,7 +207,7 @@ func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault b
 		readyFile = filepath.Join(root, "projection-ready")
 	}
 	process := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestProjectionProcessHelper$")
-	process.Env = append(os.Environ(), "WF_PROJECTION_HELPER=1", "WF_PROJECTION_URL="+cluster.Servers[0].ClientURL(), "WF_PROJECTION_READY_FILE="+readyFile)
+	process.Env = append(os.Environ(), "WF_PROJECTION_HELPER=1", "WF_PROJECTION_DOMAIN="+domain, "WF_PROJECTION_URL="+cluster.Servers[0].ClientURL(), "WF_PROJECTION_READY_FILE="+readyFile)
 	backend := "kv"
 	if postgresFault {
 		backend = "postgres"
@@ -360,7 +414,7 @@ func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault b
 	projectionDone := make(chan error, 1)
 	go func() { projectionDone <- restarted.Run(projectionCtx) }()
 	if postgresFault {
-		applyPostgresProjectionCatchupFault(t, ctx, db, cluster, all, journalStream, projectionDone, proof)
+		applyPostgresProjectionCatchupFault(t, ctx, db, cluster, all, journalStream, projectionDone, proof, jsOptions...)
 		stopProjection()
 		projectionJS = tracedAuditJS{JetStream: all[2], trace: dependencyTrace}
 		restarted, err = visibility.New(ctx, projectionJS, options...)
