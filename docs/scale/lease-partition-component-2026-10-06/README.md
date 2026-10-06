@@ -71,3 +71,13 @@ The fresh-key diagnostic at `dc0fa46` retains the production 12-second MaxAge an
 The control repairs one conflicting entry (leader term 3 versus minority term 2 at index 2,778, followed by repair to 2,777) and logs one snapshot warning before recovery. In the production-marker diagnostic, repair repeatedly backs through many conflicting term-1 entries. This supports the subject-marker/proposal path as a candidate source of the long recovery, while plain MaxAge expiry still operates in the successful control. The SDK's marker-disabled configuration also disables message TTL support and sets duplicate_window to 12 seconds instead of 120 seconds; those derived differences are retained and prevent a claim that every stream field was held equal. No message-ID deduplication or per-message TTL is requested by the diagnostic writers.
 
 Production `WF_LEASE` keeps its required one-minute LimitMarkerTTL and 12-second lease TTL. The original plan explicitly includes LimitMarkerTTL; dropping it solely to pass a fault test would change the requested contract. A causal proof still needs the isolated minority's uncommitted entries tied to expiry marker proposals and a recovery fix that preserves the contract. Native matrices, causal Tier1 and full24h gates remain open.
+
+## Offline WAL diagnosis
+
+The read-only decoder checks the pinned NATS 2.15 uncompressed file-record format and HighwayHash checksums, then decodes append entries and stream operations. A separately built adapter calls the pinned server's own `decodeAppendEntry`, `decodeStreamMsg` and `decodeMsgDelete` functions for differential comparison. The adapter is added to a fresh source copy through a build overlay; it never changes the original server executable or module cache. No broker or file store is started.
+
+The review restores the complete failure archive to a fresh directory, binds committed helper templates and selected dependency source inputs, compares all retained append records with the upstream decoder, rejects a checksum-corrupt control, and checks that the restored fixture and inputs remain unchanged. Initial exploratory decoding found expiry markers in the isolated minority's divergent tail; the bound review below must pass before promoting that result as complete evidence.
+
+    python3 scripts/run-lease-raft-offline-review.py --root /tmp/js-wf-lease-raft-offline-bound-20261006
+
+This reads a retained tail, rather than a complete pre-cut history. The majority WALs were compacted at shutdown. It does not prove a recovery fix, all possible protocol behavior or a causal Tier1 reproduction.

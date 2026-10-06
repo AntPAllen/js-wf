@@ -1,0 +1,32 @@
+// Reads append-entry payloads from stdin; no server or store is started.
+package main
+
+import (
+	"bufio"
+	"encoding/base64"
+	"encoding/json"
+	"github.com/nats-io/nats-server/v2/server"
+	"os"
+)
+
+func main() {
+	scan := bufio.NewScanner(os.Stdin)
+	scan.Buffer(make([]byte, 4096), 16<<20)
+	enc := json.NewEncoder(os.Stdout)
+	for scan.Scan() {
+		data, err := base64.StdEncoding.DecodeString(scan.Text())
+		if err != nil {
+			panic(err)
+		}
+		row, err := server.DiagnosticDecodeLeaseAppend(data)
+		if err != nil {
+			panic(err)
+		}
+		if err := enc.Encode(row); err != nil {
+			panic(err)
+		}
+	}
+	if err := scan.Err(); err != nil {
+		panic(err)
+	}
+}

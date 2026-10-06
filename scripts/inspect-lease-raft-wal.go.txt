@@ -1,0 +1,161 @@
+// Offline diagnostic only. Reads copied, uncompressed NATS 2.15 WAL blocks.
+package main
+
+import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+
+	"github.com/klauspost/compress/s2"
+	"github.com/minio/highwayhash"
+)
+
+type reader struct{ b []byte }
+
+func (r *reader) take(n int) []byte {
+	if n < 0 || len(r.b) < n {
+		panic("truncated record")
+	}
+	p := r.b[:n]
+	r.b = r.b[n:]
+	return p
+}
+func (r *reader) u16() uint16 { return binary.LittleEndian.Uint16(r.take(2)) }
+func (r *reader) u32() uint32 { return binary.LittleEndian.Uint32(r.take(4)) }
+func (r *reader) u64() uint64 { return binary.LittleEndian.Uint64(r.take(8)) }
+func (r *reader) variable() uint64 {
+	v, n := binary.Uvarint(r.b)
+	if n <= 0 {
+		panic("invalid varint")
+	}
+	r.take(n)
+	return v
+}
+func digest(b []byte) string { h := sha256.Sum256(b); return hex.EncodeToString(h[:]) }
+func stream(data []byte) map[string]any {
+	r := reader{data}
+	seq, ts := r.u64(), r.u64()
+	subject := string(r.take(int(r.u16())))
+	reply := string(r.take(int(r.u16())))
+	hdr := string(r.take(int(r.u16())))
+	msg := r.take(int(r.u32()))
+	flags := uint64(0)
+	if len(r.b) > 0 {
+		flags = r.variable()
+	}
+	if len(r.b) != 0 {
+		panic("stream trailing bytes")
+	}
+	return map[string]any{"last_stream_sequence": seq, "stream_timestamp_ns": ts, "subject": subject, "reply": reply, "headers": hdr, "message_bytes": len(msg), "message_sha256": digest(msg), "flags": flags}
+}
+func appendEntry(data []byte) map[string]any {
+	r := reader{data}
+	leader := string(r.take(8))
+	term, commit, pterm, pindex := r.u64(), r.u64(), r.u64(), r.u64()
+	n := int(r.u16())
+	entries := make([]map[string]any, 0, n)
+	for i := 0; i < n; i++ {
+		e := r.take(int(r.u32()))
+		if len(e) == 0 {
+			panic("empty entry")
+		}
+		typ, payload := e[0], e[1:]
+		entry := map[string]any{"type": typ, "bytes": len(payload), "sha256": digest(payload)}
+		if typ == 0 && len(payload) > 0 {
+			op := payload[0]
+			entry["operation"] = op
+			if op == 4 {
+				entry["stream"] = stream(payload[1:])
+			}
+			if op == 14 {
+				decoded, err := s2.Decode(nil, payload[1:])
+				if err != nil {
+					panic(err)
+				}
+				entry["stream"] = stream(decoded)
+			}
+			if op == 6 {
+				var deleted map[string]any
+				if err := json.Unmarshal(payload[1:], &deleted); err != nil {
+					panic(err)
+				}
+				entry["deleted"] = deleted
+			}
+		}
+		entries = append(entries, entry)
+	}
+	lterm := uint64(0)
+	if len(r.b) > 0 {
+		lterm = r.variable()
+	}
+	if len(r.b) != 0 {
+		panic("append trailing bytes")
+	}
+	return map[string]any{"leader": leader, "term": term, "commit": commit, "previous_term": pterm, "previous_index": pindex, "leader_term": lterm, "entries": entries}
+}
+func main() {
+	if len(os.Args) != 3 {
+		panic("usage: decoder RAFT_GROUP COPIED_BLOCK")
+	}
+	group, path := os.Args[1], os.Args[2]
+	if !filepath.IsAbs(path) {
+		panic("absolute copied block required")
+	}
+	index, err := strconv.ParseUint(strings.TrimSuffix(filepath.Base(path), ".blk"), 10, 32)
+	if err != nil {
+		panic(err)
+	}
+	key := sha256.Sum256([]byte(fmt.Sprintf("%s-%d", group, index)))
+	hh, err := highwayhash.NewDigest64(key[:])
+	if err != nil {
+		panic(err)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	enc := json.NewEncoder(os.Stdout)
+	for offset := 0; offset < len(data); {
+		if len(data)-offset < 22 {
+			panic("short file header")
+		}
+		h := data[offset : offset+22]
+		rawLength := binary.LittleEndian.Uint32(h)
+		if rawLength&(1<<31) != 0 {
+			panic("WAL header-bearing records unsupported")
+		}
+		length := int(rawLength)
+		slen := int(binary.LittleEndian.Uint16(h[20:]))
+		if length < 30+slen || length > len(data)-offset {
+			panic("invalid file record size")
+		}
+		record := data[offset : offset+length]
+		body := record[22 : len(record)-8]
+		hh.Reset()
+		hh.Write(h[4:20])
+		hh.Write(body)
+		if !bytes.Equal(hh.Sum(nil), record[len(record)-8:]) {
+			panic("file record checksum mismatch")
+		}
+		seq, ts := binary.LittleEndian.Uint64(h[4:]), binary.LittleEndian.Uint64(h[12:])
+		row := map[string]any{"offset": offset, "record_bytes": length, "record_sha256": digest(record), "wal_sequence": seq, "timestamp_ns": ts, "checksum_verified": true}
+		if seq != 0 && seq&(uint64(3)<<62) == 0 {
+			row["append"] = appendEntry(body[slen:])
+			row["raw_append_base64"] = base64.StdEncoding.EncodeToString(body[slen:])
+		} else {
+			row["deleted_or_tombstone"] = true
+		}
+		if err := enc.Encode(row); err != nil {
+			panic(err)
+		}
+		offset += length
+	}
+}

@@ -1,0 +1,60 @@
+// Build-overlay adapter only. Calls the pinned server's real decoders.
+package server
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"github.com/klauspost/compress/s2"
+)
+
+func DiagnosticDecodeLeaseAppend(data []byte) (map[string]any, error) {
+	ae, err := decodeAppendEntry(data, nil, "")
+	if err != nil {
+		return nil, err
+	}
+	digest := func(b []byte) string { h := sha256.Sum256(b); return hex.EncodeToString(h[:]) }
+	entries := make([]map[string]any, 0, len(ae.entries))
+	for _, e := range ae.entries {
+		row := map[string]any{"type": uint8(e.Type), "bytes": len(e.Data), "sha256": digest(e.Data)}
+		if e.Type == EntryNormal && len(e.Data) > 0 {
+			op := entryOp(e.Data[0])
+			row["operation"] = uint8(op)
+			if op == streamMsgOp || op == compressedStreamMsgOp {
+				payload := e.Data[1:]
+				if op == compressedStreamMsgOp {
+					payload, err = s2.Decode(nil, payload)
+					if err != nil {
+						return nil, err
+					}
+				}
+				subject, reply, hdr, msg, seq, ts, sourced, err := decodeStreamMsg(payload)
+				if err != nil {
+					return nil, err
+				}
+				if sourced {
+					return nil, fmt.Errorf("sourced records outside this diagnostic")
+				}
+				row["stream"] = map[string]any{"last_stream_sequence": seq, "stream_timestamp_ns": ts, "subject": subject, "reply": reply, "headers": string(hdr), "message_bytes": len(msg), "message_sha256": digest(msg), "flags": 0}
+			}
+			if op == deleteMsgOp {
+				deleted, err := decodeMsgDelete(e.Data[1:])
+				if err != nil {
+					return nil, err
+				}
+				body, err := json.Marshal(deleted)
+				if err != nil {
+					return nil, err
+				}
+				var normalized map[string]any
+				if err = json.Unmarshal(body, &normalized); err != nil {
+					return nil, err
+				}
+				row["deleted"] = normalized
+			}
+		}
+		entries = append(entries, row)
+	}
+	return map[string]any{"leader": ae.leader, "term": ae.term, "commit": ae.commit, "previous_term": ae.pterm, "previous_index": ae.pindex, "leader_term": ae.lterm, "entries": entries}, nil
+}
