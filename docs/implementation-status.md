@@ -29,6 +29,24 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: corrected deadline real87920 comparison accepted
+
+At65c9036 fresh R5 normal nativePASS53.91s: original20s full integrity before/after
+both pass87,920/969,925/87,920; bulk samples exactly equal the complete canonical
+accepted point oracle,16.775331767s under original6m. Complete source censuses and
+cuts/consumer cleanup verified. SDK/five actual2.15 servers closed,3,887 donor
+hashes unchanged. Complete4,434 logical files preserved via fully verified pinned
+base plus96,099,748-byte/four-part delta. Application charge397,172,839 bytes;
+late process observations are not full400k RSS qualification. No earlier failure
+reclassified. Full400k/memory/fault/currentmatrix/24h remain open; bulk not selected
+in default matrix/live soak.
+[Accepted fresh cohort](scale/state-admission-deadlines-2026-10-06/native-bulk-whole-state/).
+
+Complete canonical pause/isolation proofs also verified; only redundant raw
+archives removed,196,091,904 allocated bytes recovered. Original fixtures/source/
+executables/caches/live stores and canonical Git proof retained.
+[Duplicate recovery](scale/state-admission-deadlines-2026-10-06/tier2-proof-duplicate-recovery/).
+
 ## Live status — 2026-10-06 07:35 UTC
 
 Original journal-leader 24-hour campaign remains active at 6h24m / batch3249.
