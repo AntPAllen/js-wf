@@ -26,7 +26,7 @@ class FixtureArchiveControls(unittest.TestCase):
                 path.chmod(mode)
                 os.utime(path, ns=(1728000000123456789, 1728000000123456789))
             archive = base / "proof.tar.gz"
-            proof = fixture_archive.capture(root, archive, base / "meta")
+            proof = fixture_archive.capture(root, archive, base / "meta", compresslevel=1)
             manifest = fixture_archive.verify(archive)
             expected = dict(bytes=proof["archive_bytes"], sha256=proof["archive_sha256"])
             result = fixture_archive.restore(archive, expected, manifest, base / "fresh")

@@ -92,7 +92,7 @@ def verify_hashed_stream(stream, expected):
     return declared, actual
 
 
-def capture(root, archive_path, out):
+def capture(root, archive_path, out, *, compresslevel=9):
     root, archive_path, out = Path(root), Path(archive_path), Path(out)
     if archive_path.resolve().is_relative_to(root.resolve()) or out.resolve().is_relative_to(root.resolve()):
         raise ValueError("archive and metadata must be outside fixture")
@@ -106,7 +106,8 @@ def capture(root, archive_path, out):
                 "scope": "Complete file bytes, paths, modes and original nanosecond mtimes; no ownership/directory metadata or gate qualification."}
     # The control JSON is an ordinary final member, never an alias or hardlink.
     with archive_path.open("xb") as raw:
-        with tarfile.open(fileobj=raw, mode="w:gz", dereference=True) as archive:
+        with tarfile.open(fileobj=raw, mode="w:gz", dereference=True,
+                          compresslevel=compresslevel) as archive:
             for name in files:
                 archive.add(root / name, arcname=name, recursive=False)
             import io
