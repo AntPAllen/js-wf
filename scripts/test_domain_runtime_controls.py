@@ -55,6 +55,20 @@ class DomainCoverageControls(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'successor epoch'):
             controls.verify_log('retirement-weak-frame-expiry', renamed)
 
+    def test_actual_expiry_frame_row_requires_expired_ttl_higher_epoch_and_frame_confirmation(self):
+        log = (REPO/'docs/scale/domain-retirement-weak-frame-expiry-2026-10-06/native-race/native.log').read_text()
+        controls.verify_log('retirement-weak-frame-expiry', log)
+        bad = [re.sub(r'prior_epoch=(\d+) terminal_epoch=\d+', lambda m: f'prior_epoch={m[1]} terminal_epoch={m[1]}', log),
+               re.sub(r'held=[0-9.]+s ttl=12s', 'held=12s ttl=12s', log),
+               log.replace('ttl=12s', 'ttl=20s'),
+               log.replace('drops=1 reads=3', 'drops=0 reads=3'),
+               log.replace('generation=3 drops=1', 'generation=1 drops=1'),
+               log.replace('signal=killed', 'signal=terminated', 1)]
+        for malformed in bad:
+            self.assertNotEqual(log, malformed)
+            with self.assertRaises(ValueError):
+                controls.verify_log('retirement-weak-frame-expiry', malformed)
+
     def test_native_failure_never_qualifies(self):
         for case in controls.CASES:
             for log in ('FAIL\n', '--- SKIP: x\nPASS\n', 'DATA RACE\nPASS\n'):
