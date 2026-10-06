@@ -41,7 +41,13 @@ latency stage,5m completion deadline, p99/history/drain/fault/checkpoint gates.
 Comparison must match every original point sample within that same6m stage.
 Clock-controller, wire-rollout and cached-point profile conflicts are rejected;
 no flags are inherited into an unselected run. Thirteen producer controls and
-Go compile/skip pass. Native sustained qualification is next; default unchanged.
+Go compile/skip pass. Original10m journal seed1 is live at29904c5 with actual
+SDK3166840,4CPU/GOGC500/4GiB, both bulk/comparison flags observed and all five
+NATS2.15 roles captured. Native terminal qualification remains pending; default
+unchanged. New explicit artifact checks reject missing/error receipts, changed
+full counts, changed6m budget, incomplete source/sample lifecycle censuses and
+false point-equivalence claims. Five mutation groups,26 existing row controls
+and13 producer controls pass. [Live proof](scale/sustained-bulk-final-latency-2026-10-06/live-journal-ten-minute/).
 
 Thirteen additional closed disposable Tier2 copied-audit store trees pass full
 canonical Git archive/member/current-file census checks, original-copy provenance

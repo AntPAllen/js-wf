@@ -91,6 +91,10 @@ def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=
     if explicit_route_seeds:
         env['WF_TIER3_EXPLICIT_ROUTE_SEEDS']='1'
     flags = ['--require-checkpoint-audits']
+    if bulk_final_latency:
+        flags += ['--require-bulk-final-latency']
+        if compare_bulk_point:
+            flags += ['--require-bulk-point-equivalence']
     if journal_rollout != 'none':
         if journal_rollout != 'protobuf-to-json' or row != 'worker_kill':
             raise ValueError('journal rollout requires worker_kill')

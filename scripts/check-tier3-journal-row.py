@@ -964,6 +964,57 @@ def check_checkpoint_audits(root, report):
                 scope='Captured completed cohorts; mandatory final whole-state check remains separate.')
 
 
+def check_bulk_latency_artifacts(root, report, require_point_comparison=False):
+    proof = json.loads((root/'bulk-latency-audit.json').read_text())
+    invocations = report['invocations']
+    expected = dict(Invocations=invocations, Journals=invocations,
+                    Entries=report['journal_entries'], Terminal=invocations)
+    if proof.get('error') != '<nil>' or proof.get('after_error') != '<nil>' or proof.get('final_integrity_verified') is not True:
+        raise ValueError('bulk audit lacks successful final full integrity')
+    if proof.get('before_report') != expected or proof.get('after_report') != expected:
+        raise ValueError('bulk full integrity reports disagree with native row counts')
+    elapsed = proof.get('elapsed_ns')
+    if proof.get('stage_limit_ns') != 360_000_000_000 or type(elapsed) is not int or not 0 <= elapsed < 360_000_000_000:
+        raise ValueError('bulk final stage missed original six-minute limit')
+    if require_point_comparison and (proof.get('point_comparison_requested') is not True or proof.get('every_sample_matches_point') is not True):
+        raise ValueError('missing complete bulk/point sample equivalence')
+    stats = proof['bulk_stats']
+    names = {'WF_INV', 'KV_WF_STATE', 'WF_JRN', 'WF_SIG'}
+    cuts, records = stats['source_cuts'], stats['records']
+    if set(cuts) != names or not set(records) <= names:
+        raise ValueError('bulk audit source census incomplete or unknown')
+    for name, cut in cuts.items():
+        if any(type(cut.get(key)) is not int or cut[key] < 0 for key in ('First','Last','Messages','Bytes','Consumers')) or type(records.get(name,0)) is not int or records.get(name,0) != cut['Messages']:
+            raise ValueError('bulk audit record census differs from source cut')
+    if cuts['WF_INV']['Messages'] != invocations or stats['invocation_cutoff'] != cuts['WF_INV']['Last']:
+        raise ValueError('bulk audit omitted invocation suffix')
+    if type(stats.get('charged_bytes')) is not int or not 0 < stats['charged_bytes'] <= 3*1024**3:
+        raise ValueError('bulk retained-data charge exceeds original ceiling')
+    samples = json.loads((root/'latencies.json').read_text())
+    starts, terminals = set(), set()
+    for sample in samples:
+        coordinate = (sample['type'], sample['id'])
+        if sample['type'] not in report['cells']:
+            raise ValueError('bulk sample has unknown workload type')
+        if sample.get('server_clock_offset_ns',0) != 0 or sample.get('observed_lower') is not None:
+            raise ValueError('bulk row has unsupported clock-controller samples')
+        if type(sample.get('delay_ns')) is not int or sample['delay_ns'] != timestamp_ns(sample['observed'])-timestamp_ns(sample['enabled']) or sample['delay_ns'] < 0:
+            raise ValueError('bulk sample timestamp math mismatch')
+        if sample['event'] in ('start', 'terminal'):
+            seen = starts if sample['event']=='start' else terminals
+            if coordinate in seen: raise ValueError('duplicate bulk lifecycle sample')
+            seen.add(coordinate)
+    if len(starts) != invocations or starts != terminals:
+        raise ValueError('bulk sample lifecycle census differs from full row')
+    if any(sum(typ == name for typ, identifier in terminals) != cell['invocations'] for name,cell in report['cells'].items()):
+        raise ValueError('bulk workload census differs from native metrics')
+    return dict(invocations=invocations, samples=len(samples), stage_elapsed_ns=elapsed,
+                full_integrity_before_after_verified=True,
+                all_source_censuses_verified=True,
+                complete_point_equivalence=proof.get('point_comparison_requested') is True and proof.get('every_sample_matches_point') is True,
+                scope='Explicit bulk final audit within original row gates; not default/full-matrix or 24h qualification.')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, help='required consumer/restart fault artifacts')
@@ -976,6 +1027,8 @@ if __name__ == '__main__':
     parser.add_argument('--require-common-timer-clock', action='store_true')
     parser.add_argument('--require-journal-rollout', action='store_true')
     parser.add_argument('--require-checkpoint-audits', action='store_true')
+    parser.add_argument('--require-bulk-final-latency', action='store_true')
+    parser.add_argument('--require-bulk-point-equivalence', action='store_true')
     parser.add_argument('--require-upgrade-start-gap', action='store_true')
     parser.add_argument('--require-start-scan-progress', action='store_true')
     parser.add_argument('--expected-upgrade-shutdown', choices=('sigkill','ldm'))
@@ -984,8 +1037,16 @@ if __name__ == '__main__':
         parser.error('--require-clock-timer-cut requires a server-clock row')
     if args.require_common_timer_clock and not args.row.startswith('server_clock_'):
         parser.error('--require-common-timer-clock requires a server-clock row')
+    if args.require_bulk_point_equivalence and not args.require_bulk_final_latency:
+        parser.error('--require-bulk-point-equivalence requires bulk final latency')
     events = [json.loads(line) for line in args.events.read_text().splitlines() if line.strip()]
     report = check(events, args.duration, args.row, args.expected_seed, args.require_upgrade_start_gap, args.expected_upgrade_shutdown)
+    bulk_claim = any('TIER3_BULK_LATENCY ' in event.get('Output','') for event in events)
+    bulk_present = args.root is not None and (args.root/'bulk-latency-audit.json').exists()
+    if bulk_claim or bulk_present or args.require_bulk_final_latency:
+        if not args.require_bulk_final_latency or args.root is None or args.row.startswith('server_clock_') or not bulk_claim:
+            raise ValueError('bulk audit requires explicit zero-server-offset row verification')
+        report['bulk_latency_artifact_checks'] = check_bulk_latency_artifacts(args.root, report, args.require_bulk_point_equivalence)
     rollout_claim = any('TIER3_JOURNAL_ROLLOUT=' in event.get('Output','') for event in events)
     rollout_present = args.root is not None and (args.root/'journal-rollout.json').exists()
     if rollout_claim or rollout_present or args.require_journal_rollout:
