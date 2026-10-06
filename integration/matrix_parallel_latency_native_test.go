@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"js-wf/client"
+	"js-wf/integrity"
 	"js-wf/testcluster"
 	"js-wf/wf"
 	"js-wf/worker"
@@ -174,6 +175,16 @@ func TestMatrixParallelInvocationAuditsNativeOracle(t *testing.T) {
 	if counts["journal"] != 1 || counts["signals"] != 1 || counts["state"] != 1 || counts["objects"] != 0 {
 		t.Fatalf("unexpected native handle lookups: %v", counts)
 	}
+	auditCtx, stopAudit := context.WithTimeout(ctx, 20*time.Second)
+	fullReport, err := integrity.CheckWithChunkedConcurrentStateReads(auditCtx, all[2])
+	stopAudit()
+	if err != nil || fullReport.Invocations != 160 || fullReport.Terminal != 160 {
+		t.Fatalf("bulk oracle requires complete integrity: %+v %v", fullReport, err)
+	}
+	bulk, bulkStats, err := matrixBulkInvocationAudits(ctx, all[2], fullReport, deadline)
+	if err != nil || !reflect.DeepEqual(bulk, serial) || bulkStats.SnapshotFallbacks != 0 {
+		t.Fatalf("bulk timestamp samples differ from frozen point oracle: stats=%+v err=%v", bulkStats, err)
+	}
 	// The same actual terminal records must still fail a violated deadline.
 	deadline = time.Unix(0, 0)
 	_, serialErr := read(ctx, info.State.FirstSeq)
@@ -194,11 +205,15 @@ func TestMatrixParallelInvocationAuditsNativeOracle(t *testing.T) {
 	if cachedFailure != nil || cachedErr == nil || !strings.Contains(cachedErr.Error(), serialErr.Error()) {
 		t.Fatalf("metadata reuse weakened terminal deadline: %v", cachedErr)
 	}
+	bulkFailure, _, bulkErr := matrixBulkInvocationAudits(ctx, all[2], fullReport, deadline)
+	if bulkFailure != nil || bulkErr == nil || !strings.Contains(bulkErr.Error(), "post-heal deadline") {
+		t.Fatalf("bulk audit weakened terminal deadline: %v", bulkErr)
+	}
 	persistedSamples := make([][]matrixLatencySample, len(parallel))
 	for index, result := range parallel {
 		persistedSamples[index] = result.samples
 	}
-	data, err := json.MarshalIndent(map[string]any{"invocations": len(serial), "serial_equals_parallel": true, "legacy_equals_shared_reducer": true, "cached_metadata_equals_serial": true, "metadata_handle_lookups": counts, "deadline_negative_control": true, "parallel_elapsed": parallelElapsed, "serial_elapsed": serialElapsed, "measurement_scope": "ordered same-fixture point checks; no isolated speed ratio or large/fault/24h qualification", "samples": persistedSamples}, "", "  ")
+	data, err := json.MarshalIndent(map[string]any{"invocations": len(serial), "serial_equals_parallel": true, "legacy_equals_shared_reducer": true, "bulk_equals_serial": true, "bulk_stats": bulkStats, "cached_metadata_equals_serial": true, "metadata_handle_lookups": counts, "deadline_negative_control": true, "parallel_elapsed": parallelElapsed, "serial_elapsed": serialElapsed, "measurement_scope": "ordered same-fixture point and bulk checks; no isolated speed ratio or large/fault/24h qualification", "samples": persistedSamples}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}
