@@ -29,6 +29,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest proof recovery — 2026-10-06
+
+Accepted real87920 owner-restart fixture's complete374,002,849-byte archive,
+metadata and4,437-file inventory pass full S3 GET readback. After revalidating
+complete archive/current-file/clone-census/SDK-six-server/container/mount/visibleFD
+closure, only the closed disposable store copy and local archive duplicate were
+reclaimed:2,357,710,848 allocated bytes; about2.6GB free. All remaining captured
+primary source/exes/metadata and original donors/caches retained. No old handle
+restarted. This recorded-source fault qualification remains accepted; full400k
+valid latency/RSS, current/default matrices and actual24h/million remain open.
+[Recovery](scale/bulk-cursor-fault-preparation-2026-10-06/accepted-v2-copy-recovery/).
+
 ## Latest qualification — 2026-10-06: real87920 bulk owner restart accepted
 
 At2621015 fresh R5 normal nativePASS49.44s. Actual active R1 memory AckNone JRN
