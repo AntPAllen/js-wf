@@ -1,0 +1,256 @@
+// Real-server diagnostic reduction only; no workflow/matrix qualification.
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/provision"
+	"js-wf/testcluster"
+	"os"
+	"path/filepath"
+	"sync"
+	"sync/atomic"
+	"time"
+)
+
+func main() {
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+func run() error {
+	if len(os.Args) != 2 || !filepath.IsAbs(os.Args[1]) {
+		return fmt.Errorf("usage: component FRESH_ROOT")
+	}
+	root := os.Args[1]
+	ctx, stop := context.WithTimeout(context.Background(), 120*time.Second)
+	defer stop()
+	c, err := testcluster.StartPartitionableProcesses(filepath.Join(root, "originals", "cluster"), 3)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+	nc, err := nats.Connect(c.ClientURL(0)+","+c.ClientURL(1), nats.IgnoreDiscoveredServers(), nats.MaxReconnects(-1), nats.ReconnectWait(25*time.Millisecond))
+	if err != nil {
+		return err
+	}
+	defer nc.Close()
+	js, err := jetstream.New(nc)
+	if err != nil {
+		return err
+	}
+	kv, err := js.CreateKeyValue(ctx, jetstream.KeyValueConfig{Bucket: "WF_LEASE", History: 1, TTL: provision.LeaseTTL, LimitMarkerTTL: time.Minute, Storage: jetstream.FileStorage, Replicas: 3})
+	if err != nil {
+		return err
+	}
+	stream, err := js.Stream(ctx, "KV_WF_LEASE")
+	if err != nil {
+		return err
+	}
+	// Public leader stepdown placement is supported by the pinned NATS API.
+	prefer, done := context.WithTimeout(ctx, 20*time.Second)
+	requested := false
+	for prefer.Err() == nil {
+		info, e := stream.Info(prefer)
+		if e == nil && info.Cluster != nil && info.Cluster.Leader == "wf-process-2" && len(info.Cluster.Replicas) == 2 && info.Cluster.Replicas[0].Current && info.Cluster.Replicas[1].Current {
+			break
+		}
+		if e == nil && info.Cluster != nil && info.Cluster.Leader != "wf-process-2" && !requested {
+			reply, e := nc.RequestWithContext(prefer, "$JS.API.STREAM.LEADER.STEPDOWN.KV_WF_LEASE", []byte(`{"placement":{"preferred":"wf-process-2"}}`))
+			if e != nil {
+				done()
+				return e
+			}
+			requested = true
+			var response struct {
+				Success bool            `json:"success"`
+				Error   json.RawMessage `json:"error"`
+			}
+			if e = json.Unmarshal(reply.Data, &response); e != nil || !response.Success {
+				done()
+				return fmt.Errorf("preferred leader response: %s: %v", reply.Data, e)
+			}
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	err = prefer.Err()
+	done()
+	if err != nil {
+		return fmt.Errorf("preferred leader admission: %w", err)
+	}
+	log, err := os.Create(filepath.Join(root, "observations.jsonl"))
+	if err != nil {
+		return err
+	}
+	defer log.Close()
+	enc := json.NewEncoder(log)
+	sample := func(stage string) error {
+		type peer struct {
+			Node   int             `json:"node"`
+			At     time.Time       `json:"observed_at"`
+			Routes int             `json:"routes"`
+			Data   json.RawMessage `json:"jetstream,omitempty"`
+			Error  string          `json:"error,omitempty"`
+		}
+		var peers [3]peer
+		var joined sync.WaitGroup
+		for node := range peers {
+			joined.Add(1)
+			go func(node int) {
+				defer joined.Done()
+				attempt, cancel := context.WithTimeout(ctx, time.Second)
+				defer cancel()
+				p := peer{Node: node, At: time.Now().UTC()}
+				data, e := c.Diagnostic(attempt, node, "jetstream")
+				p.Data = data
+				if e != nil {
+					p.Error = e.Error()
+				}
+				routes, e := c.RouteCount(attempt, node)
+				p.Routes = routes
+				if e != nil {
+					p.Error += e.Error()
+				}
+				peers[node] = p
+			}(node)
+		}
+		joined.Wait()
+		return enc.Encode(map[string]any{"stage": stage, "at": time.Now().UTC(), "peers": peers})
+	}
+	if err := sample("admitted"); err != nil {
+		return err
+	}
+	var acknowledged, errors atomic.Uint64
+	writers, cancelWriters := context.WithCancel(ctx)
+	var joined sync.WaitGroup
+	defer func() { cancelWriters(); joined.Wait() }()
+	for actor := 0; actor < 6; actor++ {
+		joined.Add(1)
+		go func(actor int) {
+			defer joined.Done()
+			for iteration := 0; writers.Err() == nil; iteration++ {
+				key := fmt.Sprintf("actor%d.key%d", actor, iteration%32)
+				attempt, cancel := context.WithTimeout(writers, time.Second)
+				revision, e := kv.Put(attempt, key, []byte(fmt.Sprintf("{\"worker\":\"actor%d\",\"epoch\":%d}", actor, iteration)))
+				if e == nil {
+					revision, e = kv.Update(attempt, key, []byte("{\"worker\":\"renewed\"}"), revision)
+				}
+				if e == nil {
+					e = kv.Delete(attempt, key, jetstream.LastRevision(revision))
+				}
+				cancel()
+				if e == nil {
+					acknowledged.Add(1)
+				} else {
+					errors.Add(1)
+				}
+				select {
+				case <-writers.Done():
+				case <-time.After(50 * time.Millisecond):
+				}
+			}
+		}(actor)
+	}
+	warm := time.NewTimer(30 * time.Second)
+	defer warm.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-warm.C:
+	}
+	if acknowledged.Load() == 0 {
+		return fmt.Errorf("no acknowledged warm transactions")
+	}
+	if err := sample("before-cut"); err != nil {
+		return err
+	}
+	killed := time.Now().UTC()
+	bound, cancelBound := context.WithTimeout(ctx, 35*time.Second)
+	defer cancelBound()
+	if err := c.RouteMesh().PartitionNode(2); err != nil {
+		return err
+	}
+	defer c.RouteMesh().Heal()
+	cutOK := false
+	for bound.Err() == nil && time.Since(killed) < 4*time.Second {
+		var routes [3]int
+		for node := range routes {
+			routes[node], err = c.RouteCount(bound, node)
+			if err != nil {
+				break
+			}
+		}
+		if err == nil && routes == [3]int{4, 4, 0} {
+			cutOK = true
+			break
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+	if !cutOK {
+		return fmt.Errorf("real minority route cut not confirmed")
+	}
+	if err := sample("isolated"); err != nil {
+		return err
+	}
+	var probe uint64
+	for bound.Err() == nil && time.Since(killed) < 10*time.Second {
+		attempt, cancel := context.WithTimeout(bound, time.Second)
+		probe, err = kv.Put(attempt, "majority.probe", []byte("during-cut"))
+		cancel()
+		if err == nil {
+			break
+		}
+	}
+	if probe == 0 || err != nil {
+		return fmt.Errorf("majority KV acknowledgement during cut: %w", err)
+	}
+	healTimer := time.NewTimer(time.Until(killed.Add(10 * time.Second)))
+	defer healTimer.Stop()
+	select {
+	case <-bound.Done():
+		return bound.Err()
+	case <-healTimer.C:
+	}
+	c.RouteMesh().Heal()
+	healed := time.Now().UTC()
+	recovered := false
+	for bound.Err() == nil {
+		if err := sample("recovering"); err != nil {
+			return err
+		}
+		attempt, cancel := context.WithTimeout(bound, time.Second)
+		info, e := stream.Info(attempt)
+		cancel()
+		recovered = e == nil && info.Cluster != nil && info.Cluster.Leader != "" && len(info.Cluster.Replicas) == 2
+		if recovered {
+			for _, p := range info.Cluster.Replicas {
+				recovered = recovered && p.Current && !p.Offline
+			}
+		}
+		if recovered {
+			for node := 0; node < 3; node++ {
+				routes, e := c.RouteCount(bound, node)
+				recovered = recovered && e == nil && routes == 8
+			}
+		}
+		if recovered {
+			break
+		}
+		select {
+		case <-bound.Done():
+		case <-time.After(2 * time.Second):
+		}
+	}
+	cancelWriters()
+	joined.Wait()
+	result := map[string]any{"recovered": recovered, "killed": killed, "routes_heal_requested": healed, "finished": time.Now().UTC(), "majority_probe_revision": probe, "acknowledged_transactions": acknowledged.Load(), "transaction_errors": errors.Load(), "replicas": 3, "ttl_ns": int64(provision.LeaseTTL), "history": 1, "scope": "Bare KV write/CAS/delete component diagnostic; no workflow SDK, full matrix or Tier1 reproduction qualification."}
+	data, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(root, "result.json"), append(data, '\n'), 0600)
+}
