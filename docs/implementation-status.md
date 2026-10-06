@@ -29,6 +29,25 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Live status — 2026-10-06 07:35 UTC
+
+Original journal-leader 24-hour campaign remains active at 6h24m / batch3249.
+Million-timer candidate remains active: 904,982 unique receipts at07:33:54,
+p99 0.289618995s / maximum17.839281762s, zero redeliveries and ACK errors.
+Both actual all-server restarts are recorded; final delivery and physical drain
+checks remain pending. The candidate server is not adopted.
+
+Full integrity race suite passes in4.553s after the state deadline correction.
+Changed-code native real-cohort validation is next; earlier native observations
+ran before that correction and do not qualify it.
+
+The complete state diagnostic base/delta proof is verified in Git; the delta has
+an additional complete S3 readback (reconstruction still requires its pinned base).
+Only the closed disposable copied stores were reclaimed after full census,
+PID/mount/visible-file-descriptor checks:1,984,749,568 allocated bytes recovered.
+Every remaining captured source/executable/metadata file is unchanged.
+[Recovery evidence](scale/state-admission-deadlines-2026-10-06/copied-store-recovery/).
+
 ## Latest follow-up — 2026-10-06: ordered native state observation accepted; deadline scope corrected
 
 At271bbd2 fresh R5 diagnosticPASS23.78s: standalone88,068 state entries complete
