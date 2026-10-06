@@ -37,9 +37,10 @@ def inventory(root):
     return files
 
 
-def verify(archive_path):
+def verify_stream(stream):
+    """Verify every member of a non-seeking compressed input stream."""
     actual, declared = {}, None
-    with tarfile.open(archive_path, mode="r|gz") as archive:
+    with tarfile.open(fileobj=stream, mode="r|gz") as archive:
         for member in archive:
             safe_name(member.name)
             if not member.isfile():
@@ -60,6 +61,34 @@ def verify(archive_path):
     if actual != expected:
         raise ValueError("fixture archive differs from inventory")
     return declared
+
+
+def verify(archive_path):
+    with Path(archive_path).open("rb") as stream:
+        return verify_stream(stream)
+
+
+def verify_hashed_stream(stream, expected):
+    """Verify members and the complete compressed body, including trailing bytes."""
+    class HashedInput:
+        def __init__(self):
+            self.hash = hashlib.sha256()
+            self.size = 0
+
+        def read(self, size=-1):
+            data = stream.read(size)
+            self.hash.update(data)
+            self.size += len(data)
+            return data
+
+    hashed = HashedInput()
+    declared = verify_stream(hashed)
+    while hashed.read(1 << 20):
+        pass
+    actual = {"bytes": hashed.size, "sha256": hashed.hash.hexdigest()}
+    if actual != expected:
+        raise ValueError("complete compressed archive differs from committed proof")
+    return declared, actual
 
 
 def capture(root, archive_path, out):

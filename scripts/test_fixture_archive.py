@@ -1,3 +1,4 @@
+import hashlib
 import io
 import json
 from pathlib import Path
@@ -36,6 +37,33 @@ class FixtureArchiveControls(unittest.TestCase):
                     dst.addfile(member, io.BytesIO(data))
             with self.assertRaisesRegex(ValueError, "differs from inventory"):
                 fixture_archive.verify(bad)
+
+    def test_nonseeking_stream_and_complete_compressed_digest(self):
+        class NonSeeking:
+            def __init__(self, data):
+                self.stream = io.BytesIO(data)
+
+            def read(self, size=-1):
+                return self.stream.read(min(size, 257) if size >= 0 else 257)
+
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp)
+            root = base / "root"
+            root.mkdir()
+            (root / "data").write_bytes(b"complete archived store" * 1000)
+            archive = base / "proof.tar.gz"
+            fixture_archive.capture(root, archive, base / "meta")
+            data = archive.read_bytes()
+            expected = dict(bytes=len(data), sha256=hashlib.sha256(data).hexdigest())
+            manifest, actual = fixture_archive.verify_hashed_stream(NonSeeking(data), expected)
+            self.assertEqual(actual, expected)
+            self.assertEqual(manifest, fixture_archive.verify(archive))
+            for changed in (data + b"uncommitted trailing bytes", data[:-8]):
+                with self.assertRaises((ValueError, tarfile.TarError, EOFError)):
+                    fixture_archive.verify_hashed_stream(NonSeeking(changed), expected)
+            for wrong in (dict(expected, bytes=len(data)+1), dict(expected, sha256="0"*64)):
+                with self.assertRaisesRegex(ValueError, "committed proof"):
+                    fixture_archive.verify_hashed_stream(NonSeeking(data), wrong)
 
     def test_symlink_and_in_fixture_output_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
