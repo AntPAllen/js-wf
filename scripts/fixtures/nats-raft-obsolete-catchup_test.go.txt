@@ -1,0 +1,51 @@
+// Diagnostic regression in the pinned NATS server package, not a workflow Tier1 test.
+package server
+
+import "testing"
+
+func TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState(t *testing.T) {
+	for _, modern := range []bool{false, true} {
+		for _, replaced := range []bool{false, true} {
+			name := "legacy/canceled"
+			if modern {
+				name = "modern/canceled"
+			}
+			if replaced {
+				name = name[:len(name)-len("canceled")] + "replaced"
+			}
+			t.Run(name, func(t *testing.T) {
+				n, cleanup := initSingleMemRaftNode(t)
+				defer cleanup()
+				leader := "S1Nunr6R"
+				trigger := encode(t, &appendEntry{leader: leader, term: 1, lterm: 1, pterm: 1, pindex: 1, reply: "$TEST.MAIN"})
+				n.processAppendEntry(trigger, n.aesub)
+				if n.catchup == nil {
+					t.Fatal("catchup admission failed")
+				}
+				obsolete := n.catchup.sub
+				n.cancelCatchup()
+				if replaced {
+					n.Lock()
+					n.createCatchup(&appendEntry{leader: leader, term: 1, lterm: 1, pterm: 1, pindex: 2})
+					n.Unlock()
+				}
+				current := n.catchup
+				lterm := uint64(0)
+				if modern {
+					lterm = 1
+				}
+				// A queued callback from the unsubscribed inbox carries the old
+				// progress reply. It cannot legitimately start another catchup
+				// or cancel the replacement subscription.
+				queued := encode(t, &appendEntry{leader: leader, term: 1, lterm: lterm, pterm: 1, pindex: 1, reply: "$NRG.CP.OBSOLETE"})
+				n.processAppendEntry(queued, obsolete)
+				if n.catchup != current {
+					t.Fatalf("obsolete callback changed catchup state: prior=%p current=%p", current, n.catchup)
+				}
+				if n.pindex != 0 || n.commit != 0 {
+					t.Fatalf("obsolete callback changed log state: index=%d commit=%d", n.pindex, n.commit)
+				}
+			})
+		}
+	}
+}
