@@ -1,0 +1,31 @@
+=== RUN   TestNRGTermDoesntRollBackToPtermOnCatchup
+--- PASS: TestNRGTermDoesntRollBackToPtermOnCatchup (3.81s)
+=== RUN   TestNRGCatchupCanTruncateMultipleEntriesWithoutQuorum
+--- PASS: TestNRGCatchupCanTruncateMultipleEntriesWithoutQuorum (0.29s)
+=== RUN   TestNRGCatchupDoesNotTruncateCommittedEntriesDuringRedelivery
+--- PASS: TestNRGCatchupDoesNotTruncateCommittedEntriesDuringRedelivery (0.34s)
+=== RUN   TestNRGCatchupFromNewLeaderWithIncorrectPterm
+--- PASS: TestNRGCatchupFromNewLeaderWithIncorrectPterm (0.27s)
+=== RUN   TestNRGCatchupAcksProgressWhenGivenProgressInbox
+--- PASS: TestNRGCatchupAcksProgressWhenGivenProgressInbox (2.67s)
+=== RUN   TestNRGCatchupSendsProgressInboxAndRefillsWindow
+--- PASS: TestNRGCatchupSendsProgressInboxAndRefillsWindow (0.42s)
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/new-entry
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/new-entry-backward-compatible
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/catchup
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/catchup-backward-compatible
+--- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader (1.05s)
+    --- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/new-entry (0.25s)
+    --- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/new-entry-backward-compatible (0.26s)
+    --- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/catchup (0.28s)
+    --- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/catchup-backward-compatible (0.27s)
+=== RUN   TestNRGIgnoreEntryAfterCanceledCatchup
+--- PASS: TestNRGIgnoreEntryAfterCanceledCatchup (0.27s)
+=== RUN   TestNRGDelayedMessagesAfterCatchupDontCountTowardQuorum
+--- PASS: TestNRGDelayedMessagesAfterCatchupDontCountTowardQuorum (1.29s)
+=== RUN   TestNRGNewEntriesFromOldLeaderResetsWALDuringCatchup
+--- PASS: TestNRGNewEntriesFromOldLeaderResetsWALDuringCatchup (0.27s)
+=== RUN   TestNRGParallelCatchupRollback
+--- PASS: TestNRGParallelCatchupRollback (0.29s)
+PASS

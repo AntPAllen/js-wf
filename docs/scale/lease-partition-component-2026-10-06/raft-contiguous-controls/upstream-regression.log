@@ -1,0 +1,35 @@
+=== RUN   TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState
+=== RUN   TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/legacy/canceled
+=== RUN   TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/legacy/replaced
+=== RUN   TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/modern/canceled
+    diagnostic_obsolete_catchup_test.go:43: obsolete callback changed catchup state: prior=0x0 current=0xc0003401e0
+=== RUN   TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/modern/replaced
+    diagnostic_obsolete_catchup_test.go:43: obsolete callback changed catchup state: prior=0xc0003ea730 current=0x0
+--- FAIL: TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState (4.45s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/legacy/canceled (0.39s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/legacy/replaced (0.35s)
+    --- FAIL: TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/modern/canceled (0.35s)
+    --- FAIL: TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/modern/replaced (3.36s)
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/contiguous
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/ahead
+    diagnostic_obsolete_catchup_test.go:105: trailing callback changed state incorrectly: index=2 want=2 previous=20 term=20 leader="S1Nunr6R" catchingUp=true
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/behind
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/wrong_previous_term
+    diagnostic_obsolete_catchup_test.go:105: trailing callback changed state incorrectly: index=1 want=2 previous=20 term=20 leader="S1Nunr6R" catchingUp=false
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/wrong_leader
+    diagnostic_obsolete_catchup_test.go:105: trailing callback changed state incorrectly: index=3 want=2 previous=20 term=20 leader="S1Nunr6R" catchingUp=false
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/higher_leader_term
+    diagnostic_obsolete_catchup_test.go:105: trailing callback changed state incorrectly: index=3 want=2 previous=20 term=21 leader="S1Nunr6R" catchingUp=false
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/older_leader_term
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/legacy
+--- FAIL: TestDiagnosticRaftObsoleteCatchupTrailingEntries (2.41s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupTrailingEntries/contiguous (0.38s)
+    --- FAIL: TestDiagnosticRaftObsoleteCatchupTrailingEntries/ahead (0.37s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupTrailingEntries/behind (0.30s)
+    --- FAIL: TestDiagnosticRaftObsoleteCatchupTrailingEntries/wrong_previous_term (0.30s)
+    --- FAIL: TestDiagnosticRaftObsoleteCatchupTrailingEntries/wrong_leader (0.29s)
+    --- FAIL: TestDiagnosticRaftObsoleteCatchupTrailingEntries/higher_leader_term (0.24s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupTrailingEntries/older_leader_term (0.25s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupTrailingEntries/legacy (0.28s)
+FAIL

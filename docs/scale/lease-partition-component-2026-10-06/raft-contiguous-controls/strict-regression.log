@@ -1,0 +1,30 @@
+=== RUN   TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState
+=== RUN   TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/legacy/canceled
+=== RUN   TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/legacy/replaced
+=== RUN   TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/modern/canceled
+=== RUN   TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/modern/replaced
+--- PASS: TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState (1.34s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/legacy/canceled (0.38s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/legacy/replaced (0.33s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/modern/canceled (0.35s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState/modern/replaced (0.29s)
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/contiguous
+    diagnostic_obsolete_catchup_test.go:105: trailing callback changed state incorrectly: index=2 want=3 previous=20 term=20 leader="S1Nunr6R" catchingUp=false
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/ahead
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/behind
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/wrong_previous_term
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/wrong_leader
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/higher_leader_term
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/older_leader_term
+=== RUN   TestDiagnosticRaftObsoleteCatchupTrailingEntries/legacy
+--- FAIL: TestDiagnosticRaftObsoleteCatchupTrailingEntries (2.34s)
+    --- FAIL: TestDiagnosticRaftObsoleteCatchupTrailingEntries/contiguous (0.26s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupTrailingEntries/ahead (0.31s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupTrailingEntries/behind (0.27s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupTrailingEntries/wrong_previous_term (0.31s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupTrailingEntries/wrong_leader (0.29s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupTrailingEntries/higher_leader_term (0.32s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupTrailingEntries/older_leader_term (0.29s)
+    --- PASS: TestDiagnosticRaftObsoleteCatchupTrailingEntries/legacy (0.29s)
+FAIL

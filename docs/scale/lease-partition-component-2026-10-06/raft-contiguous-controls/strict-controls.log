@@ -1,0 +1,32 @@
+=== RUN   TestNRGTermDoesntRollBackToPtermOnCatchup
+--- PASS: TestNRGTermDoesntRollBackToPtermOnCatchup (3.27s)
+=== RUN   TestNRGCatchupCanTruncateMultipleEntriesWithoutQuorum
+--- PASS: TestNRGCatchupCanTruncateMultipleEntriesWithoutQuorum (0.28s)
+=== RUN   TestNRGCatchupDoesNotTruncateCommittedEntriesDuringRedelivery
+--- PASS: TestNRGCatchupDoesNotTruncateCommittedEntriesDuringRedelivery (0.29s)
+=== RUN   TestNRGCatchupFromNewLeaderWithIncorrectPterm
+--- PASS: TestNRGCatchupFromNewLeaderWithIncorrectPterm (0.27s)
+=== RUN   TestNRGCatchupAcksProgressWhenGivenProgressInbox
+--- PASS: TestNRGCatchupAcksProgressWhenGivenProgressInbox (0.61s)
+=== RUN   TestNRGCatchupSendsProgressInboxAndRefillsWindow
+--- PASS: TestNRGCatchupSendsProgressInboxAndRefillsWindow (0.54s)
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/new-entry
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/new-entry-backward-compatible
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/catchup
+=== RUN   TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/catchup-backward-compatible
+--- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader (1.25s)
+    --- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/new-entry (0.31s)
+    --- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/new-entry-backward-compatible (0.30s)
+    --- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/catchup (0.28s)
+    --- PASS: TestNRGRejectAppendEntryDuringCatchupFromPreviousLeader/catchup-backward-compatible (0.37s)
+=== RUN   TestNRGIgnoreEntryAfterCanceledCatchup
+--- PASS: TestNRGIgnoreEntryAfterCanceledCatchup (1.91s)
+=== RUN   TestNRGDelayedMessagesAfterCatchupDontCountTowardQuorum
+--- PASS: TestNRGDelayedMessagesAfterCatchupDontCountTowardQuorum (3.41s)
+=== RUN   TestNRGNewEntriesFromOldLeaderResetsWALDuringCatchup
+    raft_test.go:4675: require uint64 equal, but got: 2 != 3
+--- FAIL: TestNRGNewEntriesFromOldLeaderResetsWALDuringCatchup (0.29s)
+=== RUN   TestNRGParallelCatchupRollback
+--- PASS: TestNRGParallelCatchupRollback (0.26s)
+FAIL
