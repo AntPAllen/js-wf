@@ -1,15 +1,16 @@
 # /tmp storage review — 2026-10-06
 
-Completed guarded S3 offloads recovered **16.61 GiB of older data**. The final observation has **29.11 GiB available** and **69.71 GiB of visible `/tmp` allocations**. Live runs continue writing, so free space changes.
+Completed guarded S3 offloads recovered **20.41 GiB of older data**, including **3.81 GiB** in the latest seven-root pass. The latest observation has **32.10 GiB available**. Live runs continue writing, so free space changes. See [additional closed store offload](additional-closed-stores/README.md) and its inventory for the newest observation.
 
 | Completed cleanup | Older allocated bytes recovered |
 | --- | ---: |
 | Earlier five cardinality fixtures, five closed large-artifact sets and primary rolling archive | 6,122,799,104 |
 | Closed final byte-refill stores and actual SDK binaries | 1,118,212,096 |
 | 214 closed regular single-link test binaries, 203 unique bodies | 10,588,585,984 |
-| Total | 17,829,597,184 |
+| Additional seven closed timer/audit store roots | 4,087,672,832 |
+| Total | 21,917,270,016 |
 
-Temporary archive staging removed separately totals 8,608,985,088 bytes. The disposable exact restoration control is also excluded from old-data recovery.
+Temporary archive staging removed separately totals 9,418,285,056 bytes. The disposable exact restoration control is also excluded from old-data recovery.
 
 Every removed original was covered by committed S3 proof metadata and a full remote body readback. Removal additionally checked remote archive members, original hashes/modes/mtimes and fresh visible closure. Process inspection limits are retained. Source, native logs and provenance remain local; binary restoration uses the complete content-addressed archive plus original-path index. See [binary removal](closed-test-binaries/offload/offload.json), [refill removal](byte-refill-final-controls/media-offload/offload.json) and [final inventory](inventory-final/summary.json).
 
