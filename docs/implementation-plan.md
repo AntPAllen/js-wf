@@ -5342,3 +5342,15 @@ and trace outgoing administrative API prefixes. Startup4s attempts/30s admission
 remain within original60s body/3m SDK. Retain stores, plugin, bundles, selected
 source and actual SDK profile. Exploratory race/trace controls pass; clean
 full-originals qualification is pending. [Preparation](scale/operator-domain-cli-2026-10-06/).
+
+## Operator CLI domain selection accepted — 2026-10-06
+
+Explicit `wf -domain NAME` healthy command controls pass at clean ea29cf8 with
+real three-peer domain admission, unknown-domain rejection,203 traced API
+requests/zero wrong prefixes and unchanged default/offline replay behavior.
+Original command assertions cover assignment/list/paging/rebuild/lag/scan/describe/
+cancel/purge/export and inline/spilled plugin replay. Actual race SDK/profile/cwd/
+closed PID, retained plugin/stores,1899 exact inputs and complete2409-member
+archive independently verify. Original failed runner remains preserved; two
+negative guard groups pass. Daemon/PostgreSQL-domain/leaf/fault/fullmatrix/million/
+actual24h qualification remain separate. [Proof](scale/operator-domain-cli-2026-10-06/).

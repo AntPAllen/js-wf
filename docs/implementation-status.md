@@ -35,6 +35,23 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Operator CLI explicit domain accepted — 2026-10-06
+
+`wf -domain NAME` now selects the explicit JetStream domain for online commands;
+default context and connection-free bundle replay remain. Clean ea29cf8 actual
+race command pair passes default3.84s/domain8.34s/13.2229s SDK. Existing assignment,
+list/paging/rebuild/lag/scan/describe/cancel/purge/export/plugin replay assertions,
+including spilled data, pass on three realWFOPS peers; unknown domain fails.
+Client trace observes203 administrative requests/zero wrong traced prefixes.
+Independent review binds1899 exact source inputs, actual SDKrace/count1/3m/profile/
+packagecwd/closedPID, retained race plugin and closed1/3 store topologies; full2409-
+member48,091,236-byte archive verifies. Two guard groups reject nine mutations
+and original failed runner. [Complete proof](scale/operator-domain-cli-2026-10-06/).
+Original provisioning/subscription explorations and clean wrong-cwd failure are
+preserved; none promoted. Daemon projection/PostgreSQL-domain/leaf routing/CLI
+fault cuts and full matrices/million drain/actual24h remain open. Original
+journal soak and partition200 handles continue unchanged.
+
 ## Committed manifest lost-ack/domain/expiry/frame case accepted — 2026-10-06
 
 Clean782d525 race case passes41.39s/42.4173s SDK. Real generation3 manifest
