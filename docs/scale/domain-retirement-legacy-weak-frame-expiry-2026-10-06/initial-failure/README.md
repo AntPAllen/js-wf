@@ -1,0 +1,5 @@
+# Preserved original legacy failure
+
+Source01dee30 actualrace case fails after41.52s named body/41.6572s SDK. Three real2.11.17 domain peers are admitted with fallback provisioning; every original process is SIGKILLed and three replacement legacy executables are observed. The all-server outage lasts13.000204132s, beyond production12s TTL. No first domain-heal/frame/epoch-successor confirmation is logged. The final assertion reports completed server fault batches0; the callback's underlying error was not recorded, so its precise cause is unconfirmed.
+
+Independent preservation binds1893 exact Git/before/after/current retained source inputs, actual SDKrace/count1/3m profile, all six closed2.11.17 executable identities and2351 complete archive members. The original test remains failed. The newly added fallback stream-info check can return immediately after transient post-restart metadata errors; the corrected fixture will use the original bounded metadata retry and explicitly log callback failures, retaining the original30s whole-cut deadline. This is a new diagnostic source, not an unchanged repeat or an accepted runtime result.
