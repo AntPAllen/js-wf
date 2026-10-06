@@ -8,7 +8,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Area | Accepted evidence / current state |
 | --- | --- |
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
-| Tier1 deterministic simulation | Earlier recorded runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. Current handler runtime at3e35e7c: full122 workloads ×1,000 race seeds (122,000 bodies),179 top-level passes/two trace-only skips and392 pins independently accepted. Current100k normal remains open. Simulation does not model NATS Raft/disk internals. |
+| Tier1 deterministic simulation | Earlier recorded runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. Current handler runtime at3e35e7c: full122 workloads ×1,000 race seeds (122,000 bodies),179 top-level passes/two trace-only skips and392 pins independently accepted. Current100k normal is live at4f93039; terminal gate remains open. Simulation does not model NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and hosted seed3 at a517d2e, each with independent copied integrity/history/drain, qualified. Retained normal ten-minute block-disk seed1 at f57da4d plus copied raw-image integrity/history/drain qualified. Ten-minute worker seed1 native and copied audits also pass, with the original producer generated-cache failure separately preserved. Retained normal ten-minute pause seed1 at d893bb0 and reply-isolation seed1 at85c4cf2, each with independent copied integrity/history/drain, qualify. Original retained fanout-restart seed1 at e3399bf and full rolling-upgrade seed1 at661239d, each with native plus independent copied audits, qualify. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
@@ -31,6 +31,21 @@ use, finish remaining clock/checkpoint, million-timer physical-drain, combined a
 coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
+
+## Complete current100k normal Tier1 qualifier live — 2026-10-06
+
+Full122-workload100,000-seed normal qualifier now executes at4f93039 from an
+isolated sparse checkout with original300m budget, GOMAXPROCS2/GOMEMLIMIT512MiB,
+all392 pins and complete compiled/seeded inventories. Actual SDK3312214 executable
+hash/argv/profile match retained non-race binary provenance; all1,803 captured
+source files bind exactly to Git/current before inventory, detached checkout clean.
+Runtime Go, module dependencies and sim/testdata inputs are byte-identical to
+accepted race3e35e7c. Unit/producer/SDK are live, initial checkpoint workloads are
+running. Exact12.2M-body checker, unchanged after-source and terminal closure remain
+mandatory; no terminal normal or broader real-matrix/24h claim. Complete accepted
+race proof also has canonical S3 full compressed-byte readback.
+[Verified normal launch](scale/outer-handler-cancellation-2026-10-06/full-normal100k-launch/).
+[Race S3 receipt](scale/outer-handler-cancellation-2026-10-06/full-race-terminal/s3-readback.json).
 
 ## Complete corrected Tier1 race qualification accepted — 2026-10-06
 

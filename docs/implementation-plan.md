@@ -5061,3 +5061,15 @@ and unchanged current census verified. Aggregate126,947 generated schedules and
 and broader native fault combinations/current full real matrices/million physical
 drain/actual24h remain open. NATS Raft/disk internals are outside model scope.
 [Terminal review](scale/outer-handler-cancellation-2026-10-06/full-race-terminal/).
+
+### Complete current100k normal Tier1 launch verified — 2026-10-06
+
+Original full100,000-seed normal qualifier is live at4f93039, isolated source,
+original300m/GOMAXPROCS2/GOMEMLIMIT512MiB,122 seeded workloads and392 pins.
+Actual SDK3312214 non-race hash/argv/profile verified, all1,803 captured source
+inputs exactly bind to Git and clean detached checkout. Runtime Go/dependencies/
+sim testdata equal accepted race3e35e7c. Complete12.2M-body seed checker, terminal
+native verdict, unchanged after-source and SDK/producer closure remain required;
+no current-normal/full real-matrix/24h promotion from a live launch. Accepted race
+proof has canonical S3 full readback.
+[Normal launch](scale/outer-handler-cancellation-2026-10-06/full-normal100k-launch/).
