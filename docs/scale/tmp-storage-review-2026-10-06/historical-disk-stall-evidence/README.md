@@ -7,3 +7,5 @@ Removal requires committed and pushed metadata, complete S3 upload/readback, a f
 Only single-link files within `raw`, `original-stores`, `originals.zip`, `raw.zip` and `raw.zip.attempt-1` are eligible. Local source, logs and reports remain available. Restore archived evidence into a fresh directory with `scripts/restore-full-fixture-proof.py` and the committed inventory and metadata. Original broker stores are never reopened.
 
 Active campaigns, observers, both full400k donors, attachments, caches and Git storage are retained. See per-root `s3-readback.json` and `offload.json` for transfer and removal records.
+
+Completed removal recovered **4.35 GiB** of older allocated data. Temporary archive staging removed separately totals **1.22 GiB**. The final observation has **36.77 GiB available**. See `summary.json` for exact totals.
