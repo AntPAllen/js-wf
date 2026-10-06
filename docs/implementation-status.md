@@ -29,6 +29,16 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: retained fanout restart native accepted
+
+Original e3399bf normal ten-minute seed1 PASS638.36s:77batches/2,156terminals/
+23,793entries. All19unfinished cuts/exact child+grandchild identities/unchanged
+prefixes independently reviewed; native six cells/integrity/history/drain pass.
+SDK/source/external inputs/helpers/profile/observed closure verified. Full6,355member/
+79,499,469byte/fourpart archive readback passes. Independent copied audit follows;
+full13x200/current-source/24h remain open. Long handles continue unchanged.
+[Native proof](scale/tier2-retained-fanout-2026-10-06/native-ten-minute/).
+
 ## Latest follow-up — 2026-10-06: additional proof working-tree headroom
 
 Five full canonical archives/parts/concat and16working-tree part bytes/Git object
