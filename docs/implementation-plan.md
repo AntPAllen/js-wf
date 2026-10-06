@@ -5073,3 +5073,16 @@ native verdict, unchanged after-source and SDK/producer closure remain required;
 no current-normal/full real-matrix/24h promotion from a live launch. Accepted race
 proof has canonical S3 full readback.
 [Normal launch](scale/outer-handler-cancellation-2026-10-06/full-normal100k-launch/).
+
+### Original bulk consumer-leader ten-minute qualification live — 2026-10-06
+
+Fresh original10m consumer-leader row seed1 atb861f95 now runs with explicit
+chunked retained integrity/bulk final latency and full point comparison. Actual
+SDK3316473/profile/build and all1,805 source files independently verified, five
+NATS2.15 executable identities observed; faults select confirmed active consumer
+ACK-pending work. Periodic observer retains actual SDK/server incarnations; shared
+CPU with the100k normal qualifier and cgroup quota recorded. Original audit/final/
+completion/p99/history/checkpoint/drain gates retained. Full terminal row/artifact/
+source-after/closure and complete canonical proof remain mandatory. No live-launch
+row/default/fullmatrix/24h promotion.
+[Launch](scale/sustained-bulk-final-latency-2026-10-06/joined-consumer-ten-minute-launch/).

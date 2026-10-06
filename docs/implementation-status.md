@@ -28,9 +28,26 @@ qualification, rather than treating older executed-source rows as a blanket pass
 
 Immediate work: preserve the accepted full400k proof, qualify broader live/fault
 use, finish remaining clock/checkpoint, million-timer physical-drain, combined and operational
-coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
-terminal failures; there is no running long campaign to poll or resume. Their
-complete current files, including partial no-space evidence, are preserved to S3.
+coverage, and qualify the actual 24-hour gate. Both latest24h campaigns are
+terminal failures; no24h soak is running. Their complete current files, including
+partial no-space evidence, are preserved to S3. Current normal simulation and
+ten-minute consumer-leader qualifiers are live as recorded below.
+
+## Original ten-minute bulk consumer-leader row live — 2026-10-06
+
+Fresh original10m consumer-leader seed1 runs atb861f95 with explicit chunked
+retained integrity plus bulk final latency and every-point comparison. Actual
+SDK3316473 executable/build/source/profile verified: GOMAXPROCS4/GOGC500/4GiB,
+non-race, all1,805 before/current source files match Git and isolated clean source.
+Five distinct NATS2.15 executable names/hash observed; periodic500ms observer
+retains14 actual incarnations at launch review. Faults already target confirmed
+active consumers (including ACK-pending5 and1). Parent cgroup6GiB/CPUQuota200%,
+shared VM CPU with the full100k normal qualifier explicitly recorded. Original
+20s/60s retained audits,6m final stage, completion/p99/history/checkpoint/drain and
+active-consumer selectors unchanged. Terminal native/complete artifact checker,
+source-after and observer/process closure/full proof remain required; no row,
+default/fullmatrix/24h qualification from this launch.
+[Verified launch](scale/sustained-bulk-final-latency-2026-10-06/joined-consumer-ten-minute-launch/).
 
 ## Complete current100k normal Tier1 qualifier live — 2026-10-06
 
