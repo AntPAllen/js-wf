@@ -9,3 +9,7 @@ A campaign-owned cache shares captured source/executable bytes before native exe
 The coordinator records source, original fixed range, each terminal producer and hashed source/execution/acceptance records. Native coverage is complete only after exactly all200 successful seeds. It always leaves `qualifies_full_row=false`: independent review of every raw fault, latency, history, source and closed store corpus remains required. Hosted provider identities are never fabricated. This does not qualify the full13-row/current-source matrix or actual24h soak.
 
 Preparation controls: two new tests cover exact full200 coverage, failed/missing/reordered/extra-seed rejection, shared source bytes/timestamp/inode and corrupted/symlink input rejection. Existing twelve retained fanout/clock/upgrade/worker reviewer controls pass. Unchanged production/runtime/Tier1 graphs do not require another full12.2M simulation run.
+
+## Actual launch
+
+Launched under `js-wf-local-partition200-20261006.service` from `/tmp/js-wf-local-partition200-source-20261006` at300a36a. Evidence root `/tmp/js-wf-local-partition200-20261006`; coordinator802461, first actualSDK806249. [Independent live launch binding](launch/launch-review.json) verifies719 Git and3286 external inputs, actual SDK hash/birth/arguments/profile and unit limits. Neither the running first seed nor the whole200 row is qualified yet. Do not restart the campaign on an observer timeout or overwrite its evidence root.
