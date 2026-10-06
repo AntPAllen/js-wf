@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"strings"
@@ -26,7 +28,14 @@ import (
 
 func outerHandlerNativeFixture(t *testing.T, limit time.Duration) (context.Context, *testcluster.Cluster, jetstream.JetStream) {
 	t.Helper()
-	cluster, err := testcluster.Start(t.TempDir(), 3)
+	root := t.TempDir()
+	if retained := os.Getenv("WF_OUTER_HANDLER_STORE_ROOT"); retained != "" {
+		root = filepath.Join(retained, strings.ReplaceAll(t.Name(), "/", "-"))
+		if err := os.Mkdir(root, 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cluster, err := testcluster.Start(root, 3)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -5133,3 +5133,19 @@ preserving wrapped error; compile/skip passes. Current100k normal continues from
 unchanged isolated source. Next diagnosis must use retained timelines/logs and
 fresh controlled cases with an explicit hypothesis; no blind campaign rerun.
 [Corrected failed proof](scale/sustained-bulk-final-latency-2026-10-06/joined-restart-ten-minute/corrected-independent-review.json).
+
+## Native outer-handler lease-expiry combination prepared — 2026-10-06
+
+`TestOuterHandlerNativeLeaseExpiryAndLateAppend` covers ordinary handlers and
+named continuation stages against a real R3 file-backed cluster. It withholds
+only the old owner's heartbeat ticks, verifies the production12s KV TTL and
+server-observed expiry, then starts a live successor on the unchanged13s
+AckWait consumer. The successor must complete within30s, in a higher epoch.
+Resuming the old heartbeat while its handler remains held must produce explicit
+`lease_heartbeat_lost`, bounded worker shutdown, unchanged accepted journal and
+no late effect. All three public local Jsz queues must physically drain.
+
+Optional `WF_OUTER_HANDLER_STORE_ROOT` retains fresh per-test stores for exact
+archive/provenance review; it does not alter the test's deadlines or assertions.
+The test compiles. Native race execution and independent evidence review are
+pending; full combined and release qualification remain open.
