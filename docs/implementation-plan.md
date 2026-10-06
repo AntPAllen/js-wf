@@ -4912,3 +4912,28 @@ flag on final full-integrity errors or unexpected counts. Integration compilatio
 passes; this reporting correction adds no new native qualification. Next capacity
 work requires a fresh valid full400k latency/memory fixture, with the original
 20s full integrity and6m latency limits retained.
+
+### Fresh full400k latency/memory gate prepared — 2026-10-06
+
+`TestMatrixBulkLatencyFull400kCapacity` creates an original fresh R5 file-backed
+400,000-invocation/4.8M-entry activity population. INV acknowledgment precedes JRN
+publication across stream leaders. Fixed population has no reduced-count override.
+Original20s complete integrity checks run before and after bulk; bulk computation
+and comparison retain the original6m deadline. A separate full public timestamp
+walk checks the entire known input shape and derives800,000 expected start/terminal
+samples without calling the bulk projector or shared reducer.256 spread-out
+workflows, including both endpoints, also match the independent frozen point
+oracle. Every bulk sample must equal its independent expected sample; complete
+accepted samples are persisted only after final integrity. This synthetic gate
+does not replace real-workflow, other cursor faults, default/fullmatrix or24h gates.
+
+Linux RUSAGE_SELF records whole SDK lifetime peak RSS, including preparation and
+oracle work but excluding Docker servers. Native producer pins4CPU/GOGC500/4GiB
+and observes actual SDK/server executables, mounts, source before/after and public
+process memory.5GiB minimum free is checked on the fixture filesystem before any
+root/checkout creation; this is a finite fixture launch estimate, not an ongoing
+reservation or a24h admission. Compilation/skip and invalid-input race controls
+pass; native qualification is still pending. Additional23 canonical raw duplicate
+archives verified and reclaimed1,084,948,480 allocated bytes; about4.8GB free still
+falls below launch admission. Original primary media, sources/exes/caches and Git
+proof retained. [Recovery](scale/remaining-raw-proof-duplicate-recovery-2026-10-06/).

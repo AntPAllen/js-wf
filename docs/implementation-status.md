@@ -33,6 +33,23 @@ complete current files, including partial no-space evidence, are preserved to S3
 
 ## Latest storage and proof reporting correction — 2026-10-06
 
+Fresh full400k/4.8M valid activity latency/memory gate is now prepared. It requires
+original20s full integrity before/after, original6m bulk read/reduction and full
+sample comparison, a separate full independent timestamp/input-shape census,
+and256 frozen point-oracle checks spread over the entire population. Every accepted
+sample is retained. Linux RUSAGE_SELF captures actual whole-SDK-lifetime peak RSS,
+excluding Docker servers; the4GiB Go target is not an RSS ceiling. Race controls
+reject invalid coordinates/counts/payloads/order/deadlines. Native result remains
+pending; no smaller population override is available. Producer admission requires
+5GiB on the fixture filesystem before creating it. About4.8GB free is still below
+that threshold. [Producer](../scripts/run-bulk-latency-capacity.py).
+
+Twenty-three additional raw proof duplicates pass complete committed-part,
+concatenated archive and member/hardlink verification. Only identical redundant
+archives removed, recovering1,084,948,480 allocated bytes. Original media,
+source/executables/metadata, caches and canonical proofs retained.
+[Recovery](scale/remaining-raw-proof-duplicate-recovery-2026-10-06/).
+
 The two closed block-media copied-audit trees are completely verified against
 committed archive parts, embedded member manifests and current file censuses.
 SDK and three server executables per fixture are closed; detached-image ledgers,
