@@ -32,6 +32,25 @@ coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
 
+## Failed campaign media offloaded after complete verification — 2026-10-06
+
+The closed failed chunked-journal24h campaign's complete 431,060,062-byte S3
+archive was freshly streamed and verified against its committed compressed SHA,
+every member and embedded inventory. All9,205 current local files matched the
+committed census before removal; producer/process/mount/visible-descriptor closure
+was checked again after readback, with visibility limits retained. Only five
+closed primary JetStream store directories were removed, recovering2,158,702,592
+allocated bytes. Source, SDK/NATS executables, configs, logs, partial artifacts and
+metadata remain local with unchanged bytes/modes/mtimes. Complete original store
+bytes now reside in the canonical S3 archive; future audits must restore a fresh
+verified copy. The native failure and open24h gate are unchanged; no independent
+S3 durability claim. Four separately archived closed fanout diagnostic copies
+also recovered90,206,208bytes after complete proof/census/closure checks. Free
+space is now approximately2.3GiB, still below the16GiB long-campaign admission
+minimum. The isolated full Tier1 race qualifier continues progressing.
+[Media offload](scale/terminal-campaigns-disk-pressure-2026-10-06/journal-store-media-offload/).
+[Diagnostic copy recovery](scale/closed-fanout-diagnostic-copy-recovery-2026-10-06/).
+
 ## Complete corrected Tier1 race qualifier live — 2026-10-06
 
 Original full1,000-seed race qualifier is live at3e35e7c from an isolated sparse
