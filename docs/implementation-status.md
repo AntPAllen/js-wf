@@ -32,6 +32,18 @@ coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
 
+## Complete corrected Tier1 race qualifier live — 2026-10-06
+
+Original full1,000-seed race qualifier is live at3e35e7c from an isolated sparse
+checkout, with the repository's unchanged60m race budget, GOMAXPROCS2 and
+GOMEMLIMIT512MiB. Actual SDK3301917 exe hash/argv/selected environment verified
+against retained binary provenance; all captured source files match the before
+inventory and detached commit. Original complete compiled-test, per-workload
+seed and392-pin inventories are retained. Source before/after and complete-suite
+checker remain mandatory; initial continuation workloads are passing. This is a
+live launch, with no terminal full-race verdict or current100k normal/full real
+matrix/24h promotion. [Verified launch](scale/outer-handler-cancellation-2026-10-06/full-race-launch/).
+
 ## Handler cancellation policy and pinned trace transition — 2026-10-06
 
 Cancellation now explicitly wins over a simultaneously ready handler completion.
