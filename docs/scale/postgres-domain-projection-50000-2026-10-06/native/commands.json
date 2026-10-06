@@ -1,0 +1,28 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-c",
+    "-o",
+    "/tmp/js-wf-postgres-domain-projection-corrected-50000-20261006/integration.test",
+    "./integration"
+  ],
+  "test": [
+    "/tmp/js-wf-postgres-domain-projection-corrected-50000-20261006/integration.test",
+    "-test.run=^TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain$",
+    "-test.count=1",
+    "-test.v",
+    "-test.timeout=22m"
+  ],
+  "working_directory": "/home/exedev/js-wf",
+  "environment": {
+    "GOMAXPROCS": "2",
+    "GOMEMLIMIT": "2GiB",
+    "GOWORK": "off",
+    "GOFLAGS": "",
+    "WF_PROJECTION_POSTGRES_FAULT_ROOT": "/tmp/js-wf-postgres-domain-projection-corrected-50000-20261006/originals",
+    "WF_TEST_POSTGRES_DSN": "postgres://workflow@127.0.0.1:33351/workflow?sslmode=disable"
+  }
+}
