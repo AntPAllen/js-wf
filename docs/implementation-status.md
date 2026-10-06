@@ -34,6 +34,20 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier is live; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## R5 100k pull-resumption complete archive verified — 2026-10-06
+
+Closed recorded8ba0b61 R5 explicit suffix-loss case now captured as complete1,368-
+member/250,197,069-byte archive. Exact native SDK/source-before/after/current,
+all five captured server binaries, existing1,366-file hash/size ledger and visible
+root process/descriptor/mount closure verify. Baseline18.776959284s and interrupted
+19.372032037s cover100k invocations/1.2M entries under original20s. Existing
+executed-source/injected-client-fault scope stays unchanged; no current-source,
+natural server-cause, OS-kill/fullmatrix/24h claim. Source, native outputs and
+stores remain local until committed full S3 readback and fresh member/census/
+closure checks. Sparse planner-only Tier2/Tier3 checkouts also passed all30 source
+selection and planner tests; no matrix workload changes.
+[Complete capture](scale/bulk-read-resumption-2026-10-05/r5-100k-complete-offload-2026-10-06/capture.json).
+
 ## Full-matrix source checkout and interrupted-million storage — 2026-10-06
 
 Tier2/Tier3 full-matrix workflows now fetch with `blob:none`, initially materialize
