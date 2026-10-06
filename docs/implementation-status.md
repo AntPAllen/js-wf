@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: reusable retained worker review
+
+A repository command now reviews closed normal ten-minute Tier2 pause and reply
+isolation for arbitrary recorded seeds. Source/executable/helper binding, duration/
+all workload cells, actual SDK/worker/server closure, ten active faults/original
+minute cadence, exact ownership/delivery fencing within recorded observation and
+transport recovery remain fail-closed. Native d893bb0 pause fixture passes the
+reusable reviewer; four tests cover valid patterns and35 wrong ownership/timing/
+identity/transport/fencing variants. No stores reopened; copied raw-state audit and
+whole archive preservation stay separate. Current isolation producer/reviewer and
+both long handles remain live; Go/module inputs unchanged while native finishes.
+[Verification](scale/tier2-retained-worker-review-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: original retained Tier2 reply isolation live
 
 Clean85c4cf2 actual normal SDK1389090/three worker SDKs/three NATS processes and
