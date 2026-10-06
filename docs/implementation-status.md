@@ -14821,3 +14821,10 @@ Executedb26bf3a passes all four race suites in64.506s: default/domain static/KV/
 ## Local partition200 stopped on seed6 — 2026-10-06
 
 Latest authoritative status: coordinator802461 terminated exit1 at20:10:01; seeds1–5 nativeexit0, seed6failed70.41s. Only seed1 independently qualified; no full200-row acceptance. Seed6first partition failed replica-recovery deadline onKV_WF_LEASE: node2non-current/lag3535 after seven completed mixed batches, with catchup warnings in broker logs. Cause remains unconfirmed. Exact original10m/count1/nonrace source300a/18m SDK and failed media are preserved unchanged, with complete closed root archive and campaign checkpoint. [Failure retention](scale/local-tier2-partition-2026-10-06/seed-006-failure/). No restart, retry or gate relaxation. The original24h journal handle remains active. Built-worker qualification is independent of this failed campaign.
+
+
+## Failed partition stores recover in a verified quiescent copy — 2026-10-06
+
+Corrected623ab82 diagnostic downloads the canonical seed6 S3 archive, verifies every member, restores a fresh immutable baseline and separately copies mutable stores. With no workflow writers, three real processes executing the exact captured NATS bytes recover all ten stores current/online in10.336s/three rounds. Independent review binds1944 source/1494 external inputs, all live executable/birth/argv captures and three local publicjsz peer/store censuses. Restored baseline remains byte/mode/mtime identical; complete11948member diagnostic archive verified. Initial observer-layout error is retained separately as unqualified. [Diagnostic proof](scale/local-tier2-partition-2026-10-06/seed-006-quiescent-restart/).
+
+The original running-workload partition failure,35s replica gate and200 row remain unchanged. Recovery after this quiescent copy restart narrows the diagnosis toward transient/live catchup behavior; it does not establish a NATS cause, a production workaround, fault-row acceptance or a causal Tier1 reproduction. Original24h journal handle remains active.
