@@ -37,6 +37,7 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 	if os.Getenv("WF_WORKER_TEST_ROOT") == "" {
 		_ = os.RemoveAll(workerTestPluginDir)
+		_ = os.RemoveAll(workerStandaloneDir)
 	}
 	os.Exit(code)
 }
@@ -81,6 +82,13 @@ func TestWorkerRunnerStartsAfterServerRestartInJetStreamDomain(t *testing.T) {
 }
 
 func runWorkerRestart(t *testing.T, domain string) {
+	runWorkerRestartWithInvoker(t, domain, nil)
+}
+
+func runWorkerRestartWithInvoker(t *testing.T, domain string, invoke func(context.Context, []string) error) {
+	if invoke == nil {
+		invoke = func(ctx context.Context, args []string) error { return runDomainWorker(t, ctx, domain, args) }
+	}
 	pluginPath := testWorkerPlugin(t)
 	cluster, err := workerDomainCluster(t, domain)
 	if err != nil {
@@ -107,7 +115,7 @@ func runWorkerRestart(t *testing.T, domain string) {
 	defer cancel()
 	done := make(chan error, 1)
 	go func() {
-		done <- runDomainWorker(t, ctx, domain, append(workerDomainArgs(domain, len(cluster.Servers)), []string{"-url", serverURL, "-id", "restart-smoke", "-handler-plugin", pluginPath, "-metrics-addr", metricsAddr, "-reconcile=false"}...))
+		done <- invoke(ctx, append(workerDomainArgs(domain, len(cluster.Servers)), []string{"-url", serverURL, "-id", "restart-smoke", "-handler-plugin", pluginPath, "-metrics-addr", metricsAddr, "-reconcile=false"}...))
 	}()
 	select {
 	case runErr := <-done:
@@ -267,6 +275,13 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string, encodings ...string) 
 }
 
 func runWorkerSmokeWithDomain(t *testing.T, pluginPath, mode, domain string, encodings ...string) {
+	runWorkerSmokeWithInvoker(t, pluginPath, mode, domain, nil, encodings...)
+}
+
+func runWorkerSmokeWithInvoker(t *testing.T, pluginPath, mode, domain string, invoke func(context.Context, []string) error, encodings ...string) {
+	if invoke == nil {
+		invoke = func(ctx context.Context, args []string) error { return runDomainWorker(t, ctx, domain, args) }
+	}
 	t.Helper()
 	cluster, err := workerDomainCluster(t, domain)
 	if err != nil {
@@ -319,7 +334,7 @@ func runWorkerSmokeWithDomain(t *testing.T, pluginPath, mode, domain string, enc
 		args = append(args, "-journal-encoding", encodings[0])
 	}
 	done := make(chan error, 1)
-	go func() { done <- runDomainWorker(t, ctx, domain, args) }()
+	go func() { done <- invoke(ctx, args) }()
 	httpClient := &http.Client{Timeout: time.Second}
 	metricsURL := "http://" + metricsAddr + "/metrics"
 	for ctx.Err() == nil {

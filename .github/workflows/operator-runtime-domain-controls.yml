@@ -62,6 +62,7 @@ jobs:
           - {program: operator, case: daemon-signals, args: "--case daemon-signals"}
           - {program: operator, case: standalone-commands, args: "--case standalone-commands"}
           - {program: worker, case: commands, args: ""}
+          - {program: worker, case: standalone-commands, args: "--case standalone-commands"}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

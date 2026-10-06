@@ -41,10 +41,33 @@ def verify_log(log):
                 scope='Real embedded NATS domain CLI workflow/metrics/assignment/retention and startup after all-server library restart; no native SIGKILL, leaf, full matrix or release qualification.')
 
 
+STANDALONE_TESTS=['TestWorkerStandaloneCommands','TestWorkerStandaloneCommandsInJetStreamDomain','TestWorkerStandaloneStartsAfterServerRestart','TestWorkerStandaloneStartsAfterServerRestartInJetStreamDomain']
+
+
+def verify_standalone_log(log):
+    assert log.rstrip().endswith('PASS') and not any(x in log for x in ('DATA RACE','--- FAIL:','--- SKIP:'))
+    assert sorted(re.findall(r'^--- PASS: (\w+) \([0-9.]+s\)$',log,re.M))==sorted(STANDALONE_TESTS)
+    for name in STANDALONE_TESTS[:2]:
+        assert sorted(re.findall(r'^\s+--- PASS: '+name+r'/(static|kv|auto) \(',log,re.M))==['auto','kv','static']
+    peers=re.findall(r'worker domain admitted node=(\d) domain=WFWORKER server_id=(\w+)',log)
+    assert len(peers)==12 and len({i for _,i in peers})==12 and all(sum(n==str(i) for n,_ in peers)==4 for i in range(3))
+    old=re.findall(r'worker domain startup stopped node=(\d) domain=WFWORKER server_id=(\w+)',log)
+    new=re.findall(r'worker domain startup restarted node=(\d) domain=WFWORKER server_id=(\w+)',log)
+    assert sorted(n for n,_ in old)==sorted(n for n,_ in new)==['0','1','2']
+    assert len({i for _,i in old})==len({i for _,i in new})==3 and not ({i for _,i in old}&{i for _,i in new})
+    assert {i for _,i in new}.issubset({i for _,i in peers})
+    assert max(log.index('worker domain startup stopped node='+n) for n,_ in old)<min(log.index('worker domain startup restarted node='+n) for n,_ in new)
+    processes=re.findall(r'worker standalone process domain="(WFWORKER)?" pid=(\d+) signal=SIGTERM exit=0 exe_sha256=([0-9a-f]{64})',log)
+    assert len(processes)==len({p for _,p,_ in processes})==8 and len({h for _,_,h in processes})==1
+    assert sum(d=='WFWORKER' for d,_,_ in processes)==4
+    assert len(re.findall(r'worker standalone process ',log))==8
+    return dict(tests=STANDALONE_TESTS,actual_standalone_processes=8,real_domain_peer_admissions=12,scope='Actual built worker default/domain static/KV/auto workflow metrics retention and startup after real embedded all-server library restart; eight real SIGTERM joins. No outgoing child wire trace, native SIGKILL, leaf, fullmatrix or release qualification.')
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
+    parser.add_argument('--case',choices=['commands','standalone-commands'],default='commands')
     args = parser.parse_args()
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
@@ -60,10 +83,11 @@ def main():
         target = root/'selected-source'/name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(REPO/name, target)
-    env = dict(os.environ, GOMAXPROCS='2', GOMEMLIMIT='1GiB', GOWORK='off', GOFLAGS='', WF_WORKER_TEST_ROOT=str(root/'stores'))
+    env = dict(os.environ, GOMAXPROCS='2', GOMEMLIMIT='1GiB', GOWORK='off', GOFLAGS='', WF_WORKER_TEST_ROOT=str(root/'stores'), WF_WORKER_STANDALONE='1')
     binary = root/'worker-race.test'
-    build = ['go', 'test', '-race', '-c', '-o', str(binary), './cmd/wf-worker']
-    command = [str(binary), '-test.v', '-test.run=^('+'|'.join(TESTS)+')$', '-test.count=1', '-test.timeout=4m']
+    build = ['go', 'test', '-race', '-buildvcs=true', '-c', '-o', str(binary), './cmd/wf-worker']
+    tests=STANDALONE_TESTS if args.case=='standalone-commands' else TESTS
+    command = [str(binary), '-test.v', '-test.run=^('+'|'.join(tests)+')$', '-test.count=1', '-test.timeout=4m']
     run_directory = REPO/'cmd/wf-worker'
     save('commands.json', dict(build=build, build_working_directory=str(REPO), run=command, run_working_directory=str(run_directory)))
     with (root/'build.log').open('w') as log:
@@ -79,7 +103,7 @@ def main():
         actual = dict(pid=child.pid, stat=(proc/'stat').read_text(), exe=str((proc/'exe').resolve()), working_directory=str((proc/'cwd').resolve()),
                       exe_sha256=shared.sha(proc/'exe'),
                       args=[os.fsdecode(v) for v in (proc/'cmdline').read_bytes().split(b'\0') if v],
-                      environment={k:os.fsdecode(actual_env[k.encode()]) for k in ('GOMAXPROCS','GOMEMLIMIT','GOWORK','GOFLAGS','WF_WORKER_TEST_ROOT')})
+                      environment={k:os.fsdecode(actual_env[k.encode()]) for k in ('GOMAXPROCS','GOMEMLIMIT','GOWORK','GOFLAGS','WF_WORKER_TEST_ROOT','WF_WORKER_STANDALONE')})
         assert actual['args']==command and actual['exe_sha256']==shared.sha(binary) and actual['exe']==str(binary) and actual['working_directory']==str(run_directory)
         save('actual-sdk.json', actual)
         print('ACTUAL_WORKER_SDK', child.pid, flush=True)
@@ -97,7 +121,14 @@ def main():
     try:
         assert code==0, 'native command tests failed'
         assert len(plugin_records)==1 and '-race=true' in plugin_records[0]['build_info'], 'exact retained race plugin missing'
-        result = verify_log((root/'native.log').read_text())
+        if args.case=='commands':
+            result = verify_log((root/'native.log').read_text())
+        else:
+            result = verify_standalone_log((root/'native.log').read_text())
+            records=[json.loads(p.read_text()) for p in (root/'stores').rglob('standalone.process.json')]
+            assert len(records)==8 and len({r['pid'] for r in records})==8
+            assert all(r['signal']=='SIGTERM' and r['exit_code']==0 and r['argv'][0]==r['exe'] and Path(r['exe']).is_relative_to(root/'stores') and shared.sha(r['exe'])==r['exe_sha256'] and 'vcs.revision='+revision in r['build_info'] and 'vcs.modified=false' in r['build_info'] and '-race=true' in r['build_info'] and not Path('/proc',str(r['pid'])).exists() for r in records)
+            save('standalone-processes.json',records)
     except AssertionError as exc:
         error = str(exc) or 'native coverage rejected'
     save('row-review.json', dict(qualification=result, rejection=error))
