@@ -10,6 +10,20 @@ spec.loader.exec_module(controls)
 
 
 class DomainCoverageControls(unittest.TestCase):
+    def test_actual_legacy_row_requires_all_peer_versions_and_fallback_after_restart(self):
+        log = (REPO/'docs/scale/domain-retirement-legacy-weak-frame-expiry-2026-10-06/native-race/native.log').read_text()
+        controls.verify_log('legacy-retirement-weak-frame-expiry', log)
+        bad = [log.replace('version=2.11.17', 'version=2.15.0', 1),
+               log.replace('timer_backend=fallback', 'timer_backend=native', 1),
+               log.replace('legacy domain admitted node=0', 'legacy domain admitted node=1'),
+               log.replace('legacy domain healed node=2', 'missing domain healed node=2'),
+               re.sub(r'prior_epoch=(\d+) terminal_epoch=\d+', lambda m: f'prior_epoch={m[1]} terminal_epoch={m[1]}', log),
+               log.replace('ttl=12s', 'ttl=20s')]
+        for malformed in bad:
+            self.assertNotEqual(log, malformed)
+            with self.assertRaises(ValueError):
+                controls.verify_log('legacy-retirement-weak-frame-expiry', malformed)
+
     def test_current_expiry_row_cannot_substitute_for_legacy_servers(self):
         log = (REPO/'docs/scale/domain-retirement-weak-frame-expiry-2026-10-06/native-race/native.log').read_text()
         with self.assertRaisesRegex(ValueError, 'coverage'):

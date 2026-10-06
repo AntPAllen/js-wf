@@ -1,0 +1,27 @@
+=== RUN   TestContinuationRetirementReuseInLegacyJetStreamDomainWithManifestLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL
+    continuation_retirement_process_test.go:61: native domain admitted node=0 pid=217415 domain=WFRETIRE server_id=NC3MAWSML2JBULOD36PO3S6FTBF3A5GLRWXOHYZUFJRKJ4MBAQWHU253
+    continuation_retirement_process_test.go:61: legacy domain admitted node=0 version=2.11.17 timer_backend=fallback
+    continuation_retirement_process_test.go:61: native domain admitted node=1 pid=217421 domain=WFRETIRE server_id=NCRYRDLTXXZQHYE2VF3NBH4MRDXIW4OYWVPQ4KBGAAEJDC4WNTOXKCJC
+    continuation_retirement_process_test.go:61: legacy domain admitted node=1 version=2.11.17 timer_backend=fallback
+    continuation_retirement_process_test.go:61: native domain admitted node=2 pid=217425 domain=WFRETIRE server_id=NB2GF3CPSV3DWZQRDUG2NQAM5ZEI74GOB7DTOSA435YHH6CIQP6FZA3M
+    continuation_retirement_process_test.go:61: legacy domain admitted node=2 version=2.11.17 timer_backend=fallback
+    continuation_retirement_process_test.go:308: retirement lease before outage: epoch=55 ttl=12s revision=64 created=2026-10-06T17:12:20.567934736Z
+    continuation_retirement_process_test.go:325: retirement fresh manifest cut: state_leader=wf-process-0 killed_node=0 pid=217415 signal=killed
+    continuation_retirement_process_test.go:325: retirement fresh manifest cut: state_leader=wf-process-0 killed_node=1 pid=217421 signal=killed
+    continuation_retirement_process_test.go:325: retirement fresh manifest cut: state_leader=wf-process-0 killed_node=2 pid=217425 signal=killed
+    continuation_retirement_process_test.go:335: retirement all-server outage: held=13.000379939s ttl=12s
+    continuation_retirement_process_test.go:344: retirement restarted node=0 pid=219759
+    continuation_retirement_process_test.go:344: retirement restarted node=1 pid=219769
+    continuation_retirement_process_test.go:344: retirement restarted node=2 pid=219783
+    continuation_retirement_process_test.go:372: legacy domain healed node=0 version=2.11.17 timer_backend=fallback
+    continuation_retirement_process_test.go:379: native domain healed node=0 pid=219759 domain=WFRETIRE server_id=NCBKCICOHB2T4SFEX5LTWDM6TSHQBYOCG4JHUOTHYB5A3N3TCXYMUGVD elapsed=19.494894777s
+    continuation_retirement_process_test.go:372: legacy domain healed node=1 version=2.11.17 timer_backend=fallback
+    continuation_retirement_process_test.go:379: native domain healed node=1 pid=219769 domain=WFRETIRE server_id=NC2JTLXDWBQ6A34UE53VPVRHGGJMPZZVG4GT36FYH2ZCQQHOJRFW4KZC elapsed=19.496382956s
+    continuation_retirement_process_test.go:372: legacy domain healed node=2 version=2.11.17 timer_backend=fallback
+    continuation_retirement_process_test.go:379: native domain healed node=2 pid=219783 domain=WFRETIRE server_id=NCCUMVGXMIQWNK6D4WFYKR5YJVLAFCFOTSGRCSGYVXC6XLIUUMCVTBBQ elapsed=19.498465178s
+    continuation_retirement_process_test.go:260: retirement weak frame armed after domain heal: object=step-result-ad7868cb73de62bda54cb80d326228bdc614f2c286c2a9fa4b8092f7c3f6bae2
+    continuation_retirement_test.go:381: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=4 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=2 manifest_drops=1
+    continuation_retirement_process_test.go:61: retirement weak frame confirmed: object=step-result-ad7868cb73de62bda54cb80d326228bdc614f2c286c2a9fa4b8092f7c3f6bae2 generation=3 drops=1 reads=3 leader=1 direct=0 route=$JS.WFRETIRE.API.STREAM.MSG.GET.OBJ_WF_BLOB
+    continuation_retirement_process_test.go:61: retirement lease-expiry recovery: prior_epoch=55 terminal_epoch=73 records=11
+--- PASS: TestContinuationRetirementReuseInLegacyJetStreamDomainWithManifestLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL (41.33s)
+PASS

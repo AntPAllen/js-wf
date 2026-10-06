@@ -1,0 +1,18 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-race",
+    "-c",
+    "-o",
+    "/tmp/js-wf-domain-legacy-weak-expiry-corrected-20261006/integration-race.test",
+    "./integration"
+  ],
+  "run": [
+    "/tmp/js-wf-domain-legacy-weak-expiry-corrected-20261006/integration-race.test",
+    "-test.v",
+    "-test.run=^(TestContinuationRetirementReuseInLegacyJetStreamDomainWithManifestLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL)$",
+    "-test.count=1",
+    "-test.timeout=3m"
+  ]
+}

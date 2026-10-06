@@ -5295,3 +5295,14 @@ legacy input and exact observed executable bytes for all six incarnations.
 Current-version and renamed results cannot stand in for legacy evidence. The
 opt-in CI runner preserves complete originals; native acceptance remains
 pending. [Preparation](scale/domain-retirement-legacy-weak-frame-expiry-2026-10-06/).
+
+## Legacy combined domain retirement accepted — 2026-10-06
+
+Actual clean97d12e8 race case passes on three2.11.17 peers, including all-server
+SIGKILL held beyond production12s TTL, same-domain replacement/fallback checks,
+strict retirement/reuse and fresh weak-frame native leader confirmation. Higher
+terminal epoch55→73, whole-cut heal19.4985s under original30s,1894 exact inputs,
+six closed legacy incarnations and full2352-member originals independently verify.
+Initial failure remains unqualified and preserved. Ten guard groups pass; other
+legacy combinations/full matrices/million physical drain/actual24h remain open.
+[Accepted focused proof](scale/domain-retirement-legacy-weak-frame-expiry-2026-10-06/).

@@ -35,6 +35,24 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Legacy domain retirement/weak-frame/lease-expiry accepted — 2026-10-06
+
+Clean97d12e8 actual race case passes41.33s/42.4893s SDK on three real2.11.17
+peers inWFRETIRE. All originals SIGKILLed, replacements execute exact retained
+legacy bytes, held outage exceeds production12s TTL, and all-peer domain/version/
+fallback confirmation heals within19.4985s under unchanged30s whole-cut target.
+Strict generation1→3/reclaimed2/shared blob/effects3/terminals2/fresh initial2,
+one manifest drop, one weak frame drop with three reads/one domain leader oracle/
+zero target-body direct requests and higher epoch55→73/11 records all verify.
+Original integrity/quiescentGC pass. Independent review binds1894 exact source
+inputs, actual SDKrace/count1/3m and six closed legacy incarnations; full2352-
+member78,099,583-byte archive verified. Ten guard groups reject current-version
+substitution and malformed actual legacy peer/backend/epoch/TTL coverage.
+[Complete proof](scale/domain-retirement-legacy-weak-frame-expiry-2026-10-06/).
+Initial01dee30 failure remains preserved; callback cause unconfirmed. This focused
+legacy case does not qualify full matrices, active-writerGC, natural follower lag,
+originalmillion drain or actual24h. Long original journal handle remains active.
+
 ## Legacy domain combined control prepared; first failure preserved — 2026-10-06
 
 The existing domain retirement/manifest-loss/weak-frame/lease-expiry case now
