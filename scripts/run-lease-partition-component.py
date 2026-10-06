@@ -23,6 +23,58 @@ def module(name, filename):
     return result
 
 
+def prepare_candidate(root, revision, shared, save, env):
+    """Build one explicitly bound overlay on a fresh unchanged upstream copy."""
+    source = Path(subprocess.check_output(['go', 'list', '-m', '-f', '{{.Dir}}',
+                                         'github.com/nats-io/nats-server/v2'], cwd=REPO, text=True).strip())
+    copied = root/'candidate-nats-source'
+    shutil.copytree(source, copied)
+    source_before = fixture_archive.inventory(copied)
+    save('candidate-nats-source-before.json', source_before)
+    patcher = REPO/'scripts/raft-obsolete-catchup-candidate.py'
+    assert patcher.read_bytes() == subprocess.check_output(
+        ['git', 'cat-file', 'blob', revision+':scripts/raft-obsolete-catchup-candidate.py'], cwd=REPO)
+    shutil.copyfile(patcher, root/'candidate-patcher.py')
+    candidate = root/'candidate-raft.go'
+    subprocess.run(['python3', str(patcher), '--original', str(copied/'server/raft.go'),
+                    '--output', str(candidate)], cwd=REPO, check=True)
+    mod = root/'candidate.mod'
+    mod.write_text((REPO/'go.mod').read_text()+'\nreplace github.com/nats-io/nats-server/v2 => '+str(copied)+'\n')
+    shutil.copyfile(REPO/'go.sum', root/'candidate.sum')
+    save('candidate-overlay.json', {'Replace': {str(copied/'server/raft.go'): str(candidate)}})
+    flags = ['-mod=readonly', '-modfile='+str(mod), '-overlay='+str(root/'candidate-overlay.json')]
+    command = ['go', 'list', *flags, '-deps', '-f',
+               '{{.Dir}}|{{join .GoFiles " "}}|{{join .CgoFiles " "}}',
+               'github.com/nats-io/nats-server/v2']
+    deps = subprocess.check_output(command, cwd=REPO, env=env, text=True)
+    (root/'candidate-dependencies.txt').write_text(deps)
+    external = {}
+    for line in deps.splitlines():
+        directory, *groups = line.split('|')
+        for name in ' '.join(groups).split():
+            path = (Path(directory)/name).resolve()
+            if path == copied/'server/raft.go':
+                path = candidate
+            target = root/'candidate-selected-dependencies'/str(path).lstrip('/')
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(path, target)
+            external[str(path)] = {'sha256': shared.sha(path), 'captured': str(target.relative_to(root))}
+    save('candidate-dependencies-before.json', external)
+    inputs = {'mod_sha256': shared.sha(mod), 'sum_sha256': shared.sha(root/'candidate.sum')}
+    save('candidate-module-inputs.json', inputs)
+    binary = root/'candidate-server'
+    build = ['go', 'build', *flags, '-p=1', '-buildvcs=true', '-o', str(binary),
+             'github.com/nats-io/nats-server/v2']
+    with (root/'candidate-build.log').open('w') as output:
+        subprocess.run(build, cwd=REPO, env=env, check=True, stdout=output, stderr=subprocess.STDOUT)
+    save('candidate-build.json', {'source': revision, 'list': command, 'build': build,
+         'executable_sha256': shared.sha(binary), 'patcher_sha256': shared.sha(patcher),
+         'original_raft_sha256': shared.sha(copied/'server/raft.go'),
+         'candidate_raft_sha256': shared.sha(candidate),
+         'build_info': subprocess.check_output(['go', 'version', '-m', str(binary)], text=True)})
+    return binary, copied, source_before, external, inputs
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
@@ -30,6 +82,7 @@ def main():
     parser.add_argument('--expiry-profile',choices=['production','disabled'],default='production')
     parser.add_argument('--raft-debug',action='store_true')
     parser.add_argument('--marker-profile',choices=['production','disabled-markers'],default='production')
+    parser.add_argument('--server-profile', choices=['upstream', 'obsolete-catchup-candidate'], default='upstream')
     args = parser.parse_args()
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
@@ -37,6 +90,7 @@ def main():
     revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip()
     assert revision == subprocess.check_output(['git','ls-remote','origin','refs/heads/main'],cwd=REPO,text=True).split()[0]
     before = shared.source_inventory(revision)
+    env = dict(os.environ,GOMAXPROCS='2',GOMEMLIMIT='2GiB',GOWORK='off',GOFLAGS='')
     root.mkdir()
     save = lambda name, value: (root/name).write_text(json.dumps(value,indent=2)+'\n')
     save('source-before.json',before)
@@ -44,6 +98,7 @@ def main():
         target = root/'selected-source'/name
         target.parent.mkdir(parents=True,exist_ok=True)
         shutil.copyfile(REPO/name,target)
+    candidate = prepare_candidate(root, revision, shared, save, env) if args.server_profile != 'upstream' else None
     template = REPO/'scripts/lease-partition-component.go.txt'
     assert template.read_bytes()==subprocess.check_output(['git','cat-file','blob',revision+':scripts/lease-partition-component.go.txt'],cwd=REPO)
     helper = root/'helper.go';shutil.copyfile(template,helper)
@@ -65,12 +120,13 @@ def main():
                 external[str(path)]=dict(sha256=digest,captured=str(target.relative_to(root)))
     save('external-source-before.json',external)
     binary = root/'diagnostic'
-    env = dict(os.environ,GOMAXPROCS='2',GOMEMLIMIT='2GiB',GOWORK='off',GOFLAGS='')
     build = ['go','build','-p=1','-buildvcs=true','-o',str(binary),str(helper)]
     with (root/'build.log').open('w') as output:
         subprocess.run(build,cwd=REPO,env=env,stdout=output,stderr=subprocess.STDOUT,check=True)
     command = [str(binary),str(root),args.key_profile,args.expiry_profile,'debug' if args.raft_debug else 'normal',args.marker_profile]
-    save('commands.json',dict(build=build,run=command,source=revision,helper_sha256=shared.sha(helper)))
+    if candidate is not None:
+        command.append(str(candidate[0]))
+    save('commands.json',dict(build=build,run=command,source=revision,helper_sha256=shared.sha(helper),server_profile=args.server_profile))
     records=[];seen=set()
     with (root/'native.log').open('w') as output:
         child=subprocess.Popen(command,cwd=REPO,env=env,stdout=output,stderr=subprocess.STDOUT)
@@ -84,12 +140,20 @@ def main():
         code=child.wait()
     assert len(records)==3 and len({r['actual_executable_sha256'] for r in records})==1
     assert all('v2.15.0' in r['build_info'] for r in records)
+    if candidate is not None:
+        candidate_binary, copied, source_before, dependencies, inputs = candidate
+        assert all(r['actual_executable_sha256'] == shared.sha(candidate_binary) for r in records)
+        assert fixture_archive.inventory(copied) == source_before
+        assert inputs == {'mod_sha256': shared.sha(root/'candidate.mod'), 'sum_sha256': shared.sha(root/'candidate.sum')}
+        assert all(shared.sha(path) == row['sha256'] == shared.sha(root/row['captured']) for path, row in dependencies.items())
+        save('candidate-nats-source-after.json', source_before)
+        save('candidate-dependencies-after.json', dependencies)
     assert all(shared.sha(path)==record['sha256']==shared.sha(root/record['captured']) for path,record in external.items())
     save('external-source-after.json',external)
     after=shared.source_inventory(revision);assert after==before
     save('source-after.json',after)
     save('closure.json',shared.closure(root))
-    save('execution.json',dict(source=revision,exit_code=code,scope='Bare R3 lease KV component diagnostic on fresh stores. No SDK workflows, native matrix or causal Tier1 reproduction qualification.'))
+    save('execution.json',dict(source=revision,exit_code=code,server_profile=args.server_profile,scope='Bare R3 lease KV component diagnostic on fresh stores. No SDK workflows, native matrix or causal Tier1 reproduction qualification.'))
     shutil.copyfile(__file__,root/'executed-producer.py')
     proof=fixture_archive.capture(root,root.with_suffix('.tar.gz'),root.with_name(root.name+'-proof'),compresslevel=1)
     print(json.dumps(dict(exit_code=code,proof=proof)),flush=True)

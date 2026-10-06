@@ -24,8 +24,8 @@ func main() {
 	}
 }
 func run() error {
-	if len(os.Args) != 6 || !filepath.IsAbs(os.Args[1]) || (os.Args[2] != "fixed" && os.Args[2] != "fresh") {
-		return fmt.Errorf("usage: component FRESH_ROOT fixed|fresh production|disabled normal|debug production|disabled-markers")
+	if (len(os.Args) != 6 && len(os.Args) != 7) || !filepath.IsAbs(os.Args[1]) || (os.Args[2] != "fixed" && os.Args[2] != "fresh") {
+		return fmt.Errorf("usage: component FRESH_ROOT fixed|fresh production|disabled normal|debug production|disabled-markers [ABSOLUTE_SERVER_BINARY]")
 	}
 	root := os.Args[1]
 	debugProfile := os.Args[4]
@@ -34,6 +34,19 @@ func run() error {
 		start = testcluster.StartPartitionableDebugProcesses
 	} else if debugProfile != "normal" {
 		return fmt.Errorf("unknown debug profile: %s", debugProfile)
+	}
+	if len(os.Args) == 7 {
+		binary := os.Args[6]
+		info, err := os.Lstat(binary)
+		if !filepath.IsAbs(binary) || err != nil || !info.Mode().IsRegular() {
+			return fmt.Errorf("server binary must be an absolute regular file: %s", binary)
+		}
+		start = func(root string, count int) (*testcluster.ProcessCluster, error) {
+			if count != 3 {
+				return nil, fmt.Errorf("candidate diagnostic requires three peers")
+			}
+			return testcluster.StartPartitionableProcessesWithBinaries(root, []string{binary, binary, binary}, debugProfile == "debug")
+		}
 	}
 	markerProfile := os.Args[5]
 	markerTTL := time.Minute

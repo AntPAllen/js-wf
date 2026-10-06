@@ -134,6 +134,16 @@ func StartPartitionableDebugProcesses(root string, count int) (*ProcessCluster, 
 	return startProcessesWithDiagnostics(root, count, true, nil, false, "", true)
 }
 
+// StartPartitionableProcessesWithBinaries retains the route relay and startup
+// admission while using an explicitly supplied executable for each of three
+// peers. Callers capture the source and actual running executable identities.
+func StartPartitionableProcessesWithBinaries(root string, binaries []string, debug bool) (*ProcessCluster, error) {
+	if len(binaries) != 3 {
+		return nil, fmt.Errorf("partitionable binary cluster needs three binaries")
+	}
+	return startProcessesWithDiagnostics(root, 3, true, binaries, false, "", debug)
+}
+
 func startProcesses(root string, count int, partitionable bool) (_ *ProcessCluster, err error) {
 	return startProcessesWithBinaries(root, count, partitionable, nil, false)
 }
