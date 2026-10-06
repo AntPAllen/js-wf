@@ -120,9 +120,9 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 		defer stop()
 		projection, err := visibility.New(ctx, js, projectionOptions...)
 		if err != nil {
-			return err
+			return daemonExit(ctx, err)
 		}
-		return projection.Run(ctx)
+		return daemonExit(ctx, projection.Run(ctx))
 	}
 	if command[0] == "tombstone-loop" {
 		if len(command) != 1 {
@@ -345,4 +345,13 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 		}
 	}
 	return fmt.Errorf("unknown command %q", command[0])
+}
+
+// A registered shutdown signal cancels daemon startup as well as its run loop.
+// Preserve independent failures even when they coincide with a shutdown signal.
+func daemonExit(ctx context.Context, err error) error {
+	if ctx.Err() == context.Canceled && errors.Is(err, context.Canceled) {
+		return nil
+	}
+	return err
 }

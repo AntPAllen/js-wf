@@ -30,9 +30,31 @@ def verify_log(log):
                 scope='Healthy default/domain command controls with real embedded NATS peers; no fault matrix, PostgreSQL/domain or full release qualification.')
 
 
+DAEMON_TESTS = ['TestOperatorDaemonSignals', 'TestOperatorDaemonSignalsInJetStreamDomain']
+
+
+def verify_daemon_log(log):
+    assert log.rstrip().endswith('PASS') and not any(s in log for s in ('DATA RACE','--- FAIL:','--- SKIP:'))
+    assert sorted(re.findall(r'^--- PASS: (\w+) \([0-9.]+s\)$',log,re.M))==sorted(DAEMON_TESTS)
+    for name in DAEMON_TESTS:
+        modes=re.findall(r'^\s+--- PASS: '+name+r'/(project|tombstone-loop)/(startup|running) \(',log,re.M)
+        assert sorted(modes)==[('project','running'),('project','startup'),('tombstone-loop','running'),('tombstone-loop','startup')]
+    peers=re.findall(r'operator daemon domain admitted node=(\d) domain=WFOPS server_id=(\w+)',log)
+    assert sorted(n for n,_ in peers)==['0','1','2'] and len({i for _,i in peers})==3
+    exits=re.findall(r'operator daemon stopped command=(project|tombstone-loop) stage=(startup|running) domain="(WFOPS)?" signal=(terminated|interrupt) exit=0 pid=(\d+)',log)
+    assert len(exits)==8 and len({p for _,_,_,_,p in exits})==8
+    assert len({(c,s,d) for c,s,d,_,_ in exits})==8
+    assert all(signal==('terminated' if stage=='startup' else 'interrupt') for _,stage,_,signal,_ in exits)
+    fatal=re.findall(r'operator daemon fatal startup domain="(WFOPS)?" error=stream-not-found exit=1',log)
+    assert sorted(fatal)==['','WFOPS']
+    return dict(tests=DAEMON_TESTS,real_domain_peers=3,real_signal_subprocesses=8,unrelated_fatal_startups=2,
+                scope='Default/domain operator daemon startup/steady SIGTERM/SIGINT with controlled startup client-trace delay; no SQL/domain fullscale, native server fault or fullrelease qualification.')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
+    parser.add_argument('--case', choices=['commands','daemon-signals'],default='commands')
     args = parser.parse_args()
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
@@ -51,7 +73,8 @@ def main():
     env = dict(os.environ, GOMAXPROCS='2', GOMEMLIMIT='1GiB', GOWORK='off', GOFLAGS='', WF_OPERATOR_TEST_ROOT=str(root/'stores'))
     binary = root/'operator-race.test'
     build = ['go', 'test', '-race', '-c', '-o', str(binary), './cmd/wf']
-    command = [str(binary), '-test.v', '-test.run=^('+'|'.join(TESTS)+')$', '-test.count=1', '-test.timeout=3m']
+    tests = TESTS if args.case=='commands' else DAEMON_TESTS
+    command = [str(binary), '-test.v', '-test.run=^('+'|'.join(tests)+')$', '-test.count=1', '-test.timeout=3m']
     run_directory = REPO/'cmd/wf'
     save('commands.json', dict(build=build, build_working_directory=str(REPO), run=command, run_working_directory=str(run_directory)))
     with (root/'build.log').open('w') as log:
@@ -84,8 +107,15 @@ def main():
     result = None; error = None
     try:
         assert code==0, 'native command tests failed'
-        assert len(plugin_records)==1 and '-race=true' in plugin_records[0]['build_info'], 'exact retained race plugin missing'
-        result = verify_log((root/'native.log').read_text())
+        if args.case=='commands':
+            assert len(plugin_records)==1 and '-race=true' in plugin_records[0]['build_info'], 'exact retained race plugin missing'
+            result = verify_log((root/'native.log').read_text())
+        else:
+            records=[json.loads(p.read_text()) for p in (root/'stores').rglob('*.process.json')]
+            assert len(records)==8 and len({r['pid'] for r in records})==8
+            assert all(r['exe_sha256']==shared.sha(binary) and r['argv']==[str(binary),'-test.run=^TestOperatorDaemonProcessHelper$'] and not Path('/proc',str(r['pid'])).exists() for r in records)
+            save('daemon-processes.json',records)
+            result=verify_daemon_log((root/'native.log').read_text())
     except AssertionError as exc:
         error = str(exc) or 'native coverage rejected'
     save('row-review.json', dict(qualification=result, rejection=error))

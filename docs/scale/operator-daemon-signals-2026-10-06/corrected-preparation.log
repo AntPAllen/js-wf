@@ -1,0 +1,37 @@
+=== RUN   TestOperatorDaemonSignals
+=== RUN   TestOperatorDaemonSignals/project/startup
+    daemon_test.go:262: operator daemon stopped command=project stage=startup domain="" signal=terminated exit=0 pid=654827
+=== RUN   TestOperatorDaemonSignals/project/running
+    daemon_test.go:262: operator daemon stopped command=project stage=running domain="" signal=interrupt exit=0 pid=654990
+=== RUN   TestOperatorDaemonSignals/tombstone-loop/startup
+    daemon_test.go:262: operator daemon stopped command=tombstone-loop stage=startup domain="" signal=terminated exit=0 pid=655102
+=== RUN   TestOperatorDaemonSignals/tombstone-loop/running
+    daemon_test.go:262: operator daemon stopped command=tombstone-loop stage=running domain="" signal=interrupt exit=0 pid=655458
+=== NAME  TestOperatorDaemonSignals
+    daemon_test.go:287: operator daemon fatal startup domain="" error=stream-not-found exit=1
+--- PASS: TestOperatorDaemonSignals (9.36s)
+    --- PASS: TestOperatorDaemonSignals/project/startup (3.02s)
+    --- PASS: TestOperatorDaemonSignals/project/running (2.06s)
+    --- PASS: TestOperatorDaemonSignals/tombstone-loop/startup (3.03s)
+    --- PASS: TestOperatorDaemonSignals/tombstone-loop/running (1.14s)
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain
+    daemon_test.go:113: operator daemon domain admitted node=0 domain=WFOPS server_id=NA544LMVBXXK6L244KZ5GJFA5XTDUNOGMQGKSAXNZ5HNAYO7PKN3CQB2
+    daemon_test.go:113: operator daemon domain admitted node=1 domain=WFOPS server_id=NCFVZ3USJAXQKW7FJZTKGRR2EUGRF4FUG46J3Q465A7D4QQBVDAVGQ2P
+    daemon_test.go:113: operator daemon domain admitted node=2 domain=WFOPS server_id=NDUFUXEVVFOA4IINMLHDDWITRIWQR4CJ2ZRJAZY42P6UKTU2O5TYPS7V
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/project/startup
+    daemon_test.go:262: operator daemon stopped command=project stage=startup domain="WFOPS" signal=terminated exit=0 pid=655909
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/project/running
+    daemon_test.go:262: operator daemon stopped command=project stage=running domain="WFOPS" signal=interrupt exit=0 pid=656084
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/startup
+    daemon_test.go:262: operator daemon stopped command=tombstone-loop stage=startup domain="WFOPS" signal=terminated exit=0 pid=656233
+=== RUN   TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/running
+    daemon_test.go:262: operator daemon stopped command=tombstone-loop stage=running domain="WFOPS" signal=interrupt exit=0 pid=656405
+=== NAME  TestOperatorDaemonSignalsInJetStreamDomain
+    daemon_test.go:287: operator daemon fatal startup domain="WFOPS" error=stream-not-found exit=1
+--- PASS: TestOperatorDaemonSignalsInJetStreamDomain (14.72s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/project/startup (3.02s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/project/running (2.16s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/startup (3.02s)
+    --- PASS: TestOperatorDaemonSignalsInJetStreamDomain/tombstone-loop/running (1.13s)
+PASS
+ok  	js-wf/cmd/wf	25.106s

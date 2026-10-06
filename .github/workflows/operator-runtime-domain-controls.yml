@@ -57,21 +57,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        program: [operator, worker]
+        include:
+          - {program: operator, case: commands, args: ""}
+          - {program: operator, case: daemon-signals, args: "--case daemon-signals"}
+          - {program: worker, case: commands, args: ""}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
       - name: Require actual default and domain race controls
-        run: python3 scripts/run-${{ matrix.program }}-domain-controls.py --root '${{ runner.temp }}/command-domain-${{ matrix.program }}'
+        run: python3 scripts/run-${{ matrix.program }}-domain-controls.py ${{ matrix.args }} --root '${{ runner.temp }}/command-domain-${{ matrix.program }}-${{ matrix.case }}'
       - if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: command-domain-${{ matrix.program }}
+          name: command-domain-${{ matrix.program }}-${{ matrix.case }}
           path: |
-            ${{ runner.temp }}/command-domain-${{ matrix.program }}.tar.gz
-            ${{ runner.temp }}/command-domain-${{ matrix.program }}-proof/
-            ${{ runner.temp }}/command-domain-${{ matrix.program }}/*.json
-            ${{ runner.temp }}/command-domain-${{ matrix.program }}/*.log
+            ${{ runner.temp }}/command-domain-${{ matrix.program }}-${{ matrix.case }}.tar.gz
+            ${{ runner.temp }}/command-domain-${{ matrix.program }}-${{ matrix.case }}-proof/
+            ${{ runner.temp }}/command-domain-${{ matrix.program }}-${{ matrix.case }}/*.json
+            ${{ runner.temp }}/command-domain-${{ matrix.program }}-${{ matrix.case }}/*.log
           if-no-files-found: error
