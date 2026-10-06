@@ -41,7 +41,7 @@ def load_rows():
     return module.TESTS
 
 
-def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=False, batched_retained_audit=False, memory_limit='512MiB', streaming_state_retained_audit=False, explicit_route_seeds=False, journal_rollout='none', audit_wait_stack=False, concurrent_state_retained_audit=False, chunked_state_retained_audit=False, cached_latency_metadata=False):
+def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=False, batched_retained_audit=False, memory_limit='512MiB', streaming_state_retained_audit=False, explicit_route_seeds=False, journal_rollout='none', audit_wait_stack=False, concurrent_state_retained_audit=False, chunked_state_retained_audit=False, cached_latency_metadata=False, bulk_final_latency=False, compare_bulk_point=False):
     if row not in load_rows() or duration not in ('35s', '10m', '24h'):
         raise ValueError('unsupported row or duration')
     if type(seed) is not int or not 1 <= seed <= 2**63-1:
@@ -58,6 +58,13 @@ def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=
         raise ValueError('audit wait stack requires retained audit trace')
     if cached_latency_metadata and row.startswith('server_clock_'):
         raise ValueError('cached latency metadata applies to point audits, not clock controller rows')
+    if compare_bulk_point and not bulk_final_latency:
+        raise ValueError('bulk point comparison requires bulk final latency')
+    if bulk_final_latency:
+        if memory_limit != '4GiB':
+            raise ValueError('bulk final latency requires explicit 4GiB memory budget')
+        if row.startswith('server_clock_') or cached_latency_metadata or journal_rollout != 'none':
+            raise ValueError('bulk final latency requires zero server offset without cached point or rollout profile')
     # Do not inherit fixture/mutation/child-process activation from another run.
     env = {k:v for k,v in os.environ.items() if not k.startswith('WF_')}
     env.update(GOMEMLIMIT=memory_limit, GOMAXPROCS='2', WF_TIER3_MATRIX='1',
@@ -75,6 +82,10 @@ def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=
         env['WF_TIER3_CONCURRENT_STATE_RETAINED_AUDIT'] = '1'
     if chunked_state_retained_audit:
         env.update(WF_TIER3_CHUNKED_STATE_RETAINED_AUDIT='1', GOMAXPROCS='4', GOGC='500')
+    if bulk_final_latency:
+        env.update(WF_MATRIX_BULK_FINAL_LATENCY='1', GOMAXPROCS='4', GOGC='500')
+        if compare_bulk_point:
+            env['WF_MATRIX_BULK_POINT_COMPARE']='1'
     if cached_latency_metadata:
         env['WF_MATRIX_CACHED_LATENCY_METADATA']='1'
     if explicit_route_seeds:
@@ -154,7 +165,10 @@ def main():
     readers.add_argument('--concurrent-state-retained-audit', action='store_true', help='Experimental: overlap complete state snapshot and journal reads within original audit limits')
     readers.add_argument('--batched-retained-audit', action='store_true')
     readers.add_argument('--streaming-state-retained-audit', action='store_true')
-    p.add_argument('--cached-latency-metadata', action='store_true', help='Experimental: reuse successful final point audit metadata handles; all record reads remain fresh')
+    latencies = p.add_mutually_exclusive_group()
+    latencies.add_argument('--cached-latency-metadata', action='store_true', help='Experimental: reuse successful final point audit metadata handles; all record reads remain fresh')
+    latencies.add_argument('--bulk-final-latency', action='store_true', help='Experimental: full-census bulk final latency within original6m; requires4GiB and selects4 CPUs/GOGC500')
+    p.add_argument('--compare-bulk-point', action='store_true', help='Qualification: compare every bulk sample with original point audits in the same6m stage; requires bulk final latency')
     p.add_argument('--explicit-route-seeds', action='store_true', help='Diagnostic: seed every other route-only peer on each restart')
     p.add_argument('--journal-rollout', choices=('none','protobuf-to-json'), default='none')
     p.add_argument('--no-race', action='store_true')
@@ -172,7 +186,7 @@ def main():
         p.error(str(error))
     env, testargs, flags = execution(a.row,a.duration,a.seed,root/'fixture',
                                      a.upgrade_shutdown,a.upgrade_start_gap,
-                                     a.retained_audit_trace,a.batched_retained_audit,a.memory_limit,a.streaming_state_retained_audit,a.explicit_route_seeds,a.journal_rollout,a.audit_wait_stack,a.concurrent_state_retained_audit,a.chunked_state_retained_audit,a.cached_latency_metadata)
+                                     a.retained_audit_trace,a.batched_retained_audit,a.memory_limit,a.streaming_state_retained_audit,a.explicit_route_seeds,a.journal_rollout,a.audit_wait_stack,a.concurrent_state_retained_audit,a.chunked_state_retained_audit,a.cached_latency_metadata,a.bulk_final_latency,a.compare_bulk_point)
     if subprocess.check_output(['git','status','--porcelain'],cwd=REPO):
         p.error('execution requires a clean committed checkout')
     revision = subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip()
@@ -192,6 +206,7 @@ def main():
                  concurrent_state_retained_audit=a.concurrent_state_retained_audit,
                  chunked_state_retained_audit=a.chunked_state_retained_audit,
                  cached_latency_metadata=a.cached_latency_metadata,
+                 bulk_final_latency=a.bulk_final_latency, compare_bulk_point=a.compare_bulk_point,
                  explicit_route_seeds=a.explicit_route_seeds,journal_rollout=a.journal_rollout,
                  clears_full_tier3_release=False)
     def save():

@@ -4961,3 +4961,16 @@ Future test field is named for test-body highwater and the producer now records
 exact-child wait4 RSS through SDK exit. Real OS control preserves nonzero exit17
 and excludes a larger prior subprocess. It does not retroactively provide final
 RSS for this accepted run. Original counts/deadlines and prior verdicts unchanged.
+
+### Sustained bulk final latency entry point prepared — 2026-10-06
+
+R5 producer/harness expose explicit `--bulk-final-latency`, with optional
+`--compare-bulk-point` for complete original-point equivalence in the same6m
+stage.4GiB/4CPU/GOGC500 profile required. Bulk admission uses a complete retained
+integrity report; post-stage complete report must equal it, including entry counts,
+or all samples are discarded. Full source census/cuts, original5m completion
+deadline, p99/recovery/history/drain/fault/checkpoint gates retained. Server-clock
+controller, wire-rollout and cached-point profile conflicts are rejected; comparison
+requires bulk selection. Defaults unchanged. Thirteen producer controls and Go
+compile/skip pass. First native qualification must use the full original ten-minute
+journal fault row and compare every sample, rather than promote a short smoke.

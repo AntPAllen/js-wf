@@ -34,6 +34,15 @@ complete current files, including partial no-space evidence, are preserved to S3
 
 ## Latest storage and proof reporting correction — 2026-10-06
 
+Sustained R5 producer/harness now expose explicit `--bulk-final-latency` and
+`--compare-bulk-point` qualification options. Bulk requires4GiB, selects4CPU/GOGC500,
+and preserves original full integrity before/after, complete source census,6m final
+latency stage,5m completion deadline, p99/history/drain/fault/checkpoint gates.
+Comparison must match every original point sample within that same6m stage.
+Clock-controller, wire-rollout and cached-point profile conflicts are rejected;
+no flags are inherited into an unselected run. Thirteen producer controls and
+Go compile/skip pass. Native sustained qualification is next; default unchanged.
+
 Thirteen additional closed disposable Tier2 copied-audit store trees pass full
 canonical Git archive/member/current-file census checks, original-copy provenance
 and closed-file ledgers, actual SDK/three-server executable closure, mount/loop/

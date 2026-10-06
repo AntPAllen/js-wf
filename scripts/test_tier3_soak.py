@@ -5,6 +5,22 @@ spec=importlib.util.spec_from_file_location('soak',Path(__file__).with_name('run
 soak=importlib.util.module_from_spec(spec);spec.loader.exec_module(soak)
 
 class SoakProducerTests(unittest.TestCase):
+ def test_bulk_final_latency_qualification_cannot_inherit_or_drop_original_gates(self):
+  with patch.dict(os.environ,{'WF_MATRIX_BULK_FINAL_LATENCY':'1','WF_MATRIX_BULK_POINT_COMPARE':'1'}):
+   plain,args,flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,memory_limit='4GiB')
+   bulk,new_args,new_flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,memory_limit='4GiB',bulk_final_latency=True,compare_bulk_point=True)
+  self.assertNotIn('WF_MATRIX_BULK_FINAL_LATENCY',plain)
+  self.assertNotIn('WF_MATRIX_BULK_POINT_COMPARE',plain)
+  self.assertEqual(bulk['WF_MATRIX_BULK_FINAL_LATENCY'],'1')
+  self.assertEqual(bulk['WF_MATRIX_BULK_POINT_COMPARE'],'1')
+  self.assertEqual((bulk['GOMAXPROCS'],bulk['GOGC'],bulk['GOMEMLIMIT']),('4','500','4GiB'))
+  self.assertEqual((args,flags),(new_args,new_flags))
+  self.assertEqual(bulk['WF_TIER3_MATRIX_DURATION'],'10m')
+  self.assertEqual(bulk['WF_TIER3_SYNC_INTERVAL'],plain['WF_TIER3_SYNC_INTERVAL'])
+  with self.assertRaises(ValueError):soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,compare_bulk_point=True)
+  with self.assertRaises(ValueError):soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,bulk_final_latency=True)
+  for row,extra in [('server_clock_ahead',{}),('server_clock_behind',{}),('journal',{'cached_latency_metadata':True}),('worker_kill',{'journal_rollout':'protobuf-to-json'})]:
+   with self.assertRaises(ValueError):soak.execution(row,'10m',1,Path('/tmp/f'),'sigkill',False,memory_limit='4GiB',bulk_final_latency=True,**extra)
  def test_disk_admission_rejects_before_any_fixture_creation_and_counts_overlap(self):
   from types import SimpleNamespace
   with tempfile.TemporaryDirectory() as d:

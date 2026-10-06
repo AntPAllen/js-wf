@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -119,6 +120,14 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	if os.Getenv("WF_MATRIX_CACHED_LATENCY_METADATA") == "1" && matrixServerClockOffset(row) != 0 {
 		t.Fatal("cached latency metadata requires a point audit row")
+	}
+	bulkFinalLatency := os.Getenv("WF_MATRIX_BULK_FINAL_LATENCY") == "1"
+	compareBulkPoint := os.Getenv("WF_MATRIX_BULK_POINT_COMPARE") == "1"
+	if compareBulkPoint && !bulkFinalLatency {
+		t.Fatal("bulk point comparison requires bulk final latency")
+	}
+	if bulkFinalLatency && (matrixServerClockOffset(row) != 0 || rollout != "" || os.Getenv("WF_MATRIX_CACHED_LATENCY_METADATA") == "1") {
+		t.Fatal("bulk final latency requires zero server offset without rollout or cached point profile")
 	}
 	timerCutRequired := os.Getenv("WF_TIER3_CLOCK_TIMER_CUT") == "1"
 	commonClockEnabled := matrixServerClockOffset(row) != 0 && os.Getenv("WF_TIER3_COMMON_CLOCK") == "1"
@@ -369,6 +378,8 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	var faults []matrixLeaderFault
 	var samples []matrixLatencySample
+	var bulkProof map[string]any
+	var bulkBaseline integrity.Report
 	var fleet sync.WaitGroup
 	workCtx, stopWork := context.WithCancel(ctx)
 	fleetErrors := make(chan error, provision.Partitions+3)
@@ -710,6 +721,9 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		evidenceMu.Unlock()
 		write("faults.json", faults)
 		write("latencies.json", samples)
+		if bulkProof != nil {
+			write("bulk-latency-audit.json", bulkProof)
+		}
 		var metrics []worker.Metrics
 		for _, w := range workers {
 			metrics = append(metrics, w.Metrics())
@@ -1315,24 +1329,60 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 			metadata = &matrixLatencyMetadataJS{JetStream: js}
 			pointJS = metadata
 		}
-		results, err := matrixParallelInvocationAudits(ctx, info.State.FirstSeq, info.State.LastSeq, func(attempt context.Context, sequence uint64) (matrixInvocationAuditResult, error) {
-			var result matrixInvocationAuditResult
-			msg, err := inv.GetMsg(attempt, sequence)
-			if err != nil {
+		pointAudits := func(bound context.Context) ([]matrixInvocationAuditResult, error) {
+			return matrixParallelInvocationAudits(bound, info.State.FirstSeq, info.State.LastSeq, func(attempt context.Context, sequence uint64) (matrixInvocationAuditResult, error) {
+				var result matrixInvocationAuditResult
+				msg, err := inv.GetMsg(attempt, sequence)
+				if err != nil {
+					return result, err
+				}
+				parts := strings.Split(msg.Subject, ".")
+				if len(parts) != 4 {
+					return result, fmt.Errorf("invalid invocation subject %q", msg.Subject)
+				}
+				result.samples, err = matrixInvocationLatencies(attempt, pointJS, parts[2], parts[3], msg.Time, completionDeadline)
+				if err == nil && rollout != "" {
+					result.mixed, err = auditMatrixRolloutInvocation(attempt, pointJS, root, parts[2], parts[3])
+				}
 				return result, err
+			})
+		}
+		var results []matrixInvocationAuditResult
+		if bulkFinalLatency {
+			bulkProof = map[string]any{"stage_limit_ns": int64(6 * time.Minute), "point_comparison_requested": compareBulkPoint, "every_sample_matches_point": false, "final_integrity_verified": false, "scope": "explicit bulk final latency; original retained audit budgets, completion deadline, history/p99/drain gates retained"}
+			bulkBaseline, err = matrixRetainedAudit(ctx, js)
+			bulkProof["before_report"], bulkProof["error"] = bulkBaseline, fmt.Sprint(err)
+			if err != nil || bulkBaseline.Invocations != batches*28 || bulkBaseline.Journals != batches*28 || bulkBaseline.Terminal != batches*28 {
+				t.Fatalf("bulk before integrity=%+v err=%v", bulkBaseline, err)
 			}
-			parts := strings.Split(msg.Subject, ".")
-			if len(parts) != 4 {
-				return result, fmt.Errorf("invalid invocation subject %q", msg.Subject)
+			stage, stop := context.WithTimeout(ctx, 6*time.Minute)
+			began := time.Now()
+			var stats matrixBulkLatencyStats
+			results, stats, err = matrixBulkInvocationAudits(stage, js, bulkBaseline, completionDeadline)
+			if err == nil && compareBulkPoint {
+				var point []matrixInvocationAuditResult
+				point, err = pointAudits(stage)
+				if err == nil && !reflect.DeepEqual(results, point) {
+					err = fmt.Errorf("bulk final latency differs from original point samples")
+				}
+				bulkProof["every_sample_matches_point"] = err == nil
 			}
-			result.samples, err = matrixInvocationLatencies(attempt, pointJS, parts[2], parts[3], msg.Time, completionDeadline)
-			if err == nil && rollout != "" {
-				result.mixed, err = auditMatrixRolloutInvocation(attempt, pointJS, root, parts[2], parts[3])
+			elapsed := time.Since(began)
+			if err == nil {
+				err = stage.Err()
 			}
-			return result, err
-		})
-		if err != nil {
-			t.Fatal(err)
+			stop()
+			bulkProof["elapsed_ns"], bulkProof["bulk_stats"], bulkProof["error"] = int64(elapsed), stats, fmt.Sprint(err)
+			if err != nil || elapsed >= 6*time.Minute {
+				results = nil
+				t.Fatalf("bulk final latency elapsed=%s err=%v", elapsed, err)
+			}
+			t.Logf("TIER3_BULK_LATENCY invocations=%d elapsed=%s point_comparison=%t charged=%d", len(results), elapsed, compareBulkPoint, stats.ChargedBytes)
+		} else {
+			results, err = pointAudits(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
 		}
 		if metadata != nil {
 			data, err := json.MarshalIndent(map[string]any{"enabled": true, "metadata_handle_lookups": metadata.lookupCounts(), "scope": "successful metadata handles only; record and snapshot queries remain fresh"}, "", "  ")
@@ -1364,6 +1414,14 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	}
 	report, err := matrixRetainedAudit(ctx, js)
 	want := batches * 28
+	if bulkProof != nil {
+		bulkProof["after_report"], bulkProof["after_error"] = report, fmt.Sprint(err)
+		if err != nil || report != bulkBaseline {
+			samples = nil
+			t.Fatalf("bulk final integrity changed: before=%+v after=%+v err=%v", bulkBaseline, report, err)
+		}
+		bulkProof["final_integrity_verified"] = true
+	}
 	if err != nil || report.Invocations != want || report.Journals != want || report.Terminal != want {
 		t.Fatalf("retained=%+v want=%d err=%v", report, want, err)
 	}
