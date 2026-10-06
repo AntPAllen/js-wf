@@ -49,6 +49,10 @@ func TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAb
 	runContinuationRetirementProcessFault(t, true, false, "WFRETIRE", true)
 }
 
+func TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL(t *testing.T) {
+	runContinuationRetirementProcessFault(t, true, true, "WFRETIRE", true)
+}
+
 // Only the selected fresh frame's first weak Object Store response is injected.
 // The frame upload, administrative metadata confirmation and retried payload
 // read use real domain servers and original retained stores after SIGKILL.

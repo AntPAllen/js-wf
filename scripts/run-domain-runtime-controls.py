@@ -23,8 +23,10 @@ SNAPSHOT = 'TestSnapshotManifestReadsUseLeader'
 KILL = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndAllServerSIGKILL'
 EXPIRY = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndLeaseExpiryAcrossAllServerSIGKILL'
 WEAK_FRAME = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAbsenceAndAllServerSIGKILL'
+WEAK_EXPIRY = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL'
 CASES = {'read-controls': [RESULT, RESULT+'InJetStreamDomain', SNAPSHOT, SNAPSHOT+'InJetStreamDomain'],
-         'retirement-server-kill': [KILL, EXPIRY], 'retirement-weak-frame': [WEAK_FRAME]}
+         'retirement-server-kill': [KILL, EXPIRY], 'retirement-weak-frame': [WEAK_FRAME],
+         'retirement-weak-frame-expiry': [WEAK_EXPIRY]}
 
 
 def sha(path):
@@ -68,10 +70,13 @@ def verify_log(case, log):
         heal = re.findall(r'native domain healed node=\d pid=\d+ domain=WFRETIRE server_id=\w+ elapsed=([0-9.]+)s', log)
         require(len(heal) == nodes and all(float(value) < 30 for value in heal), 'whole-cut domain heal gate')
         epochs = re.findall(r'prior_epoch=(\d+) terminal_epoch=(\d+) records=(\d+)', log)
-        if case == 'retirement-server-kill':
+        if case in ('retirement-server-kill', 'retirement-weak-frame-expiry'):
             require(len(epochs) == 1 and int(epochs[0][1]) > int(epochs[0][0]), 'lease expiry successor epoch missing')
+            outages = re.findall(r'all-server outage: held=([0-9.]+)s ttl=12s', log)
+            require(len(outages) == 1 and float(outages[0]) > 12, 'outage did not exceed production lease TTL')
         else:
             require(not epochs, 'unexpected lease expiry profile')
+        if case in ('retirement-weak-frame', 'retirement-weak-frame-expiry'):
             armed = re.findall(r'weak frame armed after domain heal: object=(step-result-[a-f0-9]{64})', log)
             confirmed = re.findall(r'weak frame confirmed: object=(step-result-[a-f0-9]{64}) generation=(\d+) drops=1 reads=(\d+) leader=1 direct=0 route=\$JS.WFRETIRE.API.STREAM.MSG.GET.OBJ_WF_BLOB', log)
             generations = re.findall(r'old_generation=(\d+) fresh_generation=(\d+)', log)

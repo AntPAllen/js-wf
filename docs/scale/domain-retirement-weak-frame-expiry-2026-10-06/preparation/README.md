@@ -1,0 +1,7 @@
+# Combined weak frame absence and production lease expiry preparation
+
+The new named domain retirement/reuse case holds every server down for productionLeaseTTL12s plus1s at the fresh manifest-loss cut. After three replacement processes admit actualWFRETIRE domain metadata, the exact fresh frame returns one controlled weak Object Store absence. Production frame/manifest repair must confirm native leader metadata and retry real payload bytes, retain the exact generation3 frame, and finish under a strictly higher terminal epoch than the owner captured before outage.
+
+The original30s whole-cut recovery and60s scenario limits remain. Exactthree effects/two terminals, old generation rejection, shared/survivor/fresh references and quiescent GC remain required. One absence/at leasttwo selected reads/one exact domain administrative confirmation/zero target-body direct oracle requests retain the ordinary combined case's checks. This synthetic weak response does not establish natural follower lag.
+
+Persistent domain CI adds a fourth `retirement-weak-frame-expiry` row. Native SDK/race/source/process/raw-store/archive binding uses the existing exact runner. Seven guard groups pass; a renamed ordinary weak-frame result cannot substitute for actual expiry or a higher epoch. Native qualification remains required after the preparation commit. Full current matrices, million physical timer drain, legacy versions, active-writer GC and actual24h remain open. Existing long-run handles stay unchanged.

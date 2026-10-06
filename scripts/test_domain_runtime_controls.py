@@ -47,6 +47,14 @@ class DomainCoverageControls(unittest.TestCase):
             with self.assertRaises(ValueError):
                 controls.verify_log('retirement-weak-frame', malformed)
 
+    def test_ordinary_weak_frame_cannot_substitute_for_expired_owner(self):
+        log = (REPO/'docs/scale/domain-retirement-weak-frame-2026-10-06/native-race/native.log').read_text()
+        with self.assertRaisesRegex(ValueError, 'coverage'):
+            controls.verify_log('retirement-weak-frame-expiry', log)
+        renamed = log.replace(controls.WEAK_FRAME, controls.WEAK_EXPIRY)
+        with self.assertRaisesRegex(ValueError, 'successor epoch'):
+            controls.verify_log('retirement-weak-frame-expiry', renamed)
+
     def test_native_failure_never_qualifies(self):
         for case in controls.CASES:
             for log in ('FAIL\n', '--- SKIP: x\nPASS\n', 'DATA RACE\nPASS\n'):
