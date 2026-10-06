@@ -29,6 +29,21 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: protobuf snapshot oracle and S3 proof copies
+
+At adf84cf, actual R3 race protobuf160 PASS50.73s with all160 unpurged snapshot
+fallbacks exactly equal to frozen point samples; purged missing timestamps reject
+without partial success while complete logical integrity passes. SDK2662291 closed;
+full2,809member/32,579,782byte archive verified. JSON/protobuf snapshot and encoding
+controls now qualify at their recorded sources; large/memory/fault/24h remain open.
+[Protobuf evidence](scale/bulk-final-latency-preparation-2026-10-06/native-bulk-snapshot-protobuf-v1/).
+
+User-provided S3 gateway is pinned to bucket nameless-bird-8772. JSON proof and
+committed metadata uploaded under content hashes; complete GET hashes/sizes match.
+Repeated uploads return412 without replacement and full readback still matches.
+The helper removes no local files; Git proof remains authoritative.
+[S3 receipts](scale/s3-proof-offload-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: JSON snapshot bulk oracle accepted
 
 At c674e8b, actual R3 race native160 PASS49.19s. All160 unpurged snapshot
