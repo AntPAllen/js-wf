@@ -5102,3 +5102,15 @@ matching the creating shell's fixture literal. Shared CPU with100k normal record
 This qualifies explicit original consumer component only; default/other rows/full
 current real matrices and actual24h remain open.
 [Terminal proof](scale/sustained-bulk-final-latency-2026-10-06/joined-consumer-ten-minute/).
+
+### Original bulk all-server restart ten-minute row live — 2026-10-06
+
+At executede09442a fresh original10m all-server SIGKILL/restart seed1 runs with
+explicit chunked retained integrity/bulk/full point comparison. Actual SDK3375975
+profile/build,1,814 source inputs and five NATS executable identities independently
+verified; first two operation receipts prove all five removals precede any restart.
+Shared CPU with100k normal qualifier/cgroup quota recorded. Original audit/final/
+completion/p99/history/checkpoint/drain and full all-fault operation gates retained.
+Terminal/source-after/full row-artifact checks/closure/canonical proof remain
+mandatory; no live-launch qualification or default/fullmatrix/24h promotion.
+[Launch](scale/sustained-bulk-final-latency-2026-10-06/joined-restart-ten-minute-launch/).

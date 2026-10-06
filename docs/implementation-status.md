@@ -34,6 +34,21 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier is live; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Original ten-minute bulk all-server restart row live — 2026-10-06
+
+Fresh original10m all-server SIGKILL/restart seed1 at e09442a runs with explicit
+chunked retained integrity/bulk final latency/full point comparison. Actual
+SDK3375975 executable/build/profile and1,814 before/current source files exactly
+match Git and clean detached source. Five actual NATS executable identities,
+15 observed incarnations at launch review. First two fault receipts independently
+confirm all five SIGKILL removals precede any restart, unchanged endpoints and
+native recovery; original complete all-fault operation checks remain mandatory.
+Original audit/final/completion/p99/history/checkpoint/drain gates unchanged;
+shared CPU with100k normal qualifier/cgroup quota retained. Native terminal,
+source-after, full row/artifact/closure and canonical proof pending. This is a
+verified live launch; no row/default/fullmatrix/24h promotion.
+[Launch and operation receipts](scale/sustained-bulk-final-latency-2026-10-06/joined-restart-ten-minute-launch/).
+
 ## Original ten-minute bulk consumer-leader component accepted — 2026-10-06
 
 Fresh original10m consumer-leader seed1 atb861f95 passes646.15s:93cohorts,

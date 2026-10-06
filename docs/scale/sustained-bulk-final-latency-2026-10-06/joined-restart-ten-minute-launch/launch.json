@@ -1,0 +1,82 @@
+{
+  "observed_utc": "2026-10-06T11:41:04.235029+00:00",
+  "execution": {
+    "source": "e09442a47ffa825217ab28b6961ba510e126a1b9",
+    "row": "restart",
+    "seed": 1,
+    "duration": "10m",
+    "status": "running",
+    "supervisor_pid": 3375547,
+    "started": 1791286739.4054441,
+    "upgrade_shutdown": null,
+    "upgrade_start_gap": false,
+    "race": false,
+    "memory_limit": "4GiB",
+    "gomaxprocs": "4",
+    "gc_percent": "500",
+    "disk_admission": {
+      "filesystem_probe": "/tmp",
+      "free_bytes": 13237559296,
+      "minimum_free_bytes": 1073741824,
+      "additional_reserve_bytes": 1073741824,
+      "scope": "Launch-time estimate, not a filesystem reservation. 24h baseline16GiB covers observed retained growth and archival; callers must add overlapping job budgets."
+    },
+    "retained_audit_trace": false,
+    "audit_wait_stack": false,
+    "batched_retained_audit": false,
+    "streaming_state_retained_audit": false,
+    "concurrent_state_retained_audit": false,
+    "chunked_state_retained_audit": true,
+    "cached_latency_metadata": false,
+    "bulk_final_latency": true,
+    "compare_bulk_point": true,
+    "explicit_route_seeds": true,
+    "journal_rollout": "none",
+    "clears_full_tier3_release": false,
+    "test_pid": 3375946
+  },
+  "live_unit": {
+    "MainPID": "3375547",
+    "CPUQuotaPerSecUSec": "2s",
+    "MemoryMax": "6442450944",
+    "ActiveState": "active"
+  },
+  "actual_sdk": {
+    "pid": 3375975,
+    "args": [
+      "/tmp/js-wf-bulk-restart-ten-minute-joined-20261006/integration.test",
+      "-test.run=^TestFiveContainerMixedAllServersEveryThirtySeconds$",
+      "-test.v=test2json",
+      "-test.count=1",
+      "-test.timeout=20m"
+    ],
+    "sha256": "386947c4086b9c366867f1f455e6125ef9fc2327bb01a8e0084a814d6e94e8ac",
+    "build_info": "/proc/3375975/exe: go1.27.1\n\tpath\tjs-wf/integration.test\n\tmod\tjs-wf\tv0.0.0-20261006113855-e09442a47ffa\t\n\tdep\tgithub.com/anishathalye/porcupine\tv1.3.1\th1:fBZ4/NGNPnIDdd6xNtrNk9/GiEQ0L4FO5+scINN+t0E=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/jackc/pgpassfile\tv1.0.0\th1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=\n\tdep\tgithub.com/jackc/pgservicefile\tv0.0.0-20240606120523-5a60cdf6a761\th1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=\n\tdep\tgithub.com/jackc/pgx/v5\tv5.11.0\th1:IzBBtyK9AHqf98cctWFifYSci2hgQR/cd56wB4p+ogg=\n\tdep\tgithub.com/jackc/puddle/v2\tv2.2.2\th1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sync\tv0.23.0\th1:KameEIfc1IkluZyXWLn39Wd4tURc6GbCiISGiZm2bQk=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/text\tv0.42.0\th1:JbOZXgfeCPU9gacVtYliJqOhD+zhrEqK4LfdpmlUZqI=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=e09442a47ffa825217ab28b6961ba510e126a1b9\n\tbuild\tvcs.time=2026-10-06T11:38:55Z\n\tbuild\tvcs.modified=false\n",
+    "stat": "3375975 (integration.tes) S 3375968 3375547 3375547 0 -1 4194304 875 0 0 0 0 0 0 0 20 0 7 0 10047911 1780355072 4650 18446744073709551615 4194304 22004784 140733231670736 0 0 0 0 2 2143420157 0 0 0 17 0 0 0 0 0 0 39190528 39870016 524038144 140733231679619 140733231679800 140733231679800 140733231681460 0\n",
+    "profile_environment": {
+      "GOMEMLIMIT": "4GiB",
+      "GOMAXPROCS": "4",
+      "WF_TIER3_CHUNKED_STATE_RETAINED_AUDIT": "1",
+      "GOGC": "500",
+      "WF_MATRIX_BULK_FINAL_LATENCY": "1",
+      "WF_MATRIX_BULK_POINT_COMPARE": "1"
+    },
+    "observed_utc": "2026-10-06T11:39:17.846744+00:00"
+  },
+  "source_files_exact_git_current_before": 1814,
+  "server_observations": 15,
+  "observed_distinct_names": [
+    "/js-wf-route-3375975-1791286757556509688-n0",
+    "/js-wf-route-3375975-1791286757556509688-n1",
+    "/js-wf-route-3375975-1791286757556509688-n2",
+    "/js-wf-route-3375975-1791286757556509688-n3",
+    "/js-wf-route-3375975-1791286757556509688-n4"
+  ],
+  "actual_server_sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+  "confirmed_restart_faults_so_far": [
+    "tier3_mixed_journal_test.go:1026: tier3 restart fault node=-1 scheduled=30s killed=30.102318678s healed=41.706637779s",
+    "tier3_mixed_journal_test.go:1026: tier3 restart fault node=-1 scheduled=1m0s killed=1m0.118135565s healed=1m14.681654061s"
+  ],
+  "overlapping_normal_qualifier": "MainPID=3308963\nActiveState=active\n",
+  "scope": "Verified live fresh original10m all-server SIGKILL/restart row seed1 at executede09442a with explicit chunked/bulk/point comparison. Actual SDK/source/profile and five observed NATS executables verified; shared CPU with full100k normal qualifier recorded. Original deadlines/counts/history/drain/p99/checkpoint/all-five kill-before-restart gates unchanged. Terminal native/full artifact/source-after/observer/process-closure and complete proof remain mandatory; no row/default/fullmatrix/24h qualification."
+}
