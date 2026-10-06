@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -101,27 +102,81 @@ func TestMatrixParallelInvocationAuditsRetainedCohort(t *testing.T) {
 		metadata = &matrixLatencyMetadataJS{JetStream: js}
 		pointJS = metadata
 	}
+	bulkMode := os.Getenv("WF_MATRIX_BULK_LATENCY_COHORT") == "1"
+	var baseline struct {
+		Cutoff             uint64                  `json:"cutoff"`
+		PointError         string                  `json:"point_error"`
+		ReportError        string                  `json:"report_error"`
+		CompletionDeadline time.Time               `json:"original_completion_deadline"`
+		Samples            [][]matrixLatencySample `json:"samples"`
+	}
+	var fullReport integrity.Report
+	if bulkMode {
+		oraclePath := os.Getenv("WF_MATRIX_LATENCY_COHORT_ORACLE")
+		if !filepath.IsAbs(oraclePath) {
+			t.Fatal("bulk cohort requires verified original point oracle")
+		}
+		data, err := os.ReadFile(oraclePath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := json.Unmarshal(data, &baseline); err != nil {
+			t.Fatal(err)
+		}
+		if baseline.Cutoff != cutoff || baseline.PointError != "<nil>" || baseline.ReportError != "<nil>" || len(baseline.Samples) != int(cutoff) || !baseline.CompletionDeadline.Equal(completionDeadline) {
+			t.Fatal("bulk cohort point oracle boundary/deadline/verdict differs")
+		}
+		check, stop := context.WithTimeout(context.Background(), 20*time.Second)
+		fullReport, err = integrity.CheckThroughInvocationSequenceWithChunkedConcurrentStateReads(check, js, cutoff)
+		stop()
+		if err != nil || fullReport != (integrity.Report{Invocations: 87920, Journals: 87920, Entries: 969925, Terminal: 87920}) {
+			t.Fatalf("bulk cohort requires full original integrity: %+v %v", fullReport, err)
+		}
+	}
 	var completed atomic.Uint64
 	started := time.Now()
 	stage, stopStage := context.WithTimeout(context.Background(), 6*time.Minute)
-	results, failure := matrixParallelInvocationAudits(stage, 1, cutoff, func(ctx context.Context, sequence uint64) (matrixInvocationAuditResult, error) {
-		var result matrixInvocationAuditResult
-		msg, err := inv.GetMsg(ctx, sequence)
-		if err != nil {
-			return result, err
-		}
-		parts := strings.Split(msg.Subject, ".")
-		if len(parts) != 4 {
-			return result, fmt.Errorf("invalid invocation subject %q", msg.Subject)
-		}
-		result.samples, err = matrixInvocationLatencies(ctx, pointJS, parts[2], parts[3], msg.Time, completionDeadline)
-		if err == nil {
-			if n := completed.Add(1); n%10000 == 0 {
-				t.Logf("LATENCY_COHORT_PROGRESS completed=%d/%d elapsed=%s", n, cutoff, time.Since(started))
+	var results []matrixInvocationAuditResult
+	var failure error
+	var bulkStats matrixBulkLatencyStats
+	if bulkMode {
+		results, bulkStats, failure = matrixBulkInvocationAuditsThrough(stage, js, fullReport, completionDeadline, cutoff)
+		if failure == nil {
+			if len(results) != len(baseline.Samples) {
+				failure = fmt.Errorf("bulk sample census differs from accepted point oracle")
+			}
+			for index, result := range results {
+				if failure != nil {
+					break
+				}
+				if !reflect.DeepEqual(result.samples, baseline.Samples[index]) {
+					failure = fmt.Errorf("bulk samples differ from accepted point oracle at invocation %d", index+1)
+				}
 			}
 		}
-		return result, err
-	})
+		if failure != nil {
+			results = nil
+		}
+	} else {
+		results, failure = matrixParallelInvocationAudits(stage, 1, cutoff, func(ctx context.Context, sequence uint64) (matrixInvocationAuditResult, error) {
+			var result matrixInvocationAuditResult
+			msg, err := inv.GetMsg(ctx, sequence)
+			if err != nil {
+				return result, err
+			}
+			parts := strings.Split(msg.Subject, ".")
+			if len(parts) != 4 {
+				return result, fmt.Errorf("invalid invocation subject %q", msg.Subject)
+			}
+			result.samples, err = matrixInvocationLatencies(ctx, pointJS, parts[2], parts[3], msg.Time, completionDeadline)
+			if err == nil {
+				if n := completed.Add(1); n%10000 == 0 {
+					t.Logf("LATENCY_COHORT_PROGRESS completed=%d/%d elapsed=%s", n, cutoff, time.Since(started))
+				}
+			}
+			return result, err
+		})
+	}
 	elapsed := time.Since(started)
 	stopStage()
 	var report integrity.Report
@@ -142,6 +197,12 @@ func TestMatrixParallelInvocationAuditsRetainedCohort(t *testing.T) {
 		}
 	}
 	proof := map[string]any{"cutoff": cutoff, "completed_point_checks": completed.Load(), "elapsed_ns": elapsed.Nanoseconds(), "stage_limit_ns": int64(6 * time.Minute), "point_error": fmt.Sprint(failure), "original_completion_deadline": completionDeadline, "terminal_samples": terminals, "report": report, "report_error": fmt.Sprint(reportError), "samples": persisted, "scope": "quiet copied87920 real-workflow point checks; no original24h/full400k/currentmatrix qualification; partial errors discard whole samples"}
+	if bulkMode {
+		proof["audit_mode"] = "bulk"
+		proof["bulk_stats"] = bulkStats
+		proof["bulk_equals_accepted_point_oracle"] = failure == nil
+		proof["scope"] = "quiet copied87920 bulk samples compared with committed verified original cached point oracle; no original24h/full400k/currentmatrix qualification; any errors discard all samples"
+	}
 	if metadata != nil {
 		proof["metadata_handle_lookups"] = metadata.lookupCounts()
 	}

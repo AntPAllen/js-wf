@@ -106,3 +106,46 @@ func TestMatrixBulkDeliveryTimeRepresentationMatchesPointUTC(t *testing.T) {
 		t.Fatal("bulk retains delivery time representation instead of point UTC")
 	}
 }
+
+func TestMatrixBulkPrefixExclusionAndSourceCuts(t *testing.T) {
+	cut := matrixBulkSourceCut{First: 1, Last: 3, Messages: 3}
+	if got, err := matrixBulkCohortCut(cut, 2, 2); err != nil || got != 2 {
+		t.Fatalf("valid prefix: %d %v", got, err)
+	}
+	for _, bad := range []matrixBulkSourceCut{{First: 0, Last: 3, Messages: 3}, {First: 3, Last: 1, Messages: 3}, {First: 1, Last: 3, Messages: 2}} {
+		if _, err := matrixBulkCohortCut(bad, 2, 2); err == nil {
+			t.Fatal("invalid source accepted")
+		}
+	}
+	for _, boundary := range []uint64{0, 1, 4} {
+		if _, err := matrixBulkCohortCut(cut, 2, boundary); err == nil {
+			t.Fatal("wrong cohort boundary accepted")
+		}
+	}
+	at := time.Now().UTC()
+	p := matrixBulkProjection{cutoff: 1, bySubject: map[string]*matrixBulkInvocation{}, limit: 4096}
+	if err := p.invocation(&jetstream.RawStreamMsg{Subject: "wf.inv.parent.p", Sequence: 1, Time: at}); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.invocation(&jetstream.RawStreamMsg{Subject: "wf.inv.child.c", Sequence: 2, Time: at}); err != nil {
+		t.Fatal(err)
+	}
+	if len(p.ordered) != 1 {
+		t.Fatal("outside invocation retained in cohort")
+	}
+	if err := p.invocation(&jetstream.RawStreamMsg{Subject: "wf.inv.child.c", Sequence: 3, Time: at}); err == nil {
+		t.Fatal("duplicate excluded invocation accepted")
+	}
+	if err := p.journal(&jetstream.RawStreamMsg{Subject: "wf.jrn.child.c", Time: at}); err != nil {
+		t.Fatal(err)
+	}
+	if !p.excluded["wf.jrn.child.c"].Equal(at) {
+		t.Fatal("excluded child last time missing")
+	}
+	if err := p.journal(&jetstream.RawStreamMsg{Subject: "wf.jrn.unknown.u", Time: at}); err == nil {
+		t.Fatal("unknown outside journal accepted")
+	}
+	if err := p.journal(&jetstream.RawStreamMsg{Subject: "wf.jrn.child.c"}); err == nil {
+		t.Fatal("missing outside child time accepted")
+	}
+}

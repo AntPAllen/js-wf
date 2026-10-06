@@ -26,10 +26,12 @@ type matrixBulkSourceCut struct {
 	Consumers                    int
 }
 type matrixBulkLatencyStats struct {
-	SourceCuts        map[string]matrixBulkSourceCut `json:"source_cuts"`
-	Records           map[string]int                 `json:"records"`
-	SnapshotFallbacks int                            `json:"snapshot_fallbacks"`
-	ChargedBytes      uint64                         `json:"charged_bytes"`
+	SourceCuts              map[string]matrixBulkSourceCut `json:"source_cuts"`
+	Records                 map[string]int                 `json:"records"`
+	InvocationCutoff        uint64                         `json:"invocation_cutoff"`
+	OutOfPrefixChildLookups int                            `json:"out_of_prefix_child_lookups"`
+	SnapshotFallbacks       int                            `json:"snapshot_fallbacks"`
+	ChargedBytes            uint64                         `json:"charged_bytes"`
 }
 type matrixBulkInvocation struct {
 	typ, id  string
@@ -39,6 +41,8 @@ type matrixBulkInvocation struct {
 	snapshot bool
 }
 type matrixBulkProjection struct {
+	cutoff         uint64
+	excluded       map[string]time.Time
 	bySubject      map[string]*matrixBulkInvocation
 	ordered        []*matrixBulkInvocation
 	signals        map[uint64]time.Time
@@ -59,8 +63,19 @@ func (p *matrixBulkProjection) invocation(msg *jetstream.RawStreamMsg) error {
 		return fmt.Errorf("invalid bulk invocation coordinates")
 	}
 	subject := identity.JournalSubject(parts[2], parts[3])
-	if p.bySubject[subject] != nil {
+	_, excluded := p.excluded[subject]
+	if p.bySubject[subject] != nil || excluded {
 		return fmt.Errorf("duplicate bulk invocation %s", subject)
+	}
+	if p.cutoff != 0 && msg.Sequence > p.cutoff {
+		if err := p.charge(128 + uint64(2*len(subject))); err != nil {
+			return err
+		}
+		if p.excluded == nil {
+			p.excluded = map[string]time.Time{}
+		}
+		p.excluded[subject] = time.Time{}
+		return nil
 	}
 	if err := p.charge(512 + uint64(2*len(msg.Subject))); err != nil {
 		return err
@@ -73,6 +88,10 @@ func (p *matrixBulkProjection) invocation(msg *jetstream.RawStreamMsg) error {
 
 func (p *matrixBulkProjection) journal(msg *jetstream.RawStreamMsg) error {
 	inv := p.bySubject[msg.Subject]
+	if _, outside := p.excluded[msg.Subject]; outside && !msg.Time.IsZero() {
+		p.excluded[msg.Subject] = msg.Time.UTC()
+		return nil
+	}
 	if inv == nil || msg.Time.IsZero() {
 		return fmt.Errorf("bulk journal outside invocation cohort: %s", msg.Subject)
 	}
@@ -128,6 +147,13 @@ func (p *matrixBulkProjection) journal(msg *jetstream.RawStreamMsg) error {
 // its original 20-second request context. A changed source invalidates everything.
 // Server-clock rows continue using their controller receipts, not this adapter.
 func matrixBulkInvocationAudits(ctx context.Context, js jetstream.JetStream, expected integrity.Report, completionDeadline time.Time) ([]matrixInvocationAuditResult, matrixBulkLatencyStats, error) {
+	return matrixBulkInvocationAuditsThrough(ctx, js, expected, completionDeadline, 0)
+}
+
+// Through audits an inclusive invocation prefix while retaining full source
+// censuses/stability checks. Out-of-prefix subjects must be proven by WF_INV;
+// their last raw journal time is retained for point-equivalent child lookups.
+func matrixBulkInvocationAuditsThrough(ctx context.Context, js jetstream.JetStream, expected integrity.Report, completionDeadline time.Time, cutoff uint64) ([]matrixInvocationAuditResult, matrixBulkLatencyStats, error) {
 	stats := matrixBulkLatencyStats{SourceCuts: map[string]matrixBulkSourceCut{}, Records: map[string]int{}}
 	if _, ok := ctx.Deadline(); !ok || expected.Invocations <= 0 || expected.Journals != expected.Invocations || expected.Terminal != expected.Invocations {
 		return nil, stats, fmt.Errorf("bulk latency requires deadline and complete integrity cohort")
@@ -147,9 +173,12 @@ func matrixBulkInvocationAudits(ctx context.Context, js jetstream.JetStream, exp
 		stats.SourceCuts[name] = matrixBulkSourceCut{info.State.FirstSeq, info.State.LastSeq, info.State.Msgs, info.State.Bytes, info.State.Consumers}
 	}
 	invCut := stats.SourceCuts["WF_INV"]
-	if invCut.Messages != uint64(expected.Invocations) || invCut.First == 0 || invCut.Last-invCut.First+1 != invCut.Messages {
-		return nil, stats, fmt.Errorf("bulk invocation cohort/count/hole differs from point audit")
+	var err error
+	cutoff, err = matrixBulkCohortCut(invCut, expected.Invocations, cutoff)
+	if err != nil {
+		return nil, stats, err
 	}
+	stats.InvocationCutoff, p.cutoff = cutoff, cutoff
 	for _, name := range []string{"WF_INV", "KV_WF_STATE", "WF_JRN", "WF_SIG"} {
 		err := integrity.WalkRetainedWithChunkedReads(ctx, streams[name], stats.SourceCuts[name].Last, func(msg *jetstream.RawStreamMsg) error {
 			stats.Records[name]++
@@ -161,10 +190,17 @@ func matrixBulkInvocationAudits(ctx context.Context, js jetstream.JetStream, exp
 			case "KV_WF_STATE":
 				if strings.HasPrefix(msg.Subject, "$KV.WF_STATE.snap.") && msg.Header.Get("KV-Operation") != "DEL" && msg.Header.Get("KV-Operation") != "PURGE" {
 					parts := strings.Split(strings.TrimPrefix(msg.Subject, "$KV.WF_STATE.snap."), ".")
-					if len(parts) != 2 || p.bySubject[identity.JournalSubject(parts[0], parts[1])] == nil {
+					if len(parts) != 2 || identity.Validate(parts[0], parts[1]) != nil {
+						return fmt.Errorf("invalid snapshot coordinates")
+					}
+					subject := identity.JournalSubject(parts[0], parts[1])
+					if _, outside := p.excluded[subject]; outside {
+						return nil
+					}
+					if p.bySubject[subject] == nil {
 						return fmt.Errorf("snapshot outside bulk cohort")
 					}
-					p.bySubject[identity.JournalSubject(parts[0], parts[1])].snapshot = true
+					p.bySubject[subject].snapshot = true
 				}
 			case "WF_SIG":
 				if msg.Time.IsZero() || msg.Sequence == 0 {
@@ -227,7 +263,14 @@ func matrixBulkInvocationAudits(ctx context.Context, js jetstream.JetStream, exp
 			samples, err = matrixReduceInvocationLatencies(ctx, inv.typ, inv.id, inv.enabled, completionDeadline, 0, inv.records, inv.times,
 				func(typ, id string) (time.Time, error) {
 					child := p.bySubject[identity.JournalSubject(typ, id)]
-					if child == nil || len(child.times) == 0 {
+					if child == nil {
+						if at := p.excluded[identity.JournalSubject(typ, id)]; !at.IsZero() {
+							stats.OutOfPrefixChildLookups++
+							return at, nil
+						}
+						return time.Time{}, jetstream.ErrMsgNotFound
+					}
+					if len(child.times) == 0 {
 						return time.Time{}, jetstream.ErrMsgNotFound
 					}
 					return child.times[len(child.times)-1], nil
@@ -266,4 +309,17 @@ func matrixBulkInvocationAudits(ctx context.Context, js jetstream.JetStream, exp
 		return nil, stats, err
 	}
 	return results, stats, nil
+}
+
+func matrixBulkCohortCut(cut matrixBulkSourceCut, count int, cutoff uint64) (uint64, error) {
+	if count <= 0 || cut.First == 0 || cut.Last < cut.First || cut.Last-cut.First+1 != cut.Messages {
+		return 0, fmt.Errorf("bulk invocation source count/hole differs from point audit")
+	}
+	if cutoff == 0 {
+		cutoff = cut.Last
+	}
+	if cutoff < cut.First || cutoff > cut.Last || cutoff-cut.First+1 != uint64(count) {
+		return 0, fmt.Errorf("bulk invocation prefix/count differs from point audit")
+	}
+	return cutoff, nil
 }

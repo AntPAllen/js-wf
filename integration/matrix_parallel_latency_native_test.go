@@ -210,6 +210,19 @@ func TestMatrixParallelInvocationAuditsNativeOracle(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(bulk, serial) || bulkStats.SnapshotFallbacks != 0 {
 		t.Fatalf("bulk timestamp samples differ from frozen point oracle: stats=%+v err=%v", bulkStats, err)
 	}
+	// Sequence97 is the first parent invocation; its child necessarily follows
+	// it and lies outside this prefix. Compare against the same complete frozen
+	// point oracle, including that external child timestamp dependency.
+	prefixCtx, stopPrefix := context.WithTimeout(ctx, 20*time.Second)
+	prefixReport, prefixErr := integrity.CheckThroughInvocationSequenceWithChunkedConcurrentStateReads(prefixCtx, all[2], 97)
+	stopPrefix()
+	if prefixErr != nil || prefixReport.Invocations != 97 || prefixReport.Terminal != 97 {
+		t.Fatalf("prefix integrity: %+v %v", prefixReport, prefixErr)
+	}
+	prefixBulk, prefixStats, prefixErr := matrixBulkInvocationAuditsThrough(ctx, all[2], prefixReport, deadline, 97)
+	if prefixErr != nil || !reflect.DeepEqual(prefixBulk, serial[:97]) || prefixStats.OutOfPrefixChildLookups < 1 {
+		t.Fatalf("bulk prefix changes point child dependency: %+v %v", prefixStats, prefixErr)
+	}
 	// The same actual terminal records must still fail a violated deadline.
 	deadline = time.Unix(0, 0)
 	_, serialErr := read(ctx, info.State.FirstSeq)
@@ -293,7 +306,7 @@ func TestMatrixParallelInvocationAuditsNativeOracle(t *testing.T) {
 	for index, result := range parallel {
 		persistedSamples[index] = result.samples
 	}
-	data, err := json.MarshalIndent(map[string]any{"encoding": encoding, "snapshot_controls": snapshotProof, "invocations": len(serial), "serial_equals_parallel": true, "legacy_equals_shared_reducer": true, "bulk_equals_serial": true, "bulk_stats": bulkStats, "cached_metadata_equals_serial": true, "metadata_handle_lookups": counts, "deadline_negative_control": true, "parallel_elapsed": parallelElapsed, "serial_elapsed": serialElapsed, "measurement_scope": "ordered same-fixture point and bulk checks; no isolated speed ratio or large/fault/24h qualification", "samples": persistedSamples}, "", "  ")
+	data, err := json.MarshalIndent(map[string]any{"encoding": encoding, "snapshot_controls": snapshotProof, "prefix_equals_frozen_point": true, "prefix_stats": prefixStats, "invocations": len(serial), "serial_equals_parallel": true, "legacy_equals_shared_reducer": true, "bulk_equals_serial": true, "bulk_stats": bulkStats, "cached_metadata_equals_serial": true, "metadata_handle_lookups": counts, "deadline_negative_control": true, "parallel_elapsed": parallelElapsed, "serial_elapsed": serialElapsed, "measurement_scope": "ordered same-fixture point and bulk checks; no isolated speed ratio or large/fault/24h qualification", "samples": persistedSamples}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}

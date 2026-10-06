@@ -4787,3 +4787,17 @@ recheck logical integrity, and require both point and bulk latency paths to reje
 missing server timestamps without partial samples. Compacted journals cannot prove
 original latency samples unless original timestamps are independently retained.
 These controls do not replace large-cohort, memory, transport-fault or 24-hour gates.
+
+### Bulk latency qualification on a real retained invocation prefix
+
+Preserve the full quiet store copies and source censuses; do not truncate stores
+to fit a cohort. Verify the inclusive invocation cutoff and complete bounded
+integrity independently under the original20s budget. Bulk acquisition must scan
+complete source cuts, identify excluded subjects from INV, retain their last
+journal times for external child dependencies, and reject unknown subjects or
+source changes. A97-invocation native prefix includes the first parent while its
+child lies beyond the cutoff; its samples must exactly match the frozen point
+oracle. Run87920 real-workflow bulk mode (`WF_MATRIX_BULK_LATENCY_COHORT=1`) against
+a canonical-bound accepted point oracle (`WF_MATRIX_LATENCY_COHORT_ORACLE`),
+retaining the identical original completion deadline and6m final audit budget.
+No partial samples qualify. Full400k/memory/fault/default/24h gates still apply.

@@ -29,6 +29,24 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: real-cohort headroom and prefix bulk preparation
+
+Six complete canonical outer proofs/five inner member inventories read back;
+only redundant raw archives removed, recovering2,177,323,008 allocated bytes,
+3,145,932,800 free atcompletion. R5 profile proof additionally uploaded to S3 and
+all297,722,514 remote bytes match. Original stores/source/exes/cache/live retained.
+[Recovery](scale/nested-raw-proof-recovery-2026-10-06/).
+
+Bulk prefix support preserves complete source censuses/stability while excluding
+only subjects proven outside the invocation cutoff. Their last journal timestamps
+remain available for original point-equivalent external child lookups. Four bulk
+race groups pass1.019s. A native97-invocation prefix must exactly match the frozen
+oracle and exercise a child beyond the cutoff; native qualification pending.
+The retained87920 test now has an explicit bulk mode requiring a verified accepted
+point oracle, identical cutoff/deadline, independent20s full integrity before/after
+and original6m bulk stage. Large-cohort execution remains pending; bulk disabled
+in matrix/soak.
+
 ## Live snapshot and proof storage — 2026-10-06 06:32 UTC
 
 Original24h journal handle remainsactive,5h22m/batch2736; latest completed checkpoint
