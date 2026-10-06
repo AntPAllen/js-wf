@@ -29,6 +29,25 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest storage/admission correction — 2026-10-06
+
+After complete committed S3 archive/metadata/inventory readback and full current
+primary-file census verification, only the two local archive duplicates were
+removed:516,481,024 allocated bytes recovered, about2GB free. Original primary
+stores/source/exes/partial evidence remain local; committed manifests/hashes/S3
+receipts preserve complete current files. No original handle restarted.
+
+The shared24h producer now checks16GiB minimum free space before any fixture or
+checkout creation, plus an explicit additional overlapping-job reserve. Twelve
+producer controls pass, including boundary/overlap/no-directory admission rejection;
+three complete-archive/corruption/path controls pass. This is a conservative launch
+estimate rather than an ongoing filesystem reservation; overlapping launchers must
+account for their budgets. Original20s/60s/3,6m and24h release gates remain unchanged.
+Next: reclaim additional canonically preserved redundant artifacts, finish fresh
+corrected real-cohort fault qualification, prepare valid full400k memory/latency
+fixture, then admit new long campaigns with enough growth/archival headroom.
+[Local archive recovery](scale/terminal-campaigns-disk-pressure-2026-10-06/local-archive-duplicate-recovery/).
+
 ## Latest preservation — 2026-10-06: both closed campaigns completely archived to S3
 
 Journal9,205 current files /431,060,062-byte archive and million6,729 current files /

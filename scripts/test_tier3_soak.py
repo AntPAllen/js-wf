@@ -5,6 +5,24 @@ spec=importlib.util.spec_from_file_location('soak',Path(__file__).with_name('run
 soak=importlib.util.module_from_spec(spec);spec.loader.exec_module(soak)
 
 class SoakProducerTests(unittest.TestCase):
+ def test_disk_admission_rejects_before_any_fixture_creation_and_counts_overlap(self):
+  from types import SimpleNamespace
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d)/'fresh'/'campaign'
+   budget=soak.LONG_CAMPAIGN_MIN_FREE
+   with patch.object(soak.shutil,'disk_usage',return_value=SimpleNamespace(free=budget-1)):
+    with self.assertRaisesRegex(ValueError,'campaign needs'):soak.disk_admission(root,'24h')
+   self.assertFalse(root.parent.exists())
+   with patch.object(soak.shutil,'disk_usage',return_value=SimpleNamespace(free=budget)):
+    admitted=soak.disk_admission(root,'24h')
+    self.assertEqual(admitted['minimum_free_bytes'],budget)
+    self.assertEqual(admitted['filesystem_probe'],str(Path(d).resolve()))
+    with self.assertRaises(ValueError):soak.disk_admission(root,'24h',1)
+   with patch.object(soak.shutil,'disk_usage',return_value=SimpleNamespace(free=99)):
+    self.assertEqual(soak.disk_admission(root,'10m',99)['minimum_free_bytes'],99)
+    with self.assertRaises(ValueError):soak.disk_admission(root,'10m',100)
+   for invalid in (-1,True,None):
+    with self.assertRaises(ValueError):soak.disk_admission(root,'24h',invalid)
  def test_cached_latency_metadata_is_explicit_and_keeps_point_gate_arguments(self):
   with patch.dict(os.environ,{'WF_MATRIX_CACHED_LATENCY_METADATA':'1'}):
    plain,args,flags=soak.execution('journal','24h',1,Path('/tmp/f'),'sigkill',False)

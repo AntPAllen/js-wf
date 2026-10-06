@@ -9,7 +9,7 @@ adoption are not qualified. Partial files and malformed/truncated event frames
 remain original evidence. No old handle restarted, verdict promoted, original
 artifact repaired or server cause assumed.
 
-Complete archives will use verified S3 full-file storage, with complete inventory,
+Complete archives use verified S3 full-file storage, with complete inventory,
 archive hash and full GET readback receipt committed in Git. Each current source
 file is hashed before and after capture; all tar member bytes/modes and embedded
 inventory are read back. The new format deliberately contains no local/Git part
@@ -21,3 +21,11 @@ committed; its new fresh native fault run remains pending. Full400k valid latenc
 RSS and original24h/million gates remain open. Future long runs need headroom for
 remaining campaign growth and archival as well as any concurrent native copies;
 short-run copy reserves alone are insufficient.
+
+Both complete archive, metadata and inventory S3 readbacks are committed. After
+full canonical/primary-file/visible-descriptor verification, only local archive
+duplicates were reclaimed (516,481,024 allocated bytes). All original primary
+files remain local. New24h launches require16GiB free plus explicit overlapping
+job budget before fixture/checkout creation. This conservative launch check is
+not a live reservation or storage guarantee and does not change release deadlines.
+Twelve producer controls and three complete-archive negative controls pass.

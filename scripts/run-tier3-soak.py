@@ -9,12 +9,29 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tarfile
 import time
 
 REPO = Path(__file__).resolve().parents[1]
 MEMORY_LIMITS = ('512MiB', '1GiB', '2GiB', '4GiB')
+LONG_CAMPAIGN_MIN_FREE = 16 * 1024**3
+
+
+def disk_admission(root, duration, additional_reserve_bytes=0):
+    if type(additional_reserve_bytes) is not int or additional_reserve_bytes < 0:
+        raise ValueError('additional disk reserve must be nonnegative bytes')
+    path = Path(root).resolve()
+    while not path.exists():
+        path = path.parent
+    minimum = (LONG_CAMPAIGN_MIN_FREE if duration == '24h' else 0) + additional_reserve_bytes
+    free = shutil.disk_usage(path).free
+    if free < minimum:
+        raise ValueError(f'campaign needs {minimum} free bytes including growth/archive/concurrent reserve; filesystem has {free}')
+    return dict(filesystem_probe=str(path), free_bytes=free,
+                minimum_free_bytes=minimum, additional_reserve_bytes=additional_reserve_bytes,
+                scope='Launch-time estimate, not a filesystem reservation. 24h baseline16GiB covers observed retained growth and archival; callers must add overlapping job budgets.')
 
 
 def load_rows():
@@ -143,10 +160,16 @@ def main():
     p.add_argument('--no-race', action='store_true')
     p.add_argument('--memory-limit', choices=MEMORY_LIMITS, default='512MiB',
                    help='Explicit Go memory budget, captured with execution evidence')
+    p.add_argument('--additional-disk-reserve-bytes', type=int, default=0,
+                   help='Additional overlapping job disk budget; 24h launches also require16GiB free for growth/archival')
     a = p.parse_args()
     root = a.root.resolve()
     if root.exists() or root.is_relative_to(REPO):
         p.error('root must be fresh and outside the repository')
+    try:
+        disk = disk_admission(root, a.duration, a.additional_disk_reserve_bytes)
+    except ValueError as error:
+        p.error(str(error))
     env, testargs, flags = execution(a.row,a.duration,a.seed,root/'fixture',
                                      a.upgrade_shutdown,a.upgrade_start_gap,
                                      a.retained_audit_trace,a.batched_retained_audit,a.memory_limit,a.streaming_state_retained_audit,a.explicit_route_seeds,a.journal_rollout,a.audit_wait_stack,a.concurrent_state_retained_audit,a.chunked_state_retained_audit,a.cached_latency_metadata)
@@ -161,6 +184,7 @@ def main():
                  upgrade_shutdown=a.upgrade_shutdown if a.row=='rolling_upgrade' else None,
                  upgrade_start_gap=a.upgrade_start_gap,race=not a.no_race,
                  memory_limit=a.memory_limit, gomaxprocs=env['GOMAXPROCS'], gc_percent=env.get('GOGC'),
+                 disk_admission=disk,
                  retained_audit_trace=a.retained_audit_trace,
                  audit_wait_stack=a.audit_wait_stack,
                  batched_retained_audit=a.batched_retained_audit,
