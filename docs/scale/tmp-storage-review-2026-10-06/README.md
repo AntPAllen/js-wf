@@ -1,6 +1,6 @@
 # /tmp storage review — 2026-10-06
 
-Completed guarded S3 offloads recovered **27.70 GiB of older data**, including **4.35 GiB** in the newest seventeen-root historical disk-stall/upgrade pass. The latest observation has **36.77 GiB available**. Live runs continue writing, so free space changes. See [latest offload](historical-disk-stall-evidence/README.md).
+Completed guarded S3 offloads recovered **29.10 GiB of older data**, including **1.39 GiB** in the latest three-root consumer/partition pass. Including verified staging copies, this pass recovered **2.47 GiB**. The latest observation has **36.99 GiB available**. Live runs continue writing, so free space changes. See [latest offload](consumer-partition-evidence/README.md).
 
 | Completed cleanup | Older allocated bytes recovered |
 | --- | ---: |
@@ -10,9 +10,10 @@ Completed guarded S3 offloads recovered **27.70 GiB of older data**, including *
 | Additional seven closed timer/audit store roots | 4,087,672,832 |
 | Historical matrix raw evidence and media, five closed roots | 3,157,147,648 |
 | Historical disk-stall and upgrade evidence, seventeen closed roots | 4,671,275,008 |
-| Total | 29,745,692,672 |
+| Closed consumer and partition raw evidence/media, three roots | 1,495,064,576 |
+| Total | 31,240,757,248 |
 
-Temporary archive staging removed separately totals 16,095,428,608 bytes. The disposable exact restoration control is also excluded from old-data recovery.
+Temporary archive staging removed separately totals 17,247,199,232 bytes. The disposable exact restoration control is also excluded from old-data recovery.
 
 Every removed original was covered by committed S3 proof metadata and a full remote body readback. Removal additionally checked remote archive members, original hashes/modes/mtimes and fresh visible closure. Process inspection limits are retained. Source, native logs and provenance remain local; binary restoration uses the complete content-addressed archive plus original-path index. See [binary removal](closed-test-binaries/offload/offload.json), [refill removal](byte-refill-final-controls/media-offload/offload.json) and [final inventory](inventory-final/summary.json).
 
