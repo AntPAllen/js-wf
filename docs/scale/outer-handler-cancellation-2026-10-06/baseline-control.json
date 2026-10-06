@@ -1,0 +1,20 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-race",
+    "-overlay=/tmp/js-wf-outer-handler-baseline-control-20261006/overlay.json",
+    "./sim",
+    "-run",
+    "^TestOuterHandlerCancellationHandoffAndLateAppend$",
+    "-count=1",
+    "-timeout=30s"
+  ],
+  "baseline_source": "ca7a1fa",
+  "baseline_worker_sha256": "35af6373e0b3a58d76cf5baebc2abcdebc04e96176746fa79e58d75f5991afd7",
+  "exit_code": 1,
+  "elapsed_seconds": 12.620661089997157,
+  "expected_rejection": "outer handler trapped delivery: context deadline exceeded",
+  "expected_rejection_observed": true,
+  "scope": "In-memory production-worker regression rejects pre-fix outer handler boundary via compiler overlay. No NATS startup or old store opening; no matrix/release qualification."
+}

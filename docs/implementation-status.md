@@ -48,6 +48,12 @@ explicit bulk use for this recorded-source sustained component; default, other
 rows/fullmatrix and24h remain open.
 [Accepted proof](scale/sustained-bulk-final-latency-2026-10-06/joined-journal-ten-minute/).
 
+After complete committed archive/member/current-file/S3 verification and actual
+SDK/24-observed-server/container/process/visible-descriptor closure, only the
+redundant ten-minute raw archive was removed:141,352,960 allocated bytes recovered.
+All current primary bytes/modes/mtimes unchanged; no old store reopened.
+[Recovery](scale/sustained-bulk-final-latency-2026-10-06/joined-ten-minute-raw-recovery/).
+
 ## Outer workflow handler cancellation boundary — 2026-10-06
 
 Production outer handlers and named continuations now run behind a cancellable
@@ -70,7 +76,9 @@ Started,three Attempt and Failed records. Its initial20s fixture attempt failed
 in provisioning before any handler ran; corrected startup waits for metadata
 readiness with bounded requests inside the same20s whole-test context. Preliminary
 SIM_SEEDS=100 was rejected by the existing minimum1000 gate; only the corrected
-full1,000 runs count. Full-suite and broader native/combined qualification remain
+full1,000 runs count. The new handoff regression rejects pre-fix ca7a1fa via a compiler overlay at seed1
+with the explicit trapped-delivery3s deadline error; only in-memory transport used.
+[Controls](scale/outer-handler-cancellation-2026-10-06/). Full-suite and broader native/combined qualification remain
 open; no promotion of current-main full matrices or earlier recorded-source runs.
 
 ## Corrected original ten-minute qualification live — 2026-10-06

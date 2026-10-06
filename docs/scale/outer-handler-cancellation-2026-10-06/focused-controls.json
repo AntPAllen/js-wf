@@ -1,0 +1,48 @@
+{
+  "source": "efe440a",
+  "source_sha256": {
+    "worker/worker.go": "dad6d3bf0b597882403c2535f499fc161410283fda95affc5976daea7a2c165b",
+    "worker/handler.go": "65c39458a101337f0524dd7e3e7e855426463bee10b5b2c3b342616910e77001",
+    "worker/handler_test.go": "e6c1a08eedc759f8528f9f786a3c9c96d7205732e83f7ce26ab5e73e04804977",
+    "worker/handler_native_test.go": "947956336c952e41487d1736b3ba2a8d3c32626d6ccf6bfe6466a21cd7a26dac",
+    "sim/worker_outer_handler_handoff_test.go": "6c10c0e57e84b5f04ed14bb2399d36babf8e3ac026a7f2e2be2c07023d0f70ef"
+  },
+  "controls": [
+    {
+      "command": "go test -race ./worker -run '^Test(HandlerReturnPanicAndGoexit|HandlerCancellationAbandonsLateReturn|AlreadyCancelledHandlerDoesNotEnterUserCode)$' -count=1",
+      "result": "PASS",
+      "elapsed_seconds": 1.02
+    },
+    {
+      "command": "go test -race ./sim -run '^TestSeeded(WorkerExecutionReplay|WorkerRunningCancelReplay|HeartbeatHandoffReplay)$' -count=1",
+      "result": "PASS",
+      "elapsed_seconds": 19.271,
+      "seed_limit_per_suite": 1000
+    },
+    {
+      "command": "go test -race ./sim -run '^TestOuterHandlerCancellationHandoffAndLateAppend$' -count=1",
+      "result": "PASS",
+      "elapsed_seconds": 3.68,
+      "seeds": 1000,
+      "exact_replays": 10
+    },
+    {
+      "command": "go test -race ./worker -run '^TestOuterHandlerGoexitRecordsBoundedAttempts$' -count=1",
+      "result": "PASS",
+      "elapsed_seconds": 7.594,
+      "native_peers": 3,
+      "attempts": 3
+    }
+  ],
+  "preliminary_rejections": [
+    {
+      "reason": "SIM_SEEDS=100 rejected by minimum1000 admission",
+      "executed_seeds": 0
+    },
+    {
+      "reason": "Initial native provisioning did not wait for metadata election; expired original20s context before handler invocation",
+      "elapsed_seconds": 20.074
+    }
+  ],
+  "scope": "Focused commands and results recorded from tool outputs; source bytes verify against committed implementation. Native unit fixture was ephemeral, not an independently archived matrix proof. No current-main full release or 100k normal-seed claim. Full simulation race suite still pending."
+}
