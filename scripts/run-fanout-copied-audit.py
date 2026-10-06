@@ -97,6 +97,15 @@ def review(root):
     native_source = read(donor / 'source-before.json')
     native_external = read(donor / 'external-source-before.json')
     require(inputs['production_source'] == native_source['revision'] == canonical['native_review']['source'], 'production source differs')
+    dependencies = set()
+    for line in (root / 'dependencies.txt').read_text().splitlines():
+        directory, *groups = line.split('|')
+        require(len(groups) == 2, 'malformed selected dependency record')
+        for name in ' '.join(groups).split():
+            path = (Path(directory) / name).resolve()
+            if path != root / 'helper.go':
+                dependencies.add(str(path))
+    require(dependencies == set(inputs['files']), 'selected build input census differs from dependency record')
     for name, item in inputs['files'].items():
         require(sha(root / item['captured']) == item['sha256'], 'captured build input differs: ' + name)
         path = Path(name)
@@ -116,7 +125,9 @@ def review(root):
     case = next(item for item in canonical['native_review']['cases']
                 if item['phase'] == canonical['selected_phase'] and item['position'] == canonical['selected_position'])
     report = read(root / 'retained-review.json')
-    require(report['report'] == case['retained_report'] and 0 < report['audit_ns'] <= report['whole_review_ns'] < 20_000_000_000,
+    require(report['report'] == case['retained_report'] and
+            type(report['audit_ns']) is int and type(report['whole_review_ns']) is int and
+            0 < report['audit_ns'] <= report['whole_review_ns'] < 20_000_000_000,
             'copied complete cohort or original audit budget differs')
     require(report['physically_drained'] is True and report['observed_partition_consumers'] == 64 and
             len(report['child_ids']) == len(set(report['child_ids'])) == 500, 'copied results or durable census invalid')

@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: all six full fanout copied physical audits accepted
+
+All six fresh copies/helpera4e9016/originalcdd4c7b independently qualify exact
+501inv/jrn/terminal cohorts,500child results,parent249500,three distinct local
+WF_RUNzero/64consumer witnesses and original20s combined budget. ActualcopiedSDKs
+closed; each1,690selectedinputs/nativeGit/module/external bindings and unchanged
+original files verified. Full23,931member/157,628,217byte/9part copied archives
+read back. Stronger reviewer rechecks allsix and rejects observed boolean-duration/
+omitted-input corruptions with valid baseline unchanged. Native transient startup
+retry remains unexercised by this successful run; prior failed campaign preserved.
+Full matrices/original24h/million finalphysical gates remain open.
+[Copied qualification](scale/fanout-combined-local-physical-2026-10-06/copied-local-physical/).
+
 ## Latest follow-up — 2026-10-06: full six native fanout physical cuts accepted
 
 Original full-cardinality race campaign at cdd4c7b passes525.46s. All six actual
