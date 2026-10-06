@@ -1,5 +1,5 @@
 from pathlib import Path
-import subprocess,json,hashlib,sys
+import subprocess,json,hashlib,sys,shutil
 root=Path('/tmp/js-wf-tier2-retained-pause-ten-minute-20261006')
 def digest(p):
  with p.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
@@ -35,7 +35,12 @@ seed_report=campaign.check_seed(native,'worker_pause',1,a['test']);assert seed_r
 (root/'seed-review.json').write_text(json.dumps(seed_report,indent=2)+'\n')
 count=seed_report['invocations']
 (root/'expected-original-report.json').write_text(json.dumps({'Invocations':count,'Journals':count,'Entries':seed_report['journal_entries'],'Terminal':count},indent=2)+'\n')
-from datetime import datetime
+clock_path=Path('scripts/tier3-worker-clock-evidence.py')
+clock_bytes=subprocess.check_output(['git','show',revision+':scripts/tier3-worker-clock-evidence.py']);assert clock_path.read_bytes()==clock_bytes
+(root/'executed-timestamp-helper.py').write_bytes(clock_bytes)
+spec=importlib.util.spec_from_file_location('pause_timestamps',root/'executed-timestamp-helper.py');clock=importlib.util.module_from_spec(spec);spec.loader.exec_module(clock)
+ns=clock.timestamp_ns
+shutil.copy2(__file__,root/'executed-native-review.py')
 workers=json.loads((root/'observed-workers.json').read_text());assert len(workers)==3
 by_pid={v['pid']:v for v in workers};assert len(by_pid)==3
 for v in workers:
@@ -49,17 +54,17 @@ for f in faults['faults']:
  assert not f.get('error') and f['active_leases']>0 and f['fencing_events']>0
  assert len(f['paused_leases'])==f['active_leases']
  assert f['pid'] in by_pid and by_pid[f['pid']]['worker_id']==f['worker']
- paused=datetime.fromisoformat(f['paused'].replace('Z','+00:00'));resumed=datetime.fromisoformat(f['resumed'].replace('Z','+00:00'))
- assert (resumed-paused).total_seconds()>=45
+ paused=ns(f['paused']);resumed=ns(f['resumed'])
+ assert resumed-paused>=45_000_000_000
  assert all(l['worker_id']==f['worker'] and l['epoch']>0 and l['revision']>0 for l in f['paused_leases'])
- assert (resumed-paused).total_seconds()>=45
+ assert resumed-paused>=45_000_000_000
  fence_path=root/('matrix-pause-1-'+f['worker']+'-fencing.jsonl')
  data=fence_path.read_bytes();assert data.endswith(b'\n')
  records=[json.loads(line) for line in data.splitlines()]
  held={(l['key'],l['epoch']) for l in f['paused_leases']};matches=0
  for i,record in enumerate(records,1):
   event=record['event'];assert record['pid']==f['pid'] and record['sequence']==i and event['Worker']==f['worker']
-  at=datetime.fromisoformat(event['At'].replace('Z','+00:00'))
+  at=ns(event['At'])
   if at>=resumed and (event['Type']+'.'+event['ID'],event['Epoch']) in held:matches+=1
  assert matches>=f['fencing_events']>0
 assert 'worker faults=10 active_worker_faults=10 row=worker_pause' in native
