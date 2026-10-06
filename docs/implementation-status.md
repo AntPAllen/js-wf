@@ -29,6 +29,16 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: additional proof working-tree headroom
+
+Five full canonical archives/parts/concat and16working-tree part bytes/Git object
+identities verified before sparse exclusion. Recovered395,665,408allocatedbytes;
+canonicalGit/rawarchives/originalfixtures/source/exes/caches/live stores retained.
+Visible task descriptors checked. About3.5GiB free;12GiB target still unmet. New
+closed-original verifier uses canonicalGit blobs and remains functional when parts
+are sparse. Fanout native/reviewer and both long handles remain live.
+[Verification](scale/sustained-proof-headroom-second-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: reusable closed-original copy verification
 
 Repository command binds pushed canonical native proof parts/fullarchive/embedded
