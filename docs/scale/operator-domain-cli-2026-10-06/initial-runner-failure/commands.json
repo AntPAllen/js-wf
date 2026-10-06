@@ -1,0 +1,18 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-race",
+    "-c",
+    "-o",
+    "/tmp/js-wf-operator-domain-controls-20261006/operator-race.test",
+    "./cmd/wf"
+  ],
+  "run": [
+    "/tmp/js-wf-operator-domain-controls-20261006/operator-race.test",
+    "-test.v",
+    "-test.run=^(TestOperatorCommands|TestOperatorCommandsInJetStreamDomain)$",
+    "-test.count=1",
+    "-test.timeout=3m"
+  ]
+}
