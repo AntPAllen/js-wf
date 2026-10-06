@@ -29,6 +29,16 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: JSON snapshot bulk oracle accepted
+
+At c674e8b, actual R3 race native160 PASS49.19s. All160 unpurged snapshot
+fallbacks match frozen point samples. After three prefix entries are purged,
+complete logical integrity remains160/768/160; both point/bulk reject missing
+server timestamps with no partial success. SDK2643617 closed and full2,805member/
+32,498,174byte archive verified. Protobuf/large/memory/fault/24h remain pending;
+bulk notenabled in matrix/soak.
+[JSON native evidence](scale/bulk-final-latency-preparation-2026-10-06/native-bulk-snapshot-json/).
+
 ## Latest follow-up — 2026-10-06: archive headroom and snapshot evidence controls prepared
 
 Complete Git part/concatenation/member checks recovered 1,079,451,648 allocated
