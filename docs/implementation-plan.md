@@ -4839,3 +4839,16 @@ state behavior on fresh real-cohort copies with complete source counts, exact
 terminal/snapshot checks, cleanup, and original20s/60s/3 budgets; then complete
 87920 bulk/frozen-point comparison under the unchanged6m final stage. Ordered
 state diagnostic results alone cannot qualify bulk or release gates.
+
+### Corrected state deadline and real87920 bulk comparison accepted — 2026-10-06
+
+At65c9036 fresh normal R5 nativePASS53.91s. Original20s integrity checks before
+and after pass87,920 invocations /969,925 entries /87,920 terminals; all latency
+samples exactly equal the complete canonical accepted point oracle with identical
+original completion deadline. Bulk stage16.775331767s is within original6m.
+Complete source counts/cuts/consumer cleanup, unchanged donor hashes and actual
+SDK/five server closure independently verified. Complete4,434-file base/delta
+proof verified. This qualifies the quiet real87920 cohort at recorded source;
+full400k/memory/fault/default/currentmatrix/24h gates remain required. Bulk is not
+adopted in live campaigns. Earlier failures remain preserved without attributed
+cause. [Evidence](scale/state-admission-deadlines-2026-10-06/native-bulk-whole-state/).
