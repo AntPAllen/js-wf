@@ -4,6 +4,7 @@ package integration_test
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 	"time"
 
@@ -81,5 +82,27 @@ func TestMatrixBulkProjectionPreservesCausalPayloadsAndDropsEffectBodies(t *test
 	data, _ := json.Marshal(journal.Entry{Kind: journal.Completed})
 	if err := p.journal(&jetstream.RawStreamMsg{Subject: "wf.jrn.parent.p", Sequence: 100, Time: f.start, Data: data}); err == nil || len(inv.records) != before {
 		t.Fatal("budget failure retained journal record")
+	}
+}
+
+func TestMatrixBulkDeliveryTimeRepresentationMatchesPointUTC(t *testing.T) {
+	at := time.Date(2026, 10, 6, 0, 0, 0, 123456789, time.UTC)
+	delivery := at.In(time.FixedZone("delivery-local", 0))
+	if !delivery.Equal(at) || reflect.DeepEqual(delivery, at) {
+		t.Fatal("control requires equal instants with distinct representations")
+	}
+	p := matrixBulkProjection{bySubject: map[string]*matrixBulkInvocation{}, limit: 4096}
+	if err := p.invocation(&jetstream.RawStreamMsg{Subject: "wf.inv.parent.p", Time: delivery}); err != nil {
+		t.Fatal(err)
+	}
+	data, err := json.Marshal(journal.Entry{Kind: journal.Started})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := p.journal(&jetstream.RawStreamMsg{Subject: "wf.jrn.parent.p", Sequence: 1, Time: delivery, Data: data}); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(p.ordered[0].enabled, at) || !reflect.DeepEqual(p.ordered[0].times[0], at) {
+		t.Fatal("bulk retains delivery time representation instead of point UTC")
 	}
 }

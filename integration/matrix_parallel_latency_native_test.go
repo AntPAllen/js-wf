@@ -182,6 +182,24 @@ func TestMatrixParallelInvocationAuditsNativeOracle(t *testing.T) {
 		t.Fatalf("bulk oracle requires complete integrity: %+v %v", fullReport, err)
 	}
 	bulk, bulkStats, err := matrixBulkInvocationAudits(ctx, all[2], fullReport, deadline)
+	comparison := map[string]any{"invocations": len(serial), "bulk_count": len(bulk), "samples_equal": reflect.DeepEqual(bulk, serial), "stats": bulkStats}
+	if err != nil {
+		comparison["error"] = err.Error()
+	}
+	for index := 0; index < len(bulk) && index < len(serial); index++ {
+		if !reflect.DeepEqual(bulk[index], serial[index]) {
+			comparison["first_mismatch"] = map[string]any{"index": index, "bulk": bulk[index].samples, "point": serial[index].samples,
+				"bulk_go_representation": fmt.Sprintf("%#v", bulk[index].samples), "point_go_representation": fmt.Sprintf("%#v", serial[index].samples)}
+			break
+		}
+	}
+	comparisonData, comparisonErr := json.MarshalIndent(comparison, "", "  ")
+	if comparisonErr == nil {
+		comparisonErr = os.WriteFile(filepath.Join(root, "bulk-oracle-comparison.json"), comparisonData, 0600)
+	}
+	if comparisonErr != nil {
+		t.Fatal(comparisonErr)
+	}
 	if err != nil || !reflect.DeepEqual(bulk, serial) || bulkStats.SnapshotFallbacks != 0 {
 		t.Fatalf("bulk timestamp samples differ from frozen point oracle: stats=%+v err=%v", bulkStats, err)
 	}

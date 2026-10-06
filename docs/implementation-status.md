@@ -29,6 +29,22 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: bulk acquisition candidate and preserved native mismatch
+
+Explicit chunked retained walker/shared-reducer candidate captures complete four
+source cuts/censuses, conservative3GiB charged projection/output retention, snapshot
+point fallback20s, final source/cursor stability and no partial successes. Three
+race groups pass. Fresh5fa0926 R3 full160 nativeFAIL32.39s: all four censuses correct,
+no bulk error, samples differ underDeepEqual. ActualSDK2532437/703Gitinputs/closure
+and full2,805member32,063,188byte/twopart failedproof verified. Exact first mismatch
+was not saved. Delivery metadata Time.Unix representation can differ from pointUTC;
+explicit equal-instant/different-location control reproduces representation issue.
+Bulk timestamps nowUTC; three race controls pass1.017s; next fresh native retains
+first mismatch/sample representations. Native correction/largecohort/fault/snapshot/
+24h qualification pending; bulk notenabled in matrix/soak. Longhandles unchanged.
+[Failed native](scale/bulk-final-latency-preparation-2026-10-06/native-bulk-oracle/).
+[Correction preparation](scale/bulk-final-latency-preparation-2026-10-06/utc-correction-preparation/).
+
 ## Latest follow-up — 2026-10-06: shared final-latency reducer native equivalence
 
 Point latency rules extracted into shared reducer; complete timestamp census and

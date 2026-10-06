@@ -65,7 +65,7 @@ func (p *matrixBulkProjection) invocation(msg *jetstream.RawStreamMsg) error {
 	if err := p.charge(512 + uint64(2*len(msg.Subject))); err != nil {
 		return err
 	}
-	inv := &matrixBulkInvocation{typ: parts[2], id: parts[3], enabled: msg.Time}
+	inv := &matrixBulkInvocation{typ: parts[2], id: parts[3], enabled: msg.Time.UTC()}
 	p.bySubject[subject] = inv
 	p.ordered = append(p.ordered, inv)
 	return nil
@@ -118,7 +118,7 @@ func (p *matrixBulkProjection) journal(msg *jetstream.RawStreamMsg) error {
 	entry.Payload = payload
 	entry.WorkerID = ""
 	inv.records = append(inv.records, journal.Record{Entry: entry, Sequence: msg.Sequence})
-	inv.times = append(inv.times, msg.Time)
+	inv.times = append(inv.times, msg.Time.UTC())
 	return nil
 }
 
@@ -176,7 +176,7 @@ func matrixBulkInvocationAudits(ctx context.Context, js jetstream.JetStream, exp
 				if err := p.charge(128); err != nil {
 					return err
 				}
-				p.signals[msg.Sequence] = msg.Time
+				p.signals[msg.Sequence] = msg.Time.UTC()
 			}
 			return nil
 		})
