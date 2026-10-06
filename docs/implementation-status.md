@@ -32,6 +32,19 @@ coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
 
+## Corrected original ten-minute qualification live — 2026-10-06
+
+Fresh original10m journal seed1 atca7a1fa is running with explicit bulk final
+latency plus complete point comparison, chunked retained integrity,4CPU/GOGC500/
+4GiB. Actual SDK3239290 SHA/build/VCS/profile and all1,786 captured source files
+verified; all five current NATS2.15 roles publicly observed and hashed, including
+the first scheduled journal-leader kill/heal and replacement incarnation. Producer,
+observer and independent reviewer units confirmed live. Launch admitted768MiB
+reserve with about836MiB free; no competing campaign started. Original20s/60s
+integrity,6m final stage,5m completion,p99/history/checkpoint/fault/drain gates stay.
+No native or independent row verdict yet; default/fullmatrix and24h remain open.
+[Verified launch](scale/sustained-bulk-final-latency-2026-10-06/joined-journal-ten-minute-launch/).
+
 ## Further closed-copy recovery — 2026-10-06
 
 All18 closed fanout copied-audit store trees (six local physical, six prior

@@ -1,0 +1,1794 @@
+{
+  "observed_utc": "2026-10-06T10:05:18.574124+00:00",
+  "execution": {
+    "source": "ca7a1fa658adcd3bdd0ead2daddb6fcf7f9f1129",
+    "row": "journal",
+    "seed": 1,
+    "duration": "10m",
+    "status": "running",
+    "supervisor_pid": 3238887,
+    "started": 1791281037.5564475,
+    "upgrade_shutdown": null,
+    "upgrade_start_gap": false,
+    "race": false,
+    "memory_limit": "4GiB",
+    "gomaxprocs": "4",
+    "gc_percent": "500",
+    "disk_admission": {
+      "filesystem_probe": "/tmp",
+      "free_bytes": 875716608,
+      "minimum_free_bytes": 805306368,
+      "additional_reserve_bytes": 805306368,
+      "scope": "Launch-time estimate, not a filesystem reservation. 24h baseline16GiB covers observed retained growth and archival; callers must add overlapping job budgets."
+    },
+    "retained_audit_trace": false,
+    "audit_wait_stack": false,
+    "batched_retained_audit": false,
+    "streaming_state_retained_audit": false,
+    "concurrent_state_retained_audit": false,
+    "chunked_state_retained_audit": true,
+    "cached_latency_metadata": false,
+    "bulk_final_latency": true,
+    "compare_bulk_point": true,
+    "explicit_route_seeds": true,
+    "journal_rollout": "none",
+    "clears_full_tier3_release": false,
+    "test_pid": 3239261
+  },
+  "actual_sdk": {
+    "pid": 3239290,
+    "args": [
+      "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/integration.test",
+      "-test.run=^TestFiveContainerMixedJournalLeaderEveryThirtySeconds$",
+      "-test.v=test2json",
+      "-test.count=1",
+      "-test.timeout=20m"
+    ],
+    "sha256": "c86252432f315ea2ec47bc8325c824b283558a05efe51d1a5a8fbe67f996ce70",
+    "build_info": "/proc/3239290/exe: go1.27.1\n\tpath\tjs-wf/integration.test\n\tmod\tjs-wf\tv0.0.0-20261006100344-ca7a1fa658ad\t\n\tdep\tgithub.com/anishathalye/porcupine\tv1.3.1\th1:fBZ4/NGNPnIDdd6xNtrNk9/GiEQ0L4FO5+scINN+t0E=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/jackc/pgpassfile\tv1.0.0\th1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=\n\tdep\tgithub.com/jackc/pgservicefile\tv0.0.0-20240606120523-5a60cdf6a761\th1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=\n\tdep\tgithub.com/jackc/pgx/v5\tv5.11.0\th1:IzBBtyK9AHqf98cctWFifYSci2hgQR/cd56wB4p+ogg=\n\tdep\tgithub.com/jackc/puddle/v2\tv2.2.2\th1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sync\tv0.23.0\th1:KameEIfc1IkluZyXWLn39Wd4tURc6GbCiISGiZm2bQk=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/text\tv0.42.0\th1:JbOZXgfeCPU9gacVtYliJqOhD+zhrEqK4LfdpmlUZqI=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=ca7a1fa658adcd3bdd0ead2daddb6fcf7f9f1129\n\tbuild\tvcs.time=2026-10-06T10:03:44Z\n\tbuild\tvcs.modified=false\n",
+    "stat": "3239290 (integration.tes) S 3239283 3238887 3238887 0 -1 4194304 864 0 0 0 0 0 0 0 20 0 6 0 9477136 1704321024 4573 18446744073709551615 4194304 22003568 140722489490992 0 0 0 0 2 2143420157 0 0 0 17 1 0 0 0 0 0 39182336 39861824 1068351488 140722489497728 140722489497912 140722489497912 140722489499572 0\n",
+    "profile_environment": {
+      "GOMEMLIMIT": "4GiB",
+      "GOMAXPROCS": "4",
+      "WF_TIER3_CHUNKED_STATE_RETAINED_AUDIT": "1",
+      "GOGC": "500",
+      "WF_MATRIX_BULK_FINAL_LATENCY": "1",
+      "WF_MATRIX_BULK_POINT_COMPARE": "1"
+    },
+    "observed_utc": "2026-10-06T10:04:09.891818+00:00"
+  },
+  "source_files_verified": 1786,
+  "live_server_roles": {
+    "0": {
+      "pid": 3239517,
+      "container": "e5c685e00829",
+      "sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+      "build_info": "/proc/3239517/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+      "args": [
+        "/nats-server",
+        "-c",
+        "/etc/nats.conf",
+        "-a",
+        "0.0.0.0",
+        "-p",
+        "4222",
+        "-m",
+        "8222",
+        "-n",
+        "js-wf-route-3239290-1791281049805806446-n0",
+        "-js",
+        "-sd",
+        "/data",
+        "-cluster_name",
+        "js-wf-route-3239290-1791281049805806446",
+        "-cluster",
+        "nats://0.0.0.0:6222",
+        "-cluster_advertise",
+        "js-wf-route-3239290-1791281049805806446-route-n0:6222",
+        "-routes",
+        "nats://js-wf-route-3239290-1791281049805806446-route-n1:6222,nats://js-wf-route-3239290-1791281049805806446-route-n2:6222,nats://js-wf-route-3239290-1791281049805806446-route-n3:6222,nats://js-wf-route-3239290-1791281049805806446-route-n4:6222"
+      ],
+      "stat": "3239517 (nats-server) S 3239493 3239517 3239517 0 -1 4194560 2375 0 0 0 1 1 0 0 20 0 9 0 9477280 1306603520 4211 18446744073709551615 4194304 12802353 140725743699296 0 0 0 1002057728 0 2143420159 0 0 0 17 2 0 0 0 0 0 21032960 21447456 1119817728 140725743705470 140725743705996 140725743705996 140725743706091 0\n",
+      "inspect": {
+        "Id": "e5c685e0082993434e4da052627d33448f3c14d70fe2addd4fc0ef957e7af105",
+        "Created": "2026-10-06T10:04:11.028508795Z",
+        "Path": "/nats-server",
+        "Args": [
+          "-c",
+          "/etc/nats.conf",
+          "-a",
+          "0.0.0.0",
+          "-p",
+          "4222",
+          "-m",
+          "8222",
+          "-n",
+          "js-wf-route-3239290-1791281049805806446-n0",
+          "-js",
+          "-sd",
+          "/data",
+          "-cluster_name",
+          "js-wf-route-3239290-1791281049805806446",
+          "-cluster",
+          "nats://0.0.0.0:6222",
+          "-cluster_advertise",
+          "js-wf-route-3239290-1791281049805806446-route-n0:6222",
+          "-routes",
+          "nats://js-wf-route-3239290-1791281049805806446-route-n1:6222,nats://js-wf-route-3239290-1791281049805806446-route-n2:6222,nats://js-wf-route-3239290-1791281049805806446-route-n3:6222,nats://js-wf-route-3239290-1791281049805806446-route-n4:6222"
+        ],
+        "State": {
+          "Status": "running",
+          "Running": true,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 3239517,
+          "ExitCode": 0,
+          "Error": "",
+          "StartedAt": "2026-10-06T10:04:11.186269576Z",
+          "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:289db69f88d154588a89dcaea862d935450e8dc4bb2c3ec1f0da8e22b0abb0d3",
+        "ResolvConfPath": "/var/lib/docker/containers/e5c685e0082993434e4da052627d33448f3c14d70fe2addd4fc0ef957e7af105/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/e5c685e0082993434e4da052627d33448f3c14d70fe2addd4fc0ef957e7af105/hostname",
+        "HostsPath": "/var/lib/docker/containers/e5c685e0082993434e4da052627d33448f3c14d70fe2addd4fc0ef957e7af105/hosts",
+        "LogPath": "/var/lib/docker/containers/e5c685e0082993434e4da052627d33448f3c14d70fe2addd4fc0ef957e7af105/e5c685e0082993434e4da052627d33448f3c14d70fe2addd4fc0ef957e7af105-json.log",
+        "Name": "/js-wf-route-3239290-1791281049805806446-n0",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+          "Binds": [
+            "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/node-0:/data",
+            "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/nats.conf:/etc/nats.conf:ro"
+          ],
+          "ContainerIDFile": "",
+          "LogConfig": {
+            "Type": "json-file",
+            "Config": {}
+          },
+          "NetworkMode": "js-wf-client-3239290-1791281049805806446",
+          "PortBindings": {
+            "4222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": ""
+              }
+            ],
+            "8222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": ""
+              }
+            ]
+          },
+          "RestartPolicy": {
+            "Name": "no",
+            "MaximumRetryCount": 0
+          },
+          "AutoRemove": true,
+          "VolumeDriver": "",
+          "VolumesFrom": null,
+          "ConsoleSize": [
+            0,
+            0
+          ],
+          "CapAdd": null,
+          "CapDrop": null,
+          "CgroupnsMode": "private",
+          "Dns": null,
+          "DnsOptions": [],
+          "DnsSearch": [],
+          "ExtraHosts": null,
+          "GroupAdd": null,
+          "IpcMode": "private",
+          "Cgroup": "",
+          "Links": null,
+          "OomScoreAdj": 0,
+          "PidMode": "",
+          "Privileged": false,
+          "PublishAllPorts": false,
+          "ReadonlyRootfs": false,
+          "SecurityOpt": null,
+          "UTSMode": "",
+          "UsernsMode": "",
+          "ShmSize": 67108864,
+          "Runtime": "runc",
+          "Isolation": "",
+          "CpuShares": 0,
+          "Memory": 0,
+          "NanoCpus": 0,
+          "CgroupParent": "",
+          "BlkioWeight": 0,
+          "BlkioWeightDevice": [],
+          "BlkioDeviceReadBps": [],
+          "BlkioDeviceWriteBps": [],
+          "BlkioDeviceReadIOps": [],
+          "BlkioDeviceWriteIOps": [],
+          "CpuPeriod": 0,
+          "CpuQuota": 0,
+          "CpuRealtimePeriod": 0,
+          "CpuRealtimeRuntime": 0,
+          "CpusetCpus": "",
+          "CpusetMems": "",
+          "Devices": [],
+          "DeviceCgroupRules": null,
+          "DeviceRequests": null,
+          "MemoryReservation": 0,
+          "MemorySwap": 0,
+          "MemorySwappiness": null,
+          "OomKillDisable": null,
+          "PidsLimit": null,
+          "Ulimits": [],
+          "CpuCount": 0,
+          "CpuPercent": 0,
+          "IOMaximumIOps": 0,
+          "IOMaximumBandwidth": 0,
+          "MaskedPaths": [
+            "/proc/acpi",
+            "/proc/asound",
+            "/proc/interrupts",
+            "/proc/kcore",
+            "/proc/keys",
+            "/proc/latency_stats",
+            "/proc/sched_debug",
+            "/proc/scsi",
+            "/proc/timer_list",
+            "/proc/timer_stats",
+            "/sys/devices/virtual/powercap",
+            "/sys/firmware"
+          ],
+          "ReadonlyPaths": [
+            "/proc/bus",
+            "/proc/fs",
+            "/proc/irq",
+            "/proc/sys",
+            "/proc/sysrq-trigger"
+          ]
+        },
+        "Storage": {
+          "RootFS": {
+            "Snapshot": {
+              "Name": "overlayfs"
+            }
+          }
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/node-0",
+            "Destination": "/data",
+            "Mode": "",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/nats.conf",
+            "Destination": "/etc/nats.conf",
+            "Mode": "ro",
+            "RW": false,
+            "Propagation": "rprivate"
+          }
+        ],
+        "Config": {
+          "Hostname": "e5c685e00829",
+          "Domainname": "",
+          "User": "1000:1000",
+          "AttachStdin": false,
+          "AttachStdout": false,
+          "AttachStderr": false,
+          "ExposedPorts": {
+            "4222/tcp": {},
+            "8222/tcp": {}
+          },
+          "Tty": false,
+          "OpenStdin": false,
+          "StdinOnce": false,
+          "Env": [
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          ],
+          "Cmd": [
+            "-c",
+            "/etc/nats.conf",
+            "-a",
+            "0.0.0.0",
+            "-p",
+            "4222",
+            "-m",
+            "8222",
+            "-n",
+            "js-wf-route-3239290-1791281049805806446-n0",
+            "-js",
+            "-sd",
+            "/data",
+            "-cluster_name",
+            "js-wf-route-3239290-1791281049805806446",
+            "-cluster",
+            "nats://0.0.0.0:6222",
+            "-cluster_advertise",
+            "js-wf-route-3239290-1791281049805806446-route-n0:6222",
+            "-routes",
+            "nats://js-wf-route-3239290-1791281049805806446-route-n1:6222,nats://js-wf-route-3239290-1791281049805806446-route-n2:6222,nats://js-wf-route-3239290-1791281049805806446-route-n3:6222,nats://js-wf-route-3239290-1791281049805806446-route-n4:6222"
+          ],
+          "Image": "js-wf-nats-3239290-1791281049805806446",
+          "Volumes": null,
+          "WorkingDir": "/",
+          "Entrypoint": [
+            "/nats-server"
+          ],
+          "Labels": {}
+        },
+        "NetworkSettings": {
+          "SandboxID": "7f64ae1acacd4febf26c0de9afa9911f6d06658c179e2e5c3ac3ae33dc10ffa1",
+          "SandboxKey": "/var/run/docker/netns/7f64ae1acacd",
+          "Ports": {
+            "4222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "33311"
+              }
+            ],
+            "8222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "33312"
+              }
+            ]
+          },
+          "Networks": {
+            "js-wf-client-3239290-1791281049805806446": {
+              "IPAMConfig": null,
+              "Links": null,
+              "Aliases": null,
+              "DriverOpts": null,
+              "GwPriority": 0,
+              "NetworkID": "408df9922c7eaa39d650620aa6888e9ffb7e0718f4596d7043d350b39d7ca09b",
+              "EndpointID": "385817afa3fcaa7c9d25ea12705cd9edc4502a70d7e32edcdf12579e57ff2ea0",
+              "Gateway": "172.18.0.1",
+              "IPAddress": "172.18.0.2",
+              "MacAddress": "9e:3e:fe:ce:c0:66",
+              "IPPrefixLen": 16,
+              "IPv6Gateway": "",
+              "GlobalIPv6Address": "",
+              "GlobalIPv6PrefixLen": 0,
+              "DNSNames": [
+                "js-wf-route-3239290-1791281049805806446-n0",
+                "e5c685e00829"
+              ]
+            },
+            "js-wf-route-3239290-1791281049805806446": {
+              "IPAMConfig": {
+                "IPv4Address": "",
+                "IPv6Address": ""
+              },
+              "Links": null,
+              "Aliases": [
+                "js-wf-route-3239290-1791281049805806446-route-n0"
+              ],
+              "DriverOpts": {},
+              "GwPriority": 0,
+              "NetworkID": "0058ee882651e92b70d436a7b958deca882b922e6bcf261550665ae259afe6ef",
+              "EndpointID": "244c735c9108bee80ffe65401cad09804888fc2720019f63be499676fcf58442",
+              "Gateway": "172.19.0.1",
+              "IPAddress": "172.19.0.2",
+              "MacAddress": "fa:54:ea:40:c7:51",
+              "IPPrefixLen": 16,
+              "IPv6Gateway": "",
+              "GlobalIPv6Address": "",
+              "GlobalIPv6PrefixLen": 0,
+              "DNSNames": [
+                "js-wf-route-3239290-1791281049805806446-n0",
+                "js-wf-route-3239290-1791281049805806446-route-n0",
+                "e5c685e00829"
+              ]
+            }
+          }
+        },
+        "ImageManifestDescriptor": {
+          "mediaType": "application/vnd.oci.image.manifest.v1+json",
+          "digest": "sha256:1925d8b47e9debf1f451ec651b219bd28d6bab4dad12362cb1d5dbe901ee8853",
+          "size": 481,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        }
+      },
+      "observed_utc": "2026-10-06T10:04:11.545873+00:00"
+    },
+    "3": {
+      "pid": 3243558,
+      "container": "b40588e846b1",
+      "sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+      "build_info": "/proc/3243558/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+      "args": [
+        "/nats-server",
+        "-c",
+        "/etc/nats.conf",
+        "-a",
+        "0.0.0.0",
+        "-p",
+        "4222",
+        "-m",
+        "8222",
+        "-n",
+        "js-wf-route-3239290-1791281049805806446-n3",
+        "-js",
+        "-sd",
+        "/data",
+        "-cluster_name",
+        "js-wf-route-3239290-1791281049805806446",
+        "-cluster",
+        "nats://0.0.0.0:6222",
+        "-cluster_advertise",
+        "js-wf-route-3239290-1791281049805806446-route-n3:6222",
+        "-routes",
+        "nats://js-wf-route-3239290-1791281049805806446-route-n0:6222,nats://js-wf-route-3239290-1791281049805806446-route-n1:6222,nats://js-wf-route-3239290-1791281049805806446-route-n2:6222,nats://js-wf-route-3239290-1791281049805806446-route-n4:6222"
+      ],
+      "stat": "3243558 (nats-server) S 3243535 3243558 3243558 0 -1 4194560 7685 0 0 0 13 6 0 0 20 0 11 0 9481219 1375522816 9506 18446744073709551615 4194304 12802353 140721847493408 0 0 0 1002057728 0 2143420159 0 0 0 17 3 0 0 0 0 0 21032960 21447456 1102827520 140721847500158 140721847500684 140721847500684 140721847500779 0\n",
+      "inspect": {
+        "Id": "b40588e846b1f60b70a8c88976fb61c5a40e2d2ea0139fbfffeddfd9101f3125",
+        "Created": "2026-10-06T10:04:50.526641499Z",
+        "Path": "/nats-server",
+        "Args": [
+          "-c",
+          "/etc/nats.conf",
+          "-a",
+          "0.0.0.0",
+          "-p",
+          "4222",
+          "-m",
+          "8222",
+          "-n",
+          "js-wf-route-3239290-1791281049805806446-n3",
+          "-js",
+          "-sd",
+          "/data",
+          "-cluster_name",
+          "js-wf-route-3239290-1791281049805806446",
+          "-cluster",
+          "nats://0.0.0.0:6222",
+          "-cluster_advertise",
+          "js-wf-route-3239290-1791281049805806446-route-n3:6222",
+          "-routes",
+          "nats://js-wf-route-3239290-1791281049805806446-route-n0:6222,nats://js-wf-route-3239290-1791281049805806446-route-n1:6222,nats://js-wf-route-3239290-1791281049805806446-route-n2:6222,nats://js-wf-route-3239290-1791281049805806446-route-n4:6222"
+        ],
+        "State": {
+          "Status": "running",
+          "Running": true,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 3243558,
+          "ExitCode": 0,
+          "Error": "",
+          "StartedAt": "2026-10-06T10:04:50.576567376Z",
+          "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:289db69f88d154588a89dcaea862d935450e8dc4bb2c3ec1f0da8e22b0abb0d3",
+        "ResolvConfPath": "/var/lib/docker/containers/b40588e846b1f60b70a8c88976fb61c5a40e2d2ea0139fbfffeddfd9101f3125/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/b40588e846b1f60b70a8c88976fb61c5a40e2d2ea0139fbfffeddfd9101f3125/hostname",
+        "HostsPath": "/var/lib/docker/containers/b40588e846b1f60b70a8c88976fb61c5a40e2d2ea0139fbfffeddfd9101f3125/hosts",
+        "LogPath": "/var/lib/docker/containers/b40588e846b1f60b70a8c88976fb61c5a40e2d2ea0139fbfffeddfd9101f3125/b40588e846b1f60b70a8c88976fb61c5a40e2d2ea0139fbfffeddfd9101f3125-json.log",
+        "Name": "/js-wf-route-3239290-1791281049805806446-n3",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+          "Binds": [
+            "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/node-3:/data",
+            "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/nats.conf:/etc/nats.conf:ro"
+          ],
+          "ContainerIDFile": "",
+          "LogConfig": {
+            "Type": "json-file",
+            "Config": {}
+          },
+          "NetworkMode": "js-wf-client-3239290-1791281049805806446",
+          "PortBindings": {
+            "4222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "33317"
+              }
+            ],
+            "8222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "33318"
+              }
+            ]
+          },
+          "RestartPolicy": {
+            "Name": "no",
+            "MaximumRetryCount": 0
+          },
+          "AutoRemove": true,
+          "VolumeDriver": "",
+          "VolumesFrom": null,
+          "ConsoleSize": [
+            0,
+            0
+          ],
+          "CapAdd": null,
+          "CapDrop": null,
+          "CgroupnsMode": "private",
+          "Dns": null,
+          "DnsOptions": [],
+          "DnsSearch": [],
+          "ExtraHosts": null,
+          "GroupAdd": null,
+          "IpcMode": "private",
+          "Cgroup": "",
+          "Links": null,
+          "OomScoreAdj": 0,
+          "PidMode": "",
+          "Privileged": false,
+          "PublishAllPorts": false,
+          "ReadonlyRootfs": false,
+          "SecurityOpt": null,
+          "UTSMode": "",
+          "UsernsMode": "",
+          "ShmSize": 67108864,
+          "Runtime": "runc",
+          "Isolation": "",
+          "CpuShares": 0,
+          "Memory": 0,
+          "NanoCpus": 0,
+          "CgroupParent": "",
+          "BlkioWeight": 0,
+          "BlkioWeightDevice": [],
+          "BlkioDeviceReadBps": [],
+          "BlkioDeviceWriteBps": [],
+          "BlkioDeviceReadIOps": [],
+          "BlkioDeviceWriteIOps": [],
+          "CpuPeriod": 0,
+          "CpuQuota": 0,
+          "CpuRealtimePeriod": 0,
+          "CpuRealtimeRuntime": 0,
+          "CpusetCpus": "",
+          "CpusetMems": "",
+          "Devices": [],
+          "DeviceCgroupRules": null,
+          "DeviceRequests": null,
+          "MemoryReservation": 0,
+          "MemorySwap": 0,
+          "MemorySwappiness": null,
+          "OomKillDisable": null,
+          "PidsLimit": null,
+          "Ulimits": [],
+          "CpuCount": 0,
+          "CpuPercent": 0,
+          "IOMaximumIOps": 0,
+          "IOMaximumBandwidth": 0,
+          "MaskedPaths": [
+            "/proc/acpi",
+            "/proc/asound",
+            "/proc/interrupts",
+            "/proc/kcore",
+            "/proc/keys",
+            "/proc/latency_stats",
+            "/proc/sched_debug",
+            "/proc/scsi",
+            "/proc/timer_list",
+            "/proc/timer_stats",
+            "/sys/devices/virtual/powercap",
+            "/sys/firmware"
+          ],
+          "ReadonlyPaths": [
+            "/proc/bus",
+            "/proc/fs",
+            "/proc/irq",
+            "/proc/sys",
+            "/proc/sysrq-trigger"
+          ]
+        },
+        "Storage": {
+          "RootFS": {
+            "Snapshot": {
+              "Name": "overlayfs"
+            }
+          }
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/node-3",
+            "Destination": "/data",
+            "Mode": "",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/nats.conf",
+            "Destination": "/etc/nats.conf",
+            "Mode": "ro",
+            "RW": false,
+            "Propagation": "rprivate"
+          }
+        ],
+        "Config": {
+          "Hostname": "b40588e846b1",
+          "Domainname": "",
+          "User": "1000:1000",
+          "AttachStdin": false,
+          "AttachStdout": false,
+          "AttachStderr": false,
+          "ExposedPorts": {
+            "4222/tcp": {},
+            "8222/tcp": {}
+          },
+          "Tty": false,
+          "OpenStdin": false,
+          "StdinOnce": false,
+          "Env": [
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          ],
+          "Cmd": [
+            "-c",
+            "/etc/nats.conf",
+            "-a",
+            "0.0.0.0",
+            "-p",
+            "4222",
+            "-m",
+            "8222",
+            "-n",
+            "js-wf-route-3239290-1791281049805806446-n3",
+            "-js",
+            "-sd",
+            "/data",
+            "-cluster_name",
+            "js-wf-route-3239290-1791281049805806446",
+            "-cluster",
+            "nats://0.0.0.0:6222",
+            "-cluster_advertise",
+            "js-wf-route-3239290-1791281049805806446-route-n3:6222",
+            "-routes",
+            "nats://js-wf-route-3239290-1791281049805806446-route-n0:6222,nats://js-wf-route-3239290-1791281049805806446-route-n1:6222,nats://js-wf-route-3239290-1791281049805806446-route-n2:6222,nats://js-wf-route-3239290-1791281049805806446-route-n4:6222"
+          ],
+          "Image": "js-wf-nats-3239290-1791281049805806446",
+          "Volumes": null,
+          "WorkingDir": "/",
+          "Entrypoint": [
+            "/nats-server"
+          ],
+          "Labels": {}
+        },
+        "NetworkSettings": {
+          "SandboxID": "483e0e4e79c9ddea804c6e5c89e2461152d4dabc9a01b036f0e9f99f97fb56a4",
+          "SandboxKey": "/var/run/docker/netns/483e0e4e79c9",
+          "Ports": {
+            "4222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "33317"
+              }
+            ],
+            "8222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "33318"
+              }
+            ]
+          },
+          "Networks": {
+            "js-wf-client-3239290-1791281049805806446": {
+              "IPAMConfig": null,
+              "Links": null,
+              "Aliases": null,
+              "DriverOpts": null,
+              "GwPriority": 0,
+              "NetworkID": "408df9922c7eaa39d650620aa6888e9ffb7e0718f4596d7043d350b39d7ca09b",
+              "EndpointID": "6f6a4a80d3a2783219fa1ebdd01bf9b3bf836bb851ee99e95ba98eec01fd15b5",
+              "Gateway": "172.18.0.1",
+              "IPAddress": "172.18.0.5",
+              "MacAddress": "be:55:21:28:43:ed",
+              "IPPrefixLen": 16,
+              "IPv6Gateway": "",
+              "GlobalIPv6Address": "",
+              "GlobalIPv6PrefixLen": 0,
+              "DNSNames": [
+                "js-wf-route-3239290-1791281049805806446-n3",
+                "b40588e846b1"
+              ]
+            },
+            "js-wf-route-3239290-1791281049805806446": {
+              "IPAMConfig": {
+                "IPv4Address": "",
+                "IPv6Address": ""
+              },
+              "Links": null,
+              "Aliases": [
+                "js-wf-route-3239290-1791281049805806446-route-n3"
+              ],
+              "DriverOpts": {},
+              "GwPriority": 0,
+              "NetworkID": "0058ee882651e92b70d436a7b958deca882b922e6bcf261550665ae259afe6ef",
+              "EndpointID": "cd754bf949d259fa5fc84897e18b2f5c3c39c2d3aec9f76f2a3c94c8226dd2e6",
+              "Gateway": "172.19.0.1",
+              "IPAddress": "172.19.0.5",
+              "MacAddress": "22:99:65:78:47:92",
+              "IPPrefixLen": 16,
+              "IPv6Gateway": "",
+              "GlobalIPv6Address": "",
+              "GlobalIPv6PrefixLen": 0,
+              "DNSNames": [
+                "js-wf-route-3239290-1791281049805806446-n3",
+                "js-wf-route-3239290-1791281049805806446-route-n3",
+                "b40588e846b1"
+              ]
+            }
+          }
+        },
+        "ImageManifestDescriptor": {
+          "mediaType": "application/vnd.oci.image.manifest.v1+json",
+          "digest": "sha256:1925d8b47e9debf1f451ec651b219bd28d6bab4dad12362cb1d5dbe901ee8853",
+          "size": 481,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        }
+      },
+      "observed_utc": "2026-10-06T10:04:51.157423+00:00"
+    },
+    "2": {
+      "pid": 3239815,
+      "container": "b11295616669",
+      "sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+      "build_info": "/proc/3239815/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+      "args": [
+        "/nats-server",
+        "-c",
+        "/etc/nats.conf",
+        "-a",
+        "0.0.0.0",
+        "-p",
+        "4222",
+        "-m",
+        "8222",
+        "-n",
+        "js-wf-route-3239290-1791281049805806446-n2",
+        "-js",
+        "-sd",
+        "/data",
+        "-cluster_name",
+        "js-wf-route-3239290-1791281049805806446",
+        "-cluster",
+        "nats://0.0.0.0:6222",
+        "-cluster_advertise",
+        "js-wf-route-3239290-1791281049805806446-route-n2:6222",
+        "-routes",
+        "nats://js-wf-route-3239290-1791281049805806446-route-n0:6222,nats://js-wf-route-3239290-1791281049805806446-route-n1:6222,nats://js-wf-route-3239290-1791281049805806446-route-n3:6222,nats://js-wf-route-3239290-1791281049805806446-route-n4:6222"
+      ],
+      "stat": "3239815 (nats-server) S 3239792 3239815 3239815 0 -1 4194560 2462 0 0 0 2 1 0 0 20 0 9 0 9477328 1306341376 4306 18446744073709551615 4194304 12802353 140721571875728 0 0 0 1002057728 0 2143420159 0 0 0 17 2 0 0 0 0 0 21032960 21447456 656252928 140721571880318 140721571880844 140721571880844 140721571880939 0\n",
+      "inspect": {
+        "Id": "b112956166692c5e1fb4cc2835219dfab87eae20cc92e6715ce8080fed21a41e",
+        "Created": "2026-10-06T10:04:11.631309373Z",
+        "Path": "/nats-server",
+        "Args": [
+          "-c",
+          "/etc/nats.conf",
+          "-a",
+          "0.0.0.0",
+          "-p",
+          "4222",
+          "-m",
+          "8222",
+          "-n",
+          "js-wf-route-3239290-1791281049805806446-n2",
+          "-js",
+          "-sd",
+          "/data",
+          "-cluster_name",
+          "js-wf-route-3239290-1791281049805806446",
+          "-cluster",
+          "nats://0.0.0.0:6222",
+          "-cluster_advertise",
+          "js-wf-route-3239290-1791281049805806446-route-n2:6222",
+          "-routes",
+          "nats://js-wf-route-3239290-1791281049805806446-route-n0:6222,nats://js-wf-route-3239290-1791281049805806446-route-n1:6222,nats://js-wf-route-3239290-1791281049805806446-route-n3:6222,nats://js-wf-route-3239290-1791281049805806446-route-n4:6222"
+        ],
+        "State": {
+          "Status": "running",
+          "Running": true,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 3239815,
+          "ExitCode": 0,
+          "Error": "",
+          "StartedAt": "2026-10-06T10:04:11.686411571Z",
+          "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:289db69f88d154588a89dcaea862d935450e8dc4bb2c3ec1f0da8e22b0abb0d3",
+        "ResolvConfPath": "/var/lib/docker/containers/b112956166692c5e1fb4cc2835219dfab87eae20cc92e6715ce8080fed21a41e/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/b112956166692c5e1fb4cc2835219dfab87eae20cc92e6715ce8080fed21a41e/hostname",
+        "HostsPath": "/var/lib/docker/containers/b112956166692c5e1fb4cc2835219dfab87eae20cc92e6715ce8080fed21a41e/hosts",
+        "LogPath": "/var/lib/docker/containers/b112956166692c5e1fb4cc2835219dfab87eae20cc92e6715ce8080fed21a41e/b112956166692c5e1fb4cc2835219dfab87eae20cc92e6715ce8080fed21a41e-json.log",
+        "Name": "/js-wf-route-3239290-1791281049805806446-n2",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+          "Binds": [
+            "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/node-2:/data",
+            "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/nats.conf:/etc/nats.conf:ro"
+          ],
+          "ContainerIDFile": "",
+          "LogConfig": {
+            "Type": "json-file",
+            "Config": {}
+          },
+          "NetworkMode": "js-wf-client-3239290-1791281049805806446",
+          "PortBindings": {
+            "4222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": ""
+              }
+            ],
+            "8222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": ""
+              }
+            ]
+          },
+          "RestartPolicy": {
+            "Name": "no",
+            "MaximumRetryCount": 0
+          },
+          "AutoRemove": true,
+          "VolumeDriver": "",
+          "VolumesFrom": null,
+          "ConsoleSize": [
+            0,
+            0
+          ],
+          "CapAdd": null,
+          "CapDrop": null,
+          "CgroupnsMode": "private",
+          "Dns": null,
+          "DnsOptions": [],
+          "DnsSearch": [],
+          "ExtraHosts": null,
+          "GroupAdd": null,
+          "IpcMode": "private",
+          "Cgroup": "",
+          "Links": null,
+          "OomScoreAdj": 0,
+          "PidMode": "",
+          "Privileged": false,
+          "PublishAllPorts": false,
+          "ReadonlyRootfs": false,
+          "SecurityOpt": null,
+          "UTSMode": "",
+          "UsernsMode": "",
+          "ShmSize": 67108864,
+          "Runtime": "runc",
+          "Isolation": "",
+          "CpuShares": 0,
+          "Memory": 0,
+          "NanoCpus": 0,
+          "CgroupParent": "",
+          "BlkioWeight": 0,
+          "BlkioWeightDevice": [],
+          "BlkioDeviceReadBps": [],
+          "BlkioDeviceWriteBps": [],
+          "BlkioDeviceReadIOps": [],
+          "BlkioDeviceWriteIOps": [],
+          "CpuPeriod": 0,
+          "CpuQuota": 0,
+          "CpuRealtimePeriod": 0,
+          "CpuRealtimeRuntime": 0,
+          "CpusetCpus": "",
+          "CpusetMems": "",
+          "Devices": [],
+          "DeviceCgroupRules": null,
+          "DeviceRequests": null,
+          "MemoryReservation": 0,
+          "MemorySwap": 0,
+          "MemorySwappiness": null,
+          "OomKillDisable": null,
+          "PidsLimit": null,
+          "Ulimits": [],
+          "CpuCount": 0,
+          "CpuPercent": 0,
+          "IOMaximumIOps": 0,
+          "IOMaximumBandwidth": 0,
+          "MaskedPaths": [
+            "/proc/acpi",
+            "/proc/asound",
+            "/proc/interrupts",
+            "/proc/kcore",
+            "/proc/keys",
+            "/proc/latency_stats",
+            "/proc/sched_debug",
+            "/proc/scsi",
+            "/proc/timer_list",
+            "/proc/timer_stats",
+            "/sys/devices/virtual/powercap",
+            "/sys/firmware"
+          ],
+          "ReadonlyPaths": [
+            "/proc/bus",
+            "/proc/fs",
+            "/proc/irq",
+            "/proc/sys",
+            "/proc/sysrq-trigger"
+          ]
+        },
+        "Storage": {
+          "RootFS": {
+            "Snapshot": {
+              "Name": "overlayfs"
+            }
+          }
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/node-2",
+            "Destination": "/data",
+            "Mode": "",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/nats.conf",
+            "Destination": "/etc/nats.conf",
+            "Mode": "ro",
+            "RW": false,
+            "Propagation": "rprivate"
+          }
+        ],
+        "Config": {
+          "Hostname": "b11295616669",
+          "Domainname": "",
+          "User": "1000:1000",
+          "AttachStdin": false,
+          "AttachStdout": false,
+          "AttachStderr": false,
+          "ExposedPorts": {
+            "4222/tcp": {},
+            "8222/tcp": {}
+          },
+          "Tty": false,
+          "OpenStdin": false,
+          "StdinOnce": false,
+          "Env": [
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          ],
+          "Cmd": [
+            "-c",
+            "/etc/nats.conf",
+            "-a",
+            "0.0.0.0",
+            "-p",
+            "4222",
+            "-m",
+            "8222",
+            "-n",
+            "js-wf-route-3239290-1791281049805806446-n2",
+            "-js",
+            "-sd",
+            "/data",
+            "-cluster_name",
+            "js-wf-route-3239290-1791281049805806446",
+            "-cluster",
+            "nats://0.0.0.0:6222",
+            "-cluster_advertise",
+            "js-wf-route-3239290-1791281049805806446-route-n2:6222",
+            "-routes",
+            "nats://js-wf-route-3239290-1791281049805806446-route-n0:6222,nats://js-wf-route-3239290-1791281049805806446-route-n1:6222,nats://js-wf-route-3239290-1791281049805806446-route-n3:6222,nats://js-wf-route-3239290-1791281049805806446-route-n4:6222"
+          ],
+          "Image": "js-wf-nats-3239290-1791281049805806446",
+          "Volumes": null,
+          "WorkingDir": "/",
+          "Entrypoint": [
+            "/nats-server"
+          ],
+          "Labels": {}
+        },
+        "NetworkSettings": {
+          "SandboxID": "45caea9c780dc9981a288b3f2206d7b10d1709aa14e602ade2eb70f595e11fc2",
+          "SandboxKey": "/var/run/docker/netns/45caea9c780d",
+          "Ports": {
+            "4222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "33315"
+              }
+            ],
+            "8222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "33316"
+              }
+            ]
+          },
+          "Networks": {
+            "js-wf-client-3239290-1791281049805806446": {
+              "IPAMConfig": null,
+              "Links": null,
+              "Aliases": null,
+              "DriverOpts": null,
+              "GwPriority": 0,
+              "NetworkID": "408df9922c7eaa39d650620aa6888e9ffb7e0718f4596d7043d350b39d7ca09b",
+              "EndpointID": "d9cf3f1b4e2768eb8aa68e5be1c26924e28c5546d4f448238b419f6ca41646a7",
+              "Gateway": "172.18.0.1",
+              "IPAddress": "172.18.0.4",
+              "MacAddress": "fe:96:d3:b5:76:0b",
+              "IPPrefixLen": 16,
+              "IPv6Gateway": "",
+              "GlobalIPv6Address": "",
+              "GlobalIPv6PrefixLen": 0,
+              "DNSNames": [
+                "js-wf-route-3239290-1791281049805806446-n2",
+                "b11295616669"
+              ]
+            },
+            "js-wf-route-3239290-1791281049805806446": {
+              "IPAMConfig": {
+                "IPv4Address": "",
+                "IPv6Address": ""
+              },
+              "Links": null,
+              "Aliases": [
+                "js-wf-route-3239290-1791281049805806446-route-n2"
+              ],
+              "DriverOpts": {},
+              "GwPriority": 0,
+              "NetworkID": "0058ee882651e92b70d436a7b958deca882b922e6bcf261550665ae259afe6ef",
+              "EndpointID": "9c6db68f6033082e69816f705392f201c1111099eb057a1fce64b335e06f9056",
+              "Gateway": "172.19.0.1",
+              "IPAddress": "172.19.0.4",
+              "MacAddress": "7e:46:44:75:ad:0e",
+              "IPPrefixLen": 16,
+              "IPv6Gateway": "",
+              "GlobalIPv6Address": "",
+              "GlobalIPv6PrefixLen": 0,
+              "DNSNames": [
+                "js-wf-route-3239290-1791281049805806446-n2",
+                "js-wf-route-3239290-1791281049805806446-route-n2",
+                "b11295616669"
+              ]
+            }
+          }
+        },
+        "ImageManifestDescriptor": {
+          "mediaType": "application/vnd.oci.image.manifest.v1+json",
+          "digest": "sha256:1925d8b47e9debf1f451ec651b219bd28d6bab4dad12362cb1d5dbe901ee8853",
+          "size": 481,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        }
+      },
+      "observed_utc": "2026-10-06T10:04:12.217077+00:00"
+    },
+    "1": {
+      "pid": 3239664,
+      "container": "eb0b3306ffae",
+      "sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+      "build_info": "/proc/3239664/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+      "args": [
+        "/nats-server",
+        "-c",
+        "/etc/nats.conf",
+        "-a",
+        "0.0.0.0",
+        "-p",
+        "4222",
+        "-m",
+        "8222",
+        "-n",
+        "js-wf-route-3239290-1791281049805806446-n1",
+        "-js",
+        "-sd",
+        "/data",
+        "-cluster_name",
+        "js-wf-route-3239290-1791281049805806446",
+        "-cluster",
+        "nats://0.0.0.0:6222",
+        "-cluster_advertise",
+        "js-wf-route-3239290-1791281049805806446-route-n1:6222",
+        "-routes",
+        "nats://js-wf-route-3239290-1791281049805806446-route-n0:6222,nats://js-wf-route-3239290-1791281049805806446-route-n2:6222,nats://js-wf-route-3239290-1791281049805806446-route-n3:6222,nats://js-wf-route-3239290-1791281049805806446-route-n4:6222"
+      ],
+      "stat": "3239664 (nats-server) S 3239634 3239664 3239664 0 -1 4194560 2474 0 0 0 3 0 0 0 20 0 9 0 9477301 1306341376 4402 18446744073709551615 4194304 12802353 140729776544080 0 0 0 1002057728 0 2143420159 0 0 0 17 1 0 0 0 0 0 21032960 21447456 1108246528 140729776549246 140729776549772 140729776549772 140729776549867 0\n",
+      "inspect": {
+        "Id": "eb0b3306ffae64076a40d484bf2517421ef6d3ac118ee60096d4ec694d1e5ec5",
+        "Created": "2026-10-06T10:04:11.388593596Z",
+        "Path": "/nats-server",
+        "Args": [
+          "-c",
+          "/etc/nats.conf",
+          "-a",
+          "0.0.0.0",
+          "-p",
+          "4222",
+          "-m",
+          "8222",
+          "-n",
+          "js-wf-route-3239290-1791281049805806446-n1",
+          "-js",
+          "-sd",
+          "/data",
+          "-cluster_name",
+          "js-wf-route-3239290-1791281049805806446",
+          "-cluster",
+          "nats://0.0.0.0:6222",
+          "-cluster_advertise",
+          "js-wf-route-3239290-1791281049805806446-route-n1:6222",
+          "-routes",
+          "nats://js-wf-route-3239290-1791281049805806446-route-n0:6222,nats://js-wf-route-3239290-1791281049805806446-route-n2:6222,nats://js-wf-route-3239290-1791281049805806446-route-n3:6222,nats://js-wf-route-3239290-1791281049805806446-route-n4:6222"
+        ],
+        "State": {
+          "Status": "running",
+          "Running": true,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 3239664,
+          "ExitCode": 0,
+          "Error": "",
+          "StartedAt": "2026-10-06T10:04:11.421577437Z",
+          "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:289db69f88d154588a89dcaea862d935450e8dc4bb2c3ec1f0da8e22b0abb0d3",
+        "ResolvConfPath": "/var/lib/docker/containers/eb0b3306ffae64076a40d484bf2517421ef6d3ac118ee60096d4ec694d1e5ec5/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/eb0b3306ffae64076a40d484bf2517421ef6d3ac118ee60096d4ec694d1e5ec5/hostname",
+        "HostsPath": "/var/lib/docker/containers/eb0b3306ffae64076a40d484bf2517421ef6d3ac118ee60096d4ec694d1e5ec5/hosts",
+        "LogPath": "/var/lib/docker/containers/eb0b3306ffae64076a40d484bf2517421ef6d3ac118ee60096d4ec694d1e5ec5/eb0b3306ffae64076a40d484bf2517421ef6d3ac118ee60096d4ec694d1e5ec5-json.log",
+        "Name": "/js-wf-route-3239290-1791281049805806446-n1",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+          "Binds": [
+            "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/node-1:/data",
+            "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/nats.conf:/etc/nats.conf:ro"
+          ],
+          "ContainerIDFile": "",
+          "LogConfig": {
+            "Type": "json-file",
+            "Config": {}
+          },
+          "NetworkMode": "js-wf-client-3239290-1791281049805806446",
+          "PortBindings": {
+            "4222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": ""
+              }
+            ],
+            "8222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": ""
+              }
+            ]
+          },
+          "RestartPolicy": {
+            "Name": "no",
+            "MaximumRetryCount": 0
+          },
+          "AutoRemove": true,
+          "VolumeDriver": "",
+          "VolumesFrom": null,
+          "ConsoleSize": [
+            0,
+            0
+          ],
+          "CapAdd": null,
+          "CapDrop": null,
+          "CgroupnsMode": "private",
+          "Dns": null,
+          "DnsOptions": [],
+          "DnsSearch": [],
+          "ExtraHosts": null,
+          "GroupAdd": null,
+          "IpcMode": "private",
+          "Cgroup": "",
+          "Links": null,
+          "OomScoreAdj": 0,
+          "PidMode": "",
+          "Privileged": false,
+          "PublishAllPorts": false,
+          "ReadonlyRootfs": false,
+          "SecurityOpt": null,
+          "UTSMode": "",
+          "UsernsMode": "",
+          "ShmSize": 67108864,
+          "Runtime": "runc",
+          "Isolation": "",
+          "CpuShares": 0,
+          "Memory": 0,
+          "NanoCpus": 0,
+          "CgroupParent": "",
+          "BlkioWeight": 0,
+          "BlkioWeightDevice": [],
+          "BlkioDeviceReadBps": [],
+          "BlkioDeviceWriteBps": [],
+          "BlkioDeviceReadIOps": [],
+          "BlkioDeviceWriteIOps": [],
+          "CpuPeriod": 0,
+          "CpuQuota": 0,
+          "CpuRealtimePeriod": 0,
+          "CpuRealtimeRuntime": 0,
+          "CpusetCpus": "",
+          "CpusetMems": "",
+          "Devices": [],
+          "DeviceCgroupRules": null,
+          "DeviceRequests": null,
+          "MemoryReservation": 0,
+          "MemorySwap": 0,
+          "MemorySwappiness": null,
+          "OomKillDisable": null,
+          "PidsLimit": null,
+          "Ulimits": [],
+          "CpuCount": 0,
+          "CpuPercent": 0,
+          "IOMaximumIOps": 0,
+          "IOMaximumBandwidth": 0,
+          "MaskedPaths": [
+            "/proc/acpi",
+            "/proc/asound",
+            "/proc/interrupts",
+            "/proc/kcore",
+            "/proc/keys",
+            "/proc/latency_stats",
+            "/proc/sched_debug",
+            "/proc/scsi",
+            "/proc/timer_list",
+            "/proc/timer_stats",
+            "/sys/devices/virtual/powercap",
+            "/sys/firmware"
+          ],
+          "ReadonlyPaths": [
+            "/proc/bus",
+            "/proc/fs",
+            "/proc/irq",
+            "/proc/sys",
+            "/proc/sysrq-trigger"
+          ]
+        },
+        "Storage": {
+          "RootFS": {
+            "Snapshot": {
+              "Name": "overlayfs"
+            }
+          }
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/node-1",
+            "Destination": "/data",
+            "Mode": "",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/nats.conf",
+            "Destination": "/etc/nats.conf",
+            "Mode": "ro",
+            "RW": false,
+            "Propagation": "rprivate"
+          }
+        ],
+        "Config": {
+          "Hostname": "eb0b3306ffae",
+          "Domainname": "",
+          "User": "1000:1000",
+          "AttachStdin": false,
+          "AttachStdout": false,
+          "AttachStderr": false,
+          "ExposedPorts": {
+            "4222/tcp": {},
+            "8222/tcp": {}
+          },
+          "Tty": false,
+          "OpenStdin": false,
+          "StdinOnce": false,
+          "Env": [
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          ],
+          "Cmd": [
+            "-c",
+            "/etc/nats.conf",
+            "-a",
+            "0.0.0.0",
+            "-p",
+            "4222",
+            "-m",
+            "8222",
+            "-n",
+            "js-wf-route-3239290-1791281049805806446-n1",
+            "-js",
+            "-sd",
+            "/data",
+            "-cluster_name",
+            "js-wf-route-3239290-1791281049805806446",
+            "-cluster",
+            "nats://0.0.0.0:6222",
+            "-cluster_advertise",
+            "js-wf-route-3239290-1791281049805806446-route-n1:6222",
+            "-routes",
+            "nats://js-wf-route-3239290-1791281049805806446-route-n0:6222,nats://js-wf-route-3239290-1791281049805806446-route-n2:6222,nats://js-wf-route-3239290-1791281049805806446-route-n3:6222,nats://js-wf-route-3239290-1791281049805806446-route-n4:6222"
+          ],
+          "Image": "js-wf-nats-3239290-1791281049805806446",
+          "Volumes": null,
+          "WorkingDir": "/",
+          "Entrypoint": [
+            "/nats-server"
+          ],
+          "Labels": {}
+        },
+        "NetworkSettings": {
+          "SandboxID": "02b4215db6fa6d52f469a66d19910a8dd67626b1473fe629cb046d2b543ec491",
+          "SandboxKey": "/var/run/docker/netns/02b4215db6fa",
+          "Ports": {
+            "4222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "33313"
+              }
+            ],
+            "8222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "33314"
+              }
+            ]
+          },
+          "Networks": {
+            "js-wf-client-3239290-1791281049805806446": {
+              "IPAMConfig": null,
+              "Links": null,
+              "Aliases": null,
+              "DriverOpts": null,
+              "GwPriority": 0,
+              "NetworkID": "408df9922c7eaa39d650620aa6888e9ffb7e0718f4596d7043d350b39d7ca09b",
+              "EndpointID": "a8ac4086ffade17284aca4d737f6309f898f75db09675a50300f4806896d75a6",
+              "Gateway": "172.18.0.1",
+              "IPAddress": "172.18.0.3",
+              "MacAddress": "a6:54:d5:34:98:3f",
+              "IPPrefixLen": 16,
+              "IPv6Gateway": "",
+              "GlobalIPv6Address": "",
+              "GlobalIPv6PrefixLen": 0,
+              "DNSNames": [
+                "js-wf-route-3239290-1791281049805806446-n1",
+                "eb0b3306ffae"
+              ]
+            },
+            "js-wf-route-3239290-1791281049805806446": {
+              "IPAMConfig": {
+                "IPv4Address": "",
+                "IPv6Address": ""
+              },
+              "Links": null,
+              "Aliases": [
+                "js-wf-route-3239290-1791281049805806446-route-n1"
+              ],
+              "DriverOpts": {},
+              "GwPriority": 0,
+              "NetworkID": "0058ee882651e92b70d436a7b958deca882b922e6bcf261550665ae259afe6ef",
+              "EndpointID": "beb318542d3e4162df07f840297d5a8fac954e9b6131b3321af4f0ffaa4ebd29",
+              "Gateway": "172.19.0.1",
+              "IPAddress": "172.19.0.3",
+              "MacAddress": "ba:5c:ca:39:93:34",
+              "IPPrefixLen": 16,
+              "IPv6Gateway": "",
+              "GlobalIPv6Address": "",
+              "GlobalIPv6PrefixLen": 0,
+              "DNSNames": [
+                "js-wf-route-3239290-1791281049805806446-n1",
+                "js-wf-route-3239290-1791281049805806446-route-n1",
+                "eb0b3306ffae"
+              ]
+            }
+          }
+        },
+        "ImageManifestDescriptor": {
+          "mediaType": "application/vnd.oci.image.manifest.v1+json",
+          "digest": "sha256:1925d8b47e9debf1f451ec651b219bd28d6bab4dad12362cb1d5dbe901ee8853",
+          "size": 481,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        }
+      },
+      "observed_utc": "2026-10-06T10:04:12.285339+00:00"
+    },
+    "4": {
+      "pid": 3240136,
+      "container": "1c16c4a93156",
+      "sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+      "build_info": "/proc/3240136/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+      "args": [
+        "/nats-server",
+        "-c",
+        "/etc/nats.conf",
+        "-a",
+        "0.0.0.0",
+        "-p",
+        "4222",
+        "-m",
+        "8222",
+        "-n",
+        "js-wf-route-3239290-1791281049805806446-n4",
+        "-js",
+        "-sd",
+        "/data",
+        "-cluster_name",
+        "js-wf-route-3239290-1791281049805806446",
+        "-cluster",
+        "nats://0.0.0.0:6222",
+        "-cluster_advertise",
+        "js-wf-route-3239290-1791281049805806446-route-n4:6222",
+        "-routes",
+        "nats://js-wf-route-3239290-1791281049805806446-route-n0:6222,nats://js-wf-route-3239290-1791281049805806446-route-n1:6222,nats://js-wf-route-3239290-1791281049805806446-route-n2:6222,nats://js-wf-route-3239290-1791281049805806446-route-n3:6222"
+      ],
+      "stat": "3240136 (nats-server) S 3240097 3240136 3240136 0 -1 4194560 2534 0 0 0 2 1 0 0 20 0 9 0 9477379 1306341376 4546 18446744073709551615 4194304 12802353 140722743619696 0 0 0 1002057728 0 2143420159 0 0 0 17 2 0 0 0 0 0 21032960 21447456 906825728 140722743627134 140722743627660 140722743627660 140722743627755 0\n",
+      "inspect": {
+        "Id": "1c16c4a931567ab27f061053fc8b4d824b15573698763cb79f274d2f7ba8ec97",
+        "Created": "2026-10-06T10:04:12.150168141Z",
+        "Path": "/nats-server",
+        "Args": [
+          "-c",
+          "/etc/nats.conf",
+          "-a",
+          "0.0.0.0",
+          "-p",
+          "4222",
+          "-m",
+          "8222",
+          "-n",
+          "js-wf-route-3239290-1791281049805806446-n4",
+          "-js",
+          "-sd",
+          "/data",
+          "-cluster_name",
+          "js-wf-route-3239290-1791281049805806446",
+          "-cluster",
+          "nats://0.0.0.0:6222",
+          "-cluster_advertise",
+          "js-wf-route-3239290-1791281049805806446-route-n4:6222",
+          "-routes",
+          "nats://js-wf-route-3239290-1791281049805806446-route-n0:6222,nats://js-wf-route-3239290-1791281049805806446-route-n1:6222,nats://js-wf-route-3239290-1791281049805806446-route-n2:6222,nats://js-wf-route-3239290-1791281049805806446-route-n3:6222"
+        ],
+        "State": {
+          "Status": "running",
+          "Running": true,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 3240136,
+          "ExitCode": 0,
+          "Error": "",
+          "StartedAt": "2026-10-06T10:04:12.197920032Z",
+          "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:289db69f88d154588a89dcaea862d935450e8dc4bb2c3ec1f0da8e22b0abb0d3",
+        "ResolvConfPath": "/var/lib/docker/containers/1c16c4a931567ab27f061053fc8b4d824b15573698763cb79f274d2f7ba8ec97/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/1c16c4a931567ab27f061053fc8b4d824b15573698763cb79f274d2f7ba8ec97/hostname",
+        "HostsPath": "/var/lib/docker/containers/1c16c4a931567ab27f061053fc8b4d824b15573698763cb79f274d2f7ba8ec97/hosts",
+        "LogPath": "/var/lib/docker/containers/1c16c4a931567ab27f061053fc8b4d824b15573698763cb79f274d2f7ba8ec97/1c16c4a931567ab27f061053fc8b4d824b15573698763cb79f274d2f7ba8ec97-json.log",
+        "Name": "/js-wf-route-3239290-1791281049805806446-n4",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+          "Binds": [
+            "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/node-4:/data",
+            "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/nats.conf:/etc/nats.conf:ro"
+          ],
+          "ContainerIDFile": "",
+          "LogConfig": {
+            "Type": "json-file",
+            "Config": {}
+          },
+          "NetworkMode": "js-wf-client-3239290-1791281049805806446",
+          "PortBindings": {
+            "4222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": ""
+              }
+            ],
+            "8222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": ""
+              }
+            ]
+          },
+          "RestartPolicy": {
+            "Name": "no",
+            "MaximumRetryCount": 0
+          },
+          "AutoRemove": true,
+          "VolumeDriver": "",
+          "VolumesFrom": null,
+          "ConsoleSize": [
+            0,
+            0
+          ],
+          "CapAdd": null,
+          "CapDrop": null,
+          "CgroupnsMode": "private",
+          "Dns": null,
+          "DnsOptions": [],
+          "DnsSearch": [],
+          "ExtraHosts": null,
+          "GroupAdd": null,
+          "IpcMode": "private",
+          "Cgroup": "",
+          "Links": null,
+          "OomScoreAdj": 0,
+          "PidMode": "",
+          "Privileged": false,
+          "PublishAllPorts": false,
+          "ReadonlyRootfs": false,
+          "SecurityOpt": null,
+          "UTSMode": "",
+          "UsernsMode": "",
+          "ShmSize": 67108864,
+          "Runtime": "runc",
+          "Isolation": "",
+          "CpuShares": 0,
+          "Memory": 0,
+          "NanoCpus": 0,
+          "CgroupParent": "",
+          "BlkioWeight": 0,
+          "BlkioWeightDevice": [],
+          "BlkioDeviceReadBps": [],
+          "BlkioDeviceWriteBps": [],
+          "BlkioDeviceReadIOps": [],
+          "BlkioDeviceWriteIOps": [],
+          "CpuPeriod": 0,
+          "CpuQuota": 0,
+          "CpuRealtimePeriod": 0,
+          "CpuRealtimeRuntime": 0,
+          "CpusetCpus": "",
+          "CpusetMems": "",
+          "Devices": [],
+          "DeviceCgroupRules": null,
+          "DeviceRequests": null,
+          "MemoryReservation": 0,
+          "MemorySwap": 0,
+          "MemorySwappiness": null,
+          "OomKillDisable": null,
+          "PidsLimit": null,
+          "Ulimits": [],
+          "CpuCount": 0,
+          "CpuPercent": 0,
+          "IOMaximumIOps": 0,
+          "IOMaximumBandwidth": 0,
+          "MaskedPaths": [
+            "/proc/acpi",
+            "/proc/asound",
+            "/proc/interrupts",
+            "/proc/kcore",
+            "/proc/keys",
+            "/proc/latency_stats",
+            "/proc/sched_debug",
+            "/proc/scsi",
+            "/proc/timer_list",
+            "/proc/timer_stats",
+            "/sys/devices/virtual/powercap",
+            "/sys/firmware"
+          ],
+          "ReadonlyPaths": [
+            "/proc/bus",
+            "/proc/fs",
+            "/proc/irq",
+            "/proc/sys",
+            "/proc/sysrq-trigger"
+          ]
+        },
+        "Storage": {
+          "RootFS": {
+            "Snapshot": {
+              "Name": "overlayfs"
+            }
+          }
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/node-4",
+            "Destination": "/data",
+            "Mode": "",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/tmp/js-wf-bulk-journal-ten-minute-joined-20261006/fixture/cluster/nats.conf",
+            "Destination": "/etc/nats.conf",
+            "Mode": "ro",
+            "RW": false,
+            "Propagation": "rprivate"
+          }
+        ],
+        "Config": {
+          "Hostname": "1c16c4a93156",
+          "Domainname": "",
+          "User": "1000:1000",
+          "AttachStdin": false,
+          "AttachStdout": false,
+          "AttachStderr": false,
+          "ExposedPorts": {
+            "4222/tcp": {},
+            "8222/tcp": {}
+          },
+          "Tty": false,
+          "OpenStdin": false,
+          "StdinOnce": false,
+          "Env": [
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          ],
+          "Cmd": [
+            "-c",
+            "/etc/nats.conf",
+            "-a",
+            "0.0.0.0",
+            "-p",
+            "4222",
+            "-m",
+            "8222",
+            "-n",
+            "js-wf-route-3239290-1791281049805806446-n4",
+            "-js",
+            "-sd",
+            "/data",
+            "-cluster_name",
+            "js-wf-route-3239290-1791281049805806446",
+            "-cluster",
+            "nats://0.0.0.0:6222",
+            "-cluster_advertise",
+            "js-wf-route-3239290-1791281049805806446-route-n4:6222",
+            "-routes",
+            "nats://js-wf-route-3239290-1791281049805806446-route-n0:6222,nats://js-wf-route-3239290-1791281049805806446-route-n1:6222,nats://js-wf-route-3239290-1791281049805806446-route-n2:6222,nats://js-wf-route-3239290-1791281049805806446-route-n3:6222"
+          ],
+          "Image": "js-wf-nats-3239290-1791281049805806446",
+          "Volumes": null,
+          "WorkingDir": "/",
+          "Entrypoint": [
+            "/nats-server"
+          ],
+          "Labels": {}
+        },
+        "NetworkSettings": {
+          "SandboxID": "0c1f4e55839e073dc53a164ecf27831d6e9905ebc6baccbd0bff66f50192afe8",
+          "SandboxKey": "/var/run/docker/netns/0c1f4e55839e",
+          "Ports": {
+            "4222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "33319"
+              }
+            ],
+            "8222/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "33320"
+              }
+            ]
+          },
+          "Networks": {
+            "js-wf-client-3239290-1791281049805806446": {
+              "IPAMConfig": null,
+              "Links": null,
+              "Aliases": null,
+              "DriverOpts": null,
+              "GwPriority": 0,
+              "NetworkID": "408df9922c7eaa39d650620aa6888e9ffb7e0718f4596d7043d350b39d7ca09b",
+              "EndpointID": "bccc0130da8909f5dd72016ea1de0db3f9f510ec2343f5a95fdfb691dc0736ae",
+              "Gateway": "172.18.0.1",
+              "IPAddress": "172.18.0.6",
+              "MacAddress": "fa:c2:29:31:50:b6",
+              "IPPrefixLen": 16,
+              "IPv6Gateway": "",
+              "GlobalIPv6Address": "",
+              "GlobalIPv6PrefixLen": 0,
+              "DNSNames": [
+                "js-wf-route-3239290-1791281049805806446-n4",
+                "1c16c4a93156"
+              ]
+            },
+            "js-wf-route-3239290-1791281049805806446": {
+              "IPAMConfig": {
+                "IPv4Address": "",
+                "IPv6Address": ""
+              },
+              "Links": null,
+              "Aliases": [
+                "js-wf-route-3239290-1791281049805806446-route-n4"
+              ],
+              "DriverOpts": {},
+              "GwPriority": 0,
+              "NetworkID": "0058ee882651e92b70d436a7b958deca882b922e6bcf261550665ae259afe6ef",
+              "EndpointID": "122e6017386e574b479c3303dde05c76b8dfd6b695a44440144de57fc6b92fd5",
+              "Gateway": "172.19.0.1",
+              "IPAddress": "172.19.0.6",
+              "MacAddress": "8e:02:dc:ee:4b:2f",
+              "IPPrefixLen": 16,
+              "IPv6Gateway": "",
+              "GlobalIPv6Address": "",
+              "GlobalIPv6PrefixLen": 0,
+              "DNSNames": [
+                "js-wf-route-3239290-1791281049805806446-n4",
+                "js-wf-route-3239290-1791281049805806446-route-n4",
+                "1c16c4a93156"
+              ]
+            }
+          }
+        },
+        "ImageManifestDescriptor": {
+          "mediaType": "application/vnd.oci.image.manifest.v1+json",
+          "digest": "sha256:1925d8b47e9debf1f451ec651b219bd28d6bab4dad12362cb1d5dbe901ee8853",
+          "size": 481,
+          "platform": {
+            "architecture": "amd64",
+            "os": "linux"
+          }
+        }
+      },
+      "observed_utc": "2026-10-06T10:04:12.916659+00:00"
+    }
+  },
+  "observed_server_incarnations": 6,
+  "live_units": {
+    "js-wf-bulk-journal-ten-minute-joined-20261006.service": {
+      "MainPID": "3238887",
+      "ActiveState": "active"
+    },
+    "js-wf-bulk-journal-ten-minute-joined-watch-20261006.service": {
+      "MainPID": "3238889",
+      "ActiveState": "active"
+    },
+    "js-wf-bulk-journal-ten-minute-joined-review-20261006.service": {
+      "MainPID": "3238890",
+      "ActiveState": "active"
+    }
+  },
+  "scope": "Verified live original ten-minute journal seed1 with explicit bulk/complete point comparison and joined repair writers at final audit. No native or independent row verdict yet; no default/fullmatrix/24h qualification."
+}
