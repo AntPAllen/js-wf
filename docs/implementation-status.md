@@ -14572,3 +14572,12 @@ control groups pass.516,825,088 bytes of disposable staging removed after exact
 census/visible closure, excluded from older-data recovery. Both original native
 qualification units remain active. Preparation is not24h acceptance.
 [Controls, pinned waiter and live handle](scale/bulk-journal-24h-2026-10-06/terminal-preparation/).
+
+
+## Domain retirement across native all-server SIGKILL — 2026-10-06
+
+Focused `TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndAllServerSIGKILL` is qualified at executed4b4719e: race body32.34s / SDK33.42s. Three real2.15 server processes admit `WFRETIRE` on pinned clients, all are reaped with SIGKILL at the fresh-manifest reply-loss cut, and three replacement PID/server identities confirm the domain through actual connection and AccountInfo by6.611s under the original30s whole-cut gate. Existing startup30s/scenario60s/production leases remain unchanged.
+
+Strict retirement/reuse verifies generation1→3, two objects reclaimed while survivor/shared references remain, old manifest rejection, exactly three effects/two terminals and all-peer fresh references/integrity/GC checks. Two fresh handler entries exercise one controlled manifest loss. Independent review binds1871 Git/before/after/current inputs, actual SDK race binary/profile, six observed real server incarnations, visible closure and all2324 complete archive members. No original store was reopened; sampled process observation is not exhaustive. [Complete proof](scale/continuation-domain-all-server-sigkill-2026-10-06/).
+
+This closes the focused domain manifest-loss/all-server SIGKILL component. Other domain/lease-expiry cuts, forced absence confirmation, legacy versions, active-writer GC, full current-source matrices and actual24h remain open. The normal100k simulation and original24h journal handles are still active, without terminal acceptance. No unchanged Tier1 graph rerun is required for this integration-only fixture.

@@ -1,0 +1,16 @@
+=== RUN   TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndAllServerSIGKILL
+    continuation_retirement_process_test.go:39: native domain admitted node=0 pid=3835452 domain=WFRETIRE server_id=NDHVNXQE5RFJG7UEKZFZIPVBYBGXVJMDEKRNHSWH5CTV5M5QOIPN227X
+    continuation_retirement_process_test.go:39: native domain admitted node=1 pid=3835453 domain=WFRETIRE server_id=NAGLBYGMECLM2NFCSJOPSUHGD6EHAYZ2XUBMXB2CIRUI3PMDAS3J2JI7
+    continuation_retirement_process_test.go:39: native domain admitted node=2 pid=3835454 domain=WFRETIRE server_id=NAXPEO5VI4CUHN4CESM5TVANSEYX53XDKBZ2D6PE7RNUI4E3NF46SEWI
+    continuation_retirement_process_test.go:183: retirement fresh manifest cut: state_leader=wf-process-1 killed_node=0 pid=3835452 signal=killed
+    continuation_retirement_process_test.go:183: retirement fresh manifest cut: state_leader=wf-process-1 killed_node=1 pid=3835453 signal=killed
+    continuation_retirement_process_test.go:183: retirement fresh manifest cut: state_leader=wf-process-1 killed_node=2 pid=3835454 signal=killed
+    continuation_retirement_process_test.go:202: retirement restarted node=0 pid=3836863
+    continuation_retirement_process_test.go:202: retirement restarted node=1 pid=3836880
+    continuation_retirement_process_test.go:202: retirement restarted node=2 pid=3836899
+    continuation_retirement_process_test.go:218: native domain healed node=0 pid=3836863 domain=WFRETIRE server_id=NCTKDWSV7H64CB4MDRFLETU5OBWD766GHCP2GPO4G3NN64NRALMBWQIX elapsed=6.602603414s
+    continuation_retirement_process_test.go:218: native domain healed node=1 pid=3836880 domain=WFRETIRE server_id=NCU6D4AQ76ANY5Y3NZWU47DEVSRTGL2DDFU45RVRTFQ6MFTGOXZY4RQ7 elapsed=6.606483487s
+    continuation_retirement_process_test.go:218: native domain healed node=2 pid=3836899 domain=WFRETIRE server_id=NBHV4L7NPPSIOPQIGNEDDMNBGV6VAKMGACU42YQJNMDXLUNYKBZQ4OJJ elapsed=6.610455128s
+    continuation_retirement_test.go:373: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=4 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=2 manifest_drops=1
+--- PASS: TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndAllServerSIGKILL (32.34s)
+PASS

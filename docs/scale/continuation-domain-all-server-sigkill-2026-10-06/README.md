@@ -1,7 +1,7 @@
 # JetStream domain retirement across all-server SIGKILL
 
-Prepared native fixture: `TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndAllServerSIGKILL`.
+Qualified focused native fixture: `TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndAllServerSIGKILL`.
 
 Three real server processes use domain `WFRETIRE` and original file stores. Each client is pinned to its server; both AccountInfo and the actual connected domain are checked. The existing strict retirement/reuse scenario drops a fresh-manifest publication reply, then reaps all three servers with SIGKILL before starting replacements. Replacement PIDs/server IDs and domain metadata recovery must be confirmed under the original 30-second whole-cut deadline. The original startup budget, 60-second scenario and production lease settings are retained.
 
-This extends the native process fixture only. Native qualification is pending. Lease expiry, other domain cuts, legacy servers, active-writer GC, full matrices and actual24h remain separate requirements.
+This extends the native process fixture only. At executed source `4b4719e`, native race qualification passed: body32.34s / SDK33.42s; all-peer domain metadata recovered by6.611s from the whole-cut start. The dropped manifest reply exercised two fresh initial entries, with exactly three effects and two terminals, old generation1/fresh generation3 and two reclaimed objects. Independent review binds1871 source files to Git/before/after/current, actual SDK binary/profile, six observed native server incarnations and stopped original stores. The complete2,324-member archive is46,702,099 bytes with SHA256 `f0a14a77d341443dbb8560ca42ae5d2de3cc7049f1df6bd995b00b7208326031`. See [native proof](native-race/). Original stores were not reopened; process sampling is not an exhaustive lifetime observation. Lease expiry, other domain cuts, legacy servers, active-writer GC, full matrices and actual24h remain separate requirements.
