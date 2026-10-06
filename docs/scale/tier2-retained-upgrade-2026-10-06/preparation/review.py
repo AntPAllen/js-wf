@@ -67,6 +67,8 @@ def review(root):
             len(faults['faults']) == result['faults'] == 3, 'wrong original duration or fault count')
     legacy = read(root/'legacy-server-input.json')
     require(sha(root/'legacy-server.bin') == legacy['sha256'] and '\tmod\tgithub.com/nats-io/nats-server/v2\tv2.11.17\t' in legacy['build_info'], 'legacy input identity invalid')
+    require({v['node'] for v in servers if v['actual_executable_sha256']==legacy['sha256']}=={0,1,2}, 'actual legacy executables missing on peers')
+    require({v['node'] for v in servers if v['actual_executable_sha256']!=legacy['sha256']}=={0,1,2}, 'actual replacement executables missing on peers')
     initial = ['2.11.17']*3
     upgraded = set(); first = ns(faults['faults'][0]['scheduled']); snapshots = []
     def peers(phase):
@@ -81,7 +83,7 @@ def review(root):
         return record
     for index, fault in enumerate(faults['faults']):
         scheduled = ns(fault['scheduled']); node = fault['node']
-        require(not fault.get('error') and node in (0,1,2) and node not in upgraded and scheduled==first+index*30_000_000_000 and scheduled<=ns(fault['killed'])<=ns(fault['healed']), 'upgrade fault failed or cadence invalid')
+        require(not fault.get('error') and node in (0,1,2) and node not in upgraded and scheduled==first+index*270_000_000_000 and scheduled<=ns(fault['killed'])<=ns(fault['healed']), 'upgrade fault failed or cadence invalid')
         require(fault['versions_before']==initial and initial[node]=='2.11.17', 'wrong upgrade starting versions')
         initial = initial.copy(); initial[node]='2.15.0'; upgraded.add(node)
         require(fault['versions_after']==initial, 'upgrade changed another peer or target version')

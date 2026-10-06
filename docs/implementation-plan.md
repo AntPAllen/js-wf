@@ -4580,3 +4580,17 @@ All2,281originalfiles unchanged; no originalstore reopen. Full4,007member54,135,
 threepart copiedproof readback passes. Full13x200/current-source/24h gates remain open.
 [Native proof](scale/tier2-retained-fanout-2026-10-06/native-ten-minute/).
 [Copied proof](scale/tier2-retained-fanout-2026-10-06/copied-audit/).
+
+## Original rolling upgrade physical queue diagnostics live — 2026-10-06
+
+Failed123bc4b canonical archive/log correlation binds sequence494 successful
+confirmedACK/delivery4 to subsequent native retainedrawmessage with64zero-pending
+consumers. Physical deletion cause remains unconfirmed. New diagnostic snapshots
+read each pinned publicNATS /jsz before/afterupgrade and atdrain success/failure,
+joined under2s withtimestamps/errors. Original gates/budgets remain unchanged.
+Clean661239d original normal ten-minute seed1 actualSDK1610819/profile/legacybinary/
+threeinitiallegacy+currentservers/source verified. First upgrade/snapshots pass;
+allthree/fullnative/copied qualification pending. Original30s/5m/9m30s cadence
+retained; reviewer corrected before terminal. Long handles continue unchanged.
+[Preparation](scale/tier2-retained-upgrade-2026-10-06/preparation/).
+[Live evidence](scale/tier2-retained-upgrade-2026-10-06/live-initial/).

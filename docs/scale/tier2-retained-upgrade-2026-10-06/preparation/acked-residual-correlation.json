@@ -1,0 +1,291 @@
+{
+  "head": "661239d3f3453c313127b32a3810bcadf6658c49",
+  "canonical_archive_sha256": "deeff8cfbd299b179f0341308d3569d24f7cfe3ac6702fdef88c1047017c9a82",
+  "all_canonical_part_and_concat_hashes_verified": true,
+  "current_logs_match_canonical_archive": true,
+  "inputs": {
+    "matrix-upgrade-1-dispatch.jsonl": {
+      "sha256": "4fd5e15c469d34f049b0dcca697b82c0dcd044eea5d5a2ea62e897a41340181f",
+      "bytes": 571142
+    },
+    "matrix-upgrade-1-operations.jsonl": {
+      "sha256": "eb3d4297fb8620ccb27b8f0ba027de0230f917acbc4b8a30327fd63dca87a8df",
+      "bytes": 2846027
+    },
+    "matrix-upgrade-1-queue.json": {
+      "sha256": "32c1ed8ba46f1d954a265ecbfdcf6a59dc64369bd7c2e485ca995da3878a878e",
+      "bytes": 103073
+    },
+    "matrix-upgrade-1-faults.json": {
+      "sha256": "76d58a8b1c62675f5174259ce682116a505ae9c11797ad85f840feacb215dc5d",
+      "bytes": 617
+    }
+  },
+  "dispatch": [
+    {
+      "At": "2026-10-05T18:46:03.90201717Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "fetched",
+      "RunSequence": 494,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:03.930092328Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "lease_held",
+      "RunSequence": 494,
+      "Delivery": 1,
+      "Error": "workflow lease is held",
+      "HeldLease": {
+        "key": "matrixchild.c-8e42390a21f5c779a68ee1399bb48a2e",
+        "reason": "held_entry",
+        "entry_observed": true,
+        "revision": 3746,
+        "created": "2026-10-05T18:46:03.91375964Z",
+        "observed_at": "2026-10-05T18:46:03.929983592Z",
+        "value_valid": true,
+        "worker": "matrix-worker",
+        "epoch": 3704
+      }
+    },
+    {
+      "At": "2026-10-05T18:46:03.930663006Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "terminal_probe_error",
+      "RunSequence": 494,
+      "Delivery": 1,
+      "Error": "nats: key not found"
+    },
+    {
+      "At": "2026-10-05T18:46:03.930667954Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "nak",
+      "RunSequence": 494,
+      "Delivery": 1,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:14.384418189Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "fetched",
+      "RunSequence": 494,
+      "Delivery": 2,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:14.43101183Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "lease_acquired",
+      "RunSequence": 494,
+      "Delivery": 2,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:14.987661482Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "terminal_probe_error",
+      "RunSequence": 494,
+      "Delivery": 2,
+      "Error": "terminal parent notification: signal publish outcome unknown: nats: no response from stream"
+    },
+    {
+      "At": "2026-10-05T18:46:15.558329744Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "execution_retry",
+      "RunSequence": 494,
+      "Delivery": 2,
+      "Error": "signal publish outcome unknown: nats: no response from stream"
+    },
+    {
+      "At": "2026-10-05T18:46:15.558732998Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "nak",
+      "RunSequence": 494,
+      "Delivery": 2,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:15.56510565Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "released",
+      "RunSequence": 494,
+      "Delivery": 2,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:16.570645865Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "fetched",
+      "RunSequence": 494,
+      "Delivery": 3,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:16.590012602Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "lease_acquired",
+      "RunSequence": 494,
+      "Delivery": 3,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:17.132374263Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "terminal_probe_error",
+      "RunSequence": 494,
+      "Delivery": 3,
+      "Error": "terminal parent notification: signal publish outcome unknown: nats: no response from stream"
+    },
+    {
+      "At": "2026-10-05T18:46:17.809272771Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "execution_retry",
+      "RunSequence": 494,
+      "Delivery": 3,
+      "Error": "signal publish outcome unknown: nats: no response from stream"
+    },
+    {
+      "At": "2026-10-05T18:46:17.809288164Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "nak",
+      "RunSequence": 494,
+      "Delivery": 3,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:17.813741624Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "released",
+      "RunSequence": 494,
+      "Delivery": 3,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:18.815084538Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "fetched",
+      "RunSequence": 494,
+      "Delivery": 4,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:18.839955254Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "lease_acquired",
+      "RunSequence": 494,
+      "Delivery": 4,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:19.195848484Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "released",
+      "RunSequence": 494,
+      "Delivery": 4,
+      "Error": ""
+    },
+    {
+      "At": "2026-10-05T18:46:19.216104986Z",
+      "Worker": "matrix-worker",
+      "Type": "matrixchild",
+      "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+      "Stage": "ack",
+      "RunSequence": 494,
+      "Delivery": 4,
+      "Error": ""
+    }
+  ],
+  "confirmed_ack": {
+    "At": "2026-10-05T18:46:19.216100609Z",
+    "Duration": 20251073,
+    "Worker": "matrix-worker",
+    "Type": "matrixchild",
+    "ID": "c-8e42390a21f5c779a68ee1399bb48a2e",
+    "RunSequence": 494,
+    "Delivery": 4,
+    "Operation": "dispatch_ack_confirmed",
+    "JournalIndex": 0,
+    "JournalKind": "",
+    "Error": "",
+    "LeaseGateWait": 0,
+    "LeaseUpdateDuration": 0,
+    "LeaseUpdateAttempted": false
+  },
+  "fault": {
+    "worker_ping_at": "0001-01-01T00:00:00Z",
+    "versions_before": [
+      "2.11.17",
+      "2.11.17",
+      "2.11.17"
+    ],
+    "versions_after": [
+      "2.11.17",
+      "2.11.17",
+      "2.15.0"
+    ],
+    "scheduled": "2026-10-05T18:46:07.319981849Z",
+    "killed": "2026-10-05T18:46:07.320359761Z",
+    "healed": "2026-10-05T18:46:19.222488204Z",
+    "node": 2,
+    "partition_routes": [
+      0,
+      0,
+      0
+    ],
+    "paused": "0001-01-01T00:00:00Z",
+    "resumed": "0001-01-01T00:00:00Z"
+  },
+  "residual": {
+    "Subject": "wf.run.45",
+    "Sequence": 494,
+    "Header": {
+      "Nats-Msg-Id": [
+        "signal-wakeup:193"
+      ]
+    },
+    "Data": "bWF0cml4Y2hpbGQuYy04ZTQyMzkwYTIxZjVjNzc5YTY4ZWUxMzk5YmI0OGEyZQ==",
+    "Time": "2026-10-05T18:46:03.895269676Z"
+  },
+  "consumer_count": 64,
+  "all_consumers_pending_and_ack_pending_zero": true,
+  "scope": "Historical confirmed ACK and subsequent retained raw message correlate to exact delivery; physical deletion cause remains unconfirmed. No original store reopened."
+}

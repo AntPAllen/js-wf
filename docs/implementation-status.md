@@ -29,6 +29,21 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: original rolling upgrade physical diagnostics live
+
+Canonical failed123bc4b proof confirms residualseq494's delivery4 successful
+confirmedACK before first upgrade healing; later retainedrawmessage/64zero-pending
+consumers still inconsistent. Cause remains unconfirmed. Full proof/log hashes
+bind the correlation; no original store reopened. New public pinned /jsz snapshots
+before/aftereachupgrade and finaldrain/failure preserve physical peer states/errors.
+Clean661239d actualSDK1610819/legacybinary/threeinitiallegacy+currentprocesses/
+2CPU/2GiB/694sourceinputs verified; firstnode2 upgrade heals36.487257232s and both
+three-peer snapshots succeed. Native full ten-minute/allthreeupgrades/copy pending.
+Original cadence30s/5m/9m30s retained; reviewer corrected before terminal. Both long
+handles continue unchanged; full13x200/current-source/24h gates remain open.
+[Preparation/canonical correlation](scale/tier2-retained-upgrade-2026-10-06/preparation/).
+[Live proof](scale/tier2-retained-upgrade-2026-10-06/live-initial/).
+
 ## Latest follow-up — 2026-10-06: retained fanout restart copied audit accepted
 
 Fresh copies: exact2,156/23,793/2,156 report, histories/allthreequeues/64durables
