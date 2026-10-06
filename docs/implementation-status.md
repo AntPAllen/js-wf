@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: original retained Tier2 pause live
+
+Clean d893bb0 actual normal SDK1271023, all three worker SDK processes and three
+NATS processes verified from actual executables. Original ten-minute seed1 normal
+2 CPU/2GiB profile. First complete280-invocation checkpoint passes; final native,
+exact paused-lease post-resume fencing, independent copied integrity/history/drain
+and full proof are pending. Terminal reviewer waits on the same producer unit and
+preserves either verdict after closure. Current-main Go/module/producer inputs must
+stay unchanged until producer after-checks complete. Existing long and cached
+journal campaigns overlap; no isolated performance claim/full13x200 qualification.
+[Live observation](scale/tier2-retained-pause-2026-10-06/live-initial/).
+[Review preparation](scale/tier2-retained-pause-2026-10-06/preparation/).
+
 ## Latest follow-up — 2026-10-06: cached live journal actual profile verified
 
 Clean727b950 actual normal SDK1235495/source/build/profile and five server roles,
