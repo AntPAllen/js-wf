@@ -29,6 +29,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: preserved R5 disposable clone reclaimed
+
+Pushedaf0cfef canonical delta/allparts/concat/full base+delta virtual tree and every
+current captured file reverified, including exact640clonefiles. SDK/observedserver
+PIDs/containers/currentactive mounts/visibleFD checked again; permissionlimits
+recorded. Only closeddisposable copied-stores removed: 864,817,152
+allocatedbytes recovered, 1,524,555,776bytes free. Allremainingcapturedfiles
+unchanged; canonicalGit/base/delta/originaldonors/failednativefixtures/source/exes/
+metadata/caches/live stores retained. Original24h/million handles active; historical
+failures and release gates unchanged. NoNATS/originalstore reopen.
+[Recovery evidence](scale/r5-profile-derived-store-recovery-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: complete closed R5 derived clone preserved
 
 Current closed827MiB R5 profile clone now has byte-complete lossless preservation;
