@@ -26,6 +26,11 @@ class DomainCoverageControls(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'coverage'):
             controls.verify_log('retirement-server-kill', log)
 
+    def test_existing_retirement_pair_cannot_qualify_combined_weak_frame(self):
+        log = (REPO/'docs/scale/domain-runtime-ci-2026-10-06/native-qualification/retirement-server-kill/native.log').read_text()
+        with self.assertRaisesRegex(ValueError, 'coverage'):
+            controls.verify_log('retirement-weak-frame', log)
+
     def test_native_failure_never_qualifies(self):
         for case in controls.CASES:
             for log in ('FAIL\n', '--- SKIP: x\nPASS\n', 'DATA RACE\nPASS\n'):

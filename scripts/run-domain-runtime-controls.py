@@ -22,8 +22,9 @@ RESULT = 'TestResultReadVerifiesWeakAbsence'
 SNAPSHOT = 'TestSnapshotManifestReadsUseLeader'
 KILL = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndAllServerSIGKILL'
 EXPIRY = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndLeaseExpiryAcrossAllServerSIGKILL'
+WEAK_FRAME = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAbsenceAndAllServerSIGKILL'
 CASES = {'read-controls': [RESULT, RESULT+'InJetStreamDomain', SNAPSHOT, SNAPSHOT+'InJetStreamDomain'],
-         'retirement-server-kill': [KILL, EXPIRY]}
+         'retirement-server-kill': [KILL, EXPIRY], 'retirement-weak-frame': [WEAK_FRAME]}
 
 
 def sha(path):
@@ -59,15 +60,24 @@ def verify_log(case, log):
             require(log.count('leader requests=2 direct requests=0 route='+prefix+'.STREAM.MSG.GET.KV_WF_STATE') == 2,
                     'exact snapshot leader route not observed')
     else:
-        require(log.count('native domain admitted node=') == 6, 'domain admission missing')
-        require(log.count('retirement fresh manifest cut:') == 6 and log.count('signal=killed') == 6,
-                'not all six SIGKILL statuses observed')
-        require(log.count('retirement restarted node=') == 6, 'replacement processes missing')
+        nodes = 3*len(expected)
+        require(log.count('native domain admitted node=') == nodes, 'domain admission missing')
+        require(log.count('retirement fresh manifest cut:') == nodes and log.count('signal=killed') == nodes,
+                'not all SIGKILL statuses observed')
+        require(log.count('retirement restarted node=') == nodes, 'replacement processes missing')
         heal = re.findall(r'native domain healed node=\d pid=\d+ domain=WFRETIRE server_id=\w+ elapsed=([0-9.]+)s', log)
-        require(len(heal) == 6 and all(float(value) < 30 for value in heal), 'whole-cut domain heal gate')
+        require(len(heal) == nodes and all(float(value) < 30 for value in heal), 'whole-cut domain heal gate')
         epochs = re.findall(r'prior_epoch=(\d+) terminal_epoch=(\d+) records=(\d+)', log)
-        require(len(epochs) == 1 and int(epochs[0][1]) > int(epochs[0][0]), 'lease expiry successor epoch missing')
-        require(log.count('effects=3 terminals=2 shared_blob_retained=true') == 2 and log.count('manifest_drops=1') == 2,
+        if case == 'retirement-server-kill':
+            require(len(epochs) == 1 and int(epochs[0][1]) > int(epochs[0][0]), 'lease expiry successor epoch missing')
+        else:
+            require(not epochs, 'unexpected lease expiry profile')
+            armed = re.findall(r'weak frame armed after domain heal: object=(step-result-[a-f0-9]{64})', log)
+            confirmed = re.findall(r'weak frame confirmed: object=(step-result-[a-f0-9]{64}) generation=(\d+) drops=1 reads=(\d+) leader=1 direct=0 route=\$JS.WFRETIRE.API.STREAM.MSG.GET.OBJ_WF_BLOB', log)
+            require(len(armed) == len(confirmed) == 1 and armed[0] == confirmed[0][0]
+                    and int(confirmed[0][1]) > 0 and int(confirmed[0][2]) >= 2,
+                    'fresh frame weak absence and exact native domain confirmation missing')
+        require(log.count('effects=3 terminals=2 shared_blob_retained=true') == len(expected) and log.count('manifest_drops=1') == len(expected),
                 'strict retirement/reuse completion missing')
     return {'case': case, 'tests': expected, 'scope': 'Focused native row only; full matrix/24h not qualified.'}
 
@@ -177,8 +187,8 @@ def main():
     try:
         require(code == 0, 'native test failed')
         qualification = verify_log(args.case, (root/'native.log').read_text())
-        if args.case == 'retirement-server-kill':
-            require(len(servers) == 12, 'all twelve native server incarnations must be observed')
+        if args.case != 'read-controls':
+            require(len(servers) == 6*len(CASES[args.case]), 'all original/replacement native server incarnations must be observed')
             for row in servers.values():
                 require(sha(row['exe']) == row['exe_sha256'] and 'v2.15.0' in row['build_info'],
                         'observed native server executable changed or wrong version')

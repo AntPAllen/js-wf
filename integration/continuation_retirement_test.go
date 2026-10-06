@@ -33,6 +33,7 @@ type retirementManifestPort struct {
 	generation atomic.Uint64
 	dropped    atomic.Int64
 	onDrop     func(context.Context) error
+	afterDrop  func(string)
 }
 
 func (p *retirementManifestPort) CreateManifest(ctx context.Context, key string, data []byte) error {
@@ -46,6 +47,9 @@ func (p *retirementManifestPort) CreateManifest(ctx context.Context, key string,
 			if err := p.onDrop(ctx); err != nil {
 				return err
 			}
+		}
+		if p.afterDrop != nil {
+			p.afterDrop(snap.Runtime.Object)
 		}
 		return journal.ErrUnknown
 	}
@@ -112,7 +116,7 @@ func runContinuationRetirementWithServerFault(t *testing.T, manifestDrop, server
 	runContinuationRetirementOnCluster(t, all, manifestDrop, onDrop)
 }
 
-func runContinuationRetirementOnCluster(t *testing.T, all []jetstream.JetStream, manifestDrop bool, onDrop func(context.Context) error) {
+func runContinuationRetirementOnCluster(t *testing.T, all []jetstream.JetStream, manifestDrop bool, onDrop func(context.Context) error, configure ...func(*retirementManifestPort)) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	const typ = "checkpoint-retire"
@@ -126,6 +130,9 @@ func runContinuationRetirementOnCluster(t *testing.T, all []jetstream.JetStream,
 	var freshGeneration atomic.Uint64
 	var freshInitialCalls atomic.Int64
 	port := &retirementManifestPort{SnapshotWritePort: journal.NewSnapshotPort(all[1])}
+	for _, apply := range configure {
+		apply(port)
+	}
 	var serverFaults atomic.Int64
 	if onDrop != nil {
 		port.onDrop = func(ctx context.Context) error {

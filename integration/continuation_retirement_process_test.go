@@ -4,12 +4,14 @@ package integration_test
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"testing"
 	"time"
@@ -43,16 +45,64 @@ func TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndLeaseExp
 	runContinuationRetirementProcessFault(t, true, true, "WFRETIRE")
 }
 
-func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool, domain string) {
+func TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAbsenceAndAllServerSIGKILL(t *testing.T) {
+	runContinuationRetirementProcessFault(t, true, false, "WFRETIRE", true)
+}
+
+// Only the selected fresh frame's first weak Object Store response is injected.
+// The frame upload, administrative metadata confirmation and retried payload
+// read use real domain servers and original retained stores after SIGKILL.
+type retirementWeakFrameJS struct {
+	jetstream.JetStream
+	object  atomic.Value
+	armed   atomic.Bool
+	drops   atomic.Int64
+	reads   atomic.Int64
+	leaders atomic.Int64
+	direct  atomic.Int64
+}
+
+func (j *retirementWeakFrameJS) ObjectStore(ctx context.Context, bucket string) (jetstream.ObjectStore, error) {
+	store, err := j.JetStream.ObjectStore(ctx, bucket)
+	if err != nil || bucket != "WF_BLOB" {
+		return store, err
+	}
+	return &retirementWeakFrameStore{ObjectStore: store, owner: j}, nil
+}
+
+type retirementWeakFrameStore struct {
+	jetstream.ObjectStore
+	owner *retirementWeakFrameJS
+}
+
+func (s *retirementWeakFrameStore) GetBytes(ctx context.Context, name string, opts ...jetstream.GetObjectOpt) ([]byte, error) {
+	if object, ok := s.owner.object.Load().(string); ok && name == object {
+		s.owner.reads.Add(1)
+		if s.owner.armed.Swap(false) {
+			s.owner.drops.Add(1)
+			return nil, jetstream.ErrObjectNotFound
+		}
+	}
+	return s.ObjectStore.GetBytes(ctx, name, opts...)
+}
+
+func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool, domain string, weakFrame ...bool) {
 	t.Helper()
 	if expireLease && !full {
 		t.Fatal("lease expiry requires every server stopped")
+	}
+	forcedAbsence := len(weakFrame) == 1 && weakFrame[0]
+	if len(weakFrame) > 1 || forcedAbsence && (!full || domain == "") {
+		t.Fatal("weak frame control requires a full domain server cut")
 	}
 	root := t.TempDir()
 	if retained := os.Getenv("WF_CONTINUATION_RETIREMENT_PROCESS_ROOT"); retained != "" {
 		root = filepath.Join(retained, fmt.Sprintf("all-servers-%t-lease-expiry-%t", full, expireLease))
 		if domain != "" {
 			root += "-domain-" + domain
+		}
+		if forcedAbsence {
+			root += "-weak-frame-absence"
 		}
 		if err := os.Mkdir(root, 0700); err != nil {
 			t.Fatal(err)
@@ -123,6 +173,42 @@ func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool,
 	}
 	var previousEpoch uint64
 	var leaseTTL time.Duration
+	var weak *retirementWeakFrameJS
+	var configure []func(*retirementManifestPort)
+	if forcedAbsence {
+		weak = &retirementWeakFrameJS{}
+		prefix := "$JS." + domain + ".API"
+		traced, err := jetstream.NewWithDomain(all[1].Conn(), domain, jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent: func(subject string, data []byte) {
+			object, ok := weak.object.Load().(string)
+			if !ok {
+				return
+			}
+			var request struct {
+				LastBySubject string `json:"last_by_subj"`
+			}
+			if json.Unmarshal(data, &request) != nil || request.LastBySubject != "$O.WF_BLOB.M."+base64.URLEncoding.EncodeToString([]byte(object)) {
+				return
+			}
+			if subject == prefix+".STREAM.MSG.GET.OBJ_WF_BLOB" {
+				weak.leaders.Add(1)
+			}
+			if strings.HasPrefix(subject, prefix+".DIRECT.GET.OBJ_WF_BLOB") {
+				weak.direct.Add(1)
+			}
+		}}))
+		if err != nil {
+			t.Fatal(err)
+		}
+		weak.JetStream = traced
+		configure = append(configure, func(port *retirementManifestPort) {
+			port.SnapshotWritePort = journal.NewSnapshotPort(weak)
+			port.afterDrop = func(object string) {
+				weak.object.Store(object)
+				weak.armed.Store(true)
+				t.Logf("retirement weak frame armed after domain heal: object=%s", object)
+			}
+		})
+	}
 	runContinuationRetirementOnCluster(t, all, true, func(ctx context.Context) error {
 		cutStarted := time.Now()
 		originalPIDs, originalIDs := map[int]int{}, map[int]string{}
@@ -231,7 +317,28 @@ func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool,
 			}
 		}
 		return nil
-	})
+	}, configure...)
+	if forcedAbsence {
+		read, stop := context.WithTimeout(context.Background(), 5*time.Second)
+		defer stop()
+		state, err := all[0].KeyValue(read, "WF_STATE")
+		if err != nil {
+			t.Fatal(err)
+		}
+		manifest, err := state.Get(read, "snap."+identity.Key("checkpoint-retire", "reused"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var snapshot journal.Snapshot
+		if err := json.Unmarshal(manifest.Value(), &snapshot); err != nil {
+			t.Fatal(err)
+		}
+		object, _ := weak.object.Load().(string)
+		if snapshot.Runtime == nil || snapshot.Runtime.Object != object || weak.drops.Load() != 1 || weak.reads.Load() < 2 || weak.armed.Load() || weak.leaders.Load() != 1 || weak.direct.Load() != 0 {
+			t.Fatalf("combined weak frame proof: runtime=%+v object=%s drops=%d reads=%d armed=%t leader=%d direct=%d", snapshot.Runtime, object, weak.drops.Load(), weak.reads.Load(), weak.armed.Load(), weak.leaders.Load(), weak.direct.Load())
+		}
+		t.Logf("retirement weak frame confirmed: object=%s generation=%d drops=1 reads=%d leader=1 direct=0 route=$JS.%s.API.STREAM.MSG.GET.OBJ_WF_BLOB", object, snapshot.Runtime.InvSeq, weak.reads.Load(), domain)
+	}
 	if expireLease {
 		read, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()
