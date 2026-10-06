@@ -1,0 +1,21 @@
+{
+  "convert": [
+    "go",
+    "tool",
+    "test2json",
+    "-t",
+    "-p",
+    "js-wf/integration"
+  ],
+  "check": [
+    "python3",
+    "/tmp/js-wf-partition-seed6-live-diagnostics-20261006/executed-checker.py",
+    "/tmp/js-wf-partition-seed6-live-diagnostics-20261006/converted-events.jsonl",
+    "TestMixedMatrixServerPartitionEveryThirtySeconds",
+    "10m"
+  ],
+  "checker_sha256": "f34fe0c0401caff095d3805196287f29d5e3dafb42d6d92a55ef2b7d1ea0f93d",
+  "producer_failed_after_native_and_source_ledgers": true,
+  "producer_error": "AttributeError: list has no attribute partition_diagnostics",
+  "native_rerun": false
+}

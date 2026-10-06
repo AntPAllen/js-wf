@@ -1,0 +1,123 @@
+=== RUN   TestMixedMatrixServerPartitionEveryThirtySeconds
+    mixed_matrix_leader_test.go:150: retained matrix process stores=/tmp/js-wf-partition-seed6-live-diagnostics-20261006/originals/TestMixedMatrixServerPartitionEveryThirtySeconds
+    mixed_matrix_leader_test.go:150: mixed batch=1 elapsed=5.421570297s
+    mixed_matrix_leader_test.go:150: mixed batch=2 elapsed=10.73348537s
+    mixed_matrix_leader_test.go:150: mixed batch=3 elapsed=14.667097937s
+    mixed_matrix_leader_test.go:150: mixed batch=4 elapsed=18.778973392s
+    mixed_matrix_leader_test.go:150: mixed batch=5 elapsed=22.916339818s
+    mixed_matrix_leader_test.go:150: mixed batch=6 elapsed=28.760029814s
+    mixed_matrix_leader_test.go:150: mixed batch=7 elapsed=38.482229796s
+    mixed_matrix_leader_test.go:150: mixed batch=8 elapsed=56.191142352s
+    mixed_matrix_leader_test.go:632: server_partition fault failed: workflow replica recovery stream=WF_INV cluster=null last_error=context deadline exceeded: context deadline exceeded
+    mixed_matrix_leader_test.go:150: leader fault: workflow replica recovery stream=WF_INV cluster=null last_error=context deadline exceeded: context deadline exceeded
+    mixed_matrix_leader_test.go:277: server 0 log tail:
+        eader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:02.360920 [WRN] RAFT [0m6vARoZ - C-R3F-NN7uw4o5] Detected another leader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:02.416082 [WRN] RAFT [0m6vARoZ - C-R3F-X2G8CKU9] Detected another leader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:02.416917 [WRN] RAFT [0m6vARoZ - S-R3F-Ci0VPFcq] Detected another leader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:02.446755 [WRN] RAFT [0m6vARoZ - C-R3F-6y8X7MCB] Detected another leader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:02.481274 [WRN] RAFT [0m6vARoZ - C-R3F-0LnKlInr] Detected another leader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:02.483997 [WRN] RAFT [0m6vARoZ - C-R3F-42fnuncm] Detected another leader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:02.544098 [WRN] RAFT [0m6vARoZ - C-R3F-doks3hlw] Detected another leader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:02.581034 [WRN] RAFT [0m6vARoZ - C-R3F-WmXA08Ek] Detected another leader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:02.607468 [WRN] RAFT [0m6vARoZ - S-R3F-MXhLnApr] Detected another leader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:02.622289 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_32' has NO quorum, stalled.
+        [1106196] 2026/10/06 20:27:02.673037 [WRN] RAFT [0m6vARoZ - C-R3F-ygSd5Szi] Detected another leader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:02.754109 [WRN] RAFT [0m6vARoZ - C-R3F-lwmzxwyA] Detected another leader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:02.903606 [WRN] RAFT [0m6vARoZ - C-R3F-P63sKr6L] Detected another leader with higher term, will stepdown
+        [1106196] 2026/10/06 20:27:03.203724 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_32'
+        [1106196] 2026/10/06 20:27:05.852989 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_10'
+        [1106196] 2026/10/06 20:27:06.609280 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_06'
+        [1106196] 2026/10/06 20:27:06.746285 [INF] JetStream cluster new stream leader for '$G > KV_WF_VIEW'
+        [1106196] 2026/10/06 20:27:06.899499 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_03'
+        [1106196] 2026/10/06 20:27:06.920146 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_09'
+        [1106196] 2026/10/06 20:27:07.033783 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_22'
+        [1106196] 2026/10/06 20:27:07.104817 [INF] JetStream cluster new stream leader for '$G > OBJ_WF_BLOB'
+        [1106196] 2026/10/06 20:27:07.139590 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_02'
+        [1106196] 2026/10/06 20:27:07.336951 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_63'
+        [1106196] 2026/10/06 20:27:07.364926 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_62'
+        [1106196] 2026/10/06 20:27:07.423993 [INF] JetStream cluster new metadata leader: wf-process-1/wf-process
+        [1106196] 2026/10/06 20:27:07.504945 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_38'
+        [1106196] 2026/10/06 20:27:07.647071 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_56'
+        [1106196] 2026/10/06 20:27:07.873080 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_14'
+        [1106196] 2026/10/06 20:27:08.137417 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_53'
+        [1106196] 2026/10/06 20:27:08.147386 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_15'
+        [1106196] 2026/10/06 20:27:08.601784 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_48'
+        [1106196] 2026/10/06 20:27:08.622256 [INF] JetStream cluster new stream leader for '$G > WF_RUN'
+        [1106196] 2026/10/06 20:27:08.816704 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_45'
+        [1106196] 2026/10/06 20:27:09.039221 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_08'
+        [1106196] 2026/10/06 20:27:09.936694 [INF] JetStream cluster new stream leader for '$G > WF_JRN'
+    mixed_matrix_leader_test.go:277: server 1 log tail:
+        27:02.146011 [WRN] RAFT [St9I6EVH - C-R3F-GvgTFkN3] Detected another leader with higher term, will stepdown
+        [1106197] 2026/10/06 20:27:02.168096 [WRN] RAFT [St9I6EVH - C-R3F-QmAUkGur] Detected another leader with higher term, will stepdown
+        [1106197] 2026/10/06 20:27:02.239152 [WRN] RAFT [St9I6EVH - C-R3F-2xH9QhiV] Detected another leader with higher term, will stepdown
+        [1106197] 2026/10/06 20:27:02.334445 [WRN] RAFT [St9I6EVH - C-R3F-B9vLBuoo] Detected another leader with higher term, will stepdown
+        [1106197] 2026/10/06 20:27:02.343884 [WRN] RAFT [St9I6EVH - C-R3F-zo17A1kr] Detected another leader with higher term, will stepdown
+        [1106197] 2026/10/06 20:27:02.370838 [WRN] RAFT [St9I6EVH - C-R3F-0d2caUw5] Detected another leader with higher term, will stepdown
+        [1106197] 2026/10/06 20:27:02.499530 [INF] JetStream cluster new stream leader for '$G > WF_INV'
+        [1106197] 2026/10/06 20:27:05.705485 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_26'
+        [1106197] 2026/10/06 20:27:06.095167 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_43'
+        [1106197] 2026/10/06 20:27:06.487647 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_07'
+        [1106197] 2026/10/06 20:27:06.488417 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_25'
+        [1106197] 2026/10/06 20:27:06.536260 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_41'
+        [1106197] 2026/10/06 20:27:06.586797 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_21'
+        [1106197] 2026/10/06 20:27:06.598531 [INF] JetStream cluster new stream leader for '$G > WF_SIG'
+        [1106197] 2026/10/06 20:27:06.812529 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_00'
+        [1106197] 2026/10/06 20:27:06.862385 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_37'
+        [1106197] 2026/10/06 20:27:06.895598 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_30'
+        [1106197] 2026/10/06 20:27:07.085503 [INF] JetStream cluster new stream leader for '$G > KV_WF_STATE'
+        [1106197] 2026/10/06 20:27:07.222410 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_28'
+        [1106197] 2026/10/06 20:27:07.424132 [INF] Self is new JetStream cluster metadata leader
+        [1106197] 2026/10/06 20:27:07.578973 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_46'
+        [1106197] 2026/10/06 20:27:07.853492 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_54'
+        [1106197] 2026/10/06 20:27:08.016242 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_47'
+        [1106197] 2026/10/06 20:27:08.200950 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_60'
+        [1106197] 2026/10/06 20:27:08.241617 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_01'
+        [1106197] 2026/10/06 20:27:08.507608 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_59'
+        [1106197] 2026/10/06 20:27:08.754473 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_20'
+        [1106197] 2026/10/06 20:27:08.797109 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_51'
+        [1106197] 2026/10/06 20:27:08.832493 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_34'
+        [1106197] 2026/10/06 20:27:08.851355 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_49'
+        [1106197] 2026/10/06 20:27:08.884212 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_27'
+        [1106197] 2026/10/06 20:27:09.008867 [INF] JetStream cluster new stream leader for '$G > MATRIX_ROUTE_PROBE'
+        [1106197] 2026/10/06 20:27:09.163156 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_24'
+        [1106197] 2026/10/06 20:27:09.382666 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_18'
+        [1106197] 2026/10/06 20:27:09.859495 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_35'
+        [1106197] 2026/10/06 20:27:10.250172 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_29'
+        [1106197] 2026/10/06 20:27:11.202442 [INF] JetStream cluster new consumer leader for '$G > WF_RUN > WF_P_16'
+    mixed_matrix_leader_test.go:277: server 2 log tail:
+        ED9nmv - S-R3F-R3g35pxB] Expected first catchup entry to be a snapshot and peerstate, will retry
+        [1106198] 2026/10/06 20:27:05.857465 [WRN] RAFT [0WED9nmv - C-R3F-B94jQHJC] Expected first catchup entry to be a snapshot and peerstate, will retry
+        [1106198] 2026/10/06 20:27:06.311458 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_09' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:06.726488 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_02' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:06.916563 [WRN] JetStream cluster stream '$G > WF_PURGE' has NO quorum, stalled
+        [1106198] 2026/10/06 20:27:06.925684 [INF] JetStream cluster new stream leader for '$G > WF_PURGE'
+        [1106198] 2026/10/06 20:27:07.005275 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_28' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:07.155451 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_46' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:07.358670 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_56' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:07.423952 [INF] JetStream cluster new metadata leader: wf-process-1/wf-process
+        [1106198] 2026/10/06 20:27:07.622658 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_47' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:07.707389 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_60' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:08.017496 [WRN] RAFT [0WED9nmv - S-R3F-R3g35pxB] Expected first catchup entry to be a snapshot and peerstate, will retry
+        [1106198] 2026/10/06 20:27:08.031001 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_01' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:08.103008 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_45' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:08.231639 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_59' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:08.431580 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_34' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:08.514759 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_49' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:08.537212 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_51' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:08.911347 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_18' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:09.154502 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_35' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:09.458438 [WRN] JetStream cluster stream '$G > WF_JRN' has NO quorum, stalled
+        [1106198] 2026/10/06 20:27:09.483848 [WRN] JetStream cluster consumer '$G > WF_RUN > WF_P_29' has NO quorum, stalled.
+        [1106198] 2026/10/06 20:27:09.609853 [WRN] JetStream cluster stream '$G > KV_WF_ASSIGN' has NO quorum, stalled
+        [1106198] 2026/10/06 20:27:09.635419 [INF] JetStream cluster new stream leader for '$G > KV_WF_ASSIGN'
+        [1106198] 2026/10/06 20:27:10.201818 [WRN] RAFT [0WED9nmv - S-R3F-R3g35pxB] Expected first catchup entry to be a snapshot and peerstate, will retry
+        [1106198] 2026/10/06 20:27:12.424842 [WRN] RAFT [0WED9nmv - S-R3F-R3g35pxB] Expected first catchup entry to be a snapshot and peerstate, will retry
+        [1106198] 2026/10/06 20:27:14.442757 [WRN] RAFT [0WED9nmv - S-R3F-R3g35pxB] Expected first catchup entry to be a snapshot and peerstate, will retry
+        [1106198] 2026/10/06 20:27:17.038468 [WRN] RAFT [0WED9nmv - S-R3F-R3g35pxB] Expected first catchup entry to be a snapshot and peerstate, will retry
+        [1106198] 2026/10/06 20:27:19.234611 [WRN] RAFT [0WED9nmv - S-R3F-R3g35pxB] Expected first catchup entry to be a snapshot and peerstate, will retry
+        [1106198] 2026/10/06 20:27:21.421947 [WRN] RAFT [0WED9nmv - S-R3F-R3g35pxB] Expected first catchup entry to be a snapshot and peerstate, will retry
+        [1106198] 2026/10/06 20:27:24.227163 [WRN] RAFT [0WED9nmv - S-R3F-R3g35pxB] Expected first catchup entry to be a snapshot and peerstate, will retry
+        [1106198] 2026/10/06 20:27:26.254100 [WRN] RAFT [0WED9nmv - S-R3F-R3g35pxB] Expected first catchup entry to be a snapshot and peerstate, will retry
+--- FAIL: TestMixedMatrixServerPartitionEveryThirtySeconds (70.78s)
+FAIL

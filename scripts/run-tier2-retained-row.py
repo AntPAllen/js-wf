@@ -134,7 +134,6 @@ after={n:sha(repo/n) for n in names};assert before==after;(root/'source-after.js
 assert all(sha(root/d['captured'])==d['sha256'] for d in generated.values())
 external_after={n:sha(Path(n)) for n in inputs};assert inputs==external_after;(root/'external-source-after.json').write_text(json.dumps(external_after,indent=2)+'\n');assert Path(__file__).read_bytes()==producer_bytes and observer.read_bytes()==observer_bytes and worker_observer.read_bytes()==worker_observer_bytes and profiles.read_bytes()==profiles_bytes and cache_module.read_bytes()==cache_bytes;shutil.copy2(__file__,root/'executed-producer.py');print('NATIVE_FINISHED',code,flush=True)
 
-if args.partition_diagnostics:env['WF_MATRIX_PARTITION_DIAGNOSTICS']='1'
 if row=='blockdisk':
  images=list((root/'originals').glob('*/wf-block-*/backing.img'))
  media=[{'path':str(p.relative_to(root)),'bytes':p.stat().st_size,'sha256':sha(p)} for p in images]
