@@ -35,6 +35,19 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Official NATS RC cleanup diagnostic accepted — 2026-10-06
+
+Fresh two-message baseline/control execution at clean `de2f805` confirms official
+`v2.15.1-RC.1` still restores a removed scheduler entry after clean reopen.
+Unchanged baseline fails the intended assertion (package0.019s); the exact copied
+single-file dirty-count control passes (0.010s), preserving the anchor/last2 and
+zero callbacks. Independent review checks598 module files, complete compiled
+sources, raw verdicts, retained stores and unchanged production dependency
+hashes bound to recorded Git source. Earlier stable complete originals remain
+accepted; fourteen provenance substitutions are rejected. Production remains
+2.15.0. Complete archive and [diagnostic report](scale/scheduler-upstream-rc1-2026-10-06/)
+preserve this narrow result; original million physical-drain cause/gate remain open.
+
 ## Fresh original24h bulk-journal launch verified — 2026-10-06
 
 Actual original24h journal seed1 at757454a now runs, SDK3461745/producer3461056.

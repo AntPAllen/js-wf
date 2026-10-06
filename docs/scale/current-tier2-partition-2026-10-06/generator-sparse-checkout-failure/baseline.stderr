@@ -1,0 +1,20 @@
+.............E..........
+======================================================================
+ERROR: test_registry_matches_existing_workflow_and_go_tests (test_matrix_full.FullMatrixTests.test_registry_matches_existing_workflow_and_go_tests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/js-wf-partition-generator-sparse-control-20261006/checkout/scripts/test_matrix_full.py", line 143, in test_registry_matches_existing_workflow_and_go_tests
+    source = Path("integration/mixed_matrix_leader_test.go").read_text()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1029, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'integration/mixed_matrix_leader_test.go'
+
+----------------------------------------------------------------------
+Ran 24 tests in 2.332s
+
+FAILED (errors=1)

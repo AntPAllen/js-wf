@@ -1363,6 +1363,17 @@ and compare harness/fixture bytes against the recorded Git revision. This
 strengthens evidence for the isolated missing-source cleanup defect; production
 NATS dependency and original million-timer retirement cause remain unchanged.
 
+Use an explicitly selected upstream release candidate to check whether the
+same narrow defect is fixed, without replacing the production dependency or
+changing the fixture and its original baseline/control assertions. Bind the
+selected module to its download version, checksum and Git tag; require complete
+before/after `go.mod` and `go.sum` hashes matching the recorded runtime source.
+The default remains pinned stable2.15.0. The actual official2.15.1-RC.1 pair at
+de2f805 still reproduces the baseline defect and passes the exact dirty-count
+control; independently reviewed complete sources/stores are preserved in
+[the RC diagnostic](scale/scheduler-upstream-rc1-2026-10-06/). This does not
+qualify the original million-timer physical-drain gate or promote the candidate.
+
 ### Start scan checkpoints after bounded transient failures
 
 A failed Start scan must not repeatedly restart a confirmed prefix while a large

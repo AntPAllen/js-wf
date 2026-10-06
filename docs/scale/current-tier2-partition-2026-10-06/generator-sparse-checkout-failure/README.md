@@ -1,0 +1,5 @@
+# Partition200 generator failure and checkout control
+
+Run37486948256 at `fcf2e9` is terminal failure. Generator job112349343189 failed its registry unit test because the sparse checkout selected only `.github` and `scripts`; `integration/mixed_matrix_leader_test.go` was absent. No partition workload ran, and no runtime, duration, fault, latency, history or drain gate is qualified.
+
+The exact recorded source in a fresh sparse checkout reproduces the same missing-file failure. Adding only `integration` to that checkout makes all24 matrix tests and the workload-source test pass. The generator workflow now selects that required directory before those tests. The workload jobs retain their original source materialization and unchanged200-seed/10m/fault/latency/history/drain requirements. Provider terminal metadata, generator steps, original log download hash and actual local baseline/control logs are retained. The original observer continues collecting its same terminal handle; it is not restarted or reclassified.
