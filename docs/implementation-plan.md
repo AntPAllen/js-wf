@@ -4949,7 +4949,8 @@ zero-consumer cleanup verified, application charge1,581,600,000 bytes. Source
 unchanged; actual SDK3147263 and five2.15 server processes closed. Independent
 artifact review verifies all persisted sample coordinates/census/timestamp math.
 Complete1,793-file fixture/1,794-member archive637,549,119 bytes fully read back;
-all current original bytes/modes/mtimes unchanged. S3 transfer follows. Synthetic capacity
+all current original bytes/modes/mtimes unchanged. Complete archive/metadata/inventory
+pass full S3 GET hash/size readback. Synthetic capacity
 does not qualify real-workflow/fault/default/currentmatrix/24h adoption of bulk.
 [Evidence](scale/full400k-bulk-capacity-preparation-2026-10-06/native-valid-population/).
 

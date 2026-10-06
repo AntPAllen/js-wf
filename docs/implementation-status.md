@@ -56,7 +56,8 @@ timestamp oracle;256 spread-out frozen point witnesses pass. Application charge
 SDK3147263 and five observed NATS2.15 processes closed, selected source unchanged.
 Complete sample-file census/math verified by corrected independent reviewer;
 complete1,793-file fixture/1,794-member archive637,549,119 bytes fully read back,
-all current original bytes/modes/mtimes unchanged. S3 publication follows. Initial reviewer
+all current original bytes/modes/mtimes unchanged. Complete archive, metadata and
+inventory also pass full S3 GET hash/size readback; canonical receipt committed. Initial reviewer
 incorrectly required an explicit empty-stream counter; its failure is preserved,
 and corrected controls still reject missing nonzero or unexpected counters.
 [Review](scale/full400k-bulk-capacity-preparation-2026-10-06/native-valid-population/).
