@@ -34,6 +34,24 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier is live; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Broader /tmp cleanup: closed large artifacts moved to verified S3 — 2026-10-06
+
+Fresh full remote compressed bodies/every member/metadata/inventory, exact current
+post-media local censuses and visible closure checks pass on five closed failed
+24h roots. Large actual SDK binaries, dispatch logs and a partial archive now
+moved off local disk: exactly1,206,849,536 allocated bytes recovered. All
+exact original bytes remain in already committed complete S3 archives; remaining
+local bytes/modes/mtimes unchanged. Source trees and smaller provenance/verdict/
+restore ledgers remain local. Earlier statements that those large binaries/logs
+remain local describe the pre-cleanup state; any future use requires verified
+fresh restoration. No stores reopened or native qualification promoted. Live
+100k normal and full400k donors untouched.
+[Exact files and per-root guards](scale/tmp-storage-review-2026-10-06/large-artifact-offload-summary.json).
+
+Primary worker-clock131–1431.4GB tar also passes full S3 byte readback; its committed
+member/root inventories retain51,519 member identities. Local primary removal
+still requires fresh remote member/body and complete current-root/closure checks.
+
 ## Broader /tmp cleanup: five closed scale-media offloads complete — 2026-10-06
 
 All five complete S3 readbacks and fresh full member/body/current census/visible
