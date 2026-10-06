@@ -43,8 +43,12 @@ root process/descriptor/mount closure verify. Baseline18.776959284s and interrup
 19.372032037s cover100k invocations/1.2M entries under original20s. Existing
 executed-source/injected-client-fault scope stays unchanged; no current-source,
 natural server-cause, OS-kill/fullmatrix/24h claim. Source, native outputs and
-stores remain local until committed full S3 readback and fresh member/census/
-closure checks. Sparse planner-only Tier2/Tier3 checkouts also passed all30 source
+complete stores now retained in committed S3 proof: fresh full compressed-body/
+member/census/closure verification precedes removal of five closed store dirs
+and the raw duplicate. Exactly928,575,488 allocated store bytes recovered; all
+remaining local bytes/modes/mtimes unchanged. Source/exes/configs/native outputs
+stay local, and future store audit requires a newly verified restored copy.
+[Guarded media offload](scale/bulk-read-resumption-2026-10-05/r5-100k-store-media-offload-2026-10-06/offload.json). Sparse planner-only Tier2/Tier3 checkouts also passed all30 source
 selection and planner tests; no matrix workload changes.
 [Complete capture](scale/bulk-read-resumption-2026-10-05/r5-100k-complete-offload-2026-10-06/capture.json).
 
