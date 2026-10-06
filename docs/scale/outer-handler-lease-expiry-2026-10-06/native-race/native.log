@@ -1,0 +1,11 @@
+=== RUN   TestOuterHandlerNativeLeaseExpiryAndLateAppend
+=== RUN   TestOuterHandlerNativeLeaseExpiryAndLateAppend/handler
+    handler_lease_loss_native_test.go:153: production TTL12s / AckWait13s takeover=13.07283216s
+    handler_lease_loss_native_test.go:170: old owner fenced: {At:2026-10-06 14:06:03.079644404 +0000 UTC Worker:expired-old Type:lease-expiry ID:handler RunSequence:1 Delivery:1 Epoch:1 Reason:lease_heartbeat_lost Error:workflow lease was lost: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 10: nats: key revision mismatch}
+=== RUN   TestOuterHandlerNativeLeaseExpiryAndLateAppend/continuation
+    handler_lease_loss_native_test.go:153: production TTL12s / AckWait13s takeover=13.077403431s
+    handler_lease_loss_native_test.go:170: old owner fenced: {At:2026-10-06 14:06:20.160151977 +0000 UTC Worker:expired-old Type:lease-expiry ID:continuation RunSequence:2 Delivery:1 Epoch:11 Reason:lease_heartbeat_lost Error:workflow lease was lost: nats: nats: API error: code=400 err_code=10071 description=wrong last sequence: 19: nats: key revision mismatch}
+--- PASS: TestOuterHandlerNativeLeaseExpiryAndLateAppend (34.23s)
+    --- PASS: TestOuterHandlerNativeLeaseExpiryAndLateAppend/handler (17.09s)
+    --- PASS: TestOuterHandlerNativeLeaseExpiryAndLateAppend/continuation (17.14s)
+PASS
