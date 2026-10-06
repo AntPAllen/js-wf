@@ -1,15 +1,71 @@
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
 import tarfile
 import tempfile
 import unittest
+from unittest import mock
 
 import fixture_archive
 
 
 class FixtureArchiveControls(unittest.TestCase):
+    def test_restore_exact_bytes_modes_and_nanosecond_mtimes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp)
+            root = base / "root"
+            root.mkdir()
+            for name, data, mode in [("nested/sdk", b"binary", 0o755),
+                                     ("partial.json.tmp", b'{"unfinished":', 0o600),
+                                     ("empty", b"", 0o644)]:
+                path = root / name
+                path.parent.mkdir(exist_ok=True)
+                path.write_bytes(data)
+                path.chmod(mode)
+                os.utime(path, ns=(1728000000123456789, 1728000000123456789))
+            archive = base / "proof.tar.gz"
+            proof = fixture_archive.capture(root, archive, base / "meta")
+            manifest = fixture_archive.verify(archive)
+            expected = dict(bytes=proof["archive_bytes"], sha256=proof["archive_sha256"])
+            result = fixture_archive.restore(archive, expected, manifest, base / "fresh")
+            self.assertTrue(result["all_bytes_modes_mtimes_verified"])
+            self.assertEqual(fixture_archive.inventory(base / "fresh"), manifest["files"])
+            with self.assertRaisesRegex(ValueError, "fresh"):
+                fixture_archive.restore(archive, expected, manifest, root)
+            self.assertEqual(fixture_archive.inventory(root), manifest["files"])
+            with self.assertRaisesRegex(ValueError, "committed proof"):
+                fixture_archive.restore(archive, dict(expected, sha256="0" * 64),
+                                        manifest, base / "wrong-hash")
+            self.assertFalse((base / "wrong-hash").exists())
+            with self.assertRaisesRegex(ValueError, "canonical manifest"):
+                fixture_archive.restore(archive, expected, dict(manifest, scope="wrong"),
+                                        base / "wrong-inventory")
+            self.assertFalse((base / "wrong-inventory").exists())
+
+    def test_restore_detects_archive_path_replacement(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp)
+            root = base / "root"
+            root.mkdir()
+            (root / "data").write_bytes(b"original")
+            archive = base / "proof.tar.gz"
+            proof = fixture_archive.capture(root, archive, base / "meta")
+            manifest = fixture_archive.verify(archive)
+            expected = dict(bytes=proof["archive_bytes"], sha256=proof["archive_sha256"])
+            real_utime = os.utime
+
+            def replace_archive(*args, **kwargs):
+                replacement = base / "replacement"
+                replacement.write_bytes(archive.read_bytes())
+                replacement.replace(archive)
+                return real_utime(*args, **kwargs)
+
+            with mock.patch.object(fixture_archive.os, "utime", side_effect=replace_archive):
+                with self.assertRaisesRegex(ValueError, "archive path changed"):
+                    fixture_archive.restore(archive, expected, manifest, base / "fresh")
+
     def test_complete_capture_and_corrupt_member_rejection(self):
         with tempfile.TemporaryDirectory() as temp:
             base = Path(temp)

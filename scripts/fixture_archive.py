@@ -5,6 +5,7 @@ file bytes, including failed or partial artifacts; it never repairs a verdict.
 """
 import hashlib
 import json
+import os
 from pathlib import Path
 import tarfile
 
@@ -128,3 +129,72 @@ def capture(root, archive_path, out):
              "storage": "Full archive for S3 content-addressed storage; manifests/receipts in Git. No local or Git archive-part copies."}
     metadata.write_text(json.dumps(proof, indent=2) + "\n")
     return proof
+
+
+def restore(archive_path, expected_archive, expected_manifest, destination):
+    """Restore a verified full fixture to a fresh directory, without starting it.
+
+    The embedded manifest and entire compressed body must match the caller's
+    canonical proof before creating the destination. A failed restoration stays
+    partial and has no success report; it never overwrites an existing tree.
+    """
+    archive_path, destination = Path(archive_path), Path(destination)
+    if destination.exists() or destination.is_symlink():
+        raise ValueError("restoration destination must be fresh")
+    if archive_path.is_symlink() or not archive_path.is_file():
+        raise ValueError("archive must be a regular file")
+    with archive_path.open("rb") as raw:
+        original = os.fstat(raw.fileno())
+        declared, fingerprint = verify_hashed_stream(raw, expected_archive)
+        if declared != expected_manifest:
+            raise ValueError("embedded inventory differs from canonical manifest")
+        files = declared["files"]
+        # Reject impossible filesystem trees before any destination is created.
+        for name in files:
+            safe_name(name)
+            if any(parent.as_posix() in files for parent in Path(name).parents
+                   if parent != Path(".")):
+                raise ValueError("fixture file conflicts with a parent path")
+        destination.mkdir(parents=True, exist_ok=False)
+        raw.seek(0)
+        restored = set()
+        with tarfile.open(fileobj=raw, mode="r|gz") as archive:
+            for member in archive:
+                name = safe_name(member.name)
+                if not member.isfile():
+                    raise ValueError("archive changed to a non-regular member")
+                source = archive.extractfile(member)
+                if name == CONTROL:
+                    if json.load(source) != declared:
+                        raise ValueError("archive inventory changed during restoration")
+                    continue
+                if name not in files or name in restored:
+                    raise ValueError("archive member changed during restoration")
+                record = files[name]
+                output = destination / name
+                output.parent.mkdir(parents=True, exist_ok=True)
+                digest_value, size = hashlib.sha256(), 0
+                with output.open("xb") as writer:
+                    while block := source.read(1 << 20):
+                        writer.write(block)
+                        digest_value.update(block)
+                        size += len(block)
+                    writer.flush()
+                    os.fsync(writer.fileno())
+                if (size != record["bytes"] or digest_value.hexdigest() != record["sha256"]
+                        or member.mode & 0o777 != record["mode"]):
+                    raise ValueError("restored member differs from canonical inventory")
+                output.chmod(record["mode"])
+                os.utime(output, ns=(record["mtime_ns"], record["mtime_ns"]))
+                restored.add(name)
+        raw.seek(0)
+        if digest(raw) != expected_archive:
+            raise ValueError("compressed archive changed during restoration")
+        current = archive_path.stat()
+        if (current.st_dev, current.st_ino) != (original.st_dev, original.st_ino):
+            raise ValueError("archive path changed during restoration")
+        if restored != set(files) or inventory(destination) != files:
+            raise ValueError("restored full census differs from canonical inventory")
+    return {"files": len(files), "restored_bytes": sum(r["bytes"] for r in files.values()),
+            "archive": fingerprint, "all_bytes_modes_mtimes_verified": True,
+            "scope": "Fresh file restoration only; no original fixture reopened, broker started or native gate qualified."}
