@@ -55,8 +55,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # The planner needs its scripts and workflow registry, not the
-          # retained broker/binary archives. Workload jobs keep full checkout.
+          # Planner inputs; workload jobs expand to every runtime/verifier input.
+          filter: blob:none
           sparse-checkout: |
             .github
             scripts
@@ -68,6 +68,7 @@ jobs:
           CLOCK_TIMER_CUT: ${{ inputs.clock_timer_cut && '1' || '' }}
           COMMON_TIMER_CLOCK: ${{ inputs.common_timer_clock && '1' || '' }}
         run: |
+          python3 -m unittest discover -s scripts -p 'test_workload_source.py'
           python3 -m unittest discover -s scripts -p 'test_tier3_matrix_planner.py'
           python3 scripts/tier3-matrix-campaign.py
   journal:
@@ -99,6 +100,19 @@ jobs:
       GOMAXPROCS: '2'
     steps:
       - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            .github
+            scripts
+      - name: Materialize complete workload and verifier inputs
+        run: python3 scripts/materialize-workload-source.py --report "$RUNNER_TEMP/workload-source.json"
+      - name: Retain source selection evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: workload-source-${{ matrix.row }}-${{ matrix.artifact_seed }}
+          path: ${{ runner.temp }}/workload-source.json
+          if-no-files-found: error
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod

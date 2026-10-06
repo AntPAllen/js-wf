@@ -34,6 +34,26 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier is live; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Full-matrix source checkout and interrupted-million storage — 2026-10-06
+
+Tier2/Tier3 full-matrix workflows now fetch with `blob:none`, initially materialize
+planner scripts, then select every non-docs file plus every Go/Python/YML verifier
+in docs using the existing isolated-producer policy. Runtime inputs, embedded
+assets, sim pins and verifier code remain present; source inventory is retained
+in a separate artifact outside the checkout. Canonical Git archive proofs remain
+available for audit. Matrix counts, seed ranges, timeouts, workloads and raw proof
+artifact layouts are unchanged. This addresses checkout volume, not an established
+cause of queued hosted jobs. Real-Git fixture expansion and dirty-tree controls
+pass; full repository materialization/compile verification is the next check.
+
+Interrupted million-candidate media offload now complete: full remote body and
+members, current census and visible process/descriptor/mount closure reverified
+before removing three closed broker store directories and the raw tar. Exactly
+703,860,736 allocated bytes recovered; retained files unchanged. Source, SDK,
+unadopted server candidate, stale report and receipts remain local. Native terminal
+exit/drain was not observed and original million/24h gates remain unqualified.
+[Guarded offload receipt](scale/scheduler-server-candidate-2026-10-04/million-interrupted-store-media-offload-2026-10-06/offload.json).
+
 ## Original all-server row failed before bulk; retry window localized — 2026-10-06
 
 Original10m all-server SIGKILL/restart seed1 ate09442a fails611.10s before bulk:
@@ -76,9 +96,10 @@ unadopted, originalmillion/24h unqualified. S3 offload must follow committed com
 proof and full remote verification before any media removal.
 [Capture and guard](scale/scheduler-server-candidate-2026-10-04/million-interrupted-complete-offload-2026-10-06/).
 
-## Original ten-minute bulk all-server restart row live — 2026-10-06
+## Historical launch: original ten-minute bulk all-server restart row — 2026-10-06
 
-Fresh original10m all-server SIGKILL/restart seed1 at e09442a runs with explicit
+This launch is now terminal FAIL; the failed-row review above is authoritative.
+At launch, fresh original10m all-server SIGKILL/restart seed1 at e09442a ran with explicit
 chunked retained integrity/bulk final latency/full point comparison. Actual
 SDK3375975 executable/build/profile and1,814 before/current source files exactly
 match Git and clean detached source. Five actual NATS executable identities,

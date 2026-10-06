@@ -32,6 +32,11 @@ jobs:
       matrix: ${{ steps.matrix.outputs.jobs }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            .github
+            scripts
       - id: matrix
         env:
           SEED_COUNT: ${{ inputs.seeds }}
@@ -39,6 +44,7 @@ jobs:
           MATRIX_DURATION: ${{ inputs.duration }}
           START_SEED: ${{ inputs.start_seed }}
         run: |
+          python3 -m unittest discover -s scripts -p 'test_workload_source.py'
           python3 -m unittest discover -s scripts -p 'test_matrix_*.py'
           python3 scripts/matrix-campaign.py
   leader:
@@ -62,6 +68,19 @@ jobs:
       MATRIX_TEST: ${{ matrix.row == 'upgrade' && 'TestMixedMatrixRollingServerUpgrade' || matrix.row == 'blockdisk' && 'TestMixedMatrixBlockDiskStallEveryThirtySeconds' || matrix.row == 'fanoutrestart' && 'TestMixedMatrixFanoutRestartEveryThirtySeconds' || matrix.row == 'serverclockplus' && 'TestMixedMatrixServerClockSkewPositive' || matrix.row == 'serverclockminus' && 'TestMixedMatrixServerClockSkewNegative' || matrix.row == 'workerclock' && 'TestMixedMatrixWorkerClockSkew' || matrix.row == 'isolation' && 'TestMixedMatrixWorkerReplyIsolationFortyFiveSeconds' || matrix.row == 'pause' && 'TestMixedMatrixWorkerPausedFortyFiveSeconds' || matrix.row == 'worker' && 'TestMixedMatrixRandomWorkerKilledEveryFiveSeconds' || matrix.row == 'partition' && 'TestMixedMatrixServerPartitionEveryThirtySeconds' || matrix.row == 'cluster' && 'TestMixedMatrixAllServersKilledEveryThirtySeconds' || matrix.row == 'consumer' && 'TestMixedMatrixConsumerLeaderEveryThirtySeconds' || 'TestMixedMatrixJournalLeaderEveryThirtySeconds' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            .github
+            scripts
+      - name: Materialize complete workload and verifier inputs
+        run: python3 scripts/materialize-workload-source.py --report "$RUNNER_TEMP/workload-source.json"
+      - name: Retain source selection evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: workload-source-${{ matrix.row }}-${{ matrix.artifact_seed }}
+          path: ${{ runner.temp }}/workload-source.json
+          if-no-files-found: error
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
