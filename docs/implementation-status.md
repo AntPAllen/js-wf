@@ -29,6 +29,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: original positive server-clock row live
+
+Clean835d19e actualnormalSDK1715508/source694/profile2CPU/2GiB/threeexternalNATS
+bytes/paths verified. Exact retainedtime.go overlay matches+60s; independent pinned
+publicvarz confirms node2+60s/neutral peers within original±2s. Repository reviewer
+supports both directions, original19observations/30scadence/overlay/actualexes/
+alllatency corrections/fullterminalcohort/source/closure/nativegates. Three controls
+acceptvalidpatterns and reject24clock+4latency variants. Native/copy/full13x200
+qualification pending; original24h/million handles unchanged.
+[Preparation](scale/tier2-retained-server-clock-2026-10-06/preparation/).
+[Live evidence](scale/tier2-retained-server-clock-2026-10-06/positive-live-initial/).
+
 ## Latest follow-up — 2026-10-06: original rolling upgrade copied audit accepted
 
 Fresh copies verify exact2,016/22,252/2,016report/histories/allthree queues/64durables.

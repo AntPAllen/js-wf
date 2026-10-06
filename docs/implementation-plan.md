@@ -4611,3 +4611,15 @@ archive readback passes. Historical35s mixed-version residual cause unconfirmed;
 this full all-upgraded row does not erase it. Full13x200/current-source/24h remain.
 [Native proof/corrected review](scale/tier2-retained-upgrade-2026-10-06/native-ten-minute/).
 [Copied proof](scale/tier2-retained-upgrade-2026-10-06/copied-audit/).
+
+## Original retained positive server-clock row live — 2026-10-06
+
+Clean835d19e originalnormal ten-minute seed1 actualSDK1715508/threeexternalNATS/
+694inputs/2CPU/2GiB verified. Exact retainedtoolchain overlay+60s/actualshiftedbinary
+and independent pinnedvarz clocks match node2+60s/neutral peers within original±2s.
+Reviewer covers both clockdirections, nineteen original30s observations, exactoverlay/
+actualexes/fullnativegates/latencycorrection+allterminals/source/profile/closure.
+Threecontrols acceptvalidpatterns and reject24clock+4latency variants. Native
+terminal/independentcopy/full13x200 remainpending; long24h/million sources unchanged.
+[Preparation](scale/tier2-retained-server-clock-2026-10-06/preparation/).
+[Live evidence](scale/tier2-retained-server-clock-2026-10-06/positive-live-initial/).
