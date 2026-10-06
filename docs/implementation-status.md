@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: corrected real87920 point measurement live
+
+Clean38a0a8e actualnormalSDK1054824/executable/VCS/profile4CPU/GOGC500/4GiB verified;
+fiveactualserverprocesses observedalive. R5ready gate nowpasses; same6min point
+allowance/20s requests/originallastheal+5min terminaldeadline. Partial30000checks
+at2m12.980s observed, notfinaltiming/coverage. Onlyfresh verified copies mounted;
+original/failedstores not reopened. Oldfailed disposable3701files/1,971,184,303bytes
+reclaimed afterpushedwholearchive/parts/manifest/currentbytes/SDK+5serverclosure/
+allvisibletaskFD checks. Canonicalproof/originals/source/exes/caches retained.
+Original24h andmilliontimercampaigns overlap, neitherrestarted; no isolatedratio.
+Sameproducer/reviewer handles continue. [Live](scale/parallel-final-latency-2026-10-06/cohort-r5-live-initial/).
+[Reclamation](scale/parallel-final-latency-2026-10-06/reclaimed-admission-copy/).
+
 ## Latest follow-up — 2026-10-06: bounded final latency sustained row accepted
 
 Clean89642e4 normalPASS633.19s,90batches/2520terminals/27752entries,19actualjournal

@@ -4448,3 +4448,12 @@ readiness corrected, same60s. Cleancheckout launch rejection separate; noSDK or
 copy created. Fresh verified copies required for changedmeasurement.
 [Accepted row](scale/parallel-final-latency-2026-10-06/live-journal-ten-minute/).
 [Failed admission](scale/parallel-final-latency-2026-10-06/retained-cohort/).
+
+## Corrected real87920 cohort point measurement live — 2026-10-06
+
+Clean38a0a8e actualSDK1054824/exe/VCS/profile4CPU/GOGC500/4GiB/fivealive actual
+servers verified; correctedR5ready passes. Original6min point allowance/20s requests/
+lastheal+5min terminaldeadline retained. Freshverifiedcopies only, oldfailedcopy
+reclaimed aftercanonicalpushedproof/fullhashes/closure/FDchecks. Original24h and
+milliontimer remainlive. Partialprogress is notfullsize/currentmatrix/24h proof.
+[Launch](scale/parallel-final-latency-2026-10-06/cohort-r5-live-initial/).
