@@ -1,0 +1,47 @@
+=== RUN   TestWorkerStandaloneCommands
+=== RUN   TestWorkerStandaloneCommands/static
+    standalone_test.go:166: worker standalone process domain="" pid=1036158 signal=SIGTERM exit=0 exe_sha256=5dbc0faeb8f54d0f2aa3c410d2ca957dae0cfafa46c1923fc05928016485034f
+=== RUN   TestWorkerStandaloneCommands/kv
+    standalone_test.go:166: worker standalone process domain="" pid=1036296 signal=SIGTERM exit=0 exe_sha256=5dbc0faeb8f54d0f2aa3c410d2ca957dae0cfafa46c1923fc05928016485034f
+=== RUN   TestWorkerStandaloneCommands/auto
+    standalone_test.go:166: worker standalone process domain="" pid=1036413 signal=SIGTERM exit=0 exe_sha256=5dbc0faeb8f54d0f2aa3c410d2ca957dae0cfafa46c1923fc05928016485034f
+--- PASS: TestWorkerStandaloneCommands (12.11s)
+    --- PASS: TestWorkerStandaloneCommands/static (5.32s)
+    --- PASS: TestWorkerStandaloneCommands/kv (2.08s)
+    --- PASS: TestWorkerStandaloneCommands/auto (2.48s)
+=== RUN   TestWorkerStandaloneCommandsInJetStreamDomain
+=== RUN   TestWorkerStandaloneCommandsInJetStreamDomain/static
+    standalone_test.go:178: worker domain admitted node=0 domain=WFWORKER server_id=NAIM2WTFNMWUNV3XGKASZFPLP2UUHCY3CGGMCN4H25JNMPSCNSCEQ3PP
+    standalone_test.go:178: worker domain admitted node=1 domain=WFWORKER server_id=NCJYN7DRQZPXY3A4FGA6XRHRCMNQWUIEIRCHDX2DGQY2I7LLK4M5BFLV
+    standalone_test.go:178: worker domain admitted node=2 domain=WFWORKER server_id=NATHYAQFNP3FXZTNA4XY3J4OCTDTGKUG7NYFXC6VP2ACNDYLQHV2ETZB
+    standalone_test.go:166: worker standalone process domain="WFWORKER" pid=1037022 signal=SIGTERM exit=0 exe_sha256=5dbc0faeb8f54d0f2aa3c410d2ca957dae0cfafa46c1923fc05928016485034f
+=== RUN   TestWorkerStandaloneCommandsInJetStreamDomain/kv
+    standalone_test.go:178: worker domain admitted node=0 domain=WFWORKER server_id=NC2GICATHQJFRS4SPPIFC2O2Y2BUV2EWS6JHJRREFSAFWJXDW5ERNQZ5
+    standalone_test.go:178: worker domain admitted node=1 domain=WFWORKER server_id=ND3CHLLUVVAT5L3CWOMXJ6NO4AHZ6C6ZSJ2NJAXQOQ6FKDF3WZTOXURY
+    standalone_test.go:178: worker domain admitted node=2 domain=WFWORKER server_id=NCMKWHZDSDL5O7323E6RFLZSFV5ISDPXCPM5B7QFN5DCCMEEK2I2HTET
+    standalone_test.go:166: worker standalone process domain="WFWORKER" pid=1037760 signal=SIGTERM exit=0 exe_sha256=5dbc0faeb8f54d0f2aa3c410d2ca957dae0cfafa46c1923fc05928016485034f
+=== RUN   TestWorkerStandaloneCommandsInJetStreamDomain/auto
+    standalone_test.go:178: worker domain admitted node=0 domain=WFWORKER server_id=NDQDNCGF7HFUQ6K2WR7Q72TJX6XOC3Q5I2HNHLQOQFYAONTR7KG5RZQX
+    standalone_test.go:178: worker domain admitted node=1 domain=WFWORKER server_id=NDQGBVXKELWI2D4USYAXEXJNYB5TZ3XT5Q5MWCAXY67EBPKEYKI2XQYU
+    standalone_test.go:178: worker domain admitted node=2 domain=WFWORKER server_id=NB7M2KDV42ASDLHNLPWSTPAOGIGDP5DGSQX4D6C3VLGH5LU6A5SRV4IZ
+    standalone_test.go:166: worker standalone process domain="WFWORKER" pid=1038881 signal=SIGTERM exit=0 exe_sha256=5dbc0faeb8f54d0f2aa3c410d2ca957dae0cfafa46c1923fc05928016485034f
+--- PASS: TestWorkerStandaloneCommandsInJetStreamDomain (39.94s)
+    --- PASS: TestWorkerStandaloneCommandsInJetStreamDomain/static (10.64s)
+    --- PASS: TestWorkerStandaloneCommandsInJetStreamDomain/kv (16.05s)
+    --- PASS: TestWorkerStandaloneCommandsInJetStreamDomain/auto (13.25s)
+=== RUN   TestWorkerStandaloneStartsAfterServerRestart
+    standalone_test.go:166: worker standalone process domain="" pid=1039452 signal=SIGTERM exit=0 exe_sha256=5dbc0faeb8f54d0f2aa3c410d2ca957dae0cfafa46c1923fc05928016485034f
+--- PASS: TestWorkerStandaloneStartsAfterServerRestart (1.77s)
+=== RUN   TestWorkerStandaloneStartsAfterServerRestartInJetStreamDomain
+    main_test.go:105: worker domain startup stopped node=0 domain=WFWORKER server_id=NCV5HYVILHZHKNGQG7BM6QJZY7DYENRKNC5GQI6Y2IQ6DNUINNOBMF77
+    main_test.go:105: worker domain startup stopped node=1 domain=WFWORKER server_id=NBUE7HHODS7CLV2JRWAGZLV7VQH4YRLC6GE3TLS4QFWNV6LJ3QK6KM2G
+    main_test.go:105: worker domain startup stopped node=2 domain=WFWORKER server_id=ND744I5XTJBI7SEBJCR66NNXLR5ZFGJERC3QSICUN33ZDSKN2SAXJWY3
+    main_test.go:133: worker domain startup restarted node=0 domain=WFWORKER server_id=NAZW2VMKMNEOWTXZ3HESWHULEQ7NHMAD5BNMYLRGQZTAQO3L4VWVAD36
+    main_test.go:133: worker domain startup restarted node=1 domain=WFWORKER server_id=NBRMRTHQGWR3ZBQVLUBII546S62PMBLZQ7LGWZB4JSSF6BV7Z6UM3Y3P
+    main_test.go:133: worker domain startup restarted node=2 domain=WFWORKER server_id=NBBG2UGHTEY3RALYIMFQDF2YZAJX2VOORBH7MAETUYCKHUSZKDMY6Y7L
+    main_test.go:161: worker domain admitted node=0 domain=WFWORKER server_id=NAZW2VMKMNEOWTXZ3HESWHULEQ7NHMAD5BNMYLRGQZTAQO3L4VWVAD36
+    main_test.go:161: worker domain admitted node=1 domain=WFWORKER server_id=NBRMRTHQGWR3ZBQVLUBII546S62PMBLZQ7LGWZB4JSSF6BV7Z6UM3Y3P
+    main_test.go:161: worker domain admitted node=2 domain=WFWORKER server_id=NBBG2UGHTEY3RALYIMFQDF2YZAJX2VOORBH7MAETUYCKHUSZKDMY6Y7L
+    standalone_test.go:166: worker standalone process domain="WFWORKER" pid=1039567 signal=SIGTERM exit=0 exe_sha256=5dbc0faeb8f54d0f2aa3c410d2ca957dae0cfafa46c1923fc05928016485034f
+--- PASS: TestWorkerStandaloneStartsAfterServerRestartInJetStreamDomain (9.61s)
+PASS

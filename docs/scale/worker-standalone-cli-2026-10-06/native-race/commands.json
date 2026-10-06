@@ -1,0 +1,21 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-race",
+    "-buildvcs=true",
+    "-c",
+    "-o",
+    "/tmp/js-wf-worker-standalone-commands-20261006/worker-race.test",
+    "./cmd/wf-worker"
+  ],
+  "build_working_directory": "/home/exedev/js-wf",
+  "run": [
+    "/tmp/js-wf-worker-standalone-commands-20261006/worker-race.test",
+    "-test.v",
+    "-test.run=^(TestWorkerStandaloneCommands|TestWorkerStandaloneCommandsInJetStreamDomain|TestWorkerStandaloneStartsAfterServerRestart|TestWorkerStandaloneStartsAfterServerRestartInJetStreamDomain)$",
+    "-test.count=1",
+    "-test.timeout=4m"
+  ],
+  "run_working_directory": "/home/exedev/js-wf/cmd/wf-worker"
+}
