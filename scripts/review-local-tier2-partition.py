@@ -92,6 +92,9 @@ def seed_review(campaign_root, record, revision, model_root, output_root):
     require(command['test_command'] == execution['actual_argv'] == [str(root/'integration.test'),
             '-test.run=^'+TEST+'$', '-test.count=1', '-test.v', '-test.timeout=18m'], 'SDK actual selector/count/deadline differs')
     env = command['environment']
+    require(command.get('server_profile', 'default') == 'default'
+            and 'WF_MATRIX_PARTITION_SERVER_BIN' not in env,
+            'original campaign review rejects experimental server profiles')
     require((env['GOMAXPROCS'], env['GOMEMLIMIT'], env['WF_MATRIX_DURATION'], env['FAULT_SEED'])
             == ('2', '2GiB', '10m', str(seed)) and env['WF_MATRIX_CHAOS'] == '1'
             and env['WF_MATRIX_OPERATION_TIMINGS'] == '1'

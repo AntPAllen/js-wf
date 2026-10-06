@@ -4,7 +4,7 @@ import subprocess,json,hashlib,os,shutil,time,datetime,argparse,signal,traceback
 from matrix_process_observer import observe_servers
 from matrix_worker_observer import observe_workers
 from retained_input_cache import retain
-from tier2_retained_profiles import ROWS, CLOCK_ROWS, sdk_timeout, capture_legacy_server
+from tier2_retained_profiles import ROWS, CLOCK_ROWS, sdk_timeout, capture_legacy_server, capture_partition_candidate
 
 parser=argparse.ArgumentParser(description='Retain one original Tier2 row, actual SDK, selected source, observed NATS executables and closed process stores. Full13x200 gate remains separate.')
 parser.add_argument('--root',type=Path,required=True)
@@ -13,6 +13,8 @@ parser.add_argument('--seed',type=int,default=1)
 parser.add_argument('--duration',choices=['10m','35s'],default='10m',help='35s smoke never qualifies sustained duration')
 parser.add_argument('--old-server',type=Path,help='Absolute NATS 2.11.17 executable for the upgrade row; retained before use')
 parser.add_argument('--partition-diagnostics',action='store_true',help='Capture live per-peer public Raft/stream status alongside the original partition fault; gates unchanged')
+parser.add_argument('--partition-server',type=Path,help='Experimental executable tied to a committed successful component proof; partition row only')
+parser.add_argument('--partition-server-proof',type=Path,help='Repository-relative canonical component evidence directory for --partition-server')
 parser.add_argument('--race',action='store_true',help='explicit race profile; default preserves standard Tier2 normal execution')
 parser.add_argument('--prepare-only',action='store_true',help='Capture selected source and compile SDK without starting native tests')
 parser.add_argument('--prepared-inputs',type=Path,help='Verified prepare-only fixture at this exact clean revision')
@@ -23,6 +25,8 @@ root=args.root
 if not root.is_absolute() or root.resolve().is_relative_to(repo) or not -(2**63)<=args.seed<2**63:
  parser.error('require an absolute evidence root outside the checkout and an int64 seed')
 if args.partition_diagnostics and args.row!='partition':parser.error('--partition-diagnostics applies only to partition')
+if (args.partition_server is None) != (args.partition_server_proof is None):parser.error('partition server and proof must be supplied together')
+if args.partition_server is not None and args.row!='partition':parser.error('partition server applies only to partition')
 if (args.row=='upgrade') != (args.old_server is not None):parser.error('--old-server is required only for upgrade')
 root=root.resolve()
 cache=args.input_cache
@@ -65,6 +69,9 @@ for line in deps.splitlines():
 env={k:v for k,v in os.environ.items() if not k.startswith(('WF_','MATRIX_','TIER3_MATRIX_'))};env.update(GOMAXPROCS='2',GOMEMLIMIT='2GiB',WF_MATRIX_CHAOS='1',WF_MATRIX_OPERATION_TIMINGS='1',WF_MATRIX_DURATION=args.duration,WF_MATRIX_PROCESS_ROOT=str(root/'originals'),MATRIX_ARTIFACT_PREFIX=str(root/('matrix-'+args.row+'-'+str(args.seed))),FAULT_SEED=str(args.seed))
 row=args.row;duration=args.duration;race=args.race;test=ROWS[row]
 if args.partition_diagnostics:env['WF_MATRIX_PARTITION_DIAGNOSTICS']='1'
+candidate_binary = capture_partition_candidate(args.partition_server,args.partition_server_proof,root,repo,revision) if args.partition_server is not None else None
+server_profile = 'experimental-component-candidate' if candidate_binary is not None else 'default'
+if candidate_binary is not None:env['WF_MATRIX_PARTITION_SERVER_BIN']=str(candidate_binary)
 if row=='blockdisk':env['WF_BLOCK_DISK']='1'
 if row=='upgrade':env['WF_NATS_SERVER_BIN']=str(capture_legacy_server(args.old_server,root))
 selection='^'+test+'$'
@@ -91,7 +98,7 @@ if args.prepare_only:
 
 prepared_input_root=str(args.prepared_inputs) if args.prepared_inputs is not None else None
 args=[str(root/'integration.test'),'-test.run='+selection,'-test.count=1','-test.v','-test.timeout='+sdk_timeout(row)]
-(root/'commands.json').write_text(json.dumps({'build':build if prepared_input_root is None else None,'prepared_input_root':prepared_input_root,'test_command':args,'row':row,'test':test,'duration':duration,'race':race,'sustained_ten_minutes':duration=='10m','environment':{k:v for k,v in env.items() if k.startswith(('WF_','MATRIX_')) or k in ['GOMEMLIMIT','GOMAXPROCS','GOCACHE','FAULT_SEED']}},indent=2)+'\n')
+(root/'commands.json').write_text(json.dumps({'build':build if prepared_input_root is None else None,'prepared_input_root':prepared_input_root,'test_command':args,'row':row,'test':test,'duration':duration,'race':race,'server_profile':server_profile,'sustained_ten_minutes':duration=='10m','environment':{k:v for k,v in env.items() if k.startswith(('WF_','MATRIX_')) or k in ['GOMEMLIMIT','GOMAXPROCS','GOCACHE','FAULT_SEED']}},indent=2)+'\n')
 with (root/'native.log').open('w') as log:
  p=subprocess.Popen(args,cwd=repo/'integration',env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
  try:
@@ -127,8 +134,14 @@ with (root/'native.log').open('w') as log:
   actual.update(status='interrupted',exit_code=p.returncode,finished_utc=datetime.datetime.now(datetime.timezone.utc).isoformat())
   (root/'execution.json').write_text(json.dumps(actual,indent=2)+'\n')
   raise
- actual.update(status='passed' if code==0 else 'failed',exit_code=code,finished_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),server_observer_errors=len(observation_errors))
+ actual.update(status='passed' if code==0 else 'failed',exit_code=code,finished_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),server_observer_errors=len(observation_errors),server_profile=server_profile)
  (root/'execution.json').write_text(json.dumps(actual,indent=2)+'\n')
+
+if candidate_binary is not None:
+ expected_candidate=json.loads((root/'partition-server-input.json').read_text())['sha256']
+ candidate_verified=sha(candidate_binary)==expected_candidate and len(servers)==3 and all(s['actual_executable_sha256']==expected_candidate for s in servers)
+ (root/'partition-server-verification.json').write_text(json.dumps({'passed':candidate_verified,'expected_sha256':expected_candidate,'observed_peers':len(servers),'server_profile':server_profile},indent=2)+'\n')
+ assert candidate_verified, 'candidate server bytes or actual peer coverage differs'
 
 after={n:sha(repo/n) for n in names};assert before==after;(root/'source-after.json').write_text(json.dumps({'revision':revision,'files':after},indent=2)+'\n')
 assert all(sha(root/d['captured'])==d['sha256'] for d in generated.values())
@@ -148,5 +161,5 @@ with (root/'native.log').open('rb') as native, (root/'converted-events.jsonl').o
  subprocess.run(['go','tool','test2json','-t','-p','js-wf/integration'],stdin=native,stdout=converted,check=True)
 with (root/'acceptance.log').open('w') as log:
  acceptance=subprocess.run(['python3',str(root/'executed-checker.py'),str(root/'converted-events.jsonl'),test,duration],stdout=log,stderr=subprocess.STDOUT)
-(root/'acceptance.json').write_text(json.dumps({'exit_code':acceptance.returncode,'native_exit_code':code,'duration':duration,'row':row,'source':revision,'server_observer_errors':len(observation_errors),'scope':'Native duration acceptance only; independent fault/history/store review still required.'},indent=2)+'\n')
+(root/'acceptance.json').write_text(json.dumps({'exit_code':acceptance.returncode,'native_exit_code':code,'duration':duration,'row':row,'source':revision,'server_observer_errors':len(observation_errors),'server_profile':server_profile,'scope':'Native duration acceptance only; independent fault/history/store review still required. Experimental candidate profile does not qualify default production server or original campaign.'},indent=2)+'\n')
 raise SystemExit(code or acceptance.returncode or bool(observation_errors))

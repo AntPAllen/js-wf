@@ -240,6 +240,19 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 		}
 	} else if row == "server_partition" {
 		startCluster = testcluster.StartPartitionableProcesses
+		if binary := os.Getenv("WF_MATRIX_PARTITION_SERVER_BIN"); binary != "" {
+			info, err := os.Lstat(binary)
+			if !filepath.IsAbs(binary) || err != nil || !info.Mode().IsRegular() {
+				t.Fatal("partition candidate requires an absolute regular server executable")
+			}
+			t.Logf("experimental partition server binary=%s", binary)
+			startCluster = func(root string, count int) (*testcluster.ProcessCluster, error) {
+				if count != 3 {
+					return nil, fmt.Errorf("partition candidate requires three peers")
+				}
+				return testcluster.StartPartitionableProcessesWithBinaries(root, []string{binary, binary, binary}, false)
+			}
+		}
 	} else if row == "worker_isolation" {
 		startCluster = testcluster.StartProfiledProcesses
 	}
