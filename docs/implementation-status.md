@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: 24-hour chunked campaign prepared
+
+Observer/reviewer prepared for the actual24h duration, retaining original20s/60s/
+threeattempts, normal4CPU/GOGC500/4GiB, actual source/process/closedarchive and row
+verification. Launch waits for accepted ten-minute result. Reclaimed only40 exact
+pushed duplicate archives2,156,177,817bytes and208 verified pushed worktree proof
+parts4,605,620,224allocatedbytes. Original fixtures/source/executables/canonicalGit
+parts/caches/livecampaigns retained; free disk now about9.4GiB. The duplicate
+reclamation12GiB target was not reached. Preparation is not a24h/default/matrix pass.
+[Preparation](scale/chunked-callback-audit-2026-10-06/live-journal-24h-preparation/).
+[Duplicate proof](scale/chunked-callback-audit-2026-10-06/24h-proof-headroom/).
+[Worktree proof](scale/chunked-callback-audit-2026-10-06/24h-worktree-headroom/).
+
 ## Latest follow-up — 2026-10-06: explicit chunked ten-minute journal running
 
 Actual clean2f74289 normalSDK799942 source/executable/VCS and /proc4CPU/GOGC500/

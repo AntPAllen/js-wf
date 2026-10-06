@@ -4384,3 +4384,13 @@ campaign/repeatedSIGKILL/checkpoint/final/drain gates retain20s/60s/threeattempt
 Supervised watcher/independent terminal review active; no live stores read/copied.
 No sustained/default/currentmatrix/24h pass from launch metadata.
 [Launch](scale/chunked-callback-audit-2026-10-06/live-journal-initial/).
+
+## Actual24h chunked campaign preparation — 2026-10-06
+
+Normal4CPU/GOGC500/4GiB R5 journal seed1 with original20s/60s/threeattempts,
+checkpoint/final/drain gates prepared after ten-minute qualification. Actual
+24h observer/reviewer deadlines retain source/executable/original archive and
+independent row verification. Verified pushed duplicate archive/worktree parts
+reclaimed with canonicalGit/originalfixtures/cache retention, about9.4GiB free.
+Preparation alone does not qualify actual24h/default/fullmatrix.
+[Preparation](scale/chunked-callback-audit-2026-10-06/live-journal-24h-preparation/).
