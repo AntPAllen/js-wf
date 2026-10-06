@@ -95,6 +95,12 @@ func TestMatrixParallelInvocationAuditsRetainedCohort(t *testing.T) {
 	if info == nil || info.Config.Replicas != 5 || info.State.FirstSeq != 1 || info.State.LastSeq < cutoff {
 		t.Fatalf("unexpected original invocation boundary: %+v", info)
 	}
+	pointJS := js
+	var metadata *matrixLatencyMetadataJS
+	if os.Getenv("WF_MATRIX_CACHED_LATENCY_METADATA") == "1" {
+		metadata = &matrixLatencyMetadataJS{JetStream: js}
+		pointJS = metadata
+	}
 	var completed atomic.Uint64
 	started := time.Now()
 	stage, stopStage := context.WithTimeout(context.Background(), 6*time.Minute)
@@ -108,7 +114,7 @@ func TestMatrixParallelInvocationAuditsRetainedCohort(t *testing.T) {
 		if len(parts) != 4 {
 			return result, fmt.Errorf("invalid invocation subject %q", msg.Subject)
 		}
-		result.samples, err = matrixInvocationLatencies(ctx, js, parts[2], parts[3], msg.Time, completionDeadline)
+		result.samples, err = matrixInvocationLatencies(ctx, pointJS, parts[2], parts[3], msg.Time, completionDeadline)
 		if err == nil {
 			if n := completed.Add(1); n%10000 == 0 {
 				t.Logf("LATENCY_COHORT_PROGRESS completed=%d/%d elapsed=%s", n, cutoff, time.Since(started))
@@ -136,6 +142,9 @@ func TestMatrixParallelInvocationAuditsRetainedCohort(t *testing.T) {
 		}
 	}
 	proof := map[string]any{"cutoff": cutoff, "completed_point_checks": completed.Load(), "elapsed_ns": elapsed.Nanoseconds(), "stage_limit_ns": int64(6 * time.Minute), "point_error": fmt.Sprint(failure), "original_completion_deadline": completionDeadline, "terminal_samples": terminals, "report": report, "report_error": fmt.Sprint(reportError), "samples": persisted, "scope": "quiet copied87920 real-workflow point checks; no original24h/full400k/currentmatrix qualification; partial errors discard whole samples"}
+	if metadata != nil {
+		proof["metadata_handle_lookups"] = metadata.lookupCounts()
+	}
 	data, err = json.MarshalIndent(proof, "", "  ")
 	if err == nil {
 		err = os.WriteFile(filepath.Join(root, "cohort.json"), data, 0600)

@@ -143,6 +143,24 @@ func TestMatrixParallelInvocationAuditsNativeOracle(t *testing.T) {
 	if !reflect.DeepEqual(parallel, serial) {
 		t.Fatal("parallel samples differ from serial point oracle")
 	}
+	metadata := &matrixLatencyMetadataJS{JetStream: all[2]}
+	cached, err := matrixParallelInvocationAudits(ctx, info.State.FirstSeq, info.State.LastSeq, func(ctx context.Context, sequence uint64) (matrixInvocationAuditResult, error) {
+		var result matrixInvocationAuditResult
+		msg, err := inv.GetMsg(ctx, sequence)
+		if err != nil {
+			return result, err
+		}
+		parts := strings.Split(msg.Subject, ".")
+		result.samples, err = matrixInvocationLatencies(ctx, metadata, parts[2], parts[3], msg.Time, deadline)
+		return result, err
+	})
+	if err != nil || !reflect.DeepEqual(cached, serial) {
+		t.Fatalf("metadata reuse changes point oracle: %v", err)
+	}
+	counts := metadata.lookupCounts()
+	if counts["journal"] != 1 || counts["signals"] != 1 || counts["state"] != 1 || counts["objects"] != 0 {
+		t.Fatalf("unexpected native handle lookups: %v", counts)
+	}
 	// The same actual terminal records must still fail a violated deadline.
 	deadline = time.Unix(0, 0)
 	_, serialErr := read(ctx, info.State.FirstSeq)
@@ -150,11 +168,24 @@ func TestMatrixParallelInvocationAuditsNativeOracle(t *testing.T) {
 	if serialErr == nil || parallelErr == nil || failed != nil || !strings.Contains(serialErr.Error(), "post-heal deadline") || !strings.Contains(parallelErr.Error(), serialErr.Error()) {
 		t.Fatalf("deadline invariant weakened: serial=%v parallel=%v result=%v", serialErr, parallelErr, failed)
 	}
+	cachedFailure, cachedErr := matrixParallelInvocationAudits(ctx, info.State.FirstSeq, info.State.FirstSeq, func(ctx context.Context, sequence uint64) (matrixInvocationAuditResult, error) {
+		var result matrixInvocationAuditResult
+		msg, err := inv.GetMsg(ctx, sequence)
+		if err != nil {
+			return result, err
+		}
+		parts := strings.Split(msg.Subject, ".")
+		result.samples, err = matrixInvocationLatencies(ctx, metadata, parts[2], parts[3], msg.Time, deadline)
+		return result, err
+	})
+	if cachedFailure != nil || cachedErr == nil || !strings.Contains(cachedErr.Error(), serialErr.Error()) {
+		t.Fatalf("metadata reuse weakened terminal deadline: %v", cachedErr)
+	}
 	persistedSamples := make([][]matrixLatencySample, len(parallel))
 	for index, result := range parallel {
 		persistedSamples[index] = result.samples
 	}
-	data, err := json.MarshalIndent(map[string]any{"invocations": len(serial), "serial_equals_parallel": true, "deadline_negative_control": true, "parallel_elapsed": parallelElapsed, "serial_elapsed": serialElapsed, "measurement_scope": "ordered same-fixture point checks; no isolated speed ratio or large/fault/24h qualification", "samples": persistedSamples}, "", "  ")
+	data, err := json.MarshalIndent(map[string]any{"invocations": len(serial), "serial_equals_parallel": true, "cached_metadata_equals_serial": true, "metadata_handle_lookups": counts, "deadline_negative_control": true, "parallel_elapsed": parallelElapsed, "serial_elapsed": serialElapsed, "measurement_scope": "ordered same-fixture point checks; no isolated speed ratio or large/fault/24h qualification", "samples": persistedSamples}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}

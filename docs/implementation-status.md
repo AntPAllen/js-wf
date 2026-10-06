@@ -29,6 +29,22 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: larger point deadline failure and metadata reuse prepared
+
+Clean38a0a8e normalnativeFAIL377.62s, correctR5ready passes. Real87920 pointstage
+hitsoriginal6min after83,924successful callbacks; firsterrorsequence83,897 context
+expires. Completions notcontiguousprefix; wholeresultdiscarded, retainedcheckskipped,
+zero report/terminal samples do notindicate dataabsence. ActualSDK/profile/source/
+5servers/mounts/closure/originalunchanged and4784member353,988,356byte fullproof
+verified/readback. No unchangedrerun orservercause claim. [Failure](scale/parallel-final-latency-2026-10-06/retained-cohort-r5-v2/).
+
+Explicitcohort metadata reuse nowshares onlysuccessfulWF_JRN/WF_SIG/WF_STATE/
+WF_BLOB handles via existingcancellablecoalescing cache; allvalues/snapshot/record/
+timestamp queries stayfresh, failures notcached, resourcesindependent. Same6min/
+20s/predicates; default/live24h source unchanged. Race controlsPASS1.061s, native
+160cached/uncached/serialoracle anddeadlinecontrol prepared, timingunqualified.
+[Preparation](scale/cached-final-latency-2026-10-06/preparation/).
+
 ## Latest follow-up — 2026-10-06: corrected real87920 point measurement live
 
 Clean38a0a8e actualnormalSDK1054824/executable/VCS/profile4CPU/GOGC500/4GiB verified;

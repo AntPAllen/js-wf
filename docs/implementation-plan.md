@@ -4457,3 +4457,16 @@ lastheal+5min terminaldeadline retained. Freshverifiedcopies only, oldfailedcopy
 reclaimed aftercanonicalpushedproof/fullhashes/closure/FDchecks. Original24h and
 milliontimer remainlive. Partialprogress is notfullsize/currentmatrix/24h proof.
 [Launch](scale/parallel-final-latency-2026-10-06/cohort-r5-live-initial/).
+
+## Larger point audit deadline failure; metadata reuse prepared — 2026-10-06
+
+CorrectR5 real87920 copiedcohort 38a0a8e nativeFAIL377.62s;83,924successful point
+callbacks beforeoriginal6min expires. Incomplete result discarded, retainedcheck
+skipped; zero report notdataabsence. Complete353,988,356byte source/executable/
+servers/originalstore/closure proof independently verified/readback. Newexplicit
+cohort option shares successfulmetadatahandles only, allrecord/snapshot/timestamp
+operations fresh; retry/cancel semantics and6min/20s checks retained. Racecontrols
+pass1.061s; nativecached/uncached/serialoracle prepared. No fullscale/default/
+currentmatrix/24h qualification from preparation; existing24h source unchanged.
+[Failure](scale/parallel-final-latency-2026-10-06/retained-cohort-r5-v2/).
+[Preparation](scale/cached-final-latency-2026-10-06/preparation/).
