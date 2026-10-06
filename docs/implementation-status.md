@@ -45,6 +45,15 @@ actual SDK profile and all six observed server incarnations verify; complete
 closed originals archived with full member/current-file verification; complete archive,
 metadata and inventory also pass full S3 GET readback. No old store reopened. [Smoke proof](scale/sustained-bulk-final-latency-2026-10-06/joined-state-cut-smoke/).
 
+After complete committed archive/member/current-file/S3 verification and actual
+SDK/six-observed-server/container/process/visible-descriptor closure, only the
+redundant corrected-smoke raw archive was removed:106,205,184 allocated bytes
+recovered; every current primary file unchanged. About345MiB remains free, below
+the512MiB reserve used by these finite launches; no corrected ten-minute or24h
+campaign is running. Next reclaim other fully preserved redundant/disposable
+copies, then run the original corrected ten-minute gate with adequate headroom.
+[Recovery](scale/sustained-bulk-final-latency-2026-10-06/joined-smoke-raw-recovery/).
+
 ## Repair-cursor audit diagnostic — 2026-10-06
 
 Fresh35s journal diagnostic at009de76 reproduces the bulk cut failure in
