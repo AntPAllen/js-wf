@@ -25,9 +25,26 @@ Real-cluster failures with unconfirmed causes remain recorded; successful focuse
 diagnostics do not erase them. Current-main full matrices require final-source
 qualification, rather than treating older executed-source rows as a blanket pass.
 
-Immediate work: review live matrix results, diagnose remaining clock/checkpoint
-and million-timer physical-drain failures, finish outstanding combined
-retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
+Immediate work: prepare a fresh valid full400k latency/memory fixture, finish
+remaining clock/checkpoint, million-timer physical-drain, combined and operational
+coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
+terminal failures; there is no running long campaign to poll or resume. Their
+complete current files, including partial no-space evidence, are preserved to S3.
+
+## Latest storage and proof reporting correction — 2026-10-06
+
+The two closed block-media copied-audit trees are completely verified against
+committed archive parts, embedded member manifests and current file censuses.
+SDK and three server executables per fixture are closed; detached-image ledgers,
+current loop devices, mounts, Docker mounts and visible file descriptors checked.
+Only the disposable copied trees were removed, recovering1,179,799,552 allocated
+bytes; about3.8GB free. Original donors, source/executables/metadata, caches and
+canonical archives remain. [Recovery](scale/closed-blockdisk-copy-recovery-2026-10-06/).
+
+The real87920 cohort proof writer now discards all samples and leaves its oracle
+qualification flag false when the final full integrity check fails or reports
+unexpected counts. This changes rejected-proof reporting, with no promotion of
+earlier failures or new native qualification.
 
 ## Latest proof recovery — 2026-10-06
 

@@ -224,6 +224,10 @@ func TestMatrixParallelInvocationAuditsRetainedCohort(t *testing.T) {
 		report, reportError = integrity.CheckThroughInvocationSequenceWithChunkedConcurrentStateReads(check, js, cutoff)
 		stop()
 	}
+	expectedReport := integrity.Report{Invocations: 87920, Journals: 87920, Entries: 969925, Terminal: 87920}
+	if failure != nil || reportError != nil || report != expectedReport {
+		results = nil
+	}
 	persisted := make([][]matrixLatencySample, len(results))
 	terminals := 0
 	for i, result := range results {
@@ -238,7 +242,7 @@ func TestMatrixParallelInvocationAuditsRetainedCohort(t *testing.T) {
 	if bulkMode {
 		proof["audit_mode"] = "bulk"
 		proof["bulk_stats"] = bulkStats
-		proof["bulk_equals_accepted_point_oracle"] = failure == nil
+		proof["bulk_equals_accepted_point_oracle"] = failure == nil && reportError == nil && report == expectedReport
 		proof["scope"] = "quiet copied87920 bulk samples compared with committed verified original cached point oracle; no original24h/full400k/currentmatrix qualification; any errors discard all samples"
 		if faultProof != nil {
 			proof["cursor_fault"] = faultProof
@@ -254,7 +258,7 @@ func TestMatrixParallelInvocationAuditsRetainedCohort(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if failure != nil || reportError != nil || terminals != int(cutoff) || report != (integrity.Report{Invocations: 87920, Journals: 87920, Entries: 969925, Terminal: 87920}) {
+	if failure != nil || reportError != nil || terminals != int(cutoff) || report != expectedReport {
 		t.Fatalf("point checks=%d terminals=%d elapsed=%s err=%v report=%+v report_err=%v", completed.Load(), terminals, elapsed, failure, report, reportError)
 	}
 	t.Logf("LATENCY_COHORT_RESULT invocations=87920 terminals=%d elapsed=%s", terminals, elapsed)

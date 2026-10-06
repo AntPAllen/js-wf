@@ -4896,3 +4896,19 @@ incarnations closed and original donor unchanged. Recorded-source quiet real-coh
 fault qualification does not replace full400k valid latency/RSS, other faults,
 current/default matrices or24h/million release gates. Bulk remains opt-in.
 [Evidence](scale/bulk-cursor-fault-preparation-2026-10-06/native-real87920-owner-restart-v2/).
+
+### Closed copied block-media reclamation and rejected-proof reporting — 2026-10-06
+
+Two disposable copied block-media audit trees are reclaimed only after complete
+committed archive/member/current-file verification, detached-image ledgers,
+closed SDK/server executable checks, current mount/loop/Docker checks and visible
+descriptor checks. Recover1,179,799,552 allocated bytes; original donors,
+source/executable/metadata, caches and canonical archives retained. About3.8GB free
+still falls below the16GiB long-campaign launch baseline plus overlapping reserves.
+[Recovery](scale/closed-blockdisk-copy-recovery-2026-10-06/).
+
+The real87920 proof writer discards all samples and suppresses its oracle-pass
+flag on final full-integrity errors or unexpected counts. Integration compilation
+passes; this reporting correction adds no new native qualification. Next capacity
+work requires a fresh valid full400k latency/memory fixture, with the original
+20s full integrity and6m latency limits retained.
