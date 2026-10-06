@@ -90,7 +90,7 @@ def main():
     assert set(source_names) == set(expected) and len(source_names) == len(expected)
     env = {k:v for k,v in os.environ.items() if not k.startswith(('WF_', 'MATRIX_', 'TIER3_MATRIX_'))}
     temporary = root/'test-tmp'; temporary.mkdir()
-    env.update(GOMAXPROCS='1', GOMEMLIMIT='2GiB', TMPDIR=str(temporary), GOWORK='off', GOFLAGS='')
+    env.update(GOMAXPROCS='2', GOMEMLIMIT='2GiB', TMPDIR=str(temporary), GOWORK='off', GOFLAGS='')
     results = {}
     for profile, binary in binaries.items():
         command = [str(binary), '-test.run=^TestNRG', '-test.v', '-test.count=1', '-test.timeout=20m']
@@ -120,7 +120,7 @@ def main():
     after = shared.source_inventory(revision); assert after == before; save('source-after.json', after)
     save('closure.json', shared.closure(root))
     save('result.json', {'orchestrator_source':revision, 'compiled_server_source':read('independent-review.json')['source'], 'results':results,
-         'scope':'Every170 pinned TestNRG top-level case, original source-bound race binaries, count1/20m each, fresh fixture-source and temp dirs, 1CPU/2GiB. Broader Raft controls only; no full NATS test suite, production adoption, workflow matrix or Tier1 qualification.'})
+         'scope':'Every170 pinned TestNRG top-level case, original source-bound race binaries, count1/20m each, fresh fixture-source and temp dirs, 2CPU/2GiB. Broader Raft controls only; no full NATS test suite, production adoption, workflow matrix or Tier1 qualification.'})
     shutil.copyfile(__file__, root/'executed-producer.py')
     proof = fixture_archive.capture(root, root.with_suffix('.tar.gz'), root.with_name(root.name+'-proof'), compresslevel=1)
     print(json.dumps({'proof':proof,'all_pass':all(r['qualified'] for r in results.values())}), flush=True)
