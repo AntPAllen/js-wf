@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: cached live journal actual profile verified
+
+Clean727b950 actual normal SDK1235495/source/build/profile and five server roles,
+observed process generations and mounts verified. Explicit cached metadata/chunked
+reader, 4 CPUs/GOGC500/4GiB, original ten-minute journal fault cadence/all gates.
+First actual leaderSIGKILL/heal observed; producer/observer/reviewer active.
+Terminal/full proof pending. Accepted closed copied stores alone reclaimed after
+pushed canonical part/archive/manifest/current bytes/closure/open-file checks:
+4,065 files/1,917,703,477 bytes. Originals/exes/source/proof/cache/live retained.
+Long campaigns continue on their original sources and handles.
+[Live observation](scale/cached-final-latency-2026-10-06/live-journal-initial/).
+[Reclamation](scale/cached-final-latency-2026-10-06/reclaimed-accepted-copy/).
+
 ## Latest follow-up — 2026-10-06: full real cached point cohort accepted
 
 Clean `14cea25` normal native PASS345.87s. All87,920 point checks/terminal samples
