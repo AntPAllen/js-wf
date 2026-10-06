@@ -4668,3 +4668,14 @@ vectors/monitorcuts/seven pinned physical snapshots/finaldrain/64durables. Accep
 physical corruptions. Copied reviewer fixes submicrosecond ordering; reversed1ns
 control rejects and positiveclock copied evidence rechecks. No NATS process/store
 reopen; historicalfailedupgrade/full13x200/current-main/24h/million gates remain.
+
+## Negative clock native pass and fanout/projection physical scope correction — 2026-10-06
+
+Original0b24a84 normal ten-minute negativeclock seed1 native/review passes3,332
+terminals/36,768entries/allcells/19confirmed-60s observations. Full6,305member/
+105,596,417byte/fivepart proof verified; independentcopy pending. Fanout/projection
+copied and500-child native drain helper records are three leader-routed API views,
+not all-three local physical stores. Historical retaineddata/results/logicaldrain
+outcomes remain; stronger physical claims need new witnesses. Copied templates now
+add publicJsz localserver snapshots under unchanged20s, bothcompile. Freshruntime/
+500-child native physical proof/fullmatrix/current-source/24h gates remain open.

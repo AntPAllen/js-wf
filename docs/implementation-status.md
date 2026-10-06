@@ -12,7 +12,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and hosted seed3 at a517d2e, each with independent copied integrity/history/drain, qualified. Retained normal ten-minute block-disk seed1 at f57da4d plus copied raw-image integrity/history/drain qualified. Ten-minute worker seed1 native and copied audits also pass, with the original producer generated-cache failure separately preserved. Retained normal ten-minute pause seed1 at d893bb0 and reply-isolation seed1 at85c4cf2, each with independent copied integrity/history/drain, qualify. Original retained fanout-restart seed1 at e3399bf and full rolling-upgrade seed1 at661239d, each with native plus independent copied audits, qualify. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
-| Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries, physical drain and independent copied audits qualified at executed dc8422a. Other finite combined cases remain. |
+| Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries, retained results/prefixes/logical drain and copied audits qualify at dc8422a. Earlier all-three local physical claims used leader-routed API views and require stronger witnesses. Other finite combined cases remain. |
 | Explicit full400k audit capacity | At02d485a explicit chunked R1 reader qualifies fresh full400k/4.8M cold baseline18.134257s and actual R5 ownerSIGKILL leftdown16.429780s including zero-consumer cleanup, under4CPU/GOGC500/4GiB. At8693ab5 same-store ownerrestart qualifies17.087980s. Explicit ten-minute journal now accepted at2f74289; default/fullmatrix/24h remain open. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. Corrected continuous-byte attempt also failed checkpoint1040 /29120 after7986.85s; originals independently preserved, state snapshot phase is the next diagnostic target. No24h row qualified; full-matrix soak remains. |
@@ -28,6 +28,21 @@ qualification, rather than treating older executed-source rows as a blanket pass
 Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
+
+## Latest follow-up — 2026-10-06: negative clock native pass; further physical scope correction
+
+Original0b24a84 negativeclock normal ten-minute seed1/nativeindependentreview passes:
+3,332terminals/36,768entries/all six cells/19confirmed-60s observations. ActualSDK/
+threeNATS/694source/3,286external/profile/helpers/closure verified. Full6,305member/
+105,596,417byte/fivepart archive readback passes. Independent copy pending.
+
+Fanout/projection copied helpers and native500-child drain helper also use leader-
+routed API views: retained results/integrity/logical drain remain proven, earlier
+all-three local physical wording is corrected. Copied templates now add actual
+per-server publicJsz snapshots inside original20s budget; both compile. Freshruntime/
+full500-child native strongerphysical witnesses pending. Longhandles unchanged.
+[Negative native proof](scale/tier2-retained-server-clock-2026-10-06/negative-native-ten-minute/).
+[Scope correction/preparation](scale/fanout-projection-local-physical-review-2026-10-06/).
 
 ## Latest follow-up — 2026-10-06: reusable rolling-upgrade physical review
 

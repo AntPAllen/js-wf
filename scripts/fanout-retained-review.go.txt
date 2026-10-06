@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/client"
 	"js-wf/integrity"
@@ -138,7 +139,8 @@ func run() error {
 	// Observe queue state without running workers or acknowledging messages.
 	// A completed parent can leave a redelivery when its final worker is canceled.
 	drained := true
-	// Confirm physical queue and every partition's durable state after audit.
+	// Confirm leader-routed API views and every partition durable state.
+	// Local physical states are independently checked below.
 	var queue = []*jetstream.StreamInfo{}
 	for _, js := range all {
 		stream, err := js.Stream(ctx, "WF_RUN")
@@ -172,6 +174,11 @@ func run() error {
 	if checked != int(provision.Partitions) {
 		return fmt.Errorf("incomplete durable census %d expected=%d", checked, provision.Partitions)
 	}
+	physical, localDrained, err := observeLocalQueues(ctx, cluster)
+	if err != nil {
+		return err
+	}
+	drained = drained && localDrained
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
@@ -180,12 +187,13 @@ func run() error {
 		Report            integrity.Report        `json:"report"`
 		AuditNS           int64                   `json:"audit_ns"`
 		WholeReviewNS     int64                   `json:"whole_review_ns"`
-		ParentRecords     []journal.Record         `json:"parent_records"`
+		ParentRecords     []journal.Record        `json:"parent_records"`
 		ChildIDs          []string                `json:"child_ids"`
 		PhysicallyDrained bool                    `json:"physically_drained"`
 		Queue             []*jetstream.StreamInfo `json:"queue_all_three_peers"`
+		Physical          []physicalPeer          `json:"physical_queue_peers"`
 		Consumers         int                     `json:"observed_partition_consumers"`
-	}{"complete copied retained fanout integrity/results and queue observation; not original fault verdict or every-cut qualification", report, elapsed.Nanoseconds(), time.Since(began).Nanoseconds(), parent, ids, drained, queue, checked}
+	}{"complete copied retained fanout integrity/results and queue observation; not original fault verdict or every-cut qualification", report, elapsed.Nanoseconds(), time.Since(began).Nanoseconds(), parent, ids, drained, queue, physical, checked}
 	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		return err
@@ -195,4 +203,56 @@ func run() error {
 	}
 	fmt.Printf("full retained audit invocations=%d journals=%d entries=%d terminal=%d audit=%s review=%s observed_consumers=%d\n", report.Invocations, report.Journals, report.Entries, report.Terminal, elapsed, time.Since(began), checked)
 	return nil
+}
+
+// Jsz runs the public monitoring handler on each actual in-process server.
+// Stream.Info through a pinned client is still leader-routed. These local
+// observations are sequential, not simultaneous, and share the audit budget.
+type physicalPeer struct {
+	Node     int            `json:"node"`
+	Started  time.Time      `json:"started"`
+	Finished time.Time      `json:"finished"`
+	State    *server.JSInfo `json:"state"`
+}
+
+func observeLocalQueues(ctx context.Context, cluster *testcluster.Cluster) ([]physicalPeer, bool, error) {
+	if len(cluster.Servers) != 3 {
+		return nil, false, fmt.Errorf("require three physical servers")
+	}
+	peers := make([]physicalPeer, 3)
+	identities := make(map[string]bool)
+	drained := true
+	for node, actual := range cluster.Servers {
+		if err := ctx.Err(); err != nil {
+			return peers, false, err
+		}
+		peer := &peers[node]
+		peer.Node, peer.Started = node, time.Now().UTC()
+		state, err := actual.Jsz(&server.JSzOptions{Accounts: true, Streams: true, Consumer: true, RaftGroups: true})
+		peer.Finished, peer.State = time.Now().UTC(), state
+		if err != nil {
+			return peers, false, err
+		}
+		if state == nil || state.Disabled || state.ID == "" || identities[state.ID] {
+			return peers, false, fmt.Errorf("missing or duplicate physical server identity")
+		}
+		identities[state.ID] = true
+		found := 0
+		for _, account := range state.AccountDetails {
+			for _, stream := range account.Streams {
+				if stream.Name != "WF_RUN" {
+					continue
+				}
+				found++
+				drained = drained && stream.State.Msgs == 0 && stream.State.Consumers == int(provision.Partitions)
+			}
+		}
+		if found != 1 {
+			return peers, false, fmt.Errorf("node%d local WF_RUN census=%d", node, found)
+		}
+		if err := ctx.Err(); err != nil {
+			return peers, false, err
+		}
+	}
+	return peers, drained, nil
 }
