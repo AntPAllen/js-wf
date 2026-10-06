@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import tempfile
 
 REPO = Path(__file__).resolve().parents[1]
 TEST = 'TestWorkflowMissingSourceScheduleCleanupPersists'
@@ -31,8 +32,12 @@ def main():
     if version == pinned['Version']:
         module = Path(pinned['Dir'])
     else:
-        download = json.loads(subprocess.check_output(['go','mod','download','-json',
-            'github.com/nats-io/nats-server/v2@'+version],cwd=REPO))
+        # Download from an empty directory so this Go command cannot add the
+        # diagnostic version to the runtime's go.sum or workspace selection.
+        with tempfile.TemporaryDirectory(prefix='js-wf-upstream-module-') as directory:
+            download = json.loads(subprocess.check_output(['go','mod','download','-json',
+                'github.com/nats-io/nats-server/v2@'+version],cwd=directory,
+                env=dict(os.environ,GOWORK='off',GO111MODULE='on')))
         assert download.get('Version') == version and download.get('Path') == 'github.com/nats-io/nats-server/v2'
         assert download.get('Sum') and download.get('GoModSum') and not download.get('Error')
         module = Path(download['Dir'])
