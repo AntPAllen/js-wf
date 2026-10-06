@@ -1,0 +1,15 @@
+Oct 05 09:35:25 jetstream-wf systemd[351]: Started js-wf-million-candidate-24h-20261005.service - /usr/bin/python3 /tmp/js-wf-million-candidate-24h-20261005/producer.py.
+Oct 06 07:59:19 jetstream-wf python3[101005]: Traceback (most recent call last):
+Oct 06 07:59:19 jetstream-wf python3[101005]:   File "/tmp/js-wf-million-candidate-24h-20261005/producer.py", line 61, in <module>
+Oct 06 07:59:19 jetstream-wf python3[101005]:     after={str(p):sha(p) for p in inputs};write('source-after.json',after)
+Oct 06 07:59:19 jetstream-wf python3[101005]:                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 07:59:19 jetstream-wf python3[101005]:   File "/tmp/js-wf-million-candidate-24h-20261005/producer.py", line 9, in write
+Oct 06 07:59:19 jetstream-wf python3[101005]:     p=root/n;t=p.with_name(p.name+'.tmp');t.write_text(json.dumps(x,indent=2)+'\n');os.replace(t,p)
+Oct 06 07:59:19 jetstream-wf python3[101005]:                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 07:59:19 jetstream-wf python3[101005]:   File "/usr/lib/python3.12/pathlib.py", line 1050, in write_text
+Oct 06 07:59:19 jetstream-wf python3[101005]:     return f.write(data)
+Oct 06 07:59:19 jetstream-wf python3[101005]:            ^^^^^^^^^^^^^
+Oct 06 07:59:19 jetstream-wf python3[101005]: OSError: [Errno 28] No space left on device
+Oct 06 07:59:19 jetstream-wf systemd[351]: js-wf-million-candidate-24h-20261005.service: Main process exited, code=exited, status=1/FAILURE
+Oct 06 07:59:19 jetstream-wf systemd[351]: js-wf-million-candidate-24h-20261005.service: Failed with result 'exit-code'.
+Oct 06 07:59:19 jetstream-wf systemd[351]: js-wf-million-candidate-24h-20261005.service: Consumed 5h 42min 47.050s CPU time, 3.4G memory peak, 0B memory swap peak.

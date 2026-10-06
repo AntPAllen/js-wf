@@ -1,0 +1,46 @@
+Oct 06 01:10:05 jetstream-wf systemd[351]: Started js-wf-chunked-journal-24h-20261006.service - /usr/bin/python3 /home/exedev/js-wf/scripts/run-tier3-soak.py --root /tmp/js-wf-chunked-journal-24h-20261006 --row journal --duration 24h --seed 1 --chunked-state-retained-audit --memory-limit 4GiB --no-race --explicit-route-seeds --retained-audit-trace --audit-wait-stack.
+Oct 06 01:10:05 jetstream-wf python3[861951]: Preparing worktree (detached HEAD 21b4729)
+Oct 06 07:58:47 jetstream-wf python3[861924]: Traceback (most recent call last):
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/home/exedev/js-wf/scripts/run-tier3-soak.py", line 219, in main
+Oct 06 07:58:47 jetstream-wf python3[861924]:     state.update(status='running',test_pid=child.pid);save()
+Oct 06 07:58:47 jetstream-wf python3[861924]:           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 07:58:47 jetstream-wf python3[861924]: RuntimeError: named test failed with exit1
+Oct 06 07:58:47 jetstream-wf python3[861924]: During handling of the above exception, another exception occurred:
+Oct 06 07:58:47 jetstream-wf python3[861924]: Traceback (most recent call last):
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/home/exedev/js-wf/scripts/run-tier3-soak.py", line 103, in archive_originals
+Oct 06 07:58:47 jetstream-wf python3[861924]:     hashes = {str(p.relative_to(root)):sha(p) for p in files}
+Oct 06 07:58:47 jetstream-wf python3[861924]:             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/usr/lib/python3.12/tarfile.py", line 2260, in add
+Oct 06 07:58:47 jetstream-wf python3[861924]:     self.addfile(tarinfo, f)
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/usr/lib/python3.12/tarfile.py", line 2288, in addfile
+Oct 06 07:58:47 jetstream-wf python3[861924]:     copyfileobj(fileobj, self.fileobj, tarinfo.size, bufsize=bufsize)
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/usr/lib/python3.12/tarfile.py", line 254, in copyfileobj
+Oct 06 07:58:47 jetstream-wf python3[861924]:     dst.write(buf)
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/usr/lib/python3.12/gzip.py", line 300, in write
+Oct 06 07:58:47 jetstream-wf python3[861924]:     return self._buffer.write(data)
+Oct 06 07:58:47 jetstream-wf python3[861924]:            ^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/usr/lib/python3.12/gzip.py", line 130, in write
+Oct 06 07:58:47 jetstream-wf python3[861924]:     return self.gzip_file._write_raw(data)
+Oct 06 07:58:47 jetstream-wf python3[861924]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/usr/lib/python3.12/gzip.py", line 312, in _write_raw
+Oct 06 07:58:47 jetstream-wf python3[861924]:     self.fileobj.write(self.compress.compress(data))
+Oct 06 07:58:47 jetstream-wf python3[861924]: OSError: [Errno 28] No space left on device
+Oct 06 07:58:47 jetstream-wf python3[861924]: During handling of the above exception, another exception occurred:
+Oct 06 07:58:47 jetstream-wf python3[861924]: Traceback (most recent call last):
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/home/exedev/js-wf/scripts/run-tier3-soak.py", line 239, in <module>
+Oct 06 07:58:47 jetstream-wf python3[861924]:     # intact for observation, never archive changing stores as final proof.
+Oct 06 07:58:47 jetstream-wf python3[861924]:                     ^^^^^^
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/home/exedev/js-wf/scripts/run-tier3-soak.py", line 235, in main
+Oct 06 07:58:47 jetstream-wf python3[861924]:     raise
+Oct 06 07:58:47 jetstream-wf python3[861924]:         ^^
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/home/exedev/js-wf/scripts/run-tier3-soak.py", line 101, in archive_originals
+Oct 06 07:58:47 jetstream-wf python3[861924]:     and '__pycache__' not in p.parts and p.name not in
+Oct 06 07:58:47 jetstream-wf python3[861924]: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/usr/lib/python3.12/tarfile.py", line 2935, in __exit__
+Oct 06 07:58:47 jetstream-wf python3[861924]:     self.fileobj.close()
+Oct 06 07:58:47 jetstream-wf python3[861924]:   File "/usr/lib/python3.12/gzip.py", line 357, in close
+Oct 06 07:58:47 jetstream-wf python3[861924]:     fileobj.write(self.compress.flush())
+Oct 06 07:58:47 jetstream-wf python3[861924]: OSError: [Errno 28] No space left on device
+Oct 06 07:58:47 jetstream-wf systemd[351]: js-wf-chunked-journal-24h-20261006.service: Main process exited, code=exited, status=1/FAILURE
+Oct 06 07:58:47 jetstream-wf systemd[351]: js-wf-chunked-journal-24h-20261006.service: Failed with result 'exit-code'.
+Oct 06 07:58:47 jetstream-wf systemd[351]: js-wf-chunked-journal-24h-20261006.service: Consumed 1h 8min 5.781s CPU time, 2.4G memory peak, 0B memory swap peak.

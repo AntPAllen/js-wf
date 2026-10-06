@@ -29,6 +29,25 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Current terminal status — 2026-10-06 08:00 UTC
+
+Both long campaign handles are now terminal failures. Original journal row fails
+replica-readiness at6h48m: WF_INV node4 Currentfalse/Lag21, then evidence/cleanup
+and archive writes fail with ENOSPC. Million wrapper fails its final source-after
+write with ENOSPC; last stale report saysrunning/921,929 receipts, not a complete
+million or physical-drain verdict. Known SDK/supervisor processes closed; no old
+handle restarted. Disk pressure overlapped native proof preservation and blocks
+promotion of either campaign. Earlier live snapshots are historical observations.
+
+Complete pushed failed-cohort base/delta/S3 bytes verified; removing only closed
+disposable copied-stores and redundant raw delta recovered1,984,651,264 allocated
+bytes (about2GB free). Primary original campaign files, including partial evidence,
+remain retained. Complete closed-campaign archival is next, using a fully readback-
+verified S3 canonical archive with committed manifests/receipts to avoid triplicate
+local proof storage. Full400k bulk/memory, corrected native fault and24h/million
+qualification remain open.
+[Terminal observations](scale/terminal-campaigns-disk-pressure-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: bulk owner-fault preparation failure corrected
 
 Atbb5f2e0 fresh copied nativeFAIL21.35s before bulk/fault injection: same public
