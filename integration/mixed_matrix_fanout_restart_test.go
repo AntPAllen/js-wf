@@ -64,7 +64,11 @@ func (b *matrixFanoutBarrier) handlers() map[string]worker.Handler {
 }
 
 func (b *matrixFanoutBarrier) restart(ctx context.Context, js jetstream.JetStream, cluster *testcluster.ProcessCluster, scheduled time.Time) (matrixLeaderFault, error) {
-	return b.restartWith(ctx, js, scheduled, "", func() (matrixLeaderFault, error) { return killMatrixAllServers(ctx, js, cluster, scheduled) })
+	prefix := os.Getenv("MATRIX_ARTIFACT_PREFIX")
+	if prefix != "" {
+		prefix = fmt.Sprintf("%s-fault-%d", prefix, scheduled.UnixNano())
+	}
+	return b.restartWith(ctx, js, scheduled, prefix, func() (matrixLeaderFault, error) { return killMatrixAllServers(ctx, js, cluster, scheduled) })
 }
 
 // Share the cut and identity checks across native R3 and container R5 rows.
@@ -220,7 +224,14 @@ func (b *matrixFanoutBarrier) restartWith(ctx context.Context, js jetstream.JetS
 // exactly two terminal grandchildren per child, rather than only counting
 // aggregate completions from the mixed generator.
 func verifyMatrixRestartFanouts(ctx context.Context, js jetstream.JetStream, faults []matrixLeaderFault) error {
-	return verifyMatrixRestartFanoutsWithArtifacts(ctx, js, faults, "")
+	root := os.Getenv("MATRIX_ARTIFACT_PREFIX")
+	if root != "" {
+		root += "-fanout-final"
+		if err := os.Mkdir(root, 0700); err != nil {
+			return err
+		}
+	}
+	return verifyMatrixRestartFanoutsWithArtifacts(ctx, js, faults, root)
 }
 
 func verifyMatrixRestartFanoutsWithArtifacts(ctx context.Context, js jetstream.JetStream, faults []matrixLeaderFault, root string) error {

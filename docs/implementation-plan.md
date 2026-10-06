@@ -4543,3 +4543,14 @@ under20s. All2,281originalfiles unchanged; originals never reopened. Both comple
 archives read back. Full13x200/current-source/24h gates remain open.
 [Native proof](scale/tier2-retained-isolation-2026-10-06/native-ten-minute/).
 [Copied proof](scale/tier2-retained-isolation-2026-10-06/copied-audit/).
+
+## Original retained fanout restart evidence prepared — 2026-10-06
+
+Original Tier2 fanout restart now preserves the existing barrier's exact suspended
+parent/six-child/unfinished-child cut, recovered prefix and final descendants.
+Read-only repository reviewer requires19 successful original30-second restart cuts,
+all native workload/gates/source/profile/closure, unchanged prefixes and exact
+six-child/two-grandchild completions. Valid fixture/19 corrupted-evidence controls
+pass; integration compiles. Native ten-minute seed1 and independent copied-store
+qualification pending; full13x200/current-source gate remains open.
+[Preparation](scale/tier2-retained-fanout-2026-10-06/preparation/).
