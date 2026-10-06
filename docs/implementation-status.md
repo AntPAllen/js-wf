@@ -29,6 +29,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: original rolling upgrade native accepted
+
+Original661239d normal ten-minute seed1 PASS649.10s: full2016terminals/
+22252entries, three exactlegacy→current upgrades/original270s cadence, allnative
+cells/latency/history/integrity/drain. Seven complete three-peer physical snapshots,
+all finalphysical queueszero, source694/external3286/actualprocess/profile/closure
+reviewed. Initial report-variable shadowing failure preserved; correctedv2 reviews
+same closed evidence without rerun/store reopen. Complete6338member/101144198byte/
+4part archive readback passes. Independentcopy pending; historical35s residual
+cause unconfirmed, full13x200/current-source/24h remain open. Long handles continue.
+[Native proof/corrected review](scale/tier2-retained-upgrade-2026-10-06/native-ten-minute/).
+
 ## Latest follow-up — 2026-10-06: fully preserved state-copy headroom
 
 Three closed disposablecopied-stores reclaimed after full canonical archive/member/
