@@ -23,7 +23,7 @@ def module(name, filename):
     return result
 
 
-def prepare_candidate(root, revision, shared, save, env):
+def prepare_candidate(root, revision, shared, save, env, variant='strict'):
     """Build one explicitly bound overlay on a fresh unchanged upstream copy."""
     source = Path(subprocess.check_output(['go', 'list', '-m', '-f', '{{.Dir}}',
                                          'github.com/nats-io/nats-server/v2'], cwd=REPO, text=True).strip())
@@ -37,7 +37,30 @@ def prepare_candidate(root, revision, shared, save, env):
     shutil.copyfile(patcher, root/'candidate-patcher.py')
     candidate = root/'candidate-raft.go'
     subprocess.run(['python3', str(patcher), '--original', str(copied/'server/raft.go'),
-                    '--output', str(candidate)], cwd=REPO, check=True)
+                    '--output', str(candidate), '--variant', variant], cwd=REPO, check=True)
+    if variant == 'contiguous':
+        canonical = Path('docs/scale/lease-partition-component-2026-10-06/raft-contiguous-controls')
+        records = {}
+        for name in ['contiguous-raft.go.txt', 'independent-review.json',
+                     'archive-verification.json', 'fixture-inventory.json', 's3-readback.json']:
+            data = subprocess.check_output(['git', 'cat-file', 'blob', revision+':'+str(canonical/name)], cwd=REPO)
+            assert data == (REPO/canonical/name).read_bytes()
+            records[name] = hashlib.sha256(data).hexdigest()
+            (root/('contiguous-parent-'+name)).write_bytes(data)
+        assert candidate.read_bytes() == (REPO/canonical/'contiguous-raft.go.txt').read_bytes()
+        metadata = json.loads((REPO/canonical/'archive-verification.json').read_text())
+        receipt = json.loads((REPO/canonical/'s3-readback.json').read_text())
+        assert receipt['archive']['full_readback'] == {
+            'bytes': metadata['archive_bytes'], 'sha256': metadata['archive_sha256']}
+        review = json.loads((REPO/canonical/'independent-review.json').read_text())
+        assert review['direct_cases'] == 12 and review['unchanged_upstream_controls'] == 11
+        assert review['results']['contiguous-regression']['exit_code'] == 0
+        assert review['results']['contiguous-controls']['exit_code'] == 0
+        save('contiguous-parent-reference.json', {
+            'canonical': str(canonical), 'records': records,
+            'source': review['source'], 'archive_url': receipt['archive']['url'],
+            'archive_sha256': metadata['archive_sha256'],
+            'candidate_raft_sha256': shared.sha(candidate)})
     mod = root/'candidate.mod'
     mod.write_text((REPO/'go.mod').read_text()+'\nreplace github.com/nats-io/nats-server/v2 => '+str(copied)+'\n')
     shutil.copyfile(REPO/'go.sum', root/'candidate.sum')
@@ -70,7 +93,7 @@ def prepare_candidate(root, revision, shared, save, env):
     save('candidate-build.json', {'source': revision, 'list': command, 'build': build,
          'executable_sha256': shared.sha(binary), 'patcher_sha256': shared.sha(patcher),
          'original_raft_sha256': shared.sha(copied/'server/raft.go'),
-         'candidate_raft_sha256': shared.sha(candidate),
+         'candidate_raft_sha256': shared.sha(candidate), 'guard_variant': variant,
          'build_info': subprocess.check_output(['go', 'version', '-m', str(binary)], text=True)})
     return binary, copied, source_before, external, inputs
 
@@ -82,7 +105,8 @@ def main():
     parser.add_argument('--expiry-profile',choices=['production','disabled'],default='production')
     parser.add_argument('--raft-debug',action='store_true')
     parser.add_argument('--marker-profile',choices=['production','disabled-markers'],default='production')
-    parser.add_argument('--server-profile', choices=['upstream', 'obsolete-catchup-candidate'], default='upstream')
+    parser.add_argument('--server-profile', choices=['upstream', 'obsolete-catchup-candidate',
+                                                   'obsolete-catchup-contiguous-candidate'], default='upstream')
     args = parser.parse_args()
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
@@ -98,7 +122,8 @@ def main():
         target = root/'selected-source'/name
         target.parent.mkdir(parents=True,exist_ok=True)
         shutil.copyfile(REPO/name,target)
-    candidate = prepare_candidate(root, revision, shared, save, env) if args.server_profile != 'upstream' else None
+    variant = 'contiguous' if args.server_profile == 'obsolete-catchup-contiguous-candidate' else 'strict'
+    candidate = prepare_candidate(root, revision, shared, save, env, variant) if args.server_profile != 'upstream' else None
     template = REPO/'scripts/lease-partition-component.go.txt'
     assert template.read_bytes()==subprocess.check_output(['git','cat-file','blob',revision+':scripts/lease-partition-component.go.txt'],cwd=REPO)
     helper = root/'helper.go';shutil.copyfile(template,helper)
