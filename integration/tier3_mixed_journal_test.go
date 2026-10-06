@@ -382,17 +382,26 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 	var bulkBaseline integrity.Report
 	var fleet sync.WaitGroup
 	workCtx, stopWork := context.WithCancel(ctx)
+	repairCtx, stopRepair := context.WithCancel(workCtx)
+	defer stopRepair()
+	var repairLoops sync.WaitGroup
 	fleetErrors := make(chan error, provision.Partitions+3)
 	var fleetFailures []struct {
 		At    time.Time `json:"at"`
 		Loop  string    `json:"loop"`
 		Error string    `json:"error"`
 	}
-	launch := func(name string, run func() error) {
+	launchUsing := func(loopCtx context.Context, name string, run func() error, joined *sync.WaitGroup) {
 		fleet.Add(1)
+		if joined != nil {
+			joined.Add(1)
+		}
 		go func() {
 			defer fleet.Done()
-			if err := run(); err != nil && workCtx.Err() == nil {
+			if joined != nil {
+				defer joined.Done()
+			}
+			if err := run(); err != nil && loopCtx.Err() == nil {
 				failure := fmt.Errorf("%s: %w", name, err)
 				evidenceMu.Lock()
 				fleetFailures = append(fleetFailures, struct {
@@ -406,6 +415,12 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 				cancel()
 			}
 		}()
+	}
+	launch := func(name string, run func() error) {
+		launchUsing(workCtx, name, run, nil)
+	}
+	launchRepair := func(name string, run func() error) {
+		launchUsing(repairCtx, name, run, &repairLoops)
 	}
 	var processes, processSessions []*matrixProcessWorker
 	var workerProxies []*testcluster.ClientProxy
@@ -578,8 +593,8 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		}
 	}
 	if row == "rolling_upgrade" {
-		launch("repair/fallback-timers", func() error {
-			return reconcile.RunFallbackTimerLoop(workCtx, js, "tier3-upgrade-timers", 100*time.Millisecond, 100)
+		launchRepair("repair/fallback-timers", func() error {
+			return reconcile.RunFallbackTimerLoop(repairCtx, js, "tier3-upgrade-timers", 100*time.Millisecond, 100)
 		})
 	}
 	startCadence, startBudget := time.Second, 32
@@ -589,15 +604,15 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		startCadence, startBudget = 100*time.Millisecond, 64
 	}
 	t.Logf("TIER3_START_SCAN interval=%s budget=%d", startCadence, startBudget)
-	launch("repair/start", func() error {
-		return reconcile.RunRepairLoopWithScanObserver(workCtx, startRepairJS, "tier3-mixed-start", "start", startCadence, startBudget, repairObserver, func(event reconcile.ScanEvent) {
+	launchRepair("repair/start", func() error {
+		return reconcile.RunRepairLoopWithScanObserver(repairCtx, startRepairJS, "tier3-mixed-start", "start", startCadence, startBudget, repairObserver, func(event reconcile.ScanEvent) {
 			evidenceMu.Lock()
 			startScans = append(startScans, event)
 			evidenceMu.Unlock()
 		})
 	})
-	launch("repair/signal", func() error {
-		return reconcile.RunRepairLoopObserved(workCtx, js, "tier3-mixed-signal", "signal", time.Second, 32, repairObserver)
+	launchRepair("repair/signal", func() error {
+		return reconcile.RunRepairLoopObserved(repairCtx, js, "tier3-mixed-signal", "signal", time.Second, 32, repairObserver)
 	})
 	suspendedCadence, suspendedBudget := time.Second, 8
 	if matrixServerClockOffset(row) != 0 {
@@ -617,8 +632,8 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		t.Fatal(err)
 	}
 	t.Logf("TIER3_SUSPENDED_SCAN interval=%s budget=%d", suspendedCadence, suspendedBudget)
-	launch("repair/suspended", func() error {
-		return reconcile.RunSuspendedLoopWithClockAndObservers(workCtx, js, "tier3-mixed-suspended", suspendedCadence, suspendedBudget, func(cursor uint64, result reconcile.ScanResult, err error) {
+	launchRepair("repair/suspended", func() error {
+		return reconcile.RunSuspendedLoopWithClockAndObservers(repairCtx, js, "tier3-mixed-suspended", suspendedCadence, suspendedBudget, func(cursor uint64, result reconcile.ScanResult, err error) {
 			evidenceMu.Lock()
 			defer evidenceMu.Unlock()
 			message := ""
@@ -1350,6 +1365,18 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		var results []matrixInvocationAuditResult
 		if bulkFinalLatency {
 			bulkProof = map[string]any{"stage_limit_ns": int64(6 * time.Minute), "point_comparison_requested": compareBulkPoint, "every_sample_matches_point": false, "final_integrity_verified": false, "scope": "explicit bulk final latency; original retained audit budgets, completion deadline, history/p99/drain gates retained"}
+			// Repair cursors live in WF_STATE. After all cohorts and scheduled
+			// faults finish, join their writers before requiring a frozen cut.
+			// Workers and dispatch remain live for the original drain checks.
+			bulkProof["repair_stop_requested_at"] = time.Now().UTC()
+			stopRepair()
+			repairLoops.Wait()
+			bulkProof["repair_writers_joined_at"] = time.Now().UTC()
+			bulkProof["repair_writers_stopped"] = true
+			if err := ctx.Err(); err != nil {
+				bulkProof["error"] = err.Error()
+				t.Fatal(err)
+			}
 			bulkBaseline, err = matrixRetainedAudit(ctx, js)
 			bulkProof["before_report"], bulkProof["error"] = bulkBaseline, fmt.Sprint(err)
 			if err != nil || bulkBaseline.Invocations != batches*28 || bulkBaseline.Journals != batches*28 || bulkBaseline.Terminal != batches*28 {

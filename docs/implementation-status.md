@@ -32,6 +32,38 @@ coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
 
+## Repair-cursor audit diagnostic — 2026-10-06
+
+Fresh35s journal diagnostic at009de76 reproduces the bulk cut failure in
+54.56s. KV_WF_STATE changes from First4/Last302/Messages199/Bytes33983/Consumers0
+to First4/Last308/Messages199/Bytes33984/Consumers0 during2.048380142s.
+The196 terminal results plus three scan cursors explain the199 retained messages;
+production repair loops save those cursors in WF_STATE every second. This
+identifies a harness quiescence problem, without claiming unrecorded cut fields
+for the earlier failed ten-minute fixture. No partial samples accepted.
+
+Explicit bulk final audit now cancels and joins repair writers after all cohorts
+and scheduled faults finish, before the full integrity baseline and frozen-cut
+read. Workers/dispatch remain live for original drain checks. Stop/join timestamps
+and a joined receipt are retained; parent deadline, source equality and original
+20s/60s/6m/history/p99/checkpoint/fault gates stay unchanged. Default point mode
+keeps repair loops running. Seeded Tier1 regression uses the production scanner
+loop state machine and shared modeled terminal/cursor KV:100 schedules pass
+under race, first10 exact replays match. It proves cursor-only revision drift and
+stability after joining, without modeling Raft or server metadata. Integration
+compile/skip passes. Corrected native and original ten-minute qualification pending.
+
+Diagnostic original archive/source/binary/profile and five late-observed server
+processes independently verified closed; periodic observation is not exhaustive
+lifetime coverage. The first observer failed before launching because its script
+was absent; its terminal failure and corrected observer logs are preserved.
+Complete diagnostic fixture archived with full member/current-file verification.
+[Diagnostic proof](scale/sustained-bulk-final-latency-2026-10-06/diagnostic-state-cut/).
+Only the earlier failed ten-minute redundant archive was reclaimed after full
+committed S3/member/current-file and process/descriptor checks:141,770,752 allocated
+bytes recovered; primary originals remain intact.
+[Recovery](scale/sustained-bulk-final-latency-2026-10-06/failed-ten-minute-raw-recovery/).
+
 ## Latest storage and proof reporting correction — 2026-10-06
 
 Sustained R5 producer/harness now expose explicit `--bulk-final-latency` and
