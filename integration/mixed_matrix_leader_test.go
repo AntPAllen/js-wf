@@ -1365,10 +1365,20 @@ func matrixRouteCounts(ctx context.Context, cluster *testcluster.ProcessCluster,
 	return got, fmt.Errorf("route counts=%v want=%v: %w", got, want, ctx.Err())
 }
 
-func partitionMatrixServer(ctx context.Context, js jetstream.JetStream, cluster *testcluster.ProcessCluster, scheduled time.Time) (matrixLeaderFault, error) {
-	event := matrixLeaderFault{Scheduled: scheduled, Node: 2, Killed: time.Now()}
+func partitionMatrixServer(ctx context.Context, js jetstream.JetStream, cluster *testcluster.ProcessCluster, scheduled time.Time) (event matrixLeaderFault, resultErr error) {
+	event = matrixLeaderFault{Scheduled: scheduled, Node: 2, Killed: time.Now()}
 	bound, stop := context.WithTimeout(ctx, 35*time.Second)
 	defer stop()
+	finishDiagnostics, diagnosticErr := startMatrixPartitionDiagnostics(bound, cluster, scheduled)
+	if diagnosticErr != nil {
+		return event, diagnosticErr
+	}
+	defer func() {
+		if err := finishDiagnostics(); resultErr == nil {
+			resultErr = err
+		}
+	}()
+
 	if err := cluster.RouteMesh().PartitionNode(2); err != nil {
 		return event, err
 	}

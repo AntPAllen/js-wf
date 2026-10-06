@@ -12,6 +12,7 @@ parser.add_argument('--row',choices=ROWS,required=True)
 parser.add_argument('--seed',type=int,default=1)
 parser.add_argument('--duration',choices=['10m','35s'],default='10m',help='35s smoke never qualifies sustained duration')
 parser.add_argument('--old-server',type=Path,help='Absolute NATS 2.11.17 executable for the upgrade row; retained before use')
+parser.add_argument('--partition-diagnostics',action='store_true',help='Capture live per-peer public Raft/stream status alongside the original partition fault; gates unchanged')
 parser.add_argument('--race',action='store_true',help='explicit race profile; default preserves standard Tier2 normal execution')
 parser.add_argument('--prepare-only',action='store_true',help='Capture selected source and compile SDK without starting native tests')
 parser.add_argument('--prepared-inputs',type=Path,help='Verified prepare-only fixture at this exact clean revision')
@@ -21,6 +22,7 @@ repo=Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],text=Tru
 root=args.root
 if not root.is_absolute() or root.resolve().is_relative_to(repo) or not -(2**63)<=args.seed<2**63:
  parser.error('require an absolute evidence root outside the checkout and an int64 seed')
+if args.partition_diagnostics and args.row!='partition':parser.error('--partition-diagnostics applies only to partition')
 if (args.row=='upgrade') != (args.old_server is not None):parser.error('--old-server is required only for upgrade')
 root=root.resolve()
 cache=args.input_cache
@@ -62,6 +64,7 @@ for line in deps.splitlines():
 (root/'external-source-before.json').write_text(json.dumps(inputs,indent=2)+'\n');(root/'external-captured-paths.json').write_text(json.dumps(captured,indent=2)+'\n')
 env={k:v for k,v in os.environ.items() if not k.startswith(('WF_','MATRIX_','TIER3_MATRIX_'))};env.update(GOMAXPROCS='2',GOMEMLIMIT='2GiB',WF_MATRIX_CHAOS='1',WF_MATRIX_OPERATION_TIMINGS='1',WF_MATRIX_DURATION=args.duration,WF_MATRIX_PROCESS_ROOT=str(root/'originals'),MATRIX_ARTIFACT_PREFIX=str(root/('matrix-'+args.row+'-'+str(args.seed))),FAULT_SEED=str(args.seed))
 row=args.row;duration=args.duration;race=args.race;test=ROWS[row]
+if args.partition_diagnostics:env['WF_MATRIX_PARTITION_DIAGNOSTICS']='1'
 if row=='blockdisk':env['WF_BLOCK_DISK']='1'
 if row=='upgrade':env['WF_NATS_SERVER_BIN']=str(capture_legacy_server(args.old_server,root))
 selection='^'+test+'$'
@@ -92,7 +95,7 @@ args=[str(root/'integration.test'),'-test.run='+selection,'-test.count=1','-test
 with (root/'native.log').open('w') as log:
  p=subprocess.Popen(args,cwd=repo/'integration',env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
  try:
-  exe=Path(f'/proc/{p.pid}/exe');actual={'pid':p.pid,'sha256':sha(exe),'exe':os.readlink(exe),'build_info':subprocess.check_output(['go','version','-m',str(exe)],text=True),'source':revision,'row':row,'test':test,'duration':duration,'race':race,'sustained_ten_minutes':duration=='10m','status':'running','started_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'start_ticks':Path(f'/proc/{p.pid}/stat').read_text().rsplit(')',1)[1].split()[19],'actual_argv':Path(f'/proc/{p.pid}/cmdline').read_bytes().decode().rstrip('\0').split('\0'),'server_observation_scope':'Periodic owned NATS descendants; point-in-time /proc bytes, not exhaustive process lifetime coverage.'};assert actual['sha256']==sha(root/'integration.test');(root/'execution.json').write_text(json.dumps(actual,indent=2)+'\n');print('NATIVE_STARTED',p.pid,revision,flush=True)
+  exe=Path(f'/proc/{p.pid}/exe');actual={'pid':p.pid,'sha256':sha(exe),'exe':os.readlink(exe),'build_info':subprocess.check_output(['go','version','-m',str(exe)],text=True),'source':revision,'row':row,'test':test,'duration':duration,'race':race,'sustained_ten_minutes':duration=='10m','status':'running','started_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'start_ticks':Path(f'/proc/{p.pid}/stat').read_text().rsplit(')',1)[1].split()[19],'actual_argv':Path(f'/proc/{p.pid}/cmdline').read_bytes().decode().rstrip('\0').split('\0'),'server_observation_scope':'Periodic owned NATS descendants; point-in-time /proc bytes, not exhaustive process lifetime coverage.'};actual_environment=dict(item.split(b'=',1) for item in Path(f'/proc/{p.pid}/environ').read_bytes().split(b'\0') if b'=' in item);actual['environment']={k:os.fsdecode(actual_environment[k.encode()]) for k in env if k.startswith(('WF_','MATRIX_')) or k in ['GOMEMLIMIT','GOMAXPROCS','GOCACHE','FAULT_SEED']};assert actual['environment']==json.loads((root/'commands.json').read_text())['environment'];assert actual['sha256']==sha(root/'integration.test');(root/'execution.json').write_text(json.dumps(actual,indent=2)+'\n');print('NATIVE_STARTED',p.pid,revision,flush=True)
  except BaseException:
   (root/'producer-error.txt').write_text(traceback.format_exc())
   os.killpg(p.pid,signal.SIGTERM)
@@ -131,6 +134,7 @@ after={n:sha(repo/n) for n in names};assert before==after;(root/'source-after.js
 assert all(sha(root/d['captured'])==d['sha256'] for d in generated.values())
 external_after={n:sha(Path(n)) for n in inputs};assert inputs==external_after;(root/'external-source-after.json').write_text(json.dumps(external_after,indent=2)+'\n');assert Path(__file__).read_bytes()==producer_bytes and observer.read_bytes()==observer_bytes and worker_observer.read_bytes()==worker_observer_bytes and profiles.read_bytes()==profiles_bytes and cache_module.read_bytes()==cache_bytes;shutil.copy2(__file__,root/'executed-producer.py');print('NATIVE_FINISHED',code,flush=True)
 
+if args.partition_diagnostics:env['WF_MATRIX_PARTITION_DIAGNOSTICS']='1'
 if row=='blockdisk':
  images=list((root/'originals').glob('*/wf-block-*/backing.img'))
  media=[{'path':str(p.relative_to(root)),'bytes':p.stat().st_size,'sha256':sha(p)} for p in images]
