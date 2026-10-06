@@ -29,6 +29,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: retained fanout restart ten-minute live
+
+Clean e3399bf actual normal SDK1507357/three current externalNATS/profile2CPU/2GiB
+and694Go/module source inputs verified. Original ten-minute seed1 starts; first
+allthree restart at30s heals39.375499s. Suspended parent/six children/unfinished
+selection and recovered prefix retained unchanged. Read-only exact cut/final
+reviewer passes valid/19corrupted evidence controls; integration compiles. Native
+terminal, full preservation and independent copied audits pending. Long24h and
+million campaigns stay live on original handles/sources; full13x200/currentgate open.
+[Live evidence](scale/tier2-retained-fanout-2026-10-06/live-initial/).
+[Preparation](scale/tier2-retained-fanout-2026-10-06/preparation/).
+
 ## Latest follow-up — 2026-10-06: original reply isolation copied audit accepted
 
 Fresh copies verify full2,296/25,336/2,296 report, independent histories and allthree
