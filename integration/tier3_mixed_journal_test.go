@@ -1306,25 +1306,29 @@ func runFiveContainerMixedLeader(t *testing.T, row string) {
 		}
 		samples = controllerProof.Samples
 	} else {
-		for sequence := info.State.FirstSeq; sequence <= info.State.LastSeq; sequence++ {
-			attempt, stop := context.WithTimeout(ctx, 20*time.Second)
+		results, err := matrixParallelInvocationAudits(ctx, info.State.FirstSeq, info.State.LastSeq, func(attempt context.Context, sequence uint64) (matrixInvocationAuditResult, error) {
+			var result matrixInvocationAuditResult
 			msg, err := inv.GetMsg(attempt, sequence)
-			if err == nil {
-				parts := strings.Split(msg.Subject, ".")
-				var next []matrixLatencySample
-				next, err = matrixInvocationLatencies(attempt, js, parts[2], parts[3], msg.Time, completionDeadline)
-				samples = append(samples, next...)
-				if err == nil && rollout != "" {
-					var mixed bool
-					mixed, err = auditMatrixRolloutInvocation(attempt, js, root, parts[2], parts[3])
-					if mixed {
-						mixedEncodingInvocations++
-					}
-				}
-			}
-			stop()
 			if err != nil {
-				t.Fatal(err)
+				return result, err
+			}
+			parts := strings.Split(msg.Subject, ".")
+			if len(parts) != 4 {
+				return result, fmt.Errorf("invalid invocation subject %q", msg.Subject)
+			}
+			result.samples, err = matrixInvocationLatencies(attempt, js, parts[2], parts[3], msg.Time, completionDeadline)
+			if err == nil && rollout != "" {
+				result.mixed, err = auditMatrixRolloutInvocation(attempt, js, root, parts[2], parts[3])
+			}
+			return result, err
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, result := range results {
+			samples = append(samples, result.samples...)
+			if result.mixed {
+				mixedEncodingInvocations++
 			}
 		}
 	}
