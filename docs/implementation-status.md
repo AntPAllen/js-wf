@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: bulk owner-fault preparation failure corrected
+
+Atbb5f2e0 fresh copied nativeFAIL21.35s before bulk/fault injection: same public
+cursor name listed twice; first deletion succeeds, second returns consumer-not-
+found. SDK/five actual servers closed,3,887 donor hashes unchanged; complete
+base plus87,043,258-byte delta verified. No recovery pass or server cause claimed.
+Preparation now finishes/validates inventory before deletion, preserves duplicate
+observations while deleting each ephemeral name once, retains already-absent
+responses and still requires zero-consumer final source inventory. Unknown/durable
+consumers reject. Five deterministic preparation controls plus fault delivery and
+metadata cleanup controls pass under race1.102s. Fresh native qualification next.
+[Failed attempt](scale/bulk-cursor-fault-preparation-2026-10-06/native-real87920-owner-restart/).
+
 ## Latest follow-up — 2026-10-06: corrected deadline real87920 comparison accepted
 
 At65c9036 fresh R5 normal nativePASS53.91s: original20s full integrity before/after

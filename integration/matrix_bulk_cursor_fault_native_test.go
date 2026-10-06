@@ -163,17 +163,20 @@ func (f *matrixBulkCursorFault) snapshot() matrixBulkCursorFaultProof {
 // configuration and deletion receipt. Workflow records are not altered.
 func matrixPrepareCopiedBulkCursors(ctx context.Context, js jetstream.JetStream, root string) (failure error) {
 	type removed struct {
-		Info       *jetstream.ConsumerInfo `json:"info"`
-		AttemptUTC time.Time               `json:"attempt_utc"`
-		DeletedUTC time.Time               `json:"deleted_utc"`
-		Error      string                  `json:"error"`
+		Info          *jetstream.ConsumerInfo `json:"info"`
+		AttemptUTC    time.Time               `json:"attempt_utc"`
+		DeletedUTC    time.Time               `json:"deleted_utc"`
+		AlreadyAbsent bool                    `json:"already_absent"`
+		Error         string                  `json:"error"`
 	}
 	var receipts []removed
+	var listed []*jetstream.ConsumerInfo
 	defer func() {
 		data, err := json.MarshalIndent(struct {
-			Receipts []removed `json:"receipts"`
-			Error    string    `json:"error"`
-		}{receipts, fmt.Sprint(failure)}, "", "  ")
+			Listed   []*jetstream.ConsumerInfo `json:"listed"`
+			Receipts []removed                 `json:"receipts"`
+			Error    string                    `json:"error"`
+		}{listed, receipts, fmt.Sprint(failure)}, "", "  ")
 		if err == nil {
 			err = os.WriteFile(filepath.Join(root, "bulk-cursor-preparation.json"), data, 0600)
 		}
@@ -185,21 +188,44 @@ func matrixPrepareCopiedBulkCursors(ctx context.Context, js jetstream.JetStream,
 			return err
 		}
 		list := s.ListConsumers(ctx)
+		var sourceConsumers []*jetstream.ConsumerInfo
 		for info := range list.Info() {
-			if !strings.HasPrefix(info.Name, "wf-audit-") || info.Config.AckPolicy != jetstream.AckNonePolicy || !info.Config.MemoryStorage {
+			listed = append(listed, info)
+			sourceConsumers = append(sourceConsumers, info)
+		}
+		if err := list.Err(); err != nil {
+			return err
+		}
+		// Finish inventory before mutating a paginated listing. Validate every
+		// observed consumer before deleting any, and retain duplicate public
+		// entries while executing at most one deletion for each name.
+		for _, info := range sourceConsumers {
+			if !strings.HasPrefix(info.Name, "wf-audit-") || info.Config.Durable != "" || info.Config.AckPolicy != jetstream.AckNonePolicy || !info.Config.MemoryStorage {
 				return fmt.Errorf("unexpected copied source consumer %s/%s", name, info.Name)
 			}
+		}
+		seen := map[string]bool{}
+		for _, info := range sourceConsumers {
+			if seen[info.Name] {
+				continue
+			}
+			seen[info.Name] = true
 			r := removed{Info: info, AttemptUTC: time.Now().UTC()}
 			if err := s.DeleteConsumer(ctx, info.Name); err != nil {
 				r.Error = err.Error()
+				if errors.Is(err, jetstream.ErrConsumerNotFound) {
+					// Listing is an observation, not a lock on an expiring memory
+					// cursor. Preserve this response and require the zero-consumer
+					// source inventory below before admitting the prepared copy.
+					r.AlreadyAbsent = true
+					receipts = append(receipts, r)
+					continue
+				}
 				receipts = append(receipts, r)
 				return err
 			}
 			r.DeletedUTC = time.Now().UTC()
 			receipts = append(receipts, r)
-		}
-		if err := list.Err(); err != nil {
-			return err
 		}
 		info, err := s.Info(ctx)
 		if err != nil || info.State.Consumers != 0 {
