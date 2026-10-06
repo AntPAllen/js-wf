@@ -1,0 +1,65 @@
+name: domain-runtime-controls
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/domain-runtime-controls.yml'
+      - 'scripts/run-domain-runtime-controls.py'
+      - 'scripts/fixture_archive.py'
+      - 'scripts/verify-tier2-closed-originals.py'
+      - 'integration/core_test.go'
+      - 'integration/result_absence_test.go'
+      - 'integration/snapshot_manifest_leader_test.go'
+      - 'integration/continuation_retirement*.go'
+      - 'internal/natsutil/**'
+      - 'client/**'
+      - 'worker/**'
+      - 'journal/**'
+      - 'lease/**'
+      - 'provision/**'
+      - 'retention/**'
+      - 'testcluster/**'
+      - 'go.mod'
+      - 'go.sum'
+  pull_request:
+    paths:
+      - '.github/workflows/domain-runtime-controls.yml'
+      - 'scripts/run-domain-runtime-controls.py'
+      - 'integration/**'
+      - 'internal/natsutil/**'
+      - 'client/**'
+      - 'worker/**'
+      - 'journal/**'
+      - 'lease/**'
+      - 'provision/**'
+      - 'retention/**'
+      - 'testcluster/**'
+      - 'go.mod'
+      - 'go.sum'
+permissions:
+  contents: read
+jobs:
+  domain-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [read-controls, retirement-server-kill]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Require complete native race coverage and retain closed originals
+        run: python3 scripts/run-domain-runtime-controls.py --case '${{ matrix.case }}' --root '${{ runner.temp }}/domain-controls-${{ matrix.case }}'
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: domain-controls-${{ matrix.case }}
+          path: |
+            ${{ runner.temp }}/domain-controls-${{ matrix.case }}.tar.gz
+            ${{ runner.temp }}/domain-controls-${{ matrix.case }}-proof/
+            ${{ runner.temp }}/domain-controls-${{ matrix.case }}/*.json
+            ${{ runner.temp }}/domain-controls-${{ matrix.case }}/*.log
+          if-no-files-found: error

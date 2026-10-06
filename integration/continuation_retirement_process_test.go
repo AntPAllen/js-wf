@@ -39,6 +39,10 @@ func TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndAllServe
 	runContinuationRetirementProcessFault(t, true, false, "WFRETIRE")
 }
 
+func TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndLeaseExpiryAcrossAllServerSIGKILL(t *testing.T) {
+	runContinuationRetirementProcessFault(t, true, true, "WFRETIRE")
+}
+
 func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool, domain string) {
 	t.Helper()
 	if expireLease && !full {
