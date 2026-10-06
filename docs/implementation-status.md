@@ -32,6 +32,19 @@ coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
 
+## Further closed-copy recovery — 2026-10-06
+
+All18 closed fanout copied-audit store trees (six local physical, six prior
+successful and six prior drained copies) pass complete committed Git archive
+parts/concatenated members/embedded manifests and current-file census checks,
+copy provenance and closed-copy ledgers, actual SDK hash/closure with embedded
+R3 servers, visible descriptors, process arguments, Docker mounts and loop/mount
+checks. Only disposable cluster copies were removed;424,861,696 allocated bytes
+recovered, about836MiB free. Every remaining captured source/executable/metadata
+file matches its pre-removal census; primary donors, caches and canonical proofs
+remain. No old stores reopened or verdicts changed.
+[Recovery](scale/closed-fanout-copy-recovery-2026-10-06/).
+
 ## Corrected bulk final-audit smoke — 2026-10-06
 
 Fresh35s journal seed1 atf2f6983 passes53.93s with seven cohorts,196 completed
