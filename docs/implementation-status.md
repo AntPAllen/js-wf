@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: full six native fanout physical cuts accepted
+
+Original full-cardinality race campaign at cdd4c7b passes525.46s. All six actual
+parent SIGKILL + library journal-leader restart cuts preserve prefixes/500child
+results/parent249500/501complete records and distinct three local physical queue
+zero/64durable witnesses after workers joined, within original five-minute cases.
+ActualSDK2293554/696source/3,287external/closure/source/profile independently
+verified. All18starts were first-attempt successes; native transient retry recovery
+is not demonstrated. Full16,805member69,051,153byte/threepart archive readback passes.
+Fresh copied audits pending; historical failed campaign/unconfirmed timeout cause
+remain. Full matrices/24h/million final physical gates remain open.
+[Native proof](scale/fanout-combined-local-physical-2026-10-06/native-retry/).
+
 ## Live snapshot — 2026-10-06 05:24 UTC
 
 - The corrected full six-case, 500-child fanout campaign is active at `cdd4c7b`.
