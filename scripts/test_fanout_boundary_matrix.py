@@ -124,7 +124,7 @@ class CombinedBoundaryGateChecks(unittest.TestCase):
 
 class PhysicalDrainGateChecks(unittest.TestCase):
     events = CombinedBoundaryGateChecks.events
-    marker = 'FANOUT_PHYSICAL_DRAIN peers=3 stream_messages=0 consumers=64 pending=0 ack_pending=0 workers_joined=64\n'
+    marker = 'FANOUT_PHYSICAL_DRAIN peers=3 stream_messages=0 consumers=64 pending=0 ack_pending=0 workers_joined=64 local_monitors=3\n'
 
     def drained_events(self):
         events = self.events()
@@ -141,8 +141,8 @@ class PhysicalDrainGateChecks(unittest.TestCase):
     def test_missing_wrong_duplicate_and_reordered_drain(self):
         original = self.drained_events()[3]['Output']
         for changed in (original.replace(self.marker, ''), original.replace('stream_messages=0','stream_messages=1'),
-                        original.replace('consumers=64','consumers=63'), original.replace('peers=3','peers=2'),
-                        original.replace('ack_pending=0','ack_pending=1'), original.replace('workers_joined=64','workers_joined=63'), original.replace('workers_joined=64','workers_joined=640'),
+                        original.replace('consumers=64','consumers=63'), original.replace(' local_monitors=3',''), original.replace('peers=3','peers=2'),
+                        original.replace('ack_pending=0','ack_pending=1'), original.replace('workers_joined=64 local_monitors=3','workers_joined=63'), original.replace('workers_joined=64 local_monitors=3','workers_joined=64 local_monitors=30'),
                         original.replace(self.marker,self.marker+self.marker), self.marker+original.replace(self.marker,''),
                         original.replace(self.marker,'')+self.marker,
                         original.replace(self.marker,'').replace('combined journal restart',self.marker+'combined journal restart')):

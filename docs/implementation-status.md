@@ -29,6 +29,23 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: negative clock copied accepted; full500 physical repair prepared
+
+Fresh copied SDK1873157/helpera3cb577 binds original0b24a84 full3,332/36,768/3,332
+report/history and distinct pinned /jsz local queueszero/64consumers. Integrity
+635.639039ms/combined4.652001527s<20s. 1,698inputs/2,287unchangedoriginalfiles/
+actualexes/closure/canonicalprecopy verification pass; full4,013member65,914,668byte/
+threepart proof readback passes. Bothclockdirections native+copy qualify recorded
+source/seed; full13x200/current-main/24h/million finalphysical gates remain open.
+
+Full500-child native drain now additionally records actualper-server publicJsz local
+states/IDs/intervals within original5-minute case deadline, preserving failures.
+Gate requires local_monitors=3; old API-only markers reject. Fourteen controls pass,
+integration compiles, reusable fullsix reviewer prepared. Full500-child native/copy
+localphysical requalification pending; originallong handles remain unchanged.
+[Negative copied proof](scale/tier2-retained-server-clock-2026-10-06/negative-physical-copied-audit/).
+[Full500 physical preparation](scale/fanout-combined-local-physical-2026-10-06/preparation/).
+
 ## Latest follow-up — 2026-10-06: negative clock native pass; further physical scope correction
 
 Original0b24a84 negativeclock normal ten-minute seed1/nativeindependentreview passes:

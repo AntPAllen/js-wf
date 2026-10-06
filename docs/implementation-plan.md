@@ -4679,3 +4679,15 @@ not all-three local physical stores. Historical retaineddata/results/logicaldrai
 outcomes remain; stronger physical claims need new witnesses. Copied templates now
 add publicJsz localserver snapshots under unchanged20s, bothcompile. Freshruntime/
 500-child native physical proof/fullmatrix/current-source/24h gates remain open.
+
+## Negativeclock copied accepted; full500 local physical repair prepared — 2026-10-06
+
+Original0b24a84 ten-minute negativeclock seed1 native+copied now qualifies full
+3,332terminals/36,768entries/history/localphysicaldrain/64durables. Copied audit
+635.639039ms/combined4.652001527s<20s;1,698inputs/2,287unchangedoriginals/canonical
+precopy/executableclosure/full4,013member65,914,668byte/threepart proof verified.
+Full500-child native drain now adds actualServer.Jsz localstates/IDs/intervals within
+original5-minute case deadline, retains failures, and requires local_monitors=3.
+Fourteen controls/integrationcompile pass; reusable sixcase independent reviewer
+prepared. Fullsix native/copy localphysical qualification pending; fullmatrix/
+current-source/24h/million gates remain open. No original long handle restarted.

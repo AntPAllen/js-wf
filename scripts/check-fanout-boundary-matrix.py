@@ -41,7 +41,7 @@ def check(events, combined=False, physical_drain=False):
         if completions[0][0] != '500' or not 0 <= int(completions[0][1]) <= 500:
             raise ValueError(f'{case}: incomplete fanout')
         if physical_drain:
-            drains = list(re.finditer(r'FANOUT_PHYSICAL_DRAIN peers=3 stream_messages=0 consumers=64 pending=0 ack_pending=0 workers_joined=64(?=\s|$)', log))
+            drains = list(re.finditer(r'FANOUT_PHYSICAL_DRAIN peers=3 stream_messages=0 consumers=64 pending=0 ack_pending=0 workers_joined=64 local_monitors=3(?=\s|$)', log))
             prefix = re.search(r'FANOUT_PREFIX_PRESERVED ', log)
             kill = re.search(r'SIGKILLed parent worker at ', log)
             if len(drains) != 1 or not kill.start() < drains[0].start() < prefix.start():

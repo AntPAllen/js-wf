@@ -10,12 +10,22 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/provision"
+	"js-wf/testcluster"
 	"js-wf/worker"
 )
 
+type fanoutPhysicalPeer struct {
+	Node     int            `json:"node"`
+	Started  time.Time      `json:"started"`
+	Finished time.Time      `json:"finished"`
+	State    *server.JSInfo `json:"state"`
+}
+
 type fanoutDrainPeer struct {
+	Physical  *fanoutPhysicalPeer       `json:"physical"`
 	Queue     *jetstream.StreamInfo     `json:"queue"`
 	Consumers []*jetstream.ConsumerInfo `json:"consumers"`
 }
@@ -24,7 +34,7 @@ type fanoutDrainPeer struct {
 // joined. These are production deliveries and acknowledgments, never purges.
 // Every read and worker join stays inside the original five-minute case.
 // A terminal-wakeup backlog has no separate recovery-p99/30-second contract.
-func drainFanoutTerminalWakeups(t *testing.T, ctx context.Context, all []jetstream.JetStream, handlers map[string]worker.Handler, root string) {
+func drainFanoutTerminalWakeups(t *testing.T, ctx context.Context, all []jetstream.JetStream, cluster *testcluster.Cluster, handlers map[string]worker.Handler, root string) {
 	t.Helper()
 	caseDeadline, hasDeadline := ctx.Deadline()
 	if !hasDeadline {
@@ -59,7 +69,7 @@ func drainFanoutTerminalWakeups(t *testing.T, ctx context.Context, all []jetstre
 	var peers []fanoutDrainPeer
 	var lastErr error
 	for bound.Err() == nil {
-		peers, lastErr = observeFanoutPhysicalDrain(bound, all)
+		peers, lastErr = observeFanoutPhysicalDrain(bound, all, cluster)
 		if lastErr == nil {
 			break
 		}
@@ -80,7 +90,7 @@ func drainFanoutTerminalWakeups(t *testing.T, ctx context.Context, all []jetstre
 	}
 	join()
 	// The persisted witness is after every producer/worker is joined.
-	peers, err = observeFanoutPhysicalDrain(bound, all)
+	peers, err = observeFanoutPhysicalDrain(bound, all, cluster)
 	if err != nil {
 		t.Fatalf("fanout drain changed after worker joins: %v", err)
 	}
@@ -96,14 +106,15 @@ func drainFanoutTerminalWakeups(t *testing.T, ctx context.Context, all []jetstre
 	if err := os.WriteFile(filepath.Join(root, "physical-drain.json"), append(data, '\n'), 0600); err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("FANOUT_PHYSICAL_DRAIN peers=3 stream_messages=0 consumers=64 pending=0 ack_pending=0 workers_joined=64")
+	t.Logf("FANOUT_PHYSICAL_DRAIN peers=3 stream_messages=0 consumers=64 pending=0 ack_pending=0 workers_joined=64 local_monitors=3")
 }
 
-func observeFanoutPhysicalDrain(ctx context.Context, all []jetstream.JetStream) ([]fanoutDrainPeer, error) {
+func observeFanoutPhysicalDrain(ctx context.Context, all []jetstream.JetStream, cluster *testcluster.Cluster) ([]fanoutDrainPeer, error) {
 	peers := make([]fanoutDrainPeer, 0, len(all))
-	if len(all) != 3 {
-		return nil, fmt.Errorf("expected three clients")
+	if len(all) != 3 || cluster == nil || len(cluster.Servers) != 3 {
+		return nil, fmt.Errorf("expected three clients and physical servers")
 	}
+	identities := make(map[string]bool)
 	for index, js := range all {
 		attempt, stop := context.WithTimeout(ctx, time.Second)
 		stream, err := js.Stream(attempt, "WF_RUN")
@@ -152,6 +163,43 @@ func observeFanoutPhysicalDrain(ctx context.Context, all []jetstream.JetStream) 
 				return peers, fmt.Errorf("peer%d missing partition%d", index, part)
 			}
 		}
+		// Stream.Info is leader-routed. Ask each actual in-process server's
+		// public monitoring implementation for its local physical state too.
+		if err := ctx.Err(); err != nil {
+			return peers, err
+		}
+		physical := &fanoutPhysicalPeer{Node: index, Started: time.Now().UTC()}
+		peer.Physical = physical
+		peers[len(peers)-1] = peer
+		physical.State, err = cluster.Servers[index].Jsz(&server.JSzOptions{Accounts: true, Streams: true, Consumer: true, RaftGroups: true})
+		physical.Finished = time.Now().UTC()
+		if err != nil {
+			return peers, err
+		}
+		if err := ctx.Err(); err != nil {
+			return peers, err
+		}
+		state := physical.State
+		if state == nil || state.Disabled || state.ID == "" || identities[state.ID] {
+			return peers, fmt.Errorf("missing or duplicate physical server identity")
+		}
+		identities[state.ID] = true
+		found := 0
+		for _, account := range state.AccountDetails {
+			for _, stream := range account.Streams {
+				if stream.Name != "WF_RUN" {
+					continue
+				}
+				found++
+				if stream.State.Msgs != 0 || stream.State.Consumers != int(provision.Partitions) {
+					return peers, fmt.Errorf("node%d physical queue messages=%d consumers=%d", index, stream.State.Msgs, stream.State.Consumers)
+				}
+			}
+		}
+		if found != 1 {
+			return peers, fmt.Errorf("node%d local WF_RUN census=%d", index, found)
+		}
+		peer.Physical = physical
 		peers[len(peers)-1] = peer
 	}
 	if ctx.Err() != nil {
