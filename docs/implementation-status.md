@@ -14502,3 +14502,17 @@ observer, no per-record clocks or reduced population/warmup. Compile/skip passes
 original20s/config/fault/24h gates unchanged, native pending verified copy headroom.
 [Failure](scale/direct-callback-audit-2026-10-05/full400k-owner-down/).
 [Preparation](scale/direct-callback-audit-2026-10-05/full400k-cold-profile-preparation/).
+
+### Additional closed fixture storage cleanup — 2026-10-06
+
+Closed byte-refill final normal/race controls are preserved in a complete S3
+archive (5,983 members, 50,901,530 compressed bytes). Full remote compressed-body
+and member checks, current local inventory equality and visible process/file/
+container/mount closure preceded removal of the stores and SDK binaries. This
+recovered 1,118,212,096 allocated bytes of older data; the 50,909,184-byte raw
+archive staging copy is counted separately. All 5,982 files were also restored
+to a fresh disposable tree and verified for bytes, modes and original nanosecond
+mtimes before that disposable copy was removed. Source/logs/provenance remain
+local. This does not change the historical dirty-build native qualification.
+The current normal simulation and original 24-hour journal remain active.
+Proof: [storage review](scale/tmp-storage-review-2026-10-06/byte-refill-final-controls/media-offload/offload.json).

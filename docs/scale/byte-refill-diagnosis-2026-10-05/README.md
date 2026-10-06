@@ -85,8 +85,15 @@ These failed parent/package verdicts remain preserved and are not promoted.
 ## Evidence and limits
 
 Every proof-index archive member and split part is read back/hash-verified. All
-original fixture roots and canonical proofs remain under /tmp at the recorded
-producer paths. Actual normal/race SDK executable hashes, live process identity,
+original fixture roots and canonical proofs were retained under /tmp at the recorded
+producer paths. On 2026-10-06, the closed final-controls stores and actual normal/race
+SDK binaries were moved to a complete S3 proof after full remote body/member,
+current inventory and visible closure checks. Source, logs, build/process records
+and ledgers remain local. See [storage proof](../tmp-storage-review-2026-10-06/byte-refill-final-controls/complete/archive-verification.json),
+[S3 readback](../tmp-storage-review-2026-10-06/byte-refill-final-controls/complete/s3-readback.json)
+and [removal record](../tmp-storage-review-2026-10-06/byte-refill-final-controls/media-offload/offload.json).
+A fresh file restoration verified all 5,982 original files, including nanosecond
+mtimes; no broker was started. Historical dirty-build provenance remains unchanged. Actual normal/race SDK executable hashes, live process identity,
 full build info and647 selected Go/module inputs are captured. Final integrity
 and trace campaigns have unchanged before/after selected-source inventories;
 final integrity inputs also match current code. Embedded actual NATS2.15 servers
