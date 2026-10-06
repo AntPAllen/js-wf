@@ -13,11 +13,20 @@ def read(p): return json.loads(p.read_text())
 def inventory(p):
     return {str(f.relative_to(p)):sha(f) for f in sorted(p.rglob('*')) if f.is_file()}
 
-def review(root, repo, require_retained_store=False):
+def review(root, repo, require_retained_store=False, expected_version='v2.15.0'):
     source = read(root/'source.json')
-    assert source['version']=='v2.15.0'
+    assert expected_version in ('v2.15.0','v2.15.1-RC.1') and source['version']==expected_version
     before = read(root/'module-before.json')
-    assert len(before)==598
+    assert before and (expected_version != 'v2.15.0' or len(before)==598)
+    if expected_version != 'v2.15.0':
+        assert source['production_version']=='v2.15.0'
+        download=source['download']
+        assert download['Path']=='github.com/nats-io/nats-server/v2' and download['Version']==expected_version
+        assert download['Dir']==source['module'] and download['Sum'] and download['GoModSum'] and not download.get('Error')
+        assert source['dependency_before']==read(root/'dependency-after.json')
+        for name,digest in source['dependency_before'].items():
+            assert name in ('go.mod','go.sum')
+            assert digest==hashlib.sha256(subprocess.check_output(['git','show',source['revision']+':'+name],cwd=repo)).hexdigest()
     assert before==read(root/'module-after.json')
     module_cache_verified=False
     if Path(source['module']).is_dir():
@@ -76,7 +85,7 @@ def review(root, repo, require_retained_store=False):
         else: assert not any(e['Action']=='fail' for e in events)
         cases.append(dict(mode=mode,actual_test_verdict=verdict,measurement=measurement,changed_upstream_files=sorted(changes),package_seconds=next(e['Elapsed'] for e in events if not e.get('Test') and e['Action']==verdict)))
     assert read(root/'result.json')['accepted']
-    review=dict(accepted=True,module_files_verified=598,module_cache_unchanged=True,module_cache_readback_at_review=module_cache_verified,retained_stores_verified=2 if retained else 0,runner_sha256=source['runner_sha256'],fixture_sha256=source['fixture_sha256'],source_revision=source['revision'],source_clean_at_execution=source['clean'],cases=cases,scope='Fresh two-message file-store cleanup reproduction and exact dirty-count control; no copied campaign data/index deletion/server/Raft; production dependency unchanged and original million retirement cause unconfirmed.')
+    review=dict(accepted=True,upstream_version=expected_version,module_files_verified=len(before),module_cache_unchanged=True,module_cache_readback_at_review=module_cache_verified,retained_stores_verified=2 if retained else 0,runner_sha256=source['runner_sha256'],fixture_sha256=source['fixture_sha256'],source_revision=source['revision'],source_clean_at_execution=source['clean'],cases=cases,scope='Fresh two-message file-store cleanup reproduction and exact dirty-count control; no copied campaign data/index deletion/server/Raft; production dependency unchanged and original million retirement cause unconfirmed.')
     return review
 
 if __name__ == '__main__':
@@ -85,8 +94,9 @@ if __name__ == '__main__':
     parser.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1])
     parser.add_argument('--output',type=Path)
     parser.add_argument('--require-retained-store',action='store_true')
+    parser.add_argument('--expected-version',choices=('v2.15.0','v2.15.1-RC.1'),default='v2.15.0')
     args=parser.parse_args()
-    result=review(args.root.resolve(),args.repo.resolve(),args.require_retained_store)
+    result=review(args.root.resolve(),args.repo.resolve(),args.require_retained_store,args.expected_version)
     output=args.output or args.root/'independent-review.json'
     output.write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result,indent=2))

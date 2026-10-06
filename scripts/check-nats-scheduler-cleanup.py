@@ -18,12 +18,24 @@ def hashes(root):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--root', type=Path, required=True)
+    p.add_argument('--module-version', choices=('v2.15.0', 'v2.15.1-RC.1'), default='v2.15.0',
+                   help='Explicit upstream diagnostic version; production dependency stays pinned')
     a = p.parse_args()
     root = a.root.resolve()
     assert not root.exists() and not root.is_relative_to(REPO)
-    version = subprocess.check_output(['go','list','-m','-f','{{.Version}}','github.com/nats-io/nats-server/v2'],cwd=REPO,text=True).strip()
-    assert version == 'v2.15.0'
-    module = Path(subprocess.check_output(['go','list','-m','-f','{{.Dir}}','github.com/nats-io/nats-server/v2'],cwd=REPO,text=True).strip())
+    pinned = json.loads(subprocess.check_output(['go','list','-m','-json','github.com/nats-io/nats-server/v2'],cwd=REPO))
+    assert pinned['Version'] == 'v2.15.0' and not pinned.get('Replace')
+    dependency_before = {n:hashlib.sha256((REPO/n).read_bytes()).hexdigest() for n in ('go.mod','go.sum')}
+    version = a.module_version
+    download = None
+    if version == pinned['Version']:
+        module = Path(pinned['Dir'])
+    else:
+        download = json.loads(subprocess.check_output(['go','mod','download','-json',
+            'github.com/nats-io/nats-server/v2@'+version],cwd=REPO))
+        assert download.get('Version') == version and download.get('Path') == 'github.com/nats-io/nats-server/v2'
+        assert download.get('Sum') and download.get('GoModSum') and not download.get('Error')
+        module = Path(download['Dir'])
     upstream = hashes(module)
     fixture = REPO/'scripts/fixtures/nats-scheduler-cleanup_minimal_test.go.txt'
     fixture_raw = fixture.read_bytes()
@@ -32,7 +44,7 @@ def main():
     (root/'runner.py').write_bytes(Path(__file__).read_bytes())
     (root/'fixture.go.txt').write_bytes(fixture_raw)
     (root/'module-before.json').write_text(json.dumps(upstream,indent=2)+'\n')
-    (root/'source.json').write_text(json.dumps(dict(version=version,module=str(module),revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip(),clean=not bool(subprocess.check_output(['git','status','--porcelain'],cwd=REPO)),fixture_sha256=fixture_hash,runner_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()),indent=2)+'\n')
+    (root/'source.json').write_text(json.dumps(dict(version=version,module=str(module),production_version=pinned['Version'],dependency_before=dependency_before,download=download,revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip(),clean=not bool(subprocess.check_output(['git','status','--porcelain'],cwd=REPO)),fixture_sha256=fixture_hash,runner_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()),indent=2)+'\n')
     results = []
     try:
         for mode in ('baseline','dirty-control'):
@@ -88,6 +100,9 @@ def main():
         after = hashes(module)
         (root/'module-after.json').write_text(json.dumps(after,indent=2)+'\n')
         assert after == upstream
+        dependency_after = {n:hashlib.sha256((REPO/n).read_bytes()).hexdigest() for n in ('go.mod','go.sum')}
+        (root/'dependency-after.json').write_text(json.dumps(dependency_after,indent=2)+'\n')
+        assert dependency_after == dependency_before
     print((root/'result.json').read_text())
 
 if __name__ == '__main__':
