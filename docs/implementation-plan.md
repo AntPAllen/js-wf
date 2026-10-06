@@ -4343,3 +4343,13 @@ Preparation only deletes validated old donor cursors and proves zero/unchanged
 source boundaries. Whole1698file823alias proof/actualSDK688inputs/fiveservers/
 mounts/closure/1058unchangeddonorfiles accepted. Fullsame-store restart/default/
 live/currentmatrices/actual24h remain open. [Evidence](scale/chunked-callback-audit-2026-10-06/clean-fixture/).
+
+## Full400k same-store cursor-owner restart accepted — 2026-10-06
+
+Fresh8693ab5 nativePASS53.85s: verified/prepared400k/4.8M baselinezero17.394841s,
+actualR5source/R1owner node1SIGKILL/samestore restart zero17.087980s. Distinct cursor
+129 after128; exact reports/all4.8M once-only visits withinoriginal20s. Six actual
+closedserverprocesses/old-newownerPIDs+containers/samemount/SDK688sourceinputs/
+unchanged1058donorfiles/full1699file816alias proof accepted. This run resumes on
+transport failure, not a same-assignment position regression proof. Public/default/
+live/currentmatrix/actual24h remain open. [Evidence](scale/chunked-callback-audit-2026-10-06/full400k-owner-restart/).
