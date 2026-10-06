@@ -42,8 +42,8 @@ before/after integrity counts equal, and original p99/history/drain checks pass.
 This accepts the short correction control only, not the original ten-minute row,
 default/fullmatrix or24h gate. Independent row/artifact checks, source/binary/
 actual SDK profile and all six observed server incarnations verify; complete
-closed originals archived with full member/current-file verification. No old
-store reopened. [Smoke proof](scale/sustained-bulk-final-latency-2026-10-06/joined-state-cut-smoke/).
+closed originals archived with full member/current-file verification; complete archive,
+metadata and inventory also pass full S3 GET readback. No old store reopened. [Smoke proof](scale/sustained-bulk-final-latency-2026-10-06/joined-state-cut-smoke/).
 
 ## Repair-cursor audit diagnostic — 2026-10-06
 
