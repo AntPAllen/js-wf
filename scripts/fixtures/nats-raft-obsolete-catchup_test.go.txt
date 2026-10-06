@@ -49,3 +49,61 @@ func TestDiagnosticRaftObsoleteCatchupDoesNotCreateOrCancelState(t *testing.T) {
 		}
 	}
 }
+
+func TestDiagnosticRaftObsoleteCatchupTrailingEntries(t *testing.T) {
+	for _, name := range []string{"contiguous", "ahead", "behind", "wrong_previous_term", "wrong_leader", "higher_leader_term", "older_leader_term", "legacy"} {
+		t.Run(name, func(t *testing.T) {
+			n, cleanup := initSingleMemRaftNode(t)
+			defer cleanup()
+			leader := "S1Nunr6R"
+			entries := []*Entry{newEntry(EntryNormal, []byte("trailing catchup entry"))}
+			makeEntry := func(index, previous uint64) *appendEntry {
+				return &appendEntry{leader: leader, term: 20, lterm: 20, pterm: previous, pindex: index, entries: entries, reply: "$NRG.CP.COMPLETED"}
+			}
+			n.processAppendEntry(encode(t, makeEntry(1, 20)), n.aesub)
+			n.RLock()
+			if n.catchup == nil {
+				n.RUnlock()
+				t.Fatal("catchup admission failed")
+			}
+			completed := n.catchup.sub
+			n.RUnlock()
+			n.processAppendEntry(encode(t, makeEntry(0, 0)), completed)
+			n.processAppendEntry(encode(t, makeEntry(1, 20)), completed)
+			n.RLock()
+			ready := n.catchup == nil && n.pindex == 2 && n.pterm == 20 && n.term == 20 && n.leader == leader
+			n.RUnlock()
+			if !ready {
+				t.Fatal("completed catchup precondition failed")
+			}
+			queued := makeEntry(2, 20)
+			switch name {
+			case "ahead":
+				queued.pindex = 3
+			case "behind":
+				queued.pindex = 1
+			case "wrong_previous_term":
+				queued.pterm = 19
+			case "wrong_leader":
+				queued.leader = "yrzKKRBu"
+			case "higher_leader_term":
+				queued.lterm = 21
+			case "older_leader_term":
+				queued.lterm = 19
+			case "legacy":
+				queued.lterm = 0
+			}
+			n.processAppendEntry(encode(t, queued), completed)
+			wantIndex := uint64(2)
+			if name == "contiguous" {
+				wantIndex = 3
+			}
+			n.RLock()
+			index, previous, term, currentLeader, catchingUp := n.pindex, n.pterm, n.term, n.leader, n.catchup != nil
+			n.RUnlock()
+			if index != wantIndex || previous != 20 || term != 20 || currentLeader != leader || catchingUp {
+				t.Fatalf("trailing callback changed state incorrectly: index=%d want=%d previous=%d term=%d leader=%q catchingUp=%v", index, wantIndex, previous, term, currentLeader, catchingUp)
+			}
+		})
+	}
+}
