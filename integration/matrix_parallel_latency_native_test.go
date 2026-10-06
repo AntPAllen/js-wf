@@ -143,6 +143,19 @@ func TestMatrixParallelInvocationAuditsNativeOracle(t *testing.T) {
 	if !reflect.DeepEqual(parallel, serial) {
 		t.Fatal("parallel samples differ from serial point oracle")
 	}
+	// Evaluate the same retained bytes with the frozen pre-extraction point
+	// implementation. This oracle has its own latency reduction logic.
+	for sequence := info.State.FirstSeq; sequence <= info.State.LastSeq; sequence++ {
+		msg, err := inv.GetMsg(ctx, sequence)
+		if err != nil {
+			t.Fatal(err)
+		}
+		parts := strings.Split(msg.Subject, ".")
+		legacy, err := matrixInvocationLatenciesLegacyOracle(ctx, all[2], parts[2], parts[3], msg.Time, deadline, 0)
+		if err != nil || !reflect.DeepEqual(legacy, serial[sequence-info.State.FirstSeq].samples) {
+			t.Fatalf("shared reducer differs from frozen point oracle for %s: %v", msg.Subject, err)
+		}
+	}
 	metadata := &matrixLatencyMetadataJS{JetStream: all[2]}
 	cached, err := matrixParallelInvocationAudits(ctx, info.State.FirstSeq, info.State.LastSeq, func(ctx context.Context, sequence uint64) (matrixInvocationAuditResult, error) {
 		var result matrixInvocationAuditResult
@@ -185,7 +198,7 @@ func TestMatrixParallelInvocationAuditsNativeOracle(t *testing.T) {
 	for index, result := range parallel {
 		persistedSamples[index] = result.samples
 	}
-	data, err := json.MarshalIndent(map[string]any{"invocations": len(serial), "serial_equals_parallel": true, "cached_metadata_equals_serial": true, "metadata_handle_lookups": counts, "deadline_negative_control": true, "parallel_elapsed": parallelElapsed, "serial_elapsed": serialElapsed, "measurement_scope": "ordered same-fixture point checks; no isolated speed ratio or large/fault/24h qualification", "samples": persistedSamples}, "", "  ")
+	data, err := json.MarshalIndent(map[string]any{"invocations": len(serial), "serial_equals_parallel": true, "legacy_equals_shared_reducer": true, "cached_metadata_equals_serial": true, "metadata_handle_lookups": counts, "deadline_negative_control": true, "parallel_elapsed": parallelElapsed, "serial_elapsed": serialElapsed, "measurement_scope": "ordered same-fixture point checks; no isolated speed ratio or large/fault/24h qualification", "samples": persistedSamples}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}
