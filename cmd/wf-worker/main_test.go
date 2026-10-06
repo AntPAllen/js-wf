@@ -35,7 +35,9 @@ var workerTestPluginErr error
 
 func TestMain(m *testing.M) {
 	code := m.Run()
-	_ = os.RemoveAll(workerTestPluginDir)
+	if os.Getenv("WF_WORKER_TEST_ROOT") == "" {
+		_ = os.RemoveAll(workerTestPluginDir)
+	}
 	os.Exit(code)
 }
 
@@ -49,7 +51,7 @@ func TestWorkerRunnerCompletesWorkflowAndServesMetrics(t *testing.T) {
 func testWorkerPlugin(t *testing.T) string {
 	t.Helper()
 	workerTestPluginOnce.Do(func() {
-		workerTestPluginDir, workerTestPluginErr = os.MkdirTemp("", "wf-worker-plugin-")
+		workerTestPluginDir, workerTestPluginErr = os.MkdirTemp(os.Getenv("WF_WORKER_TEST_ROOT"), "wf-worker-plugin-")
 		if workerTestPluginErr != nil {
 			return
 		}
@@ -71,14 +73,30 @@ func testWorkerPlugin(t *testing.T) string {
 }
 
 func TestWorkerRunnerStartsAfterServerRestart(t *testing.T) {
+	runWorkerRestart(t, "")
+}
+
+func TestWorkerRunnerStartsAfterServerRestartInJetStreamDomain(t *testing.T) {
+	runWorkerRestart(t, "WFWORKER")
+}
+
+func runWorkerRestart(t *testing.T, domain string) {
 	pluginPath := testWorkerPlugin(t)
-	cluster, err := testcluster.Start(t.TempDir(), 1)
+	cluster, err := workerDomainCluster(t, domain)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer cluster.Close()
 	serverURL := cluster.Servers[0].ClientURL()
-	cluster.KillNode(0)
+	oldIDs := make(map[string]bool)
+	for node := range cluster.Servers {
+		id := cluster.Servers[node].ID()
+		oldIDs[id] = true
+		cluster.KillNode(node)
+		if domain != "" {
+			t.Logf("worker domain startup stopped node=%d domain=%s server_id=%s", node, domain, id)
+		}
+	}
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -89,15 +107,23 @@ func TestWorkerRunnerStartsAfterServerRestart(t *testing.T) {
 	defer cancel()
 	done := make(chan error, 1)
 	go func() {
-		done <- run(ctx, []string{"-url", serverURL, "-id", "restart-smoke", "-replicas", "1", "-handler-plugin", pluginPath, "-metrics-addr", metricsAddr, "-reconcile=false"})
+		done <- runDomainWorker(t, ctx, domain, append(workerDomainArgs(domain, len(cluster.Servers)), []string{"-url", serverURL, "-id", "restart-smoke", "-handler-plugin", pluginPath, "-metrics-addr", metricsAddr, "-reconcile=false"}...))
 	}()
 	select {
 	case runErr := <-done:
 		t.Fatalf("runner exited before NATS restart: %v", runErr)
 	case <-time.After(300 * time.Millisecond):
 	}
-	if err := cluster.RestartNode(0); err != nil {
-		t.Fatal(err)
+	for node := range cluster.Servers {
+		if err := cluster.RestartNode(node); err != nil {
+			t.Fatal(err)
+		}
+		if oldIDs[cluster.Servers[node].ID()] {
+			t.Fatal("restart reused old server identity")
+		}
+		if domain != "" {
+			t.Logf("worker domain startup restarted node=%d domain=%s server_id=%s", node, domain, cluster.Servers[node].ID())
+		}
 	}
 	metricsURL := "http://" + metricsAddr + "/metrics"
 	clientHTTP := &http.Client{Timeout: time.Second}
@@ -119,9 +145,12 @@ func TestWorkerRunnerStartsAfterServerRestart(t *testing.T) {
 	if ctx.Err() != nil {
 		t.Fatalf("runner did not start after NATS restart: %v", ctx.Err())
 	}
-	js, err := jetstream.New(cluster.Clients[0])
+	js, err := workerDomainJS(cluster, domain)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if domain != "" {
+		admitWorkerDomain(t, ctx, cluster, domain)
 	}
 	c := client.New(js)
 	if _, err := c.Start(ctx, "worker-smoke", "after-restart", []byte(`42`)); err != nil {
@@ -234,20 +263,27 @@ func TestWorkerRunnerRunsFallbackTimerLoop(t *testing.T) {
 }
 
 func runWorkerSmoke(t *testing.T, pluginPath, mode string, encodings ...string) {
+	runWorkerSmokeWithDomain(t, pluginPath, mode, "", encodings...)
+}
+
+func runWorkerSmokeWithDomain(t *testing.T, pluginPath, mode, domain string, encodings ...string) {
 	t.Helper()
-	cluster, err := testcluster.Start(t.TempDir(), 1)
+	cluster, err := workerDomainCluster(t, domain)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer cluster.Close()
-	js, err := jetstream.New(cluster.Clients[0])
+	js, err := workerDomainJS(cluster, domain)
 	if err != nil {
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
 	defer cancel()
+	if domain != "" {
+		admitWorkerDomain(t, ctx, cluster, domain)
+	}
 	if mode == "kv" {
-		if err := provision.Ensure(ctx, js, 1); err != nil {
+		if err := provision.Ensure(ctx, js, len(cluster.Servers)); err != nil {
 			t.Fatal(err)
 		}
 		assignments, err := assignment.New(ctx, js)
@@ -268,10 +304,11 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string, encodings ...string) 
 	}
 	args := []string{
 		"-url", cluster.Servers[0].ClientURL(), "-id", "runner-smoke",
-		"-replicas", "1", "-handler-plugin", pluginPath, "-mode", mode,
+		"-handler-plugin", pluginPath, "-mode", mode,
 		"-metrics-addr", metricsAddr, "-reconcile-interval", "100ms",
 		"-retention-type", "retention", "-retention-grace", "1h",
 	}
+	args = append(args, workerDomainArgs(domain, len(cluster.Servers))...)
 	if mode == "static" {
 		args = append(args, "-journal-max-bytes", "131072")
 	} else {
@@ -282,7 +319,7 @@ func runWorkerSmoke(t *testing.T, pluginPath, mode string, encodings ...string) 
 		args = append(args, "-journal-encoding", encodings[0])
 	}
 	done := make(chan error, 1)
-	go func() { done <- run(ctx, args) }()
+	go func() { done <- runDomainWorker(t, ctx, domain, args) }()
 	httpClient := &http.Client{Timeout: time.Second}
 	metricsURL := "http://" + metricsAddr + "/metrics"
 	for ctx.Err() == nil {

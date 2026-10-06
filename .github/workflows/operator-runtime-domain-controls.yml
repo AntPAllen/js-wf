@@ -1,0 +1,77 @@
+name: operator-runtime-domain-controls
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/operator-runtime-domain-controls.yml'
+      - 'cmd/wf/**'
+      - 'cmd/wf-worker/**'
+      - 'scripts/run-operator-domain-controls.py'
+      - 'scripts/run-worker-domain-controls.py'
+      - 'scripts/run-domain-runtime-controls.py'
+      - 'scripts/fixture_archive.py'
+      - 'scripts/verify-tier2-closed-originals.py'
+      - 'assignment/**'
+      - 'client/**'
+      - 'worker/**'
+      - 'wf/**'
+      - 'visibility/**'
+      - 'reconcile/**'
+      - 'retention/**'
+      - 'runtimeclock/**'
+      - 'provision/**'
+      - 'identity/**'
+      - 'journal/**'
+      - 'lease/**'
+      - 'internal/**'
+      - 'testcluster/**'
+      - 'go.mod'
+      - 'go.sum'
+  pull_request:
+    paths:
+      - '.github/workflows/operator-runtime-domain-controls.yml'
+      - 'cmd/**'
+      - 'scripts/**'
+      - 'assignment/**'
+      - 'client/**'
+      - 'worker/**'
+      - 'wf/**'
+      - 'visibility/**'
+      - 'reconcile/**'
+      - 'retention/**'
+      - 'runtimeclock/**'
+      - 'provision/**'
+      - 'identity/**'
+      - 'journal/**'
+      - 'lease/**'
+      - 'internal/**'
+      - 'testcluster/**'
+      - 'go.mod'
+      - 'go.sum'
+permissions:
+  contents: read
+jobs:
+  command-domain-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        program: [operator, worker]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Require actual default and domain race controls
+        run: python3 scripts/run-${{ matrix.program }}-domain-controls.py --root '${{ runner.temp }}/command-domain-${{ matrix.program }}'
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: command-domain-${{ matrix.program }}
+          path: |
+            ${{ runner.temp }}/command-domain-${{ matrix.program }}.tar.gz
+            ${{ runner.temp }}/command-domain-${{ matrix.program }}-proof/
+            ${{ runner.temp }}/command-domain-${{ matrix.program }}/*.json
+            ${{ runner.temp }}/command-domain-${{ matrix.program }}/*.log
+          if-no-files-found: error

@@ -5354,3 +5354,7 @@ closed PID, retained plugin/stores,1899 exact inputs and complete2409-member
 archive independently verify. Original failed runner remains preserved; two
 negative guard groups pass. Daemon/PostgreSQL-domain/leaf/fault/fullmatrix/million/
 actual24h qualification remain separate. [Proof](scale/operator-domain-cli-2026-10-06/).
+
+## Worker CLI domain selection prepared — 2026-10-06
+
+Add explicit `wf-worker -domain NAME` during each startup retry. Chosen JetStream context supplies provision/assignment/membership/delivery/metrics/retention/repair; default omission unchanged. Existing three assignment modes and startup recovery run against actual three-peer WFWORKER servers with client API-prefix tracing. Two uncommitted preparations passed; clean retained originals qualification is pending. New two-program CI retains complete default/domain operator and worker race proof. Original35s cases/startup30s, leases and recovery gates remain. [Preparation](scale/worker-cli-domain-2026-10-06/).

@@ -36,9 +36,14 @@ func main() {
 	}
 }
 
-func run(ctx context.Context, args []string) (runErr error) {
+func run(ctx context.Context, args []string) error {
+	return runWithJetStreamOptions(ctx, args)
+}
+
+func runWithJetStreamOptions(ctx context.Context, args []string, jsOptions ...jetstream.JetStreamOpt) (runErr error) {
 	flags := flag.NewFlagSet("wf-worker", flag.ContinueOnError)
 	url := flags.String("url", os.Getenv("NATS_URL"), "NATS server URL")
+	domain := flags.String("domain", "", "JetStream domain (empty uses the default API)")
 	id := flags.String("id", "", "unique worker ID")
 	pluginPath := flags.String("handler-plugin", "", "Go plugin exporting a handler map")
 	pluginSymbol := flags.String("handler-symbol", "Handlers", "plugin handler-map symbol")
@@ -63,7 +68,7 @@ func run(ctx context.Context, args []string) (runErr error) {
 		return err
 	}
 	if flags.NArg() != 0 || *id == "" || *pluginPath == "" || *pluginSymbol == "" || *replicas < 1 || *replicas > 5 || *journalMaxBytes < 0 || *repairInterval <= 0 || *repairInterval > 10*time.Second || *repairBudget < 2 {
-		return fmt.Errorf("usage: wf-worker -id ID -handler-plugin FILE [-mode static|kv|auto] [-metrics-addr ADDR]")
+		return fmt.Errorf("usage: wf-worker -id ID -handler-plugin FILE [-domain NAME] [-mode static|kv|auto] [-metrics-addr ADDR]")
 	}
 	if journal.Encoding(*journalEncoding) != journal.JSON && journal.Encoding(*journalEncoding) != journal.ProtobufV1 {
 		return fmt.Errorf("invalid journal encoding %q", *journalEncoding)
@@ -138,7 +143,7 @@ func run(ctx context.Context, args []string) (runErr error) {
 		observeRepair = events.repair
 		eventErrors = events.errors
 	}
-	nc, js, backend, w, clock, err := startWorkerWithClock(ctx, *url, *id, *replicas, *journalMaxBytes, *concurrency, *timerBackend, handlers, *retentionType, *retentionGrace, clockConfig, *bootstrapClock, continuationOptions...)
+	nc, js, backend, w, clock, err := startWorkerWithClock(ctx, *url, *domain, *id, *replicas, *journalMaxBytes, *concurrency, *timerBackend, handlers, *retentionType, *retentionGrace, clockConfig, *bootstrapClock, jsOptions, continuationOptions...)
 	if err != nil {
 		if ctx.Err() != nil {
 			return nil
@@ -265,11 +270,11 @@ func run(ctx context.Context, args []string) (runErr error) {
 }
 
 func startWorker(ctx context.Context, url, id string, replicas int, journalMaxBytes int64, concurrency int, timerBackend string, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration, options ...worker.Option) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, error) {
-	nc, js, backend, w, _, err := startWorkerWithClock(ctx, url, id, replicas, journalMaxBytes, concurrency, timerBackend, handlers, retentionType, retentionGrace, nil, false, options...)
+	nc, js, backend, w, _, err := startWorkerWithClock(ctx, url, "", id, replicas, journalMaxBytes, concurrency, timerBackend, handlers, retentionType, retentionGrace, nil, false, nil, options...)
 	return nc, js, backend, w, err
 }
 
-func startWorkerWithClock(ctx context.Context, url, id string, replicas int, journalMaxBytes int64, concurrency int, timerBackend string, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration, clockConfig *runtimeclock.Config, bootstrapClock bool, options ...worker.Option) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, *runtimeclock.Clock, error) {
+func startWorkerWithClock(ctx context.Context, url, domain, id string, replicas int, journalMaxBytes int64, concurrency int, timerBackend string, handlers map[string]worker.Handler, retentionType string, retentionGrace time.Duration, clockConfig *runtimeclock.Config, bootstrapClock bool, jsOptions []jetstream.JetStreamOpt, options ...worker.Option) (*nats.Conn, jetstream.JetStream, provision.TimerBackend, *worker.Worker, *runtimeclock.Clock, error) {
 	startupCtx, stopStartup := context.WithTimeout(ctx, 30*time.Second)
 	defer stopStartup()
 	var lastErr error
@@ -278,7 +283,11 @@ func startWorkerWithClock(ctx context.Context, url, id string, replicas int, jou
 		nc, err := nats.Connect(url, nats.Timeout(2*time.Second))
 		if err == nil {
 			var js jetstream.JetStream
-			js, err = jetstream.New(nc)
+			if domain == "" {
+				js, err = jetstream.New(nc, jsOptions...)
+			} else {
+				js, err = jetstream.NewWithDomain(nc, domain, jsOptions...)
+			}
 			if err == nil {
 				attempt, stop := context.WithTimeout(startupCtx, 5*time.Second)
 				backend, provisionErr := ensureTimerBackend(attempt, js, replicas, journalMaxBytes, timerBackend)
