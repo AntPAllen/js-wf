@@ -1,5 +1,9 @@
 # /tmp storage review — 2026-10-06
 
+Latest follow-up: **eight more closed fixtures offloaded, recovering 2.12 GiB of pre-existing allocated data**. Complete S3 copies were verified before deletion. See [latest cleanup](fourth-closed-roots/README.md) and [measured summary](fourth-closed-roots/summary.json). This follows the [eleven-root pass](further-closed-roots/summary.json), which recovered another 3.79 GiB. Live runs and capacity donors remain local.
+
+## Earlier cleanup
+
 Completed guarded S3 offloads now total **33.28 GiB of older data**. This latest pass recovered **4.46 GiB of pre-existing data**, including verified staging copies. The latest observation has **39.64 GiB available**. The live run continues writing, so free space changes. See [latest summary](latest-pass-summary.json), [existing-custody cleanup](closed-fixture-duplicates/README.md) and [six additional historical roots](additional-historical-roots/README.md).
 
 | Completed cleanup | Older allocated bytes recovered |
