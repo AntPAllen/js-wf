@@ -24,8 +24,8 @@ func main() {
 	}
 }
 func run() error {
-	if len(os.Args) != 5 || !filepath.IsAbs(os.Args[1]) || (os.Args[2] != "fixed" && os.Args[2] != "fresh") {
-		return fmt.Errorf("usage: component FRESH_ROOT fixed|fresh production|disabled normal|debug")
+	if len(os.Args) != 6 || !filepath.IsAbs(os.Args[1]) || (os.Args[2] != "fixed" && os.Args[2] != "fresh") {
+		return fmt.Errorf("usage: component FRESH_ROOT fixed|fresh production|disabled normal|debug production|disabled-markers")
 	}
 	root := os.Args[1]
 	debugProfile := os.Args[4]
@@ -34,6 +34,13 @@ func run() error {
 		start = testcluster.StartPartitionableDebugProcesses
 	} else if debugProfile != "normal" {
 		return fmt.Errorf("unknown debug profile: %s", debugProfile)
+	}
+	markerProfile := os.Args[5]
+	markerTTL := time.Minute
+	if markerProfile == "disabled-markers" {
+		markerTTL = 0
+	} else if markerProfile != "production" {
+		return fmt.Errorf("unknown marker profile: %s", markerProfile)
 	}
 	keyProfile := os.Args[2]
 	expiryProfile := os.Args[3]
@@ -80,7 +87,7 @@ func run() error {
 	var kv jetstream.KeyValue
 	for setup.Err() == nil {
 		attempt, cancel := context.WithTimeout(setup, 2*time.Second)
-		kv, err = js.CreateKeyValue(attempt, jetstream.KeyValueConfig{Bucket: "WF_LEASE", History: 1, TTL: ttl, LimitMarkerTTL: time.Minute, Storage: jetstream.FileStorage, Replicas: 3})
+		kv, err = js.CreateKeyValue(attempt, jetstream.KeyValueConfig{Bucket: "WF_LEASE", History: 1, TTL: ttl, LimitMarkerTTL: markerTTL, Storage: jetstream.FileStorage, Replicas: 3})
 		cancel()
 		if err == nil {
 			break
@@ -319,7 +326,7 @@ func run() error {
 	}
 	cancelWriters()
 	joined.Wait()
-	result := map[string]any{"debug_profile": debugProfile, "key_profile": keyProfile, "expiry_profile": expiryProfile, "recovered": recovered, "killed": killed, "routes_heal_requested": healed, "finished": time.Now().UTC(), "majority_probe_revision": probe, "acknowledged_transactions": acknowledged.Load(), "transaction_errors": errors.Load(), "replicas": 3, "ttl_ns": int64(ttl), "history": 1, "scope": "Bare KV write/CAS/delete component diagnostic; no workflow SDK, full matrix or Tier1 reproduction qualification."}
+	result := map[string]any{"marker_profile": markerProfile, "marker_ttl_ns": int64(markerTTL), "debug_profile": debugProfile, "key_profile": keyProfile, "expiry_profile": expiryProfile, "recovered": recovered, "killed": killed, "routes_heal_requested": healed, "finished": time.Now().UTC(), "majority_probe_revision": probe, "acknowledged_transactions": acknowledged.Load(), "transaction_errors": errors.Load(), "replicas": 3, "ttl_ns": int64(ttl), "history": 1, "scope": "Bare KV write/CAS/delete component diagnostic; no workflow SDK, full matrix or Tier1 reproduction qualification."}
 	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		return err

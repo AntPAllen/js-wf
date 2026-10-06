@@ -49,3 +49,17 @@ Two production-TTL fresh-key runs now reproduce the component symptom, while one
 `--raft-debug` starts the same pinned NATS executable with its `-D` logging option on all three servers. Normal fixture constructors keep their existing logging. The component retains actual server argv/executable hashes and complete node logs. This changes diagnostic logging and may affect scheduling; it does not change the traffic, bucket settings, isolation or recovery bound. The helper race build passed before execution.
 
     python3 scripts/run-lease-partition-component.py --root /tmp/js-wf-lease-partition-component-raft-debug-20261006 --key-profile fresh --expiry-profile production --raft-debug
+
+## Raft debug reproduction exposes conflicting terms — 2026-10-06
+
+The fresh production-TTL component at `0ede3c4` reproduced the stall with `-D` enabled on all three captured NATS executables. It acknowledged 6,282 complete cycles and majority-cut probe 11,836, with 49 transaction errors. After routes healed, all peers reported eight routes, but the minority remained non-current at the unchanged 35-second cut boundary. The current leader reported lag 6,447; majority local sequence heads were 23,615 versus minority 11,835.
+
+Independent review verifies 1,955 selected source files, 1,494 dependencies, actual helper/server bytes and argv, stable peer IDs, configuration, routes and local store state, plus every member of the complete 3,530-member archive. [Evidence and indexed log excerpts](raft-debug-reproduction/). The server bytes match the original failed matrix run.
+
+Logs show the new leader repeatedly offering term-2 entries where the minority requests term-1 entries at the same indices. The minority logs WAL repair to term 1/index 3,550 and later backs down through indices to 3,537 while snapshot/peerstate warnings recur. This identifies the observed conflict-resolution path, but does not establish why those conflicting entries accumulated or prove a general protocol defect. The pinned file-store expiry code submits subject marker messages through the stream leader's clustered proposal path. A candidate explanation is expiry-generated proposals on the isolated former leader combined with slow rollback; this remains a hypothesis.
+
+The next diagnostic retains production 12-second MaxAge but disables subject markers, to distinguish the marker/proposal path from plain TTL expiry. Production marker settings and lease TTL remain unchanged. No native matrix, causal Tier1, or full qualification gate is promoted.
+
+`--marker-profile disabled-markers` sets only the diagnostic bucket's LimitMarkerTTL to zero. Default `production` keeps one minute. The actual stream configuration and profile are retained.
+
+    python3 scripts/run-lease-partition-component.py --root /tmp/js-wf-lease-partition-component-no-markers-20261006 --key-profile fresh --expiry-profile production --marker-profile disabled-markers --raft-debug
