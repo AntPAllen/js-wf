@@ -1,0 +1,16 @@
+{
+  "source": "0f512f7bbd4ffabd4222c73836acb3c22d9a5068",
+  "observed_utc": "2026-10-06T08:57:37.782508+00:00",
+  "command": [
+    "python3",
+    "scripts/run-bulk-latency-capacity.py",
+    "--root",
+    "/tmp/js-wf-full400k-capacity-admission-rejected-20261006"
+  ],
+  "exit_code": 1,
+  "stderr": "Traceback (most recent call last):\n  File \"/home/exedev/js-wf/scripts/run-bulk-latency-capacity.py\", line 15, in <module>\n    assert free_at_admission>=minimum_free,'Need at least5GiB for full population, complete samples, source/exes and final archival'\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Need at least5GiB for full population, complete samples, source/exes and final archival\n",
+  "free_bytes": 4711936000,
+  "minimum_free_bytes": 5368709120,
+  "no_fixture_or_checkout_created": true,
+  "scope": "Expected low-disk admission rejection before any native run; not a capacity pass"
+}

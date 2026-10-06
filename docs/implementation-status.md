@@ -43,6 +43,8 @@ reject invalid coordinates/counts/payloads/order/deadlines. Native result remain
 pending; no smaller population override is available. Producer admission requires
 5GiB on the fixture filesystem before creating it. About4.8GB free is still below
 that threshold. [Producer](../scripts/run-bulk-latency-capacity.py).
+Actual low-disk admission rejection at0f512f7 is verified: nonzero producer exit
+with no fixture or checkout created. [Control](scale/full400k-bulk-capacity-preparation-2026-10-06/admission-control.json).
 
 Twenty-three additional raw proof duplicates pass complete committed-part,
 concatenated archive and member/hardlink verification. Only identical redundant
