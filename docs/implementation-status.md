@@ -14555,3 +14555,20 @@ original handles. The normal has156 top-level passes/no failures in the latest
 observation; the journal has passed67 minutes. These observations are not terminal
 acceptance. Broader combined cuts, full matrices, million physical drain and
 actual24h qualification remain open.
+
+### Original24h independent terminal review ready — 2026-10-06
+
+The pinned checker is running as an observer-only waiter on the same original
+24h journal producer and observer units; no native restart or target/profile
+change. Original source757454a/SDK3461745, full24h/native24h20m deadline,2m
+sync, explicit chunked/bulk/full point profile, all complete original gates,
+source/binary/incarnation closure and report regeneration remain required.
+Reused PIDs cannot be confused with still-live original processes.
+
+A fresh verified S3 file restore of the accepted10m component passes the full
+read-only checker and identical report regeneration; all5,633 restored files
+remain byte/mode/mtime identical. The same evidence is rejected as24h. Three
+control groups pass.516,825,088 bytes of disposable staging removed after exact
+census/visible closure, excluded from older-data recovery. Both original native
+qualification units remain active. Preparation is not24h acceptance.
+[Controls, pinned waiter and live handle](scale/bulk-journal-24h-2026-10-06/terminal-preparation/).

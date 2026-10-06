@@ -5170,3 +5170,25 @@ change after successor completion and old heartbeat fencing. The original failed
 wrapped-error observer guard remains separately preserved. No production change
 or deadline relaxation. [Accepted component and limits](scale/outer-handler-lease-expiry-2026-10-06/).
 Broader combined cut, current fullmatrix, million physical-drain and24h gates remain.
+
+## Original24h terminal reviewer verified and waiting — 2026-10-06
+
+The pinned terminal reviewer now waits on the same original producer/observer
+units. Complete original24h/native24h20m deadline and production2m sync,
+source/SDK/profile/known process incarnation closure, legacy member hashes,
+original checkpoint/count/history/p99/drain and bulk/every-point6m report
+regeneration are mandatory. PID reuse is distinguished from a live original
+incarnation; observation timeout alone is never a native verdict or restart.
+
+Full read-only validation passes on a verified fresh S3 restore of accepted
+original10m sourceca7a1fa: all5,633 file bytes/modes/mtimes unchanged, complete
+compiled-source/current row/event/fencing reports regenerated. Promotion of that
+evidence to24h is rejected. Three control groups reject incompatible profiles,
+missing gates/admission, live processes and shortened/over-deadline terminals.
+Disposable restore/observer/archive staging was removed after exact census and
+visible closure; canonical S3 originals unchanged.
+
+The watcher will preserve a terminal rejection as unqualified current closed
+files; canonical metadata/full S3 readback remain separate required steps.
+[Preparation, controls and pinned source](scale/bulk-journal-24h-2026-10-06/terminal-preparation/).
+Actual24h, other rows/current fullmatrix/default adoption remain open.
