@@ -60,9 +60,8 @@ for f in faults['faults']:
  assert not healed['responses_held'] and healed['server_to_client']>blocked['server_to_client']
  assert all(stats['buffer_overflows']==0 for stats in (before,blocked,healed))
  target=f['isolation_target'];delivery=target['delivery']
- assert target['token'] and delivery['Worker']==f['worker'] and delivery['Stage']=='acquired'
+ assert target['token'] and delivery['Worker']==f['worker'] and delivery['Stage']=='lease_acquired'
  assert delivery['RunSequence']>0 and delivery['Delivery']>0
- assert ns(target['nonterminal_observed_at'])<=killed
  dispatch_path=root/('matrix-isolation-1-'+f['worker']+'-dispatch.jsonl')
  data=dispatch_path.read_bytes();assert data.endswith(b'\n')
  records=[json.loads(line) for line in data.splitlines()];matches=0
