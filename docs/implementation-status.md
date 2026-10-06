@@ -13,7 +13,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and hosted seed3 at a517d2e, each with independent copied integrity/history/drain, qualified. Retained normal ten-minute block-disk seed1 at f57da4d plus copied raw-image integrity/history/drain qualified. Ten-minute worker seed1 native and copied audits also pass, with the original producer generated-cache failure separately preserved. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries, physical drain and independent copied audits qualified at executed dc8422a. Other finite combined cases remain. |
-| Explicit full400k audit capacity | R1 direct reader passes18.350496s at08a90c8 under4-core/GOGC500/4GiB. Latestchunked full read/reduction completes17.114920s atacc9123, exact4.8M entries, but zero-consumer cleanup fails20s. Current cold combined cleanup/fault/default qualification remains open. |
+| Explicit full400k audit capacity | At02d485a explicit chunked R1 reader qualifies fresh full400k/4.8M cold baseline18.134257s and actual R5 ownerSIGKILL leftdown16.429780s including zero-consumer cleanup, under4CPU/GOGC500/4GiB. Full same-store restart/default/live/24h remain open. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. Corrected continuous-byte attempt also failed checkpoint1040 /29120 after7986.85s; originals independently preserved, state snapshot phase is the next diagnostic target. No24h row qualified; full-matrix soak remains. |
 
@@ -28,6 +28,17 @@ qualification, rather than treating older executed-source rows as a blanket pass
 Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
+
+## Latest follow-up — 2026-10-06: fullsize cold and owner-down gates accepted
+
+Clean02d485a nativePASS51.57s. Verified freshcopy preparation deletes only proved
+old donor cursors and confirms zero/unchanged source boundaries. Full400k/4.8M
+cold baseline audit18.132709s/zero18.134257s; actual R5 source/R1 JRN ownerSIGKILL
+leftdown audit16.427917s/zero16.429780s, distinct resume24202 after24201, all4.8M
+once-only visits/exact reports. Original20s retained. ActualSDK/688inputs/fiveservers/
+mounts/closure/1058unchangeddonorfiles/1698file823alias proof independently verified.
+Same-store fullrestart/default/live/finalmatrix/24h remain open.
+[Evidence](scale/chunked-callback-audit-2026-10-06/clean-fixture/).
 
 ## Latest follow-up — 2026-10-06: clean copied fixture preparation implemented
 

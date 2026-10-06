@@ -4333,3 +4333,13 @@ retained message/byte/first/last/deletion boundaries. Existing60s readiness incl
 pressure controlsPASS1.024s. Native baseline/actualowner-down pending headroom;
 original donor/failed fixtures remain unchanged. No default/live/fault/24h pass.
 [Preparation](scale/chunked-callback-audit-2026-10-06/clean-fixture-preparation/).
+
+## Full400k cold and owner-left-down capacity accepted — 2026-10-06
+
+At02d485a cleanfreshcopy nativePASS51.57s: exact400k/4.8M baseline audit18.132709s/
+zero18.134257s, actualR5source/R1ownerSIGKILL leftdown audit16.427917s/zero16.429780s.
+Distinct resume24202 after24201 and once-only4.8M visits; original20s retained.
+Preparation only deletes validated old donor cursors and proves zero/unchanged
+source boundaries. Whole1698file823alias proof/actualSDK688inputs/fiveservers/
+mounts/closure/1058unchangeddonorfiles accepted. Fullsame-store restart/default/
+live/currentmatrices/actual24h remain open. [Evidence](scale/chunked-callback-audit-2026-10-06/clean-fixture/).
