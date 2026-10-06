@@ -1,0 +1,15 @@
+Oct 06 02:10:51 jetstream-wf systemd[351]: Started js-wf-tier2-retained-pause-review-20261006.service - /usr/bin/python3 /tmp/js-wf-review-and-preserve-pause-ten-minute-20261006.py.
+Oct 06 02:20:06 jetstream-wf python3[1344528]: Traceback (most recent call last):
+Oct 06 02:20:06 jetstream-wf python3[1344528]:   File "/tmp/js-wf-review-tier2-retained-pause-ten-minute-20261006.py", line 52, in <module>
+Oct 06 02:20:06 jetstream-wf python3[1344528]:     assert faults['seed']==1 and faults['duration']=='10m' and len(faults['faults'])==10
+Oct 06 02:20:06 jetstream-wf python3[1344528]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 02:20:06 jetstream-wf python3[1344528]: AssertionError
+Oct 06 02:20:06 jetstream-wf python3[1283144]: Traceback (most recent call last):
+Oct 06 02:20:06 jetstream-wf python3[1283144]:   File "/tmp/js-wf-review-and-preserve-pause-ten-minute-20261006.py", line 16, in <module>
+Oct 06 02:20:06 jetstream-wf python3[1283144]:     subprocess.run(['python3','/tmp/js-wf-review-tier2-retained-pause-ten-minute-20261006.py'],cwd=repo,check=True)
+Oct 06 02:20:06 jetstream-wf python3[1283144]:   File "/usr/lib/python3.12/subprocess.py", line 571, in run
+Oct 06 02:20:06 jetstream-wf python3[1283144]:     raise CalledProcessError(retcode, process.args,
+Oct 06 02:20:06 jetstream-wf python3[1283144]: subprocess.CalledProcessError: Command '['python3', '/tmp/js-wf-review-tier2-retained-pause-ten-minute-20261006.py']' returned non-zero exit status 1.
+Oct 06 02:20:06 jetstream-wf systemd[351]: js-wf-tier2-retained-pause-review-20261006.service: Main process exited, code=exited, status=1/FAILURE
+Oct 06 02:20:06 jetstream-wf systemd[351]: js-wf-tier2-retained-pause-review-20261006.service: Failed with result 'exit-code'.
+Oct 06 02:20:06 jetstream-wf systemd[351]: js-wf-tier2-retained-pause-review-20261006.service: Consumed 4.074s CPU time, 21.0M memory peak, 0B memory swap peak.

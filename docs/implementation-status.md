@@ -29,6 +29,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: original Tier2 pause native accepted
+
+Clean d893bb0 normal native PASS637.04s:83batches/2,324terminals/25,675entries,
+ten45-second pauses of actual retained leases, exact post-resume invocation/epoch
+fencing, all workload cells/checkpoints/final integrity/history/latency/drain pass.
+Actual SDK/threeworker/threeNATS binaries/closure,694Go+module/3,286external inputs
+verified. Full6,323member98,384,365byte proof/fourparts readback passes. Initial
+review rejected10m0s formatting; failed script/log preserved, corrected600-second/
+nanosecond reviewer succeeds without rerun/store reopen. Independent copied-store
+review follows. Full13x200/currentmatrix/24h remain open; original long handles live.
+[Native evidence](scale/tier2-retained-pause-2026-10-06/native-ten-minute/).
+
 ## Latest follow-up — 2026-10-06: cached final point live journal accepted
 
 Clean727b950 normal native PASS633.03s:80batches/2,240terminals/24,707entries,
