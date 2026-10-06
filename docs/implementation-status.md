@@ -44,7 +44,13 @@ in a separate artifact outside the checkout. Canonical Git archive proofs remain
 available for audit. Matrix counts, seed ranges, timeouts, workloads and raw proof
 artifact layouts are unchanged. This addresses checkout volume, not an established
 cause of queued hosted jobs. Real-Git fixture expansion and dirty-tree controls
-pass; full repository materialization/compile verification is the next check.
+pass. Independent clean46171e6 checkout: all1,840 files bind exact Git blob,
+SHA256, size and executable mode; all materialized paths equal selection. All Go
+packages compile/skip successfully at unchanged source/profile, including docs
+packages. Materialized27,713,823 bytes; full matrix remains unqualified.
+[Exact selection and compile proof](scale/workload-source-checkout-2026-10-06/review.json).
+The original100k normal producer remains live; an independent terminal reviewer
+now waits on the same unit, with original300m timeout unchanged.
 
 Interrupted million-candidate media offload now complete: full remote body and
 members, current census and visible process/descriptor/mount closure reverified
