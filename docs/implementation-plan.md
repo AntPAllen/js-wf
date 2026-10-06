@@ -4993,3 +4993,57 @@ original equality gate retained. Projection/delivery race controls pass1.089s.
 Next: a fresh bounded diagnostic to distinguish actor/state writes from cleanup
 and metadata behavior, then rerun full original ten-minute qualification after a
 justified correction. No old original/failed fixture is reopened.
+
+### Corrected original ten-minute bulk final audit accepted — 2026-10-06
+
+The fresh35s diagnostic at009de76 identifies three repair loops writing scan
+cursors in WF_STATE during the final bulk snapshot, even after all terminal
+results exist. Each repair writer now stops and joins before explicit bulk
+collection; workers and dispatch remain live for drain. Source equality gates
+and original audit/completion/p99/history/fault/checkpoint deadlines remain.
+Seeded production-loop/shared-KV regression passes race and exact replays.
+Fresh original10m journal seed1 atca7a1fa passes626.35s:93cohorts,2,604 complete
+invocations/journals/terminals,28,693 entries,19 actual journal-leader faults and
+all nine required checkpoint receipts. Before/after integrity equals; four source
+cuts stable, consumers0. Bulk plus every-point comparison passes8.697232942s under
+original6m; actual source/SDK/profile and all24 observed server incarnations closed
+independently checked. Full canonical S3 proof verified. This accepts the explicit
+original ten-minute component at executed source; default/other rows/current full
+matrix and actual24h remain open.
+[Qualification](scale/sustained-bulk-final-latency-2026-10-06/joined-journal-ten-minute/).
+
+### Outer handler cancellation and delivery handoff qualification — 2026-10-06
+
+Ordinary handlers and named continuations run behind an outer cancellation
+boundary. Error/panic/Goexit are retained; cancellation wins when completion is
+also ready. Abandoned user code owns its buffers, which the canceled delivery
+does not inspect; late SDK calls reject canceled context. Shutdown, lease loss
+and durable cancellation can return delivery ownership while ignored user code
+remains outside SDK control. External effects still require idempotency.
+Focused1,000-seed production-worker handoffs and native R3 worker-stop/durable-cancel
+controls pass. New successor epoch, exact result/cancel outcome, unchanged accepted
+journal, rejected late SDK call and three distinct public local Jsz drain witnesses
+are checked within original contexts. Outer Goexit retains bounded three-attempt
+terminal policy. Three cancellation pins changed cleanup/redelivery ordering;
+all scheduler choices remain identical, prior bytes/diffs preserved, two independent
+replacement processes agree, and all392 pins pass. Complete122-workload1,000-seed
+race qualification is live at3e35e7c with original60m budget and complete source,
+binary, seed and pin inventories. Current100k normal and broader native fault/matrix
+qualification remain open; focused results do not establish full-source acceptance.
+[Controls and transition](scale/outer-handler-cancellation-2026-10-06/pin-transition/).
+[Live qualifier](scale/outer-handler-cancellation-2026-10-06/full-race-launch/).
+
+### Closed failed media storage policy — 2026-10-06
+
+User-provided S3 supports offloading closed failed primary store media. Require
+complete canonical archive/inventory metadata committed and pushed first, full
+S3 compressed-body/hash/size and every-member readback, exact current full file
+census, and repeated producer/process/mount/visible-descriptor closure with limits
+recorded. Remove only selected store directories after those checks; retain source,
+executables, configs, logs, partial artifacts and metadata locally and verify all
+remaining bytes/modes/mtimes. Future audits restore fresh verified copies. Offload
+changes storage locality, never the original failed verdict or a release gate.
+Accepted capacity donors remain local while needed. The actual24h admission floor
+of16GiB plus concurrent growth/copy/archive headroom remains unchanged.
+[First media offload](scale/terminal-campaigns-disk-pressure-2026-10-06/journal-store-media-offload/).
+[Second media offload](scale/watch-observed-journal-24h-2026-10-05/store-media-offload-2026-10-06/).

@@ -32,6 +32,24 @@ coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
 
+## Third failed soak media offload complete — 2026-10-06
+
+Closed failed continuous-byte journal24h atb2d7011 is preserved in a complete
+6,252-member/225,147,272-byte canonical S3 archive. Recorded source and SDK hash,
+existing6,249-file ledger, complete present6,251-file census and closure verified.
+Fresh full remote compressed SHA/every-member/embedded-inventory readback plus
+repeated census and closure preceded removal of five primary JetStream stores,
+recovering690,647,040 allocated media bytes. Verified duplicate raw archive also
+removed225,153,024bytes. All2,545 remaining local files retain exact bytes/modes/
+mtimes; source/executables/configs/logs/partials/metadata remain local. Full store
+bytes remain canonical remotely, with fresh verified restores required for future
+audits; native failure remains and no24h/S3 durability promotion. Filesystem now
+reports approximately10.8GiB free, still below16GiB admission; only the above exact
+recovery is attributed to this operation. Full Tier1 race remains live with159
+top-level passes and zero reported failures at this observation, no terminal verdict.
+[Proof](scale/continuous-byte-journal-24h-2026-10-05/complete-offload-proof-2026-10-06/).
+[Offload](scale/continuous-byte-journal-24h-2026-10-05/store-media-offload-2026-10-06/).
+
 ## Second failed soak media offload complete — 2026-10-06
 
 The closed failed watch-observed journal24h root at executed aace912 is now fully
