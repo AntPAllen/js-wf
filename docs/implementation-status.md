@@ -35,6 +35,20 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Partition200 generator corrected after native terminal failure — 2026-10-06
+
+Original hosted run37486948256 at `fcf2e9` failed its generator registry test:
+sparse checkout omitted `integration/mixed_matrix_leader_test.go`. No partition
+workload executed. Provider job/step metadata and terminal logs are preserved;
+this is a checkout failure, not runtime partition evidence. Fresh exact-source
+sparse baseline reproduces that error; adding only `integration` passes24 matrix
+tests and the workload-source test. Corrected workflow source `d9093d7` is now
+launched as run37500390198 for original partition/seeds200/start1/10m. Native
+workload deadlines, fault counts, raw histories, latency and physical drain
+remain unchanged. Persistent observer follows this exact new ID/source; queued
+launch is unqualified. [Failure/control and terminal originals](scale/current-tier2-partition-2026-10-06/generator-sparse-checkout-failure/)
+and [corrected launch](scale/current-tier2-partition-2026-10-06/corrected-generator-launch/).
+
 ## Official NATS RC cleanup diagnostic accepted — 2026-10-06
 
 Fresh two-message baseline/control execution at clean `de2f805` confirms official
