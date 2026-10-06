@@ -83,7 +83,21 @@ def main():
     if metadata_path.read_bytes() != metadata_bytes:
         raise ValueError("working metadata differs from committed bytes")
     meta = json.loads(metadata_bytes)
-    if not meta.get("all_archive_members_and_parts_read_back"):
+    full_fixture = meta.get("schema") == "js-wf-full-fixture-archive-v1"
+    if full_fixture:
+        import fixture_archive
+        if not meta.get("all_archive_members_read_back") or not meta.get("all_current_fixture_files_unchanged_after_capture"):
+            raise ValueError("requires a fully verified fixture archive")
+        inventory_relative = str(Path(args.canonical_metadata).parent / meta["inventory_file"])
+        inventory_path = repo / inventory_relative
+        if inventory_path.is_symlink() or not inventory_path.resolve().is_relative_to(repo):
+            raise ValueError("inventory must be inside repository")
+        inventory_bytes = subprocess.check_output(["git", "cat-file", "blob", revision + ":" + inventory_relative], cwd=repo)
+        if inventory_path.read_bytes() != inventory_bytes or hashlib.sha256(inventory_bytes).hexdigest() != meta["inventory_sha256"]:
+            raise ValueError("inventory differs from committed proof")
+        if fixture_archive.verify(args.archive) != json.loads(inventory_bytes):
+            raise ValueError("archive differs from committed inventory")
+    elif not meta.get("all_archive_members_and_parts_read_back"):
         raise ValueError("requires a fully verified canonical archive")
     expected = {"bytes": meta["archive_bytes"], "sha256": meta["archive_sha256"]}
     with args.archive.open("rb") as stream:
@@ -98,6 +112,13 @@ def main():
     archive = upload_and_verify(args.archive, origin + quote(archive_key, safe="/"), config, args.region, expected)
     metadata = upload_and_verify(metadata_path, origin + quote(metadata_key, safe="/"), config, args.region,
                                  {"bytes": len(metadata_bytes), "sha256": metadata_hash})
+    inventory_receipt = None
+    if full_fixture:
+        inventory_key = prefix + "/fixture-inventory-" + meta["inventory_sha256"] + ".json"
+        inventory_receipt = upload_and_verify(inventory_path, origin + quote(inventory_key, safe="/"), config, args.region,
+                                             {"bytes": len(inventory_bytes), "sha256": meta["inventory_sha256"]})
+        if inventory_path.read_bytes() != inventory_bytes:
+            raise ValueError("inventory changed during transfer")
     # Recheck the donor after transfers. No deletion is part of this command.
     with args.archive.open("rb") as stream:
         if digest(stream) != expected:
@@ -109,6 +130,9 @@ def main():
               "metadata_key": metadata_key, "archive": archive, "metadata": metadata,
               "verified_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
               "scope": "Full remote byte readback matches committed fully verified archive and metadata; no local deletion, public sharing, retention policy or independent remote durability guarantee."}
+    if inventory_receipt is not None:
+        report["inventory"] = inventory_receipt
+        report["storage"] = "Canonical S3 full fixture archive; Git contains committed complete inventory, archive hash and readback receipt, not archive parts."
     args.receipt.parent.mkdir(parents=True, exist_ok=True)
     with args.receipt.open("x") as stream:
         json.dump(report, stream, indent=2)
