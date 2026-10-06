@@ -4703,3 +4703,28 @@ transients within originalcase; permanent/cancel errors failfast, allattempts re
 late success rejected/unusedworkerclosed. Productionruntimeunchanged. Three race
 controls pass. Fullsix fresh500-child samecuts/prefix/results/localdrain requalification
 prepared; no originalstore reopened/longhandle restart/fullmatrix or24h promotion.
+
+## Full six fanout native and copied local physical qualification — 2026-10-06
+
+The fresh full R3/file/race/2CPU/2GiB campaign at `cdd4c7b` passes all six
+original 500-child parent SIGKILL plus library journal-leader restart cuts in
+525.46 s. Each preserves the exact pre-kill prefix, all 500 child results, parent
+249500 and 501 complete invocation/journal/terminal records. Actual local public
+Jsz observations on three distinct servers show WF_RUN zero messages/64 consumers,
+with every durable zero pending/ack-pending after all 64 drain workers joined,
+within each unchanged five-minute case deadline. Actual SDK/source/module/external
+inputs and closure independently verified; complete 16,805-member native proof
+retained. [Native qualification](scale/fanout-combined-local-physical-2026-10-06/native-retry/).
+
+All six fresh copied audits at helper `a4e9016` also qualify complete cohorts,
+results, all three local physical states, durable census and unchanged originals.
+Each complete review is below the original 20-second budget. Full copied archives
+retain 23,931 members/157,628,217 bytes/nine parts. Stronger read-only review rechecks
+all six and rejects boolean durations and omitted build inputs; originals are
+never reopened. [Copied qualification and controls](scale/fanout-combined-local-physical-2026-10-06/copied-local-physical/).
+
+All eighteen native worker starts succeeded on their first attempt; this pass
+supports the full native case verdict but does not demonstrate transient retry
+recovery. The prior failed full campaign and unconfirmed constructor timeout cause
+remain preserved. Other combined fault cases, final-source full matrices, original
+million-timer final physical drain and actual 24-hour gates remain open.

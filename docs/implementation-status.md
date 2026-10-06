@@ -29,6 +29,16 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: copied proof duplicate headroom
+
+Six full pushed canonical copied fanout archives reverified before raw/staging
+archive duplicates and sparse working-tree exclusions: 472,920,064
+allocated bytes recovered; measured 970,821,632 bytes free. CanonicalGit,
+original/copied stores, sources/exes/caches/live handles retained. Original24h
+journal handle remains active after4h26m/2,281batches; million candidate active
+with823,792unique receipts and runningp99.29194s. Terminal gates remain pending.
+[Recovery evidence](scale/fanout-combined-local-physical-2026-10-06/copied-duplicate-recovery/).
+
 ## Latest follow-up — 2026-10-06: all six full fanout copied physical audits accepted
 
 All six fresh copies/helpera4e9016/originalcdd4c7b independently qualify exact
