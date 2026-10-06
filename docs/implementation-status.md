@@ -33,6 +33,20 @@ complete current files, including partial no-space evidence, are preserved to S3
 
 ## Latest storage and proof reporting correction — 2026-10-06
 
+Thirteen additional closed disposable Tier2 copied-audit store trees pass full
+canonical Git archive/member/current-file census checks, original-copy provenance
+and closed-file ledgers, actual SDK/three-server executable closure, mount/loop/
+Docker and visible-FD checks. Only these copied trees reclaimed1,014,509,568
+allocated bytes; about5.8GB free now exceeds the finite capacity launch threshold.
+Remaining sources/executables/metadata and original donors/caches unchanged.
+[Recovery](scale/closed-tier2-copy-recovery-2026-10-06/).
+
+Stopped the obsolete read-only journal24h review waiter after confirming its
+producer/wrapper/SDK are terminal and closed: its required original archive
+manifest was never written after no-space failure. Complete current files are
+already canonical S3-preserved; no synthetic original manifest, SDK restart or
+verdict change. [Waiter closure](scale/terminal-campaigns-disk-pressure-2026-10-06/obsolete-review-wait/).
+
 Fresh full400k/4.8M valid activity latency/memory gate is now prepared. It requires
 original20s full integrity before/after, original6m bulk read/reduction and full
 sample comparison, a separate full independent timestamp/input-shape census,
