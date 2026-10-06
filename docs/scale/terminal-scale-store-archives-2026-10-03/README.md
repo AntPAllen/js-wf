@@ -26,3 +26,14 @@ python3 scripts/restore-fixture-archive.py \
   --manifest /tmp/js-wf-scale-spilled-10m-20261002/broker-store-archive/manifest.jsonl \
   --destination /tmp/restored-spilled-scale
 ```
+
+## Storage update — 2026-10-06
+
+The closed cardinality fixture broker gzip files have moved to complete verified
+S3 archives. The historical local paths above now retain reports and restore
+ledgers. See [complete per-fixture archive/readback/offload records](../closed-scale-s3-2026-10-06/).
+For a future restore, download and verify that fixture's full archive against its
+committed compressed hash and member inventory, unpack it into a fresh root, then
+use the retained legacy manifest to restore gzip broker members into a second
+fresh destination. Preserve original modes/nanosecond mtimes from the manifest.
+No original closed stores were reopened during offload.

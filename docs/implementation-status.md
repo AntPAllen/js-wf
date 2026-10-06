@@ -34,6 +34,22 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier is live; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## /tmp primary rolling archive moved;24h admission headroom restored — 2026-10-06
+
+Full fresh S3 compressed-body and all51,519 member hash/size/mode/mtime identities,
+metadata, complete current-root census and visible closure verify. Sole local
+worker-clock131–143 primary tar removed: exactly1,408,557,056 allocated bytes
+recovered; remaining root bytes/modes/mtimes unchanged. Committed S3 full archive
+and Git inventories retain its original physical bytes; raw/model/provider/native
+report and original rolling manifest stay local. Existing accepted shard scope
+unchanged; no store reopened. [Final removal guard](scale/tmp-storage-review-2026-10-06/worker-clock-131-143/primary-offload/offload.json).
+
+Together latest cleanup reclaims6,122,799,104 older-data allocated bytes, plus
+3,394,428,928 temporary archive staging bytes reported separately. Approximately
+18.7GiB free now. Fresh actual24h producer prepared with a stricter16GiB+1GiB
+admission reserve. Live100k qualifier/full400k donors untouched. No new24h launch
+or acceptance until actual unit/source/SDK/profile/server checks succeed.
+
 ## Broader /tmp cleanup: closed large artifacts moved to verified S3 — 2026-10-06
 
 Fresh full remote compressed bodies/every member/metadata/inventory, exact current
