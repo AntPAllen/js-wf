@@ -4801,3 +4801,16 @@ oracle. Run87920 real-workflow bulk mode (`WF_MATRIX_BULK_LATENCY_COHORT=1`) aga
 a canonical-bound accepted point oracle (`WF_MATRIX_LATENCY_COHORT_ORACLE`),
 retaining the identical original completion deadline and6m final audit budget.
 No partial samples qualify. Full400k/memory/fault/default/24h gates still apply.
+
+### Real-cohort state admission diagnosis before bulk adoption
+
+The4d03dd1 real87920 attempt failed its independent original20s fresh-state check
+before bulk latency acquisition (58,403 initial records/revision96,250, no initial
+completion barrier). Preserve that verdict and complete closed originals. Instrument
+state-watch creation, initial pending count, received/included revisions, completion
+barrier, cleanup and journal-phase timing on a new verified disposable copy. Compare
+fresh-state acquisition alone and concurrent journal/state acquisition with their
+complete source inventories and original budgets. No cached outcome values, longer
+release budget, reopened failed fixture or assumed NATS/runtime cause can qualify
+this gate. A faster state transport must independently preserve complete KV latest
+values, deletion/purge semantics, snapshot/terminal validation and cursor cleanup.

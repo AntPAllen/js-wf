@@ -12,7 +12,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
 | Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and hosted seed3 at a517d2e, each with independent copied integrity/history/drain, qualified. Retained normal ten-minute block-disk seed1 at f57da4d plus copied raw-image integrity/history/drain qualified. Ten-minute worker seed1 native and copied audits also pass, with the original producer generated-cache failure separately preserved. Retained normal ten-minute pause seed1 at d893bb0 and reply-isolation seed1 at85c4cf2, each with independent copied integrity/history/drain, qualify. Original retained fanout-restart seed1 at e3399bf and full rolling-upgrade seed1 at661239d, each with native plus independent copied audits, qualify. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
-| Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries, retained results/prefixes/logical drain and copied audits qualify at dc8422a. Earlier all-three local physical claims used leader-routed API views and require stronger witnesses. Other finite combined cases remain. |
+| Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries qualify at cdd4c7b with exact results/prefixes, independent public local Jsz evidence on all three replicas, 64 durable drain witnesses and fresh copied-store audits. Earlier leader-routed physical claims remain corrected in their recorded scope. Other finite combined cases remain. |
 | Explicit full400k audit capacity | At02d485a explicit chunked R1 reader qualifies fresh full400k/4.8M cold baseline18.134257s and actual R5 ownerSIGKILL leftdown16.429780s including zero-consumer cleanup, under4CPU/GOGC500/4GiB. At8693ab5 same-store ownerrestart qualifies17.087980s. Explicit ten-minute journal now accepted at2f74289; default/fullmatrix/24h remain open. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. Corrected continuous-byte attempt also failed checkpoint1040 /29120 after7986.85s; originals independently preserved, state snapshot phase is the next diagnostic target. No24h row qualified; full-matrix soak remains. |
@@ -28,6 +28,23 @@ qualification, rather than treating older executed-source rows as a blanket pass
 Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
+
+## Latest follow-up — 2026-10-06 07:00 UTC: failed cohort mirrored and copy reclaimed
+
+Complete364,060,327-byte failed cohort archive additionally uploaded to S3;
+full GET hash/size and metadata match committed proof. At pushed220e216, complete
+Git archive/current-file/clone-census/PID/mount/visibleFD checks preceded removal
+of only closed disposablecopied-stores and redundant raw/worktree proof files.
+2,711,601,152 allocated bytes recovered,2,983,780,352 free atcompletion. Every
+remaining captured source/executable/metadata file unchanged; original donor,
+Git/S3 proof/caches/live retained; failed verdict unchanged.
+[Copy recovery](scale/bulk-final-latency-preparation-2026-10-06/retained-cohort-copy-recovery/).
+
+Original24h journal handle remainsactive at5h50m/batch2957 with continued actual
+journal-leader kills/heals. Millioncandidate remainsactive,880,978 unique receipts
+at06:59:20,p99.290309164s/max17.839281762s. Final24h/millionphysical gates notqualified.
+Next: instrument the independent fresh-state initial-set phase on new verified
+copies under original20s admission budget, then finish realbulk comparison.
 
 ## Latest follow-up — 2026-10-06: real87920 pre-bulk state admission failure preserved
 
