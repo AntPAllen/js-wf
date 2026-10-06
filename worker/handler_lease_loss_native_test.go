@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -163,7 +164,7 @@ func TestOuterHandlerNativeLeaseExpiryAndLateAppend(t *testing.T) {
 			}
 			select {
 			case e := <-fenced:
-				if e.Reason != "lease_heartbeat_lost" || e.Epoch != old.Epoch || e.Worker != first.ID || e.Error != lease.ErrLost.Error() {
+				if e.Reason != "lease_heartbeat_lost" || e.Epoch != old.Epoch || e.Worker != first.ID || !strings.HasPrefix(e.Error, lease.ErrLost.Error()+": ") {
 					t.Fatalf("wrong fencing evidence: %+v", e)
 				}
 				t.Logf("old owner fenced: %+v", e)

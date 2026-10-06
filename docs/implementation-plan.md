@@ -5149,3 +5149,13 @@ Optional `WF_OUTER_HANDLER_STORE_ROOT` retains fresh per-test stores for exact
 archive/provenance review; it does not alter the test's deadlines or assertions.
 The test compiles. Native race execution and independent evidence review are
 pending; full combined and release qualification remain open.
+
+### Native lease-expiry observation guard correction
+
+Inspection of `lease.Lease.renew` shows the production heartbeat reports wrapped
+`ErrLost` with its underlying real JetStream CAS error. The initial native
+control wrongly required the bare error string. Its original isolated run stays
+at13af4d2; the corrected assertion preserves reason/owner/epoch checks and
+requires the lost-lease prefix plus underlying cause. This changes observation
+only, with no runtime, TTL, AckWait, counts or deadlines changed. Original
+output/stores must be retained before a fresh corrected-source qualification.
