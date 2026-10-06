@@ -38,6 +38,11 @@ func runHandler(ctx context.Context, fn func() (json.RawMessage, error)) (handle
 	}()
 	select {
 	case outcome := <-done:
+		// Cancellation wins over a simultaneously ready completion. This also
+		// keeps durable-cancel handoff independent of goroutine scheduling.
+		if err := ctx.Err(); err != nil {
+			return handlerOutcome{err: err}, false
+		}
 		return outcome, true
 	case <-ctx.Done():
 		return handlerOutcome{err: ctx.Err()}, false

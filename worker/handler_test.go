@@ -91,3 +91,17 @@ func TestAlreadyCancelledHandlerDoesNotEnterUserCode(t *testing.T) {
 		t.Fatalf("outcome=%+v joined=%t", outcome, joined)
 	}
 }
+
+func TestHandlerCancellationWinsReturnedValue(t *testing.T) {
+	for i := 0; i < 1000; i++ {
+		ctx, cancel := context.WithCancel(context.Background())
+		outcome, joined := runHandler(ctx, func() (json.RawMessage, error) {
+			cancel()
+			return json.RawMessage(`99`), nil
+		})
+		cancel()
+		if joined || !errors.Is(outcome.err, context.Canceled) || len(outcome.result) != 0 {
+			t.Fatalf("cancelled completion was accepted: %+v joined=%t", outcome, joined)
+		}
+	}
+}

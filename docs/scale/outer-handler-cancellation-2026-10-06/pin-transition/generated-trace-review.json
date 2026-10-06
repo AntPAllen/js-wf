@@ -1,0 +1,71 @@
+[
+  {
+    "name": "worker-running-cancel.json",
+    "before_sha256": "0d24437c0058a4192a16f63b86f3e394fc2accf158fd6130e70cf0776d1a3671",
+    "after_sha256": "8ff2441769bcb5ebc5e0ee3002b9908fe2392d14ac91d7e91c07bdf29c9718dc",
+    "old_events": 38,
+    "new_events": 48,
+    "same_seed_workload_version_step_limit_and_all_scheduler_decisions": true,
+    "two_separate_processes_byte_identical": true,
+    "first_changed_event_index": 21,
+    "before_first_change": {
+      "at_ms": 0,
+      "operation": "signal_stream_info",
+      "sequence": 1,
+      "outcome": "ok"
+    },
+    "after_first_change": {
+      "at_ms": 0,
+      "operation": "consumer_nak",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "outcome": "ok"
+    }
+  },
+  {
+    "name": "worker-cancel-durable-poll.json",
+    "before_sha256": "266975c35d4eb5b2d5729f4c4c03de1e2fe738c507c83b70e7ae3017387c050d",
+    "after_sha256": "c8fea510da4ed3b0f3b8a4c1f8180cacd50d642f42df35248c38f506d2020dd9",
+    "old_events": 50,
+    "new_events": 60,
+    "same_seed_workload_version_step_limit_and_all_scheduler_decisions": true,
+    "two_separate_processes_byte_identical": true,
+    "first_changed_event_index": 25,
+    "before_first_change": {
+      "at_ms": 15000,
+      "operation": "signal_stream_info",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    "after_first_change": {
+      "at_ms": 15000,
+      "operation": "consumer_nak",
+      "subject": "wf.run.0",
+      "sequence": 1,
+      "outcome": "ok"
+    }
+  },
+  {
+    "name": "continuation-running-cancel-42.json",
+    "before_sha256": "0f0e5d51219c597e3250cf00434e3fb6ccc3b1dc7caaf3768571fc8fa0185786",
+    "after_sha256": "19ab50eed92140649f8994e1a846ada9843a6942d7430673219fec99dc0d417b",
+    "old_events": 163,
+    "new_events": 183,
+    "same_seed_workload_version_step_limit_and_all_scheduler_decisions": true,
+    "two_separate_processes_byte_identical": true,
+    "first_changed_event_index": 130,
+    "before_first_change": {
+      "at_ms": 0,
+      "operation": "signal_stream_info",
+      "sequence": 2,
+      "outcome": "ok"
+    },
+    "after_first_change": {
+      "at_ms": 0,
+      "operation": "consumer_nak",
+      "subject": "wf.run.0",
+      "sequence": 3,
+      "outcome": "ok"
+    }
+  }
+]

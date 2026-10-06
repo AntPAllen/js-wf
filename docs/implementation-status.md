@@ -32,6 +32,35 @@ coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
 
+## Handler cancellation policy and pinned trace transition — 2026-10-06
+
+Cancellation now explicitly wins over a simultaneously ready handler completion.
+The first broad race run at the previous handler code rejected three old exact
+transport pins and expired its selected10m package timeout at suspended-scan
+capacity (600.043s); no full-suite qualification. The repository race qualifier's
+original budget is60m. Those three pins still pass against ca7a1fa worker code
+via compiler overlay. Each first diverges at durable cancellation: new NAK,
+lease cleanup and redelivery precede cancel drain under a fresh epoch, with the
+same outcome/integrity/drain requirements. Every seed/workload/version/step limit
+and scheduler decision is unchanged. Two independent processes per replacement
+produce identical bytes; previous exact pins and complete diffs are preserved,
+with no corpus entry removed.
+
+All392 current pins, both affected1,000-seed running-cancel suites and the
+1,000-seed outer-handoff control now pass under race25.595s. Handler boundary/
+cancellation-priority race controls pass1.031s. Fresh native R3 worker-stop and
+durable-cancel controls pass9.959s: shutdown994.646us, successor42 or exact canceled
+outcome, new epoch, all three distinct local Jsz WF_RUN replicas empty with one
+configured durable each, unchanged accepted journal after late SDK call and no
+late effect, full retained integrity1/4/1 or1/3/1. All within original contexts;
+no old stores reopened. Initial strengthening controls failed due to drain check
+ordering and an incorrect64-consumer expectation for this single-partition
+fixture; both failures recorded, production and sustained64-consumer gates
+unchanged. These native unit fixtures are ephemeral, not independently archived
+full-matrix proofs. Corrected complete60m race qualification and current100k-normal
+qualification remain open.
+[Transition and controls](scale/outer-handler-cancellation-2026-10-06/pin-transition/).
+
 ## Corrected original ten-minute bulk qualification accepted — 2026-10-06
 
 Fresh original10m journal seed1 atca7a1fa passes626.35s:93 cohorts,2,604 complete

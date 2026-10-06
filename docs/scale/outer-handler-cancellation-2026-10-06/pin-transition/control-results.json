@@ -1,0 +1,58 @@
+{
+  "prior_full_race": {
+    "command": "go test -race ./sim -count=1 -timeout=10m",
+    "result": "FAIL",
+    "elapsed_seconds": 600.043,
+    "diverged_pins": [
+      "continuation-running-cancel-42.json",
+      "worker-cancel-durable-poll.json",
+      "worker-running-cancel.json"
+    ],
+    "timeout_running_test": "TestSeededSuspendedScanCapacityReplay",
+    "scope": "Partial full-suite run; no acceptance. Repository full-race qualifier uses60m, unlike selected10m."
+  },
+  "corrected_controls": [
+    {
+      "command": "go test -race ./sim -run '^Test(PinnedRegressionCorpus|SeededWorkerRunningCancelReplay|SeededContinuationRunningCancelReplay|OuterHandlerCancellationHandoffAndLateAppend)$' -count=1",
+      "result": "PASS",
+      "elapsed_seconds": 25.595,
+      "pinned_files": 392,
+      "seeded_running_cancel_suites": 2,
+      "seeds_per_suite": 1000,
+      "outer_handoff_seeds": 1000
+    },
+    {
+      "command": "go test -race ./worker -run '^Test(HandlerReturnPanicAndGoexit|HandlerCancellationAbandonsLateReturn|AlreadyCancelledHandlerDoesNotEnterUserCode|HandlerCancellationWinsReturnedValue)$' -count=1",
+      "result": "PASS",
+      "elapsed_seconds": 1.031
+    },
+    {
+      "command": "go test -race ./worker -run '^TestOuterHandlerNativeCancellationAndLateAppend$' -count=1 -v",
+      "result": "PASS",
+      "elapsed_seconds": 9.959,
+      "test_body_seconds": 8.93,
+      "worker_stop_seconds": 4.37,
+      "durable_cancel_seconds": 4.56,
+      "shutdown_ns": 994646,
+      "native_peers_per_case": 3,
+      "physical_local_queue_messages": 0,
+      "physical_consumers_per_peer": 1
+    }
+  ],
+  "native_strengthening_preliminary_failures": [
+    {
+      "reason": "Local drain was placed before cancelling the blocked handler; ordering corrected",
+      "package_elapsed_seconds": 40.296
+    },
+    {
+      "reason": "Copied fanout consumer census expected64, but this one-partition fixture creates1 durable; adjusted fixture census without changing sustained64-consumer gates",
+      "package_elapsed_seconds": 60.693
+    }
+  ],
+  "source_sha256": {
+    "worker/handler.go": "cf0a4f9ba4c73c8543291c05f491bfa8df2f9840bbfdcf49644ea99a805ecd84",
+    "worker/handler_test.go": "29263ec837fefde500032e5c6c2e3f94317ceafee0c495a69af6a5f63173553d",
+    "worker/handler_native_test.go": "80ac4f7403b73d49759de364b52d3300e9c88878f592ba87e53f026149d37dca"
+  },
+  "scope": "Control results recorded from tool outputs. All prior pin bytes retained, no corpus entry removed. Native fixtures ephemeral; not independently archived full-matrix proofs. Corrected full60m race qualifier remains pending."
+}

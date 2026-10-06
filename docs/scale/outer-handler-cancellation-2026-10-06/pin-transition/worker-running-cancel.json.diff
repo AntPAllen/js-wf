@@ -1,0 +1,274 @@
+--- before/worker-running-cancel.json
++++ after/worker-running-cancel.json
+@@ -181,12 +181,90 @@
+     },
+     {
+       "at_ms": 0,
++      "operation": "consumer_nak",
++      "subject": "wf.run.0",
++      "sequence": 1,
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 0,
++      "operation": "kv_delete",
++      "subject": "test.integrated-043",
++      "expected": 4,
++      "sequence": 5,
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
++      "operation": "consumer_fetch",
++      "subject": "wf.run.0",
++      "outcome": "no_messages"
++    },
++    {
++      "at_ms": 1000,
++      "operation": "consumer_fetch",
++      "subject": "wf.run.0",
++      "sequence": 1,
++      "outcome": "delivery_2"
++    },
++    {
++      "at_ms": 1000,
++      "operation": "kv_create",
++      "subject": "test.integrated-043",
++      "sequence": 6,
++      "data_sha256": "43c8e264a5e116243780caf24923712eae2fbe56b8c77306050f5b7a89480539",
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
++      "operation": "kv_update",
++      "subject": "test.integrated-043",
++      "expected": 6,
++      "sequence": 7,
++      "data_sha256": "737053ddfaab8089da0f204efe9a72d8e6e36cf1f1dbdedd6259c3edeb57efb3",
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
++      "operation": "next_journal",
++      "subject": "wf.jrn.test.integrated-043",
++      "expected": 1,
++      "sequence": 1,
++      "data_sha256": "5391d63e90d9a60bed5589e3a9fc745de15880d57457ecdd4e8c77a570474f93",
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
++      "operation": "next_journal",
++      "subject": "wf.jrn.test.integrated-043",
++      "expected": 2,
++      "sequence": 2,
++      "data_sha256": "71d18910a3fdc5f3887c91681c3e4b9f4d80ca251ad4d906e14accc9ffe4ad61",
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
++      "operation": "next_journal",
++      "subject": "wf.jrn.test.integrated-043",
++      "expected": 3,
++      "outcome": "not_found"
++    },
++    {
++      "at_ms": 1000,
++      "operation": "last_invocation",
++      "subject": "wf.inv.test.integrated-043",
++      "sequence": 1,
++      "data_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
+       "operation": "signal_stream_info",
+       "sequence": 1,
+       "outcome": "ok"
+     },
+     {
+-      "at_ms": 0,
++      "at_ms": 1000,
+       "operation": "next_signal",
+       "subject": "wf.sig.test.integrated-043.*",
+       "expected": 1,
+@@ -195,16 +273,16 @@
+       "outcome": "ok"
+     },
+     {
+-      "at_ms": 0,
+-      "operation": "kv_update",
+-      "subject": "test.integrated-043",
+-      "expected": 4,
+-      "sequence": 5,
+-      "data_sha256": "3bb3d629d3ecebc2180ede673fd7e9f78891647231955c7154c6d8347acff336",
+-      "outcome": "ok"
+-    },
+-    {
+-      "at_ms": 0,
++      "at_ms": 1000,
++      "operation": "kv_update",
++      "subject": "test.integrated-043",
++      "expected": 7,
++      "sequence": 8,
++      "data_sha256": "737053ddfaab8089da0f204efe9a72d8e6e36cf1f1dbdedd6259c3edeb57efb3",
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
+       "operation": "last",
+       "subject": "wf.jrn.test.integrated-043",
+       "sequence": 2,
+@@ -212,42 +290,42 @@
+       "outcome": "ok"
+     },
+     {
+-      "at_ms": 0,
++      "at_ms": 1000,
+       "operation": "publish",
+       "subject": "wf.jrn.test.integrated-043",
+       "expected": 2,
+       "sequence": 3,
+-      "data_sha256": "fc409d35936dcfb1f6ee4ca99ac140521e07b77414495ff463f7c19da7fc9f37",
+-      "outcome": "ok"
+-    },
+-    {
+-      "at_ms": 0,
+-      "operation": "kv_update",
+-      "subject": "test.integrated-043",
+-      "expected": 5,
+-      "sequence": 6,
+-      "data_sha256": "3bb3d629d3ecebc2180ede673fd7e9f78891647231955c7154c6d8347acff336",
+-      "outcome": "ok"
+-    },
+-    {
+-      "at_ms": 0,
++      "data_sha256": "5ef12331e82f5a2cd2c54e4f3fa34cd9ab7529d437736f02a66f9f6d0b68c4c3",
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
++      "operation": "kv_update",
++      "subject": "test.integrated-043",
++      "expected": 8,
++      "sequence": 9,
++      "data_sha256": "737053ddfaab8089da0f204efe9a72d8e6e36cf1f1dbdedd6259c3edeb57efb3",
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
+       "operation": "last",
+       "subject": "wf.jrn.test.integrated-043",
+       "sequence": 3,
+-      "data_sha256": "fc409d35936dcfb1f6ee4ca99ac140521e07b77414495ff463f7c19da7fc9f37",
+-      "outcome": "ok"
+-    },
+-    {
+-      "at_ms": 0,
++      "data_sha256": "5ef12331e82f5a2cd2c54e4f3fa34cd9ab7529d437736f02a66f9f6d0b68c4c3",
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
+       "operation": "publish",
+       "subject": "wf.jrn.test.integrated-043",
+       "expected": 3,
+       "sequence": 4,
+-      "data_sha256": "d944087ad54131efc6cff80a5cfa77b1a476c620c3720824802360a5232c916d",
+-      "outcome": "ok"
+-    },
+-    {
+-      "at_ms": 0,
++      "data_sha256": "b301c7a7065b8206e4949e83e7d1b7abb691f9027954cf2d30b7424b7dea056f",
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
+       "operation": "kv_create",
+       "subject": "test.integrated-043",
+       "sequence": 1,
+@@ -255,22 +333,22 @@
+       "outcome": "ok"
+     },
+     {
+-      "at_ms": 0,
++      "at_ms": 1000,
+       "operation": "kv_delete",
+       "subject": "test.integrated-043",
+-      "expected": 6,
+-      "sequence": 7,
+-      "outcome": "ok"
+-    },
+-    {
+-      "at_ms": 0,
++      "expected": 9,
++      "sequence": 10,
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
+       "operation": "consumer_ack",
+       "subject": "wf.run.0",
+       "sequence": 1,
+       "outcome": "ok"
+     },
+     {
+-      "at_ms": 0,
++      "at_ms": 1000,
+       "operation": "next_journal",
+       "subject": "wf.jrn.test.integrated-043",
+       "expected": 1,
+@@ -279,7 +357,7 @@
+       "outcome": "ok"
+     },
+     {
+-      "at_ms": 0,
++      "at_ms": 1000,
+       "operation": "next_journal",
+       "subject": "wf.jrn.test.integrated-043",
+       "expected": 2,
+@@ -288,32 +366,32 @@
+       "outcome": "ok"
+     },
+     {
+-      "at_ms": 0,
++      "at_ms": 1000,
+       "operation": "next_journal",
+       "subject": "wf.jrn.test.integrated-043",
+       "expected": 3,
+       "sequence": 3,
+-      "data_sha256": "fc409d35936dcfb1f6ee4ca99ac140521e07b77414495ff463f7c19da7fc9f37",
+-      "outcome": "ok"
+-    },
+-    {
+-      "at_ms": 0,
++      "data_sha256": "5ef12331e82f5a2cd2c54e4f3fa34cd9ab7529d437736f02a66f9f6d0b68c4c3",
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
+       "operation": "next_journal",
+       "subject": "wf.jrn.test.integrated-043",
+       "expected": 4,
+       "sequence": 4,
+-      "data_sha256": "d944087ad54131efc6cff80a5cfa77b1a476c620c3720824802360a5232c916d",
+-      "outcome": "ok"
+-    },
+-    {
+-      "at_ms": 0,
++      "data_sha256": "b301c7a7065b8206e4949e83e7d1b7abb691f9027954cf2d30b7424b7dea056f",
++      "outcome": "ok"
++    },
++    {
++      "at_ms": 1000,
+       "operation": "next_journal",
+       "subject": "wf.jrn.test.integrated-043",
+       "expected": 5,
+       "outcome": "not_found"
+     },
+     {
+-      "at_ms": 0,
++      "at_ms": 1000,
+       "operation": "check_worker_running_cancel",
+       "subject": "wf.jrn.test.integrated-043",
+       "sequence": 1,
