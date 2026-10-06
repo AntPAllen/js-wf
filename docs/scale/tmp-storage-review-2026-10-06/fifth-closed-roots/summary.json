@@ -1,0 +1,27 @@
+{
+  "utc": "2026-10-06T22:05:24.786207+00:00",
+  "closed_roots": 34,
+  "closed_root_allocated_bytes_removed": 9280417792,
+  "redundant_preexisting_archives": 20,
+  "preexisting_archive_allocated_bytes_removed": 1298210816,
+  "total_preexisting_allocated_bytes_removed": 10578628608,
+  "new_capture_staging_bytes_removed_separately": 3507265536,
+  "available_bytes_observed": 51523502080,
+  "protected_roots_retained": [
+    "/tmp/js-wf-bulk-journal-24h-joined-20261006",
+    "/tmp/js-wf-bulk-latency-full400k-valid-20261006",
+    "/tmp/js-wf-concurrent-state-400k-capacity-bounded-preparation-20261005",
+    "/tmp/js-wf-timer-volume-million-service-20261001",
+    "/tmp/js-wf-raft-callback-regression-20261006",
+    "/tmp/js-wf-matrix-seed6-offline-bound-20261006",
+    "/tmp/js-wf-lease-raft-offline-bound-20261006"
+  ],
+  "original_24h_processes_live": {
+    "3461056": "python3 /home/exedev/js-wf/scripts/run-tier3-soak.py --root /tmp/js-wf-bulk-journal-24h-joined-20261006 --row journal --duration 24h --seed 1 --no-race --memory-limit 4GiB --chunked-state-retained-audit --bulk-final-latency --compare-bulk-point --explicit-route-seeds --retained-audit-trace --audit-wait-stack --additional-disk-reserve-bytes 1073741824 ",
+    "3461745": "/tmp/js-wf-bulk-journal-24h-joined-20261006/integration.test -test.run=^TestFiveContainerMixedJournalLeaderEveryThirtySeconds$ -test.v=test2json -test.count=1 -test.timeout=24h20m "
+  },
+  "skipped_symlink_roots": [
+    "/tmp/js-wf-tier2-retained-blockdisk-ten-minute-20261005"
+  ],
+  "scope": "Storage-only cleanup; complete committed S3 proofs verified before deleting exact archived single-link files. Root logs/provenance and protected fixtures retained. No historical verdict or test gate changed. New archive staging excluded from pre-existing reclaimed totals."
+}

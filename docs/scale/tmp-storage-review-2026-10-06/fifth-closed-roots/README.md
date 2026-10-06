@@ -1,5 +1,7 @@
 # Fifth closed directory cleanup — 2026-10-06
 
+Completed: **9.85 GiB of pre-existing allocated data reclaimed**, comprising 8.64 GiB from 34 closed result directories and 1.21 GiB from 20 redundant archive copies. An additional 3.27 GiB of newly created archive staging was removed separately. Available space at the final observation: 47.99 GiB. See [measured totals](summary.json).
+
 Selected 35 large historical result directories from the current `/tmp` inventory. The live 24-hour campaign, both full 400k capacity donors, million-timer primary, and newest regression/offline diagnostic roots are excluded. One directory containing symlinks was skipped; 34 complete archives were captured without starting any broker or changing a historical verdict.
 
 Each capture records full file paths, bytes, SHA256, modes and original nanosecond mtimes, with local archive-member verification and unchanged-fixture checks. Closure observations include visible processes and descriptors, Docker mounts, loop devices and filesystem mounts; inspection permission limits remain recorded.

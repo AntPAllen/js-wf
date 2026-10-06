@@ -1,6 +1,6 @@
 # /tmp storage review — 2026-10-06
 
-Latest follow-up: **eight more closed fixtures offloaded, recovering 2.12 GiB of pre-existing allocated data**. Complete S3 copies were verified before deletion. See [latest cleanup](fourth-closed-roots/README.md) and [measured summary](fourth-closed-roots/summary.json). This follows the [eleven-root pass](further-closed-roots/summary.json), which recovered another 3.79 GiB. Live runs and capacity donors remain local.
+Latest follow-up: **9.85 GiB of pre-existing allocated data reclaimed** from 34 closed directories and 20 redundant archive copies, after complete S3 preservation and verification. See [latest cleanup](fifth-closed-roots/README.md), [measured totals](fifth-closed-roots/summary.json), and [archive-copy removal](fifth-verified-staging-removal/README.md). Live runs, both full400k donors and the million-timer primary remain local. This follows the [eight-root pass](fourth-closed-roots/summary.json) (2.12 GiB) and [eleven-root pass](further-closed-roots/summary.json) (3.79 GiB).
 
 ## Earlier cleanup
 
