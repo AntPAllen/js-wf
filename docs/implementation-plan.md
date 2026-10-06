@@ -4565,3 +4565,18 @@ Copied producer opt-in --canonical-proof records verifier/report and binds initi
 copy hashes to reviewed manifest. No original stores reopened. Pending fanout
 native/copied qualification continues on existing handles; full13x200/24h remain.
 [Verification](scale/tier2-closed-originals-review-2026-10-06/).
+
+## Original retained fanout restart seed1 qualified — 2026-10-06
+
+Original normal ten-minute e3399bf PASS638.36s:77batches/2,156terminals/23,793entries,
+19verified unfinished six-child cuts, unchanged parent+child prefixes and exact
+six terminalchildren/two distinct completedgrandchildren each. Native allsix cells/
+latency/integrity/history/drain pass. SDK/source/external/profile/observed closure
+bound; full6,355member79,499,469byte/fourpart native proof readback passes. Independent
+fresh-copy helpereaa56f9 verifies exactfull retainedreport/histories/allthree physical
+queues/64durables, audit2.447008218s/combined2.461618250s under20s. Canonical pre-copy
+verification executed/retained before copying; visibleFD permission limits recorded.
+All2,281originalfiles unchanged; no originalstore reopen. Full4,007member54,135,850byte/
+threepart copiedproof readback passes. Full13x200/current-source/24h gates remain open.
+[Native proof](scale/tier2-retained-fanout-2026-10-06/native-ten-minute/).
+[Copied proof](scale/tier2-retained-fanout-2026-10-06/copied-audit/).
