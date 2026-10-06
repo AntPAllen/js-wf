@@ -1,6 +1,6 @@
 # Implementation status against the supplied plan
 
-## Summary — 2026-10-05
+## Summary — 2026-10-06
 
 The core runtime is implemented and broadly exercised. Full release qualification
 against the complete supplied plan is still incomplete; no percentage is claimed.
@@ -28,6 +28,20 @@ qualification, rather than treating older executed-source rows as a blanket pass
 Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
+
+## Latest follow-up — 2026-10-06: current full-capacity baseline fails
+
+Actual bb6f75c full400k/4.8M cold/instrumented baseline fails original20s after
+4256199 journal visits, before any owner kill. Whole1710-file/823alias base+delta
+proof and unchanged1058 donor files independently verified. Earlier18.35s quiet
+pass is an ordered/warmed profile; it does not qualify this current cold gate.
+Changed full-copy CPU/phase/heap/GC/watch diagnostic prepared with unchanged
+cardinality/config/deadline, no per-record clocks,500ms observer. Old disposable
+998-file3,580,395,657byte copy reclaimed only after pushed complete reconstruction,
+current-byte inventory and all-visible-task FD/actual process closure verification.
+Original donor/proof/source/executable retained. Fresh diagnostic is next.
+[Failure](scale/direct-callback-audit-2026-10-05/full400k-owner-down/).
+[Changed diagnostic](scale/direct-callback-audit-2026-10-05/full400k-cold-profile-preparation/).
 
 ## Latest follow-up — 2026-10-05: actual R1 legacy oracle compatibility accepted
 
