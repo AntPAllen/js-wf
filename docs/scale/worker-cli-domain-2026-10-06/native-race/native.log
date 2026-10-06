@@ -1,0 +1,43 @@
+=== RUN   TestWorkerRunnerCompletesWorkflowAndServesMetricsInJetStreamDomain
+=== RUN   TestWorkerRunnerCompletesWorkflowAndServesMetricsInJetStreamDomain/static
+    domain_test.go:19: worker domain admitted node=0 domain=WFWORKER server_id=NAXUUEXJZSR3MW5OESJVFYYDDIRUBQRLX5VTX2DIVD7UAMJXQZBNV5BW
+    domain_test.go:19: worker domain admitted node=1 domain=WFWORKER server_id=NCK6LUTGME4ICWM2ELEFE5MHQRBQFLUN2PZI7J5B6TX3EAXN5HJIVFSE
+    domain_test.go:19: worker domain admitted node=2 domain=WFWORKER server_id=NAGDOAHK4BGZNEWHYQPDTESPK5PQVKYDRCEDC3EQUG65DESJNJ7B2NB7
+    domain_test.go:72: worker real domain=WFWORKER domain_api_requests=1071 wrong_prefix_requests=0
+=== RUN   TestWorkerRunnerCompletesWorkflowAndServesMetricsInJetStreamDomain/kv
+    domain_test.go:19: worker domain admitted node=0 domain=WFWORKER server_id=NCZBCRL53NAZCD5GD3UYFALR66TRA45FMXYTRTDYIDWSSEKTIXOFQVZZ
+    domain_test.go:19: worker domain admitted node=1 domain=WFWORKER server_id=NAXVKS7WCN534JEYB724DHQGNRVO7H5QCPCKB2ZJOOIPLD5UGYEC2NKE
+    domain_test.go:19: worker domain admitted node=2 domain=WFWORKER server_id=NCKIABAJTRTF6BHAPHLQRJ7RMGS4VJKIS2YRLW7WSBOEY2PJYVJIJOOF
+    domain_test.go:72: worker real domain=WFWORKER domain_api_requests=1257 wrong_prefix_requests=0
+=== RUN   TestWorkerRunnerCompletesWorkflowAndServesMetricsInJetStreamDomain/auto
+    domain_test.go:19: worker domain admitted node=0 domain=WFWORKER server_id=NA7HKIIBVPB2GKJ3KFXS6IPBDC7MTIQI3KFBQYAEKNTFEKEW657VDKCG
+    domain_test.go:19: worker domain admitted node=1 domain=WFWORKER server_id=NDQ736CSZ73C5D2EGZFGWAXEUATJJVLBP76XX2A23QWAVTOGCXOONNJC
+    domain_test.go:19: worker domain admitted node=2 domain=WFWORKER server_id=NCH7AEYFOPIZXBMACXMPAXZDL3GGOAHBQG2VRBOUUDVOSLCWASVDZ7PJ
+    domain_test.go:72: worker real domain=WFWORKER domain_api_requests=2584 wrong_prefix_requests=0
+--- PASS: TestWorkerRunnerCompletesWorkflowAndServesMetricsInJetStreamDomain (31.12s)
+    --- PASS: TestWorkerRunnerCompletesWorkflowAndServesMetricsInJetStreamDomain/static (8.99s)
+    --- PASS: TestWorkerRunnerCompletesWorkflowAndServesMetricsInJetStreamDomain/kv (9.04s)
+    --- PASS: TestWorkerRunnerCompletesWorkflowAndServesMetricsInJetStreamDomain/auto (11.05s)
+=== RUN   TestWorkerRunnerCompletesWorkflowAndServesMetrics
+=== RUN   TestWorkerRunnerCompletesWorkflowAndServesMetrics/static
+=== RUN   TestWorkerRunnerCompletesWorkflowAndServesMetrics/kv
+=== RUN   TestWorkerRunnerCompletesWorkflowAndServesMetrics/auto
+--- PASS: TestWorkerRunnerCompletesWorkflowAndServesMetrics (2.37s)
+    --- PASS: TestWorkerRunnerCompletesWorkflowAndServesMetrics/static (0.77s)
+    --- PASS: TestWorkerRunnerCompletesWorkflowAndServesMetrics/kv (0.88s)
+    --- PASS: TestWorkerRunnerCompletesWorkflowAndServesMetrics/auto (0.72s)
+=== RUN   TestWorkerRunnerStartsAfterServerRestart
+--- PASS: TestWorkerRunnerStartsAfterServerRestart (0.84s)
+=== RUN   TestWorkerRunnerStartsAfterServerRestartInJetStreamDomain
+    main_test.go:97: worker domain startup stopped node=0 domain=WFWORKER server_id=NC3XXTITNOSTAJPIJSNARZOOHH46MWQAB2NZEXUMJFGHMGBIUTPBNYGZ
+    main_test.go:97: worker domain startup stopped node=1 domain=WFWORKER server_id=NBUP4YJ36HMRMABBAYFDIVINLXVK36GAFY7KSHFXW5DODJ7KJR2EAV2Z
+    main_test.go:97: worker domain startup stopped node=2 domain=WFWORKER server_id=NATZMRQG66KSYIL2F5XNMJF7O5VJOWAGDWPDANSRF56HSZSF5RRBZVCQ
+    main_test.go:125: worker domain startup restarted node=0 domain=WFWORKER server_id=NDMC7JWWVGQ5AHJB3WN52G5CCWLIQLC2HD3TWB5TKCLFADHIEPH43OOL
+    main_test.go:125: worker domain startup restarted node=1 domain=WFWORKER server_id=NA33W7TU3HDIGDMJHKLSPVXVYZEUK7OE2VLOAOU5WEN5YY2TWGEQHU5V
+    main_test.go:125: worker domain startup restarted node=2 domain=WFWORKER server_id=NBM74ZIJOBKK4BWUC455VTWMYQSJRRFVH3PPVDD4E3HSB37HKC77S56I
+    main_test.go:153: worker domain admitted node=0 domain=WFWORKER server_id=NDMC7JWWVGQ5AHJB3WN52G5CCWLIQLC2HD3TWB5TKCLFADHIEPH43OOL
+    main_test.go:153: worker domain admitted node=1 domain=WFWORKER server_id=NA33W7TU3HDIGDMJHKLSPVXVYZEUK7OE2VLOAOU5WEN5YY2TWGEQHU5V
+    main_test.go:153: worker domain admitted node=2 domain=WFWORKER server_id=NBM74ZIJOBKK4BWUC455VTWMYQSJRRFVH3PPVDD4E3HSB37HKC77S56I
+    domain_test.go:72: worker real domain=WFWORKER domain_api_requests=184 wrong_prefix_requests=0
+--- PASS: TestWorkerRunnerStartsAfterServerRestartInJetStreamDomain (14.44s)
+PASS

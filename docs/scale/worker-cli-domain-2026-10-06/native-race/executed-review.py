@@ -1,0 +1,30 @@
+from pathlib import Path
+import sys,json,hashlib,subprocess,importlib.util,io,shutil,datetime
+repo=Path('/home/exedev/js-wf');sys.path.insert(0,str(repo/'scripts'));import fixture_archive
+spec=importlib.util.spec_from_file_location('shared',repo/'scripts/run-domain-runtime-controls.py');shared=importlib.util.module_from_spec(spec);spec.loader.exec_module(shared)
+spec=importlib.util.spec_from_file_location('native',repo/'scripts/run-worker-domain-controls.py');native=importlib.util.module_from_spec(spec);spec.loader.exec_module(native)
+root=Path('/tmp/js-wf-worker-domain-controls-20261006');proof=root.with_name(root.name+'-proof');raw=root.with_suffix('.tar.gz')
+unit=dict(l.split('=',1) for l in subprocess.check_output(['systemctl','--user','show','js-wf-worker-domain-controls-20261006.service','-p','ActiveState','-p','MainPID','-p','ExecMainStatus'],text=True).splitlines());assert unit==dict(ActiveState='inactive',MainPID='0',ExecMainStatus='0')
+e=json.loads((root/'execution.json').read_text());rev=e['source'];assert rev==subprocess.check_output(['git','rev-parse','3be727b'],cwd=repo,text=True).strip() and e['exit_code']==0
+before=json.loads((root/'source-before.json').read_text());assert before==json.loads((root/'source-after.json').read_text()) and before['revision']==rev
+names=subprocess.check_output(['git','ls-tree','-r','--name-only',rev],cwd=repo,text=True).splitlines();expected=[n for n in names if n.endswith(('.go','.py','.yml')) or n in ('go.mod','go.sum') or n.startswith('sim/testdata/')];assert set(expected)==set(before['files'])
+data=subprocess.check_output(['git','cat-file','--batch'],cwd=repo,input=''.join(rev+':'+n+'\n' for n in expected).encode());stream=io.BytesIO(data)
+for n in expected:
+ header=stream.readline().split();assert header[1]==b'blob';body=stream.read(int(header[2]));assert stream.read(1)==b'\n';assert hashlib.sha256(body).hexdigest()==before['files'][n]==shared.sha(root/'selected-source'/n)==shared.sha(repo/n)
+assert not stream.read()
+sdk=json.loads((root/'actual-sdk.json').read_text());binary=json.loads((root/'binary.json').read_text());commands=json.loads((root/'commands.json').read_text())
+assert sdk['args']==commands['run'] and sdk['args'][2]=='-test.run=^('+'|'.join(native.TESTS)+')$' and sdk['args'][-2:]==['-test.count=1','-test.timeout=4m']
+assert sdk['working_directory']==commands['run_working_directory']==str(repo/'cmd/wf-worker') and commands['build_working_directory']==str(repo)
+assert sdk['exe_sha256']==binary['sha256']==shared.sha(root/'worker-race.test') and '-race=true' in binary['build_info'] and 'v2.15.0' in binary['build_info'];assert not Path('/proc',str(sdk['pid'])).exists()
+assert sdk['environment']==dict(GOMAXPROCS='2',GOMEMLIMIT='1GiB',GOWORK='off',GOFLAGS='',WF_WORKER_TEST_ROOT=str(root/'stores'))
+plugins=json.loads((root/'plugins.json').read_text());assert len(plugins)==1 and plugins[0]['sha256']==shared.sha(plugins[0]['path']) and '-race=true' in plugins[0]['build_info'] and '-buildmode=plugin' in plugins[0]['build_info'] and 'vcs.revision='+rev in plugins[0]['build_info'] and 'vcs.modified=false' in plugins[0]['build_info']
+clusters=[p for p in (root/'stores').iterdir() if (p/'node-0').is_dir()];assert len(clusters)==8 and sorted(len(list(p.glob('node-*'))) for p in clusters)==[1,1,1,1,3,3,3,3]
+qualification=native.verify_log((root/'native.log').read_text());assert json.loads((root/'row-review.json').read_text())==dict(qualification=qualification,rejection=None)
+closure=shared.closure(root);meta=json.loads((proof/'archive-verification.json').read_text());manifest=json.loads((proof/'fixture-inventory.json').read_text());assert fixture_archive.verify(raw)==manifest and fixture_archive.inventory(root)==manifest['files']
+with raw.open('rb') as stream:assert fixture_archive.digest(stream)==dict(bytes=meta['archive_bytes'],sha256=meta['archive_sha256'])
+out=repo/'docs/scale/worker-cli-domain-2026-10-06/native-race';out.mkdir(exist_ok=True)
+for name in ['native.log','execution.json','source-before.json','source-after.json','actual-sdk.json','binary.json','commands.json','plugins.json','row-review.json','closure.json']:shutil.copyfile(root/name,out/name)
+for name in ['archive-verification.json','fixture-inventory.json']:shutil.copyfile(proof/name,out/name)
+shutil.copyfile(__file__,out/'executed-review.py')
+report=dict(unit=unit,execution=e,source_files=len(expected),source_git_before_after_current_retained_equal=True,actual_sdk_binary_args_environment_cwd_verified=True,actual_sdk_closed=True,retained_race_plugin_verified=True,retained_real_store_topology=[1,1,1,1,3,3,3,3],fresh_closure=closure,independent_log_review=qualification,complete_archive=meta,scope='Worker default/domain workflow/metrics/retention/assignment and actual all-server library startup restart only; no SIGKILL, leaf, PostgreSQL/domain, full matrices, million drain or actual24h acceptance.')
+(out/'independent-review.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(dict(source=rev,files=len(expected),elapsed=e['elapsed_seconds'],members=meta['members'])))
