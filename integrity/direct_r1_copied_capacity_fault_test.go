@@ -57,6 +57,27 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 		case <-time.After(50 * time.Millisecond):
 		}
 	}
+	probeNames := os.Getenv("WF_AUDIT_CAPACITY_CURSOR_NAMES") == "1"
+	if probeNames {
+		var inventory []capacityConsumerInventory
+		for _, name := range []string{"WF_INV", "WF_JRN"} {
+			call, cancel := context.WithTimeout(ready, time.Second)
+			inventory = append(inventory, capacityReadConsumerInventory(call, js, name, nil))
+			cancel()
+		}
+		data, err := json.MarshalIndent(inventory, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(root, "initial-consumer-inventory.json"), append(data, '\n'), 0600); err != nil {
+			t.Fatal(err)
+		}
+		for _, entry := range inventory {
+			if entry.Error != "" {
+				t.Fatalf("initial consumer inventory: %s", entry.Error)
+			}
+		}
+	}
 	type observation struct {
 		Stream   string `json:"stream"`
 		Consumer string `json:"consumer"`
@@ -64,10 +85,11 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 		Start    uint64 `json:"start"`
 	}
 	type cleanupObservation struct {
-		Stream    string `json:"stream"`
-		Consumers int    `json:"consumers"`
-		ElapsedNS int64  `json:"elapsed_ns"`
-		Error     string `json:"error"`
+		Stream    string                     `json:"stream"`
+		Consumers int                        `json:"consumers"`
+		ElapsedNS int64                      `json:"elapsed_ns"`
+		Error     string                     `json:"error"`
+		Inventory *capacityConsumerInventory `json:"inventory,omitempty"`
 	}
 	type result struct {
 		Kind             string                            `json:"kind"`
@@ -232,6 +254,7 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 		}
 		if failure == nil {
 			for _, name := range []string{"WF_INV", "WF_JRN"} {
+				probed := false
 				for {
 					call, stop := context.WithTimeout(attempt, time.Second)
 					stream, err := js.Stream(call, name)
@@ -241,6 +264,19 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 						o.Consumers = stream.CachedInfo().State.Consumers
 					} else {
 						o.Error = err.Error()
+					}
+					if probeNames && !probed && err == nil && o.Consumers != 0 {
+						probed = true
+						var owned []string
+						for _, cursor := range r.Cursors {
+							if cursor.Stream == name {
+								owned = append(owned, cursor.Consumer)
+							}
+						}
+						call, cancel := context.WithTimeout(attempt, time.Second)
+						inventory := capacityReadConsumerInventory(call, js, name, owned)
+						cancel()
+						o.Inventory = &inventory
 					}
 					r.Cleanup = append(r.Cleanup, o)
 					if err == nil && o.Consumers == 0 {
@@ -310,4 +346,50 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 			t.Fatalf("full400k %s failed: %v", mode, failure)
 		}
 	}
+}
+
+// Diagnostic-only named APIs. They do not delete any pre-existing consumer or
+// relax the gate's zero-consumer assertion. Post-delete probes share original20s.
+type capacityConsumerInventory struct {
+	Stream    string                    `json:"stream"`
+	At        time.Time                 `json:"at"`
+	Count     int                       `json:"count"`
+	Consumers []*jetstream.ConsumerInfo `json:"consumers"`
+	Owned     []capacityOwnedConsumer   `json:"owned,omitempty"`
+	Error     string                    `json:"error"`
+}
+type capacityOwnedConsumer struct {
+	Name    string                  `json:"name"`
+	Info    *jetstream.ConsumerInfo `json:"info,omitempty"`
+	Missing bool                    `json:"missing"`
+	Error   string                  `json:"error"`
+}
+
+func capacityReadConsumerInventory(ctx context.Context, js jetstream.JetStream, name string, owned []string) capacityConsumerInventory {
+	r := capacityConsumerInventory{Stream: name, At: time.Now().UTC(), Count: -1}
+	stream, err := js.Stream(ctx, name)
+	if err != nil {
+		r.Error = err.Error()
+		return r
+	}
+	r.Count = stream.CachedInfo().State.Consumers
+	lister := stream.ListConsumers(ctx)
+	for info := range lister.Info() {
+		r.Consumers = append(r.Consumers, info)
+	}
+	if err := lister.Err(); err != nil {
+		r.Error = err.Error()
+	}
+	for _, name := range owned {
+		o := capacityOwnedConsumer{Name: name}
+		consumer, err := stream.Consumer(ctx, name)
+		if err != nil {
+			o.Error = err.Error()
+			o.Missing = errors.Is(err, jetstream.ErrConsumerNotFound)
+		} else {
+			o.Info = consumer.CachedInfo()
+		}
+		r.Owned = append(r.Owned, o)
+	}
+	return r
 }

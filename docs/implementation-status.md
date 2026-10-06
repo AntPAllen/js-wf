@@ -29,6 +29,14 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: named cleanup diagnostic prepared
+
+Opt-in instrumentation now captures full consumer identities/configs before any
+current cursor exists, plus first residual-count list and named current-cursor
+Info/typednot-found. Post-delete probes share original20s; zero count remains
+required and no restored consumer is deleted. Fresh full400k/4.8M execution is
+next after verified prior-copy reclamation. [Preparation](scale/chunked-callback-audit-2026-10-06/named-cleanup-preparation/).
+
 ## Latest follow-up — 2026-10-06: full chunked read completes; cleanup fails
 
 Fresh cleanacc9123 full400k/4.8M chunked audit/reduction completes17.114920s,

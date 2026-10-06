@@ -4292,3 +4292,11 @@ APIs before changing fixture/cleanup semantics. Complete1713-file/827alias lossl
 proof, actualsource/SDK/fiveservers/closure/unchanged1058donorfiles verified.
 No combinedcleanup/fault/default/live/fullmatrix/24h acceptance.
 [Evidence](scale/chunked-callback-audit-2026-10-06/full400k-cold-profile/).
+
+## Named full-capacity cleanup diagnostic prepared — 2026-10-06
+
+Capture pre-audit full consumer identities/configs and first residual count names,
+plus each current cursor's named API/typednot-found. Preserve zero assertion,
+original20s/full400k/4.8M; do not delete restored consumers or infer cause from
+unnamed count. Compile/opt-in skip accepted; new fresh-copy execution pending.
+[Preparation](scale/chunked-callback-audit-2026-10-06/named-cleanup-preparation/).
