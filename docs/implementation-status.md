@@ -29,6 +29,17 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: changed final audit sustained launch verified
+
+Clean89642e4 actualnormalSDK920976 running ten-minute journal seed1 with bounded32
+finalpoint latency reads and explicit chunked4CPU/GOGC500/4GiB. Actualexe/VCS/profile
+and allfivecurrentR5 server roles verified; producer/observer/reviewer live under
+user systemd handles. Original20s/60s/threeattempts/checkpoint/final/history/p99/drain
+retained, no live stores read/copied. Terminal sustained/source/originalarchive/
+independentrow/fullproof acceptance pending. Original24h21b4729 and milliontimer
+handles remain live; no replacement/restart. Initial identity is not a gate pass.
+[Launch](scale/parallel-final-latency-2026-10-06/live-journal-initial/).
+
 ## Latest follow-up — 2026-10-06: bounded final latency point audit oracle accepted
 
 Non-clock R5 final latency point checks now use32joined readers, source-ordered
