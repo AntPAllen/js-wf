@@ -29,6 +29,17 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: cached live sustained review prepared
+
+Fresh ten-minute journal observer and reviewer now verify the explicit metadata
+option from execution and actual SDK environment, diagnostic artifact, original
+archive/current bytes, selected source, SDK/server closure and independent row
+verdict, then preserve full proof. Original gates remain; launch waits for terminal
+copied-cohort review and committed proof. The same cohort handle is still running:
+50,000 checks at 3m5.342s is progress, not final acceptance. Existing long campaigns
+continue on their original isolated sources.
+[Preparation](scale/cached-final-latency-2026-10-06/live-journal-preparation/).
+
 ## Latest follow-up — 2026-10-06: live point metadata option implemented
 
 An explicit `--cached-latency-metadata` option now wires successful handle reuse
