@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/metrics"
+	"runtime/pprof"
 	"sync"
 	"testing"
 	"time"
@@ -87,7 +88,20 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 		GCCycles         uint32                            `json:"gc_cycles"`
 		MemoryLimitBytes uint64                            `json:"memory_limit_bytes"`
 		GOMAXPROCS       int                               `json:"gomaxprocs"`
+		HeapBefore       uint64                            `json:"heap_before"`
+		HeapAfter        uint64                            `json:"heap_after"`
+		NextGCBefore     uint64                            `json:"next_gc_before"`
+		NextGCAfter      uint64                            `json:"next_gc_after"`
+		GCPauseNS        uint64                            `json:"gc_pause_ns"`
+		CPUProfile       bool                              `json:"cpu_profile"`
+		Phases           []struct {
+			Stream     string `json:"stream"`
+			StartedNS  int64  `json:"started_ns"`
+			FinishedNS int64  `json:"finished_ns"`
+		} `json:"phases"`
+		StateWatches []capacityWatchTiming `json:"state_watches,omitempty"`
 	}
+	profileCPU := os.Getenv("WF_AUDIT_CAPACITY_R1_CPU_PROFILE") == "1"
 	var results []result
 	// A current-source healthy baseline precedes the one fault in the same fresh
 	// fixture. A baseline failure stops before injecting any destructive fault.
@@ -98,8 +112,34 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 		runtime.ReadMemStats(&before)
 		attempt, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		started := time.Now()
+		var cpu *os.File
+		currentJS := js
+		trace := &capacityStateTrace{origin: &started}
+		if profileCPU {
+			var err error
+			cpu, err = os.Create(filepath.Join(root, mode+"-cpu.pprof"))
+			if err != nil {
+				cancel()
+				t.Fatal(err)
+			}
+			if err = pprof.StartCPUProfile(cpu); err != nil {
+				cpu.Close()
+				cancel()
+				t.Fatal(err)
+			}
+			currentJS = capacityStateTraceJS{JetStream: js, trace: trace}
+		}
 		var failure error
-		r.Report, failure = checkUsingConcurrentOptions(attempt, js, nil, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+		r.Report, failure = checkUsingConcurrentOptions(attempt, currentJS, nil, func(call context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+			streamName := stream.CachedInfo().Config.Name
+			phaseStart := int64(time.Since(started))
+			defer func() {
+				r.Phases = append(r.Phases, struct {
+					Stream     string `json:"stream"`
+					StartedNS  int64  `json:"started_ns"`
+					FinishedNS int64  `json:"finished_ns"`
+				}{Stream: streamName, StartedNS: phaseStart, FinishedNS: int64(time.Since(started))})
+			}()
 			observed := &candidateObservedStream{Stream: stream, cursorReplicas: 1}
 			record := func(info *jetstream.ConsumerInfo, err error) {
 				if info != nil {
@@ -117,55 +157,64 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 				defer deletionMu.Unlock()
 				r.Deletions = append(r.Deletions, o)
 			}}
-			return scanConsumeDirectWindowsThrough(call, wrapped, cutoff, func(msg *jetstream.RawStreamMsg) error {
-				if stream.CachedInfo().Config.Name != "WF_JRN" {
-					return visit(msg)
-				}
-				r.JournalVisits++
-				if msg.Sequence != uint64(r.JournalVisits) {
-					return fmt.Errorf("duplicate or omitted capacity journal entry: visit=%d seq=%d", r.JournalVisits, msg.Sequence)
-				}
-				if mode != "baseline" && r.JournalVisits == 128 {
-					target, err := observed.consumer.Info(call)
-					if err != nil {
-						return err
+			read := func(call context.Context) error {
+				return scanConsumeDirectWindowsThrough(call, wrapped, cutoff, func(msg *jetstream.RawStreamMsg) error {
+					if streamName != "WF_JRN" {
+						return visit(msg)
 					}
-					r.Target = target
-					if target.Name != observed.name || target.Stream != "WF_JRN" || target.Config.Replicas != 1 || !target.Config.MemoryStorage || target.Config.AckPolicy != jetstream.AckNonePolicy || target.Cluster == nil || target.NumPending == 0 {
-						return fmt.Errorf("invalid active capacity cursor: %+v", target)
+					r.JournalVisits++
+					if msg.Sequence != uint64(r.JournalVisits) {
+						return fmt.Errorf("duplicate or omitted capacity journal entry: visit=%d seq=%d", r.JournalVisits, msg.Sequence)
 					}
-					owner := -1
-					for n := 0; n < 5; n++ {
-						if cluster.NodeName(n) == target.Cluster.Leader {
-							owner = n
-						}
-					}
-					if owner < 0 {
-						return fmt.Errorf("capacity cursor owner %q absent", target.Cluster.Leader)
-					}
-					logs, err := cluster.Logs(owner)
-					if err != nil {
-						return err
-					}
-					if err = os.WriteFile(filepath.Join(root, "capacity-owner-before-kill.log"), []byte(logs), 0600); err != nil {
-						return err
-					}
-					r.Kill, err = cluster.KillNodeObserved(owner)
-					if err != nil {
-						return err
-					}
-					if r.Kill.SourceStopped.IsZero() {
-						return errors.New("capacity cursor owner exit unconfirmed")
-					}
-					if mode == "owner-restart" {
-						if err = cluster.RestartNode(owner); err != nil {
+					if mode != "baseline" && r.JournalVisits == 128 {
+						target, err := observed.consumer.Info(call)
+						if err != nil {
 							return err
 						}
-						r.RestartCompleted = time.Now().UTC()
+						r.Target = target
+						if target.Name != observed.name || target.Stream != "WF_JRN" || target.Config.Replicas != 1 || !target.Config.MemoryStorage || target.Config.AckPolicy != jetstream.AckNonePolicy || target.Cluster == nil || target.NumPending == 0 {
+							return fmt.Errorf("invalid active capacity cursor: %+v", target)
+						}
+						owner := -1
+						for n := 0; n < 5; n++ {
+							if cluster.NodeName(n) == target.Cluster.Leader {
+								owner = n
+							}
+						}
+						if owner < 0 {
+							return fmt.Errorf("capacity cursor owner %q absent", target.Cluster.Leader)
+						}
+						logs, err := cluster.Logs(owner)
+						if err != nil {
+							return err
+						}
+						if err = os.WriteFile(filepath.Join(root, "capacity-owner-before-kill.log"), []byte(logs), 0600); err != nil {
+							return err
+						}
+						r.Kill, err = cluster.KillNodeObserved(owner)
+						if err != nil {
+							return err
+						}
+						if r.Kill.SourceStopped.IsZero() {
+							return errors.New("capacity cursor owner exit unconfirmed")
+						}
+						if mode == "owner-restart" {
+							if err = cluster.RestartNode(owner); err != nil {
+								return err
+							}
+							r.RestartCompleted = time.Now().UTC()
+						}
 					}
-				}
-				return visit(msg)
-			})
+					return visit(msg)
+
+				})
+			}
+			if profileCPU {
+				var err error
+				pprof.Do(call, pprof.Labels("audit_phase", streamName), func(ctx context.Context) { err = read(ctx) })
+				return err
+			}
+			return read(call)
 		}, true, true, true)
 		r.AuditNS = int64(time.Since(started))
 		if failure == nil && (r.Report != want || r.JournalVisits != want.Entries) {
@@ -217,9 +266,20 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 			failure = context.DeadlineExceeded
 		}
 		cancel()
+		if profileCPU {
+			pprof.StopCPUProfile()
+			if err := cpu.Close(); err != nil {
+				failure = errors.Join(failure, err)
+			}
+			r.StateWatches = trace.snapshot()
+		}
 		runtime.ReadMemStats(&after)
 		r.AllocatedBytes = after.TotalAlloc - before.TotalAlloc
 		r.GCCycles = after.NumGC - before.NumGC
+		r.HeapBefore, r.HeapAfter = before.HeapAlloc, after.HeapAlloc
+		r.NextGCBefore, r.NextGCAfter = before.NextGC, after.NextGC
+		r.GCPauseNS = after.PauseTotalNs - before.PauseTotalNs
+		r.CPUProfile = profileCPU
 		samples := []metrics.Sample{{Name: "/gc/gomemlimit:bytes"}}
 		metrics.Read(samples)
 		if samples[0].Value.Kind() != metrics.KindUint64 {

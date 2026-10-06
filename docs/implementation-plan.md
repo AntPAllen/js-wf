@@ -4236,3 +4236,18 @@ baseline, actual R5 owner SIGKILL, original20s per baseline/fault including clea
 each outcome will receive complete pinned base-plus-delta review/preservation.
 [Producer](scale/direct-callback-audit-2026-10-05/full400k-owner-down-preparation/).
 [Reclamation proof](scale/direct-callback-audit-2026-10-05/full-capacity-proof-headroom/).
+
+## Current-source full fault baseline failed; cold CPU/GC diagnostic prepared — 2026-10-06
+
+bb6f75c normal full400k/4.8M nativeFAIL36.88s: healthy baseline accepts4256199
+journal visits then original20s/callback-join deadlines; no fault injected.
+Actual4CPU/4GiB/R1 and R5 file/catch-up verified. Partial2.815GB/7GC is incomplete
+attempt data, not isolated causality/per-record speed. Full1710-file/823alias
+pinned base+50.100MB delta and selectedSDK/server/mount/closure/1058 unchanged
+donor files independently reviewed. Earlier ordered/warmed18.35s remains scoped.
+Changed fresh-copy optionalCPU profile adds stream boundaries/heap/NextGC/pause/
+watch lifecycle with no per-record clock/update relay, hoisted constant lookup and
+500ms observer (no replacement PID in owner-down). Original20s/fullscope/config
+unchanged; compile/skip passes, native pending verified fresh-copy headroom.
+[Failure](scale/direct-callback-audit-2026-10-05/full400k-owner-down/).
+[Preparation](scale/direct-callback-audit-2026-10-05/full400k-cold-profile-preparation/).

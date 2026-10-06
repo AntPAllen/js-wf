@@ -12738,3 +12738,19 @@ including zero-consumer cleanup. ActualSDK/server/mount/closure/unchanged donor 
 complete pinned base-plus-delta proof required. Native verdict pending.
 [Preparation](scale/direct-callback-audit-2026-10-05/full400k-owner-down-preparation/).
 [Headroom evidence](scale/direct-callback-audit-2026-10-05/full-capacity-proof-headroom/).
+
+## Full current-source baseline failed before fault; changed profile prepared — 2026-10-06
+
+bb6f75c normalFAIL36.88s: full400k/4.8M cold/instrumented baseline accepts4256199
+journal visits before original20s plus callback-join deadlines. 400kINV/zero final
+reduction is incomplete work, not data absence. No SIGKILL injected. ActualR5 file/
+catch-up/R1/4CPU/4GiB verified; partial2.815GB/7GC cannot establish causality or
+throughput ratio. SDK/five servers/mounts/source/closure/1058 original files and
+whole1710-file/823alias base+50.100MB delta reviewed. Initial reviewer path collision
+left canonical proof untouched; corrected unique destination succeeds. Earlier
+ordered/warmed18.35s pass remains limited. Changed full fresh-copy CPU/phase/heap/
+NextGC/pause/watch-lifecycle diagnostic prepared, hoisted constant lookup and500ms
+observer, no per-record clocks or reduced population/warmup. Compile/skip passes;
+original20s/config/fault/24h gates unchanged, native pending verified copy headroom.
+[Failure](scale/direct-callback-audit-2026-10-05/full400k-owner-down/).
+[Preparation](scale/direct-callback-audit-2026-10-05/full400k-cold-profile-preparation/).
