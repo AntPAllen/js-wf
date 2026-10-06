@@ -5086,3 +5086,19 @@ completion/p99/history/checkpoint/drain gates retained. Full terminal row/artifa
 source-after/closure and complete canonical proof remain mandatory. No live-launch
 row/default/fullmatrix/24h promotion.
 [Launch](scale/sustained-bulk-final-latency-2026-10-06/joined-consumer-ten-minute-launch/).
+
+### Original bulk consumer-leader ten-minute component accepted — 2026-10-06
+
+At executedb861f95 fresh original10m consumer-leader seed1 passes646.15s:
+2,604invocations/journals/terminals,28,712 entries,19 confirmed active-delivery
+leader faults, nine required checkpoint receipts. Four source cuts stable with
+audit consumers0, full integrity before/after equal. Explicit bulk and all12,276
+point samples agree11.982354808s under unchanged6m. Original20s/60s, completion/
+p99/history/fault/checkpoint/drain gates pass. Independent source/actual SDK/profile/
+24 observed server incarnation closure and whole5,572-member147,177,686-byte
+fixture proof verified; supplemental full current census/compressed/member/global
+visible process/mount/descriptor closure passes after separate invocation avoids
+matching the creating shell's fixture literal. Shared CPU with100k normal recorded.
+This qualifies explicit original consumer component only; default/other rows/full
+current real matrices and actual24h remain open.
+[Terminal proof](scale/sustained-bulk-final-latency-2026-10-06/joined-consumer-ten-minute/).

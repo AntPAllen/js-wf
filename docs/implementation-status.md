@@ -31,7 +31,45 @@ use, finish remaining clock/checkpoint, million-timer physical-drain, combined a
 coverage, and qualify the actual 24-hour gate. Both latest24h campaigns are
 terminal failures; no24h soak is running. Their complete current files, including
 partial no-space evidence, are preserved to S3. Current normal simulation and
-ten-minute consumer-leader qualifiers are live as recorded below.
+normal qualifier is live; the ten-minute consumer-leader component is now
+accepted in its executed-source scope as recorded below.
+
+## Original ten-minute bulk consumer-leader component accepted — 2026-10-06
+
+Fresh original10m consumer-leader seed1 atb861f95 passes646.15s:93cohorts,
+2,604 complete invocations/journals/terminals,28,712 entries,19 confirmed faults
+all targeting active deliveries, all nine checkpoint receipts. Full integrity
+before/after equal; four source cuts stable and audit consumers0. Bulk and all
+12,276 point samples agree within11.982354808s, original6m unchanged. Original
+20s/60s, completion/p99/history/fault/checkpoint/drain gates pass. Independent
+native row/artifact/source/actual SDK/profile and all24 observed NATS incarnation
+checks pass, producer/watch/reviewer units terminal/status0. Complete5,572-member/
+147,177,686-byte archived fixture verified plus exact current census/compressed
+body/all members/global visible root process/descriptor/mount closure, with limits
+retained. Initial supplemental argv guard saw the fixture literal inside the
+creating shell; separate unchanged invocation passes without fixture mutation.
+Shared CPU with the100k normal qualifier is recorded. This accepts only explicit
+original ten-minute consumer component at executed source; default/other rows/full
+current matrices/actual24h remain open.
+[Independent terminal proof](scale/sustained-bulk-final-latency-2026-10-06/joined-consumer-ten-minute/).
+
+## Failed short-success resumption media offload complete — 2026-10-06
+
+Closed failed R5 short-success resumption at base5bbdbbf now preserved in complete
+1,392-member/242,328,830-byte canonical S3 archive, including source overlay, SDK,
+logs and failed partial evidence. Recorded actual SDK absent; exact existing
+1,390-file size/hash ledger and before/after/current source verify. Manual producer
+has no unit exit claim; global visible process/mount/descriptor closure recorded.
+Full fresh remote compressed SHA/every-member/embedded-inventory and repeated
+current census/closure precede offload of five store directories, recovering
+894,857,216 allocated media bytes; raw duplicate removed242,335,744bytes. All
+remaining local files retain exact bytes/modes/mtimes. Full original store bytes
+are canonical remotely, fresh verified restores required for future audits.
+Failed20s short-success budget verdict and unconfirmed server cause unchanged.
+Free space approximately12.3GiB, still below16GiB plus overlap reserve; accepted
+full400k donors and active qualifiers remain local.
+[Complete proof](scale/bulk-read-resumption-2026-10-05/short-success-r5-complete-offload-2026-10-06/).
+[Offload](scale/bulk-read-resumption-2026-10-05/short-success-r5-store-media-offload-2026-10-06/).
 
 ## Fifth failed soak media offload complete — 2026-10-06
 
