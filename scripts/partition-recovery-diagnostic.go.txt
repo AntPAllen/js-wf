@@ -1,0 +1,113 @@
+// Diagnostic only: caller must provide freshly verified restored stores.
+// Quiescent restart recovery does not qualify the original partition row.
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/testcluster"
+	"os"
+	"path/filepath"
+	"time"
+)
+
+func main() {
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
+	if len(os.Args) != 4 || !filepath.IsAbs(os.Args[1]) || !filepath.IsAbs(os.Args[2]) || !filepath.IsAbs(os.Args[3]) {
+		return fmt.Errorf("usage: diagnostic FRESH_RESTORED_CLUSTER EXACT_NATS_BINARY OUTPUT_DIRECTORY")
+	}
+	out := os.Args[3]
+	if err := os.Mkdir(out, 0700); err != nil {
+		return err
+	}
+	// Allow the external observer to capture this helper before stores open.
+	time.Sleep(250 * time.Millisecond)
+	started := time.Now()
+	c, err := testcluster.StartMixedVersionProcesses(os.Args[1], []string{os.Args[2], os.Args[2], os.Args[2]})
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+	js, err := jetstream.New(c.Clients[0])
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
+	f, err := os.Create(filepath.Join(out, "observations.jsonl"))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	enc := json.NewEncoder(f)
+	names := []string{"WF_INV", "WF_JRN", "WF_RUN", "WF_SIG", "KV_WF_LEASE", "KV_WF_STATE", "WF_PURGE", "KV_WF_VIEW", "KV_WF_ASSIGN", "OBJ_WF_BLOB"}
+	peers := map[string]bool{}
+	for _, nc := range c.Clients {
+		peers[nc.ConnectedServerId()] = true
+	}
+	if len(peers) != 3 {
+		return fmt.Errorf("require three distinct live peers")
+	}
+	round := 0
+	for ctx.Err() == nil {
+		round++
+		ready := true
+		for _, name := range names {
+			attempt, stop := context.WithTimeout(ctx, time.Second)
+			stream, e := js.Stream(attempt, name)
+			var info *jetstream.StreamInfo
+			if e == nil {
+				info, e = stream.Info(attempt)
+			}
+			stop()
+			record := map[string]any{"round": round, "observed_utc": time.Now().UTC(), "elapsed_ns": time.Since(started).Nanoseconds(), "stream": name, "info": info}
+			if e != nil {
+				record["error"] = e.Error()
+			}
+			if err := enc.Encode(record); err != nil {
+				return err
+			}
+			current := e == nil && info != nil && info.Cluster != nil && info.Cluster.Leader != "" && len(info.Cluster.Replicas) == 2
+			if current {
+				for _, peer := range info.Cluster.Replicas {
+					current = current && peer.Current && !peer.Offline
+				}
+			}
+			ready = ready && current
+		}
+		for node := 0; node < 3; node++ {
+			attempt, stop := context.WithTimeout(ctx, time.Second)
+			body, e := c.Diagnostic(attempt, node, "jetstream")
+			stop()
+			if e != nil {
+				return fmt.Errorf("node%d public jsz: %w", node, e)
+			}
+			if e == nil {
+				if err := os.WriteFile(filepath.Join(out, fmt.Sprintf("jsz-round-%03d-node-%d.json", round, node)), body, 0600); err != nil {
+					return err
+				}
+			}
+		}
+		if ready {
+			result := map[string]any{"scope": "Quiescent fresh-copy restart diagnostic only; original native partition failure remains unchanged.", "all_ten_streams_current": true, "elapsed_ns": time.Since(started).Nanoseconds(), "rounds": round, "server_ids": peers}
+			data, err := json.MarshalIndent(result, "", "  ")
+			if err != nil {
+				return err
+			}
+			return os.WriteFile(filepath.Join(out, "result.json"), append(data, '\n'), 0600)
+		}
+		select {
+		case <-ctx.Done():
+		case <-time.After(500 * time.Millisecond):
+		}
+	}
+	return fmt.Errorf("quiescent copied-store replica recovery diagnostic timed out: %w", ctx.Err())
+}
