@@ -50,7 +50,7 @@ def main():
             if not path.is_file() or path.is_relative_to(REPO) or str(path) in inputs:
                 continue
             inputs[str(path)] = shared.sha(path)
-            relative = Path('modules')/path.relative_to(modules) if path.is_relative_to(modules) else Path('toolchain')/path.relative_to(goroot)
+            relative = Path('modules')/path.relative_to(modules) if path.is_relative_to(modules) else Path('toolchain')/path.relative_to(goroot) if path.is_relative_to(goroot) else Path('other')/str(path).lstrip('/')
             target = root/'selected-external-source'/relative
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, target)

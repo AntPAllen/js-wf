@@ -1,0 +1,13 @@
+Oct 06 18:15:48 jetstream-wf systemd[351]: Started js-wf-postgres-domain-projection-50000-20261006.service - /usr/bin/python3 /home/exedev/js-wf/scripts/run-postgres-domain-projection.py --root /tmp/js-wf-postgres-domain-projection-50000-20261006.
+Oct 06 18:15:55 jetstream-wf python3[497169]: Traceback (most recent call last):
+Oct 06 18:15:55 jetstream-wf python3[497169]:   File "/home/exedev/js-wf/scripts/run-postgres-domain-projection.py", line 145, in <module>
+Oct 06 18:15:55 jetstream-wf python3[497169]:     main()
+Oct 06 18:15:55 jetstream-wf python3[497169]:   File "/home/exedev/js-wf/scripts/run-postgres-domain-projection.py", line 53, in main
+Oct 06 18:15:55 jetstream-wf python3[497169]:     relative = Path('modules')/path.relative_to(modules) if path.is_relative_to(modules) else Path('toolchain')/path.relative_to(goroot)
+Oct 06 18:15:55 jetstream-wf python3[497169]:                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 06 18:15:55 jetstream-wf python3[497169]:   File "/usr/lib/python3.12/pathlib.py", line 682, in relative_to
+Oct 06 18:15:55 jetstream-wf python3[497169]:     raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+Oct 06 18:15:55 jetstream-wf python3[497169]: ValueError: '/home/exedev/.cache/go-build/a3/a3cb6c8d2d690f0405335d440a4231a4def643604f004922c18c3690fcc26fe6-d' is not in the subpath of '/usr/local/go'
+Oct 06 18:15:55 jetstream-wf systemd[351]: js-wf-postgres-domain-projection-50000-20261006.service: Main process exited, code=exited, status=1/FAILURE
+Oct 06 18:15:55 jetstream-wf systemd[351]: js-wf-postgres-domain-projection-50000-20261006.service: Failed with result 'exit-code'.
+Oct 06 18:15:55 jetstream-wf systemd[351]: js-wf-postgres-domain-projection-50000-20261006.service: Consumed 4.904s CPU time.
