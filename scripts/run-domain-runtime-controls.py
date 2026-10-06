@@ -92,7 +92,7 @@ def verify_log(case, log):
             require(len(publications)==1 and publications[0][1]==confirmed[0][1]
                     and publications[0][2]==confirmed[0][0] and int(publications[0][3])>0
                     and publications[0].start()<log.index('retirement fresh manifest cut:')
-                    and log.count('manifest_drops=1 manifest_commits=1')==1,
+                    and log.count('fresh_initial_calls=1 manifest_drops=1 manifest_commits=1')==1,
                     'exact durable manifest publication before SIGKILL and lost acknowledgement missing')
         else:
             require('retirement manifest committed before SIGKILL:' not in log,

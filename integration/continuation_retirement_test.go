@@ -352,8 +352,16 @@ func runContinuationRetirementOnCluster(t *testing.T, all []jetstream.JetStream,
 	if err != nil || string(value) != "2" || initialCalls.Load() != 2+freshInitialCalls.Load() || freshInitialCalls.Load() < 1 || effects.Load() != 3 {
 		t.Fatalf("reused result=%s calls=%d effects=%d err=%v", value, initialCalls.Load(), effects.Load(), err)
 	}
-	if manifestDrop && (port.dropped.Load() != 1 || freshInitialCalls.Load() < 2) {
-		t.Fatalf("controlled manifest loss not exercised: dropped=%d fresh_calls=%d", port.dropped.Load(), freshInitialCalls.Load())
+	if manifestDrop {
+		// Missing publication requires replay of the initial body. A committed
+		// runtime frame must instead resume without entering that body again.
+		if port.commitFresh {
+			if port.dropped.Load() != 1 || port.committed.Load() != 1 || freshInitialCalls.Load() != 1 {
+				t.Fatalf("committed manifest recovery: dropped=%d commits=%d fresh_calls=%d", port.dropped.Load(), port.committed.Load(), freshInitialCalls.Load())
+			}
+		} else if port.dropped.Load() != 1 || freshInitialCalls.Load() < 2 || port.committed.Load() != 0 {
+			t.Fatalf("controlled manifest loss not exercised: dropped=%d fresh_calls=%d", port.dropped.Load(), freshInitialCalls.Load())
+		}
 	}
 	if !manifestDrop && port.dropped.Load() != 0 {
 		t.Fatal("unexpected injected drop")
