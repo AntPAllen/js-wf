@@ -24,17 +24,19 @@ def load_rows():
     return module.TESTS
 
 
-def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=False, batched_retained_audit=False, memory_limit='512MiB', streaming_state_retained_audit=False, explicit_route_seeds=False, journal_rollout='none', audit_wait_stack=False, concurrent_state_retained_audit=False):
+def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=False, batched_retained_audit=False, memory_limit='512MiB', streaming_state_retained_audit=False, explicit_route_seeds=False, journal_rollout='none', audit_wait_stack=False, concurrent_state_retained_audit=False, chunked_state_retained_audit=False):
     if row not in load_rows() or duration not in ('35s', '10m', '24h'):
         raise ValueError('unsupported row or duration')
     if type(seed) is not int or not 1 <= seed <= 2**63-1:
         raise ValueError('seed must be positive int64')
     if shutdown not in ('sigkill', 'ldm') or (row != 'rolling_upgrade' and (gap or shutdown != 'sigkill')):
         raise ValueError('invalid shutdown or gap profile')
-    if sum((batched_retained_audit, streaming_state_retained_audit, concurrent_state_retained_audit)) > 1:
+    if sum((batched_retained_audit, streaming_state_retained_audit, concurrent_state_retained_audit, chunked_state_retained_audit)) > 1:
         raise ValueError('conflicting retained audit modes')
     if memory_limit not in MEMORY_LIMITS:
         raise ValueError('unsupported explicit memory budget')
+    if chunked_state_retained_audit and memory_limit != '4GiB':
+        raise ValueError('chunked audit profile requires explicit 4GiB memory budget')
     if audit_wait_stack and not retained_audit_trace:
         raise ValueError('audit wait stack requires retained audit trace')
     # Do not inherit fixture/mutation/child-process activation from another run.
@@ -52,6 +54,8 @@ def execution(row, duration, seed, fixture, shutdown, gap, retained_audit_trace=
         env['WF_TIER3_STREAMING_STATE_RETAINED_AUDIT'] = '1'
     if concurrent_state_retained_audit:
         env['WF_TIER3_CONCURRENT_STATE_RETAINED_AUDIT'] = '1'
+    if chunked_state_retained_audit:
+        env.update(WF_TIER3_CHUNKED_STATE_RETAINED_AUDIT='1', GOMAXPROCS='4', GOGC='500')
     if explicit_route_seeds:
         env['WF_TIER3_EXPLICIT_ROUTE_SEEDS']='1'
     flags = ['--require-checkpoint-audits']
@@ -125,6 +129,7 @@ def main():
     p.add_argument('--retained-audit-trace', action='store_true')
     p.add_argument('--audit-wait-stack', action='store_true', help='Diagnostic: capture parent stack and trace one second before a pending audit deadline')
     readers = p.add_mutually_exclusive_group()
+    readers.add_argument('--chunked-state-retained-audit', action='store_true', help='Experimental: bounded chunk/R1 audit with concurrent state; requires 4GiB and selects 4 CPUs/GOGC500')
     readers.add_argument('--concurrent-state-retained-audit', action='store_true', help='Experimental: overlap complete state snapshot and journal reads within original audit limits')
     readers.add_argument('--batched-retained-audit', action='store_true')
     readers.add_argument('--streaming-state-retained-audit', action='store_true')
@@ -139,7 +144,7 @@ def main():
         p.error('root must be fresh and outside the repository')
     env, testargs, flags = execution(a.row,a.duration,a.seed,root/'fixture',
                                      a.upgrade_shutdown,a.upgrade_start_gap,
-                                     a.retained_audit_trace,a.batched_retained_audit,a.memory_limit,a.streaming_state_retained_audit,a.explicit_route_seeds,a.journal_rollout,a.audit_wait_stack,a.concurrent_state_retained_audit)
+                                     a.retained_audit_trace,a.batched_retained_audit,a.memory_limit,a.streaming_state_retained_audit,a.explicit_route_seeds,a.journal_rollout,a.audit_wait_stack,a.concurrent_state_retained_audit,a.chunked_state_retained_audit)
     if subprocess.check_output(['git','status','--porcelain'],cwd=REPO):
         p.error('execution requires a clean committed checkout')
     revision = subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip()
@@ -156,6 +161,7 @@ def main():
                  batched_retained_audit=a.batched_retained_audit,
                  streaming_state_retained_audit=a.streaming_state_retained_audit,
                  concurrent_state_retained_audit=a.concurrent_state_retained_audit,
+                 chunked_state_retained_audit=a.chunked_state_retained_audit,
                  explicit_route_seeds=a.explicit_route_seeds,journal_rollout=a.journal_rollout,
                  clears_full_tier3_release=False)
     def save():

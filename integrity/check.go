@@ -187,6 +187,19 @@ func CheckThroughInvocationSequenceWithConcurrentStreamingStateReads(ctx context
 	return checkUsingConcurrentOptions(ctx, js, &cutoff, scanByteBoundedThrough, true, true, true)
 }
 
+// CheckWithChunkedConcurrentStateReads explicitly selects bounded chunk delivery,
+// R1 memory audit cursors and a concurrent fresh complete state snapshot. Retained
+// data must be quiescent; all normal integrity checks and caller budgets apply.
+func CheckWithChunkedConcurrentStateReads(ctx context.Context, js jetstream.JetStream) (Report, error) {
+	return checkUsingConcurrentOptions(ctx, js, nil, scanSingleReplicaChunkedThrough, true, true, true)
+}
+
+// CheckThroughInvocationSequenceWithChunkedConcurrentStateReads requires the
+// same quiescent-cohort/no-purge/no-reuse contract as the sequential checker.
+func CheckThroughInvocationSequenceWithChunkedConcurrentStateReads(ctx context.Context, js jetstream.JetStream, cutoff uint64) (Report, error) {
+	return checkUsingConcurrentOptions(ctx, js, &cutoff, scanSingleReplicaChunkedThrough, true, true, true)
+}
+
 func checkUsingOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner, snapshotState, streaming bool) (Report, error) {
 	return checkUsingConcurrentOptions(ctx, js, cutoff, read, snapshotState, streaming, false)
 }

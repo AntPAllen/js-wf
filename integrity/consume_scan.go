@@ -75,6 +75,34 @@ func scanConsumeChunkedWindowsThrough(ctx context.Context, stream jetstream.Stre
 	})
 }
 
+// Only the explicitly selected chunked audit creates R1 memory cursors. The
+// retained source still uses its original replication and leader-read oracle.
+type singleReplicaChunkedAuditStream struct{ jetstream.Stream }
+
+func (s singleReplicaChunkedAuditStream) CreateConsumer(ctx context.Context, cfg jetstream.ConsumerConfig) (jetstream.Consumer, error) {
+	if cfg.Name == "" || !cfg.MemoryStorage || cfg.AckPolicy != jetstream.AckNonePolicy {
+		return nil, errors.New("chunked audit: unexpected cursor configuration")
+	}
+	source := s.Stream.CachedInfo()
+	if source == nil || source.Config.Name == "" {
+		return nil, errors.New("chunked audit: missing retained stream identity")
+	}
+	cfg.Replicas = 1
+	c, err := s.Stream.CreateConsumer(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+	info := c.CachedInfo()
+	if info == nil || info.Name != cfg.Name || info.Stream != source.Config.Name || info.Config.Replicas != 1 || !info.Config.MemoryStorage || info.Config.AckPolicy != jetstream.AckNonePolicy {
+		return nil, errors.New("chunked audit: actual cursor identity/configuration differs")
+	}
+	return c, nil
+}
+
+func scanSingleReplicaChunkedThrough(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error) error {
+	return scanConsumeChunkedWindowsThrough(ctx, singleReplicaChunkedAuditStream{stream}, cutoff, visit)
+}
+
 func scanConsumeDirectWindowsWithFactory(ctx context.Context, stream jetstream.Stream, cutoff *uint64, visit func(*jetstream.RawStreamMsg) error, create func(jetstream.Consumer) (callbackWindowDelivery, error)) (failure error) {
 	var delivery callbackWindowDelivery
 	var name, consumerStream, initialLeader string

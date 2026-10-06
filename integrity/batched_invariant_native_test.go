@@ -159,7 +159,7 @@ func compareFullAudits(t *testing.T, ctx context.Context, js jetstream.JetStream
 		observed := &candidateObservedStream{Stream: stream, cursorReplicas: 1}
 		reader := scanConsumeDirectWindowsThrough
 		if os.Getenv("WF_AUDIT_CHUNKED_CALLBACK") == "1" {
-			reader = scanConsumeChunkedWindowsThrough
+			reader = scanSingleReplicaChunkedThrough
 		}
 		failure := reader(call, observed, cutoff, visit)
 		if observed.consumer != nil {

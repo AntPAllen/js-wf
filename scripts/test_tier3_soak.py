@@ -86,6 +86,19 @@ class SoakProducerTests(unittest.TestCase):
   for mode in ['batched_retained_audit','streaming_state_retained_audit']:
    with self.assertRaises(ValueError):
     soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,concurrent_state_retained_audit=True,**{mode:True})
+ def test_chunked_mode_requires_qualified_explicit_profile_and_preserves_gates(self):
+  with patch.dict(os.environ,{'WF_TIER3_CHUNKED_STATE_RETAINED_AUDIT':'1'}):
+   plain,args,flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,memory_limit='4GiB')
+   chunked,new_args,new_flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,memory_limit='4GiB',chunked_state_retained_audit=True)
+  self.assertNotIn('WF_TIER3_CHUNKED_STATE_RETAINED_AUDIT',plain)
+  self.assertEqual(chunked['WF_TIER3_CHUNKED_STATE_RETAINED_AUDIT'],'1')
+  self.assertEqual((chunked['GOMAXPROCS'],chunked['GOGC'],chunked['GOMEMLIMIT']),('4','500','4GiB'))
+  self.assertEqual((args,flags),(new_args,new_flags))
+  with self.assertRaises(ValueError):
+   soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,chunked_state_retained_audit=True)
+  for mode in ['batched_retained_audit','streaming_state_retained_audit','concurrent_state_retained_audit']:
+   with self.assertRaises(ValueError):
+    soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False,memory_limit='4GiB',chunked_state_retained_audit=True,**{mode:True})
  def test_explicit_route_seeds_are_diagnostic_and_do_not_change_gate_arguments(self):
   with patch.dict(os.environ,{'WF_TIER3_EXPLICIT_ROUTE_SEEDS':'1'}):
    plain,args,flags=soak.execution('journal','10m',1,Path('/tmp/f'),'sigkill',False)

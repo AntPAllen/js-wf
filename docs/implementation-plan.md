@@ -4353,3 +4353,14 @@ closedserverprocesses/old-newownerPIDs+containers/samemount/SDK688sourceinputs/
 unchanged1058donorfiles/full1699file816alias proof accepted. This run resumes on
 transport failure, not a same-assignment position regression proof. Public/default/
 live/currentmatrix/actual24h remain open. [Evidence](scale/chunked-callback-audit-2026-10-06/full400k-owner-restart/).
+
+## Explicit chunked-concurrent live entry points prepared — 2026-10-06
+
+Full/cohort explicit public APIs and matrix checkpoint/final mode select same
+bounded chunk/R1 scanner/state snapshot/common checks. Actual cursor config/name
+validated; source replication unchanged. Produceropt-in requires4GiB and selects
+4CPU/GOGC500, matching recordedfullcapacity profile. Four readers mutuallyexclusive;
+20s/60s/threeattempts/p99heal/drain/cardinality unchanged. TenPython controls plus
+Go race retry/conflict/callback/position controlsPASS1.022/1.029s. Current2.15library
+race fulloracles prepared; sustainedlive/default/currentmatrix/24h remainsopen.
+[Preparation](scale/chunked-callback-audit-2026-10-06/live-entry-preparation/).

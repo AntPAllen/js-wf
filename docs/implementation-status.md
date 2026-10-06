@@ -29,6 +29,16 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: explicit chunked live entry points prepared
+
+Explicit public full/cohort chunked-concurrent APIs validate actual R1 cursor
+identity/config and preserve source replication/common invariants/recovery. Matrix
+checkpoint/final selection and producer opt-in added: explicit4GiB/4CPU/GOGC500,
+four mutually exclusive readers, original20s/60s/threeattempts/gates unchanged.
+TenPython profile controls and Go race retry/conflict/callback/position controls
+pass1.022/1.029s. Current2.15library race oracles prepared; no sustainedlive/default/
+currentmatrix/24h adoption. [Preparation](scale/chunked-callback-audit-2026-10-06/live-entry-preparation/).
+
 ## Latest follow-up — 2026-10-06: fullsize same-store owner restart accepted
 
 Clean8693ab5 nativePASS53.85s. Fresh verified/prepared full400k/4.8M baseline
