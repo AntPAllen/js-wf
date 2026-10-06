@@ -155,7 +155,7 @@ def main():
                  status='preparing',supervisor_pid=os.getpid(),started=time.time(),
                  upgrade_shutdown=a.upgrade_shutdown if a.row=='rolling_upgrade' else None,
                  upgrade_start_gap=a.upgrade_start_gap,race=not a.no_race,
-                 memory_limit=a.memory_limit,
+                 memory_limit=a.memory_limit, gomaxprocs=env['GOMAXPROCS'], gc_percent=env.get('GOGC'),
                  retained_audit_trace=a.retained_audit_trace,
                  audit_wait_stack=a.audit_wait_stack,
                  batched_retained_audit=a.batched_retained_audit,
@@ -204,7 +204,7 @@ def main():
         def capture(stage):
             call(['python3','scripts/capture-tier3-clock-source.py','--row',a.row,'--root',str(root/'fixture'),'--stage',stage])
         if observed:capture('before')
-        (root/'test-environment.json').write_text(json.dumps({k:v for k,v in env.items() if k.startswith('WF_') or k in ('GOMEMLIMIT','GOMAXPROCS','FAULT_SEED','TIER3_MATRIX_ARTIFACT_ROOT')},indent=2)+'\n')
+        (root/'test-environment.json').write_text(json.dumps({k:v for k,v in env.items() if k.startswith('WF_') or k in ('GOMEMLIMIT','GOMAXPROCS','GOGC','FAULT_SEED','TIER3_MATRIX_ARTIFACT_ROOT')},indent=2)+'\n')
         command=['go','tool','test2json','-t','-p','js-wf/integration',str(binary),*testargs]
         commands.append(dict(command=command,working_directory=str(source/'integration')))
         (root/'commands.json').write_text(json.dumps(commands,indent=2)+'\n')

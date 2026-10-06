@@ -4364,3 +4364,14 @@ validated; source replication unchanged. Produceropt-in requires4GiB and selects
 Go race retry/conflict/callback/position controlsPASS1.022/1.029s. Current2.15library
 race fulloracles prepared; sustainedlive/default/currentmatrix/24h remainsopen.
 [Preparation](scale/chunked-callback-audit-2026-10-06/live-entry-preparation/).
+
+## Current chunked entry oracle equivalence accepted — 2026-10-06
+
+At9eaf35f actual2.15library race compaction/cohort/freshcorruption75.41s,
+journalcorruption13.81s/statevalues13.40s PASS. All41 actualR1 entryscanner
+observations sourceR3/cursorR1, complete reports/errors match point oracle.
+ActualSDK/module/688inputs/cleanVCS/closure/full1772member22,993,426byte archive
+readback accepted. Live runner recordsCPU/GC profile. Next explicitnormal10m
+R5journal/repeatedSIGKILL/checkpoint/final/drain gate matchesqualified4CPU/GOGC500/
+4GiB; original20s/60s/threeattempts unchanged. No live/default/matrix/24h pass.
+[Evidence](scale/chunked-callback-audit-2026-10-06/current-oracles/).

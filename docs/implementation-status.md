@@ -29,6 +29,16 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: current chunked entry oracles accepted
+
+Clean9eaf35f actual current2.15library race compaction/cohort/freshcorruption75.41s,
+journalcorruption13.81s andstatevalues13.40s PASS. All41 R1 chunked entry scanner
+observations sourceR3/cursorR1, reports/errors match independent point oracle.
+SDK/module/cleanVCS/688inputs/closure and1772member22,993,426byte full archive
+readback verified. Live producer records GC/CPU profile explicitly. Next normal10m
+R5 journal/repeatedSIGKILL/checkpoint/final/drain gate usesqualified4CPU/GOGC500/4GiB;
+no sustainedlive/default/currentmatrix/24h pass. [Evidence](scale/chunked-callback-audit-2026-10-06/current-oracles/).
+
 ## Latest follow-up — 2026-10-06: explicit chunked live entry points prepared
 
 Explicit public full/cohort chunked-concurrent APIs validate actual R1 cursor
