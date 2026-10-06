@@ -1,0 +1,11 @@
+# Local original Tier2 partition campaign
+
+`python3 scripts/run-local-tier2-partition-campaign.py --root /tmp/FRESH-ROOT` runs exactly partition seeds1–200 sequentially, each original10m/18m SDK/25m job envelope, normal instrumentation, GOMAXPROCS2/GOMEMLIMIT2GiB. It stops on the first failed seed and retains partial evidence. It never retries a native handle. Run it in an isolated clean source checkout under a supervised unit with control-group shutdown.
+
+Selected Git and external Go inputs are captured before one source-bound SDK compile. Each seed verifies those inventories against the current clean selected revision and external inputs before using the same SDK bytes. Live `/proc` SDK bytes/build information/birth/arguments and owned NATS/worker executables are captured. Source/external inputs are rechecked after each native run. Broker stores are distinct and retained.
+
+A campaign-owned cache shares captured source/executable bytes before native execution. Captured sources retain mode and timestamp; executable captures retain exact bytes/mode and use the first captured timestamp for that content. Each fixture still contains regular files and complete archives dereference them. No original store is deduplicated, reopened or deleted. Corrupt cached content, wrong mode/timestamp, source symlinks, substituted preparation source or external inputs reject. Between-seed disk admission waits below5GiB free; an already-running native test keeps its original deadlines.
+
+The coordinator records source, original fixed range, each terminal producer and hashed source/execution/acceptance records. Native coverage is complete only after exactly all200 successful seeds. It always leaves `qualifies_full_row=false`: independent review of every raw fault, latency, history, source and closed store corpus remains required. Hosted provider identities are never fabricated. This does not qualify the full13-row/current-source matrix or actual24h soak.
+
+Preparation controls: two new tests cover exact full200 coverage, failed/missing/reordered/extra-seed rejection, shared source bytes/timestamp/inode and corrupted/symlink input rejection. Existing twelve retained fanout/clock/upgrade/worker reviewer controls pass. Unchanged production/runtime/Tier1 graphs do not require another full12.2M simulation run.

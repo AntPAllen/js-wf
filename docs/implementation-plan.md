@@ -5378,3 +5378,10 @@ Actual default/domain subprocess reproduction shows project SIGTERM during first
 ## Operator daemon shutdown boundary accepted — 2026-10-06
 
 Clean4a1f1bf actual race SDK passes25.2741s across eight default/domain project/tombstone startupSIGTERM/steadySIGINT children and two unrelated fatal controls. Registered project startup cancellation now exits0; other errors remain fatal. Independent review binds1921 exact source inputs, actual SDK and eight captured child executable/birth/argv/logged exit identities/closure, closed1/3-node stores and full2355-member archive. Nine actual log substitutions and original clean failure are rejected. Original60s/3m preserved; first domain steady readiness failure remains cause-unconfirmed. [Focused proof](scale/operator-daemon-signals-2026-10-06/). Qualification is CLI core in actual SDK subprocesses with controlled startup delay; standalone-binary/SQL-daemon/leaf/serverfault/fullmatrix/million drain/actual24h remain separate.
+
+
+## Local full200 partition execution prepared — 2026-10-06
+
+Hosted original partition200 run37500390198 remains queued at the current provider poll; the original24h journal SDK remains active after six hours without restart. A local sequential original200-seed campaign now uses one source-bound normal SDK and shares captured immutable input bytes to fit VM storage while retaining distinct broker stores, actual SDK/worker/server provenance and each complete source ledger. Every seed keeps original10m/18m SDK/25m job limits, original faults/audits/history/latency/drain and count1. Failed native attempts stop the campaign and remain retained; neither observer expiry nor disk admission between seeds restarts a seed.
+
+Two new coverage/cache guard groups and twelve existing retained-row reviewer groups pass. Launch/native/fullrow acceptance is not implied by these preparation controls. The coordinator deliberately cannot qualify a row; independent all200 raw review remains required. [Implementation and scope](scale/local-tier2-partition-2026-10-06/). Existing provider and24h handles remain unchanged.

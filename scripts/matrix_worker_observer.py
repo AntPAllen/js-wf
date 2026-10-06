@@ -30,7 +30,7 @@ def worker_identity(argv, environment, originals):
                 base=str(base), process_root=str(parent_root))
 
 
-def observe_workers(sdk_pid, root, seen, records):
+def observe_workers(sdk_pid, root, seen, records, executable_cache=None):
     for pid in descendants(sdk_pid):
         proc = Path(f'/proc/{pid}')
         temporary = None
@@ -61,7 +61,11 @@ def observe_workers(sdk_pid, root, seen, records):
             destination = root/'worker-executables'/f'{digest}.bin'
             destination.parent.mkdir(exist_ok=True)
             if not destination.exists():
-                os.replace(temporary, destination)
+                if executable_cache is None:
+                    os.replace(temporary, destination)
+                else:
+                    from retained_input_cache import retain
+                    retain(temporary, destination, executable_cache, executable=True)
             info = subprocess.check_output(['go', 'version', '-m', str(destination)], text=True)
             records.append(dict(identity, pid=pid, start_ticks=start, argv=argv,
                                 actual_executable_sha256=digest,

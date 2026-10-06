@@ -49,7 +49,7 @@ def descendants(pid):
     return found
 
 
-def observe_servers(sdk_pid, root, seen, records):
+def observe_servers(sdk_pid, root, seen, records, executable_cache=None):
     for pid in descendants(sdk_pid):
         proc = Path(f'/proc/{pid}')
         try:
@@ -76,6 +76,10 @@ def observe_servers(sdk_pid, root, seen, records):
             destination = root/'server-executables'/f'{digest}.bin'
             destination.parent.mkdir(exist_ok=True)
             if destination.exists():
+                temporary.unlink()
+            elif executable_cache is not None:
+                from retained_input_cache import retain
+                retain(temporary, destination, executable_cache, executable=True)
                 temporary.unlink()
             else:
                 os.replace(temporary, destination)
