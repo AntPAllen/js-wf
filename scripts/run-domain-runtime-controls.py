@@ -74,8 +74,10 @@ def verify_log(case, log):
             require(not epochs, 'unexpected lease expiry profile')
             armed = re.findall(r'weak frame armed after domain heal: object=(step-result-[a-f0-9]{64})', log)
             confirmed = re.findall(r'weak frame confirmed: object=(step-result-[a-f0-9]{64}) generation=(\d+) drops=1 reads=(\d+) leader=1 direct=0 route=\$JS.WFRETIRE.API.STREAM.MSG.GET.OBJ_WF_BLOB', log)
+            generations = re.findall(r'old_generation=(\d+) fresh_generation=(\d+)', log)
             require(len(armed) == len(confirmed) == 1 and armed[0] == confirmed[0][0]
-                    and int(confirmed[0][1]) > 0 and int(confirmed[0][2]) >= 2,
+                    and len(generations) == 1 and confirmed[0][1] == generations[0][1]
+                    and int(generations[0][1]) > int(generations[0][0]) and int(confirmed[0][2]) >= 2,
                     'fresh frame weak absence and exact native domain confirmation missing')
         require(log.count('effects=3 terminals=2 shared_blob_retained=true') == len(expected) and log.count('manifest_drops=1') == len(expected),
                 'strict retirement/reuse completion missing')

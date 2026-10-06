@@ -1,0 +1,18 @@
+=== RUN   TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAbsenceAndAllServerSIGKILL
+    continuation_retirement_process_test.go:49: native domain admitted node=0 pid=4178296 domain=WFRETIRE server_id=NAMELLEE7PL72MR77BUNFXG7XJ7ARN2WDDNEFKJPAJKUARINGEMKM7KW
+    continuation_retirement_process_test.go:49: native domain admitted node=1 pid=4178297 domain=WFRETIRE server_id=NDIW5F22ETSJZJH3SJBUU6TNW6ZWX7G2MINH3QEWLMRX36J4NREXYJZR
+    continuation_retirement_process_test.go:49: native domain admitted node=2 pid=4178304 domain=WFRETIRE server_id=ND5NN5LMDS7IJ3UTNQ5CYVPYQ7C2LHGBVR3QITHZ2WD5PHXU2ZTWGRK4
+    continuation_retirement_process_test.go:273: retirement fresh manifest cut: state_leader=wf-process-1 killed_node=0 pid=4178296 signal=killed
+    continuation_retirement_process_test.go:273: retirement fresh manifest cut: state_leader=wf-process-1 killed_node=1 pid=4178297 signal=killed
+    continuation_retirement_process_test.go:273: retirement fresh manifest cut: state_leader=wf-process-1 killed_node=2 pid=4178304 signal=killed
+    continuation_retirement_process_test.go:292: retirement restarted node=0 pid=4179467
+    continuation_retirement_process_test.go:292: retirement restarted node=1 pid=4179476
+    continuation_retirement_process_test.go:292: retirement restarted node=2 pid=4179492
+    continuation_retirement_process_test.go:308: native domain healed node=0 pid=4179467 domain=WFRETIRE server_id=NALNK2ME7R22LWUIN2KTIKK34KZZK7W5VEOL3U3VR645P4SJ27MM6JME elapsed=5.439375275s
+    continuation_retirement_process_test.go:308: native domain healed node=1 pid=4179476 domain=WFRETIRE server_id=NCYIKAQZS436576HDIIQYAKEBTUI3FPLTJEVGNHDS2TB6QIQKOF5EXVF elapsed=5.440053434s
+    continuation_retirement_process_test.go:308: native domain healed node=2 pid=4179492 domain=WFRETIRE server_id=NCE3IMO22VGHUSLDF3T76OFICPM3CJN5IVWAOILIWGQ24MNWSXN3EQ26 elapsed=5.440698893s
+    continuation_retirement_process_test.go:208: retirement weak frame armed after domain heal: object=step-result-4ab5924e57105077358ff16685b28f284672014c665ad468f29c25cc7f384999
+    continuation_retirement_test.go:380: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=4 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=2 manifest_drops=1
+    continuation_retirement_process_test.go:49: retirement weak frame confirmed: object=step-result-4ab5924e57105077358ff16685b28f284672014c665ad468f29c25cc7f384999 generation=3 drops=1 reads=3 leader=1 direct=0 route=$JS.WFRETIRE.API.STREAM.MSG.GET.OBJ_WF_BLOB
+--- PASS: TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAbsenceAndAllServerSIGKILL (33.81s)
+PASS

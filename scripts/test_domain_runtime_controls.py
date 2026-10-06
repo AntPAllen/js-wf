@@ -31,6 +31,22 @@ class DomainCoverageControls(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'coverage'):
             controls.verify_log('retirement-weak-frame', log)
 
+    def test_actual_combined_frame_row_rejects_wrong_object_generation_route_and_counts(self):
+        log = (REPO/'docs/scale/domain-retirement-weak-frame-2026-10-06/native-race/native.log').read_text()
+        controls.verify_log('retirement-weak-frame', log)
+        bad = [log.replace('generation=3 drops=1', 'generation=1 drops=1'),
+               log.replace('drops=1 reads=3', 'drops=0 reads=3'),
+               log.replace('drops=1 reads=3', 'drops=1 reads=1'),
+               log.replace('leader=1 direct=0', 'leader=2 direct=0'),
+               log.replace('leader=1 direct=0', 'leader=1 direct=1'),
+               log.replace('$JS.WFRETIRE.API.STREAM.MSG.GET.OBJ_WF_BLOB', '$JS.API.STREAM.MSG.GET.OBJ_WF_BLOB'),
+               re.sub(r'(weak frame confirmed: object=)step-result-[a-f0-9]{64}', r'\g<1>step-result-'+'0'*64, log),
+               re.sub(r'elapsed=[0-9.]+s', 'elapsed=30s', log, count=1)]
+        for malformed in bad:
+            self.assertNotEqual(log, malformed)
+            with self.assertRaises(ValueError):
+                controls.verify_log('retirement-weak-frame', malformed)
+
     def test_native_failure_never_qualifies(self):
         for case in controls.CASES:
             for log in ('FAIL\n', '--- SKIP: x\nPASS\n', 'DATA RACE\nPASS\n'):
