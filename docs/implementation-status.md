@@ -10,7 +10,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Runtime | Durable Start, CAS journals/snapshots, leases/fencing/dispatch, deterministic SDK replay/checkpoints, timers, signals/children, reconcilers/retention/visibility are implemented. Some combined fault and operational cases remain open. |
 | Tier1 deterministic simulation | Corrected runtime: 121 workloads × 100,000 normal seeds (12.1M bodies), full 1,000 race seeds and 391 pins accepted. This does not simulate NATS Raft/disk internals. |
 | Sustained mutation controls | All six original ten-minute components accepted at their recorded reference; failed parent campaigns are not promoted. |
-| Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and hosted seed3 at a517d2e, each with independent copied integrity/history/drain, qualified. Retained normal ten-minute block-disk seed1 at f57da4d plus copied raw-image integrity/history/drain qualified. Ten-minute worker seed1 native and copied audits also pass, with the original producer generated-cache failure separately preserved. Full 13-row × 200 current-source gate remains open. |
+| Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and hosted seed3 at a517d2e, each with independent copied integrity/history/drain, qualified. Retained normal ten-minute block-disk seed1 at f57da4d plus copied raw-image integrity/history/drain qualified. Ten-minute worker seed1 native and copied audits also pass, with the original producer generated-cache failure separately preserved. Retained normal ten-minute pause seed1 at d893bb0 plus independent copied integrity/history/drain qualifies. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries, physical drain and independent copied audits qualified at executed dc8422a. Other finite combined cases remain. |
 | Explicit full400k audit capacity | At02d485a explicit chunked R1 reader qualifies fresh full400k/4.8M cold baseline18.134257s and actual R5 ownerSIGKILL leftdown16.429780s including zero-consumer cleanup, under4CPU/GOGC500/4GiB. At8693ab5 same-store ownerrestart qualifies17.087980s. Explicit ten-minute journal now accepted at2f74289; default/fullmatrix/24h remain open. |
@@ -28,6 +28,17 @@ qualification, rather than treating older executed-source rows as a blanket pass
 Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
+
+## Latest follow-up — 2026-10-06: original Tier2 pause copied audit accepted
+
+Fresh copies only: full2,324/25,675/2,324 report, independent histories, allthree
+physicalqueues/64durables drained, audit451.842ms/combined4.459724s under20s.
+ActualhelperSDK/threeexternalNATS binaries/closure/1,698selected inputs verified;
+all2,281original files unchanged. Full4,006member49,939,893byte proof/twoparts
+readback passes. Combined with complete native ten-minute source d893bb0, retained
+pause seed1 qualifies; full13x200/currentfullmatrix/24h remain open. First native
+review formatting failure preserved; no original store reopened. Long handles continue.
+[Independent copied proof](scale/tier2-retained-pause-2026-10-06/copied-audit/).
 
 ## Latest follow-up — 2026-10-06: original Tier2 pause native accepted
 

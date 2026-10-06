@@ -4516,3 +4516,16 @@ data queries retained. ActualSDK/source/profile/originalarchive/servers/closure
 and independent row result/full1,678member99,886,746byte proof/fourparts verified.
 This explicit changedsource row qualifies; full400k final point/currentmatrix/
 defaultretainedreader/original24h gates remain open. Existing long handles unchanged.
+
+## Original retained Tier2 full ten-minute pause seed accepted — 2026-10-06
+
+At d893bb0 normal native637.04s:2,324terminals/25,675entries/ten active45-second
+pauses, exact post-resume paused invocation+epoch fencing and all workload cells/
+checkpoint/final integrity/history/p99/physicaldrain. Actual SDK/three workers/
+three NATS binaries/closure/694Go-module/3,286external inputs/full6,323member native
+proof verified. Initial10m/10m0s reviewer mismatch preserved; corrected exact600s
+review passed without rerun. Independent freshcopy full report/histories/allthree
+physicalqueues/64durables pass,451.842ms audit/4.459724s combined under20s; all2,281
+original files unchanged,1,698inputs/actualSDK/three NATS/closure/full4,006member
+49,939,893byte copiedproof verified. Retained original sustained pause seed1 now
+qualifies at executedsource. Full13x200/currentfullmatrix/original24h remain open.
