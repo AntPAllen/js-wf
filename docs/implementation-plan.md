@@ -4748,3 +4748,30 @@ Bulk acquisition, bounded memory, snapshot handling and large-cohort/fault
 qualification remain pending. This refactor does not qualify the original
 six-minute final audit at 24-hour population sizes or change20s point/20s per
 retained attempt/60s aggregate limits. The original live24h source remains unchanged.
+
+## Native bulk timestamp sample equivalence — 2026-10-06
+
+The explicit chunked retained walker now supplies a bulk latency acquisition
+candidate. It captures and checks four complete raw source cuts/censuses, projects
+causal journal fields, accounts conservatively for retained projections/output,
+uses the existing point path for snapshots, and rejects changed cuts/cursors,
+errors and canceled/incomplete samples. The existing full integrity audit remains
+required independently. No matrix/soak launcher selects bulk yet.
+
+Initial5fa0926 full160 native comparison failed despite complete scans; full failed
+proof retained. Delivery metadata constructs local Time.Unix representations while
+point JSON decodes UTC. An equal-instant/distinct-location control reproduces that
+representation gap; bulk now normalizes UTC. The old failure did not save individual
+mismatches, so its exact first mismatch is not independently established. New
+fixtures retain comparison status and first mismatch/Go representations.
+
+Fresh7bd5571 R3 race160-real-workflow campaign PASS26.82s: allsamples exactly equal
+bulk/frozenlegacy/shared/serial/parallel/cached, independent integrity/census/source/
+consumer stability and deadline rejection pass. ActualSDK/703Gitinputs/closure and
+complete archive verified; external compiler inputs notexhaustivelycaptured.
+[Corrected native proof](scale/bulk-final-latency-preparation-2026-10-06/native-bulk-oracle-v2/).
+
+Large real-cohort throughput/process memory, snapshot fallback, protobuf/purge/reuse
+and native fault recovery remain pending before adoption. Conservative charged-data
+limit is not an RSS guarantee. Original20/60-second retained audit,20-second point
+fallback and six-minute final-stage limits remain; original long handles unchanged.

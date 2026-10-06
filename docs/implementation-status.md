@@ -29,6 +29,20 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: corrected bulk native sample oracle accepted
+
+Fresh7bd5571 full160-real-workflow R3 race PASS26.82s: allordered samples equal
+bulk/frozenlegacy/shared/serial/parallel/cached, independent fullintegrity/censuses/
+source-byte-consumer stability and impossibledeadline controls pass. UTC correction
+preservesinstants; exact comparison/mismatch representations retained. Snapshot
+fallbacks0; conservativecharge382,981bytes, notRSS measurement.
+ActualSDK2570664/703Gitinputs/build/sourcebefore-after/closure verified;
+full2,805member32,316,104byte/2part archive readback passes.
+Externalcompiler inputs notexhaustivelycaptured; prior failednative remains. Bulk
+notenabled in matrix/soak. Largecohort/memory/snapshot/fault/24h qualification pending;
+originalbudgets and long handles unchanged.
+[Corrected native proof](scale/bulk-final-latency-preparation-2026-10-06/native-bulk-oracle-v2/).
+
 ## Latest follow-up — 2026-10-06: bulk acquisition candidate and preserved native mismatch
 
 Explicit chunked retained walker/shared-reducer candidate captures complete four
