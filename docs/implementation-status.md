@@ -32,9 +32,49 @@ coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
 
+## Corrected original ten-minute bulk qualification accepted — 2026-10-06
+
+Fresh original10m journal seed1 atca7a1fa passes626.35s:93 cohorts,2,604 complete
+invocations/journals,28,693 entries,19 actual journal-leader faults and all nine
+expected checkpoint receipts. Full before/after integrity counts equal; repair
+writers join before frozen-cut collection, all four source cuts stable with
+consumer counts0. Bulk and every-point comparison pass8.697232942s under the
+original6m stage; original20s/60s,5m completion,p99/history/fault/checkpoint/drain
+gates pass unchanged. Independent row/artifact checks verify all samples,
+actual SDK/source/profile and all24 observed NATS incarnations closed. Complete
+closed originals archived with full member/current-file verification. This accepts
+explicit bulk use for this recorded-source sustained component; default, other
+rows/fullmatrix and24h remain open.
+[Accepted proof](scale/sustained-bulk-final-latency-2026-10-06/joined-journal-ten-minute/).
+
+## Outer workflow handler cancellation boundary — 2026-10-06
+
+Production outer handlers and named continuations now run behind a cancellable
+boundary. On cancellation without joining, the delivery returns without reading
+or mutating the SDK/journal buffers still owned by the abandoned handler; its
+late result is discarded. Durable cancellation remains retained for the next
+redelivery. SDK appends reject their cancelled context before accessing the
+append closure. Panic behavior stays bounded; outer runtime.Goexit now records
+an Attempt and follows the existing three-attempt terminal policy. Go cannot
+stop ignored cancellation externally; downstream idempotency remains required.
+
+Race controls cover normal return/error, panic, Goexit, already-cancelled entry
+and late return/panic/Goexit after abandonment. Modeled production-worker handoff
+passes1,000 seeds across parent cancellation, closed heartbeat and lost renewal
+ack, with10 exact replays: successor42 wins, late SDK append rejected, full journal
+unchanged and retained integrity1/4/1 with physical model queue empty. Three
+existing worker execution/running-cancel/heartbeat suites pass their1,000 race
+schedules and replay checks. Native fresh R3 Goexit control passes7.594s with
+Started,three Attempt and Failed records. Its initial20s fixture attempt failed
+in provisioning before any handler ran; corrected startup waits for metadata
+readiness with bounded requests inside the same20s whole-test context. Preliminary
+SIM_SEEDS=100 was rejected by the existing minimum1000 gate; only the corrected
+full1,000 runs count. Full-suite and broader native/combined qualification remain
+open; no promotion of current-main full matrices or earlier recorded-source runs.
+
 ## Corrected original ten-minute qualification live — 2026-10-06
 
-Fresh original10m journal seed1 atca7a1fa is running with explicit bulk final
+Fresh original10m journal seed1 atca7a1fa was launched with explicit bulk final
 latency plus complete point comparison, chunked retained integrity,4CPU/GOGC500/
 4GiB. Actual SDK3239290 SHA/build/VCS/profile and all1,786 captured source files
 verified; all five current NATS2.15 roles publicly observed and hashed, including
@@ -42,7 +82,7 @@ the first scheduled journal-leader kill/heal and replacement incarnation. Produc
 observer and independent reviewer units confirmed live. Launch admitted768MiB
 reserve with about836MiB free; no competing campaign started. Original20s/60s
 integrity,6m final stage,5m completion,p99/history/checkpoint/fault/drain gates stay.
-No native or independent row verdict yet; default/fullmatrix and24h remain open.
+The live receipt below is historical; final acceptance is recorded above. Default/fullmatrix and24h remain open.
 [Verified launch](scale/sustained-bulk-final-latency-2026-10-06/joined-journal-ten-minute-launch/).
 
 ## Further closed-copy recovery — 2026-10-06

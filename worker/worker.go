@@ -1039,6 +1039,9 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	}
 	sdkNext := uint64(len(steps))
 	appender := func(ctx context.Context, k wf.Kind, p json.RawMessage) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		index := nextIndex()
 		if err := appendEntry(journal.Kind(k), p); err != nil {
 			return err
@@ -1132,24 +1135,21 @@ func (w *Worker) execute(ctx context.Context, typ, id string, l *lease.Lease, wa
 	wctx.SetChildSupport(typ, id, input.Sequence, func(ctx context.Context, childType, childID string, childInput []byte, signalName string) error {
 		return w.startChild(ctx, childType, childID, childInput, typ, id, input.Sequence, signalName, ops)
 	})
-	var result json.RawMessage
-	var runErr error
-	var panicked bool
 	stopCancelWatch := w.watchRunningCancellation(ctx, typ, id, input.Sequence, cancelHandler)
-	func() {
-		defer func() {
-			if p := recover(); p != nil {
-				panicked = true
-				runErr = fmt.Errorf("workflow panic: %v", p)
-			}
-		}()
+	outcome, joined := runHandler(handlerCtx, func() (json.RawMessage, error) {
 		if resumed != nil {
-			result, runErr = w.continuations[typ][checkpointInfo.Stage](wctx, inputData, checkpointInfo.Data)
-		} else {
-			result, runErr = handler(wctx, inputData)
+			return w.continuations[typ][checkpointInfo.Stage](wctx, inputData, checkpointInfo.Data)
 		}
-	}()
+		return handler(wctx, inputData)
+	})
 	cancelSeen := stopCancelWatch()
+	if !joined {
+		// The abandoned handler still owns its SDK/journal buffers. Retry the
+		// delivery; a durable cancel signal is drained before the next handler
+		// entry. Do not inspect or mutate those buffers on this goroutine.
+		return outcome.err
+	}
+	result, runErr, panicked := outcome.result, outcome.err, outcome.panicked
 	if cancelSeen {
 		current, err := w.drainSignalsFrom(ctx, typ, id, input.Sequence, checkpointInfo.SignalCursor, records, appendEntry, ops)
 		if err != nil {
@@ -1429,8 +1429,8 @@ func (w *Worker) pollRunningCancellation(ctx context.Context, typ, id, generatio
 }
 
 // watchRunningCancellation observes the core signal notification and checks
-// the durable stream at registration and after gaps. Journal writes remain on
-// the execute goroutine after the handler has returned.
+// the durable stream at registration and after gaps. A handler that cannot join
+// after cancellation leaves its durable cancel signal for the next delivery.
 func (w *Worker) watchRunningCancellation(ctx context.Context, typ, id string, invSeq uint64, cancelHandler context.CancelFunc) func() bool {
 	if w.cancelStream == nil && !w.modeledCancelNotifications && w.cancelPollPort == nil {
 		return func() bool { return false }
