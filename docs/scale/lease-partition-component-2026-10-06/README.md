@@ -125,3 +125,11 @@ The intended first candidate run retains fresh keys, six writers, production 12-
 ```sh
 python3 scripts/run-lease-partition-component.py --root /tmp/js-wf-lease-partition-component-candidate-20261006 --key-profile fresh --raft-debug --server-profile obsolete-catchup-candidate
 ```
+
+## Candidate repairs the real production lease component — 2026-10-06
+
+The source-overlay candidate at executed `e815c3b` recovers the fresh-key, six-writer component within the unchanged 35-second whole-cut bound: 18.027 seconds from cut and 8.026 seconds after route healing. Production 12-second TTL, one-minute markers and the entire stream configuration exactly match the prior debug reproduction. It acknowledges 4,374 complete Put/CASUpdate/CASDelete cycles, with 84 transaction errors and majority-cut probe 11,953. All three public local sequence heads equal 16,441; the actual leader reports both followers current and every peer has eight routes.
+
+The minority performs 340 WAL repairs, from term-1/index 3,431 to 3,092, between 22:09:22.487 and 22:09:29.023 UTC. This replaces the observed slow rollback through the divergent tail with successful recovery in this experiment. Independent review binds 1,969 selected Git/current/retained/before/after sources, 1,494 helper dependencies, 1,450 server-main dependencies, 86 selected original server files equal to the failed matrix inputs, the unchanged 598-file upstream module copy, the exact single guard overlay, helper and all three actual candidate executable/argv/birth captures, configuration, stable peer IDs and complete 5,606-member archive. Candidate server SHA256: `45665408225060738d56fa3e637e2bbfee4ed672e4e31520c1360335748720a3`. Archive: 73,496,558 bytes, SHA256 `40729c7184c81975f9315e4f2a4c1d16caf1b981f9c7703fe41fd774925ee283`.
+
+[Real component evidence](candidate-component/]. This is one qualified candidate component recovery, separate from the original failed upstream component and seed6 verdicts. Next is the original ten-minute SDK partition seed6 with a retained copy of this exact source-bound candidate executable, preserving native duration, 18-minute SDK timeout, traffic, lease/marker settings and replica-current gates. Broader upstream safety, production dependency adoption, complete matrices, causal workflow Tier1 reproduction and 24-hour acceptance remain open.
