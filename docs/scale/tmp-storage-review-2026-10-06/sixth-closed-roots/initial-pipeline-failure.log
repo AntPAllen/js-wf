@@ -1,0 +1,160 @@
+[main eb536a5] Preserve closed temporary fixture inventories, batch 1
+ 65 files changed, 454462 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/executed-capture.py
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/initial-candidates.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/inventory-inspection-limits.txt
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-state-watch-faults-native-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-state-watch-faults-native-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-state-watch-faults-native-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-state-cut-diagnostic-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-state-cut-diagnostic-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-state-cut-diagnostic-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-state-cut-joined-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-state-cut-joined-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-state-cut-joined-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock170-182-restoration-check/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock170-182-restoration-check/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock170-182-restoration-check/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock183-195-restoration-check/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock183-195-restoration-check/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock183-195-restoration-check/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuation-production-37037256768/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuation-production-37037256768/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuation-production-37037256768/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-byte-journal-24h-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-byte-journal-24h-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-byte-journal-24h-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-normal-2g-10m-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-normal-2g-10m-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-normal-2g-10m-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-seed28-failure-36891850893/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-seed28-failure-36891850893/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-seed28-failure-36891850893/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-candidate-24h-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-candidate-24h-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-candidate-24h-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-subject-purge-20261002/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-subject-purge-20261002/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-subject-purge-20261002/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-subject-purge-actual-20261002/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-subject-purge-actual-20261002/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-subject-purge-actual-20261002/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-operator-standalone-commands-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-operator-standalone-commands-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-operator-standalone-commands-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-seed6-offline-exploration-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-seed6-offline-exploration-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-seed6-offline-exploration-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-upgrade-smoke-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-upgrade-smoke-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-upgrade-smoke-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-worker-smoke-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-worker-smoke-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-worker-smoke-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-clock131-143-37164231641/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-clock131-143-37164231641/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-clock131-143-37164231641/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-verified-staging-removal/executed-removal.py
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-verified-staging-removal/removal.json
+To https://github.com/AntPAllen/js-wf.git
+   7a48413..eb536a5  main -> main
+{"archive_key": "js-wf/proofs/ef00853a23bbdaa47c830671fac0e2a4c2d019237c5a6ad312c120943a1d1194/proof.tar.gz", "bytes": 34336262, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-audit-streaming-state-watch-faults-native-20261004
+{"archive_key": "js-wf/proofs/9f5cc7cd5be040093a2646164302a5f7448f853885d3de7149d0fb14d9e1262c/proof.tar.gz", "bytes": 84333170, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-bulk-state-cut-diagnostic-20261006
+{"archive_key": "js-wf/proofs/f277205ec92fda6831e315ffd2c27f6cc9cf6935970eae78254c455b0077c891/proof.tar.gz", "bytes": 84748931, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-bulk-state-cut-joined-20261006
+{"archive_key": "js-wf/proofs/0219e8810684bad72f1fbec4e349ed697376d7562dc1b4e8fcc37e7820d57963/proof.tar.gz", "bytes": 1174053, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-byte-native-20261005
+{"archive_key": "js-wf/proofs/ebbf48b7f70e17c0df01840840e40de10142307d4dfda15bd92461d56e6d1c0b/proof.tar.gz", "bytes": 39847694, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-cached-latency-journal-10m-20261006
+{"archive_key": "js-wf/proofs/1c3ed8c42d8b4c56cca5882bd54574a6a1c7c58489e62b7e60407576c724e641/proof.tar.gz", "bytes": 1071197303, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-clock170-182-restoration-check
+{"archive_key": "js-wf/proofs/b2ee6e130e83180936798900e69fece05a14efc4d4fdeb4a42eaccd00d50d0e5/proof.tar.gz", "bytes": 1071198680, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-clock183-195-restoration-check
+{"archive_key": "js-wf/proofs/f5c579296b2b5ab8c7ab00f80dd89f65ba04b8c85501c9a98197fbfac8f099f3/proof.tar.gz", "bytes": 23014298, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-continuation-production-37037256768
+{"archive_key": "js-wf/proofs/1ed46ca39540decb77bf0c463a23075e1b6808b376010448503f18ec5720ea1a/proof.tar.gz", "bytes": 89141366, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-continuous-byte-journal-24h-20261005
+{"archive_key": "js-wf/proofs/0bc7287e2d1dcd5072e0d45c5b44feaa384fb09527daf5574d6c52cb47d7d9b2/proof.tar.gz", "bytes": 37954751, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-journal-normal-2g-10m-20261004
+{"archive_key": "js-wf/proofs/01684891a9a6953035ce014dd4eb0811895cb280470b1eaee7388bc627dc513c/proof.tar.gz", "bytes": 15685082, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-journal-seed28-failure-36891850893
+{"archive_key": "js-wf/proofs/3a5a7daeb5d1a0ebc04de14b75ad1137c8de4531e6b367d90615704cec7e6409/proof.tar.gz", "bytes": 91538044, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-million-candidate-24h-20261005
+{"archive_key": "js-wf/proofs/2b405787631c8d1c103245e8aef5dabb44e463040f9e25b6a1c353547c5cb044/proof.tar.gz", "bytes": 49682779, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-million-subject-purge-20261002
+{"archive_key": "js-wf/proofs/019d031562d7266b58735866be800fa0e65ec572a981c1f75fb738fca6f6d575/proof.tar.gz", "bytes": 34905323, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-million-subject-purge-actual-20261002
+{"archive_key": "js-wf/proofs/6ae26f00a225a5f66f2be324afed27c14d05f698242e989f65b05fc23fd175c5/proof.tar.gz", "bytes": 66375743, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-operator-standalone-commands-20261006
+{"archive_key": "js-wf/proofs/3589dc8b0b134df24e567018b679bf429d6471ead5205bea20b296d813c33f1a/proof.tar.gz", "bytes": 74726440, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-partition-seed6-offline-exploration-20261006
+{"archive_key": "js-wf/proofs/b102e897d221c08012002ea07a492a8c7ecb315de139fe682052a1c1047a7cbf/proof.tar.gz", "bytes": 93146270, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-r5-retained-profile-20261005
+{"archive_key": "js-wf/proofs/dbae0a70405304d20027b334ded5d9250bea836ffc754ca43ce8aa6a26537aed/proof.tar.gz", "bytes": 76206716, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-tier2-retained-upgrade-smoke-20261005
+{"archive_key": "js-wf/proofs/f073f3b43a4169e673ea1a10e374530e5b6922b826e175e9811d99f7adfc595f/proof.tar.gz", "bytes": 75400813, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-tier2-retained-worker-smoke-20261005
+{"archive_key": "js-wf/proofs/20795af4fa32e7e41f3fdb710c413b90262807dec6089df2018ee9e5a00cfbf7/proof.tar.gz", "bytes": 1163705773, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-tier3-clock131-143-37164231641
+[main 61e4b93] Record verified S3 copies for temporary fixtures, batch 1
+ 20 files changed, 700 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-state-watch-faults-native-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-state-cut-diagnostic-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-state-cut-joined-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock170-182-restoration-check/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock183-195-restoration-check/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuation-production-37037256768/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-byte-journal-24h-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-normal-2g-10m-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-seed28-failure-36891850893/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-candidate-24h-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-subject-purge-20261002/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-subject-purge-actual-20261002/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-operator-standalone-commands-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-seed6-offline-exploration-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-upgrade-smoke-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-worker-smoke-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-clock131-143-37164231641/s3-readback.json
+To https://github.com/AntPAllen/js-wf.git
+   eb536a5..61e4b93  main -> main
+OFFLOADED_NEW js-wf-audit-streaming-state-watch-faults-native-20261004 177754112 34340864
+OFFLOADED_NEW js-wf-bulk-state-cut-diagnostic-20261006 166002688 84340736
+OFFLOADED_NEW js-wf-bulk-state-cut-joined-20261006 168263680 84754432
+OFFLOADED_NEW js-wf-byte-native-20261005 191832064 1175552
+OFFLOADED_NEW js-wf-cached-latency-journal-10m-20261006 181047296 39854080
+OFFLOADED_NEW js-wf-clock170-182-restoration-check 175292416 1071202304
+OFFLOADED_NEW js-wf-clock183-195-restoration-check 175292416 1071206400
+OFFLOADED_NEW js-wf-continuation-production-37037256768 196726784 23015424
+OFFLOADED_NEW js-wf-continuous-byte-journal-24h-20261005 183042048 89149440
+OFFLOADED_NEW js-wf-journal-normal-2g-10m-20261004 175767552 37957632
+OFFLOADED_NEW js-wf-journal-seed28-failure-36891850893 173309952 15687680
+OFFLOADED_NEW js-wf-million-candidate-24h-20261005 244752384 91545600
+Traceback (most recent call last):
+  File "/tmp/storage-remove-sixth.py", line 69, in <module>
+    (root/k).unlink()
+  File "/usr/lib/python3.12/pathlib.py", line 1344, in unlink
+    os.unlink(self)
+PermissionError: [Errno 13] Permission denied: '/tmp/js-wf-million-subject-purge-20261002/nats-source/.coveralls.yml'
+Traceback (most recent call last):
+  File "/tmp/storage-pipeline-sixth.py", line 30, in <module>
+    run(['python3','/tmp/storage-remove-sixth.py'],env=dict(os.environ,AWS_ACCESS_KEY_ID='x',AWS_SECRET_ACCESS_KEY='x'))
+  File "/tmp/storage-pipeline-sixth.py", line 4, in <lambda>
+    run=lambda args,**kw:subprocess.run(args,cwd=repo,check=True,**kw)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['python3', '/tmp/storage-remove-sixth.py']' returned non-zero exit status 1.
