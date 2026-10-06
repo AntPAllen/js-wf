@@ -29,6 +29,15 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: sustained proof worktree headroom
+
+Reclaimed1,772,335,104 allocatedbytes from verified pushed worktree proof parts
+via sparse checkout. Manifest/canonicalGit bytes/hash/objectID and visible-task
+FD checks precede removal; canonicalGit/originalfixtures/archives/exes/source/
+caches/live stores retained. Active pause Go/module input bytes still match before
+inventory. Existing campaigns/reviewers stay on the same live handles.
+[Verification](scale/sustained-proof-headroom-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: original retained Tier2 pause live
 
 Clean d893bb0 actual normal SDK1271023, all three worker SDK processes and three
