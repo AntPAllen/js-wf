@@ -27,6 +27,7 @@ import (
 	"js-wf/worker"
 
 	"github.com/anishathalye/porcupine"
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -41,10 +42,15 @@ func setup(t *testing.T) ([]jetstream.JetStream, *testcluster.Cluster) {
 
 func setupCluster(t *testing.T, c *testcluster.Cluster) ([]jetstream.JetStream, *testcluster.Cluster) {
 	t.Helper()
+	return setupClusterDomain(t, c, "")
+}
+
+func setupClusterDomain(t *testing.T, c *testcluster.Cluster, domain string) ([]jetstream.JetStream, *testcluster.Cluster) {
+	t.Helper()
 	t.Cleanup(c.Close)
 	var all []jetstream.JetStream
 	for _, nc := range c.Clients {
-		js, err := jetstream.New(nc)
+		js, err := newTestJetStreamDomain(nc, domain)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -72,6 +78,15 @@ func setupCluster(t *testing.T, c *testcluster.Cluster) ([]jetstream.JetStream, 
 			t.Fatalf("provision: %v", err)
 		}
 		time.Sleep(50 * time.Millisecond)
+	}
+	if domain != "" {
+		for node, js := range all {
+			info, err := js.AccountInfo(ctx)
+			if err != nil || info.Domain != domain || js.Conn().ConnectedDomain() != domain {
+				t.Fatalf("node%d actual domain admission: %+v / %v", node, info, err)
+			}
+			t.Logf("real domain admitted node=%d domain=%s server_id=%s", node, domain, js.Conn().ConnectedServerId())
+		}
 	}
 	return all, c
 }
@@ -618,4 +633,12 @@ func TestPlainReplicationNegativeControl(t *testing.T) {
 	if err == nil {
 		t.Fatal("one-replica stream passed audit after its only copy was killed")
 	}
+}
+
+// Keep the actual public constructor options for domain routing controls.
+func newTestJetStreamDomain(nc *nats.Conn, domain string, opts ...jetstream.JetStreamOpt) (jetstream.JetStream, error) {
+	if domain == "" {
+		return jetstream.New(nc, opts...)
+	}
+	return jetstream.NewWithDomain(nc, domain, opts...)
 }

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -56,6 +57,15 @@ func (kv *staleSnapshotManifestKV) Get(ctx context.Context, key string) (jetstre
 // The journal and both successive compactions are real. Only the weak KV Get
 // response is injected; leader reads are native administrative requests.
 func TestSnapshotManifestReadsUseLeader(t *testing.T) {
+	runSnapshotManifestLeader(t, "")
+}
+
+func TestSnapshotManifestReadsUseLeaderInJetStreamDomain(t *testing.T) {
+	runSnapshotManifestLeader(t, "WFRESULT")
+}
+
+func runSnapshotManifestLeader(t *testing.T, domain string) {
+	t.Helper()
 	parent := os.Getenv("WF_SNAPSHOT_LEADER_ROOT")
 	if parent == "" {
 		t.Skip("set WF_SNAPSHOT_LEADER_ROOT to retain native regression stores")
@@ -64,16 +74,26 @@ func TestSnapshotManifestReadsUseLeader(t *testing.T) {
 	if err := os.Mkdir(root, 0700); err != nil {
 		t.Fatal(err)
 	}
-	cluster, err := testcluster.Start(root, 3)
+	var cluster *testcluster.Cluster
+	var err error
+	if domain == "" {
+		cluster, err = testcluster.Start(root, 3)
+	} else {
+		cluster, err = testcluster.StartWithDomain(root, 3, domain)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
-	all, _ := setupCluster(t, cluster)
+	all, _ := setupClusterDomain(t, cluster, domain)
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	var mu sync.Mutex
 	var requests []string
-	traced, err := jetstream.New(cluster.Clients[1], jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent: func(subject string, _ []byte) { mu.Lock(); requests = append(requests, subject); mu.Unlock() }}))
+	prefix := "$JS.API"
+	if domain != "" {
+		prefix = "$JS." + domain + ".API"
+	}
+	traced, err := newTestJetStreamDomain(cluster.Clients[1], domain, jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent: func(subject string, _ []byte) { mu.Lock(); requests = append(requests, subject); mu.Unlock() }}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,10 +164,10 @@ func TestSnapshotManifestReadsUseLeader(t *testing.T) {
 			mu.Lock()
 			leaders, direct := 0, 0
 			for _, subject := range requests {
-				if subject == "$JS.API.STREAM.MSG.GET.KV_WF_STATE" {
+				if subject == prefix+".STREAM.MSG.GET.KV_WF_STATE" {
 					leaders++
 				}
-				if len(subject) >= len("$JS.API.DIRECT.GET.KV_WF_STATE") && subject[:len("$JS.API.DIRECT.GET.KV_WF_STATE")] == "$JS.API.DIRECT.GET.KV_WF_STATE" {
+				if strings.HasPrefix(subject, prefix+".DIRECT.GET.KV_WF_STATE") {
 					direct++
 				}
 			}
@@ -155,7 +175,7 @@ func TestSnapshotManifestReadsUseLeader(t *testing.T) {
 			if leaders < 2 || direct != 0 {
 				t.Fatalf("manifest wire route: leader=%d direct=%d", leaders, direct)
 			}
-			t.Logf("200 exact records; committed manifest revision=%d leader requests=%d direct requests=%d", value.Revision, leaders, direct)
+			t.Logf("200 exact records; committed manifest revision=%d leader requests=%d direct requests=%d route=%s", value.Revision, leaders, direct, prefix+".STREAM.MSG.GET.KV_WF_STATE")
 		})
 	}
 	t.Run("object_absence", func(t *testing.T) {
@@ -172,7 +192,7 @@ func TestSnapshotManifestReadsUseLeader(t *testing.T) {
 		defer mu.Unlock()
 		leaders := 0
 		for _, subject := range requests {
-			if subject == "$JS.API.STREAM.MSG.GET.OBJ_WF_BLOB" {
+			if subject == prefix+".STREAM.MSG.GET.OBJ_WF_BLOB" {
 				leaders++
 			}
 		}

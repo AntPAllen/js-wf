@@ -67,6 +67,15 @@ type resultOracleRoute struct {
 func (j resultOracleRoute) Options() jetstream.JetStreamOptions { return j.options }
 
 func TestResultReadVerifiesWeakAbsence(t *testing.T) {
+	runResultReadWeakAbsence(t, "")
+}
+
+func TestResultReadVerifiesWeakAbsenceInJetStreamDomain(t *testing.T) {
+	runResultReadWeakAbsence(t, "WFRESULT")
+}
+
+func runResultReadWeakAbsence(t *testing.T, domain string) {
+	t.Helper()
 	if os.Getenv("WF_RESULT_ABSENCE_ROOT") == "" {
 		t.Skip("set WF_RESULT_ABSENCE_ROOT to retain native regression stores")
 	}
@@ -74,14 +83,24 @@ func TestResultReadVerifiesWeakAbsence(t *testing.T) {
 	if err := os.Mkdir(root, 0700); err != nil {
 		t.Fatal(err)
 	}
-	cluster, err := testcluster.Start(root, 3)
+	var cluster *testcluster.Cluster
+	var err error
+	if domain == "" {
+		cluster, err = testcluster.Start(root, 3)
+	} else {
+		cluster, err = testcluster.StartWithDomain(root, 3, domain)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
-	all, _ := setupCluster(t, cluster)
+	all, _ := setupClusterDomain(t, cluster, domain)
 	var mu sync.Mutex
 	var requests []string
-	js, err := jetstream.New(cluster.Clients[0], jetstream.WithClientTrace(&jetstream.ClientTrace{
+	prefix := "$JS.API"
+	if domain != "" {
+		prefix = "$JS." + domain + ".API"
+	}
+	js, err := newTestJetStreamDomain(cluster.Clients[0], domain, jetstream.WithClientTrace(&jetstream.ClientTrace{
 		RequestSent: func(subject string, _ []byte) { mu.Lock(); requests = append(requests, subject); mu.Unlock() },
 	}))
 	if err != nil {
@@ -143,14 +162,14 @@ func TestResultReadVerifiesWeakAbsence(t *testing.T) {
 			defer mu.Unlock()
 			leaders := 0
 			for _, subject := range requests {
-				if subject == "$JS.API.STREAM.MSG.GET.OBJ_WF_BLOB" {
+				if subject == prefix+".STREAM.MSG.GET.OBJ_WF_BLOB" {
 					leaders++
 				}
 			}
 			if leaders != 1 {
 				t.Fatalf("expected one administrative metadata confirmation: %v", requests)
 			}
-			t.Logf("real payload recovered; leader confirmations=%d", leaders)
+			t.Logf("real payload recovered; leader confirmations=%d route=%s", leaders, prefix+".STREAM.MSG.GET.OBJ_WF_BLOB")
 		})
 	}
 	t.Run("deletion", func(t *testing.T) {
