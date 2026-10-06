@@ -47,6 +47,16 @@ for f in faults['faults']:
  paused=datetime.fromisoformat(f['paused'].replace('Z','+00:00'));resumed=datetime.fromisoformat(f['resumed'].replace('Z','+00:00'))
  assert (resumed-paused).total_seconds()>=45
  assert all(l['worker_id']==f['worker'] and l['epoch']>0 and l['revision']>0 for l in f['paused_leases'])
+ assert (resumed-paused).total_seconds()>=45
+ fence_path=root/('matrix-pause-1-'+f['worker']+'-fencing.jsonl')
+ data=fence_path.read_bytes();assert data.endswith(b'\n')
+ records=[json.loads(line) for line in data.splitlines()]
+ held={(l['key'],l['epoch']) for l in f['paused_leases']};matches=0
+ for i,record in enumerate(records,1):
+  event=record['event'];assert record['pid']==f['pid'] and record['sequence']==i and event['Worker']==f['worker']
+  at=datetime.fromisoformat(event['At'].replace('Z','+00:00'))
+  if at>=resumed and (event['Type']+'.'+event['ID'],event['Epoch']) in held:matches+=1
+ assert matches>=f['fencing_events']>0
 assert 'worker faults=10 active_worker_faults=10 row=worker_pause' in native
 report={'source':revision,'actual_sdk_pid':a['pid'],'actual_sdk_sha256':a['sha256'],'source_files':len(b['files']),'external_files':len(before),'server_observations':len(servers),'server_nodes':[0,1,2],'native_fault_admitted':True,'native_duration_accepted':True,'closed_sdk_and_observed_servers':True,'smoke_only':False,'independent_store_audit':False,'scope':'Original ten-minute active-pause row checked; independent copied-store and full-matrix qualification remain separate.'}
 (root/'review.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))

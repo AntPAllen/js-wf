@@ -11,3 +11,8 @@ executables/closure, all ten retained fault records and native duration acceptan
 Independent copied-store/history/drain review and whole archive preservation follow
 closure. This is one original sustained seed; full13x200/current-source gates remain.
 Long campaigns overlap; no isolated performance claims. Never reopen original stores.
+
+The native reviewer also verifies complete ordered fencing records for each
+actual PID/worker, requiring matching paused invocation key/epoch after resume.
+Copied-review expected cardinalities must be saved from the independently reviewed
+original MATRIX_RETAINED result; they are not fixed to another fixture.
