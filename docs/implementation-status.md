@@ -34,6 +34,25 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier is live; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Broader /tmp cleanup: five closed scale-media offloads complete — 2026-10-06
+
+All five complete S3 readbacks and fresh full member/body/current census/visible
+closure checks pass; exactly3,507,392,512 allocated older gzip-media bytes
+recovered. Separately3,394,428,928 temporary archive staging bytes removed,
+not double-counted as older-data recovery. Local reports/configs/logs/legacy
+hash/mode/mtime restore ledgers unchanged; no stores reopened or new qualification.
+Full400k donors and live100k normal remain local. Broader `/tmp` inventory shows
+most usage is fixture/evidence trees, not Go scratch (about278MiB).
+[Guarded per-fixture and aggregate offloads](scale/closed-scale-s3-2026-10-06/offload-summary.json).
+
+Existing accepted worker-clock131–143 primary1,408,552,144-byte rolling tar equals
+its committed hash/size; all51,519 regular safe members match the original rolling
+manifest. Full current root census unchanged and visible closure passes. This
+primary tar has zero Git parts; complete byte/member metadata prepared for S3,
+with no deletion before full readback and fresh revalidation. Other raw/model/
+source evidence remains local. No existing/native/source scope promotion.
+[Primary archive review](scale/tmp-storage-review-2026-10-06/worker-clock-131-143/review.json).
+
 ## Original24h bulk-journal preparation and closed-scale preservation — 2026-10-06
 
 Five closed historical cardinality fixtures now have complete modern archives:
