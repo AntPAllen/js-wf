@@ -29,6 +29,26 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Live snapshot — 2026-10-06 05:24 UTC
+
+- The corrected full six-case, 500-child fanout campaign is active at `cdd4c7b`.
+  All three creation cuts have recorded local physical drain witnesses; the first
+  result cut is in progress. Full campaign and independent copied review remain open.
+- The original 24-hour chunked journal campaign remains active after about
+  4 h 13 min / 2,174 batches, with continuing confirmed journal-leader restarts.
+  Its terminal retained audit and full qualification remain pending.
+- The million-timer candidate has acknowledged all 1,000,000 publishes and received
+  814,614 unique timers. Running p99 is 0.2923 s and maximum delay 17.8393 s;
+  both scheduled all-server SIGKILL/restarts have occurred. Final delivery,
+  physical queue/index drain and candidate adoption remain pending. Last timer
+  is due 2026-10-06 09:50:43 UTC. Running final-drain fields are placeholders.
+- Both positive and negative server-clock ten-minute native rows and independent
+  copied audits qualify at their recorded sources and seed; full matrices remain open.
+- Nine closed canonical archives were fully reverified before duplicate removal
+  and sparse worktree exclusions. Recovered 928,423,936 allocated bytes; about
+  2 GiB remains free. Canonical Git evidence and original/live stores are retained.
+  [Recovery record](scale/recent-raw-proof-duplicates-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: fullsix local physical failure and bounded startup retry
 
 Originalaa2015a fullsix race campaign FAIL370.79s: five cases pass and local
