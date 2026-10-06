@@ -30,6 +30,11 @@ sys.path.insert(0,'scripts')
 import importlib.util
 spec=importlib.util.spec_from_file_location('matrix_check','scripts/check-matrix-result.py');module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
 module.check([json.loads(s) for s in (root/'converted-events.jsonl').read_text().splitlines()],a['test'],'10m')
+spec=importlib.util.spec_from_file_location('campaign_check','scripts/check-matrix-campaign.py');campaign=importlib.util.module_from_spec(spec);spec.loader.exec_module(campaign)
+seed_report=campaign.check_seed(native,'worker_pause',1,a['test']);assert seed_report['faults']==10
+(root/'seed-review.json').write_text(json.dumps(seed_report,indent=2)+'\n')
+count=seed_report['invocations']
+(root/'expected-original-report.json').write_text(json.dumps({'Invocations':count,'Journals':count,'Entries':seed_report['journal_entries'],'Terminal':count},indent=2)+'\n')
 from datetime import datetime
 workers=json.loads((root/'observed-workers.json').read_text());assert len(workers)==3
 by_pid={v['pid']:v for v in workers};assert len(by_pid)==3
