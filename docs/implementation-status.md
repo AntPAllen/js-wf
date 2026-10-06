@@ -29,6 +29,22 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: cached real-cohort measurement launched
+
+Clean `14cea25` actual normal SDK `1173935` and five live server processes verified.
+Explicit metadata reuse / 4 CPU / GOGC 500 / 4 GiB profile is confirmed from the
+SDK process. Only fresh verified donor copies are mounted. The original six-minute
+point stage, 20-second requests and complete 87,920 / 969,925 retained gates remain.
+Reviewer permits valid metadata retries and snapshot object handles; lookup counts
+are diagnostic. Producer and reviewer are live; no terminal qualification yet.
+[Launch evidence](scale/cached-final-latency-2026-10-06/cohort-live-initial/).
+
+The original million-timer campaign records its second all-three-server SIGKILL
+and healing in 13.984 seconds. Both sets of killed processes are absent and the
+original SDK remains live. Delivery and final physical drain are still pending;
+running report drain fields are placeholders, and the server candidate is not adopted.
+[Live observation](scale/million-candidate-2026-10-06-second-restart/).
+
 ## Latest follow-up — 2026-10-06: metadata reuse native oracle accepted
 
 Clean037bed8 actualcurrentR3libraryracePASS18.46s: all160actualshort/timer/signal/
