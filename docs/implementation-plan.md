@@ -4322,3 +4322,14 @@ verified. Prepare freshcopy by explicitly validating/deleting only confirmed old
 names, recording boundaries/populations and requiring zero before original20s
 healthy/fault gates. Originaldonor untouched; no fault/default/live/24h pass.
 [Evidence](scale/chunked-callback-audit-2026-10-06/assignment-names/).
+
+## Verified restored-cursor fixture preparation — 2026-10-06
+
+Only exact two independently captured old names/timestamps/config/position0 are
+eligible for freshcopy preparation deletion; unknown/extra/changed/unavailable
+identity aborts before deletion. Record initial/delete/finalnamedzero and identical
+retained message/byte/first/last/deletion boundaries. Existing60s readiness includes
+5s inventory probes; no journalwarmup/20s/full400k/4.8M changes. Race validation/
+pressure controlsPASS1.024s. Native baseline/actualowner-down pending headroom;
+original donor/failed fixtures remain unchanged. No default/live/fault/24h pass.
+[Preparation](scale/chunked-callback-audit-2026-10-06/clean-fixture-preparation/).

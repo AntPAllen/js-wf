@@ -29,6 +29,17 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: clean copied fixture preparation implemented
+
+Preparation validates only the two proved old names/timestamps/R5memoryAckNone/
+start1/inactive30/position0/pending4.8M identities before deleting either one.
+Unknown/extra/changed/unavailable identities abort. Initial/delete/finalnamedzero
+and unchanged source population boundaries/bytes recorded. Existing60s readiness
+budget includes up-to5s inventory probes; no journal warmup or20s audit budget
+change. Race validation/pressure controlsPASS1.024s. Fresh clean full400k/4.8M
+baseline/owner-down gate pending headroom, original donor/failed fixtures untouched.
+[Preparation](scale/chunked-callback-audit-2026-10-06/clean-fixture-preparation/).
+
 ## Latest follow-up — 2026-10-06: restored residual identities confirmed
 
 At53b3871 fresh full400k/4.8M exact read/reduction completes17.473097s. Initial

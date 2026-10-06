@@ -58,10 +58,18 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 		}
 	}
 	probeNames := os.Getenv("WF_AUDIT_CAPACITY_CURSOR_NAMES") == "1"
+	prepareRestored := os.Getenv("WF_AUDIT_CAPACITY_PREPARE_RESTORED") == "1"
+	if prepareRestored && !probeNames {
+		t.Fatal("restored cursor preparation requires named inventory")
+	}
 	if probeNames {
 		var inventory []capacityConsumerInventory
+		probeLimit := time.Second
+		if prepareRestored {
+			probeLimit = 5 * time.Second
+		}
 		for _, name := range []string{"WF_INV", "WF_JRN"} {
-			call, cancel := context.WithTimeout(ready, time.Second)
+			call, cancel := context.WithTimeout(ready, probeLimit)
 			inventory = append(inventory, capacityReadConsumerInventory(call, js, name, nil))
 			cancel()
 		}
@@ -75,6 +83,11 @@ func directR1CopiedCapacityFault(t *testing.T, js jetstream.JetStream, cluster *
 		for _, entry := range inventory {
 			if entry.Error != "" {
 				t.Fatalf("initial consumer inventory: %s", entry.Error)
+			}
+		}
+		if prepareRestored {
+			if err := prepareRestoredCapacityCursors(ready, js, root, inventory); err != nil {
+				t.Fatal(err)
 			}
 		}
 	}
