@@ -29,6 +29,20 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: shared final-latency reducer native equivalence
+
+Point latency rules extracted into shared reducer; complete timestamp census and
+lookup/cancellation failures discard all partial samples. Three race controlgroups
+pass, including exact causal samples/±60s normalization/nine impossible evidence
+cases/lookup errors/late cancellation. Frozen pre-extraction36f82cf function body
+matches exactly. Fresh14efcfb R3 race native160 realworkflows PASS47.89s; allsamples
+identical across frozenlegacy/shared/serial/parallel/cached adapters and terminal
+deadline controls reject. ActualSDK2463458/699Gitinputs/sourcebefore-after/build/closure
+verified; full2,803member32,153,215byte/twopart proof readback passes. Externalcompiler
+inputs notexhaustivelycaptured. Bulk acquisition/largecohort/fault/24h capacity pending;
+productionruntime/deadlines unchanged. Long original handles continue unchanged.
+[Native equivalence](scale/bulk-final-latency-preparation-2026-10-06/native-reducer-oracle/).
+
 ## Latest follow-up — 2026-10-06: preserved R5 disposable clone reclaimed
 
 Pushedaf0cfef canonical delta/allparts/concat/full base+delta virtual tree and every

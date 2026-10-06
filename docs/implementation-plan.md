@@ -4728,3 +4728,23 @@ supports the full native case verdict but does not demonstrate transient retry
 recovery. The prior failed full campaign and unconfirmed constructor timeout cause
 remain preserved. Other combined fault cases, final-source full matrices, original
 million-timer final physical drain and actual 24-hour gates remain open.
+
+## Bulk final latency audit preparation — 2026-10-06
+
+The existing point latency rules now share one evaluator for complete logical
+journals and raw retained timestamps. Point adapters continue using fresh queries;
+production runtime is unchanged. Three race control groups verify exact causal
+samples, signed clock normalization, impossible/missing evidence and cancellation
+without partial success. The old `36f82cf` point implementation is retained
+independently and its renamed body is byte-identical to that source.
+
+Fresh R3 race native160-real-workflow run at `14efcfb` passes47.89s with every
+sample equal across frozen legacy/shared/serial/parallel/cached adapters and the
+existing deadline controls rejecting. Actual SDK/captured699Git source inputs/
+closure and full2,803-member proof independently verify. External compiler input
+capture is not exhaustive. [Native reducer equivalence](scale/bulk-final-latency-preparation-2026-10-06/native-reducer-oracle/).
+
+Bulk acquisition, bounded memory, snapshot handling and large-cohort/fault
+qualification remain pending. This refactor does not qualify the original
+six-minute final audit at 24-hour population sizes or change20s point/20s per
+retained attempt/60s aggregate limits. The original live24h source remains unchanged.
