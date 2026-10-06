@@ -29,6 +29,16 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: chunked legacy oracle accepted
+
+At578c216 actualthree-process NATS2.11.17 race full-oracle testPASS74.53s.
+All18 chunked R1 cursor observations and full/cohort/compaction/corruption/state/
+tombstone/snapshot/orphan reports/errors match independent point oracle. Actual
+SDK/source/modules/legacy bytes/closedPIDs and complete1070-member48,939,101byte
+archive independently verified. This qualifies legacy oracle compatibility only;
+fresh full400k/4.8M original20s cold CPU/owner-down gate is next. No default/live/
+full matrix/24h adoption. [Evidence](scale/chunked-callback-audit-2026-10-06/legacy-controls/).
+
 ## Latest follow-up — 2026-10-06: bounded chunk handoff prepared
 
 An explicit candidate transfers bounded chunks, preserving scanner-owned visitors

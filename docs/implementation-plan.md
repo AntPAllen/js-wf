@@ -4272,3 +4272,12 @@ semantic, recovery and cleanup gates. Two bounded256-record/1MiB payload buffers
 Race pressure/order/cancel/error/join controls accepted; native legacy oracle and
 fresh full400k/4.8M original20s CPU/fault qualification pending. No adoption or
 speedup claim. [Preparation](scale/chunked-callback-audit-2026-10-06/preparation/).
+
+## Chunked R1 legacy oracle accepted — 2026-10-06
+
+Clean578c216 actualthree-process NATS2.11.17 race full-oracle testPASS74.53s.
+All18 actualchunked R1 cursors and full/cohort/compaction/corruption/state/tombstone/
+snapshot/orphan reports/errors match independent point oracle. SDK/source/actual
+legacy bytes/closedPIDs and whole1070-member48,939,101byte archive/readback accepted.
+Full400k/4.8M original20s cold CPU/owner-down gate remains pending; no default/live/
+fullmatrix/24h qualification. [Evidence](scale/chunked-callback-audit-2026-10-06/legacy-controls/).
