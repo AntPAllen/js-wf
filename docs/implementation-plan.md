@@ -4884,3 +4884,15 @@ stores/source/exes remain local. Future long/native runs must reserve space for
 remaining campaign growth, copy allocation and final archival across concurrent
 jobs; a short-copy-only reserve cannot qualify safe campaign admission.
 [Terminal evidence and full proofs](scale/terminal-campaigns-disk-pressure-2026-10-06/).
+
+### Real87920 bulk cursor-owner restart accepted — 2026-10-06
+
+At2621015 fresh copied normal R5 nativePASS49.44s: active R1 memory AckNone JRN
+cursor owner actualSIGKILL and same-store restart confirmed, distinct replacement
+start24738, complete source counts and zero-consumer cleanup. Original20s integrity
+before/after both pass87,920/969,925/87,920. Every sample exactly equals complete
+canonical original point oracle;18.143767852s under original6m. SDK/six actual server
+incarnations closed and original donor unchanged. Recorded-source quiet real-cohort
+fault qualification does not replace full400k valid latency/RSS, other faults,
+current/default matrices or24h/million release gates. Bulk remains opt-in.
+[Evidence](scale/bulk-cursor-fault-preparation-2026-10-06/native-real87920-owner-restart-v2/).

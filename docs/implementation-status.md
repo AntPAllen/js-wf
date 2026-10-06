@@ -29,6 +29,24 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest qualification — 2026-10-06: real87920 bulk owner restart accepted
+
+At2621015 fresh R5 normal nativePASS49.44s. Actual active R1 memory AckNone JRN
+cursor owner node2 SIGKILL/source exit confirmed; same-store restart and distinct
+resumed cursor24738 on node3 verified. Original20s full integrity before/after
+both pass87,920/969,925/87,920; every bulk sample equals the complete original point
+oracle in18.143767852s under original6m. Complete source cuts/censuses stable,
+consumer counts0 after. SDK3139233/six actual2.15 incarnations closed;3,887 donor
+hashes unchanged. Complete full-file fixture archive verified; S3 transfer next.
+[Accepted fault evidence](scale/bulk-cursor-fault-preparation-2026-10-06/native-real87920-owner-restart-v2/).
+
+Fourteen legacy archives' complete Git parts/concat/member/hardlink inventories
+verified; only redundant raw archives removed,817,893,376 allocated bytes recovered.
+No original stores/source/exes/caches or canonical proofs removed. Both earlier
+long campaigns remain terminal/unqualified. Full400k valid latency/RSS, default/
+current matrices and24h/million gates remain open.
+[Legacy duplicate recovery](scale/legacy-raw-proof-duplicate-recovery-2026-10-06/).
+
 ## Latest storage/admission correction — 2026-10-06
 
 After complete committed S3 archive/metadata/inventory readback and full current
