@@ -1,0 +1,61 @@
+{
+  "observed_utc": "2026-10-06T13:09:10.990038+00:00",
+  "actual_sdk_pid": 3461745,
+  "actual_original_argv": [
+    "/tmp/js-wf-bulk-journal-24h-joined-20261006/integration.test",
+    "-test.run=^TestFiveContainerMixedJournalLeaderEveryThirtySeconds$",
+    "-test.v=test2json",
+    "-test.count=1",
+    "-test.timeout=24h20m"
+  ],
+  "actual_native_environment": {
+    "WF_TIER3_MATRIX_DURATION": "24h",
+    "FAULT_SEED": "1",
+    "WF_TIER3_MATRIX": "1",
+    "TIER3_MATRIX_ARTIFACT_ROOT": "/tmp/js-wf-bulk-journal-24h-joined-20261006/fixture",
+    "WF_TIER3_EXPLICIT_ROUTE_SEEDS": "1",
+    "WF_TIER3_SYNC_INTERVAL": "2m"
+  },
+  "live_unit": {
+    "MainPID": "3461056",
+    "CPUQuotaPerSecUSec": "4s",
+    "MemoryMax": "6442450944",
+    "ActiveState": "active"
+  },
+  "execution": {
+    "source": "757454ab9681f044af469a9462ecb7dfc63233ad",
+    "row": "journal",
+    "seed": 1,
+    "duration": "24h",
+    "status": "running",
+    "supervisor_pid": 3461056,
+    "started": 1791291767.5849364,
+    "upgrade_shutdown": null,
+    "upgrade_start_gap": false,
+    "race": false,
+    "memory_limit": "4GiB",
+    "gomaxprocs": "4",
+    "gc_percent": "500",
+    "disk_admission": {
+      "filesystem_probe": "/tmp",
+      "free_bytes": 20076646400,
+      "minimum_free_bytes": 18253611008,
+      "additional_reserve_bytes": 1073741824,
+      "scope": "Launch-time estimate, not a filesystem reservation. 24h baseline16GiB covers observed retained growth and archival; callers must add overlapping job budgets."
+    },
+    "retained_audit_trace": true,
+    "audit_wait_stack": true,
+    "batched_retained_audit": false,
+    "streaming_state_retained_audit": false,
+    "concurrent_state_retained_audit": false,
+    "chunked_state_retained_audit": true,
+    "cached_latency_metadata": false,
+    "bulk_final_latency": true,
+    "compare_bulk_point": true,
+    "explicit_route_seeds": true,
+    "journal_rollout": "none",
+    "clears_full_tier3_release": false,
+    "test_pid": 3461714
+  },
+  "scope": "Same live actual SDK additionally binds exact24h native duration/seed/journal row/production2m sync/explicit routes, original24h20m timeout/count1/nonrace,6GiB cgroup/4CPU quota and strict17GiB launch admission. No source/runtime/test restart, original fault/audit/p99/history/drain/final/terminal24h acceptance still pending."
+}

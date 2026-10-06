@@ -28,11 +28,33 @@ qualification, rather than treating older executed-source rows as a blanket pass
 
 Immediate work: preserve the accepted full400k proof, qualify broader live/fault
 use, finish remaining clock/checkpoint, million-timer physical-drain, combined and operational
-coverage, and qualify the actual 24-hour gate. Both latest24h campaigns are
-terminal failures; no24h soak is running. Their complete current files, including
+coverage, and qualify the actual 24-hour gate. Earlier latest24h campaigns are
+terminal failures. Fresh explicit bulk/chunked24h journal seed1 now runs at757454a;
+no24h row is accepted. Their complete current files, including
 partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier is live; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
+
+## Fresh original24h bulk-journal launch verified — 2026-10-06
+
+Actual original24h journal seed1 at757454a now runs, SDK3461745/producer3461056.
+Independent live executable/build/source binding checks all1,848 selected files
+against Git/current/before. Five logical NATS names/eight observed incarnations
+at review match actual module2.15 executable. Actual SDK argv requires exact
+journal named test/count1/original24h20m timeout; actual env24h/seed1/production2m
+sync/explicit routes and chunked/bulk/full point comparison verify. Nonrace4CPU/
+GOGC500/4GiB profile, cgroup6GiB/4CPU quota and16GiB+1GiB launch admission verify.
+Initial fault heals and full280-invocation checkpoint pass; normal100k overlap
+and minute disk samples retained. This is live launch evidence only: original
+20s/60s audit,6m final, raw journal p99/history/checkpoint/drain/full source-after/
+closure/terminal24h gate remain required. No24h/fullmatrix/default adoption.
+
+Initial adapted observer stopped on nonexistent journal marker, then supplemental
+observer stopped on a hosted-only row env variable. Both guards retained; actual
+producer emits journal fault lines and chooses row through exact test argv.
+Corrected observations pass without native/source restart or target change.
+[Launch, source and profile checks](scale/bulk-journal-24h-2026-10-06/launch/).
+[Current /tmp review and protected roots](scale/tmp-storage-review-2026-10-06/inventory-after-cleanup/summary.json).
 
 ## /tmp primary rolling archive moved;24h admission headroom restored — 2026-10-06
 

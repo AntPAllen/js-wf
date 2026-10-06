@@ -1,0 +1,104 @@
+{
+  "observed_utc": "2026-10-06T13:05:31.043198+00:00",
+  "execution": {
+    "source": "757454ab9681f044af469a9462ecb7dfc63233ad",
+    "row": "journal",
+    "seed": 1,
+    "duration": "24h",
+    "status": "running",
+    "supervisor_pid": 3461056,
+    "started": 1791291767.5849364,
+    "upgrade_shutdown": null,
+    "upgrade_start_gap": false,
+    "race": false,
+    "memory_limit": "4GiB",
+    "gomaxprocs": "4",
+    "gc_percent": "500",
+    "disk_admission": {
+      "filesystem_probe": "/tmp",
+      "free_bytes": 20076646400,
+      "minimum_free_bytes": 18253611008,
+      "additional_reserve_bytes": 1073741824,
+      "scope": "Launch-time estimate, not a filesystem reservation. 24h baseline16GiB covers observed retained growth and archival; callers must add overlapping job budgets."
+    },
+    "retained_audit_trace": true,
+    "audit_wait_stack": true,
+    "batched_retained_audit": false,
+    "streaming_state_retained_audit": false,
+    "concurrent_state_retained_audit": false,
+    "chunked_state_retained_audit": true,
+    "cached_latency_metadata": false,
+    "bulk_final_latency": true,
+    "compare_bulk_point": true,
+    "explicit_route_seeds": true,
+    "journal_rollout": "none",
+    "clears_full_tier3_release": false,
+    "test_pid": 3461714
+  },
+  "live_unit": {
+    "MainPID": "3461056",
+    "CPUQuotaPerSecUSec": "4s",
+    "MemoryMax": "6442450944",
+    "ActiveState": "active"
+  },
+  "actual_sdk": {
+    "pid": 3461745,
+    "args": [
+      "/tmp/js-wf-bulk-journal-24h-joined-20261006/integration.test",
+      "-test.run=^TestFiveContainerMixedJournalLeaderEveryThirtySeconds$",
+      "-test.v=test2json",
+      "-test.count=1",
+      "-test.timeout=24h20m"
+    ],
+    "sha256": "2c5d8c3e2d6280fb344826fbbd8097c962ffcdf265ab3eee938374e546694a62",
+    "build_info": "/proc/3461745/exe: go1.27.1\n\tpath\tjs-wf/integration.test\n\tmod\tjs-wf\tv0.0.0-20261006130116-757454ab9681\t\n\tdep\tgithub.com/anishathalye/porcupine\tv1.3.1\th1:fBZ4/NGNPnIDdd6xNtrNk9/GiEQ0L4FO5+scINN+t0E=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/jackc/pgpassfile\tv1.0.0\th1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=\n\tdep\tgithub.com/jackc/pgservicefile\tv0.0.0-20240606120523-5a60cdf6a761\th1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=\n\tdep\tgithub.com/jackc/pgx/v5\tv5.11.0\th1:IzBBtyK9AHqf98cctWFifYSci2hgQR/cd56wB4p+ogg=\n\tdep\tgithub.com/jackc/puddle/v2\tv2.2.2\th1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sync\tv0.23.0\th1:KameEIfc1IkluZyXWLn39Wd4tURc6GbCiISGiZm2bQk=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/text\tv0.42.0\th1:JbOZXgfeCPU9gacVtYliJqOhD+zhrEqK4LfdpmlUZqI=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=757454ab9681f044af469a9462ecb7dfc63233ad\n\tbuild\tvcs.time=2026-10-06T13:01:16Z\n\tbuild\tvcs.modified=false\n",
+    "stat": "3461745 (integration.tes) S 3461737 3461056 3461056 0 -1 4194304 834 0 0 0 0 0 0 0 20 0 6 0 10551889 1704587264 4610 18446744073709551615 4194304 22005392 140723636221440 0 0 0 0 2 2143420157 0 0 0 17 0 0 0 0 0 0 39186432 39865920 489369600 140723636226141 140723636226321 140723636226321 140723636228027 0\n",
+    "profile_environment": {
+      "GOMEMLIMIT": "4GiB",
+      "GOMAXPROCS": "4",
+      "WF_TIER3_CHUNKED_STATE_RETAINED_AUDIT": "1",
+      "GOGC": "500",
+      "WF_MATRIX_BULK_FINAL_LATENCY": "1",
+      "WF_MATRIX_BULK_POINT_COMPARE": "1"
+    },
+    "observed_utc": "2026-10-06T13:03:17.973113+00:00"
+  },
+  "source_files_exact_git_current_before": 1848,
+  "server_observations": 8,
+  "observed_distinct_names": [
+    "/js-wf-route-3461745-1791291797339562802-n0",
+    "/js-wf-route-3461745-1791291797339562802-n1",
+    "/js-wf-route-3461745-1791291797339562802-n2",
+    "/js-wf-route-3461745-1791291797339562802-n3",
+    "/js-wf-route-3461745-1791291797339562802-n4"
+  ],
+  "actual_server_sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+  "overlap_reserve_bytes": 1073741824,
+  "minute_disk_samples": [
+    {
+      "observed_utc": "2026-10-06T13:03:17.480667+00:00",
+      "total": 158404653056,
+      "used": 131736080384,
+      "free": 19930308608
+    },
+    {
+      "observed_utc": "2026-10-06T13:04:18.875120+00:00",
+      "total": 158404653056,
+      "used": 131857362944,
+      "free": 19809026048
+    },
+    {
+      "observed_utc": "2026-10-06T13:05:20.178789+00:00",
+      "total": 158404653056,
+      "used": 131888021504,
+      "free": 19778367488
+    }
+  ],
+  "confirmed_journal_faults_so_far": [
+    "tier3_mixed_journal_test.go:1026: tier3 journal fault node=3 scheduled=30s killed=30.039490366s healed=36.199270908s",
+    "tier3_mixed_journal_test.go:1026: tier3 journal fault node=1 scheduled=1m0s killed=1m0.129163788s healed=1m7.534099315s",
+    "tier3_mixed_journal_test.go:1026: tier3 journal fault node=3 scheduled=1m30s killed=1m30.038699224s healed=1m36.896201228s"
+  ],
+  "overlapping_normal_qualifier": "MainPID=3308963\nActiveState=active\n",
+  "scope": "Verified live fresh original24h journal-leader seed1 at recorded executed source with explicit chunked/bulk/point comparison. Actual SDK/source/profile and five observed NATS executables verified; shared CPU with full100k normal qualifier recorded. Original deadlines/counts/history/drain/p99/checkpoint/checkpoint gates unchanged. Terminal native/full artifact/source-after/observer/process-closure and complete proof remain mandatory; no row/default/fullmatrix/24h qualification."
+}
