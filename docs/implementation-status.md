@@ -62,6 +62,13 @@ incorrectly required an explicit empty-stream counter; its failure is preserved,
 and corrected controls still reject missing nonzero or unexpected counters.
 [Review](scale/full400k-bulk-capacity-preparation-2026-10-06/native-valid-population/).
 
+After revalidating the committed complete archive/member/current-file census and
+remote readback receipts, SDK/five-server closure, running Docker/root process
+scope and visible descriptors, only the redundant local archive was removed:
+637,558,784 allocated bytes recovered, about1.58GB free. Every current original
+store/source/executable/metadata byte, mode and mtime remains unchanged locally.
+[Recovery](scale/full400k-bulk-capacity-preparation-2026-10-06/raw-archive-duplicate-recovery/).
+
 RSS scope corrected: native RUSAGE_SELF3,804,444KiB is measured through test-body
 completion before cleanup/SDK exit, not exact final whole-lifetime peak. Future
 producer now uses wait4 of the exact SDK child through exit. Real OS control
