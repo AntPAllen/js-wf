@@ -102,18 +102,35 @@ def bind(run, job, artifact, log, first, last, row='journal', job_layout='shard'
 
 def review(run, job, artifact, job_log, artifact_root, first, last, temporary_root=None,
            model_root=None, model_binary_out=None, row='journal', job_layout='shard'):
+    revision = bind(run, job, artifact, job_log, first, last, row, job_layout)
+    headers = list(re.finditer(r'Sustained matrix row=(\w+) seed=(\d+) duration=(\S+)', job_log))
+    segments = {seed:job_log[headers[seed-first].end():headers[seed-first+1].start()
+                    if seed < last else len(job_log)] for seed in range(first,last+1)}
+    result = review_raw(revision, artifact_root, first, last, segments, temporary_root,
+                        model_root, model_binary_out, row)
+    result.update(shard_qualified=True, run=run['id'], job=job['id'], artifact=artifact['id'], job_layout=job_layout)
+    return result
+
+
+def review_raw(revision, artifact_root, first, last, segments, temporary_root=None,
+               model_root=None, model_binary_out=None, row='journal', event_files=None):
+    """Shared raw corpus checks only; caller must bind provider or native provenance."""
+    if not re.fullmatch('[0-9a-f]{40}', revision) or type(first) is not int or type(last) is not int or not 1 <= first <= last <= 200:
+        raise ValueError('invalid recorded source or original seed range')
     report_row, test = row_contract(row)
     if model_binary_out is not None:
         model_binary_out = Path(model_binary_out).resolve()
         if model_binary_out.exists() or model_binary_out.is_relative_to(artifact_root.resolve()):
             raise ValueError('model executable output must be fresh and outside original artifacts')
-    revision = bind(run, job, artifact, job_log, first, last, row, job_layout)
     repo = REPO if model_root is None else Path(model_root).resolve()
     before = shared.inventory(artifact_root)
+    event_files = event_files or {seed:f'matrix-{row}-{seed}-test.jsonl' for seed in range(first,last+1)}
+    if set(event_files) != set(range(first,last+1)) or set(segments) != set(range(first,last+1)):
+        raise ValueError('incomplete raw event or execution log mapping')
     required = {f'matrix-{row}-{seed}-{suffix}' for seed in range(first,last+1)
-                for suffix in ('test.jsonl', 'faults.json', 'latencies.json', 'history.jsonl')}
+                for suffix in ('faults.json', 'latencies.json', 'history.jsonl')} | set(event_files.values())
     if not required <= set(before) or {p for p in before if p.endswith('test.jsonl')} != {
-            f'matrix-{row}-{seed}-test.jsonl' for seed in range(first,last+1)}:
+            value for value in event_files.values() if value.endswith('test.jsonl')}:
         raise ValueError('missing, duplicate or unexpected raw seed evidence')
     # Compile production models only after proving the model dependency inputs
     # match the actually executed revision. Captured runtime binaries/stores are
@@ -149,25 +166,22 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
         go.write_bytes(Path(__file__).with_name('tier2-history-review.go.txt').read_bytes())
         subprocess.run(['go', 'build', '-p=1', '-o', str(binary), str(go)], cwd=repo, check=True)
         binary_hash = hashlib.sha256(binary.read_bytes()).hexdigest()
-        headers = list(re.finditer(r'Sustained matrix row=(\w+) seed=(\d+) duration=(\S+)', job_log))
         for seed in range(first, last + 1):
             r = artifact_root
             prefix = f'matrix-{row}-{seed}-'
-            events = [json.loads(l) for l in (r / (prefix + 'test.jsonl')).read_text().splitlines()]
+            events = [json.loads(l) for l in (r / event_files[seed]).read_text().splitlines()]
             if any(e['Action'] in ('skip', 'fail', 'build-fail') for e in events):
                 raise ValueError("raw evidence check failed: not any((e['Action'] in ('skip', 'fail', 'build-fail') for e in events))")
             execution.check(events, test, '10m')
             log = ''.join((e.get('Output', '') for e in events))
             report = campaign.check_seed(log, report_row, seed, test)
-            index = seed-first
-            segment = job_log[headers[index].end():headers[index+1].start()
-                              if index+1 < len(headers) else len(job_log)]
+            segment = segments[seed]
             guard = f'Verified executed sustained test {test} duration=10m'
             if segment.count(guard) != 1 or campaign.check_seed(segment, report_row, seed, test) != report:
                 raise ValueError('raw events differ from bound job log or its duration guard')
             fault_data = read(r / (prefix + 'faults.json'))
             faults = fault_data['faults']
-            if not (fault_data['seed'] == seed and campaign.seconds(fault_data['duration']) == 600 and (len(faults) == report['faults'] == 19)):
+            if not (type(fault_data['seed']) is int and fault_data['seed'] == seed and campaign.seconds(fault_data['duration']) == 600 and (len(faults) == report['faults'] == 19)):
                 raise ValueError("raw evidence check failed: fault_data['seed'] == seed and campaign.seconds(fault_data['duration']) == 600 and (len(faults) == report['faults'] == 19)")
             previous = None
             for fault in faults:
@@ -241,8 +255,7 @@ def review(run, job, artifact, job_log, artifact_root, first, last, temporary_ro
         model_binary_out.chmod(0o755)
         if hashlib.sha256(model_binary_out.read_bytes()).hexdigest() != binary_hash:
             raise ValueError('retained model executable failed readback verification')
-    return dict(shard_qualified=True, revision=revision, run=run['id'], job=job['id'],
-                artifact=artifact['id'], row=row, job_layout=job_layout, first=first, last=last,
+    return dict(raw_data_verified=True, revision=revision, row=row, first=first, last=last,
                 duration_seconds_per_seed=600, seeds=reports,
                 all_three_independent_history_models_pass=True,
                 model_source_root=str(repo),

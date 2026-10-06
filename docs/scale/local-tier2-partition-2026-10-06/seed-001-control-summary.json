@@ -1,0 +1,22 @@
+{
+  "source": "300a36a3917a61e51a4a3584288cd05b1fde0cb3",
+  "controls": [
+    {
+      "control": "missing-majority",
+      "rejected": true,
+      "error": "partition lacks exact minority isolation and acknowledged majority write"
+    },
+    {
+      "control": "wrong-latency",
+      "rejected": true,
+      "error": "raw evidence check failed: observed - enabled == delay"
+    },
+    {
+      "control": "duplicate-start",
+      "rejected": true,
+      "error": "raw evidence check failed: result == ''.join((f'whole {name} operations={operations} verdict=Ok error=<nil>\\n' for name in ('starts', 'signals', 'results')))"
+    }
+  ],
+  "original_fixture_unchanged": true,
+  "scope": "Disposable copies of actual closed seed1 raw data only; no native rerun, original store opening or full200 qualification."
+}
