@@ -16,6 +16,9 @@ import (
 
 	"js-wf/client"
 	"js-wf/integrity"
+	"js-wf/journal"
+
+	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/testcluster"
 	"js-wf/wf"
 	"js-wf/worker"
@@ -61,7 +64,11 @@ func TestMatrixParallelInvocationAuditsNativeOracle(t *testing.T) {
 			return wf.Call(c, "latencychild", raw)
 		},
 	}
-	w, err := worker.New(ctx, all[0], "latency-native", handlers, worker.WithPartitionConcurrency(8))
+	encoding := journal.JSON
+	if configured := os.Getenv("WF_MATRIX_LATENCY_ENCODING"); configured != "" {
+		encoding = journal.Encoding(configured)
+	}
+	w, err := worker.New(ctx, all[0], "latency-native", handlers, worker.WithPartitionConcurrency(8), worker.WithJournalEncoding(encoding))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,11 +234,66 @@ func TestMatrixParallelInvocationAuditsNativeOracle(t *testing.T) {
 	if bulkFailure != nil || bulkErr == nil || !strings.Contains(bulkErr.Error(), "post-heal deadline") {
 		t.Fatalf("bulk audit weakened terminal deadline: %v", bulkErr)
 	}
+	var snapshotProof map[string]any
+	if os.Getenv("WF_MATRIX_BULK_SNAPSHOT_CONTROLS") == "1" {
+		// A manifest before purge preserves every original server timestamp.
+		// After purge, logical integrity still holds, but neither point nor bulk
+		// may invent the missing timestamps or return partial success.
+		deadline = time.Now().Add(time.Minute)
+		store := journal.New(all[0])
+		var firstSnapshot journal.Snapshot
+		var firstType, firstID string
+		for sequence := info.State.FirstSeq; sequence <= info.State.LastSeq; sequence++ {
+			msg, err := inv.GetMsg(ctx, sequence)
+			if err != nil {
+				t.Fatal(err)
+			}
+			parts := strings.Split(msg.Subject, ".")
+			snapshot, err := store.WriteSnapshot(ctx, parts[2], parts[3], 1)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if sequence == info.State.FirstSeq {
+				firstSnapshot, firstType, firstID = snapshot, parts[2], parts[3]
+			}
+			legacy, err := matrixInvocationLatenciesLegacyOracle(ctx, all[2], parts[2], parts[3], msg.Time, deadline, 0)
+			if err != nil || !reflect.DeepEqual(legacy, serial[sequence-info.State.FirstSeq].samples) {
+				t.Fatalf("manifest changed frozen point samples for %s: %v", msg.Subject, err)
+			}
+		}
+		auditCtx, stopAudit := context.WithTimeout(ctx, 20*time.Second)
+		manifestReport, err := integrity.CheckWithChunkedConcurrentStateReads(auditCtx, all[2])
+		stopAudit()
+		if err != nil || manifestReport != fullReport {
+			t.Fatalf("manifest integrity changed: %+v %v", manifestReport, err)
+		}
+		snapshotBulk, snapshotStats, err := matrixBulkInvocationAudits(ctx, all[2], manifestReport, deadline)
+		if err != nil || !reflect.DeepEqual(snapshotBulk, serial) || snapshotStats.SnapshotFallbacks != 160 {
+			t.Fatalf("snapshot fallback samples differ: %+v %v", snapshotStats, err)
+		}
+		if err := store.PurgeSnapshot(ctx, firstType, firstID, firstSnapshot); err != nil {
+			t.Fatal(err)
+		}
+		auditCtx, stopAudit = context.WithTimeout(ctx, 20*time.Second)
+		purgedReport, err := integrity.CheckWithChunkedConcurrentStateReads(auditCtx, all[2])
+		stopAudit()
+		if err != nil || purgedReport != fullReport {
+			t.Fatalf("purged logical integrity changed: %+v %v", purgedReport, err)
+		}
+		pointFailure, pointErr := read(ctx, info.State.FirstSeq)
+		purgedFailure, purgedStats, purgedErr := matrixBulkInvocationAudits(ctx, all[2], purgedReport, deadline)
+		if pointFailure.samples != nil || !errors.Is(pointErr, jetstream.ErrMsgNotFound) || purgedFailure != nil || !errors.Is(purgedErr, jetstream.ErrMsgNotFound) {
+			t.Fatalf("purged timestamp evidence invented: point=%v bulk=%v", pointErr, purgedErr)
+		}
+		snapshotProof = map[string]any{"manifest_equals_frozen_point": true, "manifest_bulk_equals_serial": true, "manifest_stats": snapshotStats,
+			"purged_integrity_report": purgedReport, "purged_point_error": pointErr.Error(), "purged_bulk_error": purgedErr.Error(),
+			"purged_stats": purgedStats, "purged_missing_timestamps_rejected_without_partial_samples": true}
+	}
 	persistedSamples := make([][]matrixLatencySample, len(parallel))
 	for index, result := range parallel {
 		persistedSamples[index] = result.samples
 	}
-	data, err := json.MarshalIndent(map[string]any{"invocations": len(serial), "serial_equals_parallel": true, "legacy_equals_shared_reducer": true, "bulk_equals_serial": true, "bulk_stats": bulkStats, "cached_metadata_equals_serial": true, "metadata_handle_lookups": counts, "deadline_negative_control": true, "parallel_elapsed": parallelElapsed, "serial_elapsed": serialElapsed, "measurement_scope": "ordered same-fixture point and bulk checks; no isolated speed ratio or large/fault/24h qualification", "samples": persistedSamples}, "", "  ")
+	data, err := json.MarshalIndent(map[string]any{"encoding": encoding, "snapshot_controls": snapshotProof, "invocations": len(serial), "serial_equals_parallel": true, "legacy_equals_shared_reducer": true, "bulk_equals_serial": true, "bulk_stats": bulkStats, "cached_metadata_equals_serial": true, "metadata_handle_lookups": counts, "deadline_negative_control": true, "parallel_elapsed": parallelElapsed, "serial_elapsed": serialElapsed, "measurement_scope": "ordered same-fixture point and bulk checks; no isolated speed ratio or large/fault/24h qualification", "samples": persistedSamples}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}

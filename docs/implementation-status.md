@@ -29,6 +29,21 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: archive headroom and snapshot evidence controls prepared
+
+Complete Git part/concatenation/member checks recovered 1,079,451,648 allocated
+bytes from duplicate working-tree parts, leaving 1,509,875,712 bytes free.
+Canonical proof, original/failed fixtures and live campaigns are retained.
+[Recovery evidence](scale/legacy-proof-parts-recovery-2026-10-06/).
+
+The opt-in native latency oracle now supports actual JSON/protobuf worker writes
+and snapshot controls. Manifests before purge must retain exact frozen-point/bulk
+samples; after prefix purge, logical integrity must pass while point/bulk both
+reject missing server timestamps with no partial samples. Native execution is
+pending. Snapshot entries preserve sequence IDs but not purged message times;
+this is an evidence limitation, not permission to weaken latency qualification.
+Bulk remains disabled in matrix/soak.
+
 ## Latest follow-up — 2026-10-06: corrected bulk native sample oracle accepted
 
 Fresh7bd5571 full160-real-workflow R3 race PASS26.82s: allordered samples equal

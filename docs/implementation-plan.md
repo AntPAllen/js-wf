@@ -4775,3 +4775,15 @@ Large real-cohort throughput/process memory, snapshot fallback, protobuf/purge/r
 and native fault recovery remain pending before adoption. Conservative charged-data
 limit is not an RSS guarantee. Original20/60-second retained audit,20-second point
 fallback and six-minute final-stage limits remain; original long handles unchanged.
+
+### Bulk latency snapshot and encoding qualification
+
+Run the retained native 160-workflow oracle with `WF_MATRIX_LATENCY_ENCODING=json`
+and `protobuf-v1`, plus `WF_MATRIX_BULK_SNAPSHOT_CONTROLS=1`. Actual worker writes
+must match the frozen original point samples. Write snapshot manifests before
+purge for all workflows; independently recheck complete integrity and verify all
+160 bulk snapshot fallbacks equal the original samples. Purge one covered prefix,
+recheck logical integrity, and require both point and bulk latency paths to reject
+missing server timestamps without partial samples. Compacted journals cannot prove
+original latency samples unless original timestamps are independently retained.
+These controls do not replace large-cohort, memory, transport-fault or 24-hour gates.
