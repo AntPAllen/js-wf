@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Live snapshot and proof storage — 2026-10-06 06:32 UTC
+
+Original24h journal handle remainsactive,5h22m/batch2736; latest completed checkpoint
+2720 covers76,160 invocations and839,657 entries. Million candidate remainsactive:
+861,917 unique receipts, p99.290773575s/max17.839281762s; both actual restart events
+recorded, finalphysical index/drain verdict pending. No24h campaign is accepted.
+
+JSON and protobuf native snapshot proofs have additional complete S3 readback
+copies. With committed receipts and complete Git/member/execution checks, only
+redundant raw/worktree archives were reclaimed:130,174,976 allocated bytes;
+969,535,488 free atcompletion. Originalstores/exes/source/caches/Git/live retained.
+[Snapshot duplicate recovery](scale/snapshot-proof-duplicate-recovery-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: protobuf snapshot oracle and S3 proof copies
 
 At adf84cf, actual R3 race protobuf160 PASS50.73s with all160 unpurged snapshot
