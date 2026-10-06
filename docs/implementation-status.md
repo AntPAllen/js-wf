@@ -13,7 +13,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier2 real-cluster matrix | Complete journal-leader, consumer-leader and all-server-kill rows, each seeds 1–200, qualified at executed `c4fed06`. Retained normal ten-minute partition seed2 at ec60e83 and hosted seed3 at a517d2e, each with independent copied integrity/history/drain, qualified. Retained normal ten-minute block-disk seed1 at f57da4d plus copied raw-image integrity/history/drain qualified. Ten-minute worker seed1 native and copied audits also pass, with the original producer generated-cache failure separately preserved. Full 13-row × 200 current-source gate remains open. |
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries, physical drain and independent copied audits qualified at executed dc8422a. Other finite combined cases remain. |
-| Explicit full400k audit capacity | R1 direct reader passes18.350496s at08a90c8 under4-core/GOGC500/4GiB, exact4.8M entries. Earlier2GiB/default and R1 fault/replay qualification remain open. |
+| Explicit full400k audit capacity | R1 direct reader passes18.350496s at08a90c8 under4-core/GOGC500/4GiB. Latestchunked full read/reduction completes17.114920s atacc9123, exact4.8M entries, but zero-consumer cleanup fails20s. Current cold combined cleanup/fault/default qualification remains open. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. Corrected continuous-byte attempt also failed checkpoint1040 /29120 after7986.85s; originals independently preserved, state snapshot phase is the next diagnostic target. No24h row qualified; full-matrix soak remains. |
 
@@ -28,6 +28,18 @@ qualification, rather than treating older executed-source rows as a blanket pass
 Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
+
+## Latest follow-up — 2026-10-06: full chunked read completes; cleanup fails
+
+Fresh cleanacc9123 full400k/4.8M chunked audit/reduction completes17.114920s,
+exact report and4.8M once-only journal visits. Both created deletes succeed;
+INVcount0 but JRNcount2 persists until original20s overall deadline. NativeFAIL37.33s,
+owner fault never injected. Residual identities/cause unconfirmed; historical
+restored assignments are only a hypothesis. CPU parse4.65s/JSON4.51s/select0.61s
+are overlapping costs, not an isolated speed ratio. ActualSDK/686inputs/fiveservers/
+closure/unchanged1058donorfiles/full1713file827alias proof independently verified.
+Named pre-audit and post-delete diagnostics are next, retaining zero assertion/
+20s/cardinality. No default/fault/24h pass. [Evidence](scale/chunked-callback-audit-2026-10-06/full400k-cold-profile/).
 
 ## Latest follow-up — 2026-10-06: chunked legacy oracle accepted
 

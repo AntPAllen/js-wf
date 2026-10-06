@@ -4281,3 +4281,14 @@ snapshot/orphan reports/errors match independent point oracle. SDK/source/actual
 legacy bytes/closedPIDs and whole1070-member48,939,101byte archive/readback accepted.
 Full400k/4.8M original20s cold CPU/owner-down gate remains pending; no default/live/
 fullmatrix/24h qualification. [Evidence](scale/chunked-callback-audit-2026-10-06/legacy-controls/).
+
+## Full chunked audit completes; residual cleanup gate fails — 2026-10-06
+
+Atacc9123 fresh full400k/4.8M normal4CPU/GOGC500/4GiB exact read/reduction completes
+17.114920s. Both created deletes succeed, INVcount0 observed, JRNcount2 persists to
+original20s overall deadline. NativeFAIL37.33s; no owner fault injected. Residual
+identity/cause unconfirmed; capture pre-audit named configs and post-delete named
+APIs before changing fixture/cleanup semantics. Complete1713-file/827alias lossless
+proof, actualsource/SDK/fiveservers/closure/unchanged1058donorfiles verified.
+No combinedcleanup/fault/default/live/fullmatrix/24h acceptance.
+[Evidence](scale/chunked-callback-audit-2026-10-06/full400k-cold-profile/).
