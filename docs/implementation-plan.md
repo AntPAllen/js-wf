@@ -5284,3 +5284,14 @@ Focused race component qualifies at0b2716b: body42.13s/actual SDK43.33s. Every o
 Original60s scenario/production heartbeat3s/AckWait13s remain. Strict generation1→3, two collected objects, shared/survivor/fresh references, three effects/two terminals, two fresh handler entries/one manifest loss, all-peer results/raw integrity/quiescent GC pass. Independent review binds1886 source inputs, actual race SDK/profile, six closed server incarnations and all2323 complete archive members without reopening stores. Eight guard groups pass, including actual-log short-outage/TTL/non-increasing-epoch/missing weak response/wrong-generation/missing-SIGKILL negatives. [Complete proof](scale/domain-retirement-weak-frame-expiry-2026-10-06/).
 
 Persistent domain CI adds the fourth combined row; hosted acceptance remains independent. This closes the focused domain frame-absence/manifest-repair/lease-expiry/server cut. Legacy versions, other publication timings, active-writer GC, full current-source matrices, original million physical timer drain and actual24h remain open. Original24h producer and partition200 observer remain active unchanged.
+
+## Legacy combined domain retirement control prepared — 2026-10-06
+
+Extend the accepted current-server domain/frame-absence/lease-expiry cut to three
+actual2.11.17 peers, preserving the same production lease, strict retirement
+assertions and original30s whole-cut/60s scenario/3m SDK deadlines. Select fallback
+provisioning and prove versions and backend at admission/restart; retain the
+legacy input and exact observed executable bytes for all six incarnations.
+Current-version and renamed results cannot stand in for legacy evidence. The
+opt-in CI runner preserves complete originals; native acceptance remains
+pending. [Preparation](scale/domain-retirement-legacy-weak-frame-expiry-2026-10-06/).

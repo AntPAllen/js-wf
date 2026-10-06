@@ -53,12 +53,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        case: [read-controls, retirement-server-kill, retirement-weak-frame, retirement-weak-frame-expiry]
+        case: [read-controls, retirement-server-kill, retirement-weak-frame, retirement-weak-frame-expiry, legacy-retirement-weak-frame-expiry]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Build exact legacy server input in isolation
+        if: matrix.case == 'legacy-retirement-weak-frame-expiry'
+        run: |
+          mkdir -p "$RUNNER_TEMP/domain-legacy-build" "$RUNNER_TEMP/domain-legacy-bin"
+          cd "$RUNNER_TEMP/domain-legacy-build"
+          GOWORK=off GO111MODULE=on GOBIN="$RUNNER_TEMP/domain-legacy-bin" go install github.com/nats-io/nats-server/v2@v2.11.17
+          printf 'WF_NATS_SERVER_BIN=%s\n' "$RUNNER_TEMP/domain-legacy-bin/nats-server" >> "$GITHUB_ENV"
       - name: Require complete native race coverage and retain closed originals
         run: python3 scripts/run-domain-runtime-controls.py --case '${{ matrix.case }}' --root '${{ runner.temp }}/domain-controls-${{ matrix.case }}'
       - if: always()

@@ -93,6 +93,15 @@ func StartMixedVersionProcesses(root string, binaries []string) (*ProcessCluster
 	return startProcessesWithBinaries(root, 3, false, binaries, false)
 }
 
+// StartMixedVersionProcessesWithDomain retains chosen server binaries and the
+// same domain configuration across every RestartNode, including legacy peers.
+func StartMixedVersionProcessesWithDomain(root string, binaries []string, domain string) (*ProcessCluster, error) {
+	if len(binaries) != 3 || domain == "" || strings.ContainsAny(domain, "\r\n") {
+		return nil, fmt.Errorf("mixed-version domain cluster needs three binaries and a valid domain")
+	}
+	return startProcessesWithDomain(root, 3, false, binaries, false, domain)
+}
+
 // StartClockSkewProcesses shifts one actual NATS process's Go wall clock.
 // Callers must verify the running clocks through ServerNow before workloads.
 func StartClockSkewProcesses(root string, count, node int, offset time.Duration) (*ProcessCluster, error) {

@@ -53,6 +53,14 @@ func TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAb
 	runContinuationRetirementProcessFault(t, true, true, "WFRETIRE", true)
 }
 
+func TestContinuationRetirementReuseInLegacyJetStreamDomainWithManifestLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL(t *testing.T) {
+	binary := os.Getenv("WF_NATS_SERVER_BIN")
+	if binary == "" {
+		t.Skip("requires NATS 2.11.17 through WF_NATS_SERVER_BIN")
+	}
+	runContinuationRetirementProcessFaultWithBinary(t, true, true, "WFRETIRE", true, binary)
+}
+
 // Only the selected fresh frame's first weak Object Store response is injected.
 // The frame upload, administrative metadata confirmation and retried payload
 // read use real domain servers and original retained stores after SIGKILL.
@@ -92,11 +100,18 @@ func (s *retirementWeakFrameStore) GetBytes(ctx context.Context, name string, op
 
 func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool, domain string, weakFrame ...bool) {
 	t.Helper()
+	if len(weakFrame) > 1 {
+		t.Fatal("at most one weak frame control")
+	}
+	runContinuationRetirementProcessFaultWithBinary(t, full, expireLease, domain, len(weakFrame) == 1 && weakFrame[0], "")
+}
+
+func runContinuationRetirementProcessFaultWithBinary(t *testing.T, full, expireLease bool, domain string, forcedAbsence bool, legacyBinary string) {
+	t.Helper()
 	if expireLease && !full {
 		t.Fatal("lease expiry requires every server stopped")
 	}
-	forcedAbsence := len(weakFrame) == 1 && weakFrame[0]
-	if len(weakFrame) > 1 || forcedAbsence && (!full || domain == "") {
+	if forcedAbsence && (!full || domain == "") {
 		t.Fatal("weak frame control requires a full domain server cut")
 	}
 	root := t.TempDir()
@@ -108,13 +123,32 @@ func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool,
 		if forcedAbsence {
 			root += "-weak-frame-absence"
 		}
+		if legacyBinary != "" {
+			root += "-legacy-2.11.17"
+		}
 		if err := os.Mkdir(root, 0700); err != nil {
 			t.Fatal(err)
 		}
 	}
 	var cluster *testcluster.ProcessCluster
 	var err error
-	if domain == "" {
+	if legacyBinary != "" {
+		if domain == "" || !full {
+			t.Fatal("legacy control requires a full domain server cut")
+		}
+		data, readErr := os.ReadFile(legacyBinary)
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		retained := filepath.Join(root, "legacy", "nats-server")
+		if err = os.MkdirAll(filepath.Dir(retained), 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err = os.WriteFile(retained, data, 0700); err != nil {
+			t.Fatal(err)
+		}
+		cluster, err = testcluster.StartMixedVersionProcessesWithDomain(root, []string{retained, retained, retained}, domain)
+	} else if domain == "" {
 		cluster, err = testcluster.StartProcesses(root, 3)
 	} else {
 		cluster, err = testcluster.StartProcessesWithDomain(root, 3, domain)
@@ -149,7 +183,15 @@ func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool,
 	provisioned := false
 	for ready.Err() == nil {
 		attempt, finish := context.WithTimeout(ready, 4*time.Second)
-		provisionErr = provision.Ensure(attempt, all[0], 3)
+		if legacyBinary == "" {
+			provisionErr = provision.Ensure(attempt, all[0], 3)
+		} else {
+			var backend provision.TimerBackend
+			backend, provisionErr = provision.EnsureAuto(attempt, all[0], 3)
+			if provisionErr == nil && backend != provision.FallbackTimers {
+				provisionErr = fmt.Errorf("legacy control backend=%s want fallback", backend)
+			}
+		}
 		finish()
 		if provisionErr == nil {
 			provisioned = true
@@ -168,11 +210,17 @@ func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool,
 	}
 	if domain != "" {
 		for node := range all {
+			if legacyBinary != "" && all[node].Conn().ConnectedServerVersion() != "2.11.17" {
+				t.Fatalf("legacy node%d version=%s want2.11.17", node, all[node].Conn().ConnectedServerVersion())
+			}
 			info, err := all[node].AccountInfo(ready)
 			if err != nil || info.Domain != domain || all[node].Conn().ConnectedDomain() != domain {
 				t.Fatalf("native node%d domain admission: %+v / %v", node, info, err)
 			}
 			t.Logf("native domain admitted node=%d pid=%d domain=%s server_id=%s", node, cluster.Commands[node].Process.Pid, info.Domain, all[node].Conn().ConnectedServerId())
+			if legacyBinary != "" {
+				t.Logf("legacy domain admitted node=%d version=%s timer_backend=fallback", node, all[node].Conn().ConnectedServerVersion())
+			}
 		}
 	}
 	var previousEpoch uint64
@@ -306,6 +354,25 @@ func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool,
 					info, err := all[node].AccountInfo(attempt)
 					stopAttempt()
 					if err == nil {
+						if legacyBinary != "" {
+							if all[node].Conn().ConnectedServerVersion() != "2.11.17" {
+								return fmt.Errorf("legacy restarted node%d wrong version", node)
+							}
+							attempt, stopAttempt := context.WithTimeout(observe, time.Second)
+							run, readErr := all[node].Stream(attempt, "WF_RUN")
+							if readErr == nil {
+								var streamInfo *jetstream.StreamInfo
+								streamInfo, readErr = run.Info(attempt)
+								if readErr == nil && streamInfo.Config.AllowMsgSchedules {
+									readErr = fmt.Errorf("legacy domain restart changed fallback backend")
+								}
+							}
+							stopAttempt()
+							if readErr != nil {
+								return readErr
+							}
+							t.Logf("legacy domain healed node=%d version=%s timer_backend=fallback", node, all[node].Conn().ConnectedServerVersion())
+						}
 						if info.Domain != domain || all[node].Conn().ConnectedDomain() != domain || all[node].Conn().ConnectedServerId() == originalIDs[node] {
 							return fmt.Errorf("restarted node%d wrong domain %q", node, info.Domain)
 						}

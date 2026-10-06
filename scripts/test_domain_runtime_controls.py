@@ -10,6 +10,14 @@ spec.loader.exec_module(controls)
 
 
 class DomainCoverageControls(unittest.TestCase):
+    def test_current_expiry_row_cannot_substitute_for_legacy_servers(self):
+        log = (REPO/'docs/scale/domain-retirement-weak-frame-expiry-2026-10-06/native-race/native.log').read_text()
+        with self.assertRaisesRegex(ValueError, 'coverage'):
+            controls.verify_log('legacy-retirement-weak-frame-expiry', log)
+        renamed = log.replace(controls.WEAK_EXPIRY, controls.LEGACY_WEAK_EXPIRY)
+        with self.assertRaisesRegex(ValueError, 'legacy peer versions/backend'):
+            controls.verify_log('legacy-retirement-weak-frame-expiry', renamed)
+
     def test_accepted_read_row_rejects_missing_duplicate_skip_and_wrong_route(self):
         log = (REPO/'docs/scale/domain-object-absence-2026-10-06/native-race/native.log').read_text()
         controls.verify_log('read-controls', log)

@@ -24,9 +24,10 @@ KILL = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndAllSe
 EXPIRY = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndLeaseExpiryAcrossAllServerSIGKILL'
 WEAK_FRAME = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAbsenceAndAllServerSIGKILL'
 WEAK_EXPIRY = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL'
+LEGACY_WEAK_EXPIRY = 'TestContinuationRetirementReuseInLegacyJetStreamDomainWithManifestLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL'
 CASES = {'read-controls': [RESULT, RESULT+'InJetStreamDomain', SNAPSHOT, SNAPSHOT+'InJetStreamDomain'],
          'retirement-server-kill': [KILL, EXPIRY], 'retirement-weak-frame': [WEAK_FRAME],
-         'retirement-weak-frame-expiry': [WEAK_EXPIRY]}
+         'retirement-weak-frame-expiry': [WEAK_EXPIRY], 'legacy-retirement-weak-frame-expiry': [LEGACY_WEAK_EXPIRY]}
 
 
 def sha(path):
@@ -70,13 +71,13 @@ def verify_log(case, log):
         heal = re.findall(r'native domain healed node=\d pid=\d+ domain=WFRETIRE server_id=\w+ elapsed=([0-9.]+)s', log)
         require(len(heal) == nodes and all(float(value) < 30 for value in heal), 'whole-cut domain heal gate')
         epochs = re.findall(r'prior_epoch=(\d+) terminal_epoch=(\d+) records=(\d+)', log)
-        if case in ('retirement-server-kill', 'retirement-weak-frame-expiry'):
+        if case in ('retirement-server-kill', 'retirement-weak-frame-expiry', 'legacy-retirement-weak-frame-expiry'):
             require(len(epochs) == 1 and int(epochs[0][1]) > int(epochs[0][0]), 'lease expiry successor epoch missing')
             outages = re.findall(r'all-server outage: held=([0-9.]+)s ttl=12s', log)
             require(len(outages) == 1 and float(outages[0]) > 12, 'outage did not exceed production lease TTL')
         else:
             require(not epochs, 'unexpected lease expiry profile')
-        if case in ('retirement-weak-frame', 'retirement-weak-frame-expiry'):
+        if case in ('retirement-weak-frame', 'retirement-weak-frame-expiry', 'legacy-retirement-weak-frame-expiry'):
             armed = re.findall(r'weak frame armed after domain heal: object=(step-result-[a-f0-9]{64})', log)
             confirmed = re.findall(r'weak frame confirmed: object=(step-result-[a-f0-9]{64}) generation=(\d+) drops=1 reads=(\d+) leader=1 direct=0 route=\$JS.WFRETIRE.API.STREAM.MSG.GET.OBJ_WF_BLOB', log)
             generations = re.findall(r'old_generation=(\d+) fresh_generation=(\d+)', log)
@@ -86,6 +87,10 @@ def verify_log(case, log):
                     'fresh frame weak absence and exact native domain confirmation missing')
         require(log.count('effects=3 terminals=2 shared_blob_retained=true') == len(expected) and log.count('manifest_drops=1') == len(expected),
                 'strict retirement/reuse completion missing')
+        if case == 'legacy-retirement-weak-frame-expiry':
+            for stage in ('admitted', 'healed'):
+                peers=re.findall(r'legacy domain '+stage+r' node=(\d) version=2\.11\.17 timer_backend=fallback', log)
+                require(sorted(peers)==['0','1','2'], 'legacy peer versions/backend not verified: '+stage)
     return {'case': case, 'tests': expected, 'scope': 'Focused native row only; full matrix/24h not qualified.'}
 
 
@@ -139,6 +144,18 @@ def main():
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(REPO/name, dest)
     env = dict(os.environ, GOMAXPROCS='2', GOMEMLIMIT='1GiB')
+    legacy = args.case == 'legacy-retirement-weak-frame-expiry'
+    if legacy:
+        donor = Path(os.environ.get('WF_NATS_SERVER_BIN', ''))
+        require(donor.is_file() and not donor.is_symlink(), 'legacy row requires a regular NATS2.11.17 binary')
+        info = subprocess.check_output(['go','version','-m',str(donor)], text=True)
+        require(re.search(r'\bgithub.com/nats-io/nats-server/v2\s+v2\.11\.17\b', info), 'legacy module identity mismatch')
+        target = root/'inputs'/'nats-server'
+        target.parent.mkdir()
+        shutil.copyfile(donor, target)
+        target.chmod(0o700)
+        env['WF_NATS_SERVER_BIN'] = str(target)
+        save('legacy-binary.json', {'donor': str(donor), 'retained': str(target), 'sha256': sha(target), 'build_info': info})
     for key in ('WF_RESULT_ABSENCE_ROOT', 'WF_SNAPSHOT_LEADER_ROOT', 'WF_CONTINUATION_RETIREMENT_PROCESS_ROOT'):
         env[key] = str(root/'stores')
     binary = root/'integration-race.test'
@@ -157,7 +174,7 @@ def main():
         actual_env = dict(v.split(b'=', 1) for v in (proc/'environ').read_bytes().split(b'\0') if b'=' in v)
         actual = {'pid': child.pid, 'exe': str((proc/'exe').resolve()), 'exe_sha256': sha(proc/'exe'),
                   'stat': (proc/'stat').read_text(), 'args': [os.fsdecode(v) for v in (proc/'cmdline').read_bytes().split(b'\0') if v],
-                  'environment': {k: os.fsdecode(actual_env[k.encode()]) for k in ('GOMAXPROCS', 'GOMEMLIMIT', 'WF_RESULT_ABSENCE_ROOT', 'WF_SNAPSHOT_LEADER_ROOT', 'WF_CONTINUATION_RETIREMENT_PROCESS_ROOT')}}
+                  'environment': {k: os.fsdecode(actual_env[k.encode()]) for k in ('GOMAXPROCS', 'GOMEMLIMIT', 'WF_RESULT_ABSENCE_ROOT', 'WF_SNAPSHOT_LEADER_ROOT', 'WF_CONTINUATION_RETIREMENT_PROCESS_ROOT') + (('WF_NATS_SERVER_BIN',) if legacy else ())}}
         require(actual['exe'] == str(binary) and actual['exe_sha256'] == sha(binary) and actual['args'] == command,
                 'actual SDK identity mismatch')
         save('actual-sdk.json', actual)
@@ -197,8 +214,11 @@ def main():
         if args.case != 'read-controls':
             require(len(servers) == 6*len(CASES[args.case]), 'all original/replacement native server incarnations must be observed')
             for row in servers.values():
-                require(sha(row['exe']) == row['exe_sha256'] and 'v2.15.0' in row['build_info'],
+                version = 'v2.11.17' if legacy else 'v2.15.0'
+                require(sha(row['exe']) == row['exe_sha256'] and re.search(r'\bgithub.com/nats-io/nats-server/v2\s+'+re.escape(version)+r'\b', row['build_info']),
                         'observed native server executable changed or wrong version')
+                if legacy:
+                    require(row['exe_sha256']==sha(root/'inputs'/'nats-server'), 'legacy observed binary differs from retained input')
             qualification['observed_native_server_incarnations'] = len(servers)
     except ValueError as exc:
         error = str(exc)
