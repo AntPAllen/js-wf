@@ -24,11 +24,18 @@ func main() {
 	}
 }
 func run() error {
-	if len(os.Args) != 3 || !filepath.IsAbs(os.Args[1]) || (os.Args[2] != "fixed" && os.Args[2] != "fresh") {
-		return fmt.Errorf("usage: component FRESH_ROOT fixed|fresh")
+	if len(os.Args) != 4 || !filepath.IsAbs(os.Args[1]) || (os.Args[2] != "fixed" && os.Args[2] != "fresh") {
+		return fmt.Errorf("usage: component FRESH_ROOT fixed|fresh production|disabled")
 	}
 	root := os.Args[1]
 	keyProfile := os.Args[2]
+	expiryProfile := os.Args[3]
+	ttl := provision.LeaseTTL
+	if expiryProfile == "disabled" {
+		ttl = 0
+	} else if expiryProfile != "production" {
+		return fmt.Errorf("unknown expiry profile: %s", expiryProfile)
+	}
 	ctx, stop := context.WithTimeout(context.Background(), 120*time.Second)
 	defer stop()
 	c, err := testcluster.StartPartitionableProcesses(filepath.Join(root, "originals", "cluster"), 3)
@@ -66,7 +73,7 @@ func run() error {
 	var kv jetstream.KeyValue
 	for setup.Err() == nil {
 		attempt, cancel := context.WithTimeout(setup, 2*time.Second)
-		kv, err = js.CreateKeyValue(attempt, jetstream.KeyValueConfig{Bucket: "WF_LEASE", History: 1, TTL: provision.LeaseTTL, LimitMarkerTTL: time.Minute, Storage: jetstream.FileStorage, Replicas: 3})
+		kv, err = js.CreateKeyValue(attempt, jetstream.KeyValueConfig{Bucket: "WF_LEASE", History: 1, TTL: ttl, LimitMarkerTTL: time.Minute, Storage: jetstream.FileStorage, Replicas: 3})
 		cancel()
 		if err == nil {
 			break
@@ -305,7 +312,7 @@ func run() error {
 	}
 	cancelWriters()
 	joined.Wait()
-	result := map[string]any{"key_profile": keyProfile, "recovered": recovered, "killed": killed, "routes_heal_requested": healed, "finished": time.Now().UTC(), "majority_probe_revision": probe, "acknowledged_transactions": acknowledged.Load(), "transaction_errors": errors.Load(), "replicas": 3, "ttl_ns": int64(provision.LeaseTTL), "history": 1, "scope": "Bare KV write/CAS/delete component diagnostic; no workflow SDK, full matrix or Tier1 reproduction qualification."}
+	result := map[string]any{"key_profile": keyProfile, "expiry_profile": expiryProfile, "recovered": recovered, "killed": killed, "routes_heal_requested": healed, "finished": time.Now().UTC(), "majority_probe_revision": probe, "acknowledged_transactions": acknowledged.Load(), "transaction_errors": errors.Load(), "replicas": 3, "ttl_ns": int64(ttl), "history": 1, "scope": "Bare KV write/CAS/delete component diagnostic; no workflow SDK, full matrix or Tier1 reproduction qualification."}
 	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		return err
