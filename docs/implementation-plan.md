@@ -4394,3 +4394,13 @@ independent row verification. Verified pushed duplicate archive/worktree parts
 reclaimed with canonicalGit/originalfixtures/cache retention, about9.4GiB free.
 Preparation alone does not qualify actual24h/default/fullmatrix.
 [Preparation](scale/chunked-callback-audit-2026-10-06/live-journal-24h-preparation/).
+
+## Explicit chunked live journal ten-minute row accepted — 2026-10-06
+
+Clean2f74289 normalPASS653.11s,94 batches/2632invocations/29003entries,19actual
+journal leaderSIGKILL/heals,9checkpoints/finalwholeintegrity/history/physicaldrain.
+Original20s/60s/threeattempts and30sp99 retained; normal4CPU/GOGC500/4GiB.
+ActualSDK/server/source/originalarchive closure and complete100,804,049byte proof
+independently verified/readback. This explicit row is qualified; actual24h,
+defaultreader and currentfullmatrix remain open.
+[Evidence](scale/chunked-callback-audit-2026-10-06/live-journal-ten-minute/).
