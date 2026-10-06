@@ -44,7 +44,7 @@ def get(url,verify):
   except BaseException:p.kill();p.wait();raise
   error=p.stderr.read();assert p.wait()==0,error
  return result
-for name in names[2:3]:
+for name in names:
  root=Path('/tmp')/name;out=base/name
  if (out/'offload.json').exists():continue
  canonical=str(out.relative_to(repo))

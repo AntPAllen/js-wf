@@ -6,4 +6,4 @@ Before removal, each archive and its complete inventory must be committed, pushe
 
 Only single-link files within `raw`, `original-stores`, `originals.zip` and `raw.zip`, where present, are candidates for removal. Shared hardlinked binaries are retained; recovery totals exclude their bytes. Source, logs and reports remain local. Restore evidence into a fresh directory with `scripts/restore-full-fixture-proof.py` using the committed metadata and inventory. No original broker store is opened.
 
-Live campaign roots and both full400k capacity donors remain local. Final recovery totals are recorded in `summary.json` after guarded removal.
+Live campaign roots and both full400k capacity donors remain local. Completed removal recovered **2.94 GiB** of old allocated data. Temporary archive staging removed separately totals **5.00 GiB**. The final observation has **33.54 GiB available**; active runs continue writing. Exact totals and per-root records are in `summary.json`.
