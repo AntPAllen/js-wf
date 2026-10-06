@@ -33,6 +33,23 @@ terminal failures; no24h soak is running. Their complete current files, includin
 partial no-space evidence, are preserved to S3. Current normal simulation and
 ten-minute consumer-leader qualifiers are live as recorded below.
 
+## Fifth failed soak media offload complete — 2026-10-06
+
+Closed failed explicit-route streaming journal24h at95b63c0 now preserved in a
+complete6,147-member/160,269,098-byte canonical S3 archive. Recorded SDK/source,
+existing6,144-file hash ledger, complete current6,146-file census and closure
+verified. Known SDK/supervisor absent; missing historical unit recorded without
+claiming its exit observation. Fresh complete compressed SHA/every-member/
+embedded-inventory readback and repeated census/closure preceded offload of five
+primary JetStream stores, recovering703,971,328 allocated bytes. Verified raw
+archive duplicate removed160,276,480bytes. Remaining local source/executables/
+configs/logs/partial artifacts/metadata unchanged. Full original store bytes are
+canonical remotely; future audits restore fresh verified copies. Failed verdict
+and open24h gate unchanged; no independent provider-durability claim. Native
+consumer and full100k normal qualifiers continue in separate fresh roots.
+[Full proof](scale/local-r5-streaming-audit-2026-10-04/explicit-routes-normal-2g-24h-complete-offload-2026-10-06/).
+[Offload](scale/local-r5-streaming-audit-2026-10-04/explicit-routes-normal-2g-24h-store-media-offload-2026-10-06/).
+
 ## Original ten-minute bulk consumer-leader row live — 2026-10-06
 
 Fresh original10m consumer-leader seed1 runs atb861f95 with explicit chunked
