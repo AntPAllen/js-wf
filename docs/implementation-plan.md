@@ -4311,3 +4311,14 @@ failure retained/corrected. Next bounded probe captures ConsumerNames before Inf
 resolve fixtureprecondition before more bulk runs. No deletion/zeroassertion
 relaxation/capacity/fault/default/24h acceptance.
 [Evidence](scale/chunked-callback-audit-2026-10-06/initial-consumer-failure/).
+
+## Restored residual cursor identities confirmed — 2026-10-06
+
+Fresh53b3871 exact400k/4.8M read/reduction completes17.473097s. Before current
+audit, two old R5 memoryAckNone cursors exist (createdOct5 19:54/19:55). Post-delete
+names match them; current R1 JRN cursor is typed404/10014 missing, both current
+deletes succeed. Overallzero gate remainsFAIL20s. Complete1714file828alias proof
+verified. Prepare freshcopy by explicitly validating/deleting only confirmed old
+names, recording boundaries/populations and requiring zero before original20s
+healthy/fault gates. Originaldonor untouched; no fault/default/live/24h pass.
+[Evidence](scale/chunked-callback-audit-2026-10-06/assignment-names/).

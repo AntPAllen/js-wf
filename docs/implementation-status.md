@@ -29,6 +29,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: restored residual identities confirmed
+
+At53b3871 fresh full400k/4.8M exact read/reduction completes17.473097s. Initial
+names/Info identify two old R5 memory AckNone cursors createdOct5 at19:54/19:55;
+post-audit named APIs show same old names and typed404/10014 for current R1 JRN
+cursor. Both current deletes succeed; overallzero gate stillFAIL20s. This resolves
+residual identity, not why restored cursors persist. Complete1714file828alias
+proof/currentSDK/source/fiveservers/closure/unchanged1058donorfiles verified.
+Next fresh-copy preparation targets only these validated old names and requires
+zero before original20s/full4.8M gates; original donor untouched. No fault/default/
+24h acceptance. [Evidence](scale/chunked-callback-audit-2026-10-06/assignment-names/).
+
 ## Latest follow-up — 2026-10-06: pre-existing copied consumer count confirmed
 
 Fresh clean058040c full400k/4.8M preflightFAIL16.30s before any current cursor or
