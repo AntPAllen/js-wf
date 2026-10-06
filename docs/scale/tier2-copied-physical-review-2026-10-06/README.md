@@ -22,4 +22,6 @@ Four controls accept new physical and legacy API evidence separately, rejecting
 10 cohort/budget/API and 14 physical identity/state/timestamp corruptions. The
 helper compiles from a copied .go template. The accepted upgrade closed fixture
 rechecks without starting NATS; its local physical copied coverage is false.
-Fresh positive-clock copied execution is the next runtime check.
+Fresh positive-clock copied execution passes all new pinned local physical checks
+in4.822946765s. Legacy pause/isolation/fanout fixtures independently recheck their
+complete histories/counts/logical drain and explicitly report physicalfalse.

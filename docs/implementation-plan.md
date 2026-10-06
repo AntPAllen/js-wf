@@ -4636,3 +4636,15 @@ Legacy API evidence explicitly reports copied physical verification false; nativ
 upgrade physical snapshots remain valid. Four controls reject24 corruptions and
 closed upgrade crosscheck passes without NATS/store reopen. Fullmatrix/currentmain/
 24h/million physical gates remain open.
+
+## Original positive server-clock seed1 copied physical audit accepted — 2026-10-06
+
+Original835d19e normal ten-minute native + fresh independent copied integrity/full
+history/localphysicaldrain now qualifies:3,136terminals/34,530entries. Helper4954561
+reads distinct pinned /jsz queueszero/64consumers, integrity805.706728ms/whole
+4.822946765s<20s,1,698inputs/2,287unchangedoriginals/actualSDK+threeNATSclosure.
+Canonicalprecopy binding/full4,013member64,475,064byte/threepart proof verified.
+Legacy pause/isolation/fanout copied fixtures also recheck complete counts/history/
+logical drain, explicitly no local physical evidence. No original store opened or
+legacy NATS rerun. Negativeclock/full13x200/current-source/24h/million finalphysical
+gates remain open.

@@ -29,6 +29,19 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: positive clock copied physical audit accepted
+
+Fresh copied SDK1792976/helper4954561 verifies original835d19e ten-minute seed1:
+exact3,136/34,530/3,136report/fullhistory, three distinct pinned /jsz local physical
+queueszero/64consumers plus original64durable logicaldrain. Integrity805.706728ms/
+combined4.822946765s under20s. Selected1,698SDK inputs/source/exes/closure and
+2,287unchanged originals verified; canonical pre-copy verifier executed and bound.
+Full4,013member64,475,064byte/threepart archive readback passes. Positiveclock row
+qualifies at recordedsource/seed; negative/fullmatrix/currentmain/24h/million open.
+Closed pause/isolation/fanout copied fixtures also recheck complete cohort/history/
+logical drain; legacy local physical coverage explicitlyfalse. No NATS reruns.
+[Positive copied proof](scale/tier2-retained-server-clock-2026-10-06/positive-physical-copied-audit/).
+
 ## Latest follow-up — 2026-10-06: positive clock native pass and copied evidence correction
 
 Original835d19e normal ten-minute positive-clock seed1 passes native and independent
