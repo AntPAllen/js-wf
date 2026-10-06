@@ -20,13 +20,21 @@ def review(root, repo, require_retained_store=False, expected_version='v2.15.0')
     assert before and (expected_version != 'v2.15.0' or len(before)==598)
     if expected_version != 'v2.15.0':
         assert source['production_version']=='v2.15.0'
+        assert set(source['dependency_before'])=={'go.mod','go.sum'}
         download=source['download']
         assert download['Path']=='github.com/nats-io/nats-server/v2' and download['Version']==expected_version
         assert download['Dir']==source['module'] and download['Sum'] and download['GoModSum'] and not download.get('Error')
+        assert all(re.fullmatch(r'h1:[A-Za-z0-9+/]{43}=',download[key]) for key in ('Sum','GoModSum'))
+        origin=download['Origin']
+        assert origin['VCS']=='git' and origin['URL']=='https://github.com/nats-io/nats-server'
+        assert origin['Ref']=='refs/tags/'+expected_version and re.fullmatch(r'[0-9a-f]{40}',origin['Hash'])
         assert source['dependency_before']==read(root/'dependency-after.json')
         for name,digest in source['dependency_before'].items():
             assert name in ('go.mod','go.sum')
             assert digest==hashlib.sha256(subprocess.check_output(['git','show',source['revision']+':'+name],cwd=repo)).hexdigest()
+        production_mod=subprocess.check_output(['git','show',source['revision']+':go.mod'],cwd=repo,text=True)
+        assert re.search(r'^\s*github\.com/nats-io/nats-server/v2\s+v2\.15\.0\s*$',production_mod,re.M)
+        assert not re.search(r'^\s*(?:replace\s+)?github\.com/nats-io/nats-server/v2(?:\s|$).*=>',production_mod,re.M)
     assert before==read(root/'module-after.json')
     module_cache_verified=False
     if Path(source['module']).is_dir():

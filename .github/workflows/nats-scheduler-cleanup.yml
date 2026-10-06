@@ -1,5 +1,14 @@
 name: nats-scheduler-cleanup
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      module_version:
+        description: Explicit copied upstream diagnostic version (production stays pinned)
+        type: choice
+        default: v2.15.0
+        options:
+          - v2.15.0
+          - v2.15.1-RC.1
 jobs:
   copied-source-contract:
     runs-on: ubuntu-latest
@@ -7,16 +16,17 @@ jobs:
     env:
       GOMEMLIMIT: 512MiB
       GOMAXPROCS: '2'
+      CLEANUP_MODULE_VERSION: ${{ inputs.module_version }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
       - name: Execute fresh-store baseline and precise dirty-count control
-        run: python3 scripts/check-nats-scheduler-cleanup.py --root "$RUNNER_TEMP/scheduler-cleanup-evidence"
+        run: python3 scripts/check-nats-scheduler-cleanup.py --root "$RUNNER_TEMP/scheduler-cleanup-evidence" --module-version "$CLEANUP_MODULE_VERSION"
       - name: Independently verify compiled inventories and actual verdicts
         run: |
-          python3 scripts/review-nats-scheduler-cleanup.py "$RUNNER_TEMP/scheduler-cleanup-evidence" --require-retained-store
+          python3 scripts/review-nats-scheduler-cleanup.py "$RUNNER_TEMP/scheduler-cleanup-evidence" --require-retained-store --expected-version "$CLEANUP_MODULE_VERSION"
           python3 -c 'import json,os; from pathlib import Path; root=Path(os.environ["RUNNER_TEMP"])/"scheduler-cleanup-evidence"; assert json.loads((root/"source.json").read_text())["clean"], "hosted source must be clean"'
       - name: Preserve every compiled source and original store
         if: always()
