@@ -4529,3 +4529,17 @@ physicalqueues/64durables pass,451.842ms audit/4.459724s combined under20s; all2
 original files unchanged,1,698inputs/actualSDK/three NATS/closure/full4,006member
 49,939,893byte copiedproof verified. Retained original sustained pause seed1 now
 qualifies at executedsource. Full13x200/currentfullmatrix/original24h remain open.
+
+## Original retained Tier2 reply isolation seed1 qualified — 2026-10-06
+
+Normal ten-minute executed85c4cf2: PASS649.01s,82batches/2,296terminals/25,336entries,
+ten active45-second reply holds, exact selected-delivery fencing and fresh PING
+recovery, all six workload cells/native integrity/history/drain. Reusable review
+checks actual SDK/threeworkers/threeservers closure and694Go/module/3,286external
+inputs. Archived initial external-count reporting error preserved and independently
+corrected. Separate fresh-copy helper73bbd85 verifies exactfull retainedreport,
+histories/allthreephysicalqueues/64durables, audit530.008518ms and combined535.525980ms
+under20s. All2,281originalfiles unchanged; originals never reopened. Both complete
+archives read back. Full13x200/current-source/24h gates remain open.
+[Native proof](scale/tier2-retained-isolation-2026-10-06/native-ten-minute/).
+[Copied proof](scale/tier2-retained-isolation-2026-10-06/copied-audit/).
