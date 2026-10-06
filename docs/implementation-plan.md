@@ -4852,3 +4852,20 @@ proof verified. This qualifies the quiet real87920 cohort at recorded source;
 full400k/memory/fault/default/currentmatrix/24h gates remain required. Bulk is not
 adopted in live campaigns. Earlier failures remain preserved without attributed
 cause. [Evidence](scale/state-admission-deadlines-2026-10-06/native-bulk-whole-state/).
+
+### Bulk cursor-owner recovery and valid capacity fixture preparation
+
+On a fresh archive-verified87920 copy, remove only recorded historical audit
+cursors before source cuts, then run independent20s full integrity. During the6m
+bulk stage, target actual R1 memory AckNone journal cursor metadata, confirm its
+physical owner SIGKILL and same-store restart, require a distinct later cursor
+start and complete source/consumer cleanup, and compare every sample to the
+canonical accepted original point oracle. Repeat independent20s full integrity.
+Preserve preparation, fault, actual server executable/mount observations and the
+complete closed fixture. No partial results or changed deadlines qualify.
+
+The original synthetic400k retained-read donor's empty StepRequested payloads
+are invalid for the original point latency evaluator. Future capacity preparation
+writes valid activity request JSON while preserving400k/4.8M counts. Earlier
+retained-read qualification remains unchanged in scope; full400k valid latency
+and RSS qualification still require native evidence.

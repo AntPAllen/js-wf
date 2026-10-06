@@ -79,11 +79,23 @@ func TestMatrixParallelInvocationAuditsRetainedCohort(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	faultMode := os.Getenv("WF_MATRIX_BULK_LATENCY_CURSOR_FAULT")
+	if faultMode != "" && (faultMode != "owner-restart" || os.Getenv("WF_MATRIX_BULK_LATENCY_COHORT") != "1") {
+		t.Fatal("cursor fault requires bulk cohort owner-restart")
+	}
 	ready, stopReady := context.WithTimeout(context.Background(), time.Minute)
 	err = waitFiveReplicaReadiness(ready, js, 0)
 	stopReady()
 	if err != nil {
 		t.Fatal(err)
+	}
+	if faultMode != "" {
+		prepare, stop := context.WithTimeout(context.Background(), 20*time.Second)
+		err = matrixPrepareCopiedBulkCursors(prepare, js, root)
+		stop()
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 	meta, stopMeta := context.WithTimeout(context.Background(), 5*time.Second)
 	inv, err := js.Stream(meta, "WF_INV")
@@ -139,8 +151,34 @@ func TestMatrixParallelInvocationAuditsRetainedCohort(t *testing.T) {
 	var results []matrixInvocationAuditResult
 	var failure error
 	var bulkStats matrixBulkLatencyStats
+	var faultProof *matrixBulkCursorFaultProof
 	if bulkMode {
-		results, bulkStats, failure = matrixBulkInvocationAuditsThrough(stage, js, fullReport, completionDeadline, cutoff)
+		bulkJS := js
+		var fault *matrixBulkCursorFault
+		if faultMode != "" {
+			faultContext, cancel := context.WithCancel(stage)
+			defer cancel()
+			fault = &matrixBulkCursorFault{JetStream: js, cluster: cluster, root: root, ctx: faultContext, cancel: cancel}
+			bulkJS = fault
+			stage = faultContext
+		}
+		results, bulkStats, failure = matrixBulkInvocationAuditsThrough(stage, bulkJS, fullReport, completionDeadline, cutoff)
+		if fault != nil {
+			p := fault.snapshot()
+			faultProof = &p
+			resumed := false
+			for _, cursor := range p.Cursors {
+				// The callback trigger is delivered metadata, not the visitor's
+				// commit point. Buffered records can put the exact resume on
+				// either side of it; the scanner verifies contiguous visits.
+				if p.Target != nil && cursor.Name != p.Target.Name && cursor.Config.OptStartSeq > p.Target.Config.OptStartSeq {
+					resumed = true
+				}
+			}
+			if failure == nil && (p.Error != "" || p.Kill.SourceStopped.IsZero() || p.RestartCompleted.IsZero() || !resumed) {
+				failure = fmt.Errorf("bulk cursor fault/recovery unproven: %+v", p)
+			}
+		}
 		if failure == nil {
 			if len(results) != len(baseline.Samples) {
 				failure = fmt.Errorf("bulk sample census differs from accepted point oracle")
@@ -202,6 +240,9 @@ func TestMatrixParallelInvocationAuditsRetainedCohort(t *testing.T) {
 		proof["bulk_stats"] = bulkStats
 		proof["bulk_equals_accepted_point_oracle"] = failure == nil
 		proof["scope"] = "quiet copied87920 bulk samples compared with committed verified original cached point oracle; no original24h/full400k/currentmatrix qualification; any errors discard all samples"
+		if faultProof != nil {
+			proof["cursor_fault"] = faultProof
+		}
 	}
 	if metadata != nil {
 		proof["metadata_handle_lookups"] = metadata.lookupCounts()
