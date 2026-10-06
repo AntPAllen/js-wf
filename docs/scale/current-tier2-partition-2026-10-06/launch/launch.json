@@ -1,0 +1,52 @@
+{
+  "observed_utc": "2026-10-06T15:27:00.632363+00:00",
+  "run": {
+    "conclusion": "",
+    "databaseId": 37486948256,
+    "event": "workflow_dispatch",
+    "headSha": "fcf2e940ee22f2dda7116d1d860683bcaa3bc329",
+    "jobs": [
+      {
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "databaseId": 112349343189,
+        "name": "seeds",
+        "startedAt": "2026-10-06T15:22:28Z",
+        "status": "queued",
+        "steps": [],
+        "url": "https://github.com/AntPAllen/js-wf/actions/runs/37486948256/job/112349343189"
+      }
+    ],
+    "status": "queued",
+    "url": "https://github.com/AntPAllen/js-wf/actions/runs/37486948256"
+  },
+  "dispatch_command": [
+    "gh",
+    "workflow",
+    "run",
+    "tier2-matrix-journal.yml",
+    "--ref",
+    "main",
+    "-f",
+    "row=partition",
+    "-f",
+    "seeds=200",
+    "-f",
+    "start_seed=1",
+    "-f",
+    "duration=10m"
+  ],
+  "requested_coverage": "partition seeds1\u2013200, original10m each; planner has200 singleton jobs",
+  "preflight": {
+    "matrix_parser_tests": 24,
+    "workload_source_tests": 1,
+    "result": "pass"
+  },
+  "observer_unit": {
+    "MainPID": "3977365",
+    "ActiveState": "active"
+  },
+  "observer_sha256": "9b83f19d4a9f1607c4a0a8e06b0e54c9cf7b159e72e70454bf92a2a8f17bb907",
+  "observer_root": "/tmp/js-wf-tier2-partition200-watch-37486948256-20261006",
+  "scope": "Actual queued Actions handle at exact source. All200 native jobs and terminal/raw acceptance remain unproven until generator, execution and independent review. Observer only collects originals on terminal; no restart/cancel or autoqualification."
+}
