@@ -29,6 +29,15 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: duplicate archive headroom
+
+Removed seven exact closed temporary proof duplicates totaling1,218,708,182bytes,
+after actual SDK closure/current archive bytes/canonical pushed parts+concat/hash/
+visible task FD checks. Lossless delta virtual tree also verifies. Original donor
+stores/source/exes/canonicalGit/provider originals/caches/live media retained.
+Free space about5.5GiB;12GiB target not reached. Existing campaign handles continue.
+[Verification](scale/sustained-proof-duplicates-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: sustained proof worktree headroom
 
 Reclaimed1,772,335,104 allocatedbytes from verified pushed worktree proof parts
