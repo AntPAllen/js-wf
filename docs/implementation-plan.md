@@ -4826,3 +4826,16 @@ censuses, every attempt's deadline/counters and cleanup. Each phase has its own
 verdict. This ordered diagnostic is not an isolated speed ratio or a release pass.
 Keep original20s/60s/3 retained-audit and6m final-latency gates; qualify any deadline
 scope correction against exact initial-set/terminal/snapshot and fault controls.
+
+### Fresh-state stream deadline scope correction
+
+An initial-state snapshot is a whole retained stream read. For bounded audits,
+use the caller's existing deadline for the complete initial set, preserve at most
+three transient attempts with canceled/closed contexts, and discard incomplete
+maps. Keep individual metadata/record requests at2s and retain the old finite
+wrapper for unbounded callers. Deterministic delivery-window and retry/cancel
+controls must distinguish this from the former2s whole-set bound. Qualify changed
+state behavior on fresh real-cohort copies with complete source counts, exact
+terminal/snapshot checks, cleanup, and original20s/60s/3 budgets; then complete
+87920 bulk/frozen-point comparison under the unchanged6m final stage. Ordered
+state diagnostic results alone cannot qualify bulk or release gates.

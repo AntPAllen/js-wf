@@ -233,7 +233,7 @@ func checkUsingConcurrentOptions(ctx context.Context, js jetstream.JetStream, cu
 	// same captured cohort, and terminal/snapshot validation below remains exact.
 	sourceState := state
 	snapshot := func(call context.Context) (jetstream.KeyValue, error) {
-		return auditRead(call, func(attempt context.Context) (jetstream.KeyValue, error) {
+		return auditStateRead(call, func(attempt context.Context) (jetstream.KeyValue, error) {
 			return initialAuditState(attempt, sourceState, func(key string) bool {
 				if cutoff == nil {
 					return true
@@ -423,6 +423,35 @@ func auditRead[T any](ctx context.Context, read func(context.Context) (T, error)
 			return value, ctx.Err()
 		}
 		call, stop := context.WithTimeout(ctx, 2*time.Second)
+		value, err = read(call)
+		stop()
+		if err == nil {
+			return value, nil
+		}
+		transient := errors.Is(err, context.DeadlineExceeded) || errors.Is(err, nats.ErrTimeout) || errors.Is(err, nats.ErrNoResponders) || errors.Is(err, jetstream.ErrNoStreamResponse) || natsutil.IsUnavailable(err)
+		if !transient || ctx.Err() != nil {
+			break
+		}
+	}
+	return value, err
+}
+
+// An initial state set is a complete stream read, like the retained INV/JRN
+// scans, rather than one metadata request. Give it the existing audit deadline;
+// each failed attempt discards its map and closes its watch before retrying.
+// Unbounded callers retain the old finite request wrapper. All metadata and
+// individual record requests continue to use auditRead's two-second bound.
+func auditStateRead[T any](ctx context.Context, read func(context.Context) (T, error)) (T, error) {
+	if _, bounded := ctx.Deadline(); !bounded {
+		return auditRead(ctx, read)
+	}
+	var value T
+	var err error
+	for attempt := 0; attempt < 3; attempt++ {
+		if ctx.Err() != nil {
+			return value, ctx.Err()
+		}
+		call, stop := context.WithCancel(ctx)
 		value, err = read(call)
 		stop()
 		if err == nil {

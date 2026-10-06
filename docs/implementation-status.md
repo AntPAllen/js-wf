@@ -29,6 +29,27 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: ordered native state observation accepted; deadline scope corrected
+
+At271bbd2 fresh R5 diagnosticPASS23.78s: standalone88,068 state entries complete
+in1.896566660s under20s watch deadline (creation1.2694s); subsequent full87920/
+969925/87920 concurrent audit completes8.838345502s with state watch deadline2s
+(creation.1235s/barrier1.1675s). Both source cuts unchanged, consumers0 after;
+public metadata confirms R1/memory/AckNone. Ordered warmup is not an isolated
+ratio, earlier failure-cause proof, bulk/fault/24h qualification.
+SDK2906133/five servers closed,3,887 donor hashes unchanged. Complete4,451 logical
+files preserve1,813,932,703 aliased bytes plus80,326,749-byte delta; full base/delta
+and every virtual member verified.
+[Native observation](scale/state-admission-deadlines-2026-10-06/native-ordered/).
+
+Initial-state snapshot now uses its existing bounded caller audit deadline,
+with at most3 transient attempts, canceled/closed attempt contexts and no outcome
+cache. Individual metadata/record requests retain2s; unbounded callers retain the
+old finite wrapper. Original20s/60s/3 and6m budgets unchanged. Deterministic delivery-
+window control rejects old2s scope and accepts whole20s; retry/cancel and existing
+state observer/snapshot/concurrent race controls pass. Changed native/large/fault
+qualification pending; live campaign sources unchanged.
+
 ## Latest follow-up — 2026-10-06: state initial-set deadline instrumentation
 
 Opt-in observer records actual per-attempt deadline/budget, creation, sampled
