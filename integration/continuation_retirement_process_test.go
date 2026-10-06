@@ -26,16 +26,20 @@ import (
 func TestContinuationRetirementReuseWithManifestLossAndServerSIGKILL(t *testing.T) {
 	for _, full := range []bool{false, true} {
 		t.Run(fmt.Sprintf("all_servers=%t", full), func(t *testing.T) {
-			runContinuationRetirementProcessFault(t, full, false)
+			runContinuationRetirementProcessFault(t, full, false, "")
 		})
 	}
 }
 
 func TestContinuationRetirementReuseWithManifestLossAndLeaseExpiryAcrossServerSIGKILL(t *testing.T) {
-	runContinuationRetirementProcessFault(t, true, true)
+	runContinuationRetirementProcessFault(t, true, true, "")
 }
 
-func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool) {
+func TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndAllServerSIGKILL(t *testing.T) {
+	runContinuationRetirementProcessFault(t, true, false, "WFRETIRE")
+}
+
+func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool, domain string) {
 	t.Helper()
 	if expireLease && !full {
 		t.Fatal("lease expiry requires every server stopped")
@@ -43,23 +47,40 @@ func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool)
 	root := t.TempDir()
 	if retained := os.Getenv("WF_CONTINUATION_RETIREMENT_PROCESS_ROOT"); retained != "" {
 		root = filepath.Join(retained, fmt.Sprintf("all-servers-%t-lease-expiry-%t", full, expireLease))
+		if domain != "" {
+			root += "-domain-" + domain
+		}
 		if err := os.Mkdir(root, 0700); err != nil {
 			t.Fatal(err)
 		}
 	}
-	cluster, err := testcluster.StartProcesses(root, 3)
+	var cluster *testcluster.ProcessCluster
+	var err error
+	if domain == "" {
+		cluster, err = testcluster.StartProcesses(root, 3)
+	} else {
+		cluster, err = testcluster.StartProcessesWithDomain(root, 3, domain)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(cluster.Close)
 	all := make([]jetstream.JetStream, 3)
 	for node := range all {
-		nc, err := nats.Connect(cluster.ClientURL(node), nats.MaxReconnects(-1), nats.ReconnectWait(25*time.Millisecond))
+		options := []nats.Option{nats.MaxReconnects(-1), nats.ReconnectWait(25 * time.Millisecond)}
+		if domain != "" {
+			options = append(options, nats.IgnoreDiscoveredServers())
+		}
+		nc, err := nats.Connect(cluster.ClientURL(node), options...)
 		if err != nil {
 			t.Fatal(err)
 		}
 		t.Cleanup(nc.Close)
-		all[node], err = jetstream.New(nc)
+		if domain == "" {
+			all[node], err = jetstream.New(nc)
+		} else {
+			all[node], err = jetstream.NewWithDomain(nc, domain)
+		}
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -87,9 +108,20 @@ func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool)
 	if err := waitMatrixWorkflowReplicas(ready, all[0]); err != nil {
 		t.Fatal(err)
 	}
+	if domain != "" {
+		for node := range all {
+			info, err := all[node].AccountInfo(ready)
+			if err != nil || info.Domain != domain || all[node].Conn().ConnectedDomain() != domain {
+				t.Fatalf("native node%d domain admission: %+v / %v", node, info, err)
+			}
+			t.Logf("native domain admitted node=%d pid=%d domain=%s server_id=%s", node, cluster.Commands[node].Process.Pid, info.Domain, all[node].Conn().ConnectedServerId())
+		}
+	}
 	var previousEpoch uint64
 	var leaseTTL time.Duration
 	runContinuationRetirementOnCluster(t, all, true, func(ctx context.Context) error {
+		cutStarted := time.Now()
+		originalPIDs, originalIDs := map[int]int{}, map[int]string{}
 		stream, err := all[0].Stream(ctx, "KV_WF_STATE")
 		if err != nil {
 			return err
@@ -136,6 +168,7 @@ func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool)
 		// Reap and verify every SIGKILL before starting any replacement.
 		for _, node := range nodes {
 			pid := cluster.Commands[node].Process.Pid
+			originalPIDs[node], originalIDs[node] = pid, all[node].Conn().ConnectedServerId()
 			if err := cluster.KillNode(node); err != nil {
 				return err
 			}
@@ -163,7 +196,35 @@ func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool)
 			if err := cluster.RestartNode(node); err != nil {
 				return err
 			}
+			if domain != "" && cluster.Commands[node].Process.Pid == originalPIDs[node] {
+				return fmt.Errorf("domain node%d replacement PID unchanged", node)
+			}
 			t.Logf("retirement restarted node=%d pid=%d", node, cluster.Commands[node].Process.Pid)
+		}
+		if domain != "" {
+			// Reconnect alone does not prove domain metadata leadership. Bound
+			// all peer API recovery by the original 30-second whole-cut target.
+			observe, stopObserve := context.WithDeadline(context.Background(), cutStarted.Add(30*time.Second))
+			defer stopObserve()
+			for node := range all {
+				for {
+					attempt, stopAttempt := context.WithTimeout(observe, time.Second)
+					info, err := all[node].AccountInfo(attempt)
+					stopAttempt()
+					if err == nil {
+						if info.Domain != domain || all[node].Conn().ConnectedDomain() != domain || all[node].Conn().ConnectedServerId() == originalIDs[node] {
+							return fmt.Errorf("restarted node%d wrong domain %q", node, info.Domain)
+						}
+						t.Logf("native domain healed node=%d pid=%d domain=%s server_id=%s elapsed=%s", node, cluster.Commands[node].Process.Pid, info.Domain, all[node].Conn().ConnectedServerId(), time.Since(cutStarted))
+						break
+					}
+					select {
+					case <-observe.Done():
+						return fmt.Errorf("domain node%d recovery: %w", node, err)
+					case <-time.After(50 * time.Millisecond):
+					}
+				}
+			}
 		}
 		return nil
 	})

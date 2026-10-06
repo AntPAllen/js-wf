@@ -68,6 +68,15 @@ func StartProcesses(root string, count int) (_ *ProcessCluster, err error) {
 	return startProcesses(root, count, false)
 }
 
+// StartProcessesWithDomain configures a real domain on every native server.
+// RestartNode reuses its original configuration, ports and file stores.
+func StartProcessesWithDomain(root string, count int, domain string) (*ProcessCluster, error) {
+	if domain == "" || strings.ContainsAny(domain, "\r\n") {
+		return nil, fmt.Errorf("invalid process JetStream domain")
+	}
+	return startProcessesWithDomain(root, count, false, nil, false, domain)
+}
+
 // StartProfiledProcesses enables NATS' loopback HTTP profiler for diagnostic
 // stack capture. Sampling remains disabled; profiles are collected on demand.
 func StartProfiledProcesses(root string, count int) (*ProcessCluster, error) {
@@ -115,6 +124,10 @@ func startProcesses(root string, count int, partitionable bool) (_ *ProcessClust
 }
 
 func startProcessesWithBinaries(root string, count int, partitionable bool, binaries []string, profiling bool) (_ *ProcessCluster, err error) {
+	return startProcessesWithDomain(root, count, partitionable, binaries, profiling, "")
+}
+
+func startProcessesWithDomain(root string, count int, partitionable bool, binaries []string, profiling bool, domain string) (_ *ProcessCluster, err error) {
 	if count < 1 || count > 3 {
 		return nil, fmt.Errorf("count must be 1..3")
 	}
@@ -177,6 +190,13 @@ func startProcessesWithBinaries(root string, count int, partitionable bool, bina
 	}
 	for i := 0; i < count; i++ {
 		args := []string{"-a", "127.0.0.1", "-p", strconv.Itoa(c.ports[i]), "-m", strconv.Itoa(c.monitors[i]), "-n", fmt.Sprintf("wf-process-%d", i), "-js", "-sd", filepath.Join(root, fmt.Sprintf("node-%d", i))}
+		if domain != "" {
+			config := filepath.Join(root, fmt.Sprintf("node-%d-domain.conf", i))
+			if err := os.WriteFile(config, []byte("jetstream { domain: "+strconv.Quote(domain)+" }\n"), 0600); err != nil {
+				return nil, err
+			}
+			args = append(args, "-c", config)
+		}
 		if profiling {
 			args = append(args, "--profile", strconv.Itoa(c.profiles[i]))
 		}
