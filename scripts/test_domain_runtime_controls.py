@@ -1,6 +1,7 @@
 import importlib.util
 from pathlib import Path
 import unittest
+import re
 
 REPO = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location('controls', REPO/'scripts/run-domain-runtime-controls.py')
@@ -30,3 +31,13 @@ class DomainCoverageControls(unittest.TestCase):
             for log in ('FAIL\n', '--- SKIP: x\nPASS\n', 'DATA RACE\nPASS\n'):
                 with self.subTest(case=case, log=log), self.assertRaises(ValueError):
                     controls.verify_log(case, log)
+
+    def test_accepted_expiry_pair_rejects_slow_heal_epoch_regression_and_missing_kill(self):
+        log = (REPO/'docs/scale/domain-runtime-ci-2026-10-06/native-qualification/retirement-server-kill/native.log').read_text()
+        controls.verify_log('retirement-server-kill', log)
+        malformed = [re.sub(r'elapsed=[0-9.]+s', 'elapsed=30s', log, count=1),
+                     log.replace('prior_epoch=54 terminal_epoch=76', 'prior_epoch=54 terminal_epoch=54'),
+                     log.replace('signal=killed', 'signal=terminated', 1)]
+        for bad in malformed:
+            with self.subTest(bad=bad[-100:]), self.assertRaises(ValueError):
+                controls.verify_log('retirement-server-kill', bad)

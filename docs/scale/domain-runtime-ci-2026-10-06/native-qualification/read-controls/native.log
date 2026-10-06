@@ -1,0 +1,75 @@
+=== RUN   TestResultReadVerifiesWeakAbsence
+=== RUN   TestResultReadVerifiesWeakAbsence/worker
+    result_absence_test.go:172: real payload recovered; leader confirmations=1 route=$JS.API.STREAM.MSG.GET.OBJ_WF_BLOB
+=== RUN   TestResultReadVerifiesWeakAbsence/client
+    result_absence_test.go:172: real payload recovered; leader confirmations=1 route=$JS.API.STREAM.MSG.GET.OBJ_WF_BLOB
+=== RUN   TestResultReadVerifiesWeakAbsence/deletion
+=== RUN   TestResultReadVerifiesWeakAbsence/corruption
+=== RUN   TestResultReadVerifiesWeakAbsence/permanent_stale_absence_deadline
+=== RUN   TestResultReadVerifiesWeakAbsence/blocked_leader_deadline_and_cancel
+=== RUN   TestResultReadVerifiesWeakAbsence/leader_rejects_malformed_metadata
+--- PASS: TestResultReadVerifiesWeakAbsence (5.12s)
+    --- PASS: TestResultReadVerifiesWeakAbsence/worker (0.16s)
+    --- PASS: TestResultReadVerifiesWeakAbsence/client (0.16s)
+    --- PASS: TestResultReadVerifiesWeakAbsence/deletion (0.02s)
+    --- PASS: TestResultReadVerifiesWeakAbsence/corruption (0.02s)
+    --- PASS: TestResultReadVerifiesWeakAbsence/permanent_stale_absence_deadline (0.25s)
+    --- PASS: TestResultReadVerifiesWeakAbsence/blocked_leader_deadline_and_cancel (0.52s)
+    --- PASS: TestResultReadVerifiesWeakAbsence/leader_rejects_malformed_metadata (0.01s)
+=== RUN   TestResultReadVerifiesWeakAbsenceInJetStreamDomain
+    result_absence_test.go:74: real domain admitted node=0 domain=WFRESULT server_id=NCBYYILVJVD3KLBGLBAB56QEKMZWRICG5XFR6U3IHRDM6UPN27YP6VIE
+    result_absence_test.go:74: real domain admitted node=1 domain=WFRESULT server_id=NDLTU5UYDGYAGAGRQKBCSVYAIBYTOPFMQ36VTJN2BDO4VPURMTWZRC3U
+    result_absence_test.go:74: real domain admitted node=2 domain=WFRESULT server_id=NAI77LQDFECGDPVLCR7FFMGVUDMJTP3PLMQLYQDQV4NES26XZCSJUHUB
+=== RUN   TestResultReadVerifiesWeakAbsenceInJetStreamDomain/worker
+    result_absence_test.go:172: real payload recovered; leader confirmations=1 route=$JS.WFRESULT.API.STREAM.MSG.GET.OBJ_WF_BLOB
+=== RUN   TestResultReadVerifiesWeakAbsenceInJetStreamDomain/client
+    result_absence_test.go:172: real payload recovered; leader confirmations=1 route=$JS.WFRESULT.API.STREAM.MSG.GET.OBJ_WF_BLOB
+=== RUN   TestResultReadVerifiesWeakAbsenceInJetStreamDomain/deletion
+=== RUN   TestResultReadVerifiesWeakAbsenceInJetStreamDomain/corruption
+=== RUN   TestResultReadVerifiesWeakAbsenceInJetStreamDomain/permanent_stale_absence_deadline
+=== RUN   TestResultReadVerifiesWeakAbsenceInJetStreamDomain/blocked_leader_deadline_and_cancel
+=== RUN   TestResultReadVerifiesWeakAbsenceInJetStreamDomain/leader_rejects_malformed_metadata
+--- PASS: TestResultReadVerifiesWeakAbsenceInJetStreamDomain (4.89s)
+    --- PASS: TestResultReadVerifiesWeakAbsenceInJetStreamDomain/worker (0.20s)
+    --- PASS: TestResultReadVerifiesWeakAbsenceInJetStreamDomain/client (0.22s)
+    --- PASS: TestResultReadVerifiesWeakAbsenceInJetStreamDomain/deletion (0.03s)
+    --- PASS: TestResultReadVerifiesWeakAbsenceInJetStreamDomain/corruption (0.04s)
+    --- PASS: TestResultReadVerifiesWeakAbsenceInJetStreamDomain/permanent_stale_absence_deadline (0.25s)
+    --- PASS: TestResultReadVerifiesWeakAbsenceInJetStreamDomain/blocked_leader_deadline_and_cancel (0.52s)
+    --- PASS: TestResultReadVerifiesWeakAbsenceInJetStreamDomain/leader_rejects_malformed_metadata (0.01s)
+=== RUN   TestSnapshotManifestReadsUseLeader
+=== RUN   TestSnapshotManifestReadsUseLeader/absent
+    snapshot_manifest_leader_test.go:178: 200 exact records; committed manifest revision=2 leader requests=2 direct requests=0 route=$JS.API.STREAM.MSG.GET.KV_WF_STATE
+=== RUN   TestSnapshotManifestReadsUseLeader/old
+    snapshot_manifest_leader_test.go:178: 200 exact records; committed manifest revision=2 leader requests=2 direct requests=0 route=$JS.API.STREAM.MSG.GET.KV_WF_STATE
+=== RUN   TestSnapshotManifestReadsUseLeader/object_absence
+=== RUN   TestSnapshotManifestReadsUseLeader/deleted_and_purged
+=== RUN   TestSnapshotManifestReadsUseLeader/malformed_manifest
+=== RUN   TestSnapshotManifestReadsUseLeader/blocked_leader_deadline_cancel
+--- PASS: TestSnapshotManifestReadsUseLeader (7.90s)
+    --- PASS: TestSnapshotManifestReadsUseLeader/absent (0.04s)
+    --- PASS: TestSnapshotManifestReadsUseLeader/old (0.04s)
+    --- PASS: TestSnapshotManifestReadsUseLeader/object_absence (0.13s)
+    --- PASS: TestSnapshotManifestReadsUseLeader/deleted_and_purged (0.03s)
+    --- PASS: TestSnapshotManifestReadsUseLeader/malformed_manifest (2.04s)
+    --- PASS: TestSnapshotManifestReadsUseLeader/blocked_leader_deadline_cancel (0.25s)
+=== RUN   TestSnapshotManifestReadsUseLeaderInJetStreamDomain
+    snapshot_manifest_leader_test.go:64: real domain admitted node=0 domain=WFRESULT server_id=NAF7GFM46W6FJMM4DBJBTZS4RAGFBR2Q3XBD2O4HSLMYEMBWA6L2BGIY
+    snapshot_manifest_leader_test.go:64: real domain admitted node=1 domain=WFRESULT server_id=NCLJDEBQZALIG3S5ZLM2G6VP6OMACFUE5V536KZQT6L6CIRXLNGH3M33
+    snapshot_manifest_leader_test.go:64: real domain admitted node=2 domain=WFRESULT server_id=NBHT73AXFOWQT7PBWCOBNBGRJNWL62VINEX5KUVWQ5QZ3EAQVIEKOR5K
+=== RUN   TestSnapshotManifestReadsUseLeaderInJetStreamDomain/absent
+    snapshot_manifest_leader_test.go:178: 200 exact records; committed manifest revision=2 leader requests=2 direct requests=0 route=$JS.WFRESULT.API.STREAM.MSG.GET.KV_WF_STATE
+=== RUN   TestSnapshotManifestReadsUseLeaderInJetStreamDomain/old
+    snapshot_manifest_leader_test.go:178: 200 exact records; committed manifest revision=2 leader requests=2 direct requests=0 route=$JS.WFRESULT.API.STREAM.MSG.GET.KV_WF_STATE
+=== RUN   TestSnapshotManifestReadsUseLeaderInJetStreamDomain/object_absence
+=== RUN   TestSnapshotManifestReadsUseLeaderInJetStreamDomain/deleted_and_purged
+=== RUN   TestSnapshotManifestReadsUseLeaderInJetStreamDomain/malformed_manifest
+=== RUN   TestSnapshotManifestReadsUseLeaderInJetStreamDomain/blocked_leader_deadline_cancel
+--- PASS: TestSnapshotManifestReadsUseLeaderInJetStreamDomain (8.38s)
+    --- PASS: TestSnapshotManifestReadsUseLeaderInJetStreamDomain/absent (0.09s)
+    --- PASS: TestSnapshotManifestReadsUseLeaderInJetStreamDomain/old (0.06s)
+    --- PASS: TestSnapshotManifestReadsUseLeaderInJetStreamDomain/object_absence (0.11s)
+    --- PASS: TestSnapshotManifestReadsUseLeaderInJetStreamDomain/deleted_and_purged (0.01s)
+    --- PASS: TestSnapshotManifestReadsUseLeaderInJetStreamDomain/malformed_manifest (2.01s)
+    --- PASS: TestSnapshotManifestReadsUseLeaderInJetStreamDomain/blocked_leader_deadline_cancel (0.25s)
+PASS

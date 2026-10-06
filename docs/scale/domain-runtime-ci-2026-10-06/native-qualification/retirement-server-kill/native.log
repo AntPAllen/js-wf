@@ -1,0 +1,34 @@
+=== RUN   TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndAllServerSIGKILL
+    continuation_retirement_process_test.go:39: native domain admitted node=0 pid=3902594 domain=WFRETIRE server_id=NCKH5TUHRSKAWZQMK36SRGGCHQ5VRXO6ESTJCOIKP53AEQUJ2TPITO7M
+    continuation_retirement_process_test.go:39: native domain admitted node=1 pid=3902595 domain=WFRETIRE server_id=NBQRYXCSNZ3DT2LSN3SK3N2GRM6QFSLLOMORSPTWLJ7UPCOGUAO6TQAR
+    continuation_retirement_process_test.go:39: native domain admitted node=2 pid=3902601 domain=WFRETIRE server_id=NDF532AHVRAYXWRRQGKKFPAHNLBZYY5SAOTQFBGWV5KXRCGWUTKUTMSZ
+    continuation_retirement_process_test.go:187: retirement fresh manifest cut: state_leader=wf-process-0 killed_node=0 pid=3902594 signal=killed
+    continuation_retirement_process_test.go:187: retirement fresh manifest cut: state_leader=wf-process-0 killed_node=1 pid=3902595 signal=killed
+    continuation_retirement_process_test.go:187: retirement fresh manifest cut: state_leader=wf-process-0 killed_node=2 pid=3902601 signal=killed
+    continuation_retirement_process_test.go:206: retirement restarted node=0 pid=3904036
+    continuation_retirement_process_test.go:206: retirement restarted node=1 pid=3904046
+    continuation_retirement_process_test.go:206: retirement restarted node=2 pid=3904056
+    continuation_retirement_process_test.go:222: native domain healed node=0 pid=3904036 domain=WFRETIRE server_id=NCNX5UMMC7BEDLIAYHCR2YT5WCJRCI3JGBH6T3YHNID6VSUMVWFD74LI elapsed=5.457992794s
+    continuation_retirement_process_test.go:222: native domain healed node=1 pid=3904046 domain=WFRETIRE server_id=NAATUJE35J4NQD3TRFOA6QVBY5JDNRPUY26HKFISS5XVXGKKHV3U34QR elapsed=5.458854444s
+    continuation_retirement_process_test.go:222: native domain healed node=2 pid=3904056 domain=WFRETIRE server_id=NAKBVRYWXECNDE27UIV6O26A3DOBWGZ6NFRQGCSPAR3YCOOV67ISTB6B elapsed=5.46031323s
+    continuation_retirement_test.go:373: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=4 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=2 manifest_drops=1
+--- PASS: TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndAllServerSIGKILL (32.88s)
+=== RUN   TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndLeaseExpiryAcrossAllServerSIGKILL
+    continuation_retirement_process_test.go:43: native domain admitted node=0 pid=3904843 domain=WFRETIRE server_id=ND3WJT2UJSFBZ5W3IWYA4ENA2YWJFWF54DUCQRBJLY6TFMZDVKCFVRJL
+    continuation_retirement_process_test.go:43: native domain admitted node=1 pid=3904844 domain=WFRETIRE server_id=NBDU2H53NGXT26IA7WXI64P7VJAPKFA673MK5GT455C32O4IAIUPFHHC
+    continuation_retirement_process_test.go:43: native domain admitted node=2 pid=3904845 domain=WFRETIRE server_id=NBB4XNSM6R2FH3JHAWNA5IZ4PBH7WBUSZOYYVPEVPUN3TTBZPKY2AK4D
+    continuation_retirement_process_test.go:170: retirement lease before outage: epoch=54 ttl=12s revision=63 created=2026-10-06T15:09:19.86676005Z
+    continuation_retirement_process_test.go:187: retirement fresh manifest cut: state_leader=wf-process-0 killed_node=0 pid=3904843 signal=killed
+    continuation_retirement_process_test.go:187: retirement fresh manifest cut: state_leader=wf-process-0 killed_node=1 pid=3904844 signal=killed
+    continuation_retirement_process_test.go:187: retirement fresh manifest cut: state_leader=wf-process-0 killed_node=2 pid=3904845 signal=killed
+    continuation_retirement_process_test.go:197: retirement all-server outage: held=13.000047607s ttl=12s
+    continuation_retirement_process_test.go:206: retirement restarted node=0 pid=3907248
+    continuation_retirement_process_test.go:206: retirement restarted node=1 pid=3907258
+    continuation_retirement_process_test.go:206: retirement restarted node=2 pid=3907268
+    continuation_retirement_process_test.go:222: native domain healed node=0 pid=3907248 domain=WFRETIRE server_id=ND6N2U5WS63NN2YBHJHVQANMGCAW4VN3NMHUCGRIXFBIAN2G5OOTYWQ4 elapsed=18.443362579s
+    continuation_retirement_process_test.go:222: native domain healed node=1 pid=3907258 domain=WFRETIRE server_id=NDWJUJQ65CMFM76TSC7GYFIJ3MP2YDLC65SUOOBUXYKWX3ET5Y5SCF2A elapsed=18.445360655s
+    continuation_retirement_process_test.go:222: native domain healed node=2 pid=3907268 domain=WFRETIRE server_id=NAJTPSRA5IZ5HEMKLYKCIGFYNP7J7TFQUK5E6NMFXDW3P6Y4CK7VZNV6 elapsed=18.447419825s
+    continuation_retirement_test.go:373: continuation retirement/reuse: old_generation=1 fresh_generation=3 reclaimed=2 calls=4 effects=3 terminals=2 shared_blob_retained=true fresh_initial_calls=2 manifest_drops=1
+    continuation_retirement_process_test.go:43: retirement lease-expiry recovery: prior_epoch=54 terminal_epoch=76 records=11
+--- PASS: TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndLeaseExpiryAcrossAllServerSIGKILL (47.02s)
+PASS
