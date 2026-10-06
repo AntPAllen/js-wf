@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -34,16 +35,30 @@ var replayPluginErr error
 
 func TestMain(m *testing.M) {
 	code := m.Run()
-	if replayPluginDir != "" {
+	if replayPluginDir != "" && os.Getenv("WF_OPERATOR_TEST_ROOT") == "" {
 		_ = os.RemoveAll(replayPluginDir)
 	}
 	os.Exit(code)
 }
 
+func operatorTempDir(t *testing.T) string {
+	t.Helper()
+	root := os.Getenv("WF_OPERATOR_TEST_ROOT")
+	if root == "" {
+		return t.TempDir()
+	}
+	directory, err := os.MkdirTemp(root, strings.ReplaceAll(t.Name(), "/", "_")+"-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return directory
+}
+
 func buildReplayPlugin(t *testing.T) string {
 	t.Helper()
 	replayPluginOnce.Do(func() {
-		replayPluginDir, replayPluginErr = os.MkdirTemp("", "js-wf-replay-plugin-")
+		parent := os.Getenv("WF_OPERATOR_TEST_ROOT")
+		replayPluginDir, replayPluginErr = os.MkdirTemp(parent, "js-wf-replay-plugin-")
 		if replayPluginErr != nil {
 			return
 		}
@@ -65,19 +80,75 @@ func buildReplayPlugin(t *testing.T) string {
 }
 
 func TestOperatorCommands(t *testing.T) {
-	cluster, err := testcluster.Start(t.TempDir(), 1)
+	runOperatorCommands(t, "")
+}
+
+func TestOperatorCommandsInJetStreamDomain(t *testing.T) {
+	runOperatorCommands(t, "WFOPS")
+}
+
+func runOperatorCommands(t *testing.T, domain string) {
+	count := 1
+	if domain != "" {
+		count = 3
+	}
+	var cluster *testcluster.Cluster
+	var err error
+	if domain == "" {
+		cluster, err = testcluster.Start(operatorTempDir(t), count)
+	} else {
+		cluster, err = testcluster.StartWithDomain(operatorTempDir(t), count, domain)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer cluster.Close()
-	js, err := jetstream.New(cluster.Clients[0])
+	var js jetstream.JetStream
+	if domain == "" {
+		js, err = jetstream.New(cluster.Clients[0])
+	} else {
+		js, err = jetstream.NewWithDomain(cluster.Clients[0], domain)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	if err := provision.Ensure(ctx, js, 1); err != nil {
-		t.Fatal(err)
+	if domain == "" {
+		err = provision.Ensure(ctx, js, count)
+	} else {
+		// Like the other real domain fixtures, retry startup metadata under
+		// a bounded admission window; a first request can precede election.
+		ready, finish := context.WithTimeout(ctx, 30*time.Second)
+		for ready.Err() == nil {
+			attempt, stop := context.WithTimeout(ready, 4*time.Second)
+			err = provision.Ensure(attempt, js, count)
+			stop()
+			if err == nil {
+				break
+			}
+			select {
+			case <-ready.Done():
+			case <-time.After(50 * time.Millisecond):
+			}
+		}
+		finish()
+	}
+	if err != nil {
+		t.Fatalf("operator provision domain=%q peers=%d: %v", domain, count, err)
+	}
+	if domain != "" {
+		for node, connection := range cluster.Clients {
+			peer, err := jetstream.NewWithDomain(connection, domain)
+			if err != nil {
+				t.Fatal(err)
+			}
+			info, err := peer.AccountInfo(ctx)
+			if err != nil || info.Domain != domain || connection.ConnectedDomain() != domain {
+				t.Fatalf("operator domain admission node=%d info=%+v err=%v", node, info, err)
+			}
+			t.Logf("operator domain admitted node=%d domain=%s server_id=%s", node, info.Domain, connection.ConnectedServerId())
+		}
 	}
 	const typ, id = "test", "operator"
 	ack, err := js.Publish(ctx, identity.InvocationSubject(typ, id), []byte(`null`))
@@ -98,11 +169,33 @@ func TestOperatorCommands(t *testing.T) {
 		t.Fatal(err)
 	}
 	base := []string{"-url", cluster.Servers[0].ClientURL()}
+	var options []jetstream.JetStreamOpt
+	if domain != "" {
+		base = append(base, "-domain", domain)
+		var output bytes.Buffer
+		if err := run([]string{"-url", cluster.Servers[0].ClientURL(), "-domain", "MISSING", "-timeout", "1s", "describe", typ, id}, &output); err == nil {
+			t.Fatal("unknown domain silently read the local workflow")
+		}
+		var observed, wrong atomic.Int64
+		options = append(options, jetstream.WithClientTrace(&jetstream.ClientTrace{RequestSent: func(subject string, _ []byte) {
+			if strings.HasPrefix(subject, "$JS."+domain+".API.") {
+				observed.Add(1)
+			} else {
+				wrong.Add(1)
+			}
+		}}))
+		defer func() {
+			if observed.Load() == 0 || wrong.Load() != 0 {
+				t.Errorf("operator domain API routing: observed=%d wrong=%d", observed.Load(), wrong.Load())
+			}
+			t.Logf("operator real domain=%s peers=%d domain_api_requests=%d wrong_prefix_requests=%d", domain, count, observed.Load(), wrong.Load())
+		}()
+	}
 	call := func(args ...string) []byte {
 		t.Helper()
 		var output bytes.Buffer
-		if err := run(append(append([]string{}, base...), args...), &output); err != nil {
-			t.Fatal(err)
+		if err := runWithJetStreamOptions(append(append([]string{}, base...), args...), &output, options...); err != nil {
+			t.Fatalf("operator command %v: %v", args, err)
 		}
 		return output.Bytes()
 	}
@@ -186,7 +279,7 @@ func TestOperatorCommands(t *testing.T) {
 	if err := <-replayDone; err != nil {
 		t.Fatal(err)
 	}
-	marker := filepath.Join(t.TempDir(), "effect")
+	marker := filepath.Join(operatorTempDir(t), "effect")
 	t.Setenv("WF_REPLAY_EFFECT_MARKER", marker)
 	var replayed replayReport
 	if err := json.Unmarshal(call("-handler-plugin", pluginPath, "replay", typ, replayID), &replayed); err != nil || replayed.Type != typ || replayed.ID != replayID || string(replayed.Result) != "10" || replayed.JournalEntries != 4 {
@@ -245,7 +338,7 @@ func TestOperatorCommands(t *testing.T) {
 	if _, err := os.Stat(marker); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("large effect ran during replay: %v", err)
 	}
-	bundlePath := filepath.Join(t.TempDir(), "replay.json")
+	bundlePath := filepath.Join(operatorTempDir(t), "replay.json")
 	if err := os.WriteFile(bundlePath, call("export-replay", typ, blobID), 0600); err != nil {
 		t.Fatal(err)
 	}
@@ -268,7 +361,7 @@ func TestOperatorCommands(t *testing.T) {
 		bundle.Objects[name] = []byte(`"corrupt"`)
 		break
 	}
-	corruptPath := filepath.Join(t.TempDir(), "corrupt.json")
+	corruptPath := filepath.Join(operatorTempDir(t), "corrupt.json")
 	corruptBytes, _ := json.Marshal(bundle)
 	if err := os.WriteFile(corruptPath, corruptBytes, 0600); err != nil {
 		t.Fatal(err)

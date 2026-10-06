@@ -104,6 +104,16 @@ Run `visibility.Projection.Run` in a separate goroutine or run the `project` CLI
 ./wf-cli -url nats://localhost:4222 -budget 256 -interval 100ms tombstone-loop
 ```
 
+Pass `-domain NAME` before the command to select a JetStream domain:
+
+```sh
+./wf-cli -url nats://localhost:4222 -domain WFOPS -rebuild list completed
+./wf-cli -url nats://localhost:4222 -domain WFOPS describe math job-1
+```
+
+Online commands use that domain's API and workflow stores. Omitting `-domain`
+uses the default API. Offline bundle replay can run without a connection.
+
 For a larger query view, set `WF_POSTGRES_DSN` (or pass `-postgres-dsn`) on the `project`, `list`, and `lag` CLI commands. The CLI uses PostgreSQL instead of `WF_VIEW` for rows and queries; it creates `wf_visibility` with a status B-tree and a GIN index for exact search-attribute matches. The PostgreSQL projection has separate `WF_VIEW_PG` journal and `WF_VIEW_PG_PURGE` event consumers, so a KV projector can run independently. Run `provision.Ensure` when upgrading to create the retained `WF_PURGE` stream. A PostgreSQL advisory lock rejects concurrent projector writers and `-rebuild` commands while a projector runs. The database pool needs at least two connections. For example:
 
 ```sh

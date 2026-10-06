@@ -35,9 +35,16 @@ func main() {
 }
 
 func run(args []string, out io.Writer) error {
+	return runWithJetStreamOptions(args, out)
+}
+
+// Client tracing can observe the same operator path without relying on server
+// subject subscriptions, which see domain API subjects after server mapping.
+func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.JetStreamOpt) error {
 	flags := flag.NewFlagSet("wf", flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
 	url := flags.String("url", os.Getenv("NATS_URL"), "NATS server URL")
+	domain := flags.String("domain", "", "JetStream domain (empty uses the default API)")
 	timeout := flags.Duration("timeout", 2*time.Minute, "operation timeout")
 	grace := flags.Duration("grace", 24*time.Hour, "purge tombstone grace")
 	rebuild := flags.Bool("rebuild", false, "rebuild the visibility view before listing")
@@ -58,7 +65,7 @@ func run(args []string, out io.Writer) error {
 	}
 	command := flags.Args()
 	if len(command) == 0 {
-		return errors.New("usage: wf [-url nats://...] [-attribute key=value] {project|list [status]|describe type id|lag|export-journal type id|export-replay type id|replay type id|cancel type id|purge type id|sweep-tombstones|scan-tombstones|tombstone-loop|scan-suspended|journal-capacity|assignment-init worker...|assignment-get partition|assignment-move partition owner revision}")
+		return errors.New("usage: wf [-url nats://...] [-domain name] [-attribute key=value] {project|list [status]|describe type id|lag|export-journal type id|export-replay type id|replay type id|cancel type id|purge type id|sweep-tombstones|scan-tombstones|tombstone-loop|scan-suspended|journal-capacity|assignment-init worker...|assignment-get partition|assignment-move partition owner revision}")
 	}
 	encode := func(value any) error {
 		writer := json.NewEncoder(out)
@@ -87,7 +94,12 @@ func run(args []string, out io.Writer) error {
 		return err
 	}
 	defer nc.Close()
-	js, err := jetstream.New(nc)
+	var js jetstream.JetStream
+	if *domain == "" {
+		js, err = jetstream.New(nc, options...)
+	} else {
+		js, err = jetstream.NewWithDomain(nc, *domain, options...)
+	}
 	if err != nil {
 		return err
 	}

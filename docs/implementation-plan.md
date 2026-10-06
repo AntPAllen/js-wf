@@ -5332,3 +5332,13 @@ original archive independently verify. Twelve verifier groups pass. Initial
 failed prepublication-count assertion remains preserved; no deadline relaxation.
 Other publication/legacy/natural-lag/fullmatrix/million/actual24h gates remain
 open. [Focused accepted proof](scale/domain-retirement-committed-manifest-2026-10-06/).
+
+## Operator CLI domain selection prepared — 2026-10-06
+
+Add explicit `wf -domain NAME` routing to existing commands, preserving default
+selection and offline bundle replay. Exercise the same command body on three
+real domain peers, admit their actual domains/IDs, reject missing-domain fallback
+and trace outgoing administrative API prefixes. Startup4s attempts/30s admission
+remain within original60s body/3m SDK. Retain stores, plugin, bundles, selected
+source and actual SDK profile. Exploratory race/trace controls pass; clean
+full-originals qualification is pending. [Preparation](scale/operator-domain-cli-2026-10-06/).
