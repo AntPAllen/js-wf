@@ -8,11 +8,60 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/testcluster"
 )
+
+// Each response comes from the pinned server's monitoring port. A JetStream
+// Stream.Info request is routed to the leader and cannot establish each peer's
+// physical state. These snapshots are bounded and are not simultaneous.
+func recordMatrixPeerQueues(cluster *testcluster.ProcessCluster, phase string) error {
+	prefix := os.Getenv("MATRIX_ARTIFACT_PREFIX")
+	if prefix == "" {
+		return nil
+	}
+	type peer struct {
+		Node     int             `json:"node"`
+		Started  time.Time       `json:"started"`
+		Finished time.Time       `json:"finished"`
+		State    json.RawMessage `json:"state,omitempty"`
+		Error    string          `json:"error,omitempty"`
+	}
+	peers := make([]peer, len(cluster.Clients))
+	ctx, stop := context.WithTimeout(context.Background(), 2*time.Second)
+	defer stop()
+	var joined sync.WaitGroup
+	for node := range peers {
+		joined.Add(1)
+		go func(node int) {
+			defer joined.Done()
+			p := &peers[node]
+			p.Node, p.Started = node, time.Now().UTC()
+			data, err := cluster.Diagnostic(ctx, node, "jetstream")
+			p.Finished = time.Now().UTC()
+			if err != nil {
+				p.Error = err.Error()
+			} else if !json.Valid(data) {
+				p.Error = "invalid JetStream monitoring JSON"
+			} else {
+				p.State = data
+			}
+		}(node)
+	}
+	joined.Wait()
+	data, err := json.MarshalIndent(struct {
+		Phase string `json:"phase"`
+		Peers []peer `json:"peers"`
+	}{phase, peers}, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(prefix+"-peer-queues-"+phase+".json", append(data, '\n'), 0644)
+}
 
 func captureMatrixQueueDiagnostics(t *testing.T, run jetstream.Stream) {
 	t.Helper()

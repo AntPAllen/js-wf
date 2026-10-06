@@ -928,10 +928,20 @@ func runMixedMatrixLeaderWithChallenge(t *testing.T, row, mutationMode string) {
 			break
 		}
 		if drainCtx.Err() != nil {
+			if row == "rolling_upgrade" {
+				if err := recordMatrixPeerQueues(cluster, "drain-failed"); err != nil {
+					t.Logf("physical peer queue diagnostic: %v", err)
+				}
+			}
 			captureMatrixQueueDiagnostics(t, run)
 			t.Fatalf("run queue did not drain: info=%+v err=%v", info, err)
 		}
 		time.Sleep(100 * time.Millisecond)
+	}
+	if row == "rolling_upgrade" {
+		if err := recordMatrixPeerQueues(cluster, "drained"); err != nil {
+			t.Errorf("physical peer queue diagnostic: %v", err)
+		}
 	}
 	stopWork()
 	fleet.Wait()

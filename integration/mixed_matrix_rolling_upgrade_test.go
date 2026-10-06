@@ -26,6 +26,9 @@ func upgradeMatrixServer(ctx context.Context, js jetstream.JetStream, cluster *t
 	if event.VersionsBefore[node] != "2.11.17" {
 		return event, fmt.Errorf("upgrade node %d starts at %q, want 2.11.17", node, event.VersionsBefore[node])
 	}
+	if err := recordMatrixPeerQueues(cluster, fmt.Sprintf("upgrade-%d-%d-before", scheduled.UnixNano(), node)); err != nil {
+		return event, fmt.Errorf("upgrade peer queue capture: %w", err)
+	}
 	bound, done := context.WithTimeout(ctx, 45*time.Second)
 	defer done()
 	event.Killed = time.Now()
@@ -55,5 +58,8 @@ func upgradeMatrixServer(ctx context.Context, js jetstream.JetStream, cluster *t
 		return event, fmt.Errorf("upgrade changed fallback deployment: backend=%s err=%v", backend, err)
 	}
 	event.Healed = time.Now()
+	if err := recordMatrixPeerQueues(cluster, fmt.Sprintf("upgrade-%d-%d-healed", scheduled.UnixNano(), node)); err != nil {
+		return event, fmt.Errorf("upgrade peer queue capture: %w", err)
+	}
 	return event, nil
 }
