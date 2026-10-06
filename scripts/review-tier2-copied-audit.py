@@ -4,6 +4,7 @@ import argparse
 from datetime import datetime
 import hashlib
 import json
+import re
 from pathlib import Path
 import subprocess
 
@@ -45,6 +46,17 @@ def review_counts(result, expected):
                 'API queue or durable count differs from original drain gate')
 
 
+
+def timestamp_ns(value):
+    require(isinstance(value,str) and re.fullmatch(
+        r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})',value),
+        'invalid physical monitoring timestamp')
+    instant=datetime.fromisoformat(value.replace('Z','+00:00'))
+    fraction=re.search(r'\.(\d+)',value)
+    return int(instant.replace(microsecond=0).timestamp())*1_000_000_000 + int(
+        (fraction[1] if fraction else '').ljust(9,'0'))
+
+
 def review_physical_peers(result, required=False):
     peers=result.get('physical_queue_peers')
     if peers is None:
@@ -55,9 +67,8 @@ def review_physical_peers(result, required=False):
             {peer['node'] for peer in peers}=={0,1,2}, 'missing or duplicated physical nodes')
     identities=set()
     for peer in peers:
-        started=datetime.fromisoformat(peer['started'].replace('Z','+00:00'))
-        finished=datetime.fromisoformat(peer['finished'].replace('Z','+00:00'))
-        require(started.tzinfo is not None and finished.tzinfo is not None and started<=finished,
+        started=timestamp_ns(peer['started']);finished=timestamp_ns(peer['finished'])
+        require(started<=finished,
                 'invalid physical monitoring interval')
         snapshot=peer['state'];identity=snapshot.get('server_id')
         require(not peer.get('error') and isinstance(identity,str) and bool(identity) and

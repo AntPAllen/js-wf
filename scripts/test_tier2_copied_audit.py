@@ -38,7 +38,7 @@ class CopiedAuditReview(unittest.TestCase):
                 elif mutation=='api_bool':result['queue_all_three_peers'][0]['state']['messages']=False
                 with self.assertRaises(ValueError):r.review_counts(result,expected)
     def test_local_physical_corruption(self):
-        for mutation in ('missing','duplicate_node','bool_node','duplicate_id','empty_id','error','reversed','naive','missing_stream','duplicate_stream','messages','bool_messages','missing_messages','durables'):
+        for mutation in ('missing','duplicate_node','bool_node','duplicate_id','empty_id','error','reversed','nano_reversed','naive','missing_stream','duplicate_stream','messages','bool_messages','missing_messages','durables'):
             with self.subTest(mutation=mutation):
                 result,_=self.fixture();peers=result['physical_queue_peers'];peer=peers[0];stream=peer['state']['account_details'][0]['stream_detail']
                 if mutation=='missing':peers.pop()
@@ -48,6 +48,7 @@ class CopiedAuditReview(unittest.TestCase):
                 elif mutation=='empty_id':peer['state']['server_id']=''
                 elif mutation=='error':peer['error']='unavailable'
                 elif mutation=='reversed':peer['finished']='2026-10-06T02:59:59Z'
+                elif mutation=='nano_reversed':peer.update(started='2026-10-06T03:00:00.000000002Z',finished='2026-10-06T03:00:00.000000001Z')
                 elif mutation=='naive':peer['started']='2026-10-06T03:00:00'
                 elif mutation=='missing_stream':stream.clear()
                 elif mutation=='duplicate_stream':stream.append(copy.deepcopy(stream[0]))

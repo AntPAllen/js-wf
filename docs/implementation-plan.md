@@ -4657,3 +4657,14 @@ monotonic clock. Independent public pinnedvarz measures node2-59.987814811s;
 neutral peers within2s. Same original producer/reviewer handles remain active;
 native terminal/fullproof/copy/full13x200 gates pending. Positiveclock native/copy
 accepted at recordedsource/seed; long24h/million processes unchanged.
+
+## Reusable retained rolling-upgrade physical reviewer accepted — 2026-10-06
+
+Repository reviewer binds closed ten-minute original SDK/source/externalinputs/
+producer/profile/nativegates, exact2.11.17/current2.15.0 binaries/paths and one
+initial/replacement generation pernode. Three upgrades retain270scadence/version
+vectors/monitorcuts/seven pinned physical snapshots/finaldrain/64durables. Accepted
+661239d seed1 rechecks2,016terminals/22,252entries. Three controls reject27fault/
+physical corruptions. Copied reviewer fixes submicrosecond ordering; reversed1ns
+control rejects and positiveclock copied evidence rechecks. No NATS process/store
+reopen; historicalfailedupgrade/full13x200/current-main/24h/million gates remain.

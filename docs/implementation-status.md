@@ -29,6 +29,18 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: reusable rolling-upgrade physical review
+
+Repository command rechecks closed original661239d ten-minute upgrade seed1:
+actualSDK/source694/external3286/legacy+current server bytes/paths/two generations
+pernode/nativecells/cohort and three original270s upgrades/seven pinned physical
+snapshots/final64durable drain. Three controls reject27fault/cut/physical corruptions.
+Copied reviewer preserves nanosecond timing; reversed1ns control rejects and accepted
+positiveclock copied proof rechecks. No NATS rerun/store reopen. Historical failure
+and full13x200/current-main/24h/million gates remain. Negativeclock and longhandles
+continue unchanged.
+[Review and controls](scale/tier2-retained-upgrade-review-2026-10-06/).
+
 ## Latest follow-up — 2026-10-06: live qualification storage headroom
 
 Six pushed full canonical archives/parts/concat/member/manifest reverified before
