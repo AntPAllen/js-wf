@@ -141,3 +141,7 @@ Every archived member is SHA256-compared on readback. Modified store copies
 remain local and are excluded from the archives. The original retention cause
 remains open. Future release drain must inspect every physical replica; an empty
 leader/current metadata alone cannot establish all-replica physical drain.
+
+## Complete original physical-store custody — 2026-10-06
+
+The [complete original service root](complete-primary-root-2026-10-06/) now has a verified full S3 archive including all physical stores/executable, receipt ledger, observations and report. All4995 current cluster files match the earlier committed preinspection ledger; terminal report/receipt/observation hashes also match historical metadata. This fills the earlier terminal archive's physical-store omission. No original was reopened or removed and the failed original physical-drain gate is unchanged. Future native diagnostics must restore this exact complete proof to a fresh directory.
