@@ -43,14 +43,36 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	kv, err := js.CreateKeyValue(ctx, jetstream.KeyValueConfig{Bucket: "WF_LEASE", History: 1, TTL: provision.LeaseTTL, LimitMarkerTTL: time.Minute, Storage: jetstream.FileStorage, Replicas: 3})
+	fmt.Println("component stage=api-readiness")
+	ready, stopReady := context.WithTimeout(ctx, 15*time.Second)
+	for ready.Err() == nil {
+		attempt, cancel := context.WithTimeout(ready, 2*time.Second)
+		_, err = js.AccountInfo(attempt)
+		cancel()
+		if err == nil {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	err = ready.Err()
+	stopReady()
+	if err != nil {
+		return fmt.Errorf("API readiness: %w", err)
+	}
+	fmt.Println("component stage=create-kv")
+	setup, stopSetup := context.WithTimeout(ctx, 10*time.Second)
+	kv, err := js.CreateKeyValue(setup, jetstream.KeyValueConfig{Bucket: "WF_LEASE", History: 1, TTL: provision.LeaseTTL, LimitMarkerTTL: time.Minute, Storage: jetstream.FileStorage, Replicas: 3})
 	if err != nil {
 		return err
 	}
-	stream, err := js.Stream(ctx, "KV_WF_LEASE")
+	stopSetup()
+	setup, stopSetup = context.WithTimeout(ctx, 5*time.Second)
+	stream, err := js.Stream(setup, "KV_WF_LEASE")
 	if err != nil {
 		return err
 	}
+	stopSetup()
+	fmt.Println("component stage=preferred-leader")
 	// Public leader stepdown placement is supported by the pinned NATS API.
 	prefer, done := context.WithTimeout(ctx, 20*time.Second)
 	requested := false
@@ -155,6 +177,7 @@ func run() error {
 			}
 		}(actor)
 	}
+	fmt.Println("component stage=warm-traffic")
 	warm := time.NewTimer(30 * time.Second)
 	defer warm.Stop()
 	select {
@@ -196,9 +219,11 @@ func run() error {
 	if err := sample("isolated"); err != nil {
 		return err
 	}
+	probeCtx, stopProbe := context.WithDeadline(bound, killed.Add(10*time.Second))
+	defer stopProbe()
 	var probe uint64
-	for bound.Err() == nil && time.Since(killed) < 10*time.Second {
-		attempt, cancel := context.WithTimeout(bound, time.Second)
+	for probeCtx.Err() == nil {
+		attempt, cancel := context.WithTimeout(probeCtx, time.Second)
 		probe, err = kv.Put(attempt, "majority.probe", []byte("during-cut"))
 		cancel()
 		if err == nil {
