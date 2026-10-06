@@ -29,11 +29,14 @@ import (
 
 type retirementManifestPort struct {
 	journal.SnapshotWritePort
-	failFresh  atomic.Bool
-	generation atomic.Uint64
-	dropped    atomic.Int64
-	onDrop     func(context.Context) error
-	afterDrop  func(string)
+	failFresh   atomic.Bool
+	generation  atomic.Uint64
+	dropped     atomic.Int64
+	onDrop      func(context.Context) error
+	afterDrop   func(string)
+	commitFresh bool
+	committed   atomic.Int64
+	afterCommit func(string, []byte)
 }
 
 func (p *retirementManifestPort) CreateManifest(ctx context.Context, key string, data []byte) error {
@@ -42,6 +45,15 @@ func (p *retirementManifestPort) CreateManifest(ctx context.Context, key string,
 		return err
 	}
 	if snap.Runtime != nil && snap.Runtime.InvSeq == p.generation.Load() && p.failFresh.Swap(false) {
+		if p.commitFresh {
+			if err := p.SnapshotWritePort.CreateManifest(ctx, key, data); err != nil {
+				return err
+			}
+			p.committed.Add(1)
+			if p.afterCommit != nil {
+				p.afterCommit(key, append([]byte(nil), data...))
+			}
+		}
 		p.dropped.Add(1)
 		if p.onDrop != nil {
 			if err := p.onDrop(ctx); err != nil {
@@ -378,5 +390,5 @@ func runContinuationRetirementOnCluster(t *testing.T, all []jetstream.JetStream,
 	if err != nil || !bytes.Equal(sharedBytes, sharedJSON) {
 		t.Fatalf("shared content after reuse lost: %v", err)
 	}
-	t.Logf("continuation retirement/reuse: old_generation=%d fresh_generation=%d reclaimed=%d calls=%d effects=%d terminals=%d shared_blob_retained=true fresh_initial_calls=%d manifest_drops=%d", first.InvSeq, second.InvSeq, swept.Deleted, initialCalls.Load(), effects.Load(), report.Terminal, freshInitialCalls.Load(), port.dropped.Load())
+	t.Logf("continuation retirement/reuse: old_generation=%d fresh_generation=%d reclaimed=%d calls=%d effects=%d terminals=%d shared_blob_retained=true fresh_initial_calls=%d manifest_drops=%d manifest_commits=%d", first.InvSeq, second.InvSeq, swept.Deleted, initialCalls.Load(), effects.Load(), report.Terminal, freshInitialCalls.Load(), port.dropped.Load(), port.committed.Load())
 }

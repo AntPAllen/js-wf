@@ -25,9 +25,11 @@ EXPIRY = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossAndLea
 WEAK_FRAME = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAbsenceAndAllServerSIGKILL'
 WEAK_EXPIRY = 'TestContinuationRetirementReuseInJetStreamDomainWithManifestLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL'
 LEGACY_WEAK_EXPIRY = 'TestContinuationRetirementReuseInLegacyJetStreamDomainWithManifestLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL'
+COMMITTED_WEAK_EXPIRY = 'TestContinuationRetirementReuseInJetStreamDomainWithCommittedManifestAckLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL'
 CASES = {'read-controls': [RESULT, RESULT+'InJetStreamDomain', SNAPSHOT, SNAPSHOT+'InJetStreamDomain'],
          'retirement-server-kill': [KILL, EXPIRY], 'retirement-weak-frame': [WEAK_FRAME],
-         'retirement-weak-frame-expiry': [WEAK_EXPIRY], 'legacy-retirement-weak-frame-expiry': [LEGACY_WEAK_EXPIRY]}
+         'retirement-weak-frame-expiry': [WEAK_EXPIRY], 'legacy-retirement-weak-frame-expiry': [LEGACY_WEAK_EXPIRY],
+         'retirement-committed-weak-frame-expiry': [COMMITTED_WEAK_EXPIRY]}
 
 
 def sha(path):
@@ -71,13 +73,13 @@ def verify_log(case, log):
         heal = re.findall(r'native domain healed node=\d pid=\d+ domain=WFRETIRE server_id=\w+ elapsed=([0-9.]+)s', log)
         require(len(heal) == nodes and all(float(value) < 30 for value in heal), 'whole-cut domain heal gate')
         epochs = re.findall(r'prior_epoch=(\d+) terminal_epoch=(\d+) records=(\d+)', log)
-        if case in ('retirement-server-kill', 'retirement-weak-frame-expiry', 'legacy-retirement-weak-frame-expiry'):
+        if case in ('retirement-server-kill', 'retirement-weak-frame-expiry', 'legacy-retirement-weak-frame-expiry', 'retirement-committed-weak-frame-expiry'):
             require(len(epochs) == 1 and int(epochs[0][1]) > int(epochs[0][0]), 'lease expiry successor epoch missing')
             outages = re.findall(r'all-server outage: held=([0-9.]+)s ttl=12s', log)
             require(len(outages) == 1 and float(outages[0]) > 12, 'outage did not exceed production lease TTL')
         else:
             require(not epochs, 'unexpected lease expiry profile')
-        if case in ('retirement-weak-frame', 'retirement-weak-frame-expiry', 'legacy-retirement-weak-frame-expiry'):
+        if case in ('retirement-weak-frame', 'retirement-weak-frame-expiry', 'legacy-retirement-weak-frame-expiry', 'retirement-committed-weak-frame-expiry'):
             armed = re.findall(r'weak frame armed after domain heal: object=(step-result-[a-f0-9]{64})', log)
             confirmed = re.findall(r'weak frame confirmed: object=(step-result-[a-f0-9]{64}) generation=(\d+) drops=1 reads=(\d+) leader=1 direct=0 route=\$JS.WFRETIRE.API.STREAM.MSG.GET.OBJ_WF_BLOB', log)
             generations = re.findall(r'old_generation=(\d+) fresh_generation=(\d+)', log)
@@ -85,6 +87,16 @@ def verify_log(case, log):
                     and len(generations) == 1 and confirmed[0][1] == generations[0][1]
                     and int(generations[0][1]) > int(generations[0][0]) and int(confirmed[0][2]) >= 2,
                     'fresh frame weak absence and exact native domain confirmation missing')
+        if case == 'retirement-committed-weak-frame-expiry':
+            publications=list(re.finditer(r'retirement manifest committed before SIGKILL: generation=(\d+) object=(step-result-[a-f0-9]{64}) sequence=(\d+)',log))
+            require(len(publications)==1 and publications[0][1]==confirmed[0][1]
+                    and publications[0][2]==confirmed[0][0] and int(publications[0][3])>0
+                    and publications[0].start()<log.index('retirement fresh manifest cut:')
+                    and log.count('manifest_drops=1 manifest_commits=1')==1,
+                    'exact durable manifest publication before SIGKILL and lost acknowledgement missing')
+        else:
+            require('retirement manifest committed before SIGKILL:' not in log,
+                    'unexpected committed manifest profile')
         require(log.count('effects=3 terminals=2 shared_blob_retained=true') == len(expected) and log.count('manifest_drops=1') == len(expected),
                 'strict retirement/reuse completion missing')
         if case == 'legacy-retirement-weak-frame-expiry':

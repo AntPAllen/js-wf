@@ -10,6 +10,14 @@ spec.loader.exec_module(controls)
 
 
 class DomainCoverageControls(unittest.TestCase):
+    def test_prepublication_expiry_row_cannot_substitute_for_committed_ack_loss(self):
+        log = (REPO/'docs/scale/domain-retirement-weak-frame-expiry-2026-10-06/native-race/native.log').read_text()
+        with self.assertRaisesRegex(ValueError, 'coverage'):
+            controls.verify_log('retirement-committed-weak-frame-expiry', log)
+        renamed = log.replace(controls.WEAK_EXPIRY, controls.COMMITTED_WEAK_EXPIRY)
+        with self.assertRaisesRegex(ValueError, 'durable manifest publication'):
+            controls.verify_log('retirement-committed-weak-frame-expiry', renamed)
+
     def test_actual_legacy_row_requires_all_peer_versions_and_fallback_after_restart(self):
         log = (REPO/'docs/scale/domain-retirement-legacy-weak-frame-expiry-2026-10-06/native-race/native.log').read_text()
         controls.verify_log('legacy-retirement-weak-frame-expiry', log)

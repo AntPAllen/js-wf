@@ -5306,3 +5306,16 @@ six closed legacy incarnations and full2352-member originals independently verif
 Initial failure remains unqualified and preserved. Ten guard groups pass; other
 legacy combinations/full matrices/million physical drain/actual24h remain open.
 [Accepted focused proof](scale/domain-retirement-legacy-weak-frame-expiry-2026-10-06/).
+
+## Committed manifest lost-ack domain retirement control prepared — 2026-10-06
+
+The prior combined manifest-loss/frame-absence/lease-expiry tests inject absence
+before publication. Add the complementary real committed-write control: complete
+CreateManifest, read back exact fresh manifest bytes/generation/object/positive
+stream sequence before SIGKILL, then hold all domain peers beyond productionTTL
+and return ErrUnknown after restart instead of delivering the acknowledgement.
+Require the same strict reuse/epoch/frame/integrity/GC and original30s/60s/3m
+budgets. Prove commit occurs before every kill and final frame matches it;
+prepublication or renamed evidence is insufficient. Eleven verifier groups and
+compilation pass; native acceptance remains pending.
+[Prepared fixture](scale/domain-retirement-committed-manifest-2026-10-06/).

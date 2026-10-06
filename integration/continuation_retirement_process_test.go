@@ -3,6 +3,7 @@
 package integration_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -61,6 +62,10 @@ func TestContinuationRetirementReuseInLegacyJetStreamDomainWithManifestLossWeakF
 	runContinuationRetirementProcessFaultWithBinary(t, true, true, "WFRETIRE", true, binary)
 }
 
+func TestContinuationRetirementReuseInJetStreamDomainWithCommittedManifestAckLossWeakFrameAbsenceAndLeaseExpiryAcrossAllServerSIGKILL(t *testing.T) {
+	runContinuationRetirementProcessFaultWithBinary(t, true, true, "WFRETIRE", true, "", true)
+}
+
 // Only the selected fresh frame's first weak Object Store response is injected.
 // The frame upload, administrative metadata confirmation and retried payload
 // read use real domain servers and original retained stores after SIGKILL.
@@ -106,8 +111,15 @@ func runContinuationRetirementProcessFault(t *testing.T, full, expireLease bool,
 	runContinuationRetirementProcessFaultWithBinary(t, full, expireLease, domain, len(weakFrame) == 1 && weakFrame[0], "")
 }
 
-func runContinuationRetirementProcessFaultWithBinary(t *testing.T, full, expireLease bool, domain string, forcedAbsence bool, legacyBinary string) {
+func runContinuationRetirementProcessFaultWithBinary(t *testing.T, full, expireLease bool, domain string, forcedAbsence bool, legacyBinary string, commitBeforeDrop ...bool) {
 	t.Helper()
+	if len(commitBeforeDrop) > 1 {
+		t.Fatal("at most one committed manifest control")
+	}
+	committed := len(commitBeforeDrop) == 1 && commitBeforeDrop[0]
+	if committed && (!full || !expireLease || domain == "" || !forcedAbsence) {
+		t.Fatal("committed manifest control requires full domain/expiry/weak-frame cut")
+	}
 	if expireLease && !full {
 		t.Fatal("lease expiry requires every server stopped")
 	}
@@ -125,6 +137,9 @@ func runContinuationRetirementProcessFaultWithBinary(t *testing.T, full, expireL
 		}
 		if legacyBinary != "" {
 			root += "-legacy-2.11.17"
+		}
+		if committed {
+			root += "-committed-manifest-ack-loss"
 		}
 		if err := os.Mkdir(root, 0700); err != nil {
 			t.Fatal(err)
@@ -227,6 +242,19 @@ func runContinuationRetirementProcessFaultWithBinary(t *testing.T, full, expireL
 	var leaseTTL time.Duration
 	var weak *retirementWeakFrameJS
 	var configure []func(*retirementManifestPort)
+	type committedRecord struct {
+		key  string
+		data []byte
+	}
+	var publication atomic.Value
+	if committed {
+		configure = append(configure, func(port *retirementManifestPort) {
+			port.commitFresh = true
+			port.afterCommit = func(key string, data []byte) {
+				publication.Store(committedRecord{key: key, data: data})
+			}
+		})
+	}
 	if forcedAbsence {
 		weak = &retirementWeakFrameJS{}
 		prefix := "$JS." + domain + ".API"
@@ -267,6 +295,21 @@ func runContinuationRetirementProcessFaultWithBinary(t *testing.T, full, expireL
 		stream, err := all[0].Stream(ctx, "KV_WF_STATE")
 		if err != nil {
 			return err
+		}
+		if committed {
+			record, ok := publication.Load().(committedRecord)
+			if !ok {
+				return fmt.Errorf("fresh manifest publication not recorded")
+			}
+			message, readErr := stream.GetLastMsgForSubject(ctx, "$KV.WF_STATE."+record.key)
+			if readErr != nil || message == nil || !bytes.Equal(message.Data, record.data) || message.Sequence == 0 {
+				return fmt.Errorf("committed manifest readback mismatch: %v", readErr)
+			}
+			var snap journal.Snapshot
+			if err := json.Unmarshal(message.Data, &snap); err != nil || snap.Runtime == nil {
+				return fmt.Errorf("committed runtime manifest absent: %v", err)
+			}
+			t.Logf("retirement manifest committed before SIGKILL: generation=%d object=%s sequence=%d", snap.Runtime.InvSeq, snap.Runtime.Object, message.Sequence)
 		}
 		info, err := stream.Info(ctx)
 		if err != nil || info.Cluster == nil || info.Cluster.Leader == "" {
