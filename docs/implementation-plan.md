@@ -4937,3 +4937,26 @@ pass; native qualification is still pending. Additional23 canonical raw duplicat
 archives verified and reclaimed1,084,948,480 allocated bytes; about4.8GB free still
 falls below launch admission. Original primary media, sources/exes/caches and Git
 proof retained. [Recovery](scale/remaining-raw-proof-duplicate-recovery-2026-10-06/).
+
+### Fresh valid full400k bulk latency capacity accepted — 2026-10-06
+
+At86a9a33 fresh R5 full400k/4.8M valid activity population passes native346.87s.
+Original20s complete integrity checks pass17.935866136s before/16.185203628s after.
+Original6m bulk read/reduction and comparison finish19.345814968s. Every one of
+800,000 samples equals the complete independent timestamp/input-shape oracle;
+256 distributed frozen point-oracle witnesses pass. Complete source counts and
+zero-consumer cleanup verified, application charge1,581,600,000 bytes. Source
+unchanged; actual SDK3147263 and five2.15 server processes closed. Independent
+artifact review verifies all persisted sample coordinates/census/timestamp math.
+Complete1,793-file fixture/1,794-member archive637,549,119 bytes fully read back;
+all current original bytes/modes/mtimes unchanged. S3 transfer follows. Synthetic capacity
+does not qualify real-workflow/fault/default/currentmatrix/24h adoption of bulk.
+[Evidence](scale/full400k-bulk-capacity-preparation-2026-10-06/native-valid-population/).
+
+Native RUSAGE_SELF3,804,444KiB (3.63GiB) is SDK highwater measured through test-body
+completion, before cleanup/exit and excluding Docker servers. Earlier field name
+suggested a final lifetime peak; independent review explicitly corrects that scope.
+Future test field is named for test-body highwater and the producer now records
+exact-child wait4 RSS through SDK exit. Real OS control preserves nonzero exit17
+and excludes a larger prior subprocess. It does not retroactively provide final
+RSS for this accepted run. Original counts/deadlines and prior verdicts unchanged.

@@ -226,11 +226,11 @@ func TestMatrixBulkLatencyFull400kCapacity(t *testing.T) {
 	defer func() {
 		var usage syscall.Rusage
 		if err := syscall.Getrusage(syscall.RUSAGE_SELF, &usage); err == nil {
-			proof["sdk_lifetime_peak_rss_kib"] = usage.Maxrss
+			proof["sdk_test_body_peak_rss_kib"] = usage.Maxrss
 		} else {
 			proof["rss_error"] = err.Error()
 		}
-		proof["rss_scope"] = "Linux RUSAGE_SELF whole SDK lifetime including fixture preparation, excluding Docker server processes; Go memory target is not an RSS bound"
+		proof["rss_scope"] = "Linux RUSAGE_SELF through test-body completion including fixture preparation, before test cleanup and SDK exit, excluding Docker server processes; Go memory target is not an RSS bound"
 		proof["profile"] = map[string]any{"gomaxprocs": runtime.GOMAXPROCS(0), "gogc": os.Getenv("GOGC"), "gomemlimit": os.Getenv("GOMEMLIMIT")}
 		data, err := json.MarshalIndent(proof, "", "  ")
 		if err == nil {

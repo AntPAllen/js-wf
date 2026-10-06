@@ -14,6 +14,7 @@ against the complete supplied plan is still incomplete; no percentage is claimed
 | Tier3 fault matrix | Ahead-clock seeds 1–200 qualified at executed `63fbc03`; worker-clock 135 seeds, disk-delay seeds 1–200 and disk-stall seeds 1–65 and 79–200 qualified at executed `79915ca`; full 16-row × 200/current-source gate and historical failed ranges remain open. |
 | Original focused scale cases | Continuous-partition 100k distinct Start count and 200 workflows × 50 steps / 6 workers with repeated 2 s faults are qualified at their recorded sources. Repeated faults with busy partition rebalance also qualified. All six full500-child parent SIGKILL + library journal restart boundaries qualify at cdd4c7b with exact results/prefixes, independent public local Jsz evidence on all three replicas, 64 durable drain witnesses and fresh copied-store audits. Earlier leader-routed physical claims remain corrected in their recorded scope. Other finite combined cases remain. |
 | Explicit full400k audit capacity | At02d485a explicit chunked R1 reader qualifies fresh full400k/4.8M cold baseline18.134257s and actual R5 ownerSIGKILL leftdown16.429780s including zero-consumer cleanup, under4CPU/GOGC500/4GiB. At8693ab5 same-store ownerrestart qualifies17.087980s. Explicit ten-minute journal now accepted at2f74289; default/fullmatrix/24h remain open. |
+| Full400k bulk latency capacity | Fresh valid synthetic R5 full400k/4.8M at86a9a33: nativePASS346.87s; full integrity before17.935866136s/after16.185203628s; bulk and exact full-sample comparison19.345814968s, all800,000 samples match independent timestamp oracle plus256 frozen point witnesses. SDK test-body highwater3,804,444KiB (3.63GiB), excluding servers and before cleanup/exit; not exact final lifetime peak. Default/live/fault/fullmatrix/24h adoption remains open. |
 | Original million-timer gate | Delivery alone is insufficient: the original physical index/drain assertion is not qualified. |
 | Original 24-hour soak | Three actual journal-leader attempts failed retained audits at batch110/100/400 after950/799/3223s. Complete originals independently preserved; instrumented scan throughput localized. Batched attempt also failed at batch400 /11200 after3223s; originals independently preserved. Explicit-route normal attempt also failed at batch1050 /29400 after7751.58s; complete originals reviewed, concurrent million-loading overlap recorded. Byte-bounded explicit-route attempt failed checkpoint1750 /49000 after13096.14s; all originals independently preserved. Corrected continuous-byte attempt also failed checkpoint1040 /29120 after7986.85s; originals independently preserved, state snapshot phase is the next diagnostic target. No24h row qualified; full-matrix soak remains. |
 
@@ -25,8 +26,8 @@ Real-cluster failures with unconfirmed causes remain recorded; successful focuse
 diagnostics do not erase them. Current-main full matrices require final-source
 qualification, rather than treating older executed-source rows as a blanket pass.
 
-Immediate work: prepare a fresh valid full400k latency/memory fixture, finish
-remaining clock/checkpoint, million-timer physical-drain, combined and operational
+Immediate work: preserve the accepted full400k proof, qualify broader live/fault
+use, finish remaining clock/checkpoint, million-timer physical-drain, combined and operational
 coverage, and qualify the actual 24-hour gate. Both latest long campaigns are
 terminal failures; there is no running long campaign to poll or resume. Their
 complete current files, including partial no-space evidence, are preserved to S3.
@@ -47,12 +48,32 @@ manifest was never written after no-space failure. Complete current files are
 already canonical S3-preserved; no synthetic original manifest, SDK restart or
 verdict change. [Waiter closure](scale/terminal-campaigns-disk-pressure-2026-10-06/obsolete-review-wait/).
 
+Fresh valid full400k gate at86a9a33 passes346.87s. Before/after original20s full
+integrity17.935866136s/16.185203628s; original6m bulk and complete independent
+sample comparison19.345814968s. All800,000 samples equal the independent complete
+timestamp oracle;256 spread-out frozen point witnesses pass. Application charge
+1,581,600,000 bytes, full source counts and zero-consumer cleanup verified. Actual
+SDK3147263 and five observed NATS2.15 processes closed, selected source unchanged.
+Complete sample-file census/math verified by corrected independent reviewer;
+complete1,793-file fixture/1,794-member archive637,549,119 bytes fully read back,
+all current original bytes/modes/mtimes unchanged. S3 publication follows. Initial reviewer
+incorrectly required an explicit empty-stream counter; its failure is preserved,
+and corrected controls still reject missing nonzero or unexpected counters.
+[Review](scale/full400k-bulk-capacity-preparation-2026-10-06/native-valid-population/).
+
+RSS scope corrected: native RUSAGE_SELF3,804,444KiB is measured through test-body
+completion before cleanup/SDK exit, not exact final whole-lifetime peak. Future
+producer now uses wait4 of the exact SDK child through exit. Real OS control
+preserves exit17 and measures34,836KiB for its24MiB child without contamination
+from an earlier128MiB child. This reporting change does not add a native rerun or
+retroactive RSS claim. [Control](scale/full400k-bulk-capacity-preparation-2026-10-06/wait4-control/).
+
 Fresh full400k/4.8M valid activity latency/memory gate is now prepared. It requires
 original20s full integrity before/after, original6m bulk read/reduction and full
 sample comparison, a separate full independent timestamp/input-shape census,
 and256 frozen point-oracle checks spread over the entire population. Every accepted
-sample is retained. Linux RUSAGE_SELF captures actual whole-SDK-lifetime peak RSS,
-excluding Docker servers; the4GiB Go target is not an RSS ceiling. Race controls
+sample is retained. Linux RUSAGE_SELF captures SDK highwater through test-body completion,
+excluding cleanup/exit and Docker servers; the4GiB Go target is not an RSS ceiling. Race controls
 reject invalid coordinates/counts/payloads/order/deadlines. Native result remains
 pending; no smaller population override is available. Producer admission requires
 5GiB on the fixture filesystem before creating it. About4.8GB free is still below

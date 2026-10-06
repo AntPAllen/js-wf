@@ -14,6 +14,7 @@ while not probe.exists():probe=probe.parent
 free_at_admission=shutil.disk_usage(probe).free
 assert free_at_admission>=minimum_free,'Need at least5GiB for full population, complete samples, source/exes and final archival'
 root.mkdir();source=root/'source'
+shutil.copyfile(__file__,root/'executed-producer.py')
 def sha(p):
  with p.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
 def save(name,data):(root/name).write_text(json.dumps(data,indent=2)+'\n')
@@ -35,14 +36,22 @@ assert 'vcs.revision='+revision in info and 'vcs.modified=false' in info
 save('binary.json',{'sha256':sha(root/'integration.test'),'build_info':info})
 args=[str(root/'integration.test'),'-test.run=^TestMatrixBulkLatencyFull400kCapacity$','-test.v','-test.count=1','-test.timeout=100m']
 save('commands.json',{'build':build,'test':args,'env':{k:v for k,v in env.items() if k.startswith('WF_') or k in ('GOMAXPROCS','GOMEMLIMIT','GOGC')},'source_capture_scope':'Selected Git Go/module source, retained isolated worktree and executable build metadata; not exhaustive external toolchain/compiler input capture'})
-(root/'actual-containers').mkdir();seen=set();records=[];memory=[]
+(root/'actual-containers').mkdir();seen=set();records=[];memory=[];native_usage=None
+def poll_native():
+ global native_usage
+ if p.returncode is not None:return p.returncode
+ pid,status,usage=os.wait4(p.pid,os.WNOHANG)
+ if not pid:return None
+ native_usage=usage
+ p.returncode=os.waitstatus_to_exitcode(status)
+ return p.returncode
 with (root/'native.log').open('w') as log:
  p=subprocess.Popen(args,cwd=source,env=env,stdout=log,stderr=subprocess.STDOUT)
  exe=Path(f'/proc/{p.pid}/exe')
  actual={'pid':p.pid,'source':revision,'sha256':sha(exe),'build_info':subprocess.check_output(['go','version','-m',str(exe)],text=True),'args':args,'stat':Path(f'/proc/{p.pid}/stat').read_text(),'status':'running','started_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'scope':'Fresh normal R5 full400k/4.8M valid activity latency capacity, complete independent timestamp oracle and 256 frozen point checks; original20s before/after and6m bulk limits; whole SDK lifetime Maxrss recorded; not live/default/matrix/24h or real-workflow/fault qualification'}
  assert actual['sha256']==sha(root/'integration.test');save('execution.json',actual)
  print('NATIVE_STARTED',p.pid,revision,flush=True)
- while p.poll() is None:
+ while poll_native() is None:
   try:
    status=Path(f'/proc/{p.pid}/status').read_text().splitlines()
    memory.append(dict(observed_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),pid=p.pid,values=[x for x in status if x.startswith(('VmRSS:','VmHWM:','VmSize:'))]))
@@ -62,11 +71,13 @@ with (root/'native.log').open('w') as log:
     records.append(record);seen.add((cid,pid));save('actual-containers/actual-servers.json',records)
    except (FileNotFoundError,ProcessLookupError,subprocess.CalledProcessError):continue
   time.sleep(1)
- code=p.wait();actual.update(status='passed' if code==0 else 'failed',exit_code=code,finished_utc=datetime.datetime.now(datetime.timezone.utc).isoformat());save('execution.json',actual)
+ code=p.wait();assert native_usage is not None
+ actual.update(status='passed' if code==0 else 'failed',exit_code=code,finished_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),sdk_wait4_usage=dict(peak_rss_kib=native_usage.ru_maxrss,user_seconds=native_usage.ru_utime,system_seconds=native_usage.ru_stime,scope='Linux wait4 of this exact SDK child through exit, including test cleanup; excludes compiler/Git/other children and Docker servers'))
+ save('execution.json',actual)
 after=inventory();save('source-after.json',after);assert before==after
 assert sha(root/'integration.test')==actual['sha256']
 assert not Path(f'/proc/{p.pid}').exists()
 for r in records:assert not Path('/proc/'+str(r['host_pid'])).exists()
-shutil.copyfile(__file__,root/'executed-producer.py')
+assert sha(root/'executed-producer.py')==sha(Path(__file__))
 print('NATIVE_FINISHED',code,flush=True)
 raise SystemExit(code)

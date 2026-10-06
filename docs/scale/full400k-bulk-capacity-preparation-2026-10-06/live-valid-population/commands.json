@@ -1,0 +1,28 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-c",
+    "-o",
+    "/tmp/js-wf-bulk-latency-full400k-valid-20261006/integration.test",
+    "./integration"
+  ],
+  "test": [
+    "/tmp/js-wf-bulk-latency-full400k-valid-20261006/integration.test",
+    "-test.run=^TestMatrixBulkLatencyFull400kCapacity$",
+    "-test.v",
+    "-test.count=1",
+    "-test.timeout=100m"
+  ],
+  "env": {
+    "GOMAXPROCS": "4",
+    "GOGC": "500",
+    "GOMEMLIMIT": "4GiB",
+    "WF_MATRIX_BULK_CAPACITY_ROOT": "/tmp/js-wf-bulk-latency-full400k-valid-20261006/fixture",
+    "WF_TIER3_EXPLICIT_ROUTE_SEEDS": "1",
+    "WF_TIER3_SYNC_INTERVAL": "2m"
+  },
+  "source_capture_scope": "Selected Git Go/module source, retained isolated worktree and executable build metadata; not exhaustive external toolchain/compiler input capture"
+}
