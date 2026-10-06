@@ -27,6 +27,7 @@ type matrixBulkSourceCut struct {
 }
 type matrixBulkLatencyStats struct {
 	SourceCuts              map[string]matrixBulkSourceCut `json:"source_cuts"`
+	FinalSourceCuts         map[string]matrixBulkSourceCut `json:"final_source_cuts,omitempty"`
 	Records                 map[string]int                 `json:"records"`
 	InvocationCutoff        uint64                         `json:"invocation_cutoff"`
 	OutOfPrefixChildLookups int                            `json:"out_of_prefix_child_lookups"`
@@ -296,13 +297,17 @@ func matrixBulkInvocationAuditsThrough(ctx context.Context, js jetstream.JetStre
 	if logicalEntries != expected.Entries {
 		return nil, stats, fmt.Errorf("bulk logical journal entry census differs from full integrity audit")
 	}
+	stats.FinalSourceCuts = map[string]matrixBulkSourceCut{}
 	for name, s := range streams {
 		info, err := s.Info(ctx)
 		if err != nil {
 			return nil, stats, err
 		}
-		if (matrixBulkSourceCut{info.State.FirstSeq, info.State.LastSeq, info.State.Msgs, info.State.Bytes, info.State.Consumers}) != stats.SourceCuts[name] {
-			return nil, stats, fmt.Errorf("bulk source changed or audit cursor remains: %s", name)
+		stats.FinalSourceCuts[name] = matrixBulkSourceCut{info.State.FirstSeq, info.State.LastSeq, info.State.Msgs, info.State.Bytes, info.State.Consumers}
+	}
+	for _, name := range []string{"WF_INV", "KV_WF_STATE", "WF_JRN", "WF_SIG"} {
+		if stats.FinalSourceCuts[name] != stats.SourceCuts[name] {
+			return nil, stats, fmt.Errorf("bulk source changed or audit cursor remains: %s before=%+v after=%+v", name, stats.SourceCuts[name], stats.FinalSourceCuts[name])
 		}
 	}
 	if err := ctx.Err(); err != nil {

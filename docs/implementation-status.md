@@ -43,8 +43,15 @@ Clock-controller, wire-rollout and cached-point profile conflicts are rejected;
 no flags are inherited into an unselected run. Thirteen producer controls and
 Go compile/skip pass. Original10m journal seed1 is live at29904c5 with actual
 SDK3166840,4CPU/GOGC500/4GiB, both bulk/comparison flags observed and all five
-NATS2.15 roles captured. Native terminal qualification remains pending; default
-unchanged. New explicit artifact checks reject missing/error receipts, changed
+NATS2.15 roles captured. Native failed620.54s after the bulk stage rejected a
+KV_WF_STATE cut change in2.241896878s. Before full integrity was
+2,604/28,689/2,604; all partial samples discarded, no point equivalence or row
+qualification. SDK and24 actual server incarnations closed. Complete5,502-file
+fixture/5,503-member archive141,763,935 bytes fully read back; S3 transfer next.
+Default unchanged; the differing field/server-side cause was not recorded by the
+original generic error. Future bulk stats now retain final cuts for all four
+sources and errors include exact before/after values; rejection remains strict.
+Projection/delivery race controls pass1.089s. No old stores reopened. New explicit artifact checks reject missing/error receipts, changed
 full counts, changed6m budget, incomplete source/sample lifecycle censuses and
 false point-equivalence claims. Five mutation groups,26 existing row controls
 and13 producer controls pass. [Live proof](scale/sustained-bulk-final-latency-2026-10-06/live-journal-ten-minute/).

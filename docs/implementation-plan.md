@@ -4974,3 +4974,20 @@ controller, wire-rollout and cached-point profile conflicts are rejected; compar
 requires bulk selection. Defaults unchanged. Thirteen producer controls and Go
 compile/skip pass. First native qualification must use the full original ten-minute
 journal fault row and compare every sample, rather than promote a short smoke.
+
+### First sustained bulk row fails strict source stability — 2026-10-06
+
+Original10m journal seed1 at29904c5 fails native620.54s. Before full integrity
+passes2,604 invocations/journals/terminals and28,689 entries; bulk stage rejects
+a KV_WF_STATE source-cut change after2.241896878s. No samples accepted and no
+point-equivalence/row/default/fullmatrix/24h promotion. Actual SDK3166840 and24
+observed NATS2.15 incarnations closed; source unchanged. Complete5,502-file
+fixture/5,503-member archive141,763,935 bytes verified; S3 transfer next.
+
+Original error does not identify whether data coordinates/counts or consumer
+cleanup changed, so a server-side cause is unconfirmed. Future bulk stats capture
+all four final source cuts, and errors show exact before/after fields with the
+original equality gate retained. Projection/delivery race controls pass1.089s.
+Next: a fresh bounded diagnostic to distinguish actor/state writes from cleanup
+and metadata behavior, then rerun full original ten-minute qualification after a
+justified correction. No old original/failed fixture is reopened.
