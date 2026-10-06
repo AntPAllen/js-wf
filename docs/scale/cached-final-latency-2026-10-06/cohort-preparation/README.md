@@ -8,3 +8,7 @@ Normal4CPU/GOGC500/4GiB. Onsuccess complete87920/969925 retainedcheck under20s.
 Onfailure discardpartialwhole result, preservepoint counts/error and closedoriginals.
 Actualsource/SDK/servers/mounts/closure/unchangeddonor/fullproof reviewed. No quiet
 host/speedratio/full400k/default/currentmatrix/original24h acceptance frompreparation.
+
+Reviewer verifies the explicit cache flag on both outcomes. Handle lookup counts
+are diagnostics: failed lookups can retry and snapshots can require object handles.
+The native small fixture counts are not an additional large-cohort acceptance gate.
