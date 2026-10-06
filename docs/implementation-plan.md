@@ -4404,3 +4404,12 @@ ActualSDK/server/source/originalarchive closure and complete100,804,049byte proo
 independently verified/readback. This explicit row is qualified; actual24h,
 defaultreader and currentfullmatrix remain open.
 [Evidence](scale/chunked-callback-audit-2026-10-06/live-journal-ten-minute/).
+
+## Actual24h chunked journal launch verified — 2026-10-06
+
+Clean21b4729 actualSDK862338 normal24h journalseed1 executing under original gates;
+1628sourceinputs/actualexecutable/VCS/profile4CPU/GOGC500/4GiB verified, allfive
+currentR5 server roles observed. Named user systemd producer/observer/reviewer live.
+First actual leaderSIGKILL/heal recorded, no live stores read/copied. Terminal
+24h/default/fullmatrix qualification remains open.
+[Launch](scale/chunked-callback-audit-2026-10-06/live-journal-24h-initial/).

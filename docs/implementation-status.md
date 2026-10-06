@@ -29,6 +29,17 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: actual24h chunked journal launch verified
+
+Clean21b4729 actual normalSDK862338 running24h journalseed1;1628sourceinputs/
+actualexe/build/VCS and/proc4CPU/GOGC500/4GiB/chunked verified. Five actualcurrent
+server roles/sixperiodic observations include first leaderSIGKILL/heal. User
+systemd producer/observer/reviewer active, source isolated. Original20s/60s/
+threeattempts/checkpoint/final/history/p99/drain unchanged; no live stores read/
+copied. Live launch is not terminal/drain/default/fullmatrix/24h acceptance.
+Original milliontimer handle101283 also remains live; secondkill/finaldrain pending.
+[Launch](scale/chunked-callback-audit-2026-10-06/live-journal-24h-initial/).
+
 ## Latest follow-up — 2026-10-06: explicit chunked live journal accepted
 
 Clean2f74289 nativePASS653.11s:94 batches/2632 terminal invocations/29003 entries,
