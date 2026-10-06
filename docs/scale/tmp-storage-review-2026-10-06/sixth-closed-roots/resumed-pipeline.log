@@ -1,0 +1,981 @@
+[main 1118884] Preserve closed temporary fixture inventories, batch 2
+ 60 files changed, 294489 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-batch4096-native-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-batch4096-native-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-batch4096-native-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-consumer-replication-native-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-consumer-replication-native-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-consumer-replication-native-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-native-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-native-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-native-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-normal-native-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-normal-native-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-normal-native-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-large-fault-race-native-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-large-fault-race-native-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-large-fault-race-native-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-auto-journal-seed1-parent-stack-launch-assembly-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-auto-journal-seed1-parent-stack-launch-assembly-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-auto-journal-seed1-parent-stack-launch-assembly-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-faults-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-faults-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-faults-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-replicated-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-replicated-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-replicated-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-owner-restart-v2-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-owner-restart-v2-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-owner-restart-v2-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-whole-state-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-whole-state-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-whole-state-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-faults-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-faults-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-faults-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-soak-launch-publication-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-soak-launch-publication-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-soak-launch-publication-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-cohort-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-cohort-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-cohort-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-proof-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-proof-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-proof-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-controls-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-controls-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-controls-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-fault-controls-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-fault-controls-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-fault-controls-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-10m-proof-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-10m-proof-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-10m-proof-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-24h-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-24h-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-24h-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock-seed6-success-37170797762/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock-seed6-success-37170797762/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock-seed6-success-37170797762/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock144-156-restoration-check/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock144-156-restoration-check/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock144-156-restoration-check/fixture-inventory.json
+To https://github.com/AntPAllen/js-wf.git
+   903d19f..1118884  main -> main
+{"archive_key": "js-wf/proofs/0b8412e8132399df5845a0cea31d6070d5965aa3b1842b3c3d2723bbe9aeb681/proof.tar.gz", "bytes": 25448930, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-audit-consumer-replication-native-20261004
+{"archive_key": "js-wf/proofs/5422cd6b02f66e94ed9061e8a30e644018a5e384a14b4dab1ea48cb48b390d2d/proof.tar.gz", "bytes": 25310104, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-audit-batch4096-native-20261004
+{"archive_key": "js-wf/proofs/69b8d45ed78bc31e29ba48b289d0e124e004b1254bf31d4b961b95b1108113f4/proof.tar.gz", "bytes": 25045818, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-audit-phase-profile-native-20261004
+{"archive_key": "js-wf/proofs/ba94f1d386fc73c4797c6d938b08406d3f739aa9969951051de5a83e05405a08/proof.tar.gz", "bytes": 24957594, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-audit-phase-profile-normal-native-20261004
+{"archive_key": "js-wf/proofs/78fd45908533d3381c57387bdfa7805c19381bfbd7c42c8fbf290bcb71057b85/proof.tar.gz", "bytes": 25238774, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-audit-streaming-large-fault-race-native-20261004
+{"archive_key": "js-wf/proofs/d685c911af82ecdf23a8620752c43b7732e3c925e04f765545ff15c6ed77dad0/proof.tar.gz", "bytes": 42327995, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-batch-candidate-faults-20261004
+{"archive_key": "js-wf/proofs/2856554dac6397865fa3b2cff16aa6375123bb1847fa2e0e9c821b7f92f731e1/proof.tar.gz", "bytes": 74127776, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-auto-journal-seed1-parent-stack-launch-assembly-20261005
+{"archive_key": "js-wf/proofs/8dd712105791b2b0ac242307c86ee9ca6eec68e5e5e74e90fc83566b5485b12e/proof.tar.gz", "bytes": 43112506, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-bulk-latency-cohort-owner-restart-v2-20261006
+{"archive_key": "js-wf/proofs/cb7729158ff8ab906a84c69e25b54f4332acd13ac6871797cd9f091456ff2fec/proof.tar.gz", "bytes": 51250382, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-batch-candidate-replicated-20261004
+{"archive_key": "js-wf/proofs/1906f547af1228f203b0197af79031bc9851050754f903b1a8e784d0c5aad1b1/proof.tar.gz", "bytes": 18054849, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-byte-native-faults-20261005
+{"archive_key": "js-wf/proofs/ba32544324e1a8e164897d685cdff6042a1168be44d0bdf8cbaddeb00277efa2/proof.tar.gz", "bytes": 43366555, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-bulk-latency-cohort-whole-state-20261006
+{"archive_key": "js-wf/proofs/79f83a7631e7d50b48ab969c9f4082900f18e140d27f960f3a0494e475b8b29d/proof.tar.gz", "bytes": 43303700, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-cached-latency-cohort-20261006
+{"archive_key": "js-wf/proofs/dff0fee66674ae8066d252b744a18352c081dda2900f986114b579828fb446b3/proof.tar.gz", "bytes": 74078194, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-byte-soak-launch-publication-20261005
+{"archive_key": "js-wf/proofs/a2052aa938c1580ddd9c858b5e09357cd48bfb01cbf0853201e29b06ad074629/proof.tar.gz", "bytes": 2320760, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-callback-audit-native-controls-20261005
+{"archive_key": "js-wf/proofs/f3d89542839f777be070178c229fc1c7ca113ea5a8c83d7b14231bc54c478acc/proof.tar.gz", "bytes": 5804813, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-callback-audit-native-fault-controls-20261005
+{"archive_key": "js-wf/proofs/9f987cf4db1af42cbc0c2c3307eb9cc3c5a972a48aea8b8ae4fbc87793fe5d92/proof.tar.gz", "bytes": 44458516, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-cached-latency-journal-10m-proof-20261006
+{"archive_key": "js-wf/proofs/ee5cacf46020cc6a3f9f753744cf7b46248ad29bc474de8348748624658aa4ee/proof.tar.gz", "bytes": 44327962, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-chunked-journal-10m-proof-20261006
+{"archive_key": "js-wf/proofs/027b40395218c3dea0e0c4656d09cd8f429c41c7f29151e0d182ed5f35841945/proof.tar.gz", "bytes": 26651806, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-chunked-journal-24h-20261006
+{"archive_key": "js-wf/proofs/91d78c95d200a4800e997fe56a8bdccb57112c7d27d4c0e370a75c57cb29fb87/proof.tar.gz", "bytes": 121043548, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-clock-seed6-success-37170797762
+{"archive_key": "js-wf/proofs/8fc174ed0ccf2058c06388e0defb7fc3af4bf00be9b806cae7dfa26ea5e590fc/proof.tar.gz", "bytes": 1071198691, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-clock144-156-restoration-check
+[main 6c94558] Record verified S3 copies for temporary fixtures, batch 2
+ 20 files changed, 700 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-batch4096-native-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-consumer-replication-native-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-native-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-normal-native-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-large-fault-race-native-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-auto-journal-seed1-parent-stack-launch-assembly-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-faults-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-replicated-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-owner-restart-v2-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-whole-state-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-faults-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-soak-launch-publication-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-cohort-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-proof-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-controls-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-fault-controls-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-10m-proof-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-24h-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock-seed6-success-37170797762/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock144-156-restoration-check/s3-readback.json
+To https://github.com/AntPAllen/js-wf.git
+   1118884..6c94558  main -> main
+OFFLOADED_NEW js-wf-audit-batch4096-native-20261004 122413056 25313280
+OFFLOADED_NEW js-wf-audit-consumer-replication-native-20261004 121344000 25452544
+OFFLOADED_NEW js-wf-audit-phase-profile-native-20261004 118181888 25047040
+OFFLOADED_NEW js-wf-audit-phase-profile-normal-native-20261004 119238656 24961024
+OFFLOADED_NEW js-wf-audit-streaming-large-fault-race-native-20261004 119762944 25239552
+OFFLOADED_NEW js-wf-auto-journal-seed1-parent-stack-launch-assembly-20261005 152981504 74133504
+OFFLOADED_NEW js-wf-batch-candidate-faults-20261004 102907904 42328064
+OFFLOADED_NEW js-wf-batch-candidate-replicated-20261004 128270336 51257344
+OFFLOADED_NEW js-wf-bulk-latency-cohort-owner-restart-v2-20261006 165457920 43114496
+OFFLOADED_NEW js-wf-bulk-latency-cohort-whole-state-20261006 166801408 43368448
+OFFLOADED_NEW js-wf-byte-native-faults-20261005 104804352 18055168
+OFFLOADED_NEW js-wf-byte-soak-launch-publication-20261005 152829952 74084352
+OFFLOADED_NEW js-wf-cached-latency-cohort-20261006 165281792 43311104
+OFFLOADED_NEW js-wf-cached-latency-journal-10m-proof-20261006 105603072 44466176
+OFFLOADED_NEW js-wf-callback-audit-native-controls-20261005 106749952 2322432
+OFFLOADED_NEW js-wf-callback-audit-native-fault-controls-20261005 171118592 5808128
+OFFLOADED_NEW js-wf-chunked-journal-10m-proof-20261006 105107456 44335104
+OFFLOADED_NEW js-wf-chunked-journal-24h-20261006 127504384 26652672
+OFFLOADED_NEW js-wf-clock-seed6-success-37170797762 166559744 121049088
+OFFLOADED_NEW js-wf-clock144-156-restoration-check 175288320 1071206400
+TOTAL_NEW 2698207232
+[main e397a04] Remove verified local temporary fixture copies, batch 2
+ 100 files changed, 640915 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-batch4096-native-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-batch4096-native-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-batch4096-native-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-batch4096-native-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-batch4096-native-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-consumer-replication-native-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-consumer-replication-native-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-consumer-replication-native-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-consumer-replication-native-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-consumer-replication-native-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-native-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-native-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-native-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-native-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-native-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-normal-native-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-normal-native-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-normal-native-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-normal-native-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-phase-profile-normal-native-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-large-fault-race-native-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-large-fault-race-native-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-large-fault-race-native-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-large-fault-race-native-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-audit-streaming-large-fault-race-native-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-auto-journal-seed1-parent-stack-launch-assembly-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-auto-journal-seed1-parent-stack-launch-assembly-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-auto-journal-seed1-parent-stack-launch-assembly-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-auto-journal-seed1-parent-stack-launch-assembly-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-auto-journal-seed1-parent-stack-launch-assembly-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-faults-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-faults-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-faults-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-faults-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-faults-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-replicated-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-replicated-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-replicated-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-replicated-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-batch-candidate-replicated-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-owner-restart-v2-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-owner-restart-v2-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-owner-restart-v2-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-owner-restart-v2-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-owner-restart-v2-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-whole-state-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-whole-state-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-whole-state-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-whole-state-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-bulk-latency-cohort-whole-state-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-faults-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-faults-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-faults-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-faults-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-native-faults-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-soak-launch-publication-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-soak-launch-publication-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-soak-launch-publication-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-soak-launch-publication-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-byte-soak-launch-publication-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-cohort-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-cohort-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-cohort-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-cohort-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-cohort-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-proof-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-proof-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-proof-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-proof-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-cached-latency-journal-10m-proof-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-controls-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-controls-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-controls-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-controls-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-controls-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-fault-controls-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-fault-controls-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-fault-controls-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-fault-controls-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-callback-audit-native-fault-controls-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-10m-proof-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-10m-proof-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-10m-proof-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-10m-proof-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-10m-proof-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-24h-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-24h-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-24h-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-24h-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-chunked-journal-24h-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock-seed6-success-37170797762/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock-seed6-success-37170797762/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock-seed6-success-37170797762/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock-seed6-success-37170797762/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock-seed6-success-37170797762/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock144-156-restoration-check/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock144-156-restoration-check/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock144-156-restoration-check/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock144-156-restoration-check/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock144-156-restoration-check/unlink-journal.jsonl
+To https://github.com/AntPAllen/js-wf.git
+   6c94558..e397a04  main -> main
+BATCH_FINISHED 2
+[main 906029b] Preserve closed temporary fixture inventories, batch 3
+ 60 files changed, 307907 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock157-169-restoration-check/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock157-169-restoration-check/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock157-169-restoration-check/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock196-200-restoration-check/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock196-200-restoration-check/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock196-200-restoration-check/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-compact-metadata-native-fault-controls-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-compact-metadata-native-fault-controls-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-compact-metadata-native-fault-controls-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-concurrent-state-87920-leader-loss-copied-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-concurrent-state-87920-leader-loss-copied-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-concurrent-state-87920-leader-loss-copied-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-soak-launch-proof-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-soak-launch-proof-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-soak-launch-proof-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-controls-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-controls-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-controls-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-fault-controls-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-fault-controls-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-fault-controls-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-3140-concurrent-state-copied-comparison-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-3140-concurrent-state-copied-comparison-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-3140-concurrent-state-copied-comparison-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-soak-copied-cohort-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-soak-copied-cohort-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-soak-copied-cohort-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-graceful-upgrade-qualified-20261003/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-graceful-upgrade-qualified-20261003/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-graceful-upgrade-qualified-20261003/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-held-metadata-rollout-10m-launch-proof-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-held-metadata-rollout-10m-launch-proof-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-held-metadata-rollout-10m-launch-proof-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-hosted-partition-seed3-download-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-hosted-partition-seed3-download-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-hosted-partition-seed3-download-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-explicit-routes-race-2g-10m-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-explicit-routes-race-2g-10m-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-explicit-routes-race-2g-10m-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-state-race-2g-10m-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-state-race-2g-10m-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-state-race-2g-10m-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-admitted-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-admitted-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-admitted-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-repeat-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-repeat-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-repeat-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-expiry-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-expiry-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-expiry-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-markers-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-markers-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-markers-20261006/fixture-inventory.json
+To https://github.com/AntPAllen/js-wf.git
+   e397a04..906029b  main -> main
+{"archive_key": "js-wf/proofs/c23e73fde98353d0994ac7c0dc7dc3bef9e681de6cd90dc92b849c318bb12dde/proof.tar.gz", "bytes": 411991058, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-clock196-200-restoration-check
+{"archive_key": "js-wf/proofs/cd4a10dc86f192d93ff697c85fe2e4364f1a7db4565509512d0ea4b24f9ff28e/proof.tar.gz", "bytes": 5694124, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-compact-metadata-native-fault-controls-20261005
+{"archive_key": "js-wf/proofs/36f33347649230ada2599701c7b9f9e685a672295ba5431c8949f13643195e59/proof.tar.gz", "bytes": 86827151, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-concurrent-state-87920-leader-loss-copied-20261005
+{"archive_key": "js-wf/proofs/06fc7853591b8156efd9e39aec165f1e6eec84d6a70134f6228c25d4a142e91b/proof.tar.gz", "bytes": 74129519, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-continuous-soak-launch-proof-20261005
+{"archive_key": "js-wf/proofs/768e53c0cb5f85f598efc783e0f0361a6dab06171d8c62f48fcfbefb78211873/proof.tar.gz", "bytes": 2343032, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-direct-callback-audit-native-controls-20261005
+{"archive_key": "js-wf/proofs/36c863b41b1eafc93a33764fe5058a05e1655b9ebdccbc556fdbcfff3c9140a9/proof.tar.gz", "bytes": 4485052, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-direct-callback-audit-native-fault-controls-20261005
+{"archive_key": "js-wf/proofs/9396ed1906c3850fb9bdf53287fedf940d60c1e5706d3542c0ab366bdb682913/proof.tar.gz", "bytes": 86826280, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-failed-3140-concurrent-state-copied-comparison-20261005
+{"archive_key": "js-wf/proofs/27a4b3190af4f2598e856260076db74fc07bc8b613ce5db6d1b6dd4d98caee34/proof.tar.gz", "bytes": 86785527, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-failed-soak-copied-cohort-20261005
+{"archive_key": "js-wf/proofs/012f989b863092666db6e01a1dd4226248a818c11b1903be1de1b4b1911c6d9e/proof.tar.gz", "bytes": 82807441, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-graceful-upgrade-qualified-20261003
+{"archive_key": "js-wf/proofs/916c13d7a793a659f6cd3442233f9950595c4c7f10d7ce85519b6c9e33529b6c/proof.tar.gz", "bytes": 74219319, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-held-metadata-rollout-10m-launch-proof-20261005
+{"archive_key": "js-wf/proofs/d52e1c4d28c8295d31b9dbf2c928c5248c4e88ab7744c7114b35ab7f61f79c51/proof.tar.gz", "bytes": 1071198615, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-clock157-169-restoration-check
+{"archive_key": "js-wf/proofs/8d675e37b53e3c12dcbc8d6a0c92a4ef1f4f832637abc80092e031e8b4b89f2f/proof.tar.gz", "bytes": 34304570, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-hosted-partition-seed3-download-20261005
+{"archive_key": "js-wf/proofs/8afeaabe7ddc361a138ebb256746c7e9f1f5a30222819629d1657cdde1c91523/proof.tar.gz", "bytes": 34257102, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-journal-streaming-explicit-routes-race-2g-10m-20261004
+{"archive_key": "js-wf/proofs/7627f705f9c53043c8a5cc88f9c2e450ae5ffa2965e5134d276bc73598c9774d/proof.tar.gz", "bytes": 33106604, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-journal-streaming-state-race-2g-10m-20261004
+{"archive_key": "js-wf/proofs/f892e09f752d7a23474e1fcf6d6609de17b942abd8fd7f9a6e7f2963edf0245a/proof.tar.gz", "bytes": 46539350, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-lease-partition-component-20261006
+{"archive_key": "js-wf/proofs/dc297c278c075b262802589e65f01280e4457a6397491c4e22145485f91747de/proof.tar.gz", "bytes": 47611017, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-lease-partition-component-admitted-20261006
+{"archive_key": "js-wf/proofs/482154d1a60ba5455b04c3e97a58b0cbed36b165a30cc3488f05a8d068e2537b/proof.tar.gz", "bytes": 48426824, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-lease-partition-component-fresh-20261006
+{"archive_key": "js-wf/proofs/be46c327323da353416a14632244ae8f9c8bea4a5ff5a24093b9ed455b2371bd/proof.tar.gz", "bytes": 48445083, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-lease-partition-component-fresh-repeat-20261006
+{"archive_key": "js-wf/proofs/1dd40febf0b3d600cd79d7b6dc3152c9a29f124ee1cc1094f86ad913caa5638a/proof.tar.gz", "bytes": 47614352, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-lease-partition-component-no-expiry-20261006
+{"archive_key": "js-wf/proofs/2d89077b6c7c1506fb2ab83e0bd9b5a6bb50f24dae19a3815f11eac83842cbbf/proof.tar.gz", "bytes": 47508018, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-lease-partition-component-no-markers-20261006
+[main 227ae2a] Record verified S3 copies for temporary fixtures, batch 3
+ 20 files changed, 700 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock157-169-restoration-check/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock196-200-restoration-check/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-compact-metadata-native-fault-controls-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-concurrent-state-87920-leader-loss-copied-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-soak-launch-proof-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-controls-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-fault-controls-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-3140-concurrent-state-copied-comparison-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-soak-copied-cohort-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-graceful-upgrade-qualified-20261003/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-held-metadata-rollout-10m-launch-proof-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-hosted-partition-seed3-download-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-explicit-routes-race-2g-10m-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-state-race-2g-10m-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-admitted-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-repeat-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-expiry-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-markers-20261006/s3-readback.json
+To https://github.com/AntPAllen/js-wf.git
+   906029b..227ae2a  main -> main
+OFFLOADED_NEW js-wf-clock157-169-restoration-check 175292416 1071206400
+OFFLOADED_NEW js-wf-clock196-200-restoration-check 175292416 411996160
+OFFLOADED_NEW js-wf-compact-metadata-native-fault-controls-20261005 170778624 5697536
+OFFLOADED_NEW js-wf-concurrent-state-87920-leader-loss-copied-20261005 156557312 86835200
+OFFLOADED_NEW js-wf-continuous-soak-launch-proof-20261005 153063424 74137600
+OFFLOADED_NEW js-wf-direct-callback-audit-native-controls-20261005 107040768 2347008
+OFFLOADED_NEW js-wf-direct-callback-audit-native-fault-controls-20261005 165064704 4485120
+OFFLOADED_NEW js-wf-failed-3140-concurrent-state-copied-comparison-20261005 156520448 86831104
+OFFLOADED_NEW js-wf-failed-soak-copied-cohort-20261005 156438528 86790144
+OFFLOADED_NEW js-wf-graceful-upgrade-qualified-20261003 149151744 82812928
+OFFLOADED_NEW js-wf-held-metadata-rollout-10m-launch-proof-20261005 153239552 74223616
+OFFLOADED_NEW js-wf-hosted-partition-seed3-download-20261005 132775936 34312192
+OFFLOADED_NEW js-wf-journal-streaming-explicit-routes-race-2g-10m-20261004 158502912 34258944
+OFFLOADED_NEW js-wf-journal-streaming-state-race-2g-10m-20261004 142356480 33107968
+OFFLOADED_NEW js-wf-lease-partition-component-20261006 118083584 46546944
+OFFLOADED_NEW js-wf-lease-partition-component-admitted-20261006 123564032 47611904
+OFFLOADED_NEW js-wf-lease-partition-component-fresh-20261006 127696896 48427008
+OFFLOADED_NEW js-wf-lease-partition-component-fresh-repeat-20261006 127807488 48451584
+OFFLOADED_NEW js-wf-lease-partition-component-no-expiry-20261006 123768832 47620096
+OFFLOADED_NEW js-wf-lease-partition-component-no-markers-20261006 124039168 47513600
+TOTAL_NEW 2897035264
+[main 61b294d] Remove verified local temporary fixture copies, batch 3
+ 100 files changed, 671639 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock157-169-restoration-check/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock157-169-restoration-check/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock157-169-restoration-check/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock157-169-restoration-check/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock157-169-restoration-check/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock196-200-restoration-check/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock196-200-restoration-check/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock196-200-restoration-check/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock196-200-restoration-check/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-clock196-200-restoration-check/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-compact-metadata-native-fault-controls-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-compact-metadata-native-fault-controls-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-compact-metadata-native-fault-controls-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-compact-metadata-native-fault-controls-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-compact-metadata-native-fault-controls-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-concurrent-state-87920-leader-loss-copied-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-concurrent-state-87920-leader-loss-copied-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-concurrent-state-87920-leader-loss-copied-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-concurrent-state-87920-leader-loss-copied-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-concurrent-state-87920-leader-loss-copied-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-soak-launch-proof-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-soak-launch-proof-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-soak-launch-proof-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-soak-launch-proof-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-continuous-soak-launch-proof-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-controls-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-controls-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-controls-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-controls-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-controls-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-fault-controls-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-fault-controls-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-fault-controls-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-fault-controls-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-direct-callback-audit-native-fault-controls-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-3140-concurrent-state-copied-comparison-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-3140-concurrent-state-copied-comparison-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-3140-concurrent-state-copied-comparison-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-3140-concurrent-state-copied-comparison-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-3140-concurrent-state-copied-comparison-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-soak-copied-cohort-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-soak-copied-cohort-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-soak-copied-cohort-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-soak-copied-cohort-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-failed-soak-copied-cohort-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-graceful-upgrade-qualified-20261003/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-graceful-upgrade-qualified-20261003/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-graceful-upgrade-qualified-20261003/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-graceful-upgrade-qualified-20261003/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-graceful-upgrade-qualified-20261003/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-held-metadata-rollout-10m-launch-proof-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-held-metadata-rollout-10m-launch-proof-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-held-metadata-rollout-10m-launch-proof-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-held-metadata-rollout-10m-launch-proof-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-held-metadata-rollout-10m-launch-proof-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-hosted-partition-seed3-download-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-hosted-partition-seed3-download-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-hosted-partition-seed3-download-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-hosted-partition-seed3-download-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-hosted-partition-seed3-download-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-explicit-routes-race-2g-10m-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-explicit-routes-race-2g-10m-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-explicit-routes-race-2g-10m-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-explicit-routes-race-2g-10m-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-explicit-routes-race-2g-10m-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-state-race-2g-10m-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-state-race-2g-10m-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-state-race-2g-10m-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-state-race-2g-10m-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-journal-streaming-state-race-2g-10m-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-admitted-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-admitted-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-admitted-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-admitted-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-admitted-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-repeat-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-repeat-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-repeat-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-repeat-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-fresh-repeat-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-expiry-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-expiry-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-expiry-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-expiry-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-expiry-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-markers-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-markers-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-markers-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-markers-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-no-markers-20261006/unlink-journal.jsonl
+To https://github.com/AntPAllen/js-wf.git
+   227ae2a..61b294d  main -> main
+BATCH_FINISHED 3
+[main d8be0b4] Preserve closed temporary fixture inventories, batch 4
+ 60 files changed, 566032 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-raft-debug-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-raft-debug-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-raft-debug-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-ready-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-ready-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-ready-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-raft-offline-restored-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-raft-offline-restored-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-raft-offline-restored-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-partition200-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-partition200-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-partition200-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-soak-producer-smoke-20261003/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-soak-producer-smoke-20261003/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-soak-producer-smoke-20261003/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-direct-filestore-actual-20261002/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-direct-filestore-actual-20261002/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-direct-filestore-actual-20261002/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-mixed-seed65-a1995cc-artifacts/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-mixed-seed65-a1995cc-artifacts/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-mixed-seed65-a1995cc-artifacts/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-native-million-scheduler-candidate-24h-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-native-million-scheduler-candidate-24h-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-native-million-scheduler-candidate-24h-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-parallel-latency-journal-10m-proof-20261006/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-parallel-latency-journal-10m-proof-20261006/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-parallel-latency-journal-10m-proof-20261006/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-terminal-leader-seed1-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-terminal-leader-seed1-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-terminal-leader-seed1-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-full-cohort-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-full-cohort-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-full-cohort-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-rebalance-available-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-rebalance-available-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-rebalance-available-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-10m-launch-proof-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-10m-launch-proof-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-10m-launch-proof-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-10m-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-10m-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-10m-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-smoke-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-smoke-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-smoke-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-provision-failure-native-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-provision-failure-native-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-provision-failure-native-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-interrupted-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-interrupted-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-interrupted-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-profile-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-profile-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-profile-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-continuous-interrupted-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-continuous-interrupted-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-continuous-interrupted-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-large-resumption-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-large-resumption-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-large-resumption-20261005/fixture-inventory.json
+To https://github.com/AntPAllen/js-wf.git
+   61b294d..d8be0b4  main -> main
+{"archive_key": "js-wf/proofs/1f0acb297e1b14e14dabdb70e604830141146d7d3a2ed1327cf8e1f6c7376f8e/proof.tar.gz", "bytes": 46541128, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-lease-partition-component-ready-20261006
+{"archive_key": "js-wf/proofs/43d5ee44d6282052c86ab76d220eb64dc7c54fee610285fd6eafbb3ab7b1698c/proof.tar.gz", "bytes": 49494765, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-lease-partition-component-raft-debug-20261006
+{"archive_key": "js-wf/proofs/1f81c9a3745e2c74e1d31e2681f96cc2a53517d5f67b3c2621357618e1f26ed9/proof.tar.gz", "bytes": 49494756, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-lease-raft-offline-restored-20261006
+{"archive_key": "js-wf/proofs/14f063888dc975eb8cf06bf2005258395bfa679d5d76c27dfd7bd8348b926438/proof.tar.gz", "bytes": 72183393, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-local-soak-producer-smoke-20261003
+{"archive_key": "js-wf/proofs/35801a68f158483235cb083c749f961fa395e0f5e69bb97f4fb4583552938eee/proof.tar.gz", "bytes": 20218223, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-million-direct-filestore-actual-20261002
+{"archive_key": "js-wf/proofs/b541ace5b0233a59c8a149a64c0e20e583cfdf2cc73882795e9195379e51aeab/proof.tar.gz", "bytes": 12194066, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-mixed-seed65-a1995cc-artifacts
+{"archive_key": "js-wf/proofs/f08b7192a92239734b0584e033617dcee82c69fc6eecb7122190c76b3d53f331/proof.tar.gz", "bytes": 60621806, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-native-million-scheduler-candidate-24h-20261004
+{"archive_key": "js-wf/proofs/f46d192a0a590bc7a46045dc00a2a2d4f20867e6f5c73771bc391c3b07dfccad/proof.tar.gz", "bytes": 44367969, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-parallel-latency-journal-10m-proof-20261006
+{"archive_key": "js-wf/proofs/3bca9dc05d6d512edb3f99d297b4a355c1f0fbec4851d45d69b700774aa624ad/proof.tar.gz", "bytes": 38721870, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-partition-terminal-leader-seed1-20261005
+{"archive_key": "js-wf/proofs/80a7033bc1b0b4b381f27ef42ba28603401d85e0639c2d0707bfe10bc178267e/proof.tar.gz", "bytes": 27756987, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-phase3-full-cohort-20261004
+{"archive_key": "js-wf/proofs/15ecd1c5d365bdd7509d08f920834b77856e02ef45b9b7b7e784d34ddd43e3e2/proof.tar.gz", "bytes": 412016411, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-local-partition200-20261006
+{"archive_key": "js-wf/proofs/0622615378dae2d24486c802acbdfaac784819ab39010b2f027c9b106babad87/proof.tar.gz", "bytes": 28304692, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-phase3-rebalance-available-20261004
+{"archive_key": "js-wf/proofs/b2c4c38f0b6b417cea9d23d67caebb16a4520aebaf1cfa362cafedd02e0e827b/proof.tar.gz", "bytes": 74167096, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-protobuf-json-10m-launch-proof-20261005
+{"archive_key": "js-wf/proofs/89501a288fe8c79a20856440676337446289f9e55d85c1b69a60a7ac756790ec/proof.tar.gz", "bytes": 75685670, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-protobuf-json-worker-10m-20261005
+{"archive_key": "js-wf/proofs/c5e0d0e6b7ca66864df1e7defc35de45b4590f68dce22d6c97ee3f0bf116f8d0/proof.tar.gz", "bytes": 66462818, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-protobuf-json-worker-smoke-20261005
+{"archive_key": "js-wf/proofs/1eac2d0027c0b62727cb480ad01fba7958cc16bf983b74be9d1ae99f6b5b48c2/proof.tar.gz", "bytes": 86426892, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-provision-failure-native-20261005
+{"archive_key": "js-wf/proofs/166715a28cbbeb18e0dbda663eb140a13b05554b4c7fe729fce85f3a6a01b969/proof.tar.gz", "bytes": 86550463, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-r5-byte-interrupted-20261005
+{"archive_key": "js-wf/proofs/0eaab61c22d86dafbb8bfcc5f45e9b593d4ee57f15d76805e77cc282006dcf72/proof.tar.gz", "bytes": 86572204, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-r5-byte-profile-20261005
+{"archive_key": "js-wf/proofs/25a7c3f0c2b74f4ab4dfdee94c0d5403bd8f7e3e6a82cff617621a1f729c3d4e/proof.tar.gz", "bytes": 86548605, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-r5-continuous-interrupted-20261005
+{"archive_key": "js-wf/proofs/1a2218af66358ff6f7f88348ac588d8dce6b20f8fae02d331fe119e8f3bd12e7/proof.tar.gz", "bytes": 86400446, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-r5-large-resumption-20261005
+[main 0c3b6be] Record verified S3 copies for temporary fixtures, batch 4
+ 20 files changed, 700 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-raft-debug-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-ready-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-raft-offline-restored-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-partition200-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-soak-producer-smoke-20261003/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-direct-filestore-actual-20261002/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-mixed-seed65-a1995cc-artifacts/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-native-million-scheduler-candidate-24h-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-parallel-latency-journal-10m-proof-20261006/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-terminal-leader-seed1-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-full-cohort-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-rebalance-available-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-10m-launch-proof-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-10m-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-smoke-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-provision-failure-native-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-interrupted-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-profile-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-continuous-interrupted-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-large-resumption-20261005/s3-readback.json
+To https://github.com/AntPAllen/js-wf.git
+   d8be0b4..0c3b6be  main -> main
+OFFLOADED_NEW js-wf-lease-partition-component-raft-debug-20261006 142020608 49500160
+OFFLOADED_NEW js-wf-lease-partition-component-ready-20261006 118083584 46546944
+OFFLOADED_NEW js-wf-lease-raft-offline-restored-20261006 142020608 49500160
+OFFLOADED_NEW js-wf-local-partition200-20261006 137601024 412020736
+OFFLOADED_NEW js-wf-local-soak-producer-smoke-20261003 135749632 72187904
+OFFLOADED_NEW js-wf-million-direct-filestore-actual-20261002 131702784 20221952
+OFFLOADED_NEW js-wf-mixed-seed65-a1995cc-artifacts 21819392 12197888
+OFFLOADED_NEW js-wf-native-million-scheduler-candidate-24h-20261004 150114304 60628992
+OFFLOADED_NEW js-wf-parallel-latency-journal-10m-proof-20261006 105250816 44376064
+OFFLOADED_NEW js-wf-partition-terminal-leader-seed1-20261005 163536896 38727680
+OFFLOADED_NEW js-wf-phase3-full-cohort-20261004 101625856 27758592
+OFFLOADED_NEW js-wf-phase3-rebalance-available-20261004 105783296 28307456
+OFFLOADED_NEW js-wf-protobuf-json-10m-launch-proof-20261005 153112576 74174464
+OFFLOADED_NEW js-wf-protobuf-json-worker-10m-20261005 164806656 75689984
+OFFLOADED_NEW js-wf-protobuf-json-worker-smoke-20261005 129482752 66469888
+OFFLOADED_NEW js-wf-provision-failure-native-20261005 156459008 86433792
+OFFLOADED_NEW js-wf-r5-byte-interrupted-20261005 156323840 86556672
+OFFLOADED_NEW js-wf-r5-byte-profile-20261005 156323840 86577152
+OFFLOADED_NEW js-wf-r5-continuous-interrupted-20261005 156397568 86556672
+OFFLOADED_NEW js-wf-r5-large-resumption-20261005 156147712 86405120
+TOTAL_NEW 2684362752
+[main 2969803] Remove verified local temporary fixture copies, batch 4
+ 100 files changed, 1271024 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-raft-debug-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-raft-debug-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-raft-debug-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-raft-debug-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-raft-debug-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-ready-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-ready-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-ready-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-ready-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-partition-component-ready-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-raft-offline-restored-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-raft-offline-restored-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-raft-offline-restored-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-raft-offline-restored-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-lease-raft-offline-restored-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-partition200-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-partition200-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-partition200-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-partition200-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-partition200-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-soak-producer-smoke-20261003/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-soak-producer-smoke-20261003/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-soak-producer-smoke-20261003/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-soak-producer-smoke-20261003/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-local-soak-producer-smoke-20261003/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-direct-filestore-actual-20261002/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-direct-filestore-actual-20261002/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-direct-filestore-actual-20261002/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-direct-filestore-actual-20261002/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-million-direct-filestore-actual-20261002/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-mixed-seed65-a1995cc-artifacts/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-mixed-seed65-a1995cc-artifacts/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-mixed-seed65-a1995cc-artifacts/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-mixed-seed65-a1995cc-artifacts/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-mixed-seed65-a1995cc-artifacts/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-native-million-scheduler-candidate-24h-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-native-million-scheduler-candidate-24h-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-native-million-scheduler-candidate-24h-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-native-million-scheduler-candidate-24h-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-native-million-scheduler-candidate-24h-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-parallel-latency-journal-10m-proof-20261006/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-parallel-latency-journal-10m-proof-20261006/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-parallel-latency-journal-10m-proof-20261006/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-parallel-latency-journal-10m-proof-20261006/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-parallel-latency-journal-10m-proof-20261006/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-terminal-leader-seed1-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-terminal-leader-seed1-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-terminal-leader-seed1-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-terminal-leader-seed1-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-partition-terminal-leader-seed1-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-full-cohort-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-full-cohort-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-full-cohort-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-full-cohort-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-full-cohort-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-rebalance-available-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-rebalance-available-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-rebalance-available-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-rebalance-available-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-phase3-rebalance-available-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-10m-launch-proof-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-10m-launch-proof-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-10m-launch-proof-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-10m-launch-proof-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-10m-launch-proof-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-10m-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-10m-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-10m-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-10m-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-10m-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-smoke-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-smoke-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-smoke-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-smoke-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-protobuf-json-worker-smoke-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-provision-failure-native-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-provision-failure-native-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-provision-failure-native-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-provision-failure-native-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-provision-failure-native-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-interrupted-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-interrupted-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-interrupted-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-interrupted-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-interrupted-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-profile-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-profile-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-profile-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-profile-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-byte-profile-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-continuous-interrupted-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-continuous-interrupted-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-continuous-interrupted-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-continuous-interrupted-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-continuous-interrupted-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-large-resumption-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-large-resumption-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-large-resumption-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-large-resumption-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-large-resumption-20261005/unlink-journal.jsonl
+To https://github.com/AntPAllen/js-wf.git
+   0c3b6be..2969803  main -> main
+BATCH_FINISHED 4
+[main a9f357b] Preserve closed temporary fixture inventories, batch 5
+ 51 files changed, 219891 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-bounded-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-bounded-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-bounded-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-restored-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-restored-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-restored-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-traced-cohort-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-traced-cohort-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-traced-cohort-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade14-26-failure-37164231641/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade14-26-failure-37164231641/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade14-26-failure-37164231641/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade40-52-failure-37164231641/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade40-52-failure-37164231641/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade40-52-failure-37164231641/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-scheduler-server-native-candidate-20261004/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-scheduler-server-native-candidate-20261004/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-scheduler-server-native-candidate-20261004/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-short-bulk-resumption-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-short-bulk-resumption-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-short-bulk-resumption-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-snapshot-copied-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-snapshot-copied-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-snapshot-copied-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-leader-loss-copied-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-leader-loss-copied-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-leader-loss-copied-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-mapped-client-copied-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-mapped-client-copied-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-mapped-client-copied-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-sustained-ten-minute-ci-37021348438/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-sustained-ten-minute-ci-37021348438/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-sustained-ten-minute-ci-37021348438/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-journal-smoke-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-journal-smoke-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-journal-smoke-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-consumer-10m-225f04a/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-consumer-10m-225f04a/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-consumer-10m-225f04a/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-journal-10m-20261001/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-journal-10m-20261001/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-journal-10m-20261001/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-upgrade-api-trace-seed41-37197193507/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-upgrade-api-trace-seed41-37197193507/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-upgrade-api-trace-seed41-37197193507/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-20261005/fixture-inventory.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-launch-proof-20261005/archive-verification.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-launch-proof-20261005/capture.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-launch-proof-20261005/fixture-inventory.json
+To https://github.com/AntPAllen/js-wf.git
+   2969803..a9f357b  main -> main
+{"archive_key": "js-wf/proofs/2104cfd99f440518d4ba9d9f76fd0649f35e892c39dd709611d4325707b0aba5/proof.tar.gz", "bytes": 86479222, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-r5-retained-profile-bounded-20261005
+{"archive_key": "js-wf/proofs/f9f29a6d4fab8ddcc9055912b1f730624acd0838186afac7b06e5fab00499a63/proof.tar.gz", "bytes": 86472187, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-r5-retained-profile-restored-20261005
+{"archive_key": "js-wf/proofs/14937766f7d82e15bdbb5f8c630fc09ca93c6374f433eed134355367dd0bc04f/proof.tar.gz", "bytes": 83691363, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-rolling-upgrade14-26-failure-37164231641
+{"archive_key": "js-wf/proofs/9fa2f036c1d8a560d5ad48d647f1b1adc0ea6418c2694eef14bfca5f1285491d/proof.tar.gz", "bytes": 86450254, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-r5-traced-cohort-20261005
+{"archive_key": "js-wf/proofs/027d792c373b0b8781c1525304f351bf05f1051187828caacb847c99cd2dd2a0/proof.tar.gz", "bytes": 48166269, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-scheduler-server-native-candidate-20261004
+{"archive_key": "js-wf/proofs/add7559fe0f62703091919a72e92f0e1810ff2f281b2f8fbe3953dfd4aecddfe/proof.tar.gz", "bytes": 83723625, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-rolling-upgrade40-52-failure-37164231641
+{"archive_key": "js-wf/proofs/e9fbba84906e2999508541c9da571de327f609d073e47926d703c375c05a16fa/proof.tar.gz", "bytes": 86429013, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-short-bulk-resumption-20261005
+{"archive_key": "js-wf/proofs/cddd78a136613435d1107bf0ee13d227d52fc9d4b22c630fc4ab28233d65a9ea/proof.tar.gz", "bytes": 86765090, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-state-snapshot-copied-20261005
+{"archive_key": "js-wf/proofs/c0c07505e1cd0fd3c6b3921ac6b1086282262e270d4efb2e449f654b326bd7c8/proof.tar.gz", "bytes": 86776280, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-state-watch-leader-loss-copied-20261005
+{"archive_key": "js-wf/proofs/49e2a1f38ebc2acead8043a25669b789f8518966a0f12ed04ef71125d52c7af1/proof.tar.gz", "bytes": 86781742, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-state-watch-mapped-client-copied-20261005
+{"archive_key": "js-wf/proofs/65239a619d3c98275619c0565f8b75ab3645f94386512b86423c7e776f47063b/proof.tar.gz", "bytes": 15345489, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-sustained-ten-minute-ci-37021348438
+{"archive_key": "js-wf/proofs/4bf0ce761b55d50807a99518e37958aa940dd11ce4923d3b68c771cfe4531854/proof.tar.gz", "bytes": 34657350, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-tier3-consumer-10m-225f04a
+{"archive_key": "js-wf/proofs/b2286b2bdfb86377b9511c2677ad26c16ed42d6c6674b5ca7b7fc63844545a1f/proof.tar.gz", "bytes": 48462770, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-tier2-retained-journal-smoke-20261005
+{"archive_key": "js-wf/proofs/e46bc32cc4766eab6df5c869cf5fb1557020dcbec3c6d0f0a7f57f4259afab27/proof.tar.gz", "bytes": 34829237, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-tier3-journal-10m-20261001
+{"archive_key": "js-wf/proofs/191c48fd00443803cf852e0f141b595122813e44d339297551874faeb9db6a9b/proof.tar.gz", "bytes": 26806597, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-watch-observed-journal-24h-20261005
+{"archive_key": "js-wf/proofs/45f66597a09448e5aaa3b93afba86d4e3d39a7fd23c911cf5fa028e26da34a83/proof.tar.gz", "bytes": 95453829, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-upgrade-api-trace-seed41-37197193507
+{"archive_key": "js-wf/proofs/3c342e1c7968e5cd85c7701ed659f04623e5ad127fe6d6d0c05c4f50e2d658e7/proof.tar.gz", "bytes": 74216859, "full_remote_readback_verified": true}
+REMOTE_VERIFIED js-wf-watch-observed-journal-24h-launch-proof-20261005
+[main 5048e1e] Record verified S3 copies for temporary fixtures, batch 5
+ 17 files changed, 595 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-bounded-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-restored-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-traced-cohort-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade14-26-failure-37164231641/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade40-52-failure-37164231641/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-scheduler-server-native-candidate-20261004/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-short-bulk-resumption-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-snapshot-copied-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-leader-loss-copied-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-mapped-client-copied-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-sustained-ten-minute-ci-37021348438/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-journal-smoke-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-consumer-10m-225f04a/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-journal-10m-20261001/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-upgrade-api-trace-seed41-37197193507/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-20261005/s3-readback.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-launch-proof-20261005/s3-readback.json
+To https://github.com/AntPAllen/js-wf.git
+   a9f357b..5048e1e  main -> main
+OFFLOADED_NEW js-wf-r5-retained-profile-bounded-20261005 156327936 86487040
+OFFLOADED_NEW js-wf-r5-retained-profile-restored-20261005 156192768 86478848
+OFFLOADED_NEW js-wf-r5-traced-cohort-20261005 156319744 86458368
+OFFLOADED_NEW js-wf-rolling-upgrade14-26-failure-37164231641 115929088 83697664
+OFFLOADED_NEW js-wf-rolling-upgrade40-52-failure-37164231641 117219328 83730432
+OFFLOADED_NEW js-wf-scheduler-server-native-candidate-20261004 109985792 48173056
+OFFLOADED_NEW js-wf-short-bulk-resumption-20261005 156155904 86433792
+OFFLOADED_NEW js-wf-state-snapshot-copied-20261005 156372992 86769664
+OFFLOADED_NEW js-wf-state-watch-leader-loss-copied-20261005 156405760 86781952
+OFFLOADED_NEW js-wf-state-watch-mapped-client-copied-20261005 156422144 86786048
+OFFLOADED_NEW js-wf-sustained-ten-minute-ci-37021348438 149286912 15347712
+OFFLOADED_NEW js-wf-tier2-retained-journal-smoke-20261005 137474048 48467968
+OFFLOADED_NEW js-wf-tier3-consumer-10m-225f04a 143781888 34660352
+OFFLOADED_NEW js-wf-tier3-journal-10m-20261001 145301504 34832384
+OFFLOADED_NEW js-wf-upgrade-api-trace-seed41-37197193507 125939712 95461376
+OFFLOADED_NEW js-wf-watch-observed-journal-24h-20261005 124993536 26808320
+OFFLOADED_NEW js-wf-watch-observed-journal-24h-launch-proof-20261005 153354240 74223616
+TOTAL_NEW 2417463296
+[main 2469681] Remove verified local temporary fixture copies, batch 5
+ 85 files changed, 472652 insertions(+)
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-bounded-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-bounded-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-bounded-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-bounded-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-bounded-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-restored-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-restored-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-restored-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-restored-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-retained-profile-restored-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-traced-cohort-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-traced-cohort-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-traced-cohort-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-traced-cohort-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-r5-traced-cohort-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade14-26-failure-37164231641/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade14-26-failure-37164231641/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade14-26-failure-37164231641/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade14-26-failure-37164231641/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade14-26-failure-37164231641/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade40-52-failure-37164231641/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade40-52-failure-37164231641/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade40-52-failure-37164231641/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade40-52-failure-37164231641/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-rolling-upgrade40-52-failure-37164231641/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-scheduler-server-native-candidate-20261004/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-scheduler-server-native-candidate-20261004/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-scheduler-server-native-candidate-20261004/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-scheduler-server-native-candidate-20261004/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-scheduler-server-native-candidate-20261004/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-short-bulk-resumption-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-short-bulk-resumption-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-short-bulk-resumption-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-short-bulk-resumption-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-short-bulk-resumption-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-snapshot-copied-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-snapshot-copied-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-snapshot-copied-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-snapshot-copied-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-snapshot-copied-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-leader-loss-copied-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-leader-loss-copied-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-leader-loss-copied-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-leader-loss-copied-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-leader-loss-copied-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-mapped-client-copied-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-mapped-client-copied-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-mapped-client-copied-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-mapped-client-copied-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-state-watch-mapped-client-copied-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-sustained-ten-minute-ci-37021348438/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-sustained-ten-minute-ci-37021348438/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-sustained-ten-minute-ci-37021348438/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-sustained-ten-minute-ci-37021348438/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-sustained-ten-minute-ci-37021348438/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-journal-smoke-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-journal-smoke-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-journal-smoke-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-journal-smoke-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier2-retained-journal-smoke-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-consumer-10m-225f04a/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-consumer-10m-225f04a/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-consumer-10m-225f04a/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-consumer-10m-225f04a/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-consumer-10m-225f04a/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-journal-10m-20261001/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-journal-10m-20261001/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-journal-10m-20261001/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-journal-10m-20261001/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-tier3-journal-10m-20261001/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-upgrade-api-trace-seed41-37197193507/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-upgrade-api-trace-seed41-37197193507/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-upgrade-api-trace-seed41-37197193507/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-upgrade-api-trace-seed41-37197193507/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-upgrade-api-trace-seed41-37197193507/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-20261005/unlink-journal.jsonl
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-launch-proof-20261005/directory-permission-adjustments.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-launch-proof-20261005/offload.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-launch-proof-20261005/removed-files.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-launch-proof-20261005/removed-links.json
+ create mode 100644 docs/scale/tmp-storage-review-2026-10-06/sixth-closed-roots/js-wf-watch-observed-journal-24h-launch-proof-20261005/unlink-journal.jsonl
+To https://github.com/AntPAllen/js-wf.git
+   5048e1e..2469681  main -> main
+BATCH_FINISHED 5
+STORAGE_PIPELINE_DONE 5

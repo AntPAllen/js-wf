@@ -1,6 +1,10 @@
 # /tmp storage review — 2026-10-06
 
-Latest follow-up: **9.85 GiB of pre-existing allocated data reclaimed** from 34 closed directories and 20 redundant archive copies, after complete S3 preservation and verification. See [latest cleanup](fifth-closed-roots/README.md), [measured totals](fifth-closed-roots/summary.json), and [archive-copy removal](fifth-verified-staging-removal/README.md). Live runs, both full400k donors and the million-timer primary remain local. This follows the [eight-root pass](fourth-closed-roots/summary.json) (2.12 GiB) and [eleven-root pass](further-closed-roots/summary.json) (3.79 GiB).
+## Latest follow-up
+
+This pass reclaimed at least **13.51 GiB** from 97 additional closed directories and 2 redundant archives after full S3 verification. Observed free space is **59.89 GiB**. See [cleanup records](sixth-closed-roots/README.md) and [measured totals](sixth-closed-roots/summary.json). Hard-linked copies count toward reclaimed space only when the final link is removed.
+
+Previous follow-up: **9.85 GiB of pre-existing allocated data reclaimed** from 34 closed directories and 20 redundant archive copies, after complete S3 preservation and verification. See [previous cleanup](fifth-closed-roots/README.md), [measured totals](fifth-closed-roots/summary.json), and [archive-copy removal](fifth-verified-staging-removal/README.md). Live runs, both full400k donors and the million-timer primary remain local. This follows the [eight-root pass](fourth-closed-roots/summary.json) (2.12 GiB) and [eleven-root pass](further-closed-roots/summary.json) (3.79 GiB).
 
 ## Earlier cleanup
 
