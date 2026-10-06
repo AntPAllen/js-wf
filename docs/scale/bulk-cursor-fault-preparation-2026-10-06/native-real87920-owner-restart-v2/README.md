@@ -23,7 +23,7 @@ cursor deletions; unknown/durable consumers remain fatal.
 Application charge397,172,839 bytes. Forty process observations include VmHWM up
 to1,945,384KiB; they do not prove final process peak or full400k memory capacity.
 The complete closed fixture is archived in the full S3 format: inventory and
-archive hash in Git, no local/Git archive-part duplicates. Remote readback pending.
+archive hash in Git, no local/Git archive-part duplicates. Complete S3 archive, metadata and inventory readbacks verified.
 Full400k valid latency/RSS, additional fault rows, default/current matrices and
 actual24h/million release gates remain open. Bulk is not selected in live/default
 matrix execution. Earlier failures remain preserved in their original scope.
