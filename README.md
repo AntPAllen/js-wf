@@ -88,7 +88,7 @@ For a bounded journal, call `provision.EnsureAutoWithJournalLimit(ctx, js, repli
 
 Run the four regular reconciler loops in separate goroutines, plus the fallback timer loop when `EnsureAuto` returns `FallbackTimers`. A deployment must arrange workers for all 64 partitions and register every workflow type each worker may receive.
 
-Run `visibility.Projection.Run` in a separate goroutine or run the `project` CLI command to maintain the query view. For example, after building the CLI with `go build -o wf-cli ./cmd/wf`:
+Run `visibility.Projection.Run` in a separate goroutine or run the `project` CLI command to maintain the query view. The `project` daemon handles SIGTERM and SIGINT as clean shutdown during initialization and normal operation. Independent startup and runtime failures return a nonzero exit status. For example, after building the CLI with `go build -o wf-cli ./cmd/wf`:
 
 ```sh
 ./wf-cli -url nats://localhost:4222 project

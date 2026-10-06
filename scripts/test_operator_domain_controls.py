@@ -31,5 +31,26 @@ class OperatorDomainCoverageTests(unittest.TestCase):
             controls.verify_log(log)
 
 
+class OperatorDaemonCoverageTests(unittest.TestCase):
+    def test_actual_daemon_pair_rejects_wrong_signals_peers_cases_and_fatal_masking(self):
+        log=(REPO/'docs/scale/operator-daemon-signals-2026-10-06/native-race/native.log').read_text()
+        controls.verify_daemon_log(log)
+        bad=[log.replace('domain=WFOPS','domain=OTHER',1),
+             log.replace('domain admitted node=2','domain admitted node=1'),
+             log.replace('stage=startup domain="" signal=terminated','stage=startup domain="" signal=interrupt'),
+             log.replace('stage=running domain="" signal=interrupt','stage=running domain="" signal=terminated'),
+             log.replace('error=stream-not-found exit=1','error=stream-not-found exit=0'),
+             log.replace('--- PASS: TestOperatorDaemonSignals/project/startup','--- PASS: Other/project/startup'),
+             log.replace('--- PASS: TestOperatorDaemonSignalsInJetStreamDomain','--- SKIP: TestOperatorDaemonSignalsInJetStreamDomain',1),
+             log+'DATA RACE\n','PASS\n']
+        for altered in bad:
+            self.assertNotEqual(log,altered)
+            with self.assertRaises(AssertionError):controls.verify_daemon_log(altered)
+
+    def test_original_readiness_failure_cannot_qualify(self):
+        log=(REPO/'docs/scale/operator-daemon-signals-2026-10-06/initial-native-failure/native.log').read_text()
+        with self.assertRaises(AssertionError):controls.verify_daemon_log(log)
+
+
 if __name__ == '__main__':
     unittest.main()
