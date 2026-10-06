@@ -4434,3 +4434,17 @@ originalgates. Actualexe/VCS/profile/fivecurrentserver roles verified, user
 systemd observer/reviewer live. Original24h source21b4729 remainsrunning. Terminal
 sustained/fullscale/fullmatrix/24h acceptance remainsopen; no live stores read/copied.
 [Launch](scale/parallel-final-latency-2026-10-06/live-journal-initial/).
+
+## Bounded final latency sustained journal row accepted — 2026-10-06
+
+Clean89642e4 normalPASS633.19s,90batches/2520terminals/27752entries/19leaderSIGKILLs,
+9checkpoints/finalintegrity/history/physicaldrain. Bounded32finalpoint reads and
+explicit4CPU/GOGC500/4GiB chunked reader retainallchecks/ordered samples/original
+20s/60s/threeattempts/30sp99. Actualsource/SDK/servers/originalarchive/closure and
+complete102,872,551byte proof independently verified/readback. Fullscale/default/
+currentfullmatrix/24h remainopen. Larger87920cohort initialreadiness mismatch
+failsbeforepoint reads; complete364,052,563byte failureproof preserved. R5fixture
+readiness corrected, same60s. Cleancheckout launch rejection separate; noSDK or
+copy created. Fresh verified copies required for changedmeasurement.
+[Accepted row](scale/parallel-final-latency-2026-10-06/live-journal-ten-minute/).
+[Failed admission](scale/parallel-final-latency-2026-10-06/retained-cohort/).

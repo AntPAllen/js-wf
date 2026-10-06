@@ -29,6 +29,27 @@ Immediate work: review live matrix results, diagnose remaining clock/checkpoint
 and million-timer physical-drain failures, finish outstanding combined
 retirement/fanout/rebalance and operational fault coverage, then qualify the actual 24-hour gate.
 
+## Latest follow-up — 2026-10-06: bounded final latency sustained row accepted
+
+Clean89642e4 normalPASS633.19s,90batches/2520terminals/27752entries,19actualjournal
+leaderSIGKILL/heals,9checkpoints/finalintegrity/history/physicaldrain. Bounded32final
+point reads retain ordered samples andallchecks/original20s/60s/threeattempts.
+Worstterminal12.076159s/progress7.151118s under30s. SDK/source/originalarchive/24actual
+periodicserverobservations/closure and1655member102,872,551byte proof verified;
+independentrowresult matches. This explicit changedsource row qualified, notfull
+scale/currentfullmatrix/defaultreader/24h. Original24h remains21b4729 andmillion
+campaign live. [Proof](scale/parallel-final-latency-2026-10-06/live-journal-ten-minute/).
+
+Larger real87920 copiedcohort first5a374f8 FAIL84.69s beforepoint reads: incorrect
+R3 readiness expected2followers while actualR5INV showed4current. Fixedd308a29
+usesexistingR5 helper/same60s. All692sourceinputs/SDK/5servers/mounts/closure,
+3887originalstore+fault files unchanged/full4420member364,052,563byte proof preserved.
+Corrected launch rejected bycleancheckout guard while proofwriters createduntracked
+files; noSDK/copy created, waitingreviewer stopped afterconfirmedproducerfailure.
+No point capacity/dataabsence/servercause claim. Fresh changedmeasurement follows
+proofcommit. [Failure](scale/parallel-final-latency-2026-10-06/retained-cohort/).
+[Launch guard](scale/parallel-final-latency-2026-10-06/cohort-launch-guard/).
+
 ## Latest follow-up — 2026-10-06: changed final audit sustained launch verified
 
 Clean89642e4 actualnormalSDK920976 running ten-minute journal seed1 with bounded32

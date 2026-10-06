@@ -1,0 +1,99 @@
+{
+  "execution": {
+    "source": "89642e4c88101818ad84ae6bfd4dcb22f40c12bb",
+    "row": "journal",
+    "seed": 1,
+    "duration": "10m",
+    "status": "row_verified",
+    "supervisor_pid": 919341,
+    "started": 1791249602.9495378,
+    "upgrade_shutdown": null,
+    "upgrade_start_gap": false,
+    "race": false,
+    "memory_limit": "4GiB",
+    "gomaxprocs": "4",
+    "gc_percent": "500",
+    "retained_audit_trace": true,
+    "audit_wait_stack": true,
+    "batched_retained_audit": false,
+    "streaming_state_retained_audit": false,
+    "concurrent_state_retained_audit": false,
+    "chunked_state_retained_audit": true,
+    "explicit_route_seeds": true,
+    "journal_rollout": "none",
+    "clears_full_tier3_release": false,
+    "test_pid": 920947,
+    "test_exit_code": 0,
+    "finished": 1791250253.7492423
+  },
+  "native_terminal": {
+    "Time": "2026-10-06T01:30:52.948543733Z",
+    "Action": "pass",
+    "Package": "js-wf/integration",
+    "Test": "TestFiveContainerMixedJournalLeaderEveryThirtySeconds",
+    "Elapsed": 633.19
+  },
+  "source_inputs_verified": 1636,
+  "original_files_verified": 5467,
+  "original_archive_sha256": "6dac5bc394b20422bc87e54df2444e63e412883619b594da0f6ec1d7825e3625",
+  "actual_sdk_pid": 920976,
+  "sdk_sha256": "b6bb00129204bd7cadbfad627b98f219f77eb790e4039372173cef5b91771a7f",
+  "server_observations": 24,
+  "server_sha256": "751a788956b200d9ed08fa7dff4587b772b98e1b3e82cef6ff15b69be052f42d",
+  "observed_processes_closed": true,
+  "observation_scope": "Periodic server observations began during campaign; not exhaustive lifetime coverage",
+  "clears_full_tier3_release": false,
+  "qualifies_24h": false,
+  "candidate_adopted": false,
+  "stores_not_reopened": true,
+  "row_result": {
+    "scope": "single five-container R5 journal-leader row",
+    "seed": 1,
+    "duration_seconds": 600,
+    "common_timer_clock": null,
+    "clock_timer_cut_profile": null,
+    "shortened_smoke": false,
+    "invocations": 2520,
+    "journal_entries": 27752,
+    "confirmed_faults": 19,
+    "active_consumer_faults": null,
+    "cells": {
+      "matrixshort": {
+        "invocations": 360,
+        "terminal_p99_seconds": 7.212004126,
+        "progress_p99_seconds": 7.151118104
+      },
+      "matrixtimer": {
+        "invocations": 270,
+        "terminal_p99_seconds": 7.580160759,
+        "progress_p99_seconds": 6.971100213
+      },
+      "matrixsignal": {
+        "invocations": 180,
+        "terminal_p99_seconds": 11.192355003,
+        "progress_p99_seconds": 1.977838422
+      },
+      "matrixfanout": {
+        "invocations": 90,
+        "terminal_p99_seconds": 12.076159431,
+        "progress_p99_seconds": 0.277540496
+      },
+      "matrixchild": {
+        "invocations": 540,
+        "terminal_p99_seconds": 5.173789066,
+        "progress_p99_seconds": 0.364422741
+      },
+      "matrixgrandchild": {
+        "invocations": 1080,
+        "terminal_p99_seconds": 1.050021585,
+        "progress_p99_seconds": 0.655516422
+      }
+    },
+    "clears_full_tier3_release": false,
+    "checkpoint_audit_checks": {
+      "completed_cohort_audits": 9,
+      "all_expected_checkpoints_present": true,
+      "scope": "Captured completed cohorts; mandatory final whole-state check remains separate."
+    }
+  }
+}
