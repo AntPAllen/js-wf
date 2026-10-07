@@ -17,3 +17,5 @@ This closes this recorded-source SQL relation-lock startup cancellation plus ful
 ## Restoration
 
 Use `s3-readback.json` to download the complete archive, then `scripts/restore-full-fixture-proof.py` with this directory's archive metadata and inventory into a fresh destination. Empty directories are omitted. Restoration starts no process and changes no original verdict. Local retirement requires fresh remote full-hash/every-member verification, unchanged local inventory, closure checks and exact owned stopped SQL container/volume validation.
+
+The completed local fixture/archive and exact owned stopped SQL container/volume are now retired after fresh verification: [removal proof](../reclaimed/). The complete original bytes remain in S3.
