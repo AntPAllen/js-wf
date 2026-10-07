@@ -136,6 +136,12 @@ func compareFullAudits(t *testing.T, ctx context.Context, js jetstream.JetStream
 	if concurrent != point || (concurrentErr == nil) != (pointErr == nil) || concurrentErr != nil && concurrentErr.Error() != pointErr.Error() {
 		t.Fatalf("concurrent state mismatch: point=%+v concurrent=%+v errors=%v / %v", point, concurrent, pointErr, concurrentErr)
 	}
+	parallelCtx, parallelStop := context.WithTimeout(ctx, 20*time.Second)
+	parallel, parallelErr := checkUsingJournalDecodeOptions(parallelCtx, js, cutoff, scanSingleReplicaChunkedThrough, true, true, true, true)
+	parallelStop()
+	if parallel != point || (parallelErr == nil) != (pointErr == nil) || parallelErr != nil && parallelErr.Error() != pointErr.Error() {
+		t.Fatalf("parallel decode mismatch: point=%+v parallel=%+v errors=%v / %v", point, parallel, pointErr, parallelErr)
+	}
 	compactCtx, compactStop := context.WithTimeout(ctx, 20*time.Second)
 	compact, compactErr := checkUsingConcurrentOptions(compactCtx, js, cutoff, scanCompactByteBoundedThrough, true, true, true)
 	compactStop()

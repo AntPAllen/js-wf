@@ -5560,3 +5560,8 @@ Clean5c6cc85 verifies the entire failed238560-invocation cohort on a full fresh 
 ## Full checkpoint8520 CPU diagnosis reviewed — 2026-10-07
 
 Separate fresh complete copied cohort atf9be625 passes13.447759199s under original20s/4CPU/GOGC500/4GiB; all238560 journals/terminals and2630779 entries verify. Independent source/actual SDK/server/copy/original/complete20621-member review passes. Journal entry decode takes22.42% of sampled SDK CPU; NATS client parsing31.18%; categories overlap and exclude server CPU. Full checker allocates4,886,431,864 bytes; before/after GC/heap snapshots are not peak claims. Instrumentation can perturb timing. Evaluate bounded ordered parallel decoding without reducing captured bounds/invariants or changing deadlines. Original live24h failure/cause and broader gates remain open. [Evidence](scale/bulk-soak-checkpoint8520-copy-2026-10-07/cpu-profile/).
+
+
+## Bounded ordered decoding candidate prepared — 2026-10-07
+
+The CPU profile now has an explicit implementation candidate: bounded parallel JSON/protobuf journal decoding with ordered single-goroutine reduction, cohort filtering before decode, reusable batch storage and cancellation/worker joins. Existing checker APIs remain serial; original20s/full-cohort requirements remain. Seeded ordering/error/filtering/bound/join controls pass normal/race count20 after correcting an incoming-record bound in the test (initial failure retained). Native point-oracle invariants and the complete238560/2630779 copied candidate still require execution/review; no throughput/default/24h acceptance follows yet. [Candidate and controls](scale/parallel-journal-decode-2026-10-07/).

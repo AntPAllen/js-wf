@@ -129,9 +129,14 @@ func TestRetainedAuditBulkSoakCheckpoint8520VerifiedCopy(t *testing.T) {
 		runtime.ReadMemStats(&memoryBefore)
 	}
 	trace := &retainedAuditTrace{}
+	parallelDecode := os.Getenv("WF_AUDIT_BULK_SOAK_PARALLEL_DECODE") == "1"
 	call, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	began := time.Now()
-	report, failure := integrity.CheckThroughInvocationSequenceWithChunkedConcurrentStateReads(call, tracedAuditJS{JetStream: js, trace: trace}, cutoff)
+	check := integrity.CheckThroughInvocationSequenceWithChunkedConcurrentStateReads
+	if parallelDecode {
+		check = integrity.CheckThroughInvocationSequenceWithParallelDecodedChunkedStateReads
+	}
+	report, failure := check(call, tracedAuditJS{JetStream: js, trace: trace}, cutoff)
 	elapsed := time.Since(began)
 	cancel()
 	if profiling {
@@ -155,14 +160,15 @@ func TestRetainedAuditBulkSoakCheckpoint8520VerifiedCopy(t *testing.T) {
 	}
 
 	result := struct {
-		Cutoff       uint64                           `json:"cutoff"`
-		ElapsedNS    int64                            `json:"elapsed_ns"`
-		Report       integrity.Report                 `json:"report"`
-		Error        string                           `json:"error"`
-		Readiness    map[string]*jetstream.StreamInfo `json:"readiness"`
-		Trace        retainedAuditTraceSnapshot       `json:"trace"`
-		Qualifies24h bool                             `json:"qualifies_24h"`
-	}{cutoff, int64(elapsed), report, fmt.Sprint(failure), readiness, trace.snapshot(), false}
+		Cutoff         uint64                           `json:"cutoff"`
+		ElapsedNS      int64                            `json:"elapsed_ns"`
+		Report         integrity.Report                 `json:"report"`
+		Error          string                           `json:"error"`
+		Readiness      map[string]*jetstream.StreamInfo `json:"readiness"`
+		Trace          retainedAuditTraceSnapshot       `json:"trace"`
+		Qualifies24h   bool                             `json:"qualifies_24h"`
+		ParallelDecode bool                             `json:"parallel_decode"`
+	}{cutoff, int64(elapsed), report, fmt.Sprint(failure), readiness, trace.snapshot(), false, parallelDecode}
 	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		t.Fatal(err)

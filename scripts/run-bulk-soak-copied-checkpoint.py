@@ -24,6 +24,8 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,required=True)
     parser.add_argument('--cpu-profile',action='store_true',help='Opt-in full SDK checker CPU/memory diagnosis; original audit budget unchanged.')
+    parser.add_argument('--parallel-decode',action='store_true',help='Explicit experimental bounded ordered decoding; original full cohort and audit budget unchanged.')
+    parser.add_argument('--archive',type=Path,default=Path('/tmp/js-wf-bulk-journal-24h-joined-complete-20261006.tar.gz'),help='Downloaded complete original S3 archive; every byte/member is verified before opening stores.')
     a=parser.parse_args();root=a.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO) and not root.is_relative_to(DONOR)
     assert shutil.disk_usage(root.parent).free>=20*(1<<30),'20GiB restore/collection reserve required'
@@ -48,7 +50,7 @@ def main():
     for name in before['files']:
         p=root/'selected-source'/name;p.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(REPO/name,p)
     restored=root/'restored-original'
-    report=fixture_archive.restore(Path('/tmp/js-wf-bulk-journal-24h-joined-complete-20261006.tar.gz'),dict(bytes=meta['archive_bytes'],sha256=meta['archive_sha256']),inventory,restored)
+    report=fixture_archive.restore(a.archive,dict(bytes=meta['archive_bytes'],sha256=meta['archive_sha256']),inventory,restored)
     save('restore-verification.json',dict(destination=str(restored),**report))
     prefix='fixture/cluster/'
     stores={name:row for name,row in inventory['files'].items() if any(name.startswith(prefix+f'node-{n}/') for n in range(5))}
@@ -77,6 +79,7 @@ def main():
     env={k:v for k,v in os.environ.items() if not k.startswith('WF_')}
     env.update(GOMAXPROCS='4',GOGC='500',GOMEMLIMIT='4GiB',GOWORK='off',GOFLAGS='',WF_AUDIT_BULK_SOAK_STORES=str(restored/'fixture/cluster'),WF_AUDIT_BULK_SOAK_ROOT=str(root/'originals'),WF_AUDIT_BULK_SOAK_IDENTITY=identity,WF_TIER3_EXPLICIT_ROUTE_SEEDS='1',WF_TIER3_SYNC_INTERVAL='2m')
     if a.cpu_profile:env['WF_AUDIT_BULK_SOAK_CPU_PROFILE']='1'
+    if a.parallel_decode:env['WF_AUDIT_BULK_SOAK_PARALLEL_DECODE']='1'
     profile={k:v for k,v in env.items() if k.startswith('WF_') or k in ('GOMAXPROCS','GOGC','GOMEMLIMIT','GOWORK','GOFLAGS')}
     binary=root/'integration.test';build=['go','test','-p=1','-buildvcs=true','-c','-o',str(binary),'./integration']
     command=[str(binary),'-test.run=^'+TEST+'$','-test.count=1','-test.v','-test.timeout=6m']

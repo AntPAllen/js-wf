@@ -200,11 +200,30 @@ func CheckThroughInvocationSequenceWithChunkedConcurrentStateReads(ctx context.C
 	return checkUsingConcurrentOptions(ctx, js, &cutoff, scanSingleReplicaChunkedThrough, true, true, true)
 }
 
+// CheckWithParallelDecodedChunkedStateReads experimentally overlaps bounded
+// journal decoding with chunk delivery. Entries are reduced in stream order;
+// all captured bounds, integrity checks and caller budgets remain unchanged.
+// Retained data must be quiescent. Existing checker APIs do not select this path.
+func CheckWithParallelDecodedChunkedStateReads(ctx context.Context, js jetstream.JetStream) (Report, error) {
+	return checkUsingJournalDecodeOptions(ctx, js, nil, scanSingleReplicaChunkedThrough, true, true, true, true)
+}
+
+// CheckThroughInvocationSequenceWithParallelDecodedChunkedStateReads keeps the
+// original quiescent-cohort/no-purge/no-reuse contract. Out-of-cohort records
+// are excluded before decoding; each audit obtains fresh journals and state.
+func CheckThroughInvocationSequenceWithParallelDecodedChunkedStateReads(ctx context.Context, js jetstream.JetStream, cutoff uint64) (Report, error) {
+	return checkUsingJournalDecodeOptions(ctx, js, &cutoff, scanSingleReplicaChunkedThrough, true, true, true, true)
+}
+
 func checkUsingOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner, snapshotState, streaming bool) (Report, error) {
 	return checkUsingConcurrentOptions(ctx, js, cutoff, read, snapshotState, streaming, false)
 }
 
 func checkUsingConcurrentOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner, snapshotState, streaming, concurrentSnapshot bool) (Report, error) {
+	return checkUsingJournalDecodeOptions(ctx, js, cutoff, read, snapshotState, streaming, concurrentSnapshot, false)
+}
+
+func checkUsingJournalDecodeOptions(ctx context.Context, js jetstream.JetStream, cutoff *uint64, read retainedScanner, snapshotState, streaming, concurrentSnapshot, parallelDecode bool) (Report, error) {
 	var report Report
 	inv, err := auditRead(ctx, func(attempt context.Context) (jetstream.Stream, error) { return js.Stream(attempt, "WF_INV") })
 	if err != nil {
@@ -264,16 +283,15 @@ func checkUsingConcurrentOptions(ctx context.Context, js jetstream.JetStream, cu
 	live := map[string][]journal.Record{}
 	summaries := map[string]*journalAudit{}
 	compacted := map[string]bool{}
-	if err := read(ctx, jrn, nil, func(m *jetstream.RawStreamMsg) error {
+	accept := func(m *jetstream.RawStreamMsg) bool {
 		if cutoff != nil {
 			if _, ok := seen[strings.Replace(m.Subject, "wf.jrn.", "wf.inv.", 1)]; !ok {
-				return nil
+				return false
 			}
 		}
-		var e journal.Entry
-		if err := journal.UnmarshalEntry(m.Data, &e); err != nil {
-			return err
-		}
+		return true
+	}
+	visit := func(m *jetstream.RawStreamMsg, e journal.Entry) error {
 		groups[m.Subject] = struct{}{}
 		record := journal.Record{Entry: e, Sequence: m.Sequence}
 		if streaming {
@@ -285,7 +303,8 @@ func checkUsingConcurrentOptions(ctx context.Context, js jetstream.JetStream, cu
 			live[m.Subject] = append(live[m.Subject], record)
 		}
 		return nil
-	}); err != nil {
+	}
+	if err := readJournalEntries(ctx, jrn, read, accept, visit, parallelDecode); err != nil {
 		return report, err
 	}
 	if snapshotState {
