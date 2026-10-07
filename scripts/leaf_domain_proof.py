@@ -25,7 +25,8 @@ def validate(proof):
     assert 0<(end-start).total_seconds()<30
     api={name:count for name,count in proof['subjects'].items() if '.API.' in name}
     assert api and all(name.startswith('$JS.WFRETIRE.API.') and type(count) is int and count>0 for name,count in api.items())
-    assert any('STREAM.MSG.GET.OBJ_WF_BLOB' in name for name in api)
+    assert any('.DIRECT.GET.OBJ_WF_BLOB.' in name for name in api)
+    assert any('.CONSUMER.CREATE.OBJ_WF_BLOB.' in name for name in api)
     assert any('STREAM.MSG.GET.KV_WF_STATE' in name for name in api)
     return dict(remote_domain='WFRETIRE',local_domain='WFEDGE',hub_originals=3,hub_replacements=3,
                 leaf_disconnect_and_reconnect=True,whole_cut_seconds=(end-start).total_seconds(),

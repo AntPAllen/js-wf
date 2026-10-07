@@ -241,7 +241,7 @@ def main():
                 if legacy:
                     require(row['exe_sha256']==sha(root/'inputs'/'nats-server'), 'legacy observed binary differs from retained input')
             qualification['observed_native_server_incarnations'] = len(servers)
-    except ValueError as exc:
+    except (ValueError, AssertionError) as exc:
         error = str(exc)
     save('row-review.json', {'qualified': qualification, 'rejection': error})
     proof = fixture_archive.capture(root, root.with_suffix('.tar.gz'), root.with_name(root.name+'-proof'), compresslevel=1)
