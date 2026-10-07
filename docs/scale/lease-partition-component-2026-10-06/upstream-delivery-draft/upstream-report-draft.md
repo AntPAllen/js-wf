@@ -41,3 +41,7 @@ At b33e795, both actual race binaries run all170 original tests with only the qu
 ## Deterministic snapshot-fixture late-permit control
 
 At cb48979, both stock/refined original drain variants fail both original snapshot subcases under the same controlled late permit return (4095/4096 held). Both variants reserving all4096 permits pass with and without the injection. Six actual race/count1/3m/2CPU/2GiB binaries, all original assertions/sleeps/deadlines retained, no races/skips; complete independent source/native/archive review. snapshot-test-reservation.patch is a test-only correction and applies to exact official v2.15.0. Historical full170 cause remains untraced; no production change/default adoption. Combined peer-locking/reservation/full170 remains pending. Full proof: ../snapshot-reservation-controls/.
+
+## Composed fixture setup qualified
+
+At9af9a65, actual stock/contiguous race binaries each pass all three original tests/twelve subcases, count1/3m/2CPU/2GiB, no races/skips. Exactly eight peer lock pairs/17additions plus complete snapshot permit reservation; no diagnostic injection; every original assertion/case/sleep/deadline unchanged. Complete independent source/native/archive review is in ../synchronized-setup-controls/. Full170 with these binaries remains pending, and historical full-suite failures remain unchanged.
