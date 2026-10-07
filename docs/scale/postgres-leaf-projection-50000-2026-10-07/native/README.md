@@ -11,3 +11,5 @@ Independent review binds2,158 selected Git inputs,3,360 actual external Go input
 The first independent report checked the entire source census but mistakenly reported3 selected Git inputs because its wire-log expected set shadowed the source list. That original report/script are preserved; corrected read-only review reports2,158 without rerunning the SDK. An initial negative-control harness compared Python True==1; serialized JSON comparison now distinguishes that changed count type and the verifier rejects it. Native artifacts/verdict were unchanged.
 
 This closes this recorded-source full packaged SQL projector SIGKILL/session-loss/library-journal-restart/replacement-SIGTERM/rebuild/purge component through a leaf. Startup SQL cancellation, leaf/process-NATS SIGKILL, natural reply loss, broad fault matrices, onlineGC, million physical timer drain and fullrelease/actual24h remain separate. The original isolated24h producer/observer/reviewer is unchanged.
+
+Complete original fixture bytes are in verified S3 storage; the local fixture/archive and owned stopped SQL container/volume are retired. [Ledger and restoration](../reclaimed/README.md).
