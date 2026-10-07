@@ -33,3 +33,5 @@ Latest user-requested pass reclaimed **4.83 GiB** from completed S3-backed diagn
 The new completed all-hub/leaf SIGKILL proof fixture and staging archive were also retired after fresh full S3/member/current-inventory/closure checks: **222.7 MiB** reclaimed. [Ledger and restoration](../leaf-all-hub-sigkill-2026-10-07/reclaimed/README.md).
 
 The completed packaged-worker leaf wire fixture and archive are also retired after fresh complete S3/member/current-inventory/closure checks: **359.6 MiB** reclaimed. Collector failure/native pass/independent acceptance remain distinguished. [Ledger and restore](../worker-leaf-wire-2026-10-07/reclaimed/README.md).
+
+Latest user-requested cleanup moved both closed 400k donor stores to verified S3 and retired the completed native blob-boundary fixture, reclaiming **7.80 GiB**. `/tmp`: **7.53 GiB**; filesystem free: **83.75 GiB**. Source worktrees and review records remain local; restore fresh donor stores before reuse. Live24h remained running. [Ledger and restoration](fourteenth-scale-offload/README.md).
