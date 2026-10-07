@@ -94,6 +94,13 @@ def main():
         reject('missing-excluded-physical-state', lambda r, s: change_complete_frames(r, 'received', 238560))
         reject('incomplete-included-state', lambda r, s: change_complete_frames(r, 'included', 238559))
         reject('missing-native-barrier', lambda r, s: r['state_connection_loss'].__setitem__('frames', [f for f in r['state_connection_loss']['frames'] if f['event'] != 'initial_complete']))
+    if (baseline.get('state_connection_loss') or {}).get('peer_outage'):
+        for key, bad in (('peer_outage', False), ('exposed_status', 'CONNECTED'),
+                         ('disconnected', '2000-01-01T00:00:00Z'), ('disconnect_error', ''),
+                         ('offline_hold_ns', 2_000_000_000), ('restart_started', '2000-01-01T00:00:00Z')):
+            reject('peer-outage-' + key, lambda r, s, k=key, value=bad: r['state_connection_loss'].__setitem__(k, value))
+        reject('closed-watch-substituted-for-idle', lambda r, s: attempt_frames(r)[0].__setitem__('error', 'closed before initial completion'))
+        reject('premature-idle-timeout', lambda r, s: attempt_frames(r)[0].__setitem__('elapsed_ns', 1_000_000_000))
     report = dict(admitted=admitted, rejected_controls=controls, rejected_count=len(controls),
                   scope='Mutations of actual retained fault result and server observations; no broker or original store opened.')
     args.output.write_text(json.dumps(report, indent=2)+'\n')

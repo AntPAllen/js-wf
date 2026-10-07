@@ -15,19 +15,27 @@ import (
 
 // Controlled loss of a real SDK watch connection, not a model or a relay of
 // fabricated entries. The first native watch is held before exposure until its
-// connection closes. Its finite SDK buffer cannot contain the full cohort.
+// connection closes or its actual peer is confirmed dead and reconnecting.
+// Its finite SDK buffer cannot contain the full cohort.
 // This deliberately exercises partial/closed-watch retry, not the cause of the
 // historical silent subscription or a naturally occurring lost reply.
 type copiedWatchConnectionLoss struct {
-	mu                                                  sync.Mutex
-	ownerReady, watchReady, connectionClosed, restarted chan struct{}
-	owner                                               int
-	first                                               *nats.Conn
-	attempts                                            int
-	proof                                               copiedWatchConnectionProof
+	mu                                             sync.Mutex
+	ownerReady, watchReady, exposeReady, restarted chan struct{}
+	owner                                          int
+	peerOutage                                     bool
+	first                                          *nats.Conn
+	attempts                                       int
+	proof                                          copiedWatchConnectionProof
 }
 
 type copiedWatchConnectionProof struct {
+	PeerOutage             bool                       `json:"peer_outage,omitempty"`
+	Disconnected           time.Time                  `json:"disconnected,omitempty"`
+	DisconnectError        string                     `json:"disconnect_error,omitempty"`
+	ExposedStatus          string                     `json:"exposed_status,omitempty"`
+	RestartStarted         time.Time                  `json:"restart_started,omitempty"`
+	OfflineHoldNS          int64                      `json:"offline_hold_ns,omitempty"`
 	Owner                  int                        `json:"owner"`
 	URL                    string                     `json:"url"`
 	ServerID               string                     `json:"server_id"`
@@ -43,7 +51,7 @@ type copiedWatchConnectionProof struct {
 }
 
 func newCopiedWatchConnectionLoss() *copiedWatchConnectionLoss {
-	return &copiedWatchConnectionLoss{ownerReady: make(chan struct{}), watchReady: make(chan struct{}), connectionClosed: make(chan struct{}), restarted: make(chan struct{})}
+	return &copiedWatchConnectionLoss{ownerReady: make(chan struct{}), watchReady: make(chan struct{}), exposeReady: make(chan struct{}), restarted: make(chan struct{})}
 }
 
 func (f *copiedWatchConnectionLoss) observe(frame StateSnapshotObservation) {
@@ -59,6 +67,39 @@ func (f *copiedWatchConnectionLoss) snapshot() copiedWatchConnectionProof {
 	result.Frames = append([]StateSnapshotObservation(nil), result.Frames...)
 	return result
 }
+func (f *copiedWatchConnectionLoss) waitFirst(ctx context.Context) error {
+	select {
+	case <-f.watchReady:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+// Expose the actual native Updates channel only after the direct peer is
+// confirmed dead and this connection has actually entered reconnecting state.
+// No client Close occurs here; the candidate's timeout/Stop owns that cleanup.
+func (f *copiedWatchConnectionLoss) exposeDisconnected(ctx context.Context) error {
+	for {
+		f.mu.Lock()
+		nc := f.first
+		observed := !f.proof.Disconnected.IsZero()
+		f.mu.Unlock()
+		if nc != nil && observed && nc.Status() == nats.RECONNECTING {
+			f.mu.Lock()
+			f.proof.ExposedStatus = nc.Status().String()
+			f.mu.Unlock()
+			close(f.exposeReady)
+			return nil
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(10 * time.Millisecond):
+		}
+	}
+}
+
 func (f *copiedWatchConnectionLoss) closeFirst(ctx context.Context) error {
 	select {
 	case <-f.watchReady:
@@ -77,7 +118,7 @@ func (f *copiedWatchConnectionLoss) closeFirst(ctx context.Context) error {
 	f.proof.CloseFinished = time.Now().UTC()
 	f.proof.StatusAfterClose = nc.Status().String()
 	f.mu.Unlock()
-	close(f.connectionClosed)
+	close(f.exposeReady)
 	return nil
 }
 
@@ -122,7 +163,18 @@ func (s copiedWatchFaultKV) WatchAll(ctx context.Context, opts ...jetstream.Watc
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	}
-	nc, err := nats.Connect(s.cluster.ClientURL(f.owner), nats.IgnoreDiscoveredServers(), nats.NoReconnect(), nats.Timeout(time.Second))
+	optsConnect := []nats.Option{nats.IgnoreDiscoveredServers(), nats.Timeout(time.Second), nats.NoReconnect()}
+	if f.peerOutage {
+		optsConnect = []nats.Option{nats.IgnoreDiscoveredServers(), nats.Timeout(time.Second), nats.MaxReconnects(-1), nats.ReconnectWait(100 * time.Millisecond), nats.DisconnectErrHandler(func(_ *nats.Conn, err error) {
+			f.mu.Lock()
+			defer f.mu.Unlock()
+			if f.proof.Disconnected.IsZero() {
+				f.proof.Disconnected = time.Now().UTC()
+				f.proof.DisconnectError = fmt.Sprint(err)
+			}
+		})}
+	}
+	nc, err := nats.Connect(s.cluster.ClientURL(f.owner), optsConnect...)
 	if err != nil {
 		return nil, err
 	}
@@ -144,6 +196,7 @@ func (s copiedWatchFaultKV) WatchAll(ctx context.Context, opts ...jetstream.Watc
 	f.mu.Lock()
 	f.first = nc
 	f.proof.Owner = f.owner
+	f.proof.PeerOutage = f.peerOutage
 	f.proof.URL = nc.ConnectedUrl()
 	f.proof.ServerID = nc.ConnectedServerId()
 	f.proof.ServerName = nc.ConnectedServerName()
@@ -151,11 +204,14 @@ func (s copiedWatchFaultKV) WatchAll(ctx context.Context, opts ...jetstream.Watc
 	f.mu.Unlock()
 	close(f.watchReady)
 	select {
-	case <-f.connectionClosed:
+	case <-f.exposeReady:
 		f.mu.Lock()
 		f.proof.BufferedBeforeExposure = len(watch.Updates())
 		f.proof.Exposed = time.Now().UTC()
 		f.mu.Unlock()
+		if f.peerOutage {
+			return copiedPeerOutageWatch{KeyWatcher: watch, fault: f}, nil
+		}
 		return watch, nil
 	case <-ctx.Done():
 		nc.Close()
@@ -172,4 +228,26 @@ func (s copiedWatchFaultKV) WatchAll(ctx context.Context, opts ...jetstream.Watc
 			}
 		}
 	}
+}
+
+// Closing the dedicated client after the runtime stops its watch prevents its
+// automatic reconnect loop from escaping the failed snapshot attempt.
+type copiedPeerOutageWatch struct {
+	jetstream.KeyWatcher
+	fault *copiedWatchConnectionLoss
+}
+
+func (s copiedPeerOutageWatch) Stop() error {
+	err := s.KeyWatcher.Stop()
+	f := s.fault
+	f.mu.Lock()
+	f.proof.CloseStarted = time.Now().UTC()
+	nc := f.first
+	f.mu.Unlock()
+	nc.Close()
+	f.mu.Lock()
+	f.proof.CloseFinished = time.Now().UTC()
+	f.proof.StatusAfterClose = nc.Status().String()
+	f.mu.Unlock()
+	return err
 }

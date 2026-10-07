@@ -78,11 +78,21 @@ def validate(result, servers, identity):
         ports = before['container']['NetworkSettings']['Ports']['4222/tcp']
         assert len(ports) == 1 and connection['url'] == 'nats://127.0.0.1:' + ports[0]['HostPort']
         assert stamp(connection['native_created']) <= stamp(connection['close_started']) <= stamp(connection['close_finished'])
-        assert stamp(connection['close_finished']) <= stamp(connection['exposed'])
-        assert stamp(connection['close_finished']) <= stamp(kill['kill_started'])
+        peer_outage = connection.get('peer_outage', False)
+        if peer_outage:
+            assert connection['exposed_status'] == 'RECONNECTING' and connection['disconnect_error']
+            assert stamp(connection['native_created']) <= stamp(kill['kill_started']) <= stamp(connection['disconnected']) <= stamp(connection['exposed'])
+            assert stamp(kill['source_stopped']) <= stamp(connection['exposed']) <= stamp(connection['close_started'])
+            assert stamp(connection['close_finished']) < stamp(connection['restart_started']) <= stamp(result['restart_completed'])
+            hold = (stamp(connection['restart_started']) - stamp(kill['source_stopped'])).total_seconds()
+            assert hold >= 3 and connection['offline_hold_ns'] >= 3_000_000_000
+            assert abs(hold - connection['offline_hold_ns']/1e9) < .00001
+        else:
+            assert stamp(connection['close_finished']) <= stamp(connection['exposed'])
+            assert stamp(connection['close_finished']) <= stamp(kill['kill_started'])
         assert 0 <= connection['buffered_before_exposure'] < 238560
         assert connection['attempts'] == len(watches) and 2 <= len(watches) <= 3
-        assert watches[0]['StopError'] in ('nats: connection closed', 'nats: invalid subscription')
+        assert watches[0]['StopError'] in (('<nil>',) if peer_outage else ('nats: connection closed', 'nats: invalid subscription'))
         frames = connection['frames']
         assert frames and len({f['deadline'] for f in frames}) == 1
         returns = [f for f in frames if f['event'] == 'attempt_return']
@@ -91,6 +101,9 @@ def validate(result, servers, identity):
         assert not first_frame['initial_complete'] and first_frame['error']
         assert 'closed before initial completion' in first_frame['error'] or 'made no progress' in first_frame['error']
         assert first_frame['received'] < 238560
+        if peer_outage:
+            assert 'made no progress' in first_frame['error'] and first_frame['elapsed_ns'] >= 2_000_000_000
+            assert stamp(connection['close_finished']) <= stamp(first_frame['time']) < stamp(connection['restart_started'])
         assert final['initial_complete'] and not final.get('error')
         assert final['received'] == result['readiness']['KV_WF_STATE']['state']['messages']
         assert final['included'] == result['cutoff']
@@ -102,7 +115,7 @@ def validate(result, servers, identity):
             assert frame['received'] >= frame['included'] >= 0
             if i > 0:
                 assert stamp(frame['time']) > stamp(returns[i-1]['time'])
-        connection_review = dict(controlled_real_connection_close=True, actual_connected_server_id=connection['server_id'],
+        connection_review = dict(controlled_real_connection_close=not peer_outage, actual_direct_peer_outage=peer_outage, actual_connected_server_id=connection['server_id'],
             watch_attempts=len(watches), abandoned_received=first_frame['received'], fresh_received=final['received'],
             original_deadline=final['deadline'], natural_outage_or_historical_cause=False)
     return dict(actual_cursor_owner=node, raw_journal_visits=result['journal_visits'],

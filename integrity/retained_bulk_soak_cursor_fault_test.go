@@ -155,8 +155,12 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 	began := time.Now()
 	trace := &capacityStateTrace{origin: &began}
 	var watchFault *copiedWatchConnectionLoss
-	if os.Getenv("WF_AUDIT_BULK_SOAK_STATE_CONNECTION_LOSS") == "1" {
+	if os.Getenv("WF_AUDIT_BULK_SOAK_STATE_CONNECTION_LOSS") == "1" || os.Getenv("WF_AUDIT_BULK_SOAK_STATE_PEER_OUTAGE") == "1" {
 		watchFault = newCopiedWatchConnectionLoss()
+		watchFault.peerOutage = os.Getenv("WF_AUDIT_BULK_SOAK_STATE_PEER_OUTAGE") == "1"
+		if watchFault.peerOutage && os.Getenv("WF_AUDIT_BULK_SOAK_STATE_CONNECTION_LOSS") == "1" {
+			t.Fatal("watch fault profiles are mutually exclusive")
+		}
 		call = WithStateSnapshotObserver(call, watchFault.observe)
 	}
 	created := map[string]bool{}
@@ -222,7 +226,11 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 					if watchFault.owner != owner {
 						return fmt.Errorf("watch connection owner changed before cut")
 					}
-					if err := watchFault.closeFirst(ctx); err != nil {
+					if watchFault.peerOutage {
+						if err := watchFault.waitFirst(ctx); err != nil {
+							return err
+						}
+					} else if err := watchFault.closeFirst(ctx); err != nil {
 						return err
 					}
 				}
@@ -232,6 +240,24 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 				}
 				if result.Kill.SourceStopped.IsZero() {
 					return fmt.Errorf("actual cursor owner exit unconfirmed")
+				}
+				if watchFault != nil && watchFault.peerOutage {
+					if err := watchFault.exposeDisconnected(ctx); err != nil {
+						return err
+					}
+					// A real three-second offline interval exceeds the candidate's two-second
+					// idle bound. The original caller deadline remains the total limit.
+					hold := time.NewTimer(3 * time.Second)
+					select {
+					case <-hold.C:
+					case <-ctx.Done():
+						hold.Stop()
+						return ctx.Err()
+					}
+					watchFault.mu.Lock()
+					watchFault.proof.RestartStarted = time.Now().UTC()
+					watchFault.proof.OfflineHoldNS = int64(watchFault.proof.RestartStarted.Sub(result.Kill.SourceStopped))
+					watchFault.mu.Unlock()
 				}
 				if err := cluster.RestartNode(owner); err != nil {
 					return err
@@ -348,6 +374,16 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 			}
 		}
 		qualification = qualification && failedAttempts >= 1 && completedAttempts == 1
+		if watchFault.peerOutage {
+			qualification = qualification && proof.OfflineHoldNS >= int64(3*time.Second) && proof.ExposedStatus == "RECONNECTING"
+			var idleTimeout bool
+			for _, frame := range proof.Frames {
+				if frame.Event == "attempt_return" && !frame.InitialComplete && strings.Contains(frame.Error, "made no progress") && frame.Time.Before(proof.RestartStarted) {
+					idleTimeout = true
+				}
+			}
+			qualification = qualification && idleTimeout
+		}
 	}
 	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
