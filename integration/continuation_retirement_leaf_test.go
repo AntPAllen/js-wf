@@ -255,7 +255,10 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf bool) {
 	}
 	onDrop := func(ctx context.Context) error {
 		proof.CutStart = time.Now().UTC()
-		observe, stop := context.WithDeadline(ctx, proof.CutStart.Add(30*time.Second))
+		// The worker may cancel its operation after losing its leaf connection.
+		// Fault recovery is an external observer, bounded by the original cut
+		// deadline rather than the operation whose failure we are injecting.
+		observe, stop := context.WithDeadline(context.Background(), proof.CutStart.Add(30*time.Second))
 		defer stop()
 		for i := range hub.Servers {
 			hub.KillNode(i)
