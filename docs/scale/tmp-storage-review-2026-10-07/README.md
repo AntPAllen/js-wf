@@ -29,3 +29,5 @@ The three newly completed abrupt-leaf diagnostic fixtures and archives were reti
 The newly completed leaf/lease-expiry fixture and staging archive were also retired after verified remote/member/current-inventory/closure checks: **185.0 MiB** reclaimed. Approximately **73 GiB** remains free. [Ledger](../leaf-domain-expiry-2026-10-07/reclaimed/README.md).
 
 Latest user-requested pass reclaimed **4.83 GiB** from completed S3-backed diagnostics. `/tmp`: **14.4 GiB**; filesystem free: **77.1 GiB**. Live24h and reusable fixtures remain local. [Exact records and restoration](thirteenth-completed-diagnostics/README.md).
+
+The new completed all-hub/leaf SIGKILL proof fixture and staging archive were also retired after fresh full S3/member/current-inventory/closure checks: **222.7 MiB** reclaimed. [Ledger and restoration](../leaf-all-hub-sigkill-2026-10-07/reclaimed/README.md).
