@@ -1,5 +1,9 @@
 # Implementation status against the supplied plan
 
+## Fresh explicit recovery journal24h live — 2026-10-07
+
+At clean `bc9f92bdfd1f01ad78d4acd24e6576d46c82a078`, actual SDK3743450 is running original journal/seed1/24h/count1/nonrace/24h20m with new five-node stores and isolated source. Explicit parallel recovery/full bulk-point final audit retain4CPU/GOGC500/4GiB and all original workload/fault/deadline/history/queue/latency gates. Actual SDK hash/buildVCS/argv/environment and all five stock2.15 server observations verify. Four journal faults healed and26 batches completed at the recorded observation; no terminal24h qualification. Durable producer, observer and prepared terminal-reviewer are actually live; no failed original restarted. [Live admission and exact handles](scale/parallel-recovery-journal-24h-2026-10-07/launch/).
+
 ## Explicit recovery journal10m accepted — 2026-10-07
 
 Original journal/seed1/10m/count1/nonrace/20m SDK at `ecb2f895854b68ebdc26530d75c61687d0da7c94`, actual SDK3683804, 4CPU/GOGC500/4GiB, passed in624.38s. Explicit parallel/chunked/fresh-watch recovery served nine cutoff checkpoints and final full audits. Independent review accepted93batches/2604invocations/28690entries/19confirmed journal-leader faults, all six workload cells and all12276 bulk/point samples; bulk final stage9.348158025s. Defaults and original deadlines remain unchanged. This qualifies this single source-bound ten-minute row; full matrices and actual24h remain open. [Terminal evidence and complete S3 restoration proof](scale/parallel-recovery-journal-ten-minute-2026-10-07/terminal/).
@@ -10,11 +14,11 @@ Storage cleanup moved this completed fixture and the failed757454a original24h f
 
 Clean1cd14c4 actual SDK3675960 nativePASS35.06s. Full238560-invocation/journal/terminal cohort/2630779 scoped entries, all2632932 raw records exactly once, actual node1 cursor-owner/direct-watch-peer SIGKILL/EOF/RECONNECTING/3.1135s offline/same-store restart, exact resume129, zero INV/JRN readers and four R5 source sets current finish18.621295134s under unchanged20s/4CPU/GOGC500/4GiB. Idle-timeout decision occurs before restart; SDK cleanup finishes after healing and before fresh retry. First watch receives zero entries; second reads all238757 physical states/includes238560 and reaches its native initial-set barrier under the same absolute deadline. Independent complete20131-member/source/actual SDK/six-stock-server/restore review accepts;68 actual-positive mutations rejected. [Evidence and scope](scale/checkpoint8520-cursor-owner-recovery-2026-10-07/native-peer-outage/). This closes this controlled native silent-watch recovery component, not historical cause, naturally lost replies, positive native partial-map retry, KV zero-consumer population, default adoption, full live matrices or actual24h.
 
-The first attempt was unadmitted after a missing first /proc environment field; complete evidence remains retained. Stable admission now reobserves incomplete live identity without killing/relaunching, and real-child mismatches are rejected. A second native completes all counts in15.98s but fails an overstrict cleanup-before-restart assertion; it remains failed. The corrected gate records timeout decision before cleanup, while all prior Stop/context cleanup must still precede fresh retry. Normal/race count20 controls verify this order. Original20s target/counts remain unchanged. Next: a sustained live workload with the explicit recovery candidate, then actual24h qualification.
+The first attempt was unadmitted after a missing first /proc environment field; complete evidence remains retained. Stable admission now reobserves incomplete live identity without killing/relaunching, and real-child mismatches are rejected. A second native completes all counts in15.98s but fails an overstrict cleanup-before-restart assertion; it remains failed. The corrected gate records timeout decision before cleanup, while all prior Stop/context cleanup must still precede fresh retry. Normal/race count20 controls verify this order. Original20s target/counts remain unchanged. The source-bound sustained ten-minute recovery row is now accepted; a fresh original24h run is live and still unqualified.
 
-## Original hosted partition200 now executing — 2026-10-07
+## Original hosted partition200: seed12 failed — 2026-10-07
 
-Same Actions run37500390198 atd9093d74 has successful setup and completed successful seeds1–9; seed10 is actually running and190 queued. Full per-seed native logs verify original10m workloads/faults/retained counts/six cells/progress/p99 checks; worst aggregate terminal p99 is13.187135406s. Complete retained/source/process artifact admission remains pending. The full200 verifier correctly rejects the unfinished campaign. [Captured provider snapshot and logs](scale/hosted-partition200-progress-2026-10-07/). No run restarted, failed historical seed cleared or fullrow/currentmain/24h gate qualified.
+Same Actions run37500390198 atd9093d74 has provider successes for setup/seeds1–11, seed12 failure and188 queued jobs, with zero active jobs in the latest snapshot. Native seed12 fails70.07s at the first partition: `KV_WF_LEASE` replica node2 remains noncurrent/lag3688 at the recovery deadline; fault evidence has no confirmed heal. Repeated initial-catchup snapshot warnings do not establish cause. Both native/source artifacts are fully read, all1908 recorded source blobs verified; complete raw failure evidence is archived. [Failure and limits](scale/hosted-partition200-progress-2026-10-07/seed12-failure/). Prior full per-seed log checks cover1–9 only; full source/process/store admission and full200/currentmain gates remain open. No cancellation, duplicate run or restart issued.
 
 ## Full checkpoint8520 closed-watch recovery accepted — 2026-10-07
 
@@ -53,7 +57,7 @@ composed comparison, qualify broader live/fault capacity,
 finish million-timer physical-drain and combined/operational coverage, and qualify
 the actual 24-hour gate. Earlier latest24h campaigns are
 terminal failures. Original explicit bulk/chunked24h journal seed1 at757454a is now terminal failed
-after about17h at batch8520; no replacement launched and no24h row is accepted. Their complete current files, including
+after about17h at batch8520. A fresh explicit parallel-recovery journal24h run atbc9f92b is now actually live and admitted; no24h row is accepted. Their complete current files, including
 partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.

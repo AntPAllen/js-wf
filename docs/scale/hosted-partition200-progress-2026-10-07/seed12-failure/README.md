@@ -1,0 +1,7 @@
+# Hosted original partition seed12 failure
+
+Original run37500390198, source `d9093d74f4e18562d70173c0fc6715c394a0314a`, job112465583274. The native ten-minute profile fails after70.07s at its first route partition: `KV_WF_LEASE` node2 remains noncurrent, lag3688, and the original recovery deadline expires. Fault evidence has no confirmed healed timestamp. No final matrix result exists. Raft warnings repeatedly say the initial catchup entry was not snapshot/peerstate. Cause is unconfirmed; no physical Raft stores or actual hosted executable bytes are present in these artifacts.
+
+Downloaded both native artifact11470794502 and source artifact11471520036. Native ZIP SHA matches the provider upload receipt; every ZIP member/CRC was read and hashed. All1,908 recorded source inputs match corresponding blobs at the recorded Git revision. Complete raw provider log, native JSON events, server logs, faults, histories, operation records, source inventory and both original ZIPs are captured in the full S3 archive. This is failure preservation, not native acceptance or exact process/external dependency admission.
+
+Current provider snapshot: setup plus seeds1–11 successful, seed12 failed,188 jobs queued, zero in progress. Seeds10–11 are provider successes only in this snapshot; prior raw-log verification covers1–9. The run-level API says queued with no conclusion. Do not infer a terminal campaign or restart jobs from these observations. Original local seed6 failure and complete200 gate remain unchanged.
