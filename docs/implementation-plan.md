@@ -5575,3 +5575,8 @@ At clean d86b0e4, three native point-oracle invariant suites and all five journa
 ## Reused decode slots prepared — 2026-10-07
 
 The bounded candidate now decodes into existing batch entry slots rather than allocating a fresh worker destination per record. Normal/race count20 controls pass, and compiler escape analysis no longer reports that worker-local Entry escape. Existing decoder allocations remain; no measured heap/throughput improvement is claimed. Native acceptance at d86b0e4 predates this follow-up source; its full native capacity/performance remain to measure with the original20s/full238560/2630779 workload. Default decoding/24h verdict unchanged. [Evidence](scale/parallel-journal-decode-2026-10-07/reused-slots/).
+
+
+## Reused-slot full cohort independently accepted — 2026-10-07
+
+Clean47ab18c passes the complete fresh original238560/2630779 cohort in13.534420105s under unchanged20s/4CPU/GOGC500/4GiB. All original files remain unchanged, actual SDK/five identical stock NATS executable/identity/mounts and four current R5 source sets are reviewed, selected sources/dependencies before/after agree, and every20626 archive member is verified. Normal/race count20 order/error/filter/bound/join controls accompany the candidate. This is a lower single observation than15.972s first candidate/14.316s serial, not a statistical performance or measured allocation comparison. Explicit candidate capacity is accepted; default decoding remains serial, original live24h failed, fault interaction/adoption remain open. Next is actual cursor-owner recovery on this complete copied cohort, preserving all original budgets/invariants. Full archive/S3 retention for this follow-up pending. [Evidence](scale/parallel-journal-decode-2026-10-07/).
