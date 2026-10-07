@@ -1,0 +1,242 @@
+{
+  "source": "1c4e4f404e5541b436ab45fe942d67d00a4bb3c3",
+  "source_inputs_verified": 2325,
+  "profiles": {
+    "normal100k": {
+      "verification": {
+        "modes": {
+          "close_race": 6760,
+          "drop_before_commit": 6650,
+          "lost_close_reply": 6571,
+          "lost_commit_reply": 6736,
+          "lost_delete_reply": 6701,
+          "lost_fence_reply": 6644,
+          "lost_pin_reply": 6532,
+          "lost_ready_reply": 6702,
+          "lost_upload_reply": 6536,
+          "partial_prepare": 6588,
+          "paused_commit": 6716,
+          "paused_upload": 6680,
+          "preserve_root": 6718,
+          "reset_head_control": 6644,
+          "shared_reference": 6822
+        },
+        "coverage": {
+          "model_version": "3",
+          "seeds_per_workload": "100000",
+          "generated_schedules": "100000",
+          "scheduler_choices": "600000",
+          "choices_per_second": "14128.4",
+          "transport_events": "8813590",
+          "virtual_ms_max": "8000",
+          "virtual_buckets_zero": "0",
+          "under_1s": "0",
+          "under_1m": "100000",
+          "at_least_1m": "0",
+          "elapsed": "42.467752901s"
+        },
+        "pins": 15,
+        "contiguous_completed_bodies": 100000
+      },
+      "execution": {
+        "source": "1c4e4f404e5541b436ab45fe942d67d00a4bb3c3",
+        "exit_code": 0,
+        "elapsed_seconds": 42.47605512299924,
+        "profile": "normal100k",
+        "seeds": 100000,
+        "race": false,
+        "command": [
+          "/tmp/js-wf-blob-publication-tier1-20261007/normal100k/sim.test",
+          "-test.v",
+          "-test.run=^(TestSeededBlobPublicationReplay|TestBlobPublicationTransportAuthorityCopies|TestPinnedRegressionCorpus)$/^blob-publication-",
+          "-test.count=1",
+          "-test.timeout=3m"
+        ],
+        "build": [
+          "go",
+          "test",
+          "-p=1",
+          "-buildvcs=true",
+          "-c",
+          "-o",
+          "/tmp/js-wf-blob-publication-tier1-20261007/normal100k/sim.test",
+          "./sim"
+        ],
+        "body_complete": true,
+        "scope": "Focused shared Tier1 workload, 15 pins and transport authority controls; not full124 graph or native transport qualification."
+      },
+      "actual_sdk": {
+        "pid": 2623243,
+        "stat": "2623243 (sim.test) S 2620815 2620815 2620815 0 -1 4194304 2044 0 0 0 2 0 0 0 20 0 5 0 21993083 1678712832 4607 18446744073709551615 4194304 12916192 140725542124576 0 0 0 0 0 2143420159 0 0 0 17 0 0 0 0 0 0 20692992 21123264 270680064 140725542125981 140725542126219 140725542126219 140725542129593 0\n",
+        "start_ticks": "21993083",
+        "args": [
+          "/tmp/js-wf-blob-publication-tier1-20261007/normal100k/sim.test",
+          "-test.v",
+          "-test.run=^(TestSeededBlobPublicationReplay|TestBlobPublicationTransportAuthorityCopies|TestPinnedRegressionCorpus)$/^blob-publication-",
+          "-test.count=1",
+          "-test.timeout=3m"
+        ],
+        "exe": "/tmp/js-wf-blob-publication-tier1-20261007/normal100k/sim.test",
+        "working_directory": "/home/exedev/js-wf/sim",
+        "environment": {
+          "GOMAXPROCS": "2",
+          "GOMEMLIMIT": "512MiB",
+          "SIM_COVERAGE_SUMMARY": "1",
+          "SIM_SEEDS": "100000",
+          "FAULT_TRACE_OUT": "/tmp/js-wf-blob-publication-tier1-20261007/failure-trace.json"
+        },
+        "exe_sha256": "1cac33ac803d4f5e6e17fe15849d7eb6b1c835ed5dc1f6362bdca6e94c14edd0",
+        "admission": {
+          "observations": 1,
+          "rejected_observations": 0,
+          "first_missing_environment_keys": [],
+          "stable_identity_observed_twice": true,
+          "scope": "Actual live process identity before/after executable digest; incomplete reads repeated without killing or relaunching."
+        }
+      },
+      "binary": {
+        "sha256": "1cac33ac803d4f5e6e17fe15849d7eb6b1c835ed5dc1f6362bdca6e94c14edd0",
+        "build_info": "/tmp/js-wf-blob-publication-tier1-20261007/normal100k/sim.test: go1.27.1\n\tpath\tjs-wf/sim.test\n\tmod\tjs-wf\tv0.0.0-20261007204812-1c4e4f404e55\t\n\tdep\tgithub.com/anishathalye/porcupine\tv1.3.1\th1:fBZ4/NGNPnIDdd6xNtrNk9/GiEQ0L4FO5+scINN+t0E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=1c4e4f404e5541b436ab45fe942d67d00a4bb3c3\n\tbuild\tvcs.time=2026-10-07T20:48:12Z\n\tbuild\tvcs.modified=false\n",
+        "race": false
+      },
+      "actual_log_sha256": "09d7c99ebf1b9fa292b9a8e2717b9b53a795175a088fc1a0c49ab38def310f9b",
+      "actual_positive_mutations_rejected": [
+        "missing_PASS",
+        "duplicate_PASS",
+        "native_failure",
+        "data_race",
+        "short_last",
+        "short_completed",
+        "short_requested",
+        "missing_body_counter",
+        "missing_coverage",
+        "wrong_choices",
+        "missing_pin",
+        "mode_count_mismatch"
+      ]
+    },
+    "race1000": {
+      "verification": {
+        "modes": {
+          "close_race": 73,
+          "drop_before_commit": 77,
+          "lost_close_reply": 68,
+          "lost_commit_reply": 56,
+          "lost_delete_reply": 53,
+          "lost_fence_reply": 71,
+          "lost_pin_reply": 74,
+          "lost_ready_reply": 58,
+          "lost_upload_reply": 71,
+          "partial_prepare": 55,
+          "paused_commit": 61,
+          "paused_upload": 73,
+          "preserve_root": 67,
+          "reset_head_control": 78,
+          "shared_reference": 65
+        },
+        "coverage": {
+          "model_version": "3",
+          "seeds_per_workload": "1000",
+          "generated_schedules": "1000",
+          "scheduler_choices": "6000",
+          "choices_per_second": "1258.2",
+          "transport_events": "88074",
+          "virtual_ms_max": "8000",
+          "virtual_buckets_zero": "0",
+          "under_1s": "0",
+          "under_1m": "1000",
+          "at_least_1m": "0",
+          "elapsed": "4.768789821s"
+        },
+        "pins": 15,
+        "contiguous_completed_bodies": 1000
+      },
+      "execution": {
+        "source": "1c4e4f404e5541b436ab45fe942d67d00a4bb3c3",
+        "exit_code": 0,
+        "elapsed_seconds": 5.7870213619899005,
+        "profile": "race1000",
+        "seeds": 1000,
+        "race": true,
+        "command": [
+          "/tmp/js-wf-blob-publication-tier1-20261007/race1000/sim.test",
+          "-test.v",
+          "-test.run=^(TestSeededBlobPublicationReplay|TestBlobPublicationTransportAuthorityCopies|TestPinnedRegressionCorpus)$/^blob-publication-",
+          "-test.count=1",
+          "-test.timeout=3m"
+        ],
+        "build": [
+          "go",
+          "test",
+          "-p=1",
+          "-buildvcs=true",
+          "-race",
+          "-c",
+          "-o",
+          "/tmp/js-wf-blob-publication-tier1-20261007/race1000/sim.test",
+          "./sim"
+        ],
+        "body_complete": true,
+        "scope": "Focused shared Tier1 workload, 15 pins and transport authority controls; not full124 graph or native transport qualification."
+      },
+      "actual_sdk": {
+        "pid": 2625858,
+        "stat": "2625858 (sim.test) R 2623335 2623335 2623335 0 -1 4194304 4906 0 0 0 1 0 0 0 20 0 5 0 22003608 1944657920 8321 18446744073709551615 4194304 18813616 140735724732608 0 0 0 0 0 2143420159 0 0 0 17 1 0 0 0 0 0 27701248 28155648 604352512 140735724741027 140735724741263 140735724741263 140735724744635 0\n",
+        "start_ticks": "22003608",
+        "args": [
+          "/tmp/js-wf-blob-publication-tier1-20261007/race1000/sim.test",
+          "-test.v",
+          "-test.run=^(TestSeededBlobPublicationReplay|TestBlobPublicationTransportAuthorityCopies|TestPinnedRegressionCorpus)$/^blob-publication-",
+          "-test.count=1",
+          "-test.timeout=3m"
+        ],
+        "exe": "/tmp/js-wf-blob-publication-tier1-20261007/race1000/sim.test",
+        "working_directory": "/home/exedev/js-wf/sim",
+        "environment": {
+          "GOMAXPROCS": "2",
+          "GOMEMLIMIT": "512MiB",
+          "SIM_COVERAGE_SUMMARY": "1",
+          "SIM_SEEDS": "1000",
+          "FAULT_TRACE_OUT": "/tmp/js-wf-blob-publication-tier1-20261007/failure-trace.json"
+        },
+        "exe_sha256": "278dc6af61428f036d9afd76e23d5db9e175fb4a482b7b643de4749b326ebc5e",
+        "admission": {
+          "observations": 1,
+          "rejected_observations": 0,
+          "first_missing_environment_keys": [],
+          "stable_identity_observed_twice": true,
+          "scope": "Actual live process identity before/after executable digest; incomplete reads repeated without killing or relaunching."
+        }
+      },
+      "binary": {
+        "sha256": "278dc6af61428f036d9afd76e23d5db9e175fb4a482b7b643de4749b326ebc5e",
+        "build_info": "/tmp/js-wf-blob-publication-tier1-20261007/race1000/sim.test: go1.27.1\n\tpath\tjs-wf/sim.test\n\tmod\tjs-wf\tv0.0.0-20261007204812-1c4e4f404e55\t\n\tdep\tgithub.com/anishathalye/porcupine\tv1.3.1\th1:fBZ4/NGNPnIDdd6xNtrNk9/GiEQ0L4FO5+scINN+t0E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/nats-io/nats.go\tv1.54.0\th1:vsXoOxjHp/GmPUN+EcI7uOf/uB+iAP+kEsAFNQN0yzA=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.6\th1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-race=true\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=1c4e4f404e5541b436ab45fe942d67d00a4bb3c3\n\tbuild\tvcs.time=2026-10-07T20:48:12Z\n\tbuild\tvcs.modified=false\n",
+        "race": true
+      },
+      "actual_log_sha256": "0e71ea77a01d8d98bbdaeaa8476a55bc7807126212fbe801f3dab4a9c73a89c5",
+      "actual_positive_mutations_rejected": [
+        "missing_PASS",
+        "duplicate_PASS",
+        "native_failure",
+        "data_race",
+        "short_last",
+        "short_completed",
+        "short_requested",
+        "missing_body_counter",
+        "missing_coverage",
+        "wrong_choices",
+        "missing_pin",
+        "mode_count_mismatch"
+      ]
+    }
+  },
+  "original_producer_format_failure": {
+    "original_producer_exit_code": 1,
+    "original_normal_sdk_exit_code": 0,
+    "reason": "Old log check incorrectly required PASS to follow the Tier1 TestMain coverage summary; native normal body and all pins passed. Original producer and original native artifacts retained; no normal rerun."
+  },
+  "full124_graph_qualified": false,
+  "native_transport_qualified": false,
+  "production_online_gc_enabled": false,
+  "scope": "Focused common Tier1 workload source, exact replay, 15 pinned traces and transport copying/CAS authority controls; not full graph or native online GC."
+}

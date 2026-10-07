@@ -1,0 +1,27 @@
+{
+  "source": "1c4e4f404e5541b436ab45fe942d67d00a4bb3c3",
+  "exit_code": 0,
+  "elapsed_seconds": 42.47605512299924,
+  "profile": "normal100k",
+  "seeds": 100000,
+  "race": false,
+  "command": [
+    "/tmp/js-wf-blob-publication-tier1-20261007/normal100k/sim.test",
+    "-test.v",
+    "-test.run=^(TestSeededBlobPublicationReplay|TestBlobPublicationTransportAuthorityCopies|TestPinnedRegressionCorpus)$/^blob-publication-",
+    "-test.count=1",
+    "-test.timeout=3m"
+  ],
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-c",
+    "-o",
+    "/tmp/js-wf-blob-publication-tier1-20261007/normal100k/sim.test",
+    "./sim"
+  ],
+  "body_complete": true,
+  "scope": "Focused shared Tier1 workload, 15 pins and transport authority controls; not full124 graph or native transport qualification."
+}

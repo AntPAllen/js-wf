@@ -1,0 +1,40 @@
+=== RUN   TestSeededBlobPublicationReplay
+    blob_publication_replay_test.go:347: blob publication: modes=map[close_race:73 drop_before_commit:77 lost_close_reply:68 lost_commit_reply:56 lost_delete_reply:53 lost_fence_reply:71 lost_pin_reply:74 lost_ready_reply:58 lost_upload_reply:71 partial_prepare:55 paused_commit:61 paused_upload:73 preserve_root:67 reset_head_control:78 shared_reference:65] every generated trace exactly replayed; referenced bytes and terminal reclamation checked; unsafe head reset detected
+    seed_count_test.go:32: TIER1_SEEDS test=TestSeededBlobPublicationReplay first=1 last=1000 completed=1000 requested=1000
+--- PASS: TestSeededBlobPublicationReplay (4.61s)
+=== RUN   TestBlobPublicationTransportAuthorityCopies
+--- PASS: TestBlobPublicationTransportAuthorityCopies (0.00s)
+=== RUN   TestPinnedRegressionCorpus
+=== RUN   TestPinnedRegressionCorpus/blob-publication-close_race.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-drop_before_commit.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-lost_close_reply.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-lost_commit_reply.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-lost_delete_reply.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-lost_fence_reply.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-lost_pin_reply.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-lost_ready_reply.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-lost_upload_reply.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-partial_prepare.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-paused_commit.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-paused_upload.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-preserve_root.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-reset_head_control.json
+=== RUN   TestPinnedRegressionCorpus/blob-publication-shared_reference.json
+--- PASS: TestPinnedRegressionCorpus (0.16s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-close_race.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-drop_before_commit.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-lost_close_reply.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-lost_commit_reply.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-lost_delete_reply.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-lost_fence_reply.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-lost_pin_reply.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-lost_ready_reply.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-lost_upload_reply.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-partial_prepare.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-paused_commit.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-paused_upload.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-preserve_root.json (0.01s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-reset_head_control.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/blob-publication-shared_reference.json (0.01s)
+PASS
+TIER1_COVERAGE model_version=3 seeds_per_workload=1000 generated_schedules=1000 scheduler_choices=6000 choices_per_second=1258.2 transport_events=88074 virtual_ms_max=8000 virtual_buckets_zero=0 under_1s=0 under_1m=1000 at_least_1m=0 elapsed=4.768789821s
