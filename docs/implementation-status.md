@@ -1,8 +1,10 @@
 # Implementation status against the supplied plan
 
-## Explicit recovery journal10m live — 2026-10-07
+## Explicit recovery journal10m accepted — 2026-10-07
 
-Original journal/seed1/10m/count1/nonrace/20m SDK is launched in isolated cleanecb2f89 (full source `ecb2f895854b68ebdc26530d75c61687d0da7c94`), actual SDK3683804,4CPU/GOGC500/4GiB. Explicit parallel/chunked/fresh-watch recovery is now selected for cutoff checkpoint and final full audits, with actual selector output and the original full bulk/point final comparison, workload/fault/history/latency/progress/queue/fencing/20s-60s limits intact. Live SDK hash/buildVCS/argv/environment and stock2.15 server observations verify; **no native row qualification yet**. [Live launch and same supervised handles](scale/parallel-recovery-journal-ten-minute-2026-10-07/launch/README.md). All14 planner and three actual-selector profile guard groups plus ten reader-conflict pairs/retained-budget cancellation controls pass; defaults do not inherit or select the candidate. Failed earlier verdicts remain, fixed-cohort recovery stays scoped to1cd14c4, full matrices and actual24h remain open.
+Original journal/seed1/10m/count1/nonrace/20m SDK at `ecb2f895854b68ebdc26530d75c61687d0da7c94`, actual SDK3683804, 4CPU/GOGC500/4GiB, passed in624.38s. Explicit parallel/chunked/fresh-watch recovery served nine cutoff checkpoints and final full audits. Independent review accepted93batches/2604invocations/28690entries/19confirmed journal-leader faults, all six workload cells and all12276 bulk/point samples; bulk final stage9.348158025s. Defaults and original deadlines remain unchanged. This qualifies this single source-bound ten-minute row; full matrices and actual24h remain open. [Terminal evidence and complete S3 restoration proof](scale/parallel-recovery-journal-ten-minute-2026-10-07/terminal/).
+
+Storage cleanup moved this completed fixture and the failed757454a original24h fixture to complete, freshly verified S3 archives, reclaiming9.64GiB; no verdict changed or store resumed. [Removal records](scale/tmp-storage-review-2026-10-07/twelfth-completed-originals/).
 
 ## Full checkpoint8520 native silent-watch recovery accepted — 2026-10-07
 

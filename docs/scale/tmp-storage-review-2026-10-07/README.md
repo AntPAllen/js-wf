@@ -21,3 +21,5 @@ Latest cleanup retired both completed cold cursor-owner diagnostic copies and st
 The new completed closed-watch recovery experiment was also retired after verified S3/member/current-inventory/closure checks: **9.35 GiB** reclaimed. This removes newly created experiment data, separate from the preceding18.71 GiB cleanup. Free space: **64.88 GiB**. [Ledger](../checkpoint8520-cursor-owner-recovery-2026-10-07/closed-watch-reclaimed/README.md).
 
 All three completed new watch-peer diagnostics and staging archives are now retired after fresh complete S3/member/inventory/closure checks: **27.99 GiB** reclaimed, with **64.68 GiB** free. This removes newly created experiment data, separate from earlier passes. [Full ledger](../checkpoint8520-cursor-owner-recovery-2026-10-07/peer-attempts-reclaimed/README.md).
+
+Latest user-requested pass moved two completed original fixtures to verified S3 storage and reclaimed **9.64 GiB**. `/tmp` now uses about **19 GiB**, with **74 GiB** free on the filesystem. [Exact records and restoration](twelfth-completed-originals/README.md).
