@@ -1,0 +1,3 @@
+# Closed qualification fixtures retired
+
+All three selected roots and staging archives were removed after fresh complete remote S3/member/hash verification, exact committed current inventories, original retained successful service identity, and process/descriptor/Docker/mount/loop closure checks. The previous CLI baseline’s clean registered source worktree was removed through Git before removal of the remaining fixture. Full corrected native results, original baseline failures and reviewer rejections remain in their canonical S3 archives. **2.64 GiB** of allocated qualification fixture/worktree/archive storage retired. Both original live campaigns remain local and active. See [removal.json](removal.json) and [final-storage.json](final-storage.json).

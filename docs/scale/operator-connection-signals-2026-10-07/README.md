@@ -13,3 +13,7 @@ Both finite test runs have original retained successful user-service identities,
 ## Limits
 
 INFO/PONG cases use controlled protocol fixtures, not an actual NATS cluster. They do not qualify TLS, authentication, DNS failure, leaf faults, SQL startup, or complete release matrices. Existing real default/domain daemon regression is a separate result. The persistent operator CI adds a dedicated `standalone-connection` row; hosted acceptance is not claimed. Production NATS remains official2.15.0. Safe onlineGC, full native matrices, original million physical drain, full123 normal100k and actual24h remain separate requirements.
+
+## Storage
+
+All three closed qualification roots, the previous CLI’s exact clean registered worktree, and staging archives are now verified S3-backed and retired (**2.64 GiB** of qualification storage). See [retirement ledger](reclaimed/). Original full123 normal100k and24h remain live and untouched. Restore the selected group with its `s3-readback.json`, `archive-verification.json` and `fixture-inventory.json` into a fresh destination using `scripts/restore-full-fixture-proof.py`; restoration starts no process. Historical worktree pointer files are evidence and must not be used as a new Git worktree.
