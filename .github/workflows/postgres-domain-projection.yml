@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        projector: [sdk, standalone, standalone-leaf, standalone-leaf-startup]
+        projector: [sdk, standalone, standalone-leaf, standalone-leaf-startup, standalone-leaf-sigkill]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -19,15 +19,16 @@ jobs:
       - name: Obtain PostgreSQL image and record exact executed identity in runner
         run: docker pull postgres:16-alpine
       - name: Check disk-backed trace and actual captured streaming controls
-        if: matrix.projector == 'standalone-leaf' || matrix.projector == 'standalone-leaf-startup'
+        if: matrix.projector == 'standalone-leaf' || matrix.projector == 'standalone-leaf-startup' || matrix.projector == 'standalone-leaf-sigkill'
         run: |
           go test -race ./testcluster -run '^TestClientProxyFileTraceJoinedBytesAndFailures$' -count=1
           python3 -m unittest discover -s scripts -p test_sql_leaf_stream_wire.py
+          python3 -m unittest discover -s scripts -p test_sql_leaf_fault_parser.py
       - name: Run full50000 projection fault and rebuild in domain (${{ matrix.projector }})
-        if: matrix.projector != 'standalone-leaf' && matrix.projector != 'standalone-leaf-startup'
+        if: matrix.projector != 'standalone-leaf' && matrix.projector != 'standalone-leaf-startup' && matrix.projector != 'standalone-leaf-sigkill'
         run: python3 scripts/run-postgres-domain-projection.py --projector-profile '${{ matrix.projector }}' --root '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000'
       - name: Run full50000 packaged SQL leaf case with retained producer identity
-        if: matrix.projector == 'standalone-leaf' || matrix.projector == 'standalone-leaf-startup'
+        if: matrix.projector == 'standalone-leaf' || matrix.projector == 'standalone-leaf-startup' || matrix.projector == 'standalone-leaf-sigkill'
         run: |
           sudo systemd-run --unit=postgres-domain-projection-${{ matrix.projector }}-full50000 --property="User=$USER" --property="WorkingDirectory=$GITHUB_WORKSPACE" --property=MemoryMax=4G --property=Restart=no --property=RemainAfterExit=yes --setenv="PATH=$PATH" --setenv=PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$GITHUB_WORKSPACE/scripts/run-postgres-domain-projection.py" --projector-profile '${{ matrix.projector }}' --root '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000'
           python3 - <<'PY'
@@ -47,11 +48,14 @@ jobs:
         if: matrix.projector == 'standalone'
         run: python3 scripts/check-postgres-standalone-proof-controls.py --root '${{ runner.temp }}/postgres-domain-projection-standalone-full50000' --output '${{ runner.temp }}/postgres-domain-projection-standalone-full50000-proof/coverage-controls.json'
       - name: Reject weakened full packaged SQL leaf fault evidence
-        if: matrix.projector == 'standalone-leaf' || matrix.projector == 'standalone-leaf-startup'
+        if: matrix.projector == 'standalone-leaf' || matrix.projector == 'standalone-leaf-startup' || matrix.projector == 'standalone-leaf-sigkill'
         run: python3 scripts/check-postgres-standalone-proof-controls.py --projector-profile '${{ matrix.projector }}' --root '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000' --output '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000-proof/coverage-controls.json'
       - name: Reject weakened actual SQL startup boundary
-        if: matrix.projector == 'standalone-leaf-startup'
-        run: python3 scripts/check-postgres-sql-startup-proof-controls.py --root '${{ runner.temp }}/postgres-domain-projection-standalone-leaf-startup-full50000' --output '${{ runner.temp }}/postgres-domain-projection-standalone-leaf-startup-full50000-proof/startup-controls.json'
+        if: matrix.projector == 'standalone-leaf-startup' || matrix.projector == 'standalone-leaf-sigkill'
+        run: python3 scripts/check-postgres-sql-startup-proof-controls.py --root '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000' --output '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000-proof/startup-controls.json'
+      - name: Reject weakened stock leaf SIGKILL and healthy SQL proof
+        if: matrix.projector == 'standalone-leaf-sigkill'
+        run: python3 scripts/check-postgres-leaf-fault-proof-controls.py --root '${{ runner.temp }}/postgres-domain-projection-standalone-leaf-sigkill-full50000' --output '${{ runner.temp }}/postgres-domain-projection-standalone-leaf-sigkill-full50000-proof/leaf-fault-controls.json'
       - if: always()
         uses: actions/upload-artifact@v7
         with:

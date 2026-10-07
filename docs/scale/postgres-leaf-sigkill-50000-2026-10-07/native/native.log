@@ -1,0 +1,23 @@
+=== RUN   TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSIGKILL
+    visibility_scale_test.go:150: real domain admitted node=0 domain=WFVIEW server_id=NC46EHNMT323K6MFDV363WQ7B5RU45MY5BXLTCQPC2UPPZ6BRCPRF2TA
+    visibility_scale_test.go:150: real domain admitted node=1 domain=WFVIEW server_id=NDPQM5PZARWIM7XBSPEB5WDK2P3XWPDCYNUC3QJJGAULD6SV4WFGIADT
+    visibility_scale_test.go:150: real domain admitted node=2 domain=WFVIEW server_id=NBY3ENJVKZGKVAWSAAHSPJ4GMIRWP2LVSTAIBWHTEGK7UJTHK5GGHJPM
+    visibility_scale_test.go:150: SQL projector leaf wire: phase=sql-startup pid=1440182 records=7 client_bytes=377 server_bytes=3356
+    visibility_scale_test.go:150: SQL startup cancelled: pid=1440182 backend=103 blocker=101 wait=Lock/relation exit=0 residual_sessions=0 residual_locks=0 rows=0 durables_absent=true
+    visibility_scale_test.go:150: SQL projector leaf wire: phase=initial pid=1440232 records=23 client_bytes=1738 server_bytes=11594
+    visibility_scale_test.go:150: started 50000 invocations in 1m37.976781394s while projection stopped
+    visibility_scale_test.go:150: completed and checked 50000 results in 1m54.065046661s
+    visibility_scale_test.go:150: projection healed domain node=0 domain=WFVIEW server_id=NC46EHNMT323K6MFDV363WQ7B5RU45MY5BXLTCQPC2UPPZ6BRCPRF2TA
+    visibility_scale_test.go:150: projection healed domain node=1 domain=WFVIEW server_id=NDPQM5PZARWIM7XBSPEB5WDK2P3XWPDCYNUC3QJJGAULD6SV4WFGIADT
+    visibility_scale_test.go:150: projection healed domain node=2 domain=WFVIEW server_id=NA7ZZ2BVX6A3JFZ7FZANGGMI64EXX4JUSB6IPNR5ZWHH2IC7QEGB7PTN
+    visibility_scale_test.go:150: SQL projector leaf wire: phase=catchup pid=1450316 records=3354 client_bytes=1074989 server_bytes=5759676
+    visibility_project_leaf_test.go:147: SQL leaf SIGKILL: pid=1439600 id=NAIILTOY33LGVHXTSQNW3GDYSJGX2JWXZEF4BK275FWIQ5UVFM6OS3RP reaped=true
+    visibility_scale_test.go:150: SQL projector leaf wire: phase=leaf-fault pid=1451498 records=3467 client_bytes=1073190 server_bytes=5768671
+    visibility_project_leaf_test.go:172: SQL leaf replacement: old_pid=1439600 pid=1452679 old_id=NAIILTOY33LGVHXTSQNW3GDYSJGX2JWXZEF4BK275FWIQ5UVFM6OS3RP id=NBYLP7MSHZC7XJEICX5NB3CX652PAJZ3AI6UVKR57RQ2XF7NZHAFORN7 same_ports_store=true
+    visibility_scale_test.go:150: SQL leaf transport fault: pid=1451498 backend=635 baseline_rows=1126 admitted_rows=1127 exit=1 SQL_healthy=true sessions=0
+    visibility_scale_test.go:150: SQL projector leaf wire: phase=replacement pid=1452766 records=153733 client_bytes=47189270 server_bytes=250492205
+    visibility_scale_test.go:150: projection lag drained in 4m16.162809486s
+    visibility_project_leaf_test.go:203: SQL projector leaf: test=TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSIGKILL local=WFEDGE remote=WFVIEW leaf_pid=1439600 local_streams=0
+    visibility_scale_test.go:215: projection real domain=WFVIEW domain_api_requests=1153634 wrong_prefix_requests=0
+--- PASS: TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSIGKILL (381.73s)
+PASS

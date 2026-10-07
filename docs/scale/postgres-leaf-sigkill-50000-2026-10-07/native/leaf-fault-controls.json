@@ -1,0 +1,143 @@
+{
+  "source": "0030e225058ed34e291e77485370c87e3332fce4",
+  "actual_proof_accepted": true,
+  "rejected_mutations": 37,
+  "mutations": [
+    "baseline_rows:0",
+    "baseline_rows:50000",
+    "baseline_rows:True",
+    "admitted_rows:50000",
+    "admitted_rows:0",
+    "sql_sessions_after_reap:1",
+    "sql_sessions_after_reap:False",
+    "sql_healthy_after_reap:False",
+    "sql_healthy_after_reap:1",
+    "sql_backend_terminated:True",
+    "sql_backend_terminated:0",
+    "child.phase",
+    "child.exit_code",
+    "child.wait_error",
+    "child.exit_signal",
+    "child.sha256",
+    "child.stat",
+    "child.environment",
+    "child.build_info",
+    "child.leaf_transport",
+    "child.nats_target",
+    "child.wire_root",
+    "child.writer_backend_pid",
+    "child domain",
+    "child duplicate",
+    "no partial progress",
+    "fault before child admission",
+    "SQL health before reap",
+    "heal before fatal child",
+    "missing SQL leaf SIGKILL:",
+    "duplicate SQL leaf SIGKILL:",
+    "missing SQL leaf replacement:",
+    "duplicate SQL leaf replacement:",
+    "missing SQL leaf transport fault:",
+    "duplicate SQL leaf transport fault:",
+    "missing SQL projector leaf wire: phase=leaf-fault ",
+    "duplicate SQL projector leaf wire: phase=leaf-fault "
+  ],
+  "actual_fault_child_pid": 1451498,
+  "wire": {
+    "connection": {
+      "id": 1,
+      "client": "127.0.0.1:41002",
+      "upstream": "127.0.0.1:38988",
+      "target": "127.0.0.1:33403",
+      "at": "2026-10-07T14:54:07.678334573Z"
+    },
+    "streams": {
+      "client_to_server": {
+        "bytes": 1073190,
+        "sha256": "f8db0438330d28da11329b89b06a732e600e1b784a8b472b2d0d1c5c9117b0e3",
+        "operations": {
+          "CONNECT": 1,
+          "PING": 1,
+          "SUB": 2,
+          "PUB": 9161,
+          "PONG": 1
+        },
+        "api": {
+          "$JS.WFVIEW.API.STREAM.INFO.WF_INV": 2,
+          "$JS.WFVIEW.API.STREAM.INFO.WF_JRN": 1153,
+          "$JS.WFVIEW.API.STREAM.INFO.KV_WF_STATE": 1149,
+          "$JS.WFVIEW.API.STREAM.INFO.WF_PURGE": 1,
+          "$JS.WFVIEW.API.CONSUMER.CREATE.WF_PURGE.WF_VIEW_PG_PURGE.wf.purge.*.*": 1,
+          "$JS.WFVIEW.API.CONSUMER.CREATE.WF_JRN.WF_VIEW_PG.wf.jrn.*.*": 1,
+          "$JS.WFVIEW.API.CONSUMER.CREATE.WF_INV.NluKgXrBE1awLPzAcjhNbS_1": 1,
+          "$JS.WFVIEW.API.CONSUMER.MSG.NEXT.WF_INV.NluKgXrBE1awLPzAcjhNbS_1": 10,
+          "$JS.WFVIEW.API.STREAM.MSG.GET.WF_INV": 1153,
+          "$JS.WFVIEW.API.STREAM.MSG.GET.KV_WF_STATE": 1144,
+          "$JS.WFVIEW.API.STREAM.MSG.GET.WF_JRN": 4546
+        },
+        "infos": [],
+        "peak_buffer": 4533,
+        "interrupted_tail_bytes": 0,
+        "interrupted_tail_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "server_to_client": {
+        "bytes": 5768671,
+        "sha256": "4e438d3a7e20232ab81c2ac1900d9ea5f96e96c7a8826aff04f5413158da5a88",
+        "operations": {
+          "INFO": 2,
+          "PONG": 1,
+          "MSG": 9127,
+          "HMSG": 1417,
+          "PING": 1
+        },
+        "api": {},
+        "infos": [
+          {
+            "server_id": "NAIILTOY33LGVHXTSQNW3GDYSJGX2JWXZEF4BK275FWIQ5UVFM6OS3RP",
+            "server_name": "wf-process-0",
+            "version": "2.15.0",
+            "proto": 1,
+            "go": "go1.27.1",
+            "host": "127.0.0.1",
+            "port": 33403,
+            "headers": true,
+            "max_payload": 1048576,
+            "jetstream": true,
+            "client_id": 12,
+            "client_ip": "127.0.0.1",
+            "cluster": "wf-process-0",
+            "domain": "WFEDGE",
+            "api_lvl": 5,
+            "xkey": "XB3XMIVBCMKO27MWJ5QO5WWVCLCTQMTV6WLOFMAHQJS5QV4FEXSGD7ZK"
+          },
+          {
+            "server_id": "NAIILTOY33LGVHXTSQNW3GDYSJGX2JWXZEF4BK275FWIQ5UVFM6OS3RP",
+            "server_name": "wf-process-0",
+            "version": "2.15.0",
+            "proto": 1,
+            "go": "go1.27.1",
+            "host": "127.0.0.1",
+            "port": 33403,
+            "headers": true,
+            "max_payload": 1048576,
+            "jetstream": true,
+            "client_id": 12,
+            "client_ip": "127.0.0.1",
+            "cluster": "wf-process-0",
+            "domain": "WFEDGE",
+            "connect_info": true,
+            "remote_account": "$G",
+            "api_lvl": 5,
+            "xkey": "XB3XMIVBCMKO27MWJ5QO5WWVCLCTQMTV6WLOFMAHQJS5QV4FEXSGD7ZK"
+          }
+        ],
+        "peak_buffer": 32768,
+        "interrupted_tail_bytes": 0,
+        "interrupted_tail_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "encoded_bytes": 9459925,
+    "encoded_sha256": "a3700df5d47d8e4da558b5a7ed45e34e59310578e963ca777a459e534a82a9ca",
+    "frame_records": 3467
+  },
+  "scope": "Actual admitted leaf-fault proof/native-log mutations only; full original recovery/stock-process identity and SQL startup controls are separate."
+}

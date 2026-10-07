@@ -1,7 +1,3 @@
-# Original full50000 packaged SQL recovery with stock leaf SIGKILL
+# Full50000 packaged SQL/leaf SIGKILL recovery
 
-Prepared, not yet accepted. New `standalone-leaf-sigkill` profile executes `TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsThroughLeafWithSIGKILL`.
-
-The original real SQL startup cancellation and three full recovery phases remain. Between the admitted SQL writer-session/journal-leader fault and final replacement, an additional actual packaged child must make partial SQL progress while all original hubs and PostgreSQL are healthy. The actual stock leaf is SIGKILLed/reaped. The child must report fatal transport loss and release every SQL session before the same leaf store/ports/executable/config are restarted. Whole cut must meet original30s recovery target. Final replacement and all50000 original rows/indexed fields/rebuild/purge/dependency checks remain under20m/22m/count1/nonrace/twoCPU2GiB.
-
-All fault-phase successfully forwarded bytes are retained on disk. Failed reconnect dials are counted separately. A killed connection may contain a partial final protocol packet: its exact bytes are hash-accounted separately, never counted as a complete API publication. The three original healthy child traces and SQL startup trace retain strict complete framing. Recorded old/new leaf identities, actual SIGKILL, process births, fault/admission/reap/restart order and SQL health are independently reviewed. No native acceptance yet; gate-disabled compile and existing streaming controls are preparation only.
+Recorded-source acceptance and complete restoration proof: [native](native/). All original counts/targets remain. Broader release and fault scopes are still open.
