@@ -20,7 +20,9 @@ TEST = 'TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetSt
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
+    parser.add_argument('--projector-profile', choices=('sdk','standalone'), default='sdk')
     args = parser.parse_args()
+    test = TEST if args.projector_profile=='sdk' else 'TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain'
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
     assert shutil.disk_usage(root.parent).free >= 5*(1 << 30), '5GiB disk admission required'
@@ -32,13 +34,15 @@ def main():
     root.mkdir(); (root/'originals').mkdir()
     save = lambda name, value: (root/name).write_text(json.dumps(value, indent=2)+'\n')
     save('source-before.json', before)
+    save('projector-profile.json', dict(profile=args.projector_profile,test=test,child_package='js-wf/cmd/wf' if args.projector_profile=='standalone' else 'js-wf/integration'))
     for name in before['files']:
         target = root/'selected-source'/name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(REPO/name, target)
     # Preserve the selected actual external Go inputs, as in the original full case.
     fmt = '{{.Dir}}|{{join .GoFiles " "}}|{{join .CgoFiles " "}}|{{join .TestGoFiles " "}}|{{join .XTestGoFiles " "}}'
-    deps = subprocess.check_output(['go','list','-deps','-test','-f',fmt,'./integration'], cwd=REPO, text=True)
+    packages = ['./integration'] + (['./cmd/wf'] if args.projector_profile=='standalone' else [])
+    deps = subprocess.check_output(['go','list','-deps','-test','-f',fmt,*packages], cwd=REPO, text=True)
     (root/'dependencies.txt').write_text(deps)
     goroot = Path(subprocess.check_output(['go','env','GOROOT'],text=True).strip())
     modules = Path(subprocess.check_output(['go','env','GOMODCACHE'],text=True).strip())
@@ -91,7 +95,7 @@ def main():
                    WF_PROJECTION_POSTGRES_FAULT_ROOT=str(root/'originals'),WF_TEST_POSTGRES_DSN=dsn)
         binary = root/'integration.test'
         build = ['go','test','-p=1','-buildvcs=true','-c','-o',str(binary),'./integration']
-        command = [str(binary),'-test.run=^'+TEST+'$','-test.count=1','-test.v','-test.timeout=22m']
+        command = [str(binary),'-test.run=^'+test+'$','-test.count=1','-test.v','-test.timeout=22m']
         save('commands.json',dict(build=build,test=command,working_directory=str(REPO),
                                  environment={k:env[k] for k in ('GOMAXPROCS','GOMEMLIMIT','GOWORK','GOFLAGS','WF_PROJECTION_POSTGRES_FAULT_ROOT','WF_TEST_POSTGRES_DSN')}))
         with (root/'build.log').open('w') as log:

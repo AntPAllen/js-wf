@@ -6,4 +6,4 @@ The setup overlay adds eight lock/unlock pairs around 17 peer additions in two t
 
 This qualifies this complete derived comparison, not the earlier unmodified failed suites, production dependency adoption, workflow fault matrices, Tier1, million-timer drain or 24-hour soak. Historical snapshot-failure holders and interrupted-run termination cause remain unconfirmed. The default dependency is official NATS v2.15.0.
 
-Full archive: 89,364,246 bytes / 5,338 members, SHA256 `3854bc4dcb0b0a64545355d000e561dfb60cabc3fd241e8c7b841f729601047c`. Source and execution ledgers, raw logs and independent review are retained here; the complete archive is prepared for content-addressed S3 retention.
+Full archive: 89,364,246 bytes / 5,338 members, SHA256 `3854bc4dcb0b0a64545355d000e561dfb60cabc3fd241e8c7b841f729601047c`. Source and execution ledgers, raw logs and independent review are retained here; the complete archive is retained in content-addressed S3 storage with a fresh complete byte readback; see [receipt](s3-readback.json).

@@ -38,6 +38,10 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Packaged PostgreSQL domain projection recovery prepared — 2026-10-07
+
+The new explicit standalone profile builds clean source-bound `js-wf/cmd/wf`, observes actual child executable/argv/birth/environment and its SQL application-name writer lock, reaps initialSIGKILL, binds partial SQL termination to the admitted catchup child and requires exit1, then joins replacementSIGTERM with exit0. The shared full50000 fixture retains all acknowledged Starts/results, stoppedlag100000, physical queue drain/six worker joins, library journal-leader restart/all fourR3 sources/threeWFVIEW peers, lag0 and every exposed SQL row/indexed column across full rebuild. The default SDK-helper profile and its checks remain intact. Runner also captures actual command package dependencies. Parent SDK request tracing is explicitly not a child wire-prefix trace. Compilation and historical verifier controls pass; actual standalone50000 qualification is pending. Original20m/22m/nonrace2CPU/2GiB unchanged.
+
 ## Full synchronized Raft comparison accepted — 2026-10-07
 
 Both actual race binaries pass all170 original cases atc048bcc with compiled parent9af9a65, count1/20m/2CPU/2GiB. Independent review verifies exact source and dependency bytes, complete unchanged original module, live SDK birth/argv/executable/environment, all170 raw outcomes, closure and full5338-member archive. Setup corrections only: eight peer lock pairs/17additions and complete snapshot permit reservation in three tests, no diagnostic injection, all assertions/cases/sleeps/deadlines unchanged. Durable service reaches terminal exit0 with Restart=no. Earlier failed and interrupted comparisons remain preserved. Default official NATS2.15.0 is unchanged; dependency delivery and broader qualification remain open. [Complete comparison](scale/lease-partition-component-2026-10-06/synchronized-safety170/).

@@ -109,7 +109,21 @@ func TestPostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStrea
 	runProjectionRecoversFiftyThousandInvocations(t, true, "WFVIEW")
 }
 
+func TestStandalonePostgresProjectionCrashAndSessionLossFiftyThousandInvocationsInJetStreamDomain(t *testing.T) {
+	if os.Getenv("WF_PROJECTION_POSTGRES_FAULT_ROOT") == "" || os.Getenv("WF_TEST_POSTGRES_DSN") == "" {
+		t.Skip("opt-in retained full packaged PostgreSQL domain projection fault proof")
+	}
+	if os.Getenv("WF_PROJECTION_COUNT") != "" {
+		t.Fatal("full standalone proof requires default50000 count")
+	}
+	runProjectionRecovery(t, true, true, "WFVIEW")
+}
+
 func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault bool, domains ...string) {
+	runProjectionRecovery(t, postgresFault, false, domains...)
+}
+
+func runProjectionRecovery(t *testing.T, postgresFault, standalone bool, domains ...string) {
 	t.Helper()
 	count := 50000
 	if value := os.Getenv("WF_PROJECTION_COUNT"); value != "" {
@@ -202,54 +216,71 @@ func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault b
 		options = append(options, visibility.WithPostgres(&visibility.PostgresStore{DB: db}))
 	}
 	const typ = "view-scale"
-	readyFile := filepath.Join(t.TempDir(), "projection-ready")
-	if postgresFault {
-		readyFile = filepath.Join(root, "projection-ready")
-	}
-	process := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestProjectionProcessHelper$")
-	process.Env = append(os.Environ(), "WF_PROJECTION_HELPER=1", "WF_PROJECTION_DOMAIN="+domain, "WF_PROJECTION_URL="+cluster.Servers[0].ClientURL(), "WF_PROJECTION_READY_FILE="+readyFile)
-	backend := "kv"
-	if postgresFault {
-		backend = "postgres"
-	}
-	process.Env = append(process.Env, "WF_PROJECTION_BACKEND="+backend)
-	var processOutput bytes.Buffer
-	process.Stdout, process.Stderr = &processOutput, &processOutput
-	if err := process.Start(); err != nil {
-		t.Fatal(err)
-	}
-	processReaped := false
-	defer func() {
-		if !processReaped {
-			_ = process.Process.Kill()
-			_ = process.Wait()
+	var standaloneBinary string
+	var standaloneRecords []map[string]any
+	if standalone {
+		proof["projector_profile"] = "standalone"
+		standaloneBinary = buildStandaloneProjection(t, ctx, root, proof)
+		initial := startStandaloneProjection(t, ctx, db, standaloneBinary, root, "initial", cluster.Servers[0].ClientURL(), domain)
+		var rows int
+		if err := db.QueryRowContext(ctx, `SELECT count(*) FROM wf_visibility`).Scan(&rows); err != nil || rows != 0 {
+			t.Fatalf("initial rows=%d err=%v", rows, err)
 		}
-	}()
-	readyDeadline := time.Now().Add(10 * time.Second)
-	for time.Now().Before(readyDeadline) && ctx.Err() == nil {
-		if _, err := os.Stat(readyFile); err == nil {
-			break
-		}
-		time.Sleep(20 * time.Millisecond)
-	}
-	if _, err := os.Stat(readyFile); err != nil {
-		t.Fatalf("projection process did not become ready: %v; output=%s", err, processOutput.String())
-	}
-	if postgresFault {
-		captureProjectionProcess(t, process, root, proof)
-	}
-	if err := process.Process.Kill(); err != nil {
-		t.Fatal(err)
-	}
-	if err := process.Wait(); err == nil {
-		t.Fatal("projection process exited without SIGKILL")
-	}
-	processReaped = true
-	if postgresFault {
-		assertProjectionSIGKILL(t, process, proof)
+		proof["projection_process_observed_before_kill"] = initial.record["admitted_at"]
+		standaloneRecords = append(standaloneRecords, initial.kill(t))
+		proof["standalone_projectors"] = standaloneRecords
+		proof["projection_process_reaped_sigkill"] = true
 		proof["projection_process_stopped"] = time.Now().UTC()
-		if err := os.WriteFile(filepath.Join(root, "killed-projection.log"), processOutput.Bytes(), 0600); err != nil {
+	} else {
+		readyFile := filepath.Join(t.TempDir(), "projection-ready")
+		if postgresFault {
+			readyFile = filepath.Join(root, "projection-ready")
+		}
+		process := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestProjectionProcessHelper$")
+		process.Env = append(os.Environ(), "WF_PROJECTION_HELPER=1", "WF_PROJECTION_DOMAIN="+domain, "WF_PROJECTION_URL="+cluster.Servers[0].ClientURL(), "WF_PROJECTION_READY_FILE="+readyFile)
+		backend := "kv"
+		if postgresFault {
+			backend = "postgres"
+		}
+		process.Env = append(process.Env, "WF_PROJECTION_BACKEND="+backend)
+		var processOutput bytes.Buffer
+		process.Stdout, process.Stderr = &processOutput, &processOutput
+		if err := process.Start(); err != nil {
 			t.Fatal(err)
+		}
+		processReaped := false
+		defer func() {
+			if !processReaped {
+				_ = process.Process.Kill()
+				_ = process.Wait()
+			}
+		}()
+		readyDeadline := time.Now().Add(10 * time.Second)
+		for time.Now().Before(readyDeadline) && ctx.Err() == nil {
+			if _, err := os.Stat(readyFile); err == nil {
+				break
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+		if _, err := os.Stat(readyFile); err != nil {
+			t.Fatalf("projection process did not become ready: %v; output=%s", err, processOutput.String())
+		}
+		if postgresFault {
+			captureProjectionProcess(t, process, root, proof)
+		}
+		if err := process.Process.Kill(); err != nil {
+			t.Fatal(err)
+		}
+		if err := process.Wait(); err == nil {
+			t.Fatal("projection process exited without SIGKILL")
+		}
+		processReaped = true
+		if postgresFault {
+			assertProjectionSIGKILL(t, process, proof)
+			proof["projection_process_stopped"] = time.Now().UTC()
+			if err := os.WriteFile(filepath.Join(root, "killed-projection.log"), processOutput.Bytes(), 0600); err != nil {
+				t.Fatal(err)
+			}
 		}
 	}
 	projection, err := visibility.New(ctx, all[0], options...)
@@ -412,9 +443,26 @@ func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault b
 	projectionCtx, stopProjection := context.WithCancel(ctx)
 	defer stopProjection()
 	projectionDone := make(chan error, 1)
-	go func() { projectionDone <- restarted.Run(projectionCtx) }()
+	var standaloneWriter *standaloneProjection
+	if standalone {
+		standaloneWriter = startStandaloneProjection(t, projectionCtx, db, standaloneBinary, root, "catchup", cluster.Servers[0].ClientURL(), domain)
+		projectionDone = standaloneWriter.done
+	} else {
+		go func() { projectionDone <- restarted.Run(projectionCtx) }()
+	}
 	if postgresFault {
 		applyPostgresProjectionCatchupFault(t, ctx, db, cluster, all, journalStream, projectionDone, proof, jsOptions...)
+		if standalone {
+			if proof["terminated_writer_backend_pid"] != standaloneWriter.record["writer_backend_pid"] {
+				t.Fatal("fault did not terminate admitted CLI writer")
+			}
+			record := standaloneWriter.recordExit(t)
+			if record["exit_code"] != 1 {
+				t.Fatalf("faulted CLI exit=%v want1", record["exit_code"])
+			}
+			standaloneRecords = append(standaloneRecords, record)
+			proof["standalone_projectors"] = standaloneRecords
+		}
 		stopProjection()
 		projectionJS = tracedAuditJS{JetStream: all[2], trace: dependencyTrace}
 		restarted, err = visibility.New(ctx, projectionJS, options...)
@@ -424,7 +472,12 @@ func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault b
 		projectionCtx, stopProjection = context.WithCancel(ctx)
 		defer stopProjection()
 		projectionDone = make(chan error, 1)
-		go func() { projectionDone <- restarted.Run(projectionCtx) }()
+		if standalone {
+			standaloneWriter = startStandaloneProjection(t, projectionCtx, db, standaloneBinary, root, "replacement", cluster.Servers[0].ClientURL(), domain)
+			projectionDone = standaloneWriter.done
+		} else {
+			go func() { projectionDone <- restarted.Run(projectionCtx) }()
+		}
 	}
 	for ctx.Err() == nil {
 		select {
@@ -443,9 +496,17 @@ func runProjectionRecoversFiftyThousandInvocations(t *testing.T, postgresFault b
 		<-projectionDone
 		t.Fatalf("projection lag did not drain: %v", ctx.Err())
 	}
+	if standalone {
+		standaloneWriter.stop(t)
+	}
 	stopProjection()
 	if err := <-projectionDone; err != nil && !errors.Is(err, context.Canceled) {
 		t.Fatal(err)
+	}
+	if standalone {
+		standaloneRecords = append(standaloneRecords, standaloneWriter.recordExit(t))
+		proof["standalone_projectors"] = standaloneRecords
+		proof["standalone_replacement_clean_sigterm"] = true
 	}
 	t.Logf("projection lag drained in %s", time.Since(started))
 	if postgresFault {
