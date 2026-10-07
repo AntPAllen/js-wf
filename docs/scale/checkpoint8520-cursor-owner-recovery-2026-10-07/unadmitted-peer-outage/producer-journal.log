@@ -1,0 +1,12 @@
+Oct 07 08:37:42 jetstream-wf systemd[1]: Started js-wf-checkpoint8520-watch-peer-outage-20261007.service - /usr/bin/python3 /home/exedev/js-wf/scripts/run-bulk-soak-copied-checkpoint.py --root /tmp/js-wf-checkpoint8520-watch-peer-outage-20261007 --archive /tmp/js-wf-checkpoint8520-original-download-20261007.tar.gz --parallel-decode --cursor-owner-restart --state-watch-peer-outage.
+Oct 07 08:39:22 jetstream-wf python3[3660511]: Traceback (most recent call last):
+Oct 07 08:39:22 jetstream-wf python3[3660511]:   File "/home/exedev/js-wf/scripts/run-bulk-soak-copied-checkpoint.py", line 135, in <module>
+Oct 07 08:39:22 jetstream-wf python3[3660511]:     if __name__=='__main__':main()
+Oct 07 08:39:22 jetstream-wf python3[3660511]:                             ^^^^^^
+Oct 07 08:39:22 jetstream-wf python3[3660511]:   File "/home/exedev/js-wf/scripts/run-bulk-soak-copied-checkpoint.py", line 106, in main
+Oct 07 08:39:22 jetstream-wf python3[3660511]:     actual=dict(pid=child.pid,stat=(proc/'stat').read_text(),args=[os.fsdecode(x) for x in (proc/'cmdline').read_bytes().split(b'\0') if x],exe=str((proc/'exe').resolve()),exe_sha256=shared.sha(proc/'exe'),working_directory=str((proc/'cwd').resolve()),environment={k:os.fsdecode(actual_env[k.encode()]) for k in profile})
+Oct 07 08:39:22 jetstream-wf python3[3660511]:                                                                                                                                                                                                                                                                                        ~~~~~~~~~~^^^^^^^^^^^^
+Oct 07 08:39:22 jetstream-wf python3[3660511]: KeyError: b'GOMAXPROCS'
+Oct 07 08:39:23 jetstream-wf systemd[1]: js-wf-checkpoint8520-watch-peer-outage-20261007.service: Main process exited, code=exited, status=1/FAILURE
+Oct 07 08:39:23 jetstream-wf systemd[1]: js-wf-checkpoint8520-watch-peer-outage-20261007.service: Failed with result 'exit-code'.
+Oct 07 08:39:23 jetstream-wf systemd[1]: js-wf-checkpoint8520-watch-peer-outage-20261007.service: Consumed 1min 8.648s CPU time, 9.3G memory peak, 0B memory swap peak.

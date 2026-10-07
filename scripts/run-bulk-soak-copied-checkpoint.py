@@ -13,6 +13,7 @@ import sys
 import time
 
 import fixture_archive
+import live_process_admission
 
 REPO=Path(__file__).resolve().parents[1]
 DONOR=Path('/tmp/js-wf-bulk-journal-24h-joined-20261006')
@@ -102,8 +103,7 @@ def main():
     actual_servers=[];seen=set();(root/'actual-containers').mkdir();started=time.monotonic()
     with (root/'native.log').open('wb') as log:
         child=subprocess.Popen(command,cwd=REPO,env=env,stdout=log,stderr=subprocess.STDOUT)
-        proc=Path('/proc',str(child.pid));actual_env=dict(x.split(b'=',1) for x in (proc/'environ').read_bytes().split(b'\0') if b'=' in x)
-        actual=dict(pid=child.pid,stat=(proc/'stat').read_text(),args=[os.fsdecode(x) for x in (proc/'cmdline').read_bytes().split(b'\0') if x],exe=str((proc/'exe').resolve()),exe_sha256=shared.sha(proc/'exe'),working_directory=str((proc/'cwd').resolve()),environment={k:os.fsdecode(actual_env[k.encode()]) for k in profile})
+        actual=live_process_admission.admit(child,command,profile,REPO,binary,shared.sha(binary))
         assert actual['args']==command and actual['environment']==profile and actual['exe_sha256']==shared.sha(binary)
         save('actual-sdk.json',actual);save('execution.json',dict(source=revision,status='running',started_utc=datetime.now(timezone.utc).isoformat()))
         print('ACTUAL_COPIED_CHECKPOINT_SDK',child.pid,revision,flush=True)
