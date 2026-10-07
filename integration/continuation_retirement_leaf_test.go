@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -39,14 +40,28 @@ func TestContinuationRetirementReuseThroughLeafSIGKILLAndLeaseExpiryWithHubResta
 }
 
 func TestContinuationRetirementReuseThroughLeafSIGKILLLeaseExpiryAndWeakFrameWithHubRestart(t *testing.T) {
-	runContinuationRetirementLeaf(t, true, true, true)
+	runContinuationRetirementLeaf(t, true, true, leafRetirementControls{weakFrame: true})
 }
 
-func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, forcedWeak ...bool) {
-	weakFrame := len(forcedWeak) == 1 && forcedWeak[0]
-	if len(forcedWeak) > 1 || (weakFrame && (!processLeaf || !expireLease)) {
-		t.Fatal("invalid combined weak-frame profile")
+func TestContinuationRetirementReuseThroughLeafAndAllHubSIGKILLWithLeaseExpiryAndWeakFrame(t *testing.T) {
+	runContinuationRetirementLeaf(t, true, true, leafRetirementControls{weakFrame: true, processHubs: true})
+}
+
+type leafRetirementControls struct{ weakFrame, processHubs bool }
+
+func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, controls ...leafRetirementControls) {
+	var control leafRetirementControls
+	if len(controls) > 1 {
+		t.Fatal("at most one leaf retirement control")
 	}
+	if len(controls) == 1 {
+		control = controls[0]
+	}
+	weakFrame, processHubs := control.weakFrame, control.processHubs
+	if ((weakFrame || processHubs) && (!processLeaf || !expireLease)) || (processHubs && !weakFrame) {
+		t.Fatal("combined profile requires leaf process and lease expiry")
+	}
+
 	root := os.Getenv("WF_CONTINUATION_DOMAIN_ROOT")
 	if root == "" {
 		t.Skip("set WF_CONTINUATION_DOMAIN_ROOT to a fresh absolute directory")
@@ -58,15 +73,41 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 		t.Fatal(err)
 	}
 	const hubDomain, leafDomain = "WFRETIRE", "WFEDGE"
-	hub, err := testcluster.StartWithLeafDomain(filepath.Join(root, "hub"), 3, hubDomain)
-	if err != nil {
-		t.Fatal(err)
+	var hub *testcluster.Cluster
+	var hubProcess *testcluster.ProcessCluster
+	var remotes []*url.URL
+	var err error
+	if processHubs {
+		hubProcess, err = testcluster.StartLeafHubProcesses(filepath.Join(root, "hub-processes"), 3, hubDomain)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer hubProcess.Close()
+		remotes = hubProcess.LeafURLs()
+	} else {
+		hub, err = testcluster.StartWithLeafDomain(filepath.Join(root, "hub"), 3, hubDomain)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer hub.Close()
+		remotes = hub.LeafURLs()
 	}
-	defer hub.Close()
+	hubClients := func() []*nats.Conn {
+		if processHubs {
+			return hubProcess.Clients
+		}
+		return hub.Clients
+	}
+	hubIdentity := func(i int) (string, string) {
+		if processHubs {
+			return hubProcess.Clients[i].ConnectedServerName(), hubProcess.Clients[i].ConnectedServerId()
+		}
+		return hub.Servers[i].Name(), hub.Servers[i].ID()
+	}
 	var leaf *server.Server
 	var leafProcess *testcluster.ProcessCluster
 	if processLeaf {
-		leafProcess, err = testcluster.StartLeafProcess(filepath.Join(root, "leaf-process"), leafDomain, hub.LeafURLs())
+		leafProcess, err = testcluster.StartLeafProcess(filepath.Join(root, "leaf-process"), leafDomain, remotes)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -74,7 +115,7 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 	} else {
 		leaf, err = server.NewServer(&server.Options{Host: "127.0.0.1", Port: -1, ServerName: "wf-edge", NoLog: true, NoSigs: true,
 			JetStream: true, JetStreamDomain: leafDomain, StoreDir: filepath.Join(root, "leaf"),
-			LeafNode: server.LeafNodeOpts{ReconnectInterval: 25 * time.Millisecond, Remotes: []*server.RemoteLeafOpts{{URLs: hub.LeafURLs(), NoRandomize: true}}}})
+			LeafNode: server.LeafNodeOpts{ReconnectInterval: 25 * time.Millisecond, Remotes: []*server.RemoteLeafOpts{{URLs: remotes, NoRandomize: true}}}})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -139,20 +180,67 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 	// Require an elected hub metadata leader with fresh stats for all three peers.
 	var metadataLeader string
 	var metadataPeers []string
+	var metadataDiagnostics []server.JSInfo
 	for {
-		current := true
-		for _, s := range hub.Servers {
-			current = current && s.JetStreamIsCurrent()
-		}
-		for _, s := range hub.Servers {
-			if !s.JetStreamIsLeader() {
-				continue
+		if processHubs {
+			metadataDiagnostics = nil
+			// The documented /jsz metadata leader must see all three current peers.
+			// Read every node to require agreement before any R3 workflow placement.
+			leader := ""
+			current := true
+			var peers []string
+			for i := 0; i < 3; i++ {
+				raw, e := hubProcess.Diagnostic(ready, i, "jetstream")
+				if e != nil {
+					current = false
+					break
+				}
+				var state server.JSInfo
+				if e = json.Unmarshal(raw, &state); e != nil {
+					t.Fatal(e)
+				}
+				name, id := hubIdentity(i)
+				metadataDiagnostics = append(metadataDiagnostics, state)
+				if state.ID != id || state.Config.Domain != hubDomain || state.Disabled || state.Meta == nil || state.Meta.Size != 3 || state.Meta.Rescue || state.Meta.Leader == "" {
+					current = false
+					break
+				}
+				if leader == "" {
+					leader = state.Meta.Leader
+				} else if leader != state.Meta.Leader {
+					current = false
+					break
+				}
+				if name == state.Meta.Leader {
+					peers = []string{name}
+					for _, replica := range state.Meta.Replicas {
+						if !replica.Current || replica.Offline || replica.Lag != 0 {
+							current = false
+						}
+						peers = append(peers, replica.Name)
+					}
+				}
 			}
-			peers := s.JetStreamClusterPeers()
 			sort.Strings(peers)
-			if current && len(peers) == 3 && peers[0] == "wf-test-0" && peers[1] == "wf-test-1" && peers[2] == "wf-test-2" {
-				metadataLeader = s.Name()
+			if current && len(peers) == 3 && peers[0] == "wf-process-0" && peers[1] == "wf-process-1" && peers[2] == "wf-process-2" {
+				metadataLeader = leader
 				metadataPeers = peers
+			}
+		} else {
+			current := true
+			for _, server := range hub.Servers {
+				current = current && server.JetStreamIsCurrent()
+			}
+			for _, server := range hub.Servers {
+				if !server.JetStreamIsLeader() {
+					continue
+				}
+				peers := server.JetStreamClusterPeers()
+				sort.Strings(peers)
+				if current && len(peers) == 3 && peers[0] == "wf-test-0" && peers[1] == "wf-test-1" && peers[2] == "wf-test-2" {
+					metadataLeader = server.Name()
+					metadataPeers = peers
+				}
 			}
 		}
 		if metadataLeader != "" {
@@ -163,7 +251,7 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 		}
 		time.Sleep(25 * time.Millisecond)
 	}
-	metadata, err := json.MarshalIndent(map[string]any{"leader": metadataLeader, "peers": metadataPeers, "all_hubs_current": true, "observed_at": time.Now().UTC()}, "", "  ")
+	metadata, err := json.MarshalIndent(map[string]any{"leader": metadataLeader, "peers": metadataPeers, "all_hubs_current": true, "process_metadata": metadataDiagnostics, "observed_at": time.Now().UTC()}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -201,6 +289,11 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 		Domain string `json:"domain"`
 	}
 	type evidence struct {
+		HubPIDBefore []int    `json:"hub_pids_before,omitempty"`
+		HubPIDAfter  []int    `json:"hub_pids_after,omitempty"`
+		HubSignals   []string `json:"hub_signals,omitempty"`
+		HubExits     []bool   `json:"hub_exit_observed,omitempty"`
+
 		FreshGeneration uint64 `json:"fresh_generation,omitempty"`
 		WeakObject      string `json:"weak_object,omitempty"`
 		WeakGeneration  uint64 `json:"weak_generation,omitempty"`
@@ -265,6 +358,9 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 	if weakFrame {
 		proof.FaultProfile = "leaf-sigkill-lease-expiry-weak-frame-hub-restart"
 	}
+	if processHubs {
+		proof.FaultProfile = "leaf-and-all-hub-sigkill-lease-expiry-weak-frame"
+	}
 	save := func() {
 		mu.Lock()
 		proof.Subjects = make(map[string]int, len(subjects))
@@ -282,8 +378,9 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 		}
 	}
 	defer save()
-	for i, s := range hub.Servers {
-		js, e := jetstream.NewWithDomain(hub.Clients[i], hubDomain)
+	for i := 0; i < 3; i++ {
+		name, id := hubIdentity(i)
+		js, e := jetstream.NewWithDomain(hubClients()[i], hubDomain)
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -291,7 +388,7 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 		if e != nil || info.Domain != hubDomain {
 			t.Fatalf("hub%d domain=%+v err=%v", i, info, e)
 		}
-		proof.Before = append(proof.Before, peer{s.Name(), s.ID(), info.Domain})
+		proof.Before = append(proof.Before, peer{name, id, info.Domain})
 	}
 	onDrop := func(ctx context.Context) error {
 		proof.CutStart = time.Now().UTC()
@@ -327,12 +424,26 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 			proof.PriorEpoch = held.Epoch
 			proof.LeaseRevision = entry.Revision()
 		}
-		for i := range hub.Servers {
-			hub.KillNode(i)
-			if hub.Servers[i].Running() {
-				return fmt.Errorf("hub%d not stopped", i)
+		for i := 0; i < 3; i++ {
+			if processHubs {
+				old := hubProcess.Commands[i]
+				proof.HubPIDBefore = append(proof.HubPIDBefore, old.Process.Pid)
+				if e := hubProcess.KillNode(i); e != nil {
+					return e
+				}
+				status, ok := old.ProcessState.Sys().(syscall.WaitStatus)
+				if !ok || !status.Signaled() || status.Signal() != syscall.SIGKILL {
+					return fmt.Errorf("hub%d did not exit with SIGKILL", i)
+				}
+				proof.HubSignals = append(proof.HubSignals, "killed")
+				proof.HubExits = append(proof.HubExits, true)
+			} else {
+				hub.KillNode(i)
+				if hub.Servers[i].Running() {
+					return fmt.Errorf("hub%d not stopped", i)
+				}
 			}
-			proof.Stopped = append(proof.Stopped, hub.Servers[i].ID())
+			proof.Stopped = append(proof.Stopped, proof.Before[i].ID)
 		}
 		if processLeaf {
 			old := leafProcess.Commands[0]
@@ -378,8 +489,17 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 			}
 			t.Logf("leaf lease outage: held=%s ttl=%s prior_epoch=%d", proof.OutageEnd.Sub(proof.OutageStart), provision.LeaseTTL, proof.PriorEpoch)
 		}
-		for i := range hub.Servers {
-			if e := hub.RestartNode(i); e != nil {
+		for i := 0; i < 3; i++ {
+			if processHubs {
+				if e := hubProcess.RestartNode(i); e != nil {
+					return e
+				}
+				pid := hubProcess.Commands[i].Process.Pid
+				if pid == proof.HubPIDBefore[i] {
+					return fmt.Errorf("hub%d PID unchanged", i)
+				}
+				proof.HubPIDAfter = append(proof.HubPIDAfter, pid)
+			} else if e := hub.RestartNode(i); e != nil {
 				return e
 			}
 		}
@@ -419,8 +539,9 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 		if e := waitMatrixWorkflowReplicas(observe, all[0]); e != nil {
 			return e
 		}
-		for i, s := range hub.Servers {
-			js, e := jetstream.NewWithDomain(hub.Clients[i], hubDomain)
+		for i := 0; i < 3; i++ {
+			name, id := hubIdentity(i)
+			js, e := jetstream.NewWithDomain(hubClients()[i], hubDomain)
 			if e != nil {
 				return e
 			}
@@ -431,10 +552,10 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 			if info.Domain != hubDomain {
 				return fmt.Errorf("replacement hub wrong domain")
 			}
-			if s.ID() == proof.Before[i].ID {
+			if id == proof.Before[i].ID {
 				return fmt.Errorf("hub%d identity unchanged", i)
 			}
-			proof.After = append(proof.After, peer{s.Name(), s.ID(), info.Domain})
+			proof.After = append(proof.After, peer{name, id, info.Domain})
 		}
 		for _, nc := range connections {
 			if nc.ConnectedServerId() != leafID() {
@@ -445,6 +566,9 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf, expireLease bool, 
 		proof.CutEnd = time.Now().UTC()
 		if processLeaf {
 			t.Logf("leaf SIGKILL confirmed: old_pid=%d new_pid=%d old_id=%s new_id=%s client_disconnects=3", proof.LeafPIDBefore, proof.LeafPIDAfter, proof.LeafOriginalID, proof.LeafID)
+		}
+		if processHubs {
+			t.Logf("hub SIGKILL confirmed: old_pids=%v new_pids=%v killed=3 reaped=3", proof.HubPIDBefore, proof.HubPIDAfter)
 		}
 		t.Logf("leaf domain hub cut: disconnected=true reconnected=true hub_peers=3 leaf_id=%s elapsed=%s", leafID(), proof.CutEnd.Sub(proof.CutStart))
 		return nil

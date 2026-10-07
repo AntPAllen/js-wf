@@ -30,6 +30,7 @@ type ProcessCluster struct {
 	routes    []int
 	monitors  []int
 	profiles  []int
+	leafPorts []int
 	logs      []string
 	paused    []bool
 	slowDisk  []*exec.Cmd
@@ -76,6 +77,23 @@ func StartProcessesWithDomain(root string, count int, domain string) (*ProcessCl
 		return nil, fmt.Errorf("invalid process JetStream domain")
 	}
 	return startProcessesWithDomain(root, count, false, nil, false, domain)
+}
+
+// StartLeafHubProcesses starts domain hubs with fixed loopback leaf listeners.
+// Every restart retains the original listeners, routes, client ports and stores.
+func StartLeafHubProcesses(root string, count int, domain string) (*ProcessCluster, error) {
+	if domain == "" || strings.ContainsAny(domain, "\r\n") {
+		return nil, fmt.Errorf("invalid leaf hub domain")
+	}
+	return startProcessesWithDiagnosticsAndLeaves(root, count, false, nil, false, domain, false, true)
+}
+
+func (c *ProcessCluster) LeafURLs() []*url.URL {
+	urls := make([]*url.URL, len(c.leafPorts))
+	for i, port := range c.leafPorts {
+		urls[i] = &url.URL{Scheme: "nats", Host: fmt.Sprintf("127.0.0.1:%d", port)}
+	}
+	return urls
 }
 
 // StartLeafProcess starts a domain leaf connected to the supplied hub listeners.
@@ -174,6 +192,10 @@ func startProcessesWithDomain(root string, count int, partitionable bool, binari
 }
 
 func startProcessesWithDiagnostics(root string, count int, partitionable bool, binaries []string, profiling bool, domain string, debug bool, extraConfig ...string) (_ *ProcessCluster, err error) {
+	return startProcessesWithDiagnosticsAndLeaves(root, count, partitionable, binaries, profiling, domain, debug, false, extraConfig...)
+}
+
+func startProcessesWithDiagnosticsAndLeaves(root string, count int, partitionable bool, binaries []string, profiling bool, domain string, debug, leafListeners bool, extraConfig ...string) (_ *ProcessCluster, err error) {
 	if count < 1 || count > 3 {
 		return nil, fmt.Errorf("count must be 1..3")
 	}
@@ -186,6 +208,9 @@ func startProcessesWithDiagnostics(root string, count int, partitionable bool, b
 		return nil, fmt.Errorf("build nats-server: %w: %s", buildErr, output)
 	}
 	c := &ProcessCluster{root: root, ports: make([]int, count), routes: make([]int, count), monitors: make([]int, count), profiles: make([]int, count), paused: make([]bool, count), slowDisk: make([]*exec.Cmd, count)}
+	if leafListeners {
+		c.leafPorts = make([]int, count)
+	}
 	defer func() {
 		if err != nil {
 			c.Close()
@@ -206,6 +231,12 @@ func startProcessesWithDiagnostics(root string, count int, partitionable bool, b
 		return 0, fmt.Errorf("could not allocate distinct NATS process ports")
 	}
 	for i := 0; i < count; i++ {
+		if leafListeners {
+			c.leafPorts[i], err = uniquePort()
+			if err != nil {
+				return nil, err
+			}
+		}
 		c.ports[i], err = uniquePort()
 		if err != nil {
 			return nil, err
@@ -241,7 +272,11 @@ func startProcessesWithDiagnostics(root string, count int, partitionable bool, b
 		}
 		if domain != "" {
 			config := filepath.Join(root, fmt.Sprintf("node-%d-domain.conf", i))
-			if err := os.WriteFile(config, []byte("jetstream { domain: "+strconv.Quote(domain)+" }\n"+strings.Join(extraConfig, "")), 0600); err != nil {
+			contents := "jetstream { domain: " + strconv.Quote(domain) + " }\n" + strings.Join(extraConfig, "")
+			if leafListeners {
+				contents += fmt.Sprintf("leafnodes { listen: \"127.0.0.1:%d\" }\n", c.leafPorts[i])
+			}
+			if err := os.WriteFile(config, []byte(contents), 0600); err != nil {
 				return nil, err
 			}
 			args = append(args, "-c", config)

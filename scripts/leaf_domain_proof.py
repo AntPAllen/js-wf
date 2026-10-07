@@ -3,7 +3,7 @@ from datetime import datetime
 import re
 
 def validate(proof, expected_profile="hub-restart", native_log=None):
-    assert expected_profile in ('hub-restart','leaf-sigkill-hub-restart','leaf-sigkill-lease-expiry-hub-restart','leaf-sigkill-lease-expiry-weak-frame-hub-restart')
+    assert expected_profile in ('hub-restart','leaf-sigkill-hub-restart','leaf-sigkill-lease-expiry-hub-restart','leaf-sigkill-lease-expiry-weak-frame-hub-restart','leaf-and-all-hub-sigkill-lease-expiry-weak-frame')
     assert proof.get('fault_profile','hub-restart') == expected_profile
     process_leaf=expected_profile!='hub-restart'
     assert proof['scenario_passed'] is True
@@ -13,7 +13,8 @@ def validate(proof, expected_profile="hub-restart", native_log=None):
     assert len(proof['runtime_server_ids'])==3 and set(proof['runtime_server_ids'])=={proof['leaf_id']}
     before,after=proof['before'],proof['after']
     assert len(before)==len(after)==3
-    names={f'wf-test-{i}' for i in range(3)}
+    process_hubs=expected_profile=='leaf-and-all-hub-sigkill-lease-expiry-weak-frame'
+    names={f"wf-{'process' if process_hubs else 'test'}-{i}" for i in range(3)}
     assert {x['name'] for x in before}=={x['name'] for x in after}==names
     assert all(x['domain']=='WFRETIRE' for x in before+after)
     old,new={x['id'] for x in before},{x['id'] for x in after}
@@ -26,6 +27,17 @@ def validate(proof, expected_profile="hub-restart", native_log=None):
         assert proof['leaf_pid_before']>0 and proof['leaf_pid_after']>0 and proof['leaf_pid_before']!=proof['leaf_pid_after']
         assert proof['client_disconnects']==[True,True,True]
         assert proof['leaf_original_id'] and proof['leaf_original_id'] not in old|new|{proof['leaf_id']}
+    if process_hubs:
+        pids=proof['hub_pids_before']+proof['hub_pids_after']
+        assert len(proof['hub_pids_before'])==len(proof['hub_pids_after'])==3
+        assert all(type(pid) is int and pid>0 for pid in pids)
+        assert len(set(pids+[proof['leaf_pid_before'],proof['leaf_pid_after']]))==8
+        assert proof['hub_signals']==['killed']*3 and proof['hub_exit_observed']==[True]*3
+        assert isinstance(native_log,str)
+        old_pids=' '.join(map(str,proof['hub_pids_before']))
+        new_pids=' '.join(map(str,proof['hub_pids_after']))
+        confirmations=re.findall(r'hub SIGKILL confirmed: old_pids=\[([0-9 ]+)\] new_pids=\[([0-9 ]+)\] killed=3 reaped=3',native_log)
+        assert confirmations==[(old_pids,new_pids)]
     for key in ('leaf_before','leaf_after'):
         row=proof[key]
         assert row['server_id']==(proof['leaf_original_id'] if process_leaf and key=='leaf_before' else proof['leaf_id']) and row['leafnodes']==len(row['leafs'])==1
@@ -58,4 +70,4 @@ def validate(proof, expected_profile="hub-restart", native_log=None):
     assert any('STREAM.MSG.GET.KV_WF_STATE' in name for name in api)
     return dict(remote_domain='WFRETIRE',local_domain='WFEDGE',hub_originals=3,hub_replacements=3,
                 fault_profile=expected_profile,weak_frame=weak,lease_expiry=expiry,leaf_process_sigkill=process_leaf,leaf_disconnect_and_reconnect=True,whole_cut_seconds=(end-start).total_seconds(),
-                api_subjects=len(api),scope='Single leaf-connected strict retirement/reuse and graceful all-hub restart, plus actual leaf SIGKILL only when explicitly selected; lease expiry only when explicitly selected; no all-hub SIGKILL, daemon-child wire or broad leaf matrix claim.')
+                api_subjects=len(api),hub_process_sigkill=process_hubs,scope=('Single leaf-connected strict retirement/reuse with actual all-hub and leaf SIGKILL, production lease expiry and controlled weak frame; no daemon-child wire or broad matrix claim.' if process_hubs else 'Single leaf-connected strict retirement/reuse and graceful all-hub restart, plus actual leaf SIGKILL only when explicitly selected; lease expiry only when explicitly selected; no all-hub SIGKILL, daemon-child wire or broad leaf matrix claim.'))

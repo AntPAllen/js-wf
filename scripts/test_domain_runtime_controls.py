@@ -10,6 +10,12 @@ spec.loader.exec_module(controls)
 
 
 class DomainCoverageControls(unittest.TestCase):
+    def test_graceful_hub_weak_row_cannot_qualify_all_hub_sigkill(self):
+        log=(REPO/'docs/scale/leaf-domain-weak-frame-2026-10-07/native-race/native.log').read_text()
+        promoted=log.replace(controls.LEAF_WEAK,controls.ALL_HUB_KILL)
+        with self.assertRaisesRegex(ValueError,'all-hub SIGKILL'):
+            controls.verify_log('leaf-retirement-all-sigkill-expiry-weak',promoted)
+
     def test_actual_committed_case_requires_publication_before_kill_and_no_initial_reentry(self):
         log = (REPO/'docs/scale/domain-retirement-committed-manifest-2026-10-06/native-race/native.log').read_text()
         controls.verify_log('retirement-committed-weak-frame-expiry', log)
