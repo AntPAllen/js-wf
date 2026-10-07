@@ -1,0 +1,65 @@
+from storage_review_common import *
+spec=importlib.util.spec_from_file_location('s3',repo/'scripts/offload-proof-to-s3.py')
+s3=importlib.util.module_from_spec(spec);spec.loader.exec_module(s3)
+head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()
+assert head==subprocess.check_output(['git','ls-remote','origin','refs/heads/main'],cwd=repo,text=True).split()[0]
+def blob(path):
+    data = subprocess.check_output(['git','cat-file','blob',head+':'+str(path)],cwd=repo)
+    assert (repo/path).read_bytes() == data
+    return data
+def remote(url, expected):
+    with subprocess.Popen(['curl','--config','-','--aws-sigv4','aws:amz:us-east-1:s3',
+        '--silent','--show-error','--fail','--connect-timeout','30','--max-time','1800',url],
+        stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE) as p:
+        p.stdin.write(config);p.stdin.close()
+        try: result=fixture_archive.verify_hashed_stream(p.stdout,expected)
+        except BaseException: p.kill();p.wait();raise
+        error=p.stderr.read();assert p.wait()==0,error
+    return result
+config=s3.credentials()
+out=Path('/tmp/storage-operator-daemon-leaf-removal-20261007');out.mkdir(exist_ok=False)
+shutil.copyfile(__file__,out/'executed-removal.py');shutil.copyfile('/tmp/storage_review_common.py',out/'executed-common.py')
+report=dict(head=head,started_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),free_bytes_before=shutil.disk_usage('/tmp').free,removed=[],scope='Completed initial/paced failed and accepted observed packaged daemon leaf roots/archives only. Fresh remote members/current inventory/process/FD/Docker/mount/loop checks. Live24h and other fixtures retained; all original verdicts unchanged.')
+def save():
+ report['free_bytes_after']=shutil.disk_usage('/tmp').free
+ (out/'removal.json').write_text(json.dumps(report,indent=2)+'\n')
+base=Path('docs/scale/operator-daemon-leaf-2026-10-07')
+items=[('js-wf-operator-daemon-leaf-20261007','js-wf-operator-daemon-leaf-20261007.tar.gz','initial-readiness-failure'),('js-wf-operator-daemon-leaf-paced-20261007','js-wf-operator-daemon-leaf-paced-20261007.tar.gz','paced-readiness-failure'),('js-wf-operator-daemon-leaf-observed-20261007','js-wf-operator-daemon-leaf-observed-20261007.tar.gz','native-race')]
+worktrees=[Path(line.removeprefix('worktree ')) for line in subprocess.check_output(['git','worktree','list','--porcelain'],cwd=repo,text=True).splitlines() if line.startswith('worktree ')]
+save()
+for name,archive_name,canonical in items:
+ root=Path('/tmp')/name;archive=Path('/tmp')/archive_name;proof=base/canonical
+ assert not any(w.is_relative_to(root) for w in worktrees)
+ meta=json.loads(blob(proof/'archive-verification.json'));receipt=json.loads(blob(proof/'s3-readback.json'))
+ manifest_bytes=blob(proof/meta['inventory_file']);inventory=json.loads(manifest_bytes)
+ assert meta['schema']==fixture_archive.SCHEMA and meta['all_archive_members_read_back'] and meta['all_current_fixture_files_unchanged_after_capture']
+ assert hashlib.sha256(manifest_bytes).hexdigest()==meta['inventory_sha256']
+ expected=dict(bytes=meta['archive_bytes'],sha256=meta['archive_sha256'])
+ assert receipt['archive']['full_readback']==expected and receipt['canonical_metadata']==str(proof/'archive-verification.json')
+ expected_exit=0 if canonical=='native-race' else 1
+ assert json.loads((root/'execution.json').read_text())['exit_code']==expected_exit
+ if expected_exit==0:assert json.loads(blob(proof/'independent-review.json'))['accepted_packaged_daemon_leaf'] is True
+ else:
+  verdict=json.loads(blob(proof/'row-review.json'));assert verdict['qualification'] is None and verdict['rejection']
+ qualification='accepted packaged daemon leaf signal/fatal-source component; not SQL/natural faults/matrix/fullrelease' if expected_exit==0 else 'original native readiness failure preserved; no acceptance'
+ unit=subprocess.check_output(['systemctl','show',name+'.service','-p','LoadState','-p','MainPID','-p','SubState','-p','ExecMainStatus','-p','Restart','-p','ExecMainPID','-p','InvocationID'],text=True)
+ fields=dict(line.split('=',1) for line in unit.splitlines())
+ assert fields['LoadState']=='loaded' and fields['MainPID']=='0' and fields['SubState']==('exited' if expected_exit==0 else 'failed') and fields['ExecMainStatus']==str(expected_exit) and fields['Restart']=='no'
+ sdk=json.loads((root/'actual-sdk.json').read_text());assert sdk['stat'].split(') ',1)[1].split()[1]==fields['ExecMainPID']
+
+ before=closure(root);assert fixture_archive.inventory(root)==inventory['files']
+ print('VERIFY_REMOTE',name,flush=True)
+ declared,actual=remote(receipt['archive']['url'],expected);assert declared==inventory
+ assert fixture_archive.inventory(root)==inventory['files']
+ assert archive.is_file() and not archive.is_symlink() and archive.stat().st_nlink==1
+ with archive.open('rb') as f:assert s3.digest(f)==expected
+ after=closure(root);archive_closed=closure(archive)
+ allocated=sum(p.stat().st_blocks*512 for p in root.rglob('*'))+root.stat().st_blocks*512+archive.stat().st_blocks*512
+ record=dict(root=str(root),archive=str(archive),canonical_metadata=str(proof/'archive-verification.json'),receipt=str(proof/'s3-readback.json'),archive_url=receipt['archive']['url'],full_remote_archive_and_every_member_verified=actual,files=len(inventory['files']),local_complete_tree_matches_committed_inventory=True,closure_before=before,closure_immediately_before_removal=after,archive_closure=archive_closed,original_qualification=qualification,retained_terminal_unit=unit,removed_allocated_bytes=allocated)
+ report['pending_verified_removal']=record;save()
+ shutil.rmtree(root);assert not root.exists();archive.unlink()
+ report.pop('pending_verified_removal',None);report['removed'].append(record);save()
+ print('REMOVED',name,allocated,flush=True)
+report['removed_allocated_bytes']=sum(x['removed_allocated_bytes'] for x in report['removed'])
+report['finished_utc']=datetime.datetime.now(datetime.timezone.utc).isoformat();save()
+print('FINISHED',report['removed_allocated_bytes'],report['free_bytes_after'],flush=True)

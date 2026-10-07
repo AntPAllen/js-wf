@@ -9,3 +9,5 @@ Independent review binds2,150 exact selected-source inputs to the recorded Git r
 The first two running-project readiness timeouts retain their original failure verdicts and complete S3 archives in adjacent directories. The observed passing run does **not** establish their cause; polling50ms alone did not fix the second run. The diagnostic parent response recorder remains in the test. No production runtime change or deadline relaxation was made.
 
 This closes the recorded-source packaged daemon startup/running OS-signal/fatal-source boundary through a real leaf. SQL daemon lifecycle, natural leaf/route/server faults, broader matrices, online blobGC, originalmillion physical timer drain and fullrelease/actual24h remain open. The isolated original24h producer/observer/reviewer remains unchanged.
+
+The complete original fixture and archive are now in verified S3 storage and their local roots have been retired. [Removal ledger and fresh restoration](../reclaimed/README.md).
