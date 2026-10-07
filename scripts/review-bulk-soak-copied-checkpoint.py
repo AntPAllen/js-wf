@@ -4,11 +4,14 @@ import sys,json,hashlib,subprocess,io,re,importlib.util,shutil,argparse
 sys.dont_write_bytecode=True
 parser=argparse.ArgumentParser(description='Independent full copied checkpoint review; no original broker is opened.')
 parser.add_argument('--root',type=Path,required=True)
+parser.add_argument('--checkpoint',type=int,choices=(8520,4160),default=8520)
 parser.add_argument('--parallel-decode',action='store_true')
 parser.add_argument('--cursor-owner-restart',action='store_true')
 parser.add_argument('--state-watch-connection-loss',action='store_true')
 parser.add_argument('--state-watch-peer-outage',action='store_true')
 a=parser.parse_args()
+assert a.checkpoint!=4160 or a.cursor_owner_restart
+cutoff=238560 if a.checkpoint==8520 else 116480
 assert not a.state_watch_peer_outage or (a.cursor_owner_restart and not a.state_watch_connection_loss)
 assert not a.state_watch_connection_loss or a.cursor_owner_restart
 assert not a.cursor_owner_restart or a.parallel_decode
@@ -42,11 +45,21 @@ restore=read(root/'restore-verification.json')
 assert restore['all_bytes_modes_mtimes_verified'] and restore['destination']==str(root/'restored-original')
 assert restore['files']==len(original_inventory['files']) and restore['restored_bytes']==sum(x['bytes'] for x in original_inventory['files'].values())
 assert restore['archive']==dict(bytes=original_meta['archive_bytes'],sha256=original_meta['archive_sha256'])
-admission=read(root/'copied-store-admission.json');prefix=admission['stores_prefix'];assert prefix=='fixture/cluster/' and admission['cutoff']==238560
+admission=read(root/'copied-store-admission.json');prefix=admission['stores_prefix'];assert prefix=='fixture/cluster/' and admission['cutoff']==cutoff
+assert admission.get('checkpoint',8520)==a.checkpoint
+assert canonical==('docs/scale/bulk-journal-24h-2026-10-06/terminal' if a.checkpoint==8520 else 'docs/scale/parallel-recovery-journal-24h-2026-10-07/terminal-failure')
 expected_stores={n:row for n,row in original_inventory['files'].items() if any(n.startswith(prefix+f'node-{i}/') for i in range(5))}
 assert expected_stores==admission['files'] and len({n.split('/')[2] for n in expected_stores})==5
-assert original['original_execution']==read(donor/'execution.json') and original['original_execution']['status']=='failed' and original['original_execution']['test_exit_code']==1
-assert fixture_archive.inventory(donor)==original_inventory['files'] and read(root/'original-after-verification.json')['all_original_bytes_modes_mtimes_unchanged']
+assert original['original_execution']==json.loads(blob('execution.json'))
+assert original['original_execution']==read(root/'restored-original/execution.json')
+assert original['original_execution']['status']=='failed' and original['original_execution']['test_exit_code']==1
+assert original['original_execution']['source']==('757454ab9681f044af469a9462ecb7dfc63233ad' if a.checkpoint==8520 else 'bc9f92bdfd1f01ad78d4acd24e6576d46c82a078')
+if original.get('local_original_present',True):
+ assert original['original_execution']==read(donor/'execution.json')
+ assert fixture_archive.inventory(donor)==original_inventory['files']
+else:
+ assert not donor.exists() and original['visible_closure']['local_original_retired']
+assert read(root/'original-after-verification.json')['all_original_bytes_modes_mtimes_unchanged']
 old=[json.loads(x) for x in (root/'restored-original/watch-servers.jsonl').read_text().splitlines()]
 old_ids={x['inspect']['Id'] for x in old};identity=admission['identity']
 assert {x['inspect']['Args'][x['inspect']['Args'].index('-n')+1].rsplit('-n',1)[0] for x in old}=={identity}
@@ -63,7 +76,7 @@ for s in servers:
  assert int(s['stat'].split(') ',1)[1].split()[19])>0
 assert nodes==set(range(5))
 execution=read(root/'execution.json');sdk=read(root/'actual-sdk.json');binary=read(root/'binary.json');command=read(root/'commands.json')
-test='TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy' if a.cursor_owner_restart else 'TestRetainedAuditBulkSoakCheckpoint8520VerifiedCopy'
+test=f'TestRetainedAuditBulkSoakCheckpoint{a.checkpoint}CursorOwnerRestartVerifiedCopy' if a.cursor_owner_restart else 'TestRetainedAuditBulkSoakCheckpoint8520VerifiedCopy'
 binary_name='integrity.test' if a.cursor_owner_restart else 'integration.test'
 assert execution['source']==revision and execution['exit_code'] in (0,1) and execution['status']==('passed' if execution['exit_code']==0 else 'failed')
 assert sdk['args']==command['test']==[str(root/binary_name),'-test.run=^'+test+'$','-test.count=1','-test.v','-test.timeout=6m']
@@ -74,7 +87,7 @@ assert sdk['environment']==command['environment'] and {k:sdk['environment'][k] f
 assert sdk['environment']['WF_AUDIT_BULK_SOAK_STORES']==str(root/'restored-original/fixture/cluster') and sdk['environment']['WF_AUDIT_BULK_SOAK_IDENTITY']==identity
 assert sdk['environment']['WF_TIER3_SYNC_INTERVAL']=='2m' and sdk['environment']['WF_TIER3_EXPLICIT_ROUTE_SEEDS']=='1'
 results=list((root/'originals').rglob('copied-checkpoint-audit.json'));assert len(results)==1
-result=read(results[0]);assert result['cutoff']==238560 and not result['qualifies_24h']
+result=read(results[0]);assert result['cutoff']==cutoff and not result['qualifies_24h']
 assert result.get('parallel_decode',False)==a.parallel_decode
 assert sdk['environment'].get('WF_AUDIT_BULK_SOAK_PARALLEL_DECODE')==('1' if a.parallel_decode else None)
 assert sdk['environment'].get('WF_AUDIT_BULK_SOAK_CURSOR_OWNER_RESTART')==('1' if a.cursor_owner_restart else None)
@@ -91,20 +104,20 @@ for n in ['WF_INV','WF_JRN','KV_WF_STATE','WF_PURGE']:
 log=(root/'native.log').read_text();assert 'DATA RACE' not in log and '--- SKIP:' not in log
 passed=re.findall(r'^--- PASS: (\w+) \(',log,re.M);failed=re.findall(r'^--- FAIL: (\w+) \(',log,re.M)
 assert passed==([test] if execution['exit_code']==0 else []) and failed==([test] if execution['exit_code']==1 else [])
-assert 'full original checkpoint8520 copied audit cutoff=238560' in log
-qualified=(result['error']=='<nil>' and result['elapsed_ns']<20_000_000_000 and result['report']['Invocations']==result['report']['Journals']==result['report']['Terminal']==238560 and result['report']['Entries']==2630779)
+assert f'full original checkpoint{a.checkpoint} copied audit cutoff={cutoff}' in log
+qualified=(result['error']=='<nil>' and result['elapsed_ns']<20_000_000_000 and result['report']['Invocations']==result['report']['Journals']==result['report']['Terminal']==cutoff and (result['report']['Entries']==2630779 if a.checkpoint==8520 else result['report']['Entries']>0))
 fault_review=None
 if a.cursor_owner_restart and execution['exit_code'] != 0:
  qualified=False  # Preserve a native fault failure even if its base checker completed.
 if qualified and a.cursor_owner_restart:
  import copied_checkpoint_fault_proof
- fault_review=copied_checkpoint_fault_proof.validate(result,servers,identity)
+ fault_review=copied_checkpoint_fault_proof.validate(result,servers,identity,checkpoint=a.checkpoint)
 elif qualified:
  for n in ['WF_STATE.WatchAll','WF_STATE.WatchStop']:
   row=result['trace']['counts'][n];assert row['started']==row['completed']==1 and row['errors']==0
 assert (execution['exit_code']==0)==qualified
 spec=importlib.util.spec_from_file_location('shared',repo/'scripts/run-domain-runtime-controls.py');shared=importlib.util.module_from_spec(spec);spec.loader.exec_module(shared)
 closure=shared.closure(root);assert fixture_archive.inventory(root)==inventory['files']
-report=dict(state_watch_peer_outage=a.state_watch_peer_outage,state_watch_connection_loss=a.state_watch_connection_loss,parallel_decode=a.parallel_decode,cursor_owner_restart=a.cursor_owner_restart,fault_review=fault_review,source=revision,selected_git_inputs=len(selected),selected_external_inputs=len(external),restore=restore,exact_original_store_files=len(expected_stores),original_server_hash=admission['original_server_sha256'],actual_servers=len(servers),original_complete_files_unchanged=len(original_inventory['files']),execution=execution,result=result,qualified_quiescent_copied_capacity=qualified,qualifies_24h=False,closure=closure,archive=meta,scope='Entire original checkpoint8520 cohort on fresh verified complete restore: actual identical stock NATS2.15 server binaries/five R5 sources/profile4CPU/GOGC500/4GiB/original20s attempt. Explicit cursor-owner fault only when selected; no concurrent application workload, historical cause attribution, original24h acceptance or release adoption.')
+report=dict(state_watch_peer_outage=a.state_watch_peer_outage,state_watch_connection_loss=a.state_watch_connection_loss,parallel_decode=a.parallel_decode,cursor_owner_restart=a.cursor_owner_restart,fault_review=fault_review,source=revision,selected_git_inputs=len(selected),selected_external_inputs=len(external),restore=restore,exact_original_store_files=len(expected_stores),original_server_hash=admission['original_server_sha256'],actual_servers=len(servers),original_complete_files_unchanged=len(original_inventory['files']),execution=execution,result=result,qualified_quiescent_copied_capacity=qualified,qualifies_24h=False,closure=closure,archive=meta,checkpoint=a.checkpoint,scope=f'Entire original checkpoint{a.checkpoint} cohort on fresh verified complete restore: actual identical stock NATS2.15 server binaries/five R5 sources/profile4CPU/GOGC500/4GiB/original20s attempt. Explicit cursor-owner fault only when selected; no concurrent application workload, historical cause attribution, original24h acceptance or release adoption.')
 (proof/'independent-review.json').write_text(json.dumps(report,indent=2)+'\n');shutil.copyfile(__file__,proof/'executed-independent-review.py')
 print(json.dumps(dict(qualified_quiescent_copied_capacity=qualified,cursor_owner_restart=a.cursor_owner_restart,result=result['report'],elapsed_ns=result['elapsed_ns'],actual_servers=len(servers),full_archive_members=meta['members'],qualifies_24h=False)))

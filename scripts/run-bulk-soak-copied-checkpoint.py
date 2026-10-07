@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Diagnose the full failed checkpoint8520 on fresh verified stores, unchanged20s."""
+"""Diagnose a complete original failed checkpoint on fresh verified stores, unchanged20s."""
 import argparse
 from datetime import datetime, timezone
 import hashlib
@@ -24,6 +24,7 @@ TEST='TestRetainedAuditBulkSoakCheckpoint8520VerifiedCopy'
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,required=True)
+    parser.add_argument('--checkpoint',type=int,choices=(8520,4160),default=8520,help='Exact original failure profile; latest4160 requires the cursor-owner fault.')
     parser.add_argument('--cpu-profile',action='store_true',help='Opt-in full SDK checker CPU/memory diagnosis; original audit budget unchanged.')
     parser.add_argument('--parallel-decode',action='store_true',help='Explicit experimental bounded ordered decoding; original full cohort and audit budget unchanged.')
     parser.add_argument('--cursor-owner-restart',action='store_true',help='Cold full-cohort R1 cursor-owner SIGKILL/same-store restart, requiring --parallel-decode; no healthy warmup.')
@@ -31,11 +32,19 @@ def main():
     parser.add_argument('--state-watch-connection-loss',action='store_true',help='Controlled real SDK watch connection close before exposure; requires --cursor-owner-restart.')
     parser.add_argument('--state-watch-peer-outage',action='store_true',help='Direct watch peer SIGKILL with three-second offline interval; requires --cursor-owner-restart.')
     a=parser.parse_args();root=a.root.absolute()
+    global DONOR,CANONICAL
+    cutoff=238560; original_source='757454ab9681f044af469a9462ecb7dfc63233ad'
+    if a.checkpoint==4160:
+        assert a.cursor_owner_restart, 'checkpoint4160 requires the full fault diagnostic'
+        DONOR=Path('/tmp/js-wf-parallel-recovery-journal-24h-20261007')
+        CANONICAL='docs/scale/parallel-recovery-journal-24h-2026-10-07/terminal-failure'
+        cutoff=116480; original_source='bc9f92bdfd1f01ad78d4acd24e6576d46c82a078'
+
     assert not a.state_watch_peer_outage or (a.cursor_owner_restart and not a.state_watch_connection_loss)
     assert not a.state_watch_connection_loss or a.cursor_owner_restart
     assert not a.cursor_owner_restart or (a.parallel_decode and not a.cpu_profile),'cursor fault requires explicit parallel decode and no CPU instrumentation'
     package='./integrity' if a.cursor_owner_restart else './integration'
-    test='TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy' if a.cursor_owner_restart else TEST
+    test=f'TestRetainedAuditBulkSoakCheckpoint{a.checkpoint}CursorOwnerRestartVerifiedCopy' if a.cursor_owner_restart else TEST
     assert not root.exists() and not root.is_relative_to(REPO) and not root.is_relative_to(DONOR)
     assert shutil.disk_usage(root.parent).free>=20*(1<<30),'20GiB restore/collection reserve required'
     spec=importlib.util.spec_from_file_location('shared',REPO/'scripts/run-domain-runtime-controls.py')
@@ -49,18 +58,25 @@ def main():
     meta=committed('archive-verification.json');inventory=committed('fixture-inventory.json');receipt=committed('s3-readback.json')
     assert receipt['archive']['full_readback']==dict(bytes=meta['archive_bytes'],sha256=meta['archive_sha256'])
     assert hashlib.sha256((REPO/CANONICAL/'fixture-inventory.json').read_bytes()).hexdigest()==meta['inventory_sha256']
-    assert fixture_archive.inventory(DONOR)==inventory['files'],'original complete closed census changed'
-    original_closure=shared.closure(DONOR)
-    execution=json.loads((DONOR/'execution.json').read_text());assert execution['status']=='failed' and execution['test_exit_code']==1 and execution['source']=='757454ab9681f044af469a9462ecb7dfc63233ad'
+    donor_present=DONOR.exists()
+    if donor_present:
+        assert fixture_archive.inventory(DONOR)==inventory['files'],'original complete closed census changed'
+        original_closure=shared.closure(DONOR)
+    else:
+        original_closure=dict(local_original_retired=True,scope='Complete verified archive is the donor; no original local stores opened.')
+    execution=committed('execution.json')
+    assert execution['status']=='failed' and execution['test_exit_code']==1 and execution['source']==original_source
+    if donor_present: assert execution==json.loads((DONOR/'execution.json').read_text())
     root.mkdir();(root/'originals').mkdir()
     save=lambda name,value:(root/name).write_text(json.dumps(value,indent=2)+'\n')
     save('source-before.json',before)
-    save('donor-reference.json',dict(root=str(DONOR),canonical=CANONICAL,original_execution=execution,archive=meta,receipt=receipt,visible_closure=original_closure))
+    save('donor-reference.json',dict(root=str(DONOR),local_original_present=donor_present,checkpoint=a.checkpoint,canonical=CANONICAL,original_execution=execution,archive=meta,receipt=receipt,visible_closure=original_closure))
     for name in before['files']:
         p=root/'selected-source'/name;p.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(REPO/name,p)
     restored=root/'restored-original'
     report=fixture_archive.restore(a.archive,dict(bytes=meta['archive_bytes'],sha256=meta['archive_sha256']),inventory,restored)
     save('restore-verification.json',dict(destination=str(restored),**report))
+    assert json.loads((restored/'execution.json').read_text())==execution
     prefix='fixture/cluster/'
     stores={name:row for name,row in inventory['files'].items() if any(name.startswith(prefix+f'node-{n}/') for n in range(5))}
     assert stores and len({name.split('/')[2] for name in stores})==5
@@ -68,7 +84,7 @@ def main():
     identities={x['inspect']['Args'][x['inspect']['Args'].index('-n')+1].rsplit('-n',1)[0] for x in observations}
     assert len(identities)==1
     identity=identities.pop();original_server_hashes={x['sha256'] for x in observations};assert len(original_server_hashes)==1
-    save('copied-store-admission.json',dict(identity=identity,stores_prefix=prefix,files=stores,original_server_sha256=original_server_hashes.pop(),cutoff=238560,original_native_failure_unchanged=True))
+    save('copied-store-admission.json',dict(identity=identity,stores_prefix=prefix,files=stores,original_server_sha256=original_server_hashes.pop(),checkpoint=a.checkpoint,cutoff=cutoff,original_native_failure_unchanged=True))
     # Capture selected external compiler inputs for both the test SDK and Docker server.
     fmt='{{.Dir}}|{{join .GoFiles " "}}|{{join .CgoFiles " "}}|{{join .TestGoFiles " "}}|{{join .XTestGoFiles " "}}'
     deps=subprocess.check_output(['go','list','-deps','-test','-f',fmt,package,'github.com/nats-io/nats-server/v2'],cwd=REPO,text=True)
@@ -124,8 +140,8 @@ def main():
     save('execution.json',dict(source=revision,status='passed' if code==0 else 'failed',exit_code=code,elapsed_seconds=time.monotonic()-started,finished_utc=datetime.now(timezone.utc).isoformat()))
     after=shared.source_inventory(revision);save('source-after.json',after);assert before==after
     external_after={name:shared.sha(Path(name)) for name in inputs};save('external-source-after.json',external_after);assert inputs==external_after
-    assert fixture_archive.inventory(DONOR)==inventory['files']
-    save('original-after-verification.json',dict(all_original_bytes_modes_mtimes_unchanged=True,original_files=len(inventory['files']),visible_closure=shared.closure(DONOR)))
+    if donor_present: assert fixture_archive.inventory(DONOR)==inventory['files']
+    save('original-after-verification.json',dict(all_original_bytes_modes_mtimes_unchanged=True,local_original_present=donor_present,original_files=len(inventory['files']),visible_closure=shared.closure(DONOR) if donor_present else original_closure,scope='Verified complete archive preserved; only fresh restored stores were opened.'))
     save('closure.json',shared.closure(root));shutil.copyfile(__file__,root/'executed-producer.py')
     proof=fixture_archive.capture(root,root.with_suffix('.tar.gz'),root.with_name(root.name+'-proof'),compresslevel=1)
     print(json.dumps(dict(native_exit_code=code,proof=proof,qualification='Pending independent copied full-cohort review; original24h failure unchanged')),flush=True)

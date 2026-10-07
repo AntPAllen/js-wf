@@ -2,16 +2,23 @@
 from datetime import datetime
 
 
-def validate(result, servers, identity):
+def validate(result, servers, identity, *, checkpoint=8520):
+    assert type(checkpoint) is int and checkpoint in (8520,4160)
+    cutoff=238560 if checkpoint==8520 else 116480
     def stamp(value):
         return datetime.fromisoformat(value.replace('Z', '+00:00'))
 
     assert result['cursor_owner_restart'] and result['parallel_decode']
-    assert not result['qualifies_24h'] and result['cutoff'] == 238560
+    assert not result['qualifies_24h'] and result['cutoff'] == cutoff
     assert result['error'] == '<nil>' and 0 < result['audit_ns'] <= result['elapsed_ns'] < 20_000_000_000
-    assert result['report'] == dict(Invocations=238560, Journals=238560, Entries=2630779, Terminal=238560)
+    entries=result['report']['Entries']
+    assert type(entries) is int and entries>0
+    if checkpoint==8520: assert entries==2630779
+    assert result['report'] == dict(Invocations=cutoff, Journals=cutoff, Entries=entries, Terminal=cutoff)
     state = result['readiness']['WF_JRN']['state']
-    assert state['first_seq'] == 1 and state['last_seq'] == state['messages'] == result['journal_visits'] == 2632932
+    assert state['first_seq'] == 1 and state['last_seq'] == state['messages'] == result['journal_visits']
+    if checkpoint==8520: assert result['journal_visits']==2632932
+    assert type(result['journal_visits']) is int and result['journal_visits']>=entries>=cutoff
     assert not state.get('num_deleted', 0)
     assert result['cleanup'] == dict(WF_INV=0, WF_JRN=0)
     assert set(result['readiness_after']) == {'WF_INV', 'WF_JRN', 'KV_WF_STATE', 'WF_PURGE'}
@@ -91,7 +98,7 @@ def validate(result, servers, identity):
         else:
             assert stamp(connection['close_finished']) <= stamp(connection['exposed'])
             assert stamp(connection['close_finished']) <= stamp(kill['kill_started'])
-        assert 0 <= connection['buffered_before_exposure'] < 238560
+        assert 0 <= connection['buffered_before_exposure'] < cutoff
         assert connection['attempts'] == len(watches) and 2 <= len(watches) <= 3
         assert watches[0]['StopError'] in (('<nil>', 'nats: consumer not found', 'nats: connection closed', 'nats: invalid subscription') if peer_outage else ('nats: connection closed', 'nats: invalid subscription'))
         frames = connection['frames']
@@ -101,7 +108,7 @@ def validate(result, servers, identity):
         first_frame, final = returns[0], returns[-1]
         assert not first_frame['initial_complete'] and first_frame['error']
         assert 'closed before initial completion' in first_frame['error'] or 'made no progress' in first_frame['error']
-        assert first_frame['received'] < 238560
+        assert first_frame['received'] < cutoff
         if peer_outage:
             assert 'made no progress' in first_frame['error'] and first_frame['elapsed_ns'] >= 2_000_000_000
             decisions = [f for f in frames if f['event'] == 'watch_idle_timeout']

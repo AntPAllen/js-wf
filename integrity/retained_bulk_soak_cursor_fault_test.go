@@ -21,7 +21,19 @@ import (
 // original attempt budget. Only fresh, fully verified restored stores are used.
 // Quiescent recovery cannot qualify the original concurrent 24-hour run.
 func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *testing.T) {
-	const cutoff = 238560
+	retainedBulkSoakCursorOwnerRestart(t, 8520, 238560, 2630779)
+}
+
+// Checkpoint4160 preserves the latest failed full cohort. Its original guard
+// requires complete invocation/journal/terminal counts; no fixed entry count
+// was specified by the concurrent producer. Entries still undergo the same
+// complete journal validation, and the entire physical journal is visited.
+func TestRetainedAuditBulkSoakCheckpoint4160CursorOwnerRestartVerifiedCopy(t *testing.T) {
+	retainedBulkSoakCursorOwnerRestart(t, 4160, 116480, 0)
+}
+
+func retainedBulkSoakCursorOwnerRestart(t *testing.T, checkpoint, cutoff, expectedEntries int) {
+	t.Helper()
 	if os.Getenv("WF_AUDIT_BULK_SOAK_CURSOR_OWNER_RESTART") != "1" {
 		t.Skip("opt-in full copied cohort cursor-owner restart")
 	}
@@ -32,7 +44,7 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 	storesRoot, artifact := os.Getenv("WF_AUDIT_BULK_SOAK_STORES"), os.Getenv("WF_AUDIT_BULK_SOAK_ROOT")
 	identity := os.Getenv("WF_AUDIT_BULK_SOAK_IDENTITY")
 	if storesRoot == "" || artifact == "" {
-		t.Skip("opt-in verified original checkpoint8520 copied-store audit")
+		t.Skip("opt-in verified original full checkpoint copied-store audit")
 	}
 	if !filepath.IsAbs(storesRoot) || !filepath.IsAbs(artifact) || identity == "" {
 		t.Fatal("absolute fresh copied stores, artifact root and original Raft identity required")
@@ -92,7 +104,7 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 			if info.Config.Replicas != 5 || info.Config.Storage != jetstream.FileStorage {
 				t.Fatalf("%s: original full R5 file source required: %+v", name, info)
 			}
-			if (name == "WF_INV" && info.State.Msgs < cutoff) || (name == "WF_JRN" && info.State.Msgs == 0) {
+			if (name == "WF_INV" && info.State.Msgs < uint64(cutoff)) || (name == "WF_JRN" && info.State.Msgs == 0) {
 				t.Fatalf("%s: incomplete full original cohort: %+v", name, info)
 			}
 			if info.Cluster == nil || info.Cluster.Leader == "" || len(info.Cluster.Replicas) != 4 {
@@ -149,7 +161,7 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 		StateConnectionLoss *copiedWatchConnectionProof       `json:"state_connection_loss,omitempty"`
 		StateWatches        []capacityWatchTiming             `json:"state_watches"`
 		Cleanup             map[string]int                    `json:"cleanup"`
-	}{Cutoff: cutoff, Readiness: readiness, ParallelDecode: true, CursorRestart: true, Cleanup: map[string]int{}, RecoveredReadiness: map[string]*jetstream.StreamInfo{}}
+	}{Cutoff: uint64(cutoff), Readiness: readiness, ParallelDecode: true, CursorRestart: true, Cleanup: map[string]int{}, RecoveredReadiness: map[string]*jetstream.StreamInfo{}}
 	call, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	began := time.Now()
@@ -339,8 +351,9 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 		result.StateConnectionLoss = &proof
 	}
 	result.Error = fmt.Sprint(failure)
-	want := Report{Invocations: cutoff, Journals: cutoff, Entries: 2630779, Terminal: cutoff}
-	qualification := failure == nil && report == want && result.JournalVisits == journalState.Msgs && result.ElapsedNS < int64(20*time.Second) && !result.RestartCompleted.IsZero()
+	want := Report{Invocations: cutoff, Journals: cutoff, Entries: report.Entries, Terminal: cutoff}
+	entryCountMatches := report.Entries > 0 && (expectedEntries == 0 || report.Entries == expectedEntries)
+	qualification := failure == nil && report == want && entryCountMatches && result.JournalVisits == journalState.Msgs && result.ElapsedNS < int64(20*time.Second) && !result.RestartCompleted.IsZero()
 	var journalCursors []cursorObservation
 	for _, cursor := range result.Cursors {
 		if cursor.Created && cursor.Info.Stream == "WF_JRN" {
@@ -392,7 +405,7 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 	if err := os.WriteFile(filepath.Join(root, "copied-checkpoint-audit.json"), append(data, '\n'), 0600); err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("full original checkpoint8520 copied audit cutoff=%d elapsed=%s report=%+v err=%v raw_visits=%d cursor_owner_restart=true", cutoff, time.Duration(result.ElapsedNS), report, failure, result.JournalVisits)
+	t.Logf("full original checkpoint%d copied audit cutoff=%d elapsed=%s report=%+v err=%v raw_visits=%d cursor_owner_restart=true", checkpoint, cutoff, time.Duration(result.ElapsedNS), report, failure, result.JournalVisits)
 	if !qualification {
 		t.Fatalf("original-budget full cursor-owner restart failed: report=%+v raw_visits=%d cursors=%d failure=%v", report, result.JournalVisits, len(journalCursors), failure)
 	}
