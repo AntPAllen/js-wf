@@ -19,3 +19,5 @@ This closes one recorded-source packaged SQL/leaf SIGKILL/fatal-child replacemen
 ## Restoration
 
 Download the complete archive from `s3-readback.json`, then use `scripts/restore-full-fixture-proof.py` with this directory's metadata/inventory into a fresh destination. Empty directories are omitted; no process starts. Local retirement requires fresh full remote hash/every-member verification, unchanged current inventory, process/descriptor/Docker/mount/loop closure and exact owned stopped SQL container/volume checks. Original verdicts remain unchanged.
+
+Completed local fixture/archive and exact owned stopped SQL container/volume are now retired after fresh verification: [removal proof](../reclaimed/). All original bytes remain in S3.
