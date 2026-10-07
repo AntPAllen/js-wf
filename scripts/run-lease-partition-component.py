@@ -12,6 +12,7 @@ import time
 
 import fixture_archive
 from matrix_process_observer import observe_servers
+from live_process_admission import admit
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -98,6 +99,56 @@ def prepare_candidate(root, revision, shared, save, env, variant='strict'):
     return binary, copied, source_before, external, inputs
 
 
+def prepare_official(root, revision, shared, save, env, version):
+    """Build an unchanged explicit release, separate from diagnostic overlays."""
+    canonical = Path('docs/scale/scheduler-upstream-rc2-2026-10-07/official-tag.json')
+    tag_bytes = subprocess.check_output(['git', 'cat-file', 'blob', revision+':'+str(canonical)], cwd=REPO)
+    assert tag_bytes == (REPO/canonical).read_bytes()
+    tag = json.loads(tag_bytes)
+    assert tag['ref'] == 'refs/tags/'+version
+    (root/'official-tag.json').write_bytes(tag_bytes)
+    # Download outside the production module; its dependency files stay pinned.
+    download = json.loads(subprocess.check_output(
+        ['go', 'mod', 'download', '-json', 'github.com/nats-io/nats-server/v2@'+version],
+        cwd=root, env=dict(env, GO111MODULE='on')))
+    assert download['Version'] == version and download['Path'] == 'github.com/nats-io/nats-server/v2'
+    assert not download.get('Error') and download['Origin']['Hash'] == tag['resolved_commit']
+    assert download['Sum'] == 'h1:5dyJEGdG+OswDdiEvw06W7BukgvHbJEW8OrikvMbbIs='
+    save('official-download.json', download)
+    copied = root/'official-nats-source'
+    shutil.copytree(download['Dir'], copied)
+    original = fixture_archive.inventory(Path(download['Dir']))
+    assert fixture_archive.inventory(copied) == original
+    save('official-nats-source-before.json', original)
+    command = ['go', 'list', '-mod=readonly', '-deps', '-f',
+               '{{.Dir}}|{{join .GoFiles " "}}|{{join .CgoFiles " "}}', '.']
+    deps = subprocess.check_output(command, cwd=copied, env=env, text=True)
+    (root/'official-dependencies.txt').write_text(deps)
+    external = {}
+    for line in deps.splitlines():
+        directory, *groups = line.split('|')
+        for name in ' '.join(groups).split():
+            path = (Path(directory)/name).resolve()
+            target = root/'official-selected-dependencies'/str(path).lstrip('/')
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(path, target)
+            external[str(path)] = {'sha256': shared.sha(path), 'captured': str(target.relative_to(root))}
+    save('official-dependencies-before.json', external)
+    binary = root/'official-server'
+    build = ['go', 'build', '-mod=readonly', '-p=1', '-buildvcs=false', '-o', str(binary), '.']
+    with (root/'official-build.log').open('w') as output:
+        subprocess.run(build, cwd=copied, env=env, check=True, stdout=output, stderr=subprocess.STDOUT)
+    advertised = subprocess.check_output([str(binary), '-v'], text=True).strip()
+    assert advertised == 'nats-server: '+version
+    save('official-build.json', {'source': revision, 'module_version': version,
+         'module_sum': download['Sum'], 'official_commit': tag['resolved_commit'],
+         'list': command, 'build': build, 'working_directory': str(copied),
+         'executable_sha256': shared.sha(binary), 'advertised_version': advertised,
+         'build_info': subprocess.check_output(['go', 'version', '-m', str(binary)], text=True),
+         'scope': 'Unchanged official release source, no overlays. Explicit diagnostic only; production dependency unchanged.'})
+    return binary, copied, original, external
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
@@ -106,8 +157,12 @@ def main():
     parser.add_argument('--raft-debug',action='store_true')
     parser.add_argument('--marker-profile',choices=['production','disabled-markers'],default='production')
     parser.add_argument('--server-profile', choices=['upstream', 'obsolete-catchup-candidate',
-                                                   'obsolete-catchup-contiguous-candidate'], default='upstream')
+                                                   'obsolete-catchup-contiguous-candidate', 'official-release'], default='upstream')
+    parser.add_argument('--official-server-version', choices=['v2.15.1-RC.2'],
+                        help='Explicit source-bound official release; requires official-release profile')
     args = parser.parse_args()
+    if (args.server_profile == 'official-release') != (args.official_server_version is not None):
+        parser.error('official-release profile and explicit official version must be supplied together')
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
     shared = module('shared', 'run-domain-runtime-controls.py')
@@ -123,7 +178,8 @@ def main():
         target.parent.mkdir(parents=True,exist_ok=True)
         shutil.copyfile(REPO/name,target)
     variant = 'contiguous' if args.server_profile == 'obsolete-catchup-contiguous-candidate' else 'strict'
-    candidate = prepare_candidate(root, revision, shared, save, env, variant) if args.server_profile != 'upstream' else None
+    candidate = prepare_candidate(root, revision, shared, save, env, variant) if args.server_profile.startswith('obsolete-catchup-') else None
+    official = prepare_official(root, revision, shared, save, env, args.official_server_version) if args.server_profile == 'official-release' else None
     template = REPO/'scripts/lease-partition-component.go.txt'
     assert template.read_bytes()==subprocess.check_output(['git','cat-file','blob',revision+':scripts/lease-partition-component.go.txt'],cwd=REPO)
     helper = root/'helper.go';shutil.copyfile(template,helper)
@@ -151,12 +207,17 @@ def main():
     command = [str(binary),str(root),args.key_profile,args.expiry_profile,'debug' if args.raft_debug else 'normal',args.marker_profile]
     if candidate is not None:
         command.append(str(candidate[0]))
+    elif official is not None:
+        command.append(str(official[0]))
     save('commands.json',dict(build=build,run=command,source=revision,helper_sha256=shared.sha(helper),server_profile=args.server_profile))
     records=[];seen=set()
     with (root/'native.log').open('w') as output:
         child=subprocess.Popen(command,cwd=REPO,env=env,stdout=output,stderr=subprocess.STDOUT)
         proc=Path('/proc',str(child.pid))
-        save('actual-helper.json',dict(pid=child.pid,stat=(proc/'stat').read_text(),argv=[os.fsdecode(a) for a in (proc/'cmdline').read_bytes().split(b'\0') if a],exe_sha256=shared.sha(proc/'exe'),build_info=subprocess.check_output(['go','version','-m',str(binary)],text=True)))
+        actual = admit(child, command, {k: env[k] for k in ('GOMAXPROCS', 'GOMEMLIMIT', 'GOWORK', 'GOFLAGS')}, REPO, binary, shared.sha(binary))
+        actual['argv'] = actual['args']
+        actual['build_info'] = subprocess.check_output(['go','version','-m',str(binary)],text=True)
+        save('actual-helper.json',actual)
         while child.poll() is None:
             observe_servers(child.pid,root,seen,records)
             save('observed-servers.json',records)
@@ -164,7 +225,15 @@ def main():
             except subprocess.TimeoutExpired: pass
         code=child.wait()
     assert len(records)==3 and len({r['actual_executable_sha256'] for r in records})==1
-    assert all('v2.15.0' in r['build_info'] for r in records)
+    if official is None:
+        assert all('v2.15.0' in r['build_info'] for r in records)
+    else:
+        official_binary, copied, source_before, dependencies = official
+        assert all(r['actual_executable_sha256'] == shared.sha(official_binary) for r in records)
+        assert fixture_archive.inventory(copied) == source_before
+        assert all(shared.sha(path) == row['sha256'] == shared.sha(root/row['captured']) for path, row in dependencies.items())
+        save('official-nats-source-after.json', source_before)
+        save('official-dependencies-after.json', dependencies)
     if candidate is not None:
         candidate_binary, copied, source_before, dependencies, inputs = candidate
         assert all(r['actual_executable_sha256'] == shared.sha(candidate_binary) for r in records)

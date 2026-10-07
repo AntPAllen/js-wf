@@ -1,0 +1,28 @@
+[
+  {
+    "command": [
+      "python3",
+      "scripts/run-lease-partition-component.py",
+      "--root",
+      "/tmp/js-wf-rejected-official-component-profile-20261007",
+      "--server-profile",
+      "official-release"
+    ],
+    "exit_code": 2,
+    "stderr": "usage: run-lease-partition-component.py [-h] --root ROOT\n                                        [--key-profile {fixed,fresh}]\n                                        [--expiry-profile {production,disabled}]\n                                        [--raft-debug]\n                                        [--marker-profile {production,disabled-markers}]\n                                        [--server-profile {upstream,obsolete-catchup-candidate,obsolete-catchup-contiguous-candidate,official-release}]\n                                        [--official-server-version {v2.15.1-RC.2}]\nrun-lease-partition-component.py: error: official-release profile and explicit official version must be supplied together\n",
+    "root_absent": true
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/run-lease-partition-component.py",
+      "--root",
+      "/tmp/js-wf-rejected-official-component-profile-20261007",
+      "--official-server-version",
+      "v2.15.1-RC.2"
+    ],
+    "exit_code": 2,
+    "stderr": "usage: run-lease-partition-component.py [-h] --root ROOT\n                                        [--key-profile {fixed,fresh}]\n                                        [--expiry-profile {production,disabled}]\n                                        [--raft-debug]\n                                        [--marker-profile {production,disabled-markers}]\n                                        [--server-profile {upstream,obsolete-catchup-candidate,obsolete-catchup-contiguous-candidate,official-release}]\n                                        [--official-server-version {v2.15.1-RC.2}]\nrun-lease-partition-component.py: error: official-release profile and explicit official version must be supplied together\n",
+    "root_absent": true
+  }
+]
