@@ -7,3 +7,5 @@ Timeout bypasses Go test cleanup, leaving five owned Docker peers. The first pro
 The new closed archive has15869 members/2,278,889,039B/SHA256`c9abd0772f885f996946f043f438cf42b30fa4ae2485da33579e5f235293eb0a`. All original source/native/failed verdicts and both cleanup script attempts remain. Its review binds the original Git-selected/external captured source, SDK hash/build metadata, native timeout stack, original failed unit and actual strong closure. S3 offload follows. Reopen only fresh verified copies; no original24h store was opened.
 
 Correction must bind the watch parent directly from the original20s audit context, record the short metadata admission separately, return native-fixture errors rather than call t.Fatal from snapshot goroutines, and reap positively identified leftover copied peers before future failure archives. Neither original concurrent24h nor full-release gates are accepted.
+
+The complete archive has verified S3 body/metadata/inventory readbacks and fresh member/hash/current-inventory/closure verification; its local root and staging archive are now [retired](../checkpoint4160-creation-reclaimed/).

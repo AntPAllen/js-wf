@@ -1,0 +1,9 @@
+# Closed R5 creation trials retired after full S3 verification
+
+Reclaimed **17.70 GiB** (19,007,234,048 allocated bytes): the closed initial failed fixture (including nested original live-container archive), limited cached-metadata component, accepted exact-profile creation trial, all three staging archives, obsolete initial producer metadata and redundant original archive download. `/tmp` is approximately7.8GiB; filesystem free82GiB. Most remaining growth is the live partition campaign (4.3GiB).
+
+Each complete remote compressed body and every member was read again against committed metadata/inventory; each full local current inventory matched before deletion. Original retained failed/successful unit producer PID/InvocationID/exit status/result were checked, with process/descriptors/container mounts including stopped containers/filesystem mounts/loops/worktrees checked before removal. Permission limits remain in the [ledger](removal.json). Inode accounting excludes storage still held by hardlinks. The obsolete initial producer metadata exactly matched its nested preserved copy before removal.
+
+The original complete24h archive was read and member-verified again before removing only its redundant download. No original store was reopened or native verdict changed. All failed, limited and accepted trial source/store/wire evidence remains in S3 with committed receipts. Diagnose only fresh verified restores.
+
+Both original no-restart campaign handles remain live after removal: fullcandidate200 producer2354515/invocation739815ede74f4562aca63e5a0fc52ee9, now seed17 with16 completed native records (only1–3 independently reviewed); full123 normal100k producer2039197/invocationc232dbf42fcf4d9ca69c01c57c52b176/SDK2045340, still progressing through worker result-budget replay at3h54m. Their raw fixtures and input remain local. No replacement full24h run was launched.
