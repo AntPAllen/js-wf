@@ -198,7 +198,11 @@ func runPackagedLeafDaemon(t *testing.T, ctx context.Context, js jetstream.JetSt
 				t.Fatal(ctx.Err())
 			default:
 			}
-			time.Sleep(10 * time.Millisecond)
+			pause := 10 * time.Millisecond
+			if stage == "running" && command == "project" {
+				pause = 50 * time.Millisecond
+			}
+			time.Sleep(pause)
 		}
 		signal := syscall.SIGTERM
 		if stage == "running" {
