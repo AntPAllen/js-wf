@@ -89,6 +89,10 @@ def review(root, repo):
             args=['python3',str(scripts/'check-tier3-journal-row.py'),'--root',str(temporary/'fixture'),
                   '--events',str(temporary/'events.jsonl'),'--row',state['row'],'--duration',state['duration'],
                   '--expected-seed',str(state['seed']),'--output',str(output),'--require-checkpoint-audits']
+            if state.get('bulk_final_latency', False):
+                args+=['--require-bulk-final-latency']
+                if state.get('compare_bulk_point', False):
+                    args+=['--require-bulk-point-equivalence']
             if state['row'].startswith('server_clock_'):
                 args+=['--require-clock-timer-cut','--require-common-timer-clock']
             if state['row']=='rolling_upgrade':
