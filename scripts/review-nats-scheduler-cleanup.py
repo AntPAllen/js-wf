@@ -15,7 +15,7 @@ def inventory(p):
 
 def review(root, repo, require_retained_store=False, expected_version='v2.15.0'):
     source = read(root/'source.json')
-    assert expected_version in ('v2.15.0','v2.15.1-RC.1') and source['version']==expected_version
+    assert expected_version in ('v2.15.0','v2.15.1-RC.1','v2.15.1-RC.2') and source['version']==expected_version
     before = read(root/'module-before.json')
     assert before and (expected_version != 'v2.15.0' or len(before)==598)
     if expected_version != 'v2.15.0':
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     parser.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1])
     parser.add_argument('--output',type=Path)
     parser.add_argument('--require-retained-store',action='store_true')
-    parser.add_argument('--expected-version',choices=('v2.15.0','v2.15.1-RC.1'),default='v2.15.0')
+    parser.add_argument('--expected-version',choices=('v2.15.0','v2.15.1-RC.1','v2.15.1-RC.2'),default='v2.15.0')
     args=parser.parse_args()
     result=review(args.root.resolve(),args.repo.resolve(),args.require_retained_store,args.expected_version)
     output=args.output or args.root/'independent-review.json'

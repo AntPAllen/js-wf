@@ -19,7 +19,7 @@ def hashes(root):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--root', type=Path, required=True)
-    p.add_argument('--module-version', choices=('v2.15.0', 'v2.15.1-RC.1'), default='v2.15.0',
+    p.add_argument('--module-version', choices=('v2.15.0', 'v2.15.1-RC.1', 'v2.15.1-RC.2'), default='v2.15.0',
                    help='Explicit upstream diagnostic version; production dependency stays pinned')
     a = p.parse_args()
     root = a.root.resolve()
