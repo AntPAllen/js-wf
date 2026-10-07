@@ -13,6 +13,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--projector-profile',choices=('standalone','standalone-leaf'),default='standalone')
     a=parser.parse_args();root=a.root.absolute()
     repo=Path(__file__).resolve().parents[1]
     if not (repo/'scripts/review-postgres-domain-projection.py').is_file():
@@ -24,12 +25,12 @@ def main():
     proof=json.loads(fixtures[0].read_text());case=fixtures[0].parent
     revision=json.loads((root/'execution.json').read_text())['source']
     sdk=json.loads((root/'binary.json').read_text())['sha256'];log=(root/'native.log').read_text()
-    review.verify_fault(proof,log,'',sdk,'standalone');review.verify_standalone(proof,revision,case)
+    review.verify_fault(proof,log,'',sdk,a.projector_profile);review.verify_standalone(proof,revision,case)
     rejected=[]
     def check(label,alter):
         value=copy.deepcopy(proof);alter(value)
         try:
-            review.verify_fault(value,log,'',sdk,'standalone')
+            review.verify_fault(value,log,'',sdk,a.projector_profile)
             review.verify_standalone(value,revision,case)
         except (ValueError,KeyError,IndexError):rejected.append(label)
         else:raise ValueError('weakened proof accepted: '+label)
@@ -44,7 +45,7 @@ def main():
     check('wrong command',lambda p:p['standalone_projectors'][1]['argv'].__setitem__(5,'lag'))
     check('duplicate pid',lambda p:p['standalone_projectors'][1].__setitem__('pid',p['standalone_projectors'][0]['pid']))
     for name,altered in [('missing workload', 'PASS\n'),('native skip',log.replace('--- PASS:','--- SKIP:',1)),('wrong prefix',log.replace('wrong_prefix_requests=0','wrong_prefix_requests=1'))]:
-        try:review.verify_fault(proof,altered,'',sdk,'standalone')
+        try:review.verify_fault(proof,altered,'',sdk,a.projector_profile)
         except ValueError:rejected.append(name)
         else:raise ValueError('weakened native log accepted: '+name)
     a.output.parent.mkdir(parents=True,exist_ok=True)

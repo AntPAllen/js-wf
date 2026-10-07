@@ -1,5 +1,12 @@
 # Implementation status against the supplied plan
 
+## Full50000 packaged SQL projector fault/rebuild through a leaf accepted — 2026-10-07
+
+At recorded clean `d6f859d`, actual nonrace SDK954578 passes in372.17s body/372.192s SDK. Three actual packaged `wf project` children use stock WFEDGE leaf954986/R3 WFVIEW hubs. Original50000/20m scenario/22m SDK/count1/twoCPU2GiB remain. Initial SIGKILL, all50000 results while stopped/100000 lag, partial15-row SQL-backend termination with library journal-leader restart/fatal exit1, replacement SIGTERM0, exact final row/index rebuild/purge/dependency checks pass. Complete file-backed child traffic47,494,043client/252,131,297server bytes/403,012WFVIEW API publications verifies actual leaf identity and zero local streams. Independent2,158Git/3,360external/1,285SQL-media/9,200-archive-file review accepts;32 inherited and20 captured-wire negatives reject. [Evidence and limits](scale/postgres-leaf-projection-50000-2026-10-07/native/).
+
+This closes this recorded-source packaged SQL leaf fault/rebuild/replacement-shutdown component. Startup SQL cancellation, natural leaf/route/server faults, process-killed NATS hubs, full fault matrices, onlineGC, million physical drain and fullrelease/24h remain open. Hosted acceptance is separate; isolated original24h remains live.
+
+
 ## Packaged operator daemon leaf signal boundary accepted — 2026-10-07
 
 At recorded clean `db67e7d`, actual race SDK842305 passes in15.25s body/16.278s SDK. Five actual packaged race `wf` children run through stock WFEDGE leaf843214/R3 WFOPS hubs: project/tombstone first-API SIGTERM and running SIGINT exit0; missing-source project exits1. Startup packets are retained separately, cancelled before upstream forwarding with zero forwarded bytes. Running readiness uses the original real NumWaiting/tombstone criteria. Original60s/3m/count1 remain. Complete child wire6,036client/28,040server bytes/36WFOPS publications binds actual leaf INFO identity and zero local streams. Independent2,150-source/5-child/SDK/stockleaf/2,543-file review accepts; captured-proof controls reject22 artifact and15 log mutations. Two earlier readiness timeouts remain failed and their cause unconfirmed. [Evidence and limits](scale/operator-daemon-leaf-2026-10-07/native-race/).

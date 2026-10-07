@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        projector: [sdk, standalone]
+        projector: [sdk, standalone, standalone-leaf]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -18,13 +18,37 @@ jobs:
           go-version-file: go.mod
       - name: Obtain PostgreSQL image and record exact executed identity in runner
         run: docker pull postgres:16-alpine
+      - name: Check disk-backed trace and actual captured streaming controls
+        if: matrix.projector == 'standalone-leaf'
+        run: |
+          go test -race ./testcluster -run '^TestClientProxyFileTraceJoinedBytesAndFailures$' -count=1
+          python3 -m unittest discover -s scripts -p test_sql_leaf_stream_wire.py
       - name: Run full50000 projection fault and rebuild in domain (${{ matrix.projector }})
+        if: matrix.projector != 'standalone-leaf'
         run: python3 scripts/run-postgres-domain-projection.py --projector-profile '${{ matrix.projector }}' --root '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000'
+      - name: Run full50000 packaged SQL leaf case with retained producer identity
+        if: matrix.projector == 'standalone-leaf'
+        run: |
+          sudo systemd-run --unit=postgres-domain-projection-standalone-leaf-full50000 --property="User=$USER" --property="WorkingDirectory=$GITHUB_WORKSPACE" --property=MemoryMax=4G --property=Restart=no --property=RemainAfterExit=yes --setenv="PATH=$PATH" --setenv=PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$GITHUB_WORKSPACE/scripts/run-postgres-domain-projection.py" --projector-profile standalone-leaf --root '${{ runner.temp }}/postgres-domain-projection-standalone-leaf-full50000'
+          python3 - <<'PY'
+          import subprocess,time,sys
+          unit='postgres-domain-projection-standalone-leaf-full50000.service'
+          while True:
+              output=subprocess.check_output(['systemctl','show',unit,'-p','LoadState','-p','SubState','-p','MainPID','-p','ExecMainStatus','-p','Result'],text=True)
+              fields=dict(line.split('=',1) for line in output.splitlines())
+              assert fields['LoadState']=='loaded', 'original producer unit missing'
+              if fields['MainPID']=='0' and fields['SubState'] in ('exited','failed'):
+                  sys.exit(0 if fields['SubState']=='exited' and fields['ExecMainStatus']=='0' and fields['Result']=='success' else 1)
+              time.sleep(5)
+          PY
       - name: Require independent complete domain and rebuild evidence
         run: python3 scripts/review-postgres-domain-projection.py --projector-profile '${{ matrix.projector }}' --root '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000' --output '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000-proof/independent-review.json'
       - name: Reject weakened packaged daemon evidence
         if: matrix.projector == 'standalone'
         run: python3 scripts/check-postgres-standalone-proof-controls.py --root '${{ runner.temp }}/postgres-domain-projection-standalone-full50000' --output '${{ runner.temp }}/postgres-domain-projection-standalone-full50000-proof/coverage-controls.json'
+      - name: Reject weakened full packaged SQL leaf fault evidence
+        if: matrix.projector == 'standalone-leaf'
+        run: python3 scripts/check-postgres-standalone-proof-controls.py --projector-profile standalone-leaf --root '${{ runner.temp }}/postgres-domain-projection-standalone-leaf-full50000' --output '${{ runner.temp }}/postgres-domain-projection-standalone-leaf-full50000-proof/coverage-controls.json'
       - if: always()
         uses: actions/upload-artifact@v7
         with:

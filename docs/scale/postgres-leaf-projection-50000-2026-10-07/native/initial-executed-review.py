@@ -164,8 +164,8 @@ def main():
         require(fields['LoadState']=='loaded' and fields['ExecMainStatus']=='0' and fields['SubState']=='exited' and fields['MainPID']=='0' and fields['Result']=='success' and fields['Restart']=='no' and sdk['stat'].split(') ',1)[1].split()[1]==fields['ExecMainPID'],'original retained terminal producer/SDK identity required')
         leaf_wire=sql_leaf_stream_wire.validate_case(case,proof)
         logged=re.findall(r'SQL projector leaf wire: phase=(initial|catchup|replacement) pid=(\d+) records=(\d+) client_bytes=(\d+) server_bytes=(\d+)',(root/'native.log').read_text())
-        expected_wire_logs={(p['phase'],str(p['pid']),str(leaf_wire['phases'][p['phase']]['frame_records']),str(leaf_wire['phases'][p['phase']]['streams']['client_to_server']['bytes']),str(leaf_wire['phases'][p['phase']]['streams']['server_to_client']['bytes'])) for p in proof['standalone_projectors']}
-        require(len(logged)==3 and set(logged)==expected_wire_logs,'all actual child wire logs/proof counters required')
+        expected={(p['phase'],str(p['pid']),str(leaf_wire['phases'][p['phase']]['frame_records']),str(leaf_wire['phases'][p['phase']]['streams']['client_to_server']['bytes']),str(leaf_wire['phases'][p['phase']]['streams']['server_to_client']['bytes'])) for p in proof['standalone_projectors']}
+        require(len(logged)==3 and set(logged)==expected,'all actual child wire logs/proof counters required')
     rows=verify_rows(case/'before-rebuild.jsonl',case/'after-rebuild.jsonl',proof['row_and_indexed_column_sha256'])
     trace=json.loads((case/'projection-dependency-trace.json').read_text())
     minimum = 2 if args.projector_profile=='sdk' else 1

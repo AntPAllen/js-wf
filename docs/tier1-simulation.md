@@ -1,5 +1,9 @@
 # Tier 1 deterministic simulation: journal, lease, start, signals, timers, dispatch, and worker slices
 
+## Full packaged SQL leaf component — 2026-10-07
+
+The original50000 packaged SQL projector fault/rebuild case passes through a stock leaf atd6f859d, including SIGKILL, SQL session loss/library journal restart and replacement SIGTERM. Disk-backed complete child wire is reviewed incrementally. This is a recorded-source focused native component; it does not require or imply an unchanged full Tier1 graph rerun or broader release acceptance. [Native evidence](scale/postgres-leaf-projection-50000-2026-10-07/native/).
+
 ## Packaged daemon leaf component — 2026-10-07
 
 Actual packaged project/tombstone startup/running signal cases and fatal missing-source rejection pass through a real leaf atdb67e7d, with complete forwarded traffic and separate zero-forwarded pending startup packets. This is a focused native component; no unchanged full Tier1 graph rerun or fullrelease acceptance is claimed. Original two readiness failures remain unconfirmed. [Native proof](scale/operator-daemon-leaf-2026-10-07/native-race/).
