@@ -1,3 +1,5 @@
 # First committed-source native qualification failed
 
 At3fc0978, actual race SDK2641506 exits1 after14.82s. R1 completes; R3 rejects the actual held333-byte old publication, then its first cold authority metadata lookup reaches its local2s deadline despite route/leader/meta-current admission. The entire protocol model, concurrency and unsafe-configuration controls pass; full native R3 persistence remains failed. Complete source/actual SDK/native media/log/archive evidence is retained. No historical server-side cause is assigned. The fix retries only timed-out read-only opening requests, at most three fresh2s attempts inside the original20s parent. Missing/unsafe streams are never recreated or retried. This original native verdict is not rerun or relabeled.
+
+The complete archive, metadata and inventory have verified S3 readbacks. Closed local fixture/archive staging is retired; restore to a fresh directory from the committed receipt before further inspection.

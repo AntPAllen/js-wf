@@ -11,3 +11,5 @@ All **2,336** selected committed source inputs match retained copies and before/
 This qualifies only the experimental durable authority and its controlled stale wire case. Native ObjectStore upload/delete/partial-chunk conformance, all workflow reference writers/readers, full-history retention/migration, privileged authority lifecycle permissions, partition/lost-publish-reply qualification and production online GC remain open. Current full124 graph/full native release/actual24h/million physical drain/default dependency adoption remain independent.
 
 [Independent review](independent-review.json) binds original logs, native JSON/wire proofs, actual SDK and complete fixture archive. The original committed3fc0978 reopen failure is separately preserved and stays failed.
+
+The complete archive, metadata and inventory have verified S3 readbacks. Closed local fixture/archive staging is retired; restore to a fresh directory from the committed receipt before further inspection.
