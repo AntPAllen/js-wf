@@ -11,3 +11,5 @@ Earlier cleanup records are in [the October 6 review](../tmp-storage-review-2026
 Latest pass removed another **469.3 MiB** of redundant archive staging copies after fresh complete S3 verification. See [details](ninth-verified-staging-removal/README.md). Observed filesystem free space afterward: approximately **71 GiB**. Original fixture directories remain local.
 
 This pass recovered another **20.92 GiB** from two complete closed diagnostic copies and five redundant archive files after fresh full S3/member verification. Observed filesystem free space: **67.24 GiB**. See [verified removal and restoration records](tenth-copied-roots-and-staging/README.md). Original failed-run stores and donor fixtures remain local.
+
+An implementation experiment later reclaimed its first complete copied diagnostic and staging archive after fresh verified S3/member/inventory/closure checks: **9.39 GiB**. This retires newly created experiment data and is separate from the earlier20.92 GiB cleanup. [Records](../parallel-journal-decode-2026-10-07/first-copy-reclaimed/README.md).
