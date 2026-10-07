@@ -107,7 +107,7 @@ def verify_standalone_log(log):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
-    parser.add_argument('--case', choices=['commands','daemon-signals','standalone-commands','standalone-leaf','standalone-daemon-leaf'],default='commands')
+    parser.add_argument('--case', choices=['commands','daemon-signals','standalone-commands','standalone-leaf','standalone-daemon-leaf','standalone-connection'],default='commands')
     args = parser.parse_args()
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
@@ -126,7 +126,7 @@ def main():
     env = dict(os.environ, GOMAXPROCS='2', GOMEMLIMIT='1GiB', GOWORK='off', GOFLAGS='', WF_OPERATOR_TEST_ROOT=str(root/'stores'), WF_OPERATOR_STANDALONE='1')
     binary = root/'operator-race.test'
     build = ['go', 'test', '-race', '-buildvcs=true', '-c', '-o', str(binary), './cmd/wf']
-    tests = ['TestOperatorStandaloneDaemonSignalsThroughLeaf'] if args.case=='standalone-daemon-leaf' else TESTS if args.case=='commands' else DAEMON_TESTS if args.case=='daemon-signals' else LEAF_TESTS if args.case=='standalone-leaf' else STANDALONE_TESTS
+    tests = ['TestOperatorStandaloneConnectionSignals'] if args.case=='standalone-connection' else ['TestOperatorStandaloneDaemonSignalsThroughLeaf'] if args.case=='standalone-daemon-leaf' else TESTS if args.case=='commands' else DAEMON_TESTS if args.case=='daemon-signals' else LEAF_TESTS if args.case=='standalone-leaf' else STANDALONE_TESTS
     command = [str(binary), '-test.v', '-test.run=^('+'|'.join(tests)+')$', '-test.count=1', '-test.timeout=3m']
     run_directory = REPO/'cmd/wf'
     save('commands.json', dict(build=build, build_working_directory=str(REPO), run=command, run_working_directory=str(run_directory)))
@@ -164,6 +164,32 @@ def main():
             assert all(r['exe_sha256']==shared.sha(binary) and r['argv']==[str(binary),'-test.run=^TestOperatorDaemonProcessHelper$'] and not Path('/proc',str(r['pid'])).exists() for r in records)
             save('daemon-processes.json',records)
             result=verify_daemon_log((root/'native.log').read_text())
+        elif args.case=='standalone-connection':
+            log=(root/'native.log').read_text()
+            assert not plugin_records and log.rstrip().endswith('PASS')
+            assert not any(s in log for s in ('DATA RACE','--- FAIL:','--- SKIP:'))
+            assert re.findall(r'^--- PASS: (\w+) \(',log,re.M)==['TestOperatorStandaloneConnectionSignals']
+            records=[json.loads(p.read_text()) for p in (root/'stores').rglob('connection.process.json')]
+            expected={(c,s,g) for c in ('project','tombstone-loop') for s in ('INFO','PONG') for g in ('terminated','interrupt')}
+            assert len(records)==8 and len({r['pid'] for r in records})==8
+            assert {(r['command'],r['stage'],r['signal']) for r in records}==expected
+            logged=re.findall(r'operator connection signal command=(project|tombstone-loop) stage=(INFO|PONG) signal=(terminated|interrupt) exit=0 elapsed=\S+ pid=(\d+)',log)
+            assert len(logged)==8 and {(c,s,g,int(p)) for c,s,g,p in logged}=={(r['command'],r['stage'],r['signal'],r['pid']) for r in records}
+            for r in records:
+                assert r['scenario_passed'] is True and type(r['exit_code']) is int and r['exit_code']==0
+                assert r['argv']==[r['binary'],*r['args']] and r['binary'].startswith(str(root/'stores')+'/')
+                assert shared.sha(r['binary'])==r['exe_sha256'] and 'vcs.revision='+revision in r['build_info'] and 'vcs.modified=false' in r['build_info'] and '-race=true' in r['build_info']
+                assert not Path('/proc',str(r['pid'])).exists() and r['stat'].startswith(str(r['pid'])+' ')
+                assert datetime.fromisoformat(r['admitted_at'])<=datetime.fromisoformat(r['signal_sent_at'])<=datetime.fromisoformat(r['joined_at'])
+                assert (datetime.fromisoformat(r['joined_at'])-datetime.fromisoformat(r['signal_sent_at'])).total_seconds()<3
+                if r['stage']=='INFO': assert r['client_wire']==r['server_wire']==''
+                else:
+                    assert r['server_wire'].startswith('INFO ') and r['server_wire'].endswith('\r\n')
+                    lines=r['client_wire'].split('\r\n')
+                    assert len(lines)==3 and lines[0].startswith('CONNECT ') and lines[1:]==['PING','']
+                    json.loads(lines[0].removeprefix('CONNECT '))
+            save('connection-processes.json',records)
+            result=dict(actual_standalone_processes=8,qualified_boundaries=sorted(expected),scope='Controlled INFO/PONG protocol fixtures and actual race CLI signal shutdown only; not real JetStream, TLS/authentication/DNS fault or broad release acceptance.')
         elif args.case=='standalone-daemon-leaf':
             import operator_daemon_leaf_wire
             assert not plugin_records

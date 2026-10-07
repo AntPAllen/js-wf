@@ -86,11 +86,31 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 		}
 		return encode(report)
 	}
+	// Daemon shutdown covers dialing and the protocol handshake as well as
+	// metadata initialization. Register before opening any network connection.
+	var daemonCtx context.Context
+	if command[0] == "project" || command[0] == "tombstone-loop" {
+		if len(command) != 1 {
+			return fmt.Errorf("usage: wf %s", command[0])
+		}
+		var stop context.CancelFunc
+		daemonCtx, stop = signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
+	}
 	if *url == "" {
 		*url = nats.DefaultURL
 	}
-	nc, err := nats.Connect(*url)
+	var nc *nats.Conn
+	var err error
+	if daemonCtx != nil {
+		nc, err = connectDaemon(daemonCtx, *url)
+	} else {
+		nc, err = nats.Connect(*url)
+	}
 	if err != nil {
+		if daemonCtx != nil {
+			return daemonExit(daemonCtx, err)
+		}
 		return err
 	}
 	defer nc.Close()
@@ -116,8 +136,7 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 		if len(command) != 1 {
 			return errors.New("usage: wf project")
 		}
-		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-		defer stop()
+		ctx := daemonCtx
 		projection, err := visibility.New(ctx, js, projectionOptions...)
 		if err != nil {
 			return daemonExit(ctx, err)
@@ -128,8 +147,7 @@ func runWithJetStreamOptions(args []string, out io.Writer, options ...jetstream.
 		if len(command) != 1 {
 			return errors.New("usage: wf [-interval duration] [-budget n] tombstone-loop")
 		}
-		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-		defer stop()
+		ctx := daemonCtx
 		return reconcile.RunTombstoneLoop(ctx, js, fmt.Sprintf("tombstone-%d", os.Getpid()), *interval, *budget)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
