@@ -22,6 +22,9 @@ jobs:
         run: python3 scripts/run-postgres-domain-projection.py --projector-profile '${{ matrix.projector }}' --root '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000'
       - name: Require independent complete domain and rebuild evidence
         run: python3 scripts/review-postgres-domain-projection.py --projector-profile '${{ matrix.projector }}' --root '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000' --output '${{ runner.temp }}/postgres-domain-projection-${{ matrix.projector }}-full50000-proof/independent-review.json'
+      - name: Reject weakened packaged daemon evidence
+        if: matrix.projector == 'standalone'
+        run: python3 scripts/check-postgres-standalone-proof-controls.py --root '${{ runner.temp }}/postgres-domain-projection-standalone-full50000' --output '${{ runner.temp }}/postgres-domain-projection-standalone-full50000-proof/coverage-controls.json'
       - if: always()
         uses: actions/upload-artifact@v7
         with:
