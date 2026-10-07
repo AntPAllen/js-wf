@@ -1,0 +1,35 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-p=1",
+    "-buildvcs=true",
+    "-c",
+    "-o",
+    "/tmp/js-wf-checkpoint4160-creation-stall-v2-20261007/integrity.test",
+    "./integrity"
+  ],
+  "test": [
+    "/tmp/js-wf-checkpoint4160-creation-stall-v2-20261007/integrity.test",
+    "-test.run=^TestRetainedAuditBulkSoakCheckpoint4160CursorOwnerRestartVerifiedCopy$",
+    "-test.count=1",
+    "-test.v",
+    "-test.timeout=6m"
+  ],
+  "environment": {
+    "GOMAXPROCS": "4",
+    "GOGC": "500",
+    "GOMEMLIMIT": "4GiB",
+    "GOWORK": "off",
+    "GOFLAGS": "",
+    "WF_AUDIT_BULK_SOAK_STORES": "/tmp/js-wf-checkpoint4160-creation-stall-v2-20261007/restored-original/fixture/cluster",
+    "WF_AUDIT_BULK_SOAK_ROOT": "/tmp/js-wf-checkpoint4160-creation-stall-v2-20261007/originals",
+    "WF_AUDIT_BULK_SOAK_IDENTITY": "js-wf-route-3743450-1791366204984907448",
+    "WF_TIER3_EXPLICIT_ROUTE_SEEDS": "1",
+    "WF_TIER3_SYNC_INTERVAL": "2m",
+    "WF_AUDIT_BULK_SOAK_PARALLEL_DECODE": "1",
+    "WF_AUDIT_BULK_SOAK_CURSOR_OWNER_RESTART": "1",
+    "WF_AUDIT_BULK_SOAK_STATE_CREATION_STALL": "1"
+  },
+  "working_directory": "/home/exedev/js-wf"
+}
