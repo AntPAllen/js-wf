@@ -1,0 +1,95 @@
+{
+  "root": "/tmp/js-wf-parallel-recovery-journal-24h-20261007",
+  "local_original_present": false,
+  "checkpoint": 4160,
+  "canonical": "docs/scale/parallel-recovery-journal-24h-2026-10-07/terminal-failure",
+  "original_execution": {
+    "source": "bc9f92bdfd1f01ad78d4acd24e6576d46c82a078",
+    "row": "journal",
+    "seed": 1,
+    "duration": "24h",
+    "status": "failed",
+    "supervisor_pid": 3743034,
+    "started": 1791366192.3632061,
+    "upgrade_shutdown": null,
+    "upgrade_start_gap": false,
+    "race": false,
+    "memory_limit": "4GiB",
+    "gomaxprocs": "4",
+    "gc_percent": "500",
+    "disk_admission": {
+      "filesystem_probe": "/tmp",
+      "free_bytes": 79168733184,
+      "minimum_free_bytes": 18253611008,
+      "additional_reserve_bytes": 1073741824,
+      "scope": "Launch-time estimate, not a filesystem reservation. 24h baseline16GiB covers observed retained growth and archival; callers must add overlapping job budgets."
+    },
+    "retained_audit_trace": true,
+    "audit_wait_stack": true,
+    "batched_retained_audit": false,
+    "streaming_state_retained_audit": false,
+    "concurrent_state_retained_audit": false,
+    "chunked_state_retained_audit": false,
+    "parallel_state_retained_audit": true,
+    "cached_latency_metadata": false,
+    "bulk_final_latency": true,
+    "compare_bulk_point": true,
+    "explicit_route_seeds": true,
+    "journal_rollout": "none",
+    "clears_full_tier3_release": false,
+    "test_pid": 3743421,
+    "test_exit_code": 1,
+    "error": "named test failed with exit1",
+    "finished": 1791395947.5921595
+  },
+  "archive": {
+    "schema": "js-wf-full-fixture-archive-v1",
+    "archive_sha256": "418f0281c0afa0ba2279ff3decbb34007d4a31a35a01b5dfd4d938481d317d0a",
+    "archive_bytes": 1088449356,
+    "members": 10454,
+    "all_archive_members_read_back": true,
+    "all_current_fixture_files_unchanged_after_capture": true,
+    "inventory_file": "fixture-inventory.json",
+    "inventory_sha256": "61071f6a57e8ef107bbecea5ceb9d66b9f49c0346891ac69f93d01e3b26d7ff4",
+    "storage": "Full archive for S3 content-addressed storage; manifests/receipts in Git. No local or Git archive-part copies."
+  },
+  "receipt": {
+    "revision": "c0738e68b068ac3f0a0a6a5dcdffa72016c87aa9",
+    "canonical_metadata": "docs/scale/parallel-recovery-journal-24h-2026-10-07/terminal-failure/archive-verification.json",
+    "endpoint": "https://nameless-bird-8772.int.exe.xyz",
+    "bucket": "nameless-bird-8772",
+    "archive_key": "js-wf/proofs/418f0281c0afa0ba2279ff3decbb34007d4a31a35a01b5dfd4d938481d317d0a/proof.tar.gz",
+    "metadata_key": "js-wf/proofs/418f0281c0afa0ba2279ff3decbb34007d4a31a35a01b5dfd4d938481d317d0a/archive-verification-d05a4167538b9132d4517923443183e818f85f40741a1e8e678ca1e223a4699b.json",
+    "archive": {
+      "url": "https://nameless-bird-8772.int.exe.xyz/nameless-bird-8772/js-wf/proofs/418f0281c0afa0ba2279ff3decbb34007d4a31a35a01b5dfd4d938481d317d0a/proof.tar.gz",
+      "put_http_status": "200",
+      "full_readback": {
+        "bytes": 1088449356,
+        "sha256": "418f0281c0afa0ba2279ff3decbb34007d4a31a35a01b5dfd4d938481d317d0a"
+      }
+    },
+    "metadata": {
+      "url": "https://nameless-bird-8772.int.exe.xyz/nameless-bird-8772/js-wf/proofs/418f0281c0afa0ba2279ff3decbb34007d4a31a35a01b5dfd4d938481d317d0a/archive-verification-d05a4167538b9132d4517923443183e818f85f40741a1e8e678ca1e223a4699b.json",
+      "put_http_status": "200",
+      "full_readback": {
+        "bytes": 552,
+        "sha256": "d05a4167538b9132d4517923443183e818f85f40741a1e8e678ca1e223a4699b"
+      }
+    },
+    "verified_utc": "2026-10-07T18:12:59.488426+00:00",
+    "scope": "Full remote byte readback matches committed fully verified archive and metadata; no local deletion, public sharing, retention policy or independent remote durability guarantee.",
+    "inventory": {
+      "url": "https://nameless-bird-8772.int.exe.xyz/nameless-bird-8772/js-wf/proofs/418f0281c0afa0ba2279ff3decbb34007d4a31a35a01b5dfd4d938481d317d0a/fixture-inventory-61071f6a57e8ef107bbecea5ceb9d66b9f49c0346891ac69f93d01e3b26d7ff4.json",
+      "put_http_status": "200",
+      "full_readback": {
+        "bytes": 2441946,
+        "sha256": "61071f6a57e8ef107bbecea5ceb9d66b9f49c0346891ac69f93d01e3b26d7ff4"
+      }
+    },
+    "storage": "Canonical S3 full fixture archive; Git contains committed complete inventory, archive hash and readback receipt, not archive parts."
+  },
+  "visible_closure": {
+    "local_original_retired": true,
+    "scope": "Complete verified archive is the donor; no original local stores opened."
+  }
+}
