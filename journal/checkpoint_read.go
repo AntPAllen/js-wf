@@ -118,9 +118,9 @@ func (s *Store) readCheckpointOnce(ctx context.Context, typ, id string, invSeq u
 	if waiter, ok := port.(interface {
 		Wait(context.Context, time.Duration) error
 	}); ok {
-		data, err = verifiedSnapshotObjectVirtual(ctx, port.GetObject, waiter.Wait, runtime.Object, runtime.SHA256)
+		data, err = verifiedSnapshotObjectVirtual(ctx, snapshotObjectGetter(port, snapshotKey(typ, id)), waiter.Wait, runtime.Object, runtime.SHA256)
 	} else {
-		data, err = verifiedSnapshotObject(ctx, port.GetObject, runtime.Object, runtime.SHA256)
+		data, err = verifiedSnapshotObject(ctx, snapshotObjectGetter(port, snapshotKey(typ, id)), runtime.Object, runtime.SHA256)
 	}
 	if err != nil {
 		return nil, err

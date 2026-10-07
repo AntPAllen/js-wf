@@ -621,8 +621,7 @@ func TestPrepareAtPreservesCallerRevision(t *testing.T) {
 	if len(m.blobs) != 0 || len(m.objects) != 0 || m.serial != 0 {
 		t.Fatal("stale preparation had side effects")
 	}
-	m.putHook = func(name string, data []byte) error {
-		m.objects[name] = append([]byte(nil), data...)
+	m.putHook = func(_ string, _ []byte) error {
 		_, err := m.CASRoot(ctx, "snapshot", 3, Root{Token: "winner", Data: []byte("newer manifest")})
 		return err
 	}

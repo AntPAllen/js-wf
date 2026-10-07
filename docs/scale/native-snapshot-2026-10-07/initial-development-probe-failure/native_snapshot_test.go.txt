@@ -1,0 +1,286 @@
+package journal
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
+
+	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/internal/blobpublication"
+	"js-wf/internal/checkpoint"
+	"js-wf/provision"
+	"js-wf/testcluster"
+)
+
+func nativeJournalSnapshotFixture(t *testing.T, replicas int) (*NativeSnapshotPort, *Store, context.Context, string) {
+	t.Helper()
+	directory := filepath.Join(t.TempDir(), "cluster")
+	if root := os.Getenv("WF_NATIVE_SNAPSHOT_ROOT"); root != "" {
+		if !filepath.IsAbs(root) {
+			t.Fatal("snapshot root must be absolute")
+		}
+		directory = filepath.Join(root, fmt.Sprintf("%s-R%d", t.Name(), replicas))
+		if err := os.Mkdir(directory, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cluster, err := testcluster.Start(directory, replicas)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
+	t.Cleanup(func() { cancel(); cluster.Close() })
+	if replicas > 1 {
+		ticker := time.NewTicker(20 * time.Millisecond)
+		defer ticker.Stop()
+		for {
+			ready := false
+			for _, s := range cluster.Servers {
+				ready = ready || s.JetStreamIsLeader() && len(s.JetStreamClusterPeers()) == replicas
+			}
+			if ready {
+				break
+			}
+			select {
+			case <-ctx.Done():
+				t.Fatal(ctx.Err())
+			case <-ticker.C:
+			}
+		}
+	}
+	js, err := jetstream.New(cluster.Clients[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = provision.Ensure(ctx, js, replicas); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = js.CreateStream(ctx, blobpublication.AuthorityStreamConfig("SNAP_AUTH", "wf.snapshot.authority", replicas)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = js.CreateStream(ctx, blobpublication.NativeObjectStreamConfig("SNAP_BLOB", replicas)); err != nil {
+		t.Fatal(err)
+	}
+	authority, err := blobpublication.OpenNativeAuthority(ctx, js, "SNAP_AUTH", "wf.snapshot.authority")
+	if err != nil {
+		t.Fatal(err)
+	}
+	native, err := blobpublication.OpenNativePort(ctx, authority, "SNAP_BLOB")
+	if err != nil {
+		t.Fatal(err)
+	}
+	port, err := NewNativeSnapshotPort(native, NewSnapshotPort(js), time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	store := NewWithJetStreamSnapshotPort(js, port)
+	return port, store, ctx, directory
+}
+func nativeSnapshotProof(t *testing.T, directory string, value map[string]any) {
+	t.Helper()
+	data, err := json.MarshalIndent(value, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filepath.Join(directory, "snapshot-proof.json"), append(data, '\n'), 0600); err != nil {
+		t.Fatal(err)
+	}
+}
+func nativeAppendRecords(t *testing.T, ctx context.Context, store *Store, entries []Entry) []Record {
+	t.Helper()
+	var records []Record
+	var tail uint64
+	for _, entry := range entries {
+		seq, err := store.Append(ctx, "test", "atomic", entry, tail)
+		if err != nil {
+			t.Fatal(err)
+		}
+		records = append(records, Record{Entry: entry, Sequence: seq})
+		tail = seq
+	}
+	return records
+}
+func nativeRootGraphReadable(t *testing.T, ctx context.Context, port *NativeSnapshotPort, key string) blobpublication.Root {
+	t.Helper()
+	root, value, err := port.manifestRoot(ctx, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, hash := range value.Objects {
+		data, err := port.GetOwnedObject(ctx, key, name)
+		if err != nil || snapshotHash(data) != hash {
+			t.Fatal("native snapshot dangling graph", name, err)
+		}
+	}
+	return root
+}
+func TestNativeSnapshotRetainedGraph(t *testing.T) {
+	for _, replicas := range []int{1, 3} {
+		t.Run(fmt.Sprintf("R%d", replicas), func(t *testing.T) {
+			port, store, ctx, directory := nativeJournalSnapshotFixture(t, replicas)
+			result := []byte("retained step result")
+			signal := []byte("retained signal payload")
+			resultName := "step-result-" + snapshotHash(result)
+			signalName := "signal-" + snapshotHash(signal)
+			for name, data := range map[string][]byte{resultName: result, signalName: signal} {
+				if err := port.PutObject(ctx, name, data); err != nil {
+					t.Fatal(err)
+				}
+			}
+			done, _ := json.Marshal(map[string]string{"result_ref": resultName, "result_hash": snapshotHash(result)})
+			consumed, _ := json.Marshal(map[string]any{"ref": signalName, "sig_seq": uint64(1)})
+			records := nativeAppendRecords(t, ctx, store, []Entry{{Epoch: 1, Index: 0, Kind: Started}, {Epoch: 1, Index: 1, Kind: StepRequested}, {Epoch: 1, Index: 2, Kind: StepCompleted, Payload: done}, {Epoch: 1, Index: 3, Kind: SignalConsumed, Payload: consumed}, {Epoch: 1, Index: 4, Kind: Suspended}})
+			snap, err := store.WriteSnapshot(ctx, "test", "atomic", 1)
+			if err != nil {
+				t.Fatal(err)
+			}
+			key := snapshotKey("test", "atomic")
+			root := nativeRootGraphReadable(t, ctx, port, key)
+			if len(root.Blobs) != 3 {
+				t.Fatal("snapshot graph omitted references", len(root.Blobs))
+			}
+			if n, err := (blobpublication.Protocol{Port: port.Native}).Sweep(ctx, time.Now().Add(time.Hour)); err != nil || n != 0 {
+				t.Fatal("live graph reclaimed", n, err)
+			}
+			// Purge the live prefix only after the canonical manifest is confirmed.
+			if err = store.PurgeSnapshot(ctx, "test", "atomic", snap); err != nil {
+				t.Fatal(err)
+			}
+			got, tail, err := store.Read(ctx, "test", "atomic")
+			if err != nil || len(got) != len(records) || tail != records[len(records)-1].Sequence {
+				t.Fatal("canonical snapshot replay failed", len(got), tail, err)
+			}
+			stale := root.Head
+			if _, err = store.Append(ctx, "test", "atomic", Entry{Epoch: 1, Index: 5, Kind: Completed}, tail); err != nil {
+				t.Fatal(err)
+			}
+			newer, err := store.WriteSnapshot(ctx, "test", "atomic", 1)
+			if err != nil {
+				t.Fatal(err)
+			}
+			current := nativeRootGraphReadable(t, ctx, port, key)
+			if current.Head <= stale || newer.LastSeq <= snap.LastSeq {
+				t.Fatal("snapshot revision did not advance")
+			}
+			oldData, _ := json.Marshal(records[:4])
+			if _, err = port.PublishSnapshot(ctx, key, stale, snap, oldData); !errors.Is(err, ErrSnapshotStale) {
+				t.Fatal("stale manifest overwrote newer", err)
+			}
+			if n, err := (blobpublication.Protocol{Port: port.Native}).Sweep(ctx, time.Now().Add(time.Hour)); err != nil || n != 1 {
+				t.Fatal("superseded archive not reclaimed", n, err)
+			}
+			if _, err = port.GetOwnedObject(ctx, key, snap.Object); !errors.Is(err, ErrSnapshotSuperseded) {
+				t.Fatal("old archive not classified superseded", err)
+			}
+			nativeRootGraphReadable(t, ctx, port, key)
+			if err = port.RetireManifest(ctx, key, current.Head); err != nil {
+				t.Fatal(err)
+			}
+			if n, err := (blobpublication.Protocol{Port: port.Native}).Sweep(ctx, time.Now().Add(time.Hour)); err != nil || n != 3 {
+				t.Fatal("retired graph not reclaimed", n, err)
+			}
+			objects, err := port.Native.Objects(ctx)
+			if err != nil || len(objects) != 0 {
+				t.Fatal("physical snapshot objects remain", objects, err)
+			}
+			nativeSnapshotProof(t, directory, map[string]any{"scenario": "retained-graph", "replicas": replicas, "first_snapshot": snap, "first_root": root, "newer_snapshot": newer, "newer_root": current, "records_replayed": len(got), "result_and_signal_retained": true, "stale_publication_rejected": true, "superseded_archive_reclaimed": true, "retired_graph_reclaimed": true})
+		})
+	}
+}
+func TestNativeCheckpointSnapshotPromiseGraph(t *testing.T) {
+	for _, replicas := range []int{1, 3} {
+		t.Run(fmt.Sprintf("R%d", replicas), func(t *testing.T) {
+			port, store, ctx, directory := nativeJournalSnapshotFixture(t, replicas)
+			result := []byte("promise outcome retained only in frame")
+			resultName := "terminal-result-" + snapshotHash(result)
+			if err := port.PutObject(ctx, resultName, result); err != nil {
+				t.Fatal(err)
+			}
+			outcome, _ := json.Marshal(map[string]any{"inv_seq": uint64(17), "result_ref": resultName, "result_hash": snapshotHash(result)})
+			frame := checkpoint.Frame{Version: 1, Identity: checkpoint.Identity{Type: "test", ID: "atomic", InvSeq: 17}, Stage: "next_v1", Data: json.RawMessage(`23`), Anchor: checkpoint.Anchor{Index: 2, Epoch: 1}, StepPosition: 2, PromiseOutcomes: map[string]json.RawMessage{"child": outcome}}
+			frameBytes, hash, err := checkpoint.Encode(frame)
+			if err != nil {
+				t.Fatal(err)
+			}
+			frameName := "step-result-" + hash
+			if err = port.PutObject(ctx, frameName, frameBytes); err != nil {
+				t.Fatal(err)
+			}
+			request, _ := json.Marshal(map[string]string{"kind": "checkpoint", "name": "next_v1", "input_hash": snapshotHash(frame.Data)})
+			done, _ := json.Marshal(map[string]string{"result_ref": frameName, "result_hash": hash})
+			records := nativeAppendRecords(t, ctx, store, []Entry{{Epoch: 1, Index: 0, Kind: Started}, {Epoch: 1, Index: 1, Kind: StepRequested, Payload: request}, {Epoch: 1, Index: 2, Kind: StepCompleted, Payload: done}, {Epoch: 1, Index: 3, Kind: Suspended}})
+			runtime := RuntimeCheckpoint{InvSeq: 17, Stage: "next_v1", Sequence: records[2].Sequence, Index: 2, Epoch: 1, StepPosition: 2, Object: frameName, SHA256: hash}
+			snap, err := store.WriteCheckpointSnapshot(ctx, "test", "atomic", runtime)
+			if err != nil {
+				t.Fatal(err)
+			}
+			key := snapshotKey("test", "atomic")
+			root := nativeRootGraphReadable(t, ctx, port, key)
+			if len(root.Blobs) != 3 {
+				t.Fatal("frame promise dependency omitted", len(root.Blobs))
+			}
+			if n, err := (blobpublication.Protocol{Port: port.Native}).Sweep(ctx, time.Now().Add(time.Hour)); err != nil || n != 0 {
+				t.Fatal("checkpoint graph reclaimed", n, err)
+			}
+			if err = store.PurgeSnapshot(ctx, "test", "atomic", snap); err != nil {
+				t.Fatal(err)
+			}
+			view, err := store.ReadCheckpoint(ctx, "test", "atomic", 17)
+			if err != nil || view == nil || snapshotHash(view.Frame) != hash || len(view.Records) != 2 {
+				t.Fatal("canonical fast resume failed", view, err)
+			}
+			// Import must be sufficient even after legacy copies are removed.
+			legacyJS := port.Source.(*jetStreamSnapshotReadPort).js
+			legacy, err := legacyJS.ObjectStore(ctx, "WF_BLOB")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err = legacy.Delete(ctx, resultName); err != nil {
+				t.Fatal(err)
+			}
+			if err = legacy.Delete(ctx, frameName); err != nil {
+				t.Fatal(err)
+			}
+			if _, err = store.ReadCheckpoint(ctx, "test", "atomic", 17); err != nil {
+				t.Fatal("frame depended on legacy bytes", err)
+			}
+			if bytes, err := port.GetBytes(ctx, resultName); err != nil || snapshotHash(bytes) != snapshotHash(result) {
+				t.Fatal("promise result depended on legacy bytes", err)
+			}
+			all, _, err := store.Read(ctx, "test", "atomic")
+			if err != nil || len(all) != len(records) {
+				t.Fatal("full archival replay failed", len(all), err)
+			}
+			if err = port.RetireManifest(ctx, key, root.Head); err != nil {
+				t.Fatal(err)
+			}
+			if n, err := (blobpublication.Protocol{Port: port.Native}).Sweep(ctx, time.Now().Add(time.Hour)); err != nil || n != 3 {
+				t.Fatal("checkpoint retirement leaked", n, err)
+			}
+			nativeSnapshotProof(t, directory, map[string]any{"scenario": "checkpoint-promise-graph", "replicas": replicas, "snapshot": snap, "root": root, "frame_sha256": hash, "frame_and_promise_imported": true, "legacy_bytes_removed": true, "fast_resume_records": len(view.Records), "full_replay_records": len(all), "all_imported_objects_reclaimed": true})
+		})
+	}
+}
+func TestSnapshotSupersededRetriesWholeRead(t *testing.T) {
+	for _, virtual := range []bool{false, true} {
+		get := func(context.Context, string) ([]byte, error) { return nil, ErrSnapshotSuperseded }
+		var err error
+		if virtual {
+			_, err = verifiedSnapshotObjectVirtual(context.Background(), get, func(context.Context, time.Duration) error {
+				t.Fatal("superseded read waited for absent bytes")
+				return nil
+			}, "old", "unused")
+		} else {
+			_, err = verifiedSnapshotObject(context.Background(), get, "old", "unused")
+		}
+		var objectGap *snapshotObjectGap
+		if !errors.Is(err, ErrGap) || errors.As(err, &objectGap) {
+			t.Fatal("superseded read prevents whole-manifest retry", err)
+		}
+	}
+}

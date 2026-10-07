@@ -1,0 +1,3 @@
+# Development probe failures retained
+
+The original focused race run failed: both R1/R3 retained-graph cases passed, checkpoint cases incorrectly expected the anchor to be included in CheckpointRead.Records (it is returned separately as Anchor), and the PrepareAt race probe's Put hook returned success without storing any bytes before expecting a deletion. The corrections change those test assumptions. Ordinary temporary stores and actual development SDK were not retained; this is not source-bound native qualification. The full command output and failed probe sources are preserved; the successful native controls will receive their own retained committed-source qualification.

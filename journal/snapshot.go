@@ -58,6 +58,28 @@ type SnapshotWritePort interface {
 	PurgeSignals(context.Context, string, uint64) error
 }
 
+// AtomicSnapshotPublisher supplies a canonical manifest publication that pins
+// the entire retained object graph before one destination CAS. Existing ports
+// keep the separate object/manifest sequence.
+type AtomicSnapshotPublisher interface {
+	PublishSnapshot(context.Context, string, uint64, Snapshot, []byte) (Snapshot, error)
+}
+
+// OwnedSnapshotReadPort resolves logical names through the current canonical
+// snapshot's pinned graph. A superseded read retries the manifest as a whole.
+type OwnedSnapshotReadPort interface {
+	GetOwnedObject(context.Context, string, string) ([]byte, error)
+}
+
+var ErrSnapshotSuperseded = errors.New("snapshot object belongs to a superseded manifest")
+
+func snapshotObjectGetter(port SnapshotReadPort, key string) func(context.Context, string) ([]byte, error) {
+	if owned, ok := port.(OwnedSnapshotReadPort); ok {
+		return func(ctx context.Context, name string) ([]byte, error) { return owned.GetOwnedObject(ctx, key, name) }
+	}
+	return port.GetObject
+}
+
 type jetStreamSnapshotReadPort struct {
 	js      jetstream.JetStream
 	state   handlecache.Cache[jetstream.KeyValue]
@@ -295,6 +317,14 @@ func (s *Store) writeSnapshot(ctx context.Context, typ, id string, keep int, run
 	digest := sha256.Sum256(data)
 	keyDigest := sha256.Sum256([]byte(identity.Key(typ, id)))
 	objectName := fmt.Sprintf("snapshot-%s-%d-%s", hex.EncodeToString(keyDigest[:8]), last.Sequence, hex.EncodeToString(digest[:8]))
+	snap := Snapshot{Version: 1, LastSeq: last.Sequence, LastIndex: last.Index, Epoch: last.Epoch, Object: objectName, SHA256: hex.EncodeToString(digest[:]), Runtime: runtime}
+	if runtime != nil {
+		snap.Version = 2
+	}
+	if atomic, ok := port.(AtomicSnapshotPublisher); ok {
+		result, err := atomic.PublishSnapshot(ctx, snapshotKey(typ, id), old.Revision, snap, data)
+		return result, err
+	}
 	if err := port.PutObject(ctx, objectName, data); err != nil {
 		return empty, err
 	}
@@ -308,10 +338,6 @@ func (s *Store) writeSnapshot(ctx context.Context, typ, id string, keep int, run
 	}
 	if err != nil {
 		return empty, err
-	}
-	snap := Snapshot{Version: 1, LastSeq: last.Sequence, LastIndex: last.Index, Epoch: last.Epoch, Object: objectName, SHA256: hex.EncodeToString(digest[:]), Runtime: runtime}
-	if runtime != nil {
-		snap.Version = 2
 	}
 	manifest, _ := json.Marshal(snap)
 	if !oldExists {
@@ -432,9 +458,9 @@ func (s *Store) loadSnapshot(ctx context.Context, typ, id string) ([]Record, *Sn
 	if waiter, ok := port.(interface {
 		Wait(context.Context, time.Duration) error
 	}); ok {
-		data, err = verifiedSnapshotObjectVirtual(ctx, port.GetObject, waiter.Wait, snap.Object, snap.SHA256)
+		data, err = verifiedSnapshotObjectVirtual(ctx, snapshotObjectGetter(port, key), waiter.Wait, snap.Object, snap.SHA256)
 	} else {
-		data, err = verifiedSnapshotObject(ctx, port.GetObject, snap.Object, snap.SHA256)
+		data, err = verifiedSnapshotObject(ctx, snapshotObjectGetter(port, key), snap.Object, snap.SHA256)
 	}
 	if err != nil {
 		return nil, nil, err
@@ -507,6 +533,9 @@ func verifiedSnapshotObjectVirtual(ctx context.Context, get func(context.Context
 	var lastErr error
 	for attempt := 0; attempt < 80; attempt++ {
 		data, err := get(ctx, name)
+		if errors.Is(err, ErrSnapshotSuperseded) {
+			return nil, fmt.Errorf("%w: %w", ErrGap, err)
+		}
 		if err == nil {
 			digest := sha256.Sum256(data)
 			if hex.EncodeToString(digest[:]) == wantHash {

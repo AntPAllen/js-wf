@@ -132,6 +132,25 @@ func (p Protocol) Prepare(ctx context.Context, destination string, payload []byt
 	if err != nil {
 		return Prepared{}, err
 	}
+	return p.prepareAt(ctx, destination, root.Head, payload, blobs, expires)
+}
+
+// PrepareAt retains the caller's original destination revision while acquiring
+// blob pins. A stale caller cannot overwrite a publication observed later.
+func (p Protocol) PrepareAt(ctx context.Context, destination string, expected uint64, payload []byte, blobs [][]byte, expires time.Time) (Prepared, error) {
+	if destination == "" || expires.IsZero() {
+		return Prepared{}, errors.New("destination and expiration required")
+	}
+	root, err := p.Port.ReadRoot(ctx, destination)
+	if err != nil {
+		return Prepared{}, err
+	}
+	if root.Head != expected {
+		return Prepared{}, ErrConflict
+	}
+	return p.prepareAt(ctx, destination, expected, payload, blobs, expires)
+}
+func (p Protocol) prepareAt(ctx context.Context, destination string, expected uint64, payload []byte, blobs [][]byte, expires time.Time) (Prepared, error) {
 	token, err := p.id()
 	if err != nil {
 		return Prepared{}, err
@@ -139,13 +158,13 @@ func (p Protocol) Prepare(ctx context.Context, destination string, payload []byt
 	if !validID(token) {
 		return Prepared{}, errors.New("invalid publication ID")
 	}
-	result := Prepared{destination: destination, expected: root.Head, publication: Root{Token: token, Blobs: map[string]Reference{}, Data: append([]byte(nil), payload...)}}
+	result := Prepared{destination: destination, expected: expected, publication: Root{Token: token, Blobs: map[string]Reference{}, Data: append([]byte(nil), payload...)}}
 	for _, data := range blobs {
 		k := key(data)
 		if _, exists := result.publication.Blobs[k]; exists {
 			continue
 		}
-		ref, err := p.acquire(ctx, k, data, token, Intent{Root: destination, Expected: root.Head, Expires: expires})
+		ref, err := p.acquire(ctx, k, data, token, Intent{Root: destination, Expected: expected, Expires: expires})
 		if err != nil {
 			return Prepared{}, err
 		}
