@@ -5611,3 +5611,10 @@ Native race sourceffcc107/actual SDK3807458 passes28.74s with the original stric
 Persistent domain CI includes `leaf-retirement-hub-restart`. This closes the focused leaf retirement/reuse/graceful all-hub restart component. Leaf SIGKILL/lease-expiry combinations, packaged daemon/child traffic through a leaf, broad leaf matrices, online active-writer GC, million physical drain and complete release requirements remain open.
 
 The explicit parallel/fresh-watch recovery profile now also has an accepted original ten-minute journal row at ecb2f89 and a fresh original24h journal run actually live atbc9f92b. These source-bound recorded scopes do not qualify the whole release or historical failed original24h. [Ten-minute review](scale/parallel-recovery-journal-ten-minute-2026-10-07/terminal/), [fresh24h admission](scale/parallel-recovery-journal-24h-2026-10-07/launch/).
+
+
+## Abrupt leaf endpoint loss with hub restart accepted — 2026-10-07
+
+Explicit `leaf-retirement-sigkill-hub-restart` at4a49240 passes original strict retirement/reuse under race in30.00s. Actual separate stock leaf SIGKILL/reap, all three client disconnects, distinct replacement identity/same executable/argv/store, all hub graceful replacements, all ten stream replica sets, remote domain traffic and zero local streams verify; original whole-cut30s target finishes9.0828s. Independent complete-source/SDK/leaf-process/archive review and25 proof mutations accept. [Full proof and retained failed attempts](scale/leaf-domain-sigkill-2026-10-07/native-race/).
+
+CI retains hub-only and abrupt-leaf profiles. The original worker-operation context may cancel during endpoint loss; the external fault observer now remains bounded by the original cut-start-plus30s instead. All-hub SIGKILL, leaf/lease-expiry combinations, packaged daemon/child wire paths, broad leaf matrices and full release requirements remain open.

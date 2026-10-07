@@ -31,4 +31,18 @@ class LeafDomainProofControls(unittest.TestCase):
             with self.subTest(mutation=i),self.assertRaises((AssertionError,ValueError,KeyError)):
                 validate(bad)
 
+    def test_actual_sigkill_requires_exit_identity_and_all_client_disconnects(self):
+        baseline=json.loads((Path(__file__).resolve().parents[1]/'docs/scale/leaf-domain-sigkill-2026-10-07/native-race/leaf-domain-proof.json').read_text())
+        validate(baseline,'leaf-sigkill-hub-restart')
+        variants=[lambda p:p.update(fault_profile='hub-restart'),lambda p:p.update(leaf_signal='terminated'),
+                  lambda p:p.update(leaf_exit_observed=False),lambda p:p.update(leaf_pid_after=p['leaf_pid_before']),
+                  lambda p:p.update(leaf_original_id=p['leaf_id']),lambda p:p.update(client_disconnects=[True,True]),
+                  lambda p:p['leaf_before'].update(server_id=p['leaf_id'])]
+        for i,change in enumerate(variants):
+            bad=copy.deepcopy(baseline);change(bad)
+            with self.subTest(mutation=i),self.assertRaises((AssertionError,ValueError,KeyError)):
+                validate(bad,'leaf-sigkill-hub-restart')
+        hub_only=json.loads((Path(__file__).resolve().parents[1]/'docs/scale/leaf-domain-retirement-2026-10-07/native-race/leaf-domain-proof.json').read_text())
+        with self.assertRaises(AssertionError):validate(hub_only,'leaf-sigkill-hub-restart')
+
 if __name__=='__main__':unittest.main()

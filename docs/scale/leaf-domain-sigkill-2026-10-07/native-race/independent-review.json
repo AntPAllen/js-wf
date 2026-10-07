@@ -1,0 +1,126 @@
+{
+  "build_vcs_stamp_present": true,
+  "source_binding": "Verified complete selected source before/after, captured files and Git blobs plus recorded compiler command and actual live SDK digest; actual race binary buildVCS matches the executed source.",
+  "source": "4a492409b7c8079ed6fc380e58f317d098ef2e93",
+  "source_inputs_verified": 2094,
+  "actual_sdk": {
+    "pid": 3931497,
+    "stat": "3931497 (integration-rac) S 3926809 3926809 3926809 0 -1 4194304 11080 0 0 0 4 3 0 0 39 19 8 0 18174599 2218864640 16911 18446744073709551615 4194304 35151728 140733841977696 0 0 0 0 0 2143420159 0 0 0 17 3 0 0 0 0 0 55095296 55814048 233816064 140733841984397 140733841984597 140733841984597 140733841985445 0\n",
+    "start_ticks": "18174599",
+    "args": [
+      "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/integration-race.test",
+      "-test.v",
+      "-test.run=^(TestContinuationRetirementReuseThroughLeafSIGKILLWithHubRestart)$",
+      "-test.count=1",
+      "-test.timeout=3m"
+    ],
+    "exe": "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/integration-race.test",
+    "working_directory": "/home/exedev/js-wf",
+    "environment": {
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "1GiB",
+      "WF_RESULT_ABSENCE_ROOT": "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/stores",
+      "WF_SNAPSHOT_LEADER_ROOT": "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/stores",
+      "WF_CONTINUATION_RETIREMENT_PROCESS_ROOT": "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/stores",
+      "WF_CONTINUATION_DOMAIN_ROOT": "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/stores/leaf-scenario"
+    },
+    "exe_sha256": "9ffa37d204fa28a5f612c0d732d669b24cc1dafe4e2d2f4598fc58d4e01aef8b",
+    "admission": {
+      "observations": 1,
+      "rejected_observations": 0,
+      "first_missing_environment_keys": [],
+      "stable_identity_observed_twice": true,
+      "scope": "Actual live process identity before/after executable digest; incomplete reads repeated without killing or relaunching."
+    }
+  },
+  "embedded_brokers": "Three hub NATS library servers run in the admitted race SDK. Separate leaf process identities and native SIGKILL are verified only for an accepted row; missing short-lived process observations in a startup failure are not inferred. Module version is build-info provenance, not a complete prebuild external-source census.",
+  "archive_every_member_verified": {
+    "bytes": 52409625,
+    "sha256": "11c4c4cdaa82a8af9cf3b83e006eeac97579ba8494a47ded3d34959f8764fdbd"
+  },
+  "files": 2528,
+  "accepted": true,
+  "original_stores_not_reopened": true,
+  "full_matrix_24h_qualified": false,
+  "log_review": {
+    "case": "leaf-retirement-sigkill-hub-restart",
+    "tests": [
+      "TestContinuationRetirementReuseThroughLeafSIGKILLWithHubRestart"
+    ],
+    "scope": "Focused native row only; full matrix/24h not qualified."
+  },
+  "leaf_review": {
+    "remote_domain": "WFRETIRE",
+    "local_domain": "WFEDGE",
+    "hub_originals": 3,
+    "hub_replacements": 3,
+    "fault_profile": "leaf-sigkill-hub-restart",
+    "leaf_process_sigkill": true,
+    "leaf_disconnect_and_reconnect": true,
+    "whole_cut_seconds": 9.082754,
+    "api_subjects": 122,
+    "scope": "Single leaf-connected strict retirement/reuse and graceful all-hub restart, plus actual leaf SIGKILL only when explicitly selected; no all-hub SIGKILL, lease-expiry, daemon-child wire or broad leaf matrix claim."
+  },
+  "actual_stock_leaf_incarnations": [
+    {
+      "pid": 3931688,
+      "birth": "18174777",
+      "exe": "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/stores/leaf-scenario/leaf-process/nats-server",
+      "exe_sha256": "24759ea94c030a9c5f1cd7fc61c74e14615a3c35650b5bb28b29891b5899ba9d",
+      "stat": "3931688 (nats-server) S 3931497 3926809 3926809 0 -1 4194304 1275 0 0 0 1 0 0 0 39 19 7 0 18174777 1762041856 4536 18446744073709551615 4194304 12824208 140736863581536 0 0 0 1002057728 0 2143420159 0 0 0 17 0 0 0 0 0 0 21082112 21497536 1061425152 140736863587008 140736863587389 140736863587389 140736863588237 0\n",
+      "args": [
+        "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/stores/leaf-scenario/leaf-process/nats-server",
+        "-a",
+        "127.0.0.1",
+        "-p",
+        "44603",
+        "-m",
+        "38295",
+        "-n",
+        "wf-process-0",
+        "-js",
+        "-sd",
+        "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/stores/leaf-scenario/leaf-process/node-0",
+        "-c",
+        "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/stores/leaf-scenario/leaf-process/node-0-domain.conf"
+      ],
+      "build_info": "/proc/3931688/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    },
+    {
+      "pid": 3933084,
+      "birth": "18176519",
+      "exe": "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/stores/leaf-scenario/leaf-process/nats-server",
+      "exe_sha256": "24759ea94c030a9c5f1cd7fc61c74e14615a3c35650b5bb28b29891b5899ba9d",
+      "stat": "3933084 (nats-server) S 3931497 3926809 3926809 0 -1 4194304 1186 0 0 0 1 0 0 0 39 19 8 0 18176519 1837543424 4340 18446744073709551615 4194304 12824208 140725252742016 0 0 0 1002057728 0 2143420159 0 0 0 17 2 0 0 0 0 0 21082112 21497536 350990336 140725252750016 140725252750397 140725252750397 140725252751245 0\n",
+      "args": [
+        "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/stores/leaf-scenario/leaf-process/nats-server",
+        "-a",
+        "127.0.0.1",
+        "-p",
+        "44603",
+        "-m",
+        "38295",
+        "-n",
+        "wf-process-0",
+        "-js",
+        "-sd",
+        "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/stores/leaf-scenario/leaf-process/node-0",
+        "-c",
+        "/tmp/js-wf-leaf-domain-sigkill-independent-observer-20261007/stores/leaf-scenario/leaf-process/node-0-domain.conf"
+      ],
+      "build_info": "/proc/3933084/exe: go1.27.1\n\tpath\tgithub.com/nats-io/nats-server/v2\n\tmod\tgithub.com/nats-io/nats-server/v2\tv2.15.0\th1:M99yf0y05rTr46/qc/Is6ZAowI58Ryp2SjufLCUeVJc=\n\tdep\tgithub.com/antithesishq/antithesis-sdk-go\tv0.8.0-default-no-op\th1:1BOWQJweNyvZMlpAHXGLiZQn9S+QXGcz3xh94lC0w6E=\n\tdep\tgithub.com/klauspost/compress\tv1.20.0\th1:a3C1ke2ohxFymNlb2HWAHjDeKCI90scRskErZkR0ezA=\n\tdep\tgithub.com/minio/highwayhash\tv1.0.4\th1:asJizugGgchQod2ja9NJlGOWq4s7KsAWr5XUc9Clgl4=\n\tdep\tgithub.com/nats-io/jwt/v2\tv2.8.2\th1:XXRgB60MSTnqsRwejQurVDs/hcv2dkt+86GjI+I/bMc=\n\tdep\tgithub.com/nats-io/nkeys\tv0.4.16\th1:rd5oAuLOb8mnAycB0xleuEBNS1pVVnN0fv/FF34Eypg=\n\tdep\tgithub.com/nats-io/nuid\tv1.0.1\th1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=\n\tdep\tgolang.org/x/crypto\tv0.57.0\th1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=\n\tdep\tgolang.org/x/sys\tv0.48.0\th1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=\n\tdep\tgolang.org/x/time\tv0.16.0\th1:vMb6ptszcQMkcwiRTAuNNU50gom6++Q/6gY2hDM6VDE=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n"
+    }
+  ],
+  "same_leaf_executable_argv_and_store": true,
+  "hub_metadata_admission": {
+    "all_hubs_current": true,
+    "leader": "wf-test-2",
+    "observed_at": "2026-10-07T10:13:46.272153754Z",
+    "peers": [
+      "wf-test-0",
+      "wf-test-1",
+      "wf-test-2"
+    ]
+  },
+  "rejected_actual_proof_mutations": 25
+}
