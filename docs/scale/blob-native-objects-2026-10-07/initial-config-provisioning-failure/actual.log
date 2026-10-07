@@ -1,0 +1,42 @@
+=== RUN   TestNativeObjectSameStoreColdRestart
+=== RUN   TestNativeObjectSameStoreColdRestart/R1
+    nats_objects_test.go:631: native object cold restart: R1 all peers shut down/joined/replaced on same stores; live bytes and attempt tombstones retained, stale metadata rejected; chunks=0
+=== RUN   TestNativeObjectSameStoreColdRestart/R3
+    nats_objects_test.go:631: native object cold restart: R3 all peers shut down/joined/replaced on same stores; live bytes and attempt tombstones retained, stale metadata rejected; chunks=0
+--- PASS: TestNativeObjectSameStoreColdRestart (6.26s)
+    --- PASS: TestNativeObjectSameStoreColdRestart/R1 (0.26s)
+    --- PASS: TestNativeObjectSameStoreColdRestart/R3 (6.00s)
+=== RUN   TestNativeObjectUnsafeConfiguration
+=== RUN   TestNativeObjectUnsafeConfiguration/age
+=== RUN   TestNativeObjectUnsafeConfiguration/messages
+=== RUN   TestNativeObjectUnsafeConfiguration/bytes
+=== RUN   TestNativeObjectUnsafeConfiguration/chunks_per_subject
+=== RUN   TestNativeObjectUnsafeConfiguration/direct
+=== RUN   TestNativeObjectUnsafeConfiguration/memory
+=== RUN   TestNativeObjectUnsafeConfiguration/ttl
+=== RUN   TestNativeObjectUnsafeConfiguration/no_rollup
+=== RUN   TestNativeObjectUnsafeConfiguration/purge_denied
+    nats_objects_test.go:664: nats: API error: code=500 err_code=10052 description=roll-ups require the purge permission
+=== RUN   TestNativeObjectUnsafeConfiguration/delete_allowed
+=== RUN   TestNativeObjectUnsafeConfiguration/wrong_format
+=== RUN   TestNativeObjectUnsafeConfiguration/async_persist
+=== RUN   TestNativeObjectUnsafeConfiguration/atomic
+=== RUN   TestNativeObjectUnsafeConfiguration/schedules
+--- FAIL: TestNativeObjectUnsafeConfiguration (0.13s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/age (0.01s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/messages (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/bytes (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/chunks_per_subject (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/direct (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/memory (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/ttl (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/no_rollup (0.01s)
+    --- FAIL: TestNativeObjectUnsafeConfiguration/purge_denied (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/delete_allowed (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/wrong_format (0.01s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/async_persist (0.01s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/atomic (0.00s)
+    --- PASS: TestNativeObjectUnsafeConfiguration/schedules (0.00s)
+FAIL
+FAIL	js-wf/internal/blobpublication	6.415s
+FAIL
