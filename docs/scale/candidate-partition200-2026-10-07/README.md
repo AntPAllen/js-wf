@@ -16,8 +16,8 @@ Every seed must retain its original terminal producer/SDK/server identity, compl
 
 ## Current native progress
 
-Original seed1 passes665.72s body and the producer validates all three exact candidate identities. Seed2 is live under the same original supervisor. [Recorded progress](native-progress/). This is native execution only; independent candidate source/fault/history/store/archive qualification remains pending. Initial failed preparation/source/archive are fully S3-backed and [retired](preparation-failure/reclaimed/).
+Original seeds1–3 pass665.72/686.88/703.76s bodies and the producer validates all three exact candidate identities for each. Seed4 is live under the original supervisor. Initial failed preparation/source/archive are fully S3-backed and [retired](preparation-failure/reclaimed/). Full200 native coverage and terminal independent qualification remain pending.
 
 ## Independent candidate review available
 
-Seed1 is independently accepted with all19 fault records,9108 latency samples,2484 operations in each of three history models,745 Git/3355 external inputs and exact three candidate peers;27 actual-proof substitutions reject. [Complete proof and limits](seed001-independent/). Seed2 native passes; the original supervisor continues seed3. Full200 remains pending.
+Seed1 is independently accepted with all19 fault records,9108 latency samples,2484 operations in each of three history models,745 Git/3355 external inputs and exact three candidate peers;27 actual-proof substitutions reject. [Complete proof and limits](seed001-independent/). Seeds2 and3 are independently accepted against all19 faults, raw latency samples, three history models,745 Git/3355 external inputs and actual candidate bytes. [Seed2 proof](seed002-independent/) and [seed3 proof](seed003-independent/) preserve complete original fixtures and reviewer artifacts. Seed4 continues under the same supervisor. Full200 remains pending.

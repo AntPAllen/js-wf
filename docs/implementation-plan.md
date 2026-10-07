@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Candidate partition seeds 2–3 independently accepted — 2026-10-07
+
+At original isolated `f3f7913`, actual SDK2411181/2464955 pass the unchanged 10m/count1/nonrace partition cases in686.88/703.76s, with1904/1988 invocations,21048/21979 journal entries and19 cuts each. Independent candidate-aware review validates raw faults/latencies, all three history models,745 selected Git/3355 external inputs and exact original A569 candidate server bytes/identities. Complete native and reviewer artifacts are captured for S3 preservation. [Seed2](scale/candidate-partition200-2026-10-07/seed002-independent/) and [seed3](scale/candidate-partition200-2026-10-07/seed003-independent/). Original full200 supervisor continues seed4; full-row/default production,13x200/16x200,actual24h,safe onlineGC,original million physical drain and dependency adoption remain open.
+
 ## Complete123-workload normal100000 graph live — 2026-10-07
 
 Actual normal SDK2045340 runs the original full123-workload/395-pin graph at isolated4a04e00 with100000 seeds per workload/count1/300m/twoGoCPU/512MiB. Independent admission verifies2215 selected Git inputs, exact live binary/argv/birth/profile/cwd, compiled/source inventories and original retained service. [Launch and terminal requirements](scale/tier1-full123-2026-10-07/normal100k-launch/). Full123 race1000 is independently accepted and S3-preserved; full normal12300000-body acceptance awaits terminal evidence. Both SQL SIGINT original failure and accepted full50000 fixtures/owned stoppedSQL volumes are now verified S3-backed and retired,1.55GiB reclaimed. Original24h remains live. Full native matrices, safe onlineGC, original million physical drain and fullrelease remain open.
