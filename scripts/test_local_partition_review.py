@@ -39,6 +39,21 @@ class LocalPartitionReviewControls(unittest.TestCase):
                 else:changed['records'][0]['root']='../other-root'
                 with self.subTest(mutation=mutation),self.assertRaises(ValueError):review.contract(changed)
 
+    def test_candidate_requires_explicit_profile_and_every_seed_identity(self):
+        candidate=state();candidate.update(server_profile='experimental-component-candidate',candidate_sha256='b'*64)
+        for record in candidate['records']:record.update(server_profile='experimental-component-candidate',profile_verified=True,candidate_sha256='b'*64)
+        with patch.object(review,'closed_instance'):
+            with self.assertRaises(ValueError):review.contract(candidate)
+            self.assertEqual(len(review.contract(candidate,server_profile='experimental-component-candidate')),200)
+            for field,value in [('candidate_sha256','c'*64),('profile_verified',1),('profile_verified',False),('server_profile','default')]:
+                altered=copy.deepcopy(candidate);altered['records'][17][field]=value
+                with self.subTest(field=field,value=value),self.assertRaises(ValueError):review.contract(altered,server_profile='experimental-component-candidate')
+            partial=copy.deepcopy(candidate);partial.update(status='running',native_coverage_complete=False,records=candidate['records'][:1])
+            self.assertEqual(len(review.contract(partial,1,'experimental-component-candidate')),1)
+            with self.assertRaises(ValueError):review.contract(partial,server_profile='experimental-component-candidate')
+            original=state();original['records'][0]['profile_verified']=False
+            with self.assertRaises(ValueError):review.contract(original)
+
     def test_native_failure_or_substitution_rejects_before_reading_payload(self):
         base=dict(source='a'*40,row='partition',test=review.TEST,duration='10m',race=False,
                   sustained_ten_minutes=True,status='passed',exit_code=0,server_observer_errors=0)
