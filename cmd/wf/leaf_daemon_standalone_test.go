@@ -9,10 +9,12 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 	"testing"
 	"time"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"js-wf/identity"
 	"js-wf/provision"
@@ -37,7 +39,23 @@ func TestOperatorStandaloneDaemonSignalsThroughLeaf(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer cluster.Close()
-	js, err := jetstream.NewWithDomain(cluster.Clients[0], "WFOPS")
+	observations, err := os.Create(filepath.Join(root, "parent-consumer-info.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer observations.Close()
+	var observeMu sync.Mutex
+	trace := &jetstream.ClientTrace{ResponseReceived: func(subject string, payload []byte, headers nats.Header) {
+		if !strings.Contains(subject, ".CONSUMER.INFO.WF_JRN.WF_VIEW") {
+			return
+		}
+		observeMu.Lock()
+		defer observeMu.Unlock()
+		if e := json.NewEncoder(observations).Encode(map[string]any{"at": time.Now().UTC(), "subject": subject, "payload": payload, "headers": headers}); e != nil {
+			t.Error(e)
+		}
+	}}
+	js, err := jetstream.NewWithDomain(cluster.Clients[0], "WFOPS", jetstream.WithClientTrace(trace))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,8 +195,13 @@ func runPackagedLeafDaemon(t *testing.T, ctx context.Context, js jetstream.JetSt
 			} else if command == "project" {
 				consumer, e := js.Consumer(ctx, "WF_JRN", "WF_VIEW")
 				if e == nil {
-					info, e := consumer.Info(ctx)
-					ready = e == nil && info.NumWaiting > 0
+					info, infoErr := consumer.Info(ctx)
+					ready = infoErr == nil && info.NumWaiting > 0
+					if infoErr != nil {
+						t.Logf("packaged project readiness info: %v", infoErr)
+					}
+				} else {
+					t.Logf("packaged project readiness consumer: %v", e)
 				}
 			} else {
 				_, e := state.Get(ctx, key)
