@@ -22,7 +22,6 @@ import (
 
 type nativeCreationState struct {
 	jetstream.KeyValue
-	t      *testing.T
 	first  jetstream.KeyValue
 	nc     *nats.Conn
 	proxy  *testcluster.ClientProxy
@@ -35,11 +34,12 @@ func (s *nativeCreationState) WatchAll(ctx context.Context, opts ...jetstream.Wa
 	s.calls++
 	deadline, _ := ctx.Deadline()
 	if !deadline.Equal(s.parent) {
-		s.t.Fatal("native creation changed the full initial-set deadline")
+		return nil, fmt.Errorf("native creation changed the full initial-set deadline")
 	}
 	if s.calls != 1 {
-		if s.proxy.Stats().Active != 0 || s.proxy.PendingAPI().Disposition != "cancelled" {
-			s.t.Fatal("fresh native watch began before blocked transport joined")
+		pending := s.proxy.PendingAPI()
+		if s.proxy.Stats().Active != 0 || pending == nil || pending.Disposition != "cancelled" {
+			return nil, fmt.Errorf("fresh native watch began before blocked transport joined")
 		}
 		return s.KeyValue.WatchAll(ctx, opts...)
 	}
@@ -49,8 +49,9 @@ func (s *nativeCreationState) WatchAll(ctx context.Context, opts ...jetstream.Wa
 	pending := s.proxy.PendingAPI()
 	if watch != nil || !errors.Is(err, context.Canceled) || pending == nil || pending.ForwardedBytes != 0 || pending.Disposition != "held" ||
 		!strings.HasPrefix(pending.Subject, "$JS.API.CONSUMER.CREATE.KV_WF_STATE.") || elapsed < auditStateProgressInterval || elapsed >= 3*time.Second {
-		s.t.Fatalf("real blocked creation did not cancel: watch=%v err=%v elapsed=%s pending=%+v", watch, err, elapsed, pending)
+		return watch, fmt.Errorf("real blocked creation did not cancel: watch=%v err=%v elapsed=%s pending=%+v", watch, err, elapsed, pending)
 	}
+	s.proof["creation_control_valid"] = true
 	s.proof["first_creation_started"] = started.UTC()
 	s.proof["first_creation_returned"] = time.Now().UTC()
 	s.proof["first_creation_elapsed_ns"] = elapsed.Nanoseconds()
@@ -160,7 +161,7 @@ func TestStateCreationNativeRecovery(t *testing.T) {
 	defer stop()
 	deadline, _ := ctx.Deadline()
 	proof := map[string]any{"scope": "Actual R3 WatchAll pre-publication creation stall and fresh snapshot recovery; no R5/24h/full-cohort qualification", "deadline": deadline.UTC(), "parent_budget_ns": int64(20 * time.Second), "expected_keys": len(expected)}
-	wrapped := &nativeCreationState{KeyValue: state, t: t, first: firstState, nc: nc, proxy: proxy, parent: deadline, proof: proof}
+	wrapped := &nativeCreationState{KeyValue: state, first: firstState, nc: nc, proxy: proxy, parent: deadline, proof: proof}
 	var frames []StateSnapshotObservation
 	observed := WithStateSnapshotObserver(ctx, func(frame StateSnapshotObservation) { frames = append(frames, frame) })
 	include := func(key string) bool { return key != "excluded" }

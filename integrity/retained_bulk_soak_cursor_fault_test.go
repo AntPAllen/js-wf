@@ -229,6 +229,10 @@ func retainedBulkSoakCursorOwnerRestart(t *testing.T, checkpoint, cutoff, expect
 	var watchFault *copiedWatchConnectionLoss
 	var creationFrames []StateSnapshotObservation
 	if creationFault != nil {
+		deadline, _ := call.Deadline()
+		creationFault.parent = deadline
+		creationFault.proof["deadline"] = deadline.UTC()
+		creationFault.proof["parent_budget_ns"] = int64(20 * time.Second)
 		call = WithStateSnapshotObserver(call, func(frame StateSnapshotObservation) { creationFrames = append(creationFrames, frame) })
 	}
 	if os.Getenv("WF_AUDIT_BULK_SOAK_STATE_CONNECTION_LOSS") == "1" || os.Getenv("WF_AUDIT_BULK_SOAK_STATE_PEER_OUTAGE") == "1" {
@@ -436,7 +440,7 @@ func retainedBulkSoakCursorOwnerRestart(t *testing.T, checkpoint, cutoff, expect
 	entryCountMatches := report.Entries > 0 && (expectedEntries == 0 || report.Entries == expectedEntries)
 	qualification := failure == nil && report == want && entryCountMatches && result.JournalVisits == journalState.Msgs && result.ElapsedNS < int64(20*time.Second) && !result.RestartCompleted.IsZero()
 	if creationFault != nil {
-		qualification = qualification && creationFault.calls >= 2 && creationFault.calls <= 3 && result.RecoveredReadiness["KV_WF_STATE"] != nil && result.RecoveredReadiness["KV_WF_STATE"].State.Consumers == 0
+		qualification = qualification && creationFault.proof["creation_control_valid"] == true && creationFault.calls >= 2 && creationFault.calls <= 3 && result.RecoveredReadiness["KV_WF_STATE"] != nil && result.RecoveredReadiness["KV_WF_STATE"].State.Consumers == 0
 	}
 	var journalCursors []cursorObservation
 	for _, cursor := range result.Cursors {

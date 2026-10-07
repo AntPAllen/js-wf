@@ -14,6 +14,8 @@ ns=clock.timestamp_ns
 
 def validate(root,result,servers,identity):
     root=Path(root);p=result['state_creation_stall']
+    assert p['creation_control_valid'] is True
+    assert ns(p['metadata_deadline'])<ns(p['deadline'])
     assert result['cutoff']==116480 and not result.get('state_connection_loss')
     assert type(p['attempts']) is int and 2<=p['attempts']<=3
     assert type(p['parent_budget_ns']) is int and p['parent_budget_ns']==20_000_000_000

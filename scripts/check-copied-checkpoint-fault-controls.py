@@ -43,7 +43,7 @@ def main():
             raise AssertionError('invalid proof admitted: ' + name)
 
     if args.state_watch_creation_stall:
-        for key,bad in [('attempts',1),('parent_budget_ns',30_000_000_000),('first_creation_elapsed_ns',1_000_000_000),
+        for key,bad in [('creation_control_valid',False),('metadata_deadline','2030-01-01T00:00:00Z'),('attempts',1),('parent_budget_ns',30_000_000_000),('first_creation_elapsed_ns',1_000_000_000),
                         ('first_native_error','context deadline exceeded'),('server_id','wrong'),('server_name','wrong'),
                         ('upstream_url','nats://127.0.0.1:1'),('transport_joined','2030-01-01T00:00:00Z'),('frames',[])]:
             reject('creation-'+key,lambda r,s,k=key,v=bad:r['state_creation_stall'].__setitem__(k,v))

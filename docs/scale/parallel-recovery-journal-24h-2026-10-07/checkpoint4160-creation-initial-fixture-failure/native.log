@@ -1,0 +1,199 @@
+=== RUN   TestRetainedAuditBulkSoakCheckpoint4160CursorOwnerRestartVerifiedCopy
+    state_creation_native_test.go:38: native creation changed the full initial-set deadline
+panic: test timed out after 6m0s
+	running tests:
+		TestRetainedAuditBulkSoakCheckpoint4160CursorOwnerRestartVerifiedCopy (6m0s)
+
+goroutine 585 [running]:
+testing.(*M).startAlarm.func1()
+	/usr/local/go/src/testing/testing.go:2959 +0x34a
+created by time.goFunc
+	/usr/local/go/src/time/sleep.go:182 +0x2d
+
+goroutine 1 [chan receive, 5 minutes]:
+testing.(*T).Run(0x3d140e1f3688, {0xff51a5?, 0x3d140e25faa0?}, 0x1b275e8)
+	/usr/local/go/src/testing/testing.go:2266 +0x4f2
+testing.runTests.func1(0x3d140e1f3688)
+	/usr/local/go/src/testing/testing.go:2742 +0x37
+testing.tRunner(0x3d140e1f3688, 0x3d140e25fbc8)
+	/usr/local/go/src/testing/testing.go:2193 +0xea
+testing.runTests({0xfa1df7, 0x5}, {0xfac047, 0xf}, 0x3d140e1c0540, {0x1b9a538, 0x6d, 0x6d}, {0xc2a9c5603422c652, 0x53d1c4e05b, ...})
+	/usr/local/go/src/testing/testing.go:2740 +0x510
+testing.(*M).Run(0x3d140e272d20)
+	/usr/local/go/src/testing/testing.go:2600 +0x6af
+main.main()
+	_testmain.go:264 +0x9b
+
+goroutine 21 [chan receive, 5 minutes]:
+js-wf/integrity.checkUsingJournalDecodeOptions({0x1b1e8c0, 0x3d140e508a80}, {0x1b269b0, 0x3d140e1c0d68}, 0x3d140e530180, 0x3d140e391910, 0x1, 0x1, 0x1, 0x1)
+	/home/exedev/js-wf/integrity/check.go:316 +0x6a6
+js-wf/integrity.retainedBulkSoakCursorOwnerRestart(0x3d140e1f38c8, 0x1040, 0x1c700, 0x0)
+	/home/exedev/js-wf/integrity/retained_bulk_soak_cursor_fault_test.go:366 +0x26b5
+js-wf/integrity.TestRetainedAuditBulkSoakCheckpoint4160CursorOwnerRestartVerifiedCopy(0x3d140e1f38c8?)
+	/home/exedev/js-wf/integrity/retained_bulk_soak_cursor_fault_test.go:33 +0x1f
+testing.tRunner(0x3d140e1f38c8, 0x1b275e8)
+	/usr/local/go/src/testing/testing.go:2193 +0xea
+created by testing.(*T).Run in goroutine 1
+	/usr/local/go/src/testing/testing.go:2258 +0x4d4
+
+goroutine 148 [IO wait, 5 minutes]:
+internal/poll.runtime_pollWait(0x7f60193a1c00, 0x72)
+	/usr/local/go/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0x3d140e282c80?, 0x490136?, 0x0)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Accept(0x3d140e282c80)
+	/usr/local/go/src/internal/poll/fd_unix.go:618 +0x27d
+net.(*netFD).accept(0x3d140e282c80)
+	/usr/local/go/src/net/fd_unix.go:149 +0x29
+net.(*TCPListener).accept(0x3d140e2f6b00)
+	/usr/local/go/src/net/tcpsock_posix.go:159 +0x1b
+net.(*TCPListener).Accept(0x3d140e2f6b00)
+	/usr/local/go/src/net/tcpsock.go:387 +0x30
+js-wf/testcluster.(*ClientProxy).accept(0x3d140e27cf00)
+	/home/exedev/js-wf/testcluster/client_proxy.go:254 +0x87
+created by js-wf/testcluster.NewClientProxy in goroutine 21
+	/home/exedev/js-wf/testcluster/client_proxy.go:121 +0x167
+
+goroutine 140 [IO wait, 3 minutes]:
+internal/poll.runtime_pollWait(0x7f60193a1a00, 0x72)
+	/usr/local/go/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0x3d140e282d00?, 0x3d140e542000?, 0x0)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0x3d140e282d00, {0x3d140e542000, 0x8000, 0x8000})
+	/usr/local/go/src/internal/poll/fd_unix.go:170 +0x2a8
+net.(*netFD).Read(0x3d140e282d00, {0x3d140e542000?, 0xa003d140e0b2720?, 0x4910cc?})
+	/usr/local/go/src/net/fd_posix.go:68 +0x25
+net.(*conn).Read(0x3d140e182498, {0x3d140e542000?, 0x1ad88a0?, 0x0?})
+	/usr/local/go/src/net/net.go:196 +0x45
+github.com/nats-io/nats%2ego.(*natsReader).Read(0x3d140e2f6bc0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:2427 +0x7f
+github.com/nats-io/nats%2ego.(*Conn).readLoop(0x3d140e2d9808)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3718 +0xef
+created by github.com/nats-io/nats%2ego.(*Conn).processConnectInit in goroutine 21
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:2941 +0x2c5
+
+goroutine 149 [sync.Cond.Wait, 5 minutes]:
+sync.runtime_notifyListWait(0x3d140e2f6b90, 0x0)
+	/usr/local/go/src/runtime/sema.go:617 +0x1b3
+sync.(*Cond).Wait(0x0?)
+	/usr/local/go/src/sync/cond.go:71 +0x73
+github.com/nats-io/nats%2ego.(*asyncCallbacksHandler).asyncCBDispatcher(0x3d140e271c80)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3643 +0x5a
+created by github.com/nats-io/nats%2ego.Options.Connect in goroutine 21
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:2019 +0x3d6
+
+goroutine 132 [sync.Cond.Wait, 5 minutes]:
+sync.runtime_notifyListWait(0x3d140e317a10, 0x1b)
+	/usr/local/go/src/runtime/sema.go:617 +0x1b3
+sync.(*Cond).Wait(0x0?)
+	/usr/local/go/src/sync/cond.go:71 +0x73
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x3d140e3ed808, 0x3d140e606000)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3765 +0x105
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 21
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430
+
+goroutine 95 [IO wait, 3 minutes]:
+internal/poll.runtime_pollWait(0x7f60193a1e00, 0x72)
+	/usr/local/go/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0x3d140e3ac880?, 0x3d140e5aa000?, 0x0)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0x3d140e3ac880, {0x3d140e5aa000, 0x8000, 0x8000})
+	/usr/local/go/src/internal/poll/fd_unix.go:170 +0x2a8
+net.(*netFD).Read(0x3d140e3ac880, {0x3d140e5aa000?, 0xa003d140e414f20?, 0xa0?})
+	/usr/local/go/src/net/fd_posix.go:68 +0x25
+net.(*conn).Read(0x3d140e0481d8, {0x3d140e5aa000?, 0x1ad88a0?, 0x0?})
+	/usr/local/go/src/net/net.go:196 +0x45
+github.com/nats-io/nats%2ego.(*natsReader).Read(0x3d140e0d98c0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:2427 +0x7f
+github.com/nats-io/nats%2ego.(*Conn).readLoop(0x3d140e3ed808)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3718 +0xef
+created by github.com/nats-io/nats%2ego.(*Conn).processConnectInit in goroutine 21
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:2941 +0x2c5
+
+goroutine 139 [IO wait, 3 minutes]:
+internal/poll.runtime_pollWait(0x7f60193a1600, 0x72)
+	/usr/local/go/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0x3d140e32a980?, 0x3d140e60c000?, 0x0)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0x3d140e32a980, {0x3d140e60c000, 0x8000, 0x8000})
+	/usr/local/go/src/internal/poll/fd_unix.go:170 +0x2a8
+net.(*netFD).Read(0x3d140e32a980, {0x3d140e60c000?, 0x0?, 0x3d140e0adeb0?})
+	/usr/local/go/src/net/fd_posix.go:68 +0x25
+net.(*conn).Read(0x3d140e32e388, {0x3d140e60c000?, 0x3d140e13c6f8?, 0x15819b8?})
+	/usr/local/go/src/net/net.go:196 +0x45
+js-wf/testcluster.(*ClientProxy).bridge.func3()
+	/home/exedev/js-wf/testcluster/client_proxy.go:339 +0x142
+created by js-wf/testcluster.(*ClientProxy).bridge in goroutine 137
+	/home/exedev/js-wf/testcluster/client_proxy.go:329 +0x385
+
+goroutine 96 [chan receive, 5 minutes]:
+github.com/nats-io/nats%2ego.(*Conn).flusher(0x3d140e3ed808)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:4191 +0xfa
+created by github.com/nats-io/nats%2ego.(*Conn).processConnectInit in goroutine 21
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:2942 +0x311
+
+goroutine 138 [IO wait, 3 minutes]:
+internal/poll.runtime_pollWait(0x7f60193a1800, 0x72)
+	/usr/local/go/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0x3d140e32a900?, 0x3d140e614000?, 0x0)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/local/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0x3d140e32a900, {0x3d140e614000, 0x10000, 0x10000})
+	/usr/local/go/src/internal/poll/fd_unix.go:170 +0x2a8
+net.(*netFD).Read(0x3d140e32a900, {0x3d140e614000?, 0x1b18438?, 0x1b94f60?})
+	/usr/local/go/src/net/fd_posix.go:68 +0x25
+net.(*conn).Read(0x3d140e32e380, {0x3d140e614000?, 0x6?, 0x8?})
+	/usr/local/go/src/net/net.go:196 +0x45
+bufio.(*Reader).fill(0x3d140e3309c0)
+	/usr/local/go/src/bufio/bufio.go:113 +0x103
+bufio.(*Reader).ReadSlice(0x3d140e3309c0, 0xa)
+	/usr/local/go/src/bufio/bufio.go:377 +0x29
+js-wf/testcluster.readClientPacket(0x3d140e3309c0)
+	/home/exedev/js-wf/testcluster/client_proxy_api_barrier.go:88 +0x2c
+js-wf/testcluster.(*ClientProxy).copyWithAPIBarrier(0x3d140e27cf00, {0x1b20eb0?, 0x3d140e32e380}, {0x1b20eb0, 0x3d140e32e388}, 0x1, 0x3d140e327c00, 0x3d140e5087e0)
+	/home/exedev/js-wf/testcluster/client_proxy_api_barrier.go:134 +0x20a
+js-wf/testcluster.(*ClientProxy).bridge.func1()
+	/home/exedev/js-wf/testcluster/client_proxy.go:309 +0x185
+created by js-wf/testcluster.(*ClientProxy).bridge in goroutine 137
+	/home/exedev/js-wf/testcluster/client_proxy.go:302 +0x193
+
+goroutine 137 [select, 3 minutes]:
+js-wf/testcluster.(*ClientProxy).bridge(0x3d140e27cf00, {0x1b20eb0, 0x3d140e32e380}, {0x1b20eb0, 0x3d140e32e388}, 0x1)
+	/home/exedev/js-wf/testcluster/client_proxy.go:383 +0x665
+created by js-wf/testcluster.(*ClientProxy).accept in goroutine 148
+	/home/exedev/js-wf/testcluster/client_proxy.go:294 +0x6e6
+
+goroutine 141 [chan receive, 5 minutes]:
+github.com/nats-io/nats%2ego.(*Conn).flusher(0x3d140e2d9808)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:4191 +0xfa
+created by github.com/nats-io/nats%2ego.(*Conn).processConnectInit in goroutine 21
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:2942 +0x311
+
+goroutine 162 [sync.Cond.Wait, 5 minutes]:
+sync.runtime_notifyListWait(0x3d140e0d9890, 0x0)
+	/usr/local/go/src/runtime/sema.go:617 +0x1b3
+sync.(*Cond).Wait(0x0?)
+	/usr/local/go/src/sync/cond.go:71 +0x73
+github.com/nats-io/nats%2ego.(*asyncCallbacksHandler).asyncCBDispatcher(0x3d140e09a840)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3643 +0x5a
+created by github.com/nats-io/nats%2ego.Options.Connect in goroutine 21
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:2019 +0x3d6
+
+goroutine 142 [sync.Cond.Wait, 5 minutes]:
+sync.runtime_notifyListWait(0x3d140e626150, 0x1)
+	/usr/local/go/src/runtime/sema.go:617 +0x1b3
+sync.(*Cond).Wait(0x0?)
+	/usr/local/go/src/sync/cond.go:71 +0x73
+github.com/nats-io/nats%2ego.(*Conn).waitForMsgs(0x3d140e2d9808, 0x3d140e6060f0)
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:3765 +0x105
+created by github.com/nats-io/nats%2ego.(*Conn).subscribeLocked in goroutine 21
+	/home/exedev/go/pkg/mod/github.com/nats-io/nats.go@v1.54.0/nats.go:5165 +0x430

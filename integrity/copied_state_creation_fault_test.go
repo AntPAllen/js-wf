@@ -44,12 +44,10 @@ func (s copiedCreationJS) KeyValue(ctx context.Context, bucket string) (jetstrea
 		return nil, fmt.Errorf("creation fault unexpectedly requested bucket %q", bucket)
 	}
 	deadline, ok := ctx.Deadline()
-	if !ok || !s.state.parent.IsZero() {
-		return nil, fmt.Errorf("creation fault requires one full-budget state admission")
+	if !ok || s.state.parent.IsZero() || deadline.After(s.state.parent) {
+		return nil, fmt.Errorf("creation metadata admission must stay inside the bound full audit parent")
 	}
-	s.state.parent = deadline
-	s.state.proof["deadline"] = deadline.UTC()
-	s.state.proof["parent_budget_ns"] = int64(20 * time.Second)
+	s.state.proof["metadata_deadline"] = deadline.UTC()
 	return s.state, nil
 }
 
@@ -87,5 +85,5 @@ func prepareCopiedCreation(t *testing.T, ctx context.Context, js jetstream.JetSt
 		"scope":     "Full original checkpoint4160 R5 copied creation stall plus cold cursor-owner recovery; no concurrent24h/historical cause qualification",
 		"server_id": nc.ConnectedServerId(), "server_name": nc.ConnectedServerName(), "upstream_url": cluster.ClientURL(0),
 	}
-	return &copiedCreationState{nativeCreationState: &nativeCreationState{KeyValue: state, t: t, first: first, nc: nc, proxy: proxy, proof: proof}, joined: make(chan struct{})}
+	return &copiedCreationState{nativeCreationState: &nativeCreationState{KeyValue: state, first: first, nc: nc, proxy: proxy, proof: proof}, joined: make(chan struct{})}
 }

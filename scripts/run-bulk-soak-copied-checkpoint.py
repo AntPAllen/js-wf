@@ -6,6 +6,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -20,6 +21,40 @@ DONOR=Path('/tmp/js-wf-bulk-journal-24h-joined-20261006')
 CANONICAL='docs/scale/bulk-journal-24h-2026-10-06/terminal'
 TEST='TestRetainedAuditBulkSoakCheckpoint8520VerifiedCopy'
 
+
+def close_failed_owned_containers(root,sdk_pid,exit_code):
+    # Go's SDK timeout bypasses testing cleanups. Never archive a live Docker
+    # mount merely because host /proc descriptors show its /data namespace.
+    ids=subprocess.check_output(['docker','ps','-aq','--filter',f'name=js-wf-route-{sdk_pid}-'],text=True).split()
+    if not ids:return dict(native_exit_code=exit_code,remaining_owned_containers=0,containers=[])
+    assert exit_code!=0,'a passing native test must close its own containers'
+    out=root/'failed-container-cleanup';out.mkdir()
+    report=dict(native_exit_code=exit_code,containers=[])
+    for cid in ids:
+        info=json.loads(subprocess.check_output(['docker','inspect',cid],text=True))[0]
+        assert re.fullmatch(rf'js-wf-route-{sdk_pid}-[0-9]+-n[0-4]',info['Name'].lstrip('/'))
+        mounts=[m for m in info['Mounts'] if m['Destination']=='/data'];assert len(mounts)==1
+        source=Path(mounts[0]['Source'])
+        assert source.parent==root/'restored-original/fixture/cluster' and source.name in {f'node-{n}' for n in range(5)}
+        (out/(cid+'-logs.txt')).write_bytes(subprocess.check_output(['docker','logs',cid],stderr=subprocess.STDOUT))
+        if info['State']['Running']:
+            subprocess.run(['docker','stop','--time','10',cid],check=True,stdout=subprocess.DEVNULL)
+        final_read=subprocess.run(['docker','inspect',cid],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        if final_read.returncode==0:
+            final=json.loads(final_read.stdout)[0];assert not final['State']['Running']
+            removed=subprocess.run(['docker','rm',cid],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            if removed.returncode:
+                assert info['HostConfig']['AutoRemove']
+                assert not subprocess.check_output(['docker','ps','-aq','--filter','id='+cid]).strip()
+        else:
+            assert info['HostConfig']['AutoRemove'] and b'no such object' in final_read.stderr.lower()
+            final=dict(auto_removed_after_stop=True,inspect_exit=final_read.returncode,stderr=final_read.stderr.decode())
+        assert not subprocess.check_output(['docker','ps','-aq','--filter','id='+cid]).strip()
+        report['containers'].append(dict(before=info,after_stop=final,removed=True))
+        (out/'cleanup.json').write_text(json.dumps(report,indent=2)+'\n')
+    assert not subprocess.check_output(['docker','ps','-aq','--filter',f'name=js-wf-route-{sdk_pid}-']).strip()
+    report['remaining_owned_containers']=0
+    return report
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
@@ -141,6 +176,7 @@ def main():
             time.sleep(.5)
         code=child.wait()
     save('execution.json',dict(source=revision,status='passed' if code==0 else 'failed',exit_code=code,elapsed_seconds=time.monotonic()-started,finished_utc=datetime.now(timezone.utc).isoformat()))
+    save('container-cleanup-after-sdk.json',close_failed_owned_containers(root,child.pid,code))
     after=shared.source_inventory(revision);save('source-after.json',after);assert before==after
     external_after={name:shared.sha(Path(name)) for name in inputs};save('external-source-after.json',external_after);assert inputs==external_after
     if donor_present: assert fixture_archive.inventory(DONOR)==inventory['files']
