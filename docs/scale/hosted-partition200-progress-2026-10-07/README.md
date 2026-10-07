@@ -1,0 +1,7 @@
+# Original hosted partition200 campaign progress
+
+Original Actions run37500390198 at `d9093d74f4e18562d70173c0fc6715c394a0314a` has resumed executing. The captured provider snapshot has successful setup and nine successful native jobs (seeds1–9), seed10 running and190 further jobs queued. No cancellation, duplicate run or restart was issued.
+
+Full completed native logs for seeds1–9 pass `scripts/check-matrix-campaign.py`'s per-seed verifier with native row `server_partition`: each original10m sustained test, positive fault/workload counts, exact retained invocation/journal/terminal counts, six workload-cell/progress checks and all p99 limits. Worst aggregate terminal p99 is13.187135406s. [Provider snapshot, summaries and log hashes](review.json). These checks confirm the recorded per-seed logs only; complete retained/source/process artifact admission is still pending. Original local failed seed6 remains failed; a hosted successful seed6 at another recorded source/environment does not erase it or establish cause.
+
+The full200 verifier correctly rejects this live incomplete campaign with `campaign is not terminal and successful`. Neither nine job successes nor an active provider job qualifies the full200 row, other rows, current main, default dependency delivery, or24h. Continue observing the same actual handle; retain failed jobs if any appear and review the complete artifacts before claiming broader qualification.

@@ -1,0 +1,465 @@
+﻿2026-10-07T06:14:52.8789357Z Current runner version: '2.337.0'
+2026-10-07T06:14:52.8814214Z ##[group]Runner Image Provisioner
+2026-10-07T06:14:52.8815082Z Hosted Compute Agent
+2026-10-07T06:14:52.8815606Z Version: 20260901.588
+2026-10-07T06:14:52.8816224Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-07T06:14:52.8817418Z Build Date: 2026-09-01T19:56:44Z
+2026-10-07T06:14:52.8818065Z Worker ID: {2d043ca2-8285-4440-b9bf-1394b05d2ed7}
+2026-10-07T06:14:52.8818742Z Azure Region: centralus
+2026-10-07T06:14:52.8819445Z ##[endgroup]
+2026-10-07T06:14:52.8820688Z ##[group]Operating System
+2026-10-07T06:14:52.8821272Z Ubuntu
+2026-10-07T06:14:52.8821850Z 24.04.5
+2026-10-07T06:14:52.8822364Z LTS
+2026-10-07T06:14:52.8822876Z ##[endgroup]
+2026-10-07T06:14:52.8823402Z ##[group]Runner Image
+2026-10-07T06:14:52.8823972Z Image: ubuntu-24.04
+2026-10-07T06:14:52.8824510Z Version: 20260927.320.1
+2026-10-07T06:14:52.8825720Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-07T06:14:52.8827115Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-07T06:14:52.8827999Z ##[endgroup]
+2026-10-07T06:14:52.8829441Z ##[group]GITHUB_TOKEN Permissions
+2026-10-07T06:14:52.8831659Z Contents: read
+2026-10-07T06:14:52.8832228Z Metadata: read
+2026-10-07T06:14:52.8832746Z Packages: read
+2026-10-07T06:14:52.8833296Z ##[endgroup]
+2026-10-07T06:14:52.8835248Z Secret source: Actions
+2026-10-07T06:14:52.8836092Z Cache mode: write
+2026-10-07T06:14:52.8836937Z Prepare workflow directory
+2026-10-07T06:14:52.9312767Z Prepare all required actions
+2026-10-07T06:14:52.9358074Z Getting action download info
+2026-10-07T06:14:53.2188683Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-07T06:14:53.3248454Z Download action repository 'actions/upload-artifact@v7' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-10-07T06:14:53.4498588Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+2026-10-07T06:14:54.1064231Z Complete job name: leader (6)
+2026-10-07T06:14:54.1652772Z ##[group]Run actions/checkout@v4
+2026-10-07T06:14:54.1653942Z with:
+2026-10-07T06:14:54.1654449Z   filter: blob:none
+2026-10-07T06:14:54.1654979Z   sparse-checkout: .github
+scripts
+
+2026-10-07T06:14:54.1655597Z   repository: AntPAllen/js-wf
+2026-10-07T06:14:54.1659480Z   token: ***
+2026-10-07T06:14:54.1659987Z   ssh-strict: true
+2026-10-07T06:14:54.1660484Z   ssh-user: git
+2026-10-07T06:14:54.1660974Z   persist-credentials: true
+2026-10-07T06:14:54.1661505Z   clean: true
+2026-10-07T06:14:54.1661995Z   sparse-checkout-cone-mode: true
+2026-10-07T06:14:54.1662553Z   fetch-depth: 1
+2026-10-07T06:14:54.1663051Z   fetch-tags: false
+2026-10-07T06:14:54.1663541Z   show-progress: true
+2026-10-07T06:14:54.1664073Z   lfs: false
+2026-10-07T06:14:54.1664528Z   submodules: false
+2026-10-07T06:14:54.1665023Z   set-safe-directory: true
+2026-10-07T06:14:54.1665588Z   allow-unsafe-pr-checkout: false
+2026-10-07T06:14:54.1666389Z env:
+2026-10-07T06:14:54.1667069Z   WF_MATRIX_CHAOS: 1
+2026-10-07T06:14:54.1667698Z   WF_MATRIX_OPERATION_TIMINGS: 1
+2026-10-07T06:14:54.1668248Z   WF_MATRIX_DURATION: 10m
+2026-10-07T06:14:54.1668763Z   FIRST_SEED: 6
+2026-10-07T06:14:54.1669443Z   LAST_SEED: 6
+2026-10-07T06:14:54.1669929Z   MATRIX_ROW: partition
+2026-10-07T06:14:54.1670447Z   MATRIX_TIMEOUT: 18m
+2026-10-07T06:14:54.1671122Z   MATRIX_TEST: TestMixedMatrixServerPartitionEveryThirtySeconds
+2026-10-07T06:14:54.1671839Z ##[endgroup]
+2026-10-07T06:14:54.2602048Z Syncing repository: AntPAllen/js-wf
+2026-10-07T06:14:54.2604122Z ##[group]Getting Git version info
+2026-10-07T06:14:54.2604772Z Working directory is '/home/runner/work/js-wf/js-wf'
+2026-10-07T06:14:54.2606434Z [command]/usr/bin/git version
+2026-10-07T06:14:54.2663484Z git version 2.55.0
+2026-10-07T06:14:54.2683643Z ##[endgroup]
+2026-10-07T06:14:54.2696090Z Temporarily overriding HOME='/home/runner/work/_temp/354bcfdf-7526-495e-8599-5cc8f1c79ecf' before making global git config changes
+2026-10-07T06:14:54.2698189Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T06:14:54.2702336Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+2026-10-07T06:14:54.2763116Z Deleting the contents of '/home/runner/work/js-wf/js-wf'
+2026-10-07T06:14:54.2774793Z ##[group]Initializing the repository
+2026-10-07T06:14:54.2775593Z [command]/usr/bin/git init /home/runner/work/js-wf/js-wf
+2026-10-07T06:14:54.2853310Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-07T06:14:54.2855342Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-07T06:14:54.2856916Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-07T06:14:54.2857853Z hint: call:
+2026-10-07T06:14:54.2858554Z hint:
+2026-10-07T06:14:54.2860010Z hint: 	git config --global init.defaultBranch <name>
+2026-10-07T06:14:54.2860973Z hint:
+2026-10-07T06:14:54.2861864Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-07T06:14:54.2863152Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-07T06:14:54.2864075Z hint:
+2026-10-07T06:14:54.2864790Z hint: 	git branch -m <name>
+2026-10-07T06:14:54.2865437Z hint:
+2026-10-07T06:14:54.2866406Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-07T06:14:54.2867938Z Initialized empty Git repository in /home/runner/work/js-wf/js-wf/.git/
+2026-10-07T06:14:54.2870219Z [command]/usr/bin/git remote add origin https://github.com/AntPAllen/js-wf
+2026-10-07T06:14:54.2910858Z ##[endgroup]
+2026-10-07T06:14:54.2911732Z ##[group]Disabling automatic garbage collection
+2026-10-07T06:14:54.2916064Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-07T06:14:54.2944335Z ##[endgroup]
+2026-10-07T06:14:54.2945127Z ##[group]Setting up auth
+2026-10-07T06:14:54.2952812Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T06:14:54.2981661Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-07T06:14:54.3294324Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T06:14:54.3330480Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-07T06:14:54.3525949Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T06:14:54.3558892Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-07T06:14:54.3735487Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-07T06:14:54.3769552Z ##[endgroup]
+2026-10-07T06:14:54.3770521Z ##[group]Fetching the repository
+2026-10-07T06:14:54.3779474Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --filter=blob:none --depth=1 origin +d9093d74f4e18562d70173c0fc6715c394a0314a:refs/remotes/origin/main
+2026-10-07T06:14:54.8841561Z From https://github.com/AntPAllen/js-wf
+2026-10-07T06:14:54.8843776Z  * [new ref]         d9093d74f4e18562d70173c0fc6715c394a0314a -> origin/main
+2026-10-07T06:14:54.8848318Z ##[endgroup]
+2026-10-07T06:14:54.8850425Z ##[group]Determining the checkout info
+2026-10-07T06:14:54.8852319Z ##[endgroup]
+2026-10-07T06:14:54.8854414Z ##[group]Setting up sparse checkout
+2026-10-07T06:14:54.8856018Z [command]/usr/bin/git sparse-checkout set .github scripts
+2026-10-07T06:14:54.8894657Z ##[endgroup]
+2026-10-07T06:14:54.8896908Z ##[group]Checking out the ref
+2026-10-07T06:14:54.8899462Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-07T06:14:55.4298112Z Switched to a new branch 'main'
+2026-10-07T06:14:55.4300535Z branch 'main' set up to track 'origin/main'.
+2026-10-07T06:14:55.4308582Z ##[endgroup]
+2026-10-07T06:14:55.4349214Z [command]/usr/bin/git log -1 --format=%H
+2026-10-07T06:14:55.4371730Z d9093d74f4e18562d70173c0fc6715c394a0314a
+2026-10-07T06:14:55.4561073Z ##[group]Run python3 scripts/materialize-workload-source.py --report "$RUNNER_TEMP/workload-source.json"
+2026-10-07T06:14:55.4562387Z [36;1mpython3 scripts/materialize-workload-source.py --report "$RUNNER_TEMP/workload-source.json"[0m
+2026-10-07T06:14:55.4738270Z shell: /usr/bin/bash -e {0}
+2026-10-07T06:14:55.4739157Z env:
+2026-10-07T06:14:55.4739889Z   WF_MATRIX_CHAOS: 1
+2026-10-07T06:14:55.4740639Z   WF_MATRIX_OPERATION_TIMINGS: 1
+2026-10-07T06:14:55.4741232Z   WF_MATRIX_DURATION: 10m
+2026-10-07T06:14:55.4742209Z   FIRST_SEED: 6
+2026-10-07T06:14:55.4742751Z   LAST_SEED: 6
+2026-10-07T06:14:55.4743290Z   MATRIX_ROW: partition
+2026-10-07T06:14:55.4743865Z   MATRIX_TIMEOUT: 18m
+2026-10-07T06:14:55.4744572Z   MATRIX_TEST: TestMixedMatrixServerPartitionEveryThirtySeconds
+2026-10-07T06:14:55.4745276Z ##[endgroup]
+2026-10-07T06:14:57.6743255Z Verified source checkout d9093d74f4e18562d70173c0fc6715c394a0314a 1908 files 28135788 bytes
+2026-10-07T06:14:57.6894132Z ##[group]Run actions/upload-artifact@v7
+2026-10-07T06:14:57.6894565Z with:
+2026-10-07T06:14:57.6894869Z   name: workload-source-partition-6
+2026-10-07T06:14:57.6895272Z   path: /home/runner/work/_temp/workload-source.json
+2026-10-07T06:14:57.6895674Z   if-no-files-found: error
+2026-10-07T06:14:57.6896032Z   compression-level: 6
+2026-10-07T06:14:57.6896339Z   overwrite: false
+2026-10-07T06:14:57.6896634Z   include-hidden-files: false
+2026-10-07T06:14:57.6896963Z   archive: true
+2026-10-07T06:14:57.6897260Z env:
+2026-10-07T06:14:57.6897522Z   WF_MATRIX_CHAOS: 1
+2026-10-07T06:14:57.6897849Z   WF_MATRIX_OPERATION_TIMINGS: 1
+2026-10-07T06:14:57.6898173Z   WF_MATRIX_DURATION: 10m
+2026-10-07T06:14:57.6898483Z   FIRST_SEED: 6
+2026-10-07T06:14:57.6899036Z   LAST_SEED: 6
+2026-10-07T06:14:57.6899359Z   MATRIX_ROW: partition
+2026-10-07T06:14:57.6899700Z   MATRIX_TIMEOUT: 18m
+2026-10-07T06:14:57.6900082Z   MATRIX_TEST: TestMixedMatrixServerPartitionEveryThirtySeconds
+2026-10-07T06:14:57.6900612Z ##[endgroup]
+2026-10-07T06:14:57.8180121Z With the provided path, there will be 1 file uploaded
+2026-10-07T06:14:57.8183467Z Artifact name is valid!
+2026-10-07T06:14:57.8184381Z Root directory input is valid!
+2026-10-07T06:14:58.0845204Z Uploading artifact: workload-source-partition-6.zip
+2026-10-07T06:14:58.0888308Z Beginning upload of artifact content to blob storage
+2026-10-07T06:14:58.3502769Z Uploaded bytes 94622
+2026-10-07T06:14:58.3924077Z Finished uploading artifact content to blob storage!
+2026-10-07T06:14:58.3925215Z SHA256 digest of uploaded artifact is 3d11369035d0841eacb56dfb29dfb7f62b05448ce67acfd3c95dbff419225379
+2026-10-07T06:14:58.3926177Z Finalizing artifact upload
+2026-10-07T06:14:58.6970365Z Artifact workload-source-partition-6 successfully finalized. Artifact ID 11463919115
+2026-10-07T06:14:58.6971509Z Artifact workload-source-partition-6 has been successfully uploaded! Final size is 94622 bytes. Artifact ID is 11463919115
+2026-10-07T06:14:58.6975051Z Artifact download URL: https://github.com/AntPAllen/js-wf/actions/runs/37500390198/artifacts/11463919115
+2026-10-07T06:14:58.7125044Z ##[group]Run actions/setup-go@v5
+2026-10-07T06:14:58.7125439Z with:
+2026-10-07T06:14:58.7125784Z   go-version-file: go.mod
+2026-10-07T06:14:58.7126124Z   check-latest: false
+2026-10-07T06:14:58.7128429Z   token: ***
+2026-10-07T06:14:58.7128928Z   cache: true
+2026-10-07T06:14:58.7129271Z env:
+2026-10-07T06:14:58.7129564Z   WF_MATRIX_CHAOS: 1
+2026-10-07T06:14:58.7129901Z   WF_MATRIX_OPERATION_TIMINGS: 1
+2026-10-07T06:14:58.7130258Z   WF_MATRIX_DURATION: 10m
+2026-10-07T06:14:58.7130627Z   FIRST_SEED: 6
+2026-10-07T06:14:58.7130913Z   LAST_SEED: 6
+2026-10-07T06:14:58.7131207Z   MATRIX_ROW: partition
+2026-10-07T06:14:58.7131571Z   MATRIX_TIMEOUT: 18m
+2026-10-07T06:14:58.7131946Z   MATRIX_TEST: TestMixedMatrixServerPartitionEveryThirtySeconds
+2026-10-07T06:14:58.7132603Z ##[endgroup]
+2026-10-07T06:14:58.8328172Z Setup go version spec 1.27.1
+2026-10-07T06:14:58.8336164Z Attempting to download 1.27.1...
+2026-10-07T06:14:58.8435700Z (node:2167) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-07T06:14:58.8436457Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-07T06:14:59.9075486Z matching 1.27.1...
+2026-10-07T06:14:59.9098091Z Acquiring 1.27.1 from https://github.com/actions/go-versions/releases/download/1.27.1-33583469715/go-1.27.1-linux-x64.tar.gz
+2026-10-07T06:15:00.4735176Z Extracting Go...
+2026-10-07T06:15:00.4906869Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/f4c9c112-611a-4947-b02a-3a154eb52307 -f /home/runner/work/_temp/2277ddaa-a3dd-4077-a714-b400a3c5c24c
+2026-10-07T06:15:02.0711978Z Successfully extracted go to /home/runner/work/_temp/f4c9c112-611a-4947-b02a-3a154eb52307
+2026-10-07T06:15:02.0713013Z Adding to the cache ...
+2026-10-07T06:15:08.3270508Z Successfully cached go to /opt/hostedtoolcache/go/1.27.1/x64
+2026-10-07T06:15:08.3272682Z Added go to the path
+2026-10-07T06:15:08.3275007Z Successfully set up Go version 1.27.1
+2026-10-07T06:15:08.3453916Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+2026-10-07T06:15:08.3480302Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+2026-10-07T06:15:08.3507465Z /home/runner/go/pkg/mod
+2026-10-07T06:15:08.3523484Z /home/runner/.cache/go-build
+2026-10-07T06:15:08.5192822Z Cache hit for: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+2026-10-07T06:15:08.5291959Z (node:2167) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-07T06:15:09.6831455Z Received 121634816 of 209563510 (58.0%), 115.8 MBs/sec
+2026-10-07T06:15:10.2795411Z Received 209563510 of 209563510 (100.0%), 124.9 MBs/sec
+2026-10-07T06:15:10.2796223Z Cache Size: ~200 MB (209563510 B)
+2026-10-07T06:15:10.2922879Z [command]/usr/bin/tar -xf /home/runner/work/_temp/dd65f02f-b040-48fb-a32a-0b7f13f17bae/cache.tzst -P -C /home/runner/work/js-wf/js-wf --use-compress-program unzstd
+2026-10-07T06:15:11.0794516Z Cache restored successfully
+2026-10-07T06:15:11.0879881Z Cache restored from key: setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb
+2026-10-07T06:15:11.0906913Z go version go1.27.1 linux/amd64
+2026-10-07T06:15:11.0907237Z 
+2026-10-07T06:15:11.0907700Z ##[group]go env
+2026-10-07T06:15:11.1010733Z AR='ar'
+2026-10-07T06:15:11.1011174Z CC='gcc'
+2026-10-07T06:15:11.1011711Z CGO_CFLAGS='-O2 -g'
+2026-10-07T06:15:11.1012077Z CGO_CPPFLAGS=''
+2026-10-07T06:15:11.1012397Z CGO_CXXFLAGS='-O2 -g'
+2026-10-07T06:15:11.1012732Z CGO_ENABLED='1'
+2026-10-07T06:15:11.1013053Z CGO_FFLAGS='-O2 -g'
+2026-10-07T06:15:11.1013358Z CGO_LDFLAGS='-O2 -g'
+2026-10-07T06:15:11.1013698Z CXX='g++'
+2026-10-07T06:15:11.1013972Z GCCGO='gccgo'
+2026-10-07T06:15:11.1014239Z GO111MODULE=''
+2026-10-07T06:15:11.1014566Z GOAMD64='v1'
+2026-10-07T06:15:11.1014837Z GOARCH='amd64'
+2026-10-07T06:15:11.1015359Z GOAUTH='netrc'
+2026-10-07T06:15:11.1015675Z GOBIN='/home/runner/go/bin'
+2026-10-07T06:15:11.1016036Z GOCACHE='/home/runner/.cache/go-build'
+2026-10-07T06:15:11.1016409Z GOCACHEPROG=''
+2026-10-07T06:15:11.1016682Z GODEBUG=''
+2026-10-07T06:15:11.1016992Z GOENV='/home/runner/.config/go/env'
+2026-10-07T06:15:11.1017346Z GOEXE=''
+2026-10-07T06:15:11.1017602Z GOEXPERIMENT=''
+2026-10-07T06:15:11.1017918Z GOFIPS140='off'
+2026-10-07T06:15:11.1018182Z GOFLAGS=''
+2026-10-07T06:15:11.1019101Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build2903005296=/tmp/go-build -gno-record-gcc-switches'
+2026-10-07T06:15:11.1019820Z GOHOSTARCH='amd64'
+2026-10-07T06:15:11.1020223Z GOHOSTOS='linux'
+2026-10-07T06:15:11.1020551Z GOINSECURE=''
+2026-10-07T06:15:11.1020849Z GOMOD='/home/runner/work/js-wf/js-wf/go.mod'
+2026-10-07T06:15:11.1021242Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-10-07T06:15:11.1021591Z GONOPROXY=''
+2026-10-07T06:15:11.1021866Z GONOSUMDB=''
+2026-10-07T06:15:11.1022211Z GOOS='linux'
+2026-10-07T06:15:11.1022466Z GOPACKAGESDRIVER=''
+2026-10-07T06:15:11.1022805Z GOPATH='/home/runner/go'
+2026-10-07T06:15:11.1023123Z GOPRIVATE=''
+2026-10-07T06:15:11.1023533Z GOPROXY='https://proxy.golang.org,direct'
+2026-10-07T06:15:11.1023901Z GOROOT='/opt/hostedtoolcache/go/1.27.1/x64'
+2026-10-07T06:15:11.1024345Z GOSUMDB='sum.golang.org'
+2026-10-07T06:15:11.1024764Z GOTELEMETRY='local'
+2026-10-07T06:15:11.1025212Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-10-07T06:15:11.1025720Z GOTMPDIR=''
+2026-10-07T06:15:11.1026076Z GOTOOLCHAIN='auto'
+2026-10-07T06:15:11.1026681Z GOTOOLDIR='/opt/hostedtoolcache/go/1.27.1/x64/pkg/tool/linux_amd64'
+2026-10-07T06:15:11.1027259Z GOVCS=''
+2026-10-07T06:15:11.1027782Z GOVERSION='go1.27.1'
+2026-10-07T06:15:11.1028250Z GOWORK=''
+2026-10-07T06:15:11.1028717Z PKG_CONFIG='pkg-config'
+2026-10-07T06:15:11.1029205Z 
+2026-10-07T06:15:11.1029633Z ##[endgroup]
+2026-10-07T06:15:11.1176145Z ##[group]Run set -o pipefail
+2026-10-07T06:15:11.1176572Z [36;1mset -o pipefail[0m
+2026-10-07T06:15:11.1176999Z [36;1mfor seed in $(seq "$FIRST_SEED" "$LAST_SEED"); do[0m
+2026-10-07T06:15:11.1177553Z [36;1m  echo "Sustained matrix row=$MATRIX_ROW seed=$seed duration=$WF_MATRIX_DURATION"[0m
+2026-10-07T06:15:11.1178140Z [36;1m  result_log="integration/matrix-${MATRIX_ROW}-${seed}-test.jsonl"[0m
+2026-10-07T06:15:11.1179488Z [36;1m  FAULT_SEED="$seed" MATRIX_ARTIFACT_PREFIX="matrix-${MATRIX_ROW}-${seed}" go test -json ./integration -run "^${MATRIX_TEST}$" -count=1 -timeout="${MATRIX_TIMEOUT}" | tee "$result_log" | python3 -u scripts/render-go-test.py[0m
+2026-10-07T06:15:11.1180490Z [36;1m  python3 scripts/check-matrix-result.py "$result_log" "$MATRIX_TEST" "$WF_MATRIX_DURATION"[0m
+2026-10-07T06:15:11.1181069Z [36;1mdone[0m
+2026-10-07T06:15:11.1223492Z shell: /usr/bin/bash -e {0}
+2026-10-07T06:15:11.1223907Z env:
+2026-10-07T06:15:11.1224225Z   WF_MATRIX_CHAOS: 1
+2026-10-07T06:15:11.1224676Z   WF_MATRIX_OPERATION_TIMINGS: 1
+2026-10-07T06:15:11.1225163Z   WF_MATRIX_DURATION: 10m
+2026-10-07T06:15:11.1225505Z   FIRST_SEED: 6
+2026-10-07T06:15:11.1225816Z   LAST_SEED: 6
+2026-10-07T06:15:11.1226161Z   MATRIX_ROW: partition
+2026-10-07T06:15:11.1226461Z   MATRIX_TIMEOUT: 18m
+2026-10-07T06:15:11.1226949Z   MATRIX_TEST: TestMixedMatrixServerPartitionEveryThirtySeconds
+2026-10-07T06:15:11.1227387Z ##[endgroup]
+2026-10-07T06:15:11.1324776Z Sustained matrix row=partition seed=6 duration=10m
+2026-10-07T06:15:11.2128718Z go: downloading google.golang.org/protobuf v1.36.6
+2026-10-07T06:15:28.9595633Z === RUN   TestMixedMatrixServerPartitionEveryThirtySeconds
+2026-10-07T06:15:37.8230536Z     mixed_matrix_leader_test.go:150: mixed batch=1 elapsed=4.417790724s
+2026-10-07T06:15:41.9328084Z     mixed_matrix_leader_test.go:150: mixed batch=2 elapsed=8.527234921s
+2026-10-07T06:15:45.8432332Z     mixed_matrix_leader_test.go:150: mixed batch=3 elapsed=12.438027116s
+2026-10-07T06:15:49.8526439Z     mixed_matrix_leader_test.go:150: mixed batch=4 elapsed=16.447390388s
+2026-10-07T06:15:53.8621264Z     mixed_matrix_leader_test.go:150: mixed batch=5 elapsed=20.456744415s
+2026-10-07T06:15:57.8721312Z     mixed_matrix_leader_test.go:150: mixed batch=6 elapsed=24.466884612s
+2026-10-07T06:16:01.8837746Z     mixed_matrix_leader_test.go:150: mixed batch=7 elapsed=28.478024909s
+2026-10-07T06:16:12.6982366Z     mixed_matrix_leader_test.go:150: mixed batch=8 elapsed=39.292941774s
+2026-10-07T06:16:21.2883201Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=1 consumer= pending=0 ack_pending=0 scheduled=30s killed=30.001093597s healed=47.882750912s
+2026-10-07T06:16:29.5061206Z     mixed_matrix_leader_test.go:150: mixed batch=9 elapsed=56.100671073s
+2026-10-07T06:16:34.5589171Z     mixed_matrix_leader_test.go:150: mixed batch=10 elapsed=1m1.153675994s
+2026-10-07T06:16:34.5594274Z     mixed_matrix_leader_test.go:675: checkpoint audit batch=10 invocation_cutoff=280 started elapsed=1m1.153710587s
+2026-10-07T06:16:36.7993733Z     mixed_matrix_leader_test.go:687: checkpoint audit batch=10 complete report={Invocations:280 Journals:280 Entries:3084 Terminal:280} elapsed=1m3.394043035s
+2026-10-07T06:16:39.7663151Z     mixed_matrix_leader_test.go:150: mixed batch=11 elapsed=1m6.361117409s
+2026-10-07T06:16:52.3515481Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=2 consumer= pending=0 ack_pending=0 scheduled=1m0s killed=1m0.000994409s healed=1m18.946294021s
+2026-10-07T06:16:56.5733450Z     mixed_matrix_leader_test.go:150: mixed batch=12 elapsed=1m23.168122685s
+2026-10-07T06:17:01.6256418Z     mixed_matrix_leader_test.go:150: mixed batch=13 elapsed=1m28.220182529s
+2026-10-07T06:17:05.4337246Z     mixed_matrix_leader_test.go:150: mixed batch=14 elapsed=1m32.028327043s
+2026-10-07T06:17:10.6473841Z     mixed_matrix_leader_test.go:150: mixed batch=15 elapsed=1m37.241911867s
+2026-10-07T06:17:21.4524915Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=3 consumer= pending=0 ack_pending=0 scheduled=1m30s killed=1m30.000137707s healed=1m48.047171361s
+2026-10-07T06:17:21.8547000Z     mixed_matrix_leader_test.go:150: mixed batch=16 elapsed=1m48.449477427s
+2026-10-07T06:17:28.0633394Z     mixed_matrix_leader_test.go:150: mixed batch=17 elapsed=1m54.658100917s
+2026-10-07T06:17:31.8716519Z     mixed_matrix_leader_test.go:150: mixed batch=18 elapsed=1m58.466375882s
+2026-10-07T06:17:36.9342576Z     mixed_matrix_leader_test.go:150: mixed batch=19 elapsed=2m3.528908996s
+2026-10-07T06:17:40.7430009Z     mixed_matrix_leader_test.go:150: mixed batch=20 elapsed=2m7.337751425s
+2026-10-07T06:17:40.7436270Z     mixed_matrix_leader_test.go:675: checkpoint audit batch=20 invocation_cutoff=560 started elapsed=2m7.337856483s
+2026-10-07T06:17:41.1558466Z     mixed_matrix_leader_test.go:687: checkpoint audit batch=20 complete report={Invocations:560 Journals:560 Entries:6171 Terminal:560} elapsed=2m7.750651027s
+2026-10-07T06:17:52.1232550Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=4 consumer= pending=0 ack_pending=0 scheduled=2m0s killed=2m0.000608796s healed=2m18.718018733s
+2026-10-07T06:17:57.5528429Z     mixed_matrix_leader_test.go:150: mixed batch=21 elapsed=2m24.147365067s
+2026-10-07T06:18:01.5635308Z     mixed_matrix_leader_test.go:150: mixed batch=22 elapsed=2m28.158239189s
+2026-10-07T06:18:06.6221662Z     mixed_matrix_leader_test.go:150: mixed batch=23 elapsed=2m33.216664107s
+2026-10-07T06:18:11.8297826Z     mixed_matrix_leader_test.go:150: mixed batch=24 elapsed=2m38.42455376s
+2026-10-07T06:18:22.0842387Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=5 consumer= pending=0 ack_pending=0 scheduled=2m30s killed=2m30.000590832s healed=2m48.678875403s
+2026-10-07T06:18:27.2372859Z     mixed_matrix_leader_test.go:150: mixed batch=25 elapsed=2m53.832086863s
+2026-10-07T06:18:32.0434499Z     mixed_matrix_leader_test.go:150: mixed batch=26 elapsed=2m58.638214132s
+2026-10-07T06:18:36.0527705Z     mixed_matrix_leader_test.go:150: mixed batch=27 elapsed=3m2.647430511s
+2026-10-07T06:18:41.2611072Z     mixed_matrix_leader_test.go:150: mixed batch=28 elapsed=3m7.855724639s
+2026-10-07T06:18:50.9418141Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=6 consumer= pending=0 ack_pending=0 scheduled=3m0s killed=3m0.00095974s healed=3m17.536620223s
+2026-10-07T06:18:58.1694564Z     mixed_matrix_leader_test.go:150: mixed batch=29 elapsed=3m24.764154918s
+2026-10-07T06:19:03.3280328Z     mixed_matrix_leader_test.go:150: mixed batch=30 elapsed=3m29.922859285s
+2026-10-07T06:19:03.3281910Z     mixed_matrix_leader_test.go:675: checkpoint audit batch=30 invocation_cutoff=840 started elapsed=3m29.922957756s
+2026-10-07T06:19:04.0030214Z     mixed_matrix_leader_test.go:687: checkpoint audit batch=30 complete report={Invocations:840 Journals:840 Entries:9256 Terminal:840} elapsed=3m30.597867833s
+2026-10-07T06:19:08.6408535Z     mixed_matrix_leader_test.go:150: mixed batch=31 elapsed=3m35.2355238s
+2026-10-07T06:19:21.8861632Z     mixed_matrix_leader_test.go:150: mixed batch=32 elapsed=3m48.48092037s
+2026-10-07T06:19:22.1891670Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=7 consumer= pending=0 ack_pending=0 scheduled=3m30s killed=3m30.000130396s healed=3m48.78375138s
+2026-10-07T06:19:28.9935365Z     mixed_matrix_leader_test.go:150: mixed batch=33 elapsed=3m55.587946618s
+2026-10-07T06:19:34.2021901Z     mixed_matrix_leader_test.go:150: mixed batch=34 elapsed=4m0.79678774s
+2026-10-07T06:19:39.4104569Z     mixed_matrix_leader_test.go:150: mixed batch=35 elapsed=4m6.004943045s
+2026-10-07T06:19:52.1808040Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=8 consumer= pending=0 ack_pending=0 scheduled=4m0s killed=4m0.000051995s healed=4m18.775588056s
+2026-10-07T06:19:56.5183189Z     mixed_matrix_leader_test.go:150: mixed batch=36 elapsed=4m23.113004285s
+2026-10-07T06:20:01.7261964Z     mixed_matrix_leader_test.go:150: mixed batch=37 elapsed=4m28.320938737s
+2026-10-07T06:20:06.9333417Z     mixed_matrix_leader_test.go:150: mixed batch=38 elapsed=4m33.528117876s
+2026-10-07T06:20:12.1412549Z     mixed_matrix_leader_test.go:150: mixed batch=39 elapsed=4m38.736008842s
+2026-10-07T06:20:21.4849609Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=9 consumer= pending=0 ack_pending=0 scheduled=4m30s killed=4m30.000592033s healed=4m48.079758809s
+2026-10-07T06:20:28.7496289Z     mixed_matrix_leader_test.go:150: mixed batch=40 elapsed=4m55.344049407s
+2026-10-07T06:20:28.7502169Z     mixed_matrix_leader_test.go:675: checkpoint audit batch=40 invocation_cutoff=1120 started elapsed=4m55.344195757s
+2026-10-07T06:20:29.6425919Z     mixed_matrix_leader_test.go:687: checkpoint audit batch=40 complete report={Invocations:1120 Journals:1120 Entries:12340 Terminal:1120} elapsed=4m56.237411069s
+2026-10-07T06:20:33.9581312Z     mixed_matrix_leader_test.go:150: mixed batch=41 elapsed=5m0.552766934s
+2026-10-07T06:20:39.1632375Z     mixed_matrix_leader_test.go:150: mixed batch=42 elapsed=5m5.757969847s
+2026-10-07T06:20:50.8646334Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=10 consumer= pending=0 ack_pending=0 scheduled=5m0s killed=5m0.000418192s healed=5m17.459362032s
+2026-10-07T06:20:56.4013665Z     mixed_matrix_leader_test.go:150: mixed batch=43 elapsed=5m22.99612888s
+2026-10-07T06:21:01.5524377Z     mixed_matrix_leader_test.go:150: mixed batch=44 elapsed=5m28.147227625s
+2026-10-07T06:21:06.7602686Z     mixed_matrix_leader_test.go:150: mixed batch=45 elapsed=5m33.355077828s
+2026-10-07T06:21:11.9675416Z     mixed_matrix_leader_test.go:150: mixed batch=46 elapsed=5m38.562261647s
+2026-10-07T06:21:22.3667284Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=11 consumer= pending=0 ack_pending=0 scheduled=5m30s killed=5m30.00018703s healed=5m48.961509625s
+2026-10-07T06:21:28.6734748Z     mixed_matrix_leader_test.go:150: mixed batch=47 elapsed=5m55.268075483s
+2026-10-07T06:21:33.8799511Z     mixed_matrix_leader_test.go:150: mixed batch=48 elapsed=6m0.474690257s
+2026-10-07T06:21:39.0857779Z     mixed_matrix_leader_test.go:150: mixed batch=49 elapsed=6m5.680547158s
+2026-10-07T06:21:51.8925185Z     mixed_matrix_leader_test.go:150: mixed batch=50 elapsed=6m18.48714566s
+2026-10-07T06:21:51.8926897Z     mixed_matrix_leader_test.go:675: checkpoint audit batch=50 invocation_cutoff=1400 started elapsed=6m18.487192024s
+2026-10-07T06:21:51.9354746Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=12 consumer= pending=0 ack_pending=0 scheduled=6m0s killed=6m0.000376846s healed=6m18.525197714s
+2026-10-07T06:21:52.7573429Z     mixed_matrix_leader_test.go:687: checkpoint audit batch=50 complete report={Invocations:1400 Journals:1400 Entries:15422 Terminal:1400} elapsed=6m19.351631625s
+2026-10-07T06:22:01.4008654Z     mixed_matrix_leader_test.go:150: mixed batch=51 elapsed=6m27.995612839s
+2026-10-07T06:22:06.6056885Z     mixed_matrix_leader_test.go:150: mixed batch=52 elapsed=6m33.200464356s
+2026-10-07T06:22:11.8117138Z     mixed_matrix_leader_test.go:150: mixed batch=53 elapsed=6m38.406558199s
+2026-10-07T06:22:21.4669405Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=13 consumer= pending=0 ack_pending=0 scheduled=6m30s killed=6m30.001056877s healed=6m48.061561722s
+2026-10-07T06:22:28.4178127Z     mixed_matrix_leader_test.go:150: mixed batch=54 elapsed=6m55.011944905s
+2026-10-07T06:22:33.6254303Z     mixed_matrix_leader_test.go:150: mixed batch=55 elapsed=7m0.220198915s
+2026-10-07T06:22:37.5321410Z     mixed_matrix_leader_test.go:150: mixed batch=56 elapsed=7m4.126918412s
+2026-10-07T06:22:42.7393093Z     mixed_matrix_leader_test.go:150: mixed batch=57 elapsed=7m9.334031637s
+2026-10-07T06:22:52.9405377Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=14 consumer= pending=0 ack_pending=0 scheduled=7m0s killed=7m0.000375022s healed=7m19.535304283s
+2026-10-07T06:22:59.3451879Z     mixed_matrix_leader_test.go:150: mixed batch=58 elapsed=7m25.939862746s
+2026-10-07T06:23:04.5548704Z     mixed_matrix_leader_test.go:150: mixed batch=59 elapsed=7m31.149602503s
+2026-10-07T06:23:09.7623374Z     mixed_matrix_leader_test.go:150: mixed batch=60 elapsed=7m36.357085846s
+2026-10-07T06:23:09.7624313Z     mixed_matrix_leader_test.go:675: checkpoint audit batch=60 invocation_cutoff=1680 started elapsed=7m36.357213595s
+2026-10-07T06:23:13.0914959Z     mixed_matrix_leader_test.go:687: checkpoint audit batch=60 complete report={Invocations:1680 Journals:1680 Entries:18507 Terminal:1680} elapsed=7m39.68631035s
+2026-10-07T06:23:21.5095867Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=15 consumer= pending=0 ack_pending=0 scheduled=7m30s killed=7m30.001084273s healed=7m48.10436849s
+2026-10-07T06:23:26.5740008Z     mixed_matrix_leader_test.go:150: mixed batch=61 elapsed=7m53.168026099s
+2026-10-07T06:23:31.7116100Z     mixed_matrix_leader_test.go:150: mixed batch=62 elapsed=7m58.30611127s
+2026-10-07T06:23:36.9170364Z     mixed_matrix_leader_test.go:150: mixed batch=63 elapsed=8m3.511788388s
+2026-10-07T06:23:42.1299677Z     mixed_matrix_leader_test.go:150: mixed batch=64 elapsed=8m8.724660763s
+2026-10-07T06:23:52.0507066Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=16 consumer= pending=0 ack_pending=0 scheduled=8m0s killed=8m0.00066475s healed=8m18.645487858s
+2026-10-07T06:23:58.7389381Z     mixed_matrix_leader_test.go:150: mixed batch=65 elapsed=8m25.333647697s
+2026-10-07T06:24:03.9482873Z     mixed_matrix_leader_test.go:150: mixed batch=66 elapsed=8m30.543064874s
+2026-10-07T06:24:08.9976484Z     mixed_matrix_leader_test.go:150: mixed batch=67 elapsed=8m35.592201136s
+2026-10-07T06:24:21.9137809Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=17 consumer= pending=0 ack_pending=0 scheduled=8m30s killed=8m30.000358721s healed=8m48.508566777s
+2026-10-07T06:24:26.1510816Z     mixed_matrix_leader_test.go:150: mixed batch=68 elapsed=8m52.745567133s
+2026-10-07T06:24:31.3582946Z     mixed_matrix_leader_test.go:150: mixed batch=69 elapsed=8m57.952980259s
+2026-10-07T06:24:35.1654158Z     mixed_matrix_leader_test.go:150: mixed batch=70 elapsed=9m1.760144559s
+2026-10-07T06:24:35.1655556Z     mixed_matrix_leader_test.go:675: checkpoint audit batch=70 invocation_cutoff=1960 started elapsed=9m1.76019678s
+2026-10-07T06:24:40.3730797Z     mixed_matrix_leader_test.go:687: checkpoint audit batch=70 complete report={Invocations:1960 Journals:1960 Entries:21591 Terminal:1960} elapsed=9m6.967876075s
+2026-10-07T06:24:40.4740669Z     mixed_matrix_leader_test.go:150: mixed batch=71 elapsed=9m7.068798156s
+2026-10-07T06:24:52.1449470Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=18 consumer= pending=0 ack_pending=0 scheduled=9m0s killed=9m0.000342335s healed=9m18.739690595s
+2026-10-07T06:24:57.0813528Z     mixed_matrix_leader_test.go:150: mixed batch=72 elapsed=9m23.676120688s
+2026-10-07T06:25:01.0889113Z     mixed_matrix_leader_test.go:150: mixed batch=73 elapsed=9m27.683219732s
+2026-10-07T06:25:05.0956561Z     mixed_matrix_leader_test.go:150: mixed batch=74 elapsed=9m31.690436813s
+2026-10-07T06:25:10.3020407Z     mixed_matrix_leader_test.go:150: mixed batch=75 elapsed=9m36.896830568s
+2026-10-07T06:25:21.8532835Z     mixed_matrix_leader_test.go:651: server_partition fault node=2 nodes=[] worker= pid=0 active_leases=0 routes=[4 4 0] majority_seq=19 consumer= pending=0 ack_pending=0 scheduled=9m30s killed=9m30.000313807s healed=9m48.448088931s
+2026-10-07T06:25:27.6091774Z     mixed_matrix_leader_test.go:150: mixed batch=76 elapsed=9m54.203828238s
+2026-10-07T06:25:32.8167653Z     mixed_matrix_leader_test.go:150: mixed batch=77 elapsed=9m59.411603234s
+2026-10-07T06:25:38.0249089Z     mixed_matrix_leader_test.go:150: mixed batch=78 elapsed=10m4.619649275s
+2026-10-07T06:25:59.2090866Z     mixed_matrix_leader_test.go:150: MATRIX_RETAINED row=server_partition report={Invocations:2184 Journals:2184 Entries:24057 Terminal:2184} expected_invocations=2184
+2026-10-07T06:25:59.2313591Z     mixed_matrix_leader_test.go:150: MATRIX_RESULT row=server_partition seed=6 duration=10m0s release_duration=true batches=78 invocations=2184 faults=19 terminal_p99=12.149297306s
+2026-10-07T06:25:59.2315486Z     mixed_matrix_leader_test.go:150: MATRIX_CELL type=matrixshort invocations=312 terminal_p99=948.697162ms
+2026-10-07T06:25:59.2316523Z     mixed_matrix_leader_test.go:150: MATRIX_PROGRESS type=matrixshort enabled_events=312 progress_p99=937.21908ms progress_max=4.226857289s above_30s=0
+2026-10-07T06:25:59.2317477Z     mixed_matrix_leader_test.go:150: MATRIX_CELL type=matrixtimer invocations=234 terminal_p99=13.251002115s
+2026-10-07T06:25:59.2319065Z     mixed_matrix_leader_test.go:150: MATRIX_PROGRESS type=matrixtimer enabled_events=2106 progress_p99=13.248839905s progress_max=13.368019763s above_30s=0
+2026-10-07T06:25:59.2320481Z     mixed_matrix_leader_test.go:150: MATRIX_CELL type=matrixsignal invocations=156 terminal_p99=17.093207745s
+2026-10-07T06:25:59.2322024Z     mixed_matrix_leader_test.go:150: MATRIX_PROGRESS type=matrixsignal enabled_events=1404 progress_p99=630.692118ms progress_max=8.210777417s above_30s=0
+2026-10-07T06:25:59.2323526Z     mixed_matrix_leader_test.go:150: MATRIX_CELL type=matrixfanout invocations=78 terminal_p99=17.146363623s
+2026-10-07T06:25:59.2324854Z     mixed_matrix_leader_test.go:150: MATRIX_PROGRESS type=matrixfanout enabled_events=1014 progress_p99=44.133482ms progress_max=5.997583739s above_30s=0
+2026-10-07T06:25:59.2326345Z     mixed_matrix_leader_test.go:150: MATRIX_CELL type=matrixchild invocations=468 terminal_p99=5.013605621s
+2026-10-07T06:25:59.2327594Z     mixed_matrix_leader_test.go:150: MATRIX_PROGRESS type=matrixchild enabled_events=2340 progress_p99=40.662752ms progress_max=1.327134416s above_30s=0
+2026-10-07T06:25:59.2329169Z     mixed_matrix_leader_test.go:150: MATRIX_CELL type=matrixgrandchild invocations=936 terminal_p99=45.002123ms
+2026-10-07T06:25:59.2331176Z     mixed_matrix_leader_test.go:150: MATRIX_PROGRESS type=matrixgrandchild enabled_events=936 progress_p99=23.585029ms progress_max=6.932055996s above_30s=0
+2026-10-07T06:26:00.0399905Z --- PASS: TestMixedMatrixServerPartitionEveryThirtySeconds (631.08s)
+2026-10-07T06:26:00.0400654Z PASS
+2026-10-07T06:26:00.0432527Z ok  	js-wf/integration	631.088s
+2026-10-07T06:26:00.1925868Z Verified executed sustained test TestMixedMatrixServerPartitionEveryThirtySeconds duration=10m
+2026-10-07T06:26:00.2016240Z ##[group]Run actions/upload-artifact@v7
+2026-10-07T06:26:00.2016618Z with:
+2026-10-07T06:26:00.2016996Z   name: matrix-partition-6-10m
+2026-10-07T06:26:00.2017409Z   path: integration/matrix-partition-*-*
+2026-10-07T06:26:00.2017780Z   if-no-files-found: error
+2026-10-07T06:26:00.2018164Z   compression-level: 6
+2026-10-07T06:26:00.2018447Z   overwrite: false
+2026-10-07T06:26:00.2018892Z   include-hidden-files: false
+2026-10-07T06:26:00.2019215Z   archive: true
+2026-10-07T06:26:00.2019469Z env:
+2026-10-07T06:26:00.2020009Z   WF_MATRIX_CHAOS: 1
+2026-10-07T06:26:00.2020330Z   WF_MATRIX_OPERATION_TIMINGS: 1
+2026-10-07T06:26:00.2020728Z   WF_MATRIX_DURATION: 10m
+2026-10-07T06:26:00.2021049Z   FIRST_SEED: 6
+2026-10-07T06:26:00.2021346Z   LAST_SEED: 6
+2026-10-07T06:26:00.2021696Z   MATRIX_ROW: partition
+2026-10-07T06:26:00.2022022Z   MATRIX_TIMEOUT: 18m
+2026-10-07T06:26:00.2022473Z   MATRIX_TEST: TestMixedMatrixServerPartitionEveryThirtySeconds
+2026-10-07T06:26:00.2022943Z ##[endgroup]
+2026-10-07T06:26:00.3440250Z With the provided path, there will be 6 files uploaded
+2026-10-07T06:26:00.3460116Z Artifact name is valid!
+2026-10-07T06:26:00.3460714Z Root directory input is valid!
+2026-10-07T06:26:00.6065850Z Uploading artifact: matrix-partition-6-10m.zip
+2026-10-07T06:26:00.6104118Z Beginning upload of artifact content to blob storage
+2026-10-07T06:26:01.5729606Z Uploaded bytes 3101890
+2026-10-07T06:26:01.6205847Z Finished uploading artifact content to blob storage!
+2026-10-07T06:26:01.6206997Z SHA256 digest of uploaded artifact is 7f2e8ad243e87c6b32095d0380436635f373a20ab7cad3ae98b420c971fd72d0
+2026-10-07T06:26:01.6207712Z Finalizing artifact upload
+2026-10-07T06:26:01.9024845Z Artifact matrix-partition-6-10m successfully finalized. Artifact ID 11464528770
+2026-10-07T06:26:01.9025905Z Artifact matrix-partition-6-10m has been successfully uploaded! Final size is 3101890 bytes. Artifact ID is 11464528770
+2026-10-07T06:26:01.9029641Z Artifact download URL: https://github.com/AntPAllen/js-wf/actions/runs/37500390198/artifacts/11464528770
+2026-10-07T06:26:01.9171415Z Post job cleanup.
+2026-10-07T06:26:02.0230599Z (node:5014) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-07T06:26:02.0231453Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-07T06:26:02.0292129Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOMODCACHE
+2026-10-07T06:26:02.0331821Z [command]/opt/hostedtoolcache/go/1.27.1/x64/bin/go env GOCACHE
+2026-10-07T06:26:02.0360733Z /home/runner/go/pkg/mod
+2026-10-07T06:26:02.0381075Z /home/runner/.cache/go-build
+2026-10-07T06:26:02.0385749Z Cache hit occurred on the primary key setup-go-Linux-x64-ubuntu24-go-1.27.1-05fc3b25fc9f8da09ce7d05c0dc054d40239ab068ad334b7c31a444aad3c64eb, not saving cache.
+2026-10-07T06:26:02.0514720Z Post job cleanup.
+2026-10-07T06:26:02.1282399Z [command]/usr/bin/git version
+2026-10-07T06:26:02.1317340Z git version 2.55.0
+2026-10-07T06:26:02.1351046Z Temporarily overriding HOME='/home/runner/work/_temp/73f0cc33-d2b4-43a6-b954-deeea8aae15e' before making global git config changes
+2026-10-07T06:26:02.1352323Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T06:26:02.1356678Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/js-wf/js-wf
+2026-10-07T06:26:02.1389480Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T06:26:02.1420667Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-07T06:26:02.1642375Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T06:26:02.1666392Z http.https://github.com/.extraheader
+2026-10-07T06:26:02.1679606Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-07T06:26:02.1707143Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-07T06:26:02.1930311Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T06:26:02.1961602Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-07T06:26:02.2338332Z Cleaning up orphan processes
+2026-10-07T06:26:02.2581887Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-go@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
