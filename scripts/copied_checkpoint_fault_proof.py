@@ -20,6 +20,27 @@ def validate(result, servers, identity, *, checkpoint=8520):
     if checkpoint==8520: assert result['journal_visits']==2632932
     assert type(result['journal_visits']) is int and result['journal_visits']>=entries>=cutoff
     assert not state.get('num_deleted', 0)
+    if checkpoint==4160:
+        before=result['readiness_before_cleanup']
+        inherited=result['inherited_cursors'];deletions=result['inherited_deletions']
+        assert len(inherited)==len(deletions)==2
+        assert {c['stream_name'] for c in inherited}=={'WF_INV','WF_JRN'}
+        names={c['name'] for c in inherited};assert len(names)==2
+        assert {d['name'] for d in deletions}==names and all(not d['error'] for d in deletions)
+        finished=stamp(result['inherited_cleanup_finished'])
+        for c in inherited:
+            assert c['name'].startswith('wf-audit-') and c['config']['num_replicas']==1
+            assert c['config']['mem_storage'] and c['config']['ack_policy']=='none'
+            assert stamp(c['created'])<stamp('2026-10-07T18:01:14Z')
+            source=c['stream_name'];old=before[source];new=result['readiness'][source]
+            assert old['config']==new['config'] and old['state']['consumer_count']==1
+            state=dict(old['state']);state['consumer_count']=0
+            assert state==new['state']
+        assert all(stamp(d['at'])<=finished for d in deletions)
+        trial=[c['info'] for c in result['cursors'] if c['created']]
+        assert all(stamp(c['created'])>=finished and c['name'] not in names for c in trial)
+        for frame in (result.get('state_connection_loss') or {}).get('frames',[]):
+            assert finished.timestamp()<=stamp(frame['deadline']).timestamp()-20
     assert result['cleanup'] == dict(WF_INV=0, WF_JRN=0)
     assert set(result['readiness_after']) == {'WF_INV', 'WF_JRN', 'KV_WF_STATE', 'WF_PURGE'}
     for info in result['readiness_after'].values():

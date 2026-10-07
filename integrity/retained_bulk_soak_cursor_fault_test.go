@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -129,6 +130,53 @@ func retainedBulkSoakCursorOwnerRestart(t *testing.T, checkpoint, cutoff, expect
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
+	// The failed latest producer retained one old ephemeral audit cursor per
+	// source. Remove only these positively identified inherited consumers from
+	// this fresh copy, before any trial cursor exists. Never reset stream data.
+	readinessBeforeCleanup := map[string]*jetstream.StreamInfo{}
+	for name, info := range readiness {
+		readinessBeforeCleanup[name] = info
+	}
+	var inheritedCursors []*jetstream.ConsumerInfo
+	var inheritedDeletions []processDeleteObservation
+	if checkpoint == 4160 {
+		originalFinished := time.Date(2026, 10, 7, 18, 1, 14, 0, time.UTC)
+		for _, name := range []string{"WF_INV", "WF_JRN"} {
+			stream, err := js.Stream(startup, name)
+			if err != nil {
+				t.Fatal(err)
+			}
+			listed := stream.ListConsumers(startup)
+			var infos []*jetstream.ConsumerInfo
+			for info := range listed.Info() {
+				infos = append(infos, info)
+			}
+			if listed.Err() != nil || len(infos) != 1 || readiness[name].State.Consumers != 1 {
+				t.Fatalf("%s: expected exactly one inherited original audit cursor: count=%d err=%v", name, len(infos), listed.Err())
+			}
+			info := infos[0]
+			if info.Stream != name || !strings.HasPrefix(info.Name, "wf-audit-") || info.Config.Replicas != 1 || !info.Config.MemoryStorage || info.Config.AckPolicy != jetstream.AckNonePolicy || info.Created.IsZero() || !info.Created.Before(originalFinished) {
+				t.Fatalf("%s: refusing to remove unknown inherited consumer: %+v", name, info)
+			}
+			inheritedCursors = append(inheritedCursors, info)
+			err = stream.DeleteConsumer(startup, info.Name)
+			inheritedDeletions = append(inheritedDeletions, processDeleteObservation{Name: info.Name, At: time.Now()})
+			if err != nil {
+				t.Fatal("delete inherited original audit cursor", err)
+			}
+			after, err := stream.Info(startup)
+			if err != nil {
+				t.Fatal(err)
+			}
+			beforeState := readiness[name].State
+			beforeState.Consumers = 0
+			if !reflect.DeepEqual(beforeState, after.State) || !reflect.DeepEqual(readiness[name].Config, after.Config) {
+				t.Fatal("inherited cursor preparation changed source data/config or left a consumer", name)
+			}
+			readiness[name] = after
+		}
+	}
+	inheritedCleanupFinished := time.Now()
 	// No healthy journal scan precedes this fault. Admission reads only stream
 	// metadata; the original full captured cohort and budgets remain unchanged.
 	journalState := readiness["WF_JRN"].State
@@ -141,27 +189,31 @@ func retainedBulkSoakCursorOwnerRestart(t *testing.T, checkpoint, cutoff, expect
 		Created       bool                    `json:"created"`
 	}
 	result := struct {
-		Cutoff              uint64                            `json:"cutoff"`
-		ElapsedNS           int64                             `json:"elapsed_ns"`
-		AuditNS             int64                             `json:"audit_ns"`
-		Report              Report                            `json:"report"`
-		Error               string                            `json:"error"`
-		Readiness           map[string]*jetstream.StreamInfo  `json:"readiness"`
-		RecoveredReadiness  map[string]*jetstream.StreamInfo  `json:"readiness_after"`
-		ParallelDecode      bool                              `json:"parallel_decode"`
-		CursorRestart       bool                              `json:"cursor_owner_restart"`
-		Qualifies24h        bool                              `json:"qualifies_24h"`
-		JournalVisits       uint64                            `json:"journal_visits"`
-		Target              *jetstream.ConsumerInfo           `json:"target"`
-		Kill                testcluster.DockerKillObservation `json:"kill"`
-		RestartCompleted    time.Time                         `json:"restart_completed"`
-		Cursors             []cursorObservation               `json:"cursors"`
-		CursorErrors        []string                          `json:"cursor_errors"`
-		Deletions           []processDeleteObservation        `json:"deletions"`
-		StateConnectionLoss *copiedWatchConnectionProof       `json:"state_connection_loss,omitempty"`
-		StateWatches        []capacityWatchTiming             `json:"state_watches"`
-		Cleanup             map[string]int                    `json:"cleanup"`
-	}{Cutoff: uint64(cutoff), Readiness: readiness, ParallelDecode: true, CursorRestart: true, Cleanup: map[string]int{}, RecoveredReadiness: map[string]*jetstream.StreamInfo{}}
+		ReadinessBeforeCleanup   map[string]*jetstream.StreamInfo  `json:"readiness_before_cleanup,omitempty"`
+		InheritedCursors         []*jetstream.ConsumerInfo         `json:"inherited_cursors,omitempty"`
+		InheritedDeletions       []processDeleteObservation        `json:"inherited_deletions,omitempty"`
+		InheritedCleanupFinished time.Time                         `json:"inherited_cleanup_finished"`
+		Cutoff                   uint64                            `json:"cutoff"`
+		ElapsedNS                int64                             `json:"elapsed_ns"`
+		AuditNS                  int64                             `json:"audit_ns"`
+		Report                   Report                            `json:"report"`
+		Error                    string                            `json:"error"`
+		Readiness                map[string]*jetstream.StreamInfo  `json:"readiness"`
+		RecoveredReadiness       map[string]*jetstream.StreamInfo  `json:"readiness_after"`
+		ParallelDecode           bool                              `json:"parallel_decode"`
+		CursorRestart            bool                              `json:"cursor_owner_restart"`
+		Qualifies24h             bool                              `json:"qualifies_24h"`
+		JournalVisits            uint64                            `json:"journal_visits"`
+		Target                   *jetstream.ConsumerInfo           `json:"target"`
+		Kill                     testcluster.DockerKillObservation `json:"kill"`
+		RestartCompleted         time.Time                         `json:"restart_completed"`
+		Cursors                  []cursorObservation               `json:"cursors"`
+		CursorErrors             []string                          `json:"cursor_errors"`
+		Deletions                []processDeleteObservation        `json:"deletions"`
+		StateConnectionLoss      *copiedWatchConnectionProof       `json:"state_connection_loss,omitempty"`
+		StateWatches             []capacityWatchTiming             `json:"state_watches"`
+		Cleanup                  map[string]int                    `json:"cleanup"`
+	}{ReadinessBeforeCleanup: readinessBeforeCleanup, InheritedCursors: inheritedCursors, InheritedDeletions: inheritedDeletions, InheritedCleanupFinished: inheritedCleanupFinished, Cutoff: uint64(cutoff), Readiness: readiness, ParallelDecode: true, CursorRestart: true, Cleanup: map[string]int{}, RecoveredReadiness: map[string]*jetstream.StreamInfo{}}
 	call, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	began := time.Now()

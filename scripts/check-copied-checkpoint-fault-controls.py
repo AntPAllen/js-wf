@@ -11,6 +11,7 @@ import copied_checkpoint_fault_proof
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
+    parser.add_argument('--checkpoint', type=int, choices=(8520,4160), default=8520)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     paths = list((args.root/'originals').rglob('copied-checkpoint-audit.json'))
@@ -18,29 +19,37 @@ def main():
     baseline = json.loads(paths[0].read_text())
     servers = json.loads((args.root/'actual-servers.json').read_text())
     identity = json.loads((args.root/'copied-store-admission.json').read_text())['identity']
-    admitted = copied_checkpoint_fault_proof.validate(baseline, servers, identity)
+    admitted = copied_checkpoint_fault_proof.validate(baseline, servers, identity, checkpoint=args.checkpoint)
     controls = []
 
     def reject(name, change):
         result, observed = copy.deepcopy(baseline), copy.deepcopy(servers)
         change(result, observed)
         try:
-            copied_checkpoint_fault_proof.validate(result, observed, identity)
+            copied_checkpoint_fault_proof.validate(result, observed, identity, checkpoint=args.checkpoint)
         except (AssertionError, KeyError, ValueError, TypeError):
             controls.append(name)
         else:
             raise AssertionError('invalid proof admitted: ' + name)
 
+    if args.checkpoint==4160:
+        reject('missing-inherited-cursors',lambda r,s:r.__setitem__('inherited_cursors',[]))
+        reject('unknown-inherited-consumer',lambda r,s:r['inherited_cursors'][0].__setitem__('name','application'))
+        reject('inherited-non-memory',lambda r,s:r['inherited_cursors'][0]['config'].__setitem__('mem_storage',False))
+        reject('inherited-new-consumer',lambda r,s:r['inherited_cursors'][0].__setitem__('created','2030-01-01T00:00:00Z'))
+        reject('inherited-delete-failed',lambda r,s:r['inherited_deletions'][0].__setitem__('error','failed'))
+        reject('inherited-data-changed',lambda r,s:r['readiness_before_cleanup']['WF_INV']['state'].__setitem__('messages',1))
+        reject('inherited-cleanup-after-trial',lambda r,s:r.__setitem__('inherited_cleanup_finished','2030-01-01T00:00:00Z'))
     for field, value in (
         ('cursor_owner_restart', False), ('parallel_decode', False), ('qualifies_24h', True),
-        ('cutoff', 238559), ('error', 'context deadline exceeded'), ('audit_ns', 0),
-        ('elapsed_ns', 20_000_000_000), ('journal_visits', 2632931),
+        ('cutoff', baseline['cutoff']-1), ('error', 'context deadline exceeded'), ('audit_ns', 0),
+        ('elapsed_ns', 20_000_000_000), ('journal_visits', baseline['journal_visits']-1),
         ('cleanup', {'WF_INV': 0, 'WF_JRN': 1}), ('state_watches', []),
         ('readiness_after', {}), ('restart_completed', '2000-01-01T00:00:00Z'),
     ):
         reject(field, lambda r, s, key=field, bad=value: r.__setitem__(key, bad))
     for field in ('Invocations', 'Journals', 'Entries', 'Terminal'):
-        reject('incomplete-' + field, lambda r, s, key=field: r['report'].__setitem__(key, r['report'][key]-1))
+        reject('incomplete-' + field, lambda r, s, key=field: r['report'].__setitem__(key, 0 if key=='Entries' and args.checkpoint==4160 else r['report'][key]-1))
     reject('source-hole', lambda r, s: r['readiness']['WF_JRN']['state'].__setitem__('num_deleted', 1))
     reject('source-bound', lambda r, s: r['readiness']['WF_JRN']['state'].__setitem__('last_seq', 1))
     reject('watch-error', lambda r, s: r['state_watches'][-1].__setitem__('StopError', 'failed'))
@@ -76,7 +85,7 @@ def main():
     if baseline.get('state_connection_loss'):
         for key, bad in (('owner', -1), ('server_id', ''), ('server_name', 'unknown'),
                          ('url', 'nats://127.0.0.1:1'), ('status_after_close', 'CONNECTED'),
-                         ('attempts', 1), ('buffered_before_exposure', 238560),
+                         ('attempts', 1), ('buffered_before_exposure', baseline['cutoff']),
                          ('close_finished', '2000-01-01T00:00:00Z'), ('frames', [])):
             reject('watch-connection-' + key, lambda r, s, k=key, value=bad: r['state_connection_loss'].__setitem__(k, value))
         def attempt_frames(r):
