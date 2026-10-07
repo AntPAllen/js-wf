@@ -1,0 +1,55 @@
+name: Copied checkpoint proof controls
+
+on:
+  push:
+    paths:
+      - scripts/copied_checkpoint_fault_proof.py
+      - scripts/check-copied-checkpoint-fault-controls.py
+      - .github/workflows/copied-checkpoint-proof.yml
+      - docs/scale/checkpoint8520-cursor-owner-recovery-2026-10-07/native-peer-outage/*.json
+      - docs/scale/parallel-recovery-journal-24h-2026-10-07/checkpoint4160-copied-recovery-accepted/*.json
+  pull_request:
+    paths:
+      - scripts/copied_checkpoint_fault_proof.py
+      - scripts/check-copied-checkpoint-fault-controls.py
+      - .github/workflows/copied-checkpoint-proof.yml
+      - docs/scale/checkpoint8520-cursor-owner-recovery-2026-10-07/native-peer-outage/*.json
+      - docs/scale/parallel-recovery-journal-24h-2026-10-07/checkpoint4160-copied-recovery-accepted/*.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - checkpoint: 8520
+            proof: docs/scale/checkpoint8520-cursor-owner-recovery-2026-10-07/native-peer-outage
+          - checkpoint: 4160
+            proof: docs/scale/parallel-recovery-journal-24h-2026-10-07/checkpoint4160-copied-recovery-accepted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Review mutations of actual retained native evidence
+        env:
+          CHECKPOINT: ${{ matrix.checkpoint }}
+          PROOF: ${{ matrix.proof }}
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          proof_root="$RUNNER_TEMP/copied-checkpoint-$CHECKPOINT"
+          mkdir -p "$proof_root/originals"
+          cp "$PROOF/copied-checkpoint-audit.json" "$proof_root/originals/"
+          cp "$PROOF/actual-servers.json" "$PROOF/copied-store-admission.json" "$proof_root/"
+          python3 scripts/check-copied-checkpoint-fault-controls.py \
+            --root "$proof_root" --checkpoint "$CHECKPOINT" \
+            --output "$RUNNER_TEMP/proof-controls-$CHECKPOINT.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: copied-checkpoint-proof-controls-${{ matrix.checkpoint }}
+          path: ${{ runner.temp }}/proof-controls-${{ matrix.checkpoint }}.json
+          if-no-files-found: error
