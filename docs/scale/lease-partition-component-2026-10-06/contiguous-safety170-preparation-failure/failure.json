@@ -1,0 +1,9 @@
+{
+  "source": "9038eb4f72e9c7cb47c817aaaaaea64bd3a41460",
+  "producer_pid": 2179276,
+  "terminal_exit_code": 1,
+  "native_cases_started": 0,
+  "root": "/tmp/js-wf-raft-safety170-contiguous-20261007",
+  "cause": "Parent full archive and native originals contain verified nats-source-before/after records, but the canonical direct-control directory had not published those two records. Admission fails before any TestNRG case launches.",
+  "correction": "Publish exact records after verifying their size/hash against the already committed full parent fixture inventory. Preserve original source and native gates."
+}
