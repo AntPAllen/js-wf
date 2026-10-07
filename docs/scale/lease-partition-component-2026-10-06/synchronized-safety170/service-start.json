@@ -1,0 +1,30 @@
+{
+  "unit": "js-wf-raft-full-synchronized-20261007.service",
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=js-wf-raft-full-synchronized-20261007",
+    "--property=Type=exec",
+    "--property=RemainAfterExit=yes",
+    "--property=Restart=no",
+    "--property=RuntimeMaxSec=50min",
+    "--property=WorkingDirectory=/home/exedev/js-wf",
+    "--property=StandardOutput=append:/tmp/full-synchronized-durable-producer-20261007.log",
+    "--property=StandardError=inherit",
+    "--setenv=PATH=/home/exedev/.codex/packages/app-server-daemon/releases/0.160.1-x86_64-unknown-linux-musl/codex-path:/home/exedev/.local/bin:/home/exedev/.codex/tmp/arg0/codex-arg0bGVOeW:/home/exedev/.codex/packages/app-server-daemon/releases/0.160.1-x86_64-unknown-linux-musl/codex-path:/home/exedev/.codex/tmp/arg0/codex-arg0ALRmXg:/home/exedev/.codex/packages/app-server-daemon/releases/0.160.0-x86_64-unknown-linux-musl/codex-path:/home/exedev/.codex/tmp/arg0/codex-arg0LJgNL8:/usr/local/lib/codex/releases/rust-v0.160.0-x86_64-unknown-linux-musl-4fcc47ab57f52ff7/codex-path:/home/exedev/.local/bin:/home/exedev/.local/bin:/exe.dev/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin",
+    "--setenv=PYTHONDONTWRITEBYTECODE=1",
+    "/usr/bin/python3",
+    "/home/exedev/js-wf/scripts/run-raft-catchup-safety-controls.py",
+    "--root",
+    "/tmp/js-wf-raft-safety170-synchronized-durable-20261007",
+    "--parent-root",
+    "/tmp/js-wf-raft-synchronized-setup-controls-20261007",
+    "--guard-variant",
+    "contiguous",
+    "--test-profile",
+    "synchronized-setup"
+  ],
+  "initial_service_state": "Restart=no\nRuntimeMaxUSec=50min\nMainPID=3457823\nResult=success\nExecMainPID=3457823\nExecMainCode=0\nExecMainStatus=0\nActiveState=active\nSubState=running\n",
+  "source": "c048bcc4cab0e40fe714c30de8eb5801acdcf53c",
+  "scope": "Durable execution only. Original complete170/count1/20m per SDK/2CPU/2GiB retained; 50-minute service bound covers both SDK deadlines plus collection. No automatic restart or qualification inferred from service startup."
+}

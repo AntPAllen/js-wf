@@ -45,3 +45,7 @@ At cb48979, both stock/refined original drain variants fail both original snapsh
 ## Composed fixture setup qualified
 
 At9af9a65, actual stock/contiguous race binaries each pass all three original tests/twelve subcases, count1/3m/2CPU/2GiB, no races/skips. Exactly eight peer lock pairs/17additions plus complete snapshot permit reservation; no diagnostic injection; every original assertion/case/sleep/deadline unchanged. Complete independent source/native/archive review is in ../synchronized-setup-controls/. Full170 with these binaries remains pending, and historical full-suite failures remain unchanged.
+
+## Complete composed comparison
+
+At c048bcc (compiled parent9af9a65), both actual source-bound race binaries pass all170 original tests under count1/20m/2CPU/2GiB. Eight peer setup lock pairs/17additions and complete snapshot I/O reservation, no injection, all original assertions/cases/sleeps/deadlines unchanged. Full independent source/native/archive review: ../synchronized-safety170/. This closes this derived comparison; prior failures and missing historical causes remain recorded. Official default dependency is unchanged. No upstream issue or patch has been posted.
