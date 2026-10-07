@@ -20,11 +20,18 @@ def validate(result, servers, identity):
         assert info['cluster']['leader'] and len(info['cluster']['replicas']) == 4
         assert all(p['current'] and not p.get('offline', False) for p in info['cluster']['replicas'])
     watches = result['state_watches']
-    assert len(watches) == 1
-    watch = watches[0]
-    assert watch['CreationError'] == watch['StopError'] == '<nil>'
-    assert 0 <= watch['StartedNS'] <= watch['CreatedNS'] <= watch['StopStartedNS'] <= watch['StopFinishedNS'] <= result['elapsed_ns']
-    assert watch['StopFinishedNS'] > 0
+    assert 1 <= len(watches) <= 3
+    previous_stop = 0
+    for watch in watches:
+        assert previous_stop <= watch['StartedNS'] <= watch['CreatedNS'] <= result['elapsed_ns']
+        if watch['CreationError'] == '<nil>':
+            assert watch['CreatedNS'] <= watch['StopStartedNS'] <= watch['StopFinishedNS'] <= result['elapsed_ns']
+            assert watch['StopFinishedNS'] > 0
+            previous_stop = watch['StopFinishedNS']
+        else:
+            assert watch['StopStartedNS'] == watch['StopFinishedNS'] == 0 and not watch['StopError']
+            previous_stop = watch['CreatedNS']
+    assert watches[-1]['CreationError'] == watches[-1]['StopError'] == '<nil>'
     target, kill = result['target'], result['kill']
     assert target['stream_name'] == 'WF_JRN' and target['num_pending'] > 0
     config = target['config']

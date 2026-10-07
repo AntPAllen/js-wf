@@ -6,13 +6,49 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
+
+// Explicit parallel-checker candidate: a silent watch must not consume the
+// whole audit deadline. Progress resets this idle clock; a large active initial
+// set still receives the caller's original complete-read budget.
+const auditStateProgressInterval = 2 * time.Second
+
+type auditStateProgressTimer interface {
+	C() <-chan time.Time
+	Reset()
+	Stop()
+}
+
+type realAuditStateProgressTimer struct{ timer *time.Timer }
+
+func (t realAuditStateProgressTimer) C() <-chan time.Time { return t.timer.C }
+func (t realAuditStateProgressTimer) Stop()               { t.timer.Stop() }
+func (t realAuditStateProgressTimer) Reset() {
+	if !t.timer.Stop() {
+		select {
+		case <-t.timer.C:
+		default:
+		}
+	}
+	t.timer.Reset(auditStateProgressInterval)
+}
+
+func initialAuditStateWithProgressTimeout(ctx context.Context, state jetstream.KeyValue, include func(string) bool) (jetstream.KeyValue, error) {
+	return initialAuditStateUsingProgress(ctx, state, include, func() auditStateProgressTimer {
+		return realAuditStateProgressTimer{timer: time.NewTimer(auditStateProgressInterval)}
+	})
+}
 
 // The documented nil watch entry marks completion of the initial latest-value
 // set. A closed channel, timeout or malformed entry never certifies a partial
 // set. The caller bounds and retries the entire snapshot, not just creation.
 func initialAuditState(ctx context.Context, state jetstream.KeyValue, include func(string) bool) (result jetstream.KeyValue, err error) {
+	return initialAuditStateUsingProgress(ctx, state, include, nil)
+}
+
+func initialAuditStateUsingProgress(ctx context.Context, state jetstream.KeyValue, include func(string) bool, createTimer func() auditStateProgressTimer) (result jetstream.KeyValue, err error) {
 	// Preserve the underlying error for retry classification while identifying a
 	// failure before the initial-set barrier. Iterator completion alone cannot
 	// show whether this later snapshot phase received any state records.
@@ -67,47 +103,70 @@ func initialAuditState(ctx context.Context, state jetstream.KeyValue, include fu
 		}
 	}()
 	phase = "initial set"
+	var progressTimer auditStateProgressTimer
+	var progress <-chan time.Time
+	if createTimer != nil {
+		progressTimer = createTimer()
+		progress = progressTimer.C()
+		defer progressTimer.Stop()
+	}
 	values := make(map[string]jetstream.KeyValueEntry)
 	for {
+		var entry jetstream.KeyValueEntry
+		var ok bool
 		select {
 		case <-ctx.Done():
 			return nil, ctx.Err()
-		case entry, ok := <-watch.Updates():
-			if !ok {
-				return nil, errors.New("retained state watch closed before initial completion")
-			}
+		case <-progress:
 			if ctx.Err() != nil {
 				return nil, ctx.Err()
 			}
-			if entry == nil {
-				complete = true
-				emit("initial_complete", nil)
-				return &auditStateSnapshot{KeyValue: state, values: values}, nil
-			}
-			received++
-			lastRevision = entry.Revision()
-			if entry.Bucket() != state.Bucket() || entry.Key() == "" || entry.Revision() == 0 {
-				return nil, errors.New("retained state watch invalid entry identity")
-			}
-			switch entry.Operation() {
-			case jetstream.KeyValuePut, jetstream.KeyValueDelete, jetstream.KeyValuePurge:
+			// Buffered progress wins over an idle tick delayed by scheduling.
+			// A nil entry is still the native initial-completion barrier.
+			select {
+			case entry, ok = <-watch.Updates():
 			default:
-				return nil, fmt.Errorf("retained state watch invalid operation %v", entry.Operation())
+				return nil, fmt.Errorf("state watch made no progress: %w", nats.ErrTimeout)
 			}
-			if !include(entry.Key()) {
-				if received%10000 == 0 {
-					emit("progress", nil)
-				}
-				continue
-			}
-			if prior := values[entry.Key()]; prior != nil && entry.Revision() <= prior.Revision() {
-				return nil, errors.New("retained state watch revisions out of order")
-			}
-			included++
-			values[entry.Key()] = entry
+		case entry, ok = <-watch.Updates():
+		}
+		if !ok {
+			return nil, errors.New("retained state watch closed before initial completion")
+		}
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+		if progressTimer != nil {
+			progressTimer.Reset()
+		}
+		if entry == nil {
+			complete = true
+			emit("initial_complete", nil)
+			return &auditStateSnapshot{KeyValue: state, values: values}, nil
+		}
+		received++
+		lastRevision = entry.Revision()
+		if entry.Bucket() != state.Bucket() || entry.Key() == "" || entry.Revision() == 0 {
+			return nil, errors.New("retained state watch invalid entry identity")
+		}
+		switch entry.Operation() {
+		case jetstream.KeyValuePut, jetstream.KeyValueDelete, jetstream.KeyValuePurge:
+		default:
+			return nil, fmt.Errorf("retained state watch invalid operation %v", entry.Operation())
+		}
+		if !include(entry.Key()) {
 			if received%10000 == 0 {
 				emit("progress", nil)
 			}
+			continue
+		}
+		if prior := values[entry.Key()]; prior != nil && entry.Revision() <= prior.Revision() {
+			return nil, errors.New("retained state watch revisions out of order")
+		}
+		included++
+		values[entry.Key()] = entry
+		if received%10000 == 0 {
+			emit("progress", nil)
 		}
 	}
 }

@@ -43,7 +43,7 @@ def main():
         reject('incomplete-' + field, lambda r, s, key=field: r['report'].__setitem__(key, r['report'][key]-1))
     reject('source-hole', lambda r, s: r['readiness']['WF_JRN']['state'].__setitem__('num_deleted', 1))
     reject('source-bound', lambda r, s: r['readiness']['WF_JRN']['state'].__setitem__('last_seq', 1))
-    reject('watch-error', lambda r, s: r['state_watches'][0].__setitem__('StopError', 'failed'))
+    reject('watch-error', lambda r, s: r['state_watches'][-1].__setitem__('StopError', 'failed'))
     reject('watch-unjoined', lambda r, s: r['state_watches'][0].__setitem__('StopFinishedNS', r['elapsed_ns']+1))
     reject('source-not-current', lambda r, s: next(iter(r['readiness_after'].values()))['cluster']['replicas'][0].__setitem__('current', False))
     reject('non-R5-source', lambda r, s: next(iter(r['readiness_after'].values()))['config'].__setitem__('num_replicas', 1))

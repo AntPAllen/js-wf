@@ -287,7 +287,18 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 		}
 	}
 	qualification = qualification && len(journalCursors) == 2 && journalCursors[1].Info.Name != journalCursors[0].Info.Name && journalCursors[1].Info.Config.OptStartSeq == journalCursors[1].JournalVisits+1
-	qualification = qualification && len(result.StateWatches) == 1 && result.StateWatches[0].CreationError == "<nil>" && result.StateWatches[0].StopError == "<nil>" && result.StateWatches[0].StopFinishedNS > 0
+	qualification = qualification && len(result.StateWatches) >= 1 && len(result.StateWatches) <= 3
+	for _, watch := range result.StateWatches {
+		if watch.CreationError == "<nil>" {
+			qualification = qualification && watch.StopFinishedNS > 0
+		} else {
+			qualification = qualification && watch.StopFinishedNS == 0
+		}
+	}
+	if len(result.StateWatches) > 0 {
+		last := result.StateWatches[len(result.StateWatches)-1]
+		qualification = qualification && last.CreationError == "<nil>" && last.StopError == "<nil>"
+	}
 	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		t.Fatal(err)

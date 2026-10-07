@@ -251,9 +251,13 @@ func checkUsingJournalDecodeOptions(ctx context.Context, js jetstream.JetStream,
 	// The invocation set is immutable after this point. Both readers use the
 	// same captured cohort, and terminal/snapshot validation below remains exact.
 	sourceState := state
+	readSnapshot := initialAuditState
+	if parallelDecode {
+		readSnapshot = initialAuditStateWithProgressTimeout
+	}
 	snapshot := func(call context.Context) (jetstream.KeyValue, error) {
 		return auditStateRead(call, func(attempt context.Context) (jetstream.KeyValue, error) {
-			return initialAuditState(attempt, sourceState, func(key string) bool {
+			return readSnapshot(attempt, sourceState, func(key string) bool {
 				if cutoff == nil {
 					return true
 				}
