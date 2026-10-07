@@ -43,7 +43,7 @@ def admit(child, command, profile, cwd, binary, expected_sha256):
                         first_missing_environment_keys=first_missing, stable_identity_observed_twice=True,
                         scope='Actual live process identity before/after executable digest; incomplete reads repeated without killing or relaunching.')
                     return confirmed
-        except (FileNotFoundError, ProcessLookupError):
+        except (FileNotFoundError, ProcessLookupError, PermissionError):
             pass
         rejected += 1
         time.sleep(.01)

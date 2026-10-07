@@ -1,35 +1,8 @@
 test_incomplete_exec_environment_is_reobserved (test_live_process_admission.LiveProcessAdmission.test_incomplete_exec_environment_is_reobserved) ... ok
 test_real_identity_admitted (test_live_process_admission.LiveProcessAdmission.test_real_identity_admitted) ... ok
-test_wrong_identity_never_substituted_from_intent (test_live_process_admission.LiveProcessAdmission.test_wrong_identity_never_substituted_from_intent) ... 
-  test_wrong_identity_never_substituted_from_intent (test_live_process_admission.LiveProcessAdmission.test_wrong_identity_never_substituted_from_intent) (change=<function LiveProcessAdmission.test_wrong_identity_never_substituted_from_intent.<locals>.<lambda> at 0x7f448fd7a0c0>) ... ERROR
-
-======================================================================
-ERROR: test_wrong_identity_never_substituted_from_intent (test_live_process_admission.LiveProcessAdmission.test_wrong_identity_never_substituted_from_intent) (change=<function LiveProcessAdmission.test_wrong_identity_never_substituted_from_intent.<locals>.<lambda> at 0x7f448fd7a0c0>)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/exedev/js-wf/scripts/test_live_process_admission.py", line 59, in test_wrong_identity_never_substituted_from_intent
-    self.exercise(wrong=change)
-  File "/home/exedev/js-wf/scripts/test_live_process_admission.py", line 34, in exercise
-    return admission.admit(child, **args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/exedev/js-wf/scripts/live_process_admission.py", line 39, in admit
-    confirmed = snapshot(child.pid, profile)
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/exedev/js-wf/scripts/test_live_process_admission.py", line 25, in observed
-    row = original(pid, expected)
-          ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/exedev/js-wf/scripts/live_process_admission.py", line 15, in snapshot
-    raw = dict(row.split(b'=', 1) for row in (proc/'environ').read_bytes().split(b'\0') if b'=' in row)
-                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.12/pathlib.py", line 1021, in read_bytes
-    with self.open(mode='rb') as f:
-         ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
-    return io.open(self, mode, buffering, encoding, errors, newline)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-PermissionError: [Errno 13] Permission denied: '/proc/3665010/environ'
+test_wrong_identity_never_substituted_from_intent (test_live_process_admission.LiveProcessAdmission.test_wrong_identity_never_substituted_from_intent) ... ok
 
 ----------------------------------------------------------------------
-Ran 3 tests in 2.221s
+Ran 3 tests in 2.249s
 
-FAILED (errors=1)
+OK
