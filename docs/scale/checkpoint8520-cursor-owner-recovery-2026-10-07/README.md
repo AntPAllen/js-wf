@@ -1,0 +1,11 @@
+# Full checkpoint8520 cursor-owner recovery preparation
+
+A new cold opt-in native profile tests the entire original failed checkpoint8520 cohort with explicit ordered parallel decoding. It uses the existing original byte/mode/mtime verified restore and unchanged20s total attempt,4CPU/GOGC500/4GiB/count1/6m SDK. No healthy journal scan precedes the fault. Original source and default checker configuration are unchanged.
+
+The retained stores contain238756 physical invocations and2632932 physical journal records. The captured invocation cutoff remains238560. All physical journal records must be visited exactly once in increasing physical sequence; filtering and semantic reduction remain scoped to238560 invocations and2630779 journal entries. The196 newer invocations are excluded before decoding. This preserves both raw reader coverage and the original cohort's invariants.
+
+At journal visit128 the test queries the actual active R1 memory/AckNone cursor, requires pending messages, and resolves its owner from the actual cursor cluster leader. That owner's Docker process receives SIGKILL, actual stopped/absent state is observed, and the same node restarts on its original copied data mount. A distinct new cursor must start exactly one sequence after the last accepted physical record. The final complete cohort report, raw record count, all four R5 source sets current, state watcher joined and zero INV/JRN cursors must finish under20s including fault/recovery and proof collection.
+
+The runner's `--cursor-owner-restart` selects the integrity test package and requires `--parallel-decode`, with CPU instrumentation disabled. It captures all six original/replacement actual server identities. The reviewer retains all source/copy/original/archive requirements and adds cursor/PID/container/mount/event/order/cleanup/replica checks. Negative controls operate on the actual retained positive native result, when available. Failed native outcomes remain failed and may be preserved independently.
+
+Focused decoder/chunked callback/state watcher/position controls passed race count5 before native launch. This is preparation only, not a new native fault or original24h qualification. The goal is to identify recovery behavior on the real full cohort without attributing the historical failure or adopting a default reader.
