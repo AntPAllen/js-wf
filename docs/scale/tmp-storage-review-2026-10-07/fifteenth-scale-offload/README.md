@@ -1,5 +1,7 @@
 # Closed temporary stores and loose files moved to S3
 
+Completed: **2.32 GiB** of pre-existing allocated data reclaimed, plus **1.26 GiB** of newly created archive staging. `/tmp` uses approximately **5.69 GiB**; filesystem free space is **85.46 GiB**. The original 24-hour producer, observer and reviewer were all active after cleanup. [Exact removal ledger](removal.json) and [final storage snapshot](final-storage.json).
+
 This pass preserves the closed legacy million-capacity fixture, two closed block-media images, and 44 closed loose files from `/tmp`. The original test results and artifact bytes are unchanged. Archive manifests are committed before upload; S3 receipts bind full compressed-byte readback. Removal requires a second remote read with every archive member verified against the committed inventory, unchanged local bytes, and fresh process/descriptor/Docker/mount/loop closure checks.
 
 The million-timer primary root already has a complete committed archive and receipt under [complete-primary-root](../../million-timer-terminal-2026-10-02/complete-primary-root-2026-10-06/). It is removed only after its complete current inventory and remote archive are verified again.
