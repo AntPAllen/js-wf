@@ -1,0 +1,588 @@
+{
+  "cutoff": 238560,
+  "elapsed_ns": 20000950875,
+  "audit_ns": 20000950465,
+  "report": {
+    "Invocations": 238560,
+    "Journals": 0,
+    "Entries": 0,
+    "Terminal": 0
+  },
+  "error": "retained state snapshot initial set: received=0 included=0 last_revision=0 initial_complete=false: context deadline exceeded",
+  "readiness": {
+    "KV_WF_STATE": {
+      "config": {
+        "name": "KV_WF_STATE",
+        "subjects": [
+          "$KV.WF_STATE.\u003e"
+        ],
+        "retention": "limits",
+        "max_consumers": -1,
+        "max_msgs": -1,
+        "max_bytes": -1,
+        "discard": "new",
+        "max_age": 0,
+        "max_msgs_per_subject": 1,
+        "max_msg_size": -1,
+        "storage": "file",
+        "num_replicas": 5,
+        "duplicate_window": 120000000000,
+        "deny_delete": true,
+        "allow_rollup_hdrs": true,
+        "compression": "none",
+        "allow_direct": true,
+        "mirror_direct": false,
+        "consumer_limits": {},
+        "metadata": {
+          "_nats.level": "5",
+          "_nats.req.level": "0",
+          "_nats.ver": "2.15.0"
+        }
+      },
+      "created": "2026-10-06T13:03:29.856238396Z",
+      "state": {
+        "messages": 238757,
+        "bytes": 41958559,
+        "first_seq": 4,
+        "first_ts": "2026-10-06T13:03:31.237354274Z",
+        "last_seq": 379144,
+        "last_ts": "2026-10-07T06:02:28.542333432Z",
+        "consumer_count": 0,
+        "deleted": null,
+        "num_deleted": 140384,
+        "num_subjects": 238757,
+        "subjects": null
+      },
+      "cluster": {
+        "name": "js-wf-route-3461745-1791291797339562802",
+        "raft_group": "S-R5F-fbHTD8V2",
+        "leader": "js-wf-route-3461745-1791291797339562802-n1",
+        "leader_since": "2026-10-07T07:41:07.622671657Z",
+        "system_account": true,
+        "traffic_account": "$SYS",
+        "replicas": [
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n0",
+            "current": true,
+            "active": 33025917,
+            "peer": "ZZI2lPM6"
+          },
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n2",
+            "current": true,
+            "active": 32834456,
+            "peer": "P5judJH9"
+          },
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n3",
+            "current": true,
+            "active": 33027980,
+            "peer": "mePr3u7h"
+          },
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n4",
+            "current": true,
+            "active": 27629127,
+            "peer": "KBSfHrbE"
+          }
+        ]
+      },
+      "ts": "2026-10-07T07:41:13.655728902Z"
+    },
+    "WF_INV": {
+      "config": {
+        "name": "WF_INV",
+        "subjects": [
+          "wf.inv.*.*"
+        ],
+        "retention": "limits",
+        "max_consumers": -1,
+        "max_msgs": -1,
+        "max_bytes": -1,
+        "discard": "new",
+        "discard_new_per_subject": true,
+        "max_age": 0,
+        "max_msgs_per_subject": 1,
+        "max_msg_size": -1,
+        "storage": "file",
+        "num_replicas": 5,
+        "duplicate_window": 120000000000,
+        "compression": "none",
+        "allow_direct": false,
+        "mirror_direct": false,
+        "consumer_limits": {},
+        "metadata": {
+          "_nats.level": "5",
+          "_nats.req.level": "0",
+          "_nats.ver": "2.15.0"
+        }
+      },
+      "created": "2026-10-06T13:03:29.194359887Z",
+      "state": {
+        "messages": 238756,
+        "bytes": 72970148,
+        "first_seq": 1,
+        "first_ts": "2026-10-06T13:03:30.640076851Z",
+        "last_seq": 238756,
+        "last_ts": "2026-10-07T06:02:24.249946638Z",
+        "consumer_count": 0,
+        "deleted": null,
+        "num_deleted": 0,
+        "num_subjects": 238756,
+        "subjects": null
+      },
+      "cluster": {
+        "name": "js-wf-route-3461745-1791291797339562802",
+        "raft_group": "S-R5F-3gSdOX18",
+        "leader": "js-wf-route-3461745-1791291797339562802-n0",
+        "leader_since": "2026-10-07T07:41:08.782015Z",
+        "system_account": true,
+        "traffic_account": "$SYS",
+        "replicas": [
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n1",
+            "current": true,
+            "active": 873194050,
+            "peer": "kQKQhtcl"
+          },
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n2",
+            "current": true,
+            "active": 873269115,
+            "peer": "P5judJH9"
+          },
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n3",
+            "current": true,
+            "active": 873270226,
+            "peer": "mePr3u7h"
+          },
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n4",
+            "current": true,
+            "active": 873328816,
+            "peer": "KBSfHrbE"
+          }
+        ]
+      },
+      "ts": "2026-10-07T07:41:13.65459161Z"
+    },
+    "WF_JRN": {
+      "config": {
+        "name": "WF_JRN",
+        "subjects": [
+          "wf.jrn.*.*"
+        ],
+        "retention": "limits",
+        "max_consumers": -1,
+        "max_msgs": -1,
+        "max_bytes": -1,
+        "discard": "new",
+        "max_age": 0,
+        "max_msgs_per_subject": -1,
+        "max_msg_size": -1,
+        "storage": "file",
+        "num_replicas": 5,
+        "duplicate_window": 120000000000,
+        "compression": "none",
+        "allow_direct": false,
+        "mirror_direct": false,
+        "consumer_limits": {},
+        "metadata": {
+          "_nats.level": "5",
+          "_nats.req.level": "0",
+          "_nats.ver": "2.15.0"
+        }
+      },
+      "created": "2026-10-06T13:03:29.436674386Z",
+      "state": {
+        "messages": 2632932,
+        "bytes": 759072247,
+        "first_seq": 1,
+        "first_ts": "2026-10-06T13:03:30.676038365Z",
+        "last_seq": 2632932,
+        "last_ts": "2026-10-07T06:02:27.411179684Z",
+        "consumer_count": 0,
+        "deleted": null,
+        "num_deleted": 0,
+        "num_subjects": 238756,
+        "subjects": null
+      },
+      "cluster": {
+        "name": "js-wf-route-3461745-1791291797339562802",
+        "raft_group": "S-R5F-5aGSapSb",
+        "leader": "js-wf-route-3461745-1791291797339562802-n0",
+        "leader_since": "2026-10-07T07:41:08.450745925Z",
+        "system_account": true,
+        "traffic_account": "$SYS",
+        "replicas": [
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n1",
+            "current": true,
+            "active": 204799237,
+            "peer": "kQKQhtcl"
+          },
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n2",
+            "current": true,
+            "active": 204766146,
+            "peer": "P5judJH9"
+          },
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n3",
+            "current": true,
+            "active": 204797835,
+            "peer": "mePr3u7h"
+          },
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n4",
+            "current": true,
+            "active": 196287651,
+            "peer": "KBSfHrbE"
+          }
+        ]
+      },
+      "ts": "2026-10-07T07:41:13.655190052Z"
+    },
+    "WF_PURGE": {
+      "config": {
+        "name": "WF_PURGE",
+        "subjects": [
+          "wf.purge.*.*"
+        ],
+        "retention": "workqueue",
+        "max_consumers": -1,
+        "max_msgs": -1,
+        "max_bytes": -1,
+        "discard": "old",
+        "max_age": 2592000000000000,
+        "max_msgs_per_subject": -1,
+        "max_msg_size": -1,
+        "storage": "file",
+        "num_replicas": 5,
+        "duplicate_window": 120000000000,
+        "compression": "none",
+        "allow_direct": false,
+        "mirror_direct": false,
+        "consumer_limits": {},
+        "metadata": {
+          "_nats.level": "5",
+          "_nats.req.level": "0",
+          "_nats.ver": "2.15.0"
+        }
+      },
+      "created": "2026-10-06T13:03:29.647393819Z",
+      "state": {
+        "messages": 0,
+        "bytes": 0,
+        "first_seq": 0,
+        "first_ts": "0001-01-01T00:00:00Z",
+        "last_seq": 0,
+        "last_ts": "0001-01-01T00:00:00Z",
+        "consumer_count": 0,
+        "deleted": null,
+        "num_deleted": 0,
+        "num_subjects": 0,
+        "subjects": null
+      },
+      "cluster": {
+        "name": "js-wf-route-3461745-1791291797339562802",
+        "raft_group": "S-R5F-iRXAP64e",
+        "leader": "js-wf-route-3461745-1791291797339562802-n1",
+        "leader_since": "2026-10-07T07:41:08.869675424Z",
+        "system_account": true,
+        "traffic_account": "$SYS",
+        "replicas": [
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n0",
+            "current": true,
+            "active": 785880287,
+            "peer": "ZZI2lPM6"
+          },
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n2",
+            "current": true,
+            "active": 785816750,
+            "peer": "P5judJH9"
+          },
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n3",
+            "current": true,
+            "active": 785868659,
+            "peer": "mePr3u7h"
+          },
+          {
+            "name": "js-wf-route-3461745-1791291797339562802-n4",
+            "current": true,
+            "active": 785801997,
+            "peer": "KBSfHrbE"
+          }
+        ]
+      },
+      "ts": "2026-10-07T07:41:13.656189564Z"
+    }
+  },
+  "readiness_after": {},
+  "parallel_decode": true,
+  "cursor_owner_restart": true,
+  "qualifies_24h": false,
+  "journal_visits": 2632932,
+  "target": {
+    "stream_name": "WF_JRN",
+    "name": "wf-audit-rHnxEsTaA9qhBv0pxORYGv",
+    "created": "2026-10-07T07:41:14.585291753Z",
+    "config": {
+      "name": "wf-audit-rHnxEsTaA9qhBv0pxORYGv",
+      "deliver_policy": "by_start_sequence",
+      "opt_start_seq": 1,
+      "ack_policy": "none",
+      "max_deliver": -1,
+      "replay_policy": "instant",
+      "max_waiting": 512,
+      "inactive_threshold": 30000000000,
+      "num_replicas": 1,
+      "mem_storage": true,
+      "metadata": {
+        "_nats.level": "5",
+        "_nats.req.level": "0",
+        "_nats.ver": "2.15.0"
+      }
+    },
+    "delivered": {
+      "consumer_seq": 848,
+      "stream_seq": 848,
+      "last_active": "2026-10-07T07:41:14.595585764Z"
+    },
+    "ack_floor": {
+      "consumer_seq": 848,
+      "stream_seq": 848
+    },
+    "num_ack_pending": 0,
+    "num_redelivered": 0,
+    "num_waiting": 1,
+    "num_pending": 2632084,
+    "cluster": {
+      "name": "js-wf-route-3461745-1791291797339562802",
+      "leader": "js-wf-route-3461745-1791291797339562802-n0"
+    },
+    "ts": "2026-10-07T07:41:14.595588418Z"
+  },
+  "kill": {
+    "node": 0,
+    "container": "js-wf-route-3635044-1791358858654668471-n0",
+    "kill_started": "2026-10-07T07:41:14.623966125Z",
+    "kill_returned": "2026-10-07T07:41:15.053373922Z",
+    "source_stopped": "2026-10-07T07:41:15.089476516Z",
+    "cleanup_complete": "2026-10-07T07:41:15.204307194Z",
+    "state": "dead",
+    "concurrent_observation": true
+  },
+  "restart_completed": "2026-10-07T07:41:16.820371459Z",
+  "cursors": [
+    {
+      "info": {
+        "stream_name": "WF_INV",
+        "name": "wf-audit-rHnxEsTaA9qhBv0pxORY5n",
+        "created": "2026-10-07T07:41:13.65811706Z",
+        "config": {
+          "name": "wf-audit-rHnxEsTaA9qhBv0pxORY5n",
+          "deliver_policy": "by_start_sequence",
+          "opt_start_seq": 1,
+          "ack_policy": "none",
+          "max_deliver": -1,
+          "replay_policy": "instant",
+          "max_waiting": 512,
+          "inactive_threshold": 30000000000,
+          "num_replicas": 1,
+          "mem_storage": true,
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "delivered": {
+          "consumer_seq": 0,
+          "stream_seq": 0
+        },
+        "ack_floor": {
+          "consumer_seq": 0,
+          "stream_seq": 0
+        },
+        "num_ack_pending": 0,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 238756,
+        "cluster": {
+          "name": "js-wf-route-3461745-1791291797339562802",
+          "leader": "js-wf-route-3461745-1791291797339562802-n4"
+        },
+        "ts": "2026-10-07T07:41:13.659342196Z"
+      },
+      "journal_visits": 0,
+      "created": true
+    },
+    {
+      "info": {
+        "stream_name": "WF_JRN",
+        "name": "wf-audit-rHnxEsTaA9qhBv0pxORYGv",
+        "created": "2026-10-07T07:41:14.585291753Z",
+        "config": {
+          "name": "wf-audit-rHnxEsTaA9qhBv0pxORYGv",
+          "deliver_policy": "by_start_sequence",
+          "opt_start_seq": 1,
+          "ack_policy": "none",
+          "max_deliver": -1,
+          "replay_policy": "instant",
+          "max_waiting": 512,
+          "inactive_threshold": 30000000000,
+          "num_replicas": 1,
+          "mem_storage": true,
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "delivered": {
+          "consumer_seq": 0,
+          "stream_seq": 0
+        },
+        "ack_floor": {
+          "consumer_seq": 0,
+          "stream_seq": 0
+        },
+        "num_ack_pending": 0,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 2632932,
+        "cluster": {
+          "name": "js-wf-route-3461745-1791291797339562802",
+          "leader": "js-wf-route-3461745-1791291797339562802-n0"
+        },
+        "ts": "2026-10-07T07:41:14.586099834Z"
+      },
+      "journal_visits": 0,
+      "created": true
+    },
+    {
+      "info": {
+        "stream_name": "WF_JRN",
+        "name": "wf-audit-rHnxEsTaA9qhBv0pxORYGv",
+        "created": "2026-10-07T07:41:14.585291753Z",
+        "config": {
+          "name": "wf-audit-rHnxEsTaA9qhBv0pxORYGv",
+          "deliver_policy": "by_start_sequence",
+          "opt_start_seq": 1,
+          "ack_policy": "none",
+          "max_deliver": -1,
+          "replay_policy": "instant",
+          "max_waiting": 512,
+          "inactive_threshold": 30000000000,
+          "num_replicas": 1,
+          "mem_storage": true,
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "delivered": {
+          "consumer_seq": 848,
+          "stream_seq": 848,
+          "last_active": "2026-10-07T07:41:14.595585764Z"
+        },
+        "ack_floor": {
+          "consumer_seq": 848,
+          "stream_seq": 848
+        },
+        "num_ack_pending": 0,
+        "num_redelivered": 0,
+        "num_waiting": 1,
+        "num_pending": 2632084,
+        "cluster": {
+          "name": "js-wf-route-3461745-1791291797339562802",
+          "leader": "js-wf-route-3461745-1791291797339562802-n0"
+        },
+        "ts": "2026-10-07T07:41:14.595588418Z"
+      },
+      "journal_visits": 128,
+      "created": false
+    },
+    {
+      "info": {
+        "stream_name": "WF_JRN",
+        "name": "wf-audit-rHnxEsTaA9qhBv0pxORYNb",
+        "created": "2026-10-07T07:41:20.822451874Z",
+        "config": {
+          "name": "wf-audit-rHnxEsTaA9qhBv0pxORYNb",
+          "deliver_policy": "by_start_sequence",
+          "opt_start_seq": 129,
+          "ack_policy": "none",
+          "max_deliver": -1,
+          "replay_policy": "instant",
+          "max_waiting": 512,
+          "inactive_threshold": 30000000000,
+          "num_replicas": 1,
+          "mem_storage": true,
+          "metadata": {
+            "_nats.level": "5",
+            "_nats.req.level": "0",
+            "_nats.ver": "2.15.0"
+          }
+        },
+        "delivered": {
+          "consumer_seq": 0,
+          "stream_seq": 128
+        },
+        "ack_floor": {
+          "consumer_seq": 0,
+          "stream_seq": 128
+        },
+        "num_ack_pending": 0,
+        "num_redelivered": 0,
+        "num_waiting": 0,
+        "num_pending": 2632804,
+        "cluster": {
+          "name": "js-wf-route-3461745-1791291797339562802",
+          "leader": "js-wf-route-3461745-1791291797339562802-n1"
+        },
+        "ts": "2026-10-07T07:41:20.82443198Z"
+      },
+      "journal_visits": 128,
+      "created": true
+    }
+  ],
+  "cursor_errors": [
+    "context deadline exceeded",
+    "context deadline exceeded"
+  ],
+  "deletions": [
+    {
+      "name": "wf-audit-rHnxEsTaA9qhBv0pxORY5n",
+      "error": "",
+      "at": "2026-10-07T07:41:14.583078131Z"
+    },
+    {
+      "name": "wf-audit-rHnxEsTaA9qhBv0pxORYGv",
+      "error": "",
+      "at": "2026-10-07T07:41:27.982398715Z"
+    },
+    {
+      "name": "wf-audit-rHnxEsTaA9qhBv0pxORYNb",
+      "error": "",
+      "at": "2026-10-07T07:41:27.983663261Z"
+    }
+  ],
+  "state_watches": [
+    {
+      "StartedNS": 927502984,
+      "CreatedNS": 969384551,
+      "CreationError": "\u003cnil\u003e",
+      "StopStartedNS": 20000924285,
+      "StopFinishedNS": 20000930724,
+      "StopError": "nats: invalid subscription"
+    }
+  ],
+  "cleanup": {}
+}
