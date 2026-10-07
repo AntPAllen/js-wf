@@ -1,0 +1,20 @@
+{
+  "build": [
+    "go",
+    "test",
+    "-buildvcs=true",
+    "-p=1",
+    "-c",
+    "-o",
+    "/tmp/js-wf-online-blob-normal100k-v2-20261007/sim-normal.test",
+    "./sim"
+  ],
+  "run": [
+    "/tmp/js-wf-online-blob-normal100k-v2-20261007/sim-normal.test",
+    "-test.v",
+    "-test.run=^(TestSeededOnlineBlobBoundaryReplay|TestPinnedRegressionCorpus)$/^online-blob-boundary-",
+    "-test.count=1",
+    "-test.timeout=300m"
+  ],
+  "scope": "One workload seeds1..100000 with exact replay and its three shared pins; not full-suite acceptance."
+}

@@ -5656,3 +5656,9 @@ Production Start and quiescent collector decisions now share a seeded transport 
 The actual R1 stock NATS 2.15.0 native race contract at `2430702` confirms refresh-after-census deletion of a fresh uploaded NUID after production Start acknowledgment. The quiescent control retains the payload. Native minimum age is zero. Independent full source/SDK/proof/archive review accepts; permanent captured-log/proof mutation controls and a dedicated native CI row now preserve this boundary. [Evidence](scale/online-blob-boundary-2026-10-07/native-race/).
 
 This supplies a concrete reproduction for the reported online-GC gap; it does not implement safe online collection. An online protocol must protect and fence pending-reference publication through arbitrary writer pauses, crashes, lost acknowledgments and shared-object reuse across inputs, signals, results and snapshot/checkpoint references. Until that protocol is implemented and proven, the existing collector requires stopped writers. Previous full Tier 1 graphs and all real release matrices retain their original scope.
+
+## Focused blob-boundary normal100k accepted — 2026-10-07
+
+Source `3a7022c`, actual normal SDK265617: all100,000 production-decision schedules and exact replays, three shared pins,33,334 paused uploads/33,253 refreshes/33,413 quiescent controls pass817.04s body. Independent full source/SDK/2,138-file archive review accepts and rejects13 actual-log mutations. Original failed launches and overstrict terminal-state reviewer rejection remain preserved. Corrected review binds the original producer's successful invocation journal and unchanged artifacts; no model rerun. [Evidence](scale/online-blob-boundary-2026-10-07/normal100k/).
+
+This closes the new workload's focused normal100k gate. It does not promote historical full122-workload source scopes to a full current123-workload result, implement online GC or qualify native matrices/actual24h.

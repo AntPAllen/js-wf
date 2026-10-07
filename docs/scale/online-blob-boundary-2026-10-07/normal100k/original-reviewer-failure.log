@@ -1,0 +1,9 @@
+Oct 07 11:51:57 jetstream-wf systemd[1]: Started js-wf-online-blob-normal100k-review-20261007.service - /usr/bin/python3 /tmp/review_online_blob_normal100k.py.
+Oct 07 11:51:57 jetstream-wf python3[305880]: WAITING_FOR_ORIGINAL_MODEL_UNIT js-wf-online-blob-normal100k-v2-20261007.service
+Oct 07 11:58:17 jetstream-wf python3[305880]: Traceback (most recent call last):
+Oct 07 11:58:17 jetstream-wf python3[305880]:   File "/tmp/review_online_blob_normal100k.py", line 30, in <module>
+Oct 07 11:58:17 jetstream-wf python3[305880]:     state=unit_state();assert 'ExecMainStatus=0\n' in state and 'Restart=no\n' in state and 'SubState=exited\n' in state
+Oct 07 11:58:17 jetstream-wf python3[305880]:                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Oct 07 11:58:17 jetstream-wf python3[305880]: AssertionError
+Oct 07 11:58:17 jetstream-wf systemd[1]: js-wf-online-blob-normal100k-review-20261007.service: Main process exited, code=exited, status=1/FAILURE
+Oct 07 11:58:17 jetstream-wf systemd[1]: js-wf-online-blob-normal100k-review-20261007.service: Failed with result 'exit-code'.

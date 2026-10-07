@@ -1,0 +1,14 @@
+=== RUN   TestSeededOnlineBlobBoundaryReplay
+    blob_online_boundary_test.go:199: online blob boundary: modes=map[paused_upload:33334 quiescent_control:33413 refresh_after_census:33253] active-writer failures expected; every generated trace exactly replayed; quiescent control preserved
+    seed_count_test.go:32: TIER1_SEEDS test=TestSeededOnlineBlobBoundaryReplay first=1 last=100000 completed=100000 requested=100000
+--- PASS: TestSeededOnlineBlobBoundaryReplay (817.04s)
+=== RUN   TestPinnedRegressionCorpus
+=== RUN   TestPinnedRegressionCorpus/online-blob-boundary-paused_upload.json
+=== RUN   TestPinnedRegressionCorpus/online-blob-boundary-quiescent_control.json
+=== RUN   TestPinnedRegressionCorpus/online-blob-boundary-refresh_after_census.json
+--- PASS: TestPinnedRegressionCorpus (0.02s)
+    --- PASS: TestPinnedRegressionCorpus/online-blob-boundary-paused_upload.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/online-blob-boundary-quiescent_control.json (0.00s)
+    --- PASS: TestPinnedRegressionCorpus/online-blob-boundary-refresh_after_census.json (0.00s)
+PASS
+TIER1_COVERAGE model_version=3 seeds_per_workload=100000 generated_schedules=100000 scheduler_choices=100000 choices_per_second=122.4 transport_events=1432771 virtual_ms_max=7200000 virtual_buckets_zero=0 under_1s=0 under_1m=0 at_least_1m=100000 elapsed=13m37.061789224s
