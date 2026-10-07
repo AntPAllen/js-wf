@@ -44,7 +44,7 @@ jobs:
           GOMEMLIMIT: 1GiB
         run: |
           go test -race ./testcluster -run 'Test(ClientProxyFirstAPIBarrier|ClientProxyConsumerCreationSelector|ReadClientPacketRejectsMalformedPublications)' -count=5 -timeout=3m
-          go test -race ./integrity -run 'Test(SeededState.*Progress|SeededStateClosedWatch|StateProgress|StateCreationProgress)' -count=20 -timeout=3m
+          go test -race ./integrity -run 'Test(CopiedCreationMetadataDeadlineDoesNotReplaceWatchParent|NativeCreationFixtureDeadlineErrorReturnsFromSnapshotGoroutine|SeededState.*Progress|SeededStateClosedWatch|StateProgress|StateCreationProgress)' -count=20 -timeout=3m
       - name: Actual proof substitution controls
         env:
           PYTHONDONTWRITEBYTECODE: '1'
