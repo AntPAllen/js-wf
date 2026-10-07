@@ -1,0 +1,9 @@
+# Packaged daemon leaf preparation
+
+Adds `TestOperatorStandaloneDaemonSignalsThroughLeaf`, using the actual race-built `wf` executable and a separate stock WFEDGE leaf connected to three WFOPS embedded hubs. It retains the original 60-second scenario and three-minute SDK deadlines, four project/tombstone startup/running signal cases, and fatal missing-WF_INV rejection. Startup holds the first complete API publication before forwarding it upstream; running readiness uses a real waiting visibility consumer or an expired tombstone actually removed from WF_STATE. The captured pending startup packet is distinct from successfully forwarded TCP traffic and must end cancelled with zero forwarded bytes.
+
+The optional ClientProxy barrier parses bounded PUB/HPUB packets, including payload boundaries, and leaves ordinary relay behavior unchanged. Four actual TCP controls cover release, Close, Block and upstream EOF; API-looking payload bytes cannot trigger the barrier. Eleven malformed/oversized/incomplete inputs are rejected. Deep-copy evidence and joined output traces are checked. Focused race controls pass (1.179 s SDK); the packaged test compiles with its environment gate disabled. Those checks do not qualify the packaged native cases.
+
+`run-operator-domain-controls.py --case standalone-daemon-leaf` preserves complete selected source, SDK/child executable identity, real leaf identity, all five joined wire captures, process exits and closed stores. `operator_daemon_leaf_wire.py` parses every incoming/outgoing packet and independently checks the pending startup publications, WFOPS prefixes, actual WFEDGE INFO identities and zero local streams. Native acceptance and captured-artifact mutation controls remain pending.
+
+This does not qualify SQL daemon lifecycle, natural network/server faults, broad fault matrices, million physical timer drain, online blob GC or full-release/24-hour gates. The original 24-hour run remains isolated at bc9f92b.

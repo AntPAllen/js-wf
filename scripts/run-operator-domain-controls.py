@@ -93,7 +93,7 @@ def verify_standalone_log(log):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
-    parser.add_argument('--case', choices=['commands','daemon-signals','standalone-commands','standalone-leaf'],default='commands')
+    parser.add_argument('--case', choices=['commands','daemon-signals','standalone-commands','standalone-leaf','standalone-daemon-leaf'],default='commands')
     args = parser.parse_args()
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
@@ -112,7 +112,7 @@ def main():
     env = dict(os.environ, GOMAXPROCS='2', GOMEMLIMIT='1GiB', GOWORK='off', GOFLAGS='', WF_OPERATOR_TEST_ROOT=str(root/'stores'), WF_OPERATOR_STANDALONE='1')
     binary = root/'operator-race.test'
     build = ['go', 'test', '-race', '-buildvcs=true', '-c', '-o', str(binary), './cmd/wf']
-    tests = TESTS if args.case=='commands' else DAEMON_TESTS if args.case=='daemon-signals' else LEAF_TESTS if args.case=='standalone-leaf' else STANDALONE_TESTS
+    tests = ['TestOperatorStandaloneDaemonSignalsThroughLeaf'] if args.case=='standalone-daemon-leaf' else TESTS if args.case=='commands' else DAEMON_TESTS if args.case=='daemon-signals' else LEAF_TESTS if args.case=='standalone-leaf' else STANDALONE_TESTS
     command = [str(binary), '-test.v', '-test.run=^('+'|'.join(tests)+')$', '-test.count=1', '-test.timeout=3m']
     run_directory = REPO/'cmd/wf'
     save('commands.json', dict(build=build, build_working_directory=str(REPO), run=command, run_working_directory=str(run_directory)))
@@ -150,6 +150,20 @@ def main():
             assert all(r['exe_sha256']==shared.sha(binary) and r['argv']==[str(binary),'-test.run=^TestOperatorDaemonProcessHelper$'] and not Path('/proc',str(r['pid'])).exists() for r in records)
             save('daemon-processes.json',records)
             result=verify_daemon_log((root/'native.log').read_text())
+        elif args.case=='standalone-daemon-leaf':
+            import operator_daemon_leaf_wire
+            assert not plugin_records
+            log=(root/'native.log').read_text()
+            assert log.rstrip().endswith('PASS') and not any(s in log for s in ('DATA RACE','--- FAIL:','--- SKIP:'))
+            assert re.findall(r'^--- PASS: (\w+) \(',log,re.M)==tests
+            records=[json.loads(p.read_text()) for p in (root/'stores').rglob('daemon.process.json')]
+            assert len(records)==5
+            assert all(r['argv'][0].startswith(str(root/'stores')) and shared.sha(r['argv'][0])==r['exe_sha256'] and 'vcs.revision='+revision in r['build_info'] and 'vcs.modified=false' in r['build_info'] and '-race=true' in r['build_info'] and not Path('/proc',str(r['pid'])).exists() for r in records)
+            result=operator_daemon_leaf_wire.validate(root/'stores')
+            save('daemon-processes.json',records);save('leaf-wire-review.json',result)
+            leaves=[json.loads(p.read_text()) for p in (root/'stores').rglob('leaf.process.json')]
+            assert len(leaves)==1 and leaves[0]['reaped'] is True and leaves[0]['exit_code']==0 and not Path('/proc',str(leaves[0]['pid'])).exists()
+            assert shared.sha(leaves[0]['exe'])==leaves[0]['exe_sha256'];save('leaf-processes.json',leaves)
         else:
             assert len(plugin_records)==1 and '-race=true' in plugin_records[0]['build_info'], 'exact retained race plugin missing'
             records=[json.loads(p.read_text()) for p in (root/'stores').rglob('standalone.process.json')]

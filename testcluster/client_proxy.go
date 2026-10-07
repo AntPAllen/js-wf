@@ -37,6 +37,7 @@ type ClientProxy struct {
 	trafficLimit         int
 	trafficUsed          int
 	traffic              ClientProxyTraffic
+	apiBarrier           *clientAPIBarrier
 }
 
 type ClientProxyTraffic struct {
@@ -222,6 +223,9 @@ func (w clientProxyWriter) Write(data []byte) (int, error) {
 
 func (p *ClientProxy) Close() {
 	p.mu.Lock()
+	if !p.closed && p.apiBarrier != nil {
+		close(p.apiBarrier.cancel)
+	}
 	p.closed = true
 	p.blocked = true
 	_ = p.listener.Close()
@@ -285,8 +289,16 @@ func (p *ClientProxy) accept() {
 func (p *ClientProxy) bridge(client, upstream net.Conn, connection uint64) {
 	defer p.sessions.Done()
 	copyDone := make(chan struct{})
+	sessionDone := make(chan struct{})
 	go func() {
-		_, _ = io.Copy(clientProxyWriter{p, upstream, connection}, client)
+		p.mu.Lock()
+		barrier := p.apiBarrier
+		p.mu.Unlock()
+		if barrier == nil {
+			_, _ = io.Copy(clientProxyWriter{p, upstream, connection}, client)
+		} else {
+			_ = p.copyWithAPIBarrier(client, upstream, connection, sessionDone, barrier)
+		}
 		close(copyDone)
 		_ = upstream.Close()
 		_ = client.Close()
@@ -387,6 +399,7 @@ forward:
 			}
 		}
 	}
+	close(sessionDone)
 	_ = client.Close()
 	_ = upstream.Close()
 	<-readerDone
