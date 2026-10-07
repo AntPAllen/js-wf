@@ -78,7 +78,7 @@ for out in pending:
  recovery=json.loads((out/'partial-removal-recovery.json').read_text()) if (out/'partial-removal-recovery.json').exists() else {}
  assert set(missing)<=set(prior_by_name)|set(recovery.get('missing_files',{}))
  names={k:v for k,v in before.items() if (('/' in k and k.split('/')[0] not in ('reviewer','model-source')) or v['bytes']>=1048576 or (k.endswith('.log') and v['bytes']>=65536))}
- assert names or missing
+ # Roots containing only retained reviewer/model source may have no eligible removals.
  observation=closure(root)
  assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()==head
  links=[prior_by_name[k] if k in prior_by_name else dict(path=k,device=None,inode=None,links_before_unlink=None,allocated_bytes=0,accounting='Prior partial deletion; original link/allocation observation unavailable, excluded from reclaimed-byte totals.') for k in missing]
