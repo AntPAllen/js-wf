@@ -25,3 +25,5 @@ All three completed new watch-peer diagnostics and staging archives are now reti
 Latest user-requested pass moved two completed original fixtures to verified S3 storage and reclaimed **9.64 GiB**. `/tmp` now uses about **19 GiB**, with **74 GiB** free on the filesystem. [Exact records and restoration](twelfth-completed-originals/README.md).
 
 The three newly completed abrupt-leaf diagnostic fixtures and archives were retired after verified S3/member/local-inventory/closure checks, reclaiming **543.6 MiB**. Live24h and reusable fixtures remain local; approximately **73 GiB** is free. [Exact ledger](../leaf-domain-sigkill-2026-10-07/reclaimed/README.md).
+
+The newly completed leaf/lease-expiry fixture and staging archive were also retired after verified remote/member/current-inventory/closure checks: **185.0 MiB** reclaimed. Approximately **73 GiB** remains free. [Ledger](../leaf-domain-expiry-2026-10-07/reclaimed/README.md).
