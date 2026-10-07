@@ -1,5 +1,9 @@
 # JetStream Durable Workflow Runtime — Implementation Plan
 
+## Official RC2 production lease component fails original recovery bound — 2026-10-07
+
+At1691ab1, unchanged officialv2.15.1-RC.2 does not recover the fresh-key/six-writer production12s TTL/one-minute-marker R3 lease component within the original35s whole-cut bound. Native `recovered=false` at35.000870s/25.000842s after requested heal; all8/8/8 routes are restored, local heads19699/19699/9136 and leader reports minority lag2878/non-current.5293 full transactions acknowledge. Independent actual helper/three server/source/dependency/configuration/5839-member review accepts this failed diagnostic verdict. [Evidence and scope](scale/lease-partition-component-2026-10-06/official-rc2-component/). Initial copied-module VCS preparation failure and reviewer version-metadata mismatch are separately preserved; no verdict promotion. Production2.15.0/defaults unchanged. This official release is not established as the observed component's recovery fix. Full123 race and original24h remain live; full matrices/onlineGC/million drain remain open.
+
 ## Complete current Tier1 race graph live — 2026-10-07
 
 The isolated full123-workload/395-pin race1000 qualifier is now actually live at362219f. Independent admission binds actual SDK1746503, originalcount1/60m/twoGoCPU/512MiB, race binary/argv/birth/profile, all2200 selected Git inputs, compiled/source inventories and retained no-restart user service. Historical full122 and focused online-blob results keep their original scopes. Original24h producer/observer/reviewer remain active. [Launch evidence and terminal requirements](scale/tier1-full123-2026-10-07/). Full123 race acceptance requires terminal per-workload coverage/unchanged sources/independent review; full123 normal100k remains pending. Full matrices, onlineGC, original million physical drain and actual24h remain open.
