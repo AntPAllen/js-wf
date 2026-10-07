@@ -1,0 +1,20 @@
+{
+  "accepted": true,
+  "cases": [
+    {
+      "mode": "baseline",
+      "expected_verdict": "fail",
+      "compiled_upstream_changes": [],
+      "measurement": "before=1 after=0 reopened=1 callbacks=0 physical=1 last=2"
+    },
+    {
+      "mode": "dirty-control",
+      "expected_verdict": "pass",
+      "compiled_upstream_changes": [
+        "server/filestore.go"
+      ],
+      "measurement": "before=1 after=0 reopened=0 callbacks=0 physical=1 last=2"
+    }
+  ],
+  "scope": "Fresh two-message direct file-store reproduction; no server, Raft, copied campaign stores, index removal or production dependency change; original million missed-retirement cause unconfirmed."
+}

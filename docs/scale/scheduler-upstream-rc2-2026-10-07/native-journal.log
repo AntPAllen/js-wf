@@ -1,0 +1,21 @@
+2026-10-07T15:09:52+00:00 jetstream-wf systemd[1]: Started js-wf-upstream-scheduler-rc2-20261007.service - /usr/bin/python3 /home/exedev/js-wf/scripts/check-nats-scheduler-cleanup.py --module-version v2.15.1-RC.2 --root /tmp/js-wf-upstream-scheduler-rc2-20261007.
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]: {
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:   "accepted": true,
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:   "cases": [
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:     {
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:       "mode": "baseline",
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:       "expected_verdict": "fail",
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:       "compiled_upstream_changes": [],
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:       "measurement": "before=1 after=0 reopened=1 callbacks=0 physical=1 last=2"
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:     },
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:     {
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:       "mode": "dirty-control",
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:       "expected_verdict": "pass",
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:       "compiled_upstream_changes": [
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:         "server/filestore.go"
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:       ],
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:       "measurement": "before=1 after=0 reopened=0 callbacks=0 physical=1 last=2"
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:     }
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:   ],
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]:   "scope": "Fresh two-message direct file-store reproduction; no server, Raft, copied campaign stores, index removal or production dependency change; original million missed-retirement cause unconfirmed."
+2026-10-07T15:14:56+00:00 jetstream-wf python3[1587618]: }

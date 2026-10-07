@@ -1,0 +1,20 @@
+{
+  "command": [
+    "go",
+    "test",
+    "-p=1",
+    "-json",
+    "./server",
+    "-run",
+    "^TestWorkflowMissingSourceScheduleCleanupPersists$",
+    "-count=1",
+    "-timeout=3m"
+  ],
+  "working_directory": "/tmp/js-wf-upstream-scheduler-rc2-20261007/baseline/nats-source",
+  "environment": {
+    "GOWORK": "off",
+    "GOMEMLIMIT": "512MiB",
+    "GOMAXPROCS": "2",
+    "WF_SCHEDULER_CLEANUP_STORE": "/tmp/js-wf-upstream-scheduler-rc2-20261007/baseline/store"
+  }
+}

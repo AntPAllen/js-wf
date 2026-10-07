@@ -1,5 +1,11 @@
 # Implementation status against the supplied plan
 
+## Official RC2 scheduler-cleanup diagnostic accepted — 2026-10-07
+
+At clean `da8dc7d`, unchanged official v2.15.1-RC.2 reproduces the fresh two-message cleanup defect (memory1→0, clean reopen1; callbacks0; anchor/physical1/last2); exact copied dirty-count control reopens0. Actual named/package failure0.009s and control pass0.019s are retained; compilation wall time is separate. Independent review verifies598 upstream files, both compiled inventories, exact Git-bound runner/fixture, retained stores, unchanged production dependencies and annotated tag resolution to Go download commit d564fd6982a44cc47c4228b12f7a9b6c9f722a8c. Three complete stable/RC1/RC2 corpora accept;15 provenance substitutions reject with original bytes unchanged. Legacy roots were restored from full verified S3 copies; no native rerun/store reopen.
+
+[Evidence and limits](scale/scheduler-upstream-rc2-2026-10-07/). This confirms that the selected newer official RC still has the narrow cleanup persistence defect; it does not establish the original million missed-retirement cause or clear its physical-drain gate. Manual CI adds explicit RC2 selection, defaults and production pin remain2.15.0. No additional long campaign/hosted diagnostic is launched. Full matrices, onlineGC/million/full release/actual24h remain open; original isolated24h is active.
+
 ## Full50000 packaged SQL recovery through stock leaf SIGKILL accepted — 2026-10-07
 
 At recorded clean `0030e22`, actual nonrace SDK1439144 passes381.73s body/381.777s SDK. Original SQL startup cancellation and three full50000 fault/rebuild phases remain. Additional packaged child1451498 progresses1126→1127 rows, stock leaf1439600 is SIGKILLed/reaped, child exits1 with broken-pipe/deadline transport error and zero SQL sessions while PostgreSQL stays healthy. Only then does leaf1452679 restart with identical executable/config/store/ports and distinct server ID. Whole cut6.095665s meets unchanged30s; final replacement completes every50000 row/index rebuild/purge/dependency assertion. Original20m/22m/count1/nonrace/twoCPU2GiB remain; no production code changes.

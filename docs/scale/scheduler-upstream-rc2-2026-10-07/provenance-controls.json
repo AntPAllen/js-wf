@@ -1,0 +1,117 @@
+{
+  "accepted": true,
+  "positive_reviews": [
+    {
+      "accepted": true,
+      "upstream_version": "v2.15.1-RC.2",
+      "module_files_verified": 598,
+      "module_cache_unchanged": true,
+      "module_cache_readback_at_review": true,
+      "retained_stores_verified": 2,
+      "runner_sha256": "b92154978ecc1c46411b49bd4f66786eb1d2d26172de81a9494fecc869294e63",
+      "fixture_sha256": "ad07c9fcb8c347ffc7958596ad590eb2e68ee69cf6a3c5144166bb8a314e8199",
+      "source_revision": "da8dc7dd31bb9930b6d2cb63bfe9a5c95b0f8aeb",
+      "source_clean_at_execution": true,
+      "cases": [
+        {
+          "mode": "baseline",
+          "actual_test_verdict": "fail",
+          "measurement": "before=1 after=0 reopened=1 callbacks=0 physical=1 last=2",
+          "changed_upstream_files": [],
+          "package_seconds": 0.009
+        },
+        {
+          "mode": "dirty-control",
+          "actual_test_verdict": "pass",
+          "measurement": "before=1 after=0 reopened=0 callbacks=0 physical=1 last=2",
+          "changed_upstream_files": [
+            "server/filestore.go"
+          ],
+          "package_seconds": 0.019
+        }
+      ],
+      "scope": "Fresh two-message file-store cleanup reproduction and exact dirty-count control; no copied campaign data/index deletion/server/Raft; production dependency unchanged and original million retirement cause unconfirmed."
+    },
+    {
+      "accepted": true,
+      "upstream_version": "v2.15.0",
+      "module_files_verified": 598,
+      "module_cache_unchanged": true,
+      "module_cache_readback_at_review": true,
+      "retained_stores_verified": 2,
+      "runner_sha256": "74eb4ab5e0547804fc5743781269323c5c09fa6628ebfbd5c8c8aacef22aebd1",
+      "fixture_sha256": "ad07c9fcb8c347ffc7958596ad590eb2e68ee69cf6a3c5144166bb8a314e8199",
+      "source_revision": "bac93561810bed2712dea7a42c487700209a9dcd",
+      "source_clean_at_execution": true,
+      "cases": [
+        {
+          "mode": "baseline",
+          "actual_test_verdict": "fail",
+          "measurement": "before=1 after=0 reopened=1 callbacks=0 physical=1 last=2",
+          "changed_upstream_files": [],
+          "package_seconds": 0.035
+        },
+        {
+          "mode": "dirty-control",
+          "actual_test_verdict": "pass",
+          "measurement": "before=1 after=0 reopened=0 callbacks=0 physical=1 last=2",
+          "changed_upstream_files": [
+            "server/filestore.go"
+          ],
+          "package_seconds": 0.008
+        }
+      ],
+      "scope": "Fresh two-message file-store cleanup reproduction and exact dirty-count control; no copied campaign data/index deletion/server/Raft; production dependency unchanged and original million retirement cause unconfirmed."
+    },
+    {
+      "accepted": true,
+      "upstream_version": "v2.15.1-RC.1",
+      "module_files_verified": 598,
+      "module_cache_unchanged": true,
+      "module_cache_readback_at_review": true,
+      "retained_stores_verified": 2,
+      "runner_sha256": "c34e95a5cf5cd7675987631ff62fe686dc91d4344deaa216010009e5b2746625",
+      "fixture_sha256": "ad07c9fcb8c347ffc7958596ad590eb2e68ee69cf6a3c5144166bb8a314e8199",
+      "source_revision": "de2f805b1e008a88fa6f9264605c1dceb5100ca6",
+      "source_clean_at_execution": true,
+      "cases": [
+        {
+          "mode": "baseline",
+          "actual_test_verdict": "fail",
+          "measurement": "before=1 after=0 reopened=1 callbacks=0 physical=1 last=2",
+          "changed_upstream_files": [],
+          "package_seconds": 0.019
+        },
+        {
+          "mode": "dirty-control",
+          "actual_test_verdict": "pass",
+          "measurement": "before=1 after=0 reopened=0 callbacks=0 physical=1 last=2",
+          "changed_upstream_files": [
+            "server/filestore.go"
+          ],
+          "package_seconds": 0.01
+        }
+      ],
+      "scope": "Fresh two-message file-store cleanup reproduction and exact dirty-count control; no copied campaign data/index deletion/server/Raft; production dependency unchanged and original million retirement cause unconfirmed."
+    }
+  ],
+  "rejected_controls": [
+    "RC evidence rejected by default stable version",
+    "empty dependency ledgers",
+    "missing go.sum in both ledgers",
+    "extra dependency key in both ledgers",
+    "dependency changed after execution",
+    "equal ledgers differ from recorded Git source",
+    "production pin substituted",
+    "download version substituted",
+    "download module substituted",
+    "download error ignored",
+    "checksum malformed",
+    "upstream origin substituted",
+    "upstream tag substituted",
+    "upstream revision malformed",
+    "prior RC substituted for selected RC2"
+  ],
+  "original_evidence_unchanged": true,
+  "scope": "Read-only actual stable/RC corpus checks and isolated metadata substitutions; no native rerun or broker store opened."
+}

@@ -1,0 +1,99 @@
+package server
+
+import (
+	"os"
+	"sync/atomic"
+	"testing"
+	"time"
+)
+
+// Fresh files only: no copied campaign stores, index deletion or artificial
+// scheduler-map injection. Scheduling stays paused until its explicit loop cut.
+func TestWorkflowMissingSourceScheduleCleanupPersists(t *testing.T) {
+	dir := t.TempDir()
+	if retained := os.Getenv("WF_SCHEDULER_CLEANUP_STORE"); retained != "" {
+		dir = retained
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		files, err := os.ReadDir(dir)
+		if err != nil || len(files) != 0 {
+			t.Fatalf("fresh cleanup store must be empty: %d %v", len(files), err)
+		}
+	}
+	cfg := StreamConfig{Name: "CLEANUP", Subjects: []string{"foo.*"}, Storage: FileStorage, AllowMsgSchedules: true}
+	created := time.Now()
+	var fs *fileStore
+	open := func() {
+		var err error
+		fs, err = newFileStoreWithCreatedAndMode(FileStoreConfig{StoreDir: dir}, cfg, created, nil, nil, true)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	close := func() {
+		if err := fs.Stop(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	schedules := func() int { fs.mu.Lock(); defer fs.mu.Unlock(); return len(fs.scheduling.schedules) }
+	open()
+	defer func() {
+		if fs != nil {
+			fs.Stop()
+		}
+	}()
+	hdr := genHeader(nil, JSSchedulePattern, "@at "+time.Now().Add(-time.Hour).Format(time.RFC3339Nano))
+	hdr = genHeader(hdr, JSScheduleTarget, "foo.target")
+	seq, _, err := fs.StoreMsg("foo.source", hdr, []byte("scheduled"), 0)
+	if err != nil || seq != 1 {
+		t.Fatalf("source seq=%d err=%v", seq, err)
+	}
+	seq, _, err = fs.StoreMsg("foo.anchor", nil, []byte("keep"), 0)
+	if err != nil || seq != 2 || schedules() != 1 {
+		t.Fatalf("anchor seq=%d schedules=%d err=%v", seq, schedules(), err)
+	}
+	close()
+	open()
+	if schedules() != 1 || fs.State().Msgs != 2 {
+		t.Fatalf("initial reopen schedules=%d state=%+v", schedules(), fs.State())
+	}
+	purged, err := fs.PurgeEx("foo.source", 0, 0)
+	if err != nil || purged != 1 {
+		t.Fatalf("purge=%d err=%v", purged, err)
+	}
+	close()
+	open()
+	before := schedules()
+	if before != 1 || fs.State().Msgs != 1 {
+		t.Fatalf("purged reopen schedules=%d state=%+v", before, fs.State())
+	}
+	if _, err := fs.LoadMsg(1, nil); err == nil {
+		t.Fatal("source still readable")
+	}
+	var callbacks atomic.Int64
+	fs.RegisterProcessJetStreamMsg(func(*inMsg) { callbacks.Add(1) })
+	fs.mu.Lock()
+	fs.scheduling.paused = false
+	fs.mu.Unlock()
+	fs.runMsgScheduling()
+	after := schedules()
+	if after != 0 || callbacks.Load() != 0 {
+		t.Fatalf("loop schedules=%d callbacks=%d", after, callbacks.Load())
+	}
+	close()
+	open()
+	final := schedules()
+	t.Logf("CLEANUP_RESULT fresh_source_count=1 anchor_count=1 before=%d after=%d reopened=%d callbacks=%d physical=%d last=%d", before, after, final, callbacks.Load(), fs.State().Msgs, fs.State().LastSeq)
+
+	anchor, err := fs.LoadMsg(2, nil)
+	if err != nil || anchor.subj != "foo.anchor" || string(anchor.msg) != "keep" {
+		t.Fatalf("anchor corrupted: %v", err)
+	}
+	if fs.State().Msgs != 1 || fs.State().LastSeq != 2 {
+		t.Fatalf("physical state changed: %+v", fs.State())
+	}
+	if final != 0 {
+		t.Fatalf("missing-source cleanup returned after reopen: schedules=%d want=0", final)
+	}
+}
