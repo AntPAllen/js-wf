@@ -1,0 +1,46 @@
+{
+  "build_vcs_stamp_present": true,
+  "source_binding": "Verified complete selected source before/after, captured files and Git blobs plus recorded compiler command and actual live SDK digest; actual race binary buildVCS matches the executed source.",
+  "source": "8389fe4ef6f40cf5bd375d061a2791cacb1e6c7b",
+  "source_inputs_verified": 2092,
+  "actual_sdk": {
+    "pid": 3876584,
+    "stat": "3876584 (integration-rac) S 3871800 3871800 3871800 0 -1 4194304 9834 0 0 0 5 1 0 0 39 19 8 0 18127382 2214531072 15749 18446744073709551615 4194304 35146736 140733853179904 0 0 0 0 0 2143420159 0 0 0 17 1 0 0 0 0 0 55091200 55809952 791408640 140733853187104 140733853187283 140733853187283 140733853188026 0\n",
+    "start_ticks": "18127382",
+    "args": [
+      "/tmp/js-wf-leaf-domain-sigkill-20261007/integration-race.test",
+      "-test.v",
+      "-test.run=^(TestContinuationRetirementReuseThroughLeafSIGKILLWithHubRestart)$",
+      "-test.count=1",
+      "-test.timeout=3m"
+    ],
+    "exe": "/tmp/js-wf-leaf-domain-sigkill-20261007/integration-race.test",
+    "working_directory": "/home/exedev/js-wf",
+    "environment": {
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "1GiB",
+      "WF_RESULT_ABSENCE_ROOT": "/tmp/js-wf-leaf-domain-sigkill-20261007/stores",
+      "WF_SNAPSHOT_LEADER_ROOT": "/tmp/js-wf-leaf-domain-sigkill-20261007/stores",
+      "WF_CONTINUATION_RETIREMENT_PROCESS_ROOT": "/tmp/js-wf-leaf-domain-sigkill-20261007/stores",
+      "WF_CONTINUATION_DOMAIN_ROOT": "/tmp/js-wf-leaf-domain-sigkill-20261007/stores/leaf-scenario"
+    },
+    "exe_sha256": "0aea75fc8c06464dc3a1abe2b3750b79de6b3c0557b41a7676a6584b35126908",
+    "admission": {
+      "observations": 1,
+      "rejected_observations": 0,
+      "first_missing_environment_keys": [],
+      "stable_identity_observed_twice": true,
+      "scope": "Actual live process identity before/after executable digest; incomplete reads repeated without killing or relaunching."
+    }
+  },
+  "embedded_brokers": "Three hub NATS library servers run in the admitted race SDK. Separate leaf process identities and native SIGKILL are verified only for an accepted row; missing short-lived process observations in a startup failure are not inferred. Module version is build-info provenance, not a complete prebuild external-source census.",
+  "archive_every_member_verified": {
+    "bytes": 52244498,
+    "sha256": "99144af887b042ff02b86569849bf7d915e4fd64a4bb5a084583ccae35293086"
+  },
+  "files": 2127,
+  "accepted": false,
+  "original_stores_not_reopened": true,
+  "full_matrix_24h_qualified": false,
+  "failure_preserved": true
+}

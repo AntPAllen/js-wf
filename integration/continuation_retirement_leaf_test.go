@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 	"syscall"
 	"testing"
@@ -116,6 +117,41 @@ func runContinuationRetirementLeaf(t *testing.T, processLeaf bool) {
 	localInfo, err := local.AccountInfo(ready)
 	if err != nil || localInfo.Domain != leafDomain {
 		t.Fatalf("local domain=%+v err=%v", localInfo, err)
+	}
+	// A listening client socket or connected leaf does not admit R3 placement.
+	// Require an elected hub metadata leader with fresh stats for all three peers.
+	var metadataLeader string
+	var metadataPeers []string
+	for {
+		current := true
+		for _, s := range hub.Servers {
+			current = current && s.JetStreamIsCurrent()
+		}
+		for _, s := range hub.Servers {
+			if !s.JetStreamIsLeader() {
+				continue
+			}
+			peers := s.JetStreamClusterPeers()
+			sort.Strings(peers)
+			if current && len(peers) == 3 && peers[0] == "wf-test-0" && peers[1] == "wf-test-1" && peers[2] == "wf-test-2" {
+				metadataLeader = s.Name()
+				metadataPeers = peers
+			}
+		}
+		if metadataLeader != "" {
+			break
+		}
+		if ready.Err() != nil {
+			t.Fatalf("hub metadata placement admission: %v", ready.Err())
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+	metadata, err := json.MarshalIndent(map[string]any{"leader": metadataLeader, "peers": metadataPeers, "all_hubs_current": true, "observed_at": time.Now().UTC()}, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filepath.Join(root, "hub-metadata-ready.json"), metadata, 0600); err != nil {
+		t.Fatal(err)
 	}
 	for {
 		attempt, done := context.WithTimeout(ready, time.Second)
