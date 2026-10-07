@@ -16,6 +16,7 @@ import (
 	"testing"
 
 	"github.com/nats-io/nats.go/jetstream"
+	"js-wf/testcluster"
 )
 
 var operatorStandaloneOnce sync.Once
@@ -90,6 +91,10 @@ func TestOperatorStandaloneCommandsInJetStreamDomain(t *testing.T) {
 }
 
 func runOperatorStandaloneCommands(t *testing.T, domain string) {
+	runOperatorStandaloneCommandsWithTransport(t, domain, false)
+}
+
+func runOperatorStandaloneCommandsWithTransport(t *testing.T, domain string, leaf bool) {
 	binary := operatorStandalone(t)
 	expectedSHA, err := operatorFileSHA(binary)
 	if err != nil {
@@ -102,6 +107,30 @@ func runOperatorStandaloneCommands(t *testing.T, domain string) {
 			t.Fatal("standalone execution cannot inherit parent client-trace options")
 		}
 		root := operatorTempDir(t)
+		var proxy *testcluster.ClientProxy
+		offline := false
+		if leaf {
+			args = append([]string(nil), args...)
+			urlIndex := -1
+			for index, arg := range args {
+				if arg == "-url" {
+					urlIndex = index + 1
+				}
+				offline = offline || arg == "-replay-bundle"
+			}
+			if urlIndex < 0 || urlIndex >= len(args) {
+				t.Fatal("operator child lacks explicit endpoint")
+			}
+			proxy, err = testcluster.NewClientProxy(args[urlIndex])
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer proxy.Close()
+			if err = proxy.EnableTrafficTrace(16 << 20); err != nil {
+				t.Fatal(err)
+			}
+			args[urlIndex] = proxy.URL()
+		}
 		stdout, err := os.Create(filepath.Join(root, "stdout"))
 		if err != nil {
 			t.Fatal(err)
@@ -143,6 +172,27 @@ func runOperatorStandaloneCommands(t *testing.T, domain string) {
 		}
 		waitErr := process.Wait()
 		joined = true
+		if proxy != nil {
+			proxy.Close() // Join both directions before serializing complete bytes.
+			trace, stats := proxy.TrafficTrace(), proxy.Stats()
+			connections := 1
+			if offline {
+				connections = 0
+			}
+			if trace.Truncated || len(trace.Connections) != connections || stats.Active != 0 || stats.BufferOverflows != 0 || stats.BufferedBytes != 0 {
+				t.Errorf("operator child wire incomplete: offline=%t truncated=%t connections=%d stats=%+v", offline, trace.Truncated, len(trace.Connections), stats)
+			}
+			for name, value := range map[string]any{"traffic.json": trace, "proxy-final.json": stats, "wire-expectation.json": map[string]any{"offline": offline, "proxy_url": proxy.URL(), "args": args}} {
+				encoded, err := json.MarshalIndent(value, "", "  ")
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err = os.WriteFile(filepath.Join(root, name), append(encoded, '\n'), 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			t.Logf("operator child wire: pid=%d offline=%t connections=%d truncated=%t client_bytes=%d server_bytes=%d", process.Process.Pid, offline, len(trace.Connections), trace.Truncated, stats.ClientToServer, stats.ServerToClient)
+		}
 		data, err := os.ReadFile(filepath.Join(root, "stdout"))
 		if err != nil {
 			t.Fatal(err)
@@ -171,6 +221,6 @@ func runOperatorStandaloneCommands(t *testing.T, domain string) {
 		}
 		return nil
 	}
-	runOperatorCommandsWithInvoker(t, domain, invoke)
+	runOperatorCommandsWithTransport(t, domain, invoke, leaf)
 	t.Logf("operator standalone commands domain=%q processes=%d exe_sha256=%s", domain, count, expectedSHA)
 }

@@ -1,0 +1,7 @@
+# Packaged operator leaf preparation
+
+The new optional `TestOperatorStandaloneCommandsThroughLeaf` reuses every existing WFOPS standalone command assertion and original 60s scenario/3m SDK deadlines. Three embedded stock WFOPS hubs admit their metadata peers; one separate stock WFEDGE leaf admits its real upstream domain and keeps zero local workflow streams before and after. Actual packaged CLI children retain executable/argv/birth/exit/stdout/stderr captures.
+
+Each child receives an exclusive joined TCP relay and complete bounded traffic trace. Online commands must use the real leaf and the exact domain in their argv, including the intentional missing-domain rejection. Two offline replay children use relays to the original unreachable endpoint and must make zero connections. The original 23-child suite and five nonzero exits remain required. Protocol framing comes from the already tested worker wire parser; collector proofs also check all frames, complete byte counts and actual leaf INFO identities.
+
+Compilation and five existing operator collector guard groups pass. Source-bound native race execution, independent complete-source/process/wire/archive review, captured-proof negative controls and CI addition remain pending. This does not yet qualify healthy operator leaf routing or daemon/SQL/fault/full-release paths. The original 24-hour journal test continues independently.

@@ -98,6 +98,10 @@ func runOperatorCommands(t *testing.T, domain string) {
 }
 
 func runOperatorCommandsWithInvoker(t *testing.T, domain string, external operatorCommandInvoker) {
+	runOperatorCommandsWithTransport(t, domain, external, false)
+}
+
+func runOperatorCommandsWithTransport(t *testing.T, domain string, external operatorCommandInvoker, leaf bool) {
 	count := 1
 	if domain != "" {
 		count = 3
@@ -106,6 +110,8 @@ func runOperatorCommandsWithInvoker(t *testing.T, domain string, external operat
 	var err error
 	if domain == "" {
 		cluster, err = testcluster.Start(operatorTempDir(t), count)
+	} else if leaf {
+		cluster, err = testcluster.StartWithLeafDomain(operatorTempDir(t), count, domain)
 	} else {
 		cluster, err = testcluster.StartWithDomain(operatorTempDir(t), count, domain)
 	}
@@ -191,12 +197,18 @@ func runOperatorCommandsWithInvoker(t *testing.T, domain string, external operat
 		var child *operatorCommandProcessError
 		return errors.As(err, &child) && child.exitCode == 1 && strings.Contains(child.stderr, target.Error())
 	}
-	base := []string{"-url", cluster.Servers[0].ClientURL()}
+	endpoint := cluster.Servers[0].ClientURL()
+	if leaf {
+		var finish func()
+		endpoint, finish = operatorLeafEndpoint(t, ctx, cluster, domain)
+		defer finish()
+	}
+	base := []string{"-url", endpoint}
 	var options []jetstream.JetStreamOpt
 	if domain != "" {
 		base = append(base, "-domain", domain)
 		var output bytes.Buffer
-		if err := invoke([]string{"-url", cluster.Servers[0].ClientURL(), "-domain", "MISSING", "-timeout", "1s", "describe", typ, id}, &output); err == nil {
+		if err := invoke([]string{"-url", endpoint, "-domain", "MISSING", "-timeout", "1s", "describe", typ, id}, &output); err == nil {
 			t.Fatal("unknown domain silently read the local workflow")
 		}
 		if external == nil {

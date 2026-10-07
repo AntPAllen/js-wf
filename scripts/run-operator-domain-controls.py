@@ -12,6 +12,7 @@ import subprocess
 import time
 
 import fixture_archive
+import live_process_admission
 
 REPO = Path(__file__).resolve().parents[1]
 TESTS = ['TestOperatorCommands', 'TestOperatorCommandsInJetStreamDomain']
@@ -53,6 +54,24 @@ def verify_daemon_log(log):
 
 
 STANDALONE_TESTS=['TestOperatorStandaloneCommands','TestOperatorStandaloneCommandsInJetStreamDomain']
+LEAF_TESTS=['TestOperatorStandaloneCommandsThroughLeaf']
+
+def verify_leaf_log(log):
+    assert log.rstrip().endswith('PASS') and not any(s in log for s in ('DATA RACE','--- FAIL:','--- SKIP:'))
+    assert re.findall(r'^--- PASS: (\w+) \([0-9.]+s\)$',log,re.M)==LEAF_TESTS
+    peers=re.findall(r'operator domain admitted node=(\d) domain=WFOPS server_id=(\w+)',log)
+    assert sorted(n for n,_ in peers)==['0','1','2'] and len({i for _,i in peers})==3
+    summaries=re.findall(r'operator standalone commands domain="WFOPS" processes=(\d+) exe_sha256=([0-9a-f]{64})',log)
+    assert len(summaries)==1 and summaries[0][0]=='23'
+    processes=re.findall(r'operator standalone process domain="WFOPS" pid=(\d+) exit=(-?\d+)',log)
+    assert len(processes)==len({pid for pid,_ in processes})==23 and sum(code=='1' for _,code in processes)==5
+    assert all(code in ('0','1') for _,code in processes)
+    wire=re.findall(r'operator child wire: pid=(\d+) offline=(true|false) connections=(\d+) truncated=false client_bytes=(\d+) server_bytes=(\d+)',log)
+    assert len(wire)==len({row[0] for row in wire})==23 and {row[0] for row in wire}=={pid for pid,_ in processes}
+    assert sum(row[1]=='true' for row in wire)==2
+    assert all((row[2],row[3],row[4])==('0','0','0') if row[1]=='true' else row[2]=='1' and int(row[3])>0 and int(row[4])>0 for row in wire)
+    assert len(re.findall(r'operator leaf: test='+LEAF_TESTS[0]+r' local=WFEDGE remote=WFOPS leaf_pid=\d+ local_streams=0',log))==1
+    return dict(tests=LEAF_TESTS,actual_standalone_processes=23,online_children=21,offline_children=2,scope='Focused healthy packaged operator leaf suite only; no daemon, SQL, injected fault or full release acceptance.')
 
 def verify_standalone_log(log):
     assert log.rstrip().endswith('PASS') and not any(s in log for s in ('DATA RACE','--- FAIL:','--- SKIP:'))
@@ -74,7 +93,7 @@ def verify_standalone_log(log):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
-    parser.add_argument('--case', choices=['commands','daemon-signals','standalone-commands'],default='commands')
+    parser.add_argument('--case', choices=['commands','daemon-signals','standalone-commands','standalone-leaf'],default='commands')
     args = parser.parse_args()
     root = args.root.absolute()
     assert not root.exists() and not root.is_relative_to(REPO)
@@ -93,7 +112,7 @@ def main():
     env = dict(os.environ, GOMAXPROCS='2', GOMEMLIMIT='1GiB', GOWORK='off', GOFLAGS='', WF_OPERATOR_TEST_ROOT=str(root/'stores'), WF_OPERATOR_STANDALONE='1')
     binary = root/'operator-race.test'
     build = ['go', 'test', '-race', '-buildvcs=true', '-c', '-o', str(binary), './cmd/wf']
-    tests = TESTS if args.case=='commands' else DAEMON_TESTS if args.case=='daemon-signals' else STANDALONE_TESTS
+    tests = TESTS if args.case=='commands' else DAEMON_TESTS if args.case=='daemon-signals' else LEAF_TESTS if args.case=='standalone-leaf' else STANDALONE_TESTS
     command = [str(binary), '-test.v', '-test.run=^('+'|'.join(tests)+')$', '-test.count=1', '-test.timeout=3m']
     run_directory = REPO/'cmd/wf'
     save('commands.json', dict(build=build, build_working_directory=str(REPO), run=command, run_working_directory=str(run_directory)))
@@ -105,13 +124,8 @@ def main():
     started = time.monotonic()
     with (root/'native.log').open('w') as log:
         child = subprocess.Popen(command, cwd=run_directory, env=env, stdout=log, stderr=subprocess.STDOUT)
-        proc = Path('/proc', str(child.pid))
-        actual_env = dict(v.split(b'=', 1) for v in (proc/'environ').read_bytes().split(b'\0') if b'=' in v)
-        actual = dict(pid=child.pid, stat=(proc/'stat').read_text(), exe=str((proc/'exe').resolve()), working_directory=str((proc/'cwd').resolve()),
-                      exe_sha256=shared.sha(proc/'exe'),
-                      args=[os.fsdecode(v) for v in (proc/'cmdline').read_bytes().split(b'\0') if v],
-                      environment={k:os.fsdecode(actual_env[k.encode()]) for k in ('GOMAXPROCS','GOMEMLIMIT','GOWORK','GOFLAGS','WF_OPERATOR_TEST_ROOT','WF_OPERATOR_STANDALONE')})
-        assert actual['args']==command and actual['exe_sha256']==shared.sha(binary) and actual['exe']==str(binary) and actual['working_directory']==str(run_directory)
+        keys=('GOMAXPROCS','GOMEMLIMIT','GOWORK','GOFLAGS','WF_OPERATOR_TEST_ROOT','WF_OPERATOR_STANDALONE')
+        actual=live_process_admission.admit(child,command,{k:env[k] for k in keys},run_directory,binary,shared.sha(binary))
         save('actual-sdk.json', actual)
         print('ACTUAL_OPERATOR_SDK', child.pid, flush=True)
         code = child.wait()
@@ -139,11 +153,20 @@ def main():
         else:
             assert len(plugin_records)==1 and '-race=true' in plugin_records[0]['build_info'], 'exact retained race plugin missing'
             records=[json.loads(p.read_text()) for p in (root/'stores').rglob('standalone.process.json')]
-            result=verify_standalone_log((root/'native.log').read_text())
+            result=(verify_leaf_log if args.case=='standalone-leaf' else verify_standalone_log)((root/'native.log').read_text())
             assert len(records)==result['actual_standalone_processes']
             assert all(r['argv'][0].startswith(str(root/'stores')) and shared.sha(r['argv'][0])==r['exe_sha256'] and 'vcs.revision='+revision in r['build_info'] and 'vcs.modified=false' in r['build_info'] and '-race=true' in r['build_info'] and not Path('/proc',str(r['pid'])).exists() for r in records)
             save('standalone-processes.json',records)
-    except AssertionError as exc:
+            if args.case=='standalone-leaf':
+                import operator_leaf_wire
+                wire=operator_leaf_wire.validate(root/'stores')
+                assert {r['pid'] for r in wire['processes']}=={r['pid'] for r in records}
+                save('leaf-wire-review.json',wire)
+                leaves=[json.loads(p.read_text()) for p in (root/'stores').rglob('leaf.process.json')]
+                assert len(leaves)==1 and leaves[0]['reaped'] is True and leaves[0]['exit_code']==0 and not Path('/proc',str(leaves[0]['pid'])).exists()
+                assert shared.sha(leaves[0]['exe'])==leaves[0]['exe_sha256']
+                save('leaf-processes.json',leaves)
+    except (AssertionError,ValueError,KeyError,TypeError) as exc:
         error = str(exc) or 'native coverage rejected'
     save('row-review.json', dict(qualification=result, rejection=error))
     proof = fixture_archive.capture(root, root.with_suffix('.tar.gz'), root.with_name(root.name+'-proof'), compresslevel=1)
