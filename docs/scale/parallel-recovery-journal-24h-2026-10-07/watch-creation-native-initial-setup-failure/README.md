@@ -5,3 +5,5 @@ Original clean source6cc1dc3, actual race SDK2528356/SHA d358434fadc30a5f2f80d7b
 TCP listener readiness was the only admission before the first R3 bucket request. The corrected fixture explicitly observes an elected metadata leader inside the same30s setup budget before creating the bucket. This removes that admission gap; it does not establish the complete cause of the original ignored/timed-out creation request. The next native execution uses a fresh root and original race/count1/2m/twoGoCPU/1GiB and20s recovery stage.
 
 Source/external before/after, actual live SDK identity, failed log, original failed unit and complete3627-member fixture are retained. Complete archive38,376,975B, SHA256 `cb67997edb0a5f2c1a70d9065c6768eaf94e8be2bd7b405441f4c7d3d7009c5e`. No store reopened or failed verdict repaired.
+
+The complete fixture and redundant archive staging file are now [retired after fresh S3/member/inventory/unit/closure verification](../watch-creation-native-reclaimed/). Git retains native source/process/verdict/reviewer evidence and full archive inventories/receipts.
