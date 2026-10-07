@@ -13,3 +13,7 @@ The initial empty --no-checkout index rejected clean-source admission before any
 ## Remaining qualification
 
 Every seed must retain its original terminal producer/SDK/server identity, complete raw fault schedule, verified majority progress and confirmed heal, raw enabling-event/recovery latency gates, all three history models, full integrity/store/source inventories, unchanged actual binaries and complete archive/S3 proof. Candidate full-row review must remain separate from the default release gate. Full13x200 Tier2,16x200 Tier3, actual24h, safe onlineGC, original million physical drain and dependency delivery/adoption remain open. Production Go dependencies remain official NATS2.15.0.
+
+## Current native progress
+
+Original seed1 passes665.72s body and the producer validates all three exact candidate identities. Seed2 is live under the same original supervisor. [Recorded progress](native-progress/). This is native execution only; independent candidate source/fault/history/store/archive qualification remains pending. Initial failed preparation/source/archive are fully S3-backed and [retired](preparation-failure/reclaimed/).
