@@ -1,0 +1,9 @@
+# Complete123-workload Tier1 race1000 accepted
+
+Recorded isolated source362219fc53ffdc2e67ca92c02f596a239ab50276 completes all **123000 seeded bodies**, every workload's exact1..1000 range, all **395 source pins**,180 top-level passes and only two documented trace-only skips. Package passes2271.395s; originalcount1/60m/GOMAXPROCS2/GOMEMLIMIT512MiB remain.
+
+[Independent review](independent-review.json) regenerates the report from raw Go JSON, compares all compiled/source/seed/pin inventories, verifies2200 selected repository inputs against committed Git and the unchanged clean isolated checkout, before/after equality, original actual SDK executable/profile/birth/argv against launch, retained binary bytes, and the original successful retained service InvocationID/ExecMainPID. All known SDK/producer/supervisor handles are closed. Complete2244-member archive/21047332bytes/SHA256 `9b4c43944016ac66485e220fd2073ef5003bc5c4cc7368a85e57ff24333e1a3a` is read back with current original files unchanged. Raw events, exact source files, binary, launcher and all metadata remain in the full archive. Compiler provenance is not exhaustive/hermetic.
+
+The external supervisor cap changed2GiB→3GiB after measured RSS approached it while the VM had8.8GiB available. The original512MiB Go heap/twoGoCPU/native timeout/count/seeds/source and process/service identities remain unchanged. Both cap values and exact live transition are retained; no restart occurred.
+
+This qualifies the complete123-workload race graph at this recorded source. Historical122 scopes remain separate. Full123 normal100k still requires execution and independent review. The active-writer blob cases prove expected unsafe-quiescent-collector counterexamples; this pass does not implement or qualify safe onlineGC, simulate NATS Raft internals, clear real fault matrices, original million physical drain or actual24h. Original24h is still active.

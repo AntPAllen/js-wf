@@ -1,5 +1,9 @@
 # Tier 1 deterministic simulation: journal, lease, start, signals, timers, dispatch, and worker slices
 
+## Complete123-workload Tier1 race graph accepted — 2026-10-07
+
+The exact isolated362219f campaign passes every123000 workload body, all395 pins,180 top-level cases/two documented trace-only skips and2271.395s package. Independent review regenerates all exact1..1000 ranges and verifies2200 selected Git inputs, unchanged source/binary/profile/launch identity, original retained successful service and every complete archive member. External supervisor cap2GiB→3GiB was explicitly recorded; original512MiB Go heap/twoGoCPU/60m/count1/source/process/invocation remain. No restart. [Complete evidence and limits](scale/tier1-full123-2026-10-07/race-terminal/). Full123 normal100k remains next; original24h remains live. Safe onlineGC, NATS internal causality, full native matrices, original million physical drain and fullrelease remain open.
+
 ## Complete current Tier1 race graph live — 2026-10-07
 
 The isolated full123-workload/395-pin race1000 qualifier is now actually live at362219f. Independent admission binds actual SDK1746503, originalcount1/60m/twoGoCPU/512MiB, race binary/argv/birth/profile, all2200 selected Git inputs, compiled/source inventories and retained no-restart user service. Historical full122 and focused online-blob results keep their original scopes. Original24h producer/observer/reviewer remain active. [Launch evidence and terminal requirements](scale/tier1-full123-2026-10-07/). Full123 race acceptance requires terminal per-workload coverage/unchanged sources/independent review; full123 normal100k remains pending. Full matrices, onlineGC, original million physical drain and actual24h remain open.
