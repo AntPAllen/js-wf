@@ -9,6 +9,9 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
+
+sys.dont_write_bytecode = True
 
 import fixture_archive
 
@@ -21,7 +24,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--parent-root', type=Path, required=True)
+    parser.add_argument('--guard-variant', choices=['strict', 'contiguous'], default='strict')
     args = parser.parse_args()
+    parent_canonical = PARENT if args.guard_variant == 'strict' else Path('docs/scale/lease-partition-component-2026-10-06/raft-contiguous-controls')
+    component_canonical = COMPONENT if args.guard_variant == 'strict' else Path('docs/scale/lease-partition-component-2026-10-06/contiguous-component')
+    candidate_profile = 'candidate' if args.guard_variant == 'strict' else 'contiguous'
+    profiles = ['upstream', candidate_profile]
     root, parent = args.root.absolute(), args.parent_root.absolute()
     if root.exists() or root.is_relative_to(REPO) or parent.is_symlink() or not parent.is_dir():
         parser.error('require fresh output outside checkout and a regular preserved parent directory')
@@ -41,11 +49,11 @@ def main():
     records = {}
     retained = root/'parent-proof'; retained.mkdir()
     for name in ['archive-verification.json', 'fixture-inventory.json', 's3-readback.json', 'independent-review.json',
-                 'upstream-binary.json', 'candidate-binary.json', 'dependencies-before.json', 'dependencies-after.json',
+                 'upstream-binary.json', candidate_profile+'-binary.json', 'dependencies-before.json', 'dependencies-after.json',
                  'nats-source-before.json', 'nats-source-after.json', 'module-inputs.json', 'source-before.json', 'source-after.json',
-                 'candidate-overlay.json', 'upstream-overlay.json', 'generated-testmain-limits.json']:
-        data = subprocess.check_output(['git', 'cat-file', 'blob', revision+':'+str(PARENT/name)], cwd=REPO)
-        assert data == (REPO/PARENT/name).read_bytes()
+                 candidate_profile+'-overlay.json', 'upstream-overlay.json', 'generated-testmain-limits.json']:
+        data = subprocess.check_output(['git', 'cat-file', 'blob', revision+':'+str(parent_canonical/name)], cwd=REPO)
+        assert data == (REPO/parent_canonical/name).read_bytes()
         (retained/name).write_bytes(data); records[name] = hashlib.sha256(data).hexdigest()
     read = lambda name: json.loads((retained/name).read_text())
     metadata, manifest, receipt = (read(n) for n in ['archive-verification.json', 'fixture-inventory.json', 's3-readback.json'])
@@ -62,15 +70,20 @@ def main():
     module_before = fixture_archive.inventory(copied)
     assert module_before == read('nats-source-before.json') == read('nats-source-after.json')
     save('fixture-source-before.json', module_before)
-    component_raft = REPO/COMPONENT/'candidate-raft.go.txt'
-    component_data = subprocess.check_output(['git', 'cat-file', 'blob', revision+':'+str(COMPONENT/'candidate-raft.go.txt')], cwd=REPO)
-    assert component_data == component_raft.read_bytes() == (parent/'candidate-raft.go').read_bytes()
-    save('parent-reference.json', {'canonical': str(PARENT), 'records': records, 'source': read('independent-review.json')['source'],
+    component_raft = REPO/component_canonical/'candidate-raft.go.txt'
+    component_data = subprocess.check_output(['git', 'cat-file', 'blob', revision+':'+str(component_canonical/'candidate-raft.go.txt')], cwd=REPO)
+    assert component_data == component_raft.read_bytes() == (parent/(candidate_profile+'-raft.go')).read_bytes()
+    component_build_data = subprocess.check_output(['git', 'cat-file', 'blob', revision+':'+str(component_canonical/'candidate-build.json')], cwd=REPO)
+    assert component_build_data == (REPO/component_canonical/'candidate-build.json').read_bytes()
+    component_build = json.loads(component_build_data)
+    assert component_build['candidate_raft_sha256'] == shared.sha(component_raft)
+    assert component_build.get('guard_variant', 'strict') == args.guard_variant
+    save('parent-reference.json', {'canonical': str(parent_canonical), 'guard_variant':args.guard_variant, 'candidate_profile':candidate_profile, 'component_canonical':str(component_canonical), 'records': records, 'source': read('independent-review.json')['source'],
          'archive_url': receipt['archive']['url'], 'archive_sha256': metadata['archive_sha256'],
-         'component_source': json.loads((REPO/COMPONENT/'candidate-build.json').read_text())['source'],
+         'component_source':component_build['source'], 'component_build_sha256':hashlib.sha256(component_build_data).hexdigest(),
          'component_candidate_raft_sha256': shared.sha(component_raft), 'same_candidate_guard_source_as_real_component': True})
     binaries = {}
-    for profile in ['upstream', 'candidate']:
+    for profile in profiles:
         binary_info = read(profile+'-binary.json')
         assert '-race' in binary_info['build'] and binary_info['executable_sha256'] == shared.sha(parent/(profile+'.test'))
         target = root/(profile+'.test'); shutil.copy2(parent/(profile+'.test'), target); target.chmod(0o700)
@@ -99,6 +112,11 @@ def main():
             proc = Path('/proc', str(child.pid))
             actual = {'pid':child.pid, 'stat':(proc/'stat').read_text(), 'argv':[os.fsdecode(v) for v in (proc/'cmdline').read_bytes().split(b'\0') if v],
                       'actual_executable_sha256':shared.sha(proc/'exe'), 'cwd':os.readlink(proc/'cwd')}
+            actual_environment = {os.fsdecode(row.split(b'=', 1)[0]):os.fsdecode(row.split(b'=', 1)[1]) for row in (proc/'environ').read_bytes().split(b'\0') if b'=' in row}
+            expected_environment = {k:env[k] for k in ['GOMAXPROCS','GOMEMLIMIT','TMPDIR','GOWORK','GOFLAGS']}
+            actual['environment'] = {k:actual_environment[k] for k in expected_environment}
+            assert actual['environment'] == expected_environment
+            actual['build_info'] = subprocess.check_output(['go','version','-m',str(proc/'exe')],text=True)
             save(profile+'-live-execution.json', {'actual':actual, 'command':command, 'environment':{k:env[k] for k in ['GOMAXPROCS','GOMEMLIMIT','TMPDIR','GOWORK','GOFLAGS']}})
             code = child.wait()
         assert shared.sha(binary) == actual['actual_executable_sha256'] == read(profile+'-binary.json')['executable_sha256']
@@ -120,6 +138,7 @@ def main():
     after = shared.source_inventory(revision); assert after == before; save('source-after.json', after)
     save('closure.json', shared.closure(root))
     save('result.json', {'orchestrator_source':revision, 'compiled_server_source':read('independent-review.json')['source'], 'results':results,
+         'guard_variant':args.guard_variant, 'candidate_profile':candidate_profile,
          'scope':'Every170 pinned TestNRG top-level case, original source-bound race binaries, count1/20m each, fresh fixture-source and temp dirs, 2CPU/2GiB. Broader Raft controls only; no full NATS test suite, production adoption, workflow matrix or Tier1 qualification.'})
     shutil.copyfile(__file__, root/'executed-producer.py')
     proof = fixture_archive.capture(root, root.with_suffix('.tar.gz'), root.with_name(root.name+'-proof'), compresslevel=1)
