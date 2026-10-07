@@ -4,7 +4,7 @@ The isolated `f3f7913` campaign executes every original seed1–200 in order wit
 
 [Independent first-seed admission](launch/independent-launch-review.json) verifies actual SDK2359016, original serviceInvocationID739815ede74f4562aca63e5a0fc52ee9, all745 selected Git Go/module inputs,3355 external inputs, unchanged isolated sparse source and two actual identity snapshots around each executable digest for all three candidate NATS peers. All original200 bodies and independent terminal fault/history/store/source/archive qualification remain pending. The independent reviewer now supports explicit `--candidate-proof`; only complete200 candidate coverage can qualify its candidate row, and it cannot clear the default partition200 release gate. No default production or complete release gate is cleared.
 
-The exact candidate was restored from the full77,133,636-byte verified component S3 archive; no retained old server stores were reopened. [Restore and launch records](launch/). Live root `/tmp/js-wf-candidate-partition200-v2-20261007`; input root `/tmp/js-wf-candidate-partition200-input-20261007`; user unit `js-wf-candidate-partition200-v2-20261007.service`. Preserve both roots, source checkout and original handles while the campaign runs.
+The exact candidate was restored from the full77,133,636-byte verified component S3 archive; no retained old server stores were reopened. [Restore and launch records](launch/). Live root `/tmp/js-wf-candidate-partition200-v2-20261007`; input root `/tmp/js-wf-candidate-partition200-input-20261007`; user unit `js-wf-candidate-partition200-v2-20261007.service`. The campaign has stopped; its complete closed campaign data is preserved in the S3 archive linked below. The source checkout and candidate input root remain local.
 
 ## Preparation failure retained
 
@@ -14,10 +14,16 @@ The initial empty --no-checkout index rejected clean-source admission before any
 
 Every seed must retain its original terminal producer/SDK/server identity, complete raw fault schedule, verified majority progress and confirmed heal, raw enabling-event/recovery latency gates, all three history models, full integrity/store/source inventories, unchanged actual binaries and complete archive/S3 proof. Candidate full-row review must remain separate from the default release gate. Full13x200 Tier2,16x200 Tier3, actual24h, safe onlineGC, original million physical drain and dependency delivery/adoption remain open. Production Go dependencies remain official NATS2.15.0.
 
-## Current native progress
+## Earlier native progress
 
-Original seeds1–3 pass665.72/686.88/703.76s bodies and the producer validates all three exact candidate identities for each. Seed4 has passed natively and seed5 is live under the original supervisor. Initial failed preparation/source/archive are fully S3-backed and [retired](preparation-failure/reclaimed/). Full200 native coverage and terminal independent qualification remain pending.
+Original seeds1–3 pass665.72/686.88/703.76s bodies and the producer validates all three exact candidate identities for each. At the earlier progress observation, seed4 had passed natively and seed5 was live under the original supervisor. See the terminal status below. Initial failed preparation/source/archive are fully S3-backed and [retired](preparation-failure/reclaimed/). Full200 native coverage and terminal independent qualification remain pending.
 
 ## Independent candidate review available
 
-Seed1 is independently accepted with all19 fault records,9108 latency samples,2484 operations in each of three history models,745 Git/3355 external inputs and exact three candidate peers;27 actual-proof substitutions reject. [Complete proof and limits](seed001-independent/). Seeds2 and3 are independently accepted against all19 faults, raw latency samples, three history models,745 Git/3355 external inputs and actual candidate bytes. [Seed2 proof](seed002-independent/) and [seed3 proof](seed003-independent/) preserve complete original fixtures and reviewer artifacts. Seed4 has passed natively and seed5 continues under the same supervisor. Full200 remains pending.
+Seed1 is independently accepted with all19 fault records,9108 latency samples,2484 operations in each of three history models,745 Git/3355 external inputs and exact three candidate peers;27 actual-proof substitutions reject. [Complete proof and limits](seed001-independent/). Seeds2 and3 are independently accepted against all19 faults, raw latency samples, three history models,745 Git/3355 external inputs and actual candidate bytes. [Seed2 proof](seed002-independent/) and [seed3 proof](seed003-independent/) preserve complete original fixtures and reviewer artifacts. The earlier observation recorded seed4 passing natively and seed5 running under the same supervisor; see the terminal status below. Full200 remains pending.
+
+## Terminal campaign and storage preservation
+
+The original supervisor stopped at seed 31 on 2026-10-07 at 22:48:54 UTC with producer and native SDK exit 1. Seeds 1–30 have producer completion records; only seeds 1–3 have the independent acceptance described above. Full 200-seed coverage failed to complete. The cause of seed 31 failure has not been independently established. No retry or dependency adoption occurred.
+
+The [complete closed campaign archive](../tmp-storage-review-2026-10-07/twenty-fourth-candidate-closed/README.md) preserves every campaign file, including failed seed 31, under a fully verified S3 receipt. Restore to a fresh directory for further independent review. This storage operation does not qualify any additional seed or release gate.
