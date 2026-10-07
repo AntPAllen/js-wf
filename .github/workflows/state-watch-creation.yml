@@ -7,6 +7,10 @@ on:
       - 'integrity/**'
       - 'testcluster/client_proxy*'
       - 'scripts/run-state-creation-native.py'
+      - 'scripts/review-state-creation-native.py'
+      - 'scripts/check-state-creation-proof-controls.py'
+      - 'scripts/worker_leaf_wire.py'
+      - 'scripts/check-tier2-journal-shard.py'
       - 'scripts/live_process_admission.py'
       - 'scripts/fixture_archive.py'
       - 'go.mod'
@@ -17,6 +21,10 @@ on:
       - 'integrity/**'
       - 'testcluster/client_proxy*'
       - 'scripts/run-state-creation-native.py'
+      - 'scripts/review-state-creation-native.py'
+      - 'scripts/check-state-creation-proof-controls.py'
+      - 'scripts/worker_leaf_wire.py'
+      - 'scripts/check-tier2-journal-shard.py'
       - 'go.mod'
       - 'go.sum'
 permissions:
@@ -37,6 +45,11 @@ jobs:
         run: |
           go test -race ./testcluster -run 'Test(ClientProxyFirstAPIBarrier|ClientProxyConsumerCreationSelector|ReadClientPacketRejectsMalformedPublications)' -count=5 -timeout=3m
           go test -race ./integrity -run 'Test(SeededState.*Progress|SeededStateClosedWatch|StateProgress|StateCreationProgress)' -count=20 -timeout=3m
+      - name: Actual proof substitution controls
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHONPATH: scripts
+        run: python3 scripts/check-state-creation-proof-controls.py --fixture docs/scale/parallel-recovery-journal-24h-2026-10-07/watch-creation-native-accepted/fixture --output "$RUNNER_TEMP/state-watch-creation-proof-controls.json"
       - name: Original native R3 WatchAll cancellation and recovery
         env:
           PYTHONDONTWRITEBYTECODE: '1'
