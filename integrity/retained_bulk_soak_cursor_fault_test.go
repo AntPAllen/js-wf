@@ -129,31 +129,38 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 		Created       bool                    `json:"created"`
 	}
 	result := struct {
-		Cutoff             uint64                            `json:"cutoff"`
-		ElapsedNS          int64                             `json:"elapsed_ns"`
-		AuditNS            int64                             `json:"audit_ns"`
-		Report             Report                            `json:"report"`
-		Error              string                            `json:"error"`
-		Readiness          map[string]*jetstream.StreamInfo  `json:"readiness"`
-		RecoveredReadiness map[string]*jetstream.StreamInfo  `json:"readiness_after"`
-		ParallelDecode     bool                              `json:"parallel_decode"`
-		CursorRestart      bool                              `json:"cursor_owner_restart"`
-		Qualifies24h       bool                              `json:"qualifies_24h"`
-		JournalVisits      uint64                            `json:"journal_visits"`
-		Target             *jetstream.ConsumerInfo           `json:"target"`
-		Kill               testcluster.DockerKillObservation `json:"kill"`
-		RestartCompleted   time.Time                         `json:"restart_completed"`
-		Cursors            []cursorObservation               `json:"cursors"`
-		CursorErrors       []string                          `json:"cursor_errors"`
-		Deletions          []processDeleteObservation        `json:"deletions"`
-		StateWatches       []capacityWatchTiming             `json:"state_watches"`
-		Cleanup            map[string]int                    `json:"cleanup"`
+		Cutoff              uint64                            `json:"cutoff"`
+		ElapsedNS           int64                             `json:"elapsed_ns"`
+		AuditNS             int64                             `json:"audit_ns"`
+		Report              Report                            `json:"report"`
+		Error               string                            `json:"error"`
+		Readiness           map[string]*jetstream.StreamInfo  `json:"readiness"`
+		RecoveredReadiness  map[string]*jetstream.StreamInfo  `json:"readiness_after"`
+		ParallelDecode      bool                              `json:"parallel_decode"`
+		CursorRestart       bool                              `json:"cursor_owner_restart"`
+		Qualifies24h        bool                              `json:"qualifies_24h"`
+		JournalVisits       uint64                            `json:"journal_visits"`
+		Target              *jetstream.ConsumerInfo           `json:"target"`
+		Kill                testcluster.DockerKillObservation `json:"kill"`
+		RestartCompleted    time.Time                         `json:"restart_completed"`
+		Cursors             []cursorObservation               `json:"cursors"`
+		CursorErrors        []string                          `json:"cursor_errors"`
+		Deletions           []processDeleteObservation        `json:"deletions"`
+		StateConnectionLoss *copiedWatchConnectionProof       `json:"state_connection_loss,omitempty"`
+		StateWatches        []capacityWatchTiming             `json:"state_watches"`
+		Cleanup             map[string]int                    `json:"cleanup"`
 	}{Cutoff: cutoff, Readiness: readiness, ParallelDecode: true, CursorRestart: true, Cleanup: map[string]int{}, RecoveredReadiness: map[string]*jetstream.StreamInfo{}}
 	call, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	began := time.Now()
 	trace := &capacityStateTrace{origin: &began}
+	var watchFault *copiedWatchConnectionLoss
+	if os.Getenv("WF_AUDIT_BULK_SOAK_STATE_CONNECTION_LOSS") == "1" {
+		watchFault = newCopiedWatchConnectionLoss()
+		call = WithStateSnapshotObserver(call, watchFault.observe)
+	}
 	created := map[string]bool{}
+	ownerSelected := false
 	reader := func(ctx context.Context, stream jetstream.Stream, upper *uint64, visit func(*jetstream.RawStreamMsg) error) error {
 		streamName := stream.CachedInfo().Config.Name
 		observed := &candidateObservedStream{Stream: stream, cursorReplicas: 1}
@@ -162,6 +169,15 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 				result.CursorErrors = append(result.CursorErrors, err.Error())
 			}
 			if info != nil {
+				if watchFault != nil && info.Stream == "WF_JRN" && !ownerSelected {
+					for n := 0; n < 5; n++ {
+						if info.Cluster != nil && cluster.NodeName(n) == info.Cluster.Leader {
+							ownerSelected = true
+							watchFault.owner = n
+							close(watchFault.ownerReady)
+						}
+					}
+				}
 				key := info.Stream + "/" + info.Name
 				result.Cursors = append(result.Cursors, cursorObservation{Info: info, JournalVisits: result.JournalVisits, Created: !created[key]})
 				created[key] = true
@@ -202,6 +218,14 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 				if err := os.WriteFile(filepath.Join(root, "cursor-owner-before-kill.log"), []byte(logs), 0600); err != nil {
 					return err
 				}
+				if watchFault != nil {
+					if watchFault.owner != owner {
+						return fmt.Errorf("watch connection owner changed before cut")
+					}
+					if err := watchFault.closeFirst(ctx); err != nil {
+						return err
+					}
+				}
 				result.Kill, err = cluster.KillNodeObserved(owner)
 				if err != nil {
 					return err
@@ -213,12 +237,19 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 					return err
 				}
 				result.RestartCompleted = time.Now().UTC()
+				if watchFault != nil {
+					close(watchFault.restarted)
+				}
 			}
 			return visit(msg)
 		})
 	}
 	cutoffValue := uint64(cutoff)
-	report, failure := checkUsingJournalDecodeOptions(call, capacityStateTraceJS{JetStream: js, trace: trace}, &cutoffValue, reader, true, true, true, true)
+	var stateJS jetstream.JetStream = js
+	if watchFault != nil {
+		stateJS = copiedWatchFaultJS{JetStream: js, fault: watchFault, cluster: cluster}
+	}
+	report, failure := checkUsingJournalDecodeOptions(call, capacityStateTraceJS{JetStream: stateJS, trace: trace}, &cutoffValue, reader, true, true, true, true)
 	result.AuditNS = int64(time.Since(began))
 	result.Report = report
 	if failure == nil {
@@ -277,6 +308,10 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 	}
 	result.ElapsedNS = int64(time.Since(began))
 	result.StateWatches = trace.snapshot()
+	if watchFault != nil {
+		proof := watchFault.snapshot()
+		result.StateConnectionLoss = &proof
+	}
 	result.Error = fmt.Sprint(failure)
 	want := Report{Invocations: cutoff, Journals: cutoff, Entries: 2630779, Terminal: cutoff}
 	qualification := failure == nil && report == want && result.JournalVisits == journalState.Msgs && result.ElapsedNS < int64(20*time.Second) && !result.RestartCompleted.IsZero()
@@ -298,6 +333,21 @@ func TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy(t *te
 	if len(result.StateWatches) > 0 {
 		last := result.StateWatches[len(result.StateWatches)-1]
 		qualification = qualification && last.CreationError == "<nil>" && last.StopError == "<nil>"
+	}
+	if watchFault != nil {
+		proof := result.StateConnectionLoss
+		qualification = qualification && proof.Attempts >= 2 && proof.Attempts <= 3 && proof.StatusAfterClose == "CLOSED" && proof.ServerID != "" && proof.ServerName == cluster.NodeName(proof.Owner) && proof.Owner == result.Kill.Node
+		var failedAttempts, completedAttempts int
+		for _, frame := range proof.Frames {
+			if frame.Event == "attempt_return" {
+				if frame.InitialComplete && frame.Error == "" {
+					completedAttempts++
+				} else if !frame.InitialComplete && frame.Error != "" {
+					failedAttempts++
+				}
+			}
+		}
+		qualification = qualification && failedAttempts >= 1 && completedAttempts == 1
 	}
 	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {

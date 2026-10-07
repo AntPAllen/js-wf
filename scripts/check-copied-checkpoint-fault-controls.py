@@ -73,6 +73,20 @@ def main():
     reject('same-container', lambda r, s: s[after]['container'].__setitem__('Id', s[before]['container']['Id']))
     reject('same-process', lambda r, s: s[after].__setitem__('pid', s[before]['pid']))
     reject('changed-store', lambda r, s: [m for m in s[after]['container']['Mounts'] if m['Destination']=='/data'][0].__setitem__('Source', '/tmp/unverified'))
+    if baseline.get('state_connection_loss'):
+        for key, bad in (('owner', -1), ('server_id', ''), ('server_name', 'unknown'),
+                         ('url', 'nats://127.0.0.1:1'), ('status_after_close', 'CONNECTED'),
+                         ('attempts', 1), ('buffered_before_exposure', 238560),
+                         ('close_finished', '2000-01-01T00:00:00Z'), ('frames', [])):
+            reject('watch-connection-' + key, lambda r, s, k=key, value=bad: r['state_connection_loss'].__setitem__(k, value))
+        def attempt_frames(r):
+            return [f for f in r['state_connection_loss']['frames'] if f['event'] == 'attempt_return']
+        reject('partial-watch-certified', lambda r, s: attempt_frames(r)[0].__setitem__('initial_complete', True))
+        reject('partial-watch-error-hidden', lambda r, s: attempt_frames(r)[0].__setitem__('error', ''))
+        reject('fresh-watch-incomplete', lambda r, s: attempt_frames(r)[-1].__setitem__('initial_complete', False))
+        reject('fresh-watch-too-small', lambda r, s: attempt_frames(r)[-1].__setitem__('received', 238559))
+        reject('watch-deadline-reset', lambda r, s: attempt_frames(r)[-1].__setitem__('deadline', '2100-01-01T00:00:00Z'))
+        reject('missing-native-barrier', lambda r, s: r['state_connection_loss'].__setitem__('frames', [f for f in r['state_connection_loss']['frames'] if f['event'] != 'initial_complete']))
     report = dict(admitted=admitted, rejected_controls=controls, rejected_count=len(controls),
                   scope='Mutations of actual retained fault result and server observations; no broker or original store opened.')
     args.output.write_text(json.dumps(report, indent=2)+'\n')

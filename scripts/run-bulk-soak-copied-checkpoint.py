@@ -27,7 +27,9 @@ def main():
     parser.add_argument('--parallel-decode',action='store_true',help='Explicit experimental bounded ordered decoding; original full cohort and audit budget unchanged.')
     parser.add_argument('--cursor-owner-restart',action='store_true',help='Cold full-cohort R1 cursor-owner SIGKILL/same-store restart, requiring --parallel-decode; no healthy warmup.')
     parser.add_argument('--archive',type=Path,default=Path('/tmp/js-wf-bulk-journal-24h-joined-complete-20261006.tar.gz'),help='Downloaded complete original S3 archive; every byte/member is verified before opening stores.')
+    parser.add_argument('--state-watch-connection-loss',action='store_true',help='Controlled real SDK watch connection close before exposure; requires --cursor-owner-restart.')
     a=parser.parse_args();root=a.root.absolute()
+    assert not a.state_watch_connection_loss or a.cursor_owner_restart
     assert not a.cursor_owner_restart or (a.parallel_decode and not a.cpu_profile),'cursor fault requires explicit parallel decode and no CPU instrumentation'
     package='./integrity' if a.cursor_owner_restart else './integration'
     test='TestRetainedAuditBulkSoakCheckpoint8520CursorOwnerRestartVerifiedCopy' if a.cursor_owner_restart else TEST
@@ -85,6 +87,7 @@ def main():
     if a.cpu_profile:env['WF_AUDIT_BULK_SOAK_CPU_PROFILE']='1'
     if a.parallel_decode:env['WF_AUDIT_BULK_SOAK_PARALLEL_DECODE']='1'
     if a.cursor_owner_restart:env['WF_AUDIT_BULK_SOAK_CURSOR_OWNER_RESTART']='1'
+    if a.state_watch_connection_loss:env['WF_AUDIT_BULK_SOAK_STATE_CONNECTION_LOSS']='1'
     profile={k:v for k,v in env.items() if k.startswith('WF_') or k in ('GOMAXPROCS','GOGC','GOMEMLIMIT','GOWORK','GOFLAGS')}
     binary=root/('integrity.test' if a.cursor_owner_restart else 'integration.test');build=['go','test','-p=1','-buildvcs=true','-c','-o',str(binary),package]
     command=[str(binary),'-test.run=^'+test+'$','-test.count=1','-test.v','-test.timeout=6m']

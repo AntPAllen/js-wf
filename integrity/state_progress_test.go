@@ -49,6 +49,14 @@ func (s *scriptedStateWatches) WatchAll(ctx context.Context, _ ...jetstream.Watc
 }
 
 func TestSeededStateProgressRetryDiscardsPartialSet(t *testing.T) {
+	testStateProgressRetryDiscardsPartialSet(t, false)
+}
+
+func TestSeededStateClosedWatchRetryDiscardsPartialSet(t *testing.T) {
+	testStateProgressRetryDiscardsPartialSet(t, true)
+}
+
+func testStateProgressRetryDiscardsPartialSet(t *testing.T, closed bool) {
 	for seed := int64(0); seed < 32; seed++ {
 		rng := rand.New(rand.NewSource(seed))
 		partial := rng.Intn(6)
@@ -60,12 +68,17 @@ func TestSeededStateProgressRetryDiscardsPartialSet(t *testing.T) {
 			}
 			first.updates <- auditWatchEntry{key: key, rev: uint64(100 + i)}
 		}
+		if closed {
+			close(first.updates)
+		}
 		second := &auditWatch{updates: make(chan jetstream.KeyValueEntry, 2)}
 		second.updates <- auditWatchEntry{key: "complete", rev: 1}
 		second.updates <- nil
 		clock := &scriptedStateProgress{ticks: make(chan time.Time, 1)}
 		pulse := func() { clock.ticks <- time.Unix(2, 0) }
-		if partial == 0 {
+		if closed {
+			// No idle pulse: a real closed SDK watch must itself trigger retry.
+		} else if partial == 0 {
 			pulse()
 		} else {
 			clock.onReset = func(count int) {

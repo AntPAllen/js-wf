@@ -6,7 +6,9 @@ parser=argparse.ArgumentParser(description='Independent full copied checkpoint r
 parser.add_argument('--root',type=Path,required=True)
 parser.add_argument('--parallel-decode',action='store_true')
 parser.add_argument('--cursor-owner-restart',action='store_true')
+parser.add_argument('--state-watch-connection-loss',action='store_true')
 a=parser.parse_args()
+assert not a.state_watch_connection_loss or a.cursor_owner_restart
 assert not a.cursor_owner_restart or a.parallel_decode
 repo=Path(__file__).resolve().parents[1];root=a.root.absolute();proof=Path(str(root)+'-proof')
 assert not root.is_relative_to(repo) and root.is_dir()
@@ -75,6 +77,8 @@ assert result.get('parallel_decode',False)==a.parallel_decode
 assert sdk['environment'].get('WF_AUDIT_BULK_SOAK_PARALLEL_DECODE')==('1' if a.parallel_decode else None)
 assert sdk['environment'].get('WF_AUDIT_BULK_SOAK_CURSOR_OWNER_RESTART')==('1' if a.cursor_owner_restart else None)
 assert result.get('cursor_owner_restart',False)==a.cursor_owner_restart
+assert bool(result.get('state_connection_loss'))==a.state_watch_connection_loss
+assert sdk['environment'].get('WF_AUDIT_BULK_SOAK_STATE_CONNECTION_LOSS')==('1' if a.state_watch_connection_loss else None)
 assert 'WF_AUDIT_BULK_SOAK_CPU_PROFILE' not in sdk['environment'], 'use a separate explicit CPU-profile reviewer'
 for n in ['WF_INV','WF_JRN','KV_WF_STATE','WF_PURGE']:
  row=result['readiness'][n];assert row['config']['num_replicas']==5 and row['config']['storage']=='file'
@@ -97,6 +101,6 @@ elif qualified:
 assert (execution['exit_code']==0)==qualified
 spec=importlib.util.spec_from_file_location('shared',repo/'scripts/run-domain-runtime-controls.py');shared=importlib.util.module_from_spec(spec);spec.loader.exec_module(shared)
 closure=shared.closure(root);assert fixture_archive.inventory(root)==inventory['files']
-report=dict(parallel_decode=a.parallel_decode,cursor_owner_restart=a.cursor_owner_restart,fault_review=fault_review,source=revision,selected_git_inputs=len(selected),selected_external_inputs=len(external),restore=restore,exact_original_store_files=len(expected_stores),original_server_hash=admission['original_server_sha256'],actual_servers=len(servers),original_complete_files_unchanged=len(original_inventory['files']),execution=execution,result=result,qualified_quiescent_copied_capacity=qualified,qualifies_24h=False,closure=closure,archive=meta,scope='Entire original checkpoint8520 cohort on fresh verified complete restore: actual identical stock NATS2.15 server binaries/five R5 sources/profile4CPU/GOGC500/4GiB/original20s attempt. Explicit cursor-owner fault only when selected; no concurrent application workload, historical cause attribution, original24h acceptance or release adoption.')
+report=dict(state_watch_connection_loss=a.state_watch_connection_loss,parallel_decode=a.parallel_decode,cursor_owner_restart=a.cursor_owner_restart,fault_review=fault_review,source=revision,selected_git_inputs=len(selected),selected_external_inputs=len(external),restore=restore,exact_original_store_files=len(expected_stores),original_server_hash=admission['original_server_sha256'],actual_servers=len(servers),original_complete_files_unchanged=len(original_inventory['files']),execution=execution,result=result,qualified_quiescent_copied_capacity=qualified,qualifies_24h=False,closure=closure,archive=meta,scope='Entire original checkpoint8520 cohort on fresh verified complete restore: actual identical stock NATS2.15 server binaries/five R5 sources/profile4CPU/GOGC500/4GiB/original20s attempt. Explicit cursor-owner fault only when selected; no concurrent application workload, historical cause attribution, original24h acceptance or release adoption.')
 (proof/'independent-review.json').write_text(json.dumps(report,indent=2)+'\n');shutil.copyfile(__file__,proof/'executed-independent-review.py')
 print(json.dumps(dict(qualified_quiescent_copied_capacity=qualified,cursor_owner_restart=a.cursor_owner_restart,result=result['report'],elapsed_ns=result['elapsed_ns'],actual_servers=len(servers),full_archive_members=meta['members'],qualifies_24h=False)))

@@ -131,6 +131,11 @@ func initialAuditStateUsingProgress(ctx context.Context, state jetstream.KeyValu
 		case entry, ok = <-watch.Updates():
 		}
 		if !ok {
+			if createTimer != nil {
+				// The explicit recovery candidate retries a lost real subscription,
+				// discarding its partial set under the same caller deadline.
+				return nil, fmt.Errorf("retained state watch closed before initial completion: %w", nats.ErrTimeout)
+			}
 			return nil, errors.New("retained state watch closed before initial completion")
 		}
 		if ctx.Err() != nil {

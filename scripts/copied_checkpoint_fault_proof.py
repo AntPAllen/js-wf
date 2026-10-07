@@ -70,7 +70,39 @@ def validate(result, servers, identity):
     before_mount = [m for m in before['container']['Mounts'] if m['Destination'] == '/data']
     after_mount = [m for m in after['container']['Mounts'] if m['Destination'] == '/data']
     assert len(before_mount) == len(after_mount) == 1 and before_mount[0]['Source'] == after_mount[0]['Source']
+    connection = result.get('state_connection_loss')
+    connection_review = None
+    if connection is not None:
+        assert connection['owner'] == node and connection['server_name'] == identity + '-n' + str(node)
+        assert connection['server_id'] and connection['status_after_close'] == 'CLOSED'
+        ports = before['container']['NetworkSettings']['Ports']['4222/tcp']
+        assert len(ports) == 1 and connection['url'] == 'nats://127.0.0.1:' + ports[0]['HostPort']
+        assert stamp(connection['native_created']) <= stamp(connection['close_started']) <= stamp(connection['close_finished'])
+        assert stamp(connection['close_finished']) <= stamp(connection['exposed'])
+        assert stamp(connection['close_finished']) <= stamp(kill['kill_started'])
+        assert 0 <= connection['buffered_before_exposure'] < 238560
+        assert connection['attempts'] == len(watches) and 2 <= len(watches) <= 3
+        frames = connection['frames']
+        assert frames and len({f['deadline'] for f in frames}) == 1
+        returns = [f for f in frames if f['event'] == 'attempt_return']
+        assert len(returns) == len(watches)
+        first_frame, final = returns[0], returns[-1]
+        assert not first_frame['initial_complete'] and first_frame['error']
+        assert 'closed before initial completion' in first_frame['error'] or 'made no progress' in first_frame['error']
+        assert first_frame['received'] < 238560
+        assert final['initial_complete'] and not final.get('error') and final['received'] >= 238560
+        assert all(not f['initial_complete'] and f.get('error') for f in returns[:-1])
+        barriers = [f for f in frames if f['event'] == 'initial_complete']
+        assert len(barriers) == 1 and barriers[0]['received'] == final['received']
+        assert stamp(barriers[0]['time']) >= stamp(result['restart_completed'])
+        for i, frame in enumerate(returns):
+            assert frame['received'] >= frame['included'] >= 0
+            if i > 0:
+                assert stamp(frame['time']) > stamp(returns[i-1]['time'])
+        connection_review = dict(controlled_real_connection_close=True, actual_connected_server_id=connection['server_id'],
+            watch_attempts=len(watches), abandoned_received=first_frame['received'], fresh_received=final['received'],
+            original_deadline=final['deadline'], natural_outage_or_historical_cause=False)
     return dict(actual_cursor_owner=node, raw_journal_visits=result['journal_visits'],
                 resumed_start_sequence=resumed['info']['config']['opt_start_seq'],
                 target_cursor=target['name'], replacement_cursor=resumed['info']['name'],
-                actual_servers=6, same_store_restart=True, old_cursor_deletion_error=deletions[target['name']]['error'])
+                actual_servers=6, same_store_restart=True, connection_review=connection_review, old_cursor_deletion_error=deletions[target['name']]['error'])
