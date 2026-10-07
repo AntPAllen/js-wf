@@ -7,3 +7,5 @@ Independent review verifies source/Git/before/after, actual race SDK hash/birth/
 Two earlier failed native attempts stay failed and fully preserved: initial API10005 placement before hub membership admission, then worker-parent context cancellation during recovery observation. The corrected fixture requires fresh stats/current membership for all three hubs before provisioning and gives the external fault observer its original cut-start-plus30s budget independent of the disrupted worker context. No count/latency/deadline reduction or failed-store restart.
 
 This closes the focused abrupt leaf endpoint loss combined with graceful all-hub restart and strict retirement/reuse. All-hub SIGKILL, lease-expiry/leaf combinations, packaged daemon/child leaf traffic, broad leaf matrices, onlineGC, million drain and full release/24h requirements remain open. Existing24h SDK remains isolated atbc9f92b.
+
+Local completed fixture and staging archive retired after fresh full remote/member/local-inventory/closure verification. Complete bytes remain in S3; [removal/restoration records](../reclaimed/README.md).

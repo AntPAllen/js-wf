@@ -23,3 +23,5 @@ The new completed closed-watch recovery experiment was also retired after verifi
 All three completed new watch-peer diagnostics and staging archives are now retired after fresh complete S3/member/inventory/closure checks: **27.99 GiB** reclaimed, with **64.68 GiB** free. This removes newly created experiment data, separate from earlier passes. [Full ledger](../checkpoint8520-cursor-owner-recovery-2026-10-07/peer-attempts-reclaimed/README.md).
 
 Latest user-requested pass moved two completed original fixtures to verified S3 storage and reclaimed **9.64 GiB**. `/tmp` now uses about **19 GiB**, with **74 GiB** free on the filesystem. [Exact records and restoration](twelfth-completed-originals/README.md).
+
+The three newly completed abrupt-leaf diagnostic fixtures and archives were retired after verified S3/member/local-inventory/closure checks, reclaiming **543.6 MiB**. Live24h and reusable fixtures remain local; approximately **73 GiB** is free. [Exact ledger](../leaf-domain-sigkill-2026-10-07/reclaimed/README.md).
