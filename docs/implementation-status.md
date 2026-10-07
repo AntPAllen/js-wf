@@ -38,6 +38,10 @@ partial no-space evidence, are preserved to S3. The current normal simulation
 qualifier has completed successfully at its recorded source; the ten-minute consumer-leader component is now
 accepted in its executed-source scope as recorded below.
 
+## Full checkpoint8520 copied audit prepared — 2026-10-07
+
+New opt-in diagnostic restores every original closed fixture member from the committed complete archive before opening only the fresh five-node stores. It keeps the complete238560-invocation cutoff, original R5 identities, four current R5 sources, same chunked concurrent-state invariant checker and20s attempt budget. Native profile retains4CPU/GOGC500/4GiB/2m sync/explicit routes, with exact source/dependency/actual SDK/server observations and untouched original after-check. Quiescent copied capacity is diagnostic, not original24h acceptance or a concurrent fault reproduction. Compilation passes; native and independent review remain pending. No original restart or deadline relaxation.
+
 ## Original bulk/chunked 24h journal terminal failure — 2026-10-07
 
 Original757454a actual SDK3461745 fails after61168.65s native body (about17h), batch8520/cutoff238560. Retained audit attempts20.2221s/20.0006s/19.7794s exceed original60s checkpoint: firsttwo zero completed journals; third179520journals/1438910entries. Actual producer/observer units terminal; no observer-timeout inference or restart. Pinned review correctly rejects; fresh independent preservation verifies source equality, complete15402-member/2,090,346,262-byte archive and current originals, no stores reopened. SDK deadline stacks locate pending chunked journal scanning, not confirmed server-side cause or corruption. [Complete terminal evidence](scale/bulk-journal-24h-2026-10-06/terminal/). Actual24h and fullmatrix gates remain open; original deadlines unchanged. Hosted partition200 remains queued.
